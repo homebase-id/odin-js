@@ -84,6 +84,7 @@ export const LoginBox = async (onSubmit: (identity: string) => void, isStandalon
   };
 
   const storagePartioned = await checkStorageAccess();
+  console.debug('storagePartioned', storagePartioned);
   mainForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -122,7 +123,7 @@ export const LoginBox = async (onSubmit: (identity: string) => void, isStandalon
     return false;
   });
 
-  const fillIdentityFromStorage = () => {
+  const fillIdentityFromStorage = (autoFocused?: boolean) => {
     if (dotyouInputBox.value) return;
 
     const previousIdentities = getIdentityFromStorage();
@@ -144,6 +145,7 @@ export const LoginBox = async (onSubmit: (identity: string) => void, isStandalon
       });
 
       dotyouInputBox.addEventListener('focus', () => selectableWrapper.classList.add('show'));
+      if (autoFocused) selectableWrapper.classList.add('show');
     }
   };
 
@@ -153,7 +155,7 @@ export const LoginBox = async (onSubmit: (identity: string) => void, isStandalon
       if (!e.target || !('value' in e.target)) return;
       if ((e.target as HTMLInputElement).value) return;
 
-      requestStorageAccess().then(() => fillIdentityFromStorage());
+      requestStorageAccess().then(() => fillIdentityFromStorage(true));
     });
   } else fillIdentityFromStorage();
 };

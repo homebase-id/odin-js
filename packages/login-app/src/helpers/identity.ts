@@ -7,12 +7,26 @@ export const stripIdentity = (identity: string) => {
 // https://developer.mozilla.org/en-US/docs/Web/API/Storage_Access_API/Using
 export const checkStorageAccess = async () => {
   if (!document.hasStorageAccess) {
-    console.debug('window.document.hasStorageAccess is not accessible');
+    console.debug('document.hasStorageAccess is not accessible');
     return false;
   }
 
   const hasAccess = await document.hasStorageAccess();
-  if (hasAccess) return false;
+  console.debug('document.hasStorageAccess', hasAccess);
+  if (hasAccess) {
+    try {
+      const permission = await navigator.permissions.query({
+        name: 'storage-access',
+      });
+
+      console.debug('document.hasStorageAccess', permission.state);
+      if (permission.state === 'granted') {
+        return false;
+      }
+    } catch (ex) {
+      //
+    }
+  }
 
   return true;
 };
