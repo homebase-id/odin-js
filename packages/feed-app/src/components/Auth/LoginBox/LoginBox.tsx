@@ -48,8 +48,8 @@ export const LoginBox = () => {
       {stringifiedAuthParams ? (
         <iframe
           src={`${
-            import.meta.env.VITE_CENTRAL_LOGIN_URL
-          }?isDarkMode=${isDarkMode}${`&${stringifiedAuthParams}`}`}
+            import.meta.env.VITE_CENTRAL_LOGIN_HOST
+          }/anonymous?isDarkMode=${isDarkMode}${`&${stringifiedAuthParams}`}`}
           key={stringifiedAuthParams}
           className="h-[16rem] w-full"
         ></iframe>

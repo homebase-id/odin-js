@@ -18,7 +18,7 @@ const ConnectLink = ({ className }: { className: string }) => {
         href={
           identity && alreadyConnected
             ? `https://${getIdentity()}/owner/connections/${window.location.host}`
-            : `https://anon.homebase.id/redirect/connections/${window.location.host}/connect`
+            : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect/connections/${window.location.host}/connect`
         }
         icon={alreadyConnected ? Check : Persons}
         type={alreadyConnected ? 'secondary' : 'primary'}
