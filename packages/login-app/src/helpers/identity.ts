@@ -36,10 +36,11 @@ export const requestStorageAccess = async () => {
   return new Promise<void>((resolve) => {
     try {
       if (window.document.requestStorageAccess) {
+        console.debug('window.document.requestStorageAccess');
         window.document
           .requestStorageAccess()
           .then(resolve, () => {
-            // Ignore success; this is just a best-effort attempt to get storage access
+            // Ignore reject; this is just a best-effort attempt to get storage access
             resolve();
           })
           .catch(() => {
