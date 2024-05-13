@@ -4,19 +4,17 @@ export const stripIdentity = (identity: string) => {
   return identity.replace(new RegExp('^(http|https)://'), '').split('/')[0].toLowerCase();
 };
 
+// https://developer.mozilla.org/en-US/docs/Web/API/Storage_Access_API/Using
 export const checkStorageAccess = async () => {
-  try {
-    let storagePartioned = !!document.requestStorageAccess; // Checks => https://developer.mozilla.org/en-US/docs/Web/Privacy/State_Partitioning#disable_dynamic_state_partitioning
-    await (window.document.hasStorageAccess &&
-      window.document.hasStorageAccess().then((hasAccess) => {
-        storagePartioned = !hasAccess;
-      }));
-
-    return storagePartioned;
-  } catch (ex) {
+  if (!document.hasStorageAccess) {
     console.debug('window.document.hasStorageAccess is not accessible');
     return false;
   }
+
+  const hasAccess = await document.hasStorageAccess();
+  if (hasAccess) return false;
+
+  return true;
 };
 
 export const requestStorageAccess = async () => {
