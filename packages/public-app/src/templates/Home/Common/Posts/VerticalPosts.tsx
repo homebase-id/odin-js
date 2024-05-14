@@ -1,7 +1,12 @@
 import { Virtualizer, useWindowVirtualizer } from '@tanstack/react-virtual';
 import { PostContent } from '@youfoundation/js-lib/public';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Label, SubtleMessage, useBlogPostsInfinite } from '@youfoundation/common-app';
+import {
+  Label,
+  SubtleMessage,
+  useBlogPostsInfinite,
+  useDotYouClient,
+} from '@youfoundation/common-app';
 import { Select } from '@youfoundation/common-app';
 import { flattenInfinteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
@@ -84,6 +89,15 @@ const ChannelSidebar = ({
 // Docs for combination of Virtual and infinite:
 // https://tanstack.com/virtual/v3/docs/examples/react/infinite-scroll
 const MainVerticalPosts = ({ className, channelId }: { className: string; channelId?: string }) => {
+  const { isOwner, getIdentity } = useDotYouClient();
+  const isAuthenticated = isOwner || !!getIdentity();
+  const { data: channels } = useChannels({ isAuthenticated, isOwner });
+  const showAuthor = channels?.find(
+    (channel) =>
+      channel.fileMetadata.appData.content.isCollaborative &&
+      channel.fileMetadata.appData.content.showOnHomePage
+  );
+
   const [isLogin, setIsLogin] = useState(false);
 
   const {
@@ -202,6 +216,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
                         showChannel={true}
                         allowExpand={true}
                         login={() => setIsLogin(true)}
+                        showAuthor={showAuthor}
                       />
                     </div>
                   );
