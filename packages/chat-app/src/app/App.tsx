@@ -61,7 +61,7 @@ const INCLUDED_QUERY_KEYS = [
   'connectionDetails',
 ];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
-  buster: '202403',
+  buster: '202405',
   maxAge: Infinity,
   persister: localStoragePersister,
   dehydrateOptions: {

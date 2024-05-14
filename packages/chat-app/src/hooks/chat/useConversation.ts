@@ -8,13 +8,9 @@ import {
 } from '@tanstack/react-query';
 import { useDotYouClient } from '@youfoundation/common-app';
 import {
-  Conversation,
-  GroupConversation,
-  SingleConversation,
+  UnifiedConversation,
   getConversation,
-  requestConversationCommand,
   updateConversation,
-  updateGroupConversationCommand,
   uploadConversation,
 } from '../../providers/ConversationProvider';
 import {
@@ -46,21 +42,23 @@ export const useConversation = (props?: { conversationId?: string | undefined })
 
   const getExistingConversationsForRecipient = async (
     recipients: string[]
-  ): Promise<null | HomebaseFile<Conversation>> => {
+  ): Promise<null | HomebaseFile<UnifiedConversation>> => {
     const allConversationsInCache = await queryClient.fetchInfiniteQuery<{
-      searchResults: HomebaseFile<Conversation>[];
+      searchResults: HomebaseFile<UnifiedConversation>[];
     }>({ queryKey: ['conversations'], initialPageParam: undefined });
+
+    const filteredRecipients = recipients.filter((id) => id !== identity);
 
     for (const page of allConversationsInCache?.pages || []) {
       const matchedConversation = page.searchResults.find((conversation) => {
         const conversationContent = conversation.fileMetadata.appData.content;
-        const conversationRecipients = (conversationContent as GroupConversation).recipients || [
-          (conversationContent as SingleConversation).recipient,
-        ];
+        const conversationRecipients = conversationContent.recipients.filter(
+          (id) => id !== identity
+        );
 
         return (
-          conversationRecipients.length === recipients.length &&
-          conversationRecipients.every((recipient) => recipients.includes(recipient))
+          conversationRecipients.length === filteredRecipients.length &&
+          conversationRecipients.every((recipient) => filteredRecipients.includes(recipient))
         );
       });
       if (matchedConversation) return matchedConversation;
@@ -87,18 +85,14 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     const newConversationId =
       recipients.length === 1 ? await getNewXorId(identity as string, recipients[0]) : getNewId();
 
-    const newConversation: NewHomebaseFile<Conversation> = {
+    const updatedRecipients = [...new Set([...recipients, identity as string])];
+
+    const newConversation: NewHomebaseFile<UnifiedConversation> = {
       fileMetadata: {
         appData: {
           uniqueId: newConversationId,
           content: {
-            ...(recipients.length > 1
-              ? {
-                  recipients: recipients,
-                }
-              : {
-                  recipient: recipients[0],
-                }),
+            recipients: updatedRecipients,
             title: title || recipients.join(', '),
           },
         },
@@ -121,40 +115,40 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const sendJoinCommand = async ({
     conversation,
   }: {
-    conversation: HomebaseFile<Conversation>;
-  }): Promise<void> => {
-    await requestConversationCommand(
-      dotYouClient,
-      conversation.fileMetadata.appData.content,
-      conversation.fileMetadata.appData.uniqueId as string
-    );
+    conversation: HomebaseFile<UnifiedConversation>;
+  }) => {
+    return await uploadConversation(dotYouClient, conversation, true);
   };
 
   const updateExistingConversation = async ({
     conversation,
     isTitleUpdated = false,
   }: {
-    conversation: HomebaseFile<Conversation>;
+    conversation: HomebaseFile<UnifiedConversation>;
     isTitleUpdated?: boolean;
   }) => {
     await updateConversation(dotYouClient, conversation);
     if (isTitleUpdated && 'recipients' in conversation.fileMetadata.appData.content) {
-      await updateGroupConversationCommand(
-        dotYouClient,
-        conversation.fileMetadata.appData.content as GroupConversation,
-        conversation.fileMetadata.appData.uniqueId as string
-      );
+      await uploadConversation(dotYouClient, conversation, true);
     }
   };
 
-  const clearChat = async ({ conversation }: { conversation: HomebaseFile<Conversation> }) => {
+  const clearChat = async ({
+    conversation,
+  }: {
+    conversation: HomebaseFile<UnifiedConversation>;
+  }) => {
     return await deleteAllChatMessages(
       dotYouClient,
       conversation.fileMetadata.appData.uniqueId as string
     );
   };
 
-  const deleteChat = async ({ conversation }: { conversation: HomebaseFile<Conversation> }) => {
+  const deleteChat = async ({
+    conversation,
+  }: {
+    conversation: HomebaseFile<UnifiedConversation>;
+  }) => {
     const deletedResult = await deleteAllChatMessages(
       dotYouClient,
       conversation.fileMetadata.appData.uniqueId as string
@@ -162,7 +156,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     if (!deletedResult) throw new Error('Failed to delete chat messages');
 
     // We soft delete the conversation, so we can still see newly received messages
-    const newConversation: HomebaseFile<Conversation> = {
+    const newConversation: HomebaseFile<UnifiedConversation> = {
       ...conversation,
       fileMetadata: {
         ...conversation.fileMetadata,
@@ -173,8 +167,12 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     return await updateConversation(dotYouClient, newConversation);
   };
 
-  const restoreChat = async ({ conversation }: { conversation: HomebaseFile<Conversation> }) => {
-    const newConversation: HomebaseFile<Conversation> = {
+  const restoreChat = async ({
+    conversation,
+  }: {
+    conversation: HomebaseFile<UnifiedConversation>;
+  }) => {
+    const newConversation: HomebaseFile<UnifiedConversation> = {
       ...conversation,
       fileMetadata: {
         ...conversation.fileMetadata,
@@ -196,11 +194,17 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }),
     inviteRecipient: useMutation({
       mutationFn: sendJoinCommand,
+      onSettled: async (_data, _error, variables) => {
+        queryClient.invalidateQueries({
+          queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
+        });
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      },
     }),
     update: useMutation({
       mutationFn: updateExistingConversation,
       onMutate: async (variables) => {
-        queryClient.setQueryData<HomebaseFile<Conversation>>(
+        queryClient.setQueryData<HomebaseFile<UnifiedConversation>>(
           ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
           variables.conversation
         );
@@ -264,7 +268,7 @@ const fetchSingleConversation = async (
 ) => {
   const queryData = queryClient.getQueryData<
     InfiniteData<{
-      searchResults: HomebaseFile<Conversation>[];
+      searchResults: HomebaseFile<UnifiedConversation>[];
       cursorState: string;
       queryTime: number;
       includeMetadataHeader: boolean;
@@ -285,7 +289,7 @@ export const getConversationQueryOptions: (
   dotYouClient: DotYouClient,
   queryClient: QueryClient,
   conversationId: string | undefined
-) => UndefinedInitialDataOptions<HomebaseFile<Conversation> | null> = (
+) => UndefinedInitialDataOptions<HomebaseFile<UnifiedConversation> | null> = (
   dotYouClient,
   queryClient,
   conversationId
