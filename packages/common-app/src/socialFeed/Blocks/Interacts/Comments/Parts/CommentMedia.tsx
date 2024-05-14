@@ -27,8 +27,10 @@ export const CommentMedia = ({
       targetDrive={targetDrive}
       fileKey={fileKey}
       lastModified={lastModified}
-      className="my-1 max-w-[250px]"
+      className="my-1"
+      maxWidth="250px"
       systemFileType="Comment"
+      fit="contain"
     />
   );
 };
