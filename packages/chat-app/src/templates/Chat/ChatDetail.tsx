@@ -16,10 +16,8 @@ import {
 } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
-  Conversation,
   ConversationWithYourselfId,
-  GroupConversation,
-  SingleConversation,
+  UnifiedConversation,
 } from '../../providers/ConversationProvider';
 import { useEffect, useState } from 'react';
 import { useConversation } from '../../hooks/chat/useConversation';
@@ -29,6 +27,7 @@ import { ChatComposer } from '../../components/Chat/Composer/ChatComposer';
 import { ChatInfo } from '../../components/Chat/Detail/ChatInfo';
 import { useNavigate } from 'react-router-dom';
 import { CHAT_ROOT } from './ChatHome';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 export const ChatDetail = ({ conversationId }: { conversationId: string | undefined }) => {
   const [isEmptyChat, setIsEmptyChat] = useState<boolean>(false);
@@ -45,7 +44,12 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
     );
 
   const onSend = async () => {
-    if (isEmptyChat && conversation && conversationId !== ConversationWithYourselfId)
+    console.log('onSend', isEmptyChat, conversation, conversationId, ConversationWithYourselfId);
+    if (
+      isEmptyChat &&
+      conversation &&
+      !stringGuidsEqual(conversationId, ConversationWithYourselfId)
+    )
       inviteRecipient({ conversation });
   };
 
@@ -78,14 +82,20 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
 const ChatHeader = ({
   conversation: conversationDsr,
 }: {
-  conversation: HomebaseFile<Conversation> | undefined;
+  conversation: HomebaseFile<UnifiedConversation> | undefined;
 }) => {
   const navigate = useNavigate();
+  const identity = useDotYouClient().getIdentity();
 
   const withYourself =
     conversationDsr?.fileMetadata.appData.uniqueId === ConversationWithYourselfId;
   const conversation = conversationDsr?.fileMetadata.appData.content;
-  const recipient = (conversation as SingleConversation)?.recipient;
+  const recipients = conversation?.recipients;
+  const singleRecipient =
+    recipients && recipients.length === 2
+      ? recipients.filter((recipient) => recipient !== identity)[0]
+      : undefined;
+
   const [showChatInfo, setShowChatInfo] = useState<boolean>(false);
 
   const { mutate: clearChat, error: clearChatError } = useConversation().clearChat;
@@ -111,9 +121,9 @@ const ChatHeader = ({
           onClick={() => setShowChatInfo(true)}
           className="flex cursor-pointer flex-row items-center gap-2"
         >
-          {recipient ? (
+          {singleRecipient ? (
             <ConnectionImage
-              odinId={recipient}
+              odinId={singleRecipient}
               className="border border-neutral-200 dark:border-neutral-800"
               size="sm"
             />
@@ -126,8 +136,8 @@ const ChatHeader = ({
               <Persons className="h-6 w-6" />
             </div>
           )}
-          {recipient ? (
-            <ConnectionName odinId={recipient} />
+          {singleRecipient ? (
+            <ConnectionName odinId={singleRecipient} />
           ) : withYourself ? (
             <>
               <OwnerName />
@@ -193,17 +203,21 @@ const ChatHeader = ({
 const GroupChatConnectedState = ({
   conversation,
 }: {
-  conversation: HomebaseFile<Conversation> | undefined;
+  conversation: HomebaseFile<UnifiedConversation> | undefined;
 }) => {
+  const identity = useDotYouClient().getIdentity();
+
   if (!conversation) return null;
-  const recipients = (conversation.fileMetadata.appData.content as GroupConversation).recipients;
-  if (!recipients || recipients.length <= 1) return null;
+  const recipients = conversation.fileMetadata.appData.content.recipients;
+  if (!recipients || recipients.length <= 2) return null;
 
   return (
     <div className="border-t empty:hidden dark:border-t-slate-800">
-      {recipients.map((recipient) => {
-        return <RecipientConnectedState recipient={recipient} key={recipient} />;
-      })}
+      {recipients
+        .filter((recipient) => recipient !== identity)
+        .map((recipient) => {
+          return <RecipientConnectedState recipient={recipient} key={recipient} />;
+        })}
     </div>
   );
 };

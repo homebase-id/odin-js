@@ -13,9 +13,6 @@ import {
   Conversation,
   CHAT_CONVERSATION_FILE_TYPE,
   GroupCHAT_CONVERSATION_FILE_TYPE,
-  JOIN_CONVERSATION_COMMAND,
-  JOIN_GROUP_CONVERSATION_COMMAND,
-  UPDATE_GROUP_CONVERSATION_COMMAND,
   dsrToConversation,
 } from '../../providers/ConversationProvider';
 import { useDotYouClient, useNotificationSubscriber } from '@youfoundation/common-app';
@@ -235,10 +232,10 @@ const useChatWebsocket = (isEnabled: boolean) => {
         }
       } else if (
         [
-          JOIN_CONVERSATION_COMMAND,
-          JOIN_GROUP_CONVERSATION_COMMAND,
+          // JOIN_CONVERSATION_COMMAND,
+          // JOIN_GROUP_CONVERSATION_COMMAND,
           MARK_CHAT_READ_COMMAND,
-          UPDATE_GROUP_CONVERSATION_COMMAND,
+          // UPDATE_GROUP_CONVERSATION_COMMAND,
         ].includes(notification.header.fileMetadata.appData.dataType) &&
         identity
       ) {
@@ -284,10 +281,10 @@ const useChatCommandProcessor = (isEnabled?: boolean) => {
       const commands = await getCommands(dotYouClient, ChatDrive);
       const filteredCommands = commands.receivedCommands.filter(
         (command) =>
-          command.clientCode === JOIN_CONVERSATION_COMMAND ||
-          command.clientCode === MARK_CHAT_READ_COMMAND ||
-          command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND ||
-          command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND
+          // command.clientCode === JOIN_CONVERSATION_COMMAND ||
+          command.clientCode === MARK_CHAT_READ_COMMAND
+        // command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND ||
+        // command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND
       );
 
       const completedCommands: string[] = [];

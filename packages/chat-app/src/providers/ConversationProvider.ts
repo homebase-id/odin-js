@@ -18,6 +18,7 @@ import {
   SendContents,
 } from '@youfoundation/js-lib/core';
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import { identity } from 'lodash-es';
 
 export const CHAT_CONVERSATION_FILE_TYPE = 8888;
 export const GroupCHAT_CONVERSATION_FILE_TYPE = 8890;
@@ -136,6 +137,7 @@ export const getConversation = async (dotYouClient: DotYouClient, conversationId
           recipients: (conversationHeader.fileMetadata.appData.content as GroupConversation)
             .recipients || [
             (conversationHeader.fileMetadata.appData.content as SingleConversation).recipient,
+            dotYouClient.getIdentity(),
           ],
         },
       },
@@ -190,6 +192,7 @@ export const uploadConversation = async (
   distribute: boolean = false,
   onVersionConflict?: () => void
 ) => {
+  const identity = dotYouClient.getIdentity();
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: ChatDrive,
@@ -197,7 +200,9 @@ export const uploadConversation = async (
     },
     transitOptions: distribute
       ? {
-          recipients: conversation.fileMetadata.appData.content.recipients,
+          recipients: conversation.fileMetadata.appData.content.recipients.filter(
+            (recipient) => recipient !== identity
+          ),
           schedule: ScheduleOptions.SendNowAwaitResponse,
           sendContents: SendContents.All,
           useGlobalTransitId: true,

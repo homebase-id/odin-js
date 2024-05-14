@@ -6,13 +6,9 @@ import {
   requestMarkAsRead,
   softDeleteChatMessage,
 } from '../../providers/ChatProvider';
-import {
-  Conversation,
-  GroupConversation,
-  SingleConversation,
-} from '../../providers/ConversationProvider';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { UnifiedConversation } from '../../providers/ConversationProvider';
 
 const PAGE_SIZE = 100;
 export const useChatMessages = (props?: { conversationId: string | undefined }) => {
@@ -28,7 +24,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     conversation,
     messages,
   }: {
-    conversation: HomebaseFile<Conversation>;
+    conversation: HomebaseFile<UnifiedConversation>;
     messages: HomebaseFile<ChatMessage>[];
   }) => {
     // => Much nicer solution: Handle with a last read time on the conversation file;
@@ -49,14 +45,13 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     messages,
     deleteForEveryone,
   }: {
-    conversation: HomebaseFile<Conversation>;
+    conversation: HomebaseFile<UnifiedConversation>;
     messages: HomebaseFile<ChatMessage>[];
     deleteForEveryone?: boolean;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
-    const recipients = (conversationContent as GroupConversation).recipients || [
-      (conversationContent as SingleConversation).recipient,
-    ];
+    const identity = dotYouClient.getIdentity();
+    const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     return await Promise.all(
       messages.map(async (msg) => {

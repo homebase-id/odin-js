@@ -1,17 +1,5 @@
-import { DotYouClient, SecurityGroupType } from '@youfoundation/js-lib/core';
-import {
-  GroupConversation,
-  JOIN_CONVERSATION_COMMAND,
-  JOIN_GROUP_CONVERSATION_COMMAND,
-  JoinConversationRequest,
-  JoinGroupConversationRequest,
-  SingleConversation,
-  UPDATE_GROUP_CONVERSATION_COMMAND,
-  UpdateGroupConversationRequest,
-  getConversation,
-  updateConversation,
-  uploadConversation,
-} from './ConversationProvider';
+import { DotYouClient } from '@youfoundation/js-lib/core';
+import { getConversation } from './ConversationProvider';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { ReceivedCommand } from '@youfoundation/js-lib/core';
 import { QueryClient } from '@tanstack/react-query';
@@ -22,7 +10,6 @@ import {
   getChatMessage,
   updateChatMessage,
 } from './ChatProvider';
-import { getSingleConversation } from '../hooks/chat/useConversation';
 
 export const processCommand = async (
   dotYouClient: DotYouClient,
@@ -30,118 +17,118 @@ export const processCommand = async (
   command: ReceivedCommand,
   identity: string
 ) => {
-  if (command.clientCode === JOIN_CONVERSATION_COMMAND)
-    return await joinConversation(dotYouClient, queryClient, command);
+  // if (command.clientCode === JOIN_CONVERSATION_COMMAND)
+  //   return await joinConversation(dotYouClient, queryClient, command);
 
-  if (command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND && identity)
-    return await joinGroupConversation(dotYouClient, queryClient, command, identity);
+  // if (command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND && identity)
+  //   return await joinGroupConversation(dotYouClient, queryClient, command, identity);
 
   if (command.clientCode === MARK_CHAT_READ_COMMAND)
     return await markChatAsRead(dotYouClient, queryClient, command);
 
-  if (command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND) {
-    return await updateGroupConversation(dotYouClient, queryClient, command);
-  }
+  // if (command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND) {
+  //   return await updateGroupConversation(dotYouClient, queryClient, command);
+  // }
 };
 
-const joinConversation = async (
-  dotYouClient: DotYouClient,
-  queryClient: QueryClient,
-  command: ReceivedCommand
-) => {
-  const joinConversationRequest = tryJsonParse<JoinConversationRequest>(command.clientJsonMessage);
-  try {
-    await uploadConversation(dotYouClient, {
-      fileMetadata: {
-        appData: {
-          uniqueId: joinConversationRequest.conversationId,
-          content: {
-            title: joinConversationRequest.title,
-            recipient: command.sender,
-          },
-        },
-      },
-      serverMetadata: {
-        accessControlList: {
-          requiredSecurityGroup: SecurityGroupType.Connected,
-        },
-      },
-    });
-    queryClient.invalidateQueries({ queryKey: ['conversations'] });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (ex: any) {
-    if (ex?.response?.data?.errorCode === 'existingFileWithUniqueId') return command.id;
+// const joinConversation = async (
+//   dotYouClient: DotYouClient,
+//   queryClient: QueryClient,
+//   command: ReceivedCommand
+// ) => {
+//   const joinConversationRequest = tryJsonParse<JoinConversationRequest>(command.clientJsonMessage);
+//   try {
+//     await uploadConversation(dotYouClient, {
+//       fileMetadata: {
+//         appData: {
+//           uniqueId: joinConversationRequest.conversationId,
+//           content: {
+//             title: joinConversationRequest.title,
+//             recipient: command.sender,
+//           },
+//         },
+//       },
+//       serverMetadata: {
+//         accessControlList: {
+//           requiredSecurityGroup: SecurityGroupType.Connected,
+//         },
+//       },
+//     });
+//     queryClient.invalidateQueries({ queryKey: ['conversations'] });
+//     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//   } catch (ex: any) {
+//     if (ex?.response?.data?.errorCode === 'existingFileWithUniqueId') return command.id;
 
-    console.error(ex);
-    return null;
-  }
+//     console.error(ex);
+//     return null;
+//   }
 
-  return command.id;
-};
+//   return command.id;
+// };
 
-const joinGroupConversation = async (
-  dotYouClient: DotYouClient,
-  queryClient: QueryClient,
-  command: ReceivedCommand,
-  identity: string
-) => {
-  const joinConversationRequest = tryJsonParse<JoinGroupConversationRequest>(
-    command.clientJsonMessage
-  );
+// const joinGroupConversation = async (
+//   dotYouClient: DotYouClient,
+//   queryClient: QueryClient,
+//   command: ReceivedCommand,
+//   identity: string
+// ) => {
+//   const joinConversationRequest = tryJsonParse<JoinGroupConversationRequest>(
+//     command.clientJsonMessage
+//   );
 
-  const recipients = joinConversationRequest?.recipients?.filter(
-    (recipient) => recipient !== identity
-  );
-  if (!recipients?.length) return command.id;
-  recipients.push(command.sender);
+//   const recipients = joinConversationRequest?.recipients?.filter(
+//     (recipient) => recipient !== identity
+//   );
+//   if (!recipients?.length) return command.id;
+//   recipients.push(command.sender);
 
-  try {
-    await uploadConversation(dotYouClient, {
-      fileMetadata: {
-        appData: {
-          uniqueId: joinConversationRequest.conversationId,
-          content: {
-            title: joinConversationRequest.title,
-            recipients: recipients,
-          },
-        },
-      },
-      serverMetadata: {
-        accessControlList: {
-          requiredSecurityGroup: SecurityGroupType.Connected,
-        },
-      },
-    });
-    queryClient.invalidateQueries({ queryKey: ['conversations'] });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (ex: any) {
-    if (ex?.response?.data?.errorCode === 'existingFileWithUniqueId') return command.id;
+//   try {
+//     await uploadConversation(dotYouClient, {
+//       fileMetadata: {
+//         appData: {
+//           uniqueId: joinConversationRequest.conversationId,
+//           content: {
+//             title: joinConversationRequest.title,
+//             recipients: recipients,
+//           },
+//         },
+//       },
+//       serverMetadata: {
+//         accessControlList: {
+//           requiredSecurityGroup: SecurityGroupType.Connected,
+//         },
+//       },
+//     });
+//     queryClient.invalidateQueries({ queryKey: ['conversations'] });
+//     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//   } catch (ex: any) {
+//     if (ex?.response?.data?.errorCode === 'existingFileWithUniqueId') return command.id;
 
-    console.error(ex);
-    return null;
-  }
+//     console.error(ex);
+//     return null;
+//   }
 
-  return command.id;
-};
+//   return command.id;
+// };
 
-const updateGroupConversation = async (
-  dotYouClient: DotYouClient,
-  queryClient: QueryClient,
-  command: ReceivedCommand
-) => {
-  const updateGroupConversation = tryJsonParse<UpdateGroupConversationRequest>(
-    command.clientJsonMessage
-  );
-  const conversation = await getSingleConversation(
-    dotYouClient,
-    updateGroupConversation.conversationId
-  );
-  if (!conversation) return null;
-  conversation.fileMetadata.appData.content.title = updateGroupConversation.title;
-  await updateConversation(dotYouClient, conversation);
-  queryClient.invalidateQueries({ queryKey: ['conversations'] });
-  return command.id;
-};
+// const updateGroupConversation = async (
+//   dotYouClient: DotYouClient,
+//   queryClient: QueryClient,
+//   command: ReceivedCommand
+// ) => {
+//   const updateGroupConversation = tryJsonParse<UpdateGroupConversationRequest>(
+//     command.clientJsonMessage
+//   );
+//   const conversation = await getSingleConversation(
+//     dotYouClient,
+//     updateGroupConversation.conversationId
+//   );
+//   if (!conversation) return null;
+//   conversation.fileMetadata.appData.content.title = updateGroupConversation.title;
+//   await updateConversation(dotYouClient, conversation);
+//   queryClient.invalidateQueries({ queryKey: ['conversations'] });
+//   return command.id;
+// };
 
 const markChatAsRead = async (
   dotYouClient: DotYouClient,
@@ -151,15 +138,14 @@ const markChatAsRead = async (
   const markAsReadRequest = tryJsonParse<MarkAsReadRequest>(command.clientJsonMessage);
   const conversationId = markAsReadRequest.conversationId;
   const chatUniqueIds = markAsReadRequest.messageIds;
+  const identity = dotYouClient.getIdentity();
 
   if (!conversationId || !chatUniqueIds) return null;
 
   const conversation = await getConversation(dotYouClient, conversationId);
   if (!conversation) return null;
   const conversationContent = conversation.fileMetadata.appData.content;
-  const recipients = (conversationContent as GroupConversation).recipients || [
-    (conversationContent as SingleConversation).recipient,
-  ];
+  const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
   if (!recipients.filter(Boolean)?.length) return null;
   const chatMessages = await Promise.all(
     Array.from(new Set(chatUniqueIds)).map((msgId) => getChatMessage(dotYouClient, msgId))

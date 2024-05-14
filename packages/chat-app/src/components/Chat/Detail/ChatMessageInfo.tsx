@@ -1,23 +1,18 @@
 import { createPortal } from 'react-dom';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../providers/ChatProvider';
-import { AuthorImage, AuthorName, DialogWrapper, t, usePortal } from '@youfoundation/common-app';
 import {
-  Conversation,
-  GroupConversation,
-  SingleConversation,
-} from '../../../providers/ConversationProvider';
+  AuthorImage,
+  AuthorName,
+  DialogWrapper,
+  t,
+  useDotYouClient,
+  usePortal,
+} from '@youfoundation/common-app';
 import { InnerDeliveryIndicator } from './ChatDeliveryIndicator';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app/src/helpers/timeago/format';
-
-const dateTimeFormat: Intl.DateTimeFormatOptions = {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-  hour: 'numeric',
-  minute: 'numeric',
-};
+import { UnifiedConversation } from '../../../providers/ConversationProvider';
 
 export const ChatMessageInfo = ({
   msg,
@@ -25,17 +20,16 @@ export const ChatMessageInfo = ({
   onClose,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation: HomebaseFile<Conversation>;
+  conversation: HomebaseFile<UnifiedConversation>;
   onClose: () => void;
 }) => {
+  const identity = useDotYouClient().getIdentity();
   const target = usePortal('modal-container');
   const messageContent = msg.fileMetadata.appData.content;
   const conversationContent = conversation.fileMetadata.appData.content;
-  const recipients = (
-    (conversationContent as GroupConversation).recipients || [
-      (conversationContent as SingleConversation).recipient,
-    ]
-  ).filter(Boolean);
+  const recipients = conversationContent.recipients.filter(
+    (recipient) => recipient && recipient !== identity
+  );
 
   const { data: reactions } = useChatReaction({
     conversationId: conversation?.fileMetadata.appData.uniqueId,

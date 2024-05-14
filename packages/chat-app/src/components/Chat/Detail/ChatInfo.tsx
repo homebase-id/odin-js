@@ -14,29 +14,25 @@ import {
   usePortal,
 } from '@youfoundation/common-app';
 import {
-  Conversation,
   ConversationWithYourselfId,
-  GroupConversation,
-  SingleConversation,
+  UnifiedConversation,
 } from '../../../providers/ConversationProvider';
 
 export const ChatInfo = ({
   conversation,
   onClose,
 }: {
-  conversation: HomebaseFile<Conversation>;
+  conversation: HomebaseFile<UnifiedConversation>;
   onClose: () => void;
 }) => {
   const target = usePortal('modal-container');
 
   const identity = useDotYouClient().getIdentity();
   const conversationContent = conversation.fileMetadata.appData.content;
-  const recipients = (conversationContent as GroupConversation).recipients || [
-    (conversationContent as SingleConversation).recipient,
-  ];
+  const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
   const withYourself = conversation?.fileMetadata.appData.uniqueId === ConversationWithYourselfId;
-  const recipient = (conversationContent as SingleConversation)?.recipient;
+  const recipient = recipients.length === 1 ? recipients[0] : undefined;
 
   const dialog = (
     <DialogWrapper onClose={onClose} title={t('Chat info')}>
