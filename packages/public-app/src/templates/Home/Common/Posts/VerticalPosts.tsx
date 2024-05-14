@@ -92,11 +92,12 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
   const { isOwner, getIdentity } = useDotYouClient();
   const isAuthenticated = isOwner || !!getIdentity();
   const { data: channels } = useChannels({ isAuthenticated, isOwner });
-  const showAuthor = channels?.find(
-    (channel) =>
-      channel.fileMetadata.appData.content.isCollaborative &&
-      channel.fileMetadata.appData.content.showOnHomePage
-  );
+  const showAuthor =
+    !!channels?.find(
+      (channel) =>
+        channel.fileMetadata.appData.content.isCollaborative &&
+        channel.fileMetadata.appData.content.showOnHomePage
+    ) || false;
 
   const [isLogin, setIsLogin] = useState(false);
 
