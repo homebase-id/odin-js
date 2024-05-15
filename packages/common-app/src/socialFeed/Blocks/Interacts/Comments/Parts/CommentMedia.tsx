@@ -20,18 +20,20 @@ export const CommentMedia = ({
 
   if (!targetDrive) return null;
   return (
-    <OdinImage
-      odinId={postAuthorOdinId}
-      dotYouClient={dotYouClient}
-      fileId={fileId}
-      targetDrive={targetDrive}
-      fileKey={fileKey}
-      lastModified={lastModified}
-      className="my-1"
-      maxWidth="250px"
-      systemFileType="Comment"
-      fit="contain"
-    />
+    <div className="max-w-[250px] mr-auto">
+      <OdinImage
+        odinId={postAuthorOdinId}
+        dotYouClient={dotYouClient}
+        fileId={fileId}
+        targetDrive={targetDrive}
+        fileKey={fileKey}
+        lastModified={lastModified}
+        className="my-1"
+        maxWidth="250px"
+        systemFileType="Comment"
+        fit="contain"
+      />
+    </div>
   );
 };
 

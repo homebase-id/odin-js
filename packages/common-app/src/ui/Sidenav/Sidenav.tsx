@@ -174,7 +174,7 @@ export const Sidenav = ({
 
             {!isTightHeight ? (
               <div>
-                <p className={`${navItemClassName} opacity-40 leading-none`}>
+                <a className={`${navItemClassName} opacity-40 leading-none`} href="/api/v1/version">
                   <span className={`text-center text-2xl px-[0.18rem]`}>©</span>
                   <span
                     className={`my-auto ml-3 max-w-[15rem] overflow-hidden whitespace-pre-wrap ${
@@ -184,7 +184,7 @@ export const Sidenav = ({
                     {new Date().getFullYear()} | v.
                     {getVersion()}
                   </span>
-                </p>
+                </a>
               </div>
             ) : null}
 

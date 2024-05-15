@@ -73,6 +73,10 @@ body {
   margin-top: 0.75rem;
   margin-bottom: 0.75rem;
 }
+.px-3 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
 .text-center {
   text-align: center;
 }

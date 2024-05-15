@@ -140,6 +140,7 @@ const PostOverview = () => {
             <ListComponent
               blogPosts={blogPosts}
               showAuthor={activeChannel?.fileMetadata.appData.content.isCollaborative || false}
+              showChannel={activeChannel?.fileMetadata.appData.content.isCollaborative || false}
             />
           ) : (
             <SubtleMessage>{t('Nothing has been posted yet')}</SubtleMessage>

@@ -300,7 +300,7 @@ export const ChannelOrAclSelector = React.forwardRef(
           defaultValue={defaultChannelValue}
           key={'loading-select'}
         >
-          <option>{t('Public Posts')}</option>
+          <option>{t('Main')}</option>
         </select>
       );
     }
