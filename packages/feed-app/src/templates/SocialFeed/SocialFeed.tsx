@@ -6,6 +6,7 @@ import {
   Article,
   Ellipsis,
   FEED_APP_ID,
+  FEED_CHAT_APP_ID,
   Quote,
   t,
   useRemoveNotifications,
@@ -57,7 +58,7 @@ export const SocialFeed = () => {
       </Helmet>
       <ExtendPermissionDialog
         appName={t('Homebase Feed')}
-        appId={FEED_APP_ID}
+        appId={isReactNative ? FEED_CHAT_APP_ID : FEED_APP_ID}
         drives={drives}
         permissions={permissions}
       />
