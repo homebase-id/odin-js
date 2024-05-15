@@ -139,13 +139,12 @@ const ConversationBody = ({
   );
   const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
 
-  const lastReadTime = conversation?.fileMetadata.appData.content.lastReadTime;
-  const unreadCount =
-    flatMessages && lastReadTime
-      ? flatMessages.filter(
-          (msg) => msg.fileMetadata.senderOdinId && msg.fileMetadata.created >= lastReadTime
-        )?.length
-      : 0;
+  const lastReadTime = conversation?.fileMetadata.appData.content.lastReadTime || 0;
+  const unreadCount = flatMessages
+    ? flatMessages.filter(
+        (msg) => msg.fileMetadata.senderOdinId && msg.fileMetadata.created >= lastReadTime
+      )?.length
+    : 0;
 
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
 

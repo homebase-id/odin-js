@@ -117,7 +117,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   }: {
     conversation: HomebaseFile<UnifiedConversation>;
   }) => {
-    conversation.fileMetadata.appData.content.lastReadTime = undefined;
+    conversation.fileMetadata.appData.content.lastReadTime = 0;
     return await uploadConversation(dotYouClient, conversation, true);
   };
 
@@ -129,9 +129,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     isTitleUpdated?: boolean;
   }) => {
     await updateConversation(dotYouClient, conversation);
-    conversation.fileMetadata.appData.content.lastReadTime = undefined;
+    conversation.fileMetadata.appData.content.lastReadTime = 0;
     if (isTitleUpdated && 'recipients' in conversation.fileMetadata.appData.content) {
-      conversation.fileMetadata.appData.content.lastReadTime = undefined;
+      conversation.fileMetadata.appData.content.lastReadTime = 0;
       await uploadConversation(dotYouClient, conversation, true);
     }
   };

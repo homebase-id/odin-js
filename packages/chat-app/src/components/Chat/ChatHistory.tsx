@@ -46,7 +46,11 @@ export const ChatHistory = ({
     ) || [];
 
   useEffect(() => {
-    if (isFetchedAfterMount && (!flattenedMsgs || flattenedMsgs.length === 0)) setIsEmptyChat(true);
+    if (
+      isFetchedAfterMount &&
+      (!flattenedMsgs || flattenedMsgs?.filter((msg) => msg.fileId).length === 0)
+    )
+      setIsEmptyChat(true);
   }, [isFetchedAfterMount, flattenedMsgs]);
 
   useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
