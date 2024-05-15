@@ -23,7 +23,7 @@ export const ImageLightbox = ({
   fileKey: string;
   previewThumbnail?: EmbeddedThumb;
   lastModified: number | undefined;
-  systemFileType: SystemFileType;
+  systemFileType?: SystemFileType;
   onClose: () => void;
 }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
