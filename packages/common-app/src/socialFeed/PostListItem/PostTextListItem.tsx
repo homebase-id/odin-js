@@ -1,4 +1,4 @@
-import { Article } from '@youfoundation/js-lib/public';
+import { Article, BlogConfig } from '@youfoundation/js-lib/public';
 import { ellipsisAtMaxChar } from '../../helpers';
 import { ChannelDefinitionVm } from '../../hooks';
 import { FakeAnchor } from '../../ui';
@@ -27,7 +27,7 @@ export const PostTextListItem = ({
         key={draft.fileId}
       >
         <FakeAnchor
-          href={`${linkRoot}/${channel?.fileMetadata.appData.content.slug ?? 'public-posts'}/${
+          href={`${linkRoot}/${channel?.fileMetadata.appData.content.slug ?? BlogConfig.PublicChannelSlug}/${
             content.id
           }`}
         >

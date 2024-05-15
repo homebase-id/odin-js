@@ -37,9 +37,9 @@ export class BlogConfig {
   static readonly DriveType: string = '8f448716e34cedf9014145e043ca6612'; //toGuidId('channel_drive');
 
   static readonly PublicChannelId = toGuidId('public_channel_drive');
-  static readonly PublicChannelSlug = 'public-posts';
+  static readonly PublicChannelSlug = 'main-posts';
   static readonly PublicChannel: ChannelDefinition = {
-    name: 'Public Posts',
+    name: 'Main',
     slug: BlogConfig.PublicChannelSlug,
     showOnHomePage: true,
     description: '',
