@@ -14,6 +14,8 @@ import {
   CHAT_CONVERSATION_FILE_TYPE,
   GROUP_CHAT_CONVERSATION_FILE_TYPE,
   dsrToConversation,
+  JOIN_CONVERSATION_COMMAND,
+  JOIN_GROUP_CONVERSATION_COMMAND,
 } from '../../providers/ConversationProvider';
 import { useDotYouClient, useNotificationSubscriber } from '@youfoundation/common-app';
 import { useCallback, useEffect, useRef } from 'react';
@@ -282,9 +284,9 @@ const useChatCommandProcessor = (isEnabled?: boolean) => {
       const commands = await getCommands(dotYouClient, ChatDrive);
       const filteredCommands = commands.receivedCommands.filter(
         (command) =>
-          // command.clientCode === JOIN_CONVERSATION_COMMAND ||
-          command.clientCode === MARK_CHAT_READ_COMMAND
-        // command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND ||
+          command.clientCode === JOIN_CONVERSATION_COMMAND ||
+          command.clientCode === MARK_CHAT_READ_COMMAND ||
+          command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND
         // command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND
       );
 

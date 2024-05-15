@@ -277,14 +277,14 @@ export const updateConversation = async (
   );
 };
 
-// export const JOIN_CONVERSATION_COMMAND = 100;
-// export const JOIN_GROUP_CONVERSATION_COMMAND = 110;
+export const JOIN_CONVERSATION_COMMAND = 100;
+export const JOIN_GROUP_CONVERSATION_COMMAND = 110;
 // export const UPDATE_GROUP_CONVERSATION_COMMAND = 111;
 
-// export interface JoinConversationRequest {
-//   conversationId: string;
-//   title: string;
-// }
+export interface JoinConversationRequest {
+  conversationId: string;
+  title: string;
+}
 
 // export interface UpdateGroupConversationRequest {
 //   title: string;
@@ -292,9 +292,9 @@ export const updateConversation = async (
 //   conversationId: string;
 // }
 
-// export interface JoinGroupConversationRequest extends JoinConversationRequest {
-//   recipients: string[];
-// }
+export interface JoinGroupConversationRequest extends JoinConversationRequest {
+  recipients: string[];
+}
 
 // export const updateGroupConversationCommand = async (
 //   dotYouClient: DotYouClient,
