@@ -9,7 +9,7 @@ import {
 } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../providers/ChatProvider';
-import { Conversation } from '../../../providers/ConversationProvider';
+import { UnifiedConversation } from '../../../providers/ConversationProvider';
 import { ChatMessageInfo } from './ChatMessageInfo';
 import { EditChatMessage } from './EditChatMessage';
 
@@ -24,7 +24,7 @@ export const ContextMenu = ({
   chatActions,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation?: HomebaseFile<Conversation>;
+  conversation?: HomebaseFile<UnifiedConversation>;
   chatActions?: ChatActions;
 }) => {
   if (!chatActions) return null;

@@ -14,7 +14,7 @@ import { HomebaseFile, NewMediaFile } from '@youfoundation/js-lib/core';
 
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { ChatMessage } from '../../../providers/ChatProvider';
-import { Conversation } from '../../../providers/ConversationProvider';
+import { Conversation, UnifiedConversation } from '../../../providers/ConversationProvider';
 import { useState, useEffect, useRef } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
 import { isTouchDevice } from '@youfoundation/js-lib/helpers';
@@ -28,7 +28,7 @@ export const ChatComposer = ({
   clearReplyMsg,
   onSend,
 }: {
-  conversation: HomebaseFile<Conversation> | undefined;
+  conversation: HomebaseFile<UnifiedConversation> | undefined;
   replyMsg: HomebaseFile<ChatMessage> | undefined;
   clearReplyMsg: () => void;
   onSend?: () => void;
