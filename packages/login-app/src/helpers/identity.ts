@@ -87,6 +87,11 @@ export const storeIdentity = (identity: string) => {
 export const authorize = async (identity: string, params: URLSearchParams) => {
   if (!window.top) throw new Error('window.top is not accessible');
 
+  if (!identity || identity === '') {
+    window.top.location.href = `https://anon.homebase.id/auth/owner/v1/youauth/authorize?${params.toString()}`;
+    return;
+  }
+
   const parentUrl =
     window.location != window.parent.location ? document.referrer : document.location.href;
 

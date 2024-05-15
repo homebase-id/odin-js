@@ -11,9 +11,9 @@ const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]{2,25}(
 const INVALID_CLASSNAME = 'invalid';
 const LOADING_CLASSNAME = 'loading';
 
-const setupHtml = (isStandalone?: boolean) => {
+const setupHtml = (isStandalone?: boolean, allowEmptySubmit?: boolean) => {
   document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-    <div ${isStandalone ? 'class="max-w-sm m-auto w-full"' : ''}>
+    <div ${isStandalone ? 'class="max-w-sm m-auto px-3 w-full"' : ''}>
       <form id="main" class="form">
         <h1 class="text-lg">YouAuth</h1>
         <div class="label-group">
@@ -23,7 +23,7 @@ const setupHtml = (isStandalone?: boolean) => {
           <span class="invalid-msg">Invalid identity</span>
         </div>
         <div id="selectable-wrapper">
-          <input type="text" name="homebase-id" list="homebase-identities" id="homebase-id" inputmode="url" autoComplete="off" />
+          <input type="text" name="homebase-id" list="homebase-identities" id="homebase-id" inputmode="url" autoComplete="off" ${!allowEmptySubmit ? 'required' : ''}/>
           <ul id="homebase-identities"></ul>
         </div>
         <button class="login">Login</button>
@@ -33,8 +33,12 @@ const setupHtml = (isStandalone?: boolean) => {
     </div>`;
 };
 
-export const LoginBox = async (onSubmit: (identity: string) => void, isStandalone?: boolean) => {
-  setupHtml(isStandalone);
+export const LoginBox = async (
+  onSubmit: (identity: string) => void,
+  isStandalone?: boolean,
+  allowEmptySubmit?: boolean
+) => {
+  setupHtml(isStandalone, allowEmptySubmit);
 
   const mainForm = document.getElementById('main');
   const dotyouInputBox: HTMLInputElement | null = document.getElementById(
@@ -88,17 +92,9 @@ export const LoginBox = async (onSubmit: (identity: string) => void, isStandalon
   mainForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    if (dotyouInputBox.value === '' && window.top) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const parentUrl = urlParams.get('client_id');
-
-      if (parentUrl) {
-        const isParentAnIdentity = await pingIdentity(parentUrl);
-        if (isParentAnIdentity) {
-          window.top.location.href = `https://${stripIdentity(parentUrl)}/owner/login?returnUrl=/owner`;
-          return;
-        }
-      }
+    if (dotyouInputBox.value === '' && allowEmptySubmit) {
+      onSubmit('');
+      return;
     }
 
     if (!(mainForm as HTMLFormElement).reportValidity()) {
