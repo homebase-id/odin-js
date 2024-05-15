@@ -49,8 +49,10 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
       isEmptyChat &&
       conversation &&
       !stringGuidsEqual(conversationId, ConversationWithYourselfId)
-    )
+    ) {
+      console.log('invite recipient');
       inviteRecipient({ conversation });
+    }
   };
 
   return (
