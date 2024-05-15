@@ -12,7 +12,7 @@ import {
   ChatDrive,
   Conversation,
   CHAT_CONVERSATION_FILE_TYPE,
-  GroupCHAT_CONVERSATION_FILE_TYPE,
+  GROUP_CHAT_CONVERSATION_FILE_TYPE,
   dsrToConversation,
 } from '../../providers/ConversationProvider';
 import { useDotYouClient, useNotificationSubscriber } from '@youfoundation/common-app';
@@ -54,6 +54,7 @@ const useInboxProcessor = (connected?: boolean) => {
     const processedresult = await processInbox(dotYouClient, ChatDrive, 2000);
     // We don't know how many messages we have processed, so we can only invalidate the entire chat query
     queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
+    queryClient.invalidateQueries({ queryKey: ['conversations'] });
     return processedresult;
   };
 
@@ -173,7 +174,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
         queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
       } else if (
         notification.header.fileMetadata.appData.fileType === CHAT_CONVERSATION_FILE_TYPE ||
-        notification.header.fileMetadata.appData.fileType === GroupCHAT_CONVERSATION_FILE_TYPE
+        notification.header.fileMetadata.appData.fileType === GROUP_CHAT_CONVERSATION_FILE_TYPE
       ) {
         const isNewFile = notification.notificationType === 'fileAdded';
 
