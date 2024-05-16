@@ -46,8 +46,6 @@ export const ChatHistory = ({
     ) || [];
 
   useEffect(() => {
-    console.log('setIsEmptyChat', flattenedMsgs?.length);
-
     if (isFetched && (!flattenedMsgs || flattenedMsgs?.filter((msg) => msg.fileId).length === 0))
       setIsEmptyChat(true);
   }, [isFetched, flattenedMsgs]);
