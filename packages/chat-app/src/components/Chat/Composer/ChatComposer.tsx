@@ -74,12 +74,14 @@ export const ChatComposer = ({
       replyId: replyMsg?.fileMetadata?.appData?.uniqueId,
       files,
     });
+
     sendMessage({
       conversation,
       message: trimmedVal || '',
       replyId: replyMsg?.fileMetadata?.appData?.uniqueId,
       files,
     });
+
     onSend && onSend();
   };
 

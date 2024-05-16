@@ -32,7 +32,7 @@ export const ChatHistory = ({
       hasNextPage: hasMoreMessages,
       fetchNextPage,
       isFetchingNextPage,
-      isFetchedAfterMount,
+      isFetched,
     },
     delete: { mutate: deleteMessages, error: deleteMessagesError },
   } = useChatMessages({ conversationId: conversation?.fileMetadata?.appData?.uniqueId });
@@ -46,12 +46,11 @@ export const ChatHistory = ({
     ) || [];
 
   useEffect(() => {
-    if (
-      isFetchedAfterMount &&
-      (!flattenedMsgs || flattenedMsgs?.filter((msg) => msg.fileId).length === 0)
-    )
+    console.log('setIsEmptyChat', flattenedMsgs?.length);
+
+    if (isFetched && (!flattenedMsgs || flattenedMsgs?.filter((msg) => msg.fileId).length === 0))
       setIsEmptyChat(true);
-  }, [isFetchedAfterMount, flattenedMsgs]);
+  }, [isFetched, flattenedMsgs]);
 
   useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
   const chatActions: ChatActions = {
