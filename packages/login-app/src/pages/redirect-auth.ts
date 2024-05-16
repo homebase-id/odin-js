@@ -6,9 +6,11 @@ export const RedirectAuth = () => {
   const target = pathName.split('/auth/')[1];
   if (!target) return;
 
+  const params = window.location.search;
+
   LoginBox(
     (identity) =>
-      (window.location.href = `https://${identity}/api/${target}?${window.location.search}`),
+      (window.location.href = `https://${identity}/api/${target}?${params.startsWith('?') ? params.slice(1) : params}`),
     true
   );
 };
