@@ -2,6 +2,7 @@ import { Virtualizer, useWindowVirtualizer } from '@tanstack/react-virtual';
 import { PostContent } from '@youfoundation/js-lib/public';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
+  HOME_ROOT_PATH,
   Label,
   SubtleMessage,
   useBlogPostsInfinite,
@@ -17,35 +18,25 @@ import { useAuth } from '../../../../hooks/auth/useAuth';
 import { PostTeaser } from '@youfoundation/common-app';
 import LoginDialog from '../../../../components/Dialog/LoginDialog/LoginDialog';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { useNavigate } from 'react-router-dom';
 
 const PAGE_SIZE = 30;
 
 const VerticalPosts = ({ className }: { className?: string }) => {
-  const [mobileChannelId, setMobileChannelId] = useState<string>();
-
   return (
     <div className={className ?? ''}>
       <div className="grid max-w-7xl grid-cols-1 gap-4 lg:grid-cols-5 xl:grid-cols-6">
-        <ChannelSidebar
-          className="lg:order-2 lg:col-span-2"
-          setChannelId={(newId) => setMobileChannelId(newId)}
-        />
-        <MainVerticalPosts className="lg:col-span-3" channelId={mobileChannelId} />
+        <ChannelSidebar className="lg:order-2 lg:col-span-2" />
+        <MainVerticalPosts className="lg:col-span-3" />
       </div>
     </div>
   );
 };
 
-const ChannelSidebar = ({
-  className,
-  channelId,
-  setChannelId,
-}: {
-  className: string;
-  channelId?: string;
-  setChannelId: (channelId: string | undefined) => void;
-}) => {
+const ChannelSidebar = ({ className }: { className: string }) => {
   const { isAuthenticated, isOwner } = useAuth();
+  const navigate = useNavigate();
   const { data: channels } = useChannels({ isAuthenticated, isOwner });
   if (!channels?.length || channels.length === 1) return null;
 
@@ -65,10 +56,16 @@ const ChannelSidebar = ({
       <div className="lg:hidden">
         <Label>{t('Channel')}:</Label>
         <Select
-          defaultValue={channelId || 'all'}
-          onChange={(e) =>
-            setChannelId(e.currentTarget.value === 'all' ? undefined : e.currentTarget.value)
-          }
+          defaultValue={'all'}
+          onChange={(e) => {
+            const channel = channels?.find((chnl) =>
+              stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, e.target.value)
+            );
+            if (!channel) return;
+            const targetHref = `${HOME_ROOT_PATH}posts/${channel.fileMetadata.appData.content.slug ?? '#'}`;
+
+            navigate(targetHref);
+          }}
           className="border border-gray-200 border-opacity-60 py-4 dark:border-gray-800"
         >
           <option value="all">{t('All channels')}</option>
