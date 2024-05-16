@@ -66,7 +66,10 @@ export const saveComment = async (
     const { additionalThumbnails, tinyThumb } = await createThumbnails(
       imageFile,
       COMMENT_MEDIA_PAYLOAD,
-      [{ height: 250, width: 250, quality: 100 }]
+      [
+        { height: 250, width: 250, quality: 100 },
+        { height: 1600, width: 1600, quality: 100 },
+      ]
     );
 
     thumbnails.push(...additionalThumbnails);
