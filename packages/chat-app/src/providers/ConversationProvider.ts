@@ -57,7 +57,6 @@ export const ChatDrive: TargetDrive = {
 
 interface BaseConversation {
   title: string;
-  // imgId?: string;
   lastReadTime?: number;
 }
 
@@ -66,21 +65,21 @@ export interface UnifiedConversation extends BaseConversation {
 }
 
 /**
- * @deprecated The SingleConversation type is deprecated. Use the Conversation type instead.
+ * @deprecated The SingleConversation type is deprecated. Use the UnifiedConversation type instead.
  */
 export interface SingleConversation extends BaseConversation {
   recipient: string;
 }
 
 /**
- * @deprecated The GroupConversation type is deprecated. Use the Conversation type instead.
+ * @deprecated The GroupConversation type is deprecated. Use the UnifiedConversation type instead.
  */
 export interface GroupConversation extends BaseConversation {
   recipients: string[];
 }
 
 /**
- * @deprecated The GroupConversation type is deprecated. Use the Conversation type instead.
+ * @deprecated The SingleConversation & GroupConversation types are deprecated. Use the UnifiedConversation type instead.
  */
 export type Conversation = SingleConversation | GroupConversation;
 
@@ -210,7 +209,7 @@ export const uploadConversation = async (
   };
 
   const conversationContent = conversation.fileMetadata.appData.content;
-  const payloadJson: string = jsonStringify64({ ...conversationContent });
+  const payloadJson: string = jsonStringify64({ ...conversationContent, version: 1 });
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: conversation?.fileMetadata.versionTag,
