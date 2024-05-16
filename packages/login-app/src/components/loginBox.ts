@@ -161,7 +161,7 @@ export const LoginBox = async (
         selectableWrapper.classList.toggle('show');
       });
 
-      dotyouInputBox.addEventListener('keyup', (e) => selectableWrapper.classList.remove('show'));
+      dotyouInputBox.addEventListener('keyup', () => selectableWrapper.classList.remove('show'));
       dotyouInputBox.addEventListener('focus', () => selectableWrapper.classList.add('show'));
       if (autoFocused) selectableWrapper.classList.add('show');
     }
