@@ -243,9 +243,19 @@ input {
   position: relative;
 }
 
-.selectable-input:after {
-  content: '';
+.selectable-input ul + a {
   position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: block;
+  width: 3rem;
+  cursor: pointer;
+}
+
+.selectable-input ul + a:after {
+  position: absolute;
+  content: '';
   right: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
@@ -254,6 +264,10 @@ input {
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
   border-top: 5px solid rgb(55 65 81);
+}
+
+.selectable-input ul:empty + a {
+  display: none;
 }
 
 .selectable-input ul {
