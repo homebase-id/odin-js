@@ -282,6 +282,7 @@ const useChatCommandProcessor = (isEnabled?: boolean) => {
       if (isProcessing.current) return;
       isProcessing.current = true;
       const commands = await getCommands(dotYouClient, ChatDrive);
+
       const filteredCommands = commands.receivedCommands.filter(
         (command) =>
           command.clientCode === JOIN_CONVERSATION_COMMAND ||

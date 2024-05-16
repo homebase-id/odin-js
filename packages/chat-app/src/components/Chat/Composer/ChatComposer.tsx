@@ -68,13 +68,6 @@ export const ChatComposer = ({
     )
       return;
 
-    console.log({
-      conversation,
-      message: trimmedVal || '',
-      replyId: replyMsg?.fileMetadata?.appData?.uniqueId,
-      files,
-    });
-
     sendMessage({
       conversation,
       message: trimmedVal || '',

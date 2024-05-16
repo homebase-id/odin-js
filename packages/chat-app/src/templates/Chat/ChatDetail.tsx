@@ -44,7 +44,6 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
     );
 
   const onSend = async () => {
-    console.log('onSend', isEmptyChat, conversation, conversationId, ConversationWithYourselfId);
     if (
       isEmptyChat &&
       conversation &&
