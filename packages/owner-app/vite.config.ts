@@ -50,6 +50,16 @@ export default defineConfig({
         if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
         warn(warning);
       },
+      onLog(level, log, handler) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (
+          log.cause &&
+          (log.cause as any)?.message === `Can't resolve original location of error.`
+        ) {
+          return;
+        }
+        handler(level, log);
+      },
       output: {
         // manualChunks(id) {
         //   if (
