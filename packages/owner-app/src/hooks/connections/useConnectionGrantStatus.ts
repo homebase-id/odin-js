@@ -8,7 +8,7 @@ export const useConnectionGrantStatus = ({ odinId }: { odinId?: string }) => {
     fetchStatus: async () => {
       const axiosClient = dotYouClient.createAxiosClient();
       const jsonData = await axiosClient
-        .post(`/circles/connections/status`, { odinId: odinId })
+        .post(`/circles/connections/troubleshooting-info`, { odinId: odinId })
         .then((res) => res.data);
 
       const stringified = jsonStringify64(jsonData);
