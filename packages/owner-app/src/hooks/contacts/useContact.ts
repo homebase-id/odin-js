@@ -17,11 +17,11 @@ import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation
 export const useContact = ({
   odinId,
   id,
-  canSave = true,
+  canSave,
 }: {
   odinId?: string;
   id?: string;
-  canSave?: boolean;
+  canSave: boolean;
 }) => {
   const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
@@ -53,41 +53,25 @@ export const useContact = ({
       return contactBookContact;
     } else if (contactBookContact)
       console.log(`[${odinId}] Ignoring contact book record`, contactBookContact);
-    let returnContact;
 
-    // If no contact in the contact book:
-    // Get contact data from ICRs/Remote Attributes:
-    const connectionInfo = await fetchConnectionInfo(dotYouClient, odinId);
-    if (connectionInfo) {
-      returnContact = connectionInfo;
-    } else {
-      // Or from their public data
-      const publicContact = await fetchDataFromPublic(odinId);
-      returnContact = publicContact ? { ...publicContact } : returnContact;
+    const returnContact =
+      (await fetchConnectionInfo(dotYouClient, odinId)) || (await fetchDataFromPublic(odinId));
+
+    if (!returnContact) return undefined;
+
+    const contactFile = {
+      fileMetadata: { appData: { content: { ...returnContact, odinId: odinId } } },
+      serverMetadata: {
+        accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+      },
+    };
+
+    if (canSave) {
+      const savedReturnedContact = await saveContact(dotYouClient, contactFile);
+      return parseContact(savedReturnedContact);
     }
 
-    if (returnContact) {
-      // Only save contacts if we were allowed to or if the source is of the "contact" level
-      if (canSave) {
-        const savedReturnedContact = await saveContact(dotYouClient, {
-          fileMetadata: { appData: { content: { ...returnContact, odinId: odinId } } },
-          serverMetadata: {
-            accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
-          },
-        });
-
-        return parseContact(savedReturnedContact);
-      } else {
-        return parseContact({
-          fileMetadata: { appData: { content: { ...returnContact, odinId: odinId } } },
-          serverMetadata: {
-            accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
-          },
-        });
-      }
-    }
-
-    return undefined;
+    return parseContact(contactFile);
   };
 
   const refresh = async ({ contact }: { contact: HomebaseFile<ContactFile> }) => {

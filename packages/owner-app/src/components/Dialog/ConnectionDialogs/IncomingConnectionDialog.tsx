@@ -92,7 +92,7 @@ const IncomingConnectionDialog = ({
               </h2>
               <div className="-m-4 flex flex-row flex-wrap sm:flex-nowrap">
                 <div className="w-full p-4 md:w-2/5">
-                  <ContactImage odinId={senderOdinId} />
+                  <ContactImage odinId={senderOdinId} canSave={false} />
                 </div>
                 <div className="w-full p-4 text-gray-600 dark:text-gray-400 md:w-3/5">
                   <p>{pendingConnection?.message}</p>

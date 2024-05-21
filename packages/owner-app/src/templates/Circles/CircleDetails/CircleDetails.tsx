@@ -370,6 +370,7 @@ const CircleMemberCard = ({
         className={`${className ?? ''} group relative`}
         odinId={odinId}
         href={(odinId && `/owner/connections/${odinId}`) ?? undefined}
+        canSave={true}
       >
         {isEditable ? (
           <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">
