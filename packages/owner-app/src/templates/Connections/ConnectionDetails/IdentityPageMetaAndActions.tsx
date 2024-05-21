@@ -12,6 +12,7 @@ import {
   ConfirmDialog,
   Ellipsis,
   useIdentityIFollow,
+  HeartBeat,
 } from '@youfoundation/common-app';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
@@ -20,6 +21,8 @@ import { useContact } from '../../../hooks/contacts/useContact';
 import { useEffect, useState } from 'react';
 import OutgoingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/OutgoingConnectionDialog';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
+import { useConnectionGrantStatus } from '../../../hooks/connections/useConnectionGrantStatus';
+import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
 
 export const IdentityPageMetaAndActions = ({
   odinId, // setIsEditPermissionActive,
@@ -144,6 +147,15 @@ export const IdentityPageMetaAndActions = ({
     });
   }
 
+  const { fetchStatus } = useConnectionGrantStatus({ odinId });
+  const doDownloadStatusUrl = (url: string) => {
+    // Dirty hack for easy download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${odinId}.json`;
+    link.click();
+  };
+
   if (connectionInfo?.status === 'connected') {
     actionGroupOptions.push({
       icon: Trash,
@@ -160,6 +172,14 @@ export const IdentityPageMetaAndActions = ({
         )}`,
       },
     });
+
+    if (hasDebugFlag()) {
+      actionGroupOptions.push({
+        icon: HeartBeat,
+        label: t('Grant Status'),
+        onClick: async () => doDownloadStatusUrl(await fetchStatus()),
+      });
+    }
   }
 
   if (isFollowing === false) {
