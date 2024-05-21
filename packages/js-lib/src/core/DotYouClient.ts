@@ -1,7 +1,8 @@
 import axios, { AxiosError } from 'axios';
 import { decryptData, encryptData, encryptUrl } from './InterceptionEncryptionUtil';
-import { hasDebugFlag, isLocalStorageAvailable, jsonStringify64 } from '../helpers/helpers';
 import { SystemFileType } from './DriveData/File/DriveFileTypes';
+import { hasDebugFlag, isLocalStorageAvailable } from '../helpers/BrowserUtil';
+import { jsonStringify64 } from '../helpers/DataUtil';
 
 export enum ApiType {
   Owner,

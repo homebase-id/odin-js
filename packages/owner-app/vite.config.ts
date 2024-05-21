@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import { defineConfig, splitVendorChunkPlugin } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
@@ -13,7 +13,6 @@ const hostConfig = {
 export default defineConfig({
   plugins: [
     react(),
-    // splitVendorChunkPlugin(),
     VitePWA({
       srcDir: 'src',
       filename: 'sw.ts',
