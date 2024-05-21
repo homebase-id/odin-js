@@ -223,6 +223,12 @@ const PrefixInput = ({
       required
       onKeyDown={(e) => e.key.match(validDomainLabelRegEx) && e.preventDefault()}
       onChange={debouncedChange}
+      onPaste={(e) => {
+        const text = e.clipboardData.getData('text');
+        const newText = text.trim().replaceAll(' ', '');
+        e.currentTarget.value = newText;
+        e.preventDefault();
+      }}
       className="focus:outline-t-0 focus:outline-x-0 border-x-0 border-t-0 focus:ring-0"
     />
   );

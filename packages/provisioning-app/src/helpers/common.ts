@@ -39,7 +39,7 @@ export const flattenInfinteData = <T>(
 
 export const domainFromPrefixAndApex = (prefix: string, apex: string) => {
   if (prefix && apex) {
-    return `${prefix}.${apex}`.toLocaleLowerCase();
+    return `${prefix}.${apex}`.toLocaleLowerCase().replaceAll(' ', '');
   } else {
     return '';
   }
