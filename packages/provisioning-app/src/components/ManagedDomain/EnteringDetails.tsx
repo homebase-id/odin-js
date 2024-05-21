@@ -225,7 +225,7 @@ const PrefixInput = ({
       onChange={debouncedChange}
       onPaste={(e) => {
         const text = e.clipboardData.getData('text');
-        const newText = text.trim().replaceAll(' ', '').replaceAll('\t', '');
+        const newText = text.trim().replaceAll(/\s/g, '');
         e.currentTarget.value = newText;
         e.preventDefault();
       }}
