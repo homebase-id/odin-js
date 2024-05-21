@@ -25,6 +25,7 @@ const setupHtml = (isStandalone?: boolean, allowEmptySubmit?: boolean) => {
         <div id="selectable-wrapper">
           <input type="text" name="homebase-id" list="homebase-identities" id="homebase-id" inputmode="url" autoComplete="off" ${!allowEmptySubmit ? 'required' : ''}/>
           <ul id="homebase-identities"></ul>
+          <a id="toggle"></a>
         </div>
         <button class="login">Login</button>
       </form>
@@ -47,8 +48,16 @@ export const LoginBox = async (
 
   const selectableWrapper = document.getElementById('selectable-wrapper') as HTMLDivElement;
   const homebaseIdentities = document.getElementById('homebase-identities') as HTMLUListElement;
+  const identitiesToggle = document.getElementById('toggle') as HTMLAnchorElement;
 
-  if (!mainForm || !dotyouInputBox || !selectableWrapper || !homebaseIdentities) return;
+  if (
+    !mainForm ||
+    !dotyouInputBox ||
+    !selectableWrapper ||
+    !homebaseIdentities ||
+    !identitiesToggle
+  )
+    return;
 
   const localDomainComplete = (domain: string) => {
     const strippedIdentity = stripIdentity(domain);
@@ -123,7 +132,7 @@ export const LoginBox = async (
     if (dotyouInputBox.value) return;
 
     const previousIdentities = getIdentityFromStorage();
-    if (previousIdentities?.length === 1) dotyouInputBox.value = previousIdentities[0];
+    if (previousIdentities?.length >= 1) dotyouInputBox.value = previousIdentities[0];
     if (previousIdentities?.length > 1) {
       selectableWrapper.classList.add('selectable-input');
       homebaseIdentities.innerHTML = previousIdentities
@@ -140,6 +149,19 @@ export const LoginBox = async (
         selectableWrapper.classList.remove('show');
       });
 
+      document.addEventListener('click', (e) => {
+        if (!homebaseIdentities.contains(e.target as Node) && e.target !== dotyouInputBox)
+          selectableWrapper.classList.remove('show');
+      });
+
+      identitiesToggle.addEventListener('click', (e) => {
+        console.log('toggle');
+        e.preventDefault();
+        e.stopPropagation();
+        selectableWrapper.classList.toggle('show');
+      });
+
+      dotyouInputBox.addEventListener('keyup', () => selectableWrapper.classList.remove('show'));
       dotyouInputBox.addEventListener('focus', () => selectableWrapper.classList.add('show'));
       if (autoFocused) selectableWrapper.classList.add('show');
     }

@@ -1,4 +1,10 @@
-import { ActionButton, Plus, SubtleMessage } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  OWNER_APP_ID,
+  Plus,
+  SubtleMessage,
+  useRemoveNotifications,
+} from '@youfoundation/common-app';
 import PersonIncomingRequest from '../../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
 import PersonOutgoingRequest from '../../../components/Connection/PersonOutgoingRequest/PersonOutgoingRequest';
 import { t, usePendingConnections, useSentConnections } from '@youfoundation/common-app';
@@ -18,6 +24,8 @@ const Connections = () => {
   const [hasSentConnections, setSentConnections] = useState(true);
 
   const [isSentConnectionOpen, setIsSentConnectionOpen] = useState(false);
+
+  useRemoveNotifications({ appId: OWNER_APP_ID });
 
   return (
     <>

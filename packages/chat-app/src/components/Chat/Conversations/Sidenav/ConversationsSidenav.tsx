@@ -86,6 +86,9 @@ const ConversationList = ({
   openConversation: (id: string | undefined) => void;
   activeConversationId: string | undefined;
 }) => {
+  const { data: contacts } = useAllContacts(!conversations || !conversations?.length);
+  const noContacts = !contacts || contacts.length === 0;
+
   return (
     <div className="flex flex-grow flex-col">
       <div className="flex flex-grow flex-col">
@@ -95,11 +98,27 @@ const ConversationList = ({
         />
         {!conversations?.length ? (
           <div className="order-2 flex flex-row flex-wrap px-5">
-            <SubtleMessage className="">{t('No conversations found')}</SubtleMessage>
+            {noContacts ? (
+              <SubtleMessage className="flex flex-row items-center gap-1">
+                <span>{t('To chat with someone on Homebase you need to be connected first.')}</span>
+                <ActionLink href="/owner/connections" type="secondary" icon={Persons}>
+                  {t('Connect')}
+                </ActionLink>
+              </SubtleMessage>
+            ) : (
+              <>
+                <SubtleMessage className="">{t('No conversations found')}</SubtleMessage>
 
-            <ActionLink href={`${CHAT_ROOT}/new`} icon={Plus} type="secondary" className="ml-auto">
-              {t('New conversation')}
-            </ActionLink>
+                <ActionLink
+                  href={`${CHAT_ROOT}/new`}
+                  icon={Plus}
+                  type="secondary"
+                  className="ml-auto"
+                >
+                  {t('New conversation')}
+                </ActionLink>
+              </>
+            )}
           </div>
         ) : null}
         {conversations?.map((conversation) => (

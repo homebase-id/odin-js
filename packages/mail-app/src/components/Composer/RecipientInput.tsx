@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 
-import { useAllContacts, ActionButton, Times } from '@youfoundation/common-app';
+import { useAllContacts, ActionButton, Times, useDotYouClient } from '@youfoundation/common-app';
+import { ContactFile } from '@youfoundation/js-lib/dist';
 
 export const RecipientInput = ({
   recipients,
@@ -17,17 +18,31 @@ export const RecipientInput = ({
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [inputStateIndex, setInputStateIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
+  const identity = useDotYouClient().getIdentity();
+
+  const ownContactFile: ContactFile = {
+    odinId: identity || window.location.host,
+    name: {
+      displayName: 'You',
+    },
+    source: 'user',
+  };
 
   const { data: contacts } = useAllContacts(true);
-  const contactResults = contacts
-    ? contacts
-        .map((dsr) => dsr.fileMetadata.appData.content)
-        .filter(
-          (contact) =>
-            contact.odinId &&
-            (!query || contact.odinId?.includes(query) || contact.name?.displayName.includes(query))
-        )
-    : [];
+  const contactResults = [
+    ...(contacts
+      ? contacts
+          .map((dsr) => dsr.fileMetadata.appData.content)
+          .filter(
+            (contact) =>
+              contact.odinId &&
+              (!query ||
+                contact.odinId?.includes(query) ||
+                contact.name?.displayName.includes(query))
+          )
+      : []),
+    ownContactFile,
+  ];
 
   const doInsertRecipient = useCallback(
     (odinId: string) => {

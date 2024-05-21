@@ -77,7 +77,7 @@ export const storeIdentity = (identity: string) => {
     const previousIdentities = getIdentityFromStorage();
     window.localStorage.setItem(
       LOCAL_STORAGE_PREV_IDENTITY_KEY,
-      JSON.stringify([...new Set([...previousIdentities, identity])])
+      JSON.stringify([...new Set([identity, ...previousIdentities])])
     );
   } catch (ex) {
     console.debug('window.localStorage is not accessible');
@@ -88,7 +88,7 @@ export const authorize = async (identity: string, params: URLSearchParams) => {
   if (!window.top) throw new Error('window.top is not accessible');
 
   if (!identity || identity === '') {
-    window.top.location.href = `https://anon.homebase.id/auth/owner/v1/youauth/authorize?${params.toString()}`;
+    window.top.location.href = `https://${window.location.host}/auth/owner/v1/youauth/authorize?${params.toString()}`;
     return;
   }
 

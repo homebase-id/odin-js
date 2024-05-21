@@ -78,6 +78,20 @@ export const getNewId = () => {
   return Guid.create().toString().replace(/-/g, '');
 };
 
+export const formatGuidId = (guid: string) => {
+  return (
+    guid.slice(0, 8) +
+    '-' +
+    guid.slice(8, 12) +
+    '-' +
+    guid.slice(12, 16) +
+    '-' +
+    guid.slice(16, 20) +
+    '-' +
+    guid.slice(20)
+  );
+};
+
 // Creates a base64 encoded byte array of the given input
 export const toGuidId = (input: string): string => {
   return md5(input).toString();

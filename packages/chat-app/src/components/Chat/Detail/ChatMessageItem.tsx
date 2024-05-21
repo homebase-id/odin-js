@@ -127,7 +127,7 @@ const ChatTextMessageBody = ({
     <div
       className={`relative w-auto max-w-[75vw] rounded-lg px-2 py-[0.4rem] ${
         isEmojiOnly ? '' : 'shadow-sm'
-      } md:max-w-xs lg:max-w-lg ${
+      } md:max-w-xs lg:max-w-lg xl:max-w-[50vw] ${
         showBackground
           ? messageFromMe
             ? 'bg-primary/10 dark:bg-primary/30'
