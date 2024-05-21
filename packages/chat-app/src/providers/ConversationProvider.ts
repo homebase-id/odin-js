@@ -238,13 +238,26 @@ export const uploadConversation = async (
 
 export const updateConversation = async (
   dotYouClient: DotYouClient,
-  conversation: HomebaseFile<UnifiedConversation>
+  conversation: HomebaseFile<UnifiedConversation>,
+  distribute = false,
+  onVersionConflict?: () => void
 ) => {
+  const identity = dotYouClient.getIdentity();
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: ChatDrive,
       overwriteFileId: conversation.fileId,
     },
+    transitOptions: distribute
+      ? {
+          recipients: conversation.fileMetadata.appData.content.recipients.filter(
+            (recipient) => recipient !== identity
+          ),
+          schedule: ScheduleOptions.SendNowAwaitResponse,
+          sendContents: SendContents.All,
+          useGlobalTransitId: true,
+        }
+      : undefined,
   };
 
   const conversationContent = conversation.fileMetadata.appData.content;
@@ -252,7 +265,7 @@ export const updateConversation = async (
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: conversation?.fileMetadata.versionTag,
-    allowDistribution: false,
+    allowDistribution: distribute,
     appData: {
       archivalStatus: conversation.fileMetadata.appData.archivalStatus,
       uniqueId: conversation.fileMetadata.appData.uniqueId,
@@ -270,9 +283,10 @@ export const updateConversation = async (
     conversation.sharedSecretEncryptedKeyHeader,
     uploadInstructions,
     uploadMetadata,
-    () => {
-      // Ignore version conflict; Updates are not critical; (Most likely race condition between multiple clients)
-    }
+    onVersionConflict ||
+      (() => {
+        // Ignore version conflict; Updates are not critical; (Most likely race condition between multiple clients)
+      })
   );
 };
 

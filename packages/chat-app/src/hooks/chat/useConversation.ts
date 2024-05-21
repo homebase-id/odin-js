@@ -123,16 +123,16 @@ export const useConversation = (props?: { conversationId?: string | undefined })
 
   const updateExistingConversation = async ({
     conversation,
-    isTitleUpdated = false,
+    distribute = false,
   }: {
     conversation: HomebaseFile<UnifiedConversation>;
-    isTitleUpdated?: boolean;
+    distribute?: boolean;
   }) => {
-    await updateConversation(dotYouClient, conversation);
-    conversation.fileMetadata.appData.content.lastReadTime = 0;
-    if (isTitleUpdated && conversation.fileMetadata.appData.content.recipients.length > 2) {
+    if (distribute && conversation.fileMetadata.appData.content.recipients?.length > 2) {
       conversation.fileMetadata.appData.content.lastReadTime = 0;
-      await uploadConversation(dotYouClient, conversation, true);
+      return await updateConversation(dotYouClient, conversation, distribute);
+    } else {
+      return await updateConversation(dotYouClient, conversation);
     }
   };
 
