@@ -9,7 +9,13 @@ import { Value, insertNodes, TElement, getPluginOptions, removeNodes } from '@ud
 import { ReactEditor } from 'slate-react';
 import { TargetDrive, NewMediaFile } from '@youfoundation/js-lib/core';
 import { useMemo, useState } from 'react';
-import { ImageIcon, Trash, t, useDotYouClient } from '@youfoundation/common-app';
+import {
+  ImageIcon,
+  Trash,
+  getImagesFromPasteEvent,
+  t,
+  useDotYouClient,
+} from '@youfoundation/common-app';
 import { ImageDialog } from '@youfoundation/common-app';
 import { ToolbarButton, ToolbarButtonProps } from '../../components/plate-ui/toolbar';
 import { OdinThumbnailImage } from '@youfoundation/ui-lib';
@@ -174,4 +180,22 @@ export const createImagePlugin = createPluginFactory({
   key: ELEMENT_IMAGE,
   isElement: true,
   component: (props) => ImageElementBlock({ ...props }),
+  handlers: {
+    onPaste: (editor) => (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+
+      const imageFiles = getImagesFromPasteEvent(e as React.ClipboardEvent<HTMLElement>);
+
+      (async () => {
+        const options = getPluginOptions<MediaOptions | undefined>(editor, ELEMENT_IMAGE);
+        if (imageFiles.length > 0 && options?.onAppend) {
+          const uploadResult = await options.onAppend(imageFiles[0]);
+          if (uploadResult) insertImage(editor, uploadResult.fileKey);
+        }
+      })();
+
+      return true;
+    },
+  },
 });
