@@ -5,6 +5,7 @@ import PersonCard, { PersonCardProps } from '../PersonCard/PersonCard';
 const ConnectionCard = (props: PersonCardProps) => {
   const { data: contactData, isLoading } = useContact({
     odinId: props.odinId,
+    canSave: true,
   }).fetch;
   const nameData = contactData?.fileMetadata.appData.content?.name;
   const fullName = nameData

@@ -14,6 +14,7 @@ const PersonActive = ({
       className={`${className ?? ''} group relative`}
       odinId={dotYouProfile.odinId}
       href={(dotYouProfile.odinId && `/owner/connections/${dotYouProfile.odinId}`) ?? undefined}
+      canSave={true}
     />
   );
 };

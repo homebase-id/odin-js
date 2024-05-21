@@ -111,6 +111,7 @@ const MemberLookupDialog = ({
                     odinId={member.odinId}
                     className={`relative cursor-pointer`}
                     isChecked={checked}
+                    canSave={true}
                     onClick={() => {
                       const isInDefault = defaultMembers.some(
                         (defaultMember) => defaultMember === member.odinId
