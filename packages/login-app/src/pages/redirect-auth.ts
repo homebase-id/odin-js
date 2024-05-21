@@ -1,4 +1,5 @@
 import { LoginBox } from '../components/loginBox';
+import { stripIdentity } from '../helpers/identity';
 
 export const RedirectAuth = () => {
   // 1. Parse target URL
@@ -8,9 +9,16 @@ export const RedirectAuth = () => {
 
   const params = window.location.search;
 
-  LoginBox(
-    (identity) =>
-      (window.location.href = `https://${identity}/api/${target}?${params.startsWith('?') ? params.slice(1) : params}`),
-    true
-  );
+  const urlSearchParams = new URLSearchParams(params);
+  const CLIENT_ID_PARAM = 'client_id';
+  const clientId = urlSearchParams.get(CLIENT_ID_PARAM);
+
+  LoginBox((identity) => {
+    // Check if target and identity are the same; Then we run owner login;
+    if (clientId && identity === stripIdentity(clientId)) {
+      window.location.href = `https://${identity}/owner/login?returnUrl=/owner`;
+    } else {
+      window.location.href = `https://${identity}/api/${target}?${params.startsWith('?') ? params.slice(1) : params}`;
+    }
+  }, true);
 };
