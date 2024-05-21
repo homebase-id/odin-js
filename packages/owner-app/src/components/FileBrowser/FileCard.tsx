@@ -216,6 +216,8 @@ const FileTypeLabel = ({ file }: { file: HomebaseFile<string> | DeletedHomebaseF
       return 'Draft post';
     case BlogConfig.ChannelDefinitionFileType:
       return 'Channel Definition';
+    case BlogConfig.RemoteChannelDefinitionFileType:
+      return 'Channel Link';
 
     // Reactions
     case ReactionConfig.CommentFileType:
