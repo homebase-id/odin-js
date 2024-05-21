@@ -81,7 +81,8 @@ export const getRelativeOffset = (absoluteOffset: number, parentNode: Node) => {
     const child = children[i];
     const relativeOffset = absoluteOffset - runningOffset;
 
-    runningOffset += Array.from(child.textContent || '').length;
+    // Dont't count line breaks; Chrome counts them.. Firefox doesn't
+    runningOffset += Array.from(child.textContent?.replaceAll('\n', '') || '').length;
 
     const node = child.childNodes[0] || child;
     if (runningOffset > absoluteOffset) {

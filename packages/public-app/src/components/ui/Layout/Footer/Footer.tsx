@@ -24,10 +24,13 @@ const Footer: FC<FooterProps> = ({ className }) => {
             </small>
           </span>
         </a>
-        <p className="mt-4 text-sm text-gray-500 sm:ml-auto sm:mt-0 sm:border-l-2 sm:border-gray-200 sm:py-2 sm:pl-4 dark:sm:border-gray-700">
+        <a
+          href="/api/v1/version"
+          className="mt-4 text-sm text-gray-500 sm:ml-auto sm:mt-0 sm:border-l-2 sm:border-gray-200 sm:py-2 sm:pl-4 dark:sm:border-gray-700"
+        >
           © {new Date().getFullYear()} | v.
           {getVersion()}
-        </p>
+        </a>
         <Socials
           socialHandles={social}
           className="mt-4 justify-center sm:ml-4 sm:mt-0 sm:justify-start"

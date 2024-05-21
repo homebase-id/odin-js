@@ -45,7 +45,7 @@ export class BlogConfig {
   static readonly PublicChannelId = toGuidId('public_channel_drive');
   static readonly PublicChannelSlug = 'public-posts';
   static readonly PublicChannel: ChannelDefinition = {
-    name: 'Public Posts',
+    name: 'Main',
     slug: BlogConfig.PublicChannelSlug,
     showOnHomePage: true,
     description: '',

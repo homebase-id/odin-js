@@ -30,6 +30,8 @@ export const RecipientsList = ({
     recipient === identity ? anyReply : anyReceived
   );
 
+  const fromMeToMe = !allRecipients.some((recipient) => recipient !== identity);
+
   return (
     <>
       <span className="overflow-hidden overflow-ellipsis text-nowrap">
@@ -37,7 +39,9 @@ export const RecipientsList = ({
           <>
             {t('To')}:{' '}
             <InnerRecipients
-              recipients={allRecipients.filter((recipient) => recipient !== identity)}
+              recipients={allRecipients.filter(
+                (recipient, index) => (fromMeToMe && index === 0) || recipient !== identity
+              )}
             />
           </>
         ) : (

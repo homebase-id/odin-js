@@ -12,6 +12,7 @@ import {
   OWNER_APP_ID,
   useDotYouClient,
   MAIL_APP_ID,
+  ErrorNotification,
 } from '@youfoundation/common-app';
 import { Bell } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
@@ -29,7 +30,6 @@ interface NotificationClickData {
 
 const Notifications = () => {
   const [params] = useSearchParams();
-
   const { data: notifications, isFetching: fetchingNotifications } = usePushNotifications().fetch;
 
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -80,6 +80,15 @@ const Notifications = () => {
     [notifications]
   );
 
+  const {
+    mutate: remove,
+    status: removeStatus,
+    error: removeError,
+  } = usePushNotifications().remove;
+  const doClearAll = () => {
+    remove(notifications?.results.map((n) => n.id) || []);
+  };
+
   return (
     <>
       <PageMeta
@@ -92,15 +101,27 @@ const Notifications = () => {
         }
       />
       {notifications?.results?.length ? (
-        <div className="flex flex-col gap-3 px-2">
-          {Object.keys(groupedNotificationsPerDay).map((day) => (
-            <NotificationDay
-              day={new Date(day)}
-              notifications={groupedNotificationsPerDay[day]}
-              key={day}
-            />
-          ))}
-        </div>
+        <>
+          <div className="flex flex-col gap-3 px-2">
+            {Object.keys(groupedNotificationsPerDay).map((day) => (
+              <NotificationDay
+                day={new Date(day)}
+                notifications={groupedNotificationsPerDay[day]}
+                key={day}
+              />
+            ))}
+          </div>
+          <ErrorNotification error={removeError} />
+          <div className="mx-2 mt-5 flex max-w-sm flex-row-reverse">
+            <ActionButton
+              type="mute"
+              onClick={doClearAll}
+              state={removeStatus !== 'success' ? removeStatus : undefined}
+            >
+              {t('Clear notifications')}
+            </ActionButton>
+          </div>
+        </>
       ) : (
         <SubtleMessage>{t('No notifications')}</SubtleMessage>
       )}

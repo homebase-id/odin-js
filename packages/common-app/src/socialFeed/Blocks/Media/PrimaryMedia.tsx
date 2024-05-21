@@ -88,6 +88,7 @@ export const PrimaryMedia = ({
           targetDrive={getChannelDrive(channelId)}
           fileId={fileId}
           file={file}
+          className="aspect-video"
         />
       )}
     </div>
@@ -129,7 +130,7 @@ export const BoringFile = ({
             }
           : undefined
       }
-      className={`${className || ''} relative aspect-square overflow-hidden bg-slate-50 text-slate-200 dark:bg-slate-700 dark:text-slate-600 mx-auto ${canDownload ? 'cursor-pointer' : ''}`}
+      className={`${className || ''} relative ${className?.indexOf('aspect-') ? '' : 'aspect-square'} overflow-hidden bg-slate-50 text-slate-200 dark:bg-slate-700 dark:text-slate-600 mx-auto ${canDownload ? 'cursor-pointer' : ''}`}
     >
       <p className="absolute inset-0 p-2 text-9xl break-all">
         {file.descriptorContent || file.contentType}

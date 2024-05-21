@@ -112,6 +112,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
             <CommentBody
               context={context}
               content={commentContent}
+              previewThumbnail={commentData.fileMetadata.appData.previewThumbnail}
               commentFileId={fileId}
               commentLastModifed={(commentData as HomebaseFile<ReactionFile>).fileMetadata.updated}
               isEdit={isEdit}

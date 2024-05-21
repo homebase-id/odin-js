@@ -17,6 +17,8 @@ export interface OdinImageProps
   avoidPayload?: boolean;
   fit?: 'cover' | 'contain';
   position?: 'left' | 'right' | 'center';
+
+  maxWidth?: string;
 }
 
 const thumblessContentTypes = ['image/svg+xml', 'image/gif'];
@@ -29,6 +31,7 @@ export const OdinImage = ({
   fit,
   onLoad,
   lazyLoad = true,
+  maxWidth,
   ...props
 }: OdinImageProps) => {
   const imgFitClassNames = `${fit === 'cover' ? 'w-full h-full object-cover' : fit === 'contain' ? 'max-h-[inherit] m-auto object-contain' : ''}`;
@@ -122,7 +125,7 @@ export const OdinImage = ({
         naturalSize?.pixelWidth && naturalSize?.pixelHeight && fit !== 'cover'
           ? {
               aspectRatio: `${naturalSize?.pixelWidth}/${naturalSize?.pixelHeight}`,
-              maxWidth: `${naturalSize.pixelWidth}px`,
+              maxWidth: maxWidth || `${naturalSize.pixelWidth}px`,
             }
           : undefined
       }

@@ -13,6 +13,8 @@ import {
   useDotYouClient,
   House,
   AddressBook,
+  OWNER_APP_ID,
+  useRemoveNotifications,
 } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
 import { Times } from '@youfoundation/common-app';
@@ -24,6 +26,8 @@ import { useConnectionActions } from '../../hooks/connections/useConnectionActio
 
 const Follow = () => {
   const followersMatch = useMatch({ path: 'owner/follow/followers/*' });
+
+  useRemoveNotifications({ appId: OWNER_APP_ID });
 
   return (
     <>

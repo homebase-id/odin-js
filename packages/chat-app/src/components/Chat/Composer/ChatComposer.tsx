@@ -3,12 +3,12 @@ import {
   FileOverview,
   EmojiSelector,
   FileSelector,
-  ImageIcon,
   VolatileInput,
   ActionButton,
   Times,
   PaperPlane,
   getImagesFromPasteEvent,
+  Plus,
 } from '@youfoundation/common-app';
 import { HomebaseFile, NewMediaFile } from '@youfoundation/js-lib/core';
 
@@ -119,7 +119,7 @@ export const ChatComposer = ({
               accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4, audio/mp3, application/pdf"
               maxSize={HUNDRED_MEGA_BYTES}
             >
-              <ImageIcon className="h-5 w-5" />
+              <Plus className="h-5 w-5" />
             </FileSelector>
           </div>
 

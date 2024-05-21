@@ -8,6 +8,7 @@ import {
   LoadingBlock,
   PostComposer,
   useSocialFeed,
+  SubtleMessage,
 } from '@youfoundation/common-app';
 import PostTeaserCard, { NewPostTeaserCard } from '../PostTeaserCard';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
@@ -146,7 +147,11 @@ const SocialFeedMainContent = () => {
             </div>
           </div>
         </>
-      ) : null}
+      ) : (
+        <SubtleMessage>
+          {t('No posts yet, send a post to your followers, or start following other identities')}
+        </SubtleMessage>
+      )}
     </>
   );
 };

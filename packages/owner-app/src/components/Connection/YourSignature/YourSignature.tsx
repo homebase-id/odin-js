@@ -68,6 +68,7 @@ const YourSignature = ({ className }: YourSignatureProps) => {
             <FallbackImg
               initials={initials}
               className="aspect-square h-[3rem] w-[3rem] sm:text-4xl"
+              size="none"
             />
           ) : (
             <img src={imageUrl} className="aspect-square object-cover object-top" />

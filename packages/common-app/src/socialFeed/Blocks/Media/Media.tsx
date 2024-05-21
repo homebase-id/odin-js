@@ -49,6 +49,8 @@ export const PostMedia = ({
     return <div className={`${className || ''}`}></div>;
   }
 
+  if (!mediaFiles || mediaFiles.length === 0) return null;
+
   if (mediaFiles && mediaFiles.length > 1)
     return (
       <MediaGallery

@@ -1,7 +1,8 @@
-import { TargetDrive } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, TargetDrive } from '@youfoundation/js-lib/core';
 import { useDotYouClient } from '../../../../../hooks';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { OdinImage } from '@youfoundation/ui-lib';
+import { ImageLightbox } from '../../../../../dialogs/ImageLightbox/ImageLightbox';
 
 export const CommentMedia = ({
   postAuthorOdinId,
@@ -9,27 +10,50 @@ export const CommentMedia = ({
   fileId,
   fileKey,
   lastModified,
+  previewThumbnail,
 }: {
   postAuthorOdinId?: string;
   targetDrive?: TargetDrive;
   fileId?: string;
   fileKey?: string;
   lastModified?: number;
+  previewThumbnail?: EmbeddedThumb;
 }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
+  const [isImageLightboxOpen, setIsImageLightboxOpen] = useState(false);
 
   if (!targetDrive) return null;
   return (
-    <OdinImage
-      odinId={postAuthorOdinId}
-      dotYouClient={dotYouClient}
-      fileId={fileId}
-      targetDrive={targetDrive}
-      fileKey={fileKey}
-      lastModified={lastModified}
-      className="my-1 max-w-[250px]"
-      systemFileType="Comment"
-    />
+    <>
+      <div className="max-w-[250px] mr-auto">
+        <a onClick={() => setIsImageLightboxOpen(true)} className="cursor-pointer">
+          <OdinImage
+            odinId={postAuthorOdinId}
+            dotYouClient={dotYouClient}
+            fileId={fileId}
+            targetDrive={targetDrive}
+            fileKey={fileKey}
+            lastModified={lastModified}
+            previewThumbnail={previewThumbnail}
+            className="my-1"
+            maxWidth="250px"
+            systemFileType="Comment"
+            fit="contain"
+          />
+        </a>
+      </div>
+      {isImageLightboxOpen && fileId && fileKey ? (
+        <ImageLightbox
+          targetDrive={targetDrive}
+          fileId={fileId}
+          fileKey={fileKey}
+          lastModified={lastModified}
+          previewThumbnail={previewThumbnail}
+          systemFileType="Comment"
+          onClose={() => setIsImageLightboxOpen(false)}
+        />
+      ) : null}
+    </>
   );
 };
 
