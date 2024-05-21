@@ -129,6 +129,19 @@ export const dsrToConversation = async (
     );
     if (!attrContent) return null;
 
+    const identity = dotYouClient.getIdentity() as string;
+    const recipients = (attrContent as GroupConversation)?.recipients?.filter(
+      (recipient) => recipient !== identity
+    );
+
+    if (recipients && recipients.length === 1) {
+      delete (attrContent as any).recipients;
+      (attrContent as any).recipient = recipients[0];
+    } else if (recipients && recipients.length > 1) {
+      delete (attrContent as any).recipient;
+      (attrContent as any).recipients = recipients;
+    }
+
     const conversation: HomebaseFile<Conversation> = {
       ...dsr,
       fileMetadata: {
