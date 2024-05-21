@@ -227,6 +227,7 @@ const PrefixInput = ({
         const text = e.clipboardData.getData('text');
         const newText = text.trim().replaceAll(/\s/g, '');
         e.currentTarget.value = newText;
+        debouncedChange({ target: { name, value: newText } });
         e.preventDefault();
       }}
       className="focus:outline-t-0 focus:outline-x-0 border-x-0 border-t-0 focus:ring-0"
