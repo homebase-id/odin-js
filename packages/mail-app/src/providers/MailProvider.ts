@@ -118,7 +118,10 @@ export const uploadMail = async (
   files: (NewMediaFile | MediaFile)[] | undefined,
   onVersionConflict?: () => void
 ) => {
-  const recipients = conversation.fileMetadata.appData.content.recipients;
+  const identity = dotYouClient.getIdentity();
+  const recipients = conversation.fileMetadata.appData.content.recipients.filter(
+    (recipient) => recipient !== identity
+  );
   const distribute =
     recipients?.length > 0 &&
     conversation.fileMetadata.appData.fileType !== MAIL_DRAFT_CONVERSATION_FILE_TYPE;
@@ -131,7 +134,7 @@ export const uploadMail = async (
     },
     transitOptions: distribute
       ? {
-          recipients: [...recipients],
+          recipients: recipients,
           schedule: ScheduleOptions.SendNowAwaitResponse,
           sendContents: SendContents.All,
           useGlobalTransitId: true,
@@ -414,9 +417,14 @@ export const getAllRecipients = (
 ): string[] => {
   if (!conversation?.fileMetadata?.appData?.content?.recipients) return [];
 
-  const recipients = conversation.fileMetadata.appData.content.recipients;
   const sender =
     conversation.fileMetadata.senderOdinId || conversation.fileMetadata.appData.content.sender;
+  const recipients = [...conversation.fileMetadata.appData.content.recipients, sender];
 
-  return [...recipients, sender].filter((recipient) => recipient && recipient !== identity);
+  const fromMeToMe = recipients.every(
+    (recipient) => recipient && identity && recipient === identity
+  );
+  if (fromMeToMe && identity) return [identity];
+
+  return recipients.filter((recipient) => recipient && recipient !== identity);
 };
