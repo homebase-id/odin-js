@@ -1,14 +1,18 @@
 import { createPortal } from 'react-dom';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
+  ActionButton,
   Arrow,
   ConnectionImage,
   ConnectionName,
   DialogWrapper,
   House,
+  Input,
   OwnerImage,
   OwnerName,
+  Pencil,
   Persons,
+  Save,
   t,
   useDotYouClient,
   usePortal,
@@ -17,6 +21,8 @@ import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../../providers/ConversationProvider';
+import { useEffect, useState } from 'react';
+import { useConversation } from '../../../hooks/chat/useConversation';
 
 export const ChatInfo = ({
   conversation,
@@ -33,6 +39,23 @@ export const ChatInfo = ({
 
   const withYourself = conversation?.fileMetadata.appData.uniqueId === ConversationWithYourselfId;
   const recipient = recipients.length === 1 ? recipients[0] : undefined;
+
+  const [isEditTitle, setIsEditTitle] = useState<boolean>(false);
+  const [newTitle, setNewTitle] = useState<string>(conversationContent.title || '');
+
+  const { mutate: updateConversation, status: updateStatus } = useConversation().update;
+  const doSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    conversation.fileMetadata.appData.content.title = newTitle;
+    updateConversation({
+      conversation,
+      distribute: true,
+    });
+  };
+
+  useEffect(() => {
+    updateStatus === 'success' && setIsEditTitle(false);
+  }, [updateStatus]);
 
   const dialog = (
     <DialogWrapper onClose={onClose} title={t('Chat info')}>
@@ -55,9 +78,9 @@ export const ChatInfo = ({
             </div>
           )}
 
-          <p className="text-center text-xl">
+          <>
             {recipient ? (
-              <>
+              <p className="text-center text-xl">
                 <ConnectionName odinId={recipient} />
                 <small className="flex flex-row gap-2 text-sm">
                   <House className="h-5 w-5" />
@@ -70,16 +93,48 @@ export const ChatInfo = ({
                     {recipient}
                   </a>
                 </small>
-              </>
+              </p>
             ) : withYourself ? (
-              <>
+              <p className="text-center text-xl">
                 <OwnerName />
                 <span className="text-sm text-foreground/50">({t('you')})</span>
-              </>
+              </p>
             ) : (
-              conversationContent?.title
+              <>
+                {isEditTitle ? (
+                  <form className="flex flex-col items-center gap-2" onSubmit={doSubmit}>
+                    <Input
+                      required
+                      defaultValue={conversationContent?.title}
+                      onChange={(e) => setNewTitle(e.currentTarget.value)}
+                    />
+                    <span className="flex flex-row">
+                      <ActionButton
+                        type="mute"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setIsEditTitle(false);
+                        }}
+                      >
+                        {t('Cancel')}
+                      </ActionButton>
+                      <ActionButton type="mute" icon={Save}>
+                        {t('Save')}
+                      </ActionButton>
+                    </span>
+                  </form>
+                ) : (
+                  <a
+                    onClick={() => setIsEditTitle(true)}
+                    className="flex cursor-pointer flex-row items-center gap-2"
+                  >
+                    <span className="text-center text-xl">{conversationContent?.title}</span>
+                    <Pencil className="h-5 w-5" />
+                  </a>
+                )}
+              </>
             )}
-          </p>
+          </>
         </div>
       </div>
       {recipients?.length > 1 ? (
