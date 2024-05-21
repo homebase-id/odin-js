@@ -3,23 +3,24 @@ import {
   FileOverview,
   EmojiSelector,
   FileSelector,
-  ImageIcon,
   VolatileInput,
   ActionButton,
   Times,
   PaperPlane,
   getImagesFromPasteEvent,
+  Plus,
 } from '@youfoundation/common-app';
 import { HomebaseFile, NewMediaFile } from '@youfoundation/js-lib/core';
 
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import { Conversation } from '../../../providers/ConversationProvider';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
 import { isTouchDevice } from '@youfoundation/js-lib/helpers';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
+const CHAT_DRAFTS_KEY = 'CHAT_LOCAL_DRAFTS';
 
 export const ChatComposer = ({
   conversation,
@@ -32,8 +33,22 @@ export const ChatComposer = ({
   clearReplyMsg: () => void;
   onSend?: () => void;
 }) => {
-  const [message, setMessage] = useState<string | undefined>();
+  const volatileRef = useRef<HTMLDivElement>(null);
+
+  const drafts = JSON.parse(localStorage.getItem(CHAT_DRAFTS_KEY) || '{}');
+  const [message, setMessage] = useState<string | undefined>(
+    conversation?.fileMetadata.appData.uniqueId
+      ? drafts[conversation.fileMetadata.appData.uniqueId] || undefined
+      : undefined
+  );
   const [files, setFiles] = useState<NewMediaFile[]>();
+
+  useEffect(() => {
+    if (conversation?.fileMetadata.appData.uniqueId) {
+      drafts[conversation.fileMetadata.appData.uniqueId] = message;
+      localStorage.setItem(CHAT_DRAFTS_KEY, JSON.stringify(drafts));
+    }
+  }, [conversation, message]);
 
   const {
     mutate: sendMessage,
@@ -53,6 +68,12 @@ export const ChatComposer = ({
     )
       return;
 
+    console.log({
+      conversation,
+      message: trimmedVal || '',
+      replyId: replyMsg?.fileMetadata?.appData?.uniqueId,
+      files,
+    });
     sendMessage({
       conversation,
       message: trimmedVal || '',
@@ -73,12 +94,9 @@ export const ChatComposer = ({
   }, [sendMessageState]);
 
   useEffect(() => {
-    if (replyMsg) setFiles([]);
+    // When replying to a message, focus the input
+    if (replyMsg) volatileRef.current?.focus();
   }, [replyMsg]);
-
-  useEffect(() => {
-    if (files?.length) clearReplyMsg();
-  }, [files]);
 
   return (
     <>
@@ -98,10 +116,10 @@ export const ChatComposer = ({
             <FileSelector
               onChange={(files) => setFiles(files.map((file) => ({ file })))}
               className="px-2 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
-              accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4, audio/mp3"
+              accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4, audio/mp3, application/pdf"
               maxSize={HUNDRED_MEGA_BYTES}
             >
-              <ImageIcon className="h-5 w-5" />
+              <Plus className="h-5 w-5" />
             </FileSelector>
           </div>
 
@@ -111,6 +129,7 @@ export const ChatComposer = ({
             className="w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"
             onChange={(newVal) => setMessage(newVal)}
             autoFocus={!isTouchDevice()}
+            ref={volatileRef}
             onPaste={(e) => {
               const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
 

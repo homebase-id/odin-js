@@ -88,6 +88,7 @@ export const PrimaryMedia = ({
           targetDrive={getChannelDrive(channelId)}
           fileId={fileId}
           file={file}
+          className="aspect-video"
         />
       )}
     </div>
@@ -100,12 +101,14 @@ export const BoringFile = ({
   fileId,
   file,
   canDownload,
+  className,
 }: {
   odinId: string | undefined;
   targetDrive: TargetDrive;
   fileId: string;
   file: PayloadDescriptor;
   canDownload?: boolean;
+  className?: string;
 }) => {
   const fetchFile = useFile({ targetDrive }).fetchFile;
   const doDownload = (url: string) => {
@@ -116,6 +119,8 @@ export const BoringFile = ({
     link.click();
   };
 
+  if (!file) return null;
+
   return (
     <div
       onClick={
@@ -125,7 +130,7 @@ export const BoringFile = ({
             }
           : undefined
       }
-      className={`relative aspect-square overflow-hidden bg-slate-50 text-slate-200 dark:bg-slate-700 dark:text-slate-600 mx-auto ${canDownload ? 'cursor-pointer' : ''}`}
+      className={`${className || ''} relative ${className?.indexOf('aspect-') ? '' : 'aspect-square'} overflow-hidden bg-slate-50 text-slate-200 dark:bg-slate-700 dark:text-slate-600 mx-auto ${canDownload ? 'cursor-pointer' : ''}`}
     >
       <p className="absolute inset-0 p-2 text-9xl break-all">
         {file.descriptorContent || file.contentType}

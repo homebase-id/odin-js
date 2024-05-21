@@ -41,6 +41,7 @@ import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 const PAGE_SIZE = 30;
 const PostOverview = () => {
+  const { isOwner } = useDotYouClient();
   const { channelKey } = useParams();
   const { data: activeChannel, isFetched: channelFetched } = useChannel(
     channelKey ? { channelSlug: channelKey } : { channelId: BlogConfig.PublicChannelId }
@@ -140,6 +141,7 @@ const PostOverview = () => {
             <ListComponent
               blogPosts={blogPosts}
               showAuthor={activeChannel?.fileMetadata.appData.content.isCollaborative || false}
+              showChannel={activeChannel?.fileMetadata.appData.content.isCollaborative || isOwner}
             />
           ) : (
             <SubtleMessage>{t('Nothing has been posted yet')}</SubtleMessage>

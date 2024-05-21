@@ -9,9 +9,10 @@ export const Redirect = () => {
 
   // 2. Get identity from local storage; Or if not found, show a login box
   requestStorageAccess().then(() => {
-    const identity = getIdentityFromStorage();
-    if (identity) {
-      window.location.href = `https://${identity}/owner/${target}`;
+    const previousIdentities = getIdentityFromStorage();
+
+    if (previousIdentities?.length === 1) {
+      window.location.href = `https://${previousIdentities[0]}/owner/${target}`;
     } else
       LoginBox((identity) => (window.location.href = `https://${identity}/owner/${target}`), true);
   });

@@ -9,9 +9,16 @@ const useFixMissingPublicChannel = () => {
   const { mutateAsync: saveChannel } = useChannel({ channelId: BlogConfig.PublicChannelId }).save;
 
   useEffect(() => {
-    if (isFetched && !publicChannel) {
-      console.warn('[Missing Public Channel], attempting to create');
-      saveChannel(BlogConfig.PublicChannelNewDsr);
+    if (isFetched) {
+      if (!publicChannel) {
+        console.warn('[Missing Public Channel], attempting to create');
+        saveChannel(BlogConfig.PublicChannelNewDsr);
+      } else if (publicChannel.fileMetadata.appData.content.name === 'Public Posts') {
+        console.warn('[Old Public Channel], renaming public channel');
+        publicChannel.fileMetadata.appData.content.name = 'Main';
+        publicChannel.fileMetadata.appData.content.slug = BlogConfig.PublicChannelSlug;
+        saveChannel(publicChannel);
+      }
     }
   }, [isFetched]);
 };

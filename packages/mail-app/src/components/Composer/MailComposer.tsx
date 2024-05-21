@@ -349,16 +349,7 @@ export const MailComposer = ({
               </div>
             )}
           </div>
-          <div
-            onPaste={(e) => {
-              const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
-
-              if (mediaFiles.length) {
-                setFiles([...(files ?? []), ...mediaFiles]);
-                e.preventDefault();
-              }
-            }}
-          >
+          <div>
             <Label className="sr-only">{t('Message')}</Label>
             <ErrorBoundary>
               {mailSettingsFetched ? (

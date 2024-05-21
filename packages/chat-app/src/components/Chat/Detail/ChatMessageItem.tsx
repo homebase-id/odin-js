@@ -124,7 +124,7 @@ const ChatTextMessageBody = ({
     <div
       className={`relative w-auto max-w-[75vw] rounded-lg px-2 py-[0.4rem] ${
         isEmojiOnly ? '' : 'shadow-sm'
-      } md:max-w-xs lg:max-w-lg ${
+      } md:max-w-xs lg:max-w-lg xl:max-w-[50vw] ${
         showBackground
           ? messageFromMe
             ? 'bg-primary/10 dark:bg-primary/30'
@@ -254,11 +254,14 @@ const ChatMediaMessageBody = ({
       ) : null}
       <div className="relative">
         <ChatMedia msg={msg} />
-        {!hasACaption ? <ChatFooter className="absolute bottom-0 right-0 px-2 py-1" /> : null}
+        {!hasACaption && !content.replyId ? (
+          <ChatFooter className="absolute bottom-0 right-0 px-2 py-1" />
+        ) : null}
       </div>
-      {hasACaption ? (
+      {hasACaption || content.replyId ? (
         <div className="flex min-w-0 flex-col px-2 py-2 md:flex-row md:justify-between">
           <p className="whitespace-pre-wrap break-words">{content.message}</p>
+          {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
           <ChatFooter />
         </div>
       ) : null}

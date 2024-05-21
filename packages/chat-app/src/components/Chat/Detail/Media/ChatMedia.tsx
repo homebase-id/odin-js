@@ -8,7 +8,7 @@ import {
 import { OdinImage, OdinThumbnailImage, OdinAudio, OdinAudioWaveForm } from '@youfoundation/ui-lib';
 import { ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
-import { Triangle, useDarkMode } from '@youfoundation/common-app';
+import { BoringFile, Triangle, useDarkMode } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 import { useMemo, useState } from 'react';
@@ -62,6 +62,7 @@ const MediaItem = ({
   const dotYouClient = useDotYouClientContext();
   const isVideo = payload.contentType?.startsWith('video');
   const isAudio = payload.contentType?.startsWith('audio');
+  const isImage = payload.contentType?.startsWith('image');
 
   return (
     <div
@@ -110,7 +111,7 @@ const MediaItem = ({
                 className="my-3"
               />
             </>
-          ) : (
+          ) : isImage ? (
             <OdinImage
               dotYouClient={dotYouClient}
               fileId={fileId}
@@ -122,6 +123,13 @@ const MediaItem = ({
               className={`h-full w-auto`}
               fit={fit}
               onLoad={onLoad}
+            />
+          ) : (
+            <BoringFile
+              odinId={undefined}
+              fileId={fileId}
+              targetDrive={ChatDrive}
+              file={payload as PayloadDescriptor}
             />
           )}
         </>

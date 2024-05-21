@@ -1,9 +1,7 @@
-import { useState } from 'react';
-import { ActionLink, HOME_ROOT_PATH, ellipsisAtMaxChar } from '@youfoundation/common-app';
+import { ActionLink, ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { useAuth } from '../../../hooks/auth/useAuth';
 import { ChannelDefinitionVm } from '@youfoundation/common-app';
-import LoginDialog from '../../Dialog/LoginDialog/LoginDialog';
 
 import { Feed } from '@youfoundation/common-app';
 import { useFollowDetail } from '../../../hooks/follow/useFollowDetail';
@@ -20,7 +18,6 @@ const FollowLink = ({
 }) => {
   const { isOwner, getIdentity } = useAuth();
   const identity = getIdentity();
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const { data } = useFollowDetail().fetch;
 
   if (isOwner) return null;
@@ -38,12 +35,11 @@ const FollowLink = ({
       <ActionLink
         className={`w-auto ${className ?? ''}`}
         href={
-          identity
-            ? `https://${identity}/owner/follow/following/${window.location.hostname}` +
-              (channel ? `?chnl=${channel.fileMetadata.appData.uniqueId}` : '')
-            : undefined
+          (identity
+            ? `https://${identity}/owner/follow/following/${window.location.hostname}`
+            : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/follow/following/${window.location.hostname}`) +
+          (channel ? `?chnl=${channel.fileMetadata.appData.uniqueId}` : '')
         }
-        onClick={!identity ? () => setIsLoginOpen(true) : undefined}
         icon={alreadyFollowingThis ? Check : Feed}
         type={alreadyFollowingThis ? 'secondary' : 'primary'}
       >
@@ -56,17 +52,6 @@ const FollowLink = ({
           ) : null}
         </span>
       </ActionLink>
-      <LoginDialog
-        title={t('Login')}
-        isOpen={isLoginOpen}
-        onCancel={() => setIsLoginOpen(false)}
-        returnPath={`${HOME_ROOT_PATH}action?targetPath=${
-          `/owner/follow/following/${window.location.hostname}` +
-          (channel ? `?chnl=${channel.fileMetadata.appData.uniqueId}` : '')
-        }`}
-      >
-        {t('You need to login before you can follow someone:')}
-      </LoginDialog>
     </>
   );
 };

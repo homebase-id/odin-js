@@ -1,4 +1,4 @@
-import { PostContent } from '@youfoundation/js-lib/public';
+import { BlogConfig, PostContent } from '@youfoundation/js-lib/public';
 import { FC } from 'react';
 import { PostMeta } from '../Blocks/Meta/Meta';
 import { useNavigate } from 'react-router-dom';
@@ -44,7 +44,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
   // Compared to PostTeaserCard, this one is always clickable as comments can't be loaded within;
   //   If there is any media linked and not an article, we load the blogImageDetailPage
   const postPath = `${HOME_ROOT_PATH}posts/${
-    channel ? channel.fileMetadata.appData.content.slug : 'public-posts'
+    channel ? channel.fileMetadata.appData.content.slug : BlogConfig.PublicChannelSlug
   }/${post.slug ?? post.id}`;
   const targetPath = `${postPath}${
     post.type !== 'Article' && post.primaryMediaFile?.fileId ? '/0' : ''
