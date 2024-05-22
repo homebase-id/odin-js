@@ -216,7 +216,10 @@ const NotificationGroup = ({
   const canExpand = typeGroup.length > 1;
   const [isExpanded, setExpanded] = useState(!canExpand);
 
-  const { mutate: remove } = usePushNotifications().remove;
+  const {
+    remove: { mutate: remove },
+    markAsRead: { mutate: markAsRead },
+  } = usePushNotifications();
 
   const groupCount = typeGroup.length - 1;
   const visibleLength = isExpanded ? 10 : 3;
@@ -250,7 +253,9 @@ const NotificationGroup = ({
               isExpanded={index === 0 || isExpanded}
               onDismiss={() => remove([notification.id])}
               onOpen={() =>
-                canExpand && !isExpanded ? setExpanded(true) : remove(typeGroup.map((n) => n.id))
+                canExpand && !isExpanded
+                  ? setExpanded(true)
+                  : markAsRead(typeGroup.map((n) => n.id))
               }
               groupCount={isExpanded ? 0 : groupCount}
               href={
