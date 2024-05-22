@@ -29,7 +29,7 @@ const useInboxProcessor = (isEnabled?: boolean) => {
   };
 
   return useQuery({
-    queryKey: ['processInbox'],
+    queryKey: ['process-inbox'],
     queryFn: fetchData,
     refetchOnMount: false,
     // We want to refetch on window focus, as we might have missed some messages while the window was not focused and the websocket might have lost connection

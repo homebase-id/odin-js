@@ -279,7 +279,7 @@ export const useSiteData = () => {
   };
 
   return useQuery({
-    queryKey: ['siteData'],
+    queryKey: ['site-data'],
     queryFn: fetchData,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
