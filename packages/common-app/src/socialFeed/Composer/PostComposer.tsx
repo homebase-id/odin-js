@@ -302,6 +302,7 @@ export const ChannelOrAclSelector = React.forwardRef(
     },
     ref: Ref<HTMLSelectElement>
   ) => {
+    const identity = useDotYouClient().getIdentity();
     const { data: channels, isLoading } = useChannels({ isAuthenticated: true, isOwner: true });
     const { data: collaborativeChannels } = useCollaborativeChannels().fetch;
     const [isChnlMgmtOpen, setIsChnlMgmtOpen] = useState(false);
@@ -373,6 +374,8 @@ export const ChannelOrAclSelector = React.forwardRef(
       }
     };
 
+    const showCollaborativeChannels = !excludeCollaborative && collaborativeChannels?.length;
+
     return (
       <>
         <select
@@ -389,7 +392,7 @@ export const ChannelOrAclSelector = React.forwardRef(
           ref={ref}
           disabled={disabled}
         >
-          <optgroup label={t('Channels')}>
+          <optgroup label={showCollaborativeChannels ? identity : t('Channels')}>
             {channels.map((channel) => (
               <option
                 value={channel.fileMetadata.appData.uniqueId}
@@ -400,7 +403,7 @@ export const ChannelOrAclSelector = React.forwardRef(
             ))}
           </optgroup>
 
-          {!excludeCollaborative && collaborativeChannels?.length ? (
+          {showCollaborativeChannels ? (
             <>
               {collaborativeChannels?.map((collaborative) => (
                 <optgroup label={collaborative.odinId} key={collaborative.odinId}>
