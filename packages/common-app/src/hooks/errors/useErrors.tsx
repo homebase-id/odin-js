@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { t } from '../../helpers';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 
 export interface Error {
   type: 'warning' | 'critical';
+  title?: string;
   message: string;
   details?: {
     title?: string;
@@ -144,14 +145,16 @@ export const useErrors = () => {
       gcTime: Infinity,
       staleTime: Infinity,
     }),
-    add: (error: unknown) => {
+    add: (error: unknown, title?: string, message?: string) => {
       const currentErrors = queryClient.getQueryData<Error[]>(['errors']);
       const knownErrorMessage = getKnownErrorMessages(error);
       const details = getDetails(error);
 
       const newError: Error = {
         type: knownErrorMessage ? 'warning' : 'critical',
+        title,
         message:
+          message ||
           knownErrorMessage ||
           (error instanceof Error
             ? error.toString()
