@@ -13,6 +13,7 @@ import {
   useDotYouClient,
   MAIL_APP_ID,
   ErrorNotification,
+  Times,
 } from '@youfoundation/common-app';
 import { Bell } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
@@ -95,9 +96,21 @@ const Notifications = () => {
         title={t('Notifications')}
         icon={Bell}
         actions={
-          <ActionButton type="primary" icon={Cog} onClick={() => setDialogOpen(true)}>
-            {t('Notifications')}
-          </ActionButton>
+          <>
+            {notifications?.results?.length ? (
+              <ActionButton
+                type="primary"
+                icon={Times}
+                onClick={doClearAll}
+                state={removeStatus !== 'success' ? removeStatus : undefined}
+              >
+                {t('Clear all')}
+              </ActionButton>
+            ) : null}
+            <ActionButton type="secondary" icon={Cog} onClick={() => setDialogOpen(true)}>
+              {t('Notifications')}
+            </ActionButton>
+          </>
         }
       />
       {notifications?.results?.length ? (
@@ -115,10 +128,12 @@ const Notifications = () => {
           <div className="mx-2 mt-5 flex max-w-sm flex-row-reverse">
             <ActionButton
               type="mute"
+              size="none"
               onClick={doClearAll}
               state={removeStatus !== 'success' ? removeStatus : undefined}
+              className="opacity-50 hover:opacity-100"
             >
-              {t('Clear notifications')}
+              {t('Clear all')}
             </ActionButton>
           </div>
         </>
