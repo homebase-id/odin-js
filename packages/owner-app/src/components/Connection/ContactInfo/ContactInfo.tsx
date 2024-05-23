@@ -18,7 +18,7 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
   const {
     fetch: { data: contact },
     refresh: { mutate: refresh, status: refreshState, error: refreshError },
-  } = useContact(odinId ? { odinId: odinId } : { id: contactId });
+  } = useContact(odinId ? { odinId: odinId, canSave: true } : { id: contactId, canSave: true });
   const {
     fetch: { data: connectionInfo },
   } = useConnection({ odinId: odinId });
@@ -75,7 +75,11 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
         <div className="-mx-4 sm:flex sm:flex-row">
           <div className="flex flex-row px-4 sm:mx-0">
             {odinId ? (
-              <ContactImage odinId={odinId} className="mx-auto h-[12rem] w-[12rem]" />
+              <ContactImage
+                odinId={odinId}
+                className="mx-auto h-[12rem] w-[12rem]"
+                canSave={true}
+              />
             ) : null}
           </div>
           <div className="px-4">

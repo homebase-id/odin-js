@@ -9,7 +9,7 @@ import {
   EmailFields,
 } from '@youfoundation/js-lib/profile';
 
-import { ApiType, DotYouClient, ImageContentType } from '@youfoundation/js-lib/core';
+import { DotYouClient, ImageContentType } from '@youfoundation/js-lib/core';
 import {
   getProfileAttributesOverPeer,
   getDecryptedImageDataOverPeer,
@@ -38,7 +38,7 @@ export const fetchConnectionInfo = async (
   };
 };
 
-export const queryRemoteAttributes = async (
+const queryRemoteAttributes = async (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<RawContact | undefined> => {
@@ -91,7 +91,7 @@ export const queryRemoteAttributes = async (
   }
 };
 
-export const queryConnectionPhotoData = async (
+const queryConnectionPhotoData = async (
   dotYouClient: DotYouClient,
   odinId: string,
   profileImageFileId: string,

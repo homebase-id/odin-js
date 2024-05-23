@@ -17,11 +17,11 @@ import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation
 export const useContact = ({
   odinId,
   id,
-  canSave = true,
+  canSave,
 }: {
   odinId?: string;
   id?: string;
-  canSave?: boolean;
+  canSave: boolean;
 }) => {
   const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
@@ -42,52 +42,52 @@ export const useContact = ({
       return (await getContactByUniqueId(dotYouClient, id)) || undefined;
     }
 
+    const hasCache =
+      !!odinId &&
+      queryClient.getQueryData<HomebaseFile<ContactVm> | NewHomebaseFile<ContactVm> | undefined>([
+        'contact',
+        odinId,
+        canSave,
+      ]);
+
     // Direct fetch with odinId:
     // Use the data from the contact book, if it exists and if it's a contact level source or we are not allowed to save anyway
     // TODO: Not sure if this is the best way yet... But it works for now
     const contactBookContact = await getContactByOdinId(dotYouClient, odinId);
     if (
+      !hasCache && // If we have a contact on drive, and we don't have cache, we need a fast return; Otherwise we trigger a refresh
       contactBookContact &&
       contactBookContact.fileMetadata.appData.content.source === 'contact'
     ) {
       return contactBookContact;
     } else if (contactBookContact)
-      console.log(`[${odinId}] Ignoring contact book record`, contactBookContact);
-    let returnContact;
+      console.log(
+        `[${odinId}] [${!hasCache ? 'Explicit' : 'Implicit'}] Ignoring contact book record`,
+        contactBookContact
+      );
 
-    // If no contact in the contact book:
-    // Get contact data from ICRs/Remote Attributes:
-    const connectionInfo = await fetchConnectionInfo(dotYouClient, odinId);
-    if (connectionInfo) {
-      returnContact = connectionInfo;
-    } else {
-      // Or from their public data
-      const publicContact = await fetchDataFromPublic(odinId);
-      returnContact = publicContact ? { ...publicContact } : returnContact;
+    const returnContact =
+      (await fetchConnectionInfo(dotYouClient, odinId)) || (await fetchDataFromPublic(odinId));
+
+    if (!returnContact) return undefined;
+
+    const contactFile: NewHomebaseFile<ContactFile> = {
+      fileId: contactBookContact?.fileId,
+      fileMetadata: {
+        appData: { content: { ...returnContact, odinId: odinId } },
+        versionTag: contactBookContact?.fileMetadata.versionTag,
+      },
+      serverMetadata: {
+        accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+      },
+    };
+
+    if (canSave) {
+      const savedReturnedContact = await saveContact(dotYouClient, contactFile);
+      return parseContact(savedReturnedContact);
     }
 
-    if (returnContact) {
-      // Only save contacts if we were allowed to or if the source is of the "contact" level
-      if (canSave) {
-        const savedReturnedContact = await saveContact(dotYouClient, {
-          fileMetadata: { appData: { content: { ...returnContact, odinId: odinId } } },
-          serverMetadata: {
-            accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
-          },
-        });
-
-        return parseContact(savedReturnedContact);
-      } else {
-        return parseContact({
-          fileMetadata: { appData: { content: { ...returnContact, odinId: odinId } } },
-          serverMetadata: {
-            accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
-          },
-        });
-      }
-    }
-
-    return undefined;
+    return parseContact(contactFile);
   };
 
   const refresh = async ({ contact }: { contact: HomebaseFile<ContactFile> }) => {
@@ -135,8 +135,9 @@ export const useContact = ({
           id: id as string, // Defined as otherwise query would not be triggered
           canSave: canSave,
         }),
+      staleTime: 1000 * 60 * 60 * 24, // 24 hours
       refetchOnWindowFocus: false,
-
+      refetchOnMount: false,
       retry: false,
       enabled: !!odinId || !!id,
     }),
