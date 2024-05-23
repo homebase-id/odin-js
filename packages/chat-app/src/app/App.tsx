@@ -59,6 +59,7 @@ const INCLUDED_QUERY_KEYS = [
   'conversations',
   'chat-reaction',
   'connection-details',
+  'process-inbox',
 ];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   buster: '202403',
