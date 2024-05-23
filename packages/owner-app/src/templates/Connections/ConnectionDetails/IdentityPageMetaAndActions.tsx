@@ -22,7 +22,7 @@ import { useEffect, useState } from 'react';
 import OutgoingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/OutgoingConnectionDialog';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
 import { useConnectionGrantStatus } from '../../../hooks/connections/useConnectionGrantStatus';
-import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
+import { hasDebugFlag, jsonStringify64 } from '@youfoundation/js-lib/helpers';
 
 export const IdentityPageMetaAndActions = ({
   odinId, // setIsEditPermissionActive,
@@ -147,8 +147,13 @@ export const IdentityPageMetaAndActions = ({
     });
   }
 
-  const { fetchStatus } = useConnectionGrantStatus({ odinId });
-  const doDownloadStatusUrl = (url: string) => {
+  const { data: grantStatus } = useConnectionGrantStatus({ odinId }).fetchStatus;
+  const doDownloadStatusUrl = async () => {
+    const stringified = jsonStringify64(grantStatus);
+    const url = window.URL.createObjectURL(
+      new Blob([stringified], { type: 'application/json;charset=utf-8' })
+    );
+
     // Dirty hack for easy download
     const link = document.createElement('a');
     link.href = url;
@@ -177,7 +182,7 @@ export const IdentityPageMetaAndActions = ({
       actionGroupOptions.push({
         icon: HeartBeat,
         label: t('Grant Status'),
-        onClick: async () => doDownloadStatusUrl(await fetchStatus()),
+        onClick: doDownloadStatusUrl,
       });
     }
   }
