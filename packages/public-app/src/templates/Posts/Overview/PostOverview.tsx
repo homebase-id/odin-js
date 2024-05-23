@@ -14,6 +14,7 @@ import {
   useIntersection,
   LoadingBlock,
   NotFound,
+  useDotYouClient,
 } from '@youfoundation/common-app';
 
 import CardPostOverview from '../../../components/Post/Overview/CardPostOverview/CardPostOverview';

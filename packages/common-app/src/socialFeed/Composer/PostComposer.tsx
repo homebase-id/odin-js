@@ -392,7 +392,7 @@ export const ChannelOrAclSelector = React.forwardRef(
           ref={ref}
           disabled={disabled}
         >
-          <optgroup label={showCollaborativeChannels ? identity : t('Channels')}>
+          <optgroup label={showCollaborativeChannels ? identity || '' : t('Channels')}>
             {channels.map((channel) => (
               <option
                 value={channel.fileMetadata.appData.uniqueId}
