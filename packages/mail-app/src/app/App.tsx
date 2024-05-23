@@ -69,10 +69,9 @@ const idbPersister = createIDBPersister(REACT_QUERY_CACHE_KEY);
 // Explicit includes to avoid persisting media items, or large data in general
 const INCLUDED_QUERY_KEYS = [
   'mail-conversations',
-  'connectionDetails',
+  'connection-details',
   'push-notifications',
-  'siteData',
-  'connectionDetails',
+  'site-data',
   'mail-settings',
 
   // Small data (blobs to local file Uri)

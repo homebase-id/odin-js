@@ -41,7 +41,7 @@ const useInboxProcessor = (connected?: boolean) => {
   };
 
   return useQuery({
-    queryKey: ['processInbox'],
+    queryKey: ['process-inbox'],
     queryFn: fetchData,
     refetchOnMount: false,
     // We want to refetch on window focus, as we might have missed some messages while the window was not focused and the websocket might have lost connection
@@ -125,7 +125,7 @@ const useMailWebsocket = (isEnabled: boolean) => {
     ['fileAdded', 'fileModified'],
     [MailDrive],
     () => {
-      queryClient.invalidateQueries({ queryKey: ['processInbox'] });
+      queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
     }
   );
 };

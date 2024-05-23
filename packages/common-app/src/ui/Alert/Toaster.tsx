@@ -65,7 +65,7 @@ export const ErrorToaster = () => {
     <>
       {errors?.map((error, index) => (
         <Toast
-          title={t('Something went wrong')}
+          title={error.title || t('Something went wrong')}
           body={error.message}
           key={index}
           onDismiss={() => dismissError(error)}

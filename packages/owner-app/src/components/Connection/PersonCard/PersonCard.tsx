@@ -10,7 +10,7 @@ export interface PersonCardProps {
   className: string;
   children?: ReactNode;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
-  canSave?: boolean;
+  canSave: boolean;
 }
 
 const PersonCard = ({
@@ -29,8 +29,8 @@ const PersonCard = ({
           isChecked
             ? 'border-4 border-indigo-500 dark:border-indigo-700'
             : isChecked === false
-            ? 'border-4'
-            : 'border-gray-200 border-opacity-60 dark:border-gray-800'
+              ? 'border-4'
+              : 'border-gray-200 border-opacity-60 dark:border-gray-800'
         }
         ${href ? 'cursor-pointer hover:shadow-md hover:dark:shadow-slate-600' : ''}`}
         onClick={onClick}

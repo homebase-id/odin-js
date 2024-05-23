@@ -7,7 +7,8 @@ const ConnectLink = ({ className }: { className: string }) => {
   const identity = getIdentity();
 
   const { data: securityContext } = useSecurityContext(undefined, isAuthenticated).fetch;
-  const alreadyConnected = securityContext?.caller?.securityLevel === 'connected' || false;
+  const isConnected =
+    securityContext?.caller?.securityLevel?.toLowerCase() === 'connected' || false;
 
   if (isOwner) return null;
 
@@ -16,14 +17,14 @@ const ConnectLink = ({ className }: { className: string }) => {
       <ActionLink
         className={`w-auto ${className ?? ''}`}
         href={
-          identity && alreadyConnected
+          identity && isConnected
             ? `https://${getIdentity()}/owner/connections/${window.location.host}`
             : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect/connections/${window.location.host}/connect`
         }
-        icon={alreadyConnected ? Check : Persons}
-        type={alreadyConnected ? 'secondary' : 'primary'}
+        icon={isConnected ? Check : Persons}
+        type={isConnected ? 'secondary' : 'primary'}
       >
-        {alreadyConnected ? t('Connected') : t('Connect')}
+        {isConnected ? t('Connected') : t('Connect')}
       </ActionLink>
     </>
   );

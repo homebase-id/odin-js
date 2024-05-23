@@ -58,7 +58,7 @@ const INCLUDED_QUERY_KEYS = [
   'chat-messages',
   'conversations',
   'chat-reaction',
-  'connectionDetails',
+  'connection-details',
 ];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   buster: '202405',

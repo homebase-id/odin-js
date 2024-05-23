@@ -32,7 +32,7 @@ const ContactImage = ({
   fallbackSize,
 }: {
   odinId: string;
-  canSave?: boolean;
+  canSave: boolean;
   className?: string;
   fallbackSize?: 'xs';
 }) => {

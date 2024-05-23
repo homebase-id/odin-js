@@ -1,6 +1,7 @@
-import { HomebaseFile, NewHomebaseFile } from '../core/core';
-import { Attribute, LocationFields, MinimalProfileFields } from '../profile/profile';
-import { PostContent } from '../public/public';
+import { HomebaseFile, NewHomebaseFile } from '../core/DriveData/File/DriveFileTypes';
+import { Attribute } from '../profile/AttributeData/AttributeDataTypes';
+import { LocationFields, MinimalProfileFields } from '../profile/ProfileData/ProfileConfig';
+import { PostContent } from '../public/posts/PostTypes';
 import { getNewId } from './DataUtil';
 
 export const slugify = (text: string) => {

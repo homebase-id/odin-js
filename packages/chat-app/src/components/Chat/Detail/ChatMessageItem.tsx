@@ -5,6 +5,7 @@ import {
   Block,
   t,
   getOdinIdColor,
+  useDarkMode,
 } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
@@ -221,6 +222,7 @@ const ChatMediaMessageBody = ({
   authorOdinId: string;
   chatActions?: ChatActions;
 }) => {
+  const { isDarkMode } = useDarkMode();
   const content = msg.fileMetadata.appData.content;
 
   const hasACaption = !!content.message;
@@ -230,14 +232,16 @@ const ChatMediaMessageBody = ({
         <ChatDeliveryIndicator msg={msg} />
         <ChatSentTimeIndicator
           msg={msg}
-          className={
+          className={`dark:text-white/70 ${
+            !hasACaption &&
+            !isDarkMode &&
             msg.fileMetadata.payloads.some(
               (payload) =>
                 payload.contentType.includes('image/') || payload.contentType.includes('video/')
             )
               ? 'invert'
-              : undefined
-          }
+              : ''
+          }`}
         />
       </div>
       <ContextMenu chatActions={chatActions} msg={msg} conversation={conversation} />
