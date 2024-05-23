@@ -1,21 +1,18 @@
+import { useQuery } from '@tanstack/react-query';
 import { useDotYouClient } from '@youfoundation/common-app';
-import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import { fetchCircleMembershipStatus } from '../../provider/network/troubleshooting/ConnectionGrantProvider';
 
 export const useConnectionGrantStatus = ({ odinId }: { odinId?: string }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
+  const fetchStatus = async (odinId: string) => fetchCircleMembershipStatus(dotYouClient, odinId);
   return {
-    fetchStatus: async () => {
-      const axiosClient = dotYouClient.createAxiosClient();
-      const jsonData = await axiosClient
-        .post(`/circles/connections/troubleshooting-info`, { odinId: odinId })
-        .then((res) => res.data);
-
-      const stringified = jsonStringify64(jsonData);
-      const url = window.URL.createObjectURL(
-        new Blob([stringified], { type: 'application/json;charset=utf-8' })
-      );
-      return url;
-    },
+    fetchStatus: useQuery({
+      queryKey: ['connection-grant-status'],
+      queryFn: () => fetchStatus(odinId as string),
+      enabled: !!odinId,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnMount: false,
+    }),
   };
 };

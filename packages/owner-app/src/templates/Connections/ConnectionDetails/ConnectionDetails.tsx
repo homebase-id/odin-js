@@ -10,6 +10,7 @@ import { ConnectionInfo } from '@youfoundation/js-lib/network';
 import { ConnectionPermissionViewer } from './ConnectionPermissionViewer';
 import { IdentityPageMetaAndActions } from './IdentityPageMetaAndActions';
 import { IdentityAlerts } from './IdentityAlerts';
+import { useConnectionGrantStatus } from '../../../hooks/connections/useConnectionGrantStatus';
 
 const ConnectionDetails = () => {
   const { odinId } = useParams();
@@ -22,6 +23,8 @@ const ConnectionDetails = () => {
     odinId: odinId,
     canSave: connectionInfo?.status === 'connected',
   }).fetch;
+
+  const { data: grantStatus } = useConnectionGrantStatus({ odinId }).fetchStatus;
 
   if (connectionInfoLoading || contactDataLoading) return <LoadingDetailPage />;
   if (!odinId) return <>{t('No matching connection found')}</>;
@@ -43,6 +46,7 @@ const ConnectionDetails = () => {
         <>
           <ConnectionPermissionViewer
             accessGrant={activeConnection.accessGrant}
+            grantStatus={grantStatus}
             openEditCircleMembership={() => setIsEditPermissionActive(true)}
           />
           <CircleMembershipDialog
