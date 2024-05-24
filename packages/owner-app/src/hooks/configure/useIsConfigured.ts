@@ -13,12 +13,12 @@ export const useIsConfigured = () => {
 
   const getIsConfigured = async () => {
     if (!isAuthenticated) {
-      console.log('getIsConfigured: Not authenticated');
+      console.warn('getIsConfigured: Not authenticated');
       return;
     }
 
     if (!sharedSecret) {
-      console.log('getIsConfigured: No shared secret');
+      console.warn('getIsConfigured: No shared secret');
       return;
     }
 
