@@ -3,14 +3,14 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../providers/ChatProvider';
 import { useChatMessages } from './useChatMessages';
 import { useEffect, useState } from 'react';
-import { Conversation } from '../../providers/ConversationProvider';
+import { UnifiedConversation } from '../../providers/ConversationProvider';
 import { useConversation } from './useConversation';
 
 export const useMarkMessagesAsRead = ({
   conversation,
   messages,
 }: {
-  conversation: HomebaseFile<Conversation> | undefined;
+  conversation: HomebaseFile<UnifiedConversation> | undefined;
   messages: HomebaseFile<ChatMessage>[] | undefined;
 }) => {
   const { mutateAsync: markAsRead } = useChatMessages({

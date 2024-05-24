@@ -10,7 +10,7 @@ import {
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { ChatMessage, ChatDeletedArchivalStaus } from '../../../providers/ChatProvider';
-import { Conversation, GroupConversation } from '../../../providers/ConversationProvider';
+import { UnifiedConversation } from '../../../providers/ConversationProvider';
 import { ChatMedia } from './Media/ChatMedia';
 import { ChatMediaGallery } from './Media/ChatMediaGallery';
 import { ChatDeliveryIndicator } from './ChatDeliveryIndicator';
@@ -28,7 +28,7 @@ export const ChatMessageItem = ({
   chatActions,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation?: HomebaseFile<Conversation>;
+  conversation?: HomebaseFile<UnifiedConversation>;
   chatActions?: ChatActions;
 }) => {
   const identity = useDotYouClient().getIdentity();
@@ -41,9 +41,12 @@ export const ChatMessageItem = ({
   const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey) && mediaKey;
 
   const isDeleted = msg.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
-
-  const isGroupChat = !!(conversation?.fileMetadata.appData.content as GroupConversation)
-    ?.recipients;
+  const isGroupChat =
+    (
+      conversation?.fileMetadata.appData.content?.recipients?.filter(
+        (recipient) => recipient !== identity
+      ) || []
+    )?.length > 1;
 
   const hasReactions = useChatReaction({
     messageId: msg.fileMetadata.appData.uniqueId,
@@ -105,7 +108,7 @@ const ChatTextMessageBody = ({
   isDeleted,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation?: HomebaseFile<Conversation>;
+  conversation?: HomebaseFile<UnifiedConversation>;
 
   isGroupChat?: boolean;
   messageFromMe: boolean;
@@ -211,7 +214,7 @@ const ChatMediaMessageBody = ({
   chatActions,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation?: HomebaseFile<Conversation>;
+  conversation?: HomebaseFile<UnifiedConversation>;
 
   isGroupChat?: boolean;
   messageFromMe: boolean;
