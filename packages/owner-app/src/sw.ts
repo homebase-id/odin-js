@@ -56,12 +56,8 @@ const getNameForOdinId = async (odinId: string) => {
 const bodyFormer = async (payload: NotificationData, existingNotifications: Notification[]) => {
   const sender = (await getNameForOdinId(payload.senderId)) || payload.senderId;
 
-  if (payload.options.unEncryptedMessage) {
-    if (payload.options.appId === CHAT_APP_ID) {
-      return `${sender} ${payload.options.unEncryptedMessage}`;
-    }
-    return payload.options.unEncryptedMessage;
-  }
+  if (payload.options.unEncryptedMessage)
+    return (payload.options.unEncryptedMessage || '').replace(payload.senderId, sender);
 
   if (payload.options.appId === OWNER_APP_ID) {
     // Based on type, we show different messages

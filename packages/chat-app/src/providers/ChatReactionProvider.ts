@@ -83,7 +83,7 @@ export const uploadReaction = async (
             typeId: conversationId,
             tagId: getNewId(),
             silent: false,
-            unEncryptedMessage: t('reacted to a message'),
+            unEncryptedMessage: t('{0} reacted to a message', dotYouClient.getIdentity()),
           },
         }
       : undefined,
