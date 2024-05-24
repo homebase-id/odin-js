@@ -89,7 +89,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
       enabled: !!conversationId,
       refetchOnMount: false,
       refetchOnReconnect: false,
-      staleTime: 1000 * 60 * 10, // 10 minutes; The chat messages are already invalidated by the websocket;
+      staleTime: 1000 * 60 * 60 * 24, // 24 hour
     }),
     markAsRead: useMutation({
       mutationKey: ['markAsRead', conversationId],
