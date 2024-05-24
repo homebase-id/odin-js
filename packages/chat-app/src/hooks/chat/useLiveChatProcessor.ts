@@ -102,10 +102,10 @@ const useInboxProcessor = (connected?: boolean) => {
     return processedresult;
   };
 
+  // We refetch this one on mount as each mount the websocket would reconnect, and there might be a backlog of messages
   return useQuery({
     queryKey: ['process-inbox'],
     queryFn: fetchData,
-    staleTime: MINUTE_IN_MS * 1,
     enabled: connected,
   });
 };

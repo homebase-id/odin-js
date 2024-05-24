@@ -144,13 +144,6 @@ export const insertNewMessage = (
             (msg) => msg && msg?.fileId && !stringGuidsEqual(msg?.fileId, newMessage.fileId)
           ) as HomebaseFile<ChatMessage>[];
 
-          console.log(
-            'new first page',
-            [newMessage, ...filteredSearchResults].sort(
-              (a, b) => b.fileMetadata.created - a.fileMetadata.created
-            )
-          );
-
           return {
             ...page,
             searchResults:
@@ -172,6 +165,8 @@ export const insertNewMessage = (
     };
 
     queryClient.setQueryData(['chat-messages', conversationId], newData);
+  } else {
+    queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
   }
 
   queryClient.setQueryData(['chat-message', newMessage.fileMetadata.appData.uniqueId], newMessage);

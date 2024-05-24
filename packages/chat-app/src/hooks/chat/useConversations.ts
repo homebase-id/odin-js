@@ -73,5 +73,7 @@ export const insertNewConversation = (
       })),
     };
     queryClient.setQueryData(['conversations'], newData);
+  } else {
+    queryClient.invalidateQueries({ queryKey: ['conversations'] });
   }
 };

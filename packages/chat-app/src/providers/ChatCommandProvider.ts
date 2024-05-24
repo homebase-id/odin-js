@@ -164,7 +164,6 @@ const markChatAsRead = async (
   const chatMessages = await Promise.all(
     Array.from(new Set(chatUniqueIds)).map((msgId) => getChatMessage(dotYouClient, msgId))
   );
-  console.log('marking as read', chatMessages);
 
   const updateSuccess = await Promise.all(
     chatMessages

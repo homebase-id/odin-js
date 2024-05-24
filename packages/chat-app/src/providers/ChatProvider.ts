@@ -302,7 +302,10 @@ export const updateChatMessage = async (
     dotYouClient,
     keyHeader || (message as HomebaseFile<ChatMessage>).sharedSecretEncryptedKeyHeader,
     uploadInstructions,
-    uploadMetadata
+    uploadMetadata,
+    () => {
+      console.warn('Version conflict: failed to update chat message');
+    }
   );
 };
 
