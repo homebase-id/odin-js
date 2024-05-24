@@ -54,7 +54,6 @@ const CircleAppInteractionDialog = ({
     setUpdateState('idle');
   };
 
-  console.log({ toGrantApps, toRevokeApps });
   const dialog = (
     <DialogWrapper title={title} onClose={onCancel} size="4xlarge">
       <>
@@ -122,7 +121,6 @@ const CircleAppInteractionDialog = ({
                   toGrantApps.some((toGrant) => stringGuidsEqual(toGrant, app.appId));
 
                 const clickHandler = () => {
-                  console.log({ checked });
                   if (!checked) {
                     if (!hadAccess) {
                       // Provide access

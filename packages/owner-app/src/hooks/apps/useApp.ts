@@ -92,7 +92,6 @@ export const useApp = ({ appId }: { appId?: string }) => {
     if (drives)
       await Promise.all(
         drives.map(async (driveGrant: DriveGrantRequest) => {
-          console.log({ driveGrant });
           if (driveGrant.driveMeta && driveGrant.driveMeta.name)
             return await ensureDrive(
               dotYouClient,

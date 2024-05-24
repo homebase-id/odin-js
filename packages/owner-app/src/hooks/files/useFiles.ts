@@ -95,6 +95,7 @@ export const useFile = ({
           content: tryJsonParse(decryptedJsonContent),
         },
       },
+      serverMetadata: result.serverMetadata,
       defaultPayload: result.fileMetadata.payloads.some(
         (payload) => payload.contentType === 'application/json'
       )

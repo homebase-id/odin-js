@@ -1,4 +1,10 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  InfiniteData,
+  QueryClient,
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import {
   ChatDeliveryStatus,
   ChatMessage,
@@ -9,6 +15,7 @@ import {
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { UnifiedConversation } from '../../providers/ConversationProvider';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 const PAGE_SIZE = 100;
 export const useChatMessages = (props?: { conversationId: string | undefined }) => {
@@ -75,7 +82,9 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
           ? lastPage.cursorState
           : undefined,
       enabled: !!conversationId,
-      staleTime: 1000 * 60 * 1, // 1 minute; The chat messages are already invalidated by the websocket;
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      staleTime: 1000 * 60 * 60 * 24, // 24 hour
     }),
     markAsRead: useMutation({
       mutationKey: ['markAsRead', conversationId],
@@ -94,4 +103,66 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
       },
     }),
   };
+};
+
+export const insertNewMessage = (
+  queryClient: QueryClient,
+  newMessage: HomebaseFile<ChatMessage>,
+  isUpdate?: boolean
+) => {
+  const conversationId = newMessage.fileMetadata.appData.groupId;
+
+  const extistingMessages = queryClient.getQueryData<
+    InfiniteData<{
+      searchResults: (HomebaseFile<ChatMessage> | null)[];
+      cursorState: string;
+      queryTime: number;
+      includeMetadataHeader: boolean;
+    }>
+  >(['chat-messages', conversationId]);
+
+  if (extistingMessages) {
+    const isNewFile =
+      isUpdate === undefined
+        ? !extistingMessages.pages.some((page) =>
+            page.searchResults.some((msg) => stringGuidsEqual(msg?.fileId, newMessage.fileId))
+          )
+        : !isUpdate;
+
+    const newData = {
+      ...extistingMessages,
+      pages: extistingMessages?.pages?.map((page, index) => {
+        if (isNewFile) {
+          const filteredSearchResults = page.searchResults.filter(
+            // Remove messages without a fileId, as the optimistic mutations should be removed when there's actual data coming over the websocket;
+            //   And There shouldn't be any duplicates, but just in case
+            (msg) => msg && msg?.fileId && !stringGuidsEqual(msg?.fileId, newMessage.fileId)
+          ) as HomebaseFile<ChatMessage>[];
+
+          return {
+            ...page,
+            searchResults:
+              index === 0
+                ? [newMessage, ...filteredSearchResults].sort(
+                    (a, b) => b.fileMetadata.created - a.fileMetadata.created
+                  ) // Re-sort the first page, as the new message might be older than the first message in the page;
+                : filteredSearchResults,
+          };
+        }
+
+        return {
+          ...page,
+          searchResults: page.searchResults.map((msg) =>
+            msg?.fileId && stringGuidsEqual(msg?.fileId, newMessage.fileId) ? newMessage : msg
+          ),
+        };
+      }),
+    };
+
+    queryClient.setQueryData(['chat-messages', conversationId], newData);
+  } else {
+    queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+  }
+
+  queryClient.setQueryData(['chat-message', newMessage.fileMetadata.appData.uniqueId], newMessage);
 };
