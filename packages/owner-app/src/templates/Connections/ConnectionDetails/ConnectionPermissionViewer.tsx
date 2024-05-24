@@ -97,8 +97,12 @@ export const ConnectionPermissionViewer = ({
                   const grantStatusForCircle = grantStatus?.circles.find((circle) =>
                     stringGuidsEqual(circle.circleDefinitionId, grantedCircle.id)
                   );
+
                   const invalidPermissionKeys =
-                    !grantStatusForCircle?.analysis?.permissionKeysAreValid ?? false;
+                    grantStatusForCircle?.analysis?.permissionKeysAreValid !== undefined
+                      ? !grantStatusForCircle.analysis.permissionKeysAreValid
+                      : false;
+
                   const missingDriveGrant =
                     grantStatusForCircle?.analysis?.driveGrantAnalysis !== undefined &&
                     grantedCircle.driveGrants !== undefined
@@ -119,8 +123,8 @@ export const ConnectionPermissionViewer = ({
                       <CirclePermissionView circleDef={grantedCircle} />
                       {invalidPermissionKeys || missingDriveGrant || invalidDriveGrant ? (
                         <div className="flex flex-row items-center gap-1">
-                          <Exclamation className="h-5 w-5 text-red-500" />
-                          <p className="text-red-500">
+                          <Exclamation className="h-4 w-4 text-red-500" />
+                          <p className="text-sm text-red-500">
                             {invalidPermissionKeys
                               ? t('Invalid permission keys')
                               : missingDriveGrant
@@ -160,8 +164,8 @@ export const ConnectionPermissionViewer = ({
                   <AppMembershipView appDef={app} />
                   {invalidAppGrant ? (
                     <div className="flex flex-row items-center gap-1">
-                      <Exclamation className="h-5 w-5 text-red-500" />
-                      <p className="text-red-500">{t('Missing app grant')}</p>
+                      <Exclamation className="h-4 w-4 text-red-500" />
+                      <p className="text-sm text-red-500">{t('Missing app grant')}</p>
                     </div>
                   ) : (
                     <div className="flex flex-row items-center gap-1 opacity-50">
