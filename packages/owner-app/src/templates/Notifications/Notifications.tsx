@@ -356,7 +356,12 @@ const bodyFormer = (
 ) => {
   const sender = senderName || payload.senderId;
 
-  if (payload.options.unEncryptedMessage) return payload.options.unEncryptedMessage;
+  if (payload.options.unEncryptedMessage) {
+    if (payload.options.appId === CHAT_APP_ID) {
+      return `${sender} ${payload.options.unEncryptedMessage}`;
+    }
+    return payload.options.unEncryptedMessage;
+  }
 
   if (payload.options.appId === OWNER_APP_ID) {
     // Based on type, we show different messages
