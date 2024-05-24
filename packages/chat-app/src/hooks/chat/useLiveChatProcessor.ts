@@ -11,7 +11,7 @@ import { processInbox } from '@youfoundation/js-lib/peer';
 import {
   ChatDrive,
   CHAT_CONVERSATION_FILE_TYPE,
-  GroupCHAT_CONVERSATION_FILE_TYPE,
+  GROUP_CHAT_CONVERSATION_FILE_TYPE,
   JOIN_CONVERSATION_COMMAND,
   JOIN_GROUP_CONVERSATION_COMMAND,
   UPDATE_GROUP_CONVERSATION_COMMAND,
@@ -170,7 +170,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
         queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
       } else if (
         notification.header.fileMetadata.appData.fileType === CHAT_CONVERSATION_FILE_TYPE ||
-        notification.header.fileMetadata.appData.fileType === GroupCHAT_CONVERSATION_FILE_TYPE
+        notification.header.fileMetadata.appData.fileType === GROUP_CHAT_CONVERSATION_FILE_TYPE
       ) {
         const isNewFile = notification.notificationType === 'fileAdded';
 

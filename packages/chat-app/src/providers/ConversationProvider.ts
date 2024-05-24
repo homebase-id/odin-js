@@ -20,7 +20,7 @@ import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { ImageSource } from '@youfoundation/ui-lib';
 
 export const CHAT_CONVERSATION_FILE_TYPE = 8888;
-export const GroupCHAT_CONVERSATION_FILE_TYPE = 8890;
+export const GROUP_CHAT_CONVERSATION_FILE_TYPE = 8890;
 export const ConversationWithYourselfId = 'e4ef2382-ab3c-405d-a8b5-ad3e09e980dd';
 export const CONVERSATION_PAYLOAD_KEY = 'convo_pk';
 
@@ -78,7 +78,7 @@ export const getConversations = async (
 ) => {
   const params: FileQueryParams = {
     targetDrive: ChatDrive,
-    fileType: [CHAT_CONVERSATION_FILE_TYPE, GroupCHAT_CONVERSATION_FILE_TYPE],
+    fileType: [CHAT_CONVERSATION_FILE_TYPE, GROUP_CHAT_CONVERSATION_FILE_TYPE],
   };
 
   const ro: GetBatchQueryResultOptions = {
