@@ -327,6 +327,7 @@ const NotificationItem = ({
   return (
     <Toast
       title={title}
+      imgSrc={notification.senderId ? `https://${notification.senderId}/pub/image` : undefined}
       // Keeping the hidden ones short
       body={ellipsisAtMaxChar(body, isExpanded ? 120 : 40)}
       timestamp={notification.created}
