@@ -41,7 +41,9 @@ export const ConnectionPermissionViewer = ({
 
   const grantedAppIs = accessGrant.appGrants ? Object.keys(accessGrant.appGrants) : [];
   const grantedApps = apps?.filter((app) =>
-    grantedAppIs.some((appId) => stringGuidsEqual(appId, app.appId))
+    app.authorizedCircles.some((authorizedCircle) =>
+      grantedCircles?.some((grantedCircle) => stringGuidsEqual(authorizedCircle, grantedCircle.id))
+    )
   );
 
   const grantedDrives = [
@@ -147,7 +149,28 @@ export const ConnectionPermissionViewer = ({
         <Section title={t('Can use the following apps')}>
           <div className="flex flex-col gap-6">
             {grantedApps?.map((app) => {
-              return <AppMembershipView key={`${app.appId}`} appDef={app} />;
+              const invalidAppGrant = !grantedAppIs.some((appId) =>
+                stringGuidsEqual(appId, app.appId)
+              );
+              return (
+                <div
+                  className="flex flex-row items-center justify-between gap-1"
+                  key={`${app.appId}`}
+                >
+                  <AppMembershipView appDef={app} />
+                  {invalidAppGrant ? (
+                    <div className="flex flex-row items-center gap-1">
+                      <Exclamation className="h-5 w-5 text-red-500" />
+                      <p className="text-red-500">{t('Missing app grant')}</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-row items-center gap-1 opacity-50">
+                      <Check className="h-4 w-4 " />
+                      <p className="text-sm">{t('Validated')}</p>
+                    </div>
+                  )}
+                </div>
+              );
             })}
           </div>
         </Section>
