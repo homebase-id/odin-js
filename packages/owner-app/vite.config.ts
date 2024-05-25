@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import { defineConfig, splitVendorChunkPlugin } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
@@ -13,7 +13,6 @@ const hostConfig = {
 export default defineConfig({
   plugins: [
     react(),
-    // splitVendorChunkPlugin(),
     VitePWA({
       srcDir: 'src',
       filename: 'sw.ts',
@@ -50,6 +49,16 @@ export default defineConfig({
       onwarn(warning, warn) {
         if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
         warn(warning);
+      },
+      onLog(level, log, handler) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (
+          log.cause &&
+          (log.cause as any)?.message === `Can't resolve original location of error.`
+        ) {
+          return;
+        }
+        handler(level, log);
       },
       output: {
         // manualChunks(id) {

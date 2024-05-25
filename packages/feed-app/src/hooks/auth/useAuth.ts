@@ -51,7 +51,7 @@ export const useAuth = () => {
       if (!hasValidToken) {
         setAuthenticationState('anonymous');
         if (window.localStorage.getItem(APP_SHARED_SECRET)) {
-          console.log('Token is invalid, logging out..');
+          console.warn('Token is invalid, logging out..');
           // Auth state was presumed logged in, but not allowed.. Will attempt reload page?
           //  (Browsers may ignore, as it's not a reload on user request)
           logout();

@@ -60,8 +60,6 @@ export const MailThreadInfo = ({
     );
   }, [originalThread]);
 
-  console.log('messagesFromTheSameOrigin', messagesFromTheSameOrigin);
-
   const dialog = (
     <DialogWrapper onClose={onClose} title={t('Thread info')}>
       {'Subject'}: {lastMessageContent.subject}

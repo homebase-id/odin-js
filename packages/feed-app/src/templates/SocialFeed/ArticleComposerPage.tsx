@@ -227,6 +227,26 @@ export const ArticleComposerPage = () => {
       />
       <section className="pb-10">
         <div className="sm:px-10">
+          <div className="grid grid-flow-row gap-1">
+            <span className="text-sm text-gray-400">{t('Channel')}</span>
+            <div className="mb-5 flex flex-row items-center gap-2 border-gray-200 border-opacity-60 bg-background p-2 text-foreground dark:border-gray-800 md:rounded-lg md:border md:p-4">
+              {isPublished ? (
+                <p className="text-sm text-gray-400">
+                  {t('After a publish, the post can no longer be moved between channels')}
+                </p>
+              ) : (
+                <ChannelOrAclSelector
+                  className={`w-full rounded border-gray-300 px-3 focus:border-indigo-500 dark:border-gray-700`}
+                  defaultChannelValue={postFile.fileMetadata.appData.content?.channelId}
+                  onChange={(newChannel) => newChannel && setChannel(newChannel)}
+                  disabled={isPublished}
+                  excludeMore={true}
+                  excludeCustom={true}
+                />
+              )}
+            </div>
+          </div>
+
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -252,10 +272,10 @@ export const ArticleComposerPage = () => {
       </section>
       <OptionsDialog
         postFile={postFile}
-        isPublished={isPublished}
+        // isPublished={isPublished}
         isOpen={isOptionsDialogOpen}
         onCancel={() => setIsOptionsDialogOpen(false)}
-        onConfirm={async (newReactAccess, newChannel) => {
+        onConfirm={async (newReactAccess) => {
           setIsOptionsDialogOpen(false);
 
           if (newReactAccess !== undefined) {
@@ -267,10 +287,10 @@ export const ArticleComposerPage = () => {
             await doSave(dirtyPostFile);
           }
 
-          if (newChannel) {
-            if (postFile.fileId) movePost(newChannel);
-            else setChannel(newChannel);
-          }
+          // if (newChannel) {
+          //   if (postFile.fileId) movePost(newChannel);
+          //   else setChannel(newChannel);
+          // }
         }}
       />
       {isConfirmUnpublish ? (
@@ -292,36 +312,30 @@ export const ArticleComposerPage = () => {
 };
 
 const OptionsDialog = ({
-  isPublished,
   postFile,
 
   isOpen,
   onCancel,
   onConfirm,
 }: {
-  isPublished?: boolean;
   postFile: HomebaseFile<Article> | NewHomebaseFile<Article>;
 
   isOpen: boolean;
   onCancel: () => void;
-  onConfirm: (
-    newReactAccess: ReactAccess | undefined,
-    newChannel: NewHomebaseFile<ChannelDefinition> | undefined
-  ) => void;
+  onConfirm: (newReactAccess: ReactAccess | undefined) => void;
 }) => {
   const target = usePortal('modal-container');
 
   const [newReactAccess, setNewReactAccess] = useState<ReactAccess | undefined>(
     postFile.fileMetadata.appData.content.reactAccess
   );
-  const [newChannel, setNewChannel] = useState<NewHomebaseFile<ChannelDefinition> | undefined>();
 
   if (!isOpen) return null;
 
   const dialog = (
     <DialogWrapper title={t('Options')} onClose={onCancel}>
-      <form onSubmit={() => onConfirm(newReactAccess, newChannel)}>
-        <div className="mt-4 px-2 pt-4">
+      <form onSubmit={() => onConfirm(newReactAccess)}>
+        <div className="px-2">
           <Label>{t('Reactions')}</Label>
           <Select
             id="reactAccess"
@@ -340,22 +354,7 @@ const OptionsDialog = ({
             <option value={'false'}>{t('Disabled')}</option>
           </Select>
         </div>
-        <div className="mt-4 px-2 pt-4">
-          <Label>{t('Channel')}</Label>
-          {isPublished ? (
-            <p className="text-sm text-gray-400">
-              {t('After a publish, the post can no longer be moved between channels')}
-            </p>
-          ) : null}
-          <ChannelOrAclSelector
-            className={`w-full rounded border border-gray-300 px-3 py-1 focus:border-indigo-500 dark:border-gray-700`}
-            defaultChannelValue={postFile.fileMetadata.appData.content?.channelId}
-            onChange={setNewChannel}
-            disabled={isPublished}
-            excludeMore={true}
-            excludeCustom={true}
-          />
-        </div>
+
         <div className="flex flex-row-reverse gap-2 py-3">
           <ActionButton className="m-2">{t('Ok')}</ActionButton>
           <ActionButton

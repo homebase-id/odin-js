@@ -13,7 +13,6 @@ export const fetchCircleMembershipStatus = async (dotYouClient: DotYouClient, od
     .catch(dotYouClient.handleErrorResponse);
 };
 
-
 export interface CircleMembershipStatus {
   circles: CircleMembershipStatusEntry[];
 }

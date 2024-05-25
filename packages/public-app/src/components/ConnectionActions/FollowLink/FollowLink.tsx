@@ -22,7 +22,7 @@ const FollowLink = ({
 
   if (isOwner) return null;
 
-  const alreadyFollowingThis =
+  const isFollowing =
     (!channel && data?.notificationType === 'allNotifications') ||
     (channel &&
       data?.channels?.some((chnl) =>
@@ -40,11 +40,11 @@ const FollowLink = ({
             : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/follow/following/${window.location.hostname}`) +
           (channel ? `?chnl=${channel.fileMetadata.appData.uniqueId}` : '')
         }
-        icon={alreadyFollowingThis ? Check : Feed}
-        type={alreadyFollowingThis ? 'secondary' : 'primary'}
+        icon={isFollowing ? Check : Feed}
+        type={isFollowing ? 'secondary' : 'primary'}
       >
         <span className="flex flex-col leading-tight">
-          {alreadyFollowingThis ? t('Following') : t('Follow')}
+          {isFollowing ? t('Following') : t('Follow')}
           {channel ? (
             <small className="block">
               {ellipsisAtMaxChar(channel.fileMetadata.appData.content.name, 20)}

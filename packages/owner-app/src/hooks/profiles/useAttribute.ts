@@ -183,7 +183,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
           queryClient.invalidateQueries({ queryKey: ['attribute'] });
         }
 
-        queryClient.invalidateQueries({ queryKey: ['siteData'] });
+        queryClient.invalidateQueries({ queryKey: ['site-data'] });
         queryClient.invalidateQueries({ queryKey: getListItemCacheKey(newAttr) });
 
         if (!_variables.fileId) {
@@ -234,7 +234,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
         }
         // Settimeout to allow serverSide a bit more time to process remove before fetching the data again
         setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ['siteData'] });
+          queryClient.invalidateQueries({ queryKey: ['site-data'] });
           queryClient.invalidateQueries({ queryKey: getListItemCacheKey(newAttr) });
 
           publishStaticFiles(variables.attribute?.fileMetadata?.appData?.content?.type);

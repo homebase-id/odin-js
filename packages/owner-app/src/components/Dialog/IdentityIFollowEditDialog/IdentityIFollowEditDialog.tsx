@@ -13,6 +13,7 @@ import {
   Quote,
   Persons,
   CheckboxToggle,
+  LoadingBlock,
 } from '@youfoundation/common-app';
 
 import { BlogConfig } from '@youfoundation/js-lib/public';
@@ -42,12 +43,12 @@ const IdentityIFollowEditDialog = ({
     error: followError,
   } = useFollowingInfinite({}).follow;
   const {
-    fetch: { data: identityIFollow, isFetchedAfterMount: identityIFollowLoaded },
+    fetch: { data: identityIFollow, isFetched: identityIFollowLoaded },
     unfollow: { mutateAsync: unfollow, error: unfollowError },
   } = useIdentityIFollow({
     odinId,
   });
-  const { data: socialChannels, isFetchedAfterMount: socialChannelsLoaded } = useSocialChannels({
+  const { data: socialChannels, isFetched: socialChannelsLoaded } = useSocialChannels({
     odinId,
   }).fetch;
 
@@ -78,8 +79,6 @@ const IdentityIFollowEditDialog = ({
 
   const updateFollow = async () => {
     const selectChannels = channelSelection?.length !== socialChannels?.length;
-
-    console.log(selectChannels, channelSelection, identityIFollow);
 
     if (identityIFollow && channelSelection?.length === 0) unfollow({ odinId: odinId });
     else {
@@ -133,7 +132,13 @@ const IdentityIFollowEditDialog = ({
         }
         onClose={onCancel}
       >
-        {!socialChannels && socialChannelsLoaded ? (
+        {!socialChannelsLoaded ? (
+          <div>
+            <LoadingBlock className="my-5 h-12 w-full" />
+            <LoadingBlock className="my-5 h-12 w-full" />
+            <LoadingBlock className="my-5 h-12 w-full" />
+          </div>
+        ) : !socialChannels ? (
           <Alert type="info" className="my-5">
             {t('No accessible channels found. You might not get any posts when subscribed')}
           </Alert>

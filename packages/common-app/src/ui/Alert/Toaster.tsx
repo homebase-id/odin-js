@@ -65,7 +65,7 @@ export const ErrorToaster = () => {
     <>
       {errors?.map((error, index) => (
         <Toast
-          title={t('Something went wrong')}
+          title={error.title || t('Something went wrong')}
           body={error.message}
           key={index}
           onDismiss={() => dismissError(error)}
@@ -179,7 +179,7 @@ export const Toast = ({
 
   return (
     <div
-      className={`relative flex max-w-sm flex-row rounded-md bg-white px-2 py-2 shadow-md dark:bg-black dark:text-slate-300 ${
+      className={`relative flex max-w-sm flex-row gap-2 rounded-md bg-white px-3 py-2 shadow-md dark:bg-black dark:text-slate-300 ${
         href || onOpen ? 'cursor-pointer' : ''
       }`}
       onClick={doOpen}
@@ -198,7 +198,7 @@ export const Toast = ({
         </div>
       ) : null}
 
-      <div className="flex-grow-1 pl-3">
+      <div className="flex-grow-1">
         <p
           className={`max-h-12 w-full overflow-hidden text-ellipsis pr-8 font-medium ${fadeAfter} after:right-8`}
         >

@@ -182,10 +182,12 @@ export const createImagePlugin = createPluginFactory({
   component: (props) => ImageElementBlock({ ...props }),
   handlers: {
     onPaste: (editor) => (e) => {
+      const imageFiles = getImagesFromPasteEvent(e as React.ClipboardEvent<HTMLElement>);
+
+      if (!imageFiles || imageFiles.length === 0) return false;
+
       e.stopPropagation();
       e.preventDefault();
-
-      const imageFiles = getImagesFromPasteEvent(e as React.ClipboardEvent<HTMLElement>);
 
       (async () => {
         const options = getPluginOptions<MediaOptions | undefined>(editor, ELEMENT_IMAGE);

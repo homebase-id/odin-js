@@ -9,10 +9,11 @@ export const useExternalOdinId = ({ odinId }: { odinId?: string }) => {
 
   return {
     fetch: useQuery({
-      queryKey: ['connectionDetails', odinId],
+      queryKey: ['connection-details', odinId],
       queryFn: () => fetchSingle({ odinId }),
       refetchOnWindowFocus: false,
       refetchOnMount: false,
+      staleTime: 1000 * 60 * 60 * 1, // 1 hours
       enabled: !!odinId,
     }),
   };

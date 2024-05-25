@@ -1,5 +1,4 @@
 import {
-  ErrorNotification,
   FileOverview,
   EmojiSelector,
   FileSelector,
@@ -9,12 +8,15 @@ import {
   PaperPlane,
   getImagesFromPasteEvent,
   Plus,
+  useErrors,
+  t,
+  ellipsisAtMaxChar,
 } from '@youfoundation/common-app';
 import { HomebaseFile, NewMediaFile } from '@youfoundation/js-lib/core';
 
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { ChatMessage } from '../../../providers/ChatProvider';
-import { Conversation } from '../../../providers/ConversationProvider';
+import { UnifiedConversation } from '../../../providers/ConversationProvider';
 import { useState, useEffect, useRef } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
 import { isTouchDevice } from '@youfoundation/js-lib/helpers';
@@ -28,7 +30,7 @@ export const ChatComposer = ({
   clearReplyMsg,
   onSend,
 }: {
-  conversation: HomebaseFile<Conversation> | undefined;
+  conversation: HomebaseFile<UnifiedConversation> | undefined;
   replyMsg: HomebaseFile<ChatMessage> | undefined;
   clearReplyMsg: () => void;
   onSend?: () => void;
@@ -50,16 +52,14 @@ export const ChatComposer = ({
     }
   }, [conversation, message]);
 
-  const {
-    mutate: sendMessage,
-    status: sendMessageState,
-    reset: resetState,
-    error: sendMessageError,
-  } = useChatMessage().send;
+  const addError = useErrors().add;
+  const { mutateAsync: sendMessage } = useChatMessage().send;
 
   const conversationContent = conversation?.fileMetadata.appData.content;
-  const doSend = (forcedVal?: string) => {
+  const doSend = async (forcedVal?: string) => {
     const trimmedVal = (forcedVal || message)?.trim();
+    const replyId = replyMsg?.fileMetadata.appData.uniqueId;
+    const newFiles = [...(files || [])];
 
     if (
       (!trimmedVal && !files?.length) ||
@@ -68,30 +68,27 @@ export const ChatComposer = ({
     )
       return;
 
-    console.log({
-      conversation,
-      message: trimmedVal || '',
-      replyId: replyMsg?.fileMetadata?.appData?.uniqueId,
-      files,
-    });
-    sendMessage({
-      conversation,
-      message: trimmedVal || '',
-      replyId: replyMsg?.fileMetadata?.appData?.uniqueId,
-      files,
-    });
-    onSend && onSend();
-  };
+    // Clear internal state and allow excessive senders
+    setMessage('');
+    setFiles([]);
+    clearReplyMsg();
 
-  // Reset state, when the message was sent successfully
-  useEffect(() => {
-    if (sendMessageState === 'pending') {
-      setMessage('');
-      setFiles([]);
-      clearReplyMsg();
-      resetState();
+    try {
+      await sendMessage({
+        conversation,
+        message: trimmedVal || '',
+        replyId: replyId,
+        files: newFiles,
+      });
+      onSend && onSend();
+    } catch (err) {
+      addError(
+        err,
+        t('Failed to send'),
+        t('Your message "{0}" was not sent', ellipsisAtMaxChar(trimmedVal || '', 20) || '')
+      );
     }
-  }, [sendMessageState]);
+  };
 
   useEffect(() => {
     // When replying to a message, focus the input
@@ -100,7 +97,6 @@ export const ChatComposer = ({
 
   return (
     <>
-      <ErrorNotification error={sendMessageError} />
       <div className="bg-page-background pb-[env(safe-area-inset-bottom)]">
         <div className="max-h-[30vh] overflow-auto">
           <FileOverview files={files} setFiles={setFiles} cols={8} />
@@ -148,7 +144,6 @@ export const ChatComposer = ({
                 e.stopPropagation();
                 doSend();
               }}
-              state={sendMessageState}
               className="flex-shrink"
               icon={PaperPlane}
               size="square"
