@@ -1,4 +1,4 @@
-import { getOdinIdColor, useDotYouClient } from '@youfoundation/common-app';
+import { getOdinIdColor, useDotYouClient, useErrors } from '@youfoundation/common-app';
 import {
   base64ToUint8Array,
   byteArrayToString,
@@ -12,18 +12,60 @@ import {
 } from '@youfoundation/js-lib/profile';
 import { useEffect, useRef } from 'react';
 import { useAttribute } from './profiles/useAttribute';
+import { useSettings } from './settings/useSettings';
+import { DotYouClient } from '@youfoundation/js-lib/core';
+import { autoFixConnections } from '../provider/network/troubleshooting/AutoFixConnectionProvider';
 
+const AUTO_FIX_VERSION = '0.0.1';
 export const useAutofixDefaultConfig = () => {
+  const { add: addError } = useErrors();
+
+  const {
+    fetchUiSettings: { data: uiSettings, isFetched: isUiSettingsFetched },
+    updateUiSetting: { mutateAsync: updateUiSetting },
+  } = useSettings();
+
+  const lastRunAutoFix = uiSettings?.lastRunAutoFix;
+  const shouldRun = lastRunAutoFix !== AUTO_FIX_VERSION;
+
   const dotYouClient = useDotYouClient().getDotYouClient();
   const isRunning = useRef<boolean>();
 
-  const { mutateAsync: saveAttr } = useAttribute().save;
+  const { fixDefaultProfileImage } = useFixDefaultProfileImage();
 
   useEffect(() => {
-    if (isRunning.current) return;
+    if (isRunning.current || !isUiSettingsFetched || !shouldRun) return;
     isRunning.current = true;
-
+    console.log('[useAutoFixDefaultConfig] Starting');
     (async () => {
+      try {
+        await fixDefaultProfileImage();
+        await fixConnections(dotYouClient);
+
+        updateUiSetting({ ...uiSettings, lastRunAutoFix: AUTO_FIX_VERSION });
+        console.log('[useAutoFixDefaultConfig] Finished');
+      } catch (ex) {
+        console.error(
+          '[useAutoFixDefaultConfig] Failed to run auto fix, will try again next time',
+          ex
+        );
+        addError(ex, 'Failed to run auto fix');
+      }
+    })();
+  }, [isUiSettingsFetched]);
+};
+
+const fixConnections = async (dotYouClient: DotYouClient) => {
+  const result = await autoFixConnections(dotYouClient);
+  if (result?.status !== 200) throw new Error('Failed to fix connections');
+};
+
+const useFixDefaultProfileImage = () => {
+  const dotYouClient = useDotYouClient().getDotYouClient();
+  const { mutateAsync: saveAttr } = useAttribute().save;
+
+  return {
+    fixDefaultProfileImage: async () => {
       const data = await getProfileAttributes(
         dotYouClient,
         BuiltInProfiles.StandardProfileId,
@@ -74,10 +116,10 @@ export const useAutofixDefaultConfig = () => {
 
             await saveAttr(updatedAttr);
           } catch (e) {
-            console.error('Failed to update profile image', e);
+            throw new Error('Failed to update profile image');
           }
         })
       );
-    })();
-  }, []);
+    },
+  };
 };
