@@ -8,10 +8,20 @@ import { AclSummary } from '../../../acl';
 import { HOME_ROOT_PATH } from '../../../core';
 import { t } from '../../../helpers';
 import { useDotYouClient, useIsConnected, useManageSocialFeed } from '../../../hooks';
-import { ActionGroupOptionProps, UserX, Times, Lock, Flag, Block, ActionGroup } from '../../../ui';
+import {
+  ActionGroupOptionProps,
+  UserX,
+  Times,
+  Lock,
+  Flag,
+  Block,
+  ActionGroup,
+  Link,
+} from '../../../ui';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;
+  authorOdinId?: string;
   postFile: HomebaseFile<PostContent>;
   embeddedPost?: undefined;
   channel?:
@@ -24,6 +34,7 @@ interface PostMetaWithPostFileProps {
 
 interface PostMetaWithEmbeddedPostContentProps {
   odinId?: string;
+  authorOdinId?: string;
   postFile?: HomebaseFile<PostContent>;
   embeddedPost: EmbeddedPost;
   channel?:
@@ -36,6 +47,7 @@ interface PostMetaWithEmbeddedPostContentProps {
 
 export const PostMeta = ({
   odinId,
+  authorOdinId,
   postFile,
   embeddedPost,
   channel,
@@ -54,8 +66,9 @@ export const PostMeta = ({
     hour: 'numeric',
     minute: 'numeric',
   };
+  const groupPost = authorOdinId !== odinId;
   const identity = getIdentity();
-  const isAuthor = odinId === identity;
+  const isAuthor = authorOdinId === identity;
 
   const isConnected = useIsConnected(odinId).data;
   const channelLink = channel
@@ -96,13 +109,19 @@ export const PostMeta = ({
         </a>
       ) : null}
 
-      {excludeContextMenu || !postFile ? null : (!odinId && isOwner) || isAuthor ? (
-        <Suspense>
-          <OwnerActions postFile={postFile} />
-        </Suspense>
-      ) : odinId ? (
-        <ExternalActions odinId={odinId} postFile={postFile} />
-      ) : null}
+      {excludeContextMenu || !postFile ? null : (
+        <>
+          {groupPost ? (
+            <GroupChannelActions odinId={odinId} postFile={postFile} channelLink={channelLink} />
+          ) : (!odinId && isOwner) || isAuthor ? (
+            <Suspense>
+              <OwnerActions postFile={postFile} />
+            </Suspense>
+          ) : odinId ? (
+            <ExternalActions odinId={odinId} postFile={postFile} />
+          ) : null}
+        </>
+      )}
     </div>
   );
 };
@@ -146,6 +165,59 @@ const ExternalActions = ({
       label: `${t('Block this user')}`,
       href: `https://${identity}/owner/connections/${odinId}/block`,
     },
+  ];
+
+  return (
+    <div className="ml-auto" onClick={(e) => e.stopPropagation()}>
+      <ActionGroup className="" type="mute" size="none" options={options} />
+    </div>
+  );
+};
+
+const GroupChannelActions = ({
+  odinId,
+  channelLink,
+  postFile,
+}: {
+  odinId?: string;
+  channelLink?: string;
+  postFile: HomebaseFile<PostContent>;
+}) => {
+  const { getIdentity } = useDotYouClient();
+
+  const identity = getIdentity();
+  const isAuthor = postFile.fileMetadata.appData.content.authorOdinId === identity;
+
+  const {
+    removeFromFeed: { mutateAsync: removeFromMyFeed },
+    getReportContentUrl,
+  } = useManageSocialFeed(odinId ? { odinId } : undefined);
+
+  const options: (ActionGroupOptionProps | undefined)[] = [
+    channelLink
+      ? {
+          icon: Link,
+          label: `${t('Go to collaborative channel')}`,
+          href: channelLink,
+        }
+      : undefined,
+    {
+      icon: Times,
+      label: `${t('Remove this post from my feed')}`,
+      onClick: () => {
+        removeFromMyFeed({ postFile });
+      },
+    },
+    isAuthor
+      ? {
+          icon: Flag,
+          label: `${t('Report')}`,
+          onClick: async () => {
+            const reportUrl = await getReportContentUrl();
+            window.open(reportUrl, '_blank');
+          },
+        }
+      : undefined,
   ];
 
   return (
