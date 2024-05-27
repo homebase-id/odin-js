@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { BlogConfig } from '@youfoundation/js-lib/public';
 import { getChannelOverPeer } from '@youfoundation/js-lib/peer';
-import { useDotYouClient } from '../../..';
+import { useDotYouClient } from '../auth/useDotYouClient';
 
 interface useSocialChannelProps {
   odinId?: string;

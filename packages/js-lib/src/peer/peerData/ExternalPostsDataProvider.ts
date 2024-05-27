@@ -83,9 +83,10 @@ export const getSocialFeed = async (
       true // include hidden channels
     );
 
-    const postsOfOwn = resultOfOwn.results.filter(
-      (file) => file.fileMetadata.appData.fileType !== BlogConfig.DraftPostFileType
-    );
+    const postsOfOwn = resultOfOwn.results
+      .filter((file) => file.fileMetadata.appData.fileType !== BlogConfig.DraftPostFileType)
+      // We need to remove the senderOdinId, as it can be the authorOdinId in a grou channel, and that's not where it's actually stored
+      .map((file) => ({ ...file, fileMetadata: { ...file.fileMetadata, senderOdinId: '' } }));
 
     return {
       results: [...allPostFiles, ...postsOfOwn].sort(

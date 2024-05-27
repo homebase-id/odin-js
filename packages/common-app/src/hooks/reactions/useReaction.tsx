@@ -10,13 +10,14 @@ import {
 
 import { getRichTextFromString } from '../../helpers/richTextHelper';
 import { UseCommentsVal } from './comments/useComments';
-import { useDotYouClient } from '../../..';
+
 import {
   HomebaseFile,
   EmojiReactionSummary,
   NewHomebaseFile,
   ReactionFile,
 } from '@youfoundation/js-lib/core';
+import { useDotYouClient } from '../auth/useDotYouClient';
 
 export const useReaction = () => {
   const queryClient = useQueryClient();

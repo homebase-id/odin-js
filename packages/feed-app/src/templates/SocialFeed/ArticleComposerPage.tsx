@@ -20,7 +20,7 @@ import {
 } from '@youfoundation/common-app';
 import { InnerFieldEditors } from '../../components/SocialFeed/ArticleFieldsEditor/ArticleFieldsEditor';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { Article, ChannelDefinition, ReactAccess } from '@youfoundation/js-lib/public';
+import { Article, ReactAccess } from '@youfoundation/js-lib/public';
 import { useArticleComposer } from '@youfoundation/common-app';
 import { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -238,7 +238,11 @@ export const ArticleComposerPage = () => {
                 <ChannelOrAclSelector
                   className={`w-full rounded border-gray-300 px-3 focus:border-indigo-500 dark:border-gray-700`}
                   defaultChannelValue={postFile.fileMetadata.appData.content?.channelId}
-                  onChange={(newChannel) => newChannel && setChannel(newChannel)}
+                  onChange={({ channel: newChannel }) => {
+                    if (!newChannel) return;
+                    if (postFile.fileId) movePost(newChannel);
+                    else setChannel(newChannel);
+                  }}
                   disabled={isPublished}
                   excludeMore={true}
                   excludeCustom={true}
@@ -354,7 +358,6 @@ const OptionsDialog = ({
             <option value={'false'}>{t('Disabled')}</option>
           </Select>
         </div>
-
         <div className="flex flex-row-reverse gap-2 py-3">
           <ActionButton className="m-2">{t('Ok')}</ActionButton>
           <ActionButton

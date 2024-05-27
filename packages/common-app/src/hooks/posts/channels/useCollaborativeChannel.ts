@@ -1,9 +1,12 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ChannelDefinition,
   CollaborativeChannelDefinition,
   GetTargetDriveFromChannelId,
+  RemoteCollaborativeChannelDefinition,
+  removeChannelLink,
   saveChannelDefinition,
+  saveChannelLink,
 } from '@youfoundation/js-lib/public';
 
 import { FEED_APP_ID, t, useCircles, useDotYouClient } from '../../../..';
@@ -11,6 +14,7 @@ import { stringGuidsEqual, stringifyToQueryParams } from '@youfoundation/js-lib/
 import {
   DrivePermissionType,
   HomebaseFile,
+  NewHomebaseFile,
   SecurityGroupType,
   TargetDrive,
 } from '@youfoundation/js-lib/core';
@@ -82,10 +86,23 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
   const { channelId } = props || {};
   const { getDotYouClient } = useDotYouClient();
   const dotYouClient = getDotYouClient();
+  const queryClient = useQueryClient();
 
   const { data: channelDef, isFetched: isChannelFetched } = useChannel({ channelId }).fetch;
   const { data: circles } = useCircles().fetch;
   const { data: channelDrives } = useChannelDrives(true);
+
+  const saveCollaborativeChannel = async (
+    chnlLink: NewHomebaseFile<RemoteCollaborativeChannelDefinition>
+  ) => {
+    return await saveChannelLink(dotYouClient, chnlLink);
+  };
+
+  const removeCollaborativeChannel = async (
+    chnlLink: HomebaseFile<RemoteCollaborativeChannelDefinition>
+  ) => {
+    return await removeChannelLink(dotYouClient, chnlLink);
+  };
 
   const validateCollaborativeChannel = () => {
     if (!channelId || !channelDef?.fileMetadata.appData.content.isCollaborative) return null;
@@ -192,6 +209,18 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
   };
 
   return {
+    save: useMutation({
+      mutationFn: saveCollaborativeChannel,
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ['collaborative-channels'] });
+      },
+    }),
+    remove: useMutation({
+      mutationFn: removeCollaborativeChannel,
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ['collaborative-channels'] });
+      },
+    }),
     validate: useQuery({
       queryKey: ['validate-collaborative', channelId],
       queryFn: validateCollaborativeChannel,

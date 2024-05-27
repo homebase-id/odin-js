@@ -9,6 +9,7 @@ import {
   SecurityGroupType,
   NewMediaFile,
   MediaFile,
+  UploadResult,
 } from '@youfoundation/js-lib/core';
 
 export const EMPTY_POST: Article = {
@@ -171,11 +172,15 @@ export const useArticleComposer = ({
       mediaFiles: files,
     });
 
-    if (uploadResult)
+    if (
+      uploadResult &&
+      (uploadResult as UploadResult).file &&
+      (uploadResult as UploadResult).newVersionTag
+    )
       setPostFile((oldPostFile) => {
         return {
           ...oldPostFile,
-          fileId: uploadResult.file.fileId,
+          fileId: (uploadResult as UploadResult).file.fileId,
           fileMetadata: {
             ...oldPostFile.fileMetadata,
             appData: {
@@ -185,7 +190,7 @@ export const useArticleComposer = ({
                 ...toPostFile.fileMetadata.appData.content,
               },
             },
-            versionTag: uploadResult.newVersionTag,
+            versionTag: (uploadResult as UploadResult).newVersionTag,
           },
         };
       });

@@ -14,6 +14,7 @@ import {
 } from '@youfoundation/js-lib/core';
 import { useDotYouClient } from '../../auth/useDotYouClient';
 import { getRichTextFromString } from '../../../helpers/richTextHelper';
+import { TransitUploadResult } from '@youfoundation/js-lib/dist/peer/peerData/PeerTypes';
 
 export const usePost = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
@@ -21,48 +22,65 @@ export const usePost = () => {
 
   const savePost = async ({
     postFile,
+    odinId,
     channelId,
     mediaFiles,
     onUpdate,
   }: {
     postFile: NewHomebaseFile<PostContent> | HomebaseFile<PostContent>;
+    odinId?: string;
     channelId: string;
     mediaFiles?: (NewMediaFile | MediaFile)[];
     onUpdate?: (progress: number) => void;
   }) => {
-    return new Promise<UploadResult>((resolve, reject) => {
-      const onVersionConflict = async () => {
-        const serverPost = await getPost<PostContent>(
-          dotYouClient,
-          channelId,
-          postFile.fileMetadata.appData.content.id
-        );
-        if (!serverPost) return;
+    return new Promise<TransitUploadResult | UploadResult>((resolve, reject) => {
+      const onVersionConflict = odinId
+        ? undefined
+        : async () => {
+            const serverPost = await getPost<PostContent>(
+              dotYouClient,
+              channelId,
+              postFile.fileMetadata.appData.content.id
+            );
+            if (!serverPost) return;
 
-        const newPost: HomebaseFile<PostContent> = {
-          ...serverPost,
-          fileMetadata: {
-            ...serverPost.fileMetadata,
-            appData: {
-              ...serverPost.fileMetadata.appData,
-              content: {
-                ...serverPost.fileMetadata.appData.content,
-                ...postFile.fileMetadata.appData.content,
+            const newPost: HomebaseFile<PostContent> = {
+              ...serverPost,
+              fileMetadata: {
+                ...serverPost.fileMetadata,
+                appData: {
+                  ...serverPost.fileMetadata.appData,
+                  content: {
+                    ...serverPost.fileMetadata.appData.content,
+                    ...postFile.fileMetadata.appData.content,
+                  },
+                },
               },
-            },
-          },
-        };
-        savePostFile(dotYouClient, newPost, channelId, mediaFiles, onVersionConflict).then(
-          (result) => {
-            if (result) resolve(result);
-          }
-        );
-      };
+            };
+            savePostFile(
+              dotYouClient,
+              newPost,
+              odinId,
+              channelId,
+              mediaFiles,
+              onVersionConflict
+            ).then((result) => {
+              if (result) resolve(result);
+            });
+          };
 
       postFile.fileMetadata.appData.content.captionAsRichText = getRichTextFromString(
         postFile.fileMetadata.appData.content.caption.trim()
       );
-      savePostFile(dotYouClient, postFile, channelId, mediaFiles, onVersionConflict, onUpdate)
+      savePostFile(
+        dotYouClient,
+        postFile,
+        odinId,
+        channelId,
+        mediaFiles,
+        onVersionConflict,
+        onUpdate
+      )
         .then((result) => {
           if (result) resolve(result);
         })
@@ -126,7 +144,8 @@ export const usePost = () => {
                   ...post,
                   fileMetadata: {
                     ...post.fileMetadata,
-                    versionTag: _data.newVersionTag,
+                    versionTag:
+                      (_data as UploadResult).newVersionTag || post.fileMetadata.versionTag,
                   },
                 }
               : post
@@ -148,11 +167,11 @@ export const usePost = () => {
             ...newPost.postFile,
             fileMetadata: {
               ...newPost.postFile.fileMetadata,
+              senderOdinId: newPost.odinId,
               appData: {
                 ...newPost.postFile.fileMetadata.appData,
                 content: {
                   ...newPost.postFile.fileMetadata.appData.content,
-
                   primaryMediaFile: {
                     fileKey: newPost.mediaFiles?.[0].key,
                     type: (newPost.mediaFiles?.[0] as MediaFile)?.contentType,
@@ -236,7 +255,8 @@ export const usePost = () => {
                   ...post,
                   fileMetadata: {
                     ...post.fileMetadata,
-                    versionTag: _data.newVersionTag,
+                    versionTag:
+                      (_data as UploadResult).newVersionTag || post.fileMetadata.versionTag,
                   },
                 }
               : post

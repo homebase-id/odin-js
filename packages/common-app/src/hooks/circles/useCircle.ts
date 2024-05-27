@@ -13,7 +13,7 @@ import {
   addDomainToCircle,
   removeDomainFromCircle,
 } from '@youfoundation/js-lib/network';
-import { useDotYouClient } from '../../..';
+import { useDotYouClient } from '../auth/useDotYouClient';
 
 export const useCircle = ({ circleId }: { circleId?: string }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
