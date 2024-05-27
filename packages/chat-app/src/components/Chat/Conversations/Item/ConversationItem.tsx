@@ -187,8 +187,9 @@ const ConversationBody = ({
           </div>
 
           {unreadCount ? (
-            <div className="ml-auto flex h-5 w-5 flex-shrink-0 flex-row items-center justify-center rounded-full bg-primary text-xs text-primary-contrast">
-              {unreadCount}
+            <div className="ml-auto flex h-7 w-7 flex-shrink-0 flex-row items-center justify-center rounded-full bg-primary text-sm text-primary-contrast">
+              {Math.min(unreadCount, 10)}
+              {unreadCount >= 10 ? '+' : ''}
             </div>
           ) : null}
         </div>

@@ -9,7 +9,7 @@ import { hasDebugFlag, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 const isDebug = hasDebugFlag();
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 150;
 export const usePushNotifications = (props?: { appId?: string }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();

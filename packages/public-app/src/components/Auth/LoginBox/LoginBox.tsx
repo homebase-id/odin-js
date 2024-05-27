@@ -45,6 +45,7 @@ const CentralLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
         <>
           <Helmet>
             <meta name="youauth" content={stringifiedAuthParams} />
+            <link rel="preconnect" href={import.meta.env.VITE_CENTRAL_LOGIN_HOST} />
           </Helmet>
           <iframe
             src={`${

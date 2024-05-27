@@ -122,7 +122,6 @@ const SocialFeedMainContent = () => {
 
                   const post = flattenedPosts[virtualRow.index];
                   const postTeaserCardProps = {
-                    key: post.fileId || post.fileMetadata.appData.content.id,
                     postFile: post,
                     odinId: post.fileMetadata.senderOdinId,
                     className: 'bg-background shadow-sm',
@@ -136,9 +135,15 @@ const SocialFeedMainContent = () => {
                       className="py-2"
                     >
                       {post.fileId ? (
-                        <PostTeaserCard {...postTeaserCardProps} />
+                        <PostTeaserCard
+                          key={post.fileId || post.fileMetadata.appData.content.id}
+                          {...postTeaserCardProps}
+                        />
                       ) : (
-                        <NewPostTeaserCard {...postTeaserCardProps} />
+                        <NewPostTeaserCard
+                          key={post.fileId || post.fileMetadata.appData.content.id}
+                          {...postTeaserCardProps}
+                        />
                       )}
                     </div>
                   );
