@@ -266,7 +266,9 @@ const NotificationGroup = ({
             <NotificationItem
               notification={notification}
               isExpanded={index === 0 || isExpanded}
-              onDismiss={() => remove([notification.id])}
+              onDismiss={() =>
+                isExpanded ? remove([notification.id]) : remove(typeGroup.map((n) => n.id))
+              }
               onOpen={() =>
                 canExpand && !isExpanded
                   ? setExpanded(true)
