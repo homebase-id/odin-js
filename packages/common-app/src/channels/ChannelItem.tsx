@@ -2,7 +2,12 @@ import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation
 import { useState } from 'react';
 
 import { ChannelTemplateSelector } from './ChannelTemplateSelector';
-import { BlogConfig, ChannelDefinition, ChannelTemplate } from '@youfoundation/js-lib/public';
+import {
+  BlogConfig,
+  ChannelTemplate,
+  CollaborativeChannelDefinition,
+  RemoteCollaborativeChannelDefinition,
+} from '@youfoundation/js-lib/public';
 import { slugify, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { ChannelDefinitionVm } from '../hooks/posts/channels/useChannels';
 import { ActionButton } from '../ui/Buttons/ActionButton';
@@ -317,14 +322,51 @@ export const ChannelItem = ({
   );
 };
 
-export const CollaborativeChannelItem = ({
+export const ManageCollaborativeChannelItem = ({
   odinId,
   className,
-  chnl: chnlDsr,
+  chnlLink,
 }: {
   odinId: string;
   className?: string;
-  chnl: HomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
+  chnlLink: HomebaseFile<RemoteCollaborativeChannelDefinition>;
+}) => {
+  const { mutate: removeCollaborativeChannel } = useCollaborativeChannel().remove;
+
+  return (
+    <CollaborativeChannelItem odinId={odinId} className={className} chnlDsr={chnlLink}>
+      {chnlLink.fileId !== '' ? (
+        <ActionGroup
+          options={[
+            {
+              label: t('Delete Link'),
+              icon: Trash,
+              onClick: () => removeCollaborativeChannel(chnlLink),
+            },
+          ]}
+          type="mute"
+        />
+      ) : (
+        <p className="rounded-lg bg-slate-200 px-2 py-1 text-sm dark:bg-slate-600">
+          {t('Auto discovered')}
+        </p>
+      )}
+    </CollaborativeChannelItem>
+  );
+};
+
+export const CollaborativeChannelItem = ({
+  odinId,
+  className,
+  chnlDsr,
+  children,
+}: {
+  odinId: string;
+  className?: string;
+  chnlDsr:
+    | HomebaseFile<CollaborativeChannelDefinition | RemoteCollaborativeChannelDefinition>
+    | NewHomebaseFile<CollaborativeChannelDefinition | RemoteCollaborativeChannelDefinition>;
+  children?: React.ReactNode;
 }) => {
   const chnl = chnlDsr?.fileMetadata.appData.content;
 
@@ -338,7 +380,7 @@ export const CollaborativeChannelItem = ({
         <h2 className="text-lg">
           {chnl.name}{' '}
           {chnlDsr?.serverMetadata?.accessControlList ? (
-            <small className="text-xs">
+            <small className="text-xs mr-1">
               ({<AclSummary acl={chnlDsr?.serverMetadata?.accessControlList} />})
             </small>
           ) : null}
@@ -346,11 +388,12 @@ export const CollaborativeChannelItem = ({
           <small className="text-md block">{chnl.description}</small>
         </h2>
         <span className="ml-auto"></span>
+        {children}
         {chnl?.isCollaborative ? (
           <p title={t('Collaborative')}>
             <Persons className="w-5 h-5" />
           </p>
-        ) : null}{' '}
+        ) : null}
       </div>
     </div>
   );

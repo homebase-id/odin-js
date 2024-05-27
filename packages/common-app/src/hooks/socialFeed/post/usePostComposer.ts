@@ -13,11 +13,12 @@ import {
   EmbeddedPost,
   ReactAccess,
   CollaborativeChannelDefinition,
+  RemoteCollaborativeChannelDefinition,
 } from '@youfoundation/js-lib/public';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { usePost } from './usePost';
-import { useDotYouClient } from '../../../..';
+import { useDotYouClient } from '../../auth/useDotYouClient';
 
 export const usePostComposer = () => {
   const [postState, setPostState] = useState<'uploading' | 'encrypting' | 'error' | undefined>();
@@ -30,16 +31,21 @@ export const usePostComposer = () => {
     caption: string | undefined,
     mediaFiles: NewMediaFile[] | undefined,
     embeddedPost: EmbeddedPost | undefined,
-    channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>,
-    reactAccess: ReactAccess | undefined,
-    overrideAcl: AccessControlList | undefined
+    targetChannel: {
+      channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
+      overrideAcl?: AccessControlList;
+      odinId?: string;
+    },
+    reactAccess: ReactAccess | undefined
   ) => {
     if (!mediaFiles && !caption && !embeddedPost) return;
 
-    if (
-      overrideAcl &&
-      !stringGuidsEqual(channel.fileMetadata.appData.uniqueId, BlogConfig.PublicChannelId)
-    ) {
+    const { channel, overrideAcl, odinId } = targetChannel;
+    const channelId =
+      (channel.fileMetadata.appData.content as RemoteCollaborativeChannelDefinition).uniqueId ||
+      channel.fileMetadata.appData.uniqueId ||
+      BlogConfig.PublicChannelId;
+    if (overrideAcl && !stringGuidsEqual(channelId, BlogConfig.PublicChannelId)) {
       throw new Error('Custom ACLs are only allowed for public channels');
     }
     try {
@@ -57,7 +63,7 @@ export const usePostComposer = () => {
               caption: caption?.trim() || '',
               id: postId,
               slug: postId,
-              channelId: channel.fileMetadata.appData.uniqueId || BlogConfig.PublicChannelId,
+              channelId: channelId,
               reactAccess: reactAccess,
 
               embeddedPost: embeddedPost,
@@ -82,7 +88,8 @@ export const usePostComposer = () => {
 
       await savePostFile({
         postFile: postFile,
-        channelId: channel.fileMetadata.appData.uniqueId as string,
+        odinId: odinId,
+        channelId: channelId,
         mediaFiles: mediaFiles,
         onUpdate: (progress) => setProcessingProgress(progress),
       });

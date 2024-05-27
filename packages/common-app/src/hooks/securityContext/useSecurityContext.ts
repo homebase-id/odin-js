@@ -4,11 +4,11 @@ import {
   getSecurityContext,
   getSecurityContextOverPeer,
 } from '@youfoundation/js-lib/core';
-import { useDotYouClient } from '../../..';
+import { useDotYouClient } from '../auth/useDotYouClient';
 
 export const useSecurityContext = (odinId?: string, isEnabled?: boolean) => {
-  const { getApiType } = useDotYouClient();
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const { getApiType, getDotYouClient } = useDotYouClient();
+  const dotYouClient = getDotYouClient();
 
   const fetch = async (odinId?: string) => {
     if (
