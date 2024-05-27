@@ -364,26 +364,27 @@ const uploadPostHeader = async <T extends PostContent>(
   let runningVersionTag;
   if (!shouldEmbedContent) {
     // Append/update payload
-    runningVersionTag = (
-      await appendDataToFile(
-        dotYouClient,
-        file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
-        {
-          targetFile: {
-            fileId: file.fileId as string,
-            targetDrive: targetDrive,
-          },
-          versionTag: file.fileMetadata.versionTag,
-        },
-        [
+    runningVersionTag =
+      (
+        await appendDataToFile(
+          dotYouClient,
+          file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
           {
-            key: DEFAULT_PAYLOAD_KEY,
-            payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
+            targetFile: {
+              fileId: file.fileId as string,
+              targetDrive: targetDrive,
+            },
+            versionTag: file.fileMetadata.versionTag,
           },
-        ],
-        undefined
-      )
-    ).newVersionTag;
+          [
+            {
+              key: DEFAULT_PAYLOAD_KEY,
+              payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
+            },
+          ],
+          undefined
+        )
+      )?.newVersionTag || runningVersionTag;
   } else if (file.fileMetadata.payloads?.some((p) => p.key === DEFAULT_PAYLOAD_KEY)) {
     // Remove default payload if it was there before
     runningVersionTag = (
@@ -507,15 +508,16 @@ const updatePost = async <T extends PostContent>(
       versionTag: runningVersionTag,
     };
 
-    runningVersionTag = (
-      await appendDataToFile(
-        dotYouClient,
-        header?.fileMetadata.isEncrypted ? header.sharedSecretEncryptedKeyHeader : undefined,
-        appendInstructionSet,
-        payloads,
-        thumbnails
-      )
-    ).newVersionTag;
+    runningVersionTag =
+      (
+        await appendDataToFile(
+          dotYouClient,
+          header?.fileMetadata.isEncrypted ? header.sharedSecretEncryptedKeyHeader : undefined,
+          appendInstructionSet,
+          payloads,
+          thumbnails
+        )
+      )?.newVersionTag || runningVersionTag;
   }
 
   if (file.fileMetadata.appData.content.type !== 'Article') {

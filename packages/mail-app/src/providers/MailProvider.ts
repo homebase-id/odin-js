@@ -235,7 +235,7 @@ export const uploadMail = async (
   uploadMetadata.appData.previewThumbnail =
     previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
-  const uploadResult: AppendResult | UploadResult | null = await (async () => {
+  const uploadResult: AppendResult | UploadResult | void | null = await (async () => {
     if (!distribute && anyExistingFiles && 'sharedSecretEncryptedKeyHeader' in conversation) {
       const headerUploadResult = await uploadHeader(
         dotYouClient,
@@ -244,7 +244,7 @@ export const uploadMail = async (
         uploadMetadata,
         onVersionConflict
       );
-      if (!headerUploadResult) return null;
+      if (!headerUploadResult) return;
       if (payloads.length) {
         const uploadResult = await appendDataToFile(
           dotYouClient,
@@ -260,6 +260,7 @@ export const uploadMail = async (
           thumbnails,
           onVersionConflict
         );
+        if (!uploadResult) return null;
         return { ...uploadResult, file: { fileId: conversation.fileId } };
       } else {
         return headerUploadResult;

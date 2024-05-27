@@ -155,21 +155,22 @@ export const saveProfileAttribute = async (
     }
 
     if (payloads.length) {
-      runningVersionTag = (
-        await appendDataToFile(
-          dotYouClient,
-          keyHeader,
-          {
-            targetFile: {
-              fileId: toSaveAttribute.fileId,
-              targetDrive: targetDrive,
+      runningVersionTag =
+        (
+          await appendDataToFile(
+            dotYouClient,
+            keyHeader,
+            {
+              targetFile: {
+                fileId: toSaveAttribute.fileId,
+                targetDrive: targetDrive,
+              },
+              versionTag: runningVersionTag,
             },
-            versionTag: runningVersionTag,
-          },
-          payloads,
-          thumbnails
-        )
-      ).newVersionTag;
+            payloads,
+            thumbnails
+          )
+        )?.newVersionTag || runningVersionTag;
     }
 
     // Cleanup the default payload if it existed, and we don't need it anymore
