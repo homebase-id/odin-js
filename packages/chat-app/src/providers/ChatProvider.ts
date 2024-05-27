@@ -300,12 +300,12 @@ export const updateChatMessage = async (
     uploadInstructions,
     uploadMetadata,
     async () => {
-      const existinChatMessage = await getChatMessage(
+      const existingChatMessage = await getChatMessage(
         dotYouClient,
         message.fileMetadata.appData.uniqueId as string
       );
-      if (!existinChatMessage) return null;
-      message.fileMetadata.versionTag = existinChatMessage.fileMetadata.versionTag;
+      if (!existingChatMessage) return null;
+      message.fileMetadata.versionTag = existingChatMessage.fileMetadata.versionTag;
       return await updateChatMessage(dotYouClient, message, recipients, keyHeader);
     }
   );
