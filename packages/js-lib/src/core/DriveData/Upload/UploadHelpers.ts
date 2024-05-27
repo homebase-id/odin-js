@@ -155,9 +155,9 @@ export const pureUpload = async (
   dotYouClient: DotYouClient,
   data: FormData,
   systemFileType?: SystemFileType,
-  onVersionConflict?: () => void,
+  onVersionConflict?: () => Promise<void | UploadResult> | void,
   axiosConfig?: AxiosRequestConfig
-) => {
+): Promise<UploadResult | void> => {
   const client = dotYouClient.createAxiosClient({ overrideEncryption: true, systemFileType });
   const url = '/drive/files/upload';
 
@@ -179,8 +179,7 @@ export const pureUpload = async (
         if (!onVersionConflict) {
           console.warn('VersionTagMismatch, to avoid this, add an onVersionConflict handler');
         } else {
-          onVersionConflict();
-          return;
+          return onVersionConflict();
         }
       }
 
@@ -195,9 +194,9 @@ export const pureAppend = async (
   dotYouClient: DotYouClient,
   data: FormData,
   systemFileType?: SystemFileType,
-  onVersionConflict?: () => void,
+  onVersionConflict?: () => Promise<void | AppendResult> | void,
   axiosConfig?: AxiosRequestConfig
-): Promise<AppendResult> => {
+): Promise<AppendResult | void> => {
   const client = dotYouClient.createAxiosClient({
     overrideEncryption: true,
     systemFileType,
@@ -222,8 +221,7 @@ export const pureAppend = async (
         if (!onVersionConflict) {
           console.warn('VersionTagMismatch, to avoid this, add an onVersionConflict handler');
         } else {
-          onVersionConflict();
-          return;
+          return onVersionConflict();
         }
       }
 

@@ -16,6 +16,7 @@ import {
   EncryptedKeyHeader,
   ScheduleOptions,
   SendContents,
+  UploadResult,
 } from '@youfoundation/js-lib/core';
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
 
@@ -239,9 +240,8 @@ export const uploadConversation = async (
 export const updateConversation = async (
   dotYouClient: DotYouClient,
   conversation: HomebaseFile<UnifiedConversation>,
-  distribute = false,
-  onVersionConflict?: () => void
-) => {
+  distribute = false
+): Promise<UploadResult | void> => {
   const identity = dotYouClient.getIdentity();
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
@@ -283,10 +283,15 @@ export const updateConversation = async (
     conversation.sharedSecretEncryptedKeyHeader,
     uploadInstructions,
     uploadMetadata,
-    onVersionConflict ||
-      (() => {
-        // Ignore version conflict; Updates are not critical; (Most likely race condition between multiple clients)
-      })
+    async () => {
+      const existingConversation = await getConversation(
+        dotYouClient,
+        conversation.fileMetadata.appData.uniqueId as string
+      );
+      if (!existingConversation) return;
+      conversation.fileMetadata.versionTag = existingConversation.fileMetadata.versionTag;
+      return updateConversation(dotYouClient, conversation, distribute);
+    }
   );
 };
 

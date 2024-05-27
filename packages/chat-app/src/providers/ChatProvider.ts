@@ -25,6 +25,7 @@ import {
   uploadFile,
   uploadHeader,
   NewMediaFile,
+  UploadResult,
 } from '@youfoundation/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
@@ -255,7 +256,7 @@ export const updateChatMessage = async (
   message: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>,
   recipients: string[],
   keyHeader?: KeyHeader
-) => {
+): Promise<UploadResult | void> => {
   const messageContent = message.fileMetadata.appData.content;
   const distribute = recipients?.length > 0;
 
@@ -298,8 +299,14 @@ export const updateChatMessage = async (
     keyHeader || (message as HomebaseFile<ChatMessage>).sharedSecretEncryptedKeyHeader,
     uploadInstructions,
     uploadMetadata,
-    () => {
-      console.warn('Version conflict: failed to update chat message');
+    async () => {
+      const existingChatMessage = await getChatMessage(
+        dotYouClient,
+        message.fileMetadata.appData.uniqueId as string
+      );
+      if (!existingChatMessage) return null;
+      message.fileMetadata.versionTag = existingChatMessage.fileMetadata.versionTag;
+      return await updateChatMessage(dotYouClient, message, recipients, keyHeader);
     }
   );
 };
