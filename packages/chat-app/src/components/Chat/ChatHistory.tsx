@@ -3,7 +3,7 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
 import { ChatMessage } from '../../providers/ChatProvider';
-import { Conversation } from '../../providers/ConversationProvider';
+import { UnifiedConversation } from '../../providers/ConversationProvider';
 import { ChatMessageItem } from './Detail/ChatMessageItem';
 import { ChatActions } from './Detail/ContextMenu';
 import { useMemo, useRef, useEffect, useLayoutEffect } from 'react';
@@ -20,7 +20,7 @@ export const ChatHistory = ({
   setReplyMsg,
   setIsEmptyChat,
 }: {
-  conversation: HomebaseFile<Conversation> | undefined;
+  conversation: HomebaseFile<UnifiedConversation> | undefined;
   setReplyMsg: (msg: HomebaseFile<ChatMessage>) => void;
   setIsEmptyChat: (isEmpty: boolean) => void;
 }) => {
@@ -32,7 +32,7 @@ export const ChatHistory = ({
       hasNextPage: hasMoreMessages,
       fetchNextPage,
       isFetchingNextPage,
-      isFetchedAfterMount,
+      isFetched,
     },
     delete: { mutate: deleteMessages, error: deleteMessagesError },
   } = useChatMessages({ conversationId: conversation?.fileMetadata?.appData?.uniqueId });
@@ -46,8 +46,9 @@ export const ChatHistory = ({
     ) || [];
 
   useEffect(() => {
-    if (isFetchedAfterMount && (!flattenedMsgs || flattenedMsgs.length === 0)) setIsEmptyChat(true);
-  }, [isFetchedAfterMount, flattenedMsgs]);
+    if (isFetched && (!flattenedMsgs || flattenedMsgs?.filter((msg) => msg.fileId).length === 0))
+      setIsEmptyChat(true);
+  }, [isFetched, flattenedMsgs]);
 
   useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
   const chatActions: ChatActions = {

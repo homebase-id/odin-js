@@ -31,15 +31,17 @@ const DrivePermissionRequestView = ({
         <LoadingBlock className="h-10 flex-grow" />
       ) : (
         <div className="flex flex-col">
-          <p className={`leading-none ${!permissionTree ? 'my-auto' : ''}`}>
-            {drive?.name ?? (
-              <>
-                <span className="font-bold">*</span> {driveGrant.driveMeta?.name}
-              </>
-            )}
-            {!isNew
-              ? `: ${t(getDrivePermissionFromNumber(driveGrant.permissionedDrive.permission))}`
-              : null}
+          <div className={`leading-none ${!permissionTree ? 'my-auto' : ''}`}>
+            <p>
+              {drive?.name ?? (
+                <>
+                  <span className="font-bold">*</span> {driveGrant.driveMeta?.name}
+                </>
+              )}
+              {!isNew
+                ? `: ${t(getDrivePermissionFromNumber(driveGrant.permissionedDrive.permission))}`
+                : null}
+            </p>
 
             {driveGrant.driveMeta?.attributes ? (
               <div className="pt-2">
@@ -53,7 +55,7 @@ const DrivePermissionRequestView = ({
                 </span>
               </div>
             ) : null}
-          </p>
+          </div>
           {permissionTree && <small className="ml-1">{permissionTree}</small>}
         </div>
       )}

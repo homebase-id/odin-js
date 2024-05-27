@@ -26,12 +26,7 @@ import {
   uploadHeader,
   NewMediaFile,
 } from '@youfoundation/js-lib/core';
-import {
-  ChatDrive,
-  Conversation,
-  GroupConversation,
-  SingleConversation,
-} from './ConversationProvider';
+import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { makeGrid } from '@youfoundation/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
@@ -302,7 +297,10 @@ export const updateChatMessage = async (
     dotYouClient,
     keyHeader || (message as HomebaseFile<ChatMessage>).sharedSecretEncryptedKeyHeader,
     uploadInstructions,
-    uploadMetadata
+    uploadMetadata,
+    () => {
+      console.warn('Version conflict: failed to update chat message');
+    }
   );
 };
 
@@ -343,7 +341,7 @@ export interface MarkAsReadRequest {
 
 export const requestMarkAsRead = async (
   dotYouClient: DotYouClient,
-  conversation: HomebaseFile<Conversation>,
+  conversation: HomebaseFile<UnifiedConversation>,
   chatUniqueIds: string[]
 ) => {
   const request: MarkAsReadRequest = {
@@ -352,9 +350,8 @@ export const requestMarkAsRead = async (
   };
 
   const conversationContent = conversation.fileMetadata.appData.content;
-  const recipients = (conversationContent as GroupConversation).recipients || [
-    (conversationContent as SingleConversation).recipient,
-  ];
+  const identity = dotYouClient.getIdentity();
+  const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
   if (!recipients?.filter(Boolean)?.length)
     throw new Error('No recipients found in the conversation');
 
@@ -388,9 +385,10 @@ export const requestMarkAsRead = async (
 //   };
 
 //   const conversationContent = conversation.fileMetadata.appData.content;
-//   const recipients = (conversationContent as GroupConversation).recipients || [
-//     (conversationContent as SingleConversation).recipient,
-//   ];
+//   const identity = dotYouClient.getIdentity();
+//   const recipients = conversationContent.recipients.filter(
+//     (recipient) => recipient !== identity
+//   );
 //   if (!recipients?.filter(Boolean)?.length)
 //     throw new Error('No recipients found in the conversation');
 

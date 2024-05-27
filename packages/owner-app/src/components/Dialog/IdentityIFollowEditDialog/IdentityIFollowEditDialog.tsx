@@ -80,8 +80,6 @@ const IdentityIFollowEditDialog = ({
   const updateFollow = async () => {
     const selectChannels = channelSelection?.length !== socialChannels?.length;
 
-    console.log(selectChannels, channelSelection, identityIFollow);
-
     if (identityIFollow && channelSelection?.length === 0) unfollow({ odinId: odinId });
     else {
       // Check if following already exactly the same channels

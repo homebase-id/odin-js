@@ -172,13 +172,8 @@ const FileDelete = ({
       className={className}
       confirmOptions={{
         title: t('Delete file'),
+        body: t('Are you sure you want to delete this file? This action cannot be undone.'),
         buttonText: t('Delete'),
-        trickQuestion: {
-          question: t(
-            'Are you sure you want to delete this file? This action cannot be undone (type "yes" to confirm)'
-          ),
-          answer: 'yes',
-        },
       }}
     />
   );

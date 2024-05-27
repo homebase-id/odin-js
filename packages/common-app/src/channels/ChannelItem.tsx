@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { ChannelTemplateSelector } from './ChannelTemplateSelector';
 import {
   BlogConfig,
-  ChannelDefinition,
   ChannelTemplate,
   CollaborativeChannelDefinition,
   RemoteCollaborativeChannelDefinition,
@@ -14,6 +13,7 @@ import { ChannelDefinitionVm } from '../hooks/posts/channels/useChannels';
 import { ActionButton } from '../ui/Buttons/ActionButton';
 import { t } from '../helpers/i18n/dictionary';
 import { useChannel } from '../hooks/posts/channels/useChannel';
+import { useCollaborativeChannel } from '../hooks/posts/channels/useCollaborativeChannel';
 import { AclIcon, AclSummary } from '../acl/AclInfo/AclInfo';
 import { Persons } from '../ui/Icons/Persons';
 import { ActionGroup } from '../ui/Buttons/ActionGroup';
@@ -24,7 +24,7 @@ import { Input } from '../form/Input';
 import { Textarea } from '../form/Textarea';
 import { CheckboxToggle } from '../form/CheckboxToggle';
 import { Pencil } from '../ui/Icons/Pencil';
-import { useCollaborativeChannel } from '../hooks';
+import { Alert, Exclamation } from '../ui';
 
 export const ChannelItem = ({
   chnl: chnlDsr,
@@ -44,9 +44,13 @@ export const ChannelItem = ({
   const {
     save: { mutateAsync: saveChannel, status: saveStatus },
     remove: { mutateAsync: removeChannel },
+  } = useChannel({});
+
+  const {
+    validate: { data: validateCollaborativeData },
     convertToCollaborativeChannel: { mutateAsync: convertToCollaborativeChannel },
     convertToPrivateChannel: { mutateAsync: convertToPrivateChannel },
-  } = useChannel({});
+  } = useCollaborativeChannel({ channelId: chnlDsr?.fileMetadata.appData.uniqueId as string });
 
   const chnl = chnlDsr?.fileMetadata.appData.content;
 
@@ -71,10 +75,10 @@ export const ChannelItem = ({
       {isEdit || !chnl ? (
         <>
           {
-            <span className="mb-5 flex flex-row items-center">
+            <span className="gap-2 mb-5 flex flex-row items-center">
               <button
                 title={newAcl.requiredSecurityGroup}
-                className={`mr-2 inline-block`}
+                className={`inline-block`}
                 onClick={() => setIsAclEdit(true)}
               >
                 <AclIcon className="h-5 w-5" acl={newAcl} />
@@ -85,9 +89,14 @@ export const ChannelItem = ({
               </span>
               <span className="ml-auto"></span>
               {chnl?.isCollaborative ? (
-                <p title={t('Collaborative')}>
-                  <Persons className="w-5 h-5" />
-                </p>
+                <>
+                  <p title={t('Invalid configuration')}>
+                    {validateCollaborativeData ? <Exclamation className="w-5 h-5" /> : null}
+                  </p>
+                  <p title={t('Collaborative')}>
+                    <Persons className="w-5 h-5" />
+                  </p>
+                </>
               ) : null}
 
               {chnlDsr &&
@@ -161,98 +170,132 @@ export const ChannelItem = ({
               }}
             />
           ) : (
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
+            <>
+              {validateCollaborativeData ? (
+                <Alert type="warning" title={t('Invalid configuration')} className="mb-4">
+                  <p>
+                    {t(
+                      'The channel is marked as colalborative, but is missing the necessary circle permissions or drive attribute'
+                    )}
+                  </p>
+                  <div className="mt-2 flex flex-row-reverse gap-4">
+                    <ActionButton
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        convertToCollaborativeChannel(chnlDsr as HomebaseFile<ChannelDefinitionVm>);
+                      }}
+                    >
+                      {t('Add permissions')}
+                    </ActionButton>
 
-                if (!e.currentTarget.reportValidity()) return;
+                    <ActionButton
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        convertToPrivateChannel(chnlDsr as HomebaseFile<ChannelDefinitionVm>);
+                      }}
+                      type="secondary"
+                    >
+                      {t('Convert to private channel')}
+                    </ActionButton>
+                  </div>
+                </Alert>
+              ) : null}
 
-                const uploadResult = await saveChannel({
-                  ...chnlDsr,
-                  fileMetadata: {
-                    ...chnlDsr?.fileMetadata,
-                    appData: {
-                      ...chnlDsr?.fileMetadata.appData,
-                      content: {
-                        ...chnlDsr?.fileMetadata.appData.content,
-                        name: newName ?? '',
-                        slug: newSlug ?? '',
-                        description: newDescription ?? '',
-                        showOnHomePage: newShowOnHomePage ?? false,
-                        templateId: newTemplateId ?? ChannelTemplate.ClassicBlog,
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+
+                  if (!e.currentTarget.reportValidity()) return;
+
+                  const uploadResult = await saveChannel({
+                    ...chnlDsr,
+                    fileMetadata: {
+                      ...chnlDsr?.fileMetadata,
+                      appData: {
+                        ...chnlDsr?.fileMetadata.appData,
+                        content: {
+                          ...chnlDsr?.fileMetadata.appData.content,
+                          name: newName ?? '',
+                          slug: newSlug ?? '',
+                          description: newDescription ?? '',
+                          showOnHomePage: newShowOnHomePage ?? false,
+                          templateId: newTemplateId ?? ChannelTemplate.ClassicBlog,
+                        },
                       },
                     },
-                  },
-                  serverMetadata: {
-                    ...chnlDsr?.serverMetadata,
-                    accessControlList: newAcl,
-                  },
-                });
-                if (uploadResult) {
-                  setIsEdit(false);
-                  onClose && onClose();
-                }
-                return false;
-              }}
-              className="flex w-full flex-col"
-            >
-              <div className="mb-5">
-                <Label htmlFor="name">{t('Name')}</Label>
-                <Input
-                  id="name"
-                  defaultValue={chnl?.name}
-                  required={true}
-                  onChange={(e) => {
-                    setNewName(e.target.value);
-                    setNewSlug(slugify(e.target.value));
-                  }}
-                />
-              </div>
-              <div className="mb-5">
-                <Label htmlFor="description">{t('Description')}</Label>
-                <Textarea
-                  id="description"
-                  defaultValue={chnl?.description}
-                  onChange={(e) => setNewDescription(e.target.value)}
-                />
-              </div>
-              <div className="mb-5 flex flex-row items-center gap-5">
-                <Label htmlFor="showOnHomepage" className="mb-0">
-                  {t('Include posts from this channel on your feed')}
-                </Label>
-                <CheckboxToggle
-                  id="showOnHomepage"
-                  defaultChecked={chnl?.showOnHomePage}
-                  onChange={(e) => setNewShowOnHomePage(e.target.checked)}
-                />
-              </div>
-              <div className="mb-5">
-                <Label htmlFor="template">{t('Template')}</Label>
-                <ChannelTemplateSelector
-                  name="templateId"
-                  defaultValue={(chnl?.templateId ?? ChannelTemplate.ClassicBlog) + ''}
-                  onChange={(e) => setNewTemplateId(parseInt(e.target.value))}
-                />
-              </div>
-              <div className="gap-2 flex flex-row-reverse">
-                <ActionButton state={saveStatus}>
-                  {isNew && !chnl ? t('Create Drive & Save') : t('Save')}
-                </ActionButton>
-                <ActionButton
-                  type="secondary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
+                    serverMetadata: {
+                      ...chnlDsr?.serverMetadata,
+                      accessControlList: newAcl,
+                    },
+                  });
+                  if (uploadResult) {
                     setIsEdit(false);
                     onClose && onClose();
-                    return false;
-                  }}
-                >
-                  {t('Cancel')}
-                </ActionButton>
-              </div>
-            </form>
+                  }
+                  return false;
+                }}
+                className="flex w-full flex-col"
+              >
+                <div className="mb-5">
+                  <Label htmlFor="name">{t('Name')}</Label>
+                  <Input
+                    id="name"
+                    defaultValue={chnl?.name}
+                    required={true}
+                    onChange={(e) => {
+                      setNewName(e.target.value);
+                      setNewSlug(slugify(e.target.value));
+                    }}
+                  />
+                </div>
+                <div className="mb-5">
+                  <Label htmlFor="description">{t('Description')}</Label>
+                  <Textarea
+                    id="description"
+                    defaultValue={chnl?.description}
+                    onChange={(e) => setNewDescription(e.target.value)}
+                  />
+                </div>
+                <div className="mb-5 flex flex-row items-center gap-5">
+                  <Label htmlFor="showOnHomepage" className="mb-0">
+                    {t('Include posts from this channel on your feed')}
+                  </Label>
+                  <CheckboxToggle
+                    id="showOnHomepage"
+                    defaultChecked={chnl?.showOnHomePage}
+                    onChange={(e) => setNewShowOnHomePage(e.target.checked)}
+                  />
+                </div>
+                <div className="mb-5">
+                  <Label htmlFor="template">{t('Template')}</Label>
+                  <ChannelTemplateSelector
+                    name="templateId"
+                    defaultValue={(chnl?.templateId ?? ChannelTemplate.ClassicBlog) + ''}
+                    onChange={(e) => setNewTemplateId(parseInt(e.target.value))}
+                  />
+                </div>
+                <div className="gap-2 flex flex-row-reverse">
+                  <ActionButton state={saveStatus}>
+                    {isNew && !chnl ? t('Create Drive & Save') : t('Save')}
+                  </ActionButton>
+                  <ActionButton
+                    type="secondary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      setIsEdit(false);
+                      onClose && onClose();
+                      return false;
+                    }}
+                  >
+                    {t('Cancel')}
+                  </ActionButton>
+                </div>
+              </form>
+            </>
           )}
         </>
       ) : (
@@ -263,9 +306,14 @@ export const ChannelItem = ({
           </h2>
           <span className="ml-auto"></span>
           {chnl?.isCollaborative ? (
-            <p title={t('Collaborative')}>
-              <Persons className="w-5 h-5" />
-            </p>
+            <>
+              <p title={t('Invalid configuration')}>
+                {validateCollaborativeData ? <Exclamation className="w-5 h-5" /> : null}
+              </p>
+              <p title={t('Collaborative')}>
+                <Persons className="w-5 h-5" />
+              </p>
+            </>
           ) : null}
           <ActionButton icon={Pencil} size="square" type="mute"></ActionButton>
         </div>
@@ -286,11 +334,7 @@ export const ManageCollaborativeChannelItem = ({
   const { mutate: removeCollaborativeChannel } = useCollaborativeChannel().remove;
 
   return (
-    <CollaborativeChannelItem
-      odinId={odinId}
-      className={className}
-      chnl={chnlLink.fileMetadata.appData.content}
-    >
+    <CollaborativeChannelItem odinId={odinId} className={className} chnlDsr={chnlLink}>
       {chnlLink.fileId !== '' ? (
         <ActionGroup
           options={[
@@ -314,14 +358,18 @@ export const ManageCollaborativeChannelItem = ({
 export const CollaborativeChannelItem = ({
   odinId,
   className,
-  chnl,
+  chnlDsr,
   children,
 }: {
   odinId: string;
   className?: string;
-  chnl: CollaborativeChannelDefinition | RemoteCollaborativeChannelDefinition;
+  chnlDsr:
+    | HomebaseFile<CollaborativeChannelDefinition | RemoteCollaborativeChannelDefinition>
+    | NewHomebaseFile<CollaborativeChannelDefinition | RemoteCollaborativeChannelDefinition>;
   children?: React.ReactNode;
 }) => {
+  const chnl = chnlDsr?.fileMetadata.appData.content;
+
   return (
     <div
       className={`${
@@ -331,7 +379,11 @@ export const CollaborativeChannelItem = ({
       <div className="flex flex-row items-center gap-2">
         <h2 className="text-lg">
           {chnl.name}{' '}
-          {/* {chnl.acl ? <small className="text-xs">({<AclSummary acl={chnl.acl} />})</small> : null} */}
+          {chnlDsr?.serverMetadata?.accessControlList ? (
+            <small className="text-xs mr-1">
+              ({<AclSummary acl={chnlDsr?.serverMetadata?.accessControlList} />})
+            </small>
+          ) : null}
           <small className="text-xs">({odinId})</small>
           <small className="text-md block">{chnl.description}</small>
         </h2>

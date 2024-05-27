@@ -85,7 +85,16 @@ export const IncomingCollaborativeChannelPage = () => {
           </div>
           <CollaborativeChannelItem
             odinId={incomingChannel.odinId}
-            chnl={incomingChannel}
+            chnlDsr={{
+              fileMetadata: {
+                appData: {
+                  content: incomingChannel,
+                },
+              },
+              serverMetadata: {
+                accessControlList: incomingChannel.acl,
+              },
+            }}
             className="bg-background"
           />
           <div className="mt-4 flex flex-row-reverse gap-2">

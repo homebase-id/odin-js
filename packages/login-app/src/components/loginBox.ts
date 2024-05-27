@@ -155,7 +155,6 @@ export const LoginBox = async (
       });
 
       identitiesToggle.addEventListener('click', (e) => {
-        console.log('toggle');
         e.preventDefault();
         e.stopPropagation();
         selectableWrapper.classList.toggle('show');

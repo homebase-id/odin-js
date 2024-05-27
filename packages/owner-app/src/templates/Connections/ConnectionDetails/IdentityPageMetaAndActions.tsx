@@ -147,8 +147,11 @@ export const IdentityPageMetaAndActions = ({
     });
   }
 
-  const { data: grantStatus } = useConnectionGrantStatus({ odinId }).fetchStatus;
+  const { data: grantStatus, refetch: refetchGrantStatus } = useConnectionGrantStatus({
+    odinId,
+  }).fetchStatus;
   const doDownloadStatusUrl = async () => {
+    await refetchGrantStatus();
     const stringified = jsonStringify64(grantStatus);
     const url = window.URL.createObjectURL(
       new Blob([stringified], { type: 'application/json;charset=utf-8' })

@@ -123,7 +123,7 @@ export const EncryptedMseSource = ({
             ) {
               if (removedCounter < 1) {
                 // We try and make it better.. But we don't support re-adding removed data ATM;
-                console.log('QuotaExceededError', videoRef.current.currentTime / 2);
+                console.warn('QuotaExceededError', videoRef.current.currentTime / 2);
                 removedCounter++;
 
                 sourceBuffer.remove(0, videoRef.current.currentTime / 2);
@@ -162,7 +162,7 @@ export const EncryptedMseSource = ({
         if (videoRef.current?.buffered.length > 1)
           console.warn('Multile buffers have drifted apart, this is not good');
 
-        if (Math.round(currentTime) % 5 === 0) console.log(currentTime, { start, end });
+        if (Math.round(currentTime) % 5 === 0) console.debug(currentTime, { start, end });
         if (currentTime >= start && currentTime <= end) {
           // We are buffered, check if we need to fetch the next segment
           if (currentTime > end * 0.5 && !reachedEnd) {
@@ -185,7 +185,7 @@ export const EncryptedMseSource = ({
               console.error('We got behind, not supported');
               return;
             }
-            console.log('Catching up', {
+            console.warn('Catching up', {
               currentTime,
               durationInSec,
               currentChunk,

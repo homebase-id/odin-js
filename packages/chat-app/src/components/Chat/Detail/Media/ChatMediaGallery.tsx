@@ -115,7 +115,7 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
               fileId={msg.fileId}
               file={payload}
               canDownload={true}
-              className="h-full"
+              className="h-full w-full"
             />
           ) : null}
 

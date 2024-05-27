@@ -327,6 +327,7 @@ const NotificationItem = ({
   return (
     <Toast
       title={title}
+      imgSrc={notification.senderId ? `https://${notification.senderId}/pub/image` : undefined}
       // Keeping the hidden ones short
       body={ellipsisAtMaxChar(body, isExpanded ? 120 : 40)}
       timestamp={notification.created}
@@ -355,7 +356,8 @@ const bodyFormer = (
 ) => {
   const sender = senderName || payload.senderId;
 
-  if (payload.options.unEncryptedMessage) return payload.options.unEncryptedMessage;
+  if (payload.options.unEncryptedMessage)
+    return (payload.options.unEncryptedMessage || '').replaceAll(payload.senderId, sender);
 
   if (payload.options.appId === OWNER_APP_ID) {
     // Based on type, we show different messages

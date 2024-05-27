@@ -1,10 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
-import {
-  Conversation,
-  GroupConversation,
-  SingleConversation,
-} from '../../providers/ConversationProvider';
 import { ChatMessage } from '../../providers/ChatProvider';
 import {
   ChatReaction,
@@ -14,6 +9,7 @@ import {
 } from '../../providers/ChatReactionProvider';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { UnifiedConversation } from '../../providers/ConversationProvider';
 
 export const useChatReaction = (props?: {
   conversationId: string | undefined;
@@ -33,15 +29,14 @@ export const useChatReaction = (props?: {
     message,
     reaction,
   }: {
-    conversation: HomebaseFile<Conversation>;
+    conversation: HomebaseFile<UnifiedConversation>;
     message: HomebaseFile<ChatMessage>;
     reaction: string;
   }) => {
     const conversationId = conversation.fileMetadata.appData.uniqueId as string;
     const conversationContent = conversation.fileMetadata.appData.content;
-    const recipients =
-      (conversationContent as GroupConversation).recipients ||
-      [(conversationContent as SingleConversation).recipient].filter(Boolean);
+    const identity = dotYouClient.getIdentity();
+    const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     const newReaction: NewHomebaseFile<ChatReaction> = {
       fileMetadata: {
@@ -68,14 +63,13 @@ export const useChatReaction = (props?: {
 
     reaction,
   }: {
-    conversation: HomebaseFile<Conversation>;
+    conversation: HomebaseFile<UnifiedConversation>;
     message: HomebaseFile<ChatMessage>;
     reaction: HomebaseFile<ChatReaction>;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
-    const recipients =
-      (conversationContent as GroupConversation).recipients ||
-      [(conversationContent as SingleConversation).recipient].filter(Boolean);
+    const identity = dotYouClient.getIdentity();
+    const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     return await deleteReaction(dotYouClient, reaction, recipients);
   };

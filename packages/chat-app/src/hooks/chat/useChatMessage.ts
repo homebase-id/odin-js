@@ -12,10 +12,8 @@ import { updateChatMessage, uploadChatMessage } from '../../providers/ChatProvid
 
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import {
-  Conversation,
   ConversationWithYourselfId,
-  GroupConversation,
-  SingleConversation,
+  UnifiedConversation,
 } from '../../providers/ConversationProvider';
 
 export const useChatMessage = (props?: { messageId: string | undefined }) => {
@@ -33,16 +31,15 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     files,
     message,
   }: {
-    conversation: HomebaseFile<Conversation>;
+    conversation: HomebaseFile<UnifiedConversation>;
     replyId?: string;
     files?: NewMediaFile[];
     message: string;
   }): Promise<NewHomebaseFile<ChatMessage> | null> => {
     const conversationId = conversation.fileMetadata.appData.uniqueId as string;
     const conversationContent = conversation.fileMetadata.appData.content;
-    const recipients =
-      (conversationContent as GroupConversation).recipients ||
-      [(conversationContent as SingleConversation).recipient].filter(Boolean);
+    const identity = dotYouClient.getIdentity();
+    const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     const newChatId = getNewId();
     const newChat: NewHomebaseFile<ChatMessage> = {
@@ -91,13 +88,11 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     conversation,
   }: {
     updatedChatMessage: HomebaseFile<ChatMessage>;
-    conversation: HomebaseFile<Conversation>;
+    conversation: HomebaseFile<UnifiedConversation>;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
-
-    const recipients =
-      (conversationContent as GroupConversation).recipients ||
-      [(conversationContent as SingleConversation).recipient].filter(Boolean);
+    const identity = dotYouClient.getIdentity();
+    const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     await updateChatMessage(dotYouClient, updatedChatMessage, recipients);
   };

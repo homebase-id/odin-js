@@ -15,14 +15,13 @@ export const DriveStatusDialog = ({
 }) => {
   const target = usePortal('modal-container');
   const {
-    fetchStatus: { data: outboxStatus, isLoading: outboxStatusLoading },
+    fetchStatus: { data: outboxStatus },
   } = useDrive({
     targetDrive: targetDrive,
     fetchOutboxStatus: true,
   });
 
   if (!isOpen) return null;
-  console.log(outboxStatus, outboxStatusLoading);
 
   const dialog = (
     <DialogWrapper title={t('Drive status')} onClose={onClose}>
