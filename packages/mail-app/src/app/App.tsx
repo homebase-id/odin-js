@@ -180,7 +180,13 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
     if (window.location.pathname === AUTH_PATH) return <></>;
 
     console.debug('[NOT AUTHENTICATED]: Redirect to login');
-    return <Navigate to={`${ROOT_PATH}/auth`} />;
+    return (
+      <Navigate
+        to={`${AUTH_PATH}?returnUrl=${encodeURIComponent(
+          window.location.pathname + window.location.search
+        )}`}
+      />
+    );
   }
 
   return <>{children}</>;
