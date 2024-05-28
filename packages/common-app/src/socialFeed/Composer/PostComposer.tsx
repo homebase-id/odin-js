@@ -45,11 +45,13 @@ export const PostComposer = ({
   embeddedPost,
   forcedChannel,
   className,
+  excludeCustom,
 }: {
   onPost?: () => void;
   embeddedPost?: EmbeddedPost;
   forcedChannel?: HomebaseFile<ChannelDefinition>;
   className?: string;
+  excludeCustom?: boolean;
 }) => {
   const { isOwner } = useDotYouClient();
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
@@ -235,6 +237,7 @@ export const PostComposer = ({
                 }));
               }}
               excludeMore={true}
+              excludeCustom={excludeCustom}
               ref={selectRef}
             />
           ) : null}
