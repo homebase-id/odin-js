@@ -154,7 +154,7 @@ const ConversationBody = ({
       return;
     }
     const date = lastMessage?.fileMetadata.created;
-    setOrder && date && setOrder(new Date().getTime() - date);
+    setOrder && date && setOrder(Math.min(new Date().getTime() - date, 2));
   }, [lastMessage]);
 
   return (
