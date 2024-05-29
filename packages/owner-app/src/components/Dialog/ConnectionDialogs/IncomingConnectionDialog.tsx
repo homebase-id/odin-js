@@ -44,7 +44,7 @@ const IncomingConnectionDialog = ({
     acceptRequest: { mutateAsync: acceptPending, status: acceptPendingStatus, error: acceptError },
   } = usePendingConnection({ odinId: senderOdinId });
 
-  const { mutateAsync: follow, error: followError } = useFollowingInfinite({}).follow;
+  const { mutateAsync: follow, error: followError } = useFollowingInfinite().follow;
 
   const checkReturnTo = useFocusedEditing();
 

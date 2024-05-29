@@ -38,7 +38,7 @@ const OutgoingConnectionDialog = ({
     reset: resetConnectionRequest,
     error: actionError,
   } = useConnectionActions().sendConnectionRequest;
-  const { mutateAsync: follow, error: followError } = useFollowingInfinite({}).follow;
+  const { mutateAsync: follow, error: followError } = useFollowingInfinite().follow;
   const checkReturnTo = useFocusedEditing();
 
   const [doubleChecked, setDoubleChecked] = useState(false);

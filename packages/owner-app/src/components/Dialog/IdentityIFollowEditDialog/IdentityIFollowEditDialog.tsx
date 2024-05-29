@@ -41,7 +41,7 @@ const IdentityIFollowEditDialog = ({
     mutateAsync: follow,
     status: followStatus,
     error: followError,
-  } = useFollowingInfinite({}).follow;
+  } = useFollowingInfinite().follow;
   const {
     fetch: { data: identityIFollow, isFetched: identityIFollowLoaded },
     unfollow: { mutateAsync: unfollow, error: unfollowError },
