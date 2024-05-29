@@ -66,8 +66,9 @@ export const PostMeta = ({
     hour: 'numeric',
     minute: 'numeric',
   };
-  const groupPost = authorOdinId !== odinId;
+
   const identity = getIdentity();
+  const groupPost = authorOdinId !== (odinId || identity);
   const isAuthor = authorOdinId === identity;
 
   const isConnected = useIsConnected(odinId).data;
