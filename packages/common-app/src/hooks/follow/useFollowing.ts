@@ -21,8 +21,7 @@ export const useFollowingInfinite = () => {
   };
 
   const createOrUpdateFollowInternal = async (request: FollowRequest) => {
-    const response = await createOrUpdateFollow(dotYouClient, request);
-    return response;
+    return await createOrUpdateFollow(dotYouClient, request);
   };
 
   return {
