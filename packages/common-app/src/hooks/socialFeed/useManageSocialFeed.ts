@@ -11,7 +11,15 @@ export const useManageSocialFeed = (props?: { odinId: string }) => {
   const queryClient = useQueryClient();
 
   const removeFromFeed = async ({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
-    return await deleteFile(dotYouClient, BlogConfig.FeedDrive, postFile.fileId);
+    return await deleteFile(
+      dotYouClient,
+      BlogConfig.FeedDrive,
+      postFile.fileId,
+      undefined,
+      undefined,
+      undefined,
+      true
+    );
   };
 
   const getContentReportUrl = () => {
