@@ -47,6 +47,7 @@ export const getKnownOdinErrorMessages = (error: unknown): string | undefined =>
   if (errorCode === 'notAConnectedIdentity') return t('Not a connected identity');
   if (errorCode === 'notAFollowerIdentity') return t('Not a follower identity');
   if (errorCode === 'identityNotFollowed') return t('Identity not followed');
+  if (errorCode === 'identityAlreadyFollowed') return t('Already following this identity');
 
   // Drive Management Errors
   if (errorCode === 'cannotAllowAnonymousReadsOnOwnerOnlyDrive')

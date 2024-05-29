@@ -6,13 +6,11 @@ const FollowersView = ({ className }: { className?: string }) => {
     data: followers,
     isFetched: followersFetched,
     isLoading: isFollowersLoading,
-  } = useFollowerInfinite({
-    pageSize: 5,
-  });
+  } = useFollowerInfinite();
 
-  const followersList = followers?.pages
-    .flatMap((page) => page?.results)
-    .filter(Boolean) as string[];
+  const followersList = (
+    followers?.pages.flatMap((page) => page?.results).filter(Boolean) as string[]
+  )?.slice(0, 5);
 
   if (followersFetched && !followersList?.length) {
     return null;

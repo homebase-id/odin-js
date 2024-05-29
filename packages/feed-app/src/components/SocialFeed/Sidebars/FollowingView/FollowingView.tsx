@@ -6,13 +6,11 @@ const FollowingView = ({ className }: { className?: string }) => {
     data: following,
     isFetched: followingFetched,
     isLoading: isFollowingLoading,
-  } = useFollowingInfinite({
-    pageSize: 5,
-  }).fetch;
+  } = useFollowingInfinite().fetch;
 
-  const followingList = following?.pages
-    .flatMap((page) => page?.results)
-    .filter(Boolean) as string[];
+  const followingList = (
+    following?.pages.flatMap((page) => page?.results).filter(Boolean) as string[]
+  )?.slice(0, 5);
 
   if (followingFetched && !followingList?.length) {
     return null;

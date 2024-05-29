@@ -57,7 +57,7 @@ const Following = () => {
 
   const {
     fetch: { data: followingPages, isLoading: isFollowingLoading, hasNextPage, fetchNextPage },
-  } = useFollowingInfinite({ pageSize: 10 });
+  } = useFollowingInfinite();
   const following = followingPages?.pages?.flatMap((page) => page?.results);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   useIntersection(
@@ -110,7 +110,7 @@ const Followers = () => {
     isLoading: isFollowersLoading,
     hasNextPage,
     fetchNextPage,
-  } = useFollowerInfinite({ pageSize: 10 });
+  } = useFollowerInfinite();
   const followers = followersPages?.pages?.flatMap((page) => page?.results);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   useIntersection(
