@@ -13,6 +13,8 @@ import {
   SetupProfileDefinition,
 } from '../../provider/setup/SetupProvider';
 import { useStaticFiles } from '@youfoundation/common-app';
+import { getSettings, updateSettings } from '../../provider/system/SettingsProvider';
+import { AUTO_FIX_VERSION } from '../useAutoFixDefaultConfig';
 
 export const FIRST_RUN_TOKEN_STORAGE_KEY = 'first-run-token';
 
@@ -56,6 +58,12 @@ export const useInit = () => {
     // Do a first publish of the static files
     // This is normally a side effect from the useAttribute hook.. TODO: Move to providers instead of the hook
     await publishStaticFiles(undefined);
+
+    const defaultServerSettings = getSettings(dotYouClient);
+    await updateSettings(dotYouClient, {
+      ...defaultServerSettings,
+      lastRunAutoFix: AUTO_FIX_VERSION,
+    });
   };
 
   return {
