@@ -64,7 +64,16 @@ export const createOrUpdateFollow = async (
     .then(() => {
       return true;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch((err) => {
+      if (
+        // TODO: Update with actual erroCode check;
+        err?.response?.data?.errorCode === 'unhandledScenario' &&
+        err?.response?.data?.title === 'You already follow the requested identity'
+      ) {
+        return true;
+      }
+      return dotYouClient.handleErrorResponse(err);
+    });
 };
 
 export const syncFeedHistoryForFollowing = async (

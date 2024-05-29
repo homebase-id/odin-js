@@ -18,7 +18,9 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
   const {
     fetch: { data: contact },
     refresh: { mutate: refresh, status: refreshState, error: refreshError },
-  } = useContact(odinId ? { odinId: odinId, canSave: true } : { id: contactId, canSave: true });
+  } = useContact(odinId ? { odinId: odinId, canSave: false } : { id: contactId, canSave: false });
+  // Disable saving so we can support manual refresh;
+
   const {
     fetch: { data: connectionInfo },
   } = useConnection({ odinId: odinId });
@@ -52,7 +54,7 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
         }
         actions={
           odinId &&
-          contact?.fileMetadata.appData.uniqueId && (
+          contact?.fileId && (
             <ActionButton
               className="text-base"
               state={refreshState}

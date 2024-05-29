@@ -1,4 +1,4 @@
-import { ConnectionName, t } from '@youfoundation/common-app';
+import { ConnectionName, ExtensionThumbnail, t } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { ChatMessage } from '../../../providers/ChatProvider';
@@ -64,16 +64,26 @@ export const EmbeddedMessageMedia = ({
   const firstPayload = msg.fileMetadata.payloads[0];
   if (!firstPayload) return null;
 
+  if (firstPayload.contentType.includes('image/')) {
+    return (
+      <OdinImage
+        dotYouClient={dotYouClient}
+        fileId={msg.fileId}
+        fileKey={firstPayload.key}
+        lastModified={firstPayload.lastModified || msg.fileMetadata.updated}
+        targetDrive={ChatDrive}
+        avoidPayload={true}
+        className={`${className || ''} flex-shrink-0`}
+        fit="cover"
+      />
+    );
+  }
   return (
-    <OdinImage
-      dotYouClient={dotYouClient}
-      fileId={msg.fileId}
-      fileKey={firstPayload.key}
-      lastModified={firstPayload.lastModified || msg.fileMetadata.updated}
-      targetDrive={ChatDrive}
-      avoidPayload={true}
-      className={`${className || ''} flex-shrink-0`}
-      fit="cover"
-    />
+    <div className={`${className || ''} flex flex-shrink-0 items-center justify-center`}>
+      <ExtensionThumbnail
+        contentType={firstPayload.contentType}
+        className="h-10 w-10 text-slate-500 dark:text-slate-400"
+      />
+    </div>
   );
 };

@@ -14,6 +14,7 @@ import {
   MAIL_APP_ID,
   ErrorNotification,
   Times,
+  useRemoveNotifications,
 } from '@youfoundation/common-app';
 import { Bell } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
@@ -31,6 +32,8 @@ interface NotificationClickData {
 
 const Notifications = () => {
   const [params] = useSearchParams();
+
+  useRemoveNotifications({ appId: OWNER_APP_ID });
   const { data: notifications, isFetching: fetchingNotifications } = usePushNotifications().fetch;
 
   const [isDialogOpen, setDialogOpen] = useState(false);

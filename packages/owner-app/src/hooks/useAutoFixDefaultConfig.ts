@@ -16,7 +16,7 @@ import { useSettings } from './settings/useSettings';
 import { DotYouClient } from '@youfoundation/js-lib/core';
 import { autoFixConnections } from '../provider/network/troubleshooting/AutoFixConnectionProvider';
 
-const AUTO_FIX_VERSION = '0.0.1';
+export const AUTO_FIX_VERSION = '0.0.1';
 export const useAutofixDefaultConfig = () => {
   const { add: addError } = useErrors();
 
@@ -36,14 +36,14 @@ export const useAutofixDefaultConfig = () => {
   useEffect(() => {
     if (isRunning.current || !isUiSettingsFetched || !shouldRun) return;
     isRunning.current = true;
-    console.log('[useAutoFixDefaultConfig] Starting');
+    console.log('[useAutoFixDefaultConfig] Starting ', AUTO_FIX_VERSION);
     (async () => {
       try {
         await fixDefaultProfileImage();
         await fixConnections(dotYouClient);
 
         updateUiSetting({ ...uiSettings, lastRunAutoFix: AUTO_FIX_VERSION });
-        console.log('[useAutoFixDefaultConfig] Finished');
+        console.log('[useAutoFixDefaultConfig] Finished ', AUTO_FIX_VERSION);
       } catch (ex) {
         console.error(
           '[useAutoFixDefaultConfig] Failed to run auto fix, will try again next time',

@@ -153,18 +153,19 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
-    if (window.location.pathname === AUTH_PATH) {
-      return <>{children}</>;
-    }
-
-    console.debug('[NOT AUTHENTICATED]: Redirect to login');
+    if (window.location.pathname === AUTH_PATH) return <>{children}</>;
 
     // It can happen that the RootRoute renders when we already are rendering Login, which would cause and endless url of returnUrls; So return early if it is the login already
-    if (window.location.pathname === AUTH_PATH) {
-      return <></>;
-    }
+    if (window.location.pathname === AUTH_PATH) return <></>;
 
-    return <Navigate to={`${ROOT_PATH}/auth`} />;
+    console.debug('[NOT AUTHENTICATED]: Redirect to login');
+    return (
+      <Navigate
+        to={`${AUTH_PATH}?returnUrl=${encodeURIComponent(
+          window.location.pathname + window.location.search
+        )}`}
+      />
+    );
   }
 
   return <>{children}</>;

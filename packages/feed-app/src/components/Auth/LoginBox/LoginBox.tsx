@@ -20,23 +20,20 @@ const useParams = (returnUrl: string) => {
 };
 
 export const LoginBox = () => {
-  const isAutoAuthorize = window.location.pathname.startsWith(ROOT_PATH);
+  const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
+  const { data: authParams, isLoading } = useParams(returnUrl || ROOT_PATH || '/');
 
-  const { data: authParams, isLoading } = useParams(ROOT_PATH || '/');
   const stringifiedAuthParams = authParams && stringifyToQueryParams(authParams);
   const isDarkMode = document.documentElement.classList.contains(IS_DARK_CLASSNAME);
+
+  const isAutoAuthorize = window.location.pathname.startsWith(ROOT_PATH);
 
   useEffect(() => {
     if (isAutoAuthorize && stringifiedAuthParams)
       window.location.href = `https://${window.location.hostname}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
   }, [authParams]);
 
-  if (isLoading || isAutoAuthorize)
-    return (
-      <>
-        <LoadingBlock className="h-[16rem] w-full " />
-      </>
-    );
+  if (isLoading || isAutoAuthorize) return <LoadingBlock className="h-[16rem] w-full " />;
 
   return (
     <>
@@ -59,7 +56,8 @@ export const LoginBox = () => {
 };
 
 export const AutoAuthorize = () => {
-  const { data: authParams } = useParams(ROOT_PATH || '/');
+  const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
+  const { data: authParams } = useParams(returnUrl || ROOT_PATH || '/');
   const stringifiedAuthParams = authParams && stringifyToQueryParams(authParams);
 
   useEffect(() => {
