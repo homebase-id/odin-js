@@ -82,7 +82,13 @@ export const PostDetailCard = ({
                 </>
               )}
 
-              <PostMeta postFile={postFile} channel={channel} odinId={odinId} size="text-sm" />
+              <PostMeta
+                postFile={postFile}
+                channel={channel}
+                odinId={odinId}
+                authorOdinId={post.authorOdinId || odinId}
+                size="text-sm"
+              />
             </>
           )}
         </div>

@@ -68,7 +68,7 @@ export const PostMeta = ({
   };
 
   const identity = getIdentity();
-  const groupPost = authorOdinId !== (odinId || identity);
+  const groupPost = authorOdinId !== (odinId || identity) && (odinId || identity) && authorOdinId;
   const isAuthor = authorOdinId === identity;
 
   const isConnected = useIsConnected(odinId).data;
@@ -194,6 +194,10 @@ const GroupChannelActions = ({
     getReportContentUrl,
   } = useManageSocialFeed(odinId ? { odinId } : undefined);
 
+  if (!window.location.pathname.startsWith('/apps/feed')) {
+    return null;
+  }
+
   const options: (ActionGroupOptionProps | undefined)[] = [
     channelLink
       ? {
@@ -209,7 +213,7 @@ const GroupChannelActions = ({
         removeFromMyFeed({ postFile });
       },
     },
-    isAuthor
+    !isAuthor
       ? {
           icon: Flag,
           label: `${t('Report')}`,

@@ -88,7 +88,11 @@ export const PostTeaser: FC<PostTeaserProps> = ({
                 ) : null}
 
                 {channel && post ? (
-                  <PostMeta postFile={postFile} channel={showChannel ? channel : undefined} />
+                  <PostMeta
+                    postFile={postFile}
+                    channel={showChannel ? channel : undefined}
+                    authorOdinId={post.authorOdinId}
+                  />
                 ) : null}
               </div>
 

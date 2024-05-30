@@ -189,6 +189,7 @@ export const PostImageDetailCard = ({
                       odinId={odinId}
                       channel={channel}
                       postFile={postFile}
+                      authorOdinId={post.authorOdinId || odinId}
                       excludeContextMenu={true}
                     />
                   ) : null}

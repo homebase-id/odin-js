@@ -38,7 +38,13 @@ export const PostTextListItem = ({
                   <AuthorName />
                 </h2>
                 <span className="hidden px-2 leading-4 md:block">·</span>
-                {channel && draft ? <PostMeta postFile={draft} channel={channel} /> : null}
+                {channel && draft ? (
+                  <PostMeta
+                    postFile={draft}
+                    channel={channel}
+                    authorOdinId={draft.fileMetadata.appData.content.authorOdinId}
+                  />
+                ) : null}
               </div>
               <h1 className={`text-foreground mb-1 text-lg text-opacity-80`}>{content.caption}</h1>
               <div className="text-foreground leading-relaxed text-opacity-70">

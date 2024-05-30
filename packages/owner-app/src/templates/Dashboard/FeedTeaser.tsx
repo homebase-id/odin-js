@@ -107,6 +107,7 @@ const PostTeaser = ({
                   postFile={postFile}
                   channel={channel || undefined}
                   odinId={odinId}
+                  authorOdinId={post.authorOdinId || odinId}
                   excludeContextMenu={true}
                 />
               </div>
