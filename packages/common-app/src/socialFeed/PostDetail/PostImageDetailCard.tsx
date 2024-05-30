@@ -1,4 +1,9 @@
-import { ChannelDefinition, PostContent, getChannelDrive } from '@youfoundation/js-lib/public';
+import {
+  ChannelDefinition,
+  GetTargetDriveFromChannelId,
+  PostContent,
+  getChannelDrive,
+} from '@youfoundation/js-lib/public';
 import { useEffect } from 'react';
 import {
   Loader,
@@ -20,6 +25,8 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
+import { getAnonymousDirectImageUrl } from '@youfoundation/js-lib/media';
+import { Helmet } from 'react-helmet-async';
 
 export const PostImageDetailCard = ({
   odinId,
@@ -94,129 +101,142 @@ export const PostImageDetailCard = ({
   const currentMediaFile = mediaFiles?.[currIndex];
 
   return (
-    <div className="relative z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
-      <div className="inset-0 bg-black transition-opacity lg:fixed"></div>
-      <div className="inset-0 z-10 lg:fixed">
-        <div className="flex h-full min-h-screen flex-col lg:flex-row overflow-auto lg:overflow-none">
-          <div
-            className={`relative flex h-[60vh] lg:h-full lg:flex-grow max-h-screen flex-grow-0 overflow-hidden`}
-          >
-            {!post ? (
-              <Loader className="m-auto h-10 w-10 text-white" />
-            ) : currentMediaFile?.contentType.startsWith('image') ? (
-              <Image
-                odinId={odinId}
-                className={`absolute inset-0 flex max-h-[60vh] lg:max-h-full lg:w-full lg:static`}
-                fileId={postFile.fileId}
-                globalTransitId={postFile.fileMetadata.globalTransitId}
-                fileKey={currentMediaFile?.key}
-                targetDrive={getChannelDrive(post.channelId)}
-                lastModified={postFile.fileMetadata.updated}
-                alt="post"
-                fit="contain"
-                previewThumbnail={
-                  mediaFiles?.length === 1
-                    ? postFile.fileMetadata.appData.previewThumbnail
-                    : undefined
-                }
-                probablyEncrypted={postFile.fileMetadata.isEncrypted}
-                key={(postFile.fileId || '') + (currentMediaFile?.key || currIndex)}
-              />
-            ) : currentMediaFile?.contentType.startsWith('video') ? (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Video
+    <>
+      <Helmet>
+        <meta
+          name="og:image"
+          content={getAnonymousDirectImageUrl(
+            window.location.host,
+            GetTargetDriveFromChannelId(channel?.fileMetadata.appData.uniqueId || ''),
+            postFile?.fileId || '',
+            currentMediaFile?.key || ''
+          )}
+        />
+      </Helmet>
+      <div className="relative z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
+        <div className="inset-0 bg-black transition-opacity lg:fixed"></div>
+        <div className="inset-0 z-10 lg:fixed">
+          <div className="flex h-full min-h-screen flex-col lg:flex-row overflow-auto lg:overflow-none">
+            <div
+              className={`relative flex h-[60vh] lg:h-full lg:flex-grow max-h-screen flex-grow-0 overflow-hidden`}
+            >
+              {!post ? (
+                <Loader className="m-auto h-10 w-10 text-white" />
+              ) : currentMediaFile?.contentType.startsWith('image') ? (
+                <Image
+                  odinId={odinId}
+                  className={`absolute inset-0 flex max-h-[60vh] lg:max-h-full lg:w-full lg:static`}
                   fileId={postFile.fileId}
                   globalTransitId={postFile.fileMetadata.globalTransitId}
-                  lastModified={postFile.fileMetadata.updated}
                   fileKey={currentMediaFile?.key}
-                  className={`object-contain max-h-full`}
                   targetDrive={getChannelDrive(post.channelId)}
+                  lastModified={postFile.fileMetadata.updated}
+                  alt="post"
+                  fit="contain"
                   previewThumbnail={
                     mediaFiles?.length === 1
                       ? postFile.fileMetadata.appData.previewThumbnail
                       : undefined
                   }
-                  odinId={odinId}
                   probablyEncrypted={postFile.fileMetadata.isEncrypted}
+                  key={(postFile.fileId || '') + (currentMediaFile?.key || currIndex)}
                 />
-              </div>
-            ) : currentMediaFile ? (
-              <BoringFile
-                odinId={odinId}
-                targetDrive={getChannelDrive(post.channelId)}
-                fileId={postFile.fileId}
-                file={currentMediaFile}
-                canDownload={true}
-              />
-            ) : null}
-            <ActionButton
-              icon={Times}
-              onClick={doClose}
-              className="absolute left-2 top-2 rounded-full p-3 lg:absolute"
-              size="square"
-              type="secondary"
-            />
-            {currIndex !== 0 ? (
-              <ActionButton
-                icon={ArrowLeft}
-                onClick={() => doSlide(-1)}
-                className="absolute left-2 top-[calc(50%-1.25rem)] rounded-full p-3"
-                size="square"
-                type="secondary"
-              />
-            ) : null}
-            {mediaFiles && currIndex !== mediaFiles.length - 1 ? (
-              <ActionButton
-                icon={Arrow}
-                onClick={() => doSlide(1)}
-                className="absolute right-2 top-[calc(50%-1.25rem)] rounded-full p-3"
-                size="square"
-                type="secondary"
-              />
-            ) : null}
-          </div>
-
-          <div className="bg-background flex-shrink-0 lg:max-h-screen flex-grow md:block lg:w-[27rem] lg:flex-grow-0 lg:overflow-auto">
-            <div className="grid grid-flow-col grid-cols-[3rem_auto] gap-3 p-5 pb-0">
-              <AuthorImage odinId={odinId} size="sm" />
-              <div className="flex max-w-lg flex-grow flex-col">
-                <div className="text-foreground mb-2 text-opacity-60">
-                  <h2 className="mr-4">
-                    <AuthorName odinId={odinId} />
-                  </h2>
-                  {post && channel ? (
-                    <PostMeta
-                      odinId={odinId}
-                      channel={channel}
-                      postFile={postFile}
-                      authorOdinId={post.authorOdinId || odinId}
-                      excludeContextMenu={true}
-                    />
-                  ) : null}
+              ) : currentMediaFile?.contentType.startsWith('video') ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Video
+                    fileId={postFile.fileId}
+                    globalTransitId={postFile.fileMetadata.globalTransitId}
+                    lastModified={postFile.fileMetadata.updated}
+                    fileKey={currentMediaFile?.key}
+                    className={`object-contain max-h-full`}
+                    targetDrive={getChannelDrive(post.channelId)}
+                    previewThumbnail={
+                      mediaFiles?.length === 1
+                        ? postFile.fileMetadata.appData.previewThumbnail
+                        : undefined
+                    }
+                    odinId={odinId}
+                    probablyEncrypted={postFile.fileMetadata.isEncrypted}
+                  />
                 </div>
-                <p>{post?.caption}</p>
-              </div>
-            </div>
-            {postFile ? (
-              <PostInteracts
-                authorOdinId={odinId || window.location.hostname}
-                postFile={postFile}
-                defaultExpanded={true}
-                className="p-5"
-                isAuthenticated={isAuthenticated}
-                isOwner={isOwner}
-                login={login}
-                isPublic={
-                  channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-                    SecurityGroupType.Anonymous ||
-                  channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-                    SecurityGroupType.Authenticated
-                }
+              ) : currentMediaFile ? (
+                <BoringFile
+                  odinId={odinId}
+                  targetDrive={getChannelDrive(post.channelId)}
+                  fileId={postFile.fileId}
+                  file={currentMediaFile}
+                  canDownload={true}
+                />
+              ) : null}
+              <ActionButton
+                icon={Times}
+                onClick={doClose}
+                className="absolute left-2 top-2 rounded-full p-3 lg:absolute"
+                size="square"
+                type="secondary"
               />
-            ) : null}
+              {currIndex !== 0 ? (
+                <ActionButton
+                  icon={ArrowLeft}
+                  onClick={() => doSlide(-1)}
+                  className="absolute left-2 top-[calc(50%-1.25rem)] rounded-full p-3"
+                  size="square"
+                  type="secondary"
+                />
+              ) : null}
+              {mediaFiles && currIndex !== mediaFiles.length - 1 ? (
+                <ActionButton
+                  icon={Arrow}
+                  onClick={() => doSlide(1)}
+                  className="absolute right-2 top-[calc(50%-1.25rem)] rounded-full p-3"
+                  size="square"
+                  type="secondary"
+                />
+              ) : null}
+            </div>
+
+            <div className="bg-background flex-shrink-0 lg:max-h-screen flex-grow md:block lg:w-[27rem] lg:flex-grow-0 lg:overflow-auto">
+              <div className="grid grid-flow-col grid-cols-[3rem_auto] gap-3 p-5 pb-0">
+                <AuthorImage odinId={odinId} size="sm" />
+                <div className="flex max-w-lg flex-grow flex-col">
+                  <div className="text-foreground mb-2 text-opacity-60">
+                    <h2 className="mr-4">
+                      <AuthorName odinId={odinId} />
+                    </h2>
+                    {post && channel ? (
+                      <PostMeta
+                        odinId={odinId}
+                        channel={channel}
+                        postFile={postFile}
+                        authorOdinId={post.authorOdinId || odinId}
+                        excludeContextMenu={true}
+                      />
+                    ) : null}
+                  </div>
+                  <p>{post?.caption}</p>
+                </div>
+              </div>
+              {postFile ? (
+                <PostInteracts
+                  authorOdinId={odinId || window.location.hostname}
+                  postFile={postFile}
+                  defaultExpanded={true}
+                  className="p-5"
+                  isAuthenticated={isAuthenticated}
+                  isOwner={isOwner}
+                  login={login}
+                  isPublic={
+                    channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+                      SecurityGroupType.Anonymous ||
+                    channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+                      SecurityGroupType.Authenticated
+                  }
+                />
+              ) : null}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
