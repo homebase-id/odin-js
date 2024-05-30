@@ -9,6 +9,7 @@ import { BuiltInProfiles, MinimalProfileFields } from '../../profile/ProfileData
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';
 import { getProfileAttributes, BuiltInAttributes, Attribute } from '../../profile/profile';
 import { publishProfileCardFile, publishProfileImageFile } from './FileProvider';
+import { fromBlob } from '../../media/media';
 
 export interface ProfileCard {
   name: string;
@@ -102,11 +103,31 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
       payloadIsAnSvg ? undefined : size
     );
     if (imageData) {
-      await publishProfileImageFile(
-        dotYouClient,
-        new Uint8Array(imageData.bytes),
-        imageData.contentType
-      );
+      try {
+        const imageBlobData = new OdinBlob([new Uint8Array(imageData.bytes)], {
+          type: imageData.contentType,
+        });
+        const resizedJpgData = await fromBlob(
+          imageBlobData,
+          100,
+          size.pixelWidth,
+          size.pixelHeight,
+          'jpeg'
+        );
+
+        await publishProfileImageFile(
+          dotYouClient,
+          new Uint8Array(await resizedJpgData.blob.arrayBuffer()),
+          resizedJpgData.blob.type
+        );
+      } catch (ex) {
+        // Fallback to unresized image
+        await publishProfileImageFile(
+          dotYouClient,
+          new Uint8Array(imageData.bytes),
+          imageData.contentType
+        );
+      }
     }
   }
 };
