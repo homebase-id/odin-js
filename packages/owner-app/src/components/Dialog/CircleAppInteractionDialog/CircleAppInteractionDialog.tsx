@@ -164,12 +164,11 @@ const CircleAppInteractionDialog = ({
             </div>
           </div>
 
-          <div className="-m-2 flex flex-row-reverse py-3">
-            <ActionButton className="m-2" state={updateState} icon={Arrow}>
+          <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
+            <ActionButton state={updateState} icon={Arrow}>
               {confirmText || t('Update')}
             </ActionButton>
             <ActionButton
-              className="m-2"
               type="secondary"
               onClick={() => {
                 reset();

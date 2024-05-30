@@ -72,7 +72,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
 
   const widthClasses =
     children && type !== 'mute' && size !== 'square'
-      ? `${className?.indexOf('w-full') !== -1 ? '' : 'w-full sm:w-auto'}`
+      ? `${className && className?.indexOf('w-full') !== -1 ? '' : 'w-full sm:w-auto'}`
       : '';
 
   const sizeClasses =

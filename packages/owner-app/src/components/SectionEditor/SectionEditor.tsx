@@ -58,13 +58,12 @@ const SectionEditor = ({
             <Input id="name" name="name" defaultValue={section.name} onChange={handleChange} />
           </div>
 
-          <div className="-m-2 flex flex-row-reverse">
-            <ActionButton type="primary" className="m-2" state={saveSectionStatus}>
+          <div className="flex flex-col gap-2 sm:flex-row-reverse">
+            <ActionButton type="primary" state={saveSectionStatus}>
               {t('Save')}
             </ActionButton>
             <ActionButton
               type="secondary"
-              className="m-2"
               onClick={(e) => {
                 e.preventDefault();
                 onClose();
@@ -75,7 +74,7 @@ const SectionEditor = ({
             <ActionButton
               type="remove"
               icon={Trash}
-              className="m-2 mr-auto"
+              className="mr-auto"
               state={removeSectionState}
               onClick={() => removeSection({ profileId, profileSection: section })}
               confirmOptions={{

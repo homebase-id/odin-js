@@ -285,7 +285,11 @@ const fetchSingleConversation = async (
     );
   if (conversationFromCache) return conversationFromCache;
 
-  return await getSingleConversation(dotYouClient, conversationId);
+  const conversationFromServer = await getSingleConversation(dotYouClient, conversationId);
+  // Don't cache if the conversation is not found
+  if (!conversationFromServer) throw new Error('Conversation not found');
+
+  return conversationFromServer;
 };
 
 export const getConversationQueryOptions: (

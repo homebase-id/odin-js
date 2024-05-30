@@ -97,9 +97,9 @@ export const EditPostDialog = ({
             setFiles={setNewMediaFiles}
             cols={4}
           />
-          <div className="-m-2 mt-3 flex flex-row-reverse items-center md:flex-nowrap">
+          <div className="gap-2 mt-3 flex flex-col sm:flex-row-reverse ">
             <ActionButton
-              className={`m-2 ${
+              className={`${
                 postFile.fileMetadata.appData.content.caption?.length || newMediaFiles.length
                   ? ''
                   : 'pointer-events-none opacity-20 grayscale'
@@ -110,7 +110,6 @@ export const EditPostDialog = ({
               {t('Save')}
             </ActionButton>
             <ActionButton
-              className={`m-2`}
               type="secondary"
               onClick={(e) => {
                 e.stopPropagation();

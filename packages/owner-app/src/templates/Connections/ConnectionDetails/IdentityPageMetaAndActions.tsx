@@ -13,6 +13,7 @@ import {
   Ellipsis,
   useIdentityIFollow,
   HeartBeat,
+  useErrors,
 } from '@youfoundation/common-app';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
@@ -58,7 +59,7 @@ export const IdentityPageMetaAndActions = ({
     fetch: { data: connectionInfo },
   } = useConnection({ odinId: odinId });
   const {
-    disconnect: { mutate: disconnect, error: disconnectError },
+    disconnect: { mutateAsync: disconnect },
     revokeConnectionRequest: {
       mutate: revokeRequest,
       status: revokeRequestStatus,
@@ -68,9 +69,13 @@ export const IdentityPageMetaAndActions = ({
     unblock: { mutate: unblock, status: unblockStatus, error: unblockError },
   } = useConnectionActions();
 
-  const { data: identityIfollow, isFetched: followStateFetched } = useIdentityIFollow({
+  const {
+    fetch: { data: identityIfollow, isFetched: followStateFetched },
+    unfollow: { mutateAsync: unfollow },
+  } = useIdentityIFollow({
     odinId,
-  }).fetch;
+  });
+
   const isFollowing = !followStateFetched ? undefined : !!identityIfollow;
 
   // Contact data:
@@ -147,8 +152,9 @@ export const IdentityPageMetaAndActions = ({
     });
   }
 
+  const { add: addError } = useErrors();
   const { data: grantStatus, refetch: refetchGrantStatus } = useConnectionGrantStatus({
-    odinId,
+    odinId: isConnected ? odinId : undefined,
   }).fetchStatus;
   const doDownloadStatusUrl = async () => {
     await refetchGrantStatus();
@@ -168,16 +174,54 @@ export const IdentityPageMetaAndActions = ({
     actionGroupOptions.push({
       icon: Trash,
       label: t('Remove'),
-      onClick: () => {
-        disconnect({ connectionOdinId: odinId });
-        navigate('/owner/connections');
-      },
-      confirmOptions: {
+      actionOptions: {
         title: `${t('Remove')} ${odinId}`,
-        buttonText: t('Remove'),
         body: `${t('Are you sure you want to remove')} ${odinId} ${t(
           'from your connections. They will lose all existing access.'
         )}`,
+        options: [
+          isFollowing
+            ? {
+                children: t('Unfollow & Remove'),
+                type: 'primary',
+                onClick: async () => {
+                  try {
+                    await unfollow({ odinId });
+                    await disconnect({ connectionOdinId: odinId });
+                    navigate('/owner/connections');
+                  } catch (e) {
+                    addError(e, t('Failed to remove a connection'));
+                  }
+                },
+              }
+            : undefined,
+          {
+            children: t('Remove'),
+            type: isFollowing ? 'secondary' : 'primary',
+            onClick: async () => {
+              try {
+                await disconnect({ connectionOdinId: odinId });
+                navigate('/owner/connections');
+              } catch (e) {
+                addError(e, t('Failed to remove a connection'));
+              }
+            },
+          },
+          isFollowing
+            ? {
+                children: t('Unfollow'),
+                type: 'secondary',
+                onClick: async () => {
+                  try {
+                    console.log('unfollow');
+                    await unfollow({ odinId });
+                  } catch (e) {
+                    addError(e, t('Failed to remove a connection'));
+                  }
+                },
+              }
+            : undefined,
+        ],
       },
     });
 
@@ -200,7 +244,7 @@ export const IdentityPageMetaAndActions = ({
 
   return (
     <>
-      <ErrorNotification error={disconnectError || revokeError || blockError || unblockError} />
+      <ErrorNotification error={revokeError || blockError || unblockError} />
 
       <PageMeta
         icon={Persons}

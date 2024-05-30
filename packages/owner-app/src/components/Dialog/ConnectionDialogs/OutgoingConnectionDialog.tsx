@@ -163,11 +163,9 @@ const OutgoingConnectionDialog = ({
               <Label>{t('From')}</Label>
               <YourSignature />
 
-              <div className="-m-2 flex flex-row-reverse py-3">
-                <ActionButton className="m-2" icon={Arrow}>
-                  {t('Continue')}
-                </ActionButton>
-                <ActionButton className="m-2" type="secondary" onClick={onCancel}>
+              <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
+                <ActionButton icon={Arrow}>{t('Continue')}</ActionButton>
+                <ActionButton type="secondary" onClick={onCancel}>
                   {t('Cancel')}
                 </ActionButton>
               </div>
@@ -213,12 +211,11 @@ const OutgoingConnectionDialog = ({
                 />
               </div>
 
-              <div className="-m-2 flex flex-row-reverse py-3">
-                <ActionButton className="m-2" state={sendConnectionRequestStatus} icon={Arrow}>
+              <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
+                <ActionButton state={sendConnectionRequestStatus} icon={Arrow}>
                   {t('Send')}
                 </ActionButton>
                 <ActionButton
-                  className="m-2"
                   onClick={(e) => {
                     e.preventDefault();
                     setDoubleChecked(false);
@@ -228,7 +225,7 @@ const OutgoingConnectionDialog = ({
                   {t('Back')}
                 </ActionButton>
                 <ActionButton
-                  className="m-2 sm:mr-auto"
+                  className="sm:mr-auto"
                   type="secondary"
                   onClick={() => {
                     setDoubleChecked(false);
