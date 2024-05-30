@@ -24,7 +24,9 @@ const ConnectionDetails = () => {
     canSave: connectionInfo?.status === 'connected',
   }).fetch;
 
-  const { data: grantStatus } = useConnectionGrantStatus({ odinId }).fetchStatus;
+  const { data: grantStatus } = useConnectionGrantStatus({
+    odinId: connectionInfo?.status === 'connected' ? odinId : undefined,
+  }).fetchStatus;
 
   if (connectionInfoLoading || contactDataLoading) return <LoadingDetailPage />;
   if (!odinId) return <>{t('No matching connection found')}</>;
