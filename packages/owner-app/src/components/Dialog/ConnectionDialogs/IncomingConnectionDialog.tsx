@@ -103,12 +103,12 @@ const IncomingConnectionDialog = ({
               </div>
             </div>
 
-            <div className="-m-2 flex flex-col py-3 sm:flex-row-reverse">
-              <ActionButton className="m-2" icon={Arrow} onClick={() => setDoubleChecked(true)}>
+            <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
+              <ActionButton className="" icon={Arrow} onClick={() => setDoubleChecked(true)}>
                 {t('Continue')}
               </ActionButton>
               <ActionButton
-                className="m-2"
+                className=""
                 type="mute"
                 onClick={() => {
                   checkReturnTo('Canceled');
@@ -118,7 +118,7 @@ const IncomingConnectionDialog = ({
                 {t('Cancel')}
               </ActionButton>
               <ActionButton
-                className="m-2 sm:mr-auto"
+                className=" sm:mr-auto"
                 type="secondary"
                 onClick={() => {
                   checkReturnTo('Ignored');
@@ -185,12 +185,12 @@ const IncomingConnectionDialog = ({
                 />
               </div>
 
-              <div className="-m-2 flex flex-col py-3 sm:flex-row-reverse">
-                <ActionButton className="m-2" icon={Arrow} state={acceptPendingStatus}>
+              <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
+                <ActionButton className="" icon={Arrow} state={acceptPendingStatus}>
                   {confirmText ?? t('Accept')}
                 </ActionButton>
                 <ActionButton
-                  className="m-2"
+                  className=""
                   type="secondary"
                   onClick={() => {
                     setDoubleChecked(false);
