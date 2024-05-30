@@ -4,7 +4,8 @@ import {
   SystemFileType,
   TargetDrive,
 } from '../../../core/DriveData/File/DriveFileTypes';
-import { stringifyToQueryParams, uint8ArrayToBase64 } from '../../../helpers/DataUtil';
+import { uint8ArrayToBase64 } from '../../../helpers/DataUtil';
+import { getAnonymousDirectImageUrl } from '../../../media/MediaProvider';
 import {
   getFileHeaderOverPeerByGlobalTransitId,
   getPayloadBytesOverPeerByGlobalTransitId,
@@ -33,21 +34,16 @@ export const getDecryptedMediaUrlOverPeerByGlobalTransitId = async (
 ): Promise<string> => {
   const { size, systemFileType, fileSizeLimit } = options || {};
 
-  const getDirectImageUrl = async (fileId: string) => {
-    return `https://${odinId}/api/guest/v1/drive/files/${
-      size ? 'thumb' : 'payload'
-    }?${stringifyToQueryParams({
-      alias: targetDrive.alias,
-      type: targetDrive.type,
-      fileId: fileId,
-      ...(size
-        ? { payloadKey: fileKey, width: size.pixelWidth, height: size.pixelHeight }
-        : { key: fileKey }),
-      lastModified: lastModified,
-      xfst: systemFileType || 'Standard',
-      iac: true,
-    })}`;
-  };
+  const getDirectImageUrl = (fileId: string) =>
+    getAnonymousDirectImageUrl(
+      odinId,
+      targetDrive,
+      fileId,
+      fileKey,
+      size,
+      systemFileType,
+      lastModified
+    );
 
   // We try and avoid the payload call as much as possible, so if the payload is probabaly not encrypted,
   //   we first get confirmation from the header and return a direct url if possible
@@ -128,22 +124,16 @@ export const getDecryptedMediaUrlOverPeer = async (
   }
 ): Promise<string> => {
   const { size, systemFileType, fileSizeLimit } = options || {};
-
-  const getDirectImageUrl = async () => {
-    return `https://${odinId}/api/guest/v1/drive/files/${
-      size ? 'thumb' : 'payload'
-    }?${stringifyToQueryParams({
-      alias: targetDrive.alias,
-      type: targetDrive.type,
-      fileId: fileId,
-      ...(size
-        ? { payloadKey: fileKey, width: size.pixelWidth, height: size.pixelHeight }
-        : { key: fileKey }),
-      lastModified: lastModified,
-      xfst: systemFileType || 'Standard',
-      iac: true,
-    })}`;
-  };
+  const getDirectImageUrl = () =>
+    getAnonymousDirectImageUrl(
+      odinId,
+      targetDrive,
+      fileId,
+      fileKey,
+      size,
+      systemFileType,
+      lastModified
+    );
 
   const ss = dotYouClient.getSharedSecret();
 

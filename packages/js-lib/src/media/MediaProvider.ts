@@ -26,26 +26,16 @@ export const getDecryptedMediaUrl = async (
   }
 ): Promise<string> => {
   const { size, systemFileType, fileSizeLimit } = options || {};
-
-  const getDirectImageUrl = async () => {
-    const directUrl = `https://${dotYouClient.getIdentity()}/api/guest/v1/drive/files/${
-      size ? 'thumb' : 'payload'
-    }?${stringifyToQueryParams({
-      alias: targetDrive.alias,
-      type: targetDrive.type,
-      fileId: fileId,
-      ...(size
-        ? { payloadKey: fileKey, width: size.pixelWidth, height: size.pixelHeight }
-        : { key: fileKey }),
-      lastModified: lastModified,
-      xfst: systemFileType || 'Standard',
-      iac: true, // iac is a flag that tells the identity to ignore any auth cookies
-    })}`;
-
-    // if (ss) return await encryptUrl(directUrl, ss);
-
-    return directUrl;
-  };
+  const getDirectImageUrl = () =>
+    getAnonymousDirectImageUrl(
+      dotYouClient.getIdentity(),
+      targetDrive,
+      fileId,
+      fileKey,
+      size,
+      systemFileType,
+      lastModified
+    );
 
   const ss = dotYouClient.getSharedSecret();
 
@@ -92,3 +82,26 @@ export const getDecryptedMediaUrl = async (
     return `data:${data.contentType};base64,${uint8ArrayToBase64(new Uint8Array(data.bytes))}`;
   });
 };
+
+export const getAnonymousDirectImageUrl = (
+  identity: string,
+  targetDrive: TargetDrive,
+  fileId: string,
+  fileKey: string,
+  size?: ImageSize,
+  systemFileType?: SystemFileType,
+  lastModified?: number
+) =>
+  `https://${identity}/api/guest/v1/drive/files/${
+    size ? 'thumb' : 'payload'
+  }?${stringifyToQueryParams({
+    alias: targetDrive.alias,
+    type: targetDrive.type,
+    fileId: fileId,
+    ...(size
+      ? { payloadKey: fileKey, width: size.pixelWidth, height: size.pixelHeight }
+      : { key: fileKey }),
+    lastModified: lastModified,
+    xfst: systemFileType || 'Standard',
+    iac: true, // iac is a flag that tells the identity to ignore any auth cookies
+  })}`;
