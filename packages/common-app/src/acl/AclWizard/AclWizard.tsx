@@ -38,10 +38,9 @@ export const AclWizard = ({
           />
         </div>
       ) : null}
-      <div className="flex flex-row-reverse">
+      <div className="flex gap-2 w-full flex-col sm:flex-row-reverse">
         <ActionButton
           type="primary"
-          className="ml-2"
           isDisabled={
             (currentAcl.requiredSecurityGroup.toLowerCase() ===
               SecurityGroupType.Connected.toLowerCase() &&
@@ -54,7 +53,7 @@ export const AclWizard = ({
           {t('Continue')}
         </ActionButton>
         {onCancel ? (
-          <ActionButton type="secondary" className="ml-2" onClick={onCancel}>
+          <ActionButton type="secondary" onClick={onCancel}>
             {t('Cancel')}
           </ActionButton>
         ) : null}

@@ -27,9 +27,9 @@ const Profiles = () => {
           }
         />
         {isLoading ? (
-          <div className="-m-2 flex">
-            <LoadingBlock className="m-2 h-10 w-1/4" />
-            <LoadingBlock className="m-2 h-10 w-1/4" />
+          <div className="flex gap-2">
+            <LoadingBlock className="h-10 w-1/4" />
+            <LoadingBlock className="h-10 w-1/4" />
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">

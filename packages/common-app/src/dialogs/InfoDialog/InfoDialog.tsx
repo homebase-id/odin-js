@@ -42,10 +42,8 @@ export const InfoDialog = ({
       isSidePanel={false}
     >
       {children}
-      <div className="-m-2 flex flex-row-reverse py-3">
-        <ActionButton className="m-2" onClick={onConfirm}>
-          {confirmText || t('Ok')}
-        </ActionButton>
+      <div className="gap-2 flex flex-row-reverse py-3">
+        <ActionButton onClick={onConfirm}>{confirmText || t('Ok')}</ActionButton>
       </div>
     </DialogWrapper>
   );

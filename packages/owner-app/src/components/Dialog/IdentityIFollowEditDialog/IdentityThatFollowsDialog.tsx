@@ -71,8 +71,8 @@ const IdentityThatFollowsDialog = ({
           );
         })}
       </ul>
-      <div className="-m-2 flex flex-row-reverse py-3">
-        <ActionButton className="m-2" type="secondary" onClick={onConfirm}>
+      <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
+        <ActionButton type="secondary" onClick={onConfirm}>
           {t('Ok')}
         </ActionButton>
       </div>

@@ -142,16 +142,14 @@ const DriveMetadataEditDialog = ({
               />
             </div>
           </div>
-          <div className="-m-2 flex flex-row-reverse py-3">
+          <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
             <ActionButton
-              className="m-2"
               icon={Arrow}
               state={mergeStates(updateAnonymousReadStatus, updateDescriptionStatus)}
             >
               {confirmText || t('Save')}
             </ActionButton>
             <ActionButton
-              className="m-2"
               type="secondary"
               onClick={(e) => {
                 e.preventDefault();

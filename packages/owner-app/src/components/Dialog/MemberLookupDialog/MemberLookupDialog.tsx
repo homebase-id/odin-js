@@ -134,9 +134,8 @@ const MemberLookupDialog = ({
             <></>
           )}
         </div>
-        <div className="-m-2 flex flex-row-reverse py-3">
+        <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
           <ActionButton
-            className="m-2"
             icon={Arrow}
             state={confirmationStatus}
             onClick={() => {
@@ -147,11 +146,11 @@ const MemberLookupDialog = ({
           >
             {confirmText || t('Update Circle')}
           </ActionButton>
-          <ActionButton className="m-2" type="secondary" onClick={onCancel}>
+          <ActionButton type="secondary" onClick={onCancel}>
             {t('Cancel')}
           </ActionButton>
           {toProvideMembers?.length || toRevokeMembers?.length ? (
-            <div className="m-2 my-auto">
+            <div className="my-auto">
               {toProvideMembers?.length
                 ? `${
                     toProvideMembers.length >= 2

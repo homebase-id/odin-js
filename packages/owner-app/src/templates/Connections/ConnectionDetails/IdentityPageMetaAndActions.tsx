@@ -75,7 +75,7 @@ export const IdentityPageMetaAndActions = ({
   } = useIdentityIFollow({
     odinId,
   });
-  console.log('identityIfollow', identityIfollow);
+
   const isFollowing = !followStateFetched ? undefined : !!identityIfollow;
 
   // Contact data:

@@ -57,15 +57,11 @@ export const ImageDialog = ({
           autoSave={false}
         />
 
-        <div className="-m-2 flex flex-row-reverse py-3">
-          <ActionButton
-            className="m-2"
-            onClick={doUploadImage}
-            state={isGettingData ? 'loading' : undefined}
-          >
+        <div className="gap-2 flex flex-col sm:flex-row-reverse py-3">
+          <ActionButton onClick={doUploadImage} state={isGettingData ? 'loading' : undefined}>
             {confirmText ?? 'Add'}
           </ActionButton>
-          <ActionButton className="m-2" type="secondary" onClick={() => onCancel()}>
+          <ActionButton type="secondary" onClick={() => onCancel()}>
             {t('Cancel')}
           </ActionButton>
         </div>

@@ -170,11 +170,9 @@ const InnerCircleSelectionDialog = ({
             excludeSystemCircles={true}
           />
 
-          <div className="-m-2 flex flex-row-reverse py-3">
-            <ActionButton className="m-2" icon={Arrow}>
-              {t('Save')}
-            </ActionButton>
-            <ActionButton className="m-2" type="secondary" onClick={onCancel}>
+          <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
+            <ActionButton icon={Arrow}>{t('Save')}</ActionButton>
+            <ActionButton type="secondary" onClick={onCancel}>
               {t('Cancel')}
             </ActionButton>
           </div>

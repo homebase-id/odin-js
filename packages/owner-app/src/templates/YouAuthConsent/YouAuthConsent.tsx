@@ -123,7 +123,7 @@ const YouAuthConsent = () => {
                 </div>
               ) : null}
 
-              <div className="mt-8 flex flex-row-reverse gap-2">
+              <div className="mt-8 flex flex-col gap-2 sm:flex-row-reverse">
                 {/* TODO: Check if this would be better with a normal XHR request... Having a form is pretty uncommon, and doesn't add anything in terms of security */}
                 <form action="/api/owner/v1/youauth/authorize" method="post" className="contents">
                   <input type="hidden" name="return_url" value={returnUrl} />

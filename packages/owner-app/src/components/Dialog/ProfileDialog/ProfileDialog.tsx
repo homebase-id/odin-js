@@ -87,11 +87,11 @@ const ProfileDialog = ({
             />
           </div>
 
-          <div className="-m-2 flex flex-row-reverse py-3">
-            <ActionButton className="m-2" state={saveProfileDefinitionStatus} icon={Arrow}>
+          <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
+            <ActionButton state={saveProfileDefinitionStatus} icon={Arrow}>
               {confirmText || t('Add Profile')}
             </ActionButton>
-            <ActionButton className="m-2" type="secondary" onClick={onCancel}>
+            <ActionButton type="secondary" onClick={onCancel}>
               {t('Cancel')}
             </ActionButton>
           </div>

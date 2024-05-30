@@ -37,32 +37,28 @@ export const ChannelsDialog = ({
       size="4xlarge"
       keepOpenOnBlur={true}
     >
-      <div className="-m-2">
+      <div className="flex flex-col gap-2">
         {channels?.map((chnl) => (
-          <div className="p-2" key={chnl.fileId}>
-            <ChannelItem chnl={chnl} className="bg-slate-50 dark:bg-slate-900" />
-          </div>
+          <ChannelItem key={chnl.fileId} chnl={chnl} className="bg-slate-50 dark:bg-slate-900" />
         ))}
         {isAddNew ? (
-          <div className="p-2" key={'new'}>
-            <ChannelItem
-              onClose={() => setIsAddNew(false)}
-              className="bg-slate-50 dark:bg-slate-900"
-            />
-          </div>
+          <ChannelItem
+            key={'new'}
+            onClose={() => setIsAddNew(false)}
+            className="bg-slate-50 dark:bg-slate-900"
+          />
         ) : (
-          <div className="p-2" key={'new'}>
-            <div
-              onClick={() => setIsAddNew(true)}
-              className="flex cursor-pointer flex-row items-center rounded-md border border-slate-100 bg-slate-50 px-4 py-4 dark:border-slate-800 dark:bg-slate-900"
-            >
-              <Plus className="mr-2 h-5 w-5" /> {t('Add new')}
-            </div>
+          <div
+            key={'new'}
+            onClick={() => setIsAddNew(true)}
+            className="flex cursor-pointer flex-row items-center rounded-md border border-slate-100 bg-slate-50 px-4 py-4 dark:border-slate-800 dark:bg-slate-900"
+          >
+            <Plus className="mr-2 h-5 w-5" /> {t('Add new')}
           </div>
         )}
       </div>
-      <div className="-m-2 flex flex-row-reverse py-3">
-        <ActionButton className="m-2" onClick={onCancel} type="secondary">
+      <div className="gap-2 flex flex-row-reverse py-3">
+        <ActionButton onClick={onCancel} type="secondary">
           {t('Cancel')}
         </ActionButton>
       </div>

@@ -157,11 +157,9 @@ const ColorThemeSelectorDialog = ({
           onChange={(set) => setCurrValue(set)}
         />
       </ul>
-      <div className="-m-2 flex flex-row-reverse px-4 py-3">
-        <ActionButton className="m-2" onClick={() => onChange(currValue)}>
-          {'Save'}
-        </ActionButton>
-        <ActionButton className="m-2" type="secondary" onClick={() => onCancel()}>
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row-reverse">
+        <ActionButton onClick={() => onChange(currValue)}>{'Save'}</ActionButton>
+        <ActionButton type="secondary" onClick={() => onCancel()}>
           {t('Cancel')}
         </ActionButton>
       </div>

@@ -271,7 +271,7 @@ const AppRegistration = ({
       )}
 
       {needsCircleSelection && !circleSelection ? (
-        <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
+        <div className="flex flex-col gap-2 sm:flex-row-reverse">
           <ActionButton onClick={() => setCircleSelection(true)} type="primary" icon={Arrow}>
             {t('Next')}
           </ActionButton>
@@ -280,7 +280,7 @@ const AppRegistration = ({
           </ActionButton>
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
+        <div className="flex flex-col gap-2 sm:flex-row-reverse">
           <ActionButton
             onClick={doRegisterApp}
             type="primary"
