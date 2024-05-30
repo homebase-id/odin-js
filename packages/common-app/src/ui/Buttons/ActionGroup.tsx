@@ -8,15 +8,27 @@ import { IconProps } from '../Icons/Types';
 import { ActionButtonProps, ActionButton } from './ActionButton';
 import { FakeAnchor } from './FakeAnchor';
 
-export interface ActionGroupOptionProps {
+export interface ActionGroupOptionPropsBase {
   icon?: FC<IconProps>;
   label: string;
   onClick?: React.MouseEventHandler<HTMLElement>;
   href?: string;
-  confirmOptions?: Omit<ConfirmDialogProps, 'onConfirm' | 'onCancel'>;
-  actionOptions?: Omit<OptionDialogProps, 'onCancel'>;
+
   className?: string;
 }
+
+export interface ActionGroupOptionPropsWithConfirmation extends ActionGroupOptionPropsBase {
+  confirmOptions?: Omit<ConfirmDialogProps, 'onConfirm' | 'onCancel'>;
+}
+
+export interface ActionGroupOptionPropsWithOptions extends ActionGroupOptionPropsBase {
+  onClick: undefined;
+  actionOptions?: Omit<OptionDialogProps, 'onCancel'>;
+}
+
+export type ActionGroupOptionProps =
+  | ActionGroupOptionPropsWithConfirmation
+  | ActionGroupOptionPropsWithOptions;
 
 export interface ActionGroupProps extends Omit<ActionButtonProps, 'onClick'> {
   buttonClassName?: string;
@@ -113,10 +125,12 @@ const ActionOption = ({
   label,
   onClick,
   href,
-  confirmOptions, // TODO: ConfirmOptions or ActionOptions
-  actionOptions,
   className,
+  ...props
 }: ActionGroupOptionProps) => {
+  const confirmOptions = 'confirmOptions' in props ? props.confirmOptions : undefined;
+  const actionOptions = 'actionOptions' in props ? props.actionOptions : undefined;
+
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [needsOption, setNeedsOption] = useState(false);
   const [mouseEvent, setMouseEvent] = useState<React.MouseEvent<HTMLElement> | null>();
@@ -172,7 +186,7 @@ const ActionOption = ({
           onCancel={() => setNeedsConfirmation(false)}
         />
       ) : null}
-      {actionOptions && onClick && needsOption ? (
+      {actionOptions && needsOption ? (
         <OptionDialog
           {...actionOptions}
           options={actionOptions.options.filter(Boolean).map((option) => ({
