@@ -172,10 +172,12 @@ export const usePost = () => {
                 ...newPost.postFile.fileMetadata.appData,
                 content: {
                   ...newPost.postFile.fileMetadata.appData.content,
-                  primaryMediaFile: {
-                    fileKey: newPost.mediaFiles?.[0].key,
-                    type: (newPost.mediaFiles?.[0] as MediaFile)?.contentType,
-                  },
+                  primaryMediaFile: newPost.mediaFiles?.[0]
+                    ? {
+                        fileKey: newPost.mediaFiles?.[0].key,
+                        type: (newPost.mediaFiles?.[0] as MediaFile)?.contentType,
+                      }
+                    : undefined,
                 },
               },
             },
