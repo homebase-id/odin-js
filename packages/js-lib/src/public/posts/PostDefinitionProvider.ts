@@ -160,12 +160,6 @@ export const saveChannelDefinition = async (
       overwriteFileId: fileId,
       drive: targetDrive,
     },
-    transitOptions: {
-      useGlobalTransitId: true,
-      recipients: [],
-      schedule: ScheduleOptions.SendLater,
-      sendContents: SendContents.All,
-    },
   };
 
   const payloadJson: string = jsonStringify64({
@@ -180,7 +174,7 @@ export const saveChannelDefinition = async (
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
     versionTag: versionTag,
-    allowDistribution: true,
+    allowDistribution: false,
     appData: {
       uniqueId: definition.fileMetadata.appData.uniqueId,
       tags: [definition.fileMetadata.appData.uniqueId],
