@@ -4,6 +4,7 @@ import {
   TypedConnectionNotification,
   getCommands,
   markCommandComplete,
+  queryBatch,
   queryModified,
 } from '@youfoundation/js-lib/core';
 
@@ -24,6 +25,7 @@ import {
   dsrToMessage,
 } from '../../providers/ChatProvider';
 import {
+  getQueryBatchCursorFromTime,
   getQueryModifiedCursorFromTime,
   hasDebugFlag,
   stringGuidsEqual,
@@ -60,27 +62,43 @@ const useInboxProcessor = (connected?: boolean) => {
 
   const fetchData = async () => {
     const lastProcessedTime = queryClient.getQueryState(['process-inbox'])?.dataUpdatedAt;
-
-    const preProcessCursor = lastProcessedTime
-      ? getQueryModifiedCursorFromTime(lastProcessedTime - MINUTE_IN_MS * 5)
-      : undefined;
+    const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 5;
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
 
-    if (preProcessCursor) {
-      const newData = await queryModified(
+    if (lastProcessedWithBuffer) {
+      const modifiedCursor = getQueryModifiedCursorFromTime(lastProcessedWithBuffer); // Friday, 31 May 2024 09:38:54.678
+      const batchCursor = getQueryBatchCursorFromTime(
+        new Date().getTime(),
+        lastProcessedWithBuffer
+      );
+
+      const newData = await queryBatch(
         dotYouClient,
         {
           targetDrive: ChatDrive,
         },
         {
           maxRecords: BATCH_SIZE,
-          cursor: preProcessCursor,
+          cursorState: batchCursor,
+          includeMetadataHeader: true,
+        }
+      );
+
+      const modifieData = await queryModified(
+        dotYouClient,
+        {
+          targetDrive: ChatDrive,
+        },
+        {
+          maxRecords: BATCH_SIZE,
+          cursor: modifiedCursor,
           excludePreviewThumbnail: false,
           includeHeaderContent: true,
         }
       );
-      const newMessages = newData.searchResults.filter(
+
+      const newMessages = [...newData.searchResults, ...modifieData.searchResults].filter(
         (dsr) => dsr.fileMetadata.appData.fileType === CHAT_MESSAGE_FILE_TYPE
       );
 
