@@ -170,12 +170,14 @@ export const dsrToConversation = async (
           ...dsr.fileMetadata.appData,
           content: {
             ...attrContent,
-            recipients: [
-              ...(attrContent as GroupConversation).recipients.filter(
-                (recipient) => recipient !== identity
-              ),
-              identity,
-            ] || [(attrContent as SingleConversation).recipient, identity],
+            recipients: (attrContent as GroupConversation).recipients
+              ? [
+                  ...(attrContent as GroupConversation).recipients.filter(
+                    (recipient) => recipient !== identity
+                  ),
+                  identity,
+                ]
+              : [(attrContent as SingleConversation).recipient, identity],
           },
         },
       },
