@@ -161,6 +161,7 @@ export const dsrToConversation = async (
     );
     if (!attrContent) return null;
 
+    const identity = dotYouClient.getIdentity();
     const conversation: HomebaseFile<UnifiedConversation> = {
       ...dsr,
       fileMetadata: {
@@ -169,10 +170,12 @@ export const dsrToConversation = async (
           ...dsr.fileMetadata.appData,
           content: {
             ...attrContent,
-            recipients: (attrContent as GroupConversation).recipients || [
-              (attrContent as SingleConversation).recipient,
-              dotYouClient.getIdentity(),
-            ],
+            recipients: [
+              ...(attrContent as GroupConversation).recipients.filter(
+                (recipient) => recipient !== identity
+              ),
+              identity,
+            ] || [(attrContent as SingleConversation).recipient, identity],
           },
         },
       },
