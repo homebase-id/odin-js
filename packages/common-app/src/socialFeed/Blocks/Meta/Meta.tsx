@@ -17,6 +17,7 @@ import {
   Block,
   ActionGroup,
   Link,
+  Persons,
 } from '../../../ui';
 
 interface PostMetaWithPostFileProps {
@@ -107,6 +108,7 @@ export const PostMeta = ({
                 : ''}
             </>
           )}
+          {groupPost ? <Persons className="h-3 w-3" /> : null}
         </a>
       ) : null}
 

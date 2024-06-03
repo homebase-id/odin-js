@@ -12,7 +12,7 @@ export const useIsConnected = (odinId?: string) => {
 
   const getIsConnected = async (odinId: string) => {
     const fullConnectionInfo = queryClient.getQueryData<ConnectionInfo | ConnectionRequest | null>([
-      'connectionInfo',
+      'connection-info',
       odinId,
     ]);
     if (fullConnectionInfo?.status === 'connected') return true;

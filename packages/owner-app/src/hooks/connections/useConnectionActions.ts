@@ -58,7 +58,7 @@ export const useConnectionActions = () => {
       mutationFn: disconnect,
       onSuccess: (data, param) => {
         queryClient.invalidateQueries({ queryKey: ['activeConnections'] });
-        queryClient.invalidateQueries({ queryKey: ['connectionInfo', param.connectionOdinId] });
+        queryClient.invalidateQueries({ queryKey: ['connection-info', param.connectionOdinId] });
       },
       onError: (ex) => {
         console.error(ex);
@@ -92,14 +92,14 @@ export const useConnectionActions = () => {
       },
       onSettled: (data) => {
         queryClient.invalidateQueries({ queryKey: ['sentRequests'] });
-        queryClient.invalidateQueries({ queryKey: ['connectionInfo', data?.targetOdinId] });
+        queryClient.invalidateQueries({ queryKey: ['connection-info', data?.targetOdinId] });
       },
     }),
     revokeConnectionRequest: useMutation({
       mutationFn: revokeConnectionRequest,
       onSuccess: (data, param) => {
         queryClient.invalidateQueries({ queryKey: ['sentRequests'] });
-        queryClient.invalidateQueries({ queryKey: ['connectionInfo', param.targetOdinId] });
+        queryClient.invalidateQueries({ queryKey: ['connection-info', param.targetOdinId] });
       },
       onError: (ex) => {
         console.error(ex);
@@ -110,7 +110,7 @@ export const useConnectionActions = () => {
       onSettled: (_data, _err, odinId) => {
         queryClient.invalidateQueries({ queryKey: ['pendingConnections'] });
         queryClient.invalidateQueries({ queryKey: ['activeConnections'] });
-        queryClient.invalidateQueries({ queryKey: ['connectionInfo', odinId] });
+        queryClient.invalidateQueries({ queryKey: ['connection-info', odinId] });
       },
     }),
     unblock: useMutation({
@@ -118,7 +118,7 @@ export const useConnectionActions = () => {
       onSettled: (_data, _err, odinId) => {
         queryClient.invalidateQueries({ queryKey: ['pendingConnections'] });
         queryClient.invalidateQueries({ queryKey: ['activeConnections'] });
-        queryClient.invalidateQueries({ queryKey: ['connectionInfo', odinId] });
+        queryClient.invalidateQueries({ queryKey: ['connection-info', odinId] });
       },
     }),
   };

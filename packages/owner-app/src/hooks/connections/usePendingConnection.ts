@@ -81,7 +81,7 @@ export const usePendingConnection = ({ odinId }: { odinId?: string }) => {
         queryClient.invalidateQueries({ queryKey: ['pendingConnections'] });
         queryClient.invalidateQueries({ queryKey: ['pendingConnection', data?.senderOdinId] });
         queryClient.invalidateQueries({ queryKey: ['activeConnections'] });
-        queryClient.invalidateQueries({ queryKey: ['connectionInfo', data?.senderOdinId] });
+        queryClient.invalidateQueries({ queryKey: ['connection-info', data?.senderOdinId] });
       },
     }),
     ignoreRequest: useMutation({
@@ -89,7 +89,7 @@ export const usePendingConnection = ({ odinId }: { odinId?: string }) => {
       onSuccess: (data, param) => {
         queryClient.invalidateQueries({ queryKey: ['pendingConnections'] });
         queryClient.invalidateQueries({ queryKey: ['pendingConnection', param.senderOdinId] });
-        queryClient.invalidateQueries({ queryKey: ['connectionInfo', param.senderOdinId] });
+        queryClient.invalidateQueries({ queryKey: ['connection-info', param.senderOdinId] });
       },
       onError: (ex) => {
         console.error(ex);
