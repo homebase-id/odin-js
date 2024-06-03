@@ -194,4 +194,5 @@ export interface NewAppFileMetaData<T = string> extends Partial<AppFileMetaData<
 
 export interface NewPayloadDescriptor extends Partial<PayloadDescriptor> {
   pendingFile?: File | Blob;
+  uploadProgress?: { phase?: string; progress?: number };
 }
