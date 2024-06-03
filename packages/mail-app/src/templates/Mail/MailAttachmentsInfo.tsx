@@ -19,7 +19,7 @@ import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext'
 import { OdinPreviewImage } from '@youfoundation/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ROOT_PATH } from '../../app/App';
-import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app/src/helpers/timeago/format';
+import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
 
 export const MailAttachmentsInfo = ({
   mailThread,

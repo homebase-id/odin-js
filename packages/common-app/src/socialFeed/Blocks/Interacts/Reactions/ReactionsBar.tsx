@@ -140,6 +140,7 @@ export const ReactionsBar = ({
           setIsCustomOpen(false);
           onMouseLeave?.();
         }}
+        onClick={(e) => e.stopPropagation()}
       >
         {defaultValue?.length ? (
           defaultValue.map((emoji) => (

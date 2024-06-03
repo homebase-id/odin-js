@@ -263,7 +263,7 @@ const FullCustomOption = ({
       <ColorSelectorRow
         row={customSet.light}
         isChecked={isChecked}
-        className="w-full bg-slate-100 px-4"
+        className="w-full bg-slate-100 px-4 text-slate-800"
         onChange={(colorRow) => onChange({ ...customSet, light: { ...colorRow } })}
       />
       <ColorSelectorRow
@@ -344,7 +344,7 @@ const SingleColorSelection = ({
         {isChecked && (
           <input
             type={'text'}
-            className="w-full flex-grow p-1 px-2 py-1 uppercase text-black"
+            className="w-full flex-grow p-1 px-2 py-1 uppercase text-black dark:text-white"
             defaultValue={defaultVal}
             onChange={(e) => {
               const rgb = convertHexToRgb(e.target.value);

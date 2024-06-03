@@ -28,7 +28,7 @@ export const ChatReactionComposer = ({
   useOutsideTrigger(wrapperRef, () => setIsReact(false));
 
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const { verticalSpace } = useMostSpace(buttonRef, isReact);
+  const { verticalSpace, horizontalSpace } = useMostSpace(buttonRef, isReact);
 
   const { mutate: addReaction } = useChatReaction().add;
   const { mutate: removeReaction } = useChatReaction().remove;
@@ -44,32 +44,37 @@ export const ChatReactionComposer = ({
 
   return (
     <div
-      className={`mx-1 my-auto cursor-pointer opacity-0 transition-opacity duration-300 group-hover:opacity-100 md:relative ${
+      className={`mx-1 my-auto cursor-pointer opacity-0 transition-opacity duration-300 group-hover:opacity-100 xl:relative ${
         isReact ? 'opacity-100' : ''
       }`}
       ref={wrapperRef}
     >
       {isReact ? (
-        <ReactionsBar
-          className={`absolute ${
-            verticalSpace === 'top' ? 'md:bottom-8' : 'md:top-8'
-          } ${messageFromMe ? 'right-0' : 'left-0'} z-20`}
-          emojis={['👍️', '❤️', '😂', '😮', '😥']}
-          defaultValue={
-            myReactions?.map((reaction) => reaction.fileMetadata.appData.content.message) || []
-          }
-          doLike={(emoji) => {
-            addReaction({ conversation, message: msg, reaction: emoji });
-            setIsReact(false);
-          }}
-          doUnlike={(emoji) => {
-            const dsr = myReactions?.find(
-              (reaction) => reaction.fileMetadata.appData.content.message === emoji
-            );
-            if (dsr) removeReaction({ conversation, message: msg, reaction: dsr });
-            setIsReact(false);
-          }}
-        />
+        <div
+          className="absolute inset-0 flex items-center justify-center xl:contents"
+          onClick={() => setIsReact(false)}
+        >
+          <ReactionsBar
+            className={`xl:absolute ${
+              verticalSpace === 'top' ? 'xl:bottom-8' : 'xl:top-8'
+            } ${horizontalSpace === 'left' ? 'right-0' : 'left-0'} z-20`}
+            emojis={['👍️', '❤️', '😂', '😮', '😥']}
+            defaultValue={
+              myReactions?.map((reaction) => reaction.fileMetadata.appData.content.message) || []
+            }
+            doLike={(emoji) => {
+              addReaction({ conversation, message: msg, reaction: emoji });
+              setIsReact(false);
+            }}
+            doUnlike={(emoji) => {
+              const dsr = myReactions?.find(
+                (reaction) => reaction.fileMetadata.appData.content.message === emoji
+              );
+              if (dsr) removeReaction({ conversation, message: msg, reaction: dsr });
+              setIsReact(false);
+            }}
+          />
+        </div>
       ) : null}
       <button
         className={`cursor-pointer text-slate-400 hover:text-black dark:text-slate-600 dark:hover:text-white ${

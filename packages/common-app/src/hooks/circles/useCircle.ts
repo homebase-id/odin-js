@@ -185,7 +185,8 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
         queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] });
         await Promise.all(
           param.odinIds.map(async (odinId) => {
-            return await queryClient.invalidateQueries({ queryKey: ['connectionInfo', odinId] });
+            await queryClient.invalidateQueries({ queryKey: ['connection-info', odinId] });
+            await queryClient.invalidateQueries({ queryKey: ['connection-grant-status', odinId] });
           })
         );
       },
@@ -202,7 +203,7 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
         queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] });
         await Promise.all(
           param.domains.map(async (domain) => {
-            return await queryClient.invalidateQueries({ queryKey: ['domainInfo', domain] });
+            await queryClient.invalidateQueries({ queryKey: ['domainInfo', domain] });
           })
         );
       },
@@ -219,7 +220,7 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
         queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] });
         await Promise.all(
           param.odinIds.map(async (odinId) => {
-            return await queryClient.invalidateQueries({ queryKey: ['connectionInfo', odinId] });
+            await queryClient.invalidateQueries({ queryKey: ['connection-info', odinId] });
           })
         );
       },
@@ -234,7 +235,8 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
         queryClient.invalidateQueries({ queryKey: ['circles'] });
         queryClient.invalidateQueries({ queryKey: ['circle', circleId] });
         queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] });
-        queryClient.invalidateQueries({ queryKey: ['connectionInfo', param.odinId] });
+        queryClient.invalidateQueries({ queryKey: ['connection-info', param.odinId] });
+        queryClient.invalidateQueries({ queryKey: ['connection-grant-status', param.odinId] });
       },
       onError: (ex) => {
         console.error(ex);
@@ -247,7 +249,7 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
         queryClient.invalidateQueries({ queryKey: ['circles'] });
         queryClient.invalidateQueries({ queryKey: ['circle', circleId] });
         queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] });
-        queryClient.invalidateQueries({ queryKey: ['connectionInfo', param.odinId] });
+        queryClient.invalidateQueries({ queryKey: ['connection-info', param.odinId] });
       },
       onError: (ex) => {
         console.error(ex);

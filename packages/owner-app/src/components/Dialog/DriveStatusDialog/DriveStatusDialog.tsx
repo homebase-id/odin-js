@@ -2,7 +2,7 @@ import { usePortal, DialogWrapper, ActionButton, Arrow, t } from '@youfoundation
 import { TargetDrive } from '@youfoundation/js-lib/core';
 import { createPortal } from 'react-dom';
 import { useDrive } from '../../../hooks/drives/useDrive';
-import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app/src/helpers/timeago/format';
+import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
 
 export const DriveStatusDialog = ({
   targetDrive,
