@@ -14,7 +14,7 @@ import { MailDrive } from '../../providers/MailProvider';
 import { useMailAttachment, useMailConversation } from '../../hooks/mail/useMailConversation';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { OdinImage } from '@youfoundation/ui-lib';
-import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app/src/helpers/timeago/format';
+import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
 import { bytesToSize } from '../../templates/Mail/MailAttachmentsInfo';
 
 export const MailAttachmentPreview = ({

@@ -11,7 +11,7 @@ import {
 } from '@youfoundation/common-app';
 import { InnerDeliveryIndicator } from './ChatDeliveryIndicator';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
-import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app/src/helpers/timeago/format';
+import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
 import { UnifiedConversation } from '../../../providers/ConversationProvider';
 
 export const ChatMessageInfo = ({

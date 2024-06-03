@@ -1,1 +1,5 @@
-export { formatToTimeAgo, formatToTimeAgoWithRelativeDetail } from './format';
+export {
+  formatToTimeAgo,
+  formatToTimeAgoWithRelativeDetail,
+  formatDateExludingYearIfCurrent,
+} from './format';

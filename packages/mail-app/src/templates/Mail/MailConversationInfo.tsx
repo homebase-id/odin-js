@@ -9,7 +9,7 @@ import {
   usePortal,
 } from '@youfoundation/common-app';
 import { MailConversation, MailDeliveryStatus } from '../../providers/MailProvider';
-import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app/src/helpers/timeago/format';
+import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
 
 const dateTimeFormat: Intl.DateTimeFormatOptions = {
   month: 'short',

@@ -14,7 +14,7 @@ import {
 } from '@youfoundation/js-lib/core';
 import { BlogConfig, ReactionConfig } from '@youfoundation/js-lib/public';
 import { ContactConfig } from '@youfoundation/js-lib/network';
-import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app/src/helpers/timeago/format';
+import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
 
 export const FileCard = ({
   targetDrive,
