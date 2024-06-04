@@ -35,9 +35,7 @@ export const useBlog = ({ channelSlug, channelId, blogSlug }: useBlogProps = {})
   };
 
   const fetchBlog = async ({ blogSlug }: useBlogProps) => {
-    if (!channel || !blogSlug) {
-      return;
-    }
+    if (!channel || !blogSlug) return null;
 
     const cachedBlogs = getCachedBlogs(channel.fileMetadata.appData.uniqueId);
     if (cachedBlogs) {
