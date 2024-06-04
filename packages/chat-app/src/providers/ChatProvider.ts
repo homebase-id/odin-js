@@ -82,6 +82,7 @@ export const getChatMessages = async (
     maxRecords: pageSize,
     cursorState: cursorState,
     includeMetadataHeader: true,
+    includeTransferHistory: true,
   };
 
   const response = await queryBatch(dotYouClient, params, ro);

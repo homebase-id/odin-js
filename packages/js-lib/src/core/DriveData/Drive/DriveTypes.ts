@@ -41,6 +41,7 @@ export interface QueryParams {
 
   //specifies if the HomebaseFile.content field should be parsed as JSON
   includeMetadataHeader?: boolean;
+  includeTransferHistory?: boolean;
   pageNumber: number;
   pageSize: number;
 }
@@ -73,6 +74,7 @@ export interface GetBatchQueryResultOptions {
   cursorState?: string | undefined;
   maxRecords: number;
   includeMetadataHeader?: boolean;
+  includeTransferHistory?: boolean;
   sorting?: 'fileId' | 'userDate'; // default is 'fileId'
   ordering?: 'default' | 'newestFirst' | 'oldestFirst'; // default is 'default'
 }
