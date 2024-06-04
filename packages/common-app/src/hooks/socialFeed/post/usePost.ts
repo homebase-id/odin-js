@@ -72,6 +72,7 @@ export const usePost = () => {
       postFile.fileMetadata.appData.content.captionAsRichText = getRichTextFromString(
         postFile.fileMetadata.appData.content.caption.trim()
       );
+
       savePostFile(
         dotYouClient,
         postFile,
@@ -106,9 +107,10 @@ export const usePost = () => {
         if (variables.postFile.fileMetadata.appData.content.slug) {
           queryClient.invalidateQueries({
             queryKey: ['blog', variables.postFile.fileMetadata.appData.content.slug],
+            exact: false,
           });
         } else {
-          queryClient.invalidateQueries({ queryKey: ['blog'] });
+          queryClient.invalidateQueries({ queryKey: ['blog'], exact: false });
         }
 
         // Too many invalidates, but during article creation, the slug is not known
@@ -124,10 +126,12 @@ export const usePost = () => {
         });
 
         queryClient.invalidateQueries({
-          queryKey: ['blogs', variables.postFile.fileMetadata.appData.content.channelId || '', ''],
+          queryKey: ['blogs', variables.postFile.fileMetadata.appData.content.channelId || ''],
+          exact: false,
         });
         queryClient.invalidateQueries({
-          queryKey: ['blogs', '', ''],
+          queryKey: ['blogs', ''],
+          exact: false,
         });
 
         // Update versionTag of post in social feeds cache
@@ -237,10 +241,12 @@ export const usePost = () => {
         });
 
         queryClient.invalidateQueries({
-          queryKey: ['blogs', variables.postFile.fileMetadata.appData.content.channelId || '', ''],
+          queryKey: ['blogs', variables.postFile.fileMetadata.appData.content.channelId || ''],
+          exact: false,
         });
         queryClient.invalidateQueries({
-          queryKey: ['blogs', '', ''],
+          queryKey: ['blogs', ''],
+          exact: false,
         });
 
         // Update versionTag of post in social feeds cache
@@ -288,10 +294,15 @@ export const usePost = () => {
         }
 
         queryClient.invalidateQueries({
-          queryKey: ['blogs', variables.postFile.fileMetadata.appData.content.channelId || '', ''],
+          queryKey: ['blogs', variables.postFile.fileMetadata.appData.content.channelId || ''],
+          exact: false,
         });
         queryClient.invalidateQueries({
-          queryKey: ['blogs', '', ''],
+          queryKey: ['blogs', ''],
+          exact: false,
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['drafts'],
         });
       },
     }),

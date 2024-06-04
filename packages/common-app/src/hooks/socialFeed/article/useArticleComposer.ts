@@ -18,7 +18,7 @@ export const EMPTY_POST: Article = {
   channelId: BlogConfig.PublicChannelId,
   slug: '',
   type: 'Article',
-  caption: '',
+  caption: 'Untitled',
   body: '',
   abstract: '',
 };
@@ -33,7 +33,7 @@ export const useArticleComposer = ({
   caption?: string;
 }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
-  const { data: serverData } = useBlog({
+  const { data: serverData, isPending: isLoadingServerData } = useBlog({
     channelSlug: channelKey,
     channelId: channelKey,
     blogSlug: postKey,
@@ -41,12 +41,7 @@ export const useArticleComposer = ({
 
   const {
     save: { mutateAsync: savePost, error: savePostError, status: savePostStatus },
-    remove: {
-      mutateAsync: removePost,
-      error: removePostError,
-      status: removePostStatus,
-      reset: resetRemovePostStatus,
-    },
+    remove: { mutateAsync: removePost, error: removePostError, status: removePostStatus },
   } = usePost();
 
   const [postFile, setPostFile] = useState<NewHomebaseFile<Article> | HomebaseFile<Article>>({
@@ -86,7 +81,7 @@ export const useArticleComposer = ({
       : BlogConfig.PublicChannelNewDsr
   );
 
-  // Update state when server data changes
+  // Update state when server data is fetched
   useEffect(() => {
     if (serverData && serverData.activeBlog && (!postFile.fileId || savePostStatus === 'success')) {
       setPostFile({
@@ -114,7 +109,7 @@ export const useArticleComposer = ({
 
   const isPublished = postFile.fileMetadata.appData.fileType !== BlogConfig.DraftPostFileType;
 
-  const isValidPost = (postFile: HomebaseFile<Article> | NewHomebaseFile<Article>) => {
+  const isInvalidPost = (postFile: HomebaseFile<Article> | NewHomebaseFile<Article>) => {
     const postContent = postFile.fileMetadata.appData.content;
     return (
       !postContent.caption?.length &&
@@ -133,11 +128,11 @@ export const useArticleComposer = ({
     explicitTargetChannel?: NewHomebaseFile<ChannelDefinition>,
     redirectOnPublish?: boolean
   ) => {
-    // Check if fully empty and if so don't save
-    if (isValidPost(dirtyPostFile)) return;
-
     const isPublish = action === 'publish';
     const isUnpublish = action === 'draft';
+
+    // Check if fully empty and if so don't save
+    if (isPublish && isInvalidPost(dirtyPostFile)) return;
 
     const targetChannel = explicitTargetChannel || channel;
 
@@ -185,6 +180,7 @@ export const useArticleComposer = ({
             ...oldPostFile.fileMetadata,
             appData: {
               ...oldPostFile.fileMetadata.appData,
+              fileType: toPostFile.fileMetadata.appData.fileType,
               content: {
                 // These got updated during saving
                 ...toPostFile.fileMetadata.appData.content,
@@ -192,6 +188,8 @@ export const useArticleComposer = ({
             },
             versionTag: (uploadResult as UploadResult).newVersionTag,
           },
+          // We force set the keyHeader as it's returned from the server, and needed for fast saves afterwards
+          sharedSecretEncryptedKeyHeader: (uploadResult as UploadResult).keyHeader as any,
         };
       });
 
@@ -217,34 +215,15 @@ export const useArticleComposer = ({
     });
   };
 
-  const movePost = async (newChannelDefinition: NewHomebaseFile<ChannelDefinition>) => {
-    setChannel(newChannelDefinition);
-
-    // Clear fileId and contentId (as they can clash with what exists, or cause a fail to overwrite during upload)
-    const dataToMove: NewHomebaseFile<Article> = {
-      ...postFile,
-    };
-    dataToMove.fileId = undefined;
-    dataToMove.fileMetadata.appData.content.id = getNewId();
-
-    // Files needs to get removed and saved again
-    await doRemovePost();
-    resetRemovePostStatus();
-
-    setPostFile(dataToMove);
-    doSave(dataToMove, 'save', newChannelDefinition);
-  };
-
   return {
     // Actions
     doSave,
     doRemovePost,
-    movePost,
 
     // Data
     channel,
     postFile,
-    isValidPost,
+    isInvalidPost,
     isPublished,
     files,
 
@@ -259,5 +238,7 @@ export const useArticleComposer = ({
 
     // Errors
     error: savePostError || removePostError,
+
+    isLoadingServerData: isLoadingServerData && !!postKey && !!channelKey,
   };
 };
