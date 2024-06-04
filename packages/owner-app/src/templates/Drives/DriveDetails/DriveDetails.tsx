@@ -12,15 +12,15 @@ import AppMembershipView from '../../../components/PermissionViews/AppPermission
 import { CirclePermissionView } from '@youfoundation/common-app';
 import { useApps } from '../../../hooks/apps/useApps';
 import { useCircles } from '@youfoundation/common-app';
-import DriveCircleAccessDialog from '../../../components/Dialog/DriveCircleAccessDialog/DriveCircleAccessDialog';
-import DriveAppAccessDialog from '../../../components/Dialog/DriveAppAccessDialog/DriveAppAccessDialog';
-import FileBrowser from '../../../components/FileBrowser/FileBrowser';
 import { Download } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { getDrivePermissionFromNumber, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { TRANSIENT_TEMP_DRIVE_ALIAS } from '@youfoundation/js-lib/core';
-import DriveMetadataEditDialog from '../../../components/Dialog/DriveCircleAccessDialog/DriveMetadataEditDialog';
-import { DriveStatusDialog } from '../../../components/Dialog/DriveStatusDialog/DriveStatusDialog';
+import DriveAppAccessDialog from '../../../components/Drives/DriveAppAccessDialog/DriveAppAccessDialog';
+import DriveCircleAccessDialog from '../../../components/Drives/DriveCircleAccessDialog/DriveCircleAccessDialog';
+import DriveMetadataEditDialog from '../../../components/Drives/DriveCircleAccessDialog/DriveMetadataEditDialog';
+import { DriveStatusDialog } from '../../../components/Drives/DriveStatusDialog/DriveStatusDialog';
+import FileBrowser from '../../../components/Drives/FileBrowser/FileBrowser';
 
 const DriveDetails = () => {
   const { driveKey } = useParams();

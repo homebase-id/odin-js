@@ -3,9 +3,10 @@ import { Times, t } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
-import IncomingConnectionDialog from '../../Dialog/ConnectionDialogs/IncomingConnectionDialog';
+
 import PersonCard from '../PersonCard/PersonCard';
 import { usePendingConnection } from '../../../hooks/connections/usePendingConnection';
+import IncomingConnectionDialog from '../ConnectionDialogs/IncomingConnectionDialog';
 
 const PersonIncomingRequest = ({
   senderOdinId,
