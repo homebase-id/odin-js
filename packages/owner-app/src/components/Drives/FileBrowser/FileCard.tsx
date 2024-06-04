@@ -1,7 +1,6 @@
 import { AttributeConfig, ProfileConfig } from '@youfoundation/js-lib/profile';
 import { useMemo } from 'react';
 import { AclIcon, AclSummary, ExtensionThumbnail, Trash, t } from '@youfoundation/common-app';
-import { useFile } from '../../hooks/files/useFiles';
 import { Clipboard } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { Download, Image } from '@youfoundation/common-app';
@@ -15,6 +14,7 @@ import {
 import { BlogConfig, ReactionConfig } from '@youfoundation/js-lib/public';
 import { ContactConfig } from '@youfoundation/js-lib/network';
 import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
+import { useFile } from '../../../hooks/files/useFiles';
 
 export const FileCard = ({
   targetDrive,

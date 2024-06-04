@@ -4,7 +4,7 @@ import { Plus, SubtleMessage, t } from '@youfoundation/common-app';
 import { useCircles } from '@youfoundation/common-app';
 import { Circles as CirclesIcon } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
-import CircleDialog from '../../../components/Dialog/CircleDialog/CircleDialog';
+
 import { LoadingBlock } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { useCircle } from '@youfoundation/common-app';
@@ -15,6 +15,7 @@ import ContactImage from '../../../components/Connection/ContactImage/ContactIma
 import { CompanyImage } from '../../../components/Connection/CompanyImage/CompanyImage';
 import { DrivePermissionType } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import CircleDialog from '../../../components/Circles/CircleDialog/CircleDialog';
 
 const Circles = () => {
   const {

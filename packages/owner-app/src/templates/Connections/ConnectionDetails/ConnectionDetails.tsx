@@ -4,13 +4,13 @@ import { t } from '@youfoundation/common-app';
 import { useConnection } from '../../../hooks/connections/useConnection';
 import { useContact } from '../../../hooks/contacts/useContact';
 import ContactInfo from '../../../components/Connection/ContactInfo/ContactInfo';
-import { CircleMembershipDialog } from '../../../components/Dialog/CircleMembershipDialog/CircleMembershipDialog';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import { ConnectionInfo } from '@youfoundation/js-lib/network';
 import { ConnectionPermissionViewer } from './ConnectionPermissionViewer';
 import { IdentityPageMetaAndActions } from './IdentityPageMetaAndActions';
 import { IdentityAlerts } from './IdentityAlerts';
 import { useConnectionGrantStatus } from '../../../hooks/connections/useConnectionGrantStatus';
+import { CircleMembershipDialog } from '../../../components/Circles/CircleMembershipDialog/CircleMembershipDialog';
 
 const ConnectionDetails = () => {
   const { odinId } = useParams();

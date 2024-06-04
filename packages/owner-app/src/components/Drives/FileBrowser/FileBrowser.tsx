@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Bars, Grid, t } from '@youfoundation/common-app';
-import { useFiles } from '../../hooks/files/useFiles';
-import Section from '../ui/Sections/Section';
 import { Pager } from '@youfoundation/common-app';
 import { SystemFileType, TargetDrive } from '@youfoundation/js-lib/core';
 import { FileCard } from './FileCard';
+import { useFiles } from '../../../hooks/files/useFiles';
+import Section from '../../ui/Sections/Section';
 
 const FileBrowser = ({
   targetDrive,

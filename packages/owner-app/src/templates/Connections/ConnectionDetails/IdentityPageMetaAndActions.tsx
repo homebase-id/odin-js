@@ -20,10 +20,10 @@ import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { useConnection } from '../../../hooks/connections/useConnection';
 import { useContact } from '../../../hooks/contacts/useContact';
 import { useEffect, useState } from 'react';
-import OutgoingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/OutgoingConnectionDialog';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
 import { useConnectionGrantStatus } from '../../../hooks/connections/useConnectionGrantStatus';
 import { hasDebugFlag, jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import OutgoingConnectionDialog from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
 
 export const IdentityPageMetaAndActions = ({
   odinId, // setIsEditPermissionActive,
