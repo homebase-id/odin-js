@@ -12,8 +12,6 @@ import {
   UploadResult,
   SecurityGroupType,
   UploadInstructionSet,
-  ScheduleOptions,
-  SendContents,
   UploadFileMetadata,
   uploadFile,
   deleteFile,

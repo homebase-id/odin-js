@@ -24,6 +24,7 @@ import {
   CommentReactionPreview,
   NewHomebaseFile,
   ReactionFileBody,
+  PriorityOptions,
 } from '../../core/core';
 import {
   jsonStringify64,
@@ -125,6 +126,7 @@ export const saveComment = async (
         useGlobalTransitId: true, // Needed to support having a reference to this file over transit
         recipients: [],
         schedule: ScheduleOptions.SendLater,
+        priority: PriorityOptions.Medium,
         sendContents: SendContents.All,
       },
       systemFileType: 'Comment',
@@ -155,7 +157,8 @@ export const saveComment = async (
       overwriteGlobalTransitFileId: (comment as HomebaseFile<ReactionFile>).fileMetadata
         .globalTransitId,
       remoteTargetDrive: targetDrive,
-      schedule: ScheduleOptions.SendNowAwaitResponse,
+      schedule: ScheduleOptions.SendLater,
+      priority: PriorityOptions.Medium,
       recipients: [context.authorOdinId],
       systemFileType: 'Comment',
     };
@@ -170,12 +173,7 @@ export const saveComment = async (
     );
 
     if (
-      [
-        TransferStatus.PendingRetry,
-        TransferStatus.TotalRejectionClientShouldRetry,
-        TransferStatus.FileDoesNotAllowDistribution,
-        TransferStatus.RecipientReturnedAccessDenied,
-      ].includes(result.recipientStatus[context.authorOdinId])
+      TransferStatus.EnqueuedFailed === result.recipientStatus[context.authorOdinId].toLowerCase()
     ) {
       throw new Error(result.recipientStatus[context.authorOdinId].toString());
     }

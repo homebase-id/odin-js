@@ -1,5 +1,9 @@
 import { FileQueryParams, GetBatchQueryResultOptions } from '../../core/DriveData/Drive/DriveTypes';
-import { ScheduleOptions, TransferStatus } from '../../core/DriveData/Upload/DriveUploadTypes';
+import {
+  PriorityOptions,
+  ScheduleOptions,
+  TransferStatus,
+} from '../../core/DriveData/Upload/DriveUploadTypes';
 import { TargetDrive, SystemFileType } from '../../core/core';
 
 export interface TransitQueryBatchRequest {
@@ -13,6 +17,7 @@ export interface TransitInstructionSet {
   overwriteGlobalTransitFileId?: string | null;
   remoteTargetDrive?: TargetDrive;
   schedule?: ScheduleOptions;
+  priority?: PriorityOptions;
   recipients: string[];
   systemFileType?: SystemFileType;
 }

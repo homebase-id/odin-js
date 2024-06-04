@@ -80,8 +80,9 @@ export const uploadFileOverPeer = async (
     .then((response) => {
       const recipientStatus = response.data.recipientStatus;
       Object.keys(recipientStatus).forEach((key) => {
-        if (failedTransferStatuses.includes(recipientStatus[key].toLowerCase()))
+        if (recipientStatus[key].toString().toLowerCase() === TransferStatus.EnqueuedFailed) {
           throw new Error(`Recipient ${key} failed to receive file`);
+        }
       });
 
       return response.data;
@@ -100,9 +101,3 @@ export const uploadFileOverPeer = async (
 
   return response;
 };
-
-const failedTransferStatuses = [
-  TransferStatus?.FileDoesNotAllowDistribution.toString().toLowerCase(),
-  TransferStatus?.RecipientReturnedAccessDenied.toString().toLowerCase(),
-  TransferStatus?.TotalRejectionClientShouldRetry.toString().toLowerCase(),
-];

@@ -26,6 +26,8 @@ import {
   uploadHeader,
   NewMediaFile,
   UploadResult,
+  PriorityOptions,
+  TransferStatus,
 } from '@youfoundation/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
@@ -116,13 +118,26 @@ export const dsrToMessage = async (
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<ChatMessage> | null> => {
   try {
-    const attrContent = await getContentFromHeaderOrPayload<ChatMessage>(
+    const msgContent = await getContentFromHeaderOrPayload<ChatMessage>(
       dotYouClient,
       targetDrive,
       dsr,
       includeMetadataHeader
     );
-    if (!attrContent) return null;
+    if (!msgContent) return null;
+
+    if (
+      msgContent.deliveryStatus === ChatDeliveryStatus.Sent &&
+      dsr.serverMetadata?.transferHistory?.recipients
+    ) {
+      const someFailed = Object.keys(dsr.serverMetadata.transferHistory.recipients).some(
+        (recipient) => {
+          !dsr.serverMetadata?.transferHistory?.recipients[recipient]
+            .latestSuccessfullyDeliveredVersionTag;
+        }
+      );
+      if (!someFailed) msgContent.deliveryStatus = ChatDeliveryStatus.Delivered;
+    }
 
     const chatMessage: HomebaseFile<ChatMessage> = {
       ...dsr,
@@ -130,7 +145,7 @@ export const dsrToMessage = async (
         ...dsr.fileMetadata,
         appData: {
           ...dsr.fileMetadata.appData,
-          content: attrContent,
+          content: msgContent,
         },
       },
     };
@@ -160,7 +175,8 @@ export const uploadChatMessage = async (
     transitOptions: distribute
       ? {
           recipients: [...recipients],
-          schedule: ScheduleOptions.SendNowAwaitResponse,
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.Medium,
           sendContents: SendContents.All,
           useGlobalTransitId: true,
           useAppNotification: true,
@@ -245,6 +261,27 @@ export const uploadChatMessage = async (
 
   if (!uploadResult) return null;
 
+  if (
+    recipients.some(
+      (recipient) =>
+        uploadResult.recipientStatus?.[recipient].toLowerCase() === TransferStatus.EnqueuedFailed
+    )
+  ) {
+    message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Failed;
+    message.fileMetadata.appData.content.deliveryDetails = {};
+    for (const recipient of recipients) {
+      message.fileMetadata.appData.content.deliveryDetails[recipient] =
+        uploadResult.recipientStatus?.[recipient].toLowerCase() === TransferStatus.EnqueuedFailed
+          ? ChatDeliveryStatus.Failed
+          : ChatDeliveryStatus.Delivered;
+    }
+
+    await updateChatMessage(dotYouClient, message, recipients, uploadResult.keyHeader);
+
+    console.error('Not all recipients received the message: ', uploadResult);
+    throw new Error(`Not all recipients received the message: ${recipients.join(', ')}`);
+  }
+
   return {
     ...uploadResult,
     previewThumbnail: uploadMetadata.appData.previewThumbnail,
@@ -268,7 +305,8 @@ export const updateChatMessage = async (
     transitOptions: distribute
       ? {
           recipients: [...recipients],
-          schedule: ScheduleOptions.SendNowAwaitResponse,
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.Medium,
           sendContents: SendContents.All,
           useGlobalTransitId: true,
         }

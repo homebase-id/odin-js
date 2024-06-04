@@ -31,10 +31,21 @@ export enum SecurityGroupType {
   Owner = 'owner',
 }
 
+export interface RecipientTransferHistory {
+  lastUpdated: number;
+  latestTransferStatus: string;
+  isInOutbox: string;
+  latestSuccessfullyDeliveredVersionTag: string;
+  isReadByRecipient: boolean;
+}
+
 export interface ServerMetaData {
   doNotIndex: boolean;
   allowDistribution: boolean;
   accessControlList: AccessControlList;
+  transferHistory?: {
+    recipients: { [key: string]: RecipientTransferHistory };
+  };
 }
 
 export interface ImageSize {
