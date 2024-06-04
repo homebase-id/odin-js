@@ -192,7 +192,6 @@ const uploadPost = async <T extends PostContent>(
       drive: targetDrive,
     },
     transitOptions: {
-      useGlobalTransitId: true,
       recipients: [],
       schedule: ScheduleOptions.SendLater,
       sendContents: SendContents.All, // TODO: Should this be header only?
@@ -303,7 +302,6 @@ const uploadPostHeader = async <T extends PostContent>(
       drive: targetDrive,
     },
     transitOptions: {
-      useGlobalTransitId: true,
       recipients: [],
       schedule: ScheduleOptions.SendLater,
       sendContents: SendContents.All, // TODO: Should this be header only?

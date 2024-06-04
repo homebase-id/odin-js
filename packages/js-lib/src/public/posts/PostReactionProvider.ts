@@ -122,7 +122,6 @@ export const saveComment = async (
         drive: targetDrive,
       },
       transitOptions: {
-        useGlobalTransitId: true, // Needed to support having a reference to this file over transit
         recipients: [],
         schedule: ScheduleOptions.SendLater,
         sendContents: SendContents.All,

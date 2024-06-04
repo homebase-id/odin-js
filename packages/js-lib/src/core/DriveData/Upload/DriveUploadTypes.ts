@@ -37,7 +37,6 @@ export interface StorageOptions {
 interface BaseTransitOptions {
   recipients: string[];
   isTransient?: boolean; // File is removed after it's received by all recipients
-  useGlobalTransitId?: boolean | undefined;
   schedule: ScheduleOptions;
   sendContents: SendContents;
   remoteTargetDrive?: TargetDrive;

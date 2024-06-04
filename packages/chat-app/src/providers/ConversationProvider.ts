@@ -209,7 +209,6 @@ export const uploadConversation = async (
           ),
           schedule: ScheduleOptions.SendNowAwaitResponse,
           sendContents: SendContents.All,
-          useGlobalTransitId: true,
         }
       : undefined,
   };
@@ -260,7 +259,6 @@ export const updateConversation = async (
           ),
           schedule: ScheduleOptions.SendNowAwaitResponse,
           sendContents: SendContents.All,
-          useGlobalTransitId: true,
         }
       : undefined,
   };
