@@ -108,7 +108,6 @@ export const PostMeta = ({
                 : ''}
             </>
           )}
-          {groupPost ? <Persons className="h-3 w-3" /> : null}
         </a>
       ) : null}
 
@@ -126,6 +125,52 @@ export const PostMeta = ({
         </>
       )}
     </div>
+  );
+};
+
+export const ToGroupBlock = ({
+  odinId,
+  authorOdinId,
+  channel,
+  className,
+}: {
+  odinId?: string;
+  authorOdinId?: string;
+  channel?:
+    | HomebaseFile<ChannelDefinitionVm | ChannelDefinition>
+    | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
+  className?: string;
+}) => {
+  const { getIdentity } = useDotYouClient();
+
+  const identity = getIdentity();
+  const groupPost =
+    channel?.fileMetadata.appData.content.isCollaborative ||
+    (authorOdinId !== (odinId || identity) && (odinId || identity) && authorOdinId);
+  const isConnected = useIsConnected(odinId).data;
+
+  if (!groupPost) return null;
+
+  const channelLink = channel
+    ? `${odinId ? `https://${odinId}` : ''}${HOME_ROOT_PATH}posts/${
+        channel.fileMetadata.appData.content.slug
+      }${isConnected && identity ? '?youauth-logon=' + identity : ''}`
+    : undefined;
+
+  return (
+    <span className={className}>
+      {t('to')}{' '}
+      <a
+        className="text-indigo-500 hover:underline inline-flex items-center flex-row gap-1"
+        href={channelLink}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {channel?.fileMetadata.appData.content.name
+          ? `${channel?.fileMetadata.appData.content.name}`
+          : ''}
+        <Persons className="h-3 w-3" />
+      </a>
+    </span>
   );
 };
 
