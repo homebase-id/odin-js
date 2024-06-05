@@ -27,10 +27,10 @@ export const useNotificationSubscriber = (
 
   const wrappedSubscriber = useCallback(
     (notification: TypedConnectionNotification) => {
-      if (notification.notificationType === 'transitFileReceived') {
+      if (notification.notificationType === 'inboxItemReceived') {
         isDebug &&
           console.debug(
-            '[NotificationSubscriber] Replying to TransitFileReceived by sending processInbox'
+            '[NotificationSubscriber] Replying to inboxItemReceived by sending processInbox'
           );
 
         Notify({

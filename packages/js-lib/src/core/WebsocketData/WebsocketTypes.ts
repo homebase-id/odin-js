@@ -15,7 +15,7 @@ export type NotificationType =
   | 'fileModified'
   | 'connectionRequestReceived'
   | 'connectionRequestAccepted'
-  | 'transitFileReceived'
+  | 'inboxItemReceived'
   | 'appNotificationAdded'
   | 'error'
   | 'unknown';
@@ -32,7 +32,7 @@ export interface ClientFileNotification extends ClientNotification {
 }
 
 export interface ClientTransitNotification extends ClientNotification {
-  notificationType: 'transitFileReceived';
+  notificationType: 'inboxItemReceived';
   externalFileIdentifier: ExternalFileIdentifier;
 }
 

@@ -47,7 +47,7 @@ const ParseRawClientNotification = (
     Record<string, unknown>
   >(notification.data);
 
-  if (notification.notificationType === 'transitFileReceived') {
+  if (notification.notificationType === 'inboxItemReceived') {
     return {
       notificationType: notification.notificationType,
       externalFileIdentifier: externalFileIdentifier,
