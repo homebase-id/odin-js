@@ -21,7 +21,6 @@ import {
   getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
   queryBatch,
-  sendCommand,
   uploadFile,
   uploadHeader,
   NewMediaFile,
@@ -36,6 +35,7 @@ import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { makeGrid } from '@youfoundation/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
 import { createThumbnails, processVideoFile } from '@youfoundation/js-lib/media';
+import { sendReadReceipt } from '@youfoundation/js-lib/peer';
 
 export const CHAT_MESSAGE_FILE_TYPE = 7878;
 export const ChatDeletedArchivalStaus = 2;
@@ -147,7 +147,11 @@ export const dsrToMessage = async (
             dsr.serverMetadata.transferHistory.recipients[recipient]
               .latestSuccessfullyDeliveredVersionTag
           ) {
-            msgContent.deliveryDetails[recipient] = ChatDeliveryStatus.Delivered;
+            if (dsr.serverMetadata.transferHistory.recipients[recipient].isReadByRecipient) {
+              msgContent.deliveryDetails[recipient] = ChatDeliveryStatus.Read;
+            } else {
+              msgContent.deliveryDetails[recipient] = ChatDeliveryStatus.Delivered;
+            }
           } else {
             if (
               FailedTransferStatuses.includes(
@@ -422,35 +426,17 @@ export const requestMarkAsRead = async (
   conversation: HomebaseFile<UnifiedConversation>,
   messages: HomebaseFile<ChatMessage>[]
 ) => {
-  // => Much nicer solution: Handle with a last read time on the conversation file;
-  const chatUniqueIds = messages
+  const chatFileIds = messages
     .filter(
       (msg) =>
         msg.fileMetadata.appData.content.deliveryStatus !== ChatDeliveryStatus.Read &&
-        msg.fileMetadata.senderOdinId &&
-        msg.fileMetadata.appData.uniqueId
+        msg.fileMetadata.senderOdinId
     )
-    .map((msg) => msg.fileMetadata.appData.uniqueId) as string[];
+    .map((msg) => msg.fileId) as string[];
 
-  const request: MarkAsReadRequest = {
-    conversationId: conversation.fileMetadata.appData.uniqueId as string,
-    messageIds: chatUniqueIds,
-  };
-
-  const conversationContent = conversation.fileMetadata.appData.content;
-  const identity = dotYouClient.getIdentity();
-  const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
-  if (!recipients?.filter(Boolean)?.length)
-    throw new Error('No recipients found in the conversation');
-
-  return await sendCommand(
-    dotYouClient,
-    {
-      code: MARK_CHAT_READ_COMMAND,
-      globalTransitIdList: [],
-      jsonMessage: jsonStringify64(request),
-      recipients: recipients,
-    },
-    ChatDrive
+  return await Promise.all(
+    chatFileIds.map((chatFileId) => {
+      return sendReadReceipt(dotYouClient, ChatDrive, [chatFileId]);
+    })
   );
 };
