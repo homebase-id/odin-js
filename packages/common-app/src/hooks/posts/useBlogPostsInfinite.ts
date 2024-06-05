@@ -12,9 +12,9 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 type useBlogPostsInfiniteProps = {
   channelId?: string;
-  pageSize?: number;
   postType?: PostType;
   enabled?: boolean;
+  includeHidden?: boolean;
 };
 
 export type useBlogPostsInfiniteReturn = {
@@ -22,11 +22,12 @@ export type useBlogPostsInfiniteReturn = {
   cursorState: string | Record<string, string>;
 };
 
+export const BLOG_POST_INFIITE_PAGE_SIZE = 30;
 export const useBlogPostsInfinite = ({
   channelId,
-  pageSize = 30,
   postType,
   enabled = true,
+  includeHidden = false,
 }: useBlogPostsInfiniteProps) => {
   const { getDotYouClient, isOwner, getIdentity } = useDotYouClient();
   const dotYouClient = getDotYouClient();
@@ -56,16 +57,16 @@ export const useBlogPostsInfinite = ({
             postType,
             false,
             typeof pageParam === 'string' ? pageParam : undefined,
-            pageSize
+            BLOG_POST_INFIITE_PAGE_SIZE
           )
         : await getRecentPosts(
             dotYouClient,
             postType,
             false,
             typeof pageParam === 'object' ? pageParam : undefined,
-            pageSize,
+            BLOG_POST_INFIITE_PAGE_SIZE,
             channels,
-            false
+            includeHidden
           ));
 
     return {
@@ -77,11 +78,11 @@ export const useBlogPostsInfinite = ({
   };
 
   return useInfiniteQuery({
-    queryKey: ['blogs', channelId || '', postType || ''],
+    queryKey: ['blogs', channelId || '', postType || '', includeHidden],
     initialPageParam: undefined as string | Record<string, string> | undefined,
     queryFn: ({ pageParam }) => fetchBlogData({ channelId, pageParam }),
     getNextPageParam: (lastPage) =>
-      lastPage?.results?.length >= pageSize ? lastPage.cursorState : undefined,
+      lastPage?.results?.length >= BLOG_POST_INFIITE_PAGE_SIZE ? lastPage.cursorState : undefined,
     refetchOnWindowFocus: false,
     staleTime: Infinity,
     enabled: enabled,

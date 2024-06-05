@@ -76,6 +76,7 @@ export const ArticleComposerPage = () => {
     return (
       <ActionButton
         className={`md:w-auto ${
+          !postFile.fileId ||
           isInvalidPost(postFile) ||
           !postFile.fileMetadata.appData.content.caption ||
           !postFile.fileMetadata.appData.content.caption.length

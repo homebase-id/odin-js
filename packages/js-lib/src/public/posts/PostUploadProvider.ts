@@ -14,7 +14,7 @@ import {
   UploadResult,
 } from '../../core/DriveData/Upload/DriveUploadTypes';
 import { SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
-import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
+import { DEFAULT_PAYLOAD_KEY, GenerateKeyHeader } from '../../core/DriveData/Upload/UploadHelpers';
 import {
   HomebaseFile,
   NewHomebaseFile,
@@ -435,6 +435,15 @@ const updatePost = async <T extends PostContent>(
   if (!file.fileMetadata.appData.content.authorOdinId)
     file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
 
+  const encrypt = !(
+    file.serverMetadata.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+    file.serverMetadata.accessControlList?.requiredSecurityGroup === SecurityGroupType.Authenticated
+  );
+  const keyHeader = encrypt
+    ? header.sharedSecretEncryptedKeyHeader || GenerateKeyHeader()
+    : undefined;
+  if (keyHeader) file.sharedSecretEncryptedKeyHeader = keyHeader;
+
   let runningVersionTag: string = file.fileMetadata.versionTag;
   const existingMediaFiles =
     file.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || [];
@@ -513,15 +522,8 @@ const updatePost = async <T extends PostContent>(
     };
 
     runningVersionTag =
-      (
-        await appendDataToFile(
-          dotYouClient,
-          header?.fileMetadata.isEncrypted ? header.sharedSecretEncryptedKeyHeader : undefined,
-          appendInstructionSet,
-          payloads,
-          thumbnails
-        )
-      )?.newVersionTag || runningVersionTag;
+      (await appendDataToFile(dotYouClient, keyHeader, appendInstructionSet, payloads, thumbnails))
+        ?.newVersionTag || runningVersionTag;
   }
 
   if (file.fileMetadata.appData.content.type !== 'Article') {
@@ -538,10 +540,6 @@ const updatePost = async <T extends PostContent>(
       ? previewThumbnail
       : file.fileMetadata.appData.previewThumbnail || previewThumbnail;
 
-  const encrypt = !(
-    file.serverMetadata.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
-    file.serverMetadata.accessControlList?.requiredSecurityGroup === SecurityGroupType.Authenticated
-  );
   file.fileMetadata.isEncrypted = encrypt;
   file.fileMetadata.versionTag = runningVersionTag;
   const result = await uploadPostHeader(dotYouClient, file, channelId, targetDrive);
