@@ -15,6 +15,7 @@ import {
   LoadingBlock,
   NotFound,
   useDotYouClient,
+  BLOG_POST_INFIITE_PAGE_SIZE,
 } from '@youfoundation/common-app';
 
 import CardPostOverview from '../../../components/Post/Overview/CardPostOverview/CardPostOverview';
@@ -27,7 +28,6 @@ import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { SaveCollaborativeChannelLink } from '../../../components/CollaborativeChannels/SaveCollaborativeChannelLink';
 import { PublicPostComposer } from '../../../components/CollaborativeChannels/PublicPostComposer';
 
-const PAGE_SIZE = 30;
 const PostOverview = () => {
   const { isOwner } = useDotYouClient();
   const { channelKey } = useParams();
@@ -44,7 +44,6 @@ const PostOverview = () => {
     isLoading,
   } = useBlogPostsInfinite({
     channelId: activeChannel?.fileMetadata.appData.uniqueId,
-    pageSize: PAGE_SIZE,
     enabled: !channelKey || !!activeChannel,
   });
 
@@ -67,7 +66,7 @@ const PostOverview = () => {
 
   const blogPosts = flattenInfinteData<HomebaseFile<PostContent>>(
     data,
-    PAGE_SIZE,
+    BLOG_POST_INFIITE_PAGE_SIZE,
     (a, b) =>
       (b.fileMetadata.appData.userDate || b.fileMetadata.updated) -
       (a.fileMetadata.appData.userDate || a.fileMetadata.updated)
