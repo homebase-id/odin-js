@@ -6,7 +6,6 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import {
-  ChatDeliveryStatus,
   ChatMessage,
   getChatMessages,
   requestMarkAsRead,
@@ -34,17 +33,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     conversation: HomebaseFile<UnifiedConversation>;
     messages: HomebaseFile<ChatMessage>[];
   }) => {
-    // => Much nicer solution: Handle with a last read time on the conversation file;
-    const messagesToMarkAsRead = messages
-      .filter(
-        (msg) =>
-          msg.fileMetadata.appData.content.deliveryStatus !== ChatDeliveryStatus.Read &&
-          msg.fileMetadata.senderOdinId &&
-          msg.fileMetadata.appData.uniqueId
-      )
-      .map((msg) => msg.fileMetadata.appData.uniqueId) as string[];
-
-    return await requestMarkAsRead(dotYouClient, conversation, messagesToMarkAsRead);
+    return await requestMarkAsRead(dotYouClient, conversation, messages);
   };
 
   const removeMessage = async ({

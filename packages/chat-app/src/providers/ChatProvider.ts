@@ -420,8 +420,18 @@ export interface MarkAsReadRequest {
 export const requestMarkAsRead = async (
   dotYouClient: DotYouClient,
   conversation: HomebaseFile<UnifiedConversation>,
-  chatUniqueIds: string[]
+  messages: HomebaseFile<ChatMessage>[]
 ) => {
+  // => Much nicer solution: Handle with a last read time on the conversation file;
+  const chatUniqueIds = messages
+    .filter(
+      (msg) =>
+        msg.fileMetadata.appData.content.deliveryStatus !== ChatDeliveryStatus.Read &&
+        msg.fileMetadata.senderOdinId &&
+        msg.fileMetadata.appData.uniqueId
+    )
+    .map((msg) => msg.fileMetadata.appData.uniqueId) as string[];
+
   const request: MarkAsReadRequest = {
     conversationId: conversation.fileMetadata.appData.uniqueId as string,
     messageIds: chatUniqueIds,
