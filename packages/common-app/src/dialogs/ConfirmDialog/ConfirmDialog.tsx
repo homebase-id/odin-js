@@ -6,6 +6,7 @@ import { Exclamation, Question } from '../../ui';
 import { t } from '../../helpers/i18n/dictionary';
 import { Input } from '../../form/Input';
 import { Label } from '../../form/Label';
+import { Checkbox } from '../../form';
 
 export interface ConfirmDialogProps {
   type?: 'critical' | 'info' | 'warning';
@@ -13,6 +14,7 @@ export interface ConfirmDialogProps {
   buttonText: string;
   body?: string;
   trickQuestion?: TrickQuestion;
+  allowSkipNextTime?: boolean;
   onConfirm: (e: React.MouseEvent<HTMLElement> | React.FormEvent<HTMLElement>) => void;
   onCancel: (e: React.MouseEvent<HTMLElement>) => void;
 }
@@ -23,11 +25,13 @@ export const ConfirmDialog = ({
   buttonText,
   body,
   trickQuestion,
+  allowSkipNextTime,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) => {
   const target = usePortal('modal-container');
   const [isValid, setIsvalid] = useState(!trickQuestion);
+  const [askNextTime, setAskNextTime] = useState(true);
 
   const dialog = (
     <div className="relative z-40" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -50,8 +54,8 @@ export const ConfirmDialog = ({
                     type === 'info'
                       ? 'text-indigo-400'
                       : type === 'warning'
-                      ? 'text-orange-400'
-                      : 'text-red-400'
+                        ? 'text-orange-400'
+                        : 'text-red-400'
                   } sm:mx-0 sm:h-10 sm:w-10`}
                 >
                   {type !== 'info' ? <Exclamation /> : <Question />}
@@ -81,14 +85,14 @@ export const ConfirmDialog = ({
                 </div>
               </div>
             </div>
-            <div className="bg-gray-50 px-4 py-3 dark:bg-slate-900  sm:flex sm:flex-row-reverse sm:px-6">
+            <div className="bg-gray-50 px-4 py-3 dark:bg-slate-900 flex flex-col sm:flex-row-reverse px-6 gap-2">
               <button
                 type="button"
                 className={`${!isValid ? 'pointer-events-none opacity-40' : ''} ${
                   type === 'info' || type === 'warning'
                     ? 'hover:bg-indigo-70 bg-indigo-600 focus:ring-indigo-500'
                     : 'hover:bg-red-70 bg-red-600 focus:ring-red-500'
-                } inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm`}
+                } flex w-full sm:w-auto justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm`}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -100,7 +104,7 @@ export const ConfirmDialog = ({
               </button>
               <button
                 type="button"
-                className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-gray-800 dark:bg-slate-700 dark:text-white sm:ml-3 sm:mt-0 sm:w-auto sm:text-sm"
+                className="flex w-full sm:w-auto justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-gray-800 dark:bg-slate-700 dark:text-white sm:text-sm"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -109,6 +113,21 @@ export const ConfirmDialog = ({
               >
                 {t('Cancel')}
               </button>
+              {allowSkipNextTime ? (
+                <>
+                  <Label
+                    className="flex flex-row items-center mr-auto text-sm gap-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Checkbox
+                      defaultChecked={!askNextTime}
+                      onChange={(e) => setAskNextTime(!e.currentTarget.checked)}
+                    />
+
+                    {t(`Don't ask next time`)}
+                  </Label>
+                </>
+              ) : null}
             </div>
           </div>
         </div>
