@@ -31,7 +31,7 @@ const SocialFeedMainContent = () => {
     () =>
       flattenInfinteData<HomebaseFile<PostContent>>(
         posts,
-        PAGE_SIZE,
+        hasMorePosts ? PAGE_SIZE : undefined, // If we're out of ServerSide pages we don't want to slice
         (a, b) =>
           (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
           (a.fileMetadata.appData.userDate || a.fileMetadata.created)
