@@ -27,7 +27,9 @@ import {
   NewMediaFile,
   UploadResult,
   PriorityOptions,
+  TransferUploadStatus,
   TransferStatus,
+  FailedTransferStatuses,
 } from '@youfoundation/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
@@ -131,13 +133,41 @@ export const dsrToMessage = async (
       msgContent.deliveryStatus === ChatDeliveryStatus.Sent &&
       dsr.serverMetadata?.transferHistory?.recipients
     ) {
-      const someFailed = Object.keys(dsr.serverMetadata.transferHistory.recipients).some(
-        (recipient) => {
+      const allDelivered = !Object.keys(dsr.serverMetadata.transferHistory.recipients).some(
+        (recipient) =>
           !dsr.serverMetadata?.transferHistory?.recipients[recipient]
-            .latestSuccessfullyDeliveredVersionTag;
-        }
+            .latestSuccessfullyDeliveredVersionTag
       );
-      if (!someFailed) msgContent.deliveryStatus = ChatDeliveryStatus.Delivered;
+      if (allDelivered) msgContent.deliveryStatus = ChatDeliveryStatus.Delivered;
+      else {
+        let someFailed = false;
+        msgContent.deliveryDetails = {};
+        for (const recipient of Object.keys(dsr.serverMetadata.transferHistory.recipients)) {
+          if (
+            dsr.serverMetadata.transferHistory.recipients[recipient]
+              .latestSuccessfullyDeliveredVersionTag
+          ) {
+            msgContent.deliveryDetails[recipient] = ChatDeliveryStatus.Delivered;
+          } else {
+            if (
+              FailedTransferStatuses.includes(
+                dsr.serverMetadata.transferHistory.recipients[
+                  recipient
+                ].latestTransferStatus.toLocaleLowerCase() as TransferStatus
+              )
+            ) {
+              msgContent.deliveryDetails[recipient] = ChatDeliveryStatus.Failed;
+              someFailed = true;
+            } else {
+              msgContent.deliveryDetails[recipient] = ChatDeliveryStatus.Sent;
+            }
+          }
+        }
+
+        msgContent.deliveryStatus = someFailed
+          ? ChatDeliveryStatus.Failed
+          : ChatDeliveryStatus.Sent;
+      }
     }
 
     const chatMessage: HomebaseFile<ChatMessage> = {
@@ -265,14 +295,16 @@ export const uploadChatMessage = async (
   if (
     recipients.some(
       (recipient) =>
-        uploadResult.recipientStatus?.[recipient].toLowerCase() === TransferStatus.EnqueuedFailed
+        uploadResult.recipientStatus?.[recipient].toLowerCase() ===
+        TransferUploadStatus.EnqueuedFailed
     )
   ) {
     message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Failed;
     message.fileMetadata.appData.content.deliveryDetails = {};
     for (const recipient of recipients) {
       message.fileMetadata.appData.content.deliveryDetails[recipient] =
-        uploadResult.recipientStatus?.[recipient].toLowerCase() === TransferStatus.EnqueuedFailed
+        uploadResult.recipientStatus?.[recipient].toLowerCase() ===
+        TransferUploadStatus.EnqueuedFailed
           ? ChatDeliveryStatus.Failed
           : ChatDeliveryStatus.Delivered;
     }
@@ -412,40 +444,3 @@ export const requestMarkAsRead = async (
     ChatDrive
   );
 };
-
-// export const DELETE_CHAT_COMMAND = 180;
-// export interface DeleteRequest {
-//   conversationId: string;
-//   messageIds: string[];
-// }
-
-// Probably not needed, as the file is "updated" for a soft delete, which just is sent over transit to the recipients
-// export const requestDelete = async (
-//   dotYouClient: DotYouClient,
-//   conversation: HomebaseFile<Conversation>,
-//   chatGlobalTransitIds: string[]
-// ) => {
-//   const request: DeleteRequest = {
-//     conversationId: conversation.fileMetadata.appData.uniqueId as string,
-//     messageIds: chatGlobalTransitIds,
-//   };
-
-//   const conversationContent = conversation.fileMetadata.appData.content;
-//   const identity = dotYouClient.getIdentity();
-//   const recipients = conversationContent.recipients.filter(
-//     (recipient) => recipient !== identity
-//   );
-//   if (!recipients?.filter(Boolean)?.length)
-//     throw new Error('No recipients found in the conversation');
-
-//   return await sendCommand(
-//     dotYouClient,
-//     {
-//       code: DELETE_CHAT_COMMAND,
-//       globalTransitIdList: [],
-//       jsonMessage: jsonStringify64(request),
-//       recipients: recipients,
-//     },
-//     ChatDrive
-//   );
-// };

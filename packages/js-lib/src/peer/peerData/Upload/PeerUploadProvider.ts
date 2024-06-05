@@ -5,7 +5,12 @@ import {
   buildFormData,
   buildManifest,
 } from '../../../core/DriveData/Upload/UploadHelpers';
-import { UploadFileMetadata, ThumbnailFile, TransferStatus, PayloadFile } from '../../../core/core';
+import {
+  UploadFileMetadata,
+  ThumbnailFile,
+  TransferUploadStatus,
+  PayloadFile,
+} from '../../../core/core';
 import { TransitInstructionSet, TransitUploadResult } from '../PeerTypes';
 import { hasDebugFlag } from '../../../helpers/BrowserUtil';
 import { getRandom16ByteArray } from '../../../helpers/DataUtil';
@@ -80,7 +85,7 @@ export const uploadFileOverPeer = async (
     .then((response) => {
       const recipientStatus = response.data.recipientStatus;
       Object.keys(recipientStatus).forEach((key) => {
-        if (recipientStatus[key].toString().toLowerCase() === TransferStatus.EnqueuedFailed) {
+        if (recipientStatus[key].toString().toLowerCase() === TransferUploadStatus.EnqueuedFailed) {
           throw new Error(`Recipient ${key} failed to receive file`);
         }
       });

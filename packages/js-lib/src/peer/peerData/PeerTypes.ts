@@ -2,7 +2,7 @@ import { FileQueryParams, GetBatchQueryResultOptions } from '../../core/DriveDat
 import {
   PriorityOptions,
   ScheduleOptions,
-  TransferStatus,
+  TransferUploadStatus,
 } from '../../core/DriveData/Upload/DriveUploadTypes';
 import { TargetDrive, SystemFileType } from '../../core/core';
 
@@ -23,7 +23,7 @@ export interface TransitInstructionSet {
 }
 
 export interface TransitUploadResult {
-  recipientStatus: { [key: string]: TransferStatus };
+  recipientStatus: { [key: string]: TransferUploadStatus };
   remoteGlobalTransitIdFileIdentifier: {
     globalTransitId: string;
     targetDrive: TargetDrive;

@@ -15,7 +15,7 @@ import {
   SendContents,
   TargetDrive,
   ThumbnailFile,
-  TransferStatus,
+  TransferUploadStatus,
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
@@ -29,6 +29,8 @@ import {
   MediaFile,
   NewMediaFile,
   PriorityOptions,
+  TransferStatus,
+  FailedTransferStatuses,
 } from '@youfoundation/js-lib/core';
 import { getNewId, jsonStringify64, makeGrid } from '@youfoundation/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
@@ -294,7 +296,7 @@ export const uploadMail = async (
       recipients.some(
         (recipient) =>
           (uploadResult as UploadResult).recipientStatus?.[recipient].toLowerCase() ===
-          TransferStatus.EnqueuedFailed
+          TransferUploadStatus.EnqueuedFailed
       )
     ) {
       conversation.fileMetadata.appData.content.deliveryStatus = MailDeliveryStatus.Failed;
@@ -302,7 +304,7 @@ export const uploadMail = async (
       for (const recipient of recipients) {
         conversation.fileMetadata.appData.content.deliveryDetails[recipient] =
           (uploadResult as UploadResult).recipientStatus?.[recipient].toLowerCase() ===
-          TransferStatus.DeliveredToInbox
+          TransferUploadStatus.DeliveredToInbox
             ? MailDeliveryStatus.Delivered
             : MailDeliveryStatus.Failed;
       }
@@ -372,25 +374,54 @@ export const dsrToMailConversation = async (
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<MailConversation> | null> => {
   try {
-    const attrContent = await getContentFromHeaderOrPayload<MailConversation>(
+    const mailContent = await getContentFromHeaderOrPayload<MailConversation>(
       dotYouClient,
       targetDrive,
       dsr,
       includeMetadataHeader
     );
-    if (!attrContent) return null;
+    if (!mailContent) return null;
 
     if (
-      attrContent.deliveryStatus === MailDeliveryStatus.Sent &&
+      mailContent.deliveryStatus === MailDeliveryStatus.Sent &&
       dsr.serverMetadata?.transferHistory?.recipients
     ) {
-      const someFailed = Object.keys(dsr.serverMetadata.transferHistory.recipients).some(
-        (recipient) => {
+      const allDelivered = !Object.keys(dsr.serverMetadata.transferHistory.recipients).some(
+        (recipient) =>
           !dsr.serverMetadata?.transferHistory?.recipients[recipient]
-            .latestSuccessfullyDeliveredVersionTag;
-        }
+            .latestSuccessfullyDeliveredVersionTag
       );
-      if (!someFailed) attrContent.deliveryStatus = MailDeliveryStatus.Delivered;
+
+      if (allDelivered) mailContent.deliveryStatus = MailDeliveryStatus.Delivered;
+      else {
+        mailContent.deliveryDetails = {};
+        let someFailed = false;
+        for (const recipient of Object.keys(dsr.serverMetadata.transferHistory.recipients)) {
+          if (
+            dsr.serverMetadata.transferHistory.recipients[recipient]
+              .latestSuccessfullyDeliveredVersionTag
+          ) {
+            mailContent.deliveryDetails[recipient] = MailDeliveryStatus.Delivered;
+          } else {
+            if (
+              FailedTransferStatuses.includes(
+                dsr.serverMetadata.transferHistory.recipients[
+                  recipient
+                ].latestTransferStatus.toLocaleLowerCase() as TransferStatus
+              )
+            ) {
+              mailContent.deliveryDetails[recipient] = MailDeliveryStatus.Failed;
+              someFailed = true;
+            } else {
+              mailContent.deliveryDetails[recipient] = MailDeliveryStatus.Sent;
+            }
+          }
+        }
+
+        mailContent.deliveryStatus = someFailed
+          ? MailDeliveryStatus.Failed
+          : MailDeliveryStatus.Sent;
+      }
     }
 
     const conversation: HomebaseFile<MailConversation> = {
@@ -400,8 +431,8 @@ export const dsrToMailConversation = async (
         appData: {
           ...dsr.fileMetadata.appData,
           content: {
-            ...attrContent,
-            plainMessage: getTextRootsRecursive(attrContent.message).join(' '),
+            ...mailContent,
+            plainMessage: getTextRootsRecursive(mailContent.message).join(' '),
             plainAttachment: dsr.fileMetadata.payloads
               .map((payload) => payload.descriptorContent)
               .join(' '),

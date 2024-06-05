@@ -31,11 +31,30 @@ export enum SecurityGroupType {
   Owner = 'owner',
 }
 
+export enum TransferStatus {
+  Delivered = 'delivered',
+  RecipientIdentityReturnedAccessDenied = 'recipientidentityreturnedaccessdenied',
+  SourceFileDoesNotAllowDistribution = 'sourcefiledoesnotallowdistribution',
+  RecipientServerNotResponding = 'recipientservernotresponding',
+  RecipientIdentityReturnedServerError = 'recipientidentityreturnedservererror',
+  RecipientIdentityReturnedBadRequest = 'recipientidentityreturnedbadrequest',
+  UnknownServerError = 'unknownservererror',
+}
+
+export const FailedTransferStatuses = [
+  TransferStatus.RecipientIdentityReturnedAccessDenied,
+  TransferStatus.SourceFileDoesNotAllowDistribution,
+  TransferStatus.RecipientServerNotResponding,
+  TransferStatus.RecipientIdentityReturnedServerError,
+  TransferStatus.RecipientIdentityReturnedBadRequest,
+  TransferStatus.UnknownServerError,
+];
+
 export interface RecipientTransferHistory {
   lastUpdated: number;
-  latestTransferStatus: string;
+  latestTransferStatus: TransferStatus;
   isInOutbox: string;
-  latestSuccessfullyDeliveredVersionTag: string;
+  latestSuccessfullyDeliveredVersionTag: string | null;
   isReadByRecipient: boolean;
 }
 

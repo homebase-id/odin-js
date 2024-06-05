@@ -9,7 +9,7 @@ import {
   SendContents,
   UploadInstructionSet,
   uploadFile,
-  TransferStatus,
+  TransferUploadStatus,
   deleteFile,
   FileQueryParams,
   queryBatch,
@@ -173,7 +173,8 @@ export const saveComment = async (
     );
 
     if (
-      TransferStatus.EnqueuedFailed === result.recipientStatus[context.authorOdinId].toLowerCase()
+      TransferUploadStatus.EnqueuedFailed ===
+      result.recipientStatus[context.authorOdinId].toLowerCase()
     ) {
       throw new Error(result.recipientStatus[context.authorOdinId].toString());
     }
