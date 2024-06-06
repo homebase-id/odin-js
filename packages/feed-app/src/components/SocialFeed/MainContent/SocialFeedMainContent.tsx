@@ -113,7 +113,7 @@ const SocialFeedMainContent = () => {
                           </div>
                         ) : (
                           <div className="italic opacity-50" key={'no-more'}>
-                            {t('No more posts. Expecting more? Make sure your following them.')}
+                            {t(`No more posts. Expecting more? Make sure you're following them.`)}
                           </div>
                         )}
                       </div>
