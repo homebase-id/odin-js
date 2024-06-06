@@ -15,7 +15,10 @@ export interface ConfirmDialogProps {
   body?: string;
   trickQuestion?: TrickQuestion;
   allowSkipNextTime?: boolean;
-  onConfirm: (e: React.MouseEvent<HTMLElement> | React.FormEvent<HTMLElement>) => void;
+  onConfirm: (
+    e: React.MouseEvent<HTMLElement> | React.FormEvent<HTMLElement>,
+    skipNextTime: boolean
+  ) => void;
   onCancel: (e: React.MouseEvent<HTMLElement>) => void;
 }
 
@@ -65,14 +68,14 @@ export const ConfirmDialog = ({
                     {title}
                   </h3>
                   <div className="mt-2">
-                    <p className="text-sm">{body}</p>
+                    <p className="text-sm whitespace-pre-wrap">{body}</p>
                   </div>
                   {trickQuestion ? (
                     <form
                       onSubmit={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        if (isValid) onConfirm(e);
+                        if (isValid) onConfirm(e, !askNextTime);
                       }}
                     >
                       <TrickQuestion
@@ -96,7 +99,7 @@ export const ConfirmDialog = ({
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  onConfirm(e);
+                  onConfirm(e, !askNextTime);
                 }}
                 disabled={!isValid}
               >

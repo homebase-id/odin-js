@@ -39,6 +39,7 @@ import { EmojiSelector } from '../Blocks/Interacts/EmojiPicker/EmojiSelector';
 
 const FEED_ROOT_PATH = '/apps/feed';
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
+const STORAGE_SKIP_NEXT_KEY = 'feed-skip-next-time';
 
 export const PostComposer = ({
   onPost,
@@ -69,13 +70,15 @@ export const PostComposer = ({
   }>({
     channel: forcedChannel || BlogConfig.PublicChannelNewDsr,
   });
-  const [files, setFiles] = useState<NewMediaFile[]>();
 
+  const [files, setFiles] = useState<NewMediaFile[]>();
   const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
 
+  const skipConfirmation = window.localStorage.getItem(STORAGE_SKIP_NEXT_KEY) === 'true';
   const isPosting = postState === 'uploading' || postState === 'encrypting';
+  const doPost = async (_e?: unknown, skipNextTime?: boolean) => {
+    if (skipNextTime) window.localStorage.setItem(STORAGE_SKIP_NEXT_KEY, 'true');
 
-  const doPost = async () => {
     if (isPosting) return;
     await savePost(caption, files, embeddedPost, targetChannel, reactAccess);
     resetUi();
@@ -253,12 +256,12 @@ export const PostComposer = ({
               stringGuidsEqual(
                 targetChannel.channel.fileMetadata.appData.uniqueId,
                 BlogConfig.PublicChannelId
-              )
+              ) && !skipConfirmation
                 ? {
                     title: t('Post'),
                     buttonText: t('Post'),
                     body: t(
-                      'Posting this, will make it publicly available on your identity {0}. If you want to hide this post from anonymos users, you have to change the security settings from the dropdown. Are you sure you want to post this?',
+                      'Posting this, will make it publicly available on your identity {0}. \n\nIf you want to hide this post from anonymos users, you have to change the security settings from the dropdown first.',
                       `${identity}`
                     ),
                     type: 'info',
