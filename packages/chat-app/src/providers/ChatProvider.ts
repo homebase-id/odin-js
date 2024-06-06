@@ -434,9 +434,5 @@ export const requestMarkAsRead = async (
     )
     .map((msg) => msg.fileId) as string[];
 
-  return await Promise.all(
-    chatFileIds.map((chatFileId) => {
-      return sendReadReceipt(dotYouClient, ChatDrive, [chatFileId]);
-    })
-  );
+  return sendReadReceipt(dotYouClient, ChatDrive, chatFileIds);
 };

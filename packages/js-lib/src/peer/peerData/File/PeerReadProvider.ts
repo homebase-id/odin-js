@@ -11,10 +11,10 @@ export const sendReadReceipt = async (
   const client = dotYouClient.createAxiosClient();
 
   const request = {
-    file: {
+    files: fileIds.map((fileId) => ({
       targetDrive: targetDrive,
-      fileId: fileIds[0],
-    },
+      fileId: fileId,
+    })),
   };
 
   return client
