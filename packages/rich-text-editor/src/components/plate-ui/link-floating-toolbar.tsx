@@ -57,7 +57,7 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
     props: editProps,
     ref: editRef,
     editButtonProps,
-    unExternalLinkProps,
+    unlinkButtonProps,
   } = useFloatingLinkEdit(editState);
 
   if (hidden) return null;
@@ -121,7 +121,7 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
           variant: 'ghost',
           size: 'sms',
         })}
-        {...unExternalLinkProps}
+        {...unlinkButtonProps}
       >
         <Icons.unlink width={18} />
       </button>
