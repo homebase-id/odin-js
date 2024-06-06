@@ -24,7 +24,8 @@ import { Input } from '../form/Input';
 import { Textarea } from '../form/Textarea';
 import { CheckboxToggle } from '../form/CheckboxToggle';
 import { Pencil } from '../ui/Icons/Pencil';
-import { Alert, Exclamation } from '../ui';
+import { ActionLink, Alert, Exclamation, ExternalLink } from '../ui';
+import { useDotYouClient } from '../hooks';
 
 export const ChannelItem = ({
   chnl: chnlDsr,
@@ -37,6 +38,8 @@ export const ChannelItem = ({
   className?: string;
   isDefaultEdit?: boolean;
 }) => {
+  const { getIdentity } = useDotYouClient();
+  const identity = getIdentity();
   const isNew = !chnlDsr;
 
   const [isEdit, setIsEdit] = useState(isDefaultEdit);
@@ -316,6 +319,12 @@ export const ChannelItem = ({
             </>
           ) : null}
           <ActionButton icon={Pencil} size="square" type="mute"></ActionButton>
+          <ActionLink
+            icon={ExternalLink}
+            size="square"
+            type="mute"
+            href={`https://${identity}/posts/${chnl?.slug}`}
+          ></ActionLink>
         </div>
       )}
     </div>
@@ -394,6 +403,12 @@ export const CollaborativeChannelItem = ({
             <Persons className="w-5 h-5" />
           </p>
         ) : null}
+        <ActionLink
+          icon={ExternalLink}
+          size="square"
+          type="mute"
+          href={`https://${odinId}/posts/${chnl?.slug}`}
+        ></ActionLink>
       </div>
     </div>
   );
