@@ -53,7 +53,8 @@ export const PostComposer = ({
   className?: string;
   excludeCustom?: boolean;
 }) => {
-  const { isOwner } = useDotYouClient();
+  const { isOwner, getIdentity } = useDotYouClient();
+  const identity = getIdentity();
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
 
   const { savePost, postState, processingProgress, error } = usePostComposer();
@@ -248,13 +249,23 @@ export const PostComposer = ({
               canPost ? '' : 'pointer-events-none hidden opacity-20 grayscale md:flex'
             } ${postState === 'uploading' ? 'pointer-events-none animate-pulse' : ''}`}
             icon={Arrow}
-            confirmOptions={{
-              title: t('Post'),
-              buttonText: t('Post'),
-              body: t('Are you sure you want to post this?'),
-              type: 'info',
-              allowSkipNextTime: true,
-            }}
+            confirmOptions={
+              stringGuidsEqual(
+                targetChannel.channel.fileMetadata.appData.uniqueId,
+                BlogConfig.PublicChannelId
+              )
+                ? {
+                    title: t('Post'),
+                    buttonText: t('Post'),
+                    body: t(
+                      'Posting this, will make it publicly available on your identity {0}. If you want to hide this post from anonymos users, you have to change the security settings from the dropdown. Are you sure you want to post this?',
+                      `${identity}`
+                    ),
+                    type: 'info',
+                    allowSkipNextTime: true,
+                  }
+                : undefined
+            }
             onClick={doPost}
           >
             {targetChannel.channel.serverMetadata?.accessControlList && canPost ? (
