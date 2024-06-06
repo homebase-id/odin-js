@@ -11,11 +11,13 @@ export const PostTextListItem = ({
   channel,
   linkRoot,
   className,
+  children,
 }: {
   draft: HomebaseFile<Article>;
   channel?: NewHomebaseFile<ChannelDefinitionVm>;
   linkRoot: string;
   className?: string;
+  children?: React.ReactNode;
 }) => {
   const content = draft.fileMetadata.appData.content;
   return (
@@ -46,9 +48,16 @@ export const PostTextListItem = ({
                   />
                 ) : null}
               </div>
-              <h1 className={`text-foreground mb-1 text-lg text-opacity-80`}>{content.caption}</h1>
-              <div className="text-foreground leading-relaxed text-opacity-70">
-                {ellipsisAtMaxChar(content.abstract, 280)}
+              <div className="flex flex-row justify-between">
+                <div>
+                  <h1 className={`text-foreground mb-1 text-lg text-opacity-80`}>
+                    {content.caption}
+                  </h1>
+                  <div className="text-foreground leading-relaxed text-opacity-70">
+                    {ellipsisAtMaxChar(content.abstract, 280)}
+                  </div>
+                </div>
+                {children}
               </div>
             </div>
           </div>

@@ -7,6 +7,7 @@ import {
   BLOG_POST_INFIITE_PAGE_SIZE,
   HOME_ROOT_PATH,
   LoadingBlock,
+  Pencil,
   Plus,
   PostTextListItem,
   SubtleMessage,
@@ -138,7 +139,18 @@ const PublishedArticlesView = () => {
                     key={draft.fileId ?? index}
                     className="bg-background"
                     linkRoot={`${HOME_ROOT_PATH}posts`}
-                  />
+                  >
+                    <ActionLink
+                      icon={Pencil}
+                      type="mute"
+                      size="none"
+                      className="opacity-60 hover:opacity-100"
+                      href={`${ROOT_PATH}/edit/${
+                        channel?.fileMetadata.appData.content.slug ||
+                        channel?.fileMetadata.appData.uniqueId
+                      }/${draft.fileMetadata.appData.content.id}`}
+                    />
+                  </PostTextListItem>
                 );
               })
             )}

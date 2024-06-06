@@ -102,11 +102,7 @@ export const PostMeta = ({
           ) ? (
             <AclSummary acl={postFile.serverMetadata.accessControlList} />
           ) : (
-            <>
-              {channel?.fileMetadata.appData.content.name
-                ? `${channel?.fileMetadata.appData.content.name}`
-                : ''}
-            </>
+            <>{channel?.fileMetadata.appData.content.name || ''}</>
           )}
         </a>
       ) : null}

@@ -1,4 +1,4 @@
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useBlocker, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ActionButton,
   ActionGroup,
@@ -7,23 +7,24 @@ import {
   Cog,
   ConfirmDialog,
   DialogWrapper,
-  Ellipsis,
   ErrorNotification,
   Label,
   SaveStatus,
   Select,
   Trash,
-  useDebounce,
   usePortal,
   t,
   ChannelOrAclSelector,
-  Times,
+  Lock,
+  Save,
+  OpenLock,
+  BlockerDialog,
 } from '@youfoundation/common-app';
 import { InnerFieldEditors } from '../../components/SocialFeed/ArticleFieldsEditor/ArticleFieldsEditor';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { Article, ReactAccess } from '@youfoundation/js-lib/public';
 import { useArticleComposer } from '@youfoundation/common-app';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { HomebaseFile, NewHomebaseFile, RichText } from '@youfoundation/js-lib/core';
 import { ROOT_PATH } from '../../app/App';
@@ -54,7 +55,6 @@ export const ArticleComposerPage = () => {
 
     // Status
     saveStatus,
-    // removeStatus,
 
     // Errors
     error,
@@ -66,42 +66,83 @@ export const ArticleComposerPage = () => {
     caption: searchParams.get('caption') || undefined,
   });
 
-  const debouncedSave = useDebounce(() => doSave(postFile, isPublished ? 'publish' : undefined), {
-    timeoutMillis: 1500,
+  const [needsSaving, setNeedsSaving] = useState(false);
+  const [willSave, setWillSave] = useState(false);
+
+  // Delay needSaving to willSave; Auto save every 15s
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNeedsSaving((needsSaving) => {
+        setWillSave(needsSaving);
+        return needsSaving;
+      });
+    }, 1000 * 15);
+    return () => clearInterval(interval);
+  }, [setNeedsSaving, setWillSave]);
+
+  useEffect(() => {
+    if (willSave) {
+      setNeedsSaving(false);
+      setWillSave(false);
+      doSave(postFile, isPublished ? 'publish' : undefined);
+    }
+  }, [willSave, setWillSave, postFile, isPublished]);
+
+  const PublishButton = useCallback(
+    ({ className }: { className?: string }) => {
+      if (isPublished) return null;
+
+      return (
+        <ActionButton
+          className={`md:w-auto ${
+            !postFile.fileId ||
+            isInvalidPost(postFile) ||
+            !postFile.fileMetadata.appData.content.caption ||
+            !postFile.fileMetadata.appData.content.caption.length
+              ? 'pointer-events-none opacity-20 grayscale'
+              : ''
+          } ${className ?? ''}`}
+          icon={Arrow}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            doSave(postFile, 'publish', undefined, true);
+            setNeedsSaving(false);
+          }}
+          confirmOptions={{
+            title: t('Post'),
+            body: t('Are you sure you want to publish this post?'),
+            buttonText: t('Publish'),
+            type: 'info',
+          }}
+          type="secondary"
+        >
+          {t('Publish')}
+        </ActionButton>
+      );
+    },
+    [isPublished, saveStatus, postFile]
+  );
+
+  // Show browser specific message when trying to close the tab with unsaved changes
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (needsSaving) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handler);
+
+    return () => window.removeEventListener('beforeunload', handler);
   });
 
-  const PostButton = ({ className }: { className?: string }) => {
-    if (isPublished) return null;
-
-    return (
-      <ActionButton
-        className={`md:w-auto ${
-          !postFile.fileId ||
-          isInvalidPost(postFile) ||
-          !postFile.fileMetadata.appData.content.caption ||
-          !postFile.fileMetadata.appData.content.caption.length
-            ? 'pointer-events-none opacity-20 grayscale'
-            : ''
-        } ${className ?? ''}`}
-        icon={Arrow}
-        state={saveStatus !== 'success' ? saveStatus : undefined}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          doSave(postFile, 'publish', undefined, true);
-        }}
-        confirmOptions={{
-          title: t('Post'),
-          body: t('Are you sure you want to publish this post?'),
-          buttonText: t('Publish'),
-          type: 'info',
-        }}
-        type="primary"
-      >
-        {t('Publish')}
-      </ActionButton>
-    );
-  };
+  // Block navigating elsewhere when data has been entered into the input
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      needsSaving && currentLocation.pathname !== nextLocation.pathname
+  );
 
   const handleRTEChange = useCallback(
     (e: {
@@ -110,6 +151,7 @@ export const ArticleComposerPage = () => {
         value: string | { fileKey: string; type: string } | RichText | undefined;
       };
     }) => {
+      setNeedsSaving(true);
       setPostFile((oldPostFile) => {
         const dirtyPostFile = { ...oldPostFile };
 
@@ -139,10 +181,8 @@ export const ArticleComposerPage = () => {
           },
         };
       });
-
-      debouncedSave();
     },
-    [setPostFile, debouncedSave]
+    [setNeedsSaving, setPostFile]
   );
 
   if (isLoadingServerData) return null;
@@ -154,10 +194,14 @@ export const ArticleComposerPage = () => {
           <div className="flex-col">
             {postFile?.fileMetadata.appData.content?.caption || t('New article')}
             <small className="text-sm text-gray-400">
-              <SaveStatus
-                state={saveStatus === 'error' ? 'idle' : saveStatus}
-                className="text-sm"
-              />
+              <span className="flex flex-row items-center gap-1">
+                {postFile?.fileMetadata.isEncrypted ? (
+                  <Lock className="h-3 w-3" />
+                ) : (
+                  <OpenLock className="h-3 w-3" />
+                )}
+                {channel?.fileMetadata.appData.content.name || ''}
+              </span>
             </small>
           </div>
         }
@@ -170,10 +214,17 @@ export const ArticleComposerPage = () => {
         ]}
         actions={
           <>
-            <PostButton />
-
+            <ActionButton
+              icon={Save}
+              state={saveStatus !== 'success' ? saveStatus : 'idle'}
+              onClick={() => {
+                doSave();
+                setNeedsSaving(false);
+              }}
+            />
+            <PublishButton />
             <ActionGroup
-              type="secondary"
+              type="mute"
               size="square"
               options={[
                 {
@@ -193,33 +244,13 @@ export const ArticleComposerPage = () => {
                         title: t('Remove'),
                         body: `${t('Are you sure you want to remove')} "${
                           postFile?.fileMetadata.appData.content?.caption || t('New article')
-                        }"`,
+                        }". Any reactions or comments will be lost.`,
                         buttonText: t('Remove'),
                       },
                     }
                   : undefined,
-                isPublished
-                  ? {
-                      label: t('Convert to draft'),
-                      onClick: () => {
-                        doSave(postFile, 'draft');
-                      },
-                      icon: Times,
-                      confirmOptions: {
-                        title: t('Post'),
-                        body: t(
-                          'Are you sure you want to unpublish this post, it will no longer be publicly available?'
-                        ),
-                        buttonText: t('Convert to draft'),
-                        type: 'info',
-                      },
-                    }
-                  : undefined,
               ]}
-              icon={Ellipsis}
-            >
-              {t('More')}
-            </ActionGroup>
+            />
           </>
         }
       />
@@ -231,6 +262,7 @@ export const ArticleComposerPage = () => {
               onSubmit={(e) => {
                 e.preventDefault();
                 doSave();
+                setNeedsSaving(false);
                 return false;
               }}
             >
@@ -243,8 +275,14 @@ export const ArticleComposerPage = () => {
                 onChange={handleRTEChange}
               />
 
-              <div className="mb-5 flex md:hidden">
-                <PostButton className="w-full justify-center" />
+              <div className="flex flex-col gap-2 sm:flex-row-reverse">
+                <PublishButton className="w-full sm:hidden" />
+                <div className="flex flex-col items-end gap-1">
+                  <ActionButton icon={Save} state={saveStatus !== 'success' ? saveStatus : 'idle'}>
+                    {t('Save')}
+                  </ActionButton>
+                  <SaveStatus state={saveStatus} className="text-sm" />
+                </div>
               </div>
             </form>
           ) : (
@@ -303,6 +341,7 @@ export const ArticleComposerPage = () => {
               newReactAccess !== true ? newReactAccess : undefined;
 
             setPostFile(dirtyPostFile);
+            setNeedsSaving(false);
             await doSave(dirtyPostFile);
           }
         }}
@@ -320,6 +359,16 @@ export const ArticleComposerPage = () => {
             'This post is currently published, if you wish to edit you need to convert it back to draft'
           )}
         />
+      ) : null}
+      {blocker && blocker.reset && blocker.proceed ? (
+        <BlockerDialog
+          isOpen={blocker.state === 'blocked'}
+          onCancel={blocker.reset}
+          onProceed={blocker.proceed}
+          title={t('You have unsaved changes')}
+        >
+          <p>{t('Are you sure you want to leave this page? Your changes will be lost.')}</p>
+        </BlockerDialog>
       ) : null}
     </>
   );

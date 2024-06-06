@@ -47,7 +47,7 @@ export const InnerFieldEditors = ({
   disabled?: boolean;
   setFiles: (newFiles: (NewMediaFile | MediaFile)[]) => void;
 }) => {
-  const [isEditTeaser, setIsEditTeaser] = useState(false);
+  const [isEditTeaser, setIsEditTeaser] = useState(true);
   const { data: imageData } = useImage({
     imageFileId: postFile.fileId,
     imageFileKey: postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey,
@@ -84,7 +84,7 @@ export const InnerFieldEditors = ({
       <div className="grid grid-flow-row gap-1">
         <span className="text-sm text-gray-400">{t('Metadata')}</span>
         <div className="mb-5 border-gray-200 border-opacity-60 bg-background p-2 pb-0 text-foreground dark:border-gray-800 md:rounded-lg md:border md:p-4 md:pb-0">
-          <div className="mb-2 flex flex-row items-center justify-between gap-2 md:mb-4">
+          <div className="mb-2 flex flex-row justify-between gap-2 md:mb-4">
             <div className="w-full">
               {isEditTeaser ? (
                 <Label className="mb-1 text-gray-700 dark:text-gray-300">{t('Title')}</Label>
@@ -100,13 +100,13 @@ export const InnerFieldEditors = ({
               />
             </div>
             <ActionButton
-              className="shrink-0"
+              className="mb-auto shrink-0"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 setIsEditTeaser(!isEditTeaser);
               }}
-              type="secondary"
+              type="mute"
             >
               {isEditTeaser ? t('Collapse') : t('Expand')}{' '}
               <Arrow
