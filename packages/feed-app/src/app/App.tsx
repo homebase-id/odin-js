@@ -24,6 +24,7 @@ const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
 
 const SocialFeed = lazy(() => import('../templates/SocialFeed/SocialFeed'));
 const ArticleComposerPage = lazy(() => import('../templates/SocialFeed/ArticleComposerPage'));
+const ArticleDuplicatePage = lazy(() => import('../templates/SocialFeed/ArticleDuplicatePage'));
 const ArticlesPage = lazy(() => import('../templates/SocialFeed/ArticlesPage'));
 const ChannelsPage = lazy(() => import('../templates/SocialFeed/ChannelsPage'));
 const IncomingCollaborativeChannelPage = lazy(
@@ -115,6 +116,7 @@ function App() {
             <Route path="articles" element={<ArticlesPage />} />
             <Route path="channels" element={<ChannelsPage />} />
             <Route path="edit/:channelKey/:postKey" element={<ArticleComposerPage />} />
+            <Route path="duplicate/:channelKey/:postKey" element={<ArticleDuplicatePage />} />
 
             <Route
               path="channels/incoming-collaborative"

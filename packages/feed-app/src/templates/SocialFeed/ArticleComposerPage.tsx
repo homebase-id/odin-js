@@ -34,7 +34,6 @@ export const ArticleComposerPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [isOptionsDialogOpen, setIsOptionsDialogOpen] = useState(false);
-  const [isConfirmUnpublish, setIsConfirmUnpublish] = useState(false);
 
   const {
     // Actions
@@ -218,7 +217,7 @@ export const ArticleComposerPage = () => {
               icon={Save}
               state={saveStatus !== 'success' ? saveStatus : 'idle'}
               onClick={() => {
-                doSave();
+                doSave(undefined, isPublished ? 'publish' : undefined);
                 setNeedsSaving(false);
               }}
             />
@@ -261,7 +260,7 @@ export const ArticleComposerPage = () => {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                doSave();
+                doSave(undefined, isPublished ? 'publish' : undefined);
                 setNeedsSaving(false);
                 return false;
               }}
@@ -342,24 +341,10 @@ export const ArticleComposerPage = () => {
 
             setPostFile(dirtyPostFile);
             setNeedsSaving(false);
-            await doSave(dirtyPostFile);
+            await doSave(dirtyPostFile, isPublished ? 'publish' : undefined);
           }
         }}
       />
-      {isConfirmUnpublish ? (
-        <ConfirmDialog
-          title={t('Published')}
-          onConfirm={() => {
-            doSave(postFile, 'draft');
-            setIsConfirmUnpublish(false);
-          }}
-          buttonText={t('Convert to draft')}
-          onCancel={() => setIsConfirmUnpublish(false)}
-          body={t(
-            'This post is currently published, if you wish to edit you need to convert it back to draft'
-          )}
-        />
-      ) : null}
       {blocker && blocker.reset && blocker.proceed ? (
         <BlockerDialog
           isOpen={blocker.state === 'blocked'}

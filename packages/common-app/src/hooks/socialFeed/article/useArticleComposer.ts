@@ -2,7 +2,7 @@ import { slugify, getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpe
 import { Article, ChannelDefinition, BlogConfig } from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
 import { HOME_ROOT_PATH, getReadingTime, useBlog, useDotYouClient } from '../../../..';
-import { usePost } from '../post/usePost';
+import { useManagePost } from '../post/useManagePost';
 import {
   HomebaseFile,
   NewHomebaseFile,
@@ -42,7 +42,7 @@ export const useArticleComposer = ({
   const {
     save: { mutateAsync: savePost, error: savePostError, status: savePostStatus },
     remove: { mutateAsync: removePost, error: removePostError, status: removePostStatus },
-  } = usePost();
+  } = useManagePost();
 
   const [postFile, setPostFile] = useState<NewHomebaseFile<Article> | HomebaseFile<Article>>({
     ...serverData?.activeBlog,

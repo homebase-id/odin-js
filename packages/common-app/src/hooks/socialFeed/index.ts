@@ -1,5 +1,5 @@
 export * from './drafts/useDrafts';
-export * from './post/usePost';
+export * from './post/useManagePost';
 export * from './post/usePostComposer';
 export * from './useSocialChannel';
 export * from './useSocialChannels';
