@@ -2,7 +2,7 @@ import { ChannelDefinition, PostContent } from '@youfoundation/js-lib/public';
 import { PostTeaser } from '../PostListItem/PostTeaser';
 import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
 import { t } from '../../helpers/i18n/dictionary';
-import { useBlogPostsInfinite } from '../../hooks/socialFeed/post/usePostsInfinite';
+import { usePostsInfinite } from '../../hooks/socialFeed/post/usePostsInfinite';
 import { ChannelDefinitionVm } from '../../hooks/socialFeed/channels/useChannels';
 
 export const RelatedArticles = ({
@@ -12,7 +12,7 @@ export const RelatedArticles = ({
   blog: HomebaseFile<PostContent>;
   channel: NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition> | undefined;
 }) => {
-  const { data: blogPosts } = useBlogPostsInfinite(
+  const { data: blogPosts } = usePostsInfinite(
     channel ? { channelId: channel.fileMetadata.appData.uniqueId, postType: 'Article' } : {}
   );
 

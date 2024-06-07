@@ -11,25 +11,25 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useChannels } from '../channels/useChannels';
 import { useDotYouClient } from '../../auth/useDotYouClient';
 
-type useBlogPostsInfiniteProps = {
+type usePostsInfiniteProps = {
   channelId?: string;
   postType?: PostType;
   enabled?: boolean;
   includeHidden?: boolean;
 };
 
-export type useBlogPostsInfiniteReturn = {
+export type usePostsInfiniteReturn = {
   results: HomebaseFile<PostContent>[];
   cursorState: string | Record<string, string>;
 };
 
 export const BLOG_POST_INFIITE_PAGE_SIZE = 30;
-export const useBlogPostsInfinite = ({
+export const usePostsInfinite = ({
   channelId,
   postType,
   enabled = true,
   includeHidden = false,
-}: useBlogPostsInfiniteProps) => {
+}: usePostsInfiniteProps) => {
   const { getDotYouClient, isOwner, getIdentity } = useDotYouClient();
   const dotYouClient = getDotYouClient();
   const isAuthenticated = isOwner || !!getIdentity();
@@ -41,7 +41,7 @@ export const useBlogPostsInfinite = ({
   }: {
     channelId?: string;
     pageParam: string | Record<string, string> | undefined;
-  }): Promise<useBlogPostsInfiniteReturn> => {
+  }): Promise<usePostsInfiniteReturn> => {
     const canRunCached = !pageParam && !isAuthenticated;
     const cachedData = canRunCached
       ? channelId

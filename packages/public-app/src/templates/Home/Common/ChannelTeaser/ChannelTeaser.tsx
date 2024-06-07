@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { HOME_ROOT_PATH, t, useBlogPostsInfinite } from '@youfoundation/common-app';
+import { HOME_ROOT_PATH, t, usePostsInfinite } from '@youfoundation/common-app';
 import { ChannelDefinitionVm } from '@youfoundation/common-app';
 
 import { Arrow } from '@youfoundation/common-app';
@@ -12,7 +12,7 @@ interface ChannelTeaserProps {
 }
 
 const ChannelTeaser: FC<ChannelTeaserProps> = ({ className, channel }) => {
-  const { data: blogPosts, isFetched: blogPostsFetched } = useBlogPostsInfinite({
+  const { data: blogPosts, isFetched: blogPostsFetched } = usePostsInfinite({
     channelId: channel.fileMetadata.appData.uniqueId,
     // We don't pass the pageSize as it would force another call to the API when fetching the actual first page
   });

@@ -6,7 +6,7 @@ const PAGE_SIZE = 30;
 export const useFollowerInfinite = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
-  const fetchBlogData = async ({ pageParam }: { pageParam?: string }) => {
+  const fetch = async ({ pageParam }: { pageParam?: string }) => {
     const response = await fetchFollowers(dotYouClient, pageParam, PAGE_SIZE);
     return response;
   };
@@ -14,7 +14,7 @@ export const useFollowerInfinite = () => {
   return useInfiniteQuery({
     queryKey: ['followers'],
     initialPageParam: undefined as string | undefined,
-    queryFn: ({ pageParam }) => fetchBlogData({ pageParam }),
+    queryFn: ({ pageParam }) => fetch({ pageParam }),
     getNextPageParam: (lastPage) =>
       lastPage?.results && lastPage.results.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
     refetchOnMount: false,

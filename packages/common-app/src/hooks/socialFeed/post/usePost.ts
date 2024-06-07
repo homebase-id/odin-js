@@ -1,18 +1,18 @@
 import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getPost, getPostBySlug, PostContent } from '@youfoundation/js-lib/public';
 
-import { useBlogPostsInfiniteReturn } from './usePostsInfinite';
+import { usePostsInfiniteReturn } from './usePostsInfinite';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useChannel } from '../channels/useChannel';
 import { useDotYouClient } from '../../auth/useDotYouClient';
 
-type useBlogProps = {
+type usePostProps = {
   channelId?: string;
   channelSlug?: string;
   blogSlug?: string;
 };
 
-export const useBlog = ({ channelSlug, channelId, blogSlug }: useBlogProps = {}) => {
+export const usePost = ({ channelSlug, channelId, blogSlug }: usePostProps = {}) => {
   const { data: channel, isFetched: channelFetched } = useChannel({
     channelSlug,
     channelId,
@@ -24,8 +24,8 @@ export const useBlog = ({ channelSlug, channelId, blogSlug }: useBlogProps = {})
 
   const getCachedBlogs = (channelId?: string) => {
     const infinite =
-      queryClient.getQueryData<InfiniteData<useBlogPostsInfiniteReturn>>(['blogs', channelId]) ||
-      queryClient.getQueryData<InfiniteData<useBlogPostsInfiniteReturn>>(['blogs', undefined]);
+      queryClient.getQueryData<InfiniteData<usePostsInfiniteReturn>>(['blogs', channelId]) ||
+      queryClient.getQueryData<InfiniteData<usePostsInfiniteReturn>>(['blogs', undefined]);
     if (infinite) return infinite.pages.flatMap((page) => page.results);
 
     return (
@@ -34,7 +34,7 @@ export const useBlog = ({ channelSlug, channelId, blogSlug }: useBlogProps = {})
     );
   };
 
-  const fetchBlog = async ({ blogSlug }: useBlogProps) => {
+  const fetchBlog = async ({ blogSlug }: usePostProps) => {
     if (!channel || !blogSlug) return null;
 
     const cachedBlogs = getCachedBlogs(channel.fileMetadata.appData.uniqueId);
@@ -44,7 +44,7 @@ export const useBlog = ({ channelSlug, channelId, blogSlug }: useBlogProps = {})
           blog.fileMetadata.appData.content?.slug === blogSlug ||
           blog.fileMetadata.appData.content.id === blogSlug
       );
-      if (foundBlog) return { activeBlog: foundBlog, activeChannel: channel };
+      if (foundBlog) return { activePost: foundBlog, activeChannel: channel };
     }
 
     const postFile =
@@ -55,7 +55,7 @@ export const useBlog = ({ channelSlug, channelId, blogSlug }: useBlogProps = {})
       )) ||
       (await getPost(dotYouClient, channel.fileMetadata.appData.uniqueId as string, blogSlug));
 
-    if (postFile) return { activeBlog: postFile, activeChannel: channel };
+    if (postFile) return { activePost: postFile, activeChannel: channel };
   };
 
   return useQuery({

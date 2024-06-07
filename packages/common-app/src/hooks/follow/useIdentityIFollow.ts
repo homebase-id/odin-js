@@ -10,7 +10,7 @@ export const useIdentityIFollow = ({ odinId }: useIdentityIFollowProps) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
 
-  const fetchBlogData = async ({ odinId }: { odinId: string }) => {
+  const fetch = async ({ odinId }: { odinId: string }) => {
     const response = await fetchIdentityIFollow(dotYouClient, odinId);
     return response;
   };
@@ -23,7 +23,7 @@ export const useIdentityIFollow = ({ odinId }: useIdentityIFollowProps) => {
   return {
     fetch: useQuery({
       queryKey: ['following', odinId],
-      queryFn: () => fetchBlogData({ odinId: odinId as string }),
+      queryFn: () => fetch({ odinId: odinId as string }),
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,

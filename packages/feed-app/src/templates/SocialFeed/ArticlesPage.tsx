@@ -11,7 +11,7 @@ import {
   Plus,
   PostTextListItem,
   SubtleMessage,
-  useBlogPostsInfinite,
+  usePostsInfinite,
   useDrafts,
 } from '@youfoundation/common-app';
 import { flattenInfinteData } from '@youfoundation/common-app';
@@ -94,7 +94,7 @@ const PublishedArticlesView = () => {
     isLoading: articlesLoading,
     hasNextPage,
     fetchNextPage,
-  } = useBlogPostsInfinite({
+  } = usePostsInfinite({
     postType: 'Article',
     includeHidden: true,
   });

@@ -5,7 +5,7 @@ import {
   PostDetailCard,
   RelatedArticles,
   t,
-  useBlog,
+  usePost,
 } from '@youfoundation/common-app';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
 
@@ -17,7 +17,7 @@ import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
 const PostDetail = () => {
   const navigate = useNavigate();
   const { channelKey, postKey } = useParams();
-  const { data: postData, isLoading: postDataLoading } = useBlog(
+  const { data: postData, isLoading: postDataLoading } = usePost(
     channelKey && postKey
       ? {
           channelSlug: channelKey,
@@ -38,7 +38,7 @@ const PostDetail = () => {
     );
   }
 
-  const post = postData?.activeBlog.fileMetadata.appData.content;
+  const post = postData?.activePost.fileMetadata.appData.content;
   const channel = postData?.activeChannel;
   return (
     <>
@@ -68,7 +68,7 @@ const PostDetail = () => {
           />
           <PostDetailCard
             channel={channel}
-            postFile={postData?.activeBlog}
+            postFile={postData?.activePost}
             isOwner={isOwner}
             isAuthenticated={isAuthenticated}
             onNavigate={(path: string) => navigate(path)}
@@ -77,8 +77,8 @@ const PostDetail = () => {
         </div>
       </section>
       <div className="container mx-auto sm:px-5">
-        {postData?.activeBlog.fileMetadata.appData.content.type === 'Article' && (
-          <RelatedArticles blog={postData.activeBlog} channel={channel} />
+        {postData?.activePost.fileMetadata.appData.content.type === 'Article' && (
+          <RelatedArticles blog={postData.activePost} channel={channel} />
         )}
       </div>
 

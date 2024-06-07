@@ -6,7 +6,7 @@ import {
   HOME_ROOT_PATH,
   Label,
   SubtleMessage,
-  useBlogPostsInfinite,
+  usePostsInfinite,
   useDotYouClient,
 } from '@youfoundation/common-app';
 import { Select } from '@youfoundation/common-app';
@@ -103,7 +103,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
     fetchNextPage,
     isFetchingNextPage,
     isFetched: isPostsLoaded,
-  } = useBlogPostsInfinite({ channelId: channelId });
+  } = usePostsInfinite({ channelId: channelId });
   const flattenedPosts = flattenInfinteData<HomebaseFile<PostContent>>(
     blogPosts,
     BLOG_POST_INFIITE_PAGE_SIZE

@@ -2,7 +2,7 @@ import {
   OpenLock,
   Lock,
   t,
-  useBlog,
+  usePost,
   Article as ArticleIcon,
   ChannelOrAclSelector,
   ActionButton,
@@ -20,7 +20,7 @@ import { getNewId } from '@youfoundation/js-lib/helpers';
 
 export const ArticleDuplicatePage = () => {
   const { channelKey, postKey } = useParams();
-  const { data: serverData, isLoading: isLoadingServerData } = useBlog({
+  const { data: serverData, isLoading: isLoadingServerData } = usePost({
     channelSlug: channelKey,
     channelId: channelKey,
     blogSlug: postKey,
@@ -30,7 +30,7 @@ export const ArticleDuplicatePage = () => {
     status: duplicatePostStatus,
     error: duplictePostError,
   } = useManagePost().duplicate;
-  const { activeBlog: postFile, activeChannel: channel } = serverData || {};
+  const { activePost: postFile, activeChannel: channel } = serverData || {};
   const [newPostId] = useState(getNewId());
 
   const [targetChannel, setTargetChannel] = useState<

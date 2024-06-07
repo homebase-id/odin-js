@@ -2,11 +2,7 @@ import { getChannelDrive, PostContent } from '@youfoundation/js-lib/public';
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import {
-  ChannelDefinitionVm,
-  HOME_ROOT_PATH,
-  useBlogPostsInfinite,
-} from '@youfoundation/common-app';
+import { ChannelDefinitionVm, HOME_ROOT_PATH, usePostsInfinite } from '@youfoundation/common-app';
 import { Arrow, Image, Video } from '@youfoundation/common-app';
 
 import { t } from '@youfoundation/common-app';
@@ -34,7 +30,7 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
   const [clientWidth, setClientWidth] = useState<number>();
   const scrollContainer = useRef<HTMLDivElement>(null);
 
-  const { data: blogPosts, isFetched: blogsFetched } = useBlogPostsInfinite({
+  const { data: blogPosts, isFetched: blogsFetched } = usePostsInfinite({
     channelId: channel?.fileMetadata.appData.uniqueId,
   });
   const flattenedPosts = blogPosts ? blogPosts?.pages?.flatMap((page) => page.results) : [];
