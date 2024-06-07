@@ -5,8 +5,6 @@ import { useCircle } from '@youfoundation/common-app';
 import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification, mergeStates, ActionButton } from '@youfoundation/common-app';
 import ConnectionCard from '../../../components/Connection/ConnectionCard/ConnectionCard';
-import CircleDialog from '../../../components/Dialog/CircleDialog/CircleDialog';
-import MemberLookupDialog from '../../../components/Dialog/MemberLookupDialog/MemberLookupDialog';
 import { Circles } from '@youfoundation/common-app';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
@@ -17,12 +15,14 @@ import { Trash } from '@youfoundation/common-app';
 import { Block } from '@youfoundation/common-app';
 import { Check } from '@youfoundation/common-app';
 import { AppInteractionPermissionOverview } from '../../../components/PermissionViews/AppInteractionPermissionView/AppInteractionPermissionView';
-import CircleAppInteractionDialog from '../../../components/Dialog/CircleAppInteractionDialog/CircleAppInteractionDialog';
-import DrivePermissionSelectorDialog from '../../../components/Dialog/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { ALL_CONNECTIONS_CIRCLE_ID, Membership } from '@youfoundation/js-lib/network';
 import DomainCard from '../../../components/Connection/DomainCard/DomainCard';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import CircleAppInteractionDialog from '../../../components/Circles/CircleAppInteractionDialog/CircleAppInteractionDialog';
+import CircleDialog from '../../../components/Circles/CircleDialog/CircleDialog';
+import MemberLookupDialog from '../../../components/Circles/MemberLookupDialog/MemberLookupDialog';
+import DrivePermissionSelectorDialog from '../../../components/Drives/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
 
 const CircleDetails = () => {
   const { circleKey } = useParams();

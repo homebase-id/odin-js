@@ -19,12 +19,12 @@ import {
 import { Bell } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { useEffect, useMemo, useState } from 'react';
-import PushNotificationsDialog from '../../components/Dialog/PushNotificationsDialog/PushNotificationsDialog';
 import { useApp } from '../../hooks/apps/useApp';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useSearchParams } from 'react-router-dom';
 import { useContact } from '../../hooks/contacts/useContact';
 import { PushNotification } from '@youfoundation/js-lib/core';
+import PushNotificationsDialog from '../../components/Notifications/PushNotificationsDialog/PushNotificationsDialog';
 
 interface NotificationClickData {
   notification: string;

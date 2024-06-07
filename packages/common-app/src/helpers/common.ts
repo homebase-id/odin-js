@@ -15,7 +15,7 @@ export const getVersion = () => {
       return import.meta.env.VITE_VERSION;
     }
 
-    const t = new Date(1970, 0, 1); // Epoch
+    const t = new Date(0);
     t.setSeconds(numberedVersion);
     return t.toISOString();
   } catch (ex) {
@@ -32,14 +32,14 @@ export const flattenInfinteData = <T>(
         cursorState: unknown;
       }>
     | undefined,
-  pageSize: number,
+  pageSize?: number,
   sortFn?: (a: T, b: T) => number
 ) => {
   return (rawData?.pages
     .flatMap((page) => page?.results)
     .filter((post) => !!post)
     .sort(sortFn)
-    .slice(0, rawData?.pages.length * pageSize) || []) as T[];
+    .slice(0, pageSize ? rawData?.pages.length * pageSize : undefined) || []) as T[];
 };
 
 export const ellipsisAtMaxChar = (str?: string, maxChar?: number) => {

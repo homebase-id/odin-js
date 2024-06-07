@@ -20,10 +20,10 @@ import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { useConnection } from '../../../hooks/connections/useConnection';
 import { useContact } from '../../../hooks/contacts/useContact';
 import { useEffect, useState } from 'react';
-import OutgoingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/OutgoingConnectionDialog';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
 import { useConnectionGrantStatus } from '../../../hooks/connections/useConnectionGrantStatus';
 import { hasDebugFlag, jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import OutgoingConnectionDialog from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
 
 export const IdentityPageMetaAndActions = ({
   odinId, // setIsEditPermissionActive,
@@ -173,17 +173,17 @@ export const IdentityPageMetaAndActions = ({
   if (connectionInfo?.status === 'connected') {
     actionGroupOptions.push({
       icon: Trash,
-      label: t('Remove'),
+      label: t('Disconnect'),
       actionOptions: {
-        title: `${t('Remove')} ${odinId}`,
+        title: `${t('Disconnect')} ${odinId}`,
         body: `${t('Are you sure you want to remove')} ${odinId} ${t(
           'from your connections. They will lose all existing access.'
         )}`,
         options: [
           isFollowing
             ? {
-                children: t('Unfollow & Remove'),
-                type: 'primary',
+                children: t('Unfollow & Disconnect'),
+                type: 'remove',
                 onClick: async () => {
                   try {
                     await unfollow({ odinId });
@@ -196,7 +196,7 @@ export const IdentityPageMetaAndActions = ({
               }
             : undefined,
           {
-            children: t('Remove'),
+            children: t('Disconnect'),
             type: isFollowing ? 'secondary' : 'primary',
             onClick: async () => {
               try {

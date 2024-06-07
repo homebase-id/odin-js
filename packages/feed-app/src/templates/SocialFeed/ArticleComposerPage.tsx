@@ -17,6 +17,7 @@ import {
   usePortal,
   t,
   ChannelOrAclSelector,
+  Times,
 } from '@youfoundation/common-app';
 import { InnerFieldEditors } from '../../components/SocialFeed/ArticleFieldsEditor/ArticleFieldsEditor';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
@@ -38,12 +39,11 @@ export const ArticleComposerPage = () => {
     // Actions
     doSave,
     doRemovePost,
-    movePost,
 
     // Data
     channel,
     postFile,
-    isValidPost,
+    isInvalidPost,
     isPublished,
     files,
 
@@ -58,6 +58,8 @@ export const ArticleComposerPage = () => {
 
     // Errors
     error,
+
+    isLoadingServerData,
   } = useArticleComposer({
     postKey,
     channelKey: channelKey || searchParams.get('channel') || undefined,
@@ -69,34 +71,13 @@ export const ArticleComposerPage = () => {
   });
 
   const PostButton = ({ className }: { className?: string }) => {
-    if (isPublished)
-      return (
-        <ActionButton
-          className={`md:w-auto ${className ?? ''}`}
-          state={saveStatus !== 'success' ? saveStatus : undefined}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            doSave(postFile, 'draft');
-          }}
-          confirmOptions={{
-            title: t('Post'),
-            body: t(
-              'Are you sure you want to unpublish this post, it will no longer be publicly available?'
-            ),
-            buttonText: t('Convert to draft'),
-            type: 'info',
-          }}
-          type="primary"
-        >
-          {t('Convert to draft')}
-        </ActionButton>
-      );
+    if (isPublished) return null;
 
     return (
       <ActionButton
         className={`md:w-auto ${
-          isValidPost(postFile) ||
+          !postFile.fileId ||
+          isInvalidPost(postFile) ||
           !postFile.fileMetadata.appData.content.caption ||
           !postFile.fileMetadata.appData.content.caption.length
             ? 'pointer-events-none opacity-20 grayscale'
@@ -164,6 +145,8 @@ export const ArticleComposerPage = () => {
     [setPostFile, debouncedSave]
   );
 
+  if (isLoadingServerData) return null;
+
   return (
     <>
       <PageMeta
@@ -198,25 +181,40 @@ export const ArticleComposerPage = () => {
                   icon: Cog,
                   onClick: () => setIsOptionsDialogOpen(!isOptionsDialogOpen),
                 },
-                ...(postFile.fileId
-                  ? [
-                      {
-                        label: t('Remove'),
-                        onClick: () => {
-                          doRemovePost();
-                          navigate(`${ROOT_PATH}/articles`);
-                        },
-                        icon: Trash,
-                        confirmOptions: {
-                          title: t('Remove'),
-                          body: `${t('Are you sure you want to remove')} "${
-                            postFile?.fileMetadata.appData.content?.caption || t('New article')
-                          }"`,
-                          buttonText: t('Remove'),
-                        },
+                postFile.fileId
+                  ? {
+                      label: t('Remove'),
+                      onClick: () => {
+                        doRemovePost();
+                        navigate(`${ROOT_PATH}/articles`);
                       },
-                    ]
-                  : []),
+                      icon: Trash,
+                      confirmOptions: {
+                        title: t('Remove'),
+                        body: `${t('Are you sure you want to remove')} "${
+                          postFile?.fileMetadata.appData.content?.caption || t('New article')
+                        }"`,
+                        buttonText: t('Remove'),
+                      },
+                    }
+                  : undefined,
+                isPublished
+                  ? {
+                      label: t('Convert to draft'),
+                      onClick: () => {
+                        doSave(postFile, 'draft');
+                      },
+                      icon: Times,
+                      confirmOptions: {
+                        title: t('Post'),
+                        body: t(
+                          'Are you sure you want to unpublish this post, it will no longer be publicly available?'
+                        ),
+                        buttonText: t('Convert to draft'),
+                        type: 'info',
+                      },
+                    }
+                  : undefined,
               ]}
               icon={Ellipsis}
             >
@@ -225,52 +223,69 @@ export const ArticleComposerPage = () => {
           </>
         }
       />
+
       <section className="pb-10">
         <div className="sm:px-10">
-          <div className="grid grid-flow-row gap-1">
-            <span className="text-sm text-gray-400">{t('Channel')}</span>
-            <div className="mb-5 flex flex-row items-center gap-2 border-gray-200 border-opacity-60 bg-background p-2 text-foreground dark:border-gray-800 md:rounded-lg md:border md:p-4">
-              {isPublished ? (
-                <p className="text-sm text-gray-400">
-                  {t('After a publish, the post can no longer be moved between channels')}
-                </p>
-              ) : (
+          {isPublished || postFile.fileId ? (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                doSave();
+                return false;
+              }}
+            >
+              <InnerFieldEditors
+                key={postFile.fileMetadata.appData.content.id}
+                postFile={postFile}
+                channel={channel}
+                files={files}
+                setFiles={setFiles}
+                onChange={handleRTEChange}
+              />
+
+              <div className="mb-5 flex md:hidden">
+                <PostButton className="w-full justify-center" />
+              </div>
+            </form>
+          ) : (
+            <div className="grid grid-flow-row gap-1">
+              <span className="text-sm text-gray-400">{t('Channel')}</span>
+              <div className="mb-5 flex flex-row items-center gap-2 border-gray-200 border-opacity-60 bg-background p-2 text-foreground dark:border-gray-800 md:rounded-lg md:border md:p-4">
                 <ChannelOrAclSelector
+                  key={postFile.fileMetadata.appData.content?.channelId}
                   className={`w-full rounded border-gray-300 px-3 focus:border-indigo-500 dark:border-gray-700`}
                   defaultChannelValue={postFile.fileMetadata.appData.content?.channelId}
                   onChange={({ channel: newChannel }) => {
                     if (!newChannel) return;
-                    if (postFile.fileId) movePost(newChannel);
                     else setChannel(newChannel);
                   }}
                   disabled={isPublished}
                   excludeMore={true}
                   excludeCustom={true}
                 />
-              )}
-            </div>
-          </div>
+              </div>
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              doSave();
-              return false;
-            }}
-          >
-            <InnerFieldEditors
-              key={postFile.fileMetadata.appData.content.id}
-              postFile={postFile}
-              channel={channel}
-              files={files}
-              setFiles={setFiles}
-              onChange={handleRTEChange}
-            />
-
-            <div className="mb-5 flex md:hidden">
-              <PostButton className="w-full justify-center" />
+              <div className="flex flex-row-reverse gap-2">
+                <ActionButton
+                  className={``}
+                  icon={Arrow}
+                  state={saveStatus !== 'success' ? saveStatus : undefined}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    doSave(postFile);
+                  }}
+                  type="primary"
+                >
+                  {t('Continue')}
+                </ActionButton>
+                <ActionButton type="secondary" onClick={() => navigate(-1)}>
+                  {t('Cancel')}
+                </ActionButton>
+              </div>
             </div>
-          </form>
+          )}
+
           <ErrorNotification error={error} />
         </div>
       </section>
@@ -290,11 +305,6 @@ export const ArticleComposerPage = () => {
             setPostFile(dirtyPostFile);
             await doSave(dirtyPostFile);
           }
-
-          // if (newChannel) {
-          //   if (postFile.fileId) movePost(newChannel);
-          //   else setChannel(newChannel);
-          // }
         }}
       />
       {isConfirmUnpublish ? (

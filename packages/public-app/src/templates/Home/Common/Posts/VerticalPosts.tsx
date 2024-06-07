@@ -2,6 +2,7 @@ import { Virtualizer, useWindowVirtualizer } from '@tanstack/react-virtual';
 import { PostContent } from '@youfoundation/js-lib/public';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
+  BLOG_POST_INFIITE_PAGE_SIZE,
   HOME_ROOT_PATH,
   Label,
   SubtleMessage,
@@ -20,8 +21,6 @@ import LoginDialog from '../../../../components/Dialog/LoginDialog/LoginDialog';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useNavigate } from 'react-router-dom';
-
-const PAGE_SIZE = 30;
 
 const VerticalPosts = ({ className }: { className?: string }) => {
   return (
@@ -104,8 +103,11 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
     fetchNextPage,
     isFetchingNextPage,
     isFetched: isPostsLoaded,
-  } = useBlogPostsInfinite({ pageSize: PAGE_SIZE, channelId: channelId });
-  const flattenedPosts = flattenInfinteData<HomebaseFile<PostContent>>(blogPosts, PAGE_SIZE);
+  } = useBlogPostsInfinite({ channelId: channelId });
+  const flattenedPosts = flattenInfinteData<HomebaseFile<PostContent>>(
+    blogPosts,
+    BLOG_POST_INFIITE_PAGE_SIZE
+  );
 
   const parentRef = useRef<HTMLDivElement>(null);
   const parentOffsetRef = useRef(0);

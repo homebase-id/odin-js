@@ -1,6 +1,5 @@
 import { useRef } from 'react';
 import { useMatch, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import IdentityIFollowEditDialog from '../../components/Dialog/IdentityIFollowEditDialog/IdentityIFollowEditDialog';
 import {
   ActionGroup,
   Block,
@@ -19,10 +18,11 @@ import {
 import { Persons } from '@youfoundation/common-app';
 import { Times } from '@youfoundation/common-app';
 import { t, useIdentityIFollow } from '@youfoundation/common-app';
-import IdentityThatFollowsDialog from '../../components/Dialog/IdentityIFollowEditDialog/IdentityThatFollowsDialog';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import Submenu from '../../components/SubMenu/SubMenu';
 import { useConnectionActions } from '../../hooks/connections/useConnectionActions';
+import IdentityIFollowEditDialog from '../../components/Followers/IdentityIFollowEditDialog/IdentityIFollowEditDialog';
+import IdentityThatFollowsDialog from '../../components/Followers/IdentityIFollowEditDialog/IdentityThatFollowsDialog';
 
 const Follow = () => {
   const followersMatch = useMatch({ path: 'owner/follow/followers/*' });

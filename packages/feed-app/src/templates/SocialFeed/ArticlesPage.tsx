@@ -4,6 +4,7 @@ import {
   ActionButton,
   ActionLink,
   Article as ArticleIcon,
+  BLOG_POST_INFIITE_PAGE_SIZE,
   HOME_ROOT_PATH,
   LoadingBlock,
   Plus,
@@ -85,7 +86,6 @@ const DraftsView = () => {
   );
 };
 
-const PAGE_SIZE = 30;
 const PublishedArticlesView = () => {
   const { data: channels } = useChannels({ isAuthenticated: true, isOwner: true });
 
@@ -96,7 +96,7 @@ const PublishedArticlesView = () => {
     fetchNextPage,
   } = useBlogPostsInfinite({
     postType: 'Article',
-    pageSize: PAGE_SIZE,
+    includeHidden: true,
   });
 
   const flattenedPosts = flattenInfinteData<HomebaseFile<Article>>(
@@ -104,7 +104,7 @@ const PublishedArticlesView = () => {
       results: HomebaseFile<Article>[];
       cursorState: unknown;
     }>,
-    PAGE_SIZE
+    hasNextPage ? BLOG_POST_INFIITE_PAGE_SIZE : undefined
   );
 
   return (

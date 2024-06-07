@@ -191,6 +191,22 @@ export const PostComposer = ({
                 size="square"
                 type="mute"
                 options={[
+                  isOwner
+                    ? {
+                        label: t('Create new article'),
+                        href: `${FEED_ROOT_PATH}/new?caption=${caption}&channel=${targetChannel.channel.fileMetadata.appData.uniqueId}`,
+                        icon: Article,
+                      }
+                    : undefined,
+
+                  isOwner
+                    ? {
+                        label: t('List my articles'),
+                        href: `${FEED_ROOT_PATH}/articles`,
+                        icon: Pencil,
+                      }
+                    : undefined,
+
                   reactAccess === false
                     ? {
                         label: t('Enable reactions'),
@@ -202,21 +218,6 @@ export const PostComposer = ({
                         icon: Lock,
                         onClick: () => setReactAccess(false),
                       },
-
-                  ...(isOwner
-                    ? [
-                        {
-                          label: t('Convert to an article'),
-                          href: `${FEED_ROOT_PATH}/new?caption=${caption}&channel=${targetChannel.channel.fileMetadata.appData.uniqueId}`,
-                          icon: Article,
-                        },
-                        {
-                          label: t('See my drafts'),
-                          href: `${FEED_ROOT_PATH}/articles`,
-                          icon: Pencil,
-                        },
-                      ]
-                    : []),
                 ]}
               />
             </>
@@ -229,11 +230,12 @@ export const PostComposer = ({
                 targetChannel.channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
               }
               defaultAcl={targetChannel.overrideAcl}
-              onChange={(newTargetChannel) => {
+              onChange={({ channel, acl }) => {
                 setTargetChannel((current) => ({
                   ...current,
-                  ...newTargetChannel,
-                  channel: newTargetChannel.channel || current.channel,
+                  ...channel,
+                  channel: channel || current.channel,
+                  overrideAcl: acl,
                 }));
               }}
               excludeMore={true}
@@ -404,6 +406,12 @@ export const ChannelOrAclSelector = React.forwardRef(
                 {channel.fileMetadata.appData.content.name}
               </option>
             ))}
+
+            {!excludeCustom ? (
+              <option value={'custom'} key={'custom'}>
+                ⚙️ {t('Custom')} ...
+              </option>
+            ) : null}
           </optgroup>
 
           {showCollaborativeChannels ? (
@@ -423,16 +431,11 @@ export const ChannelOrAclSelector = React.forwardRef(
             </>
           ) : null}
 
-          {!excludeMore || !excludeCustom ? (
+          {!excludeMore ? (
             <optgroup label={t('Advanced')}>
               {!excludeMore ? (
                 <option value={'more'} key={'more'}>
                   {t('More')}...
-                </option>
-              ) : null}
-              {!excludeCustom ? (
-                <option value={'custom'} key={'custom'}>
-                  {t('Custom')}...
                 </option>
               ) : null}
             </optgroup>
@@ -448,6 +451,7 @@ export const ChannelOrAclSelector = React.forwardRef(
           }
           title={t('Who can see your post?')}
           onConfirm={(acl) => {
+            console.log('custom acl', acl);
             onChange({ channel: publicChannel, acl, odinId: undefined });
             setIsCustomAclOpen(false);
           }}
