@@ -38,7 +38,7 @@ export const RecipientInput = ({
               contact.odinId &&
               (!query ||
                 contact.odinId?.includes(query) ||
-                contact.name?.displayName.includes(query))
+                contact.name?.displayName?.includes(query))
           )
       : []),
     ownContactFile,

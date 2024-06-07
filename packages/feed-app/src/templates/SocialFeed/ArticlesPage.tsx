@@ -104,7 +104,7 @@ const PublishedArticlesView = () => {
       results: HomebaseFile<Article>[];
       cursorState: unknown;
     }>,
-    BLOG_POST_INFIITE_PAGE_SIZE
+    hasNextPage ? BLOG_POST_INFIITE_PAGE_SIZE : undefined
   );
 
   return (

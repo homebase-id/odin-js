@@ -29,7 +29,7 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
     () =>
       flattenInfinteData<HomebaseFile<MailConversation>>(
         conversations,
-        MAIL_CONVERSATIONS_PAGE_SIZE,
+        hasMorePosts ? MAIL_CONVERSATIONS_PAGE_SIZE : undefined,
         (a, b) =>
           (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
           (a.fileMetadata.appData.userDate || a.fileMetadata.created)
