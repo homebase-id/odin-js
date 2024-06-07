@@ -80,6 +80,7 @@ export const useArticleComposer = ({
       ? serverData.activeChannel
       : BlogConfig.PublicChannelNewDsr
   );
+  const [groupOdinId, setGroupOdinId] = useState<string | undefined>(undefined);
 
   // Update state when server data is fetched
   useEffect(() => {
@@ -163,6 +164,7 @@ export const useArticleComposer = ({
     // Save and process result
     const uploadResult = await savePost({
       postFile: toPostFile,
+      odinId: groupOdinId,
       channelId: targetChannel.fileMetadata.appData.uniqueId as string,
       mediaFiles: files,
     });
@@ -230,6 +232,7 @@ export const useArticleComposer = ({
     // Data updates
     setPostFile,
     setChannel,
+    setGroupOdinId,
     setFiles,
 
     // Status

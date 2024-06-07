@@ -38,6 +38,7 @@ export const PostMedia = ({
     if (showFallback) {
       return (
         <div
+          onClick={onClick ? (e) => onClick(e, 0) : undefined}
           className={`${
             className || ''
           } relative aspect-square overflow-hidden bg-slate-50 text-slate-200 dark:bg-slate-700 dark:text-slate-600`}

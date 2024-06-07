@@ -49,6 +49,7 @@ export const ArticleComposerPage = () => {
 
     // Data updates
     setPostFile,
+    setGroupOdinId,
     setChannel,
     setFiles,
 
@@ -292,13 +293,15 @@ export const ArticleComposerPage = () => {
                   key={postFile.fileMetadata.appData.content?.channelId}
                   className={`w-full rounded border-gray-300 px-3 focus:border-indigo-500 dark:border-gray-700`}
                   defaultChannelValue={postFile.fileMetadata.appData.content?.channelId}
-                  onChange={({ channel: newChannel }) => {
+                  onChange={({ channel: newChannel, odinId }) => {
                     if (!newChannel) return;
-                    else setChannel(newChannel);
+                    setChannel(newChannel);
+                    setGroupOdinId(odinId);
                   }}
                   disabled={isPublished}
                   excludeMore={true}
                   excludeCustom={true}
+                  excludeCollaborative={true}
                 />
               </div>
 

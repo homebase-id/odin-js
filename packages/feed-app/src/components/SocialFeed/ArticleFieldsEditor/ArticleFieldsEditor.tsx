@@ -54,6 +54,7 @@ export const InnerFieldEditors = ({
     imageDrive: getChannelDrive(channel.fileMetadata.appData.uniqueId as string),
     lastModified: (postFile as HomebaseFile<unknown>)?.fileMetadata?.updated,
   }).fetch;
+  console.log(imageData, 'imageData');
 
   const pendingFile = files.find(
     (f) => 'file' in f && f.key === postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey

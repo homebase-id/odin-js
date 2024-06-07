@@ -107,6 +107,7 @@ export const ArticleDuplicatePage = () => {
                 }}
                 excludeMore={true}
                 excludeCustom={true}
+                excludeCollaborative={true}
               />
             </div>
 

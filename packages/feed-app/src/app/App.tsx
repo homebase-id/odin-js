@@ -56,7 +56,7 @@ const localStoragePersister = createSyncStoragePersister({
 });
 
 // Explicit includes to avoid persisting media items, or large data in general
-const INCLUDED_QUERY_KEYS = ['collaborative-channels'];
+const INCLUDED_QUERY_KEYS = ['common-image', 'collaborative-channels'];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   buster: '202403',
   maxAge: Infinity,
