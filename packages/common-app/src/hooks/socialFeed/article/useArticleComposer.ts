@@ -1,7 +1,6 @@
 import { slugify, getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { Article, ChannelDefinition, BlogConfig } from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
-import { HOME_ROOT_PATH, getReadingTime, useBlog, useDotYouClient } from '../../../..';
 import { useManagePost } from '../post/useManagePost';
 import {
   HomebaseFile,
@@ -11,6 +10,10 @@ import {
   MediaFile,
   UploadResult,
 } from '@youfoundation/js-lib/core';
+import { useDotYouClient } from '../../auth/useDotYouClient';
+import { useBlog } from '../post/usePost';
+import { getReadingTime } from '../../../helpers/richTextHelper';
+import { HOME_ROOT_PATH } from '../../../core/paths';
 
 export const EMPTY_POST: Article = {
   id: '',
@@ -191,6 +194,7 @@ export const useArticleComposer = ({
             versionTag: (uploadResult as UploadResult).newVersionTag,
           },
           // We force set the keyHeader as it's returned from the server, and needed for fast saves afterwards
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           sharedSecretEncryptedKeyHeader: (uploadResult as UploadResult).keyHeader as any,
         };
       });

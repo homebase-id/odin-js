@@ -3,11 +3,9 @@ import { ChannelDefinition, EmbeddedPost, PostContent } from '@youfoundation/js-
 import { OwnerActions } from './OwnerActions';
 import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
 import { aclEqual } from '@youfoundation/js-lib/helpers';
-import { ChannelDefinitionVm } from '../../../hooks/posts/channels/useChannels';
 import { AclSummary } from '../../../acl';
 import { HOME_ROOT_PATH } from '../../../core';
 import { t } from '../../../helpers';
-import { useDotYouClient, useIsConnected, useManageSocialFeed } from '../../../hooks';
 import {
   ActionGroupOptionProps,
   UserX,
@@ -19,6 +17,9 @@ import {
   Link,
   Persons,
 } from '../../../ui';
+import { ChannelDefinitionVm, useManageSocialFeed } from '../../../hooks/socialFeed';
+import { useDotYouClient } from '../../../hooks/auth/useDotYouClient';
+import { useIsConnected } from '../../../hooks/connections/useIsConnected';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;

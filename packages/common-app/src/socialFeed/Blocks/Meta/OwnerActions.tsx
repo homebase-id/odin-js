@@ -3,13 +3,13 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useManagePost } from '../../../hooks/socialFeed/post/useManagePost';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { useChannel } from '../../../hooks/posts/channels/useChannel';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { ActionGroup, ActionGroupOptionProps } from '../../../ui/Buttons/ActionGroup';
 import { Pencil } from '../../../ui/Icons/Pencil';
 import { t } from '../../../helpers/i18n/dictionary';
 import { Clipboard, Trash } from '../../../ui';
 import { EditPostDialog } from '../../EditPostDialog/EditPostDialog';
+import { useChannel } from '../../../hooks/socialFeed/channels/useChannel';
 
 export const OwnerActions = ({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
   const postContent = postFile.fileMetadata.appData.content;

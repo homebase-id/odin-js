@@ -6,9 +6,10 @@ import {
   PostContent,
   PostType,
 } from '@youfoundation/js-lib/public';
-import { useChannels, useDotYouClient } from '../../..';
 import { getCachedPosts, getCachedRecentPosts } from './cachedDataHelpers';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { useChannels } from '../channels/useChannels';
+import { useDotYouClient } from '../../auth/useDotYouClient';
 
 type useBlogPostsInfiniteProps = {
   channelId?: string;

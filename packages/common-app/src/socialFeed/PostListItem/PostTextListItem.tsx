@@ -23,9 +23,7 @@ export const PostTextListItem = ({
   return (
     <>
       <div
-        className={`m-3 rounded-lg ${
-          className ?? ''
-        } p-3 hover:shadow-md hover:dark:shadow-slate-600`}
+        className={`rounded-lg ${className ?? ''} p-3 hover:shadow-md hover:dark:shadow-slate-600`}
         key={draft.fileId}
       >
         <FakeAnchor

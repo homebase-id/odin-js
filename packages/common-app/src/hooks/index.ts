@@ -23,7 +23,6 @@ export * from './longPress/useLongPress';
 export * from './notifications/useNotifications';
 export * from './notifications/usePushNotifications';
 export * from './portal/usePortal';
-export * from './posts';
 export * from './profiles/useProfiles';
 export * from './reactions';
 export * from './securityContext/useSecurityContext';

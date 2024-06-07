@@ -354,6 +354,7 @@ export const useManagePost = () => {
         queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
       },
     }),
+
     remove: useMutation({
       mutationFn: removeData,
       onSuccess: (_data, variables) => {
@@ -383,6 +384,7 @@ export const useManagePost = () => {
 
     duplicate: useMutation({
       mutationFn: duplicatePost,
+      // No optimistic mutation as it directly navigates after success; And as such would lose the cache
     }),
   };
 };

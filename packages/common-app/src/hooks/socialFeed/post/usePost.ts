@@ -1,10 +1,10 @@
 import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getPost, getPostBySlug, PostContent } from '@youfoundation/js-lib/public';
 
-import { useBlogPostsInfiniteReturn } from './useBlogPostsInfinite';
+import { useBlogPostsInfiniteReturn } from './usePostsInfinite';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { useChannel } from './channels/useChannel';
-import { useDotYouClient } from '../auth/useDotYouClient';
+import { useChannel } from '../channels/useChannel';
+import { useDotYouClient } from '../../auth/useDotYouClient';
 
 type useBlogProps = {
   channelId?: string;
