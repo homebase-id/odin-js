@@ -1,6 +1,5 @@
-import { ExternalFileIdentifier } from '../../../../core';
 import { DotYouClient } from '../../../core/DotYouClient';
-import { TargetDrive } from '../../../core/DriveData/File/DriveFileTypes';
+import { ExternalFileIdentifier, TargetDrive } from '../../../core/DriveData/File/DriveFileTypes';
 import { assertIfDefined } from '../../../helpers/DataUtil';
 
 export interface SendReadReceiptResponse {
