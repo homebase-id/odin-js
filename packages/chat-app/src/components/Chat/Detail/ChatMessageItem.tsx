@@ -260,15 +260,15 @@ const ChatMediaMessageBody = ({
         </p>
       ) : null}
       <div className="relative">
-        <ChatMedia msg={msg} />
-        {!hasACaption && !content.replyId ? (
-          <ChatFooter className="absolute bottom-0 right-0 px-2 py-1" />
+        {content.replyId ? (
+          <EmbeddedMessageWithId msgId={content.replyId} className="mb-4" />
         ) : null}
+        <ChatMedia msg={msg} />
+        {!hasACaption ? <ChatFooter className="absolute bottom-0 right-0 px-2 py-1" /> : null}
       </div>
-      {hasACaption || content.replyId ? (
+      {hasACaption ? (
         <div className="flex min-w-0 flex-col px-2 py-2 md:flex-row md:justify-between">
           <p className="whitespace-pre-wrap break-words">{content.message}</p>
-          {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
           <ChatFooter />
         </div>
       ) : null}
