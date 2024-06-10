@@ -65,6 +65,7 @@ export interface FileQueryParams {
 export interface GetModifiedResultOptions {
   maxRecords: number;
   includeHeaderContent?: boolean;
+  includeTransferHistory?: boolean;
   excludePreviewThumbnail?: boolean;
   maxDate?: number | undefined;
   cursor?: number | undefined;
