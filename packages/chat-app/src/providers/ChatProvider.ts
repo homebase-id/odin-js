@@ -387,7 +387,7 @@ export const updateChatMessage = async (
         dotYouClient,
         message.fileMetadata.appData.uniqueId as string
       );
-      if (!existingChatMessage) return null;
+      if (!existingChatMessage) return;
       message.fileMetadata.versionTag = existingChatMessage.fileMetadata.versionTag;
       return await updateChatMessage(dotYouClient, message, recipients, keyHeader);
     }
