@@ -15,6 +15,7 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { UnifiedConversation } from '../../providers/ConversationProvider';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { SendReadReceiptResponseRecipientStatus } from '@youfoundation/js-lib/peer';
 
 const PAGE_SIZE = 100;
 export const useChatMessages = (props?: { conversationId: string | undefined }) => {
@@ -33,7 +34,21 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     conversation: HomebaseFile<UnifiedConversation>;
     messages: HomebaseFile<ChatMessage>[];
   }) => {
-    return await requestMarkAsRead(dotYouClient, conversation, messages);
+    const response = await requestMarkAsRead(dotYouClient, conversation, messages);
+
+    response.results.forEach((result) => {
+      const someFailed = result.status.some(
+        (recipientStatus) =>
+          recipientStatus.status?.toLowerCase() ===
+          SendReadReceiptResponseRecipientStatus.SenderServerHadAnInternalError
+      );
+      if (someFailed) {
+        // TODO: Should we throw an error?
+        console.error('Error marking chat as read', { response });
+      }
+    });
+
+    return response;
   };
 
   const removeMessage = async ({

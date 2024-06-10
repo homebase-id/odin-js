@@ -1,12 +1,29 @@
+import { ExternalFileIdentifier } from '../../../../core';
 import { DotYouClient } from '../../../core/DotYouClient';
 import { TargetDrive } from '../../../core/DriveData/File/DriveFileTypes';
 import { assertIfDefined } from '../../../helpers/DataUtil';
+
+export interface SendReadReceiptResponse {
+  results: {
+    file: ExternalFileIdentifier;
+    status: { recipient: string; status: SendReadReceiptResponseRecipientStatus }[];
+  }[];
+}
+
+export enum SendReadReceiptResponseRecipientStatus {
+  RequestAcceptedIntoInbox = 'requestacceptedintoinbox',
+  RecipientIdentityReturnedServerError = 'recipientidentityreturnedservererror',
+  RecipientIdentityReturnedAccessDenied = 'recipientidentityreturnedaccessdenied',
+  NotConnectedToOriginalSender = 'notconnectedtooriginalsender',
+  RecipientIdentityReturnedBadRequest = 'recipientidentityreturnedbadrequest',
+  SenderServerHadAnInternalError = 'senderserverhadaninternalerror',
+}
 
 export const sendReadReceipt = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileIds: string[]
-): Promise<boolean | void> => {
+): Promise<SendReadReceiptResponse> => {
   assertIfDefined('TargetDrive', targetDrive);
   const client = dotYouClient.createAxiosClient();
 
@@ -18,10 +35,9 @@ export const sendReadReceipt = async (
   };
 
   return client
-    .post('/drive/files/send-read-receipt', request)
+    .post<SendReadReceiptResponse>('/drive/files/send-read-receipt', request)
     .then((response) => {
-      if (response.status === 200) return true;
-      return false;
+      return response.data;
     })
     .catch((error) => {
       console.error('[DotYouCore-js:sendReadReceipt]', error);
