@@ -76,7 +76,6 @@ export const uploadReaction = async (
           recipients: [...recipients],
           schedule: ScheduleOptions.SendNowAwaitResponse,
           sendContents: SendContents.All,
-          useGlobalTransitId: true,
           useAppNotification: true,
           appNotificationOptions: {
             appId: appId,
