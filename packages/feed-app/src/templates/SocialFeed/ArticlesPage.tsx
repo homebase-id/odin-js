@@ -7,10 +7,11 @@ import {
   BLOG_POST_INFIITE_PAGE_SIZE,
   HOME_ROOT_PATH,
   LoadingBlock,
+  Pencil,
   Plus,
   PostTextListItem,
   SubtleMessage,
-  useBlogPostsInfinite,
+  usePostsInfinite,
   useDrafts,
 } from '@youfoundation/common-app';
 import { flattenInfinteData } from '@youfoundation/common-app';
@@ -59,10 +60,9 @@ const DraftsView = () => {
         ) : null}
         {(!drafts || !drafts.length) && !draftsLoading ? (
           <SubtleMessage>{t('No drafts found')}</SubtleMessage>
-        ) : null}
-        {drafts ? (
-          <div className="-m-3">
-            {drafts.map((draft, index) => {
+        ) : (
+          <div className="flex flex-col gap-3">
+            {drafts?.map((draft, index) => {
               const channel = channels?.find((chnl) =>
                 stringGuidsEqual(
                   chnl.fileMetadata.appData.uniqueId,
@@ -80,7 +80,7 @@ const DraftsView = () => {
               );
             })}
           </div>
-        ) : null}
+        )}
       </div>
     </section>
   );
@@ -94,7 +94,7 @@ const PublishedArticlesView = () => {
     isLoading: articlesLoading,
     hasNextPage,
     fetchNextPage,
-  } = useBlogPostsInfinite({
+  } = usePostsInfinite({
     postType: 'Article',
     includeHidden: true,
   });
@@ -120,9 +120,9 @@ const PublishedArticlesView = () => {
         ) : null}
         {!articleData && !articlesLoading ? <>{t('No articles found')}</> : null}
         {articleData ? (
-          <div className="-m-3">
+          <div className="flex flex-col gap-3">
             {!flattenedPosts.length ? (
-              <SubtleMessage className="m-3">{t('No articles found')}</SubtleMessage>
+              <SubtleMessage>{t('No articles found')}</SubtleMessage>
             ) : (
               flattenedPosts.map((draft, index) => {
                 const channel = channels?.find((chnl) =>
@@ -138,7 +138,18 @@ const PublishedArticlesView = () => {
                     key={draft.fileId ?? index}
                     className="bg-background"
                     linkRoot={`${HOME_ROOT_PATH}posts`}
-                  />
+                  >
+                    <ActionLink
+                      icon={Pencil}
+                      type="mute"
+                      size="none"
+                      className="opacity-60 hover:opacity-100"
+                      href={`${ROOT_PATH}/edit/${
+                        channel?.fileMetadata.appData.content.slug ||
+                        channel?.fileMetadata.appData.uniqueId
+                      }/${draft.fileMetadata.appData.content.id}`}
+                    />
+                  </PostTextListItem>
                 );
               })
             )}

@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { usePortal } from '../hooks/portal/usePortal';
-import { useChannels } from '../hooks/posts/channels/useChannels';
 import { DialogWrapper } from '../ui/Dialog/DialogWrapper';
 import { Quote } from '../ui/Icons/Quote';
 import { ActionButton } from '../ui/Buttons/ActionButton';
 import { Plus } from '../ui/Icons/Plus';
 import { t } from '../helpers/i18n/dictionary';
 import { ChannelItem } from './ChannelItem';
+import { useChannels } from '../hooks/socialFeed/channels/useChannels';
 
 export const ChannelsDialog = ({
   isOpen,

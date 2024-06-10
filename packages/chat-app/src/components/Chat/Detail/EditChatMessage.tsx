@@ -75,7 +75,7 @@ export const EditChatMessage = ({
               }
         }
       />
-      <span className="mt-4 flex flex-row-reverse gap-2">
+      <div className="mt-4 flex flex-row-reverse gap-2">
         <ActionButton
           type="primary"
           onClick={(e) => {
@@ -97,7 +97,7 @@ export const EditChatMessage = ({
         >
           {t('Cancel')}
         </ActionButton>
-      </span>
+      </div>
     </DialogWrapper>
   );
 

@@ -11,13 +11,13 @@ import {
 import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
 import { FEED_APP_ID, t, useDotYouClient, useStaticFiles } from '../../../..';
 import { stringGuidsEqual, stringifyToQueryParams, toGuidId } from '@youfoundation/js-lib/helpers';
-import { fetchCachedPublicChannels } from '../cachedDataHelpers';
 import {
   DrivePermissionType,
   HomebaseFile,
   NewHomebaseFile,
   TargetDrive,
 } from '@youfoundation/js-lib/core';
+import { fetchCachedPublicChannels } from '../post/cachedDataHelpers';
 const FEED_ROOT_PATH = '/apps/feed';
 
 type useChannelsProps = {

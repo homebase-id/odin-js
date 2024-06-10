@@ -17,7 +17,7 @@ import {
 } from '@youfoundation/js-lib/public';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
-import { usePost } from './usePost';
+import { useManagePost } from './useManagePost';
 import { useDotYouClient } from '../../auth/useDotYouClient';
 
 export const usePostComposer = () => {
@@ -25,7 +25,7 @@ export const usePostComposer = () => {
   const [processingProgress, setProcessingProgress] = useState<number>(0);
   const loggedInIdentity = useDotYouClient().getIdentity();
   const dotYouClient = useDotYouClient().getDotYouClient();
-  const { mutateAsync: savePostFile, error: savePostError } = usePost().save;
+  const { mutateAsync: savePostFile, error: savePostError } = useManagePost().save;
 
   const savePost = async (
     caption: string | undefined,

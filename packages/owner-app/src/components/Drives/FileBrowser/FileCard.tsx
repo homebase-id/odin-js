@@ -1,6 +1,13 @@
 import { AttributeConfig, ProfileConfig } from '@youfoundation/js-lib/profile';
 import { useMemo } from 'react';
-import { AclIcon, AclSummary, ExtensionThumbnail, Trash, t } from '@youfoundation/common-app';
+import {
+  AclIcon,
+  AclSummary,
+  Exclamation,
+  ExtensionThumbnail,
+  Trash,
+  t,
+} from '@youfoundation/common-app';
 import { Clipboard } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { Download, Image } from '@youfoundation/common-app';
@@ -30,6 +37,11 @@ export const FileCard = ({
   const isImage = ['image/webp', 'image/jpeg', 'image/png', 'image/svg+xml', 'image/gif'].includes(
     contentType
   );
+
+  const isBroken =
+    file.fileMetadata.isEncrypted &&
+    typeof file.fileMetadata.appData.content === 'object' &&
+    Object.keys(file.fileMetadata.appData.content).length === 0;
 
   return (
     <div
@@ -88,6 +100,7 @@ export const FileCard = ({
 
       <FileTimestamps file={file} className={isRow ? 'flex w-40 flex-row gap-2' : ''} />
       <FileFileId fileId={file.fileId} className={isRow ? 'mr-auto w-80' : 'w-full'} />
+      <FileState isBroken={isBroken} className={isRow ? 'absolute bottom-2 right-2' : ''} />
     </div>
   );
 };
@@ -282,6 +295,16 @@ const FileFileId = ({ fileId, className }: { fileId: string; className?: string 
           <Clipboard className="h-4 w-4" />
         </ActionButton>
       </div>
+    </div>
+  );
+};
+
+const FileState = ({ isBroken, className }: { isBroken: boolean; className?: string }) => {
+  if (!isBroken) return null;
+  return (
+    <div className={`${className} flex flex-row items-center gap-1`}>
+      <Exclamation className="h-4 w-4 text-red-600" />
+      <p className="text-red-500">Broken content</p>
     </div>
   );
 };

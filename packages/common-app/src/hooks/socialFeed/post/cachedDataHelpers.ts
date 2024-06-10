@@ -21,7 +21,7 @@ import {
   ChannelDefinition,
   GetFile,
 } from '@youfoundation/js-lib/public';
-import { parseChannelTemplate, ChannelDefinitionVm } from './channels/useChannels';
+import { parseChannelTemplate, ChannelDefinitionVm } from '../channels/useChannels';
 
 export const getCachedPosts = async (
   dotYouClient: DotYouClient,

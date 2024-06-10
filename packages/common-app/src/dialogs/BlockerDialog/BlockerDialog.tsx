@@ -25,7 +25,7 @@ export const BlockerDialog = ({
   const dialog = (
     <DialogWrapper title={title} onClose={onCancel} isSidePanel={false}>
       {children || null}
-      <div className="flex flex-row-reverse gap-2 pb-3 pt-8">
+      <div className="flex flex-row-reverse gap-2 pt-8">
         <ActionButton onClick={onProceed} type="secondary">
           {t('Yes, discard changes')}
         </ActionButton>

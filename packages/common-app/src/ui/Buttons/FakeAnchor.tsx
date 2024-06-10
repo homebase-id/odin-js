@@ -39,6 +39,16 @@ export const FakeAnchor = ({
             }
           : props.onClick
       }
+      onAuxClick={
+        href
+          ? (e) => {
+              if (e.button === 1) {
+                e.preventDefault();
+                window.open(href);
+              }
+            }
+          : undefined
+      }
       tabIndex={0}
       role="link"
     >

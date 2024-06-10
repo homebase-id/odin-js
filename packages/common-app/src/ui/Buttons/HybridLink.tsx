@@ -23,7 +23,7 @@ export const HybridLink = (props: HybridLinkProps) => {
 
   if (isExternal)
     return (
-      <a {...props} data-external>
+      <a {...props} onClick={props.onClick || ((e) => e.stopPropagation())} data-external>
         {props.children}
       </a>
     );
