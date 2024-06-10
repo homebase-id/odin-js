@@ -6,6 +6,7 @@ import {
   UploadFileMetadata,
   UploadResult,
   AppendInstructionSet,
+  AppendResult,
 } from './DriveUploadTypes';
 import { decryptKeyHeader, encryptWithSharedSecret } from '../SecurityHelpers';
 import {
@@ -34,7 +35,7 @@ export const uploadFile = async (
   payloads?: PayloadFile[],
   thumbnails?: ThumbnailFile[],
   encrypt = true,
-  onVersionConflict?: () => void,
+  onVersionConflict?: () => Promise<void | UploadResult> | void,
   axiosConfig?: AxiosRequestConfig
 ): Promise<UploadResult | void> => {
   isDebug &&
@@ -95,7 +96,7 @@ export const uploadHeader = async (
   keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
-  onVersionConflict?: () => void,
+  onVersionConflict?: () => Promise<void | UploadResult> | void,
   axiosConfig?: AxiosRequestConfig
 ): Promise<UploadResult | void> => {
   isDebug &&
@@ -147,7 +148,7 @@ export const appendDataToFile = async (
   instructions: AppendInstructionSet,
   payloads: PayloadFile[] | undefined,
   thumbnails: ThumbnailFile[] | undefined,
-  onVersionConflict?: () => void,
+  onVersionConflict?: () => Promise<void | AppendResult> | void,
   axiosConfig?: AxiosRequestConfig
 ) => {
   isDebug &&
