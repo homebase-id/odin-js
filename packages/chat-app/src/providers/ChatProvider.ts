@@ -221,7 +221,7 @@ export const uploadChatMessage = async (
       ? {
           recipients: [...recipients],
           schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.Medium,
+          priority: PriorityOptions.High,
           sendContents: SendContents.All,
           useAppNotification: true,
           appNotificationOptions: {
@@ -352,7 +352,7 @@ export const updateChatMessage = async (
       ? {
           recipients: [...recipients],
           schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.Medium,
+          priority: PriorityOptions.High,
           sendContents: SendContents.All,
         }
       : undefined,
