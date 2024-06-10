@@ -2,18 +2,10 @@ import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation
 import { useState } from 'react';
 
 import { ChannelTemplateSelector } from './ChannelTemplateSelector';
-import {
-  BlogConfig,
-  ChannelTemplate,
-  CollaborativeChannelDefinition,
-  RemoteCollaborativeChannelDefinition,
-} from '@youfoundation/js-lib/public';
+import { BlogConfig, ChannelTemplate } from '@youfoundation/js-lib/public';
 import { slugify, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { ChannelDefinitionVm } from '../hooks/posts/channels/useChannels';
 import { ActionButton } from '../ui/Buttons/ActionButton';
 import { t } from '../helpers/i18n/dictionary';
-import { useChannel } from '../hooks/posts/channels/useChannel';
-import { useCollaborativeChannel } from '../hooks/posts/channels/useCollaborativeChannel';
 import { AclIcon, AclSummary } from '../acl/AclInfo/AclInfo';
 import { Persons } from '../ui/Icons/Persons';
 import { ActionGroup } from '../ui/Buttons/ActionGroup';
@@ -24,7 +16,11 @@ import { Input } from '../form/Input';
 import { Textarea } from '../form/Textarea';
 import { CheckboxToggle } from '../form/CheckboxToggle';
 import { Pencil } from '../ui/Icons/Pencil';
-import { Alert, Exclamation } from '../ui';
+import { ActionLink, Alert, Exclamation, ExternalLink } from '../ui';
+import { useDotYouClient } from '../hooks/auth/useDotYouClient';
+import { useCollaborativeChannel } from '../hooks/socialFeed/channels/useCollaborativeChannel';
+import { ChannelDefinitionVm } from '../hooks/socialFeed/channels/useChannels';
+import { useChannel } from '../hooks/socialFeed/channels/useChannel';
 
 export const ChannelItem = ({
   chnl: chnlDsr,
@@ -37,6 +33,8 @@ export const ChannelItem = ({
   className?: string;
   isDefaultEdit?: boolean;
 }) => {
+  const { getIdentity } = useDotYouClient();
+  const identity = getIdentity();
   const isNew = !chnlDsr;
 
   const [isEdit, setIsEdit] = useState(isDefaultEdit);
@@ -316,85 +314,14 @@ export const ChannelItem = ({
             </>
           ) : null}
           <ActionButton icon={Pencil} size="square" type="mute"></ActionButton>
+          <ActionLink
+            icon={ExternalLink}
+            size="square"
+            type="mute"
+            href={`https://${identity}/posts/${chnl?.slug}`}
+          ></ActionLink>
         </div>
       )}
-    </div>
-  );
-};
-
-export const ManageCollaborativeChannelItem = ({
-  odinId,
-  className,
-  chnlLink,
-}: {
-  odinId: string;
-  className?: string;
-  chnlLink: HomebaseFile<RemoteCollaborativeChannelDefinition>;
-}) => {
-  const { mutate: removeCollaborativeChannel } = useCollaborativeChannel().remove;
-
-  return (
-    <CollaborativeChannelItem odinId={odinId} className={className} chnlDsr={chnlLink}>
-      {chnlLink.fileId !== '' ? (
-        <ActionGroup
-          options={[
-            {
-              label: t('Delete Link'),
-              icon: Trash,
-              onClick: () => removeCollaborativeChannel(chnlLink),
-            },
-          ]}
-          type="mute"
-        />
-      ) : (
-        <p className="rounded-lg bg-slate-200 px-2 py-1 text-sm dark:bg-slate-600">
-          {t('Auto discovered')}
-        </p>
-      )}
-    </CollaborativeChannelItem>
-  );
-};
-
-export const CollaborativeChannelItem = ({
-  odinId,
-  className,
-  chnlDsr,
-  children,
-}: {
-  odinId: string;
-  className?: string;
-  chnlDsr:
-    | HomebaseFile<CollaborativeChannelDefinition | RemoteCollaborativeChannelDefinition>
-    | NewHomebaseFile<CollaborativeChannelDefinition | RemoteCollaborativeChannelDefinition>;
-  children?: React.ReactNode;
-}) => {
-  const chnl = chnlDsr?.fileMetadata.appData.content;
-
-  return (
-    <div
-      className={`${
-        className ?? ''
-      } rounded-md border border-slate-100 px-4 py-4 dark:border-slate-800`}
-    >
-      <div className="flex flex-row items-center gap-2">
-        <h2 className="text-lg">
-          {chnl.name}{' '}
-          {chnlDsr?.serverMetadata?.accessControlList ? (
-            <small className="text-xs mr-1">
-              ({<AclSummary acl={chnlDsr?.serverMetadata?.accessControlList} />})
-            </small>
-          ) : null}
-          <small className="text-xs">({odinId})</small>
-          <small className="text-md block">{chnl.description}</small>
-        </h2>
-        <span className="ml-auto"></span>
-        {children}
-        {chnl?.isCollaborative ? (
-          <p title={t('Collaborative')}>
-            <Persons className="w-5 h-5" />
-          </p>
-        ) : null}
-      </div>
     </div>
   );
 };

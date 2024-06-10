@@ -1,7 +1,7 @@
 import { PostContent, getChannelDrive } from '@youfoundation/js-lib/public';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { usePost } from '../../hooks/socialFeed/post/usePost';
+import { useManagePost } from '../../hooks/socialFeed/post/useManagePost';
 import {
   DEFAULT_PAYLOAD_KEY,
   HomebaseFile,
@@ -27,7 +27,7 @@ export const EditPostDialog = ({
   const target = usePortal('modal-container');
   const {
     update: { mutate: updatePost, error: updatePostError, status: updatePostStatus },
-  } = usePost();
+  } = useManagePost();
   const [postFile, setPostFile] = useState<HomebaseFile<PostContent>>({ ...incomingPostFile });
   const [newMediaFiles, setNewMediaFiles] = useState<(MediaFile | NewMediaFile)[]>(
     postFile.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || []

@@ -13,6 +13,7 @@ import {
   useCheckIdentity,
   LoadingBlock,
   t,
+  ToGroupBlock,
 } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
@@ -80,6 +81,12 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
               <div className="mb-1 flex flex-col text-foreground text-opacity-60 md:flex-row md:flex-wrap md:items-center">
                 <h2>
                   <AuthorName odinId={authorOdinId} />
+                  <ToGroupBlock
+                    channel={channel || undefined}
+                    odinId={odinId}
+                    authorOdinId={authorOdinId}
+                    className="ml-1"
+                  />
                 </h2>
                 <span className="hidden px-2 leading-4 md:block">·</span>
 

@@ -15,7 +15,7 @@ export interface ActionButtonProps extends React.HTMLAttributes<HTMLButtonElemen
   type?: 'primary' | 'secondary' | 'remove' | 'mute';
   state?: ActionButtonState;
   isDisabled?: boolean;
-  onClick?: React.MouseEventHandler<HTMLElement>;
+  onClick?: (e: React.MouseEvent<HTMLElement>, skipNextTime?: boolean) => void;
   title?: string;
   size?: 'large' | 'small' | 'square' | 'none';
   confirmOptions?: Omit<ConfirmDialogProps, 'onConfirm' | 'onCancel'>;
@@ -119,9 +119,9 @@ export const ActionButton: FC<ActionButtonProps> = ({
       {confirmOptions && onClick && needsConfirmation ? (
         <ConfirmDialog
           {...confirmOptions}
-          onConfirm={() => {
+          onConfirm={(_e, skipNextTime) => {
             setNeedsConfirmation(false);
-            onClick && mouseEvent && onClick(mouseEvent);
+            onClick && mouseEvent && onClick(mouseEvent, skipNextTime);
           }}
           onCancel={() => setNeedsConfirmation(false)}
         />

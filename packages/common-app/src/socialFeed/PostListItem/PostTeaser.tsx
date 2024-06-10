@@ -3,15 +3,15 @@ import { FC } from 'react';
 import { PostMeta } from '../Blocks/Meta/Meta';
 import { useNavigate } from 'react-router-dom';
 import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
-import { useChannel } from '../../hooks/posts/channels/useChannel';
 import { HOME_ROOT_PATH } from '../../core';
-import { useDotYouClient } from '../../hooks';
 import { FakeAnchor, ErrorBoundary } from '../../ui';
 import { AuthorImage } from '../Blocks/Author/Image';
 import { AuthorName } from '../Blocks/Author/Name';
 import { PostBody } from '../Blocks/Body/Body';
 import { PostInteracts } from '../Blocks/Interacts/PostInteracts';
 import { DoubleClickHeartForMedia } from '../Blocks/Media/DoubleClickHeartForMedia';
+import { useChannel } from '../../hooks/socialFeed/channels/useChannel';
+import { useDotYouClient } from '../../hooks/auth/useDotYouClient';
 
 interface PostTeaserProps {
   className?: string;

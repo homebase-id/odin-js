@@ -24,3 +24,5 @@ export * from './peerData/ExternalPostsDataProvider';
 
 // Profile
 export * from './peerData/ExternalProfileDataProvider';
+
+export * from './peerData/PeerTypes';

@@ -211,7 +211,6 @@ export const uploadConversation = async (
           schedule: ScheduleOptions.SendLater,
           priority: PriorityOptions.Medium,
           sendContents: SendContents.All,
-          useGlobalTransitId: true,
         }
       : undefined,
   };
@@ -263,7 +262,6 @@ export const updateConversation = async (
           schedule: ScheduleOptions.SendLater,
           priority: PriorityOptions.Medium,
           sendContents: SendContents.All,
-          useGlobalTransitId: true,
         }
       : undefined,
   };

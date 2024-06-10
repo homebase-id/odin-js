@@ -3,11 +3,9 @@ import { ChannelDefinition, EmbeddedPost, PostContent } from '@youfoundation/js-
 import { OwnerActions } from './OwnerActions';
 import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
 import { aclEqual } from '@youfoundation/js-lib/helpers';
-import { ChannelDefinitionVm } from '../../../hooks/posts/channels/useChannels';
 import { AclSummary } from '../../../acl';
 import { HOME_ROOT_PATH } from '../../../core';
 import { t } from '../../../helpers';
-import { useDotYouClient, useIsConnected, useManageSocialFeed } from '../../../hooks';
 import {
   ActionGroupOptionProps,
   UserX,
@@ -19,6 +17,9 @@ import {
   Link,
   Persons,
 } from '../../../ui';
+import { ChannelDefinitionVm, useManageSocialFeed } from '../../../hooks/socialFeed';
+import { useDotYouClient } from '../../../hooks/auth/useDotYouClient';
+import { useIsConnected } from '../../../hooks/connections/useIsConnected';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;
@@ -102,13 +103,8 @@ export const PostMeta = ({
           ) ? (
             <AclSummary acl={postFile.serverMetadata.accessControlList} />
           ) : (
-            <>
-              {channel?.fileMetadata.appData.content.name
-                ? `${channel?.fileMetadata.appData.content.name}`
-                : ''}
-            </>
+            <>{channel?.fileMetadata.appData.content.name || ''}</>
           )}
-          {groupPost ? <Persons className="h-3 w-3" /> : null}
         </a>
       ) : null}
 
@@ -126,6 +122,52 @@ export const PostMeta = ({
         </>
       )}
     </div>
+  );
+};
+
+export const ToGroupBlock = ({
+  odinId,
+  authorOdinId,
+  channel,
+  className,
+}: {
+  odinId?: string;
+  authorOdinId?: string;
+  channel?:
+    | HomebaseFile<ChannelDefinitionVm | ChannelDefinition>
+    | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
+  className?: string;
+}) => {
+  const { getIdentity } = useDotYouClient();
+
+  const identity = getIdentity();
+  const groupPost =
+    channel?.fileMetadata.appData.content.isCollaborative ||
+    (authorOdinId !== (odinId || identity) && (odinId || identity) && authorOdinId);
+  const isConnected = useIsConnected(odinId).data;
+
+  if (!groupPost) return null;
+
+  const channelLink = channel
+    ? `${odinId ? `https://${odinId}` : ''}${HOME_ROOT_PATH}posts/${
+        channel.fileMetadata.appData.content.slug
+      }${isConnected && identity ? '?youauth-logon=' + identity : ''}`
+    : undefined;
+
+  return (
+    <span className={className}>
+      {t('to')}{' '}
+      <a
+        className="text-indigo-500 hover:underline inline-flex items-center flex-row gap-1"
+        href={channelLink}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {channel?.fileMetadata.appData.content.name
+          ? `${channel?.fileMetadata.appData.content.name}`
+          : ''}
+        <Persons className="h-3 w-3" />
+      </a>
+    </span>
   );
 };
 

@@ -19,6 +19,9 @@ const ConnectionsView = lazy(
 const IdentityLink = lazy(
   () => import('../../components/SocialFeed/Sidebars/IdentityLink/IdentityLink')
 );
+const ChannelsOverview = lazy(
+  () => import('../../components/SocialFeed/Sidebars/ChannelsOverview/ChannelsOverview')
+);
 const FollowersView = lazy(
   () => import('../../components/SocialFeed/Sidebars/FollowersView/FollowersView')
 );
@@ -111,6 +114,7 @@ export const SocialFeed = () => {
                   <Suspense>
                     <IdentityLink className="overflow-hidden rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm hover:shadow-md dark:border-gray-800 hover:dark:shadow-slate-600" />
                     <FollowHomebase className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
+                    <ChannelsOverview className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
                   </Suspense>
                 </div>
               ) : null}
