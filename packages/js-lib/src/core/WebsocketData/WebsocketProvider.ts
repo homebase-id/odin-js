@@ -19,7 +19,6 @@ let webSocketClient: WebSocket | undefined;
 let activeSs: Uint8Array;
 
 let isConnected = false;
-
 const PING_INTERVAL = 1000 * 5 * 1;
 
 let pingInterval: NodeJS.Timeout | undefined;
