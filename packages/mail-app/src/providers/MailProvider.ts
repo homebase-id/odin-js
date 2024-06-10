@@ -142,7 +142,6 @@ export const uploadMail = async (
           schedule: ScheduleOptions.SendLater,
           priority: PriorityOptions.Medium,
           sendContents: SendContents.All,
-          useGlobalTransitId: true,
           useAppNotification: true,
           appNotificationOptions: {
             appId: appId,

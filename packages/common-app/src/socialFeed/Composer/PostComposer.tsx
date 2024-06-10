@@ -39,6 +39,7 @@ import { EmojiSelector } from '../Blocks/Interacts/EmojiPicker/EmojiSelector';
 
 const FEED_ROOT_PATH = '/apps/feed';
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
+const STORAGE_SKIP_NEXT_KEY = 'feed-skip-next-time';
 
 export const PostComposer = ({
   onPost,
@@ -53,7 +54,8 @@ export const PostComposer = ({
   className?: string;
   excludeCustom?: boolean;
 }) => {
-  const { isOwner } = useDotYouClient();
+  const { isOwner, getIdentity } = useDotYouClient();
+  const identity = getIdentity();
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
 
   const { savePost, postState, processingProgress, error } = usePostComposer();
@@ -68,13 +70,15 @@ export const PostComposer = ({
   }>({
     channel: forcedChannel || BlogConfig.PublicChannelNewDsr,
   });
-  const [files, setFiles] = useState<NewMediaFile[]>();
 
+  const [files, setFiles] = useState<NewMediaFile[]>();
   const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
 
+  const skipConfirmation = window.localStorage.getItem(STORAGE_SKIP_NEXT_KEY) === 'true';
   const isPosting = postState === 'uploading' || postState === 'encrypting';
+  const doPost = async (_e?: unknown, skipNextTime?: boolean) => {
+    if (skipNextTime) window.localStorage.setItem(STORAGE_SKIP_NEXT_KEY, 'true');
 
-  const doPost = async () => {
     if (isPosting) return;
     await savePost(caption, files, embeddedPost, targetChannel, reactAccess);
     resetUi();
@@ -191,6 +195,22 @@ export const PostComposer = ({
                 size="square"
                 type="mute"
                 options={[
+                  isOwner
+                    ? {
+                        label: t('Create new article'),
+                        href: `${FEED_ROOT_PATH}/new?caption=${caption}&channel=${targetChannel.channel.fileMetadata.appData.uniqueId}`,
+                        icon: Article,
+                      }
+                    : undefined,
+
+                  isOwner
+                    ? {
+                        label: t('List my articles'),
+                        href: `${FEED_ROOT_PATH}/articles`,
+                        icon: Pencil,
+                      }
+                    : undefined,
+
                   reactAccess === false
                     ? {
                         label: t('Enable reactions'),
@@ -202,21 +222,6 @@ export const PostComposer = ({
                         icon: Lock,
                         onClick: () => setReactAccess(false),
                       },
-
-                  ...(isOwner
-                    ? [
-                        {
-                          label: t('Convert to an article'),
-                          href: `${FEED_ROOT_PATH}/new?caption=${caption}&channel=${targetChannel.channel.fileMetadata.appData.uniqueId}`,
-                          icon: Article,
-                        },
-                        {
-                          label: t('See my drafts'),
-                          href: `${FEED_ROOT_PATH}/articles`,
-                          icon: Pencil,
-                        },
-                      ]
-                    : []),
                 ]}
               />
             </>
@@ -229,11 +234,12 @@ export const PostComposer = ({
                 targetChannel.channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
               }
               defaultAcl={targetChannel.overrideAcl}
-              onChange={(newTargetChannel) => {
+              onChange={({ channel, acl }) => {
                 setTargetChannel((current) => ({
                   ...current,
-                  ...newTargetChannel,
-                  channel: newTargetChannel.channel || current.channel,
+                  ...channel,
+                  channel: channel || current.channel,
+                  overrideAcl: acl,
                 }));
               }}
               excludeMore={true}
@@ -246,6 +252,24 @@ export const PostComposer = ({
               canPost ? '' : 'pointer-events-none hidden opacity-20 grayscale md:flex'
             } ${postState === 'uploading' ? 'pointer-events-none animate-pulse' : ''}`}
             icon={Arrow}
+            confirmOptions={
+              stringGuidsEqual(
+                targetChannel.channel.fileMetadata.appData.uniqueId,
+                BlogConfig.PublicChannelId
+              ) && !skipConfirmation
+                ? {
+                    title: t('Post'),
+                    buttonText: t('Post'),
+                    body: t(
+                      'Posting this, will make it publicly available on your identity {0}. \n\nIf you want to hide this post from anonymos users, you have to change the security settings from the dropdown first.',
+                      `${identity}`
+                    ),
+                    type: 'info',
+                    allowSkipNextTime: true,
+                  }
+                : undefined
+            }
+            onClick={doPost}
           >
             {targetChannel.channel.serverMetadata?.accessControlList && canPost ? (
               <AclIcon
@@ -404,6 +428,12 @@ export const ChannelOrAclSelector = React.forwardRef(
                 {channel.fileMetadata.appData.content.name}
               </option>
             ))}
+
+            {!excludeCustom ? (
+              <option value={'custom'} key={'custom'}>
+                ⚙️ {t('Custom')} ...
+              </option>
+            ) : null}
           </optgroup>
 
           {showCollaborativeChannels ? (
@@ -423,16 +453,11 @@ export const ChannelOrAclSelector = React.forwardRef(
             </>
           ) : null}
 
-          {!excludeMore || !excludeCustom ? (
+          {!excludeMore ? (
             <optgroup label={t('Advanced')}>
               {!excludeMore ? (
                 <option value={'more'} key={'more'}>
                   {t('More')}...
-                </option>
-              ) : null}
-              {!excludeCustom ? (
-                <option value={'custom'} key={'custom'}>
-                  {t('Custom')}...
                 </option>
               ) : null}
             </optgroup>
@@ -448,6 +473,7 @@ export const ChannelOrAclSelector = React.forwardRef(
           }
           title={t('Who can see your post?')}
           onConfirm={(acl) => {
+            console.log('custom acl', acl);
             onChange({ channel: publicChannel, acl, odinId: undefined });
             setIsCustomAclOpen(false);
           }}

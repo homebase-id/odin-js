@@ -1,8 +1,7 @@
 import { slugify, getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { Article, ChannelDefinition, BlogConfig } from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
-import { HOME_ROOT_PATH, getReadingTime, useBlog, useDotYouClient } from '../../../..';
-import { usePost } from '../post/usePost';
+import { useManagePost } from '../post/useManagePost';
 import {
   HomebaseFile,
   NewHomebaseFile,
@@ -11,6 +10,10 @@ import {
   MediaFile,
   UploadResult,
 } from '@youfoundation/js-lib/core';
+import { useDotYouClient } from '../../auth/useDotYouClient';
+import { usePost } from '../post/usePost';
+import { getReadingTime } from '../../../helpers/richTextHelper';
+import { HOME_ROOT_PATH } from '../../../core/paths';
 
 export const EMPTY_POST: Article = {
   id: '',
@@ -33,7 +36,7 @@ export const useArticleComposer = ({
   caption?: string;
 }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
-  const { data: serverData, isPending: isLoadingServerData } = useBlog({
+  const { data: serverData, isPending: isLoadingServerData } = usePost({
     channelSlug: channelKey,
     channelId: channelKey,
     blogSlug: postKey,
@@ -42,33 +45,33 @@ export const useArticleComposer = ({
   const {
     save: { mutateAsync: savePost, error: savePostError, status: savePostStatus },
     remove: { mutateAsync: removePost, error: removePostError, status: removePostStatus },
-  } = usePost();
+  } = useManagePost();
 
   const [postFile, setPostFile] = useState<NewHomebaseFile<Article> | HomebaseFile<Article>>({
-    ...serverData?.activeBlog,
+    ...serverData?.activePost,
     fileMetadata: {
-      ...serverData?.activeBlog.fileMetadata,
+      ...serverData?.activePost.fileMetadata,
       appData: {
         fileType: BlogConfig.DraftPostFileType,
-        userDate: serverData?.activeBlog.fileMetadata.appData.userDate || new Date().getTime(),
+        userDate: serverData?.activePost.fileMetadata.appData.userDate || new Date().getTime(),
         content: {
           ...EMPTY_POST,
           caption: caption ?? EMPTY_POST.caption,
           authorOdinId: dotYouClient.getIdentity(),
           id: getNewId(),
-          ...serverData?.activeBlog?.fileMetadata.appData.content,
+          ...serverData?.activePost?.fileMetadata.appData.content,
           type: 'Article',
         },
       },
     },
     serverMetadata: {
       accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous },
-      ...serverData?.activeBlog.serverMetadata,
+      ...serverData?.activePost.serverMetadata,
     },
   });
 
   const [files, setFiles] = useState<(NewMediaFile | MediaFile)[]>(
-    serverData?.activeBlog.fileMetadata.payloads || []
+    serverData?.activePost.fileMetadata.payloads || []
   );
 
   const [channel, setChannel] = useState<NewHomebaseFile<ChannelDefinition>>(
@@ -80,19 +83,20 @@ export const useArticleComposer = ({
       ? serverData.activeChannel
       : BlogConfig.PublicChannelNewDsr
   );
+  const [groupOdinId, setGroupOdinId] = useState<string | undefined>(undefined);
 
   // Update state when server data is fetched
   useEffect(() => {
-    if (serverData && serverData.activeBlog && (!postFile.fileId || savePostStatus === 'success')) {
+    if (serverData && serverData.activePost && (!postFile.fileId || savePostStatus === 'success')) {
       setPostFile({
-        ...serverData.activeBlog,
+        ...serverData.activePost,
         fileMetadata: {
-          ...serverData.activeBlog.fileMetadata,
+          ...serverData.activePost.fileMetadata,
           appData: {
-            ...serverData.activeBlog.fileMetadata.appData,
+            ...serverData.activePost.fileMetadata.appData,
             content: {
               ...EMPTY_POST,
-              ...serverData.activeBlog?.fileMetadata.appData.content,
+              ...serverData.activePost?.fileMetadata.appData.content,
               type: 'Article',
             },
           },
@@ -104,7 +108,7 @@ export const useArticleComposer = ({
       serverData?.activeChannel ? serverData.activeChannel : BlogConfig.PublicChannelNewDsr
     );
 
-    setFiles([...(serverData?.activeBlog.fileMetadata.payloads || [])]);
+    setFiles([...(serverData?.activePost.fileMetadata.payloads || [])]);
   }, [serverData]);
 
   const isPublished = postFile.fileMetadata.appData.fileType !== BlogConfig.DraftPostFileType;
@@ -163,6 +167,7 @@ export const useArticleComposer = ({
     // Save and process result
     const uploadResult = await savePost({
       postFile: toPostFile,
+      odinId: groupOdinId,
       channelId: targetChannel.fileMetadata.appData.uniqueId as string,
       mediaFiles: files,
     });
@@ -189,6 +194,7 @@ export const useArticleComposer = ({
             versionTag: (uploadResult as UploadResult).newVersionTag,
           },
           // We force set the keyHeader as it's returned from the server, and needed for fast saves afterwards
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           sharedSecretEncryptedKeyHeader: (uploadResult as UploadResult).keyHeader as any,
         };
       });
@@ -230,6 +236,7 @@ export const useArticleComposer = ({
     // Data updates
     setPostFile,
     setChannel,
+    setGroupOdinId,
     setFiles,
 
     // Status

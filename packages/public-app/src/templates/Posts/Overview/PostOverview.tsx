@@ -8,7 +8,7 @@ import {
   HOME_ROOT_PATH,
   SubtleMessage,
   t,
-  useBlogPostsInfinite,
+  usePostsInfinite,
   useChannel,
   flattenInfinteData,
   useIntersection,
@@ -42,7 +42,7 @@ const PostOverview = () => {
     isFetchedAfterMount,
     isFetchingNextPage,
     isLoading,
-  } = useBlogPostsInfinite({
+  } = usePostsInfinite({
     channelId: activeChannel?.fileMetadata.appData.uniqueId,
     enabled: !channelKey || !!activeChannel,
   });
@@ -66,7 +66,7 @@ const PostOverview = () => {
 
   const blogPosts = flattenInfinteData<HomebaseFile<PostContent>>(
     data,
-    BLOG_POST_INFIITE_PAGE_SIZE,
+    hasMorePosts ? BLOG_POST_INFIITE_PAGE_SIZE : undefined,
     (a, b) =>
       (b.fileMetadata.appData.userDate || b.fileMetadata.updated) -
       (a.fileMetadata.appData.userDate || a.fileMetadata.updated)

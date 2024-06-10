@@ -24,6 +24,7 @@ const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
 
 const SocialFeed = lazy(() => import('../templates/SocialFeed/SocialFeed'));
 const ArticleComposerPage = lazy(() => import('../templates/SocialFeed/ArticleComposerPage'));
+const ArticleDuplicatePage = lazy(() => import('../templates/SocialFeed/ArticleDuplicatePage'));
 const ArticlesPage = lazy(() => import('../templates/SocialFeed/ArticlesPage'));
 const ChannelsPage = lazy(() => import('../templates/SocialFeed/ChannelsPage'));
 const IncomingCollaborativeChannelPage = lazy(
@@ -55,7 +56,7 @@ const localStoragePersister = createSyncStoragePersister({
 });
 
 // Explicit includes to avoid persisting media items, or large data in general
-const INCLUDED_QUERY_KEYS = ['collaborative-channels'];
+const INCLUDED_QUERY_KEYS = ['common-image', 'collaborative-channels'];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   buster: '202403',
   maxAge: Infinity,
@@ -115,6 +116,7 @@ function App() {
             <Route path="articles" element={<ArticlesPage />} />
             <Route path="channels" element={<ChannelsPage />} />
             <Route path="edit/:channelKey/:postKey" element={<ArticleComposerPage />} />
+            <Route path="duplicate/:channelKey/:postKey" element={<ArticleDuplicatePage />} />
 
             <Route
               path="channels/incoming-collaborative"

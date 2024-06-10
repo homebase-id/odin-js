@@ -193,7 +193,6 @@ const uploadPost = async <T extends PostContent>(
       drive: targetDrive,
     },
     transitOptions: {
-      useGlobalTransitId: true,
       recipients: [],
       schedule: ScheduleOptions.SendLater,
       priority: PriorityOptions.Medium,
@@ -242,7 +241,7 @@ const uploadPost = async <T extends PostContent>(
   const isDraft = file.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType;
   const metadata: UploadFileMetadata = {
     versionTag: file?.fileMetadata.versionTag ?? undefined,
-    allowDistribution: !isDraft,
+    allowDistribution: !isDraft || !!odinId,
     appData: {
       tags: [file.fileMetadata.appData.content.id],
       uniqueId: uniqueId,
@@ -306,7 +305,6 @@ const uploadPostHeader = async <T extends PostContent>(
       drive: targetDrive,
     },
     transitOptions: {
-      useGlobalTransitId: true,
       recipients: [],
       schedule: ScheduleOptions.SendLater,
       priority: PriorityOptions.Medium,

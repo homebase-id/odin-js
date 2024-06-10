@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActionButton,
+  BlockerDialog,
   ErrorBoundary,
   ErrorNotification,
   FileOverview,
@@ -11,7 +12,6 @@ import {
   Plus,
   Save,
   Trash,
-  getImagesFromPasteEvent,
   getTextRootsRecursive,
   t,
   useAllContacts,
@@ -38,7 +38,6 @@ import { RecipientInput } from './RecipientInput';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { RichTextEditor } from '@youfoundation/rich-text-editor';
 import { useBlocker } from 'react-router-dom';
-import { BlockerDialog } from './BlockerDialog';
 import { MediaOptions } from '@youfoundation/rich-text-editor/src/editor/ImagePlugin/ImagePlugin';
 import { useMailSettings } from '../../hooks/mail/useMailSettings';
 

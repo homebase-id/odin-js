@@ -209,7 +209,6 @@ export const uploadChatMessage = async (
           schedule: ScheduleOptions.SendLater,
           priority: PriorityOptions.Medium,
           sendContents: SendContents.All,
-          useGlobalTransitId: true,
           useAppNotification: true,
           appNotificationOptions: {
             appId: appId,
@@ -341,7 +340,6 @@ export const updateChatMessage = async (
           schedule: ScheduleOptions.SendLater,
           priority: PriorityOptions.Medium,
           sendContents: SendContents.All,
-          useGlobalTransitId: true,
         }
       : undefined,
   };

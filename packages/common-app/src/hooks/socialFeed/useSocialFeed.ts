@@ -7,7 +7,7 @@ import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useChannelDrives } from './useChannelDrives';
 import { useDotYouClient } from '../auth/useDotYouClient';
 import { useNotificationSubscriber } from '../transitProcessor/useNotificationSubscriber';
-import { useChannels } from '../posts/channels/useChannels';
+import { useChannels } from './channels/useChannels';
 
 const MINUTE_IN_MS = 60000;
 

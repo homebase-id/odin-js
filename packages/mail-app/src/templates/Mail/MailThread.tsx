@@ -58,7 +58,7 @@ export const MailThread = () => {
     () =>
       flattenInfinteData<HomebaseFile<MailConversation>>(
         messages,
-        PAGE_SIZE,
+        hasNextPage ? PAGE_SIZE : undefined,
         (a, b) =>
           (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
           (a.fileMetadata.appData.userDate || a.fileMetadata.created)
