@@ -43,14 +43,14 @@ const isDebug = hasDebugFlag();
 const ParseRawClientNotification = (
   notification: RawClientNotification
 ): TypedConnectionNotification => {
-  const { targetDrive, header, externalFileIdentifier, sender, recipient, ...data } = tryJsonParse<
-    Record<string, unknown>
-  >(notification.data);
+  const { targetDrive, header, sender, recipient, ...data } = tryJsonParse<Record<string, unknown>>(
+    notification.data
+  );
 
   if (notification.notificationType === 'inboxItemReceived') {
     return {
       notificationType: notification.notificationType,
-      externalFileIdentifier: externalFileIdentifier,
+      targetDrive,
       data: data,
     } as ClientTransitNotification;
   }

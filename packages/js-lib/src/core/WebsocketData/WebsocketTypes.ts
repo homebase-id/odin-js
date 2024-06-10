@@ -1,5 +1,5 @@
 import { HomebaseFile } from '../DriveData/File/DriveFileTypes';
-import { TargetDrive, ExternalFileIdentifier, PushNotification } from '../core';
+import { TargetDrive, PushNotification } from '../core';
 
 export interface EstablishConnectionRequest {
   drives: TargetDrive[];
@@ -33,7 +33,7 @@ export interface ClientFileNotification extends ClientNotification {
 
 export interface ClientTransitNotification extends ClientNotification {
   notificationType: 'inboxItemReceived';
-  externalFileIdentifier: ExternalFileIdentifier;
+  targetDrive: TargetDrive;
 }
 
 export interface ClientDeviceNotification extends ClientNotification {
