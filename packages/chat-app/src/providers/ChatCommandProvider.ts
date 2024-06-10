@@ -4,19 +4,11 @@ import {
   JOIN_GROUP_CONVERSATION_COMMAND,
   JoinConversationRequest,
   JoinGroupConversationRequest,
-  getConversation,
   uploadConversation,
 } from './ConversationProvider';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { ReceivedCommand } from '@youfoundation/js-lib/core';
 import { QueryClient } from '@tanstack/react-query';
-import {
-  ChatDeliveryStatus,
-  MARK_CHAT_READ_COMMAND,
-  MarkAsReadRequest,
-  getChatMessage,
-  updateChatMessage,
-} from './ChatProvider';
 
 export const processCommand = async (
   dotYouClient: DotYouClient,
@@ -30,8 +22,8 @@ export const processCommand = async (
   if (command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND && identity)
     return await joinGroupConversation(dotYouClient, queryClient, command, identity);
 
-  if (command.clientCode === MARK_CHAT_READ_COMMAND)
-    return await markChatAsRead(dotYouClient, queryClient, command);
+  // if (command.clientCode === MARK_CHAT_READ_COMMAND)
+  //   return await markChatAsRead(dotYouClient, queryClient, command);
 
   // if (command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND) {
   //   return await updateGroupConversation(dotYouClient, queryClient, command);
@@ -137,69 +129,69 @@ const joinGroupConversation = async (
 //   return command.id;
 // };
 
-const markChatAsRead = async (
-  dotYouClient: DotYouClient,
-  queryClient: QueryClient,
-  command: ReceivedCommand
-) => {
-  const markAsReadRequest = tryJsonParse<MarkAsReadRequest>(command.clientJsonMessage);
-  const conversationId = markAsReadRequest.conversationId;
-  const chatUniqueIds = markAsReadRequest.messageIds;
-  const identity = dotYouClient.getIdentity();
+// const markChatAsRead = async (
+//   dotYouClient: DotYouClient,
+//   queryClient: QueryClient,
+//   command: ReceivedCommand
+// ) => {
+//   const markAsReadRequest = tryJsonParse<MarkAsReadRequest>(command.clientJsonMessage);
+//   const conversationId = markAsReadRequest.conversationId;
+//   const chatUniqueIds = markAsReadRequest.messageIds;
+//   const identity = dotYouClient.getIdentity();
 
-  if (!conversationId || !chatUniqueIds) return null;
+//   if (!conversationId || !chatUniqueIds) return null;
 
-  const conversation = await getConversation(dotYouClient, conversationId);
-  if (!conversation) return null;
-  const conversationContent = conversation.fileMetadata.appData.content;
-  const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
-  if (!recipients.filter(Boolean)?.length) return null;
-  const chatMessages = await Promise.all(
-    Array.from(new Set(chatUniqueIds)).map((msgId) => getChatMessage(dotYouClient, msgId))
-  );
+//   const conversation = await getConversation(dotYouClient, conversationId);
+//   if (!conversation) return null;
+//   const conversationContent = conversation.fileMetadata.appData.content;
+//   const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
+//   if (!recipients.filter(Boolean)?.length) return null;
+//   const chatMessages = await Promise.all(
+//     Array.from(new Set(chatUniqueIds)).map((msgId) => getChatMessage(dotYouClient, msgId))
+//   );
 
-  const updateSuccess = await Promise.all(
-    chatMessages
-      // Only update messages from the current user
-      .filter(
-        (chatMessage) =>
-          chatMessage &&
-          (!chatMessage?.fileMetadata.senderOdinId || chatMessage?.fileMetadata.senderOdinId === '')
-      )
-      .map(async (chatMessage) => {
-        if (!chatMessage) return true;
+//   const updateSuccess = await Promise.all(
+//     chatMessages
+//       // Only update messages from the current user
+//       .filter(
+//         (chatMessage) =>
+//           chatMessage &&
+//           (!chatMessage?.fileMetadata.senderOdinId || chatMessage?.fileMetadata.senderOdinId === '')
+//       )
+//       .map(async (chatMessage) => {
+//         if (!chatMessage) return true;
 
-        chatMessage.fileMetadata.appData.content.deliveryDetails = {
-          ...chatMessage.fileMetadata.appData.content.deliveryDetails,
-        };
-        chatMessage.fileMetadata.appData.content.deliveryDetails[command.sender] =
-          ChatDeliveryStatus.Read;
+//         chatMessage.fileMetadata.appData.content.deliveryDetails = {
+//           ...chatMessage.fileMetadata.appData.content.deliveryDetails,
+//         };
+//         chatMessage.fileMetadata.appData.content.deliveryDetails[command.sender] =
+//           ChatDeliveryStatus.Read;
 
-        // Single recipient conversation
-        if (recipients.length === 1)
-          chatMessage.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Read;
+//         // Single recipient conversation
+//         if (recipients.length === 1)
+//           chatMessage.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Read;
 
-        const keys = Object.keys(chatMessage.fileMetadata.appData.content.deliveryDetails);
-        const allRead = keys.every(
-          (key) =>
-            chatMessage.fileMetadata.appData.content.deliveryDetails?.[key] ===
-            ChatDeliveryStatus.Read
-        );
-        if (recipients.length === keys.length && allRead) {
-          chatMessage.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Read;
-        }
-        try {
-          const updateResult = await updateChatMessage(dotYouClient, chatMessage, recipients);
-          return !!updateResult;
-        } catch (ex) {
-          console.error(ex);
-          return false;
-        }
-      })
-  );
+//         const keys = Object.keys(chatMessage.fileMetadata.appData.content.deliveryDetails);
+//         const allRead = keys.every(
+//           (key) =>
+//             chatMessage.fileMetadata.appData.content.deliveryDetails?.[key] ===
+//             ChatDeliveryStatus.Read
+//         );
+//         if (recipients.length === keys.length && allRead) {
+//           chatMessage.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Read;
+//         }
+//         try {
+//           const updateResult = await updateChatMessage(dotYouClient, chatMessage, recipients);
+//           return !!updateResult;
+//         } catch (ex) {
+//           console.error(ex);
+//           return false;
+//         }
+//       })
+//   );
 
-  queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+//   queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
 
-  if (updateSuccess.every((success) => success)) return command.id;
-  return null;
-};
+//   if (updateSuccess.every((success) => success)) return command.id;
+//   return null;
+// };

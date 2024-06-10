@@ -1,14 +1,27 @@
-import { Conversation, getConversations } from '../../providers/ConversationProvider';
+import {
+  Conversation,
+  UnifiedConversation,
+  getConversations,
+} from '../../providers/ConversationProvider';
 import { InfiniteData, QueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
+export interface ChatConversationsReturn {
+  searchResults: HomebaseFile<UnifiedConversation>[];
+  cursorState: string;
+  queryTime: number;
+  includeMetadataHeader: boolean;
+}
+
 const PAGE_SIZE = 500;
 export const useConversations = () => {
   const dotYouClient = useDotYouClientContext();
 
-  const fetchConversations = async (cursorState: string | undefined) =>
+  const fetchConversations = async (
+    cursorState: string | undefined
+  ): Promise<ChatConversationsReturn | null> =>
     await getConversations(dotYouClient, cursorState, PAGE_SIZE);
 
   return {

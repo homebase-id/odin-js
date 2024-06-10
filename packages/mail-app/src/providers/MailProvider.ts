@@ -31,6 +31,7 @@ import {
   PriorityOptions,
   TransferStatus,
   FailedTransferStatuses,
+  RecipientTransferHistory,
 } from '@youfoundation/js-lib/core';
 import { getNewId, jsonStringify64, makeGrid } from '@youfoundation/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
@@ -385,42 +386,10 @@ export const dsrToMailConversation = async (
       mailContent.deliveryStatus === MailDeliveryStatus.Sent &&
       dsr.serverMetadata?.transferHistory?.recipients
     ) {
-      const allDelivered = !Object.keys(dsr.serverMetadata.transferHistory.recipients).some(
-        (recipient) =>
-          !dsr.serverMetadata?.transferHistory?.recipients[recipient]
-            .latestSuccessfullyDeliveredVersionTag
+      mailContent.deliveryDetails = buildDeliveryDetails(
+        dsr.serverMetadata.transferHistory.recipients
       );
-
-      if (allDelivered) mailContent.deliveryStatus = MailDeliveryStatus.Delivered;
-      else {
-        mailContent.deliveryDetails = {};
-        let someFailed = false;
-        for (const recipient of Object.keys(dsr.serverMetadata.transferHistory.recipients)) {
-          if (
-            dsr.serverMetadata.transferHistory.recipients[recipient]
-              .latestSuccessfullyDeliveredVersionTag
-          ) {
-            mailContent.deliveryDetails[recipient] = MailDeliveryStatus.Delivered;
-          } else {
-            if (
-              FailedTransferStatuses.includes(
-                dsr.serverMetadata.transferHistory.recipients[
-                  recipient
-                ].latestTransferStatus.toLocaleLowerCase() as TransferStatus
-              )
-            ) {
-              mailContent.deliveryDetails[recipient] = MailDeliveryStatus.Failed;
-              someFailed = true;
-            } else {
-              mailContent.deliveryDetails[recipient] = MailDeliveryStatus.Sent;
-            }
-          }
-        }
-
-        mailContent.deliveryStatus = someFailed
-          ? MailDeliveryStatus.Failed
-          : MailDeliveryStatus.Sent;
-      }
+      mailContent.deliveryStatus = buildDeliveryStatus(mailContent.deliveryDetails);
     }
 
     const conversation: HomebaseFile<MailConversation> = {
@@ -445,6 +414,49 @@ export const dsrToMailConversation = async (
     console.error('[DotYouCore-js] failed to get the conversation payload of a dsr', dsr, ex);
     return null;
   }
+};
+
+const buildDeliveryDetails = (recipientTransferHistory: {
+  [key: string]: RecipientTransferHistory;
+}): Record<string, MailDeliveryStatus> => {
+  const deliveryDetails: Record<string, MailDeliveryStatus> = {};
+
+  for (const recipient of Object.keys(recipientTransferHistory)) {
+    if (recipientTransferHistory[recipient].latestSuccessfullyDeliveredVersionTag) {
+      // if (recipientTransferHistory[recipient].isReadByRecipient) {
+      //   deliveryDetails[recipient] = MailDeliveryStatus.Read;
+      // } else {
+      deliveryDetails[recipient] = MailDeliveryStatus.Delivered;
+      // }
+    } else {
+      const latest = recipientTransferHistory[recipient].latestTransferStatus;
+      const transferStatus =
+        latest && typeof latest === 'string'
+          ? (latest?.toLocaleLowerCase() as TransferStatus)
+          : undefined;
+      if (transferStatus && FailedTransferStatuses.includes(transferStatus)) {
+        deliveryDetails[recipient] = MailDeliveryStatus.Failed;
+      } else {
+        deliveryDetails[recipient] = MailDeliveryStatus.Sent;
+      }
+    }
+  }
+
+  return deliveryDetails;
+};
+
+const buildDeliveryStatus = (
+  deliveryDetails: Record<string, MailDeliveryStatus>
+): MailDeliveryStatus => {
+  const values = Object.values(deliveryDetails);
+  // If any failed, the message is failed
+  if (values.includes(MailDeliveryStatus.Failed)) return MailDeliveryStatus.Failed;
+  // If all are delivered, the message is delivered
+  if (values.every((val) => val === MailDeliveryStatus.Delivered))
+    return MailDeliveryStatus.Delivered;
+
+  // If it exists, it's sent
+  return MailDeliveryStatus.Sent;
 };
 
 export const getAllRecipients = (

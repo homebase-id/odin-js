@@ -29,6 +29,7 @@ import {
   TransferUploadStatus,
   TransferStatus,
   FailedTransferStatuses,
+  RecipientTransferHistory,
 } from '@youfoundation/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
@@ -133,45 +134,10 @@ export const dsrToMessage = async (
       msgContent.deliveryStatus === ChatDeliveryStatus.Sent &&
       dsr.serverMetadata?.transferHistory?.recipients
     ) {
-      const allDelivered = !Object.keys(dsr.serverMetadata.transferHistory.recipients).some(
-        (recipient) =>
-          !dsr.serverMetadata?.transferHistory?.recipients[recipient]
-            .latestSuccessfullyDeliveredVersionTag
+      msgContent.deliveryDetails = buildDeliveryDetails(
+        dsr.serverMetadata.transferHistory.recipients
       );
-      if (allDelivered) msgContent.deliveryStatus = ChatDeliveryStatus.Delivered;
-      else {
-        let someFailed = false;
-        msgContent.deliveryDetails = {};
-        for (const recipient of Object.keys(dsr.serverMetadata.transferHistory.recipients)) {
-          if (
-            dsr.serverMetadata.transferHistory.recipients[recipient]
-              .latestSuccessfullyDeliveredVersionTag
-          ) {
-            if (dsr.serverMetadata.transferHistory.recipients[recipient].isReadByRecipient) {
-              msgContent.deliveryDetails[recipient] = ChatDeliveryStatus.Read;
-            } else {
-              msgContent.deliveryDetails[recipient] = ChatDeliveryStatus.Delivered;
-            }
-          } else {
-            if (
-              FailedTransferStatuses.includes(
-                dsr.serverMetadata.transferHistory.recipients[
-                  recipient
-                ].latestTransferStatus.toLocaleLowerCase() as TransferStatus
-              )
-            ) {
-              msgContent.deliveryDetails[recipient] = ChatDeliveryStatus.Failed;
-              someFailed = true;
-            } else {
-              msgContent.deliveryDetails[recipient] = ChatDeliveryStatus.Sent;
-            }
-          }
-        }
-
-        msgContent.deliveryStatus = someFailed
-          ? ChatDeliveryStatus.Failed
-          : ChatDeliveryStatus.Sent;
-      }
+      msgContent.deliveryStatus = buildDeliveryStatus(msgContent.deliveryDetails);
     }
 
     const chatMessage: HomebaseFile<ChatMessage> = {
@@ -190,6 +156,50 @@ export const dsrToMessage = async (
     console.error('[DotYouCore-js] failed to get the chatMessage payload of a dsr', dsr, ex);
     return null;
   }
+};
+
+const buildDeliveryDetails = (recipientTransferHistory: {
+  [key: string]: RecipientTransferHistory;
+}): Record<string, ChatDeliveryStatus> => {
+  const deliveryDetails: Record<string, ChatDeliveryStatus> = {};
+
+  for (const recipient of Object.keys(recipientTransferHistory)) {
+    if (recipientTransferHistory[recipient].latestSuccessfullyDeliveredVersionTag) {
+      if (recipientTransferHistory[recipient].isReadByRecipient) {
+        deliveryDetails[recipient] = ChatDeliveryStatus.Read;
+      } else {
+        deliveryDetails[recipient] = ChatDeliveryStatus.Delivered;
+      }
+    } else {
+      const latest = recipientTransferHistory[recipient].latestTransferStatus;
+      const transferStatus =
+        latest && typeof latest === 'string'
+          ? (latest?.toLocaleLowerCase() as TransferStatus)
+          : undefined;
+      if (transferStatus && FailedTransferStatuses.includes(transferStatus)) {
+        deliveryDetails[recipient] = ChatDeliveryStatus.Failed;
+      } else {
+        deliveryDetails[recipient] = ChatDeliveryStatus.Sent;
+      }
+    }
+  }
+
+  return deliveryDetails;
+};
+
+const buildDeliveryStatus = (
+  deliveryDetails: Record<string, ChatDeliveryStatus>
+): ChatDeliveryStatus => {
+  const values = Object.values(deliveryDetails);
+  // If any failed, the message is failed
+  if (values.includes(ChatDeliveryStatus.Failed)) return ChatDeliveryStatus.Failed;
+  // If all are delivered/read, the message is delivered/read
+  if (values.every((val) => val === ChatDeliveryStatus.Delivered))
+    return ChatDeliveryStatus.Delivered;
+  if (values.every((val) => val === ChatDeliveryStatus.Read)) return ChatDeliveryStatus.Read;
+
+  // If it exists, it's sent
+  return ChatDeliveryStatus.Sent;
 };
 
 export const uploadChatMessage = async (
@@ -412,12 +422,6 @@ export const softDeleteChatMessage = async (
   message.fileMetadata.appData.content.message = '';
   return await updateChatMessage(dotYouClient, message, deleteForEveryone ? recipients : []);
 };
-
-export const MARK_CHAT_READ_COMMAND = 150;
-export interface MarkAsReadRequest {
-  conversationId: string;
-  messageIds: string[];
-}
 
 export const requestMarkAsRead = async (
   dotYouClient: DotYouClient,
