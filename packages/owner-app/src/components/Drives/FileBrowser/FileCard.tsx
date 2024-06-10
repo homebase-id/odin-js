@@ -1,5 +1,5 @@
 import { AttributeConfig, ProfileConfig } from '@youfoundation/js-lib/profile';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   AclIcon,
   AclSummary,
@@ -17,11 +17,14 @@ import {
   PayloadDescriptor,
   SecurityGroupType,
   TargetDrive,
+  decryptJsonContent,
+  decryptKeyHeader,
 } from '@youfoundation/js-lib/core';
 import { BlogConfig, ReactionConfig } from '@youfoundation/js-lib/public';
 import { ContactConfig } from '@youfoundation/js-lib/network';
 import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
 import { useFile } from '../../../hooks/files/useFiles';
+import { useAuth } from '../../../hooks/auth/useAuth';
 
 export const FileCard = ({
   targetDrive,
@@ -37,11 +40,6 @@ export const FileCard = ({
   const isImage = ['image/webp', 'image/jpeg', 'image/png', 'image/svg+xml', 'image/gif'].includes(
     contentType
   );
-
-  const isBroken =
-    file.fileMetadata.isEncrypted &&
-    typeof file.fileMetadata.appData.content === 'object' &&
-    Object.keys(file.fileMetadata.appData.content).length === 0;
 
   return (
     <div
@@ -100,7 +98,7 @@ export const FileCard = ({
 
       <FileTimestamps file={file} className={isRow ? 'flex w-40 flex-row gap-2' : ''} />
       <FileFileId fileId={file.fileId} className={isRow ? 'mr-auto w-80' : 'w-full'} />
-      <FileState isBroken={isBroken} className={isRow ? 'absolute bottom-2 right-2' : ''} />
+      <FileState file={file} className={isRow ? 'absolute bottom-2 right-2' : ''} />
     </div>
   );
 };
@@ -299,7 +297,34 @@ const FileFileId = ({ fileId, className }: { fileId: string; className?: string 
   );
 };
 
-const FileState = ({ isBroken, className }: { isBroken: boolean; className?: string }) => {
+const FileState = ({
+  file,
+  className,
+}: {
+  file: HomebaseFile<string> | DeletedHomebaseFile<string>;
+  className?: string;
+}) => {
+  const [isBroken, setIsBroken] = useState(false);
+  const dotYouClient = useAuth().getDotYouClient();
+  useEffect(() => {
+    (async () => {
+      try {
+        const keyheader = file.fileMetadata.isEncrypted
+          ? await decryptKeyHeader(dotYouClient, file.sharedSecretEncryptedKeyHeader)
+          : undefined;
+        const parsedContent = await decryptJsonContent(file.fileMetadata, keyheader);
+
+        setIsBroken(
+          file.fileMetadata.isEncrypted && typeof parsedContent === 'object'
+            ? Object.keys(parsedContent).length === 0
+            : false
+        );
+      } catch (e) {
+        setIsBroken(true);
+      }
+    })();
+  });
+
   if (!isBroken) return null;
   return (
     <div className={`${className} flex flex-row items-center gap-1`}>
