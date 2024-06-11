@@ -6,7 +6,6 @@ import {
   t,
   ActionGroup,
   ChevronDown,
-  Times,
   ErrorNotification,
 } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
