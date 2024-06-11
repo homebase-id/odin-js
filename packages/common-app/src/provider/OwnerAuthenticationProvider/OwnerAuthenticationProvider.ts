@@ -23,3 +23,27 @@ export const logoutOwner = async (): Promise<boolean> => {
     return response.data;
   });
 };
+
+export const logoutOwnerAndAllApps = async (): Promise<void> => {
+  await logoutOwner();
+
+  // CAT
+  localStorage.removeItem(`BX0900_feed`);
+  localStorage.removeItem(`BX0900_mail`);
+  localStorage.removeItem(`BX0900_chat`);
+
+  // Shared Secret
+  localStorage.removeItem(`APPS_feed`);
+  localStorage.removeItem(`APPS_mail`);
+  localStorage.removeItem(`APPS_chat`);
+
+  // Caches
+  localStorage.removeItem(`OWNER_REACT_QUERY_OFFLINE_CACHE`);
+  localStorage.removeItem(`FEED_REACT_QUERY_OFFLINE_CACHE`);
+  localStorage.removeItem(`CHAT_REACT_QUERY_OFFLINE_CACHE`);
+
+  // IndexedDB
+  indexedDB.deleteDatabase(`keyval-store`);
+
+  window.location.href = '/owner';
+};
