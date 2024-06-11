@@ -1,4 +1,4 @@
-import { useDotYouClient, SubtleCheck, Clock, Times } from '@youfoundation/common-app';
+import { useDotYouClient, SubtleCheck, Clock, Times, t } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage, ChatDeliveryStatus } from '../../../providers/ChatProvider';
 
@@ -16,6 +16,24 @@ export const ChatDeliveryIndicator = ({
 
   if (!messageFromMe) return null;
   return <InnerDeliveryIndicator state={content.deliveryStatus} className={className} />;
+};
+
+export const FailedDeliveryDetails = ({
+  msg,
+  recipient,
+  className,
+}: {
+  msg: HomebaseFile<ChatMessage>;
+  recipient: string;
+  className?: string;
+}) => {
+  const deliveryDetails = msg.serverMetadata?.transferHistory?.recipients[recipient];
+  if (!deliveryDetails) return null;
+  if (deliveryDetails.latestSuccessfullyDeliveredVersionTag) return null;
+
+  return (
+    <p className={`text-red-500 ${className || ''}`}>{t(deliveryDetails.latestTransferStatus)}</p>
+  );
 };
 
 export const InnerDeliveryIndicator = ({
@@ -37,7 +55,9 @@ export const InnerDeliveryIndicator = ({
       } ${className || ''}`}
     >
       {isFailed ? (
-        <Times className="h-6 w-6 pb-1 text-red-500" />
+        <>
+          <Times className="h-6 w-6 text-red-500" />
+        </>
       ) : (
         <>
           {isDelivered ? <SubtleCheck className="relative -right-2 z-10 h-5 w-5" /> : null}

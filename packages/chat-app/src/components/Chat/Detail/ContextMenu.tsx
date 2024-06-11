@@ -6,12 +6,15 @@ import {
   t,
   ActionGroup,
   ChevronDown,
+  Times,
+  ErrorNotification,
 } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { ChatMessage } from '../../../providers/ChatProvider';
+import { ChatDeliveryStatus, ChatMessage } from '../../../providers/ChatProvider';
 import { UnifiedConversation } from '../../../providers/ConversationProvider';
 import { ChatMessageInfo } from './ChatMessageInfo';
 import { EditChatMessage } from './EditChatMessage';
+import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 
 export interface ChatActions {
   doReply: (msg: HomebaseFile<ChatMessage>) => void;
@@ -30,6 +33,8 @@ export const ContextMenu = ({
   if (!chatActions) return null;
   const [showMessageInfo, setShowMessageInfo] = useState(false);
   const [editMessage, setEditMessage] = useState(false);
+
+  const { mutate: resend, error: resendError } = useChatMessage().update;
 
   const identity = useDotYouClient().getIdentity();
   const authorOdinId = msg.fileMetadata.senderOdinId;
@@ -58,8 +63,19 @@ export const ContextMenu = ({
       onClick: () => setShowMessageInfo(true),
     });
 
+  if (
+    conversation &&
+    msg.fileMetadata.appData.content.deliveryStatus === ChatDeliveryStatus.Failed
+  ) {
+    optionalOptions.push({
+      label: t('Retry sending'),
+      onClick: () => resend({ updatedChatMessage: msg, conversation: conversation }),
+    });
+  }
+
   return (
     <>
+      <ErrorNotification error={resendError} />
       {showMessageInfo && conversation ? (
         <ChatMessageInfo
           msg={msg}

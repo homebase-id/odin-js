@@ -9,7 +9,7 @@ import {
   useDotYouClient,
   usePortal,
 } from '@youfoundation/common-app';
-import { InnerDeliveryIndicator } from './ChatDeliveryIndicator';
+import { FailedDeliveryDetails, InnerDeliveryIndicator } from './ChatDeliveryIndicator';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
 import { UnifiedConversation } from '../../../providers/ConversationProvider';
@@ -62,20 +62,26 @@ export const ChatMessageInfo = ({
             <p className="mb-2 text-xl">{t('Recipients')}</p>
             <div className="flex flex-col gap-4">
               {recipients.map((recipient) => (
-                <div className="flex flex-row items-center justify-between" key={recipient}>
+                <div
+                  className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center"
+                  key={recipient}
+                >
                   <div className="flex flex-row items-center gap-2">
                     <AuthorImage
                       odinId={recipient}
-                      className="border border-neutral-200 dark:border-neutral-800"
+                      className="flex-shrink-0 border border-neutral-200 dark:border-neutral-800"
                       size="sm"
                     />
                     <AuthorName odinId={recipient} />
                   </div>
-                  <InnerDeliveryIndicator
-                    state={
-                      messageContent.deliveryDetails?.[recipient] || messageContent.deliveryStatus
-                    }
-                  />
+                  <div className="flex flex-row justify-end gap-2 sm:contents">
+                    <FailedDeliveryDetails msg={msg} recipient={recipient} className="sm:ml-auto" />
+                    <InnerDeliveryIndicator
+                      state={
+                        messageContent.deliveryDetails?.[recipient] || messageContent.deliveryStatus
+                      }
+                    />
+                  </div>
                 </div>
               ))}
             </div>
