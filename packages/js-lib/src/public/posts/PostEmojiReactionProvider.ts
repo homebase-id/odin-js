@@ -85,7 +85,7 @@ export const removeEmojiReaction = async (
   } else {
     const url = emojiRootTransit + '/delete';
     return client
-      .post(url, { odinId: emoji.authorOdinId, request: data })
+      .post(url, { odinId: context.authorOdinId, request: data })
       .then((response) => {
         return { ...response.data, status: response.data?.status?.toLowerCase() };
       })
