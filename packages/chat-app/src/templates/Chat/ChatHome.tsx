@@ -16,7 +16,7 @@ import {
   t,
   useRemoveNotifications,
 } from '@youfoundation/common-app';
-import { drives, permissions, useAuth } from '../../hooks/auth/useAuth';
+import { drives, permissions } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
 
 export const CHAT_ROOT = ROOT_PATH;
@@ -52,7 +52,6 @@ export const ChatHome = () => {
 
 const ChatSideNav = ({ isOnline }: { isOnline: boolean }) => {
   const { conversationKey } = useParams();
-  const { logout } = useAuth();
 
   const navigate = useNavigate();
 
@@ -69,7 +68,7 @@ const ChatSideNav = ({ isOnline }: { isOnline: boolean }) => {
 
   return (
     <>
-      <Sidenav disablePinning={true} hideMobileDrawer={!isRoot} logout={logout} />
+      <Sidenav disablePinning={true} hideMobileDrawer={!isRoot} />
       <div
         className={`${isActive ? 'translate-x-full' : 'translate-x-0'} ${
           isCreateNew || isCreateNewGroup ? '' : 'pb-14'

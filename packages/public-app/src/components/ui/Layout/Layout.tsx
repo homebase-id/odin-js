@@ -19,7 +19,7 @@ interface LayoutProps {
 }
 
 const Layout: FC<LayoutProps> = ({ children }) => {
-  const { isOwner, logout } = useAuth();
+  const { isOwner } = useAuth();
 
   return (
     <NoLayout>
@@ -31,7 +31,7 @@ const Layout: FC<LayoutProps> = ({ children }) => {
       >
         {isOwner ? (
           <Suspense fallback={<></>}>
-            <Sidenav logout={logout} />
+            <Sidenav />
           </Suspense>
         ) : null}
         <div className={`flex min-h-screen w-full flex-grow flex-col`}>{children}</div>

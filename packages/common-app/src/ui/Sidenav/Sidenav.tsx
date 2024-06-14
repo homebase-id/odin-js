@@ -35,6 +35,7 @@ import { Scissors } from '../Icons/Scissors';
 import { Times } from '../Icons/Times';
 import { IconProps } from '../Icons/Types';
 import { Wallet } from '../Icons/Wallet';
+import { logoutOwnerAndAllApps } from '../../provider';
 
 const STORAGE_KEY = 'isOpen';
 
@@ -158,7 +159,10 @@ export const Sidenav = ({
               )}
             </div>
 
-            <MoreItems isOpen={isPinned || isOpen || isHoverOpen || isPeeking} logout={logout}>
+            <MoreItems
+              isOpen={isPinned || isOpen || isHoverOpen || isPeeking}
+              logout={logout || logoutOwnerAndAllApps}
+            >
               {isTightHeight ? (
                 <>
                   <NavItem icon={Persons} label={'Following & Followers'} to={'/owner/follow'} />

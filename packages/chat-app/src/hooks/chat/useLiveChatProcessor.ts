@@ -1,38 +1,23 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  ReceivedCommand,
-  TypedConnectionNotification,
-  getCommands,
-  markCommandComplete,
-  queryBatch,
-  queryModified,
-} from '@youfoundation/js-lib/core';
+import { TypedConnectionNotification, queryBatch, queryModified } from '@youfoundation/js-lib/core';
 
 import { processInbox } from '@youfoundation/js-lib/peer';
 import {
   ChatDrive,
   CHAT_CONVERSATION_FILE_TYPE,
   GROUP_CHAT_CONVERSATION_FILE_TYPE,
-  JOIN_CONVERSATION_COMMAND,
-  JOIN_GROUP_CONVERSATION_COMMAND,
   dsrToConversation,
 } from '../../providers/ConversationProvider';
-import { useDotYouClient, useNotificationSubscriber } from '@youfoundation/common-app';
-import { useCallback, useEffect, useRef } from 'react';
-import {
-  CHAT_MESSAGE_FILE_TYPE,
-  MARK_CHAT_READ_COMMAND,
-  dsrToMessage,
-} from '../../providers/ChatProvider';
+import { useNotificationSubscriber } from '@youfoundation/common-app';
+import { useCallback } from 'react';
+import { CHAT_MESSAGE_FILE_TYPE, dsrToMessage } from '../../providers/ChatProvider';
 import {
   getQueryBatchCursorFromTime,
   getQueryModifiedCursorFromTime,
   hasDebugFlag,
   stringGuidsEqual,
-  tryJsonParse,
 } from '@youfoundation/js-lib/helpers';
 import { getConversationQueryOptions, useConversation } from './useConversation';
-import { processCommand } from '../../providers/ChatCommandProvider';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { ChatReactionFileType } from '../../providers/ChatReactionProvider';
 import { insertNewMessage } from './useChatMessages';
@@ -47,9 +32,6 @@ export const useLiveChatProcessor = () => {
 
   // Only after the inbox is processed, we connect for live updates; So we avoid clearing the cache on each fileAdded update
   const isOnline = useChatWebsocket(inboxStatus === 'success');
-
-  // Only after the inbox is processed, we process commands as new ones might have been added via the inbox
-  useChatCommandProcessor(inboxStatus === 'success');
 
   return isOnline;
 };
@@ -95,6 +77,7 @@ const useInboxProcessor = (connected?: boolean) => {
           cursor: modifiedCursor,
           excludePreviewThumbnail: false,
           includeHeaderContent: true,
+          includeTransferHistory: true,
         }
       );
 
@@ -130,7 +113,6 @@ const useInboxProcessor = (connected?: boolean) => {
 const isDebug = hasDebugFlag();
 
 const useChatWebsocket = (isEnabled: boolean) => {
-  const identity = useDotYouClient().getIdentity();
   const dotYouClient = useDotYouClientContext();
 
   // Added to ensure we have the conversation query available
@@ -207,25 +189,6 @@ const useChatWebsocket = (isEnabled: boolean) => {
         }
 
         insertNewConversation(queryClient, updatedConversation, !isNewFile);
-      } else if (
-        [
-          // JOIN_CONVERSATION_COMMAND,
-          // JOIN_GROUP_CONVERSATION_COMMAND,
-          MARK_CHAT_READ_COMMAND,
-          // UPDATE_GROUP_CONVERSATION_COMMAND,
-        ].includes(notification.header.fileMetadata.appData.dataType) &&
-        identity
-      ) {
-        const command: ReceivedCommand = tryJsonParse<ReceivedCommand>(
-          notification.header.fileMetadata.appData.content
-        );
-        command.sender = notification.header.fileMetadata.senderOdinId;
-        command.clientCode = notification.header.fileMetadata.appData.dataType;
-        command.id = notification.header.fileId;
-
-        const processedCommand = await processCommand(dotYouClient, queryClient, command, identity);
-        if (processedCommand)
-          await markCommandComplete(dotYouClient, ChatDrive, [processedCommand]);
       }
     }
   }, []);
@@ -238,50 +201,4 @@ const useChatWebsocket = (isEnabled: boolean) => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
     }
   );
-};
-
-const useChatCommandProcessor = (isEnabled?: boolean) => {
-  const { getIdentity } = useDotYouClient();
-  const dotYouClient = useDotYouClientContext();
-  const identity = getIdentity();
-  const queryClient = useQueryClient();
-
-  const isProcessing = useRef(false);
-
-  useEffect(() => {
-    if (!isEnabled) return;
-
-    (async () => {
-      if (!identity) return;
-      if (isProcessing.current) return;
-      isProcessing.current = true;
-      const commands = await getCommands(dotYouClient, ChatDrive);
-
-      const filteredCommands = commands.receivedCommands.filter(
-        (command) =>
-          command.clientCode === JOIN_CONVERSATION_COMMAND ||
-          command.clientCode === MARK_CHAT_READ_COMMAND ||
-          command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND
-        // command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND
-      );
-
-      const completedCommands: string[] = [];
-      // Can't use Promise.all, as we need to wait for the previous command to complete as commands can target the same conversation
-      for (let i = 0; i < filteredCommands.length; i++) {
-        const command = filteredCommands[i];
-
-        const completedCommand = await processCommand(dotYouClient, queryClient, command, identity);
-        if (completedCommand) completedCommands.push(completedCommand);
-      }
-
-      if (completedCommands.length > 0)
-        await markCommandComplete(
-          dotYouClient,
-          ChatDrive,
-          completedCommands.filter(Boolean) as string[]
-        );
-
-      isProcessing.current = false;
-    })();
-  }, [isEnabled]);
 };

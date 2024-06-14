@@ -16,6 +16,7 @@ import { useAuth } from '../auth/useAuth';
 import { jsonStringify64, tryJsonParse } from '@youfoundation/js-lib/helpers';
 
 const includeMetadataHeader = true;
+const includeTransferHistory = true;
 const pageSize = 300;
 
 export const useFiles = ({
@@ -37,7 +38,12 @@ export const useFiles = ({
     const response = await queryBatch(
       dotYouClient,
       { targetDrive, systemFileType },
-      { cursorState: pageParam, maxRecords: pageSize, includeMetadataHeader: includeMetadataHeader }
+      {
+        cursorState: pageParam,
+        maxRecords: pageSize,
+        includeMetadataHeader,
+        includeTransferHistory,
+      }
     );
     return response;
   };

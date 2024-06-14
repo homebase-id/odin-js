@@ -17,6 +17,7 @@ import {
   ScheduleOptions,
   SendContents,
   UploadResult,
+  PriorityOptions,
 } from '@youfoundation/js-lib/core';
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
 
@@ -207,7 +208,8 @@ export const uploadConversation = async (
           recipients: conversation.fileMetadata.appData.content.recipients.filter(
             (recipient) => recipient !== identity
           ),
-          schedule: ScheduleOptions.SendNowAwaitResponse,
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.Medium,
           sendContents: SendContents.All,
         }
       : undefined,
@@ -257,7 +259,8 @@ export const updateConversation = async (
           recipients: conversation.fileMetadata.appData.content.recipients.filter(
             (recipient) => recipient !== identity
           ),
-          schedule: ScheduleOptions.SendNowAwaitResponse,
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.Medium,
           sendContents: SendContents.All,
         }
       : undefined,

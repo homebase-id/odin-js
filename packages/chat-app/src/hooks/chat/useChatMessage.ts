@@ -4,7 +4,6 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
-  TransferStatus,
   NewMediaFile,
 } from '@youfoundation/js-lib/core';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
@@ -71,15 +70,6 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     newChat.fileMetadata.versionTag = uploadResult.newVersionTag;
     newChat.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
 
-    const deliveredToInboxes = recipients.map(
-      (recipient) =>
-        uploadResult.recipientStatus[recipient].toLowerCase() === TransferStatus.DeliveredToInbox
-    );
-
-    if (recipients.length && deliveredToInboxes.every((delivered) => delivered)) {
-      newChat.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Delivered;
-      await updateChatMessage(dotYouClient, newChat, recipients, uploadResult.keyHeader);
-    }
     return newChat;
   };
 

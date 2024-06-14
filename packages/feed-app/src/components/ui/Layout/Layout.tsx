@@ -1,7 +1,6 @@
 import { FC, ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Sidenav, Toaster, useDarkMode } from '@youfoundation/common-app';
-import { useAuth } from '../../../hooks/auth/useAuth';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -33,7 +32,6 @@ const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
 
   const [searchParams] = useSearchParams();
   const uiSetting = searchParams.get('ui');
-  const { logout } = useAuth();
   const isReactNative = window.localStorage.getItem('client_type')?.startsWith('react-native');
 
   if (uiSetting === 'none') {
@@ -50,7 +48,7 @@ const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
       <div
         className={`relative flex flex-row ${noShadedBg ? NOT_SHADED_BG : SHADED_BG} pb-14 md:pb-0`}
       >
-        {!isReactNative ? <Sidenav logout={logout} disablePinning={true} /> : null}
+        {!isReactNative ? <Sidenav disablePinning={true} /> : null}
         <div
           className={`relative flex min-h-screen w-full flex-col ${
             noShadedBg ? NOT_SHADED_BG : SHADED_BG

@@ -6,7 +6,6 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import {
-  ChatDeliveryStatus,
   ChatMessage,
   getChatMessages,
   requestMarkAsRead,
@@ -16,6 +15,7 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { UnifiedConversation } from '../../providers/ConversationProvider';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { SendReadReceiptResponseRecipientStatus } from '@youfoundation/js-lib/peer';
 
 const PAGE_SIZE = 100;
 export const useChatMessages = (props?: { conversationId: string | undefined }) => {
@@ -34,17 +34,21 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     conversation: HomebaseFile<UnifiedConversation>;
     messages: HomebaseFile<ChatMessage>[];
   }) => {
-    // => Much nicer solution: Handle with a last read time on the conversation file;
-    const messagesToMarkAsRead = messages
-      .filter(
-        (msg) =>
-          msg.fileMetadata.appData.content.deliveryStatus !== ChatDeliveryStatus.Read &&
-          msg.fileMetadata.senderOdinId &&
-          msg.fileMetadata.appData.uniqueId
-      )
-      .map((msg) => msg.fileMetadata.appData.uniqueId) as string[];
+    const response = await requestMarkAsRead(dotYouClient, conversation, messages);
 
-    return await requestMarkAsRead(dotYouClient, conversation, messagesToMarkAsRead);
+    response.results.forEach((result) => {
+      const someFailed = result.status.some(
+        (recipientStatus) =>
+          recipientStatus.status?.toLowerCase() ===
+          SendReadReceiptResponseRecipientStatus.SenderServerHadAnInternalError
+      );
+      if (someFailed) {
+        // TODO: Should we throw an error?
+        console.error('Error marking chat as read', { response });
+      }
+    });
+
+    return response;
   };
 
   const removeMessage = async ({

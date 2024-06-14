@@ -83,8 +83,14 @@ export const useContact = ({
     };
 
     if (canSave) {
-      const savedReturnedContact = await saveContact(dotYouClient, contactFile);
-      return parseContact(savedReturnedContact);
+      const uploadResult = await saveContact(dotYouClient, contactFile);
+      const savedContactFile = {
+        ...contactFile,
+        fileId: uploadResult?.file.fileId,
+        fileMetaData: { ...contactFile.fileMetadata, versionTag: uploadResult?.newVersionTag },
+      };
+
+      return parseContact(savedContactFile);
     }
 
     return parseContact(contactFile);

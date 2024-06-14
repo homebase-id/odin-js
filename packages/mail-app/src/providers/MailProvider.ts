@@ -15,7 +15,7 @@ import {
   SendContents,
   TargetDrive,
   ThumbnailFile,
-  TransferStatus,
+  TransferUploadStatus,
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
@@ -28,6 +28,10 @@ import {
   uploadHeader,
   MediaFile,
   NewMediaFile,
+  PriorityOptions,
+  TransferStatus,
+  FailedTransferStatuses,
+  RecipientTransferHistory,
 } from '@youfoundation/js-lib/core';
 import { getNewId, jsonStringify64, makeGrid } from '@youfoundation/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
@@ -95,6 +99,7 @@ export const getMailConversations = async (
     maxRecords: pageSize,
     cursorState: cursorState,
     includeMetadataHeader: true,
+    includeTransferHistory: true,
   };
 
   const response = await queryBatch(dotYouClient, params, ro);
@@ -135,7 +140,8 @@ export const uploadMail = async (
     transitOptions: distribute
       ? {
           recipients: recipients,
-          schedule: ScheduleOptions.SendNowAwaitResponse,
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.Medium,
           sendContents: SendContents.All,
           useAppNotification: true,
           appNotificationOptions: {
@@ -286,30 +292,19 @@ export const uploadMail = async (
   conversation.fileMetadata.appData.previewThumbnail = uploadMetadata.appData.previewThumbnail;
 
   if (distribute) {
-    const deliveredToInboxes = recipients.map(
-      (recipient) =>
-        (uploadResult as UploadResult).recipientStatus?.[recipient].toLowerCase() ===
-        TransferStatus.DeliveredToInbox
-    );
-
-    if (recipients.length && deliveredToInboxes.every((delivered) => delivered)) {
-      conversation.fileMetadata.appData.content.deliveryStatus = MailDeliveryStatus.Delivered;
-      await updateLocalMailHeader(
-        dotYouClient,
-        conversation as HomebaseFile<MailConversation>,
-        undefined,
-        (uploadResult as UploadResult).keyHeader
-      );
-    }
-
-    // TODO: Should this work differently with the job system? Would it auto retry?
-    if (!deliveredToInboxes.every((delivered) => delivered)) {
+    if (
+      recipients.some(
+        (recipient) =>
+          (uploadResult as UploadResult).recipientStatus?.[recipient].toLowerCase() ===
+          TransferUploadStatus.EnqueuedFailed
+      )
+    ) {
       conversation.fileMetadata.appData.content.deliveryStatus = MailDeliveryStatus.Failed;
       conversation.fileMetadata.appData.content.deliveryDetails = {};
       for (const recipient of recipients) {
         conversation.fileMetadata.appData.content.deliveryDetails[recipient] =
           (uploadResult as UploadResult).recipientStatus?.[recipient].toLowerCase() ===
-          TransferStatus.DeliveredToInbox
+          TransferUploadStatus.DeliveredToInbox
             ? MailDeliveryStatus.Delivered
             : MailDeliveryStatus.Failed;
       }
@@ -379,13 +374,23 @@ export const dsrToMailConversation = async (
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<MailConversation> | null> => {
   try {
-    const attrContent = await getContentFromHeaderOrPayload<MailConversation>(
+    const mailContent = await getContentFromHeaderOrPayload<MailConversation>(
       dotYouClient,
       targetDrive,
       dsr,
       includeMetadataHeader
     );
-    if (!attrContent) return null;
+    if (!mailContent) return null;
+
+    if (
+      mailContent.deliveryStatus === MailDeliveryStatus.Sent &&
+      dsr.serverMetadata?.transferHistory?.recipients
+    ) {
+      mailContent.deliveryDetails = buildDeliveryDetails(
+        dsr.serverMetadata.transferHistory.recipients
+      );
+      mailContent.deliveryStatus = buildDeliveryStatus(mailContent.deliveryDetails);
+    }
 
     const conversation: HomebaseFile<MailConversation> = {
       ...dsr,
@@ -394,8 +399,8 @@ export const dsrToMailConversation = async (
         appData: {
           ...dsr.fileMetadata.appData,
           content: {
-            ...attrContent,
-            plainMessage: getTextRootsRecursive(attrContent.message).join(' '),
+            ...mailContent,
+            plainMessage: getTextRootsRecursive(mailContent.message).join(' '),
             plainAttachment: dsr.fileMetadata.payloads
               .map((payload) => payload.descriptorContent)
               .join(' '),
@@ -409,6 +414,49 @@ export const dsrToMailConversation = async (
     console.error('[DotYouCore-js] failed to get the conversation payload of a dsr', dsr, ex);
     return null;
   }
+};
+
+const buildDeliveryDetails = (recipientTransferHistory: {
+  [key: string]: RecipientTransferHistory;
+}): Record<string, MailDeliveryStatus> => {
+  const deliveryDetails: Record<string, MailDeliveryStatus> = {};
+
+  for (const recipient of Object.keys(recipientTransferHistory)) {
+    if (recipientTransferHistory[recipient].latestSuccessfullyDeliveredVersionTag) {
+      // if (recipientTransferHistory[recipient].isReadByRecipient) {
+      //   deliveryDetails[recipient] = MailDeliveryStatus.Read;
+      // } else {
+      deliveryDetails[recipient] = MailDeliveryStatus.Delivered;
+      // }
+    } else {
+      const latest = recipientTransferHistory[recipient].latestTransferStatus;
+      const transferStatus =
+        latest && typeof latest === 'string'
+          ? (latest?.toLocaleLowerCase() as TransferStatus)
+          : undefined;
+      if (transferStatus && FailedTransferStatuses.includes(transferStatus)) {
+        deliveryDetails[recipient] = MailDeliveryStatus.Failed;
+      } else {
+        deliveryDetails[recipient] = MailDeliveryStatus.Sent;
+      }
+    }
+  }
+
+  return deliveryDetails;
+};
+
+const buildDeliveryStatus = (
+  deliveryDetails: Record<string, MailDeliveryStatus>
+): MailDeliveryStatus => {
+  const values = Object.values(deliveryDetails);
+  // If any failed, the message is failed
+  if (values.includes(MailDeliveryStatus.Failed)) return MailDeliveryStatus.Failed;
+  // If all are delivered, the message is delivered
+  if (values.every((val) => val === MailDeliveryStatus.Delivered))
+    return MailDeliveryStatus.Delivered;
+
+  // If it exists, it's sent
+  return MailDeliveryStatus.Sent;
 };
 
 export const getAllRecipients = (

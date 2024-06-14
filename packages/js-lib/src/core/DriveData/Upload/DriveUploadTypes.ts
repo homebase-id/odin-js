@@ -38,6 +38,7 @@ interface BaseTransitOptions {
   recipients: string[];
   isTransient?: boolean; // File is removed after it's received by all recipients
   schedule: ScheduleOptions;
+  priority: PriorityOptions;
   sendContents: SendContents;
   remoteTargetDrive?: TargetDrive;
 }
@@ -70,7 +71,13 @@ export enum SendContents {
 
 export enum ScheduleOptions {
   SendNowAwaitResponse = 'sendNowAwaitResponse',
-  SendLater = 'sendLater',
+  SendLater = 'sendAsync',
+}
+
+export enum PriorityOptions {
+  High = 1,
+  Medium = 2,
+  Low = 3,
 }
 
 export interface UploadFileDescriptor {
@@ -108,7 +115,7 @@ export interface UploadResult {
   keyHeader: KeyHeader | undefined;
   file: ExternalFileIdentifier;
   globalTransitIdFileIdentifier: GlobalTransitIdFileIdentifier;
-  recipientStatus: { [key: string]: TransferStatus };
+  recipientStatus: { [key: string]: TransferUploadStatus };
   newVersionTag: string;
 }
 
@@ -116,13 +123,16 @@ export interface AppendResult {
   newVersionTag: string;
 }
 
-export enum TransferStatus {
-  AwaitingTransferKey = 'awaitingtransferkey',
-  TransferKeyCreated = 'transferkeycreated',
+export enum TransferUploadStatus {
+  Enqueued = 'enqueued',
+  EnqueuedFailed = 'enqueuedfailed',
+
+  // Old statuses?
   DeliveredToInbox = 'deliveredtoinbox',
   DeliveredToTargetDrive = 'deliveredtotargetdrive',
   PendingRetry = 'pendingretry',
   TotalRejectionClientShouldRetry = 'totalrejectionclientshouldretry',
   FileDoesNotAllowDistribution = 'filedoesnotallowdistribution',
   RecipientReturnedAccessDenied = 'recipientreturnedaccessdenied',
+  RecipientDoesNotHavePermissionToFileAcl = 'recipientdoesnothavepermissiontofileacl',
 }

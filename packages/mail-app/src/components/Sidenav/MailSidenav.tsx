@@ -13,14 +13,11 @@ import {
   t,
   useRemoveNotifications,
 } from '@youfoundation/common-app';
-import { useAuth } from '../../hooks/auth/useAuth';
 import { useLiveMailProcessor } from '../../hooks/mail/useLiveMailProcessor';
 
 const ROOT_PATH = '/apps/mail';
 
 export const MailSidenav = () => {
-  const { logout } = useAuth();
-
   const isOnline = useLiveMailProcessor();
   useRemoveNotifications({ appId: MAIL_APP_ID });
 
@@ -31,7 +28,7 @@ export const MailSidenav = () => {
 
   return (
     <>
-      <Sidenav disablePinning={true} hideMobileDrawer={!isRoot} logout={logout} />
+      <Sidenav disablePinning={true} hideMobileDrawer={!isRoot} />
       <div
         className={`bottom-0 left-0 top-0 z-[11] bg-page-background ${isActive ? 'fixed right-0 flex w-full md:sticky md:right-auto md:w-[15rem]' : 'hidden md:sticky md:flex md:w-[15rem]'} flex-shrink-0 flex-col border-r border-gray-200/80 bg-background dark:border-gray-700/80`}
       >

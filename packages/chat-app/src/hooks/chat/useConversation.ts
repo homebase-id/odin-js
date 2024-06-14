@@ -20,7 +20,7 @@ import {
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
 import { getNewId, getNewXorId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { useConversations } from './useConversations';
+import { ChatConversationsReturn, useConversations } from './useConversations';
 import { deleteAllChatMessages } from '../../providers/ChatProvider';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
@@ -211,6 +211,26 @@ export const useConversation = (props?: { conversationId?: string | undefined })
           ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
           variables.conversation
         );
+        const existingData = queryClient.getQueryData<InfiniteData<ChatConversationsReturn>>([
+          'conversations',
+        ]);
+        if (existingData) {
+          const newConversations = {
+            ...existingData,
+            pages: existingData.pages.map((page) => ({
+              ...page,
+              searchResults: page.searchResults.map((conversation) =>
+                stringGuidsEqual(
+                  conversation.fileMetadata.appData.uniqueId,
+                  variables.conversation.fileMetadata.appData.uniqueId
+                )
+                  ? variables.conversation
+                  : conversation
+              ),
+            })),
+          };
+          queryClient.setQueryData(['conversations'], newConversations);
+        }
       },
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({ queryKey: ['conversations'] });

@@ -36,14 +36,20 @@ export const useMarkMessagesAsRead = ({
       if (!unreadMessages.length) return;
       isProcessing.current = true;
 
-      // We await the markAsRead (async version), as the mutationStatus isn't shared between hooks;
-      // So it can happen that the status would reset in between renders
-      await markAsRead({
-        conversation: conversation,
-        messages: unreadMessages,
-      });
+      try {
+        // We await the markAsRead (async version), as the mutationStatus isn't shared between hooks;
+        // So it can happen that the status would reset in between renders
+        await markAsRead({
+          conversation: conversation,
+          messages: unreadMessages,
+        });
 
-      setMessagesMarkedAsRead(true);
+        setMessagesMarkedAsRead(true);
+      } catch (e) {
+        console.error('Error marking messages as read', e);
+        setMessagesMarkedAsRead(false);
+        isProcessing.current = false;
+      }
     })();
   }, [messages]);
 

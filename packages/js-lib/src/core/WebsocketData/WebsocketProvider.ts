@@ -19,7 +19,6 @@ let webSocketClient: WebSocket | undefined;
 let activeSs: Uint8Array;
 
 let isConnected = false;
-
 const PING_INTERVAL = 1000 * 5 * 1;
 
 let pingInterval: NodeJS.Timeout | undefined;
@@ -43,14 +42,14 @@ const isDebug = hasDebugFlag();
 const ParseRawClientNotification = (
   notification: RawClientNotification
 ): TypedConnectionNotification => {
-  const { targetDrive, header, externalFileIdentifier, sender, recipient, ...data } = tryJsonParse<
-    Record<string, unknown>
-  >(notification.data);
+  const { targetDrive, header, sender, recipient, ...data } = tryJsonParse<Record<string, unknown>>(
+    notification.data
+  );
 
-  if (notification.notificationType === 'transitFileReceived') {
+  if (notification.notificationType === 'inboxItemReceived') {
     return {
       notificationType: notification.notificationType,
-      externalFileIdentifier: externalFileIdentifier,
+      targetDrive,
       data: data,
     } as ClientTransitNotification;
   }
