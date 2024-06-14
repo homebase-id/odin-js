@@ -31,6 +31,8 @@ export const ChatMessageInfo = ({
     (recipient) => recipient && recipient !== identity
   );
 
+  const isAuthor = msg.fileMetadata.senderOdinId === identity || !msg.fileMetadata.senderOdinId;
+
   const { data: reactions } = useChatReaction({
     conversationId: conversation?.fileMetadata.appData.uniqueId,
     messageId: msg.fileMetadata.appData.uniqueId,
@@ -74,14 +76,21 @@ export const ChatMessageInfo = ({
                     />
                     <AuthorName odinId={recipient} />
                   </div>
-                  <div className="flex flex-row justify-end gap-2 sm:contents">
-                    <FailedDeliveryDetails msg={msg} recipient={recipient} className="sm:ml-auto" />
-                    <InnerDeliveryIndicator
-                      state={
-                        messageContent.deliveryDetails?.[recipient] || messageContent.deliveryStatus
-                      }
-                    />
-                  </div>
+                  {isAuthor ? (
+                    <div className="flex flex-row justify-end gap-2 sm:contents">
+                      <FailedDeliveryDetails
+                        msg={msg}
+                        recipient={recipient}
+                        className="sm:ml-auto"
+                      />
+                      <InnerDeliveryIndicator
+                        state={
+                          messageContent.deliveryDetails?.[recipient] ||
+                          messageContent.deliveryStatus
+                        }
+                      />
+                    </div>
+                  ) : null}
                 </div>
               ))}
             </div>

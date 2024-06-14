@@ -194,12 +194,12 @@ const buildDeliveryStatus = (
   const values = Object.values(deliveryDetails);
   // If any failed, the message is failed
   if (values.includes(ChatDeliveryStatus.Failed)) return ChatDeliveryStatus.Failed;
+  if (values.every((val) => val === ChatDeliveryStatus.Read)) return ChatDeliveryStatus.Read;
   // If all are delivered/read, the message is delivered/read
   if (
     values.every((val) => val === ChatDeliveryStatus.Delivered || val === ChatDeliveryStatus.Read)
   )
     return ChatDeliveryStatus.Delivered;
-  if (values.every((val) => val === ChatDeliveryStatus.Read)) return ChatDeliveryStatus.Read;
 
   // If it exists, it's sent
   return ChatDeliveryStatus.Sent;
