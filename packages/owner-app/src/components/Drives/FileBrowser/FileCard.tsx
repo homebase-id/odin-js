@@ -6,6 +6,7 @@ import {
   Exclamation,
   ExtensionThumbnail,
   Trash,
+  bytesToSize,
   t,
 } from '@youfoundation/common-app';
 import { Clipboard } from '@youfoundation/common-app';
@@ -188,14 +189,6 @@ const FileDelete = ({
       }}
     />
   );
-};
-
-export const bytesToSize = (bytes: number) => {
-  return bytes < 1024
-    ? `${bytes} B`
-    : bytes < 1024 * 1024
-      ? `${(bytes / 1024).toFixed(2)} KB`
-      : `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 };
 
 const CHAT_MESSAGE_FILE_TYPE = 7878;

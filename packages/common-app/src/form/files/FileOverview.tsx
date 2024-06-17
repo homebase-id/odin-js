@@ -12,6 +12,7 @@ import { Triangle } from '../../ui/Icons/Triangle';
 import { ExtensionThumbnail } from './ExtensionThumbnail';
 import { ActionButton } from '../../ui/Buttons/ActionButton';
 import { Trash } from '../../ui/Icons/Trash';
+import { bytesToSize, ellipsisAtMaxChar } from '../../helpers';
 
 type NewFileArray = NewMediaFile[];
 interface FileOverViewProps {
@@ -98,7 +99,9 @@ export const FileOverview = ({
                 </div>
               </>
             ) : (
-              <ExtensionThumbnail contentType={currFile.contentType} />
+              <div className="p-1">
+                <ExtensionThumbnail contentType={currFile.contentType} />
+              </div>
             )}
             <ActionButton
               className="absolute bottom-3 right-3"
@@ -120,7 +123,7 @@ export const FileOverview = ({
           : URL.createObjectURL(currFile.file);
 
       return (
-        <div key={(currFile.file as File).name || index} className="relative">
+        <div key={(currFile.file as File).name || index} className="relative group">
           {currFile.file.type === 'video/mp4' ? (
             <>
               <video
@@ -141,12 +144,20 @@ export const FileOverview = ({
               className="aspect-square h-auto w-full object-cover"
             />
           ) : (
-            <ExtensionThumbnail contentType={currFile.file.type} />
+            <div className="p-1">
+              <ExtensionThumbnail contentType={currFile.file.type} className="opacity-10" />
+              <div className="absolute inset-2 flex items-center justify-center overflow-hidden">
+                <p className="text-sm">
+                  {ellipsisAtMaxChar((currFile.file as File).name, 25)} (
+                  {bytesToSize((currFile.file as File).size)})
+                </p>
+              </div>
+            </div>
           )}
           <ActionButton
-            className="absolute bottom-3 right-3"
+            className="absolute bottom-1 right-1 group-hover:opacity-100 sm:opacity-0 transition-opacity duration-200"
             icon={Trash}
-            type="remove"
+            type="secondary"
             size="square"
             onClick={(e) => {
               e.preventDefault();
