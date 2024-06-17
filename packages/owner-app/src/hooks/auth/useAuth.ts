@@ -117,7 +117,7 @@ export const useAuth = () => {
     getApiType,
     finalizeRegistration,
     isPasswordSet: isPasswordSetOwner,
-    logout,
+    // logout => always uses the `logoutOwnerAndAllApps`,
     getSharedSecret,
     isAuthenticated: authenticationState !== 'anonymous',
   };

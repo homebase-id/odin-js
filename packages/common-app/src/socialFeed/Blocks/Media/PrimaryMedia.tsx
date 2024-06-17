@@ -5,7 +5,7 @@ import { Video, VideoClickToLoad } from '../../../media/Video';
 import { ExtensionThumbnail } from '../../../form/files/ExtensionThumbnail';
 import { useFile } from '../../../hooks';
 import { Download } from '../../../ui';
-import { t } from '../../../helpers';
+import { bytesToSize, t } from '../../../helpers';
 
 export const PrimaryMedia = ({
   odinId,
@@ -145,7 +145,7 @@ export const BoringFile = ({
       {canDownload ? (
         <div className="absolute inset-0 flex gap-3 items-center justify-center text-foreground">
           <span className="flex flex-col items-center">
-            <Download className="h-12 w-12 " /> {t('Download')}
+            <Download className="h-12 w-12 " /> {t('Download')} ({bytesToSize(file.bytesWritten)})
           </span>
         </div>
       ) : null}

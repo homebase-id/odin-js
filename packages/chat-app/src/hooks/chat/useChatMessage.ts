@@ -29,18 +29,23 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     replyId,
     files,
     message,
+    chatId,
+    userDate,
   }: {
     conversation: HomebaseFile<UnifiedConversation>;
     replyId?: string;
     files?: NewMediaFile[];
     message: string;
+    chatId?: string;
+    userDate?: number;
   }): Promise<NewHomebaseFile<ChatMessage> | null> => {
     const conversationId = conversation.fileMetadata.appData.uniqueId as string;
     const conversationContent = conversation.fileMetadata.appData.content;
     const identity = dotYouClient.getIdentity();
     const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
-    const newChatId = getNewId();
+    // We prefer having the uniqueId set outside of the mutation, so that an auto-retry of the mutation doesn't create duplicates
+    const newChatId = chatId || getNewId();
     const newChat: NewHomebaseFile<ChatMessage> = {
       fileMetadata: {
         appData: {
@@ -53,7 +58,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
               : ChatDeliveryStatus.Sent,
             replyId: replyId,
           },
-          userDate: new Date().getTime(),
+          userDate: userDate || new Date().getTime(),
         },
       },
       serverMetadata: {
