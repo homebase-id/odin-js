@@ -45,5 +45,5 @@ export const logoutOwnerAndAllApps = async (): Promise<void> => {
   // IndexedDB
   indexedDB.deleteDatabase(`keyval-store`);
 
-  window.location.href = '/owner';
+  window.location.href = '/owner/login';
 };

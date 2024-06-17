@@ -79,7 +79,7 @@ export const ChatComposer = ({
         message: trimmedVal || '',
         replyId: replyId,
         files: newFiles,
-        messageId: getNewId(),
+        chatId: getNewId(),
         userDate: new Date().getTime(),
       });
       onSend && onSend();
