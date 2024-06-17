@@ -19,7 +19,7 @@ import { ChatMessage } from '../../../providers/ChatProvider';
 import { UnifiedConversation } from '../../../providers/ConversationProvider';
 import { useState, useEffect, useRef } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
-import { isTouchDevice } from '@youfoundation/js-lib/helpers';
+import { getNewId, isTouchDevice } from '@youfoundation/js-lib/helpers';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const CHAT_DRAFTS_KEY = 'CHAT_LOCAL_DRAFTS';
@@ -79,6 +79,8 @@ export const ChatComposer = ({
         message: trimmedVal || '',
         replyId: replyId,
         files: newFiles,
+        messageId: getNewId(),
+        userDate: new Date().getTime(),
       });
       onSend && onSend();
     } catch (err) {

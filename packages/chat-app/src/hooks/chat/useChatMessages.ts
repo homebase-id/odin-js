@@ -138,9 +138,16 @@ export const insertNewMessage = (
       pages: extistingMessages?.pages?.map((page, index) => {
         if (isNewFile) {
           const filteredSearchResults = page.searchResults.filter(
-            // Remove messages without a fileId, as the optimistic mutations should be removed when there's actual data coming over the websocket;
-            //   And There shouldn't be any duplicates, but just in case
-            (msg) => msg && msg?.fileId && !stringGuidsEqual(msg?.fileId, newMessage.fileId)
+            // Remove messages with the same fileId && uniqueId so we avoid duplicates with the optimistic update
+            (msg) =>
+              msg &&
+              (newMessage.fileId ? !stringGuidsEqual(msg?.fileId, newMessage.fileId) : true) &&
+              (newMessage.fileMetadata.appData.uniqueId
+                ? !stringGuidsEqual(
+                    msg?.fileMetadata.appData.uniqueId,
+                    newMessage.fileMetadata.appData.uniqueId
+                  )
+                : true)
           ) as HomebaseFile<ChatMessage>[];
 
           return {
@@ -156,9 +163,21 @@ export const insertNewMessage = (
 
         return {
           ...page,
-          searchResults: page.searchResults.map((msg) =>
-            msg?.fileId && stringGuidsEqual(msg?.fileId, newMessage.fileId) ? newMessage : msg
-          ),
+          searchResults: page.searchResults
+            .map((msg) =>
+              msg?.fileId && stringGuidsEqual(msg?.fileId, newMessage.fileId) ? newMessage : msg
+            )
+            .filter((msg) =>
+              msg &&
+              // (Sanity for fileModified) Remove messages without a fileId and the same uniqueId so we avoid duplicates with the optimistic update
+              !msg.fileId &&
+              newMessage.fileMetadata.appData.uniqueId
+                ? !stringGuidsEqual(
+                    msg?.fileMetadata.appData.uniqueId,
+                    newMessage.fileMetadata.appData.uniqueId
+                  )
+                : true
+            ),
         };
       }),
     };
