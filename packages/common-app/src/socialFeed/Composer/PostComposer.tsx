@@ -234,12 +234,11 @@ export const PostComposer = ({
                 targetChannel.channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
               }
               defaultAcl={targetChannel.overrideAcl}
-              onChange={({ channel, acl }) => {
+              onChange={(newTarget) => {
                 setTargetChannel((current) => ({
                   ...current,
-                  ...channel,
-                  channel: channel || current.channel,
-                  overrideAcl: acl,
+                  ...newTarget,
+                  channel: newTarget.channel || current.channel,
                 }));
               }}
               excludeMore={true}
