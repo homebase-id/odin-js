@@ -1,4 +1,4 @@
-import { t, Alert, ActionButton, Label } from '@youfoundation/common-app';
+import { t, Alert, ActionButton, Label, logoutOwnerAndAllApps } from '@youfoundation/common-app';
 import { useState } from 'react';
 import Section from '../../components/ui/Sections/Section';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -12,7 +12,7 @@ export const SecuritySettings = () => {
   const [password, setPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
 
-  const { changePassword, getDotYouClient, logout } = useAuth();
+  const { changePassword, getDotYouClient } = useAuth();
 
   const passwordIsValid = password === retypePassword && password !== '';
 
@@ -32,7 +32,7 @@ export const SecuritySettings = () => {
               {t('Your password has been changed successfully, please login again')}
             </p>
             <div className="mt-5 flex flex-row-reverse">
-              <ActionButton onClick={() => logout('/owner/login')}>{t('Open login')}</ActionButton>
+              <ActionButton onClick={() => logoutOwnerAndAllApps()}>{t('Open login')}</ActionButton>
             </div>
           </>
         ) : state === 'error' ? (
