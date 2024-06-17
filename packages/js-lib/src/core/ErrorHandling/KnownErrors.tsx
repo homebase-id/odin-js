@@ -164,6 +164,7 @@ export const getOdinErrorDetails = (error: Error | unknown): OdinErrorDetails =>
   }
 
   return {
-    title: 'Unknown error',
+    title: (error as any)?.name || `Unknown error`,
+    stackTrace: (error as any)?.stack || error?.toString(),
   };
 };
