@@ -102,7 +102,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     }),
     send: useMutation({
       mutationFn: sendMessage,
-      onMutate: async ({ conversation, replyId, files, message }) => {
+      onMutate: async ({ conversation, replyId, files, message, chatId, userDate }) => {
         const existingData = queryClient.getQueryData<
           InfiniteData<{
             searchResults: (HomebaseFile<ChatMessage> | null)[];
@@ -117,12 +117,14 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
         const newMessageDsr: NewHomebaseFile<ChatMessage> = {
           fileMetadata: {
             appData: {
+              uniqueId: chatId,
               groupId: conversation.fileMetadata.appData.uniqueId,
               content: {
                 message: message,
                 deliveryStatus: ChatDeliveryStatus.Sending,
                 replyId: replyId,
               },
+              userDate,
             },
             payloads: files?.map((file) => ({
               contentType: file.file.type,
