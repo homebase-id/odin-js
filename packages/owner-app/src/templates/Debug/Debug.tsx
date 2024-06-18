@@ -137,7 +137,9 @@ const getDictionaryFromText = (text: string) => {
   return text.split('\n').reduce(
     (acc, line) => {
       const [key, value] = line.split(':');
-      acc[key.trim()] = value.trim();
+      if (key && value) {
+        acc[key.trim()] = value.trim();
+      }
       return acc;
     },
     {} as Record<string, string>
