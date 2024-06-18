@@ -5,7 +5,7 @@ import { assertIfDefined } from '../../../helpers/DataUtil';
 export interface SendReadReceiptResponse {
   results: {
     file: ExternalFileIdentifier;
-    status: { recipient: string; status: SendReadReceiptResponseRecipientStatus }[];
+    status: { recipient: string; status: SendReadReceiptResponseRecipientStatus | null }[];
   }[];
 }
 
