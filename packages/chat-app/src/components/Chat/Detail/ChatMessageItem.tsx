@@ -60,6 +60,7 @@ export const ChatMessageItem = ({
         className={`flex gap-2 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} group relative ${
           hasReactions ? 'pb-6' : ''
         }`}
+        data-unique-id={msg.fileMetadata.appData.uniqueId}
       >
         {isGroupChat && !messageFromMe ? (
           <ConnectionImage
@@ -68,7 +69,6 @@ export const ChatMessageItem = ({
             size="sm"
           />
         ) : null}
-
         {hasMedia && !isDeleted ? (
           <ChatMediaMessageBody
             msg={msg}
