@@ -48,6 +48,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     const newChatId = chatId || getNewId();
     const newChat: NewHomebaseFile<ChatMessage> = {
       fileMetadata: {
+        created: userDate,
         appData: {
           uniqueId: newChatId,
           groupId: conversationId,
@@ -74,6 +75,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     newChat.fileId = uploadResult.file.fileId;
     newChat.fileMetadata.versionTag = uploadResult.newVersionTag;
     newChat.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
+    newChat.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Sent;
 
     return newChat;
   };
@@ -116,6 +118,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
 
         const newMessageDsr: NewHomebaseFile<ChatMessage> = {
           fileMetadata: {
+            created: userDate,
             appData: {
               uniqueId: chatId,
               groupId: conversation.fileMetadata.appData.uniqueId,
@@ -152,6 +155,41 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
           newData
         );
         return { existingData };
+      },
+      onSuccess: async (newMessage, params) => {
+        if (!newMessage) return;
+        const extistingMessages = queryClient.getQueryData<
+          InfiniteData<{
+            searchResults: (HomebaseFile<ChatMessage> | null)[];
+            cursorState: string;
+            queryTime: number;
+            includeMetadataHeader: boolean;
+          }>
+        >(['chat-messages', params.conversation.fileMetadata.appData.uniqueId]);
+
+        if (extistingMessages) {
+          const newData = {
+            ...extistingMessages,
+            pages: extistingMessages?.pages?.map((page) => ({
+              ...page,
+              searchResults: page.searchResults.map((msg) =>
+                stringGuidsEqual(
+                  msg?.fileMetadata.appData.uniqueId,
+                  newMessage.fileMetadata.appData.uniqueId
+                ) &&
+                (!msg?.fileMetadata.appData.content.deliveryStatus ||
+                  msg?.fileMetadata.appData.content.deliveryStatus <= ChatDeliveryStatus.Sent)
+                  ? newMessage
+                  : msg
+              ),
+            })),
+          };
+
+          queryClient.setQueryData(
+            ['chat-messages', params.conversation.fileMetadata.appData.uniqueId],
+            newData
+          );
+        }
       },
       onError: (err, messageParams, context) => {
         queryClient.setQueryData(
