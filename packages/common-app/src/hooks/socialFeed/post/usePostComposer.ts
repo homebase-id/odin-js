@@ -33,19 +33,19 @@ export const usePostComposer = () => {
     embeddedPost: EmbeddedPost | undefined,
     targetChannel: {
       channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
-      overrideAcl?: AccessControlList;
+      acl?: AccessControlList;
       odinId?: string;
     },
     reactAccess: ReactAccess | undefined
   ) => {
     if (!mediaFiles && !caption && !embeddedPost) return;
 
-    const { channel, overrideAcl, odinId } = targetChannel;
+    const { channel, acl, odinId } = targetChannel;
     const channelId =
       (channel.fileMetadata.appData.content as RemoteCollaborativeChannelDefinition).uniqueId ||
       channel.fileMetadata.appData.uniqueId ||
       BlogConfig.PublicChannelId;
-    if (overrideAcl && !stringGuidsEqual(channelId, BlogConfig.PublicChannelId)) {
+    if (acl && !stringGuidsEqual(channelId, BlogConfig.PublicChannelId)) {
       throw new Error('Custom ACLs are only allowed for public channels');
     }
     try {
@@ -70,9 +70,9 @@ export const usePostComposer = () => {
             },
           },
         },
-        serverMetadata: overrideAcl
+        serverMetadata: acl
           ? {
-              accessControlList: overrideAcl,
+              accessControlList: acl,
             }
           : channel.serverMetadata ||
             ((channel.fileMetadata.appData.content as CollaborativeChannelDefinition).acl

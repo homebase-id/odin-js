@@ -65,7 +65,7 @@ export const PostComposer = ({
 
   const [targetChannel, setTargetChannel] = useState<{
     channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
-    overrideAcl?: AccessControlList | undefined;
+    acl?: AccessControlList | undefined;
     odinId?: string | undefined;
   }>({
     channel: forcedChannel || BlogConfig.PublicChannelNewDsr,
@@ -233,7 +233,7 @@ export const PostComposer = ({
               defaultChannelValue={
                 targetChannel.channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
               }
-              defaultAcl={targetChannel.overrideAcl}
+              defaultAcl={targetChannel.acl}
               onChange={(newTarget) => {
                 setTargetChannel((current) => ({
                   ...current,
@@ -273,10 +273,7 @@ export const PostComposer = ({
             {targetChannel.channel.serverMetadata?.accessControlList && canPost ? (
               <AclIcon
                 className="mr-3 h-5 w-5"
-                acl={
-                  targetChannel.overrideAcl ||
-                  targetChannel.channel.serverMetadata?.accessControlList
-                }
+                acl={targetChannel.acl || targetChannel.channel.serverMetadata?.accessControlList}
               />
             ) : null}
             <span className="flex flex-col">
@@ -285,8 +282,7 @@ export const PostComposer = ({
                 <small className="flex flex-row items-center gap-1 leading-none">
                   <AclSummary
                     acl={
-                      targetChannel.overrideAcl ||
-                      targetChannel.channel.serverMetadata?.accessControlList
+                      targetChannel.acl || targetChannel.channel.serverMetadata?.accessControlList
                     }
                   />{' '}
                 </small>

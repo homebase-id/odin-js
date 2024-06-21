@@ -104,7 +104,7 @@ function App() {
       <OdinQueryClient
         cacheKey={REACT_QUERY_CACHE_KEY}
         cachedQueryKeys={INCLUDED_QUERY_KEYS}
-        type={'indexeddb'}
+        type="indexeddb"
       >
         <RouterProvider router={router} fallbackElement={<></>} />
       </OdinQueryClient>
