@@ -23,6 +23,7 @@ import {
   useDotYouClient,
 } from '@youfoundation/common-app';
 import { ChatDrive } from '../../providers/ConversationProvider';
+import { clear } from 'idb-keyval';
 
 export const useAuth = () => {
   const { getDotYouClient, getSharedSecret, hasSharedSecret } = useDotYouClient();
@@ -38,6 +39,8 @@ export const useAuth = () => {
     localStorage.removeItem(APP_SHARED_SECRET);
     localStorage.removeItem(APP_AUTH_TOKEN);
     localStorage.removeItem(REACT_QUERY_CACHE_KEY);
+    clear();
+
     setAuthenticationState('anonymous');
 
     window.location.href = '/owner';

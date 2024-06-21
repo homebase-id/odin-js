@@ -37,7 +37,7 @@ import { IconProps } from '../Icons/Types';
 import { Wallet } from '../Icons/Wallet';
 import { logoutOwnerAndAllApps } from '../../provider';
 
-const STORAGE_KEY = 'isOpen';
+const STORAGE_KEY = 'sidenavIsOpen';
 
 const navItemClassName = `my-1 py-2 px-2 flex`;
 const navItemActiveClassname = `bg-indigo-200 dark:bg-indigo-700`;

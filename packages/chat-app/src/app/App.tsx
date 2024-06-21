@@ -9,13 +9,16 @@ import {
 } from 'react-router-dom';
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { QueryClient } from '@tanstack/react-query';
-import {
-  PersistQueryClientOptions,
-  PersistQueryClientProvider,
-  removeOldestQuery,
-} from '@tanstack/react-query-persist-client';
-import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
+
+export const REACT_QUERY_CACHE_KEY = 'CHAT_REACT_QUERY_OFFLINE_CACHE';
+const REACT_QUERY_INCLUDED_QUERY_KEYS = [
+  'chat-message',
+  'chat-messages',
+  'conversations',
+  'chat-reaction',
+  'connection-details',
+  'process-inbox',
+];
 
 import { MinimalLayout, NoLayout } from '../components/ui/Layout/Layout';
 
@@ -36,51 +39,7 @@ const AUTH_PATH = ROOT_PATH + '/auth';
 import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
 import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
 import VideoPlayer from '../templates/VideoPlayer/VideoPlayer';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours
-    },
-  },
-});
-
-export const REACT_QUERY_CACHE_KEY = 'CHAT_REACT_QUERY_OFFLINE_CACHE';
-const localStoragePersister = createSyncStoragePersister({
-  storage: window.localStorage,
-  retry: removeOldestQuery,
-  key: REACT_QUERY_CACHE_KEY,
-});
-
-// Explicit includes to avoid persisting media items, or large data in general
-const INCLUDED_QUERY_KEYS = [
-  'chat-message',
-  'chat-messages',
-  'conversations',
-  'chat-reaction',
-  'connection-details',
-  'process-inbox',
-];
-const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
-  buster: '20240524',
-  maxAge: Infinity,
-  persister: localStoragePersister,
-  dehydrateOptions: {
-    shouldDehydrateQuery: (query) => {
-      if (
-        query.state.status === 'pending' ||
-        query.state.status === 'error' ||
-        (query.state.data &&
-          typeof query.state.data === 'object' &&
-          !Array.isArray(query.state.data) &&
-          Object.keys(query.state.data).length === 0)
-      )
-        return false;
-      const { queryKey } = query;
-      return INCLUDED_QUERY_KEYS.some((key) => queryKey.includes(key));
-    },
-  },
-};
+import { OdinQueryClient } from '@youfoundation/common-app';
 
 function App() {
   const router = createBrowserRouter(
@@ -141,9 +100,13 @@ function App() {
       <Helmet>
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
-      <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
+      <OdinQueryClient
+        cacheKey={REACT_QUERY_CACHE_KEY}
+        cachedQueryKeys={REACT_QUERY_INCLUDED_QUERY_KEYS}
+        type="indexeddb"
+      >
         <RouterProvider router={router} fallbackElement={<></>} />
-      </PersistQueryClientProvider>
+      </OdinQueryClient>
     </HelmetProvider>
   );
 }
