@@ -9,14 +9,6 @@ import {
 } from 'react-router-dom';
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { QueryClient } from '@tanstack/react-query';
-import {
-  PersistQueryClientOptions,
-  PersistQueryClientProvider,
-  removeOldestQuery,
-} from '@tanstack/react-query-persist-client';
-import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
-
 import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
 
 const Auth = lazy(() => import('../templates/Auth/Auth'));
@@ -38,45 +30,10 @@ import { useAuth } from '../hooks/auth/useAuth';
 export const ROOT_PATH = '/apps/feed';
 const AUTH_PATH = ROOT_PATH + '/auth';
 
-import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours
-    },
-  },
-});
+import { ErrorBoundary, NotFound, OdinQueryClient } from '@youfoundation/common-app';
 
 export const REACT_QUERY_CACHE_KEY = 'FEED_REACT_QUERY_OFFLINE_CACHE';
-const localStoragePersister = createSyncStoragePersister({
-  storage: window.localStorage,
-  retry: removeOldestQuery,
-  key: REACT_QUERY_CACHE_KEY,
-});
-
-// Explicit includes to avoid persisting media items, or large data in general
 const INCLUDED_QUERY_KEYS = ['common-image', 'collaborative-channels'];
-const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
-  buster: '202403',
-  maxAge: Infinity,
-  persister: localStoragePersister,
-  dehydrateOptions: {
-    shouldDehydrateQuery: (query) => {
-      if (
-        query.state.status === 'pending' ||
-        query.state.status === 'error' ||
-        (query.state.data &&
-          typeof query.state.data === 'object' &&
-          !Array.isArray(query.state.data) &&
-          Object.keys(query.state.data).length === 0)
-      )
-        return false;
-      const { queryKey } = query;
-      return INCLUDED_QUERY_KEYS.some((key) => queryKey.includes(key));
-    },
-  },
-};
 
 function App() {
   const router = createBrowserRouter(
@@ -144,9 +101,13 @@ function App() {
       <Helmet>
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
-      <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
+      <OdinQueryClient
+        cacheKey={REACT_QUERY_CACHE_KEY}
+        cachedQueryKeys={INCLUDED_QUERY_KEYS}
+        type={'indexeddb'}
+      >
         <RouterProvider router={router} fallbackElement={<></>} />
-      </PersistQueryClientProvider>
+      </OdinQueryClient>
     </HelmetProvider>
   );
 }

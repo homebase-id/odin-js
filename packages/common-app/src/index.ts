@@ -14,3 +14,4 @@ export * from './media/Image';
 export * from './media/Video';
 export * from './socialFeed';
 export * from './identity';
+export * from './reactQuery';

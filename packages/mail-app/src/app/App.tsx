@@ -9,11 +9,6 @@ import {
 } from 'react-router-dom';
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { QueryClient } from '@tanstack/react-query';
-import {
-  PersistQueryClientOptions,
-  PersistQueryClientProvider,
-} from '@tanstack/react-query-persist-client';
 
 import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
 
@@ -47,27 +42,13 @@ import { useAuth } from '../hooks/auth/useAuth';
 export const ROOT_PATH = '/apps/mail';
 const AUTH_PATH = ROOT_PATH + '/auth';
 
-import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
+import { ErrorBoundary, NotFound, OdinQueryClient } from '@youfoundation/common-app';
 import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
-import { createIDBPersister } from './createIdbPersister';
-// import { createExperimentalPersiter } from './createExperimentalPersister';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours,
-      // => TODO: Disabled the experimentalPersister as the setQueryData isn't kept in the persister
-      // => https://github.com/TanStack/query/issues/6310
-      // persister: createExperimentalPersiter(),
-    },
-  },
-});
 
 export const REACT_QUERY_CACHE_KEY = 'MAIL_REACT_QUERY_OFFLINE_CACHE';
-const idbPersister = createIDBPersister(REACT_QUERY_CACHE_KEY);
 
 // Explicit includes to avoid persisting media items, or large data in general
-const INCLUDED_QUERY_KEYS = [
+const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'mail-conversations',
   'connection-details',
   'push-notifications',
@@ -77,25 +58,6 @@ const INCLUDED_QUERY_KEYS = [
   // Small data (blobs to local file Uri)
   'image',
 ];
-const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
-  maxAge: Infinity,
-  persister: idbPersister,
-  dehydrateOptions: {
-    shouldDehydrateQuery: (query) => {
-      if (
-        query.state.status === 'pending' ||
-        query.state.status === 'error' ||
-        (query.state.data &&
-          typeof query.state.data === 'object' &&
-          !Array.isArray(query.state.data) &&
-          Object.keys(query.state.data).length === 0)
-      )
-        return false;
-      const { queryKey } = query;
-      return INCLUDED_QUERY_KEYS.some((key) => queryKey.includes(key));
-    },
-  },
-};
 
 function App() {
   const router = createBrowserRouter(
@@ -163,9 +125,13 @@ function App() {
       <Helmet>
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
-      <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
+      <OdinQueryClient
+        cacheKey={REACT_QUERY_CACHE_KEY}
+        cachedQueryKeys={REACT_QUERY_INCLUDED_QUERY_KEYS}
+        type="indexeddb"
+      >
         <RouterProvider router={router} fallbackElement={<></>} />
-      </PersistQueryClientProvider>
+      </OdinQueryClient>
     </HelmetProvider>
   );
 }

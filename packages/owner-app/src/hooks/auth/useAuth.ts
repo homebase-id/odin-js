@@ -64,14 +64,19 @@ export const useAuth = () => {
   };
 
   const logout = async (redirectPath?: string) => {
-    await logoutOwner();
+    try {
+      await logoutOwner();
+    } catch (e) {
+      // We ignore server error states; And continue cleaning local storage
+      console.warn('Error logging out from server', e);
+    }
     setAuthenticationState('anonymous');
 
     window.localStorage.removeItem(OWNER_SHARED_SECRET);
     window.localStorage.removeItem(HOME_SHARED_SECRET);
     window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
 
-    window.location.href = redirectPath || HOME_ROOT_PATH;
+    window.location.href = redirectPath || LOGIN_PATH;
   };
 
   /// Redirects back to returnUrls; Explicitly uses window navigation to ensure that the anonymous state doesn't stick on the rootRoute

@@ -48,7 +48,11 @@ export const ChatComposer = ({
   useEffect(() => {
     if (conversation?.fileMetadata.appData.uniqueId) {
       drafts[conversation.fileMetadata.appData.uniqueId] = message;
-      localStorage.setItem(CHAT_DRAFTS_KEY, JSON.stringify(drafts));
+      try {
+        localStorage.setItem(CHAT_DRAFTS_KEY, JSON.stringify(drafts));
+      } catch (e) {
+        /* empty */
+      }
     }
   }, [conversation, message]);
 
