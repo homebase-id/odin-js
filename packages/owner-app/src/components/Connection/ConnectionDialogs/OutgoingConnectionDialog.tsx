@@ -128,7 +128,15 @@ const OutgoingConnectionDialog = ({
                 <Input
                   id="dotyouid"
                   name="dotyouid"
+                  autoCorrect="off"
+                  autoCapitalize="none"
                   onChange={(e) => setConnectionTarget(getDomainFromUrl(e.target.value))}
+                  onKeyUp={(e) =>
+                    (e.currentTarget.value = e.currentTarget.value
+                      .toLowerCase()
+                      .trimStart()
+                      .replace(/\s/g, '.'))
+                  }
                   defaultValue={connectionTarget}
                   readOnly={!!targetOdinId && !invalid}
                   disabled={!!targetOdinId && !invalid}

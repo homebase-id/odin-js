@@ -1,5 +1,9 @@
 export const getDomainFromUrl = (url?: string): string | undefined => {
-  return url?.replace(new RegExp('^(http|https)://'), '').split('/')[0]?.toLowerCase();
+  return url
+    ?.replace(new RegExp('^(http|https)://'), '')
+    .replace(/\s/g, '')
+    .split('/')[0]
+    ?.toLowerCase();
 };
 
 export const getTwoLettersFromDomain = (domain: string): string => {
