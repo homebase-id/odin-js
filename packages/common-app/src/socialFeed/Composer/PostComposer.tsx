@@ -255,7 +255,9 @@ export const PostComposer = ({
               stringGuidsEqual(
                 targetChannel.channel.fileMetadata.appData.uniqueId,
                 BlogConfig.PublicChannelId
-              ) && !skipConfirmation
+              ) &&
+              !targetChannel.acl &&
+              !skipConfirmation
                 ? {
                     title: t('Post'),
                     buttonText: t('Post'),
