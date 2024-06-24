@@ -3,6 +3,7 @@ import {
   DeleteNotifications,
   GetNotifications,
   MarkNotificationsAsRead,
+  PushNotification,
 } from '@youfoundation/js-lib/core';
 import { useEffect } from 'react';
 import { hasDebugFlag, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
@@ -38,19 +39,46 @@ export const usePushNotifications = (props?: { appId?: string }) => {
     }),
     markAsRead: useMutation({
       mutationFn: markAsRead,
-      onMutate: async () => {
-        // TODO
+      onMutate: async (notificationIds) => {
+        const existingData = queryClient.getQueryData<{
+          results: PushNotification[];
+          cursor: number;
+        }>(['push-notifications']);
+
+        if (!existingData) return;
+        const newData = {
+          ...existingData,
+          results: existingData.results.map((n) => ({
+            ...n,
+            unread: !notificationIds.some((id) => id === n.id),
+          })),
+        };
+        queryClient.setQueryData(['push-notifications'], newData);
+
+        return existingData;
       },
-      onSettled: () => {
+      onError: () => {
         queryClient.invalidateQueries({ queryKey: ['push-notifications'] });
       },
     }),
     remove: useMutation({
       mutationFn: removeNotifications,
-      onMutate: async () => {
-        // TODO
+      onMutate: async (notificationIds) => {
+        const existingData = queryClient.getQueryData<{
+          results: PushNotification[];
+          cursor: number;
+        }>(['push-notifications']);
+
+        if (!existingData) return;
+        const newData = {
+          ...existingData,
+          results: existingData.results.filter((n) => !notificationIds.some((id) => id === n.id)),
+        };
+        queryClient.setQueryData(['push-notifications'], newData);
+
+        return existingData;
       },
-      onSettled: () => {
+      onError: () => {
         queryClient.invalidateQueries({ queryKey: ['push-notifications'] });
       },
     }),
