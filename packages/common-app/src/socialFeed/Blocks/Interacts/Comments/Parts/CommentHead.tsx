@@ -20,12 +20,13 @@ export const CommentHead = ({
 
   const actionOptions = [];
 
-  if (isAuthor && setIsEdit && onRemove) {
+  if (identity && isAuthor && setIsEdit && onRemove) {
     actionOptions.push({ label: t('Edit'), onClick: () => setIsEdit(true), icon: Pencil });
     actionOptions.push({ label: t('Remove'), onClick: onRemove, icon: Times });
   }
 
-  if (!isAuthor) {
+  // idenity && to make sure the user is logged in
+  if (identity && !isAuthor) {
     actionOptions.push({
       icon: Block,
       label: `${t('Block this user')}`,
