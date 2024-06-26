@@ -29,6 +29,7 @@ import { insertNewMessage, insertNewMessagesForConversation } from './useChatMes
 import { insertNewConversation } from './useConversations';
 
 const MINUTE_IN_MS = 60000;
+const isDebug = hasDebugFlag();
 
 // We first process the inbox, then we connect for live updates;
 export const useLiveChatProcessor = () => {
@@ -53,6 +54,7 @@ const useInboxProcessor = (connected?: boolean) => {
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
 
+    isDebug && console.log('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
     if (lastProcessedWithBuffer) {
       const modifiedCursor = getQueryModifiedCursorFromTime(lastProcessedWithBuffer); // Friday, 31 May 2024 09:38:54.678
       const batchCursor = getQueryBatchCursorFromTime(
@@ -90,7 +92,7 @@ const useInboxProcessor = (connected?: boolean) => {
       );
 
       const newMessages = modifieData.searchResults.concat(newData.searchResults);
-
+      isDebug && console.log('[InboxProcessor] new messages', newMessages.length);
       const uniqueMessagesPerConversation = newMessages.reduce(
         (acc, dsr) => {
           if (!dsr.fileMetadata?.appData?.groupId || dsr.fileState === 'deleted') {
@@ -111,6 +113,11 @@ const useInboxProcessor = (connected?: boolean) => {
         },
         {} as Record<string, HomebaseFile<string>[]>
       );
+      isDebug &&
+        console.log(
+          '[InboxProcessor] new conversation updates',
+          Object.keys(uniqueMessagesPerConversation).length
+        );
 
       await Promise.all(
         Object.keys(uniqueMessagesPerConversation).map(async (updatedConversation) => {
@@ -139,8 +146,6 @@ const useInboxProcessor = (connected?: boolean) => {
     enabled: connected,
   });
 };
-
-const isDebug = hasDebugFlag();
 
 const useChatWebsocket = (isEnabled: boolean) => {
   const dotYouClient = useDotYouClientContext();
