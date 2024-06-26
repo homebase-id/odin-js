@@ -50,11 +50,11 @@ const useInboxProcessor = (connected?: boolean) => {
 
   const fetchData = async () => {
     const lastProcessedTime = queryClient.getQueryState(['process-inbox'])?.dataUpdatedAt;
-    const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 5;
+    const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 2;
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
 
-    isDebug && console.log('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
+    isDebug && console.debug('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
     if (lastProcessedWithBuffer) {
       const modifiedCursor = getQueryModifiedCursorFromTime(lastProcessedWithBuffer); // Friday, 31 May 2024 09:38:54.678
       const batchCursor = getQueryBatchCursorFromTime(
@@ -92,7 +92,7 @@ const useInboxProcessor = (connected?: boolean) => {
       );
 
       const newMessages = modifieData.searchResults.concat(newData.searchResults);
-      isDebug && console.log('[InboxProcessor] new messages', newMessages.length);
+      isDebug && console.debug('[InboxProcessor] new messages', newMessages.length);
       const uniqueMessagesPerConversation = newMessages.reduce(
         (acc, dsr) => {
           if (!dsr.fileMetadata?.appData?.groupId || dsr.fileState === 'deleted') {
@@ -114,7 +114,7 @@ const useInboxProcessor = (connected?: boolean) => {
         {} as Record<string, HomebaseFile<string>[]>
       );
       isDebug &&
-        console.log(
+        console.debug(
           '[InboxProcessor] new conversation updates',
           Object.keys(uniqueMessagesPerConversation).length
         );
