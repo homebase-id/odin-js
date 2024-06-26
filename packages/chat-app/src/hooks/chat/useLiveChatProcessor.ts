@@ -1,5 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { TypedConnectionNotification, queryBatch, queryModified } from '@youfoundation/js-lib/core';
+import {
+  HomebaseFile,
+  TypedConnectionNotification,
+  queryBatch,
+  queryModified,
+} from '@youfoundation/js-lib/core';
 
 import { processInbox } from '@youfoundation/js-lib/peer';
 import {
@@ -10,7 +15,7 @@ import {
 } from '../../providers/ConversationProvider';
 import { useNotificationSubscriber } from '@youfoundation/common-app';
 import { useCallback } from 'react';
-import { CHAT_MESSAGE_FILE_TYPE, dsrToMessage } from '../../providers/ChatProvider';
+import { CHAT_MESSAGE_FILE_TYPE, ChatMessage, dsrToMessage } from '../../providers/ChatProvider';
 import {
   getQueryBatchCursorFromTime,
   getQueryModifiedCursorFromTime,
@@ -20,7 +25,7 @@ import {
 import { getConversationQueryOptions, useConversation } from './useConversation';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { ChatReactionFileType } from '../../providers/ChatReactionProvider';
-import { insertNewMessage } from './useChatMessages';
+import { insertNewMessage, insertNewMessagesForConversation } from './useChatMessages';
 import { insertNewConversation } from './useConversations';
 
 const MINUTE_IN_MS = 60000;
@@ -59,11 +64,13 @@ const useInboxProcessor = (connected?: boolean) => {
         dotYouClient,
         {
           targetDrive: ChatDrive,
+          fileType: [CHAT_MESSAGE_FILE_TYPE],
         },
         {
           maxRecords: BATCH_SIZE,
           cursorState: batchCursor,
           includeMetadataHeader: true,
+          includeTransferHistory: true,
         }
       );
 
@@ -71,6 +78,7 @@ const useInboxProcessor = (connected?: boolean) => {
         dotYouClient,
         {
           targetDrive: ChatDrive,
+          fileType: [CHAT_MESSAGE_FILE_TYPE],
         },
         {
           maxRecords: BATCH_SIZE,
@@ -81,17 +89,39 @@ const useInboxProcessor = (connected?: boolean) => {
         }
       );
 
-      const newMessages = [...newData.searchResults, ...modifieData.searchResults].filter(
-        (dsr) => dsr.fileMetadata.appData.fileType === CHAT_MESSAGE_FILE_TYPE
+      const newMessages = modifieData.searchResults.concat(newData.searchResults);
+
+      const uniqueMessagesPerConversation = newMessages.reduce(
+        (acc, dsr) => {
+          if (!dsr.fileMetadata?.appData?.groupId || dsr.fileState === 'deleted') {
+            return acc;
+          }
+
+          const conversationId = dsr.fileMetadata?.appData.groupId as string;
+          if (!acc[conversationId]) {
+            acc[conversationId] = [];
+          }
+
+          if (acc[conversationId].some((m) => stringGuidsEqual(m.fileId, dsr.fileId))) {
+            return acc;
+          }
+
+          acc[conversationId].push(dsr);
+          return acc;
+        },
+        {} as Record<string, HomebaseFile<string>[]>
       );
 
       await Promise.all(
-        newMessages.map(async (newMessage) => {
-          if (newMessage.fileState === 'deleted') return;
-
-          const newChatMessage = await dsrToMessage(dotYouClient, newMessage, ChatDrive, true);
-          if (!newChatMessage) return;
-          insertNewMessage(queryClient, newChatMessage);
+        Object.keys(uniqueMessagesPerConversation).map(async (updatedConversation) => {
+          const updatedChatMessages = (
+            await Promise.all(
+              uniqueMessagesPerConversation[updatedConversation].map(
+                async (newMessage) => await dsrToMessage(dotYouClient, newMessage, ChatDrive, true)
+              )
+            )
+          ).filter(Boolean) as HomebaseFile<ChatMessage>[];
+          insertNewMessagesForConversation(queryClient, updatedConversation, updatedChatMessages);
         })
       );
     } else {
@@ -163,7 +193,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
           return;
         }
 
-        insertNewMessage(queryClient, updatedChatMessage, !isNewFile);
+        insertNewMessage(queryClient, updatedChatMessage);
       } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
         const messageId = notification.header.fileMetadata.appData.groupId;
         queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
