@@ -38,9 +38,14 @@ export const FileCard = ({
 }) => {
   const firstPayload = file.fileMetadata.payloads?.[0];
   const contentType = firstPayload?.contentType || 'application/json';
-  const isImage = ['image/webp', 'image/jpeg', 'image/png', 'image/svg+xml', 'image/gif'].includes(
-    contentType
-  );
+  const isImage = [
+    'image/webp',
+    'image/jpeg',
+    'image/png',
+    'image/svg+xml',
+    'image/gif',
+    'image/heic',
+  ].includes(contentType);
 
   return (
     <div
