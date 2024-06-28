@@ -10,13 +10,15 @@ import { hasDebugFlag, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 const isDebug = hasDebugFlag();
-const PAGE_SIZE = 150;
+const PAGE_SIZE = 700;
 export const usePushNotifications = (props?: { appId?: string }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
 
   const getNotifications = async (cursor: number | undefined) => {
-    return await GetNotifications(dotYouClient, undefined, PAGE_SIZE, cursor);
+    const notifications = await GetNotifications(dotYouClient, undefined, PAGE_SIZE, cursor);
+    console.log('Notifications', notifications);
+    return notifications;
   };
 
   const markAsRead = async (notificationIds: string[]) =>
@@ -33,7 +35,7 @@ export const usePushNotifications = (props?: { appId?: string }) => {
       select: (data) => ({
         ...data,
         results: data.results.filter(
-          (n) => !props?.appId || stringGuidsEqual(n.options.appId, props.appId)
+          (n) => n.unread && (!props?.appId || stringGuidsEqual(n.options.appId, props.appId))
         ),
       }),
     }),
