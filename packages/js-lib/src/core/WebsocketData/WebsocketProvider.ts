@@ -140,9 +140,15 @@ const ConnectSocket = async (
     if (isDebug) console.debug(`[NotificationProvider] Client connected`);
 
     webSocketClient.onopen = () => {
+      const establishConnectionRequest: EstablishConnectionRequest = {
+        drives,
+        waitTimeMs: 2000,
+        batchSize: 20,
+      };
+
       Notify({
         command: 'establishConnectionRequest',
-        data: JSON.stringify(drives),
+        data: JSON.stringify(establishConnectionRequest),
       });
     };
 
