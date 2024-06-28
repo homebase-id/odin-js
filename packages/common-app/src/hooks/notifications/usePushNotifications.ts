@@ -16,9 +16,7 @@ export const usePushNotifications = (props?: { appId?: string }) => {
   const queryClient = useQueryClient();
 
   const getNotifications = async (cursor: number | undefined) => {
-    const notifications = await GetNotifications(dotYouClient, undefined, PAGE_SIZE, cursor);
-    console.log('Notifications', notifications);
-    return notifications;
+    return await GetNotifications(dotYouClient, undefined, PAGE_SIZE, cursor);
   };
 
   const markAsRead = async (notificationIds: string[]) =>
