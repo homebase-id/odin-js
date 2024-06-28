@@ -10,12 +10,11 @@ export interface SendReadReceiptResponse {
 }
 
 export enum SendReadReceiptResponseRecipientStatus {
-  RequestAcceptedIntoInbox = 'requestacceptedintoinbox',
-  RecipientIdentityReturnedServerError = 'recipientidentityreturnedservererror',
-  RecipientIdentityReturnedAccessDenied = 'recipientidentityreturnedaccessdenied',
   NotConnectedToOriginalSender = 'notconnectedtooriginalsender',
-  RecipientIdentityReturnedBadRequest = 'recipientidentityreturnedbadrequest',
-  SenderServerHadAnInternalError = 'senderserverhadaninternalerror',
+  FileDoesNotExist = 'filedoesnotexist',
+  FileDoesNotHaveSender = 'filedoesnothavesender',
+  MissingGlobalTransitId = 'missingglobaltransitid',
+  Enqueued = 'enqueued',
 }
 
 export const sendReadReceipt = async (
