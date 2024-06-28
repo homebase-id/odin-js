@@ -35,7 +35,7 @@ export const usePushNotifications = (props?: { appId?: string }) => {
       select: (data) => ({
         ...data,
         results: data.results.filter(
-          (n) => n.unread && (!props?.appId || stringGuidsEqual(n.options.appId, props.appId))
+          (n) => !props?.appId || stringGuidsEqual(n.options.appId, props.appId)
         ),
       }),
     }),
@@ -89,7 +89,6 @@ export const usePushNotifications = (props?: { appId?: string }) => {
 
 export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
   const { data: notifications } = usePushNotifications(props).fetch;
-
   return notifications?.results.filter((n) => n.unread).length ?? 0;
 };
 
