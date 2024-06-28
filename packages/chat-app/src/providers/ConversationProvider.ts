@@ -296,6 +296,8 @@ export const updateConversation = async (
       );
       if (!existingConversation) return;
       conversation.fileMetadata.versionTag = existingConversation.fileMetadata.versionTag;
+      conversation.sharedSecretEncryptedKeyHeader =
+        existingConversation.sharedSecretEncryptedKeyHeader;
       return updateConversation(dotYouClient, conversation, distribute);
     }
   );
