@@ -11,6 +11,7 @@ import {
   useErrors,
   t,
   ellipsisAtMaxChar,
+  VolatileInputRef,
 } from '@youfoundation/common-app';
 import { HomebaseFile, NewMediaFile } from '@youfoundation/js-lib/core';
 
@@ -35,7 +36,7 @@ export const ChatComposer = ({
   clearReplyMsg: () => void;
   onSend?: () => void;
 }) => {
-  const volatileRef = useRef<HTMLDivElement>(null);
+  const volatileRef = useRef<VolatileInputRef>(null);
 
   const drafts = JSON.parse(localStorage.getItem(CHAT_DRAFTS_KEY) || '{}');
   const [message, setMessage] = useState<string | undefined>(
@@ -76,6 +77,7 @@ export const ChatComposer = ({
     setMessage('');
     setFiles([]);
     clearReplyMsg();
+    volatileRef.current?.clear();
 
     try {
       await sendMessage({

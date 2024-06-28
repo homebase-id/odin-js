@@ -225,7 +225,7 @@ export const getThumbBytes = async (
   payloadKey: string,
   width: number,
   height: number,
-  options: {
+  options?: {
     systemFileType?: SystemFileType;
     lastModified?: number;
     axiosConfig?: AxiosRequestConfig;
