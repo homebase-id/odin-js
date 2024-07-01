@@ -111,6 +111,7 @@ const useInboxProcessor = (connected?: boolean) => {
     queryKey: ['process-inbox'],
     queryFn: fetchData,
     enabled: connected,
+    staleTime: MINUTE_IN_MS * 2,
   });
 };
 
@@ -227,6 +228,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
   const processQueue = useCallback(
     async (queuedMessages: HomebaseFile<ChatMessage>[]) => {
+      isDebug && console.debug('[ChatWebsocket] Processing queue', queuedMessages.length);
       setChatMessagesQueue([]);
 
       // Filter out duplicate messages and selec the one with the latest updated property
@@ -252,7 +254,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
         // Start timeout to always process the queue after a certain time
         interval.current = setInterval(
           async () => await processQueue([...chatMessagesQueue]),
-          5000
+          3000
         );
       }
     }
