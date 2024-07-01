@@ -39,6 +39,7 @@ export interface VideoClickToLoadProps extends Omit<OdinVideoProps, 'dotYouClien
 export const VideoClickToLoad = ({
   preload = true,
   previewThumbnail,
+  probablyEncrypted,
   ...props
 }: VideoClickToLoadProps) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
@@ -74,6 +75,7 @@ export const VideoClickToLoad = ({
             loadSize={{ pixelWidth: 1920, pixelHeight: 1080 }}
             onLoad={() => setPreviewLoaded(true)}
             onError={() => setShouldFallback(true)}
+            probablyEncrypted={probablyEncrypted}
           />
         </>
       )}
@@ -96,6 +98,7 @@ export const VideoClickToLoad = ({
             props.className || ''
           } ${(loadVideo && playingVideo) || shouldFallback ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
           onPlay={() => setPlayingVideo(true)}
+          probablyEncrypted={probablyEncrypted}
         />
       ) : null}
     </div>
