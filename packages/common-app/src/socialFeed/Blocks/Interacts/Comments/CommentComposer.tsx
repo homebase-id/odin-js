@@ -93,7 +93,7 @@ export const CommentComposer = ({
           />
         </div>
       ) : (
-        <CantReactInfo cantReact={canReact} login={login} />
+        <CantReactInfo cantReact={canReact} login={login} intent="comment" />
       )}
       <ErrorNotification error={postCommentError} />
     </div>
