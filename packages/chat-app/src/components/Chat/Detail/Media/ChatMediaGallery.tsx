@@ -96,6 +96,7 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
               lastModified={msg.fileMetadata.updated}
               probablyEncrypted={true}
               autoPlay={true}
+              className="max-h-[100dvh]"
             />
           ) : contentType?.startsWith('image') ? (
             <OdinImage
