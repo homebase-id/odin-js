@@ -1,5 +1,10 @@
-import { OdinThumbnailImage, OdinVideo, OdinVideoProps } from '@youfoundation/ui-lib';
-import { Triangle, useDotYouClient } from '../..';
+import {
+  OdinPreviewImage,
+  OdinThumbnailImage,
+  OdinVideo,
+  OdinVideoProps,
+} from '@youfoundation/ui-lib';
+import { Loader, Triangle, useDotYouClient } from '../..';
 import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { useMemo, useState } from 'react';
 
@@ -39,6 +44,9 @@ export const VideoClickToLoad = ({
   const dotYouClient = useDotYouClient().getDotYouClient();
   const [loadVideo, setLoadVideo] = useState(false);
   const [shouldFallback, setShouldFallback] = useState(false);
+  const [previewLoaded, setPreviewLoaded] = useState(false);
+  const [playingVideo, setPlayingVideo] = useState(false);
+
   return (
     <div
       className={`bg-page-background relative overflow-hidden ${props.className || ''}`}
@@ -52,18 +60,31 @@ export const VideoClickToLoad = ({
           <div className="bg-slate-200 dark:bg-slate-800 aspect-video w-full"></div>
         )
       ) : (
-        <OdinThumbnailImage
-          dotYouClient={dotYouClient}
-          {...props}
-          className={`${props.className || ''} blur-sm`}
-          loadSize={{ pixelWidth: 1920, pixelHeight: 1080 }}
-          onError={() => setShouldFallback(true)}
-        />
+        <>
+          <OdinPreviewImage
+            dotYouClient={dotYouClient}
+            {...props}
+            className={`${props.className || ''} ${previewLoaded ? 'opacity-0' : 'opacity-100'} blur-sm`}
+            previewThumbnail={previewThumbnail}
+          />
+          <OdinThumbnailImage
+            dotYouClient={dotYouClient}
+            {...props}
+            className={`${props.className || ''} absolute inset-0 blur-sm object-cover`}
+            loadSize={{ pixelWidth: 1920, pixelHeight: 1080 }}
+            onLoad={() => setPreviewLoaded(true)}
+            onError={() => setShouldFallback(true)}
+          />
+        </>
       )}
       <div className="absolute inset-0 flex items-center justify-center z-0">
-        <div className="bg-background/40 rounded-full p-7 border border-foreground/40">
-          <Triangle className="text-foreground h-12 w-12" />
-        </div>
+        {loadVideo && !playingVideo ? (
+          <Loader className="h-12 w-12" />
+        ) : (
+          <div className="bg-background/40 rounded-full p-7 border border-foreground/40">
+            <Triangle className="text-foreground h-12 w-12" />
+          </div>
+        )}
       </div>
 
       {preload || loadVideo ? (
@@ -73,7 +94,8 @@ export const VideoClickToLoad = ({
           autoPlay={loadVideo}
           className={`z-0 ${shouldFallback ? 'relative' : 'absolute inset-0'} ${
             props.className || ''
-          } ${loadVideo || shouldFallback ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+          } ${(loadVideo && playingVideo) || shouldFallback ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+          onPlay={() => setPlayingVideo(true)}
         />
       ) : null}
     </div>

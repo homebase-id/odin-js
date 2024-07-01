@@ -27,11 +27,12 @@ export interface OdinVideoProps {
   poster?: string;
   directFileSizeLimit?: number;
   lastModified: number | undefined;
+  onPlay?: () => void;
 }
 
 const MB = 1000000;
 export const OdinVideo = (videoProps: OdinVideoProps) => {
-  const { dotYouClient, odinId, targetDrive, fileId, globalTransitId, fileKey, className } =
+  const { dotYouClient, odinId, targetDrive, fileId, globalTransitId, fileKey, className, onPlay } =
     videoProps;
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -106,6 +107,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
       data-playback={playback}
       data-probably-encrypted={videoProps.probablyEncrypted}
       playsInline={true}
+      onPlaying={onPlay}
     >
       {isInView && playback !== undefined ? (
         playback === 'encrypted-mse' ? (
