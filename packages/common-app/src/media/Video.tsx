@@ -39,6 +39,7 @@ export interface VideoClickToLoadProps extends Omit<OdinVideoProps, 'dotYouClien
 export const VideoClickToLoad = ({
   preload = true,
   previewThumbnail,
+  probablyEncrypted,
   ...props
 }: VideoClickToLoadProps) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
@@ -74,6 +75,7 @@ export const VideoClickToLoad = ({
             loadSize={{ pixelWidth: 1920, pixelHeight: 1080 }}
             onLoad={() => setPreviewLoaded(true)}
             onError={() => setShouldFallback(true)}
+            probablyEncrypted={probablyEncrypted}
           />
         </>
       )}
@@ -90,6 +92,7 @@ export const VideoClickToLoad = ({
       {preload || loadVideo ? (
         <OdinVideo
           dotYouClient={dotYouClient}
+          probablyEncrypted={probablyEncrypted}
           {...props}
           autoPlay={loadVideo}
           className={`z-0 ${shouldFallback ? 'relative' : 'absolute inset-0'} ${

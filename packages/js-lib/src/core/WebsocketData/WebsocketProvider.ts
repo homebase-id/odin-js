@@ -143,7 +143,7 @@ const ConnectSocket = async (
       const establishConnectionRequest: EstablishConnectionRequest = {
         drives,
         waitTimeMs: 2000,
-        batchSize: 20,
+        batchSize: 1,
       };
 
       Notify({

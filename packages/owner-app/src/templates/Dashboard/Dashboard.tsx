@@ -110,7 +110,7 @@ const AppWrapper = ({
 );
 
 const SystemApp = () => {
-  const unreadCount = useUnreadPushNotificationsCount({ appId: OWNER_APP_ID });
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: OWNER_APP_ID });
 
   // const os = getOperatingSystem();
   // const isAndroid = os.name === 'Android';
@@ -120,14 +120,14 @@ const SystemApp = () => {
       name={'Notifications'}
       appId={OWNER_APP_ID}
       href={'/owner/notifications'}
-      unreadCount={unreadCount}
+      unreadCount={unreadCount || 0}
     />
   );
 };
 
 const ChatApp = () => {
   // const { data: appReg } = useApp({ appId: CHAT_APP_ID }).fetch;
-  const unreadCount = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
   const os = getOperatingSystem();
   const isAndroid = os.name === 'Android';
   const isIos = os.name === 'iOS';
@@ -137,7 +137,7 @@ const ChatApp = () => {
       appId={CHAT_APP_ID}
       name={'Chat'}
       href={`/apps/chat`}
-      unreadCount={unreadCount}
+      unreadCount={unreadCount || 0}
       options={[
         {
           label: t('Settings'),
@@ -167,14 +167,14 @@ const ChatApp = () => {
 };
 
 const MailApp = () => {
-  const unreadCount = useUnreadPushNotificationsCount({ appId: MAIL_APP_ID });
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: MAIL_APP_ID });
 
   return (
     <AppWrapper
       appId={MAIL_APP_ID}
       name={'Mail'}
       href={`/apps/mail`}
-      unreadCount={unreadCount}
+      unreadCount={unreadCount || 0}
       options={[
         {
           label: t('Settings'),
@@ -188,7 +188,7 @@ const MailApp = () => {
 
 const FeedApp = () => {
   // const { data: appReg } = useApp({ appId: FEED_APP_ID }).fetch;
-  const unreadCount = useUnreadPushNotificationsCount({ appId: FEED_APP_ID });
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: FEED_APP_ID });
   const os = getOperatingSystem();
   const isAndroid = os.name === 'Android';
   const isIos = os.name === 'iOS';
@@ -198,7 +198,7 @@ const FeedApp = () => {
       appId={FEED_APP_ID}
       name={'Feed'}
       href={`/apps/feed`}
-      unreadCount={unreadCount}
+      unreadCount={unreadCount || 0}
       options={[
         {
           label: t('Settings'),
@@ -229,7 +229,7 @@ const FeedApp = () => {
 
 const PhotoApp = () => {
   // const { data: appReg } = useApp({ appId: PHOTO_APP_ID }).fetch;
-  const unreadCount = useUnreadPushNotificationsCount({ appId: PHOTO_APP_ID });
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: PHOTO_APP_ID });
 
   const os = getOperatingSystem();
   const isAndroid = os.name === 'Android';
@@ -239,7 +239,7 @@ const PhotoApp = () => {
       appId={PHOTO_APP_ID}
       name={'Photos'}
       href={`https://photos.homebase.id`}
-      unreadCount={unreadCount}
+      unreadCount={unreadCount || 0}
       options={[
         {
           label: t('Settings'),
