@@ -52,7 +52,7 @@ export const usePushNotifications = (props?: { appId?: string }) => {
           ...existingData,
           results: existingData.results.map((n) => ({
             ...n,
-            unread: !notificationIds.some((id) => id === n.id),
+            unread: notificationIds.some((id) => id === n.id) ? false : n.unread,
           })),
         };
         queryClient.setQueryData(['push-notifications'], newData);
