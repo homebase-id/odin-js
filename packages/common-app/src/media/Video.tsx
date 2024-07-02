@@ -92,7 +92,6 @@ export const VideoClickToLoad = ({
       {preload || loadVideo ? (
         <OdinVideo
           dotYouClient={dotYouClient}
-          probablyEncrypted={probablyEncrypted}
           {...props}
           autoPlay={loadVideo}
           className={`z-0 ${shouldFallback ? 'relative' : 'absolute inset-0'} ${
