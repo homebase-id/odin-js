@@ -164,6 +164,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
           !updatedChatMessage ||
           Object.keys(updatedChatMessage.fileMetadata.appData.content).length === 0
         ) {
+          // Something is up with the message, invalidate all messages for this conversation
+          console.warn('[ChatWebsocket] Invalid message received', notification, conversationId);
           queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
           return;
         }
@@ -226,51 +228,44 @@ const useChatWebsocket = (isEnabled: boolean) => {
     }
   }, []);
 
-  const processQueue = useCallback(
-    async (queuedMessages: HomebaseFile<ChatMessage>[]) => {
-      isDebug && console.debug('[ChatWebsocket] Processing queue', queuedMessages.length);
-      setChatMessagesQueue([]);
+  const chatMessagesQueueTunnel = useRef<HomebaseFile<ChatMessage>[]>([]);
+  const processQueue = useCallback(async (queuedMessages: HomebaseFile<ChatMessage>[]) => {
+    isDebug && console.debug('[ChatWebsocket] Processing queue', queuedMessages.length);
+    setChatMessagesQueue([]);
+    if (timeout.current) {
+      clearTimeout(timeout.current);
+      timeout.current = null;
+    }
 
-      // Filter out duplicate messages and selec the one with the latest updated property
-      const filteredMessages = queuedMessages.reduce((acc, message) => {
-        const existingMessage = acc.find((m) => stringGuidsEqual(m.fileId, message.fileId));
-        if (!existingMessage) {
-          acc.push(message);
-        } else if (existingMessage.fileMetadata.updated < message.fileMetadata.updated) {
-          acc[acc.indexOf(existingMessage)] = message;
-        }
-        return acc;
-      }, [] as HomebaseFile<ChatMessage>[]);
+    // Filter out duplicate messages and selec the one with the latest updated property
+    const filteredMessages = queuedMessages.reduce((acc, message) => {
+      const existingMessage = acc.find((m) => stringGuidsEqual(m.fileId, message.fileId));
+      if (!existingMessage) {
+        acc.push(message);
+      } else if (existingMessage.fileMetadata.updated < message.fileMetadata.updated) {
+        acc[acc.indexOf(existingMessage)] = message;
+      }
+      return acc;
+    }, [] as HomebaseFile<ChatMessage>[]);
 
-      await processChatMessagesBatch(dotYouClient, queryClient, filteredMessages);
-    },
-    [setChatMessagesQueue]
-  );
+    await processChatMessagesBatch(dotYouClient, queryClient, filteredMessages);
+  }, []);
 
-  const interval = useRef<NodeJS.Timeout | null>(null);
+  const timeout = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
+    // Using a ref as it's part of the global closure so we can easily pass the latest queue into the timeout
+    chatMessagesQueueTunnel.current = [...chatMessagesQueue];
+
     if (chatMessagesQueue.length >= 1) {
-      if (!interval.current) {
+      if (!timeout.current) {
         // Start timeout to always process the queue after a certain time
-        interval.current = setInterval(
-          async () => await processQueue([...chatMessagesQueue]),
-          3000
-        );
+        timeout.current = setTimeout(() => processQueue(chatMessagesQueueTunnel.current), 3000);
       }
     }
 
     if (chatMessagesQueue.length > 25) {
-      (async () => {
-        await processQueue([...chatMessagesQueue]);
-      })();
+      processQueue(chatMessagesQueue);
     }
-
-    return () => {
-      if (interval.current) {
-        clearInterval(interval.current);
-        interval.current = null;
-      }
-    };
   }, [processQueue, chatMessagesQueue]);
 
   return useNotificationSubscriber(
