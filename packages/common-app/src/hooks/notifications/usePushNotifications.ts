@@ -7,11 +7,11 @@ import {
   getNotificationCountsByAppId,
   markAllNotificationsOfAppAsRead,
 } from '@youfoundation/js-lib/core';
-import { useEffect, useState } from 'react';
-import { hasDebugFlag, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { useEffect } from 'react';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
-const isDebug = hasDebugFlag();
+// const isDebug = hasDebugFlag();
 const PAGE_SIZE = 700;
 export const usePushNotifications = (props?: { appId?: string }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
