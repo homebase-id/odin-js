@@ -16,8 +16,10 @@ import {
   ActionGroup,
   Link,
   Persons,
+  Trash,
+  ErrorNotification,
 } from '../../../ui';
-import { ChannelDefinitionVm, useManageSocialFeed } from '../../../hooks/socialFeed';
+import { ChannelDefinitionVm, useManagePost, useManageSocialFeed } from '../../../hooks/socialFeed';
 import { useDotYouClient } from '../../../hooks/auth/useDotYouClient';
 import { useIsConnected } from '../../../hooks/connections/useIsConnected';
 
@@ -111,7 +113,12 @@ export const PostMeta = ({
       {excludeContextMenu || !postFile ? null : (
         <>
           {groupPost ? (
-            <GroupChannelActions odinId={odinId} postFile={postFile} channelLink={channelLink} />
+            <GroupChannelActions
+              odinId={odinId}
+              postFile={postFile}
+              channel={channel}
+              channelLink={channelLink}
+            />
           ) : (!odinId && isOwner) || isAuthor ? (
             <Suspense>
               <OwnerActions postFile={postFile} />
@@ -222,10 +229,14 @@ const ExternalActions = ({
 const GroupChannelActions = ({
   odinId,
   channelLink,
+  channel,
   postFile,
 }: {
   odinId?: string;
   channelLink?: string;
+  channel?:
+    | HomebaseFile<ChannelDefinitionVm | ChannelDefinition>
+    | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
   postFile: HomebaseFile<PostContent>;
 }) => {
   const { getIdentity } = useDotYouClient();
@@ -238,39 +249,67 @@ const GroupChannelActions = ({
     getReportContentUrl,
   } = useManageSocialFeed(odinId ? { odinId } : undefined);
 
-  if (!window.location.pathname.startsWith('/apps/feed')) {
-    return null;
-  }
+  const { mutateAsync: removePost, error: removePostError } = useManagePost().remove;
 
-  const options: (ActionGroupOptionProps | undefined)[] = [
-    channelLink
-      ? {
-          icon: Link,
-          label: `${t('Go to collaborative channel')}`,
-          href: channelLink,
-        }
-      : undefined,
-    {
+  const options: (ActionGroupOptionProps | undefined)[] = [];
+
+  if (window.location.pathname.startsWith('/apps/feed')) {
+    if (channelLink)
+      options.push({
+        icon: Link,
+        label: `${t('Go to collaborative channel')}`,
+        href: channelLink,
+      });
+
+    options.push({
       icon: Times,
       label: `${t('Remove this post from my feed')}`,
       onClick: () => {
         removeFromMyFeed({ postFile });
       },
-    },
-    !isAuthor
-      ? {
-          icon: Flag,
-          label: `${t('Report')}`,
-          onClick: async () => {
-            const reportUrl = await getReportContentUrl();
-            window.open(reportUrl, '_blank');
-          },
-        }
-      : undefined,
-  ];
+    });
+
+    if (!isAuthor) {
+      options.push({
+        icon: Flag,
+        label: `${t('Report')}`,
+        onClick: async () => {
+          const reportUrl = await getReportContentUrl();
+          window.open(reportUrl, '_blank');
+        },
+      });
+    }
+  }
+
+  // If the channel has serverMetadata, it is a collaborative channel from this identity so we can remove the post
+  if (channel && channel.serverMetadata) {
+    options.push({
+      icon: Trash,
+      label: t(
+        postFile.fileMetadata.appData.content.type === 'Article' ? 'Remove Article' : 'Remove post'
+      ),
+      confirmOptions: {
+        title: `${t('Remove')} "${
+          postFile.fileMetadata.appData.content.caption.substring(0, 50) || t('Untitled')
+        }"`,
+        buttonText: 'Permanently remove',
+        body: t('Are you sure you want to remove this post? This action cannot be undone.'),
+      },
+      onClick: async (e) => {
+        e.stopPropagation();
+        await removePost({
+          channelId: postFile.fileMetadata.appData.content.channelId,
+          postFile,
+        });
+
+        return false;
+      },
+    });
+  }
 
   return (
     <div className="ml-auto" onClick={(e) => e.stopPropagation()}>
+      <ErrorNotification error={removePostError} />
       <ActionGroup className="" type="mute" size="none" options={options} />
     </div>
   );

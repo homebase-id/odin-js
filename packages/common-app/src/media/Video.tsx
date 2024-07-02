@@ -99,6 +99,7 @@ export const VideoClickToLoad = ({
             props.className || ''
           } ${(loadVideo && playingVideo) || shouldFallback ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
           onPlay={() => setPlayingVideo(true)}
+          probablyEncrypted={probablyEncrypted}
         />
       ) : null}
     </div>
