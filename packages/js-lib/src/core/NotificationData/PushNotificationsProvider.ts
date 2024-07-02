@@ -72,11 +72,7 @@ export const markAllNotificationsOfAppAsRead = async (
   appId: string
 ) => {
   const axiosClient = dotYouClient.createAxiosClient();
-  return await axiosClient
-    .post(`/notify/list/mark-read-by-appid`, {
-      appId: appId,
-    })
-    .then((res) => res.data);
+  return await axiosClient.post(`/notify/list/mark-read-by-appid`, appId).then((res) => res.data);
 };
 
 export const DeleteNotifications = async (

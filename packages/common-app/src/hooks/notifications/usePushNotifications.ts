@@ -117,7 +117,7 @@ export const useRemoveNotifications = (props: { appId: string }) => {
     mutationFn: markAsRead,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['push-notifications'] });
-      queryClient.invalidateQueries({ queryKey: ['push-notifications-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['push-notifications-count'] });
     },
   });
 
