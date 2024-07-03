@@ -6,7 +6,7 @@ import {
   useDotYouClient,
   useManageSocialFeed,
 } from '@youfoundation/common-app';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import { PostContent } from '@youfoundation/js-lib/public';
 
 interface UnreachableIdentityProps {
@@ -16,7 +16,7 @@ interface UnreachableIdentityProps {
 }
 
 export const UnreachableIdentity = ({ className, postFile, odinId }: UnreachableIdentityProps) => {
-  const identity = useDotYouClient().getIdentity();
+  const host = useDotYouClient().getDotYouClient().getRoot;
 
   const {
     removeFromFeed: { mutateAsync: removeFromMyFeed },
@@ -31,7 +31,7 @@ export const UnreachableIdentity = ({ className, postFile, odinId }: Unreachable
           {t('This content is no longer accessible')}.
           <span className="block text-sm text-slate-400">
             <a
-              href={`https://${odinId}`}
+              href={new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}
               className="hover:underline"
               target="_blank"
               rel="nofollow noreferrer"
@@ -56,7 +56,7 @@ export const UnreachableIdentity = ({ className, postFile, odinId }: Unreachable
             {
               icon: UserX,
               label: `${t('Unfollow')}`,
-              href: `https://${identity}/owner/follow/following/${odinId}`,
+              href: `${host}/owner/follow/following/${odinId}`,
             },
           ]}
         />

@@ -10,6 +10,7 @@ import {
 } from '@youfoundation/common-app';
 import React from 'react';
 import { ROOT_PATH } from '../../../../app/App';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 
 const ChannelsOverview = ({ className }: { className?: string }) => {
   const { getIdentity } = useDotYouClient();
@@ -33,7 +34,7 @@ const ChannelsOverview = ({ className }: { className?: string }) => {
               {channels?.map((chnl) => (
                 <HybridLink
                   key={chnl.fileMetadata.appData.uniqueId}
-                  href={`https://${identity}/posts/${chnl?.fileMetadata.appData.content.slug}`}
+                  href={`${new DotYouClient({ identity: identity || undefined, api: ApiType.Guest }).getRoot()}/posts/${chnl?.fileMetadata.appData.content.slug}`}
                   className="relative flex w-full flex-row items-center gap-2 bg-background p-1 hover:z-10 hover:bg-gray-100 hover:shadow-md dark:hover:bg-gray-800 hover:dark:shadow-slate-600"
                 >
                   <Quote className="h-4 w-4 flex-shrink-0" />
@@ -54,7 +55,7 @@ const ChannelsOverview = ({ className }: { className?: string }) => {
                 {collaborative.channels.map((chnl) => (
                   <HybridLink
                     key={chnl.fileMetadata.appData.uniqueId}
-                    href={`https://${collaborative.odinId}/posts/${chnl?.fileMetadata.appData.content.slug}?youauth-logon=${identity}`}
+                    href={`${new DotYouClient({ identity: collaborative.odinId, api: ApiType.Guest }).getRoot()}/posts/${chnl?.fileMetadata.appData.content.slug}?youauth-logon=${identity}`}
                     className="relative flex w-full flex-row items-center gap-2 bg-background p-1 hover:z-10 hover:bg-gray-100 hover:shadow-md dark:hover:bg-gray-800 hover:dark:shadow-slate-600"
                   >
                     <Persons className="h-4 w-4 flex-shrink-0" />

@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import { LoginBox } from '../LoginBox/LoginBox';
 import { useAuth } from '../../../hooks/auth/useAuth';
 import { useOutsideTrigger, Times, Person, ConnectionImage, t } from '@youfoundation/common-app';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 
 const LoginNav = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,7 +48,9 @@ const LoginNav = () => {
                 <p className="mb-4">
                   {t('Logged in as: ')}{' '}
                   <a
-                    href={`https://${identity ?? ''}`}
+                    href={
+                      identity ? new DotYouClient({ identity, api: ApiType.Guest }).getRoot() : ''
+                    }
                     className="underline"
                     target={'_blank'}
                     rel="noopener noreferrer"

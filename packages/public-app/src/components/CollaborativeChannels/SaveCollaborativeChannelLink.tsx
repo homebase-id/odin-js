@@ -1,5 +1,5 @@
 import { ChannelDefinitionVm, ActionLink, Plus, t } from '@youfoundation/common-app';
-import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 import {
   RemoteCollaborativeChannelDefinition,
   CollaborativeChannelDefinition,
@@ -42,7 +42,7 @@ export const SaveCollaborativeChannelLink = ({
   return (
     <ActionLink
       className={`w-auto ${className ?? ''}`}
-      href={`https://${loggedInIdentity}/apps/feed/channels/incoming-collaborative?channel=${JSON.stringify(remoteGroupChannel)}`}
+      href={`${new DotYouClient({ identity: loggedInIdentity, api: ApiType.Guest }).getRoot()}/apps/feed/channels/incoming-collaborative?channel=${JSON.stringify(remoteGroupChannel)}`}
       icon={Plus}
       type={'primary'}
     >

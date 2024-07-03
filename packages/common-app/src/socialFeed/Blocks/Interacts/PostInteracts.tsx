@@ -25,6 +25,8 @@ import {
   HomebaseFile,
   EmojiReactionSummary,
   ParsedReactionPreview,
+  ApiType,
+  DotYouClient,
 } from '@youfoundation/js-lib/core';
 
 export const PostInteracts = ({
@@ -86,7 +88,7 @@ export const PostInteracts = ({
     },
   };
 
-  const permalink = `https://${authorOdinId}${HOME_ROOT_PATH}posts/${postContent.channelId}/${
+  const permalink = `${new DotYouClient({ identity: authorOdinId || undefined, api: ApiType.Guest }).getRoot()}${HOME_ROOT_PATH}posts/${postContent.channelId}/${
     postContent.slug ?? postContent.id
   }`;
 

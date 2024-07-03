@@ -12,6 +12,8 @@ import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
 import { FEED_APP_ID, t, useDotYouClient, useStaticFiles } from '../../../..';
 import { stringGuidsEqual, stringifyToQueryParams, toGuidId } from '@youfoundation/js-lib/helpers';
 import {
+  ApiType,
+  DotYouClient,
   DrivePermissionType,
   HomebaseFile,
   NewHomebaseFile,
@@ -55,7 +57,8 @@ const getExtendAuthorizationUrl = (
     d: JSON.stringify(drives),
   };
 
-  return `https://${identity}/owner/appupdate?${stringifyToQueryParams(
+  const host = new DotYouClient({ identity: identity || undefined, api: ApiType.App }).getRoot();
+  return `${host}/owner/appupdate?${stringifyToQueryParams(
     params
   )}&return=${encodeURIComponent(returnUrl)}`;
 };
@@ -126,13 +129,13 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
       if (!channelDef.fileMetadata.appData.uniqueId)
         throw new Error('Channel unique id is not set');
 
-      const identity = dotYouClient.getIdentity();
+      const host = dotYouClient.getRoot();
       const returnUrl = `${FEED_ROOT_PATH}/channels?new=${JSON.stringify(channelDef)}`;
 
       const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);
 
       window.location.href = getExtendAuthorizationUrl(
-        identity,
+        host,
         channelDef.fileMetadata.appData.content.name,
         t('Drive for "{0}" channel posts', channelDef.fileMetadata.appData.content.name),
         targetDrive,

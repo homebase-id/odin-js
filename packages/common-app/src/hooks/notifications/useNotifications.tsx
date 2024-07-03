@@ -1,6 +1,8 @@
 import {
+  ApiType,
   AppNotification,
   ClientConnectionNotification,
+  DotYouClient,
   PushNotification,
   TypedConnectionNotification,
 } from '@youfoundation/js-lib/core';
@@ -40,6 +42,8 @@ export const useNotifications = () => {
           ? clientNotification.sender
           : clientNotification.recipient;
 
+      const host = new DotYouClient({ api: ApiType.Guest, identity: otherId }).getRoot();
+
       const notification: Notification = {
         key: `incoming-${otherId}`,
         title:
@@ -47,7 +51,7 @@ export const useNotifications = () => {
             ? t('New connection request')
             : t('Your connection request was accepted'),
         body: otherId ? <DomainHighlighter>{otherId}</DomainHighlighter> : undefined,
-        imgSrc: `https://${otherId}/pub/image`,
+        imgSrc: `${host}/pub/image`,
         href: `/owner/connections/${otherId}`,
         type:
           clientNotification.notificationType === 'connectionRequestReceived'
@@ -104,27 +108,8 @@ export const useNotifications = () => {
     ['connectionRequestAccepted', 'connectionRequestReceived', 'appNotificationAdded', 'unknown'],
     [BlogConfig.FeedDrive]
   );
-
-  // const notifications = pending?.results.map((connection) => {
-  //   return {
-  //     key: `incoming-${connection.senderOdinId}`,
-  //     title: t('Incoming connection request'),
-  //     body: (
-  //       <>
-  //         {`${t('You have a new connection request from')}`}{' '}
-  //         <DomainHighlighter>{connection.senderOdinId}</DomainHighlighter>
-  //       </>
-  //     ),
-  //     imgSrc: `https://${connection.senderOdinId}/pub/image`,
-  //     href: `/owner/connections/${connection.senderOdinId}`,
-  //     type: 'pending',
-  //   };
-  // });
-
   return {
-    // notifications,
     liveNotifications,
-    // hasUnread: notifications?.length ? notifications.length > 0 : false,
     dismiss,
   };
 };

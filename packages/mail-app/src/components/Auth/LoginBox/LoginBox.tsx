@@ -30,7 +30,7 @@ export const LoginBox = () => {
 
   useEffect(() => {
     if (isAutoAuthorize && stringifiedAuthParams)
-      window.location.href = `https://${window.location.hostname}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
+      window.location.href = `https://${window.location.host}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
   }, [authParams]);
 
   if (isLoading || isAutoAuthorize) return <LoadingBlock className="h-[16rem] w-full " />;
@@ -62,7 +62,7 @@ export const AutoAuthorize = () => {
 
   useEffect(() => {
     if (stringifiedAuthParams)
-      window.location.href = `https://${window.location.hostname}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
+      window.location.href = `https://${window.location.host}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
   }, [authParams]);
 
   return (

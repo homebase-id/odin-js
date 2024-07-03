@@ -6,7 +6,7 @@ import { ChannelDefinitionVm } from '@youfoundation/common-app';
 import { Feed } from '@youfoundation/common-app';
 import { useFollowDetail } from '../../../hooks/follow/useFollowDetail';
 import { Check } from '@youfoundation/common-app';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 const FollowLink = ({
@@ -17,7 +17,7 @@ const FollowLink = ({
   channel?: HomebaseFile<ChannelDefinitionVm>;
 }) => {
   const { isOwner, getIdentity } = useAuth();
-  const identity = getIdentity();
+  const loggedInIdentity = getIdentity();
   const { data } = useFollowDetail().fetch;
 
   if (isOwner) return null;
@@ -35,8 +35,8 @@ const FollowLink = ({
       <ActionLink
         className={`w-auto ${className ?? ''}`}
         href={
-          (identity
-            ? `https://${identity}/owner/follow/following/${window.location.hostname}`
+          (loggedInIdentity
+            ? `${new DotYouClient({ identity: loggedInIdentity, api: ApiType.Guest }).getRoot()}/owner/follow/following/${window.location.hostname}`
             : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect/follow/following/${window.location.hostname}`) +
           (channel ? `?chnl=${channel.fileMetadata.appData.uniqueId}` : '')
         }

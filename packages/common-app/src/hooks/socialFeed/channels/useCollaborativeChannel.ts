@@ -12,6 +12,8 @@ import {
 import { FEED_APP_ID, t, useCircles, useDotYouClient } from '../../../..';
 import { stringGuidsEqual, stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
 import {
+  ApiType,
+  DotYouClient,
   DrivePermissionType,
   HomebaseFile,
   NewHomebaseFile,
@@ -44,7 +46,8 @@ const getExtendDriveDetailsUrl = (
     d: JSON.stringify(drives),
   };
 
-  return `https://${identity}/owner/apprequest-drives?${stringifyToQueryParams(
+  const host = new DotYouClient({ identity: identity || undefined, api: ApiType.App }).getRoot();
+  return `${host}/owner/apprequest-drives?${stringifyToQueryParams(
     params
   )}&return=${encodeURIComponent(returnUrl)}`;
 };
@@ -77,7 +80,8 @@ const getExtendCirclePermissionUrl = (
     c: circleIds.join(','),
   };
 
-  return `https://${identity}/owner/apprequest-circles?${stringifyToQueryParams(
+  const host = new DotYouClient({ identity: identity || undefined, api: ApiType.App }).getRoot();
+  return `${host}/owner/apprequest-circles?${stringifyToQueryParams(
     params
   )}&return=${encodeURIComponent(returnUrl)}`;
 };

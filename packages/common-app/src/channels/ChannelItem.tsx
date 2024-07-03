@@ -1,4 +1,10 @@
-import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import {
+  ApiType,
+  DotYouClient,
+  HomebaseFile,
+  NewHomebaseFile,
+  SecurityGroupType,
+} from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 
 import { ChannelTemplateSelector } from './ChannelTemplateSelector';
@@ -318,7 +324,7 @@ export const ChannelItem = ({
             icon={ExternalLink}
             size="square"
             type="mute"
-            href={`https://${identity}/posts/${chnl?.slug}`}
+            href={`${new DotYouClient({ identity: identity || undefined, api: ApiType.Guest }).getRoot()}/posts/${chnl?.slug}`}
           ></ActionLink>
         </div>
       )}
