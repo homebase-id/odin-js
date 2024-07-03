@@ -2,6 +2,8 @@
 
 ## File Management
 
+> TM: question: if we manage to reduce down to driveId,  does it make sense to consider putting the driveId and fileId in the URL? (i suppose this concept is broken by our shared secret encyption)
+
 `/api/apps/v1/drive/files/delete`\
 `/api/apps/v1/drive/files/deletefileidbatch`\
 `/api/apps/v1/drive/files/deletegroupidbatch`\
@@ -14,6 +16,8 @@
 `/api/apps/v1/drive/files/header`\
 `/api/owner/v1/drive/query/specialized/cuid/header`\
 => [GET] `/api/apps/v2/drive/files/header` (request object with option for uniqueId)
+
+> TM: given that gtid is now on every file, we should also consider an option for gtid when getting header/thumb/payload.  not sure if that just goes next to the uniqueId and we only allow one at a time or if there's some other smoother way you can do it. (i.e. there is a UID field with a uidType {gtid | clientUid}.
 
 `/api/apps/v1/drive/files/thumb`\
 `/api/owner/v1/drive/query/specialized/cuid/thumb`\
@@ -51,6 +55,8 @@
 => [GET] `/api/apps/v2/drive/files/reactions/summary`
 
 ## File queries
+
+> TM: these are all GETs, what happens when the query is too large for the url?
 
 `/api/owner/v1/drive/query/batch`\
 => [GET] `/api/owner/v2/drive/query/batch`
