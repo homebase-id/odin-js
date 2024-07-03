@@ -116,7 +116,7 @@ export const MediaGallery = ({
                     </div>
                   ) : file.contentType.startsWith('video') ? (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="bg-background/40 rounded-full p-7 border border-foreground/40">
+                      <div className="bg-background/40 rounded-full p-7 border border-foreground/20">
                         <Triangle className="text-foreground h-12 w-12" />
                       </div>
                     </div>
