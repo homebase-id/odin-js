@@ -166,22 +166,36 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
             includeMetadataHeader: boolean;
           }>
         >(['chat-messages', params.conversation.fileMetadata.appData.uniqueId]);
-
         if (extistingMessages) {
           const newData = {
             ...extistingMessages,
             pages: extistingMessages?.pages?.map((page) => ({
               ...page,
-              searchResults: page.searchResults.map((msg) =>
-                stringGuidsEqual(
-                  msg?.fileMetadata.appData.uniqueId,
-                  newMessage.fileMetadata.appData.uniqueId
-                ) &&
-                (!msg?.fileMetadata.appData.content.deliveryStatus ||
-                  msg?.fileMetadata.appData.content.deliveryStatus <= ChatDeliveryStatus.Sent)
-                  ? newMessage
-                  : msg
-              ),
+              searchResults: page.searchResults.map((msg) => {
+                if (
+                  stringGuidsEqual(
+                    msg?.fileMetadata.appData.uniqueId,
+                    newMessage.fileMetadata.appData.uniqueId
+                  ) &&
+                  (!msg?.fileMetadata.appData.content.deliveryStatus ||
+                    msg?.fileMetadata.appData.content.deliveryStatus <= ChatDeliveryStatus.Sent)
+                ) {
+                  // We want to keep previewThumbnail and payloads from the existing message as that holds the optimistic updates from the onMutate
+                  return {
+                    ...newMessage,
+                    fileMetadata: {
+                      ...newMessage.fileMetadata,
+                      appData: {
+                        ...newMessage.fileMetadata.appData,
+                        previewThumbnail: msg?.fileMetadata.appData.previewThumbnail,
+                      },
+                      payloads: msg?.fileMetadata.payloads,
+                    },
+                  };
+                }
+
+                return msg;
+              }),
             })),
           };
 
@@ -198,9 +212,9 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
         );
       },
       onSettled: async (_data, _error, variables) => {
-        queryClient.invalidateQueries({
-          queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
-        });
+        // queryClient.invalidateQueries({
+        //   queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
+        // });
       },
     }),
     update: useMutation({
