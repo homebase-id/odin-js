@@ -1,6 +1,6 @@
 # First draft of a potential new api v2 structure:
 
-# File Management
+## File Management
 
 `/api/apps/v1/drive/files/delete`\
 `/api/apps/v1/drive/files/deletefileidbatch`\
@@ -50,7 +50,7 @@
 `/api/apps/v1/drive/files/reactions/summary`\
 => [GET] `/api/apps/v2/drive/files/reactions/summary`
 
-# File queries
+## File queries
 
 `/api/owner/v1/drive/query/batch`\
 => [GET] `/api/owner/v2/drive/query/batch`
@@ -61,7 +61,7 @@
 `/api/owner/v1/drive/query/modified`\
 => [GET] `/api/owner/v2/drive/query/modified`
 
-# Connections
+## Connections
 
 `/api/apps/v1/circles/connections/blocked`\
 => [GET] `/api/apps/v2/circles/connections/blocked`
