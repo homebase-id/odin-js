@@ -246,7 +246,8 @@ export const uploadConversation = async (
 export const updateConversation = async (
   dotYouClient: DotYouClient,
   conversation: HomebaseFile<UnifiedConversation>,
-  distribute = false
+  distribute = false,
+  ignoreConflict = false
 ): Promise<UploadResult | void> => {
   const identity = dotYouClient.getIdentity();
   const uploadInstructions: UploadInstructionSet = {
@@ -289,17 +290,21 @@ export const updateConversation = async (
     conversation.sharedSecretEncryptedKeyHeader,
     uploadInstructions,
     uploadMetadata,
-    async () => {
-      const existingConversation = await getConversation(
-        dotYouClient,
-        conversation.fileMetadata.appData.uniqueId as string
-      );
-      if (!existingConversation) return;
-      conversation.fileMetadata.versionTag = existingConversation.fileMetadata.versionTag;
-      conversation.sharedSecretEncryptedKeyHeader =
-        existingConversation.sharedSecretEncryptedKeyHeader;
-      return updateConversation(dotYouClient, conversation, distribute);
-    }
+    !ignoreConflict
+      ? async () => {
+          const existingConversation = await getConversation(
+            dotYouClient,
+            conversation.fileMetadata.appData.uniqueId as string
+          );
+          if (!existingConversation) return;
+          conversation.fileMetadata.versionTag = existingConversation.fileMetadata.versionTag;
+          conversation.sharedSecretEncryptedKeyHeader =
+            existingConversation.sharedSecretEncryptedKeyHeader;
+          return updateConversation(dotYouClient, conversation, distribute, true);
+        }
+      : () => {
+          // We just supress the warning; As we are ignoring the conflict following @param ignoreConflict
+        }
   );
 };
 
