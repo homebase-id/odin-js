@@ -2,13 +2,13 @@ import { useQueryClient, useMutation, useQuery } from '@tanstack/react-query';
 import { useDotYouClient, OWNER_APP_ID } from '@youfoundation/common-app';
 import { useState, useEffect } from 'react';
 import {
-  GetApplicationServerKey,
-  RegisterNewDevice,
-  GetCurrentDeviceDetails,
-  GetRegisteredDevices,
-  RemoveAllRegisteredDevice,
-  RemoveCurrentRegisteredDevice,
-  RemoveRegisteredDevice,
+  getApplicationServerKey,
+  registerNewDevice,
+  getCurrentDeviceDetails,
+  getRegisteredDevices,
+  removeAllRegisteredDevice,
+  removeCurrentRegisteredDevice,
+  removeRegisteredDevice,
 } from '../../provider/notifications/PushClientProvider';
 import { SendNotification } from '@youfoundation/js-lib/core';
 import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
@@ -63,7 +63,7 @@ export const usePushNotificationClient = () => {
           navigator.serviceWorker.ready
             .then(async (serviceWorkerRegistration) => {
               console.log('Service Worker is still ready)');
-              const publicKey = await GetApplicationServerKey();
+              const publicKey = await getApplicationServerKey();
               const options = {
                 userVisibleOnly: true,
                 applicationServerKey: publicKey,
@@ -73,7 +73,7 @@ export const usePushNotificationClient = () => {
                 .subscribe(options)
                 .then(async (pushSubscription) => {
                   console.log('Push registration success, sending to server...');
-                  await RegisterNewDevice(dotYouClient, pushSubscription);
+                  await registerNewDevice(dotYouClient, pushSubscription);
 
                   queryClient.invalidateQueries({
                     queryKey: ['notification-clients', 'current'],
@@ -107,23 +107,23 @@ export const usePushNotificationClients = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   const getCurrentClient = async () => {
-    return await GetCurrentDeviceDetails(dotYouClient);
+    return await getCurrentDeviceDetails(dotYouClient);
   };
 
   const removeCurrentDevice = async () => {
-    return await RemoveCurrentRegisteredDevice(dotYouClient);
+    return await removeCurrentRegisteredDevice(dotYouClient);
   };
 
-  const removeRegisteredDevice = async (key: string) => {
-    return await RemoveRegisteredDevice(dotYouClient, key);
+  const _removeRegisteredDevice = async (key: string) => {
+    return await removeRegisteredDevice(dotYouClient, key);
   };
 
   const getNotificationClients = async () => {
-    return await GetRegisteredDevices(dotYouClient);
+    return await getRegisteredDevices(dotYouClient);
   };
 
   const removeAllClients = async () => {
-    return await RemoveAllRegisteredDevice(dotYouClient);
+    return await removeAllRegisteredDevice(dotYouClient);
   };
 
   return {
@@ -153,7 +153,7 @@ export const usePushNotificationClients = () => {
       },
     }),
     removeRegisteredDevice: useMutation({
-      mutationFn: removeRegisteredDevice,
+      mutationFn: _removeRegisteredDevice,
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ['notification-clients'], exact: false });
       },

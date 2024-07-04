@@ -10,6 +10,11 @@ import {
   saveSelection,
 } from '../helpers/selection';
 
+export interface VolatileInputRef {
+  focus: () => void;
+  clear: () => void;
+}
+
 const VolatileInput = forwardRef(
   (
     {
@@ -42,6 +47,12 @@ const VolatileInput = forwardRef(
       () => ({
         focus() {
           divRef.current?.focus();
+        },
+        clear() {
+          if (divRef.current) {
+            divRef.current.innerText = '';
+            divRef.current.innerHTML = '';
+          }
         },
       }),
       []
@@ -134,6 +145,9 @@ const VolatileInput = forwardRef(
         ? defaultValue?.slice(divRef.current.innerText?.length)
         : defaultValue;
 
+      if (defaultValue === '') {
+        divRef.current.innerHTML = '';
+      }
       divRef.current.innerText = defaultValue || '';
 
       restoreCaretPosition(

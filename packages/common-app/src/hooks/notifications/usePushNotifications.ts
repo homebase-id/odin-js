@@ -10,7 +10,7 @@ import { hasDebugFlag, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 const isDebug = hasDebugFlag();
-const PAGE_SIZE = 150;
+const PAGE_SIZE = 700;
 export const usePushNotifications = (props?: { appId?: string }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
@@ -50,7 +50,7 @@ export const usePushNotifications = (props?: { appId?: string }) => {
           ...existingData,
           results: existingData.results.map((n) => ({
             ...n,
-            unread: !notificationIds.some((id) => id === n.id),
+            unread: notificationIds.some((id) => id === n.id) ? false : n.unread,
           })),
         };
         queryClient.setQueryData(['push-notifications'], newData);
@@ -87,7 +87,6 @@ export const usePushNotifications = (props?: { appId?: string }) => {
 
 export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
   const { data: notifications } = usePushNotifications(props).fetch;
-
   return notifications?.results.filter((n) => n.unread).length ?? 0;
 };
 

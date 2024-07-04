@@ -104,7 +104,7 @@ export const FileCard = ({
 
       <FileTimestamps file={file} className={isRow ? 'flex w-40 flex-row gap-2' : ''} />
       <FileFileId fileId={file.fileId} className={isRow ? 'mr-auto w-80' : 'w-full'} />
-      <FileState file={file} className={isRow ? 'absolute bottom-2 right-2' : ''} />
+      <FileState file={file} className={isRow ? 'absolute right-2 top-2' : ''} />
     </div>
   );
 };
@@ -327,7 +327,7 @@ const FileState = ({
   return (
     <div className={`${className} flex flex-row items-center gap-1`}>
       <Exclamation className="h-4 w-4 text-red-600" />
-      <p className="text-red-500">Broken content</p>
+      <p className="text-red-500">{t('Broken content')}</p>
     </div>
   );
 };

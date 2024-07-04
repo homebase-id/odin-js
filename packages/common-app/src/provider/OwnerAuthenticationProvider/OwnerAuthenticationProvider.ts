@@ -1,5 +1,6 @@
 import { ApiType } from '@youfoundation/js-lib/core';
 import { OwnerClient } from '../../core/OwnerClient';
+import { removeCurrentRegisteredDevice } from '../../../../owner-app/src/provider/notifications/PushClientProvider';
 
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidOwnerToken = async (): Promise<boolean> => {
@@ -25,6 +26,11 @@ export const logoutOwner = async (): Promise<boolean> => {
 };
 
 export const logoutOwnerAndAllApps = async (): Promise<void> => {
+  // Unsubscribe from notifications
+  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
+  await removeCurrentRegisteredDevice(dotYouClient);
+
+  // Remove session from server
   await logoutOwner();
 
   // CAT

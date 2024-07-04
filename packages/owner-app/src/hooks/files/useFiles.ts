@@ -84,13 +84,18 @@ export const useFile = ({
       );
     }
 
-    const decryptedJsonContent =
-      result.fileMetadata.appData.content && result.fileMetadata.isEncrypted
-        ? await decryptJsonContent(
-            result.fileMetadata,
-            await decryptKeyHeader(dotYouClient, result.sharedSecretEncryptedKeyHeader)
-          )
-        : result.fileMetadata.appData.content;
+    const decryptedJsonContent = await (async () => {
+      try {
+        return result.fileMetadata.appData.content && result.fileMetadata.isEncrypted
+          ? await decryptJsonContent(
+              result.fileMetadata,
+              await decryptKeyHeader(dotYouClient, result.sharedSecretEncryptedKeyHeader)
+            )
+          : result.fileMetadata.appData.content;
+      } catch (e) {
+        return '{"error":"Failed to decrypt file"}';
+      }
+    })();
 
     const exportable = {
       fileId: result.fileId,

@@ -8,10 +8,11 @@ import {
   ArrowLeft,
   BoringFile,
   Times,
+  VideoClickToLoad,
   usePortal,
 } from '@youfoundation/common-app';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
-import { OdinImage, OdinVideo } from '@youfoundation/ui-lib';
+import { OdinImage } from '@youfoundation/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 
@@ -88,14 +89,14 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
       <div className="inset-0 z-10 lg:fixed lg:overflow-y-auto">
         <div className="relative flex h-full min-h-[100dvh] flex-row items-center justify-center">
           {contentType?.startsWith('video') ? (
-            <OdinVideo
-              dotYouClient={dotYouClient}
+            <VideoClickToLoad
+              preload={true}
               fileId={msg.fileId}
               fileKey={mediaKey}
               targetDrive={ChatDrive}
               lastModified={msg.fileMetadata.updated}
               probablyEncrypted={true}
-              autoPlay={true}
+              className="h-full max-h-[100dvh] w-full object-contain"
             />
           ) : contentType?.startsWith('image') ? (
             <OdinImage

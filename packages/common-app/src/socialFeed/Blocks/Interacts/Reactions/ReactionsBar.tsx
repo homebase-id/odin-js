@@ -76,7 +76,7 @@ export const SocialReactionsBar = ({
           className ?? ''
         }`}
       >
-        <CantReactInfo cantReact={canReact} />
+        <CantReactInfo cantReact={canReact} intent="emoji" />
       </div>
     );
   }
