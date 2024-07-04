@@ -1,8 +1,4 @@
-import {
-  Conversation,
-  UnifiedConversation,
-  getConversations,
-} from '../../providers/ConversationProvider';
+import { UnifiedConversation, getConversations } from '../../providers/ConversationProvider';
 import { InfiniteData, QueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
@@ -33,18 +29,19 @@ export const useConversations = () => {
         lastPage?.searchResults && lastPage.searchResults?.length >= PAGE_SIZE
           ? lastPage.cursorState
           : undefined,
+      staleTime: 1000 * 60 * 5, // 5min before new conversations from another device are fetched on this one
     }),
   };
 };
 
 export const insertNewConversation = (
   queryClient: QueryClient,
-  newConversation: HomebaseFile<Conversation>,
+  newConversation: HomebaseFile<UnifiedConversation>,
   isUpdate?: boolean
 ) => {
   const extistingConversations = queryClient.getQueryData<
     InfiniteData<{
-      searchResults: HomebaseFile<Conversation>[];
+      searchResults: HomebaseFile<UnifiedConversation>[];
       cursorState: string;
       queryTime: number;
       includeMetadataHeader: boolean;
@@ -88,5 +85,20 @@ export const insertNewConversation = (
     queryClient.setQueryData(['conversations'], newData);
   } else {
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
+  }
+
+  const extistingConversation = queryClient.getQueryData<HomebaseFile<UnifiedConversation>>([
+    'conversation',
+    newConversation.fileMetadata.appData.uniqueId,
+  ]);
+  if (extistingConversation) {
+    queryClient.setQueryData(
+      ['conversation', newConversation.fileMetadata.appData.uniqueId],
+      newConversation
+    );
+  } else {
+    queryClient.invalidateQueries({
+      queryKey: ['conversation', newConversation.fileMetadata.appData.uniqueId],
+    });
   }
 };

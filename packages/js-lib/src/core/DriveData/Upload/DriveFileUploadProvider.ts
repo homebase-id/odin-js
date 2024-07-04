@@ -105,13 +105,13 @@ export const uploadHeader = async (
       metadata,
     });
 
-  const decryptedKeyHeader =
+  const plainKeyHeader =
     keyHeader && 'encryptionVersion' in keyHeader
       ? await decryptKeyHeader(dotYouClient, keyHeader)
       : keyHeader;
 
-  const finalKeyHeader =
-    decryptedKeyHeader || (metadata.isEncrypted ? GenerateKeyHeader() : undefined);
+  if (!decryptKeyHeader && metadata.isEncrypted)
+    throw new Error('[DotYouCore-JS] Missing existing keyHeader for appending encrypted metadata.');
 
   const { systemFileType, ...strippedInstructions } = instructions;
   if (!strippedInstructions.storageOptions) throw new Error('storageOptions is required');
@@ -120,7 +120,8 @@ export const uploadHeader = async (
   strippedInstructions.transferIv = instructions.transferIv || getRandom16ByteArray();
 
   // Build package
-  const encryptedMetaData = await encryptMetaData(metadata, finalKeyHeader);
+  const encryptedMetaData = await encryptMetaData(metadata, plainKeyHeader);
+  // No need for buidDescriptor here, as it's a metadataOnly upload
   const encryptedDescriptor = await encryptWithSharedSecret(
     dotYouClient,
     {
