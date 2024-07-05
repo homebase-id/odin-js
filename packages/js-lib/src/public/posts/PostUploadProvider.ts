@@ -43,6 +43,7 @@ import { processVideoFile } from '../../media/Video/VideoProcessor';
 import { createThumbnails } from '../../media/media';
 import { uploadFileOverPeer } from '../../peer/peer';
 import { TransitInstructionSet, TransitUploadResult } from '../../peer/peerData/PeerTypes';
+import { getFileHeaderOverPeerByGlobalTransitId } from '../../peer/peerData/File/PeerFileByGlobalTransitProvider';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
@@ -58,12 +59,6 @@ export const savePost = async <T extends PostContent>(
   onVersionConflict?: () => void,
   onUpdate?: (progress: number) => void
 ): Promise<UploadResult | TransitUploadResult> => {
-  if (odinId && file.fileId) {
-    throw new Error(
-      '[PostUploadProvider] Editing a post to a group channel is not supported (yet)'
-    );
-  }
-
   if (!file.fileMetadata.appData.content.id) {
     // The content id is set once, and then never updated to keep the permalinks correct at all times; Even when the slug changes
     file.fileMetadata.appData.content.id = file.fileMetadata.appData.content.slug
@@ -294,6 +289,7 @@ const uploadPost = async <T extends PostContent>(
 
 const uploadPostHeader = async <T extends PostContent>(
   dotYouClient: DotYouClient,
+  odinId: string | undefined,
   file: HomebaseFile<T>,
   channelId: string,
   targetDrive: TargetDrive
@@ -401,11 +397,30 @@ const uploadPostHeader = async <T extends PostContent>(
   }
 
   if (runningVersionTag) metadata.versionTag = runningVersionTag;
-  return await uploadHeader(
+  if (!odinId) {
+    return await uploadHeader(
+      dotYouClient,
+      file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
+      instructionSet,
+      metadata
+    );
+  }
+
+  const transitInstructionSet: TransitInstructionSet = {
+    transferIv: getRandom16ByteArray(),
+    remoteTargetDrive: targetDrive,
+    schedule: ScheduleOptions.SendLater,
+    priority: PriorityOptions.Medium,
+    recipients: [odinId],
+  };
+
+  return await uploadFileOverPeer(
     dotYouClient,
-    file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
-    instructionSet,
-    metadata
+    transitInstructionSet,
+    metadata,
+    [],
+    [],
+    file.fileMetadata.isEncrypted
   );
 };
 
@@ -415,9 +430,23 @@ const updatePost = async <T extends PostContent>(
   file: HomebaseFile<T>,
   channelId: string,
   existingAndNewMediaFiles?: (NewMediaFile | MediaFile)[]
-): Promise<UploadResult> => {
+): Promise<TransitUploadResult | UploadResult> => {
+  // TODO: Implement editing a post to a group channel
+  if (odinId && existingAndNewMediaFiles?.length) {
+    throw new Error(
+      '[PostUploadProvider] Appending/removing payloads on a group channel is not supported (yet)'
+    );
+  }
+
   const targetDrive = GetTargetDriveFromChannelId(channelId);
-  const header = await getFileHeader(dotYouClient, targetDrive, file.fileId as string);
+  const header = !odinId
+    ? await getFileHeader(dotYouClient, targetDrive, file.fileId as string)
+    : await getFileHeaderOverPeerByGlobalTransitId(
+        dotYouClient,
+        odinId,
+        targetDrive,
+        file.fileMetadata.globalTransitId as string
+      );
 
   if (!header) throw new Error('Cannot update a post that does not exist');
   if (header?.fileMetadata.versionTag !== file.fileMetadata.versionTag)
@@ -540,7 +569,7 @@ const updatePost = async <T extends PostContent>(
 
   file.fileMetadata.isEncrypted = encrypt;
   file.fileMetadata.versionTag = runningVersionTag;
-  const result = await uploadPostHeader(dotYouClient, file, channelId, targetDrive);
+  const result = await uploadPostHeader(dotYouClient, odinId, file, channelId, targetDrive);
   if (!result) throw new Error(`[DotYouCore-js] PostProvider: Post update failed`);
 
   return result;

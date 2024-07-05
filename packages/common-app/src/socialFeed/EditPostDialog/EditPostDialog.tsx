@@ -7,6 +7,7 @@ import {
   HomebaseFile,
   MediaFile,
   NewMediaFile,
+  SecurityGroupType,
 } from '@youfoundation/js-lib/core';
 import { VolatileInput, FileOverview } from '../../form';
 import { t } from '../../helpers';
@@ -15,11 +16,13 @@ import { ErrorNotification, DialogWrapper, ActionButton, Save } from '../../ui';
 
 export const EditPostDialog = ({
   postFile: incomingPostFile,
+  odinId,
   isOpen,
   onConfirm,
   onCancel,
 }: {
   postFile: HomebaseFile<PostContent>;
+  odinId?: string;
   isOpen: boolean;
   onConfirm: () => void;
   onCancel: () => void;
@@ -49,11 +52,25 @@ export const EditPostDialog = ({
   if (!isOpen) return null;
 
   const doUpdate = async () => {
-    const newPostFile = { ...postFile };
+    const newPostFile = {
+      ...postFile,
+      serverMetadata: postFile.serverMetadata || {
+        accessControlList: {
+          requiredSecurityGroup: SecurityGroupType.Connected,
+        },
+      },
+    };
 
+    console.log('doUpdate', {
+      channelId: incomingPostFile.fileMetadata.appData.content.channelId,
+      odinId,
+      postFile: newPostFile,
+      mediaFiles: newMediaFiles,
+    });
     await updatePost({
       channelId: incomingPostFile.fileMetadata.appData.content.channelId,
-      postFile: { ...newPostFile },
+      odinId,
+      postFile: newPostFile,
       mediaFiles: newMediaFiles,
     });
   };
