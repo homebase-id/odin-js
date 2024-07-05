@@ -3,6 +3,8 @@ import { TargetDrive, PushNotification } from '../core';
 
 export interface EstablishConnectionRequest {
   drives: TargetDrive[];
+  waitTimeMs: number;
+  batchSize: number;
 }
 
 export type NotificationType =
