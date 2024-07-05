@@ -44,7 +44,7 @@ const Website = () => {
               type="mute"
               options={[
                 {
-                  href: `https://${window.location.hostname}`,
+                  href: `https://${window.location.host}`,
                   icon: Cloud,
                   label: t('Open website'),
                 },

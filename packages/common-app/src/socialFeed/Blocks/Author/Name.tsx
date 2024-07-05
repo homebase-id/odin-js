@@ -1,3 +1,4 @@
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 import { useSiteData, useExternalOdinId, useIsConnected, useDotYouClient } from '../../../..';
 
 export const AuthorName = ({ odinId }: { odinId?: string }) => {
@@ -6,9 +7,11 @@ export const AuthorName = ({ odinId }: { odinId?: string }) => {
   const identity = useDotYouClient().getIdentity();
   const isConnected = useIsConnected(odinId).data;
 
+  const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
+
   return (
     <a
-      href={`https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`}
+      href={`${host}${isConnected && identity ? '?youauth-logon=' + identity : ''}`}
       className="hover:underline"
     >
       <ConnectionName odinId={odinId} />

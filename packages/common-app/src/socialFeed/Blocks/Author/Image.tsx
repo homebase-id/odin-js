@@ -3,6 +3,7 @@ import { Image } from '../../../media/Image';
 import { t } from '../../../helpers/i18n/dictionary';
 import { Person } from '../../../ui/Icons/Person';
 import { useSiteData } from '../../../hooks/siteData/useSiteData';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 
 interface ImageProps {
   className?: string;
@@ -17,8 +18,9 @@ export const AuthorImage = ({ odinId, ...props }: ConnectionImageProps) => {
   const ownerHost = window.location.hostname;
 
   if (odinId && ownerHost !== odinId) {
+    const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
     return (
-      <a href={`https://${odinId}`}>
+      <a href={host}>
         <ConnectionImage {...props} odinId={odinId} />
       </a>
     );
@@ -54,11 +56,12 @@ export const OwnerImage = ({ className, size }: ImageProps) => {
 };
 
 export const ConnectionImage = ({ odinId, className, size }: ConnectionImageProps) => {
+  const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
   return (
     <>
       {odinId ? (
         <img
-          src={`https://${odinId}/pub/image`}
+          src={`${host}/pub/image`}
           className={`${
             size === 'xs'
               ? 'h-[2rem] w-[2rem]'

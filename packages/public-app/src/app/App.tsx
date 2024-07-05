@@ -132,13 +132,13 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
 };
 
 const ActionRedirect = () => {
-  const { isAuthenticated, getIdentity } = useAuth();
+  const { isAuthenticated, getDotYouClient } = useAuth();
   const [searchParams] = useSearchParams();
 
-  const identity = getIdentity();
-  if (isAuthenticated && identity) {
+  const host = getDotYouClient().getRoot();
+  if (isAuthenticated && host) {
     console.debug('[AUTHENTICATED]: Redirect to action after login');
-    window.location.href = `https://${identity}${searchParams.get('targetPath')}`;
+    window.location.href = `${host}${searchParams.get('targetPath')}`;
 
     return null;
   }

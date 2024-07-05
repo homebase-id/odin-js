@@ -7,6 +7,7 @@ import { Circles } from '../../ui/Icons/Circles';
 import { LoadingBlock } from '../../ui/LoadingBlock/LoadingBlock';
 import { Arrow } from '../../ui/Icons/Arrow';
 import { t } from '../../helpers/i18n/dictionary';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 
 export const CirclePermissionView = ({
   circleDef,
@@ -38,7 +39,7 @@ export const CirclePermissionView = ({
       </a>
     ) : (
       <Link
-        to={`https://${odinId}/owner/circles/${encodeURIComponent(circleDef.id || '')}`}
+        to={`${new DotYouClient({ identity: odinId, api: ApiType.App }).getRoot()}/owner/circles/${encodeURIComponent(circleDef.id || '')}`}
         className={`hover:text-slate-700 hover:underline dark:hover:text-slate-400 ${
           className ?? ''
         }`}

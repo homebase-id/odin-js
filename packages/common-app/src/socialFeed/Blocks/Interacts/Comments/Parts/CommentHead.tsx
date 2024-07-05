@@ -1,3 +1,4 @@
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 import { t } from '../../../../../helpers';
 import { useDotYouClient } from '../../../../../hooks';
 import { ActionGroup, Pencil, Times, Block } from '../../../../../ui';
@@ -30,7 +31,7 @@ export const CommentHead = ({
     actionOptions.push({
       icon: Block,
       label: `${t('Block this user')}`,
-      href: `https://${identity}/owner/connections/${authorOdinId}/block`,
+      href: `${new DotYouClient({ identity, api: ApiType.Guest }).getRoot()}/owner/connections/${authorOdinId}/block`,
     });
   }
 

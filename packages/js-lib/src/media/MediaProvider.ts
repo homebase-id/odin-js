@@ -1,5 +1,5 @@
 import { stringifyToQueryParams, uint8ArrayToBase64 } from '../helpers/DataUtil';
-import { DotYouClient } from '../core/DotYouClient';
+import { ApiType, DotYouClient } from '../core/DotYouClient';
 import {
   TargetDrive,
   SystemFileType,
@@ -91,8 +91,9 @@ export const getAnonymousDirectImageUrl = (
   size?: ImageSize,
   systemFileType?: SystemFileType,
   lastModified?: number
-) =>
-  `https://${identity}/api/guest/v1/drive/files/${
+) => {
+  const dotYouClient = new DotYouClient({ identity, api: ApiType.Guest });
+  return `${dotYouClient.getEndpoint()}/drive/files/${
     size ? 'thumb' : 'payload'
   }?${stringifyToQueryParams({
     alias: targetDrive.alias,
@@ -105,3 +106,4 @@ export const getAnonymousDirectImageUrl = (
     xfst: systemFileType || 'Standard',
     iac: true, // iac is a flag that tells the identity to ignore any auth cookies
   })}`;
+};

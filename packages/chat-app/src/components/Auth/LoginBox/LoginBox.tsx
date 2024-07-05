@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ROOT_PATH } from '../../../app/App';
 import { useEffect } from 'react';
 import { MinimalLayout } from '../../ui/Layout/Layout';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 
 const AUTHORIZE_PATH = '/api/owner/v1/youauth/authorize';
 
@@ -29,8 +30,12 @@ export const LoginBox = () => {
   const isAutoAuthorize = window.location.pathname.startsWith(ROOT_PATH);
 
   useEffect(() => {
+    const host = new DotYouClient({
+      identity: window.location.hostname,
+      api: ApiType.Guest,
+    }).getRoot();
     if (isAutoAuthorize && stringifiedAuthParams)
-      window.location.href = `https://${window.location.hostname}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
+      window.location.href = `${host}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
   }, [authParams]);
 
   if (isLoading || isAutoAuthorize) return <LoadingBlock className="h-[16rem] w-full " />;
@@ -62,7 +67,7 @@ export const AutoAuthorize = () => {
 
   useEffect(() => {
     if (stringifiedAuthParams)
-      window.location.href = `https://${window.location.hostname}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
+      window.location.href = `https://${window.location.host}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
   }, [authParams]);
 
   return (

@@ -57,7 +57,7 @@ export const useDotYouClient = () => {
     return _app === 'owner' ||
       (_app === 'home' && _isOwner) ||
       window.location.pathname.startsWith(OWNER_APPS_ROOT)
-      ? window.location.host
+      ? window.location.hostname
       : localStorage.getItem(STORAGE_IDENTITY_KEY);
   };
 

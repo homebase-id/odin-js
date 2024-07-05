@@ -1,7 +1,7 @@
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
-import { DotYouClient } from '../../../core/DotYouClient';
+import { ApiType, DotYouClient } from '../../../core/DotYouClient';
 import { SystemFileType, TargetDrive } from '../../../core/core';
 import { stringifyToQueryParams } from '../../../helpers/helpers';
 import {
@@ -56,7 +56,9 @@ export const getDecryptedVideoUrlOverPeer = async (
     systemFileType,
   });
   if (!meta?.fileMetadata.isEncrypted) {
-    return `https://${odinId}/api/guest/v1/drive/files/payload?${stringifyToQueryParams({
+    const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getEndpoint();
+
+    return `${host}/drive/files/payload?${stringifyToQueryParams({
       ...targetDrive,
       fileId,
       key,
@@ -95,7 +97,8 @@ export const getDecryptedVideoUrlOverPeerByGlobalTransitId = async (
     }
   );
   if (!meta?.fileMetadata.isEncrypted) {
-    return `https://${odinId}/api/guest/v1/drive/files/payload?${stringifyToQueryParams({
+    const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getEndpoint();
+    return `${host}/drive/files/payload?${stringifyToQueryParams({
       ...targetDrive,
       fileId: meta?.fileId,
       key,

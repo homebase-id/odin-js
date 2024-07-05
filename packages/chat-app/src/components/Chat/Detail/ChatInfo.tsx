@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   ActionButton,
   Arrow,
@@ -85,7 +85,7 @@ export const ChatInfo = ({
                 <small className="flex flex-row gap-2 text-sm">
                   <House className="h-5 w-5" />
                   <a
-                    href={`https://${recipient}`}
+                    href={new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}
                     rel="noreferrer noopener"
                     target="_blank"
                     className="text-primary hover:underline"
@@ -143,7 +143,7 @@ export const ChatInfo = ({
           <div className="flex flex-col gap-4">
             {recipients.map((recipient) => (
               <a
-                href={`https://${identity}/owner/connections/${recipient}`}
+                href={`${new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}/owner/connections/${recipient}`}
                 rel="noreferrer noopener"
                 target="_blank"
                 className="group flex flex-row items-center gap-3"

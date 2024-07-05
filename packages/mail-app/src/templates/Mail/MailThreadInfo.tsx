@@ -28,6 +28,7 @@ export const MailThreadInfo = ({
   const identity = useDotYouClientContext().getIdentity();
   const target = usePortal('modal-container');
   const lastMessage = mailThread[mailThread.length - 1];
+  const host = useDotYouClientContext().getRoot();
 
   const lastMessageContent = lastMessage.fileMetadata.appData.content;
   const recipients = getAllRecipients(lastMessage, identity);
@@ -69,7 +70,7 @@ export const MailThreadInfo = ({
           <div className="flex flex-col gap-4">
             {recipients.map((recipient) => (
               <a
-                href={`https://${identity}/owner/connections/${recipient}`}
+                href={`${host}/owner/connections/${recipient}`}
                 rel="noreferrer noopener"
                 target="_blank"
                 className="group flex flex-row items-center gap-3"

@@ -3,8 +3,8 @@ import { useAuth } from '../../../hooks/auth/useAuth';
 import { Persons } from '@youfoundation/common-app';
 
 const ConnectLink = ({ className }: { className: string }) => {
-  const { isOwner, getIdentity, isAuthenticated } = useAuth();
-  const identity = getIdentity();
+  const { isOwner, getDotYouClient, isAuthenticated } = useAuth();
+  const host = getDotYouClient().getRoot();
 
   const { data: securityContext } = useSecurityContext(undefined, isAuthenticated).fetch;
   const isConnected =
@@ -17,8 +17,8 @@ const ConnectLink = ({ className }: { className: string }) => {
       <ActionLink
         className={`w-auto ${className ?? ''}`}
         href={
-          identity && isConnected
-            ? `https://${getIdentity()}/owner/connections/${window.location.host}`
+          host && isConnected
+            ? `${host}/owner/connections/${window.location.host}`
             : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect/connections/${window.location.host}/connect`
         }
         icon={isConnected ? Check : Persons}

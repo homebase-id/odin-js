@@ -24,6 +24,7 @@ import { useConnectionActions } from '../../../hooks/connections/useConnectionAc
 import { useConnectionGrantStatus } from '../../../hooks/connections/useConnectionGrantStatus';
 import { hasDebugFlag, jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import OutgoingConnectionDialog from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 
 export const IdentityPageMetaAndActions = ({
   odinId, // setIsEditPermissionActive,
@@ -130,7 +131,7 @@ export const IdentityPageMetaAndActions = ({
       label: t('Open homepage'),
       onClick: () => {
         window.open(
-          `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
+          `${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
           '_blank'
         );
       },
