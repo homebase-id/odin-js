@@ -43,6 +43,17 @@ export const GetNotifications = async (
     });
 };
 
+export interface NotificationCountsByAppId {
+  unreadCounts: Record<string, number>;
+}
+
+export const getNotificationCountsByAppId = async (dotYouClient: DotYouClient) => {
+  const axiosClient = dotYouClient.createAxiosClient();
+  return await axiosClient
+    .get<NotificationCountsByAppId>(`/notify/list/counts-by-appid`)
+    .then((res) => res.data);
+};
+
 export const MarkNotificationsAsRead = async (
   dotYouClient: DotYouClient,
   notificationIds: string[]
@@ -54,6 +65,14 @@ export const MarkNotificationsAsRead = async (
       unread: false,
     })),
   });
+};
+
+export const markAllNotificationsOfAppAsRead = async (
+  dotYouClient: DotYouClient,
+  appId: string
+) => {
+  const axiosClient = dotYouClient.createAxiosClient();
+  return await axiosClient.post(`/notify/list/mark-read-by-appid`, appId).then((res) => res.data);
 };
 
 export const DeleteNotifications = async (

@@ -30,7 +30,7 @@ export const Video = ({ previewThumbnail, ...props }: VideoProps) => {
   );
 };
 
-export interface VideoClickToLoadProps extends Omit<OdinVideoProps, 'dotYouClient'> {
+export interface VideoClickToLoadProps extends Omit<OdinVideoProps, 'dotYouClient' | 'autoPlay'> {
   fit?: 'cover' | 'contain';
   preload?: boolean;
   previewThumbnail?: EmbeddedThumb;
@@ -50,7 +50,7 @@ export const VideoClickToLoad = ({
 
   return (
     <div
-      className={`bg-page-background relative overflow-hidden ${props.className || ''}`}
+      className={`${props.className?.includes('absolute') ? '' : 'relative'} overflow-hidden ${props.className || ''}`}
       onClick={(e) => {
         e.stopPropagation();
         setLoadVideo(true);
@@ -71,11 +71,13 @@ export const VideoClickToLoad = ({
           <OdinThumbnailImage
             dotYouClient={dotYouClient}
             {...props}
-            className={`${props.className || ''} absolute inset-0 blur-sm object-cover`}
+            className={`${props.className || ''} ${playingVideo ? 'opacity-0' : 'opacity-100'} absolute inset-0 blur-sm ${props.className?.includes('object-') ? '' : 'object-cover'}`}
             loadSize={{ pixelWidth: 1920, pixelHeight: 1080 }}
             onLoad={() => setPreviewLoaded(true)}
             onError={() => setShouldFallback(true)}
             probablyEncrypted={probablyEncrypted}
+            width={1920}
+            height={1080}
           />
         </>
       )}
@@ -83,7 +85,7 @@ export const VideoClickToLoad = ({
         {loadVideo && !playingVideo ? (
           <Loader className="h-12 w-12" />
         ) : (
-          <div className="bg-background/40 rounded-full p-7 border border-foreground/40">
+          <div className="bg-background/40 rounded-full p-7 border border-foreground/20">
             <Triangle className="text-foreground h-12 w-12" />
           </div>
         )}

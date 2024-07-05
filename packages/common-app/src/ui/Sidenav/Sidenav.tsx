@@ -439,25 +439,30 @@ const WalletLink = () => {
 };
 
 const NotificationBell = () => {
-  const count = useUnreadPushNotificationsCount();
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: 'all' });
   return (
-    <NavItem label={t('Notifications')} to={'/owner/notifications'} icon={Bell} unread={!!count} />
+    <NavItem
+      label={t('Notifications')}
+      to={'/owner/notifications'}
+      icon={Bell}
+      unread={!!unreadCount}
+    />
   );
 };
 
 const FeedNavItem = () => {
-  const count = useUnreadPushNotificationsCount({ appId: FEED_APP_ID });
-  return <NavItem icon={Feed} label={'Feed'} to="/apps/feed" unread={!!count} />;
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: FEED_APP_ID });
+  return <NavItem icon={Feed} label={'Feed'} to="/apps/feed" unread={!!unreadCount} />;
 };
 
 const ChatNavItem = () => {
-  const count = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
-  return <NavItem icon={ChatBubble} label={'Chat'} to="/apps/chat" unread={!!count} />;
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
+  return <NavItem icon={ChatBubble} label={'Chat'} to="/apps/chat" unread={!!unreadCount} />;
 };
 
 const MailNavItem = () => {
-  const count = useUnreadPushNotificationsCount({ appId: MAIL_APP_ID });
-  return <NavItem icon={Envelope} label={'Mail'} to="/apps/mail" unread={!!count} />;
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: MAIL_APP_ID });
+  return <NavItem icon={Envelope} label={'Mail'} to="/apps/mail" unread={!!unreadCount} />;
 };
 
 const MobileDrawer = ({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) => {
