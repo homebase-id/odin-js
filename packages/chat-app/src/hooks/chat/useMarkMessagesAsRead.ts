@@ -20,18 +20,24 @@ export const useMarkMessagesAsRead = ({
   const [messagesMarkedAsRead, setMessagesMarkedAsRead] = useState<boolean>(false);
 
   const { mutate: updateConversation } = useConversation().update;
-  const [pendingReadTime, setPendingReadTime] = useState<Date | undefined>(undefined);
+  const [pendingReadTime, setPendingReadTime] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     (async () => {
       if (!conversation || !messages || isProcessing.current) return;
-      setPendingReadTime(new Date());
+
       const unreadMessages = messages.filter(
         (msg) =>
           msg?.fileMetadata.created >
             (conversation.fileMetadata.appData.content.lastReadTime || 0) &&
           msg.fileMetadata.senderOdinId
       );
+
+      const newestMessageCreated = unreadMessages.reduce((acc, msg) => {
+        return msg.fileMetadata.created > acc ? msg.fileMetadata.created : acc;
+      }, conversation.fileMetadata.appData.content.lastReadTime || 0);
+
+      setPendingReadTime(newestMessageCreated);
 
       if (!unreadMessages.length) return;
       isProcessing.current = true;
@@ -66,7 +72,7 @@ export const useMarkMessagesAsRead = ({
               ...conversation.fileMetadata.appData,
               content: {
                 ...conversation.fileMetadata.appData.content,
-                lastReadTime: pendingReadTime.getTime(),
+                lastReadTime: pendingReadTime,
               },
             },
           },
