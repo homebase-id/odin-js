@@ -8,7 +8,7 @@ import { useSecurityContext } from '../securityContext/useSecurityContext';
 import { useDotYouClient } from './useDotYouClient';
 
 const getExtendAuthorizationUrl = (
-  identity: string,
+  host: string,
   appId: string,
   drives: { a: string; t: string; n: string; d: string; p: number }[],
   permissionKeys: number[],
@@ -22,7 +22,7 @@ const getExtendAuthorizationUrl = (
     c: needsAllConnected ? ALL_CONNECTIONS_CIRCLE_ID : null,
   };
 
-  return `https://${identity}/owner/appupdate?${stringifyToQueryParams(
+  return `${host}/owner/appupdate?${stringifyToQueryParams(
     params
   )}&return=${encodeURIComponent(returnUrl)}`;
 };
@@ -45,9 +45,9 @@ export const useMissingPermissions = ({
   needsAllConnected?: boolean;
 }) => {
   const { data: context } = useSecurityContext().fetch;
-  const identity = useDotYouClient().getIdentity();
+  const host = useDotYouClient().getDotYouClient().getRoot();
 
-  if (!context || !identity) return;
+  if (!context || !host) return;
 
   const driveGrants = context?.permissionContext.permissionGroups.flatMap(
     (group) => group.driveGrants
@@ -82,7 +82,7 @@ export const useMissingPermissions = ({
     return;
 
   const extendPermissionUrl = getExtendAuthorizationUrl(
-    identity,
+    host,
     appId,
     missingDrives,
     missingPermissions,

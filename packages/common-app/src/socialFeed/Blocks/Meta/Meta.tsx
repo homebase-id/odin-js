@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { ChannelDefinition, EmbeddedPost, PostContent } from '@youfoundation/js-lib/public';
 import { OwnerActions } from './OwnerActions';
-import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
 import { aclEqual } from '@youfoundation/js-lib/helpers';
 import { AclSummary } from '../../../acl';
 import { HOME_ROOT_PATH } from '../../../core';
@@ -77,7 +77,7 @@ export const PostMeta = ({
 
   const isConnected = useIsConnected(odinId).data;
   const channelLink = channel
-    ? `${odinId ? `https://${odinId}` : ''}${HOME_ROOT_PATH}posts/${
+    ? `${odinId ? new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot() : ''}${HOME_ROOT_PATH}posts/${
         channel.fileMetadata.appData.content.slug
       }${isConnected && identity ? '?youauth-logon=' + identity : ''}`
     : undefined;
@@ -156,7 +156,7 @@ export const ToGroupBlock = ({
   if (!groupPost) return null;
 
   const channelLink = channel
-    ? `${odinId ? `https://${odinId}` : ''}${HOME_ROOT_PATH}posts/${
+    ? `${odinId ? new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot() : ''}${HOME_ROOT_PATH}posts/${
         channel.fileMetadata.appData.content.slug
       }${isConnected && identity ? '?youauth-logon=' + identity : ''}`
     : undefined;
@@ -191,11 +191,12 @@ const ExternalActions = ({
     getReportContentUrl,
   } = useManageSocialFeed({ odinId });
 
+  const host = new DotYouClient({ api: ApiType.Guest, identity: identity || undefined }).getRoot();
   const options: ActionGroupOptionProps[] = [
     {
       icon: UserX,
       label: `${t('Follow settings')}`,
-      href: `https://${identity}/owner/follow/following/${odinId}`,
+      href: `${host}/owner/follow/following/${odinId}`,
     },
     {
       icon: Times,
@@ -215,7 +216,7 @@ const ExternalActions = ({
     {
       icon: Block,
       label: `${t('Block this user')}`,
-      href: `https://${identity}/owner/connections/${odinId}/block`,
+      href: `${host}/owner/connections/${odinId}/block`,
     },
   ];
 

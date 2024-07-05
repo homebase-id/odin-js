@@ -14,7 +14,7 @@ import {
   useDotYouClient,
   useIsConnected,
 } from '@youfoundation/common-app';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   ConversationWithYourselfId,
   UnifiedConversation,
@@ -225,18 +225,21 @@ const GroupChatConnectedState = ({
 
 const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
   const { data: isConnected, isFetched } = useIsConnected(recipient);
-  const identity = useDotYouClient().getIdentity();
+  const host = useDotYouClient().getDotYouClient().getRoot();
 
   if (isConnected || !isFetched) return null;
   return (
     <div className="flex w-full flex-row items-center justify-between bg-page-background px-5 py-2">
       <p>
         {t('You can only chat with connected identites, messages will not be delivered to')}:{' '}
-        <a href={`https://${recipient}`} className="underline">
+        <a
+          href={`${new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}`}
+          className="underline"
+        >
           {recipient}
         </a>
       </p>
-      <ActionLink href={`https://${identity}/owner/connections/${recipient}/connect`}>
+      <ActionLink href={`${host}/owner/connections/${recipient}/connect`}>
         {t('Connect')}
       </ActionLink>
     </div>

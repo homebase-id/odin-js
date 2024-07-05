@@ -130,7 +130,7 @@ const ConnectSocket = async (
         });
     }
 
-    const url = `wss://${dotYouClient.getIdentity()}/api/${
+    const url = `wss://${dotYouClient.getRoot().split('//')[1]}/api/${
       apiType === ApiType.Owner ? 'owner' : 'apps'
     }/v1/notify/ws`;
 

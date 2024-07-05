@@ -1,5 +1,6 @@
 import { MouseEventHandler, ReactNode, useRef, useState } from 'react';
 import { useDotYouClient, useExternalOdinId, useIntersection, useIsConnected } from '../..';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 
 export const IdentityTeaser = ({
   odinId,
@@ -33,7 +34,7 @@ export const IdentityTeaser = ({
   useIntersection(wrapperRef, () => setIsInView(true));
 
   const imageSizeClass = size === 'sm' ? 'h-10 w-10 mr-2' : 'h-16 w-16 mr-4';
-  const link = `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`;
+  const link = `${new DotYouClient({ identity: odinId || undefined, api: ApiType.App }).getRoot()}${isConnected && identity ? '?youauth-logon=' + identity : ''}`;
 
   return (
     <a

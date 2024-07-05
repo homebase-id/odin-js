@@ -12,7 +12,13 @@ import {
   getContactByOdinId,
   getContactByUniqueId,
 } from '@youfoundation/js-lib/network';
-import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import {
+  ApiType,
+  DotYouClient,
+  HomebaseFile,
+  NewHomebaseFile,
+  SecurityGroupType,
+} from '@youfoundation/js-lib/core';
 
 export const useContact = ({
   odinId,
@@ -178,7 +184,7 @@ export const parseContact = (
 
   const imageUrl = pureContent.image
     ? `data:${pureContent.image.contentType};base64,${pureContent.image.content}`
-    : `https://${pureContent.odinId}/pub/image`;
+    : `${new DotYouClient({ identity: pureContent.odinId, api: ApiType.Guest }).getRoot()}/pub/image`;
 
   const { name, location, phone, birthday, odinId, source } = pureContent;
 

@@ -23,7 +23,7 @@ import { useApp } from '../../hooks/apps/useApp';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useSearchParams } from 'react-router-dom';
 import { useContact } from '../../hooks/contacts/useContact';
-import { PushNotification } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, PushNotification } from '@youfoundation/js-lib/core';
 import PushNotificationsDialog from '../../components/Notifications/PushNotificationsDialog/PushNotificationsDialog';
 
 interface NotificationClickData {
@@ -332,7 +332,11 @@ const NotificationItem = ({
   return (
     <Toast
       title={title}
-      imgSrc={notification.senderId ? `https://${notification.senderId}/pub/image` : undefined}
+      imgSrc={
+        notification.senderId
+          ? `${new DotYouClient({ identity: notification.senderId, api: ApiType.Guest }).getRoot()}/pub/image`
+          : undefined
+      }
       // Keeping the hidden ones short
       body={ellipsisAtMaxChar(body, isExpanded ? 120 : 40)}
       timestamp={notification.created}

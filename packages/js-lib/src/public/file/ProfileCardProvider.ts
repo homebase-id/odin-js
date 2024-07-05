@@ -2,7 +2,7 @@ const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
 import axios from 'axios';
-import { DotYouClient } from '../../core/DotYouClient';
+import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { HomebaseFile, SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
 import { getDecryptedImageData } from '../../media/ImageProvider';
 import { BuiltInProfiles, MinimalProfileFields } from '../../profile/ProfileData/ProfileConfig';
@@ -46,16 +46,18 @@ export const GetProfileCard = async (odinId: string): Promise<ProfileCard | unde
       return await _internalFileCache.get(odinId);
     }
 
+    const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
+
     const httpClient = axios.create();
     const fetchProfileCard = async () => {
       return await httpClient
-        .get<ProfileCard>(`https://${odinId}/pub/profile`, {
+        .get<ProfileCard>(`${host}/pub/profile`, {
           withCredentials: false,
         })
         .then((response) => {
           return {
             ...response.data,
-            image: `https://${odinId}/pub/image`,
+            image: `${host}/pub/image`,
           };
         });
     };
@@ -136,8 +138,10 @@ export const GetProfileImage = async (odinId: string): Promise<Blob | undefined>
   try {
     const httpClient = axios.create();
     const fetchProfileCard = async () => {
+      const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
+
       return await httpClient
-        .get(`https://${odinId}/pub/image`, {
+        .get(`${host}/pub/image`, {
           baseURL: odinId,
           withCredentials: false,
           responseType: 'arraybuffer',

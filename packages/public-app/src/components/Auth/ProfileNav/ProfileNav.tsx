@@ -6,6 +6,7 @@ import { useAuth } from '../../../hooks/auth/useAuth';
 import { Person, useOutsideTrigger } from '@youfoundation/common-app';
 import { Times } from '@youfoundation/common-app';
 import { LoginBox } from '../LoginBox/LoginBox';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 
 const ProfileNav = () => {
   const { logout, isAuthenticated, getIdentity, isOwner } = useAuth();
@@ -66,7 +67,11 @@ const ProfileNav = () => {
                   <>
                     {t('Logged in with: ')}{' '}
                     <a
-                      href={`https://${identity ?? ''}`}
+                      href={
+                        identity
+                          ? new DotYouClient({ identity, api: ApiType.Guest }).getRoot()
+                          : undefined
+                      }
                       className="underline"
                       target={'_blank'}
                       rel="noopener noreferrer"
