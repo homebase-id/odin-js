@@ -28,13 +28,15 @@ export const useMarkMessagesAsRead = ({
 
       const unreadMessages = messages.filter(
         (msg) =>
-          msg?.fileMetadata.created >
+          (msg?.fileMetadata.transitCreated || msg?.fileMetadata.created) >
             (conversation.fileMetadata.appData.content.lastReadTime || 0) &&
           msg.fileMetadata.senderOdinId
       );
 
       const newestMessageCreated = unreadMessages.reduce((acc, msg) => {
-        return msg.fileMetadata.created > acc ? msg.fileMetadata.created : acc;
+        return (msg?.fileMetadata.transitCreated || msg.fileMetadata.created) > acc
+          ? msg?.fileMetadata.transitCreated || msg.fileMetadata.created
+          : acc;
       }, conversation.fileMetadata.appData.content.lastReadTime || 0);
 
       setPendingReadTime(newestMessageCreated);

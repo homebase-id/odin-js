@@ -111,7 +111,7 @@ const useInboxProcessor = (connected?: boolean) => {
     queryKey: ['process-inbox'],
     queryFn: fetchData,
     enabled: connected,
-    staleTime: MINUTE_IN_MS * 2,
+    staleTime: 1000 * 10, // 10 seconds
   });
 };
 
