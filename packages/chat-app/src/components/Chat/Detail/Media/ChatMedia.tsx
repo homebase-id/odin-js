@@ -70,7 +70,7 @@ const MediaItem = ({
       onClick={onClick}
       data-thumb={!!previewThumbnail}
     >
-      {!fileId ? (
+      {!fileId || (payload as NewPayloadDescriptor)?.pendingFile ? (
         <PendingFile payload={payload} className={`h-full w-auto`} fit={fit} onLoad={onLoad} />
       ) : (
         <>
