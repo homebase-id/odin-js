@@ -14,7 +14,7 @@
 `/api/apps/v1/drive/files/upload`\
 => [POST] `/api/apps/v2/drive/files`
 
-`/api/apps/v1/drive/files/header`\
+`/api/apps/v1/drive/files/header`\s
 `/api/owner/v1/drive/query/specialized/cuid/header`\
 => [GET] `/api/apps/v2/drive/files/header` (request object with option for uniqueId)
 
@@ -36,24 +36,6 @@
 
 `/api/apps/v1/drive/files/send-read-receipt`\
 => [POST] `/api/apps/v2/drive/files/read-receipts`
-
-`/api/apps/v1/drive/files/reactions/add`\
-=> [POST] `/api/apps/v2/drive/files/reactions`
-
-`/api/apps/v1/drive/files/reactions/delete`\
-=> [DELETE] `/api/apps/v2/drive/files/reactions`
-
-`/api/apps/v1/drive/files/reactions/deleteall`\
-=> [DELETE] `/api/apps/v2/drive/files/reactions/all`
-
-`/api/apps/v1/drive/files/reactions/list`\
-=> [GET] `/api/apps/v2/drive/files/reactions`
-
-`/api/apps/v1/drive/files/reactions/listbyidentity`\
-=> [GET] `/api/apps/v2/drive/files/reactions?groupBy=identity`
-
-`/api/apps/v1/drive/files/reactions/summary`\
-=> [GET] `/api/apps/v2/drive/files/reactions/summary`
 
 ## File queries
 
@@ -101,4 +83,90 @@
 `/api/apps/v1/circles/connections/troubleshooting-info`\
 => [GET] `/api/apps/v2/circles/connections/troubleshooting-info?odinId={ODINID}`
 
+## Reactions
+
+`/api/apps/v1/drive/files/reactions/add`\
+=> [POST] `/api/apps/v2/drive/files/reactions`
+
+`/api/apps/v1/drive/files/reactions/delete`\
+=> [DELETE] `/api/apps/v2/drive/files/reactions`
+
+`/api/apps/v1/drive/files/reactions/deleteall`\
+=> [DELETE] `/api/apps/v2/drive/files/reactions/all`
+
+`/api/apps/v1/drive/files/reactions/list`\
+=> [GET] `/api/apps/v2/drive/files/reactions`
+
+`/api/apps/v1/drive/files/reactions/listbyidentity`\
+=> [GET] `/api/apps/v2/drive/files/reactions?groupBy=identity`
+
+`/api/apps/v1/drive/files/reactions/summary`\
+=> [GET] `/api/apps/v2/drive/files/reactions/summary`
+
 ---
+
+## Transit
+
+### File Management
+
+`/api/apps/v1/transit/sender/files/delete`\
+`/api/apps/v1/transit/sender/files/deletefileidbatch`\
+`/api/apps/v1/transit/sender/files/deletegroupidbatch`\
+`/api/apps/v1/transit/sender/files/harddelete`\
+`/api/owner/v1/transit/sender/files/senddeleterequest`\
+=> [DELETE] `/api/apps/v2/transit/files` (request object with one or more fileId, groupId + option to hard delete)
+
+`/api/owner/v1/transit/sender/files/send`\
+=> [POST] `/api/apps/v2/transit/files`
+
+`/api/apps/v1/transit/sender/uploadpayload`\
+=> [POST] `/api/apps/v2/transit/files/payload`
+
+`/api/apps/v1/transit/files/deletepayload`\
+=> [DELETE] `/api/apps/v2/transit/files/payload`
+
+`/api/apps/v1/transit/files/header`\
+`/api/owner/v1/transit/query/specialized/cuid/header`\
+`/api/apps/v1/transit/query/header_byglobaltransitid`\
+=> [GET] `/api/apps/v2/transit/files/header` (request object with option for uniqueId)
+
+`/api/apps/v1/transit/query/thumb`\
+`/api/owner/v1/transit/query/specialized/cuid/thumb`\
+`/api/apps/v1/transit/query/thumb_byglobaltransitid`\
+=> [GET] `/api/apps/v2/transit/files/thumb` (request object with option for uniqueId/globalTransitId)
+
+`/api/apps/v1/transit/query/payload`\
+`/api/owner/v1/transit/query/specialized/cuid/payload`\
+`/api/apps/v1/transit/query/payload_byglobaltransitid`\
+=> [GET] `/api/apps/v2/transit/files/payload` (request object with option for uniqueId/globalTransitId)
+
+### File Queries
+
+`/api/owner/v1/transit/query/batch`\
+=> [GET][POST] `/api/owner/v2/transit/query/batch`
+
+`/api/owner/v1/transit/query/batchcollection`\
+=> [GET][POST] `/api/owner/v2/transit/query/batch/collection`
+
+`/api/owner/v1/transit/query/modified`\
+=> [GET][POST] `/api/owner/v2/transit/query/modified`
+
+### Reactions
+
+`/api/apps/v1/transit/files/reactions/add`\
+=> [POST] `/api/apps/v2/transit/files/reactions`
+
+`/api/apps/v1/transit/files/reactions/delete`\
+=> [DELETE] `/api/apps/v2/transit/files/reactions`
+
+`/api/apps/v1/transit/files/reactions/deleteall`\
+=> [DELETE] `/api/apps/v2/transit/files/reactions/all`
+
+`/api/apps/v1/transit/files/reactions/list`\
+=> [GET] `/api/apps/v2/transit/files/reactions`
+
+`/api/apps/v1/transit/files/reactions/listbyidentity`\
+=> [GET] `/api/apps/v2/transit/files/reactions?groupBy=identity`
+
+`/api/apps/v1/transit/files/reactions/summary`\
+=> [GET] `/api/apps/v2/transit/files/reactions/summary`
