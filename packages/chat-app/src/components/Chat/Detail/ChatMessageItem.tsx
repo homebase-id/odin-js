@@ -168,9 +168,13 @@ const ChatTextMessageBody = ({
   );
 };
 
-const urlRegex = new RegExp(/(https?:\/\/[^\s]+)/);
+const urlAndMentionRegex = new RegExp(/(https?:\/\/[^\s]+|@[^\s]+)/);
+const urlRegex = new RegExp(
+  /https?:\/\/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|(localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d{1,5})?)(\/[^\s]*)?/
+);
+const mentionRegex = new RegExp(/@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
 const ParagraphWithLinks = ({ text, className }: { text: string; className?: string }) => {
-  const splitUpText = text.split(urlRegex);
+  const splitUpText = text.split(urlAndMentionRegex);
 
   return (
     <p className={className}>
@@ -180,6 +184,18 @@ const ParagraphWithLinks = ({ text, className }: { text: string; className?: str
             <a
               key={index}
               href={part}
+              target="_blank"
+              rel="noreferrer"
+              className="text-primary underline"
+            >
+              {part}
+            </a>
+          );
+        } else if (mentionRegex.test(part)) {
+          return (
+            <a
+              key={index}
+              href={`https://${part.slice(1)}`}
               target="_blank"
               rel="noreferrer"
               className="text-primary underline"
@@ -268,7 +284,10 @@ const ChatMediaMessageBody = ({
       </div>
       {hasACaption ? (
         <div className="flex min-w-0 flex-col px-2 py-2 md:flex-row md:justify-between">
-          <p className="whitespace-pre-wrap break-words">{content.message}</p>
+          <ParagraphWithLinks
+            text={content.message}
+            className={`whitespace-pre-wrap break-words`}
+          />
           <ChatFooter />
         </div>
       ) : null}
