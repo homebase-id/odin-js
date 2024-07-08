@@ -259,7 +259,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
     if (chatMessagesQueue.length >= 1) {
       if (!timeout.current) {
         // Start timeout to always process the queue after a certain time
-        timeout.current = setTimeout(() => processQueue(chatMessagesQueueTunnel.current), 3000);
+        timeout.current = setTimeout(() => processQueue(chatMessagesQueueTunnel.current), 700);
       }
     }
 
