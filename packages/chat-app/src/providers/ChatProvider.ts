@@ -30,6 +30,7 @@ import {
   TransferStatus,
   FailedTransferStatuses,
   RecipientTransferHistory,
+  deleteFile,
 } from '@youfoundation/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
@@ -396,6 +397,20 @@ export const updateChatMessage = async (
       message.fileMetadata.versionTag = existingChatMessage.fileMetadata.versionTag;
       return await updateChatMessage(dotYouClient, message, recipients, keyHeader);
     }
+  );
+};
+
+export const hardDeleteChatMessage = async (
+  dotYouClient: DotYouClient,
+  message: HomebaseFile<ChatMessage>,
+  recipients: string[],
+  deleteForEveryone?: boolean
+) => {
+  return await deleteFile(
+    dotYouClient,
+    ChatDrive,
+    message.fileId,
+    deleteForEveryone ? recipients : []
   );
 };
 
