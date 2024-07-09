@@ -230,8 +230,8 @@ export const uploadChatMessage = async (
           useAppNotification: true,
           appNotificationOptions: {
             appId: appId,
-            typeId: message.fileMetadata.appData.groupId as string,
-            tagId: getNewId(),
+            typeId: message.fileMetadata.appData.groupId || getNewId(),
+            tagId: message.fileMetadata.appData.uniqueId || getNewId(),
             silent: false,
           },
         }
