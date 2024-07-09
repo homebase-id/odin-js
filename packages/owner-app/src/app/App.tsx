@@ -51,6 +51,7 @@ const Following = lazy(() => import('../templates/Follow/Follow'));
 
 const Drives = lazy(() => import('../templates/Drives/Drives/Drives'));
 const DriveDetails = lazy(() => import('../templates/Drives/DriveDetails/DriveDetails'));
+const FileDetails = lazy(() => import('../templates/Drives/DriveDetails/FileDetails'));
 const Settings = lazy(() => import('../templates/Settings/Settings'));
 
 const DemoData = lazy(() => import('../templates/DemoData/DemoData'));
@@ -186,6 +187,7 @@ function App() {
 
             <Route path="drives" element={<Drives />}></Route>
             <Route path="drives/:driveKey" element={<DriveDetails />}></Route>
+            <Route path="drives/:driveKey/:fileQuery" element={<FileDetails />}></Route>
             <Route path="settings" element={<Settings />}></Route>
             <Route path="settings/:sectionId" element={<Settings />}></Route>
 
