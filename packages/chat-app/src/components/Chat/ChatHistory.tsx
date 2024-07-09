@@ -111,6 +111,27 @@ export const ChatHistory = ({
         className="flex w-full flex-grow flex-col-reverse overflow-auto p-5"
         ref={scrollRef}
         key={conversation?.fileId}
+        onCopyCapture={(e) => {
+          const range = window.getSelection()?.getRangeAt(0),
+            rangeContents = range?.cloneContents(),
+            helper = document.createElement('div');
+
+          if (rangeContents) helper.appendChild(rangeContents);
+          const elements = helper.getElementsByClassName('copyable-content');
+          if (elements.length === 0) return;
+
+          let runningText = '';
+          for (let i = elements.length - 1; i >= 0; i--) {
+            const text = (elements[i] as any).innerText;
+            if (text?.length) {
+              runningText += text + '\n';
+            }
+          }
+
+          e.clipboardData.setData('text/plain', runningText);
+          e.preventDefault();
+          return false;
+        }}
       >
         <div
           className="relative w-full flex-shrink-0 flex-grow-0 overflow-hidden" // This overflow-hidden cuts of the context-menu of the first chat-items; But we need it as it otherwise breaks the scroll edges

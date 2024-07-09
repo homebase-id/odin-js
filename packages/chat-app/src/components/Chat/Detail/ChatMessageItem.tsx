@@ -149,7 +149,7 @@ const ChatTextMessageBody = ({
             {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
             <ParagraphWithLinks
               text={content.message}
-              className={`whitespace-pre-wrap break-words ${
+              className={`copyable-content whitespace-pre-wrap break-words ${
                 isEmojiOnly && !isReply ? 'text-7xl' : ''
               }`}
             />
