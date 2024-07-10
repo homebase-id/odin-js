@@ -6,6 +6,12 @@ export const getDomainFromUrl = (url?: string): string | undefined => {
     ?.toLowerCase();
 };
 
+export const getHostFromUrl = (url?: string): string | undefined => {
+  return getDomainFromUrl(url)
+    ?.split('.')
+    .find((part) => part !== 'www');
+};
+
 export const getTwoLettersFromDomain = (domain: string): string => {
   const domainParts = domain.replace('www.', '').split('.');
   if (domainParts.length <= 2) {

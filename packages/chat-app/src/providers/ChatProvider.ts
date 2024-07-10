@@ -33,11 +33,16 @@ import {
   deleteFile,
 } from '@youfoundation/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
-import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
-import { makeGrid } from '@youfoundation/js-lib/helpers';
+import {
+  getNewId,
+  jsonStringify64,
+  stringToUint8Array,
+  makeGrid,
+} from '@youfoundation/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
 import { createThumbnails, processVideoFile } from '@youfoundation/js-lib/media';
 import { sendReadReceipt } from '@youfoundation/js-lib/peer';
+import { NewLinkPreview } from '@youfoundation/js-lib/media';
 
 export const CHAT_MESSAGE_FILE_TYPE = 7878;
 export const ChatDeletedArchivalStaus = 2;
@@ -52,6 +57,13 @@ export enum ChatDeliveryStatus {
   Failed = 50, // when the message failed to send to the recipient
 }
 
+export interface LinkPreview {
+  url: string;
+  title: string;
+  description: string;
+  previewImagePayloadKey?: string;
+}
+
 export interface ChatMessage {
   // /// ReplyId used to get the replyId of the message
   replyId?: string; //=> Better to use the groupId (unless that would break finding the messages of a conversation)...
@@ -64,12 +76,15 @@ export interface ChatMessage {
   /// Content of the message
   message: string;
 
+  linkPreviews?: Record<string, LinkPreview>;
+
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;
   deliveryDetails?: Record<string, ChatDeliveryStatus>;
 }
 
 const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_web';
+const CHAT_LINKS_PAYLOAD_KEY = 'chat_links';
 
 export const getChatMessages = async (
   dotYouClient: DotYouClient,
@@ -211,6 +226,7 @@ export const uploadChatMessage = async (
   message: NewHomebaseFile<ChatMessage>,
   recipients: string[],
   files: NewMediaFile[] | undefined,
+  linkPreviews: NewLinkPreview[] | undefined,
   onVersionConflict?: () => void
 ) => {
   const messageContent = message.fileMetadata.appData.content;
@@ -258,6 +274,15 @@ export const uploadChatMessage = async (
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+
+  if (linkPreviews) {
+    payloads.push({
+      key: CHAT_LINKS_PAYLOAD_KEY,
+      payload: new Blob([stringToUint8Array(JSON.stringify(linkPreviews))], {
+        type: 'application/json',
+      }),
+    });
+  }
 
   for (let i = 0; files && i < files?.length; i++) {
     const payloadKey = `${CHAT_MESSAGE_PAYLOAD_KEY}${i}`;

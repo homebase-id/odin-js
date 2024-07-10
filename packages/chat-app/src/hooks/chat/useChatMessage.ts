@@ -14,6 +14,7 @@ import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../providers/ConversationProvider';
+import { NewLinkPreview } from '@youfoundation/js-lib/media';
 
 export const useChatMessage = (props?: { messageId: string | undefined }) => {
   const dotYouClient = useDotYouClientContext();
@@ -29,6 +30,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     replyId,
     files,
     message,
+    linkPreviews,
     chatId,
     userDate,
   }: {
@@ -36,6 +38,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     replyId?: string;
     files?: NewMediaFile[];
     message: string;
+    linkPreviews?: NewLinkPreview[];
     chatId?: string;
     userDate?: number;
   }): Promise<NewHomebaseFile<ChatMessage> | null> => {
@@ -69,7 +72,13 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
       },
     };
 
-    const uploadResult = await uploadChatMessage(dotYouClient, newChat, recipients, files);
+    const uploadResult = await uploadChatMessage(
+      dotYouClient,
+      newChat,
+      recipients,
+      files,
+      linkPreviews
+    );
     if (!uploadResult) throw new Error('Failed to send the chat message');
 
     newChat.fileId = uploadResult.file.fileId;

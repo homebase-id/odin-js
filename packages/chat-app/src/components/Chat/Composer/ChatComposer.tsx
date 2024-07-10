@@ -12,6 +12,8 @@ import {
   t,
   ellipsisAtMaxChar,
   VolatileInputRef,
+  LinkOverview,
+  useLinkPreviewBuilder,
 } from '@youfoundation/common-app';
 import { HomebaseFile, NewMediaFile } from '@youfoundation/js-lib/core';
 
@@ -21,6 +23,7 @@ import { UnifiedConversation } from '../../../providers/ConversationProvider';
 import { useState, useEffect, useRef } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
 import { getNewId, isTouchDevice } from '@youfoundation/js-lib/helpers';
+import { NewLinkPreview } from '@youfoundation/js-lib/media';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const CHAT_DRAFTS_KEY = 'CHAT_LOCAL_DRAFTS';
@@ -57,6 +60,8 @@ export const ChatComposer = ({
     }
   }, [conversation, message]);
 
+  const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(message || '');
+
   const addError = useErrors().add;
   const { mutateAsync: sendMessage } = useChatMessage().send;
 
@@ -87,6 +92,7 @@ export const ChatComposer = ({
         files: newFiles,
         chatId: getNewId(),
         userDate: new Date().getTime(),
+        linkPreviews: Object.values(linkPreviews).filter(Boolean) as NewLinkPreview[],
       });
       onSend && onSend();
     } catch (err) {
@@ -108,6 +114,9 @@ export const ChatComposer = ({
       <div className="bg-page-background pb-[env(safe-area-inset-bottom)]">
         <div className="max-h-[30vh] overflow-auto">
           <FileOverview files={files} setFiles={setFiles} cols={8} />
+        </div>
+        <div className="max-h-[30vh] overflow-auto">
+          <LinkOverview linkPreviews={linkPreviews} setLinkPreviews={setLinkPreviews} />
         </div>
         {replyMsg ? <MessageForReply msg={replyMsg} onClear={clearReplyMsg} /> : null}
         <div className="flex flex-shrink-0 flex-row gap-2 px-2 py-3 md:px-5">

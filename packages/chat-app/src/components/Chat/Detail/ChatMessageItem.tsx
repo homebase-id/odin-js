@@ -186,7 +186,7 @@ const ParagraphWithLinks = ({ text, className }: { text: string; className?: str
               href={part}
               target="_blank"
               rel="noreferrer"
-              className="text-primary underline"
+              className="break-all text-primary underline"
             >
               {part}
             </a>
@@ -198,7 +198,7 @@ const ParagraphWithLinks = ({ text, className }: { text: string; className?: str
               href={`https://${part.slice(1)}`}
               target="_blank"
               rel="noreferrer"
-              className="text-primary underline"
+              className="break-all text-primary underline"
             >
               {part}
             </a>
