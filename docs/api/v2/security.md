@@ -5,29 +5,12 @@
 ### Direct
 
 `/api/apps/v1/security/context`\
-=> [GET] `/api/apps/v2/security/context`
+=> [GET] `/api/{guest/apps/owner}/v2/security/context`
 
-### Over Transit
+### Over peer
 
 `/api/apps/v1/transit/query/security/context`\
-=> [GET] `/api/apps/v2/transit/security/context`
-
-## Account
-
-`/api/owner/v1/security/account-status`\
-=> [GET] `/api/owner/v2/security/account`
-
-`/api/owner/v1/security/recovery-key`\
-=> [GET] `/api/owner/v2/security/recovery`
-
-`/api/owner/v1/security/resetpasswd`\
-=> [POST] `/api/owner/v2/security/password`
-
-`/api/owner/v1/security/delete-account`\
-=> [DELETE] `/api/owner/v2/security/account/delete`
-
-`/api/owner/v1/security/undelete-account`\
-=> [POST] `/api/owner/v2/security/account/undelete`
+=> [GET] `/api/{apps/owner}/v2/peer/security/context`
 
 ## Keys
 

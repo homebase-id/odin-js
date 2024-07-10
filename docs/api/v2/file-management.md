@@ -9,63 +9,63 @@
 `/api/apps/v1/drive/files/deletefileidbatch`\
 `/api/apps/v1/drive/files/deletegroupidbatch`\
 `/api/apps/v1/drive/files/harddelete`\
-=> [DELETE] `/api/apps/v2/drive/files` (request object with one or more fileId, groupId + option to hard delete)
+=> [DELETE] `/api/{guest/apps/owner}/v2/drive/files` (request object with one or more fileId, groupId + option to hard delete)
 
 `/api/apps/v1/drive/files/upload`\
-=> [POST] `/api/apps/v2/drive/files`
+=> [POST] `/api/{guest/apps/owner}/v2/drive/files`
 
 `/api/apps/v1/drive/files/header`\
 `/api/owner/v1/drive/query/specialized/cuid/header`\
-=> [GET] `/api/apps/v2/drive/files/header` (request object with option for fileId/uniqueId/globalTransitId)
+=> [GET] `/api/{guest/apps/owner}/v2/drive/files/header` (request object with option for fileId/uniqueId/globalTransitId)
 
 > TM: given that gtid is now on every file, we should also consider an option for gtid when getting header/thumb/payload. not sure if that just goes next to the uniqueId and we only allow one at a time or if there's some other smoother way you can do it. (i.e. there is a UID field with a uidType {gtid | clientUid}.
 
 `/api/apps/v1/drive/files/thumb`\
 `/api/owner/v1/drive/query/specialized/cuid/thumb`\
-=> [GET] `/api/apps/v2/drive/files/thumb` (request object with option for fileId/uniqueId/globalTransitId)
+=> [GET] `/api/{guest/apps/owner}/v2/drive/files/thumb` (request object with option for fileId/uniqueId/globalTransitId)
 
 `/api/apps/v1/drive/files/payload`\
 `/api/owner/v1/drive/query/specialized/cuid/payload`\
-=> [GET] `/api/apps/v2/drive/files/payload` (request object with option for fileId/uniqueId/globalTransitId)
+=> [GET] `/api/{guest/apps/owner}/v2/drive/files/payload` (request object with option for fileId/uniqueId/globalTransitId)
 
 `/api/apps/v1/drive/files/uploadpayload`\
-=> [POST] `/api/apps/v2/drive/files/payload`
+=> [POST] `/api/{guest/apps/owner}/v2/drive/files/payload`
 
 `/api/apps/v1/drive/files/deletepayload`\
-=> [DELETE] `/api/apps/v2/drive/files/payload`
+=> [DELETE] `/api/{guest/apps/owner}/v2/drive/files/payload`
 
 `/api/apps/v1/drive/files/send-read-receipt`\
-=> [POST] `/api/apps/v2/drive/files/read-receipts`
+=> [POST] `/api/{guest/apps/owner}/v2/drive/files/read-receipts`
 
-## Over transit
+## Over peer
 
 `/api/apps/v1/transit/sender/files/delete`\
 `/api/apps/v1/transit/sender/files/deletefileidbatch`\
 `/api/apps/v1/transit/sender/files/deletegroupidbatch`\
 `/api/apps/v1/transit/sender/files/harddelete`\
 `/api/owner/v1/transit/sender/files/senddeleterequest`\
-=> [DELETE] `/api/apps/v2/transit/files` (request object with one or more fileId, groupId + option to hard delete)
+=> [DELETE] `/api/{apps/owner}/v2/peer/files` (request object with one or more fileId, groupId + option to hard delete)
 
 `/api/owner/v1/transit/sender/files/send`\
-=> [POST] `/api/apps/v2/transit/files`
+=> [POST] `/api/{apps/owner}/v2/peer/files`
 
 `/api/apps/v1/transit/sender/uploadpayload`\
-=> [POST] `/api/apps/v2/transit/files/payload`
+=> [POST] `/api/{apps/owner}/v2/peer/files/payload`
 
 `/api/apps/v1/transit/files/deletepayload`\
-=> [DELETE] `/api/apps/v2/transit/files/payload`
+=> [DELETE] `/api/{apps/owner}/v2/peer/files/payload`
 
 `/api/apps/v1/transit/files/header`\
 `/api/owner/v1/transit/query/specialized/cuid/header`\
 `/api/apps/v1/transit/query/header_byglobaltransitid`\
-=> [GET] `/api/apps/v2/transit/files/header` (request object with option for fileId/uniqueId/globalTransitId)
+=> [GET] `/api/{apps/owner}/v2/peer/files/header` (request object with option for fileId/uniqueId/globalTransitId)
 
 `/api/apps/v1/transit/query/thumb`\
 `/api/owner/v1/transit/query/specialized/cuid/thumb`\
 `/api/apps/v1/transit/query/thumb_byglobaltransitid`\
-=> [GET] `/api/apps/v2/transit/files/thumb` (request object with option for fileId/uniqueId/globalTransitId)
+=> [GET] `/api/{apps/owner}/v2/peer/files/thumb` (request object with option for fileId/uniqueId/globalTransitId)
 
 `/api/apps/v1/transit/query/payload`\
 `/api/owner/v1/transit/query/specialized/cuid/payload`\
 `/api/apps/v1/transit/query/payload_byglobaltransitid`\
-=> [GET] `/api/apps/v2/transit/files/payload` (request object with option for fileId/uniqueId/globalTransitId)
+=> [GET] `/api/{apps/owner}/v2/peer/files/payload` (request object with option for fileId/uniqueId/globalTransitId)
