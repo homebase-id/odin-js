@@ -1,4 +1,4 @@
-import { DotYouClient } from '@youfoundation/js-lib/core';
+import { DotYouClient } from '../../core/DotYouClient';
 
 interface LinkPreviewFromServer {
   title: string;
