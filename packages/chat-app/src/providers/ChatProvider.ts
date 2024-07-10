@@ -84,7 +84,7 @@ export interface ChatMessage {
 }
 
 const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_web';
-const CHAT_LINKS_PAYLOAD_KEY = 'chat_links';
+export const CHAT_LINKS_PAYLOAD_KEY = 'chat_links';
 
 export const getChatMessages = async (
   dotYouClient: DotYouClient,
@@ -275,7 +275,8 @@ export const uploadChatMessage = async (
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
 
-  if (linkPreviews) {
+  if (!files?.length && linkPreviews) {
+    // We only support link previews when there is no media
     payloads.push({
       key: CHAT_LINKS_PAYLOAD_KEY,
       payload: new Blob([stringToUint8Array(JSON.stringify(linkPreviews))], {

@@ -6,7 +6,7 @@ import {
   NewPayloadDescriptor,
 } from '@youfoundation/js-lib/core';
 import { OdinImage, OdinThumbnailImage, OdinAudio, OdinAudioWaveForm } from '@youfoundation/ui-lib';
-import { ChatMessage } from '../../../../providers/ChatProvider';
+import { CHAT_LINKS_PAYLOAD_KEY, ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
 import { BoringFile, Triangle, useDarkMode } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
@@ -19,11 +19,12 @@ export const ChatMedia = ({
   msg: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>;
 }) => {
   const payloads = msg.fileMetadata.payloads;
+  const isLinkPreview = payloads?.find((p) => p.key === CHAT_LINKS_PAYLOAD_KEY);
   const isGallery = payloads && payloads.length >= 2;
   const navigate = useNavigate();
 
   if (!payloads) return null;
-
+  if (isLinkPreview) return <LinkPreview msg={msg} />;
   if (isGallery) return <MediaGallery msg={msg} />;
 
   return (
@@ -37,6 +38,14 @@ export const ChatMedia = ({
       />
     </div>
   );
+};
+
+const LinkPreview = ({
+  msg,
+}: {
+  msg: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>;
+}) => {
+  return <div className={`overflow-hidden rounded-lg`}>{/* TODO */}</div>;
 };
 
 const MediaItem = ({

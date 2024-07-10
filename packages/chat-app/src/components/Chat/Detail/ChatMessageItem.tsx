@@ -35,7 +35,7 @@ export const ChatMessageItem = ({
   const authorOdinId = msg.fileMetadata.senderOdinId;
 
   const messageFromMe = !authorOdinId || authorOdinId === identity;
-  const hasMedia = !!msg.fileMetadata.payloads?.length;
+  const hasMedia = !!msg.fileMetadata.payloads.length;
 
   const { chatMessageKey, mediaKey } = useParams();
   const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey) && mediaKey;
