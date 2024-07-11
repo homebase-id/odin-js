@@ -53,13 +53,7 @@ export enum ChatDeliveryStatus {
 }
 
 export interface ChatMessage {
-  // /// ReplyId used to get the replyId of the message
-  replyId?: string; //=> Better to use the groupId (unless that would break finding the messages of a conversation)...
-
-  /// FileState of the Message
-  /// [FileState.active] shows the message is active
-  /// [FileState.deleted] shows the message is deleted. It's soft deleted
-  // fileState: FileState => archivalStatus
+  replyId?: string;
 
   /// Content of the message
   message: string;
