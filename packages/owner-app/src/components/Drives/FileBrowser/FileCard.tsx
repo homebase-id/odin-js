@@ -298,7 +298,7 @@ const FileIds = ({
     return (
       <HybridLink
         className={`relative flex ${isRow ? 'flex-row items-center gap-2' : 'flex-col'} group justify-between`}
-        href={`${driveRoot}/${file.fileId}`}
+        href={`${driveRoot}/${id}`}
       >
         <span className="flex-shrink-0 text-sm">{label}:</span>
         <p className="ml-auto bg-transparent font-mono text-xs text-slate-400 group-hover:underline">
