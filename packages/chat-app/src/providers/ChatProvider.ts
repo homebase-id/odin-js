@@ -246,8 +246,8 @@ export const uploadChatMessage = async (
           useAppNotification: true,
           appNotificationOptions: {
             appId: appId,
-            typeId: message.fileMetadata.appData.groupId as string,
-            tagId: getNewId(),
+            typeId: message.fileMetadata.appData.groupId || getNewId(),
+            tagId: message.fileMetadata.appData.uniqueId || getNewId(),
             silent: false,
           },
         }
@@ -428,16 +428,9 @@ export const updateChatMessage = async (
 
 export const hardDeleteChatMessage = async (
   dotYouClient: DotYouClient,
-  message: HomebaseFile<ChatMessage>,
-  recipients: string[],
-  deleteForEveryone?: boolean
+  message: HomebaseFile<ChatMessage>
 ) => {
-  return await deleteFile(
-    dotYouClient,
-    ChatDrive,
-    message.fileId,
-    deleteForEveryone ? recipients : []
-  );
+  return await deleteFile(dotYouClient, ChatDrive, message.fileId, []);
 };
 
 export const softDeleteChatMessage = async (
