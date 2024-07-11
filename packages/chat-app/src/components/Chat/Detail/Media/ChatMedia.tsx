@@ -8,7 +8,7 @@ import {
 import { OdinImage, OdinThumbnailImage, OdinAudio, OdinAudioWaveForm } from '@youfoundation/ui-lib';
 import { CHAT_LINKS_PAYLOAD_KEY, ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
-import { BoringFile, Triangle, useDarkMode } from '@youfoundation/common-app';
+import { BoringFile, Triangle, useDarkMode, LinkPreviewItem } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 import { useMemo, useState } from 'react';
@@ -19,12 +19,10 @@ export const ChatMedia = ({
   msg: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>;
 }) => {
   const payloads = msg.fileMetadata.payloads;
-  const isLinkPreview = payloads?.find((p) => p.key === CHAT_LINKS_PAYLOAD_KEY);
   const isGallery = payloads && payloads.length >= 2;
   const navigate = useNavigate();
 
   if (!payloads) return null;
-  if (isLinkPreview) return <LinkPreview msg={msg} />;
   if (isGallery) return <MediaGallery msg={msg} />;
 
   return (
@@ -38,14 +36,6 @@ export const ChatMedia = ({
       />
     </div>
   );
-};
-
-const LinkPreview = ({
-  msg,
-}: {
-  msg: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>;
-}) => {
-  return <div className={`overflow-hidden rounded-lg`}>{/* TODO */}</div>;
 };
 
 const MediaItem = ({
@@ -72,6 +62,7 @@ const MediaItem = ({
   const isVideo = payload.contentType?.startsWith('video');
   const isAudio = payload.contentType?.startsWith('audio');
   const isImage = payload.contentType?.startsWith('image');
+  const isLink = payload.key === CHAT_LINKS_PAYLOAD_KEY;
 
   return (
     <div
@@ -132,6 +123,12 @@ const MediaItem = ({
               className={`h-full w-auto`}
               fit={fit}
               onLoad={onLoad}
+            />
+          ) : isLink ? (
+            <LinkPreviewItem
+              targetDrive={ChatDrive}
+              fileId={fileId}
+              payload={payload as PayloadDescriptor}
             />
           ) : (
             <BoringFile

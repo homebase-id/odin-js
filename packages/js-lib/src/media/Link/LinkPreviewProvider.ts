@@ -9,17 +9,19 @@ interface LinkPreviewFromServer {
   url: string;
 }
 
-export interface NewLinkPreview {
+export interface LinkPreview {
   title?: string;
   description?: string;
   imageUrl?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   url: string;
 }
 
 export const getLinkPreview = async (
   dotYouClient: DotYouClient,
   url: string
-): Promise<NewLinkPreview | null> => {
+): Promise<LinkPreview | null> => {
   const axiosClient = dotYouClient.createAxiosClient();
   const standardizedUrl = url.startsWith('http') ? url : `https://${url}`;
 
@@ -46,7 +48,9 @@ export const getLinkPreview = async (
       return {
         title: response.data.title || '',
         description: response.data.description || '',
-        image: response.data.imageUrl || undefined,
+        imageUrl: response.data.imageUrl || undefined,
+        imageWidth: response.data.imageWidth || undefined,
+        imageHeight: response.data.imageHeight || undefined,
         url: response.data.url,
       };
     })

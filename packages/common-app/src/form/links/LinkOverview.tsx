@@ -1,20 +1,22 @@
-import { ellipsisAtMaxChar } from '../../helpers/common';
-import { getHostFromUrl } from '@youfoundation/js-lib/helpers';
 import { ActionButton, Times } from '../../ui';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useDotYouClient } from '../../hooks';
-import { NewLinkPreview, getLinkPreview } from '@youfoundation/js-lib/media';
+import { LinkPreview, getLinkPreview } from '@youfoundation/js-lib/media';
+import { LinkPreviewTextual } from '../../media/Link';
 
 export const LinkOverview = ({
   linkPreviews,
   setLinkPreviews,
 }: {
-  linkPreviews: Record<string, NewLinkPreview | null>;
-  setLinkPreviews: Dispatch<SetStateAction<Record<string, NewLinkPreview | null>>>;
+  linkPreviews: Record<string, LinkPreview | null>;
+  setLinkPreviews: Dispatch<SetStateAction<Record<string, LinkPreview | null>>>;
 }) => {
-  if (!linkPreviews || !Object.keys(linkPreviews).length) {
+  if (
+    !linkPreviews ||
+    !Object.keys(linkPreviews).length ||
+    !Object.values(linkPreviews).filter(Boolean).length
+  )
     return null;
-  }
 
   return (
     <div className="p-4 flex flex-row gap-2">
@@ -23,7 +25,7 @@ export const LinkOverview = ({
         if (!linkMeta) return null;
         return (
           <div className="group relative w-full max-w-lg" key={link}>
-            <LinkOverviewItem
+            <LinkPreviewTextual
               key={link}
               linkPreview={linkMeta || { url: link }}
               className="border rounded-md overflow-hidden px-2 py-1"
@@ -48,45 +50,6 @@ export const LinkOverview = ({
   );
 };
 
-const LinkOverviewItem = ({
-  linkPreview,
-  size,
-  className,
-}: {
-  linkPreview: NewLinkPreview;
-  size?: 'sm' | 'md';
-  className?: string;
-}) => {
-  return (
-    <a
-      className={`block group w-full max-w-lg ${className || ''}`}
-      href={linkPreview.url}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      <div className="">
-        <p className="capitalize font-bold">{getHostFromUrl(linkPreview.url)}</p>
-        <p
-          className={`text-sm text-primary group-hover:underline ${size === 'sm' ? 'max-h-[1.3rem] overflow-hidden' : ''}`}
-        >
-          {ellipsisAtMaxChar(linkPreview.title || linkPreview.url, size !== 'sm' ? 120 : 40)}
-        </p>
-        {size !== 'sm' ? (
-          <p className="text-sm">{ellipsisAtMaxChar(linkPreview.description, 140)}</p>
-        ) : null}
-      </div>
-
-      {size !== 'sm' ? (
-        <img
-          src={linkPreview.imageUrl}
-          alt={linkPreview.url}
-          className="border rounded-lg max-w-[70%]"
-        />
-      ) : null}
-    </a>
-  );
-};
-
 export const useLinkPreviewBuilder = (textToSearchIn: string) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
@@ -98,9 +61,9 @@ export const useLinkPreviewBuilder = (textToSearchIn: string) => {
 
     const removedLinks = Object.keys(linkPreviews).filter((link) => !foundLinks.includes(link));
     setLinkPreviews((old) => {
-      const newLinkPreviews = { ...old };
-      removedLinks.forEach((link) => delete newLinkPreviews[link]);
-      return newLinkPreviews;
+      const LinkPreviews = { ...old };
+      removedLinks.forEach((link) => delete LinkPreviews[link]);
+      return LinkPreviews;
     });
 
     const newLinks = foundLinks.filter(
@@ -109,41 +72,17 @@ export const useLinkPreviewBuilder = (textToSearchIn: string) => {
     if (!newLinks.length) return;
 
     (async () => {
-      const newLinkPreviews = (
+      const LinkPreviews = (
         await Promise.all(newLinks.map(async (link) => await getLinkPreview(dotYouClient, link)))
-      ).filter(Boolean) as NewLinkPreview[];
+      ).filter(Boolean) as LinkPreview[];
 
       setLinkPreviews((old) => ({
         ...old,
-        ...Object.fromEntries(newLinkPreviews.map((link) => [link.url, link])),
+        ...Object.fromEntries(LinkPreviews.map((link) => [link.url, link])),
       }));
     })();
   }, [textToSearchIn]);
 
-  const [linkPreviews, setLinkPreviews] = useState<Record<string, NewLinkPreview | null>>({});
+  const [linkPreviews, setLinkPreviews] = useState<Record<string, LinkPreview | null>>({});
   return { linkPreviews, setLinkPreviews };
 };
-
-// <div className={`flex flex-row max-w-lg ${className || ''}`}>
-//   <ActionButton icon={Times} type="mute" className="mb-auto" />
-//   <a
-//     className={`border-l border-l-4 ${size === 'sm' ? 'pl-2' : 'pl-4'} group`}
-//     href={linkPreview.url}
-//     target="_blank"
-//     rel="noopener noreferrer"
-//   >
-//     <div className="">
-//       <p className="capitalize font-bold">{getHostFromUrl(linkPreview.url)}</p>
-//       <p className="text-sm text-primary group-hover:underline">
-//         {ellipsisAtMaxChar(linkPreview.title || linkPreview.url, 120)}
-//       </p>
-//       {size !== 'sm' ? (
-//         <p className="text-sm">{ellipsisAtMaxChar(linkPreview.description, 140)}</p>
-//       ) : null}
-//     </div>
-
-//     {size !== 'sm' ? (
-//       <img src={imageUrl} alt={linkPreview.url} className="border rounded-lg max-w-[70%]" />
-//     ) : null}
-//   </a>
-// </div>

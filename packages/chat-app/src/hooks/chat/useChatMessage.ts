@@ -14,7 +14,7 @@ import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../providers/ConversationProvider';
-import { NewLinkPreview } from '@youfoundation/js-lib/media';
+import { LinkPreview } from '@youfoundation/js-lib/media';
 
 export const useChatMessage = (props?: { messageId: string | undefined }) => {
   const dotYouClient = useDotYouClientContext();
@@ -38,7 +38,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     replyId?: string;
     files?: NewMediaFile[];
     message: string;
-    linkPreviews?: NewLinkPreview[];
+    linkPreviews?: LinkPreview[];
     chatId?: string;
     userDate?: number;
   }): Promise<NewHomebaseFile<ChatMessage> | null> => {

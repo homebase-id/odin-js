@@ -23,7 +23,7 @@ import { UnifiedConversation } from '../../../providers/ConversationProvider';
 import { useState, useEffect, useRef } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
 import { getNewId, isTouchDevice } from '@youfoundation/js-lib/helpers';
-import { NewLinkPreview } from '@youfoundation/js-lib/media';
+import { LinkPreview } from '@youfoundation/js-lib/media';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const CHAT_DRAFTS_KEY = 'CHAT_LOCAL_DRAFTS';
@@ -92,7 +92,7 @@ export const ChatComposer = ({
         files: newFiles,
         chatId: getNewId(),
         userDate: new Date().getTime(),
-        linkPreviews: Object.values(linkPreviews).filter(Boolean) as NewLinkPreview[],
+        linkPreviews: Object.values(linkPreviews).filter(Boolean) as LinkPreview[],
       });
       onSend && onSend();
     } catch (err) {
