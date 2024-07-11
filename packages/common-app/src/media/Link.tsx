@@ -1,5 +1,5 @@
 import { getHostFromUrl, tryJsonParse } from '@youfoundation/js-lib/helpers';
-import { LinkPreview } from '@youfoundation/js-lib/media';
+import { LinkPreview, LinkPreviewDescriptor } from '@youfoundation/js-lib/media';
 import { ellipsisAtMaxChar } from '../helpers';
 import { useQuery } from '@tanstack/react-query';
 import { getPayloadAsJson, PayloadDescriptor, TargetDrive } from '@youfoundation/js-lib/core';
@@ -85,7 +85,7 @@ export const LinkPreviewItem = ({
   });
 
   const hasImage = payload.descriptorContent
-    ? tryJsonParse<[{ hasImage: boolean; url: string }]>(payload.descriptorContent)?.[0]?.hasImage
+    ? tryJsonParse<LinkPreviewDescriptor[]>(payload.descriptorContent)?.[0]?.hasImage
     : undefined;
 
   // ATM We only use the first one
@@ -97,7 +97,7 @@ export const LinkPreviewItem = ({
       <div className="rounded-t-lg p-1">
         <LinkPreviewTextual
           linkPreview={linkPreview}
-          className="rounded-t-md bg-background/60 p-2"
+          className={`rounded-t-md bg-background/60 p-2`}
         />
 
         {hasImage ? <LinkPreviewImage linkPreview={linkPreview} className="w-full" /> : null}

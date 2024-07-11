@@ -40,7 +40,12 @@ import {
   makeGrid,
 } from '@youfoundation/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
-import { createThumbnails, LinkPreview, processVideoFile } from '@youfoundation/js-lib/media';
+import {
+  createThumbnails,
+  LinkPreview,
+  LinkPreviewDescriptor,
+  processVideoFile,
+} from '@youfoundation/js-lib/media';
 import { sendReadReceipt } from '@youfoundation/js-lib/peer';
 
 export const CHAT_MESSAGE_FILE_TYPE = 7878;
@@ -270,10 +275,9 @@ export const uploadChatMessage = async (
     const descriptorContent = JSON.stringify(
       linkPreviews.map((preview) => {
         return {
-          ...preview,
-          imageUrl: undefined,
+          url: preview.url,
           hasImage: !!preview.imageUrl,
-        };
+        } as LinkPreviewDescriptor;
       })
     );
 

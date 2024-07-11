@@ -18,6 +18,11 @@ export interface LinkPreview {
   url: string;
 }
 
+export interface LinkPreviewDescriptor {
+  url: string;
+  hasImage?: boolean;
+}
+
 export const getLinkPreview = async (
   dotYouClient: DotYouClient,
   url: string
@@ -28,29 +33,12 @@ export const getLinkPreview = async (
   return axiosClient
     .get<LinkPreviewFromServer>(`/utils/links/extract?url=${standardizedUrl}`)
     .then((response) => {
-      // const imageBlob = (() => {
-      //   if (!response.data.imageUrl) return null;
-      //   try {
-      //     const dataUri = response.data.imageUrl;
-
-      //     const contentType = dataUri.split(';')[0].split(':')[1];
-      //     const contentBase64 = dataUri.split('base64,')[1];
-
-      //     if (contentType && contentBase64) {
-      //       return new Blob([base64ToUint8Array(contentBase64)], { type: contentType });
-      //     }
-      //     return null;
-      //   } catch (e) {
-      //     return null;
-      //   }
-      // })();
-
       return {
         title: response.data.title || '',
         description: response.data.description || '',
         imageUrl: response.data.imageUrl || undefined,
-        imageWidth: response.data.imageWidth || undefined,
-        imageHeight: response.data.imageHeight || undefined,
+        imageWidth: response.data.imageWidth || undefined, // TODO: Should we find a way to always get one from the dataUri?
+        imageHeight: response.data.imageHeight || undefined, // TODO: Should we find a way to always get one from the dataUri?
         url: response.data.url,
       };
     })
