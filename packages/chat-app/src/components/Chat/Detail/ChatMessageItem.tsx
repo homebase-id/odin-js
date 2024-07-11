@@ -32,7 +32,8 @@ export const ChatMessageItem = ({
   chatActions?: ChatActions;
 }) => {
   const identity = useDotYouClient().getIdentity();
-  const authorOdinId = msg.fileMetadata.senderOdinId;
+  const authorOdinId =
+    msg.fileMetadata.senderOdinId || msg.fileMetadata.appData.content.authorOdinId || '';
 
   const messageFromMe = !authorOdinId || authorOdinId === identity;
   const hasMedia = !!msg.fileMetadata.payloads?.length;

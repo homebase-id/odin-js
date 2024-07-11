@@ -69,9 +69,10 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     const identity = dotYouClient.getIdentity();
     const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
-    const hardDelete =
-      !deleteForEveryone ||
-      stringGuidsEqual(conversation?.fileMetadata.appData.uniqueId, ConversationWithYourselfId);
+    const hardDelete = stringGuidsEqual(
+      conversation?.fileMetadata.appData.uniqueId,
+      ConversationWithYourselfId
+    );
 
     return await Promise.all(
       messages.map(async (msg) => {

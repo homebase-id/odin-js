@@ -53,12 +53,12 @@ export const ChatHistory = ({
   useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
   const chatActions: ChatActions = {
     doReply: (msg: HomebaseFile<ChatMessage>) => setReplyMsg(msg),
-    doDelete: async (msg: HomebaseFile<ChatMessage>) => {
+    doDelete: async (msg: HomebaseFile<ChatMessage>, deleteForEveryone: boolean) => {
       if (!conversation || !msg) return;
       await deleteMessages({
         conversation: conversation,
         messages: [msg],
-        deleteForEveryone: true,
+        deleteForEveryone: deleteForEveryone,
       });
     },
   };

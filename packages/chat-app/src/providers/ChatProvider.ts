@@ -64,6 +64,9 @@ export interface ChatMessage {
   /// Content of the message
   message: string;
 
+  // After an update to a message on the receiving end, the senderOdinId is emptied; So we have an authorOdinId to keep track of the original sender
+  authorOdinId?: string;
+
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;
   deliveryDetails?: Record<string, ChatDeliveryStatus>;
@@ -433,6 +436,7 @@ export const softDeleteChatMessage = async (
 
   message.fileMetadata.versionTag = runningVersionTag;
   message.fileMetadata.appData.content.message = '';
+  message.fileMetadata.appData.content.authorOdinId = message.fileMetadata.senderOdinId;
   return await updateChatMessage(dotYouClient, message, deleteForEveryone ? recipients : []);
 };
 
