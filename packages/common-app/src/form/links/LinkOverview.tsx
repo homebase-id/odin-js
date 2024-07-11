@@ -7,9 +7,13 @@ import { LinkPreviewTextual } from '../../media/Link';
 export const LinkOverview = ({
   linkPreviews,
   setLinkPreviews,
+  className,
+  cols,
 }: {
   linkPreviews: Record<string, LinkPreview | null>;
   setLinkPreviews: Dispatch<SetStateAction<Record<string, LinkPreview | null>>>;
+  cols: 3 | 4;
+  className?: string;
 }) => {
   if (
     !linkPreviews ||
@@ -19,7 +23,11 @@ export const LinkOverview = ({
     return null;
 
   return (
-    <div className="p-4 flex flex-row gap-2">
+    <div
+      className={`gap-[2px] grid ${
+        cols === 3 ? 'grid-cols-3' : cols === 4 ? 'grid-cols-4' : ''
+      }  ${className ?? ''}`}
+    >
       {Object.keys(linkPreviews).map((link) => {
         const linkMeta = linkPreviews[link];
         if (!linkMeta) return null;

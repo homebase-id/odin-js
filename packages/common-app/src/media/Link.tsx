@@ -17,7 +17,7 @@ export const LinkPreviewTextual = ({
 }) => {
   return (
     <a
-      className={`block group w-full max-w-xl ${className || ''}`}
+      className={`block group w-full ${className || ''}`}
       href={linkPreview?.url}
       target="_blank"
       rel="noopener noreferrer"
@@ -50,12 +50,35 @@ export const LinkPreviewTextual = ({
 
 export const LinkPreviewImage = ({
   linkPreview,
+  width,
+  height,
   className,
 }: {
   linkPreview?: LinkPreview;
+  width?: number;
+  height?: number;
   className?: string;
 }) => {
-  if (!linkPreview) return <LoadingBlock className="w-full aspect-video" />;
+  const aspectRatio =
+    width && height
+      ? width / height
+      : linkPreview?.imageWidth && linkPreview.imageHeight
+        ? linkPreview?.imageWidth / linkPreview.imageHeight
+        : undefined;
+
+  if (!linkPreview)
+    return (
+      <LoadingBlock
+        className="w-full aspect-video"
+        style={
+          aspectRatio
+            ? {
+                aspectRatio: `${aspectRatio}`,
+              }
+            : undefined
+        }
+      />
+    );
   if (!linkPreview.imageUrl) return null;
 
   return (
@@ -65,6 +88,13 @@ export const LinkPreviewImage = ({
       height={linkPreview.imageHeight}
       alt={linkPreview.url}
       className={className}
+      style={
+        aspectRatio
+          ? {
+              aspectRatio: `${aspectRatio}`,
+            }
+          : undefined
+      }
     />
   );
 };
@@ -73,10 +103,12 @@ export const LinkPreviewItem = ({
   targetDrive,
   fileId,
   payload,
+  className,
 }: {
   targetDrive: TargetDrive;
   fileId: string;
   payload: PayloadDescriptor;
+  className?: string;
 }) => {
   const { data: linkMetadata, isLoading: linkMetadataLoading } = useLinkMetadata({
     fileId,
@@ -84,8 +116,8 @@ export const LinkPreviewItem = ({
     targetDrive,
   });
 
-  const hasImage = payload.descriptorContent
-    ? tryJsonParse<LinkPreviewDescriptor[]>(payload.descriptorContent)?.[0]?.hasImage
+  const descriptorInfo = payload.descriptorContent
+    ? tryJsonParse<LinkPreviewDescriptor[]>(payload.descriptorContent)?.[0]
     : undefined;
 
   // ATM We only use the first one
@@ -93,15 +125,19 @@ export const LinkPreviewItem = ({
   if (!linkPreview && !linkMetadataLoading) return null;
 
   return (
-    <div className={`overflow-hidden`} onClick={(e) => e.stopPropagation()}>
-      <div className="rounded-t-lg p-1">
-        <LinkPreviewTextual
+    <div
+      className={`rounded-t-lg overflow-hidden ${className || ''}`}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <LinkPreviewTextual linkPreview={linkPreview} className={`rounded-t-md  p-2 bg-primary/10`} />
+      {descriptorInfo?.hasImage ? (
+        <LinkPreviewImage
           linkPreview={linkPreview}
-          className={`rounded-t-md bg-background/60 p-2`}
+          className="w-full"
+          width={descriptorInfo.imageWidth}
+          height={descriptorInfo.imageHeight}
         />
-
-        {hasImage ? <LinkPreviewImage linkPreview={linkPreview} className="w-full" /> : null}
-      </div>
+      ) : null}
     </div>
   );
 };

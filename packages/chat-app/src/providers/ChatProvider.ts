@@ -277,6 +277,8 @@ export const uploadChatMessage = async (
         return {
           url: preview.url,
           hasImage: !!preview.imageUrl,
+          imageWidth: preview.imageWidth,
+          imageHeight: preview.imageHeight,
         } as LinkPreviewDescriptor;
       })
     );

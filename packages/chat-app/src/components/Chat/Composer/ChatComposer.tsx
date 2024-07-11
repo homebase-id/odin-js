@@ -115,9 +115,11 @@ export const ChatComposer = ({
         <div className="max-h-[30vh] overflow-auto">
           <FileOverview files={files} setFiles={setFiles} cols={8} />
         </div>
-        <div className="max-h-[30vh] overflow-auto">
-          <LinkOverview linkPreviews={linkPreviews} setLinkPreviews={setLinkPreviews} />
-        </div>
+        {files?.length ? null : (
+          <div className="max-h-[30vh] overflow-auto p-2">
+            <LinkOverview linkPreviews={linkPreviews} setLinkPreviews={setLinkPreviews} cols={4} />
+          </div>
+        )}
         {replyMsg ? <MessageForReply msg={replyMsg} onClear={clearReplyMsg} /> : null}
         <div className="flex flex-shrink-0 flex-row gap-2 px-2 py-3 md:px-5">
           <div className="my-auto flex flex-row items-center gap-1">

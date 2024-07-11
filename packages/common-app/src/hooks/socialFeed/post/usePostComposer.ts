@@ -19,6 +19,7 @@ import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { useManagePost } from './useManagePost';
 import { useDotYouClient } from '../../auth/useDotYouClient';
+import { LinkPreview } from '@youfoundation/js-lib/media';
 
 export const usePostComposer = () => {
   const [postState, setPostState] = useState<'uploading' | 'encrypting' | 'error' | undefined>();
@@ -30,6 +31,7 @@ export const usePostComposer = () => {
   const savePost = async (
     caption: string | undefined,
     mediaFiles: NewMediaFile[] | undefined,
+    linkPreviews: LinkPreview[] | undefined,
     embeddedPost: EmbeddedPost | undefined,
     targetChannel: {
       channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
@@ -91,6 +93,7 @@ export const usePostComposer = () => {
         odinId: odinId,
         channelId: channelId,
         mediaFiles: mediaFiles,
+        linkPreviews: linkPreviews,
         onUpdate: (progress) => setProcessingProgress(progress),
       });
     } catch (ex) {

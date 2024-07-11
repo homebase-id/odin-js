@@ -129,6 +129,7 @@ const MediaItem = ({
               targetDrive={ChatDrive}
               fileId={fileId}
               payload={payload as PayloadDescriptor}
+              className="p-1"
             />
           ) : (
             <BoringFile

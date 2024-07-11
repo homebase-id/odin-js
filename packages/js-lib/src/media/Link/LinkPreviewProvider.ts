@@ -21,6 +21,8 @@ export interface LinkPreview {
 export interface LinkPreviewDescriptor {
   url: string;
   hasImage?: boolean;
+  imageWidth?: number;
+  imageHeight?: number;
 }
 
 export const getLinkPreview = async (

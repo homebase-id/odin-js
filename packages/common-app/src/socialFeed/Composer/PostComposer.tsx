@@ -16,7 +16,13 @@ import {
 } from '@youfoundation/js-lib/core';
 import { AclIcon, AclSummary, AclDialog } from '../../acl';
 import { ChannelsDialog } from '../../channels';
-import { VolatileInput, FileOverview, FileSelector } from '../../form';
+import {
+  VolatileInput,
+  FileOverview,
+  FileSelector,
+  useLinkPreviewBuilder,
+  LinkOverview,
+} from '../../form';
 import { t, getImagesFromPasteEvent, getVideosFromPasteEvent } from '../../helpers';
 import {
   useDotYouClient,
@@ -36,6 +42,7 @@ import {
 } from '../../ui';
 import { EmbeddedPostContent } from '../Blocks/Body/EmbeddedPostContent';
 import { EmojiSelector } from '../Blocks/Interacts/EmojiPicker/EmojiSelector';
+import { LinkPreview } from '@youfoundation/js-lib/media';
 
 const FEED_ROOT_PATH = '/apps/feed';
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
@@ -72,6 +79,7 @@ export const PostComposer = ({
   });
 
   const [files, setFiles] = useState<NewMediaFile[]>();
+  const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(caption || '');
   const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
 
   const skipConfirmation = window.localStorage.getItem(STORAGE_SKIP_NEXT_KEY) === 'true';
@@ -80,7 +88,14 @@ export const PostComposer = ({
     if (skipNextTime) window.localStorage.setItem(STORAGE_SKIP_NEXT_KEY, 'true');
 
     if (isPosting) return;
-    await savePost(caption, files, embeddedPost, targetChannel, reactAccess);
+    await savePost(
+      caption,
+      files,
+      Object.values(linkPreviews).filter(Boolean) as LinkPreview[],
+      embeddedPost,
+      targetChannel,
+      reactAccess
+    );
     resetUi();
     onPost && onPost();
   };
@@ -160,6 +175,15 @@ export const PostComposer = ({
           />
         </div>
         <FileOverview files={files} setFiles={setFiles} className="mt-2" cols={4} />
+        {files?.length ? null : (
+          <LinkOverview
+            linkPreviews={linkPreviews}
+            setLinkPreviews={setLinkPreviews}
+            className="mt-2"
+            cols={3}
+          />
+        )}
+
         {embeddedPost ? (
           <EmbeddedPostContent content={embeddedPost} className="pointer-events-none mt-4" />
         ) : null}
