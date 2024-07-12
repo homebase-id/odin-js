@@ -409,7 +409,7 @@ const getTargetLink = (payload: PushNotification) => {
   } else if (payload.options.appId === CHAT_APP_ID) {
     return `/apps/chat/${payload.options.typeId}`;
   } else if (payload.options.appId === MAIL_APP_ID) {
-    return `/apps/mail/${payload.options.typeId}`;
+    return `/apps/mail/inbox/${payload.options.typeId}`;
   } else if (payload.options.appId === FEED_APP_ID) {
     return `/apps/feed`;
   }
