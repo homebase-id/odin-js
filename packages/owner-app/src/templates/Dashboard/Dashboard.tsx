@@ -14,6 +14,7 @@ import {
   OWNER_APP_ID,
   PHOTO_APP_ID,
   MAIL_APP_ID,
+  COMMUNITY_APP_ID,
 } from '@youfoundation/common-app';
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
 import { getOperatingSystem } from '@youfoundation/js-lib/auth';
@@ -53,6 +54,7 @@ const Dashboard = () => {
         <FeedApp />
         <ChatApp />
         <MailApp />
+        <CommunityApp />
         <PhotoApp />
       </div>
 
@@ -180,6 +182,26 @@ const MailApp = () => {
           label: t('Settings'),
           icon: Cog,
           href: `/owner/third-parties/apps/${MAIL_APP_ID}`,
+        },
+      ]}
+    />
+  );
+};
+
+const CommunityApp = () => {
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: COMMUNITY_APP_ID });
+
+  return (
+    <AppWrapper
+      appId={COMMUNITY_APP_ID}
+      name={'Community'}
+      href={`/apps/community`}
+      unreadCount={unreadCount || 0}
+      options={[
+        {
+          label: t('Settings'),
+          icon: Cog,
+          href: `/owner/third-parties/apps/${COMMUNITY_APP_ID}`,
         },
       ]}
     />
