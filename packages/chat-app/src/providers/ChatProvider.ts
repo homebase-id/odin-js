@@ -33,10 +33,19 @@ import {
   deleteFile,
 } from '@youfoundation/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
-import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
-import { makeGrid } from '@youfoundation/js-lib/helpers';
+import {
+  getNewId,
+  jsonStringify64,
+  stringToUint8Array,
+  makeGrid,
+} from '@youfoundation/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
-import { createThumbnails, processVideoFile } from '@youfoundation/js-lib/media';
+import {
+  createThumbnails,
+  LinkPreview,
+  LinkPreviewDescriptor,
+  processVideoFile,
+} from '@youfoundation/js-lib/media';
 import { sendReadReceipt } from '@youfoundation/js-lib/peer';
 
 export const CHAT_MESSAGE_FILE_TYPE = 7878;
@@ -67,6 +76,7 @@ export interface ChatMessage {
 }
 
 const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_web';
+export const CHAT_LINKS_PAYLOAD_KEY = 'chat_links';
 
 export const getChatMessages = async (
   dotYouClient: DotYouClient,
@@ -208,6 +218,7 @@ export const uploadChatMessage = async (
   message: NewHomebaseFile<ChatMessage>,
   recipients: string[],
   files: NewMediaFile[] | undefined,
+  linkPreviews: LinkPreview[] | undefined,
   onVersionConflict?: () => void
 ) => {
   const messageContent = message.fileMetadata.appData.content;
@@ -255,6 +266,28 @@ export const uploadChatMessage = async (
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+
+  if (!files?.length && linkPreviews) {
+    // We only support link previews when there is no media
+    const descriptorContent = JSON.stringify(
+      linkPreviews.map((preview) => {
+        return {
+          url: preview.url,
+          hasImage: !!preview.imageUrl,
+          imageWidth: preview.imageWidth,
+          imageHeight: preview.imageHeight,
+        } as LinkPreviewDescriptor;
+      })
+    );
+
+    payloads.push({
+      key: CHAT_LINKS_PAYLOAD_KEY,
+      payload: new Blob([stringToUint8Array(JSON.stringify(linkPreviews))], {
+        type: 'application/json',
+      }),
+      descriptorContent,
+    });
+  }
 
   for (let i = 0; files && i < files?.length; i++) {
     const payloadKey = `${CHAT_MESSAGE_PAYLOAD_KEY}${i}`;

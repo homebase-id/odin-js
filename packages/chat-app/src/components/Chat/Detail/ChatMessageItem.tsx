@@ -36,7 +36,7 @@ export const ChatMessageItem = ({
     msg.fileMetadata.senderOdinId || msg.fileMetadata.appData.content.authorOdinId || '';
 
   const messageFromMe = !authorOdinId || authorOdinId === identity;
-  const hasMedia = !!msg.fileMetadata.payloads?.length;
+  const hasMedia = !!msg.fileMetadata.payloads.length;
 
   const { chatMessageKey, mediaKey } = useParams();
   const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey) && mediaKey;
@@ -187,7 +187,7 @@ const ParagraphWithLinks = ({ text, className }: { text: string; className?: str
               href={part}
               target="_blank"
               rel="noreferrer"
-              className="text-primary underline"
+              className="break-all text-primary underline"
             >
               {part}
             </a>
@@ -199,7 +199,7 @@ const ParagraphWithLinks = ({ text, className }: { text: string; className?: str
               href={`https://${part.slice(1)}`}
               target="_blank"
               rel="noreferrer"
-              className="text-primary underline"
+              className="break-all text-primary underline"
             >
               {part}
             </a>
@@ -267,7 +267,7 @@ const ChatMediaMessageBody = ({
 
   return (
     <div
-      className={`relative w-full max-w-[75vw] rounded-lg shadow-sm md:max-w-xs ${
+      className={`relative w-full max-w-[75vw] rounded-lg shadow-sm md:max-w-xs lg:max-w-xl ${
         messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10 dark:bg-gray-300/20'
       }`}
     >

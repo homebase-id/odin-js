@@ -108,7 +108,7 @@ export const ChatHistory = ({
     <>
       <ErrorNotification error={deleteMessagesError} />
       <div
-        className="flex w-full flex-grow flex-col-reverse overflow-auto p-5"
+        className="flex w-full flex-grow flex-col-reverse overflow-auto p-2 sm:p-5"
         ref={scrollRef}
         key={conversation?.fileId}
         onCopyCapture={(e) => {

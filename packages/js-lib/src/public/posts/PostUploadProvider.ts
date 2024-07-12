@@ -40,7 +40,7 @@ import { getPost, getPostBySlug } from './PostProvider';
 import { PostContent, BlogConfig, postTypeToDataType } from './PostTypes';
 import { makeGrid } from '../../helpers/ImageMerger';
 import { processVideoFile } from '../../media/Video/VideoProcessor';
-import { createThumbnails } from '../../media/media';
+import { createThumbnails, LinkPreview, LinkPreviewDescriptor } from '../../media/media';
 import { uploadFileOverPeer } from '../../peer/peer';
 import { TransitInstructionSet, TransitUploadResult } from '../../peer/peerData/PeerTypes';
 const OdinBlob: typeof Blob =
@@ -48,6 +48,7 @@ const OdinBlob: typeof Blob =
   Blob;
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
+export const POST_LINKS_PAYLOAD_KEY = 'pst_links';
 
 export const savePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
@@ -55,6 +56,7 @@ export const savePost = async <T extends PostContent>(
   odinId: string | undefined,
   channelId: string,
   toSaveFiles?: (NewMediaFile | MediaFile)[] | NewMediaFile[],
+  linkPreviews?: LinkPreview[],
   onVersionConflict?: () => void,
   onUpdate?: (progress: number) => void
 ): Promise<UploadResult | TransitUploadResult> => {
@@ -101,6 +103,28 @@ export const savePost = async <T extends PostContent>(
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+
+  if (!newMediaFiles?.length && linkPreviews) {
+    // We only support link previews when there is no media
+    const descriptorContent = JSON.stringify(
+      linkPreviews.map((preview) => {
+        return {
+          url: preview.url,
+          hasImage: !!preview.imageUrl,
+          imageWidth: preview.imageWidth,
+          imageHeight: preview.imageHeight,
+        } as LinkPreviewDescriptor;
+      })
+    );
+
+    payloads.push({
+      key: POST_LINKS_PAYLOAD_KEY,
+      payload: new Blob([stringToUint8Array(JSON.stringify(linkPreviews))], {
+        type: 'application/json',
+      }),
+      descriptorContent,
+    });
+  }
 
   // Handle image files:
   for (let i = 0; newMediaFiles && i < newMediaFiles?.length; i++) {
@@ -444,7 +468,9 @@ const updatePost = async <T extends PostContent>(
 
   let runningVersionTag: string = file.fileMetadata.versionTag;
   const existingMediaFiles =
-    file.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || [];
+    file.fileMetadata.payloads?.filter(
+      (p) => p.key !== DEFAULT_PAYLOAD_KEY && p.key !== POST_LINKS_PAYLOAD_KEY
+    ) || [];
 
   const newMediaFiles: NewMediaFile[] =
     (existingAndNewMediaFiles?.filter(
