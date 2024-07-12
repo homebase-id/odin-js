@@ -68,16 +68,15 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     const identity = dotYouClient.getIdentity();
     const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
-    // ATM we only hard delete messages to yourself
     const hardDelete = stringGuidsEqual(
-      conversation.fileMetadata.appData.uniqueId,
+      conversation?.fileMetadata.appData.uniqueId,
       ConversationWithYourselfId
     );
 
     return await Promise.all(
       messages.map(async (msg) => {
         hardDelete
-          ? await hardDeleteChatMessage(dotYouClient, msg, recipients.filter(Boolean))
+          ? await hardDeleteChatMessage(dotYouClient, msg)
           : await softDeleteChatMessage(
               dotYouClient,
               msg,

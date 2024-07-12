@@ -33,10 +33,19 @@ import {
   deleteFile,
 } from '@youfoundation/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
-import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
-import { makeGrid } from '@youfoundation/js-lib/helpers';
+import {
+  getNewId,
+  jsonStringify64,
+  stringToUint8Array,
+  makeGrid,
+} from '@youfoundation/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
-import { createThumbnails, processVideoFile } from '@youfoundation/js-lib/media';
+import {
+  createThumbnails,
+  LinkPreview,
+  LinkPreviewDescriptor,
+  processVideoFile,
+} from '@youfoundation/js-lib/media';
 import { sendReadReceipt } from '@youfoundation/js-lib/peer';
 
 export const CHAT_MESSAGE_FILE_TYPE = 7878;
@@ -53,16 +62,13 @@ export enum ChatDeliveryStatus {
 }
 
 export interface ChatMessage {
-  // /// ReplyId used to get the replyId of the message
-  replyId?: string; //=> Better to use the groupId (unless that would break finding the messages of a conversation)...
-
-  /// FileState of the Message
-  /// [FileState.active] shows the message is active
-  /// [FileState.deleted] shows the message is deleted. It's soft deleted
-  // fileState: FileState => archivalStatus
+  replyId?: string;
 
   /// Content of the message
   message: string;
+
+  // After an update to a message on the receiving end, the senderOdinId is emptied; So we have an authorOdinId to keep track of the original sender
+  authorOdinId?: string;
 
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;
@@ -70,6 +76,7 @@ export interface ChatMessage {
 }
 
 const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_web';
+export const CHAT_LINKS_PAYLOAD_KEY = 'chat_links';
 
 export const getChatMessages = async (
   dotYouClient: DotYouClient,
@@ -211,6 +218,7 @@ export const uploadChatMessage = async (
   message: NewHomebaseFile<ChatMessage>,
   recipients: string[],
   files: NewMediaFile[] | undefined,
+  linkPreviews: LinkPreview[] | undefined,
   onVersionConflict?: () => void
 ) => {
   const messageContent = message.fileMetadata.appData.content;
@@ -230,8 +238,8 @@ export const uploadChatMessage = async (
           useAppNotification: true,
           appNotificationOptions: {
             appId: appId,
-            typeId: message.fileMetadata.appData.groupId as string,
-            tagId: getNewId(),
+            typeId: message.fileMetadata.appData.groupId || getNewId(),
+            tagId: message.fileMetadata.appData.uniqueId || getNewId(),
             silent: false,
           },
         }
@@ -258,6 +266,28 @@ export const uploadChatMessage = async (
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+
+  if (!files?.length && linkPreviews) {
+    // We only support link previews when there is no media
+    const descriptorContent = JSON.stringify(
+      linkPreviews.map((preview) => {
+        return {
+          url: preview.url,
+          hasImage: !!preview.imageUrl,
+          imageWidth: preview.imageWidth,
+          imageHeight: preview.imageHeight,
+        } as LinkPreviewDescriptor;
+      })
+    );
+
+    payloads.push({
+      key: CHAT_LINKS_PAYLOAD_KEY,
+      payload: new Blob([stringToUint8Array(JSON.stringify(linkPreviews))], {
+        type: 'application/json',
+      }),
+      descriptorContent,
+    });
+  }
 
   for (let i = 0; files && i < files?.length; i++) {
     const payloadKey = `${CHAT_MESSAGE_PAYLOAD_KEY}${i}`;
@@ -402,16 +432,9 @@ export const updateChatMessage = async (
 
 export const hardDeleteChatMessage = async (
   dotYouClient: DotYouClient,
-  message: HomebaseFile<ChatMessage>,
-  recipients: string[],
-  deleteForEveryone?: boolean
+  message: HomebaseFile<ChatMessage>
 ) => {
-  return await deleteFile(
-    dotYouClient,
-    ChatDrive,
-    message.fileId,
-    deleteForEveryone ? recipients : []
-  );
+  return await deleteFile(dotYouClient, ChatDrive, message.fileId, []);
 };
 
 export const softDeleteChatMessage = async (
@@ -440,6 +463,7 @@ export const softDeleteChatMessage = async (
 
   message.fileMetadata.versionTag = runningVersionTag;
   message.fileMetadata.appData.content.message = '';
+  message.fileMetadata.appData.content.authorOdinId = message.fileMetadata.senderOdinId;
   return await updateChatMessage(dotYouClient, message, deleteForEveryone ? recipients : []);
 };
 

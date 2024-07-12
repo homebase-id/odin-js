@@ -91,7 +91,6 @@ const CircleDialog = ({
                   description: e.target.value,
                 });
               }}
-              required
             />
           </div>
 

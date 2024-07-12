@@ -5,11 +5,11 @@ import {
   AclSummary,
   Exclamation,
   ExtensionThumbnail,
+  HybridLink,
   Trash,
   bytesToSize,
   t,
 } from '@youfoundation/common-app';
-import { Clipboard } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { Download, Image } from '@youfoundation/common-app';
 import {
@@ -46,6 +46,7 @@ export const FileCard = ({
     'image/gif',
     'image/heic',
   ].includes(contentType);
+  const driveRoot = `/owner/drives/${targetDrive.alias}_${targetDrive.type}`;
 
   return (
     <div
@@ -103,7 +104,12 @@ export const FileCard = ({
       </div>
 
       <FileTimestamps file={file} className={isRow ? 'flex w-40 flex-row gap-2' : ''} />
-      <FileFileId fileId={file.fileId} className={isRow ? 'mr-auto w-80' : 'w-full'} />
+      <FileIds
+        file={file}
+        isRow={isRow}
+        className={isRow ? 'mr-auto w-80' : 'w-full'}
+        driveRoot={driveRoot}
+      />
       <FileState file={file} className={isRow ? 'absolute right-2 top-2' : ''} />
     </div>
   );
@@ -277,20 +283,40 @@ const FileTimestamps = ({
   );
 };
 
-const FileFileId = ({ fileId, className }: { fileId: string; className?: string }) => {
+const FileIds = ({
+  file,
+  className,
+  isRow,
+  driveRoot,
+}: {
+  file: HomebaseFile<string> | DeletedHomebaseFile<string>;
+  className?: string;
+  isRow?: boolean;
+  driveRoot?: string;
+}) => {
+  const IdWrapper = (label: string, id: string) => {
+    return (
+      <HybridLink
+        className={`relative flex ${isRow ? 'flex-row items-center gap-2' : 'flex-col'} group justify-between`}
+        href={`${driveRoot}/${id}`}
+      >
+        <span className="flex-shrink-0 text-sm">{label}:</span>
+        <p className="ml-auto bg-transparent font-mono text-xs text-slate-400 group-hover:underline">
+          {id}
+        </p>
+      </HybridLink>
+    );
+  };
+
   return (
-    <div className={`relative ${className || ''}`}>
-      <input readOnly className="w-full bg-transparent pl-6 text-sm" value={fileId} />
-      <div className="absolute bottom-0 left-0 top-0 flex flex-col justify-center">
-        <ActionButton
-          onClick={() => navigator.clipboard.writeText(fileId)}
-          type="mute"
-          size="none"
-          className="opacity-60 hover:opacity-100"
-        >
-          <Clipboard className="h-4 w-4" />
-        </ActionButton>
-      </div>
+    <div className={`${className || ''}`}>
+      {IdWrapper(t('File'), file.fileId)}
+      {file.fileMetadata.globalTransitId
+        ? IdWrapper(t('Global'), file.fileMetadata.globalTransitId)
+        : null}
+      {file.fileMetadata.appData.uniqueId
+        ? IdWrapper(t('Unique'), file.fileMetadata.appData.uniqueId)
+        : null}
     </div>
   );
 };

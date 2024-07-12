@@ -12,3 +12,5 @@ export * from './Video/VideoSegmenterFfmpeg';
 export * from './MediaProvider';
 export * from './ImageProvider';
 export * from './VideoProvider';
+
+export * from './Link/LinkPreviewProvider';
