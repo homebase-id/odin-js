@@ -146,8 +146,8 @@ export const uploadMail = async (
           useAppNotification: true,
           appNotificationOptions: {
             appId: appId,
-            typeId: conversation.fileMetadata.appData.uniqueId as string,
-            tagId: getNewId(),
+            typeId: conversation.fileMetadata.appData.groupId || getNewId(),
+            tagId: conversation.fileMetadata.appData.uniqueId || getNewId(),
             silent: false,
           },
         }

@@ -162,7 +162,7 @@ self.addEventListener('notificationclick', (event) => {
         event.notification?.data?.options?.typeId
       ) {
         return {
-          pathToOpen: `/apps/mail/${event.notification?.data?.options?.typeId}`,
+          pathToOpen: `/apps/mail/inbox/${event.notification?.data?.options?.typeId}`,
         };
       }
 

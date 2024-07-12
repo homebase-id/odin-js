@@ -133,7 +133,7 @@ const CircleCardLink = ({ circleDef }: { circleDef: CircleDefinition }) => {
       description={
         isSystemCircle
           ? t('This is a built-in circle, that contains all your connections.')
-          : circleDef.description
+          : circleDef.description || ' '
       }
       isDisabled={circleDef.disabled}
       href={`/owner/circles/${circleDef.id ? encodeURIComponent(circleDef.id) : ''}`}

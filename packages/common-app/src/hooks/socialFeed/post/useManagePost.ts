@@ -23,6 +23,7 @@ import {
 import { useDotYouClient } from '../../auth/useDotYouClient';
 import { getRichTextFromString } from '../../../helpers/richTextHelper';
 import { TransitUploadResult } from '@youfoundation/js-lib/peer';
+import { LinkPreview } from '@youfoundation/js-lib/media';
 
 export const useManagePost = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
@@ -33,12 +34,14 @@ export const useManagePost = () => {
     odinId,
     channelId,
     mediaFiles,
+    linkPreviews,
     onUpdate,
   }: {
     postFile: NewHomebaseFile<PostContent> | HomebaseFile<PostContent>;
     odinId?: string;
     channelId: string;
     mediaFiles?: (NewMediaFile | MediaFile)[];
+    linkPreviews?: LinkPreview[];
     onUpdate?: (progress: number) => void;
   }) => {
     return new Promise<TransitUploadResult | UploadResult>((resolve, reject) => {
@@ -71,6 +74,7 @@ export const useManagePost = () => {
               odinId,
               channelId,
               mediaFiles,
+              linkPreviews,
               onVersionConflict
             ).then((result) => {
               if (result) resolve(result);
@@ -87,6 +91,7 @@ export const useManagePost = () => {
         odinId,
         channelId,
         mediaFiles,
+        linkPreviews,
         onVersionConflict,
         onUpdate
       )
