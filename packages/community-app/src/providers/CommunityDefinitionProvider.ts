@@ -4,6 +4,7 @@ const OdinBlob: typeof Blob =
 import {
   ApiType,
   DEFAULT_PAYLOAD_KEY,
+  deleteFile,
   DotYouClient,
   ensureDrive,
   FileQueryParams,
@@ -187,7 +188,7 @@ export const saveCommunity = async (
   return result;
 };
 
-const getCommunityDefinition = async (
+export const getCommunityDefinition = async (
   dotYouClient: DotYouClient,
   communityId: string
 ): Promise<HomebaseFile<CommunityDefinition> | undefined> => {
@@ -216,6 +217,18 @@ const getCommunityDefinition = async (
   }
 
   return;
+};
+
+export const removeCommunityDefinition = async (
+  dotYouClient: DotYouClient,
+  community: HomebaseFile<CommunityDefinition>
+) => {
+  if (!community.fileMetadata.appData.uniqueId) throw new Error('Community unique id is not set');
+  return await deleteFile(
+    dotYouClient,
+    getTargetDriveFromCommunityId(community.fileMetadata.appData.uniqueId as string),
+    community.fileId
+  );
 };
 
 // Helpers
