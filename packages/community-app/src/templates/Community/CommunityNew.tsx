@@ -113,7 +113,7 @@ export const NewCommunity = () => {
             <div className="flex flex-row flex-wrap gap-2">
               {newRecipients.map((recipient, index) => (
                 <div
-                  className="flex flex-row items-center gap-1 rounded-lg bg-primary/20 px-1 py-1"
+                  className="mb-5 flex flex-row items-center gap-1 rounded-lg bg-primary/20 px-1 py-1"
                   key={recipient.odinId || index}
                 >
                   <ConnectionImage odinId={recipient.odinId} size="xs" />
@@ -129,7 +129,7 @@ export const NewCommunity = () => {
               ))}
             </div>
 
-            <div className="my-5 flex flex-col gap-2">
+            <div className="mb-5 flex flex-col gap-2">
               <Input
                 onChange={(e) => {
                   e.preventDefault();
