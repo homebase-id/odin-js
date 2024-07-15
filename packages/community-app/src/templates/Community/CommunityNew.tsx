@@ -91,7 +91,7 @@ export const NewCommunity = () => {
   return (
     <ErrorBoundary>
       <form
-        className="flex h-full items-center justify-center p-5"
+        className="flex h-full w-full items-center justify-center p-5"
         onSubmit={(e) => {
           e.preventDefault();
           doCreate();

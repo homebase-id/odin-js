@@ -1,4 +1,4 @@
-import { useParams, useMatch } from 'react-router-dom';
+import { useParams, useMatch, Link } from 'react-router-dom';
 
 import { CommunityDetail } from './CommunityDetail';
 
@@ -6,6 +6,8 @@ import { ROOT_PATH } from '../../app/App';
 import {
   ActionLink,
   COMMUNITY_APP_ID,
+  ConnectionImage,
+  ConnectionName,
   ErrorBoundary,
   ExtendPermissionDialog,
   Plus,
@@ -21,6 +23,9 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useCommunities } from '../../hooks/community/useCommunities';
 import { NewCommunity } from './CommunityNew';
+import { useCommunityChannels } from '../../hooks/community/channels/useCommunityChannels';
+import { CommunityChannel } from '../../providers/CommunityProvider';
+import { useCommunity } from '../../hooks/community/useCommunity';
 
 export const COMMUNITY_ROOT = ROOT_PATH;
 
@@ -47,9 +52,14 @@ export const CommunityHome = () => {
       />
       <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`}>
         <CommunitySideNav isOnline={false} />
-        <div className="h-full w-full flex-grow bg-background">
-          {isCreateNew ? <NewCommunity /> : <CommunityDetail communityId={communityKey} />}
-        </div>
+        {isCreateNew ? (
+          <NewCommunity />
+        ) : (
+          <>
+            <CommunitySidebar />
+            <CommunityDetail communityId={communityKey} />
+          </>
+        )}
       </div>
     </>
   );
@@ -158,5 +168,94 @@ const CommunityListItem = ({
         {community.fileMetadata.appData.content.title.slice(0, 2)}
       </ActionLink>
     </div>
+  );
+};
+
+const CommunitySidebar = () => {
+  const { communityKey, channelOrDmKey } = useParams();
+  const {
+    data: community,
+    isLoading,
+    isFetched,
+  } = useCommunity({ communityId: communityKey }).fetch;
+
+  const communityId = community?.fileMetadata.appData.uniqueId;
+  const recipients = community?.fileMetadata.appData.content?.recipients;
+
+  const isActive = !!useMatch({ path: `${COMMUNITY_ROOT}/${communityId}` });
+
+  const { data: communityChannels } = useCommunityChannels({ communityId }).fetch;
+
+  if (!communityId || isLoading || !community)
+    return (
+      <div className="flex h-full flex-grow flex-col items-center justify-center">
+        <p className="text-4xl">Homebase Community</p>
+      </div>
+    );
+
+  return (
+    <div
+      className={`fixed ${isActive ? 'translate-x-full' : 'translate-x-0'} -left-full h-[100dvh] w-full bg-page-background transition-transform lg:relative lg:left-0 lg:max-w-xs lg:translate-x-0 lg:border-r lg:shadow-inner`}
+    >
+      <div className="absolute inset-0 flex flex-col gap-5 overflow-auto px-2 py-5">
+        <p className="text-xl font-semibold">{community.fileMetadata.appData.content?.title}</p>
+
+        <div className="flex flex-col gap-1">
+          <h2 className="px-1">{t('Channels')}</h2>
+          {communityChannels?.map((channel) => (
+            <ChannelItem communityId={communityId} channel={channel} key={channel.fileId} />
+          ))}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <h2 className="px-1">{t('Direct messages')}</h2>
+          {recipients?.map((recipient) => (
+            <DirectMessageItem communityId={communityId} recipient={recipient} key={recipient} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ChannelItem = ({
+  communityId,
+  channel,
+}: {
+  communityId: string;
+  channel: HomebaseFile<CommunityChannel>;
+}) => {
+  const channelId = channel.fileMetadata.appData.uniqueId;
+  const href = `${COMMUNITY_ROOT}/${communityId}/${channelId}`;
+  const isActive = !!useMatch({ path: href });
+
+  return (
+    <Link
+      to={`${COMMUNITY_ROOT}/${communityId}/${channelId}`}
+      className={`flex flex-row items-center gap-1 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
+    >
+      # {channel.fileMetadata.appData.content?.title}
+    </Link>
+  );
+};
+
+const DirectMessageItem = ({
+  communityId,
+  recipient,
+}: {
+  communityId: string;
+  recipient: string;
+}) => {
+  const href = `${COMMUNITY_ROOT}/${communityId}/${recipient}`;
+  const isActive = !!useMatch({ path: href });
+
+  return (
+    <Link
+      to={`${COMMUNITY_ROOT}/${communityId}/${recipient}`}
+      className={`flex flex-row items-center gap-1 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
+    >
+      <ConnectionImage odinId={recipient} size="xxs" />
+      <ConnectionName odinId={recipient} />
+    </Link>
   );
 };

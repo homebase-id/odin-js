@@ -1,16 +1,34 @@
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
-import { ConnectionImage, ConnectionName, t } from '@youfoundation/common-app';
+import {
+  ActionLink,
+  ChevronLeft,
+  DialogWrapper,
+  ErrorBoundary,
+  usePortal,
+} from '@youfoundation/common-app';
+import { useParams } from 'react-router-dom';
+import { useState } from 'react';
 import { COMMUNITY_ROOT } from './CommunityHome';
-import { Link, useMatch } from 'react-router-dom';
-import { useCommunityChannels } from '../../hooks/community/channels/useCommunityChannels';
 import { CommunityChannel } from '../../providers/CommunityProvider';
+import { useCommunityChannel } from '../../hooks/community/channels/useCommunityChannel';
+import { createPortal } from 'react-dom';
+import { MessageComposer } from '../../components/Community/Message/MessageComposer';
+import { CommunityMessage } from '../../providers/CommunityMessageProvider';
 
 export const CommunityDetail = ({ communityId }: { communityId: string | undefined }) => {
   const { data: community, isLoading, isFetched } = useCommunity({ communityId }).fetch;
+  const { channelOrDmKey } = useParams();
 
-  if (!communityId || isLoading || (!community && isFetched))
+  const { data: channelDsr, isFetched: isChannelFetched } = useCommunityChannel({
+    communityId: communityId,
+    channelId: channelOrDmKey,
+  }).fetch;
+
+  const [replyMsg, setReplyMsg] = useState<HomebaseFile<CommunityMessage> | undefined>();
+
+  if (!communityId || isLoading || (!community && isFetched) || (!channelDsr && isChannelFetched))
     return (
       <div className="flex h-full flex-grow flex-col items-center justify-center">
         <p className="text-4xl">Homebase Community</p>
@@ -18,87 +36,280 @@ export const CommunityDetail = ({ communityId }: { communityId: string | undefin
     );
 
   return (
-    <div>
-      <CommunitySidebar community={community || undefined} />
-    </div>
-  );
-};
-
-const CommunitySidebar = ({ community }: { community?: HomebaseFile<CommunityDefinition> }) => {
-  const communityId = community?.fileMetadata.appData.uniqueId;
-  const recipients = community?.fileMetadata.appData.content?.recipients;
-
-  const isActive = !!useMatch({ path: `${COMMUNITY_ROOT}/${communityId}` });
-
-  const { data: communityChannels } = useCommunityChannels({ communityId }).fetch;
-
-  if (!community || !communityId) {
-    return null;
-  }
-
-  return (
-    <div
-      className={`fixed ${isActive ? 'translate-x-full' : 'translate-x-0'} -left-full h-[100dvh] w-full bg-page-background transition-transform lg:relative lg:left-0 lg:max-w-xs lg:translate-x-0 lg:border-r lg:shadow-inner`}
-    >
-      <div className="absolute inset-0 flex flex-col gap-5 overflow-auto px-2 py-5">
-        <p className="text-xl font-semibold">{community.fileMetadata.appData.content?.title}</p>
-
-        <div className="flex flex-col gap-1">
-          <h2 className="px-1">{t('Channels')}</h2>
-          {communityChannels?.map((channel) => (
-            <ChannelItem communityId={communityId} channel={channel} key={channel.fileId} />
-          ))}
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <h2 className="px-1">{t('Direct messages')}</h2>
-          {recipients?.map((recipient) => (
-            <DirectMessageItem communityId={communityId} recipient={recipient} key={recipient} />
-          ))}
-        </div>
+    <ErrorBoundary>
+      <div className="flex h-full flex-grow flex-col overflow-hidden">
+        {/* <CommunitySidebar community={community || undefined} /> */}
+        <CommunityChannelHeader community={community || undefined} channel={channelDsr} />
+        <ErrorBoundary>
+          <div className="flex w-full flex-grow flex-col-reverse overflow-auto bg-background p-2 sm:p-5"></div>
+          {/* <CommunityHistory
+          community={community || undefined}
+          channel={channelDsr || undefined}
+          setReplyMsg={setReplyMsg}
+          // setIsEmptyChat={setIsEmptyChat}
+        /> */}
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <MessageComposer
+            community={community || undefined}
+            channel={channelDsr || undefined}
+            replyMsg={replyMsg}
+            clearReplyMsg={() => setReplyMsg(undefined)}
+            // onSend={onSend}
+            key={channelOrDmKey}
+          />
+        </ErrorBoundary>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 };
 
-const ChannelItem = ({
-  communityId,
+const CommunityChannelHeader = ({
+  community,
   channel,
 }: {
-  communityId: string;
-  channel: HomebaseFile<CommunityChannel>;
+  community?: HomebaseFile<CommunityDefinition>;
+  channel?: HomebaseFile<CommunityChannel>;
 }) => {
-  const channelId = channel.fileMetadata.appData.uniqueId;
-  const href = `${COMMUNITY_ROOT}/${communityId}/${channelId}`;
-  const isActive = !!useMatch({ path: href });
+  const communityId = community?.fileMetadata.appData.uniqueId;
+
+  const [showChatInfo, setShowChatInfo] = useState<boolean>(false);
 
   return (
-    <Link
-      to={`${COMMUNITY_ROOT}/${communityId}/${channelId}`}
-      className={`flex flex-row items-center gap-1 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
-    >
-      # {channel.fileMetadata.appData.content?.title}
-    </Link>
+    <>
+      {/* <ErrorNotification error={clearChatError || deleteChatError} /> */}
+      <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
+        <ActionLink className="lg:hidden" type="mute" href={`${COMMUNITY_ROOT}/${communityId}`}>
+          <ChevronLeft className="h-5 w-5" />
+        </ActionLink>
+
+        <a
+          onClick={() => setShowChatInfo(true)}
+          className="flex cursor-pointer flex-row items-center gap-2"
+        >
+          # {channel?.fileMetadata.appData.content?.title}
+          {/* {singleRecipient ? (
+            <ConnectionImage
+              odinId={singleRecipient}
+              className="border border-neutral-200 dark:border-neutral-800"
+              size="sm"
+            />
+          ) : withYourself ? (
+            <div className="h-[3rem] w-[3rem] flex-shrink-0">
+              <OwnerImage className="border border-neutral-200 dark:border-neutral-800" size="sm" />
+            </div>
+          ) : (
+            <div className="rounded-full bg-primary/20 p-3">
+              <Persons className="h-6 w-6" />
+            </div>
+          )}
+          {singleRecipient ? (
+            <ConnectionName odinId={singleRecipient} />
+          ) : withYourself ? (
+            <>
+              <OwnerName />
+              <span className="text-sm text-foreground/50">({t('you')})</span>
+            </>
+          ) : (
+            conversation?.title
+          )} */}
+        </a>
+
+        {/* {conversationDsr && !withYourself ? (
+          <ActionGroup
+            options={[
+              {
+                label: t('Chat info'),
+                onClick: () => setShowChatInfo(true),
+              },
+              {
+                label: t('Delete'),
+                confirmOptions: {
+                  title: t('Delete chat'),
+                  buttonText: t('Delete'),
+                  body: t('Are you sure you want to delete this chat? All messages will be lost.'),
+                },
+                onClick: () => {
+                  deleteChat({ conversation: conversationDsr });
+                },
+              },
+              {
+                label: t('Clear'),
+                confirmOptions: {
+                  title: t('Clear chat'),
+                  buttonText: t('Clear'),
+                  body: t(
+                    'Are you sure you want to clear all messages from this chat? All messages will be lost.'
+                  ),
+                },
+                onClick: () => {
+                  clearChat({ conversation: conversationDsr });
+                },
+              },
+              // {label: t('Mute'), onClick: () => {}},
+            ]}
+            className="ml-auto"
+            type={'mute'}
+            size="square"
+          >
+            <>
+              <ChevronDown className="h-5 w-5" />
+              <span className="sr-only ml-1">{t('More')}</span>
+            </>
+          </ActionGroup>
+        ) : null} */}
+      </div>
+
+      {showChatInfo && channel ? (
+        <ChannelInfo channel={channel} onClose={() => setShowChatInfo(false)} />
+      ) : null}
+    </>
   );
 };
 
-const DirectMessageItem = ({
-  communityId,
-  recipient,
+const ChannelInfo = ({
+  channel,
+  onClose,
 }: {
-  communityId: string;
-  recipient: string;
+  channel: HomebaseFile<CommunityChannel>;
+  onClose: () => void;
 }) => {
-  const href = `${COMMUNITY_ROOT}/${communityId}/${recipient}`;
-  const isActive = !!useMatch({ path: href });
+  const target = usePortal('modal-container');
 
-  return (
-    <Link
-      to={`${COMMUNITY_ROOT}/${communityId}/${recipient}`}
-      className={`flex flex-row items-center gap-1 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
-    >
-      <ConnectionImage odinId={recipient} size="xxs" />
-      <ConnectionName odinId={recipient} />
-    </Link>
+  // const identity = useDotYouClient().getIdentity();
+  const channelContent = channel.fileMetadata.appData.content;
+  // const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
+
+  // const withYourself = conversation?.fileMetadata.appData.uniqueId === ConversationWithYourselfId;
+  // const recipient = recipients.length === 1 ? recipients[0] : undefined;
+
+  // const [isEditTitle, setIsEditTitle] = useState<boolean>(false);
+  // const [newTitle, setNewTitle] = useState<string>(channelContent.title || '');
+
+  // const { mutate: updateConversation, status: updateStatus } = useConversation().update;
+  // const doSubmit = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   conversation.fileMetadata.appData.content.title = newTitle;
+  //   updateConversation({
+  //     conversation,
+  //     distribute: true,
+  //   });
+  // };
+
+  // useEffect(() => {
+  //   updateStatus === 'success' && setIsEditTitle(false);
+  // }, [updateStatus]);
+
+  const dialog = (
+    <DialogWrapper onClose={onClose} title={`${channelContent.title}`}>
+      <></>
+      {/* <div>
+        <div className="flex flex-col items-center gap-4">
+          {recipient ? (
+            <ConnectionImage
+              odinId={recipient}
+              className="h-24 w-24 border border-neutral-200 dark:border-neutral-800"
+              size="custom"
+            />
+          ) : withYourself ? (
+            <OwnerImage
+              className="h-24 w-24 border border-neutral-200 dark:border-neutral-800"
+              size="custom"
+            />
+          ) : (
+            <div className="rounded-full bg-primary/20 p-7">
+              <Persons className="h-10 w-10" />
+            </div>
+          )}
+
+          <>
+            {recipient ? (
+              <p className="text-center text-xl">
+                <ConnectionName odinId={recipient} />
+                <small className="flex flex-row gap-2 text-sm">
+                  <House className="h-5 w-5" />
+                  <a
+                    href={new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}
+                    rel="noreferrer noopener"
+                    target="_blank"
+                    className="text-primary hover:underline"
+                  >
+                    {recipient}
+                  </a>
+                </small>
+              </p>
+            ) : withYourself ? (
+              <p className="text-center text-xl">
+                <OwnerName />
+                <span className="text-sm text-foreground/50">({t('you')})</span>
+              </p>
+            ) : (
+              <>
+                {isEditTitle ? (
+                  <form className="flex flex-col items-center gap-2" onSubmit={doSubmit}>
+                    <Input
+                      required
+                      defaultValue={conversationContent?.title}
+                      onChange={(e) => setNewTitle(e.currentTarget.value)}
+                    />
+                    <span className="flex flex-row">
+                      <ActionButton
+                        type="mute"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setIsEditTitle(false);
+                        }}
+                      >
+                        {t('Cancel')}
+                      </ActionButton>
+                      <ActionButton type="mute" icon={Save}>
+                        {t('Save')}
+                      </ActionButton>
+                    </span>
+                  </form>
+                ) : (
+                  <a
+                    onClick={() => setIsEditTitle(true)}
+                    className="flex cursor-pointer flex-row items-center gap-2"
+                  >
+                    <span className="text-center text-xl">{conversationContent?.title}</span>
+                    <Pencil className="h-5 w-5" />
+                  </a>
+                )}
+              </>
+            )}
+          </>
+        </div>
+      </div>
+      {recipients?.length > 1 ? (
+        <div className="mt-10">
+          <p className="mb-4 text-lg">{t('Recipients')}</p>
+          <div className="flex flex-col gap-4">
+            {recipients.map((recipient) => (
+              <a
+                href={`${new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}/owner/connections/${recipient}`}
+                rel="noreferrer noopener"
+                target="_blank"
+                className="group flex flex-row items-center gap-3"
+                key={recipient}
+              >
+                <ConnectionImage
+                  odinId={recipient}
+                  className="border border-neutral-200 dark:border-neutral-800"
+                  size="sm"
+                />
+                <div className="flex flex-col group-hover:underline">
+                  <ConnectionName odinId={recipient} />
+                  <p>{recipient}</p>
+                </div>
+                <Arrow className="ml-auto h-5 w-5" />
+              </a>
+            ))}
+          </div>
+        </div>
+      ) : null} */}
+    </DialogWrapper>
   );
+
+  return createPortal(dialog, target);
 };

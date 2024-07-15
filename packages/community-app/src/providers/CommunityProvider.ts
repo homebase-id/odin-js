@@ -4,6 +4,7 @@ import {
   FileQueryParams,
   GetBatchQueryResultOptions,
   getContentFromHeaderOrPayload,
+  getFileHeaderByUniqueId,
   HomebaseFile,
   queryBatch,
   SecurityGroupType,
@@ -84,6 +85,21 @@ export const getCommunityChannels = async (
     ).filter(Boolean) as HomebaseFile<CommunityChannel>[]) || [];
 
   return [COMMUNITY_GENERAL_CHANNEL, ...serverChannels];
+};
+
+export const getCommunityChannel = async (
+  dotYouClient: DotYouClient,
+  communityId: string,
+  channelId: string
+): Promise<HomebaseFile<CommunityChannel> | undefined> => {
+  if (channelId === COMMUNITY_DEFAULT_GEENRAL_ID) return COMMUNITY_GENERAL_CHANNEL;
+
+  const targetDrive = getTargetDriveFromCommunityId(communityId);
+
+  const dsr = await getFileHeaderByUniqueId(dotYouClient, targetDrive, channelId);
+
+  if (!dsr) return undefined;
+  return dsrToCommunityChannel(dotYouClient, dsr, targetDrive, true);
 };
 
 // Helpers
