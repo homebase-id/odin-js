@@ -66,7 +66,8 @@ function App() {
             }
           >
             <Route index={true} element={<CommunityHome />} />
-            <Route path={':conversationKey'} element={<CommunityHome />} />
+            <Route path={':communityKey'} element={<CommunityHome />} />
+            <Route path={':communityKey/:channelOrDmKey'} element={<CommunityHome />} />
             <Route path={'new'} element={<CommunityHome />} />
             {/* <Route path={':conversationKey/:chatMessageKey'} element={<ChatHome />} />
             <Route path={':conversationKey/:chatMessageKey/:mediaKey'} element={<ChatHome />} /> */}

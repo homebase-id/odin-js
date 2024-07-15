@@ -1,0 +1,21 @@
+import { useQuery } from '@tanstack/react-query';
+import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { getCommunityChannels } from '../../../providers/CommunityProvider';
+
+export const useCommunityChannels = (props: { communityId?: string }) => {
+  const { communityId } = props;
+  const dotYouClient = useDotYouClientContext();
+
+  const fetchChannels = async (communityId: string) => {
+    // Fetch channels
+    return await getCommunityChannels(dotYouClient, communityId);
+  };
+
+  return {
+    fetch: useQuery({
+      queryKey: ['community-channels', communityId],
+      queryFn: async () => fetchChannels(communityId as string),
+      enabled: !!communityId,
+    }),
+  };
+};

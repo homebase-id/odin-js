@@ -7,7 +7,7 @@ import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 
 interface ImageProps {
   className?: string;
-  size?: 'xs' | 'sm' | 'md' | 'custom';
+  size?: 'xxs' | 'xs' | 'sm' | 'md' | 'custom';
 }
 
 interface ConnectionImageProps extends ImageProps {
@@ -63,13 +63,15 @@ export const ConnectionImage = ({ odinId, className, size }: ConnectionImageProp
         <img
           src={`${host}/pub/image`}
           className={`${
-            size === 'xs'
-              ? 'h-[2rem] w-[2rem]'
-              : size === 'sm'
-                ? 'h-[3rem] w-[3rem]'
-                : size === 'md'
-                  ? 'h-[5rem] w-[5rem]'
-                  : ''
+            size === 'xxs'
+              ? 'h-[1.5rem] w-[1.5rem]'
+              : size === 'xs'
+                ? 'h-[2rem] w-[2rem]'
+                : size === 'sm'
+                  ? 'h-[3rem] w-[3rem]'
+                  : size === 'md'
+                    ? 'h-[5rem] w-[5rem]'
+                    : ''
           } rounded-full ${className ?? ''}`}
           alt={`${odinId}`}
           title={`${odinId}`}
