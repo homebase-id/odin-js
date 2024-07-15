@@ -18,12 +18,13 @@ import {
 } from '../../providers/CommunityDefinitionProvider';
 import { COMMUNITY_APP_ID, t } from '@youfoundation/common-app';
 import { COMMUNITY_ROOT } from '../../templates/Community/CommunityHome';
+import { getExtendAppRegistrationParams } from '@youfoundation/js-lib/auth';
 
 type useCommunityProps = {
   communityId?: string;
 };
 
-const getExtendAuthorizationUrl = (
+const ensureNewDriveAndPermission = (
   identity: string,
   name: string,
   description: string,
@@ -48,15 +49,16 @@ const getExtendAuthorizationUrl = (
     },
   ];
 
-  const params = {
-    appId: COMMUNITY_APP_ID,
-    d: JSON.stringify(drives),
-  };
+  const params = getExtendAppRegistrationParams(
+    COMMUNITY_APP_ID,
+    drives,
+    undefined,
+    undefined,
+    returnUrl
+  );
 
   const host = new DotYouClient({ identity: identity || undefined, api: ApiType.App }).getRoot();
-  return `${host}/owner/appupdate?${stringifyToQueryParams(
-    params
-  )}&return=${encodeURIComponent(returnUrl)}`;
+  return `${host}/owner/appupdate?${stringifyToQueryParams(params)}`;
 };
 
 export const useCommunity = ({ communityId }: useCommunityProps) => {
@@ -76,12 +78,12 @@ export const useCommunity = ({ communityId }: useCommunityProps) => {
       if (!communityDef.fileMetadata.appData.uniqueId)
         throw new Error('Community unique id is not set');
 
-      const host = dotYouClient.getRoot();
+      const host = dotYouClient.getIdentity();
       const returnUrl = `${COMMUNITY_ROOT}?new=${JSON.stringify(communityDef)}`;
 
       const targetDrive = getTargetDriveFromCommunityId(communityDef.fileMetadata.appData.uniqueId);
 
-      window.location.href = getExtendAuthorizationUrl(
+      window.location.href = ensureNewDriveAndPermission(
         host,
         communityDef.fileMetadata.appData.content.title,
         t('Drive for "{0}" community', communityDef.fileMetadata.appData.content.title),

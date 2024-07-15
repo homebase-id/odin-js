@@ -1,3 +1,4 @@
+import { ALL_CONNECTIONS_CIRCLE_ID } from '../../../network';
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { cbcDecrypt } from '../../helpers/AesEncrypt';
 import { base64ToUint8Array, stringToUint8Array, uint8ArrayToBase64 } from '../../helpers/DataUtil';
@@ -27,6 +28,14 @@ export interface AppAuthorizationParams {
   o?: string;
 }
 
+export interface AppDriveAuthorizationParams {
+  a: string;
+  t: string;
+  n: string;
+  d: string;
+  p: number;
+}
+
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidToken = async (dotYouClient: DotYouClient): Promise<boolean | null> => {
   const client = dotYouClient.createAxiosClient();
@@ -46,8 +55,8 @@ export const getRegistrationParams = async (
   appId: string,
   permissionKeys: number[] | undefined,
   circlePermissionKeys: number[] | undefined,
-  drives: { a: string; t: string; n: string; d: string; p: number }[],
-  circleDrives: { a: string; t: string; n: string; d: string; p: number }[] | undefined,
+  drives: AppDriveAuthorizationParams[],
+  circleDrives: AppDriveAuthorizationParams[] | undefined,
   circles: string[] | undefined,
   eccPublicKey: CryptoKey,
   host?: string,
@@ -85,6 +94,37 @@ export const getRegistrationParams = async (
     state: state || '',
     redirect_uri: returnUrl,
   };
+};
+
+interface AppAuthorizationExtendParams {
+  appId: string;
+
+  p: string | undefined;
+  d: string | undefined;
+
+  c: string | undefined;
+  cp?: string | undefined;
+  cd?: string | undefined;
+
+  return: string;
+}
+
+export const getExtendAppRegistrationParams = (
+  appId: string,
+  drives: AppDriveAuthorizationParams[],
+  permissionKeys: number[] | undefined,
+  needsAllConnected: boolean | undefined,
+  returnUrl: string
+): AppAuthorizationExtendParams => {
+  const params: AppAuthorizationExtendParams = {
+    appId: appId,
+    d: JSON.stringify(drives),
+    p: permissionKeys?.join(','),
+    c: needsAllConnected ? ALL_CONNECTIONS_CIRCLE_ID : undefined,
+    return: returnUrl,
+  };
+
+  return params;
 };
 
 export const exchangeDigestForToken = async (

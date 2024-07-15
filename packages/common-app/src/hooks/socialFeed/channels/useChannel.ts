@@ -20,6 +20,7 @@ import {
   TargetDrive,
 } from '@youfoundation/js-lib/core';
 import { fetchCachedPublicChannels } from '../post/cachedDataHelpers';
+import { getExtendAppRegistrationParams } from '@youfoundation/js-lib/auth';
 const FEED_ROOT_PATH = '/apps/feed';
 
 type useChannelsProps = {
@@ -27,7 +28,7 @@ type useChannelsProps = {
   channelId?: string;
 };
 
-const getExtendAuthorizationUrl = (
+const ensureNewDriveAndPermission = (
   identity: string,
   name: string,
   description: string,
@@ -52,15 +53,18 @@ const getExtendAuthorizationUrl = (
     },
   ];
 
-  const params = {
-    appId: FEED_APP_ID,
-    d: JSON.stringify(drives),
-  };
+  const params = getExtendAppRegistrationParams(
+    FEED_APP_ID,
+    drives,
+    undefined,
+    undefined,
+    returnUrl
+  );
+
+  // delete params.return;
 
   const host = new DotYouClient({ identity: identity || undefined, api: ApiType.App }).getRoot();
-  return `${host}/owner/appupdate?${stringifyToQueryParams(
-    params
-  )}&return=${encodeURIComponent(returnUrl)}`;
+  return `${host}/owner/appupdate?${stringifyToQueryParams(params)}`;
 };
 
 export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
@@ -129,12 +133,12 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
       if (!channelDef.fileMetadata.appData.uniqueId)
         throw new Error('Channel unique id is not set');
 
-      const host = dotYouClient.getRoot();
+      const host = dotYouClient.getIdentity();
       const returnUrl = `${FEED_ROOT_PATH}/channels?new=${JSON.stringify(channelDef)}`;
 
       const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);
 
-      window.location.href = getExtendAuthorizationUrl(
+      const extendUrl = ensureNewDriveAndPermission(
         host,
         channelDef.fileMetadata.appData.content.name,
         t('Drive for "{0}" channel posts', channelDef.fileMetadata.appData.content.name),
@@ -143,6 +147,8 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
         true,
         true
       );
+
+      window.location.href = extendUrl;
     };
 
     return await saveChannelDefinition(dotYouClient, { ...channelDef }, onMissingDrive);
