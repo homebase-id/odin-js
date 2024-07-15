@@ -90,8 +90,8 @@ export const useCommunity = (props?: useCommunityProps) => {
         t('Drive for "{0}" community', communityDef.fileMetadata.appData.content.title),
         targetDrive,
         returnUrl,
-        true,
-        true
+        false,
+        false
       );
     };
 
