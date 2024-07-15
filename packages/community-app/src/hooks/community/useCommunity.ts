@@ -61,7 +61,8 @@ const ensureNewDriveAndPermission = (
   return `${host}/owner/appupdate?${stringifyToQueryParams(params)}`;
 };
 
-export const useCommunity = ({ communityId }: useCommunityProps) => {
+export const useCommunity = (props?: useCommunityProps) => {
+  const { communityId } = props || {};
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
@@ -79,7 +80,7 @@ export const useCommunity = ({ communityId }: useCommunityProps) => {
         throw new Error('Community unique id is not set');
 
       const host = dotYouClient.getIdentity();
-      const returnUrl = `${COMMUNITY_ROOT}?new=${JSON.stringify(communityDef)}`;
+      const returnUrl = `${COMMUNITY_ROOT}/new?draft=${JSON.stringify(communityDef)}`;
 
       const targetDrive = getTargetDriveFromCommunityId(communityDef.fileMetadata.appData.uniqueId);
 
