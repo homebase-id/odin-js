@@ -58,9 +58,9 @@ const getExtendAuthorizationUrl = (
   };
 
   const host = new DotYouClient({ identity: identity || undefined, api: ApiType.App }).getRoot();
-  return `${host}/owner/appupdate?${stringifyToQueryParams(
-    params
-  )}&return=${encodeURIComponent(returnUrl)}`;
+  return `${host}/owner/appupdate?${stringifyToQueryParams(params)}&return=${encodeURIComponent(
+    returnUrl
+  )}`;
 };
 
 export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
@@ -129,7 +129,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
       if (!channelDef.fileMetadata.appData.uniqueId)
         throw new Error('Channel unique id is not set');
 
-      const host = dotYouClient.getRoot();
+      const host = dotYouClient.getIdentity();
       const returnUrl = `${FEED_ROOT_PATH}/channels?new=${JSON.stringify(channelDef)}`;
 
       const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);
