@@ -267,7 +267,7 @@ export const uploadChatMessage = async (
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
 
-  if (!files?.length && linkPreviews) {
+  if (!files?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
     const descriptorContent = JSON.stringify(
       linkPreviews.map((preview) => {

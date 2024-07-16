@@ -104,7 +104,7 @@ export const savePost = async <T extends PostContent>(
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
 
-  if (!newMediaFiles?.length && linkPreviews) {
+  if (!newMediaFiles?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
     const descriptorContent = JSON.stringify(
       linkPreviews.map((preview) => {
