@@ -82,20 +82,22 @@ export const LinkPreviewImage = ({
   if (!linkPreview.imageUrl) return null;
 
   return (
-    <img
-      src={linkPreview.imageUrl}
-      width={linkPreview.imageWidth}
-      height={linkPreview.imageHeight}
-      alt={linkPreview.url}
-      className={className}
-      style={
-        aspectRatio
-          ? {
-              aspectRatio: `${aspectRatio}`,
-            }
-          : undefined
-      }
-    />
+    <a href={linkPreview?.url} target="_blank" rel="noopener noreferrer">
+      <img
+        src={linkPreview.imageUrl}
+        width={linkPreview.imageWidth}
+        height={linkPreview.imageHeight}
+        alt={linkPreview.url}
+        className={className}
+        style={
+          aspectRatio
+            ? {
+                aspectRatio: `${aspectRatio}`,
+              }
+            : undefined
+        }
+      />
+    </a>
   );
 };
 
