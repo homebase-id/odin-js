@@ -1,5 +1,5 @@
 import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 import {
   HomebaseFile,
   NewHomebaseFile,
@@ -32,7 +32,8 @@ export const useCommunityMessage = (props?: {
 
   const sendMessage = async ({
     community,
-    channel,
+    // channel,
+    groupId,
     replyId,
     files,
     message,
@@ -41,7 +42,8 @@ export const useCommunityMessage = (props?: {
     userDate,
   }: {
     community: HomebaseFile<CommunityDefinition>;
-    channel: HomebaseFile<CommunityChannel>;
+    // channel: HomebaseFile<CommunityChannel>;
+    groupId?: string;
     replyId?: string;
     files?: NewMediaFile[];
     message: string;
@@ -61,10 +63,11 @@ export const useCommunityMessage = (props?: {
         created: userDate,
         appData: {
           uniqueId: newChatId,
-          tags: channel.fileMetadata.appData.uniqueId
-            ? [channel.fileMetadata.appData.uniqueId]
-            : undefined,
+          // tags: channel.fileMetadata.appData.uniqueId
+          //   ? [channel.fileMetadata.appData.uniqueId]
+          //   : undefined,
           // groupId: communityId, TODO: Should this be the community id or the channel id? or neither and just undefined
+          groupId,
           content: {
             message: message,
             deliveryStatus:

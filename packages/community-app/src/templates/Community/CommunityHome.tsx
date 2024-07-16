@@ -1,7 +1,7 @@
 import { useParams, useMatch, Link } from 'react-router-dom';
 
-import { CommunityDetail } from './CommunityDetail';
-
+import { CommunityDetail } from './CommunityChannelDetail';
+import { ReactNode } from 'react';
 import { ROOT_PATH } from '../../app/App';
 import {
   ActionLink,
@@ -27,11 +27,9 @@ import { useCommunityChannels } from '../../hooks/community/channels/useCommunit
 import { CommunityChannel } from '../../providers/CommunityProvider';
 import { useCommunity } from '../../hooks/community/useCommunity';
 
-export const COMMUNITY_ROOT = ROOT_PATH;
+export const COMMUNITY_ROOT = '/apps/community';
 
-export const CommunityHome = () => {
-  const { communityKey } = useParams();
-
+export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   const newCommunity = useMatch({ path: `${COMMUNITY_ROOT}/new` });
   const isCreateNew = !!newCommunity;
 
@@ -57,7 +55,7 @@ export const CommunityHome = () => {
         ) : (
           <>
             <CommunitySidebar />
-            <CommunityDetail communityId={communityKey} />
+            {children || null}
           </>
         )}
       </div>
@@ -241,12 +239,12 @@ const DirectMessageItem = ({
   communityId: string;
   recipient: string;
 }) => {
-  const href = `${COMMUNITY_ROOT}/${communityId}/${recipient}`;
+  const href = `${COMMUNITY_ROOT}/${communityId}/direct/${recipient}`;
   const isActive = !!useMatch({ path: href });
 
   return (
     <Link
-      to={`${COMMUNITY_ROOT}/${communityId}/${recipient}`}
+      to={href}
       className={`flex flex-row items-center gap-1 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
     >
       <ConnectionImage odinId={recipient} size="xxs" />

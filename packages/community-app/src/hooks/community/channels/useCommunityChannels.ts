@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 import { getCommunityChannels } from '../../../providers/CommunityProvider';
 
 export const useCommunityChannels = (props: { communityId?: string }) => {

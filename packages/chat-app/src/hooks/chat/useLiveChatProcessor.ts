@@ -27,7 +27,7 @@ import {
   stringGuidsEqual,
 } from '@youfoundation/js-lib/helpers';
 import { getConversationQueryOptions, useConversation } from './useConversation';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 import { ChatReactionFileType } from '../../providers/ChatReactionProvider';
 import { insertNewMessage, insertNewMessagesForConversation } from './useChatMessages';
 import { insertNewConversation } from './useConversations';

@@ -1,6 +1,6 @@
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { CommunityDefinition, getCommunities } from '../../providers/CommunityDefinitionProvider';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 import { useQuery } from '@tanstack/react-query';
 
 export const useCommunities = () => {
@@ -11,7 +11,7 @@ export const useCommunities = () => {
 
   return {
     all: useQuery({
-      queryKey: ['conversations'],
+      queryKey: ['communities'],
       queryFn: () => fetchConversations(),
       staleTime: 1000 * 60 * 5, // 5min before new conversations from another device are fetched on this one
     }),

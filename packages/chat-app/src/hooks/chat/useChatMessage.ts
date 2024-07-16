@@ -9,12 +9,12 @@ import {
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { updateChatMessage, uploadChatMessage } from '../../providers/ChatProvider';
 
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../providers/ConversationProvider';
 import { LinkPreview } from '@youfoundation/js-lib/media';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 
 export const useChatMessage = (props?: { messageId: string | undefined }) => {
   const dotYouClient = useDotYouClientContext();

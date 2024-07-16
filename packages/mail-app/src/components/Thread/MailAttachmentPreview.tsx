@@ -13,7 +13,7 @@ import {
 } from '@youfoundation/common-app';
 import { MailDrive } from '../../providers/MailProvider';
 import { useMailAttachment, useMailConversation } from '../../hooks/mail/useMailConversation';
-import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 import { OdinImage } from '@youfoundation/ui-lib';
 import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
 

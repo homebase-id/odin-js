@@ -17,13 +17,14 @@ import { createPortal } from 'react-dom';
 import { MessageComposer } from '../../components/Community/Message/MessageComposer';
 import { CommunityMessage } from '../../providers/CommunityMessageProvider';
 
-export const CommunityDetail = ({ communityId }: { communityId: string | undefined }) => {
+export const CommunityChannelDetail = () => {
+  const { communityKey, channelKey, dmKey } = useParams();
+  const communityId = communityKey;
   const { data: community, isLoading, isFetched } = useCommunity({ communityId }).fetch;
-  const { channelOrDmKey } = useParams();
 
   const { data: channelDsr, isFetched: isChannelFetched } = useCommunityChannel({
     communityId: communityId,
-    channelId: channelOrDmKey,
+    channelId: channelKey,
   }).fetch;
 
   const [replyMsg, setReplyMsg] = useState<HomebaseFile<CommunityMessage> | undefined>();
@@ -52,11 +53,11 @@ export const CommunityDetail = ({ communityId }: { communityId: string | undefin
         <ErrorBoundary>
           <MessageComposer
             community={community || undefined}
-            channel={channelDsr || undefined}
+            groupId={undefined} // Not sure if we need to set a groupId as channels would be volatile
             replyMsg={replyMsg}
             clearReplyMsg={() => setReplyMsg(undefined)}
             // onSend={onSend}
-            key={channelOrDmKey}
+            key={channelKey || dmKey}
           />
         </ErrorBoundary>
       </div>

@@ -21,7 +21,6 @@ import { useState, useEffect, useRef } from 'react';
 
 import { getNewId, isTouchDevice } from '@youfoundation/js-lib/helpers';
 import { LinkPreview } from '@youfoundation/js-lib/media';
-import { CommunityChannel } from '../../../providers/CommunityProvider';
 import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
@@ -31,13 +30,13 @@ const CHAT_DRAFTS_KEY = 'CHAT_LOCAL_DRAFTS';
 
 export const MessageComposer = ({
   community,
-  channel,
+  groupId,
   replyMsg,
   clearReplyMsg,
   onSend,
 }: {
   community: HomebaseFile<CommunityDefinition> | undefined;
-  channel: HomebaseFile<CommunityChannel> | undefined;
+  groupId: string | undefined;
   replyMsg: HomebaseFile<CommunityMessage> | undefined;
   clearReplyMsg: () => void;
   onSend?: () => void;
@@ -46,41 +45,32 @@ export const MessageComposer = ({
 
   const drafts = JSON.parse(localStorage.getItem(CHAT_DRAFTS_KEY) || '{}');
   const [message, setMessage] = useState<string | undefined>(
-    channel?.fileMetadata.appData.uniqueId
-      ? drafts[channel.fileMetadata.appData.uniqueId] || undefined
-      : undefined
+    groupId ? drafts[groupId] || undefined : undefined
   );
   const [files, setFiles] = useState<NewMediaFile[]>();
 
   useEffect(() => {
-    if (channel?.fileMetadata.appData.uniqueId) {
-      drafts[channel.fileMetadata.appData.uniqueId] = message;
+    if (groupId) {
+      drafts[groupId] = message;
       try {
         localStorage.setItem(CHAT_DRAFTS_KEY, JSON.stringify(drafts));
       } catch (e) {
         /* empty */
       }
     }
-  }, [channel, message]);
+  }, [groupId, message]);
 
   const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(message || '');
 
   const addError = useErrors().add;
   const { mutateAsync: sendMessage } = useCommunityMessage().send;
 
-  const channelContent = channel?.fileMetadata.appData.content;
   const doSend = async (forcedVal?: string) => {
     const trimmedVal = (forcedVal || message)?.trim();
     const replyId = replyMsg?.fileMetadata.appData.uniqueId;
     const newFiles = [...(files || [])];
 
-    if (
-      (!trimmedVal && !files?.length) ||
-      !channelContent ||
-      !channel.fileMetadata.appData.uniqueId ||
-      !community
-    )
-      return;
+    if ((!trimmedVal && !files?.length) || !community) return;
 
     // Clear internal state and allow excessive senders
     setMessage('');
@@ -91,7 +81,7 @@ export const MessageComposer = ({
     try {
       await sendMessage({
         community,
-        channel,
+        groupId,
         message: trimmedVal || '',
         replyId: replyId,
         files: newFiles,

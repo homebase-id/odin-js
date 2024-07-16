@@ -8,7 +8,7 @@ import {
   NewHomebaseFile,
   TargetDrive,
 } from '@youfoundation/js-lib/core';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 import {
   CommunityDefinition,
   getCommunityDefinition,

@@ -31,9 +31,14 @@ import { useAuth } from '../hooks/auth/useAuth';
 export const ROOT_PATH = '/apps/community';
 const AUTH_PATH = ROOT_PATH + '/auth';
 
-import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
-import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
-import { OdinQueryClient } from '@youfoundation/common-app';
+import {
+  ErrorBoundary,
+  NotFound,
+  DotYouClientProvider,
+  OdinQueryClient,
+} from '@youfoundation/common-app';
+import { CommunityChannelDetail } from '../templates/Community/CommunityChannelDetail';
+import { CommunityDirectDetail } from '../templates/Community/CommunityDirectDetail';
 
 function App() {
   const router = createBrowserRouter(
@@ -66,11 +71,18 @@ function App() {
             }
           >
             <Route index={true} element={<CommunityHome />} />
-            <Route path={':communityKey'} element={<CommunityHome />} />
-            <Route path={':communityKey/:channelOrDmKey'} element={<CommunityHome />} />
             <Route path={'new'} element={<CommunityHome />} />
-            {/* <Route path={':conversationKey/:chatMessageKey'} element={<ChatHome />} />
-            <Route path={':conversationKey/:chatMessageKey/:mediaKey'} element={<ChatHome />} /> */}
+            <Route
+              path={':communityKey'}
+              element={
+                <CommunityHome>
+                  <Outlet />
+                </CommunityHome>
+              }
+            >
+              <Route path={':channelKey'} element={<CommunityChannelDetail />} />
+              <Route path={'direct/:dmKey'} element={<CommunityDirectDetail />} />
+            </Route>
           </Route>
 
           <Route

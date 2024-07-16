@@ -8,7 +8,7 @@ import {
   REMOVE_ARCHIVAL_STATUS,
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
 } from '../../providers/MailProvider';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 import { MAIL_CONVERSATIONS_PAGE_SIZE, useMailConversations } from './useMailConversations';
 import fuzzysort from 'fuzzysort';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';

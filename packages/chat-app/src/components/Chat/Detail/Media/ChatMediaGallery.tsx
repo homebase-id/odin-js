@@ -10,11 +10,11 @@ import {
   Times,
   VideoClickToLoad,
   usePortal,
+  useDotYouClientContext,
 } from '@youfoundation/common-app';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
 import { OdinImage } from '@youfoundation/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 
 export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) => {
   const target = usePortal('modal-container');
