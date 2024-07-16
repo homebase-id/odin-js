@@ -33,6 +33,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     linkPreviews,
     chatId,
     userDate,
+    tags,
   }: {
     conversation: HomebaseFile<UnifiedConversation>;
     replyId?: string;
@@ -41,6 +42,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     linkPreviews?: LinkPreview[];
     chatId?: string;
     userDate?: number;
+    tags?: string[];
   }): Promise<NewHomebaseFile<ChatMessage> | null> => {
     const conversationId = conversation.fileMetadata.appData.uniqueId as string;
     const conversationContent = conversation.fileMetadata.appData.content;
@@ -63,6 +65,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
             replyId: replyId,
           },
           userDate: userDate || new Date().getTime(),
+          tags,
         },
       },
       serverMetadata: {
@@ -113,7 +116,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     }),
     send: useMutation({
       mutationFn: sendMessage,
-      onMutate: async ({ conversation, replyId, files, message, chatId, userDate }) => {
+      onMutate: async ({ conversation, replyId, files, message, chatId, userDate, tags }) => {
         const existingData = queryClient.getQueryData<
           InfiniteData<{
             searchResults: (HomebaseFile<ChatMessage> | null)[];
@@ -137,6 +140,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
                 replyId: replyId,
               },
               userDate,
+              tags,
             },
             payloads: files?.map((file) => ({
               contentType: file.file.type,

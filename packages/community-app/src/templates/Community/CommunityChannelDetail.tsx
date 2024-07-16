@@ -39,7 +39,6 @@ export const CommunityChannelDetail = () => {
   return (
     <ErrorBoundary>
       <div className="flex h-full flex-grow flex-col overflow-hidden">
-        {/* <CommunitySidebar community={community || undefined} /> */}
         <CommunityChannelHeader community={community || undefined} channel={channelDsr} />
         <ErrorBoundary>
           <div className="flex w-full flex-grow flex-col-reverse overflow-auto bg-background p-2 sm:p-5"></div>

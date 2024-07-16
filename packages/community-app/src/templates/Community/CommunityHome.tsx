@@ -1,7 +1,6 @@
 import { useParams, useMatch, Link } from 'react-router-dom';
 
 import { ReactNode } from 'react';
-import { ROOT_PATH } from '../../app/App';
 import {
   ActionLink,
   COMMUNITY_APP_ID,

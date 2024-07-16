@@ -52,7 +52,11 @@ export const CommunityDirectDetail = () => {
   return (
     <ErrorBoundary>
       {conversationId ? (
-        <ChatDetail conversationId={conversationId} key={conversationId || dmKey} />
+        <ChatDetail
+          conversationId={conversationId}
+          communityTagId={communityId}
+          key={conversationId || dmKey}
+        />
       ) : null}
     </ErrorBoundary>
   );

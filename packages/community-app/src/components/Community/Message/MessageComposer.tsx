@@ -138,7 +138,7 @@ export const MessageComposer = ({
           </div>
 
           <VolatileInput
-            placeholder="Your message"
+            placeholder={`Message "${community?.fileMetadata.appData.content.title}"`}
             defaultValue={message}
             className="w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"
             onChange={(newVal) => setMessage(newVal)}

@@ -33,11 +33,13 @@ export const ChatComposer = ({
   replyMsg,
   clearReplyMsg,
   onSend,
+  tags,
 }: {
   conversation: HomebaseFile<UnifiedConversation> | undefined;
   replyMsg: HomebaseFile<ChatMessage> | undefined;
   clearReplyMsg: () => void;
   onSend?: () => void;
+  tags?: string[];
 }) => {
   const volatileRef = useRef<VolatileInputRef>(null);
 
@@ -93,6 +95,7 @@ export const ChatComposer = ({
         chatId: getNewId(),
         userDate: new Date().getTime(),
         linkPreviews: Object.values(linkPreviews).filter(Boolean) as LinkPreview[],
+        tags,
       });
       onSend && onSend();
     } catch (err) {
