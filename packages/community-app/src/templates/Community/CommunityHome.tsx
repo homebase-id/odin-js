@@ -1,6 +1,5 @@
 import { useParams, useMatch, Link } from 'react-router-dom';
 
-import { CommunityDetail } from './CommunityChannelDetail';
 import { ReactNode } from 'react';
 import { ROOT_PATH } from '../../app/App';
 import {
@@ -55,7 +54,9 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
         ) : (
           <>
             <CommunitySidebar />
-            {children || null}
+            {children ? (
+              <div className="h-full w-full flex-grow bg-background">{children}</div>
+            ) : null}
           </>
         )}
       </div>
