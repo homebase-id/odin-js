@@ -34,6 +34,8 @@ export interface AppDriveAuthorizationParams {
   n: string;
   d: string;
   p: number;
+  r?: boolean;
+  s?: boolean;
 }
 
 //checks if the authentication token (stored in a cookie) is valid
@@ -112,6 +114,7 @@ interface AppAuthorizationExtendParams {
 export const getExtendAppRegistrationParams = (
   appId: string,
   drives: AppDriveAuthorizationParams[],
+  circleDrives: AppDriveAuthorizationParams[] | undefined,
   permissionKeys: number[] | undefined,
   needsAllConnected: boolean | undefined,
   returnUrl: string
@@ -121,6 +124,7 @@ export const getExtendAppRegistrationParams = (
     d: JSON.stringify(drives),
     p: permissionKeys?.join(','),
     c: needsAllConnected ? ALL_CONNECTIONS_CIRCLE_ID : undefined,
+    cd: circleDrives ? JSON.stringify(circleDrives) : undefined,
     return: returnUrl,
   };
 

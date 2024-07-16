@@ -186,12 +186,7 @@ const CommunitySidebar = () => {
 
   const { data: communityChannels } = useCommunityChannels({ communityId }).fetch;
 
-  if (!communityId || isLoading || !community)
-    return (
-      <div className="flex h-full flex-grow flex-col items-center justify-center">
-        <p className="text-4xl">Homebase Community</p>
-      </div>
-    );
+  if (!communityId || isLoading || !community) return null;
 
   return (
     <div

@@ -19,6 +19,7 @@ const getExtendAppRegistrationUrl = (
   const params = getExtendAppRegistrationParams(
     appId,
     drives,
+    undefined,
     permissionKeys,
     needsAllConnected,
     returnUrl

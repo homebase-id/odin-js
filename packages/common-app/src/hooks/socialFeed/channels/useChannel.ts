@@ -20,7 +20,10 @@ import {
   TargetDrive,
 } from '@youfoundation/js-lib/core';
 import { fetchCachedPublicChannels } from '../post/cachedDataHelpers';
-import { getExtendAppRegistrationParams } from '@youfoundation/js-lib/auth';
+import {
+  AppDriveAuthorizationParams,
+  getExtendAppRegistrationParams,
+} from '@youfoundation/js-lib/auth';
 const FEED_ROOT_PATH = '/apps/feed';
 
 type useChannelsProps = {
@@ -37,7 +40,7 @@ const ensureNewDriveAndPermission = (
   allowAnonymousReads?: boolean,
   allowSubscriptions?: boolean
 ) => {
-  const drives = [
+  const drives: AppDriveAuthorizationParams[] = [
     {
       a: targetDrive.alias,
       t: targetDrive.type,
@@ -56,6 +59,7 @@ const ensureNewDriveAndPermission = (
   const params = getExtendAppRegistrationParams(
     FEED_APP_ID,
     drives,
+    undefined,
     undefined,
     undefined,
     returnUrl

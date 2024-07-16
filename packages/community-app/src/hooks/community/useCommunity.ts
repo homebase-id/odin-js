@@ -18,7 +18,10 @@ import {
 } from '../../providers/CommunityDefinitionProvider';
 import { COMMUNITY_APP_ID, t } from '@youfoundation/common-app';
 import { COMMUNITY_ROOT } from '../../templates/Community/CommunityHome';
-import { getExtendAppRegistrationParams } from '@youfoundation/js-lib/auth';
+import {
+  AppDriveAuthorizationParams,
+  getExtendAppRegistrationParams,
+} from '@youfoundation/js-lib/auth';
 
 type useCommunityProps = {
   communityId?: string;
@@ -29,11 +32,9 @@ const ensureNewDriveAndPermission = (
   name: string,
   description: string,
   targetDrive: TargetDrive,
-  returnUrl: string,
-  allowAnonymousReads?: boolean,
-  allowSubscriptions?: boolean
+  returnUrl: string
 ) => {
-  const drives = [
+  const drives: AppDriveAuthorizationParams[] = [
     {
       a: targetDrive.alias,
       t: targetDrive.type,
@@ -44,14 +45,27 @@ const ensureNewDriveAndPermission = (
         DrivePermissionType.Comment, // Permission
       n: name,
       d: description,
-      r: allowAnonymousReads,
-      s: allowSubscriptions,
+    },
+  ];
+
+  const circleDrives: AppDriveAuthorizationParams[] = [
+    {
+      a: targetDrive.alias,
+      t: targetDrive.type,
+      p:
+        DrivePermissionType.Read +
+        DrivePermissionType.Write +
+        DrivePermissionType.React +
+        DrivePermissionType.Comment, // Permission
+      n: name,
+      d: description,
     },
   ];
 
   const params = getExtendAppRegistrationParams(
     COMMUNITY_APP_ID,
     drives,
+    circleDrives,
     undefined,
     undefined,
     returnUrl
@@ -89,9 +103,7 @@ export const useCommunity = (props?: useCommunityProps) => {
         communityDef.fileMetadata.appData.content.title,
         t('Drive for "{0}" community', communityDef.fileMetadata.appData.content.title),
         targetDrive,
-        returnUrl,
-        false,
-        false
+        returnUrl
       );
     };
 
