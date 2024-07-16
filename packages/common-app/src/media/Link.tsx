@@ -27,7 +27,9 @@ export const LinkPreviewTextual = ({
           <>
             <p className="capitalize font-bold">{getHostFromUrl(linkPreview.url)}</p>
             <p
-              className={`text-sm text-primary group-hover:underline ${size === 'sm' ? 'max-h-[1.3rem] overflow-hidden' : ''}`}
+              className={`text-sm text-primary group-hover:underline ${
+                size === 'sm' ? 'max-h-[1.3rem] overflow-hidden' : ''
+              }`}
             >
               {ellipsisAtMaxChar(linkPreview.title || linkPreview.url, size !== 'sm' ? 120 : 40)}
             </p>
@@ -63,8 +65,8 @@ export const LinkPreviewImage = ({
     width && height
       ? width / height
       : linkPreview?.imageWidth && linkPreview.imageHeight
-        ? linkPreview?.imageWidth / linkPreview.imageHeight
-        : undefined;
+      ? linkPreview?.imageWidth / linkPreview.imageHeight
+      : undefined;
 
   if (!linkPreview)
     return (
