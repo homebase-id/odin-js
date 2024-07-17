@@ -8,7 +8,7 @@ import {
   AppendInstructionSet,
   AppendResult,
 } from './DriveUploadTypes';
-import { decryptKeyHeader, encryptWithSharedSecret } from '../SecurityHelpers';
+import { decryptKeyHeader, encryptKeyHeader, encryptWithSharedSecret } from '../SecurityHelpers';
 import {
   GenerateKeyHeader,
   encryptMetaData,
@@ -113,6 +113,10 @@ export const uploadHeader = async (
   if (!decryptKeyHeader && metadata.isEncrypted)
     throw new Error('[DotYouCore-JS] Missing existing keyHeader for appending encrypted metadata.');
 
+  if (plainKeyHeader) {
+    plainKeyHeader.iv = getRandom16ByteArray();
+  }
+
   const { systemFileType, ...strippedInstructions } = instructions;
   if (!strippedInstructions.storageOptions) throw new Error('storageOptions is required');
 
@@ -121,11 +125,18 @@ export const uploadHeader = async (
 
   // Build package
   const encryptedMetaData = await encryptMetaData(metadata, plainKeyHeader);
-  // No need for buidDescriptor here, as it's a metadataOnly upload
+  // Can't use buidDescriptor here, as it's a metadataOnly upload
   const encryptedDescriptor = await encryptWithSharedSecret(
     dotYouClient,
     {
       fileMetadata: encryptedMetaData,
+      encryptedKeyHeader: plainKeyHeader
+        ? await encryptKeyHeader(
+            dotYouClient,
+            { aesKey: new Uint8Array(Array(16).fill(0)), iv: plainKeyHeader.iv },
+            strippedInstructions.transferIv
+          )
+        : undefined,
     },
     strippedInstructions.transferIv
   );
