@@ -140,11 +140,14 @@ const ConversationBody = ({
   const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
 
   const lastReadTime = conversation?.fileMetadata.appData.content.lastReadTime || 0;
-  const unreadCount = flatMessages
-    ? flatMessages.filter(
-        (msg) => msg.fileMetadata.senderOdinId && msg.fileMetadata.created >= lastReadTime
-      )?.length
-    : 0;
+  const unreadCount =
+    conversation && flatMessages
+      ? flatMessages.filter(
+          (msg) =>
+            msg.fileMetadata.senderOdinId &&
+            (msg.fileMetadata.transitCreated || msg.fileMetadata.created) > lastReadTime
+        )?.length
+      : 0;
 
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
 

@@ -44,8 +44,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
       const someFailed = result.status.some(
         (recipientStatus) =>
           !recipientStatus.status ||
-          recipientStatus.status?.toLowerCase() ===
-            SendReadReceiptResponseRecipientStatus.SenderServerHadAnInternalError
+          recipientStatus.status?.toLowerCase() !== SendReadReceiptResponseRecipientStatus.Enqueued
       );
       if (someFailed) {
         // TODO: Should we throw an error?
