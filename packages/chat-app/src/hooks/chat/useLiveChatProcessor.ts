@@ -111,7 +111,7 @@ const useInboxProcessor = (connected?: boolean) => {
     queryKey: ['process-inbox'],
     queryFn: fetchData,
     enabled: connected,
-    staleTime: MINUTE_IN_MS * 2,
+    staleTime: 1000 * 10, // 10 seconds
   });
 };
 
@@ -259,7 +259,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
     if (chatMessagesQueue.length >= 1) {
       if (!timeout.current) {
         // Start timeout to always process the queue after a certain time
-        timeout.current = setTimeout(() => processQueue(chatMessagesQueueTunnel.current), 3000);
+        timeout.current = setTimeout(() => processQueue(chatMessagesQueueTunnel.current), 700);
       }
     }
 
