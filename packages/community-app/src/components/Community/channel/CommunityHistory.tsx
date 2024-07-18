@@ -169,7 +169,6 @@ export const CommunityHistory = ({
               }
 
               const msg = flattenedMsgs[item.index];
-              console.log('msg', msg);
               return (
                 <div
                   key={item.key}
