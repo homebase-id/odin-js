@@ -6,6 +6,8 @@ import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { ErrorNotification, t } from '@youfoundation/common-app';
 import { CommunityMessageItem } from '../Message/CommunityMessageItem';
+import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
+import { CommunityActions } from './ContextMenu';
 
 export const useIsomorphicLayoutEffect =
   typeof window !== 'undefined' ? useLayoutEffect : useEffect;
@@ -31,10 +33,10 @@ export const CommunityHistory = ({
       isFetchingNextPage,
       isFetched,
     },
-    delete: { mutate: deleteMessages, error: deleteMessagesError },
+    // delete: { mutate: deleteMessages, error: deleteMessagesError },
   } = useCommunityMessages({
     communityId: community?.fileMetadata?.appData?.uniqueId,
-    channelId: channel?.fileMetadata?.appData?.uniqueId,
+    // channelId: channel?.fileMetadata?.appData?.uniqueId,
   });
 
   const flattenedMsgs =
@@ -51,17 +53,18 @@ export const CommunityHistory = ({
   }, [isFetched, flattenedMsgs]);
 
   //   useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
-  //   const chatActions: ChatActions = {
-  //     doReply: (msg: HomebaseFile<ChatMessage>) => setReplyMsg(msg),
-  //     doDelete: async (msg: HomebaseFile<ChatMessage>, deleteForEveryone: boolean) => {
-  //       if (!conversation || !msg) return;
-  //       await deleteMessages({
-  //         conversation: conversation,
-  //         messages: [msg],
-  //         deleteForEveryone: deleteForEveryone,
-  //       });
-  //     },
-  //   };
+  const communityActions: CommunityActions = {
+    doReply: (msg: HomebaseFile<CommunityMessage>) => setReplyMsg(msg),
+    doDelete: async (msg: HomebaseFile<CommunityMessage>, deleteForEveryone: boolean) => {
+      if (!community || !msg) return;
+      throw new Error('Not implemented');
+      // await deleteMessages({
+      //   conversation: conversation,
+      //   messages: [msg],
+      //   deleteForEveryone: deleteForEveryone,
+      // });
+    },
+  };
 
   const count = flattenedMsgs?.length + 1;
   const virtualizer = useVirtualizer({
@@ -106,7 +109,7 @@ export const CommunityHistory = ({
 
   return (
     <>
-      <ErrorNotification error={deleteMessagesError} />
+      {/* <ErrorNotification error={deleteMessagesError} /> */}
       <div
         className="flex w-full flex-grow flex-col-reverse overflow-auto p-2 sm:p-5"
         ref={scrollRef}
@@ -166,6 +169,7 @@ export const CommunityHistory = ({
               }
 
               const msg = flattenedMsgs[item.index];
+              console.log('msg', msg);
               return (
                 <div
                   key={item.key}
@@ -177,7 +181,7 @@ export const CommunityHistory = ({
                     key={msg.fileId}
                     msg={msg}
                     community={community}
-                    // chatActions={chatActions}
+                    communityActions={communityActions}
                   />
                 </div>
               );

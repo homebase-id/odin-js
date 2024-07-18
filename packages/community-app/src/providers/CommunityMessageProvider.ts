@@ -20,6 +20,14 @@ import {
   FileMetadata,
   uploadHeader,
   getFileHeaderByUniqueId,
+  FileQueryParams,
+  GetBatchQueryResultOptions,
+  TargetDrive,
+  getContentFromHeaderOrPayload,
+  RecipientTransferHistory,
+  TransferStatus,
+  FailedTransferStatuses,
+  queryBatch,
 } from '@youfoundation/js-lib/core';
 import {
   getNewId,
@@ -36,8 +44,8 @@ import {
 import { appId } from '../hooks/auth/useAuth';
 import { getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
 
-export const COMMUNITY_MESSAGE_FILE_TYPE = 7878;
-export const ChatDeletedArchivalStaus = 2;
+export const COMMUNITY_MESSAGE_FILE_TYPE = 7020;
+export const CommunityDeletedArchivalStaus = 2;
 
 const COMMUNITY_MESSAGE_PAYLOAD_KEY = 'comm_web';
 export const COMMUNITY_LINKS_PAYLOAD_KEY = 'comm_links';
@@ -122,7 +130,7 @@ export const uploadCommunityMessage = async (
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
 
-  if (!files?.length && linkPreviews) {
+  if (!files?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
     const descriptorContent = JSON.stringify(
       linkPreviews.map((preview) => {
@@ -315,4 +323,129 @@ export const getCommunityMessage = async (
   if (!fileHeader) return null;
 
   return fileHeader;
+};
+
+export const getCommunityMessages = async (
+  dotYouClient: DotYouClient,
+  communityId: string,
+  cursorState: string | undefined,
+  pageSize: number
+) => {
+  const targetDrive = getTargetDriveFromCommunityId(communityId);
+
+  const params: FileQueryParams = {
+    targetDrive: targetDrive,
+    fileType: [COMMUNITY_MESSAGE_FILE_TYPE],
+  };
+
+  const ro: GetBatchQueryResultOptions = {
+    maxRecords: pageSize,
+    cursorState: cursorState,
+    includeMetadataHeader: true,
+    includeTransferHistory: true,
+  };
+
+  const response = await queryBatch(dotYouClient, params, ro);
+  return {
+    ...response,
+    searchResults:
+      ((await Promise.all(
+        response.searchResults
+          .map(async (result) => await dsrToMessage(dotYouClient, result, targetDrive, true))
+          .filter(Boolean)
+      )) as HomebaseFile<CommunityMessage>[]) || [],
+  };
+};
+
+export const dsrToMessage = async (
+  dotYouClient: DotYouClient,
+  dsr: HomebaseFile,
+  targetDrive: TargetDrive,
+  includeMetadataHeader: boolean
+): Promise<HomebaseFile<CommunityMessage> | null> => {
+  try {
+    const msgContent = await getContentFromHeaderOrPayload<CommunityMessage>(
+      dotYouClient,
+      targetDrive,
+      dsr,
+      includeMetadataHeader
+    );
+    if (!msgContent) return null;
+
+    if (
+      (msgContent.deliveryStatus === CommunityDeliveryStatus.Sent ||
+        msgContent.deliveryStatus === CommunityDeliveryStatus.Failed) &&
+      dsr.serverMetadata?.transferHistory?.recipients
+    ) {
+      msgContent.deliveryDetails = buildDeliveryDetails(
+        dsr.serverMetadata.transferHistory.recipients
+      );
+      msgContent.deliveryStatus = buildDeliveryStatus(msgContent.deliveryDetails);
+    }
+
+    const chatMessage: HomebaseFile<CommunityMessage> = {
+      ...dsr,
+      fileMetadata: {
+        ...dsr.fileMetadata,
+        appData: {
+          ...dsr.fileMetadata.appData,
+          content: msgContent,
+        },
+      },
+    };
+
+    return chatMessage;
+  } catch (ex) {
+    console.error('[DotYouCore-js] failed to get the chatMessage payload of a dsr', dsr, ex);
+    return null;
+  }
+};
+
+const buildDeliveryDetails = (recipientTransferHistory: {
+  [key: string]: RecipientTransferHistory;
+}): Record<string, CommunityDeliveryStatus> => {
+  const deliveryDetails: Record<string, CommunityDeliveryStatus> = {};
+
+  for (const recipient of Object.keys(recipientTransferHistory)) {
+    if (recipientTransferHistory[recipient].latestSuccessfullyDeliveredVersionTag) {
+      if (recipientTransferHistory[recipient].isReadByRecipient) {
+        deliveryDetails[recipient] = CommunityDeliveryStatus.Read;
+      } else {
+        deliveryDetails[recipient] = CommunityDeliveryStatus.Delivered;
+      }
+    } else {
+      const latest = recipientTransferHistory[recipient].latestTransferStatus;
+      const transferStatus =
+        latest && typeof latest === 'string'
+          ? (latest?.toLocaleLowerCase() as TransferStatus)
+          : undefined;
+      if (transferStatus && FailedTransferStatuses.includes(transferStatus)) {
+        deliveryDetails[recipient] = CommunityDeliveryStatus.Failed;
+      } else {
+        deliveryDetails[recipient] = CommunityDeliveryStatus.Sent;
+      }
+    }
+  }
+
+  return deliveryDetails;
+};
+
+const buildDeliveryStatus = (
+  deliveryDetails: Record<string, CommunityDeliveryStatus>
+): CommunityDeliveryStatus => {
+  const values = Object.values(deliveryDetails);
+  // If any failed, the message is failed
+  if (values.includes(CommunityDeliveryStatus.Failed)) return CommunityDeliveryStatus.Failed;
+  if (values.every((val) => val === CommunityDeliveryStatus.Read))
+    return CommunityDeliveryStatus.Read;
+  // If all are delivered/read, the message is delivered/read
+  if (
+    values.every(
+      (val) => val === CommunityDeliveryStatus.Delivered || val === CommunityDeliveryStatus.Read
+    )
+  )
+    return CommunityDeliveryStatus.Delivered;
+
+  // If it exists, it's sent
+  return CommunityDeliveryStatus.Sent;
 };

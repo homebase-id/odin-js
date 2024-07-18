@@ -16,6 +16,7 @@ import { useCommunityChannel } from '../../hooks/community/channels/useCommunity
 import { createPortal } from 'react-dom';
 import { MessageComposer } from '../../components/Community/Message/MessageComposer';
 import { CommunityMessage } from '../../providers/CommunityMessageProvider';
+import { CommunityHistory } from '../../components/Community/channel/CommunityHistory';
 
 export const CommunityChannelDetail = () => {
   const { communityKey, channelKey, dmKey } = useParams();
@@ -42,12 +43,14 @@ export const CommunityChannelDetail = () => {
         <CommunityChannelHeader community={community || undefined} channel={channelDsr} />
         <ErrorBoundary>
           <div className="flex w-full flex-grow flex-col-reverse overflow-auto bg-background p-2 sm:p-5"></div>
-          {/* <CommunityHistory
-          community={community || undefined}
-          channel={channelDsr || undefined}
-          setReplyMsg={setReplyMsg}
-          // setIsEmptyChat={setIsEmptyChat}
-        /> */}
+          <CommunityHistory
+            community={community || undefined}
+            channel={channelDsr || undefined}
+            setReplyMsg={setReplyMsg}
+            setIsEmptyChat={(isEmpty: boolean) => {
+              //
+            }} // setIsEmptyChat={setIsEmptyChat}
+          />
         </ErrorBoundary>
         <ErrorBoundary>
           <MessageComposer

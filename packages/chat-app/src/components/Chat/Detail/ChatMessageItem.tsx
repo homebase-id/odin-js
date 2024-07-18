@@ -272,7 +272,10 @@ const ChatMediaMessageBody = ({
       }`}
     >
       {isGroupChat && !messageFromMe ? (
-        <p className={`font-semibold`} style={{ color: getOdinIdColor(authorOdinId).darkTheme }}>
+        <p
+          className={`px-2 py-[0.4rem] font-semibold`}
+          style={{ color: getOdinIdColor(authorOdinId).darkTheme }}
+        >
           <ConnectionName odinId={authorOdinId} />
         </p>
       ) : null}
