@@ -20,6 +20,8 @@ import { CommunityActions, ContextMenu } from '../channel/ContextMenu';
 import { useParams } from 'react-router-dom';
 import { CommunityDeliveryIndicator } from './CommunityDeliveryIndicator';
 import { CommunitySentTimeIndicator } from './CommunitySentTimeIndicator';
+import { CommunityMedia } from './CommunityMedia';
+import { CommunityMediaGallery } from './CommunityMediaGallery';
 
 export const CommunityMessageItem = ({
   msg,
@@ -53,7 +55,12 @@ export const CommunityMessageItem = ({
 
   return (
     <>
-      {/* {isDetail ? <CommunityMediaGallery msg={msg} /> : null} */}
+      {isDetail ? (
+        <CommunityMediaGallery
+          msg={msg}
+          communityId={community?.fileMetadata.appData.uniqueId as string}
+        />
+      ) : null}
       <div
         className={`group relative flex flex-row gap-2 ${hasReactions ? 'pb-6' : ''}`}
         data-unique-id={msg.fileMetadata.appData.uniqueId}
@@ -233,7 +240,7 @@ const CommunityMediaMessageBody = ({
 
   return (
     <div className={`relative w-full max-w-[75vw] rounded-lg md:max-w-xs lg:max-w-xl`}>
-      {/* <ChatMedia msg={msg} /> */}
+      <CommunityMedia msg={msg} communityId={community?.fileMetadata.appData.uniqueId as string} />
 
       {hasACaption ? (
         <div className="flex min-w-0 flex-col md:flex-row md:justify-between">

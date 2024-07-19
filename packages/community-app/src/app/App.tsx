@@ -81,7 +81,17 @@ function App() {
               }
             >
               <Route path={':channelKey'} element={<CommunityChannelDetail />} />
+              <Route path={':channelKey/:chatMessageKey'} element={<CommunityChannelDetail />} />
+              <Route
+                path={':channelKey/:chatMessageKey/:mediaKey'}
+                element={<CommunityChannelDetail />}
+              />
               <Route path={'direct/:dmKey'} element={<CommunityDirectDetail />} />
+              <Route path={'direct/:dmKey/:chatMessageKey'} element={<CommunityDirectDetail />} />
+              <Route
+                path={'direct/:dmKey/:chatMessageKey/:mediaKey'}
+                element={<CommunityDirectDetail />}
+              />
             </Route>
           </Route>
 
