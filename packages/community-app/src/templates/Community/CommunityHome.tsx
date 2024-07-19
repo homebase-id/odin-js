@@ -94,7 +94,7 @@ export const CommunitiesSidebar = ({
 
   return (
     <ErrorBoundary>
-      <div className="absolute inset-0 flex flex-grow flex-row flex-wrap overflow-auto md:pl-[calc(env(safe-area-inset-left)+4.3rem)] lg:flex-col lg:items-center">
+      <div className="absolute inset-0 flex flex-grow flex-row flex-wrap overflow-auto md:pl-[calc(env(safe-area-inset-left)+4.3rem)] lg:flex-col lg:items-center lg:pl-0">
         <div className="px-2 py-2">
           <ActionLink href={COMMUNITY_ROOT} type="mute" size={'none'} className="px-2 py-2 pb-0">
             <RadioTower className="h-7 w-7" />
@@ -190,7 +190,7 @@ const CommunitySidebar = () => {
     <div
       className={`fixed ${isActive ? 'translate-x-full' : 'translate-x-0'} -left-full h-[100dvh] w-full bg-page-background transition-transform lg:relative lg:left-0 lg:max-w-xs lg:translate-x-0 lg:border-r lg:shadow-inner`}
     >
-      <div className="absolute inset-0 flex flex-col gap-5 overflow-auto px-2 py-5 md:pl-[calc(env(safe-area-inset-left)+4.3rem+0.5rem)]">
+      <div className="absolute inset-0 flex flex-col gap-5 overflow-auto px-2 py-5 md:pl-[calc(env(safe-area-inset-left)+4.3rem+0.5rem)] lg:pl-2">
         <p className="text-xl font-semibold">{community.fileMetadata.appData.content?.title}</p>
 
         <div className="flex flex-col gap-1">
