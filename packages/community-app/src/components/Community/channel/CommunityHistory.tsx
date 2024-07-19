@@ -199,7 +199,8 @@ export const CommunityHistory = ({
                     community={community}
                     communityActions={communityActions}
                     hideDetails={
-                      previousAuthor === currentAuthor && previousDate - currentDate < 1000 * 60 * 5
+                      previousAuthor === currentAuthor &&
+                      Math.abs(previousDate - currentDate) < 1000 * 60 * 5
                     }
                   />
                 </div>

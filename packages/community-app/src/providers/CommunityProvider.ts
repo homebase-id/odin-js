@@ -14,10 +14,10 @@ import { getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
 import { t } from '@youfoundation/common-app';
 
 export const COMMUNITY_CHANNEL_FILE_TYPE = 7015;
-export const COMMUNITY_DEFAULT_GEENRAL_ID = '7d64f4e4-f8e2-4c3b-bc4b-48bbb86e8f9a';
+export const COMMUNITY_DEFAULT_GENERAL_ID = '7d64f4e4-f8e2-4c3b-bc4b-48bbb86e8f9a';
 
 export const COMMUNITY_GENERAL_CHANNEL: HomebaseFile<CommunityChannel> = {
-  fileId: COMMUNITY_DEFAULT_GEENRAL_ID, // Just putting something so it fails it ever gets saved; OverwriteFileId during upload has to exist
+  fileId: COMMUNITY_DEFAULT_GENERAL_ID, // Just putting something so it fails it ever gets saved; OverwriteFileId during upload has to exist
   fileState: 'active',
   fileSystemType: 'Standard',
   sharedSecretEncryptedKeyHeader: {} as EncryptedKeyHeader,
@@ -26,7 +26,7 @@ export const COMMUNITY_GENERAL_CHANNEL: HomebaseFile<CommunityChannel> = {
     appData: {
       fileType: COMMUNITY_CHANNEL_FILE_TYPE,
       dataType: 0,
-      uniqueId: COMMUNITY_DEFAULT_GEENRAL_ID,
+      uniqueId: COMMUNITY_DEFAULT_GENERAL_ID,
       content: {
         title: t('General'),
         description: t('General community channel'),
@@ -92,7 +92,7 @@ export const getCommunityChannel = async (
   communityId: string,
   channelId: string
 ): Promise<HomebaseFile<CommunityChannel> | undefined> => {
-  if (channelId === COMMUNITY_DEFAULT_GEENRAL_ID) return COMMUNITY_GENERAL_CHANNEL;
+  if (channelId === COMMUNITY_DEFAULT_GENERAL_ID) return COMMUNITY_GENERAL_CHANNEL;
 
   const targetDrive = getTargetDriveFromCommunityId(communityId);
 
