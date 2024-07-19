@@ -4,7 +4,7 @@ import { CommunityChannel } from '../../../providers/CommunityProvider';
 import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ErrorNotification, t } from '@youfoundation/common-app';
+import { t } from '@youfoundation/common-app';
 import { CommunityMessageItem } from '../Message/CommunityMessageItem';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
 import { CommunityActions } from './ContextMenu';
@@ -21,7 +21,7 @@ export const CommunityHistory = ({
   community: HomebaseFile<CommunityDefinition> | undefined;
   channel?: HomebaseFile<CommunityChannel> | undefined;
   setReplyMsg: (msg: HomebaseFile<CommunityMessage>) => void;
-  setIsEmptyChat: (isEmpty: boolean) => void;
+  setIsEmptyChat?: (isEmpty: boolean) => void;
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -48,7 +48,11 @@ export const CommunityHistory = ({
     ) || [];
 
   useEffect(() => {
-    if (isFetched && (!flattenedMsgs || flattenedMsgs?.filter((msg) => msg.fileId).length === 0))
+    if (
+      setIsEmptyChat &&
+      isFetched &&
+      (!flattenedMsgs || flattenedMsgs?.filter((msg) => msg.fileId).length === 0)
+    )
       setIsEmptyChat(true);
   }, [isFetched, flattenedMsgs]);
 
@@ -169,6 +173,19 @@ export const CommunityHistory = ({
               }
 
               const msg = flattenedMsgs[item.index];
+              const currentAuthor =
+                msg?.fileMetadata?.appData?.content.authorOdinId ||
+                msg?.fileMetadata.senderOdinId ||
+                '';
+              const currentDate = msg?.fileMetadata.created;
+
+              const previousVisibleMsg = flattenedMsgs[item.index + 1];
+              const previousAuthor =
+                previousVisibleMsg?.fileMetadata?.appData?.content.authorOdinId ||
+                previousVisibleMsg?.fileMetadata.senderOdinId ||
+                '';
+              const previousDate = previousVisibleMsg?.fileMetadata.created;
+
               return (
                 <div
                   key={item.key}
@@ -181,6 +198,9 @@ export const CommunityHistory = ({
                     msg={msg}
                     community={community}
                     communityActions={communityActions}
+                    hideDetails={
+                      previousAuthor === currentAuthor && previousDate - currentDate < 1000 * 60 * 5
+                    }
                   />
                 </div>
               );

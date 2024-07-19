@@ -1,6 +1,21 @@
 import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
+import {
+  CommunityDeliveryStatus,
+  CommunityMessage,
+} from '../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
+import {
+  useDotYouClient,
+  ActionGroupOptionProps,
+  t,
+  ErrorNotification,
+  ActionGroup,
+  ChevronDown,
+} from '@youfoundation/common-app';
+import { useState } from 'react';
+import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
+import { CommunityMessageInfo } from '../Message/detail/CommunityMessageInfo';
+import { EditCommunityMessage } from '../Message/detail/EditCommunityMessage';
 
 export interface CommunityActions {
   doReply: (msg: HomebaseFile<CommunityMessage>) => void;
@@ -16,96 +31,94 @@ export const ContextMenu = ({
   community?: HomebaseFile<CommunityDefinition>;
   communityActions?: CommunityActions;
 }) => {
-  return null;
+  if (!communityActions) return null;
+  const [showMessageInfo, setShowMessageInfo] = useState(false);
+  const [editMessage, setEditMessage] = useState(false);
+
+  const { mutate: resend, error: resendError } = useCommunityMessage().update;
+
+  const identity = useDotYouClient().getIdentity();
+  const authorOdinId = msg.fileMetadata.senderOdinId;
+
+  const messageFromMe = !authorOdinId || authorOdinId === identity;
+
+  const optionalOptions: ActionGroupOptionProps[] = [];
+  if (messageFromMe) {
+    optionalOptions.push({
+      label: t('Edit'),
+      onClick: () => setEditMessage(true),
+    });
+    optionalOptions.push({
+      label: t('Delete for everyone'),
+      confirmOptions: {
+        title: t('Delete message'),
+        body: t('Are you sure you want to delete this message?'),
+        buttonText: t('Delete'),
+      },
+      onClick: () => communityActions.doDelete(msg, true),
+    });
+  }
+
+  optionalOptions.push({
+    label: t('Delete for me'),
+    confirmOptions: {
+      title: t('Delete message'),
+      body: t('Are you sure you want to delete this message?'),
+      buttonText: t('Delete'),
+    },
+    onClick: () => communityActions.doDelete(msg, false),
+  });
+
+  if (community)
+    optionalOptions.push({
+      label: t('Message info'),
+      onClick: () => setShowMessageInfo(true),
+    });
+
+  if (
+    community &&
+    msg.fileMetadata.appData.content.deliveryStatus === CommunityDeliveryStatus.Failed
+  ) {
+    optionalOptions.push({
+      label: t('Retry sending'),
+      onClick: () => resend({ updatedChatMessage: msg, community: community }),
+    });
+  }
+
+  return (
+    <>
+      <ErrorNotification error={resendError} />
+      {showMessageInfo && community ? (
+        <CommunityMessageInfo
+          msg={msg}
+          community={community}
+          onClose={() => setShowMessageInfo(false)}
+        />
+      ) : null}
+      {editMessage && community ? (
+        <EditCommunityMessage
+          msg={msg}
+          community={community}
+          onClose={() => setEditMessage(false)}
+        />
+      ) : null}
+      <ActionGroup
+        options={[
+          {
+            label: t('Reply'),
+            onClick: () => communityActions.doReply(msg),
+          },
+          ...optionalOptions,
+        ]}
+        className="absolute right-1 top-[0.125rem] z-10 rounded-full bg-transparent group-hover:pointer-events-auto group-hover:bg-background/60"
+        type={'mute'}
+        size="square"
+      >
+        <span className="opacity-0 group-hover:opacity-100">
+          <ChevronDown className="h-3 w-3" />
+          <span className="sr-only ml-1">{t('More')}</span>
+        </span>
+      </ActionGroup>
+    </>
+  );
 };
-//   if (!chatActions) return null;
-//   const [showMessageInfo, setShowMessageInfo] = useState(false);
-//   const [editMessage, setEditMessage] = useState(false);
-
-//   const { mutate: resend, error: resendError } = useChatMessage().update;
-
-//   const identity = useDotYouClient().getIdentity();
-//   const authorOdinId = msg.fileMetadata.senderOdinId;
-
-//   const messageFromMe = !authorOdinId || authorOdinId === identity;
-
-//   const optionalOptions: ActionGroupOptionProps[] = [];
-//   if (messageFromMe) {
-//     optionalOptions.push({
-//       label: t('Edit'),
-//       onClick: () => setEditMessage(true),
-//     });
-//     optionalOptions.push({
-//       label: t('Delete for everyone'),
-//       confirmOptions: {
-//         title: t('Delete message'),
-//         body: t('Are you sure you want to delete this message?'),
-//         buttonText: t('Delete'),
-//       },
-//       onClick: () => chatActions.doDelete(msg, true),
-//     });
-//   }
-
-//     optionalOptions.push({
-//       label: t('Delete for me'),
-//       confirmOptions: {
-//         title: t('Delete message'),
-//         body: t('Are you sure you want to delete this message?'),
-//         buttonText: t('Delete'),
-//       },
-//       onClick: () => chatActions.doDelete(msg, false),
-//     });
-
-//   if (community)
-//     optionalOptions.push({
-//       label: t('Message info'),
-//       onClick: () => setShowMessageInfo(true),
-//     });
-
-//   if (
-//     community &&
-//     msg.fileMetadata.appData.content.deliveryStatus === ChatDeliveryStatus.Failed
-//   ) {
-//     optionalOptions.push({
-//       label: t('Retry sending'),
-//       onClick: () => resend({ updatedChatMessage: msg, community: community }),
-//     });
-//   }
-
-//   return (
-//     <>
-//       <ErrorNotification error={resendError} />
-//       {showMessageInfo && community ? (
-//         <ChatMessageInfo
-//           msg={msg}
-//           conversation={conversation}
-//           onClose={() => setShowMessageInfo(false)}
-//         />
-//       ) : null}
-//       {editMessage && conversation ? (
-//         <EditChatMessage
-//           msg={msg}
-//           conversation={conversation}
-//           onClose={() => setEditMessage(false)}
-//         />
-//       ) : null}
-//       <ActionGroup
-//         options={[
-//           {
-//             label: t('Reply'),
-//             onClick: () => chatActions.doReply(msg),
-//           },
-//           ...optionalOptions,
-//         ]}
-//         className="absolute right-1 top-[0.125rem] z-10 rounded-full bg-transparent group-hover:pointer-events-auto group-hover:bg-background/60"
-//         type={'mute'}
-//         size="square"
-//       >
-//         <span className="opacity-0 group-hover:opacity-100">
-//           <ChevronDown className="h-3 w-3" />
-//           <span className="sr-only ml-1">{t('More')}</span>
-//         </span>
-//       </ActionGroup>
-//     </>
-//   );
-// };

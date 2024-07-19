@@ -13,8 +13,8 @@ import {
 } from '@youfoundation/common-app';
 import { OdinImage } from '@youfoundation/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
-import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
-import { getTargetDriveFromCommunityId } from '../../../providers/CommunityDefinitionProvider';
+import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
+import { getTargetDriveFromCommunityId } from '../../../../providers/CommunityDefinitionProvider';
 
 export const CommunityMediaGallery = ({
   communityId,

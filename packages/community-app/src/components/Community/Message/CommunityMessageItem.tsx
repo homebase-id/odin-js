@@ -21,16 +21,18 @@ import { useParams } from 'react-router-dom';
 import { CommunityDeliveryIndicator } from './CommunityDeliveryIndicator';
 import { CommunitySentTimeIndicator } from './CommunitySentTimeIndicator';
 import { CommunityMedia } from './CommunityMedia';
-import { CommunityMediaGallery } from './CommunityMediaGallery';
+import { CommunityMediaGallery } from './detail/CommunityMediaGallery';
 
 export const CommunityMessageItem = ({
   msg,
   community,
   communityActions,
+  hideDetails,
 }: {
   msg: HomebaseFile<CommunityMessage>;
   community?: HomebaseFile<CommunityDefinition>;
   communityActions?: CommunityActions;
+  hideDetails?: boolean;
 }) => {
   const identity = useDotYouClient().getIdentity();
   const authorOdinId =
@@ -65,26 +67,39 @@ export const CommunityMessageItem = ({
         className={`group relative flex flex-row gap-2 ${hasReactions ? 'pb-6' : ''}`}
         data-unique-id={msg.fileMetadata.appData.uniqueId}
       >
-        {!messageFromMe ? (
-          <ConnectionImage
-            odinId={authorOdinId}
-            className="border border-neutral-200 dark:border-neutral-800"
-            size="xs"
-          />
+        {hideDetails ? (
+          <div className="w-8"></div>
         ) : (
-          <OwnerImage className="border border-neutral-200 dark:border-neutral-800" size="xs" />
+          <>
+            {!messageFromMe ? (
+              <ConnectionImage
+                odinId={authorOdinId}
+                className={`border border-neutral-200 dark:border-neutral-800`}
+                size="xs"
+              />
+            ) : (
+              <OwnerImage
+                className={`border border-neutral-200 dark:border-neutral-800`}
+                size="xs"
+              />
+            )}
+          </>
         )}
 
         <div className="flex flex-col">
           <div className="flex flex-row items-center gap-2">
-            <p
-              className={`font-semibold`}
-              style={{ color: getOdinIdColor(authorOdinId).darkTheme }}
-            >
-              {messageFromMe ? <OwnerName /> : <ConnectionName odinId={authorOdinId} />}
-            </p>
-            <CommunitySentTimeIndicator className="text-sm" msg={msg} />
-            <CommunityDeliveryIndicator msg={msg} />
+            {hideDetails ? null : (
+              <>
+                <p
+                  className={`font-semibold`}
+                  style={{ color: getOdinIdColor(authorOdinId).darkTheme }}
+                >
+                  {messageFromMe ? <OwnerName /> : <ConnectionName odinId={authorOdinId} />}
+                </p>
+                <CommunitySentTimeIndicator className="text-sm" msg={msg} />
+                <CommunityDeliveryIndicator msg={msg} />
+              </>
+            )}
             {!isDeleted ? (
               <ContextMenu communityActions={communityActions} msg={msg} community={community} />
             ) : null}

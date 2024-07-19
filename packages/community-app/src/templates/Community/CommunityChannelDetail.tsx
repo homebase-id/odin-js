@@ -42,14 +42,10 @@ export const CommunityChannelDetail = () => {
       <div className="flex h-full flex-grow flex-col overflow-hidden">
         <CommunityChannelHeader community={community || undefined} channel={channelDsr} />
         <ErrorBoundary>
-          <div className="flex w-full flex-grow flex-col-reverse overflow-auto bg-background p-2 sm:p-5"></div>
           <CommunityHistory
             community={community || undefined}
             channel={channelDsr || undefined}
             setReplyMsg={setReplyMsg}
-            setIsEmptyChat={(isEmpty: boolean) => {
-              //
-            }} // setIsEmptyChat={setIsEmptyChat}
           />
         </ErrorBoundary>
         <ErrorBoundary>
