@@ -115,7 +115,7 @@ export const CommunityHistory = ({
     <>
       {/* <ErrorNotification error={deleteMessagesError} /> */}
       <div
-        className="flex w-full flex-grow flex-col-reverse overflow-auto p-2 sm:p-5"
+        className="flex w-full flex-grow flex-col-reverse overflow-auto py-2 sm:py-5"
         ref={scrollRef}
         key={channel?.fileId || community?.fileId}
         onCopyCapture={(e) => {
@@ -191,7 +191,7 @@ export const CommunityHistory = ({
                   key={item.key}
                   data-index={item.index}
                   ref={virtualizer.measureElement}
-                  className="flex-shrink-0 py-1"
+                  className="flex-shrink-0"
                 >
                   <CommunityMessageItem
                     key={msg.fileId}

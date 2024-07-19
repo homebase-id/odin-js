@@ -22,6 +22,7 @@ import { CommunityDeliveryIndicator } from './CommunityDeliveryIndicator';
 import { CommunitySentTimeIndicator } from './CommunitySentTimeIndicator';
 import { CommunityMedia } from './CommunityMedia';
 import { CommunityMediaGallery } from './detail/CommunityMediaGallery';
+import { useEffect, useState } from 'react';
 
 export const CommunityMessageItem = ({
   msg,
@@ -45,7 +46,9 @@ export const CommunityMessageItem = ({
   const hasMedia = !!msg.fileMetadata.payloads.length;
 
   const { chatMessageKey, mediaKey } = useParams();
-  const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey) && mediaKey;
+  const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey);
+  const isMediaDetail =
+    stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey) && mediaKey;
 
   const isDeleted = msg.fileMetadata.appData.archivalStatus === CommunityDeletedArchivalStaus;
 
@@ -55,16 +58,24 @@ export const CommunityMessageItem = ({
   // }).get.data?.length;
   const hasReactions = false;
 
+  const [highlight, setHighlight] = useState(isDetail);
+  useEffect(() => {
+    if (!highlight) return;
+    setTimeout(() => {
+      setHighlight(false);
+    }, 5000);
+  }, [highlight]);
+
   return (
     <>
-      {isDetail ? (
+      {isMediaDetail ? (
         <CommunityMediaGallery
           msg={msg}
           communityId={community?.fileMetadata.appData.uniqueId as string}
         />
       ) : null}
       <div
-        className={`group relative flex flex-row gap-2 ${hasReactions ? 'pb-6' : ''}`}
+        className={`group relative flex flex-row gap-2 bg-background px-2 py-1 transition-colors duration-500 ${isDetail ? (highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000') : 'hover:bg-page-background'}  sm:px-5 ${hasReactions ? 'pb-6' : ''}`}
         data-unique-id={msg.fileMetadata.appData.uniqueId}
       >
         {hideDetails ? (
