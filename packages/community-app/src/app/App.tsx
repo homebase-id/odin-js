@@ -81,7 +81,8 @@ function App() {
                 </CommunityHome>
               }
             >
-              <Route index={true} element={<Navigate to={COMMUNITY_DEFAULT_GENERAL_ID} />} />
+              {/* TODO: Run this when on desktop? */}
+              {/* <Route index={true} element={<Navigate to={COMMUNITY_DEFAULT_GENERAL_ID} />} /> */}
               <Route path={':channelKey'} element={<CommunityChannelDetail />} />
               <Route path={':channelKey/:chatMessageKey'} element={<CommunityChannelDetail />} />
               <Route path={':channelKey/thread/:threadKey'} element={<CommunityChannelDetail />} />

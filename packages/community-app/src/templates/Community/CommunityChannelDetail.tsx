@@ -42,36 +42,38 @@ export const CommunityChannelDetail = () => {
   return (
     <ErrorBoundary>
       <div className="h-full w-full flex-grow bg-background">
-        <div className="flex h-full flex-grow flex-col overflow-hidden">
-          <CommunityChannelHeader community={community || undefined} channel={channelDsr} />
-          <ErrorBoundary>
-            <CommunityHistory
-              community={community || undefined}
-              channel={channelDsr || undefined}
-              origin={community || undefined}
-              doOpenThread={(thread) =>
-                navigate(
-                  `${COMMUNITY_ROOT}/${communityId}/${channelKey}/thread/${thread.fileMetadata.appData.uniqueId}`
-                )
-              }
-            />
-          </ErrorBoundary>
-          <ErrorBoundary>
-            <MessageComposer
-              community={community || undefined}
-              groupId={communityId}
-              // tagId={} Not sure yet if we should set a tagId to match the channel
-              // onSend={onSend}
-              key={channelKey}
-            />
-          </ErrorBoundary>
+        <div className="relative flex h-full flex-row">
+          <div className="flex h-full flex-grow flex-col overflow-hidden">
+            <CommunityChannelHeader community={community || undefined} channel={channelDsr} />
+            <ErrorBoundary>
+              <CommunityHistory
+                community={community || undefined}
+                channel={channelDsr || undefined}
+                origin={community || undefined}
+                doOpenThread={(thread) =>
+                  navigate(
+                    `${COMMUNITY_ROOT}/${communityId}/${channelKey}/thread/${thread.fileMetadata.appData.uniqueId}`
+                  )
+                }
+              />
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <MessageComposer
+                community={community || undefined}
+                groupId={communityId}
+                // tagId={} Not sure yet if we should set a tagId to match the channel
+                // onSend={onSend}
+                key={channelKey}
+              />
+            </ErrorBoundary>
+          </div>
+          {threadKey ? (
+            <ErrorBoundary>
+              <CommunityThread community={community || undefined} originId={threadKey} />
+            </ErrorBoundary>
+          ) : null}
         </div>
       </div>
-      {threadKey ? (
-        <ErrorBoundary>
-          <CommunityThread community={community || undefined} originId={threadKey} />
-        </ErrorBoundary>
-      ) : null}
     </ErrorBoundary>
   );
 };
@@ -340,22 +342,28 @@ const CommunityThread = ({
     messageId: originId,
   }).get;
 
-  const navigate = useNavigate();
-
   if (!community || !originId || !originMessage) {
     return null;
   }
 
   return (
-    <div className="flex h-full w-full max-w-sm flex-col">
-      <div className="flex flex-row items-center justify-between gap-2 bg-page-background p-2 lg:p-5">
+    <div className="absolute inset-0 flex h-full w-full flex-col xl:static xl:max-w-sm">
+      <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
+        <ActionLink
+          className="p-2 xl:hidden"
+          size="none"
+          type="mute"
+          href={`${COMMUNITY_ROOT}/${communityKey}/${channelKey}`}
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </ActionLink>
         {t('Thread')}
-        <ActionButton
-          onClick={() => navigate(`${COMMUNITY_ROOT}/${communityKey}/${channelKey}`)}
+        <ActionLink
+          href={`${COMMUNITY_ROOT}/${communityKey}/${channelKey}`}
           icon={Times}
           size="none"
           type="mute"
-          className="-m-2 p-2"
+          className="hidden p-2 lg:-m-2 lg:ml-auto xl:flex"
         />
       </div>
       <div className="flex h-20 flex-grow flex-col overflow-auto bg-background">
@@ -367,7 +375,12 @@ const CommunityThread = ({
         />
 
         <ErrorBoundary>
-          <MessageComposer community={community} groupId={originId} key={originId} />
+          <MessageComposer
+            community={community}
+            groupId={originId}
+            key={originId}
+            className="mt-auto lg:mt-0"
+          />
         </ErrorBoundary>
       </div>
     </div>

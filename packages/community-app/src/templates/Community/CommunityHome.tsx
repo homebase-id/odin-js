@@ -36,14 +36,14 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   const isOnline = useLiveCommunityProcessor(communityKey); // => Probablay move to CommunityDetail as it needs to connect on different drives
   useRemoveNotifications({ appId: COMMUNITY_APP_ID });
 
-  const { data: communities } = useCommunities().all;
-
-  const navigate = useNavigate();
-  useEffect(() => {
-    if (!communities) return;
-    if (communityKey) return;
-    navigate(`${COMMUNITY_ROOT}/${communities[0].fileMetadata.appData.uniqueId}`);
-  }, [communityKey, communities]);
+  // TODO: Run this when on desktop?
+  // const { data: communities } = useCommunities().all;
+  // const navigate = useNavigate();
+  // useEffect(() => {
+  //   if (!communities) return;
+  //   if (communityKey) return;
+  //   navigate(`${COMMUNITY_ROOT}/${communities[0].fileMetadata.appData.uniqueId}`);
+  // }, [communityKey, communities]);
 
   return (
     <>
@@ -179,12 +179,8 @@ const CommunityListItem = ({
 };
 
 const CommunitySidebar = () => {
-  const { communityKey, channelOrDmKey } = useParams();
-  const {
-    data: community,
-    isLoading,
-    isFetched,
-  } = useCommunity({ communityId: communityKey }).fetch;
+  const { communityKey } = useParams();
+  const { data: community, isLoading } = useCommunity({ communityId: communityKey }).fetch;
 
   const communityId = community?.fileMetadata.appData.uniqueId;
   const recipients = community?.fileMetadata.appData.content?.recipients;
