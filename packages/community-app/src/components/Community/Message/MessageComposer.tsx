@@ -4,7 +4,6 @@ import {
   FileSelector,
   VolatileInput,
   ActionButton,
-  Times,
   PaperPlane,
   getImagesFromPasteEvent,
   Plus,
@@ -21,7 +20,6 @@ import { useState, useEffect, useRef } from 'react';
 
 import { getNewId, isTouchDevice } from '@youfoundation/js-lib/helpers';
 import { LinkPreview } from '@youfoundation/js-lib/media';
-import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 
@@ -31,15 +29,13 @@ const CHAT_DRAFTS_KEY = 'CHAT_LOCAL_DRAFTS';
 export const MessageComposer = ({
   community,
   groupId,
-  replyMsg,
-  clearReplyMsg,
   onSend,
+  className,
 }: {
   community: HomebaseFile<CommunityDefinition> | undefined;
   groupId: string | undefined;
-  replyMsg: HomebaseFile<CommunityMessage> | undefined;
-  clearReplyMsg: () => void;
   onSend?: () => void;
+  className?: string;
 }) => {
   const volatileRef = useRef<VolatileInputRef>(null);
 
@@ -67,7 +63,6 @@ export const MessageComposer = ({
 
   const doSend = async (forcedVal?: string) => {
     const trimmedVal = (forcedVal || message)?.trim();
-    const replyId = replyMsg?.fileMetadata.appData.uniqueId;
     const newFiles = [...(files || [])];
 
     if ((!trimmedVal && !files?.length) || !community) return;
@@ -75,7 +70,6 @@ export const MessageComposer = ({
     // Clear internal state and allow excessive senders
     setMessage('');
     setFiles([]);
-    clearReplyMsg();
     volatileRef.current?.clear();
 
     try {
@@ -83,7 +77,6 @@ export const MessageComposer = ({
         community,
         groupId,
         message: trimmedVal || '',
-        replyId: replyId,
         files: newFiles,
         chatId: getNewId(),
         userDate: new Date().getTime(),
@@ -99,14 +92,9 @@ export const MessageComposer = ({
     }
   };
 
-  useEffect(() => {
-    // When replying to a message, focus the input
-    if (replyMsg) volatileRef.current?.focus();
-  }, [replyMsg]);
-
   return (
     <>
-      <div className="bg-page-background pb-[env(safe-area-inset-bottom)]">
+      <div className={`bg-page-background pb-[env(safe-area-inset-bottom)] ${className || ''}`}>
         <div className="max-h-[30vh] overflow-auto">
           <FileOverview files={files} setFiles={setFiles} cols={8} />
           {files?.length ? null : (
@@ -119,7 +107,6 @@ export const MessageComposer = ({
           )}
         </div>
 
-        {replyMsg ? <MessageForReply msg={replyMsg} onClear={clearReplyMsg} /> : null}
         <div className="flex flex-shrink-0 flex-row gap-2 px-2 py-3 md:px-5">
           <div className="my-auto flex flex-row items-center gap-1">
             <EmojiSelector
@@ -171,20 +158,5 @@ export const MessageComposer = ({
         </div>
       </div>
     </>
-  );
-};
-
-const MessageForReply = ({
-  msg,
-  onClear,
-}: {
-  msg: HomebaseFile<CommunityMessage>;
-  onClear: () => void;
-}) => {
-  return (
-    <div className="flex flex-row gap-2 px-5 py-3">
-      {/* <EmbeddedMessage msg={msg} /> */}
-      <ActionButton icon={Times} type="mute" onClick={onClear}></ActionButton>
-    </div>
   );
 };

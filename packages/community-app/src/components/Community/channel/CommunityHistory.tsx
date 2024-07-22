@@ -4,7 +4,7 @@ import { CommunityChannel } from '../../../providers/CommunityProvider';
 import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { t } from '@youfoundation/common-app';
+import { ErrorNotification, t } from '@youfoundation/common-app';
 import { CommunityMessageItem } from '../Message/CommunityMessageItem';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
 import { CommunityActions } from './ContextMenu';
@@ -15,12 +15,14 @@ export const useIsomorphicLayoutEffect =
 export const CommunityHistory = ({
   community,
   channel,
-  setReplyMsg,
+  originId,
+  doOpenThread,
   setIsEmptyChat,
 }: {
   community: HomebaseFile<CommunityDefinition> | undefined;
   channel?: HomebaseFile<CommunityChannel> | undefined;
-  setReplyMsg: (msg: HomebaseFile<CommunityMessage>) => void;
+  originId?: string;
+  doOpenThread?: (msg: HomebaseFile<CommunityMessage>) => void;
   setIsEmptyChat?: (isEmpty: boolean) => void;
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -33,9 +35,10 @@ export const CommunityHistory = ({
       isFetchingNextPage,
       isFetched,
     },
-    // delete: { mutate: deleteMessages, error: deleteMessagesError },
+    delete: { mutate: deleteMessages, error: deleteMessagesError },
   } = useCommunityMessages({
     communityId: community?.fileMetadata?.appData?.uniqueId,
+    originId: originId,
     // channelId: channel?.fileMetadata?.appData?.uniqueId,
   });
 
@@ -58,17 +61,19 @@ export const CommunityHistory = ({
 
   //   useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
   const communityActions: CommunityActions = {
-    doReply: (msg: HomebaseFile<CommunityMessage>) => setReplyMsg(msg),
     doDelete: async (msg: HomebaseFile<CommunityMessage>, deleteForEveryone: boolean) => {
       if (!community || !msg) return;
-      throw new Error('Not implemented');
-      // await deleteMessages({
-      //   conversation: conversation,
-      //   messages: [msg],
-      //   deleteForEveryone: deleteForEveryone,
-      // });
+
+      await deleteMessages({
+        community: community,
+        messages: [msg],
+      });
     },
   };
+
+  if (doOpenThread) {
+    communityActions.doReply = (msg: HomebaseFile<CommunityMessage>) => doOpenThread(msg);
+  }
 
   const count = flattenedMsgs?.length + 1;
   const virtualizer = useVirtualizer({
@@ -113,9 +118,9 @@ export const CommunityHistory = ({
 
   return (
     <>
-      {/* <ErrorNotification error={deleteMessagesError} /> */}
+      <ErrorNotification error={deleteMessagesError} />
       <div
-        className="flex w-full flex-grow flex-col-reverse overflow-auto py-2 sm:py-5"
+        className="scrollbar:bg-transparent flex w-full flex-grow flex-col-reverse overflow-auto py-2 sm:py-5"
         ref={scrollRef}
         key={channel?.fileId || community?.fileId}
         onCopyCapture={(e) => {
@@ -202,6 +207,7 @@ export const CommunityHistory = ({
                       previousAuthor === currentAuthor &&
                       Math.abs(previousDate - currentDate) < 1000 * 60 * 5
                     }
+                    className="px-2 py-1 sm:px-5"
                   />
                 </div>
               );

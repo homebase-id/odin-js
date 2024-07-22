@@ -28,6 +28,7 @@ import {
   TransferStatus,
   FailedTransferStatuses,
   queryBatch,
+  deleteFile,
 } from '@youfoundation/js-lib/core';
 import {
   getNewId,
@@ -309,6 +310,16 @@ export const updateCommunityMessage = async (
   );
 };
 
+export const hardDeleteCommunityMessage = async (
+  dotYouClient: DotYouClient,
+  communityId: string,
+  message: HomebaseFile<CommunityMessage>,
+  recipients: string[]
+) => {
+  const targetDrive = getTargetDriveFromCommunityId(communityId);
+  return await deleteFile(dotYouClient, targetDrive, message.fileId, recipients);
+};
+
 export const getCommunityMessage = async (
   dotYouClient: DotYouClient,
   communityId: string,
@@ -328,6 +339,8 @@ export const getCommunityMessage = async (
 export const getCommunityMessages = async (
   dotYouClient: DotYouClient,
   communityId: string,
+  groupIds: string[] | undefined,
+  tagIds: string[] | undefined,
   cursorState: string | undefined,
   pageSize: number
 ) => {
@@ -336,6 +349,8 @@ export const getCommunityMessages = async (
   const params: FileQueryParams = {
     targetDrive: targetDrive,
     fileType: [COMMUNITY_MESSAGE_FILE_TYPE],
+    groupId: groupIds,
+    tagsMatchAtLeastOne: tagIds,
   };
 
   const ro: GetBatchQueryResultOptions = {

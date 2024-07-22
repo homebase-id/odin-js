@@ -1,22 +1,44 @@
-import { InfiniteData, QueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import {
+  InfiniteData,
+  QueryClient,
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import {
   CommunityMessage,
   getCommunityMessages,
+  hardDeleteCommunityMessage,
 } from '../../../providers/CommunityMessageProvider';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useDotYouClientContext } from '@youfoundation/common-app';
+import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 
 const PAGE_SIZE = 100;
-export const useCommunityMessages = (props?: { communityId: string | undefined }) => {
-  const { communityId } = props || { communityId: undefined };
+export const useCommunityMessages = (props?: {
+  communityId: string | undefined;
+  originId?: string;
+}) => {
+  const { communityId, originId } = props || { communityId: undefined, originId: undefined };
   const dotYouClient = useDotYouClientContext();
 
-  //   const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-  const fetchMessages = async (communityId: string, cursorState: string | undefined) =>
-    await getCommunityMessages(dotYouClient, communityId, cursorState, PAGE_SIZE);
+  const fetchMessages = async (
+    communityId: string,
+    originId: string | undefined,
+    cursorState: string | undefined
+  ) =>
+    await getCommunityMessages(
+      dotYouClient,
+      communityId,
+      originId ? [originId] : undefined,
+      undefined,
+      cursorState,
+      PAGE_SIZE
+    );
 
   //   const markAsRead = async ({
   //     conversation,
@@ -42,43 +64,39 @@ export const useCommunityMessages = (props?: { communityId: string | undefined }
   //     return response;
   //   };
 
-  //   const removeMessage = async ({
-  //     conversation,
-  //     messages,
-  //     deleteForEveryone,
-  //   }: {
-  //     conversation: HomebaseFile<UnifiedConversation>;
-  //     messages: HomebaseFile<CommunityMessage>[];
-  //     deleteForEveryone?: boolean;
-  //   }) => {
-  //     const conversationContent = conversation.fileMetadata.appData.content;
-  //     const identity = dotYouClient.getIdentity();
-  //     const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
+  const removeMessage = async ({
+    community,
+    messages,
+  }: {
+    community: HomebaseFile<CommunityDefinition>;
+    messages: HomebaseFile<CommunityMessage>[];
+  }) => {
+    const communityContent = community.fileMetadata.appData.content;
+    const identity = dotYouClient.getIdentity();
+    const recipients = communityContent.recipients.filter((recipient) => recipient !== identity);
 
-  //     const hardDelete = stringGuidsEqual(
-  //       conversation?.fileMetadata.appData.uniqueId,
-  //       ConversationWithYourselfId
-  //     );
+    if (!community.fileMetadata.appData.uniqueId) {
+      throw new Error('Community unique id is not set');
+    }
 
-  //     return await Promise.all(
-  //       messages.map(async (msg) => {
-  //         hardDelete
-  //           ? await hardDeleteChatMessage(dotYouClient, msg)
-  //           : await softDeleteChatMessage(
-  //               dotYouClient,
-  //               msg,
-  //               recipients.filter(Boolean),
-  //               deleteForEveryone
-  //             );
-  //       })
-  //     );
-  //   };
+    return await Promise.all(
+      messages.map(async (msg) => {
+        await hardDeleteCommunityMessage(
+          dotYouClient,
+          community.fileMetadata.appData.uniqueId as string,
+          msg,
+          recipients
+        );
+      })
+    );
+  };
 
   return {
     all: useInfiniteQuery({
-      queryKey: ['community-messages', communityId],
+      queryKey: ['community-messages', communityId, originId || 'all'],
       initialPageParam: undefined as string | undefined,
-      queryFn: ({ pageParam }) => fetchMessages(communityId as string, pageParam),
+      queryFn: ({ pageParam }) =>
+        fetchMessages(communityId as string, originId as string, pageParam),
       getNextPageParam: (lastPage) =>
         lastPage?.searchResults && lastPage?.searchResults?.length >= PAGE_SIZE
           ? lastPage.cursorState
@@ -88,6 +106,7 @@ export const useCommunityMessages = (props?: { communityId: string | undefined }
       refetchOnReconnect: false,
       staleTime: 1000 * 60 * 60 * 24, // 24 hour
     }),
+
     // markAsRead: useMutation({
     //   mutationKey: ['markAsRead', conversationId],
     //   mutationFn: markAsRead,
@@ -95,15 +114,17 @@ export const useCommunityMessages = (props?: { communityId: string | undefined }
     //     console.error('Error marking chat as read', { error });
     //   },
     // }),
-    // delete: useMutation({
-    //   mutationFn: removeMessage,
+    delete: useMutation({
+      mutationFn: removeMessage,
 
-    //   onSettled: async (_data, _error, variables) => {
-    //     queryClient.invalidateQueries({
-    //       queryKey: ['community-messages', variables.conversation.fileMetadata.appData.uniqueId],
-    //     });
-    //   },
-    // }),
+      onSettled: async (_data, _error, variables) => {
+        queryClient.invalidateQueries({
+          queryKey: ['community-messages', variables.community.fileMetadata.appData.uniqueId],
+        });
+
+        // TODO: Invalidate the threads?
+      },
+    }),
   };
 };
 

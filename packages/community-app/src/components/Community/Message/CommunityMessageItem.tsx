@@ -29,11 +29,13 @@ export const CommunityMessageItem = ({
   community,
   communityActions,
   hideDetails,
+  className,
 }: {
   msg: HomebaseFile<CommunityMessage>;
   community?: HomebaseFile<CommunityDefinition>;
   communityActions?: CommunityActions;
   hideDetails?: boolean;
+  className?: string;
 }) => {
   const identity = useDotYouClient().getIdentity();
   const authorOdinId =
@@ -75,7 +77,7 @@ export const CommunityMessageItem = ({
         />
       ) : null}
       <div
-        className={`group relative flex flex-row gap-2 bg-background px-2 py-1 transition-colors duration-500 ${isDetail ? (highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000') : 'hover:bg-page-background'}  sm:px-5 ${hasReactions ? 'pb-6' : ''}`}
+        className={`group relative flex flex-row gap-2 bg-background transition-colors duration-500 ${isDetail ? (highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000') : 'hover:bg-page-background'} ${hasReactions ? 'pb-6' : ''} ${className || ''}`}
         data-unique-id={msg.fileMetadata.appData.uniqueId}
       >
         {hideDetails ? (

@@ -20,7 +20,7 @@ import { COMMUNITY_ROOT } from '../../../templates/Community/CommunityHome';
 import { COMMUNITY_DEFAULT_GENERAL_ID } from '../../../providers/CommunityProvider';
 
 export interface CommunityActions {
-  doReply: (msg: HomebaseFile<CommunityMessage>) => void;
+  doReply?: (msg: HomebaseFile<CommunityMessage>) => void;
   doDelete: (msg: HomebaseFile<CommunityMessage>, deleteForEveryone: boolean) => void;
 }
 
@@ -51,7 +51,7 @@ export const ContextMenu = ({
       onClick: () => setEditMessage(true),
     });
     optionalOptions.push({
-      label: t('Delete for everyone'),
+      label: t('Delete'),
       confirmOptions: {
         title: t('Delete message'),
         body: t('Are you sure you want to delete this message?'),
@@ -60,16 +60,6 @@ export const ContextMenu = ({
       onClick: () => communityActions.doDelete(msg, true),
     });
   }
-
-  optionalOptions.push({
-    label: t('Delete for me'),
-    confirmOptions: {
-      title: t('Delete message'),
-      body: t('Are you sure you want to delete this message?'),
-      buttonText: t('Delete'),
-    },
-    onClick: () => communityActions.doDelete(msg, false),
-  });
 
   if (community)
     optionalOptions.push({
@@ -84,6 +74,13 @@ export const ContextMenu = ({
     optionalOptions.push({
       label: t('Retry sending'),
       onClick: () => resend({ updatedChatMessage: msg, community: community }),
+    });
+  }
+
+  if (communityActions.doReply) {
+    optionalOptions.push({
+      label: t('Reply in thread'),
+      onClick: () => communityActions.doReply && communityActions.doReply(msg),
     });
   }
 
@@ -106,10 +103,6 @@ export const ContextMenu = ({
       ) : null}
       <ActionGroup
         options={[
-          {
-            label: t('Reply'),
-            onClick: () => communityActions.doReply(msg),
-          },
           {
             label: t('Copy link'),
             onClick: () => {

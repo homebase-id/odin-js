@@ -24,14 +24,16 @@ import { NewCommunity } from './CommunityNew';
 import { useCommunityChannels } from '../../hooks/community/channels/useCommunityChannels';
 import { CommunityChannel } from '../../providers/CommunityProvider';
 import { useCommunity } from '../../hooks/community/useCommunity';
+import { useLiveCommunityProcessor } from '../../hooks/community/useLiveCommunityProcessor';
 
 export const COMMUNITY_ROOT = '/apps/community';
 
 export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   const newCommunity = useMatch({ path: `${COMMUNITY_ROOT}/new` });
+  const { communityKey } = useParams();
   const isCreateNew = !!newCommunity;
 
-  // const isOnline = useLiveCommunityProcessor(); // => Probablay move to CommunityDetail as it needs to connect on different drives
+  const isOnline = useLiveCommunityProcessor(communityKey); // => Probablay move to CommunityDetail as it needs to connect on different drives
   useRemoveNotifications({ appId: COMMUNITY_APP_ID });
 
   return (
@@ -53,9 +55,7 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
         ) : (
           <>
             <CommunitySidebar />
-            {children ? (
-              <div className="h-full w-full flex-grow bg-background">{children}</div>
-            ) : null}
+            {children ? <>{children}</> : null}
           </>
         )}
       </div>
@@ -188,7 +188,7 @@ const CommunitySidebar = () => {
 
   return (
     <div
-      className={`fixed ${isActive ? 'translate-x-full' : 'translate-x-0'} -left-full h-[100dvh] w-full bg-page-background transition-transform lg:relative lg:left-0 lg:max-w-xs lg:translate-x-0 lg:border-r lg:shadow-inner`}
+      className={`fixed ${isActive ? 'translate-x-full' : 'translate-x-0'} -left-full h-[100dvh] w-full bg-page-background transition-transform lg:relative lg:left-0 lg:max-w-[17rem] lg:translate-x-0 lg:border-r lg:shadow-inner`}
     >
       <div className="absolute inset-0 flex flex-col gap-5 overflow-auto px-2 py-5 md:pl-[calc(env(safe-area-inset-left)+4.3rem+0.5rem)] lg:pl-2">
         <p className="text-xl font-semibold">{community.fileMetadata.appData.content?.title}</p>
@@ -220,7 +220,7 @@ const ChannelItem = ({
 }) => {
   const channelId = channel.fileMetadata.appData.uniqueId;
   const href = `${COMMUNITY_ROOT}/${communityId}/${channelId}`;
-  const isActive = !!useMatch({ path: href });
+  const isActive = !!useMatch({ path: href, end: false });
 
   return (
     <Link

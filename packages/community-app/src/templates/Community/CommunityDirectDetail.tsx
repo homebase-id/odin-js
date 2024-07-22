@@ -51,13 +51,15 @@ export const CommunityDirectDetail = () => {
 
   return (
     <ErrorBoundary>
-      {conversationId ? (
-        <ChatDetail
-          conversationId={conversationId}
-          communityTagId={communityId}
-          key={conversationId || dmKey}
-        />
-      ) : null}
+      <div className="h-full w-full flex-grow bg-background">
+        {conversationId ? (
+          <ChatDetail
+            conversationId={conversationId}
+            communityTagId={communityId}
+            key={conversationId || dmKey}
+          />
+        ) : null}
+      </div>
     </ErrorBoundary>
   );
 };

@@ -2,33 +2,36 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import {
+  ActionButton,
   ActionLink,
   ChevronLeft,
   DialogWrapper,
   ErrorBoundary,
+  t,
+  Times,
   usePortal,
 } from '@youfoundation/common-app';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { COMMUNITY_ROOT } from './CommunityHome';
 import { CommunityChannel } from '../../providers/CommunityProvider';
 import { useCommunityChannel } from '../../hooks/community/channels/useCommunityChannel';
 import { createPortal } from 'react-dom';
 import { MessageComposer } from '../../components/Community/Message/MessageComposer';
-import { CommunityMessage } from '../../providers/CommunityMessageProvider';
 import { CommunityHistory } from '../../components/Community/channel/CommunityHistory';
+import { CommunityMessageItem } from '../../components/Community/Message/CommunityMessageItem';
+import { useCommunityMessage } from '../../hooks/community/messages/useCommunityMessage';
 
 export const CommunityChannelDetail = () => {
-  const { communityKey, channelKey, dmKey } = useParams();
+  const { communityKey, channelKey, threadKey } = useParams();
   const communityId = communityKey;
   const { data: community, isLoading, isFetched } = useCommunity({ communityId }).fetch;
+  const navigate = useNavigate();
 
   const { data: channelDsr, isFetched: isChannelFetched } = useCommunityChannel({
     communityId: communityId,
     channelId: channelKey,
   }).fetch;
-
-  const [replyMsg, setReplyMsg] = useState<HomebaseFile<CommunityMessage> | undefined>();
 
   if (!communityId || isLoading || (!community && isFetched) || (!channelDsr && isChannelFetched))
     return (
@@ -39,26 +42,36 @@ export const CommunityChannelDetail = () => {
 
   return (
     <ErrorBoundary>
-      <div className="flex h-full flex-grow flex-col overflow-hidden">
-        <CommunityChannelHeader community={community || undefined} channel={channelDsr} />
-        <ErrorBoundary>
-          <CommunityHistory
-            community={community || undefined}
-            channel={channelDsr || undefined}
-            setReplyMsg={setReplyMsg}
-          />
-        </ErrorBoundary>
-        <ErrorBoundary>
-          <MessageComposer
-            community={community || undefined}
-            groupId={undefined} // Not sure if we need to set a groupId as channels would be volatile
-            replyMsg={replyMsg}
-            clearReplyMsg={() => setReplyMsg(undefined)}
-            // onSend={onSend}
-            key={channelKey || dmKey}
-          />
-        </ErrorBoundary>
+      <div className="h-full w-full flex-grow bg-background">
+        <div className="flex h-full flex-grow flex-col overflow-hidden">
+          <CommunityChannelHeader community={community || undefined} channel={channelDsr} />
+          <ErrorBoundary>
+            <CommunityHistory
+              community={community || undefined}
+              channel={channelDsr || undefined}
+              doOpenThread={(thread) =>
+                navigate(
+                  `${COMMUNITY_ROOT}/${communityId}/${channelKey}/thread/${thread.fileMetadata.appData.uniqueId}`
+                )
+              }
+            />
+          </ErrorBoundary>
+          <ErrorBoundary>
+            <MessageComposer
+              community={community || undefined}
+              groupId={communityId}
+              // tagId={} Not sure yet if we should set a tagId to match the channel
+              // onSend={onSend}
+              key={channelKey}
+            />
+          </ErrorBoundary>
+        </div>
       </div>
+      {threadKey ? (
+        <ErrorBoundary>
+          <CommunityThread community={community || undefined} originId={threadKey} />
+        </ErrorBoundary>
+      ) : null}
     </ErrorBoundary>
   );
 };
@@ -311,4 +324,53 @@ const ChannelInfo = ({
   );
 
   return createPortal(dialog, target);
+};
+
+const CommunityThread = ({
+  community,
+  originId,
+}: {
+  community: HomebaseFile<CommunityDefinition> | undefined;
+  originId: string;
+}) => {
+  const { communityKey, channelKey } = useParams();
+
+  const { data: originMessage } = useCommunityMessage({
+    communityId: community?.fileMetadata.appData.uniqueId,
+    messageId: originId,
+  }).get;
+
+  const navigate = useNavigate();
+
+  if (!community || !originId || !originMessage) {
+    return null;
+  }
+
+  return (
+    <div className="flex h-full w-full max-w-sm flex-col bg-pink-500">
+      <div className="flex flex-row items-center justify-between gap-2 bg-page-background p-2 lg:p-5">
+        {t('Thread')}
+        <ActionButton
+          onClick={() => navigate(`${COMMUNITY_ROOT}/${communityKey}/${channelKey}`)}
+          icon={Times}
+          size="square"
+          type="mute"
+        ></ActionButton>
+      </div>
+      <div className="flex h-20 flex-grow flex-col overflow-auto">
+        <CommunityMessageItem community={community} msg={originMessage} className="px-2 py-3" />
+        <hr />
+        <CommunityHistory community={community} originId={originId} channel={undefined} />
+
+        <ErrorBoundary>
+          <MessageComposer
+            className="mt-auto"
+            community={community}
+            groupId={originId}
+            key={originId}
+          />
+        </ErrorBoundary>
+      </div>
+    </div>
+  );
 };

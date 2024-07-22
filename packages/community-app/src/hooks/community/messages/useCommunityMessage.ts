@@ -7,7 +7,6 @@ import {
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
 import { LinkPreview } from '@youfoundation/js-lib/media';
-import { CommunityChannel } from '../../../providers/CommunityProvider';
 import {
   CommunityDeliveryStatus,
   CommunityMessage,

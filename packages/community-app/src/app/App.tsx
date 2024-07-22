@@ -82,6 +82,7 @@ function App() {
             >
               <Route path={':channelKey'} element={<CommunityChannelDetail />} />
               <Route path={':channelKey/:chatMessageKey'} element={<CommunityChannelDetail />} />
+              <Route path={':channelKey/thread/:threadKey'} element={<CommunityChannelDetail />} />
               <Route
                 path={':channelKey/:chatMessageKey/:mediaKey'}
                 element={<CommunityChannelDetail />}
