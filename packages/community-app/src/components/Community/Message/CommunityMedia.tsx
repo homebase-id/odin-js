@@ -219,7 +219,7 @@ const MediaGallery = ({
 
   return (
     <div
-      className={`relative ${totalCount === 2 ? 'aspect-[2.02]' : 'aspect-square'} w-[75vw] max-w-xs overflow-hidden rounded-lg bg-background`}
+      className={`relative ${totalCount === 2 ? 'aspect-[2.02]' : 'aspect-square'} w-[75vw] max-w-[min(100%,20rem)] overflow-hidden rounded-lg bg-background`}
     >
       {tinyThumbUrl ? (
         <MediaGalleryLoading tinyThumbUrl={tinyThumbUrl} totalCount={totalCount} />

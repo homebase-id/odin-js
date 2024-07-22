@@ -39,6 +39,7 @@ import {
 } from '@youfoundation/common-app';
 import { CommunityChannelDetail } from '../templates/Community/CommunityChannelDetail';
 import { CommunityDirectDetail } from '../templates/Community/CommunityDirectDetail';
+import { COMMUNITY_DEFAULT_GENERAL_ID } from '../providers/CommunityProvider';
 
 function App() {
   const router = createBrowserRouter(
@@ -80,9 +81,14 @@ function App() {
                 </CommunityHome>
               }
             >
+              <Route index={true} element={<Navigate to={COMMUNITY_DEFAULT_GENERAL_ID} />} />
               <Route path={':channelKey'} element={<CommunityChannelDetail />} />
               <Route path={':channelKey/:chatMessageKey'} element={<CommunityChannelDetail />} />
               <Route path={':channelKey/thread/:threadKey'} element={<CommunityChannelDetail />} />
+              <Route
+                path={':channelKey/thread/:threadKey/:chatMessageKey/:mediaKey'}
+                element={<CommunityChannelDetail />}
+              />
               <Route
                 path={':channelKey/:chatMessageKey/:mediaKey'}
                 element={<CommunityChannelDetail />}

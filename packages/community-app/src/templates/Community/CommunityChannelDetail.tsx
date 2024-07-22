@@ -19,7 +19,6 @@ import { useCommunityChannel } from '../../hooks/community/channels/useCommunity
 import { createPortal } from 'react-dom';
 import { MessageComposer } from '../../components/Community/Message/MessageComposer';
 import { CommunityHistory } from '../../components/Community/channel/CommunityHistory';
-import { CommunityMessageItem } from '../../components/Community/Message/CommunityMessageItem';
 import { useCommunityMessage } from '../../hooks/community/messages/useCommunityMessage';
 
 export const CommunityChannelDetail = () => {
@@ -49,6 +48,7 @@ export const CommunityChannelDetail = () => {
             <CommunityHistory
               community={community || undefined}
               channel={channelDsr || undefined}
+              origin={community || undefined}
               doOpenThread={(thread) =>
                 navigate(
                   `${COMMUNITY_ROOT}/${communityId}/${channelKey}/thread/${thread.fileMetadata.appData.uniqueId}`
@@ -347,28 +347,27 @@ const CommunityThread = ({
   }
 
   return (
-    <div className="flex h-full w-full max-w-sm flex-col bg-pink-500">
+    <div className="flex h-full w-full max-w-sm flex-col">
       <div className="flex flex-row items-center justify-between gap-2 bg-page-background p-2 lg:p-5">
         {t('Thread')}
         <ActionButton
           onClick={() => navigate(`${COMMUNITY_ROOT}/${communityKey}/${channelKey}`)}
           icon={Times}
-          size="square"
+          size="none"
           type="mute"
-        ></ActionButton>
+          className="-m-2 p-2"
+        />
       </div>
-      <div className="flex h-20 flex-grow flex-col overflow-auto">
-        <CommunityMessageItem community={community} msg={originMessage} className="px-2 py-3" />
-        <hr />
-        <CommunityHistory community={community} originId={originId} channel={undefined} />
+      <div className="flex h-20 flex-grow flex-col overflow-auto bg-background">
+        <CommunityHistory
+          community={community}
+          origin={originMessage}
+          channel={undefined}
+          alignTop={true}
+        />
 
         <ErrorBoundary>
-          <MessageComposer
-            className="mt-auto"
-            community={community}
-            groupId={originId}
-            key={originId}
-          />
+          <MessageComposer community={community} groupId={originId} key={originId} />
         </ErrorBoundary>
       </div>
     </div>

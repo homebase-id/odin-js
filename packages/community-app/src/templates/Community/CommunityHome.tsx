@@ -1,6 +1,6 @@
-import { useParams, useMatch, Link } from 'react-router-dom';
+import { useParams, useMatch, Link, useNavigate } from 'react-router-dom';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import {
   ActionLink,
   COMMUNITY_APP_ID,
@@ -35,6 +35,15 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
 
   const isOnline = useLiveCommunityProcessor(communityKey); // => Probablay move to CommunityDetail as it needs to connect on different drives
   useRemoveNotifications({ appId: COMMUNITY_APP_ID });
+
+  const { data: communities } = useCommunities().all;
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!communities) return;
+    if (communityKey) return;
+    navigate(`${COMMUNITY_ROOT}/${communities[0].fileMetadata.appData.uniqueId}`);
+  }, [communityKey, communities]);
 
   return (
     <>

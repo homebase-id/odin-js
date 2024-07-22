@@ -8,6 +8,8 @@ import {
   useDarkMode,
   OwnerImage,
   OwnerName,
+  ActionLink,
+  formatToTimeAgoWithRelativeDetail,
 } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
@@ -22,19 +24,23 @@ import { CommunityDeliveryIndicator } from './CommunityDeliveryIndicator';
 import { CommunitySentTimeIndicator } from './CommunitySentTimeIndicator';
 import { CommunityMedia } from './CommunityMedia';
 import { CommunityMediaGallery } from './detail/CommunityMediaGallery';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
+import { COMMUNITY_ROOT } from '../../../templates/Community/CommunityHome';
 
 export const CommunityMessageItem = ({
   msg,
   community,
   communityActions,
   hideDetails,
+  hideThreads,
   className,
 }: {
   msg: HomebaseFile<CommunityMessage>;
   community?: HomebaseFile<CommunityDefinition>;
   communityActions?: CommunityActions;
   hideDetails?: boolean;
+  hideThreads?: boolean;
   className?: string;
 }) => {
   const identity = useDotYouClient().getIdentity();
@@ -87,19 +93,19 @@ export const CommunityMessageItem = ({
             {!messageFromMe ? (
               <ConnectionImage
                 odinId={authorOdinId}
-                className={`border border-neutral-200 dark:border-neutral-800`}
+                className={`flex-shrink-0 border border-neutral-200 dark:border-neutral-800`}
                 size="xs"
               />
             ) : (
               <OwnerImage
-                className={`border border-neutral-200 dark:border-neutral-800`}
+                className={`flex-shrink-0 border border-neutral-200 dark:border-neutral-800`}
                 size="xs"
               />
             )}
           </>
         )}
 
-        <div className="flex flex-col">
+        <div className="flex w-20 flex-grow flex-col">
           <div className="flex flex-row items-center gap-2">
             {hideDetails ? null : (
               <>
@@ -139,6 +145,7 @@ export const CommunityMessageItem = ({
           {/* {conversation && !isDeleted ? (
           <CommunityReactionComposer msg={msg} conversation={conversation} />
           ) : null} */}
+          {hideThreads ? null : <CommunityMessageThreadSummary community={community} msg={msg} />}
         </div>
       </div>
     </>
@@ -199,6 +206,7 @@ const urlRegex = new RegExp(
 );
 const mentionRegex = new RegExp(/@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
 const ParagraphWithLinks = ({ text, className }: { text: string; className?: string }) => {
+  if (!text) return null;
   const splitUpText = text.split(urlAndMentionRegex);
 
   return (
@@ -280,5 +288,46 @@ const CommunityMediaMessageBody = ({
       ) : null}
       {/* <ChatReactions msg={msg} community={community} /> */}
     </div>
+  );
+};
+
+const CommunityMessageThreadSummary = ({
+  community,
+  msg,
+}: {
+  community: HomebaseFile<CommunityDefinition> | undefined;
+  msg: HomebaseFile<CommunityMessage>;
+}) => {
+  const { communityKey, channelKey } = useParams();
+
+  const { data: messages } = useCommunityMessages({
+    communityId: community?.fileMetadata.appData.uniqueId as string,
+    originId: msg.fileMetadata.appData.uniqueId,
+  }).all;
+
+  const flattenedMsgs =
+    useMemo(
+      () =>
+        (messages?.pages?.flatMap((page) => page?.searchResults)?.filter(Boolean) ||
+          []) as HomebaseFile<CommunityMessage>[],
+      [messages]
+    ) || [];
+
+  if (!flattenedMsgs?.length) return null;
+
+  return (
+    <ActionLink
+      className="flex flex-row gap-2 text-indigo-500"
+      href={`${COMMUNITY_ROOT}/${communityKey}/${channelKey}/thread/${msg.fileMetadata.appData.uniqueId}`}
+      type="mute"
+    >
+      <p className="text-sm font-semibold">
+        {flattenedMsgs.length} {t('replies')}
+        <span className="ml-1 font-normal text-foreground/50">
+          {t('Last reply')}{' '}
+          {formatToTimeAgoWithRelativeDetail(new Date(flattenedMsgs?.[0].fileMetadata.created))}
+        </span>
+      </p>
+    </ActionLink>
   );
 };

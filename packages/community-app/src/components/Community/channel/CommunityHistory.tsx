@@ -1,7 +1,10 @@
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
-import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
+import {
+  COMMUNITY_MESSAGE_FILE_TYPE,
+  CommunityMessage,
+} from '../../../providers/CommunityMessageProvider';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { ErrorNotification, t } from '@youfoundation/common-app';
@@ -15,17 +18,21 @@ export const useIsomorphicLayoutEffect =
 export const CommunityHistory = ({
   community,
   channel,
-  originId,
+  origin,
   doOpenThread,
   setIsEmptyChat,
+  alignTop,
 }: {
   community: HomebaseFile<CommunityDefinition> | undefined;
   channel?: HomebaseFile<CommunityChannel> | undefined;
-  originId?: string;
+  origin?: HomebaseFile<CommunityDefinition> | HomebaseFile<CommunityMessage>;
   doOpenThread?: (msg: HomebaseFile<CommunityMessage>) => void;
   setIsEmptyChat?: (isEmpty: boolean) => void;
+  alignTop?: boolean;
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inAThread =
+    !!origin && origin.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE;
 
   const {
     all: {
@@ -38,17 +45,21 @@ export const CommunityHistory = ({
     delete: { mutate: deleteMessages, error: deleteMessagesError },
   } = useCommunityMessages({
     communityId: community?.fileMetadata?.appData?.uniqueId,
-    originId: originId,
+    originId: origin?.fileMetadata.appData.uniqueId,
     // channelId: channel?.fileMetadata?.appData?.uniqueId,
   });
 
   const flattenedMsgs =
-    useMemo(
-      () =>
-        (messages?.pages?.flatMap((page) => page?.searchResults)?.filter(Boolean) ||
-          []) as HomebaseFile<CommunityMessage>[],
-      [messages]
-    ) || [];
+    useMemo(() => {
+      const flat = (messages?.pages?.flatMap((page) => page?.searchResults)?.filter(Boolean) ||
+        []) as HomebaseFile<CommunityMessage>[];
+
+      if (inAThread) {
+        flat.push(origin as HomebaseFile<CommunityMessage>);
+      }
+
+      return flat;
+    }, [messages, origin]) || [];
 
   useEffect(() => {
     if (
@@ -61,7 +72,7 @@ export const CommunityHistory = ({
 
   //   useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
   const communityActions: CommunityActions = {
-    doDelete: async (msg: HomebaseFile<CommunityMessage>, deleteForEveryone: boolean) => {
+    doDelete: async (msg: HomebaseFile<CommunityMessage>) => {
       if (!community || !msg) return;
 
       await deleteMessages({
@@ -71,7 +82,7 @@ export const CommunityHistory = ({
     },
   };
 
-  if (doOpenThread) {
+  if (doOpenThread && inAThread) {
     communityActions.doReply = (msg: HomebaseFile<CommunityMessage>) => doOpenThread(msg);
   }
 
@@ -120,7 +131,7 @@ export const CommunityHistory = ({
     <>
       <ErrorNotification error={deleteMessagesError} />
       <div
-        className="scrollbar:bg-transparent flex w-full flex-grow flex-col-reverse overflow-auto py-2 sm:py-5"
+        className={`flex w-full ${alignTop ? '' : 'flex-grow'} flex-col-reverse overflow-auto py-2 sm:py-5`}
         ref={scrollRef}
         key={channel?.fileId || community?.fileId}
         onCopyCapture={(e) => {
@@ -165,7 +176,7 @@ export const CommunityHistory = ({
                     key={item.key}
                     data-index={item.index}
                     ref={virtualizer.measureElement}
-                    className="sm:min-h-[22rem]"
+                    className={alignTop ? '' : 'sm:min-h-[22rem]'}
                     // h-22rem keeps space for the context menu/emoji selector of the first item; otherwise the context menu would be cut off by the overflow-hidden
                   >
                     {hasMoreMessages || isFetchingNextPage ? (
@@ -207,6 +218,7 @@ export const CommunityHistory = ({
                       previousAuthor === currentAuthor &&
                       Math.abs(previousDate - currentDate) < 1000 * 60 * 5
                     }
+                    hideThreads={inAThread}
                     className="px-2 py-1 sm:px-5"
                   />
                 </div>
