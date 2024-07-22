@@ -322,7 +322,7 @@ const CommunityMessageThreadSummary = ({
       type="mute"
     >
       <p className="text-sm font-semibold">
-        {flattenedMsgs.length} {t('replies')}
+        {flattenedMsgs.length} {t(flattenedMsgs.length === 1 ? 'reply' : 'replies')}
         <span className="ml-1 font-normal text-foreground/50">
           {t('Last reply')}{' '}
           {formatToTimeAgoWithRelativeDetail(new Date(flattenedMsgs?.[0].fileMetadata.created))}
