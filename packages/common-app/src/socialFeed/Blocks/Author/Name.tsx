@@ -1,14 +1,20 @@
 import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 import { useSiteData, useExternalOdinId, useIsConnected, useDotYouClient } from '../../../..';
 
-export const AuthorName = ({ odinId }: { odinId?: string }) => {
+export const AuthorName = ({ odinId, excludeLink }: { odinId?: string; excludeLink?: boolean }) => {
   if (!odinId || odinId === window.location.hostname) return <OwnerName />;
 
   const identity = useDotYouClient().getIdentity();
   const isConnected = useIsConnected(odinId).data;
 
-  const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
+  const host = new DotYouClient({
+    identity: identity || window.location.host,
+    api: ApiType.Guest,
+  }).getRoot();
 
+  if (excludeLink) {
+    return <ConnectionName odinId={odinId} />;
+  }
   return (
     <a
       href={`${host}${isConnected && identity ? '?youauth-logon=' + identity : ''}`}

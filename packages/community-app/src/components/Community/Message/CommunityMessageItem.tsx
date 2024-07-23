@@ -2,24 +2,19 @@ import {
   useDotYouClient,
   ConnectionImage,
   ConnectionName,
-  Block,
   t,
   getOdinIdColor,
-  useDarkMode,
   OwnerImage,
   OwnerName,
   ActionLink,
   formatToTimeAgoWithRelativeDetail,
 } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import {
-  CommunityDeletedArchivalStaus,
-  CommunityMessage,
-} from '../../../providers/CommunityMessageProvider';
+import { formatGuidId, stringGuidsEqual, toGuidId } from '@youfoundation/js-lib/helpers';
+import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { CommunityActions, ContextMenu } from '../channel/ContextMenu';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { CommunityDeliveryIndicator } from './CommunityDeliveryIndicator';
 import { CommunitySentTimeIndicator } from './CommunitySentTimeIndicator';
 import { CommunityMedia } from './CommunityMedia';
@@ -58,14 +53,6 @@ export const CommunityMessageItem = ({
   const isMediaDetail =
     stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey) && mediaKey;
 
-  const isDeleted = msg.fileMetadata.appData.archivalStatus === CommunityDeletedArchivalStaus;
-
-  // const hasReactions = useChatReaction({
-  //   messageId: msg.fileMetadata.appData.uniqueId,
-  //   conversationId: conversation?.fileMetadata.appData.uniqueId,
-  // }).get.data?.length;
-  const hasReactions = false;
-
   const [highlight, setHighlight] = useState(isDetail);
   useEffect(() => {
     if (!highlight) return;
@@ -83,7 +70,7 @@ export const CommunityMessageItem = ({
         />
       ) : null}
       <div
-        className={`group relative flex flex-row gap-2 bg-background transition-colors duration-500 ${isDetail ? (highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000') : 'hover:bg-page-background'} ${hasReactions ? 'pb-6' : ''} ${className || ''}`}
+        className={`group relative flex flex-row gap-2 bg-background transition-colors duration-500 ${isDetail ? (highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000') : 'hover:bg-page-background'} ${className || ''}`}
         data-unique-id={msg.fileMetadata.appData.uniqueId}
       >
         {hideDetails ? (
@@ -119,28 +106,14 @@ export const CommunityMessageItem = ({
                 <CommunityDeliveryIndicator msg={msg} />
               </>
             )}
-            {!isDeleted ? (
-              <ContextMenu communityActions={communityActions} msg={msg} community={community} />
-            ) : null}
+
+            <ContextMenu communityActions={communityActions} msg={msg} community={community} />
           </div>
 
-          {hasMedia && !isDeleted ? (
-            <CommunityMediaMessageBody
-              msg={msg}
-              community={community}
-              authorOdinId={authorOdinId}
-              messageFromMe={messageFromMe}
-              communityActions={communityActions}
-            />
+          {hasMedia ? (
+            <CommunityMediaMessageBody msg={msg} community={community} />
           ) : (
-            <CommunityTextMessageBody
-              msg={msg}
-              community={community}
-              authorOdinId={authorOdinId}
-              messageFromMe={messageFromMe}
-              communityActions={communityActions}
-              isDeleted={isDeleted}
-            />
+            <CommunityTextMessageBody msg={msg} community={community} />
           )}
           {/* {conversation && !isDeleted ? (
           <CommunityReactionComposer msg={msg} conversation={conversation} />
@@ -154,20 +127,9 @@ export const CommunityMessageItem = ({
 
 const CommunityTextMessageBody = ({
   msg,
-  community,
-
-  messageFromMe,
-  authorOdinId,
-  communityActions,
-  isDeleted,
 }: {
   msg: HomebaseFile<CommunityMessage>;
   community?: HomebaseFile<CommunityDefinition>;
-
-  messageFromMe: boolean;
-  authorOdinId: string;
-  communityActions?: CommunityActions;
-  isDeleted: boolean;
 }) => {
   const content = msg.fileMetadata.appData.content;
   const isEmojiOnly =
@@ -181,33 +143,31 @@ const CommunityTextMessageBody = ({
       className={`relative w-auto max-w-[75vw] rounded-lg md:max-w-xs lg:max-w-lg xl:max-w-[50vw]`}
     >
       <div className="flex flex-col md:flex-row md:flex-wrap md:gap-2">
-        {isDeleted ? (
-          <MessageDeletedInnerBody />
-        ) : (
-          <div className="flex min-w-0 flex-col gap-1">
-            {/* {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null} */}
-            <ParagraphWithLinks
-              text={content.message}
-              className={`copyable-content whitespace-pre-wrap break-words ${
-                isEmojiOnly && !isReply ? 'text-7xl' : ''
-              }`}
-            />
-          </div>
-        )}
+        <div className="flex min-w-0 flex-col gap-1">
+          {/* {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null} */}
+          <ParagraphWithLinks
+            text={content.message}
+            className={`copyable-content whitespace-pre-wrap break-words ${
+              isEmojiOnly && !isReply ? 'text-7xl' : ''
+            }`}
+          />
+        </div>
       </div>
       {/* {!isDeleted ? <ChatReactions msg={msg} community={community} /> : null} */}
     </div>
   );
 };
 
-const urlAndMentionRegex = new RegExp(/(https?:\/\/[^\s]+|@[^\s]+)/);
+const urlAndMentionRegex = new RegExp(/(https?:\/\/[^\s]+|@[^\s]+|#[^\s]+)/);
 const urlRegex = new RegExp(
   /https?:\/\/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|(localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d{1,5})?)(\/[^\s]*)?/
 );
 const mentionRegex = new RegExp(/@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+const tagRegex = new RegExp(/#[a-zA-Z0-9.-]/);
 const ParagraphWithLinks = ({ text, className }: { text: string; className?: string }) => {
   if (!text) return null;
   const splitUpText = text.split(urlAndMentionRegex);
+  const { communityKey } = useParams();
 
   return (
     <p className={className}>
@@ -236,6 +196,18 @@ const ParagraphWithLinks = ({ text, className }: { text: string; className?: str
               {part}
             </a>
           );
+        } else if (tagRegex.test(part)) {
+          const tag = part.slice(1);
+          const tagGuid = formatGuidId(toGuidId(tag));
+          return (
+            <Link
+              key={index}
+              to={`${COMMUNITY_ROOT}/${communityKey}/${tagGuid}`}
+              className="break-all text-primary hover:underline"
+            >
+              {part}
+            </Link>
+          );
         }
         return part;
       })}
@@ -243,33 +215,13 @@ const ParagraphWithLinks = ({ text, className }: { text: string; className?: str
   );
 };
 
-export const MessageDeletedInnerBody = () => {
-  return (
-    <div className="flex select-none flex-row items-center gap-2 text-foreground/50">
-      <Block className="h-5 w-5" />
-      <p>{t('This message was deleted')}</p>
-    </div>
-  );
-};
-
 const CommunityMediaMessageBody = ({
   msg,
   community,
-
-  messageFromMe,
-
-  authorOdinId,
-  communityActions,
 }: {
   msg: HomebaseFile<CommunityMessage>;
   community?: HomebaseFile<CommunityDefinition>;
-
-  messageFromMe: boolean;
-
-  authorOdinId: string;
-  communityActions?: CommunityActions;
 }) => {
-  const { isDarkMode } = useDarkMode();
   const content = msg.fileMetadata.appData.content;
 
   const hasACaption = !!content.message;
@@ -286,7 +238,6 @@ const CommunityMediaMessageBody = ({
           />
         </div>
       ) : null}
-      {/* <ChatReactions msg={msg} community={community} /> */}
     </div>
   );
 };
@@ -316,18 +267,17 @@ const CommunityMessageThreadSummary = ({
   if (!flattenedMsgs?.length) return null;
 
   return (
-    <ActionLink
-      className="flex flex-row gap-2 text-indigo-500"
-      href={`${COMMUNITY_ROOT}/${communityKey}/${channelKey}/${msg.fileMetadata.appData.uniqueId}/thread`}
-      type="mute"
+    <Link
+      className="mr-auto flex w-full max-w-xs flex-row gap-2 rounded-lg px-2 py-1 text-indigo-500 transition-colors hover:bg-background hover:shadow-sm"
+      to={`${COMMUNITY_ROOT}/${communityKey}/${channelKey}/${msg.fileMetadata.appData.uniqueId}/thread`}
     >
       <p className="text-sm font-semibold">
         {flattenedMsgs.length} {t(flattenedMsgs.length === 1 ? 'reply' : 'replies')}
-        <span className="ml-1 font-normal text-foreground/50">
+        <span className="ml-2 font-normal text-foreground/50">
           {t('Last reply')}{' '}
           {formatToTimeAgoWithRelativeDetail(new Date(flattenedMsgs?.[0].fileMetadata.created))}
         </span>
       </p>
-    </ActionLink>
+    </Link>
   );
 };

@@ -1,13 +1,19 @@
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import {
   ActionLink,
+  Arrow,
+  AuthorImage,
+  AuthorName,
   ChevronLeft,
+  ConnectionImage,
   DialogWrapper,
   ErrorBoundary,
+  formatDateExludingYearIfCurrent,
   t,
   Times,
+  useDotYouClient,
   usePortal,
 } from '@youfoundation/common-app';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -61,8 +67,6 @@ export const CommunityChannelDetail = () => {
                 community={community || undefined}
                 groupId={communityId}
                 channel={channelDsr || undefined}
-                // tagId={} Not sure yet if we should set a tagId to match the channel
-                // onSend={onSend}
                 key={channelKey}
               />
             </ErrorBoundary>
@@ -90,7 +94,6 @@ const CommunityChannelHeader = ({
   channel?: HomebaseFile<CommunityChannel>;
 }) => {
   const communityId = community?.fileMetadata.appData.uniqueId;
-
   const [showChatInfo, setShowChatInfo] = useState<boolean>(false);
 
   return (
@@ -178,8 +181,12 @@ const CommunityChannelHeader = ({
         ) : null} */}
       </div>
 
-      {showChatInfo && channel ? (
-        <ChannelInfo channel={channel} onClose={() => setShowChatInfo(false)} />
+      {showChatInfo && community && channel ? (
+        <ChannelInfo
+          community={community}
+          channel={channel}
+          onClose={() => setShowChatInfo(false)}
+        />
       ) : null}
     </>
   );
@@ -187,16 +194,19 @@ const CommunityChannelHeader = ({
 
 const ChannelInfo = ({
   channel,
+  community,
   onClose,
 }: {
   channel: HomebaseFile<CommunityChannel>;
+  community: HomebaseFile<CommunityDefinition>;
   onClose: () => void;
 }) => {
   const target = usePortal('modal-container');
 
-  // const identity = useDotYouClient().getIdentity();
+  const identity = useDotYouClient().getIdentity() || window.location.host;
   const channelContent = channel.fileMetadata.appData.content;
-  // const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
+  const communityContent = community.fileMetadata.appData.content;
+  const members = communityContent.recipients;
 
   // const withYourself = conversation?.fileMetadata.appData.uniqueId === ConversationWithYourselfId;
   // const recipient = recipients.length === 1 ? recipients[0] : undefined;
@@ -219,113 +229,61 @@ const ChannelInfo = ({
   // }, [updateStatus]);
 
   const dialog = (
-    <DialogWrapper onClose={onClose} title={`${channelContent.title}`}>
-      <></>
-      {/* <div>
-        <div className="flex flex-col items-center gap-4">
-          {recipient ? (
-            <ConnectionImage
-              odinId={recipient}
-              className="h-24 w-24 border border-neutral-200 dark:border-neutral-800"
-              size="custom"
-            />
-          ) : withYourself ? (
-            <OwnerImage
-              className="h-24 w-24 border border-neutral-200 dark:border-neutral-800"
-              size="custom"
-            />
-          ) : (
-            <div className="rounded-full bg-primary/20 p-7">
-              <Persons className="h-10 w-10" />
-            </div>
-          )}
-
-          <>
-            {recipient ? (
-              <p className="text-center text-xl">
-                <ConnectionName odinId={recipient} />
-                <small className="flex flex-row gap-2 text-sm">
-                  <House className="h-5 w-5" />
-                  <a
-                    href={new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}
-                    rel="noreferrer noopener"
-                    target="_blank"
-                    className="text-primary hover:underline"
-                  >
-                    {recipient}
-                  </a>
-                </small>
-              </p>
-            ) : withYourself ? (
-              <p className="text-center text-xl">
-                <OwnerName />
-                <span className="text-sm text-foreground/50">({t('you')})</span>
-              </p>
+    <DialogWrapper onClose={onClose} title={`# ${channelContent.title}`}>
+      <div className="flex flex-col gap-5">
+        <div>
+          <p className="mb-2 text-xl">{t('Details')}</p>
+          <p>
+            {t('Created')}:{' '}
+            {formatDateExludingYearIfCurrent(
+              new Date(channel.fileMetadata.created || community.fileMetadata.created)
+            )}{' '}
+            {t('by')}{' '}
+            {channel.fileMetadata.senderOdinId ? (
+              <AuthorName odinId={channel.fileMetadata.senderOdinId} />
             ) : (
-              <>
-                {isEditTitle ? (
-                  <form className="flex flex-col items-center gap-2" onSubmit={doSubmit}>
-                    <Input
-                      required
-                      defaultValue={conversationContent?.title}
-                      onChange={(e) => setNewTitle(e.currentTarget.value)}
-                    />
-                    <span className="flex flex-row">
-                      <ActionButton
-                        type="mute"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setIsEditTitle(false);
-                        }}
-                      >
-                        {t('Cancel')}
-                      </ActionButton>
-                      <ActionButton type="mute" icon={Save}>
-                        {t('Save')}
-                      </ActionButton>
-                    </span>
-                  </form>
-                ) : (
-                  <a
-                    onClick={() => setIsEditTitle(true)}
-                    className="flex cursor-pointer flex-row items-center gap-2"
-                  >
-                    <span className="text-center text-xl">{conversationContent?.title}</span>
-                    <Pencil className="h-5 w-5" />
-                  </a>
-                )}
-              </>
+              t('You')
             )}
-          </>
+          </p>
+          {channel.fileMetadata.updated !== channel.fileMetadata.created ? (
+            <p>
+              {t('Last updated')}:{' '}
+              {formatDateExludingYearIfCurrent(
+                new Date(channel.fileMetadata.updated || community.fileMetadata.updated)
+              )}
+            </p>
+          ) : null}
         </div>
-      </div>
-      {recipients?.length > 1 ? (
-        <div className="mt-10">
-          <p className="mb-4 text-lg">{t('Recipients')}</p>
-          <div className="flex flex-col gap-4">
-            {recipients.map((recipient) => (
-              <a
-                href={`${new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}/owner/connections/${recipient}`}
-                rel="noreferrer noopener"
-                target="_blank"
-                className="group flex flex-row items-center gap-3"
-                key={recipient}
-              >
-                <ConnectionImage
-                  odinId={recipient}
-                  className="border border-neutral-200 dark:border-neutral-800"
-                  size="sm"
-                />
-                <div className="flex flex-col group-hover:underline">
-                  <ConnectionName odinId={recipient} />
-                  <p>{recipient}</p>
-                </div>
-                <Arrow className="ml-auto h-5 w-5" />
-              </a>
-            ))}
+
+        {members?.length > 1 ? (
+          <div>
+            <p className="mb-4 text-lg">{t('Members')}</p>
+            <div className="flex flex-col gap-4">
+              {members.map((recipient) => (
+                <a
+                  href={`${new DotYouClient({ identity: identity, api: ApiType.Guest }).getRoot()}/owner/connections/${recipient}`}
+                  rel="noreferrer noopener"
+                  target="_blank"
+                  className="group flex flex-row items-center gap-3"
+                  key={recipient}
+                >
+                  <AuthorImage
+                    odinId={recipient}
+                    className="border border-neutral-200 dark:border-neutral-800"
+                    size="sm"
+                    excludeLink={true}
+                  />
+                  <div className="flex flex-col group-hover:underline">
+                    <AuthorName odinId={recipient} excludeLink={true} />
+                    <p>{recipient}</p>
+                  </div>
+                  <Arrow className="ml-auto h-5 w-5" />
+                </a>
+              ))}
+            </div>
           </div>
-        </div>
-      ) : null} */}
+        ) : null}
+      </div>
     </DialogWrapper>
   );
 

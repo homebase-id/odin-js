@@ -12,6 +12,7 @@ interface ImageProps {
 
 interface ConnectionImageProps extends ImageProps {
   odinId?: string;
+  excludeLink?: boolean;
 }
 
 export const AuthorImage = ({ odinId, ...props }: ConnectionImageProps) => {
@@ -19,6 +20,9 @@ export const AuthorImage = ({ odinId, ...props }: ConnectionImageProps) => {
 
   if (odinId && ownerHost !== odinId) {
     const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
+    if (props.excludeLink) {
+      return <ConnectionImage {...props} odinId={odinId} />;
+    }
     return (
       <a href={host}>
         <ConnectionImage {...props} odinId={odinId} />

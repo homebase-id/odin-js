@@ -17,8 +17,6 @@ import {
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { getNewId, stringGuidsEqual, toGuidId } from '@youfoundation/js-lib/helpers';
 import {
-  COMMUNITY_DEFAULT_GENERAL_ID,
-  COMMUNITY_GENERAL_CHANNEL,
   CommunityChannel,
   ensureCommunityChannelsExist,
 } from '../../../providers/CommunityProvider';
@@ -61,7 +59,9 @@ export const useCommunityMessage = (props?: {
     const identity = dotYouClient.getIdentity();
     const recipients = communityContent.recipients.filter((recipient) => recipient !== identity);
 
-    const textualTags = message.match(/#[a-zA-Z0-9]+/g)?.flatMap((tag) => tag.slice(1));
+    const textualTags = message
+      .match(/#[a-zA-Z0-9]+/g)
+      ?.flatMap((tag) => tag.slice(1).toLowerCase());
     const tags = textualTags?.map(toGuidId) || [];
 
     const newlyCreatedTags = await ensureCommunityChannelsExist(

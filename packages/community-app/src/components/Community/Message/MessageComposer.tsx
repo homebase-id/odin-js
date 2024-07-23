@@ -25,7 +25,7 @@ import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvi
 import { CommunityChannel } from '../../../providers/CommunityProvider';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
-const CHAT_DRAFTS_KEY = 'CHAT_LOCAL_DRAFTS';
+const CHAT_DRAFTS_KEY = 'COMMUNITY_LOCAL_DRAFTS';
 
 export const MessageComposer = ({
   community,
