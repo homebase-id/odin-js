@@ -90,6 +90,8 @@ export const PrimaryMedia = ({
         </>
       ) : isLink ? (
         <LinkPreviewItem
+          odinId={odinId}
+          globalTransitId={globalTransitId}
           targetDrive={getChannelDrive(channelId)}
           fileId={fileId}
           payload={file as PayloadDescriptor}
