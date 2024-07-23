@@ -63,6 +63,7 @@ function App() {
               </RootRoute>
             }
           >
+            <Route index={true} element={<SocialFeed />} />
             <Route path="preview/:identityKey/:channelKey/:postKey" element={<SocialFeed />} />
             <Route
               path="preview/:identityKey/:channelKey/:postKey/:attachmentKey"

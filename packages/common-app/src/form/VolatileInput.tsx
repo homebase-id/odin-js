@@ -225,7 +225,9 @@ const VolatileInput = forwardRef(
           ref={divRef}
           style={
             placeholder
-              ? ({ '--tw-content': `'${placeholder}'` } as React.CSSProperties)
+              ? ({
+                  '--tw-content': `'${placeholder.replaceAll("'", "\\'")}'`,
+                } as React.CSSProperties)
               : undefined
           }
         ></span>
