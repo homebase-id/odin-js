@@ -95,7 +95,7 @@ export const useCommunityMessages = (props?: {
 
   return {
     all: useInfiniteQuery({
-      queryKey: ['community-messages', communityId, channelId, originId || 'root'],
+      queryKey: ['community-messages', communityId, channelId || 'any', originId || 'root'],
       initialPageParam: undefined as string | undefined,
       queryFn: ({ pageParam }) =>
         fetchMessages(communityId as string, originId, channelId, pageParam),
@@ -103,7 +103,7 @@ export const useCommunityMessages = (props?: {
         lastPage?.searchResults && lastPage?.searchResults?.length >= PAGE_SIZE
           ? lastPage.cursorState
           : undefined,
-      enabled: !!communityId && !!channelId,
+      enabled: !!communityId,
       refetchOnMount: false,
       refetchOnReconnect: false,
       staleTime: 1000 * 60 * 60 * 24, // 24 hour

@@ -82,9 +82,8 @@ export const CommunityHistory = ({
     },
   };
 
-  if (doOpenThread && inAThread) {
+  if (doOpenThread && !inAThread)
     communityActions.doReply = (msg: HomebaseFile<CommunityMessage>) => doOpenThread(msg);
-  }
 
   const count = flattenedMsgs?.length + 1;
   const virtualizer = useVirtualizer({

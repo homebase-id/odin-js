@@ -22,17 +22,20 @@ import { getNewId, isTouchDevice } from '@youfoundation/js-lib/helpers';
 import { LinkPreview } from '@youfoundation/js-lib/media';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
+import { CommunityChannel } from '../../../providers/CommunityProvider';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const CHAT_DRAFTS_KEY = 'CHAT_LOCAL_DRAFTS';
 
 export const MessageComposer = ({
   community,
+  channel,
   groupId,
   onSend,
   className,
 }: {
   community: HomebaseFile<CommunityDefinition> | undefined;
+  channel: HomebaseFile<CommunityChannel> | undefined;
   groupId: string | undefined;
   onSend?: () => void;
   className?: string;
@@ -65,7 +68,7 @@ export const MessageComposer = ({
     const trimmedVal = (forcedVal || message)?.trim();
     const newFiles = [...(files || [])];
 
-    if ((!trimmedVal && !files?.length) || !community) return;
+    if ((!trimmedVal && !files?.length) || !community || !channel) return;
 
     // Clear internal state and allow excessive senders
     setMessage('');
@@ -75,6 +78,7 @@ export const MessageComposer = ({
     try {
       await sendMessage({
         community,
+        channel,
         groupId,
         message: trimmedVal || '',
         files: newFiles,

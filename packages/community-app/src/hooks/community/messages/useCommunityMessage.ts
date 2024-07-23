@@ -19,6 +19,7 @@ import { getNewId, stringGuidsEqual, toGuidId } from '@youfoundation/js-lib/help
 import {
   COMMUNITY_DEFAULT_GENERAL_ID,
   COMMUNITY_GENERAL_CHANNEL,
+  CommunityChannel,
   ensureCommunityChannelsExist,
 } from '../../../providers/CommunityProvider';
 
@@ -36,7 +37,7 @@ export const useCommunityMessage = (props?: {
 
   const sendMessage = async ({
     community,
-    // channel,
+    channel,
     groupId,
     replyId,
     files,
@@ -46,7 +47,7 @@ export const useCommunityMessage = (props?: {
     userDate,
   }: {
     community: HomebaseFile<CommunityDefinition>;
-    // channel: HomebaseFile<CommunityChannel>;
+    channel: HomebaseFile<CommunityChannel>;
     groupId?: string;
     replyId?: string;
     files?: NewMediaFile[];
@@ -61,7 +62,7 @@ export const useCommunityMessage = (props?: {
     const recipients = communityContent.recipients.filter((recipient) => recipient !== identity);
 
     const textualTags = message.match(/#[a-zA-Z0-9]+/g)?.flatMap((tag) => tag.slice(1));
-    const tags = textualTags?.map(toGuidId);
+    const tags = textualTags?.map(toGuidId) || [];
 
     const newlyCreatedTags = await ensureCommunityChannelsExist(
       dotYouClient,
@@ -83,7 +84,7 @@ export const useCommunityMessage = (props?: {
           //   : undefined,
           // groupId: communityId, TODO: Should this be the community id or the channel id? or neither and just undefined
           groupId,
-          tags: tags || [COMMUNITY_DEFAULT_GENERAL_ID],
+          tags: Array.from(new Set([...tags, channel.fileMetadata.appData.uniqueId as string])),
           content: {
             message: message,
             deliveryStatus:
@@ -149,7 +150,7 @@ export const useCommunityMessage = (props?: {
     }),
     send: useMutation({
       mutationFn: sendMessage,
-      onMutate: async ({ community, replyId, files, message, chatId, userDate }) => {
+      onMutate: async ({ community, channel, replyId, files, message, chatId, userDate }) => {
         const existingData = queryClient.getQueryData<
           InfiniteData<{
             searchResults: (HomebaseFile<CommunityMessage> | null)[];

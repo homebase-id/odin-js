@@ -60,6 +60,7 @@ export const CommunityChannelDetail = () => {
               <MessageComposer
                 community={community || undefined}
                 groupId={communityId}
+                channel={channelDsr || undefined}
                 // tagId={} Not sure yet if we should set a tagId to match the channel
                 // onSend={onSend}
                 key={channelKey}
@@ -68,7 +69,11 @@ export const CommunityChannelDetail = () => {
           </div>
           {threadKey ? (
             <ErrorBoundary>
-              <CommunityThread community={community || undefined} originId={threadKey} />
+              <CommunityThread
+                community={community || undefined}
+                channel={channelDsr || undefined}
+                originId={threadKey}
+              />
             </ErrorBoundary>
           ) : null}
         </div>
@@ -329,9 +334,11 @@ const ChannelInfo = ({
 
 const CommunityThread = ({
   community,
+  channel,
   originId,
 }: {
   community: HomebaseFile<CommunityDefinition> | undefined;
+  channel: HomebaseFile<CommunityChannel> | undefined;
   originId: string;
 }) => {
   const { communityKey, channelKey } = useParams();
@@ -369,7 +376,7 @@ const CommunityThread = ({
         <CommunityHistory
           community={community}
           origin={originMessage}
-          channel={undefined}
+          channel={channel}
           alignTop={true}
         />
 
@@ -377,6 +384,7 @@ const CommunityThread = ({
           <MessageComposer
             community={community}
             groupId={originId}
+            channel={channel}
             key={originId}
             className="mt-auto lg:mt-0"
           />
