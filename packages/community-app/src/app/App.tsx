@@ -85,9 +85,9 @@ function App() {
               {/* <Route index={true} element={<Navigate to={COMMUNITY_DEFAULT_GENERAL_ID} />} /> */}
               <Route path={':channelKey'} element={<CommunityChannelDetail />} />
               <Route path={':channelKey/:chatMessageKey'} element={<CommunityChannelDetail />} />
-              <Route path={':channelKey/thread/:threadKey'} element={<CommunityChannelDetail />} />
+              <Route path={':channelKey/:threadKey/thread'} element={<CommunityChannelDetail />} />
               <Route
-                path={':channelKey/thread/:threadKey/:chatMessageKey/:mediaKey'}
+                path={':channelKey/:threadKey/thread/:chatMessageKey/:mediaKey'}
                 element={<CommunityChannelDetail />}
               />
               <Route

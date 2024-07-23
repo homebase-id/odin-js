@@ -318,7 +318,7 @@ const CommunityMessageThreadSummary = ({
   return (
     <ActionLink
       className="flex flex-row gap-2 text-indigo-500"
-      href={`${COMMUNITY_ROOT}/${communityKey}/${channelKey}/thread/${msg.fileMetadata.appData.uniqueId}`}
+      href={`${COMMUNITY_ROOT}/${communityKey}/${channelKey}/${msg.fileMetadata.appData.uniqueId}/thread`}
       type="mute"
     >
       <p className="text-sm font-semibold">

@@ -131,7 +131,7 @@ export const CommunityHistory = ({
     <>
       <ErrorNotification error={deleteMessagesError} />
       <div
-        className={`flex w-full ${alignTop ? '' : 'flex-grow'} flex-col-reverse overflow-auto py-2 sm:py-5`}
+        className={`flex w-full ${alignTop ? '' : 'flex-grow'} faded-scrollbar flex-col-reverse overflow-auto py-2 sm:py-5`}
         ref={scrollRef}
         key={channel?.fileId || community?.fileId}
         onCopyCapture={(e) => {

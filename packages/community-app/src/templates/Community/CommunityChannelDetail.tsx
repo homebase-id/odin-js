@@ -52,7 +52,7 @@ export const CommunityChannelDetail = () => {
                 origin={community || undefined}
                 doOpenThread={(thread) =>
                   navigate(
-                    `${COMMUNITY_ROOT}/${communityId}/${channelKey}/thread/${thread.fileMetadata.appData.uniqueId}`
+                    `${COMMUNITY_ROOT}/${communityId}/${channelKey}/${thread.fileMetadata.appData.uniqueId}/thread`
                   )
                 }
               />
@@ -347,7 +347,7 @@ const CommunityThread = ({
   }
 
   return (
-    <div className="absolute inset-0 flex h-full w-full flex-col xl:static xl:max-w-sm">
+    <div className="absolute inset-0 flex h-full w-full flex-col shadow-lg xl:static xl:max-w-sm">
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
         <ActionLink
           className="p-2 xl:hidden"

@@ -25,3 +25,16 @@
     @apply dark:border-gray-600;
   }
 }
+
+.faded-scrollbar::-webkit-scrollbar {
+  width: 9px;
+}
+
+.faded-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+}
+
+.faded-scrollbar::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0);
+}

@@ -94,7 +94,7 @@ export const MessageComposer = ({
 
   return (
     <>
-      <div className={`bg-page-background pb-[env(safe-area-inset-bottom)] ${className || ''}`}>
+      <div className={`bg-background pb-[env(safe-area-inset-bottom)] ${className || ''}`}>
         <div className="max-h-[30vh] overflow-auto">
           <FileOverview files={files} setFiles={setFiles} cols={8} />
           {files?.length ? null : (
@@ -149,7 +149,7 @@ export const MessageComposer = ({
                 e.stopPropagation();
                 doSend();
               }}
-              className="flex-shrink"
+              className="flex-shrink opacity-40 hover:opacity-100"
               icon={PaperPlane}
               size="square"
               onMouseDown={(e) => e.preventDefault()}
