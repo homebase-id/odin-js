@@ -6,8 +6,8 @@ import {
   getOdinIdColor,
   OwnerImage,
   OwnerName,
-  ActionLink,
   formatToTimeAgoWithRelativeDetail,
+  AuthorImage,
 } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { formatGuidId, stringGuidsEqual, toGuidId } from '@youfoundation/js-lib/helpers';
@@ -256,21 +256,28 @@ const CommunityMessageThreadSummary = ({
     originId: msg.fileMetadata.appData.uniqueId,
   }).all;
 
-  const flattenedMsgs =
-    useMemo(
-      () =>
-        (messages?.pages?.flatMap((page) => page?.searchResults)?.filter(Boolean) ||
-          []) as HomebaseFile<CommunityMessage>[],
-      [messages]
-    ) || [];
+  const { flattenedMsgs, uniqueSenders } = useMemo(() => {
+    const flattenedMsgs = (messages?.pages
+      ?.flatMap((page) => page?.searchResults)
+      ?.filter(Boolean) || []) as HomebaseFile<CommunityMessage>[];
+
+    const uniqueSenders = Array.from(
+      new Set(flattenedMsgs.map((msg) => msg.fileMetadata.senderOdinId))
+    );
+
+    return { flattenedMsgs, uniqueSenders };
+  }, [messages]);
 
   if (!flattenedMsgs?.length) return null;
 
   return (
     <Link
-      className="mr-auto flex w-full max-w-xs flex-row gap-2 rounded-lg px-2 py-1 text-indigo-500 transition-colors hover:bg-background hover:shadow-sm"
+      className="mr-auto flex w-full max-w-xs flex-row items-center gap-2 rounded-lg px-1 py-1 text-indigo-500 transition-colors hover:bg-background hover:shadow-sm"
       to={`${COMMUNITY_ROOT}/${communityKey}/${channelKey}/${msg.fileMetadata.appData.uniqueId}/thread`}
     >
+      {uniqueSenders.map((sender) => (
+        <AuthorImage odinId={sender} key={sender} className="h-7 w-7" excludeLink={true} />
+      ))}
       <p className="text-sm font-semibold">
         {flattenedMsgs.length} {t(flattenedMsgs.length === 1 ? 'reply' : 'replies')}
         <span className="ml-2 font-normal text-foreground/50">
