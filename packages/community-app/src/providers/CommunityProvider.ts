@@ -6,12 +6,19 @@ import {
   getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
   HomebaseFile,
+  PriorityOptions,
   queryBatch,
+  ScheduleOptions,
   SecurityGroupType,
+  SendContents,
   TargetDrive,
+  uploadFile,
+  UploadFileMetadata,
+  UploadInstructionSet,
 } from '@youfoundation/js-lib/core';
 import { getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
 import { t } from '@youfoundation/common-app';
+import { jsonStringify64, stringGuidsEqual, toGuidId } from '@youfoundation/js-lib/helpers';
 
 export const COMMUNITY_CHANNEL_FILE_TYPE = 7015;
 export const COMMUNITY_DEFAULT_GENERAL_ID = '7d64f4e4-f8e2-4c3b-bc4b-48bbb86e8f9a';
@@ -59,7 +66,7 @@ export const getCommunityChannels = async (
   const targetDrive = getTargetDriveFromCommunityId(communityId);
   const params: FileQueryParams = {
     targetDrive: targetDrive,
-    tagsMatchAtLeastOne: [communityId],
+    groupId: [communityId],
     fileType: [COMMUNITY_CHANNEL_FILE_TYPE],
   };
 
@@ -100,6 +107,93 @@ export const getCommunityChannel = async (
 
   if (!dsr) return undefined;
   return dsrToCommunityChannel(dotYouClient, dsr, targetDrive, true);
+};
+
+export const ensureCommunityChannelsExist = async (
+  dotYouClient: DotYouClient,
+  communityId: string,
+  recipients: string[],
+  tags: string[]
+) => {
+  const targetDrive = getTargetDriveFromCommunityId(communityId);
+  const params: FileQueryParams = {
+    targetDrive: targetDrive,
+    clientUniqueIdAtLeastOne: tags.map(toGuidId),
+    fileType: [COMMUNITY_CHANNEL_FILE_TYPE],
+  };
+
+  const ro: GetBatchQueryResultOptions = {
+    cursorState: undefined,
+    maxRecords: 100,
+    includeMetadataHeader: false,
+  };
+
+  const response = await queryBatch(dotYouClient, params, ro);
+  const missingTags = tags.filter(
+    (tag) =>
+      !response.searchResults.some((dsr) =>
+        stringGuidsEqual(dsr.fileMetadata.appData.uniqueId, toGuidId(tag))
+      )
+  );
+
+  return await Promise.all(
+    missingTags.map((tag) => saveCommunityChannel(dotYouClient, communityId, recipients, tag))
+  );
+};
+
+const saveCommunityChannel = async (
+  dotYouClient: DotYouClient,
+  communityId: string,
+  recipients: string[],
+  tag: string
+) => {
+  const targetDrive = getTargetDriveFromCommunityId(communityId);
+  const distribute = recipients?.length > 0;
+  const uniqueId = toGuidId(tag);
+
+  const uploadInstructions: UploadInstructionSet = {
+    storageOptions: {
+      drive: targetDrive,
+    },
+    transitOptions: distribute
+      ? {
+          recipients: [...recipients],
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.High,
+          sendContents: SendContents.All,
+        }
+      : undefined,
+  };
+
+  const jsonContent: string = jsonStringify64({
+    title: tag,
+    description: '',
+  });
+  const uploadMetadata: UploadFileMetadata = {
+    allowDistribution: distribute,
+    appData: {
+      uniqueId: uniqueId,
+      groupId: communityId,
+      fileType: COMMUNITY_CHANNEL_FILE_TYPE,
+      content: jsonContent,
+    },
+    isEncrypted: true,
+    accessControlList: {
+      requiredSecurityGroup: SecurityGroupType.Connected,
+    },
+  };
+
+  const uploadResult = await uploadFile(
+    dotYouClient,
+    uploadInstructions,
+    uploadMetadata,
+    undefined,
+    undefined,
+    undefined
+  );
+  if (!uploadResult) throw new Error('Upload failed');
+
+  return uniqueId;
 };
 
 // Helpers

@@ -125,9 +125,13 @@ export const MessageComposer = ({
           </div>
 
           <VolatileInput
-            placeholder={`Message "${community?.fileMetadata.appData.content.title}"`}
+            placeholder={
+              community?.fileMetadata.appData.uniqueId === groupId
+                ? `Message "${community?.fileMetadata.appData.content.title}"`
+                : `Reply`
+            }
             defaultValue={message}
-            className="w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"
+            className="relative w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"
             onChange={(newVal) => setMessage(newVal)}
             autoFocus={!isTouchDevice()}
             ref={volatileRef}

@@ -15,7 +15,8 @@ import {
   uploadCommunityMessage,
 } from '../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
-import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { getNewId, stringGuidsEqual, toGuidId } from '@youfoundation/js-lib/helpers';
+import { ensureCommunityChannelsExist } from '../../../providers/CommunityProvider';
 
 export const useCommunityMessage = (props?: {
   communityId: string | undefined;
@@ -55,6 +56,17 @@ export const useCommunityMessage = (props?: {
     const identity = dotYouClient.getIdentity();
     const recipients = communityContent.recipients.filter((recipient) => recipient !== identity);
 
+    const textualTags = message.match(/#[a-zA-Z0-9]+/g)?.flatMap((tag) => tag.slice(1));
+    const tags = textualTags?.map(toGuidId);
+
+    const newlyCreatedTags = await ensureCommunityChannelsExist(
+      dotYouClient,
+      communityId,
+      recipients,
+      textualTags || []
+    );
+    console.log('newlyCreatedTags', newlyCreatedTags);
+
     // We prefer having the uniqueId set outside of the mutation, so that an auto-retry of the mutation doesn't create duplicates
     const newChatId = chatId || getNewId();
     const newChat: NewHomebaseFile<CommunityMessage> = {
@@ -67,6 +79,7 @@ export const useCommunityMessage = (props?: {
           //   : undefined,
           // groupId: communityId, TODO: Should this be the community id or the channel id? or neither and just undefined
           groupId,
+          tags,
           content: {
             message: message,
             deliveryStatus:

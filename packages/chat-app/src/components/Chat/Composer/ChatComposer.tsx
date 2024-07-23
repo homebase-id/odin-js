@@ -148,7 +148,7 @@ export const ChatComposer = ({
           <VolatileInput
             placeholder="Your message"
             defaultValue={message}
-            className="w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"
+            className="relative w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"
             onChange={(newVal) => setMessage(newVal)}
             autoFocus={!isTouchDevice()}
             ref={volatileRef}
