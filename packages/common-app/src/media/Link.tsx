@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getPayloadAsJson, PayloadDescriptor, TargetDrive } from '@youfoundation/js-lib/core';
 import { useDotYouClient } from '../hooks';
 import { LoadingBlock } from '../ui';
+import { getPayloadAsJsonOverPeerByGlobalTransitId } from '@youfoundation/js-lib/peer';
 
 export const LinkPreviewTextual = ({
   linkPreview,
@@ -65,8 +66,8 @@ export const LinkPreviewImage = ({
     width && height
       ? width / height
       : linkPreview?.imageWidth && linkPreview.imageHeight
-      ? linkPreview?.imageWidth / linkPreview.imageHeight
-      : undefined;
+        ? linkPreview?.imageWidth / linkPreview.imageHeight
+        : undefined;
 
   if (!linkPreview)
     return (
@@ -105,16 +106,22 @@ export const LinkPreviewImage = ({
 
 export const LinkPreviewItem = ({
   targetDrive,
+  odinId,
+  globalTransitId,
   fileId,
   payload,
   className,
 }: {
   targetDrive: TargetDrive;
-  fileId: string;
+  odinId?: string;
+  fileId: string | undefined;
+  globalTransitId?: string | undefined;
   payload: PayloadDescriptor;
   className?: string;
 }) => {
   const { data: linkMetadata, isLoading: linkMetadataLoading } = useLinkMetadata({
+    odinId,
+    globalTransitId,
     fileId,
     payloadKey: payload.key,
     targetDrive,
@@ -147,19 +154,35 @@ export const LinkPreviewItem = ({
 };
 
 export const useLinkMetadata = ({
+  odinId,
+  globalTransitId,
   targetDrive,
   fileId,
   payloadKey,
 }: {
+  odinId?: string;
+  globalTransitId?: string;
   targetDrive: TargetDrive;
-  fileId: string;
+  fileId?: string;
   payloadKey: string;
 }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   return useQuery({
     queryKey: ['link-metadata', targetDrive.alias, fileId, payloadKey],
-    queryFn: async () =>
-      getPayloadAsJson<LinkPreview[]>(dotYouClient, targetDrive, fileId, payloadKey),
+    queryFn: async () => {
+      if (odinId && globalTransitId) {
+        return getPayloadAsJsonOverPeerByGlobalTransitId<LinkPreview[]>(
+          dotYouClient,
+          odinId,
+          targetDrive,
+          globalTransitId,
+          payloadKey
+        );
+      }
+
+      if (!fileId) return [];
+      return getPayloadAsJson<LinkPreview[]>(dotYouClient, targetDrive, fileId, payloadKey);
+    },
   });
 };
