@@ -35,7 +35,7 @@ export const COMMUNITY_GENERAL_CHANNEL: HomebaseFile<CommunityChannel> = {
       dataType: 0,
       uniqueId: COMMUNITY_DEFAULT_GENERAL_ID,
       content: {
-        title: t('General'),
+        title: t('general'),
         description: t('General community channel'),
       },
     },

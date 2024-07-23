@@ -231,7 +231,7 @@ const ChannelItem = ({
       to={`${COMMUNITY_ROOT}/${communityId}/${channelId}`}
       className={`flex flex-row items-center gap-1 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
     >
-      # {channel.fileMetadata.appData.content?.title}
+      # {channel.fileMetadata.appData.content?.title?.toLowerCase()}
     </Link>
   );
 };
