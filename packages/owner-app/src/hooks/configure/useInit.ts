@@ -53,7 +53,11 @@ export const useInit = () => {
 
     // Setup (default) Data
     await SetupDefaultIdentity(dotYouClient, data);
-    await SetupAutoFollow(dotYouClient);
+    try {
+      await SetupAutoFollow(dotYouClient);
+    } catch (ex) {
+      console.error('[init] autofollow failed', ex);
+    }
 
     // Do a first publish of the static files
     // This is normally a side effect from the useAttribute hook.. TODO: Move to providers instead of the hook
