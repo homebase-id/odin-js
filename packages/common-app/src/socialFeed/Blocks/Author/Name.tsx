@@ -7,7 +7,10 @@ export const AuthorName = ({ odinId }: { odinId?: string }) => {
   const identity = useDotYouClient().getIdentity();
   const isConnected = useIsConnected(odinId).data;
 
-  const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
+  const host = new DotYouClient({
+    identity: identity || window.location.host,
+    api: ApiType.Guest,
+  }).getRoot();
 
   return (
     <a
