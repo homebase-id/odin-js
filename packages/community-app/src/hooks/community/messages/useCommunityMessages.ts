@@ -20,8 +20,9 @@ const PAGE_SIZE = 100;
 export const useCommunityMessages = (props?: {
   communityId: string | undefined;
   originId?: string;
+  channelId?: string;
 }) => {
-  const { communityId, originId } = props || { communityId: undefined, originId: undefined };
+  const { communityId, originId, channelId } = props || {};
   const dotYouClient = useDotYouClientContext();
 
   const queryClient = useQueryClient();
@@ -29,13 +30,14 @@ export const useCommunityMessages = (props?: {
   const fetchMessages = async (
     communityId: string,
     originId: string | undefined,
+    channelId: string | undefined,
     cursorState: string | undefined
   ) =>
     await getCommunityMessages(
       dotYouClient,
       communityId,
       originId ? [originId] : undefined,
-      undefined,
+      channelId ? [channelId] : undefined,
       cursorState,
       PAGE_SIZE
     );
@@ -93,15 +95,15 @@ export const useCommunityMessages = (props?: {
 
   return {
     all: useInfiniteQuery({
-      queryKey: ['community-messages', communityId, originId || 'all'],
+      queryKey: ['community-messages', communityId, channelId, originId || 'root'],
       initialPageParam: undefined as string | undefined,
       queryFn: ({ pageParam }) =>
-        fetchMessages(communityId as string, originId as string, pageParam),
+        fetchMessages(communityId as string, originId, channelId, pageParam),
       getNextPageParam: (lastPage) =>
         lastPage?.searchResults && lastPage?.searchResults?.length >= PAGE_SIZE
           ? lastPage.cursorState
           : undefined,
-      enabled: !!communityId,
+      enabled: !!communityId && !!channelId,
       refetchOnMount: false,
       refetchOnReconnect: false,
       staleTime: 1000 * 60 * 60 * 24, // 24 hour

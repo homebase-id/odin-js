@@ -118,6 +118,7 @@ export const uploadCommunityMessage = async (
       uniqueId: message.fileMetadata.appData.uniqueId,
       groupId: message.fileMetadata.appData.groupId,
       userDate: message.fileMetadata.appData.userDate,
+      tags: message.fileMetadata.appData.tags,
       fileType: COMMUNITY_MESSAGE_FILE_TYPE,
       content: jsonContent,
     },

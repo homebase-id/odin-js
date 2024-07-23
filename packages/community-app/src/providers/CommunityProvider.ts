@@ -166,7 +166,7 @@ const saveCommunityChannel = async (
   };
 
   const jsonContent: string = jsonStringify64({
-    title: tag,
+    title: tag[0].toUpperCase() + tag.slice(1),
     description: '',
   });
   const uploadMetadata: UploadFileMetadata = {

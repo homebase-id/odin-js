@@ -46,7 +46,7 @@ export const CommunityHistory = ({
   } = useCommunityMessages({
     communityId: community?.fileMetadata?.appData?.uniqueId,
     originId: origin?.fileMetadata.appData.uniqueId,
-    // channelId: channel?.fileMetadata?.appData?.uniqueId,
+    channelId: channel?.fileMetadata?.appData?.uniqueId,
   });
 
   const flattenedMsgs =

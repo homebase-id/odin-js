@@ -2,7 +2,6 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import {
-  ActionButton,
   ActionLink,
   ChevronLeft,
   DialogWrapper,

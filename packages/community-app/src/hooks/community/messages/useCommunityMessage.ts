@@ -16,7 +16,11 @@ import {
 } from '../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { getNewId, stringGuidsEqual, toGuidId } from '@youfoundation/js-lib/helpers';
-import { ensureCommunityChannelsExist } from '../../../providers/CommunityProvider';
+import {
+  COMMUNITY_DEFAULT_GENERAL_ID,
+  COMMUNITY_GENERAL_CHANNEL,
+  ensureCommunityChannelsExist,
+} from '../../../providers/CommunityProvider';
 
 export const useCommunityMessage = (props?: {
   communityId: string | undefined;
@@ -79,7 +83,7 @@ export const useCommunityMessage = (props?: {
           //   : undefined,
           // groupId: communityId, TODO: Should this be the community id or the channel id? or neither and just undefined
           groupId,
-          tags,
+          tags: tags || [COMMUNITY_DEFAULT_GENERAL_ID],
           content: {
             message: message,
             deliveryStatus:
