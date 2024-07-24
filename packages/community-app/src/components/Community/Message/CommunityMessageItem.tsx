@@ -115,9 +115,6 @@ export const CommunityMessageItem = ({
           ) : (
             <CommunityTextMessageBody msg={msg} community={community} />
           )}
-          {/* {conversation && !isDeleted ? (
-          <CommunityReactionComposer msg={msg} conversation={conversation} />
-          ) : null} */}
           {hideThreads ? null : <CommunityMessageThreadSummary community={community} msg={msg} />}
         </div>
       </div>

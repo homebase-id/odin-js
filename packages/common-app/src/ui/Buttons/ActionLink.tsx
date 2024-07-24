@@ -17,6 +17,7 @@ type ActionLinkProps = {
   href?: string;
   target?: React.HTMLAttributeAnchorTarget;
   rel?: string;
+  style?: React.CSSProperties;
 };
 
 export const ActionLink: FC<ActionLinkProps> = ({
@@ -31,6 +32,7 @@ export const ActionLink: FC<ActionLinkProps> = ({
   href,
   target,
   rel,
+  style,
 }) => {
   const Icon = (props: { className: string }) => (icon ? icon(props) : null);
   const colorClasses =
@@ -69,6 +71,7 @@ export const ActionLink: FC<ActionLinkProps> = ({
       onClick={onClick}
       target={target}
       rel={rel}
+      style={style}
     >
       {children}
       <Icon className={`my-auto ${children ? 'ml-2' : ''} h-5 w-5`} />

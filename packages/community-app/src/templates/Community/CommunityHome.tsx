@@ -9,6 +9,7 @@ import {
   ConnectionName,
   ErrorBoundary,
   ExtendPermissionDialog,
+  getOdinIdColor,
   Plus,
   RadioTower,
   Sidenav,
@@ -171,6 +172,9 @@ const CommunityListItem = ({
       <ActionLink
         href={`${COMMUNITY_ROOT}/${community.fileMetadata.appData.uniqueId}`}
         className={`aspect-square w-full rounded-2xl p-4 uppercase hover:shadow-md`}
+        style={{
+          backgroundColor: getOdinIdColor(community.fileMetadata.appData.content.title).darkTheme,
+        }}
       >
         {community.fileMetadata.appData.content.title.slice(0, 2)}
       </ActionLink>
