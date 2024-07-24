@@ -2,7 +2,15 @@ import { useState } from 'react';
 import { t } from '../../helpers/i18n/dictionary';
 import InfoDialog from '../Dialog/InfoDialog/InfoDialog';
 import { DnsConfig, DnsRecord, DnsRecordStatus } from '../../hooks/commonDomain/commonDomain';
-import { Alert, Arrow, Check, DialogWrapper, Exclamation, Loader } from '@youfoundation/common-app';
+import {
+  Alert,
+  Arrow,
+  Check,
+  DialogWrapper,
+  Exclamation,
+  ExternalLink,
+  Loader,
+} from '@youfoundation/common-app';
 import { useApexDomain } from '../../hooks/ownDomain/useOwnDomain';
 
 const DnsSettingsView = ({
@@ -305,7 +313,7 @@ const RecordView = ({
         {showStatus ? (
           <div
             className={`ml-auto flex flex-row items-center gap-2 text-sm ${
-              isInCorrectvalue ? 'cursor-pointer hover:underline' : ''
+              isInCorrectvalue ? 'cursor-pointer text-indigo-500 hover:underline' : ''
             }`}
             onClick={isInCorrectvalue ? () => setShowBadValue(true) : undefined}
           >
@@ -320,7 +328,12 @@ const RecordView = ({
                     : simpleStatus === 'multipleRecordsNotSupported'
                       ? 'Multiple A or CNAME records are not supported'
                       : 'Record not found'}
-                <Exclamation className="h-5 w-5" />
+
+                {isInCorrectvalue ? (
+                  <ExternalLink className="h-5 w-5" />
+                ) : (
+                  <Exclamation className="h-5 w-5" />
+                )}
               </>
             )}
           </div>
