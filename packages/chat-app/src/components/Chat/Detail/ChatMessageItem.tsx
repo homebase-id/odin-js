@@ -119,9 +119,11 @@ const ChatTextMessageBody = ({
 }) => {
   const content = msg.fileMetadata.appData.content;
   const isEmojiOnly =
-    (content.message?.match(/^\p{Extended_Pictographic}/u) &&
+    ((content.message?.match(/^\p{Extended_Pictographic}/u) ||
+      content.message?.match(/^\p{Emoji_Component}/u)) &&
       !content.message?.match(/[0-9a-zA-Z]/)) ??
     false;
+
   const isReply = !!content.replyId;
   const showBackground = !isEmojiOnly || isReply;
 
