@@ -23,6 +23,7 @@ import { LinkPreview } from '@youfoundation/js-lib/media';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
+import { ChannelAutocompleteDropdown } from './ChannelAutocompleteDropdown';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const CHAT_DRAFTS_KEY = 'COMMUNITY_LOCAL_DRAFTS';
@@ -148,6 +149,7 @@ export const MessageComposer = ({
               }
             }}
             onSubmit={isTouchDevice() ? undefined : doSend}
+            autoCompleters={[ChannelAutocompleteDropdown]}
           />
           <span className="my-auto">
             <ActionButton

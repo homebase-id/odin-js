@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { FC, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { getRichTextFromString, useDebounce } from '../..';
 import { EmojiDropdown } from './VolatileInput/EmojiDropdown';
 import { MentionDropdown } from './VolatileInput/MentionDropdown';
@@ -26,6 +26,7 @@ const VolatileInput = forwardRef(
       linksArePlain,
       className,
       autoFocus,
+      autoCompleters,
     }: {
       onSubmit?: (val: string) => void;
       onPaste?: React.ClipboardEventHandler<HTMLDivElement>;
@@ -35,6 +36,7 @@ const VolatileInput = forwardRef(
       linksArePlain?: boolean;
       className?: string;
       autoFocus?: boolean;
+      autoCompleters?: FC<VolatileInputAutoCompleteProps>[];
     },
     ref
   ) => {
@@ -177,7 +179,9 @@ const VolatileInput = forwardRef(
     const onKeyUp: React.KeyboardEventHandler<HTMLDivElement> = () => {
       const wordTillCaret = getCurrentWordTillCaret();
       if (
-        (wordTillCaret?.startsWith(':') || wordTillCaret?.startsWith('@')) &&
+        (wordTillCaret?.startsWith(':') ||
+          wordTillCaret?.startsWith('@') ||
+          wordTillCaret?.startsWith('#')) &&
         wordTillCaret.length > 1
       )
         setWordTillCaret(wordTillCaret);
@@ -250,6 +254,19 @@ const VolatileInput = forwardRef(
           }}
           position={rect}
         />
+        {autoCompleters?.map((AutoCompleter, index) => (
+          <AutoCompleter
+            key={index}
+            query={wordTillCaret}
+            onInput={(val) => {
+              if (onChange && val && wordTillCaret) {
+                setLastInsertedContent(val);
+                onChange(`${divRef.current?.innerText.replace(wordTillCaret, val) || ''}`);
+              }
+            }}
+            position={rect}
+          />
+        ))}
       </div>
     );
   }
@@ -257,3 +274,14 @@ const VolatileInput = forwardRef(
 
 VolatileInput.displayName = 'VolatileInput';
 export { VolatileInput };
+
+export interface VolatileInputAutoCompleteProps {
+  query: string | undefined;
+  onInput: (val: string | undefined) => void;
+  position?:
+    | {
+        x: number;
+        y: number;
+      }
+    | undefined;
+}

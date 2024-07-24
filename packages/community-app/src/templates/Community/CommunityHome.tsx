@@ -200,7 +200,11 @@ const CommunitySidebar = () => {
         <div className="flex flex-col gap-1">
           <h2 className="px-1">{t('Channels')}</h2>
           {communityChannels?.map((channel) => (
-            <ChannelItem communityId={communityId} channel={channel} key={channel.fileId} />
+            <ChannelItem
+              communityId={communityId}
+              channel={channel}
+              key={channel.fileId || channel.fileMetadata.appData.uniqueId}
+            />
           ))}
         </div>
 
