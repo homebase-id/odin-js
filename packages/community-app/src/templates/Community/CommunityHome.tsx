@@ -3,6 +3,7 @@ import { useParams, useMatch, Link, useNavigate } from 'react-router-dom';
 import { ReactNode, useEffect } from 'react';
 import {
   ActionLink,
+  ChevronLeft,
   COMMUNITY_APP_ID,
   ConnectionImage,
   ConnectionName,
@@ -33,17 +34,18 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   const { communityKey } = useParams();
   const isCreateNew = !!newCommunity;
 
-  const isOnline = useLiveCommunityProcessor(communityKey); // => Probablay move to CommunityDetail as it needs to connect on different drives
+  useLiveCommunityProcessor(communityKey);
   useRemoveNotifications({ appId: COMMUNITY_APP_ID });
 
   // TODO: Run this when on desktop?
-  // const { data: communities } = useCommunities().all;
-  // const navigate = useNavigate();
-  // useEffect(() => {
-  //   if (!communities) return;
-  //   if (communityKey) return;
-  //   navigate(`${COMMUNITY_ROOT}/${communities[0].fileMetadata.appData.uniqueId}`);
-  // }, [communityKey, communities]);
+  const { data: communities } = useCommunities().all;
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!communities) return;
+    if (communityKey || newCommunity) return;
+    if (window.innerWidth <= 1024) return;
+    navigate(`${COMMUNITY_ROOT}/${communities[0].fileMetadata.appData.uniqueId}`);
+  }, [communityKey, communities]);
 
   return (
     <>
@@ -58,7 +60,7 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
         permissions={permissions}
       />
       <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`}>
-        <CommunitySideNav isOnline={false} />
+        <CommunitySideNav />
         {isCreateNew ? (
           <NewCommunity />
         ) : (
@@ -72,7 +74,7 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   );
 };
 
-const CommunitySideNav = ({ isOnline }: { isOnline: boolean }) => {
+const CommunitySideNav = () => {
   const { communityKey } = useParams();
 
   const rootChatMatch = useMatch({ path: COMMUNITY_ROOT });
@@ -104,10 +106,8 @@ export const CommunitiesSidebar = ({
   return (
     <ErrorBoundary>
       <div className="absolute inset-0 flex flex-grow flex-row flex-wrap overflow-auto md:pl-[calc(env(safe-area-inset-left)+4.3rem)] lg:flex-col lg:items-center lg:pl-0">
-        <div className="px-2 py-2">
-          <ActionLink href={COMMUNITY_ROOT} type="mute" size={'none'} className="px-2 py-2 pb-0">
-            <RadioTower className="h-7 w-7" />
-          </ActionLink>
+        <div className="px-4 pb-2 pt-4">
+          <RadioTower className="h-7 w-7" />
         </div>
         <CommunitiesList
           communities={
@@ -195,8 +195,14 @@ const CommunitySidebar = () => {
       className={`fixed ${isActive ? 'translate-x-full' : 'translate-x-0'} -left-full h-[100dvh] w-full bg-page-background transition-transform lg:relative lg:left-0 lg:max-w-[17rem] lg:translate-x-0 lg:border-r lg:shadow-inner`}
     >
       <div className="absolute inset-0 flex flex-col gap-5 overflow-auto px-2 py-5 md:pl-[calc(env(safe-area-inset-left)+4.3rem+0.5rem)] lg:pl-2">
-        <p className="text-xl font-semibold">{community.fileMetadata.appData.content?.title}</p>
+        <div className="flex flex-row items-center">
+          <ActionLink className="lg:hidden" type="mute" href={`${COMMUNITY_ROOT}`}>
+            <ChevronLeft className="h-5 w-5" />
+          </ActionLink>
+          <p className="text-xl font-semibold">{community.fileMetadata.appData.content?.title}</p>
+        </div>
 
+        <AllItem communityId={communityId} />
         <div className="flex flex-col gap-1">
           <h2 className="px-1">{t('Channels')}</h2>
           {communityChannels?.map((channel) => (
@@ -216,6 +222,20 @@ const CommunitySidebar = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const AllItem = ({ communityId }: { communityId: string }) => {
+  const href = `${COMMUNITY_ROOT}/${communityId}/all`;
+  const isActive = !!useMatch({ path: href, end: true });
+
+  return (
+    <Link
+      to={`${COMMUNITY_ROOT}/${communityId}/all`}
+      className={`flex flex-row items-center gap-2 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
+    >
+      <RadioTower className="h-5 w-5" /> {t('All messages')}
+    </Link>
   );
 };
 

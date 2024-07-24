@@ -6,12 +6,19 @@ import {
   RouterProvider,
   createBrowserRouter,
   createRoutesFromElements,
+  useParams,
 } from 'react-router-dom';
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 
 export const REACT_QUERY_CACHE_KEY = 'COMMUNITY_REACT_QUERY_OFFLINE_CACHE';
-const REACT_QUERY_INCLUDED_QUERY_KEYS = ['connection-details', 'process-inbox'];
+const REACT_QUERY_INCLUDED_QUERY_KEYS = [
+  'connection-details',
+  'process-inbox',
+  'communities',
+  'community-channels',
+  'community-channel', // TODO: This should be removed and replaced with community-channels + select
+];
 
 import { MinimalLayout, NoLayout } from '../components/ui/Layout/Layout';
 
@@ -37,9 +44,18 @@ import {
   DotYouClientProvider,
   OdinQueryClient,
 } from '@youfoundation/common-app';
-import { CommunityChannelDetail } from '../templates/Community/CommunityChannelDetail';
-import { CommunityDirectDetail } from '../templates/Community/CommunityDirectDetail';
-import { COMMUNITY_DEFAULT_GENERAL_ID } from '../providers/CommunityProvider';
+import { COMMUNITY_ROOT } from '../templates/Community/CommunityHome';
+
+const CommunityChannelDetail = lazy(() =>
+  import('../templates/Community/CommunityChannelDetail').then((communityApp) => ({
+    default: communityApp.CommunityChannelDetail,
+  }))
+);
+const CommunityDirectDetail = lazy(() =>
+  import('../templates/Community/CommunityDirectDetail').then((communityApp) => ({
+    default: communityApp.CommunityDirectDetail,
+  }))
+);
 
 function App() {
   const router = createBrowserRouter(
@@ -81,19 +97,43 @@ function App() {
                 </CommunityHome>
               }
             >
-              {/* TODO: Run this when on desktop? */}
-              {/* <Route index={true} element={<Navigate to={COMMUNITY_DEFAULT_GENERAL_ID} />} /> */}
-              <Route path={':channelKey'} element={<CommunityChannelDetail />} />
-              <Route path={':channelKey/:chatMessageKey'} element={<CommunityChannelDetail />} />
-              <Route path={':channelKey/:threadKey/thread'} element={<CommunityChannelDetail />} />
+              <Route index={true} element={<CommunityRootRoute />} />
+
+              {/* Items for 'all' */}
+              <Route path={'all'} element={<CommunityChannelDetail />} />
+              <Route path={'all/:chatMessageKey'} element={<CommunityChannelDetail />} />
+              <Route path={'all/:chatMessageKey/:mediaKey'} element={<CommunityChannelDetail />} />
+              {/* Items for 'all' within a thread */}
+              <Route path={'all/:threadKey/thread'} element={<CommunityChannelDetail />} />
               <Route
-                path={':channelKey/:threadKey/thread/:chatMessageKey/:mediaKey'}
+                path={'all/:threadKey/thread/:chatMessageKey'}
                 element={<CommunityChannelDetail />}
               />
+              <Route
+                path={'all/:threadKey/thread/:chatMessageKey/:mediaKey'}
+                element={<CommunityChannelDetail />}
+              />
+
+              {/* Items for 'channel' */}
+              <Route path={':channelKey'} element={<CommunityChannelDetail />} />
+              <Route path={':channelKey/:chatMessageKey'} element={<CommunityChannelDetail />} />
               <Route
                 path={':channelKey/:chatMessageKey/:mediaKey'}
                 element={<CommunityChannelDetail />}
               />
+
+              {/* Items for 'channel' within a thread*/}
+              <Route path={':channelKey/:threadKey/thread'} element={<CommunityChannelDetail />} />
+              <Route
+                path={':channelKey/:threadKey/thread/:chatMessageKey'}
+                element={<CommunityChannelDetail />}
+              />
+              <Route
+                path={':channelKey/:threadKey/thread/:chatMessageKey/:mediaKey'}
+                element={<CommunityChannelDetail />}
+              />
+
+              {/* Items for 'direct'*/}
               <Route path={'direct/:dmKey'} element={<CommunityDirectDetail />} />
               <Route path={'direct/:dmKey/:chatMessageKey'} element={<CommunityDirectDetail />} />
               <Route
@@ -133,6 +173,13 @@ function App() {
     </HelmetProvider>
   );
 }
+
+const CommunityRootRoute = () => {
+  const { communityKey } = useParams();
+  return window.innerWidth > 1024 ? (
+    <Navigate to={`${COMMUNITY_ROOT}/${communityKey}/all`} />
+  ) : null;
+};
 
 const RootRoute = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated } = useAuth();

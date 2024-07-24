@@ -7,7 +7,6 @@ import {
   AuthorImage,
   AuthorName,
   ChevronLeft,
-  ConnectionImage,
   DialogWrapper,
   ErrorBoundary,
   formatDateExludingYearIfCurrent,
@@ -27,29 +26,42 @@ import { CommunityHistory } from '../../components/Community/channel/CommunityHi
 import { useCommunityMessage } from '../../hooks/community/messages/useCommunityMessage';
 
 export const CommunityChannelDetail = () => {
-  const { communityKey, channelKey, threadKey } = useParams();
-  const communityId = communityKey;
-  const { data: community, isLoading, isFetched } = useCommunity({ communityId }).fetch;
+  const { communityKey: communityId, channelKey: channelId, threadKey } = useParams();
+  const { data: community, isFetched } = useCommunity({ communityId }).fetch;
   const navigate = useNavigate();
 
   const { data: channelDsr, isFetched: isChannelFetched } = useCommunityChannel({
     communityId: communityId,
-    channelId: channelKey,
+    channelId: channelId,
   }).fetch;
 
-  if (!communityId || isLoading || (!community && isFetched) || (!channelDsr && isChannelFetched))
+  if ((!community && isFetched) || (!channelDsr && isChannelFetched))
     return (
       <div className="flex h-full flex-grow flex-col items-center justify-center">
         <p className="text-4xl">Homebase Community</p>
       </div>
     );
 
+  if (communityId && !community) {
+    // TODO: Repalce with loading state
+    return null;
+  }
+
+  if (channelId && !channelDsr) {
+    // TODO: Repalce with loading state
+    return null;
+  }
+
   return (
     <ErrorBoundary>
       <div className="h-full w-full flex-grow bg-background">
         <div className="relative flex h-full flex-row">
           <div className="flex h-full flex-grow flex-col overflow-hidden">
-            <CommunityChannelHeader community={community || undefined} channel={channelDsr} />
+            {channelId ? (
+              <CommunityChannelHeader community={community || undefined} channel={channelDsr} />
+            ) : (
+              <CommunityRootHeader community={community || undefined} />
+            )}
             <ErrorBoundary>
               <CommunityHistory
                 community={community || undefined}
@@ -57,7 +69,7 @@ export const CommunityChannelDetail = () => {
                 origin={community || undefined}
                 doOpenThread={(thread) =>
                   navigate(
-                    `${COMMUNITY_ROOT}/${communityId}/${channelKey}/${thread.fileMetadata.appData.uniqueId}/thread`
+                    `${COMMUNITY_ROOT}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
                   )
                 }
               />
@@ -67,7 +79,7 @@ export const CommunityChannelDetail = () => {
                 community={community || undefined}
                 groupId={communityId}
                 channel={channelDsr || undefined}
-                key={channelKey}
+                key={channelId}
               />
             </ErrorBoundary>
           </div>
@@ -104,81 +116,14 @@ const CommunityChannelHeader = ({
           <ChevronLeft className="h-5 w-5" />
         </ActionLink>
 
-        <a
-          onClick={() => setShowChatInfo(true)}
-          className="flex cursor-pointer flex-row items-center gap-2"
-        >
-          # {channel?.fileMetadata.appData.content?.title}
-          {/* {singleRecipient ? (
-            <ConnectionImage
-              odinId={singleRecipient}
-              className="border border-neutral-200 dark:border-neutral-800"
-              size="sm"
-            />
-          ) : withYourself ? (
-            <div className="h-[3rem] w-[3rem] flex-shrink-0">
-              <OwnerImage className="border border-neutral-200 dark:border-neutral-800" size="sm" />
-            </div>
-          ) : (
-            <div className="rounded-full bg-primary/20 p-3">
-              <Persons className="h-6 w-6" />
-            </div>
-          )}
-          {singleRecipient ? (
-            <ConnectionName odinId={singleRecipient} />
-          ) : withYourself ? (
-            <>
-              <OwnerName />
-              <span className="text-sm text-foreground/50">({t('you')})</span>
-            </>
-          ) : (
-            conversation?.title
-          )} */}
-        </a>
-
-        {/* {conversationDsr && !withYourself ? (
-          <ActionGroup
-            options={[
-              {
-                label: t('Chat info'),
-                onClick: () => setShowChatInfo(true),
-              },
-              {
-                label: t('Delete'),
-                confirmOptions: {
-                  title: t('Delete chat'),
-                  buttonText: t('Delete'),
-                  body: t('Are you sure you want to delete this chat? All messages will be lost.'),
-                },
-                onClick: () => {
-                  deleteChat({ conversation: conversationDsr });
-                },
-              },
-              {
-                label: t('Clear'),
-                confirmOptions: {
-                  title: t('Clear chat'),
-                  buttonText: t('Clear'),
-                  body: t(
-                    'Are you sure you want to clear all messages from this chat? All messages will be lost.'
-                  ),
-                },
-                onClick: () => {
-                  clearChat({ conversation: conversationDsr });
-                },
-              },
-              // {label: t('Mute'), onClick: () => {}},
-            ]}
-            className="ml-auto"
-            type={'mute'}
-            size="square"
+        {channel ? (
+          <a
+            onClick={() => setShowChatInfo(true)}
+            className="flex cursor-pointer flex-row items-center gap-2"
           >
-            <>
-              <ChevronDown className="h-5 w-5" />
-              <span className="sr-only ml-1">{t('More')}</span>
-            </>
-          </ActionGroup>
-        ) : null} */}
+            # {channel.fileMetadata.appData.content?.title}
+          </a>
+        ) : null}
       </div>
 
       {showChatInfo && community && channel ? (
@@ -188,6 +133,21 @@ const CommunityChannelHeader = ({
           onClose={() => setShowChatInfo(false)}
         />
       ) : null}
+    </>
+  );
+};
+const CommunityRootHeader = ({ community }: { community?: HomebaseFile<CommunityDefinition> }) => {
+  const communityId = community?.fileMetadata.appData.uniqueId;
+
+  return (
+    <>
+      <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
+        <ActionLink className="lg:hidden" type="mute" href={`${COMMUNITY_ROOT}/${communityId}`}>
+          <ChevronLeft className="h-5 w-5" />
+        </ActionLink>
+
+        {community ? <>{community.fileMetadata.appData.content?.title}</> : null}
+      </div>
     </>
   );
 };
@@ -317,13 +277,13 @@ const CommunityThread = ({
           className="p-2 xl:hidden"
           size="none"
           type="mute"
-          href={`${COMMUNITY_ROOT}/${communityKey}/${channelKey}`}
+          href={`${COMMUNITY_ROOT}/${communityKey}/${channelKey || 'all'}`}
         >
           <ChevronLeft className="h-5 w-5" />
         </ActionLink>
         {t('Thread')}
         <ActionLink
-          href={`${COMMUNITY_ROOT}/${communityKey}/${channelKey}`}
+          href={`${COMMUNITY_ROOT}/${communityKey}/${channelKey || 'all'}`}
           icon={Times}
           size="none"
           type="mute"

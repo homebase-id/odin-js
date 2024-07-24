@@ -16,8 +16,6 @@ import { useState } from 'react';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { CommunityMessageInfo } from '../Message/detail/CommunityMessageInfo';
 import { EditCommunityMessage } from '../Message/detail/EditCommunityMessage';
-import { COMMUNITY_ROOT } from '../../../templates/Community/CommunityHome';
-import { COMMUNITY_DEFAULT_GENERAL_ID } from '../../../providers/CommunityProvider';
 
 export interface CommunityActions {
   doReply?: (msg: HomebaseFile<CommunityMessage>) => void;
@@ -107,7 +105,7 @@ export const ContextMenu = ({
             label: t('Copy link'),
             onClick: () => {
               navigator.clipboard.writeText(
-                `${window.location.origin}${COMMUNITY_ROOT}/${community?.fileMetadata.appData.uniqueId}/${COMMUNITY_DEFAULT_GENERAL_ID}/${msg.fileMetadata.appData.uniqueId}`
+                `${window.location.href}/${msg.fileMetadata.appData.uniqueId}`
               );
             },
           },

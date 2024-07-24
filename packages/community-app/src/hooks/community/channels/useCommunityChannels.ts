@@ -7,7 +7,6 @@ export const useCommunityChannels = (props: { communityId?: string }) => {
   const dotYouClient = useDotYouClientContext();
 
   const fetchChannels = async (communityId: string) => {
-    // Fetch channels
     return await getCommunityChannels(dotYouClient, communityId);
   };
 
