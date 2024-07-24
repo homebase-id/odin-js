@@ -100,7 +100,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       },
       serverMetadata: {
         accessControlList: {
-          requiredSecurityGroup: SecurityGroupType.Owner,
+          requiredSecurityGroup: SecurityGroupType.Connected,
         },
       },
     };

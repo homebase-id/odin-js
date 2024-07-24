@@ -259,9 +259,7 @@ export const updateConversation = async (
   const identity = dotYouClient.getIdentity();
 
   const imageFile: Blob | undefined = await (async () => {
-    if (newImage?.file) {
-      return newImage.file;
-    }
+    if (newImage?.file) return newImage.file;
 
     const existingPayloadDescriptor = conversation.fileMetadata.payloads.find(
       (payload) => payload.key === CONVERSATION_IMAGE_PAYLOAD_KEY
@@ -273,9 +271,8 @@ export const updateConversation = async (
       conversation.fileId,
       CONVERSATION_IMAGE_PAYLOAD_KEY
     );
-    if (!existingPayload) {
-      return;
-    }
+    if (!existingPayload) return;
+
     return new Blob([existingPayload.bytes], { type: existingPayload.contentType });
   })();
 
