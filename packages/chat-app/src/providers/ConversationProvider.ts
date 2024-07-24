@@ -18,13 +18,20 @@ import {
   SendContents,
   UploadResult,
   PriorityOptions,
+  NewMediaFile,
+  appendDataToFile,
+  PayloadFile,
+  ThumbnailFile,
+  getPayloadBytes,
 } from '@youfoundation/js-lib/core';
 import { jsonStringify64, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { createThumbnails } from '@youfoundation/js-lib/media';
 
 export const CHAT_CONVERSATION_FILE_TYPE = 8888;
 export const CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE = 8889;
 export const ConversationWithYourselfId = 'e4ef2382-ab3c-405d-a8b5-ad3e09e980dd';
 export const CONVERSATION_PAYLOAD_KEY = 'convo_pk';
+export const CONVERSATION_IMAGE_PAYLOAD_KEY = 'convo_img';
 
 export const ConversationWithYourself: HomebaseFile<UnifiedConversation> = {
   fileState: 'active',
@@ -245,10 +252,52 @@ export const uploadConversation = async (
 export const updateConversation = async (
   dotYouClient: DotYouClient,
   conversation: HomebaseFile<UnifiedConversation>,
+  newImage?: NewMediaFile | undefined,
   distribute = false,
   ignoreConflict = false
 ): Promise<UploadResult | void> => {
   const identity = dotYouClient.getIdentity();
+
+  const imageFile: Blob | undefined = await (async () => {
+    if (newImage?.file) {
+      return newImage.file;
+    }
+
+    const existingPayloadDescriptor = conversation.fileMetadata.payloads.find(
+      (payload) => payload.key === CONVERSATION_IMAGE_PAYLOAD_KEY
+    );
+    if (!existingPayloadDescriptor) return;
+    const existingPayload = await getPayloadBytes(
+      dotYouClient,
+      ChatDrive,
+      conversation.fileId,
+      CONVERSATION_IMAGE_PAYLOAD_KEY
+    );
+    if (!existingPayload) {
+      return;
+    }
+    return new Blob([existingPayload.bytes], { type: existingPayload.contentType });
+  })();
+
+  const payloads: PayloadFile[] | undefined = imageFile
+    ? [
+        {
+          payload: imageFile,
+          key: CONVERSATION_IMAGE_PAYLOAD_KEY,
+          descriptorContent: jsonStringify64({}),
+        },
+      ]
+    : undefined;
+  const { additionalThumbnails: thumbnails, tinyThumb } = imageFile
+    ? await createThumbnails(imageFile, CONVERSATION_IMAGE_PAYLOAD_KEY, [
+        {
+          height: 250,
+          width: 250,
+          quality: 0.8,
+        },
+      ])
+    : { additionalThumbnails: undefined, tinyThumb: undefined };
+
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: ChatDrive,
@@ -267,16 +316,17 @@ export const updateConversation = async (
   };
 
   const conversationContent = conversation.fileMetadata.appData.content;
-  const payloadJson: string = jsonStringify64({ ...conversationContent });
+  const contentJson: string = jsonStringify64({ ...conversationContent });
 
   const uploadMetadata: UploadFileMetadata = {
-    versionTag: conversation?.fileMetadata.versionTag,
+    versionTag: conversation.fileMetadata.versionTag,
     allowDistribution: distribute,
     appData: {
       archivalStatus: conversation.fileMetadata.appData.archivalStatus,
       uniqueId: conversation.fileMetadata.appData.uniqueId,
       fileType: conversation.fileMetadata.appData.fileType || CHAT_CONVERSATION_FILE_TYPE,
-      content: payloadJson,
+      content: contentJson,
+      previewThumbnail: tinyThumb,
     },
     isEncrypted: true,
     accessControlList: conversation.serverMetadata?.accessControlList || {
@@ -284,11 +334,13 @@ export const updateConversation = async (
     },
   };
 
-  return await uploadHeader(
+  return await uploadFile(
     dotYouClient,
-    conversation.sharedSecretEncryptedKeyHeader,
     uploadInstructions,
     uploadMetadata,
+    payloads,
+    thumbnails,
+    true,
     !ignoreConflict
       ? async () => {
           const existingConversation = await getConversation(
@@ -299,7 +351,7 @@ export const updateConversation = async (
           conversation.fileMetadata.versionTag = existingConversation.fileMetadata.versionTag;
           conversation.sharedSecretEncryptedKeyHeader =
             existingConversation.sharedSecretEncryptedKeyHeader;
-          return updateConversation(dotYouClient, conversation, distribute, true);
+          return updateConversation(dotYouClient, conversation, newImage, distribute, true);
         }
       : () => {
           // We just supress the warning; As we are ignoring the conflict following @param ignoreConflict
