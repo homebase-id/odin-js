@@ -1,13 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDotYouClientContext } from '@youfoundation/common-app';
-import {
-  CommunityChannel,
-  getCommunityChannel,
-  saveCommunityChannel,
-} from '../../../providers/CommunityProvider';
+import { CommunityChannel, saveCommunityChannel } from '../../../providers/CommunityProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
-import { toGuidId } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual, toGuidId } from '@youfoundation/js-lib/helpers';
+import { useCommunityChannels } from './useCommunityChannels';
 
 export const useCommunityChannel = (props?: { communityId?: string; channelId?: string }) => {
   const { communityId, channelId } = props || {};
@@ -15,10 +12,7 @@ export const useCommunityChannel = (props?: { communityId?: string; channelId?: 
   const identity = dotYouClient.getIdentity();
   const queryClient = useQueryClient();
 
-  const fetchChannel = async (communityId: string, channelId: string) => {
-    return await getCommunityChannel(dotYouClient, communityId, channelId);
-  };
-
+  const channelsQuery = useCommunityChannels({ communityId }).fetch;
   const createChannel = async ({
     community,
     channelName,
@@ -38,11 +32,12 @@ export const useCommunityChannel = (props?: { communityId?: string; channelId?: 
   };
 
   return {
-    fetch: useQuery({
-      queryKey: ['community-channel', communityId, channelId],
-      queryFn: async () => fetchChannel(communityId as string, channelId as string),
-      enabled: !!communityId && !!channelId,
-    }),
+    fetch: {
+      ...channelsQuery,
+      data: channelsQuery.data?.find((channel) =>
+        stringGuidsEqual(channel.fileMetadata.appData.uniqueId, channelId)
+      ),
+    },
     create: useMutation({
       mutationFn: createChannel,
       onMutate: async ({ channelName, community }) => {

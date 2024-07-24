@@ -30,12 +30,12 @@ export const CommunityChannelDetail = () => {
   const { data: community, isFetched } = useCommunity({ communityId }).fetch;
   const navigate = useNavigate();
 
-  const { data: channelDsr, isFetched: isChannelFetched } = useCommunityChannel({
+  const { data: channelDsr } = useCommunityChannel({
     communityId: communityId,
     channelId: channelId,
   }).fetch;
 
-  if ((!community && isFetched) || (!channelDsr && isChannelFetched))
+  if (!community && isFetched)
     return (
       <div className="flex h-full flex-grow flex-col items-center justify-center">
         <p className="text-4xl">Homebase Community</p>
@@ -167,26 +167,6 @@ const ChannelInfo = ({
   const channelContent = channel.fileMetadata.appData.content;
   const communityContent = community.fileMetadata.appData.content;
   const members = communityContent.recipients;
-
-  // const withYourself = conversation?.fileMetadata.appData.uniqueId === ConversationWithYourselfId;
-  // const recipient = recipients.length === 1 ? recipients[0] : undefined;
-
-  // const [isEditTitle, setIsEditTitle] = useState<boolean>(false);
-  // const [newTitle, setNewTitle] = useState<string>(channelContent.title || '');
-
-  // const { mutate: updateConversation, status: updateStatus } = useConversation().update;
-  // const doSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   conversation.fileMetadata.appData.content.title = newTitle;
-  //   updateConversation({
-  //     conversation,
-  //     distribute: true,
-  //   });
-  // };
-
-  // useEffect(() => {
-  //   updateStatus === 'success' && setIsEditTitle(false);
-  // }, [updateStatus]);
 
   const dialog = (
     <DialogWrapper onClose={onClose} title={`# ${channelContent.title}`}>

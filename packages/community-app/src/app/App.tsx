@@ -17,7 +17,7 @@ const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'process-inbox',
   'communities',
   'community-channels',
-  'community-channel', // TODO: This should be removed and replaced with community-channels + select
+  'community-messages',
 ];
 
 import { MinimalLayout, NoLayout } from '../components/ui/Layout/Layout';

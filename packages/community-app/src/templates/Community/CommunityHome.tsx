@@ -1,8 +1,10 @@
 import { useParams, useMatch, Link, useNavigate } from 'react-router-dom';
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import {
+  ActionButton,
   ActionLink,
+  Chevron,
   ChevronLeft,
   COMMUNITY_APP_ID,
   ConnectionImage,
@@ -192,6 +194,8 @@ const CommunitySidebar = () => {
   const isActive = !!useMatch({ path: `${COMMUNITY_ROOT}/${communityId}` });
 
   const { data: communityChannels } = useCommunityChannels({ communityId }).fetch;
+
+  const [isExpanded, setIsExpanded] = useState(false);
   if (!communityId || isLoading || !community) return null;
 
   return (
@@ -209,13 +213,30 @@ const CommunitySidebar = () => {
         <AllItem communityId={communityId} />
         <div className="flex flex-col gap-1">
           <h2 className="px-1">{t('Channels')}</h2>
-          {communityChannels?.map((channel) => (
-            <ChannelItem
-              communityId={communityId}
-              channel={channel}
-              key={channel.fileId || channel.fileMetadata.appData.uniqueId}
-            />
-          ))}
+
+          {communityChannels
+            ?.slice(0, isExpanded ? undefined : 7)
+            .map((channel) => (
+              <ChannelItem
+                communityId={communityId}
+                channel={channel}
+                key={channel.fileId || channel.fileMetadata.appData.uniqueId}
+              />
+            ))}
+
+          {communityChannels?.length && communityChannels?.length > 7 ? (
+            <ActionButton
+              type="mute"
+              size="none"
+              className="text-sm opacity-50 hover:opacity-100"
+              onClick={() => setIsExpanded((val) => !val)}
+            >
+              {isExpanded ? t('See less') : t('See more')}
+              <Chevron
+                className={`ml-2 h-3 w-3 transition-transform ${isExpanded ? '-rotate-90' : 'rotate-90'}`}
+              />
+            </ActionButton>
+          ) : null}
         </div>
 
         <div className="flex flex-col gap-1">

@@ -225,8 +225,12 @@ const CommunityMediaMessageBody = ({
 
   return (
     <div className={`relative w-full max-w-[75vw] rounded-lg md:max-w-xs lg:max-w-xl`}>
-      <CommunityMedia msg={msg} communityId={community?.fileMetadata.appData.uniqueId as string} />
-
+      <div className="my-1">
+        <CommunityMedia
+          msg={msg}
+          communityId={community?.fileMetadata.appData.uniqueId as string}
+        />
+      </div>
       {hasACaption ? (
         <div className="flex min-w-0 flex-col md:flex-row md:justify-between">
           <ParagraphWithLinks
