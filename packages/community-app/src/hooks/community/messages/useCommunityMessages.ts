@@ -2,6 +2,7 @@ import {
   InfiniteData,
   QueryClient,
   useInfiniteQuery,
+  UndefinedInitialDataInfiniteOptions,
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query';
@@ -10,7 +11,7 @@ import {
   getCommunityMessages,
   hardDeleteCommunityMessage,
 } from '../../../providers/CommunityMessageProvider';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useDotYouClientContext } from '@youfoundation/common-app';
@@ -24,47 +25,7 @@ export const useCommunityMessages = (props?: {
 }) => {
   const { communityId, originId, channelId } = props || {};
   const dotYouClient = useDotYouClientContext();
-
   const queryClient = useQueryClient();
-
-  const fetchMessages = async (
-    communityId: string,
-    originId: string | undefined,
-    channelId: string | undefined,
-    cursorState: string | undefined
-  ) =>
-    await getCommunityMessages(
-      dotYouClient,
-      communityId,
-      originId ? [originId] : undefined,
-      channelId ? [channelId] : undefined,
-      cursorState,
-      PAGE_SIZE
-    );
-
-  //   const markAsRead = async ({
-  //     conversation,
-  //     messages,
-  //   }: {
-  //     conversation: HomebaseFile<UnifiedConversation>;
-  //     messages: HomebaseFile<CommunityMessage>[];
-  //   }) => {
-  //     const response = await requestMarkAsRead(dotYouClient, conversation, messages);
-
-  //     response.results.forEach((result) => {
-  //       const someFailed = result.status.some(
-  //         (recipientStatus) =>
-  //           !recipientStatus.status ||
-  //           recipientStatus.status?.toLowerCase() !== SendReadReceiptResponseRecipientStatus.Enqueued
-  //       );
-  //       if (someFailed) {
-  //         // TODO: Should we throw an error?
-  //         console.error('Error marking chat as read', { response });
-  //       }
-  //     });
-
-  //     return response;
-  //   };
 
   const removeMessage = async ({
     community,
@@ -94,28 +55,9 @@ export const useCommunityMessages = (props?: {
   };
 
   return {
-    all: useInfiniteQuery({
-      queryKey: ['community-messages', communityId, channelId || 'any', originId || 'root'],
-      initialPageParam: undefined as string | undefined,
-      queryFn: ({ pageParam }) =>
-        fetchMessages(communityId as string, originId, channelId, pageParam),
-      getNextPageParam: (lastPage) =>
-        lastPage?.searchResults && lastPage?.searchResults?.length >= PAGE_SIZE
-          ? lastPage.cursorState
-          : undefined,
-      enabled: !!communityId,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      staleTime: 1000 * 60 * 60 * 24, // 24 hour
-    }),
-
-    // markAsRead: useMutation({
-    //   mutationKey: ['markAsRead', conversationId],
-    //   mutationFn: markAsRead,
-    //   onError: (error) => {
-    //     console.error('Error marking chat as read', { error });
-    //   },
-    // }),
+    all: useInfiniteQuery(
+      getCommunityMessagesInfiniteQueryOptions(dotYouClient, communityId, channelId, originId)
+    ),
     delete: useMutation({
       mutationFn: removeMessage,
 
@@ -129,6 +71,53 @@ export const useCommunityMessages = (props?: {
     }),
   };
 };
+
+const fetchMessages = async (
+  dotYouClient: DotYouClient,
+  communityId: string,
+  originId: string | undefined,
+  channelId: string | undefined,
+  cursorState: string | undefined
+) =>
+  await getCommunityMessages(
+    dotYouClient,
+    communityId,
+    originId ? [originId] : undefined,
+    channelId ? [channelId] : undefined,
+    cursorState,
+    PAGE_SIZE
+  );
+
+export const getCommunityMessagesInfiniteQueryOptions: (
+  dotYouClient: DotYouClient,
+  communityId?: string,
+  channelId?: string,
+  originId?: string
+) => UndefinedInitialDataInfiniteOptions<{
+  searchResults: (HomebaseFile<CommunityMessage> | null)[];
+  cursorState: string;
+  queryTime: number;
+  includeMetadataHeader: boolean;
+}> = (dotYouClient, communityId, channelId, originId) => ({
+  queryKey: ['community-messages', communityId, channelId || 'any', originId || 'root'],
+  initialPageParam: undefined as string | undefined,
+  queryFn: ({ pageParam }) =>
+    fetchMessages(
+      dotYouClient,
+      communityId as string,
+      originId,
+      channelId,
+      pageParam as string | undefined
+    ),
+  getNextPageParam: (lastPage) =>
+    lastPage?.searchResults && lastPage?.searchResults?.length >= PAGE_SIZE
+      ? lastPage.cursorState
+      : undefined,
+  enabled: !!communityId,
+  refetchOnMount: false,
+  refetchOnReconnect: false,
+  staleTime: 1000 * 60 * 60 * 24, // 24 hour
+});
 
 export const insertNewMessagesForConversation = (
   queryClient: QueryClient,

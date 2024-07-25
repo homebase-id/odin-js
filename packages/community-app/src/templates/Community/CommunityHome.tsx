@@ -25,10 +25,10 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useCommunities } from '../../hooks/community/useCommunities';
 import { NewCommunity } from './CommunityNew';
-import { useCommunityChannels } from '../../hooks/community/channels/useCommunityChannels';
 import { CommunityChannel } from '../../providers/CommunityProvider';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import { useLiveCommunityProcessor } from '../../hooks/community/useLiveCommunityProcessor';
+import { useCommunityChannelsWithRecentMessages } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 
 export const COMMUNITY_ROOT = '/apps/community';
 
@@ -193,8 +193,8 @@ const CommunitySidebar = () => {
 
   const isActive = !!useMatch({ path: `${COMMUNITY_ROOT}/${communityId}` });
 
-  const { data: communityChannels } = useCommunityChannels({ communityId }).fetch;
-
+  const { data: communityChannels } = useCommunityChannelsWithRecentMessages({ communityId }).fetch;
+  console.log('communityChannels', communityChannels);
   const [isExpanded, setIsExpanded] = useState(false);
   if (!communityId || isLoading || !community) return null;
 

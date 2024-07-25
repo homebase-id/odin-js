@@ -346,7 +346,6 @@ export const getCommunityMessages = async (
   pageSize: number
 ) => {
   const targetDrive = getTargetDriveFromCommunityId(communityId);
-
   const params: FileQueryParams = {
     targetDrive: targetDrive,
     fileType: [COMMUNITY_MESSAGE_FILE_TYPE],
