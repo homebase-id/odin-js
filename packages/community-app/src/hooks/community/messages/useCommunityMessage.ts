@@ -17,6 +17,7 @@ import {
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { formatGuidId, getNewId, stringGuidsEqual, toGuidId } from '@youfoundation/js-lib/helpers';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
+import { insertNewMessage } from './useCommunityMessages';
 
 export const useCommunityMessage = (props?: {
   communityId: string | undefined;
@@ -142,24 +143,35 @@ export const useCommunityMessage = (props?: {
     }),
     send: useMutation({
       mutationFn: sendMessage,
-      onMutate: async ({ community, channel, replyId, files, message, chatId, userDate }) => {
-        const existingData = queryClient.getQueryData<
-          InfiniteData<{
-            searchResults: (HomebaseFile<CommunityMessage> | null)[];
-            cursorState: string;
-            queryTime: number;
-            includeMetadataHeader: boolean;
-          }>
-        >(['community-messages', community.fileMetadata.appData.uniqueId]);
-
-        if (!existingData) return;
+      onMutate: async ({
+        community,
+        channel,
+        replyId,
+        files,
+        message,
+        chatId,
+        groupId,
+        userDate,
+      }) => {
+        const textualTags = message
+          .match(/#[a-zA-Z0-9]+/g)
+          ?.flatMap((tag) => tag.slice(1).toLowerCase());
+        const tags = textualTags?.map(toGuidId).map(formatGuidId) || [];
 
         const newMessageDsr: NewHomebaseFile<CommunityMessage> = {
           fileMetadata: {
             created: userDate,
             appData: {
               uniqueId: chatId,
-              groupId: community.fileMetadata.appData.uniqueId,
+              groupId,
+              tags: Array.from(
+                new Set([
+                  ...tags,
+                  ...(channel?.fileMetadata.appData.uniqueId
+                    ? [channel?.fileMetadata.appData.uniqueId]
+                    : []),
+                ])
+              ),
               content: {
                 message: message,
                 deliveryStatus: CommunityDeliveryStatus.Sending,
@@ -179,20 +191,11 @@ export const useCommunityMessage = (props?: {
           },
         };
 
-        const newData = {
-          ...existingData,
-          pages: existingData?.pages?.map((page, index) => ({
-            ...page,
-            searchResults:
-              index === 0 ? [newMessageDsr, ...page.searchResults] : page.searchResults,
-          })),
-        };
-
-        queryClient.setQueryData(
-          ['community-messages', community.fileMetadata.appData.uniqueId],
-          newData
+        insertNewMessage(
+          queryClient,
+          newMessageDsr as HomebaseFile<CommunityMessage>,
+          community.fileMetadata.appData.uniqueId as string
         );
-        return { existingData };
       },
       onSuccess: async (newMessage, params) => {
         if (!newMessage) return;
@@ -243,12 +246,6 @@ export const useCommunityMessage = (props?: {
             newData
           );
         }
-      },
-      onError: (err, messageParams, context) => {
-        queryClient.setQueryData(
-          ['community-messages', messageParams.community.fileMetadata.appData.uniqueId],
-          context?.existingData
-        );
       },
       onSettled: async (_data, _error, variables) => {
         // queryClient.invalidateQueries({
