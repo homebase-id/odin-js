@@ -313,7 +313,8 @@ const ChannelItem = ({
     metadata &&
     channel.lastMessage?.fileMetadata.created &&
     (metadata?.fileMetadata.appData.content?.channelLastReadTime[channelId] || 0) <
-      channel.lastMessage?.fileMetadata.created;
+      channel.lastMessage?.fileMetadata.created &&
+    !!channel.lastMessage.fileMetadata.senderOdinId;
 
   return (
     <Link
