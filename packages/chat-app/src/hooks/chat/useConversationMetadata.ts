@@ -63,7 +63,7 @@ export const useConversationMetadata = (props?: { conversationId?: string | unde
       queryKey: ['conversation-metadata', conversationId],
       queryFn: () => getMetadata(conversationId as string),
       enabled: !!conversationId,
-      // TODO: Cache long time and update based on websocket events
+      staleTime: 1000 * 60 * 60 * 24, // 24h, updates will come in via websocket
     }),
     update: useMutation({
       mutationFn: saveMetadata,
