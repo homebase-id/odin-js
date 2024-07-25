@@ -52,5 +52,5 @@ export const useMarkCommunityAsRead = ({
         },
       },
     });
-  }, [metadata, lastUpdate]);
+  }, [metadata, channelId, lastUpdate]);
 };

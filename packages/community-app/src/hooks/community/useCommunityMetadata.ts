@@ -76,7 +76,7 @@ export const usecommunityMetadata = (props?: { communityId?: string | undefined 
         }
 
         queryClient.setQueryData<HomebaseFile<CommunityMetadata>>(
-          ['community-metadata', variables.metadata.fileMetadata.appData.uniqueId],
+          ['community-metadata', variables.metadata.fileMetadata.appData.content.communityId],
           variables.metadata as HomebaseFile<CommunityMetadata>
         );
       },
