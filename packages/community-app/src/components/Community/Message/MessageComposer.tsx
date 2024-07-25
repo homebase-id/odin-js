@@ -69,7 +69,7 @@ export const MessageComposer = ({
     const trimmedVal = (forcedVal || message)?.trim();
     const newFiles = [...(files || [])];
 
-    if ((!trimmedVal && !files?.length) || !community || !channel) return;
+    if ((!trimmedVal && !files?.length) || !community) return;
 
     // Clear internal state and allow excessive senders
     setMessage('');

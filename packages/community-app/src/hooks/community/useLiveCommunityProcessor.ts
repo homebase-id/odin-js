@@ -338,7 +338,13 @@ const processCommunityMessagesBatch = async (
           )
         )
       ).filter(Boolean) as HomebaseFile<CommunityMessage>[];
-      // TODO: handle messages with a groupId different from the communityId: Thread messages
+      const threadMessages = updatedcommunityMessages.filter(
+        (msg) => !stringGuidsEqual(msg.fileMetadata.appData.groupId, communityId)
+      );
+      threadMessages.forEach((msg) => {
+        insertNewMessage(queryClient, msg, communityId);
+      });
+
       insertNewMessagesForChannel(
         queryClient,
         channelId,

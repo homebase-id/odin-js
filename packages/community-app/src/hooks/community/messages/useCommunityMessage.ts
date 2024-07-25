@@ -42,7 +42,7 @@ export const useCommunityMessage = (props?: {
     userDate,
   }: {
     community: HomebaseFile<CommunityDefinition>;
-    channel: HomebaseFile<CommunityChannel>;
+    channel?: HomebaseFile<CommunityChannel>;
     groupId?: string;
     replyId?: string;
     files?: NewMediaFile[];
@@ -69,7 +69,14 @@ export const useCommunityMessage = (props?: {
         appData: {
           uniqueId: newChatId,
           groupId,
-          tags: Array.from(new Set([...tags, channel.fileMetadata.appData.uniqueId as string])),
+          tags: Array.from(
+            new Set([
+              ...tags,
+              ...(channel?.fileMetadata.appData.uniqueId
+                ? [channel?.fileMetadata.appData.uniqueId]
+                : []),
+            ])
+          ),
           content: {
             message: message,
             deliveryStatus:
