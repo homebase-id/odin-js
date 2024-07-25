@@ -12,6 +12,7 @@ import {
   ErrorBoundary,
   ExtendPermissionDialog,
   getOdinIdColor,
+  Pin,
   Plus,
   RadioTower,
   Sidenav,
@@ -21,7 +22,7 @@ import {
 import { drives, permissions } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useCommunities } from '../../hooks/community/useCommunities';
 import { NewCommunity } from './CommunityNew';
@@ -29,6 +30,8 @@ import { CommunityChannel } from '../../providers/CommunityProvider';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import { useLiveCommunityProcessor } from '../../hooks/community/useLiveCommunityProcessor';
 import { useCommunityChannelsWithRecentMessages } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
+import { usecommunityMetadata } from '../../hooks/community/useCommunityMetadata';
+import { CommunityMetadata } from '../../providers/CommunityMetadataProvider';
 
 export const COMMUNITY_ROOT = '/apps/community';
 
@@ -184,9 +187,11 @@ const CommunityListItem = ({
   );
 };
 
+const maxChannels = 7;
 const CommunitySidebar = () => {
   const { communityKey } = useParams();
   const { data: community, isLoading } = useCommunity({ communityId: communityKey }).fetch;
+  const { data: metadata } = usecommunityMetadata({ communityId: communityKey }).single;
 
   const communityId = community?.fileMetadata.appData.uniqueId;
   const recipients = community?.fileMetadata.appData.content?.recipients;
@@ -194,6 +199,16 @@ const CommunitySidebar = () => {
   const isActive = !!useMatch({ path: `${COMMUNITY_ROOT}/${communityId}` });
 
   const { data: communityChannels } = useCommunityChannelsWithRecentMessages({ communityId }).fetch;
+  const pinnedChannels = communityChannels?.filter(
+    (channel) =>
+      channel.fileMetadata.appData.uniqueId &&
+      metadata?.fileMetadata.appData.content.pinnedChannels?.includes(
+        channel.fileMetadata.appData.uniqueId
+      )
+  );
+  const unpinnedChannels = communityChannels?.filter(
+    (channel) => !pinnedChannels?.includes(channel)
+  );
 
   const [isExpanded, setIsExpanded] = useState(false);
   if (!communityId || isLoading || !community) return null;
@@ -214,8 +229,16 @@ const CommunitySidebar = () => {
         <div className="flex flex-col gap-1">
           <h2 className="px-1">{t('Channels')}</h2>
 
-          {communityChannels
-            ?.slice(0, isExpanded ? undefined : 7)
+          {pinnedChannels.map((channel) => (
+            <ChannelItem
+              communityId={communityId}
+              channel={channel}
+              key={channel.fileId || channel.fileMetadata.appData.uniqueId}
+            />
+          ))}
+
+          {unpinnedChannels
+            ?.slice(0, isExpanded ? undefined : maxChannels - pinnedChannels.length)
             .map((channel) => (
               <ChannelItem
                 communityId={communityId}
@@ -275,12 +298,50 @@ const ChannelItem = ({
   const href = `${COMMUNITY_ROOT}/${communityId}/${channelId}`;
   const isActive = !!useMatch({ path: href, end: false });
 
+  const {
+    single: { data: metadata },
+    update: { mutate: updateMetadata },
+  } = usecommunityMetadata({ communityId });
+
+  const isPinned =
+    channelId && metadata?.fileMetadata.appData.content?.pinnedChannels?.includes(channelId);
+
   return (
     <Link
       to={`${COMMUNITY_ROOT}/${communityId}/${channelId}`}
-      className={`flex flex-row items-center gap-1 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
+      className={`group flex flex-row items-center gap-1 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
     >
       # {channel.fileMetadata.appData.content?.title?.toLowerCase()}
+      <button
+        className={`-m-1 ml-auto rounded-sm p-1 ${isPinned ? '' : 'opacity-0 transition-opacity group-hover:opacity-100'}`}
+        onClick={() => {
+          if (!metadata || !channelId) return;
+          let newPins: string[] = [];
+          if (isPinned) {
+            newPins =
+              metadata?.fileMetadata.appData.content?.pinnedChannels?.filter(
+                (pin) => pin !== channelId
+              ) || [];
+          } else {
+            newPins = [
+              ...(metadata?.fileMetadata.appData.content?.pinnedChannels || []),
+              channelId,
+            ];
+          }
+
+          const newMeta: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata> = {
+            ...metadata,
+          };
+          newMeta.fileMetadata.appData.content.pinnedChannels = newPins;
+          updateMetadata({ metadata: newMeta });
+        }}
+      >
+        <Pin
+          className={`hidden h-5 w-5 flex-shrink-0 transition-opacity md:block ${
+            isPinned ? 'opacity-100 hover:opacity-60' : `opacity-60 hover:opacity-100`
+          }`}
+        />
+      </button>
     </Link>
   );
 };
