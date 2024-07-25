@@ -6,6 +6,7 @@ import {
   getCommunityMetadata,
   uploadCommunityMetadata,
 } from '../../providers/CommunityMetadataProvider';
+import { formatGuidId } from '@youfoundation/js-lib/helpers';
 
 export const usecommunityMetadata = (props?: { communityId?: string | undefined }) => {
   const { communityId } = props || {};
@@ -92,7 +93,7 @@ export const insertNewcommunityMetadata = (
   newMetadata: HomebaseFile<CommunityMetadata>
 ) => {
   queryClient.setQueryData(
-    ['community-metadata', newMetadata.fileMetadata.appData.content.communityId],
+    ['community-metadata', formatGuidId(newMetadata.fileMetadata.appData.content.communityId)],
     newMetadata
   );
 };

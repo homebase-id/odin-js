@@ -65,7 +65,7 @@ export const ChannelAutocompleteDropdown = ({
   const doInput = (odinId: string) => onInput(`#${odinId} `);
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (!query || creationStatus === 'pending') return;
+      if (!enabled || !query || creationStatus === 'pending') return;
 
       if (event.key === 'ArrowDown') setActiveIndex((index) => index + 1);
       else if (event.key === 'ArrowUp') setActiveIndex((index) => index - 1);
