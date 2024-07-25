@@ -15,7 +15,7 @@ import {
   uploadCommunityMessage,
 } from '../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
-import { getNewId, stringGuidsEqual, toGuidId } from '@youfoundation/js-lib/helpers';
+import { formatGuidId, getNewId, stringGuidsEqual, toGuidId } from '@youfoundation/js-lib/helpers';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
 
 export const useCommunityMessage = (props?: {
@@ -59,7 +59,12 @@ export const useCommunityMessage = (props?: {
     const textualTags = message
       .match(/#[a-zA-Z0-9]+/g)
       ?.flatMap((tag) => tag.slice(1).toLowerCase());
-    const tags = textualTags?.map(toGuidId) || [];
+    const tags = textualTags?.map(toGuidId).map(formatGuidId) || [];
+
+    console.log(
+      'tags',
+      Array.from(new Set([...tags, channel.fileMetadata.appData.uniqueId as string]))
+    );
 
     // We prefer having the uniqueId set outside of the mutation, so that an auto-retry of the mutation doesn't create duplicates
     const newChatId = chatId || getNewId();

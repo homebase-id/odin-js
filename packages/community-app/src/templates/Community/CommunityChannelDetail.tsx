@@ -24,6 +24,7 @@ import { createPortal } from 'react-dom';
 import { MessageComposer } from '../../components/Community/Message/MessageComposer';
 import { CommunityHistory } from '../../components/Community/channel/CommunityHistory';
 import { useCommunityMessage } from '../../hooks/community/messages/useCommunityMessage';
+import { useMarkCommunityAsRead } from '../../hooks/community/useMarkCommunityAsRead';
 
 export const CommunityChannelDetail = () => {
   const { communityKey: communityId, channelKey: channelId, threadKey } = useParams();
@@ -34,6 +35,8 @@ export const CommunityChannelDetail = () => {
     communityId: communityId,
     channelId: channelId,
   }).fetch;
+
+  useMarkCommunityAsRead({ communityId, channelId });
 
   if (!community && isFetched)
     return (

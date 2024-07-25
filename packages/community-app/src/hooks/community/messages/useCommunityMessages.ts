@@ -16,6 +16,7 @@ import { DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useDotYouClientContext } from '@youfoundation/common-app';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
+import { useState, useEffect } from 'react';
 
 const PAGE_SIZE = 100;
 export const useCommunityMessages = (props?: {
@@ -116,8 +117,36 @@ export const getCommunityMessagesInfiniteQueryOptions: (
   enabled: !!communityId,
   refetchOnMount: false,
   refetchOnReconnect: false,
-  staleTime: 1000 * 60 * 60 * 24, // 24 hour
+  staleTime: 1000 * 60 * 1, //60 * 24  24 hour
 });
+
+export const useLastUpdatedChatMessages = () => {
+  const queryClient = useQueryClient();
+  const [lastUpdate, setLastUpdate] = useState(0);
+
+  useEffect(() => {
+    const lastUpdates = queryClient
+      .getQueryCache()
+      .findAll({ queryKey: ['community-messages'], exact: false })
+      .map((query) => query.state.dataUpdatedAt);
+
+    setLastUpdate(
+      lastUpdates.reduce((acc, val) => {
+        if (val > acc) {
+          return val;
+        }
+
+        return acc;
+      }, 0)
+    );
+  });
+
+  return {
+    lastUpdate,
+  };
+};
+
+// Inserters
 
 export const insertNewMessagesForConversation = (
   queryClient: QueryClient,

@@ -26,10 +26,12 @@ import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useCommunities } from '../../hooks/community/useCommunities';
 import { NewCommunity } from './CommunityNew';
-import { CommunityChannel } from '../../providers/CommunityProvider';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import { useLiveCommunityProcessor } from '../../hooks/community/useLiveCommunityProcessor';
-import { useCommunityChannelsWithRecentMessages } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
+import {
+  ChannelWithRecentMessage,
+  useCommunityChannelsWithRecentMessages,
+} from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 import { usecommunityMetadata } from '../../hooks/community/useCommunityMetadata';
 import { CommunityMetadata } from '../../providers/CommunityMetadataProvider';
 
@@ -292,7 +294,7 @@ const ChannelItem = ({
   channel,
 }: {
   communityId: string;
-  channel: HomebaseFile<CommunityChannel>;
+  channel: ChannelWithRecentMessage;
 }) => {
   const channelId = channel.fileMetadata.appData.uniqueId;
   const href = `${COMMUNITY_ROOT}/${communityId}/${channelId}`;
@@ -306,10 +308,17 @@ const ChannelItem = ({
   const isPinned =
     channelId && metadata?.fileMetadata.appData.content?.pinnedChannels?.includes(channelId);
 
+  const hasUnreadMessages =
+    channelId &&
+    metadata &&
+    channel.lastMessage?.fileMetadata.created &&
+    (metadata?.fileMetadata.appData.content?.channelLastReadTime[channelId] || 0) <
+      channel.lastMessage?.fileMetadata.created;
+
   return (
     <Link
       to={`${COMMUNITY_ROOT}/${communityId}/${channelId}`}
-      className={`group flex flex-row items-center gap-1 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
+      className={`group flex flex-row items-center gap-1 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'} ${hasUnreadMessages ? 'font-bold' : ''}`}
     >
       # {channel.fileMetadata.appData.content?.title?.toLowerCase()}
       <button

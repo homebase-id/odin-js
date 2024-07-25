@@ -21,8 +21,9 @@ export const usecommunityMetadata = (props?: { communityId?: string | undefined 
             tags: [communityId],
             content: {
               communityId,
-              lastReadTime: 0,
               pinnedChannels: [],
+              lastReadTime: 0,
+              channelLastReadTime: {},
             },
           },
         },

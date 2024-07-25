@@ -18,6 +18,7 @@ import { getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
 
 export interface CommunityMetadata {
   lastReadTime: number;
+  channelLastReadTime: Record<string, number>;
   pinnedChannels: string[];
   communityId: string;
 }

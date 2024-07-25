@@ -5,7 +5,10 @@ import { useCommunityChannels } from './useCommunityChannels';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 import { useCallback, useEffect, useState } from 'react';
-import { getCommunityMessagesInfiniteQueryOptions } from '../messages/useCommunityMessages';
+import {
+  getCommunityMessagesInfiniteQueryOptions,
+  useLastUpdatedChatMessages,
+} from '../messages/useCommunityMessages';
 
 export type ChannelWithRecentMessage = HomebaseFile<CommunityChannel> & {
   lastMessage: HomebaseFile<CommunityMessage> | null;
@@ -56,31 +59,5 @@ export const useCommunityChannelsWithRecentMessages = (props: { communityId?: st
       ...rest,
       data: channelsWithRecent,
     },
-  };
-};
-
-const useLastUpdatedChatMessages = () => {
-  const queryClient = useQueryClient();
-  const [lastUpdate, setLastUpdate] = useState(0);
-
-  useEffect(() => {
-    const lastUpdates = queryClient
-      .getQueryCache()
-      .findAll({ queryKey: ['community-messages'], exact: false })
-      .map((query) => query.state.dataUpdatedAt);
-
-    setLastUpdate(
-      lastUpdates.reduce((acc, val) => {
-        if (val > acc) {
-          return val;
-        }
-
-        return acc;
-      }, 0)
-    );
-  });
-
-  return {
-    lastUpdate,
   };
 };
