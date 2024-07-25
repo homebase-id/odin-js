@@ -1,6 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { QueryClient, useQuery } from '@tanstack/react-query';
 import { useDotYouClientContext } from '@youfoundation/common-app';
-import { getCommunityChannels } from '../../../providers/CommunityProvider';
+import { CommunityChannel, getCommunityChannels } from '../../../providers/CommunityProvider';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 export const useCommunityChannels = (props: { communityId?: string }) => {
   const { communityId } = props;
@@ -17,4 +19,25 @@ export const useCommunityChannels = (props: { communityId?: string }) => {
       enabled: !!communityId,
     }),
   };
+};
+
+export const insertNewCommunityChannel = (
+  queryClient: QueryClient,
+  updatedChannel: HomebaseFile<CommunityChannel>,
+  communityId: string
+) => {
+  const existingChannels = queryClient.getQueryData<HomebaseFile<CommunityChannel>[]>([
+    'community-channels',
+    communityId,
+  ]);
+  if (!existingChannels) return;
+
+  const allButThisOne = existingChannels.filter(
+    (channel) =>
+      !stringGuidsEqual(
+        channel.fileMetadata.appData.uniqueId,
+        updatedChannel.fileMetadata.appData.uniqueId
+      )
+  );
+  queryClient.setQueryData(['community-channels', communityId], [...allButThisOne, updatedChannel]);
 };

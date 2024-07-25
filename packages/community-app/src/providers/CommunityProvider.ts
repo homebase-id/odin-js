@@ -166,7 +166,7 @@ export const saveCommunityChannel = async (
 
 // Helpers
 
-const dsrToCommunityChannel = async (
+export const dsrToCommunityChannel = async (
   dotYouClient: DotYouClient,
   dsr: HomebaseFile,
   targetDrive: TargetDrive,

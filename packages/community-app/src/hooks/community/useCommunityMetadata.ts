@@ -92,7 +92,7 @@ export const insertNewcommunityMetadata = (
   newMetadata: HomebaseFile<CommunityMetadata>
 ) => {
   queryClient.setQueryData(
-    ['community-metadata', newMetadata.fileMetadata.appData.tags?.[0]],
+    ['community-metadata', newMetadata.fileMetadata.appData.content.communityId],
     newMetadata
   );
 };

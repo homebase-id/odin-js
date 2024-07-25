@@ -61,11 +61,6 @@ export const useCommunityMessage = (props?: {
       ?.flatMap((tag) => tag.slice(1).toLowerCase());
     const tags = textualTags?.map(toGuidId).map(formatGuidId) || [];
 
-    console.log(
-      'tags',
-      Array.from(new Set([...tags, channel.fileMetadata.appData.uniqueId as string]))
-    );
-
     // We prefer having the uniqueId set outside of the mutation, so that an auto-retry of the mutation doesn't create duplicates
     const newChatId = chatId || getNewId();
     const newChat: NewHomebaseFile<CommunityMessage> = {

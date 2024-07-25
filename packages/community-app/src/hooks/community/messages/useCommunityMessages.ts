@@ -79,8 +79,8 @@ const fetchMessages = async (
   originId: string | undefined,
   channelId: string | undefined,
   cursorState: string | undefined
-) =>
-  await getCommunityMessages(
+) => {
+  return await getCommunityMessages(
     dotYouClient,
     communityId,
     originId ? [originId] : undefined,
@@ -88,6 +88,7 @@ const fetchMessages = async (
     cursorState,
     PAGE_SIZE
   );
+};
 
 export const getCommunityMessagesInfiniteQueryOptions: (
   dotYouClient: DotYouClient,
@@ -100,7 +101,12 @@ export const getCommunityMessagesInfiniteQueryOptions: (
   queryTime: number;
   includeMetadataHeader: boolean;
 }> = (dotYouClient, communityId, channelId, originId) => ({
-  queryKey: ['community-messages', communityId, channelId || 'any', originId || 'root'],
+  queryKey: [
+    'community-messages',
+    communityId,
+    channelId || 'any',
+    originId ? (stringGuidsEqual(originId, communityId) ? 'root' : originId) : 'root',
+  ],
   initialPageParam: undefined as string | undefined,
   queryFn: ({ pageParam }) =>
     fetchMessages(
@@ -117,7 +123,7 @@ export const getCommunityMessagesInfiniteQueryOptions: (
   enabled: !!communityId,
   refetchOnMount: false,
   refetchOnReconnect: false,
-  staleTime: 1000 * 60 * 1, //60 * 24  24 hour
+  staleTime: 1000 * 60 * 60 * 24, // 24 hour
 });
 
 export const useLastUpdatedChatMessages = () => {
@@ -148,10 +154,11 @@ export const useLastUpdatedChatMessages = () => {
 
 // Inserters
 
-export const insertNewMessagesForConversation = (
+export const insertNewMessagesForChannel = (
   queryClient: QueryClient,
-  conversationId: string,
-  newMessages: HomebaseFile<CommunityMessage>[]
+  channelId: string,
+  newMessages: HomebaseFile<CommunityMessage>[],
+  communityId: string
 ) => {
   const extistingMessages = queryClient.getQueryData<
     InfiniteData<{
@@ -160,11 +167,11 @@ export const insertNewMessagesForConversation = (
       queryTime: number;
       includeMetadataHeader: boolean;
     }>
-  >(['community-messages', conversationId]);
+  >(['community-messages', communityId, channelId || 'any', 'root']);
 
   if (newMessages.length > PAGE_SIZE || !extistingMessages) {
     queryClient.setQueryData(
-      ['community-messages', conversationId],
+      ['community-messages', communityId, channelId || 'any', 'root'],
       (data: InfiniteData<unknown, unknown>) => {
         return {
           pages: data?.pages?.slice(0, 1) ?? [],
@@ -172,7 +179,9 @@ export const insertNewMessagesForConversation = (
         };
       }
     );
-    queryClient.invalidateQueries({ queryKey: ['community-messages', conversationId] });
+    queryClient.invalidateQueries({
+      queryKey: ['community-messages', communityId, channelId || 'any', 'root'],
+    });
     return;
   }
 
@@ -181,34 +190,59 @@ export const insertNewMessagesForConversation = (
     runningMessages = internalInsertNewMessage(runningMessages, newMessage);
   });
 
-  queryClient.setQueryData(['community-messages', conversationId], runningMessages);
+  queryClient.setQueryData(
+    ['community-messages', communityId, channelId || 'any', 'root'],
+    runningMessages
+  );
 };
 
 export const insertNewMessage = (
   queryClient: QueryClient,
-  newMessage: HomebaseFile<CommunityMessage>
+  newMessage: HomebaseFile<CommunityMessage>,
+  communityId: string
 ) => {
-  const conversationId = newMessage.fileMetadata.appData.groupId;
+  const update = (channelId?: string, originId?: string) => {
+    const extistingMessages = queryClient.getQueryData<
+      InfiniteData<{
+        searchResults: (HomebaseFile<CommunityMessage> | null)[];
+        cursorState: string;
+        queryTime: number;
+        includeMetadataHeader: boolean;
+      }>
+    >(['community-messages', communityId, channelId || 'any', originId || 'root']);
 
-  const extistingMessages = queryClient.getQueryData<
-    InfiniteData<{
-      searchResults: (HomebaseFile<CommunityMessage> | null)[];
-      cursorState: string;
-      queryTime: number;
-      includeMetadataHeader: boolean;
-    }>
-  >(['community-messages', conversationId]);
+    if (extistingMessages) {
+      queryClient.setQueryData(
+        ['community-messages', communityId, channelId || 'any', originId || 'root'],
+        internalInsertNewMessage(extistingMessages, newMessage)
+      );
+    } else {
+      queryClient.invalidateQueries({
+        queryKey: ['community-messages', communityId, channelId || 'any', originId || 'root'],
+      });
+    }
+  };
 
-  if (extistingMessages) {
-    queryClient.setQueryData(
-      ['community-messages', conversationId],
-      internalInsertNewMessage(extistingMessages, newMessage)
-    );
+  // Update for all
+  update();
+
+  // Update for channels/threads
+  if (stringGuidsEqual(newMessage.fileMetadata.appData.groupId, communityId)) {
+    // Root message
+    newMessage.fileMetadata.appData.tags?.forEach((tag) => {
+      update(tag);
+    });
   } else {
-    queryClient.invalidateQueries({ queryKey: ['community-messages', conversationId] });
+    // Thread message
+    newMessage.fileMetadata.appData.tags?.forEach((tag) => {
+      update(tag, newMessage.fileMetadata.appData.groupId);
+    });
   }
 
-  queryClient.setQueryData(['chat-message', newMessage.fileMetadata.appData.uniqueId], newMessage);
+  queryClient.setQueryData(
+    ['community-message', newMessage.fileMetadata.appData.uniqueId],
+    newMessage
+  );
 };
 
 export const internalInsertNewMessage = (
