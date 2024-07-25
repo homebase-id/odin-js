@@ -194,7 +194,7 @@ const CommunitySidebar = () => {
   const isActive = !!useMatch({ path: `${COMMUNITY_ROOT}/${communityId}` });
 
   const { data: communityChannels } = useCommunityChannelsWithRecentMessages({ communityId }).fetch;
-  console.log('communityChannels', communityChannels);
+
   const [isExpanded, setIsExpanded] = useState(false);
   if (!communityId || isLoading || !community) return null;
 
