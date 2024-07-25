@@ -15,13 +15,12 @@ export const useMarkCommunityAsRead = ({
   } = usecommunityMetadata({ communityId });
   const { lastUpdate } = useLastUpdatedChatMessages();
 
-  const savedLastReadTime = metadata?.fileMetadata.appData.content.lastReadTime;
-  const savedLastReadTimeChannel =
-    metadata?.fileMetadata.appData.content.channelLastReadTime[channelId || ''];
-
   useEffect(() => {
     if (!metadata || !lastUpdate || lastUpdate === 0) return;
 
+    const savedLastReadTime = metadata?.fileMetadata.appData.content.lastReadTime;
+    const savedLastReadTimeChannel =
+      metadata?.fileMetadata.appData.content.channelLastReadTime[channelId || ''];
     if (
       savedLastReadTime &&
       savedLastReadTime >= lastUpdate &&
@@ -52,5 +51,5 @@ export const useMarkCommunityAsRead = ({
         },
       },
     });
-  }, [metadata, channelId, lastUpdate]);
+  }, [metadata, communityId, channelId, lastUpdate]);
 };

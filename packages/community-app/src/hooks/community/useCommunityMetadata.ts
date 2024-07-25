@@ -81,7 +81,17 @@ export const usecommunityMetadata = (props?: { communityId?: string | undefined 
           variables.metadata as HomebaseFile<CommunityMetadata>
         );
       },
-      onError: (error, variables, context) => {
+      onSuccess: (data, variables) => {
+        if (!variables.metadata.fileId || !data) return;
+        const updatedMeta = variables.metadata as HomebaseFile<CommunityMetadata>;
+        updatedMeta.fileMetadata.versionTag = data.newVersionTag;
+
+        queryClient.setQueryData<HomebaseFile<CommunityMetadata>>(
+          ['community-metadata', updatedMeta.fileMetadata.appData.content.communityId],
+          updatedMeta
+        );
+      },
+      onError: (error) => {
         console.error('Error saving community metadata', error);
       },
     }),
