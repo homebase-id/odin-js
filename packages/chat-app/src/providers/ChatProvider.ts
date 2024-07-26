@@ -38,6 +38,7 @@ import {
   jsonStringify64,
   stringToUint8Array,
   makeGrid,
+  base64ToUint8Array,
 } from '@youfoundation/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
 import {
@@ -280,12 +281,25 @@ export const uploadChatMessage = async (
       })
     );
 
+    const imageUrl = linkPreviews.find((preview) => preview.imageUrl)?.imageUrl;
+
+    const imageBlob = imageUrl
+      ? new Blob([base64ToUint8Array(imageUrl.split(',')[1])], {
+          type: imageUrl.split(';')[0].split(':')[1],
+        })
+      : undefined;
+
+    const { tinyThumb } = imageBlob
+      ? await createThumbnails(imageBlob, '', [])
+      : { tinyThumb: undefined };
+
     payloads.push({
       key: CHAT_LINKS_PAYLOAD_KEY,
       payload: new Blob([stringToUint8Array(JSON.stringify(linkPreviews))], {
         type: 'application/json',
       }),
       descriptorContent,
+      previewThumbnail: tinyThumb,
     });
   }
 
