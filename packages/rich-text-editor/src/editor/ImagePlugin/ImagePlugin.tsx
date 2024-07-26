@@ -44,8 +44,10 @@ export const insertImage = <V extends Value>(editor: PlateEditor<V>, fileKey: st
 };
 
 export interface MediaOptions {
+  odinId?: string;
   mediaDrive: TargetDrive;
   fileId: string;
+  globalTransitId?: string;
   pendingUploadFiles?: NewMediaFile[];
   onAppend: (file: Blob) => Promise<{ fileId: string; fileKey: string } | null>;
   onRemove: (payload: { fileId: string; fileKey: string }) => Promise<unknown | null>;
@@ -132,8 +134,10 @@ export const ImageElementBlock = <V extends Value = Value>(
             <img src={pendingUrl} className="absolute inset-0 h-full w-full object-contain" />
           ) : (
             <OdinThumbnailImage
+              odinId={options.odinId}
               dotYouClient={dotYouClient}
               fileId={options.fileId}
+              globalTransitId={options.globalTransitId}
               fileKey={element.fileKey}
               targetDrive={options.mediaDrive}
               lastModified={element.lastModified || new Date().getTime()}

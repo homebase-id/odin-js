@@ -23,6 +23,7 @@ import {
 import { ThumbnailFile, SystemFileType, PayloadFile, KeyHeader } from '../File/DriveFileTypes';
 import { AxiosRequestConfig } from 'axios';
 import { getSecuredBlob } from '../../../helpers/BlobHelpers';
+import { PeerAppendInstructionSet } from '../../../peer/peer';
 
 const EMPTY_KEY_HEADER: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(0)),
@@ -103,7 +104,11 @@ export const buildDescriptor = async (
 export const DEFAULT_PAYLOAD_KEY = 'dflt_key';
 
 export const buildFormData = async (
-  instructionSet: UploadInstructionSet | TransitInstructionSet | AppendInstructionSet,
+  instructionSet:
+    | UploadInstructionSet
+    | TransitInstructionSet
+    | AppendInstructionSet
+    | PeerAppendInstructionSet,
   encryptedDescriptor: Uint8Array | undefined,
   payloads: PayloadFile[] | undefined,
   thumbnails: ThumbnailFile[] | undefined,

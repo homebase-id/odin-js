@@ -1,5 +1,11 @@
 import { slugify, getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { Article, ChannelDefinition, BlogConfig } from '@youfoundation/js-lib/public';
+import {
+  Article,
+  ChannelDefinition,
+  BlogConfig,
+  CollaborativeChannelDefinition,
+  RemoteCollaborativeChannelDefinition,
+} from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
 import { useManagePost } from '../post/useManagePost';
 import {
@@ -14,6 +20,7 @@ import { useDotYouClient } from '../../auth/useDotYouClient';
 import { usePost } from '../post/usePost';
 import { getReadingTime } from '../../../helpers/richTextHelper';
 import { HOME_ROOT_PATH } from '../../../core/paths';
+import { useChannel } from '../channels/useChannel';
 
 export const EMPTY_POST: Article = {
   id: '',
@@ -27,19 +34,25 @@ export const EMPTY_POST: Article = {
 };
 
 export const useArticleComposer = ({
+  odinKey,
   channelKey,
   postKey,
   caption,
 }: {
+  odinKey?: string;
   channelKey?: string;
   postKey?: string;
   caption?: string;
 }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
-  const { data: serverData, isPending: isLoadingServerData } = usePost({
-    channelSlug: channelKey,
-    channelId: channelKey,
-    blogSlug: postKey,
+  const { data: serverChannel, isPending: isLoadingServerChannel } = useChannel({
+    odinId: odinKey,
+    channelKey,
+  }).fetch;
+  const { data: serverPost, isPending: isLoadingServerPost } = usePost({
+    odinId: odinKey,
+    channelKey,
+    postKey,
   });
 
   const {
@@ -48,55 +61,55 @@ export const useArticleComposer = ({
   } = useManagePost();
 
   const [postFile, setPostFile] = useState<NewHomebaseFile<Article> | HomebaseFile<Article>>({
-    ...serverData?.activePost,
+    ...serverPost,
     fileMetadata: {
-      ...serverData?.activePost.fileMetadata,
+      ...serverPost?.fileMetadata,
       appData: {
         fileType: BlogConfig.DraftPostFileType,
-        userDate: serverData?.activePost.fileMetadata.appData.userDate || new Date().getTime(),
+        userDate: serverPost?.fileMetadata.appData.userDate || new Date().getTime(),
         content: {
           ...EMPTY_POST,
           caption: caption ?? EMPTY_POST.caption,
           authorOdinId: dotYouClient.getIdentity(),
           id: getNewId(),
-          ...serverData?.activePost?.fileMetadata.appData.content,
+          ...serverPost?.fileMetadata.appData.content,
           type: 'Article',
         },
       },
     },
     serverMetadata: {
       accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous },
-      ...serverData?.activePost.serverMetadata,
+      ...serverPost?.serverMetadata,
     },
   });
 
   const [files, setFiles] = useState<(NewMediaFile | MediaFile)[]>(
-    serverData?.activePost.fileMetadata.payloads || []
+    serverPost?.fileMetadata.payloads || []
   );
 
   const [channel, setChannel] = useState<NewHomebaseFile<ChannelDefinition>>(
-    serverData?.activeChannel &&
+    serverChannel &&
       stringGuidsEqual(
         postFile.fileMetadata.appData.content.channelId,
-        serverData.activeChannel.fileMetadata.appData.uniqueId
+        serverChannel.fileMetadata.appData.uniqueId
       )
-      ? serverData.activeChannel
+      ? serverChannel
       : BlogConfig.PublicChannelNewDsr
   );
-  const [groupOdinId, setGroupOdinId] = useState<string | undefined>(undefined);
+  const [groupOdinId, setGroupOdinId] = useState<string | undefined>(odinKey);
 
   // Update state when server data is fetched
   useEffect(() => {
-    if (serverData && serverData.activePost && (!postFile.fileId || savePostStatus === 'success')) {
+    if (serverPost && (!postFile.fileId || savePostStatus === 'success')) {
       setPostFile({
-        ...serverData.activePost,
+        ...serverPost,
         fileMetadata: {
-          ...serverData.activePost.fileMetadata,
+          ...serverPost.fileMetadata,
           appData: {
-            ...serverData.activePost.fileMetadata.appData,
+            ...serverPost.fileMetadata.appData,
             content: {
               ...EMPTY_POST,
-              ...serverData.activePost?.fileMetadata.appData.content,
+              ...serverPost?.fileMetadata.appData.content,
               type: 'Article',
             },
           },
@@ -104,12 +117,10 @@ export const useArticleComposer = ({
       });
     }
 
-    setChannel(
-      serverData?.activeChannel ? serverData.activeChannel : BlogConfig.PublicChannelNewDsr
-    );
+    setChannel(serverChannel ? serverChannel : BlogConfig.PublicChannelNewDsr);
 
-    setFiles([...(serverData?.activePost.fileMetadata.payloads || [])]);
-  }, [serverData]);
+    setFiles([...(serverPost?.fileMetadata.payloads || [])]);
+  }, [serverPost]);
 
   const isPublished = postFile.fileMetadata.appData.fileType !== BlogConfig.DraftPostFileType;
 
@@ -159,7 +170,13 @@ export const useArticleComposer = ({
         },
       },
 
-      serverMetadata: targetChannel.serverMetadata || {
+      serverMetadata: (targetChannel.serverMetadata ||
+        (targetChannel.fileMetadata.appData.content.isCollaborative
+          ? {
+              accessControlList: (targetChannel as HomebaseFile<CollaborativeChannelDefinition>)
+                .fileMetadata.appData.content.acl,
+            }
+          : undefined)) ?? {
         accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
       },
     };
@@ -168,7 +185,11 @@ export const useArticleComposer = ({
     const uploadResult = await savePost({
       postFile: toPostFile,
       odinId: groupOdinId,
-      channelId: targetChannel.fileMetadata.appData.uniqueId as string,
+      channelId:
+        (targetChannel.fileMetadata.appData.content.isCollaborative
+          ? ((targetChannel as HomebaseFile<RemoteCollaborativeChannelDefinition>).fileMetadata
+              .appData.content.uniqueId as string)
+          : undefined) || (targetChannel.fileMetadata.appData.uniqueId as string),
       mediaFiles: files,
     });
 
@@ -207,7 +228,7 @@ export const useArticleComposer = ({
       window.history.replaceState(
         null,
         toPostFile.fileMetadata.appData.content.caption,
-        `/apps/feed/edit/${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.id}`
+        `/apps/feed/edit/${groupOdinId ? `${groupOdinId}/` : ''}${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.id}`
       );
     }
   };
@@ -246,6 +267,7 @@ export const useArticleComposer = ({
     // Errors
     error: savePostError || removePostError,
 
-    isLoadingServerData: isLoadingServerData && !!postKey && !!channelKey,
+    isLoadingServerData:
+      (isLoadingServerPost || isLoadingServerChannel) && !!postKey && !!channelKey,
   };
 };

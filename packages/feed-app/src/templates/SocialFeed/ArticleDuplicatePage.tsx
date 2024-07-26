@@ -9,6 +9,7 @@ import {
   Clipboard,
   useManagePost,
   ErrorNotification,
+  useChannel,
 } from '@youfoundation/common-app';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
@@ -20,17 +21,18 @@ import { getNewId } from '@youfoundation/js-lib/helpers';
 
 export const ArticleDuplicatePage = () => {
   const { channelKey, postKey } = useParams();
-  const { data: serverData, isLoading: isLoadingServerData } = usePost({
-    channelSlug: channelKey,
-    channelId: channelKey,
-    blogSlug: postKey,
+  const { data: channel, isPending: isLoadingServerChannel } = useChannel({
+    channelKey,
+  }).fetch;
+  const { data: postFile, isPending: isLoadingServerPost } = usePost({
+    channelKey,
+    postKey,
   });
   const {
     mutate: duplicatePost,
     status: duplicatePostStatus,
     error: duplictePostError,
   } = useManagePost().duplicate;
-  const { activePost: postFile, activeChannel: channel } = serverData || {};
   const [newPostId] = useState(getNewId());
 
   const [targetChannel, setTargetChannel] = useState<
@@ -59,7 +61,7 @@ export const ArticleDuplicatePage = () => {
     }
   }, [duplicatePostStatus]);
 
-  if (isLoadingServerData) {
+  if (isLoadingServerChannel || isLoadingServerPost) {
     return null;
   }
 

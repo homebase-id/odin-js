@@ -7,7 +7,6 @@ import {
   PostInteracts,
   PostMeta,
   useChannel,
-  useSocialChannel,
   ErrorBoundary,
   PostBody,
   useCheckIdentity,
@@ -37,15 +36,11 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
 
   const { data: identityAccessible } = useCheckIdentity(isExternal ? odinId : undefined);
 
-  const { data: externalChannel } = useSocialChannel({
+  const { data: channel } = useChannel({
     odinId: isExternal ? odinId : undefined,
-    channelId: post.channelId,
-  }).fetch;
-  const { data: internalChannel } = useChannel({
-    channelId: isExternal ? undefined : post.channelId,
+    channelKey: post.channelId,
   }).fetch;
 
-  const channel = externalChannel || internalChannel;
   const postPath = `preview/${isExternal ? odinId : identity}/${
     channel?.fileMetadata.appData.uniqueId
   }/${post.id}`;

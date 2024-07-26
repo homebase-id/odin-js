@@ -16,7 +16,5 @@ export * from './post/usePostsInfinite';
 export * from './useManageSocialFeed';
 
 // Social (Peer)
-export * from './useSocialChannel';
 export * from './useSocialChannels';
 export * from './useSocialFeed';
-export * from './useSocialPost';
