@@ -15,7 +15,7 @@ import {
   KeyHeader,
   decryptKeyHeader,
   SystemFileType,
-  TargetDrive,
+  FileIdentifier,
 } from '../../../core/core';
 import { TransitInstructionSet, TransitUploadResult } from '../PeerTypes';
 import { hasDebugFlag } from '../../../helpers/BrowserUtil';
@@ -218,23 +218,6 @@ export const uploadHeaderOverPeer = async (
 
   return response;
 };
-interface BaseFileIdentifier {
-  targetDrive: TargetDrive;
-}
-interface FileIdFileIdentifier extends BaseFileIdentifier {
-  fileId: string;
-}
-interface GlobalTransitIdFileIdentifier extends BaseFileIdentifier {
-  globalTransitId: string;
-}
-interface UniqueIdFileIdentifier extends BaseFileIdentifier {
-  uniqueId: string;
-}
-
-export type FileIdentifier =
-  | FileIdFileIdentifier
-  | GlobalTransitIdFileIdentifier
-  | UniqueIdFileIdentifier;
 
 export interface PeerAppendInstructionSet {
   targetFile: FileIdentifier;
@@ -245,7 +228,6 @@ export interface PeerAppendInstructionSet {
 
 export interface PeerAppendResult {
   recipientStatus: { [key: string]: TransferUploadStatus };
-  newVersionTag: string;
 }
 
 export const appendDataToFileOverPeer = async (

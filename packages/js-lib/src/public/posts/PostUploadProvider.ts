@@ -482,7 +482,6 @@ const updatePost = async <T extends PostContent>(
     if (odinId) {
       const appendInstructionSet: PeerAppendInstructionSet = {
         targetFile: {
-          // fileId: file.fileId as string,
           globalTransitId: file.fileMetadata.globalTransitId as string,
           targetDrive: targetDrive,
         },
@@ -490,17 +489,25 @@ const updatePost = async <T extends PostContent>(
         recipients: [odinId],
       };
 
+      await appendDataToFileOverPeer(
+        dotYouClient,
+        keyHeader,
+        appendInstructionSet,
+        payloads,
+        thumbnails,
+        onVersionConflict
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait for the file to be available
       runningVersionTag =
         (
-          await appendDataToFileOverPeer(
+          await getFileHeaderBytesOverPeerByGlobalTransitId(
             dotYouClient,
-            keyHeader,
-            appendInstructionSet,
-            payloads,
-            thumbnails,
-            onVersionConflict
+            odinId,
+            targetDrive,
+            file.fileMetadata.globalTransitId as string
           )
-        )?.newVersionTag || runningVersionTag;
+        ).fileMetadata.versionTag || runningVersionTag;
     } else {
       const appendInstructionSet: AppendInstructionSet = {
         targetFile: {
@@ -638,17 +645,25 @@ const uploadPostHeader = async <T extends PostContent>(
         recipients: [odinId],
       };
 
+      await appendDataToFileOverPeer(
+        dotYouClient,
+        file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
+        appendInstructionSet,
+        payloads,
+        undefined,
+        onVersionConflict
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait for the file to be available
       runningVersionTag =
         (
-          await appendDataToFileOverPeer(
+          await getFileHeaderBytesOverPeerByGlobalTransitId(
             dotYouClient,
-            file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
-            appendInstructionSet,
-            payloads,
-            undefined,
-            onVersionConflict
+            odinId,
+            targetDrive,
+            file.fileMetadata.globalTransitId as string
           )
-        )?.newVersionTag || runningVersionTag;
+        ).fileMetadata.versionTag || runningVersionTag;
     } else {
       const appendInstructionSet: AppendInstructionSet = {
         targetFile: {
