@@ -45,13 +45,7 @@ export const uploadFileOverPeer = async (
     );
 
   const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
-  const strippedInstructions: TransitInstructionSet = {
-    transferIv: instructions.transferIv,
-    overwriteGlobalTransitFileId: instructions.overwriteGlobalTransitFileId,
-    remoteTargetDrive: instructions.remoteTargetDrive,
-    schedule: instructions.schedule,
-    recipients: instructions.recipients,
-  };
+  const { systemFileType, ...strippedInstructions } = instructions;
 
   const manifest = buildManifest(payloads, thumbnails, encrypt);
   const instructionsWithManifest = {
@@ -78,10 +72,10 @@ export const uploadFileOverPeer = async (
 
   const client = dotYouClient.createAxiosClient({
     overrideEncryption: true,
-    systemFileType: instructions.systemFileType,
+    systemFileType: systemFileType,
   });
-  const url = 'transit/sender/files/send';
 
+  const url = 'transit/sender/files/send';
   const config = {
     headers: {
       'content-type': 'multipart/form-data',
