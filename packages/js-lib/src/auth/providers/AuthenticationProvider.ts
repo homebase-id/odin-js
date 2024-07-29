@@ -1,7 +1,7 @@
-import { ALL_CONNECTIONS_CIRCLE_ID } from '../../../network';
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { cbcDecrypt } from '../../helpers/AesEncrypt';
 import { base64ToUint8Array, stringToUint8Array, uint8ArrayToBase64 } from '../../helpers/DataUtil';
+import { ALL_CONNECTIONS_CIRCLE_ID } from '../../network/circleNetwork/CircleProvider';
 import { getBrowser, getOperatingSystem } from '../helpers/browserInfo';
 import { getEccSharedSecret, importRemotePublicEccKey } from './EccKeyProvider';
 
