@@ -218,13 +218,26 @@ export const uploadHeaderOverPeer = async (
 
   return response;
 };
+interface BaseFileIdentifier {
+  targetDrive: TargetDrive;
+}
+interface FileIdFileIdentifier extends BaseFileIdentifier {
+  fileId: string;
+}
+interface GlobalTransitIdFileIdentifier extends BaseFileIdentifier {
+  globalTransitId: string;
+}
+interface UniqueIdFileIdentifier extends BaseFileIdentifier {
+  uniqueId: string;
+}
+
+export type FileIdentifier =
+  | FileIdFileIdentifier
+  | GlobalTransitIdFileIdentifier
+  | UniqueIdFileIdentifier;
 
 export interface PeerAppendInstructionSet {
-  targetFile: {
-    fileId?: string;
-    globalTransitId: string;
-    drive: TargetDrive;
-  };
+  targetFile: FileIdentifier;
   recipients: string[];
   versionTag: string | undefined;
   systemFileType?: SystemFileType;

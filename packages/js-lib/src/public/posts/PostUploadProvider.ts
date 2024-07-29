@@ -482,9 +482,9 @@ const updatePost = async <T extends PostContent>(
     if (odinId) {
       const appendInstructionSet: PeerAppendInstructionSet = {
         targetFile: {
-          fileId: file.fileId as string,
+          // fileId: file.fileId as string,
           globalTransitId: file.fileMetadata.globalTransitId as string,
-          drive: targetDrive,
+          targetDrive: targetDrive,
         },
         versionTag: runningVersionTag,
         recipients: [odinId],
@@ -632,7 +632,7 @@ const uploadPostHeader = async <T extends PostContent>(
       const appendInstructionSet: PeerAppendInstructionSet = {
         targetFile: {
           globalTransitId: file.fileMetadata.globalTransitId as string,
-          drive: targetDrive,
+          targetDrive: targetDrive,
         },
         versionTag: runningVersionTag,
         recipients: [odinId],
