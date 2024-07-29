@@ -383,7 +383,7 @@ const bodyFormer = (
     return `${sender} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
   } else if (payload.options.appId === FEED_APP_ID) {
     if (payload.options.typeId === FEED_NEW_CONTENT_TYPE_ID) {
-      return `${sender} posted to your feed`;
+      return `${sender} uploaded a new post`;
     } else if (payload.options.typeId === FEED_NEW_REACTION_TYPE_ID) {
       return `${sender} reacted to your post`;
     } else if (payload.options.typeId === FEED_NEW_COMMENT_TYPE_ID) {

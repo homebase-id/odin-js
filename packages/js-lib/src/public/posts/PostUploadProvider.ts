@@ -28,6 +28,7 @@ import {
   MediaFile,
 } from '../../core/core';
 import {
+  base64ToUint8Array,
   getNewId,
   getRandom16ByteArray,
   jsonStringify64,
@@ -117,12 +118,25 @@ export const savePost = async <T extends PostContent>(
       })
     );
 
+    const imageUrl = linkPreviews.find((preview) => preview.imageUrl)?.imageUrl;
+
+    const imageBlob = imageUrl
+      ? new Blob([base64ToUint8Array(imageUrl.split(',')[1])], {
+          type: imageUrl.split(';')[0].split(':')[1],
+        })
+      : undefined;
+
+    const { tinyThumb } = imageBlob
+      ? await createThumbnails(imageBlob, '', [])
+      : { tinyThumb: undefined };
+
     payloads.push({
       key: POST_LINKS_PAYLOAD_KEY,
       payload: new Blob([stringToUint8Array(JSON.stringify(linkPreviews))], {
         type: 'application/json',
       }),
       descriptorContent,
+      previewThumbnail: tinyThumb,
     });
   }
 
