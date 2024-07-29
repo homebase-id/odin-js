@@ -4,7 +4,7 @@ import { t } from '../../../helpers';
 import { AuthorImage } from '../Author/Image';
 import { AuthorName } from '../Author/Name';
 import { PostMeta } from '../Meta/Meta';
-import { useSocialChannel, useChannel } from '../../../hooks';
+import { useChannel } from '../../../hooks';
 import { FakeAnchor } from '../../../ui';
 import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { PostBody } from './Body';
@@ -22,21 +22,15 @@ export const EmbeddedPostContent = ({
   const [shouldHideMedia, setShouldHideMedia] = useState(hideMedia);
   const isExternal = !content.authorOdinId || content.authorOdinId !== window.location.hostname;
 
-  const { data: externalChannel, status: externalChannelStatus } = useSocialChannel({
+  const { data: channel, status: channelStatus } = useChannel({
     odinId: isExternal ? content.authorOdinId : undefined,
-    channelId: content.channelId,
+    channelKey: content.channelId,
   }).fetch;
-  const { data: internalChannel, status: internalChannelStatus } = useChannel({
-    channelId: content.channelId,
-  }).fetch;
-
-  const channel = externalChannel || internalChannel;
 
   // Hide media if we can't get channel info, when there's no channel we can't get the media either
   useEffect(() => {
-    if (externalChannelStatus !== 'pending' && internalChannelStatus !== 'pending' && !channel)
-      setShouldHideMedia(true);
-  }, [externalChannel, internalChannel, externalChannelStatus, internalChannelStatus]);
+    if (channelStatus !== 'pending' && !channel) setShouldHideMedia(true);
+  }, [channel, channelStatus]);
 
   // When on the feed use the preview link
   const postPath =

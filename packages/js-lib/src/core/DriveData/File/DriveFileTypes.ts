@@ -108,16 +108,23 @@ export interface AppFileMetaData<T = string> {
   previewThumbnail?: EmbeddedThumb;
   archivalStatus?: ArchivalStatus;
 }
-
-export interface ExternalFileIdentifier {
+interface BaseFileIdentifier {
+  targetDrive: TargetDrive;
+}
+export interface FileIdFileIdentifier extends BaseFileIdentifier {
   fileId: string;
-  targetDrive: TargetDrive;
+}
+export interface GlobalTransitIdFileIdentifier extends BaseFileIdentifier {
+  globalTransitId: string;
+}
+export interface UniqueIdFileIdentifier extends BaseFileIdentifier {
+  uniqueId: string;
 }
 
-export interface GlobalTransitIdFileIdentifier {
-  globalTransitId: string;
-  targetDrive: TargetDrive;
-}
+export type FileIdentifier =
+  | FileIdFileIdentifier
+  | GlobalTransitIdFileIdentifier
+  | UniqueIdFileIdentifier;
 
 export type ImageContentType =
   | 'image/webp'

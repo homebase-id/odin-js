@@ -7,11 +7,12 @@ import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 
 interface ImageProps {
   className?: string;
-  size?: 'xs' | 'sm' | 'md' | 'custom';
+  size?: 'xxs' | 'xs' | 'sm' | 'md' | 'custom';
 }
 
 interface ConnectionImageProps extends ImageProps {
   odinId?: string;
+  excludeLink?: boolean;
 }
 
 export const AuthorImage = ({ odinId, ...props }: ConnectionImageProps) => {
@@ -19,6 +20,9 @@ export const AuthorImage = ({ odinId, ...props }: ConnectionImageProps) => {
 
   if (odinId && ownerHost !== odinId) {
     const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
+    if (props.excludeLink) {
+      return <ConnectionImage {...props} odinId={odinId} />;
+    }
     return (
       <a href={host}>
         <ConnectionImage {...props} odinId={odinId} />
@@ -43,10 +47,10 @@ export const OwnerImage = ({ className, size }: ImageProps) => {
         size === 'xs'
           ? 'h-[2rem] w-[2rem]'
           : size === 'sm'
-            ? 'h-[3rem] w-[3rem]'
-            : size === 'md'
-              ? 'h-[5rem] w-[5rem]'
-              : ''
+          ? 'h-[3rem] w-[3rem]'
+          : size === 'md'
+          ? 'h-[5rem] w-[5rem]'
+          : ''
       } rounded-full ${className ?? ''}`}
       fit="cover"
       alt={t('You')}
@@ -63,13 +67,15 @@ export const ConnectionImage = ({ odinId, className, size }: ConnectionImageProp
         <img
           src={`${host}/pub/image`}
           className={`${
-            size === 'xs'
+            size === 'xxs'
+              ? 'h-[1.5rem] w-[1.5rem]'
+              : size === 'xs'
               ? 'h-[2rem] w-[2rem]'
               : size === 'sm'
-                ? 'h-[3rem] w-[3rem]'
-                : size === 'md'
-                  ? 'h-[5rem] w-[5rem]'
-                  : ''
+              ? 'h-[3rem] w-[3rem]'
+              : size === 'md'
+              ? 'h-[5rem] w-[5rem]'
+              : ''
           } rounded-full ${className ?? ''}`}
           alt={`${odinId}`}
           title={`${odinId}`}
@@ -84,10 +90,10 @@ export const ConnectionImage = ({ odinId, className, size }: ConnectionImageProp
               size === 'xs'
                 ? 'h-[2rem] w-[2rem]'
                 : size === 'sm'
-                  ? 'h-[3rem] w-[3rem]'
-                  : size === 'md'
-                    ? 'h-[5rem] w-[5rem]'
-                    : ''
+                ? 'h-[3rem] w-[3rem]'
+                : size === 'md'
+                ? 'h-[5rem] w-[5rem]'
+                : ''
             }
           />
         </div>

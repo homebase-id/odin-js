@@ -16,7 +16,7 @@ export const OwnerActions = ({ postFile }: { postFile: HomebaseFile<PostContent>
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const { mutateAsync: removePost, error: removePostError } = useManagePost().remove;
-  const { data: channel } = useChannel({ channelId: postContent.channelId }).fetch;
+  const { data: channel } = useChannel({ channelKey: postContent.channelId }).fetch;
 
   const navigate = useNavigate();
   return (

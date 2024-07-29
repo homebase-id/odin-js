@@ -37,7 +37,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
   showAuthor,
 }) => {
   const post = postFile.fileMetadata.appData.content;
-  const { data: channel } = useChannel({ channelId: post.channelId }).fetch;
+  const { data: channel } = useChannel({ channelKey: post.channelId }).fetch;
   const { isOwner, getIdentity } = useDotYouClient();
   const navigate = useNavigate();
   const isAuthenticated = !!getIdentity();

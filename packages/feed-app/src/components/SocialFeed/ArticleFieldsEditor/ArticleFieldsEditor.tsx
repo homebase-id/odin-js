@@ -1,4 +1,9 @@
-import { ChannelDefinition, Article, getChannelDrive } from '@youfoundation/js-lib/public';
+import {
+  ChannelDefinition,
+  Article,
+  getChannelDrive,
+  RemoteCollaborativeChannelDefinition,
+} from '@youfoundation/js-lib/public';
 import { lazy, useMemo, useState } from 'react';
 import {
   t,
@@ -25,6 +30,7 @@ const RichTextEditor = lazy(() =>
 const POST_MEDIA_RTE_PAYLOAD_KEY = 'pst_rte';
 
 export const InnerFieldEditors = ({
+  odinId,
   postFile,
   channel,
   files,
@@ -34,6 +40,7 @@ export const InnerFieldEditors = ({
   disabled,
   setFiles,
 }: {
+  odinId?: string;
   postFile: HomebaseFile<Article> | NewHomebaseFile<Article>;
   channel: NewHomebaseFile<ChannelDefinition>;
   files: (NewMediaFile | MediaFile)[];
@@ -47,22 +54,27 @@ export const InnerFieldEditors = ({
   disabled?: boolean;
   setFiles: (newFiles: (NewMediaFile | MediaFile)[]) => void;
 }) => {
+  const channelId =
+    (channel as HomebaseFile<RemoteCollaborativeChannelDefinition>).fileMetadata.appData.content
+      .uniqueId || (channel.fileMetadata.appData.uniqueId as string);
+
   const [isEditTeaser, setIsEditTeaser] = useState(true);
   const { data: imageData } = useImage({
     imageFileId: postFile.fileId,
     imageFileKey: postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey,
-    imageDrive: getChannelDrive(channel.fileMetadata.appData.uniqueId as string),
+    imageDrive: getChannelDrive(channelId),
     lastModified: (postFile as HomebaseFile<unknown>)?.fileMetadata?.updated,
   }).fetch;
-  console.log(imageData, 'imageData');
 
   const pendingFile = files.find(
     (f) => 'file' in f && f.key === postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey
   ) as NewMediaFile | null;
 
-  const targetDrive = getChannelDrive(channel.fileMetadata.appData.uniqueId as string);
+  const targetDrive = getChannelDrive(channelId);
   const mediaOptions: MediaOptions = useMemo(
     () => ({
+      odinId,
+      globalTransitId: postFile.fileMetadata.globalTransitId,
       fileId: postFile.fileId || '',
       mediaDrive: targetDrive,
       pendingUploadFiles: files.filter((f) => 'file' in f) as NewMediaFile[],
@@ -77,7 +89,7 @@ export const InnerFieldEditors = ({
         return true;
       },
     }),
-    [postFile.fileId, files, setFiles]
+    [odinId, postFile.fileId, files, setFiles]
   );
 
   return (

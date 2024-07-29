@@ -10,14 +10,18 @@ import {
 } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatDeliveryStatus, ChatMessage } from '../../../providers/ChatProvider';
-import { UnifiedConversation } from '../../../providers/ConversationProvider';
+import {
+  ConversationWithYourselfId,
+  UnifiedConversation,
+} from '../../../providers/ConversationProvider';
 import { ChatMessageInfo } from './ChatMessageInfo';
 import { EditChatMessage } from './EditChatMessage';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 export interface ChatActions {
   doReply: (msg: HomebaseFile<ChatMessage>) => void;
-  doDelete: (msg: HomebaseFile<ChatMessage>) => void;
+  doDelete: (msg: HomebaseFile<ChatMessage>, deleteForEveryone: boolean) => void;
 }
 
 export const ContextMenu = ({
@@ -39,6 +43,10 @@ export const ContextMenu = ({
   const authorOdinId = msg.fileMetadata.senderOdinId;
 
   const messageFromMe = !authorOdinId || authorOdinId === identity;
+  const conversationWithYourself = stringGuidsEqual(
+    conversation?.fileMetadata.appData.uniqueId,
+    ConversationWithYourselfId
+  );
 
   const optionalOptions: ActionGroupOptionProps[] = [];
   if (messageFromMe) {
@@ -47,15 +55,28 @@ export const ContextMenu = ({
       onClick: () => setEditMessage(true),
     });
     optionalOptions.push({
-      label: t('Delete'),
+      label: conversationWithYourself ? t('Delete') : t('Delete for everyone'),
       confirmOptions: {
         title: t('Delete message'),
         body: t('Are you sure you want to delete this message?'),
         buttonText: t('Delete'),
       },
-      onClick: () => chatActions.doDelete(msg),
+      onClick: () => chatActions.doDelete(msg, true),
     });
   }
+
+  if (!conversationWithYourself) {
+    optionalOptions.push({
+      label: t('Delete for me'),
+      confirmOptions: {
+        title: t('Delete message'),
+        body: t('Are you sure you want to delete this message?'),
+        buttonText: t('Delete'),
+      },
+      onClick: () => chatActions.doDelete(msg, false),
+    });
+  }
+
   if (conversation)
     optionalOptions.push({
       label: t('Message info'),

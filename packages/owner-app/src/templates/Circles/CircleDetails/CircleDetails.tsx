@@ -146,15 +146,17 @@ const CircleDetails = () => {
         </Alert>
       )}
 
-      <section>
-        <div className="mr-auto max-w-2xl">
-          {isSystemCircle
-            ? t(
-                'This is a built-in circle, that contains all your connections. Because of that you cannot edit it.'
-              )
-            : circle.description}
-        </div>
-      </section>
+      {isSystemCircle || circle.description ? (
+        <section>
+          <div className="mr-auto max-w-2xl">
+            {isSystemCircle
+              ? t(
+                  'This is a built-in circle, that contains all your connections. Because of that you cannot edit it.'
+                )
+              : circle.description}
+          </div>
+        </section>
+      ) : null}
 
       <SectionTitle
         title={t('Members')}

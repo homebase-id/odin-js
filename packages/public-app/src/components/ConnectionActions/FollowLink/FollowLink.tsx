@@ -1,20 +1,20 @@
 import { ActionLink, ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { useAuth } from '../../../hooks/auth/useAuth';
-import { ChannelDefinitionVm } from '@youfoundation/common-app';
 
 import { Feed } from '@youfoundation/common-app';
 import { useFollowDetail } from '../../../hooks/follow/useFollowDetail';
 import { Check } from '@youfoundation/common-app';
 import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { ChannelDefinition } from '@youfoundation/js-lib/public';
 
 const FollowLink = ({
   className,
   channel,
 }: {
   className?: string;
-  channel?: HomebaseFile<ChannelDefinitionVm>;
+  channel?: HomebaseFile<ChannelDefinition>;
 }) => {
   const { isOwner, getIdentity } = useAuth();
   const loggedInIdentity = getIdentity();

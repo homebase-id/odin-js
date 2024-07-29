@@ -26,7 +26,7 @@ import { ActionLink, Alert, Exclamation, ExternalLink } from '../ui';
 import { useDotYouClient } from '../hooks/auth/useDotYouClient';
 import { useCollaborativeChannel } from '../hooks/socialFeed/channels/useCollaborativeChannel';
 import { ChannelDefinitionVm } from '../hooks/socialFeed/channels/useChannels';
-import { useChannel } from '../hooks/socialFeed/channels/useChannel';
+import { useManageChannel } from '../hooks/socialFeed/channels/useManageChannel';
 
 export const ChannelItem = ({
   chnl: chnlDsr,
@@ -48,7 +48,7 @@ export const ChannelItem = ({
   const {
     save: { mutateAsync: saveChannel, status: saveStatus },
     remove: { mutateAsync: removeChannel },
-  } = useChannel({});
+  } = useManageChannel();
 
   const {
     validate: { data: validateCollaborativeData },

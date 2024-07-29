@@ -1,17 +1,12 @@
-import {
-  ChannelDefinitionVm,
-  PostComposer,
-  useDotYouClient,
-  useSecurityContext,
-} from '@youfoundation/common-app';
+import { PostComposer, useDotYouClient, useSecurityContext } from '@youfoundation/common-app';
 import { HomebaseFile, ApiType, DrivePermissionType } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { GetTargetDriveFromChannelId } from '@youfoundation/js-lib/public';
+import { ChannelDefinition, GetTargetDriveFromChannelId } from '@youfoundation/js-lib/public';
 
 export const PublicPostComposer = ({
   activeChannel,
 }: {
-  activeChannel: HomebaseFile<ChannelDefinitionVm>;
+  activeChannel: HomebaseFile<ChannelDefinition>;
 }) => {
   const hasWriteAccess = useCheckWriteAccessOnChannel({ activeChannel });
   if (!hasWriteAccess) return null;
@@ -29,7 +24,7 @@ export const PublicPostComposer = ({
 export const useCheckWriteAccessOnChannel = ({
   activeChannel,
 }: {
-  activeChannel: HomebaseFile<ChannelDefinitionVm>;
+  activeChannel: HomebaseFile<ChannelDefinition>;
 }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const { data: securityContext } = useSecurityContext().fetch;

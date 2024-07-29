@@ -32,10 +32,11 @@ export const ChatMessageItem = ({
   chatActions?: ChatActions;
 }) => {
   const identity = useDotYouClient().getIdentity();
-  const authorOdinId = msg.fileMetadata.senderOdinId;
+  const authorOdinId =
+    msg.fileMetadata.senderOdinId || msg.fileMetadata.appData.content.authorOdinId || '';
 
   const messageFromMe = !authorOdinId || authorOdinId === identity;
-  const hasMedia = !!msg.fileMetadata.payloads?.length;
+  const hasMedia = !!msg.fileMetadata.payloads.length;
 
   const { chatMessageKey, mediaKey } = useParams();
   const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey) && mediaKey;
@@ -118,9 +119,11 @@ const ChatTextMessageBody = ({
 }) => {
   const content = msg.fileMetadata.appData.content;
   const isEmojiOnly =
-    (content.message?.match(/^\p{Extended_Pictographic}/u) &&
+    ((content.message?.match(/^\p{Extended_Pictographic}/u) ||
+      content.message?.match(/^\p{Emoji_Component}/u)) &&
       !content.message?.match(/[0-9a-zA-Z]/)) ??
     false;
+
   const isReply = !!content.replyId;
   const showBackground = !isEmojiOnly || isReply;
 
@@ -149,7 +152,7 @@ const ChatTextMessageBody = ({
             {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
             <ParagraphWithLinks
               text={content.message}
-              className={`whitespace-pre-wrap break-words ${
+              className={`copyable-content whitespace-pre-wrap break-words ${
                 isEmojiOnly && !isReply ? 'text-7xl' : ''
               }`}
             />
@@ -168,9 +171,13 @@ const ChatTextMessageBody = ({
   );
 };
 
-const urlRegex = new RegExp(/(https?:\/\/[^\s]+)/);
+const urlAndMentionRegex = new RegExp(/(https?:\/\/[^\s]+|@[^\s]+)/);
+const urlRegex = new RegExp(
+  /https?:\/\/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|(localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d{1,5})?)(\/[^\s]*)?/
+);
+const mentionRegex = new RegExp(/@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
 const ParagraphWithLinks = ({ text, className }: { text: string; className?: string }) => {
-  const splitUpText = text.split(urlRegex);
+  const splitUpText = text.split(urlAndMentionRegex);
 
   return (
     <p className={className}>
@@ -182,7 +189,19 @@ const ParagraphWithLinks = ({ text, className }: { text: string; className?: str
               href={part}
               target="_blank"
               rel="noreferrer"
-              className="text-primary underline"
+              className="break-all text-primary underline"
+            >
+              {part}
+            </a>
+          );
+        } else if (mentionRegex.test(part)) {
+          return (
+            <a
+              key={index}
+              href={`https://${part.slice(1)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="break-all text-primary underline"
             >
               {part}
             </a>
@@ -250,7 +269,7 @@ const ChatMediaMessageBody = ({
 
   return (
     <div
-      className={`relative w-full max-w-[75vw] rounded-lg shadow-sm md:max-w-xs ${
+      className={`relative w-full max-w-[75vw] rounded-lg shadow-sm md:max-w-xs lg:max-w-xl ${
         messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10 dark:bg-gray-300/20'
       }`}
     >
@@ -268,7 +287,10 @@ const ChatMediaMessageBody = ({
       </div>
       {hasACaption ? (
         <div className="flex min-w-0 flex-col px-2 py-2 md:flex-row md:justify-between">
-          <p className="whitespace-pre-wrap break-words">{content.message}</p>
+          <ParagraphWithLinks
+            text={content.message}
+            className={`whitespace-pre-wrap break-words`}
+          />
           <ChatFooter />
         </div>
       ) : null}

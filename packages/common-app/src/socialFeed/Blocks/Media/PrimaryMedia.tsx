@@ -1,4 +1,4 @@
-import { getChannelDrive } from '@youfoundation/js-lib/public';
+import { getChannelDrive, POST_LINKS_PAYLOAD_KEY } from '@youfoundation/js-lib/public';
 import { EmbeddedThumb, PayloadDescriptor, TargetDrive } from '@youfoundation/js-lib/core';
 import { Image } from '../../../media/Image';
 import { Video, VideoClickToLoad } from '../../../media/Video';
@@ -6,6 +6,7 @@ import { ExtensionThumbnail } from '../../../form/files/ExtensionThumbnail';
 import { useFile } from '../../../hooks';
 import { Download } from '../../../ui';
 import { bytesToSize, t } from '../../../helpers';
+import { LinkPreviewItem } from '../../../media/Link';
 
 export const PrimaryMedia = ({
   odinId,
@@ -38,9 +39,14 @@ export const PrimaryMedia = ({
     onClick && onClick(e);
   };
 
+  const isVideo = file.contentType?.startsWith('video');
+  // const isAudio = file.contentType?.startsWith('audio');
+  const isImage = file.contentType?.startsWith('image');
+  const isLink = file.key === POST_LINKS_PAYLOAD_KEY;
+
   return (
     <div onClick={doNavigate}>
-      {file?.contentType.startsWith('image') ? (
+      {isImage ? (
         <Image
           odinId={odinId}
           targetDrive={getChannelDrive(channelId)}
@@ -53,7 +59,7 @@ export const PrimaryMedia = ({
           fit={fit}
           probablyEncrypted={probablyEncrypted}
         />
-      ) : file?.contentType.startsWith('video') ? (
+      ) : isVideo ? (
         <>
           {clickToLoad ? (
             <VideoClickToLoad
@@ -82,6 +88,15 @@ export const PrimaryMedia = ({
             />
           )}
         </>
+      ) : isLink ? (
+        <LinkPreviewItem
+          odinId={odinId}
+          globalTransitId={globalTransitId}
+          targetDrive={getChannelDrive(channelId)}
+          fileId={fileId}
+          payload={file as PayloadDescriptor}
+          className="mx-2 mt-2 border rounded-t-lg"
+        />
       ) : (
         <BoringFile
           odinId={odinId}

@@ -92,7 +92,9 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
   const dotYouClient = getDotYouClient();
   const queryClient = useQueryClient();
 
-  const { data: channelDef, isFetched: isChannelFetched } = useChannel({ channelId }).fetch;
+  const { data: channelDef, isFetched: isChannelFetched } = useChannel({
+    channelKey: channelId,
+  }).fetch;
   const { data: circles } = useCircles().fetch;
   const { data: channelDrives } = useChannelDrives(true);
 

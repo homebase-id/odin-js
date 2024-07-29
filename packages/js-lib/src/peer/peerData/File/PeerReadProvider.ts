@@ -1,21 +1,20 @@
 import { DotYouClient } from '../../../core/DotYouClient';
-import { ExternalFileIdentifier, TargetDrive } from '../../../core/DriveData/File/DriveFileTypes';
+import { FileIdFileIdentifier, TargetDrive } from '../../../core/DriveData/File/DriveFileTypes';
 import { assertIfDefined } from '../../../helpers/DataUtil';
 
 export interface SendReadReceiptResponse {
   results: {
-    file: ExternalFileIdentifier;
+    file: FileIdFileIdentifier;
     status: { recipient: string; status: SendReadReceiptResponseRecipientStatus | null }[];
   }[];
 }
 
 export enum SendReadReceiptResponseRecipientStatus {
-  RequestAcceptedIntoInbox = 'requestacceptedintoinbox',
-  RecipientIdentityReturnedServerError = 'recipientidentityreturnedservererror',
-  RecipientIdentityReturnedAccessDenied = 'recipientidentityreturnedaccessdenied',
   NotConnectedToOriginalSender = 'notconnectedtooriginalsender',
-  RecipientIdentityReturnedBadRequest = 'recipientidentityreturnedbadrequest',
-  SenderServerHadAnInternalError = 'senderserverhadaninternalerror',
+  FileDoesNotExist = 'filedoesnotexist',
+  FileDoesNotHaveSender = 'filedoesnothavesender',
+  MissingGlobalTransitId = 'missingglobaltransitid',
+  Enqueued = 'enqueued',
 }
 
 export const sendReadReceipt = async (

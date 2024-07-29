@@ -6,9 +6,9 @@ import {
   NewPayloadDescriptor,
 } from '@youfoundation/js-lib/core';
 import { OdinImage, OdinThumbnailImage, OdinAudio, OdinAudioWaveForm } from '@youfoundation/ui-lib';
-import { ChatMessage } from '../../../../providers/ChatProvider';
+import { CHAT_LINKS_PAYLOAD_KEY, ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
-import { BoringFile, Triangle, useDarkMode } from '@youfoundation/common-app';
+import { BoringFile, Triangle, useDarkMode, LinkPreviewItem } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 import { useMemo, useState } from 'react';
@@ -23,7 +23,6 @@ export const ChatMedia = ({
   const navigate = useNavigate();
 
   if (!payloads) return null;
-
   if (isGallery) return <MediaGallery msg={msg} />;
 
   return (
@@ -63,6 +62,7 @@ const MediaItem = ({
   const isVideo = payload.contentType?.startsWith('video');
   const isAudio = payload.contentType?.startsWith('audio');
   const isImage = payload.contentType?.startsWith('image');
+  const isLink = payload.key === CHAT_LINKS_PAYLOAD_KEY;
 
   return (
     <div
@@ -70,7 +70,7 @@ const MediaItem = ({
       onClick={onClick}
       data-thumb={!!previewThumbnail}
     >
-      {!fileId ? (
+      {!fileId || (payload as NewPayloadDescriptor)?.pendingFile ? (
         <PendingFile payload={payload} className={`h-full w-auto`} fit={fit} onLoad={onLoad} />
       ) : (
         <>
@@ -123,6 +123,13 @@ const MediaItem = ({
               className={`h-full w-auto`}
               fit={fit}
               onLoad={onLoad}
+            />
+          ) : isLink ? (
+            <LinkPreviewItem
+              targetDrive={ChatDrive}
+              fileId={fileId}
+              payload={payload as PayloadDescriptor}
+              className="p-1"
             />
           ) : (
             <BoringFile

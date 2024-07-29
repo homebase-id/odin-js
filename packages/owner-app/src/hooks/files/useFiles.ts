@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   decryptJsonContent,
   decryptKeyHeader,
@@ -11,9 +11,12 @@ import {
   queryBatch,
   SystemFileType,
   TargetDrive,
+  getFileHeader,
+  getFileHeaderByUniqueId,
 } from '@youfoundation/js-lib/core';
 import { useAuth } from '../auth/useAuth';
 import { jsonStringify64, tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { getFileHeaderBytesOverPeerByGlobalTransitId } from '@youfoundation/js-lib/peer';
 
 const includeMetadataHeader = true;
 const includeTransferHistory = true;
@@ -58,6 +61,41 @@ export const useFiles = ({
       enabled: !!targetDrive,
     }),
   };
+};
+
+export const useFileQuery = ({
+  targetDrive,
+  id,
+}: {
+  targetDrive: TargetDrive | undefined;
+  id: string | undefined;
+}) => {
+  const dotYouClient = useAuth().getDotYouClient();
+
+  return useQuery({
+    queryKey: ['file', targetDrive?.alias, id],
+    queryFn: async () => {
+      if (!id || !targetDrive) return null;
+
+      // Search by fileId
+      const fileByFileId = await getFileHeader(dotYouClient, targetDrive, id);
+      if (fileByFileId) return fileByFileId;
+
+      // Search by uniqueId
+      const fileByUniqueId = await getFileHeaderByUniqueId(dotYouClient, targetDrive, id);
+      if (fileByUniqueId) return fileByUniqueId;
+
+      // Search by globalTransitId
+      const fileByGlobalTransitId = await getFileHeaderBytesOverPeerByGlobalTransitId(
+        dotYouClient,
+        window.location.hostname,
+        targetDrive,
+        id
+      );
+      if (fileByGlobalTransitId) return fileByGlobalTransitId;
+    },
+    enabled: !!targetDrive && !!id,
+  });
 };
 
 export const useFile = ({

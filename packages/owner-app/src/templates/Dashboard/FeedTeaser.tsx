@@ -10,7 +10,6 @@ import {
   PostMeta,
   useChannel,
   useCheckIdentity,
-  useSocialChannel,
 } from '@youfoundation/common-app';
 import { UnreachableIdentity } from '@youfoundation/feed-app/src/components/SocialFeed/UnreachableIdentity';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
@@ -67,15 +66,11 @@ const PostTeaser = ({
 
   const { data: identityAccessible } = useCheckIdentity(isExternal ? odinId : undefined);
 
-  const { data: externalChannel } = useSocialChannel({
+  const { data: channel } = useChannel({
     odinId: isExternal ? odinId : undefined,
-    channelId: post.channelId,
-  }).fetch;
-  const { data: internalChannel } = useChannel({
-    channelId: isExternal ? undefined : post.channelId,
+    channelKey: post.channelId,
   }).fetch;
 
-  const channel = externalChannel || internalChannel;
   const authorOdinId = post.authorOdinId || odinId;
 
   if (identityAccessible === false && isExternal)

@@ -1,12 +1,13 @@
 import { useChannel } from '@youfoundation/common-app';
+import { useManageChannel } from '@youfoundation/common-app/src/hooks/socialFeed/channels/useManageChannel';
 import { BlogConfig } from '@youfoundation/js-lib/public';
 import { useEffect } from 'react';
 
 const useFixMissingPublicChannel = () => {
   const { data: publicChannel, isFetched } = useChannel({
-    channelId: BlogConfig.PublicChannelId,
+    channelKey: BlogConfig.PublicChannelId,
   }).fetch;
-  const { mutateAsync: saveChannel } = useChannel({ channelId: BlogConfig.PublicChannelId }).save;
+  const { mutateAsync: saveChannel } = useManageChannel().save;
 
   useEffect(() => {
     if (isFetched) {
