@@ -21,11 +21,12 @@ export const useMarkCommunityAsRead = ({
     const savedLastReadTime = metadata?.fileMetadata.appData.content.lastReadTime;
     const savedLastReadTimeChannel =
       metadata?.fileMetadata.appData.content.channelLastReadTime[channelId || ''];
+
     if (
       savedLastReadTime &&
       savedLastReadTime >= lastUpdate &&
-      (!savedLastReadTimeChannel ||
-        (savedLastReadTimeChannel && savedLastReadTimeChannel >= lastUpdate))
+      savedLastReadTimeChannel &&
+      savedLastReadTimeChannel >= lastUpdate
     )
       return;
 
