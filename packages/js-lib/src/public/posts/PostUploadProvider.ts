@@ -367,9 +367,14 @@ const updatePost = async <T extends PostContent>(
     : await getFileHeader(dotYouClient, targetDrive, file.fileId as string);
 
   if (!header) throw new Error('[PostUploadProvider] Cannot update a post that does not exist');
-  if (header?.fileMetadata.versionTag !== file.fileMetadata.versionTag)
-    throw new Error('[PostUploadProvider] Version conflict');
-
+  if (header?.fileMetadata.versionTag !== file.fileMetadata.versionTag) {
+    if (odinId) {
+      // There's a conflict, but we will just force ahead
+      file.fileMetadata.versionTag = header.fileMetadata.versionTag;
+    } else {
+      throw new Error('[PostUploadProvider] Version conflict');
+    }
+  }
   if (
     !file.fileId ||
     !file.serverMetadata?.accessControlList ||

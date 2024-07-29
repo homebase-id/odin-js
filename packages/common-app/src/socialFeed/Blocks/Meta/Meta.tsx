@@ -286,6 +286,8 @@ const GroupChannelActions = ({
   postFile: HomebaseFile<PostContent>;
 }) => {
   const { getIdentity } = useDotYouClient();
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const navigate = useNavigate();
 
   const identity = getIdentity();
   const isAuthor = postFile.fileMetadata.appData.content.authorOdinId === identity;
@@ -315,7 +317,26 @@ const GroupChannelActions = ({
       },
     });
 
-    if (!isAuthor) {
+    if (isAuthor) {
+      options.push({
+        icon: Pencil,
+        label: t(
+          postFile.fileMetadata.appData.content.type === 'Article' ? 'Edit Article' : 'Edit post'
+        ),
+        onClick: (e) => {
+          e.stopPropagation();
+          if (postFile.fileMetadata.appData.content.type === 'Article') {
+            const targetUrl = `/apps/feed/edit/${odinId}/${
+              channel?.fileMetadata.appData.content.slug || channel?.fileMetadata.appData.uniqueId
+            }/${postFile.fileMetadata.appData.content.id}`;
+            if (window.location.pathname.startsWith('/apps/feed')) navigate(targetUrl);
+            else window.location.href = targetUrl;
+          } else {
+            setIsEditOpen(true);
+          }
+        },
+      });
+    } else {
       options.push({
         icon: Flag,
         label: `${t('Report')}`,
@@ -357,6 +378,15 @@ const GroupChannelActions = ({
     <div className="ml-auto" onClick={(e) => e.stopPropagation()}>
       <ErrorNotification error={removePostError} />
       <ActionGroup className="" type="mute" size="none" options={options} />
+      {isEditOpen ? (
+        <EditPostDialog
+          postFile={postFile}
+          odinId={odinId}
+          isOpen={isEditOpen}
+          onConfirm={() => setIsEditOpen(false)}
+          onCancel={() => setIsEditOpen(false)}
+        />
+      ) : null}
     </div>
   );
 };
