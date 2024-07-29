@@ -25,8 +25,7 @@ export const useMarkCommunityAsRead = ({
     if (
       savedLastReadTime &&
       savedLastReadTime >= lastUpdate &&
-      savedLastReadTimeChannel &&
-      savedLastReadTimeChannel >= lastUpdate
+      (!channelId || (savedLastReadTimeChannel && savedLastReadTimeChannel >= lastUpdate))
     )
       return;
 
