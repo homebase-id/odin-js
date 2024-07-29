@@ -79,16 +79,17 @@ export const getNewId = () => {
 };
 
 export const formatGuidId = (guid: string) => {
+  const dashLessGuid = guid.replace(/-/g, '');
   return (
-    guid.slice(0, 8) +
+    dashLessGuid.slice(0, 8) +
     '-' +
-    guid.slice(8, 12) +
+    dashLessGuid.slice(8, 12) +
     '-' +
-    guid.slice(12, 16) +
+    dashLessGuid.slice(12, 16) +
     '-' +
-    guid.slice(16, 20) +
+    dashLessGuid.slice(16, 20) +
     '-' +
-    guid.slice(20)
+    dashLessGuid.slice(20)
   );
 };
 
