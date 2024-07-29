@@ -1,10 +1,10 @@
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDotYouClientContext } from '@youfoundation/common-app';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
 import { useCommunityChannels } from './useCommunityChannels';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
   getCommunityMessagesInfiniteQueryOptions,
   useLastUpdatedChatMessages,
@@ -18,13 +18,11 @@ export const useCommunityChannelsWithRecentMessages = (props: { communityId?: st
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
-  const { data: channels, ...rest } = useCommunityChannels(props).fetch;
-
-  const [channelsWithRecent, setChannelsWithRecent] = useState<ChannelWithRecentMessage[]>([]);
+  const { data: channels } = useCommunityChannels(props).fetch;
 
   const buildChannelsWithRecent = useCallback(async () => {
     if (!channels || !channels || channels.length === 0) {
-      return channels;
+      return;
     }
 
     const convoWithMessage: ChannelWithRecentMessage[] = await Promise.all(
@@ -45,7 +43,8 @@ export const useCommunityChannelsWithRecentMessages = (props: { communityId?: st
       if (!b.lastMessage) return -1;
       return b.lastMessage.fileMetadata.created - a.lastMessage.fileMetadata.created;
     });
-    setChannelsWithRecent(convoWithMessage);
+
+    queryClient.setQueryData(['channels-with-recent-message'], convoWithMessage);
   }, [channels, dotYouClient, queryClient]);
 
   const { lastUpdate } = useLastUpdatedChatMessages();
@@ -55,9 +54,14 @@ export const useCommunityChannelsWithRecentMessages = (props: { communityId?: st
   }, [lastUpdate, buildChannelsWithRecent]);
 
   return {
-    fetch: {
-      ...rest,
-      data: channelsWithRecent,
-    },
+    // We only setup a cache entry that we will fill up with the setQueryData later; So we can cache the data for offline and faster startup;
+    fetch: useQuery({
+      queryKey: ['channels-with-recent-message'],
+      queryFn: () => [] as ChannelWithRecentMessage[],
+      staleTime: Infinity,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    }),
   };
 };

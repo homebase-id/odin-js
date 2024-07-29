@@ -18,6 +18,7 @@ const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'communities',
   'community-channels',
   'community-messages',
+  'channels-with-recent-message',
 ];
 
 import { MinimalLayout, NoLayout } from '../components/ui/Layout/Layout';
