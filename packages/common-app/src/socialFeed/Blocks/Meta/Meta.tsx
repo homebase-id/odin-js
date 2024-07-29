@@ -125,7 +125,7 @@ export const PostMeta = ({
             />
           ) : (!odinId && isOwner) || isAuthor ? (
             <Suspense>
-              <OwnerActions postFile={postFile} />
+              <OwnerActions postFile={postFile} channel={channel} />
             </Suspense>
           ) : odinId ? (
             <ExternalActions odinId={odinId} channel={channel} postFile={postFile} />
@@ -231,8 +231,8 @@ const ExternalActions = ({
     },
   ];
 
-  // Only support for posts that are marked as collaborative
-  if (true) {
+  // Only supported for posts that are marked as collaborative
+  if (postFile.fileMetadata.appData.content.isCollaborative) {
     options.push({
       icon: Pencil,
       label: t(

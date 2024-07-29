@@ -61,12 +61,6 @@ export const EditPostDialog = ({
       },
     };
 
-    console.log('doUpdate', {
-      channelId: incomingPostFile.fileMetadata.appData.content.channelId,
-      odinId,
-      postFile: newPostFile,
-      mediaFiles: newMediaFiles,
-    });
     await updatePost({
       channelId: incomingPostFile.fileMetadata.appData.content.channelId,
       odinId,

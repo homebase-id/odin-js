@@ -119,6 +119,7 @@ export interface PostContent {
   channelId: string;
   authorOdinId: string;
   reactAccess?: ReactAccess;
+  isCollaborative?: boolean; // A collaborative post; => Anyone with access can edit it; (Only supported on collaborative channels)
 
   caption: string;
   captionAsRichText?: RichText;
