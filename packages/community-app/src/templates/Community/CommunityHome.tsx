@@ -231,7 +231,7 @@ const CommunitySidebar = () => {
         <div className="flex flex-col gap-1">
           <h2 className="px-1">{t('Channels')}</h2>
 
-          {pinnedChannels.map((channel) => (
+          {pinnedChannels?.map((channel) => (
             <ChannelItem
               communityId={communityId}
               channel={channel}
@@ -240,7 +240,7 @@ const CommunitySidebar = () => {
           ))}
 
           {unpinnedChannels
-            ?.slice(0, isExpanded ? undefined : maxChannels - pinnedChannels.length)
+            ?.slice(0, isExpanded ? undefined : maxChannels - (pinnedChannels?.length || 0))
             .map((channel) => (
               <ChannelItem
                 communityId={communityId}
@@ -284,7 +284,7 @@ const AllItem = ({ communityId }: { communityId: string }) => {
       to={`${COMMUNITY_ROOT}/${communityId}/all`}
       className={`flex flex-row items-center gap-2 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
     >
-      <RadioTower className="h-5 w-5" /> {t('All messages')}
+      <RadioTower className="h-5 w-5" /> {t('Activity')}
     </Link>
   );
 };

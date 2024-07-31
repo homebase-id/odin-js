@@ -22,6 +22,7 @@ import { CommunityMediaGallery } from './detail/CommunityMediaGallery';
 import { useEffect, useMemo, useState } from 'react';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
 import { COMMUNITY_ROOT } from '../../../templates/Community/CommunityHome';
+import { useCommunityChannels } from '../../../hooks/community/channels/useCommunityChannels';
 
 export const CommunityMessageItem = ({
   msg,
@@ -165,6 +166,7 @@ const ParagraphWithLinks = ({ text, className }: { text: string; className?: str
   if (!text) return null;
   const splitUpText = text.split(urlAndMentionRegex);
   const { communityKey } = useParams();
+  const { data: channels } = useCommunityChannels({ communityId: communityKey }).fetch;
 
   return (
     <p className={className}>
@@ -196,15 +198,21 @@ const ParagraphWithLinks = ({ text, className }: { text: string; className?: str
         } else if (tagRegex.test(part)) {
           const tag = part.slice(1);
           const tagGuid = formatGuidId(toGuidId(tag));
-          return (
-            <Link
-              key={index}
-              to={`${COMMUNITY_ROOT}/${communityKey}/${tagGuid}`}
-              className="break-all text-primary hover:underline"
-            >
-              {part}
-            </Link>
-          );
+          if (
+            channels?.find((channel) =>
+              stringGuidsEqual(channel.fileMetadata.appData.uniqueId, tagGuid)
+            )
+          ) {
+            return (
+              <Link
+                key={index}
+                to={`${COMMUNITY_ROOT}/${communityKey}/${tagGuid}`}
+                className="break-all text-primary hover:underline"
+              >
+                {part}
+              </Link>
+            );
+          } else return part;
         }
         return part;
       })}

@@ -53,6 +53,7 @@ const useInboxProcessor = (connected?: boolean) => {
   const queryClient = useQueryClient();
 
   const fetchData = async () => {
+    console.log('run process inbox');
     const lastProcessedTime = queryClient.getQueryState(['process-inbox'])?.dataUpdatedAt;
     const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 2;
 
@@ -111,7 +112,7 @@ const useInboxProcessor = (connected?: boolean) => {
     queryKey: ['process-inbox'],
     queryFn: fetchData,
     enabled: connected,
-    staleTime: 1000 * 10, // 10 seconds
+    staleTime: 500, // 500ms
   });
 };
 

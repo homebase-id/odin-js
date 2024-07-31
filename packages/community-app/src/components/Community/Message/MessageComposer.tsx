@@ -131,9 +131,11 @@ export const MessageComposer = ({
 
           <VolatileInput
             placeholder={
-              community?.fileMetadata.appData.uniqueId === groupId
-                ? `Message "${community?.fileMetadata.appData.content.title}"`
-                : `Reply`
+              channel?.fileMetadata.appData.content.title
+                ? `Message # ${channel.fileMetadata.appData.content.title}`
+                : community?.fileMetadata.appData.uniqueId === groupId
+                  ? `Message "${community?.fileMetadata.appData.content.title}"`
+                  : `Reply`
             }
             defaultValue={message}
             className="relative w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"

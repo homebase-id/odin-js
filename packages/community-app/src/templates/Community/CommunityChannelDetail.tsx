@@ -25,6 +25,7 @@ import { MessageComposer } from '../../components/Community/Message/MessageCompo
 import { CommunityHistory } from '../../components/Community/channel/CommunityHistory';
 import { useCommunityMessage } from '../../hooks/community/messages/useCommunityMessage';
 import { useMarkCommunityAsRead } from '../../hooks/community/useMarkCommunityAsRead';
+import { CommunityCatchup } from '../../components/Community/CommunityCatchup';
 
 export const CommunityChannelDetail = () => {
   const { communityKey: communityId, channelKey: channelId, threadKey } = useParams();
@@ -59,33 +60,36 @@ export const CommunityChannelDetail = () => {
     <ErrorBoundary>
       <div className="h-full w-full flex-grow bg-background">
         <div className="relative flex h-full flex-row">
-          <div className="flex h-full flex-grow flex-col overflow-hidden">
-            {channelId ? (
+          {!channelId ? (
+            <div className="flex h-full flex-grow flex-col overflow-hidden">
+              {/* <CommunityRootHeader community={community || undefined} /> */}
+              <CommunityCatchup community={community || undefined} />
+            </div>
+          ) : (
+            <div className="flex h-full flex-grow flex-col overflow-hidden">
               <CommunityChannelHeader community={community || undefined} channel={channelDsr} />
-            ) : (
-              <CommunityRootHeader community={community || undefined} />
-            )}
-            <ErrorBoundary>
-              <CommunityHistory
-                community={community || undefined}
-                channel={channelDsr || undefined}
-                origin={community || undefined}
-                doOpenThread={(thread) =>
-                  navigate(
-                    `${COMMUNITY_ROOT}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
-                  )
-                }
-              />
-            </ErrorBoundary>
-            <ErrorBoundary>
-              <MessageComposer
-                community={community || undefined}
-                groupId={communityId}
-                channel={channelDsr || undefined}
-                key={channelId}
-              />
-            </ErrorBoundary>
-          </div>
+              <ErrorBoundary>
+                <CommunityHistory
+                  community={community || undefined}
+                  channel={channelDsr || undefined}
+                  origin={community || undefined}
+                  doOpenThread={(thread) =>
+                    navigate(
+                      `${COMMUNITY_ROOT}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
+                    )
+                  }
+                />
+              </ErrorBoundary>
+              <ErrorBoundary>
+                <MessageComposer
+                  community={community || undefined}
+                  groupId={communityId}
+                  channel={channelDsr || undefined}
+                  key={channelId}
+                />
+              </ErrorBoundary>
+            </div>
+          )}
           {threadKey ? (
             <ErrorBoundary>
               <CommunityThread
