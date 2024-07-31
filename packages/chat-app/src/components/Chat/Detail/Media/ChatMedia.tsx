@@ -17,6 +17,7 @@ import {
 } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
+import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 
 export const ChatMedia = ({
   msg,
@@ -206,7 +207,9 @@ const MediaGallery = ({
 
   return (
     <div
-      className={`relative ${totalCount === 2 ? 'aspect-[2.02]' : 'aspect-square'} w-[75vw] max-w-xs overflow-hidden rounded-lg bg-background`}
+      className={`relative ${
+        totalCount === 2 ? 'aspect-[2.02]' : 'aspect-square'
+      } w-[75vw] overflow-hidden rounded-lg bg-background md:max-w-xs lg:max-w-xl`}
     >
       {tinyThumbUrl ? (
         <MediaGalleryLoading tinyThumbUrl={tinyThumbUrl} totalCount={totalCount} />
@@ -254,9 +257,9 @@ const MediaGalleryItem = ({
   return (
     <div
       key={payload.key}
-      className={`relative h-full w-full ${
-        isColSpan2 ? 'aspect-[2/1]' : 'aspect-square'
-      } ${isColSpan2 ? 'col-span-2' : ''} ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+      className={`relative h-full w-full ${isColSpan2 ? 'aspect-[2/1]' : 'aspect-square'} ${
+        isColSpan2 ? 'col-span-2' : ''
+      } ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
     >
       <MediaItem
         fileId={msg.fileId}
