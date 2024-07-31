@@ -17,7 +17,6 @@ import {
 } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
-import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 
 export const ChatMedia = ({
   msg,
