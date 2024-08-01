@@ -57,11 +57,6 @@ export const useCommunityMessage = (props?: {
     const identity = dotYouClient.getIdentity();
     const recipients = communityContent.recipients.filter((recipient) => recipient !== identity);
 
-    const textualTags = message
-      .match(/#[a-zA-Z0-9]+/g)
-      ?.flatMap((tag) => tag.slice(1).toLowerCase());
-    const tags = textualTags?.map(toGuidId).map(formatGuidId) || [];
-
     // We prefer having the uniqueId set outside of the mutation, so that an auto-retry of the mutation doesn't create duplicates
     const newChatId = chatId || getNewId();
     const newChat: NewHomebaseFile<CommunityMessage> = {
@@ -70,14 +65,9 @@ export const useCommunityMessage = (props?: {
         appData: {
           uniqueId: newChatId,
           groupId,
-          tags: Array.from(
-            new Set([
-              ...tags,
-              ...(channel?.fileMetadata.appData.uniqueId
-                ? [channel?.fileMetadata.appData.uniqueId]
-                : []),
-            ])
-          ),
+          tags: channel?.fileMetadata.appData.uniqueId
+            ? [channel?.fileMetadata.appData.uniqueId]
+            : [],
           content: {
             message: message,
             deliveryStatus:
@@ -153,25 +143,15 @@ export const useCommunityMessage = (props?: {
         groupId,
         userDate,
       }) => {
-        const textualTags = message
-          .match(/#[a-zA-Z0-9]+/g)
-          ?.flatMap((tag) => tag.slice(1).toLowerCase());
-        const tags = textualTags?.map(toGuidId).map(formatGuidId) || [];
-
         const newMessageDsr: NewHomebaseFile<CommunityMessage> = {
           fileMetadata: {
             created: userDate,
             appData: {
               uniqueId: chatId,
               groupId,
-              tags: Array.from(
-                new Set([
-                  ...tags,
-                  ...(channel?.fileMetadata.appData.uniqueId
-                    ? [channel?.fileMetadata.appData.uniqueId]
-                    : []),
-                ])
-              ),
+              tags: channel?.fileMetadata.appData.uniqueId
+                ? [channel?.fileMetadata.appData.uniqueId]
+                : [],
               content: {
                 message: message,
                 deliveryStatus: CommunityDeliveryStatus.Sending,

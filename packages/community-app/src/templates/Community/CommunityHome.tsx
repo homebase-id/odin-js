@@ -23,7 +23,7 @@ import { drives, permissions } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { useCommunities } from '../../hooks/community/useCommunities';
 import { NewCommunity } from './CommunityNew';
 import { useCommunity } from '../../hooks/community/useCommunity';
@@ -289,6 +289,7 @@ const AllItem = ({ communityId }: { communityId: string }) => {
   );
 };
 
+const VISITS_STORAGE_KEY = 'community-sidebar-visited';
 const ChannelItem = ({
   communityId,
   channel,
@@ -299,6 +300,20 @@ const ChannelItem = ({
   const channelId = channel.fileMetadata.appData.uniqueId;
   const href = `${COMMUNITY_ROOT}/${communityId}/${channelId}`;
   const isActive = !!useMatch({ path: href, end: false });
+
+  const vists = tryJsonParse<string[]>(sessionStorage.getItem(VISITS_STORAGE_KEY) || '[]') || [];
+  const isVisited = channelId && vists.includes(channelId);
+
+  useEffect(() => {
+    if (isActive) {
+      if (!isVisited) {
+        sessionStorage.setItem(
+          VISITS_STORAGE_KEY,
+          JSON.stringify(Array.from(new Set([...vists, channelId])))
+        );
+      }
+    }
+  }, [isActive]);
 
   const {
     single: { data: metadata },
@@ -319,7 +334,7 @@ const ChannelItem = ({
   return (
     <Link
       to={`${COMMUNITY_ROOT}/${communityId}/${channelId}`}
-      className={`group flex flex-row items-center gap-1 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'} ${hasUnreadMessages ? 'font-bold' : ''}`}
+      className={`group flex flex-row items-center gap-1 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : `hover:bg-primary/10 ${isVisited ? 'text-purple-600' : ''}`} ${hasUnreadMessages ? 'font-bold' : ''}`}
     >
       # {channel.fileMetadata.appData.content?.title?.toLowerCase()}
       <button
