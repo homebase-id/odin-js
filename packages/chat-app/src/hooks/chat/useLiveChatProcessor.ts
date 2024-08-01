@@ -17,7 +17,7 @@ import {
   GROUP_CHAT_CONVERSATION_FILE_TYPE,
   dsrToConversation,
 } from '../../providers/ConversationProvider';
-import { useNotificationSubscriber } from '@youfoundation/common-app';
+import { useDotYouClientContext, useNotificationSubscriber } from '@youfoundation/common-app';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CHAT_MESSAGE_FILE_TYPE, ChatMessage, dsrToMessage } from '../../providers/ChatProvider';
 import {
@@ -30,7 +30,6 @@ import { getConversationQueryOptions, useConversation } from './useConversation'
 import { ChatReactionFileType } from '../../providers/ChatReactionProvider';
 import { insertNewMessage, insertNewMessagesForConversation } from './useChatMessages';
 import { insertNewConversation } from './useConversations';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 const MINUTE_IN_MS = 60000;
 const isDebug = hasDebugFlag();
@@ -317,11 +316,11 @@ const processChatMessagesBatch = async (
           uniqueMessagesPerConversation[updatedConversation].map(async (newMessage) =>
             typeof newMessage.fileMetadata.appData.content === 'string'
               ? await dsrToMessage(
-                dotYouClient,
-                newMessage as HomebaseFile<string>,
-                ChatDrive,
-                true
-              )
+                  dotYouClient,
+                  newMessage as HomebaseFile<string>,
+                  ChatDrive,
+                  true
+                )
               : (newMessage as HomebaseFile<ChatMessage>)
           )
         )
