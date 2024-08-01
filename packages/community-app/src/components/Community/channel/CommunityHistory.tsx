@@ -7,7 +7,7 @@ import {
 } from '../../../providers/CommunityMessageProvider';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ErrorNotification, t } from '@youfoundation/common-app';
+import { ErrorNotification, formatToDateAgoWithRelativeDetail, t } from '@youfoundation/common-app';
 import { CommunityMessageItem } from '../Message/CommunityMessageItem';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
 import { CommunityActions } from './ContextMenu';
@@ -222,6 +222,7 @@ export const CommunityHistory = ({
                   ref={virtualizer.measureElement}
                   className="flex-shrink-0"
                 >
+                  <DateSeperator previousDate={previousDate} date={currentDate} />
                   <CommunityMessageItem
                     key={msg.fileId}
                     msg={msg}
@@ -241,5 +242,22 @@ export const CommunityHistory = ({
         </div>
       </div>
     </>
+  );
+};
+
+const DateSeperator = ({ previousDate, date }: { previousDate?: number; date?: number }) => {
+  if (!date) return null;
+
+  const previousDay = previousDate && new Date(previousDate).getDate();
+  const day = new Date(date).getDate();
+
+  if (previousDay === day) return null;
+
+  return (
+    <div className="flex justify-center py-2">
+      <div className="rounded-full bg-page-background px-3 py-2 text-sm font-medium text-foreground">
+        {formatToDateAgoWithRelativeDetail(new Date(date))}
+      </div>
+    </div>
   );
 };

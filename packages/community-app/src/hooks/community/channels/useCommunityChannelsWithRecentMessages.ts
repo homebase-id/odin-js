@@ -19,9 +19,8 @@ export const useCommunityChannelsWithRecentMessages = (props: { communityId?: st
   const queryClient = useQueryClient();
 
   const { data: channels } = useCommunityChannels(props).fetch;
-
   const buildChannelsWithRecent = useCallback(async () => {
-    if (!channels || !channels || channels.length === 0) {
+    if (!channels || channels.length === 0) {
       return;
     }
 
@@ -49,7 +48,7 @@ export const useCommunityChannelsWithRecentMessages = (props: { communityId?: st
 
   const { lastUpdate } = useLastUpdatedChatMessages();
   useEffect(() => {
-    if (!lastUpdate) return;
+    if (lastUpdate === null) return;
     buildChannelsWithRecent();
   }, [lastUpdate, buildChannelsWithRecent]);
 

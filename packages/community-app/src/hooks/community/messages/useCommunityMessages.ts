@@ -152,7 +152,7 @@ export const getCommunityMessagesInfiniteQueryOptions: (
 
 export const useLastUpdatedChatMessages = () => {
   const queryClient = useQueryClient();
-  const [lastUpdate, setLastUpdate] = useState(0);
+  const [lastUpdate, setLastUpdate] = useState<number | null>(null);
 
   useEffect(() => {
     const lastUpdates = queryClient

@@ -45,7 +45,6 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   useLiveCommunityProcessor(communityKey);
   useRemoveNotifications({ appId: COMMUNITY_APP_ID });
 
-  // TODO: Run this when on desktop?
   const { data: communities } = useCommunities().all;
   const navigate = useNavigate();
   useEffect(() => {
@@ -201,6 +200,7 @@ const CommunitySidebar = () => {
   const isActive = !!useMatch({ path: `${COMMUNITY_ROOT}/${communityId}` });
 
   const { data: communityChannels } = useCommunityChannelsWithRecentMessages({ communityId }).fetch;
+
   const pinnedChannels = communityChannels?.filter(
     (channel) =>
       channel.fileMetadata.appData.uniqueId &&
