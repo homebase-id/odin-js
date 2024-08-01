@@ -8,7 +8,7 @@ import {
 import { CommunityHistory } from './channel/CommunityHistory';
 import { ActionButton, ActionLink, ChevronLeft, RadioTower, t } from '@youfoundation/common-app';
 import { COMMUNITY_ROOT } from '../../templates/Community/CommunityHome';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 export const CommunityCatchup = ({
   community,
@@ -37,17 +37,37 @@ export const CommunityCatchup = ({
     );
   });
 
+  const [isShowAll, setIsShowAll] = useState(!channelsToCatchup?.length);
   if (!community) return null;
-  if (!channelsToCatchup?.length) return <>{t('All done!')}</>;
 
   return (
-    <div className="overflow-auto">
+    <div className="flex h-full flex-grow flex-col">
       <CommunityChannelCatchupHeader community={community} />
-      <div className="flex flex-col gap-3 p-3">
-        {channelsToCatchup?.map((chnl) => (
-          <CommunityChannelCatchup community={community} channel={chnl} key={chnl.fileId} />
-        ))}
-      </div>
+      {isShowAll ? (
+        <CommunityHistory community={community} />
+      ) : (
+        <>
+          {channelsToCatchup?.length ? (
+            <div className="flex h-20 flex-grow flex-col gap-3 overflow-auto p-3">
+              {channelsToCatchup?.map((chnl) => (
+                <CommunityChannelCatchup community={community} channel={chnl} key={chnl.fileId} />
+              ))}
+            </div>
+          ) : (
+            <div className="m-auto flex flex-col items-center gap-2">
+              <p className="text-xl">{t('All done!')}</p>
+              <ActionButton
+                className="text-primary hover:underline"
+                type="mute"
+                size="none"
+                onClick={() => setIsShowAll(true)}
+              >
+                {t('See all activity')}
+              </ActionButton>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };
@@ -101,7 +121,7 @@ const CommunityChannelCatchup = ({
 
   return (
     <div className="rounded-md border">
-      <div className="flex flex-row bg-slate-200 px-2 py-2">
+      <div className="flex flex-row justify-between bg-slate-200 px-2 py-2">
         <ActionLink
           type="mute"
           size="none"
@@ -112,9 +132,9 @@ const CommunityChannelCatchup = ({
         </ActionLink>
         {metadata ? (
           <ActionButton
-            className="ml-auto"
             size="small"
             type={'secondary'}
+            className="w-auto"
             state={updateStatus}
             onClick={doMarkAsRead}
           >
