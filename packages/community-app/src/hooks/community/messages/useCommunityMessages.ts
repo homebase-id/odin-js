@@ -23,8 +23,9 @@ export const useCommunityMessages = (props?: {
   communityId: string | undefined;
   originId?: string;
   channelId?: string;
+  maxAge?: number;
 }) => {
-  const { communityId, originId, channelId } = props || {};
+  const { communityId, originId, channelId, maxAge } = props || {};
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
@@ -57,7 +58,13 @@ export const useCommunityMessages = (props?: {
 
   return {
     all: useInfiniteQuery(
-      getCommunityMessagesInfiniteQueryOptions(dotYouClient, communityId, channelId, originId)
+      getCommunityMessagesInfiniteQueryOptions(
+        dotYouClient,
+        communityId,
+        channelId,
+        originId,
+        maxAge
+      )
     ),
     delete: useMutation({
       mutationFn: removeMessage,
@@ -94,13 +101,14 @@ export const getCommunityMessagesInfiniteQueryOptions: (
   dotYouClient: DotYouClient,
   communityId?: string,
   channelId?: string,
-  originId?: string
+  originId?: string,
+  maxAge?: number
 ) => UndefinedInitialDataInfiniteOptions<{
   searchResults: (HomebaseFile<CommunityMessage> | null)[];
   cursorState: string;
   queryTime: number;
   includeMetadataHeader: boolean;
-}> = (dotYouClient, communityId, channelId, originId) => ({
+}> = (dotYouClient, communityId, channelId, originId, maxAge) => ({
   queryKey: [
     'community-messages',
     communityId,
@@ -120,6 +128,22 @@ export const getCommunityMessagesInfiniteQueryOptions: (
     lastPage?.searchResults && lastPage?.searchResults?.length >= PAGE_SIZE
       ? lastPage.cursorState
       : undefined,
+  select: maxAge
+    ? (data) => {
+        const filteredData = { ...data };
+        filteredData.pages = data.pages.map((page) => {
+          const filteredPage = { ...page };
+
+          filteredPage.searchResults = page.searchResults.filter((msg) => {
+            if (!msg) return false;
+            return msg.fileMetadata.created > maxAge;
+          });
+
+          return filteredPage;
+        });
+        return filteredData;
+      }
+    : undefined,
   enabled: !!communityId,
   refetchOnMount: false,
   refetchOnReconnect: false,

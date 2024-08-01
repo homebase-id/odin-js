@@ -8,6 +8,7 @@ import {
 import { CommunityHistory } from './channel/CommunityHistory';
 import { ActionButton, ActionLink, ChevronLeft, RadioTower, t } from '@youfoundation/common-app';
 import { COMMUNITY_ROOT } from '../../templates/Community/CommunityHome';
+import { useCallback } from 'react';
 
 export const CommunityCatchup = ({
   community,
@@ -42,7 +43,7 @@ export const CommunityCatchup = ({
   return (
     <div className="overflow-auto">
       <CommunityChannelCatchupHeader community={community} />
-      <div className="">
+      <div className="flex flex-col gap-3 p-3">
         {channelsToCatchup?.map((chnl) => (
           <CommunityChannelCatchup community={community} channel={chnl} key={chnl.fileId} />
         ))}
@@ -77,21 +78,54 @@ const CommunityChannelCatchup = ({
   community: HomebaseFile<CommunityDefinition>;
   channel: ChannelWithRecentMessage;
 }) => {
-  // const communityId = community.fileMetadata.appData.uniqueId;
+  const communityId = community.fileMetadata.appData.uniqueId;
+  const {
+    single: { data: metadata },
+    update: { mutate: updateMeta, status: updateStatus },
+  } = usecommunityMetadata({ communityId });
+
+  const doMarkAsRead = useCallback(() => {
+    if (
+      !metadata ||
+      !channel.fileMetadata.appData.uniqueId ||
+      !channel.lastMessage?.fileMetadata.created ||
+      updateStatus !== 'idle'
+    )
+      return;
+    const newMetadata = { ...metadata };
+    metadata.fileMetadata.appData.content.channelLastReadTime[
+      channel.fileMetadata.appData.uniqueId
+    ] = channel.lastMessage.fileMetadata.created;
+    updateMeta({ metadata: newMetadata });
+  }, []);
 
   return (
-    <div className="p-3">
-      <div className="rounded-md border">
-        <div className="flex flex-row bg-slate-200 px-2 py-2">
-          <h2 className="text-lg"># {channel.fileMetadata.appData.content.title}</h2>
-          <ActionButton className="ml-auto" size="small" type={'secondary'}>
+    <div className="rounded-md border">
+      <div className="flex flex-row bg-slate-200 px-2 py-2">
+        <ActionLink
+          type="mute"
+          size="none"
+          className="text-lg hover:underline"
+          href={`${COMMUNITY_ROOT}/${communityId}/${channel.fileMetadata.appData.uniqueId}`}
+        >
+          # {channel.fileMetadata.appData.content.title}
+        </ActionLink>
+        {metadata ? (
+          <ActionButton
+            className="ml-auto"
+            size="small"
+            type={'secondary'}
+            state={updateStatus}
+            onClick={doMarkAsRead}
+          >
             {t('Mark as read')}
           </ActionButton>
-        </div>
-        <div className="relative">
-          <CommunityHistory community={community} channel={channel} alignTop={true} />
-        </div>
-        {/* <ErrorBoundary>
+        ) : null}
+      </div>
+      <div className="relative">
+        <CommunityHistory community={community} channel={channel} alignTop={true} onlyNew={true} />
+      </div>
+      {/* <ErrorBoundary>
           <MessageComposer
             community={community || undefined}
             groupId={communityId}
@@ -99,7 +133,6 @@ const CommunityChannelCatchup = ({
             key={channel.fileMetadata.appData.uniqueId}
           />
         </ErrorBoundary> */}
-      </div>
     </div>
   );
 };

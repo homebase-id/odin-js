@@ -11,6 +11,7 @@ import { ErrorNotification, t } from '@youfoundation/common-app';
 import { CommunityMessageItem } from '../Message/CommunityMessageItem';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
 import { CommunityActions } from './ContextMenu';
+import { usecommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
 
 export const useIsomorphicLayoutEffect =
   typeof window !== 'undefined' ? useLayoutEffect : useEffect;
@@ -22,6 +23,7 @@ export const CommunityHistory = ({
   doOpenThread,
   setIsEmptyChat,
   alignTop,
+  onlyNew,
 }: {
   community: HomebaseFile<CommunityDefinition> | undefined;
   channel?: HomebaseFile<CommunityChannel> | undefined;
@@ -29,10 +31,21 @@ export const CommunityHistory = ({
   doOpenThread?: (msg: HomebaseFile<CommunityMessage>) => void;
   setIsEmptyChat?: (isEmpty: boolean) => void;
   alignTop?: boolean;
+  onlyNew?: boolean;
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inAThread =
     !!origin && origin.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE;
+
+  const { data: metadata } = usecommunityMetadata({
+    communityId: community?.fileMetadata?.appData?.uniqueId,
+  }).single;
+  const lastReadTime =
+    (channel?.fileMetadata.appData.uniqueId &&
+      metadata?.fileMetadata.appData.content.channelLastReadTime[
+        channel?.fileMetadata.appData.uniqueId
+      ]) ||
+    0;
 
   const {
     all: {
@@ -47,6 +60,7 @@ export const CommunityHistory = ({
     communityId: community?.fileMetadata?.appData?.uniqueId,
     originId: origin?.fileMetadata.appData.uniqueId,
     channelId: channel?.fileMetadata?.appData?.uniqueId,
+    maxAge: onlyNew ? lastReadTime : undefined,
   });
 
   const flattenedMsgs =
