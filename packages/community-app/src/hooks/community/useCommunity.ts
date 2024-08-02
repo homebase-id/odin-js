@@ -17,7 +17,7 @@ import {
   saveCommunity,
 } from '../../providers/CommunityDefinitionProvider';
 import { COMMUNITY_APP_ID, t } from '@youfoundation/common-app';
-import { COMMUNITY_ROOT } from '../../templates/Community/CommunityHome';
+import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
 import {
   AppDriveAuthorizationParams,
   getExtendAppRegistrationParams,

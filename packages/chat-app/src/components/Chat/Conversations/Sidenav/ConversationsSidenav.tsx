@@ -24,7 +24,7 @@ import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../../../providers/ConversationProvider';
-import { CHAT_ROOT } from '../../../../templates/Chat/ChatHome';
+import { ROOT_PATH as CHAT_ROOT } from '../../../../app/App';
 import {
   GroupConversationItem,
   SingleConversationItem,

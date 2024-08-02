@@ -26,8 +26,8 @@ import { ChatHistory } from '../../components/Chat/ChatHistory';
 import { ChatComposer } from '../../components/Chat/Composer/ChatComposer';
 import { ChatInfo } from '../../components/Chat/Detail/ChatInfo';
 import { useNavigate } from 'react-router-dom';
-import { CHAT_ROOT } from './ChatHome';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { ROOT_PATH } from '../../app/App';
 
 export const ChatDetail = ({
   conversationId,
@@ -114,14 +114,14 @@ const ChatHeader = ({
   } = useConversation().deleteChat;
 
   useEffect(() => {
-    if (deleteChatStatus === 'success') navigate(CHAT_ROOT);
+    if (deleteChatStatus === 'success') navigate(ROOT_PATH);
   }, [deleteChatStatus]);
 
   return (
     <>
       <ErrorNotification error={clearChatError || deleteChatError} />
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-        <ActionLink className="lg:hidden" type="mute" href={CHAT_ROOT}>
+        <ActionLink className="lg:hidden" type="mute" href={ROOT_PATH}>
           <ChevronLeft className="h-5 w-5" />
         </ActionLink>
 
