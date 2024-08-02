@@ -34,10 +34,6 @@ export const useChatReaction = (props?: {
         })
       )?.reactions || [];
 
-    if (reactions.length) {
-      console.log('reactions', reactions);
-    }
-
     return reactions;
   };
 
