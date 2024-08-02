@@ -107,7 +107,7 @@ export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
   });
 };
 
-export const useRemoveNotifications = (props: { disabled: boolean; appId: string }) => {
+export const useRemoveNotifications = (props: { disabled?: boolean; appId: string }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
   const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: props.appId });
