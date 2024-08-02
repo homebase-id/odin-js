@@ -10,9 +10,9 @@ import {
   uploadGroupReaction,
 } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../providers/ChatProvider';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { UnifiedConversation } from '../../providers/ConversationProvider';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 
 export const useChatReaction = (props?: {
   messageGlobalTransitId: string | undefined;

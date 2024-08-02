@@ -1,7 +1,7 @@
 import { ExtensionThumbnail, FakeAnchor, highlightQuery } from '@youfoundation/common-app';
 import { PayloadDescriptor } from '@youfoundation/js-lib/core';
 import { OdinPreviewImage } from '@youfoundation/ui-lib';
-import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 import { MailDrive } from '../../providers/MailProvider';
 import { ROOT_PATH } from '../../app/App';
 import { useNavigate, useParams } from 'react-router-dom';

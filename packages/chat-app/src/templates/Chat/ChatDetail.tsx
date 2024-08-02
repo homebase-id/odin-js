@@ -29,7 +29,13 @@ import { useNavigate } from 'react-router-dom';
 import { CHAT_ROOT } from './ChatHome';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
-export const ChatDetail = ({ conversationId }: { conversationId: string | undefined }) => {
+export const ChatDetail = ({
+  conversationId,
+  communityTagId,
+}: {
+  conversationId: string | undefined;
+  communityTagId?: string;
+}) => {
   const [isEmptyChat, setIsEmptyChat] = useState<boolean>(false);
 
   const { data: conversation, isLoading, isFetched } = useConversation({ conversationId }).single;
@@ -68,6 +74,7 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
         </ErrorBoundary>
         <ErrorBoundary>
           <ChatComposer
+            tags={communityTagId ? [communityTagId] : undefined}
             conversation={conversation || undefined}
             replyMsg={replyMsg}
             clearReplyMsg={() => setReplyMsg(undefined)}

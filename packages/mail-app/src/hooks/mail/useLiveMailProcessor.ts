@@ -7,7 +7,7 @@ import { useNotificationSubscriber } from '@youfoundation/common-app';
 import { useCallback } from 'react';
 
 import { hasDebugFlag, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 import {
   MAIL_CONVERSATION_FILE_TYPE,
   MailConversationsReturn,

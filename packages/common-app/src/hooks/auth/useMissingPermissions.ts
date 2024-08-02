@@ -3,11 +3,12 @@ import {
   getUniqueDrivesWithHighestPermission,
   stringGuidsEqual,
 } from '@youfoundation/js-lib/helpers';
-import { ALL_CONNECTIONS_CIRCLE_ID, AppPermissionType } from '@youfoundation/js-lib/network';
+import { AppPermissionType } from '@youfoundation/js-lib/network';
 import { useSecurityContext } from '../securityContext/useSecurityContext';
 import { useDotYouClient } from './useDotYouClient';
+import { getExtendAppRegistrationParams } from '@youfoundation/js-lib/auth';
 
-const getExtendAuthorizationUrl = (
+const getExtendAppRegistrationUrl = (
   host: string,
   appId: string,
   drives: { a: string; t: string; n: string; d: string; p: number }[],
@@ -15,16 +16,16 @@ const getExtendAuthorizationUrl = (
   needsAllConnected: boolean,
   returnUrl: string
 ) => {
-  const params = {
-    appId: appId,
-    d: JSON.stringify(drives),
-    p: permissionKeys.join(','),
-    c: needsAllConnected ? ALL_CONNECTIONS_CIRCLE_ID : null,
-  };
+  const params = getExtendAppRegistrationParams(
+    appId,
+    drives,
+    undefined,
+    permissionKeys,
+    needsAllConnected,
+    returnUrl
+  );
 
-  return `${host}/owner/appupdate?${stringifyToQueryParams(
-    params
-  )}&return=${encodeURIComponent(returnUrl)}`;
+  return `${host}/owner/appupdate?${stringifyToQueryParams(params)}`;
 };
 
 export const useMissingPermissions = ({
@@ -81,7 +82,7 @@ export const useMissingPermissions = ({
   if (missingDrives.length === 0 && missingPermissions.length === 0 && !missingAllConnectedCircle)
     return;
 
-  const extendPermissionUrl = getExtendAuthorizationUrl(
+  const extendPermissionUrl = getExtendAppRegistrationUrl(
     host,
     appId,
     missingDrives,

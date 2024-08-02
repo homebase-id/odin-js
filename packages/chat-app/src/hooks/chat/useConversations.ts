@@ -1,6 +1,6 @@
 import { UnifiedConversation, getConversations } from '../../providers/ConversationProvider';
 import { InfiniteData, QueryClient, useInfiniteQuery } from '@tanstack/react-query';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 

@@ -8,10 +8,15 @@ import {
 import { OdinImage, OdinThumbnailImage, OdinAudio, OdinAudioWaveForm } from '@youfoundation/ui-lib';
 import { CHAT_LINKS_PAYLOAD_KEY, ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
-import { BoringFile, Triangle, useDarkMode, LinkPreviewItem } from '@youfoundation/common-app';
+import {
+  BoringFile,
+  Triangle,
+  useDarkMode,
+  LinkPreviewItem,
+  useDotYouClientContext,
+} from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
-import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 
 export const ChatMedia = ({
   msg,

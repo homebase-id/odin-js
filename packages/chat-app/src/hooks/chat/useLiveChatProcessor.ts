@@ -18,7 +18,7 @@ import {
   GROUP_CHAT_CONVERSATION_FILE_TYPE,
   dsrToConversation,
 } from '../../providers/ConversationProvider';
-import { useNotificationSubscriber } from '@youfoundation/common-app';
+import { useDotYouClientContext, useNotificationSubscriber } from '@youfoundation/common-app';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CHAT_MESSAGE_FILE_TYPE, ChatMessage, dsrToMessage } from '../../providers/ChatProvider';
 import {
@@ -31,7 +31,6 @@ import { getConversationQueryOptions, useConversation } from './useConversation'
 
 import { insertNewMessage, insertNewMessagesForConversation } from './useChatMessages';
 import { insertNewConversation } from './useConversations';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { insertNewReaction } from './useChatReaction';
 
 const MINUTE_IN_MS = 60000;
