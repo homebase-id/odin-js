@@ -16,7 +16,7 @@ import {
   t,
   useRemoveNotifications,
 } from '@youfoundation/common-app';
-import { drives, permissions } from '../../hooks/auth/useAuth';
+import { drives, circleDrives, permissions } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
 
 export const CHAT_ROOT = ROOT_PATH;
@@ -37,6 +37,7 @@ export const ChatHome = () => {
         appName={t('Homebase Chat')}
         appId={CHAT_APP_ID}
         drives={drives}
+        circleDrives={circleDrives}
         permissions={permissions}
         // needsAllConnected={true}
       />

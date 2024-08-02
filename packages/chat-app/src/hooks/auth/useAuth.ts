@@ -107,7 +107,7 @@ export const permissions = [
   AppPermissionType.SendPushNotifications,
 ];
 
-const circleDrives = [
+export const circleDrives = [
   {
     a: ChatDrive.alias,
     t: ChatDrive.type,
