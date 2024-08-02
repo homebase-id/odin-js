@@ -1,5 +1,7 @@
-import { DotYouClient, ReactionFile, TargetDrive } from '@youfoundation/js-lib/core';
-import { stringifyToQueryParams, tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { stringifyToQueryParams, tryJsonParse } from '../../helpers/DataUtil';
+import { DotYouClient } from '../DotYouClient';
+import { ReactionFile } from '../DriveData/File/DriveFileReactionTypes';
+import { TargetDrive } from '../DriveData/File/DriveFileTypes';
 
 export interface GroupEmojiReaction {
   odinId: string;
