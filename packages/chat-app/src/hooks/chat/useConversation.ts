@@ -117,7 +117,6 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   }: {
     conversation: HomebaseFile<UnifiedConversation>;
   }) => {
-    conversation.fileMetadata.appData.content.lastReadTime = 0;
     return await uploadConversation(dotYouClient, conversation, true);
   };
 
@@ -128,8 +127,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     conversation: HomebaseFile<UnifiedConversation>;
     distribute?: boolean;
   }) => {
-    if (distribute && conversation.fileMetadata.appData.content.recipients?.length > 2) {
-      conversation.fileMetadata.appData.content.lastReadTime = 0;
+    if (distribute && conversation.fileMetadata.appData.content.recipients?.length >= 2) {
       return await updateConversation(dotYouClient, conversation, distribute);
     } else {
       return await updateConversation(dotYouClient, conversation);
