@@ -76,15 +76,9 @@ const Settings = () => {
     resetEnable();
   }, [current]);
 
-  const {
-    mutate: sendTestNotification,
-    status: testNotificationStatus,
-    error: testNotificationError,
-  } = usePushNotificationClient().sendTestNotification;
-
   return (
     <>
-      <ErrorNotification error={testNotificationError || enableError} />
+      <ErrorNotification error={enableError} />
 
       {!isSupported ? (
         <Alert type="warning">
@@ -102,32 +96,7 @@ const Settings = () => {
       {isSupported ? (
         <>
           {(isEnabled && current) || enableStatus === 'success' ? (
-            <>
-              <SubtleMessage>
-                {t(
-                  'You can confirm that notifications are working as expeced, by triggering a test notification:'
-                )}
-              </SubtleMessage>
-
-              <ActionButton
-                icon={PaperPlane}
-                onClick={() => sendTestNotification()}
-                state={testNotificationStatus}
-              >
-                {t('Send a test notification')}
-              </ActionButton>
-              {testNotificationStatus === 'success' ? (
-                <p className="my-2">
-                  {t(`Notification sent. Didn't get it?`)}{' '}
-                  <Link
-                    className="text-primary hover:underline"
-                    to={`/owner/notifications/problems`}
-                  >
-                    {t(`What can I do?`)}
-                  </Link>
-                </p>
-              ) : null}
-            </>
+            <></>
           ) : (
             <>
               <SubtleMessage>
@@ -144,7 +113,7 @@ const Settings = () => {
         </>
       ) : null}
 
-      {testNotificationError || enableError ? (
+      {enableError ? (
         <p className="my-2">
           {t(`I can't get notifications working,`)}{' '}
           <Link className="text-primary hover:underline" to={`/owner/notifications/problems`}>
@@ -153,6 +122,55 @@ const Settings = () => {
         </p>
       ) : null}
     </>
+  );
+};
+
+const TestNotification = ({ className }: { className?: string }) => {
+  const {
+    mutate: sendTestNotification,
+    status: testNotificationStatus,
+    error: testNotificationError,
+    data: testNotificationData,
+  } = usePushNotificationClient().sendTestNotification;
+
+  return (
+    <div className={className}>
+      <ErrorNotification error={testNotificationError} />
+      <SubtleMessage>
+        {t(
+          'You can confirm that notifications are working as expeced, by triggering a test notification:'
+        )}
+      </SubtleMessage>
+
+      <ActionButton
+        icon={PaperPlane}
+        onClick={() => sendTestNotification()}
+        state={testNotificationStatus}
+        type="secondary"
+      >
+        {t('Send a test notification')}
+      </ActionButton>
+      {testNotificationStatus === 'success' ? (
+        <p className="my-2">
+          {t(`Notification sent. Didn't get it?`)}{' '}
+          <Link className="text-primary hover:underline" to={`/owner/notifications/problems`}>
+            {t(`What can I do?`)}
+          </Link>
+          <span className="block text-sm text-gray-400">
+            {t('Reference id:')} {testNotificationData?.headers?.['odin-correlation-id']}
+          </span>
+        </p>
+      ) : null}
+
+      {testNotificationError ? (
+        <p className="my-2">
+          {t(`I can't get notifications working,`)}{' '}
+          <Link className="text-primary hover:underline" to={`/owner/notifications/problems`}>
+            {t(`what can I do?`)}
+          </Link>
+        </p>
+      ) : null}
+    </div>
   );
 };
 
@@ -197,6 +215,8 @@ const AllDevicesDetail = ({ className }: { className?: string }) => {
           </div>
         </>
       )}
+
+      <TestNotification className="mt-5" />
     </div>
   );
 };
