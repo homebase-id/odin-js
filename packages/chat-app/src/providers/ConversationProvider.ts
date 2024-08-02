@@ -19,10 +19,10 @@ import {
   UploadResult,
   PriorityOptions,
 } from '@youfoundation/js-lib/core';
-import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import { jsonStringify64, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 export const CHAT_CONVERSATION_FILE_TYPE = 8888;
-export const GROUP_CHAT_CONVERSATION_FILE_TYPE = 8890;
+export const CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE = 8889;
 export const ConversationWithYourselfId = 'e4ef2382-ab3c-405d-a8b5-ad3e09e980dd';
 export const CONVERSATION_PAYLOAD_KEY = 'convo_pk';
 
@@ -59,7 +59,6 @@ export const ChatDrive: TargetDrive = {
 
 interface BaseConversation {
   title: string;
-  lastReadTime?: number;
 }
 
 export interface UnifiedConversation extends BaseConversation {
@@ -92,7 +91,7 @@ export const getConversations = async (
 ) => {
   const params: FileQueryParams = {
     targetDrive: ChatDrive,
-    fileType: [CHAT_CONVERSATION_FILE_TYPE, GROUP_CHAT_CONVERSATION_FILE_TYPE],
+    fileType: [CHAT_CONVERSATION_FILE_TYPE],
   };
 
   const ro: GetBatchQueryResultOptions = {
@@ -308,6 +307,124 @@ export const updateConversation = async (
   );
 };
 
+// export const getConversationMetadata = async ()=>{
+//   // CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE
+// }
+
+export interface ConversationMetadata {
+  conversationId: string;
+  lastReadTime?: number;
+}
+
+export const getConversationMetadata = async (
+  dotYouClient: DotYouClient,
+  conversationId: string
+) => {
+  if (conversationId === ConversationWithYourselfId) return null;
+
+  const result = await queryBatch(
+    dotYouClient,
+    {
+      fileType: [CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE],
+      tagsMatchAtLeastOne: [conversationId],
+      targetDrive: ChatDrive,
+    },
+    { includeMetadataHeader: true, maxRecords: 2 }
+  );
+
+  if (!result || !result.searchResults?.length) return null;
+
+  return dsrToConversationMetadata(dotYouClient, result.searchResults[0], ChatDrive, true);
+};
+
+export const dsrToConversationMetadata = async (
+  dotYouClient: DotYouClient,
+  dsr: HomebaseFile,
+  targetDrive: TargetDrive,
+  includeMetadataHeader: boolean
+): Promise<HomebaseFile<ConversationMetadata> | null> => {
+  try {
+    const attrContent = await getContentFromHeaderOrPayload<ConversationMetadata>(
+      dotYouClient,
+      targetDrive,
+      dsr,
+      includeMetadataHeader
+    );
+    if (!attrContent) return null;
+
+    const conversation: HomebaseFile<ConversationMetadata> = {
+      ...dsr,
+      fileMetadata: {
+        ...dsr.fileMetadata,
+        appData: {
+          ...dsr.fileMetadata.appData,
+          content: {
+            ...attrContent,
+          },
+        },
+      },
+    };
+
+    return conversation;
+  } catch (ex) {
+    console.error('[DotYouCore-js] failed to get the ConversationMetadata of a dsr', dsr, ex);
+    return null;
+  }
+};
+
+export const uploadConversationMetadata = async (
+  dotYouClient: DotYouClient,
+  conversation: NewHomebaseFile<ConversationMetadata>,
+  onVersionConflict?: () => void
+) => {
+  if (!conversation.fileMetadata.appData.tags) {
+    throw new Error('ConversationMetadata must have tags');
+  }
+
+  if (
+    !conversation.fileMetadata.appData.tags.some((tag) =>
+      stringGuidsEqual(tag, conversation.fileMetadata.appData.content.conversationId)
+    )
+  ) {
+    throw new Error('ConversationMetadata must have a tag that matches the conversationId');
+  }
+
+  const uploadInstructions: UploadInstructionSet = {
+    storageOptions: {
+      drive: ChatDrive,
+      overwriteFileId: conversation.fileId,
+    },
+  };
+
+  const conversationContent = conversation.fileMetadata.appData.content;
+  const payloadJson: string = jsonStringify64({ ...conversationContent, version: 1 });
+
+  const uploadMetadata: UploadFileMetadata = {
+    versionTag: conversation?.fileMetadata.versionTag,
+    allowDistribution: false,
+    appData: {
+      tags: conversation.fileMetadata.appData.tags,
+      uniqueId: conversation.fileMetadata.appData.uniqueId,
+      fileType: CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE,
+      content: payloadJson,
+    },
+    isEncrypted: true,
+    accessControlList: {
+      requiredSecurityGroup: SecurityGroupType.Owner,
+    },
+  };
+
+  return await uploadFile(
+    dotYouClient,
+    uploadInstructions,
+    uploadMetadata,
+    undefined,
+    undefined,
+    undefined,
+    onVersionConflict
+  );
+};
+
 export const JOIN_CONVERSATION_COMMAND = 100;
 export const JOIN_GROUP_CONVERSATION_COMMAND = 110;
 // export const UPDATE_GROUP_CONVERSATION_COMMAND = 111;
@@ -317,70 +434,6 @@ export interface JoinConversationRequest {
   title: string;
 }
 
-// export interface UpdateGroupConversationRequest {
-//   title: string;
-//   image?: ImageSource;
-//   conversationId: string;
-// }
-
 export interface JoinGroupConversationRequest extends JoinConversationRequest {
   recipients: string[];
 }
-
-// export const updateGroupConversationCommand = async (
-//   dotYouClient: DotYouClient,
-//   conversation: GroupConversation,
-//   conversationId: string
-// ) => {
-//   const recipients = conversation.recipients;
-
-//   if (!recipients || recipients.length === 0) {
-//     throw new Error('No recipients found for conversation');
-//   }
-
-//   const request: UpdateGroupConversationRequest = {
-//     title: conversation.title,
-//     conversationId,
-//   };
-
-//   return await sendCommand(
-//     dotYouClient,
-//     {
-//       code: UPDATE_GROUP_CONVERSATION_COMMAND,
-//       globalTransitIdList: [],
-//       jsonMessage: jsonStringify64(request),
-//       recipients,
-//     },
-//     ChatDrive
-//   );
-// };
-
-// export const requestConversationCommand = async (
-//   dotYouClient: DotYouClient,
-//   conversation: Conversation,
-//   conversationId: string
-// ) => {
-//   const recipients = (conversation as GroupConversation).recipients || [
-//     (conversation as SingleConversation).recipient,
-//   ];
-
-//   if (!recipients || recipients.length === 0)
-//     throw new Error('No recipients found for conversation');
-
-//   const request: JoinConversationRequest | JoinGroupConversationRequest = {
-//     conversationId: conversationId,
-//     title: conversation.title,
-//     recipients: recipients.length > 1 ? recipients : undefined,
-//   };
-
-//   return await sendCommand(
-//     dotYouClient,
-//     {
-//       code: recipients.length > 1 ? JOIN_GROUP_CONVERSATION_COMMAND : JOIN_CONVERSATION_COMMAND,
-//       globalTransitIdList: [],
-//       jsonMessage: jsonStringify64(request),
-//       recipients,
-//     },
-//     ChatDrive
-//   );
-// };
