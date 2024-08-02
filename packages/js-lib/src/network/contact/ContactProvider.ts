@@ -12,25 +12,18 @@ export const CONTACT_PROFILE_IMAGE_KEY = 'prfl_pic';
 export const getContactByOdinId = async (
   dotYouClient: DotYouClient,
   odinId: string
-): Promise<HomebaseFile<ContactFile> | undefined> =>
+): Promise<HomebaseFile<ContactFile> | null> =>
   getContactByUniqueId(dotYouClient, toGuidId(odinId));
 
 export const getContactByUniqueId = async (
   dotYouClient: DotYouClient,
   uniqueId: string
-): Promise<HomebaseFile<ContactFile> | undefined> => {
-  try {
-    return (
-      (await getFileHeaderByUniqueId<ContactFile>(
-        dotYouClient,
-        ContactConfig.ContactTargetDrive,
-        uniqueId
-      )) || undefined
-    );
-  } catch (ex) {
-    console.error(ex);
-    return undefined;
-  }
+): Promise<HomebaseFile<ContactFile> | null> => {
+  return await getFileHeaderByUniqueId<ContactFile>(
+    dotYouClient,
+    ContactConfig.ContactTargetDrive,
+    uniqueId
+  );
 };
 
 export const getContacts = async (

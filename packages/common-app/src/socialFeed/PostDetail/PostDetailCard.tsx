@@ -16,6 +16,7 @@ import {
   Image,
   MediaGallery,
   EmbeddedPostContent,
+  PrimaryMedia,
 } from '../../..';
 import {
   DEFAULT_PAYLOAD_KEY,
@@ -82,7 +83,13 @@ export const PostDetailCard = ({
                 </>
               )}
 
-              <PostMeta postFile={postFile} channel={channel} odinId={odinId} size="text-sm" />
+              <PostMeta
+                postFile={postFile}
+                channel={channel}
+                odinId={odinId}
+                authorOdinId={post.authorOdinId || odinId}
+                size="text-sm"
+              />
             </>
           )}
         </div>
@@ -136,16 +143,15 @@ export const PostDetailCard = ({
           />
         ) : (
           <div className="relative mb-5 sm:w-full">
-            {post.primaryMediaFile.type.startsWith('image') ? (
-              <Image
+            {mediaFiles?.[0] ? (
+              <PrimaryMedia
                 odinId={odinId}
                 className="rounded object-cover object-center"
                 fileId={post.primaryMediaFile.fileId || postFile.fileId}
                 globalTransitId={postFile.fileMetadata.globalTransitId}
                 lastModified={postFile.fileMetadata.updated}
-                fileKey={post.primaryMediaFile.fileKey}
-                targetDrive={getChannelDrive(post.channelId)}
-                alt="blog"
+                file={mediaFiles?.[0]}
+                channelId={post.channelId}
                 previewThumbnail={
                   postFile?.fileMetadata.appData.previewThumbnail ||
                   postFile?.fileMetadata.payloads?.find(
@@ -154,24 +160,7 @@ export const PostDetailCard = ({
                 }
                 probablyEncrypted={postFile?.fileMetadata.isEncrypted}
               />
-            ) : (
-              <Video
-                targetDrive={getChannelDrive(post.channelId)}
-                fileId={post.primaryMediaFile.fileId || postFile.fileId}
-                globalTransitId={postFile.fileMetadata.globalTransitId}
-                lastModified={postFile.fileMetadata.updated}
-                fileKey={post.primaryMediaFile.fileKey}
-                odinId={odinId}
-                className={`w-full rounded object-cover object-center`}
-                probablyEncrypted={postFile?.fileMetadata.isEncrypted}
-                previewThumbnail={
-                  postFile?.fileMetadata.appData.previewThumbnail ||
-                  postFile?.fileMetadata.payloads?.find(
-                    (payload) => payload.key === post.primaryMediaFile?.fileKey
-                  )?.previewThumbnail
-                }
-              />
-            )}
+            ) : null}
           </div>
         )
       ) : null}

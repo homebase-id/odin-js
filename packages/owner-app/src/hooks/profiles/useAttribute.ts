@@ -38,40 +38,28 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
   };
 
   const saveData = async (attribute: NewHomebaseFile<Attribute> | HomebaseFile<Attribute>) => {
-    return new Promise<NewHomebaseFile<Attribute> | HomebaseFile<Attribute>>((resolve, reject) => {
-      const onVersionConflict = async () => {
-        const serverAttr = await getProfileAttribute(
-          dotYouClient,
-          attribute.fileMetadata.appData.content.profileId,
-          attribute.fileMetadata.appData.content.id
-        );
-        if (!serverAttr || !serverAttr.fileMetadata.appData.content) return;
-
-        const newAttr = { ...attribute, ...(serverAttr as HomebaseFile<Attribute>) };
-        saveProfileAttribute(dotYouClient, newAttr, onVersionConflict)
-          .then((result) => {
-            if (result) resolve(result);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      };
-
-      // Don't edit original attribute as it will be used for caching decisions in onSettled
-      saveProfileAttribute(
+    const onVersionConflict = async () => {
+      const serverAttr = await getProfileAttribute(
         dotYouClient,
-        {
-          ...attribute,
-        },
-        onVersionConflict
-      )
-        .then((result) => {
-          if (result) resolve(result);
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+        attribute.fileMetadata.appData.content.profileId,
+        attribute.fileMetadata.appData.content.id
+      );
+      if (!serverAttr || !serverAttr.fileMetadata.appData.content) return;
+
+      const newAttr = { ...attribute, ...(serverAttr as HomebaseFile<Attribute>) };
+      return saveProfileAttribute(dotYouClient, newAttr, onVersionConflict);
+    };
+
+    // Don't edit original attribute as it will be used for caching decisions in onSettled
+    const uploadResult = saveProfileAttribute(
+      dotYouClient,
+      {
+        ...attribute,
+      },
+      onVersionConflict
+    );
+    if (!uploadResult) return null;
+    return uploadResult;
   };
 
   const removeBroken = async ({
@@ -183,7 +171,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
           queryClient.invalidateQueries({ queryKey: ['attribute'] });
         }
 
-        queryClient.invalidateQueries({ queryKey: ['siteData'] });
+        queryClient.invalidateQueries({ queryKey: ['site-data'] });
         queryClient.invalidateQueries({ queryKey: getListItemCacheKey(newAttr) });
 
         if (!_variables.fileId) {
@@ -194,6 +182,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
         });
       },
       onSuccess: (updatedAttr) => {
+        if (!updatedAttr) return;
         publishStaticFiles(updatedAttr.fileMetadata.appData.content.type);
       },
     }),
@@ -234,7 +223,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
         }
         // Settimeout to allow serverSide a bit more time to process remove before fetching the data again
         setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ['siteData'] });
+          queryClient.invalidateQueries({ queryKey: ['site-data'] });
           queryClient.invalidateQueries({ queryKey: getListItemCacheKey(newAttr) });
 
           publishStaticFiles(variables.attribute?.fileMetadata?.appData?.content?.type);

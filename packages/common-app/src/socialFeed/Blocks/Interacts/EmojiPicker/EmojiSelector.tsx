@@ -1,7 +1,7 @@
 import { useState, useRef, Suspense, useEffect } from 'react';
-
-import { ActionButton, Lol, useMostSpace, useOutsideTrigger } from '@youfoundation/common-app';
-import { EmojiPicker } from '@youfoundation/common-app';
+import { useOutsideTrigger, useMostSpace } from '../../../../hooks';
+import { ActionButton, Lol } from '../../../../ui';
+import { EmojiPicker } from './EmojiPicker';
 
 export const EmojiSelector = ({
   className,

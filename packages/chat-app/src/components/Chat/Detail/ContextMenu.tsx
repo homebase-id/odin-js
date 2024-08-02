@@ -6,16 +6,22 @@ import {
   t,
   ActionGroup,
   ChevronDown,
+  ErrorNotification,
 } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { ChatMessage } from '../../../providers/ChatProvider';
-import { Conversation } from '../../../providers/ConversationProvider';
+import { ChatDeliveryStatus, ChatMessage } from '../../../providers/ChatProvider';
+import {
+  ConversationWithYourselfId,
+  UnifiedConversation,
+} from '../../../providers/ConversationProvider';
 import { ChatMessageInfo } from './ChatMessageInfo';
 import { EditChatMessage } from './EditChatMessage';
+import { useChatMessage } from '../../../hooks/chat/useChatMessage';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 export interface ChatActions {
   doReply: (msg: HomebaseFile<ChatMessage>) => void;
-  doDelete: (msg: HomebaseFile<ChatMessage>) => void;
+  doDelete: (msg: HomebaseFile<ChatMessage>, deleteForEveryone: boolean) => void;
 }
 
 export const ContextMenu = ({
@@ -24,17 +30,23 @@ export const ContextMenu = ({
   chatActions,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation?: HomebaseFile<Conversation>;
+  conversation?: HomebaseFile<UnifiedConversation>;
   chatActions?: ChatActions;
 }) => {
   if (!chatActions) return null;
   const [showMessageInfo, setShowMessageInfo] = useState(false);
   const [editMessage, setEditMessage] = useState(false);
 
+  const { mutate: resend, error: resendError } = useChatMessage().update;
+
   const identity = useDotYouClient().getIdentity();
   const authorOdinId = msg.fileMetadata.senderOdinId;
 
   const messageFromMe = !authorOdinId || authorOdinId === identity;
+  const conversationWithYourself = stringGuidsEqual(
+    conversation?.fileMetadata.appData.uniqueId,
+    ConversationWithYourselfId
+  );
 
   const optionalOptions: ActionGroupOptionProps[] = [];
   if (messageFromMe) {
@@ -43,23 +55,47 @@ export const ContextMenu = ({
       onClick: () => setEditMessage(true),
     });
     optionalOptions.push({
-      label: t('Delete'),
+      label: conversationWithYourself ? t('Delete') : t('Delete for everyone'),
       confirmOptions: {
         title: t('Delete message'),
         body: t('Are you sure you want to delete this message?'),
         buttonText: t('Delete'),
       },
-      onClick: () => chatActions.doDelete(msg),
+      onClick: () => chatActions.doDelete(msg, true),
     });
   }
+
+  if (!conversationWithYourself) {
+    optionalOptions.push({
+      label: t('Delete for me'),
+      confirmOptions: {
+        title: t('Delete message'),
+        body: t('Are you sure you want to delete this message?'),
+        buttonText: t('Delete'),
+      },
+      onClick: () => chatActions.doDelete(msg, false),
+    });
+  }
+
   if (conversation)
     optionalOptions.push({
       label: t('Message info'),
       onClick: () => setShowMessageInfo(true),
     });
 
+  if (
+    conversation &&
+    msg.fileMetadata.appData.content.deliveryStatus === ChatDeliveryStatus.Failed
+  ) {
+    optionalOptions.push({
+      label: t('Retry sending'),
+      onClick: () => resend({ updatedChatMessage: msg, conversation: conversation }),
+    });
+  }
+
   return (
     <>
+      <ErrorNotification error={resendError} />
       {showMessageInfo && conversation ? (
         <ChatMessageInfo
           msg={msg}

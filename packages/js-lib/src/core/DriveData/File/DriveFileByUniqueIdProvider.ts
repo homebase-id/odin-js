@@ -239,7 +239,8 @@ export const getThumbBytesByUniqueId = async (
 
   return client
     .get<ArrayBuffer>(
-      '/drive/files/thumb?' + stringifyToQueryParams({ ...request, width, height, lastModified }),
+      '/drive/query/specialized/cuid/thumb?' +
+        stringifyToQueryParams({ ...request, width, height, lastModified }),
       config
     )
     .then(async (response) => {

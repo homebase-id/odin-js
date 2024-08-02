@@ -9,14 +9,16 @@ import {
   useDotYouClient,
 } from '@youfoundation/common-app';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 
 const IdentityLink = ({ className }: { className?: string }) => {
   const { data } = useSiteData();
   const { getIdentity } = useDotYouClient();
   const odinId = getIdentity() || undefined;
 
+  const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
   return (
-    <a href={`https://${odinId}${HOME_ROOT_PATH}`} className={`block ${className ?? ''}`}>
+    <a href={`${host}${HOME_ROOT_PATH}`} className={`block ${className ?? ''}`}>
       <div className="relative">
         <Image
           targetDrive={HomePageConfig.HomepageTargetDrive}

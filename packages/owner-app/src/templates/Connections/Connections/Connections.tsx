@@ -1,9 +1,14 @@
-import { ActionButton, Plus, SubtleMessage } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  OWNER_APP_ID,
+  Plus,
+  SubtleMessage,
+  useRemoveNotifications,
+} from '@youfoundation/common-app';
 import PersonIncomingRequest from '../../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
 import PersonOutgoingRequest from '../../../components/Connection/PersonOutgoingRequest/PersonOutgoingRequest';
 import { t, usePendingConnections, useSentConnections } from '@youfoundation/common-app';
 import { SectionTitle } from '../../../components/ui/Sections/Section';
-import OutgoingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/OutgoingConnectionDialog';
 import { useEffect, useState } from 'react';
 import { Pager, Persons } from '@youfoundation/common-app';
 import { LoadingBlock } from '@youfoundation/common-app';
@@ -11,6 +16,7 @@ import PersonActive from '../../../components/Connection/PersonActive/PersonActi
 import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { useActiveConnections } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import OutgoingConnectionDialog from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
 
 const Connections = () => {
   const [hasActiveConnections, setActiveConnections] = useState(true);
@@ -18,6 +24,7 @@ const Connections = () => {
   const [hasSentConnections, setSentConnections] = useState(true);
 
   const [isSentConnectionOpen, setIsSentConnectionOpen] = useState(false);
+  useRemoveNotifications({ appId: OWNER_APP_ID });
 
   return (
     <>
@@ -198,7 +205,7 @@ const ActiveConnectionSection = ({
     hasNextPage: activeHasNextPageOnServer,
     fetchNextPage: fetchNextActivePage,
   } = useActiveConnections({
-    pageSize: 6,
+    pageSize: 18,
   }).fetch;
 
   useEffect(() => {

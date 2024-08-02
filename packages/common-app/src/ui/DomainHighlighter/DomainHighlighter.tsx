@@ -7,14 +7,18 @@ const CharacterHighlighter = ({ children }: { children: string }) => {
     <>
       {children.split('').map((char, index) => {
         const charCode = char.charCodeAt(0);
-        if ((charCode <= 65 || charCode >= 123) && charCode !== 46) {
-          return (
-            <React.Fragment key={index}>
-              <span className="text-orange-400 underline">{char}</span>
-            </React.Fragment>
-          );
-        }
-        return <React.Fragment key={index}>{char}</React.Fragment>;
+        if (
+          charCode === 46 ||
+          (charCode >= 97 && charCode <= 122) ||
+          (charCode >= 48 && charCode <= 57)
+        )
+          return <React.Fragment key={index}>{char}</React.Fragment>;
+
+        return (
+          <React.Fragment key={index}>
+            <span className="text-orange-400 underline">{char}</span>
+          </React.Fragment>
+        );
       })}
     </>
   );

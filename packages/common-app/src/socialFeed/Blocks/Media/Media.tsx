@@ -1,6 +1,7 @@
 import { PostContent } from '@youfoundation/js-lib/public';
-import { MediaGallery, PrimaryMedia } from '@youfoundation/common-app';
 import { DEFAULT_PAYLOAD_KEY, EmbeddedThumb, PayloadDescriptor } from '@youfoundation/js-lib/core';
+import { MediaGallery } from './MediaGallery';
+import { PrimaryMedia } from './PrimaryMedia';
 
 export const PostMedia = ({
   odinId,
@@ -27,16 +28,17 @@ export const PostMedia = ({
 }) => {
   const { content: post, previewThumbnail } = postInfo;
 
+  // Fo articles we only want the primary media file
   const mediaFiles =
     postInfo?.content.type !== 'Article'
-      ? postInfo?.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || []
-      : [];
+      ? postInfo?.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY)
+      : postInfo?.payloads?.filter((p) => p.key === postInfo.content.primaryMediaFile?.fileKey);
 
-  // const mediaFiles = (post as Media).mediaFiles;
   if (!post.primaryMediaFile) {
     if (showFallback) {
       return (
         <div
+          onClick={onClick ? (e) => onClick(e, 0) : undefined}
           className={`${
             className || ''
           } relative aspect-square overflow-hidden bg-slate-50 text-slate-200 dark:bg-slate-700 dark:text-slate-600`}
@@ -47,6 +49,8 @@ export const PostMedia = ({
     }
     return <div className={`${className || ''}`}></div>;
   }
+
+  if (!mediaFiles || mediaFiles.length === 0) return null;
 
   if (mediaFiles && mediaFiles.length > 1)
     return (
@@ -68,7 +72,7 @@ export const PostMedia = ({
     <div className={`relative ${className || ''}`}>
       <PrimaryMedia
         fit="contain"
-        primaryMediaFile={post.primaryMediaFile}
+        file={mediaFiles[0]}
         channelId={post.channelId}
         fileId={postInfo.fileId}
         globalTransitId={postInfo.globalTransitId}

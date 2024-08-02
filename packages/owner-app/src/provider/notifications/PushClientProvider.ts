@@ -2,7 +2,7 @@ import { getBrowser, getOperatingSystem } from '@youfoundation/js-lib/auth';
 import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 import { assertIfDefined } from '@youfoundation/js-lib/helpers';
 
-export const GetApplicationServerKey = async () => {
+export const getApplicationServerKey = async () => {
   const dotYouClient = new DotYouClient({ api: ApiType.Guest });
   const client = dotYouClient.createAxiosClient();
   return await client
@@ -17,7 +17,7 @@ export const GetApplicationServerKey = async () => {
   // return base64ToBase64url(APPLICATION_PUBLIC_KEY_BASE64);
 };
 
-export const RegisterNewDevice = async (
+export const registerNewDevice = async (
   dotYouClient: DotYouClient,
   subscription: PushSubscription,
   clientFriendlyName?: string
@@ -43,7 +43,7 @@ export interface PushNotificationSubscription {
   subscriptionStartedDate: number;
 }
 
-export const GetCurrentDeviceDetails = async (dotYouClient: DotYouClient) => {
+export const getCurrentDeviceDetails = async (dotYouClient: DotYouClient) => {
   const axiosClient = dotYouClient.createAxiosClient();
 
   return await axiosClient
@@ -52,7 +52,7 @@ export const GetCurrentDeviceDetails = async (dotYouClient: DotYouClient) => {
     .catch(() => null);
 };
 
-export const GetRegisteredDevices = async (dotYouClient: DotYouClient) => {
+export const getRegisteredDevices = async (dotYouClient: DotYouClient) => {
   const axiosClient = dotYouClient.createAxiosClient();
 
   return await axiosClient
@@ -60,20 +60,20 @@ export const GetRegisteredDevices = async (dotYouClient: DotYouClient) => {
     .then((response) => response.data);
 };
 
-export const RemoveCurrentRegisteredDevice = async (dotYouClient: DotYouClient) => {
+export const removeCurrentRegisteredDevice = async (dotYouClient: DotYouClient) => {
   const axiosClient = dotYouClient.createAxiosClient();
 
   return await axiosClient.post(`/notify/push/unsubscribe/`);
 };
 
-export const RemoveRegisteredDevice = async (dotYouClient: DotYouClient, key: string) => {
+export const removeRegisteredDevice = async (dotYouClient: DotYouClient, key: string) => {
   const axiosClient = dotYouClient.createAxiosClient();
   assertIfDefined('key', key);
 
   return await axiosClient.delete(`/notify/push/subscription?key=${key}`);
 };
 
-export const RemoveAllRegisteredDevice = async (dotYouClient: DotYouClient) => {
+export const removeAllRegisteredDevice = async (dotYouClient: DotYouClient) => {
   const axiosClient = dotYouClient.createAxiosClient();
 
   return await axiosClient.post(`/notify/push/unsubscribeAll/`);

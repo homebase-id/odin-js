@@ -1,4 +1,4 @@
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useBlocker, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ActionButton,
   ActionGroup,
@@ -7,22 +7,24 @@ import {
   Cog,
   ConfirmDialog,
   DialogWrapper,
-  Ellipsis,
   ErrorNotification,
   Label,
   SaveStatus,
   Select,
   Trash,
-  useDebounce,
   usePortal,
+  t,
+  ChannelOrAclSelector,
+  Lock,
+  Save,
+  OpenLock,
+  BlockerDialog,
 } from '@youfoundation/common-app';
-import { t } from '@youfoundation/common-app';
 import { InnerFieldEditors } from '../../components/SocialFeed/ArticleFieldsEditor/ArticleFieldsEditor';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { Article, ChannelDefinition, ReactAccess } from '@youfoundation/js-lib/public';
+import { Article, ReactAccess } from '@youfoundation/js-lib/public';
 import { useArticleComposer } from '@youfoundation/common-app';
-import { ChannelOrAclSelector } from '../../components/SocialFeed/PostComposer';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { HomebaseFile, NewHomebaseFile, RichText } from '@youfoundation/js-lib/core';
 import { ROOT_PATH } from '../../app/App';
@@ -32,95 +34,158 @@ export const ArticleComposerPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [isOptionsDialogOpen, setIsOptionsDialogOpen] = useState(false);
-  const [isConfirmUnpublish, setIsConfirmUnpublish] = useState(false);
 
   const {
     // Actions
     doSave,
     doRemovePost,
-    movePost,
 
     // Data
     channel,
     postFile,
-    isValidPost,
+    isInvalidPost,
     isPublished,
     files,
 
     // Data updates
     setPostFile,
+    setGroupOdinId,
     setChannel,
     setFiles,
 
     // Status
     saveStatus,
-    // removeStatus,
 
     // Errors
     error,
+
+    isLoadingServerData,
   } = useArticleComposer({
     postKey,
     channelKey: channelKey || searchParams.get('channel') || undefined,
     caption: searchParams.get('caption') || undefined,
   });
 
-  const debouncedSave = useDebounce(() => doSave(postFile, isPublished ? 'publish' : undefined), {
-    timeoutMillis: 1500,
-  });
+  const [needsSaving, setNeedsSaving] = useState(false);
+  const [willSave, setWillSave] = useState(false);
 
-  const PostButton = ({ className }: { className?: string }) => {
-    if (isPublished)
+  // Delay needSaving to willSave; Auto save every 15s
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNeedsSaving((needsSaving) => {
+        setWillSave(needsSaving);
+        return needsSaving;
+      });
+    }, 1000 * 15);
+    return () => clearInterval(interval);
+  }, [setNeedsSaving, setWillSave]);
+
+  useEffect(() => {
+    if (willSave) {
+      setNeedsSaving(false);
+      setWillSave(false);
+      doSave(postFile, isPublished ? 'publish' : undefined);
+    }
+  }, [willSave, setWillSave, postFile, isPublished]);
+
+  const PublishButton = useCallback(
+    ({ className }: { className?: string }) => {
+      if (isPublished) return null;
+
       return (
         <ActionButton
-          className={`md:w-auto ${className ?? ''}`}
-          state={saveStatus !== 'success' ? saveStatus : undefined}
+          className={`md:w-auto ${
+            !postFile.fileId ||
+            isInvalidPost(postFile) ||
+            !postFile.fileMetadata.appData.content.caption ||
+            !postFile.fileMetadata.appData.content.caption.length
+              ? 'pointer-events-none opacity-20 grayscale'
+              : ''
+          } ${className ?? ''}`}
+          icon={Arrow}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            doSave(postFile, 'draft');
+            doSave(postFile, 'publish', undefined, true);
+            setNeedsSaving(false);
           }}
           confirmOptions={{
             title: t('Post'),
-            body: t(
-              'Are you sure you want to unpublish this post, it will no longer be publicly available?'
-            ),
-            buttonText: t('Convert to draft'),
+            body: t('Are you sure you want to publish this post?'),
+            buttonText: t('Publish'),
             type: 'info',
           }}
-          type="primary"
+          type="secondary"
         >
-          {t('Convert to draft')}
+          {t('Publish')}
         </ActionButton>
       );
+    },
+    [isPublished, saveStatus, postFile]
+  );
 
-    return (
-      <ActionButton
-        className={`md:w-auto ${
-          isValidPost(postFile) ||
-          !postFile.fileMetadata.appData.content.caption ||
-          !postFile.fileMetadata.appData.content.caption.length
-            ? 'pointer-events-none opacity-20 grayscale'
-            : ''
-        } ${className ?? ''}`}
-        icon={Arrow}
-        state={saveStatus !== 'success' ? saveStatus : undefined}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          doSave(postFile, 'publish', undefined, true);
-        }}
-        confirmOptions={{
-          title: t('Post'),
-          body: t('Are you sure you want to publish this post?'),
-          buttonText: t('Publish'),
-          type: 'info',
-        }}
-        type="primary"
-      >
-        {t('Publish')}
-      </ActionButton>
-    );
-  };
+  // Show browser specific message when trying to close the tab with unsaved changes
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (needsSaving) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handler);
+
+    return () => window.removeEventListener('beforeunload', handler);
+  });
+
+  // Block navigating elsewhere when data has been entered into the input
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      needsSaving && currentLocation.pathname !== nextLocation.pathname
+  );
+
+  const handleRTEChange = useCallback(
+    (e: {
+      target: {
+        name: string;
+        value: string | { fileKey: string; type: string } | RichText | undefined;
+      };
+    }) => {
+      setNeedsSaving(true);
+      setPostFile((oldPostFile) => {
+        const dirtyPostFile = { ...oldPostFile };
+
+        if (e.target.name === 'abstract') {
+          dirtyPostFile.fileMetadata.appData.content.abstract = (e.target.value as string).trim();
+        } else if (e.target.name === 'caption') {
+          dirtyPostFile.fileMetadata.appData.content.caption = (e.target.value as string).trim();
+        } else if (e.target.name === 'primaryMediaFile') {
+          if (typeof e.target.value === 'object' && 'fileKey' in e.target.value) {
+            dirtyPostFile.fileMetadata.appData.content.primaryMediaFile = {
+              fileId: undefined,
+              fileKey: e.target.value.fileKey,
+              type: e.target.value.type,
+            };
+          } else {
+            dirtyPostFile.fileMetadata.appData.content.primaryMediaFile = undefined;
+          }
+        } else if (e.target.name === 'body') {
+          dirtyPostFile.fileMetadata.appData.content.body = e.target.value as RichText;
+        }
+
+        return {
+          ...dirtyPostFile,
+          fileMetadata: {
+            ...dirtyPostFile.fileMetadata,
+            versionTag: oldPostFile.fileMetadata.versionTag,
+          },
+        };
+      });
+    },
+    [setNeedsSaving, setPostFile]
+  );
+
+  if (isLoadingServerData) return null;
 
   return (
     <>
@@ -129,10 +194,14 @@ export const ArticleComposerPage = () => {
           <div className="flex-col">
             {postFile?.fileMetadata.appData.content?.caption || t('New article')}
             <small className="text-sm text-gray-400">
-              <SaveStatus
-                state={saveStatus === 'error' ? 'idle' : saveStatus}
-                className="text-sm"
-              />
+              <span className="flex flex-row items-center gap-1">
+                {postFile?.fileMetadata.isEncrypted ? (
+                  <Lock className="h-3 w-3" />
+                ) : (
+                  <OpenLock className="h-3 w-3" />
+                )}
+                {channel?.fileMetadata.appData.content.name || ''}
+              </span>
             </small>
           </div>
         }
@@ -145,10 +214,17 @@ export const ArticleComposerPage = () => {
         ]}
         actions={
           <>
-            <PostButton />
-
+            <ActionButton
+              icon={Save}
+              state={saveStatus !== 'success' ? saveStatus : 'idle'}
+              onClick={() => {
+                doSave(undefined, isPublished ? 'publish' : undefined);
+                setNeedsSaving(false);
+              }}
+            />
+            <PublishButton />
             <ActionGroup
-              type="secondary"
+              type="mute"
               size="square"
               options={[
                 {
@@ -156,96 +232,109 @@ export const ArticleComposerPage = () => {
                   icon: Cog,
                   onClick: () => setIsOptionsDialogOpen(!isOptionsDialogOpen),
                 },
-                ...(postFile.fileId
-                  ? [
-                      {
-                        label: t('Remove'),
-                        onClick: () => {
-                          doRemovePost();
-                          navigate(`${ROOT_PATH}/articles`);
-                        },
-                        icon: Trash,
-                        confirmOptions: {
-                          title: t('Remove'),
-                          body: `${t('Are you sure you want to remove')} "${
-                            postFile?.fileMetadata.appData.content?.caption || t('New article')
-                          }"`,
-                          buttonText: t('Remove'),
-                        },
+                postFile.fileId
+                  ? {
+                      label: t('Remove'),
+                      onClick: () => {
+                        doRemovePost();
+                        navigate(`${ROOT_PATH}/articles`);
                       },
-                    ]
-                  : []),
+                      icon: Trash,
+                      confirmOptions: {
+                        title: t('Remove'),
+                        body: `${t('Are you sure you want to remove')} "${
+                          postFile?.fileMetadata.appData.content?.caption || t('New article')
+                        }". Any reactions or comments will be lost.`,
+                        buttonText: t('Remove'),
+                      },
+                    }
+                  : undefined,
               ]}
-              icon={Ellipsis}
-            >
-              {t('More')}
-            </ActionGroup>
+            />
           </>
         }
       />
+
       <section className="pb-10">
         <div className="sm:px-10">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              doSave();
-              return false;
-            }}
-          >
-            <InnerFieldEditors
-              key={postFile.fileMetadata.appData.content.id}
-              postFile={postFile}
-              channel={channel}
-              files={files}
-              setFiles={setFiles}
-              onChange={(e) => {
-                const dirtyPostFile = { ...postFile };
-                if (e.target.name === 'abstract') {
-                  dirtyPostFile.fileMetadata.appData.content.abstract = (
-                    e.target.value as string
-                  ).trim();
-                } else if (e.target.name === 'caption') {
-                  dirtyPostFile.fileMetadata.appData.content.caption = (
-                    e.target.value as string
-                  ).trim();
-                } else if (e.target.name === 'primaryMediaFile') {
-                  if (typeof e.target.value === 'object' && 'fileKey' in e.target.value) {
-                    dirtyPostFile.fileMetadata.appData.content.primaryMediaFile = {
-                      fileId: undefined,
-                      fileKey: e.target.value.fileKey,
-                      type: e.target.value.type,
-                    };
-                  } else {
-                    dirtyPostFile.fileMetadata.appData.content.primaryMediaFile = undefined;
-                  }
-                } else if (e.target.name === 'body') {
-                  dirtyPostFile.fileMetadata.appData.content.body = e.target.value as RichText;
-                }
-
-                setPostFile((oldPostFile) => ({
-                  ...dirtyPostFile,
-                  fileMetadata: {
-                    ...dirtyPostFile.fileMetadata,
-                    versionTag: oldPostFile.fileMetadata.versionTag,
-                  },
-                }));
-                debouncedSave();
+          {isPublished || postFile.fileId ? (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                doSave(undefined, isPublished ? 'publish' : undefined);
+                setNeedsSaving(false);
+                return false;
               }}
-            />
+            >
+              <InnerFieldEditors
+                key={postFile.fileMetadata.appData.content.id}
+                postFile={postFile}
+                channel={channel}
+                files={files}
+                setFiles={setFiles}
+                onChange={handleRTEChange}
+              />
 
-            <div className="mb-5 flex md:hidden">
-              <PostButton className="w-full justify-center" />
+              <div className="flex flex-col gap-2 sm:flex-row-reverse">
+                <PublishButton className="w-full sm:hidden" />
+                <div className="flex flex-col items-end gap-1">
+                  <ActionButton icon={Save} state={saveStatus !== 'success' ? saveStatus : 'idle'}>
+                    {t('Save')}
+                  </ActionButton>
+                  <SaveStatus state={saveStatus} className="text-sm" />
+                </div>
+              </div>
+            </form>
+          ) : (
+            <div className="grid grid-flow-row gap-1">
+              <span className="text-sm text-gray-400">{t('Channel')}</span>
+              <div className="mb-5 flex flex-row items-center gap-2 border-gray-200 border-opacity-60 bg-background p-2 text-foreground dark:border-gray-800 md:rounded-lg md:border md:p-4">
+                <ChannelOrAclSelector
+                  key={postFile.fileMetadata.appData.content?.channelId}
+                  className={`w-full rounded border-gray-300 px-3 focus:border-indigo-500 dark:border-gray-700`}
+                  defaultChannelValue={postFile.fileMetadata.appData.content?.channelId}
+                  onChange={({ channel: newChannel, odinId }) => {
+                    if (!newChannel) return;
+                    setChannel(newChannel);
+                    setGroupOdinId(odinId);
+                  }}
+                  disabled={isPublished}
+                  excludeMore={true}
+                  excludeCustom={true}
+                  excludeCollaborative={true}
+                />
+              </div>
+
+              <div className="flex flex-row-reverse gap-2">
+                <ActionButton
+                  className={``}
+                  icon={Arrow}
+                  state={saveStatus !== 'success' ? saveStatus : undefined}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    doSave(postFile);
+                  }}
+                  type="primary"
+                >
+                  {t('Continue')}
+                </ActionButton>
+                <ActionButton type="secondary" onClick={() => navigate(-1)}>
+                  {t('Cancel')}
+                </ActionButton>
+              </div>
             </div>
-          </form>
+          )}
+
           <ErrorNotification error={error} />
         </div>
       </section>
       <OptionsDialog
         postFile={postFile}
-        isPublished={isPublished}
+        // isPublished={isPublished}
         isOpen={isOptionsDialogOpen}
         onCancel={() => setIsOptionsDialogOpen(false)}
-        onConfirm={async (newReactAccess, newChannel) => {
+        onConfirm={async (newReactAccess) => {
           setIsOptionsDialogOpen(false);
 
           if (newReactAccess !== undefined) {
@@ -254,64 +343,50 @@ export const ArticleComposerPage = () => {
               newReactAccess !== true ? newReactAccess : undefined;
 
             setPostFile(dirtyPostFile);
-            await doSave(dirtyPostFile);
-          }
-
-          if (newChannel) {
-            if (postFile.fileId) movePost(newChannel);
-            else setChannel(newChannel);
+            setNeedsSaving(false);
+            await doSave(dirtyPostFile, isPublished ? 'publish' : undefined);
           }
         }}
       />
-      {isConfirmUnpublish ? (
-        <ConfirmDialog
-          title={t('Published')}
-          onConfirm={() => {
-            doSave(postFile, 'draft');
-            setIsConfirmUnpublish(false);
-          }}
-          buttonText={t('Convert to draft')}
-          onCancel={() => setIsConfirmUnpublish(false)}
-          body={t(
-            'This post is currently published, if you wish to edit you need to convert it back to draft'
-          )}
-        />
+      {blocker && blocker.reset && blocker.proceed ? (
+        <BlockerDialog
+          isOpen={blocker.state === 'blocked'}
+          onCancel={blocker.reset}
+          onProceed={blocker.proceed}
+          title={t('You have unsaved changes')}
+        >
+          <p>{t('Are you sure you want to leave this page? Your changes will be lost.')}</p>
+        </BlockerDialog>
       ) : null}
     </>
   );
 };
 
 const OptionsDialog = ({
-  isPublished,
   postFile,
 
   isOpen,
   onCancel,
   onConfirm,
 }: {
-  isPublished?: boolean;
   postFile: HomebaseFile<Article> | NewHomebaseFile<Article>;
 
   isOpen: boolean;
   onCancel: () => void;
-  onConfirm: (
-    newReactAccess: ReactAccess | undefined,
-    newChannel: NewHomebaseFile<ChannelDefinition> | undefined
-  ) => void;
+  onConfirm: (newReactAccess: ReactAccess | undefined) => void;
 }) => {
   const target = usePortal('modal-container');
 
   const [newReactAccess, setNewReactAccess] = useState<ReactAccess | undefined>(
     postFile.fileMetadata.appData.content.reactAccess
   );
-  const [newChannel, setNewChannel] = useState<NewHomebaseFile<ChannelDefinition> | undefined>();
 
   if (!isOpen) return null;
 
   const dialog = (
     <DialogWrapper title={t('Options')} onClose={onCancel}>
-      <form onSubmit={() => onConfirm(newReactAccess, newChannel)}>
-        <div className="mt-4 px-2 pt-4">
+      <form onSubmit={() => onConfirm(newReactAccess)}>
+        <div className="px-2">
           <Label>{t('Reactions')}</Label>
           <Select
             id="reactAccess"
@@ -329,22 +404,6 @@ const OptionsDialog = ({
             <option value={'true'}>{t('Enabled')}</option>
             <option value={'false'}>{t('Disabled')}</option>
           </Select>
-        </div>
-        <div className="mt-4 px-2 pt-4">
-          <Label>{t('Channel')}</Label>
-          {isPublished ? (
-            <p className="text-sm text-gray-400">
-              {t('After a publish, the post can no longer be moved between channels')}
-            </p>
-          ) : null}
-          <ChannelOrAclSelector
-            className={`w-full rounded border border-gray-300 px-3 py-1 focus:border-indigo-500 dark:border-gray-700`}
-            defaultChannelValue={postFile.fileMetadata.appData.content?.channelId}
-            onChange={setNewChannel}
-            disabled={isPublished}
-            excludeMore={true}
-            excludeCustom={true}
-          />
         </div>
         <div className="flex flex-row-reverse gap-2 py-3">
           <ActionButton className="m-2">{t('Ok')}</ActionButton>

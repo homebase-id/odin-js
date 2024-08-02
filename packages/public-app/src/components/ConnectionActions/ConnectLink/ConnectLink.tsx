@@ -1,22 +1,14 @@
-import { useState } from 'react';
-import {
-  ActionLink,
-  Check,
-  HOME_ROOT_PATH,
-  t,
-  useSecurityContext,
-} from '@youfoundation/common-app';
+import { ActionLink, Check, t, useSecurityContext } from '@youfoundation/common-app';
 import { useAuth } from '../../../hooks/auth/useAuth';
-import LoginDialog from '../../Dialog/LoginDialog/LoginDialog';
 import { Persons } from '@youfoundation/common-app';
 
 const ConnectLink = ({ className }: { className: string }) => {
-  const { isOwner, getIdentity, isAuthenticated } = useAuth();
-  const identity = getIdentity();
-  const [isLogin, setIsLogin] = useState(false);
+  const { isOwner, getDotYouClient, isAuthenticated } = useAuth();
+  const host = getDotYouClient().getRoot();
 
   const { data: securityContext } = useSecurityContext(undefined, isAuthenticated).fetch;
-  const alreadyConnected = securityContext?.caller?.securityLevel === 'connected' || false;
+  const isConnected =
+    securityContext?.caller?.securityLevel?.toLowerCase() === 'connected' || false;
 
   if (isOwner) return null;
 
@@ -25,27 +17,15 @@ const ConnectLink = ({ className }: { className: string }) => {
       <ActionLink
         className={`w-auto ${className ?? ''}`}
         href={
-          identity
-            ? alreadyConnected
-              ? `https://${getIdentity()}/owner/connections/${window.location.host}`
-              : `https://${getIdentity()}/owner/connections/${window.location.host}/connect`
-            : undefined
+          host && isConnected
+            ? `${host}/owner/connections/${window.location.host}`
+            : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect/connections/${window.location.host}/connect`
         }
-        onClick={!identity ? () => setIsLogin(true) : undefined}
-        icon={alreadyConnected ? Check : Persons}
-        type={alreadyConnected ? 'secondary' : 'primary'}
+        icon={isConnected ? Check : Persons}
+        type={isConnected ? 'secondary' : 'primary'}
       >
-        {alreadyConnected ? t('Connected') : t('Connect')}
+        {isConnected ? t('Connected') : t('Connect')}
       </ActionLink>
-
-      <LoginDialog
-        isOpen={isLogin}
-        onCancel={() => setIsLogin(false)}
-        title={t('Login required')}
-        returnPath={`${HOME_ROOT_PATH}action?targetPath=${`/owner/connections/${window.location.host}/connect`}`}
-      >
-        {t('You need to login before you can connect')}
-      </LoginDialog>
     </>
   );
 };

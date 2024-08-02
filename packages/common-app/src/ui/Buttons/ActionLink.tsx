@@ -1,8 +1,8 @@
-import { IconProps } from '@youfoundation/common-app';
 import { FC, ReactNode } from 'react';
 import { HybridLink } from './HybridLink';
 
 import { ButtonColors } from './ColorConfig';
+import { IconProps } from '../Icons/Types';
 export type ActionLinkState = 'loading' | 'success' | 'error' | 'idle';
 
 type ActionLinkProps = {
@@ -11,7 +11,7 @@ type ActionLinkProps = {
   type?: 'primary' | 'secondary' | 'remove' | 'mute' | 'none';
   title?: string;
   size?: 'large' | 'small' | 'square' | 'none';
-  onClick?: (e: unknown) => void;
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
   icon?: FC<IconProps>;
   download?: string;
   href?: string;
@@ -62,7 +62,7 @@ export const ActionLink: FC<ActionLinkProps> = ({
     <HybridLink
       className={`relative flex flex-row items-center rounded-md text-left ${
         onClick ? 'cursor-pointer' : ''
-      } ${widthClasses} ${sizeClasses} ${colorClasses} ${className}`}
+      } ${widthClasses} ${sizeClasses} ${colorClasses} ${className || ''}`}
       download={download}
       href={href}
       title={title}

@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react';
-import { t, Label, ActionButton, CropperRef } from '@youfoundation/common-app';
-import { Crop, ImageCropper, Trash } from '@youfoundation/common-app';
 import { fromBlob } from '@youfoundation/js-lib/media';
+import { t } from '../../helpers';
+import { Trash, ActionButton, Crop } from '../../ui';
+import { Label } from '../Label';
+import { CropperRef, ImageCropper } from './ImageDialog/ImageCropper';
 
 interface ImageUploadAndCropProps {
   expectedAspectRatio?: number;

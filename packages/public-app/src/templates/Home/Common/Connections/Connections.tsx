@@ -77,9 +77,7 @@ const FollowingSection = ({ className }: { className?: string }) => {
     hasNextPage: hasNextPageOnServer,
     fetchNextPage,
     isFetchedAfterMount,
-  } = useFollowingInfinite({
-    pageSize: 15,
-  }).fetch;
+  } = useFollowingInfinite().fetch;
 
   const flattenedIdentities = identitiesIFollow?.pages.flatMap((page) => page?.results);
 

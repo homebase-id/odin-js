@@ -1,6 +1,10 @@
 import { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { t, usePortal, DialogWrapper, Question, ActionButton } from '@youfoundation/common-app';
+import { DialogWrapper } from '../../ui/Dialog/DialogWrapper';
+import { usePortal } from '../../hooks/portal/usePortal';
+import { Question } from '../../ui/Icons/Question';
+import { ActionButton } from '../../ui/Buttons/ActionButton';
+import { t } from '../../helpers/i18n/dictionary';
 
 export const InfoDialog = ({
   title,
@@ -38,10 +42,8 @@ export const InfoDialog = ({
       isSidePanel={false}
     >
       {children}
-      <div className="-m-2 flex flex-row-reverse py-3">
-        <ActionButton className="m-2" onClick={onConfirm}>
-          {confirmText || t('Ok')}
-        </ActionButton>
+      <div className="gap-2 flex flex-row-reverse py-3">
+        <ActionButton onClick={onConfirm}>{confirmText || t('Ok')}</ActionButton>
       </div>
     </DialogWrapper>
   );

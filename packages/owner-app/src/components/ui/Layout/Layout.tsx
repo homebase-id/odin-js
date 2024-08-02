@@ -1,7 +1,6 @@
 import { FC, ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useDarkMode, Toaster, Sidenav } from '@youfoundation/common-app';
-import { useAuth } from '../../../hooks/auth/useAuth';
 import { CriticalOwnerAlerts } from '../../OwnerAlerts/CriticalOwnerAlerts';
 
 interface LayoutProps {
@@ -32,7 +31,6 @@ const NOT_SHADED_BG = 'bg-white dark:bg-black text-foreground';
 const Layout: FC<LayoutProps> = ({ children, noShadedBg, noPadding }) => {
   const [searchParams] = useSearchParams();
   const uiSetting = searchParams.get('ui');
-  const { logout } = useAuth();
 
   if (uiSetting === 'none') return <NoLayout>{children}</NoLayout>;
 
@@ -45,7 +43,7 @@ const Layout: FC<LayoutProps> = ({ children, noShadedBg, noPadding }) => {
       <div
         className={`relative flex flex-row ${noShadedBg ? NOT_SHADED_BG : SHADED_BG} pb-14 md:pb-0`}
       >
-        <Sidenav logout={logout} />
+        <Sidenav />
         <div className={`flex min-h-screen w-full flex-col`}>
           <div className={`min-h-full ${noPadding ? '' : 'px-2 py-4 sm:px-10 sm:py-8'}`}>
             {children}

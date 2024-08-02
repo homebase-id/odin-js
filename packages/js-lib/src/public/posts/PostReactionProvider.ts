@@ -9,7 +9,7 @@ import {
   SendContents,
   UploadInstructionSet,
   uploadFile,
-  TransferStatus,
+  TransferUploadStatus,
   deleteFile,
   FileQueryParams,
   queryBatch,
@@ -24,6 +24,7 @@ import {
   CommentReactionPreview,
   NewHomebaseFile,
   ReactionFileBody,
+  PriorityOptions,
 } from '../../core/core';
 import {
   jsonStringify64,
@@ -66,7 +67,10 @@ export const saveComment = async (
     const { additionalThumbnails, tinyThumb } = await createThumbnails(
       imageFile,
       COMMENT_MEDIA_PAYLOAD,
-      [{ height: 250, width: 250, quality: 100 }]
+      [
+        { height: 250, width: 250, quality: 100 },
+        { height: 1600, width: 1600, quality: 100 },
+      ]
     );
 
     thumbnails.push(...additionalThumbnails);
@@ -119,9 +123,9 @@ export const saveComment = async (
         drive: targetDrive,
       },
       transitOptions: {
-        useGlobalTransitId: true, // Needed to support having a reference to this file over transit
         recipients: [],
         schedule: ScheduleOptions.SendLater,
+        priority: PriorityOptions.Medium,
         sendContents: SendContents.All,
       },
       systemFileType: 'Comment',
@@ -152,7 +156,8 @@ export const saveComment = async (
       overwriteGlobalTransitFileId: (comment as HomebaseFile<ReactionFile>).fileMetadata
         .globalTransitId,
       remoteTargetDrive: targetDrive,
-      schedule: ScheduleOptions.SendNowAwaitResponse,
+      schedule: ScheduleOptions.SendLater,
+      priority: PriorityOptions.Medium,
       recipients: [context.authorOdinId],
       systemFileType: 'Comment',
     };
@@ -167,12 +172,8 @@ export const saveComment = async (
     );
 
     if (
-      [
-        TransferStatus.PendingRetry,
-        TransferStatus.TotalRejectionClientShouldRetry,
-        TransferStatus.FileDoesNotAllowDistribution,
-        TransferStatus.RecipientReturnedAccessDenied,
-      ].includes(result.recipientStatus[context.authorOdinId])
+      TransferUploadStatus.EnqueuedFailed ===
+      result.recipientStatus[context.authorOdinId].toLowerCase()
     ) {
       throw new Error(result.recipientStatus[context.authorOdinId].toString());
     }

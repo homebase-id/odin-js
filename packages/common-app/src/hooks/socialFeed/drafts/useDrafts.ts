@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Article, PostContent, getPosts, removePost } from '@youfoundation/js-lib/public';
-import { useChannels, useDotYouClient } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { useDotYouClient } from '../../auth/useDotYouClient';
+import { useChannels } from '../channels/useChannels';
 
 export const useDrafts = () => {
   const queryClient = useQueryClient();
@@ -10,9 +11,7 @@ export const useDrafts = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetch = async () => {
-    if (!channels) {
-      return;
-    }
+    if (!channels) return;
 
     const drafts = await Promise.all(
       channels.map(async (channel) => {
@@ -41,7 +40,7 @@ export const useDrafts = () => {
   };
 
   return {
-    fetch: useQuery({ queryKey: ['drafts'], queryFn: () => fetch(), enabled: !!channels }),
+    fetch: useQuery({ queryKey: ['drafts'], queryFn: fetch, enabled: !!channels }),
     remove: useMutation({
       mutationFn: remove,
       onMutate: async (toRemoveDetails) => {

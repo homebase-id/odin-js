@@ -1,17 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-
-import {
-  CanReactInfo,
-  Heart,
-  SocialReactionsBar,
-  t,
-  useDotYouClient,
-  useOutsideTrigger,
-  useReaction,
-} from '@youfoundation/common-app';
-
 import { ReactionContext } from '@youfoundation/js-lib/public';
-import { ErrorNotification } from '@youfoundation/common-app';
+import { t } from '../../../../helpers';
+import { CanReactInfo, useDotYouClient, useReaction, useOutsideTrigger } from '../../../../hooks';
+import { Heart, ErrorNotification } from '../../../../ui';
+import { SocialReactionsBar } from './ReactionsBar';
 
 export const LikeButton = ({
   context,

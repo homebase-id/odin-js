@@ -1,5 +1,13 @@
 import { useMemo, useState } from 'react';
-import { ChannelDefinitionVm, ChannelItem, Plus } from '@youfoundation/common-app';
+import {
+  ChannelDefinitionVm,
+  ChannelItem,
+  Loader,
+  MagnifyingGlass,
+  ManageCollaborativeChannelItem,
+  Plus,
+  useCollaborativeChannels,
+} from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { useChannels } from '@youfoundation/common-app';
@@ -8,6 +16,7 @@ import { ROOT_PATH } from '../../app/App';
 import { useSearchParams } from 'react-router-dom';
 import { NewHomebaseFile } from '@youfoundation/js-lib/core';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
+import React from 'react';
 
 export const ChannelsPage = () => {
   const [params, setSearchParams] = useSearchParams();
@@ -23,6 +32,13 @@ export const ChannelsPage = () => {
   const { data: channels } = useChannels({ isAuthenticated: true, isOwner: true });
   const [isAddNew, setIsAddNew] = useState(!!newChannelDefinition);
 
+  const [discoverCollaborativeChannels, setDiscoverCollaborativeChannels] = useState(false);
+  const {
+    data: collaborativeChannels,
+    refetch: refetchCollaborativeChannels,
+    isRefetching: isRefetchingCollaborativeChannels,
+  } = useCollaborativeChannels(discoverCollaborativeChannels).fetch;
+
   return (
     <>
       <PageMeta
@@ -32,14 +48,15 @@ export const ChannelsPage = () => {
       />
       <section className="pb-10">
         <div className="px-2 sm:px-10">
-          <div className="-m-2">
+          <h2 className="mb-2">{t('Your channels')}</h2>
+          <div className="flex flex-col gap-2">
             {channels?.map((chnl) => (
-              <div className="p-2" key={chnl.fileId}>
+              <div key={chnl.fileId}>
                 <ChannelItem chnl={chnl} className="bg-background" />
               </div>
             ))}
             {isAddNew ? (
-              <div className="p-2" key={'new'}>
+              <div key={'new'}>
                 <ChannelItem
                   chnl={newChannelDefinition}
                   isDefaultEdit={!!newChannelDefinition}
@@ -52,7 +69,7 @@ export const ChannelsPage = () => {
                 />
               </div>
             ) : (
-              <div className="p-2" key={'new'}>
+              <div key={'new'}>
                 <div
                   onClick={() => setIsAddNew(true)}
                   className="flex cursor-pointer flex-row items-center rounded-md border border-slate-100 bg-background px-4 py-4 dark:border-slate-800"
@@ -61,6 +78,54 @@ export const ChannelsPage = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      </section>
+
+      <section className="pb-10">
+        <div className="px-2 sm:px-10">
+          <h2 className="mb-2">
+            {t('Collaborative channels')}
+            <small className="block text-sm text-slate-400">
+              {t(
+                'You have permissions to write to these channels that are owned by another identity'
+              )}
+            </small>
+          </h2>
+
+          <div className="flex flex-col gap-2">
+            {collaborativeChannels?.length ? (
+              <>
+                {collaborativeChannels?.map((identityLink) => {
+                  return (
+                    <React.Fragment key={identityLink.odinId}>
+                      {identityLink.channels.map((chnlLink, index) => (
+                        <ManageCollaborativeChannelItem
+                          key={chnlLink.fileMetadata.appData.uniqueId || index}
+                          odinId={chnlLink.fileMetadata.appData.content.odinId}
+                          chnlLink={chnlLink}
+                          className="bg-background"
+                        />
+                      ))}
+                    </React.Fragment>
+                  );
+                })}
+              </>
+            ) : null}
+            <div
+              onClick={() => {
+                setDiscoverCollaborativeChannels(true);
+                setTimeout(() => refetchCollaborativeChannels(), 100);
+              }}
+              className="flex cursor-pointer flex-row items-center rounded-md border border-slate-100 bg-background px-4 py-4 dark:border-slate-800"
+            >
+              {isRefetchingCollaborativeChannels && discoverCollaborativeChannels ? (
+                <Loader className="mr-2 h-5 w-5" />
+              ) : (
+                <MagnifyingGlass className="mr-2 h-5 w-5" />
+              )}{' '}
+              {t(`Discover collaborative channels`)}
+            </div>
           </div>
         </div>
       </section>

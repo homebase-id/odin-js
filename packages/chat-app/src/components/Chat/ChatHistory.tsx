@@ -3,7 +3,7 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
 import { ChatMessage } from '../../providers/ChatProvider';
-import { Conversation } from '../../providers/ConversationProvider';
+import { UnifiedConversation } from '../../providers/ConversationProvider';
 import { ChatMessageItem } from './Detail/ChatMessageItem';
 import { ChatActions } from './Detail/ContextMenu';
 import { useMemo, useRef, useEffect, useLayoutEffect } from 'react';
@@ -20,7 +20,7 @@ export const ChatHistory = ({
   setReplyMsg,
   setIsEmptyChat,
 }: {
-  conversation: HomebaseFile<Conversation> | undefined;
+  conversation: HomebaseFile<UnifiedConversation> | undefined;
   setReplyMsg: (msg: HomebaseFile<ChatMessage>) => void;
   setIsEmptyChat: (isEmpty: boolean) => void;
 }) => {
@@ -32,7 +32,7 @@ export const ChatHistory = ({
       hasNextPage: hasMoreMessages,
       fetchNextPage,
       isFetchingNextPage,
-      isFetchedAfterMount,
+      isFetched,
     },
     delete: { mutate: deleteMessages, error: deleteMessagesError },
   } = useChatMessages({ conversationId: conversation?.fileMetadata?.appData?.uniqueId });
@@ -46,18 +46,19 @@ export const ChatHistory = ({
     ) || [];
 
   useEffect(() => {
-    if (isFetchedAfterMount && (!flattenedMsgs || flattenedMsgs.length === 0)) setIsEmptyChat(true);
-  }, [isFetchedAfterMount, flattenedMsgs]);
+    if (isFetched && (!flattenedMsgs || flattenedMsgs?.filter((msg) => msg.fileId).length === 0))
+      setIsEmptyChat(true);
+  }, [isFetched, flattenedMsgs]);
 
   useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
   const chatActions: ChatActions = {
     doReply: (msg: HomebaseFile<ChatMessage>) => setReplyMsg(msg),
-    doDelete: async (msg: HomebaseFile<ChatMessage>) => {
+    doDelete: async (msg: HomebaseFile<ChatMessage>, deleteForEveryone: boolean) => {
       if (!conversation || !msg) return;
       await deleteMessages({
         conversation: conversation,
         messages: [msg],
-        deleteForEveryone: true,
+        deleteForEveryone: deleteForEveryone,
       });
     },
   };
@@ -107,9 +108,30 @@ export const ChatHistory = ({
     <>
       <ErrorNotification error={deleteMessagesError} />
       <div
-        className="flex w-full flex-grow flex-col-reverse overflow-auto p-5"
+        className="flex w-full flex-grow flex-col-reverse overflow-auto p-2 sm:p-5"
         ref={scrollRef}
         key={conversation?.fileId}
+        onCopyCapture={(e) => {
+          const range = window.getSelection()?.getRangeAt(0),
+            rangeContents = range?.cloneContents(),
+            helper = document.createElement('div');
+
+          if (rangeContents) helper.appendChild(rangeContents);
+          const elements = helper.getElementsByClassName('copyable-content');
+          if (elements.length === 0) return;
+
+          let runningText = '';
+          for (let i = elements.length - 1; i >= 0; i--) {
+            const text = (elements[i] as any).innerText;
+            if (text?.length) {
+              runningText += text + '\n';
+            }
+          }
+
+          e.clipboardData.setData('text/plain', runningText);
+          e.preventDefault();
+          return false;
+        }}
       >
         <div
           className="relative w-full flex-shrink-0 flex-grow-0 overflow-hidden" // This overflow-hidden cuts of the context-menu of the first chat-items; But we need it as it otherwise breaks the scroll edges
@@ -131,8 +153,8 @@ export const ChatHistory = ({
                     key={item.key}
                     data-index={item.index}
                     ref={virtualizer.measureElement}
-                    className="sm:min-h-[10rem]"
-                    // h-10rem keeps space for the context menu of the first item; otherwise the context menu would be cut off by the overflow-hidden
+                    className="sm:min-h-[22rem]"
+                    // h-22rem keeps space for the context menu/emoji selector of the first item; otherwise the context menu would be cut off by the overflow-hidden
                   >
                     {hasMoreMessages || isFetchingNextPage ? (
                       <div className="animate-pulse" key={'loading'}>

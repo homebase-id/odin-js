@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import {
   ActionButton,
+  ActionLink,
   ErrorBoundary,
   Input,
   Persons,
+  SubtleMessage,
   Times,
   t,
   useAllContacts,
@@ -25,9 +27,13 @@ export const NewConversation = () => {
         .filter(
           (contact) =>
             contact.odinId &&
-            (!query || contact.odinId?.includes(query) || contact.name?.displayName.includes(query))
+            (!query ||
+              contact.odinId?.includes(query) ||
+              contact.name?.displayName?.includes(query))
         )
     : [];
+
+  const noContacts = !contacts || contacts.length === 0;
 
   return (
     <ErrorBoundary>
@@ -46,25 +52,40 @@ export const NewConversation = () => {
         </div>
       </form>
       <div className="overflow-auto">
-        <ConversationListItemWrapper
-          order={1}
-          onClick={() => {
-            navigate(`${CHAT_ROOT}/new-group`);
-          }}
-          isActive={false}
-        >
-          <div className="rounded-full bg-primary/20 p-4">
-            <Persons className="h-5 w-5" />
-          </div>
-          {t('New group')}
-        </ConversationListItemWrapper>
-        {contactResults.map((result, index) => (
-          <NewConversationSearchItem
-            key={result.odinId || index}
-            result={result}
-            onOpen={(newId) => navigate(`${CHAT_ROOT}/${newId}`)}
-          />
-        ))}
+        {noContacts ? (
+          <>
+            <div className="px-5">
+              <SubtleMessage className="flex flex-row items-center gap-1">
+                <span>{t('To chat with someone on Homebase you need to be connected first.')}</span>
+                <ActionLink href="/owner/connections" type="secondary" icon={Persons}>
+                  {t('Connect')}
+                </ActionLink>
+              </SubtleMessage>
+            </div>
+          </>
+        ) : (
+          <>
+            <ConversationListItemWrapper
+              order={1}
+              onClick={() => {
+                navigate(`${CHAT_ROOT}/new-group`);
+              }}
+              isActive={false}
+            >
+              <div className="rounded-full bg-primary/20 p-4">
+                <Persons className="h-5 w-5" />
+              </div>
+              {t('New group')}
+            </ConversationListItemWrapper>
+            {contactResults.map((result, index) => (
+              <NewConversationSearchItem
+                key={result.odinId || index}
+                result={result}
+                onOpen={(newId) => navigate(`${CHAT_ROOT}/${newId}`)}
+              />
+            ))}
+          </>
+        )}
       </div>
     </ErrorBoundary>
   );

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getMyReactions, ReactionContext } from '@youfoundation/js-lib/public';
-import { useDotYouClient } from '../../../..';
+import { useDotYouClient } from '../../auth/useDotYouClient';
 
 const PAGE_SIZE = 10;
 

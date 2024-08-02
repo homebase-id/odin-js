@@ -1,4 +1,4 @@
-import { DrivePermissionType } from '@youfoundation/js-lib/core';
+import { DrivePermissionType, TargetDrive } from '@youfoundation/js-lib/core';
 import { useEffect, useState } from 'react';
 import { useVerifyToken } from './useVerifyToken';
 import {
@@ -22,8 +22,12 @@ import {
   MAIL_APP_ID,
   useDotYouClient,
 } from '@youfoundation/common-app';
-import { MailDrive } from '../../providers/MailProvider';
 import { clear } from 'idb-keyval';
+
+const MailDrive: TargetDrive = {
+  alias: 'e69b5a48a663482fbfd846f3b0b143b0',
+  type: '2dfecc40311e41e5a12455e925144202',
+};
 
 export const useAuth = () => {
   const { getDotYouClient, getSharedSecret, hasSharedSecret } = useDotYouClient();

@@ -1,20 +1,21 @@
 import { PostContent } from '@youfoundation/js-lib/public';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { t } from '@youfoundation/common-app';
-import { useChannel } from '@youfoundation/common-app';
-import { usePost } from '../../../hooks/socialFeed/post/usePost';
-import { ErrorNotification, ActionGroup, ActionGroupOptionProps } from '@youfoundation/common-app';
-import { Pencil } from '@youfoundation/common-app';
-import { Trash } from '@youfoundation/common-app';
-import { EditPostDialog } from '@youfoundation/common-app';
+import { useManagePost } from '../../../hooks/socialFeed/post/useManagePost';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
+import { ActionGroup, ActionGroupOptionProps } from '../../../ui/Buttons/ActionGroup';
+import { Pencil } from '../../../ui/Icons/Pencil';
+import { t } from '../../../helpers/i18n/dictionary';
+import { Clipboard, Trash } from '../../../ui';
+import { EditPostDialog } from '../../EditPostDialog/EditPostDialog';
+import { useChannel } from '../../../hooks/socialFeed/channels/useChannel';
 
 export const OwnerActions = ({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
   const postContent = postFile.fileMetadata.appData.content;
 
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const { mutateAsync: removePost, error: removePostError } = usePost().remove;
+  const { mutateAsync: removePost, error: removePostError } = useManagePost().remove;
   const { data: channel } = useChannel({ channelId: postContent.channelId }).fetch;
 
   const navigate = useNavigate();
@@ -26,25 +27,35 @@ export const OwnerActions = ({ postFile }: { postFile: HomebaseFile<PostContent>
         type="mute"
         size="none"
         options={[
-          {
-            icon: Pencil,
-            label: t(postContent.type === 'Article' ? 'Edit Article' : 'Edit post'),
-            onClick: (e) => {
-              e.stopPropagation();
-              if (postContent.type === 'Article') {
-                const targetUrl = `/apps/feed/edit/${
-                  channel?.fileMetadata.appData.content.slug ||
-                  channel?.fileMetadata.appData.uniqueId
-                }/${postContent.id}`;
-                if (window.location.pathname.startsWith('/owner')) navigate(targetUrl);
-                else window.location.href = targetUrl;
-              } else {
-                setIsEditOpen(true);
-              }
-            },
-          },
           ...(postFile.fileId
             ? ([
+                {
+                  icon: Pencil,
+                  label: t(postContent.type === 'Article' ? 'Edit Article' : 'Edit post'),
+                  onClick: (e) => {
+                    e.stopPropagation();
+                    if (postContent.type === 'Article') {
+                      const targetUrl = `/apps/feed/edit/${
+                        channel?.fileMetadata.appData.content.slug ||
+                        channel?.fileMetadata.appData.uniqueId
+                      }/${postContent.id}`;
+                      if (window.location.pathname.startsWith('/owner')) navigate(targetUrl);
+                      else window.location.href = targetUrl;
+                    } else {
+                      setIsEditOpen(true);
+                    }
+                  },
+                },
+                postContent.type === 'Article'
+                  ? {
+                      icon: Clipboard,
+                      label: t('Duplicate Article'),
+                      href: `/apps/feed/duplicate/${
+                        channel?.fileMetadata.appData.content.slug ||
+                        channel?.fileMetadata.appData.uniqueId
+                      }/${postContent.id}`,
+                    }
+                  : undefined,
                 {
                   icon: Trash,
                   label: t(postContent.type === 'Article' ? 'Remove Article' : 'Remove post'),

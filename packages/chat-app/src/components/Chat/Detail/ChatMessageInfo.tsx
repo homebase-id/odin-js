@@ -1,23 +1,18 @@
 import { createPortal } from 'react-dom';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../providers/ChatProvider';
-import { AuthorImage, AuthorName, DialogWrapper, t, usePortal } from '@youfoundation/common-app';
 import {
-  Conversation,
-  GroupConversation,
-  SingleConversation,
-} from '../../../providers/ConversationProvider';
-import { InnerDeliveryIndicator } from './ChatDeliveryIndicator';
+  AuthorImage,
+  AuthorName,
+  DialogWrapper,
+  t,
+  useDotYouClient,
+  usePortal,
+} from '@youfoundation/common-app';
+import { FailedDeliveryDetails, InnerDeliveryIndicator } from './ChatDeliveryIndicator';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
-import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app/src/helpers/timeago/format';
-
-const dateTimeFormat: Intl.DateTimeFormatOptions = {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-  hour: 'numeric',
-  minute: 'numeric',
-};
+import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
+import { UnifiedConversation } from '../../../providers/ConversationProvider';
 
 export const ChatMessageInfo = ({
   msg,
@@ -25,17 +20,18 @@ export const ChatMessageInfo = ({
   onClose,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation: HomebaseFile<Conversation>;
+  conversation: HomebaseFile<UnifiedConversation>;
   onClose: () => void;
 }) => {
+  const identity = useDotYouClient().getIdentity();
   const target = usePortal('modal-container');
   const messageContent = msg.fileMetadata.appData.content;
   const conversationContent = conversation.fileMetadata.appData.content;
-  const recipients = (
-    (conversationContent as GroupConversation).recipients || [
-      (conversationContent as SingleConversation).recipient,
-    ]
-  ).filter(Boolean);
+  const recipients = conversationContent.recipients.filter(
+    (recipient) => recipient && recipient !== identity
+  );
+
+  const isAuthor = msg.fileMetadata.senderOdinId === identity || !msg.fileMetadata.senderOdinId;
 
   const { data: reactions } = useChatReaction({
     messageFileId: msg.fileId,
@@ -68,20 +64,33 @@ export const ChatMessageInfo = ({
             <p className="mb-2 text-xl">{t('Recipients')}</p>
             <div className="flex flex-col gap-4">
               {recipients.map((recipient) => (
-                <div className="flex flex-row items-center justify-between" key={recipient}>
+                <div
+                  className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center"
+                  key={recipient}
+                >
                   <div className="flex flex-row items-center gap-2">
                     <AuthorImage
                       odinId={recipient}
-                      className="border border-neutral-200 dark:border-neutral-800"
+                      className="flex-shrink-0 border border-neutral-200 dark:border-neutral-800"
                       size="sm"
                     />
                     <AuthorName odinId={recipient} />
                   </div>
-                  <InnerDeliveryIndicator
-                    state={
-                      messageContent.deliveryDetails?.[recipient] || messageContent.deliveryStatus
-                    }
-                  />
+                  {isAuthor ? (
+                    <div className="flex flex-row justify-end gap-2 sm:contents">
+                      <FailedDeliveryDetails
+                        msg={msg}
+                        recipient={recipient}
+                        className="sm:ml-auto"
+                      />
+                      <InnerDeliveryIndicator
+                        state={
+                          messageContent.deliveryDetails?.[recipient] ||
+                          messageContent.deliveryStatus
+                        }
+                      />
+                    </div>
+                  ) : null}
                 </div>
               ))}
             </div>

@@ -6,7 +6,7 @@ import {
   ArrowLeft,
   PostDetailCard,
   PostImageDetailCard,
-  useBlog,
+  usePost,
   useOutsideTrigger,
   useSocialChannel,
 } from '@youfoundation/common-app';
@@ -37,12 +37,12 @@ const PostPreview = ({
     postId: postKey,
   }).fetch;
 
-  const { data: localBlogData } = useBlog({
+  const { data: localBlogData } = usePost({
     channelId: channelKey,
     blogSlug: isLocal ? postKey : undefined,
   });
   const localChannel = localBlogData?.activeChannel;
-  const localPost = localBlogData?.activeBlog;
+  const localPost = localBlogData?.activePost;
 
   const location = useLocation();
   const state = location.state as Record<string, unknown> | undefined;

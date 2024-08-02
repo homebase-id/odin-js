@@ -45,11 +45,12 @@ const CentralLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
         <>
           <Helmet>
             <meta name="youauth" content={stringifiedAuthParams} />
+            <link rel="preconnect" href={import.meta.env.VITE_CENTRAL_LOGIN_HOST} />
           </Helmet>
           <iframe
             src={`${
-              import.meta.env.VITE_CENTRAL_LOGIN_URL
-            }?isDarkMode=${isDarkMode}${`&${stringifiedAuthParams}`}`}
+              import.meta.env.VITE_CENTRAL_LOGIN_HOST
+            }/anonymous?isDarkMode=${isDarkMode}${`&${stringifiedAuthParams}`}`}
             key={stringifiedAuthParams}
             className="h-[16rem] w-full"
           ></iframe>

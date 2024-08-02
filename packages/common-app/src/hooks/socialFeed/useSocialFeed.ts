@@ -1,13 +1,13 @@
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BlogConfig } from '@youfoundation/js-lib/public';
-
-import { useChannels, useDotYouClient } from '@youfoundation/common-app';
-import { useNotificationSubscriber } from '@youfoundation/common-app';
 import { TypedConnectionNotification } from '@youfoundation/js-lib/core';
 import { getSocialFeed, processInbox } from '@youfoundation/js-lib/peer';
 import { useCallback } from 'react';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useChannelDrives } from './useChannelDrives';
+import { useDotYouClient } from '../auth/useDotYouClient';
+import { useNotificationSubscriber } from '../transitProcessor/useNotificationSubscriber';
+import { useChannels } from './channels/useChannels';
 
 const MINUTE_IN_MS = 60000;
 
@@ -29,7 +29,7 @@ const useInboxProcessor = (isEnabled?: boolean) => {
   };
 
   return useQuery({
-    queryKey: ['processInbox'],
+    queryKey: ['process-inbox'],
     queryFn: fetchData,
     refetchOnMount: false,
     // We want to refetch on window focus, as we might have missed some messages while the window was not focused and the websocket might have lost connection

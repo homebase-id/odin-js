@@ -64,7 +64,10 @@ export const createOrUpdateFollow = async (
     .then(() => {
       return true;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch((err) => {
+      if (err?.response?.data?.errorCode === 'identityAlreadyFollowed') return true;
+      return dotYouClient.handleErrorResponse(err);
+    });
 };
 
 export const syncFeedHistoryForFollowing = async (

@@ -9,8 +9,6 @@ import {
 } from 'react-router-dom';
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
 import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
 
 const YouAuthConsent = lazy(() => import('../templates/YouAuthConsent/YouAuthConsent'));
@@ -20,6 +18,12 @@ const Home = lazy(() => import('../templates/Dashboard/Dashboard'));
 const RegisterApp = lazy(() => import('../templates/AppDefinition/RegisterApp'));
 const ExtendAppDrivePermissions = lazy(
   () => import('../templates/AppDefinition/ExtendAppDrivePermissions')
+);
+const ExtendCirclePermissionsFromApp = lazy(
+  () => import('../templates/AppDefinition/ExtendCirclePermissionsFromApp')
+);
+const UpdateDriveDetailsFromApp = lazy(
+  () => import('../templates/AppDefinition/UpdateDriveDetailsFromApp')
 );
 const Login = lazy(() => import('../templates/Login/Login'));
 const AccountRecovery = lazy(() => import('../templates/AccountRecovery/AccountRecovery'));
@@ -47,6 +51,7 @@ const Following = lazy(() => import('../templates/Follow/Follow'));
 
 const Drives = lazy(() => import('../templates/Drives/Drives/Drives'));
 const DriveDetails = lazy(() => import('../templates/Drives/DriveDetails/DriveDetails'));
+const FileDetails = lazy(() => import('../templates/Drives/DriveDetails/FileDetails'));
 const Settings = lazy(() => import('../templates/Settings/Settings'));
 
 const DemoData = lazy(() => import('../templates/DemoData/DemoData'));
@@ -64,9 +69,10 @@ import {
   SETUP_PATH,
 } from '../hooks/auth/useAuth';
 import { useIsConfigured } from '../hooks/configure/useIsConfigured';
-import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
+import { ErrorBoundary, NotFound, OdinQueryClient } from '@youfoundation/common-app';
 
-const queryClient = new QueryClient();
+export const REACT_QUERY_CACHE_KEY = 'OWNER_REACT_QUERY_OFFLINE_CACHE';
+const INCLUDED_QUERY_KEYS = ['contact'];
 
 function App() {
   const router = createBrowserRouter(
@@ -131,6 +137,8 @@ function App() {
           >
             <Route path="appreg" element={<RegisterApp />} />
             <Route path="appupdate" element={<ExtendAppDrivePermissions />} />
+            <Route path="apprequest-circles" element={<ExtendCirclePermissionsFromApp />} />
+            <Route path="apprequest-drives" element={<UpdateDriveDetailsFromApp />} />
           </Route>
 
           <Route
@@ -179,6 +187,7 @@ function App() {
 
             <Route path="drives" element={<Drives />}></Route>
             <Route path="drives/:driveKey" element={<DriveDetails />}></Route>
+            <Route path="drives/:driveKey/:fileQuery" element={<FileDetails />}></Route>
             <Route path="settings" element={<Settings />}></Route>
             <Route path="settings/:sectionId" element={<Settings />}></Route>
 
@@ -207,9 +216,13 @@ function App() {
       <Helmet>
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
-      <QueryClientProvider client={queryClient}>
+      <OdinQueryClient
+        cacheKey={REACT_QUERY_CACHE_KEY}
+        cachedQueryKeys={INCLUDED_QUERY_KEYS}
+        type="local"
+      >
         <RouterProvider router={router} fallbackElement={<></>} />
-      </QueryClientProvider>
+      </OdinQueryClient>
     </HelmetProvider>
   );
 }

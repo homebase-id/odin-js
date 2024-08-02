@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { ActionButton, Plus, t } from '@youfoundation/common-app';
 import { useProfiles } from '@youfoundation/common-app';
-import ProfileDialog from '../../../components/Dialog/ProfileDialog/ProfileDialog';
 import { Heart } from '@youfoundation/common-app';
 import { LoadingBlock } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { BuiltInProfiles } from '@youfoundation/js-lib/profile';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import ProfileDialog from '../../../components/Attribute/ProfileDialog/ProfileDialog';
 
 const Profiles = () => {
   const { data: profiles, isLoading } = useProfiles().fetchProfiles;
@@ -27,9 +27,9 @@ const Profiles = () => {
           }
         />
         {isLoading ? (
-          <div className="-m-2 flex">
-            <LoadingBlock className="m-2 h-10 w-1/4" />
-            <LoadingBlock className="m-2 h-10 w-1/4" />
+          <div className="flex gap-2">
+            <LoadingBlock className="h-10 w-1/4" />
+            <LoadingBlock className="h-10 w-1/4" />
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">

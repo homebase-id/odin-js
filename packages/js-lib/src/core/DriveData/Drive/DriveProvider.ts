@@ -155,3 +155,60 @@ export const editDriveAllowAnonymousRead = async (
       throw error;
     });
 };
+
+export const editDriveAttributes = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  newAttributes: { [key: string]: string }
+) => {
+  assertIfDefined('targetDrive', targetDrive);
+  assertIfDefined('newAttributes', newAttributes);
+
+  const client = dotYouClient.createAxiosClient();
+  const data = {
+    targetDrive: targetDrive,
+    attributes: newAttributes,
+  };
+
+  return client
+    .post('/drive/mgmt/updateattributes', data)
+    .then((response) => response.status === 200)
+    .catch((error) => {
+      console.error('[DotYouCore-js:editDriveAttributes]', error);
+      throw error;
+    });
+};
+
+export interface DriveStatus {
+  inbox: {
+    oldestItemTimestamp: number;
+    poppedCount: number;
+    totalItems: number;
+  };
+  outbox: {
+    checkedOutCount: number;
+    nextItemRun: number;
+    totalItems: number;
+  };
+  sizeInfo: {
+    fileCount: number;
+    size: number;
+  };
+}
+
+export const getDriveStatus = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive
+): Promise<DriveStatus> => {
+  assertIfDefined('targetDrive', targetDrive);
+
+  const client = dotYouClient.createAxiosClient();
+
+  return client
+    .get<DriveStatus>('/drive/status?' + stringifyToQueryParams(targetDrive))
+    .then((response) => response.data)
+    .catch((error) => {
+      console.error('[DotYouCore-js:getDriveStatus]', error);
+      throw error;
+    });
+};

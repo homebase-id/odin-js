@@ -12,8 +12,6 @@ import {
   UploadResult,
   SecurityGroupType,
   UploadInstructionSet,
-  ScheduleOptions,
-  SendContents,
   UploadFileMetadata,
   uploadFile,
   deleteFile,
@@ -31,7 +29,7 @@ import {
   stringToUint8Array,
   toGuidId,
 } from '../../helpers/helpers';
-import { ChannelDefinition, BlogConfig } from './PostTypes';
+import { ChannelDefinition, BlogConfig, CollaborativeChannelDefinition } from './PostTypes';
 
 export const getChannelDefinitions = async (
   dotYouClient: DotYouClient
@@ -160,17 +158,13 @@ export const saveChannelDefinition = async (
       overwriteFileId: fileId,
       drive: targetDrive,
     },
-    transitOptions: {
-      useGlobalTransitId: true,
-      recipients: [],
-      schedule: ScheduleOptions.SendLater,
-      sendContents: SendContents.All,
-    },
   };
 
   const payloadJson: string = jsonStringify64({
     ...definition.fileMetadata.appData.content,
-    acl: undefined,
+    acl: definition.fileMetadata.appData.content.isCollaborative
+      ? (definition.fileMetadata.appData.content as CollaborativeChannelDefinition).acl
+      : undefined,
   });
   const payloadBytes = stringToUint8Array(payloadJson);
 
@@ -178,7 +172,7 @@ export const saveChannelDefinition = async (
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
     versionTag: versionTag,
-    allowDistribution: true,
+    allowDistribution: false,
     appData: {
       uniqueId: definition.fileMetadata.appData.uniqueId,
       tags: [definition.fileMetadata.appData.uniqueId],

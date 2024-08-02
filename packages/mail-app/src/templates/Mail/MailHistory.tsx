@@ -130,6 +130,27 @@ export const MailHistory = ({
           style={{
             transform: `translateY(-${items[0]?.start ?? 0}px)`,
           }}
+          onCopyCapture={(e) => {
+            const range = window.getSelection()?.getRangeAt(0),
+              rangeContents = range?.cloneContents(),
+              helper = document.createElement('div');
+
+            if (rangeContents) helper.appendChild(rangeContents);
+            const elements = helper.getElementsByClassName('copyable-content');
+            if (elements.length === 0) return;
+
+            let runningText = '';
+            for (let i = elements.length - 1; i >= 0; i--) {
+              const text = (elements[i] as any).innerText;
+              if (text?.length) {
+                runningText += text + '\n';
+              }
+            }
+
+            e.clipboardData.setData('text/plain', runningText);
+            e.preventDefault();
+            return false;
+          }}
         >
           {items.map((virtualRow) => {
             const isLoaderRow = virtualRow.index > mailThread.length - 1;
@@ -209,7 +230,7 @@ const MailMessage = ({
           </div>
         )}
         <div
-          className={`group relative w-full max-w-[75vw] rounded-lg px-2 py-2 sm:max-w-sm lg:max-w-lg xl:max-w-2xl ${
+          className={`group relative w-full max-w-[75vw] rounded-lg px-2 py-2 sm:max-w-sm lg:max-w-lg xl:max-w-[50vw] ${
             messageFromMe
               ? 'bg-primary/10 dark:bg-primary/30'
               : 'bg-gray-500/10 dark:bg-gray-300/20'
@@ -250,7 +271,7 @@ const MailMessage = ({
               previewThumbnails: message.fileMetadata.payloads,
               query: query || undefined,
             }}
-            className="leading-7"
+            className="copyable-content leading-7"
           />
           <MailAttachmentOverview
             className="mt-5"

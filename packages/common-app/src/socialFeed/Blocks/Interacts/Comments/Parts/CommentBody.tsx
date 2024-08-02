@@ -7,7 +7,7 @@ import { RichTextRenderer } from '../../../../../richText';
 import { CommentEditor } from '../CommentComposer';
 import { CommentMedia, CommentMediaPreview } from './CommentMedia';
 import { ActionButtonState } from '../../../../../ui';
-import { ReactionFile } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, ReactionFile } from '@youfoundation/js-lib/core';
 
 export const CommentBody = ({
   context,
@@ -18,6 +18,7 @@ export const CommentBody = ({
   onUpdate,
   onCancel,
   updateState,
+  previewThumbnail,
 }: {
   context?: ReactionContext;
   commentFileId?: string;
@@ -27,6 +28,7 @@ export const CommentBody = ({
   onUpdate?: (commentBody: string, attachment?: File) => void;
   onCancel?: () => void;
   updateState: ActionButtonState;
+  previewThumbnail?: EmbeddedThumb;
 }) => {
   const { body, bodyAsRichText } = content;
   const sourceTargetDrive = context && GetTargetDriveFromChannelId(context.channelId);
@@ -54,6 +56,7 @@ export const CommentBody = ({
               fileId={commentFileId}
               fileKey={content.mediaPayloadKey}
               lastModified={commentLastModifed}
+              previewThumbnail={previewThumbnail}
             />
           ) : (content as RawReactionContent)?.attachment ? (
             <CommentMediaPreview attachment={(content as RawReactionContent)?.attachment} />

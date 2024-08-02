@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useYouAuthAuthorization } from '../../hooks/auth/useAuth';
+import { ROOT_PATH } from '../../app/App';
 
 const AuthFinalize = () => {
   const isRunning = useRef(false);
@@ -26,9 +27,10 @@ const AuthFinalize = () => {
     })();
   }, []);
 
-  if (!identity || !public_key || !salt) return <Navigate to={'/auth'} />;
+  // On error redirect to the auth page; (Which might auto restart authorize process)
+  if (!identity || !public_key || !salt) return <Navigate to={`${ROOT_PATH}/auth`} />;
+  if (finalizeState === 'error') return <Navigate to={`${ROOT_PATH}/auth?state=finalize-error`} />;
   if (finalizeState === 'success') return <Navigate to={returnUrl || '/'} />;
-  if (finalizeState === 'error') return <Navigate to={'/auth?state=finalize-error'} />;
 
   return (
     <>

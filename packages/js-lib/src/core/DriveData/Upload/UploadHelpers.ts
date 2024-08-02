@@ -16,66 +16,23 @@ import {
 } from '../SecurityHelpers';
 import {
   jsonStringify64,
-  mergeByteArrays,
   uint8ArrayToBase64,
   stringToUint8Array,
   getRandom16ByteArray,
 } from '../../../helpers/DataUtil';
 import { ThumbnailFile, SystemFileType, PayloadFile, KeyHeader } from '../File/DriveFileTypes';
 import { AxiosRequestConfig } from 'axios';
-
-const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
-  Blob;
+import { getSecuredBlob } from '../../../helpers/BlobHelpers';
 
 const EMPTY_KEY_HEADER: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(0)),
   aesKey: new Uint8Array(Array(16).fill(0)),
 };
 
-// Built purely for better support on react-native
-export const getSecuredBlob = async (
-  blobParts?: BlobPart[] | undefined,
-  options?: BlobPropertyBag
-) => {
-  const returnBlob = new OdinBlob(blobParts, options);
-
-  await new Promise<void>((resolve) => {
-    if (!('written' in returnBlob)) resolve();
-
-    const interval = setInterval(async () => {
-      if ('written' in returnBlob && returnBlob.written) {
-        clearInterval(interval);
-        resolve();
-      }
-    }, 100);
-  });
-
-  return returnBlob as Blob;
-};
-
 const toBlob = async (o: unknown): Promise<Blob> => {
   const json = jsonStringify64(o);
   const content = new TextEncoder().encode(json);
   return await getSecuredBlob([content], { type: 'application/octet-stream' });
-};
-
-export const streamToByteArray = async (stream: ReadableStream<Uint8Array>, mimeType: string) => {
-  if (mimeType != null && typeof mimeType !== 'string') {
-    throw new Error('Invalid mimetype, expected string.');
-  }
-
-  const chunks = [];
-  const reader = stream.getReader();
-
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const { done, value } = await reader.read();
-    if (value) chunks.push(value);
-    if (done) {
-      return mergeByteArrays(chunks);
-    }
-  }
 };
 
 export const encryptMetaData = async (
@@ -198,9 +155,9 @@ export const pureUpload = async (
   dotYouClient: DotYouClient,
   data: FormData,
   systemFileType?: SystemFileType,
-  onVersionConflict?: () => void,
+  onVersionConflict?: () => Promise<void | UploadResult> | void,
   axiosConfig?: AxiosRequestConfig
-) => {
+): Promise<UploadResult | void> => {
   const client = dotYouClient.createAxiosClient({ overrideEncryption: true, systemFileType });
   const url = '/drive/files/upload';
 
@@ -222,8 +179,7 @@ export const pureUpload = async (
         if (!onVersionConflict) {
           console.warn('VersionTagMismatch, to avoid this, add an onVersionConflict handler');
         } else {
-          onVersionConflict();
-          return;
+          return onVersionConflict();
         }
       }
 
@@ -238,9 +194,9 @@ export const pureAppend = async (
   dotYouClient: DotYouClient,
   data: FormData,
   systemFileType?: SystemFileType,
-  onVersionConflict?: () => void,
+  onVersionConflict?: () => Promise<void | AppendResult> | void,
   axiosConfig?: AxiosRequestConfig
-): Promise<AppendResult> => {
+): Promise<AppendResult | void> => {
   const client = dotYouClient.createAxiosClient({
     overrideEncryption: true,
     systemFileType,
@@ -265,8 +221,7 @@ export const pureAppend = async (
         if (!onVersionConflict) {
           console.warn('VersionTagMismatch, to avoid this, add an onVersionConflict handler');
         } else {
-          onVersionConflict();
-          return;
+          return onVersionConflict();
         }
       }
 

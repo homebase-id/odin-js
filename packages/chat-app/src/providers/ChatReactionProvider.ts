@@ -8,9 +8,6 @@ import {
 import { ChatDrive } from './ConversationProvider';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 
-export const ChatReactionFileType = 7979;
-const PAGE_SIZE = 100;
-
 export interface ChatReaction {
   // Content of the reaction
   message: string;

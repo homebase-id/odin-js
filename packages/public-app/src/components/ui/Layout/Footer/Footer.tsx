@@ -15,7 +15,7 @@ const Footer: FC<FooterProps> = ({ className }) => {
   return (
     <footer className={`body-font bg-background ${className}`}>
       <div className="container mx-auto flex flex-col items-center px-5 py-8 sm:flex-row">
-        <a className="title-font flex h-10 items-center justify-center font-medium md:justify-start">
+        <p className="title-font flex h-10 items-center justify-center font-medium md:justify-start">
           <Homebase className="h-12 w-12" />
           <span className="ml-3 text-xl">
             <OwnerName />
@@ -23,11 +23,14 @@ const Footer: FC<FooterProps> = ({ className }) => {
               {t('Only using strictly necessary cookies. No tracking')}
             </small>
           </span>
-        </a>
-        <p className="mt-4 text-sm text-gray-500 sm:ml-auto sm:mt-0 sm:border-l-2 sm:border-gray-200 sm:py-2 sm:pl-4 dark:sm:border-gray-700">
+        </p>
+        <a
+          href="/api/v1/version"
+          className="mt-4 text-sm text-gray-500 sm:ml-auto sm:mt-0 sm:border-l-2 sm:border-gray-200 sm:py-2 sm:pl-4 dark:sm:border-gray-700"
+        >
           © {new Date().getFullYear()} | v.
           {getVersion()}
-        </p>
+        </a>
         <Socials
           socialHandles={social}
           className="mt-4 justify-center sm:ml-4 sm:mt-0 sm:justify-start"

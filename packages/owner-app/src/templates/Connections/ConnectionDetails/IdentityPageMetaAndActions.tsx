@@ -12,14 +12,19 @@ import {
   ConfirmDialog,
   Ellipsis,
   useIdentityIFollow,
+  HeartBeat,
+  useErrors,
 } from '@youfoundation/common-app';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { useConnection } from '../../../hooks/connections/useConnection';
 import { useContact } from '../../../hooks/contacts/useContact';
 import { useEffect, useState } from 'react';
-import OutgoingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/OutgoingConnectionDialog';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
+import { useConnectionGrantStatus } from '../../../hooks/connections/useConnectionGrantStatus';
+import { hasDebugFlag, jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import OutgoingConnectionDialog from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 
 export const IdentityPageMetaAndActions = ({
   odinId, // setIsEditPermissionActive,
@@ -55,7 +60,7 @@ export const IdentityPageMetaAndActions = ({
     fetch: { data: connectionInfo },
   } = useConnection({ odinId: odinId });
   const {
-    disconnect: { mutate: disconnect, error: disconnectError },
+    disconnect: { mutateAsync: disconnect },
     revokeConnectionRequest: {
       mutate: revokeRequest,
       status: revokeRequestStatus,
@@ -65,9 +70,13 @@ export const IdentityPageMetaAndActions = ({
     unblock: { mutate: unblock, status: unblockStatus, error: unblockError },
   } = useConnectionActions();
 
-  const { data: identityIfollow, isFetched: followStateFetched } = useIdentityIFollow({
+  const {
+    fetch: { data: identityIfollow, isFetched: followStateFetched },
+    unfollow: { mutateAsync: unfollow },
+  } = useIdentityIFollow({
     odinId,
-  }).fetch;
+  });
+
   const isFollowing = !followStateFetched ? undefined : !!identityIfollow;
 
   // Contact data:
@@ -122,7 +131,7 @@ export const IdentityPageMetaAndActions = ({
       label: t('Open homepage'),
       onClick: () => {
         window.open(
-          `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
+          `${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
           '_blank'
         );
       },
@@ -144,22 +153,86 @@ export const IdentityPageMetaAndActions = ({
     });
   }
 
+  const { add: addError } = useErrors();
+  const { data: grantStatus, refetch: refetchGrantStatus } = useConnectionGrantStatus({
+    odinId: isConnected ? odinId : undefined,
+  }).fetchStatus;
+  const doDownloadStatusUrl = async () => {
+    await refetchGrantStatus();
+    const stringified = jsonStringify64(grantStatus);
+    const url = window.URL.createObjectURL(
+      new Blob([stringified], { type: 'application/json;charset=utf-8' })
+    );
+
+    // Dirty hack for easy download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${odinId}.json`;
+    link.click();
+  };
+
   if (connectionInfo?.status === 'connected') {
     actionGroupOptions.push({
       icon: Trash,
-      label: t('Remove'),
-      onClick: () => {
-        disconnect({ connectionOdinId: odinId });
-        navigate('/owner/connections');
-      },
-      confirmOptions: {
-        title: `${t('Remove')} ${odinId}`,
-        buttonText: t('Remove'),
+      label: t('Disconnect'),
+      actionOptions: {
+        title: `${t('Disconnect')} ${odinId}`,
         body: `${t('Are you sure you want to remove')} ${odinId} ${t(
           'from your connections. They will lose all existing access.'
         )}`,
+        options: [
+          isFollowing
+            ? {
+                children: t('Unfollow & Disconnect'),
+                type: 'remove',
+                onClick: async () => {
+                  try {
+                    await unfollow({ odinId });
+                    await disconnect({ connectionOdinId: odinId });
+                    navigate('/owner/connections');
+                  } catch (e) {
+                    addError(e, t('Failed to remove a connection'));
+                  }
+                },
+              }
+            : undefined,
+          {
+            children: t('Disconnect'),
+            type: isFollowing ? 'secondary' : 'primary',
+            onClick: async () => {
+              try {
+                await disconnect({ connectionOdinId: odinId });
+                navigate('/owner/connections');
+              } catch (e) {
+                addError(e, t('Failed to remove a connection'));
+              }
+            },
+          },
+          isFollowing
+            ? {
+                children: t('Unfollow'),
+                type: 'secondary',
+                onClick: async () => {
+                  try {
+                    console.log('unfollow');
+                    await unfollow({ odinId });
+                  } catch (e) {
+                    addError(e, t('Failed to remove a connection'));
+                  }
+                },
+              }
+            : undefined,
+        ],
       },
     });
+
+    if (hasDebugFlag()) {
+      actionGroupOptions.push({
+        icon: HeartBeat,
+        label: t('Grant Status'),
+        onClick: doDownloadStatusUrl,
+      });
+    }
   }
 
   if (isFollowing === false) {
@@ -172,7 +245,7 @@ export const IdentityPageMetaAndActions = ({
 
   return (
     <>
-      <ErrorNotification error={disconnectError || revokeError || blockError || unblockError} />
+      <ErrorNotification error={revokeError || blockError || unblockError} />
 
       <PageMeta
         icon={Persons}

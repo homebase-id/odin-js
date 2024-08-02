@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { BlogConfig, PostContent } from '@youfoundation/js-lib/public';
 
-import { useDotYouClient } from '@youfoundation/common-app';
-import { HomebaseFile, deleteFile } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile, deleteFile } from '@youfoundation/js-lib/core';
+import { useDotYouClient } from '../auth/useDotYouClient';
 
 export const useManageSocialFeed = (props?: { odinId: string }) => {
   const odinId = props?.odinId;
@@ -11,12 +11,22 @@ export const useManageSocialFeed = (props?: { odinId: string }) => {
   const queryClient = useQueryClient();
 
   const removeFromFeed = async ({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
-    return await deleteFile(dotYouClient, BlogConfig.FeedDrive, postFile.fileId);
+    return await deleteFile(
+      dotYouClient,
+      BlogConfig.FeedDrive,
+      postFile.fileId,
+      undefined,
+      undefined,
+      undefined,
+      true
+    );
   };
 
   const getContentReportUrl = () => {
+    const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
+
     // Fetch the reporting url from the other identities config
-    return fetch(`https://${odinId}/config/reporting`)
+    return fetch(`${host}/config/reporting`)
       .then((res) => {
         return res.json();
       })

@@ -11,7 +11,8 @@ export const deleteFile = async (
   fileId: string,
   recipients?: string[],
   systemFileType?: SystemFileType,
-  axiosConfig?: AxiosRequestConfig
+  axiosConfig?: AxiosRequestConfig,
+  hardDelete?: boolean
 ): Promise<boolean | void> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
@@ -29,7 +30,7 @@ export const deleteFile = async (
   };
 
   return client
-    .post('/drive/files/delete', request, axiosConfig)
+    .post(`/drive/files/${hardDelete ? 'harddelete' : 'delete'}`, request, axiosConfig)
     .then((response) => {
       if (response.status === 200) {
         return true;

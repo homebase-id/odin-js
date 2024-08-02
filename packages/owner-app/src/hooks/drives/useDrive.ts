@@ -3,13 +3,16 @@ import {
   DriveDefinition,
   editDriveAllowAnonymousRead,
   editDriveMetadata,
+  getDriveStatus,
   getDrivesByType,
   TargetDrive,
+  editDriveAttributes,
 } from '@youfoundation/js-lib/core';
 import { useAuth } from '../auth/useAuth';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
-export const useDrive = (props?: { targetDrive?: TargetDrive }) => {
-  const { targetDrive } = props || {};
+export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?: boolean }) => {
+  const { targetDrive, fetchOutboxStatus } = props || {};
   const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
 
@@ -19,8 +22,8 @@ export const useDrive = (props?: { targetDrive?: TargetDrive }) => {
     if (allDrivesInCache) {
       const foundDrive = allDrivesInCache.find(
         (drive) =>
-          drive.targetDriveInfo.alias === targetDrive.alias &&
-          drive.targetDriveInfo.type === targetDrive.type
+          stringGuidsEqual(drive.targetDriveInfo.alias, targetDrive.alias) &&
+          stringGuidsEqual(drive.targetDriveInfo.type, targetDrive.type)
       );
       if (foundDrive) return foundDrive;
     }
@@ -30,11 +33,14 @@ export const useDrive = (props?: { targetDrive?: TargetDrive }) => {
     return (
       allDrives.find(
         (drive) =>
-          drive.targetDriveInfo.alias === targetDrive.alias &&
-          drive.targetDriveInfo.type === targetDrive.type
+          stringGuidsEqual(drive.targetDriveInfo.alias, targetDrive.alias) &&
+          stringGuidsEqual(drive.targetDriveInfo.type, targetDrive.type)
       ) || null
     );
   };
+
+  const fetchDriveDetail = async (targetDrive: TargetDrive) =>
+    await getDriveStatus(dotYouClient, targetDrive);
 
   const editDescription = async ({
     targetDrive,
@@ -56,6 +62,16 @@ export const useDrive = (props?: { targetDrive?: TargetDrive }) => {
     return editDriveAllowAnonymousRead(dotYouClient, targetDrive, newAllowAnonymousRead);
   };
 
+  const editAttributes = async ({
+    targetDrive,
+    newAttributes,
+  }: {
+    targetDrive: TargetDrive;
+    newAttributes: { [key: string]: string };
+  }) => {
+    return editDriveAttributes(dotYouClient, targetDrive, newAttributes);
+  };
+
   return {
     fetch: useQuery({
       queryKey: ['drive', `${targetDrive?.alias}_${targetDrive?.type}`],
@@ -63,8 +79,22 @@ export const useDrive = (props?: { targetDrive?: TargetDrive }) => {
       refetchOnWindowFocus: false,
       enabled: !!targetDrive,
     }),
+    fetchStatus: useQuery({
+      queryKey: ['drive-status', `${targetDrive?.alias}_${targetDrive?.type}`],
+      queryFn: () => fetchDriveDetail(targetDrive as TargetDrive),
+      refetchOnWindowFocus: false,
+      enabled: !!targetDrive && fetchOutboxStatus,
+    }),
     editDescription: useMutation({
       mutationFn: editDescription,
+      onSettled: (_data, _error, variables) => {
+        queryClient.invalidateQueries({
+          queryKey: ['drive', `${variables.targetDrive?.alias}_${variables.targetDrive?.type}`],
+        });
+      },
+    }),
+    editAttributes: useMutation({
+      mutationFn: editAttributes,
       onSettled: (_data, _error, variables) => {
         queryClient.invalidateQueries({
           queryKey: ['drive', `${variables.targetDrive?.alias}_${variables.targetDrive?.type}`],

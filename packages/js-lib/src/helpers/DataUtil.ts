@@ -78,6 +78,21 @@ export const getNewId = () => {
   return Guid.create().toString().replace(/-/g, '');
 };
 
+export const formatGuidId = (guid: string) => {
+  const dashLessGuid = guid.replace(/-/g, '');
+  return (
+    dashLessGuid.slice(0, 8) +
+    '-' +
+    dashLessGuid.slice(8, 12) +
+    '-' +
+    dashLessGuid.slice(12, 16) +
+    '-' +
+    dashLessGuid.slice(16, 20) +
+    '-' +
+    dashLessGuid.slice(20)
+  );
+};
+
 // Creates a base64 encoded byte array of the given input
 export const toGuidId = (input: string): string => {
   return md5(input).toString();
@@ -295,6 +310,15 @@ export const getQueryBatchCursorFromTime = (fromUnixTimeInMs: number, toUnixTime
   bytes = mergeByteArrays([bytes, nullBytes, bytes2]);
 
   return uint8ArrayToBase64(bytes);
+};
+
+export const getQueryModifiedCursorFromTime = (unixTimeInMs: number) => {
+  // Example top 48 bits and bottom 16 bits as BigInts
+  const topBits = BigInt(unixTimeInMs); // Replace with your top 48 bits
+  const bottomBits = BigInt(4); // Replace with your bottom 16 bits
+
+  // Combine the top and bottom bits using bitwise left shift and bitwise OR operation
+  return Number((topBits << BigInt(16)) | bottomBits);
 };
 
 export const tryJsonParse = <T>(json: string): T => {

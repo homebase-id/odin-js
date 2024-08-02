@@ -1,4 +1,4 @@
-import { DotYouClient, assertIfDotYouClientIsOwner } from '../../../core/DotYouClient';
+import { DotYouClient, assertIfDotYouClientIsOwnerOrApp } from '../../../core/DotYouClient';
 import { TargetDrive, SystemFileType, PagedResult, DriveDefinition } from '../../../core/core';
 
 /// Drive methods:
@@ -11,7 +11,7 @@ export const getDrivesByTypeOverPeer = async (
   odinId: string,
   systemFileType?: SystemFileType
 ): Promise<PagedResult<DriveDefinition>> => {
-  assertIfDotYouClientIsOwner(dotYouClient);
+  assertIfDotYouClientIsOwnerOrApp(dotYouClient);
   const params = {
     driveType: type,
     pageNumber: pageNumber,

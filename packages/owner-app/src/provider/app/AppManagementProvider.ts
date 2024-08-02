@@ -80,8 +80,6 @@ export const RegisterChatAppClient_temp = async (
     'appmanagement/register/chatclient_temp',
     request
   );
-  console.log('RegisterChatAppClient_temp returning response');
-  console.log(response);
 
   return response.data;
 };
@@ -105,9 +103,6 @@ export const RegisterApp = async (
       })),
     },
   });
-
-  console.log('RegisterApp returning response');
-  console.log(response);
 
   return response.data;
 };
@@ -198,7 +193,6 @@ export const AllowApp = async (
 ): Promise<void> => {
   const client = dotYouClient.createAxiosClient();
   const response = await client.post('appmanagement/allow', request);
-  console.log(response);
 };
 
 export const RemoveApp = async (
@@ -207,7 +201,6 @@ export const RemoveApp = async (
 ): Promise<void> => {
   const client = dotYouClient.createAxiosClient();
   const response = await client.post('appmanagement/deleteApp', request);
-  console.log(response);
 };
 
 export const UpdateAuthorizedCircles = async (

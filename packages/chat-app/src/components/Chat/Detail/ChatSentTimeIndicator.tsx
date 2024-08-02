@@ -1,7 +1,7 @@
 import { t } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../providers/ChatProvider';
-import { formatToTimeAgoWithRelativeDetail } from '@youfoundation/common-app/src/helpers/timeago/format';
+import { formatToTimeAgoWithRelativeDetail } from '@youfoundation/common-app';
 
 export const ChatSentTimeIndicator = ({
   msg,

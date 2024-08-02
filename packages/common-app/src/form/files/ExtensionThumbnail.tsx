@@ -7,6 +7,7 @@ import {
   FileWord,
   FileZip,
 } from '../../ui/Icons/FileType';
+import { File as FileIcon } from '../../ui/Icons/File';
 
 export const ExtensionThumbnail = ({
   contentType,
@@ -52,6 +53,9 @@ export const ExtensionThumbnail = ({
 
   if (contentTypeExtension === 'mp3' || contentType === 'audio/mpeg')
     return <FileMp3 className={className} />;
+
+  if (contentTypeExtension === 'json' || contentType === 'xml')
+    return <FileIcon className={className} />;
 
   return (
     <div

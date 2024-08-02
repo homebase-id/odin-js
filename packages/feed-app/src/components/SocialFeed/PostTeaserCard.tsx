@@ -13,6 +13,7 @@ import {
   useCheckIdentity,
   LoadingBlock,
   t,
+  ToGroupBlock,
 } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
@@ -50,11 +51,13 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
   }/${post.id}`;
   const clickable = post.type === 'Article'; // Post is only clickable if it's an article; While media posts are clickable only on the media itself
 
+  const authorOdinId = post.authorOdinId || odinId;
+
   if (identityAccessible === false && isExternal)
     return <UnreachableIdentity postFile={postFile} className={className} odinId={odinId} />;
 
   return (
-    <div className={`w-full break-words rounded-lg ${className ?? ''}`}>
+    <div className={`w-full break-words rounded-lg ${className ?? ''}`} data-odin-id={odinId}>
       <ErrorBoundary>
         <FakeAnchor
           href={clickable ? postPath : undefined}
@@ -69,7 +72,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
             <div className="flex-shrink-0 py-1">
               <div className="h-10 w-10 sm:h-12 sm:w-12 md:h-[4rem] md:w-[4rem]">
                 <AuthorImage
-                  odinId={odinId}
+                  odinId={authorOdinId}
                   className="h-10 w-10 rounded-full sm:h-12 sm:w-12 md:h-[4rem] md:w-[4rem]"
                 />
               </div>
@@ -77,11 +80,22 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
             <div className="flex w-20 flex-grow flex-col">
               <div className="mb-1 flex flex-col text-foreground text-opacity-60 md:flex-row md:flex-wrap md:items-center">
                 <h2>
-                  <AuthorName odinId={odinId} />
+                  <AuthorName odinId={authorOdinId} />
+                  <ToGroupBlock
+                    channel={channel || undefined}
+                    odinId={odinId}
+                    authorOdinId={authorOdinId}
+                    className="ml-1"
+                  />
                 </h2>
                 <span className="hidden px-2 leading-4 md:block">·</span>
 
-                <PostMeta postFile={postFile} channel={channel || undefined} odinId={odinId} />
+                <PostMeta
+                  postFile={postFile}
+                  channel={channel || undefined}
+                  odinId={odinId}
+                  authorOdinId={authorOdinId}
+                />
               </div>
 
               <PostBody
@@ -128,7 +142,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
 
 const MediaStillUploading = ({ postFile }: { postFile: NewHomebaseFile<PostContent> }) => {
   if (postFile.fileId) return null;
-  if (!postFile.fileMetadata.appData.content.primaryMediaFile) return null;
+  if (!postFile.fileMetadata.appData.content.primaryMediaFile?.fileId) return null;
 
   return (
     <>

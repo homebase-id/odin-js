@@ -1,9 +1,13 @@
 import { createPortal } from 'react-dom';
-import { usePortal, Times } from '@youfoundation/common-app';
-import { EmbeddedThumb, TargetDrive } from '@youfoundation/js-lib/core';
-import { Image } from '@youfoundation/common-app';
+
+import { EmbeddedThumb, SystemFileType, TargetDrive } from '@youfoundation/js-lib/core';
+
 import { useEffect } from 'react';
 import { ButtonColors } from '../../ui/Buttons/ColorConfig';
+import { usePortal } from '../../hooks/portal/usePortal';
+import { Times } from '../../ui/Icons/Times';
+import { OdinImage } from '@youfoundation/ui-lib';
+import { useDotYouClient } from '../../hooks/auth/useDotYouClient';
 
 export const ImageLightbox = ({
   targetDrive,
@@ -11,6 +15,7 @@ export const ImageLightbox = ({
   fileKey,
   previewThumbnail,
   lastModified,
+  systemFileType,
   onClose,
 }: {
   targetDrive: TargetDrive;
@@ -18,8 +23,10 @@ export const ImageLightbox = ({
   fileKey: string;
   previewThumbnail?: EmbeddedThumb;
   lastModified: number | undefined;
+  systemFileType?: SystemFileType;
   onClose: () => void;
 }) => {
+  const dotYouClient = useDotYouClient().getDotYouClient();
   const target = usePortal('modal-container');
 
   useEffect(() => {
@@ -33,15 +40,12 @@ export const ImageLightbox = ({
     };
 
     window.addEventListener('keydown', handleKeyDown);
-
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
   useEffect(() => {
     document.documentElement.classList.add('overflow-hidden');
-    return () => {
-      document.documentElement.classList.remove('overflow-hidden');
-    };
+    return () => document.documentElement.classList.remove('overflow-hidden');
   }, []);
 
   const dialog = (
@@ -58,15 +62,16 @@ export const ImageLightbox = ({
             </button>
           ) : null}
 
-          <Image
-            className={`m-auto h-auto max-h-[calc(100vh-5rem)] w-auto max-w-full object-contain`}
+          <OdinImage
+            dotYouClient={dotYouClient}
+            className={`m-auto h-auto max-h-screen w-auto max-w-full object-contain`}
             fileId={fileId}
             fileKey={fileKey}
             targetDrive={targetDrive}
-            alt="post"
-            fit="contain"
             previewThumbnail={previewThumbnail}
             lastModified={lastModified}
+            systemFileType={systemFileType}
+            fit="contain"
           />
         </div>
       </div>

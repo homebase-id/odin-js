@@ -1,12 +1,18 @@
 import {
+  ApiType,
+  AppNotification,
   ClientConnectionNotification,
+  DotYouClient,
+  PushNotification,
   TypedConnectionNotification,
 } from '@youfoundation/js-lib/core';
 import { ReactNode, useCallback, useState } from 'react';
-
-import { DomainHighlighter, t, useNotificationSubscriber } from '@youfoundation/common-app';
 import { useQueryClient } from '@tanstack/react-query';
 import { BlogConfig } from '@youfoundation/js-lib/public';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { t } from '../../helpers/i18n/dictionary';
+import { DomainHighlighter } from '../../ui/DomainHighlighter/DomainHighlighter';
+import { useNotificationSubscriber } from '../transitProcessor/useNotificationSubscriber';
 
 interface Notification {
   title: string;
@@ -36,6 +42,8 @@ export const useNotifications = () => {
           ? clientNotification.sender
           : clientNotification.recipient;
 
+      const host = new DotYouClient({ api: ApiType.Guest, identity: otherId }).getRoot();
+
       const notification: Notification = {
         key: `incoming-${otherId}`,
         title:
@@ -43,7 +51,7 @@ export const useNotifications = () => {
             ? t('New connection request')
             : t('Your connection request was accepted'),
         body: otherId ? <DomainHighlighter>{otherId}</DomainHighlighter> : undefined,
-        imgSrc: `https://${otherId}/pub/image`,
+        imgSrc: `${host}/pub/image`,
         href: `/owner/connections/${otherId}`,
         type:
           clientNotification.notificationType === 'connectionRequestReceived'
@@ -65,6 +73,29 @@ export const useNotifications = () => {
         queryClient.invalidateQueries({ queryKey: ['activeConnections'] });
       }
     }
+
+    if (wsNotification.notificationType === 'appNotificationAdded') {
+      const clientNotification = wsNotification as AppNotification;
+
+      const existingNotificationData = queryClient.getQueryData<{
+        results: PushNotification[];
+        cursor: number;
+      }>(['push-notifications']);
+
+      if (!existingNotificationData) return;
+      const newNotificationData = {
+        ...existingNotificationData,
+        results: [
+          clientNotification,
+          ...existingNotificationData.results.filter(
+            (notification) =>
+              !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
+          ),
+        ],
+      };
+
+      queryClient.setQueryData(['push-notifications'], newNotificationData);
+    }
   }, []);
 
   const dismiss = (notification: Notification) => {
@@ -74,30 +105,11 @@ export const useNotifications = () => {
 
   useNotificationSubscriber(
     handler,
-    ['connectionRequestAccepted', 'connectionRequestReceived', 'unknown'],
+    ['connectionRequestAccepted', 'connectionRequestReceived', 'appNotificationAdded', 'unknown'],
     [BlogConfig.FeedDrive]
   );
-
-  // const notifications = pending?.results.map((connection) => {
-  //   return {
-  //     key: `incoming-${connection.senderOdinId}`,
-  //     title: t('Incoming connection request'),
-  //     body: (
-  //       <>
-  //         {`${t('You have a new connection request from')}`}{' '}
-  //         <DomainHighlighter>{connection.senderOdinId}</DomainHighlighter>
-  //       </>
-  //     ),
-  //     imgSrc: `https://${connection.senderOdinId}/pub/image`,
-  //     href: `/owner/connections/${connection.senderOdinId}`,
-  //     type: 'pending',
-  //   };
-  // });
-
   return {
-    // notifications,
     liveNotifications,
-    // hasUnread: notifications?.length ? notifications.length > 0 : false,
     dismiss,
   };
 };

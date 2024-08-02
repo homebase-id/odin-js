@@ -1,22 +1,19 @@
 import { createPortal } from 'react-dom';
 import { ReactNode, useState } from 'react';
-import {
-  ActionButton,
-  DialogWrapper,
-  Exclamation,
-  OWNER_ROOT,
-  Times,
-  t,
-  useDotYouClient,
-  useNotifications,
-  usePortal,
-  useErrors,
-  Clipboard,
-} from '@youfoundation/common-app';
-import type { Error } from '../../hooks/errors/useErrors';
+import { useErrors, type Error } from '../../hooks/errors/useErrors';
 import { useNavigate } from 'react-router-dom';
 import { formatToTimeAgoWithRelativeDetail } from '../../helpers/timeago/format';
 import { ApiType } from '@youfoundation/js-lib/core';
+import { useDotYouClient } from '../../hooks/auth/useDotYouClient';
+import { useNotifications } from '../../hooks/notifications/useNotifications';
+import { t } from '../../helpers/i18n/dictionary';
+import { usePortal } from '../../hooks/portal/usePortal';
+import { OWNER_ROOT } from '../../core';
+import { ActionButton } from '../Buttons/ActionButton';
+import { DialogWrapper } from '../Dialog/DialogWrapper';
+import { Exclamation } from '../Icons/Exclamation';
+import { Times } from '../Icons/Times';
+import { Clipboard } from '../Icons/Clipboard';
 
 export const Toaster = ({ errorOnly }: { errorOnly?: boolean }) => {
   const { getApiType } = useDotYouClient();
@@ -68,7 +65,7 @@ export const ErrorToaster = () => {
     <>
       {errors?.map((error, index) => (
         <Toast
-          title={t('Something went wrong')}
+          title={error.title || t('Something went wrong')}
           body={error.message}
           key={index}
           onDismiss={() => dismissError(error)}
@@ -182,7 +179,7 @@ export const Toast = ({
 
   return (
     <div
-      className={`relative flex max-w-sm flex-row rounded-md bg-white px-2 py-2 shadow-md dark:bg-black dark:text-slate-300 ${
+      className={`relative flex max-w-sm flex-row gap-2 rounded-md bg-white px-3 py-2 shadow-md dark:bg-black dark:text-slate-300 ${
         href || onOpen ? 'cursor-pointer' : ''
       }`}
       onClick={doOpen}
@@ -201,7 +198,7 @@ export const Toast = ({
         </div>
       ) : null}
 
-      <div className="flex-grow-1 pl-3">
+      <div className="flex-grow-1">
         <p
           className={`max-h-12 w-full overflow-hidden text-ellipsis pr-8 font-medium ${fadeAfter} after:right-8`}
         >

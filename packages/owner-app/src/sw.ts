@@ -56,7 +56,9 @@ const getNameForOdinId = async (odinId: string) => {
 const bodyFormer = async (payload: NotificationData, existingNotifications: Notification[]) => {
   const sender = (await getNameForOdinId(payload.senderId)) || payload.senderId;
 
-  if (payload.options.unEncryptedMessage) return payload.options.unEncryptedMessage;
+  if (payload.options.unEncryptedMessage)
+    return (payload.options.unEncryptedMessage || '').replace(payload.senderId, sender);
+
   if (payload.options.appId === OWNER_APP_ID) {
     // Based on type, we show different messages
     if (payload.options.typeId === OWNER_FOLLOWER_TYPE_ID) {
@@ -78,7 +80,7 @@ const bodyFormer = async (payload: NotificationData, existingNotifications: Noti
     }`;
   } else if (payload.options.appId === FEED_APP_ID) {
     if (payload.options.typeId === FEED_NEW_CONTENT_TYPE_ID) {
-      return `${sender} posted to your feed`;
+      return `${sender} uploaded a new post`;
     } else if (payload.options.typeId === FEED_NEW_REACTION_TYPE_ID) {
       return `${sender} reacted to your post`;
     } else if (payload.options.typeId === FEED_NEW_COMMENT_TYPE_ID) {
@@ -141,13 +143,42 @@ self.addEventListener('push', function (event) {
 });
 
 self.addEventListener('notificationclick', (event) => {
-  // console.log(event.notification);
-
+  console.log(event.notification);
   event.notification.close();
 
-  const tagId = event.notification?.data?.options?.tagId;
-  const examplePageURL = `/owner/notifications${tagId ? `?notification=${tagId}` : ''}`;
-  const urlToOpen = new URL(examplePageURL, self.location.origin).href;
+  const { pathToOpen, postMessageData }: { pathToOpen: string; postMessageData?: unknown } =
+    (() => {
+      if (
+        event.notification?.data?.options?.appId === CHAT_APP_ID &&
+        event.notification?.data?.options?.typeId
+      ) {
+        return {
+          pathToOpen: `/apps/chat/${event.notification?.data?.options?.typeId}`,
+        };
+      }
+
+      if (
+        event.notification?.data?.options?.appId === MAIL_APP_ID &&
+        event.notification?.data?.options?.typeId
+      ) {
+        return {
+          pathToOpen: `/apps/mail/inbox/${event.notification?.data?.options?.typeId}`,
+        };
+      }
+
+      if (event.notification?.data?.options?.appId === FEED_APP_ID) {
+        return { pathToOpen: `/apps/feed` };
+      }
+
+      const tagId = event.notification?.data?.options?.tagId;
+      return {
+        pathToOpen: `/owner/notifications${tagId ? `?notification=${tagId}` : ''}`,
+        postMessageData: { notification: tagId },
+      };
+    })();
+
+  const urlToOpen = new URL(pathToOpen, self.location.origin).href;
+  // const matchingUrl = matchingPath ? new URL(matchingPath, self.location.origin).href : '';
 
   const promiseChain = self.clients
     .matchAll({
@@ -166,7 +197,10 @@ self.addEventListener('notificationclick', (event) => {
       }
 
       if (matchingClient) {
-        matchingClient.postMessage({ notification: tagId });
+        if (postMessageData) {
+          matchingClient.postMessage(postMessageData);
+        }
+
         return matchingClient.focus();
       } else {
         return self.clients.openWindow(urlToOpen);

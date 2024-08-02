@@ -1,3 +1,4 @@
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 import { t } from '../../../../../helpers';
 import { useDotYouClient } from '../../../../../hooks';
 import { ActionGroup, Pencil, Times, Block } from '../../../../../ui';
@@ -20,16 +21,17 @@ export const CommentHead = ({
 
   const actionOptions = [];
 
-  if (isAuthor && setIsEdit && onRemove) {
+  if (identity && isAuthor && setIsEdit && onRemove) {
     actionOptions.push({ label: t('Edit'), onClick: () => setIsEdit(true), icon: Pencil });
     actionOptions.push({ label: t('Remove'), onClick: onRemove, icon: Times });
   }
 
-  if (!isAuthor) {
+  // idenity && to make sure the user is logged in
+  if (identity && !isAuthor) {
     actionOptions.push({
       icon: Block,
       label: `${t('Block this user')}`,
-      href: `https://${identity}/owner/connections/${authorOdinId}/block`,
+      href: `${new DotYouClient({ identity, api: ApiType.Guest }).getRoot()}/owner/connections/${authorOdinId}/block`,
     });
   }
 

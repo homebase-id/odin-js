@@ -1,25 +1,32 @@
 import {
-  ErrorNotification,
   FileOverview,
   EmojiSelector,
   FileSelector,
-  ImageIcon,
   VolatileInput,
   ActionButton,
   Times,
   PaperPlane,
   getImagesFromPasteEvent,
+  Plus,
+  useErrors,
+  t,
+  ellipsisAtMaxChar,
+  VolatileInputRef,
+  LinkOverview,
+  useLinkPreviewBuilder,
 } from '@youfoundation/common-app';
 import { HomebaseFile, NewMediaFile } from '@youfoundation/js-lib/core';
 
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { ChatMessage } from '../../../providers/ChatProvider';
-import { Conversation } from '../../../providers/ConversationProvider';
-import { useState, useEffect } from 'react';
+import { UnifiedConversation } from '../../../providers/ConversationProvider';
+import { useState, useEffect, useRef } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
-import { isTouchDevice } from '@youfoundation/js-lib/helpers';
+import { getNewId, isTouchDevice } from '@youfoundation/js-lib/helpers';
+import { LinkPreview } from '@youfoundation/js-lib/media';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
+const CHAT_DRAFTS_KEY = 'CHAT_LOCAL_DRAFTS';
 
 export const ChatComposer = ({
   conversation,
@@ -27,65 +34,96 @@ export const ChatComposer = ({
   clearReplyMsg,
   onSend,
 }: {
-  conversation: HomebaseFile<Conversation> | undefined;
+  conversation: HomebaseFile<UnifiedConversation> | undefined;
   replyMsg: HomebaseFile<ChatMessage> | undefined;
   clearReplyMsg: () => void;
   onSend?: () => void;
 }) => {
-  const [message, setMessage] = useState<string | undefined>();
+  const volatileRef = useRef<VolatileInputRef>(null);
+
+  const drafts = JSON.parse(localStorage.getItem(CHAT_DRAFTS_KEY) || '{}');
+  const [message, setMessage] = useState<string | undefined>(
+    conversation?.fileMetadata.appData.uniqueId
+      ? drafts[conversation.fileMetadata.appData.uniqueId] || undefined
+      : undefined
+  );
   const [files, setFiles] = useState<NewMediaFile[]>();
 
-  const {
-    mutate: sendMessage,
-    status: sendMessageState,
-    reset: resetState,
-    error: sendMessageError,
-  } = useChatMessage().send;
+  useEffect(() => {
+    if (conversation?.fileMetadata.appData.uniqueId) {
+      drafts[conversation.fileMetadata.appData.uniqueId] = message;
+      try {
+        localStorage.setItem(CHAT_DRAFTS_KEY, JSON.stringify(drafts));
+      } catch (e) {
+        /* empty */
+      }
+    }
+  }, [conversation, message]);
+
+  const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(message || '');
+
+  const addError = useErrors().add;
+  const { mutateAsync: sendMessage } = useChatMessage().send;
 
   const conversationContent = conversation?.fileMetadata.appData.content;
-  const doSend = (forcedVal?: string) => {
+  const doSend = async (forcedVal?: string) => {
     const trimmedVal = (forcedVal || message)?.trim();
+    const replyId = replyMsg?.fileMetadata.appData.uniqueId;
+    const newFiles = [...(files || [])];
+
     if (
-      (!trimmedVal && !files) ||
+      (!trimmedVal && !files?.length) ||
       !conversationContent ||
       !conversation.fileMetadata.appData.uniqueId
     )
       return;
 
-    sendMessage({
-      conversation,
-      message: trimmedVal || '',
-      replyId: replyMsg?.fileMetadata?.appData?.uniqueId,
-      files,
-    });
-    onSend && onSend();
+    // Clear internal state and allow excessive senders
+    setMessage('');
+    setFiles([]);
+    clearReplyMsg();
+    volatileRef.current?.clear();
+
+    try {
+      await sendMessage({
+        conversation,
+        message: trimmedVal || '',
+        replyId: replyId,
+        files: newFiles,
+        chatId: getNewId(),
+        userDate: new Date().getTime(),
+        linkPreviews: Object.values(linkPreviews).filter(Boolean) as LinkPreview[],
+      });
+      onSend && onSend();
+    } catch (err) {
+      addError(
+        err,
+        t('Failed to send'),
+        t('Your message "{0}" was not sent', ellipsisAtMaxChar(trimmedVal || '', 20) || '')
+      );
+    }
   };
 
-  // Reset state, when the message was sent successfully
   useEffect(() => {
-    if (sendMessageState === 'pending') {
-      setMessage('');
-      setFiles([]);
-      clearReplyMsg();
-      resetState();
-    }
-  }, [sendMessageState]);
-
-  useEffect(() => {
-    if (replyMsg) setFiles([]);
+    // When replying to a message, focus the input
+    if (replyMsg) volatileRef.current?.focus();
   }, [replyMsg]);
-
-  useEffect(() => {
-    if (files?.length) clearReplyMsg();
-  }, [files]);
 
   return (
     <>
-      <ErrorNotification error={sendMessageError} />
       <div className="bg-page-background pb-[env(safe-area-inset-bottom)]">
         <div className="max-h-[30vh] overflow-auto">
           <FileOverview files={files} setFiles={setFiles} cols={8} />
+          {files?.length ? null : (
+            <LinkOverview
+              linkPreviews={linkPreviews}
+              setLinkPreviews={setLinkPreviews}
+              cols={4}
+              className="p-2"
+            />
+          )}
         </div>
+
         {replyMsg ? <MessageForReply msg={replyMsg} onClear={clearReplyMsg} /> : null}
         <div className="flex flex-shrink-0 flex-row gap-2 px-2 py-3 md:px-5">
           <div className="my-auto flex flex-row items-center gap-1">
@@ -97,10 +135,10 @@ export const ChatComposer = ({
             <FileSelector
               onChange={(files) => setFiles(files.map((file) => ({ file })))}
               className="px-2 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
-              accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4, audio/mp3"
+              accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4, audio/mp3, application/pdf"
               maxSize={HUNDRED_MEGA_BYTES}
             >
-              <ImageIcon className="h-5 w-5" />
+              <Plus className="h-5 w-5" />
             </FileSelector>
           </div>
 
@@ -110,6 +148,7 @@ export const ChatComposer = ({
             className="w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"
             onChange={(newVal) => setMessage(newVal)}
             autoFocus={!isTouchDevice()}
+            ref={volatileRef}
             onPaste={(e) => {
               const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
 
@@ -128,7 +167,6 @@ export const ChatComposer = ({
                 e.stopPropagation();
                 doSend();
               }}
-              state={sendMessageState}
               className="flex-shrink"
               icon={PaperPlane}
               size="square"

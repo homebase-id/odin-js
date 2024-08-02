@@ -6,6 +6,7 @@ import {
   Article,
   Ellipsis,
   FEED_APP_ID,
+  FEED_CHAT_APP_ID,
   Quote,
   t,
   useRemoveNotifications,
@@ -17,6 +18,9 @@ const ConnectionsView = lazy(
 );
 const IdentityLink = lazy(
   () => import('../../components/SocialFeed/Sidebars/IdentityLink/IdentityLink')
+);
+const ChannelsOverview = lazy(
+  () => import('../../components/SocialFeed/Sidebars/ChannelsOverview/ChannelsOverview')
 );
 const FollowersView = lazy(
   () => import('../../components/SocialFeed/Sidebars/FollowersView/FollowersView')
@@ -38,7 +42,7 @@ import { useAutofixDefaultConfig } from '../../hooks/useAutofixDefaultConfig';
 
 export const SocialFeed = () => {
   const { identityKey, channelKey, postKey, attachmentKey } = useParams();
-  const isReactNative = window.localStorage.getItem('client_type') === 'react-native';
+  const isReactNative = window.localStorage.getItem('client_type')?.startsWith('react-native');
 
   useRemoveNotifications({ appId: FEED_APP_ID });
   useAutofixDefaultConfig();
@@ -57,7 +61,7 @@ export const SocialFeed = () => {
       </Helmet>
       <ExtendPermissionDialog
         appName={t('Homebase Feed')}
-        appId={FEED_APP_ID}
+        appId={isReactNative ? FEED_CHAT_APP_ID : FEED_APP_ID}
         drives={drives}
         permissions={permissions}
       />
@@ -110,6 +114,7 @@ export const SocialFeed = () => {
                   <Suspense>
                     <IdentityLink className="overflow-hidden rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm hover:shadow-md dark:border-gray-800 hover:dark:shadow-slate-600" />
                     <FollowHomebase className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
+                    <ChannelsOverview className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
                   </Suspense>
                 </div>
               ) : null}

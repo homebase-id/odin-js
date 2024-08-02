@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { NavLink, useMatch } from 'react-router-dom';
 import {
   Archive,
+  Cog,
   Envelope,
   IconProps,
   MAIL_APP_ID,
@@ -12,15 +13,11 @@ import {
   t,
   useRemoveNotifications,
 } from '@youfoundation/common-app';
-import { useAuth } from '../../hooks/auth/useAuth';
 import { useLiveMailProcessor } from '../../hooks/mail/useLiveMailProcessor';
 
 const ROOT_PATH = '/apps/mail';
 
 export const MailSidenav = () => {
-  const { logout } = useAuth();
-
-  // TODO: Check if we should move it up the render tree to have common coverage of detail views
   const isOnline = useLiveMailProcessor();
   useRemoveNotifications({ appId: MAIL_APP_ID });
 
@@ -31,7 +28,7 @@ export const MailSidenav = () => {
 
   return (
     <>
-      <Sidenav disablePinning={true} hideMobileDrawer={!isRoot} logout={logout} />
+      <Sidenav disablePinning={true} hideMobileDrawer={!isRoot} />
       <div
         className={`bottom-0 left-0 top-0 z-[11] bg-page-background ${isActive ? 'fixed right-0 flex w-full md:sticky md:right-auto md:w-[15rem]' : 'hidden md:sticky md:flex md:w-[15rem]'} flex-shrink-0 flex-col border-r border-gray-200/80 bg-background dark:border-gray-700/80`}
       >
@@ -58,6 +55,7 @@ export const MailSidenav = () => {
           <div className="mt-auto flex flex-col px-5">
             <NavItem to={`${ROOT_PATH}/trash`} icon={Trash} label={t('Trash')} />
             <NavItem to={`${ROOT_PATH}/archive`} icon={Archive} label={t('Archive')} />
+            <NavItem to={`${ROOT_PATH}/settings`} icon={Cog} label={t('Settings')} />
           </div>
         </div>
       </div>

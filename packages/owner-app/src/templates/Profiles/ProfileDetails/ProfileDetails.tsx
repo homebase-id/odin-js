@@ -16,7 +16,6 @@ import Section from '../../../components/ui/Sections/Section';
 import { Input } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import AttributeGroup from '../../../components/Attribute/AttributeGroup/AttributeGroup';
-import ProfileDialog from '../../../components/Dialog/ProfileDialog/ProfileDialog';
 import { Heart, Plus } from '@youfoundation/common-app';
 import SectionEditor from '../../../components/SectionEditor/SectionEditor';
 import { useProfileSections } from '../../../hooks/profiles/useProfileSections';
@@ -30,6 +29,7 @@ import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { ProfileSection } from '@youfoundation/js-lib/profile';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { BrokenAttribute } from '../../../components/Attribute/BrokenAttribute/BrokenAttribute';
+import ProfileDialog from '../../../components/Attribute/ProfileDialog/ProfileDialog';
 
 const ProfileDetails = () => {
   const {

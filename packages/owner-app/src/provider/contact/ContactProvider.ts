@@ -8,11 +8,12 @@ import {
   PayloadFile,
   EmbeddedThumb,
   NewHomebaseFile,
+  UploadResult,
+  getFileHeader,
 } from '@youfoundation/js-lib/core';
 import { createThumbnails } from '@youfoundation/js-lib/media';
 import {
   RawContact,
-  ContactFile,
   getContactByUniqueId,
   ContactConfig,
   CONTACT_PROFILE_IMAGE_KEY,
@@ -31,7 +32,7 @@ import {
 export const saveContact = async (
   dotYouClient: DotYouClient,
   contact: NewHomebaseFile<RawContact>
-): Promise<NewHomebaseFile<ContactFile>> => {
+): Promise<UploadResult | void> => {
   console.debug('Saving contact', { ...contact });
 
   if (contact.fileMetadata.appData.uniqueId)
@@ -123,17 +124,29 @@ export const saveContact = async (
     });
   }
 
-  const result = await uploadFile(
+  return await uploadFile(
     dotYouClient,
     instructionSet,
     metadata,
     payloads,
     thumbnails,
-    encrypt
+    encrypt,
+    async () => {
+      if (!contact.fileId) return;
+      const existingContactFile = await getFileHeader(
+        dotYouClient,
+        ContactConfig.ContactTargetDrive,
+        contact.fileId
+      );
+      if (!existingContactFile) return;
+      contact.fileMetadata.versionTag = existingContactFile.fileMetadata.versionTag;
+      return saveContact(dotYouClient, contact);
+    }
   );
-  if (!result) throw new Error('Failed to upload contact');
+  // if (!result) throw new Error('Failed to upload contact');
 
-  //update server-side info
-  contact.fileId = result.file.fileId;
-  return contact;
+  // //update server-side info
+  // contact.fileId = result.file.fileId;
+  // contact.fileMetadata.versionTag = result.newVersionTag;
+  // return contact;
 };

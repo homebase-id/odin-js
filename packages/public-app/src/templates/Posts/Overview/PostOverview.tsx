@@ -8,23 +8,30 @@ import {
   HOME_ROOT_PATH,
   SubtleMessage,
   t,
-  useBlogPostsInfinite,
+  usePostsInfinite,
+  useChannel,
+  flattenInfinteData,
+  useIntersection,
+  LoadingBlock,
+  NotFound,
+  useDotYouClient,
+  BLOG_POST_INFIITE_PAGE_SIZE,
 } from '@youfoundation/common-app';
 
 import CardPostOverview from '../../../components/Post/Overview/CardPostOverview/CardPostOverview';
 import ListPostOverview from '../../../components/Post/Overview/ListPostOverview/ListPostOverview';
 import MasonryPostOverview from '../../../components/Post/Overview/MasonryPostOverview/MasonryPostOverview';
-import { useChannel } from '@youfoundation/common-app';
-import { flattenInfinteData, useIntersection } from '@youfoundation/common-app';
+
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
-import { LoadingBlock } from '@youfoundation/common-app';
 import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { SaveCollaborativeChannelLink } from '../../../components/CollaborativeChannels/SaveCollaborativeChannelLink';
+import { PublicPostComposer } from '../../../components/CollaborativeChannels/PublicPostComposer';
 
-const PAGE_SIZE = 30;
 const PostOverview = () => {
+  const { isOwner } = useDotYouClient();
   const { channelKey } = useParams();
-  const { data: activeChannel } = useChannel(
+  const { data: activeChannel, isFetched: channelFetched } = useChannel(
     channelKey ? { channelSlug: channelKey } : { channelId: BlogConfig.PublicChannelId }
   ).fetch;
 
@@ -35,9 +42,8 @@ const PostOverview = () => {
     isFetchedAfterMount,
     isFetchingNextPage,
     isLoading,
-  } = useBlogPostsInfinite({
+  } = usePostsInfinite({
     channelId: activeChannel?.fileMetadata.appData.uniqueId,
-    pageSize: PAGE_SIZE,
     enabled: !channelKey || !!activeChannel,
   });
 
@@ -60,7 +66,7 @@ const PostOverview = () => {
 
   const blogPosts = flattenInfinteData<HomebaseFile<PostContent>>(
     data,
-    PAGE_SIZE,
+    hasMorePosts ? BLOG_POST_INFIITE_PAGE_SIZE : undefined,
     (a, b) =>
       (b.fileMetadata.appData.userDate || b.fileMetadata.updated) -
       (a.fileMetadata.appData.userDate || a.fileMetadata.updated)
@@ -71,6 +77,8 @@ const PostOverview = () => {
       SecurityGroupType.Anonymous &&
     activeChannel?.serverMetadata?.accessControlList?.requiredSecurityGroup !==
       SecurityGroupType.Authenticated;
+
+  if (channelFetched && !activeChannel) return <NotFound />;
 
   return (
     <>
@@ -105,8 +113,16 @@ const PostOverview = () => {
                 {activeChannel?.fileMetadata.appData.content.description}
               </p>
             </div>
-            <FollowLink className="sm:ml-auto" channel={activeChannel || undefined} />
+            {activeChannel ? (
+              <div className="flex flex-row gap-2 sm:ml-auto">
+                <FollowLink className="sm:ml-auto" channel={activeChannel} />
+                <SaveCollaborativeChannelLink channel={activeChannel} />
+              </div>
+            ) : null}
           </div>
+
+          {activeChannel ? <PublicPostComposer activeChannel={activeChannel} /> : null}
+
           {isLoading ? (
             <>
               <LoadingBlock className="my-2 h-24 w-full bg-background" />
@@ -114,7 +130,11 @@ const PostOverview = () => {
               <LoadingBlock className="my-2 h-24 w-full bg-background" />
             </>
           ) : blogPosts?.length && (!channelKey || activeChannel) ? (
-            <ListComponent blogPosts={blogPosts} />
+            <ListComponent
+              blogPosts={blogPosts}
+              showAuthor={activeChannel?.fileMetadata.appData.content.isCollaborative || false}
+              showChannel={activeChannel?.fileMetadata.appData.content.isCollaborative || isOwner}
+            />
           ) : (
             <SubtleMessage>{t('Nothing has been posted yet')}</SubtleMessage>
           )}

@@ -1,5 +1,5 @@
 import { stringifyToQueryParams, uint8ArrayToBase64 } from '../helpers/DataUtil';
-import { DotYouClient } from '../core/DotYouClient';
+import { ApiType, DotYouClient } from '../core/DotYouClient';
 import {
   TargetDrive,
   SystemFileType,
@@ -26,26 +26,16 @@ export const getDecryptedMediaUrl = async (
   }
 ): Promise<string> => {
   const { size, systemFileType, fileSizeLimit } = options || {};
-
-  const getDirectImageUrl = async () => {
-    const directUrl = `https://${dotYouClient.getIdentity()}/api/guest/v1/drive/files/${
-      size ? 'thumb' : 'payload'
-    }?${stringifyToQueryParams({
-      alias: targetDrive.alias,
-      type: targetDrive.type,
-      fileId: fileId,
-      ...(size
-        ? { payloadKey: fileKey, width: size.pixelWidth, height: size.pixelHeight }
-        : { key: fileKey }),
-      lastModified: lastModified,
-      xfst: systemFileType || 'Standard',
-      iac: true, // iac is a flag that tells the identity to ignore any auth cookies
-    })}`;
-
-    // if (ss) return await encryptUrl(directUrl, ss);
-
-    return directUrl;
-  };
+  const getDirectImageUrl = () =>
+    getAnonymousDirectImageUrl(
+      dotYouClient.getIdentity(),
+      targetDrive,
+      fileId,
+      fileKey,
+      size,
+      systemFileType,
+      lastModified
+    );
 
   const ss = dotYouClient.getSharedSecret();
 
@@ -91,4 +81,29 @@ export const getDecryptedMediaUrl = async (
     if (!data) return '';
     return `data:${data.contentType};base64,${uint8ArrayToBase64(new Uint8Array(data.bytes))}`;
   });
+};
+
+export const getAnonymousDirectImageUrl = (
+  identity: string,
+  targetDrive: TargetDrive,
+  fileId: string,
+  fileKey: string,
+  size?: ImageSize,
+  systemFileType?: SystemFileType,
+  lastModified?: number
+) => {
+  const dotYouClient = new DotYouClient({ identity, api: ApiType.Guest });
+  return `${dotYouClient.getEndpoint()}/drive/files/${
+    size ? 'thumb' : 'payload'
+  }?${stringifyToQueryParams({
+    alias: targetDrive.alias,
+    type: targetDrive.type,
+    fileId: fileId,
+    ...(size
+      ? { payloadKey: fileKey, width: size.pixelWidth, height: size.pixelHeight }
+      : { key: fileKey }),
+    lastModified: lastModified,
+    xfst: systemFileType || 'Standard',
+    iac: true, // iac is a flag that tells the identity to ignore any auth cookies
+  })}`;
 };

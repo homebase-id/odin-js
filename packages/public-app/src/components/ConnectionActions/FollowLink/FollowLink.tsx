@@ -1,14 +1,12 @@
-import { useState } from 'react';
-import { ActionLink, HOME_ROOT_PATH, ellipsisAtMaxChar } from '@youfoundation/common-app';
+import { ActionLink, ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { useAuth } from '../../../hooks/auth/useAuth';
 import { ChannelDefinitionVm } from '@youfoundation/common-app';
-import LoginDialog from '../../Dialog/LoginDialog/LoginDialog';
 
 import { Feed } from '@youfoundation/common-app';
 import { useFollowDetail } from '../../../hooks/follow/useFollowDetail';
 import { Check } from '@youfoundation/common-app';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 const FollowLink = ({
@@ -19,13 +17,12 @@ const FollowLink = ({
   channel?: HomebaseFile<ChannelDefinitionVm>;
 }) => {
   const { isOwner, getIdentity } = useAuth();
-  const identity = getIdentity();
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const loggedInIdentity = getIdentity();
   const { data } = useFollowDetail().fetch;
 
   if (isOwner) return null;
 
-  const alreadyFollowingThis =
+  const isFollowing =
     (!channel && data?.notificationType === 'allNotifications') ||
     (channel &&
       data?.channels?.some((chnl) =>
@@ -38,17 +35,16 @@ const FollowLink = ({
       <ActionLink
         className={`w-auto ${className ?? ''}`}
         href={
-          identity
-            ? `https://${identity}/owner/follow/following/${window.location.hostname}` +
-              (channel ? `?chnl=${channel.fileMetadata.appData.uniqueId}` : '')
-            : undefined
+          (loggedInIdentity
+            ? `${new DotYouClient({ identity: loggedInIdentity, api: ApiType.Guest }).getRoot()}/owner/follow/following/${window.location.hostname}`
+            : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect/follow/following/${window.location.hostname}`) +
+          (channel ? `?chnl=${channel.fileMetadata.appData.uniqueId}` : '')
         }
-        onClick={!identity ? () => setIsLoginOpen(true) : undefined}
-        icon={alreadyFollowingThis ? Check : Feed}
-        type={alreadyFollowingThis ? 'secondary' : 'primary'}
+        icon={isFollowing ? Check : Feed}
+        type={isFollowing ? 'secondary' : 'primary'}
       >
         <span className="flex flex-col leading-tight">
-          {alreadyFollowingThis ? t('Following') : t('Follow')}
+          {isFollowing ? t('Following') : t('Follow')}
           {channel ? (
             <small className="block">
               {ellipsisAtMaxChar(channel.fileMetadata.appData.content.name, 20)}
@@ -56,17 +52,6 @@ const FollowLink = ({
           ) : null}
         </span>
       </ActionLink>
-      <LoginDialog
-        title={t('Login')}
-        isOpen={isLoginOpen}
-        onCancel={() => setIsLoginOpen(false)}
-        returnPath={`${HOME_ROOT_PATH}action?targetPath=${
-          `/owner/follow/following/${window.location.hostname}` +
-          (channel ? `?chnl=${channel.fileMetadata.appData.uniqueId}` : '')
-        }`}
-      >
-        {t('You need to login before you can follow someone:')}
-      </LoginDialog>
     </>
   );
 };

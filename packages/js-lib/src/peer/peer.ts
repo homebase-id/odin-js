@@ -9,6 +9,8 @@ export * from './peerData/Query/PeerDriveQueryProvider';
 
 export * from './peerData/Upload/PeerUploadProvider';
 
+export * from './peerData/File/PeerReadProvider';
+
 // Inbox
 export * from './peerData/InboxProvider';
 
@@ -22,3 +24,5 @@ export * from './peerData/ExternalPostsDataProvider';
 
 // Profile
 export * from './peerData/ExternalProfileDataProvider';
+
+export * from './peerData/PeerTypes';

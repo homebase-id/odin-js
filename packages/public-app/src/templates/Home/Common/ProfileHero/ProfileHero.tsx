@@ -24,7 +24,7 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
   return (
     <>
       <section className="bg-background">
-        <div className="relative min-h-[10rem] bg-slate-50">
+        <div className="relative min-h-[10rem] bg-background">
           <Image
             fileId={(home?.templateSettings as ThemeLinksSettings)?.imageFileId}
             fileKey={(home?.templateSettings as ThemeLinksSettings)?.headerImageKey}
@@ -39,7 +39,7 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
             <div className="container absolute bottom-0 left-0 right-0 top-0 mx-auto flex justify-center px-5 md:block">
               <a
                 onClick={() => setIsImageLightboxOpen(true)}
-                className="w-h-32 absolute bottom-[-4.5rem] block h-32 cursor-pointer overflow-hidden rounded-full border-4 border-page-background bg-background sm:h-40 sm:w-40 md:bottom-[-7.5rem] md:h-60 md:w-60"
+                className="absolute bottom-[-4.5rem] block h-32 w-32 cursor-pointer overflow-hidden rounded-full border-4 border-page-background bg-background sm:h-40 sm:w-40 md:bottom-[-7.5rem] md:h-60 md:w-60"
               >
                 <Image
                   fileId={owner?.profileImageFileId}

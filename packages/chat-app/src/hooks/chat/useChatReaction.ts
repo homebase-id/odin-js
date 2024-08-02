@@ -1,15 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ReactionFile } from '@youfoundation/js-lib/core';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import {
-  ChatDrive,
-  Conversation,
-  GroupConversation,
-  SingleConversation,
-} from '../../providers/ConversationProvider';
+
+import { ChatDrive } from '../../providers/ConversationProvider';
+import { HomebaseFile, ReactionFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../providers/ChatProvider';
 import { deleteReaction, getReactions, uploadReaction } from '../../providers/ChatReactionProvider';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { UnifiedConversation } from '../../providers/ConversationProvider';
 
 export const useChatReaction = (props?: {
   messageGlobalTransitId: string | undefined;
@@ -40,14 +36,13 @@ export const useChatReaction = (props?: {
     message,
     reaction,
   }: {
-    conversation: HomebaseFile<Conversation>;
+    conversation: HomebaseFile<UnifiedConversation>;
     message: HomebaseFile<ChatMessage>;
     reaction: string;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
-    const recipients =
-      (conversationContent as GroupConversation).recipients ||
-      [(conversationContent as SingleConversation).recipient].filter(Boolean);
+    const identity = dotYouClient.getIdentity();
+    const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     if (!message.fileMetadata.globalTransitId)
       throw new Error('Message does not have a global transit id');
@@ -65,14 +60,13 @@ export const useChatReaction = (props?: {
     message,
     reaction,
   }: {
-    conversation: HomebaseFile<Conversation>;
+    conversation: HomebaseFile<UnifiedConversation>;
     message: HomebaseFile<ChatMessage>;
     reaction: ReactionFile;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
-    const recipients =
-      (conversationContent as GroupConversation).recipients ||
-      [(conversationContent as SingleConversation).recipient].filter(Boolean);
+    const identity = dotYouClient.getIdentity();
+    const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     if (!message.fileMetadata.globalTransitId)
       throw new Error('Message does not have a global transit id');

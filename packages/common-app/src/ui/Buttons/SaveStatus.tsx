@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ActionButtonState, t } from '@youfoundation/common-app';
-
-import { Alert } from '@youfoundation/common-app';
 import { formatToTimeAgo } from '../../helpers/timeago';
+import { t } from '../../helpers';
+import { Alert } from '../Alert/Alert';
+import { ActionButtonState } from './ActionButton';
 
 export const SaveStatus = ({
   className,
@@ -14,7 +14,7 @@ export const SaveStatus = ({
   error?: unknown;
 }) => {
   const [lastSave, setLastSave] = useState<Date>();
-  const [now, setNow] = useState<Date>(new Date());
+  const [, setNow] = useState<Date>(new Date());
   useEffect(() => {
     if (state === 'success') {
       setLastSave(new Date());
@@ -23,14 +23,12 @@ export const SaveStatus = ({
 
   // Use effect to trigger a render each 5s
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const timer = setInterval(() => {
       setNow(new Date());
-    }, 5000);
+    }, 1000);
 
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [now]);
+    return () => clearInterval(timer);
+  }, [setNow]);
 
   if (state === 'loading' || state === 'pending') {
     return <p className={`${className} text-sm`}>Saving...</p>;

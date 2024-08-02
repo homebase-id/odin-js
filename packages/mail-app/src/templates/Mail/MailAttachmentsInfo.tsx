@@ -10,6 +10,7 @@ import {
   FakeAnchor,
   ImageIcon,
   OwnerImage,
+  bytesToSize,
   t,
   usePortal,
 } from '@youfoundation/common-app';
@@ -19,7 +20,7 @@ import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext'
 import { OdinPreviewImage } from '@youfoundation/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ROOT_PATH } from '../../app/App';
-import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app/src/helpers/timeago/format';
+import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
 
 export const MailAttachmentsInfo = ({
   mailThread,
@@ -146,14 +147,6 @@ const FileGroup = ({
   );
 };
 
-const bytesToSize = (bytes: number) => {
-  return bytes < 1024
-    ? `${bytes} B`
-    : bytes < 1024 * 1024
-      ? `${(bytes / 1024).toFixed(2)} KB`
-      : `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-};
-
 export const AttachmentFile = ({ file }: { file: ExtendedFile }) => {
   const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getIdentity();
@@ -183,7 +176,7 @@ export const AttachmentFile = ({ file }: { file: ExtendedFile }) => {
           fileKey={file.key}
           targetDrive={MailDrive}
           lastModified={file.lastModified}
-          className="h-12 w-12"
+          className="h-12 w-12 object-cover"
         />
       ) : (
         <ExtensionThumbnail contentType={file.contentType} className="h-12 w-12" />

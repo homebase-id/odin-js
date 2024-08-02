@@ -1,9 +1,12 @@
 import { FC, ReactNode, useState } from 'react';
-import { ConfirmDialog, ConfirmDialogProps } from '@youfoundation/common-app';
-import { IconProps, Loader, Check, Exclamation } from '@youfoundation/common-app';
 
 export type ActionButtonState = 'pending' | 'loading' | 'success' | 'error' | 'idle';
 import { ButtonColors } from './ColorConfig';
+import { ConfirmDialogProps, ConfirmDialog } from '../../dialogs';
+import { Check } from '../Icons/Check';
+import { Exclamation } from '../Icons/Exclamation';
+import { Loader } from '../Icons/Loader';
+import { IconProps } from '../Icons/Types';
 
 export interface ActionButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
   children?: ReactNode;
@@ -12,7 +15,7 @@ export interface ActionButtonProps extends React.HTMLAttributes<HTMLButtonElemen
   type?: 'primary' | 'secondary' | 'remove' | 'mute';
   state?: ActionButtonState;
   isDisabled?: boolean;
-  onClick?: React.MouseEventHandler<HTMLElement>;
+  onClick?: (e: React.MouseEvent<HTMLElement>, skipNextTime?: boolean) => void;
   title?: string;
   size?: 'large' | 'small' | 'square' | 'none';
   confirmOptions?: Omit<ConfirmDialogProps, 'onConfirm' | 'onCancel'>;
@@ -69,7 +72,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
 
   const widthClasses =
     children && type !== 'mute' && size !== 'square'
-      ? `${className?.indexOf('w-full') !== -1 ? '' : 'w-full sm:w-auto'}`
+      ? `${className && className?.indexOf('w-full') !== -1 ? '' : 'w-full sm:w-auto'}`
       : '';
 
   const sizeClasses =
@@ -116,9 +119,9 @@ export const ActionButton: FC<ActionButtonProps> = ({
       {confirmOptions && onClick && needsConfirmation ? (
         <ConfirmDialog
           {...confirmOptions}
-          onConfirm={() => {
+          onConfirm={(_e, skipNextTime) => {
             setNeedsConfirmation(false);
-            onClick && mouseEvent && onClick(mouseEvent);
+            onClick && mouseEvent && onClick(mouseEvent, skipNextTime);
           }}
           onCancel={() => setNeedsConfirmation(false)}
         />

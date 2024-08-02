@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { ActionButton, t } from '@youfoundation/common-app';
-import { Exclamation } from '@youfoundation/common-app';
-import { Pencil } from '@youfoundation/common-app';
-import { Trash } from '@youfoundation/common-app';
-import { ImageDialog } from '@youfoundation/common-app';
+import { ActionButton } from '../../ui/Buttons/ActionButton';
+import { Pencil } from '../../ui/Icons/Pencil';
+import { Trash } from '../../ui/Icons/Trash';
+import { Exclamation } from '../../ui/Icons/Exclamation';
+import { ImageDialog } from './ImageDialog/ImageDialog';
+import { t } from '../../helpers/i18n/dictionary';
 
 interface ImageSelectorProps
   extends Omit<

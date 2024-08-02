@@ -1,31 +1,38 @@
 import { FC, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import {
-  ActionButton,
-  ActionButtonProps,
-  ConfirmDialogProps,
-  Ellipsis,
-  FakeAnchor,
-  t,
-  useMostSpace,
-  usePortal,
-} from '@youfoundation/common-app';
-import { ConfirmDialog } from '@youfoundation/common-app';
+import { ConfirmDialogProps, ConfirmDialog, OptionDialogProps, OptionDialog } from '../../dialogs';
+import { t } from '../../helpers';
+import { usePortal, useOutsideTrigger, useMostSpace } from '../../hooks';
+import { Ellipsis } from '../Icons/Ellipsis';
+import { IconProps } from '../Icons/Types';
+import { ActionButtonProps, ActionButton } from './ActionButton';
+import { FakeAnchor } from './FakeAnchor';
 
-import { IconProps, useOutsideTrigger } from '@youfoundation/common-app';
-
-export interface ActionGroupOptionProps {
+export interface ActionGroupOptionPropsBase {
   icon?: FC<IconProps>;
   label: string;
   onClick?: React.MouseEventHandler<HTMLElement>;
   href?: string;
-  confirmOptions?: Omit<ConfirmDialogProps, 'onConfirm' | 'onCancel'>;
+
   className?: string;
 }
 
+export interface ActionGroupOptionPropsWithConfirmation extends ActionGroupOptionPropsBase {
+  confirmOptions?: Omit<ConfirmDialogProps, 'onConfirm' | 'onCancel'>;
+}
+
+export interface ActionGroupOptionPropsWithOptions extends ActionGroupOptionPropsBase {
+  onClick: undefined;
+  actionOptions?: Omit<OptionDialogProps, 'onCancel'>;
+}
+
+export type ActionGroupOptionProps =
+  | ActionGroupOptionPropsWithConfirmation
+  | ActionGroupOptionPropsWithOptions;
+
 export interface ActionGroupProps extends Omit<ActionButtonProps, 'onClick'> {
   buttonClassName?: string;
-  options: ActionGroupOptionProps[];
+  options: (ActionGroupOptionProps | undefined)[];
 }
 
 export const ActionGroup = ({
@@ -54,7 +61,7 @@ export const ActionGroup = ({
       } overflow-auto rounded-md border-gray-200 border-opacity-80 shadow-md dark:border-gray-700`}
     >
       <ul className={`block`}>
-        {options.map((option) => {
+        {(options.filter(Boolean) as ActionGroupOptionProps[]).map((option) => {
           return (
             <ActionOption
               {...option}
@@ -66,7 +73,11 @@ export const ActionGroup = ({
             />
           );
         })}
-        <ActionOption onClick={() => setIsOpen(false)} label={'Close'} className="md:hidden" />
+        <ActionOption
+          onClick={() => setIsOpen(false)}
+          label={'Close'}
+          className="text-foreground/60 md:hidden"
+        />
       </ul>
     </div>
   );
@@ -118,10 +129,14 @@ const ActionOption = ({
   label,
   onClick,
   href,
-  confirmOptions,
   className,
+  ...props
 }: ActionGroupOptionProps) => {
+  const confirmOptions = 'confirmOptions' in props ? props.confirmOptions : undefined;
+  const actionOptions = 'actionOptions' in props ? props.actionOptions : undefined;
+
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const [needsOption, setNeedsOption] = useState(false);
   const [mouseEvent, setMouseEvent] = useState<React.MouseEvent<HTMLElement> | null>();
 
   return (
@@ -142,13 +157,21 @@ const ActionOption = ({
                   setMouseEvent(e);
                   return false;
                 }
+              : actionOptions
+              ? (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setNeedsOption(true);
+                  setMouseEvent(e);
+                  return false;
+                }
               : onClick
-                ? (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onClick(e);
-                  }
-                : undefined
+              ? (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onClick(e);
+                }
+              : undefined
           }
           className="flex w-full flex-row px-5 py-3 md:px-3 md:py-2"
         >
@@ -165,6 +188,20 @@ const ActionOption = ({
             onClick(mouseEvent);
           }}
           onCancel={() => setNeedsConfirmation(false)}
+        />
+      ) : null}
+      {actionOptions && needsOption ? (
+        <OptionDialog
+          {...actionOptions}
+          options={actionOptions.options.filter(Boolean).map((option) => ({
+            ...option,
+            onClick: () => {
+              if (!mouseEvent) return;
+              setNeedsOption(false);
+              option?.onClick(mouseEvent);
+            },
+          }))}
+          onCancel={() => setNeedsOption(false)}
         />
       ) : null}
     </>

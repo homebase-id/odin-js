@@ -1,7 +1,6 @@
 import { AxiosResponse } from 'axios';
 import { DotYouClient } from '../DotYouClient';
 
-import { getSecuredBlob, streamToByteArray } from './Upload/UploadHelpers';
 import { cbcEncrypt, streamEncryptWithCbc, cbcDecrypt } from '../../helpers/AesEncrypt';
 import {
   jsonStringify64,
@@ -11,6 +10,7 @@ import {
   mergeByteArrays,
 } from '../../helpers/DataUtil';
 import { EncryptedKeyHeader, FileMetadata, KeyHeader } from './File/DriveFileTypes';
+import { getSecuredBlob, streamToByteArray } from '../../helpers/BlobHelpers';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
@@ -117,8 +117,8 @@ export const decryptJsonContent = async (
     const cipher = base64ToUint8Array(fileMetaData.appData.content);
     return byteArrayToString(await decryptUsingKeyHeader(cipher, keyheader));
   } catch (err) {
-    console.error('[DotYouCore-js]', 'Json Content Decryption failed', err);
-    return '';
+    console.warn('[DotYouCore-js]', 'Json Content Decryption failed', err);
+    throw new Error('[DotYouCore-js] Json Content Decryption failed');
   }
 };
 

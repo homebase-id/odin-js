@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ActionButton, Pencil, t } from '@youfoundation/common-app';
+import { ActionButton, ActionGroup, HeartBeat, Pencil, t } from '@youfoundation/common-app';
 import { useDrive } from '../../../hooks/drives/useDrive';
 
 import { HardDrive } from '@youfoundation/common-app';
@@ -12,14 +12,15 @@ import AppMembershipView from '../../../components/PermissionViews/AppPermission
 import { CirclePermissionView } from '@youfoundation/common-app';
 import { useApps } from '../../../hooks/apps/useApps';
 import { useCircles } from '@youfoundation/common-app';
-import DriveCircleAccessDialog from '../../../components/Dialog/DriveCircleAccessDialog/DriveCircleAccessDialog';
-import DriveAppAccessDialog from '../../../components/Dialog/DriveAppAccessDialog/DriveAppAccessDialog';
-import FileBrowser from '../../../components/FileBrowser/FileBrowser';
 import { Download } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { getDrivePermissionFromNumber, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { TRANSIENT_TEMP_DRIVE_ALIAS } from '@youfoundation/js-lib/core';
-import DriveMetadataEditDialog from '../../../components/Dialog/DriveCircleAccessDialog/DriveMetadataEditDialog';
+import DriveAppAccessDialog from '../../../components/Drives/DriveAppAccessDialog/DriveAppAccessDialog';
+import DriveCircleAccessDialog from '../../../components/Drives/DriveCircleAccessDialog/DriveCircleAccessDialog';
+import DriveMetadataEditDialog from '../../../components/Drives/DriveCircleAccessDialog/DriveMetadataEditDialog';
+import { DriveStatusDialog } from '../../../components/Drives/DriveStatusDialog/DriveStatusDialog';
+import FileBrowser from '../../../components/Drives/FileBrowser/FileBrowser';
 
 const DriveDetails = () => {
   const { driveKey } = useParams();
@@ -41,6 +42,7 @@ const DriveDetails = () => {
   const [isDriveEditOpen, setIsDriveEditOpen] = useState(false);
   const [isCircleSelectorOpen, setIsCircleSelectorOpen] = useState(false);
   const [isAppSelectorOpen, setIsAppSelectorOpen] = useState(false);
+  const [isShowDriveStatus, setIsShowDriveStatus] = useState(false);
 
   if (driveDefLoading) return <LoadingDetailPage />;
 
@@ -51,16 +53,16 @@ const DriveDetails = () => {
   const circlesWithAGrantOnThis = circles?.filter((circle) =>
     circle.driveGrants?.some(
       (grant) =>
-        grant.permissionedDrive.drive.alias === targetDriveInfo.alias &&
-        grant.permissionedDrive.drive.type === targetDriveInfo.type
+        stringGuidsEqual(grant.permissionedDrive.drive.alias, targetDriveInfo.alias) &&
+        stringGuidsEqual(grant.permissionedDrive.drive.type, targetDriveInfo.type)
     )
   );
 
   const appsWithAGrantOnThis = apps?.filter((app) =>
     app.grant.driveGrants.some(
       (grant) =>
-        grant.permissionedDrive.drive.alias === targetDriveInfo.alias &&
-        grant.permissionedDrive.drive.type === targetDriveInfo.type
+        stringGuidsEqual(grant.permissionedDrive.drive.alias, targetDriveInfo.alias) &&
+        stringGuidsEqual(grant.permissionedDrive.drive.type, targetDriveInfo.type)
     )
   );
 
@@ -79,14 +81,22 @@ const DriveDetails = () => {
         title={`${driveDef.name}`}
         actions={
           <>
-            <ActionButton
-              onClick={async () => doDownload(await exportUnencrypted(driveDef))}
+            <ActionGroup
+              options={[
+                {
+                  label: 'Export',
+                  icon: Download,
+                  onClick: async () => doDownload(await exportUnencrypted(driveDef)),
+                },
+                {
+                  label: 'Drive Status',
+                  icon: HeartBeat,
+                  onClick: () => setIsShowDriveStatus(true),
+                },
+              ]}
               state={exportStatus}
               type="secondary"
-              icon={Download}
-            >
-              {t('Export')}
-            </ActionButton>
+            />
           </>
         }
         breadCrumbs={[
@@ -106,6 +116,16 @@ const DriveDetails = () => {
         <ul>
           {driveDef.allowAnonymousReads ? <li>{t('Allow Anonymous Reads')}</li> : null}
           {driveDef.ownerOnly ? <li>{t('Owner only')}</li> : null}
+          {driveDef?.attributes ? (
+            <>
+              {Object.keys(driveDef.attributes).map((attrKey) => (
+                <li key={attrKey}>
+                  {attrKey}: {driveDef.attributes[attrKey]}
+                </li>
+              ))}
+            </>
+          ) : null}
+          <li className="my-3 border-b border-slate-200 dark:border-slate-800"></li>
           <li>Alias: {driveDef.targetDriveInfo.alias}</li>
           <li>Type: {driveDef.targetDriveInfo.type}</li>
         </ul>
@@ -126,11 +146,22 @@ const DriveDetails = () => {
         >
           <ul className="flex flex-col items-start gap-4">
             {circlesWithAGrantOnThis.map((circle) => {
-              const matchingGrant = circle.driveGrants?.find(
+              const matchingGrants = circle.driveGrants?.filter(
                 (grant) =>
-                  grant.permissionedDrive.drive.alias === targetDriveInfo.alias &&
-                  grant.permissionedDrive.drive.type === targetDriveInfo.type
+                  stringGuidsEqual(grant.permissionedDrive.drive.alias, targetDriveInfo.alias) &&
+                  stringGuidsEqual(grant.permissionedDrive.drive.type, targetDriveInfo.type)
               );
+
+              const matchingGrant = matchingGrants?.reduce(
+                (prev, current) =>
+                  !prev ||
+                  current.permissionedDrive.permission.length >
+                    prev.permissionedDrive.permission.length
+                    ? current
+                    : prev,
+                matchingGrants[0]
+              );
+
               return (
                 <CirclePermissionView
                   circleDef={circle}
@@ -200,6 +231,12 @@ const DriveDetails = () => {
         onCancel={() => setIsAppSelectorOpen(false)}
         onConfirm={() => setIsAppSelectorOpen(false)}
         title={`${t('Edit access on')} ${driveDef.name}`}
+      />
+
+      <DriveStatusDialog
+        targetDrive={targetDriveInfo}
+        isOpen={isShowDriveStatus}
+        onClose={() => setIsShowDriveStatus(false)}
       />
     </>
   );

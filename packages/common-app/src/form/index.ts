@@ -13,4 +13,6 @@ export * from './image/ImageDialog/ImageCropper';
 export * from './files/ExtensionThumbnail';
 export * from './files/FileOverview';
 export * from './files/FileSelector';
+export * from './links/LinkOverview';
 export * from './VolatileInput';
+export * from './DictionaryEditor';

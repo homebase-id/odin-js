@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   decryptJsonContent,
   decryptKeyHeader,
@@ -11,11 +11,15 @@ import {
   queryBatch,
   SystemFileType,
   TargetDrive,
+  getFileHeader,
+  getFileHeaderByUniqueId,
 } from '@youfoundation/js-lib/core';
 import { useAuth } from '../auth/useAuth';
 import { jsonStringify64, tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { getFileHeaderBytesOverPeerByGlobalTransitId } from '@youfoundation/js-lib/peer';
 
 const includeMetadataHeader = true;
+const includeTransferHistory = true;
 const pageSize = 300;
 
 export const useFiles = ({
@@ -37,7 +41,12 @@ export const useFiles = ({
     const response = await queryBatch(
       dotYouClient,
       { targetDrive, systemFileType },
-      { cursorState: pageParam, maxRecords: pageSize, includeMetadataHeader: includeMetadataHeader }
+      {
+        cursorState: pageParam,
+        maxRecords: pageSize,
+        includeMetadataHeader,
+        includeTransferHistory,
+      }
     );
     return response;
   };
@@ -52,6 +61,41 @@ export const useFiles = ({
       enabled: !!targetDrive,
     }),
   };
+};
+
+export const useFileQuery = ({
+  targetDrive,
+  id,
+}: {
+  targetDrive: TargetDrive | undefined;
+  id: string | undefined;
+}) => {
+  const dotYouClient = useAuth().getDotYouClient();
+
+  return useQuery({
+    queryKey: ['file', targetDrive?.alias, id],
+    queryFn: async () => {
+      if (!id || !targetDrive) return null;
+
+      // Search by fileId
+      const fileByFileId = await getFileHeader(dotYouClient, targetDrive, id);
+      if (fileByFileId) return fileByFileId;
+
+      // Search by uniqueId
+      const fileByUniqueId = await getFileHeaderByUniqueId(dotYouClient, targetDrive, id);
+      if (fileByUniqueId) return fileByUniqueId;
+
+      // Search by globalTransitId
+      const fileByGlobalTransitId = await getFileHeaderBytesOverPeerByGlobalTransitId(
+        dotYouClient,
+        window.location.hostname,
+        targetDrive,
+        id
+      );
+      if (fileByGlobalTransitId) return fileByGlobalTransitId;
+    },
+    enabled: !!targetDrive && !!id,
+  });
 };
 
 export const useFile = ({
@@ -78,13 +122,18 @@ export const useFile = ({
       );
     }
 
-    const decryptedJsonContent =
-      result.fileMetadata.appData.content && result.fileMetadata.isEncrypted
-        ? await decryptJsonContent(
-            result.fileMetadata,
-            await decryptKeyHeader(dotYouClient, result.sharedSecretEncryptedKeyHeader)
-          )
-        : result.fileMetadata.appData.content;
+    const decryptedJsonContent = await (async () => {
+      try {
+        return result.fileMetadata.appData.content && result.fileMetadata.isEncrypted
+          ? await decryptJsonContent(
+              result.fileMetadata,
+              await decryptKeyHeader(dotYouClient, result.sharedSecretEncryptedKeyHeader)
+            )
+          : result.fileMetadata.appData.content;
+      } catch (e) {
+        return '{"error":"Failed to decrypt file"}';
+      }
+    })();
 
     const exportable = {
       fileId: result.fileId,
@@ -95,6 +144,7 @@ export const useFile = ({
           content: tryJsonParse(decryptedJsonContent),
         },
       },
+      serverMetadata: result.serverMetadata,
       defaultPayload: result.fileMetadata.payloads.some(
         (payload) => payload.contentType === 'application/json'
       )

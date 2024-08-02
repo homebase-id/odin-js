@@ -4,16 +4,18 @@ import { Plus, SubtleMessage, t } from '@youfoundation/common-app';
 import { useCircles } from '@youfoundation/common-app';
 import { Circles as CirclesIcon } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
-import CircleDialog from '../../../components/Dialog/CircleDialog/CircleDialog';
+
 import { LoadingBlock } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { useCircle } from '@youfoundation/common-app';
 import { Ellipsis } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { CircleDefinition } from '@youfoundation/js-lib/network';
+import { ALL_CONNECTIONS_CIRCLE_ID, CircleDefinition } from '@youfoundation/js-lib/network';
 import ContactImage from '../../../components/Connection/ContactImage/ContactImage';
 import { CompanyImage } from '../../../components/Connection/CompanyImage/CompanyImage';
 import { DrivePermissionType } from '@youfoundation/js-lib/core';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import CircleDialog from '../../../components/Circles/CircleDialog/CircleDialog';
 
 const Circles = () => {
   const {
@@ -85,6 +87,7 @@ const Circles = () => {
 
 const CircleCardLink = ({ circleDef }: { circleDef: CircleDefinition }) => {
   const { data: members } = useCircle({ circleId: circleDef.id }).fetchMembers;
+  const isSystemCircle = stringGuidsEqual(circleDef.id, ALL_CONNECTIONS_CIRCLE_ID);
 
   return (
     <CardLink
@@ -104,6 +107,7 @@ const CircleCardLink = ({ circleDef }: { circleDef: CircleDefinition }) => {
                         key={member.domain}
                         className="-mr-2 h-7 w-7 overflow-hidden rounded-full border last:mr-0 dark:border-slate-500"
                         fallbackSize="xs"
+                        canSave={true}
                       />
                     ) : (
                       <CompanyImage
@@ -126,7 +130,11 @@ const CircleCardLink = ({ circleDef }: { circleDef: CircleDefinition }) => {
           ) : null}
         </span>
       }
-      description={circleDef.description}
+      description={
+        isSystemCircle
+          ? t('This is a built-in circle, that contains all your connections.')
+          : circleDef.description || ' '
+      }
       isDisabled={circleDef.disabled}
       href={`/owner/circles/${circleDef.id ? encodeURIComponent(circleDef.id) : ''}`}
     />

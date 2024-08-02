@@ -5,7 +5,8 @@ import { Link } from 'react-router-dom';
 import {
   ChannelDefinitionVm,
   HOME_ROOT_PATH,
-  useBlogPostsInfinite,
+  PrimaryMedia,
+  usePostsInfinite,
 } from '@youfoundation/common-app';
 import { Arrow, Image, Video } from '@youfoundation/common-app';
 
@@ -13,7 +14,7 @@ import { t } from '@youfoundation/common-app';
 import { ActionLink } from '@youfoundation/common-app';
 
 import './PostChannelTeaser.css';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile, PayloadDescriptor } from '@youfoundation/js-lib/core';
 
 interface PostChannelTeaserProps {
   className?: string;
@@ -34,7 +35,7 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
   const [clientWidth, setClientWidth] = useState<number>();
   const scrollContainer = useRef<HTMLDivElement>(null);
 
-  const { data: blogPosts, isFetched: blogsFetched } = useBlogPostsInfinite({
+  const { data: blogPosts, isFetched: blogsFetched } = usePostsInfinite({
     channelId: channel?.fileMetadata.appData.uniqueId,
   });
   const flattenedPosts = blogPosts ? blogPosts?.pages?.flatMap((page) => page.results) : [];
@@ -168,47 +169,33 @@ interface PostTeaserProps {
 }
 
 const PostTeaser: FC<PostTeaserProps> = ({ className, postFile, linkRoot }) => {
-  const blog = postFile.fileMetadata.appData.content;
-  const previewThumbnail = postFile.fileMetadata.appData.previewThumbnail;
-  const isEncrypted = postFile.fileMetadata.isEncrypted;
-  const lastModified = postFile.fileMetadata.updated;
+  const postContent = postFile.fileMetadata.appData.content;
+
+  const primaryPayload = postFile.fileMetadata.payloads.find(
+    (pyld) => pyld.key === postContent.primaryMediaFile?.fileKey
+  ) as PayloadDescriptor;
 
   return (
     <div className={`mb-0 h-full flex-shrink-0 flex-grow-0 p-1 ${className}`}>
-      <Link to={linkRoot + (blog.slug ?? '#')} className="flex flex-col">
-        <div className="aspect-video overflow-hidden transition-transform duration-300 hover:scale-110">
-          {blog.primaryMediaFile ? (
-            blog.primaryMediaFile.type !== 'video' ? (
-              <Image
-                className="h-full w-full object-cover object-center"
-                fileId={blog.primaryMediaFile.fileId}
-                fileKey={blog.primaryMediaFile.fileKey}
-                lastModified={lastModified}
-                targetDrive={getChannelDrive(blog.channelId)}
-                alt="blog"
-                fit="cover"
-                previewThumbnail={previewThumbnail}
-                probablyEncrypted={isEncrypted}
-              />
-            ) : (
-              <Video
-                targetDrive={getChannelDrive(blog.channelId)}
-                fileId={blog.primaryMediaFile.fileId}
-                fileKey={blog.primaryMediaFile.fileKey}
-                lastModified={lastModified}
-                className={className}
-                probablyEncrypted={isEncrypted}
-                previewThumbnail={previewThumbnail}
-              />
-            )
+      <Link to={linkRoot + (postContent.slug ?? '#')} className="flex flex-col">
+        <div className="relative aspect-video overflow-hidden transition-transform duration-300 hover:scale-110">
+          {postContent.primaryMediaFile && primaryPayload ? (
+            <PrimaryMedia
+              file={primaryPayload}
+              fileId={postFile.fileId}
+              channelId={postContent.channelId}
+              previewThumbnail={postFile.fileMetadata.appData.previewThumbnail}
+              lastModified={primaryPayload.lastModified || postFile.fileMetadata.updated}
+              probablyEncrypted={postFile.fileMetadata.isEncrypted}
+            />
           ) : (
-            <div className="flex h-full items-center bg-slate-200 p-2  text-center dark:bg-slate-700">
-              {blog.caption}
+            <div className="flex h-full w-full overflow-hidden bg-slate-50 text-slate-200 dark:bg-slate-700 dark:text-slate-600">
+              <p className="absolute inset-0 p-2 text-6xl leading-none">{postContent.caption}</p>
             </div>
           )}
         </div>
         <h2 className="title-font fade-overflow max-h-16 whitespace-normal break-words pt-2 text-lg text-opacity-90">
-          {blog.caption}
+          {postContent.caption}
         </h2>
       </Link>
     </div>

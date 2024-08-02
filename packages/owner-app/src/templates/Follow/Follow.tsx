@@ -1,6 +1,5 @@
 import { useRef } from 'react';
 import { useMatch, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import IdentityIFollowEditDialog from '../../components/Dialog/IdentityIFollowEditDialog/IdentityIFollowEditDialog';
 import {
   ActionGroup,
   Block,
@@ -13,17 +12,23 @@ import {
   useDotYouClient,
   House,
   AddressBook,
+  OWNER_APP_ID,
+  useRemoveNotifications,
 } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
 import { Times } from '@youfoundation/common-app';
 import { t, useIdentityIFollow } from '@youfoundation/common-app';
-import IdentityThatFollowsDialog from '../../components/Dialog/IdentityIFollowEditDialog/IdentityThatFollowsDialog';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import Submenu from '../../components/SubMenu/SubMenu';
 import { useConnectionActions } from '../../hooks/connections/useConnectionActions';
+import IdentityIFollowEditDialog from '../../components/Followers/IdentityIFollowEditDialog/IdentityIFollowEditDialog';
+import IdentityThatFollowsDialog from '../../components/Followers/IdentityIFollowEditDialog/IdentityThatFollowsDialog';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 
 const Follow = () => {
   const followersMatch = useMatch({ path: 'owner/follow/followers/*' });
+
+  useRemoveNotifications({ appId: OWNER_APP_ID });
 
   return (
     <>
@@ -53,7 +58,7 @@ const Following = () => {
 
   const {
     fetch: { data: followingPages, isLoading: isFollowingLoading, hasNextPage, fetchNextPage },
-  } = useFollowingInfinite({ pageSize: 10 });
+  } = useFollowingInfinite();
   const following = followingPages?.pages?.flatMap((page) => page?.results);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   useIntersection(
@@ -106,7 +111,7 @@ const Followers = () => {
     isLoading: isFollowersLoading,
     hasNextPage,
     fetchNextPage,
-  } = useFollowerInfinite({ pageSize: 10 });
+  } = useFollowerInfinite();
   const followers = followersPages?.pages?.flatMap((page) => page?.results);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   useIntersection(
@@ -185,7 +190,7 @@ const FollowIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void
               label: t('Open homepage'),
               onClick: () => {
                 window.open(
-                  `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
+                  `${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
                   '_blank'
                 );
               },
@@ -246,7 +251,7 @@ const FollowingIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => v
               label: t('Open homepage'),
               onClick: () => {
                 window.open(
-                  `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
+                  `${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
                   '_blank'
                 );
               },

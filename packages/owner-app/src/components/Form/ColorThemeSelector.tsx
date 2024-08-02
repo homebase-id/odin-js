@@ -157,11 +157,9 @@ const ColorThemeSelectorDialog = ({
           onChange={(set) => setCurrValue(set)}
         />
       </ul>
-      <div className="-m-2 flex flex-row-reverse px-4 py-3">
-        <ActionButton className="m-2" onClick={() => onChange(currValue)}>
-          {'Save'}
-        </ActionButton>
-        <ActionButton className="m-2" type="secondary" onClick={() => onCancel()}>
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row-reverse">
+        <ActionButton onClick={() => onChange(currValue)}>{'Save'}</ActionButton>
+        <ActionButton type="secondary" onClick={() => onCancel()}>
           {t('Cancel')}
         </ActionButton>
       </div>
@@ -265,7 +263,7 @@ const FullCustomOption = ({
       <ColorSelectorRow
         row={customSet.light}
         isChecked={isChecked}
-        className="w-full bg-slate-100 px-4"
+        className="w-full bg-slate-100 px-4 text-slate-800"
         onChange={(colorRow) => onChange({ ...customSet, light: { ...colorRow } })}
       />
       <ColorSelectorRow
@@ -346,7 +344,7 @@ const SingleColorSelection = ({
         {isChecked && (
           <input
             type={'text'}
-            className="w-full flex-grow p-1 px-2 py-1 uppercase text-black"
+            className="w-full flex-grow p-1 px-2 py-1 uppercase text-black dark:text-white"
             defaultValue={defaultVal}
             onChange={(e) => {
               const rgb = convertHexToRgb(e.target.value);

@@ -1,11 +1,9 @@
 import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { t } from '@youfoundation/common-app';
 import { ChatDeliveryStatus, ChatMessage, getChatMessage } from '../../providers/ChatProvider';
 import {
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
-  TransferStatus,
   NewMediaFile,
 } from '@youfoundation/js-lib/core';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
@@ -13,11 +11,10 @@ import { updateChatMessage, uploadChatMessage } from '../../providers/ChatProvid
 
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import {
-  Conversation,
   ConversationWithYourselfId,
-  GroupConversation,
-  SingleConversation,
+  UnifiedConversation,
 } from '../../providers/ConversationProvider';
+import { LinkPreview } from '@youfoundation/js-lib/media';
 
 export const useChatMessage = (props?: { messageId: string | undefined }) => {
   const dotYouClient = useDotYouClientContext();
@@ -33,21 +30,28 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     replyId,
     files,
     message,
+    linkPreviews,
+    chatId,
+    userDate,
   }: {
-    conversation: HomebaseFile<Conversation>;
+    conversation: HomebaseFile<UnifiedConversation>;
     replyId?: string;
     files?: NewMediaFile[];
     message: string;
+    linkPreviews?: LinkPreview[];
+    chatId?: string;
+    userDate?: number;
   }): Promise<NewHomebaseFile<ChatMessage> | null> => {
     const conversationId = conversation.fileMetadata.appData.uniqueId as string;
     const conversationContent = conversation.fileMetadata.appData.content;
-    const recipients =
-      (conversationContent as GroupConversation).recipients ||
-      [(conversationContent as SingleConversation).recipient].filter(Boolean);
+    const identity = dotYouClient.getIdentity();
+    const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
-    const newChatId = getNewId();
+    // We prefer having the uniqueId set outside of the mutation, so that an auto-retry of the mutation doesn't create duplicates
+    const newChatId = chatId || getNewId();
     const newChat: NewHomebaseFile<ChatMessage> = {
       fileMetadata: {
+        created: userDate,
         appData: {
           uniqueId: newChatId,
           groupId: conversationId,
@@ -58,7 +62,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
               : ChatDeliveryStatus.Sent,
             replyId: replyId,
           },
-          userDate: new Date().getTime(),
+          userDate: userDate || new Date().getTime(),
         },
       },
       serverMetadata: {
@@ -68,22 +72,20 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
       },
     };
 
-    const uploadResult = await uploadChatMessage(dotYouClient, newChat, recipients, files);
+    const uploadResult = await uploadChatMessage(
+      dotYouClient,
+      newChat,
+      recipients,
+      files,
+      linkPreviews
+    );
     if (!uploadResult) throw new Error('Failed to send the chat message');
 
     newChat.fileId = uploadResult.file.fileId;
     newChat.fileMetadata.versionTag = uploadResult.newVersionTag;
     newChat.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
+    newChat.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Sent;
 
-    const deliveredToInboxes = recipients.map(
-      (recipient) =>
-        uploadResult.recipientStatus[recipient].toLowerCase() === TransferStatus.DeliveredToInbox
-    );
-
-    if (recipients.length && deliveredToInboxes.every((delivered) => delivered)) {
-      newChat.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Delivered;
-      await updateChatMessage(dotYouClient, newChat, recipients, uploadResult.keyHeader);
-    }
     return newChat;
   };
 
@@ -92,13 +94,11 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     conversation,
   }: {
     updatedChatMessage: HomebaseFile<ChatMessage>;
-    conversation: HomebaseFile<Conversation>;
+    conversation: HomebaseFile<UnifiedConversation>;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
-
-    const recipients =
-      (conversationContent as GroupConversation).recipients ||
-      [(conversationContent as SingleConversation).recipient].filter(Boolean);
+    const identity = dotYouClient.getIdentity();
+    const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     await updateChatMessage(dotYouClient, updatedChatMessage, recipients);
   };
@@ -113,7 +113,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     }),
     send: useMutation({
       mutationFn: sendMessage,
-      onMutate: async ({ conversation, replyId, files, message }) => {
+      onMutate: async ({ conversation, replyId, files, message, chatId, userDate }) => {
         const existingData = queryClient.getQueryData<
           InfiniteData<{
             searchResults: (HomebaseFile<ChatMessage> | null)[];
@@ -127,14 +127,21 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
 
         const newMessageDsr: NewHomebaseFile<ChatMessage> = {
           fileMetadata: {
+            created: userDate,
             appData: {
+              uniqueId: chatId,
               groupId: conversation.fileMetadata.appData.uniqueId,
               content: {
-                message: message || (files?.length ? `📷 ${t('Media')}` : ''),
+                message: message,
                 deliveryStatus: ChatDeliveryStatus.Sending,
                 replyId: replyId,
               },
+              userDate,
             },
+            payloads: files?.map((file) => ({
+              contentType: file.file.type,
+              pendingFile: file.file,
+            })),
           },
           serverMetadata: {
             accessControlList: {
@@ -142,6 +149,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
             },
           },
         };
+
         const newData = {
           ...existingData,
           pages: existingData?.pages?.map((page, index) => ({
@@ -157,6 +165,55 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
         );
         return { existingData };
       },
+      onSuccess: async (newMessage, params) => {
+        if (!newMessage) return;
+        const extistingMessages = queryClient.getQueryData<
+          InfiniteData<{
+            searchResults: (HomebaseFile<ChatMessage> | null)[];
+            cursorState: string;
+            queryTime: number;
+            includeMetadataHeader: boolean;
+          }>
+        >(['chat-messages', params.conversation.fileMetadata.appData.uniqueId]);
+        if (extistingMessages) {
+          const newData = {
+            ...extistingMessages,
+            pages: extistingMessages?.pages?.map((page) => ({
+              ...page,
+              searchResults: page.searchResults.map((msg) => {
+                if (
+                  stringGuidsEqual(
+                    msg?.fileMetadata.appData.uniqueId,
+                    newMessage.fileMetadata.appData.uniqueId
+                  ) &&
+                  (!msg?.fileMetadata.appData.content.deliveryStatus ||
+                    msg?.fileMetadata.appData.content.deliveryStatus <= ChatDeliveryStatus.Sent)
+                ) {
+                  // We want to keep previewThumbnail and payloads from the existing message as that holds the optimistic updates from the onMutate
+                  return {
+                    ...newMessage,
+                    fileMetadata: {
+                      ...newMessage.fileMetadata,
+                      appData: {
+                        ...newMessage.fileMetadata.appData,
+                        previewThumbnail: msg?.fileMetadata.appData.previewThumbnail,
+                      },
+                      payloads: msg?.fileMetadata.payloads,
+                    },
+                  };
+                }
+
+                return msg;
+              }),
+            })),
+          };
+
+          queryClient.setQueryData(
+            ['chat-messages', params.conversation.fileMetadata.appData.uniqueId],
+            newData
+          );
+        }
+      },
       onError: (err, messageParams, context) => {
         queryClient.setQueryData(
           ['chat-messages', messageParams.conversation.fileMetadata.appData.uniqueId],
@@ -164,9 +221,9 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
         );
       },
       onSettled: async (_data, _error, variables) => {
-        queryClient.invalidateQueries({
-          queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
-        });
+        // queryClient.invalidateQueries({
+        //   queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
+        // });
       },
     }),
     update: useMutation({

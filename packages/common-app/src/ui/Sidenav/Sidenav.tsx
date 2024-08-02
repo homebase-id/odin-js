@@ -1,49 +1,43 @@
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-
-import {
-  CHAT_APP_ID,
-  ChatBubble,
-  Cloud,
-  Envelope,
-  FEED_APP_ID,
-  HOME_ROOT_PATH,
-  House,
-  MAIL_APP_ID,
-  MiniDarkModeToggle,
-  Persons,
-  Pin,
-  ellipsisAtMaxChar,
-  getVersion,
-  t,
-  useUnreadPushNotificationsCount,
-} from '@youfoundation/common-app';
-import { useDarkMode } from '@youfoundation/common-app';
-import { useProfiles } from '@youfoundation/common-app';
 import { BuiltInProfiles } from '@youfoundation/js-lib/profile';
-import { OwnerImage } from '@youfoundation/common-app';
-import {
-  Bars,
-  Times,
-  Feed,
-  AddressBook,
-  Circles,
-  useOutsideTrigger,
-  Ellipsis,
-  Person,
-  Cog,
-  Scissors,
-  HardDrive,
-  Grid,
-  Wallet,
-  IconProps,
-  Heart,
-  ArrowDown,
-  Bell,
-} from '@youfoundation/common-app';
 import { hasDebugFlag, isTouchDevice } from '@youfoundation/js-lib/helpers';
+import { FEED_APP_ID, CHAT_APP_ID, MAIL_APP_ID } from '../../constants';
+import { HOME_ROOT_PATH } from '../../core';
+import { getVersion, t, ellipsisAtMaxChar } from '../../helpers';
+import {
+  useOutsideTrigger,
+  useDarkMode,
+  useProfiles,
+  useUnreadPushNotificationsCount,
+} from '../../hooks';
+import { OwnerImage } from '../../socialFeed';
+import { MiniDarkModeToggle } from '../DarkModeToggle/DarkModeToggle';
+import { AddressBook } from '../Icons/AddressBook';
+import { ArrowDown } from '../Icons/Arrow';
+import { Bars } from '../Icons/Bars';
+import { Bell } from '../Icons/Bell';
+import { ChatBubble } from '../Icons/ChatBubble';
+import { Circles } from '../Icons/Circles';
+import { Cloud } from '../Icons/Cloud';
+import { Cog } from '../Icons/Cog';
+import { Ellipsis } from '../Icons/Ellipsis';
+import { Envelope } from '../Icons/Envelope';
+import { Feed } from '../Icons/Feed';
+import { Grid } from '../Icons/Grid';
+import { HardDrive } from '../Icons/HardDrive';
+import { Heart } from '../Icons/Heart';
+import { House } from '../Icons/House';
+import { Person } from '../Icons/Person';
+import { Persons } from '../Icons/Persons';
+import { Pin } from '../Icons/Pin';
+import { Scissors } from '../Icons/Scissors';
+import { Times } from '../Icons/Times';
+import { IconProps } from '../Icons/Types';
+import { Wallet } from '../Icons/Wallet';
+import { logoutOwnerAndAllApps } from '../../provider';
 
-const STORAGE_KEY = 'isOpen';
+const STORAGE_KEY = 'sidenavIsOpen';
 
 const navItemClassName = `my-1 py-2 px-2 flex`;
 const navItemActiveClassname = `bg-indigo-200 dark:bg-indigo-700`;
@@ -165,7 +159,10 @@ export const Sidenav = ({
               )}
             </div>
 
-            <MoreItems isOpen={isPinned || isOpen || isHoverOpen || isPeeking} logout={logout}>
+            <MoreItems
+              isOpen={isPinned || isOpen || isHoverOpen || isPeeking}
+              logout={logout || logoutOwnerAndAllApps}
+            >
               {isTightHeight ? (
                 <>
                   <NavItem icon={Persons} label={'Following & Followers'} to={'/owner/follow'} />
@@ -181,7 +178,7 @@ export const Sidenav = ({
 
             {!isTightHeight ? (
               <div>
-                <p className={`${navItemClassName} opacity-40 leading-none`}>
+                <a className={`${navItemClassName} opacity-40 leading-none`} href="/api/v1/version">
                   <span className={`text-center text-2xl px-[0.18rem]`}>©</span>
                   <span
                     className={`my-auto ml-3 max-w-[15rem] overflow-hidden whitespace-pre-wrap ${
@@ -191,7 +188,7 @@ export const Sidenav = ({
                     {new Date().getFullYear()} | v.
                     {getVersion()}
                   </span>
-                </p>
+                </a>
               </div>
             ) : null}
 
@@ -442,25 +439,30 @@ const WalletLink = () => {
 };
 
 const NotificationBell = () => {
-  const count = useUnreadPushNotificationsCount();
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: 'all' });
   return (
-    <NavItem label={t('Notifications')} to={'/owner/notifications'} icon={Bell} unread={!!count} />
+    <NavItem
+      label={t('Notifications')}
+      to={'/owner/notifications'}
+      icon={Bell}
+      unread={!!unreadCount}
+    />
   );
 };
 
 const FeedNavItem = () => {
-  const count = useUnreadPushNotificationsCount({ appId: FEED_APP_ID });
-  return <NavItem icon={Feed} label={'Feed'} to="/apps/feed" unread={!!count} />;
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: FEED_APP_ID });
+  return <NavItem icon={Feed} label={'Feed'} to="/apps/feed" unread={!!unreadCount} />;
 };
 
 const ChatNavItem = () => {
-  const count = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
-  return <NavItem icon={ChatBubble} label={'Chat'} to="/apps/chat" unread={!!count} />;
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
+  return <NavItem icon={ChatBubble} label={'Chat'} to="/apps/chat" unread={!!unreadCount} />;
 };
 
 const MailNavItem = () => {
-  const count = useUnreadPushNotificationsCount({ appId: MAIL_APP_ID });
-  return <NavItem icon={Envelope} label={'Mail'} to="/apps/mail" unread={!!count} />;
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: MAIL_APP_ID });
+  return <NavItem icon={Envelope} label={'Mail'} to="/apps/mail" unread={!!unreadCount} />;
 };
 
 const MobileDrawer = ({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) => {

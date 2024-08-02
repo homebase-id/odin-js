@@ -1,4 +1,4 @@
-import { Article } from '@youfoundation/js-lib/public';
+import { Article, BlogConfig } from '@youfoundation/js-lib/public';
 import { ellipsisAtMaxChar } from '../../helpers';
 import { ChannelDefinitionVm } from '../../hooks';
 import { FakeAnchor } from '../../ui';
@@ -11,23 +11,23 @@ export const PostTextListItem = ({
   channel,
   linkRoot,
   className,
+  children,
 }: {
   draft: HomebaseFile<Article>;
   channel?: NewHomebaseFile<ChannelDefinitionVm>;
   linkRoot: string;
   className?: string;
+  children?: React.ReactNode;
 }) => {
   const content = draft.fileMetadata.appData.content;
   return (
     <>
       <div
-        className={`m-3 rounded-lg ${
-          className ?? ''
-        } p-3 hover:shadow-md hover:dark:shadow-slate-600`}
+        className={`rounded-lg ${className ?? ''} p-3 hover:shadow-md hover:dark:shadow-slate-600`}
         key={draft.fileId}
       >
         <FakeAnchor
-          href={`${linkRoot}/${channel?.fileMetadata.appData.content.slug ?? 'public-posts'}/${
+          href={`${linkRoot}/${channel?.fileMetadata.appData.content.slug ?? BlogConfig.PublicChannelSlug}/${
             content.id
           }`}
         >
@@ -38,11 +38,24 @@ export const PostTextListItem = ({
                   <AuthorName />
                 </h2>
                 <span className="hidden px-2 leading-4 md:block">·</span>
-                {channel && draft ? <PostMeta postFile={draft} channel={channel} /> : null}
+                {channel && draft ? (
+                  <PostMeta
+                    postFile={draft}
+                    channel={channel}
+                    authorOdinId={draft.fileMetadata.appData.content.authorOdinId}
+                  />
+                ) : null}
               </div>
-              <h1 className={`text-foreground mb-1 text-lg text-opacity-80`}>{content.caption}</h1>
-              <div className="text-foreground leading-relaxed text-opacity-70">
-                {ellipsisAtMaxChar(content.abstract, 280)}
+              <div className="flex flex-row justify-between">
+                <div>
+                  <h1 className={`text-foreground mb-1 text-lg text-opacity-80`}>
+                    {content.caption}
+                  </h1>
+                  <div className="text-foreground leading-relaxed text-opacity-70">
+                    {ellipsisAtMaxChar(content.abstract, 280)}
+                  </div>
+                </div>
+                {children}
               </div>
             </div>
           </div>

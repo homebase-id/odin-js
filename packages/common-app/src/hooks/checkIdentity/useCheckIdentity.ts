@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 import { getDomainFromUrl } from '@youfoundation/js-lib/helpers';
 
 export const useCheckIdentity = (odinId?: string) => {
@@ -10,7 +11,8 @@ export const useCheckIdentity = (odinId?: string) => {
     const isValid = domainRegex.test(strippedIdentity || '');
     if (!isValid) return false;
 
-    return await fetch(`https://${strippedIdentity}/api/guest/v1/auth/ident`)
+    const dotYouClient = new DotYouClient({ api: ApiType.Guest, identity: strippedIdentity });
+    return await fetch(`${dotYouClient.getEndpoint()}/auth/ident`)
       .then((response) => {
         if (response.status !== 200) return;
         return response.json();

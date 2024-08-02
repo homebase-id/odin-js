@@ -21,23 +21,35 @@ import {
   getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
   queryBatch,
-  sendCommand,
   uploadFile,
   uploadHeader,
   NewMediaFile,
+  UploadResult,
+  PriorityOptions,
+  TransferUploadStatus,
+  TransferStatus,
+  FailedTransferStatuses,
+  RecipientTransferHistory,
+  deleteFile,
 } from '@youfoundation/js-lib/core';
+import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import {
-  ChatDrive,
-  Conversation,
-  GroupConversation,
-  SingleConversation,
-} from './ConversationProvider';
-import { getNewId, jsonStringify64, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { makeGrid } from '@youfoundation/js-lib/helpers';
+  getNewId,
+  jsonStringify64,
+  stringToUint8Array,
+  makeGrid,
+  base64ToUint8Array,
+} from '@youfoundation/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
-import { createThumbnails, processVideoFile } from '@youfoundation/js-lib/media';
+import {
+  createThumbnails,
+  LinkPreview,
+  LinkPreviewDescriptor,
+  processVideoFile,
+} from '@youfoundation/js-lib/media';
+import { sendReadReceipt } from '@youfoundation/js-lib/peer';
 
-export const ChatMessageFileType = 7878;
+export const CHAT_MESSAGE_FILE_TYPE = 7878;
 export const ChatDeletedArchivalStaus = 2;
 
 export enum ChatDeliveryStatus {
@@ -51,16 +63,13 @@ export enum ChatDeliveryStatus {
 }
 
 export interface ChatMessage {
-  // /// ReplyId used to get the replyId of the message
-  replyId?: string; //=> Better to use the groupId (unless that would break finding the messages of a conversation)...
-
-  /// FileState of the Message
-  /// [FileState.active] shows the message is active
-  /// [FileState.deleted] shows the message is deleted. It's soft deleted
-  // fileState: FileState => archivalStatus
+  replyId?: string;
 
   /// Content of the message
   message: string;
+
+  // After an update to a message on the receiving end, the senderOdinId is emptied; So we have an authorOdinId to keep track of the original sender
+  authorOdinId?: string;
 
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;
@@ -68,6 +77,7 @@ export interface ChatMessage {
 }
 
 const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_web';
+export const CHAT_LINKS_PAYLOAD_KEY = 'chat_links';
 
 export const getChatMessages = async (
   dotYouClient: DotYouClient,
@@ -84,6 +94,7 @@ export const getChatMessages = async (
     maxRecords: pageSize,
     cursorState: cursorState,
     includeMetadataHeader: true,
+    includeTransferHistory: true,
   };
 
   const response = await queryBatch(dotYouClient, params, ro);
@@ -113,18 +124,6 @@ export const getChatMessage = async (dotYouClient: DotYouClient, chatMessageId: 
   return fileHeader;
 };
 
-// It's a hack... This needs to change to a better way of getting the message
-export const getChatMessageByGlobalTransitId = async (
-  dotYouClient: DotYouClient,
-  conversationId: string,
-  messageGlobalTransitId: string
-) => {
-  const allChatMessages = await getChatMessages(dotYouClient, conversationId, undefined, 2000);
-  return allChatMessages?.searchResults?.find((chat) =>
-    stringGuidsEqual(chat?.fileMetadata.globalTransitId, messageGlobalTransitId)
-  );
-};
-
 export const dsrToMessage = async (
   dotYouClient: DotYouClient,
   dsr: HomebaseFile,
@@ -132,13 +131,24 @@ export const dsrToMessage = async (
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<ChatMessage> | null> => {
   try {
-    const attrContent = await getContentFromHeaderOrPayload<ChatMessage>(
+    const msgContent = await getContentFromHeaderOrPayload<ChatMessage>(
       dotYouClient,
       targetDrive,
       dsr,
       includeMetadataHeader
     );
-    if (!attrContent) return null;
+    if (!msgContent) return null;
+
+    if (
+      (msgContent.deliveryStatus === ChatDeliveryStatus.Sent ||
+        msgContent.deliveryStatus === ChatDeliveryStatus.Failed) &&
+      dsr.serverMetadata?.transferHistory?.recipients
+    ) {
+      msgContent.deliveryDetails = buildDeliveryDetails(
+        dsr.serverMetadata.transferHistory.recipients
+      );
+      msgContent.deliveryStatus = buildDeliveryStatus(msgContent.deliveryDetails);
+    }
 
     const chatMessage: HomebaseFile<ChatMessage> = {
       ...dsr,
@@ -146,7 +156,7 @@ export const dsrToMessage = async (
         ...dsr.fileMetadata,
         appData: {
           ...dsr.fileMetadata.appData,
-          content: attrContent,
+          content: msgContent,
         },
       },
     };
@@ -158,11 +168,58 @@ export const dsrToMessage = async (
   }
 };
 
+const buildDeliveryDetails = (recipientTransferHistory: {
+  [key: string]: RecipientTransferHistory;
+}): Record<string, ChatDeliveryStatus> => {
+  const deliveryDetails: Record<string, ChatDeliveryStatus> = {};
+
+  for (const recipient of Object.keys(recipientTransferHistory)) {
+    if (recipientTransferHistory[recipient].latestSuccessfullyDeliveredVersionTag) {
+      if (recipientTransferHistory[recipient].isReadByRecipient) {
+        deliveryDetails[recipient] = ChatDeliveryStatus.Read;
+      } else {
+        deliveryDetails[recipient] = ChatDeliveryStatus.Delivered;
+      }
+    } else {
+      const latest = recipientTransferHistory[recipient].latestTransferStatus;
+      const transferStatus =
+        latest && typeof latest === 'string'
+          ? (latest?.toLocaleLowerCase() as TransferStatus)
+          : undefined;
+      if (transferStatus && FailedTransferStatuses.includes(transferStatus)) {
+        deliveryDetails[recipient] = ChatDeliveryStatus.Failed;
+      } else {
+        deliveryDetails[recipient] = ChatDeliveryStatus.Sent;
+      }
+    }
+  }
+
+  return deliveryDetails;
+};
+
+const buildDeliveryStatus = (
+  deliveryDetails: Record<string, ChatDeliveryStatus>
+): ChatDeliveryStatus => {
+  const values = Object.values(deliveryDetails);
+  // If any failed, the message is failed
+  if (values.includes(ChatDeliveryStatus.Failed)) return ChatDeliveryStatus.Failed;
+  if (values.every((val) => val === ChatDeliveryStatus.Read)) return ChatDeliveryStatus.Read;
+  // If all are delivered/read, the message is delivered/read
+  if (
+    values.every((val) => val === ChatDeliveryStatus.Delivered || val === ChatDeliveryStatus.Read)
+  )
+    return ChatDeliveryStatus.Delivered;
+
+  // If it exists, it's sent
+  return ChatDeliveryStatus.Sent;
+};
+
 export const uploadChatMessage = async (
   dotYouClient: DotYouClient,
   message: NewHomebaseFile<ChatMessage>,
   recipients: string[],
   files: NewMediaFile[] | undefined,
+  linkPreviews: LinkPreview[] | undefined,
   onVersionConflict?: () => void
 ) => {
   const messageContent = message.fileMetadata.appData.content;
@@ -176,14 +233,14 @@ export const uploadChatMessage = async (
     transitOptions: distribute
       ? {
           recipients: [...recipients],
-          schedule: ScheduleOptions.SendNowAwaitResponse,
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.High,
           sendContents: SendContents.All,
-          useGlobalTransitId: true,
           useAppNotification: true,
           appNotificationOptions: {
             appId: appId,
-            typeId: message.fileMetadata.appData.groupId as string,
-            tagId: getNewId(),
+            typeId: message.fileMetadata.appData.groupId || getNewId(),
+            tagId: message.fileMetadata.appData.uniqueId || getNewId(),
             silent: false,
           },
         }
@@ -198,7 +255,7 @@ export const uploadChatMessage = async (
       uniqueId: message.fileMetadata.appData.uniqueId,
       groupId: message.fileMetadata.appData.groupId,
       userDate: message.fileMetadata.appData.userDate,
-      fileType: ChatMessageFileType,
+      fileType: CHAT_MESSAGE_FILE_TYPE,
       content: jsonContent,
     },
     isEncrypted: true,
@@ -210,6 +267,41 @@ export const uploadChatMessage = async (
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+
+  if (!files?.length && linkPreviews?.length) {
+    // We only support link previews when there is no media
+    const descriptorContent = JSON.stringify(
+      linkPreviews.map((preview) => {
+        return {
+          url: preview.url,
+          hasImage: !!preview.imageUrl,
+          imageWidth: preview.imageWidth,
+          imageHeight: preview.imageHeight,
+        } as LinkPreviewDescriptor;
+      })
+    );
+
+    const imageUrl = linkPreviews.find((preview) => preview.imageUrl)?.imageUrl;
+
+    const imageBlob = imageUrl
+      ? new Blob([base64ToUint8Array(imageUrl.split(',')[1])], {
+          type: imageUrl.split(';')[0].split(':')[1],
+        })
+      : undefined;
+
+    const { tinyThumb } = imageBlob
+      ? await createThumbnails(imageBlob, '', [])
+      : { tinyThumb: undefined };
+
+    payloads.push({
+      key: CHAT_LINKS_PAYLOAD_KEY,
+      payload: new Blob([stringToUint8Array(JSON.stringify(linkPreviews))], {
+        type: 'application/json',
+      }),
+      descriptorContent,
+      previewThumbnail: tinyThumb,
+    });
+  }
 
   for (let i = 0; files && i < files?.length; i++) {
     const payloadKey = `${CHAT_MESSAGE_PAYLOAD_KEY}${i}`;
@@ -235,6 +327,7 @@ export const uploadChatMessage = async (
         key: payloadKey,
         payload: newMediaFile.file,
         previewThumbnail: tinyThumb,
+        descriptorContent: (newMediaFile.file as File).name || newMediaFile.file.type,
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
@@ -242,6 +335,7 @@ export const uploadChatMessage = async (
       payloads.push({
         key: payloadKey,
         payload: newMediaFile.file,
+        descriptorContent: (newMediaFile.file as File).name || newMediaFile.file.type,
       });
     }
   }
@@ -261,6 +355,29 @@ export const uploadChatMessage = async (
 
   if (!uploadResult) return null;
 
+  if (
+    recipients.some(
+      (recipient) =>
+        uploadResult.recipientStatus?.[recipient].toLowerCase() ===
+        TransferUploadStatus.EnqueuedFailed
+    )
+  ) {
+    message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Failed;
+    message.fileMetadata.appData.content.deliveryDetails = {};
+    for (const recipient of recipients) {
+      message.fileMetadata.appData.content.deliveryDetails[recipient] =
+        uploadResult.recipientStatus?.[recipient].toLowerCase() ===
+        TransferUploadStatus.EnqueuedFailed
+          ? ChatDeliveryStatus.Failed
+          : ChatDeliveryStatus.Delivered;
+    }
+
+    await updateChatMessage(dotYouClient, message, recipients, uploadResult.keyHeader);
+
+    console.error('Not all recipients received the message: ', uploadResult);
+    throw new Error(`Not all recipients received the message: ${recipients.join(', ')}`);
+  }
+
   return {
     ...uploadResult,
     previewThumbnail: uploadMetadata.appData.previewThumbnail,
@@ -272,7 +389,7 @@ export const updateChatMessage = async (
   message: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>,
   recipients: string[],
   keyHeader?: KeyHeader
-) => {
+): Promise<UploadResult | void> => {
   const messageContent = message.fileMetadata.appData.content;
   const distribute = recipients?.length > 0;
 
@@ -284,9 +401,9 @@ export const updateChatMessage = async (
     transitOptions: distribute
       ? {
           recipients: [...recipients],
-          schedule: ScheduleOptions.SendNowAwaitResponse,
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.High,
           sendContents: SendContents.All,
-          useGlobalTransitId: true,
         }
       : undefined,
   };
@@ -300,7 +417,7 @@ export const updateChatMessage = async (
       groupId: message.fileMetadata.appData.groupId,
       archivalStatus: (message.fileMetadata.appData as AppFileMetaData<ChatMessage>).archivalStatus,
       previewThumbnail: message.fileMetadata.appData.previewThumbnail,
-      fileType: ChatMessageFileType,
+      fileType: CHAT_MESSAGE_FILE_TYPE,
       content: payloadJson,
     },
     senderOdinId: (message.fileMetadata as FileMetadata<ChatMessage>).senderOdinId,
@@ -314,8 +431,24 @@ export const updateChatMessage = async (
     dotYouClient,
     keyHeader || (message as HomebaseFile<ChatMessage>).sharedSecretEncryptedKeyHeader,
     uploadInstructions,
-    uploadMetadata
+    uploadMetadata,
+    async () => {
+      const existingChatMessage = await getChatMessage(
+        dotYouClient,
+        message.fileMetadata.appData.uniqueId as string
+      );
+      if (!existingChatMessage) return;
+      message.fileMetadata.versionTag = existingChatMessage.fileMetadata.versionTag;
+      return await updateChatMessage(dotYouClient, message, recipients, keyHeader);
+    }
   );
+};
+
+export const hardDeleteChatMessage = async (
+  dotYouClient: DotYouClient,
+  message: HomebaseFile<ChatMessage>
+) => {
+  return await deleteFile(dotYouClient, ChatDrive, message.fileId, []);
 };
 
 export const softDeleteChatMessage = async (
@@ -344,76 +477,22 @@ export const softDeleteChatMessage = async (
 
   message.fileMetadata.versionTag = runningVersionTag;
   message.fileMetadata.appData.content.message = '';
+  message.fileMetadata.appData.content.authorOdinId = message.fileMetadata.senderOdinId;
   return await updateChatMessage(dotYouClient, message, deleteForEveryone ? recipients : []);
 };
 
-export const MARK_CHAT_READ_COMMAND = 150;
-export interface MarkAsReadRequest {
-  conversationId: string;
-  messageIds: string[];
-}
-
 export const requestMarkAsRead = async (
   dotYouClient: DotYouClient,
-  conversation: HomebaseFile<Conversation>,
-  chatGlobalTransitIds: string[]
+  conversation: HomebaseFile<UnifiedConversation>,
+  messages: HomebaseFile<ChatMessage>[]
 ) => {
-  const request: MarkAsReadRequest = {
-    conversationId: conversation.fileMetadata.appData.uniqueId as string,
-    messageIds: chatGlobalTransitIds,
-  };
+  const chatFileIds = messages
+    .filter(
+      (msg) =>
+        msg.fileMetadata.appData.content.deliveryStatus !== ChatDeliveryStatus.Read &&
+        msg.fileMetadata.senderOdinId
+    )
+    .map((msg) => msg.fileId) as string[];
 
-  const conversationContent = conversation.fileMetadata.appData.content;
-  const recipients = (conversationContent as GroupConversation).recipients || [
-    (conversationContent as SingleConversation).recipient,
-  ];
-  if (!recipients?.filter(Boolean)?.length)
-    throw new Error('No recipients found in the conversation');
-
-  return await sendCommand(
-    dotYouClient,
-    {
-      code: MARK_CHAT_READ_COMMAND,
-      globalTransitIdList: [],
-      jsonMessage: jsonStringify64(request),
-      recipients: recipients,
-    },
-    ChatDrive
-  );
+  return sendReadReceipt(dotYouClient, ChatDrive, chatFileIds);
 };
-
-// export const DELETE_CHAT_COMMAND = 180;
-// export interface DeleteRequest {
-//   conversationId: string;
-//   messageIds: string[];
-// }
-
-// Probably not needed, as the file is "updated" for a soft delete, which just is sent over transit to the recipients
-// export const requestDelete = async (
-//   dotYouClient: DotYouClient,
-//   conversation: HomebaseFile<Conversation>,
-//   chatGlobalTransitIds: string[]
-// ) => {
-//   const request: DeleteRequest = {
-//     conversationId: conversation.fileMetadata.appData.uniqueId as string,
-//     messageIds: chatGlobalTransitIds,
-//   };
-
-//   const conversationContent = conversation.fileMetadata.appData.content;
-//   const recipients = (conversationContent as GroupConversation).recipients || [
-//     (conversationContent as SingleConversation).recipient,
-//   ];
-//   if (!recipients?.filter(Boolean)?.length)
-//     throw new Error('No recipients found in the conversation');
-
-//   return await sendCommand(
-//     dotYouClient,
-//     {
-//       code: DELETE_CHAT_COMMAND,
-//       globalTransitIdList: [],
-//       jsonMessage: jsonStringify64(request),
-//       recipients: recipients,
-//     },
-//     ChatDrive
-//   );
-// };

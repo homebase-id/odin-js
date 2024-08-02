@@ -35,10 +35,9 @@ export const hasValidToken = async (dotYouClient: DotYouClient): Promise<boolean
     return { status: _error?.response?.status || 404 };
   });
 
-  // TODO: Enable this when the backend is fixed... The backend needs to be updated to keep sending the cors host header, to allow the front-end to read the response..
-  // Else: it's a network error which is the exact same when the backend isn't reacahble
-  // if (response.status === 404) return null;
-  return response.status === 200;
+  if (response.status === 403 || response.status === 401) return false;
+  if (response.status === 200) return true;
+  return null;
 };
 
 export const getRegistrationParams = async (

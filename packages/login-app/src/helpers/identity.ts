@@ -4,29 +4,43 @@ export const stripIdentity = (identity: string) => {
   return identity.replace(new RegExp('^(http|https)://'), '').split('/')[0].toLowerCase();
 };
 
+// https://developer.mozilla.org/en-US/docs/Web/API/Storage_Access_API/Using
 export const checkStorageAccess = async () => {
-  try {
-    let storagePartioned = !!document.requestStorageAccess; // Checks => https://developer.mozilla.org/en-US/docs/Web/Privacy/State_Partitioning#disable_dynamic_state_partitioning
-    await (window.document.hasStorageAccess &&
-      window.document.hasStorageAccess().then((hasAccess) => {
-        storagePartioned = !hasAccess;
-      }));
-
-    return storagePartioned;
-  } catch (ex) {
-    console.debug('window.document.hasStorageAccess is not accessible');
+  if (!document.hasStorageAccess) {
+    console.debug('document.hasStorageAccess is not accessible');
     return false;
   }
+
+  const hasAccess = await document.hasStorageAccess();
+  console.debug('document.hasStorageAccess', hasAccess);
+  if (hasAccess) {
+    try {
+      const permission = await navigator.permissions.query({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        name: 'storage-access' as any,
+      });
+
+      console.debug('document.hasStorageAccess', permission.state);
+      if (permission.state === 'granted') {
+        return false;
+      }
+    } catch (ex) {
+      //
+    }
+  }
+
+  return true;
 };
 
 export const requestStorageAccess = async () => {
   return new Promise<void>((resolve) => {
     try {
       if (window.document.requestStorageAccess) {
+        console.debug('window.document.requestStorageAccess');
         window.document
           .requestStorageAccess()
           .then(resolve, () => {
-            // Ignore success; this is just a best-effort attempt to get storage access
+            // Ignore reject; this is just a best-effort attempt to get storage access
             resolve();
           })
           .catch(() => {
@@ -41,19 +55,30 @@ export const requestStorageAccess = async () => {
   });
 };
 
-export const getIdentityFromStorage = () => {
+export const getIdentityFromStorage: () => string[] = () => {
   try {
-    const previousIdentity = window.localStorage.getItem(LOCAL_STORAGE_PREV_IDENTITY_KEY);
-    return previousIdentity;
+    const storageValue = window.localStorage.getItem(LOCAL_STORAGE_PREV_IDENTITY_KEY);
+    if (!storageValue) return [];
+    try {
+      const identties: string[] = JSON.parse(storageValue);
+      if (Array.isArray(identties)) return identties;
+    } catch (ex) {
+      //
+    }
+    return [storageValue];
   } catch (ex) {
     console.debug('window.localStorage is not accessible');
-    return '';
+    return [];
   }
 };
 
 export const storeIdentity = (identity: string) => {
   try {
-    window.localStorage.setItem(LOCAL_STORAGE_PREV_IDENTITY_KEY, identity);
+    const previousIdentities = getIdentityFromStorage();
+    window.localStorage.setItem(
+      LOCAL_STORAGE_PREV_IDENTITY_KEY,
+      JSON.stringify([...new Set([identity, ...previousIdentities])])
+    );
   } catch (ex) {
     console.debug('window.localStorage is not accessible');
   }
@@ -61,6 +86,11 @@ export const storeIdentity = (identity: string) => {
 
 export const authorize = async (identity: string, params: URLSearchParams) => {
   if (!window.top) throw new Error('window.top is not accessible');
+
+  if (!identity || identity === '') {
+    window.top.location.href = `https://${window.location.host}/auth/owner/v1/youauth/authorize?${params.toString()}`;
+    return;
+  }
 
   const parentUrl =
     window.location != window.parent.location ? document.referrer : document.location.href;

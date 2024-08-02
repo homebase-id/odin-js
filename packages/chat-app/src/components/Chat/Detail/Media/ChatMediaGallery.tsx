@@ -2,9 +2,17 @@ import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../../providers/ChatProvider';
-import { ActionButton, Arrow, ArrowLeft, Times, usePortal } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  Arrow,
+  ArrowLeft,
+  BoringFile,
+  Times,
+  VideoClickToLoad,
+  usePortal,
+} from '@youfoundation/common-app';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
-import { OdinImage, OdinVideo } from '@youfoundation/ui-lib';
+import { OdinImage } from '@youfoundation/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 
@@ -73,23 +81,24 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
 
   // TODO: Added previewThumbnail of the grid
 
+  const payload = msg.fileMetadata.payloads.find((p) => p.key === mediaKey);
+  const contentType = payload?.contentType;
   const dialog = (
     <div className="fixed inset-0 z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
       <div className="inset-0 bg-black transition-opacity lg:fixed"></div>
       <div className="inset-0 z-10 lg:fixed lg:overflow-y-auto">
         <div className="relative flex h-full min-h-[100dvh] flex-row items-center justify-center">
-          {msg.fileMetadata.payloads.find((p) => p.key === mediaKey)?.contentType ===
-          'video/mp4' ? (
-            <OdinVideo
-              dotYouClient={dotYouClient}
+          {contentType?.startsWith('video') ? (
+            <VideoClickToLoad
+              preload={true}
               fileId={msg.fileId}
               fileKey={mediaKey}
               targetDrive={ChatDrive}
               lastModified={msg.fileMetadata.updated}
               probablyEncrypted={true}
-              autoPlay={true}
+              className="h-full max-h-[100dvh] w-full object-contain"
             />
-          ) : (
+          ) : contentType?.startsWith('image') ? (
             <OdinImage
               className={`m-auto h-auto max-h-[100dvh] w-auto max-w-full object-contain`}
               dotYouClient={dotYouClient}
@@ -100,7 +109,16 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
               fit="contain"
               lastModified={msg.fileMetadata.updated}
             />
-          )}
+          ) : payload ? (
+            <BoringFile
+              odinId={undefined}
+              targetDrive={ChatDrive}
+              fileId={msg.fileId}
+              file={payload}
+              canDownload={true}
+              className="h-full w-full"
+            />
+          ) : null}
 
           {onClose ? (
             <button

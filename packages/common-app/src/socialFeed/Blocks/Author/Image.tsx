@@ -1,24 +1,30 @@
 import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
-import { Image, t } from '@youfoundation/common-app';
-import { useSiteData } from '@youfoundation/common-app';
-
-import { Person } from '@youfoundation/common-app';
+import { Image } from '../../../media/Image';
+import { t } from '../../../helpers/i18n/dictionary';
+import { Person } from '../../../ui/Icons/Person';
+import { useSiteData } from '../../../hooks/siteData/useSiteData';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 
 interface ImageProps {
   className?: string;
-  size?: 'xs' | 'sm' | 'md' | 'custom';
+  size?: 'xxs' | 'xs' | 'sm' | 'md' | 'custom';
 }
 
 interface ConnectionImageProps extends ImageProps {
   odinId?: string;
+  excludeLink?: boolean;
 }
 
 export const AuthorImage = ({ odinId, ...props }: ConnectionImageProps) => {
   const ownerHost = window.location.hostname;
 
   if (odinId && ownerHost !== odinId) {
+    const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
+    if (props.excludeLink) {
+      return <ConnectionImage {...props} odinId={odinId} />;
+    }
     return (
-      <a href={`https://${odinId}`}>
+      <a href={host}>
         <ConnectionImage {...props} odinId={odinId} />
       </a>
     );
@@ -41,10 +47,10 @@ export const OwnerImage = ({ className, size }: ImageProps) => {
         size === 'xs'
           ? 'h-[2rem] w-[2rem]'
           : size === 'sm'
-            ? 'h-[3rem] w-[3rem]'
-            : size === 'md'
-              ? 'h-[5rem] w-[5rem]'
-              : ''
+          ? 'h-[3rem] w-[3rem]'
+          : size === 'md'
+          ? 'h-[5rem] w-[5rem]'
+          : ''
       } rounded-full ${className ?? ''}`}
       fit="cover"
       alt={t('You')}
@@ -54,19 +60,22 @@ export const OwnerImage = ({ className, size }: ImageProps) => {
 };
 
 export const ConnectionImage = ({ odinId, className, size }: ConnectionImageProps) => {
+  const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
   return (
     <>
       {odinId ? (
         <img
-          src={`https://${odinId}/pub/image`}
+          src={`${host}/pub/image`}
           className={`${
-            size === 'xs'
+            size === 'xxs'
+              ? 'h-[1.5rem] w-[1.5rem]'
+              : size === 'xs'
               ? 'h-[2rem] w-[2rem]'
               : size === 'sm'
-                ? 'h-[3rem] w-[3rem]'
-                : size === 'md'
-                  ? 'h-[5rem] w-[5rem]'
-                  : ''
+              ? 'h-[3rem] w-[3rem]'
+              : size === 'md'
+              ? 'h-[5rem] w-[5rem]'
+              : ''
           } rounded-full ${className ?? ''}`}
           alt={`${odinId}`}
           title={`${odinId}`}
@@ -81,10 +90,10 @@ export const ConnectionImage = ({ odinId, className, size }: ConnectionImageProp
               size === 'xs'
                 ? 'h-[2rem] w-[2rem]'
                 : size === 'sm'
-                  ? 'h-[3rem] w-[3rem]'
-                  : size === 'md'
-                    ? 'h-[5rem] w-[5rem]'
-                    : ''
+                ? 'h-[3rem] w-[3rem]'
+                : size === 'md'
+                ? 'h-[5rem] w-[5rem]'
+                : ''
             }
           />
         </div>

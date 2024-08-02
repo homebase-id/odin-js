@@ -1,10 +1,16 @@
-import { getChannelDrive, PrimaryMediaFile } from '@youfoundation/js-lib/public';
-import { EmbeddedThumb } from '@youfoundation/js-lib/core';
-import { Image, Video, VideoClickToLoad } from '@youfoundation/common-app';
+import { getChannelDrive, POST_LINKS_PAYLOAD_KEY } from '@youfoundation/js-lib/public';
+import { EmbeddedThumb, PayloadDescriptor, TargetDrive } from '@youfoundation/js-lib/core';
+import { Image } from '../../../media/Image';
+import { Video, VideoClickToLoad } from '../../../media/Video';
+import { ExtensionThumbnail } from '../../../form/files/ExtensionThumbnail';
+import { useFile } from '../../../hooks';
+import { Download } from '../../../ui';
+import { bytesToSize, t } from '../../../helpers';
+import { LinkPreviewItem } from '../../../media/Link';
 
 export const PrimaryMedia = ({
   odinId,
-  primaryMediaFile,
+  file,
   fileId,
   globalTransitId,
   lastModified,
@@ -17,7 +23,7 @@ export const PrimaryMedia = ({
   clickToLoad,
 }: {
   odinId?: string;
-  primaryMediaFile: PrimaryMediaFile;
+  file: PayloadDescriptor;
   fileId: string;
   globalTransitId?: string;
   lastModified: number | undefined;
@@ -33,50 +39,131 @@ export const PrimaryMedia = ({
     onClick && onClick(e);
   };
 
-  // If the primary media fileId is set, then the media isn't stored on the postFile itself
-  const correctedGlobalTransitId = primaryMediaFile?.fileId ? undefined : globalTransitId;
+  const isVideo = file.contentType?.startsWith('video');
+  // const isAudio = file.contentType?.startsWith('audio');
+  const isImage = file.contentType?.startsWith('image');
+  const isLink = file.key === POST_LINKS_PAYLOAD_KEY;
 
   return (
     <div onClick={doNavigate}>
-      {primaryMediaFile?.type.startsWith('image') ? (
+      {isImage ? (
         <Image
           odinId={odinId}
           targetDrive={getChannelDrive(channelId)}
-          fileId={primaryMediaFile?.fileId || fileId}
-          globalTransitId={correctedGlobalTransitId}
+          fileId={fileId}
+          globalTransitId={globalTransitId}
           lastModified={lastModified}
-          fileKey={primaryMediaFile?.fileKey}
+          fileKey={file.key}
           className={className}
           previewThumbnail={previewThumbnail}
           fit={fit}
           probablyEncrypted={probablyEncrypted}
         />
-      ) : clickToLoad ? (
-        <VideoClickToLoad
+      ) : isVideo ? (
+        <>
+          {clickToLoad ? (
+            <VideoClickToLoad
+              odinId={odinId}
+              targetDrive={getChannelDrive(channelId)}
+              fileId={fileId}
+              globalTransitId={globalTransitId}
+              lastModified={lastModified}
+              fileKey={file.key}
+              className={className}
+              probablyEncrypted={probablyEncrypted}
+              previewThumbnail={previewThumbnail}
+              preload={false}
+              fit="contain"
+            />
+          ) : (
+            <Video
+              odinId={odinId}
+              targetDrive={getChannelDrive(channelId)}
+              fileId={fileId}
+              globalTransitId={globalTransitId}
+              lastModified={lastModified}
+              fileKey={file.key}
+              className={className}
+              probablyEncrypted={probablyEncrypted}
+            />
+          )}
+        </>
+      ) : isLink ? (
+        <LinkPreviewItem
           odinId={odinId}
+          globalTransitId={globalTransitId}
           targetDrive={getChannelDrive(channelId)}
-          fileId={primaryMediaFile?.fileId || fileId}
-          globalTransitId={correctedGlobalTransitId}
-          lastModified={lastModified}
-          fileKey={primaryMediaFile?.fileKey}
-          className={className}
-          probablyEncrypted={probablyEncrypted}
-          previewThumbnail={previewThumbnail}
-          preload={false}
-          fit="contain"
+          fileId={fileId}
+          payload={file as PayloadDescriptor}
+          className="mx-2 mt-2 border rounded-t-lg"
         />
       ) : (
-        <Video
+        <BoringFile
           odinId={odinId}
           targetDrive={getChannelDrive(channelId)}
-          fileId={primaryMediaFile?.fileId || fileId}
-          globalTransitId={correctedGlobalTransitId}
-          lastModified={lastModified}
-          fileKey={primaryMediaFile?.fileKey}
-          className={className}
-          probablyEncrypted={probablyEncrypted}
+          fileId={fileId}
+          file={file}
+          className="aspect-video"
         />
       )}
+    </div>
+  );
+};
+
+export const BoringFile = ({
+  odinId,
+  targetDrive,
+  fileId,
+  file,
+  canDownload,
+  className,
+}: {
+  odinId: string | undefined;
+  targetDrive: TargetDrive;
+  fileId: string;
+  file: PayloadDescriptor;
+  canDownload?: boolean;
+  className?: string;
+}) => {
+  const fetchFile = useFile({ targetDrive }).fetchFile;
+  const doDownload = (url: string) => {
+    // Dirty hack for easy download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = file.descriptorContent || url.substring(url.lastIndexOf('/') + 1);
+    link.click();
+  };
+
+  if (!file) return null;
+
+  return (
+    <div
+      onClick={
+        canDownload
+          ? async () => {
+              doDownload((await fetchFile(odinId, fileId, file.key)) || '');
+            }
+          : undefined
+      }
+      className={`${className || ''} relative ${className?.indexOf('aspect-') ? '' : 'aspect-square'} overflow-hidden bg-slate-50 text-slate-200 dark:bg-slate-700 dark:text-slate-600 mx-auto ${canDownload ? 'cursor-pointer' : ''}`}
+    >
+      <p className="absolute inset-0 p-2 text-9xl break-all">
+        {file.descriptorContent || file.contentType}
+      </p>
+      <div className="absolute inset-0 flex gap-3 items-center justify-center text-foreground">
+        <ExtensionThumbnail
+          contentType={file.contentType}
+          className={`${canDownload ? 'h-64 w-64 text-slate-200 dark:text-slate-600' : 'h-32 w-32 text-slate-500 dark:text-slate-400'}`}
+        />
+      </div>
+
+      {canDownload ? (
+        <div className="absolute inset-0 flex gap-3 items-center justify-center text-foreground">
+          <span className="flex flex-col items-center">
+            <Download className="h-12 w-12 " /> {t('Download')} ({bytesToSize(file.bytesWritten)})
+          </span>
+        </div>
+      ) : null}
     </div>
   );
 };

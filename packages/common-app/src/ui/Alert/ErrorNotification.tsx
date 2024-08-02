@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useErrors } from '@youfoundation/common-app';
+import { useErrors } from '../../hooks/errors/useErrors';
 
 export const ErrorNotification = ({ error }: { error: unknown }) => {
   const addError = useErrors().add;

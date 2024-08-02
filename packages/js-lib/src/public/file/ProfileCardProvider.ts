@@ -2,13 +2,14 @@ const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
 import axios from 'axios';
-import { DotYouClient } from '../../core/DotYouClient';
+import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { HomebaseFile, SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
 import { getDecryptedImageData } from '../../media/ImageProvider';
 import { BuiltInProfiles, MinimalProfileFields } from '../../profile/ProfileData/ProfileConfig';
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';
 import { getProfileAttributes, BuiltInAttributes, Attribute } from '../../profile/profile';
 import { publishProfileCardFile, publishProfileImageFile } from './FileProvider';
+import { fromBlob } from '../../media/media';
 
 export interface ProfileCard {
   name: string;
@@ -45,16 +46,18 @@ export const GetProfileCard = async (odinId: string): Promise<ProfileCard | unde
       return await _internalFileCache.get(odinId);
     }
 
+    const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
+
     const httpClient = axios.create();
     const fetchProfileCard = async () => {
       return await httpClient
-        .get<ProfileCard>(`https://${odinId}/pub/profile`, {
+        .get<ProfileCard>(`${host}/pub/profile`, {
           withCredentials: false,
         })
         .then((response) => {
           return {
             ...response.data,
-            image: `https://${odinId}/pub/image`,
+            image: `${host}/pub/image`,
           };
         });
     };
@@ -102,11 +105,31 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
       payloadIsAnSvg ? undefined : size
     );
     if (imageData) {
-      await publishProfileImageFile(
-        dotYouClient,
-        new Uint8Array(imageData.bytes),
-        imageData.contentType
-      );
+      try {
+        const imageBlobData = new OdinBlob([new Uint8Array(imageData.bytes)], {
+          type: imageData.contentType,
+        });
+        const resizedJpgData = await fromBlob(
+          imageBlobData,
+          100,
+          size.pixelWidth,
+          size.pixelHeight,
+          'jpeg'
+        );
+
+        await publishProfileImageFile(
+          dotYouClient,
+          new Uint8Array(await resizedJpgData.blob.arrayBuffer()),
+          resizedJpgData.blob.type
+        );
+      } catch (ex) {
+        // Fallback to unresized image
+        await publishProfileImageFile(
+          dotYouClient,
+          new Uint8Array(imageData.bytes),
+          imageData.contentType
+        );
+      }
     }
   }
 };
@@ -115,8 +138,10 @@ export const GetProfileImage = async (odinId: string): Promise<Blob | undefined>
   try {
     const httpClient = axios.create();
     const fetchProfileCard = async () => {
+      const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
+
       return await httpClient
-        .get(`https://${odinId}/pub/image`, {
+        .get(`${host}/pub/image`, {
           baseURL: odinId,
           withCredentials: false,
           responseType: 'arraybuffer',

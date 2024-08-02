@@ -225,7 +225,7 @@ export const getThumbBytes = async (
   payloadKey: string,
   width: number,
   height: number,
-  options: {
+  options?: {
     systemFileType?: SystemFileType;
     lastModified?: number;
     axiosConfig?: AxiosRequestConfig;
@@ -283,8 +283,7 @@ export const getContentFromHeaderOrPayload = async <T>(
 ): Promise<T | null> => {
   const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
   const contentIsComplete =
-    fileMetadata.payloads.filter((payload) => payload.contentType === 'application/json').length ===
-    0;
+    fileMetadata.payloads.filter((payload) => payload.key === DEFAULT_PAYLOAD_KEY).length === 0;
   if (fileMetadata.isEncrypted && !sharedSecretEncryptedKeyHeader) return null;
 
   const keyHeader = fileMetadata.isEncrypted

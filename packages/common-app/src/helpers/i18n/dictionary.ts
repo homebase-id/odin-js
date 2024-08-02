@@ -1,3 +1,5 @@
+import { TransferStatus } from '@youfoundation/js-lib/core';
+
 const enLocale = [
   ['login', 'Login'],
   ['logout', 'Logout'],
@@ -43,11 +45,27 @@ const enLocale = [
   ['sendpushnotifications', 'Send Push Notifications'],
   ['publishstaticcontent', 'Publish Static Content'],
   ['managefeed', 'Manage feed'],
+
+  // Transfer Statusses:
+  [
+    TransferStatus.RecipientIdentityReturnedAccessDenied.toLowerCase(),
+    'Recipient identity returned access denied',
+  ],
+  [TransferStatus.RecipientServerNotResponding.toLowerCase(), 'Recipient server not responding'],
+  [
+    TransferStatus.RecipientIdentityReturnedServerError.toLowerCase(),
+    'Recipient identity returned server error',
+  ],
+  [
+    TransferStatus.RecipientIdentityReturnedBadRequest.toLowerCase(),
+    'Recipient identity returned bad request',
+  ],
 ] as const;
 
 const internalDict: Map<string, string> = new Map(enLocale);
 
-const t = (key: string, ...args: (string | number)[]) => {
+const t = (key: string | undefined, ...args: (string | number)[]) => {
+  if (!key) return '';
   const localizedKey = internalDict.get(key.toLowerCase()) ?? key;
 
   return localizedKey.replaceAll(/{(\d+)}/g, (match, number) => {

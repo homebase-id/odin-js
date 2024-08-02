@@ -2,12 +2,15 @@ import { PostContent } from '@youfoundation/js-lib/public';
 import { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 
-import { flattenInfinteData } from '@youfoundation/common-app';
-import { t } from '@youfoundation/common-app';
-import { LoadingBlock } from '@youfoundation/common-app';
-import PostComposer from '../PostComposer';
+import {
+  flattenInfinteData,
+  t,
+  LoadingBlock,
+  PostComposer,
+  useSocialFeed,
+  SubtleMessage,
+} from '@youfoundation/common-app';
 import PostTeaserCard, { NewPostTeaserCard } from '../PostTeaserCard';
-import { useSocialFeed } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 const PAGE_SIZE = 15; // We could increase this one, but also might not, as on mobile 10 items are rather far, and on desktop fetching more is fast...
@@ -28,7 +31,7 @@ const SocialFeedMainContent = () => {
     () =>
       flattenInfinteData<HomebaseFile<PostContent>>(
         posts,
-        PAGE_SIZE,
+        hasMorePosts ? PAGE_SIZE : undefined, // If we're out of ServerSide pages we don't want to slice
         (a, b) =>
           (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
           (a.fileMetadata.appData.userDate || a.fileMetadata.created)
@@ -66,9 +69,13 @@ const SocialFeedMainContent = () => {
 
   const items = virtualizer.getVirtualItems();
 
+  const isReactNative = window.localStorage.getItem('client_type') === 'react-native-v2';
+
   return (
     <>
-      <PostComposer className="mb-2 w-full rounded-md border-gray-200 border-opacity-60 bg-background p-4 shadow-sm dark:border-gray-800 lg:border" />
+      {isReactNative ? null : (
+        <PostComposer className="mb-2 w-full rounded-md border-gray-200 border-opacity-60 bg-background p-4 shadow-sm dark:border-gray-800 lg:border" />
+      )}
       {postsLoading ? (
         <div className="-mx-4">
           <LoadingBlock className="m-4 h-10" />
@@ -106,7 +113,7 @@ const SocialFeedMainContent = () => {
                           </div>
                         ) : (
                           <div className="italic opacity-50" key={'no-more'}>
-                            {t('No more posts')}
+                            {t(`No more posts. Expecting more? Make sure you're following them.`)}
                           </div>
                         )}
                       </div>
@@ -115,7 +122,6 @@ const SocialFeedMainContent = () => {
 
                   const post = flattenedPosts[virtualRow.index];
                   const postTeaserCardProps = {
-                    key: post.fileId || post.fileMetadata.appData.content.id,
                     postFile: post,
                     odinId: post.fileMetadata.senderOdinId,
                     className: 'bg-background shadow-sm',
@@ -129,9 +135,15 @@ const SocialFeedMainContent = () => {
                       className="py-2"
                     >
                       {post.fileId ? (
-                        <PostTeaserCard {...postTeaserCardProps} />
+                        <PostTeaserCard
+                          key={post.fileId || post.fileMetadata.appData.content.id}
+                          {...postTeaserCardProps}
+                        />
                       ) : (
-                        <NewPostTeaserCard {...postTeaserCardProps} />
+                        <NewPostTeaserCard
+                          key={post.fileId || post.fileMetadata.appData.content.id}
+                          {...postTeaserCardProps}
+                        />
                       )}
                     </div>
                   );
@@ -140,7 +152,11 @@ const SocialFeedMainContent = () => {
             </div>
           </div>
         </>
-      ) : null}
+      ) : (
+        <SubtleMessage>
+          {t('No posts yet, send a post to your followers, or start following other identities')}
+        </SubtleMessage>
+      )}
     </>
   );
 };

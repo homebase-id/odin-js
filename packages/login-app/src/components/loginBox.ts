@@ -11,9 +11,9 @@ const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]{2,25}(
 const INVALID_CLASSNAME = 'invalid';
 const LOADING_CLASSNAME = 'loading';
 
-const setupHtml = (isStandalone?: boolean) => {
+const setupHtml = (isStandalone?: boolean, allowEmptySubmit?: boolean) => {
   document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-    <div ${isStandalone ? 'class="max-w-sm m-auto w-full"' : ''}>
+    <div ${isStandalone ? 'class="max-w-sm m-auto px-3 w-full"' : ''}>
       <form id="main" class="form">
         <h1 class="text-lg">YouAuth</h1>
         <div class="label-group">
@@ -22,7 +22,11 @@ const setupHtml = (isStandalone?: boolean) => {
           </label>
           <span class="invalid-msg">Invalid identity</span>
         </div>
-        <input type="text" name="homebase-id" id="homebase-id" required inputmode="url" />
+        <div id="selectable-wrapper">
+          <input type="text" name="homebase-id" list="homebase-identities" id="homebase-id" inputmode="url" autoComplete="off" ${!allowEmptySubmit ? 'required' : ''}/>
+          <ul id="homebase-identities"></ul>
+          <a id="toggle"></a>
+        </div>
         <button class="login">Login</button>
       </form>
       <p class="my-3 text-center">or</p>
@@ -30,15 +34,30 @@ const setupHtml = (isStandalone?: boolean) => {
     </div>`;
 };
 
-export const LoginBox = async (onSubmit: (identity: string) => void, isStandalone?: boolean) => {
-  setupHtml(isStandalone);
+export const LoginBox = async (
+  onSubmit: (identity: string) => void,
+  isStandalone?: boolean,
+  allowEmptySubmit?: boolean
+) => {
+  setupHtml(isStandalone, allowEmptySubmit);
 
   const mainForm = document.getElementById('main');
   const dotyouInputBox: HTMLInputElement | null = document.getElementById(
     'homebase-id'
   ) as HTMLInputElement;
 
-  if (!mainForm || !dotyouInputBox) return;
+  const selectableWrapper = document.getElementById('selectable-wrapper') as HTMLDivElement;
+  const homebaseIdentities = document.getElementById('homebase-identities') as HTMLUListElement;
+  const identitiesToggle = document.getElementById('toggle') as HTMLAnchorElement;
+
+  if (
+    !mainForm ||
+    !dotyouInputBox ||
+    !selectableWrapper ||
+    !homebaseIdentities ||
+    !identitiesToggle
+  )
+    return;
 
   const localDomainComplete = (domain: string) => {
     const strippedIdentity = stripIdentity(domain);
@@ -78,8 +97,18 @@ export const LoginBox = async (onSubmit: (identity: string) => void, isStandalon
   };
 
   const storagePartioned = await checkStorageAccess();
+  console.debug('storagePartioned', storagePartioned);
   mainForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    if (dotyouInputBox.value === '' && allowEmptySubmit) {
+      onSubmit('');
+      return;
+    }
+
+    if (!(mainForm as HTMLFormElement).reportValidity()) {
+      return;
+    }
 
     if (!localDomainCheck(dotyouInputBox.value)) return;
     mainForm.classList.add(LOADING_CLASSNAME);
@@ -99,18 +128,51 @@ export const LoginBox = async (onSubmit: (identity: string) => void, isStandalon
     return false;
   });
 
-  const fillIdentityFromStorage = () => {
-    const previousIdentity = getIdentityFromStorage();
-    if (!dotyouInputBox.value && previousIdentity) dotyouInputBox.value = previousIdentity;
+  const fillIdentityFromStorage = (autoFocused?: boolean) => {
+    if (dotyouInputBox.value) return;
+
+    const previousIdentities = getIdentityFromStorage();
+    if (previousIdentities?.length >= 1) dotyouInputBox.value = previousIdentities[0];
+    if (previousIdentities?.length > 1) {
+      selectableWrapper.classList.add('selectable-input');
+      homebaseIdentities.innerHTML = previousIdentities
+        .map((identity) => `<li class="option" data-identity="${identity}">${identity}</li>`)
+        .join('');
+
+      homebaseIdentities.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!e.target || !('attributes' in e.target)) return;
+        const identity = (e.target as HTMLElement).getAttribute('data-identity');
+        dotyouInputBox.value = identity || '';
+        selectableWrapper.classList.remove('show');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!homebaseIdentities.contains(e.target as Node) && e.target !== dotyouInputBox)
+          selectableWrapper.classList.remove('show');
+      });
+
+      identitiesToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        selectableWrapper.classList.toggle('show');
+      });
+
+      dotyouInputBox.addEventListener('keyup', () => selectableWrapper.classList.remove('show'));
+      dotyouInputBox.addEventListener('focus', () => selectableWrapper.classList.add('show'));
+      if (autoFocused) selectableWrapper.classList.add('show');
+    }
   };
 
   // If storage is partioned, onclick of the input box, requestAccess to fill in with a previous known identity
   if (storagePartioned) {
     dotyouInputBox.addEventListener('click', async (e) => {
-      if (!e.target || 'value' in e.target) return;
+      if (!e.target || !('value' in e.target)) return;
       if ((e.target as HTMLInputElement).value) return;
 
-      requestStorageAccess().then(() => fillIdentityFromStorage());
+      requestStorageAccess().then(() => fillIdentityFromStorage(true));
     });
   } else fillIdentityFromStorage();
 };

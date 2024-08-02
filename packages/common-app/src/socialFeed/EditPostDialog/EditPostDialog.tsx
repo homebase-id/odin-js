@@ -1,18 +1,17 @@
 import { PostContent, getChannelDrive } from '@youfoundation/js-lib/public';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ActionButton, FileOverview, Save, VolatileInput, t } from '@youfoundation/common-app';
-import { usePortal } from '@youfoundation/common-app';
-
-import { ErrorNotification } from '@youfoundation/common-app';
-import { DialogWrapper } from '@youfoundation/common-app';
-import { usePost } from '../../hooks/socialFeed/post/usePost';
+import { useManagePost } from '../../hooks/socialFeed/post/useManagePost';
 import {
   DEFAULT_PAYLOAD_KEY,
   HomebaseFile,
   MediaFile,
   NewMediaFile,
 } from '@youfoundation/js-lib/core';
+import { VolatileInput, FileOverview } from '../../form';
+import { t } from '../../helpers';
+import { usePortal } from '../../hooks';
+import { ErrorNotification, DialogWrapper, ActionButton, Save } from '../../ui';
 
 export const EditPostDialog = ({
   postFile: incomingPostFile,
@@ -28,7 +27,7 @@ export const EditPostDialog = ({
   const target = usePortal('modal-container');
   const {
     update: { mutate: updatePost, error: updatePostError, status: updatePostStatus },
-  } = usePost();
+  } = useManagePost();
   const [postFile, setPostFile] = useState<HomebaseFile<PostContent>>({ ...incomingPostFile });
   const [newMediaFiles, setNewMediaFiles] = useState<(MediaFile | NewMediaFile)[]>(
     postFile.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || []
@@ -98,9 +97,9 @@ export const EditPostDialog = ({
             setFiles={setNewMediaFiles}
             cols={4}
           />
-          <div className="-m-2 mt-3 flex flex-row-reverse items-center md:flex-nowrap">
+          <div className="gap-2 mt-3 flex flex-col sm:flex-row-reverse ">
             <ActionButton
-              className={`m-2 ${
+              className={`${
                 postFile.fileMetadata.appData.content.caption?.length || newMediaFiles.length
                   ? ''
                   : 'pointer-events-none opacity-20 grayscale'
@@ -111,7 +110,6 @@ export const EditPostDialog = ({
               {t('Save')}
             </ActionButton>
             <ActionButton
-              className={`m-2`}
               type="secondary"
               onClick={(e) => {
                 e.stopPropagation();

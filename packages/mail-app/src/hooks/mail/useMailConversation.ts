@@ -159,7 +159,6 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
           if (!serverData) return;
           updatedConversation.fileMetadata.versionTag = serverData.fileMetadata.versionTag;
           await updateLocalMailHeader(dotYouClient, updatedConversation);
-          console.log('saved after a versionConflict');
         });
       })
     );

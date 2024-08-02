@@ -1,26 +1,20 @@
 import { NewMediaFile } from '@youfoundation/js-lib/core';
 import { ReactionContext } from '@youfoundation/js-lib/public';
 import { useMemo, useState } from 'react';
+import { VolatileInput, FileOverview, FileSelector } from '../../../../form';
+import { t, getImagesFromPasteEvent } from '../../../../helpers';
+import { CanReactInfo, useDotYouClient, useReaction } from '../../../../hooks';
 import {
-  ActionButton,
+  ErrorNotification,
   ActionButtonState,
-  AuthorImage,
-  CanReactInfo,
-  CantReactInfo,
-  EmojiSelector,
-  FileOverview,
-  FileSelector,
   ImageIcon,
+  ActionButton,
   Loader,
   PaperPlane,
-  VolatileInput,
-  getImagesFromPasteEvent,
-  t,
-  useDotYouClient,
-  useReaction,
-} from '@youfoundation/common-app';
-
-import { ErrorNotification } from '@youfoundation/common-app';
+} from '../../../../ui';
+import { AuthorImage } from '../../Author/Image';
+import { CantReactInfo } from '../CantReactInfo';
+import { EmojiSelector } from '../EmojiPicker/EmojiSelector';
 
 const TEN_MEGA_BYTES = 10 * 1024 * 1024;
 
@@ -99,7 +93,7 @@ export const CommentComposer = ({
           />
         </div>
       ) : (
-        <CantReactInfo cantReact={canReact} login={login} />
+        <CantReactInfo cantReact={canReact} login={login} intent="comment" />
       )}
       <ErrorNotification error={postCommentError} />
     </div>

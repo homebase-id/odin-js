@@ -13,11 +13,10 @@ import {
   CanReactInfo,
 } from '../../../..';
 
-import { CommentTeaser } from './Comments/Comment';
+import { CommentTeaser, Comment } from './Comments/Comment';
 import { CommentComposer } from './Comments/CommentComposer';
 import { LikeButton } from './Reactions/LikeButton';
 
-import { Comment } from '@youfoundation/common-app';
 import { ReactionDetailsDialog } from './ReactionDetailsDialog/ReactionDetailsDialog';
 import { RepostDialog } from './RepostDialog/RepostDialog';
 import { ShareDialog } from './ShareDialog/ShareDialog';
@@ -26,6 +25,8 @@ import {
   HomebaseFile,
   EmojiReactionSummary,
   ParsedReactionPreview,
+  ApiType,
+  DotYouClient,
 } from '@youfoundation/js-lib/core';
 
 export const PostInteracts = ({
@@ -87,7 +88,7 @@ export const PostInteracts = ({
     },
   };
 
-  const permalink = `https://${authorOdinId}${HOME_ROOT_PATH}posts/${postContent.channelId}/${
+  const permalink = `${new DotYouClient({ identity: authorOdinId || undefined, api: ApiType.Guest }).getRoot()}${HOME_ROOT_PATH}posts/${postContent.channelId}/${
     postContent.slug ?? postContent.id
   }`;
 

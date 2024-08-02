@@ -12,16 +12,19 @@ import {
   OWNER_APP_ID,
   useDotYouClient,
   MAIL_APP_ID,
+  ErrorNotification,
+  Times,
+  useRemoveNotifications,
 } from '@youfoundation/common-app';
 import { Bell } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { useEffect, useMemo, useState } from 'react';
-import PushNotificationsDialog from '../../components/Dialog/PushNotificationsDialog/PushNotificationsDialog';
 import { useApp } from '../../hooks/apps/useApp';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useSearchParams } from 'react-router-dom';
 import { useContact } from '../../hooks/contacts/useContact';
-import { PushNotification } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, PushNotification } from '@youfoundation/js-lib/core';
+import PushNotificationsDialog from '../../components/Notifications/PushNotificationsDialog/PushNotificationsDialog';
 
 interface NotificationClickData {
   notification: string;
@@ -30,7 +33,9 @@ interface NotificationClickData {
 const Notifications = () => {
   const [params] = useSearchParams();
 
+  useRemoveNotifications({ appId: OWNER_APP_ID });
   const { data: notifications, isFetching: fetchingNotifications } = usePushNotifications().fetch;
+
   const [isDialogOpen, setDialogOpen] = useState(false);
 
   const [toOpenNotification, setToOpenNotification] = useState<string | undefined>(
@@ -79,27 +84,62 @@ const Notifications = () => {
     [notifications]
   );
 
+  const {
+    mutate: remove,
+    status: removeStatus,
+    error: removeError,
+  } = usePushNotifications().remove;
+  const doClearAll = () => {
+    remove(notifications?.results.map((n) => n.id) || []);
+  };
+
   return (
     <>
       <PageMeta
         title={t('Notifications')}
         icon={Bell}
         actions={
-          <ActionButton type="primary" icon={Cog} onClick={() => setDialogOpen(true)}>
-            {t('Notifications')}
-          </ActionButton>
+          <>
+            {notifications?.results?.length ? (
+              <ActionButton
+                type="primary"
+                icon={Times}
+                onClick={doClearAll}
+                state={removeStatus !== 'success' ? removeStatus : undefined}
+              >
+                {t('Clear all')}
+              </ActionButton>
+            ) : null}
+            <ActionButton type="secondary" icon={Cog} onClick={() => setDialogOpen(true)}>
+              {t('Notifications')}
+            </ActionButton>
+          </>
         }
       />
       {notifications?.results?.length ? (
-        <div className="flex flex-col gap-3 px-2">
-          {Object.keys(groupedNotificationsPerDay).map((day) => (
-            <NotificationDay
-              day={new Date(day)}
-              notifications={groupedNotificationsPerDay[day]}
-              key={day}
-            />
-          ))}
-        </div>
+        <>
+          <div className="flex flex-col gap-3 px-2">
+            {Object.keys(groupedNotificationsPerDay).map((day) => (
+              <NotificationDay
+                day={new Date(day)}
+                notifications={groupedNotificationsPerDay[day]}
+                key={day}
+              />
+            ))}
+          </div>
+          <ErrorNotification error={removeError} />
+          <div className="mx-2 mt-5 flex max-w-sm flex-row-reverse">
+            <ActionButton
+              type="mute"
+              size="none"
+              onClick={doClearAll}
+              state={removeStatus !== 'success' ? removeStatus : undefined}
+              className="opacity-50 hover:opacity-100"
+            >
+              {t('Clear all')}
+            </ActionButton>
+          </div>
+        </>
       ) : (
         <SubtleMessage>{t('No notifications')}</SubtleMessage>
       )}
@@ -160,7 +200,7 @@ const NotificationAppGroup = ({
       ? 'Homebase'
       : stringGuidsEqual(appId, FEED_APP_ID)
         ? 'Homebase - Feed'
-        : 'Unknown');
+        : `Unknown (${appId})`);
 
   const groupedByTypeNotifications =
     notifications.reduce(
@@ -194,7 +234,10 @@ const NotificationGroup = ({
   const canExpand = typeGroup.length > 1;
   const [isExpanded, setExpanded] = useState(!canExpand);
 
-  const { mutate: remove } = usePushNotifications().remove;
+  const {
+    remove: { mutate: remove },
+    markAsRead: { mutate: markAsRead },
+  } = usePushNotifications();
 
   const groupCount = typeGroup.length - 1;
   const visibleLength = isExpanded ? 10 : 3;
@@ -226,9 +269,13 @@ const NotificationGroup = ({
             <NotificationItem
               notification={notification}
               isExpanded={index === 0 || isExpanded}
-              onDismiss={() => remove([notification.id])}
+              onDismiss={() =>
+                isExpanded ? remove([notification.id]) : remove(typeGroup.map((n) => n.id))
+              }
               onOpen={() =>
-                canExpand && !isExpanded ? setExpanded(true) : remove(typeGroup.map((n) => n.id))
+                canExpand && !isExpanded
+                  ? setExpanded(true)
+                  : markAsRead(typeGroup.map((n) => n.id))
               }
               groupCount={isExpanded ? 0 : groupCount}
               href={
@@ -278,13 +325,18 @@ const NotificationItem = ({
 
   const title = useMemo(() => `${appName}`, [appName]);
   const body = useMemo(
-    () => bodyFormer(notification, true, appName, senderName),
+    () => bodyFormer(notification, false, appName, senderName),
     [notification, senderName, appName]
   );
 
   return (
     <Toast
       title={title}
+      imgSrc={
+        notification.senderId
+          ? `${new DotYouClient({ identity: notification.senderId, api: ApiType.Guest }).getRoot()}/pub/image`
+          : undefined
+      }
       // Keeping the hidden ones short
       body={ellipsisAtMaxChar(body, isExpanded ? 120 : 40)}
       timestamp={notification.created}
@@ -313,7 +365,8 @@ const bodyFormer = (
 ) => {
   const sender = senderName || payload.senderId;
 
-  if (payload.options.unEncryptedMessage) return payload.options.unEncryptedMessage;
+  if (payload.options.unEncryptedMessage)
+    return (payload.options.unEncryptedMessage || '').replaceAll(payload.senderId, sender);
 
   if (payload.options.appId === OWNER_APP_ID) {
     // Based on type, we show different messages
@@ -330,7 +383,7 @@ const bodyFormer = (
     return `${sender} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
   } else if (payload.options.appId === FEED_APP_ID) {
     if (payload.options.typeId === FEED_NEW_CONTENT_TYPE_ID) {
-      return `${sender} posted to your feed`;
+      return `${sender} uploaded a new post`;
     } else if (payload.options.typeId === FEED_NEW_REACTION_TYPE_ID) {
       return `${sender} reacted to your post`;
     } else if (payload.options.typeId === FEED_NEW_COMMENT_TYPE_ID) {
@@ -356,7 +409,7 @@ const getTargetLink = (payload: PushNotification) => {
   } else if (payload.options.appId === CHAT_APP_ID) {
     return `/apps/chat/${payload.options.typeId}`;
   } else if (payload.options.appId === MAIL_APP_ID) {
-    return `/apps/mail/${payload.options.typeId}`;
+    return `/apps/mail/inbox/${payload.options.typeId}`;
   } else if (payload.options.appId === FEED_APP_ID) {
     return `/apps/feed`;
   }

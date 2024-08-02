@@ -8,9 +8,6 @@ import {
   HybridLink,
   ActionGroupOptionProps,
   Download,
-  EmbeddedPostContent,
-  FakeAnchor,
-  useSocialFeed,
   useUnreadPushNotificationsCount,
   CHAT_APP_ID,
   FEED_APP_ID,
@@ -21,8 +18,12 @@ import {
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
 import { getOperatingSystem } from '@youfoundation/js-lib/auth';
 import { isTouchDevice } from '@youfoundation/js-lib/helpers';
+import { FeedTeaser } from './FeedTeaser';
+import { useAutofixDefaultConfig } from '../../hooks/useAutoFixDefaultConfig';
 
 const Dashboard = () => {
+  useAutofixDefaultConfig();
+
   return (
     <>
       <PageMeta title={t('Dashboard')} icon={House} />
@@ -55,8 +56,8 @@ const Dashboard = () => {
         <PhotoApp />
       </div>
 
-      <div className="mt-10 flex max-w-2xl flex-row flex-wrap gap-4">
-        <FeedTeaser />
+      <div className="mt-10 flex w-full max-w-2xl flex-row flex-wrap gap-4">
+        <FeedTeaser className="w-full" />
       </div>
     </>
   );
@@ -109,7 +110,7 @@ const AppWrapper = ({
 );
 
 const SystemApp = () => {
-  const unreadCount = useUnreadPushNotificationsCount({ appId: OWNER_APP_ID });
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: OWNER_APP_ID });
 
   // const os = getOperatingSystem();
   // const isAndroid = os.name === 'Android';
@@ -119,24 +120,24 @@ const SystemApp = () => {
       name={'Notifications'}
       appId={OWNER_APP_ID}
       href={'/owner/notifications'}
-      unreadCount={unreadCount}
+      unreadCount={unreadCount || 0}
     />
   );
 };
 
 const ChatApp = () => {
   // const { data: appReg } = useApp({ appId: CHAT_APP_ID }).fetch;
-  const unreadCount = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
   const os = getOperatingSystem();
   const isAndroid = os.name === 'Android';
-  // const isIos = os === 'iOS';
+  const isIos = os.name === 'iOS';
 
   return (
     <AppWrapper
       appId={CHAT_APP_ID}
       name={'Chat'}
       href={`/apps/chat`}
-      unreadCount={unreadCount}
+      unreadCount={unreadCount || 0}
       options={[
         {
           label: t('Settings'),
@@ -151,21 +152,29 @@ const ChatApp = () => {
                 href: `https://play.google.com/store/apps/details?id=id.homebase.feed`,
               },
             ]
-          : []),
+          : isIos
+            ? [
+                {
+                  label: t('Install on iOS'),
+                  icon: Download,
+                  href: `https://apps.apple.com/us/app/homebase-secure-feed/id6468971238`,
+                },
+              ]
+            : []),
       ]}
     />
   );
 };
 
 const MailApp = () => {
-  const unreadCount = useUnreadPushNotificationsCount({ appId: MAIL_APP_ID });
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: MAIL_APP_ID });
 
   return (
     <AppWrapper
       appId={MAIL_APP_ID}
       name={'Mail'}
       href={`/apps/mail`}
-      unreadCount={unreadCount}
+      unreadCount={unreadCount || 0}
       options={[
         {
           label: t('Settings'),
@@ -179,16 +188,17 @@ const MailApp = () => {
 
 const FeedApp = () => {
   // const { data: appReg } = useApp({ appId: FEED_APP_ID }).fetch;
-  const unreadCount = useUnreadPushNotificationsCount({ appId: FEED_APP_ID });
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: FEED_APP_ID });
   const os = getOperatingSystem();
   const isAndroid = os.name === 'Android';
+  const isIos = os.name === 'iOS';
 
   return (
     <AppWrapper
       appId={FEED_APP_ID}
       name={'Feed'}
       href={`/apps/feed`}
-      unreadCount={unreadCount}
+      unreadCount={unreadCount || 0}
       options={[
         {
           label: t('Settings'),
@@ -203,7 +213,15 @@ const FeedApp = () => {
                 href: `https://play.google.com/store/apps/details?id=id.homebase.feed`,
               },
             ]
-          : []),
+          : isIos
+            ? [
+                {
+                  label: t('Install on iOS'),
+                  icon: Download,
+                  href: `https://apps.apple.com/us/app/homebase-secure-feed/id6468971238`,
+                },
+              ]
+            : []),
       ]}
     />
   );
@@ -211,7 +229,7 @@ const FeedApp = () => {
 
 const PhotoApp = () => {
   // const { data: appReg } = useApp({ appId: PHOTO_APP_ID }).fetch;
-  const unreadCount = useUnreadPushNotificationsCount({ appId: PHOTO_APP_ID });
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: PHOTO_APP_ID });
 
   const os = getOperatingSystem();
   const isAndroid = os.name === 'Android';
@@ -221,7 +239,7 @@ const PhotoApp = () => {
       appId={PHOTO_APP_ID}
       name={'Photos'}
       href={`https://photos.homebase.id`}
-      unreadCount={unreadCount}
+      unreadCount={unreadCount || 0}
       options={[
         {
           label: t('Settings'),
@@ -239,51 +257,6 @@ const PhotoApp = () => {
           : []),
       ]}
     />
-  );
-};
-
-const POSTS_TO_SHOW = 2;
-const FeedTeaser = ({ className }: { className?: string }) => {
-  const { data: posts } = useSocialFeed({ pageSize: POSTS_TO_SHOW }).fetchAll;
-  const latestPosts = posts?.pages?.[0]?.results;
-
-  const hasPosts = latestPosts && latestPosts?.length;
-
-  return (
-    <div className={className}>
-      <div className="mb-4 flex flex-row items-center justify-between">
-        <p className="text-2xl">{t('What has everyone been up to?')}</p>
-      </div>
-      <FakeAnchor href={hasPosts ? `/apps/feed` : `/owner/connections`}>
-        <div className="pointer-events-none flex flex-col gap-4">
-          {hasPosts ? (
-            latestPosts.slice(0, POSTS_TO_SHOW).map((post, index) => (
-              <div
-                className={`rounded-md bg-background ${index !== 0 ? 'hidden lg:block' : ''}`}
-                key={post.fileId}
-              >
-                <EmbeddedPostContent
-                  content={{
-                    ...post.fileMetadata.appData.content,
-                    payloads: post.fileMetadata.payloads,
-                    userDate: post.fileMetadata.appData.userDate || post.fileMetadata.created,
-                    lastModified: post.fileMetadata.updated,
-                    permalink: '',
-                    previewThumbnail: post.fileMetadata.appData.previewThumbnail,
-                    fileId: post.fileId as string,
-                    globalTransitId: post.fileMetadata.globalTransitId,
-                  }}
-                />
-              </div>
-            ))
-          ) : (
-            <p className="rounded-md bg-background px-4 py-4 text-slate-400">
-              {t('Fill up your feed, by following people, or connecting with other identtiies')}
-            </p>
-          )}
-        </div>
-      </FakeAnchor>
-    </div>
   );
 };
 

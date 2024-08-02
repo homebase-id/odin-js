@@ -33,7 +33,9 @@ export const NewConversationGroup = () => {
         .filter(
           (contact) =>
             contact.odinId &&
-            (!query || contact.odinId?.includes(query) || contact.name?.displayName.includes(query))
+            (!query ||
+              contact.odinId?.includes(query) ||
+              contact.name?.displayName?.includes(query))
         )
     : [];
 

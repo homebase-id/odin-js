@@ -25,14 +25,17 @@ export const PageMeta = ({
           <ul className="mb-2 hidden flex-row xl:flex">
             {breadCrumbs.map((crumb, index) => {
               return (
-                <li key={index} className="mr-2">
+                <li key={index} className="group mr-2">
                   {crumb.href ? (
                     <Link to={crumb.href} className="">
                       {crumb.title}
                       <span className="ml-2">{'>'}</span>
                     </Link>
                   ) : (
-                    <span className="text-slate-500">{crumb.title}</span>
+                    <span className="text-slate-500">
+                      {crumb.title}
+                      <span className="ml-2 group-last:hidden">{'>'}</span>
+                    </span>
                   )}
                 </li>
               );

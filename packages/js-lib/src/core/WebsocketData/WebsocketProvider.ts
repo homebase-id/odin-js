@@ -12,13 +12,13 @@ import {
   EstablishConnectionRequest,
   NotificationType,
   TypedConnectionNotification,
+  AppNotification,
 } from './WebsocketTypes';
 
 let webSocketClient: WebSocket | undefined;
 let activeSs: Uint8Array;
 
 let isConnected = false;
-
 const PING_INTERVAL = 1000 * 5 * 1;
 
 let pingInterval: NodeJS.Timeout | undefined;
@@ -42,14 +42,14 @@ const isDebug = hasDebugFlag();
 const ParseRawClientNotification = (
   notification: RawClientNotification
 ): TypedConnectionNotification => {
-  const { targetDrive, header, externalFileIdentifier, sender, recipient, ...data } = tryJsonParse<
-    Record<string, unknown>
-  >(notification.data);
+  const { targetDrive, header, sender, recipient, ...data } = tryJsonParse<Record<string, unknown>>(
+    notification.data
+  );
 
-  if (notification.notificationType === 'transitFileReceived') {
+  if (notification.notificationType === 'inboxItemReceived') {
     return {
       notificationType: notification.notificationType,
-      externalFileIdentifier: externalFileIdentifier,
+      targetDrive,
       data: data,
     } as ClientTransitNotification;
   }
@@ -87,6 +87,18 @@ const ParseRawClientNotification = (
     } as ClientDeviceNotification;
   }
 
+  if (['appNotificationAdded'].includes(notification.notificationType)) {
+    return {
+      notificationType: notification.notificationType,
+
+      id: data.id,
+      senderId: data.senderId,
+      unread: true,
+      created: data.timestamp,
+      options: data.appNotificationOptions,
+    } as AppNotification;
+  }
+
   return {
     notificationType: 'unknown',
     data: data,
@@ -118,7 +130,7 @@ const ConnectSocket = async (
         });
     }
 
-    const url = `wss://${dotYouClient.getIdentity()}/api/${
+    const url = `wss://${dotYouClient.getRoot().split('//')[1]}/api/${
       apiType === ApiType.Owner ? 'owner' : 'apps'
     }/v1/notify/ws`;
 
@@ -128,9 +140,15 @@ const ConnectSocket = async (
     if (isDebug) console.debug(`[NotificationProvider] Client connected`);
 
     webSocketClient.onopen = () => {
+      const establishConnectionRequest: EstablishConnectionRequest = {
+        drives,
+        waitTimeMs: 2000,
+        batchSize: 1,
+      };
+
       Notify({
         command: 'establishConnectionRequest',
-        data: JSON.stringify(drives),
+        data: JSON.stringify(establishConnectionRequest),
       });
     };
 

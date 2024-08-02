@@ -4,10 +4,11 @@ import {
   publishProfileImage,
   publishProfileCard,
 } from '@youfoundation/js-lib/public';
-import { useDotYouClient } from '../../..';
+
 import { ApiType } from '@youfoundation/js-lib/core';
 import { BuiltInAttributes } from '@youfoundation/js-lib/profile';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { useDotYouClient } from '../auth/useDotYouClient';
 
 export const useStaticFiles = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();

@@ -20,15 +20,17 @@ const useParams = (returnUrl: string) => {
 };
 
 export const LoginBox = () => {
-  const isAutoAuthorize = window.location.pathname.startsWith(ROOT_PATH);
+  const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
+  const { data: authParams, isLoading } = useParams(returnUrl || ROOT_PATH || '/');
 
-  const { data: authParams, isLoading } = useParams(ROOT_PATH || '/');
   const stringifiedAuthParams = authParams && stringifyToQueryParams(authParams);
   const isDarkMode = document.documentElement.classList.contains(IS_DARK_CLASSNAME);
 
+  const isAutoAuthorize = window.location.pathname.startsWith(ROOT_PATH);
+
   useEffect(() => {
     if (isAutoAuthorize && stringifiedAuthParams)
-      window.location.href = `https://${window.location.hostname}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
+      window.location.href = `https://${window.location.host}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
   }, [authParams]);
 
   if (isLoading || isAutoAuthorize) return <LoadingBlock className="h-[16rem] w-full " />;
@@ -43,8 +45,8 @@ export const LoginBox = () => {
       {stringifiedAuthParams ? (
         <iframe
           src={`${
-            import.meta.env.VITE_CENTRAL_LOGIN_URL
-          }?isDarkMode=${isDarkMode}${`&${stringifiedAuthParams}`}`}
+            import.meta.env.VITE_CENTRAL_LOGIN_HOST
+          }/anonymous?isDarkMode=${isDarkMode}${`&${stringifiedAuthParams}`}`}
           key={stringifiedAuthParams}
           className="h-[16rem] w-full"
         ></iframe>
@@ -54,12 +56,13 @@ export const LoginBox = () => {
 };
 
 export const AutoAuthorize = () => {
-  const { data: authParams } = useParams(ROOT_PATH || '/');
+  const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
+  const { data: authParams } = useParams(returnUrl || ROOT_PATH || '/');
   const stringifiedAuthParams = authParams && stringifyToQueryParams(authParams);
 
   useEffect(() => {
     if (stringifiedAuthParams)
-      window.location.href = `https://${window.location.hostname}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
+      window.location.href = `https://${window.location.host}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
   }, [authParams]);
 
   return (

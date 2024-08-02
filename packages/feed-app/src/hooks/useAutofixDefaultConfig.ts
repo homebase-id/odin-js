@@ -2,16 +2,27 @@ import { useChannel } from '@youfoundation/common-app';
 import { BlogConfig } from '@youfoundation/js-lib/public';
 import { useEffect } from 'react';
 
-export const useAutofixDefaultConfig = () => {
+const useFixMissingPublicChannel = () => {
   const { data: publicChannel, isFetched } = useChannel({
     channelId: BlogConfig.PublicChannelId,
   }).fetch;
   const { mutateAsync: saveChannel } = useChannel({ channelId: BlogConfig.PublicChannelId }).save;
 
   useEffect(() => {
-    if (isFetched && !publicChannel) {
-      console.warn('[Missing Public Channel], attempting to create');
-      saveChannel(BlogConfig.PublicChannelNewDsr);
+    if (isFetched) {
+      if (!publicChannel) {
+        console.warn('[Missing Public Channel], attempting to create');
+        saveChannel(BlogConfig.PublicChannelNewDsr);
+      } else if (publicChannel.fileMetadata.appData.content.name === 'Public Posts') {
+        console.warn('[Old Public Channel], renaming public channel');
+        publicChannel.fileMetadata.appData.content.name = 'Main';
+        publicChannel.fileMetadata.appData.content.slug = BlogConfig.PublicChannelSlug;
+        saveChannel(publicChannel);
+      }
     }
   }, [isFetched]);
+};
+
+export const useAutofixDefaultConfig = () => {
+  useFixMissingPublicChannel();
 };

@@ -29,7 +29,7 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
     () =>
       flattenInfinteData<HomebaseFile<MailConversation>>(
         conversations,
-        MAIL_CONVERSATIONS_PAGE_SIZE,
+        hasMorePosts ? MAIL_CONVERSATIONS_PAGE_SIZE : undefined,
         (a, b) =>
           (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
           (a.fileMetadata.appData.userDate || a.fileMetadata.created)
@@ -156,6 +156,11 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
       // Remove threads with only messages from yourself when on inbox
       if (filter === 'inbox') {
         return thread.some((conversation) => {
+          const fromMeToMe = conversation.fileMetadata.appData.content.recipients.every(
+            (recipient) => recipient === identity
+          );
+          if (fromMeToMe) return true;
+
           const sender =
             conversation.fileMetadata.senderOdinId ||
             conversation.fileMetadata.appData.content.sender;

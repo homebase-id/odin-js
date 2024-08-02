@@ -1,5 +1,5 @@
 import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
-import { OwnerClient, logoutOwner, hasValidOwnerToken } from '@youfoundation/common-app';
+import { OwnerClient } from '@youfoundation/common-app';
 import {
   NonceData,
   PublicKeyData,
@@ -11,10 +11,6 @@ import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 interface AuthenticationResponse {
   sharedSecret: Uint8Array;
 }
-
-//checks if the authentication token (stored in a cookie) is valid
-export const hasValidToken = hasValidOwnerToken;
-export const logout = logoutOwner;
 
 // Authenticate the owner
 export const authenticate = async (password: string): Promise<AuthenticationResponse | null> => {

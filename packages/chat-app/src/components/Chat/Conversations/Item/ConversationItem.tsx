@@ -139,11 +139,13 @@ const ConversationBody = ({
   );
   const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
 
-  const lastReadTime = conversation?.fileMetadata.appData.content.lastReadTime;
+  const lastReadTime = conversation?.fileMetadata.appData.content.lastReadTime || 0;
   const unreadCount =
-    flatMessages && lastReadTime
+    conversation && flatMessages && !!flatMessages?.[0]?.fileMetadata.senderOdinId
       ? flatMessages.filter(
-          (msg) => msg.fileMetadata.senderOdinId && msg.fileMetadata.created >= lastReadTime
+          (msg) =>
+            msg.fileMetadata.senderOdinId &&
+            (msg.fileMetadata.transitCreated || msg.fileMetadata.created) > lastReadTime
         )?.length
       : 0;
 
@@ -155,7 +157,7 @@ const ConversationBody = ({
       return;
     }
     const date = lastMessage?.fileMetadata.created;
-    setOrder && date && setOrder(new Date().getTime() - date);
+    setOrder && date && setOrder(Math.max(new Date().getTime() - date, 2));
   }, [lastMessage]);
 
   return (
@@ -188,8 +190,9 @@ const ConversationBody = ({
           </div>
 
           {unreadCount ? (
-            <div className="ml-auto flex h-5 w-5 flex-shrink-0 flex-row items-center justify-center rounded-full bg-primary text-xs text-primary-contrast">
-              {unreadCount}
+            <div className="ml-auto flex h-7 w-7 flex-shrink-0 flex-row items-center justify-center rounded-full bg-primary text-sm text-primary-contrast">
+              {Math.min(unreadCount, 10)}
+              {unreadCount >= 10 ? '+' : ''}
             </div>
           ) : null}
         </div>

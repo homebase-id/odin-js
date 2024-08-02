@@ -1,18 +1,15 @@
-import { EmbeddedThumb, MediaFile } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, PayloadDescriptor } from '@youfoundation/js-lib/core';
 import { useState, useRef, useMemo } from 'react';
-import {
-  Image,
-  useIntersection,
-  useDarkMode,
-  Triangle,
-  useDotYouClient,
-} from '@youfoundation/common-app';
+import { Image } from '../../../media/Image';
 import { getChannelDrive } from '@youfoundation/js-lib/public';
 import { useImageCache } from '@youfoundation/ui-lib';
+import { useIntersection, useDotYouClient, useDarkMode } from '../../../hooks';
+import { Triangle } from '../../../ui';
+import { BoringFile } from './PrimaryMedia';
 
 interface MediaGalleryProps {
   odinId?: string;
-  files: MediaFile[];
+  files: PayloadDescriptor[];
   fileId: string;
   globalTransitId?: string;
   lastModified: number | undefined;
@@ -82,7 +79,7 @@ export const MediaGallery = ({
             {slicedFiles.map((file, index) => (
               <div
                 className={slicedFiles.length === 3 && index === 2 ? 'col-span-2' : undefined}
-                key={file.fileId + file.key}
+                key={file.key}
               >
                 <div
                   className={`relative ${
@@ -90,19 +87,28 @@ export const MediaGallery = ({
                   } h-auto w-full cursor-pointer overflow-hidden`}
                   onClick={onClick ? (e) => onClick(e, index) : undefined}
                 >
-                  <Image
-                    odinId={odinId}
-                    className={`h-full w-auto ${file.contentType.startsWith('video') ? 'blur-sm' : ''}`}
-                    fileId={file.fileId || fileId}
-                    globalTransitId={file.fileId ? undefined : globalTransitId}
-                    fileKey={file.key}
-                    lastModified={lastModified}
-                    targetDrive={targetDrive}
-                    fit="cover"
-                    probablyEncrypted={probablyEncrypted}
-                    avoidPayload={file.contentType.startsWith('video')}
-                    onLoad={() => setSomeLoaded(true)}
-                  />
+                  {file.contentType.startsWith('image') || file.contentType.startsWith('video') ? (
+                    <Image
+                      odinId={odinId}
+                      className={`h-full w-auto ${file.contentType.startsWith('video') ? 'blur-sm' : ''}`}
+                      fileId={fileId}
+                      globalTransitId={globalTransitId}
+                      fileKey={file.key}
+                      lastModified={lastModified}
+                      targetDrive={targetDrive}
+                      fit="cover"
+                      probablyEncrypted={probablyEncrypted}
+                      avoidPayload={file.contentType.startsWith('video')}
+                      onLoad={() => setSomeLoaded(true)}
+                    />
+                  ) : (
+                    <BoringFile
+                      odinId={odinId}
+                      targetDrive={getChannelDrive(channelId)}
+                      fileId={fileId}
+                      file={file}
+                    />
+                  )}
 
                   {index === maxVisible - 1 && countExcludedFromView > 0 ? (
                     <div className="absolute inset-0 flex flex-col justify-center bg-black bg-opacity-40 text-6xl font-light text-white">
@@ -110,7 +116,7 @@ export const MediaGallery = ({
                     </div>
                   ) : file.contentType.startsWith('video') ? (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="bg-background/40 rounded-full p-7 border border-foreground/40">
+                      <div className="bg-background/40 rounded-full p-7 border border-foreground/20">
                         <Triangle className="text-foreground h-12 w-12" />
                       </div>
                     </div>

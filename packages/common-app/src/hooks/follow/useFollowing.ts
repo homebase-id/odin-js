@@ -2,17 +2,14 @@ import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-q
 import { createOrUpdateFollow, fetchFollowing, FollowRequest } from '@youfoundation/js-lib/network';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
-type useFollowingInfiniteProps = {
-  pageSize?: number;
-};
-
-export const useFollowingInfinite = ({ pageSize = 30 }: useFollowingInfiniteProps) => {
+const PAGE_SIZE = 30;
+export const useFollowingInfinite = () => {
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetchFollowingInternal = async ({ pageParam }: { pageParam?: string }) => {
     try {
-      const response = await fetchFollowing(dotYouClient, pageParam, pageSize);
+      const response = await fetchFollowing(dotYouClient, pageParam, PAGE_SIZE);
       if (response) return response;
     } catch (ex) {
       //
@@ -24,8 +21,7 @@ export const useFollowingInfinite = ({ pageSize = 30 }: useFollowingInfiniteProp
   };
 
   const createOrUpdateFollowInternal = async (request: FollowRequest) => {
-    const response = await createOrUpdateFollow(dotYouClient, request);
-    return response;
+    return await createOrUpdateFollow(dotYouClient, request);
   };
 
   return {
@@ -35,7 +31,7 @@ export const useFollowingInfinite = ({ pageSize = 30 }: useFollowingInfiniteProp
       initialPageParam: undefined as string | undefined,
       getNextPageParam: (lastPage) =>
         (lastPage?.results?.length &&
-          lastPage?.results?.length >= pageSize &&
+          lastPage?.results?.length >= PAGE_SIZE &&
           lastPage?.cursorState) ||
         undefined,
       refetchOnMount: false,

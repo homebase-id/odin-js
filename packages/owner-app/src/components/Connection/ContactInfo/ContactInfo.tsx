@@ -5,7 +5,7 @@ import { ActionButton } from '@youfoundation/common-app';
 import { Cake, House, IconFrame, Person, Phone, Refresh } from '@youfoundation/common-app';
 import Section from '../../ui/Sections/Section';
 import ContactImage from '../ContactImage/ContactImage';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import { ContactFile } from '@youfoundation/js-lib/network';
 import { useConnection } from '../../../hooks/connections/useConnection';
 
@@ -18,7 +18,9 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
   const {
     fetch: { data: contact },
     refresh: { mutate: refresh, status: refreshState, error: refreshError },
-  } = useContact(odinId ? { odinId: odinId } : { id: contactId });
+  } = useContact(odinId ? { odinId: odinId, canSave: false } : { id: contactId, canSave: false });
+  // Disable saving so we can support manual refresh;
+
   const {
     fetch: { data: connectionInfo },
   } = useConnection({ odinId: odinId });
@@ -39,7 +41,7 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
           <>
             {t('Details')}
             <a
-              href={`https://${odinId}${
+              href={`${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${
                 isConnected && identity ? '?youauth-logon=' + identity : ''
               }`}
               rel="noopener noreferrer"
@@ -52,7 +54,7 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
         }
         actions={
           odinId &&
-          contact?.fileMetadata.appData.uniqueId && (
+          contact?.fileId && (
             <ActionButton
               className="text-base"
               state={refreshState}
@@ -75,7 +77,11 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
         <div className="-mx-4 sm:flex sm:flex-row">
           <div className="flex flex-row px-4 sm:mx-0">
             {odinId ? (
-              <ContactImage odinId={odinId} className="mx-auto h-[12rem] w-[12rem]" />
+              <ContactImage
+                odinId={odinId}
+                className="mx-auto h-[12rem] w-[12rem]"
+                canSave={true}
+              />
             ) : null}
           </div>
           <div className="px-4">
