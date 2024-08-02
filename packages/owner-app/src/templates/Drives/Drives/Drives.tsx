@@ -22,41 +22,29 @@ const Drives = () => {
   const driveTypeDefinitions = [
     {
       title: t('Profile Drives'),
-      type: ProfileConfig.ProfileDriveType,
+      type: [ProfileConfig.ProfileDriveType],
     },
     {
       title: t('Channel Drives'),
-      type: BlogConfig.DriveType,
+      type: [BlogConfig.DriveType, BlogConfig.FeedDrive.type],
     },
     {
       title: t('App specific Drives'),
     },
     {
       title: t('System Drives'),
-      type: ContactConfig.ContactTargetDrive.type,
+      type: [ContactConfig.ContactTargetDrive.type, '90f5e74ab7f9efda0ac298373a32ad8c'],
     },
   ];
 
-  const appDrives = drives?.filter(
-    (drive) =>
-      ![
-        ProfileConfig.ProfileDriveType,
-        BlogConfig.DriveType,
-        ContactConfig.ContactTargetDrive.type,
-      ].includes(drive.targetDriveInfo.type)
-  );
+  const appDrives = drives?.filter((drive) => {
+    const flatTypes = driveTypeDefinitions.map((type) => type.type).flat();
+    return !flatTypes.includes(drive.targetDriveInfo.type);
+  });
 
   return (
     <>
-      <PageMeta
-        icon={HardDrive}
-        title={t('My Drives')}
-        // actions={
-        //   <ActionButton onClick={async () => setIsImportOpen(true)} type="secondary">
-        //     {t('Import drive')}...
-        //   </ActionButton>
-        // }
-      />
+      <PageMeta icon={HardDrive} title={t('My Drives')} />
       <section className="-my-4">
         {isDrivesLoading ? (
           <>
@@ -71,7 +59,7 @@ const Drives = () => {
               <div className="grid grid-cols-2 gap-4 py-4 md:grid-cols-3 lg:grid-cols-4">
                 {(type.type
                   ? drives?.filter((drive) =>
-                      stringGuidsEqual(drive.targetDriveInfo.type, type.type)
+                      type.type.some((type) => stringGuidsEqual(drive.targetDriveInfo.type, type))
                     ) ?? []
                   : appDrives
                 )?.map((driveDef) => (

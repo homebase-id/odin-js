@@ -63,7 +63,7 @@ export const EditChatMessage = ({
       <VolatileInput
         placeholder="Your message"
         defaultValue={message}
-        className="w-full rounded-md border bg-background p-2 dark:border-slate-800"
+        className="relative w-full rounded-md border bg-background p-2 dark:border-slate-800"
         onChange={setMessage}
         autoFocus={!isTouchDevice()}
         onSubmit={

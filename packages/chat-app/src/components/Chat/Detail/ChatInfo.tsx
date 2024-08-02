@@ -96,8 +96,7 @@ export const ChatInfo = ({
               </p>
             ) : withYourself ? (
               <p className="text-center text-xl">
-                <OwnerName />
-                <span className="text-sm text-foreground/50">({t('you')})</span>
+                <OwnerName /> <span className="text-sm text-foreground/50">({t('you')})</span>
               </p>
             ) : (
               <>

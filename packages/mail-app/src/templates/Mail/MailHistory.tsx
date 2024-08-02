@@ -20,7 +20,7 @@ import {
 } from '@youfoundation/common-app';
 import { useEffect, useRef, useState } from 'react';
 import { useMarkMailConversationsAsRead } from '../../hooks/mail/useMarkMailConversationsAsRead';
-import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 import { MailConversationInfo } from './MailConversationInfo';
 import { useNavigate } from 'react-router-dom';
 import { MailAttachmentOverview } from './MailAttachmentOverview';

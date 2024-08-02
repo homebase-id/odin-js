@@ -1,5 +1,6 @@
 export * from '../../../owner-app/src/hooks/connections/useDomains';
 export * from './auth/useDotYouClient';
+export * from './auth/useDotYouClientContext';
 export * from './checkIdentity/useCheckIdentity';
 export * from './circles/useCircle';
 export * from './circles/useCircles';

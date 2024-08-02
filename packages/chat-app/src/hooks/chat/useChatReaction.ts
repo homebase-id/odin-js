@@ -7,9 +7,9 @@ import {
   getReactions,
   uploadReaction,
 } from '../../providers/ChatReactionProvider';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { UnifiedConversation } from '../../providers/ConversationProvider';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 
 export const useChatReaction = (props?: {
   conversationId: string | undefined;

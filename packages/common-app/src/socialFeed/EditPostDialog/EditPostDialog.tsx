@@ -85,7 +85,7 @@ export const EditPostDialog = ({
               setPostFile(dirtyPostFile);
             }}
             placeholder={t("What's up?")}
-            className={`w-full resize-none rounded-md border bg-transparent p-2`}
+            className={`w-full resize-none rounded-md border bg-transparent p-2 relative`}
           />
           <FileOverview
             className="mt-2"

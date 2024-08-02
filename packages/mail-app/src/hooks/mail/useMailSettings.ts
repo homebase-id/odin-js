@@ -5,7 +5,7 @@ import {
   fetchMailSettings,
   uploadMailSettings,
 } from '../../providers/MailSettingsProvider';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 
 export const useMailSettings = () => {
   const dotYouClient = useDotYouClientContext();

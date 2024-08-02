@@ -33,11 +33,13 @@ export const ChatComposer = ({
   replyMsg,
   clearReplyMsg,
   onSend,
+  tags,
 }: {
   conversation: HomebaseFile<UnifiedConversation> | undefined;
   replyMsg: HomebaseFile<ChatMessage> | undefined;
   clearReplyMsg: () => void;
   onSend?: () => void;
+  tags?: string[];
 }) => {
   const volatileRef = useRef<VolatileInputRef>(null);
 
@@ -93,6 +95,7 @@ export const ChatComposer = ({
         chatId: getNewId(),
         userDate: new Date().getTime(),
         linkPreviews: Object.values(linkPreviews).filter(Boolean) as LinkPreview[],
+        tags,
       });
       onSend && onSend();
     } catch (err) {
@@ -145,7 +148,7 @@ export const ChatComposer = ({
           <VolatileInput
             placeholder="Your message"
             defaultValue={message}
-            className="w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"
+            className="relative w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"
             onChange={(newVal) => setMessage(newVal)}
             autoFocus={!isTouchDevice()}
             ref={volatileRef}

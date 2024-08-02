@@ -42,8 +42,12 @@ import { useAuth } from '../hooks/auth/useAuth';
 export const ROOT_PATH = '/apps/mail';
 const AUTH_PATH = ROOT_PATH + '/auth';
 
-import { ErrorBoundary, NotFound, OdinQueryClient } from '@youfoundation/common-app';
-import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
+import {
+  ErrorBoundary,
+  NotFound,
+  OdinQueryClient,
+  DotYouClientProvider,
+} from '@youfoundation/common-app';
 
 export const REACT_QUERY_CACHE_KEY = 'MAIL_REACT_QUERY_OFFLINE_CACHE';
 
