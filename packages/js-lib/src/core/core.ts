@@ -28,6 +28,9 @@ export { DEFAULT_PAYLOAD_KEY } from './DriveData/Upload/UploadHelpers';
 export * from './WebsocketData/WebsocketProvider';
 export * from './WebsocketData/WebsocketTypes';
 
+// Reactions
+export * from './ReactionData/GroupReactionsProvider';
+
 // Notifications
 export * from './NotificationData/PushNotificationsProvider';
 

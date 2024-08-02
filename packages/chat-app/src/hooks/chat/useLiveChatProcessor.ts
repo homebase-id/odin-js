@@ -5,6 +5,7 @@ import {
   DotYouClient,
   HomebaseFile,
   PushNotification,
+  ReactionNotification,
   TypedConnectionNotification,
   queryBatch,
   queryModified,
@@ -27,10 +28,11 @@ import {
   stringGuidsEqual,
 } from '@youfoundation/js-lib/helpers';
 import { getConversationQueryOptions, useConversation } from './useConversation';
-import { ChatReactionFileType } from '../../providers/ChatReactionProvider';
+
 import { insertNewMessage, insertNewMessagesForConversation } from './useChatMessages';
 import { insertNewConversation } from './useConversations';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { insertNewReaction } from './useChatReaction';
 
 const MINUTE_IN_MS = 60000;
 const isDebug = hasDebugFlag();
@@ -177,9 +179,6 @@ const useChatWebsocket = (isEnabled: boolean) => {
         } else {
           setChatMessagesQueue((prev) => [...prev, updatedChatMessage]);
         }
-      } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
-        const messageId = notification.header.fileMetadata.appData.groupId;
-        queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
       } else if (
         notification.header.fileMetadata.appData.fileType === CHAT_CONVERSATION_FILE_TYPE ||
         notification.header.fileMetadata.appData.fileType === GROUP_CHAT_CONVERSATION_FILE_TYPE
@@ -227,6 +226,22 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
       queryClient.setQueryData(['push-notifications'], newNotificationData);
     }
+
+    if (
+      notification.notificationType === 'reactionContentAdded' ||
+      notification.notificationType === 'reactionContentDeleted'
+    ) {
+      if (notification.notificationType === 'reactionContentAdded') {
+        insertNewReaction(
+          queryClient,
+          notification.fileId.fileId,
+          notification as ReactionNotification
+        );
+      } else {
+        // TODO: the server currently doesn't send a 'reactionContentDeleted' notification; But we want to handle it directly without refetching the data
+        queryClient.invalidateQueries({ queryKey: ['chat-reaction', notification.fileId.fileId] });
+      }
+    }
   }, []);
 
   const chatMessagesQueueTunnel = useRef<HomebaseFile<ChatMessage>[]>([]);
@@ -271,7 +286,13 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
   return useNotificationSubscriber(
     isEnabled ? handler : undefined,
-    ['fileAdded', 'fileModified'],
+    [
+      'fileAdded',
+      'fileModified',
+      'reactionContentAdded',
+      'reactionContentDeleted',
+      'appNotificationAdded',
+    ],
     [ChatDrive],
     () => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
@@ -317,11 +338,11 @@ const processChatMessagesBatch = async (
           uniqueMessagesPerConversation[updatedConversation].map(async (newMessage) =>
             typeof newMessage.fileMetadata.appData.content === 'string'
               ? await dsrToMessage(
-                dotYouClient,
-                newMessage as HomebaseFile<string>,
-                ChatDrive,
-                true
-              )
+                  dotYouClient,
+                  newMessage as HomebaseFile<string>,
+                  ChatDrive,
+                  true
+                )
               : (newMessage as HomebaseFile<ChatMessage>)
           )
         )
