@@ -17,7 +17,7 @@ import {
 } from '@youfoundation/common-app';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
-import { COMMUNITY_ROOT } from './CommunityHome';
+import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
 import { CommunityChannel } from '../../providers/CommunityProvider';
 import { useCommunityChannel } from '../../hooks/community/channels/useCommunityChannel';
 import { createPortal } from 'react-dom';

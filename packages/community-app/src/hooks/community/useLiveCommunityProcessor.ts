@@ -1,5 +1,9 @@
 import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useDotYouClientContext, useNotificationSubscriber } from '@youfoundation/common-app';
+import {
+  incrementAppIdNotificationCount,
+  useDotYouClientContext,
+  useNotificationSubscriber,
+} from '@youfoundation/common-app';
 import {
   getQueryBatchCursorFromTime,
   getQueryModifiedCursorFromTime,
@@ -214,19 +218,20 @@ const useCommunityWebsocket = (communityId: string | undefined, isEnabled: boole
         cursor: number;
       }>(['push-notifications']);
 
-      if (!existingNotificationData) return;
-      const newNotificationData = {
-        ...existingNotificationData,
-        results: [
-          clientNotification,
-          ...existingNotificationData.results.filter(
-            (notification) =>
-              !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
-          ),
-        ],
-      };
-
-      queryClient.setQueryData(['push-notifications'], newNotificationData);
+      if (existingNotificationData) {
+        const newNotificationData = {
+          ...existingNotificationData,
+          results: [
+            clientNotification,
+            ...existingNotificationData.results.filter(
+              (notification) =>
+                !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
+            ),
+          ],
+        };
+        queryClient.setQueryData(['push-notifications'], newNotificationData);
+      }
+      incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
     }
   }, []);
 

@@ -45,7 +45,6 @@ import {
   DotYouClientProvider,
   OdinQueryClient,
 } from '@youfoundation/common-app';
-import { COMMUNITY_ROOT } from '../templates/Community/CommunityHome';
 
 const CommunityChannelDetail = lazy(() =>
   import('../templates/Community/CommunityChannelDetail').then((communityApp) => ({
@@ -177,9 +176,7 @@ function App() {
 
 const CommunityRootRoute = () => {
   const { communityKey } = useParams();
-  return window.innerWidth > 1024 ? (
-    <Navigate to={`${COMMUNITY_ROOT}/${communityKey}/all`} />
-  ) : null;
+  return window.innerWidth > 1024 ? <Navigate to={`${ROOT_PATH}/${communityKey}/all`} /> : null;
 };
 
 const RootRoute = ({ children }: { children: ReactNode }) => {
