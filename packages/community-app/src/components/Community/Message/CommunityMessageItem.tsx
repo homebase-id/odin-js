@@ -21,7 +21,7 @@ import { CommunityMedia } from './CommunityMedia';
 import { CommunityMediaGallery } from './detail/CommunityMediaGallery';
 import { useEffect, useMemo, useState } from 'react';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
-import { COMMUNITY_ROOT } from '../../../templates/Community/CommunityHome';
+import { ROOT_PATH as COMMUNITY_ROOT } from '../../../app/App';
 import { useCommunityChannels } from '../../../hooks/community/channels/useCommunityChannels';
 
 export const CommunityMessageItem = ({

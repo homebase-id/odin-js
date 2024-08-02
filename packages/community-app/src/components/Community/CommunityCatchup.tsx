@@ -7,7 +7,7 @@ import {
 } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 import { CommunityHistory } from './channel/CommunityHistory';
 import { ActionButton, ActionLink, ChevronLeft, RadioTower, t } from '@youfoundation/common-app';
-import { COMMUNITY_ROOT } from '../../templates/Community/CommunityHome';
+import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
 import { useCallback, useState } from 'react';
 
 export const CommunityCatchup = ({

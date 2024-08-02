@@ -11,7 +11,7 @@ import {
   useAllContacts,
 } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
-import { CHAT_ROOT } from '../../../../templates/Chat/ChatHome';
+import { ROOT_PATH as CHAT_ROOT } from '../../../../app/App';
 import { ConversationListItemWrapper } from '../Item/ConversationItem';
 import { NewConversationSearchItem } from '../Item/NewConversationSearchItem';
 

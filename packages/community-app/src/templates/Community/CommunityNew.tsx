@@ -20,7 +20,7 @@ import { getNewId, tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { useEffect, useState } from 'react';
 import { ContactFile } from '@youfoundation/js-lib/network';
 import { useCommunity } from '../../hooks/community/useCommunity';
-import { COMMUNITY_ROOT } from './CommunityHome';
+import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
 
 export const NewCommunity = () => {
   const [query, setQuery] = useState<string | undefined>(undefined);

@@ -19,7 +19,11 @@ import {
   CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE,
   dsrToConversationMetadata,
 } from '../../providers/ConversationProvider';
-import { useDotYouClientContext, useNotificationSubscriber } from '@youfoundation/common-app';
+import {
+  incrementAppIdNotificationCount,
+  useDotYouClientContext,
+  useNotificationSubscriber,
+} from '@youfoundation/common-app';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CHAT_MESSAGE_FILE_TYPE, ChatMessage, dsrToMessage } from '../../providers/ChatProvider';
 import {
@@ -225,19 +229,20 @@ const useChatWebsocket = (isEnabled: boolean) => {
         cursor: number;
       }>(['push-notifications']);
 
-      if (!existingNotificationData) return;
-      const newNotificationData = {
-        ...existingNotificationData,
-        results: [
-          clientNotification,
-          ...existingNotificationData.results.filter(
-            (notification) =>
-              !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
-          ),
-        ],
-      };
-
-      queryClient.setQueryData(['push-notifications'], newNotificationData);
+      if (existingNotificationData) {
+        const newNotificationData = {
+          ...existingNotificationData,
+          results: [
+            clientNotification,
+            ...existingNotificationData.results.filter(
+              (notification) =>
+                !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
+            ),
+          ],
+        };
+        queryClient.setQueryData(['push-notifications'], newNotificationData);
+      }
+      incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
     }
 
     if (
