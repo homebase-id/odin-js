@@ -5,7 +5,7 @@ import {
   uploadConversationMetadata,
   getConversationMetadata,
 } from '../../providers/ConversationProvider';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 
 export const useConversationMetadata = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
