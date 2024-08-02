@@ -54,7 +54,7 @@ const Dashboard = () => {
         <FeedApp />
         <ChatApp />
         <MailApp />
-        <CommunityApp />
+        {/* <CommunityApp /> */}
         <PhotoApp />
       </div>
 

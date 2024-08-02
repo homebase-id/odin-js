@@ -141,7 +141,7 @@ export const Sidenav = ({
               <FeedNavItem />
               <ChatNavItem />
               <MailNavItem />
-              <CommunityNavItem />
+              {/* <CommunityNavItem /> */}
             </div>
 
             <div className={`py-3`}>
