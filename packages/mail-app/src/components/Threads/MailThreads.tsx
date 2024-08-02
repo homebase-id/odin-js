@@ -14,7 +14,7 @@ import { Archive } from '@youfoundation/common-app';
 import { MailConversation } from '../../providers/MailProvider';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
-import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 import { useMailThread } from '../../hooks/mail/useMailThread';
 import { ROOT_PATH } from '../../app/App';
 import { MailThreadsFilter, useFilteredMailThreads } from '../../hooks/mail/useFilteredMailThreads';

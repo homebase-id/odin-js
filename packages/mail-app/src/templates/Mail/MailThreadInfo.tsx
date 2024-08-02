@@ -12,7 +12,7 @@ import {
   usePortal,
 } from '@youfoundation/common-app';
 import { MailConversation, getAllRecipients } from '../../providers/MailProvider';
-import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 import { useMailOrigin } from '../../hooks/mail/useMailOrigin';
 import { RecipientsList } from '../../components/Threads/RecipientsList';
 import { ROOT_PATH } from '../../app/App';

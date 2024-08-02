@@ -3,19 +3,12 @@ import { NativeEmoji } from 'emoji-picker-element/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useMostSpace, usePortal } from '../../hooks';
+import { VolatileInputAutoCompleteProps } from '../VolatileInput';
 const database = new Database({
   dataSource: '/emoji/emoji-data.json',
 });
 
-export const EmojiDropdown = ({
-  query,
-  onInput,
-  position,
-}: {
-  query?: string;
-  onInput: (emoji: string | undefined) => void;
-  position?: { x: number; y: number };
-}) => {
+export const EmojiDropdown = ({ query, onInput, position }: VolatileInputAutoCompleteProps) => {
   const target = usePortal('emoji-container');
 
   const [emojis, setEmojis] = useState<NativeEmoji[]>();

@@ -25,6 +25,7 @@ export * from './BrandIcons/HomebaseChat';
 export * from './BrandIcons/HomebaseFeed';
 export * from './BrandIcons/HomebasePhoto';
 export * from './BrandIcons/HomebaseMail';
+export * from './BrandIcons/HomebaseCommunity';
 export * from './BrandIcons/HomebaseNotifications';
 
 export * from './Icons/AddressBook';
@@ -93,6 +94,7 @@ export * from './Icons/Phone';
 export * from './Icons/Plus';
 export * from './Icons/Question';
 export * from './Icons/Quote';
+export * from './Icons/RadioTower';
 export * from './Icons/Reddit';
 export * from './Icons/Refresh';
 export * from './Icons/ReplyArrow';

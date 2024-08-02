@@ -1,16 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAllContacts, useMostSpace, usePortal } from '../../hooks';
+import { VolatileInputAutoCompleteProps } from '../VolatileInput';
 
-export const MentionDropdown = ({
-  query,
-  onInput,
-  position,
-}: {
-  query?: string;
-  onInput: (emoji: string | undefined) => void;
-  position?: { x: number; y: number };
-}) => {
+export const MentionDropdown = ({ query, onInput, position }: VolatileInputAutoCompleteProps) => {
   const target = usePortal('emoji-container');
   const enabled = !!(query && query.startsWith('@'));
   const { data: mentionTargets } = useAllContacts(enabled);

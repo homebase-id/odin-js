@@ -22,7 +22,7 @@ import {
 import { getNewId, getNewXorId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { ChatConversationsReturn, useConversations } from './useConversations';
 import { deleteAllChatMessages } from '../../providers/ChatProvider';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 
 export const getSingleConversation = async (
   dotYouClient: DotYouClient,

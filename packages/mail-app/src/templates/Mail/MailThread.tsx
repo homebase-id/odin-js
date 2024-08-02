@@ -27,7 +27,7 @@ import {
   getAllRecipients,
 } from '../../providers/MailProvider';
 import { useMailConversation, useMailDraft } from '../../hooks/mail/useMailConversation';
-import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 import { MailHistory } from './MailHistory';
 import { MailThreadInfo } from './MailThreadInfo';
 import { MailComposer } from '../../components/Composer/MailComposer';

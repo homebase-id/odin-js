@@ -35,7 +35,7 @@ import {
   MailDrive,
 } from '../../providers/MailProvider';
 import { RecipientInput } from './RecipientInput';
-import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 import { RichTextEditor } from '@youfoundation/rich-text-editor';
 import { useBlocker } from 'react-router-dom';
 import { MediaOptions } from '@youfoundation/rich-text-editor/src/editor/ImagePlugin/ImagePlugin';

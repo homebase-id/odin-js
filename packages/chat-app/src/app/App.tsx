@@ -37,8 +37,7 @@ import { useAuth } from '../hooks/auth/useAuth';
 export const ROOT_PATH = '/apps/chat';
 const AUTH_PATH = ROOT_PATH + '/auth';
 
-import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
-import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
+import { ErrorBoundary, NotFound, DotYouClientProvider } from '@youfoundation/common-app';
 import VideoPlayer from '../templates/VideoPlayer/VideoPlayer';
 import { OdinQueryClient } from '@youfoundation/common-app';
 

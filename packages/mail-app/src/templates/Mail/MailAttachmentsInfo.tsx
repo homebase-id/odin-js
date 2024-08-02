@@ -16,7 +16,7 @@ import {
 } from '@youfoundation/common-app';
 import { MailConversation, MailDrive } from '../../providers/MailProvider';
 import { AttachmentItem } from './MailAttachmentOverview';
-import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 import { OdinPreviewImage } from '@youfoundation/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ROOT_PATH } from '../../app/App';
