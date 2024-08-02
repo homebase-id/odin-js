@@ -13,6 +13,7 @@ import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { t } from '../../helpers/i18n/dictionary';
 import { DomainHighlighter } from '../../ui/DomainHighlighter/DomainHighlighter';
 import { useNotificationSubscriber } from '../transitProcessor/useNotificationSubscriber';
+import { incrementAppIdNotificationCount } from './usePushNotifications';
 
 interface Notification {
   title: string;
@@ -82,19 +83,20 @@ export const useNotifications = () => {
         cursor: number;
       }>(['push-notifications']);
 
-      if (!existingNotificationData) return;
-      const newNotificationData = {
-        ...existingNotificationData,
-        results: [
-          clientNotification,
-          ...existingNotificationData.results.filter(
-            (notification) =>
-              !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
-          ),
-        ],
-      };
-
-      queryClient.setQueryData(['push-notifications'], newNotificationData);
+      if (existingNotificationData) {
+        const newNotificationData = {
+          ...existingNotificationData,
+          results: [
+            clientNotification,
+            ...existingNotificationData.results.filter(
+              (notification) =>
+                !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
+            ),
+          ],
+        };
+        queryClient.setQueryData(['push-notifications'], newNotificationData);
+      }
+      incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
     }
   }, []);
 
