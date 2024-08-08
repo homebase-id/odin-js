@@ -154,7 +154,9 @@ export const insertNewMessagesForConversation = (
     runningMessages = internalInsertNewMessage(runningMessages, newMessage);
   });
 
-  queryClient.setQueryData(['chat-messages', conversationId], runningMessages);
+  queryClient.setQueryData(['chat-messages', conversationId], runningMessages, {
+    updatedAt: new Date().getTime(),
+  });
 };
 
 export const insertNewMessage = (
