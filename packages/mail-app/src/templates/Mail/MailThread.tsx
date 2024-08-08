@@ -416,7 +416,7 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
   return (
     <div className="flex w-full flex-row items-center justify-between bg-background px-5 py-2">
       <p>
-        {t('You can only chat with connected identites, messages will not be delivered to')}:{' '}
+        {t('You can only chat with connected identities, messages will not be delivered to')}:{' '}
         <a
           href={new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}
           className="underline"
