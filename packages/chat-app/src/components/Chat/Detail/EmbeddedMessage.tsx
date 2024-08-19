@@ -11,13 +11,15 @@ import { OdinImage } from '@youfoundation/ui-lib';
 import { ChatDrive } from '../../../providers/ConversationProvider';
 
 export const EmbeddedMessageWithId = ({
+  conversationId,
   msgId,
   className,
 }: {
+  conversationId: string | undefined;
   msgId: string;
   className?: string;
 }) => {
-  const { data: msg } = useChatMessage({ messageId: msgId }).get;
+  const { data: msg } = useChatMessage({ conversationId, messageId: msgId }).get;
   return <EmbeddedMessage msg={msg || undefined} className={className} />;
 };
 

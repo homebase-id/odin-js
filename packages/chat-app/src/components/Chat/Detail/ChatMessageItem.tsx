@@ -149,7 +149,12 @@ const ChatTextMessageBody = ({
           <MessageDeletedInnerBody />
         ) : (
           <div className="flex min-w-0 flex-col gap-1">
-            {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
+            {content.replyId ? (
+              <EmbeddedMessageWithId
+                conversationId={conversation?.fileMetadata.appData.uniqueId}
+                msgId={content.replyId}
+              />
+            ) : null}
             <ParagraphWithLinks
               text={content.message}
               className={`copyable-content whitespace-pre-wrap break-words ${
@@ -283,7 +288,11 @@ const ChatMediaMessageBody = ({
       ) : null}
       <div className="relative">
         {content.replyId ? (
-          <EmbeddedMessageWithId msgId={content.replyId} className="mb-4" />
+          <EmbeddedMessageWithId
+            conversationId={conversation?.fileMetadata.appData.uniqueId}
+            msgId={content.replyId}
+            className="mb-4"
+          />
         ) : null}
         <ChatMedia msg={msg} />
         {!hasACaption ? <ChatFooter className="absolute bottom-0 right-0 px-2 py-1" /> : null}

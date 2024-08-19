@@ -16,12 +16,35 @@ import {
 import { LinkPreview } from '@youfoundation/js-lib/media';
 import { useDotYouClientContext } from '@youfoundation/common-app';
 
-export const useChatMessage = (props?: { messageId: string | undefined }) => {
+export const useChatMessage = (props?: {
+  conversationId?: string | undefined; // Optional: if we have it we can use the cache
+  messageId: string | undefined;
+}) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
-  const getMessageByUniqueId = async (messageId: string) => {
-    // TODO: Improve by fetching the message from the cache on conversations first
+  const getMessageByUniqueId = async (conversationId: string | undefined, messageId: string) => {
+    const extistingMessages = conversationId
+      ? queryClient.getQueryData<
+          InfiniteData<{
+            searchResults: (HomebaseFile<ChatMessage> | null)[];
+            cursorState: string;
+            queryTime: number;
+            includeMetadataHeader: boolean;
+          }>
+        >(['chat-messages', conversationId])
+      : undefined;
+
+    if (extistingMessages) {
+      const message = extistingMessages.pages
+        .flatMap((page) => page.searchResults)
+        .find((msg) => stringGuidsEqual(msg?.fileMetadata.appData.uniqueId, messageId));
+
+      if (message) {
+        return message;
+      }
+    }
+
     return await getChatMessage(dotYouClient, messageId);
   };
 
@@ -109,7 +132,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
   return {
     get: useQuery({
       queryKey: ['chat-message', props?.messageId],
-      queryFn: () => getMessageByUniqueId(props?.messageId as string),
+      queryFn: () => getMessageByUniqueId(props?.conversationId, props?.messageId as string),
       enabled: !!props?.messageId,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
