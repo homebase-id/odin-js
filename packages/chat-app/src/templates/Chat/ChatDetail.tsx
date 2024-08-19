@@ -14,7 +14,13 @@ import {
   useDotYouClient,
   useIsConnected,
 } from '@youfoundation/common-app';
-import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
+import {
+  ApiType,
+  DotYouClient,
+  FailedTransferStatuses,
+  HomebaseFile,
+  TransferStatus,
+} from '@youfoundation/js-lib/core';
 import {
   ConversationWithYourselfId,
   UnifiedConversation,
@@ -36,11 +42,10 @@ export const ChatDetail = ({
   conversationId: string | undefined;
   communityTagId?: string;
 }) => {
-  const [isEmptyChat, setIsEmptyChat] = useState<boolean>(false);
-
   const { data: conversation, isLoading, isFetched } = useConversation({ conversationId }).single;
   const { mutate: inviteRecipient } = useConversation().inviteRecipient;
   const [replyMsg, setReplyMsg] = useState<HomebaseFile<ChatMessage> | undefined>();
+  const identity = useDotYouClient().getIdentity();
 
   if (!conversationId || isLoading || (!conversation && isFetched))
     return (
@@ -51,10 +56,25 @@ export const ChatDetail = ({
 
   const onSend = async () => {
     if (
-      isEmptyChat &&
-      conversation &&
-      !stringGuidsEqual(conversationId, ConversationWithYourselfId)
+      !conversation ||
+      stringGuidsEqual(conversationId, ConversationWithYourselfId) ||
+      conversation?.fileMetadata.senderOdinId
     ) {
+      return;
+    }
+
+    const filteredRecipients = conversation.fileMetadata.appData.content.recipients.filter(
+      (recipient) => recipient !== identity
+    );
+
+    const anyRecipientMissingConversation = filteredRecipients.some((recipient) => {
+      const latestTransferStatus =
+        conversation.serverMetadata?.transferHistory?.recipients[recipient].latestTransferStatus;
+
+      if (!latestTransferStatus) return true;
+      return FailedTransferStatuses.includes(latestTransferStatus);
+    });
+    if (anyRecipientMissingConversation) {
       console.log('invite recipient');
       inviteRecipient({ conversation });
     }
@@ -66,11 +86,7 @@ export const ChatDetail = ({
         <ChatHeader conversation={conversation || undefined} />
         <GroupChatConnectedState conversation={conversation || undefined} />
         <ErrorBoundary>
-          <ChatHistory
-            conversation={conversation || undefined}
-            setReplyMsg={setReplyMsg}
-            setIsEmptyChat={setIsEmptyChat}
-          />
+          <ChatHistory conversation={conversation || undefined} setReplyMsg={setReplyMsg} />
         </ErrorBoundary>
         <ErrorBoundary>
           <ChatComposer
