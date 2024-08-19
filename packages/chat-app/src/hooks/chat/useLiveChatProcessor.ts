@@ -314,6 +314,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
       'fileModified',
       'reactionContentAdded',
       'reactionContentDeleted',
+      'statisticsChanged',
       'appNotificationAdded',
     ],
     [ChatDrive],
