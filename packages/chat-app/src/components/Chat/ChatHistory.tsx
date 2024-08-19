@@ -22,7 +22,7 @@ export const ChatHistory = ({
 }: {
   conversation: HomebaseFile<UnifiedConversation> | undefined;
   setReplyMsg: (msg: HomebaseFile<ChatMessage>) => void;
-  setIsEmptyChat: (isEmpty: boolean) => void;
+  setIsEmptyChat?: (isEmpty: boolean) => void;
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +47,7 @@ export const ChatHistory = ({
 
   useEffect(() => {
     if (isFetched && (!flattenedMsgs || flattenedMsgs?.filter((msg) => msg.fileId).length === 0))
-      setIsEmptyChat(true);
+      setIsEmptyChat?.(true);
   }, [isFetched, flattenedMsgs]);
 
   useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
