@@ -12,6 +12,7 @@ import {
 } from '@youfoundation/common-app';
 import { createPortal } from 'react-dom';
 import { useMemo, useState } from 'react';
+import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 
 export const ChatReactions = ({
   msg,
@@ -22,12 +23,14 @@ export const ChatReactions = ({
 }) => {
   const [showDetail, setShowDetail] = useState(false);
 
-  const { data: reactions } = useChatReaction({
-    messageFileId: msg.fileId,
-    messageGlobalTransitId: msg.fileMetadata.globalTransitId,
-  }).get;
+  if (!msg.fileMetadata.reactionPreview?.reactions) {
+    return null;
+  }
 
-  const uniqueEmojis = Array.from(new Set(reactions?.map((reaction) => reaction.body))).slice(0, 5);
+  const reactions = Object.values(msg.fileMetadata.reactionPreview?.reactions).map((reaction) => {
+    return tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji;
+  });
+  const uniqueEmojis = Array.from(new Set(reactions)).slice(0, 5);
   const count = reactions?.length;
 
   if (!reactions?.length) return null;

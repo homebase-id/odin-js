@@ -19,7 +19,6 @@ import { ChatActions, ContextMenu } from './ContextMenu';
 import { EmbeddedMessageWithId } from './EmbeddedMessage';
 import { useParams } from 'react-router-dom';
 import { ChatReactionComposer } from '../Composer/ChatReactionComposer';
-import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 import { ChatReactions } from './ChatReactions';
 
 export const ChatMessageItem = ({
@@ -49,10 +48,9 @@ export const ChatMessageItem = ({
       ) || []
     )?.length > 1;
 
-  const hasReactions = useChatReaction({
-    messageFileId: msg.fileId,
-    messageGlobalTransitId: msg.fileMetadata.globalTransitId,
-  }).get.data?.length;
+  const hasReactions =
+    msg.fileMetadata.reactionPreview?.reactions &&
+    Object.keys(msg.fileMetadata.reactionPreview?.reactions).length;
 
   return (
     <>

@@ -37,7 +37,7 @@ import { getConversationQueryOptions, useConversation } from './useConversation'
 
 import { insertNewMessage, insertNewMessagesForConversation } from './useChatMessages';
 import { insertNewConversation } from './useConversations';
-import { insertNewReaction } from './useChatReaction';
+import { insertNewReaction, removeReaction } from './useChatReaction';
 import { insertNewConversationMetadata } from './useConversationMetadata';
 
 const MINUTE_IN_MS = 60000;
@@ -140,15 +140,16 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
     if (
       (notification.notificationType === 'fileAdded' ||
-        notification.notificationType === 'fileModified') &&
+        notification.notificationType === 'fileModified' ||
+        notification.notificationType === 'statisticsChanged') &&
       stringGuidsEqual(notification.targetDrive?.alias, ChatDrive.alias) &&
       stringGuidsEqual(notification.targetDrive?.type, ChatDrive.type)
     ) {
       if (notification.header.fileMetadata.appData.fileType === CHAT_MESSAGE_FILE_TYPE) {
         const conversationId = notification.header.fileMetadata.appData.groupId;
-        const isNewFile = notification.notificationType === 'fileAdded';
+        const isNewMessageFile = notification.notificationType === 'fileAdded';
 
-        if (isNewFile) {
+        if (isNewMessageFile) {
           // Check if the message is orphaned from a conversation
           const conversation = await queryClient.fetchQuery(
             getConversationQueryOptions(dotYouClient, queryClient, conversationId)
@@ -188,8 +189,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
       } else if (
         notification.header.fileMetadata.appData.fileType === CHAT_CONVERSATION_FILE_TYPE
       ) {
-        const isNewFile = notification.notificationType === 'fileAdded';
-
+        const isNewConversationFile = notification.notificationType === 'fileAdded';
         const updatedConversation = await dsrToConversation(
           dotYouClient,
           notification.header,
@@ -205,7 +205,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
           return;
         }
 
-        insertNewConversation(queryClient, updatedConversation, !isNewFile);
+        insertNewConversation(queryClient, updatedConversation, !isNewConversationFile);
       } else if (
         notification.header.fileMetadata.appData.fileType ===
         CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE
@@ -257,9 +257,12 @@ const useChatWebsocket = (isEnabled: boolean) => {
           notification.fileId.fileId,
           notification as ReactionNotification
         );
-      } else {
-        // TODO: the server currently doesn't send a 'reactionContentDeleted' notification; But we want to handle it directly without refetching the data
-        queryClient.invalidateQueries({ queryKey: ['chat-reaction', notification.fileId.fileId] });
+      } else if (notification.notificationType === 'reactionContentDeleted') {
+        removeReaction(
+          queryClient,
+          notification.fileId.fileId,
+          notification as ReactionNotification
+        );
       }
     }
   }, []);

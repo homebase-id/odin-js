@@ -29,8 +29,13 @@ export const ChatReactionComposer = ({
 
   const { mutate: addReaction } = useChatReaction().add;
   const { mutate: removeReaction } = useChatReaction().remove;
+
+  const hasReactions =
+    msg.fileMetadata.reactionPreview?.reactions &&
+    Object.keys(msg.fileMetadata.reactionPreview?.reactions).length;
+
   const { data } = useChatReaction({
-    messageFileId: msg.fileId,
+    messageFileId: hasReactions ? msg.fileId : undefined,
     messageGlobalTransitId: msg.fileMetadata.globalTransitId,
   }).get;
 

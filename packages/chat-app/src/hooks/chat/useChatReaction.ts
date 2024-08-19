@@ -90,7 +90,7 @@ export const useChatReaction = (props?: {
       queryKey: ['chat-reaction', messageFileId],
       queryFn: getReactionsByMessageGlobalTransitId(messageGlobalTransitId as string),
       enabled: !!messageGlobalTransitId && !!messageFileId,
-      staleTime: 1000 * 60 * 10, // 10 min
+      // staleTime: 1000 * 60 * 10, // 10 min
     }),
     add: useMutation({
       mutationFn: addReaction,
@@ -135,6 +135,43 @@ export const insertNewReaction = (
 
   queryClient.setQueryData<ReactionFile[]>(
     ['chat-reaction', messageLocalFileId],
-    [...currentReactions, reactionAsReactionFile]
+    [
+      ...currentReactions.filter(
+        (reaction) =>
+          reaction.authorOdinId !== reactionAsReactionFile.authorOdinId ||
+          reaction.body !== reactionAsReactionFile.body
+      ),
+      reactionAsReactionFile,
+    ]
+  );
+};
+
+export const removeReaction = (
+  queryClient: QueryClient,
+  messageLocalFileId: string,
+  removedReaction: GroupEmojiReaction
+) => {
+  const currentReactions = queryClient.getQueryData<ReactionFile[] | undefined>([
+    'chat-reaction',
+    messageLocalFileId,
+  ]);
+
+  if (!currentReactions) {
+    queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageLocalFileId] });
+    return;
+  }
+
+  const reactionAsReactionFile: ReactionFile = {
+    authorOdinId: removedReaction.odinId,
+    body: tryJsonParse<{ emoji: string }>(removedReaction.reactionContent).emoji,
+  };
+
+  queryClient.setQueryData<ReactionFile[]>(
+    ['chat-reaction', messageLocalFileId],
+    currentReactions.filter(
+      (reaction) =>
+        reaction.authorOdinId !== reactionAsReactionFile.authorOdinId ||
+        reaction.body !== reactionAsReactionFile.body
+    )
   );
 };
