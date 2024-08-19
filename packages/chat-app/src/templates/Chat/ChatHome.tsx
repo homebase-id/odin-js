@@ -39,7 +39,6 @@ export const ChatHome = () => {
         drives={drives}
         circleDrives={circleDrives}
         permissions={permissions}
-        // needsAllConnected={true}
       />
       <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`}>
         <ChatSideNav isOnline={isOnline} />

@@ -80,7 +80,7 @@ export const drives = [
     t: ChatDrive.type,
     n: 'Chat Drive',
     d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
+    p: DrivePermissionType.Read + DrivePermissionType.Write + DrivePermissionType.React,
   },
   {
     // Standard profile Info
