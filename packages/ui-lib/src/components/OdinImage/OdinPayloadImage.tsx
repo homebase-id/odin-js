@@ -13,9 +13,6 @@ export interface OdinPayloadImageProps
   dotYouClient: DotYouClient;
 
   naturalSize?: ImageSize;
-
-  probablyEncrypted?: boolean;
-  preferObjectUrl?: boolean;
 }
 
 // Component to render a tiny thumb image;

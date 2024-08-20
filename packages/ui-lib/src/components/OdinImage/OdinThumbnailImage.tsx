@@ -14,9 +14,6 @@ export interface OdinThumbnailImageProps
 
   loadSize: ImageSize | undefined;
   naturalSize?: ImageSize;
-
-  probablyEncrypted?: boolean;
-  preferObjectUrl?: boolean;
 }
 
 // Component to render a tiny thumb image;

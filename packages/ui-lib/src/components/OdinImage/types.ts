@@ -15,6 +15,10 @@ export interface ImageSource {
   // File params
   systemFileType?: SystemFileType;
   lastModified?: number;
+  probablyEncrypted?: boolean;
+
+  // Url params
+  preferObjectUrl?: boolean;
 }
 
 export interface ImageEvents {
