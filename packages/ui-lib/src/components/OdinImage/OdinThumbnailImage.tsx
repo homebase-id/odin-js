@@ -14,9 +14,6 @@ export interface OdinThumbnailImageProps
 
   loadSize: ImageSize | undefined;
   naturalSize?: ImageSize;
-
-  probablyEncrypted?: boolean;
-  preferObjectUrl?: boolean;
 }
 
 // Component to render a tiny thumb image;
@@ -36,6 +33,7 @@ export const OdinThumbnailImage = ({
   probablyEncrypted,
 
   onError,
+  preferObjectUrl,
   ...props
 }: OdinThumbnailImageProps) => {
   const fetchThumb = loadSize !== undefined;
@@ -56,6 +54,7 @@ export const OdinThumbnailImage = ({
     naturalSize,
     systemFileType,
     lastModified,
+    preferObjectUrl,
   }).fetch;
 
   // Error handling

@@ -13,9 +13,6 @@ export interface OdinPayloadImageProps
   dotYouClient: DotYouClient;
 
   naturalSize?: ImageSize;
-
-  probablyEncrypted?: boolean;
-  preferObjectUrl?: boolean;
 }
 
 // Component to render a tiny thumb image;
@@ -34,6 +31,7 @@ export const OdinPayloadImage = ({
   probablyEncrypted,
 
   onError,
+  preferObjectUrl,
   ...props
 }: OdinPayloadImageProps) => {
   const {
@@ -52,6 +50,7 @@ export const OdinPayloadImage = ({
     naturalSize,
     systemFileType,
     lastModified,
+    preferObjectUrl,
   }).fetch;
 
   // Error handling
