@@ -16,6 +16,7 @@ export interface OdinThumbnailImageProps
   naturalSize?: ImageSize;
 
   probablyEncrypted?: boolean;
+  preferObjectUrl?: boolean;
 }
 
 // Component to render a tiny thumb image;
@@ -43,19 +44,19 @@ export const OdinThumbnailImage = ({
     data: imageData,
     error: imageError,
     isFetched: isImageFetched,
-  } = useImage(
+  } = useImage({
     dotYouClient,
     odinId,
-    fetchThumb ? fileId : undefined,
-    fetchThumb ? globalTransitId : undefined,
-    fileKey,
-    targetDrive,
-    loadSize,
+    imageFileId: fetchThumb ? fileId : undefined,
+    imageGlobalTransitId: fetchThumb ? globalTransitId : undefined,
+    imageFileKey: fileKey,
+    imageDrive: targetDrive,
+    size: loadSize,
     probablyEncrypted,
     naturalSize,
     systemFileType,
-    lastModified
-  ).fetch;
+    lastModified,
+  }).fetch;
 
   // Error handling
   useEffect(() => {
