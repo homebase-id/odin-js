@@ -85,5 +85,6 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           branch-suffix: short-commit-hash
+          commit-message: 'Bump version for js-lib and/or ui-lib'
           title: 'Bump version for js-lib and/or ui-lib'
           body: ''
