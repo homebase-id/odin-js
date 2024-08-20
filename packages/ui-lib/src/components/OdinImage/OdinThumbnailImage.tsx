@@ -36,6 +36,7 @@ export const OdinThumbnailImage = ({
   probablyEncrypted,
 
   onError,
+  preferObjectUrl,
   ...props
 }: OdinThumbnailImageProps) => {
   const fetchThumb = loadSize !== undefined;
@@ -56,6 +57,7 @@ export const OdinThumbnailImage = ({
     naturalSize,
     systemFileType,
     lastModified,
+    preferObjectUrl,
   }).fetch;
 
   // Error handling
