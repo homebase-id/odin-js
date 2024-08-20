@@ -15,6 +15,7 @@ export interface OdinPayloadImageProps
   naturalSize?: ImageSize;
 
   probablyEncrypted?: boolean;
+  preferObjectUrl?: boolean;
 }
 
 // Component to render a tiny thumb image;
@@ -39,19 +40,19 @@ export const OdinPayloadImage = ({
     data: imageData,
     error: imageError,
     isFetched: isImageFetched,
-  } = useImage(
+  } = useImage({
     dotYouClient,
     odinId,
-    fileId,
-    globalTransitId,
-    fileKey,
-    targetDrive,
-    undefined,
+    imageFileId: fileId,
+    imageGlobalTransitId: globalTransitId,
+    imageFileKey: fileKey,
+    imageDrive: targetDrive,
+    size: undefined,
     probablyEncrypted,
     naturalSize,
     systemFileType,
-    lastModified
-  ).fetch;
+    lastModified,
+  }).fetch;
 
   // Error handling
   useEffect(() => {
