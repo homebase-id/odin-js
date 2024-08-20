@@ -17,6 +17,7 @@ export interface OdinImageProps
   avoidPayload?: boolean;
   fit?: 'cover' | 'contain';
   position?: 'left' | 'right' | 'center';
+  preferObjectUrl?: boolean; // => Prefer image urls over base64; But the objectUrls are never cleared after use;
 
   maxWidth?: string;
 }
@@ -156,7 +157,10 @@ export const OdinImage = ({
               ? { aspectRatio: `${naturalSize?.pixelWidth}/${naturalSize?.pixelHeight}` }
               : undefined
           }
-          onLoad={() => setIsFinal(true)}
+          onLoad={() => {
+            setIsFinal(true);
+            onLoad?.();
+          }}
           onError={() => setIsFatalError(true)}
           className={`relative transition-opacity duration-300 ${imgFitClassNames} ${isFinal ? 'opacity-100' : 'opacity-0'}`}
         />
