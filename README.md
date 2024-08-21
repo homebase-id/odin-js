@@ -2,43 +2,33 @@
 
 [![CI Build](https://github.com/YouFoundation/dotyoucore-js/actions/workflows/ci.yml/badge.svg)](https://github.com/YouFoundation/dotyoucore-js/actions/workflows/ci.yml)
 
-This repo contains the various apps and libraries that are maintaned by Homebase. The libraries can easily be consumed by other app developers that want to work with a Homebase Identity backend.
+This monorepo contains the various JavaScript apps and libraries that are maintaned by Homebase. The libraries can easily be consumed by other app developers that want to work with a Homebase Identity backend.
 
-## Apps
+# Installing Locally
 
-The apps are setup indepentently, and can use the first party common app library as well as the public libraries (JS & UI Lib)
-
-### Local development
-
-Before you can use the actual apps, you need to install and build the depencies:
-
-`npm install && npm run build:libs`
-
-After that you can build the apps
-
-`npm run build -w ./packages/{public/owner}-app`
-
-or run them locally
-
-`npm run start -w ./packages/{public/owner}-app`
-
-## Libraries
+## Libraries:
+To use the libraries you can just install them from Github Packages: [JS-Lib](https://github.com/YouFoundation/dotyoucore-js/pkgs/npm/js-lib) & [UI-Lib](https://github.com/YouFoundation/dotyoucore-js/pkgs/npm/ui-lib)
 
 The libraries expect a `DotYouClient`. The `DotYouClient` holds the authentication parameters for the specific request.
 
-## Usage
+## Apps:
 
-Create an `.npmrc` file within your project with the following details:
+Before you can use the actual apps, you need to install and build the dependencies:
 
-`@youfoundation:registry=https://npm.pkg.github.com`
+`npm install && npm run build:libs`
 
-After which you can run:
+After that you can run the apps locally:
 
-`npm install @youfoundation/${js/ui}-lib@0.0.1-alpha.xxx`
+`npm run start`
 
-Do ensure that you are authenticated via npm itself to [Github packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry)
+and/ore build them:
 
-### Js Lib & UI Lib
+`npm run build`
 
-Js Lib: a library that is able to communicate with the DotYouCore api on the 3 main endpoints: youauth / apps / owner
-UI Lib: a library that holds common components which handle the complexity of having no server side knowledge of any contents.
+# Security Disclosures
+
+If you discover any security issues, please send an email to [security@homebase.id](mailto:security@homebase.id). We'll respond promptly.
+
+# License (Apps: AGPL3 & Libraries: MIT)
+The repository and any apps are licensed under AGPL3 while the libraries under MIT
+See ./LICENSE per package for the details;
