@@ -77,7 +77,7 @@ const ToolbarButton = React.forwardRef<
               variant,
               size,
             }),
-            isDropdown && 'my-1 justify-between pr-1',
+            isDropdown && 'justify-between pr-1',
             className
           )}
           {...props}

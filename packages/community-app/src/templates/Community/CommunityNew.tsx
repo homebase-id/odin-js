@@ -202,7 +202,7 @@ export const SingleConversationItem = ({
       onClick={onClick}
       className={`flex w-full flex-row items-center gap-3 ${isActive ? 'opacity-40' : ''}`}
     >
-      <Radio readOnly={true} checked={isActive} />
+      <Radio readOnly={true} checked={isActive} key={`${odinId}+${isActive}`} />
       <ConnectionImage
         odinId={odinId}
         className="border border-neutral-200 dark:border-neutral-800"

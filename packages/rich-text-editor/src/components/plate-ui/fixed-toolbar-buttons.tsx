@@ -23,7 +23,7 @@ export function FixedToolbarButtons({ mediaOptions }: { mediaOptions: MediaOptio
   return (
     <div className="w-full overflow-hidden">
       <div
-        className={`flex flex-wrap ${readOnly ? 'pointer-events-none cursor-not-allowed' : ''}`}
+        className={`flex flex-wrap py-1 ${readOnly ? 'pointer-events-none cursor-not-allowed' : ''}`}
         style={{
           transform: 'translateX(calc(-1px))',
         }}
@@ -46,10 +46,10 @@ export function FixedToolbarButtons({ mediaOptions }: { mediaOptions: MediaOptio
             </MarkToolbarButton>
 
             <MarkToolbarButton tooltip="Strikethrough (⌘+⇧+M)" nodeType={MARK_STRIKETHROUGH}>
-              <Icons.strikethrough />
+              <Icons.strikethrough className="h-5 w-5" />
             </MarkToolbarButton>
             <MarkToolbarButton tooltip="Code (⌘+E)" nodeType={MARK_CODE}>
-              <Icons.code />
+              <Icons.code className="h-5 w-5" />
             </MarkToolbarButton>
             <LinkToolbarButton />
             {mediaOptions ? <ImageToolbarButton mediaOptions={mediaOptions} /> : null}

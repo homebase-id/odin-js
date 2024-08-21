@@ -51,7 +51,11 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
     if (!communities) return;
     if (communityKey || newCommunity) return;
     if (window.innerWidth <= 1024) return;
-    navigate(`${COMMUNITY_ROOT}/${communities[0].fileMetadata.appData.uniqueId}`);
+    if (communities[0]) {
+      navigate(`${COMMUNITY_ROOT}/${communities[0].fileMetadata.appData.uniqueId}`);
+    } else {
+      navigate(`${COMMUNITY_ROOT}/new`);
+    }
   }, [communityKey, communities]);
 
   return (

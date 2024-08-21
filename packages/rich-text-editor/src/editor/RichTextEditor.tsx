@@ -12,6 +12,8 @@ import {
   createDeserializeHtmlPlugin,
   PlateContent,
   TDescendant,
+  focusEditor,
+  getStartPoint,
 } from '@udecode/plate-common';
 import { withProps } from '@udecode/cn';
 import { createParagraphPlugin, ELEMENT_PARAGRAPH } from '@udecode/plate-paragraph';
@@ -74,38 +76,21 @@ import { createMentionPlugin, ELEMENT_MENTION } from '@udecode/plate-mention';
 import { MentionCombobox } from './Combobox/MentionCombobox';
 import { MentionElement } from '../components/plate-ui/mention-element';
 
-// import React from 'react';
-// const useTraceUpdate = (props: any) => {
-//   const prev = React.useRef(props);
-//   React.useEffect(() => {
-//     const changedProps = Object.entries(props).reduce((ps, [k, v]) => {
-//       if (prev.current[k] !== v) {
-//         ps[k] = [prev.current[k], v];
-//       }
-//       return ps;
-//     }, {});
-//     if (Object.keys(changedProps).length > 0) {
-//       console.log('Changed props:', changedProps);
-//     }
-//     prev.current = props;
-//   });
-// };
-
 interface RTEProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultValue?: any[] | string | undefined;
   placeholder?: string;
   mediaOptions?: MediaOptions;
   mentionables?: TComboboxItem[];
-  name: string;
+  name?: string;
   onChange: (e: { target: { name: string; value: RichText } }) => void;
   className?: string;
   disabled?: boolean;
   uniqueId?: string;
+  autoFocus?: boolean;
 }
 
 const InnerRichTextEditor = memo((props: RTEProps) => {
-  // useTraceUpdate(props);
   const {
     defaultValue,
     placeholder,
@@ -116,6 +101,7 @@ const InnerRichTextEditor = memo((props: RTEProps) => {
     className,
     disabled,
     uniqueId,
+    autoFocus,
   } = props;
 
   const { isDarkMode } = useDarkMode();
@@ -257,6 +243,12 @@ const InnerRichTextEditor = memo((props: RTEProps) => {
     },
     [innerEditor, onChange]
   );
+
+  useEffect(() => {
+    if (autoFocus && innerEditor) {
+      setTimeout(() => focusEditor(innerEditor, getStartPoint(innerEditor, [0])), 0);
+    }
+  }, [autoFocus, innerEditor]);
 
   return (
     <>
