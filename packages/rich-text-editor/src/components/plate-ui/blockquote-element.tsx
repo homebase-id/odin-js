@@ -11,7 +11,7 @@ const BlockquoteElement = React.forwardRef<
     <PlateElement
       asChild
       ref={ref}
-      className={cn('my-1 border-l-2 pl-6 italic', className)}
+      className={cn('my-1 border-l-4 pl-2 italic', className)}
       {...props}
     >
       <blockquote>{children}</blockquote>

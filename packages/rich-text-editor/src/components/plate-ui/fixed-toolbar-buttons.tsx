@@ -16,8 +16,15 @@ import { TurnIntoDropdownMenu } from './turn-into-dropdown-menu';
 import { ImageToolbarButton, MediaOptions } from '../../editor/ImagePlugin/ImagePlugin';
 import { Bold, Italic, Underline } from '@youfoundation/common-app';
 import { LinkToolbarButton } from './link-toolbar-button';
+import { ELEMENT_H1, ELEMENT_H2 } from '@udecode/plate-heading';
 
-export function FixedToolbarButtons({ mediaOptions }: { mediaOptions: MediaOptions | undefined }) {
+export function FixedToolbarButtons({
+  disableHeadings,
+  mediaOptions,
+}: {
+  disableHeadings?: boolean;
+  mediaOptions: MediaOptions | undefined;
+}) {
   const readOnly = useEditorReadOnly();
 
   return (
@@ -30,8 +37,14 @@ export function FixedToolbarButtons({ mediaOptions }: { mediaOptions: MediaOptio
       >
         <>
           <ToolbarGroup noSeparator>
-            <InsertDropdownMenu />
-            <TurnIntoDropdownMenu />
+            {mediaOptions ? (
+              <InsertDropdownMenu
+                filterValues={disableHeadings ? [ELEMENT_H1, ELEMENT_H2] : undefined}
+              />
+            ) : null}
+            <TurnIntoDropdownMenu
+              filterValues={disableHeadings ? [ELEMENT_H1, ELEMENT_H2] : undefined}
+            />
           </ToolbarGroup>
 
           <ToolbarGroup>

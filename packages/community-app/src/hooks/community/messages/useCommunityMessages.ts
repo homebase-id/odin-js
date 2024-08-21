@@ -11,7 +11,7 @@ import {
   getCommunityMessages,
   hardDeleteCommunityMessage,
 } from '../../../providers/CommunityMessageProvider';
-import { DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
+import { DeletedHomebaseFile, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useDotYouClientContext } from '@youfoundation/common-app';
@@ -181,7 +181,7 @@ export const useLastUpdatedChatMessages = () => {
 export const insertNewMessagesForChannel = (
   queryClient: QueryClient,
   channelId: string,
-  newMessages: HomebaseFile<CommunityMessage>[],
+  newMessages: (HomebaseFile<CommunityMessage> | DeletedHomebaseFile)[],
   communityId: string
 ) => {
   const extistingMessages = queryClient.getQueryData<
@@ -193,7 +193,11 @@ export const insertNewMessagesForChannel = (
     }>
   >(['community-messages', communityId, channelId || 'any', 'root']);
 
-  if (newMessages.length > PAGE_SIZE || !extistingMessages) {
+  if (
+    newMessages.length > PAGE_SIZE ||
+    !extistingMessages ||
+    newMessages?.some((msg) => msg.fileState === 'deleted')
+  ) {
     queryClient.setQueryData(
       ['community-messages', communityId, channelId || 'any', 'root'],
       (data: InfiniteData<unknown, unknown>) => {
@@ -211,7 +215,10 @@ export const insertNewMessagesForChannel = (
 
   let runningMessages = extistingMessages;
   newMessages.forEach((newMessage) => {
-    runningMessages = internalInsertNewMessage(runningMessages, newMessage);
+    runningMessages = internalInsertNewMessage(
+      runningMessages,
+      newMessage as HomebaseFile<CommunityMessage>
+    );
   });
 
   queryClient.setQueryData(
@@ -222,7 +229,7 @@ export const insertNewMessagesForChannel = (
 
 export const insertNewMessage = (
   queryClient: QueryClient,
-  newMessage: HomebaseFile<CommunityMessage>,
+  newMessage: HomebaseFile<CommunityMessage> | DeletedHomebaseFile,
   communityId: string
 ) => {
   const update = (channelId?: string, originId?: string) => {
@@ -235,7 +242,7 @@ export const insertNewMessage = (
       }>
     >(['community-messages', communityId, channelId || 'any', originId || 'root']);
 
-    if (extistingMessages) {
+    if (extistingMessages && newMessage.fileState !== 'deleted') {
       queryClient.setQueryData(
         ['community-messages', communityId, channelId || 'any', originId || 'root'],
         internalInsertNewMessage(extistingMessages, newMessage)

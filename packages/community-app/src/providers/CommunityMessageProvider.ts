@@ -29,6 +29,7 @@ import {
   FailedTransferStatuses,
   queryBatch,
   deleteFile,
+  RichText,
 } from '@youfoundation/js-lib/core';
 import {
   getNewId,
@@ -65,7 +66,7 @@ export interface CommunityMessage {
   replyId?: string;
 
   /// Content of the message
-  message: string;
+  message: string | RichText;
 
   // After an update to a message on the receiving end, the senderOdinId is emptied; So we have an authorOdinId to keep track of the original sender
   authorOdinId?: string;

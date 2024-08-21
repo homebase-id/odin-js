@@ -8,6 +8,8 @@ import {
   OwnerName,
   formatToTimeAgoWithRelativeDetail,
   AuthorImage,
+  getTextRootsRecursive,
+  RichTextRenderer,
 } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { formatGuidId, stringGuidsEqual, toGuidId } from '@youfoundation/js-lib/helpers';
@@ -130,10 +132,9 @@ const CommunityTextMessageBody = ({
   community?: HomebaseFile<CommunityDefinition>;
 }) => {
   const content = msg.fileMetadata.appData.content;
+  const plainText = getTextRootsRecursive(content.message).join(' ');
   const isEmojiOnly =
-    (content.message?.match(/^\p{Extended_Pictographic}/u) &&
-      !content.message?.match(/[0-9a-zA-Z]/)) ??
-    false;
+    (plainText?.match(/^\p{Extended_Pictographic}/u) && !plainText?.match(/[0-9a-zA-Z]/)) ?? false;
   const isReply = !!content.replyId;
 
   return (
@@ -143,12 +144,16 @@ const CommunityTextMessageBody = ({
       <div className="flex flex-col md:flex-row md:flex-wrap md:gap-2">
         <div className="flex min-w-0 flex-col gap-1">
           {/* {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null} */}
-          <ParagraphWithLinks
+          <RichTextRenderer
+            body={content.message}
+            className={`copyable-content ${isEmojiOnly && !isReply ? 'text-7xl' : ''}`}
+          />
+          {/* <ParagraphWithLinks
             text={content.message}
             className={`copyable-content whitespace-pre-wrap break-words ${
               isEmojiOnly && !isReply ? 'text-7xl' : ''
             }`}
-          />
+          /> */}
         </div>
       </div>
       {/* {!isDeleted ? <ChatReactions msg={msg} community={community} /> : null} */}
@@ -241,10 +246,11 @@ const CommunityMediaMessageBody = ({
       </div>
       {hasACaption ? (
         <div className="flex min-w-0 flex-col md:flex-row md:justify-between">
-          <ParagraphWithLinks
+          <RichTextRenderer body={content.message} />
+          {/* <ParagraphWithLinks
             text={content.message}
             className={`whitespace-pre-wrap break-words`}
-          />
+          /> */}
         </div>
       ) : null}
     </div>

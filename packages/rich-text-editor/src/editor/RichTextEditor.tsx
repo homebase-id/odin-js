@@ -15,17 +15,21 @@ import {
   TDescendant,
   focusEditor,
   getStartPoint,
-  removeNodes,
   resetEditor,
+  isSelectionAtBlockStart,
+  isBlockAboveEmpty,
 } from '@udecode/plate-common';
 import { withProps } from '@udecode/cn';
 import { createParagraphPlugin, ELEMENT_PARAGRAPH } from '@udecode/plate-paragraph';
-import { createHeadingPlugin, ELEMENT_H1, ELEMENT_H2 } from '@udecode/plate-heading';
+import { createHeadingPlugin, ELEMENT_H1, ELEMENT_H2, KEYS_HEADING } from '@udecode/plate-heading';
 import { createBlockquotePlugin, ELEMENT_BLOCKQUOTE } from '@udecode/plate-block-quote';
 import {
   createCodeBlockPlugin,
   ELEMENT_CODE_BLOCK,
   ELEMENT_CODE_LINE,
+  isCodeBlockEmpty,
+  isSelectionAtCodeBlockStart,
+  unwrapCodeBlock,
 } from '@udecode/plate-code-block';
 import { createLinkPlugin, ELEMENT_LINK } from '@udecode/plate-link';
 import { createListPlugin, ELEMENT_UL, ELEMENT_OL, ELEMENT_LI } from '@udecode/plate-list';
@@ -100,7 +104,20 @@ interface RTEProps {
   uniqueId?: string;
   autoFocus?: boolean;
   onSubmit?: () => void;
+  disableHeadings?: boolean;
+  children?: React.ReactNode;
 }
+
+const resetBlockTypesCommonRule = {
+  types: [ELEMENT_BLOCKQUOTE],
+  defaultType: ELEMENT_PARAGRAPH,
+};
+
+const resetBlockTypesCodeBlockRule = {
+  types: [ELEMENT_CODE_BLOCK],
+  defaultType: ELEMENT_PARAGRAPH,
+  onReset: unwrapCodeBlock,
+};
 
 const InnerRichTextEditor = memo(
   forwardRef((props: RTEProps, ref) => {
@@ -116,6 +133,7 @@ const InnerRichTextEditor = memo(
       disabled,
       uniqueId,
       autoFocus,
+      disableHeadings,
     } = props;
 
     const { isDarkMode } = useDarkMode();
@@ -185,6 +203,31 @@ const InnerRichTextEditor = memo(
               options: {
                 rules: [
                   // Usage: https://platejs.org/docs/reset-node
+                  {
+                    ...resetBlockTypesCommonRule,
+                    hotkey: 'Enter',
+                    predicate: isBlockAboveEmpty,
+                  },
+                  {
+                    ...resetBlockTypesCommonRule,
+                    hotkey: 'Backspace',
+                    predicate: isSelectionAtBlockStart,
+                  },
+                  {
+                    ...resetBlockTypesCodeBlockRule,
+                    hotkey: 'Enter',
+                    predicate: isCodeBlockEmpty,
+                    query: {
+                      start: true,
+                      end: true,
+                      allow: KEYS_HEADING,
+                    },
+                  },
+                  {
+                    ...resetBlockTypesCodeBlockRule,
+                    hotkey: 'Backspace',
+                    predicate: isSelectionAtCodeBlockStart,
+                  },
                 ],
               },
             }),
@@ -195,11 +238,22 @@ const InnerRichTextEditor = memo(
                 },
               },
             }),
-            createSoftBreakPlugin({
-              options: {
-                rules: [{ hotkey: 'shift+enter' }],
-              },
-            }),
+            onSubmit
+              ? undefined
+              : createSoftBreakPlugin({
+                  options: {
+                    rules: [
+                      {
+                        hotkey: 'shift+enter',
+                        query: {
+                          // Only in specific elements so we can combine shift+enter for regular breaks when there's a onSubmit
+                          // allow: [ELEMENT_PARAGRAPH, ELEMENT_BLOCKQUOTE, ELEMENT_CODE_BLOCK],
+                          allow: [],
+                        },
+                      },
+                    ],
+                  },
+                }),
             createTabbablePlugin(),
             createTrailingBlockPlugin({
               options: { type: ELEMENT_PARAGRAPH },
@@ -209,16 +263,20 @@ const InnerRichTextEditor = memo(
             createComboboxPlugin(),
             createEmojiPlugin(),
             createMentionPlugin(),
-            createImagePlugin({ options: mediaOptions }),
-          ],
+            mediaOptions ? createImagePlugin({ options: mediaOptions }) : undefined,
+          ].filter(Boolean),
           {
             components: {
               [ELEMENT_BLOCKQUOTE]: BlockquoteElement,
               [ELEMENT_CODE_BLOCK]: CodeBlockElement,
               [ELEMENT_CODE_LINE]: CodeLineElement,
               [ELEMENT_LINK]: LinkElement,
-              [ELEMENT_H1]: withProps(HeadingElement, { variant: 'h1' }),
-              [ELEMENT_H2]: withProps(HeadingElement, { variant: 'h2' }),
+              ...(disableHeadings
+                ? {}
+                : {
+                    [ELEMENT_H1]: withProps(HeadingElement, { variant: 'h1' }),
+                    [ELEMENT_H2]: withProps(HeadingElement, { variant: 'h2' }),
+                  }),
               [ELEMENT_UL]: withProps(ListElement, { variant: 'ul' }),
               [ELEMENT_OL]: withProps(ListElement, { variant: 'ol' }),
               [ELEMENT_LI]: withProps(PlateElement, { as: 'li' }),
@@ -259,9 +317,8 @@ const InnerRichTextEditor = memo(
     );
 
     useEffect(() => {
-      if (autoFocus && innerEditor) {
+      if (autoFocus && innerEditor)
         setTimeout(() => focusEditor(innerEditor, getStartPoint(innerEditor, [0])), 0);
-      }
     }, [autoFocus, innerEditor]);
 
     useImperativeHandle(
@@ -271,11 +328,7 @@ const InnerRichTextEditor = memo(
           if (innerEditor) focusEditor(innerEditor, getStartPoint(innerEditor, [0]));
         },
         clear() {
-          console.log('should be resetting editor');
-          if (innerEditor) {
-            console.log('resetting editor');
-            resetEditor(innerEditor);
-          }
+          if (innerEditor) resetEditor(innerEditor);
         },
       }),
       [innerEditor]
@@ -298,7 +351,7 @@ const InnerRichTextEditor = memo(
           }}
         />
         <section
-          className={`relative flex w-[100%] flex-col ${className ?? ''}`}
+          className={`relative flex w-[100%] flex-col ${className ?? ''} [&_.slate-selected]:!bg-primary/20 [&_.slate-selection-area]:border [&_.slate-selection-area]:bg-primary/10`}
           onSubmit={(e) => e.stopPropagation()}
           onClick={disabled ? undefined : (e) => e.stopPropagation()}
         >
@@ -312,15 +365,22 @@ const InnerRichTextEditor = memo(
             key={disabled ? 'disabled' : undefined}
           >
             <FixedToolbar>
-              <FixedToolbarButtons mediaOptions={mediaOptions} />
+              <FixedToolbarButtons disableHeadings={disableHeadings} mediaOptions={mediaOptions} />
             </FixedToolbar>
 
             <PlateContent
               placeholder={placeholder}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey && onSubmit) {
-                  e.preventDefault();
-                  onSubmit();
+                if (e.key === 'Enter') {
+                  if (onSubmit) {
+                    if (!e.shiftKey) {
+                      e.preventDefault();
+                      onSubmit();
+                    } else {
+                      e.preventDefault();
+                      innerEditor?.insertBreak();
+                    }
+                  }
                 }
               }}
             />
@@ -329,6 +389,7 @@ const InnerRichTextEditor = memo(
 
             <EditorExposer />
           </Plate>
+          {props.children}
         </section>
       </>
     );
