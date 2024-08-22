@@ -4,17 +4,19 @@
 
 [![CI Build](https://github.com/YouFoundation/dotyoucore-js/actions/workflows/ci.yml/badge.svg)](https://github.com/YouFoundation/dotyoucore-js/actions/workflows/ci.yml)
 
+####
+
 This monorepo contains the various JavaScript apps and libraries that are maintaned by Homebase. The libraries can easily be consumed by other app developers that want to work with a Homebase Identity backend.
 
-- 🚀 Feed app
-- 🚀 Chat app
-- 🚀 Mail app
-- 🚀 Community app
-- 🚀 Public app
+- 🚀 Feed app\
+- 🚀 Chat app\
+- 🚀 Mail app\
+- 🚀 Community app\
+- 🚀 Public app\
 - 🚀 Owner app
 
-- 📚 JS Lib
-- ✨ UI Lib
+- 📚 JS Lib\
+- ✨ UI Lib\
 
 ## Installing Locally
 
