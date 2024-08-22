@@ -18,6 +18,8 @@ import {
   resetEditor,
   isSelectionAtBlockStart,
   isBlockAboveEmpty,
+  PlatePlugin,
+  PlatePluginComponent,
 } from '@udecode/plate-common';
 import { withProps } from '@udecode/cn';
 import { createParagraphPlugin, ELEMENT_PARAGRAPH } from '@udecode/plate-paragraph';
@@ -109,6 +111,9 @@ interface RTEProps {
   onSubmit?: () => void;
   disableHeadings?: boolean;
   children?: React.ReactNode;
+
+  plugins?: PlatePlugin[];
+  components?: Record<string, PlatePluginComponent> | undefined;
 }
 
 const resetBlockTypesCommonRule = {
@@ -137,6 +142,8 @@ const InnerRichTextEditor = memo(
       uniqueId,
       autoFocus,
       disableHeadings,
+      plugins: _plugins,
+      components: _components,
     } = props;
 
     const { isDarkMode } = useDarkMode();
@@ -264,8 +271,9 @@ const InnerRichTextEditor = memo(
             createDeserializeHtmlPlugin(),
             createDeserializeMdPlugin(),
             createEmojiPlugin(),
-            createMentionPlugin({ options: { mentionables } }),
+            createMentionPlugin({ options: { mentionables: mentionables || [] } }),
             mediaOptions ? createImagePlugin({ options: mediaOptions }) : undefined,
+            ...(_plugins || []),
           ].filter(Boolean),
           {
             components: {
@@ -292,6 +300,7 @@ const InnerRichTextEditor = memo(
               [ELEMENT_EMOJI_INPUT]: EmojiInputElement,
               [ELEMENT_MENTION]: MentionElement,
               [ELEMENT_MENTION_INPUT]: MentionInputElement,
+              ...(_components || {}),
             },
           }
         ),

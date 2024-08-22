@@ -323,14 +323,72 @@ const InlineComboboxEmpty = ({ children, className }: HTMLAttributes<HTMLDivElem
   if (items.length > 0) return null;
 
   return (
-    <div className={cn(comboboxItemVariants({ interactive: false }), className)}>{children}</div>
+    <div className={cn(comboboxItemVariants({ interactive: true }), className)}>{children}</div>
   );
+};
+
+const InlineComboboxSeleactableEmpty = ({
+  className,
+  onClick,
+  children,
+  ...props
+}: Omit<InlineComboboxItemProps, 'value'>) => {
+  const { setHasEmpty } = useContext(InlineComboboxContext);
+  const store = useComboboxContext()!;
+  const items = store.useState('items');
+
+  useEffect(() => {
+    setHasEmpty(true);
+
+    return () => {
+      setHasEmpty(false);
+    };
+  }, [setHasEmpty]);
+
+  if (items.length > 0) return null;
+
+  return (
+    <div
+      className={cn(comboboxItemVariants({ interactive: true }), className)}
+      onClick={onClick}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+
+  // const { removeInput, setHasEmpty } = useContext(InlineComboboxContext);
+  // const store = useComboboxContext()!;
+  // const items = store.useState('items');
+
+  // // useEffect(() => {
+  // //   setHasEmpty(true);
+
+  // //   return () => {
+  // //     setHasEmpty(false);
+  // //   };
+  // // }, [setHasEmpty]);
+
+  // if (items.length > 0) return null;
+
+  // return (
+  //   <ComboboxItem
+  //     // className={cn(comboboxItemVariants(), className)}
+  //     // onClick={(event) => {
+  //     //   removeInput(true);
+  //     //   onClick?.(event);
+  //     // }}
+  //     children={'Create new channel'}
+  //     // {...props}
+  //   />
+  // );
 };
 
 export {
   InlineCombobox,
   InlineComboboxContent,
   InlineComboboxEmpty,
+  InlineComboboxSeleactableEmpty,
   InlineComboboxInput,
   InlineComboboxItem,
 };
