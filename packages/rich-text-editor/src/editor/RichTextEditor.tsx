@@ -56,8 +56,12 @@ import { createTabbablePlugin } from '@udecode/plate-tabbable';
 import { createTrailingBlockPlugin } from '@udecode/plate-trailing-block';
 import { createDeserializeMdPlugin } from '@udecode/plate-serializer-md';
 
-import { createComboboxPlugin, TComboboxItem } from '@udecode/plate-combobox';
-import { createEmojiPlugin } from '@udecode/plate-emoji';
+import { createEmojiPlugin, ELEMENT_EMOJI_INPUT } from '@udecode/plate-emoji';
+import {
+  createMentionPlugin,
+  ELEMENT_MENTION,
+  ELEMENT_MENTION_INPUT,
+} from '@udecode/plate-mention';
 
 import { BlockquoteElement } from '../components/plate-ui/blockquote-element';
 import { CodeBlockElement } from '../components/plate-ui/code-block-element';
@@ -86,17 +90,16 @@ import {
   useImperativeHandle,
 } from 'react';
 import { autoformatRules } from '../lib/autoFormatRules';
-import { EmojiCombobox } from './Combobox/EmojiCombobox';
-import { createMentionPlugin, ELEMENT_MENTION } from '@udecode/plate-mention';
-import { MentionCombobox } from './Combobox/MentionCombobox';
+import { EmojiInputElement } from './Combobox/EmojiCombobox';
 import { MentionElement } from '../components/plate-ui/mention-element';
+import { Mentionable, MentionInputElement } from '../components/plate-ui/mention-input-element';
 
 interface RTEProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultValue?: any[] | string | undefined;
   placeholder?: string;
   mediaOptions?: MediaOptions;
-  mentionables?: TComboboxItem[];
+  mentionables?: Mentionable[];
   name?: string;
   onChange: (e: { target: { name: string; value: RichText } }) => void;
   className?: string;
@@ -260,9 +263,8 @@ const InnerRichTextEditor = memo(
             }),
             createDeserializeHtmlPlugin(),
             createDeserializeMdPlugin(),
-            createComboboxPlugin(),
             createEmojiPlugin(),
-            createMentionPlugin(),
+            createMentionPlugin({ options: { mentionables } }),
             mediaOptions ? createImagePlugin({ options: mediaOptions }) : undefined,
           ].filter(Boolean),
           {
@@ -287,11 +289,13 @@ const InnerRichTextEditor = memo(
               [MARK_KBD]: KbdLeaf,
               [MARK_STRIKETHROUGH]: withProps(PlateLeaf, { as: 's' }),
               [MARK_UNDERLINE]: withProps(PlateLeaf, { as: 'u' }),
+              [ELEMENT_EMOJI_INPUT]: EmojiInputElement,
               [ELEMENT_MENTION]: MentionElement,
+              [ELEMENT_MENTION_INPUT]: MentionInputElement,
             },
           }
         ),
-      [mediaOptions]
+      [mediaOptions, mentionables]
     );
 
     const [innerEditor, setInnerEditor] = useState<PlateEditor<Value>>();
@@ -384,8 +388,6 @@ const InnerRichTextEditor = memo(
                 }
               }}
             />
-            <EmojiCombobox />
-            {mentionables?.length ? <MentionCombobox items={mentionables} /> : null}
 
             <EditorExposer />
           </Plate>

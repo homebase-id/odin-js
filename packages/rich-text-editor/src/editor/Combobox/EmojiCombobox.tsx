@@ -1,36 +1,59 @@
-import { ComboboxItemProps } from '@udecode/plate-combobox';
+import React, { useMemo, useState } from 'react';
+
+import { withRef } from '@udecode/cn';
+import { PlateElement } from '@udecode/plate-common';
+import { EmojiInlineIndexSearch, insertEmoji } from '@udecode/plate-emoji';
+
+// import { useDebounce } from '@/hooks/use-debounce';
+
 import {
-  EmojiItemData,
-  KEY_EMOJI,
-  TEmojiCombobox,
-  useEmojiComboboxState,
-} from '@udecode/plate-emoji';
+  InlineCombobox,
+  InlineComboboxContent,
+  InlineComboboxEmpty,
+  InlineComboboxInput,
+  InlineComboboxItem,
+} from '../../components/plate-ui/inline-combobox';
 
-import { Combobox } from '../../components/plate-ui/combobox';
+export const EmojiInputElement = withRef<typeof PlateElement>(({ className, ...props }, ref) => {
+  const { children, editor, element } = props;
+  const [value, setValue] = useState('');
+  const debouncedValue = value; //useDebounce(value, 100);
+  const isPending = value !== debouncedValue;
 
-export function EmojiComboboxItem({ item }: ComboboxItemProps<EmojiItemData>) {
-  const {
-    data: { id, emoji },
-  } = item;
+  const filteredEmojis = useMemo(() => {
+    if (debouncedValue.trim().length === 0) return [];
 
-  return (
-    <div>
-      {emoji} :{id}:
-    </div>
-  );
-}
-
-export function EmojiCombobox({ pluginKey = KEY_EMOJI, id = pluginKey, ...props }: TEmojiCombobox) {
-  const { trigger, onSelectItem } = useEmojiComboboxState({ pluginKey });
+    return EmojiInlineIndexSearch.getInstance().search(debouncedValue.replace(/:$/, '')).get();
+  }, [debouncedValue]);
 
   return (
-    <Combobox
-      id={id}
-      trigger={trigger}
-      controlled
-      onSelectItem={onSelectItem as any}
-      onRenderItem={EmojiComboboxItem}
-      {...props}
-    />
+    <PlateElement as="span" data-slate-value={element.value} ref={ref} {...props}>
+      <InlineCombobox
+        element={element}
+        filter={false}
+        hideWhenNoValue
+        setValue={setValue}
+        trigger=":"
+        value={value}
+      >
+        <InlineComboboxInput />
+
+        <InlineComboboxContent>
+          {!isPending && <InlineComboboxEmpty>No matching emoji found</InlineComboboxEmpty>}
+
+          {filteredEmojis.map((emoji) => (
+            <InlineComboboxItem
+              key={emoji.id}
+              onClick={() => insertEmoji(editor, emoji)}
+              value={emoji.name}
+            >
+              {emoji.skins[0].native} {emoji.name}
+            </InlineComboboxItem>
+          ))}
+        </InlineComboboxContent>
+      </InlineCombobox>
+
+      {children}
+    </PlateElement>
   );
-}
+});
