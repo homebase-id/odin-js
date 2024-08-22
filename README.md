@@ -8,15 +8,14 @@
 
 This monorepo contains the various JavaScript apps and libraries that are maintaned by Homebase. The libraries can easily be consumed by other app developers that want to work with a Homebase Identity backend.
 
-- 🚀 Feed app\
-- 🚀 Chat app\
-- 🚀 Mail app\
-- 🚀 Community app\
-- 🚀 Public app\
+- 🚀 Feed app
+- 🚀 Chat app
+- 🚀 Mail app
+- 🚀 Community app
+- 🚀 Public app
 - 🚀 Owner app
-
-- 📚 JS Lib\
-- ✨ UI Lib\
+- 📚 JS Lib
+- ✨ UI Lib
 
 ## Installing Locally
 
@@ -36,7 +35,7 @@ Before you can use the actual apps, you need to install and build the dependenci
 
 After that you can run the apps locally:
 
-All concurrently `npm run start` or one by one `npm run start:*[feed/chat/mail/community/public/owner]`
+All concurrently `npm run start` or one by one `npm run start:[feed/chat/mail/community/public/owner]`
 
 and/or build them:
 
