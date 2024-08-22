@@ -12,10 +12,11 @@ import {
   LinkOverview,
   useLinkPreviewBuilder,
   getTextRootsRecursive,
+  useAllContacts,
 } from '@youfoundation/common-app';
 import { HomebaseFile, NewMediaFile, RichText } from '@youfoundation/js-lib/core';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 
 import { getNewId, isTouchDevice } from '@youfoundation/js-lib/helpers';
 import { LinkPreview } from '@youfoundation/js-lib/media';
@@ -23,6 +24,14 @@ import { useCommunityMessage } from '../../../hooks/community/messages/useCommun
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
 import { RichTextEditor } from '@youfoundation/rich-text-editor';
+
+import {
+  createChannelPlugin,
+  ELEMENT_CHANNEL,
+  ELEMENT_CHANNEL_INPUT,
+} from './RTEChannelDropdown/RTEChannelDropdownPlugin';
+import { RTEChannelDropdownElement } from './RTEChannelDropdown/RTEChannelDropdownElement';
+import { RTEChannelDropdownInputElement } from './RTEChannelDropdown/RTEChannelDropdownInputElement';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const CHAT_DRAFTS_KEY = 'COMMUNITY_LOCAL_DRAFTS';
@@ -99,6 +108,29 @@ export const MessageComposer = ({
     }
   };
 
+  const { data: contacts } = useAllContacts(true);
+  const mentionables: { key: string; text: string }[] = useMemo(
+    () =>
+      (contacts
+        ?.filter(
+          (contact) =>
+            contact.fileMetadata.appData.content.odinId &&
+            community?.fileMetadata.appData.content.recipients.includes(
+              contact.fileMetadata.appData.content.odinId
+            )
+        )
+        ?.map((contact) =>
+          contact.fileMetadata.appData.content.odinId
+            ? {
+                key: contact.fileMetadata.appData.content.odinId,
+                text: contact.fileMetadata.appData.content.odinId,
+              }
+            : undefined
+        )
+        .filter(Boolean) as { key: string; text: string }[]) || [],
+    [contacts]
+  );
+
   return (
     <>
       <div className={`bg-background pb-[env(safe-area-inset-bottom)] ${className || ''}`}>
@@ -129,7 +161,12 @@ export const MessageComposer = ({
             ref={volatileRef}
             onSubmit={isTouchDevice() ? undefined : doSend}
             disableHeadings={true}
-            // autoCompleters={[ChannelAutocompleteDropdown]}
+            mentionables={mentionables}
+            plugins={[createChannelPlugin()]}
+            components={{
+              [ELEMENT_CHANNEL]: RTEChannelDropdownElement,
+              [ELEMENT_CHANNEL_INPUT]: RTEChannelDropdownInputElement,
+            }}
           >
             <div className="max-h-[30vh] overflow-auto">
               <FileOverview files={files} setFiles={setFiles} cols={8} />
@@ -167,30 +204,6 @@ export const MessageComposer = ({
               </span>
             </div>
           </RichTextEditor>
-          {/* <VolatileInput
-            placeholder={
-              channel?.fileMetadata.appData.content.title
-                ? `Message # ${channel.fileMetadata.appData.content.title}`
-                : community?.fileMetadata.appData.uniqueId === groupId
-                  ? `Message "${community?.fileMetadata.appData.content.title}"`
-                  : `Reply`
-            }
-            defaultValue={message}
-            className="relative w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"
-            onChange={(newVal) => setMessage(newVal)}
-            autoFocus={!isTouchDevice()}
-            ref={volatileRef}
-            onPaste={(e) => {
-              const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
-
-              if (mediaFiles.length) {
-                setFiles([...(files ?? []), ...mediaFiles]);
-                e.preventDefault();
-              }
-            }}
-            onSubmit={isTouchDevice() ? undefined : doSend}
-            autoCompleters={[ChannelAutocompleteDropdown]}
-          /> */}
         </div>
       </div>
     </>
