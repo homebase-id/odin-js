@@ -13,6 +13,7 @@ import {
   NotificationType,
   TypedConnectionNotification,
   AppNotification,
+  ReactionNotification,
 } from './WebsocketTypes';
 
 let webSocketClient: WebSocket | undefined;
@@ -54,7 +55,11 @@ const ParseRawClientNotification = (
     } as ClientTransitNotification;
   }
 
-  if (['fileAdded', 'fileDeleted', 'fileModified'].includes(notification.notificationType)) {
+  if (
+    ['fileAdded', 'fileDeleted', 'fileModified', 'statisticsChanged'].includes(
+      notification.notificationType
+    )
+  ) {
     return {
       notificationType: notification.notificationType,
       targetDrive: targetDrive,
@@ -97,6 +102,17 @@ const ParseRawClientNotification = (
       created: data.timestamp,
       options: data.appNotificationOptions,
     } as AppNotification;
+  }
+
+  if (['reactionContentAdded', 'reactionContentDeleted'].includes(notification.notificationType)) {
+    return {
+      notificationType: notification.notificationType,
+
+      odinId: data.odinId,
+      reactionContent: data.reactionContent,
+      fileId: data.fileId,
+      created: data.created,
+    } as ReactionNotification;
   }
 
   return {

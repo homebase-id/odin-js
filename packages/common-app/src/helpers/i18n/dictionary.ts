@@ -23,6 +23,7 @@ const enLocale = [
 
   // PermssionTypes
   ['readandwrite', 'Read & Write'],
+  ['reactandwrite', 'React & Write'],
   ['reactandcomment', 'React & Comment'],
   ['full', 'Full'],
   ['comment', 'Comment'],

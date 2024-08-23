@@ -6,6 +6,7 @@ import {
   FileQueryParams,
   HomebaseFile,
   PushNotification,
+  ReactionNotification,
   TypedConnectionNotification,
   queryBatch,
   queryModified,
@@ -33,9 +34,10 @@ import {
   stringGuidsEqual,
 } from '@youfoundation/js-lib/helpers';
 import { getConversationQueryOptions, useConversation } from './useConversation';
-import { ChatReactionFileType } from '../../providers/ChatReactionProvider';
+
 import { insertNewMessage, insertNewMessagesForConversation } from './useChatMessages';
 import { insertNewConversation } from './useConversations';
+import { insertNewReaction, removeReaction } from './useChatReaction';
 import { insertNewConversationMetadata } from './useConversationMetadata';
 
 const MINUTE_IN_MS = 60000;
@@ -138,15 +140,16 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
     if (
       (notification.notificationType === 'fileAdded' ||
-        notification.notificationType === 'fileModified') &&
+        notification.notificationType === 'fileModified' ||
+        notification.notificationType === 'statisticsChanged') &&
       stringGuidsEqual(notification.targetDrive?.alias, ChatDrive.alias) &&
       stringGuidsEqual(notification.targetDrive?.type, ChatDrive.type)
     ) {
       if (notification.header.fileMetadata.appData.fileType === CHAT_MESSAGE_FILE_TYPE) {
         const conversationId = notification.header.fileMetadata.appData.groupId;
-        const isNewFile = notification.notificationType === 'fileAdded';
+        const isNewMessageFile = notification.notificationType === 'fileAdded';
 
-        if (isNewFile) {
+        if (isNewMessageFile) {
           // Check if the message is orphaned from a conversation
           const conversation = await queryClient.fetchQuery(
             getConversationQueryOptions(dotYouClient, queryClient, conversationId)
@@ -183,14 +186,10 @@ const useChatWebsocket = (isEnabled: boolean) => {
         } else {
           setChatMessagesQueue((prev) => [...prev, updatedChatMessage]);
         }
-      } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
-        const messageId = notification.header.fileMetadata.appData.groupId;
-        queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
       } else if (
         notification.header.fileMetadata.appData.fileType === CHAT_CONVERSATION_FILE_TYPE
       ) {
-        const isNewFile = notification.notificationType === 'fileAdded';
-
+        const isNewConversationFile = notification.notificationType === 'fileAdded';
         const updatedConversation = await dsrToConversation(
           dotYouClient,
           notification.header,
@@ -206,7 +205,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
           return;
         }
 
-        insertNewConversation(queryClient, updatedConversation, !isNewFile);
+        insertNewConversation(queryClient, updatedConversation, !isNewConversationFile);
       } else if (
         notification.header.fileMetadata.appData.fileType ===
         CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE
@@ -246,6 +245,25 @@ const useChatWebsocket = (isEnabled: boolean) => {
         queryClient.setQueryData(['push-notifications'], newNotificationData);
       }
       incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
+    }
+
+    if (
+      notification.notificationType === 'reactionContentAdded' ||
+      notification.notificationType === 'reactionContentDeleted'
+    ) {
+      if (notification.notificationType === 'reactionContentAdded') {
+        insertNewReaction(
+          queryClient,
+          notification.fileId.fileId,
+          notification as ReactionNotification
+        );
+      } else if (notification.notificationType === 'reactionContentDeleted') {
+        removeReaction(
+          queryClient,
+          notification.fileId.fileId,
+          notification as ReactionNotification
+        );
+      }
     }
   }, []);
 
@@ -291,7 +309,14 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
   return useNotificationSubscriber(
     isEnabled ? handler : undefined,
-    ['fileAdded', 'fileModified'],
+    [
+      'fileAdded',
+      'fileModified',
+      'reactionContentAdded',
+      'reactionContentDeleted',
+      'statisticsChanged',
+      'appNotificationAdded',
+    ],
     [ChatDrive],
     () => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });

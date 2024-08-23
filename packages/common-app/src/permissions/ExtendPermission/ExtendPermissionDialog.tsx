@@ -10,12 +10,20 @@ export const ExtendPermissionDialog = ({
   appId,
   appName,
   drives,
+  circleDrives,
   permissions,
   needsAllConnected,
 }: {
   appId: string;
   appName: string;
   drives: {
+    a: string;
+    t: string;
+    n: string;
+    d: string;
+    p: number;
+  }[];
+  circleDrives?: {
     a: string;
     t: string;
     n: string;
@@ -29,6 +37,7 @@ export const ExtendPermissionDialog = ({
   const extendPermissionUrl = useMissingPermissions({
     appId,
     drives,
+    circleDrives,
     permissions,
     needsAllConnected,
   });
