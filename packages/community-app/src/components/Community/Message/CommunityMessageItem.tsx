@@ -8,8 +8,10 @@ import {
   OwnerName,
   formatToTimeAgoWithRelativeDetail,
   AuthorImage,
+  getTextRootsRecursive,
+  RichTextRenderer,
 } from '@youfoundation/common-app';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile, RichText } from '@youfoundation/js-lib/core';
 import { formatGuidId, stringGuidsEqual, toGuidId } from '@youfoundation/js-lib/helpers';
 import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
@@ -125,15 +127,15 @@ export const CommunityMessageItem = ({
 
 const CommunityTextMessageBody = ({
   msg,
+  community,
 }: {
   msg: HomebaseFile<CommunityMessage>;
   community?: HomebaseFile<CommunityDefinition>;
 }) => {
   const content = msg.fileMetadata.appData.content;
+  const plainText = getTextRootsRecursive(content.message).join(' ');
   const isEmojiOnly =
-    (content.message?.match(/^\p{Extended_Pictographic}/u) &&
-      !content.message?.match(/[0-9a-zA-Z]/)) ??
-    false;
+    (plainText?.match(/^\p{Extended_Pictographic}/u) && !plainText?.match(/[0-9a-zA-Z]/)) ?? false;
   const isReply = !!content.replyId;
 
   return (
@@ -143,8 +145,10 @@ const CommunityTextMessageBody = ({
       <div className="flex flex-col md:flex-row md:flex-wrap md:gap-2">
         <div className="flex min-w-0 flex-col gap-1">
           {/* {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null} */}
-          <ParagraphWithLinks
-            text={content.message}
+
+          <MessageTextRenderer
+            community={community}
+            message={content.message}
             className={`copyable-content whitespace-pre-wrap break-words ${
               isEmojiOnly && !isReply ? 'text-7xl' : ''
             }`}
@@ -156,67 +160,56 @@ const CommunityTextMessageBody = ({
   );
 };
 
-const urlAndMentionRegex = new RegExp(/(https?:\/\/[^\s]+|@[^\s]+|#[^\s]+)/);
-const urlRegex = new RegExp(
-  /https?:\/\/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|(localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d{1,5})?)(\/[^\s]*)?/
-);
-const mentionRegex = new RegExp(/@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-const tagRegex = new RegExp(/#[a-zA-Z0-9.-]/);
-const ParagraphWithLinks = ({ text, className }: { text: string; className?: string }) => {
-  if (!text) return null;
-  const splitUpText = text.split(urlAndMentionRegex);
-  const { communityKey } = useParams();
-  const { data: channels } = useCommunityChannels({ communityId: communityKey }).fetch;
+const MessageTextRenderer = ({
+  community,
+  message,
+  className,
+}: {
+  community?: HomebaseFile<CommunityDefinition>;
+  message: RichText | string;
+  className?: string;
+}) => {
+  const { data: channels } = useCommunityChannels({
+    communityId: community?.fileMetadata.appData.uniqueId,
+  }).fetch;
+
+  if (!message) return null;
 
   return (
-    <p className={className}>
-      {splitUpText.map((part, index) => {
-        if (urlRegex.test(part)) {
-          return (
-            <a
-              key={index}
-              href={part}
-              target="_blank"
-              rel="noreferrer"
-              className="break-all text-primary underline"
-            >
-              {part}
-            </a>
+    <RichTextRenderer
+      body={message}
+      className={className}
+      renderElement={(element) => {
+        const { type, attributes } = element;
+
+        if (
+          type === 'channel' &&
+          attributes &&
+          'value' in attributes &&
+          typeof attributes.value === 'string'
+        ) {
+          const tagGuid = formatGuidId(toGuidId(attributes.value));
+          const hasChannel = !!channels?.find((channel) =>
+            stringGuidsEqual(channel.fileMetadata.appData.uniqueId, tagGuid)
           );
-        } else if (mentionRegex.test(part)) {
-          return (
-            <a
-              key={index}
-              href={`https://${part.slice(1)}`}
-              target="_blank"
-              rel="noreferrer"
-              className="break-all text-primary underline"
-            >
-              {part}
-            </a>
-          );
-        } else if (tagRegex.test(part)) {
-          const tag = part.slice(1);
-          const tagGuid = formatGuidId(toGuidId(tag));
-          if (
-            channels?.find((channel) =>
-              stringGuidsEqual(channel.fileMetadata.appData.uniqueId, tagGuid)
-            )
-          ) {
+
+          if (hasChannel) {
             return (
               <Link
-                key={index}
-                to={`${COMMUNITY_ROOT}/${communityKey}/${tagGuid}`}
+                to={`${COMMUNITY_ROOT}/${community?.fileMetadata.appData.uniqueId}/${tagGuid}`}
                 className="break-all text-primary hover:underline"
               >
-                {part}
+                #{attributes.value}{' '}
               </Link>
             );
-          } else return part;
+          } else {
+            return <span className="break-all text-primary"># {attributes.value} </span>;
+          }
         }
-        return part;
-      })}
-    </p>
+
+        return null;
+      }}
+    />
   );
 };
 
@@ -241,8 +234,9 @@ const CommunityMediaMessageBody = ({
       </div>
       {hasACaption ? (
         <div className="flex min-w-0 flex-col md:flex-row md:justify-between">
-          <ParagraphWithLinks
-            text={content.message}
+          <MessageTextRenderer
+            community={community}
+            message={content.message}
             className={`whitespace-pre-wrap break-words`}
           />
         </div>

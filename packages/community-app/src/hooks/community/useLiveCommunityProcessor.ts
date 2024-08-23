@@ -82,6 +82,7 @@ const useInboxProcessor = (communityId: string | undefined, connected?: boolean)
         {
           targetDrive: targetDrive,
           fileType: [COMMUNITY_MESSAGE_FILE_TYPE],
+          fileState: [0, 1],
         },
         {
           maxRecords: BATCH_SIZE,
@@ -96,6 +97,7 @@ const useInboxProcessor = (communityId: string | undefined, connected?: boolean)
         {
           targetDrive: targetDrive,
           fileType: [COMMUNITY_MESSAGE_FILE_TYPE],
+          fileState: [0, 1],
         },
         {
           maxRecords: BATCH_SIZE,
@@ -108,6 +110,7 @@ const useInboxProcessor = (communityId: string | undefined, connected?: boolean)
 
       const newMessages = modifieData.searchResults.concat(newData.searchResults);
       isDebug && console.debug('[InboxProcessor] new messages', newMessages.length);
+
       await processCommunityMessagesBatch(
         dotYouClient,
         queryClient,
@@ -143,6 +146,7 @@ const useCommunityWebsocket = (communityId: string | undefined, isEnabled: boole
     if (!communityId) return;
     isDebug && console.debug('[CommunityWebsocket] Got notification', notification);
 
+    // TODO: Handle fileDeleted
     if (
       (notification.notificationType === 'fileAdded' ||
         notification.notificationType === 'fileModified') &&
@@ -150,7 +154,7 @@ const useCommunityWebsocket = (communityId: string | undefined, isEnabled: boole
       stringGuidsEqual(notification.targetDrive?.type, targetDrive.type)
     ) {
       if (notification.header.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE) {
-        const conversationId = notification.header.fileMetadata.appData.groupId;
+        const channelId = notification.header.fileMetadata.appData.groupId;
 
         // This skips the invalidation of all chat messages, as we only need to add/update this specific message
         const updatedChatMessage = await dsrToMessage(
@@ -164,12 +168,8 @@ const useCommunityWebsocket = (communityId: string | undefined, isEnabled: boole
           Object.keys(updatedChatMessage.fileMetadata.appData.content).length === 0
         ) {
           // Something is up with the message, invalidate all messages for this conversation
-          console.warn(
-            '[CommunityWebsocket] Invalid message received',
-            notification,
-            conversationId
-          );
-          queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+          console.warn('[CommunityWebsocket] Invalid message received', notification, channelId);
+          queryClient.invalidateQueries({ queryKey: ['community-messages', channelId] });
           return;
         }
 
@@ -342,7 +342,7 @@ const processCommunityMessagesBatch = async (
               : (newMessage as HomebaseFile<CommunityMessage>)
           )
         )
-      ).filter(Boolean) as HomebaseFile<CommunityMessage>[];
+      ).filter(Boolean) as (HomebaseFile<CommunityMessage> | DeletedHomebaseFile)[];
       const threadMessages = updatedcommunityMessages.filter(
         (msg) => !stringGuidsEqual(msg.fileMetadata.appData.groupId, communityId)
       );

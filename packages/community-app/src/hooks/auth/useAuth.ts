@@ -96,7 +96,7 @@ export const drives = [
     t: '66ea8355ae4155c39b5a719166b510e3',
     n: 'Chat Drive',
     d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
+    p: DrivePermissionType.Read + DrivePermissionType.Write + DrivePermissionType.React,
   },
 ];
 

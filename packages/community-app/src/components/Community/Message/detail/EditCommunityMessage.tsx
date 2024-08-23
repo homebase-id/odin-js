@@ -5,7 +5,6 @@ import {
   ActionButton,
   DialogWrapper,
   ErrorNotification,
-  VolatileInput,
   t,
   usePortal,
 } from '@youfoundation/common-app';
@@ -16,6 +15,7 @@ import { isTouchDevice } from '@youfoundation/js-lib/helpers';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
 import { useCommunityMessage } from '../../../../hooks/community/messages/useCommunityMessage';
+import { RichTextEditor } from '@youfoundation/rich-text-editor';
 
 export const EditCommunityMessage = ({
   msg,
@@ -37,7 +37,7 @@ export const EditCommunityMessage = ({
   } = useCommunityMessage().update;
 
   const doSend = () => {
-    if (!message.trim()) return;
+    if (!message) return;
 
     const updatedMessage: HomebaseFile<CommunityMessage> = {
       ...msg,
@@ -63,20 +63,13 @@ export const EditCommunityMessage = ({
   const dialog = (
     <DialogWrapper onClose={onClose} title={t('Edit message')} isSidePanel={false}>
       <ErrorNotification error={updateError} />
-      <VolatileInput
+      <RichTextEditor
         placeholder="Your message"
         defaultValue={message}
         className="w-full rounded-md border bg-background p-2 dark:border-slate-800"
-        onChange={setMessage}
+        onChange={(e) => setMessage(e.target.value)}
         autoFocus={!isTouchDevice()}
-        onSubmit={
-          isTouchDevice()
-            ? undefined
-            : (val) => {
-                setMessage(val);
-                doSend();
-              }
-        }
+        onSubmit={isTouchDevice() ? undefined : doSend}
       />
       <div className="mt-4 flex flex-row-reverse gap-2">
         <ActionButton

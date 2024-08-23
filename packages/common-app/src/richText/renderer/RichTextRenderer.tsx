@@ -8,6 +8,7 @@ export const RichTextRenderer = ({
   odinId,
   options,
   className,
+  renderElement: renderElementProp,
 }: {
   body: string | Record<string, unknown>[] | undefined;
   odinId?: string;
@@ -19,6 +20,10 @@ export const RichTextRenderer = ({
     previewThumbnails?: PayloadDescriptor[];
     query?: string;
   };
+  renderElement?: (
+    node: { type?: string; attributes?: Record<string, unknown> },
+    children: ReactNode
+  ) => ReactNode;
   className?: string;
 }) => {
   if (!body || typeof body === 'string') return <p className={className}>{body}</p>;
@@ -198,12 +203,13 @@ export const RichTextRenderer = ({
               rel="noreferrer noopener"
               className="text-primary hover:underline break-words"
             >
-              {attributes.value}
+              @{attributes.value}
             </a>
           );
         } else return <></>;
+
       default:
-        return <span {...attributes}>{children}</span>;
+        return renderElementProp?.(node, children) || <span {...attributes}>{children}</span>;
     }
   };
 

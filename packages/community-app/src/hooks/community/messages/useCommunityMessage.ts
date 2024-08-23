@@ -4,6 +4,7 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   NewMediaFile,
+  RichText,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
 import { LinkPreview } from '@youfoundation/js-lib/media';
@@ -47,7 +48,7 @@ export const useCommunityMessage = (props?: {
     groupId?: string;
     replyId?: string;
     files?: NewMediaFile[];
-    message: string;
+    message: RichText | string;
     linkPreviews?: LinkPreview[];
     chatId?: string;
     userDate?: number;
