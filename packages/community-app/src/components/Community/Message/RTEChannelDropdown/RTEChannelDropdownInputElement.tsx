@@ -55,7 +55,7 @@ export const RTEChannelDropdownInputElement = withRef<typeof PlateElement>(
           <InlineCombobox
             element={element}
             setValue={setSearch}
-            showTrigger={false}
+            showTrigger={true}
             trigger="#"
             value={search}
           >

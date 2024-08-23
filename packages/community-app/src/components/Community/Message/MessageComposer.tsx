@@ -55,6 +55,7 @@ export const MessageComposer = ({
   const [message, setMessage] = useState<RichText | undefined>(
     groupId ? drafts[groupId] || undefined : undefined
   );
+
   const [files, setFiles] = useState<NewMediaFile[]>();
 
   useEffect(() => {

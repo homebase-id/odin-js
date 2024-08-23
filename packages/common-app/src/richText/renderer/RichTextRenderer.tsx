@@ -203,7 +203,7 @@ export const RichTextRenderer = ({
               rel="noreferrer noopener"
               className="text-primary hover:underline break-words"
             >
-              {attributes.value}
+              @{attributes.value}
             </a>
           );
         } else return <></>;

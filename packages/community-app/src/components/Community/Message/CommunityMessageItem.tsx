@@ -199,7 +199,7 @@ const MessageTextRenderer = ({
                 to={`${COMMUNITY_ROOT}/${community?.fileMetadata.appData.uniqueId}/${tagGuid}`}
                 className="break-all text-primary hover:underline"
               >
-                # {attributes.value}{' '}
+                #{attributes.value}{' '}
               </Link>
             );
           } else {

@@ -28,10 +28,14 @@ export const getTextRootsRecursive = (children: RichText | string): string[] => 
   if (!Array.isArray(children)) return [children as string];
 
   return children
-    .map((child) =>
-      child.children
-        ? getTextRootsRecursive(child.children as RichText).join(' ')
-        : (child.text as string)
+    .map(
+      (child) =>
+        [
+          child.children ? getTextRootsRecursive(child.children as RichText).join(' ') : undefined,
+          (child.text || child.value || undefined) as string,
+        ]
+          .filter(Boolean)
+          .join(' ') || ''
     )
     .filter((child) => child.length);
 };
