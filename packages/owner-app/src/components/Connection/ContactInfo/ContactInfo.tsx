@@ -1,4 +1,11 @@
-import { Envelope, t, useDotYouClient } from '@youfoundation/common-app';
+import {
+  Check,
+  Envelope,
+  Exclamation,
+  mergeStates,
+  t,
+  useDotYouClient,
+} from '@youfoundation/common-app';
 import { useContact } from '../../../hooks/contacts/useContact';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
@@ -8,6 +15,7 @@ import ContactImage from '../ContactImage/ContactImage';
 import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import { ContactFile } from '@youfoundation/js-lib/network';
 import { useConnection } from '../../../hooks/connections/useConnection';
+import { useVerifyConnection } from '../../../hooks/connections/useVerifyConnection';
 
 interface ContactInfoProps {
   odinId?: string;
@@ -22,9 +30,20 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
   // Disable saving so we can support manual refresh;
 
   const {
+    mutate: verifyConnection,
+    status: verifyConnectionState,
+    error: verifyError,
+    data: verifyData,
+  } = useVerifyConnection().confirmConnection;
+
+  const {
     fetch: { data: connectionInfo },
   } = useConnection({ odinId: odinId });
   const { getIdentity } = useDotYouClient();
+
+  const {
+    fetch: { data: introducerConnectioInfo },
+  } = useConnection({ odinId: connectionInfo?.introducerOdinId });
 
   if (!contact) return null;
 
@@ -33,23 +52,52 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
   const isConnected = connectionInfo?.status === 'connected';
   const identity = getIdentity();
 
+  const isConnectedWithIntroducer = introducerConnectioInfo?.status === 'connected';
+
   return (
     <>
-      <ErrorNotification error={refreshError} />
+      <ErrorNotification error={refreshError || verifyError} />
       <Section
         title={
           <>
             {t('Details')}
-            <a
-              href={`${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${
-                isConnected && identity ? '?youauth-logon=' + identity : ''
-              }`}
-              rel="noopener noreferrer"
-              target="_blank"
-              className="block text-sm text-primary hover:underline"
-            >
-              {odinId}
-            </a>
+
+            {connectionInfo?.connectionRequestOrigin === 'introduction' ? (
+              <p className="flex gap-1 text-sm">
+                <a
+                  href={`${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${
+                    isConnected && identity ? '?youauth-logon=' + identity : ''
+                  }`}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  className="block text-sm text-primary hover:underline"
+                >
+                  {odinId}
+                </a>
+                {t('was introduced by')}
+                <a
+                  href={`${new DotYouClient({ identity: connectionInfo?.introducerOdinId, api: ApiType.Guest }).getRoot()}${
+                    isConnectedWithIntroducer && identity ? '?youauth-logon=' + identity : ''
+                  }`}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  className="block text-sm text-primary hover:underline"
+                >
+                  {connectionInfo?.introducerOdinId}
+                </a>
+              </p>
+            ) : (
+              <a
+                href={`${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${
+                  isConnected && identity ? '?youauth-logon=' + identity : ''
+                }`}
+                rel="noopener noreferrer"
+                target="_blank"
+                className="block text-sm text-primary hover:underline"
+              >
+                {odinId}
+              </a>
+            )}
           </>
         }
         actions={
@@ -57,25 +105,22 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
           contact?.fileId && (
             <ActionButton
               className="text-base"
-              state={refreshState}
-              onClick={() => refresh({ contact: contact as HomebaseFile<ContactFile> })}
-              icon={Refresh}
-              confirmOptions={{
-                type: 'info',
-                title: t('Refresh data'),
-                buttonText: t('Refresh'),
-                body: t(
-                  'Are you sure you want to refresh data, overwritten data cannot be recovered.'
-                ),
+              state={isConnected ? mergeStates(refreshState, verifyConnectionState) : refreshState}
+              onClick={() => {
+                refresh({ contact: contact as HomebaseFile<ContactFile> });
+                if (isConnected) {
+                  verifyConnection(odinId);
+                }
               }}
+              icon={Refresh}
             >
               {t('Refresh')}
             </ActionButton>
           )
         }
       >
-        <div className="-mx-4 sm:flex sm:flex-row">
-          <div className="flex flex-row px-4 sm:mx-0">
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <div className="flex flex-row sm:mx-0">
             {odinId ? (
               <ContactImage
                 odinId={odinId}
@@ -84,40 +129,55 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
               />
             ) : null}
           </div>
-          <div className="px-4">
+          <div className="flex flex-col gap-2">
             {contactContent.name && (
-              <div className="my-3 flex flex-row">
+              <div className="flex flex-row items-center">
                 <IconFrame className="mr-2">
-                  <Person className="h-5 w-5" />
+                  <Person className="h-4 w-4" />
                 </IconFrame>
                 {contactContent.name.displayName ??
                   `${contactContent.name.givenName ?? ''} ${contactContent.name.surname ?? ''}`}
               </div>
             )}
-            <div className="my-3 flex flex-row">
+            <div className="flex flex-row items-center">
               <IconFrame className="mr-2">
-                <Phone className="h-5 w-5" />
+                <Phone className="h-4 w-4" />
               </IconFrame>
               {contactContent.phone?.number ?? ''}
             </div>
-            <div className="my-3 flex flex-row">
+            <div className="flex flex-row items-center">
               <IconFrame className="mr-2">
-                <Envelope className="h-5 w-5" />
+                <Envelope className="h-4 w-4" />
               </IconFrame>
               {contactContent.email?.email ?? ''}
             </div>
-            <div className="my-3 flex flex-row">
+            <div className="flex flex-row items-center">
               <IconFrame className="mr-2">
-                <House className="h-5 w-5" />
+                <House className="h-4 w-4" />
               </IconFrame>
               {contactContent.location?.city ?? ''} {contactContent.location?.country ?? ''}
             </div>
-            <div className="my-3 flex flex-row">
+            <div className="flex flex-row items-center">
               <IconFrame className="mr-2">
-                <Cake className="h-5 w-5" />
+                <Cake className="h-4 w-4" />
               </IconFrame>
               {contactContent.birthday?.date ?? ''}
             </div>
+          </div>
+          <div className="ml-auto flex flex-col-reverse">
+            {verifyConnectionState === 'success' ? (
+              <p className="flex flex-row items-center gap-2">
+                {verifyData ? (
+                  <>
+                    <Check className="h-5 w-5" /> {t('Verified')}
+                  </>
+                ) : (
+                  <>
+                    <Exclamation className="h-5 w-5" /> {t('Failed to verify')}
+                  </>
+                )}
+              </p>
+            ) : null}
           </div>
         </div>
       </Section>

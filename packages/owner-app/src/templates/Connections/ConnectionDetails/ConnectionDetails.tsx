@@ -19,6 +19,7 @@ const ConnectionDetails = () => {
   const {
     fetch: { data: connectionInfo, isLoading: connectionInfoLoading },
   } = useConnection({ odinId: odinId });
+
   const { data: contactData, isLoading: contactDataLoading } = useContact({
     odinId: odinId,
     canSave: connectionInfo?.status === 'connected',

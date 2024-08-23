@@ -90,15 +90,20 @@ const IncomingConnectionDialog = ({
                 </span>{' '}
                 {t('would like to connect with you and sent you a personal message')}:
               </h2>
+
               <div className="-m-4 flex flex-row flex-wrap sm:flex-nowrap">
                 <div className="w-full p-4 md:w-2/5">
                   <ContactImage odinId={senderOdinId} canSave={false} />
                 </div>
                 <div className="w-full p-4 text-gray-600 dark:text-gray-400 md:w-3/5">
-                  <p>{pendingConnection?.message}</p>
-                  <p className="mt-2">
-                    -- {contactData?.fileMetadata?.appData?.content?.name?.displayName}
-                  </p>
+                  {!pendingConnection?.introducerOdinId && (
+                    <>
+                      <p>{pendingConnection?.message}</p>
+                      <p className="mt-2">
+                        -- {contactData?.fileMetadata?.appData?.content?.name?.displayName}
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -128,6 +133,23 @@ const IncomingConnectionDialog = ({
                 {t('Ignore request')}
               </ActionButton>
             </div>
+
+            {pendingConnection?.introducerOdinId && (
+              <div className="mt-9">
+                <h5 className="mb-8">
+                  {t('You were introduced by ')}:{' '}
+                  <span className="rounded-lg bg-slate-200 p-1 tracking-wide dark:bg-slate-600">
+                    <DomainHighlighter>{pendingConnection?.introducerOdinId}</DomainHighlighter>
+                  </span>
+                </h5>
+                <h5 className="mb-8">
+                  {t('with the message ')}:{' '}
+                  <div className="w-full p-4 text-gray-600 dark:text-gray-400 md:w-3/5">
+                    <p>{pendingConnection?.message}</p>
+                  </div>
+                </h5>
+              </div>
+            )}
           </>
         ) : (
           <>

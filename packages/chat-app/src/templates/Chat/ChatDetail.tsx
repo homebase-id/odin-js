@@ -12,6 +12,7 @@ import {
   Persons,
   t,
   useDotYouClient,
+  useIntroductions,
   useIsConnected,
 } from '@youfoundation/common-app';
 import {
@@ -19,7 +20,6 @@ import {
   DotYouClient,
   FailedTransferStatuses,
   HomebaseFile,
-  TransferStatus,
 } from '@youfoundation/js-lib/core';
 import {
   ConversationWithYourselfId,
@@ -44,6 +44,7 @@ export const ChatDetail = ({
 }) => {
   const { data: conversation, isLoading, isFetched } = useConversation({ conversationId }).single;
   const { mutate: inviteRecipient } = useConversation().inviteRecipient;
+  const { mutate: introduceIdentities } = useIntroductions().introduceIdentities;
   const [replyMsg, setReplyMsg] = useState<HomebaseFile<ChatMessage> | undefined>();
   const identity = useDotYouClient().getIdentity();
 
@@ -77,6 +78,13 @@ export const ChatDetail = ({
     if (anyRecipientMissingConversation) {
       console.log('invite recipient');
       inviteRecipient({ conversation });
+      if (filteredRecipients.length > 1) {
+        // Group chat; Good to introduce everyone
+        await introduceIdentities({
+          message: t('{0} has added you to a group chat', identity || ''),
+          recipients: filteredRecipients,
+        });
+      }
     }
   };
 
@@ -128,6 +136,21 @@ const ChatHeader = ({
     error: deleteChatError,
     status: deleteChatStatus,
   } = useConversation().deleteChat;
+  const { mutate: introduceIdentities, error: makeIntroductionError } =
+    useIntroductions().introduceIdentities;
+
+  const makeIntroduction = async () => {
+    if (!conversation) return;
+
+    const filteredRecipients = conversation.recipients.filter(
+      (recipient) => recipient !== identity
+    );
+
+    await introduceIdentities({
+      message: t('{0} has added you to a group chat', identity || ''),
+      recipients: filteredRecipients,
+    });
+  };
 
   useEffect(() => {
     if (deleteChatStatus === 'success') navigate(ROOT_PATH);
@@ -135,7 +158,7 @@ const ChatHeader = ({
 
   return (
     <>
-      <ErrorNotification error={clearChatError || deleteChatError} />
+      <ErrorNotification error={clearChatError || deleteChatError || makeIntroductionError} />
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
         <ActionLink className="lg:hidden" type="mute" href={ROOT_PATH}>
           <ChevronLeft className="h-5 w-5" />
@@ -178,6 +201,10 @@ const ChatHeader = ({
               {
                 label: t('Chat info'),
                 onClick: () => setShowChatInfo(true),
+              },
+              {
+                label: t('Introduce everyone'),
+                onClick: makeIntroduction,
               },
               {
                 label: t('Delete'),

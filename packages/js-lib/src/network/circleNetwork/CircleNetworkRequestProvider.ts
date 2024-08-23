@@ -95,9 +95,6 @@ export const acceptConnectionRequest = async (
     permissions: undefined,
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (header as any).contactData = { name: 'NO_LONGER_USED' };
-
   return client
     .post(url, header)
     .then((response) => {
@@ -149,11 +146,6 @@ export const sendRequest = async (
     recipient: odinId,
     message: message,
     circleIds: circleIds,
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (data as any).contactData = {
-    name: 'NO_LONGER_USED',
   };
 
   const client = dotYouClient.createAxiosClient();
