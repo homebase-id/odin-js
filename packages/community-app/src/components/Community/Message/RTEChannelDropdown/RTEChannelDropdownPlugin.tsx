@@ -38,11 +38,12 @@ export const getChannelOnSelectItem =
   }: PlatePluginKey = {}): MentionOnSelectItem<TItem> =>
   (editor, item, search = '') => {
     const {
-      options: { createMentionNode, insertSpaceAfterMention },
+      options: { createChannelNode, insertSpaceAfterMention },
       type,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } = getPlugin<ChannelPlugin>(editor as any, key);
 
-    const props = createMentionNode!(item, search);
+    const props = createChannelNode!(item, search);
 
     insertNodes<TChannelElement>(editor, {
       children: [{ text: '' }],
@@ -64,11 +65,11 @@ export const getChannelOnSelectItem =
   };
 
 export interface ChannelPlugin<TItem extends TChannel = TChannel> extends TriggerComboboxPlugin {
-  createMentionNode?: (item: TItem, search: string) => TNodeProps<TChannelElement>;
+  createChannelNode?: (item: TItem, search: string) => TNodeProps<TChannelElement>;
   insertSpaceAfterMention?: boolean;
 }
 
-/** Enables support for autocompleting @mentions. */
+/** Enables support for autocompleting #channels. */
 export const createChannelPlugin = createPluginFactory<ChannelPlugin>({
   isElement: true,
   isInline: true,
@@ -76,12 +77,12 @@ export const createChannelPlugin = createPluginFactory<ChannelPlugin>({
   isVoid: true,
   key: ELEMENT_CHANNEL,
   options: {
-    createComboboxInput: (trigger) => ({
+    createComboboxInput: (trigger: string) => ({
       children: [{ text: '' }],
       trigger,
       type: ELEMENT_CHANNEL_INPUT,
     }),
-    createMentionNode: (item) => ({ value: item.text }),
+    createChannelNode: (item: TChannel) => ({ value: item.text }),
     trigger: '#',
     triggerPreviousCharPattern: /^\s?$/,
   },
