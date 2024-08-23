@@ -12,6 +12,7 @@ const getExtendAppRegistrationUrl = (
   host: string,
   appId: string,
   drives: { a: string; t: string; n: string; d: string; p: number }[],
+  circleDrives: { a: string; t: string; n: string; d: string; p: number }[] | undefined,
   permissionKeys: number[],
   needsAllConnected: boolean,
   returnUrl: string
@@ -19,7 +20,7 @@ const getExtendAppRegistrationUrl = (
   const params = getExtendAppRegistrationParams(
     appId,
     drives,
-    undefined,
+    circleDrives,
     permissionKeys,
     needsAllConnected,
     returnUrl
@@ -31,6 +32,7 @@ const getExtendAppRegistrationUrl = (
 export const useMissingPermissions = ({
   appId,
   drives,
+  circleDrives,
   permissions,
   needsAllConnected,
 }: {
@@ -42,6 +44,15 @@ export const useMissingPermissions = ({
     d: string;
     p: number;
   }[];
+  circleDrives?:
+    | {
+        a: string;
+        t: string;
+        n: string;
+        d: string;
+        p: number;
+      }[]
+    | undefined;
   permissions: AppPermissionType[];
   needsAllConnected?: boolean;
 }) => {
@@ -86,6 +97,7 @@ export const useMissingPermissions = ({
     host,
     appId,
     missingDrives,
+    circleDrives,
     missingPermissions,
     missingAllConnectedCircle,
     window.location.href

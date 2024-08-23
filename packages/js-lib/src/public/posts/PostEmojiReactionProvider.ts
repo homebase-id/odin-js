@@ -20,6 +20,7 @@ interface ServerReactionsListWithCursor {
   cursor: string;
 }
 
+// TODO: Replace all of this with the new GroupReactionsProvider
 const emojiRootTransit = '/transit/reactions';
 const emojiRoot = '/drive/files/reactions';
 export const saveEmojiReaction = async (

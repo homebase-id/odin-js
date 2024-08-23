@@ -1,4 +1,5 @@
 import { HomebaseFile } from '../DriveData/File/DriveFileTypes';
+import { GroupEmojiReaction } from '../ReactionData/GroupReactionsProvider';
 import { TargetDrive, PushNotification } from '../core';
 
 export interface EstablishConnectionRequest {
@@ -19,6 +20,9 @@ export type NotificationType =
   | 'connectionRequestAccepted'
   | 'inboxItemReceived'
   | 'appNotificationAdded'
+  | 'statisticsChanged'
+  | 'reactionContentAdded'
+  | 'reactionContentDeleted'
   | 'error'
   | 'unknown';
 
@@ -28,7 +32,7 @@ export interface ClientNotification {
 }
 
 export interface ClientFileNotification extends ClientNotification {
-  notificationType: 'fileAdded' | 'fileDeleted' | 'fileModified';
+  notificationType: 'fileAdded' | 'fileDeleted' | 'fileModified' | 'statisticsChanged';
   targetDrive?: TargetDrive;
   header: HomebaseFile;
 }
@@ -44,6 +48,10 @@ export interface ClientDeviceNotification extends ClientNotification {
 
 export interface AppNotification extends ClientNotification, PushNotification {
   notificationType: 'appNotificationAdded';
+}
+
+export interface ReactionNotification extends ClientNotification, GroupEmojiReaction {
+  notificationType: 'reactionContentAdded' | 'reactionContentDeleted';
 }
 
 export interface ClientConnectionNotification extends ClientNotification {
@@ -62,7 +70,8 @@ export type TypedConnectionNotification =
   | ClientDeviceNotification
   | ClientConnectionNotification
   | ClientUnknownNotification
-  | AppNotification;
+  | AppNotification
+  | ReactionNotification;
 
 export interface WebsocketCommand {
   command: string;
