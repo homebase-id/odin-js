@@ -33,6 +33,7 @@ const enLocale = [
   ['none', 'None'],
   ['react', 'React'],
   ['readandwritereactionsandcomments', 'React/Comment'],
+  ['readwriteandreact', 'Read, Write & React'],
   ['readcirclemembers', 'Read Circle Members'],
   ['readconnections', 'Read Connections'],
   ['reader', 'Read'],
