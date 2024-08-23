@@ -24,6 +24,12 @@ export const getDrivePermissionFromNumber = (value?: number[]) => {
     )
       return 'full';
 
+    if (
+      permission ===
+      DrivePermissionType.Read + DrivePermissionType.Write + DrivePermissionType.React
+    )
+      return 'ReadWriteAndReact';
+
     return 'none';
   });
   if (permissions.length === 0) return 'none';
