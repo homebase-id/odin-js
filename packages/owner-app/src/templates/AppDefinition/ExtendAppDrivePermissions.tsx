@@ -56,7 +56,7 @@ const ExtendAppPermissions = () => {
   const doUpdateApp = async () => {
     if (!appRegistration || !appRegistration?.appId) throw new Error('App registration not found');
 
-    if (circleIds?.length)
+    if (circleIds?.length || circlePermissionSet?.keys?.length || circleDriveGrants?.length)
       updateCircles({
         appId: appRegistration.appId,
         circleMemberPermissionGrant: {
