@@ -39,10 +39,16 @@ const IncomingConnectionDialog = ({
     odinId: senderOdinId,
     canSave: false,
   }).fetch;
+
   const {
     fetch: { data: pendingConnection },
     acceptRequest: { mutateAsync: acceptPending, status: acceptPendingStatus, error: acceptError },
   } = usePendingConnection({ odinId: senderOdinId });
+
+  const { data: introducerContactData } = useContact({
+    odinId: pendingConnection?.introducerOdinId,
+    canSave: false,
+  }).fetch;
 
   const { mutateAsync: follow, error: followError } = useFollowingInfinite().follow;
 
@@ -60,9 +66,15 @@ const IncomingConnectionDialog = ({
   const dialog = (
     <DialogWrapper
       title={
-        <>
-          {t('Connection request from')} <DomainHighlighter>{senderOdinId}</DomainHighlighter>
-        </>
+        !pendingConnection?.introducerOdinId ? (
+          <>
+            {t('Connection request from')} <DomainHighlighter>{senderOdinId}</DomainHighlighter>
+          </>
+        ) : (
+          <>
+            {t('You were introduced to')} <DomainHighlighter>{senderOdinId}</DomainHighlighter>
+          </>
+        )
       }
       onClose={() => {
         setDoubleChecked(false);
@@ -82,31 +94,55 @@ const IncomingConnectionDialog = ({
                 )}
               </Alert>
             ) : null}
-            <div className="mb-4 pb-4">
-              <h2 className="mb-8">
-                {t('The user with the identity')}:{' '}
-                <span className="rounded-lg bg-slate-200 p-1 tracking-wide dark:bg-slate-600">
-                  <DomainHighlighter>{senderOdinId}</DomainHighlighter>
-                </span>{' '}
-                {t('would like to connect with you and sent you a personal message')}:
-              </h2>
+            {!pendingConnection?.introducerOdinId ? (
+              <div className="mb-4 pb-4">
+                <h2 className="mb-8">
+                  {t('The user with the identity')}:{' '}
+                  <span className="rounded-lg bg-slate-200 p-1 tracking-wide dark:bg-slate-600">
+                    <DomainHighlighter>{senderOdinId}</DomainHighlighter>
+                  </span>{' '}
+                  {t('would like to connect with you and sent you a personal message')}:
+                </h2>
 
-              <div className="-m-4 flex flex-row flex-wrap sm:flex-nowrap">
-                <div className="w-full p-4 md:w-2/5">
-                  <ContactImage odinId={senderOdinId} canSave={false} />
-                </div>
-                <div className="w-full p-4 text-gray-600 dark:text-gray-400 md:w-3/5">
-                  {!pendingConnection?.introducerOdinId && (
-                    <>
-                      <p>{pendingConnection?.message}</p>
-                      <p className="mt-2">
-                        -- {contactData?.fileMetadata?.appData?.content?.name?.displayName}
-                      </p>
-                    </>
-                  )}
+                <div className="-m-4 flex flex-row flex-wrap sm:flex-nowrap">
+                  <div className="w-full p-4 md:w-2/5">
+                    <ContactImage odinId={senderOdinId} canSave={false} />
+                  </div>
+                  <div className="w-full p-4 text-gray-600 dark:text-gray-400 md:w-3/5">
+                    <p>{pendingConnection?.message}</p>
+                    <p className="mt-2">
+                      -- {contactData?.fileMetadata?.appData?.content?.name?.displayName}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="mb-4 pb-4">
+                <h2 className="mb-8">
+                  {t('You were introduced to the user with the identity')}:{' '}
+                  <span className="rounded-lg bg-slate-200 p-1 tracking-wide dark:bg-slate-600">
+                    <DomainHighlighter>{senderOdinId}</DomainHighlighter>
+                  </span>{' '}
+                  {t('by')}{' '}
+                  <span className="rounded-lg bg-slate-200 p-1 tracking-wide dark:bg-slate-600">
+                    <DomainHighlighter>{pendingConnection?.introducerOdinId}</DomainHighlighter>
+                  </span>{' '}
+                  {t('and sent you a message')}:
+                </h2>
+
+                <div className="-m-4 flex flex-row flex-wrap sm:flex-nowrap">
+                  <div className="w-full p-4 md:w-2/5">
+                    <ContactImage odinId={senderOdinId} canSave={false} />
+                  </div>
+                  <div className="w-full p-4 text-gray-600 dark:text-gray-400 md:w-3/5">
+                    <p>{pendingConnection?.message}</p>
+                    <p className="mt-2">
+                      -- {introducerContactData?.fileMetadata?.appData?.content?.name?.displayName}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
               <ActionButton className="" icon={Arrow} onClick={() => setDoubleChecked(true)}>
@@ -133,23 +169,6 @@ const IncomingConnectionDialog = ({
                 {t('Ignore request')}
               </ActionButton>
             </div>
-
-            {pendingConnection?.introducerOdinId && (
-              <div className="mt-9">
-                <h5 className="mb-8">
-                  {t('You were introduced by ')}:{' '}
-                  <span className="rounded-lg bg-slate-200 p-1 tracking-wide dark:bg-slate-600">
-                    <DomainHighlighter>{pendingConnection?.introducerOdinId}</DomainHighlighter>
-                  </span>
-                </h5>
-                <h5 className="mb-8">
-                  {t('with the message ')}:{' '}
-                  <div className="w-full p-4 text-gray-600 dark:text-gray-400 md:w-3/5">
-                    <p>{pendingConnection?.message}</p>
-                  </div>
-                </h5>
-              </div>
-            )}
           </>
         ) : (
           <>

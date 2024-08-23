@@ -19,19 +19,16 @@ const PendingPathRoot: string = Root + '/pending';
 export const getPendingRequests = async (
   dotYouClient: DotYouClient,
   params: PagingOptions
-): Promise<PagedResult<RedactedConnectionRequest> | undefined> => {
+): Promise<PagedResult<RedactedConnectionRequest>> => {
   const client = dotYouClient.createAxiosClient();
   const url = PendingPathRoot + '/list?' + stringifyToQueryParams(params);
 
   return client
-    .get<PagedResult<RedactedConnectionRequest>>(url)
+    .get(url)
     .then((response) => {
       return response.data;
     })
-    .catch(() => {
-      dotYouClient.handleErrorResponse;
-      return undefined;
-    });
+    .catch(dotYouClient.handleErrorResponse);
 };
 
 export const getPendingRequest = async (
