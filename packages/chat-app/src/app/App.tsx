@@ -15,6 +15,7 @@ const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'chat-message',
   'chat-messages',
   'conversations',
+  'conversation-metadata',
   'chat-reaction',
   'connection-details',
   'process-inbox',
@@ -36,8 +37,7 @@ import { useAuth } from '../hooks/auth/useAuth';
 export const ROOT_PATH = '/apps/chat';
 const AUTH_PATH = ROOT_PATH + '/auth';
 
-import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
-import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
+import { ErrorBoundary, NotFound, DotYouClientProvider } from '@youfoundation/common-app';
 import VideoPlayer from '../templates/VideoPlayer/VideoPlayer';
 import { OdinQueryClient } from '@youfoundation/common-app';
 
@@ -133,4 +133,4 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
   return <>{children}</>;
 };
 
-export default App;
+export { App };

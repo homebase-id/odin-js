@@ -9,6 +9,8 @@ export const getDrivePermissionFromNumber = (value?: number[]) => {
     const directMatch = DrivePermissionType[permission];
     if (directMatch) return directMatch;
 
+    if (permission === DrivePermissionType.React + DrivePermissionType.Write)
+      return 'ReactAndWrite';
     if (permission === DrivePermissionType.Read + DrivePermissionType.Write) return 'ReadAndWrite';
     if (permission === DrivePermissionType.React + DrivePermissionType.Comment)
       return 'ReactAndComment';
@@ -21,6 +23,12 @@ export const getDrivePermissionFromNumber = (value?: number[]) => {
         DrivePermissionType.Comment
     )
       return 'full';
+
+    if (
+      permission ===
+      DrivePermissionType.Read + DrivePermissionType.Write + DrivePermissionType.React
+    )
+      return 'ReadWriteAndReact';
 
     return 'none';
   });
@@ -48,6 +56,7 @@ export const getDrivePermissionFromString = (permission: unknown): DrivePermissi
   // Convert multi types to their simpler form
   lowered = lowered.replace('writereactionsandcomments', 'react,comment');
   lowered = lowered.replace('readwrite', 'read,write,react,comment');
+  lowered = lowered.replace('reactandwrite', 'write,react');
   lowered = lowered.replace('all', 'read,write,react,comment');
 
   const parts = lowered.split(',');
@@ -59,12 +68,12 @@ export const getDrivePermissionFromString = (permission: unknown): DrivePermissi
       return permission === 'read'
         ? DrivePermissionType.Read
         : permission === 'write'
-        ? DrivePermissionType.Write
-        : permission === 'react'
-        ? DrivePermissionType.React
-        : permission === 'comment'
-        ? DrivePermissionType.Comment
-        : undefined;
+          ? DrivePermissionType.Write
+          : permission === 'react'
+            ? DrivePermissionType.React
+            : permission === 'comment'
+              ? DrivePermissionType.Comment
+              : undefined;
     })
     .filter(Boolean) as DrivePermissionType[];
 

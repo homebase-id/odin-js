@@ -1,7 +1,7 @@
 import { FC, ReactNode } from 'react';
 
 import { config } from '../../../app/config';
-import { IconProps } from '@youfoundation/common-app';
+import { IconProps } from '@youfoundation/common-app/icons';
 
 export type ActionLinkState = 'loading' | 'success' | 'error' | 'idle';
 

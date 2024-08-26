@@ -3,15 +3,15 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   AclIcon,
   AclSummary,
-  Exclamation,
   ExtensionThumbnail,
   HybridLink,
-  Trash,
   bytesToSize,
+  Image,
+  ActionButton,
   t,
 } from '@youfoundation/common-app';
-import { ActionButton } from '@youfoundation/common-app';
-import { Download, Image } from '@youfoundation/common-app';
+
+import { Exclamation, Trash, Download } from '@youfoundation/common-app/icons';
 import {
   DeletedHomebaseFile,
   HomebaseFile,
@@ -207,6 +207,9 @@ const CHAT_CONVERSATION_FILE_TYPE = 8888;
 
 const MAIL_DRAFT_CONVERSATION_FILE_TYPE = 9001;
 const MAIL_CONVERSATION_FILE_TYPE = 9000;
+
+const COMMUNITY_FILE_TYPE = 7010;
+const COMMUNITY_MESSAGE_FILE_TYPE = 7020;
 const FileTypeLabel = ({ file }: { file: HomebaseFile<string> | DeletedHomebaseFile<string> }) => {
   const fileType = file.fileMetadata.appData.fileType;
 
@@ -248,6 +251,12 @@ const FileTypeLabel = ({ file }: { file: HomebaseFile<string> | DeletedHomebaseF
       return 'Mail Conversation';
     case MAIL_DRAFT_CONVERSATION_FILE_TYPE:
       return 'Draft Mail Conversation';
+
+    // Community:
+    case COMMUNITY_FILE_TYPE:
+      return 'Community Defintion';
+    case COMMUNITY_MESSAGE_FILE_TYPE:
+      return 'Community Message';
 
     // Assets
     case 0:

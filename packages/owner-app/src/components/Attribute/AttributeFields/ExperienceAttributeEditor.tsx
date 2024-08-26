@@ -1,7 +1,10 @@
 import { Label, t, ImageSelector, Input, useImage } from '@youfoundation/common-app';
 import { MinimalProfileFields, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
-import { RichTextEditor } from '@youfoundation/rich-text-editor';
+import { lazy } from 'react';
+const RichTextEditor = lazy(() =>
+  import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
+);
 
 export const ExperienceAttributeEditor = ({
   fileId,

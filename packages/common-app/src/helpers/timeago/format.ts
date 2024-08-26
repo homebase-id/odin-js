@@ -1,6 +1,7 @@
 import { formatDiff, diffSec } from './utils/date';
 import { getLocale } from './register';
 import { Opts, TDate } from './interface';
+import { t } from '../i18n/dictionary';
 
 /**
  * format a TDate into string
@@ -70,6 +71,52 @@ export const formatToTimeAgoWithRelativeDetail = (
     year: yearsAgo !== 0 ? 'numeric' : undefined,
     hour: keepDetailWhenIncludesDate ? 'numeric' : undefined,
     minute: keepDetailWhenIncludesDate ? 'numeric' : undefined,
+  };
+  return date.toLocaleDateString(undefined, dateTimeFormat);
+};
+
+export const formatToDateAgoWithRelativeDetail = (date: Date | undefined): string | undefined => {
+  if (!date) return undefined;
+
+  // if date is this week
+  const thisWeek = new Date();
+  thisWeek.setDate(thisWeek.getDate() - thisWeek.getDay());
+  if (date >= thisWeek) {
+    if (date.getDate() === new Date().getDate()) {
+      return t('Today');
+    }
+
+    const yesterday = new Date();
+    yesterday.setDate(new Date().getDate() - 1);
+    if (date.getDate() === yesterday.getDate()) {
+      return t('Yesterday');
+    }
+
+    const weekdayFormat: Intl.DateTimeFormatOptions = {
+      weekday: 'long',
+    };
+    return date.toLocaleDateString(undefined, weekdayFormat);
+  }
+
+  const now = new Date();
+  // if date is this month
+  const monthsAgo = Math.abs(now.getMonth() - date.getMonth());
+  if (monthsAgo === 0) {
+    const dayFormat: Intl.DateTimeFormatOptions = {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+    };
+    return date.toLocaleDateString(undefined, dayFormat);
+  }
+
+  // if date not this month..
+  const yearsAgo = Math.abs(new Date(now.getTime() - date.getTime()).getUTCFullYear() - 1970);
+  const dateTimeFormat: Intl.DateTimeFormatOptions = {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: yearsAgo !== 0 ? 'numeric' : undefined,
   };
   return date.toLocaleDateString(undefined, dateTimeFormat);
 };

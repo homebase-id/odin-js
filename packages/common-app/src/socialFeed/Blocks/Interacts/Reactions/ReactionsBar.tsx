@@ -8,7 +8,7 @@ import { useMyEmojiReactions } from '../../../../hooks/reactions/emojis/useMyEmo
 import { CantReactInfo } from '../CantReactInfo';
 import { useMostSpace } from '../../../../hooks/intersection/useMostSpace';
 import { EmojiPicker } from '../EmojiPicker/EmojiPicker';
-import { Plus } from '../../../../ui';
+import { Plus } from '../../../../ui/Icons';
 import { t } from '../../../../helpers/i18n/dictionary';
 
 export const SocialReactionsBar = ({

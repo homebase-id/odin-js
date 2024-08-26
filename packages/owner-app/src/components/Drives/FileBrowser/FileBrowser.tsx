@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Bars, Grid, t } from '@youfoundation/common-app';
-import { Pager } from '@youfoundation/common-app';
+import { Bars, Grid } from '@youfoundation/common-app/icons';
+import { t, Pager } from '@youfoundation/common-app';
 import { SystemFileType, TargetDrive } from '@youfoundation/js-lib/core';
 import { FileCard } from './FileCard';
 import { useFiles } from '../../../hooks/files/useFiles';

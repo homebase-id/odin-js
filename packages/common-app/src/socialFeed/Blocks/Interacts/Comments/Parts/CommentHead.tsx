@@ -1,8 +1,9 @@
 import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 import { t } from '../../../../../helpers';
 import { useDotYouClient } from '../../../../../hooks';
-import { ActionGroup, Pencil, Times, Block } from '../../../../../ui';
 import { AuthorName } from '../../../Author/Name';
+import { Block, Pencil, Times } from '../../../../../ui/Icons';
+import { ActionGroup } from '../../../../../ui';
 
 export const CommentHead = ({
   authorOdinId,

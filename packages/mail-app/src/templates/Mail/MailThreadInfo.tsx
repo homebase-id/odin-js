@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
-  Arrow,
   ConnectionImage,
   ConnectionName,
   DialogWrapper,
@@ -11,8 +10,9 @@ import {
   t,
   usePortal,
 } from '@youfoundation/common-app';
+import { Arrow } from '@youfoundation/common-app/icons';
 import { MailConversation, getAllRecipients } from '../../providers/MailProvider';
-import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 import { useMailOrigin } from '../../hooks/mail/useMailOrigin';
 import { RecipientsList } from '../../components/Threads/RecipientsList';
 import { ROOT_PATH } from '../../app/App';

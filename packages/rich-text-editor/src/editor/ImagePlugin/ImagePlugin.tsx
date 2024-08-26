@@ -10,13 +10,12 @@ import { ReactEditor } from 'slate-react';
 import { TargetDrive, NewMediaFile } from '@youfoundation/js-lib/core';
 import { useMemo, useState } from 'react';
 import {
-  ImageIcon,
-  Trash,
   getImagesFromPasteEvent,
+  ImageDialog,
   t,
   useDotYouClient,
 } from '@youfoundation/common-app';
-import { ImageDialog } from '@youfoundation/common-app';
+import { ImageIcon, Trash } from '@youfoundation/common-app/icons';
 import { ToolbarButton, ToolbarButtonProps } from '../../components/plate-ui/toolbar';
 import { OdinThumbnailImage } from '@youfoundation/ui-lib';
 

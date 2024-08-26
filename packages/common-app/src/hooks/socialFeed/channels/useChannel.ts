@@ -10,7 +10,7 @@ import { useDotYouClient } from '../../../..';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { fetchCachedPublicChannels } from '../post/cachedDataHelpers';
-import { getChannelBySlugOverPeer, getChannelOverPeer } from '@youfoundation/js-lib/peer';
+import { getChannelOverPeer, getChannelBySlugOverPeer } from '@youfoundation/js-lib/peer';
 
 type useChannelsProps = {
   odinId?: string;

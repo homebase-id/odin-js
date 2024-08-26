@@ -1,18 +1,11 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ActionButton, ActionGroup, HeartBeat, Pencil, t } from '@youfoundation/common-app';
 import { useDrive } from '../../../hooks/drives/useDrive';
-
-import { HardDrive } from '@youfoundation/common-app';
-
 import Section from '../../../components/ui/Sections/Section';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import { useExport } from '../../../hooks/drives/useExport';
 import AppMembershipView from '../../../components/PermissionViews/AppPermissionView/AppPermissionView';
-import { CirclePermissionView } from '@youfoundation/common-app';
 import { useApps } from '../../../hooks/apps/useApps';
-import { useCircles } from '@youfoundation/common-app';
-import { Download } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { getDrivePermissionFromNumber, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { TRANSIENT_TEMP_DRIVE_ALIAS } from '@youfoundation/js-lib/core';
@@ -21,6 +14,14 @@ import DriveCircleAccessDialog from '../../../components/Drives/DriveCircleAcces
 import DriveMetadataEditDialog from '../../../components/Drives/DriveCircleAccessDialog/DriveMetadataEditDialog';
 import { DriveStatusDialog } from '../../../components/Drives/DriveStatusDialog/DriveStatusDialog';
 import FileBrowser from '../../../components/Drives/FileBrowser/FileBrowser';
+import {
+  ActionButton,
+  ActionGroup,
+  CirclePermissionView,
+  t,
+  useCircles,
+} from '@youfoundation/common-app';
+import { HardDrive, Download, HeartBeat, Pencil } from '@youfoundation/common-app/icons';
 
 const DriveDetails = () => {
   const { driveKey } = useParams();

@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { FC, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { getRichTextFromString, useDebounce } from '../..';
 import { EmojiDropdown } from './VolatileInput/EmojiDropdown';
 import { MentionDropdown } from './VolatileInput/MentionDropdown';
@@ -26,6 +26,7 @@ const VolatileInput = forwardRef(
       linksArePlain,
       className,
       autoFocus,
+      autoCompleters,
     }: {
       onSubmit?: (val: string) => void;
       onPaste?: React.ClipboardEventHandler<HTMLDivElement>;
@@ -35,6 +36,7 @@ const VolatileInput = forwardRef(
       linksArePlain?: boolean;
       className?: string;
       autoFocus?: boolean;
+      autoCompleters?: FC<VolatileInputAutoCompleteProps>[];
     },
     ref
   ) => {
@@ -177,7 +179,9 @@ const VolatileInput = forwardRef(
     const onKeyUp: React.KeyboardEventHandler<HTMLDivElement> = () => {
       const wordTillCaret = getCurrentWordTillCaret();
       if (
-        (wordTillCaret?.startsWith(':') || wordTillCaret?.startsWith('@')) &&
+        (wordTillCaret?.startsWith(':') ||
+          wordTillCaret?.startsWith('@') ||
+          wordTillCaret?.startsWith('#')) &&
         wordTillCaret.length > 1
       )
         setWordTillCaret(wordTillCaret);
@@ -210,14 +214,12 @@ const VolatileInput = forwardRef(
 
     return (
       <div
-        className={`relative block ${className?.indexOf('w-') === -1 ? 'w-full' : ''} ${
-          className || ''
-        }`}
+        className={`block ${className?.indexOf('w-') === -1 ? 'w-full' : ''} ${className || ''}`}
       >
         <span
           role="textbox"
           contentEditable
-          className="before:content block w-full cursor-text resize whitespace-pre-wrap break-words before:opacity-50 before:empty:content-[inherit] focus:outline-none"
+          className="before:content block w-full cursor-text resize whitespace-pre-wrap break-words before:opacity-50 before:empty:content-[inherit] focus:outline-none after:absolute after:content-[''] after:pointer-events-none	 after:inset-0 after:rounded-md focus:after:ring-2 focus:after:ring-indigo-300"
           onKeyDown={onKeyDown}
           onKeyUp={onKeyUp}
           onPaste={onPasteHandler}
@@ -225,7 +227,9 @@ const VolatileInput = forwardRef(
           ref={divRef}
           style={
             placeholder
-              ? ({ '--tw-content': `"${placeholder}"` } as React.CSSProperties)
+              ? ({
+                  '--tw-content': `'${placeholder.replaceAll("'", "\\'")}'`,
+                } as React.CSSProperties)
               : undefined
           }
         ></span>
@@ -250,6 +254,19 @@ const VolatileInput = forwardRef(
           }}
           position={rect}
         />
+        {autoCompleters?.map((AutoCompleter, index) => (
+          <AutoCompleter
+            key={index}
+            query={wordTillCaret}
+            onInput={(val) => {
+              if (onChange && val && wordTillCaret) {
+                setLastInsertedContent(val);
+                onChange(`${divRef.current?.innerText.replace(wordTillCaret, val) || ''}`);
+              }
+            }}
+            position={rect}
+          />
+        ))}
       </div>
     );
   }
@@ -257,3 +274,14 @@ const VolatileInput = forwardRef(
 
 VolatileInput.displayName = 'VolatileInput';
 export { VolatileInput };
+
+export interface VolatileInputAutoCompleteProps {
+  query: string | undefined;
+  onInput: (val: string | undefined) => void;
+  position?:
+    | {
+        x: number;
+        y: number;
+      }
+    | undefined;
+}

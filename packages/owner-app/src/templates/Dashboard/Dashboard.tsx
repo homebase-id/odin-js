@@ -1,25 +1,24 @@
 import { Link } from 'react-router-dom';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import {
-  t,
-  House,
-  ActionGroup,
-  Cog,
-  HybridLink,
-  ActionGroupOptionProps,
-  Download,
-  useUnreadPushNotificationsCount,
-  CHAT_APP_ID,
-  FEED_APP_ID,
-  OWNER_APP_ID,
-  PHOTO_APP_ID,
-  MAIL_APP_ID,
-} from '@youfoundation/common-app';
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
 import { getOperatingSystem } from '@youfoundation/js-lib/auth';
 import { isTouchDevice } from '@youfoundation/js-lib/helpers';
 import { FeedTeaser } from './FeedTeaser';
 import { useAutofixDefaultConfig } from '../../hooks/useAutoFixDefaultConfig';
+import {
+  t,
+  ActionGroupOptionProps,
+  HybridLink,
+  ActionGroup,
+  useUnreadPushNotificationsCount,
+  OWNER_APP_ID,
+  CHAT_APP_ID,
+  MAIL_APP_ID,
+  COMMUNITY_APP_ID,
+  FEED_APP_ID,
+  PHOTO_APP_ID,
+} from '@youfoundation/common-app';
+import { House, Cog, Download } from '@youfoundation/common-app/icons';
 
 const Dashboard = () => {
   useAutofixDefaultConfig();
@@ -53,6 +52,7 @@ const Dashboard = () => {
         <FeedApp />
         <ChatApp />
         <MailApp />
+        {/* <CommunityApp /> */}
         <PhotoApp />
       </div>
 
@@ -180,6 +180,26 @@ const MailApp = () => {
           label: t('Settings'),
           icon: Cog,
           href: `/owner/third-parties/apps/${MAIL_APP_ID}`,
+        },
+      ]}
+    />
+  );
+};
+
+const CommunityApp = () => {
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: COMMUNITY_APP_ID });
+
+  return (
+    <AppWrapper
+      appId={COMMUNITY_APP_ID}
+      name={'Community'}
+      href={`/apps/community`}
+      unreadCount={unreadCount || 0}
+      options={[
+        {
+          label: t('Settings'),
+          icon: Cog,
+          href: `/owner/third-parties/apps/${COMMUNITY_APP_ID}`,
         },
       ]}
     />

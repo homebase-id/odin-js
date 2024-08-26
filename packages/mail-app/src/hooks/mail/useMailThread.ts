@@ -9,7 +9,7 @@ import {
   REMOVE_ARCHIVAL_STATUS,
   updateLocalMailHeader,
 } from '../../providers/MailProvider';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useMailConversations } from './useMailConversations';

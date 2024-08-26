@@ -4,18 +4,27 @@ import { useMissingPermissions } from '../../hooks/auth/useMissingPermissions';
 import { usePortal } from '../../hooks/portal/usePortal';
 import { DialogWrapper } from '../../ui/Dialog/DialogWrapper';
 import { t } from '../../helpers';
-import { ActionLink, Shield } from '../../ui';
+import { ActionLink } from '../../ui';
+import { Shield } from '../../ui/Icons';
 
 export const ExtendPermissionDialog = ({
   appId,
   appName,
   drives,
+  circleDrives,
   permissions,
   needsAllConnected,
 }: {
   appId: string;
   appName: string;
   drives: {
+    a: string;
+    t: string;
+    n: string;
+    d: string;
+    p: number;
+  }[];
+  circleDrives?: {
     a: string;
     t: string;
     n: string;
@@ -29,6 +38,7 @@ export const ExtendPermissionDialog = ({
   const extendPermissionUrl = useMissingPermissions({
     appId,
     drives,
+    circleDrives,
     permissions,
     needsAllConnected,
   });

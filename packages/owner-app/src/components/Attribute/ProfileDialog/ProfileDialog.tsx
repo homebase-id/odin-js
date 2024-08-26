@@ -1,13 +1,18 @@
 import { ProfileDefinition } from '@youfoundation/js-lib/profile';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Arrow, t } from '@youfoundation/common-app';
-import { usePortal } from '@youfoundation/common-app';
-import { useProfiles } from '@youfoundation/common-app';
-import { ErrorNotification } from '@youfoundation/common-app';
-import { ActionButton } from '@youfoundation/common-app';
-import { Input, Label, Textarea } from '@youfoundation/common-app';
-import { DialogWrapper } from '@youfoundation/common-app';
+import {
+  t,
+  usePortal,
+  useProfiles,
+  ErrorNotification,
+  ActionButton,
+  Input,
+  Label,
+  Textarea,
+  DialogWrapper,
+} from '@youfoundation/common-app';
+import { Arrow } from '@youfoundation/common-app/icons';
 
 const ProfileDialog = ({
   title,

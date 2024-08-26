@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
 import { ImageSize, TargetDrive, DotYouClient, SystemFileType } from '@youfoundation/js-lib/core';
 import { getDecryptedImageUrl } from '@youfoundation/js-lib/media';
@@ -44,19 +44,35 @@ export const useImageCache = (dotYouClient: DotYouClient) => {
   };
 };
 
-export const useImage = (
-  dotYouClient: DotYouClient,
-  odinId?: string,
-  imageFileId?: string | undefined,
-  imageGlobalTransitId?: string | undefined,
-  imageFileKey?: string | undefined,
-  imageDrive?: TargetDrive,
-  size?: ImageSize,
-  probablyEncrypted?: boolean,
-  naturalSize?: ImageSize,
-  systemFileType?: SystemFileType,
-  lastModified?: number
-) => {
+export const useImage = (props: {
+  dotYouClient: DotYouClient;
+  odinId?: string;
+  imageFileId?: string | undefined;
+  imageGlobalTransitId?: string | undefined;
+  imageFileKey?: string | undefined;
+  imageDrive?: TargetDrive;
+  size?: ImageSize;
+  probablyEncrypted?: boolean;
+  naturalSize?: ImageSize;
+  systemFileType?: SystemFileType;
+  lastModified?: number;
+  preferObjectUrl?: boolean;
+}): { fetch: UseQueryResult<ImageData | undefined, Error> } => {
+  const {
+    dotYouClient,
+    odinId,
+    imageFileId,
+    imageGlobalTransitId,
+    imageFileKey,
+    imageDrive,
+    size,
+    probablyEncrypted,
+    naturalSize,
+    systemFileType,
+    lastModified,
+    preferObjectUrl,
+  } = props;
+
   const localHost = dotYouClient.getIdentity() || window.location.hostname;
   const queryClient = useQueryClient();
 
@@ -120,7 +136,8 @@ export const useImage = (
     imageDrive?: TargetDrive,
     size?: ImageSize,
     probablyEncrypted?: boolean,
-    naturalSize?: ImageSize
+    naturalSize?: ImageSize,
+    preferObjectUrl?: boolean
   ): Promise<ImageData | undefined> => {
     if (
       imageFileId === undefined ||
@@ -162,6 +179,7 @@ export const useImage = (
                   {
                     size,
                     systemFileType,
+                    preferObjectUrl,
                   }
                 )
               : await getDecryptedImageUrlOverPeer(
@@ -175,6 +193,7 @@ export const useImage = (
                   {
                     size,
                     systemFileType,
+                    preferObjectUrl,
                   }
                 )
             : await getDecryptedImageUrl(
@@ -187,6 +206,7 @@ export const useImage = (
                 {
                   size,
                   systemFileType,
+                  preferObjectUrl,
                 }
               ),
         naturalSize: naturalSize,
@@ -218,12 +238,13 @@ export const useImage = (
           imageDrive,
           size,
           probablyEncrypted,
-          naturalSize
+          naturalSize,
+          preferObjectUrl
         ),
       refetchOnMount: true,
       refetchOnWindowFocus: false,
-      staleTime: 1000 * 60, // 1 min
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours
+      staleTime: 1000 * 60 * 60 * 24, // 24 hours
+      gcTime: Infinity,
       enabled: !!imageFileId && imageFileId !== '' && !!imageDrive && !!imageFileKey,
     }),
   };

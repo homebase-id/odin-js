@@ -3,15 +3,12 @@ import {
   ActionLink,
   ErrorBoundary,
   Input,
-  MagnifyingGlass,
-  Persons,
-  Plus,
   SubtleMessage,
-  Times,
   t,
   useAllContacts,
   useDotYouClient,
 } from '@youfoundation/common-app';
+import { MagnifyingGlass, Persons, Plus, Times } from '@youfoundation/common-app/icons';
 
 import { useEffect, useState } from 'react';
 import { ContactFile } from '@youfoundation/js-lib/network';
@@ -24,7 +21,7 @@ import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../../../providers/ConversationProvider';
-import { CHAT_ROOT } from '../../../../templates/Chat/ChatHome';
+import { ROOT_PATH as CHAT_ROOT } from '../../../../app/App';
 import {
   GroupConversationItem,
   SingleConversationItem,

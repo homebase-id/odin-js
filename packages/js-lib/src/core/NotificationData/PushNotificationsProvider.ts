@@ -1,3 +1,4 @@
+import { AxiosRequestConfig } from 'axios';
 import { DotYouClient, NumberCursoredResult, PushNotificationOptions } from '../../core/core';
 import { stringGuidsEqual, stringifyToQueryParams } from '../../helpers/helpers';
 
@@ -89,8 +90,9 @@ export const DeleteNotifications = async (
 
 export const SendNotification = async (
   dotYouClient: DotYouClient,
-  notification: PushNotificationOptions
+  notification: PushNotificationOptions,
+  axiosConfig?: AxiosRequestConfig
 ) => {
   const axiosClient = dotYouClient.createAxiosClient();
-  return await axiosClient.post(`/notify/push/push`, notification);
+  return await axiosClient.post(`/notify/push/push`, notification, axiosConfig);
 };

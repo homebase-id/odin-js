@@ -1,12 +1,10 @@
-name: Publish libs Prerelease to Github Packages
+name: 'Release libraries to Github Packages'
 on:
   # release:
   #   types: [published]
-  workflow_dispatch:
   push:
     branches:
       - 'main'
-      - 'multi-payload-prototype'
     paths:
       - 'packages/js-lib/src/**'
       - 'packages/ui-lib/src/**'
@@ -78,8 +76,14 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Push the version increment back into the repo
-      - name: Commit version updates
+      - name: Restore npmrc updates
         run: |
           git restore .npmrc
-          git commit -am "Bump lib version(s)"
-          git push
+
+      - name: Create PR for NPM version bump
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch-suffix: short-commit-hash
+          commit-message: 'Bump version for js-lib and/or ui-lib'
+          title: 'Bump version for js-lib and/or ui-lib'
+          body: ''

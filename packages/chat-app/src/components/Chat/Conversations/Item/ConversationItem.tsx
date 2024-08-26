@@ -1,5 +1,4 @@
 import {
-  Persons,
   ConnectionImage,
   ConnectionName,
   ellipsisAtMaxChar,
@@ -8,15 +7,16 @@ import {
   OwnerName,
   LoadingBlock,
 } from '@youfoundation/common-app';
+import { Persons } from '@youfoundation/common-app/icons';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useChatMessages } from '../../../../hooks/chat/useChatMessages';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDeliveryIndicator } from '../../Detail/ChatDeliveryIndicator';
 import { MessageDeletedInnerBody } from '../../Detail/ChatMessageItem';
 import { ChatSentTimeIndicator } from '../../Detail/ChatSentTimeIndicator';
-import { useConversation } from '../../../../hooks/chat/useConversation';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ConversationWithYourselfId } from '../../../../providers/ConversationProvider';
+import { useConversationMetadata } from '../../../../hooks/chat/useConversationMetadata';
 
 const ListItemWrapper = ({
   onClick,
@@ -128,7 +128,7 @@ const ConversationBody = ({
   conversationId?: string;
   setOrder?: (order: number) => void;
 }) => {
-  const { data: conversation } = useConversation({ conversationId }).single;
+  const { data: conversationMetadata } = useConversationMetadata({ conversationId }).single;
   const { data, isFetched: fetchedMessages } = useChatMessages({ conversationId }).all;
   const flatMessages = useMemo(
     () =>
@@ -139,9 +139,9 @@ const ConversationBody = ({
   );
   const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
 
-  const lastReadTime = conversation?.fileMetadata.appData.content.lastReadTime || 0;
+  const lastReadTime = conversationMetadata?.fileMetadata.appData.content.lastReadTime || 0;
   const unreadCount =
-    conversation && flatMessages
+    conversationMetadata && flatMessages && !!flatMessages?.[0]?.fileMetadata.senderOdinId
       ? flatMessages.filter(
           (msg) =>
             msg.fileMetadata.senderOdinId &&

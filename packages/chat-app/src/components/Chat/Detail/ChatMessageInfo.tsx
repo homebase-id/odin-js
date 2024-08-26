@@ -34,8 +34,8 @@ export const ChatMessageInfo = ({
   const isAuthor = msg.fileMetadata.senderOdinId === identity || !msg.fileMetadata.senderOdinId;
 
   const { data: reactions } = useChatReaction({
-    conversationId: conversation?.fileMetadata.appData.uniqueId,
-    messageId: msg.fileMetadata.appData.uniqueId,
+    messageFileId: msg.fileId,
+    messageGlobalTransitId: msg.fileMetadata.globalTransitId,
   }).get;
 
   const dialog = (
@@ -103,16 +103,10 @@ export const ChatMessageInfo = ({
             <div className="flex flex-col gap-4">
               {reactions?.map((reaction) => {
                 return (
-                  <div className="flex flex-row items-center text-lg" key={reaction.fileId}>
-                    <AuthorImage
-                      odinId={reaction.fileMetadata.senderOdinId}
-                      size="xs"
-                      className="mr-2"
-                    />
-                    <AuthorName odinId={reaction.fileMetadata.senderOdinId} />
-                    <p className="ml-auto text-3xl">
-                      {reaction.fileMetadata.appData.content.message}
-                    </p>
+                  <div className="flex flex-row items-center text-lg" key={reaction.body}>
+                    <AuthorImage odinId={reaction.authorOdinId} size="xs" className="mr-2" />
+                    <AuthorName odinId={reaction.authorOdinId} />
+                    <p className="ml-auto text-3xl">{reaction.body}</p>
                   </div>
                 );
               })}

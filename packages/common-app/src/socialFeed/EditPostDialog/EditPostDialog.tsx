@@ -12,7 +12,8 @@ import {
 import { VolatileInput, FileOverview } from '../../form';
 import { t } from '../../helpers';
 import { usePortal } from '../../hooks';
-import { ErrorNotification, DialogWrapper, ActionButton, Save } from '../../ui';
+import { ErrorNotification, DialogWrapper, ActionButton } from '../../ui';
+import { Save } from '../../ui/Icons';
 
 export const EditPostDialog = ({
   postFile: incomingPostFile,
@@ -96,7 +97,7 @@ export const EditPostDialog = ({
               setPostFile(dirtyPostFile);
             }}
             placeholder={t("What's up?")}
-            className={`w-full resize-none rounded-md border bg-transparent p-2`}
+            className={`w-full resize-none rounded-md border bg-transparent p-2 relative`}
           />
           <FileOverview
             className="mt-2"

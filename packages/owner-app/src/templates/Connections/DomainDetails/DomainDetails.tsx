@@ -1,25 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import {
-  ActionButton,
-  ActionGroup,
-  ActionGroupOptionProps,
-  Alert,
-  Block,
-  CirclePermissionView,
-  ErrorNotification,
-  Globe,
-  HardDrive,
-  House,
-  LoadingBlock,
-  Pencil,
-  Refresh,
-  SubtleMessage,
-  Times,
-  Trash,
-  t,
-  useCircles,
-} from '@youfoundation/common-app';
+
 import { useDomain } from '../../../hooks/connections/useDomain';
 import { useState } from 'react';
 import Section from '../../../components/ui/Sections/Section';
@@ -30,6 +11,28 @@ import { useDomainClients } from '../../../hooks/connections/useDomainClients';
 import { DomainClient } from '../../../provider/network/domainNetwork/DomainProvider';
 import { getUniqueDrivesWithHighestPermission } from '@youfoundation/js-lib/helpers';
 import { CircleDomainMembershipDialog } from '../../../components/Circles/CircleMembershipDialog/CircleMembershipDialog';
+import {
+  ActionGroupOptionProps,
+  t,
+  ErrorNotification,
+  ActionButton,
+  ActionGroup,
+  Alert,
+  useCircles,
+  LoadingBlock,
+  CirclePermissionView,
+  SubtleMessage,
+} from '@youfoundation/common-app';
+import {
+  House,
+  Trash,
+  Refresh,
+  Block,
+  Globe,
+  Pencil,
+  HardDrive,
+  Times,
+} from '@youfoundation/common-app/icons';
 
 const DomainDetails = () => {
   const { domain } = useParams();

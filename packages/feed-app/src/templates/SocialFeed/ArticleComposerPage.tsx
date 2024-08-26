@@ -2,23 +2,25 @@ import { useBlocker, useNavigate, useParams, useSearchParams } from 'react-route
 import {
   ActionButton,
   ActionGroup,
-  Arrow,
-  Article as ArticleIcon,
-  Cog,
   DialogWrapper,
   ErrorNotification,
   Label,
   SaveStatus,
   Select,
-  Trash,
   usePortal,
   t,
   ChannelOrAclSelector,
+  BlockerDialog,
+} from '@youfoundation/common-app';
+import {
+  Arrow,
+  Article as ArticleIcon,
+  Cog,
+  Trash,
   Lock,
   Save,
   OpenLock,
-  BlockerDialog,
-} from '@youfoundation/common-app';
+} from '@youfoundation/common-app/icons';
 import { InnerFieldEditors } from '../../components/SocialFeed/ArticleFieldsEditor/ArticleFieldsEditor';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { Article, ReactAccess } from '@youfoundation/js-lib/public';

@@ -11,7 +11,7 @@ import {
   GroupedAttributes,
 } from '../../../hooks/profiles/useAttributeOrderer';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
-import { Collapse, Plus } from '@youfoundation/common-app';
+import { Collapse, Plus } from '@youfoundation/common-app/icons';
 import AttributeEditor from '../AttributeEditor/AttributeEditor';
 import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
 

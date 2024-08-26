@@ -6,7 +6,6 @@ import {
   ActionGroupOptionProps,
   ErrorBoundary,
   SaveStatus,
-  Times,
   t,
   useDebounce,
 } from '@youfoundation/common-app';
@@ -17,7 +16,7 @@ import { ActionButton } from '@youfoundation/common-app';
 import Section from '../../ui/Sections/Section';
 import AttributeFields from '../AttributeFields/AttributeFields';
 import { ActionGroup } from '@youfoundation/common-app';
-import { Trash, Shield, ArrowDown, ArrowUp } from '@youfoundation/common-app';
+import { Trash, Shield, Times, ArrowDown, ArrowUp } from '@youfoundation/common-app/icons';
 import { HomePageAttributes } from '@youfoundation/js-lib/public';
 import {
   HomebaseFile,

@@ -16,3 +16,4 @@ export * from './media/Link';
 export * from './socialFeed';
 export * from './identity';
 export * from './reactQuery';
+export * from './auth';

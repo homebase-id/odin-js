@@ -10,12 +10,12 @@ import {
   ErrorBoundary,
   Label,
   ActionButton,
-  Arrow,
   Textarea,
   useImage,
+  ImageSelector,
 } from '@youfoundation/common-app';
+import { Arrow } from '@youfoundation/common-app/icons';
 
-import { ImageSelector } from '@youfoundation/common-app';
 import {
   HomebaseFile,
   NewHomebaseFile,

@@ -1,8 +1,7 @@
-import { HybridLink, SubtleMessage, t } from '@youfoundation/common-app';
+import { HybridLink, SubtleMessage, t, LoadingBlock } from '@youfoundation/common-app';
 import { useApps } from '../../../hooks/apps/useApps';
-import { Grid } from '@youfoundation/common-app';
+import { Grid } from '@youfoundation/common-app/icons';
 
-import { LoadingBlock } from '@youfoundation/common-app';
 import Section from '../../../components/ui/Sections/Section';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import Submenu from '../../../components/SubMenu/SubMenu';

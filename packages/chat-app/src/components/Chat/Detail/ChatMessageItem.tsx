@@ -2,7 +2,6 @@ import {
   useDotYouClient,
   ConnectionImage,
   ConnectionName,
-  Block,
   t,
   getOdinIdColor,
   useDarkMode,
@@ -19,8 +18,8 @@ import { ChatActions, ContextMenu } from './ContextMenu';
 import { EmbeddedMessageWithId } from './EmbeddedMessage';
 import { useParams } from 'react-router-dom';
 import { ChatReactionComposer } from '../Composer/ChatReactionComposer';
-import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 import { ChatReactions } from './ChatReactions';
+import { Block } from '@youfoundation/common-app/icons';
 
 export const ChatMessageItem = ({
   msg,
@@ -49,10 +48,9 @@ export const ChatMessageItem = ({
       ) || []
     )?.length > 1;
 
-  const hasReactions = useChatReaction({
-    messageId: msg.fileMetadata.appData.uniqueId,
-    conversationId: conversation?.fileMetadata.appData.uniqueId,
-  }).get.data?.length;
+  const hasReactions =
+    msg.fileMetadata.reactionPreview?.reactions &&
+    Object.keys(msg.fileMetadata.reactionPreview?.reactions).length;
 
   return (
     <>
@@ -149,7 +147,12 @@ const ChatTextMessageBody = ({
           <MessageDeletedInnerBody />
         ) : (
           <div className="flex min-w-0 flex-col gap-1">
-            {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
+            {content.replyId ? (
+              <EmbeddedMessageWithId
+                conversationId={conversation?.fileMetadata.appData.uniqueId}
+                msgId={content.replyId}
+              />
+            ) : null}
             <ParagraphWithLinks
               text={content.message}
               className={`copyable-content whitespace-pre-wrap break-words ${
@@ -274,13 +277,20 @@ const ChatMediaMessageBody = ({
       }`}
     >
       {isGroupChat && !messageFromMe ? (
-        <p className={`font-semibold`} style={{ color: getOdinIdColor(authorOdinId).darkTheme }}>
+        <p
+          className={`px-2 py-[0.4rem] font-semibold`}
+          style={{ color: getOdinIdColor(authorOdinId).darkTheme }}
+        >
           <ConnectionName odinId={authorOdinId} />
         </p>
       ) : null}
       <div className="relative">
         {content.replyId ? (
-          <EmbeddedMessageWithId msgId={content.replyId} className="mb-4" />
+          <EmbeddedMessageWithId
+            conversationId={conversation?.fileMetadata.appData.uniqueId}
+            msgId={content.replyId}
+            className="mb-4"
+          />
         ) : null}
         <ChatMedia msg={msg} />
         {!hasACaption ? <ChatFooter className="absolute bottom-0 right-0 px-2 py-1" /> : null}

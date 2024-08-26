@@ -30,19 +30,12 @@ import {
   useChannels,
   useCollaborativeChannels,
 } from '../../hooks';
-import {
-  ActionGroup,
-  Globe,
-  Article,
-  Pencil,
-  ActionButton,
-  Arrow,
-  ErrorNotification,
-  Lock,
-} from '../../ui';
+
 import { EmbeddedPostContent } from '../Blocks/Body/EmbeddedPostContent';
 import { EmojiSelector } from '../Blocks/Interacts/EmojiPicker/EmojiSelector';
 import { LinkPreview } from '@youfoundation/js-lib/media';
+import { ActionGroup, ActionButton, ErrorNotification } from '../../ui';
+import { Article, Pencil, Globe, Arrow, Lock } from '../../ui/Icons';
 
 const FEED_ROOT_PATH = '/apps/feed';
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
@@ -140,7 +133,7 @@ export const PostComposer = ({
   const canPost = caption?.length || files?.length || !!embeddedPost;
 
   return (
-    <div className={`${className ?? ''}`}>
+    <div className={`${className ?? ''} relative`}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -148,32 +141,31 @@ export const PostComposer = ({
           return false;
         }}
       >
-        <div className="relative">
-          <VolatileInput
-            defaultValue={caption}
-            onChange={(newCaption) => setCaption(newCaption)}
-            placeholder={embeddedPost ? t('Add a comment?') : t("What's up?")}
-            onPaste={(e) => {
-              const mediaFiles = [...getImagesFromPasteEvent(e), ...getVideosFromPasteEvent(e)].map(
-                (file) => ({ file })
-              );
+        <VolatileInput
+          defaultValue={caption}
+          onChange={(newCaption) => setCaption(newCaption)}
+          placeholder={embeddedPost ? t('Add a comment?') : t("What's up?")}
+          onPaste={(e) => {
+            const mediaFiles = [...getImagesFromPasteEvent(e), ...getVideosFromPasteEvent(e)].map(
+              (file) => ({ file })
+            );
 
-              if (mediaFiles.length && !embeddedPost) {
-                setFiles([...(files ?? []), ...mediaFiles]);
-                e.preventDefault();
-              }
-            }}
-            onSubmit={
-              isTouchDevice()
-                ? undefined
-                : () => {
-                    doPost();
-                    return false;
-                  }
+            if (mediaFiles.length && !embeddedPost) {
+              setFiles([...(files ?? []), ...mediaFiles]);
+              e.preventDefault();
             }
-            key={stateIndex}
-          />
-        </div>
+          }}
+          onSubmit={
+            isTouchDevice()
+              ? undefined
+              : () => {
+                  doPost();
+                  return false;
+                }
+          }
+          key={stateIndex}
+        />
+
         <FileOverview files={files} setFiles={setFiles} className="mt-2" cols={4} />
         {files?.length ? null : (
           <LinkOverview

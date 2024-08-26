@@ -1,35 +1,31 @@
 import { getNewId, slugify } from '@youfoundation/js-lib/helpers';
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-
 import { AttributeVm, useAttributes } from '../../../hooks/profiles/useAttributes';
-import {
-  ActionButton,
-  ActionGroup,
-  ErrorBoundary,
-  Pencil,
-  useProfiles,
-} from '@youfoundation/common-app';
-
 import AttributeCreator from '../../../components/Attribute/AttributeCreator/AttributeCreator';
 import Section from '../../../components/ui/Sections/Section';
-import { Input } from '@youfoundation/common-app';
-import { t } from '@youfoundation/common-app';
 import AttributeGroup from '../../../components/Attribute/AttributeGroup/AttributeGroup';
-import { Heart, Plus } from '@youfoundation/common-app';
 import SectionEditor from '../../../components/SectionEditor/SectionEditor';
 import { useProfileSections } from '../../../hooks/profiles/useProfileSections';
 import Submenu from '../../../components/SubMenu/SubMenu';
-import { LoadingBlock } from '@youfoundation/common-app';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
-import { Label } from '@youfoundation/common-app';
-import { ErrorNotification } from '@youfoundation/common-app';
-import { Trash } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { ProfileSection } from '@youfoundation/js-lib/profile';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { BrokenAttribute } from '../../../components/Attribute/BrokenAttribute/BrokenAttribute';
 import ProfileDialog from '../../../components/Attribute/ProfileDialog/ProfileDialog';
+import {
+  Input,
+  useProfiles,
+  t,
+  ActionButton,
+  ActionGroup,
+  ErrorNotification,
+  Label,
+  LoadingBlock,
+  ErrorBoundary,
+} from '@youfoundation/common-app';
+import { Heart, Pencil, Trash, Plus } from '@youfoundation/common-app/icons';
 
 const ProfileDetails = () => {
   const {

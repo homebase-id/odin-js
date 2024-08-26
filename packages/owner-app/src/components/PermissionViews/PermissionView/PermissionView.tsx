@@ -1,4 +1,5 @@
-import { Persons, t } from '@youfoundation/common-app';
+import { t } from '@youfoundation/common-app';
+import { Persons } from '@youfoundation/common-app/icons';
 import { AppPermissionType } from '@youfoundation/js-lib/network';
 
 const PermissionView = ({ permission, className }: { permission: number; className?: string }) => {

@@ -13,13 +13,14 @@ import {
   softDeleteChatMessage,
 } from '../../providers/ChatProvider';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+
 import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../providers/ConversationProvider';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { SendReadReceiptResponseRecipientStatus } from '@youfoundation/js-lib/peer';
+import { useDotYouClientContext } from '@youfoundation/common-app';
 
 const PAGE_SIZE = 100;
 export const useChatMessages = (props?: { conversationId: string | undefined }) => {
@@ -153,7 +154,9 @@ export const insertNewMessagesForConversation = (
     runningMessages = internalInsertNewMessage(runningMessages, newMessage);
   });
 
-  queryClient.setQueryData(['chat-messages', conversationId], runningMessages);
+  queryClient.setQueryData(['chat-messages', conversationId], runningMessages, {
+    updatedAt: new Date().getTime(),
+  });
 };
 
 export const insertNewMessage = (

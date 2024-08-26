@@ -2,23 +2,6 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MailHomeHeader } from '../../components/Header/Header';
 import { useMailThread } from '../../hooks/mail/useMailThread';
-import {
-  ActionButton,
-  ActionGroup,
-  ActionLink,
-  Archive,
-  ArrowLeft,
-  ErrorNotification,
-  PaperClip,
-  ReplyArrow,
-  Share,
-  Trash,
-  flattenInfinteData,
-  highlightQuery,
-  t,
-  useDotYouClient,
-  useIsConnected,
-} from '@youfoundation/common-app';
 import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   ARCHIVE_ARCHIVAL_STATUS,
@@ -27,7 +10,18 @@ import {
   getAllRecipients,
 } from '../../providers/MailProvider';
 import { useMailConversation, useMailDraft } from '../../hooks/mail/useMailConversation';
-import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
+import {
+  ActionButton,
+  ActionGroup,
+  ActionLink,
+  ErrorNotification,
+  flattenInfinteData,
+  highlightQuery,
+  t,
+  useDotYouClient,
+  useDotYouClientContext,
+  useIsConnected,
+} from '@youfoundation/common-app';
 import { MailHistory } from './MailHistory';
 import { MailThreadInfo } from './MailThreadInfo';
 import { MailComposer } from '../../components/Composer/MailComposer';
@@ -35,6 +29,14 @@ import { useSearchParams } from 'react-router-dom';
 import { MailAttachmentsInfo } from './MailAttachmentsInfo';
 import { MailAttachmentPreview } from '../../components/Thread/MailAttachmentPreview';
 import { ROOT_PATH } from '../../app/App';
+import {
+  ReplyArrow,
+  Share,
+  ArrowLeft,
+  Trash,
+  Archive,
+  PaperClip,
+} from '@youfoundation/common-app/icons';
 
 const PAGE_SIZE = 100;
 export const MailThread = () => {
@@ -416,7 +418,7 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
   return (
     <div className="flex w-full flex-row items-center justify-between bg-background px-5 py-2">
       <p>
-        {t('You can only chat with connected identites, messages will not be delivered to')}:{' '}
+        {t('You can only chat with connected identities, messages will not be delivered to')}:{' '}
         <a
           href={new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}
           className="underline"

@@ -2,8 +2,9 @@ import { useState, useRef } from 'react';
 
 import { LoginBox } from '../LoginBox/LoginBox';
 import { useAuth } from '../../../hooks/auth/useAuth';
-import { useOutsideTrigger, Times, Person, ConnectionImage, t } from '@youfoundation/common-app';
+import { useOutsideTrigger, ConnectionImage, t } from '@youfoundation/common-app';
 import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { Times, Person } from '@youfoundation/common-app/icons';
 
 const LoginNav = () => {
   const [isOpen, setIsOpen] = useState(false);

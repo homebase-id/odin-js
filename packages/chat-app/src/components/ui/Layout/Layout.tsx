@@ -27,7 +27,7 @@ const SharedStyleTag = () => (
 const SHADED_BG = 'bg-page-background text-foreground';
 const NOT_SHADED_BG = 'bg-white dark:bg-black';
 
-const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
+export const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
   const [searchParams] = useSearchParams();
   const uiSetting = searchParams.get('ui');
 
@@ -76,5 +76,3 @@ export const NoLayout: FC<LayoutProps> = ({ children, noShadedBg }) => {
     </>
   );
 };
-
-export default Layout;

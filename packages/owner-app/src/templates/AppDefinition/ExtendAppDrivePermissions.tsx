@@ -1,13 +1,13 @@
 import { useSearchParams } from 'react-router-dom';
 import {
   ActionButton,
-  Arrow,
   CirclePermissionView,
   ErrorNotification,
   mergeStates,
   t,
   useCircles,
 } from '@youfoundation/common-app';
+import { Arrow } from '@youfoundation/common-app/icons';
 import Section from '../../components/ui/Sections/Section';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useApp } from '../../hooks/apps/useApp';
@@ -56,7 +56,7 @@ const ExtendAppPermissions = () => {
   const doUpdateApp = async () => {
     if (!appRegistration || !appRegistration?.appId) throw new Error('App registration not found');
 
-    if (circleIds?.length)
+    if (circleIds?.length || circlePermissionSet?.keys?.length || circleDriveGrants?.length)
       updateCircles({
         appId: appRegistration.appId,
         circleMemberPermissionGrant: {

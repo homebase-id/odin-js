@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { HOME_ROOT_PATH, t, usePostsInfinite } from '@youfoundation/common-app';
 import { ChannelDefinitionVm } from '@youfoundation/common-app';
 
-import { Arrow } from '@youfoundation/common-app';
+import { Arrow } from '@youfoundation/common-app/icons';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 interface ChannelTeaserProps {

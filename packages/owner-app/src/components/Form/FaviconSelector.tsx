@@ -1,4 +1,5 @@
-import { Block, EmojiSelector, t, ImageSelector, useImage } from '@youfoundation/common-app';
+import { Block } from '@youfoundation/common-app/icons';
+import { EmojiSelector, t, ImageSelector, useImage } from '@youfoundation/common-app';
 import { TargetDrive } from '@youfoundation/js-lib/core';
 import { ReactNode, useState } from 'react';
 

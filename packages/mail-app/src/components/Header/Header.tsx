@@ -1,14 +1,6 @@
 import { useEffect, useRef } from 'react';
-import {
-  t,
-  Input,
-  ActionButton,
-  MagnifyingGlass,
-  ActionLink,
-  Plus,
-  Bars,
-  Times,
-} from '@youfoundation/common-app';
+import { t, Input, ActionButton, ActionLink } from '@youfoundation/common-app';
+import { Bars, MagnifyingGlass, Plus, Times } from '@youfoundation/common-app/icons';
 import { useSearchParams } from 'react-router-dom';
 import { ROOT_PATH } from '../../app/App';
 

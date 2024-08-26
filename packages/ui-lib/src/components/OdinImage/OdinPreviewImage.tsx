@@ -47,6 +47,10 @@ export const OdinPreviewImage = forwardRef(
       className,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       lastModified,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      probablyEncrypted,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      preferObjectUrl,
       ...props
     }: OdinPreviewImageProps,
     ref: React.Ref<HTMLImageElement>
