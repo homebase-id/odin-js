@@ -1,5 +1,6 @@
 import {
   ActionButton,
+  ActionGroup,
   OWNER_APP_ID,
   Plus,
   SubtleMessage,
@@ -16,7 +17,8 @@ import PersonActive from '../../../components/Connection/PersonActive/PersonActi
 import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { useActiveConnections } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import OutgoingConnectionDialog from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
+import { OutgoingConnectionDialog } from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
+import { IntroductionDialog } from '../../../components/Connection/ConnectionDialogs/IntroductionDialog';
 
 const Connections = () => {
   const [hasActiveConnections, setActiveConnections] = useState(true);
@@ -25,6 +27,7 @@ const Connections = () => {
   const [hasOutgoingIntroductions, setOutgoingIntroductions] = useState(true);
 
   const [isSentConnectionOpen, setIsSentConnectionOpen] = useState(false);
+  const [isIntroduceOpen, setIsIntroduceOpen] = useState(false);
   useRemoveNotifications({ appId: OWNER_APP_ID });
 
   return (
@@ -37,6 +40,16 @@ const Connections = () => {
             <ActionButton onClick={() => setIsSentConnectionOpen(true)} icon={Plus}>
               {t('Send Request')}
             </ActionButton>
+            <ActionGroup
+              options={[
+                {
+                  label: t('Introduce'),
+                  icon: Persons,
+                  onClick: () => setIsIntroduceOpen(true),
+                },
+              ]}
+              type="mute"
+            />
           </>
         }
       />
@@ -74,6 +87,11 @@ const Connections = () => {
           isOpen={isSentConnectionOpen}
           onConfirm={() => setIsSentConnectionOpen(false)}
           onCancel={() => setIsSentConnectionOpen(false)}
+        />
+        <IntroductionDialog
+          isOpen={isIntroduceOpen}
+          onConfirm={() => setIsIntroduceOpen(false)}
+          onCancel={() => setIsIntroduceOpen(false)}
         />
       </div>
     </>

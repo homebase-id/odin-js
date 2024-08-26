@@ -23,7 +23,7 @@ import { useEffect, useState } from 'react';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
 import { useConnectionGrantStatus } from '../../../hooks/connections/useConnectionGrantStatus';
 import { hasDebugFlag, jsonStringify64 } from '@youfoundation/js-lib/helpers';
-import OutgoingConnectionDialog from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
+import { OutgoingConnectionDialog } from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
 import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 
 export const IdentityPageMetaAndActions = ({

@@ -17,7 +17,7 @@ import { useConnectionActions } from '../../../hooks/connections/useConnectionAc
 
 const DEFAULT_MESSAGE = t('Hi, I would like to connect with you');
 
-const OutgoingConnectionDialog = ({
+export const OutgoingConnectionDialog = ({
   title,
   targetOdinId,
   isOpen,
@@ -252,5 +252,3 @@ const OutgoingConnectionDialog = ({
 
   return createPortal(dialog, target);
 };
-
-export default OutgoingConnectionDialog;
