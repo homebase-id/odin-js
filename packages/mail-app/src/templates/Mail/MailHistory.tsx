@@ -1,4 +1,4 @@
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
   MailConversation,
@@ -15,11 +15,11 @@ import {
   RichTextRenderer,
   ActionGroup,
   highlightQuery,
-} from '@youfoundation/common-app';
-import { ChevronDown, Exclamation } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { ChevronDown, Exclamation } from '@homebase-id/common-app/icons';
 import { useEffect, useRef, useState } from 'react';
 import { useMarkMailConversationsAsRead } from '../../hooks/mail/useMarkMailConversationsAsRead';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import { MailConversationInfo } from './MailConversationInfo';
 import { useNavigate } from 'react-router-dom';
 import { MailAttachmentOverview } from './MailAttachmentOverview';

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ensureDrive } from '@youfoundation/js-lib/core';
-import { DriveGrant } from '@youfoundation/js-lib/network';
+import { ensureDrive } from '@homebase-id/js-lib/core';
+import { DriveGrant } from '@homebase-id/js-lib/network';
 import {
   AllowApp,
   GetAppRegistration,

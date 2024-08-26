@@ -1,5 +1,5 @@
 import { useContact } from '../../../hooks/contacts/useContact';
-import { t, useDotYouClient, ErrorNotification, ActionButton } from '@youfoundation/common-app';
+import { t, useDotYouClient, ErrorNotification, ActionButton } from '@homebase-id/common-app';
 import {
   Envelope,
   Cake,
@@ -8,11 +8,11 @@ import {
   Person,
   Phone,
   Refresh,
-} from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app/icons';
 import Section from '../../ui/Sections/Section';
 import ContactImage from '../ContactImage/ContactImage';
-import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
-import { ContactFile } from '@youfoundation/js-lib/network';
+import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
+import { ContactFile } from '@homebase-id/js-lib/network';
 import { useConnection } from '../../../hooks/connections/useConnection';
 
 interface ContactInfoProps {

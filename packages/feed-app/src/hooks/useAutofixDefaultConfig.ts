@@ -1,5 +1,5 @@
-import { useChannel } from '@youfoundation/common-app';
-import { BlogConfig } from '@youfoundation/js-lib/public';
+import { useChannel } from '@homebase-id/common-app';
+import { BlogConfig } from '@homebase-id/js-lib/public';
 import { useEffect } from 'react';
 
 const useFixMissingPublicChannel = () => {

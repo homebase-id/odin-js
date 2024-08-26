@@ -1,6 +1,6 @@
 import { FC, ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Sidenav, Toaster, useDarkMode } from '@youfoundation/common-app';
+import { Sidenav, Toaster, useDarkMode } from '@homebase-id/common-app';
 
 interface LayoutProps {
   children?: ReactNode;

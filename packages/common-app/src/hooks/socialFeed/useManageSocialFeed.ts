@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { BlogConfig, PostContent } from '@youfoundation/js-lib/public';
+import { BlogConfig, PostContent } from '@homebase-id/js-lib/public';
 
-import { ApiType, DotYouClient, HomebaseFile, deleteFile } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile, deleteFile } from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 export const useManageSocialFeed = (props?: { odinId: string }) => {

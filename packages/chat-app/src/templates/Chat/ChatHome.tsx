@@ -15,7 +15,7 @@ import {
   Sidenav,
   t,
   useRemoveNotifications,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { drives, circleDrives, permissions } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
 

@@ -7,8 +7,8 @@ import { useExport } from '../../../hooks/drives/useExport';
 import AppMembershipView from '../../../components/PermissionViews/AppPermissionView/AppPermissionView';
 import { useApps } from '../../../hooks/apps/useApps';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { getDrivePermissionFromNumber, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { TRANSIENT_TEMP_DRIVE_ALIAS } from '@youfoundation/js-lib/core';
+import { getDrivePermissionFromNumber, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { TRANSIENT_TEMP_DRIVE_ALIAS } from '@homebase-id/js-lib/core';
 import DriveAppAccessDialog from '../../../components/Drives/DriveAppAccessDialog/DriveAppAccessDialog';
 import DriveCircleAccessDialog from '../../../components/Drives/DriveCircleAccessDialog/DriveCircleAccessDialog';
 import DriveMetadataEditDialog from '../../../components/Drives/DriveCircleAccessDialog/DriveMetadataEditDialog';
@@ -20,8 +20,8 @@ import {
   CirclePermissionView,
   t,
   useCircles,
-} from '@youfoundation/common-app';
-import { HardDrive, Download, HeartBeat, Pencil } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { HardDrive, Download, HeartBeat, Pencil } from '@homebase-id/common-app/icons';
 
 const DriveDetails = () => {
   const { driveKey } = useParams();

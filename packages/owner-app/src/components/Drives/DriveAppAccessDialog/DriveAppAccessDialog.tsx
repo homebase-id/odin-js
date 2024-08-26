@@ -1,4 +1,4 @@
-import { DriveDefinition } from '@youfoundation/js-lib/core';
+import { DriveDefinition } from '@homebase-id/js-lib/core';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
@@ -8,9 +8,9 @@ import {
   t,
   ErrorNotification,
   DialogWrapper,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 
-import { Arrow } from '@youfoundation/common-app/icons';
+import { Arrow } from '@homebase-id/common-app/icons';
 import DrivePermissionFlagEditor from '../../Form/DrivePermissionFlagEditor';
 import { useApp } from '../../../hooks/apps/useApp';
 import { useApps } from '../../../hooks/apps/useApps';

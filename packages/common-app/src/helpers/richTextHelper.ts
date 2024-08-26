@@ -1,5 +1,5 @@
-import { ReadTimeStats } from '@youfoundation/js-lib/public';
-import { RichText } from '@youfoundation/js-lib/core';
+import { ReadTimeStats } from '@homebase-id/js-lib/public';
+import { RichText } from '@homebase-id/js-lib/core';
 
 const urlAndMentionRegex = new RegExp(/(https?:\/\/[^\s]+|@[^\s]+)/);
 

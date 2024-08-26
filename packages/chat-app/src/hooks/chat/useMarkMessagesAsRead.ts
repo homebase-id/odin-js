@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../../providers/ChatProvider';
 import { useChatMessages } from './useChatMessages';
 import { useEffect, useState } from 'react';

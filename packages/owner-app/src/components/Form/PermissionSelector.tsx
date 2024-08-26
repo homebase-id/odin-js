@@ -1,12 +1,12 @@
-import { PermissionSet } from '@youfoundation/js-lib/core';
-import { t, CheckboxToggle } from '@youfoundation/common-app';
-import { Persons } from '@youfoundation/common-app/icons';
+import { PermissionSet } from '@homebase-id/js-lib/core';
+import { t, CheckboxToggle } from '@homebase-id/common-app';
+import { Persons } from '@homebase-id/common-app/icons';
 
 import {
   AppPermissionType,
   AppCirclePermissionType,
   CirclePermissionType,
-} from '@youfoundation/js-lib/network';
+} from '@homebase-id/js-lib/network';
 
 const PermissionSelector = ({
   type,

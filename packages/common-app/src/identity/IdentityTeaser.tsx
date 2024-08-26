@@ -1,6 +1,6 @@
 import { MouseEventHandler, ReactNode, useRef, useState } from 'react';
 import { useDotYouClient, useExternalOdinId, useIntersection, useIsConnected } from '../..';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 
 export const IdentityTeaser = ({
   odinId,

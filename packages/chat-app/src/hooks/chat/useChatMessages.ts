@@ -12,15 +12,15 @@ import {
   requestMarkAsRead,
   softDeleteChatMessage,
 } from '../../providers/ChatProvider';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 
 import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../providers/ConversationProvider';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { SendReadReceiptResponseRecipientStatus } from '@youfoundation/js-lib/peer';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { SendReadReceiptResponseRecipientStatus } from '@homebase-id/js-lib/peer';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 const PAGE_SIZE = 100;
 export const useChatMessages = (props?: { conversationId: string | undefined }) => {

@@ -1,8 +1,8 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
 import { useCommunityChannels } from './useCommunityChannels';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 import { useCallback, useEffect } from 'react';
 import {

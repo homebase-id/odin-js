@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchFollower } from '@youfoundation/js-lib/network';
+import { fetchFollower } from '@homebase-id/js-lib/network';
 
 import { useAuth } from '../auth/useAuth';
 

@@ -1,5 +1,5 @@
-import { PermissionedDrive, PermissionSet } from '@youfoundation/js-lib/core';
-import { DriveGrant } from '@youfoundation/js-lib/network';
+import { PermissionedDrive, PermissionSet } from '@homebase-id/js-lib/core';
+import { DriveGrant } from '@homebase-id/js-lib/network';
 
 export interface AppClientRegistrationRequest {
   appId: string;

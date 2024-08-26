@@ -1,5 +1,5 @@
 import { useContact } from '../../../hooks/contacts/useContact';
-import { LoadingBlock } from '@youfoundation/common-app';
+import { LoadingBlock } from '@homebase-id/common-app';
 import PersonCard, { PersonCardProps } from '../PersonCard/PersonCard';
 
 const ConnectionCard = (props: PersonCardProps) => {

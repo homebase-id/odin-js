@@ -1,8 +1,8 @@
-import { EmbeddedThumb, PayloadDescriptor } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, PayloadDescriptor } from '@homebase-id/js-lib/core';
 import { useState, useRef, useMemo } from 'react';
 import { Image } from '../../../media/Image';
-import { getChannelDrive } from '@youfoundation/js-lib/public';
-import { useImageCache } from '@youfoundation/ui-lib';
+import { getChannelDrive } from '@homebase-id/js-lib/public';
+import { useImageCache } from '@homebase-id/ui-lib';
 import { useIntersection, useDotYouClient, useDarkMode } from '../../../hooks';
 import { Triangle } from '../../../ui/Icons';
 import { BoringFile } from './PrimaryMedia';

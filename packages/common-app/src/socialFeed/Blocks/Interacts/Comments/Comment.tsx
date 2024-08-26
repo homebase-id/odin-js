@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { RawReactionContent, ReactionContext } from '@youfoundation/js-lib/public';
+import { RawReactionContent, ReactionContext } from '@homebase-id/js-lib/public';
 
 import { CommentHead } from './Parts/CommentHead';
 import { CommentBody } from './Parts/CommentBody';
@@ -10,7 +10,7 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   ReactionFile,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { CanReactInfo } from '../../../../hooks/reactions/useCanReact';
 import { useReaction } from '../../../../hooks/reactions/useReaction';
 import { ErrorNotification } from '../../../../ui/Alert/ErrorNotification';

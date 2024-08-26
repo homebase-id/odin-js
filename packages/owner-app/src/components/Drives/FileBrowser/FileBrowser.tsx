@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Bars, Grid } from '@youfoundation/common-app/icons';
-import { t, Pager } from '@youfoundation/common-app';
-import { SystemFileType, TargetDrive } from '@youfoundation/js-lib/core';
+import { Bars, Grid } from '@homebase-id/common-app/icons';
+import { t, Pager } from '@homebase-id/common-app';
+import { SystemFileType, TargetDrive } from '@homebase-id/js-lib/core';
 import { FileCard } from './FileCard';
 import { useFiles } from '../../../hooks/files/useFiles';
 import Section from '../../ui/Sections/Section';

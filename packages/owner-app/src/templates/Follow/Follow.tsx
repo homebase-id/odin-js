@@ -6,7 +6,7 @@ import Submenu from '../../components/SubMenu/SubMenu';
 import { useConnectionActions } from '../../hooks/connections/useConnectionActions';
 import IdentityIFollowEditDialog from '../../components/Followers/IdentityIFollowEditDialog/IdentityIFollowEditDialog';
 import IdentityThatFollowsDialog from '../../components/Followers/IdentityIFollowEditDialog/IdentityThatFollowsDialog';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import {
   useRemoveNotifications,
   OWNER_APP_ID,
@@ -20,8 +20,8 @@ import {
   IdentityTeaser,
   ActionGroup,
   useIdentityIFollow,
-} from '@youfoundation/common-app';
-import { Persons, AddressBook, House, Block, Times } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Persons, AddressBook, House, Block, Times } from '@homebase-id/common-app/icons';
 
 const Follow = () => {
   const followersMatch = useMatch({ path: 'owner/follow/followers/*' });

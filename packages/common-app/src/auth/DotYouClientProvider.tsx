@@ -1,6 +1,6 @@
 import { ReactNode, useMemo } from 'react';
 
-import { DotYouClientContext, useDotYouClient } from '@youfoundation/common-app';
+import { DotYouClientContext, useDotYouClient } from '@homebase-id/common-app';
 
 export const DotYouClientProvider = ({ children }: { children: ReactNode }) => {
   const { getDotYouClient } = useDotYouClient();

@@ -4,8 +4,8 @@ import {
   ProfileDefinition,
   removeProfileDefinition,
   saveProfileDefinition,
-} from '@youfoundation/js-lib/profile';
-import { slugify } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/profile';
+import { slugify } from '@homebase-id/js-lib/helpers';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 export interface ProfileDefinitionVm extends ProfileDefinition {

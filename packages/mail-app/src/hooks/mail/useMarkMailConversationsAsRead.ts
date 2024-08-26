@@ -1,4 +1,4 @@
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { MailConversation } from '../../providers/MailProvider';
 import { useEffect, useRef } from 'react';
 import { useMailConversation } from './useMailConversation';

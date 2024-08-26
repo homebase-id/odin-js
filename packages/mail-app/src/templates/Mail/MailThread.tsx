@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MailHomeHeader } from '../../components/Header/Header';
 import { useMailThread } from '../../hooks/mail/useMailThread';
-import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   ARCHIVE_ARCHIVAL_STATUS,
   MailConversation,
@@ -21,7 +21,7 @@ import {
   useDotYouClient,
   useDotYouClientContext,
   useIsConnected,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { MailHistory } from './MailHistory';
 import { MailThreadInfo } from './MailThreadInfo';
 import { MailComposer } from '../../components/Composer/MailComposer';
@@ -36,7 +36,7 @@ import {
   Trash,
   Archive,
   PaperClip,
-} from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app/icons';
 
 const PAGE_SIZE = 100;
 export const MailThread = () => {

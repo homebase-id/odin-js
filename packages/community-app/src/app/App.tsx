@@ -32,7 +32,7 @@ const CommunityHome = lazy(() =>
   }))
 );
 
-import '@youfoundation/ui-lib/dist/style.css';
+import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import { useAuth } from '../hooks/auth/useAuth';
 
@@ -44,7 +44,7 @@ import {
   NotFound,
   DotYouClientProvider,
   OdinQueryClient,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 
 const CommunityChannelDetail = lazy(() =>
   import('../templates/Community/CommunityChannelDetail').then((communityApp) => ({

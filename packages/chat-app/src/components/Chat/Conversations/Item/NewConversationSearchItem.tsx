@@ -1,4 +1,4 @@
-import { ContactFile } from '@youfoundation/js-lib/network';
+import { ContactFile } from '@homebase-id/js-lib/network';
 import { useConversation } from '../../../../hooks/chat/useConversation';
 import { SingleConversationItem } from './ConversationItem';
 

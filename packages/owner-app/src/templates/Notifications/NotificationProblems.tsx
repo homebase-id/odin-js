@@ -1,8 +1,8 @@
-import { Alert, t } from '@youfoundation/common-app';
-import { Arrow, Question } from '@youfoundation/common-app/icons';
+import { Alert, t } from '@homebase-id/common-app';
+import { Arrow, Question } from '@homebase-id/common-app/icons';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import Section from '../../components/ui/Sections/Section';
-import { getOperatingSystem } from '@youfoundation/js-lib/auth';
+import { getOperatingSystem } from '@homebase-id/js-lib/auth';
 import { useState } from 'react';
 
 const isOldIos = (version: string | undefined) => {

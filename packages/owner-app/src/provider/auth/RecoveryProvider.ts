@@ -1,4 +1,4 @@
-import { DotYouClient } from '@youfoundation/js-lib/core';
+import { DotYouClient } from '@homebase-id/js-lib/core';
 
 export interface RecoveryKeyResponse {
   key: string;

@@ -1,9 +1,9 @@
-import { DotYouClient, EmbeddedThumb, ImageSize } from '@youfoundation/js-lib/core';
+import { DotYouClient, EmbeddedThumb, ImageSize } from '@homebase-id/js-lib/core';
 import { useTinyThumb } from '../../hooks/image/useTinyThumb';
 import { forwardRef, useEffect, useMemo } from 'react';
 import { useImageCache } from '../../hooks/image/useImage';
 import { ImageEvents, ImageSource } from './types';
-import { ThumbnailMeta } from '@youfoundation/js-lib/media';
+import { ThumbnailMeta } from '@homebase-id/js-lib/media';
 
 export interface OdinPreviewImageProps
   extends ImageSource,

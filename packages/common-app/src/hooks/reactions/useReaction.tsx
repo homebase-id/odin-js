@@ -6,7 +6,7 @@ import {
   removeEmojiReaction,
   saveComment,
   saveEmojiReaction,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 
 import { getRichTextFromString } from '../../helpers/richTextHelper';
 import { UseCommentsVal } from './comments/useComments';
@@ -16,7 +16,7 @@ import {
   EmojiReactionSummary,
   NewHomebaseFile,
   ReactionFile,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 export const useReaction = () => {

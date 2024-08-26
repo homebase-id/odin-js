@@ -15,10 +15,10 @@ import {
   uploadFile,
   UploadFileMetadata,
   UploadInstructionSet,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
-import { t } from '@youfoundation/common-app';
-import { jsonStringify64, toGuidId } from '@youfoundation/js-lib/helpers';
+import { t } from '@homebase-id/common-app';
+import { jsonStringify64, toGuidId } from '@homebase-id/js-lib/helpers';
 
 export const COMMUNITY_CHANNEL_FILE_TYPE = 7015;
 export const COMMUNITY_DEFAULT_GENERAL_ID = '7d64f4e4-f8e2-4c3b-bc4b-48bbb86e8f9a';

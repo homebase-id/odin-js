@@ -7,16 +7,16 @@ import {
   queryBatch,
   DEFAULT_PAYLOAD_KEY,
   NewHomebaseFile,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { demoImageArray } from './DemoImages';
 import { attrHasData, base64ToArrayBuffer, getFunName, getRandomAbstract, rando } from './helpers';
 import { lotrRealm } from './DemoLotr';
 import { useAttribute } from '../../hooks/profiles/useAttribute';
-import { Select, useChannel } from '@youfoundation/common-app';
-import { useManagePost } from '@youfoundation/common-app';
+import { Select, useChannel } from '@homebase-id/common-app';
+import { useManagePost } from '@homebase-id/common-app';
 
-import { useCircles } from '@youfoundation/common-app';
-import { useCircle } from '@youfoundation/common-app';
+import { useCircles } from '@homebase-id/common-app';
+import { useCircle } from '@homebase-id/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { useHomeAttributes } from '../../hooks/profiles/useHomeAttributes';
 import {
@@ -27,7 +27,7 @@ import {
   ProfileConfig,
   SocialFields,
   getProfileAttribute,
-} from '@youfoundation/js-lib/profile';
+} from '@homebase-id/js-lib/profile';
 import {
   HomePageConfig,
   HomePageAttributes,
@@ -38,8 +38,8 @@ import {
   Article,
   PostContent,
   HomePageThemeFields,
-} from '@youfoundation/js-lib/public';
-import { slugify, getNewId } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/public';
+import { slugify, getNewId } from '@homebase-id/js-lib/helpers';
 import { useState } from 'react';
 
 type RealmName = keyof typeof lotrRealm | undefined;

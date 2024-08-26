@@ -1,8 +1,8 @@
 import { ReactNode, useRef, useState } from 'react';
-import { t, useOutsideTrigger } from '@youfoundation/common-app';
-import { Check, Triangle } from '@youfoundation/common-app/icons';
-import { DrivePermissionType } from '@youfoundation/js-lib/core';
-import { getDrivePermissionFromNumber } from '@youfoundation/js-lib/helpers';
+import { t, useOutsideTrigger } from '@homebase-id/common-app';
+import { Check, Triangle } from '@homebase-id/common-app/icons';
+import { DrivePermissionType } from '@homebase-id/js-lib/core';
+import { getDrivePermissionFromNumber } from '@homebase-id/js-lib/helpers';
 
 const DrivePermissionFlagEditor = ({
   className,

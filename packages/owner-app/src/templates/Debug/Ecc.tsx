@@ -1,8 +1,8 @@
-import { Label, Input, ActionButton } from '@youfoundation/common-app';
+import { Label, Input, ActionButton } from '@homebase-id/common-app';
 import { useState } from 'react';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { importRemotePublicEccKey } from '@youfoundation/js-lib/auth';
-import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
+import { importRemotePublicEccKey } from '@homebase-id/js-lib/auth';
+import { hasDebugFlag } from '@homebase-id/js-lib/helpers';
 
 const EccDebug = () => {
   const [keyData, setKeyData] = useState<string>('');

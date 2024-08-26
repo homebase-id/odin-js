@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { usePortal } from '@youfoundation/common-app';
-import { DialogWrapper } from '@youfoundation/common-app';
+import { usePortal } from '@homebase-id/common-app';
+import { DialogWrapper } from '@homebase-id/common-app';
 import { LoginBox } from '../../Auth/LoginBox/LoginBox';
 
 const LoginDialog = ({

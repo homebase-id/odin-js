@@ -30,16 +30,16 @@ const ChatHome = lazy(() =>
   import('../templates/Chat/ChatHome').then((chatApp) => ({ default: chatApp.ChatHome }))
 );
 
-import '@youfoundation/ui-lib/dist/style.css';
+import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import { useAuth } from '../hooks/auth/useAuth';
 
 export const ROOT_PATH = '/apps/chat';
 const AUTH_PATH = ROOT_PATH + '/auth';
 
-import { ErrorBoundary, NotFound, DotYouClientProvider } from '@youfoundation/common-app';
+import { ErrorBoundary, NotFound, DotYouClientProvider } from '@homebase-id/common-app';
 import VideoPlayer from '../templates/VideoPlayer/VideoPlayer';
-import { OdinQueryClient } from '@youfoundation/common-app';
+import { OdinQueryClient } from '@homebase-id/common-app';
 
 function App() {
   const router = createBrowserRouter(

@@ -1,5 +1,5 @@
 import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { RecentsFromConnectionsReturn, getPostOverPeer } from '@youfoundation/js-lib/peer';
+import { RecentsFromConnectionsReturn, getPostOverPeer } from '@homebase-id/js-lib/peer';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 interface useSocialPostProps {

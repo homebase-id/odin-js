@@ -1,10 +1,10 @@
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { HOME_ROOT_PATH, t, usePostsInfinite } from '@youfoundation/common-app';
-import { ChannelDefinitionVm } from '@youfoundation/common-app';
+import { HOME_ROOT_PATH, t, usePostsInfinite } from '@homebase-id/common-app';
+import { ChannelDefinitionVm } from '@homebase-id/common-app';
 
-import { Arrow } from '@youfoundation/common-app/icons';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { Arrow } from '@homebase-id/common-app/icons';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 
 interface ChannelTeaserProps {
   className?: string;

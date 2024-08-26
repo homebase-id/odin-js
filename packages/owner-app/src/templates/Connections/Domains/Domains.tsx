@@ -14,8 +14,8 @@ import {
   ErrorNotification,
   HybridLink,
   ActionButton,
-} from '@youfoundation/common-app';
-import { Grid, Shield, Eye, Times } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Grid, Shield, Eye, Times } from '@homebase-id/common-app/icons';
 
 const Domains = () => {
   const [activePage, setActivePage] = useState(1);

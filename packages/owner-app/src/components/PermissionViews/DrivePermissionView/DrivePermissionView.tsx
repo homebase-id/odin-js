@@ -1,11 +1,11 @@
-import { DriveDefinition } from '@youfoundation/js-lib/core';
+import { DriveDefinition } from '@homebase-id/js-lib/core';
 import { Link } from 'react-router-dom';
-import { t } from '@youfoundation/common-app';
+import { t } from '@homebase-id/common-app';
 import { useDrive } from '../../../hooks/drives/useDrive';
-import { Arrow, HardDrive } from '@youfoundation/common-app/icons';
-import { LoadingBlock } from '@youfoundation/common-app';
-import { DriveGrant } from '@youfoundation/js-lib/network';
-import { getDrivePermissionFromNumber } from '@youfoundation/js-lib/helpers';
+import { Arrow, HardDrive } from '@homebase-id/common-app/icons';
+import { LoadingBlock } from '@homebase-id/common-app';
+import { DriveGrant } from '@homebase-id/js-lib/network';
+import { getDrivePermissionFromNumber } from '@homebase-id/js-lib/helpers';
 
 const DrivePermissionView = ({
   driveGrant,

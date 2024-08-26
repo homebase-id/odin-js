@@ -7,8 +7,8 @@ import {
   SubtleMessage,
   t,
   useAllContacts,
-} from '@youfoundation/common-app';
-import { Persons, Times } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Persons, Times } from '@homebase-id/common-app/icons';
 import { useNavigate } from 'react-router-dom';
 import { ROOT_PATH as CHAT_ROOT } from '../../../../app/App';
 import { ConversationListItemWrapper } from '../Item/ConversationItem';

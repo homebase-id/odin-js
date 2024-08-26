@@ -1,7 +1,7 @@
 import { FC, ReactNode } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Select } from '@youfoundation/common-app';
-import { LoadingBlock } from '@youfoundation/common-app';
+import { Select } from '@homebase-id/common-app';
+import { LoadingBlock } from '@homebase-id/common-app';
 
 interface SubmenuProps {
   className?: string;

@@ -1,4 +1,4 @@
-import { AccessControlList, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { AccessControlList, SecurityGroupType } from '@homebase-id/js-lib/core';
 import { useState } from 'react';
 import { CircleSelector } from '../../form/CircleSelector';
 import { t } from '../../helpers/i18n/dictionary';

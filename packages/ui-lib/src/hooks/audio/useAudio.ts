@@ -4,14 +4,14 @@ import {
   SystemFileType,
   DotYouClient,
   getPayloadBytes,
-} from '@youfoundation/js-lib/core';
-import { getDecryptedMediaUrl } from '@youfoundation/js-lib/media';
+} from '@homebase-id/js-lib/core';
+import { getDecryptedMediaUrl } from '@homebase-id/js-lib/media';
 import {
   getDecryptedMediaUrlOverPeer,
   getDecryptedMediaUrlOverPeerByGlobalTransitId,
   getPayloadBytesOverPeer,
   getPayloadBytesOverPeerByGlobalTransitId,
-} from '@youfoundation/js-lib/peer';
+} from '@homebase-id/js-lib/peer';
 
 export const useAudio = (
   dotYouClient: DotYouClient,

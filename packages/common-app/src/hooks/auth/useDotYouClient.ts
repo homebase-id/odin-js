@@ -1,7 +1,7 @@
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
-import { base64ToUint8Array, isLocalStorageAvailable } from '@youfoundation/js-lib/helpers';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { base64ToUint8Array, isLocalStorageAvailable } from '@homebase-id/js-lib/helpers';
 import { OWNER_ROOT, OWNER_APPS_ROOT, OwnerClient } from '../../core';
-import { retrieveIdentity } from '@youfoundation/js-lib/auth';
+import { retrieveIdentity } from '@homebase-id/js-lib/auth';
 
 export const HOME_SHARED_SECRET = 'HSS';
 export const OWNER_SHARED_SECRET = 'SS';

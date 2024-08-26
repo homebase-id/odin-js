@@ -6,9 +6,9 @@ import {
   t,
   ActionGroup,
   ErrorNotification,
-} from '@youfoundation/common-app';
-import { ChevronDown } from '@youfoundation/common-app/icons';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+} from '@homebase-id/common-app';
+import { ChevronDown } from '@homebase-id/common-app/icons';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatDeliveryStatus, ChatMessage } from '../../../providers/ChatProvider';
 import {
   ConversationWithYourselfId,
@@ -17,7 +17,7 @@ import {
 import { ChatMessageInfo } from './ChatMessageInfo';
 import { EditChatMessage } from './EditChatMessage';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export interface ChatActions {
   doReply: (msg: HomebaseFile<ChatMessage>) => void;

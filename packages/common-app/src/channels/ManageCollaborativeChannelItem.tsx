@@ -1,6 +1,6 @@
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 
-import { RemoteCollaborativeChannelDefinition } from '@youfoundation/js-lib/public';
+import { RemoteCollaborativeChannelDefinition } from '@homebase-id/js-lib/public';
 import { t } from '../helpers/i18n/dictionary';
 import { ActionGroup } from '../ui/Buttons/ActionGroup';
 import { Trash } from '../ui/Icons/Trash';

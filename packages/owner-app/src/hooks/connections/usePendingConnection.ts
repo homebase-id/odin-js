@@ -5,10 +5,10 @@ import {
   acceptConnectionRequest,
   deletePendingRequest,
   getPendingRequest,
-} from '@youfoundation/js-lib/network';
+} from '@homebase-id/js-lib/network';
 import { saveContact } from '../../provider/contact/ContactProvider';
 import { fetchConnectionInfo } from '../../provider/contact/ContactSourceProvider';
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { SecurityGroupType } from '@homebase-id/js-lib/core';
 
 export const usePendingConnection = ({ odinId }: { odinId?: string }) => {
   const queryClient = useQueryClient();

@@ -13,10 +13,10 @@ import {
   TargetDrive,
   getFileHeader,
   getFileHeaderByUniqueId,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { useAuth } from '../auth/useAuth';
-import { jsonStringify64, tryJsonParse } from '@youfoundation/js-lib/helpers';
-import { getFileHeaderBytesOverPeerByGlobalTransitId } from '@youfoundation/js-lib/peer';
+import { jsonStringify64, tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { getFileHeaderBytesOverPeerByGlobalTransitId } from '@homebase-id/js-lib/peer';
 
 const includeMetadataHeader = true;
 const includeTransferHistory = true;

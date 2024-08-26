@@ -1,6 +1,6 @@
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition, getCommunities } from '../../providers/CommunityDefinitionProvider';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import { useQuery } from '@tanstack/react-query';
 
 export const useCommunities = () => {

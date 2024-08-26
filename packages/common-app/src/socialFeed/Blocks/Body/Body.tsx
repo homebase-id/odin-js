@@ -1,9 +1,9 @@
-import { Article, PostContent, getChannelDrive } from '@youfoundation/js-lib/public';
+import { Article, PostContent, getChannelDrive } from '@homebase-id/js-lib/public';
 import { ReactNode, useState } from 'react';
 import { ellipsisAtMaxChar, t } from '../../../helpers';
 import { RichTextRenderer } from '../../../richText';
 import { EmbeddedPostContent } from './EmbeddedPostContent';
-import { PayloadDescriptor } from '@youfoundation/js-lib/core';
+import { PayloadDescriptor } from '@homebase-id/js-lib/core';
 
 const MAX_CHAR_FOR_SUMMARY = 400;
 

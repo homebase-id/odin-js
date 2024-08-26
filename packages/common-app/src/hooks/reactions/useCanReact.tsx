@@ -1,6 +1,6 @@
-import { BlogConfig, PostContent } from '@youfoundation/js-lib/public';
-import { DrivePermissionType } from '@youfoundation/js-lib/core';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { BlogConfig, PostContent } from '@homebase-id/js-lib/public';
+import { DrivePermissionType } from '@homebase-id/js-lib/core';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 import { useQuery } from '@tanstack/react-query';
 import { useSecurityContext } from '../securityContext/useSecurityContext';

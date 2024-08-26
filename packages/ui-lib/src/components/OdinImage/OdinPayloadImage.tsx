@@ -1,4 +1,4 @@
-import { DotYouClient, ImageSize } from '@youfoundation/js-lib/core';
+import { DotYouClient, ImageSize } from '@homebase-id/js-lib/core';
 import { useImage } from '../../hooks/image/useImage';
 import { useEffect } from 'react';
 import { ImageEvents, ImageSource } from './types';

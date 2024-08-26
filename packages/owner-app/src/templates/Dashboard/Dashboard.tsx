@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
-import { getOperatingSystem } from '@youfoundation/js-lib/auth';
-import { isTouchDevice } from '@youfoundation/js-lib/helpers';
+import { getOperatingSystem } from '@homebase-id/js-lib/auth';
+import { isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { FeedTeaser } from './FeedTeaser';
 import { useAutofixDefaultConfig } from '../../hooks/useAutoFixDefaultConfig';
 import {
@@ -17,8 +17,8 @@ import {
   COMMUNITY_APP_ID,
   FEED_APP_ID,
   PHOTO_APP_ID,
-} from '@youfoundation/common-app';
-import { House, Cog, Download } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { House, Cog, Download } from '@homebase-id/common-app/icons';
 
 const Dashboard = () => {
   useAutofixDefaultConfig();

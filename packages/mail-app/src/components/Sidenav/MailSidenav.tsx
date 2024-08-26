@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { NavLink, useMatch } from 'react-router-dom';
 
 import { useLiveMailProcessor } from '../../hooks/mail/useLiveMailProcessor';
-import { useRemoveNotifications, MAIL_APP_ID, Sidenav, t } from '@youfoundation/common-app';
+import { useRemoveNotifications, MAIL_APP_ID, Sidenav, t } from '@homebase-id/common-app';
 import {
   Envelope,
   PaperPlane,
@@ -11,7 +11,7 @@ import {
   Archive,
   Cog,
   IconProps,
-} from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app/icons';
 
 const ROOT_PATH = '/apps/mail';
 

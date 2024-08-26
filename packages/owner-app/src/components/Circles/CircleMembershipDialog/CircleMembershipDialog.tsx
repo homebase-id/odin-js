@@ -8,10 +8,10 @@ import {
   ActionButton,
   CircleSelector,
   DialogWrapper,
-} from '@youfoundation/common-app';
-import { Arrow } from '@youfoundation/common-app/icons';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { CircleGrant } from '@youfoundation/js-lib/network';
+} from '@homebase-id/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { CircleGrant } from '@homebase-id/js-lib/network';
 
 interface InnerCircleSelectionDialogProps {
   title: string;

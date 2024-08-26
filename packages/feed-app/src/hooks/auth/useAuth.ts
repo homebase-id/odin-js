@@ -1,4 +1,4 @@
-import { DrivePermissionType } from '@youfoundation/js-lib/core';
+import { DrivePermissionType } from '@homebase-id/js-lib/core';
 import { useEffect, useState } from 'react';
 import { useVerifyToken } from './useVerifyToken';
 import {
@@ -13,16 +13,16 @@ import {
   saveEccKey,
   retrieveEccKey,
   throwAwayTheECCKey,
-} from '@youfoundation/js-lib/auth';
+} from '@homebase-id/js-lib/auth';
 import { ROOT_PATH } from '../../app/App';
 import {
   ALL_CONNECTIONS_CIRCLE_ID,
   AppPermissionType,
   ContactConfig,
-} from '@youfoundation/js-lib/network';
-import { BlogConfig, HomePageConfig } from '@youfoundation/js-lib/public';
-import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
-import { APP_AUTH_TOKEN, APP_SHARED_SECRET, useDotYouClient } from '@youfoundation/common-app';
+} from '@homebase-id/js-lib/network';
+import { BlogConfig, HomePageConfig } from '@homebase-id/js-lib/public';
+import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
+import { APP_AUTH_TOKEN, APP_SHARED_SECRET, useDotYouClient } from '@homebase-id/common-app';
 
 export const useAuth = () => {
   const { getDotYouClient, getSharedSecret, hasSharedSecret } = useDotYouClient();

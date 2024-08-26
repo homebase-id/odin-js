@@ -3,7 +3,7 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import {
   MAIL_CONVERSATION_FILE_TYPE,
   MailConversation,
@@ -12,8 +12,8 @@ import {
   getMailConversations,
   uploadMail,
 } from './MailProvider';
-import { getNewId } from '@youfoundation/js-lib/helpers';
-import { getConnections } from '@youfoundation/js-lib/network';
+import { getNewId } from '@homebase-id/js-lib/helpers';
+import { getConnections } from '@homebase-id/js-lib/network';
 
 export const rando = (arr: string[]) => {
   return arr[Math.floor(Math.random() * arr.length)];

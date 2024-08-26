@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 
-import { ReactionContext } from '@youfoundation/js-lib/public';
+import { ReactionContext } from '@homebase-id/js-lib/public';
 import { useDotYouClient } from '../../../../../hooks/auth/useDotYouClient';
 import { useReaction } from '../../../../../hooks/reactions/useReaction';
 import { useOutsideTrigger } from '../../../../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';

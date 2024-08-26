@@ -6,8 +6,8 @@ import {
   useFetchIsOwnDomainAvailable,
 } from '../../hooks/ownDomain/useOwnDomain';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
-import { Input, Label } from '@youfoundation/common-app';
-import { Arrow, Exclamation } from '@youfoundation/common-app/icons';
+import { Input, Label } from '@homebase-id/common-app';
+import { Arrow, Exclamation } from '@homebase-id/common-app/icons';
 
 interface Props {
   domain: string;

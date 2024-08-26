@@ -1,4 +1,4 @@
-import { PostContent } from '@youfoundation/js-lib/public';
+import { PostContent } from '@homebase-id/js-lib/public';
 import { FC } from 'react';
 import {
   AuthorImage,
@@ -14,10 +14,10 @@ import {
   LoadingBlock,
   t,
   ToGroupBlock,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { useNavigate } from 'react-router-dom';
-import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
-import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DoubleClickHeartForMedia } from '@homebase-id/common-app';
+import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { UnreachableIdentity } from './UnreachableIdentity';
 

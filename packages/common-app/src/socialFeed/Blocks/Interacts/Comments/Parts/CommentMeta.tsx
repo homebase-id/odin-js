@@ -1,4 +1,4 @@
-import { ReactionContext } from '@youfoundation/js-lib/public';
+import { ReactionContext } from '@homebase-id/js-lib/public';
 import { formatToTimeAgo } from '../../../../../helpers/timeago/format';
 import { CommentLikeButton } from './CommentLikeButton';
 import { t } from '../../../../../helpers';

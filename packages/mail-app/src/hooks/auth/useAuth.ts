@@ -1,4 +1,4 @@
-import { DrivePermissionType, TargetDrive } from '@youfoundation/js-lib/core';
+import { DrivePermissionType, TargetDrive } from '@homebase-id/js-lib/core';
 import { useEffect, useState } from 'react';
 import { useVerifyToken } from './useVerifyToken';
 import {
@@ -13,15 +13,15 @@ import {
   saveEccKey,
   retrieveEccKey,
   throwAwayTheECCKey,
-} from '@youfoundation/js-lib/auth';
+} from '@homebase-id/js-lib/auth';
 import { REACT_QUERY_CACHE_KEY, ROOT_PATH } from '../../app/App';
-import { ALL_CONNECTIONS_CIRCLE_ID, AppPermissionType } from '@youfoundation/js-lib/network';
+import { ALL_CONNECTIONS_CIRCLE_ID, AppPermissionType } from '@homebase-id/js-lib/network';
 import {
   APP_AUTH_TOKEN,
   APP_SHARED_SECRET,
   MAIL_APP_ID,
   useDotYouClient,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { clear } from 'idb-keyval';
 
 const MailDrive: TargetDrive = {

@@ -1,7 +1,7 @@
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { BuiltInProfiles } from '@youfoundation/js-lib/profile';
-import { hasDebugFlag, isTouchDevice } from '@youfoundation/js-lib/helpers';
+import { BuiltInProfiles } from '@homebase-id/js-lib/profile';
+import { hasDebugFlag, isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { FEED_APP_ID, CHAT_APP_ID, MAIL_APP_ID, COMMUNITY_APP_ID } from '../../constants';
 import { HOME_ROOT_PATH } from '../../core';
 import { getVersion, t, ellipsisAtMaxChar } from '../../helpers';

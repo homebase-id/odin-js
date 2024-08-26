@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { stringGuidsEqual, stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual, stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import {
   ApiType,
   DotYouClient,
@@ -7,8 +7,8 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   TargetDrive,
-} from '@youfoundation/js-lib/core';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+} from '@homebase-id/js-lib/core';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import {
   CommunityDefinition,
   getCommunityDefinition,
@@ -16,12 +16,12 @@ import {
   removeCommunityDefinition,
   saveCommunity,
 } from '../../providers/CommunityDefinitionProvider';
-import { COMMUNITY_APP_ID, t } from '@youfoundation/common-app';
+import { COMMUNITY_APP_ID, t } from '@homebase-id/common-app';
 import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
 import {
   AppDriveAuthorizationParams,
   getExtendAppRegistrationParams,
-} from '@youfoundation/js-lib/auth';
+} from '@homebase-id/js-lib/auth';
 
 type useCommunityProps = {
   communityId?: string;

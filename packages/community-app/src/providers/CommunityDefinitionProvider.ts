@@ -22,14 +22,14 @@ import {
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import {
   getNewId,
   getRandom16ByteArray,
   jsonStringify64,
   stringGuidsEqual,
   stringToUint8Array,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 
 export interface CommunityDefinition {
   title: string;

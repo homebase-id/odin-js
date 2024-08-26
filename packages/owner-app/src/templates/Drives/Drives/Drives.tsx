@@ -1,15 +1,15 @@
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import React from 'react';
 import { useDrives } from '../../../hooks/drives/useDrives';
 import { SectionTitle } from '../../../components/ui/Sections/Section';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { ProfileConfig } from '@youfoundation/js-lib/profile';
-import { BlogConfig } from '@youfoundation/js-lib/public';
-import { ContactConfig } from '@youfoundation/js-lib/network';
-import { t, LoadingBlock } from '@youfoundation/common-app';
-import { HardDrive } from '@youfoundation/common-app/icons';
+import { ProfileConfig } from '@homebase-id/js-lib/profile';
+import { BlogConfig } from '@homebase-id/js-lib/public';
+import { ContactConfig } from '@homebase-id/js-lib/network';
+import { t, LoadingBlock } from '@homebase-id/common-app';
+import { HardDrive } from '@homebase-id/common-app/icons';
 
 const Drives = () => {
   const {

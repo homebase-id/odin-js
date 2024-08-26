@@ -11,8 +11,8 @@ import {
   InlineComboboxInput,
   InlineComboboxItem,
   InlineComboboxSeleactableEmpty,
-} from '@youfoundation/rich-text-editor';
-import { ErrorNotification, t } from '@youfoundation/common-app';
+} from '@homebase-id/rich-text-editor';
+import { ErrorNotification, t } from '@homebase-id/common-app';
 import { useParams } from 'react-router-dom';
 import { useCommunityChannels } from '../../../../hooks/community/channels/useCommunityChannels';
 import { useCommunity } from '../../../../hooks/community/useCommunity';

@@ -1,4 +1,4 @@
-import { useChannels } from '@youfoundation/common-app';
+import { useChannels } from '@homebase-id/common-app';
 import { useAuth } from '../../../../hooks/auth/useAuth';
 import ChannelTeaser from '../ChannelTeaser/ChannelTeaser';
 

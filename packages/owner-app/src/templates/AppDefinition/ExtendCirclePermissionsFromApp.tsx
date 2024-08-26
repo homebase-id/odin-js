@@ -6,14 +6,14 @@ import {
   t,
   useCircle,
   useCircles,
-} from '@youfoundation/common-app';
-import { Arrow } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
 import Section from '../../components/ui/Sections/Section';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useApp } from '../../hooks/apps/useApp';
 import { drivesParamToDriveGrantRequest } from './RegisterApp';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { DriveGrant } from '@youfoundation/js-lib/network';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { DriveGrant } from '@homebase-id/js-lib/network';
 import { useEffect } from 'react';
 
 const ExtendCirclePermissionsFromApp = () => {

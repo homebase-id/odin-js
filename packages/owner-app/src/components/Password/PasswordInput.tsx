@@ -1,5 +1,5 @@
-import { Input } from '@youfoundation/common-app';
-import { CloseEye, Eye } from '@youfoundation/common-app/icons';
+import { Input } from '@homebase-id/common-app';
+import { CloseEye, Eye } from '@homebase-id/common-app/icons';
 import React, { useState, useEffect, DetailedHTMLProps } from 'react';
 
 export const PasswordInput = (

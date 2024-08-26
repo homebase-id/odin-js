@@ -1,9 +1,9 @@
-import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 
 import {
   CollaborativeChannelDefinition,
   RemoteCollaborativeChannelDefinition,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 import { t } from '../helpers/i18n/dictionary';
 import { AclSummary } from '../acl/AclInfo/AclInfo';
 import { Persons } from '../ui/Icons/Persons';

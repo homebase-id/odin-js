@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { useOutsideTrigger, t } from '@youfoundation/common-app';
-import { Times, Arrow } from '@youfoundation/common-app/icons';
+import { useOutsideTrigger, t } from '@homebase-id/common-app';
+import { Times, Arrow } from '@homebase-id/common-app/icons';
 
 interface SelectElement {
   value: string;
