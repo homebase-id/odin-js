@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { useDotYouClient } from '../auth/useDotYouClient';
-import { sendIntroduction, IntroductionGroup } from '@youfoundation/js-lib/network';
+import { IntroductionGroup, sendIntroduction } from '@homebase-id/js-lib/network';
 
 export const useIntroductions = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
