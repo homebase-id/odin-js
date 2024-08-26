@@ -42,7 +42,7 @@ import { Globe } from './Globe';
 import { Grid } from './Grid';
 import { HardDrive } from './HardDrive';
 import { Heart } from './Heart';
-import { HeartBeat } from './HeartBeat';
+import { HeartBeat } from './Heartbeat';
 import { House } from './House';
 import { IconFrame } from './IconFrame';
 import { ImageIcon } from './ImageIcon';
