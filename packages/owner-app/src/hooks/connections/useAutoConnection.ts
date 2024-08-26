@@ -5,8 +5,8 @@ import {
   ConnectionInfo,
   confirmIntroduction,
   AUTO_CONNECTIONS_CIRCLE_ID,
-} from '@youfoundation/js-lib/network';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/network';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const useAutoConnection = ({ odinId }: { odinId?: string }) => {
   const queryClient = useQueryClient();
