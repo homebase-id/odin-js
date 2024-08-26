@@ -1,5 +1,5 @@
-import { ActionLink, t } from '@youfoundation/common-app';
-import { Plus } from '@youfoundation/common-app/icons';
+import { ActionLink, t } from '@homebase-id/common-app';
+import { Plus } from '@homebase-id/common-app/icons';
 import { ROOT_PATH as CHAT_ROOT } from '../../../../app/App';
 
 export const NavHeader = ({ isOnline }: { isOnline: boolean }) => {

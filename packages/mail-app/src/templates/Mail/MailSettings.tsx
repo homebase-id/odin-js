@@ -1,12 +1,6 @@
-import {
-  ActionButton,
-  ErrorBoundary,
-  ErrorNotification,
-  Label,
-  t,
-} from '@youfoundation/common-app';
+import { ActionButton, ErrorBoundary, ErrorNotification, Label, t } from '@homebase-id/common-app';
 import { useMailSettings } from '../../hooks/mail/useMailSettings';
-import { RichTextEditor } from '@youfoundation/rich-text-editor';
+import { RichTextEditor } from '@homebase-id/rich-text-editor';
 import { useCallback, useState } from 'react';
 import { MailSettings, mailSettingsUniqueId } from '../../providers/MailSettingsProvider';
 import {
@@ -14,7 +8,7 @@ import {
   NewHomebaseFile,
   RichText,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { MAIL_DRAFT_CONVERSATION_FILE_TYPE } from '../../providers/MailProvider';
 
 const InitialMailSettings: NewHomebaseFile<MailSettings> = {

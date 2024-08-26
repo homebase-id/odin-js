@@ -1,7 +1,7 @@
-import { useSiteData, OwnerName, ThemeLinksSettings } from '@youfoundation/common-app';
-import { HomePageConfig } from '@youfoundation/js-lib/public';
-import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
-import { Image } from '@youfoundation/common-app';
+import { useSiteData, OwnerName, ThemeLinksSettings } from '@homebase-id/common-app';
+import { HomePageConfig } from '@homebase-id/js-lib/public';
+import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@homebase-id/js-lib/profile';
+import { Image } from '@homebase-id/common-app';
 
 const PreviewPage = () => {
   const { owner, home } = useSiteData().data ?? {};

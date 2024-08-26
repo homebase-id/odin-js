@@ -1,11 +1,11 @@
 import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
-import { ImageSize, TargetDrive, DotYouClient, SystemFileType } from '@youfoundation/js-lib/core';
-import { getDecryptedImageUrl } from '@youfoundation/js-lib/media';
+import { ImageSize, TargetDrive, DotYouClient, SystemFileType } from '@homebase-id/js-lib/core';
+import { getDecryptedImageUrl } from '@homebase-id/js-lib/media';
 import {
   getDecryptedImageUrlOverPeer,
   getDecryptedImageUrlOverPeerByGlobalTransitId,
-} from '@youfoundation/js-lib/peer';
+} from '@homebase-id/js-lib/peer';
 
 interface ImageData {
   url: string;

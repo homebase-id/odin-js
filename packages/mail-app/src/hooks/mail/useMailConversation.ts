@@ -1,5 +1,5 @@
 import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { t, useDotYouClientContext, useIntroductions } from '@youfoundation/common-app';
+import { t, useDotYouClientContext, useIntroductions } from '@homebase-id/common-app';
 import {
   ContentType,
   HomebaseFile,
@@ -9,8 +9,8 @@ import {
   getPayloadBytes,
   MediaFile,
   NewMediaFile,
-} from '@youfoundation/js-lib/core';
-import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/core';
+import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import {
   MAIL_CONVERSATION_FILE_TYPE,
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,

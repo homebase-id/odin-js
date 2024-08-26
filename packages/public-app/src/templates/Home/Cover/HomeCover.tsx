@@ -1,5 +1,5 @@
 import ChannelTeaser from '../Common/ChannelTeaser/ChannelTeaser';
-import { BuiltInProfiles, ProfileConfig } from '@youfoundation/js-lib/profile';
+import { BuiltInProfiles, ProfileConfig } from '@homebase-id/js-lib/profile';
 import {
   OwnerName,
   Image,
@@ -7,7 +7,7 @@ import {
   useSiteData,
   ThemeCoverSettings,
   RichTextRenderer,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import Links from '../../../components/ui/Layout/Links/Links';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import ConnectLink from '../../../components/ConnectionActions/ConnectLink/ConnectLink';

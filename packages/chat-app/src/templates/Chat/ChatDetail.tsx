@@ -11,14 +11,14 @@ import {
   useDotYouClient,
   useIntroductions,
   useIsConnected,
-} from '@youfoundation/common-app';
-import { ChevronDown, ChevronLeft, Persons } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { ChevronDown, ChevronLeft, Persons } from '@homebase-id/common-app/icons';
 import {
   ApiType,
   DotYouClient,
   FailedTransferStatuses,
   HomebaseFile,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import {
   ConversationWithYourselfId,
   UnifiedConversation,
@@ -30,7 +30,7 @@ import { ChatHistory } from '../../components/Chat/ChatHistory';
 import { ChatComposer } from '../../components/Chat/Composer/ChatComposer';
 import { ChatInfo } from '../../components/Chat/Detail/ChatInfo';
 import { useNavigate } from 'react-router-dom';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ROOT_PATH } from '../../app/App';
 
 export const ChatDetail = ({

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { fromBlob } from '@youfoundation/js-lib/media';
+import { fromBlob } from '@homebase-id/js-lib/media';
 import { t } from '../../helpers';
 import { ActionButton } from '../../ui';
 import { Label } from '../Label';

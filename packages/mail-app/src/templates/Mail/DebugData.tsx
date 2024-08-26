@@ -1,5 +1,5 @@
-import { ActionButton } from '@youfoundation/common-app';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import { ActionButton } from '@homebase-id/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import { BePolite, MakeConversation } from '../../providers/DebugDataProvider';
 
 export const DebugDataPage = () => {

@@ -1,4 +1,4 @@
-import { MAIL_APP_ID, ExtendPermissionDialog, t } from '@youfoundation/common-app';
+import { MAIL_APP_ID, ExtendPermissionDialog, t } from '@homebase-id/common-app';
 import { drives, permissions } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
 import { MailThreads } from '../../components/Threads/MailThreads';

@@ -1,7 +1,7 @@
 import {
   getDrivePermissionFromString,
   getPermissionNumberFromDrivePermission,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 import {
   AppClientRegistrationRequest,
   AppClientRegistrationResponse,
@@ -12,7 +12,7 @@ import {
   PermissionUpdateRequest,
   PermissionSetGrantRequest,
 } from './AppManagementProviderTypes';
-import { DotYouClient } from '@youfoundation/js-lib/core';
+import { DotYouClient } from '@homebase-id/js-lib/core';
 
 //adds the specified client to the list of allowed clients for a given app; returns a CAT
 export const RegisterAppClient = async (

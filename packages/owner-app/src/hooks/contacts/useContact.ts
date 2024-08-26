@@ -11,14 +11,14 @@ import {
   RawContact,
   getContactByOdinId,
   getContactByUniqueId,
-} from '@youfoundation/js-lib/network';
+} from '@homebase-id/js-lib/network';
 import {
   ApiType,
   DotYouClient,
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 
 export const useContact = ({
   odinId,

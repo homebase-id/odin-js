@@ -7,7 +7,7 @@ import {
   HOME_ROOT_PATH,
   OwnerName,
   useSiteData,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { useAuth } from '../../../../hooks/auth/useAuth';
 
 const Header = () => {

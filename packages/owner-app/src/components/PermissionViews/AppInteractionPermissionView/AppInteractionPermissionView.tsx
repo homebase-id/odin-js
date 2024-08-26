@@ -1,7 +1,7 @@
 import AppPermissionView from '../AppPermissionView/AppPermissionView';
 import { useApps } from '../../../hooks/apps/useApps';
 import { ReactNode } from 'react';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const AppInteractionPermissionOverview = ({
   circleId,

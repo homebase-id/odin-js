@@ -6,8 +6,8 @@ import {
   mergeStates,
   t,
   useCircles,
-} from '@youfoundation/common-app';
-import { Arrow } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
 import Section from '../../components/ui/Sections/Section';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useApp } from '../../hooks/apps/useApp';
@@ -15,7 +15,7 @@ import { useDrives } from '../../hooks/drives/useDrives';
 import { useEffect } from 'react';
 import { drivesParamToDriveGrantRequest, permissionParamToPermissionSet } from './RegisterApp';
 import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 const ExtendAppPermissions = () => {
   // Read the queryString

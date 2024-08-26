@@ -1,9 +1,9 @@
 import { FC } from 'react';
-import { OwnerName, getVersion, useSiteData } from '@youfoundation/common-app';
-import { t } from '@youfoundation/common-app';
+import { OwnerName, getVersion, useSiteData } from '@homebase-id/common-app';
+import { t } from '@homebase-id/common-app';
 
 import Socials from '../Socials/Socials';
-import { Homebase } from '@youfoundation/common-app';
+import { Homebase } from '@homebase-id/common-app';
 
 interface FooterProps {
   className: string;

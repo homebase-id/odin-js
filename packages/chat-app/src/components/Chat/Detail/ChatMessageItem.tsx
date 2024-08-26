@@ -5,9 +5,9 @@ import {
   t,
   getOdinIdColor,
   useDarkMode,
-} from '@youfoundation/common-app';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/common-app';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ChatMessage, ChatDeletedArchivalStaus } from '../../../providers/ChatProvider';
 import { UnifiedConversation } from '../../../providers/ConversationProvider';
 import { ChatMedia } from './Media/ChatMedia';
@@ -19,7 +19,7 @@ import { EmbeddedMessageWithId } from './EmbeddedMessage';
 import { useParams } from 'react-router-dom';
 import { ChatReactionComposer } from '../Composer/ChatReactionComposer';
 import { ChatReactions } from './ChatReactions';
-import { Block } from '@youfoundation/common-app/icons';
+import { Block } from '@homebase-id/common-app/icons';
 
 export const ChatMessageItem = ({
   msg,

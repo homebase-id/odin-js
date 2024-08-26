@@ -1,6 +1,6 @@
-import { ActionLink, t, useSecurityContext } from '@youfoundation/common-app';
+import { ActionLink, t, useSecurityContext } from '@homebase-id/common-app';
 import { useAuth } from '../../../hooks/auth/useAuth';
-import { Check, Persons } from '@youfoundation/common-app/icons';
+import { Check, Persons } from '@homebase-id/common-app/icons';
 
 const ConnectLink = ({ className }: { className: string }) => {
   const { isOwner, getDotYouClient, isAuthenticated } = useAuth();

@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import { CommunityChannel, saveCommunityChannel } from '../../../providers/CommunityProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
-import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
-import { stringGuidsEqual, toGuidId } from '@youfoundation/js-lib/helpers';
+import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
+import { stringGuidsEqual, toGuidId } from '@homebase-id/js-lib/helpers';
 import { useCommunityChannels } from './useCommunityChannels';
 
 export const useCommunityChannel = (props?: { communityId?: string; channelId?: string }) => {

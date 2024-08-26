@@ -3,8 +3,8 @@ import {
   OdinThumbnailImage,
   OdinVideo,
   OdinVideoProps,
-} from '@youfoundation/ui-lib';
-import { EmbeddedThumb } from '@youfoundation/js-lib/core';
+} from '@homebase-id/ui-lib';
+import { EmbeddedThumb } from '@homebase-id/js-lib/core';
 import { useMemo, useState } from 'react';
 import { useDotYouClient } from '../hooks';
 import { Loader, Triangle } from '../ui/Icons';

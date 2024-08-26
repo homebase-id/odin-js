@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Attribute, getProfileAttribute } from '@youfoundation/js-lib/profile';
+import { Attribute, getProfileAttribute } from '@homebase-id/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
-import { useStaticFiles } from '@youfoundation/common-app';
+import { useStaticFiles } from '@homebase-id/common-app';
 import { AttributeDefinitions } from './AttributeDefinitions';
 import { AttributeVm } from './useAttributes';
-import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
-import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
+import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
+import { HomePageAttributes, HomePageConfig } from '@homebase-id/js-lib/public';
 import {
   removeProfileAttribute,
   saveProfileAttribute,

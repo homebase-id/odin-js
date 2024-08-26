@@ -5,8 +5,8 @@ import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import { Link } from 'react-router-dom';
 import { PasswordInput } from '../../components/Password/PasswordInput';
-import { t, DomainHighlighter, Label, ActionButton } from '@youfoundation/common-app';
-import { Loader, Arrow } from '@youfoundation/common-app/icons';
+import { t, DomainHighlighter, Label, ActionButton } from '@homebase-id/common-app';
+import { Loader, Arrow } from '@homebase-id/common-app/icons';
 
 const Login = () => {
   const [password, setPassword] = useState(import.meta.env.DEV ? 'a' : '');

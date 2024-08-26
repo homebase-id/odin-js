@@ -3,17 +3,17 @@ import {
   ChannelDefinition,
   EmbeddedPost,
   ReactAccess,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 import React, { Ref, useEffect, useMemo } from 'react';
 import { useRef, useState } from 'react';
-import { base64ToUint8Array, isTouchDevice, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { base64ToUint8Array, isTouchDevice, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import {
   AccessControlList,
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
   NewMediaFile,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { AclIcon, AclSummary, AclDialog } from '../../acl';
 import { ChannelsDialog } from '../../channels';
 import {
@@ -33,7 +33,7 @@ import {
 
 import { EmbeddedPostContent } from '../Blocks/Body/EmbeddedPostContent';
 import { EmojiSelector } from '../Blocks/Interacts/EmojiPicker/EmojiSelector';
-import { LinkPreview } from '@youfoundation/js-lib/media';
+import { LinkPreview } from '@homebase-id/js-lib/media';
 import { ActionGroup, ActionButton, ErrorNotification } from '../../ui';
 import { Article, Pencil, Globe, Arrow, Lock } from '../../ui/Icons';
 

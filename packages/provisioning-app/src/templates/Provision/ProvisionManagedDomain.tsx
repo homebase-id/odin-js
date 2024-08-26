@@ -5,7 +5,7 @@ import EnteringDetails from '../../components/ManagedDomain/EnteringDetails';
 import CreateIdentityView from '../../components/CreateIdentityView/CreateIdentityView';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useCheckInvitationCode } from '../../hooks/invitationCode/useCheckInvitationCode';
-import { Times } from '@youfoundation/common-app/icons';
+import { Times } from '@homebase-id/common-app/icons';
 import { ManagedDomainProvisionState } from '../../hooks/managedDomain/useManagedDomain';
 
 const Provision = () => {

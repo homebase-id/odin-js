@@ -1,5 +1,5 @@
-import { getHostFromUrl, tryJsonParse } from '@youfoundation/js-lib/helpers';
-import { LinkPreview, LinkPreviewDescriptor } from '@youfoundation/js-lib/media';
+import { getHostFromUrl, tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { LinkPreview, LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 import { ellipsisAtMaxChar } from '../helpers';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -7,11 +7,11 @@ import {
   getPayloadAsJson,
   PayloadDescriptor,
   TargetDrive,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../hooks';
 import { LoadingBlock } from '../ui';
-import { getPayloadAsJsonOverPeerByGlobalTransitId } from '@youfoundation/js-lib/peer';
-import { OdinPreviewImage } from '@youfoundation/ui-lib';
+import { getPayloadAsJsonOverPeerByGlobalTransitId } from '@homebase-id/js-lib/peer';
+import { OdinPreviewImage } from '@homebase-id/ui-lib';
 import { useMemo } from 'react';
 
 export const LinkPreviewTextual = ({

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
-import { getDomainFromUrl } from '@youfoundation/js-lib/helpers';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
 
 export const useCheckIdentity = (odinId?: string) => {
   const doCheckIdentity = async (odinId?: string) => {

@@ -1,12 +1,12 @@
-import { Lol } from '@youfoundation/common-app/icons';
+import { Lol } from '@homebase-id/common-app/icons';
 import {
   ReactionsBar,
   t,
   useDotYouClient,
   useMostSpace,
   useOutsideTrigger,
-} from '@youfoundation/common-app';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+} from '@homebase-id/common-app';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useState, useRef } from 'react';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import { UnifiedConversation } from '../../../providers/ConversationProvider';

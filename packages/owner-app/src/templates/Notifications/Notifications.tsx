@@ -13,15 +13,15 @@ import {
   MAIL_APP_ID,
   ErrorNotification,
   useRemoveNotifications,
-} from '@youfoundation/common-app';
-import { Cog, Times, Bell } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Cog, Times, Bell } from '@homebase-id/common-app/icons';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../../hooks/apps/useApp';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useSearchParams } from 'react-router-dom';
 import { useContact } from '../../hooks/contacts/useContact';
-import { ApiType, DotYouClient, PushNotification } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, PushNotification } from '@homebase-id/js-lib/core';
 import PushNotificationsDialog from '../../components/Notifications/PushNotificationsDialog/PushNotificationsDialog';
 
 interface NotificationClickData {

@@ -1,5 +1,5 @@
 import { Virtualizer, useWindowVirtualizer } from '@tanstack/react-virtual';
-import { PostContent } from '@youfoundation/js-lib/public';
+import { PostContent } from '@homebase-id/js-lib/public';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   BLOG_POST_INFIITE_PAGE_SIZE,
@@ -8,18 +8,18 @@ import {
   SubtleMessage,
   usePostsInfinite,
   useDotYouClient,
-} from '@youfoundation/common-app';
-import { Select } from '@youfoundation/common-app';
-import { flattenInfinteData } from '@youfoundation/common-app';
-import { t } from '@youfoundation/common-app';
-import { useChannels } from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
+import { Select } from '@homebase-id/common-app';
+import { flattenInfinteData } from '@homebase-id/common-app';
+import { t } from '@homebase-id/common-app';
+import { useChannels } from '@homebase-id/common-app';
 import ChannelTeaser from '../ChannelTeaser/ChannelTeaser';
-import { LoadingBlock } from '@youfoundation/common-app';
+import { LoadingBlock } from '@homebase-id/common-app';
 import { useAuth } from '../../../../hooks/auth/useAuth';
-import { PostTeaser } from '@youfoundation/common-app';
+import { PostTeaser } from '@homebase-id/common-app';
 import LoginDialog from '../../../../components/Dialog/LoginDialog/LoginDialog';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useNavigate } from 'react-router-dom';
 
 const VerticalPosts = ({ className }: { className?: string }) => {

@@ -1,4 +1,4 @@
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
 import {
@@ -7,7 +7,7 @@ import {
 } from '../../../providers/CommunityMessageProvider';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ErrorNotification, formatToDateAgoWithRelativeDetail, t } from '@youfoundation/common-app';
+import { ErrorNotification, formatToDateAgoWithRelativeDetail, t } from '@homebase-id/common-app';
 import { CommunityMessageItem } from '../Message/CommunityMessageItem';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
 import { CommunityActions } from './ContextMenu';

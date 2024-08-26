@@ -1,6 +1,6 @@
 {
-  "version": "0.0.4-alpha.4",
-  "name": "@youfoundation/js-lib",
+  "version": "0.0.4-alpha.5",
+  "name": "@homebase-id/js-lib",
   "author": "YouFoundation",
   "description": "JavaScript SDK for the DotYouCore api",
   "files": [
@@ -79,7 +79,7 @@
   },
   "optionalDependencies": {
     "@ffmpeg/util": "^0.12.1",
-    "@youfoundation/ffmpeg": "0.12.10",
+    "@homebase-id/ffmpeg": "0.12.10",
     "mp4box": "^0.5.2"
   },
   "devDependencies": {

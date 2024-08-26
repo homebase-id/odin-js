@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   AuthorImage,
   AuthorName,
@@ -7,9 +7,9 @@ import {
   t,
   usePortal,
   formatDateExludingYearIfCurrent,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { MailConversation, MailDeliveryStatus } from '../../providers/MailProvider';
-import { Exclamation } from '@youfoundation/common-app/icons';
+import { Exclamation } from '@homebase-id/common-app/icons';
 
 export const MailConversationInfo = ({
   mailConversation,

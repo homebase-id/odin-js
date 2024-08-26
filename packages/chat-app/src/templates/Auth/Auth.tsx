@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../hooks/auth/useAuth';
 
-import { DialogWrapper, Alert, t } from '@youfoundation/common-app';
+import { DialogWrapper, Alert, t } from '@homebase-id/common-app';
 import { AutoAuthorize, LoginBox } from '../../components/Auth/LoginBox/LoginBox';
 import { ROOT_PATH } from '../../app/App';
 import { Layout } from '../../components/ui/Layout/Layout';

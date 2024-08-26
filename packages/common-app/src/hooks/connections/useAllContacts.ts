@@ -1,7 +1,7 @@
-import { ContactFile, getContacts } from '@youfoundation/js-lib/network';
+import { ContactFile, getContacts } from '@homebase-id/js-lib/network';
 import { useDotYouClient } from '../auth/useDotYouClient';
 import { useQuery } from '@tanstack/react-query';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 
 const CHUNKSIZE = 200;
 export const useAllContacts = (enabled: boolean) => {

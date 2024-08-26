@@ -10,17 +10,17 @@ import {
   useSentConnections,
   useActiveConnections,
   ActionGroup,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import PersonIncomingRequest from '../../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
 import PersonOutgoingRequest from '../../../components/Connection/PersonOutgoingRequest/PersonOutgoingRequest';
 import { SectionTitle } from '../../../components/ui/Sections/Section';
 import { useEffect, useState } from 'react';
 import PersonActive from '../../../components/Connection/PersonActive/PersonActive';
-import { DotYouProfile } from '@youfoundation/js-lib/network';
+import { DotYouProfile } from '@homebase-id/js-lib/network';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { OutgoingConnectionDialog } from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
 import { IntroductionDialog } from '../../../components/Connection/ConnectionDialogs/IntroductionDialog';
-import { Persons, Plus } from '@youfoundation/common-app/icons';
+import { Persons, Plus } from '@homebase-id/common-app/icons';
 
 const Connections = () => {
   const [hasActiveConnections, setActiveConnections] = useState(true);

@@ -5,15 +5,15 @@ import {
   ActionButton,
   useManagePost,
   ErrorNotification,
-} from '@youfoundation/common-app';
-import { OpenLock, Lock, Article as ArticleIcon, Clipboard } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { OpenLock, Lock, Article as ArticleIcon, Clipboard } from '@homebase-id/common-app/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { ROOT_PATH } from '../../app/App';
 import { useEffect, useState } from 'react';
-import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
-import { BlogConfig, ChannelDefinition } from '@youfoundation/js-lib/public';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
+import { BlogConfig, ChannelDefinition } from '@homebase-id/js-lib/public';
+import { getNewId } from '@homebase-id/js-lib/helpers';
 
 export const ArticleDuplicatePage = () => {
   const { channelKey, postKey } = useParams();

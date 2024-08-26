@@ -5,7 +5,7 @@ import {
   useActiveConnections,
   LoadingBlock,
   Pager,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 
 const ConnectionsView = ({ className }: { className?: string }) => {
   const [activePage, setActivePage] = useState(1);

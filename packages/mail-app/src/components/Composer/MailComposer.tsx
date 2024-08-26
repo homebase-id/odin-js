@@ -12,7 +12,7 @@ import {
   t,
   useAllContacts,
   useOutsideTrigger,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 
 import {
   NewHomebaseFile,
@@ -21,8 +21,8 @@ import {
   NewMediaFile,
   MediaFile,
   RichText,
-} from '@youfoundation/js-lib/core';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/core';
+import { getNewId } from '@homebase-id/js-lib/helpers';
 import { useMailConversation, useMailDraft } from '../../hooks/mail/useMailConversation';
 import {
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
@@ -32,12 +32,12 @@ import {
   MailDrive,
 } from '../../providers/MailProvider';
 import { RecipientInput } from './RecipientInput';
-import { useDotYouClientContext } from '@youfoundation/common-app';
-import { RichTextEditor } from '@youfoundation/rich-text-editor';
+import { useDotYouClientContext } from '@homebase-id/common-app';
+import { RichTextEditor } from '@homebase-id/rich-text-editor';
 import { useBlocker } from 'react-router-dom';
-import { MediaOptions } from '@youfoundation/rich-text-editor/src/editor/ImagePlugin/ImagePlugin';
+import { MediaOptions } from '@homebase-id/rich-text-editor/src/editor/ImagePlugin/ImagePlugin';
 import { useMailSettings } from '../../hooks/mail/useMailSettings';
-import { Plus, PaperPlane, Save, Trash } from '@youfoundation/common-app/icons';
+import { Plus, PaperPlane, Save, Trash } from '@homebase-id/common-app/icons';
 
 const FIFTY_MEGA_BYTES = 50 * 1024 * 1024;
 

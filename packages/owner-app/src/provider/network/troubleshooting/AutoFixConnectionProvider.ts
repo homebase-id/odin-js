@@ -1,5 +1,5 @@
-import { DotYouClient } from '@youfoundation/js-lib/core';
-import { assertIfDefined } from '@youfoundation/js-lib/helpers';
+import { DotYouClient } from '@homebase-id/js-lib/core';
+import { assertIfDefined } from '@homebase-id/js-lib/helpers';
 
 const autoFixPath = '/circles/connections/autofix';
 export const autoFixConnections = async (dotYouClient: DotYouClient) => {

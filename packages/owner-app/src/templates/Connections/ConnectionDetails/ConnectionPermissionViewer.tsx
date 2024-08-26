@@ -4,17 +4,17 @@ import {
   ActionButton,
   LoadingBlock,
   CirclePermissionView,
-} from '@youfoundation/common-app';
-import { Exclamation, Check, Pencil } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Exclamation, Check, Pencil } from '@homebase-id/common-app/icons';
 import {
   getUniqueDrivesWithHighestPermission,
   stringGuidsEqual,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 import AppMembershipView from '../../../components/PermissionViews/AppPermissionView/AppPermissionView';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import Section from '../../../components/ui/Sections/Section';
 import { useApps } from '../../../hooks/apps/useApps';
-import { AccessGrant } from '@youfoundation/js-lib/network';
+import { AccessGrant } from '@homebase-id/js-lib/network';
 import { CircleMembershipStatus } from '../../../provider/network/troubleshooting/ConnectionGrantProvider';
 
 export const ConnectionPermissionViewer = ({

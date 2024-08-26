@@ -5,9 +5,9 @@ import { useContact } from '../../../hooks/contacts/useContact';
 import { useEffect, useState } from 'react';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
 import { useConnectionGrantStatus } from '../../../hooks/connections/useConnectionGrantStatus';
-import { hasDebugFlag, jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import { hasDebugFlag, jsonStringify64 } from '@homebase-id/js-lib/helpers';
 import { OutgoingConnectionDialog } from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import {
   useDotYouClient,
   useIdentityIFollow,
@@ -18,8 +18,8 @@ import {
   ErrorNotification,
   ActionGroup,
   ConfirmDialog,
-} from '@youfoundation/common-app';
-import { House, Block, Trash, HeartBeat, Persons, Ellipsis } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { House, Block, Trash, HeartBeat, Persons, Ellipsis } from '@homebase-id/common-app/icons';
 
 export const IdentityPageMetaAndActions = ({
   odinId, // setIsEditPermissionActive,

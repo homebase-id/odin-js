@@ -1,8 +1,8 @@
 import { Suspense } from 'react';
-import { ChannelDefinition, EmbeddedPost, PostContent } from '@youfoundation/js-lib/public';
+import { ChannelDefinition, EmbeddedPost, PostContent } from '@homebase-id/js-lib/public';
 import { OwnerActions } from './OwnerActions';
-import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
-import { aclEqual } from '@youfoundation/js-lib/helpers';
+import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
+import { aclEqual } from '@homebase-id/js-lib/helpers';
 import { AclSummary } from '../../../acl';
 import { HOME_ROOT_PATH } from '../../../core';
 import { t } from '../../../helpers';

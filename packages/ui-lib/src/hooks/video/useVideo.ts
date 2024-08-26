@@ -1,19 +1,19 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { DotYouClient, TargetDrive, getFileHeader } from '@youfoundation/js-lib/core';
-import { tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { DotYouClient, TargetDrive, getFileHeader } from '@homebase-id/js-lib/core';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import {
   getDecryptedVideoChunk,
   getDecryptedVideoUrl,
   PlainVideoMetadata,
   SegmentedVideoMetadata,
-} from '@youfoundation/js-lib/media';
+} from '@homebase-id/js-lib/media';
 import {
   getDecryptedVideoChunkOverPeer,
   getDecryptedVideoUrlOverPeer,
   getDecryptedVideoUrlOverPeerByGlobalTransitId,
   getFileHeaderBytesOverPeerByGlobalTransitId,
   getFileHeaderOverPeer,
-} from '@youfoundation/js-lib/peer';
+} from '@homebase-id/js-lib/peer';
 
 export const useVideo = (
   dotYouClient: DotYouClient,

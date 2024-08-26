@@ -8,7 +8,7 @@ import {
   resetPassword as resetOwnerPassword,
   changePassword as setNewOwnerPassword,
 } from '../../provider/auth/AuthenticationProvider';
-import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
+import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import {
   HOME_ROOT_PATH,
   HOME_SHARED_SECRET,
@@ -16,7 +16,7 @@ import {
   STORAGE_IDENTITY_KEY,
   logoutOwner,
   useDotYouClient,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 
 export const SETUP_PATH = '/owner/setup';
 

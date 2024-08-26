@@ -3,7 +3,7 @@ import {
   GetTargetDriveFromChannelId,
   PostContent,
   getChannelDrive,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 import { useEffect } from 'react';
 
 import {
@@ -11,8 +11,8 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
-import { getAnonymousDirectImageUrl } from '@youfoundation/js-lib/media';
+} from '@homebase-id/js-lib/core';
+import { getAnonymousDirectImageUrl } from '@homebase-id/js-lib/media';
 import { Helmet } from 'react-helmet-async';
 import { Video } from '../../media/Video';
 import { ActionButton } from '../../ui';

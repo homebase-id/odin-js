@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { hasValidOwnerToken } from '@youfoundation/common-app';
+import { hasValidOwnerToken } from '@homebase-id/common-app';
 
 const MINUTE_IN_MS = 60000;
 

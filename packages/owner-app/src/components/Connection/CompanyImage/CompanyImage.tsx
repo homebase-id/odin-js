@@ -13,8 +13,8 @@ import {
   FEED_CHAT_APP_ID,
   COMMUNITY_APP_ID,
   HomebaseCommunity,
-} from '@youfoundation/common-app';
-import { getTwoLettersFromDomain, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/common-app';
+import { getTwoLettersFromDomain, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useState, useMemo } from 'react';
 
 export const CompanyImage = ({

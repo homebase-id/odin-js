@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   ConnectionImage,
   ConnectionName,
@@ -9,10 +9,10 @@ import {
   formatToTimeAgoWithRelativeDetail,
   t,
   usePortal,
-} from '@youfoundation/common-app';
-import { Arrow } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
 import { MailConversation, getAllRecipients } from '../../providers/MailProvider';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import { useMailOrigin } from '../../hooks/mail/useMailOrigin';
 import { RecipientsList } from '../../components/Threads/RecipientsList';
 import { ROOT_PATH } from '../../app/App';

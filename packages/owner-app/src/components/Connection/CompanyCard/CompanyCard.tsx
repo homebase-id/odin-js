@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
-import { HybridLink } from '@youfoundation/common-app';
-import { Shop } from '@youfoundation/common-app/icons';
+import { HybridLink } from '@homebase-id/common-app';
+import { Shop } from '@homebase-id/common-app/icons';
 import { CompanyImage } from '../CompanyImage/CompanyImage';
 
 export interface CompanyCardProps {

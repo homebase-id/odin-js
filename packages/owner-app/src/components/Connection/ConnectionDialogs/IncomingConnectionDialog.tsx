@@ -12,8 +12,8 @@ import {
   DomainHighlighter,
   CircleSelector,
   DialogWrapper,
-} from '@youfoundation/common-app';
-import { Arrow } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
 import ContactImage from '../../Connection/ContactImage/ContactImage';
 import YourInfo from '../../Connection/YourInfo/YourInfo';
 import { usePendingConnection } from '../../../hooks/connections/usePendingConnection';

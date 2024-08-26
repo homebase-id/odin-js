@@ -8,8 +8,8 @@ import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 
 import { useSearchParams } from 'react-router-dom';
 import { FIRST_RUN_TOKEN_STORAGE_KEY } from '../../hooks/configure/useInit';
-import { ActionButton, Alert, DomainHighlighter, Label, t } from '@youfoundation/common-app';
-import { Arrow } from '@youfoundation/common-app/icons';
+import { ActionButton, Alert, DomainHighlighter, Label, t } from '@homebase-id/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
 import { PasswordInput } from '../../components/Password/PasswordInput';
 import { PasswordStrength } from '../../components/Password/PasswordStrength';
 

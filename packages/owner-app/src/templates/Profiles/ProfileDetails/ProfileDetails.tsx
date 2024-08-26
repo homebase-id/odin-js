@@ -1,4 +1,4 @@
-import { getNewId, slugify } from '@youfoundation/js-lib/helpers';
+import { getNewId, slugify } from '@homebase-id/js-lib/helpers';
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AttributeVm, useAttributes } from '../../../hooks/profiles/useAttributes';
@@ -10,8 +10,8 @@ import { useProfileSections } from '../../../hooks/profiles/useProfileSections';
 import Submenu from '../../../components/SubMenu/SubMenu';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { ProfileSection } from '@youfoundation/js-lib/profile';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { ProfileSection } from '@homebase-id/js-lib/profile';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { BrokenAttribute } from '../../../components/Attribute/BrokenAttribute/BrokenAttribute';
 import ProfileDialog from '../../../components/Attribute/ProfileDialog/ProfileDialog';
 import {
@@ -24,8 +24,8 @@ import {
   Label,
   LoadingBlock,
   ErrorBoundary,
-} from '@youfoundation/common-app';
-import { Heart, Pencil, Trash, Plus } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Heart, Pencil, Trash, Plus } from '@homebase-id/common-app/icons';
 
 const ProfileDetails = () => {
   const {

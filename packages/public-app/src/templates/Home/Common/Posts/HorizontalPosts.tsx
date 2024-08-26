@@ -1,5 +1,5 @@
-import { SubtleMessage, t } from '@youfoundation/common-app';
-import { useChannels } from '@youfoundation/common-app';
+import { SubtleMessage, t } from '@homebase-id/common-app';
+import { useChannels } from '@homebase-id/common-app';
 import { PostChannelTeaser } from '../PostChannelTeaser/PostChannelTeaser';
 import { useAuth } from '../../../../hooks/auth/useAuth';
 

@@ -6,10 +6,10 @@ import {
   Attribute,
   getProfileAttributes,
   getProfileAttribute,
-} from '@youfoundation/js-lib/profile';
+} from '@homebase-id/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
-import { GetFile } from '@youfoundation/js-lib/public';
-import { PayloadDescriptor } from '@youfoundation/js-lib/core';
+import { GetFile } from '@homebase-id/js-lib/public';
+import { PayloadDescriptor } from '@homebase-id/js-lib/core';
 
 type ShortBioData = {
   id: string;

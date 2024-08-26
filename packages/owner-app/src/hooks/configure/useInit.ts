@@ -3,8 +3,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { WelcomeData } from '../../templates/Setup/Setup';
 import { DriveDefinitionParam, initialize } from '../../provider/system/SystemProvider';
 import { useAuth } from '../auth/useAuth';
-import { toGuidId } from '@youfoundation/js-lib/helpers';
-import { CircleDefinition } from '@youfoundation/js-lib/network';
+import { toGuidId } from '@homebase-id/js-lib/helpers';
+import { CircleDefinition } from '@homebase-id/js-lib/network';
 import {
   SetupAutoFollow,
   SetupBlog,
@@ -12,7 +12,7 @@ import {
   SetupHome,
   SetupProfileDefinition,
 } from '../../provider/setup/SetupProvider';
-import { useStaticFiles } from '@youfoundation/common-app';
+import { useStaticFiles } from '@homebase-id/common-app';
 import { getSettings, updateSettings } from '../../provider/system/SettingsProvider';
 import { AUTO_FIX_VERSION } from '../useAutoFixDefaultConfig';
 

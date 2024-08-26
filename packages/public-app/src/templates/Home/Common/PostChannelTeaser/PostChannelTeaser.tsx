@@ -1,4 +1,4 @@
-import { PostContent } from '@youfoundation/js-lib/public';
+import { PostContent } from '@homebase-id/js-lib/public';
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -7,14 +7,14 @@ import {
   HOME_ROOT_PATH,
   PrimaryMedia,
   usePostsInfinite,
-} from '@youfoundation/common-app';
-import { Arrow } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
 
-import { t } from '@youfoundation/common-app';
-import { ActionLink } from '@youfoundation/common-app';
+import { t } from '@homebase-id/common-app';
+import { ActionLink } from '@homebase-id/common-app';
 
 import './PostChannelTeaser.css';
-import { HomebaseFile, PayloadDescriptor } from '@youfoundation/js-lib/core';
+import { HomebaseFile, PayloadDescriptor } from '@homebase-id/js-lib/core';
 
 interface PostChannelTeaserProps {
   className?: string;

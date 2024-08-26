@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { MailConversation, MailDrive } from '../../providers/MailProvider';
 import { AttachmentItem } from './MailAttachmentOverview';
 import {
@@ -13,12 +13,12 @@ import {
   t,
   useDotYouClientContext,
   usePortal,
-} from '@youfoundation/common-app';
-import { OdinPreviewImage } from '@youfoundation/ui-lib';
+} from '@homebase-id/common-app';
+import { OdinPreviewImage } from '@homebase-id/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ROOT_PATH } from '../../app/App';
-import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
-import { Chevron, Envelope, ImageIcon } from '@youfoundation/common-app/icons';
+import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
+import { Chevron, Envelope, ImageIcon } from '@homebase-id/common-app/icons';
 
 export const MailAttachmentsInfo = ({
   mailThread,

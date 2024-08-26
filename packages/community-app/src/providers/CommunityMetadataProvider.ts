@@ -12,8 +12,8 @@ import {
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
-} from '@youfoundation/js-lib/core';
-import { jsonStringify64, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/core';
+import { jsonStringify64, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
 
 export interface CommunityMetadata {

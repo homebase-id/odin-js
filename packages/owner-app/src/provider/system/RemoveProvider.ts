@@ -1,4 +1,4 @@
-import { DotYouClient, DriveDefinition, TargetDrive } from '@youfoundation/js-lib/core';
+import { DotYouClient, DriveDefinition, TargetDrive } from '@homebase-id/js-lib/core';
 import { getNonce } from '../auth/AuthenticationProvider';
 import { prepareAuthPassword } from '../auth/AuthenticationHelper';
 

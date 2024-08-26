@@ -1,6 +1,6 @@
 import { FC, ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Toaster, useDarkMode } from '@youfoundation/common-app';
+import { Toaster, useDarkMode } from '@homebase-id/common-app';
 import { MailSidenav } from '../../Sidenav/MailSidenav';
 
 interface LayoutProps {

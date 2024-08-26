@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { HOME_PATH, RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
 import { useInit } from '../../hooks/configure/useInit';
 import { useIsConfigured } from '../../hooks/configure/useIsConfigured';
-import { DomainHighlighter, ErrorNotification } from '@youfoundation/common-app';
+import { DomainHighlighter, ErrorNotification } from '@homebase-id/common-app';
 import ShowRecoveryKey from '../../components/Recovery/ShowRecoveryKey';
 import { ProfileSetupData, SocialSetupData } from '../../provider/setup/SetupProvider';
 import SetupWizard from '../../components/Setup/SetupWizard';

@@ -8,11 +8,11 @@ import {
   HomebaseFile,
   ReactionFile,
   uploadGroupReaction,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../../providers/ChatProvider';
 import { UnifiedConversation } from '../../providers/ConversationProvider';
-import { tryJsonParse } from '@youfoundation/js-lib/helpers';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useChatReaction = (props?: {
   messageGlobalTransitId: string | undefined;

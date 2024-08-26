@@ -6,15 +6,15 @@ import {
   OwnerImage,
   OwnerName,
   LoadingBlock,
-} from '@youfoundation/common-app';
-import { Persons } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Persons } from '@homebase-id/common-app/icons';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useChatMessages } from '../../../../hooks/chat/useChatMessages';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDeliveryIndicator } from '../../Detail/ChatDeliveryIndicator';
 import { MessageDeletedInnerBody } from '../../Detail/ChatMessageItem';
 import { ChatSentTimeIndicator } from '../../Detail/ChatSentTimeIndicator';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ConversationWithYourselfId } from '../../../../providers/ConversationProvider';
 import { useConversationMetadata } from '../../../../hooks/chat/useConversationMetadata';
 

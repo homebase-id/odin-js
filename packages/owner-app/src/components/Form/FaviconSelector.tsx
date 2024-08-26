@@ -1,6 +1,6 @@
-import { Block } from '@youfoundation/common-app/icons';
-import { EmojiSelector, t, ImageSelector, useImage } from '@youfoundation/common-app';
-import { TargetDrive } from '@youfoundation/js-lib/core';
+import { Block } from '@homebase-id/common-app/icons';
+import { EmojiSelector, t, ImageSelector, useImage } from '@homebase-id/common-app';
+import { TargetDrive } from '@homebase-id/js-lib/core';
 import { ReactNode, useState } from 'react';
 
 interface FaviconSelectorProps {

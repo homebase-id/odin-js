@@ -6,14 +6,14 @@ import {
   AttributeConfig,
   homebaseFileToProfileAttribute,
   GetTargetDriveFromProfileId,
-} from '@youfoundation/js-lib/profile';
+} from '@homebase-id/js-lib/profile';
 import {
   GetFile,
   HomePageAttributes,
   HomePageConfig,
   ResponseEntry,
-} from '@youfoundation/js-lib/public';
-import { HomebaseFile, EmbeddedThumb, queryBatchCollection } from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/public';
+import { HomebaseFile, EmbeddedThumb, queryBatchCollection } from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../auth/useDotYouClient';
 import { getHighestPrioAttributesFromMultiTypes } from '../../helpers/common';
 

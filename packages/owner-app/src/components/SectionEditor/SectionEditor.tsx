@@ -1,9 +1,9 @@
-import { ProfileSection } from '@youfoundation/js-lib/profile';
+import { ProfileSection } from '@homebase-id/js-lib/profile';
 import { useState } from 'react';
 
-import { Trash } from '@youfoundation/common-app/icons';
+import { Trash } from '@homebase-id/common-app/icons';
 import { useProfileSections } from '../../hooks/profiles/useProfileSections';
-import { t, ErrorNotification, ActionButton, Input, Label } from '@youfoundation/common-app';
+import { t, ErrorNotification, ActionButton, Input, Label } from '@homebase-id/common-app';
 import Section from '../ui/Sections/Section';
 
 const SectionEditor = ({

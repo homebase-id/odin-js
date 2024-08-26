@@ -9,9 +9,9 @@ import {
   UploadResult,
   getFileHeaderByUniqueId,
   uploadFile,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { MailDrive } from './MailProvider';
-import { jsonStringify64, stringGuidsEqual, toGuidId } from '@youfoundation/js-lib/helpers';
+import { jsonStringify64, stringGuidsEqual, toGuidId } from '@homebase-id/js-lib/helpers';
 
 export const MAIL_SETTINGS_FILE_TYPE = 9050;
 

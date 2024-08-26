@@ -10,8 +10,8 @@ import {
   TargetDrive,
   HomebaseFile,
   DEFAULT_PAYLOAD_KEY,
-} from '@youfoundation/js-lib/core';
-import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/core';
+import { jsonStringify64 } from '@homebase-id/js-lib/helpers';
 import { useAuth } from '../auth/useAuth';
 
 const includeMetadataHeader = true;

@@ -1,5 +1,5 @@
-import { NewMediaFile } from '@youfoundation/js-lib/core';
-import { ReactionContext } from '@youfoundation/js-lib/public';
+import { NewMediaFile } from '@homebase-id/js-lib/core';
+import { ReactionContext } from '@homebase-id/js-lib/public';
 import { useMemo, useState } from 'react';
 import { VolatileInput, FileOverview, FileSelector } from '../../../../form';
 import { t, getImagesFromPasteEvent } from '../../../../helpers';

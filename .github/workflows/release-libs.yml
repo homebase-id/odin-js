@@ -33,7 +33,7 @@ jobs:
 
       - name: Authenticate to Github packages
         run: |
-          echo "@youfoundation:registry=https://npm.pkg.github.com" > .npmrc
+          echo "@homebase-id:registry=https://npm.pkg.github.com" > .npmrc
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
 
       # Set git User & Bump the version: https://docs.npmjs.com/cli/v8/commands/npm-version

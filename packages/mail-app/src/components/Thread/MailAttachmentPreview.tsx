@@ -8,10 +8,10 @@ import {
   bytesToSize,
   ExtensionThumbnail,
   useDotYouClientContext,
-} from '@youfoundation/common-app';
-import { OdinImage } from '@youfoundation/ui-lib';
-import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
-import { Times, Download, Loader, ArrowLeft, Arrow } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { OdinImage } from '@homebase-id/ui-lib';
+import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
+import { Times, Download, Loader, ArrowLeft, Arrow } from '@homebase-id/common-app/icons';
 
 export const MailAttachmentPreview = ({
   messageId,

@@ -1,4 +1,4 @@
-import { HomePageConfig } from '@youfoundation/js-lib/public';
+import { HomePageConfig } from '@homebase-id/js-lib/public';
 import {
   OwnerName,
   t,
@@ -7,9 +7,9 @@ import {
   HOME_ROOT_PATH,
   ThemeLinksSettings,
   useDotYouClient,
-} from '@youfoundation/common-app';
-import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+} from '@homebase-id/common-app';
+import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 
 const IdentityLink = ({ className }: { className?: string }) => {
   const { data } = useSiteData();

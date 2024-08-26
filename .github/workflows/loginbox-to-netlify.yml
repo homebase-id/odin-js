@@ -24,7 +24,7 @@ jobs:
 
       - name: Authenticate to Github packages
         run: |
-          echo "@youfoundation:registry=https://npm.pkg.github.com" > .npmrc
+          echo "@homebase-id:registry=https://npm.pkg.github.com" > .npmrc
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
 
       - run: npm ci
@@ -34,7 +34,7 @@ jobs:
       - name: Publish to Netlify
         uses: netlify/actions/cli@master
         with:
-          args: deploy --dir=packages/login-app/dist --prod --filter '@youfoundation/login-app'
+          args: deploy --dir=packages/login-app/dist --prod --filter '@homebase-id/login-app'
         env:
           NETLIFY_SITE_ID: b63c83a3-1caf-486d-9a2f-4db2de190ee1
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}

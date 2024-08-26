@@ -1,4 +1,4 @@
-import { t } from '@youfoundation/common-app';
+import { t } from '@homebase-id/common-app';
 import { useState, useEffect } from 'react';
 
 const MAX_SCORE = 4;
@@ -37,14 +37,14 @@ export const PasswordStrength = ({
             {passwordStrength === 0
               ? t('Very weak')
               : passwordStrength === 1
-              ? t('Weak')
-              : passwordStrength === 2
-              ? t('Medium')
-              : passwordStrength === 3
-              ? t('Strong')
-              : passwordStrength === 4
-              ? t('Very strong')
-              : null}
+                ? t('Weak')
+                : passwordStrength === 2
+                  ? t('Medium')
+                  : passwordStrength === 3
+                    ? t('Strong')
+                    : passwordStrength === 4
+                      ? t('Very strong')
+                      : null}
           </>
         ) : null}
       </p>

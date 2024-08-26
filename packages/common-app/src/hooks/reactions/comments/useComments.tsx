@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
-import { getComments, ReactionContext } from '@youfoundation/js-lib/public';
+import { getComments, ReactionContext } from '@homebase-id/js-lib/public';
 
-import { HomebaseFile, ReactionFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../../auth/useDotYouClient';
 
 const PAGE_SIZE = 30;

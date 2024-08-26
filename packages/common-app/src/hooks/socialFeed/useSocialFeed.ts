@@ -1,9 +1,9 @@
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BlogConfig } from '@youfoundation/js-lib/public';
-import { TypedConnectionNotification } from '@youfoundation/js-lib/core';
-import { getSocialFeed, processInbox } from '@youfoundation/js-lib/peer';
+import { BlogConfig } from '@homebase-id/js-lib/public';
+import { TypedConnectionNotification } from '@homebase-id/js-lib/core';
+import { getSocialFeed, processInbox } from '@homebase-id/js-lib/peer';
 import { useCallback } from 'react';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useChannelDrives } from './useChannelDrives';
 import { useDotYouClient } from '../auth/useDotYouClient';
 import { useNotificationSubscriber } from '../transitProcessor/useNotificationSubscriber';

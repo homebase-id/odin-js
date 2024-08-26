@@ -1,5 +1,5 @@
-import { Label, Input, Select, ActionButton, t, Textarea } from '@youfoundation/common-app';
-import { Times } from '@youfoundation/common-app/icons';
+import { Label, Input, Select, ActionButton, t, Textarea } from '@homebase-id/common-app';
+import { Times } from '@homebase-id/common-app/icons';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useEffect, useState } from 'react';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
@@ -8,7 +8,7 @@ import {
   jsonStringify64,
   stringifyToQueryParams,
   tryJsonParse,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 
 const STORAGE_KEY = 'debug-draft';
 interface DefaulValue {

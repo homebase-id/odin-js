@@ -1,9 +1,9 @@
 import { Helmet } from 'react-helmet-async';
-import { HomePageTheme } from '@youfoundation/js-lib/public';
+import { HomePageTheme } from '@homebase-id/js-lib/public';
 import HomeClassic from './Classic/HomeClassic';
 import HomeContent from './Content/HomeContent';
 import HomeCover from './Cover/HomeCover';
-import { ThemeCoverSettings, useSiteData } from '@youfoundation/common-app';
+import { ThemeCoverSettings, useSiteData } from '@homebase-id/common-app';
 import HomeLinks from './Links/HomeLinks';
 import { useMemo } from 'react';
 

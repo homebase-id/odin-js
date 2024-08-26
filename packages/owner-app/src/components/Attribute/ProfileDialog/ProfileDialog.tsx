@@ -1,4 +1,4 @@
-import { ProfileDefinition } from '@youfoundation/js-lib/profile';
+import { ProfileDefinition } from '@homebase-id/js-lib/profile';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
@@ -11,8 +11,8 @@ import {
   Label,
   Textarea,
   DialogWrapper,
-} from '@youfoundation/common-app';
-import { Arrow } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
 
 const ProfileDialog = ({
   title,
