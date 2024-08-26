@@ -1,4 +1,4 @@
-import { AccessControlList } from '@youfoundation/js-lib/core';
+import { AccessControlList } from '@homebase-id/js-lib/core';
 import { createPortal } from 'react-dom';
 import { usePortal } from '../../hooks/portal/usePortal';
 import { DialogWrapper } from '../../ui/Dialog/DialogWrapper';

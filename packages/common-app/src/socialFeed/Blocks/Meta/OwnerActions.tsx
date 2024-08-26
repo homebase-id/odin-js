@@ -1,8 +1,8 @@
-import { PostContent } from '@youfoundation/js-lib/public';
+import { PostContent } from '@homebase-id/js-lib/public';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useManagePost } from '../../../hooks/socialFeed/post/useManagePost';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { ActionGroup, ActionGroupOptionProps } from '../../../ui/Buttons/ActionGroup';
 import { Pencil } from '../../../ui/Icons/Pencil';

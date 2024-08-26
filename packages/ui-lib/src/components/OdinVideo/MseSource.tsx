@@ -1,4 +1,4 @@
-import { SegmentedVideoMetadata } from '@youfoundation/js-lib/media';
+import { SegmentedVideoMetadata } from '@homebase-id/js-lib/media';
 import { useEffect } from 'react';
 import { useVideoUrl } from '../../hooks/video/useVideo';
 import { OdinVideoProps } from './OdinVideo';

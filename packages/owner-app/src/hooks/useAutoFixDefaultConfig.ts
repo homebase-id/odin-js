@@ -1,19 +1,19 @@
-import { getOdinIdColor, useDotYouClient, useErrors } from '@youfoundation/common-app';
+import { getOdinIdColor, useDotYouClient, useErrors } from '@homebase-id/common-app';
 import {
   base64ToUint8Array,
   byteArrayToString,
   stringToUint8Array,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 import {
   BuiltInAttributes,
   BuiltInProfiles,
   MinimalProfileFields,
   getProfileAttributes,
-} from '@youfoundation/js-lib/profile';
+} from '@homebase-id/js-lib/profile';
 import { useEffect, useRef } from 'react';
 import { useAttribute } from './profiles/useAttribute';
 import { useSettings } from './settings/useSettings';
-import { DotYouClient } from '@youfoundation/js-lib/core';
+import { DotYouClient } from '@homebase-id/js-lib/core';
 import { autoFixConnections } from '../provider/network/troubleshooting/AutoFixConnectionProvider';
 
 export const AUTO_FIX_VERSION = '0.0.1';

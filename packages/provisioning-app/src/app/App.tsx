@@ -18,7 +18,7 @@ const queryClient = new QueryClient();
 export const ROOT_PATH = '/sign-up';
 
 import { config } from './config';
-import { NotFound } from '@youfoundation/common-app';
+import { NotFound } from '@homebase-id/common-app';
 
 function App() {
   return (

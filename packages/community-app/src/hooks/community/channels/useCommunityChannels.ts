@@ -1,8 +1,8 @@
 import { QueryClient, useQuery } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import { CommunityChannel, getCommunityChannels } from '../../../providers/CommunityProvider';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const useCommunityChannels = (props: { communityId?: string }) => {
   const { communityId } = props;

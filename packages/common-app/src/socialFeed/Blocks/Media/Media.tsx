@@ -1,5 +1,5 @@
-import { PostContent } from '@youfoundation/js-lib/public';
-import { DEFAULT_PAYLOAD_KEY, EmbeddedThumb, PayloadDescriptor } from '@youfoundation/js-lib/core';
+import { PostContent } from '@homebase-id/js-lib/public';
+import { DEFAULT_PAYLOAD_KEY, EmbeddedThumb, PayloadDescriptor } from '@homebase-id/js-lib/core';
 import { MediaGallery } from './MediaGallery';
 import { PrimaryMedia } from './PrimaryMedia';
 

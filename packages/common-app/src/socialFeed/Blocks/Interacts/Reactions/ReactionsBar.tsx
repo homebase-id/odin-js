@@ -1,4 +1,4 @@
-import { ReactionContext } from '@youfoundation/js-lib/public';
+import { ReactionContext } from '@homebase-id/js-lib/public';
 import { Suspense, useEffect, useState, useRef } from 'react';
 import { CanReactInfo } from '../../../../hooks/reactions/useCanReact';
 import { useErrors } from '../../../../hooks/errors/useErrors';

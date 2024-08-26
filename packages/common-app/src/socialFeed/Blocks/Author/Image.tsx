@@ -1,9 +1,9 @@
-import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
+import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@homebase-id/js-lib/profile';
 import { Image } from '../../../media/Image';
 import { t } from '../../../helpers/i18n/dictionary';
 import { Person } from '../../../ui/Icons/Person';
 import { useSiteData } from '../../../hooks/siteData/useSiteData';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 
 interface ImageProps {
   className?: string;

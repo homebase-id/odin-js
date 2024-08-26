@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ReactionContext } from '@youfoundation/js-lib/public';
+import { ReactionContext } from '@homebase-id/js-lib/public';
 import { t } from '../../../../helpers';
 import { CanReactInfo, useDotYouClient, useReaction, useOutsideTrigger } from '../../../../hooks';
 import { ErrorNotification } from '../../../../ui';

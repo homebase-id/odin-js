@@ -2,11 +2,11 @@ import {
   stringifyToQueryParams,
   getUniqueDrivesWithHighestPermission,
   stringGuidsEqual,
-} from '@youfoundation/js-lib/helpers';
-import { AppPermissionType } from '@youfoundation/js-lib/network';
+} from '@homebase-id/js-lib/helpers';
+import { AppPermissionType } from '@homebase-id/js-lib/network';
 import { useSecurityContext } from '../securityContext/useSecurityContext';
 import { useDotYouClient } from './useDotYouClient';
-import { getExtendAppRegistrationParams } from '@youfoundation/js-lib/auth';
+import { getExtendAppRegistrationParams } from '@homebase-id/js-lib/auth';
 
 const getExtendAppRegistrationUrl = (
   host: string,

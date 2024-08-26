@@ -7,7 +7,7 @@ import {
 } from '../../hooks/managedDomain/useManagedDomain';
 import ActionButton from '../ui/Buttons/ActionButton';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
-import { Arrow, ArrowLeft } from '@youfoundation/common-app/icons';
+import { Arrow, ArrowLeft } from '@homebase-id/common-app/icons';
 
 interface CreateManagedDomainProps {
   domainPrefix: string;

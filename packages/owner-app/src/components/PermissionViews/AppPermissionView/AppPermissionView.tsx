@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import { t } from '@youfoundation/common-app';
+import { t } from '@homebase-id/common-app';
 import { RedactedAppRegistration } from '../../../provider/app/AppManagementProviderTypes';
-import { Grid } from '@youfoundation/common-app/icons';
+import { Grid } from '@homebase-id/common-app/icons';
 
 const AppMembershipView = ({
   appDef,

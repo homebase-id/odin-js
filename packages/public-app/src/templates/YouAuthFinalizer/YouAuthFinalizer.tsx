@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useYouAuthAuthorization } from '../../hooks/auth/useAuth';
-import { tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 
 const YouAuthFinalizer = () => {
   const { finalizeAuthorization } = useYouAuthAuthorization();

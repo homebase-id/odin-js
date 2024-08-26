@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 
 import { useParams } from 'react-router-dom';
-import { BlogConfig, ChannelTemplate, PostContent } from '@youfoundation/js-lib/public';
+import { BlogConfig, ChannelTemplate, PostContent } from '@homebase-id/js-lib/public';
 import { useRef } from 'react';
 import {
   AclIcon,
@@ -16,7 +16,7 @@ import {
   NotFound,
   useDotYouClient,
   BLOG_POST_INFIITE_PAGE_SIZE,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 
 import CardPostOverview from '../../../components/Post/Overview/CardPostOverview/CardPostOverview';
 import ListPostOverview from '../../../components/Post/Overview/ListPostOverview/ListPostOverview';
@@ -24,7 +24,7 @@ import MasonryPostOverview from '../../../components/Post/Overview/MasonryPostOv
 
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
-import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import { SaveCollaborativeChannelLink } from '../../../components/CollaborativeChannels/SaveCollaborativeChannelLink';
 import { PublicPostComposer } from '../../../components/CollaborativeChannels/PublicPostComposer';
 

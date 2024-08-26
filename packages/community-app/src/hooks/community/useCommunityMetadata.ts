@@ -1,12 +1,12 @@
 import { useQueryClient, useQuery, useMutation, QueryClient } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@youfoundation/common-app';
-import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { useDotYouClientContext } from '@homebase-id/common-app';
+import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import {
   CommunityMetadata,
   getCommunityMetadata,
   uploadCommunityMetadata,
 } from '../../providers/CommunityMetadataProvider';
-import { formatGuidId } from '@youfoundation/js-lib/helpers';
+import { formatGuidId } from '@homebase-id/js-lib/helpers';
 
 export const usecommunityMetadata = (props?: { communityId?: string | undefined }) => {
   const { communityId } = props || {};

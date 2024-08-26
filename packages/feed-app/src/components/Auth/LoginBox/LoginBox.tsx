@@ -1,7 +1,7 @@
 import { useYouAuthAuthorization } from '../../../hooks/auth/useAuth';
-import { IS_DARK_CLASSNAME, LoadingBlock } from '@youfoundation/common-app';
-import { Loader } from '@youfoundation/common-app/icons';
-import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
+import { IS_DARK_CLASSNAME, LoadingBlock } from '@homebase-id/common-app';
+import { Loader } from '@homebase-id/common-app/icons';
+import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
 import { ROOT_PATH } from '../../../app/App';

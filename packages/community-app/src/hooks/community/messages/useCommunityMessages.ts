@@ -11,10 +11,10 @@ import {
   getCommunityMessages,
   hardDeleteCommunityMessage,
 } from '../../../providers/CommunityMessageProvider';
-import { DeletedHomebaseFile, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
+import { DeletedHomebaseFile, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { useState, useEffect } from 'react';
 

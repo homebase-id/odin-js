@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 
 import {
   AuthorImage,
@@ -8,8 +8,8 @@ import {
   t,
   useDotYouClient,
   usePortal,
-} from '@youfoundation/common-app';
-import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
+import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
 import { FailedDeliveryDetails, InnerDeliveryIndicator } from '../CommunityDeliveryIndicator';

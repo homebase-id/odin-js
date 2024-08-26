@@ -1,9 +1,9 @@
-import { t } from '@youfoundation/common-app';
+import { t } from '@homebase-id/common-app';
 import { useDrive } from '../../../hooks/drives/useDrive';
 import { DriveGrantRequest } from '../../../provider/app/AppManagementProviderTypes';
-import { HardDrive } from '@youfoundation/common-app/icons';
-import { LoadingBlock } from '@youfoundation/common-app';
-import { getDrivePermissionFromNumber } from '@youfoundation/js-lib/helpers';
+import { HardDrive } from '@homebase-id/common-app/icons';
+import { LoadingBlock } from '@homebase-id/common-app';
+import { getDrivePermissionFromNumber } from '@homebase-id/js-lib/helpers';
 
 const DrivePermissionRequestView = ({
   driveGrant,

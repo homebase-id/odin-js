@@ -1,4 +1,4 @@
-import { TargetDrive, SystemFileType, DotYouClient } from '@youfoundation/js-lib/core';
+import { TargetDrive, SystemFileType, DotYouClient } from '@homebase-id/js-lib/core';
 import { useAudio } from '../../hooks/audio/useAudio';
 
 export interface AudioSource {

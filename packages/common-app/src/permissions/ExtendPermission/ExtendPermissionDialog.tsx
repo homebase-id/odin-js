@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { AppPermissionType } from '@youfoundation/js-lib/network';
+import { AppPermissionType } from '@homebase-id/js-lib/network';
 import { useMissingPermissions } from '../../hooks/auth/useMissingPermissions';
 import { usePortal } from '../../hooks/portal/usePortal';
 import { DialogWrapper } from '../../ui/Dialog/DialogWrapper';

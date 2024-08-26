@@ -1,7 +1,7 @@
-import { EmbeddedThumb, TargetDrive } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, TargetDrive } from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../../../../../hooks';
 import { useMemo, useState } from 'react';
-import { OdinImage } from '@youfoundation/ui-lib';
+import { OdinImage } from '@homebase-id/ui-lib';
 import { ImageLightbox } from '../../../../../dialogs/ImageLightbox/ImageLightbox';
 
 export const CommentMedia = ({

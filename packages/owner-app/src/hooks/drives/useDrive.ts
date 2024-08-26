@@ -7,9 +7,9 @@ import {
   getDrivesByType,
   TargetDrive,
   editDriveAttributes,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { useAuth } from '../auth/useAuth';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?: boolean }) => {
   const { targetDrive, fetchOutboxStatus } = props || {};

@@ -6,10 +6,10 @@ import { useState } from 'react';
 import Section from '../../../components/ui/Sections/Section';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
-import { CircleGrant } from '@youfoundation/js-lib/network';
+import { CircleGrant } from '@homebase-id/js-lib/network';
 import { useDomainClients } from '../../../hooks/connections/useDomainClients';
 import { DomainClient } from '../../../provider/network/domainNetwork/DomainProvider';
-import { getUniqueDrivesWithHighestPermission } from '@youfoundation/js-lib/helpers';
+import { getUniqueDrivesWithHighestPermission } from '@homebase-id/js-lib/helpers';
 import { CircleDomainMembershipDialog } from '../../../components/Circles/CircleMembershipDialog/CircleMembershipDialog';
 import {
   ActionGroupOptionProps,
@@ -22,7 +22,7 @@ import {
   LoadingBlock,
   CirclePermissionView,
   SubtleMessage,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import {
   House,
   Trash,
@@ -32,7 +32,7 @@ import {
   Pencil,
   HardDrive,
   Times,
-} from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app/icons';
 
 const DomainDetails = () => {
   const { domain } = useParams();

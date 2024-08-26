@@ -8,8 +8,8 @@ import {
 import { hasInvalidDnsRecords } from '../../hooks/commonDomain/commonDomain';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
 import { useMemo } from 'react';
-import { Alert } from '@youfoundation/common-app';
-import { Arrow } from '@youfoundation/common-app/icons';
+import { Alert } from '@homebase-id/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
 
 interface Props {
   domain: string;

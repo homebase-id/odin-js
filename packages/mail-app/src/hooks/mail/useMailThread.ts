@@ -1,4 +1,4 @@
-import { HomebaseFile, deleteFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile, deleteFile } from '@homebase-id/js-lib/core';
 import {
   ARCHIVE_ARCHIVAL_STATUS,
   DEFAULT_ARCHIVAL_STATUS,
@@ -9,9 +9,9 @@ import {
   REMOVE_ARCHIVAL_STATUS,
   updateLocalMailHeader,
 } from '../../providers/MailProvider';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useMailConversations } from './useMailConversations';
 
 export const useMailThread = (props?: { threadId: string | undefined }) => {

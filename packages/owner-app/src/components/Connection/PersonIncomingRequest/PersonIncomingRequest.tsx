@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
-import { Times } from '@youfoundation/common-app/icons';
-import { t, ErrorNotification, ActionButton, DomainHighlighter } from '@youfoundation/common-app';
+import { Times } from '@homebase-id/common-app/icons';
+import { t, ErrorNotification, ActionButton, DomainHighlighter } from '@homebase-id/common-app';
 
 import PersonCard from '../PersonCard/PersonCard';
 import { usePendingConnection } from '../../../hooks/connections/usePendingConnection';

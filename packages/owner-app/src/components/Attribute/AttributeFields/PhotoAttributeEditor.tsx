@@ -1,5 +1,5 @@
-import { Label, t, ImageSelector, useImage } from '@youfoundation/common-app';
-import { MinimalProfileFields, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
+import { Label, t, ImageSelector, useImage } from '@homebase-id/common-app';
+import { MinimalProfileFields, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 
 export const PhotoAttributeEditor = ({

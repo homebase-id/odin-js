@@ -3,9 +3,9 @@ import {
   ChannelDefinition,
   ChannelTemplate,
   getChannelDefinitions,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../../auth/useDotYouClient';
 import { fetchCachedPublicChannels } from '../post/cachedDataHelpers';
 export interface ChannelDefinitionVm extends ChannelDefinition {

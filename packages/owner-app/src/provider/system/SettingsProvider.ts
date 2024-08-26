@@ -1,5 +1,5 @@
-import { DotYouClient } from '@youfoundation/js-lib/core';
-import { tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { DotYouClient } from '@homebase-id/js-lib/core';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 
 export interface uiSettings extends Record<string, unknown> {
   automaticallyLoadProfilePicture?: boolean;

@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Attribute, getProfileAttributes } from '@youfoundation/js-lib/profile';
+import { Attribute, getProfileAttributes } from '@homebase-id/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
 import { AttributeDefinition, AttributeDefinitions } from './AttributeDefinitions';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { removeProfileAttribute } from '../../provider/profile/AttributeData/ManageAttributeProvider';
 
 export interface AttributeVm extends Attribute {

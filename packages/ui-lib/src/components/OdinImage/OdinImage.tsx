@@ -4,9 +4,9 @@ import { OdinThumbnailImage } from './OdinThumbnailImage';
 import { OdinPayloadImage } from './OdinPayloadImage';
 import Loader from '../ui/Icons/Loader/Loader';
 import { Exclamation } from '../ui/Icons/Exclamation';
-import { ImageSize } from '@youfoundation/js-lib/core';
+import { ImageSize } from '@homebase-id/js-lib/core';
 import { useIntersection } from '../../hooks/intersection/useIntersection';
-import { ThumbnailMeta } from '@youfoundation/js-lib/media';
+import { ThumbnailMeta } from '@homebase-id/js-lib/media';
 
 export interface OdinImageProps
   extends Omit<Omit<OdinPreviewImageProps, 'onLoad'>, 'blockFetchFromServer'> {

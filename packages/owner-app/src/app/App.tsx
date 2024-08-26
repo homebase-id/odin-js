@@ -58,7 +58,7 @@ const DemoData = lazy(() => import('../templates/DemoData/DemoData'));
 const Debug = lazy(() => import('../templates/Debug/Debug'));
 const SixDebug = lazy(() => import('../templates/Debug/SixDebug'));
 
-import '@youfoundation/ui-lib/dist/style.css';
+import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import {
@@ -69,7 +69,7 @@ import {
   SETUP_PATH,
 } from '../hooks/auth/useAuth';
 import { useIsConfigured } from '../hooks/configure/useIsConfigured';
-import { ErrorBoundary, NotFound, OdinQueryClient } from '@youfoundation/common-app';
+import { ErrorBoundary, NotFound, OdinQueryClient } from '@homebase-id/common-app';
 
 export const REACT_QUERY_CACHE_KEY = 'OWNER_REACT_QUERY_OFFLINE_CACHE';
 const INCLUDED_QUERY_KEYS = ['contact'];

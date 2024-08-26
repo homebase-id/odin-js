@@ -4,14 +4,14 @@ import {
   CollaborativeChannelItem,
   useCollaborativeChannel,
   useCollaborativeChannels,
-} from '@youfoundation/common-app';
-import { Quote, Save } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Quote, Save } from '@homebase-id/common-app/icons';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { ROOT_PATH } from '../../app/App';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
-import { RemoteCollaborativeChannelDefinition } from '@youfoundation/js-lib/public';
-import { NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { stringGuidsEqual, tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { RemoteCollaborativeChannelDefinition } from '@homebase-id/js-lib/public';
+import { NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import { useEffect } from 'react';
 
 export const IncomingCollaborativeChannelPage = () => {

@@ -1,4 +1,4 @@
-import { DotYouClient, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DotYouClient, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import {
   HomePageConfig,
   HomePageAttributes,
@@ -6,8 +6,8 @@ import {
   BlogConfig,
   getChannelDefinition,
   saveChannelDefinition,
-} from '@youfoundation/js-lib/public';
-import { base64ToUint8Array, getNewId, toGuidId } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/public';
+import { base64ToUint8Array, getNewId, toGuidId } from '@homebase-id/js-lib/helpers';
 import {
   ProfileDefinition,
   BuiltInProfiles,
@@ -22,9 +22,9 @@ import {
   SocialFields,
   getProfileAttributes,
   Attribute,
-} from '@youfoundation/js-lib/profile';
+} from '@homebase-id/js-lib/profile';
 import { fallbackHeaderImage } from '../../templates/Setup/fallbackImage';
-import { FollowRequest, createOrUpdateFollow } from '@youfoundation/js-lib/network';
+import { FollowRequest, createOrUpdateFollow } from '@homebase-id/js-lib/network';
 import { saveProfileAttribute } from '../profile/AttributeData/ManageAttributeProvider';
 
 export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {

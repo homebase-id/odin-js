@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchIdentityIFollow, Unfollow, UnfollowRequest } from '@youfoundation/js-lib/network';
+import { fetchIdentityIFollow, Unfollow, UnfollowRequest } from '@homebase-id/js-lib/network';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 type useIdentityIFollowProps = {

@@ -6,10 +6,10 @@ import {
   TargetDrive,
   TypedConnectionNotification,
   Notify,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useDotYouClient } from '../auth/useDotYouClient';
-import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
+import { hasDebugFlag } from '@homebase-id/js-lib/helpers';
 
 const isDebug = hasDebugFlag();
 

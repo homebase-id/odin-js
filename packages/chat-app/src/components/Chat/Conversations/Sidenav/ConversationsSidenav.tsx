@@ -7,16 +7,16 @@ import {
   t,
   useAllContacts,
   useDotYouClient,
-} from '@youfoundation/common-app';
-import { MagnifyingGlass, Persons, Plus, Times } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { MagnifyingGlass, Persons, Plus, Times } from '@homebase-id/common-app/icons';
 
 import { useEffect, useState } from 'react';
-import { ContactFile } from '@youfoundation/js-lib/network';
+import { ContactFile } from '@homebase-id/js-lib/network';
 
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useNavigate } from 'react-router-dom';
 import { useConversations } from '../../../../hooks/chat/useConversations';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   ConversationWithYourselfId,
   UnifiedConversation,

@@ -1,8 +1,8 @@
-import { DriveDefinition } from '@youfoundation/js-lib/core';
-import { t, Label } from '@youfoundation/common-app';
-import { HardDrive } from '@youfoundation/common-app/icons';
+import { DriveDefinition } from '@homebase-id/js-lib/core';
+import { t, Label } from '@homebase-id/common-app';
+import { HardDrive } from '@homebase-id/common-app/icons';
 import DrivePermissionFlagEditor from './DrivePermissionFlagEditor';
-import { DriveGrant } from '@youfoundation/js-lib/network';
+import { DriveGrant } from '@homebase-id/js-lib/network';
 
 const DrivePermissionSelector = ({
   drives,

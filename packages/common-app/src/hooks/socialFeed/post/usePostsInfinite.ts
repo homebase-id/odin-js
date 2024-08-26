@@ -5,9 +5,9 @@ import {
   getRecentPosts,
   PostContent,
   PostType,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 import { getCachedPosts, getCachedRecentPosts } from './cachedDataHelpers';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useChannels } from '../channels/useChannels';
 import { useDotYouClient } from '../../auth/useDotYouClient';
 

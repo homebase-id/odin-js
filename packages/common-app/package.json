@@ -1,5 +1,5 @@
 {
-  "name": "@youfoundation/common-app",
+  "name": "@homebase-id/common-app",
   "version": "0.1.0",
   "author": "YouFoundation",
   "description": "Common things for the Homebase apps",
@@ -28,7 +28,7 @@
     "url": "https://github.com/YouFoundation/dotyoucore-js.git"
   },
   "dependencies": {
-    "@youfoundation/js-lib": "*"
+    "@homebase-id/js-lib": "*"
   },
   "peerDependencies": {
     "@tanstack/react-query": "5.51.1",

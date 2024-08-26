@@ -1,16 +1,16 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { ActionButton, useDotYouClient } from '@youfoundation/common-app';
+import { ActionButton, useDotYouClient } from '@homebase-id/common-app';
 import {
   PostDetailCard,
   PostImageDetailCard,
   usePost,
   useOutsideTrigger,
   useSocialChannel,
-} from '@youfoundation/common-app';
-import { ArrowLeft } from '@youfoundation/common-app/icons';
-import { useSocialPost } from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
+import { ArrowLeft } from '@homebase-id/common-app/icons';
+import { useSocialPost } from '@homebase-id/common-app';
 
 const PostPreview = ({
   identityKey,

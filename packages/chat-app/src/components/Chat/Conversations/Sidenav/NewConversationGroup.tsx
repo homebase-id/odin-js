@@ -8,10 +8,10 @@ import {
   Label,
   t,
   useAllContacts,
-} from '@youfoundation/common-app';
-import { Arrow, Times } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Arrow, Times } from '@homebase-id/common-app/icons';
 import { useNavigate } from 'react-router-dom';
-import { ContactFile } from '@youfoundation/js-lib/network';
+import { ContactFile } from '@homebase-id/js-lib/network';
 import { useConversation } from '../../../../hooks/chat/useConversation';
 import { ROOT_PATH } from '../../../../app/App';
 import { SingleConversationItem } from '../Item/ConversationItem';

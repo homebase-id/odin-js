@@ -1,4 +1,4 @@
-import { t, Alert, ActionButton, Label, Input } from '@youfoundation/common-app';
+import { t, Alert, ActionButton, Label, Input } from '@homebase-id/common-app';
 import { useEffect, useState } from 'react';
 import Section from '../../components/ui/Sections/Section';
 import { useAccountRemoval } from '../../hooks/removal/useAccountRemoval';

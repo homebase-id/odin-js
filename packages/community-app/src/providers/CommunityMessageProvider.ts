@@ -30,19 +30,19 @@ import {
   queryBatch,
   deleteFile,
   RichText,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import {
   getNewId,
   jsonStringify64,
   stringToUint8Array,
   makeGrid,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 import {
   LinkPreview,
   LinkPreviewDescriptor,
   processVideoFile,
   createThumbnails,
-} from '@youfoundation/js-lib/media';
+} from '@homebase-id/js-lib/media';
 import { appId } from '../hooks/auth/useAuth';
 import { getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
 

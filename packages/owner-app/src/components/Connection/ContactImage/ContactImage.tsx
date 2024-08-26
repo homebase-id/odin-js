@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { useContact } from '../../../hooks/contacts/useContact';
-import { FallbackImg, Image, LoadingBlock } from '@youfoundation/common-app';
-import { getTwoLettersFromDomain } from '@youfoundation/js-lib/helpers';
-import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@youfoundation/js-lib/network';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { FallbackImg, Image, LoadingBlock } from '@homebase-id/common-app';
+import { getTwoLettersFromDomain } from '@homebase-id/js-lib/helpers';
+import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@homebase-id/js-lib/network';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 
 const getInitials = (
   fullName: string | undefined,

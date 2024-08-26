@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import {
   AuthorImage,
@@ -8,10 +8,10 @@ import {
   t,
   useDotYouClient,
   usePortal,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { FailedDeliveryDetails, InnerDeliveryIndicator } from './ChatDeliveryIndicator';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
-import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
+import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
 import { UnifiedConversation } from '../../../providers/ConversationProvider';
 
 export const ChatMessageInfo = ({

@@ -18,8 +18,8 @@ import {
   SendContents,
   UploadResult,
   PriorityOptions,
-} from '@youfoundation/js-lib/core';
-import { jsonStringify64, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/core';
+import { jsonStringify64, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const CHAT_CONVERSATION_FILE_TYPE = 8888;
 export const CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE = 8889;

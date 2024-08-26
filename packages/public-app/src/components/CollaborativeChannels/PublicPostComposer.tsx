@@ -3,10 +3,10 @@ import {
   PostComposer,
   useDotYouClient,
   useSecurityContext,
-} from '@youfoundation/common-app';
-import { HomebaseFile, ApiType, DrivePermissionType } from '@youfoundation/js-lib/core';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { GetTargetDriveFromChannelId } from '@youfoundation/js-lib/public';
+} from '@homebase-id/common-app';
+import { HomebaseFile, ApiType, DrivePermissionType } from '@homebase-id/js-lib/core';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { GetTargetDriveFromChannelId } from '@homebase-id/js-lib/public';
 
 export const PublicPostComposer = ({
   activeChannel,

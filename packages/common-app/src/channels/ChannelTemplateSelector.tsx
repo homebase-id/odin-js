@@ -1,4 +1,4 @@
-import { ChannelTemplate } from '@youfoundation/js-lib/public';
+import { ChannelTemplate } from '@homebase-id/js-lib/public';
 import { FC } from 'react';
 import { TemplateGrid, TemplateList, TemplateMasonry } from '../ui/Icons/Templates';
 import { t } from '../helpers/i18n/dictionary';

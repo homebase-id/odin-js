@@ -1,4 +1,4 @@
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { t } from '../../../../../helpers';
 import { useDotYouClient } from '../../../../../hooks';
 import { AuthorName } from '../../../Author/Name';

@@ -1,6 +1,6 @@
-import { IS_DARK_CLASSNAME } from '@youfoundation/common-app';
+import { IS_DARK_CLASSNAME } from '@homebase-id/common-app';
 import { useYouAuthAuthorization } from '../../../hooks/auth/useAuth';
-import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
+import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';

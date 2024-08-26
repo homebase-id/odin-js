@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   ActionButton,
   ConnectionImage,
@@ -11,14 +11,14 @@ import {
   t,
   useDotYouClient,
   usePortal,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../../providers/ConversationProvider';
 import { useEffect, useState } from 'react';
 import { useConversation } from '../../../hooks/chat/useConversation';
-import { Persons, House, Save, Pencil, Arrow } from '@youfoundation/common-app/icons';
+import { Persons, House, Save, Pencil, Arrow } from '@homebase-id/common-app/icons';
 
 export const ChatInfo = ({
   conversation,

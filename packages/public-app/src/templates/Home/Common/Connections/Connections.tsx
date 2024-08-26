@@ -4,9 +4,9 @@ import {
   t,
   useActiveConnections,
   useFollowingInfinite,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 
-import { Pager, IdentityTeaser } from '@youfoundation/common-app';
+import { Pager, IdentityTeaser } from '@homebase-id/common-app';
 
 const Connections = ({ className }: { className?: string }) => {
   return (

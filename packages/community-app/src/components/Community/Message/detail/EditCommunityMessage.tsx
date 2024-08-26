@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 
 import {
   ActionButton,
@@ -7,15 +7,15 @@ import {
   ErrorNotification,
   t,
   usePortal,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 
 import { useEffect, useState } from 'react';
 
-import { isTouchDevice } from '@youfoundation/js-lib/helpers';
+import { isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
 import { useCommunityMessage } from '../../../../hooks/community/messages/useCommunityMessage';
-import { RichTextEditor } from '@youfoundation/rich-text-editor';
+import { RichTextEditor } from '@homebase-id/rich-text-editor';
 
 export const EditCommunityMessage = ({
   msg,

@@ -7,8 +7,8 @@ import {
   ManagedDomainApex,
   ManagedDomainProvisionState,
 } from '../../hooks/managedDomain/useManagedDomain';
-import { Arrow, Exclamation, Loader } from '@youfoundation/common-app/icons';
-import { Input, Label, Select } from '@youfoundation/common-app';
+import { Arrow, Exclamation, Loader } from '@homebase-id/common-app/icons';
+import { Input, Label, Select } from '@homebase-id/common-app';
 import { domainFromPrefixAndApex, validDomainLabelRegEx } from '../../helpers/common';
 import CreateManagedDomain from './CreateManagedDomain';
 import { debounce } from 'lodash-es';

@@ -2,7 +2,7 @@
 import { AxiosError } from 'axios';
 import { t } from '../../helpers/i18n/dictionary';
 import ActionButton from '../ui/Buttons/ActionButton';
-import { Alert } from '@youfoundation/common-app';
+import { Alert } from '@homebase-id/common-app';
 
 export const AlertError = ({ error, doRetry }: { error?: unknown; doRetry?: () => void }) => {
   if (!error) return null;

@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { t } from '@youfoundation/common-app';
+import { t } from '@homebase-id/common-app';
 import { useConnection } from '../../../hooks/connections/useConnection';
 import { useContact } from '../../../hooks/contacts/useContact';
 import ContactInfo from '../../../components/Connection/ContactInfo/ContactInfo';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
-import { ConnectionInfo } from '@youfoundation/js-lib/network';
+import { ConnectionInfo } from '@homebase-id/js-lib/network';
 import { ConnectionPermissionViewer } from './ConnectionPermissionViewer';
 import { IdentityPageMetaAndActions } from './IdentityPageMetaAndActions';
 import { IdentityAlerts } from './IdentityAlerts';

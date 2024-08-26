@@ -1,4 +1,4 @@
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import { Conversation } from '../../../providers/ConversationProvider';
@@ -9,10 +9,10 @@ import {
   DialogWrapper,
   t,
   usePortal,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { createPortal } from 'react-dom';
 import { useMemo, useState } from 'react';
-import { tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 
 export const ChatReactions = ({
   msg,

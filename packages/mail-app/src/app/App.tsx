@@ -35,7 +35,7 @@ const DebugDataPage = lazy(() =>
   import('../templates/Mail/DebugData').then((mailApp) => ({ default: mailApp.DebugDataPage }))
 );
 
-import '@youfoundation/ui-lib/dist/style.css';
+import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import { useAuth } from '../hooks/auth/useAuth';
 
@@ -47,7 +47,7 @@ import {
   NotFound,
   OdinQueryClient,
   DotYouClientProvider,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 
 export const REACT_QUERY_CACHE_KEY = 'MAIL_REACT_QUERY_OFFLINE_CACHE';
 

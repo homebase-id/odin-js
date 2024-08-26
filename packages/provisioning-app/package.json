@@ -1,12 +1,12 @@
 {
-  "name": "@youfoundation/provisioning-app",
+  "name": "@homebase-id/provisioning-app",
   "version": "0.1.0",
   "private": true,
   "homepage": "/",
   "type": "module",
   "dependencies": {
     "@tanstack/react-query": "5.51.1",
-    "@youfoundation/common-app": "*",
+    "@homebase-id/common-app": "*",
     "axios": "1.6.7",
     "lodash-es": "^4.17.21",
     "react": "^18.3.1",

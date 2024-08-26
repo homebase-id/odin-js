@@ -3,11 +3,11 @@ import {
   publishProfile,
   publishProfileImage,
   publishProfileCard,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 
-import { ApiType } from '@youfoundation/js-lib/core';
-import { BuiltInAttributes } from '@youfoundation/js-lib/profile';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { ApiType } from '@homebase-id/js-lib/core';
+import { BuiltInAttributes } from '@homebase-id/js-lib/profile';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 export const useStaticFiles = () => {

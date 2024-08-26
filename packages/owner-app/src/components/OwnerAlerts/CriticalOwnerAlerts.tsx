@@ -1,4 +1,4 @@
-import { Toast, t } from '@youfoundation/common-app';
+import { Toast, t } from '@homebase-id/common-app';
 import { useAccountRemoval } from '../../hooks/removal/useAccountRemoval';
 
 export const CriticalOwnerAlerts = () => {

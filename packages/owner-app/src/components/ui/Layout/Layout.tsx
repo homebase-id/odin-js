@@ -1,6 +1,6 @@
 import { FC, ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useDarkMode, Toaster, Sidenav } from '@youfoundation/common-app';
+import { useDarkMode, Toaster, Sidenav } from '@homebase-id/common-app';
 import { CriticalOwnerAlerts } from '../../OwnerAlerts/CriticalOwnerAlerts';
 
 interface LayoutProps {

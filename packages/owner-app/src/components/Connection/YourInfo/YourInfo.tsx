@@ -7,12 +7,12 @@ import {
   PhoneFields,
   LocationFields,
   Attribute,
-} from '@youfoundation/js-lib/profile';
-import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
-import { getInitialsOfNameAttribute, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { LoadingBlock, FallbackImg, t, useImage } from '@youfoundation/common-app';
+} from '@homebase-id/js-lib/profile';
+import { HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
+import { getInitialsOfNameAttribute, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { LoadingBlock, FallbackImg, t, useImage } from '@homebase-id/common-app';
 import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
-import { Cake, House, IconFrame, Phone } from '@youfoundation/common-app/icons';
+import { Cake, House, IconFrame, Phone } from '@homebase-id/common-app/icons';
 import InfoBox from '../../ui/InfoBox/InfoBox';
 
 interface YourInfoProps {

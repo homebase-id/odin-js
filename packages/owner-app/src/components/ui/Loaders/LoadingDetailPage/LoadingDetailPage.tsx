@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { LoadingBlock } from '@youfoundation/common-app';
+import { LoadingBlock } from '@homebase-id/common-app';
 
 const LoadingDetailPage = ({ children }: { children?: ReactNode }) => {
   return (

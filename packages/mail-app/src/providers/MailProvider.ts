@@ -32,11 +32,11 @@ import {
   TransferStatus,
   FailedTransferStatuses,
   RecipientTransferHistory,
-} from '@youfoundation/js-lib/core';
-import { getNewId, jsonStringify64, makeGrid } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/core';
+import { getNewId, jsonStringify64, makeGrid } from '@homebase-id/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
-import { processVideoFile, createThumbnails } from '@youfoundation/js-lib/media';
-import { getTextRootsRecursive } from '@youfoundation/common-app';
+import { processVideoFile, createThumbnails } from '@homebase-id/js-lib/media';
+import { getTextRootsRecursive } from '@homebase-id/common-app';
 
 export const MAIL_DRAFT_CONVERSATION_FILE_TYPE = 9001;
 export const MAIL_CONVERSATION_FILE_TYPE = 9000;

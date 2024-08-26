@@ -1,6 +1,6 @@
-import { TargetDrive, getPayloadBytes } from '@youfoundation/js-lib/core';
+import { TargetDrive, getPayloadBytes } from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../auth/useDotYouClient';
-import { getPayloadBytesOverPeer } from '@youfoundation/js-lib/peer';
+import { getPayloadBytesOverPeer } from '@homebase-id/js-lib/peer';
 
 export const useFile = ({ targetDrive }: { targetDrive: TargetDrive }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();

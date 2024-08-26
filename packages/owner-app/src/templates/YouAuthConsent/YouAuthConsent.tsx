@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router-dom';
 import { RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
-import { getDomainFromUrl } from '@youfoundation/js-lib/helpers';
+import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
 import { Helmet } from 'react-helmet-async';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import { useApp } from '../../hooks/apps/useApp';
@@ -9,8 +9,8 @@ import { useEffect, useMemo, useState } from 'react';
 import DrivePermissionView from '../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
 import Section from '../../components/ui/Sections/Section';
-import { t, Label, Select, ActionButton, DomainHighlighter } from '@youfoundation/common-app';
-import { Arrow } from '@youfoundation/common-app/icons';
+import { t, Label, Select, ActionButton, DomainHighlighter } from '@homebase-id/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
 
 type AuthDuration = 'always' | 'for-1-year' | 'for-1-month' | 'for-1-week' | 'for-1-day' | 'never';
 

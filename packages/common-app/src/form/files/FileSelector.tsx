@@ -1,4 +1,4 @@
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { getNewId } from '@homebase-id/js-lib/helpers';
 import { ReactNode } from 'react';
 
 export const FileSelector = ({

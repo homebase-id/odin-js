@@ -1,13 +1,13 @@
 import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import {
   HomebaseFile,
   NewHomebaseFile,
   NewMediaFile,
   RichText,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
-import { LinkPreview } from '@youfoundation/js-lib/media';
+} from '@homebase-id/js-lib/core';
+import { LinkPreview } from '@homebase-id/js-lib/media';
 import {
   CommunityDeliveryStatus,
   CommunityMessage,
@@ -16,7 +16,7 @@ import {
   uploadCommunityMessage,
 } from '../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
-import { formatGuidId, getNewId, stringGuidsEqual, toGuidId } from '@youfoundation/js-lib/helpers';
+import { formatGuidId, getNewId, stringGuidsEqual, toGuidId } from '@homebase-id/js-lib/helpers';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
 import { insertNewMessage } from './useCommunityMessages';
 

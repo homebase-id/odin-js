@@ -5,8 +5,8 @@ import {
   TargetDrive,
   MediaFile,
   NewMediaFile,
-} from '@youfoundation/js-lib/core';
-import { OdinThumbnailImage } from '@youfoundation/ui-lib';
+} from '@homebase-id/js-lib/core';
+import { OdinThumbnailImage } from '@homebase-id/ui-lib';
 import { useDotYouClient } from '../../hooks/auth/useDotYouClient';
 import { Triangle } from '../../ui/Icons/Triangle';
 import { ExtensionThumbnail } from './ExtensionThumbnail';

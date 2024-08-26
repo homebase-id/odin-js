@@ -1,6 +1,6 @@
 import { InfiniteData } from '@tanstack/react-query';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { Attribute } from '@youfoundation/js-lib/profile';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { Attribute } from '@homebase-id/js-lib/profile';
 
 export const stringify = (obj: Record<string, unknown>) => {
   return Object.keys(obj)

@@ -4,12 +4,12 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { useState } from 'react';
 
 import { ChannelTemplateSelector } from './ChannelTemplateSelector';
-import { BlogConfig, ChannelTemplate } from '@youfoundation/js-lib/public';
-import { slugify, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { BlogConfig, ChannelTemplate } from '@homebase-id/js-lib/public';
+import { slugify, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ActionButton } from '../ui/Buttons/ActionButton';
 import { t } from '../helpers/i18n/dictionary';
 import { AclIcon, AclSummary } from '../acl/AclInfo/AclInfo';

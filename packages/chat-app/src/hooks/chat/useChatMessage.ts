@@ -5,16 +5,16 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
   NewMediaFile,
-} from '@youfoundation/js-lib/core';
-import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/core';
+import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { updateChatMessage, uploadChatMessage } from '../../providers/ChatProvider';
 
 import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../providers/ConversationProvider';
-import { LinkPreview } from '@youfoundation/js-lib/media';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import { LinkPreview } from '@homebase-id/js-lib/media';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useChatMessage = (props?: {
   conversationId?: string | undefined; // Optional: if we have it we can use the cache

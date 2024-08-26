@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { createOrUpdateFollow, fetchFollowing, FollowRequest } from '@youfoundation/js-lib/network';
+import { createOrUpdateFollow, fetchFollowing, FollowRequest } from '@homebase-id/js-lib/network';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 const PAGE_SIZE = 30;

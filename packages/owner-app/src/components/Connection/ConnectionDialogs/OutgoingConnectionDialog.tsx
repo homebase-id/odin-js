@@ -16,12 +16,12 @@ import {
   Label,
   DialogWrapper,
   CheckboxToggle,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import YourInfo from '../../Connection/YourInfo/YourInfo';
 import YourSignature from '../../Connection/YourSignature/YourSignature';
-import { getDomainFromUrl } from '@youfoundation/js-lib/helpers';
+import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
-import { Arrow } from '@youfoundation/common-app/icons';
+import { Arrow } from '@homebase-id/common-app/icons';
 
 const DEFAULT_MESSAGE = t('Hi, I would like to connect with you');
 

@@ -7,7 +7,7 @@ import { AppClientRegistration } from '../../../provider/app/AppManagementProvid
 import { useState } from 'react';
 import { useAppClients } from '../../../hooks/apps/useAppClients';
 import { useDrives } from '../../../hooks/drives/useDrives';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import CirclePermissionSelectorDialog from '../../../components/Apps/CirclePermissionSelectorDialog/CirclePermissionSelectorDialog';
 import PermissionSelectorDialog from '../../../components/Apps/PermissionSelectorDialog/PermissionSelectorDialog';
@@ -19,8 +19,8 @@ import {
   ActionButton,
   Alert,
   CirclePermissionView,
-} from '@youfoundation/common-app';
-import { Grid, Refresh, Trash, Times, Pencil, HardDrive } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Grid, Refresh, Trash, Times, Pencil, HardDrive } from '@homebase-id/common-app/icons';
 
 const AppDetails = () => {
   const { appKey } = useParams();

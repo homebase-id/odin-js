@@ -11,18 +11,18 @@ import {
   useLinkPreviewBuilder,
   getTextRootsRecursive,
   useAllContacts,
-} from '@youfoundation/common-app';
-import { PaperPlane, Plus } from '@youfoundation/common-app/icons';
-import { HomebaseFile, NewMediaFile, RichText } from '@youfoundation/js-lib/core';
+} from '@homebase-id/common-app';
+import { PaperPlane, Plus } from '@homebase-id/common-app/icons';
+import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 
-import { getNewId, isTouchDevice } from '@youfoundation/js-lib/helpers';
-import { LinkPreview } from '@youfoundation/js-lib/media';
+import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
+import { LinkPreview } from '@homebase-id/js-lib/media';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
-import { RichTextEditor } from '@youfoundation/rich-text-editor';
+import { RichTextEditor } from '@homebase-id/rich-text-editor';
 
 import {
   createChannelPlugin,

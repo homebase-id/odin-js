@@ -31,7 +31,7 @@ import {
   FailedTransferStatuses,
   RecipientTransferHistory,
   deleteFile,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import {
   getNewId,
@@ -39,15 +39,15 @@ import {
   stringToUint8Array,
   makeGrid,
   base64ToUint8Array,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
 import {
   createThumbnails,
   LinkPreview,
   LinkPreviewDescriptor,
   processVideoFile,
-} from '@youfoundation/js-lib/media';
-import { sendReadReceipt } from '@youfoundation/js-lib/peer';
+} from '@homebase-id/js-lib/media';
+import { sendReadReceipt } from '@homebase-id/js-lib/peer';
 
 export const CHAT_MESSAGE_FILE_TYPE = 7878;
 export const ChatDeletedArchivalStaus = 2;

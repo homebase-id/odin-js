@@ -4,7 +4,7 @@ import {
   useMostSpace,
   usePortal,
   VolatileInputAutoCompleteProps,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useCommunityChannels } from '../../../hooks/community/channels/useCommunityChannels';

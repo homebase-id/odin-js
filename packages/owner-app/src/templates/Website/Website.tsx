@@ -1,12 +1,12 @@
-import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
+import { HomePageAttributes, HomePageConfig } from '@homebase-id/js-lib/public';
 import { useHomeAttributes } from '../../hooks/profiles/useHomeAttributes';
 import AttributeGroup from '../../components/Attribute/AttributeGroup/AttributeGroup';
 import Section from '../../components/ui/Sections/Section';
 import { AttributeVm } from '../../hooks/profiles/useAttributes';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { AttributeDefinitions } from '../../hooks/profiles/AttributeDefinitions';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { getNewId } from '@homebase-id/js-lib/helpers';
 import {
   t,
   ActionGroup,
@@ -14,8 +14,8 @@ import {
   useStaticFiles,
   ErrorNotification,
   ActionButton,
-} from '@youfoundation/common-app';
-import { Cloud, Times } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Cloud, Times } from '@homebase-id/common-app/icons';
 
 const defaultThemeAttribute: HomebaseFile<AttributeVm> = {
   fileMetadata: {

@@ -1,5 +1,5 @@
 import { useQueryClient, useMutation, useQuery } from '@tanstack/react-query';
-import { useDotYouClient, OWNER_APP_ID, t } from '@youfoundation/common-app';
+import { useDotYouClient, OWNER_APP_ID, t } from '@homebase-id/common-app';
 import { useState, useEffect } from 'react';
 import {
   getApplicationServerKey,
@@ -10,8 +10,8 @@ import {
   removeCurrentRegisteredDevice,
   removeRegisteredDevice,
 } from '../../provider/notifications/PushClientProvider';
-import { SendNotification } from '@youfoundation/js-lib/core';
-import { formatGuidId, getNewId, hasDebugFlag } from '@youfoundation/js-lib/helpers';
+import { SendNotification } from '@homebase-id/js-lib/core';
+import { formatGuidId, getNewId, hasDebugFlag } from '@homebase-id/js-lib/helpers';
 
 const isDebug = hasDebugFlag();
 const TestGuid = '00000000-0000-0000-0000-000000000000';

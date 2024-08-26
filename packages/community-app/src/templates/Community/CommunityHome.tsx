@@ -13,12 +13,12 @@ import {
   Sidenav,
   t,
   useRemoveNotifications,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { drives, permissions } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
-import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
-import { stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
+import { stringGuidsEqual, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { useCommunities } from '../../hooks/community/useCommunities';
 import { NewCommunity } from './CommunityNew';
 import { useCommunity } from '../../hooks/community/useCommunity';
@@ -29,7 +29,7 @@ import {
 } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 import { usecommunityMetadata } from '../../hooks/community/useCommunityMetadata';
 import { CommunityMetadata } from '../../providers/CommunityMetadataProvider';
-import { RadioTower, Plus, ChevronLeft, Chevron, Pin } from '@youfoundation/common-app/icons';
+import { RadioTower, Plus, ChevronLeft, Chevron, Pin } from '@homebase-id/common-app/icons';
 
 export const COMMUNITY_ROOT = '/apps/community';
 

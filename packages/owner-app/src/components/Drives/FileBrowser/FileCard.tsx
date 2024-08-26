@@ -1,4 +1,4 @@
-import { AttributeConfig, ProfileConfig } from '@youfoundation/js-lib/profile';
+import { AttributeConfig, ProfileConfig } from '@homebase-id/js-lib/profile';
 import { useEffect, useMemo, useState } from 'react';
 import {
   AclIcon,
@@ -9,9 +9,9 @@ import {
   Image,
   ActionButton,
   t,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 
-import { Exclamation, Trash, Download } from '@youfoundation/common-app/icons';
+import { Exclamation, Trash, Download } from '@homebase-id/common-app/icons';
 import {
   DeletedHomebaseFile,
   HomebaseFile,
@@ -20,10 +20,10 @@ import {
   TargetDrive,
   decryptJsonContent,
   decryptKeyHeader,
-} from '@youfoundation/js-lib/core';
-import { BlogConfig, ReactionConfig } from '@youfoundation/js-lib/public';
-import { ContactConfig } from '@youfoundation/js-lib/network';
-import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
+} from '@homebase-id/js-lib/core';
+import { BlogConfig, ReactionConfig } from '@homebase-id/js-lib/public';
+import { ContactConfig } from '@homebase-id/js-lib/network';
+import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
 import { useFile } from '../../../hooks/files/useFiles';
 import { useAuth } from '../../../hooks/auth/useAuth';
 

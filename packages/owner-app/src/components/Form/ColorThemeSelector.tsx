@@ -7,8 +7,8 @@ import {
   ActionButton,
   DialogWrapper,
   CheckboxToggle,
-} from '@youfoundation/common-app';
-import { Triangle } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Triangle } from '@homebase-id/common-app/icons';
 
 interface ColorSet {
   name: string;

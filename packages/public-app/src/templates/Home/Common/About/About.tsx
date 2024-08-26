@@ -1,9 +1,9 @@
-import { getTwoLettersFromDomain } from '@youfoundation/js-lib/helpers';
+import { getTwoLettersFromDomain } from '@homebase-id/js-lib/helpers';
 import { useBiography } from '../../../../hooks/biography/useBiography';
-import { FallbackImg, RichTextRenderer, t, Image } from '@youfoundation/common-app';
+import { FallbackImg, RichTextRenderer, t, Image } from '@homebase-id/common-app';
 import { useMemo, useState } from 'react';
-import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
-import { Arrow } from '@youfoundation/common-app/icons';
+import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
+import { Arrow } from '@homebase-id/common-app/icons';
 
 const About = ({ className }: { className?: string }) => {
   const { data: bioData } = useBiography();

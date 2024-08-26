@@ -1,4 +1,4 @@
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidToken = async (): Promise<boolean> => {

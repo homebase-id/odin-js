@@ -1,6 +1,6 @@
-import { getBrowser, getOperatingSystem } from '@youfoundation/js-lib/auth';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
-import { assertIfDefined } from '@youfoundation/js-lib/helpers';
+import { getBrowser, getOperatingSystem } from '@homebase-id/js-lib/auth';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { assertIfDefined } from '@homebase-id/js-lib/helpers';
 
 export const getApplicationServerKey = async () => {
   const dotYouClient = new DotYouClient({ api: ApiType.Guest });

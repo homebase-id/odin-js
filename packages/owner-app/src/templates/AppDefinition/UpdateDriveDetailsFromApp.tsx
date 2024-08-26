@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router-dom';
-import { ActionButton, ErrorNotification, t } from '@youfoundation/common-app';
-import { Arrow } from '@youfoundation/common-app/icons';
+import { ActionButton, ErrorNotification, t } from '@homebase-id/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
 import Section from '../../components/ui/Sections/Section';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useApp } from '../../hooks/apps/useApp';

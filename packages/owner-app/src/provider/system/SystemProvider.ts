@@ -1,5 +1,5 @@
-import { DotYouClient, DriveDefinition, TargetDrive } from '@youfoundation/js-lib/core';
-import { CircleDefinition } from '@youfoundation/js-lib/network';
+import { DotYouClient, DriveDefinition, TargetDrive } from '@homebase-id/js-lib/core';
+import { CircleDefinition } from '@homebase-id/js-lib/network';
 
 export interface DriveDefinitionParam extends Omit<DriveDefinition, 'targetDriveInfo'> {
   targetDrive: TargetDrive;

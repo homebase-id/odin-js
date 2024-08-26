@@ -1,4 +1,4 @@
-import { DotYouClient, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DotYouClient, SecurityGroupType } from '@homebase-id/js-lib/core';
 import {
   JOIN_CONVERSATION_COMMAND,
   JOIN_GROUP_CONVERSATION_COMMAND,
@@ -6,8 +6,8 @@ import {
   JoinGroupConversationRequest,
   uploadConversation,
 } from './ConversationProvider';
-import { tryJsonParse } from '@youfoundation/js-lib/helpers';
-import { ReceivedCommand } from '@youfoundation/js-lib/core';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { ReceivedCommand } from '@homebase-id/js-lib/core';
 import { QueryClient } from '@tanstack/react-query';
 
 export const processCommand = async (

@@ -8,8 +8,8 @@ import {
   usePortal,
   DialogWrapper,
   Pager,
-} from '@youfoundation/common-app';
-import { Arrow } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
 import ConnectionCard from '../../Connection/ConnectionCard/ConnectionCard';
 
 const MemberLookupDialog = ({

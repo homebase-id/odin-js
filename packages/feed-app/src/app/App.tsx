@@ -23,14 +23,14 @@ const IncomingCollaborativeChannelPage = lazy(
   () => import('../templates/SocialFeed/IncomingCollaborativeChannelPage')
 );
 
-import '@youfoundation/ui-lib/dist/style.css';
+import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import { useAuth } from '../hooks/auth/useAuth';
 
 export const ROOT_PATH = '/apps/feed';
 const AUTH_PATH = ROOT_PATH + '/auth';
 
-import { ErrorBoundary, NotFound, OdinQueryClient } from '@youfoundation/common-app';
+import { ErrorBoundary, NotFound, OdinQueryClient } from '@homebase-id/common-app';
 
 export const REACT_QUERY_CACHE_KEY = 'FEED_REACT_QUERY_OFFLINE_CACHE';
 const INCLUDED_QUERY_KEYS = ['common-image', 'collaborative-channels'];

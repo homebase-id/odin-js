@@ -1,4 +1,4 @@
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import { usecommunityMetadata } from '../../hooks/community/useCommunityMetadata';
 import {
@@ -6,11 +6,11 @@ import {
   useCommunityChannelsWithRecentMessages,
 } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 import { CommunityHistory } from './channel/CommunityHistory';
-import { ActionButton, ActionLink, t } from '@youfoundation/common-app';
-import { RadioTower } from '@youfoundation/common-app/icons';
+import { ActionButton, ActionLink, t } from '@homebase-id/common-app';
+import { RadioTower } from '@homebase-id/common-app/icons';
 import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
 import { useCallback, useState } from 'react';
-import { ChevronLeft } from '@youfoundation/common-app/icons';
+import { ChevronLeft } from '@homebase-id/common-app/icons';
 
 export const CommunityCatchup = ({
   community,
