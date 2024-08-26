@@ -1,7 +1,6 @@
-name: 'Loginbox to netlify'
+name: 'login-app release and deploy to Netlify'
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - 'main'
