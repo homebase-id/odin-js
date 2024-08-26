@@ -14,6 +14,8 @@ import {
   Person,
   Phone,
   Refresh,
+  Check,
+  Exclamation,
 } from '@youfoundation/common-app/icons';
 import Section from '../../ui/Sections/Section';
 import ContactImage from '../ContactImage/ContactImage';
