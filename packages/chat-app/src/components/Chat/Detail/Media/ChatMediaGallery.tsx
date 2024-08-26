@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { HomebaseFile } from '@homebase-id/-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../../../../providers/ChatProvider';
 import {
   ActionButton,
@@ -8,10 +8,10 @@ import {
   VideoClickToLoad,
   usePortal,
   useDotYouClientContext,
-} from '@homebase-id/mmon-app';
-import { Arrow, ArrowLeft, Times } from '@homebase-id/mmon-app/icons';
+} from '@homebase-id/common-app';
+import { Arrow, ArrowLeft, Times } from '@homebase-id/common-app/icons';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
-import { OdinImage } from '@homebase-id/-lib';
+import { OdinImage } from '@homebase-id/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) => {
