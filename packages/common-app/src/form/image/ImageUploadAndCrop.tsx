@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
 import { fromBlob } from '@youfoundation/js-lib/media';
 import { t } from '../../helpers';
-import { Trash, ActionButton, Crop } from '../../ui';
+import { ActionButton } from '../../ui';
 import { Label } from '../Label';
 import { CropperRef, ImageCropper } from './ImageDialog/ImageCropper';
+import { Trash, Crop } from '../../ui/Icons';
 
 interface ImageUploadAndCropProps {
   expectedAspectRatio?: number;

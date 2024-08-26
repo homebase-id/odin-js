@@ -1,26 +1,24 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
-import {
-  Chevron,
-  ConnectionImage,
-  DialogWrapper,
-  Envelope,
-  ExtensionThumbnail,
-  FakeAnchor,
-  ImageIcon,
-  OwnerImage,
-  bytesToSize,
-  t,
-  usePortal,
-} from '@youfoundation/common-app';
 import { MailConversation, MailDrive } from '../../providers/MailProvider';
 import { AttachmentItem } from './MailAttachmentOverview';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import {
+  bytesToSize,
+  ConnectionImage,
+  DialogWrapper,
+  ExtensionThumbnail,
+  FakeAnchor,
+  OwnerImage,
+  t,
+  useDotYouClientContext,
+  usePortal,
+} from '@youfoundation/common-app';
 import { OdinPreviewImage } from '@youfoundation/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ROOT_PATH } from '../../app/App';
 import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
+import { Chevron, Envelope, ImageIcon } from '@youfoundation/common-app/icons';
 
 export const MailAttachmentsInfo = ({
   mailThread,

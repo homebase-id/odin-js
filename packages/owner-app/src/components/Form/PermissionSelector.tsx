@@ -1,6 +1,6 @@
 import { PermissionSet } from '@youfoundation/js-lib/core';
-
-import { Persons, t, CheckboxToggle } from '@youfoundation/common-app';
+import { t, CheckboxToggle } from '@youfoundation/common-app';
+import { Persons } from '@youfoundation/common-app/icons';
 
 import {
   AppPermissionType,

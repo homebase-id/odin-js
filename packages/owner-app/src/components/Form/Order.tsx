@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ActionButton, ArrowDown, ArrowUp } from '@youfoundation/common-app';
+import { ActionButton } from '@youfoundation/common-app';
+import { ArrowDown, ArrowUp } from '@youfoundation/common-app/icons';
 import { moveElementInArray } from '../../templates/DemoData/helpers';
 
 const Order = ({

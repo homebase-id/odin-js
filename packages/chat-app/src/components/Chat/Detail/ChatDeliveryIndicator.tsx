@@ -1,4 +1,5 @@
-import { useDotYouClient, SubtleCheck, Clock, Times, t } from '@youfoundation/common-app';
+import { useDotYouClient, t } from '@youfoundation/common-app';
+import { Clock, SubtleCheck, Times } from '@youfoundation/common-app/icons';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage, ChatDeliveryStatus } from '../../../providers/ChatProvider';
 

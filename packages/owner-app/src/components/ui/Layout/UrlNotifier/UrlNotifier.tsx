@@ -1,5 +1,5 @@
 import { t } from '@youfoundation/common-app';
-import { Arrow, Shield } from '@youfoundation/common-app';
+import { Arrow, Shield } from '@youfoundation/common-app/icons';
 
 const UrlNotifier = () => {
   return (

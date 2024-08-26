@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useCheckInvitationCode } from '../../hooks/invitationCode/useCheckInvitationCode';
 import { t } from '../../helpers/i18n/dictionary';
-import { Loader, Label, Input } from '@youfoundation/common-app';
+import { Loader } from '@youfoundation/common-app/icons';
+import { Label, Input } from '@youfoundation/common-app';
 import ActionLink from '../../components/ui/Buttons/ActionLink';
 import ActionButton from '../../components/ui/Buttons/ActionButton';
 

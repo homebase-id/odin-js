@@ -4,20 +4,12 @@ import {
   AuthorImage,
   AuthorName,
   DialogWrapper,
-  Exclamation,
   t,
   usePortal,
+  formatDateExludingYearIfCurrent,
 } from '@youfoundation/common-app';
 import { MailConversation, MailDeliveryStatus } from '../../providers/MailProvider';
-import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
-
-const dateTimeFormat: Intl.DateTimeFormatOptions = {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-  hour: 'numeric',
-  minute: 'numeric',
-};
+import { Exclamation } from '@youfoundation/common-app/icons';
 
 export const MailConversationInfo = ({
   mailConversation,

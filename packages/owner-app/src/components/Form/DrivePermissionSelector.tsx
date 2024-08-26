@@ -1,6 +1,6 @@
 import { DriveDefinition } from '@youfoundation/js-lib/core';
 import { t, Label } from '@youfoundation/common-app';
-import { HardDrive } from '@youfoundation/common-app';
+import { HardDrive } from '@youfoundation/common-app/icons';
 import DrivePermissionFlagEditor from './DrivePermissionFlagEditor';
 import { DriveGrant } from '@youfoundation/js-lib/network';
 

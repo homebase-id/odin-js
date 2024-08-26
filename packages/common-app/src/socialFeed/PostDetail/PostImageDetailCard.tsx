@@ -5,20 +5,7 @@ import {
   getChannelDrive,
 } from '@youfoundation/js-lib/public';
 import { useEffect } from 'react';
-import {
-  Loader,
-  Video,
-  ActionButton,
-  AuthorImage,
-  AuthorName,
-  PostMeta,
-  PostInteracts,
-  Image,
-  Times,
-  ArrowLeft,
-  Arrow,
-  BoringFile,
-} from '../../..';
+
 import {
   DEFAULT_PAYLOAD_KEY,
   HomebaseFile,
@@ -27,6 +14,15 @@ import {
 } from '@youfoundation/js-lib/core';
 import { getAnonymousDirectImageUrl } from '@youfoundation/js-lib/media';
 import { Helmet } from 'react-helmet-async';
+import { Video } from '../../media/Video';
+import { ActionButton } from '../../ui';
+import { Loader, Times, ArrowLeft, Arrow } from '../../ui/Icons';
+import { AuthorImage } from '../Blocks/Author/Image';
+import { AuthorName } from '../Blocks/Author/Name';
+import { PostInteracts } from '../Blocks/Interacts/PostInteracts';
+import { BoringFile } from '../Blocks/Media/PrimaryMedia';
+import { PostMeta } from '../Blocks/Meta/Meta';
+import { Image } from '../../media/Image';
 
 export const PostImageDetailCard = ({
   odinId,

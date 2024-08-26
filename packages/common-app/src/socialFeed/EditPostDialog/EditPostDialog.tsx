@@ -11,7 +11,8 @@ import {
 import { VolatileInput, FileOverview } from '../../form';
 import { t } from '../../helpers';
 import { usePortal } from '../../hooks';
-import { ErrorNotification, DialogWrapper, ActionButton, Save } from '../../ui';
+import { ErrorNotification, DialogWrapper, ActionButton } from '../../ui';
+import { Save } from '../../ui/Icons';
 
 export const EditPostDialog = ({
   postFile: incomingPostFile,

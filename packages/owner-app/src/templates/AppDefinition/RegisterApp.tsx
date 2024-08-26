@@ -9,12 +9,16 @@ import PermissionView from '../../components/PermissionViews/PermissionView/Perm
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ActionButton, ActionButtonState, ErrorNotification } from '@youfoundation/common-app';
-import { t } from '@youfoundation/common-app';
-import { CircleSelector } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  ActionButtonState,
+  ErrorNotification,
+  t,
+  CircleSelector,
+  DomainHighlighter,
+} from '@youfoundation/common-app';
 import { PermissionSet } from '@youfoundation/js-lib/core';
-import { DomainHighlighter } from '@youfoundation/common-app';
-import { Arrow } from '@youfoundation/common-app';
+import { Arrow } from '@youfoundation/common-app/icons';
 import { useDrives } from '../../hooks/drives/useDrives';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 

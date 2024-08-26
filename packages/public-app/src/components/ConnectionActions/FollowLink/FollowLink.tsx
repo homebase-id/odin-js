@@ -3,9 +3,8 @@ import { t } from '@youfoundation/common-app';
 import { useAuth } from '../../../hooks/auth/useAuth';
 import { ChannelDefinitionVm } from '@youfoundation/common-app';
 
-import { Feed } from '@youfoundation/common-app';
+import { Feed, Check } from '@youfoundation/common-app/icons';
 import { useFollowDetail } from '../../../hooks/follow/useFollowDetail';
-import { Check } from '@youfoundation/common-app';
 import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 

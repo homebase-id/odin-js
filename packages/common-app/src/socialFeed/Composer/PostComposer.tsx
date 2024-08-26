@@ -30,19 +30,12 @@ import {
   useChannels,
   useCollaborativeChannels,
 } from '../../hooks';
-import {
-  ActionGroup,
-  Globe,
-  Article,
-  Pencil,
-  ActionButton,
-  Arrow,
-  ErrorNotification,
-  Lock,
-} from '../../ui';
+
 import { EmbeddedPostContent } from '../Blocks/Body/EmbeddedPostContent';
 import { EmojiSelector } from '../Blocks/Interacts/EmojiPicker/EmojiSelector';
 import { LinkPreview } from '@youfoundation/js-lib/media';
+import { ActionGroup, ActionButton, ErrorNotification } from '../../ui';
+import { Article, Pencil, Globe, Arrow, Lock } from '../../ui/Icons';
 
 const FEED_ROOT_PATH = '/apps/feed';
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;

@@ -1,7 +1,8 @@
 import { FC } from 'react';
 
 import './darkModeToggle.css';
-import { useDarkMode, Sun, Moon, t } from '../../..';
+import { useDarkMode, t } from '../../..';
+import { Sun, Moon } from '../Icons';
 
 interface DarkModeToggleProps {
   className?: string;

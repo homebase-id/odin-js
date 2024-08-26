@@ -20,7 +20,7 @@ import {
   Tiktok,
   Twitter,
   Youtube,
-} from '@youfoundation/common-app';
+} from '@youfoundation/common-app/icons';
 import { SocialFields } from '@youfoundation/js-lib/profile';
 
 export const getLinkIcon = (type: string): React.FC<IconProps> => {

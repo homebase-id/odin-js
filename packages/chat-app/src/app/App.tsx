@@ -133,4 +133,4 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
   return <>{children}</>;
 };
 
-export default App;
+export { App };

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import {
   TargetDrive,
   SystemFileType,
@@ -25,7 +25,10 @@ export const useAudio = (
 
   systemFileType?: SystemFileType,
   lastModified?: number
-) => {
+): {
+  fetchUrl: UseQueryResult<string | null, Error>;
+  fetch: UseQueryResult<{ bytes: Uint8Array; contentType: string } | null, Error>;
+} => {
   const localHost = dotYouClient.getIdentity() || window.location.hostname;
 
   const fetchAudioData = async (

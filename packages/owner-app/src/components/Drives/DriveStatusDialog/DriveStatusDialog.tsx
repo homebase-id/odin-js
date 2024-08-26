@@ -1,4 +1,5 @@
-import { usePortal, DialogWrapper, ActionButton, Arrow, t } from '@youfoundation/common-app';
+import { usePortal, DialogWrapper, ActionButton, t } from '@youfoundation/common-app';
+import { Arrow } from '@youfoundation/common-app/icons';
 import { TargetDrive } from '@youfoundation/js-lib/core';
 import { createPortal } from 'react-dom';
 import { useDrive } from '../../../hooks/drives/useDrive';

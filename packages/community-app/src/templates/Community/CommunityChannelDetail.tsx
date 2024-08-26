@@ -3,18 +3,16 @@ import { useCommunity } from '../../hooks/community/useCommunity';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import {
   ActionLink,
-  Arrow,
   AuthorImage,
   AuthorName,
-  ChevronLeft,
   DialogWrapper,
   ErrorBoundary,
   formatDateExludingYearIfCurrent,
   t,
-  Times,
   useDotYouClient,
   usePortal,
 } from '@youfoundation/common-app';
+import { Arrow, ChevronLeft, Times } from '@youfoundation/common-app/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';

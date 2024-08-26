@@ -4,7 +4,8 @@ import { useMissingPermissions } from '../../hooks/auth/useMissingPermissions';
 import { usePortal } from '../../hooks/portal/usePortal';
 import { DialogWrapper } from '../../ui/Dialog/DialogWrapper';
 import { t } from '../../helpers';
-import { ActionLink, Shield } from '../../ui';
+import { ActionLink } from '../../ui';
+import { Shield } from '../../ui/Icons';
 
 export const ExtendPermissionDialog = ({
   appId,

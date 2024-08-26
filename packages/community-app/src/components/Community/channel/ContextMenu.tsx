@@ -10,8 +10,8 @@ import {
   t,
   ErrorNotification,
   ActionGroup,
-  ChevronDown,
 } from '@youfoundation/common-app';
+import { ChevronDown } from '@youfoundation/common-app/icons';
 import { useState } from 'react';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { CommunityMessageInfo } from '../Message/detail/CommunityMessageInfo';

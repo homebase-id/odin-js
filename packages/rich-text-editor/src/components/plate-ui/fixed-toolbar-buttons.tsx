@@ -14,7 +14,7 @@ import { MarkToolbarButton } from './mark-toolbar-button';
 import { ToolbarGroup } from './toolbar';
 import { TurnIntoDropdownMenu } from './turn-into-dropdown-menu';
 import { ImageToolbarButton, MediaOptions } from '../../editor/ImagePlugin/ImagePlugin';
-import { Bold, Italic, Underline } from '@youfoundation/common-app';
+import { Bold, Italic, Underline } from '@youfoundation/common-app/icons';
 import { LinkToolbarButton } from './link-toolbar-button';
 import { ELEMENT_H1, ELEMENT_H2 } from '@udecode/plate-heading';
 

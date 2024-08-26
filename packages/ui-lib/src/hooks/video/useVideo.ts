@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { DotYouClient, TargetDrive, getFileHeader } from '@youfoundation/js-lib/core';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 import {
@@ -22,7 +22,10 @@ export const useVideo = (
   videoGlobalTransitId?: string | undefined,
   videoFileKey?: string | undefined,
   videoDrive?: TargetDrive
-) => {
+): {
+  fetchMetadata: UseQueryResult<PlainVideoMetadata | SegmentedVideoMetadata | null, Error>;
+  getChunk: (chunkStart: number, chunkEnd?: number) => Promise<Uint8Array | null> | null;
+} => {
   const localHost = window.location.hostname;
 
   const fetchVideoData = async (
@@ -108,7 +111,7 @@ export const useVideoUrl = (
   videoFileKey?: string | undefined,
   videoDrive?: TargetDrive,
   fileSizeLimit?: number
-) => {
+): { fetch: UseQueryResult<string | null, Error> } => {
   const localHost = window.location.hostname;
 
   const fetchVideoData = async (

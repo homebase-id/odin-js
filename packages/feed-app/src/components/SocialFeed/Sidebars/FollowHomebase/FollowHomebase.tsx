@@ -1,4 +1,5 @@
-import { ActionLink, Feed, t, useIdentityIFollow } from '@youfoundation/common-app';
+import { ActionLink, t, useIdentityIFollow } from '@youfoundation/common-app';
+import { Feed } from '@youfoundation/common-app/icons';
 
 const FollowHomebase = ({ className }: { className?: string }) => {
   const { data: followingData, isFetched } = useIdentityIFollow({

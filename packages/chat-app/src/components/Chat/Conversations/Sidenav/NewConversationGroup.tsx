@@ -1,16 +1,15 @@
 import { useState } from 'react';
 import {
   ActionButton,
-  Arrow,
   ConnectionImage,
   ConnectionName,
   ErrorBoundary,
   Input,
   Label,
-  Times,
   t,
   useAllContacts,
 } from '@youfoundation/common-app';
+import { Arrow, Times } from '@youfoundation/common-app/icons';
 import { useNavigate } from 'react-router-dom';
 import { ContactFile } from '@youfoundation/js-lib/network';
 import { useConversation } from '../../../../hooks/chat/useConversation';

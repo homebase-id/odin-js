@@ -14,10 +14,9 @@ import {
   formatToTimeAgoWithRelativeDetail,
   RichTextRenderer,
   ActionGroup,
-  ChevronDown,
-  Exclamation,
   highlightQuery,
 } from '@youfoundation/common-app';
+import { ChevronDown, Exclamation } from '@youfoundation/common-app/icons';
 import { useEffect, useRef, useState } from 'react';
 import { useMarkMailConversationsAsRead } from '../../hooks/mail/useMarkMailConversationsAsRead';
 import { useDotYouClientContext } from '@youfoundation/common-app';

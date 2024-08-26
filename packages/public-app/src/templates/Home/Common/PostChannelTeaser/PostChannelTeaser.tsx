@@ -1,4 +1,4 @@
-import { getChannelDrive, PostContent } from '@youfoundation/js-lib/public';
+import { PostContent } from '@youfoundation/js-lib/public';
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -8,7 +8,7 @@ import {
   PrimaryMedia,
   usePostsInfinite,
 } from '@youfoundation/common-app';
-import { Arrow, Image, Video } from '@youfoundation/common-app';
+import { Arrow } from '@youfoundation/common-app/icons';
 
 import { t } from '@youfoundation/common-app';
 import { ActionLink } from '@youfoundation/common-app';

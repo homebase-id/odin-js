@@ -7,7 +7,7 @@ import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { ActionGroup, ActionGroupOptionProps } from '../../../ui/Buttons/ActionGroup';
 import { Pencil } from '../../../ui/Icons/Pencil';
 import { t } from '../../../helpers/i18n/dictionary';
-import { Clipboard, Trash } from '../../../ui';
+import { Clipboard, Trash } from '../../../ui/Icons';
 import { EditPostDialog } from '../../EditPostDialog/EditPostDialog';
 import { useChannel } from '../../../hooks/socialFeed/channels/useChannel';
 

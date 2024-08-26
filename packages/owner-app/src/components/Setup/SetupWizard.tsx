@@ -2,15 +2,8 @@ import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { WelcomeData } from '../../templates/Setup/Setup';
 import { fallbackProfileImage } from '../../templates/Setup/fallbackImage';
-import {
-  ActionButton,
-  Arrow,
-  Input,
-  Label,
-  Person,
-  getOdinIdColor,
-  t,
-} from '@youfoundation/common-app';
+import { ActionButton, Input, Label, getOdinIdColor, t } from '@youfoundation/common-app';
+import { Arrow, Person } from '@youfoundation/common-app/icons';
 import { ImageUploadAndCrop } from '@youfoundation/common-app';
 
 const defaultData: WelcomeData = {

@@ -1,4 +1,5 @@
-import { Alert, Arrow, Question, t } from '@youfoundation/common-app';
+import { Alert, t } from '@youfoundation/common-app';
+import { Arrow, Question } from '@youfoundation/common-app/icons';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import Section from '../../components/ui/Sections/Section';
 import { getOperatingSystem } from '@youfoundation/js-lib/auth';
