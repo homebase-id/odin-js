@@ -4,17 +4,11 @@ import { useMemo, useState } from 'react';
 import { VolatileInput, FileOverview, FileSelector } from '../../../../form';
 import { t, getImagesFromPasteEvent } from '../../../../helpers';
 import { CanReactInfo, useDotYouClient, useReaction } from '../../../../hooks';
-import {
-  ErrorNotification,
-  ActionButtonState,
-  ImageIcon,
-  ActionButton,
-  Loader,
-  PaperPlane,
-} from '../../../../ui';
+import { ErrorNotification, ActionButtonState, ActionButton } from '../../../../ui';
 import { AuthorImage } from '../../Author/Image';
 import { CantReactInfo } from '../CantReactInfo';
 import { EmojiSelector } from '../EmojiPicker/EmojiSelector';
+import { ImageIcon, Loader, PaperPlane } from '../../../../ui/Icons';
 
 const TEN_MEGA_BYTES = 10 * 1024 * 1024;
 

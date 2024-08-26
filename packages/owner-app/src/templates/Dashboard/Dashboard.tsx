@@ -1,26 +1,24 @@
 import { Link } from 'react-router-dom';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import {
-  t,
-  House,
-  ActionGroup,
-  Cog,
-  HybridLink,
-  ActionGroupOptionProps,
-  Download,
-  useUnreadPushNotificationsCount,
-  CHAT_APP_ID,
-  FEED_APP_ID,
-  OWNER_APP_ID,
-  PHOTO_APP_ID,
-  MAIL_APP_ID,
-  COMMUNITY_APP_ID,
-} from '@youfoundation/common-app';
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
 import { getOperatingSystem } from '@youfoundation/js-lib/auth';
 import { isTouchDevice } from '@youfoundation/js-lib/helpers';
 import { FeedTeaser } from './FeedTeaser';
 import { useAutofixDefaultConfig } from '../../hooks/useAutoFixDefaultConfig';
+import {
+  t,
+  ActionGroupOptionProps,
+  HybridLink,
+  ActionGroup,
+  useUnreadPushNotificationsCount,
+  OWNER_APP_ID,
+  CHAT_APP_ID,
+  MAIL_APP_ID,
+  COMMUNITY_APP_ID,
+  FEED_APP_ID,
+  PHOTO_APP_ID,
+} from '@youfoundation/common-app';
+import { House, Cog, Download } from '@youfoundation/common-app/icons';
 
 const Dashboard = () => {
   useAutofixDefaultConfig();

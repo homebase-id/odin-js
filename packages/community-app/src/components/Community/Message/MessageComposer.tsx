@@ -2,9 +2,7 @@ import {
   FileOverview,
   FileSelector,
   ActionButton,
-  PaperPlane,
   getImagesFromPasteEvent,
-  Plus,
   useErrors,
   t,
   ellipsisAtMaxChar,
@@ -14,6 +12,7 @@ import {
   getTextRootsRecursive,
   useAllContacts,
 } from '@youfoundation/common-app';
+import { PaperPlane, Plus } from '@youfoundation/common-app/icons';
 import { HomebaseFile, NewMediaFile, RichText } from '@youfoundation/js-lib/core';
 
 import { useState, useEffect, useRef, useMemo } from 'react';

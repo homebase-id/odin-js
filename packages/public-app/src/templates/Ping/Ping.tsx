@@ -1,5 +1,5 @@
-import { HardDrive, useSecurityContext } from '@youfoundation/common-app';
-import { Persons } from '@youfoundation/common-app';
+import { useSecurityContext } from '@youfoundation/common-app';
+import { HardDrive, Persons } from '@youfoundation/common-app/icons';
 import { t } from '@youfoundation/common-app';
 import {
   getAppPermissionFromNumber,

@@ -3,14 +3,11 @@ import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
   ActionGroup,
-  Article,
-  Ellipsis,
-  FEED_APP_ID,
   FEED_CHAT_APP_ID,
-  Quote,
   t,
   useRemoveNotifications,
 } from '@youfoundation/common-app';
+import { Feed, Article, Ellipsis, Quote } from '@youfoundation/common-app/icons';
 import SocialFeedMainContent from '../../components/SocialFeed/MainContent/SocialFeedMainContent';
 
 const ConnectionsView = lazy(
@@ -34,7 +31,7 @@ const FollowHomebase = lazy(
 
 const PostPreview = lazy(() => import('../../components/SocialFeed/MainContent/PostPreview'));
 
-import { Feed, ExtendPermissionDialog } from '@youfoundation/common-app';
+import { FEED_APP_ID, ExtendPermissionDialog } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { ROOT_PATH } from '../../app/App';
 import { drives, permissions } from '../../hooks/auth/useAuth';

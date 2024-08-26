@@ -1,6 +1,5 @@
 import {
   ActionButton,
-  Cog,
   ellipsisAtMaxChar,
   SubtleMessage,
   t,
@@ -13,10 +12,9 @@ import {
   useDotYouClient,
   MAIL_APP_ID,
   ErrorNotification,
-  Times,
   useRemoveNotifications,
 } from '@youfoundation/common-app';
-import { Bell } from '@youfoundation/common-app';
+import { Cog, Times, Bell } from '@youfoundation/common-app/icons';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../../hooks/apps/useApp';

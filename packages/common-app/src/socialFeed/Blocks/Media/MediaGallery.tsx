@@ -4,7 +4,7 @@ import { Image } from '../../../media/Image';
 import { getChannelDrive } from '@youfoundation/js-lib/public';
 import { useImageCache } from '@youfoundation/ui-lib';
 import { useIntersection, useDotYouClient, useDarkMode } from '../../../hooks';
-import { Triangle } from '../../../ui';
+import { Triangle } from '../../../ui/Icons';
 import { BoringFile } from './PrimaryMedia';
 
 interface MediaGalleryProps {

@@ -4,14 +4,12 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../../providers/ChatProvider';
 import {
   ActionButton,
-  Arrow,
-  ArrowLeft,
   BoringFile,
-  Times,
   VideoClickToLoad,
   usePortal,
   useDotYouClientContext,
 } from '@youfoundation/common-app';
+import { Arrow, ArrowLeft, Times } from '@youfoundation/common-app/icons';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
 import { OdinImage } from '@youfoundation/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';

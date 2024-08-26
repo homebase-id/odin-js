@@ -1,21 +1,17 @@
 import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import {
-  ActionButton,
-  Arrow,
-  ArrowLeft,
-  Download,
-  ExtensionThumbnail,
-  Loader,
-  Times,
-  bytesToSize,
-} from '@youfoundation/common-app';
 import { MailDrive } from '../../providers/MailProvider';
 import { useMailAttachment, useMailConversation } from '../../hooks/mail/useMailConversation';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  bytesToSize,
+  ExtensionThumbnail,
+  useDotYouClientContext,
+} from '@youfoundation/common-app';
 import { OdinImage } from '@youfoundation/ui-lib';
 import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
+import { Times, Download, Loader, ArrowLeft, Arrow } from '@youfoundation/common-app/icons';
 
 export const MailAttachmentPreview = ({
   messageId,

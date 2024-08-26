@@ -8,15 +8,12 @@ import {
   FileSelector,
   Input,
   Label,
-  PaperPlane,
-  Plus,
-  Save,
-  Trash,
   getTextRootsRecursive,
   t,
   useAllContacts,
   useOutsideTrigger,
 } from '@youfoundation/common-app';
+
 import {
   NewHomebaseFile,
   SecurityGroupType,
@@ -40,6 +37,7 @@ import { RichTextEditor } from '@youfoundation/rich-text-editor';
 import { useBlocker } from 'react-router-dom';
 import { MediaOptions } from '@youfoundation/rich-text-editor/src/editor/ImagePlugin/ImagePlugin';
 import { useMailSettings } from '../../hooks/mail/useMailSettings';
+import { Plus, PaperPlane, Save, Trash } from '@youfoundation/common-app/icons';
 
 const FIFTY_MEGA_BYTES = 50 * 1024 * 1024;
 

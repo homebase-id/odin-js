@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { usePortal } from '../../hooks/portal/usePortal';
-import { Exclamation, Question } from '../../ui';
 import { t } from '../../helpers/i18n/dictionary';
 import { Input } from '../../form/Input';
 import { Label } from '../../form/Label';
 import { Checkbox } from '../../form';
+import { Exclamation, Question } from '../../ui/Icons';
 
 export interface ConfirmDialogProps {
   type?: 'critical' | 'info' | 'warning';

@@ -6,22 +6,11 @@ import { aclEqual } from '@youfoundation/js-lib/helpers';
 import { AclSummary } from '../../../acl';
 import { HOME_ROOT_PATH } from '../../../core';
 import { t } from '../../../helpers';
-import {
-  ActionGroupOptionProps,
-  UserX,
-  Times,
-  Lock,
-  Flag,
-  Block,
-  ActionGroup,
-  Link,
-  Persons,
-  Trash,
-  ErrorNotification,
-} from '../../../ui';
 import { ChannelDefinitionVm, useManagePost, useManageSocialFeed } from '../../../hooks/socialFeed';
 import { useDotYouClient } from '../../../hooks/auth/useDotYouClient';
 import { useIsConnected } from '../../../hooks/connections/useIsConnected';
+import { ActionGroupOptionProps, ActionGroup, ErrorNotification } from '../../../ui';
+import { Persons, UserX, Times, Flag, Block, Link, Trash, Lock } from '../../../ui/Icons';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;

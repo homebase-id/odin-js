@@ -4,7 +4,7 @@ import { Image } from '../../../media/Image';
 import { Video, VideoClickToLoad } from '../../../media/Video';
 import { ExtensionThumbnail } from '../../../form/files/ExtensionThumbnail';
 import { useFile } from '../../../hooks';
-import { Download } from '../../../ui';
+import { Download } from '../../../ui/Icons';
 import { bytesToSize, t } from '../../../helpers';
 import { LinkPreviewItem } from '../../../media/Link';
 

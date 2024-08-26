@@ -5,9 +5,9 @@ import {
   ActionGroupOptionProps,
   t,
   ActionGroup,
-  ChevronDown,
   ErrorNotification,
 } from '@youfoundation/common-app';
+import { ChevronDown } from '@youfoundation/common-app/icons';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatDeliveryStatus, ChatMessage } from '../../../providers/ChatProvider';
 import {

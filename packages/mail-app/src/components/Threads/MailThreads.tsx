@@ -1,16 +1,14 @@
 import {
   Checkbox,
   ActionButton,
-  Trash,
   t,
   LoadingBlock,
   ErrorNotification,
   ActionGroup,
-  Download,
 } from '@youfoundation/common-app';
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { Archive } from '@youfoundation/common-app';
+import { Archive, Download, Trash } from '@youfoundation/common-app/icons';
 import { MailConversation } from '../../providers/MailProvider';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';

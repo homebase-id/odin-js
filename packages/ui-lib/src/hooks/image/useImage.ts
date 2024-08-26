@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
 import { ImageSize, TargetDrive, DotYouClient, SystemFileType } from '@youfoundation/js-lib/core';
 import { getDecryptedImageUrl } from '@youfoundation/js-lib/media';
@@ -57,7 +57,7 @@ export const useImage = (props: {
   systemFileType?: SystemFileType;
   lastModified?: number;
   preferObjectUrl?: boolean;
-}) => {
+}): { fetch: UseQueryResult<ImageData | undefined, Error> } => {
   const {
     dotYouClient,
     odinId,

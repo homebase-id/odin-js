@@ -1,19 +1,17 @@
 import { FC } from 'react';
 import { NavLink, useMatch } from 'react-router-dom';
+
+import { useLiveMailProcessor } from '../../hooks/mail/useLiveMailProcessor';
+import { useRemoveNotifications, MAIL_APP_ID, Sidenav, t } from '@youfoundation/common-app';
 import {
-  Archive,
-  Cog,
   Envelope,
-  IconProps,
-  MAIL_APP_ID,
   PaperPlane,
   Pencil,
-  Sidenav,
   Trash,
-  t,
-  useRemoveNotifications,
-} from '@youfoundation/common-app';
-import { useLiveMailProcessor } from '../../hooks/mail/useLiveMailProcessor';
+  Archive,
+  Cog,
+  IconProps,
+} from '@youfoundation/common-app/icons';
 
 const ROOT_PATH = '/apps/mail';
 

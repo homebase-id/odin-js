@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t, ActionButton, ActionButtonState, Arrow } from '@youfoundation/common-app';
+import { Arrow } from '@youfoundation/common-app/icons';
+import { t, ActionButton, ActionButtonState } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';

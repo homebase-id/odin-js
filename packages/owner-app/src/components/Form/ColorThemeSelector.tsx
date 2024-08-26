@@ -1,9 +1,14 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Label, t } from '@youfoundation/common-app';
-import { usePortal } from '@youfoundation/common-app';
-import { ActionButton } from '@youfoundation/common-app';
-import { DialogWrapper, Triangle, CheckboxToggle } from '@youfoundation/common-app';
+import {
+  Label,
+  t,
+  usePortal,
+  ActionButton,
+  DialogWrapper,
+  CheckboxToggle,
+} from '@youfoundation/common-app';
+import { Triangle } from '@youfoundation/common-app/icons';
 
 interface ColorSet {
   name: string;

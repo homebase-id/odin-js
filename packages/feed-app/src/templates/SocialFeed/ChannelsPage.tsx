@@ -2,13 +2,10 @@ import { useMemo, useState } from 'react';
 import {
   ChannelDefinitionVm,
   ChannelItem,
-  Loader,
-  MagnifyingGlass,
   ManageCollaborativeChannelItem,
-  Plus,
   useCollaborativeChannels,
 } from '@youfoundation/common-app';
-import { Quote } from '@youfoundation/common-app';
+import { Loader, MagnifyingGlass, Plus, Quote } from '@youfoundation/common-app/icons';
 import { t } from '@youfoundation/common-app';
 import { useChannels } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';

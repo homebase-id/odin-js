@@ -3,15 +3,15 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   AclIcon,
   AclSummary,
-  Exclamation,
   ExtensionThumbnail,
   HybridLink,
-  Trash,
   bytesToSize,
+  Image,
+  ActionButton,
   t,
 } from '@youfoundation/common-app';
-import { ActionButton } from '@youfoundation/common-app';
-import { Download, Image } from '@youfoundation/common-app';
+
+import { Exclamation, Trash, Download } from '@youfoundation/common-app/icons';
 import {
   DeletedHomebaseFile,
   HomebaseFile,

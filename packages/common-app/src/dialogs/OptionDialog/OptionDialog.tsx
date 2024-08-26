@@ -1,8 +1,9 @@
 import { createPortal } from 'react-dom';
 
 import { usePortal } from '../../hooks/portal/usePortal';
-import { ActionButton, ActionButtonProps, Exclamation, Question } from '../../ui';
+import { ActionButton, ActionButtonProps } from '../../ui';
 import { t } from '../../helpers/i18n/dictionary';
+import { Exclamation, Question } from '../../ui/Icons';
 
 export interface OptionDialogOptionProps extends Omit<ActionButtonProps, 'onClick'> {
   onClick: (e: React.MouseEvent<HTMLElement>) => void;

@@ -2,12 +2,10 @@ import {
   useCircles,
   t,
   ActionButton,
-  Pencil,
   LoadingBlock,
   CirclePermissionView,
-  Exclamation,
-  Check,
 } from '@youfoundation/common-app';
+import { Exclamation, Check, Pencil } from '@youfoundation/common-app/icons';
 import {
   getUniqueDrivesWithHighestPermission,
   stringGuidsEqual,

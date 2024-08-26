@@ -1,8 +1,14 @@
-import { Envelope, t, useDotYouClient } from '@youfoundation/common-app';
 import { useContact } from '../../../hooks/contacts/useContact';
-import { ErrorNotification } from '@youfoundation/common-app';
-import { ActionButton } from '@youfoundation/common-app';
-import { Cake, House, IconFrame, Person, Phone, Refresh } from '@youfoundation/common-app';
+import { t, useDotYouClient, ErrorNotification, ActionButton } from '@youfoundation/common-app';
+import {
+  Envelope,
+  Cake,
+  House,
+  IconFrame,
+  Person,
+  Phone,
+  Refresh,
+} from '@youfoundation/common-app/icons';
 import Section from '../../ui/Sections/Section';
 import ContactImage from '../ContactImage/ContactImage';
 import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';

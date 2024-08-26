@@ -4,10 +4,9 @@ import {
   useChannels,
   useCollaborativeChannels,
   HybridLink,
-  Persons,
-  Quote,
   LoadingBlock,
 } from '@youfoundation/common-app';
+import { Persons, Quote } from '@youfoundation/common-app/icons';
 import React from 'react';
 import { ROOT_PATH } from '../../../../app/App';
 import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';

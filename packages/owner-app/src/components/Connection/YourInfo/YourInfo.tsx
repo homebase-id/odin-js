@@ -10,9 +10,9 @@ import {
 } from '@youfoundation/js-lib/profile';
 import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { getInitialsOfNameAttribute, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { FallbackImg, t, useImage } from '@youfoundation/common-app';
+import { LoadingBlock, FallbackImg, t, useImage } from '@youfoundation/common-app';
 import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
-import { LoadingBlock, Cake, House, IconFrame, Phone } from '@youfoundation/common-app';
+import { Cake, House, IconFrame, Phone } from '@youfoundation/common-app/icons';
 import InfoBox from '../../ui/InfoBox/InfoBox';
 
 interface YourInfoProps {

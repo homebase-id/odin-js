@@ -1,7 +1,8 @@
 import { useState, useRef, Suspense, useEffect } from 'react';
 import { useOutsideTrigger, useMostSpace } from '../../../../hooks';
-import { ActionButton, Lol } from '../../../../ui';
+import { ActionButton } from '../../../../ui';
 import { EmojiPicker } from './EmojiPicker';
+import { Lol } from '../../../../ui/Icons';
 
 export const EmojiSelector = ({
   className,

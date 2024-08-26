@@ -1,11 +1,5 @@
-import {
-  ActionGroup,
-  Times,
-  UserX,
-  t,
-  useDotYouClient,
-  useManageSocialFeed,
-} from '@youfoundation/common-app';
+import { ActionGroup, t, useDotYouClient, useManageSocialFeed } from '@youfoundation/common-app';
+import { Times, UserX } from '@youfoundation/common-app/icons';
 import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import { PostContent } from '@youfoundation/js-lib/public';
 

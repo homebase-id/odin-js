@@ -1,11 +1,17 @@
 import { DriveDefinition } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ActionButton, ActionButtonState, Arrow, t } from '@youfoundation/common-app';
-import { usePortal } from '@youfoundation/common-app';
-import { ErrorNotification } from '@youfoundation/common-app';
+import {
+  usePortal,
+  ActionButton,
+  ActionButtonState,
+  t,
+  ErrorNotification,
+  DialogWrapper,
+} from '@youfoundation/common-app';
+
+import { Arrow } from '@youfoundation/common-app/icons';
 import DrivePermissionFlagEditor from '../../Form/DrivePermissionFlagEditor';
-import { DialogWrapper } from '@youfoundation/common-app';
 import { useApp } from '../../../hooks/apps/useApp';
 import { useApps } from '../../../hooks/apps/useApps';
 import { PermissionUpdateRequest } from '../../../provider/app/AppManagementProviderTypes';

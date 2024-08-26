@@ -4,17 +4,12 @@ import { ReactNode, useEffect, useState } from 'react';
 import {
   ActionButton,
   ActionLink,
-  Chevron,
-  ChevronLeft,
   COMMUNITY_APP_ID,
   ConnectionImage,
   ConnectionName,
   ErrorBoundary,
   ExtendPermissionDialog,
   getOdinIdColor,
-  Pin,
-  Plus,
-  RadioTower,
   Sidenav,
   t,
   useRemoveNotifications,
@@ -34,6 +29,7 @@ import {
 } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 import { usecommunityMetadata } from '../../hooks/community/useCommunityMetadata';
 import { CommunityMetadata } from '../../providers/CommunityMetadataProvider';
+import { RadioTower, Plus, ChevronLeft, Chevron, Pin } from '@youfoundation/common-app/icons';
 
 export const COMMUNITY_ROOT = '/apps/community';
 

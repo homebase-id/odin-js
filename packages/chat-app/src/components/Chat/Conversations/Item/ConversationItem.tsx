@@ -1,5 +1,4 @@
 import {
-  Persons,
   ConnectionImage,
   ConnectionName,
   ellipsisAtMaxChar,
@@ -8,6 +7,7 @@ import {
   OwnerName,
   LoadingBlock,
 } from '@youfoundation/common-app';
+import { Persons } from '@youfoundation/common-app/icons';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useChatMessages } from '../../../../hooks/chat/useChatMessages';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../../../providers/ChatProvider';

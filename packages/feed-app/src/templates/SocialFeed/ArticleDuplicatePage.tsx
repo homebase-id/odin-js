@@ -1,15 +1,12 @@
 import {
-  OpenLock,
-  Lock,
   t,
   usePost,
-  Article as ArticleIcon,
   ChannelOrAclSelector,
   ActionButton,
-  Clipboard,
   useManagePost,
   ErrorNotification,
 } from '@youfoundation/common-app';
+import { OpenLock, Lock, Article as ArticleIcon, Clipboard } from '@youfoundation/common-app/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { ROOT_PATH } from '../../app/App';

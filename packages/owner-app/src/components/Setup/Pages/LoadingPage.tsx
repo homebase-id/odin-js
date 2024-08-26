@@ -1,4 +1,5 @@
-import { Loader, t } from '@youfoundation/common-app';
+import { t } from '@youfoundation/common-app';
+import { Loader } from '@youfoundation/common-app/icons';
 
 const LoadingPage = () => {
   return (

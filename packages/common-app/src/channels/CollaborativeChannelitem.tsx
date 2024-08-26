@@ -7,7 +7,8 @@ import {
 import { t } from '../helpers/i18n/dictionary';
 import { AclSummary } from '../acl/AclInfo/AclInfo';
 import { Persons } from '../ui/Icons/Persons';
-import { ActionLink, ExternalLink } from '../ui';
+import { ActionLink } from '../ui';
+import { ExternalLink } from '../ui/Icons';
 
 export const CollaborativeChannelItem = ({
   odinId,
