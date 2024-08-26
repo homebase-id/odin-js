@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getProfileAttributes } from '@youfoundation/js-lib/profile';
+import { getProfileAttributes } from '@homebase-id/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
 
 export const useAttributeVersions = ({ profileId, type }: { profileId: string; type: string }) => {

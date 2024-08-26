@@ -7,16 +7,16 @@ import {
   GetTargetDriveFromProfileId,
   BuiltInProfiles,
   EmailFields,
-} from '@youfoundation/js-lib/profile';
+} from '@homebase-id/js-lib/profile';
 
-import { DotYouClient, ImageContentType } from '@youfoundation/js-lib/core';
+import { DotYouClient, ImageContentType } from '@homebase-id/js-lib/core';
 import {
   getProfileAttributesOverPeer,
   getDecryptedImageDataOverPeer,
-} from '@youfoundation/js-lib/peer';
-import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
-import { GetProfileCard, GetProfileImage } from '@youfoundation/js-lib/public';
-import { RawContact, getDetailedConnectionInfo } from '@youfoundation/js-lib/network';
+} from '@homebase-id/js-lib/peer';
+import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
+import { GetProfileCard, GetProfileImage } from '@homebase-id/js-lib/public';
+import { RawContact, getDetailedConnectionInfo } from '@homebase-id/js-lib/network';
 
 //Handles fetching and parsing of Contact Source data
 

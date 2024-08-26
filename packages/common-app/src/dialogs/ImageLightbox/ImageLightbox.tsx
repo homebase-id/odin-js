@@ -1,12 +1,12 @@
 import { createPortal } from 'react-dom';
 
-import { EmbeddedThumb, SystemFileType, TargetDrive } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, SystemFileType, TargetDrive } from '@homebase-id/js-lib/core';
 
 import { useEffect } from 'react';
 import { ButtonColors } from '../../ui/Buttons/ColorConfig';
 import { usePortal } from '../../hooks/portal/usePortal';
 import { Times } from '../../ui/Icons/Times';
-import { OdinImage } from '@youfoundation/ui-lib';
+import { OdinImage } from '@homebase-id/ui-lib';
 import { useDotYouClient } from '../../hooks/auth/useDotYouClient';
 
 export const ImageLightbox = ({

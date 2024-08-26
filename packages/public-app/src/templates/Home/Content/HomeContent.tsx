@@ -7,7 +7,7 @@ import HorizontalPosts from '../Common/Posts/HorizontalPosts';
 import Channels from '../Common/Posts/Channels';
 import Connections from '../Common/Connections/Connections';
 import { useTabs } from '../../../hooks/tabs/useTabs';
-import { HOME_ROOT_PATH } from '@youfoundation/common-app';
+import { HOME_ROOT_PATH } from '@homebase-id/common-app';
 
 const HomeContent = () => {
   /// Tabs

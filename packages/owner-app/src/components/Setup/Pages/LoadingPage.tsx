@@ -1,5 +1,5 @@
-import { t } from '@youfoundation/common-app';
-import { Loader } from '@youfoundation/common-app/icons';
+import { t } from '@homebase-id/common-app';
+import { Loader } from '@homebase-id/common-app/icons';
 
 const LoadingPage = () => {
   return (

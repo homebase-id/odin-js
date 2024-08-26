@@ -5,14 +5,14 @@ import {
   LoadingBlock,
   ErrorNotification,
   ActionGroup,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { Archive, Download, Trash } from '@youfoundation/common-app/icons';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { Archive, Download, Trash } from '@homebase-id/common-app/icons';
 import { MailConversation } from '../../providers/MailProvider';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import { useMailThread } from '../../hooks/mail/useMailThread';
 import { ROOT_PATH } from '../../app/App';
 import { MailThreadsFilter, useFilteredMailThreads } from '../../hooks/mail/useFilteredMailThreads';

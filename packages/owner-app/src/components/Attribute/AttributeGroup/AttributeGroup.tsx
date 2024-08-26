@@ -1,7 +1,7 @@
-import { slugify, getNewId } from '@youfoundation/js-lib/helpers';
+import { slugify, getNewId } from '@homebase-id/js-lib/helpers';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { t } from '@youfoundation/common-app';
+import { t } from '@homebase-id/common-app';
 import {
   AttributeDefinition,
   AttributeDefinitions,
@@ -11,9 +11,9 @@ import {
   GroupedAttributes,
 } from '../../../hooks/profiles/useAttributeOrderer';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
-import { Collapse, Plus } from '@youfoundation/common-app/icons';
+import { Collapse, Plus } from '@homebase-id/common-app/icons';
 import AttributeEditor from '../AttributeEditor/AttributeEditor';
-import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 
 const AttributeGroup = ({
   attributes,

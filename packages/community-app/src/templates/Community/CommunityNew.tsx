@@ -11,15 +11,15 @@ import {
   t,
   useAllContacts,
   useDotYouClient,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
-import { NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
-import { getNewId, tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
+import { getNewId, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { useEffect, useState } from 'react';
-import { ContactFile } from '@youfoundation/js-lib/network';
+import { ContactFile } from '@homebase-id/js-lib/network';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
-import { Times, Arrow } from '@youfoundation/common-app/icons';
+import { Times, Arrow } from '@homebase-id/common-app/icons';
 
 export const NewCommunity = () => {
   const [query, setQuery] = useState<string | undefined>(undefined);

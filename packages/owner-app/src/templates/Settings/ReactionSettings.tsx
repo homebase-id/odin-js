@@ -1,5 +1,5 @@
 /* eslint-disable no-fallthrough */
-import { ErrorNotification, t, Label, Radio } from '@youfoundation/common-app';
+import { ErrorNotification, t, Label, Radio } from '@homebase-id/common-app';
 import Section from '../../components/ui/Sections/Section';
 import { useSettings } from '../../hooks/settings/useSettings';
 

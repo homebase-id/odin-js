@@ -1,13 +1,13 @@
 import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { TypedConnectionNotification } from '@youfoundation/js-lib/core';
+import { TypedConnectionNotification } from '@homebase-id/js-lib/core';
 
-import { processInbox } from '@youfoundation/js-lib/peer';
+import { processInbox } from '@homebase-id/js-lib/peer';
 
-import { useNotificationSubscriber } from '@youfoundation/common-app';
+import { useNotificationSubscriber } from '@homebase-id/common-app';
 import { useCallback } from 'react';
 
-import { hasDebugFlag, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import { hasDebugFlag, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import {
   MAIL_CONVERSATION_FILE_TYPE,
   MailConversationsReturn,

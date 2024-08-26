@@ -7,7 +7,7 @@ import {
   t,
   ActionButton,
   DialogWrapper,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import {
   Arrow,
   Bubble,
@@ -16,7 +16,7 @@ import {
   SubtleCheck,
   Times,
   Trash,
-} from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app/icons';
 import { PushNotificationSubscription } from '../../../provider/notifications/PushClientProvider';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -24,7 +24,7 @@ import {
   usePushNotificationClient,
   usePushNotificationClients,
 } from '../../../hooks/notifications/usePushNotificationClients';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 const PushNotificationsDialog = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const target = usePortal('modal-container');

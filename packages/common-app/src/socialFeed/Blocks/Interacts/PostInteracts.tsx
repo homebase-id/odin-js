@@ -1,4 +1,4 @@
-import { PostContent, ReactionContext } from '@youfoundation/js-lib/public';
+import { PostContent, ReactionContext } from '@homebase-id/js-lib/public';
 import { Suspense, useState } from 'react';
 import {
   t,
@@ -24,7 +24,7 @@ import {
   ParsedReactionPreview,
   ApiType,
   DotYouClient,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { Bubble, Share, Repost } from '../../../ui/Icons';
 
 export const PostInteracts = ({

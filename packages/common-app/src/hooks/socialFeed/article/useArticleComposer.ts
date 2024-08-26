@@ -1,11 +1,11 @@
-import { slugify, getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { slugify, getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import {
   Article,
   ChannelDefinition,
   BlogConfig,
   CollaborativeChannelDefinition,
   RemoteCollaborativeChannelDefinition,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 import { useState, useEffect } from 'react';
 import { useManagePost } from '../post/useManagePost';
 import {
@@ -15,7 +15,7 @@ import {
   NewMediaFile,
   MediaFile,
   UploadResult,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../../auth/useDotYouClient';
 import { usePost } from '../post/usePost';
 import { getReadingTime } from '../../../helpers/richTextHelper';

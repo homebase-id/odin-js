@@ -1,8 +1,8 @@
-import { BlogConfig, PostContent } from '@youfoundation/js-lib/public';
+import { BlogConfig, PostContent } from '@homebase-id/js-lib/public';
 import { FC } from 'react';
 import { PostMeta } from '../Blocks/Meta/Meta';
 import { useNavigate } from 'react-router-dom';
-import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import { HOME_ROOT_PATH } from '../../core';
 import { FakeAnchor, ErrorBoundary } from '../../ui';
 import { AuthorImage } from '../Blocks/Author/Image';

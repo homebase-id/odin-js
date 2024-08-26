@@ -1,4 +1,4 @@
-import { PostImageDetailCard, t, useChannel, usePost } from '@youfoundation/common-app';
+import { PostImageDetailCard, t, useChannel, usePost } from '@homebase-id/common-app';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../hooks/auth/useAuth';
 import { useMemo, useState } from 'react';

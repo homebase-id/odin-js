@@ -7,10 +7,10 @@ import {
   removeChannelLink,
   saveChannelDefinition,
   saveChannelLink,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 
 import { FEED_APP_ID, t, useCircles, useDotYouClient } from '../../../..';
-import { stringGuidsEqual, stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual, stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import {
   ApiType,
   DotYouClient,
@@ -19,10 +19,10 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
   TargetDrive,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 const FEED_ROOT_PATH = '/apps/feed';
 import { useChannel } from './useChannel';
-import { ALL_CONNECTIONS_CIRCLE_ID } from '@youfoundation/js-lib/network';
+import { ALL_CONNECTIONS_CIRCLE_ID } from '@homebase-id/js-lib/network';
 import { useChannelDrives } from '../../socialFeed/useChannelDrives';
 
 const getExtendDriveDetailsUrl = (

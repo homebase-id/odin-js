@@ -3,7 +3,7 @@ import {
   PostContent,
   Article,
   getChannelDrive,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 import {
   LoadingBlock,
   AuthorImage,
@@ -23,7 +23,7 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 
 export const PostDetailCard = ({
   odinId,

@@ -3,7 +3,7 @@ import PersonOutgoingRequest from '../../../components/Connection/PersonOutgoing
 import { SectionTitle } from '../../../components/ui/Sections/Section';
 import { useEffect, useState } from 'react';
 import PersonActive from '../../../components/Connection/PersonActive/PersonActive';
-import { DotYouProfile } from '@youfoundation/js-lib/network';
+import { DotYouProfile } from '@homebase-id/js-lib/network';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import OutgoingConnectionDialog from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
 import {
@@ -17,8 +17,8 @@ import {
   LoadingBlock,
   useSentConnections,
   useActiveConnections,
-} from '@youfoundation/common-app';
-import { Persons, Plus } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Persons, Plus } from '@homebase-id/common-app/icons';
 
 const Connections = () => {
   const [hasActiveConnections, setActiveConnections] = useState(true);

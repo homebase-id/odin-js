@@ -4,16 +4,16 @@ import {
   PayloadDescriptor,
   NewHomebaseFile,
   NewPayloadDescriptor,
-} from '@youfoundation/js-lib/core';
-import { OdinImage, OdinThumbnailImage, OdinAudio, OdinAudioWaveForm } from '@youfoundation/ui-lib';
+} from '@homebase-id/js-lib/core';
+import { OdinImage, OdinThumbnailImage, OdinAudio, OdinAudioWaveForm } from '@homebase-id/ui-lib';
 
 import {
   BoringFile,
   useDarkMode,
   LinkPreviewItem,
   useDotYouClientContext,
-} from '@youfoundation/common-app';
-import { Triangle } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Triangle } from '@homebase-id/common-app/icons';
 import { useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import {

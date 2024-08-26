@@ -1,12 +1,12 @@
-import { ActionLink, ellipsisAtMaxChar } from '@youfoundation/common-app';
-import { t } from '@youfoundation/common-app';
+import { ActionLink, ellipsisAtMaxChar } from '@homebase-id/common-app';
+import { t } from '@homebase-id/common-app';
 import { useAuth } from '../../../hooks/auth/useAuth';
 
-import { Feed, Check } from '@youfoundation/common-app/icons';
+import { Feed, Check } from '@homebase-id/common-app/icons';
 import { useFollowDetail } from '../../../hooks/follow/useFollowDetail';
-import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { ChannelDefinition } from '@youfoundation/js-lib/public';
+import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { ChannelDefinition } from '@homebase-id/js-lib/public';
 
 const FollowLink = ({
   className,

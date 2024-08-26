@@ -6,9 +6,9 @@ import DrivePermissionView from '../../../components/PermissionViews/DrivePermis
 import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
 import { AppInteractionPermissionOverview } from '../../../components/PermissionViews/AppInteractionPermissionView/AppInteractionPermissionView';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { ALL_CONNECTIONS_CIRCLE_ID, Membership } from '@youfoundation/js-lib/network';
+import { ALL_CONNECTIONS_CIRCLE_ID, Membership } from '@homebase-id/js-lib/network';
 import DomainCard from '../../../components/Connection/DomainCard/DomainCard';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import CircleAppInteractionDialog from '../../../components/Circles/CircleAppInteractionDialog/CircleAppInteractionDialog';
 import CircleDialog from '../../../components/Circles/CircleDialog/CircleDialog';
 import MemberLookupDialog from '../../../components/Circles/MemberLookupDialog/MemberLookupDialog';
@@ -22,7 +22,7 @@ import {
   Alert,
   SubtleMessage,
   mergeStates,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import {
   Circles,
   Pencil,
@@ -33,7 +33,7 @@ import {
   Block,
   Plus,
   Times,
-} from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app/icons';
 
 const CircleDetails = () => {
   const { circleKey } = useParams();

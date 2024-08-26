@@ -1,5 +1,5 @@
 import { FC, ReactNode, useEffect, useState } from 'react';
-import { t, useSiteData } from '@youfoundation/common-app';
+import { t, useSiteData } from '@homebase-id/common-app';
 import { useLinks } from '../../../../hooks/links/useLinks';
 import {
   Clipboard as ClipboardIcon,
@@ -20,8 +20,8 @@ import {
   Tiktok,
   Twitter,
   Youtube,
-} from '@youfoundation/common-app/icons';
-import { SocialFields } from '@youfoundation/js-lib/profile';
+} from '@homebase-id/common-app/icons';
+import { SocialFields } from '@homebase-id/js-lib/profile';
 
 export const getLinkIcon = (type: string): React.FC<IconProps> => {
   switch (type) {

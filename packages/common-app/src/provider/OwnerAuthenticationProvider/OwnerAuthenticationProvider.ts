@@ -1,4 +1,4 @@
-import { ApiType } from '@youfoundation/js-lib/core';
+import { ApiType } from '@homebase-id/js-lib/core';
 import { OwnerClient } from '../../core/OwnerClient';
 import { removeCurrentRegisteredDevice } from '../../../../owner-app/src/provider/notifications/PushClientProvider';
 

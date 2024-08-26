@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { t, usePortal, DialogWrapper, ActionButton } from '@youfoundation/common-app';
+import { t, usePortal, DialogWrapper, ActionButton } from '@homebase-id/common-app';
 
 export const BlockerDialog = ({
   title,

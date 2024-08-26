@@ -4,7 +4,7 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
   NewMediaFile,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import {
   Tweet,
   Media,
@@ -14,12 +14,12 @@ import {
   ReactAccess,
   CollaborativeChannelDefinition,
   RemoteCollaborativeChannelDefinition,
-} from '@youfoundation/js-lib/public';
-import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/public';
+import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useState } from 'react';
 import { useManagePost } from './useManagePost';
 import { useDotYouClient } from '../../auth/useDotYouClient';
-import { LinkPreview } from '@youfoundation/js-lib/media';
+import { LinkPreview } from '@homebase-id/js-lib/media';
 
 export const usePostComposer = () => {
   const [postState, setPostState] = useState<'uploading' | 'encrypting' | 'error' | undefined>();

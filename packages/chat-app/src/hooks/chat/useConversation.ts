@@ -6,7 +6,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { useDotYouClient } from '@youfoundation/common-app';
+import { useDotYouClient } from '@homebase-id/common-app';
 import {
   UnifiedConversation,
   getConversation,
@@ -18,16 +18,11 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
-import {
-  formatGuidId,
-  getNewId,
-  getNewXorId,
-  stringGuidsEqual,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/core';
+import { formatGuidId, getNewId, getNewXorId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ChatConversationsReturn } from './useConversations';
 import { deleteAllChatMessages } from '../../providers/ChatProvider';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const getSingleConversation = async (
   dotYouClient: DotYouClient,

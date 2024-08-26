@@ -1,11 +1,11 @@
-import { useSecurityContext } from '@youfoundation/common-app';
-import { HardDrive, Persons } from '@youfoundation/common-app/icons';
-import { t } from '@youfoundation/common-app';
+import { useSecurityContext } from '@homebase-id/common-app';
+import { HardDrive, Persons } from '@homebase-id/common-app/icons';
+import { t } from '@homebase-id/common-app';
 import {
   getAppPermissionFromNumber,
   getDrivePermissionFromNumber,
   getUniqueDrivesWithHighestPermission,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 
 const Ping = () => {
   const { data: securityContext } = useSecurityContext().fetch;

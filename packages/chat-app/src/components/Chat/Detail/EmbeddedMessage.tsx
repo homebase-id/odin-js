@@ -3,11 +3,11 @@ import {
   ExtensionThumbnail,
   t,
   useDotYouClientContext,
-} from '@youfoundation/common-app';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+} from '@homebase-id/common-app';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { ChatMessage } from '../../../providers/ChatProvider';
-import { OdinImage } from '@youfoundation/ui-lib';
+import { OdinImage } from '@homebase-id/ui-lib';
 import { ChatDrive } from '../../../providers/ConversationProvider';
 
 export const EmbeddedMessageWithId = ({

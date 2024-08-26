@@ -1,4 +1,4 @@
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useEffect, useState } from 'react';
 import { CirclePermissionView } from '../permissions/CirclePermissionView/CirclePermissionView';
 import { useCircles } from '../hooks/circles/useCircles';

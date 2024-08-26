@@ -1,7 +1,7 @@
 import { ActionButton } from '../../ui';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useDotYouClient } from '../../hooks';
-import { LinkPreview, getLinkPreview } from '@youfoundation/js-lib/media';
+import { LinkPreview, getLinkPreview } from '@homebase-id/js-lib/media';
 import { LinkPreviewTextual } from '../../media/Link';
 import { Times } from '../../ui/Icons';
 

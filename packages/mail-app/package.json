@@ -1,5 +1,5 @@
 {
-  "name": "@youfoundation/mail-app",
+  "name": "@homebase-id/mail-app",
   "version": "0.1.0",
   "private": true,
   "files": [
@@ -21,11 +21,11 @@
     "@tanstack/react-query": "5.51.1",
     "@tanstack/react-query-persist-client": "5.51.1",
     "@tanstack/react-virtual": "3.1.3",
-    "@youfoundation/common-app": "*",
-    "@youfoundation/ffmpeg": "*",
-    "@youfoundation/js-lib": "*",
-    "@youfoundation/rich-text-editor": "*",
-    "@youfoundation/ui-lib": "*",
+    "@homebase-id/common-app": "*",
+    "@homebase-id/ffmpeg": "*",
+    "@homebase-id/js-lib": "*",
+    "@homebase-id/rich-text-editor": "*",
+    "@homebase-id/ui-lib": "*",
     "axios": "1.6.7",
     "emoji-picker-element": "^1.21.3",
     "fuzzysort": "^2.0.4",

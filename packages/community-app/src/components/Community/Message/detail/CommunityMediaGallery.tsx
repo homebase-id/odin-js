@@ -1,18 +1,18 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   ActionButton,
   BoringFile,
   VideoClickToLoad,
   usePortal,
   useDotYouClientContext,
-} from '@youfoundation/common-app';
-import { OdinImage } from '@youfoundation/ui-lib';
+} from '@homebase-id/common-app';
+import { OdinImage } from '@homebase-id/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
 import { getTargetDriveFromCommunityId } from '../../../../providers/CommunityDefinitionProvider';
-import { Times, ArrowLeft, Arrow } from '@youfoundation/common-app/icons';
+import { Times, ArrowLeft, Arrow } from '@homebase-id/common-app/icons';
 
 export const CommunityMediaGallery = ({
   communityId,

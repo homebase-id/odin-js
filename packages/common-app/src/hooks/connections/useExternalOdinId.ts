@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { GetProfileCard } from '@youfoundation/js-lib/public';
+import { GetProfileCard } from '@homebase-id/js-lib/public';
 
 export const useExternalOdinId = ({ odinId }: { odinId?: string }) => {
   const fetchSingle = async ({ odinId }: { odinId?: string }) => {

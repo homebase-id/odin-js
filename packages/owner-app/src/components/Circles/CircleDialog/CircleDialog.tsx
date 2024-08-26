@@ -10,10 +10,10 @@ import {
   Input,
   Label,
   DialogWrapper,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import PermissionFlagsEditor from '../../Form/PermissionFlagsEditor';
-import { CircleDefinition } from '@youfoundation/js-lib/network';
-import { Arrow } from '@youfoundation/common-app/icons';
+import { CircleDefinition } from '@homebase-id/js-lib/network';
+import { Arrow } from '@homebase-id/common-app/icons';
 
 const CircleDialog = ({
   title,

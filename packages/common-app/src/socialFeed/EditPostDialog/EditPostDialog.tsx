@@ -1,4 +1,4 @@
-import { PostContent, getChannelDrive } from '@youfoundation/js-lib/public';
+import { PostContent, getChannelDrive } from '@homebase-id/js-lib/public';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useManagePost } from '../../hooks/socialFeed/post/useManagePost';
@@ -8,7 +8,7 @@ import {
   MediaFile,
   NewMediaFile,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { VolatileInput, FileOverview } from '../../form';
 import { t } from '../../helpers';
 import { usePortal } from '../../hooks';

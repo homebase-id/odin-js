@@ -7,11 +7,11 @@ import {
   t,
   useChannel,
   usePost,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
 
 import { useAuth } from '../../../hooks/auth/useAuth';
-import { Article } from '@youfoundation/js-lib/public';
+import { Article } from '@homebase-id/js-lib/public';
 import { useState } from 'react';
 import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
 

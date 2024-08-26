@@ -3,7 +3,7 @@ import { ReactNode, useState } from 'react';
 import { useErrors, type Error } from '../../hooks/errors/useErrors';
 import { useNavigate } from 'react-router-dom';
 import { formatToTimeAgoWithRelativeDetail } from '../../helpers/timeago/format';
-import { ApiType } from '@youfoundation/js-lib/core';
+import { ApiType } from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../../hooks/auth/useDotYouClient';
 import { useNotifications } from '../../hooks/notifications/useNotifications';
 import { t } from '../../helpers/i18n/dictionary';

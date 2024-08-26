@@ -3,7 +3,7 @@ import {
   Article,
   getChannelDrive,
   RemoteCollaborativeChannelDefinition,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 import { lazy, useMemo, useState } from 'react';
 import {
   t,
@@ -13,8 +13,8 @@ import {
   Textarea,
   useImage,
   ImageSelector,
-} from '@youfoundation/common-app';
-import { Arrow } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
 
 import {
   HomebaseFile,
@@ -22,10 +22,10 @@ import {
   RichText,
   MediaFile,
   NewMediaFile,
-} from '@youfoundation/js-lib/core';
-import { MediaOptions } from '@youfoundation/rich-text-editor/src/editor/ImagePlugin/ImagePlugin';
+} from '@homebase-id/js-lib/core';
+import { MediaOptions } from '@homebase-id/rich-text-editor/src/editor/ImagePlugin/ImagePlugin';
 const RichTextEditor = lazy(() =>
-  import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
+  import('@homebase-id/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
 );
 const POST_MEDIA_RTE_PAYLOAD_KEY = 'pst_rte';
 

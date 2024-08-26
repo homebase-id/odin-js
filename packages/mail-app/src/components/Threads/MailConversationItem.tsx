@@ -6,7 +6,7 @@ import {
   MailConversation,
   REMOVE_ARCHIVAL_STATUS,
 } from '../../providers/MailProvider';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   ActionButton,
   Checkbox,
@@ -15,13 +15,13 @@ import {
   highlightQuery,
   t,
   useDotYouClientContext,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { ROOT_PATH } from '../../app/App';
 import { MailAttachmentOverview } from '../../templates/Mail/MailAttachmentOverview';
 import { RecipientsList } from './RecipientsList';
 import { useMailThread } from '../../hooks/mail/useMailThread';
 import { useMailConversation } from '../../hooks/mail/useMailConversation';
-import { Trash, Archive, Envelope, EnvelopeOpen } from '@youfoundation/common-app/icons';
+import { Trash, Archive, Envelope, EnvelopeOpen } from '@homebase-id/common-app/icons';
 
 export const MailConversationItem = ({
   mailThread,

@@ -3,14 +3,14 @@ import {
   BlogConfig,
   getChannelDefinition,
   getChannelDefinitionBySlug,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 
 import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
 import { useDotYouClient } from '../../../..';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { fetchCachedPublicChannels } from '../post/cachedDataHelpers';
-import { getChannelOverPeer, getChannelBySlugOverPeer } from '@youfoundation/js-lib/peer';
+import { getChannelOverPeer, getChannelBySlugOverPeer } from '@homebase-id/js-lib/peer';
 
 type useChannelsProps = {
   odinId?: string;

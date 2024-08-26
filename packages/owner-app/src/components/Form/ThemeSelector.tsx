@@ -1,6 +1,6 @@
-import { HomePageTheme } from '@youfoundation/js-lib/public';
+import { HomePageTheme } from '@homebase-id/js-lib/public';
 import { FC } from 'react';
-import { t } from '@youfoundation/common-app';
+import { t } from '@homebase-id/common-app';
 import {
   Block,
   HorizontalPosts,
@@ -8,7 +8,7 @@ import {
   Links,
   CoverPage,
   IconProps,
-} from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app/icons';
 
 const ThemeSelector = ({
   name,

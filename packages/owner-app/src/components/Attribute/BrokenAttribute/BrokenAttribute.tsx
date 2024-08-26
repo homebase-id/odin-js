@@ -1,8 +1,8 @@
-import { t, ActionButton } from '@youfoundation/common-app';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { t, ActionButton } from '@homebase-id/common-app';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useAttribute } from '../../../hooks/profiles/useAttribute';
 import Section from '../../ui/Sections/Section';
-import { Exclamation, Trash } from '@youfoundation/common-app/icons';
+import { Exclamation, Trash } from '@homebase-id/common-app/icons';
 
 const dateFormat: Intl.DateTimeFormatOptions = {
   month: 'short',

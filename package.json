@@ -1,6 +1,6 @@
 {
   "version": "0.0.1-alpha.1",
-  "name": "@youfoundation/js-monorepo",
+  "name": "@homebase-id/js-monorepo",
   "author": "YouFoundation",
   "description": "Monorepo for the JS Libs of YouFoundation",
   "workspaces": [

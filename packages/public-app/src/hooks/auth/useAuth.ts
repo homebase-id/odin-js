@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useVerifyToken } from './useVerifyToken';
 import { getEccPublicKey, logout as logoutYouauth } from '../../provider/AuthenticationProvider';
-import { HOME_ROOT_PATH, logoutOwner } from '@youfoundation/common-app';
+import { HOME_ROOT_PATH, logoutOwner } from '@homebase-id/common-app';
 import {
   HOME_SHARED_SECRET,
   OWNER_SHARED_SECRET,
   STORAGE_IDENTITY_KEY,
   useDotYouClient,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import {
   YouAuthorizationParams,
   createEccPair,
@@ -15,7 +15,7 @@ import {
   importRemotePublicEccKey,
   retrieveEccKey,
   saveEccKey,
-} from '@youfoundation/js-lib/auth';
+} from '@homebase-id/js-lib/auth';
 import {
   uint8ArrayToBase64,
   stringToUint8Array,
@@ -23,7 +23,7 @@ import {
   base64ToUint8Array,
   byteArrayToString,
   tryJsonParse,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 
 export const useAuth = () => {
   const { getDotYouClient, getIdentity, getApiType, hasSharedSecret, getSharedSecret, isOwner } =

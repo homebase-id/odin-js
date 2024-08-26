@@ -1,4 +1,4 @@
-import { PayloadDescriptor, TargetDrive } from '@youfoundation/js-lib/core';
+import { PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
 import React, { ReactNode } from 'react';
 import { Image } from '../../media/Image';
 import { ActionLink } from '../../ui/Buttons/ActionLink';

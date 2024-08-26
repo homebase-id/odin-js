@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import { HOME_ROOT_PATH, ellipsisAtMaxChar } from '@youfoundation/common-app';
-import { t } from '@youfoundation/common-app';
+import { HOME_ROOT_PATH, ellipsisAtMaxChar } from '@homebase-id/common-app';
+import { t } from '@homebase-id/common-app';
 
 const Breadcrumbs = ({
   levels,

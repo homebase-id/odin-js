@@ -1,4 +1,4 @@
-import { ActionButton, t, Checkbox } from '@youfoundation/common-app';
+import { ActionButton, t, Checkbox } from '@homebase-id/common-app';
 import { useEffect } from 'react';
 import { useEula } from '../../hooks/eula/useEula';
 

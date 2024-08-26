@@ -4,7 +4,7 @@ import {
   cbcEncrypt,
   stringToUint8Array,
   uint8ArrayToBase64,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 
 export interface NonceData {
   saltPassword64: string;

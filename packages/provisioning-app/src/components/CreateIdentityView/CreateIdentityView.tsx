@@ -5,8 +5,8 @@ import {
   useCreateIdentity,
   useDomainHasValidCertificate,
 } from '../../hooks/commonDomain/commonDomain';
-import { Alert } from '@youfoundation/common-app';
-import { Arrow, Check, Loader, Question } from '@youfoundation/common-app/icons';
+import { Alert } from '@homebase-id/common-app';
+import { Arrow, Check, Loader, Question } from '@homebase-id/common-app/icons';
 import { useEffect, useMemo, useState } from 'react';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
 

@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { t } from '@youfoundation/common-app';
+import { t } from '@homebase-id/common-app';
 import Links from '../../components/ui/Layout/Links/Links';
 
 const LinksPage = () => {

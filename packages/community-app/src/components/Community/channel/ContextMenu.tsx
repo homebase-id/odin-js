@@ -1,4 +1,4 @@
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   CommunityDeliveryStatus,
   CommunityMessage,
@@ -10,8 +10,8 @@ import {
   t,
   ErrorNotification,
   ActionGroup,
-} from '@youfoundation/common-app';
-import { ChevronDown } from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app';
+import { ChevronDown } from '@homebase-id/common-app/icons';
 import { useState } from 'react';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { CommunityMessageInfo } from '../Message/detail/CommunityMessageInfo';

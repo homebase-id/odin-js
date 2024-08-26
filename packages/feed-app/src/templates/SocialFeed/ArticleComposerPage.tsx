@@ -11,7 +11,7 @@ import {
   t,
   ChannelOrAclSelector,
   BlockerDialog,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import {
   Arrow,
   Article as ArticleIcon,
@@ -20,14 +20,14 @@ import {
   Lock,
   Save,
   OpenLock,
-} from '@youfoundation/common-app/icons';
+} from '@homebase-id/common-app/icons';
 import { InnerFieldEditors } from '../../components/SocialFeed/ArticleFieldsEditor/ArticleFieldsEditor';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { Article, ReactAccess } from '@youfoundation/js-lib/public';
-import { useArticleComposer } from '@youfoundation/common-app';
+import { Article, ReactAccess } from '@homebase-id/js-lib/public';
+import { useArticleComposer } from '@homebase-id/common-app';
 import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { HomebaseFile, NewHomebaseFile, RichText } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, RichText } from '@homebase-id/js-lib/core';
 import { ROOT_PATH } from '../../app/App';
 
 export const ArticleComposerPage = () => {

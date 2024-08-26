@@ -1,5 +1,5 @@
-import { ErrorNotification, formatToDateAgoWithRelativeDetail, t } from '@youfoundation/common-app';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { ErrorNotification, formatToDateAgoWithRelativeDetail, t } from '@homebase-id/common-app';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
 import { ChatMessage } from '../../providers/ChatProvider';

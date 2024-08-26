@@ -1,4 +1,4 @@
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { useSiteData, useExternalOdinId, useIsConnected, useDotYouClient } from '../../../..';
 
 export const AuthorName = ({ odinId, excludeLink }: { odinId?: string; excludeLink?: boolean }) => {

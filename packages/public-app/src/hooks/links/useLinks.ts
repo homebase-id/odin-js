@@ -5,9 +5,9 @@ import {
   Attribute,
   LinkFields,
   getProfileAttributes,
-} from '@youfoundation/js-lib/profile';
+} from '@homebase-id/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
-import { GetFile } from '@youfoundation/js-lib/public';
+import { GetFile } from '@homebase-id/js-lib/public';
 
 interface LinkData {
   text: string;

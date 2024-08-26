@@ -1,8 +1,8 @@
-import { PostTeaser, t } from '@youfoundation/common-app';
-import { PostContent } from '@youfoundation/js-lib/public';
+import { PostTeaser, t } from '@homebase-id/common-app';
+import { PostContent } from '@homebase-id/js-lib/public';
 import { useState } from 'react';
 import LoginDialog from '../../../Dialog/LoginDialog/LoginDialog';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 
 const ListPostOverview = ({
   blogPosts,

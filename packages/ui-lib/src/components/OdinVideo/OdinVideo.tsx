@@ -1,5 +1,5 @@
-import { DotYouClient, TargetDrive } from '@youfoundation/js-lib/core';
-import { SegmentedVideoMetadata } from '@youfoundation/js-lib/media';
+import { DotYouClient, TargetDrive } from '@homebase-id/js-lib/core';
+import { SegmentedVideoMetadata } from '@homebase-id/js-lib/media';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useIntersection } from '../../hooks/intersection/useIntersection';
 import { useVideo } from '../../hooks/video/useVideo';

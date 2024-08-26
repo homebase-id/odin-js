@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useDotYouClient } from '@youfoundation/common-app';
+import { useDotYouClient } from '@homebase-id/common-app';
 import { fetchCircleMembershipStatus } from '../../provider/network/troubleshooting/ConnectionGrantProvider';
 
 export const useConnectionGrantStatus = ({ odinId }: { odinId?: string }) => {

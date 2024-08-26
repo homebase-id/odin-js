@@ -4,11 +4,11 @@ import {
   GetTargetDriveFromChannelId,
   removeChannelDefinition,
   saveChannelDefinition,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 
 import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
 import { FEED_APP_ID, t, useDotYouClient, useStaticFiles } from '../../../..';
-import { stringGuidsEqual, stringifyToQueryParams, toGuidId } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual, stringifyToQueryParams, toGuidId } from '@homebase-id/js-lib/helpers';
 import {
   ApiType,
   DotYouClient,
@@ -16,7 +16,7 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   TargetDrive,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 const FEED_ROOT_PATH = '/apps/feed';
 
 const getExtendAuthorizationUrl = (

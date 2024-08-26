@@ -1,4 +1,4 @@
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { useContext, createContext } from 'react';
 
 export const DotYouClientContext = createContext<DotYouClient | null>(

@@ -1,7 +1,7 @@
-import { ReactionContext } from '@youfoundation/js-lib/public';
+import { ReactionContext } from '@homebase-id/js-lib/public';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ReactionFile } from '@youfoundation/js-lib/core';
+import { ReactionFile } from '@homebase-id/js-lib/core';
 import { t } from '../../../../helpers';
 import { usePortal, useEmojiReactions, useEmojiSummary } from '../../../../hooks';
 import { DialogWrapper, ActionButton } from '../../../../ui';

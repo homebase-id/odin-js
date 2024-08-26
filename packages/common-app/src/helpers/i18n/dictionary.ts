@@ -1,4 +1,4 @@
-import { TransferStatus } from '@youfoundation/js-lib/core';
+import { TransferStatus } from '@homebase-id/js-lib/core';
 
 const enLocale = [
   ['login', 'Login'],

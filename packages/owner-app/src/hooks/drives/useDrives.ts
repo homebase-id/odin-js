@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { DriveDefinition, getDrives } from '@youfoundation/js-lib/core';
+import { DriveDefinition, getDrives } from '@homebase-id/js-lib/core';
 import { useAuth } from '../auth/useAuth';
 
 export const useDrives = () => {

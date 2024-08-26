@@ -10,9 +10,9 @@ import {
   AuthorImage,
   getTextRootsRecursive,
   RichTextRenderer,
-} from '@youfoundation/common-app';
-import { HomebaseFile, RichText } from '@youfoundation/js-lib/core';
-import { formatGuidId, stringGuidsEqual, toGuidId } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/common-app';
+import { HomebaseFile, RichText } from '@homebase-id/js-lib/core';
+import { formatGuidId, stringGuidsEqual, toGuidId } from '@homebase-id/js-lib/helpers';
 import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { CommunityActions, ContextMenu } from '../channel/ContextMenu';

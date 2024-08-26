@@ -10,10 +10,10 @@ import {
   PostMeta,
   useChannel,
   useCheckIdentity,
-} from '@youfoundation/common-app';
-import { UnreachableIdentity } from '@youfoundation/feed-app/src/components/SocialFeed/UnreachableIdentity';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { PostContent } from '@youfoundation/js-lib/public';
+} from '@homebase-id/common-app';
+import { UnreachableIdentity } from '@homebase-id/feed-app/src/components/SocialFeed/UnreachableIdentity';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { PostContent } from '@homebase-id/js-lib/public';
 import { useAuth } from '../../hooks/auth/useAuth';
 
 const POSTS_TO_SHOW = 2;

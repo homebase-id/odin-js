@@ -3,14 +3,14 @@ import {
   incrementAppIdNotificationCount,
   useDotYouClientContext,
   useNotificationSubscriber,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import {
   getQueryBatchCursorFromTime,
   getQueryModifiedCursorFromTime,
   hasDebugFlag,
   stringGuidsEqual,
-} from '@youfoundation/js-lib/helpers';
-import { processInbox } from '@youfoundation/js-lib/peer';
+} from '@homebase-id/js-lib/helpers';
+import { processInbox } from '@homebase-id/js-lib/peer';
 import { getTargetDriveFromCommunityId } from '../../providers/CommunityDefinitionProvider';
 import {
   AppNotification,
@@ -22,7 +22,7 @@ import {
   queryModified,
   TargetDrive,
   TypedConnectionNotification,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { insertNewMessage, insertNewMessagesForChannel } from './messages/useCommunityMessages';
 import {
   COMMUNITY_MESSAGE_FILE_TYPE,

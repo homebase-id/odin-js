@@ -1,11 +1,11 @@
 import { useQueryClient, useQuery, useMutation, QueryClient } from '@tanstack/react-query';
-import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import {
   ConversationMetadata,
   uploadConversationMetadata,
   getConversationMetadata,
 } from '../../providers/ConversationProvider';
-import { useDotYouClientContext } from '@youfoundation/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useConversationMetadata = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};

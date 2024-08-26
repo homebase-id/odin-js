@@ -1,4 +1,4 @@
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useMailConversations } from './useMailConversations';
 
 export const useMailOrigin = (props?: {

@@ -10,9 +10,9 @@ import {
   TypedConnectionNotification,
   queryBatch,
   queryModified,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 
-import { processInbox } from '@youfoundation/js-lib/peer';
+import { processInbox } from '@homebase-id/js-lib/peer';
 import {
   ChatDrive,
   CHAT_CONVERSATION_FILE_TYPE,
@@ -24,7 +24,7 @@ import {
   incrementAppIdNotificationCount,
   useDotYouClientContext,
   useNotificationSubscriber,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CHAT_MESSAGE_FILE_TYPE, ChatMessage, dsrToMessage } from '../../providers/ChatProvider';
 import {
@@ -32,7 +32,7 @@ import {
   getQueryModifiedCursorFromTime,
   hasDebugFlag,
   stringGuidsEqual,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 import { getConversationQueryOptions, useConversation } from './useConversation';
 
 import { insertNewMessage, insertNewMessagesForConversation } from './useChatMessages';

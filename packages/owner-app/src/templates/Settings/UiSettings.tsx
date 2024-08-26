@@ -1,4 +1,4 @@
-import { t, Label, CheckboxToggle } from '@youfoundation/common-app';
+import { t, Label, CheckboxToggle } from '@homebase-id/common-app';
 import Section from '../../components/ui/Sections/Section';
 import { useSettings } from '../../hooks/settings/useSettings';
 

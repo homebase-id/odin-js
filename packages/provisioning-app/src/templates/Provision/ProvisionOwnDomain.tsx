@@ -6,7 +6,7 @@ import ValidatingDnsRecords from '../../components/OwnDomain/ValidatingDnsRecord
 import CreateIdentityView from '../../components/CreateIdentityView/CreateIdentityView';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useCheckInvitationCode } from '../../hooks/invitationCode/useCheckInvitationCode';
-import { Times } from '@youfoundation/common-app/icons';
+import { Times } from '@homebase-id/common-app/icons';
 import { OwnDomainProvisionState } from '../../hooks/ownDomain/useOwnDomain';
 
 const LOCAL_EMAIL_STORAGE_KEY = 'email';

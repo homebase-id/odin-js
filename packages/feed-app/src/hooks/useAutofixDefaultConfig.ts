@@ -1,6 +1,5 @@
-import { useChannel } from '@youfoundation/common-app';
-import { useManageChannel } from '@youfoundation/common-app/src/hooks/socialFeed/channels/useManageChannel';
-import { BlogConfig } from '@youfoundation/js-lib/public';
+import { useChannel, useManageChannel } from '@homebase-id/common-app';
+import { BlogConfig } from '@homebase-id/js-lib/public';
 import { useEffect } from 'react';
 
 const useFixMissingPublicChannel = () => {

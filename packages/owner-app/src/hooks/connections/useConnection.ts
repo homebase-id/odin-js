@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
-import { getDetailedConnectionInfo } from '@youfoundation/js-lib/network';
+import { getDetailedConnectionInfo } from '@homebase-id/js-lib/network';
 
 export const useConnection = ({ odinId }: { odinId?: string }) => {
   const dotYouClient = useAuth().getDotYouClient();

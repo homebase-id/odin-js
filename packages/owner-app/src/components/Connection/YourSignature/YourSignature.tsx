@@ -4,11 +4,11 @@ import {
   MinimalProfileFields,
   GetTargetDriveFromProfileId,
   Attribute,
-} from '@youfoundation/js-lib/profile';
+} from '@homebase-id/js-lib/profile';
 import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
-import { FallbackImg, LoadingBlock, useImage } from '@youfoundation/common-app';
-import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
-import { getInitialsOfNameAttribute } from '@youfoundation/js-lib/helpers';
+import { FallbackImg, LoadingBlock, useImage } from '@homebase-id/common-app';
+import { HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
+import { getInitialsOfNameAttribute } from '@homebase-id/js-lib/helpers';
 
 interface YourSignatureProps {
   className?: string;

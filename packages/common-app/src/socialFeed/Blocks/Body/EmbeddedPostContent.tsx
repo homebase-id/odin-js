@@ -1,4 +1,4 @@
-import { EmbeddedPost } from '@youfoundation/js-lib/public';
+import { EmbeddedPost } from '@homebase-id/js-lib/public';
 import { useEffect, useState } from 'react';
 import { t } from '../../../helpers';
 import { AuthorImage } from '../Author/Image';
@@ -6,7 +6,7 @@ import { AuthorName } from '../Author/Name';
 import { PostMeta } from '../Meta/Meta';
 import { useChannel } from '../../../hooks';
 import { FakeAnchor } from '../../../ui';
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { SecurityGroupType } from '@homebase-id/js-lib/core';
 import { PostBody } from './Body';
 import { PostMedia } from '../Media/Media';
 

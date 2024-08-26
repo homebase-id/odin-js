@@ -1,13 +1,13 @@
 import { useCommunity } from '../../hooks/community/useCommunity';
-import { ErrorBoundary } from '@youfoundation/common-app';
+import { ErrorBoundary } from '@homebase-id/common-app';
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
-import { ChatDetail } from '@youfoundation/chat-app/src/templates/Chat/ChatDetail';
-import { useDotYouClientContext } from '@youfoundation/common-app';
-import { getNewXorId } from '@youfoundation/js-lib/helpers';
-import { ConversationWithYourselfId } from '@youfoundation/chat-app/src/providers/ConversationProvider';
-import { useConversation } from '@youfoundation/chat-app/src/hooks/chat/useConversation';
+import { ChatDetail } from '@homebase-id/chat-app/src/templates/Chat/ChatDetail';
+import { useDotYouClientContext } from '@homebase-id/common-app';
+import { getNewXorId } from '@homebase-id/js-lib/helpers';
+import { ConversationWithYourselfId } from '@homebase-id/chat-app/src/providers/ConversationProvider';
+import { useConversation } from '@homebase-id/chat-app/src/hooks/chat/useConversation';
 
 export const CommunityDirectDetail = () => {
   const identity = useDotYouClientContext().getIdentity();

@@ -1,16 +1,16 @@
-import { Label, t, Input, Select, useImage } from '@youfoundation/common-app';
-import { ImageSelector } from '@youfoundation/common-app';
-import { HomePageThemeFields, HomePageConfig, HomePageTheme } from '@youfoundation/js-lib/public';
-import { GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
+import { Label, t, Input, Select, useImage } from '@homebase-id/common-app';
+import { ImageSelector } from '@homebase-id/common-app';
+import { HomePageThemeFields, HomePageConfig, HomePageTheme } from '@homebase-id/js-lib/public';
+import { GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import ColorThemeSelector from '../../Form/ColorThemeSelector';
 import FaviconSelector from '../../Form/FaviconSelector';
 import Order from '../../Form/Order';
 import ThemeSelector from '../../Form/ThemeSelector';
-import { EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb } from '@homebase-id/js-lib/core';
 import { lazy } from 'react';
 const RichTextEditor = lazy(() =>
-  import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
+  import('@homebase-id/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
 );
 
 const DEFAULT_TABS_ORDER = ['Posts', 'Links', 'About', 'Connections'];
@@ -89,10 +89,10 @@ const ThemeSpecificFields = ({
     themeId === HomePageTheme.VerticalPosts.toString()
       ? 'Vertical'
       : themeId === HomePageTheme.HorizontalPosts.toString()
-      ? 'Horizontal'
-      : themeId === HomePageTheme.Links.toString()
-      ? 'Links'
-      : 'Cover';
+        ? 'Horizontal'
+        : themeId === HomePageTheme.Links.toString()
+          ? 'Links'
+          : 'Cover';
 
   switch (theme) {
     case 'Vertical':

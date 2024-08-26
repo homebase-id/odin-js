@@ -7,17 +7,12 @@ import {
 } from '@udecode/plate-core';
 import { Value, insertNodes, TElement, getPluginOptions, removeNodes } from '@udecode/plate-common';
 import { ReactEditor } from 'slate-react';
-import { TargetDrive, NewMediaFile } from '@youfoundation/js-lib/core';
+import { TargetDrive, NewMediaFile } from '@homebase-id/js-lib/core';
 import { useMemo, useState } from 'react';
-import {
-  getImagesFromPasteEvent,
-  ImageDialog,
-  t,
-  useDotYouClient,
-} from '@youfoundation/common-app';
-import { ImageIcon, Trash } from '@youfoundation/common-app/icons';
+import { getImagesFromPasteEvent, ImageDialog, t, useDotYouClient } from '@homebase-id/common-app';
+import { ImageIcon, Trash } from '@homebase-id/common-app/icons';
 import { ToolbarButton, ToolbarButtonProps } from '../../components/plate-ui/toolbar';
-import { OdinThumbnailImage } from '@youfoundation/ui-lib';
+import { OdinThumbnailImage } from '@homebase-id/ui-lib';
 
 export interface TImageElement extends TElement {
   fileKey: string;

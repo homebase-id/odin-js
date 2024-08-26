@@ -1,4 +1,4 @@
-import { t, Alert, ActionButton, Label, logoutOwnerAndAllApps } from '@youfoundation/common-app';
+import { t, Alert, ActionButton, Label, logoutOwnerAndAllApps } from '@homebase-id/common-app';
 import { useState } from 'react';
 import Section from '../../components/ui/Sections/Section';
 import { useAuth } from '../../hooks/auth/useAuth';

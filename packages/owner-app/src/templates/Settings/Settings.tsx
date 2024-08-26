@@ -1,4 +1,4 @@
-import { t } from '@youfoundation/common-app';
+import { t } from '@homebase-id/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import Submenu from '../../components/SubMenu/SubMenu';
 import { useParams } from 'react-router-dom';
@@ -7,7 +7,7 @@ import { NetworkVisibilitySettings } from './NetworkVisibilitySettings';
 import { ReactionSettings } from './ReactionSettings';
 import { SecuritySettings } from './SecuritySettings';
 import { DeleteAccountSettings } from './DeleteAccountSettings';
-import { Cog } from '@youfoundation/common-app/icons';
+import { Cog } from '@homebase-id/common-app/icons';
 
 const Settings = () => {
   const { sectionId } = useParams();

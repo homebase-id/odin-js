@@ -1,6 +1,6 @@
-import { useDotYouClient, t } from '@youfoundation/common-app';
-import { Clock, SubtleCheck, Times } from '@youfoundation/common-app/icons';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { useDotYouClient, t } from '@homebase-id/common-app';
+import { Clock, SubtleCheck, Times } from '@homebase-id/common-app/icons';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   CommunityDeliveryStatus,
   CommunityMessage,

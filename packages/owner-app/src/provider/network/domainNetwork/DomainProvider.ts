@@ -1,5 +1,5 @@
-import { DotYouClient, NumberCursoredResult } from '@youfoundation/js-lib/core';
-import { CircleGrant } from '@youfoundation/js-lib/network';
+import { DotYouClient, NumberCursoredResult } from '@homebase-id/js-lib/core';
+import { CircleGrant } from '@homebase-id/js-lib/network';
 
 const root = '/youauthdomain';
 

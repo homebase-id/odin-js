@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
-import { t } from '@youfoundation/common-app';
-import { File } from '@youfoundation/common-app/icons';
+import { t } from '@homebase-id/common-app';
+import { File } from '@homebase-id/common-app/icons';
 import { useDrive } from '../../../hooks/drives/useDrive';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
