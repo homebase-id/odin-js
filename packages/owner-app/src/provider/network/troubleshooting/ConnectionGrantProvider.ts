@@ -42,7 +42,7 @@ export const verifyConnection = async (dotYouClient: DotYouClient, odinId: strin
 
   const client = dotYouClient.createAxiosClient();
   return await client
-    .post<{ result: boolean }>(verifyPath, { odinId: odinId })
-    .then((res) => res.data.result)
+    .post<{ isValid: boolean }>(verifyPath, { odinId: odinId })
+    .then((res) => res.data.isValid)
     .catch(dotYouClient.handleErrorResponse);
 };
