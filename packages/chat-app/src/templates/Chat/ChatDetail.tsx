@@ -1,20 +1,18 @@
 import {
   ActionGroup,
   ActionLink,
-  ChevronDown,
-  ChevronLeft,
   ConnectionImage,
   ConnectionName,
   ErrorBoundary,
   ErrorNotification,
   OwnerImage,
   OwnerName,
-  Persons,
   t,
   useDotYouClient,
   useIntroductions,
   useIsConnected,
 } from '@youfoundation/common-app';
+import { ChevronDown, ChevronLeft, Persons } from '@youfoundation/common-app/icons';
 import {
   ApiType,
   DotYouClient,

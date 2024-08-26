@@ -8,7 +8,7 @@ import {
   Links,
   CoverPage,
   IconProps,
-} from '@youfoundation/common-app';
+} from '@youfoundation/common-app/icons';
 
 const ThemeSelector = ({
   name,

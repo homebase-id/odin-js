@@ -1,20 +1,22 @@
 import { createPortal } from 'react-dom';
 import {
   Alert,
+  ErrorNotification,
+  SubtleMessage,
+  usePortal,
+  t,
+  ActionButton,
+  DialogWrapper,
+} from '@youfoundation/common-app';
+import {
   Arrow,
   Bubble,
-  ErrorNotification,
   HardDrive,
   PaperPlane,
   SubtleCheck,
-  SubtleMessage,
   Times,
   Trash,
-  t,
-} from '@youfoundation/common-app';
-import { usePortal } from '@youfoundation/common-app';
-import { ActionButton } from '@youfoundation/common-app';
-import { DialogWrapper } from '@youfoundation/common-app';
+} from '@youfoundation/common-app/icons';
 import { PushNotificationSubscription } from '../../../provider/notifications/PushClientProvider';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';

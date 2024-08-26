@@ -5,7 +5,6 @@ import {
   ActionButton,
   ActionButtonState,
   t,
-  Arrow,
   CheckboxToggle,
 } from '@youfoundation/common-app';
 import { useApps } from '../../../hooks/apps/useApps';
@@ -15,6 +14,7 @@ import { CircleDefinition } from '@youfoundation/js-lib/network';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
+import { Arrow } from '@youfoundation/common-app/icons';
 
 const CircleAppInteractionDialog = ({
   title,

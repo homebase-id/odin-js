@@ -1,4 +1,5 @@
-import { Label, Input, Select, ActionButton, Times, t, Textarea } from '@youfoundation/common-app';
+import { Label, Input, Select, ActionButton, t, Textarea } from '@youfoundation/common-app';
+import { Times } from '@youfoundation/common-app/icons';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useEffect, useState } from 'react';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';

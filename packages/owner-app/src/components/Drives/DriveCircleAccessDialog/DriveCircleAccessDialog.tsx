@@ -1,7 +1,8 @@
 import { DriveDefinition } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t, ActionButton, ActionButtonState, usePortal, Arrow } from '@youfoundation/common-app';
+import { Arrow } from '@youfoundation/common-app/icons';
+import { t, ActionButton, ActionButtonState, usePortal } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
 import { useCircles } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';

@@ -9,6 +9,16 @@
   "type": "module",
   "module": "./index.ts",
   "types": "./index.ts",
+  "exports": {
+    ".": {
+      "import": "./index.ts",
+      "require": "./index.ts"
+    },
+    "./icons": {
+      "import": "./icons.ts",
+      "require": "./icons.ts"
+    }
+  },
   "sideEffects": false,
   "scripts": {
     "lint": "eslint src/*"

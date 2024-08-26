@@ -232,7 +232,7 @@ const InnerRichTextEditor = memo(
                       end: true,
                       allow: KEYS_HEADING,
                     },
-                  },
+                  } as any,
                   {
                     ...resetBlockTypesCodeBlockRule,
                     hotkey: 'Backspace',
@@ -271,10 +271,10 @@ const InnerRichTextEditor = memo(
             createDeserializeHtmlPlugin(),
             createDeserializeMdPlugin(),
             createEmojiPlugin(),
-            createMentionPlugin({ options: { mentionables: mentionables || [] } }),
+            createMentionPlugin({ options: { mentionables: mentionables || [] } as any }),
             mediaOptions ? createImagePlugin({ options: mediaOptions }) : undefined,
             ...(_plugins || []),
-          ].filter(Boolean),
+          ].filter(Boolean) as PlatePlugin[],
           {
             components: {
               [ELEMENT_BLOCKQUOTE]: BlockquoteElement,

@@ -2,7 +2,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import {
   ActionButton,
-  Arrow,
   ConnectionImage,
   ConnectionName,
   ErrorBoundary,
@@ -10,7 +9,6 @@ import {
   Label,
   Radio,
   t,
-  Times,
   useAllContacts,
   useDotYouClient,
 } from '@youfoundation/common-app';
@@ -21,6 +19,7 @@ import { useEffect, useState } from 'react';
 import { ContactFile } from '@youfoundation/js-lib/network';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
+import { Times, Arrow } from '@youfoundation/common-app/icons';
 
 export const NewCommunity = () => {
   const [query, setQuery] = useState<string | undefined>(undefined);

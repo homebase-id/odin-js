@@ -1,20 +1,3 @@
-import {
-  ActionButton,
-  t,
-  ActionGroupOptionProps,
-  House,
-  Trash,
-  Block,
-  ErrorNotification,
-  Persons,
-  ActionGroup,
-  useDotYouClient,
-  ConfirmDialog,
-  Ellipsis,
-  useIdentityIFollow,
-  HeartBeat,
-  useErrors,
-} from '@youfoundation/common-app';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { useConnection } from '../../../hooks/connections/useConnection';
@@ -25,6 +8,18 @@ import { useConnectionGrantStatus } from '../../../hooks/connections/useConnecti
 import { hasDebugFlag, jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { OutgoingConnectionDialog } from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
 import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import {
+  useDotYouClient,
+  useIdentityIFollow,
+  ActionButton,
+  t,
+  ActionGroupOptionProps,
+  useErrors,
+  ErrorNotification,
+  ActionGroup,
+  ConfirmDialog,
+} from '@youfoundation/common-app';
+import { House, Block, Trash, HeartBeat, Persons, Ellipsis } from '@youfoundation/common-app/icons';
 
 export const IdentityPageMetaAndActions = ({
   odinId, // setIsEditPermissionActive,

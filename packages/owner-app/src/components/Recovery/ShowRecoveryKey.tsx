@@ -1,6 +1,7 @@
-import { ActionButton, CloseEye, Eye, Label, t, Clipboard } from '@youfoundation/common-app';
+import { ActionButton, Label, t } from '@youfoundation/common-app';
 import { useRecoveryKey } from '../../hooks/recovery/useRecoveryKey';
 import { useEffect, useState } from 'react';
+import { Eye, CloseEye, Clipboard } from '@youfoundation/common-app/icons';
 
 const ShowRecoveryKey = ({ onConfirm }: { onConfirm: () => void }) => {
   const { data: recoveryKey } = useRecoveryKey().fetchKey;

@@ -1,20 +1,13 @@
 import { createPortal } from 'react-dom';
 
 import { t } from '../../../../helpers';
-import {
-  ActionLink,
-  DialogWrapper,
-  Facebook,
-  Linkedin,
-  Twitter,
-  Whatsapp,
-  Reddit,
-} from '../../../../ui';
+import { ActionLink, DialogWrapper } from '../../../../ui';
 import { usePortal } from '../../../../hooks';
 import { Input } from '../../../../form/Input';
 import { Clipboard } from '../../../../ui/Icons/Clipboard';
 import { useState } from 'react';
 import { Label } from '../../../../form';
+import { Facebook, Linkedin, Reddit, Twitter, Whatsapp } from '../../../../ui/Icons';
 
 export const ShareDialog = ({
   onClose,

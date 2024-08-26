@@ -1,12 +1,11 @@
 import {
+  t,
   ActionButton,
   CollaborativeChannelItem,
-  Quote,
-  Save,
   useCollaborativeChannel,
   useCollaborativeChannels,
 } from '@youfoundation/common-app';
-import { t } from '@youfoundation/common-app';
+import { Quote, Save } from '@youfoundation/common-app/icons';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { ROOT_PATH } from '../../app/App';
 import { useNavigate, useSearchParams } from 'react-router-dom';

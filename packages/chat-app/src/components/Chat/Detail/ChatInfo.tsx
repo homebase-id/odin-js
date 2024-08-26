@@ -2,17 +2,12 @@ import { createPortal } from 'react-dom';
 import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   ActionButton,
-  Arrow,
   ConnectionImage,
   ConnectionName,
   DialogWrapper,
-  House,
   Input,
   OwnerImage,
   OwnerName,
-  Pencil,
-  Persons,
-  Save,
   t,
   useDotYouClient,
   usePortal,
@@ -23,6 +18,7 @@ import {
 } from '../../../providers/ConversationProvider';
 import { useEffect, useState } from 'react';
 import { useConversation } from '../../../hooks/chat/useConversation';
+import { Persons, House, Save, Pencil, Arrow } from '@youfoundation/common-app/icons';
 
 export const ChatInfo = ({
   conversation,

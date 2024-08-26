@@ -3,13 +3,13 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { ActionButton, useDotYouClient } from '@youfoundation/common-app';
 import {
-  ArrowLeft,
   PostDetailCard,
   PostImageDetailCard,
   usePost,
   useOutsideTrigger,
   useSocialChannel,
 } from '@youfoundation/common-app';
+import { ArrowLeft } from '@youfoundation/common-app/icons';
 import { useSocialPost } from '@youfoundation/common-app';
 
 const PostPreview = ({

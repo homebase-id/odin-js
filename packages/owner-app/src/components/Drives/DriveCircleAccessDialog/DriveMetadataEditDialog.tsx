@@ -1,11 +1,11 @@
 import { DriveDefinition } from '@youfoundation/js-lib/core';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { Arrow } from '@youfoundation/common-app/icons';
 import {
   t,
   ActionButton,
   usePortal,
-  Arrow,
   Label,
   CheckboxToggle,
   mergeStates,

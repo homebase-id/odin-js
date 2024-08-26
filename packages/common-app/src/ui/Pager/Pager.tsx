@@ -1,5 +1,5 @@
 import { t } from '../../helpers';
-import { Triangle } from '../../ui';
+import { Triangle } from '../../ui/Icons';
 
 interface PagerProps {
   totalPages: number;

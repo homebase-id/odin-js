@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ActionButton, ActionButtonState, Arrow, t } from '@youfoundation/common-app';
+import { ActionButton, ActionButtonState, t } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 import { CircleSelector } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
@@ -9,6 +9,7 @@ import { PermissionSetGrantRequest } from '../../../provider/app/AppManagementPr
 import PermissionSelector from '../../Form/PermissionSelector';
 import DrivePermissionSelector from '../../Form/DrivePermissionSelector';
 import { DriveDefinition } from '@youfoundation/js-lib/core';
+import { Arrow } from '@youfoundation/common-app/icons';
 
 const CirclePermissionSelectorDialog = ({
   title,

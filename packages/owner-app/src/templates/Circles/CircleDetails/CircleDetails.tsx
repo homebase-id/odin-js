@@ -1,19 +1,9 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Ellipsis, Pencil, Plus, SubtleMessage, Times, t } from '@youfoundation/common-app';
-import { useCircle } from '@youfoundation/common-app';
-import { Alert } from '@youfoundation/common-app';
-import { ErrorNotification, mergeStates, ActionButton } from '@youfoundation/common-app';
 import ConnectionCard from '../../../components/Connection/ConnectionCard/ConnectionCard';
-import { Circles } from '@youfoundation/common-app';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
-import { ActionGroup } from '@youfoundation/common-app';
-import { Persons } from '@youfoundation/common-app';
-import { Trash } from '@youfoundation/common-app';
-import { Block } from '@youfoundation/common-app';
-import { Check } from '@youfoundation/common-app';
 import { AppInteractionPermissionOverview } from '../../../components/PermissionViews/AppInteractionPermissionView/AppInteractionPermissionView';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { ALL_CONNECTIONS_CIRCLE_ID, Membership } from '@youfoundation/js-lib/network';
@@ -23,6 +13,27 @@ import CircleAppInteractionDialog from '../../../components/Circles/CircleAppInt
 import CircleDialog from '../../../components/Circles/CircleDialog/CircleDialog';
 import MemberLookupDialog from '../../../components/Circles/MemberLookupDialog/MemberLookupDialog';
 import DrivePermissionSelectorDialog from '../../../components/Drives/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
+import {
+  useCircle,
+  t,
+  ErrorNotification,
+  ActionButton,
+  ActionGroup,
+  Alert,
+  SubtleMessage,
+  mergeStates,
+} from '@youfoundation/common-app';
+import {
+  Circles,
+  Pencil,
+  Ellipsis,
+  Persons,
+  Trash,
+  Check,
+  Block,
+  Plus,
+  Times,
+} from '@youfoundation/common-app/icons';
 
 const CircleDetails = () => {
   const { circleKey } = useParams();

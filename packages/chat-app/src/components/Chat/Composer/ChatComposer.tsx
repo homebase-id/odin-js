@@ -4,10 +4,7 @@ import {
   FileSelector,
   VolatileInput,
   ActionButton,
-  Times,
-  PaperPlane,
   getImagesFromPasteEvent,
-  Plus,
   useErrors,
   t,
   ellipsisAtMaxChar,
@@ -24,6 +21,7 @@ import { useState, useEffect, useRef } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
 import { getNewId, isTouchDevice } from '@youfoundation/js-lib/helpers';
 import { LinkPreview } from '@youfoundation/js-lib/media';
+import { Plus, PaperPlane, Times } from '@youfoundation/common-app/icons';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const CHAT_DRAFTS_KEY = 'CHAT_LOCAL_DRAFTS';

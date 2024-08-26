@@ -1,6 +1,6 @@
 import { ReactNode, useRef, useState } from 'react';
-import { Check, t, useOutsideTrigger } from '@youfoundation/common-app';
-import { Triangle } from '@youfoundation/common-app';
+import { t, useOutsideTrigger } from '@youfoundation/common-app';
+import { Check, Triangle } from '@youfoundation/common-app/icons';
 import { DrivePermissionType } from '@youfoundation/js-lib/core';
 import { getDrivePermissionFromNumber } from '@youfoundation/js-lib/helpers';
 

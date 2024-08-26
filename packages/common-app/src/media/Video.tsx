@@ -4,9 +4,10 @@ import {
   OdinVideo,
   OdinVideoProps,
 } from '@youfoundation/ui-lib';
-import { Loader, Triangle, useDotYouClient } from '../..';
 import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { useMemo, useState } from 'react';
+import { useDotYouClient } from '../hooks';
+import { Loader, Triangle } from '../ui/Icons';
 
 export interface VideoProps extends Omit<OdinVideoProps, 'dotYouClient'> {
   previewThumbnail?: EmbeddedThumb;

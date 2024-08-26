@@ -3,10 +3,10 @@ import ActionButton from '../../components/ui/Buttons/ActionButton';
 import { t } from '../../helpers/i18n/dictionary';
 import EnteringDetails from '../../components/OwnDomain/EnteringDetails';
 import ValidatingDnsRecords from '../../components/OwnDomain/ValidatingDnsRecords';
-import CreateIdentityView from '../../components/CreateIdentityView.tsx/CreateIdentityView';
+import CreateIdentityView from '../../components/CreateIdentityView/CreateIdentityView';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useCheckInvitationCode } from '../../hooks/invitationCode/useCheckInvitationCode';
-import { Times } from '@youfoundation/common-app';
+import { Times } from '@youfoundation/common-app/icons';
 import { OwnDomainProvisionState } from '../../hooks/ownDomain/useOwnDomain';
 
 const LOCAL_EMAIL_STORAGE_KEY = 'email';

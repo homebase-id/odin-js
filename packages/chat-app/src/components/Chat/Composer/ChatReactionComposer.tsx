@@ -1,5 +1,5 @@
+import { Lol } from '@youfoundation/common-app/icons';
 import {
-  Lol,
   ReactionsBar,
   t,
   useDotYouClient,

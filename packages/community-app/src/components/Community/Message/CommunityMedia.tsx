@@ -9,11 +9,11 @@ import { OdinImage, OdinThumbnailImage, OdinAudio, OdinAudioWaveForm } from '@yo
 
 import {
   BoringFile,
-  Triangle,
   useDarkMode,
   LinkPreviewItem,
   useDotYouClientContext,
 } from '@youfoundation/common-app';
+import { Triangle } from '@youfoundation/common-app/icons';
 import { useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import {

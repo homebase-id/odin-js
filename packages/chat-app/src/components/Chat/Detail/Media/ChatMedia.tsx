@@ -10,11 +10,11 @@ import { CHAT_LINKS_PAYLOAD_KEY, ChatMessage } from '../../../../providers/ChatP
 import { ChatDrive } from '../../../../providers/ConversationProvider';
 import {
   BoringFile,
-  Triangle,
   useDarkMode,
   LinkPreviewItem,
   useDotYouClientContext,
 } from '@youfoundation/common-app';
+import { Triangle } from '@youfoundation/common-app/icons';
 import { useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 

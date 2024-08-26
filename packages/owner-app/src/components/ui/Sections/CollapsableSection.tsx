@@ -1,4 +1,4 @@
-import { Arrow } from '@youfoundation/common-app';
+import { Arrow } from '@youfoundation/common-app/icons';
 import { ReactNode, useEffect, useRef, useState } from 'react';
 
 const CollapsableSection = ({

@@ -3,10 +3,7 @@ import { createPortal } from 'react-dom';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   ActionButton,
-  Arrow,
-  ArrowLeft,
   BoringFile,
-  Times,
   VideoClickToLoad,
   usePortal,
   useDotYouClientContext,
@@ -15,6 +12,7 @@ import { OdinImage } from '@youfoundation/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
 import { getTargetDriveFromCommunityId } from '../../../../providers/CommunityDefinitionProvider';
+import { Times, ArrowLeft, Arrow } from '@youfoundation/common-app/icons';
 
 export const CommunityMediaGallery = ({
   communityId,

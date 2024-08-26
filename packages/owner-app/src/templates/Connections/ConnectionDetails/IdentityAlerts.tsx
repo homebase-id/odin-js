@@ -4,8 +4,8 @@ import {
   t,
   DomainHighlighter,
   ActionButton,
-  Times,
 } from '@youfoundation/common-app';
+import { Times } from '@youfoundation/common-app/icons';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useConnection } from '../../../hooks/connections/useConnection';

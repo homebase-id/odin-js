@@ -2,7 +2,6 @@ import {
   useDotYouClient,
   ConnectionImage,
   ConnectionName,
-  Block,
   t,
   getOdinIdColor,
   useDarkMode,
@@ -20,6 +19,7 @@ import { EmbeddedMessageWithId } from './EmbeddedMessage';
 import { useParams } from 'react-router-dom';
 import { ChatReactionComposer } from '../Composer/ChatReactionComposer';
 import { ChatReactions } from './ChatReactions';
+import { Block } from '@youfoundation/common-app/icons';
 
 export const ChatMessageItem = ({
   msg,

@@ -10,11 +10,10 @@ import {
   DialogWrapper,
   useIdentityIFollow,
   Alert,
-  Quote,
-  Persons,
   CheckboxToggle,
   LoadingBlock,
 } from '@youfoundation/common-app';
+import { Quote, Persons } from '@youfoundation/common-app/icons';
 
 import { BlogConfig } from '@youfoundation/js-lib/public';
 

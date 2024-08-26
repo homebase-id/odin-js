@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { t } from '../../helpers/i18n/dictionary';
 import { ROOT_PATH } from '../../app/App';
-import { Arrow } from '@youfoundation/common-app';
+import { Arrow } from '@youfoundation/common-app/icons';
 
 const DomainChoice = () => {
   return (

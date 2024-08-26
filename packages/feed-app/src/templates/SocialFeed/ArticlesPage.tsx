@@ -3,17 +3,15 @@ import { Article } from '@youfoundation/js-lib/public';
 import {
   ActionButton,
   ActionLink,
-  Article as ArticleIcon,
   BLOG_POST_INFIITE_PAGE_SIZE,
   HOME_ROOT_PATH,
   LoadingBlock,
-  Pencil,
-  Plus,
   PostTextListItem,
   SubtleMessage,
   usePostsInfinite,
   useDrafts,
 } from '@youfoundation/common-app';
+import { Article as ArticleIcon, Pencil, Plus } from '@youfoundation/common-app/icons';
 import { flattenInfinteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 

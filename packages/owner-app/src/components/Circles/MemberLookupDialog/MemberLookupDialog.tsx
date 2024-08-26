@@ -5,11 +5,12 @@ import {
   ActionButton,
   ActionButtonState,
   useActiveConnections,
-  Arrow,
+  usePortal,
+  DialogWrapper,
+  Pager,
 } from '@youfoundation/common-app';
-import { usePortal } from '@youfoundation/common-app';
+import { Arrow } from '@youfoundation/common-app/icons';
 import ConnectionCard from '../../Connection/ConnectionCard/ConnectionCard';
-import { DialogWrapper, Pager } from '@youfoundation/common-app';
 
 const MemberLookupDialog = ({
   title,

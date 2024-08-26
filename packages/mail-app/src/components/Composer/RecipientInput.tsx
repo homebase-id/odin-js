@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 
-import { useAllContacts, ActionButton, Times, useDotYouClient } from '@youfoundation/common-app';
-import { ContactFile } from '@youfoundation/js-lib/dist';
+import { useAllContacts, ActionButton, useDotYouClient } from '@youfoundation/common-app';
+import { Times } from '@youfoundation/common-app/icons';
+import { ContactFile } from '@youfoundation/js-lib/network';
 
 export const RecipientInput = ({
   recipients,

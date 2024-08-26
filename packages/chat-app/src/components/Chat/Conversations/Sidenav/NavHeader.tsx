@@ -1,4 +1,5 @@
-import { ActionLink, Plus, t } from '@youfoundation/common-app';
+import { ActionLink, t } from '@youfoundation/common-app';
+import { Plus } from '@youfoundation/common-app/icons';
 import { ROOT_PATH as CHAT_ROOT } from '../../../../app/App';
 
 export const NavHeader = ({ isOnline }: { isOnline: boolean }) => {

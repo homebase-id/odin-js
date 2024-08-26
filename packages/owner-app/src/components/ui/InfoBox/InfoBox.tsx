@@ -1,5 +1,6 @@
 import { ReactNode, useState } from 'react';
-import { InfoDialog, Question } from '@youfoundation/common-app';
+import { Question } from '@youfoundation/common-app/icons';
+import { InfoDialog } from '@youfoundation/common-app';
 
 const InfoBox = ({
   title,

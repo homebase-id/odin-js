@@ -6,9 +6,11 @@ import {
   useCommunityChannelsWithRecentMessages,
 } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 import { CommunityHistory } from './channel/CommunityHistory';
-import { ActionButton, ActionLink, ChevronLeft, RadioTower, t } from '@youfoundation/common-app';
+import { ActionButton, ActionLink, t } from '@youfoundation/common-app';
+import { RadioTower } from '@youfoundation/common-app/icons';
 import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
 import { useCallback, useState } from 'react';
+import { ChevronLeft } from '@youfoundation/common-app/icons';
 
 export const CommunityCatchup = ({
   community,
