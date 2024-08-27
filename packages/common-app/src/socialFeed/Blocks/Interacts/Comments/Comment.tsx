@@ -1,16 +1,15 @@
 import { useState } from 'react';
-import { RawReactionContent, ReactionContext } from '@homebase-id/js-lib/public';
+import {
+  RawReactionContent,
+  ReactionContext,
+  CommentReactionPreview,
+} from '@homebase-id/js-lib/public';
 
 import { CommentHead } from './Parts/CommentHead';
 import { CommentBody } from './Parts/CommentBody';
 import { CommentMeta } from './Parts/CommentMeta';
 import { CommentThread } from './Parts/CommentThread';
-import {
-  CommentReactionPreview,
-  HomebaseFile,
-  NewHomebaseFile,
-  ReactionFile,
-} from '@homebase-id/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
 import { CanReactInfo } from '../../../../hooks/reactions/useCanReact';
 import { useReaction } from '../../../../hooks/reactions/useReaction';
 import { ErrorNotification } from '../../../../ui/Alert/ErrorNotification';

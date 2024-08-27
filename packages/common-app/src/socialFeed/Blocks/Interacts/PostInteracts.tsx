@@ -1,4 +1,10 @@
-import { parseReactionPreview, PostContent, ReactionContext } from '@homebase-id/js-lib/public';
+import {
+  parseReactionPreview,
+  PostContent,
+  ReactionContext,
+  CommentsReactionSummary,
+  EmojiReactionSummary,
+} from '@homebase-id/js-lib/public';
 import { Suspense, useMemo, useState } from 'react';
 import {
   t,
@@ -17,13 +23,7 @@ import { LikeButton } from './Reactions/LikeButton';
 import { ReactionDetailsDialog } from './ReactionDetailsDialog/ReactionDetailsDialog';
 import { RepostDialog } from './RepostDialog/RepostDialog';
 import { ShareDialog } from './ShareDialog/ShareDialog';
-import {
-  CommentsReactionSummary,
-  HomebaseFile,
-  EmojiReactionSummary,
-  ApiType,
-  DotYouClient,
-} from '@homebase-id/js-lib/core';
+import { HomebaseFile, ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { Bubble, Share, Repost } from '../../../ui/Icons';
 
 export const PostInteracts = ({
