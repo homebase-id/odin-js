@@ -1,4 +1,4 @@
-import { ParsedReactionPreview, ReactionPreview } from './DriveFileReactionTypes';
+import { ReactionPreview } from './DriveFileReactionTypes';
 
 export type SystemFileType = 'Standard' | 'Comment';
 
@@ -12,7 +12,7 @@ export interface FileMetadata<T = string> {
   isEncrypted: boolean;
   senderOdinId: string;
   appData: AppFileMetaData<T>;
-  reactionPreview?: ReactionPreview | ParsedReactionPreview;
+  reactionPreview?: ReactionPreview;
   versionTag: string;
 
   payloads: PayloadDescriptor[];
