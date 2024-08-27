@@ -54,7 +54,7 @@ export const ChatReactionComposer = ({
           onClick={() => setIsReact(false)}
         >
           <ReactionsBar
-            className={`xl:absolute ${
+            className={`rounded-lg bg-background px-1 py-2 text-foreground shadow-md dark:bg-slate-900 xl:absolute ${
               verticalSpace === 'top' ? 'xl:bottom-8' : 'xl:top-8'
             } ${horizontalSpace === 'left' ? 'right-0' : 'left-0'} z-20`}
             emojis={['👍️', '❤️', '😂', '😮', '😥']}

@@ -1,7 +1,7 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 import { ChatMessage } from '../../../providers/ChatProvider';
-import { Conversation } from '../../../providers/ConversationProvider';
+import { UnifiedConversation } from '../../../providers/ConversationProvider';
 import {
   ActionButton,
   AuthorImage,
@@ -19,7 +19,7 @@ export const ChatReactions = ({
   conversation,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation: HomebaseFile<Conversation> | undefined;
+  conversation: HomebaseFile<UnifiedConversation> | undefined;
 }) => {
   const [showDetail, setShowDetail] = useState(false);
 
@@ -65,7 +65,7 @@ const ChatReactionsDetail = ({
   onClose,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation: HomebaseFile<Conversation> | undefined;
+  conversation: HomebaseFile<UnifiedConversation> | undefined;
   onClose: () => void;
 }) => {
   const target = usePortal('modal-container');
