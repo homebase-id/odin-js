@@ -13,6 +13,7 @@ import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
 import { FailedDeliveryDetails, InnerDeliveryIndicator } from '../CommunityDeliveryIndicator';
+import { useCommunityReaction } from '../../../../hooks/community/reactions/useCommunityReaction';
 
 export const CommunityMessageInfo = ({
   msg,
@@ -33,10 +34,11 @@ export const CommunityMessageInfo = ({
 
   const isAuthor = msg.fileMetadata.senderOdinId === identity || !msg.fileMetadata.senderOdinId;
 
-  // const { data: reactions } = useChatReaction({
-  //   conversationId: conversation?.fileMetadata.appData.uniqueId,
-  //   messageId: msg.fileMetadata.appData.uniqueId,
-  // }).get;
+  const { data: reactions } = useCommunityReaction({
+    community: community,
+    messageFileId: msg.fileId,
+    messageGlobalTransitId: msg.fileMetadata.globalTransitId,
+  }).get;
 
   const dialog = (
     <DialogWrapper onClose={onClose} title={t('Message info')}>
@@ -97,28 +99,25 @@ export const CommunityMessageInfo = ({
           </div>
         ) : null}
 
-        {/* {reactions?.length ? (
+        {reactions?.length ? (
           <div>
             <p className="mb-2 text-xl">{t('Reactions')}</p>
             <div className="flex flex-col gap-4">
               {reactions?.map((reaction) => {
                 return (
-                  <div className="flex flex-row items-center text-lg" key={reaction.fileId}>
-                    <AuthorImage
-                      odinId={reaction.fileMetadata.senderOdinId}
-                      size="xs"
-                      className="mr-2"
-                    />
-                    <AuthorName odinId={reaction.fileMetadata.senderOdinId} />
-                    <p className="ml-auto text-3xl">
-                      {reaction.fileMetadata.appData.content.message}
-                    </p>
+                  <div
+                    className="flex flex-row items-center text-lg"
+                    key={reaction.authorOdinId + reaction.body}
+                  >
+                    <AuthorImage odinId={reaction.authorOdinId} size="xs" className="mr-2" />
+                    <AuthorName odinId={reaction.authorOdinId} />
+                    <p className="ml-auto text-3xl">{reaction.body}</p>
                   </div>
                 );
               })}
             </div>
           </div>
-        ) : null} */}
+        ) : null}
       </div>
     </DialogWrapper>
   );

@@ -1,6 +1,6 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
-import { useDotYouClient } from '@homebase-id/common-app';
+import { t, useDotYouClient } from '@homebase-id/common-app';
 import { useCommunityReaction } from '../../../../hooks/community/reactions/useCommunityReaction';
 import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
@@ -43,13 +43,16 @@ export const CommunityReactions = ({
         <div className="flex cursor-pointer flex-row items-center gap-1">
           {uniqueEmojis?.map((emoji) => {
             const myReaction = myReactions?.find((reaction) => reaction.body === emoji);
+            const authors = data
+              ?.filter((reaction) => reaction.body === emoji)
+              .map((reaction) => reaction.authorOdinId);
 
             return (
               <button
                 key={emoji}
                 className={`flex flex-row items-center gap-2 rounded-3xl
                   border border-transparent bg-background px-2 py-1
-                  shadow-sm hover:bg-primary hover:text-primary-contrast ${myReaction ? 'border-primary' : ''}`}
+                  shadow-sm hover:bg-primary hover:text-primary-contrast ${myReaction ? 'border-primary bg-primary/10' : ''}`}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -57,9 +60,12 @@ export const CommunityReactions = ({
                   if (myReaction) removeReaction({ community, message: msg, reaction: myReaction });
                   else addReaction({ community, message: msg, reaction: emoji });
                 }}
+                title={`${authors?.length ? authors.join(', ') : ''} ${t('reacted with')} ${emoji}`}
               >
                 <p>{emoji}</p>
-                <p>{reactions.filter((reaction) => reaction === emoji).length}</p>
+                <p className="text-sm">
+                  {reactions.filter((reaction) => reaction === emoji).length}
+                </p>
               </button>
             );
           })}
