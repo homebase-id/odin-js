@@ -7,12 +7,14 @@ import {
   GroupEmojiReaction,
   HomebaseFile,
   ReactionFile,
+  ReactionPreview,
   uploadGroupReaction,
 } from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../../providers/ChatProvider';
 import { UnifiedConversation } from '../../providers/ConversationProvider';
-import { tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { getNewId, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
+import { insertNewMessage } from './useChatMessages';
 
 export const useChatReaction = (props?: {
   messageGlobalTransitId: string | undefined;
@@ -94,20 +96,99 @@ export const useChatReaction = (props?: {
     }),
     add: useMutation({
       mutationFn: addReaction,
+      onMutate: async ({ message, reaction }) => {
+        // Update the reaction overview
+        const previousReactions =
+          queryClient.getQueryData<ReactionFile[]>(['chat-reaction', message.fileId]) || [];
 
-      onSettled: (data, error, variables) => {
-        queryClient.invalidateQueries({
-          queryKey: ['chat-reaction', variables.message.fileMetadata.globalTransitId],
-        });
+        const newReaction: ReactionFile = {
+          authorOdinId: dotYouClient.getIdentity(),
+          body: reaction,
+        };
+
+        queryClient.setQueryData(
+          ['chat-reaction', message.fileId],
+          [...previousReactions, newReaction]
+        );
+
+        // Update the message reaction preview
+        const id = getNewId();
+        const reactionPreview: ReactionPreview = {
+          ...(message.fileMetadata.reactionPreview as ReactionPreview),
+          reactions: {
+            ...(message.fileMetadata.reactionPreview?.reactions as ReactionPreview['reactions']),
+            [id]: {
+              key: id,
+              count: '1',
+              reactionContent: JSON.stringify({ emoji: reaction }),
+            },
+          },
+        };
+
+        const messageWithReactionPreview: HomebaseFile<ChatMessage> = {
+          ...message,
+          fileMetadata: {
+            ...message.fileMetadata,
+            reactionPreview,
+          },
+        };
+
+        insertNewMessage(queryClient, messageWithReactionPreview);
       },
     }),
     remove: useMutation({
       mutationFn: removeReaction,
 
-      onSettled: (data, error, variables) => {
-        queryClient.invalidateQueries({
-          queryKey: ['chat-reaction', variables.message.fileMetadata.globalTransitId],
-        });
+      onMutate: async ({ message, reaction }) => {
+        // Update the reaction overview
+        const previousReactions = queryClient.getQueryData<ReactionFile[] | undefined>([
+          'chat-reaction',
+          message.fileId,
+        ]);
+
+        if (previousReactions) {
+          queryClient.setQueryData(
+            ['chat-reaction', message.fileId],
+            [
+              ...previousReactions.filter(
+                (existingReaction) =>
+                  existingReaction.authorOdinId !== reaction.authorOdinId ||
+                  existingReaction.body !== reaction.body
+              ),
+            ]
+          );
+        }
+
+        // Update the message reaction preview
+        const reactions = message.fileMetadata.reactionPreview?.reactions as
+          | ReactionPreview['reactions']
+          | undefined;
+        if (!reactions) return;
+
+        const reactionKey = Object.keys(reactions).find(
+          (key) =>
+            tryJsonParse<{ emoji: string }>(reactions[key].reactionContent)?.emoji === reaction.body
+        );
+        if (!reactionKey) return;
+
+        const reactionPreview: ReactionPreview = {
+          ...(message.fileMetadata.reactionPreview as ReactionPreview),
+          reactions: {
+            ...reactions,
+          },
+        };
+
+        delete reactionPreview.reactions[reactionKey];
+
+        const messageWithReactionPreview: HomebaseFile<ChatMessage> = {
+          ...message,
+          fileMetadata: {
+            ...message.fileMetadata,
+            reactionPreview,
+          },
+        };
+
+        insertNewMessage(queryClient, messageWithReactionPreview);
       },
     }),
   };
