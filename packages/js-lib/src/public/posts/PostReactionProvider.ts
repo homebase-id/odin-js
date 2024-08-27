@@ -19,12 +19,10 @@ import {
   ReactionPreview,
   PayloadFile,
   EmbeddedThumb,
-  ParsedReactionPreview,
-  ReactionFile,
-  CommentReactionPreview,
   NewHomebaseFile,
-  ReactionFileBody,
   PriorityOptions,
+  ReactionFile,
+  ReactionFileBody,
 } from '../../core/core';
 import {
   jsonStringify64,
@@ -307,9 +305,29 @@ const parseReactions = (
   };
 };
 
+export interface ParsedReactionPreview {
+  reactions: EmojiReactionSummary;
+  comments: CommentsReactionSummary;
+}
+
+export interface EmojiReactionSummary {
+  reactions: { emoji: string; count: number }[];
+  totalCount: number;
+}
+
+export interface CommentsReactionSummary {
+  comments: CommentReactionPreview[];
+  totalCount: number;
+}
+
+export interface CommentReactionPreview extends ReactionFile {
+  reactions: EmojiReactionSummary;
+  isEncrypted: boolean;
+}
+
 export const parseReactionPreview = (
   reactionPreview: ReactionPreview | ParsedReactionPreview | undefined
-): ParsedReactionPreview | ReactionPreview => {
+): ParsedReactionPreview => {
   if (reactionPreview) {
     if ('count' in reactionPreview.reactions) return reactionPreview as ParsedReactionPreview;
 
