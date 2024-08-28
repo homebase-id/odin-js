@@ -9,7 +9,7 @@ import {
 } from 'react-router-dom';
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
+import { Layout, MinimalLayout } from '../components/ui/Layout/Layout';
 
 const YouAuthConsent = lazy(() => import('../templates/YouAuthConsent/YouAuthConsent'));
 const Setup = lazy(() => import('../templates/Setup/Setup').then((m) => ({ default: m.Setup })));

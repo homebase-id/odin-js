@@ -18,7 +18,7 @@ interface LayoutProps {
   children?: ReactNode;
 }
 
-const Layout: FC<LayoutProps> = ({ children }) => {
+export const Layout: FC<LayoutProps> = ({ children }) => {
   const { isOwner } = useAuth();
 
   return (
@@ -84,5 +84,3 @@ export const NoLayout: FC<LayoutProps> = ({ children }) => {
     </>
   );
 };
-
-export default Layout;

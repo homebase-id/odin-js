@@ -21,7 +21,7 @@ const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'process-inbox',
 ];
 
-import { MinimalLayout, NoLayout } from '../components/ui/Layout/Layout';
+import { MinimalLayout, Layout } from '../components/ui/Layout/Layout';
 
 const Auth = lazy(() => import('../templates/Auth/Auth'));
 const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
@@ -64,9 +64,9 @@ function App() {
             element={
               <RootRoute>
                 <DotYouClientProvider>
-                  <NoLayout>
+                  <Layout>
                     <Outlet />
-                  </NoLayout>
+                  </Layout>
                 </DotYouClientProvider>
               </RootRoute>
             }

@@ -7,6 +7,7 @@ export * from './channels/useChannel';
 export * from './channels/useChannels';
 export * from './channels/useCollaborativeChannel';
 export * from './channels/useCollaborativeChannels';
+export * from './channels/useChannelDrives';
 
 // Posts
 export * from './post/useManagePost';

@@ -10,7 +10,7 @@ import {
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 
-import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
+import { Layout, MinimalLayout } from '../components/ui/Layout/Layout';
 
 const Auth = lazy(() => import('../templates/Auth/Auth'));
 const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));

@@ -42,7 +42,8 @@ const FEED_NEW_CONTENT_TYPE_ID = 'ad695388-c2df-47a0-ad5b-fc9f9e1fffc9';
 const FEED_NEW_REACTION_TYPE_ID = '37dae95d-e137-4bd4-b782-8512aaa2c96a';
 const FEED_NEW_COMMENT_TYPE_ID = '1e08b70a-3826-4840-8372-18410bfc02c7';
 
-const titleFormer = (payload: NotificationData) => `${payload.appDisplayName || 'Homebase'}`;
+const buildNotificationTitle = (payload: NotificationData) =>
+  `${payload.appDisplayName || 'Homebase'}`;
 
 const getNameForOdinId = async (odinId: string) => {
   return await fetch(`https://${odinId}/pub/profile`)
@@ -53,7 +54,10 @@ const getNameForOdinId = async (odinId: string) => {
     .catch(() => undefined);
 };
 
-const bodyFormer = async (payload: NotificationData, existingNotifications: Notification[]) => {
+const buildNotificationBody = async (
+  payload: NotificationData,
+  existingNotifications: Notification[]
+) => {
   const sender = (await getNameForOdinId(payload.senderId)) || payload.senderId;
 
   if (payload.options.unEncryptedMessage)
@@ -112,8 +116,8 @@ self.addEventListener('push', function (event) {
         const tag = getTag(payload);
         const existingNotifications = await self.registration.getNotifications({ tag });
 
-        const title = titleFormer(payload);
-        const body = await bodyFormer(payload, existingNotifications);
+        const title = buildNotificationTitle(payload);
+        const body = await buildNotificationBody(payload, existingNotifications);
 
         if (!title || !body || !tag) return;
 

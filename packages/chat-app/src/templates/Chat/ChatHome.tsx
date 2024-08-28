@@ -14,6 +14,7 @@ import {
   ExtendPermissionDialog,
   Sidenav,
   t,
+  Toaster,
   useRemoveNotifications,
 } from '@homebase-id/common-app';
 import { drives, circleDrives, permissions } from '../../hooks/auth/useAuth';

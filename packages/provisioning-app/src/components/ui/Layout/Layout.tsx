@@ -6,12 +6,10 @@ interface LayoutProps {
   children?: ReactNode;
 }
 
-const Layout: FC<LayoutProps> = ({ children }) => {
+export const Layout: FC<LayoutProps> = ({ children }) => {
   return (
     <>
-      <div
-        className={`flex min-h-screen flex-col bg-background text-foreground`}
-      >
+      <div className={`flex min-h-screen flex-col bg-background text-foreground`}>
         <Header />
         {children}
         <Footer />
@@ -19,5 +17,3 @@ const Layout: FC<LayoutProps> = ({ children }) => {
     </>
   );
 };
-
-export default Layout;

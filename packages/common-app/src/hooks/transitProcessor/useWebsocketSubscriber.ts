@@ -7,25 +7,25 @@ import {
   TypedConnectionNotification,
   Notify,
 } from '@homebase-id/js-lib/core';
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useDotYouClient } from '../auth/useDotYouClient';
 import { hasDebugFlag } from '@homebase-id/js-lib/helpers';
 
 const isDebug = hasDebugFlag();
 
 // Wrapper for the notification subscriber within DotYouCore-js to add client side filtering of the notifications
-export const useNotificationSubscriber = (
-  subscriber: ((notification: TypedConnectionNotification) => void) | undefined,
+export const useWebsocketSubscriber = (
+  handler: ((notification: TypedConnectionNotification) => void) | undefined,
   types: NotificationType[],
   drives: TargetDrive[],
   onDisconnect?: () => void,
-  onReconnect?: () => void
+  onReconnect?: () => void,
+  refId?: string
 ) => {
-  const [isActive, setIsActive] = useState<boolean>(false);
-  const isConnected = useRef<boolean>(false);
+  const [isConnected, setIsConected] = useState<boolean>(false);
   const dotYouClient = useDotYouClient().getDotYouClient();
 
-  const wrappedSubscriber = useCallback(
+  const wrappedHandler = useCallback(
     (notification: TypedConnectionNotification) => {
       if (notification.notificationType === 'inboxItemReceived') {
         isDebug &&
@@ -43,12 +43,12 @@ export const useNotificationSubscriber = (
       }
 
       if (types?.length >= 1 && !types.includes(notification.notificationType)) return;
-      subscriber && subscriber(notification);
+      handler && handler(notification);
     },
-    [subscriber]
+    [handler]
   );
 
-  const localHandler = subscriber ? wrappedSubscriber : undefined;
+  const localHandler = handler ? wrappedHandler : undefined;
 
   useEffect(() => {
     if (
@@ -57,32 +57,30 @@ export const useNotificationSubscriber = (
     )
       return;
 
-    if (!isConnected.current && localHandler) {
-      isConnected.current = true;
+    if (!isConnected && localHandler) {
       (async () => {
         await Subscribe(
           dotYouClient,
           drives,
           localHandler,
           () => {
-            setIsActive(false);
+            setIsConected(false);
             onDisconnect && onDisconnect();
           },
           () => {
-            setIsActive(true);
+            setIsConected(true);
             onReconnect && onReconnect();
           }
         );
-        setIsActive(true);
+        setIsConected(true);
       })();
     }
 
     return () => {
-      if (isConnected.current && localHandler) {
-        isConnected.current = false;
+      if (isConnected && localHandler) {
+        setIsConected(false);
         try {
           Unsubscribe(localHandler);
-          setIsActive(false);
         } catch (e) {
           console.error(e);
         }
@@ -90,5 +88,5 @@ export const useNotificationSubscriber = (
     };
   }, [localHandler]);
 
-  return isActive;
+  return isConnected;
 };
