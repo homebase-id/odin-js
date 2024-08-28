@@ -66,12 +66,12 @@ export const useNotifications = () => {
       ]);
 
       if (wsNotification.notificationType === 'connectionRequestReceived') {
-        queryClient.invalidateQueries({ queryKey: ['pendingConnections'] });
-        queryClient.invalidateQueries({ queryKey: ['pendingConnection'] });
+        queryClient.invalidateQueries({ queryKey: ['pending-connections'] });
+        queryClient.invalidateQueries({ queryKey: ['pending-connection'] });
       } else {
         // Accepted
-        queryClient.invalidateQueries({ queryKey: ['sentRequests'] });
-        queryClient.invalidateQueries({ queryKey: ['activeConnections'] });
+        queryClient.invalidateQueries({ queryKey: ['sent-requests'] });
+        queryClient.invalidateQueries({ queryKey: ['active-connections'] });
       }
     }
 

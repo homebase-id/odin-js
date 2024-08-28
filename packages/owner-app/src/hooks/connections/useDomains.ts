@@ -34,7 +34,7 @@ export const useDomains = (
 
   return {
     fetch: useInfiniteQuery({
-      queryKey: ['activeDomains', activePageSize, activePage],
+      queryKey: ['active-domains', activePageSize, activePage],
       queryFn: ({ pageParam }) => fetchDomains({ pageSize: activePageSize, cursor: pageParam }),
       initialPageParam: undefined as number | undefined,
       getNextPageParam: (lastPage) =>

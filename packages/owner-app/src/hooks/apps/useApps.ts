@@ -12,7 +12,7 @@ export const useApps = () => {
 
   return {
     fetchRegistered: useQuery({
-      queryKey: ['registeredApps'],
+      queryKey: ['apps'],
       queryFn: () => fetchRegistered(),
       refetchOnWindowFocus: false,
     }),

@@ -25,28 +25,25 @@ export const useDomain = ({ domain }: { domain?: string }) => {
     return await getDomainClients(dotYouClient, domain);
   };
 
-  const revokeDomain = async ({ domain }: { domain: string }) => {
-    return await revokeDomainAccess(dotYouClient, domain);
-  };
+  const revokeDomain = async ({ domain }: { domain: string }) =>
+    await revokeDomainAccess(dotYouClient, domain);
 
-  const restoreDomain = async ({ domain }: { domain: string }) => {
-    return await restoreDomainAccess(dotYouClient, domain);
-  };
+  const restoreDomain = async ({ domain }: { domain: string }) =>
+    await restoreDomainAccess(dotYouClient, domain);
 
-  const removeDomain = async ({ domain }: { domain: string }) => {
-    return await disconnectFromDomain(dotYouClient, domain);
-  };
+  const removeDomain = async ({ domain }: { domain: string }) =>
+    await disconnectFromDomain(dotYouClient, domain);
 
   return {
     fetch: useQuery({
-      queryKey: ['domainInfo', domain],
+      queryKey: ['domain-info', domain],
       queryFn: () => fetchSingle({ domain: domain as string }),
       refetchOnWindowFocus: false,
       enabled: !!domain,
     }),
 
     fetchClients: useQuery({
-      queryKey: ['domainClients', domain],
+      queryKey: ['domain-clients', domain],
       queryFn: () => fetchClients({ domain: domain as string }),
 
       refetchOnWindowFocus: false,
@@ -56,7 +53,7 @@ export const useDomain = ({ domain }: { domain?: string }) => {
     revokeDomain: useMutation({
       mutationFn: revokeDomain,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['domainInfo', param.domain] });
+        queryClient.invalidateQueries({ queryKey: ['domain-info', param.domain] });
       },
       onError: (ex) => {
         console.error(ex);
@@ -66,7 +63,7 @@ export const useDomain = ({ domain }: { domain?: string }) => {
     restoreDomain: useMutation({
       mutationFn: restoreDomain,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['domainInfo', param.domain] });
+        queryClient.invalidateQueries({ queryKey: ['domain-info', param.domain] });
       },
       onError: (ex) => {
         console.error(ex);
@@ -76,8 +73,8 @@ export const useDomain = ({ domain }: { domain?: string }) => {
     disconnect: useMutation({
       mutationFn: removeDomain,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['activeDomains'] });
-        queryClient.invalidateQueries({ queryKey: ['domainInfo', param.domain] });
+        queryClient.invalidateQueries({ queryKey: ['active-domains'] });
+        queryClient.invalidateQueries({ queryKey: ['domain-info', param.domain] });
       },
       onError: (ex) => {
         console.error(ex);

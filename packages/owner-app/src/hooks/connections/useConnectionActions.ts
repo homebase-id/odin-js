@@ -10,7 +10,8 @@ import {
 import { saveContact } from '../../provider/contact/ContactProvider';
 import { fetchConnectionInfo } from '../../provider/contact/ContactSourceProvider';
 import { useAuth } from '../auth/useAuth';
-import { SecurityGroupType } from '@homebase-id/js-lib/core';
+import { PagedResult, SecurityGroupType } from '@homebase-id/js-lib/core';
+import { getNewId } from '@homebase-id/js-lib/helpers';
 
 export const useConnectionActions = () => {
   const queryClient = useQueryClient();
@@ -57,7 +58,7 @@ export const useConnectionActions = () => {
     disconnect: useMutation({
       mutationFn: disconnect,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['activeConnections'] });
+        queryClient.invalidateQueries({ queryKey: ['active-connections'] });
         queryClient.invalidateQueries({ queryKey: ['connection-info', param.connectionOdinId] });
       },
       onError: (ex) => {
@@ -67,38 +68,43 @@ export const useConnectionActions = () => {
 
     sendConnectionRequest: useMutation({
       mutationFn: sendConnectionRequest,
-      onMutate: async (newRequest) => {
-        await queryClient.cancelQueries({ queryKey: ['sentRequests'] });
+      onMutate: async ({ targetOdinId, message }) => {
+        await queryClient.cancelQueries({ queryKey: ['sent-requests'] });
 
-        const previousRequests: ConnectionRequest[] | undefined = queryClient.getQueryData([
-          'sentRequests',
+        const previousRequests = queryClient.getQueryData<PagedResult<ConnectionRequest>>([
+          'sent-requests',
         ]);
-        const newRequests = [
-          {
-            status: 'sent',
-            recipient: newRequest.targetOdinId,
-          },
-          ...(previousRequests ?? []),
-        ];
 
-        queryClient.setQueryData(['sentRequests'], newRequests);
+        const newRequest: ConnectionRequest = {
+          status: 'sent',
+          recipient: targetOdinId,
+          id: getNewId(),
+          message: message,
+          senderOdinId: dotYouClient.getIdentity(),
+          receivedTimestampMilliseconds: Date.now(),
+        };
+        queryClient.setQueryData<PagedResult<ConnectionRequest>>(['sent-requests'], {
+          totalPages: 0,
+          ...previousRequests,
+          results: [newRequest, ...(previousRequests?.results || [])],
+        });
 
         return { previousRequests, newRequest };
       },
       onError: (err, newData, context) => {
         console.error(err);
 
-        queryClient.setQueryData(['sentRequests'], context?.previousRequests);
+        queryClient.setQueryData(['sent-requests'], context?.previousRequests);
       },
       onSettled: (data) => {
-        queryClient.invalidateQueries({ queryKey: ['sentRequests'] });
+        queryClient.invalidateQueries({ queryKey: ['sent-requests'] });
         queryClient.invalidateQueries({ queryKey: ['connection-info', data?.targetOdinId] });
       },
     }),
     revokeConnectionRequest: useMutation({
       mutationFn: revokeConnectionRequest,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['sentRequests'] });
+        queryClient.invalidateQueries({ queryKey: ['sent-requests'] });
         queryClient.invalidateQueries({ queryKey: ['connection-info', param.targetOdinId] });
       },
       onError: (ex) => {
@@ -108,16 +114,16 @@ export const useConnectionActions = () => {
     block: useMutation({
       mutationFn: block,
       onSettled: (_data, _err, odinId) => {
-        queryClient.invalidateQueries({ queryKey: ['pendingConnections'] });
-        queryClient.invalidateQueries({ queryKey: ['activeConnections'] });
+        queryClient.invalidateQueries({ queryKey: ['pending-connections'] });
+        queryClient.invalidateQueries({ queryKey: ['active-connections'] });
         queryClient.invalidateQueries({ queryKey: ['connection-info', odinId] });
       },
     }),
     unblock: useMutation({
       mutationFn: unblock,
       onSettled: (_data, _err, odinId) => {
-        queryClient.invalidateQueries({ queryKey: ['pendingConnections'] });
-        queryClient.invalidateQueries({ queryKey: ['activeConnections'] });
+        queryClient.invalidateQueries({ queryKey: ['pending-connections'] });
+        queryClient.invalidateQueries({ queryKey: ['active-connections'] });
         queryClient.invalidateQueries({ queryKey: ['connection-info', odinId] });
       },
     }),

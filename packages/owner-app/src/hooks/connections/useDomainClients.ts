@@ -27,7 +27,7 @@ export const useDomainClients = ({ domain }: { domain?: string }) => {
 
   return {
     fetch: useQuery({
-      queryKey: ['domainClients', domain],
+      queryKey: ['domain-clients', domain],
       queryFn: () => fetchClients({ domain: domain as string }),
       refetchOnWindowFocus: false,
       enabled: !!domain,
@@ -36,7 +36,7 @@ export const useDomainClients = ({ domain }: { domain?: string }) => {
     removeClient: useMutation({
       mutationFn: removeClient,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['domainClients', param.domain] });
+        queryClient.invalidateQueries({ queryKey: ['domain-clients', param.domain] });
       },
       onError: (ex) => {
         console.error(ex);

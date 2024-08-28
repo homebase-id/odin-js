@@ -1,6 +1,6 @@
 import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { UseCommentsVal } from './useComments';
-import { CommentsReactionSummary } from '@homebase-id/js-lib/core';
+import { CommentsReactionSummary } from '@homebase-id/js-lib/public';
 
 export const useCommentSummary = ({
   authorOdinId,

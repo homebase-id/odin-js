@@ -1,5 +1,11 @@
-import { PostContent, ReactionContext } from '@homebase-id/js-lib/public';
-import { Suspense, useState } from 'react';
+import {
+  parseReactionPreview,
+  PostContent,
+  ReactionContext,
+  CommentsReactionSummary,
+  EmojiReactionSummary,
+} from '@homebase-id/js-lib/public';
+import { Suspense, useMemo, useState } from 'react';
 import {
   t,
   useCanReact,
@@ -17,14 +23,7 @@ import { LikeButton } from './Reactions/LikeButton';
 import { ReactionDetailsDialog } from './ReactionDetailsDialog/ReactionDetailsDialog';
 import { RepostDialog } from './RepostDialog/RepostDialog';
 import { ShareDialog } from './ShareDialog/ShareDialog';
-import {
-  CommentsReactionSummary,
-  HomebaseFile,
-  EmojiReactionSummary,
-  ParsedReactionPreview,
-  ApiType,
-  DotYouClient,
-} from '@homebase-id/js-lib/core';
+import { HomebaseFile, ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { Bubble, Share, Repost } from '../../../ui/Icons';
 
 export const PostInteracts = ({
@@ -90,6 +89,11 @@ export const PostInteracts = ({
     postContent.slug ?? postContent.id
   }`;
 
+  const parsedReactionPreview = useMemo(
+    () => parseReactionPreview(postFile.fileMetadata.reactionPreview),
+    [postFile.fileMetadata.reactionPreview]
+  );
+
   return (
     <div className={`${className ?? ''}`}>
       <div
@@ -104,9 +108,7 @@ export const PostInteracts = ({
         ) : null}
         <EmojiSummary
           context={reactionContext}
-          reactionPreview={
-            (postFile.fileMetadata.reactionPreview as ParsedReactionPreview)?.reactions
-          }
+          reactionPreview={parsedReactionPreview.reactions}
           className="ml-2"
         />
         <div
@@ -133,9 +135,7 @@ export const PostInteracts = ({
           {!showSummary ? (
             <CommentSummary
               context={reactionContext}
-              reactionPreview={
-                (postFile.fileMetadata.reactionPreview as ParsedReactionPreview)?.comments
-              }
+              reactionPreview={parsedReactionPreview.comments}
               onToggle={() => toggleable && setIsExpanded(!isExpanded)}
             />
           ) : null}
@@ -153,9 +153,7 @@ export const PostInteracts = ({
         </div>
       ) : showSummary ? (
         <CommentTeaserList
-          reactionPreview={
-            (postFile.fileMetadata.reactionPreview as ParsedReactionPreview).comments
-          }
+          reactionPreview={parsedReactionPreview.comments}
           onExpand={() => setIsExpanded(true)}
         />
       ) : null}

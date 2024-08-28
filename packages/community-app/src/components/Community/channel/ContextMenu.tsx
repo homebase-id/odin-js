@@ -16,6 +16,7 @@ import { useState } from 'react';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { CommunityMessageInfo } from '../Message/detail/CommunityMessageInfo';
 import { EditCommunityMessage } from '../Message/detail/EditCommunityMessage';
+import { CommunityReactionComposer } from '../Message/reactions/CommunityReactionComposer';
 
 export interface CommunityActions {
   doReply?: (msg: HomebaseFile<CommunityMessage>) => void;
@@ -23,6 +24,27 @@ export interface CommunityActions {
 }
 
 export const ContextMenu = ({
+  msg,
+  community,
+  communityActions,
+}: {
+  msg: HomebaseFile<CommunityMessage>;
+  community?: HomebaseFile<CommunityDefinition>;
+  communityActions?: CommunityActions;
+}) => {
+  return (
+    <div className="invisible absolute right-5 top-[-2rem] z-10 flex flex-row items-center rounded-lg bg-background px-1 py-2 text-foreground shadow-md group-hover:pointer-events-auto group-hover:visible">
+      <CommunityReactionComposer msg={msg} community={community} />
+      <CommunityContextActions
+        msg={msg}
+        community={community}
+        communityActions={communityActions}
+      />
+    </div>
+  );
+};
+
+const CommunityContextActions = ({
   msg,
   community,
   communityActions,
@@ -111,15 +133,9 @@ export const ContextMenu = ({
           },
           ...optionalOptions,
         ]}
-        className="absolute right-1 top-[0.125rem] z-10 rounded-full bg-transparent group-hover:pointer-events-auto group-hover:bg-background/60"
         type={'mute'}
         size="square"
-      >
-        <span className="opacity-0 group-hover:opacity-100">
-          <ChevronDown className="h-3 w-3" />
-          <span className="sr-only ml-1">{t('More')}</span>
-        </span>
-      </ActionGroup>
+      />
     </>
   );
 };
