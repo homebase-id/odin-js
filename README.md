@@ -43,7 +43,7 @@ and/or build them:
 
 ## Security Disclosures
 
-If you discover any security issues, please send an email to [security@homebase.id](mailto:security@homebase.id). The email is automatically CCed to the entire team and we'll respond promptly.
+If you discover any security issues, please send an email to [info@homebase.id](mailto:info@homebase.id). The email is automatically CCed to the entire team and we'll respond promptly.
 
 ## License (Apps: AGPL3 & Libraries: MIT)
 
