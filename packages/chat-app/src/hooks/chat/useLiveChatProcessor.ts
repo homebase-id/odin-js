@@ -23,7 +23,7 @@ import {
 import {
   incrementAppIdNotificationCount,
   useDotYouClientContext,
-  useNotificationSubscriber,
+  useWebsocketSubscriber,
 } from '@homebase-id/common-app';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CHAT_MESSAGE_FILE_TYPE, ChatMessage, dsrToMessage } from '../../providers/ChatProvider';
@@ -39,6 +39,7 @@ import { insertNewMessage, insertNewMessagesForConversation } from './useChatMes
 import { insertNewConversation } from './useConversations';
 import { insertNewReaction, removeReaction } from './useChatReaction';
 import { insertNewConversationMetadata } from './useConversationMetadata';
+import { websocketDrives } from '../auth/useAuth';
 
 const MINUTE_IN_MS = 60000;
 const isDebug = hasDebugFlag();
@@ -307,7 +308,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
     }
   }, [processQueue, chatMessagesQueue]);
 
-  return useNotificationSubscriber(
+  return useWebsocketSubscriber(
     isEnabled ? handler : undefined,
     [
       'fileAdded',
@@ -317,10 +318,12 @@ const useChatWebsocket = (isEnabled: boolean) => {
       'statisticsChanged',
       'appNotificationAdded',
     ],
-    [ChatDrive],
+    websocketDrives,
     () => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
-    }
+    },
+    undefined,
+    'useLiveChatProcessor'
   );
 };
 

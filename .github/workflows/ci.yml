@@ -26,14 +26,6 @@ jobs:
 
       - run: npm run build:libs
 
-      - run: npm run build:public
-
-      - run: npm run build:owner
-
-      - run: npm run build:chat
-
-      - run: npm run build:mail
-
-      - run: npm run build:provisioning
+      - run: npm run build
 
       - run: npm run test

@@ -6,13 +6,16 @@ import {
   Toast,
   formatToTimeAgoWithRelativeDetail,
   usePushNotifications,
-  CHAT_APP_ID,
-  FEED_APP_ID,
   OWNER_APP_ID,
   useDotYouClient,
-  MAIL_APP_ID,
   ErrorNotification,
   useRemoveNotifications,
+  buildNotificationTargetLink,
+  buildNotificationBody,
+  buildNotificationTitle,
+  CHAT_APP_ID,
+  FEED_APP_ID,
+  MAIL_APP_ID,
 } from '@homebase-id/common-app';
 import { Cog, Times, Bell } from '@homebase-id/common-app/icons';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
@@ -47,7 +50,7 @@ const Notifications = () => {
 
     if (!activeNotification) return;
 
-    const targetLink = getTargetLink(activeNotification);
+    const targetLink = buildNotificationTargetLink(activeNotification);
     if (targetLink) window.location.href = targetLink;
   };
 
@@ -192,13 +195,7 @@ const NotificationAppGroup = ({
   notifications: PushNotification[];
 }) => {
   const { data: app } = useApp({ appId: appId }).fetch;
-  const appName =
-    app?.name ??
-    (stringGuidsEqual(appId, OWNER_APP_ID)
-      ? 'Homebase'
-      : stringGuidsEqual(appId, FEED_APP_ID)
-        ? 'Homebase - Feed'
-        : `Unknown (${appId})`);
+  const appName = app?.name;
 
   const groupedByTypeNotifications =
     notifications.reduce(
@@ -227,7 +224,7 @@ const NotificationGroup = ({
   appName,
 }: {
   typeGroup: PushNotification[];
-  appName: string;
+  appName?: string;
 }) => {
   const canExpand = typeGroup.length > 1;
   const [isExpanded, setExpanded] = useState(!canExpand);
@@ -277,7 +274,9 @@ const NotificationGroup = ({
               }
               groupCount={isExpanded ? 0 : groupCount}
               href={
-                (canExpand && isExpanded) || !canExpand ? getTargetLink(notification) : undefined
+                (canExpand && isExpanded) || !canExpand
+                  ? buildNotificationTargetLink(notification)
+                  : undefined
               }
               appName={appName}
             />
@@ -310,7 +309,7 @@ const NotificationItem = ({
   onDismiss: () => void;
   href: string | undefined;
   groupCount: number;
-  appName: string;
+  appName?: string;
 }) => {
   const identity = useDotYouClient().getIdentity();
   const isLocalNotification = notification.senderId === identity;
@@ -321,10 +320,13 @@ const NotificationItem = ({
   }).fetch;
   const senderName = contactFile?.fileMetadata.appData.content.name?.displayName;
 
-  const title = useMemo(() => `${appName}`, [appName]);
+  const title = useMemo(
+    () => (appName ? appName : buildNotificationTitle(notification)),
+    [appName]
+  );
   const body = useMemo(
-    () => bodyFormer(notification, false, appName, senderName),
-    [notification, senderName, appName]
+    () => buildNotificationBody(notification, false, title, senderName),
+    [notification, senderName, title]
   );
 
   return (

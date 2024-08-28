@@ -17,9 +17,8 @@ export const usePushNotifications = (props?: { appId?: string }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
 
-  const getNotifications = async (cursor: number | undefined) => {
-    return await GetNotifications(dotYouClient, undefined, PAGE_SIZE, cursor);
-  };
+  const fetchNotifications = async (cursor: number | undefined) =>
+    await GetNotifications(dotYouClient, undefined, PAGE_SIZE, cursor);
 
   const markAsRead = async (notificationIds: string[]) =>
     await MarkNotificationsAsRead(dotYouClient, notificationIds);
@@ -30,7 +29,7 @@ export const usePushNotifications = (props?: { appId?: string }) => {
   return {
     fetch: useQuery({
       queryKey: ['push-notifications'],
-      queryFn: () => getNotifications(undefined),
+      queryFn: () => fetchNotifications(undefined),
       staleTime: 1000 * 60 * 5, // 5 minutes
       select: (data) => ({
         ...data,
@@ -142,6 +141,30 @@ export const useRemoveNotifications = (props: { disabled?: boolean; appId: strin
       mutation.mutate(props.appId);
     })();
   }, [mutation, props?.disabled, props?.appId, unreadCount]);
+};
+
+export const insertPushNotification = async (
+  queryClient: QueryClient,
+  clientNotification: PushNotification
+) => {
+  const existingNotificationData = queryClient.getQueryData<{
+    results: PushNotification[];
+    cursor: number;
+  }>(['push-notifications']);
+
+  if (existingNotificationData) {
+    const newNotificationData = {
+      ...existingNotificationData,
+      results: [
+        clientNotification,
+        ...existingNotificationData.results.filter(
+          (notification) =>
+            !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
+        ),
+      ],
+    };
+    queryClient.setQueryData(['push-notifications'], newNotificationData);
+  }
 };
 
 export const incrementAppIdNotificationCount = async (queryClient: QueryClient, appId: string) => {

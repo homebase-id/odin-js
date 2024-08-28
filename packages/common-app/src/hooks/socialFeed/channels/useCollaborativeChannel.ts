@@ -9,7 +9,7 @@ import {
   saveChannelLink,
 } from '@homebase-id/js-lib/public';
 
-import { FEED_APP_ID, t, useCircles, useDotYouClient } from '../../../..';
+import { FEED_APP_ID, t, useChannelDrives, useCircles, useDotYouClient } from '../../../..';
 import { stringGuidsEqual, stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import {
   ApiType,
@@ -23,7 +23,6 @@ import {
 const FEED_ROOT_PATH = '/apps/feed';
 import { useChannel } from './useChannel';
 import { ALL_CONNECTIONS_CIRCLE_ID } from '@homebase-id/js-lib/network';
-import { useChannelDrives } from '../../socialFeed/useChannelDrives';
 
 const getExtendDriveDetailsUrl = (
   identity: string,
