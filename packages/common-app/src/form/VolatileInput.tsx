@@ -150,6 +150,7 @@ const VolatileInput = forwardRef(
       if (defaultValue === '') {
         divRef.current.innerHTML = '';
       }
+
       divRef.current.innerText = defaultValue || '';
 
       restoreCaretPosition(
@@ -212,6 +213,25 @@ const VolatileInput = forwardRef(
       if (autoFocus && divRef.current) divRef.current.focus();
     }, [autoFocus]);
 
+    // Cleanup empty node, the contenteditable div is a bit weird with empty nodes and randomly
+    //   adding them just because... And every browser does it differently :joy:
+    useEffect(() => {
+      if (!divRef.current) return;
+      const clearEmptyNodes = (parent: Node) => {
+        parent.childNodes.forEach((node) => {
+          if (
+            divRef.current &&
+            (node.nodeName === 'BR' || (node.textContent === '' && node.childNodes.length === 0))
+          ) {
+            parent.removeChild(node);
+          } else {
+            clearEmptyNodes(node);
+          }
+        });
+      };
+      clearEmptyNodes(divRef.current);
+    }, [defaultValue]);
+
     return (
       <div
         className={`block ${className?.indexOf('w-') === -1 ? 'w-full' : ''} ${className || ''}`}
@@ -219,7 +239,9 @@ const VolatileInput = forwardRef(
         <span
           role="textbox"
           contentEditable
-          className="before:content block w-full cursor-text resize whitespace-pre-wrap break-words before:opacity-50 before:empty:content-[inherit] focus:outline-none after:absolute after:content-[''] after:pointer-events-none	 after:inset-0 after:rounded-md focus:after:ring-2 focus:after:ring-indigo-300"
+          className={`before:content block w-full cursor-text resize whitespace-pre-wrap break-words before:opacity-50
+            before:empty:content-[inherit] focus:outline-none after:absolute after:content-[''] after:pointer-events-none
+            after:inset-0 after:rounded-md focus:after:ring-2 focus:after:ring-indigo-300`}
           onKeyDown={onKeyDown}
           onKeyUp={onKeyUp}
           onPaste={onPasteHandler}
@@ -249,7 +271,14 @@ const VolatileInput = forwardRef(
           onInput={(link) => {
             if (onChange && link && wordTillCaret) {
               setLastInsertedContent(link);
-              onChange(`${divRef.current?.innerText.replace(wordTillCaret, link) || ''}`);
+
+              let escapedCompleteHandle = link.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              let pattern = new RegExp(
+                `${wordTillCaret}(?!${escapedCompleteHandle.substring(wordTillCaret.length)})`,
+                'g'
+              );
+
+              onChange(`${divRef.current?.innerText.replace(pattern, link) || ''}`);
             }
           }}
           position={rect}
@@ -261,7 +290,14 @@ const VolatileInput = forwardRef(
             onInput={(val) => {
               if (onChange && val && wordTillCaret) {
                 setLastInsertedContent(val);
-                onChange(`${divRef.current?.innerText.replace(wordTillCaret, val) || ''}`);
+
+                let escapedCompleteHandle = val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                let pattern = new RegExp(
+                  `${wordTillCaret}(?!${escapedCompleteHandle.substring(wordTillCaret.length)})`,
+                  'g'
+                );
+
+                onChange(`${divRef.current?.innerText.replace(pattern, val) || ''}`);
               }
             }}
             position={rect}
