@@ -86,6 +86,6 @@
     "vitest": "^0.34.6"
   },
   "peerDependencies": {
-    "axios": "1.6.7"
+    "axios": "^1.7.5"
   }
 }
