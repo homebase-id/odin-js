@@ -203,7 +203,7 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
         queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] });
         await Promise.all(
           param.domains.map(async (domain) => {
-            await queryClient.invalidateQueries({ queryKey: ['domainInfo', domain] });
+            await queryClient.invalidateQueries({ queryKey: ['domain-info', domain] });
           })
         );
       },
@@ -262,7 +262,7 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
         queryClient.invalidateQueries({ queryKey: ['circles'] });
         queryClient.invalidateQueries({ queryKey: ['circle', circleId] });
         queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] });
-        queryClient.invalidateQueries({ queryKey: ['domainInfo', param.domain] });
+        queryClient.invalidateQueries({ queryKey: ['domain-info', param.domain] });
       },
       onError: (ex) => {
         console.error(ex);
@@ -275,7 +275,7 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
         queryClient.invalidateQueries({ queryKey: ['circles'] });
         queryClient.invalidateQueries({ queryKey: ['circle', circleId] });
         queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] });
-        queryClient.invalidateQueries({ queryKey: ['domainInfo', param.domain] });
+        queryClient.invalidateQueries({ queryKey: ['domain-info', param.domain] });
       },
       onError: (ex) => {
         console.error(ex);
