@@ -3,7 +3,7 @@ import { TypedConnectionNotification } from '@homebase-id/js-lib/core';
 
 import { processInbox } from '@homebase-id/js-lib/peer';
 
-import { useNotificationSubscriber } from '@homebase-id/common-app';
+import { useWebsocketSubscriber } from '@homebase-id/common-app';
 import { useCallback } from 'react';
 
 import { hasDebugFlag, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
@@ -14,6 +14,7 @@ import {
   MailDrive,
   dsrToMailConversation,
 } from '../../providers/MailProvider';
+import { websocketDrives } from '../auth/useAuth';
 
 const MINUTE_IN_MS = 60000;
 
@@ -120,10 +121,10 @@ const useMailWebsocket = (isEnabled: boolean) => {
     }
   }, []);
 
-  return useNotificationSubscriber(
+  return useWebsocketSubscriber(
     isEnabled ? handler : undefined,
     ['fileAdded', 'fileModified'],
-    [MailDrive],
+    websocketDrives,
     () => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
     }

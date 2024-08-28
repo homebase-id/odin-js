@@ -23,7 +23,7 @@ const Auth = () => {
       <Helmet>
         <title>Login | Homebase</title>
       </Helmet>
-      <Layout noShadedBg={true} noPadding={true}>
+      <Layout noShadedBg={true}>
         <DialogWrapper>
           {isError && (
             <Alert className="my-2" type="warning" isCompact={true}>

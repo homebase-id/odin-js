@@ -2,7 +2,7 @@ import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   incrementAppIdNotificationCount,
   useDotYouClientContext,
-  useNotificationSubscriber,
+  useWebsocketSubscriber,
 } from '@homebase-id/common-app';
 import {
   getQueryBatchCursorFromTime,
@@ -282,7 +282,7 @@ const useCommunityWebsocket = (communityId: string | undefined, isEnabled: boole
     }
   }, [processQueue, chatMessagesQueue]);
 
-  return useNotificationSubscriber(
+  return useWebsocketSubscriber(
     isEnabled ? handler : undefined,
     ['fileAdded', 'fileModified'],
     [targetDrive],

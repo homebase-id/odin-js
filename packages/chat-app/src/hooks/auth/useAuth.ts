@@ -74,6 +74,8 @@ export const useAuth = () => {
   };
 };
 
+export const websocketDrives = [ChatDrive];
+
 export const drives = [
   {
     a: ChatDrive.alias,

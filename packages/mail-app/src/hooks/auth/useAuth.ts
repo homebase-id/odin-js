@@ -78,6 +78,7 @@ export const useAuth = () => {
   };
 };
 
+export const websocketDrives = [MailDrive];
 export const drives = [
   {
     a: MailDrive.alias,
