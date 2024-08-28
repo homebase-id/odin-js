@@ -2,6 +2,7 @@ name: 'Release libraries to Github Packages'
 on:
   # release:
   #   types: [published]
+  workflow_dispatch:
   push:
     branches:
       - 'main'
