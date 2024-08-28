@@ -35,7 +35,7 @@ export const getConnections = async (
     count: number;
     cursor?: number;
   }
-): Promise<NumberCursoredResult<{ odinId: string } | DotYouProfile>> => {
+): Promise<NumberCursoredResult<DotYouProfile>> => {
   const client = dotYouClient.createAxiosClient();
   const url = root + '/connected?' + stringifyToQueryParams(data);
 

@@ -3,7 +3,7 @@ import { CursoredResult, NewHomebaseFile } from '@homebase-id/js-lib/core';
 
 import { useAuth } from '../auth/useAuth';
 import { parseContact } from './useContact';
-import { RawContact, getContacts } from '@homebase-id/js-lib/network';
+import { ContactVm, RawContact, getContacts } from '@homebase-id/js-lib/network';
 
 const pageSize = 10;
 
@@ -12,7 +12,7 @@ export const useContacts = () => {
 
   const fetch = async (
     cursorState?: string
-  ): Promise<CursoredResult<NewHomebaseFile<RawContact>[]>> => {
+  ): Promise<CursoredResult<NewHomebaseFile<ContactVm>[]>> => {
     const data = await await getContacts(dotYouClient, cursorState, pageSize);
     return { ...data, results: data.results.map((contact) => parseContact(contact)) };
   };
