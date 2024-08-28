@@ -128,12 +128,12 @@ const YouAuthConsent = () => {
                       value={JSON.stringify(consentRequirements)}
                     />
                   ) : null}
-                  <ActionButton type="primary" className="w-1/2 sm:w-auto" icon={Arrow}>
+                  <ActionButton type="primary" className="w-full sm:w-auto" icon={Arrow}>
                     {t('Login')}
                   </ActionButton>
                 </form>
 
-                <ActionButton type="secondary" onClick={doCancel} className="w-1/2 sm:w-auto">
+                <ActionButton type="secondary" onClick={doCancel} className="w-full sm:w-auto">
                   {t('Cancel')}
                 </ActionButton>
               </div>
@@ -155,7 +155,7 @@ const ServiceDetails = ({ targetDomain }: { targetDomain: string }) => {
           fallbackSize="md"
         />
 
-        <h1 className="text-3xl md:text-4xl ">
+        <h1 className="text-3xl md:text-4xl">
           {t('Login to')} &quot;<DomainHighlighter>{targetDomain}</DomainHighlighter>
           &quot;
           <small className="block text-sm dark:text-white dark:text-opacity-80">
@@ -207,7 +207,7 @@ const AppDetails = ({
           fallbackSize="md"
         />
 
-        <h1 className="text-3xl md:text-4xl ">
+        <h1 className="text-3xl md:text-4xl">
           {t('Login to')}{' '}
           {!appRegistration ? (
             <>

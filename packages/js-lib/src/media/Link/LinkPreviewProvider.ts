@@ -44,6 +44,7 @@ export const getLinkPreview = async (
   const promise = axiosClient
     .get<LinkPreviewFromServer>(`/utils/links/extract?url=${encodeURIComponent(standardizedUrl)}`)
     .then((response) => {
+      if (!response.data) return null;
       return {
         title: response.data.title || '',
         description: response.data.description || '',
