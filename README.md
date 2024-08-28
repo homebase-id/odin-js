@@ -1,4 +1,4 @@
-# ODIN-JS
+# HOMEBASE.ID (ODIN-JS)
 
 ##### Open Decentralized Identity Network
 
@@ -16,6 +16,8 @@ This monorepo contains the various JavaScript apps and libraries that are mainta
 - 🚀 Owner app
 - 📚 JS Lib
 - ✨ UI Lib
+
+The feed, chat, mail, and community apps are designed as stand-alone platform apps and will likely at some point be pulled out of the mono-repo.
 
 ## Installing Locally
 
@@ -44,8 +46,3 @@ and/or build them:
 ## Security Disclosures
 
 If you discover any security issues, please send an email to [info@homebase.id](mailto:info@homebase.id). The email is automatically CCed to the entire team and we'll respond promptly.
-
-## License (Apps: AGPL3 & Libraries: MIT)
-
-The repository and any apps are licensed under AGPL3 while the libraries under MIT
-See ./LICENSE for the details;
