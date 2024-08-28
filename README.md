@@ -1,4 +1,4 @@
-# ODIN-JS
+# HOMEBASE.ID (ODIN-JS)
 
 ##### Open Decentralized Identity Network
 
@@ -16,6 +16,8 @@ This monorepo contains the various JavaScript apps and libraries that are mainta
 - 🚀 Owner app
 - 📚 JS Lib
 - ✨ UI Lib
+
+The feed, chat, mail, and community apps are designed as stand-alone platform apps and will likely at some point be pulled out of the mono-repo.
 
 ## Installing Locally
 
