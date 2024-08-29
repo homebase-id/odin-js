@@ -27,7 +27,7 @@ export const useAttributes = ({
       profileId,
       sectionId,
       undefined,
-      100 // TODO: Should we page this properly, or how many profile attributes do we expect as normal?
+      200 // TODO: Should we page this properly, or how many profile attributes do we expect being "normal"?
     );
 
     return foundAttributes.map((attr) => {

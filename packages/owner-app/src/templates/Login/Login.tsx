@@ -5,13 +5,20 @@ import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import { Link } from 'react-router-dom';
 import { PasswordInput } from '../../components/Password/PasswordInput';
-import { t, DomainHighlighter, Label, ActionButton } from '@homebase-id/common-app';
+import {
+  t,
+  DomainHighlighter,
+  Label,
+  ActionButton,
+  ErrorNotification,
+} from '@homebase-id/common-app';
 import { Loader, Arrow } from '@homebase-id/common-app/icons';
 
 const Login = () => {
   const [password, setPassword] = useState(import.meta.env.DEV ? 'a' : '');
   const [passwordState, setPasswordState] = useState<'unknown' | 'pending' | 'ready'>('unknown');
   const [state, setState] = useState<'loading' | 'error' | 'success' | undefined>();
+  const [error, setError] = useState<unknown | undefined>();
   const { authenticate, setFirstPassword, isPasswordSet, isAuthenticated } = useAuth();
 
   const doLogin: FormEventHandler = async (e) => {
@@ -21,9 +28,9 @@ const Login = () => {
       await authenticate(password);
       setState('success');
     } catch (ex) {
-      // Todo show message what failed
-      console.error(ex);
       setState('error');
+      setError(ex);
+      console.error(ex);
     }
     return false;
   };
@@ -47,6 +54,7 @@ const Login = () => {
   if (passwordState === 'unknown' || passwordState === 'pending' || isAuthenticated) {
     return (
       <MinimalLayout noShadedBg={true} noPadding={true}>
+        <ErrorNotification error={error} />
         <div className="h-screen">
           <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col p-5">
             <div className="my-auto flex flex-col">
@@ -77,7 +85,7 @@ const Login = () => {
                   </small>
                 </h1>
                 <div className="mb-4">
-                  <Label htmlFor="password" className="text-sm leading-7  dark:text-gray-400">
+                  <Label htmlFor="password" className="text-sm leading-7 dark:text-gray-400">
                     Password
                   </Label>
                   <PasswordInput

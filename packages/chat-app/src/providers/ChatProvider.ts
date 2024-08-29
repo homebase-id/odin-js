@@ -464,7 +464,7 @@ export const softDeleteChatMessage = async (
 
   for (let i = 0; i < message.fileMetadata.payloads.length; i++) {
     const payload = message.fileMetadata.payloads[i];
-    // TODO: Should the payload be deleted for everyone? With "TransitOptions"
+    // TODO: Should the payload be deleted for everyone? With "TransitOptions"; Needs server side support for it;
     const deleteResult = await deletePayload(
       dotYouClient,
       ChatDrive,

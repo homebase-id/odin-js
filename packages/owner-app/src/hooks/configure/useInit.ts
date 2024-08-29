@@ -60,7 +60,7 @@ export const useInit = () => {
     }
 
     // Do a first publish of the static files
-    // This is normally a side effect from the useAttribute hook.. TODO: Move to providers instead of the hook
+    // This is normally a side effect from the useAttribute hook.. but we need to do it here after the first setup
     await publishStaticFiles(undefined);
 
     const defaultServerSettings = getSettings(dotYouClient);

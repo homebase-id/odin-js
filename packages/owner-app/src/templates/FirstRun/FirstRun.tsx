@@ -8,7 +8,14 @@ import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 
 import { useSearchParams } from 'react-router-dom';
 import { FIRST_RUN_TOKEN_STORAGE_KEY } from '../../hooks/configure/useInit';
-import { ActionButton, Alert, DomainHighlighter, Label, t } from '@homebase-id/common-app';
+import {
+  ActionButton,
+  Alert,
+  DomainHighlighter,
+  ErrorNotification,
+  Label,
+  t,
+} from '@homebase-id/common-app';
 import { Arrow } from '@homebase-id/common-app/icons';
 import { PasswordInput } from '../../components/Password/PasswordInput';
 import { PasswordStrength } from '../../components/Password/PasswordStrength';
@@ -18,6 +25,7 @@ const FirstRun = () => {
   const [retypePassword, setRetypePassword] = useState('');
 
   const [state, setState] = useState<'loading' | 'error' | 'success' | undefined>();
+  const [error, setError] = useState<unknown | undefined>();
   const { authenticate, finalizeRegistration } = useAuth();
 
   const [searchParams] = useSearchParams();
@@ -35,9 +43,10 @@ const FirstRun = () => {
 
       setState('success');
     } catch (ex) {
-      // Todo show message what failed
-      console.error(ex);
+      setError(ex);
       setState('error');
+
+      console.error(ex);
     }
     return false;
   };
@@ -48,8 +57,10 @@ const FirstRun = () => {
         <title>Setup | Homebase</title>
       </Helmet>
       <MinimalLayout noShadedBg={true} noPadding={true}>
+        <ErrorNotification error={error} />
         <UrlNotifier />
-        <section className="body-font flex h-full pt-24 ">
+
+        <section className="body-font flex h-full pt-24">
           <div className="container m-auto h-full max-w-[35rem] p-5">
             <form onSubmit={doNext}>
               <h1 className="mb-5 text-4xl dark:text-white">
@@ -65,7 +76,7 @@ const FirstRun = () => {
               ) : (
                 <>
                   <div className="mb-2">
-                    <Label htmlFor="password" className="text-sm leading-7  dark:text-gray-400">
+                    <Label htmlFor="password" className="text-sm leading-7 dark:text-gray-400">
                       {t('Password')}
                     </Label>
                     <PasswordInput
@@ -83,7 +94,7 @@ const FirstRun = () => {
                   <div className="mb-4">
                     <Label
                       htmlFor="retypepassword"
-                      className="text-sm leading-7  dark:text-gray-400"
+                      className="text-sm leading-7 dark:text-gray-400"
                     >
                       {t('Retype Password')}
                     </Label>
