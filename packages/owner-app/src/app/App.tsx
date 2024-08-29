@@ -17,7 +17,7 @@ const Setup = lazy(() => import('../templates/Setup/Setup').then((m) => ({ defau
 const Home = lazy(() => import('../templates/Dashboard/Dashboard'));
 const RegisterApp = lazy(() => import('../templates/AppDefinition/RegisterApp'));
 const ExtendAppDrivePermissions = lazy(
-  () => import('../templates/AppDefinition/ExtendAppDrivePermissions')
+  () => import('../templates/AppDefinition/ExtendAppPermissions')
 );
 const ExtendCirclePermissionsFromApp = lazy(
   () => import('../templates/AppDefinition/ExtendCirclePermissionsFromApp')

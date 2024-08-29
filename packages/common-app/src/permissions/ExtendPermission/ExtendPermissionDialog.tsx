@@ -49,10 +49,15 @@ export const ExtendPermissionDialog = ({
     <DialogWrapper title={t('Missing permissions')} isSidePanel={false}>
       <p>
         {t(
-          `The ${appName} app is missing permissions. Without the necessary permissions the functionality of the ${appName} will be limited. This can happen when the app added new features that require additional permissions or when you revoked permission manually.`
+          `The ${appName} app is missing permissions. Without the necessary permissions the functionality of the ${appName} will be limited.`
         )}
       </p>
-      <div className="flex flex-row-reverse">
+      <p className="mt-3 text-slate-400">
+        {t(
+          'This can happen when the app added new features that require additional permissions or when you revoked permission manually.'
+        )}
+      </p>
+      <div className="flex flex-row-reverse mt-5">
         <ActionLink href={extendPermissionUrl} icon={Shield}>
           {t('Extend permissions')}
         </ActionLink>
