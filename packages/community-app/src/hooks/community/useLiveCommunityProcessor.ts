@@ -288,7 +288,9 @@ const useCommunityWebsocket = (communityId: string | undefined, isEnabled: boole
     [targetDrive],
     () => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
-    }
+    },
+    undefined,
+    'useLiveCommunityProcessor'
   );
 };
 

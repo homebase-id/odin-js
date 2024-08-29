@@ -118,6 +118,8 @@ const useMailWebsocket = (isEnabled: boolean) => {
     websocketDrives,
     () => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
-    }
+    },
+    undefined,
+    'useLiveMailProcessor'
   );
 };

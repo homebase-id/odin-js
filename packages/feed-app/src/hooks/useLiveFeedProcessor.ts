@@ -69,6 +69,9 @@ const useFeedWebSocket = (isEnabled: boolean) => {
   useWebsocketSubscriber(
     isEnabled ? handler : undefined,
     ['fileAdded', 'fileModified'],
-    websocketDrives
+    websocketDrives,
+    undefined,
+    undefined,
+    'useLiveFeedProcessor'
   );
 };
