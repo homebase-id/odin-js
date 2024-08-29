@@ -33,6 +33,7 @@ const OWNER_APP_ID = 'ac126e09-54cb-4878-a690-856be692da16';
 const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
 const FEED_APP_ID = '5f887d80-0132-4294-ba40-bda79155551d';
 const MAIL_APP_ID = '6e8ecfff-7c15-40e4-94f4-d6e83bfb5857';
+const COMMUNITY_APP_ID = '77ed6136-6b33-4654-8088-3d89c91e6065';
 
 const OWNER_FOLLOWER_TYPE_ID = '2cc468af-109b-4216-8119-542401e32f4d';
 const OWNER_CONNECTION_REQUEST_TYPE_ID = '8ee62e9e-c224-47ad-b663-21851207f768';
@@ -90,6 +91,9 @@ const buildNotificationBody = async (
     } else if (payload.options.typeId === FEED_NEW_COMMENT_TYPE_ID) {
       return `${sender} commented to your post`;
     }
+  } else if (payload.options.appId === COMMUNITY_APP_ID) {
+    const hasMultiple = existingNotifications.length;
+    return `${sender} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
   }
 
   return `${sender} sent you a notification via ${payload.appDisplayName}`;
@@ -172,6 +176,10 @@ self.addEventListener('notificationclick', (event) => {
 
       if (event.notification?.data?.options?.appId === FEED_APP_ID) {
         return { pathToOpen: `/apps/feed` };
+      }
+
+      if (event.notification?.data?.options?.appId === COMMUNITY_APP_ID) {
+        return { pathToOpen: `/apps/community/${event.notification?.data?.options?.typeId}` };
       }
 
       const tagId = event.notification?.data?.options?.tagId;

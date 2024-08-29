@@ -54,6 +54,35 @@ const ExtendAppPermissions = () => {
       if (!appRegistration || !appRegistration?.appId)
         throw new Error('App registration not found');
 
+      // start with permissions so new drives are created before extending circles
+      await extendPermission({
+        ...appRegistration,
+        appId: appRegistration.appId,
+        permissionSet: {
+          keys: [
+            ...(appRegistration?.grant.permissionSet.keys || []),
+            ...(permissionSet?.keys || []),
+          ],
+        },
+        drives: [
+          ...(appRegistration?.grant?.driveGrants.filter(
+            (existingGrant) =>
+              !driveGrants?.some(
+                (grant) =>
+                  stringGuidsEqual(
+                    grant.permissionedDrive.drive.alias,
+                    existingGrant.permissionedDrive.drive.alias
+                  ) &&
+                  stringGuidsEqual(
+                    grant.permissionedDrive.drive.type,
+                    existingGrant.permissionedDrive.drive.type
+                  )
+              )
+          ) || []),
+          ...(driveGrants || []),
+        ],
+      });
+
       if (circleIds?.length || circlePermissionSet?.keys?.length || circleDriveGrants?.length)
         await updateCircles({
           appId: appRegistration.appId,
@@ -85,34 +114,6 @@ const ExtendAppPermissions = () => {
           },
           circleIds: [...(appRegistration?.authorizedCircles || []), ...(circleIds || [])],
         });
-
-      await extendPermission({
-        ...appRegistration,
-        appId: appRegistration.appId,
-        permissionSet: {
-          keys: [
-            ...(appRegistration?.grant.permissionSet.keys || []),
-            ...(permissionSet?.keys || []),
-          ],
-        },
-        drives: [
-          ...(appRegistration?.grant?.driveGrants.filter(
-            (existingGrant) =>
-              !driveGrants?.some(
-                (grant) =>
-                  stringGuidsEqual(
-                    grant.permissionedDrive.drive.alias,
-                    existingGrant.permissionedDrive.drive.alias
-                  ) &&
-                  stringGuidsEqual(
-                    grant.permissionedDrive.drive.type,
-                    existingGrant.permissionedDrive.drive.type
-                  )
-              )
-          ) || []),
-          ...(driveGrants || []),
-        ],
-      });
 
       if (driveGrants) {
         await Promise.all(

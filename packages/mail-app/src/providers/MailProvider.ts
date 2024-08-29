@@ -299,6 +299,9 @@ export const uploadMail = async (
           TransferUploadStatus.EnqueuedFailed
       )
     ) {
+      conversation.fileId = (uploadResult as UploadResult).file.fileId;
+      conversation.fileMetadata.versionTag = uploadResult.newVersionTag;
+
       conversation.fileMetadata.appData.content.deliveryStatus = MailDeliveryStatus.Failed;
       conversation.fileMetadata.appData.content.deliveryDetails = {};
       for (const recipient of recipients) {
