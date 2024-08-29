@@ -209,8 +209,7 @@ export const removePost = async (
   const targetDrive = GetTargetDriveFromChannelId(channelId);
 
   if (postFile.fileMetadata.globalTransitId) {
-    // Fetch the first 1000 comments and delete them with the post;
-    // TODO: this should support a larger numbers of comments; Or a delete of a tree of groupIds
+    // Fetch the first 1000 comments and delete their level 2 replies by groupId;
     const comments = (
       await queryBatch(
         dotYouClient,

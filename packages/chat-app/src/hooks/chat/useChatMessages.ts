@@ -47,10 +47,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
           !recipientStatus.status ||
           recipientStatus.status?.toLowerCase() !== SendReadReceiptResponseRecipientStatus.Enqueued
       );
-      if (someFailed) {
-        // TODO: Should we throw an error?
-        console.error('Error marking chat as read', { response });
-      }
+      if (someFailed) console.error('Error marking chat as read', { response });
     });
 
     return response;

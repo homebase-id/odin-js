@@ -78,15 +78,6 @@ const useMailWebsocket = (isEnabled: boolean) => {
         );
         if (!updatedChatMessage) return;
 
-        const sender =
-          notification.header.fileMetadata.senderOdinId ||
-          updatedChatMessage.fileMetadata.appData.content.sender;
-
-        if (!sender || sender === identity) {
-          // Ignore messages sent by the current user
-          return;
-        }
-
         const existingConversations = queryClient.getQueryData<
           InfiniteData<MailConversationsReturn>
         >(['mail-conversations']);

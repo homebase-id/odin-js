@@ -234,7 +234,7 @@ const uploadPost = async <T extends PostContent>(
       recipients: [],
       schedule: ScheduleOptions.SendLater,
       priority: PriorityOptions.Medium,
-      sendContents: SendContents.All, // TODO: Should this be header only?
+      sendContents: SendContents.All,
     },
   };
 
@@ -346,7 +346,7 @@ const uploadPostHeader = async <T extends PostContent>(
       recipients: [],
       schedule: ScheduleOptions.SendLater,
       priority: PriorityOptions.Medium,
-      sendContents: SendContents.All, // TODO: Should this be header only?
+      sendContents: SendContents.All,
     },
   };
 
