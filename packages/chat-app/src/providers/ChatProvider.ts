@@ -362,6 +362,9 @@ export const uploadChatMessage = async (
         TransferUploadStatus.EnqueuedFailed
     )
   ) {
+    message.fileId = uploadResult.file.fileId;
+    message.fileMetadata.versionTag = uploadResult.newVersionTag;
+
     message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Failed;
     message.fileMetadata.appData.content.deliveryDetails = {};
     for (const recipient of recipients) {
@@ -373,7 +376,6 @@ export const uploadChatMessage = async (
     }
 
     await updateChatMessage(dotYouClient, message, recipients, uploadResult.keyHeader);
-
     console.error('Not all recipients received the message: ', uploadResult);
     throw new Error(`Not all recipients received the message: ${recipients.join(', ')}`);
   }

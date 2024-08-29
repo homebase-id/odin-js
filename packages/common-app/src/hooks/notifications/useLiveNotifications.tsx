@@ -13,7 +13,13 @@ import { t } from '../../helpers/i18n/dictionary';
 import { DomainHighlighter } from '../../ui/DomainHighlighter/DomainHighlighter';
 import { useWebsocketSubscriber } from '../transitProcessor/useWebsocketSubscriber';
 import { incrementAppIdNotificationCount, insertPushNotification } from './usePushNotifications';
-import { OWNER_APP_ID, CHAT_APP_ID, MAIL_APP_ID, FEED_APP_ID } from '../../constants';
+import {
+  OWNER_APP_ID,
+  CHAT_APP_ID,
+  MAIL_APP_ID,
+  FEED_APP_ID,
+  COMMUNITY_APP_ID,
+} from '../../constants';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 interface LiveNotification {
@@ -82,7 +88,11 @@ export const useLiveNotifications = (props: { drives?: TargetDrive[] } | undefin
       }).getRoot();
 
       const targetLink = buildNotificationTargetLink(clientNotification);
-      if (window.location.pathname === targetLink) return;
+      if (
+        window.location.pathname === targetLink ||
+        (targetLink && window.location.pathname.startsWith(targetLink))
+      )
+        return;
 
       const liveNotification: LiveNotification = {
         key: clientNotification.id,
@@ -140,6 +150,8 @@ export const buildNotificationTitle = (payload: PushNotification) => {
     return 'Hombease Mail';
   } else if (stringGuidsEqual(payload.options.appId, FEED_APP_ID)) {
     return 'Homebase Feed';
+  } else if (stringGuidsEqual(payload.options.appId, COMMUNITY_APP_ID)) {
+    return 'Homebase Community';
   }
 
   return `Unknown (${payload.options.appId})`;
@@ -177,6 +189,8 @@ export const buildNotificationBody = (
     } else if (payload.options.typeId === FEED_NEW_COMMENT_TYPE_ID) {
       return `${sender} commented to your post`;
     }
+  } else if (payload.options.appId === COMMUNITY_APP_ID) {
+    return `${sender} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
   }
 
   return `${sender} sent you a notification via ${appName}`;
@@ -200,5 +214,7 @@ export const buildNotificationTargetLink = (payload: PushNotification) => {
     return `/apps/mail/inbox/${payload.options.typeId}`;
   } else if (payload.options.appId === FEED_APP_ID) {
     return `/apps/feed`;
+  } else if (payload.options.appId === COMMUNITY_APP_ID) {
+    return `/apps/community/${payload.options.typeId}`;
   }
 };
