@@ -12,4 +12,8 @@ export const isLocalStorageAvailable = () => {
 export const isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
 export const hasDebugFlag = () =>
-  isLocalStorageAvailable() ? localStorage.getItem('debug') === '1' : false;
+  isLocalStorageAvailable()
+    ? localStorage.getItem('debug') === '1'
+    : typeof navigator !== 'undefined' &&
+      navigator.product === 'ReactNative' &&
+      (global as any).debug;

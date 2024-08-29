@@ -70,7 +70,9 @@ export const useWebsocketSubscriber = (
           () => {
             setIsConected(true);
             onReconnect && onReconnect();
-          }
+          },
+          undefined,
+          refId
         );
         setIsConected(true);
       })();

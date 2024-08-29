@@ -276,7 +276,8 @@ export const Subscribe = async (
   handler: (data: TypedConnectionNotification) => void,
   onDisconnect?: () => void,
   onReconnect?: () => void,
-  args?: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this
+  args?: unknown, // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this,
+  refId?: string
 ): Promise<void> => {
   const apiType = dotYouClient.getType();
   const sharedSecret = dotYouClient.getSharedSecret();
@@ -287,7 +288,8 @@ export const Subscribe = async (
   activeSs = sharedSecret;
   subscribers.push({ handler, onDisconnect, onReconnect });
 
-  if (isDebug) console.debug(`[NotificationProvider] New subscriber (${subscribers.length})`);
+  if (isDebug)
+    console.debug(`[NotificationProvider] New subscriber (${subscribers.length})`, refId);
 
   // Already connected, no need to initiate a new connection
   if (webSocketClient) return Promise.resolve();
