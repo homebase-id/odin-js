@@ -115,7 +115,7 @@ export interface EmbeddedPost extends Omit<PostContent, 'embeddedPost'> {
 export type ReactAccess = 'emoji' | 'comment' | boolean;
 
 export interface PostContent {
-  id: string;
+  id: string; // id that is set once and never changes; Used for permalink;
   channelId: string;
   authorOdinId: string;
   reactAccess?: ReactAccess;

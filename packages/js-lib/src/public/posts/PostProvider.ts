@@ -22,6 +22,7 @@ import {
   queryBatchCollection,
   TargetDrive,
   deleteFilesByGroupId,
+  getFileHeaderBytesByUniqueId,
 } from '../../core/core';
 import { toGuidId } from '../../helpers/DataUtil';
 
@@ -143,10 +144,11 @@ export const getPostByFileId = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   channelId: string,
   fileId: string
-): Promise<HomebaseFile<T> | undefined> => {
+): Promise<HomebaseFile<T> | null> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const header = await getFileHeader(dotYouClient, targetDrive, fileId);
   if (header) return await dsrToPostFile(dotYouClient, header, targetDrive, true);
+  return null;
 };
 
 //Gets the content for a given post id
@@ -154,7 +156,7 @@ export const getPost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   channelId: string,
   id: string
-): Promise<HomebaseFile<T> | undefined> => {
+): Promise<HomebaseFile<T> | null> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const params: FileQueryParams = {
     tagsMatchAtLeastOne: [id],
@@ -173,32 +175,21 @@ export const getPost = async <T extends PostContent>(
     return await dsrToPostFile<T>(dotYouClient, dsr, targetDrive, response.includeMetadataHeader);
   }
 
-  return;
+  return null;
 };
 
 export const getPostBySlug = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   channelId: string,
   postSlug: string
-): Promise<HomebaseFile<T> | undefined> => {
+): Promise<HomebaseFile<T> | null> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
-  const params: FileQueryParams = {
-    clientUniqueIdAtLeastOne: [toGuidId(postSlug)],
-    targetDrive: targetDrive,
-    fileType: [BlogConfig.PostFileType, BlogConfig.DraftPostFileType],
-  };
+  const dsr = await getFileHeaderBytesByUniqueId(dotYouClient, targetDrive, toGuidId(postSlug), {
+    decrypt: false,
+  });
 
-  const response = await queryBatch(dotYouClient, params);
-
-  if (response.searchResults.length >= 1) {
-    if (response.searchResults.length > 1) {
-      console.warn(`Found more than one file with alias [${postSlug}].  Using first entry.`);
-    }
-
-    const dsr = response.searchResults[0];
-    return await dsrToPostFile<T>(dotYouClient, dsr, targetDrive, response.includeMetadataHeader);
-  }
-  return;
+  if (!dsr) return null;
+  return await dsrToPostFile<T>(dotYouClient, dsr, targetDrive, true);
 };
 
 export const removePost = async (
@@ -246,7 +237,7 @@ export const dsrToPostFile = async <T extends PostContent>(
   dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<HomebaseFile<T> | undefined> => {
+): Promise<HomebaseFile<T> | null> => {
   try {
     const postContent = await getContentFromHeaderOrPayload<T>(
       dotYouClient,
@@ -255,7 +246,7 @@ export const dsrToPostFile = async <T extends PostContent>(
       includeMetadataHeader
     );
 
-    if (!postContent) return undefined;
+    if (!postContent) return null;
 
     const file: HomebaseFile<T> = {
       ...dsr,
@@ -271,6 +262,6 @@ export const dsrToPostFile = async <T extends PostContent>(
     return file;
   } catch (ex) {
     console.error('[DotYouCore-js] failed to get the payload of a dsr', dsr, ex);
-    return undefined;
+    return null;
   }
 };

@@ -73,6 +73,7 @@ function App() {
             <Route path="articles" element={<ArticlesPage />} />
             <Route path="channels" element={<ChannelsPage />} />
             <Route path="edit/:channelKey/:postKey" element={<ArticleComposerPage />} />
+            {/* <Route path="edit/:odinKey/:channelKey/:postKey" element={<ArticleComposerPage />} /> */}
             <Route path="duplicate/:channelKey/:postKey" element={<ArticleDuplicatePage />} />
 
             <Route
