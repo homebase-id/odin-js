@@ -1,5 +1,13 @@
-import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  InfiniteData,
+  QueryClient,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+import {
+  AppNotification,
   DeleteNotifications,
   GetNotifications,
   MarkNotificationsAsRead,
@@ -11,13 +19,12 @@ import { useEffect } from 'react';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
-// const isDebug = hasDebugFlag();
-const PAGE_SIZE = 700;
-export const usePushNotifications = (props?: { appId?: string }) => {
+const PAGE_SIZE = 30;
+export const usePushNotifications = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
 
-  const fetchNotifications = async (cursor: number | undefined) =>
+  const getNotifications = async (cursor: number | undefined) =>
     await GetNotifications(dotYouClient, undefined, PAGE_SIZE, cursor);
 
   const markAsRead = async (notificationIds: string[]) =>
@@ -27,34 +34,50 @@ export const usePushNotifications = (props?: { appId?: string }) => {
     await DeleteNotifications(dotYouClient, notificationIds);
 
   return {
-    fetch: useQuery({
+    fetch: useInfiniteQuery({
       queryKey: ['push-notifications'],
-      queryFn: () => fetchNotifications(undefined),
+      initialPageParam: undefined as number | undefined,
+      queryFn: ({ pageParam }) => getNotifications(pageParam),
+      getNextPageParam: (lastPage) =>
+        lastPage?.results && lastPage?.results?.length >= PAGE_SIZE ? lastPage.cursor : undefined,
       staleTime: 1000 * 60 * 5, // 5 minutes
-      select: (data) => ({
-        ...data,
-        results: data.results.filter(
-          (n) => !props?.appId || stringGuidsEqual(n.options.appId, props.appId)
-        ),
-      }),
+      // select: (data) => ({
+      //   ...data,
+      //   results: data.results.filter(
+      //     (n) => !props?.appId || stringGuidsEqual(n.options.appId, props.appId)
+      //   ),
+      // }),
     }),
     markAsRead: useMutation({
       mutationFn: markAsRead,
       onMutate: async (notificationIds) => {
-        const existingData = queryClient.getQueryData<{
-          results: PushNotification[];
-          cursor: number;
-        }>(['push-notifications']);
+        const existingData = queryClient.getQueryData<
+          InfiniteData<{
+            results: PushNotification[];
+            cursor: number;
+          }>
+        >(['push-notifications']);
 
         if (!existingData) return;
-        const newData = {
+        const newData: InfiniteData<{
+          results: PushNotification[];
+          cursor: number;
+        }> = {
           ...existingData,
-          results: existingData.results.map((n) => ({
-            ...n,
-            unread: notificationIds.some((id) => id === n.id) ? false : n.unread,
+          pages: existingData.pages.map((page) => ({
+            ...page,
+            results: page.results.map((n) => ({
+              ...n,
+              unread: notificationIds.some((id) => id === n.id) ? false : n.unread,
+            })),
           })),
         };
-        queryClient.setQueryData(['push-notifications'], newData);
+        queryClient.setQueryData<
+          InfiniteData<{
+            results: PushNotification[];
+            cursor: number;
+          }>
+        >(['push-notifications'], newData);
 
         return existingData;
       },
@@ -65,17 +88,30 @@ export const usePushNotifications = (props?: { appId?: string }) => {
     remove: useMutation({
       mutationFn: removeNotifications,
       onMutate: async (notificationIds) => {
-        const existingData = queryClient.getQueryData<{
-          results: PushNotification[];
-          cursor: number;
-        }>(['push-notifications']);
+        const existingData = queryClient.getQueryData<
+          InfiniteData<{
+            results: PushNotification[];
+            cursor: number;
+          }>
+        >(['push-notifications']);
 
         if (!existingData) return;
-        const newData = {
+        const newData: InfiniteData<{
+          results: PushNotification[];
+          cursor: number;
+        }> = {
           ...existingData,
-          results: existingData.results.filter((n) => !notificationIds.some((id) => id === n.id)),
+          pages: existingData.pages.map((page) => ({
+            ...page,
+            results: page.results.filter((n) => !notificationIds.some((id) => id === n.id)),
+          })),
         };
-        queryClient.setQueryData(['push-notifications'], newData);
+        queryClient.setQueryData<
+          InfiniteData<{
+            results: PushNotification[];
+            cursor: number;
+          }>
+        >(['push-notifications'], newData);
 
         return existingData;
       },
@@ -84,6 +120,43 @@ export const usePushNotifications = (props?: { appId?: string }) => {
       },
     }),
   };
+};
+
+export const insertNewNotification = (
+  queryClient: QueryClient,
+  appNotification: AppNotification
+) => {
+  const existingData = queryClient.getQueryData<
+    InfiniteData<{
+      results: PushNotification[];
+      cursor: number;
+    }>
+  >(['push-notifications']);
+
+  if (!existingData) return;
+  const newData: InfiniteData<{
+    results: PushNotification[];
+    cursor: number;
+  }> = {
+    ...existingData,
+    pages: existingData.pages.map((page, index) => ({
+      ...page,
+      results:
+        index === 0
+          ? [
+              appNotification,
+              ...page.results.filter((notification) => notification.id !== appNotification.id),
+            ]
+          : page.results.filter((notification) => notification.id !== appNotification.id),
+    })),
+  };
+
+  queryClient.setQueryData<
+    InfiniteData<{
+      results: PushNotification[];
+      cursor: number;
+    }>
+  >(['push-notifications'], newData);
 };
 
 export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
