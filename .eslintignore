@@ -1,6 +1,0 @@
-node_modules/
-dist/
-prettierrc.cjs
-postcss.config.cjs
-.eslintrc
-env.d.ts
