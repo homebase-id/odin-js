@@ -3,7 +3,7 @@ import {
   GlobalTransitIdFileIdentifier,
   EmbeddedThumb,
   ArchivalStatus,
-  ExternalFileIdentifier,
+  FileIdFileIdentifier,
   SystemFileType,
   UploadPayloadDescriptor,
   AccessControlList,
@@ -113,7 +113,7 @@ export interface UploadAppFileMetaData {
 
 export interface UploadResult {
   keyHeader: KeyHeader | undefined;
-  file: ExternalFileIdentifier;
+  file: FileIdFileIdentifier;
   globalTransitIdFileIdentifier: GlobalTransitIdFileIdentifier;
   recipientStatus: { [key: string]: TransferUploadStatus };
   newVersionTag: string;

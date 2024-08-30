@@ -1,10 +1,10 @@
 import { DotYouClient } from '../../../core/DotYouClient';
-import { ExternalFileIdentifier, TargetDrive } from '../../../core/DriveData/File/DriveFileTypes';
+import { FileIdFileIdentifier, TargetDrive } from '../../../core/DriveData/File/DriveFileTypes';
 import { assertIfDefined } from '../../../helpers/DataUtil';
 
 export interface SendReadReceiptResponse {
   results: {
-    file: ExternalFileIdentifier;
+    file: FileIdFileIdentifier;
     status: { recipient: string; status: SendReadReceiptResponseRecipientStatus | null }[];
   }[];
 }

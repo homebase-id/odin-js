@@ -1,27 +1,32 @@
-import { PostContent } from '@homebase-id/js-lib/public';
+import { ChannelDefinition, PostContent } from '@homebase-id/js-lib/public';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useManagePost } from '../../../hooks/socialFeed/post/useManagePost';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { ActionGroup, ActionGroupOptionProps } from '../../../ui/Buttons/ActionGroup';
 import { Pencil } from '../../../ui/Icons/Pencil';
 import { t } from '../../../helpers/i18n/dictionary';
 import { Clipboard, Trash } from '../../../ui/Icons';
 import { EditPostDialog } from '../../EditPostDialog/EditPostDialog';
-import { useChannel } from '../../../hooks/socialFeed/channels/useChannel';
 
-export const OwnerActions = ({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
+export const OwnerActions = ({
+  postFile,
+  channel,
+}: {
+  postFile: HomebaseFile<PostContent>;
+  channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition> | undefined;
+}) => {
   const postContent = postFile.fileMetadata.appData.content;
 
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const { mutateAsync: removePost, error: removePostError } = useManagePost().remove;
-  const { data: channel } = useChannel({ channelId: postContent.channelId }).fetch;
+  const [asyncError, setAsyncError] = useState<Error | unknown | undefined>(undefined);
+  const { mutateAsync: removePost } = useManagePost().remove;
 
   const navigate = useNavigate();
   return (
     <div className="ml-auto" onClick={(e) => e.stopPropagation()}>
-      <ErrorNotification error={removePostError} />
+      <ErrorNotification error={asyncError} />
       <ActionGroup
         className=""
         type="mute"
@@ -70,10 +75,14 @@ export const OwnerActions = ({ postFile }: { postFile: HomebaseFile<PostContent>
                   },
                   onClick: async (e) => {
                     e.stopPropagation();
-                    await removePost({
-                      channelId: postContent.channelId,
-                      postFile,
-                    });
+                    try {
+                      await removePost({
+                        channelId: postContent.channelId,
+                        postFile,
+                      });
+                    } catch (error) {
+                      setAsyncError(error);
+                    }
 
                     return false;
                   },

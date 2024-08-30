@@ -7,6 +7,7 @@ import {
   HomebaseFile,
   MediaFile,
   NewMediaFile,
+  SecurityGroupType,
 } from '@homebase-id/js-lib/core';
 import { VolatileInput, FileOverview } from '../../form';
 import { t } from '../../helpers';
@@ -16,11 +17,13 @@ import { Save } from '../../ui/Icons';
 
 export const EditPostDialog = ({
   postFile: incomingPostFile,
+  odinId,
   isOpen,
   onConfirm,
   onCancel,
 }: {
   postFile: HomebaseFile<PostContent>;
+  odinId?: string;
   isOpen: boolean;
   onConfirm: () => void;
   onCancel: () => void;
@@ -50,11 +53,19 @@ export const EditPostDialog = ({
   if (!isOpen) return null;
 
   const doUpdate = async () => {
-    const newPostFile = { ...postFile };
+    const newPostFile = {
+      ...postFile,
+      serverMetadata: postFile.serverMetadata || {
+        accessControlList: {
+          requiredSecurityGroup: SecurityGroupType.Connected,
+        },
+      },
+    };
 
     await updatePost({
       channelId: incomingPostFile.fileMetadata.appData.content.channelId,
-      postFile: { ...newPostFile },
+      odinId,
+      postFile: newPostFile,
       mediaFiles: newMediaFiles,
     });
   };

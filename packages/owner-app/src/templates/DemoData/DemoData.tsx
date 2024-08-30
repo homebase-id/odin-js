@@ -41,6 +41,7 @@ import {
 } from '@homebase-id/js-lib/public';
 import { slugify, getNewId } from '@homebase-id/js-lib/helpers';
 import { useState } from 'react';
+import { useManageChannel } from '@homebase-id/common-app';
 
 type RealmName = keyof typeof lotrRealm | undefined;
 type RealmData = (typeof lotrRealm)[keyof typeof lotrRealm];
@@ -555,10 +556,13 @@ const DemoDataBlog = ({
 
   const {
     fetch: { data: channelAttr, isFetched: isChannelFetched },
-    save: { mutate: saveChannel },
   } = useChannel({
-    channelId: realmData.blog?.channels?.[0].id,
+    channelKey: realmData.blog?.channels?.[0].id,
   });
+
+  const {
+    save: { mutate: saveChannel },
+  } = useManageChannel();
 
   const {
     save: { mutateAsync: saveBlog },

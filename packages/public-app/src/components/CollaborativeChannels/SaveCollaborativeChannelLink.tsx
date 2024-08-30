@@ -1,8 +1,9 @@
-import { ChannelDefinitionVm, ActionLink, t } from '@homebase-id/common-app';
+import { ActionLink, t } from '@homebase-id/common-app';
 import { ApiType, DotYouClient, HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import {
   RemoteCollaborativeChannelDefinition,
   CollaborativeChannelDefinition,
+  ChannelDefinition,
 } from '@homebase-id/js-lib/public';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useCheckWriteAccessOnChannel } from './PublicPostComposer';
@@ -12,7 +13,7 @@ export const SaveCollaborativeChannelLink = ({
   channel,
   className,
 }: {
-  channel: HomebaseFile<ChannelDefinitionVm>;
+  channel: HomebaseFile<ChannelDefinition>;
   className?: string;
 }) => {
   const { isOwner, getIdentity, getDotYouClient } = useAuth();
