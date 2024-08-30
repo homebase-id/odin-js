@@ -132,9 +132,7 @@ export const ReactionsBar = ({
   return (
     <>
       <div
-        className={`bg-background text-foreground flex flex-row rounded-lg px-1 py-2 shadow-md dark:bg-slate-900 ${
-          className ?? ''
-        }`}
+        className={`flex flex-row ${className || ''}`}
         onMouseEnter={onMouseEnter}
         onMouseLeave={() => {
           setIsCustomOpen(false);

@@ -9,7 +9,7 @@ import {
 } from 'react-router-dom';
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
+import { Layout, MinimalLayout } from '../components/ui/Layout/Layout';
 
 const YouAuthConsent = lazy(() => import('../templates/YouAuthConsent/YouAuthConsent'));
 const Setup = lazy(() => import('../templates/Setup/Setup').then((m) => ({ default: m.Setup })));
@@ -17,7 +17,7 @@ const Setup = lazy(() => import('../templates/Setup/Setup').then((m) => ({ defau
 const Home = lazy(() => import('../templates/Dashboard/Dashboard'));
 const RegisterApp = lazy(() => import('../templates/AppDefinition/RegisterApp'));
 const ExtendAppDrivePermissions = lazy(
-  () => import('../templates/AppDefinition/ExtendAppDrivePermissions')
+  () => import('../templates/AppDefinition/ExtendAppPermissions')
 );
 const ExtendCirclePermissionsFromApp = lazy(
   () => import('../templates/AppDefinition/ExtendCirclePermissionsFromApp')

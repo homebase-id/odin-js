@@ -33,6 +33,7 @@ const OWNER_APP_ID = 'ac126e09-54cb-4878-a690-856be692da16';
 const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
 const FEED_APP_ID = '5f887d80-0132-4294-ba40-bda79155551d';
 const MAIL_APP_ID = '6e8ecfff-7c15-40e4-94f4-d6e83bfb5857';
+const COMMUNITY_APP_ID = '77ed6136-6b33-4654-8088-3d89c91e6065';
 
 const OWNER_FOLLOWER_TYPE_ID = '2cc468af-109b-4216-8119-542401e32f4d';
 const OWNER_CONNECTION_REQUEST_TYPE_ID = '8ee62e9e-c224-47ad-b663-21851207f768';
@@ -42,7 +43,8 @@ const FEED_NEW_CONTENT_TYPE_ID = 'ad695388-c2df-47a0-ad5b-fc9f9e1fffc9';
 const FEED_NEW_REACTION_TYPE_ID = '37dae95d-e137-4bd4-b782-8512aaa2c96a';
 const FEED_NEW_COMMENT_TYPE_ID = '1e08b70a-3826-4840-8372-18410bfc02c7';
 
-const titleFormer = (payload: NotificationData) => `${payload.appDisplayName || 'Homebase'}`;
+const buildNotificationTitle = (payload: NotificationData) =>
+  `${payload.appDisplayName || 'Homebase'}`;
 
 const getNameForOdinId = async (odinId: string) => {
   return await fetch(`https://${odinId}/pub/profile`)
@@ -53,7 +55,10 @@ const getNameForOdinId = async (odinId: string) => {
     .catch(() => undefined);
 };
 
-const bodyFormer = async (payload: NotificationData, existingNotifications: Notification[]) => {
+const buildNotificationBody = async (
+  payload: NotificationData,
+  existingNotifications: Notification[]
+) => {
   const sender = (await getNameForOdinId(payload.senderId)) || payload.senderId;
 
   if (payload.options.unEncryptedMessage)
@@ -86,6 +91,9 @@ const bodyFormer = async (payload: NotificationData, existingNotifications: Noti
     } else if (payload.options.typeId === FEED_NEW_COMMENT_TYPE_ID) {
       return `${sender} commented to your post`;
     }
+  } else if (payload.options.appId === COMMUNITY_APP_ID) {
+    const hasMultiple = existingNotifications.length;
+    return `${sender} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
   }
 
   return `${sender} sent you a notification via ${payload.appDisplayName}`;
@@ -112,8 +120,8 @@ self.addEventListener('push', function (event) {
         const tag = getTag(payload);
         const existingNotifications = await self.registration.getNotifications({ tag });
 
-        const title = titleFormer(payload);
-        const body = await bodyFormer(payload, existingNotifications);
+        const title = buildNotificationTitle(payload);
+        const body = await buildNotificationBody(payload, existingNotifications);
 
         if (!title || !body || !tag) return;
 
@@ -168,6 +176,10 @@ self.addEventListener('notificationclick', (event) => {
 
       if (event.notification?.data?.options?.appId === FEED_APP_ID) {
         return { pathToOpen: `/apps/feed` };
+      }
+
+      if (event.notification?.data?.options?.appId === COMMUNITY_APP_ID) {
+        return { pathToOpen: `/apps/community/${event.notification?.data?.options?.typeId}` };
       }
 
       const tagId = event.notification?.data?.options?.tagId;

@@ -7,7 +7,7 @@
   "dependencies": {
     "@tanstack/react-query": "5.51.1",
     "@homebase-id/common-app": "*",
-    "axios": "1.6.7",
+    "axios": "1.7.5",
     "lodash-es": "^4.17.21",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -18,11 +18,11 @@
     "@types/lodash-es": "^4.17.12",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.0",
-    "autoprefixer": "10.4.16",
-    "postcss": "8.4.31",
-    "prettier-plugin-tailwindcss": "0.5.5",
-    "tailwindcss": "3.4.3"
+    "@vitejs/plugin-react": "4.3.1",
+    "autoprefixer": "10.4.20",
+    "postcss": "8.4.41",
+    "prettier-plugin-tailwindcss": "0.6.6",
+    "tailwindcss": "3.4.10"
   },
   "scripts": {
     "dev": "vite",

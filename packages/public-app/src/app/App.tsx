@@ -8,7 +8,7 @@ import {
   useSearchParams,
 } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import Layout, { NoLayout } from '../components/ui/Layout/Layout';
+import { Layout, NoLayout } from '../components/ui/Layout/Layout';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 

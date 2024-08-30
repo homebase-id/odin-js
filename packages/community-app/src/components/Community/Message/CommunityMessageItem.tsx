@@ -25,6 +25,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
 import { ROOT_PATH as COMMUNITY_ROOT } from '../../../app/App';
 import { useCommunityChannels } from '../../../hooks/community/channels/useCommunityChannels';
+import { CommunityReactions } from './reactions/CommunityReactions';
 
 export const CommunityMessageItem = ({
   msg,
@@ -155,7 +156,7 @@ const CommunityTextMessageBody = ({
           />
         </div>
       </div>
-      {/* {!isDeleted ? <ChatReactions msg={msg} community={community} /> : null} */}
+      <CommunityReactions msg={msg} community={community} />
     </div>
   );
 };

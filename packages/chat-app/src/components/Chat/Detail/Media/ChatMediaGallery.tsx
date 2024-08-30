@@ -77,8 +77,6 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [msg, mediaKey]);
 
-  // TODO: Added previewThumbnail of the grid
-
   const payload = msg.fileMetadata.payloads.find((p) => p.key === mediaKey);
   const contentType = payload?.contentType;
   const dialog = (

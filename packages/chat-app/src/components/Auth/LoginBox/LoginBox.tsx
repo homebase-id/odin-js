@@ -73,7 +73,7 @@ export const AutoAuthorize = () => {
 
   return (
     <>
-      <MinimalLayout noShadedBg={true} noPadding={true}>
+      <MinimalLayout noShadedBg={true}>
         <div className="h-screen">
           <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col p-5">
             <div className="my-auto flex flex-col">

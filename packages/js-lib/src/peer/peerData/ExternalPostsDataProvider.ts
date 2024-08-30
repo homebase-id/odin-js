@@ -279,7 +279,6 @@ const dsrToPostFile = async <T extends PostContent>(
       ...dsr,
       fileMetadata: {
         ...dsr.fileMetadata,
-        reactionPreview: parseReactionPreview(dsr.fileMetadata.reactionPreview),
         appData: {
           ...dsr.fileMetadata.appData,
           content: postContent,

@@ -58,9 +58,9 @@ export const useChannels = ({
 
     const returnData = isOwner
       ? await fetchDynamicData()
-      : (await fetchCachedPublicChannels(dotYouClient)) ?? (await fetchDynamicData());
+      : ((await fetchCachedPublicChannels(dotYouClient)) ?? (await fetchDynamicData()));
 
-    if (isAuthenticated) {
+    if (isAuthenticated && !isOwner) {
       // We are authenticated, so we might have more data when fetching non-static data; Let's do so async with timeout to allow other static info to load and render
       setTimeout(async () => {
         const dynamicData = await fetchDynamicData();

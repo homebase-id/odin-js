@@ -73,7 +73,6 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
     )
       return 'direct';
 
-    // TODO: Need to know for sure if we are encrypted or not, for now we assume based on the hint
     if (videoMetaData?.isSegmented && videoProps.probablyEncrypted) return 'encrypted-mse';
     if (videoMetaData?.isSegmented) return 'mse';
 

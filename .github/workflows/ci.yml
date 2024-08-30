@@ -12,7 +12,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.x'
           registry-url: 'https://npm.pkg.github.com'
           # Defaults to the user or organization that owns the workflow file
           scope: '@octocat'
@@ -26,14 +26,6 @@ jobs:
 
       - run: npm run build:libs
 
-      - run: npm run build:public
-
-      - run: npm run build:owner
-
-      - run: npm run build:chat
-
-      - run: npm run build:mail
-
-      - run: npm run build:provisioning
+      - run: npm run build
 
       - run: npm run test

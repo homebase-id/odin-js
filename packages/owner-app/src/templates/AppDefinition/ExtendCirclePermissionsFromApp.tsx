@@ -147,10 +147,6 @@ const ExtendCirclePermissionsFromApp = () => {
               {t('The app')} &quot;{appRegistration?.name}&quot;{' '}
               {t('has requested extra access for your circles')}.
             </p>
-            {/* <p className="mt-2">
-              {t('By allowing this, the circles listed below')} &quot;{appRegistration?.name}&quot;{' '}
-              {t('will receive the following extra access on your identity')}:
-            </p> */}
 
             {applicableCircles?.length ? (
               <>
@@ -183,12 +179,7 @@ const ExtendCirclePermissionsFromApp = () => {
             ) : null}
 
             <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
-              <ActionButton
-                onClick={doUpdateCirclePermissions}
-                type="primary"
-                // state={mergeStates(extendPermissionStatus, extendPermissionStatus)}
-                icon={Arrow}
-              >
+              <ActionButton onClick={doUpdateCirclePermissions} type="primary" icon={Arrow}>
                 {t('Allow')}
               </ActionButton>
 

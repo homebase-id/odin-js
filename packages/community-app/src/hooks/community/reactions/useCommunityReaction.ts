@@ -1,6 +1,5 @@
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { ChatDrive } from '../../providers/ConversationProvider';
 import {
   deleteGroupReaction,
   getGroupReactions,
@@ -10,54 +9,63 @@ import {
   ReactionPreview,
   uploadGroupReaction,
 } from '@homebase-id/js-lib/core';
-import { ChatMessage } from '../../providers/ChatProvider';
-import { UnifiedConversation } from '../../providers/ConversationProvider';
 import { getNewId, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
-import { insertNewMessage } from './useChatMessages';
+import {
+  CommunityDefinition,
+  getTargetDriveFromCommunityId,
+} from '../../../providers/CommunityDefinitionProvider';
+import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
+import { insertNewMessage } from '../messages/useCommunityMessages';
 
-export const useChatReaction = (props?: {
+export const useCommunityReaction = (props?: {
   messageGlobalTransitId: string | undefined;
   messageFileId: string | undefined;
+  community: HomebaseFile<CommunityDefinition> | undefined;
 }) => {
-  const { messageGlobalTransitId, messageFileId } = props || {};
+  const { messageGlobalTransitId, messageFileId, community } = props || {};
 
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
-  const getReactionsByMessageGlobalTransitId = (messageGlobalTransitId: string) => async () => {
-    const reactions =
-      (
-        await getGroupReactions(dotYouClient, {
-          target: {
-            globalTransitId: messageGlobalTransitId,
-            targetDrive: ChatDrive,
-          },
-        })
-      )?.reactions || [];
+  const getReactionsByMessageGlobalTransitId =
+    (communityId: string, messageGlobalTransitId: string) => async () => {
+      const reactions =
+        (
+          await getGroupReactions(dotYouClient, {
+            target: {
+              globalTransitId: messageGlobalTransitId,
+              targetDrive: getTargetDriveFromCommunityId(communityId),
+            },
+          })
+        )?.reactions || [];
 
-    return reactions;
-  };
+      return reactions;
+    };
 
   const addReaction = async ({
-    conversation,
+    community,
     message,
     reaction,
   }: {
-    conversation: HomebaseFile<UnifiedConversation>;
-    message: HomebaseFile<ChatMessage>;
+    community: HomebaseFile<CommunityDefinition>;
+    message: HomebaseFile<CommunityMessage>;
     reaction: string;
   }) => {
-    const conversationContent = conversation.fileMetadata.appData.content;
+    if (!community || !message) return;
+    const communityContent = community.fileMetadata.appData.content;
     const identity = dotYouClient.getIdentity();
-    const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
+    const recipients = communityContent.recipients.filter((recipient) => recipient !== identity);
+    const targetDrive = getTargetDriveFromCommunityId(
+      community.fileMetadata.appData.uniqueId as string
+    );
 
     if (!message.fileMetadata.globalTransitId)
       throw new Error('Message does not have a global transit id');
 
     return await uploadGroupReaction(
       dotYouClient,
-      ChatDrive,
+      targetDrive,
       message.fileMetadata.globalTransitId,
       reaction,
       recipients
@@ -65,41 +73,49 @@ export const useChatReaction = (props?: {
   };
 
   const removeReaction = async ({
-    conversation,
+    community,
     message,
     reaction,
   }: {
-    conversation: HomebaseFile<UnifiedConversation>;
-    message: HomebaseFile<ChatMessage>;
+    community: HomebaseFile<CommunityDefinition>;
+    message: HomebaseFile<CommunityMessage>;
     reaction: ReactionFile;
   }) => {
-    const conversationContent = conversation.fileMetadata.appData.content;
+    if (!community || !message) return;
+    const communityContent = community.fileMetadata.appData.content;
     const identity = dotYouClient.getIdentity();
-    const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
+    const recipients = communityContent.recipients.filter((recipient) => recipient !== identity);
+
+    const targetDrive = getTargetDriveFromCommunityId(
+      community.fileMetadata.appData.uniqueId as string
+    );
 
     if (!message.fileMetadata.globalTransitId)
       throw new Error('Message does not have a global transit id');
 
-    return await deleteGroupReaction(dotYouClient, ChatDrive, recipients, reaction, {
+    return await deleteGroupReaction(dotYouClient, targetDrive, recipients, reaction, {
       fileId: message.fileId,
       globalTransitId: message.fileMetadata.globalTransitId,
-      targetDrive: ChatDrive,
+      targetDrive: targetDrive,
     });
   };
 
   return {
     get: useQuery({
-      queryKey: ['chat-reaction', messageFileId],
-      queryFn: getReactionsByMessageGlobalTransitId(messageGlobalTransitId as string),
-      enabled: !!messageGlobalTransitId && !!messageFileId,
+      queryKey: ['community-reaction', messageFileId],
+      queryFn: getReactionsByMessageGlobalTransitId(
+        community?.fileMetadata.appData.uniqueId as string,
+        messageGlobalTransitId as string
+      ),
+      enabled: !!community && !!messageGlobalTransitId && !!messageFileId,
       staleTime: 1000 * 60 * 10, // 10 min
     }),
     add: useMutation({
       mutationFn: addReaction,
-      onMutate: async ({ message, reaction }) => {
+      onMutate: async ({ community, message, reaction }) => {
         // Update the reaction overview
         const previousReactions =
-          queryClient.getQueryData<ReactionFile[]>(['chat-reaction', message.fileId]) || [];
+          queryClient.getQueryData<ReactionFile[]>(['community-reaction', message.fileId]) || [];
 
         const newReaction: ReactionFile = {
           authorOdinId: dotYouClient.getIdentity(),
@@ -107,7 +123,7 @@ export const useChatReaction = (props?: {
         };
 
         queryClient.setQueryData(
-          ['chat-reaction', message.fileId],
+          ['community-reaction', message.fileId],
           [...previousReactions, newReaction]
         );
 
@@ -125,7 +141,7 @@ export const useChatReaction = (props?: {
           },
         };
 
-        const messageWithReactionPreview: HomebaseFile<ChatMessage> = {
+        const messageWithReactionPreview: HomebaseFile<CommunityMessage> = {
           ...message,
           fileMetadata: {
             ...message.fileMetadata,
@@ -133,22 +149,26 @@ export const useChatReaction = (props?: {
           },
         };
 
-        insertNewMessage(queryClient, messageWithReactionPreview);
+        insertNewMessage(
+          queryClient,
+          messageWithReactionPreview,
+          community.fileMetadata.appData.uniqueId as string
+        );
       },
     }),
     remove: useMutation({
       mutationFn: removeReaction,
 
-      onMutate: async ({ message, reaction }) => {
+      onMutate: async ({ community, message, reaction }) => {
         // Update the reaction overview
         const previousReactions = queryClient.getQueryData<ReactionFile[] | undefined>([
-          'chat-reaction',
+          'community-reaction',
           message.fileId,
         ]);
 
         if (previousReactions) {
           queryClient.setQueryData(
-            ['chat-reaction', message.fileId],
+            ['community-reaction', message.fileId],
             [
               ...previousReactions.filter(
                 (existingReaction) =>
@@ -180,7 +200,7 @@ export const useChatReaction = (props?: {
 
         delete reactionPreview.reactions[reactionKey];
 
-        const messageWithReactionPreview: HomebaseFile<ChatMessage> = {
+        const messageWithReactionPreview: HomebaseFile<CommunityMessage> = {
           ...message,
           fileMetadata: {
             ...message.fileMetadata,
@@ -188,7 +208,11 @@ export const useChatReaction = (props?: {
           },
         };
 
-        insertNewMessage(queryClient, messageWithReactionPreview);
+        insertNewMessage(
+          queryClient,
+          messageWithReactionPreview,
+          community.fileMetadata.appData.uniqueId as string
+        );
       },
     }),
   };
@@ -200,12 +224,12 @@ export const insertNewReaction = (
   newReaction: GroupEmojiReaction
 ) => {
   const currentReactions = queryClient.getQueryData<ReactionFile[] | undefined>([
-    'chat-reaction',
+    'community-reaction',
     messageLocalFileId,
   ]);
 
   if (!currentReactions) {
-    queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageLocalFileId] });
+    queryClient.invalidateQueries({ queryKey: ['community-reaction', messageLocalFileId] });
     return;
   }
 
@@ -215,7 +239,7 @@ export const insertNewReaction = (
   };
 
   queryClient.setQueryData<ReactionFile[]>(
-    ['chat-reaction', messageLocalFileId],
+    ['community-reaction', messageLocalFileId],
     [
       ...currentReactions.filter(
         (reaction) =>
@@ -233,12 +257,12 @@ export const removeReaction = (
   removedReaction: GroupEmojiReaction
 ) => {
   const currentReactions = queryClient.getQueryData<ReactionFile[] | undefined>([
-    'chat-reaction',
+    'community-reaction',
     messageLocalFileId,
   ]);
 
   if (!currentReactions) {
-    queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageLocalFileId] });
+    queryClient.invalidateQueries({ queryKey: ['community-reaction', messageLocalFileId] });
     return;
   }
 
@@ -248,7 +272,7 @@ export const removeReaction = (
   };
 
   queryClient.setQueryData<ReactionFile[]>(
-    ['chat-reaction', messageLocalFileId],
+    ['community-reaction', messageLocalFileId],
     currentReactions.filter(
       (reaction) =>
         reaction.authorOdinId !== reactionAsReactionFile.authorOdinId ||

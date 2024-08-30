@@ -19,6 +19,7 @@ import {
 let webSocketClient: WebSocket | undefined;
 let activeSs: Uint8Array;
 
+let connectPromise: Promise<void> | undefined = undefined;
 let isConnected = false;
 const PING_INTERVAL = 1000 * 5 * 1;
 
@@ -131,8 +132,9 @@ const ConnectSocket = async (
 
   const apiType = dotYouClient.getType();
 
-  // eslint-disable-next-line no-async-promise-executor
-  return new Promise<void>(async (resolve, reject) => {
+  // We're already connecting, return the existing promise
+  if (connectPromise) return connectPromise;
+  connectPromise = new Promise<void>(async (resolve, reject) => {
     if (apiType === ApiType.App) {
       // we need to preauth before we can connect
       await dotYouClient
@@ -239,6 +241,7 @@ const ReconnectSocket = async (
     webSocketClient = undefined;
     lastPong = undefined;
     isConnected = false;
+    connectPromise = undefined;
     clearInterval(pingInterval);
 
     if (isDebug) console.debug('[NotificationProvider] Reconnecting');
@@ -258,6 +261,7 @@ const DisconnectSocket = async () => {
   if (isDebug) console.debug(`[NotificationProvider] Client disconnected`);
 
   isConnected = false;
+  connectPromise = undefined;
   webSocketClient = undefined;
   clearInterval(pingInterval);
 
@@ -272,8 +276,9 @@ export const Subscribe = async (
   handler: (data: TypedConnectionNotification) => void,
   onDisconnect?: () => void,
   onReconnect?: () => void,
-  args?: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this
-) => {
+  args?: unknown, // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this,
+  refId?: string
+): Promise<void> => {
   const apiType = dotYouClient.getType();
   const sharedSecret = dotYouClient.getSharedSecret();
   if ((apiType !== ApiType.Owner && apiType !== ApiType.App) || !sharedSecret) {
@@ -283,7 +288,8 @@ export const Subscribe = async (
   activeSs = sharedSecret;
   subscribers.push({ handler, onDisconnect, onReconnect });
 
-  if (isDebug) console.debug(`[NotificationProvider] New subscriber (${subscribers.length})`);
+  if (isDebug)
+    console.debug(`[NotificationProvider] New subscriber (${subscribers.length})`, refId);
 
   // Already connected, no need to initiate a new connection
   if (webSocketClient) return Promise.resolve();

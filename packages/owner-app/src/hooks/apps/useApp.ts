@@ -131,7 +131,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
       mutationFn: registerNewApp,
       onSuccess: (data, param) => {
         queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
-        queryClient.invalidateQueries({ queryKey: ['registeredApps'] });
+        queryClient.invalidateQueries({ queryKey: ['apps'] });
       },
       onError: (ex) => {
         console.error(ex);
@@ -141,7 +141,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
       mutationFn: revokeAppInternal,
       onSuccess: (data, param) => {
         queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
-        queryClient.invalidateQueries({ queryKey: ['registeredApps'] });
+        queryClient.invalidateQueries({ queryKey: ['apps'] });
       },
       onError: (ex) => {
         console.error(ex);
@@ -151,7 +151,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
       mutationFn: allowAppInternal,
       onSuccess: (data, param) => {
         queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
-        queryClient.invalidateQueries({ queryKey: ['registeredApps'] });
+        queryClient.invalidateQueries({ queryKey: ['apps'] });
       },
       onError: (ex) => {
         console.error(ex);
@@ -161,7 +161,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
       mutationFn: removeAppInternal,
       onSuccess: (data, param) => {
         queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
-        queryClient.invalidateQueries({ queryKey: ['registeredApps'] });
+        queryClient.invalidateQueries({ queryKey: ['apps'] });
       },
       onError: (ex) => {
         console.error(ex);
@@ -171,7 +171,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
       mutationFn: updateAuthorizedCircles,
       onSuccess: (data, param) => {
         queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
-        queryClient.invalidateQueries({ queryKey: ['registeredApps'] });
+        queryClient.invalidateQueries({ queryKey: ['apps'] });
       },
       onError: (ex) => {
         console.error(ex);
@@ -181,7 +181,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
       mutationFn: updatePermissions,
       onSuccess: (data, param) => {
         queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
-        queryClient.invalidateQueries({ queryKey: ['registeredApps'] });
+        queryClient.invalidateQueries({ queryKey: ['apps'] });
       },
       onError: (ex) => {
         console.error(ex);
@@ -191,7 +191,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
       mutationFn: extendPermissions,
       onSuccess: (data, param) => {
         queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
-        queryClient.invalidateQueries({ queryKey: ['registeredApps'] });
+        queryClient.invalidateQueries({ queryKey: ['apps'] });
       },
       onError: (ex) => {
         console.error(ex);
