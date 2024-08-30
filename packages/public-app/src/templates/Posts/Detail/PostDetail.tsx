@@ -45,7 +45,7 @@ const PostDetail = () => {
         <meta name="og:title" content={post?.caption ?? ''} />
         <meta
           name="og:description"
-          content={post?.type === 'Article' ? (post as Article).abstract ?? '' : ''}
+          content={post?.type === 'Article' ? ((post as Article).abstract ?? '') : ''}
         />
       </Helmet>
 

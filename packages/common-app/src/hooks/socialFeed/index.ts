@@ -5,6 +5,7 @@ export * from './drafts/useDrafts';
 // Channels
 export * from './channels/useChannel';
 export * from './channels/useChannels';
+export * from './channels/useManageChannel';
 export * from './channels/useCollaborativeChannel';
 export * from './channels/useCollaborativeChannels';
 export * from './channels/useManageChannel';
