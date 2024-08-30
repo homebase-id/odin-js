@@ -42,6 +42,7 @@ export const RTEChannelDropdownInputElement = withRef<typeof PlateElement>(
         channelTargets?.map((chnl) => ({
           key: chnl.fileId,
           text: chnl.fileMetadata.appData.content.title,
+          uniqueId: chnl.fileMetadata.appData.uniqueId as string,
         })) || [],
       [channelTargets]
     );
@@ -81,13 +82,13 @@ export const RTEChannelDropdownInputElement = withRef<typeof PlateElement>(
                 {creationStatus === 'pending' ? t('Creating...') : t('Create "{0}"', search)}
               </InlineComboboxSeleactableEmpty>
 
-              {channels.map((item) => (
+              {channels.map((item, index) => (
                 <InlineComboboxItem
-                  key={item.key}
+                  key={item.key || item.text || index}
                   onClick={() => onSelectItem(editor, item, search)}
                   value={item.text}
                 >
-                  # {item.text}
+                  #{item.text}
                 </InlineComboboxItem>
               ))}
             </InlineComboboxContent>

@@ -18,10 +18,12 @@ export const RTEChannelDropdownElement = withRef<
   const selected = useSelected();
   const focused = useFocused();
 
+  console.log(element);
+
   return (
     <PlateElement
       className={cn(
-        'bg-muted inline-block cursor-pointer rounded-md px-1.5 py-0.5 align-baseline text-sm font-medium',
+        'inline-block cursor-pointer rounded-md bg-page-background px-1 py-1 align-baseline text-sm font-medium text-primary',
         selected && focused && 'ring-ring ring-2',
         element.children[0].bold === true && 'font-bold',
         element.children[0].italic === true && 'italic',
@@ -34,7 +36,7 @@ export const RTEChannelDropdownElement = withRef<
       ref={ref}
       {...props}
     >
-      # {renderLabel ? renderLabel(element) : element.value}
+      #{renderLabel ? renderLabel(element) : element.value}
       {children}
     </PlateElement>
   );

@@ -100,7 +100,7 @@ export const SocialFeed = () => {
             <SocialFeedMainContent />
           </div>
           <div className="hidden flex-col gap-4 lg:flex xl:contents">
-            <div className="order-1 hidden lg:block ">
+            <div className="order-1 hidden lg:block">
               {isDesktop ? (
                 <div className="sticky top-4 flex flex-col gap-4">
                   <Suspense>
