@@ -22,6 +22,7 @@ import {
 } from '../../providers/ConversationProvider';
 import {
   incrementAppIdNotificationCount,
+  insertNewNotification,
   useDotYouClientContext,
   useWebsocketSubscriber,
 } from '@homebase-id/common-app';
@@ -227,24 +228,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
     if (notification.notificationType === 'appNotificationAdded') {
       const clientNotification = notification as AppNotification;
 
-      const existingNotificationData = queryClient.getQueryData<{
-        results: PushNotification[];
-        cursor: number;
-      }>(['push-notifications']);
-
-      if (existingNotificationData) {
-        const newNotificationData = {
-          ...existingNotificationData,
-          results: [
-            clientNotification,
-            ...existingNotificationData.results.filter(
-              (notification) =>
-                !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
-            ),
-          ],
-        };
-        queryClient.setQueryData(['push-notifications'], newNotificationData);
-      }
+      insertNewNotification(queryClient, clientNotification);
       incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
     }
 

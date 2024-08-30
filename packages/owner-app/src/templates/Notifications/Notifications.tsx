@@ -32,8 +32,14 @@ const Notifications = () => {
   const [params] = useSearchParams();
 
   useRemoveNotifications({ appId: OWNER_APP_ID });
-  const { data: notifications, isFetching: fetchingNotifications } = usePushNotifications().fetch;
+  const {
+    data: notifications,
+    isFetching: fetchingNotifications,
+    hasNextPage,
+    fetchNextPage,
+  } = usePushNotifications().fetch;
 
+  const flattenedNotifications = notifications?.pages?.flatMap((page) => page.results);
   const [isDialogOpen, setDialogOpen] = useState(false);
 
   const [toOpenNotification, setToOpenNotification] = useState<string | undefined>(
@@ -41,7 +47,7 @@ const Notifications = () => {
   );
 
   const doOpenNotification = (targetTagId: string) => {
-    const activeNotification = notifications?.results.find((notification) =>
+    const activeNotification = flattenedNotifications?.find((notification) =>
       stringGuidsEqual(notification.options.tagId, targetTagId)
     );
 
@@ -68,7 +74,7 @@ const Notifications = () => {
 
   const groupedNotificationsPerDay = useMemo(
     () =>
-      notifications?.results.reduce(
+      flattenedNotifications?.reduce(
         (acc, notification) => {
           const date = new Date(notification.created).toDateString();
 
@@ -79,7 +85,7 @@ const Notifications = () => {
         },
         {} as { [key: string]: PushNotification[] }
       ) || {},
-    [notifications]
+    [flattenedNotifications]
   );
 
   const {
@@ -87,8 +93,9 @@ const Notifications = () => {
     status: removeStatus,
     error: removeError,
   } = usePushNotifications().remove;
+
   const doClearAll = () => {
-    remove(notifications?.results.map((n) => n.id) || []);
+    remove(flattenedNotifications?.map((n) => n.id) || []);
   };
 
   return (
@@ -98,7 +105,7 @@ const Notifications = () => {
         icon={Bell}
         actions={
           <>
-            {notifications?.results?.length ? (
+            {flattenedNotifications?.length ? (
               <ActionButton
                 type="primary"
                 icon={Times}
@@ -114,7 +121,7 @@ const Notifications = () => {
           </>
         }
       />
-      {notifications?.results?.length ? (
+      {flattenedNotifications?.length ? (
         <>
           <div className="flex flex-col gap-3 px-2">
             {Object.keys(groupedNotificationsPerDay).map((day) => (
@@ -126,13 +133,18 @@ const Notifications = () => {
             ))}
           </div>
           <ErrorNotification error={removeError} />
-          <div className="mx-2 mt-5 flex max-w-sm flex-row-reverse">
+          <div className="mx-2 mt-5 flex max-w-sm flex-row">
+            {hasNextPage ? (
+              <ActionButton onClick={() => fetchNextPage()} type="secondary">
+                {t('Load more')}
+              </ActionButton>
+            ) : null}
             <ActionButton
               type="mute"
               size="none"
               onClick={doClearAll}
               state={removeStatus !== 'success' ? removeStatus : undefined}
-              className="opacity-50 hover:opacity-100"
+              className="ml-auto opacity-50 hover:opacity-100"
             >
               {t('Clear all')}
             </ActionButton>
@@ -141,6 +153,7 @@ const Notifications = () => {
       ) : (
         <SubtleMessage>{t('No notifications')}</SubtleMessage>
       )}
+
       <PushNotificationsDialog isOpen={isDialogOpen} onClose={() => setDialogOpen(false)} />
     </>
   );
