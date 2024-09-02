@@ -83,7 +83,7 @@ export const SocialReactionsBar = ({
 
   return (
     <ReactionsBar
-      className={className}
+      className={`bg-background text-foreground flex flex-row rounded-lg px-1 py-2 shadow-md dark:bg-slate-900 ${className || ''}`}
       doLike={doLike}
       doUnlike={doUnlike}
       onMouseEnter={() => setIsHover(true)}
