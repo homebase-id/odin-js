@@ -26,12 +26,19 @@ export const logoutOwner = async (): Promise<boolean> => {
 };
 
 export const logoutOwnerAndAllApps = async (): Promise<void> => {
-  // Unsubscribe from notifications
-  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
-  await removeCurrentRegisteredDevice(dotYouClient);
-
-  // Remove session from server
-  await logoutOwner();
+  try {
+    // Unsubscribe from notifications
+    const dotYouClient = new OwnerClient({ api: ApiType.Owner });
+    await removeCurrentRegisteredDevice(dotYouClient);
+  } catch (ex) {
+    console.warn('Failed unregister push notifiations', ex);
+  }
+  try {
+    // Remove session from server
+    await logoutOwner();
+  } catch (ex) {
+    console.warn('Failed to logout on the server', ex);
+  }
 
   // CAT
   localStorage.removeItem(`BX0900_feed`);
