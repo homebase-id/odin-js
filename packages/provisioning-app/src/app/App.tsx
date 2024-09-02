@@ -6,7 +6,6 @@ import { Layout } from '../components/ui/Layout/Layout';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import './App.css';
-import { ErrorBoundary } from '../components/ui/Layout/ErrorBoundary/ErrorBoundary';
 
 import DomainChoice from '../templates/Provision/DomainChoice';
 import InvitationCodeCheck from '../templates/InvitationCode/InvitationCodeCheck';
@@ -18,7 +17,7 @@ const queryClient = new QueryClient();
 export const ROOT_PATH = '/sign-up';
 
 import { config } from './config';
-import { NotFound } from '@homebase-id/common-app';
+import { ErrorBoundary, NotFound } from '@homebase-id/common-app';
 
 function App() {
   return (

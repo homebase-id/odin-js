@@ -115,8 +115,8 @@ const useFixDefaultProfileImage = () => {
               blob;
 
             await saveAttr(updatedAttr);
-          } catch (e) {
-            throw new Error('Failed to update profile image', e);
+          } catch {
+            throw new Error('Failed to update profile image');
           }
         })
       );
