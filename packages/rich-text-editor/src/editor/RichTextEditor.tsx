@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import {
   createPlugins,
   Plate,
@@ -232,6 +231,8 @@ const InnerRichTextEditor = memo(
                       end: true,
                       allow: KEYS_HEADING,
                     },
+                    // Type of query is not defined in the type, so we need to cast it to any
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   } as any,
                   {
                     ...resetBlockTypesCodeBlockRule,
@@ -271,6 +272,8 @@ const InnerRichTextEditor = memo(
             createDeserializeHtmlPlugin(),
             createDeserializeMdPlugin(),
             createEmojiPlugin(),
+            // createMentionPlugin is not typed correctly to our custom implementation, so we need to cast it to any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             createMentionPlugin({ options: { mentionables: mentionables || [] } as any }),
             mediaOptions ? createImagePlugin({ options: mediaOptions }) : undefined,
             ...(_plugins || []),

@@ -11,7 +11,6 @@ import {
   ErrorNotification,
   ActionGroup,
 } from '@homebase-id/common-app';
-import { ChevronDown } from '@homebase-id/common-app/icons';
 import { useState } from 'react';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { CommunityMessageInfo } from '../Message/detail/CommunityMessageInfo';

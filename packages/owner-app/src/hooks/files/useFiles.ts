@@ -131,6 +131,7 @@ export const useFile = ({
             )
           : result.fileMetadata.appData.content;
       } catch (e) {
+        console.error('Failed to decrypt file', e);
         return '{"error":"Failed to decrypt file"}';
       }
     })();

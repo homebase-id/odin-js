@@ -4,7 +4,7 @@ export const isLocalStorageAvailable = () => {
     localStorage.setItem(test, test);
     localStorage.removeItem(test);
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 };
@@ -16,4 +16,5 @@ export const hasDebugFlag = () =>
     ? localStorage.getItem('debug') === '1'
     : typeof navigator !== 'undefined' &&
       navigator.product === 'ReactNative' &&
-      (global as any).debug;
+      'debug' in global &&
+      global.debug;

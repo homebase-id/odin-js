@@ -13,19 +13,18 @@ export interface DoubleTapOptions<Target = Element> {
   onSingleTap?: CallbackFunction<Target>;
 }
 
-export type DoubleTapResult<Target, Callback> = Callback extends CallbackFunction<Target>
-  ? {
-      onClick: CallbackFunction<Target>;
-    }
-  : Callback extends null
-  ? {
-      //
-    }
-  : never;
+export type DoubleTapResult<Target, Callback> =
+  Callback extends CallbackFunction<Target>
+    ? {
+        onClick: CallbackFunction<Target>;
+      }
+    : Callback extends null
+      ? null
+      : never;
 
 export function useDoubleTap<
   Target = Element,
-  Callback extends DoubleTapCallback<Target> = DoubleTapCallback<Target>
+  Callback extends DoubleTapCallback<Target> = DoubleTapCallback<Target>,
 >(
   callback: Callback,
   threshold = 200,

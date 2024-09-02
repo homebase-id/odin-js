@@ -57,7 +57,6 @@ const isDebug = hasDebugFlag();
 const useMailWebsocket = (isEnabled: boolean) => {
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClientContext();
-  const identity = dotYouClient.getIdentity();
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
     isDebug && console.debug('[MailWebsocket] Got notification', notification);

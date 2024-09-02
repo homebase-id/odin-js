@@ -6,10 +6,11 @@ import { Refresh } from '../Icons/Refresh';
 import { Clipboard } from '../Icons/Clipboard';
 
 type ErrorBoundaryProps = {
-  children: ReactNode; // like this
+  children: ReactNode;
 };
+
 type ErrorBoundaryState = {
-  hasError: boolean; // like this
+  hasError: boolean;
   showDetails: boolean;
   errorTitle?: string;
   details?: unknown;

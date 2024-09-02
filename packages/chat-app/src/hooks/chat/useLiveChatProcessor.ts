@@ -5,7 +5,6 @@ import {
   DotYouClient,
   FileQueryParams,
   HomebaseFile,
-  PushNotification,
   ReactionNotification,
   TypedConnectionNotification,
   queryBatch,

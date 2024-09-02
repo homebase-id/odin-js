@@ -55,6 +55,7 @@ interface InlineComboboxContextValue {
   trigger: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const InlineComboboxContext = createContext<InlineComboboxContextValue>(null as any);
 
 export const defaultFilter: FilterFn = ({ keywords = [], value }, search) =>
@@ -164,8 +165,6 @@ const InlineCombobox = ({
 
   const items = store.useState('items');
 
-  useEffect;
-
   /**
    * If there is no active ID and the list of items changes, select the first
    * item.
@@ -174,7 +173,6 @@ const InlineCombobox = ({
     if (!store.getState().activeId) {
       store.setActiveId(store.first());
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, store]);
 
   return (
@@ -237,7 +235,6 @@ const InlineComboboxInput = forwardRef<HTMLInputElement, HTMLAttributes<HTMLInpu
 
 InlineComboboxInput.displayName = 'InlineComboboxInput';
 
-// eslint-disable-next-line react/prop-types
 const InlineComboboxContent: typeof ComboboxPopover = ({ className, ...props }) => {
   // Portal prevents CSS from leaking into popover
   return (

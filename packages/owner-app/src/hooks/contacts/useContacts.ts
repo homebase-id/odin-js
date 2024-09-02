@@ -3,7 +3,7 @@ import { CursoredResult, NewHomebaseFile } from '@homebase-id/js-lib/core';
 
 import { useAuth } from '../auth/useAuth';
 import { parseContact } from './useContact';
-import { ContactVm, RawContact, getContacts } from '@homebase-id/js-lib/network';
+import { ContactVm, getContacts } from '@homebase-id/js-lib/network';
 
 const pageSize = 10;
 

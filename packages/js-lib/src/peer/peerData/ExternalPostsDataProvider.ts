@@ -182,7 +182,7 @@ export const getChannelOverPeer = async (
       };
       return file;
     }
-  } catch (ex) {
+  } catch {
     // Catch al, as targetDrive might be inaccesible (when it doesn't exist yet)
   }
   return null;

@@ -1,5 +1,4 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { getCacheKey } from '../../core/DriveData/File/DriveFileHelper';
 
 interface LinkPreviewFromServer {
   title: string;

@@ -66,6 +66,7 @@ export const CommentComposer = ({
 
       setStateIndex((i) => i + 1);
     } catch (e) {
+      console.error('CommentComposer', e);
       setBodyAfterError(commentBody);
       setAttachementAfterError(attachment);
     }

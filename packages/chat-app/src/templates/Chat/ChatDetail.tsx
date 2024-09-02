@@ -17,7 +17,6 @@ import {
   DotYouClient,
   FailedTransferStatuses,
   HomebaseFile,
-  TransferStatus,
 } from '@homebase-id/js-lib/core';
 import {
   ConversationWithYourselfId,

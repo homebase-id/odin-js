@@ -272,8 +272,8 @@ const VolatileInput = forwardRef(
             if (onChange && link && wordTillCaret) {
               setLastInsertedContent(link);
 
-              let escapedCompleteHandle = link.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-              let pattern = new RegExp(
+              const escapedCompleteHandle = link.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const pattern = new RegExp(
                 `${wordTillCaret}(?!${escapedCompleteHandle.substring(wordTillCaret.length)})`,
                 'g'
               );
@@ -291,8 +291,8 @@ const VolatileInput = forwardRef(
               if (onChange && val && wordTillCaret) {
                 setLastInsertedContent(val);
 
-                let escapedCompleteHandle = val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                let pattern = new RegExp(
+                const escapedCompleteHandle = val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const pattern = new RegExp(
                   `${wordTillCaret}(?!${escapedCompleteHandle.substring(wordTillCaret.length)})`,
                   'g'
                 );

@@ -99,6 +99,7 @@ export const OdinAudioWaveForm = (props: OdinAudioWaveformProps) => {
       }
       setIsNoData(false);
     } catch (e) {
+      console.warn('Failed to draw waveform', e);
       setIsNoData(true);
     }
   };

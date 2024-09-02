@@ -25,6 +25,7 @@ export const useDomains = (
         count: pageSize,
       });
     } catch (ex) {
+      console.warn('[useDomains] Failed to fetch domains', ex);
       return {
         cursor: undefined,
         results: [],
