@@ -119,14 +119,15 @@ export const buildFormData = async (
   if (payloads) {
     for (let i = 0; i < payloads.length; i++) {
       const payload = payloads[i];
-      const encryptedPayload = keyHeader
-        ? await encryptWithKeyheader(payload.payload, {
-            ...keyHeader,
-            iv:
-              manifest?.PayloadDescriptors?.find((p) => p.payloadKey === payload.key)?.iv ||
-              keyHeader.iv,
-          })
-        : payload.payload;
+      const encryptedPayload =
+        keyHeader && !payload.skipEncryption
+          ? await encryptWithKeyheader(payload.payload, {
+              ...keyHeader,
+              iv:
+                manifest?.PayloadDescriptors?.find((p) => p.payloadKey === payload.key)?.iv ||
+                keyHeader.iv,
+            })
+          : payload.payload;
 
       data.append('payload', encryptedPayload, payload.key);
     }
