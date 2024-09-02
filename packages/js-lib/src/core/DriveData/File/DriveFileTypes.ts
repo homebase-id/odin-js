@@ -89,6 +89,7 @@ export interface PayloadFile {
   payload: File | Blob;
   previewThumbnail?: EmbeddedThumb;
   descriptorContent?: string;
+  skipEncryption?: boolean;
 }
 
 type None = 0;
