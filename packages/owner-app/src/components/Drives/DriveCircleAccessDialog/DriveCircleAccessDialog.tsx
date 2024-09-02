@@ -57,6 +57,7 @@ const DriveCircleAccessDialog = ({
             try {
               await Promise.all(newCircles.map(async (circle) => await updateCircle(circle)));
             } catch (ex) {
+              console.error('Failed to update circles', ex);
               setSaveState('error');
             }
             setSaveState('success');

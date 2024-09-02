@@ -12,6 +12,7 @@ export const useFollowingInfinite = () => {
       const response = await fetchFollowing(dotYouClient, pageParam, PAGE_SIZE);
       if (response) return response;
     } catch (ex) {
+      console.error('Failed to fetch following', ex);
       //
     }
     return {

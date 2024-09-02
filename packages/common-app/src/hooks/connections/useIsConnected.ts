@@ -16,6 +16,7 @@ export const useIsConnected = (odinId?: string) => {
       const connectionInfo = await getConnectionInfo(dotYouClient, odinId);
       return connectionInfo && connectionInfo.status.toLowerCase() === 'connected';
     } catch (e) {
+      console.warn('[useIsConnected] failed to fetch connection', e);
       return null;
     }
   };

@@ -81,7 +81,7 @@ export const MailDrive: TargetDrive = {
   type: '2dfecc40311e41e5a12455e925144202',
 };
 
-export interface MailConversationsReturn extends CursoredResult<HomebaseFile<MailConversation>[]> {}
+export type MailConversationsReturn = CursoredResult<HomebaseFile<MailConversation>[]>;
 
 export const getMailConversations = async (
   dotYouClient: DotYouClient,

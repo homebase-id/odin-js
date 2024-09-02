@@ -12,7 +12,6 @@ export const streamToByteArray = async (stream: ReadableStream<Uint8Array>, mime
   const chunks = [];
   const reader = stream.getReader();
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const { done, value } = await reader.read();
     if (value) chunks.push(value);

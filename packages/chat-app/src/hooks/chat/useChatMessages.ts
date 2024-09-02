@@ -72,7 +72,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     );
 
     return await Promise.all(
-      messages.map(async (msg) => {
+      messages.map(async (msg) =>
         hardDelete
           ? await hardDeleteChatMessage(dotYouClient, msg)
           : await softDeleteChatMessage(
@@ -80,8 +80,8 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
               msg,
               recipients.filter(Boolean),
               deleteForEveryone
-            );
-      })
+            )
+      )
     );
   };
 

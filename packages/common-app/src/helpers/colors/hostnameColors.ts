@@ -153,7 +153,6 @@ const OdinIdColorValues: OdinIdColorValue[] = [
 export const getOdinIdColor = (odinId: string): OdinIdColorValue => {
   let c = 0;
   for (let i = 0; i < odinId.length; i++) {
-    // eslint-disable-next-line no-bitwise
     c = c ^ odinId.charCodeAt(i);
   }
   return OdinIdColorValues[c % OdinIdColorValues.length];

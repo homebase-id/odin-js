@@ -353,6 +353,7 @@ export const drivesParamToDriveGrantRequest = (
       };
     });
   } catch (ex) {
+    console.warn('Error parsing drives param', ex);
     return [];
   }
 };

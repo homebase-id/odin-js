@@ -1,5 +1,3 @@
-import React from 'react';
-
 import type { TMentionElement } from '@udecode/plate-mention';
 
 import { cn, withRef } from '@udecode/cn';
@@ -9,7 +7,7 @@ import { useFocused, useSelected } from 'slate-react';
 export const MentionElement = withRef<
   typeof PlateElement,
   {
-    onClick?: (mentionNode: any) => void;
+    onClick?: (mentionNode: unknown) => void;
     prefix?: string;
     renderLabel?: (mentionable: TMentionElement) => string;
   }

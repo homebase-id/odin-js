@@ -10,7 +10,6 @@ import {
 } from '../../provider/auth/AuthenticationProvider';
 import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import {
-  HOME_ROOT_PATH,
   HOME_SHARED_SECRET,
   OWNER_SHARED_SECRET,
   STORAGE_IDENTITY_KEY,

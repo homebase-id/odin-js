@@ -1,7 +1,3 @@
-import React from 'react';
-
-// import type { TMentionElement } from '@udecode/plate-mention';
-
 import { cn, withRef } from '@udecode/cn';
 import { PlateElement, getHandler, useElement } from '@udecode/plate-common';
 import { useFocused, useSelected } from 'slate-react';
@@ -10,6 +6,7 @@ import { TChannelElement } from './RTEChannelDropdownPlugin';
 export const RTEChannelDropdownElement = withRef<
   typeof PlateElement,
   {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onClick?: (mentionNode: any) => void;
     renderLabel?: (mentionable: TChannelElement) => string;
   }

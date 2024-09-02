@@ -61,7 +61,7 @@ export const ChatReactions = ({
 
 const ChatReactionsDetail = ({
   msg,
-  conversation,
+
   onClose,
 }: {
   msg: HomebaseFile<ChatMessage>;

@@ -127,7 +127,7 @@ export const getDecryptedImageDataOverPeerByGlobalTransitId = async (
           contentType: thumbData.contentType,
           content: thumbData.bytes,
         };
-    } catch (ex) {
+    } catch {
       // Failed to get thumb data, try to get payload data
     }
   }
@@ -184,7 +184,7 @@ export const getDecryptedImageDataOverPeer = async (
           contentType: thumbData.contentType,
           content: thumbData.bytes,
         };
-    } catch (ex) {
+    } catch {
       // Failed to get thumb data, try to get payload data
     }
   }

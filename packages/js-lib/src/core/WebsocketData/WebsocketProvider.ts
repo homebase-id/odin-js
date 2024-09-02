@@ -134,6 +134,7 @@ const ConnectSocket = async (
 
   // We're already connecting, return the existing promise
   if (connectPromise) return connectPromise;
+  // eslint-disable-next-line no-async-promise-executor
   connectPromise = new Promise<void>(async (resolve, reject) => {
     if (apiType === ApiType.App) {
       // we need to preauth before we can connect
@@ -255,7 +256,7 @@ const DisconnectSocket = async () => {
   try {
     if (!webSocketClient) console.warn('No active client to disconnect');
     else webSocketClient.close(1000, 'Normal Disconnect');
-  } catch (e) {
+  } catch {
     // Ignore any errors on close, as we always want to clean up
   }
   if (isDebug) console.debug(`[NotificationProvider] Client disconnected`);

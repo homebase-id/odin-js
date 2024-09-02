@@ -11,7 +11,6 @@ import {
 import { useDotYouClient } from '../hooks';
 import { LoadingBlock } from '../ui';
 import { getPayloadAsJsonOverPeerByGlobalTransitId } from '@homebase-id/js-lib/peer';
-import { OdinPreviewImage } from '@homebase-id/ui-lib';
 import { useMemo } from 'react';
 
 export const LinkPreviewTextual = ({

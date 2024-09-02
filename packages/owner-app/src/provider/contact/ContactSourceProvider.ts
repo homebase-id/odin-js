@@ -87,6 +87,7 @@ const queryRemoteAttributes = async (
         : undefined,
     };
   } catch (ex) {
+    console.warn('Error fetching remote attributes', ex);
     return undefined;
   }
 };

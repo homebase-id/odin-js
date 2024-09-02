@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { withRef } from '@udecode/cn';
 import { PlateElement } from '@udecode/plate-common';
@@ -14,7 +14,7 @@ import {
   InlineComboboxItem,
 } from '../../components/plate-ui/inline-combobox';
 
-export const EmojiInputElement = withRef<typeof PlateElement>(({ className, ...props }, ref) => {
+export const EmojiInputElement = withRef<typeof PlateElement>(({ ...props }, ref) => {
   const { children, editor, element } = props;
   const [value, setValue] = useState('');
   const debouncedValue = value; //useDebounce(value, 100);

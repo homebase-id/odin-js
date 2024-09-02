@@ -66,7 +66,7 @@ export const GetProfileCard = async (odinId: string): Promise<ProfileCard | unde
     _internalFileCache.set(odinId, promise);
 
     return await promise;
-  } catch (ex) {
+  } catch {
     console.warn(`Fetching 'profilecard' failed`);
     return;
   }
@@ -122,7 +122,7 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
           new Uint8Array(await resizedJpgData.blob.arrayBuffer()),
           resizedJpgData.blob.type
         );
-      } catch (ex) {
+      } catch {
         // Fallback to unresized image
         await publishProfileImageFile(
           dotYouClient,
@@ -157,7 +157,7 @@ export const GetProfileImage = async (odinId: string): Promise<Blob | undefined>
     const promise = fetchProfileCard();
 
     return await promise;
-  } catch (ex) {
+  } catch {
     console.warn(`Fetching 'profileimage' failed`);
     return;
   }

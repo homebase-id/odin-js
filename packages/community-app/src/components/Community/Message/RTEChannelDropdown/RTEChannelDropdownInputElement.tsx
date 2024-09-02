@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { cn, withRef } from '@udecode/cn';
 import { PlateElement } from '@udecode/plate-common';

@@ -24,7 +24,7 @@ export const processVideoFile = async (
     if (!passedThumbnail || passedThumbnail?.size < 1 * megaByte) {
       try {
         return (await getThumbnailWithFfmpeg(videoFile.file)) || passedThumbnail;
-      } catch (e) {
+      } catch {
         // Ignore; Grabbing can fail (it's not that important)
       }
     }

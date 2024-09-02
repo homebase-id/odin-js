@@ -28,8 +28,8 @@ export const getPendingRequests = async (
     .then((response) => {
       return response.data;
     })
-    .catch(() => {
-      dotYouClient.handleErrorResponse;
+    .catch((ex) => {
+      dotYouClient.handleErrorResponse(ex);
       return undefined;
     });
 };

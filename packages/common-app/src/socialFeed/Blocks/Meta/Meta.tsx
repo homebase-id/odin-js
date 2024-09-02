@@ -1,5 +1,4 @@
 import { Suspense, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ChannelDefinition, EmbeddedPost, PostContent } from '@homebase-id/js-lib/public';
 import { OwnerActions } from './OwnerActions';
 import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
@@ -12,7 +11,7 @@ import { ChannelDefinitionVm, useManagePost, useManageSocialFeed } from '../../.
 import { useDotYouClient } from '../../../hooks/auth/useDotYouClient';
 import { useIsConnected } from '../../../hooks/connections/useIsConnected';
 import { EditPostDialog } from '../../EditPostDialog/EditPostDialog';
-import { Persons, UserX, Times, Flag, Block, Link, Trash, Lock, Pencil } from '../../../ui/Icons';
+import { Persons, UserX, Times, Flag, Block, Link, Trash, Lock } from '../../../ui/Icons';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;
@@ -172,7 +171,7 @@ export const ToGroupBlock = ({
 
 const ExternalActions = ({
   odinId,
-  channel,
+
   postFile,
 }: {
   odinId: string;
@@ -182,7 +181,7 @@ const ExternalActions = ({
   postFile: HomebaseFile<PostContent>;
 }) => {
   const identity = useDotYouClient().getIdentity();
-  const navigate = useNavigate();
+
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const {
@@ -253,7 +252,6 @@ const GroupChannelActions = ({
 }) => {
   const { getIdentity } = useDotYouClient();
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const navigate = useNavigate();
 
   const identity = getIdentity();
   const isAuthor = postFile.fileMetadata.appData.content.authorOdinId === identity;
@@ -284,6 +282,7 @@ const GroupChannelActions = ({
     });
 
     if (isAuthor) {
+      // TODO editing collaborative posts
     } else {
       options.push({
         icon: Flag,

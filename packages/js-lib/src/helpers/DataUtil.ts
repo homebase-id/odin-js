@@ -327,7 +327,7 @@ export const tryJsonParse = <T>(json: string): T => {
     if (!json || !json.length) return {} as T;
     const o = JSON.parse(json);
     return o;
-  } catch (ex) {
+  } catch {
     console.warn('base JSON.parse failed', json);
     try {
       const replaceAll = (str: string, find: string, replace: string) => {
