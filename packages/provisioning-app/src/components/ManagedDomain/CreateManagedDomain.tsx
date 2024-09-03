@@ -12,12 +12,14 @@ import { Arrow, ArrowLeft } from '@homebase-id/common-app/icons';
 interface CreateManagedDomainProps {
   domainPrefix: string;
   domainApex: string;
+  invitationCode: string | null;
   setProvisionState: React.Dispatch<React.SetStateAction<ManagedDomainProvisionState>>;
 }
 
 const CreateManagedDomain = ({
   domainPrefix,
   domainApex,
+  invitationCode,
   setProvisionState,
 }: CreateManagedDomainProps) => {
   const {
@@ -40,7 +42,8 @@ const CreateManagedDomain = ({
     if (createManagedDomainStatus === 'success') setProvisionState('Provisioning');
   }, [createManagedDomainStatus]);
 
-  const doCreateManagedDomain = async () => await createManagedDomain({ domainPrefix, domainApex });
+  const doCreateManagedDomain = async () =>
+    await createManagedDomain({ domainPrefix, domainApex, invitationCode });
 
   const doCancel = () => setProvisionState('EnteringDetails');
 
