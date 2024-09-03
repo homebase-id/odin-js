@@ -82,6 +82,7 @@ export interface EmbeddedThumb extends ImageSize {
 export interface ThumbnailFile extends ImageSize {
   key: string;
   payload: File | Blob;
+  skipEncryption?: boolean;
 }
 
 export interface PayloadFile {
