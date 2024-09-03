@@ -2,8 +2,20 @@ import { Link } from 'react-router-dom';
 import { t } from '../../helpers/i18n/dictionary';
 import { ROOT_PATH } from '../../app/App';
 import { Arrow } from '@homebase-id/common-app/icons';
+import { useFetchManagedDomainsApexes } from '../../hooks/managedDomain/useManagedDomain';
+import { useEffect, useState } from 'react';
 
 const DomainChoice = () => {
+  const [showManagedDomainOption, setShowManagedDomainOption] = useState<boolean>(false);
+
+  const {
+    fetchManagedDomainApexes: { data: managedDomainApexes },
+  } = useFetchManagedDomainsApexes();
+
+  useEffect(() => {
+    setShowManagedDomainOption((managedDomainApexes?.length ?? 0) > 0);
+  }, [managedDomainApexes]);
+
   return (
     <section className="flex flex-grow flex-col">
       <div className="container mx-auto flex h-full min-h-full flex-grow flex-col px-5">
@@ -14,24 +26,26 @@ const DomainChoice = () => {
           </h1>
           <p className="mb-4">{t('How do you want to proceed?')}</p>
           <div className="-m-4 flex w-full flex-col md:flex-row">
-            <div className="min-h-full cursor-pointer p-4 md:w-1/2">
-              <Link
-                to={`${ROOT_PATH}/managed-domain${window.location.search}`}
-                className="min-h-full"
-              >
-                <div className="flex min-h-full flex-col rounded-lg border bg-slate-50 p-4 hover:shadow-md">
-                  <h2 className="mb-2 text-lg">{t('Managed Domain')}</h2>
-                  <p className="font-light text-slate-400">
-                    {t(
-                      "Don't have your own domain? We can provide you with one to get you going. You can change this later."
-                    )}
-                  </p>
-                  <div className="mt-auto flex flex-row justify-end">
-                    <Arrow className="h-5 w-5" />
+            {showManagedDomainOption ? (
+              <div className="min-h-full cursor-pointer p-4 md:w-1/2">
+                <Link
+                  to={`${ROOT_PATH}/managed-domain${window.location.search}`}
+                  className="min-h-full"
+                >
+                  <div className="flex min-h-full flex-col rounded-lg border bg-slate-50 p-4 hover:shadow-md">
+                    <h2 className="mb-2 text-lg">{t('Managed Domain')}</h2>
+                    <p className="font-light text-slate-400">
+                      {t(
+                        "Don't have your own domain? We can provide you with one to get you going. You can change this later."
+                      )}
+                    </p>
+                    <div className="mt-auto flex flex-row justify-end">
+                      <Arrow className="h-5 w-5" />
+                    </div>
                   </div>
-                </div>
-              </Link>
-            </div>
+                </Link>
+              </div>
+            ) : null}
             <div className="min-h-full cursor-pointer p-4 md:w-1/2">
               <Link to={`${ROOT_PATH}/own-domain${window.location.search}`} className="min-h-full">
                 <div className="flex min-h-full flex-col rounded-lg border bg-slate-50 p-4 hover:shadow-md">
