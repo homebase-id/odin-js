@@ -69,7 +69,7 @@ export const getPayloadBytesOverPeer = async (
   targetDrive: TargetDrive,
   fileId: string,
   key: string,
-  options: {
+  options?: {
     systemFileType?: SystemFileType;
     chunkStart?: number;
     chunkEnd?: number;
@@ -83,7 +83,7 @@ export const getPayloadBytesOverPeer = async (
   assertIfDefined('Key', key);
   assertIfDefinedAndNotDefault('OdinId', odinId);
 
-  const { chunkStart, chunkEnd, lastModified } = options;
+  const { chunkStart, chunkEnd, lastModified } = options || {};
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 

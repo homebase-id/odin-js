@@ -31,9 +31,7 @@ export const PostMedia = ({
   // Fo articles we only want the primary media file
   const mediaFiles =
     postInfo?.content.type !== 'Article'
-      ? postInfo?.payloads?.filter(
-          (p) => p.key !== DEFAULT_PAYLOAD_KEY && p.descriptorContent !== 'HLS-segment'
-        )
+      ? postInfo?.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY)
       : postInfo?.payloads?.filter((p) => p.key === postInfo.content.primaryMediaFile?.fileKey);
 
   if (!post.primaryMediaFile) {

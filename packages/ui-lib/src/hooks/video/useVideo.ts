@@ -1,7 +1,14 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { DotYouClient, TargetDrive, getFileHeader } from '@homebase-id/js-lib/core';
-import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import {
+  DotYouClient,
+  HomebaseFile,
+  TargetDrive,
+  getFileHeader,
+  getPayloadBytes,
+} from '@homebase-id/js-lib/core';
+import { stringToUint8Array, tryJsonParse, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
+import {
+  getDecryptedMediaUrl,
   getDecryptedVideoChunk,
   getDecryptedVideoUrl,
   PlainVideoMetadata,
@@ -13,6 +20,8 @@ import {
   getDecryptedVideoUrlOverPeerByGlobalTransitId,
   getFileHeaderBytesOverPeerByGlobalTransitId,
   getFileHeaderOverPeer,
+  getPayloadBytesOverPeer,
+  getPayloadBytesOverPeerByGlobalTransitId,
 } from '@homebase-id/js-lib/peer';
 
 export const useVideo = (
@@ -23,7 +32,13 @@ export const useVideo = (
   videoFileKey?: string | undefined,
   videoDrive?: TargetDrive
 ): {
-  fetchMetadata: UseQueryResult<PlainVideoMetadata | SegmentedVideoMetadata | null, Error>;
+  fetchMetadata: UseQueryResult<
+    {
+      fileHeader: HomebaseFile;
+      metadata: PlainVideoMetadata | SegmentedVideoMetadata;
+    } | null,
+    Error
+  >;
   getChunk: (chunkStart: number, chunkEnd?: number) => Promise<Uint8Array | null> | null;
 } => {
   const localHost = window.location.hostname;
@@ -33,7 +48,10 @@ export const useVideo = (
     videoFileId: string | undefined,
     videoGlobalTransitId: string | undefined,
     videoDrive?: TargetDrive
-  ): Promise<PlainVideoMetadata | SegmentedVideoMetadata | null> => {
+  ): Promise<{
+    fileHeader: HomebaseFile;
+    metadata: PlainVideoMetadata | SegmentedVideoMetadata;
+  } | null> => {
     if (
       videoFileId === undefined ||
       videoFileId === '' ||
@@ -65,7 +83,7 @@ export const useVideo = (
       const parsedMetaData = tryJsonParse<PlainVideoMetadata | SegmentedVideoMetadata>(descriptor);
       // The fileHeader contains the most accurate file size; So we use that one.
       parsedMetaData.fileSize = payloadData.bytesWritten;
-      return parsedMetaData;
+      return { metadata: parsedMetaData, fileHeader };
     };
 
     return (await fetchMetaPromise()) || null;
@@ -129,7 +147,7 @@ export const useVideoUrl = (
     )
       return null;
 
-    const fetchMetaPromise = async () => {
+    const fetchUrl = async () => {
       return odinId !== localHost
         ? videoGlobalTransitId
           ? await getDecryptedVideoUrlOverPeerByGlobalTransitId(
@@ -160,7 +178,7 @@ export const useVideoUrl = (
           );
     };
 
-    return await fetchMetaPromise();
+    return await fetchUrl();
   };
 
   return {
@@ -178,4 +196,125 @@ export const useVideoUrl = (
       enabled: !!videoFileId && videoFileId !== '',
     }),
   };
+};
+
+export const useHlsManifest = (
+  dotYouClient: DotYouClient,
+  odinId?: string,
+  videoFileId?: string | undefined,
+  videoGlobalTransitId?: string | undefined,
+  videoFileKey?: string | undefined,
+  videoDrive?: TargetDrive
+): { fetch: UseQueryResult<string | null, Error> } => {
+  const localHost = window.location.hostname;
+
+  const fetchManifest = async (
+    odinId: string,
+    videoFileId: string | undefined,
+    videoGlobalTransitId: string | undefined,
+    videoDrive?: TargetDrive
+  ): Promise<string | null> => {
+    if (
+      videoFileId === undefined ||
+      videoFileId === '' ||
+      !videoDrive ||
+      videoFileKey === undefined ||
+      videoFileKey === ''
+    )
+      return null;
+
+    const fetchManifestPayload = async () => {
+      return odinId !== localHost
+        ? videoGlobalTransitId
+          ? await getPayloadBytesOverPeerByGlobalTransitId(
+              dotYouClient,
+              odinId,
+              videoDrive,
+              videoGlobalTransitId,
+              videoFileKey
+            )
+          : await getPayloadBytesOverPeer(
+              dotYouClient,
+              odinId,
+              videoDrive,
+              videoFileId,
+              videoFileKey
+            )
+        : await getPayloadBytes(dotYouClient, videoDrive, videoFileId, videoFileKey);
+    };
+
+    const manifestPayload = await fetchManifestPayload();
+    if (!manifestPayload) return null;
+    const manifestBlob = new Blob([manifestPayload.bytes], {
+      type: 'application/vnd.apple.mpegurl',
+    });
+
+    const contents = await replaceSegmentUrls(await manifestBlob.text(), async (url, index) => {
+      return (
+        (await getDecryptedMediaUrl(
+          dotYouClient,
+          videoDrive,
+          videoFileId,
+          videoFileKey,
+          undefined,
+          undefined,
+          { size: { pixelHeight: index, pixelWidth: index } }
+        )) || url
+      );
+    });
+    console.log('m3u8', contents);
+
+    // Convert contents to data uri
+    const dataUri = `data:application/vnd.apple.mpegurl;base64,${uint8ArrayToBase64(stringToUint8Array(contents))}`;
+    return dataUri;
+  };
+
+  return {
+    fetch: useQuery({
+      queryKey: [
+        'video-hls-manifest',
+        odinId || localHost,
+        videoDrive?.alias,
+        videoGlobalTransitId || videoFileId,
+      ],
+      queryFn: () =>
+        fetchManifest(odinId || localHost, videoFileId, videoGlobalTransitId, videoDrive),
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      enabled: !!videoFileId && videoFileId !== '',
+    }),
+  };
+};
+
+/**
+ * Replace URLs in an M3U8 playlist.
+ * @param {string} playlistContent - The content of the M3U8 playlist.
+ * @param {function} replaceFunction - A function that takes the original URL and returns the new URL.
+ * @returns {string} - The modified M3U8 playlist content.
+ */
+const replaceSegmentUrls = async (
+  playlistContent: string,
+  replaceFunction: (url: string, index: number) => Promise<string>
+): Promise<string> => {
+  // Split the playlist content into lines
+  const lines = playlistContent.split('\n');
+  const modifiedLines: string[] = [];
+  let segmentIndex = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // Check if the line is a URL (not a comment or metadata)
+    if (!line.startsWith('#') && line.trim() !== '') {
+      // Use the replaceFunction to replace the URL
+      const newUrl = await replaceFunction(line.trim(), segmentIndex);
+      segmentIndex++;
+      modifiedLines.push(newUrl);
+    } else {
+      // Return the line unchanged if it's a comment or metadata
+      modifiedLines.push(line);
+    }
+  }
+
+  // Join the modified lines back into a single string
+  const modifiedPlaylistContent = modifiedLines.join('\n');
+  return modifiedPlaylistContent;
 };
