@@ -136,14 +136,15 @@ export const buildFormData = async (
   if (thumbnails) {
     for (let i = 0; i < thumbnails.length; i++) {
       const thumb = thumbnails[i];
-      const encryptedThumb = keyHeader
-        ? await encryptWithKeyheader(thumb.payload, {
-            ...keyHeader,
-            iv:
-              manifest?.PayloadDescriptors?.find((p) => p.payloadKey === thumb.key)?.iv ||
-              keyHeader.iv,
-          })
-        : thumb.payload;
+      const encryptedThumb =
+        keyHeader && !thumb.skipEncryption
+          ? await encryptWithKeyheader(thumb.payload, {
+              ...keyHeader,
+              iv:
+                manifest?.PayloadDescriptors?.find((p) => p.payloadKey === thumb.key)?.iv ||
+                keyHeader.iv,
+            })
+          : thumb.payload;
 
       data.append('thumbnail', encryptedThumb, thumb.key + thumb.pixelWidth);
     }
