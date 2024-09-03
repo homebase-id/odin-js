@@ -3,18 +3,11 @@ import { t } from '../../helpers/i18n/dictionary';
 import { ROOT_PATH } from '../../app/App';
 import { Arrow } from '@homebase-id/common-app/icons';
 import { useFetchManagedDomainsApexes } from '../../hooks/managedDomain/useManagedDomain';
-import { useEffect, useState } from 'react';
 
 const DomainChoice = () => {
-  const [showManagedDomainOption, setShowManagedDomainOption] = useState<boolean>(false);
-
   const {
     fetchManagedDomainApexes: { data: managedDomainApexes },
   } = useFetchManagedDomainsApexes();
-
-  useEffect(() => {
-    setShowManagedDomainOption((managedDomainApexes?.length ?? 0) > 0);
-  }, [managedDomainApexes]);
 
   return (
     <section className="flex flex-grow flex-col">
@@ -26,7 +19,7 @@ const DomainChoice = () => {
           </h1>
           <p className="mb-4">{t('How do you want to proceed?')}</p>
           <div className="-m-4 flex w-full flex-col md:flex-row">
-            {showManagedDomainOption ? (
+            {managedDomainApexes?.length && managedDomainApexes.length > 0 ? (
               <div className="min-h-full cursor-pointer p-4 md:w-1/2">
                 <Link
                   to={`${ROOT_PATH}/managed-domain${window.location.search}`}
