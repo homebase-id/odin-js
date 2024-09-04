@@ -1,5 +1,5 @@
 import { SegmentedVideoMetadata } from '@homebase-id/js-lib/media';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useHlsManifest } from '../../hooks/video/useHlsManifest';
 import { OdinVideoProps } from './OdinVideo';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
@@ -42,11 +42,31 @@ export const HlsSource = ({
     return () => videoRef.current?.removeEventListener('error', errorHandler);
   });
 
+  const needsHlsJs = useMemo(
+    () => !videoRef.current?.canPlayType('application/vnd.apple.mpegurl') && hls.isSupported(),
+    [videoRef]
+  );
+
+  useEffect(() => {
+    if (!needsHlsJs || !hlsManifest) return;
+    if (videoRef.current) {
+      const hlsInstance = new hls();
+      hlsInstance.attachMedia(videoRef.current);
+      hlsInstance.on(hls.Events.ERROR, (event, data) => {
+        console.error('[Odin-Video]-HLS', data);
+        onFatalError && onFatalError();
+      });
+      hlsInstance.loadSource(hlsManifest);
+
+      return () => hlsInstance.destroy();
+    }
+  }, [needsHlsJs, hlsManifest]);
+
   if (!hlsManifest) return null;
   if (videoRef.current?.canPlayType('application/vnd.apple.mpegurl')) {
     return <source src={hlsManifest} type={videoMetaData?.mimeType} data-type="direct" />;
-  } else if (!hls.isSupported()) {
-    console.log('HLS is not supported');
+  } else {
+    if (!hls.isSupported()) console.log('HLS is not supported');
     return null;
   }
 };
