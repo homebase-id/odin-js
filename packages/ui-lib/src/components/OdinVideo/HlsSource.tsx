@@ -1,8 +1,9 @@
 import { SegmentedVideoMetadata } from '@homebase-id/js-lib/media';
 import { useEffect } from 'react';
-import { useHlsManifest } from '../../hooks/video/useVideo';
+import { useHlsManifest } from '../../hooks/video/useHlsManifest';
 import { OdinVideoProps } from './OdinVideo';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
+import hls from 'hls.js';
 
 interface OdinHlsProps extends OdinVideoProps {
   videoFileHeader: HomebaseFile;
@@ -22,8 +23,6 @@ export const HlsSource = ({
   videoRef,
   onFatalError,
 }: OdinHlsProps) => {
-  console.log('HlsSource', videoMetaData);
-
   const { data: hlsManifest } = useHlsManifest(
     dotYouClient,
     odinId,
@@ -44,5 +43,10 @@ export const HlsSource = ({
   });
 
   if (!hlsManifest) return null;
-  return <source src={hlsManifest} type={videoMetaData?.mimeType} data-type="direct" />;
+  if (videoRef.current?.canPlayType('application/vnd.apple.mpegurl')) {
+    return <source src={hlsManifest} type={videoMetaData?.mimeType} data-type="direct" />;
+  } else if (!hls.isSupported()) {
+    console.log('HLS is not supported');
+    return null;
+  }
 };

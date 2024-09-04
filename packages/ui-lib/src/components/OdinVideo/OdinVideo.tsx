@@ -102,8 +102,6 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
     );
   }
 
-  console.log('OdinVideo', videoMetaData, playback);
-
   return (
     <video
       controls={!videoProps.hideControls}

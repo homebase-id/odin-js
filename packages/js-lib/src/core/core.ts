@@ -1,5 +1,12 @@
 // DotYouClient
 export * from './DotYouClient';
+import { encryptUrl, encryptData, buildIvFromQueryString } from './InterceptionEncryptionUtil';
+export type { SharedSecretEncryptedPayload } from './InterceptionEncryptionUtil';
+export const InterceptionEncryptionUtil = {
+  encryptUrl,
+  encryptData,
+  buildIvFromQueryString,
+};
 
 // SecurityData
 export * from './SecurityData/SecurityTypes';
