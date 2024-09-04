@@ -64,16 +64,14 @@ export const getFileHeaderBytesByUniqueId = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   uniqueId: string,
-  options: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
+  options?: { decrypt?: boolean; systemFileType?: SystemFileType }
 ): Promise<HomebaseFile | null> => {
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
 
-  const decrypt = options?.decrypt ?? true;
-  const systemFileType = options?.systemFileType ?? 'Standard';
-
-  const cacheKey = getCacheKey(targetDrive, uniqueId, decrypt);
+  const { decrypt, systemFileType } = options ?? { decrypt: true, systemFileType: 'Standard' };
+  const cacheKey = getCacheKey(targetDrive, uniqueId, !!decrypt);
   const cacheEntry =
     _internalMetadataPromiseCache.has(cacheKey) &&
     (await _internalMetadataPromiseCache.get(cacheKey));
@@ -120,7 +118,7 @@ export const getPayloadAsJsonByUniqueId = async <T>(
   targetDrive: TargetDrive,
   uniqueId: string,
   key: string,
-  options: {
+  options?: {
     systemFileType?: SystemFileType;
   }
 ): Promise<T | null> => {
@@ -136,7 +134,7 @@ export const getPayloadBytesByUniqueId = async (
   targetDrive: TargetDrive,
   uniqueId: string,
   key: string,
-  options: {
+  options?: {
     systemFileType?: SystemFileType;
     chunkStart?: number;
     chunkEnd?: number;
@@ -149,9 +147,10 @@ export const getPayloadBytesByUniqueId = async (
   assertIfDefined('UniqueId', uniqueId);
   assertIfDefined('Key', key);
 
-  const { chunkStart, chunkEnd, lastModified } = options;
-  const decrypt = options?.decrypt ?? true;
-  const systemFileType = options?.systemFileType ?? 'Standard';
+  const { decrypt, systemFileType, chunkStart, chunkEnd, lastModified } = options || {
+    decrypt: true,
+    systemFileType: 'Standard',
+  };
 
   const client = getAxiosClient(dotYouClient, systemFileType);
   const request: GetFileByUniqueIdPayloadRequest = {
@@ -214,7 +213,7 @@ export const getThumbBytesByUniqueId = async (
   payloadKey: string,
   width: number,
   height: number,
-  options: {
+  options?: {
     systemFileType?: SystemFileType;
     lastModified?: number;
   }
