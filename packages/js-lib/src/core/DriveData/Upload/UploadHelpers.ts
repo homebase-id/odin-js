@@ -64,12 +64,14 @@ export const buildManifest = (
       payloadKey: payload.key,
       descriptorContent: payload.descriptorContent,
       previewThumbnail: payload.previewThumbnail,
+      contentType: payload.payload.type,
       thumbnails: thumbnails
         ?.filter((thumb) => thumb.key === payload.key)
         .map((thumb) => ({
           thumbnailKey: thumb.key + thumb.pixelWidth,
           pixelWidth: thumb.pixelWidth,
           pixelHeight: thumb.pixelHeight,
+          contentType: thumb.payload.type,
         })),
       iv: generateIv ? getRandom16ByteArray() : undefined,
     })),
