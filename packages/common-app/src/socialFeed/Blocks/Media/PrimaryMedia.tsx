@@ -41,8 +41,7 @@ export const PrimaryMedia = ({
 
   const isVideo =
     file.contentType?.startsWith('video') ||
-    file.contentType?.startsWith('application/vnd.apple.mpegurl') ||
-    file.contentType?.startsWith('audio/mpegurl');
+    file.contentType?.startsWith('application/vnd.apple.mpegurl');
   // const isAudio = file.contentType?.startsWith('audio');
   const isImage = file.contentType?.startsWith('image');
   const isLink = file.key === POST_LINKS_PAYLOAD_KEY;

@@ -9,6 +9,7 @@ import {
   InterceptionEncryptionUtil,
 } from '@homebase-id/js-lib/core';
 import {
+  byteArrayToString,
   stringifyToQueryParams,
   stringToUint8Array,
   uint8ArrayToBase64,
@@ -65,12 +66,9 @@ export const useHlsManifest = (
 
     const manifestPayload = await fetchManifestPayload();
     if (!manifestPayload) return null;
-    const manifestBlob = new Blob([manifestPayload.bytes], {
-      type: 'application/vnd.apple.mpegurl',
-    });
 
     const contents = await replaceSegmentUrls(
-      await manifestBlob.text(),
+      await byteArrayToString(manifestPayload.bytes),
       async (url, index) => {
         return (
           (await getSegmentUrl(

@@ -79,7 +79,7 @@ export const MediaGallery = ({
             {slicedFiles.map((file, index) => {
               const isVideo =
                 file.contentType.startsWith('video') ||
-                file.contentType.startsWith('audio/mpegurl');
+                file.contentType.startsWith('application/vnd.apple.mpegurl');
 
               return (
                 <div

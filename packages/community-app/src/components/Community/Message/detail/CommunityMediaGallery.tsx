@@ -92,7 +92,7 @@ export const CommunityMediaGallery = ({
       <div className="inset-0 bg-black transition-opacity lg:fixed"></div>
       <div className="inset-0 z-10 lg:fixed lg:overflow-y-auto">
         <div className="relative flex h-full min-h-[100dvh] flex-row items-center justify-center">
-          {contentType?.startsWith('video') ? (
+          {contentType?.startsWith('video') || contentType === 'application/vnd.apple.mpegurl' ? (
             <VideoClickToLoad
               preload={true}
               fileId={msg.fileId}
