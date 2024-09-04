@@ -76,7 +76,7 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
   targetDrive: TargetDrive,
   globalTransitId: string,
   key: string,
-  options: {
+  options?: {
     systemFileType?: SystemFileType;
     chunkStart?: number;
     chunkEnd?: number;
@@ -90,7 +90,7 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
   assertIfDefined('Key', key);
   assertIfDefinedAndNotDefault('OdinId', odinId);
 
-  const { chunkStart, chunkEnd, lastModified } = options;
+  const { chunkStart, chunkEnd, lastModified } = options || {};
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
@@ -157,7 +157,7 @@ export const getThumbBytesOverPeerByGlobalTransitId = async (
   payloadKey: string,
   width: number,
   height: number,
-  options: {
+  options?: {
     systemFileType?: SystemFileType;
     lastModified?: number;
   }
