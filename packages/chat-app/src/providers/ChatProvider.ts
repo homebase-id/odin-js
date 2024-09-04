@@ -375,14 +375,26 @@ export const uploadChatMessage = async (
           : ChatDeliveryStatus.Delivered;
     }
 
-    await updateChatMessage(dotYouClient, message, recipients, uploadResult.keyHeader);
-    console.error('Not all recipients received the message: ', uploadResult);
-    throw new Error(`Not all recipients received the message: ${recipients.join(', ')}`);
+    const updateResult = await updateChatMessage(
+      dotYouClient,
+      message,
+      recipients,
+      uploadResult.keyHeader
+    );
+    console.warn('Not all recipients received the message: ', uploadResult);
+    // We don't throw an error as it is not a critical failure; And the message is still saved locally
+    return {
+      ...uploadResult,
+      newVersionTag: updateResult?.newVersionTag || uploadResult?.newVersionTag,
+      previewThumbnail: uploadMetadata.appData.previewThumbnail,
+      chatDeliveryStatus: ChatDeliveryStatus.Failed, // Should we set failed, or does an enqueueFailed have a retry? (Either way it should auto-solve if it does)
+    };
   }
 
   return {
     ...uploadResult,
     previewThumbnail: uploadMetadata.appData.previewThumbnail,
+    chatDeliveryStatus: ChatDeliveryStatus.Sent,
   };
 };
 

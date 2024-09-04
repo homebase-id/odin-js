@@ -37,6 +37,7 @@ const Provision = () => {
               setEmail={setEmail}
               provisionState={provisionState}
               setProvisionState={setProvisionState}
+              invitationCode={invitationCode}
             />
           ) : provisionState === 'Provisioning' && domain ? (
             <CreateIdentityView

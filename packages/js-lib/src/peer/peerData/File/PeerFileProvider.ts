@@ -83,9 +83,9 @@ export const getPayloadBytesOverPeer = async (
   assertIfDefined('Key', key);
   assertIfDefinedAndNotDefault('OdinId', odinId);
 
-  const { chunkStart, chunkEnd, lastModified } = options || {};
+  const { chunkStart, chunkEnd, lastModified } = options || { systemFileType: 'Standard' };
   const decrypt = options?.decrypt ?? true;
-  const systemFileType = options?.systemFileType ?? 'Standard';
+  const systemFileType = options?.systemFileType;
 
   const client = getAxiosClient(dotYouClient, systemFileType);
   const request: GetPayloadRequest = {
@@ -149,7 +149,7 @@ export const getThumbBytesOverPeer = async (
   payloadKey: string,
   width: number,
   height: number,
-  options: {
+  options?: {
     systemFileType?: SystemFileType;
     lastModified?: number;
   }
@@ -229,15 +229,14 @@ export const getFileHeaderBytesOverPeer = async (
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
-  options: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
+  options?: { decrypt?: boolean; systemFileType?: SystemFileType }
 ): Promise<HomebaseFile> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('OdinId', odinId);
   assertIfDefined('FileId', fileId);
   assertIfDefinedAndNotDefault('OdinId', odinId);
 
-  const decrypt = options?.decrypt ?? true;
-  const systemFileType = options?.systemFileType ?? 'Standard';
+  const { decrypt, systemFileType } = options ?? { decrypt: true, systemFileType: 'Standard' };
 
   const cacheKey = `${odinId}+${targetDrive.alias}-${targetDrive.type}+${fileId}+${decrypt}`;
   if (_internalMetadataPromiseCache.has(cacheKey)) {

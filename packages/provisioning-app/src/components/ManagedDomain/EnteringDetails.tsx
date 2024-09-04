@@ -20,6 +20,7 @@ interface EnteringDetailsProps {
   setEmail: React.Dispatch<React.SetStateAction<string>>;
   provisionState: ManagedDomainProvisionState;
   setProvisionState: React.Dispatch<React.SetStateAction<ManagedDomainProvisionState>>;
+  invitationCode: string | null;
 }
 
 const EnteringDetails = ({
@@ -28,6 +29,7 @@ const EnteringDetails = ({
   domain,
   setDomain,
   setEmail,
+  invitationCode,
 }: EnteringDetailsProps) => {
   const [prefixes, setPrefixes] = useState<string[]>([]); // array of prefixes in ui, e.g ['john', 'doe']
   const [domainApex, setDomainApex] = useState<ManagedDomainApex | undefined>(undefined);
@@ -124,7 +126,7 @@ const EnteringDetails = ({
               </p>
             ) : null}
           </div>
-          <div className="flex w-full flex-col flex-wrap gap-2 md:flex-row ">
+          <div className="flex w-full flex-col flex-wrap gap-2 md:flex-row">
             {domainApex.prefixLabels.map((label, index) => (
               <div className="flex-grow" key={index}>
                 <PrefixInput
@@ -196,6 +198,7 @@ const EnteringDetails = ({
       <CreateManagedDomain
         domainApex={domainApex.apex}
         domainPrefix={domainPrefix}
+        invitationCode={invitationCode}
         setProvisionState={setProvisionState}
       />
     );
