@@ -1,12 +1,12 @@
 import { jsonStringify64 } from '../../helpers/DataUtil';
 import {
   EmbeddedThumb,
+  KeyHeader,
   PayloadFile,
   ThumbnailFile,
 } from '../../core/DriveData/File/DriveFileTypes';
 import { createThumbnails } from '../Thumbs/ThumbnailProvider';
 import { segmentVideoFileWithFfmpeg, getThumbnailWithFfmpeg } from './VideoSegmenterFfmpeg';
-import { KeyHeader } from '../../../core';
 
 const megaByte = 1024 * 1024;
 

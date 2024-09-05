@@ -1,11 +1,10 @@
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
-import { c } from 'vitest/dist/reporters-5f784f42.js';
+import { KeyHeader } from '../../core/DriveData/File/DriveFileTypes';
 import { base64ToUint8Array, hasDebugFlag, uint8ArrayToBase64 } from '../../helpers/helpers';
 import { PlainVideoMetadata, SegmentedVideoMetadata } from '../MediaTypes';
 import { getCodecFromMp4Info, getMp4Info } from './VideoSegmenter';
-import { KeyHeader } from '../../../core';
 
 const isDebug = hasDebugFlag();
 
