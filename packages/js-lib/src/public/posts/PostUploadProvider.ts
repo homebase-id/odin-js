@@ -13,7 +13,7 @@ import {
   UploadInstructionSet,
   UploadResult,
 } from '../../core/DriveData/Upload/DriveUploadTypes';
-import { SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
+import { KeyHeader, SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
 import { DEFAULT_PAYLOAD_KEY, GenerateKeyHeader } from '../../core/DriveData/Upload/UploadHelpers';
 import {
   HomebaseFile,
@@ -44,6 +44,7 @@ import { processVideoFile } from '../../media/Video/VideoProcessor';
 import { createThumbnails, LinkPreview, LinkPreviewDescriptor } from '../../media/media';
 import { uploadFileOverPeer } from '../../peer/peer';
 import { TransitInstructionSet, TransitUploadResult } from '../../peer/peerData/PeerTypes';
+import { AxiosRequestConfig } from 'axios';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
@@ -99,11 +100,23 @@ export const savePost = async <T extends PostContent>(
     delete (file.fileMetadata.appData.content.embeddedPost as PostContent)['embeddedPost'];
   }
 
+  const encrypt = !(
+    file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+    file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+      SecurityGroupType.Authenticated
+  );
+
   const targetDrive = GetTargetDriveFromChannelId(channelId);
 
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+  const keyHeader: KeyHeader | undefined = encrypt
+    ? {
+        iv: getRandom16ByteArray(),
+        aesKey: getRandom16ByteArray(),
+      }
+    : undefined;
 
   if (!newMediaFiles?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
@@ -145,13 +158,14 @@ export const savePost = async <T extends PostContent>(
     const newMediaFile = newMediaFiles[i];
     const payloadKey = newMediaFile.key || `${POST_MEDIA_PAYLOAD_KEY}${i}`;
     if (newMediaFile.file.type.startsWith('video/')) {
-      const { tinyThumb, additionalThumbnails, payload } = await processVideoFile(
-        newMediaFile,
-        payloadKey
-      );
+      const {
+        tinyThumb,
+        thumbnails: thumbnailsFromVideo,
+        payloads: payloadsFromVideo,
+      } = await processVideoFile(newMediaFile, payloadKey, keyHeader);
 
-      thumbnails.push(...additionalThumbnails);
-      payloads.push(payload);
+      thumbnails.push(...thumbnailsFromVideo);
+      payloads.push(...payloadsFromVideo);
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
 
@@ -203,7 +217,10 @@ export const savePost = async <T extends PostContent>(
     previewThumbnail,
     channelId,
     targetDrive,
-    onVersionConflict
+    onVersionConflict,
+    {
+      keyHeader,
+    }
   );
 };
 
@@ -216,7 +233,11 @@ const uploadPost = async <T extends PostContent>(
   previewThumbnail: EmbeddedThumb | undefined,
   channelId: string,
   targetDrive: TargetDrive,
-  onVersionConflict?: () => void
+  onVersionConflict?: () => void,
+  options?: {
+    axiosConfig?: AxiosRequestConfig;
+    keyHeader?: KeyHeader | undefined;
+  }
 ) => {
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
@@ -302,7 +323,8 @@ const uploadPost = async <T extends PostContent>(
       payloads,
       thumbnails,
       encrypt,
-      onVersionConflict
+      onVersionConflict,
+      options
     );
 
     if (!result) throw new Error(`Upload failed`);

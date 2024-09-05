@@ -1,9 +1,11 @@
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
-import { hasDebugFlag } from '../../helpers/helpers';
+import { c } from 'vitest/dist/reporters-5f784f42.js';
+import { base64ToUint8Array, hasDebugFlag, uint8ArrayToBase64 } from '../../helpers/helpers';
 import { PlainVideoMetadata, SegmentedVideoMetadata } from '../MediaTypes';
 import { getCodecFromMp4Info, getMp4Info } from './VideoSegmenter';
+import { KeyHeader } from '../../../core';
 
 const isDebug = hasDebugFlag();
 
@@ -50,17 +52,36 @@ const loadFFmpeg = async () => {
   }
 };
 
+interface VideoData {
+  video: Blob;
+  metadata: PlainVideoMetadata | SegmentedVideoMetadata;
+}
+
+interface HLSData {
+  playlist: Blob;
+  segments: Blob[];
+  metadata: SegmentedVideoMetadata;
+  keyHeader?: KeyHeader;
+}
+
+const toHexString = (byteArray: Uint8Array) => {
+  return Array.from(byteArray, function (byte) {
+    return ('0' + (byte & 0xff).toString(16)).slice(-2);
+  }).join('');
+};
+
 const MB = 1000000;
 export const segmentVideoFileWithFfmpeg = async (
-  file: File | Blob
-): Promise<{ data: Blob; metadata: SegmentedVideoMetadata | PlainVideoMetadata }> => {
+  file: File | Blob,
+  keyHeader?: KeyHeader
+): Promise<VideoData | HLSData> => {
   if (!file || file.type !== 'video/mp4') {
     throw new Error('No (supported) mp4 file found, segmentation only works with mp4 files');
   }
 
   if (file.size < 10 * MB) {
     return {
-      data: file,
+      video: file,
       metadata: {
         isSegmented: false,
         mimeType: 'video/mp4',
@@ -74,7 +95,7 @@ export const segmentVideoFileWithFfmpeg = async (
   const durationinMiliseconds = durationInSeconds * 1000;
   if (mp4Info.isFragmented) {
     return {
-      data: file,
+      video: file,
       metadata: {
         isSegmented: true,
         mimeType: 'video/mp4',
@@ -86,40 +107,77 @@ export const segmentVideoFileWithFfmpeg = async (
   }
 
   const ffmpeg = await loadFFmpeg();
-  // ffmpeg.on('log', ({ message }) => {
-  //   console.log(message);
-  // });
+
+  const inputFile = 'input.mp4';
+  const outputFile = 'output.m3u8';
+
+  const keyInfoUri =
+    (await (async () => {
+      if (keyHeader) {
+        const keyUrl = 'http://example.com/path/to/encryption.key';
+        const keyUri = `hls-encryption.key`;
+        const keyInfoUri = `hls-key_inf.txt`;
+
+        //We write a copy, as ffmpeg.writeFile will release the memory after writing
+        const copyOfAesKey = base64ToUint8Array(uint8ArrayToBase64(keyHeader.aesKey));
+        await ffmpeg.writeFile(keyUri, copyOfAesKey);
+
+        const keyInfo = `${keyUrl}\n${keyUri}\n${toHexString(keyHeader.iv)}`;
+        await ffmpeg.writeFile(keyInfoUri, keyInfo);
+
+        return keyInfoUri;
+      }
+    })()) || {};
+  const encryptionInfo = keyHeader
+    ? ['-hls_key_info_file', `${keyInfoUri}`] // -hls_enc 1`
+    : [];
 
   const buffer = await file.arrayBuffer();
-  await ffmpeg.writeFile('input.mp4', new Uint8Array(buffer));
+  await ffmpeg.writeFile(inputFile, new Uint8Array(buffer));
   const status = await ffmpeg.exec([
     '-i',
-    'input.mp4',
-    '-c:v',
+    inputFile,
+    '-codec:',
     'copy',
-    '-c:a',
-    'copy',
-    '-movflags',
-    'frag_keyframe+empty_moov+default_base_moof ',
-    'output.mp4',
+    ...encryptionInfo,
+    '-hls_time',
+    '10',
+    '-hls_list_size',
+    '0',
+    '-f',
+    'hls',
+    outputFile,
   ]);
   if (status !== 0) {
     throw new Error('Failed to segment video');
   }
 
-  const data = await ffmpeg.readFile('output.mp4');
-  const videoBlob = new OdinBlob([data], { type: 'video/mp4' });
+  const segments: Blob[] = [];
+  for (let i = 0; i < 100; i++) {
+    const fragmentUri = `${outputFile.replace('.m3u8', `${i}.ts`)}`;
+    try {
+      const segmentData = await ffmpeg.readFile(fragmentUri);
+      segments.push(new OdinBlob([segmentData], { type: 'video/mp2t' }));
+    } catch {
+      // Probably all segments are read
+      break;
+    }
+  }
+
+  const data = await ffmpeg.readFile('output.m3u8');
+  const playlistBlob = new OdinBlob([data], { type: 'application/vnd.apple.mpegurl' });
 
   const metadata: SegmentedVideoMetadata = {
     isSegmented: true,
-    mimeType: 'video/mp4',
+    mimeType: 'application/vnd.apple.mpegurl',
     codec: getCodecFromMp4Info(mp4Info),
-    fileSize: videoBlob.size,
+    fileSize: playlistBlob.size,
     duration: durationinMiliseconds,
   };
 
   return {
-    data: videoBlob,
+    playlist: playlistBlob,
+    segments: segments,
     metadata,
   };
 };
