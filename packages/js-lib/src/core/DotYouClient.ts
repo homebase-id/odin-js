@@ -73,6 +73,10 @@ export class BaseDotYouClient {
     return this.getRoot() + endpoint;
   }
 
+  getHeaders(): Record<string, string> {
+    return this._options.headers || {};
+  }
+
   //Gets an Axios client configured with token info
   createAxiosClient(options?: createAxiosClientOptions) {
     const client = axios.create({
