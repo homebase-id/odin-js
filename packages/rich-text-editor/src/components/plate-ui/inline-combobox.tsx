@@ -67,6 +67,7 @@ interface InlineComboboxProps {
   trigger: string;
   filter?: FilterFn | false;
   hideWhenNoValue?: boolean;
+  hideWhenSpace?: boolean;
   setValue?: (value: string) => void;
   showTrigger?: boolean;
   value?: string;
@@ -77,6 +78,7 @@ const InlineCombobox = ({
   element,
   filter = defaultFilter,
   hideWhenNoValue = false,
+  hideWhenSpace = false,
   setValue: setValueProp,
   showTrigger = true,
   trigger,
@@ -125,7 +127,11 @@ const InlineCombobox = ({
   }, [editor, element]);
 
   const { props: inputProps, removeInput } = useComboboxInput({
-    cancelInputOnBlur: false,
+    cancelInputOnBlur: true,
+    cancelInputOnBackspace: true,
+    cancelInputOnEscape: true,
+    cancelInputOnDeselect: true,
+    cancelInputOnArrowLeftRight: true,
     cursorState,
     onCancelInput: (cause) => {
       if (cause !== 'backspace') {
@@ -178,7 +184,11 @@ const InlineCombobox = ({
   return (
     <span contentEditable={false}>
       <ComboboxProvider
-        open={(items.length > 0 || hasEmpty) && (!hideWhenNoValue || value.length > 0)}
+        open={
+          (items.length > 0 || hasEmpty) &&
+          (!hideWhenNoValue || value.length > 0) &&
+          (!hideWhenSpace || !value.includes(' '))
+        }
         store={store}
       >
         <InlineComboboxContext.Provider value={contextValue}>
