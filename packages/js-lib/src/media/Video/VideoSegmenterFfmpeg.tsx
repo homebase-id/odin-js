@@ -141,7 +141,7 @@ export const segmentVideoFileWithFfmpeg = async (
     'copy',
     ...encryptionInfo,
     '-hls_time',
-    '10',
+    '6',
     '-hls_list_size',
     '0',
     '-f',
