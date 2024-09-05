@@ -309,6 +309,13 @@ const InlineComboboxItem = ({
         removeInput(true);
         onClick?.(event);
       }}
+      onKeyDown={(event) => {
+        // Insert the selected item when the user presses Enter or Tab
+        if (event.key === 'Tab') {
+          removeInput(true);
+          onClick?.(event as never);
+        }
+      }}
       {...props}
     />
   );
