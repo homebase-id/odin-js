@@ -50,8 +50,16 @@ export const HlsSource = ({
   useEffect(() => {
     if (!needsHlsJs || !hlsManifest) return;
     if (videoRef.current) {
-      const hlsInstance = new hls();
+      const hlsInstance = new hls({
+        xhrSetup: (xhr) => {
+          const headers: Record<string, string> = dotYouClient.getHeaders();
+          for (const [key, value] of Object.entries(headers)) {
+            xhr.setRequestHeader(key, value);
+          }
+        },
+      });
       hlsInstance.attachMedia(videoRef.current);
+
       hlsInstance.on(hls.Events.ERROR, (event, data) => {
         console.error('[Odin-Video]-HLS', data);
         onFatalError && onFatalError();
