@@ -77,15 +77,18 @@ export const segmentVideoFileWithFfmpeg = async (
     throw new Error('No (supported) mp4 file found, segmentation only works with mp4 files');
   }
 
-  if (file.size < 10 * MB) {
-    return {
-      video: file,
-      metadata: {
-        isSegmented: false,
-        mimeType: 'video/mp4',
-      },
-    };
-  }
+  // We disbled the segmentation for now, as we only want to support playback on web of HLS;
+  // We can re-enable it when we have confirmed HLS is good
+
+  // if (file.size < 10 * MB) {
+  return {
+    video: file,
+    metadata: {
+      isSegmented: false,
+      mimeType: 'video/mp4',
+    },
+  };
+  // }
 
   const mp4Info = await getMp4Info(file);
   const durationInSeconds = mp4Info.duration / mp4Info.timescale;
