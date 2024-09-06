@@ -118,7 +118,6 @@ const YouAuthConsent = () => {
               ) : null}
 
               <div className="mt-8 flex flex-col gap-2 sm:flex-row-reverse">
-                {/* TODO: Check if this would be better with a normal XHR request... Having a form is pretty uncommon, and doesn't add anything in terms of security */}
                 <form action="/api/owner/v1/youauth/authorize" method="post" className="contents">
                   <input type="hidden" name="return_url" value={returnUrl} />
                   {consentRequirements ? (
@@ -128,12 +127,12 @@ const YouAuthConsent = () => {
                       value={JSON.stringify(consentRequirements)}
                     />
                   ) : null}
-                  <ActionButton type="primary" className="w-1/2 sm:w-auto" icon={Arrow}>
+                  <ActionButton type="primary" className="w-full sm:w-auto" icon={Arrow}>
                     {t('Login')}
                   </ActionButton>
                 </form>
 
-                <ActionButton type="secondary" onClick={doCancel} className="w-1/2 sm:w-auto">
+                <ActionButton type="secondary" onClick={doCancel} className="w-full sm:w-auto">
                   {t('Cancel')}
                 </ActionButton>
               </div>
@@ -155,7 +154,7 @@ const ServiceDetails = ({ targetDomain }: { targetDomain: string }) => {
           fallbackSize="md"
         />
 
-        <h1 className="text-3xl md:text-4xl ">
+        <h1 className="text-3xl md:text-4xl">
           {t('Login to')} &quot;<DomainHighlighter>{targetDomain}</DomainHighlighter>
           &quot;
           <small className="block text-sm dark:text-white dark:text-opacity-80">
@@ -207,7 +206,7 @@ const AppDetails = ({
           fallbackSize="md"
         />
 
-        <h1 className="text-3xl md:text-4xl ">
+        <h1 className="text-3xl md:text-4xl">
           {t('Login to')}{' '}
           {!appRegistration ? (
             <>

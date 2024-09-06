@@ -141,21 +141,22 @@ const CommunityChannelHeader = ({
     </>
   );
 };
-const CommunityRootHeader = ({ community }: { community?: HomebaseFile<CommunityDefinition> }) => {
-  const communityId = community?.fileMetadata.appData.uniqueId;
 
-  return (
-    <>
-      <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-        <ActionLink className="lg:hidden" type="mute" href={`${COMMUNITY_ROOT}/${communityId}`}>
-          <ChevronLeft className="h-5 w-5" />
-        </ActionLink>
+// const CommunityRootHeader = ({ community }: { community?: HomebaseFile<CommunityDefinition> }) => {
+//   const communityId = community?.fileMetadata.appData.uniqueId;
 
-        {community ? <>{community.fileMetadata.appData.content?.title}</> : null}
-      </div>
-    </>
-  );
-};
+//   return (
+//     <>
+//       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
+//         <ActionLink className="lg:hidden" type="mute" href={`${COMMUNITY_ROOT}/${communityId}`}>
+//           <ChevronLeft className="h-5 w-5" />
+//         </ActionLink>
+
+//         {community ? <>{community.fileMetadata.appData.content?.title}</> : null}
+//       </div>
+//     </>
+//   );
+// };
 
 const ChannelInfo = ({
   channel,

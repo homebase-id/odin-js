@@ -97,6 +97,7 @@ export const usePostComposer = () => {
         onUpdate: (progress) => setProcessingProgress(progress),
       });
     } catch (ex) {
+      console.error('Error saving post', ex);
       setPostState('error');
     }
 

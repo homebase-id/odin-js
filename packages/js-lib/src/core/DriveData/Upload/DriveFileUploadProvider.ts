@@ -36,7 +36,10 @@ export const uploadFile = async (
   thumbnails?: ThumbnailFile[],
   encrypt = true,
   onVersionConflict?: () => Promise<void | UploadResult> | void,
-  axiosConfig?: AxiosRequestConfig
+  options?: {
+    axiosConfig?: AxiosRequestConfig;
+    keyHeader?: KeyHeader | undefined;
+  }
 ): Promise<UploadResult | void> => {
   isDebug &&
     console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/upload`).pathname, {
@@ -47,9 +50,9 @@ export const uploadFile = async (
     });
 
   // Force isEncrypted on the metadata to match the encrypt flag
-  metadata.isEncrypted = encrypt;
+  metadata.isEncrypted = encrypt || !!options?.keyHeader;
 
-  const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
+  const keyHeader = encrypt ? options?.keyHeader || GenerateKeyHeader() : undefined;
 
   const { systemFileType, ...strippedInstructions } = instructions;
 
@@ -83,7 +86,7 @@ export const uploadFile = async (
     data,
     systemFileType,
     onVersionConflict,
-    axiosConfig
+    options?.axiosConfig
   );
 
   if (!uploadResult) return;
@@ -266,6 +269,8 @@ export const reUploadFile = async (
     thumbnails,
     encrypt,
     undefined,
-    axiosConfig
+    {
+      axiosConfig,
+    }
   );
 };

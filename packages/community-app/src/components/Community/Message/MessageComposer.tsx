@@ -62,7 +62,7 @@ export const MessageComposer = ({
       drafts[groupId] = message;
       try {
         localStorage.setItem(CHAT_DRAFTS_KEY, JSON.stringify(drafts));
-      } catch (e) {
+      } catch {
         /* empty */
       }
     }

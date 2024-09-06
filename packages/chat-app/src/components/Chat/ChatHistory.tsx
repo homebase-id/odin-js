@@ -122,7 +122,7 @@ export const ChatHistory = ({
 
           let runningText = '';
           for (let i = elements.length - 1; i >= 0; i--) {
-            const text = (elements[i] as any).innerText;
+            const text = (elements[i] as HTMLElement).innerText;
             if (text?.length) {
               runningText += text + '\n';
             }

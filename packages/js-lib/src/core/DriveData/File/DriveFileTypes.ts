@@ -82,6 +82,7 @@ export interface EmbeddedThumb extends ImageSize {
 export interface ThumbnailFile extends ImageSize {
   key: string;
   payload: File | Blob;
+  skipEncryption?: boolean;
 }
 
 export interface PayloadFile {
@@ -89,6 +90,7 @@ export interface PayloadFile {
   payload: File | Blob;
   previewThumbnail?: EmbeddedThumb;
   descriptorContent?: string;
+  skipEncryption?: boolean;
 }
 
 type None = 0;
@@ -108,16 +110,23 @@ export interface AppFileMetaData<T = string> {
   previewThumbnail?: EmbeddedThumb;
   archivalStatus?: ArchivalStatus;
 }
-
-export interface ExternalFileIdentifier {
+interface BaseFileIdentifier {
+  targetDrive: TargetDrive;
+}
+export interface FileIdFileIdentifier extends BaseFileIdentifier {
   fileId: string;
-  targetDrive: TargetDrive;
+}
+export interface GlobalTransitIdFileIdentifier extends BaseFileIdentifier {
+  globalTransitId: string;
+}
+export interface UniqueIdFileIdentifier extends BaseFileIdentifier {
+  uniqueId: string;
 }
 
-export interface GlobalTransitIdFileIdentifier {
-  globalTransitId: string;
-  targetDrive: TargetDrive;
-}
+export type FileIdentifier =
+  | FileIdFileIdentifier
+  | GlobalTransitIdFileIdentifier
+  | UniqueIdFileIdentifier;
 
 export type ImageContentType =
   | 'image/webp'

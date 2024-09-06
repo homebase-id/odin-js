@@ -27,7 +27,7 @@ export const restoreSelection = (saved: SelectionData) => {
   try {
     const selection = window.getSelection();
     if (selection) selection.setBaseAndExtent(saved[0], saved[1], saved[2], saved[3]);
-  } catch (e) {
+  } catch {
     // Fail silently, selection will have changed in the mean time. Worst case: position will just be off
   }
 };

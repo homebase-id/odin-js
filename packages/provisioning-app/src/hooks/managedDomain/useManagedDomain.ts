@@ -61,13 +61,19 @@ export const useCreateManagedDomain = () => {
   type PrefixAndApex = {
     domainPrefix: string;
     domainApex: string;
+    invitationCode: string | null;
   };
 
   const createManagedDomain = async ({
     domainPrefix,
     domainApex,
+    invitationCode,
   }: PrefixAndApex): Promise<void> => {
-    await axios.post(root + `/registration/create-managed-domain/${domainApex}/${domainPrefix}`);
+    let url = root + `/registration/create-managed-domain/${domainApex}/${domainPrefix}`;
+    if (invitationCode) {
+      url += `?invitation-code=${invitationCode}`;
+    }
+    await axios.post(url);
   };
 
   return {

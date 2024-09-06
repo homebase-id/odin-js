@@ -78,7 +78,7 @@ export const useConversationMetadata = (props?: { conversationId?: string | unde
           variables.conversation as HomebaseFile<ConversationMetadata>
         );
       },
-      onError: (error, variables, context) => {
+      onError: (error) => {
         console.error('Error saving conversation metadata', error);
       },
     }),

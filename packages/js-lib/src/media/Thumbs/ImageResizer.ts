@@ -46,7 +46,6 @@ const getMimeType = (format: 'png' | 'webp' | 'bmp' | 'jpeg' | 'gif' | null) => 
  * @returns {Size} Returns the image width and height
  */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getTargetSize = (
   img: HTMLImageElement,
   maxWidth: number | undefined,

@@ -12,14 +12,16 @@ import Section from '../../components/ui/Sections/Section';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useApp } from '../../hooks/apps/useApp';
 import { useDrives } from '../../hooks/drives/useDrives';
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { drivesParamToDriveGrantRequest, permissionParamToPermissionSet } from './RegisterApp';
 import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { useDrive } from '../../hooks/drives/useDrive';
 
 const ExtendAppPermissions = () => {
   // Read the queryString
   const [searchParams] = useSearchParams();
+  const [error, setError] = useState<unknown | undefined>();
 
   const appId = searchParams.get('appId');
   const returnUrl = searchParams.get('return');
@@ -39,90 +41,98 @@ const ExtendAppPermissions = () => {
 
   const {
     fetch: { data: appRegistration },
-    extendPermissions: {
-      mutate: extendPermission,
-      status: extendPermissionStatus,
-      error: extendPermissionError,
-    },
-    updateAuthorizedCircles: {
-      mutate: updateCircles,
-      status: updateCirclesState,
-      error: updateCirclesError,
-    },
+    extendPermissions: { mutateAsync: extendPermission, status: extendPermissionStatus },
+    updateAuthorizedCircles: { mutateAsync: updateCircles, status: updateCirclesState },
   } = useApp({ appId: appId || undefined });
 
   const { data: circles } = useCircles().fetch;
 
-  const doUpdateApp = async () => {
-    if (!appRegistration || !appRegistration?.appId) throw new Error('App registration not found');
+  const { mutateAsync: setAttributes, status: setAttributesStatus } = useDrive().editAttributes;
 
-    if (circleIds?.length || circlePermissionSet?.keys?.length || circleDriveGrants?.length)
-      updateCircles({
+  const doUpdateApp = async () => {
+    try {
+      if (!appRegistration || !appRegistration?.appId)
+        throw new Error('App registration not found');
+
+      // start with permissions so new drives are created before extending circles
+      await extendPermission({
+        ...appRegistration,
         appId: appRegistration.appId,
-        circleMemberPermissionGrant: {
-          drives: [
-            ...(appRegistration.circleMemberPermissionSetGrantRequest?.drives?.filter(
-              (existingGrant) =>
-                !circleDriveGrants?.some(
-                  (grant) =>
-                    stringGuidsEqual(
-                      grant.permissionedDrive.drive.alias,
-                      existingGrant.permissionedDrive.drive.alias
-                    ) &&
-                    stringGuidsEqual(
-                      grant.permissionedDrive.drive.type,
-                      existingGrant.permissionedDrive.drive.type
-                    )
-                )
-            ) || []),
-            ...(circleDriveGrants || []),
+        permissionSet: {
+          keys: [
+            ...(appRegistration?.grant.permissionSet.keys || []),
+            ...(permissionSet?.keys || []),
           ],
-          permissionSet: {
-            keys: [
-              ...(appRegistration.circleMemberPermissionSetGrantRequest?.permissionSet?.keys || []),
-              ...(circlePermissionSet?.keys || []),
-            ],
-          },
         },
-        circleIds: [...(appRegistration?.authorizedCircles || []), ...(circleIds || [])],
+        drives: [
+          ...(appRegistration?.grant?.driveGrants.filter(
+            (existingGrant) =>
+              !driveGrants?.some(
+                (grant) =>
+                  stringGuidsEqual(
+                    grant.permissionedDrive.drive.alias,
+                    existingGrant.permissionedDrive.drive.alias
+                  ) &&
+                  stringGuidsEqual(
+                    grant.permissionedDrive.drive.type,
+                    existingGrant.permissionedDrive.drive.type
+                  )
+              )
+          ) || []),
+          ...(driveGrants || []),
+        ],
       });
 
-    extendPermission({
-      ...appRegistration,
-      appId: appRegistration.appId,
-      permissionSet: {
-        keys: [
-          ...(appRegistration?.grant.permissionSet.keys || []),
-          ...(permissionSet?.keys || []),
-        ],
-      },
-      drives: [
-        ...(appRegistration?.grant?.driveGrants.filter(
-          (existingGrant) =>
-            !driveGrants?.some(
-              (grant) =>
-                stringGuidsEqual(
-                  grant.permissionedDrive.drive.alias,
-                  existingGrant.permissionedDrive.drive.alias
-                ) &&
-                stringGuidsEqual(
-                  grant.permissionedDrive.drive.type,
-                  existingGrant.permissionedDrive.drive.type
-                )
-            )
-        ) || []),
-        ...(driveGrants || []),
-      ],
-    });
-  };
+      if (circleIds?.length || circlePermissionSet?.keys?.length || circleDriveGrants?.length)
+        await updateCircles({
+          appId: appRegistration.appId,
+          circleMemberPermissionGrant: {
+            drives: [
+              ...(appRegistration.circleMemberPermissionSetGrantRequest?.drives?.filter(
+                (existingGrant) =>
+                  !circleDriveGrants?.some(
+                    (grant) =>
+                      stringGuidsEqual(
+                        grant.permissionedDrive.drive.alias,
+                        existingGrant.permissionedDrive.drive.alias
+                      ) &&
+                      stringGuidsEqual(
+                        grant.permissionedDrive.drive.type,
+                        existingGrant.permissionedDrive.drive.type
+                      )
+                  )
+              ) || []),
+              ...(circleDriveGrants || []),
+            ],
+            permissionSet: {
+              keys: [
+                ...(appRegistration.circleMemberPermissionSetGrantRequest?.permissionSet?.keys ||
+                  []),
+                ...(circlePermissionSet?.keys || []),
+              ],
+            },
+          },
+          circleIds: [...(appRegistration?.authorizedCircles || []), ...(circleIds || [])],
+        });
 
-  useEffect(() => {
-    if (
-      extendPermissionStatus === 'success' &&
-      (!circleIds?.length || updateCirclesState === 'success')
-    )
+      if (driveGrants) {
+        await Promise.all(
+          driveGrants.map(async (grant) => {
+            if (!grant.driveMeta?.attributes) return;
+
+            return await setAttributes({
+              targetDrive: grant.permissionedDrive.drive,
+              newAttributes: grant.driveMeta?.attributes,
+            });
+          })
+        );
+      }
+
       window.location.href = returnUrl || '/';
-  }, [extendPermissionStatus, updateCirclesState]);
+    } catch (error) {
+      setError(error);
+    }
+  };
 
   const doCancel = async () => {
     // Redirect
@@ -130,26 +140,26 @@ const ExtendAppPermissions = () => {
   };
 
   const { data: existingDrives } = useDrives().fetch;
-  const existingDriveGrants = driveGrants?.filter((grant) =>
+  const extensionGrantsOnExistingDrives = driveGrants?.filter((grant) =>
     existingDrives?.some(
       (drive) =>
-        drive.targetDriveInfo.alias === grant.permissionedDrive.drive.alias &&
-        drive.targetDriveInfo.type === grant.permissionedDrive.drive.type
+        stringGuidsEqual(drive.targetDriveInfo.alias, grant.permissionedDrive.drive.alias) &&
+        stringGuidsEqual(drive.targetDriveInfo.type, grant.permissionedDrive.drive.type)
     )
   );
 
-  const newDriveGrants = driveGrants?.filter(
+  const newDrives = driveGrants?.filter(
     (grant) =>
       !existingDrives?.some(
         (drive) =>
-          drive.targetDriveInfo.alias === grant.permissionedDrive.drive.alias &&
-          drive.targetDriveInfo.type === grant.permissionedDrive.drive.type
+          stringGuidsEqual(drive.targetDriveInfo.alias, grant.permissionedDrive.drive.alias) &&
+          stringGuidsEqual(drive.targetDriveInfo.type, grant.permissionedDrive.drive.type)
       )
   );
 
   return (
     <>
-      <ErrorNotification error={extendPermissionError || updateCirclesError} />
+      <ErrorNotification error={error} />
       <section className="my-20">
         <div className="container mx-auto">
           <div className="max-w-[35rem]">
@@ -166,41 +176,45 @@ const ExtendAppPermissions = () => {
               {t('will receive the following extra access on your identity')}:
             </p>
 
-            <Section>
-              {permissionSet?.keys.length ? (
+            {permissionSet?.keys.length ? (
+              <Section>
                 <div className="flex flex-col gap-4">
-                  {permissionSet.keys.map((permissionLevel) => {
-                    return (
-                      <PermissionView key={`${permissionLevel}`} permission={permissionLevel} />
-                    );
-                  })}
+                  {permissionSet.keys.map((permissionLevel) => (
+                    <PermissionView key={`${permissionLevel}`} permission={permissionLevel} />
+                  ))}
                 </div>
-              ) : (
-                <p className="text-slate-400">{t('No changes to existing permissions')}</p>
-              )}
-            </Section>
+              </Section>
+            ) : null}
 
-            <Section>
-              {existingDriveGrants?.length ? (
+            {extensionGrantsOnExistingDrives?.length ? (
+              <Section>
                 <div className="flex flex-col gap-4">
-                  {existingDriveGrants.map((grant) => (
+                  {extensionGrantsOnExistingDrives.map((grant) => (
                     <DrivePermissionRequestView
                       key={`${grant.permissionedDrive.drive.alias}-${grant.permissionedDrive.drive.type}`}
                       driveGrant={grant}
+                      existingGrant={appRegistration?.grant?.driveGrants?.find(
+                        (existing) =>
+                          stringGuidsEqual(
+                            existing.permissionedDrive.drive.alias,
+                            grant.permissionedDrive.drive.alias
+                          ) &&
+                          stringGuidsEqual(
+                            existing.permissionedDrive.drive.type,
+                            grant.permissionedDrive.drive.type
+                          )
+                      )}
                     />
                   ))}
                 </div>
-              ) : (
-                <p className="text-slate-400">{t('No changes to existing drive access')}</p>
-              )}
-            </Section>
+              </Section>
+            ) : null}
 
-            {newDriveGrants?.length ? (
+            {newDrives?.length ? (
               <>
-                <p>{t('Requests these new drives')}</p>
                 <Section>
                   <div className="flex flex-col gap-4">
-                    {newDriveGrants.map((grant) => (
+                    {newDrives.map((grant) => (
                       <DrivePermissionRequestView
                         key={`${grant.permissionedDrive.drive.alias}-${grant.permissionedDrive.drive.type}`}
                         driveGrant={grant}
@@ -237,7 +251,7 @@ const ExtendAppPermissions = () => {
               <>
                 <p>{t('Requests circles that can interact to have the following access within')}</p>
                 <Section>
-                  <div className="-my-4">
+                  <div className="flex flex-col gap-4">
                     {circlePermissionSet.keys.map((permissionLevel) => (
                       <PermissionView key={`${permissionLevel}`} permission={permissionLevel} />
                     ))}
@@ -255,6 +269,17 @@ const ExtendAppPermissions = () => {
                       <DrivePermissionRequestView
                         key={`${grant.permissionedDrive.drive.alias}-${grant.permissionedDrive.drive.type}`}
                         driveGrant={grant}
+                        existingGrant={appRegistration?.circleMemberPermissionSetGrantRequest?.drives?.find(
+                          (existing) =>
+                            stringGuidsEqual(
+                              existing.permissionedDrive.drive.alias,
+                              grant.permissionedDrive.drive.alias
+                            ) &&
+                            stringGuidsEqual(
+                              existing.permissionedDrive.drive.type,
+                              grant.permissionedDrive.drive.type
+                            )
+                        )}
                       />
                     ))}
                   </div>
@@ -266,7 +291,10 @@ const ExtendAppPermissions = () => {
               <ActionButton
                 onClick={doUpdateApp}
                 type="primary"
-                state={mergeStates(extendPermissionStatus, extendPermissionStatus)}
+                state={mergeStates(
+                  mergeStates(extendPermissionStatus, updateCirclesState),
+                  setAttributesStatus
+                )}
                 icon={Arrow}
               >
                 {t('Allow')}

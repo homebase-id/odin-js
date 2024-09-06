@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { cn, withRef } from '@udecode/cn';
 import { getPluginOptions, PlateElement } from '@udecode/plate-common';
@@ -39,6 +39,8 @@ export const MentionInputElement = withRef<typeof PlateElement>(({ className, ..
         showTrigger={true}
         trigger="@"
         value={search}
+        hideWhenSpace={true}
+        hideWhenNoValue={true}
       >
         <span
           className={cn(

@@ -57,7 +57,6 @@ const isDebug = hasDebugFlag();
 const useMailWebsocket = (isEnabled: boolean) => {
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClientContext();
-  const identity = dotYouClient.getIdentity();
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
     isDebug && console.debug('[MailWebsocket] Got notification', notification);
@@ -77,15 +76,6 @@ const useMailWebsocket = (isEnabled: boolean) => {
           true
         );
         if (!updatedChatMessage) return;
-
-        const sender =
-          notification.header.fileMetadata.senderOdinId ||
-          updatedChatMessage.fileMetadata.appData.content.sender;
-
-        if (!sender || sender === identity) {
-          // Ignore messages sent by the current user
-          return;
-        }
 
         const existingConversations = queryClient.getQueryData<
           InfiniteData<MailConversationsReturn>
@@ -127,6 +117,8 @@ const useMailWebsocket = (isEnabled: boolean) => {
     websocketDrives,
     () => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
-    }
+    },
+    undefined,
+    'useLiveMailProcessor'
   );
 };

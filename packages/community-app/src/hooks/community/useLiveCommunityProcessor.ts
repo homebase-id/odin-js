@@ -1,6 +1,7 @@
 import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   incrementAppIdNotificationCount,
+  insertNewNotification,
   useDotYouClientContext,
   useWebsocketSubscriber,
 } from '@homebase-id/common-app';
@@ -17,7 +18,6 @@ import {
   DeletedHomebaseFile,
   DotYouClient,
   HomebaseFile,
-  PushNotification,
   queryBatch,
   queryModified,
   TargetDrive,
@@ -213,24 +213,7 @@ const useCommunityWebsocket = (communityId: string | undefined, isEnabled: boole
     if (notification.notificationType === 'appNotificationAdded') {
       const clientNotification = notification as AppNotification;
 
-      const existingNotificationData = queryClient.getQueryData<{
-        results: PushNotification[];
-        cursor: number;
-      }>(['push-notifications']);
-
-      if (existingNotificationData) {
-        const newNotificationData = {
-          ...existingNotificationData,
-          results: [
-            clientNotification,
-            ...existingNotificationData.results.filter(
-              (notification) =>
-                !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
-            ),
-          ],
-        };
-        queryClient.setQueryData(['push-notifications'], newNotificationData);
-      }
+      insertNewNotification(queryClient, clientNotification);
       incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
     }
   }, []);
@@ -288,7 +271,9 @@ const useCommunityWebsocket = (communityId: string | undefined, isEnabled: boole
     [targetDrive],
     () => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
-    }
+    },
+    undefined,
+    'useLiveCommunityProcessor'
   );
 };
 

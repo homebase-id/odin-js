@@ -31,7 +31,7 @@ import { HomebaseFile, NewHomebaseFile, RichText } from '@homebase-id/js-lib/cor
 import { ROOT_PATH } from '../../app/App';
 
 export const ArticleComposerPage = () => {
-  const { channelKey, postKey } = useParams();
+  const { channelKey, postKey, odinKey } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [isOptionsDialogOpen, setIsOptionsDialogOpen] = useState(false);
@@ -62,6 +62,7 @@ export const ArticleComposerPage = () => {
 
     isLoadingServerData,
   } = useArticleComposer({
+    odinKey,
     postKey,
     channelKey: channelKey || searchParams.get('channel') || undefined,
     caption: searchParams.get('caption') || undefined,
@@ -270,6 +271,7 @@ export const ArticleComposerPage = () => {
               <InnerFieldEditors
                 key={postFile.fileMetadata.appData.content.id}
                 postFile={postFile}
+                odinId={odinKey}
                 channel={channel}
                 files={files}
                 setFiles={setFiles}
@@ -302,7 +304,6 @@ export const ArticleComposerPage = () => {
                   disabled={isPublished}
                   excludeMore={true}
                   excludeCustom={true}
-                  excludeCollaborative={true}
                 />
               </div>
 

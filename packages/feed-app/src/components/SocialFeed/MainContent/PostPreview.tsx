@@ -1,16 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { ActionButton, useDotYouClient } from '@homebase-id/common-app';
+import { ActionButton, useChannel, useDotYouClient } from '@homebase-id/common-app';
 import {
   PostDetailCard,
   PostImageDetailCard,
   usePost,
   useOutsideTrigger,
-  useSocialChannel,
 } from '@homebase-id/common-app';
 import { ArrowLeft } from '@homebase-id/common-app/icons';
-import { useSocialPost } from '@homebase-id/common-app';
 
 const PostPreview = ({
   identityKey,
@@ -26,23 +24,16 @@ const PostPreview = ({
   const { isOwner, getIdentity } = useDotYouClient();
   const isLocal = identityKey === getIdentity();
 
-  const { data: externalChannel } = useSocialChannel({
+  const { data: channel } = useChannel({
     odinId: !isLocal ? identityKey : undefined,
-    channelId: channelKey,
+    channelKey: channelKey,
   }).fetch;
 
-  const { data: externalPost } = useSocialPost({
+  const { data: post } = usePost({
     odinId: !isLocal ? identityKey : undefined,
-    channelId: channelKey,
-    postId: postKey,
-  }).fetch;
-
-  const { data: localBlogData } = usePost({
-    channelId: channelKey,
-    blogSlug: isLocal ? postKey : undefined,
+    channelKey: channelKey,
+    postKey: postKey,
   });
-  const localChannel = localBlogData?.activeChannel;
-  const localPost = localBlogData?.activePost;
 
   const location = useLocation();
   const state = location.state as Record<string, unknown> | undefined;
@@ -80,8 +71,8 @@ const PostPreview = ({
       {attachmentKey ? (
         <PostImageDetailCard
           odinId={identityKey}
-          channel={externalChannel || localChannel}
-          postFile={externalPost || localPost}
+          channel={channel || undefined}
+          postFile={post || undefined}
           isOwner={isOwner}
           isAuthenticated={true}
           attachmentKey={attachmentKey}
@@ -100,15 +91,13 @@ const PostPreview = ({
               className="left-2 top-2 rounded-full p-3 lg:fixed"
               size="square"
             />
-            <h2 className="ml-2 text-lg lg:hidden">
-              {(externalPost || localPost)?.fileMetadata.appData.content.type}
-            </h2>
+            <h2 className="ml-2 text-lg lg:hidden">{post?.fileMetadata.appData.content.type}</h2>
           </div>
 
           <PostDetailCard
             odinId={identityKey}
-            channel={externalChannel || localChannel}
-            postFile={externalPost || localPost}
+            channel={channel || undefined}
+            postFile={post || undefined}
             showAuthorDetail={true}
             className="mb-5 lg:my-10"
             isOwner={isOwner}

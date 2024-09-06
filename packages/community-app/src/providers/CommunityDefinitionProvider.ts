@@ -213,6 +213,7 @@ export const getCommunityDefinition = async (
       return dsrToCommunity(dotYouClient, dsr, targetDrive, response.includeMetadataHeader);
     }
   } catch (ex) {
+    console.debug(`[CommunityDefinitionProvider] getCommunityDefinition: ${ex}`);
     // Catch al, as targetDrive might be inaccesible (when it doesn't exist yet)
   }
 

@@ -4,7 +4,7 @@ export const isLocalStorageAvailable = () => {
     localStorage.setItem(test, test);
     localStorage.removeItem(test);
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 };
@@ -12,4 +12,9 @@ export const isLocalStorageAvailable = () => {
 export const isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
 export const hasDebugFlag = () =>
-  isLocalStorageAvailable() ? localStorage.getItem('debug') === '1' : false;
+  isLocalStorageAvailable()
+    ? localStorage.getItem('debug') === '1'
+    : typeof navigator !== 'undefined' &&
+      navigator.product === 'ReactNative' &&
+      'debug' in global &&
+      global.debug;

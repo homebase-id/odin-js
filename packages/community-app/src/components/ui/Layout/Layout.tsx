@@ -3,6 +3,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { Toaster, useDarkMode } from '@homebase-id/common-app';
 import { websocketDrives } from '../../../hooks/auth/useAuth';
 import { getTargetDriveFromCommunityId } from '../../../providers/CommunityDefinitionProvider';
+import { TargetDrive } from '@homebase-id/js-lib/core';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -48,7 +49,13 @@ export const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
       >
         {children}
       </div>
-      <Toaster drives={[...websocketDrives, targetDrive]} />
+      <Toaster
+        drives={
+          [...websocketDrives, communityKey ? targetDrive : undefined].filter(
+            Boolean
+          ) as TargetDrive[]
+        }
+      />
     </>
   );
 };

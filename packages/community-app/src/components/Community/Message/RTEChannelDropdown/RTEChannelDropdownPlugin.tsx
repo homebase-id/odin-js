@@ -19,11 +19,13 @@ export const ELEMENT_CHANNEL_INPUT = 'channel_input';
 
 export interface TChannelElement extends TElement {
   value: string;
+  uniqueId: string;
 }
 
 export interface TChannel {
   text: string;
   key: string;
+  uniqueId: string;
 }
 
 export type MentionOnSelectItem<TItem extends TChannel = TChannel> = <V extends Value>(
@@ -82,7 +84,7 @@ export const createChannelPlugin = createPluginFactory<ChannelPlugin>({
       trigger,
       type: ELEMENT_CHANNEL_INPUT,
     }),
-    createChannelNode: (item: TChannel) => ({ value: item.text }),
+    createChannelNode: (item: TChannel) => ({ value: item.text, uniqueId: item.uniqueId }),
     trigger: '#',
     triggerPreviousCharPattern: /^\s?$/,
   },

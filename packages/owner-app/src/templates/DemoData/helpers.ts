@@ -1,5 +1,3 @@
-import { InfiniteData } from '@tanstack/react-query';
-
 export const getRandomNumber = (max: number) => {
   return Math.floor(Math.random() * max);
 };

@@ -68,7 +68,7 @@ export const useLinks = () => {
           })
           .sort((attrA, attrB) => attrA.priority - attrB.priority);
       } catch (e) {
-        console.error('failed to fetch dynamic data');
+        console.error('failed to fetch dynamic data', e);
       }
     };
 

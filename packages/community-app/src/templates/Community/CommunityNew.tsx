@@ -38,6 +38,7 @@ export const NewCommunity = () => {
       if (!definitionFile) return;
       (async () => {
         await createNew(definitionFile);
+        navigator.clipboard.writeText(window.location.href);
         navigate(`${COMMUNITY_ROOT}/${definitionFile.fileMetadata.appData.uniqueId}`);
       })();
     }
@@ -80,7 +81,7 @@ export const NewCommunity = () => {
         },
       };
 
-      await createNew(newCommunityDef); // Will redirect to an ensure drive
+      await createNew(newCommunityDef); // Will in 99% of the cases first redirect to an ensure drive
       navigate(`${COMMUNITY_ROOT}/${communityId}`);
     } catch (e) {
       console.error(e);

@@ -8,12 +8,11 @@ import {
   decryptKeyHeader,
   decryptJsonContent,
 } from '../../core/core';
-import { tryJsonParse } from '../../helpers/DataUtil';
+import { toGuidId, tryJsonParse } from '../../helpers/DataUtil';
 import {
   ChannelDefinition,
   PostContent,
   BlogConfig,
-  parseReactionPreview,
   getRecentPosts,
   getChannelDrive,
 } from '../../public/public';
@@ -142,7 +141,7 @@ export const getChannelOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
   channelId: string
-): Promise<HomebaseFile<ChannelDefinition> | undefined> => {
+): Promise<HomebaseFile<ChannelDefinition> | null> => {
   const targetDrive = getChannelDrive(channelId);
 
   const queryParams: FileQueryParams = {
@@ -169,7 +168,7 @@ export const getChannelOverPeer = async (
         response.includeMetadataHeader
       );
 
-      if (!definitionContent) return undefined;
+      if (!definitionContent) return null;
 
       const file: HomebaseFile<ChannelDefinition> = {
         ...dsr,
@@ -183,9 +182,19 @@ export const getChannelOverPeer = async (
       };
       return file;
     }
-  } catch (ex) {
+  } catch {
     // Catch al, as targetDrive might be inaccesible (when it doesn't exist yet)
   }
+  return null;
+};
+
+export const getChannelBySlugOverPeer = async (
+  dotYouClient: DotYouClient,
+  odinId: string,
+  slug: string
+) => {
+  const channels = await getChannelsOverPeer(dotYouClient, odinId);
+  return channels.find((channel) => channel.fileMetadata.appData.content.slug === slug);
 };
 
 export const getPostOverPeer = async (
@@ -193,22 +202,45 @@ export const getPostOverPeer = async (
   odinId: string,
   channelId: string,
   postId: string
-) => {
+): Promise<HomebaseFile<PostContent> | null> => {
   const targetDrive = getChannelDrive(channelId);
   const params: FileQueryParams = {
     tagsMatchAtLeastOne: [postId],
     targetDrive: targetDrive,
-    fileType: [BlogConfig.PostFileType],
+    fileType: [BlogConfig.PostFileType, BlogConfig.DraftPostFileType],
   };
 
   const response = await queryBatchOverPeer(dotYouClient, odinId, params);
-
-  if (!response.searchResults || response.searchResults.length === 0) return undefined;
+  if (!response.searchResults || response.searchResults.length === 0) return null;
 
   if (response.searchResults.length > 1)
-    console.warn(`Found more than one file with id [${postId}].  Using first entry.`);
+    console.warn(`Found more than one file with tag [${postId}].  Using first entry.`);
 
   return dsrToPostFile(dotYouClient, odinId, response.searchResults[0], true);
+};
+
+export const getPostBySlugOverPeer = async <T extends PostContent>(
+  dotYouClient: DotYouClient,
+  odinId: string,
+  channelId: string,
+  postSlug: string
+): Promise<HomebaseFile<T> | null> => {
+  const targetDrive = getChannelDrive(channelId);
+  const params: FileQueryParams = {
+    clientUniqueIdAtLeastOne: [toGuidId(postSlug)],
+    targetDrive: targetDrive,
+    fileType: [BlogConfig.PostFileType, BlogConfig.DraftPostFileType],
+  };
+
+  const response = await queryBatchOverPeer(dotYouClient, odinId, params);
+  if (!response.searchResults || response.searchResults.length === 0) return null;
+
+  if (response.searchResults.length > 1)
+    console.warn(
+      `Found more than one file with uniqueId [${toGuidId(postSlug)}].  Using first entry.`
+    );
+
+  return (await dsrToPostFile<T>(dotYouClient, odinId, response.searchResults[0], true)) || null;
 };
 
 const dsrToPostFile = async <T extends PostContent>(
@@ -216,9 +248,9 @@ const dsrToPostFile = async <T extends PostContent>(
   odinId: string,
   dsr: HomebaseFile,
   includeMetadataHeader: boolean
-): Promise<HomebaseFile<T> | undefined> => {
+): Promise<HomebaseFile<T> | null> => {
   try {
-    if (!dsr.fileMetadata.globalTransitId) return undefined;
+    if (!dsr.fileMetadata.globalTransitId) return null;
     // The header as a mimimum should have the channel id
     const keyHeader = dsr.fileMetadata.isEncrypted
       ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
@@ -240,7 +272,7 @@ const dsrToPostFile = async <T extends PostContent>(
       includeMetadataHeader
     );
 
-    if (!postContent) return undefined;
+    if (!postContent) return null;
 
     const file: HomebaseFile<T> = {
       ...dsr,
@@ -258,6 +290,6 @@ const dsrToPostFile = async <T extends PostContent>(
     return file;
   } catch (ex) {
     console.error('[DotYouCore-js] failed to get the payload of a dsr', dsr, ex);
-    return undefined;
+    return null;
   }
 };

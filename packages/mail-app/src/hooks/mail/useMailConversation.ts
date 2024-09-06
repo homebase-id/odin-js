@@ -218,10 +218,6 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
         queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
         console.error('Error sending mail message', _error);
       },
-      onSettled: async () => {
-        // TODO: Should we really fully refetch the mail conversations and mail thread? Might be a lot of data...
-        queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
-      },
     }),
     markAsRead: useMutation({
       mutationFn: markAsRead,
@@ -534,10 +530,6 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
         queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
 
         console.error('Error removing draft mail message', _error);
-      },
-      onSettled: async () => {
-        queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
-        // Should we fully refetch the mail conversations and mail thread? Might be a lot of data...
       },
     }),
   };

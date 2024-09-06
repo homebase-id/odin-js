@@ -145,7 +145,7 @@ const createVectorThumbnail = async (
       inMemoryImage.onerror = () => resolve(null);
 
       inMemoryImage.src = `data:image/svg+xml;base64,${uint8ArrayToBase64(imageBytes)}`;
-    } catch (e) {
+    } catch {
       resolve(null);
     }
   });

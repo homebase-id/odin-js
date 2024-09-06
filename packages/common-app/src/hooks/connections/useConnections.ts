@@ -115,6 +115,7 @@ export const useActiveConnections = (
         count: pageSize,
       });
     } catch (ex) {
+      console.warn('[useActiveConnections] Failed to fetch connections', ex);
       return {
         cursor: 0,
         results: [],

@@ -248,7 +248,7 @@ const getChannelDefinitionInternal = async (
       const dsr = response.searchResults[0];
       return dsrToChannelFile(dotYouClient, dsr, targetDrive, response.includeMetadataHeader);
     }
-  } catch (ex) {
+  } catch {
     // Catch al, as targetDrive might be inaccesible (when it doesn't exist yet)
   }
 

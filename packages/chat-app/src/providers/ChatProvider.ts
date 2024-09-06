@@ -362,6 +362,9 @@ export const uploadChatMessage = async (
         TransferUploadStatus.EnqueuedFailed
     )
   ) {
+    message.fileId = uploadResult.file.fileId;
+    message.fileMetadata.versionTag = uploadResult.newVersionTag;
+
     message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Failed;
     message.fileMetadata.appData.content.deliveryDetails = {};
     for (const recipient of recipients) {
@@ -372,15 +375,26 @@ export const uploadChatMessage = async (
           : ChatDeliveryStatus.Delivered;
     }
 
-    await updateChatMessage(dotYouClient, message, recipients, uploadResult.keyHeader);
-
-    console.error('Not all recipients received the message: ', uploadResult);
-    throw new Error(`Not all recipients received the message: ${recipients.join(', ')}`);
+    const updateResult = await updateChatMessage(
+      dotYouClient,
+      message,
+      recipients,
+      uploadResult.keyHeader
+    );
+    console.warn('Not all recipients received the message: ', uploadResult);
+    // We don't throw an error as it is not a critical failure; And the message is still saved locally
+    return {
+      ...uploadResult,
+      newVersionTag: updateResult?.newVersionTag || uploadResult?.newVersionTag,
+      previewThumbnail: uploadMetadata.appData.previewThumbnail,
+      chatDeliveryStatus: ChatDeliveryStatus.Failed, // Should we set failed, or does an enqueueFailed have a retry? (Either way it should auto-solve if it does)
+    };
   }
 
   return {
     ...uploadResult,
     previewThumbnail: uploadMetadata.appData.previewThumbnail,
+    chatDeliveryStatus: ChatDeliveryStatus.Sent,
   };
 };
 
@@ -462,7 +476,7 @@ export const softDeleteChatMessage = async (
 
   for (let i = 0; i < message.fileMetadata.payloads.length; i++) {
     const payload = message.fileMetadata.payloads[i];
-    // TODO: Should the payload be deleted for everyone? With "TransitOptions"
+    // TODO: Should the payload be deleted for everyone? With "TransitOptions"; Needs server side support for it;
     const deleteResult = await deletePayload(
       dotYouClient,
       ChatDrive,

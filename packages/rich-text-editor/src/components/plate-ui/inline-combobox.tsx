@@ -55,6 +55,7 @@ interface InlineComboboxContextValue {
   trigger: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const InlineComboboxContext = createContext<InlineComboboxContextValue>(null as any);
 
 export const defaultFilter: FilterFn = ({ keywords = [], value }, search) =>
@@ -66,6 +67,7 @@ interface InlineComboboxProps {
   trigger: string;
   filter?: FilterFn | false;
   hideWhenNoValue?: boolean;
+  hideWhenSpace?: boolean;
   setValue?: (value: string) => void;
   showTrigger?: boolean;
   value?: string;
@@ -76,6 +78,7 @@ const InlineCombobox = ({
   element,
   filter = defaultFilter,
   hideWhenNoValue = false,
+  hideWhenSpace = false,
   setValue: setValueProp,
   showTrigger = true,
   trigger,
@@ -124,7 +127,11 @@ const InlineCombobox = ({
   }, [editor, element]);
 
   const { props: inputProps, removeInput } = useComboboxInput({
-    cancelInputOnBlur: false,
+    cancelInputOnBlur: true,
+    cancelInputOnBackspace: true,
+    cancelInputOnEscape: true,
+    cancelInputOnDeselect: true,
+    cancelInputOnArrowLeftRight: true,
     cursorState,
     onCancelInput: (cause) => {
       if (cause !== 'backspace') {
@@ -164,8 +171,6 @@ const InlineCombobox = ({
 
   const items = store.useState('items');
 
-  useEffect;
-
   /**
    * If there is no active ID and the list of items changes, select the first
    * item.
@@ -174,13 +179,16 @@ const InlineCombobox = ({
     if (!store.getState().activeId) {
       store.setActiveId(store.first());
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, store]);
 
   return (
     <span contentEditable={false}>
       <ComboboxProvider
-        open={(items.length > 0 || hasEmpty) && (!hideWhenNoValue || value.length > 0)}
+        open={
+          (items.length > 0 || hasEmpty) &&
+          (!hideWhenNoValue || value.length > 0) &&
+          (!hideWhenSpace || !value.includes(' '))
+        }
         store={store}
       >
         <InlineComboboxContext.Provider value={contextValue}>
@@ -237,7 +245,6 @@ const InlineComboboxInput = forwardRef<HTMLInputElement, HTMLAttributes<HTMLInpu
 
 InlineComboboxInput.displayName = 'InlineComboboxInput';
 
-// eslint-disable-next-line react/prop-types
 const InlineComboboxContent: typeof ComboboxPopover = ({ className, ...props }) => {
   // Portal prevents CSS from leaking into popover
   return (
@@ -301,6 +308,13 @@ const InlineComboboxItem = ({
       onClick={(event) => {
         removeInput(true);
         onClick?.(event);
+      }}
+      onKeyDown={(event) => {
+        // Insert the selected item when the user presses Enter or Tab
+        if (event.key === 'Tab') {
+          removeInput(true);
+          onClick?.(event as never);
+        }
       }}
       {...props}
     />

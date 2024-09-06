@@ -1,5 +1,5 @@
 import { ActionButton } from '../../ui';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 import { useDotYouClient } from '../../hooks';
 import { LinkPreview, getLinkPreview } from '@homebase-id/js-lib/media';
 import { LinkPreviewTextual } from '../../media/Link';
@@ -62,10 +62,15 @@ export const LinkOverview = ({
 export const useLinkPreviewBuilder = (textToSearchIn: string) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
+  const foundLinks = useMemo(
+    () =>
+      textToSearchIn
+        ?.split(new RegExp(/(https?:\/\/[^\s]+)/))
+        .filter((link) => link && link.startsWith('http')),
+    [textToSearchIn]
+  );
+
   useEffect(() => {
-    const foundLinks = textToSearchIn
-      ?.split(new RegExp(/(https?:\/\/[^\s]+)/))
-      .filter((link) => link && link.startsWith('http'));
     if (!foundLinks) return;
 
     const removedLinks = Object.keys(linkPreviews).filter((link) => !foundLinks.includes(link));
@@ -90,8 +95,20 @@ export const useLinkPreviewBuilder = (textToSearchIn: string) => {
         ...Object.fromEntries(LinkPreviews.map((link) => [link.url, link])),
       }));
     })();
-  }, [textToSearchIn]);
+  }, [foundLinks]);
 
   const [linkPreviews, setLinkPreviews] = useState<Record<string, LinkPreview | null>>({});
-  return { linkPreviews, setLinkPreviews };
+
+  // We filter the previews again to avoid showing previews of links that are no longer in the text
+  const filteredLinkPreviews = useMemo(() => {
+    const filtered: Record<string, LinkPreview | null> = {};
+    Object.keys(linkPreviews).forEach((link) => {
+      if (foundLinks.includes(link)) {
+        filtered[link] = linkPreviews[link];
+      }
+    });
+
+    return filtered;
+  }, [linkPreviews, foundLinks]);
+  return { linkPreviews: filteredLinkPreviews, setLinkPreviews };
 };

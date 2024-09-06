@@ -65,6 +65,7 @@ const DriveAppAccessDialog = ({
                 newAppPermission.map(async (newAppPerm) => await updateAppPermission(newAppPerm))
               );
             } catch (ex) {
+              console.error('Failed to update apps', ex);
               setSaveState('error');
             }
             setSaveState('success');

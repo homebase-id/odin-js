@@ -14,7 +14,6 @@ import {
   OWNER_APP_ID,
   CHAT_APP_ID,
   MAIL_APP_ID,
-  COMMUNITY_APP_ID,
   FEED_APP_ID,
   PHOTO_APP_ID,
 } from '@homebase-id/common-app';
@@ -186,25 +185,25 @@ const MailApp = () => {
   );
 };
 
-const CommunityApp = () => {
-  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: COMMUNITY_APP_ID });
+// const CommunityApp = () => {
+//   const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: COMMUNITY_APP_ID });
 
-  return (
-    <AppWrapper
-      appId={COMMUNITY_APP_ID}
-      name={'Community'}
-      href={`/apps/community`}
-      unreadCount={unreadCount || 0}
-      options={[
-        {
-          label: t('Settings'),
-          icon: Cog,
-          href: `/owner/third-parties/apps/${COMMUNITY_APP_ID}`,
-        },
-      ]}
-    />
-  );
-};
+//   return (
+//     <AppWrapper
+//       appId={COMMUNITY_APP_ID}
+//       name={'Community'}
+//       href={`/apps/community`}
+//       unreadCount={unreadCount || 0}
+//       options={[
+//         {
+//           label: t('Settings'),
+//           icon: Cog,
+//           href: `/owner/third-parties/apps/${COMMUNITY_APP_ID}`,
+//         },
+//       ]}
+//     />
+//   );
+// };
 
 const FeedApp = () => {
   // const { data: appReg } = useApp({ appId: FEED_APP_ID }).fetch;

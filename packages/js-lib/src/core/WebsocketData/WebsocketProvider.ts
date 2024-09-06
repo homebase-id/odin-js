@@ -134,6 +134,7 @@ const ConnectSocket = async (
 
   // We're already connecting, return the existing promise
   if (connectPromise) return connectPromise;
+  // eslint-disable-next-line no-async-promise-executor
   connectPromise = new Promise<void>(async (resolve, reject) => {
     if (apiType === ApiType.App) {
       // we need to preauth before we can connect
@@ -255,7 +256,7 @@ const DisconnectSocket = async () => {
   try {
     if (!webSocketClient) console.warn('No active client to disconnect');
     else webSocketClient.close(1000, 'Normal Disconnect');
-  } catch (e) {
+  } catch {
     // Ignore any errors on close, as we always want to clean up
   }
   if (isDebug) console.debug(`[NotificationProvider] Client disconnected`);
@@ -276,7 +277,8 @@ export const Subscribe = async (
   handler: (data: TypedConnectionNotification) => void,
   onDisconnect?: () => void,
   onReconnect?: () => void,
-  args?: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this
+  args?: unknown, // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this,
+  refId?: string
 ): Promise<void> => {
   const apiType = dotYouClient.getType();
   const sharedSecret = dotYouClient.getSharedSecret();
@@ -287,7 +289,8 @@ export const Subscribe = async (
   activeSs = sharedSecret;
   subscribers.push({ handler, onDisconnect, onReconnect });
 
-  if (isDebug) console.debug(`[NotificationProvider] New subscriber (${subscribers.length})`);
+  if (isDebug)
+    console.debug(`[NotificationProvider] New subscriber (${subscribers.length})`, refId);
 
   // Already connected, no need to initiate a new connection
   if (webSocketClient) return Promise.resolve();

@@ -56,17 +56,17 @@ export const FileCard = ({
         <FileExtLabel
           file={file}
           defaultPayload={firstPayload}
-          className={`${isRow ? '' : 'absolute right-2 top-2'}  z-10 bg-indigo-200 p-1 text-[0.7rem] uppercase dark:bg-indigo-800`}
+          className={`${isRow ? '' : 'absolute right-2 top-2'} z-10 bg-indigo-200 p-1 text-[0.7rem] uppercase dark:bg-indigo-800`}
         />
         <FileDownload
           file={file}
           targetDrive={targetDrive}
-          className={`${isRow ? '' : 'absolute left-2 top-2'}  z-10`}
+          className={`${isRow ? '' : 'absolute left-2 top-2'} z-10`}
         />
         <FileDelete
           file={file}
           targetDrive={targetDrive}
-          className={`${isRow ? '' : 'absolute right-2 top-8'}  z-10`}
+          className={`${isRow ? '' : 'absolute right-2 top-8'} z-10`}
         />
       </div>
 
@@ -353,6 +353,7 @@ const FileState = ({
             : false
         );
       } catch (e) {
+        console.warn('[FileCard] Failed to decrypt file', e);
         setIsBroken(true);
       }
     })();

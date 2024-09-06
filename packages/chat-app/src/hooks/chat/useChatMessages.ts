@@ -47,10 +47,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
           !recipientStatus.status ||
           recipientStatus.status?.toLowerCase() !== SendReadReceiptResponseRecipientStatus.Enqueued
       );
-      if (someFailed) {
-        // TODO: Should we throw an error?
-        console.error('Error marking chat as read', { response });
-      }
+      if (someFailed) console.error('Error marking chat as read', { response });
     });
 
     return response;
@@ -75,7 +72,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     );
 
     return await Promise.all(
-      messages.map(async (msg) => {
+      messages.map(async (msg) =>
         hardDelete
           ? await hardDeleteChatMessage(dotYouClient, msg)
           : await softDeleteChatMessage(
@@ -83,8 +80,8 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
               msg,
               recipients.filter(Boolean),
               deleteForEveryone
-            );
-      })
+            )
+      )
     );
   };
 

@@ -10,7 +10,6 @@ import {
 import { saveContact } from '../../provider/contact/ContactProvider';
 import { fetchConnectionInfo } from '../../provider/contact/ContactSourceProvider';
 import { NumberCursoredResult, SecurityGroupType } from '@homebase-id/js-lib/core';
-import { getNewId } from '@homebase-id/js-lib/helpers';
 
 export const usePendingConnection = ({ odinId }: { odinId?: string }) => {
   const queryClient = useQueryClient();

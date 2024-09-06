@@ -41,6 +41,7 @@ import {
 } from '@homebase-id/js-lib/public';
 import { slugify, getNewId } from '@homebase-id/js-lib/helpers';
 import { useState } from 'react';
+import { useManageChannel } from '@homebase-id/common-app';
 
 type RealmName = keyof typeof lotrRealm | undefined;
 type RealmData = (typeof lotrRealm)[keyof typeof lotrRealm];
@@ -408,7 +409,7 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
       <h1>Profile:</h1>
       <button
         onClick={addName}
-        className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
+        className={`my-2 block w-1/3 rounded border-0 px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
           isNameSet ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
         }`}
         disabled={isNameSet}
@@ -417,7 +418,7 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
       </button>
       <button
         onClick={addPhoto}
-        className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
+        className={`my-2 block w-1/3 rounded border-0 px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
           attrHasData(photoAttr) && isPhotoFetched
             ? 'pointer-events-none bg-gray-300'
             : 'bg-green-500'
@@ -428,7 +429,7 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
       </button>
       <button
         onClick={addSocials}
-        className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
+        className={`my-2 block w-1/3 rounded border-0 px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
           attrHasData(socialAttr) && isSocialFetched
             ? 'pointer-events-none bg-gray-300'
             : 'bg-green-500'
@@ -439,7 +440,7 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
       </button>
       <button
         onClick={addBiography}
-        className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
+        className={`my-2 block w-1/3 rounded border-0 px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
           bioAttr && isBioFetched ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
         }`}
         disabled={(bioAttr && isBioFetched) || false}
@@ -513,10 +514,6 @@ const DemoDataHomeAndTheme = ({ realmData }: { client: DotYouClient; realmData: 
       { type: 'image/webp' }
     );
 
-    // TODO: Save tag and leadText into status and shortBio attributes
-    // StatusAttr.data[HomePageThemeFields.TagLineId] = realmData.home.tagLine;
-    // ShortBioAttr.data[HomePageThemeFields.LeadTextId] = realmData.home.lead;
-
     saveRoot({
       fileMetadata: {
         appData: {
@@ -536,7 +533,7 @@ const DemoDataHomeAndTheme = ({ realmData }: { client: DotYouClient; realmData: 
       <h1>Theme:</h1>
       <button
         onClick={addTheme}
-        className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
+        className={`my-2 block w-1/3 rounded border-0 px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
           hasThemeData ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
         }`}
         disabled={!!hasThemeData}
@@ -559,10 +556,13 @@ const DemoDataBlog = ({
 
   const {
     fetch: { data: channelAttr, isFetched: isChannelFetched },
-    save: { mutate: saveChannel },
   } = useChannel({
-    channelId: realmData.blog?.channels?.[0].id,
+    channelKey: realmData.blog?.channels?.[0].id,
   });
+
+  const {
+    save: { mutate: saveChannel },
+  } = useManageChannel();
 
   const {
     save: { mutateAsync: saveBlog },
@@ -683,7 +683,7 @@ const DemoDataBlog = ({
       <h1>Blog:</h1>
       <button
         onClick={addChannels}
-        className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
+        className={`my-2 block w-1/3 rounded border-0 px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
           channelAttr && isChannelFetched ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
         }`}
         disabled={(channelAttr && isChannelFetched) || false}
@@ -746,7 +746,7 @@ const CirclesAndConnections = ({ realmData }: { realmData: RealmData }) => {
       <h1>Circles and Connections:</h1>
       <button
         onClick={createCircles}
-        className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
+        className={`my-2 block w-1/3 rounded border-0 px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
           hasDemoCircles ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
         }`}
         disabled={hasDemoCircles || false}
