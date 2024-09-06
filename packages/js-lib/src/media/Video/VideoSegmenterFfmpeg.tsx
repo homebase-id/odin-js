@@ -77,7 +77,7 @@ export const segmentVideoFileWithFfmpeg = async (
     throw new Error('No (supported) mp4 file found, segmentation only works with mp4 files');
   }
 
-  if (file.size < 10 * MB) {
+  if (file.size < 5 * MB) {
     return {
       video: file,
       metadata: {
