@@ -6,6 +6,7 @@ import {
   getDecryptedVideoUrl,
   PlainVideoMetadata,
   SegmentedVideoMetadata,
+  HlsVideoMetadata,
 } from '@homebase-id/js-lib/media';
 import {
   getDecryptedVideoChunkOverPeer,
@@ -41,7 +42,7 @@ export const useVideo = (
     videoDrive?: TargetDrive
   ): Promise<{
     fileHeader: HomebaseFile;
-    metadata: PlainVideoMetadata | SegmentedVideoMetadata;
+    metadata: PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata;
   } | null> => {
     if (
       videoFileId === undefined ||
@@ -71,7 +72,9 @@ export const useVideo = (
       const descriptor = payloadData?.descriptorContent;
       if (!descriptor) return undefined;
 
-      const parsedMetaData = tryJsonParse<PlainVideoMetadata | SegmentedVideoMetadata>(descriptor);
+      const parsedMetaData = tryJsonParse<
+        PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata
+      >(descriptor);
       // The fileHeader contains the most accurate file size; So we use that one.
       parsedMetaData.fileSize = payloadData.bytesWritten;
       return { metadata: parsedMetaData, fileHeader };

@@ -5,17 +5,14 @@ import {
   SystemFileType,
   TargetDrive,
   decryptKeyHeader,
-  getPayloadBytes,
   InterceptionEncryptionUtil,
 } from '@homebase-id/js-lib/core';
 import {
-  byteArrayToString,
   stringifyToQueryParams,
   stringToUint8Array,
   uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
-import { getAnonymousDirectImageUrl } from '@homebase-id/js-lib/media';
-import { getPayloadBytesOverPeer } from '@homebase-id/js-lib/peer';
+import { getAnonymousDirectImageUrl, HlsVideoMetadata } from '@homebase-id/js-lib/media';
 import { useVideo } from './useVideo';
 
 export const useHlsManifest = (
@@ -53,23 +50,16 @@ export const useHlsManifest = (
       return null;
 
     const fetchManifestPayload = async () => {
-      return odinId !== identity
-        ? await getPayloadBytesOverPeer(
-            dotYouClient,
-            odinId,
-            videoDrive,
-            videoFile.fileId,
-            videoFileKey
-          )
-        : await getPayloadBytes(dotYouClient, videoDrive, videoFile.fileId, videoFileKey);
+      if (!videoFileData || !('hlsPlaylist' in videoFileData.metadata)) return null;
+      return videoFileData?.metadata as HlsVideoMetadata;
     };
 
     const manifestPayload = await fetchManifestPayload();
     if (!manifestPayload) return null;
 
     const contents = await replaceSegmentUrls(
-      await byteArrayToString(manifestPayload.bytes),
-      async (url, index) => {
+      manifestPayload.hlsPlaylist,
+      async (url) => {
         return (
           (await getSegmentUrl(
             dotYouClient,
@@ -77,7 +67,6 @@ export const useHlsManifest = (
             videoDrive,
             videoFile.fileId,
             videoFileKey,
-            index,
             videoFileData?.fileHeader.fileMetadata.isEncrypted || false
           )) || url
         );
@@ -163,7 +152,6 @@ const getSegmentUrl = async (
   videoDrive: TargetDrive,
   videoFileId: string,
   videoFileKey: string,
-  segmentIndex: number,
   isEncrypted: boolean,
   systemFileType?: SystemFileType
 ) => {
@@ -174,7 +162,7 @@ const getSegmentUrl = async (
       videoDrive,
       videoFileId,
       videoFileKey,
-      { pixelHeight: segmentIndex, pixelWidth: segmentIndex },
+      undefined,
       systemFileType
     );
 
@@ -186,16 +174,14 @@ const getSegmentUrl = async (
   const params = {
     ...videoDrive,
     fileId: videoFileId,
-    payloadKey: videoFileKey,
-    width: segmentIndex,
-    height: segmentIndex,
+    key: videoFileKey,
     xfst: systemFileType || 'Standard',
   };
 
   const unenryptedThumbUrl =
     odinId !== identity
-      ? `${dotYouClient.getEndpoint()}/transit/query/thumb?${stringifyToQueryParams({ odinId, ...params })}`
-      : `${dotYouClient.getEndpoint()}/drive/files/thumb?${stringifyToQueryParams(params)}`;
+      ? `${dotYouClient.getEndpoint()}/transit/query/payload?${stringifyToQueryParams({ odinId, ...params })}`
+      : `${dotYouClient.getEndpoint()}/drive/files/payload?${stringifyToQueryParams(params)}`;
 
   return InterceptionEncryptionUtil.encryptUrl(unenryptedThumbUrl, ss);
 };

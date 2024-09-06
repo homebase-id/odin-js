@@ -3,7 +3,7 @@ const OdinBlob: typeof Blob =
   Blob;
 import { KeyHeader } from '../../core/DriveData/File/DriveFileTypes';
 import { base64ToUint8Array, hasDebugFlag, uint8ArrayToBase64 } from '../../helpers/helpers';
-import { PlainVideoMetadata, SegmentedVideoMetadata } from '../MediaTypes';
+import { HlsVideoMetadata, PlainVideoMetadata, SegmentedVideoMetadata } from '../MediaTypes';
 import { getCodecFromMp4Info, getMp4Info } from './VideoSegmenter';
 
 const isDebug = hasDebugFlag();
@@ -57,9 +57,8 @@ interface VideoData {
 }
 
 interface HLSData {
-  playlist: Blob;
-  segments: Blob[];
-  metadata: SegmentedVideoMetadata;
+  segments: Blob;
+  metadata: HlsVideoMetadata;
   keyHeader?: KeyHeader;
 }
 
@@ -84,7 +83,6 @@ export const segmentVideoFileWithFfmpeg = async (
       metadata: {
         isSegmented: false,
         mimeType: 'video/mp4',
-        fileSize: file.size,
       },
     };
   }
@@ -145,37 +143,29 @@ export const segmentVideoFileWithFfmpeg = async (
     '0',
     '-f',
     'hls',
+    '-hls_flags',
+    'single_file',
     outputFile,
   ]);
+  const dir = await ffmpeg.listDir('.');
+  console.log('ffmpeg output dir', dir);
   if (status !== 0) {
     throw new Error('Failed to segment video');
   }
 
-  const segments: Blob[] = [];
-  for (let i = 0; i < 100; i++) {
-    const fragmentUri = `${outputFile.replace('.m3u8', `${i}.ts`)}`;
-    try {
-      const segmentData = await ffmpeg.readFile(fragmentUri);
-      segments.push(new OdinBlob([segmentData], { type: 'video/mp2t' }));
-    } catch {
-      // Probably all segments are read
-      break;
-    }
-  }
+  const segmentData = await ffmpeg.readFile(outputFile.replace('.m3u8', `.ts`));
+  const segments = new OdinBlob([segmentData], { type: 'video/mp2t' });
 
   const data = await ffmpeg.readFile('output.m3u8');
   const playlistBlob = new OdinBlob([data], { type: 'application/vnd.apple.mpegurl' });
 
-  const metadata: SegmentedVideoMetadata = {
+  const metadata: HlsVideoMetadata = {
     isSegmented: true,
     mimeType: 'application/vnd.apple.mpegurl',
-    codec: getCodecFromMp4Info(mp4Info),
-    fileSize: playlistBlob.size,
-    duration: durationinMiliseconds,
+    hlsPlaylist: await playlistBlob.text(),
   };
 
   return {
-    playlist: playlistBlob,
     segments: segments,
     metadata,
   };

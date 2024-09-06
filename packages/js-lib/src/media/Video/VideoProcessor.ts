@@ -52,23 +52,13 @@ export const processVideoFile = async (
   );
 
   if ('segments' in videoData) {
-    const { playlist, segments } = videoData;
-    // keyHeader = videoData.keyHeader;
+    const { segments } = videoData;
     payloads.push({
       key: payloadKey,
-      payload: playlist,
+      payload: segments,
       descriptorContent: jsonStringify64(metadata),
+      skipEncryption: true,
     });
-
-    for (let j = 0; j < segments.length; j++) {
-      thumbnails.push({
-        key: payloadKey,
-        payload: segments[j],
-        pixelHeight: j,
-        pixelWidth: j,
-        skipEncryption: true,
-      });
-    }
   } else {
     payloads.push({
       key: payloadKey,
@@ -81,6 +71,5 @@ export const processVideoFile = async (
     tinyThumb,
     thumbnails,
     payloads,
-    // keyHeader: videoData.keyHeader,
   };
 };
