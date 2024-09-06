@@ -13,9 +13,6 @@ import {
   buildNotificationTargetLink,
   buildNotificationBody,
   buildNotificationTitle,
-  CHAT_APP_ID,
-  FEED_APP_ID,
-  MAIL_APP_ID,
 } from '@homebase-id/common-app';
 import { Cog, Times, Bell } from '@homebase-id/common-app/icons';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
@@ -360,79 +357,6 @@ const NotificationItem = ({
       isRead={!notification.unread}
     />
   );
-};
-
-const OWNER_FOLLOWER_TYPE_ID = '2cc468af-109b-4216-8119-542401e32f4d';
-const OWNER_CONNECTION_REQUEST_TYPE_ID = '8ee62e9e-c224-47ad-b663-21851207f768';
-const OWNER_CONNECTION_ACCEPTED_TYPE_ID = '79f0932a-056e-490b-8208-3a820ad7c321';
-
-const OWNER_INTRODUCTION_RECEIVED_TYPE_ID = 'f100bfa0-ac4e-468a-9322-bdaf6059ec8a';
-const OWNER_ITNRODUCTION_ACCEPTED_TYPE_ID = 'f56ee792-56dd-45fd-8f9e-f96bb5d0e3de';
-
-const FEED_NEW_CONTENT_TYPE_ID = 'ad695388-c2df-47a0-ad5b-fc9f9e1fffc9';
-const FEED_NEW_REACTION_TYPE_ID = '37dae95d-e137-4bd4-b782-8512aaa2c96a';
-const FEED_NEW_COMMENT_TYPE_ID = '1e08b70a-3826-4840-8372-18410bfc02c7';
-
-const bodyFormer = (
-  payload: PushNotification,
-  hasMultiple: boolean,
-  appName: string,
-  senderName: string | undefined
-) => {
-  const sender = senderName || payload.senderId;
-
-  if (payload.options.unEncryptedMessage)
-    return (payload.options.unEncryptedMessage || '').replaceAll(payload.senderId, sender);
-
-  if (payload.options.appId === OWNER_APP_ID) {
-    // Based on type, we show different messages
-    if (payload.options.typeId === OWNER_FOLLOWER_TYPE_ID) {
-      return `${sender} started following you`;
-    } else if (payload.options.typeId === OWNER_CONNECTION_REQUEST_TYPE_ID) {
-      return `${sender} sent you a connection request`;
-    } else if (payload.options.typeId === OWNER_CONNECTION_ACCEPTED_TYPE_ID) {
-      return `${sender} accepted your connection request`;
-    } else if (payload.options.typeId === OWNER_INTRODUCTION_RECEIVED_TYPE_ID) {
-      return `${sender} was introduced to you`;
-    } else if (payload.options.typeId === OWNER_ITNRODUCTION_ACCEPTED_TYPE_ID) {
-      return `${sender} confirmed the introduction`;
-    }
-  } else if (payload.options.appId === CHAT_APP_ID) {
-    return `${sender} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
-  } else if (payload.options.appId === MAIL_APP_ID) {
-    return `${sender} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
-  } else if (payload.options.appId === FEED_APP_ID) {
-    if (payload.options.typeId === FEED_NEW_CONTENT_TYPE_ID) {
-      return `${sender} uploaded a new post`;
-    } else if (payload.options.typeId === FEED_NEW_REACTION_TYPE_ID) {
-      return `${sender} reacted to your post`;
-    } else if (payload.options.typeId === FEED_NEW_COMMENT_TYPE_ID) {
-      return `${sender} commented to your post`;
-    }
-  }
-
-  return `${sender} sent you a notification via ${appName}`;
-};
-
-const getTargetLink = (payload: PushNotification) => {
-  if (payload.options.appId === OWNER_APP_ID) {
-    // Based on type, we show different messages
-    if (
-      [
-        OWNER_FOLLOWER_TYPE_ID,
-        OWNER_CONNECTION_REQUEST_TYPE_ID,
-        OWNER_CONNECTION_ACCEPTED_TYPE_ID,
-      ].includes(payload.options.typeId)
-    ) {
-      return `/owner/connections/${payload.senderId}`;
-    }
-  } else if (payload.options.appId === CHAT_APP_ID) {
-    return `/apps/chat/${payload.options.typeId}`;
-  } else if (payload.options.appId === MAIL_APP_ID) {
-    return `/apps/mail/inbox/${payload.options.typeId}`;
-  } else if (payload.options.appId === FEED_APP_ID) {
-    return `/apps/feed`;
-  }
 };
 
 export default Notifications;

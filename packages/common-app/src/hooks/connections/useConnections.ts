@@ -14,7 +14,7 @@ interface useConnectionsProps {
   pageNumber: number;
 }
 
-interface usePendingConnectionsProps extends useConnectionsProps {}
+type usePendingConnectionsProps = useConnectionsProps;
 interface useSentConnectionsProps extends useConnectionsProps {
   includeIntroductions?: true | false | 'only';
 }
