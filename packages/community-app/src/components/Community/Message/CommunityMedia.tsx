@@ -73,7 +73,9 @@ const MediaItem = ({
 }) => {
   const { isDarkMode } = useDarkMode();
   const dotYouClient = useDotYouClientContext();
-  const isVideo = payload.contentType?.startsWith('video');
+  const isVideo =
+    payload.contentType?.startsWith('video') ||
+    payload.contentType === 'application/vnd.apple.mpegurl';
   const isAudio = payload.contentType?.startsWith('audio');
   const isImage = payload.contentType?.startsWith('image');
   const isLink = payload.key === COMMUNITY_LINKS_PAYLOAD_KEY;

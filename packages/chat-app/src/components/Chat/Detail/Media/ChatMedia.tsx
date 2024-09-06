@@ -64,7 +64,9 @@ const MediaItem = ({
 }) => {
   const { isDarkMode } = useDarkMode();
   const dotYouClient = useDotYouClientContext();
-  const isVideo = payload.contentType?.startsWith('video');
+  const isVideo =
+    payload.contentType?.startsWith('video') ||
+    payload.contentType === 'application/vnd.apple.mpegurl';
   const isAudio = payload.contentType?.startsWith('audio');
   const isImage = payload.contentType?.startsWith('image');
   const isLink = payload.key === CHAT_LINKS_PAYLOAD_KEY;
@@ -88,7 +90,7 @@ const MediaItem = ({
                 lastModified={payload.lastModified || fileLastModified}
                 targetDrive={ChatDrive}
                 className={`w-full blur-sm`}
-                loadSize={{ pixelWidth: 1920, pixelHeight: 1080 }}
+                loadSize={{ pixelWidth: 200, pixelHeight: 200 }}
               />
               <div className="absolute inset-0 flex items-center justify-center">
                 <Triangle className="h-16 w-16 text-background" />

@@ -17,6 +17,7 @@
     "@homebase-id/common-app": "*",
     "@homebase-id/js-lib": "*",
     "@homebase-id/ui-lib": "*",
+    "hls.js": "^1.5.15",
     "axios": "1.7.5",
     "emoji-picker-element": "^1.21.3",
     "lodash-es": "^4.17.21",

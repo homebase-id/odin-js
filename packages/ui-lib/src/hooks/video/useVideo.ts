@@ -1,11 +1,12 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { DotYouClient, TargetDrive, getFileHeader } from '@homebase-id/js-lib/core';
+import { DotYouClient, HomebaseFile, TargetDrive, getFileHeader } from '@homebase-id/js-lib/core';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import {
   getDecryptedVideoChunk,
   getDecryptedVideoUrl,
   PlainVideoMetadata,
   SegmentedVideoMetadata,
+  HlsVideoMetadata,
 } from '@homebase-id/js-lib/media';
 import {
   getDecryptedVideoChunkOverPeer,
@@ -23,17 +24,26 @@ export const useVideo = (
   videoFileKey?: string | undefined,
   videoDrive?: TargetDrive
 ): {
-  fetchMetadata: UseQueryResult<PlainVideoMetadata | SegmentedVideoMetadata | null, Error>;
+  fetchMetadata: UseQueryResult<
+    {
+      fileHeader: HomebaseFile;
+      metadata: PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata;
+    } | null,
+    Error
+  >;
   getChunk: (chunkStart: number, chunkEnd?: number) => Promise<Uint8Array | null> | null;
 } => {
-  const localHost = window.location.hostname;
+  const identity = dotYouClient.getIdentity();
 
   const fetchVideoData = async (
     odinId: string,
     videoFileId: string | undefined,
     videoGlobalTransitId: string | undefined,
     videoDrive?: TargetDrive
-  ): Promise<PlainVideoMetadata | SegmentedVideoMetadata | null> => {
+  ): Promise<{
+    fileHeader: HomebaseFile;
+    metadata: PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata;
+  } | null> => {
     if (
       videoFileId === undefined ||
       videoFileId === '' ||
@@ -46,7 +56,7 @@ export const useVideo = (
 
     const fetchMetaPromise = async () => {
       const fileHeader =
-        odinId !== localHost
+        odinId !== identity
           ? videoGlobalTransitId
             ? await getFileHeaderBytesOverPeerByGlobalTransitId(
                 dotYouClient,
@@ -62,10 +72,12 @@ export const useVideo = (
       const descriptor = payloadData?.descriptorContent;
       if (!descriptor) return undefined;
 
-      const parsedMetaData = tryJsonParse<PlainVideoMetadata | SegmentedVideoMetadata>(descriptor);
+      const parsedMetaData = tryJsonParse<
+        PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata
+      >(descriptor);
       // The fileHeader contains the most accurate file size; So we use that one.
       parsedMetaData.fileSize = payloadData.bytesWritten;
-      return parsedMetaData;
+      return { metadata: parsedMetaData, fileHeader };
     };
 
     return (await fetchMetaPromise()) || null;
@@ -75,12 +87,12 @@ export const useVideo = (
     fetchMetadata: useQuery({
       queryKey: [
         'video',
-        odinId || localHost,
+        odinId || identity,
         videoDrive?.alias,
         videoGlobalTransitId || videoFileId,
       ],
       queryFn: () =>
-        fetchVideoData(odinId || localHost, videoFileId, videoGlobalTransitId, videoDrive),
+        fetchVideoData(odinId || identity, videoFileId, videoGlobalTransitId, videoDrive),
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       enabled: !!videoFileId && videoFileId !== '',
@@ -96,7 +108,7 @@ export const useVideo = (
         chunkStart,
         chunkEnd,
       ] as const;
-      return odinId && odinId !== localHost
+      return odinId && odinId !== identity
         ? getDecryptedVideoChunkOverPeer(dotYouClient, odinId, ...params)
         : getDecryptedVideoChunk(dotYouClient, ...params);
     },
@@ -112,7 +124,7 @@ export const useVideoUrl = (
   videoDrive?: TargetDrive,
   fileSizeLimit?: number
 ): { fetch: UseQueryResult<string | null, Error> } => {
-  const localHost = window.location.hostname;
+  const identity = dotYouClient.getIdentity();
 
   const fetchVideoData = async (
     odinId: string,
@@ -129,8 +141,8 @@ export const useVideoUrl = (
     )
       return null;
 
-    const fetchMetaPromise = async () => {
-      return odinId !== localHost
+    const fetchUrl = async () => {
+      return odinId !== identity
         ? videoGlobalTransitId
           ? await getDecryptedVideoUrlOverPeerByGlobalTransitId(
               dotYouClient,
@@ -160,19 +172,19 @@ export const useVideoUrl = (
           );
     };
 
-    return await fetchMetaPromise();
+    return await fetchUrl();
   };
 
   return {
     fetch: useQuery({
       queryKey: [
         'video-url',
-        odinId || localHost,
+        odinId || identity,
         videoDrive?.alias,
         videoGlobalTransitId || videoFileId,
       ],
       queryFn: () =>
-        fetchVideoData(odinId || localHost, videoFileId, videoGlobalTransitId, videoDrive),
+        fetchVideoData(odinId || identity, videoFileId, videoGlobalTransitId, videoDrive),
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       enabled: !!videoFileId && videoFileId !== '',

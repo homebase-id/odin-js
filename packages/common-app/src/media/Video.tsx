@@ -51,7 +51,7 @@ export const VideoClickToLoad = ({
 
   return (
     <div
-      className={`${props.className?.includes('absolute') ? '' : 'relative'} overflow-hidden ${props.className || ''}`}
+      className={`${props.className?.includes('absolute') ? '' : 'relative'} cursor-pointer overflow-hidden ${props.className || ''}`}
       onClick={(e) => {
         e.stopPropagation();
         setLoadVideo(true);
@@ -59,7 +59,7 @@ export const VideoClickToLoad = ({
     >
       {shouldFallback ? (
         loadVideo ? null : (
-          <div className="bg-slate-200 dark:bg-slate-800 aspect-video w-full"></div>
+          <div className="bg-slate-200 dark:bg-slate-800 aspect-video w-full h-full"></div>
         )
       ) : (
         <>
@@ -73,7 +73,7 @@ export const VideoClickToLoad = ({
             dotYouClient={dotYouClient}
             {...props}
             className={`${props.className || ''} ${playingVideo ? 'opacity-0' : 'opacity-100'} absolute inset-0 blur-sm ${props.className?.includes('object-') ? '' : 'object-cover'}`}
-            loadSize={{ pixelWidth: 1920, pixelHeight: 1080 }}
+            loadSize={{ pixelWidth: 100, pixelHeight: 100 }}
             onLoad={() => setPreviewLoaded(true)}
             onError={() => setShouldFallback(true)}
             probablyEncrypted={probablyEncrypted}

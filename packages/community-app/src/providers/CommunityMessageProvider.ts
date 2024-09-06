@@ -36,6 +36,7 @@ import {
   jsonStringify64,
   stringToUint8Array,
   makeGrid,
+  getRandom16ByteArray,
 } from '@homebase-id/js-lib/helpers';
 import {
   LinkPreview,
@@ -132,6 +133,10 @@ export const uploadCommunityMessage = async (
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+  const keyHeader: KeyHeader = {
+    iv: getRandom16ByteArray(),
+    aesKey: getRandom16ByteArray(),
+  };
 
   if (!files?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
@@ -159,13 +164,14 @@ export const uploadCommunityMessage = async (
     const payloadKey = `${COMMUNITY_MESSAGE_PAYLOAD_KEY}${i}`;
     const newMediaFile = files[i];
     if (newMediaFile.file.type.startsWith('video/')) {
-      const { tinyThumb, additionalThumbnails, payload } = await processVideoFile(
-        newMediaFile,
-        payloadKey
-      );
+      const {
+        tinyThumb,
+        thumbnails: thumbnailsFromVideo,
+        payloads: payloadsFromVideo,
+      } = await processVideoFile(newMediaFile, payloadKey, keyHeader);
 
-      thumbnails.push(...additionalThumbnails);
-      payloads.push(payload);
+      thumbnails.push(...thumbnailsFromVideo);
+      payloads.push(...payloadsFromVideo);
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
     } else if (newMediaFile.file.type.startsWith('image/')) {
@@ -202,7 +208,10 @@ export const uploadCommunityMessage = async (
     payloads,
     thumbnails,
     undefined,
-    onVersionConflict
+    onVersionConflict,
+    {
+      keyHeader,
+    }
   );
 
   if (!uploadResult) return null;
