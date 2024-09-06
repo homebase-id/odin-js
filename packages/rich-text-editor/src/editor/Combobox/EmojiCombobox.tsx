@@ -31,7 +31,8 @@ export const EmojiInputElement = withRef<typeof PlateElement>(({ ...props }, ref
       <InlineCombobox
         element={element}
         filter={false}
-        hideWhenNoValue
+        hideWhenSpace={true}
+        hideWhenNoValue={true}
         setValue={setValue}
         trigger=":"
         value={value}

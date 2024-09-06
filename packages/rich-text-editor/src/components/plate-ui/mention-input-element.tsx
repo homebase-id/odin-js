@@ -39,6 +39,8 @@ export const MentionInputElement = withRef<typeof PlateElement>(({ className, ..
         showTrigger={true}
         trigger="@"
         value={search}
+        hideWhenSpace={true}
+        hideWhenNoValue={true}
       >
         <span
           className={cn(

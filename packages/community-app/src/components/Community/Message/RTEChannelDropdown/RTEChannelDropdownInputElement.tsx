@@ -59,6 +59,8 @@ export const RTEChannelDropdownInputElement = withRef<typeof PlateElement>(
             showTrigger={true}
             trigger="#"
             value={search}
+            hideWhenSpace={true}
+            hideWhenNoValue={true}
           >
             <span
               className={cn(
