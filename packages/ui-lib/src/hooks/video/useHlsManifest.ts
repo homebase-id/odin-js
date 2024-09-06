@@ -12,7 +12,7 @@ import {
   stringToUint8Array,
   uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
-import { getAnonymousDirectImageUrl, HlsVideoMetadata } from '@homebase-id/js-lib/media';
+import { getAnonymousDirectImageUrl } from '@homebase-id/js-lib/media';
 import { useVideo } from './useVideo';
 
 export const useHlsManifest = (
@@ -49,16 +49,11 @@ export const useHlsManifest = (
     )
       return null;
 
-    const fetchManifestPayload = async () => {
-      if (!videoFileData || !('hlsPlaylist' in videoFileData.metadata)) return null;
-      return videoFileData?.metadata as HlsVideoMetadata;
-    };
-
-    const manifestPayload = await fetchManifestPayload();
-    if (!manifestPayload) return null;
+    if (!videoFileData || !('hlsPlaylist' in videoFileData.metadata) || !videoFileData?.metadata)
+      return null;
 
     const contents = await replaceSegmentUrls(
-      manifestPayload.hlsPlaylist,
+      videoFileData?.metadata.hlsPlaylist,
       async (url) => {
         return (
           (await getSegmentUrl(

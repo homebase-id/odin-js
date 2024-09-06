@@ -18,7 +18,6 @@ export const processVideoFile = async (
   tinyThumb: EmbeddedThumb | undefined;
   payloads: PayloadFile[];
   thumbnails: ThumbnailFile[];
-  keyHeader?: Uint8Array;
 }> => {
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];

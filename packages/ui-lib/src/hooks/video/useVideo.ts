@@ -27,7 +27,7 @@ export const useVideo = (
   fetchMetadata: UseQueryResult<
     {
       fileHeader: HomebaseFile;
-      metadata: PlainVideoMetadata | SegmentedVideoMetadata;
+      metadata: PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata;
     } | null,
     Error
   >;
