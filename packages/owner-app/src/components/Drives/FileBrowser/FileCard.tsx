@@ -71,8 +71,8 @@ export const FileCard = ({
       </div>
 
       <div className={`${isRow ? 'w-32' : 'px-4 py-2 lg:px-5'} `}>
-        {isImage ? (
-          <div className="relative">
+        <div className="relative">
+          {isImage ? (
             <div className="flex aspect-square overflow-hidden">
               <Image
                 targetDrive={targetDrive}
@@ -84,19 +84,20 @@ export const FileCard = ({
                 className="m-auto"
               />
             </div>
-
+          ) : (
+            <div className="flex aspect-square overflow-hidden p-2">
+              <ExtensionThumbnail
+                contentType={firstPayload?.contentType || 'application/json'}
+                className="m-auto h-auto w-full max-w-[2rem] opacity-50"
+              />
+            </div>
+          )}
+          {firstPayload ? (
             <div className="absolute inset-0 flex cursor-pointer flex-row items-center justify-center bg-slate-200 bg-opacity-50 opacity-0 hover:opacity-100">
               <FileDownload file={file} targetDrive={targetDrive} payloadKey={firstPayload.key} />
             </div>
-          </div>
-        ) : (
-          <div className="flex aspect-square overflow-hidden p-2">
-            <ExtensionThumbnail
-              contentType={firstPayload?.contentType || 'application/json'}
-              className="m-auto h-auto w-full max-w-[2rem] opacity-50"
-            />
-          </div>
-        )}
+          ) : null}
+        </div>
       </div>
       <div className={isRow ? 'w-24' : ''}>
         <FileTypeLabel file={file} />

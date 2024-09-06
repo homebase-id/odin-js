@@ -1,4 +1,4 @@
-import { DotYouClient, TargetDrive } from '@homebase-id/js-lib/core';
+import { DotYouClient, HomebaseFile, TargetDrive } from '@homebase-id/js-lib/core';
 import { SegmentedVideoMetadata } from '@homebase-id/js-lib/media';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useIntersection } from '../../hooks/intersection/useIntersection';
@@ -11,6 +11,7 @@ import { Exclamation } from '../ui/Icons/Exclamation';
 import { DirectSource } from './DirectSource';
 import { EncryptedMseSource } from './EncryptedMseSource';
 import { MseSource } from './MseSource';
+import { HlsSource } from './HlsSource';
 
 export interface OdinVideoProps {
   dotYouClient: DotYouClient;
@@ -49,7 +50,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
   );
 
   const {
-    fetchMetadata: { data: videoMetaData, isFetched: videoMetaDataFetched },
+    fetchMetadata: { data, isFetched: videoMetaDataFetched },
   } = useVideo(
     dotYouClient,
     odinId,
@@ -58,26 +59,38 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
     fileKey,
     targetDrive
   );
+  const { metadata: videoMetaData, fileHeader } = data || {};
 
   useEffect(() => {
     if (videoProps.autoPlay && videoRef.current) videoRef.current.play();
   }, [videoProps.autoPlay]);
 
-  const playback: 'encrypted-mse' | 'mse' | 'direct' | undefined = useMemo(() => {
-    if (!videoMetaDataFetched) return undefined;
+  const playback: 'encrypted-mse' | 'mse' | 'hls' | 'encrypted-hls' | 'direct' | undefined =
+    useMemo(() => {
+      if (!videoMetaDataFetched) return undefined;
 
-    if (
-      shouldFallback ||
-      (videoMetaDataFetched && !videoMetaData) ||
-      (videoMetaData?.fileSize && videoMetaData.fileSize <= 16 * MB)
-    )
+      if (videoMetaData?.isSegmented && videoMetaData.mimeType === 'application/vnd.apple.mpegurl')
+        return 'hls';
+      if (
+        videoMetaData?.isSegmented &&
+        videoMetaData.mimeType === 'application/vnd.apple.mpegurl' &&
+        fileHeader?.fileMetadata.isEncrypted
+      )
+        return 'encrypted-hls';
+
+      if (
+        shouldFallback ||
+        (videoMetaDataFetched && !videoMetaData) ||
+        (videoMetaData?.fileSize && videoMetaData.fileSize <= 16 * MB)
+      )
+        return 'direct';
+
+      if (videoMetaData?.isSegmented && fileHeader?.fileMetadata.isEncrypted)
+        return 'encrypted-mse';
+      if (videoMetaData?.isSegmented) return 'mse';
+
       return 'direct';
-
-    if (videoMetaData?.isSegmented && videoProps.probablyEncrypted) return 'encrypted-mse';
-    if (videoMetaData?.isSegmented) return 'mse';
-
-    return 'direct';
-  }, [videoMetaData, videoMetaDataFetched, shouldFallback, videoProps.probablyEncrypted]);
+    }, [videoMetaData, videoMetaDataFetched, shouldFallback, fileHeader?.fileMetadata.isEncrypted]);
 
   if (fatalError) {
     return (
@@ -119,6 +132,14 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
         ) : playback === 'mse' ? (
           <MseSource
             {...videoProps}
+            videoMetaData={videoMetaData as SegmentedVideoMetadata}
+            videoRef={videoRef}
+            onFatalError={() => setShouldFallback(true)}
+          />
+        ) : playback === 'encrypted-hls' || playback === 'hls' ? (
+          <HlsSource
+            {...videoProps}
+            videoFileHeader={fileHeader as HomebaseFile}
             videoMetaData={videoMetaData as SegmentedVideoMetadata}
             videoRef={videoRef}
             onFatalError={() => setShouldFallback(true)}
