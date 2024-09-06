@@ -76,7 +76,6 @@ export const useHlsManifest = (
         return (await getKeyUrl(keyHeader.aesKey)) || url;
       }
     );
-    console.log('m3u8', contents);
 
     return `data:application/vnd.apple.mpegurl;base64,${uint8ArrayToBase64(stringToUint8Array(contents))}`;
   };

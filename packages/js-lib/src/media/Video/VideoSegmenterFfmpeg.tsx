@@ -147,8 +147,7 @@ export const segmentVideoFileWithFfmpeg = async (
     'single_file',
     outputFile,
   ]);
-  const dir = await ffmpeg.listDir('.');
-  console.log('ffmpeg output dir', dir);
+
   if (status !== 0) {
     throw new Error('Failed to segment video');
   }
