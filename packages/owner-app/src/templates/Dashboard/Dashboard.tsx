@@ -76,7 +76,7 @@ const AppWrapper = ({
   options?: ActionGroupOptionProps[];
 }) => (
   <div className="group relative flex h-full flex-grow flex-col rounded-lg bg-background transition-shadow hover:shadow-lg">
-    <HybridLink href={href} className="mx-auto px-5 pt-5">
+    <HybridLink href={href} className="mx-auto w-full px-2 pt-5">
       <div className="relative flex flex-col items-center">
         <CompanyImage domain={undefined} appId={appId} className="mb-auto w-20" fallbackSize="xs" />
 
