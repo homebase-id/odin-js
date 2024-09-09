@@ -125,7 +125,7 @@ export const insertNewMessagesForConversation = (
 ) => {
   const extistingMessages = queryClient.getQueryData<
     InfiniteData<{
-      searchResults: (HomebaseFile<ChatMessage> | null)[];
+      searchResults: (HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage> | null)[];
       cursorState: string;
       queryTime: number;
       includeMetadataHeader: boolean;
