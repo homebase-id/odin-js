@@ -18,7 +18,7 @@ import {
   ensureVerificationHash,
 } from '../provider/network/troubleshooting/DataConversionProvider';
 
-export const AUTO_FIX_VERSION = '0.0.2';
+export const AUTO_FIX_VERSION = '0.0.3';
 export const useAutofixDefaultConfig = () => {
   const { add: addError } = useErrors();
 
