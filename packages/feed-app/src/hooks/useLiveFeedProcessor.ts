@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { TypedConnectionNotification } from '@homebase-id/js-lib/core';
-import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { drivesEqual } from '@homebase-id/js-lib/helpers';
 import { useWebsocketSubscriber } from '@homebase-id/common-app';
 import { BlogConfig } from '@homebase-id/js-lib/public';
 import { processInbox } from '@homebase-id/js-lib/peer';

@@ -26,7 +26,7 @@ import { ContactConfig } from '@homebase-id/js-lib/network';
 import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
 import { useFile } from '../../../hooks/files/useFiles';
 import { useAuth } from '../../../hooks/auth/useAuth';
-import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { drivesEqual } from '@homebase-id/js-lib/helpers';
 
 export const FileCard = ({
   targetDrive,

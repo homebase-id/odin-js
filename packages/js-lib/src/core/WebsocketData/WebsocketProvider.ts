@@ -1,10 +1,4 @@
-import {
-  hasDebugFlag,
-  jsonStringify64,
-  tryJsonParse,
-  stringGuidsEqual,
-  drivesEqual,
-} from '../../helpers/helpers';
+import { hasDebugFlag, jsonStringify64, tryJsonParse, drivesEqual } from '../../helpers/helpers';
 import { ApiType, DotYouClient } from '../DotYouClient';
 import { decryptData, encryptData, getRandomIv } from '../InterceptionEncryptionUtil';
 import { TargetDrive } from '../core';
