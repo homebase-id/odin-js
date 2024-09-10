@@ -28,7 +28,6 @@ import {
   getNewId,
   getRandom16ByteArray,
   jsonStringify64,
-  stringGuidsEqual,
   stringToUint8Array,
 } from '@homebase-id/js-lib/helpers';
 

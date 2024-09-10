@@ -68,7 +68,7 @@ const toHexString = (byteArray: Uint8Array) => {
   }).join('');
 };
 
-const MB = 1000000;
+// const MB = 1000000;
 export const segmentVideoFileWithFfmpeg = async (
   file: File | Blob,
   keyHeader?: KeyHeader
