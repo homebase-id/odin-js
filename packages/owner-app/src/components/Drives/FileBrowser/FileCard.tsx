@@ -353,7 +353,9 @@ const FileState = ({
         const parsedContent = await decryptJsonContent(file.fileMetadata, keyheader);
 
         setIsBroken(
-          file.fileMetadata.isEncrypted && typeof parsedContent === 'object'
+          file.fileMetadata?.appData.content?.length &&
+            file.fileMetadata.isEncrypted &&
+            typeof parsedContent === 'object'
             ? Object.keys(parsedContent).length === 0
             : false
         );
