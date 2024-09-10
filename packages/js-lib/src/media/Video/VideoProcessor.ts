@@ -13,7 +13,8 @@ const megaByte = 1024 * 1024;
 export const processVideoFile = async (
   videoFile: { file: File | Blob; thumbnail?: ThumbnailFile },
   payloadKey: string,
-  encryptionKey?: KeyHeader
+  encryptionKey?: KeyHeader,
+  experimentalHls?: boolean
 ): Promise<{
   tinyThumb: EmbeddedThumb | undefined;
   payloads: PayloadFile[];
@@ -47,7 +48,8 @@ export const processVideoFile = async (
   // Processing video
   const { metadata, ...videoData } = await segmentVideoFileWithFfmpeg(
     videoFile.file,
-    encryptionKey
+    encryptionKey,
+    experimentalHls
   );
 
   if ('segments' in videoData) {
