@@ -8,7 +8,7 @@ export const AuthorName = ({ odinId, excludeLink }: { odinId?: string; excludeLi
   const isConnected = useIsConnected(odinId).data;
 
   const host = new DotYouClient({
-    identity: identity || window.location.host,
+    identity: odinId,
     api: ApiType.Guest,
   }).getRoot();
 
