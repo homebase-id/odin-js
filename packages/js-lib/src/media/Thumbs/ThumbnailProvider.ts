@@ -1,7 +1,7 @@
 import { uint8ArrayToBase64 } from '../../helpers/DataUtil';
 import { ImageContentType, ImageSize, ThumbnailFile, EmbeddedThumb } from '../../core/core';
 import { ThumbnailInstruction } from '../MediaTypes';
-import { fromBlob } from './ImageResizer';
+import { resizeImageFromBlob } from './ImageResizer';
 
 export const baseThumbSizes: ThumbnailInstruction[] = [
   { quality: 75, width: 400, height: 400 },
@@ -166,21 +166,25 @@ const createImageThumbnail = async (
   const blob: Blob = new Blob([imageBytes], {});
   const type = instruction.type || 'webp';
 
-  return fromBlob(blob, instruction.quality, instruction.width, instruction.height, type).then(
-    (resizedData) => {
-      return {
-        naturalSize: {
-          pixelWidth: resizedData.naturalSize.width,
-          pixelHeight: resizedData.naturalSize.height,
-        },
-        thumb: {
-          pixelWidth: resizedData.size.width,
-          pixelHeight: resizedData.size.height,
-          payload: resizedData.blob,
-          contentType: `image/${type}`,
-          key: payloadKey,
-        },
-      };
-    }
-  );
+  return resizeImageFromBlob(
+    blob,
+    instruction.quality,
+    instruction.width,
+    instruction.height,
+    type
+  ).then((resizedData) => {
+    return {
+      naturalSize: {
+        pixelWidth: resizedData.naturalSize.width,
+        pixelHeight: resizedData.naturalSize.height,
+      },
+      thumb: {
+        pixelWidth: resizedData.size.width,
+        pixelHeight: resizedData.size.height,
+        payload: resizedData.blob,
+        contentType: `image/${type}`,
+        key: payloadKey,
+      },
+    };
+  });
 };

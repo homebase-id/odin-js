@@ -1,9 +1,4 @@
-import {
-  hasDebugFlag,
-  jsonStringify64,
-  tryJsonParse,
-  stringGuidsEqual,
-} from '../../helpers/helpers';
+import { hasDebugFlag, jsonStringify64, tryJsonParse, drivesEqual } from '../../helpers/helpers';
 import { ApiType, DotYouClient } from '../DotYouClient';
 import { decryptData, encryptData, getRandomIv } from '../InterceptionEncryptionUtil';
 import { TargetDrive } from '../core';
@@ -303,12 +298,7 @@ export const Subscribe = async (
   if (
     subscribedDrives &&
     (subscribedDrives.length !== drives.length ||
-      drives.some(
-        (drive) =>
-          !subscribedDrives?.find(
-            (d) => stringGuidsEqual(d.alias, drive.alias) && stringGuidsEqual(d.type, drive.type)
-          )
-      ))
+      drives.some((drive) => !subscribedDrives?.find((d) => drivesEqual(d, drive))))
   ) {
     throw new Error('Socket already connected with different drives');
   }

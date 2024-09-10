@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { fromBlob } from '@homebase-id/js-lib/media';
+import { resizeImageFromBlob } from '@homebase-id/js-lib/media';
 import { t } from '../../helpers';
 import { ActionButton } from '../../ui';
 import { Label } from '../Label';
@@ -66,7 +66,7 @@ const ImageUploadAndCrop = ({
             if (file.type === 'image/svg+xml') {
               setRawImageData(file);
             } else {
-              const resizedData = await fromBlob(file, 100, maxWidth, maxHeight, 'webp');
+              const resizedData = await resizeImageFromBlob(file, 100, maxWidth, maxHeight, 'webp');
               setRawImageData(resizedData.blob);
             }
           } else {

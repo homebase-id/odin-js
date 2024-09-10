@@ -23,6 +23,7 @@ import {
   ensureDrive,
 } from '../../core/core';
 import {
+  drivesEqual,
   getRandom16ByteArray,
   jsonStringify64,
   stringGuidsEqual,
@@ -129,10 +130,8 @@ export const saveChannelDefinition = async (
     const securityContext = await getSecurityContext(dotYouClient);
     if (
       !securityContext?.permissionContext.permissionGroups.some((x) =>
-        x.driveGrants.some(
-          (driveGrant) =>
-            stringGuidsEqual(driveGrant.permissionedDrive.drive.alias, targetDrive.alias) &&
-            stringGuidsEqual(driveGrant.permissionedDrive.drive.type, targetDrive.type)
+        x.driveGrants.some((driveGrant) =>
+          drivesEqual(driveGrant.permissionedDrive.drive, targetDrive)
         )
       )
     ) {

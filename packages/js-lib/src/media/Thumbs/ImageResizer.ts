@@ -82,7 +82,7 @@ const getTargetSize = (
  * @returns {Promise} Returns promise with compressed, resized and converted image.
  */
 
-const fromBlob = (
+export const resizeImageFromBlob = (
   imgBlob: Blob,
   quality = 100,
   width: number,
@@ -136,5 +136,3 @@ const fromBlob = (
     };
   });
 };
-
-export { fromBlob };
