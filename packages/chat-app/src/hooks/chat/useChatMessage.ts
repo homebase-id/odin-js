@@ -15,6 +15,7 @@ import {
 } from '../../providers/ConversationProvider';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { useDotYouClientContext } from '@homebase-id/common-app';
+import { insertNewMessage } from './useChatMessages';
 
 export const useChatMessage = (props?: {
   conversationId?: string | undefined; // Optional: if we have it we can use the cache
@@ -178,20 +179,11 @@ export const useChatMessage = (props?: {
           },
         };
 
-        const newData = {
-          ...existingData,
-          pages: existingData?.pages?.map((page, index) => ({
-            ...page,
-            searchResults:
-              index === 0 ? [newMessageDsr, ...page.searchResults] : page.searchResults,
-          })),
-        };
-
-        queryClient.setQueryData(
-          ['chat-messages', conversation.fileMetadata.appData.uniqueId],
-          newData
-        );
-        return { existingData };
+        const { extistingMessages } = insertNewMessage(queryClient, newMessageDsr);
+        if (!extistingMessages) {
+          return;
+        }
+        return { existingData: extistingMessages };
       },
       onSuccess: async (newMessage, params) => {
         if (!newMessage) return;
