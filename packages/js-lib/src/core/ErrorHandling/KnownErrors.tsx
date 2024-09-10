@@ -144,21 +144,21 @@ export interface OdinErrorDetails {
 }
 
 export const getOdinErrorDetails = (error: Error | unknown): OdinErrorDetails => {
-  if (isJavaScriptError(error)) {
-    return {
-      title: error.name,
-      stackTrace: error?.stack,
-      correlationId: undefined,
-      domain: typeof window === 'undefined' ? '' : window.location?.hostname,
-    };
-  }
-
   if (axios.isAxiosError(error)) {
     return {
       title: error?.response?.data?.title,
       stackTrace: error?.response?.data?.stackTrace,
       correlationId:
         error?.response?.headers?.['odin-correlation-id'] || error?.response?.data?.correlationId,
+      domain: typeof window === 'undefined' ? '' : window.location?.hostname,
+    };
+  }
+
+  if (isJavaScriptError(error)) {
+    return {
+      title: error.name,
+      stackTrace: error?.stack,
+      correlationId: undefined,
       domain: typeof window === 'undefined' ? '' : window.location?.hostname,
     };
   }
