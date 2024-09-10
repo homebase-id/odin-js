@@ -1,8 +1,12 @@
 import { Guid } from 'guid-typescript';
 
 import md5 from './md5/md5';
-import { AccessControlList, EncryptedKeyHeader, PayloadDescriptor } from '../core/core';
-import { TargetDrive } from '../../dist/core/DriveData/File/DriveFileTypes';
+import {
+  AccessControlList,
+  EncryptedKeyHeader,
+  PayloadDescriptor,
+  TargetDrive,
+} from '../core/core';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
