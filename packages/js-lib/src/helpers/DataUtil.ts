@@ -2,6 +2,7 @@ import { Guid } from 'guid-typescript';
 
 import md5 from './md5/md5';
 import { AccessControlList, EncryptedKeyHeader, PayloadDescriptor } from '../core/core';
+import { TargetDrive } from '../../dist/core/DriveData/File/DriveFileTypes';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
@@ -103,6 +104,12 @@ export const stringGuidsEqual = (a?: string, b?: string): boolean => {
   if (!a || !b) return false;
 
   return a.toLowerCase().replace(/-/g, '') === b.toLowerCase().replace(/-/g, '');
+};
+
+export const drivesEqual = (a?: TargetDrive, b?: TargetDrive): boolean => {
+  if (!a || !b) return false;
+
+  return stringGuidsEqual(a.alias, b.alias) && stringGuidsEqual(a.type, b.type);
 };
 
 /// Compares two ACLs; Compares the requiredSecurityGroup, CircleIds and OdinIds of those ACLs and will return true or false;

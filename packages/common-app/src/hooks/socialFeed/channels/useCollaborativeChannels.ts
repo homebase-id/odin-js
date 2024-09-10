@@ -12,7 +12,7 @@ import {
   getChannelDrive,
   getChannelLinkDefinitions,
 } from '@homebase-id/js-lib/public';
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const useCollaborativeChannels = (enableDiscovery?: boolean) => {
   const { data: alllContacts, isFetched: fetchedAllContacts } = useAllContacts(
@@ -41,7 +41,7 @@ export const useCollaborativeChannels = (enableDiscovery?: boolean) => {
                 (group) =>
                   group.driveGrants.some(
                     (grant) =>
-                      stringGuidsEqual(grant.permissionedDrive.drive.alias, targetDrive.alias) &&
+                      drivesEqual(grant.permissionedDrive.drive, targetDrive) &&
                       grant.permissionedDrive.permission.includes(DrivePermissionType.Write)
                   )
               );

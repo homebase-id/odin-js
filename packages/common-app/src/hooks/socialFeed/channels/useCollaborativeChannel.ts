@@ -10,7 +10,7 @@ import {
 } from '@homebase-id/js-lib/public';
 
 import { FEED_APP_ID, t, useChannelDrives, useCircles, useDotYouClient } from '../../../..';
-import { stringGuidsEqual, stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
+import { drivesEqual, stringGuidsEqual, stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import {
   ApiType,
   DotYouClient,
@@ -128,8 +128,7 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
 
       const writeGrant = circle?.driveGrants?.find((grant) => {
         if (
-          stringGuidsEqual(grant.permissionedDrive?.drive.alias, targetDrive.alias) &&
-          stringGuidsEqual(grant.permissionedDrive?.drive.type, targetDrive.type) &&
+          drivesEqual(grant.permissionedDrive?.drive, targetDrive) &&
           grant.permissionedDrive.permission.includes(DrivePermissionType.Write)
         ) {
           return true;
@@ -146,11 +145,7 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
     }
 
     // We don't have to check both.. As one fail is enough
-    const channelDrive = channelDrives?.find(
-      (d) =>
-        stringGuidsEqual(d.targetDriveInfo.alias, targetDrive.alias) &&
-        stringGuidsEqual(d.targetDriveInfo.type, targetDrive.type)
-    );
+    const channelDrive = channelDrives?.find((d) => drivesEqual(d.targetDriveInfo, targetDrive));
     if (channelDrive?.attributes.IsCollaborativeChannel !== 'true') {
       return { invalidDriveAttribute: true };
     }

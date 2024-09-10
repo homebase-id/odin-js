@@ -7,7 +7,11 @@ import { useExport } from '../../../hooks/drives/useExport';
 import AppMembershipView from '../../../components/PermissionViews/AppPermissionView/AppPermissionView';
 import { useApps } from '../../../hooks/apps/useApps';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { getDrivePermissionFromNumber, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import {
+  drivesEqual,
+  getDrivePermissionFromNumber,
+  stringGuidsEqual,
+} from '@homebase-id/js-lib/helpers';
 import { TRANSIENT_TEMP_DRIVE_ALIAS } from '@homebase-id/js-lib/core';
 import DriveAppAccessDialog from '../../../components/Drives/DriveAppAccessDialog/DriveAppAccessDialog';
 import DriveCircleAccessDialog from '../../../components/Drives/DriveCircleAccessDialog/DriveCircleAccessDialog';
@@ -52,18 +56,12 @@ const DriveDetails = () => {
   const targetDriveInfo = driveDef?.targetDriveInfo;
 
   const circlesWithAGrantOnThis = circles?.filter((circle) =>
-    circle.driveGrants?.some(
-      (grant) =>
-        stringGuidsEqual(grant.permissionedDrive.drive.alias, targetDriveInfo.alias) &&
-        stringGuidsEqual(grant.permissionedDrive.drive.type, targetDriveInfo.type)
-    )
+    circle.driveGrants?.some((grant) => drivesEqual(grant.permissionedDrive.drive, targetDriveInfo))
   );
 
   const appsWithAGrantOnThis = apps?.filter((app) =>
-    app.grant.driveGrants.some(
-      (grant) =>
-        stringGuidsEqual(grant.permissionedDrive.drive.alias, targetDriveInfo.alias) &&
-        stringGuidsEqual(grant.permissionedDrive.drive.type, targetDriveInfo.type)
+    app.grant.driveGrants.some((grant) =>
+      drivesEqual(grant.permissionedDrive.drive, targetDriveInfo)
     )
   );
 
@@ -147,10 +145,8 @@ const DriveDetails = () => {
         >
           <ul className="flex flex-col items-start gap-4">
             {circlesWithAGrantOnThis.map((circle) => {
-              const matchingGrants = circle.driveGrants?.filter(
-                (grant) =>
-                  stringGuidsEqual(grant.permissionedDrive.drive.alias, targetDriveInfo.alias) &&
-                  stringGuidsEqual(grant.permissionedDrive.drive.type, targetDriveInfo.type)
+              const matchingGrants = circle.driveGrants?.filter((grant) =>
+                drivesEqual(grant.permissionedDrive.drive, targetDriveInfo)
               );
 
               const matchingGrant = matchingGrants?.reduce(

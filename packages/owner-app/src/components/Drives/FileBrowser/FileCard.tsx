@@ -26,6 +26,7 @@ import { ContactConfig } from '@homebase-id/js-lib/network';
 import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
 import { useFile } from '../../../hooks/files/useFiles';
 import { useAuth } from '../../../hooks/auth/useAuth';
+import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const FileCard = ({
   targetDrive,
@@ -72,7 +73,7 @@ export const FileCard = ({
 
       <div className={`${isRow ? 'w-32' : 'px-4 py-2 lg:px-5'} `}>
         <div className="relative">
-          {isImage ? (
+          {isImage && !drivesEqual(targetDrive, BlogConfig.FeedDrive) ? (
             <div className="flex aspect-square overflow-hidden">
               <Image
                 targetDrive={targetDrive}
@@ -211,6 +212,7 @@ const MAIL_CONVERSATION_FILE_TYPE = 9000;
 
 const COMMUNITY_FILE_TYPE = 7010;
 const COMMUNITY_MESSAGE_FILE_TYPE = 7020;
+const COMMUNITY_CHANNEL_FILE_TYPE = 7015;
 const FileTypeLabel = ({ file }: { file: HomebaseFile<string> | DeletedHomebaseFile<string> }) => {
   const fileType = file.fileMetadata.appData.fileType;
 
@@ -254,6 +256,8 @@ const FileTypeLabel = ({ file }: { file: HomebaseFile<string> | DeletedHomebaseF
       return 'Draft Mail Conversation';
 
     // Community:
+    case COMMUNITY_CHANNEL_FILE_TYPE:
+      return 'Community Channel';
     case COMMUNITY_FILE_TYPE:
       return 'Community Defintion';
     case COMMUNITY_MESSAGE_FILE_TYPE:
