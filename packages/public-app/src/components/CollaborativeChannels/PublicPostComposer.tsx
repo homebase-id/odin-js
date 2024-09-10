@@ -1,6 +1,6 @@
 import { PostComposer, useDotYouClient, useSecurityContext } from '@homebase-id/common-app';
 import { HomebaseFile, ApiType, DrivePermissionType } from '@homebase-id/js-lib/core';
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { drivesEqual } from '@homebase-id/js-lib/helpers';
 import { ChannelDefinition, GetTargetDriveFromChannelId } from '@homebase-id/js-lib/public';
 
 export const PublicPostComposer = ({
@@ -41,8 +41,7 @@ export const useCheckWriteAccessOnChannel = ({
     securityContext?.permissionContext.permissionGroups.some((group) =>
       group.driveGrants.some(
         (driveGrant) =>
-          stringGuidsEqual(driveGrant.permissionedDrive.drive.alias, channelDrive.alias) &&
-          stringGuidsEqual(driveGrant.permissionedDrive.drive.type, channelDrive.type) &&
+          drivesEqual(driveGrant.permissionedDrive.drive, channelDrive) &&
           driveGrant.permissionedDrive.permission.includes(DrivePermissionType.Write)
       )
     );

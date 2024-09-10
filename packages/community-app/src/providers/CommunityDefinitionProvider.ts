@@ -24,6 +24,7 @@ import {
   UploadResult,
 } from '@homebase-id/js-lib/core';
 import {
+  drivesEqual,
   getNewId,
   getRandom16ByteArray,
   jsonStringify64,
@@ -119,10 +120,8 @@ export const saveCommunity = async (
     const securityContext = await getSecurityContext(dotYouClient);
     if (
       !securityContext?.permissionContext.permissionGroups.some((x) =>
-        x.driveGrants.some(
-          (driveGrant) =>
-            stringGuidsEqual(driveGrant.permissionedDrive.drive.alias, targetDrive.alias) &&
-            stringGuidsEqual(driveGrant.permissionedDrive.drive.type, targetDrive.type)
+        x.driveGrants.some((driveGrant) =>
+          drivesEqual(driveGrant.permissionedDrive.drive, targetDrive)
         )
       )
     ) {

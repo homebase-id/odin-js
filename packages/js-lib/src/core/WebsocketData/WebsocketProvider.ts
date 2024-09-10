@@ -3,6 +3,7 @@ import {
   jsonStringify64,
   tryJsonParse,
   stringGuidsEqual,
+  drivesEqual,
 } from '../../helpers/helpers';
 import { ApiType, DotYouClient } from '../DotYouClient';
 import { decryptData, encryptData, getRandomIv } from '../InterceptionEncryptionUtil';
@@ -303,12 +304,7 @@ export const Subscribe = async (
   if (
     subscribedDrives &&
     (subscribedDrives.length !== drives.length ||
-      drives.some(
-        (drive) =>
-          !subscribedDrives?.find(
-            (d) => stringGuidsEqual(d.alias, drive.alias) && stringGuidsEqual(d.type, drive.type)
-          )
-      ))
+      drives.some((drive) => !subscribedDrives?.find((d) => drivesEqual(d, drive))))
   ) {
     throw new Error('Socket already connected with different drives');
   }

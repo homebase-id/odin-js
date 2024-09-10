@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { TypedConnectionNotification } from '@homebase-id/js-lib/core';
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useWebsocketSubscriber } from '@homebase-id/common-app';
 import { BlogConfig } from '@homebase-id/js-lib/public';
 import { processInbox } from '@homebase-id/js-lib/peer';
@@ -58,8 +58,7 @@ const useFeedWebSocket = (isEnabled: boolean) => {
     if (
       (notification.notificationType === 'fileAdded' ||
         notification.notificationType === 'fileModified') &&
-      stringGuidsEqual(notification.targetDrive?.alias, BlogConfig.FeedDrive.alias) &&
-      stringGuidsEqual(notification.targetDrive?.type, BlogConfig.FeedDrive.type)
+      drivesEqual(notification.targetDrive, BlogConfig.FeedDrive)
     ) {
       // TODO: insert the new post into th feed cache instead of invalidating the whole cache
       queryClient.invalidateQueries({ queryKey: ['social-feeds'] });

@@ -216,5 +216,8 @@ export const useLinkMetadata = ({
       if (!fileId) return [];
       return getPayloadAsJson<LinkPreview[]>(dotYouClient, targetDrive, fileId, payloadKey);
     },
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours
   });
 };
