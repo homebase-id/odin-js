@@ -89,11 +89,3 @@ jobs:
           commit-message: 'Bump version for js-lib and/or ui-lib'
           title: 'Bump version for js-lib and/or ui-lib'
           body: ''
-
-      - name: Enable auto-merge on that PR
-        if: steps.version-bump.outputs.pull-request-operation == 'created'
-        uses: peter-evans/enable-pull-request-automerge@v3
-        with:
-          token: ${{ secrets.PAT }}
-          pull-request-number: ${{ steps.version-bump.outputs.pull-request-number }}
-          merge-method: squash
