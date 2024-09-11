@@ -1,6 +1,5 @@
 import { processInbox } from '@homebase-id/js-lib/peer';
 import { useQuery } from '@tanstack/react-query';
-import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { useDotYouClient } from '@homebase-id/common-app';
 
 const BATCH_SIZE = 100;
@@ -10,7 +9,7 @@ export const useInboxProcessor = (connected?: boolean) => {
   const fetchData = async () =>
     await processInbox(
       dotYouClient,
-      GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
+      { alias: '90f5e74ab7f9efda0ac298373a32ad8c', type: '90f5e74ab7f9efda0ac298373a32ad8c' },
       BATCH_SIZE
     );
 
