@@ -26,6 +26,7 @@ export * from './DriveData/Query/DriveQueryProvider';
 export * from './DriveData/Query/DriveQueryTypes';
 
 export * from './DriveData/Upload/DriveFileUploadProvider';
+export { GenerateKeyHeader } from './DriveData/Upload/UploadHelpers';
 export * from './DriveData/Upload/DriveUploadTypes';
 
 export { decryptJsonContent, decryptKeyHeader } from './DriveData/SecurityHelpers';
