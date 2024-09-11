@@ -133,10 +133,7 @@ export const uploadCommunityMessage = async (
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
-  const keyHeader: KeyHeader = {
-    iv: getRandom16ByteArray(),
-    aesKey: getRandom16ByteArray(),
-  };
+  const aesKey = getRandom16ByteArray();
 
   if (!files?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
@@ -168,7 +165,7 @@ export const uploadCommunityMessage = async (
         tinyThumb,
         thumbnails: thumbnailsFromVideo,
         payloads: payloadsFromVideo,
-      } = await processVideoFile(newMediaFile, payloadKey, keyHeader);
+      } = await processVideoFile(newMediaFile, payloadKey, aesKey);
 
       thumbnails.push(...thumbnailsFromVideo);
       payloads.push(...payloadsFromVideo);
@@ -210,7 +207,7 @@ export const uploadCommunityMessage = async (
     undefined,
     onVersionConflict,
     {
-      keyHeader,
+      aesKey,
     }
   );
 

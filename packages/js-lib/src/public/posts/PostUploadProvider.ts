@@ -111,12 +111,7 @@ export const savePost = async <T extends PostContent>(
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
-  const keyHeader: KeyHeader | undefined = encrypt
-    ? {
-        iv: getRandom16ByteArray(),
-        aesKey: getRandom16ByteArray(),
-      }
-    : undefined;
+  const aesKey: Uint8Array | undefined = encrypt ? getRandom16ByteArray() : undefined;
 
   if (!newMediaFiles?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
@@ -162,7 +157,7 @@ export const savePost = async <T extends PostContent>(
         tinyThumb,
         thumbnails: thumbnailsFromVideo,
         payloads: payloadsFromVideo,
-      } = await processVideoFile(newMediaFile, payloadKey, keyHeader);
+      } = await processVideoFile(newMediaFile, payloadKey, aesKey);
 
       thumbnails.push(...thumbnailsFromVideo);
       payloads.push(...payloadsFromVideo);
@@ -219,7 +214,7 @@ export const savePost = async <T extends PostContent>(
     targetDrive,
     onVersionConflict,
     {
-      keyHeader,
+      aesKey,
     }
   );
 };
@@ -236,7 +231,7 @@ const uploadPost = async <T extends PostContent>(
   onVersionConflict?: () => void,
   options?: {
     axiosConfig?: AxiosRequestConfig;
-    keyHeader?: KeyHeader | undefined;
+    aesKey?: Uint8Array | undefined;
   }
 ) => {
   const encrypt = !(
