@@ -7,19 +7,22 @@ import {
 } from '../../core/DriveData/File/DriveFileTypes';
 import { createThumbnails } from '../Thumbs/ThumbnailProvider';
 import { segmentVideoFileWithFfmpeg, getThumbnailWithFfmpeg } from './VideoSegmenterFfmpeg';
+import { GenerateKeyHeader } from '../../core/DriveData/Upload/UploadHelpers';
 
 const megaByte = 1024 * 1024;
 
 export const processVideoFile = async (
   videoFile: { file: File | Blob; thumbnail?: ThumbnailFile },
   payloadKey: string,
-  encryptionKey?: KeyHeader,
+  aesKey?: Uint8Array,
   experimentalHls?: boolean
 ): Promise<{
   tinyThumb: EmbeddedThumb | undefined;
   payloads: PayloadFile[];
   thumbnails: ThumbnailFile[];
 }> => {
+  const keyHeader: KeyHeader | undefined = aesKey ? GenerateKeyHeader(aesKey) : undefined;
+
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
 
@@ -48,7 +51,7 @@ export const processVideoFile = async (
   // Processing video
   const { metadata, ...videoData } = await segmentVideoFileWithFfmpeg(
     videoFile.file,
-    encryptionKey,
+    keyHeader,
     experimentalHls
   );
 
@@ -58,7 +61,10 @@ export const processVideoFile = async (
       key: payloadKey,
       payload: segments,
       descriptorContent: jsonStringify64(metadata),
-      skipEncryption: true,
+
+      ...(keyHeader && keyHeader.iv
+        ? { skipEncryption: true, iv: keyHeader.iv }
+        : { skipEncryption: false }),
     });
   } else {
     payloads.push({
