@@ -69,14 +69,14 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
     useMemo(() => {
       if (!videoMetaDataFetched) return undefined;
 
-      if (videoMetaData?.isSegmented && videoMetaData.mimeType === 'application/vnd.apple.mpegurl')
-        return 'hls';
       if (
         videoMetaData?.isSegmented &&
         videoMetaData.mimeType === 'application/vnd.apple.mpegurl' &&
         fileHeader?.fileMetadata.isEncrypted
       )
         return 'encrypted-hls';
+      if (videoMetaData?.isSegmented && videoMetaData.mimeType === 'application/vnd.apple.mpegurl')
+        return 'hls';
 
       if (
         shouldFallback ||
