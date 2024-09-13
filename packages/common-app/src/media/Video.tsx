@@ -110,9 +110,7 @@ export const VideoClickToLoad = ({
   );
 };
 
-interface OdinVideoWrapperProps extends Omit<OdinVideoProps, 'dotYouClient'> {
-  probablyEncrypted?: boolean;
-}
+type OdinVideoWrapperProps = Omit<OdinVideoProps, 'dotYouClient'>;
 export const OdinVideoWrapper = ({ ...props }: OdinVideoWrapperProps) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
