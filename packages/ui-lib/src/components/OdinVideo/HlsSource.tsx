@@ -2,7 +2,7 @@ import { SegmentedVideoMetadata } from '@homebase-id/js-lib/media';
 import { useEffect, useMemo } from 'react';
 import { useHlsManifest } from '../../hooks/video/useHlsManifest';
 import { OdinVideoProps } from './OdinVideo';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { ApiType, HomebaseFile } from '@homebase-id/js-lib/core';
 import hls from 'hls.js';
 
 interface OdinHlsProps extends OdinVideoProps {
@@ -43,7 +43,12 @@ export const HlsSource = ({
   });
 
   const needsHlsJs = useMemo(
-    () => !videoRef.current?.canPlayType('application/vnd.apple.mpegurl') && hls.isSupported(),
+    () =>
+      hls.isSupported() &&
+      (!videoRef.current?.canPlayType('application/vnd.apple.mpegurl') ||
+        (dotYouClient.getType() === ApiType.App &&
+          odinId &&
+          odinId !== dotYouClient.getIdentity())),
     [videoRef]
   );
 
