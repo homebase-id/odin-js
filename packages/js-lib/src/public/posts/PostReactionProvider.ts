@@ -294,7 +294,7 @@ const parseReactions = (
             count: parseInt(reaction.count),
           };
         } catch {
-          console.error('[DotYouCore-js] parse failed for', reaction);
+          console.error('[odin-js] parse failed for', reaction);
           return;
         }
       })
@@ -348,7 +348,7 @@ export const parseReactionPreview = (
                 reactions: parseReactions(commentPreview.reactions),
               };
             } catch {
-              console.error('[DotYouCore-js] parse failed for', commentPreview);
+              console.error('[odin-js] parse failed for', commentPreview);
               return {
                 authorOdinId: commentPreview.odinId,
                 content: { body: 'PROBABLY ENCRYPTED' },

@@ -77,7 +77,7 @@ export const dsrToAttributeFileOverPeer = async (
 
     return attributeFile;
   } catch (ex) {
-    console.error('[DotYouCore-js] failed to get the payload of a dsr', dsr, ex);
+    console.error('[odin-js] failed to get the payload of a dsr', dsr, ex);
     return null;
   }
 };

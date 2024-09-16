@@ -424,7 +424,7 @@ export const dsrToMailConversation = async (
 
     return conversation;
   } catch (ex) {
-    console.error('[DotYouCore-js] failed to get the conversation payload of a dsr', dsr, ex);
+    console.error('[mail] failed to get the conversation payload of a dsr', dsr, ex);
     return null;
   }
 };
