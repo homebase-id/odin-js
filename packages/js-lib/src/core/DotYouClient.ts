@@ -79,6 +79,7 @@ export class BaseDotYouClient {
 
   //Gets an Axios client configured with token info
   createAxiosClient(options?: createAxiosClientOptions) {
+    const isDebug = hasDebugFlag();
     const client = axios.create({
       baseURL: this.getEndpoint(),
       withCredentials: isLocalStorageAvailable(),
@@ -87,13 +88,13 @@ export class BaseDotYouClient {
         ...this._options.headers,
         ...options?.headers,
       },
+      timeout: isDebug ? undefined : 30000, // 30 seconds
     });
 
     if (options?.overrideEncryption) return client;
 
     // Encryption/Decryption on requests and responses
     const ss = this.getSharedSecret();
-    const isDebug = hasDebugFlag();
 
     client.interceptors.request.use(
       async function (request) {
