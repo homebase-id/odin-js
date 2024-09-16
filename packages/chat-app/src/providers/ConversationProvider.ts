@@ -185,7 +185,7 @@ export const dsrToConversation = async (
 
     return conversation;
   } catch (ex) {
-    console.error('[DotYouCore-js] failed to get the conversation payload of a dsr', dsr, ex);
+    console.error('[chat] failed to get the conversation payload of a dsr', dsr, ex);
     return null;
   }
 };
@@ -367,7 +367,7 @@ export const dsrToConversationMetadata = async (
 
     return conversation;
   } catch (ex) {
-    console.error('[DotYouCore-js] failed to get the ConversationMetadata of a dsr', dsr, ex);
+    console.error('[chat] failed to get the ConversationMetadata of a dsr', dsr, ex);
     return null;
   }
 };

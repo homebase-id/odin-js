@@ -139,7 +139,7 @@ export class BaseDotYouClient {
         if (error?.response?.data?.data && ss && error.response.status !== 404) {
           // Try and get a more detailed error message
           console.error(
-            '[DotYouCore-js]',
+            '[odin-js]',
             await decryptData(error.response.data.data, error.response.data.iv, ss)
           );
         }

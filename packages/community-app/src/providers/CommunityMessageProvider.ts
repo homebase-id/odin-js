@@ -421,7 +421,7 @@ export const dsrToMessage = async (
 
     return chatMessage;
   } catch (ex) {
-    console.error('[DotYouCore-js] failed to get the chatMessage payload of a dsr', dsr, ex);
+    console.error('[community] failed to get the chatMessage payload of a dsr', dsr, ex);
     return null;
   }
 };

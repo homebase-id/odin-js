@@ -483,7 +483,7 @@ const updatePost = async <T extends PostContent>(
     !file.serverMetadata?.accessControlList ||
     !file.fileMetadata.appData.content.id
   )
-    throw new Error(`[DotYouCore-js] PostProvider: fileId is required to update a post`);
+    throw new Error(`[odin-js] PostProvider: fileId is required to update a post`);
 
   if (!file.fileMetadata.appData.content.authorOdinId)
     file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
@@ -598,7 +598,7 @@ const updatePost = async <T extends PostContent>(
   file.fileMetadata.isEncrypted = encrypt;
   file.fileMetadata.versionTag = runningVersionTag;
   const result = await uploadPostHeader(dotYouClient, file, channelId, targetDrive);
-  if (!result) throw new Error(`[DotYouCore-js] PostProvider: Post update failed`);
+  if (!result) throw new Error(`[odin-js] PostProvider: Post update failed`);
 
   return result;
 };

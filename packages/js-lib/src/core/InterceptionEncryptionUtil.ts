@@ -86,9 +86,9 @@ export const decryptData = async (data: string, iv: string, ss: Uint8Array) => {
   } catch (ex: any) {
     const isParseError = ex?.message.indexOf('JSON.parse') !== -1;
     if (isParseError) {
-      console.error('[DotYouCore-js] bad response from server', ex.message);
+      console.error('[odin-js] bad response from server', ex.message);
     } else {
-      console.error('[DotYouCore-js] decrypt response failed', ex);
+      console.error('[odin-js] decrypt response failed', ex);
     }
     return undefined;
   }
