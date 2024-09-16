@@ -359,7 +359,9 @@ export const uploadChatMessage = async (
     }
   );
 
-  if (!uploadResult) return null;
+  if (!uploadResult) {
+    throw new Error('Failed to upload chat message');
+  }
 
   if (
     recipients.some(
