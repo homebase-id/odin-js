@@ -88,7 +88,6 @@ export class BaseDotYouClient {
         ...this._options.headers,
         ...options?.headers,
       },
-      timeout: isDebug ? undefined : 30000, // 30 seconds
     });
 
     if (options?.overrideEncryption) return client;
