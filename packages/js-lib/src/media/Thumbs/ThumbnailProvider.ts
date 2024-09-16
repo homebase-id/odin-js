@@ -42,6 +42,10 @@ export const createThumbnails = async (
     throw new Error('Thumbnails can only be created in a browser environment');
 
   const imageBytes = await new Uint8Array(await image.arrayBuffer());
+  if (!imageBytes || imageBytes.length === 0) {
+    throw new Error('No image data found');
+  }
+
   const contentType = image.type as ImageContentType;
 
   if (image.type === svgType) {
