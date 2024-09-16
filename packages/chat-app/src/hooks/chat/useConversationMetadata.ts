@@ -81,6 +81,7 @@ export const useConversationMetadata = (props?: { conversationId?: string | unde
       onError: (error) => {
         console.error('Error saving conversation metadata', error);
       },
+      retry: 1,
     }),
   };
 };
