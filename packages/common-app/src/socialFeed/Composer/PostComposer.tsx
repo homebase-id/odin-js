@@ -3,6 +3,7 @@ import {
   ChannelDefinition,
   EmbeddedPost,
   ReactAccess,
+  RemoteCollaborativeChannelDefinition,
 } from '@homebase-id/js-lib/public';
 import React, { Ref, useEffect, useMemo } from 'react';
 import { useRef, useState } from 'react';
@@ -64,7 +65,10 @@ export const PostComposer = ({
   const [caption, setCaption] = useState<string>('');
 
   const [targetChannel, setTargetChannel] = useState<{
-    channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
+    channel:
+      | HomebaseFile<ChannelDefinition>
+      | NewHomebaseFile<ChannelDefinition>
+      | HomebaseFile<RemoteCollaborativeChannelDefinition>;
     acl?: AccessControlList | undefined;
     odinId?: string | undefined;
   }>({
@@ -131,6 +135,8 @@ export const PostComposer = ({
   }, []);
 
   const canPost = caption?.length || files?.length || !!embeddedPost;
+
+  console.log('targetChannel', targetChannel);
 
   return (
     <div className={`${className ?? ''} relative`}>
@@ -288,10 +294,15 @@ export const PostComposer = ({
             }
             onClick={doPost}
           >
-            {targetChannel.channel.serverMetadata?.accessControlList && canPost ? (
+            {targetChannel && canPost ? (
               <AclIcon
                 className="mr-3 h-5 w-5"
-                acl={targetChannel.acl || targetChannel.channel.serverMetadata?.accessControlList}
+                acl={
+                  (targetChannel.acl ||
+                    targetChannel.channel.serverMetadata?.accessControlList ||
+                    (targetChannel.channel as HomebaseFile<RemoteCollaborativeChannelDefinition>)
+                      .fileMetadata.appData.content.acl) as AccessControlList
+                }
               />
             ) : null}
             <span className="flex flex-col">
@@ -332,7 +343,10 @@ export const ChannelOrAclSelector = React.forwardRef(
       defaultAcl?: AccessControlList;
       onChange: (data: {
         odinId: string | undefined;
-        channel: HomebaseFile<ChannelDefinition> | undefined;
+        channel:
+          | HomebaseFile<ChannelDefinition>
+          | HomebaseFile<RemoteCollaborativeChannelDefinition>
+          | undefined;
         acl: AccessControlList | undefined;
       }) => void;
       disabled?: boolean;
