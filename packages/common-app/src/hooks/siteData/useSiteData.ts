@@ -46,11 +46,15 @@ export interface ThemeLinksSettings extends DefaultTemplateSettings {
   themeId: '444';
   headerImageKey?: string;
 }
+export interface ThemeDisabledSettings extends DefaultTemplateSettings {
+  themeId: '0';
+}
 
 export type TemplateSettings =
   | ThemeCoverSettings
   | ThemeLinksSettings
   | ThemeWithTabsSettings
+  | ThemeDisabledSettings
   | undefined;
 
 type OwnerSiteData = {

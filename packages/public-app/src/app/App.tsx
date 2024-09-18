@@ -114,7 +114,11 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
   const [searchParams] = useSearchParams();
   const { data: siteData, isFetched: siteDataFetched } = useSiteData();
 
-  if (siteData && siteDataFetched && !siteData.home?.templateSettings?.themeId) {
+  if (
+    siteData &&
+    siteDataFetched &&
+    (!siteData.home?.templateSettings?.themeId || siteData.home?.templateSettings?.themeId === '0')
+  ) {
     return (
       <div className="flex min-h-screen">
         <span className="m-auto text-center">
