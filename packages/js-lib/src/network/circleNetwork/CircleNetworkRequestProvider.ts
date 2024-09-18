@@ -19,19 +19,16 @@ const PendingPathRoot: string = Root + '/pending';
 export const getPendingRequests = async (
   dotYouClient: DotYouClient,
   params: PagingOptions
-): Promise<PagedResult<RedactedConnectionRequest> | undefined> => {
+): Promise<PagedResult<RedactedConnectionRequest>> => {
   const client = dotYouClient.createAxiosClient();
   const url = PendingPathRoot + '/list?' + stringifyToQueryParams(params);
 
   return client
-    .get<PagedResult<RedactedConnectionRequest>>(url)
+    .get(url)
     .then((response) => {
       return response.data;
     })
-    .catch((ex) => {
-      dotYouClient.handleErrorResponse(ex);
-      return undefined;
-    });
+    .catch(dotYouClient.handleErrorResponse);
 };
 
 export const getPendingRequest = async (
@@ -95,9 +92,6 @@ export const acceptConnectionRequest = async (
     permissions: undefined,
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (header as any).contactData = { name: 'NO_LONGER_USED' };
-
   return client
     .post(url, header)
     .then((response) => {
@@ -149,11 +143,6 @@ export const sendRequest = async (
     recipient: odinId,
     message: message,
     circleIds: circleIds,
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (data as any).contactData = {
-    name: 'NO_LONGER_USED',
   };
 
   const client = dotYouClient.createAxiosClient();
