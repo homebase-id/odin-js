@@ -10,8 +10,6 @@ interface FooterProps {
 }
 
 const Footer: FC<FooterProps> = ({ className }) => {
-  const { social } = useSiteData().data ?? {};
-
   return (
     <footer className={`body-font bg-background ${className}`}>
       <div className="container mx-auto flex flex-col items-center px-5 py-8 sm:flex-row">
@@ -31,10 +29,7 @@ const Footer: FC<FooterProps> = ({ className }) => {
           © {new Date().getFullYear()} | v.
           {getVersion()}
         </a>
-        <Socials
-          socialHandles={social}
-          className="mt-4 justify-center sm:ml-4 sm:mt-0 sm:justify-start"
-        />
+        <Socials className="mt-4 justify-center sm:ml-4 sm:mt-0 sm:justify-start" />
       </div>
     </footer>
   );

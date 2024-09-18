@@ -83,7 +83,7 @@ export const useLinks = (props?: { odinId: string } | undefined) => {
       setTimeout(async () => {
         const dynamicData = await fetchDynamicData();
         if (dynamicData) {
-          queryClient.setQueryData(['links'], dynamicData);
+          queryClient.setQueryData(['links', odinId || ''], dynamicData);
         }
       }, 500);
     }
@@ -96,6 +96,6 @@ export const useLinks = (props?: { odinId: string } | undefined) => {
     queryFn: () => fetchData(odinId),
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours
   });
 };

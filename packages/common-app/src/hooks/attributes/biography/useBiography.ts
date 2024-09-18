@@ -173,7 +173,7 @@ export const useBiography = (props?: { odinId: string } | undefined) => {
       setTimeout(async () => {
         const dynamicData = await fetchDynamicData();
         if (dynamicData) {
-          queryClient.setQueryData(['biography'], dynamicData);
+          queryClient.setQueryData(['biography', odinId || ''], dynamicData);
         }
       }, 500);
     }
@@ -186,6 +186,6 @@ export const useBiography = (props?: { odinId: string } | undefined) => {
     queryFn: () => fetchData(odinId),
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours
   });
 };

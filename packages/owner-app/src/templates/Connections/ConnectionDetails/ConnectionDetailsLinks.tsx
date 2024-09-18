@@ -1,48 +1,33 @@
 import { FC, ReactNode, useEffect, useState } from 'react';
-import { t, useLinks, useSocials, LinkType } from '@homebase-id/common-app';
-import { Clipboard as ClipboardIcon, Globe, IconProps } from '@homebase-id/common-app/icons';
+import { t, useLinks, useSocials } from '@homebase-id/common-app';
+import { Globe, IconProps, Clipboard as ClipboardIcon } from '@homebase-id/common-app/icons';
+import Section from '../../../components/ui/Sections/Section';
 
-const Links = ({
-  className,
-  style,
-  includeSocials,
-  direction,
-}: {
-  className?: string;
-  style?: 'secondary';
-  includeSocials?: boolean;
-  direction: 'col' | 'row';
-}) => {
-  const { data: links } = useLinks();
-  const { data: socials } = useSocials();
+export const ConnectionDetailsLinks = ({ odinId }: { odinId: string }) => {
+  const { data: links } = useLinks({ odinId });
+  const { data: socials } = useSocials({ odinId });
 
-  if (!socials || (!links && (!includeSocials || !socials))) {
-    return null;
-  }
-  const flexDir = direction === 'col' ? 'flex-col' : 'flex-row';
-
-  const allLinks: LinkType[] = [
-    ...(includeSocials ? socials : []),
-    ...(links || []).map((link) => ({
+  const allLinks =
+    links?.map((link) => ({
       icon: Globe,
       link: link.target,
       copyText: undefined,
       priority: link.priority,
       children: link.text,
-    })),
-  ].sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0));
+    })) || [];
+
+  const allSocials = socials
+    ? socials.map((social) => ({
+        ...social,
+      }))
+    : [];
+
+  const both = [...allLinks, ...allSocials].sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0));
 
   return (
-    <div className={`-m-2 flex ${flexDir} flex-wrap ${className}`}>
-      {allLinks.map((link, index) => (
-        <BetterLink
-          key={index}
-          {...link}
-          style={style}
-          className={direction === 'col' ? 'px-4 py-3' : 'px-3 py-2'}
-        />
-      ))}
-    </div>
+    <Section>
+      {both?.map((link, index) => <BetterLink key={index} {...link} className={'px-4 py-3'} />)}
+    </Section>
   );
 };
 
@@ -76,7 +61,7 @@ const BetterLink = ({
         className={`relative m-2 flex flex-row hover:shadow-lg focus:outline-none ${
           style === 'secondary'
             ? `border-gray rounded border hover:bg-background`
-            : `rounded border-0 bg-button text-white transition-colors hover:bg-button hover:bg-opacity-80`
+            : `bg-button hover:bg-button text-button-text rounded border-0 transition-colors hover:bg-opacity-80`
         } ${className ?? ''}`}
         target="_blank"
         rel={'noopener noreferrer'}
@@ -108,5 +93,3 @@ const BetterLink = ({
     </>
   );
 };
-
-export default Links;
