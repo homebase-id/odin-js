@@ -136,13 +136,10 @@ export const useSocials = (props?: { odinId: string } | undefined) => {
     const returnData = (await fetchStaticData()) ?? (await fetchDynamicData());
 
     if (isAuthenticated) {
-      console.log('fetching dynamic with delay');
       // We are authenticated, so we might have more data when fetching non-static data; Let's do so async with timeout to allow other static info to load and render
       setTimeout(async () => {
         const dynamicData = await fetchDynamicData();
-        if (dynamicData) {
-          queryClient.setQueryData(['socials', odinId || ''], dynamicData);
-        }
+        if (dynamicData) queryClient.setQueryData(['socials', odinId || ''], dynamicData);
       }, 500);
     }
 

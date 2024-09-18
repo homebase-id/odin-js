@@ -1,4 +1,10 @@
-import { RichTextRenderer, t, useBiography, useDotYouClientContext } from '@homebase-id/common-app';
+import {
+  LoadingBlock,
+  RichTextRenderer,
+  t,
+  useBiography,
+  useDotYouClientContext,
+} from '@homebase-id/common-app';
 import { OdinImage } from '@homebase-id/ui-lib';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { CompanyImage } from '../../../components/Connection/CompanyImage/CompanyImage';
@@ -6,10 +12,12 @@ import { Arrow } from '@homebase-id/common-app/icons';
 import Section from '../../../components/ui/Sections/Section';
 
 export const ConnectionDetailsAbout = ({ odinId }: { odinId: string }) => {
-  const { data: bioData } = useBiography({ odinId });
+  const { data: bioData, isLoading } = useBiography({ odinId });
 
   return (
     <Section className="flex flex-col gap-10">
+      {isLoading ? <LoadingBlock className="h-16" /> : null}
+
       {bioData?.shortBio && (
         <RichTextRenderer className="leading-relaxed" body={bioData.shortBio.body} />
       )}
