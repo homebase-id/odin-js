@@ -104,14 +104,14 @@ test('ACLs are equal', () => {
   expect(
     aclEqual(
       { requiredSecurityGroup: SecurityGroupType.Anonymous },
-      { requiredSecurityGroup: SecurityGroupType.Connected }
+      { requiredSecurityGroup: SecurityGroupType.AutoConnected }
     )
   ).toBe(false);
 
   expect(
     aclEqual(
-      { requiredSecurityGroup: SecurityGroupType.Connected },
-      { requiredSecurityGroup: SecurityGroupType.Connected }
+      { requiredSecurityGroup: SecurityGroupType.AutoConnected },
+      { requiredSecurityGroup: SecurityGroupType.AutoConnected }
     )
   ).toBe(true);
 
@@ -119,22 +119,34 @@ test('ACLs are equal', () => {
   const circleIdB = getNewId();
   expect(
     aclEqual(
-      { requiredSecurityGroup: SecurityGroupType.Connected },
-      { requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: [circleIdA, circleIdB] }
+      { requiredSecurityGroup: SecurityGroupType.AutoConnected },
+      {
+        requiredSecurityGroup: SecurityGroupType.AutoConnected,
+        circleIdList: [circleIdA, circleIdB],
+      }
     )
   ).toBe(false);
 
   expect(
     aclEqual(
-      { requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: [circleIdA] },
-      { requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: [circleIdA, circleIdB] }
+      { requiredSecurityGroup: SecurityGroupType.AutoConnected, circleIdList: [circleIdA] },
+      {
+        requiredSecurityGroup: SecurityGroupType.AutoConnected,
+        circleIdList: [circleIdA, circleIdB],
+      }
     )
   ).toBe(false);
 
   expect(
     aclEqual(
-      { requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: [circleIdA, circleIdB] },
-      { requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: [circleIdA, circleIdB] }
+      {
+        requiredSecurityGroup: SecurityGroupType.AutoConnected,
+        circleIdList: [circleIdA, circleIdB],
+      },
+      {
+        requiredSecurityGroup: SecurityGroupType.AutoConnected,
+        circleIdList: [circleIdA, circleIdB],
+      }
     )
   ).toBe(true);
 });

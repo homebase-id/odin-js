@@ -69,13 +69,13 @@ import {
   SETUP_PATH,
 } from '../hooks/auth/useAuth';
 import { useIsConfigured } from '../hooks/configure/useIsConfigured';
-import { useInboxProcessor } from '../hooks/inbox/useInboxProcessor';
 import {
   DotYouClientProvider,
   ErrorBoundary,
   NotFound,
   OdinQueryClient,
 } from '@homebase-id/common-app';
+import { useInboxProcessor } from '../hooks/inbox/useInboxProcessor';
 
 export const REACT_QUERY_CACHE_KEY = 'OWNER_REACT_QUERY_OFFLINE_CACHE';
 const INCLUDED_QUERY_KEYS = ['contact', 'process-inbox'];

@@ -68,7 +68,7 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
       },
       serverMetadata: {
         accessControlList: {
-          requiredSecurityGroup: SecurityGroupType.Connected,
+          requiredSecurityGroup: SecurityGroupType.AutoConnected,
         },
       },
     };
@@ -423,7 +423,7 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
       },
       serverMetadata: {
         accessControlList: {
-          requiredSecurityGroup: SecurityGroupType.Connected,
+          requiredSecurityGroup: SecurityGroupType.AutoConnected,
         },
       },
     };

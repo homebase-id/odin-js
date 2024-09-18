@@ -128,7 +128,7 @@ const sendOne = async (dotYouClient: DotYouClient, threadId: string, recipients:
     },
     serverMetadata: {
       accessControlList: {
-        requiredSecurityGroup: SecurityGroupType.Connected,
+        requiredSecurityGroup: SecurityGroupType.AutoConnected,
       },
     },
   };

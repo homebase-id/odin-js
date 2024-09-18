@@ -15,9 +15,9 @@ import {
   Person,
   Phone,
   Refresh,
+  ChatBubble,
   Check,
   Exclamation,
-  ChatBubble,
 } from '@homebase-id/common-app/icons';
 import Section from '../../ui/Sections/Section';
 import ContactImage from '../ContactImage/ContactImage';
@@ -121,8 +121,8 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
                   verifyConnection(odinId);
                 }
               }}
-              icon={Refresh}
               type="secondary"
+              icon={Refresh}
             >
               {t('Refresh')}
             </ActionButton>
