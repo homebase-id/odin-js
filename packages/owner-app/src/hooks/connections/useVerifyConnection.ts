@@ -12,7 +12,6 @@ export const useVerifyConnection = () => {
   return {
     confirmConnection: useMutation({
       mutationFn: doVerifyConnection,
-      throwOnError: true,
     }),
   };
 };
