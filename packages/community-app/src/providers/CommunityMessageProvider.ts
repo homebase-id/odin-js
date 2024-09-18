@@ -126,7 +126,7 @@ export const uploadCommunityMessage = async (
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList || {
-      requiredSecurityGroup: SecurityGroupType.AutoConnectedctedcted,
+      requiredSecurityGroup: SecurityGroupType.AutoConnected,
     },
   };
 

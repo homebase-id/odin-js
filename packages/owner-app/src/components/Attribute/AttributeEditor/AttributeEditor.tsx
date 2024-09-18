@@ -351,7 +351,7 @@ const getDefaultAcl = (type: string): AccessControlList => {
     case BuiltInAttributes.PhoneNumber:
     case BuiltInAttributes.Email:
       return {
-        // requiredSecurityGroup: SecurityGroupType.ConfirmConnected,
+        // requiredSecurityGroup: SecurityGroupType.Connected,
         requiredSecurityGroup: SecurityGroupType.AutoConnected,
       };
 

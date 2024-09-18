@@ -27,9 +27,9 @@ export interface AccessControlList {
 export enum SecurityGroupType {
   Anonymous = 'anonymous',
   Authenticated = 'authenticated',
-  // Connected = 'connected',
+  Connected = 'connected',
   AutoConnected = 'autoconnected',
-  ConfirmConnected = 'confirmconnected',
+  // ConfirmConnected = 'confirmconnected', // Attempted to rename to this.. But failed on the BE
   Owner = 'owner',
 }
 

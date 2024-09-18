@@ -28,8 +28,7 @@ export const AclSummary = ({
           : acl.requiredSecurityGroup.toLowerCase() ===
               SecurityGroupType.AutoConnected.toLowerCase()
             ? t('Auto Connected')
-            : acl.requiredSecurityGroup.toLowerCase() ===
-                SecurityGroupType.ConfirmConnected.toLowerCase()
+            : acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Connected.toLowerCase()
               ? acl.circleIdList?.length
                 ? `${t('Circles')}: ${ellipsisAtMaxChar(circlesDetails?.join(', '), maxLength)}`
                 : t('Connections')
