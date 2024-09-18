@@ -274,11 +274,13 @@ export const MailComposer = ({
     [setFiles, autosavedDsr.fileId, files]
   );
 
+  console.log(autosavedDsr);
+
   return (
     <>
       <ErrorNotification error={removeDraftError || saveDraftError || sendMailError} />
       <form onSubmit={doSend}>
-        <div className="flex flex-col gap-2 ">
+        <div className="flex flex-col gap-2">
           <div ref={detailsRef} className="contents">
             {expanded ? (
               <>

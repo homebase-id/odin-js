@@ -1,91 +1,6 @@
 import { FC, ReactNode, useEffect, useState } from 'react';
-import { t, useSiteData } from '@homebase-id/common-app';
-import { useLinks } from '../../../../hooks/links/useLinks';
-import {
-  Clipboard as ClipboardIcon,
-  Discord,
-  EpicGames,
-  Facebook,
-  Github,
-  Globe,
-  IconProps,
-  Instagram,
-  Snapchat,
-  Linkedin,
-  Minecraft,
-  Person,
-  RiotGames,
-  Stackoverflow,
-  Steam,
-  Tiktok,
-  Twitter,
-  Youtube,
-} from '@homebase-id/common-app/icons';
-import { SocialFields } from '@homebase-id/js-lib/profile';
-
-export const getLinkIcon = (type: string): React.FC<IconProps> => {
-  switch (type) {
-    case SocialFields.Facebook:
-      return Facebook;
-    case SocialFields.Twitter:
-      return Twitter;
-    case SocialFields.LinkedIn:
-      return Linkedin;
-    case SocialFields.Instagram:
-      return Instagram;
-    case SocialFields.Tiktok:
-      return Tiktok;
-    case SocialFields.Homebase:
-      return Person;
-    case 'minecraft':
-      return Minecraft;
-    case 'steam':
-      return Steam;
-    case 'discord':
-      return Discord;
-    case 'snapchat':
-      return Snapchat;
-    case 'youtube':
-      return Youtube;
-    case 'riot games':
-      return RiotGames;
-    case 'epic games':
-      return EpicGames;
-    case 'github':
-      return Github;
-    case 'stackoverflow':
-      return Stackoverflow;
-    default:
-      return Globe;
-  }
-};
-
-export const UNLINKABLE_SOCIALS = [
-  'minecraft',
-  'steam',
-  'discord',
-  'riot games',
-  'epic games',
-  'stackoverflow',
-];
-
-export const getLink = (type: string, username: string): string => {
-  if (UNLINKABLE_SOCIALS.includes(type)) return '';
-
-  return type !== 'dotyouid'
-    ? `https://${type}.com/${
-        type === SocialFields.LinkedIn ? 'in/' : type === SocialFields.Snapchat ? 'add/' : ''
-      }${username}`
-    : `https://${username}`;
-};
-
-type LinkType = {
-  icon: FC<IconProps>;
-  link: string;
-  copyText?: string;
-  priority?: number;
-  children: ReactNode;
-};
+import { t, useLinks, useSocials, LinkType } from '@homebase-id/common-app';
+import { Clipboard as ClipboardIcon, Globe, IconProps } from '@homebase-id/common-app/icons';
 
 const Links = ({
   className,
@@ -98,35 +13,16 @@ const Links = ({
   includeSocials?: boolean;
   direction: 'col' | 'row';
 }) => {
-  const { data: siteData } = useSiteData();
   const { data: links } = useLinks();
+  const { data: socials } = useSocials();
 
-  if (!siteData || (!links && (!includeSocials || !siteData?.social))) {
+  if (!socials || (!links && (!includeSocials || !socials))) {
     return null;
   }
   const flexDir = direction === 'col' ? 'flex-col' : 'flex-row';
 
   const allLinks: LinkType[] = [
-    ...(includeSocials && siteData.social
-      ? siteData.social
-          .filter((social) => !!social?.type)
-          .map((social) => {
-            const link = getLink(social.type, social.username);
-            return {
-              icon: getLinkIcon(social.type),
-              link: link,
-              copyText: link ? undefined : social.username,
-              priority: social.priority,
-              children: link ? (
-                social.username
-              ) : (
-                <>
-                  @{social.username} <small className="my-auto ml-1">({social.type})</small>
-                </>
-              ),
-            };
-          })
-      : []),
+    ...(includeSocials ? socials : []),
     ...(links || []).map((link) => ({
       icon: Globe,
       link: link.target,

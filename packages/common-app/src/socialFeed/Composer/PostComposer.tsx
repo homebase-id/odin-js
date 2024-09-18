@@ -30,6 +30,7 @@ import {
   usePostComposer,
   useChannels,
   useCollaborativeChannels,
+  useChannel,
 } from '../../hooks';
 
 import { EmbeddedPostContent } from '../Blocks/Body/EmbeddedPostContent';
@@ -64,6 +65,7 @@ export const PostComposer = ({
 
   const [caption, setCaption] = useState<string>('');
 
+  const { data: publicChannel } = useChannel({ channelKey: BlogConfig.PublicChannelId }).fetch;
   const [targetChannel, setTargetChannel] = useState<{
     channel:
       | HomebaseFile<ChannelDefinition>
@@ -72,8 +74,17 @@ export const PostComposer = ({
     acl?: AccessControlList | undefined;
     odinId?: string | undefined;
   }>({
-    channel: forcedChannel || BlogConfig.PublicChannelNewDsr,
+    channel: forcedChannel || publicChannel || BlogConfig.PublicChannelNewDsr,
   });
+
+  useEffect(() => {
+    if (
+      publicChannel &&
+      targetChannel.channel.fileMetadata.appData.uniqueId === BlogConfig.PublicChannelId
+    ) {
+      setTargetChannel((targetChannel) => ({ ...targetChannel, channel: publicChannel }));
+    }
+  }, [publicChannel]);
 
   const [files, setFiles] = useState<NewMediaFile[]>();
   const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(caption || '');
@@ -135,8 +146,6 @@ export const PostComposer = ({
   }, []);
 
   const canPost = caption?.length || files?.length || !!embeddedPost;
-
-  console.log('targetChannel', targetChannel);
 
   return (
     <div className={`${className ?? ''} relative`}>

@@ -46,11 +46,15 @@ export interface ThemeLinksSettings extends DefaultTemplateSettings {
   themeId: '444';
   headerImageKey?: string;
 }
+export interface ThemeDisabledSettings extends DefaultTemplateSettings {
+  themeId: '0';
+}
 
 export type TemplateSettings =
   | ThemeCoverSettings
   | ThemeLinksSettings
   | ThemeWithTabsSettings
+  | ThemeDisabledSettings
   | undefined;
 
 type OwnerSiteData = {
@@ -64,8 +68,6 @@ type OwnerSiteData = {
   status?: string;
 };
 
-type SocialSiteData = { type: string; username: string; priority: number }[];
-
 type HomeSiteData = {
   templateSettings?: TemplateSettings;
   headerPreviewThumbnail?: EmbeddedThumb;
@@ -73,7 +75,6 @@ type HomeSiteData = {
 
 type SiteData = {
   owner: OwnerSiteData;
-  social: SocialSiteData;
   home: HomeSiteData;
 };
 
@@ -115,24 +116,6 @@ export const useSiteData = () => {
       };
     };
 
-    const parseSocialData = async (
-      socialAttributes?: HomebaseFile<Attribute>[]
-    ): Promise<SocialSiteData> => {
-      return socialAttributes
-        ?.map((dsr) => {
-          const attr = dsr.fileMetadata.appData.content;
-          const value = Object.values(attr?.data || {})?.[0];
-
-          return {
-            type: Object.keys(attr?.data || {})?.[0],
-            username: typeof value === 'string' ? value : '',
-            priority: attr?.priority,
-          };
-        })
-        .sort((attrA, attrB) => attrA.priority - attrB.priority)
-        .filter((attr) => attr !== undefined) as SocialSiteData;
-    };
-
     const parseHomeData = async (
       homeAndThemeAttr?: HomebaseFile<Attribute>[]
     ): Promise<HomeSiteData> => {
@@ -153,7 +136,6 @@ export const useSiteData = () => {
     const getFullData = async () => {
       const INCLUDE_METADATA_HEADER = true;
       const ownerDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
-      const socialDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
       const homeDrive = HomePageConfig.HomepageTargetDrive;
 
       /// Query batch collection to improve performance instead of higher level `AttributeDataProvider.getProfileAttributes`
@@ -169,18 +151,6 @@ export const useSiteData = () => {
               BuiltInAttributes.Photo,
               BuiltInAttributes.Status,
             ],
-          },
-          resultOptions: {
-            includeMetadataHeader: INCLUDE_METADATA_HEADER,
-            maxRecords: 10,
-          },
-        },
-        {
-          name: 'social',
-          queryParams: {
-            targetDrive: socialDrive,
-            fileType: [AttributeConfig.AttributeFileType],
-            tagsMatchAtLeastOne: [...BuiltInAttributes.AllSocial, ...BuiltInAttributes.AllGames],
           },
           resultOptions: {
             includeMetadataHeader: INCLUDE_METADATA_HEADER,
@@ -220,19 +190,6 @@ export const useSiteData = () => {
               )
           ) ?? []
       );
-      const socialAttr = await Promise.all(
-        resultMap
-          .get('social')
-          ?.map(
-            async (dsr) =>
-              await homebaseFileToProfileAttribute(
-                dotYouClient,
-                dsr,
-                ownerDrive,
-                INCLUDE_METADATA_HEADER
-              )
-          ) ?? []
-      );
       const homeAttr = await Promise.all(
         resultMap
           .get('home')
@@ -249,27 +206,22 @@ export const useSiteData = () => {
 
       return {
         owner: await parseOwnerData(getHighestPrioAttributesFromMultiTypes(ownerAttr)),
-        social: await parseSocialData(
-          socialAttr.filter((attr) => attr !== undefined) as HomebaseFile<Attribute>[]
-        ),
         home: await parseHomeData(getHighestPrioAttributesFromMultiTypes(homeAttr)),
       } as SiteData;
     };
 
     const staticData = {
       owner: await getOwnerDataStatic(fileData),
-      social: await getSocialDataStatic(fileData),
       home: await getHomeDataStatic(fileData),
     };
 
-    if (!staticData.owner || !staticData.social || !staticData.home || isAuthenticated) {
+    if (!staticData.owner || !staticData.home || isAuthenticated) {
       try {
         return await getFullData();
       } catch (ex) {
         console.error('Fetching sitedata over api failed, fallback to static data', ex);
         return {
           owner: staticData.owner ?? {},
-          social: staticData.social ?? [],
           home: staticData.home ?? {},
         } as SiteData;
       }
@@ -306,29 +258,6 @@ const getOwnerDataStatic = (fileData: Map<string, ResponseEntry[]>): OwnerSiteDa
         status: statusAttr?.data?.status,
       };
     }
-  }
-};
-
-const getSocialDataStatic = (
-  fileData: Map<string, ResponseEntry[]>
-): SocialSiteData | undefined => {
-  if (fileData.has('socials')) {
-    const fileBasedResponse = fileData
-      .get('socials')
-      ?.sort((a, b) => (a?.payload?.priority ?? 0) - (b?.payload?.priority ?? 0))
-      ?.map((entry) => {
-        if (!entry.payload?.data) return null;
-        const value = Object.values(entry.payload?.data)?.[0];
-
-        return {
-          type: Object.keys(entry.payload?.data)?.[0],
-          username: typeof value === 'string' ? value : '',
-          priority: entry.payload?.priority,
-        };
-      })
-      ?.filter(Boolean) as SocialSiteData | undefined;
-
-    if (fileBasedResponse?.length) return fileBasedResponse;
   }
 };
 

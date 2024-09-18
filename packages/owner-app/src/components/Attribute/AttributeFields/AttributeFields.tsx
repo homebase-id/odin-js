@@ -346,7 +346,7 @@ const NameAttributeEditor = ({
           />
         </div>
       ) : null}
-      <button onClick={() => setShowMore(!showMore)} className="text-indigo-500">
+      <button onClick={() => setShowMore(!showMore)} className="text-primary">
         {showMore ? 'Show less' : 'Show more'}
       </button>
     </>

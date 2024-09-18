@@ -69,7 +69,12 @@ import {
   SETUP_PATH,
 } from '../hooks/auth/useAuth';
 import { useIsConfigured } from '../hooks/configure/useIsConfigured';
-import { ErrorBoundary, NotFound, OdinQueryClient } from '@homebase-id/common-app';
+import {
+  DotYouClientProvider,
+  ErrorBoundary,
+  NotFound,
+  OdinQueryClient,
+} from '@homebase-id/common-app';
 
 export const REACT_QUERY_CACHE_KEY = 'OWNER_REACT_QUERY_OFFLINE_CACHE';
 const INCLUDED_QUERY_KEYS = ['contact'];
@@ -113,9 +118,11 @@ function App() {
           path="/owner"
           element={
             <RootRoute>
-              <Suspense>
-                <Outlet />
-              </Suspense>
+              <DotYouClientProvider>
+                <Suspense>
+                  <Outlet />
+                </Suspense>
+              </DotYouClientProvider>
             </RootRoute>
           }
         >
@@ -168,6 +175,9 @@ function App() {
             ></Route>
             <Route path="connections" element={<Connections />}></Route>
             <Route path="connections/:odinId" element={<ConnectionDetails />}></Route>
+            <Route path="connections/:odinId/about" element={<ConnectionDetails />}></Route>
+            <Route path="connections/:odinId/links" element={<ConnectionDetails />}></Route>
+            <Route path="connections/:odinId/settings" element={<ConnectionDetails />}></Route>
             <Route path="connections/:odinId/:action" element={<ConnectionDetails />}></Route>
             <Route path="circles" element={<Circles />}></Route>
             <Route path="circles/:circleKey" element={<CircleDetails />}></Route>

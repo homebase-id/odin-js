@@ -1,26 +1,22 @@
-import { UNLINKABLE_SOCIALS, getLink, getLinkIcon } from '../Links/Links';
+import { useSocials } from '@homebase-id/common-app';
 
-const Socials = ({
-  socialHandles,
-  className,
-}: {
-  socialHandles?: { type: string; username: string }[];
-  className: string;
-}) => {
+const Socials = ({ className }: { className: string }) => {
+  const { data: socials } = useSocials();
+
   return (
     <span className={`inline-flex ${className}`}>
-      {socialHandles
-        ?.filter((handle) => !UNLINKABLE_SOCIALS.includes(handle.type))
-        .map((handle, index) => (
+      {socials
+        ?.filter((link) => !!link.link)
+        .map((socialLink, index) => (
           <a
             className="ml-3 text-gray-500 hover:text-primary"
-            href={getLink(handle.type, handle.username)}
+            href={socialLink.link}
             target="_blank"
             rel="noreferrer noopener"
             key={index}
           >
-            {getLinkIcon(handle.type)({ className: 'w-5 h-5' })}
-            <span className="sr-only">{handle.type}</span>
+            {socialLink.icon({ className: 'w-5 h-5' })}
+            <span className="sr-only">{socialLink.copyText}</span>
           </a>
         ))}
     </span>

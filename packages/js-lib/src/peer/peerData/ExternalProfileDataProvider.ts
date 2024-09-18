@@ -10,7 +10,7 @@ import { HomebaseFile, TargetDrive } from '../../core/DriveData/File/DriveFileTy
 export const getProfileAttributesOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
-  attributeType?: string
+  attributeType?: string | string[]
 ): Promise<HomebaseFile<Attribute>[]> => {
   const profileId = BuiltInProfiles.StandardProfileId;
   const targetDrive = GetTargetDriveFromProfileId(profileId);
@@ -18,7 +18,11 @@ export const getProfileAttributesOverPeer = async (
   const queryParams: FileQueryParams = {
     targetDrive: targetDrive,
     fileType: [AttributeConfig.AttributeFileType],
-    tagsMatchAll: attributeType ? [attributeType] : undefined,
+    tagsMatchAtLeastOne: attributeType
+      ? Array.isArray(attributeType)
+        ? attributeType
+        : [attributeType]
+      : undefined,
   };
   try {
     const result = await queryBatchOverPeer(dotYouClient, odinId, queryParams);
