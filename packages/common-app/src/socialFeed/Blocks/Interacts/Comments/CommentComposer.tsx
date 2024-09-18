@@ -39,6 +39,7 @@ export const CommentComposer = ({
   const odinId = getIdentity() || '';
   const doPost = async (commentBody: string, attachment?: File) => {
     if (postState === 'pending') return;
+    if (commentBody.trim().length === 0 && !attachment) return;
 
     try {
       await postComment({
