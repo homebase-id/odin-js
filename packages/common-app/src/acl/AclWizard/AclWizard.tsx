@@ -117,7 +117,7 @@ const RequiredSecurityGroupRadioGroup = ({
         <GroupOption
           name={t('Connected')}
           description={t('Only people that are connected to you')}
-          value={{ requiredSecurityGroup: SecurityGroupType.AutoConnected }}
+          value={{ requiredSecurityGroup: SecurityGroupType.ConfirmConnected }}
         />
 
         <GroupOption
