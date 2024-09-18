@@ -31,3 +31,6 @@ export * from './siteData/useSiteData';
 export * from './socialFeed';
 export * from './staticFiles/useStaticFiles';
 export * from './transitProcessor/useWebsocketSubscriber';
+export * from './attributes/biography/useBiography';
+export * from './attributes/links/useLinks';
+export * from './attributes/links/useSocials';

@@ -1,6 +1,5 @@
 import { FC, ReactNode, useEffect, useState } from 'react';
-import { t, useSiteData } from '@homebase-id/common-app';
-import { useLinks } from '../../../../hooks/links/useLinks';
+import { t, useSiteData, useLinks } from '@homebase-id/common-app';
 import {
   Clipboard as ClipboardIcon,
   Discord,

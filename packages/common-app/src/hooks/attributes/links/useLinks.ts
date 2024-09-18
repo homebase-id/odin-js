@@ -6,8 +6,9 @@ import {
   LinkFields,
   getProfileAttributes,
 } from '@homebase-id/js-lib/profile';
-import { useAuth } from '../auth/useAuth';
 import { GetFile } from '@homebase-id/js-lib/public';
+import { getProfileAttributesOverPeer } from '@homebase-id/js-lib/peer';
+import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
 
 interface LinkData {
   text: string;
@@ -16,13 +17,17 @@ interface LinkData {
   priority: number;
 }
 
-export const useLinks = () => {
-  const { isAuthenticated, getDotYouClient } = useAuth();
-  const queryClient = useQueryClient();
-  const dotYouClient = getDotYouClient();
+export const useLinks = (props?: { odinId: string } | undefined) => {
+  const { odinId } = props || {};
 
-  const fetchData: () => Promise<LinkData[] | undefined> = async () => {
+  const dotYouClient = useDotYouClientContext();
+  const isAuthenticated = !!dotYouClient.getIdentity();
+  const queryClient = useQueryClient();
+
+  const fetchData: (odinId?: string) => Promise<LinkData[] | undefined> = async () => {
     const fetchStaticData = async () => {
+      if (odinId) return null;
+
       const fileData = await GetFile(dotYouClient, 'sitedata.json');
       if (fileData.has('link')) {
         const linkAttributes = (
@@ -48,12 +53,11 @@ export const useLinks = () => {
 
     const fetchDynamicData = async () => {
       try {
-        const linkAttributes = await getProfileAttributes(
-          dotYouClient,
-          BuiltInProfiles.StandardProfileId,
-          undefined,
-          [BuiltInAttributes.Link]
-        );
+        const linkAttributes = odinId
+          ? await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.Link)
+          : await getProfileAttributes(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
+              BuiltInAttributes.Link,
+            ]);
 
         return linkAttributes
           ?.map((dsr) => {
@@ -88,8 +92,8 @@ export const useLinks = () => {
   };
 
   return useQuery({
-    queryKey: ['links'],
-    queryFn: fetchData,
+    queryKey: ['links', odinId || ''],
+    queryFn: () => fetchData(odinId),
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     staleTime: Infinity,

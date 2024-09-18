@@ -5,7 +5,17 @@ import { LoadingBlock } from '@homebase-id/common-app';
 
 interface SubmenuProps {
   className?: string;
-  items: { title: ReactNode; text?: string; key?: string; path: string; className?: string }[];
+  items: (
+    | {
+        title: ReactNode;
+        text?: string;
+        key?: string;
+        path: string;
+        className?: string;
+        end?: boolean;
+      }
+    | undefined
+  )[];
   isLoading?: boolean;
 }
 
@@ -29,6 +39,7 @@ const Submenu: FC<SubmenuProps> = ({ className, items, isLoading }) => {
         } justify-start sm:flex-row ${className ?? ''}`}
       >
         {items.map((item, index) => {
+          if (!item) return null;
           return (
             // Only NavLink Supports isActive styling https://reactrouter.com/docs/en/v6/components/nav-link
             <NavLink
@@ -41,7 +52,7 @@ const Submenu: FC<SubmenuProps> = ({ className, items, isLoading }) => {
               }
               to={item.path}
               key={item.key || item.path}
-              // end
+              end={item.end}
             >
               {item.title}
             </NavLink>
@@ -49,7 +60,7 @@ const Submenu: FC<SubmenuProps> = ({ className, items, isLoading }) => {
         })}
       </div>
       <Select
-        className={`${!forceMobileView ? 'sm:hidden' : ''} py-4  ${className ?? ''}`}
+        className={`${!forceMobileView ? 'sm:hidden' : ''} py-4 ${className ?? ''}`}
         onChange={(e) => navigate(e.target.value)}
         value={
           items.find((itm) => window.location.pathname.startsWith(itm.path))?.path ||
@@ -57,6 +68,7 @@ const Submenu: FC<SubmenuProps> = ({ className, items, isLoading }) => {
         }
       >
         {items.map((item) => {
+          if (!item) return null;
           return (
             <option key={item.key || item.path} value={item.path}>
               {item.text || item.title}

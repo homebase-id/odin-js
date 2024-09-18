@@ -136,8 +136,6 @@ export const PostComposer = ({
 
   const canPost = caption?.length || files?.length || !!embeddedPost;
 
-  console.log('targetChannel', targetChannel);
-
   return (
     <div className={`${className ?? ''} relative`}>
       <form

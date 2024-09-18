@@ -14,7 +14,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
-import { ErrorBoundary, HOME_ROOT_PATH, NotFound, PREVIEW_ROOT } from '@homebase-id/common-app';
+import {
+  DotYouClientProvider,
+  ErrorBoundary,
+  HOME_ROOT_PATH,
+  NotFound,
+  PREVIEW_ROOT,
+} from '@homebase-id/common-app';
 import { useAuth } from '../hooks/auth/useAuth';
 import Header from '../components/ui/Layout/Header/Header';
 import Footer from '../components/ui/Layout/Footer/Footer';
@@ -42,9 +48,11 @@ function App() {
           element={
             <Layout>
               <ErrorBoundary>
-                <Suspense fallback={<></>}>
-                  <Outlet />
-                </Suspense>
+                <DotYouClientProvider>
+                  <Suspense fallback={<></>}>
+                    <Outlet />
+                  </Suspense>
+                </DotYouClientProvider>
               </ErrorBoundary>
             </Layout>
           }
