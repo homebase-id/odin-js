@@ -103,7 +103,9 @@ export const saveComment = async (
     },
     isEncrypted: encrypt,
     accessControlList: {
-      requiredSecurityGroup: encrypt ? SecurityGroupType.Connected : SecurityGroupType.Anonymous,
+      requiredSecurityGroup: encrypt
+        ? SecurityGroupType.AutoConnected
+        : SecurityGroupType.Anonymous,
     },
   };
 
@@ -146,7 +148,7 @@ export const saveComment = async (
       targetDrive: targetDrive,
       globalTransitId: comment.fileMetadata.appData.groupId || context.target.globalTransitId,
     };
-    metadata.accessControlList = { requiredSecurityGroup: SecurityGroupType.Connected };
+    metadata.accessControlList = { requiredSecurityGroup: SecurityGroupType.AutoConnected };
     metadata.allowDistribution = true;
 
     const instructionSet: TransitInstructionSet = {

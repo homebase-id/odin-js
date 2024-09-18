@@ -159,7 +159,8 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
 
     const collaborativeCircleIds =
       channelDef.serverMetadata?.accessControlList.requiredSecurityGroup ===
-        SecurityGroupType.Connected && channelDef.serverMetadata?.accessControlList.circleIdList
+        SecurityGroupType.ConfirmConnected &&
+      channelDef.serverMetadata?.accessControlList.circleIdList
         ? channelDef.serverMetadata?.accessControlList.circleIdList
         : [ALL_CONNECTIONS_CIRCLE_ID];
 

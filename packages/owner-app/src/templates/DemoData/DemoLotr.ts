@@ -40,7 +40,7 @@ export const lotrRealm = {
         id: toGuidId('frodo-smoking-photo'),
         image: frodoProfilePictures[2],
         acl: {
-          requiredSecurityGroup: SecurityGroupType.Connected,
+          requiredSecurityGroup: SecurityGroupType.AutoConnected,
           circleIdList: undefined,
           odinIdList: undefined,
         },
@@ -50,7 +50,7 @@ export const lotrRealm = {
         id: toGuidId('frodo-with-ring'),
         image: frodoProfilePictures[3],
         acl: {
-          requiredSecurityGroup: SecurityGroupType.Connected,
+          requiredSecurityGroup: SecurityGroupType.AutoConnected,
           circleIdList: [toGuidId('the-fellowship')],
           odinIdList: undefined,
         },

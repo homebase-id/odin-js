@@ -23,8 +23,10 @@ import {
   EmbeddedThumb,
   NewHomebaseFile,
   SecurityGroupType,
+  AccessControlList,
 } from '@homebase-id/js-lib/core';
 import { OptionalACLHomebaseFile } from '../AttributeCreator/AttributeCreator';
+import { BuiltInAttributes } from '@homebase-id/js-lib/profile';
 
 const AttributeEditor = ({
   attribute: attributeDsr,
@@ -58,10 +60,10 @@ const AttributeEditor = ({
     ...attributeDsr,
     ...updatedAttr,
     serverMetadata: {
-      accessControlList: updatedAttr?.serverMetadata?.accessControlList ||
-        attributeDsr?.serverMetadata?.accessControlList || {
-          requiredSecurityGroup: SecurityGroupType.Owner,
-        },
+      accessControlList:
+        updatedAttr?.serverMetadata?.accessControlList ||
+        attributeDsr?.serverMetadata?.accessControlList ||
+        getDefaultAcl(attribute.type),
     },
     fileMetadata: {
       ...attributeDsr.fileMetadata,
@@ -267,11 +269,7 @@ const AttributeEditor = ({
           <>
             <h2 className="mb-2 text-lg">{t('Who can access this attribute?')}</h2>
             <AclWizard
-              acl={
-                latestAttr.serverMetadata?.accessControlList || {
-                  requiredSecurityGroup: SecurityGroupType.Owner,
-                }
-              }
+              acl={latestAttr.serverMetadata?.accessControlList || getDefaultAcl(attribute.type)}
               onConfirm={(newAcl) => {
                 setIsAclEdit(false);
                 const dirtyAttr: NewHomebaseFile<AttributeVm> = {
@@ -337,6 +335,50 @@ const AttributeEditor = ({
       </ErrorBoundary>
     </Section>
   );
+};
+
+const getDefaultAcl = (type: string): AccessControlList => {
+  switch (type) {
+    case BuiltInAttributes.Name:
+    case BuiltInAttributes.Photo:
+      return {
+        requiredSecurityGroup: SecurityGroupType.Anonymous,
+      };
+
+    case BuiltInAttributes.Nickname:
+    case BuiltInAttributes.Address:
+    case BuiltInAttributes.Birthday:
+    case BuiltInAttributes.PhoneNumber:
+    case BuiltInAttributes.Email:
+      return {
+        // requiredSecurityGroup: SecurityGroupType.ConfirmConnected,
+        requiredSecurityGroup: SecurityGroupType.AutoConnected,
+      };
+
+    case BuiltInAttributes.HomebaseIdentity:
+    case BuiltInAttributes.TwitterUsername:
+    case BuiltInAttributes.FacebookUsername:
+    case BuiltInAttributes.InstagramUsername:
+    case BuiltInAttributes.TiktokUsername:
+    case BuiltInAttributes.LinkedinUsername:
+    case BuiltInAttributes.YoutubeUsername:
+    case BuiltInAttributes.DiscordUsername:
+    case BuiltInAttributes.SnapchatUsername:
+    case BuiltInAttributes.GithubUsername:
+    case BuiltInAttributes.StackoverflowUsername:
+    case BuiltInAttributes.EpicUsername:
+    case BuiltInAttributes.RiotUsername:
+    case BuiltInAttributes.SteamUsername:
+    case BuiltInAttributes.MinecraftUsername:
+      return {
+        requiredSecurityGroup: SecurityGroupType.AutoConnected,
+      };
+
+    default:
+      return {
+        requiredSecurityGroup: SecurityGroupType.Owner,
+      };
+  }
 };
 
 export default AttributeEditor;

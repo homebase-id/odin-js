@@ -126,7 +126,7 @@ export const uploadCommunityMessage = async (
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList || {
-      requiredSecurityGroup: SecurityGroupType.Connected,
+      requiredSecurityGroup: SecurityGroupType.AutoConnectedctedcted,
     },
   };
 
@@ -293,7 +293,7 @@ export const updateCommunityMessage = async (
     senderOdinId: (message.fileMetadata as FileMetadata<CommunityMessage>).senderOdinId,
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList || {
-      requiredSecurityGroup: SecurityGroupType.Connected,
+      requiredSecurityGroup: SecurityGroupType.AutoConnected,
     },
   };
 

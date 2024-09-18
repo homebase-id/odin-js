@@ -125,7 +125,7 @@ export const ChannelItem = ({
                           },
                         }
                       : chnlDsr.serverMetadata?.accessControlList.requiredSecurityGroup ===
-                          SecurityGroupType.Connected
+                          SecurityGroupType.ConfirmConnected
                         ? {
                             label: t('Convert into a collaborative channel'),
                             icon: Persons,

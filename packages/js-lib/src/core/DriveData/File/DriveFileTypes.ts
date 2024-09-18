@@ -27,7 +27,9 @@ export interface AccessControlList {
 export enum SecurityGroupType {
   Anonymous = 'anonymous',
   Authenticated = 'authenticated',
-  Connected = 'connected',
+  // Connected = 'connected',
+  AutoConnected = 'autoconnected',
+  ConfirmConnected = 'confirmconnected',
   Owner = 'owner',
 }
 

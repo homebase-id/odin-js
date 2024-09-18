@@ -29,7 +29,8 @@ export const AclWizard = ({
         />
       </div>
       {currentAcl.requiredSecurityGroup.toLowerCase() ===
-        SecurityGroupType.Connected.toLowerCase() && Array.isArray(currentAcl.circleIdList) ? (
+        SecurityGroupType.ConfirmConnected.toLowerCase() &&
+      Array.isArray(currentAcl.circleIdList) ? (
         <div className="mb-16">
           <h2 className="mb-2 text-lg">{t('Do you want to only allow certain circles?')}</h2>
           <CircleSelector
@@ -43,7 +44,7 @@ export const AclWizard = ({
           type="primary"
           isDisabled={
             (currentAcl.requiredSecurityGroup.toLowerCase() ===
-              SecurityGroupType.Connected.toLowerCase() &&
+              SecurityGroupType.ConfirmConnected.toLowerCase() &&
               currentAcl.circleIdList &&
               !currentAcl.circleIdList.length) ||
             false
@@ -110,13 +111,13 @@ const RequiredSecurityGroupRadioGroup = ({
         <GroupOption
           name={t('Circles')}
           description={t('Only people that are member of a circle')}
-          value={{ requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: [] }}
+          value={{ requiredSecurityGroup: SecurityGroupType.ConfirmConnected, circleIdList: [] }}
         />
 
         <GroupOption
           name={t('Connected')}
           description={t('Only people that are connected to you')}
-          value={{ requiredSecurityGroup: SecurityGroupType.Connected }}
+          value={{ requiredSecurityGroup: SecurityGroupType.AutoConnected }}
         />
 
         <GroupOption
