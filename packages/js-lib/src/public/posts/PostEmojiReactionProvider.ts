@@ -124,7 +124,7 @@ export const getReactionSummary = async (
                   count: reaction.count,
                 };
               } catch {
-                console.error('[DotYouCore-js] parse failed for', reaction);
+                console.error('[odin-js] parse failed for', reaction);
                 return;
               }
             })
@@ -150,7 +150,7 @@ export const getReactionSummary = async (
                   count: reaction.count,
                 };
               } catch {
-                console.error('[DotYouCore-js] parse failed for', reaction);
+                console.error('[odin-js] parse failed for', reaction);
                 return;
               }
             })

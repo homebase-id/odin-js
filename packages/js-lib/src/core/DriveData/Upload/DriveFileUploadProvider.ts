@@ -38,7 +38,7 @@ export const uploadFile = async (
   onVersionConflict?: () => Promise<void | UploadResult> | void,
   options?: {
     axiosConfig?: AxiosRequestConfig;
-    keyHeader?: KeyHeader | undefined;
+    aesKey?: Uint8Array | undefined;
   }
 ): Promise<UploadResult | void> => {
   isDebug &&
@@ -50,9 +50,9 @@ export const uploadFile = async (
     });
 
   // Force isEncrypted on the metadata to match the encrypt flag
-  metadata.isEncrypted = encrypt || !!options?.keyHeader;
+  metadata.isEncrypted = encrypt || !!options?.aesKey;
 
-  const keyHeader = encrypt ? options?.keyHeader || GenerateKeyHeader() : undefined;
+  const keyHeader = encrypt ? GenerateKeyHeader(options?.aesKey) : undefined;
 
   const { systemFileType, ...strippedInstructions } = instructions;
 
@@ -114,7 +114,7 @@ export const uploadHeader = async (
       : keyHeader;
 
   if (!decryptKeyHeader && metadata.isEncrypted)
-    throw new Error('[DotYouCore-JS] Missing existing keyHeader for appending encrypted metadata.');
+    throw new Error('[odin-js] Missing existing keyHeader for appending encrypted metadata.');
 
   if (plainKeyHeader) {
     plainKeyHeader.iv = getRandom16ByteArray();

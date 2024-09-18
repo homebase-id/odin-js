@@ -19,7 +19,15 @@ import {
   ActionGroup,
   ConfirmDialog,
 } from '@homebase-id/common-app';
-import { House, Block, Trash, HeartBeat, Persons, Ellipsis } from '@homebase-id/common-app/icons';
+import {
+  House,
+  Block,
+  Trash,
+  HeartBeat,
+  Persons,
+  Ellipsis,
+  Bubble,
+} from '@homebase-id/common-app/icons';
 
 export const IdentityPageMetaAndActions = ({
   odinId, // setIsEditPermissionActive,
@@ -133,18 +141,11 @@ export const IdentityPageMetaAndActions = ({
     },
   ];
 
-  const blockConfirmOptions = {
-    title: `${t('Block')} ${odinId}`,
-    buttonText: t('Block'),
-    body: `${t('Are you sure you want to block')} ${odinId}`,
-  };
-
-  if (connectionInfo?.status !== 'blocked' && connectionInfo?.status) {
+  if (isFollowing === false) {
     actionGroupOptions.push({
-      icon: Block,
-      label: t('Block'),
-      onClick: () => block(odinId),
-      confirmOptions: blockConfirmOptions,
+      icon: Persons,
+      label: t('Follow'),
+      href: `/owner/follow/following/${odinId}`,
     });
   }
 
@@ -167,6 +168,20 @@ export const IdentityPageMetaAndActions = ({
   };
 
   if (connectionInfo?.status === 'connected') {
+    actionGroupOptions.push({
+      label: t('Open chat'),
+      href: `/apps/chat/open/${odinId}`,
+      icon: Bubble,
+    });
+
+    if (hasDebugFlag()) {
+      actionGroupOptions.push({
+        icon: HeartBeat,
+        label: t('Grant Status'),
+        onClick: doDownloadStatusUrl,
+      });
+    }
+
     actionGroupOptions.push({
       icon: Trash,
       label: t('Disconnect'),
@@ -220,21 +235,20 @@ export const IdentityPageMetaAndActions = ({
         ],
       },
     });
-
-    if (hasDebugFlag()) {
-      actionGroupOptions.push({
-        icon: HeartBeat,
-        label: t('Grant Status'),
-        onClick: doDownloadStatusUrl,
-      });
-    }
   }
 
-  if (isFollowing === false) {
+  const blockConfirmOptions = {
+    title: `${t('Block')} ${odinId}`,
+    buttonText: t('Block'),
+    body: `${t('Are you sure you want to block')} ${odinId}`,
+  };
+
+  if (connectionInfo?.status !== 'blocked' && connectionInfo?.status) {
     actionGroupOptions.push({
-      icon: Persons,
-      label: t('Follow'),
-      href: `/owner/follow/following/${odinId}`,
+      icon: Block,
+      label: t('Block'),
+      onClick: () => block(odinId),
+      confirmOptions: blockConfirmOptions,
     });
   }
 
@@ -250,8 +264,8 @@ export const IdentityPageMetaAndActions = ({
               <span className="block leading-tight">
                 {`${
                   contactContent?.name
-                    ? contactContent.name.displayName ??
-                      `${contactContent.name.givenName || ''} ${contactContent.name.surname || ''}`
+                    ? (contactContent.name.displayName ??
+                      `${contactContent.name.givenName || ''} ${contactContent.name.surname || ''}`)
                     : odinId
                 }`}
               </span>
@@ -276,8 +290,8 @@ export const IdentityPageMetaAndActions = ({
         breadCrumbs={[{ href: '/owner/connections', title: 'Contacts' }, { title: odinId }]}
         browserTitle={
           connectionInfo?.status === 'connected' && contactContent?.name
-            ? contactContent.name.displayName ??
-              `${contactContent.name.givenName} ${contactContent.name.surname}`
+            ? (contactContent.name.displayName ??
+              `${contactContent.name.givenName} ${contactContent.name.surname}`)
             : odinId
         }
       />

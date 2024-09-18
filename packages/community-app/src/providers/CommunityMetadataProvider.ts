@@ -133,7 +133,7 @@ export const dsrToCommunityMetadata = async (
 
     return file;
   } catch (ex) {
-    console.error('[DotYouCore-js] failed to get the CommunityMetadata of a dsr', dsr, ex);
+    console.error('[community] failed to get the CommunityMetadata of a dsr', dsr, ex);
     return null;
   }
 };

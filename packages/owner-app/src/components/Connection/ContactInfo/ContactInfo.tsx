@@ -5,6 +5,7 @@ import {
   ErrorNotification,
   ActionButton,
   mergeStates,
+  ActionLink,
 } from '@homebase-id/common-app';
 import {
   Envelope,
@@ -16,6 +17,7 @@ import {
   Refresh,
   Check,
   Exclamation,
+  ChatBubble,
 } from '@homebase-id/common-app/icons';
 import Section from '../../ui/Sections/Section';
 import ContactImage from '../ContactImage/ContactImage';
@@ -120,13 +122,14 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
                 }
               }}
               icon={Refresh}
+              type="secondary"
             >
               {t('Refresh')}
             </ActionButton>
           )
         }
       >
-        <div className="flex flex-col gap-4 sm:flex-row">
+        <div className="gap-4 sm:flex sm:flex-row">
           <div className="flex flex-row sm:mx-0">
             {odinId ? (
               <ContactImage
@@ -136,7 +139,7 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
               />
             ) : null}
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             {contactContent.name && (
               <div className="flex flex-row items-center">
                 <IconFrame className="mr-2">
@@ -146,32 +149,59 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
                   `${contactContent.name.givenName ?? ''} ${contactContent.name.surname ?? ''}`}
               </div>
             )}
-            <div className="flex flex-row items-center">
-              <IconFrame className="mr-2">
-                <Phone className="h-4 w-4" />
-              </IconFrame>
-              {contactContent.phone?.number ?? ''}
-            </div>
-            <div className="flex flex-row items-center">
-              <IconFrame className="mr-2">
-                <Envelope className="h-4 w-4" />
-              </IconFrame>
-              {contactContent.email?.email ?? ''}
-            </div>
-            <div className="flex flex-row items-center">
-              <IconFrame className="mr-2">
-                <House className="h-4 w-4" />
-              </IconFrame>
-              {contactContent.location?.city ?? ''} {contactContent.location?.country ?? ''}
-            </div>
-            <div className="flex flex-row items-center">
-              <IconFrame className="mr-2">
-                <Cake className="h-4 w-4" />
-              </IconFrame>
-              {contactContent.birthday?.date ?? ''}
-            </div>
+            {contactContent.phone?.number ? (
+              <div className="flex flex-row items-center">
+                <IconFrame className="mr-2">
+                  <Phone className="h-5 w-5" />
+                </IconFrame>
+                {contactContent.phone?.number ?? ''}
+              </div>
+            ) : null}
+            {contactContent.email?.email ? (
+              <div className="flex flex-row items-center">
+                <IconFrame className="mr-2">
+                  <Envelope className="h-5 w-5" />
+                </IconFrame>
+                {contactContent.email?.email ?? ''}
+              </div>
+            ) : null}
+            {contactContent.location?.city || contactContent.location?.country ? (
+              <div className="flex flex-row items-center">
+                <IconFrame className="mr-2">
+                  <House className="h-5 w-5" />
+                </IconFrame>
+                {contactContent.location?.city ?? ''} {contactContent.location?.country ?? ''}
+              </div>
+            ) : null}
+            {contactContent.birthday?.date ? (
+              <div className="flex flex-row items-center">
+                <IconFrame className="mr-2">
+                  <Cake className="h-5 w-5" />
+                </IconFrame>
+                {contactContent.birthday?.date ?? ''}
+              </div>
+            ) : null}
           </div>
-          <div className="ml-auto flex flex-col-reverse">
+          <div className="mt-5 flex flex-col-reverse gap-1 sm:ml-auto">
+            {isConnected ? (
+              <>
+                <div className="flex flex-row items-center gap-2 sm:flex-row-reverse">
+                  <ActionLink
+                    icon={ChatBubble}
+                    href={`/apps/chat/open/${odinId}`}
+                    type="secondary"
+                  />
+                  <ActionLink
+                    icon={Envelope}
+                    href={`/apps/mail/new?recipients=${odinId}`}
+                    type="secondary"
+                  />
+                </div>
+                <p className="text-sm text-slate-400">
+                  {t('Reach out to')} {contactContent.name?.displayName ?? odinId}:
+                </p>
+              </>
+            ) : null}
             {verifyConnectionState === 'success' ? (
               <p className="flex flex-row items-center gap-2">
                 {verifyData ? (

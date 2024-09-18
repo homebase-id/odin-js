@@ -181,10 +181,7 @@ export const uploadMail = async (
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
-  const keyHeader: KeyHeader | undefined = {
-    iv: getRandom16ByteArray(),
-    aesKey: getRandom16ByteArray(),
-  };
+  const aesKey = getRandom16ByteArray();
 
   for (let i = 0; files && i < files?.length; i++) {
     let newMediaFile = files[i];
@@ -217,7 +214,7 @@ export const uploadMail = async (
         tinyThumb,
         thumbnails: thumbnailsFromVideo,
         payloads: payloadsFromVideo,
-      } = await processVideoFile(newMediaFile, payloadKey, keyHeader);
+      } = await processVideoFile(newMediaFile, payloadKey, aesKey);
 
       thumbnails.push(...thumbnailsFromVideo);
       payloads.push(...payloadsFromVideo);
@@ -291,7 +288,7 @@ export const uploadMail = async (
       true,
       onVersionConflict,
       {
-        keyHeader,
+        aesKey,
       }
     );
 
@@ -427,7 +424,7 @@ export const dsrToMailConversation = async (
 
     return conversation;
   } catch (ex) {
-    console.error('[DotYouCore-js] failed to get the conversation payload of a dsr', dsr, ex);
+    console.error('[mail] failed to get the conversation payload of a dsr', dsr, ex);
     return null;
   }
 };

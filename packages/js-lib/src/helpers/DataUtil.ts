@@ -16,12 +16,18 @@ export const getRandom16ByteArray = (): Uint8Array => {
 };
 
 export const assertIfDefined = (key: string, value: unknown) => {
-  if (value === undefined || value === null) throw new Error(`${key} undefined`);
+  if (typeof key !== 'string') throw new Error(`[odin-js]: assertIfDefined key is not a string`);
+
+  if (value === undefined || value === null)
+    throw new Error(`[odin-js]: assertIfDefined ${key} undefined`);
 };
 
 export const assertIfDefinedAndNotDefault = (key: string, value: unknown) => {
+  if (typeof key !== 'string')
+    throw new Error(`[odin-js]: assertIfDefinedAndNotDefault key is not a string`);
+
   assertIfDefined(key, value);
-  if (value === '') throw new Error(`${key} empty`);
+  if (value === '') throw new Error(`[odin-js]: assertIfDefinedAndNotDefault ${key} empty`);
 };
 
 // from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String

@@ -15,11 +15,15 @@ const SharedStyleTag = () => (
     --color-page-background: 246 248 250;
     --color-background: 255 255 255;
     --color-foreground: 22 22 22;
+    --color-button: 99 101 241;
+    --color-button-text: 255 255 255;
   }`}
     {`html.dark {
     --color-page-background: 17 24 39;
     --color-background: 0 0 0;
     --color-foreground: 250 250 250;
+    --color-button: 99 101 141;
+    --color-button-text: 255 255 255;
   }`}
     {`html.dark { background-color: rgba(var(--color-page-background)); }`}
   </style>

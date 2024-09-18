@@ -14,7 +14,7 @@ import {
 import { useState } from 'react';
 
 const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
-  const { owner, home, social } = useSiteData().data ?? {};
+  const { owner, home } = useSiteData().data ?? {};
   const [isImageLightboxOpen, setIsImageLightboxOpen] = useState(false);
 
   const targetDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
@@ -67,10 +67,7 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
 
               <div className="my-3 flex flex-col justify-center md:my-auto md:ml-auto">
                 <div className="hidden md:contents">
-                  <Socials
-                    socialHandles={social}
-                    className="mt-4 justify-center sm:mt-0 md:ml-auto md:justify-start"
-                  />
+                  <Socials className="mt-4 justify-center sm:mt-0 md:ml-auto md:justify-start" />
                 </div>
 
                 <div

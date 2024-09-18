@@ -32,3 +32,6 @@ export * from './socialFeed';
 export * from './staticFiles/useStaticFiles';
 export * from './introductions/useIntroductions';
 export * from './transitProcessor/useWebsocketSubscriber';
+export * from './attributes/biography/useBiography';
+export * from './attributes/links/useLinks';
+export * from './attributes/links/useSocials';

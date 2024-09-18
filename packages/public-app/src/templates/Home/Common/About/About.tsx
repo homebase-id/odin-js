@@ -1,6 +1,5 @@
 import { getTwoLettersFromDomain } from '@homebase-id/js-lib/helpers';
-import { useBiography } from '../../../../hooks/biography/useBiography';
-import { FallbackImg, RichTextRenderer, t, Image } from '@homebase-id/common-app';
+import { FallbackImg, RichTextRenderer, t, Image, useBiography } from '@homebase-id/common-app';
 import { useMemo, useState } from 'react';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { Arrow } from '@homebase-id/common-app/icons';

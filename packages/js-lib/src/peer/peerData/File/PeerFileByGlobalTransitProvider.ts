@@ -86,8 +86,8 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
 ): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
-  assertIfDefined('GlobalTransitId', globalTransitId);
-  assertIfDefined('Key', key);
+  assertIfDefinedAndNotDefault('GlobalTransitId', globalTransitId);
+  assertIfDefinedAndNotDefault('Key', key);
   assertIfDefinedAndNotDefault('OdinId', odinId);
 
   const { chunkStart, chunkEnd, lastModified } = options || {};
