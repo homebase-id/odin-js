@@ -29,6 +29,11 @@ const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
 const ChatHome = lazy(() =>
   import('../templates/Chat/ChatHome').then((chatApp) => ({ default: chatApp.ChatHome }))
 );
+const ChatCreateAndOrRedirect = lazy(() =>
+  import('../templates/Chat/ChatCreateAndOrRedirect').then((chatApp) => ({
+    default: chatApp.ChatCreateAndOrRedirect,
+  }))
+);
 
 import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
@@ -74,6 +79,7 @@ function App() {
             <Route index={true} element={<ChatHome />} />
             <Route path={':conversationKey'} element={<ChatHome />} />
             <Route path={'new'} element={<ChatHome />} />
+            <Route path={'open/:odinId'} element={<ChatCreateAndOrRedirect />} />
             <Route path={'new-group'} element={<ChatHome />} />
             <Route path={':conversationKey/:chatMessageKey'} element={<ChatHome />} />
             <Route path={':conversationKey/:chatMessageKey/:mediaKey'} element={<ChatHome />} />

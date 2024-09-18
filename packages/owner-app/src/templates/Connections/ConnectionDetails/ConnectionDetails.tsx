@@ -1,5 +1,5 @@
 import { useMatch, useParams } from 'react-router-dom';
-import { t } from '@homebase-id/common-app';
+import { NotFound, t } from '@homebase-id/common-app';
 import { useConnection } from '../../../hooks/connections/useConnection';
 import { useContact } from '../../../hooks/contacts/useContact';
 import ContactInfo from '../../../components/Connection/ContactInfo/ContactInfo';
@@ -67,13 +67,11 @@ const ConnectionDetails = () => {
         <ConnectionDetailsAbout odinId={odinId} />
       ) : linksMatch ? (
         <ConnectionDetailsLinks odinId={odinId} />
-      ) : settingsMatch ? (
-        <>
-          {connectionInfo?.status === 'connected' ? (
-            <ConnectedDetailsSettings odinId={odinId} connectionInfo={connectionInfo} />
-          ) : null}
-        </>
-      ) : null}
+      ) : settingsMatch && connectionInfo?.status === 'connected' ? (
+        <ConnectedDetailsSettings odinId={odinId} connectionInfo={connectionInfo} />
+      ) : (
+        <NotFound />
+      )}
     </>
   );
 };
