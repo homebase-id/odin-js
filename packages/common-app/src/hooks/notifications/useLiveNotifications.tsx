@@ -179,7 +179,7 @@ export const buildNotificationBody = (
     } else if (payload.options.typeId === OWNER_CONNECTION_ACCEPTED_TYPE_ID) {
       return `${sender} accepted your connection request`;
     } else if (payload.options.typeId === OWNER_INTRODUCTION_RECEIVED_TYPE_ID) {
-      return `${sender} was introduced to you`;
+      return `${sender} introduced you to someone`;
     } else if (payload.options.typeId === OWNER_INTRODUCTION_ACCEPTED_TYPE_ID) {
       return `${sender} confirmed the introduction`;
     }
