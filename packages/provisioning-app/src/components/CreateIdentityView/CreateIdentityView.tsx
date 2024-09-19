@@ -14,7 +14,7 @@ interface Props {
   domain: string;
   email: string;
   planId: string;
-  invitationCode: string;
+  invitationCode: string | null;
 }
 
 const CreateIdentityView = ({ domain, email, planId, invitationCode }: Props) => {

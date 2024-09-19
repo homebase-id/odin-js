@@ -1,5 +1,13 @@
-import { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
+import { lazy, ReactNode, Suspense } from 'react';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Outlet,
+  Navigate,
+  useNavigation,
+  useMatch,
+} from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Layout } from '../components/ui/Layout/Layout';
 
@@ -18,6 +26,8 @@ export const ROOT_PATH = '/sign-up';
 
 import { config } from './config';
 import { ErrorBoundary, NotFound } from '@homebase-id/common-app';
+import { useConfiguration } from '../hooks/configuration/useConfiguration';
+import { Loader } from '@homebase-id/common-app/icons';
 
 function App() {
   return (
@@ -37,7 +47,9 @@ function App() {
                   <Layout>
                     <Suspense>
                       <ErrorBoundary>
-                        <Outlet />
+                        <RootRoute>
+                          <Outlet />
+                        </RootRoute>
                       </ErrorBoundary>
                     </Suspense>
                   </Layout>
@@ -66,5 +78,23 @@ function App() {
     </HelmetProvider>
   );
 }
+
+const RootRoute = ({ children }: { children: ReactNode }) => {
+  const { data: configuration, isLoading } = useConfiguration();
+  const isRoot = useMatch('/');
+
+  if (isLoading)
+    return (
+      <div className="flex flex-grow flex-col">
+        <Loader className="m-auto h-20 w-20" />
+      </div>
+    );
+
+  if (!configuration?.invitationCodeEnabled && !!isRoot) {
+    return <Navigate to={ROOT_PATH} />;
+  }
+
+  return <>{children}</>;
+};
 
 export default App;
