@@ -34,8 +34,6 @@ const ConnectionDetails = () => {
   return (
     <>
       <IdentityPageMetaAndActions odinId={odinId} />
-      <IdentityAlerts odinId={odinId} />
-
       <SubMenu
         items={[
           {
@@ -60,6 +58,8 @@ const ConnectionDetails = () => {
         ]}
         className="-mt-6 mb-4"
       />
+
+      <IdentityAlerts odinId={odinId} />
 
       {rootMatch ? (
         <>{contactData && <ContactInfo odinId={odinId} />}</>
