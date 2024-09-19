@@ -125,7 +125,7 @@ type CreateIdentityKey = {
   domain: string;
   email: string;
   planId: string;
-  invitationCode: string;
+  invitationCode: string | null;
 };
 
 export const useCreateIdentity = () => {
