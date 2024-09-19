@@ -352,7 +352,7 @@ const getDefaultAcl = (type: string): AccessControlList => {
     case BuiltInAttributes.Email:
       return {
         // requiredSecurityGroup: SecurityGroupType.Connected,
-        requiredSecurityGroup: SecurityGroupType.AutoConnected,
+        requiredSecurityGroup: SecurityGroupType.Connected,
       };
 
     case BuiltInAttributes.HomebaseIdentity:
@@ -371,7 +371,7 @@ const getDefaultAcl = (type: string): AccessControlList => {
     case BuiltInAttributes.SteamUsername:
     case BuiltInAttributes.MinecraftUsername:
       return {
-        requiredSecurityGroup: SecurityGroupType.AutoConnected,
+        requiredSecurityGroup: SecurityGroupType.Connected,
       };
 
     default:

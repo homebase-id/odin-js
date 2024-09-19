@@ -130,7 +130,7 @@ const parseAcl = (acl: AccessControlList) => {
   if (acl.requiredSecurityGroup.toLowerCase() === 'connected') {
     return {
       ...acl,
-      requiredSecurityGroup: SecurityGroupType.AutoConnected,
+      requiredSecurityGroup: SecurityGroupType.Connected,
     };
   }
 

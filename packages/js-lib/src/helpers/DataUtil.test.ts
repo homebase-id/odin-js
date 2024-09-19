@@ -104,14 +104,14 @@ test('ACLs are equal', () => {
   expect(
     aclEqual(
       { requiredSecurityGroup: SecurityGroupType.Anonymous },
-      { requiredSecurityGroup: SecurityGroupType.AutoConnected }
+      { requiredSecurityGroup: SecurityGroupType.Connected }
     )
   ).toBe(false);
 
   expect(
     aclEqual(
-      { requiredSecurityGroup: SecurityGroupType.AutoConnected },
-      { requiredSecurityGroup: SecurityGroupType.AutoConnected }
+      { requiredSecurityGroup: SecurityGroupType.Connected },
+      { requiredSecurityGroup: SecurityGroupType.Connected }
     )
   ).toBe(true);
 
@@ -119,9 +119,9 @@ test('ACLs are equal', () => {
   const circleIdB = getNewId();
   expect(
     aclEqual(
-      { requiredSecurityGroup: SecurityGroupType.AutoConnected },
+      { requiredSecurityGroup: SecurityGroupType.Connected },
       {
-        requiredSecurityGroup: SecurityGroupType.AutoConnected,
+        requiredSecurityGroup: SecurityGroupType.Connected,
         circleIdList: [circleIdA, circleIdB],
       }
     )
@@ -129,9 +129,9 @@ test('ACLs are equal', () => {
 
   expect(
     aclEqual(
-      { requiredSecurityGroup: SecurityGroupType.AutoConnected, circleIdList: [circleIdA] },
+      { requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: [circleIdA] },
       {
-        requiredSecurityGroup: SecurityGroupType.AutoConnected,
+        requiredSecurityGroup: SecurityGroupType.Connected,
         circleIdList: [circleIdA, circleIdB],
       }
     )
@@ -140,11 +140,11 @@ test('ACLs are equal', () => {
   expect(
     aclEqual(
       {
-        requiredSecurityGroup: SecurityGroupType.AutoConnected,
+        requiredSecurityGroup: SecurityGroupType.Connected,
         circleIdList: [circleIdA, circleIdB],
       },
       {
-        requiredSecurityGroup: SecurityGroupType.AutoConnected,
+        requiredSecurityGroup: SecurityGroupType.Connected,
         circleIdList: [circleIdA, circleIdB],
       }
     )

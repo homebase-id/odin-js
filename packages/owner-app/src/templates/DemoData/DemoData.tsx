@@ -592,7 +592,7 @@ const DemoDataBlog = ({
           },
         },
         serverMetadata: {
-          accessControlList: { requiredSecurityGroup: SecurityGroupType.AutoConnected },
+          accessControlList: { requiredSecurityGroup: SecurityGroupType.Connected },
         },
       };
 

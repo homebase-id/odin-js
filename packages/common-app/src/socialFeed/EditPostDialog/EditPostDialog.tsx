@@ -57,7 +57,7 @@ export const EditPostDialog = ({
       ...postFile,
       serverMetadata: postFile.serverMetadata || {
         accessControlList: {
-          requiredSecurityGroup: SecurityGroupType.AutoConnected,
+          requiredSecurityGroup: SecurityGroupType.Connected,
         },
       },
     };
