@@ -1,5 +1,5 @@
 import { useMailDraft } from '../../hooks/mail/useMailConversation';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { MailComposer } from '../../components/Composer/MailComposer';
 import { ROOT_PATH } from '../../app/App';
 import { MailHomeHeader } from '../../components/Header/Header';
@@ -7,6 +7,7 @@ import { MailHomeHeader } from '../../components/Header/Header';
 export const MailComposerPage = () => {
   const navigate = useNavigate();
   const { draftKey } = useParams();
+  const [searchParams] = useSearchParams();
   const isDraft = !!draftKey;
 
   const { data: draftDsr } = useMailDraft(isDraft ? { draftFileId: draftKey } : undefined).getDraft;
@@ -26,7 +27,10 @@ export const MailComposerPage = () => {
               />
             ) : null
           ) : (
-            <MailComposer onDone={() => navigate(ROOT_PATH)} />
+            <MailComposer
+              onDone={() => navigate(ROOT_PATH)}
+              recipients={searchParams.get('recipients')?.split(',')}
+            />
           )}
         </div>
       </section>

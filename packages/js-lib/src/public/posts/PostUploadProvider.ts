@@ -13,7 +13,7 @@ import {
   UploadInstructionSet,
   UploadResult,
 } from '../../core/DriveData/Upload/DriveUploadTypes';
-import { KeyHeader, SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
+import { SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
 import { DEFAULT_PAYLOAD_KEY, GenerateKeyHeader } from '../../core/DriveData/Upload/UploadHelpers';
 import {
   HomebaseFile,
@@ -111,12 +111,7 @@ export const savePost = async <T extends PostContent>(
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
-  const keyHeader: KeyHeader | undefined = encrypt
-    ? {
-        iv: getRandom16ByteArray(),
-        aesKey: getRandom16ByteArray(),
-      }
-    : undefined;
+  const aesKey: Uint8Array | undefined = encrypt ? getRandom16ByteArray() : undefined;
 
   if (!newMediaFiles?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
@@ -162,7 +157,7 @@ export const savePost = async <T extends PostContent>(
         tinyThumb,
         thumbnails: thumbnailsFromVideo,
         payloads: payloadsFromVideo,
-      } = await processVideoFile(newMediaFile, payloadKey, keyHeader);
+      } = await processVideoFile(newMediaFile, payloadKey, aesKey);
 
       thumbnails.push(...thumbnailsFromVideo);
       payloads.push(...payloadsFromVideo);
@@ -219,7 +214,7 @@ export const savePost = async <T extends PostContent>(
     targetDrive,
     onVersionConflict,
     {
-      keyHeader,
+      aesKey,
     }
   );
 };
@@ -236,7 +231,7 @@ const uploadPost = async <T extends PostContent>(
   onVersionConflict?: () => void,
   options?: {
     axiosConfig?: AxiosRequestConfig;
-    keyHeader?: KeyHeader | undefined;
+    aesKey?: Uint8Array | undefined;
   }
 ) => {
   const encrypt = !(
@@ -488,7 +483,7 @@ const updatePost = async <T extends PostContent>(
     !file.serverMetadata?.accessControlList ||
     !file.fileMetadata.appData.content.id
   )
-    throw new Error(`[DotYouCore-js] PostProvider: fileId is required to update a post`);
+    throw new Error(`[odin-js] PostProvider: fileId is required to update a post`);
 
   if (!file.fileMetadata.appData.content.authorOdinId)
     file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
@@ -603,7 +598,7 @@ const updatePost = async <T extends PostContent>(
   file.fileMetadata.isEncrypted = encrypt;
   file.fileMetadata.versionTag = runningVersionTag;
   const result = await uploadPostHeader(dotYouClient, file, channelId, targetDrive);
-  if (!result) throw new Error(`[DotYouCore-js] PostProvider: Post update failed`);
+  if (!result) throw new Error(`[odin-js] PostProvider: Post update failed`);
 
   return result;
 };

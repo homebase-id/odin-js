@@ -9,7 +9,7 @@ import { BuiltInProfiles, MinimalProfileFields } from '../../profile/ProfileData
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';
 import { getProfileAttributes, BuiltInAttributes, Attribute } from '../../profile/profile';
 import { publishProfileCardFile, publishProfileImageFile } from './FileProvider';
-import { fromBlob } from '../../media/media';
+import { resizeImageFromBlob } from '../../media/media';
 
 export interface ProfileCard {
   name: string;
@@ -109,7 +109,7 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
         const imageBlobData = new OdinBlob([new Uint8Array(imageData.bytes)], {
           type: imageData.contentType,
         });
-        const resizedJpgData = await fromBlob(
+        const resizedJpgData = await resizeImageFromBlob(
           imageBlobData,
           100,
           size.pixelWidth,

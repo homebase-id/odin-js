@@ -79,6 +79,7 @@ export class BaseDotYouClient {
 
   //Gets an Axios client configured with token info
   createAxiosClient(options?: createAxiosClientOptions) {
+    const isDebug = hasDebugFlag();
     const client = axios.create({
       baseURL: this.getEndpoint(),
       withCredentials: isLocalStorageAvailable(),
@@ -93,7 +94,6 @@ export class BaseDotYouClient {
 
     // Encryption/Decryption on requests and responses
     const ss = this.getSharedSecret();
-    const isDebug = hasDebugFlag();
 
     client.interceptors.request.use(
       async function (request) {
@@ -139,7 +139,7 @@ export class BaseDotYouClient {
         if (error?.response?.data?.data && ss && error.response.status !== 404) {
           // Try and get a more detailed error message
           console.error(
-            '[DotYouCore-js]',
+            '[odin-js]',
             await decryptData(error.response.data.data, error.response.data.iv, ss)
           );
         }

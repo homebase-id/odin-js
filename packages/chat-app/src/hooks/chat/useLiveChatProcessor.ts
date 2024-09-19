@@ -28,6 +28,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CHAT_MESSAGE_FILE_TYPE, ChatMessage, dsrToMessage } from '../../providers/ChatProvider';
 import {
+  drivesEqual,
   getQueryBatchCursorFromTime,
   getQueryModifiedCursorFromTime,
   hasDebugFlag,
@@ -143,8 +144,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
       (notification.notificationType === 'fileAdded' ||
         notification.notificationType === 'fileModified' ||
         notification.notificationType === 'statisticsChanged') &&
-      stringGuidsEqual(notification.targetDrive?.alias, ChatDrive.alias) &&
-      stringGuidsEqual(notification.targetDrive?.type, ChatDrive.type)
+      drivesEqual(notification.targetDrive, ChatDrive)
     ) {
       if (notification.header.fileMetadata.appData.fileType === CHAT_MESSAGE_FILE_TYPE) {
         const conversationId = notification.header.fileMetadata.appData.groupId;

@@ -85,13 +85,25 @@ export interface ThumbnailFile extends ImageSize {
   skipEncryption?: boolean;
 }
 
-export interface PayloadFile {
+export interface BasePayloadFile {
   key: string;
   payload: File | Blob;
   previewThumbnail?: EmbeddedThumb;
   descriptorContent?: string;
   skipEncryption?: boolean;
 }
+
+export interface PayloadFileWithRegularEncryption extends BasePayloadFile {
+  skipEncryption?: false | undefined;
+}
+
+export interface PayloadFileWithManualEncryption extends BasePayloadFile {
+  // Options to skip encryption for payloads and hav it handled outside
+  skipEncryption: true;
+  iv: Uint8Array;
+}
+
+export type PayloadFile = PayloadFileWithRegularEncryption | PayloadFileWithManualEncryption;
 
 type None = 0;
 type Archived = 1;
@@ -163,6 +175,7 @@ export interface UploadPayloadDescriptor {
   descriptorContent: string | undefined;
   thumbnails?: UploadThumbnailDescriptor[];
   previewThumbnail?: EmbeddedThumb;
+  contentType: ContentType;
   iv: Uint8Array | undefined;
 }
 

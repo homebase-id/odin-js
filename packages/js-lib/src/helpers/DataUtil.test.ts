@@ -18,6 +18,7 @@ import {
   stringifyArrayToQueryParams,
   tryJsonParse,
   getQueryModifiedCursorFromTime,
+  drivesEqual,
 } from './DataUtil';
 import { SecurityGroupType } from '../core/DriveData/File/DriveFileTypes';
 
@@ -67,6 +68,29 @@ test('String guids are equal', () => {
   expect(
     stringGuidsEqual('75c63766efa04375-9c06-f4696b2d3ede', '75c63766-efa0-4375-9c06-f4696b2d3ede')
   ).toBe(true);
+});
+
+test('TargetDrives are equal', () => {
+  expect(
+    drivesEqual(
+      { alias: '66cc60a3b5c2118e03947f2180c7b0d1', type: '66cc60a3b5c2118e03947f2180c7b0d1' },
+      { alias: '66cc60a3b5c2118e03947f2180c7b0d1', type: '66cc60a3b5c2118e03947f2180c7b0d1' }
+    )
+  ).toBe(true);
+
+  expect(
+    drivesEqual(
+      { alias: '66cc60a-3b5c2118e03947f2180-c7b0d1', type: '66cc60a3b5c2118e03947f2-180c7b0d1' },
+      { alias: '66cc60a3b5c2118e-03947f2180c7b0d1', type: '66cc60a3-b5c2118e03947f2180c7b0d1' }
+    )
+  ).toBe(true);
+
+  expect(
+    drivesEqual(
+      { alias: '66cc60a-3b5c2118e03947f2180-c7b0d1', type: 'be452abd-4d2c-4269-9859-66717bef6e8c' },
+      { alias: '66cc60a3b5c2118e-03947f2180c7b0d1', type: '86d81f88-aa9c-4e15-b830-ed82b34be1b4' }
+    )
+  ).toBe(false);
 });
 
 test('ACLs are equal', () => {

@@ -20,7 +20,13 @@ import {
   stringToUint8Array,
   getRandom16ByteArray,
 } from '../../../helpers/DataUtil';
-import { ThumbnailFile, SystemFileType, PayloadFile, KeyHeader } from '../File/DriveFileTypes';
+import {
+  ThumbnailFile,
+  SystemFileType,
+  PayloadFile,
+  KeyHeader,
+  PayloadFileWithManualEncryption,
+} from '../File/DriveFileTypes';
 import { AxiosRequestConfig } from 'axios';
 import { getSecuredBlob } from '../../../helpers/BlobHelpers';
 
@@ -73,7 +79,9 @@ export const buildManifest = (
           pixelHeight: thumb.pixelHeight,
           contentType: thumb.payload.type,
         })),
-      iv: generateIv ? getRandom16ByteArray() : undefined,
+      iv:
+        (payload as PayloadFileWithManualEncryption).iv ||
+        (generateIv ? getRandom16ByteArray() : undefined),
     })),
   };
 };
@@ -234,9 +242,9 @@ export const pureAppend = async (
     });
 };
 
-export const GenerateKeyHeader = (): KeyHeader => {
+export const GenerateKeyHeader = (aesKey?: Uint8Array): KeyHeader => {
   return {
     iv: getRandom16ByteArray(),
-    aesKey: getRandom16ByteArray(),
+    aesKey: aesKey || getRandom16ByteArray(),
   };
 };

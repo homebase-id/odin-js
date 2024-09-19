@@ -238,7 +238,7 @@ export const removeProfileSection = async (
 
   const profileSection = await getProfileSectionInternal(dotYouClient, profileId, sectionId);
   if (!profileSection) {
-    console.error('[DotYouCore-js]', "Profile not found, can't delete");
+    console.error('[odin-js]', "Profile not found, can't delete");
     return false;
   }
 
@@ -250,7 +250,7 @@ export const removeProfileDefinition = async (dotYouClient: DotYouClient, profil
 
   const profileDefinition = await getProfileDefinitionInternal(dotYouClient, profileId);
   if (!profileDefinition) {
-    console.error('[DotYouCore-js]', "Profile not found, can't delete");
+    console.error('[odin-js]', "Profile not found, can't delete");
     return false;
   }
 

@@ -12,12 +12,14 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#6366f1',
-        'primary-contrast': '#fff',
-
         'page-background': 'rgb(var(--color-page-background) / <alpha-value>)',
         background: 'rgb(var(--color-background) / <alpha-value>)',
         foreground: 'rgb(var(--color-foreground) / <alpha-value>)',
+        button: 'rgb(var(--color-button) / <alpha-value>)',
+        'button-text': 'rgb(var(--color-button-text) / <alpha-value>)',
+
+        primary: '#6366f1',
+        'primary-contrast': '#fff',
       },
       keyframes: {
         slowding: {

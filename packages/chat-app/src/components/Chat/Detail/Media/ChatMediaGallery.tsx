@@ -5,9 +5,9 @@ import { ChatMessage } from '../../../../providers/ChatProvider';
 import {
   ActionButton,
   BoringFile,
-  VideoClickToLoad,
   usePortal,
   useDotYouClientContext,
+  OdinVideoWrapper,
 } from '@homebase-id/common-app';
 import { Arrow, ArrowLeft, Times } from '@homebase-id/common-app/icons';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
@@ -85,8 +85,8 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
       <div className="inset-0 z-10 lg:fixed lg:overflow-y-auto">
         <div className="relative flex h-full min-h-[100dvh] flex-row items-center justify-center">
           {contentType?.startsWith('video') || contentType === 'application/vnd.apple.mpegurl' ? (
-            <VideoClickToLoad
-              preload={true}
+            <OdinVideoWrapper
+              autoPlay={true}
               fileId={msg.fileId}
               fileKey={mediaKey}
               targetDrive={ChatDrive}

@@ -7,9 +7,10 @@ import {
   getProfileAttributes,
   getProfileAttribute,
 } from '@homebase-id/js-lib/profile';
-import { useAuth } from '../auth/useAuth';
 import { GetFile } from '@homebase-id/js-lib/public';
 import { PayloadDescriptor } from '@homebase-id/js-lib/core';
+import { getProfileAttributesOverPeer } from '@homebase-id/js-lib/peer';
+import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
 
 type ShortBioData = {
   id: string;
@@ -33,14 +34,17 @@ export type BiographyData = {
   experience: ExperienceData[];
 };
 
-export const useBiography = () => {
-  const { isAuthenticated, getDotYouClient } = useAuth();
+export const useBiography = (props?: { odinId: string } | undefined) => {
+  const { odinId } = props || {};
+
+  const dotYouClient = useDotYouClientContext();
+  const isAuthenticated = !!dotYouClient.getIdentity();
   const queryClient = useQueryClient();
 
-  const dotYouClient = getDotYouClient();
-
-  const fetchData: () => Promise<BiographyData | undefined> = async () => {
+  const fetchData: (odinId?: string) => Promise<BiographyData | undefined> = async () => {
     const fetchStaticData = async (): Promise<BiographyData | undefined> => {
+      if (odinId) return undefined;
+
       const fileData = await GetFile(dotYouClient, 'sitedata.json');
       if (!fileData.has('short-bio') && !fileData.has('long-bio')) return;
 
@@ -111,9 +115,14 @@ export const useBiography = () => {
     const fetchDynamicData = async (): Promise<BiographyData | undefined> => {
       try {
         const shortBiographyAttributes = (
-          await getProfileAttributes(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
-            BuiltInAttributes.ShortBio,
-          ])
+          odinId
+            ? await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.ShortBio)
+            : await getProfileAttributes(
+                dotYouClient,
+                BuiltInProfiles.StandardProfileId,
+                undefined,
+                [BuiltInAttributes.ShortBio]
+              )
         )?.map((dsr) => {
           const attr = dsr.fileMetadata.appData.content;
           return {
@@ -124,9 +133,14 @@ export const useBiography = () => {
         });
 
         const longBiographyAttributes = (
-          await getProfileAttributes(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
-            BuiltInAttributes.Experience,
-          ])
+          odinId
+            ? await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.Experience)
+            : await getProfileAttributes(
+                dotYouClient,
+                BuiltInProfiles.StandardProfileId,
+                undefined,
+                [BuiltInAttributes.Experience]
+              )
         )?.map((dsr) => {
           const attr = dsr.fileMetadata.appData.content;
           return {
@@ -142,7 +156,7 @@ export const useBiography = () => {
             priority: attr.priority,
           };
         });
-        console.log('shortBiographyAttributes', shortBiographyAttributes);
+
         return {
           shortBio: shortBiographyAttributes?.[0],
           experience: longBiographyAttributes || [],
@@ -158,9 +172,7 @@ export const useBiography = () => {
       // We are authenticated, so we might have more data when fetching non-static data; Let's do so async with timeout to allow other static info to load and render
       setTimeout(async () => {
         const dynamicData = await fetchDynamicData();
-        if (dynamicData) {
-          queryClient.setQueryData(['biography'], dynamicData);
-        }
+        if (dynamicData) queryClient.setQueryData(['biography', odinId || ''], dynamicData);
       }, 500);
     }
 
@@ -168,10 +180,10 @@ export const useBiography = () => {
   };
 
   return useQuery({
-    queryKey: ['biography'],
-    queryFn: fetchData,
+    queryKey: ['biography', odinId || ''],
+    queryFn: () => fetchData(odinId),
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours
   });
 };

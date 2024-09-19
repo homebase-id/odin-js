@@ -117,8 +117,8 @@ export const decryptJsonContent = async (
     const cipher = base64ToUint8Array(fileMetaData.appData.content);
     return byteArrayToString(await decryptUsingKeyHeader(cipher, keyheader));
   } catch (err) {
-    console.warn('[DotYouCore-js]', 'Json Content Decryption failed', err);
-    throw new Error('[DotYouCore-js] Json Content Decryption failed');
+    console.warn('[odin-js]', 'Json Content Decryption failed', err);
+    throw new Error('[odin-js] Json Content Decryption failed');
   }
 };
 
