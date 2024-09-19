@@ -5,7 +5,6 @@ import {
   Route,
   Outlet,
   Navigate,
-  useNavigation,
   useMatch,
 } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
