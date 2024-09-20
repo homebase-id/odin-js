@@ -1,13 +1,7 @@
 import { useParams, useMatch, Link } from 'react-router-dom';
 
 import { useEffect, useState } from 'react';
-import {
-  ActionButton,
-  ActionLink,
-  ConnectionImage,
-  ConnectionName,
-  t,
-} from '@homebase-id/common-app';
+import { ActionButton, ConnectionImage, ConnectionName, t } from '@homebase-id/common-app';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { useCommunity } from '../../hooks/community/useCommunity';
@@ -17,7 +11,7 @@ import {
 } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 import { usecommunityMetadata } from '../../hooks/community/useCommunityMetadata';
 import { CommunityMetadata } from '../../providers/CommunityMetadataProvider';
-import { RadioTower, ChevronLeft, Chevron, Pin } from '@homebase-id/common-app/icons';
+import { RadioTower, Chevron, Pin, Grid } from '@homebase-id/common-app/icons';
 import { COMMUNITY_ROOT } from './CommunityHome';
 
 const maxChannels = 7;
@@ -53,9 +47,10 @@ export const CommunityChannelNav = () => {
     >
       <div className="absolute inset-0 flex flex-col gap-5 overflow-auto px-2 py-5 md:pl-[calc(env(safe-area-inset-left)+4.3rem+0.5rem)] lg:pl-2">
         <div className="flex flex-row items-center">
-          <ActionLink className="lg:hidden" type="mute" href={`${COMMUNITY_ROOT}`}>
-            <ChevronLeft className="h-5 w-5" />
-          </ActionLink>
+          <Link className="-ml-2 p-2 lg:hidden" type="mute" to={`${COMMUNITY_ROOT}`}>
+            <Grid className="h-5 w-5" />
+          </Link>
+
           <p className="text-xl font-semibold">{community.fileMetadata.appData.content?.title}</p>
         </div>
 

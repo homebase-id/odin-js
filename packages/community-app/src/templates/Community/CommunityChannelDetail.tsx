@@ -8,6 +8,7 @@ import {
   DialogWrapper,
   ErrorBoundary,
   formatDateExludingYearIfCurrent,
+  LoadingBlock,
   t,
   useDotYouClient,
   usePortal,
@@ -44,14 +45,19 @@ export const CommunityChannelDetail = () => {
       </div>
     );
 
-  if (communityId && !community) {
-    // TODO: Repalce with loading state
-    return null;
-  }
-
-  if (channelId && !channelDsr) {
-    // TODO: Repalce with loading state
-    return null;
+  if ((communityId && !community) || (channelId && !channelDsr)) {
+    return (
+      <div className="h-full w-full flex-grow bg-background">
+        <LoadingBlock className="h-16 w-full" />
+        <div className="mt-8 flex flex-col gap-4 px-5">
+          <LoadingBlock className="h-16 w-full" />
+          <LoadingBlock className="h-16 w-full" />
+          <LoadingBlock className="h-16 w-full" />
+          <LoadingBlock className="h-16 w-full" />
+          <LoadingBlock className="h-16 w-full" />
+        </div>
+      </div>
+    );
   }
 
   return (
