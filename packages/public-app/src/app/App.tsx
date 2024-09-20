@@ -127,16 +127,25 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
         <span className="m-auto text-center">
           {!isLogin ? (
             <>
-              {t('This is a registered dotyou identity')}
+              {t('This is a registered')}{' '}
+              <a
+                href="https://homebase.id"
+                className="text-primary"
+                target="_blank"
+                rel="norerrer noreferrer"
+              >
+                Homebase
+              </a>{' '}
+              {t('identity')}
               {isOwner ? (
-                <small className="block">
+                <small className="mt-1 block">
                   {t('Select a website theme and make yourself known on the internet!')}{' '}
                   <a href="/owner/profile/homepage" className="underline">
                     {t('Start')}!
                   </a>
                 </small>
               ) : (
-                <small className="block">
+                <small className="mt-1 block">
                   <a onClick={() => setIsLogin(true)} className="cursor-pointer underline">
                     {t('Login')}
                   </a>
