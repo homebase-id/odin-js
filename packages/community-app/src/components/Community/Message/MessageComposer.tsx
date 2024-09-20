@@ -17,7 +17,7 @@ import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 
-import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
+import { getNewId, isTouchDevice, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
@@ -147,15 +147,15 @@ export const MessageComposer = ({
           }}
         >
           <RichTextEditor
-            className="relative w-8 flex-grow border-t bg-background px-2 pb-2 dark:border-slate-800 md:rounded-md md:border"
+            className="relative w-8 flex-grow border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border"
             onChange={(newVal) => setMessage(newVal.target.value)}
             defaultValue={message}
             placeholder={
-              channel?.fileMetadata.appData.content.title
-                ? `Message # ${channel.fileMetadata.appData.content.title}`
-                : community?.fileMetadata.appData.uniqueId === groupId
-                  ? `Message "${community?.fileMetadata.appData.content.title}"`
-                  : `Reply`
+              !stringGuidsEqual(community?.fileMetadata.appData.uniqueId, groupId)
+                ? t(`Reply...`)
+                : channel?.fileMetadata.appData.content.title
+                  ? `${t('Message')} # ${channel.fileMetadata.appData.content.title}`
+                  : `${t('Message')} "${community?.fileMetadata.appData.content.title}"`
             }
             autoFocus={!isTouchDevice()}
             ref={volatileRef}
@@ -179,7 +179,7 @@ export const MessageComposer = ({
                 />
               )}
             </div>
-            <div className="flex flex-row justify-between">
+            <div className="-mx-1 flex flex-row justify-between">
               <FileSelector
                 onChange={(files) => setFiles(files.map((file) => ({ file })))}
                 className="my-auto px-2 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
