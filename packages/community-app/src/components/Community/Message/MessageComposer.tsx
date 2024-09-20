@@ -80,7 +80,7 @@ export const MessageComposer = ({
     const plainVal = (messageVal && getTextRootsRecursive(messageVal).join(' ')) || '';
     const newFiles = [...(files || [])];
 
-    if (!messageVal || (!plainVal && !files?.length) || !community) return;
+    if (((!messageVal || !plainVal) && !files?.length) || !community) return;
 
     // Clear internal state and allow excessive senders
     setMessage(undefined);
@@ -135,7 +135,7 @@ export const MessageComposer = ({
     <>
       <div className={`bg-background pb-[env(safe-area-inset-bottom)] ${className || ''}`}>
         <div
-          className="flex flex-shrink-0 flex-row gap-2 px-2 py-3 md:px-5"
+          className="flex flex-shrink-0 flex-row gap-2 px-0 md:px-3 md:pb-2 lg:pb-5"
           data-default-value={message}
           onPaste={(e) => {
             const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
@@ -147,7 +147,7 @@ export const MessageComposer = ({
           }}
         >
           <RichTextEditor
-            className="relative w-8 flex-grow rounded-md border bg-background px-2 pb-2 dark:border-slate-800"
+            className="relative w-8 flex-grow border-t bg-background px-2 pb-2 dark:border-slate-800 md:rounded-md md:border"
             onChange={(newVal) => setMessage(newVal.target.value)}
             defaultValue={message}
             placeholder={
@@ -196,9 +196,10 @@ export const MessageComposer = ({
                     e.stopPropagation();
                     doSend();
                   }}
-                  className="flex-shrink opacity-40 hover:opacity-100"
+                  className={`flex-shrink opacity-40 ${!message && !files?.length ? '' : 'hover:opacity-100'}`}
                   icon={PaperPlane}
                   size="square"
+                  isDisabled={!message && !files?.length}
                   onMouseDown={(e) => e.preventDefault()}
                 />
               </span>

@@ -144,7 +144,7 @@ export const CommunityHistory = ({
     <>
       <ErrorNotification error={deleteMessagesError} />
       <div
-        className={`flex w-full ${alignTop ? '' : 'flex-grow'} faded-scrollbar flex-col-reverse overflow-auto py-2 sm:py-5`}
+        className={`flex w-full ${alignTop ? '' : 'flex-grow'} faded-scrollbar flex-col-reverse overflow-auto py-0 sm:py-1 lg:py-5`}
         ref={scrollRef}
         key={channel?.fileId || community?.fileId}
         onCopyCapture={(e) => {
@@ -233,7 +233,7 @@ export const CommunityHistory = ({
                       Math.abs(previousDate - currentDate) < 1000 * 60 * 5
                     }
                     hideThreads={inAThread}
-                    className="px-2 py-1 sm:px-5"
+                    className="px-2 py-1 md:px-3"
                   />
                 </div>
               );
