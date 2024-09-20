@@ -5,6 +5,7 @@ import {
   ConnectionName,
   ErrorBoundary,
   ErrorNotification,
+  HybridLink,
   OwnerImage,
   OwnerName,
   t,
@@ -35,10 +36,13 @@ import { ROOT_PATH } from '../../app/App';
 export const ChatDetail = ({
   conversationId,
   communityTagId,
+  rootPath: _rootPath,
 }: {
   conversationId: string | undefined;
   communityTagId?: string;
+  rootPath?: string;
 }) => {
+  const rootPath = _rootPath || ROOT_PATH;
   const { data: conversation, isLoading, isFetched } = useConversation({ conversationId }).single;
   const { mutate: inviteRecipient } = useConversation().inviteRecipient;
   const [replyMsg, setReplyMsg] = useState<HomebaseFile<ChatMessage> | undefined>();
@@ -80,7 +84,7 @@ export const ChatDetail = ({
   return (
     <ErrorBoundary>
       <div className="flex h-full flex-grow flex-col overflow-hidden">
-        <ChatHeader conversation={conversation || undefined} />
+        <ChatHeader conversation={conversation || undefined} rootPath={rootPath} />
         <GroupChatConnectedState conversation={conversation || undefined} />
         <ErrorBoundary>
           <ChatHistory conversation={conversation || undefined} setReplyMsg={setReplyMsg} />
@@ -102,8 +106,10 @@ export const ChatDetail = ({
 
 const ChatHeader = ({
   conversation: conversationDsr,
+  rootPath,
 }: {
   conversation: HomebaseFile<UnifiedConversation> | undefined;
+  rootPath: string;
 }) => {
   const navigate = useNavigate();
   const identity = useDotYouClient().getIdentity();
@@ -127,16 +133,16 @@ const ChatHeader = ({
   } = useConversation().deleteChat;
 
   useEffect(() => {
-    if (deleteChatStatus === 'success') navigate(ROOT_PATH);
+    if (deleteChatStatus === 'success') navigate(rootPath);
   }, [deleteChatStatus]);
 
   return (
     <>
       <ErrorNotification error={clearChatError || deleteChatError} />
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-        <ActionLink className="lg:hidden" type="mute" href={ROOT_PATH}>
-          <ChevronLeft className="h-5 w-5" />
-        </ActionLink>
+        <HybridLink className="-m-1 p-1 lg:hidden" type="mute" href={rootPath}>
+          <ChevronLeft className="h-4 w-4" />
+        </HybridLink>
 
         <a
           onClick={() => setShowChatInfo(true)}
@@ -145,8 +151,8 @@ const ChatHeader = ({
           {singleRecipient ? (
             <ConnectionImage
               odinId={singleRecipient}
-              className="border border-neutral-200 dark:border-neutral-800"
-              size="sm"
+              className="h-[2rem] w-[2rem] border border-neutral-200 dark:border-neutral-800 lg:h-[3rem] lg:w-[3rem]"
+              size="custom"
             />
           ) : withYourself ? (
             <div className="h-[3rem] w-[3rem] flex-shrink-0">
