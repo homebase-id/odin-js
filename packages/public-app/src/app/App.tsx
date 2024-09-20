@@ -1,4 +1,4 @@
-import { lazy, ReactNode, Suspense } from 'react';
+import { lazy, ReactNode, Suspense, useState } from 'react';
 import {
   Route,
   Outlet,
@@ -26,6 +26,7 @@ import Header from '../components/ui/Layout/Header/Header';
 import Footer from '../components/ui/Layout/Footer/Footer';
 
 import { t, useSiteData } from '@homebase-id/common-app';
+import { LoginBox } from '../components/Auth/LoginBox/LoginBox';
 
 const Home = lazy(() => import('../templates/Home/Home'));
 const PostOverview = lazy(() => import('../templates/Posts/Overview/PostOverview'));
@@ -114,6 +115,8 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
   const [searchParams] = useSearchParams();
   const { data: siteData, isFetched: siteDataFetched } = useSiteData();
 
+  const [isLogin, setIsLogin] = useState(false);
+
   if (
     siteData &&
     siteDataFetched &&
@@ -122,15 +125,43 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
     return (
       <div className="flex min-h-screen">
         <span className="m-auto text-center">
-          {t('This is a registered dotyou identity')}
-          {isOwner ? (
-            <small className="block">
-              {t('Select a website theme and make yourself known on the internet!')}{' '}
-              <a href="/owner/profile/homepage" className="underline">
-                {t('Start')}!
-              </a>
-            </small>
-          ) : null}
+          {!isLogin ? (
+            <>
+              {t('This is a registered')}{' '}
+              <a
+                href="https://homebase.id"
+                className="text-primary"
+                target="_blank"
+                rel="norerrer noreferrer"
+              >
+                Homebase
+              </a>{' '}
+              {t('identity')}
+              {isOwner ? (
+                <small className="mt-1 block">
+                  {t('Select a website theme and make yourself known on the internet!')}{' '}
+                  <a href="/owner/profile/homepage" className="underline">
+                    {t('Start')}!
+                  </a>
+                </small>
+              ) : (
+                <small className="mt-1 block">
+                  <a onClick={() => setIsLogin(true)} className="cursor-pointer underline">
+                    {t('Login')}
+                  </a>
+                </small>
+              )}
+            </>
+          ) : (
+            <>
+              <LoginBox />
+              <small className="block">
+                <a onClick={() => setIsLogin(false)} className="cursor-pointer underline">
+                  {t('Cancel')}
+                </a>
+              </small>
+            </>
+          )}
         </span>
       </div>
     );

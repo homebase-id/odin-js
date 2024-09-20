@@ -7,8 +7,7 @@ export function CodeLeaf({ className, children, ...props }: PlateLeafProps) {
     <PlateLeaf
       asChild
       className={cn(
-        'whitespace-pre-wrap',
-        'rounded-md bg-slate-100 px-[0.3em] py-[0.2em] font-mono text-sm dark:bg-slate-700',
+        'flex w-full flex-col whitespace-pre-wrap rounded-lg bg-slate-100 px-4 py-4 font-mono text-sm text-foreground dark:bg-slate-700',
         className
       )}
       {...props}

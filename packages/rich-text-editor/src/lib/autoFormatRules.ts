@@ -1,3 +1,3 @@
-import { autoformatBlocks } from './autoFormatBlocks';
+import { autoformatBlocks, autoformatMarks } from './autoFormatBlocks';
 
-export const autoformatRules = [...autoformatBlocks];
+export const autoformatRules = [...autoformatBlocks, ...autoformatMarks];
