@@ -53,7 +53,7 @@ test('DotYouClient GET interceptor', async () => {
 });
 
 test('DotYouClient POST interceptor', async () => {
-  const fixedSharedSecret = new Uint8Array([16]).fill(1);
+  const fixedSharedSecret = new Uint8Array(16).fill(1);
   const dotYouClient = new DotYouClient({
     api: ApiType.App,
     identity: 'example.com',
