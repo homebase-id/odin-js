@@ -144,13 +144,13 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
                     {t('Start')}!
                   </a>
                 </small>
-              ) : (
+              ) : !isAuthenticated ? (
                 <small className="mt-1 block">
                   <a onClick={() => setIsLogin(true)} className="cursor-pointer underline">
                     {t('Login')}
                   </a>
                 </small>
-              )}
+              ) : null}
             </>
           ) : (
             <>
