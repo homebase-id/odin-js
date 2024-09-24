@@ -1,5 +1,5 @@
 import { useMatch, useParams } from 'react-router-dom';
-import { NotFound, t } from '@homebase-id/common-app';
+import { t } from '@homebase-id/common-app';
 import { useConnection } from '../../../hooks/connections/useConnection';
 import { useContact } from '../../../hooks/contacts/useContact';
 import ContactInfo from '../../../components/Connection/ContactInfo/ContactInfo';
@@ -13,7 +13,6 @@ import { ConnectionDetailsLinks } from './ConnectionDetailsLinks';
 import { ConnectedDetailsSettings } from './ConnectionDetailsSettings';
 
 const ConnectionDetails = () => {
-  const rootMatch = useMatch('/owner/connections/:odinId');
   const settingsMatch = useMatch('/owner/connections/:odinId/settings');
   const aboutMatch = useMatch('/owner/connections/:odinId/about');
   const linksMatch = useMatch('/owner/connections/:odinId/links');
@@ -34,7 +33,6 @@ const ConnectionDetails = () => {
   return (
     <>
       <IdentityPageMetaAndActions odinId={odinId} />
-      <IdentityAlerts odinId={odinId} />
 
       <SubMenu
         items={[
@@ -60,17 +58,16 @@ const ConnectionDetails = () => {
         ]}
         className="-mt-6 mb-4"
       />
+      <IdentityAlerts odinId={odinId} />
 
-      {rootMatch ? (
-        <>{contactData && <ContactInfo odinId={odinId} />}</>
-      ) : aboutMatch ? (
+      {aboutMatch ? (
         <ConnectionDetailsAbout odinId={odinId} />
       ) : linksMatch ? (
         <ConnectionDetailsLinks odinId={odinId} />
       ) : settingsMatch && connectionInfo?.status === 'connected' ? (
         <ConnectedDetailsSettings odinId={odinId} connectionInfo={connectionInfo} />
       ) : (
-        <NotFound />
+        <>{contactData && <ContactInfo odinId={odinId} />}</>
       )}
     </>
   );
