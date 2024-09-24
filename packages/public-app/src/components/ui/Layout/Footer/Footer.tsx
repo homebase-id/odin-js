@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { OwnerName, getVersion, useSiteData } from '@homebase-id/common-app';
+import { OwnerName, getVersion } from '@homebase-id/common-app';
 import { t } from '@homebase-id/common-app';
 
 import Socials from '../Socials/Socials';

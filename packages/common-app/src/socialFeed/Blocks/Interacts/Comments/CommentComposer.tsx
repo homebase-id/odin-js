@@ -151,18 +151,19 @@ export const CommentEditor = ({
           >
             <ImageIcon className="h-5 w-5" />
           </FileSelector>
-          {hasContent ? (
-            <div className="flex flex-row ml-auto">
-              {onCancel ? (
-                <ActionButton
-                  onClick={onCancel}
-                  type="mute"
-                  size="none"
-                  className="px-1 py-1 mr-2 text-sm hover:underline"
-                >
-                  Cancel
-                </ActionButton>
-              ) : null}
+
+          <div className="flex flex-row ml-auto">
+            {onCancel ? (
+              <ActionButton
+                onClick={onCancel}
+                type="mute"
+                size="none"
+                className="px-1 py-1 mr-2 text-sm hover:underline"
+              >
+                Cancel
+              </ActionButton>
+            ) : null}
+            {hasContent ? (
               <ActionButton
                 type="mute"
                 size="none"
@@ -175,8 +176,8 @@ export const CommentEditor = ({
                   <PaperPlane className="h-5 w-5" />
                 )}
               </ActionButton>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
       </div>
     </div>

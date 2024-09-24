@@ -17,7 +17,7 @@ import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 
-import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
+import { getNewId, isTouchDevice, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
@@ -80,7 +80,7 @@ export const MessageComposer = ({
     const plainVal = (messageVal && getTextRootsRecursive(messageVal).join(' ')) || '';
     const newFiles = [...(files || [])];
 
-    if (!messageVal || (!plainVal && !files?.length) || !community) return;
+    if (((!messageVal || !plainVal) && !files?.length) || !community) return;
 
     // Clear internal state and allow excessive senders
     setMessage(undefined);
@@ -135,7 +135,7 @@ export const MessageComposer = ({
     <>
       <div className={`bg-background pb-[env(safe-area-inset-bottom)] ${className || ''}`}>
         <div
-          className="flex flex-shrink-0 flex-row gap-2 px-2 py-3 md:px-5"
+          className="flex flex-shrink-0 flex-row gap-2 px-0 md:px-3 md:pb-2 lg:pb-5"
           data-default-value={message}
           onPaste={(e) => {
             const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
@@ -147,15 +147,15 @@ export const MessageComposer = ({
           }}
         >
           <RichTextEditor
-            className="relative w-8 flex-grow rounded-md border bg-background px-2 pb-2 dark:border-slate-800"
+            className="relative w-8 flex-grow border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border"
             onChange={(newVal) => setMessage(newVal.target.value)}
             defaultValue={message}
             placeholder={
-              channel?.fileMetadata.appData.content.title
-                ? `Message # ${channel.fileMetadata.appData.content.title}`
-                : community?.fileMetadata.appData.uniqueId === groupId
-                  ? `Message "${community?.fileMetadata.appData.content.title}"`
-                  : `Reply`
+              !stringGuidsEqual(community?.fileMetadata.appData.uniqueId, groupId)
+                ? t(`Reply...`)
+                : channel?.fileMetadata.appData.content.title
+                  ? `${t('Message')} # ${channel.fileMetadata.appData.content.title}`
+                  : `${t('Message')} "${community?.fileMetadata.appData.content.title}"`
             }
             autoFocus={!isTouchDevice()}
             ref={volatileRef}
@@ -179,7 +179,7 @@ export const MessageComposer = ({
                 />
               )}
             </div>
-            <div className="flex flex-row justify-between">
+            <div className="-mx-1 flex flex-row justify-between">
               <FileSelector
                 onChange={(files) => setFiles(files.map((file) => ({ file })))}
                 className="my-auto px-2 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
@@ -196,9 +196,10 @@ export const MessageComposer = ({
                     e.stopPropagation();
                     doSend();
                   }}
-                  className="flex-shrink opacity-40 hover:opacity-100"
+                  className={`flex-shrink opacity-40 ${!message && !files?.length ? '' : 'hover:opacity-100'}`}
                   icon={PaperPlane}
                   size="square"
+                  isDisabled={!message && !files?.length}
                   onMouseDown={(e) => e.preventDefault()}
                 />
               </span>

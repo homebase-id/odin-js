@@ -68,21 +68,16 @@ const toHexString = (byteArray: Uint8Array) => {
   }).join('');
 };
 
-// const MB = 1000000;
+const MB = 1000000;
 export const segmentVideoFileWithFfmpeg = async (
   file: File | Blob,
-  keyHeader?: KeyHeader,
-  experimentalHls?: boolean
+  keyHeader?: KeyHeader
 ): Promise<VideoData | HLSData> => {
   if (!file || file.type !== 'video/mp4') {
     throw new Error('No (supported) mp4 file found, segmentation only works with mp4 files');
   }
 
-  // We disbled the segmentation for now, as we only want to support playback on web of HLS;
-  // We can re-enable it when we have confirmed HLS is good
-
-  // file.size < 10 * MB ||
-  if (!experimentalHls) {
+  if (file.size < 5 * MB) {
     return {
       video: file,
       metadata: {

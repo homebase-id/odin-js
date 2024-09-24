@@ -144,7 +144,7 @@ const CommunityTextMessageBody = ({
       className={`relative w-auto max-w-[75vw] rounded-lg md:max-w-xs lg:max-w-lg xl:max-w-[50vw]`}
     >
       <div className="flex flex-col md:flex-row md:flex-wrap md:gap-2">
-        <div className="flex min-w-0 flex-col gap-1">
+        <div className="flex w-full min-w-0 flex-col gap-1">
           {/* {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null} */}
 
           <MessageTextRenderer
