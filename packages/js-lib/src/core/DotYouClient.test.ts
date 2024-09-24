@@ -27,7 +27,7 @@ test('Guest DotYouClient', () => {
   expect(dotYouClient.getEndpoint()).toEqual('https://example.com/api/guest/v1');
 });
 
-test('DotYouClient GET interceptor', async () => {
+test('DotYouClient GET request interceptor', async () => {
   const fixedSharedSecret = new Uint8Array(16).fill(1);
   const dotYouClient = new DotYouClient({
     api: ApiType.App,
@@ -52,7 +52,7 @@ test('DotYouClient GET interceptor', async () => {
   );
 });
 
-test('DotYouClient POST interceptor', async () => {
+test('DotYouClient POST request interceptor', async () => {
   const fixedSharedSecret = new Uint8Array(16).fill(1);
   const dotYouClient = new DotYouClient({
     api: ApiType.App,
