@@ -36,7 +36,8 @@ test('DotYouClient GET request interceptor', async () => {
   });
 
   const axiosClient = dotYouClient.createAxiosClient();
-  const internalAxiosHandlers = axiosClient.interceptors.request.handlers;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const internalAxiosHandlers = (axiosClient.interceptors.request as any)?.handlers;
 
   expect(internalAxiosHandlers).toHaveLength(1);
   expect(internalAxiosHandlers[0].fulfilled).toBeInstanceOf(Function);
@@ -61,7 +62,8 @@ test('DotYouClient POST request interceptor', async () => {
   });
 
   const axiosClient = dotYouClient.createAxiosClient();
-  const internalAxiosHandlers = axiosClient.interceptors.request.handlers;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const internalAxiosHandlers = (axiosClient.interceptors.request as any)?.handlers;
 
   expect(internalAxiosHandlers).toHaveLength(1);
   expect(internalAxiosHandlers[0].fulfilled).toBeInstanceOf(Function);
