@@ -31,6 +31,7 @@ import {
   FailedTransferStatuses,
   RecipientTransferHistory,
   deleteFile,
+  RichText,
 } from '@homebase-id/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import {
@@ -67,7 +68,7 @@ export interface ChatMessage {
   replyId?: string;
 
   /// Content of the message
-  message: string;
+  message: string | RichText;
 
   // After an update to a message on the receiving end, the senderOdinId is emptied; So we have an authorOdinId to keep track of the original sender
   authorOdinId?: string;

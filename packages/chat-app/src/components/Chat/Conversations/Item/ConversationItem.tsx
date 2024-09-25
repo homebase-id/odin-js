@@ -6,6 +6,7 @@ import {
   OwnerImage,
   OwnerName,
   LoadingBlock,
+  getPlainTextFromRichText,
 } from '@homebase-id/common-app';
 import { Persons } from '@homebase-id/common-app/icons';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
@@ -150,6 +151,7 @@ const ConversationBody = ({
       : 0;
 
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
+  const plainLastMessageContent = getPlainTextFromRichText(lastMessageContent?.message);
 
   useEffect(() => {
     if (!lastMessage) {
@@ -179,7 +181,7 @@ const ConversationBody = ({
                 <MessageDeletedInnerBody />
               ) : lastMessageContent.message ? (
                 <p className="overflow-hidden text-ellipsis whitespace-nowrap">
-                  {lastMessageContent.message}
+                  {plainLastMessageContent}
                 </p>
               ) : (
                 <p>📷 {t('Media')}</p>

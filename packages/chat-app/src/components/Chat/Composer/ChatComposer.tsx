@@ -26,18 +26,20 @@ import { Plus, PaperPlane, Times } from '@homebase-id/common-app/icons';
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const CHAT_DRAFTS_KEY = 'CHAT_LOCAL_DRAFTS';
 
-export const ChatComposer = ({
-  conversation,
-  replyMsg,
-  clearReplyMsg,
-  onSend,
-  tags,
-}: {
+export interface ChatComposerProps {
   conversation: HomebaseFile<UnifiedConversation> | undefined;
   replyMsg: HomebaseFile<ChatMessage> | undefined;
   clearReplyMsg: () => void;
   onSend?: () => void;
   tags?: string[];
+}
+
+export const ChatComposer: React.FC<ChatComposerProps> = ({
+  conversation,
+  replyMsg,
+  clearReplyMsg,
+  onSend,
+  tags,
 }) => {
   const volatileRef = useRef<VolatileInputRef>(null);
 
