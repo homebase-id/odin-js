@@ -433,7 +433,7 @@ const updatePost = async <T extends PostContent>(
       odinId,
       file,
       channelId,
-      existingAndNewMediaFiles,
+      newMediaFiles,
       deletedMediaFiles,
       onUpdate
     );
@@ -713,7 +713,7 @@ const patchPost = async <T extends PostContent>(
   odinId: string,
   file: HomebaseFile<T>,
   channelId: string,
-  existingAndNewMediaFiles?: (NewMediaFile | MediaFile)[],
+  newMediaFiles?: NewMediaFile[],
   deletedMediaFiles?: MediaFile[],
   onUpdate?: (progress: number) => void
 ): Promise<UpdateResult> => {
@@ -724,8 +724,9 @@ const patchPost = async <T extends PostContent>(
       SecurityGroupType.Authenticated
   );
 
-  const existingPostWithThisSlug = await getPostBySlug(
+  const existingPostWithThisSlug = await getPostBySlugOverPeer(
     dotYouClient,
+    odinId,
     channelId,
     file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
   );
@@ -777,6 +778,7 @@ const patchPost = async <T extends PostContent>(
 
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
+  const previewThumbnails: EmbeddedThumb[] = [];
 
   if (!shouldEmbedContent) {
     payloads.push({
@@ -795,6 +797,43 @@ const patchPost = async <T extends PostContent>(
     versionTag: file.fileMetadata.versionTag,
     recipients: [odinId],
   };
+
+  for (let i = 0; newMediaFiles && i < newMediaFiles?.length; i++) {
+    const newMediaFile = newMediaFiles[i];
+    const payloadKey = newMediaFile.key || `${POST_MEDIA_PAYLOAD_KEY}${i}`;
+    if (newMediaFile.file.type.startsWith('video/')) {
+      // TODO: figure out AESKEY
+      // const {
+      //   tinyThumb,
+      //   thumbnails: thumbnailsFromVideo,
+      //   payloads: payloadsFromVideo,
+      // } = await processVideoFile(newMediaFile, payloadKey, aesKey);
+      // thumbnails.push(...thumbnailsFromVideo);
+      // payloads.push(...payloadsFromVideo);
+      // if (tinyThumb) previewThumbnails.push(tinyThumb);
+    } else if (newMediaFile.file.type.startsWith('image/')) {
+      const { additionalThumbnails, tinyThumb } = await createThumbnails(
+        newMediaFile.file,
+        payloadKey
+      );
+
+      thumbnails.push(...additionalThumbnails);
+      payloads.push({
+        key: payloadKey,
+        payload: newMediaFile.file,
+        previewThumbnail: tinyThumb,
+      });
+
+      if (tinyThumb) previewThumbnails.push(tinyThumb);
+    } else {
+      payloads.push({
+        key: payloadKey,
+        payload: newMediaFile.file,
+        descriptorContent: (newMediaFile.file as File).name || newMediaFile.file.type,
+      });
+    }
+    onUpdate?.((i + 1) / newMediaFiles.length);
+  }
 
   const deletedPayloads = deletedMediaFiles?.map((payload) => {
     return { key: payload.key };

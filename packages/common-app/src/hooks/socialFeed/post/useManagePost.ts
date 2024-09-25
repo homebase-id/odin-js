@@ -13,6 +13,7 @@ import {
   MediaFile,
   getPayloadBytes,
   SecurityGroupType,
+  UpdateResult,
 } from '@homebase-id/js-lib/core';
 import {
   HomebaseFile,
@@ -44,7 +45,7 @@ export const useManagePost = () => {
     linkPreviews?: LinkPreview[];
     onUpdate?: (progress: number) => void;
   }) => {
-    return new Promise<TransitUploadResult | UploadResult>((resolve, reject) => {
+    return new Promise<TransitUploadResult | UploadResult | UpdateResult>((resolve, reject) => {
       const onVersionConflict = odinId
         ? undefined
         : async () => {
