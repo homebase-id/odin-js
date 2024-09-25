@@ -1,4 +1,4 @@
-import { lazy, ReactNode, Suspense } from 'react';
+import { lazy, ReactNode, Suspense, useState } from 'react';
 import {
   Route,
   Outlet,
@@ -14,12 +14,19 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
-import { ErrorBoundary, HOME_ROOT_PATH, NotFound, PREVIEW_ROOT } from '@homebase-id/common-app';
+import {
+  DotYouClientProvider,
+  ErrorBoundary,
+  HOME_ROOT_PATH,
+  NotFound,
+  PREVIEW_ROOT,
+} from '@homebase-id/common-app';
 import { useAuth } from '../hooks/auth/useAuth';
 import Header from '../components/ui/Layout/Header/Header';
 import Footer from '../components/ui/Layout/Footer/Footer';
 
 import { t, useSiteData } from '@homebase-id/common-app';
+import { LoginBox } from '../components/Auth/LoginBox/LoginBox';
 
 const Home = lazy(() => import('../templates/Home/Home'));
 const PostOverview = lazy(() => import('../templates/Posts/Overview/PostOverview'));
@@ -42,9 +49,11 @@ function App() {
           element={
             <Layout>
               <ErrorBoundary>
-                <Suspense fallback={<></>}>
-                  <Outlet />
-                </Suspense>
+                <DotYouClientProvider>
+                  <Suspense fallback={<></>}>
+                    <Outlet />
+                  </Suspense>
+                </DotYouClientProvider>
               </ErrorBoundary>
             </Layout>
           }
@@ -106,19 +115,53 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
   const [searchParams] = useSearchParams();
   const { data: siteData, isFetched: siteDataFetched } = useSiteData();
 
-  if (siteData && siteDataFetched && !siteData.home?.templateSettings?.themeId) {
+  const [isLogin, setIsLogin] = useState(false);
+
+  if (
+    siteData &&
+    siteDataFetched &&
+    (!siteData.home?.templateSettings?.themeId || siteData.home?.templateSettings?.themeId === '0')
+  ) {
     return (
       <div className="flex min-h-screen">
         <span className="m-auto text-center">
-          {t('This is a registered dotyou identity')}
-          {isOwner ? (
-            <small className="block">
-              {t('Select a website theme and make yourself known on the internet!')}{' '}
-              <a href="/owner/profile/homepage" className="underline">
-                {t('Start')}!
-              </a>
-            </small>
-          ) : null}
+          {!isLogin ? (
+            <>
+              {t('This is a registered')}{' '}
+              <a
+                href="https://homebase.id"
+                className="text-primary"
+                target="_blank"
+                rel="norerrer noreferrer"
+              >
+                Homebase
+              </a>{' '}
+              {t('identity')}
+              {isOwner ? (
+                <small className="mt-1 block">
+                  {t('Select a website theme and make yourself known on the internet!')}{' '}
+                  <a href="/owner/profile/homepage" className="underline">
+                    {t('Start')}!
+                  </a>
+                </small>
+              ) : !isAuthenticated ? (
+                <small className="mt-1 block">
+                  <a onClick={() => setIsLogin(true)} className="cursor-pointer underline">
+                    {t('Login')}
+                  </a>
+                </small>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <LoginBox />
+              <small className="block">
+                <a onClick={() => setIsLogin(false)} className="cursor-pointer underline">
+                  {t('Cancel')}
+                </a>
+              </small>
+            </>
+          )}
         </span>
       </div>
     );

@@ -1,7 +1,12 @@
 import { Guid } from 'guid-typescript';
 
 import md5 from './md5/md5';
-import { AccessControlList, EncryptedKeyHeader, PayloadDescriptor } from '../core/core';
+import {
+  AccessControlList,
+  EncryptedKeyHeader,
+  PayloadDescriptor,
+  TargetDrive,
+} from '../core/core';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
@@ -11,12 +16,18 @@ export const getRandom16ByteArray = (): Uint8Array => {
 };
 
 export const assertIfDefined = (key: string, value: unknown) => {
-  if (value === undefined || value === null) throw new Error(`${key} undefined`);
+  if (typeof key !== 'string') throw new Error(`[odin-js]: assertIfDefined key is not a string`);
+
+  if (value === undefined || value === null)
+    throw new Error(`[odin-js]: assertIfDefined ${key} undefined`);
 };
 
 export const assertIfDefinedAndNotDefault = (key: string, value: unknown) => {
+  if (typeof key !== 'string')
+    throw new Error(`[odin-js]: assertIfDefinedAndNotDefault key is not a string`);
+
   assertIfDefined(key, value);
-  if (value === '') throw new Error(`${key} empty`);
+  if (value === '') throw new Error(`[odin-js]: assertIfDefinedAndNotDefault ${key} empty`);
 };
 
 // from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
@@ -103,6 +114,12 @@ export const stringGuidsEqual = (a?: string, b?: string): boolean => {
   if (!a || !b) return false;
 
   return a.toLowerCase().replace(/-/g, '') === b.toLowerCase().replace(/-/g, '');
+};
+
+export const drivesEqual = (a?: TargetDrive, b?: TargetDrive): boolean => {
+  if (!a || !b) return false;
+
+  return stringGuidsEqual(a.alias, b.alias) && stringGuidsEqual(a.type, b.type);
 };
 
 /// Compares two ACLs; Compares the requiredSecurityGroup, CircleIds and OdinIds of those ACLs and will return true or false;
@@ -327,7 +344,7 @@ export const tryJsonParse = <T>(json: string): T => {
     if (!json || !json.length) return {} as T;
     const o = JSON.parse(json);
     return o;
-  } catch (ex) {
+  } catch {
     console.warn('base JSON.parse failed', json);
     try {
       const replaceAll = (str: string, find: string, replace: string) => {

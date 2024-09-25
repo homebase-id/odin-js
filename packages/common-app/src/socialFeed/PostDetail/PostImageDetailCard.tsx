@@ -137,7 +137,8 @@ export const PostImageDetailCard = ({
                   probablyEncrypted={postFile.fileMetadata.isEncrypted}
                   key={(postFile.fileId || '') + (currentMediaFile?.key || currIndex)}
                 />
-              ) : currentMediaFile?.contentType.startsWith('video') ? (
+              ) : currentMediaFile?.contentType.startsWith('video') ||
+                currentMediaFile?.contentType === 'application/vnd.apple.mpegurl' ? (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Video
                     fileId={postFile.fileId}

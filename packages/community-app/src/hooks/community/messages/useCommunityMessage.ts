@@ -16,7 +16,7 @@ import {
   uploadCommunityMessage,
 } from '../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
-import { formatGuidId, getNewId, stringGuidsEqual, toGuidId } from '@homebase-id/js-lib/helpers';
+import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
 import { insertNewMessage } from './useCommunityMessages';
 
@@ -228,7 +228,7 @@ export const useCommunityMessage = (props?: {
           );
         }
       },
-      onSettled: async (_data, _error, variables) => {
+      onSettled: async () => {
         // queryClient.invalidateQueries({
         //   queryKey: ['community-messages', variables.conversation.fileMetadata.appData.uniqueId],
         // });

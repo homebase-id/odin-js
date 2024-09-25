@@ -36,7 +36,10 @@ export const uploadFile = async (
   thumbnails?: ThumbnailFile[],
   encrypt = true,
   onVersionConflict?: () => Promise<void | UploadResult> | void,
-  axiosConfig?: AxiosRequestConfig
+  options?: {
+    axiosConfig?: AxiosRequestConfig;
+    aesKey?: Uint8Array | undefined;
+  }
 ): Promise<UploadResult | void> => {
   isDebug &&
     console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/upload`).pathname, {
@@ -47,9 +50,9 @@ export const uploadFile = async (
     });
 
   // Force isEncrypted on the metadata to match the encrypt flag
-  metadata.isEncrypted = encrypt;
+  metadata.isEncrypted = encrypt || !!options?.aesKey;
 
-  const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
+  const keyHeader = encrypt ? GenerateKeyHeader(options?.aesKey) : undefined;
 
   const { systemFileType, ...strippedInstructions } = instructions;
 
@@ -83,7 +86,7 @@ export const uploadFile = async (
     data,
     systemFileType,
     onVersionConflict,
-    axiosConfig
+    options?.axiosConfig
   );
 
   if (!uploadResult) return;
@@ -111,7 +114,7 @@ export const uploadHeader = async (
       : keyHeader;
 
   if (!decryptKeyHeader && metadata.isEncrypted)
-    throw new Error('[DotYouCore-JS] Missing existing keyHeader for appending encrypted metadata.');
+    throw new Error('[odin-js] Missing existing keyHeader for appending encrypted metadata.');
 
   if (plainKeyHeader) {
     plainKeyHeader.iv = getRandom16ByteArray();
@@ -266,6 +269,8 @@ export const reUploadFile = async (
     thumbnails,
     encrypt,
     undefined,
-    axiosConfig
+    {
+      axiosConfig,
+    }
   );
 };

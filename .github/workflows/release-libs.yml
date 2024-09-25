@@ -82,6 +82,7 @@ jobs:
           git restore .npmrc
 
       - name: Create PR for NPM version bump
+        id: version-bump
         uses: peter-evans/create-pull-request@v6
         with:
           branch-suffix: short-commit-hash

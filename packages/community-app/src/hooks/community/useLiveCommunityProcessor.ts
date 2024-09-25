@@ -6,6 +6,7 @@ import {
   useWebsocketSubscriber,
 } from '@homebase-id/common-app';
 import {
+  drivesEqual,
   getQueryBatchCursorFromTime,
   getQueryModifiedCursorFromTime,
   hasDebugFlag,
@@ -18,7 +19,6 @@ import {
   DeletedHomebaseFile,
   DotYouClient,
   HomebaseFile,
-  PushNotification,
   queryBatch,
   queryModified,
   TargetDrive,
@@ -151,8 +151,7 @@ const useCommunityWebsocket = (communityId: string | undefined, isEnabled: boole
     if (
       (notification.notificationType === 'fileAdded' ||
         notification.notificationType === 'fileModified') &&
-      stringGuidsEqual(notification.targetDrive?.alias, targetDrive.alias) &&
-      stringGuidsEqual(notification.targetDrive?.type, targetDrive.type)
+      drivesEqual(notification.targetDrive, targetDrive)
     ) {
       if (notification.header.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE) {
         const channelId = notification.header.fileMetadata.appData.groupId;

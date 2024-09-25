@@ -32,7 +32,7 @@ interface Mp4Info {
 
 const loadMp4box = async () => {
   try {
-    return await import('mp4box');
+    return await import('mp4box').then((m) => m.default);
   } catch (ex) {
     throw new Error('mp4box not found', { cause: ex });
   }

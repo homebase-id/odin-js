@@ -39,6 +39,7 @@ import {
   stringToUint8Array,
   makeGrid,
   base64ToUint8Array,
+  getRandom16ByteArray,
 } from '@homebase-id/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
 import {
@@ -163,7 +164,7 @@ export const dsrToMessage = async (
 
     return chatMessage;
   } catch (ex) {
-    console.error('[DotYouCore-js] failed to get the chatMessage payload of a dsr', dsr, ex);
+    console.error('[chat] failed to get the chatMessage payload of a dsr', dsr, ex);
     return null;
   }
 };
@@ -267,6 +268,7 @@ export const uploadChatMessage = async (
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+  const aesKey = getRandom16ByteArray();
 
   if (!files?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
@@ -307,13 +309,14 @@ export const uploadChatMessage = async (
     const payloadKey = `${CHAT_MESSAGE_PAYLOAD_KEY}${i}`;
     const newMediaFile = files[i];
     if (newMediaFile.file.type.startsWith('video/')) {
-      const { tinyThumb, additionalThumbnails, payload } = await processVideoFile(
-        newMediaFile,
-        payloadKey
-      );
+      const {
+        tinyThumb,
+        thumbnails: thumbnailsFromVideo,
+        payloads: payloadsFromVideo,
+      } = await processVideoFile(newMediaFile, payloadKey, aesKey);
 
-      thumbnails.push(...additionalThumbnails);
-      payloads.push(payload);
+      thumbnails.push(...thumbnailsFromVideo);
+      payloads.push(...payloadsFromVideo);
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
     } else if (newMediaFile.file.type.startsWith('image/')) {
@@ -350,10 +353,15 @@ export const uploadChatMessage = async (
     payloads,
     thumbnails,
     undefined,
-    onVersionConflict
+    onVersionConflict,
+    {
+      aesKey,
+    }
   );
 
-  if (!uploadResult) return null;
+  if (!uploadResult) {
+    throw new Error('Failed to upload chat message');
+  }
 
   if (
     recipients.some(
@@ -364,7 +372,6 @@ export const uploadChatMessage = async (
   ) {
     message.fileId = uploadResult.file.fileId;
     message.fileMetadata.versionTag = uploadResult.newVersionTag;
-
     message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Failed;
     message.fileMetadata.appData.content.deliveryDetails = {};
     for (const recipient of recipients) {
@@ -375,14 +382,26 @@ export const uploadChatMessage = async (
           : ChatDeliveryStatus.Delivered;
     }
 
-    await updateChatMessage(dotYouClient, message, recipients, uploadResult.keyHeader);
-    console.error('Not all recipients received the message: ', uploadResult);
-    throw new Error(`Not all recipients received the message: ${recipients.join(', ')}`);
+    const updateResult = await updateChatMessage(
+      dotYouClient,
+      message,
+      recipients,
+      uploadResult.keyHeader
+    );
+    console.warn('Not all recipients received the message: ', uploadResult);
+    // We don't throw an error as it is not a critical failure; And the message is still saved locally
+    return {
+      ...uploadResult,
+      newVersionTag: updateResult?.newVersionTag || uploadResult?.newVersionTag,
+      previewThumbnail: uploadMetadata.appData.previewThumbnail,
+      chatDeliveryStatus: ChatDeliveryStatus.Failed, // Should we set failed, or does an enqueueFailed have a retry? (Either way it should auto-solve if it does)
+    };
   }
 
   return {
     ...uploadResult,
     previewThumbnail: uploadMetadata.appData.previewThumbnail,
+    chatDeliveryStatus: ChatDeliveryStatus.Sent,
   };
 };
 

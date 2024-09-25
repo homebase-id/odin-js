@@ -140,7 +140,7 @@ export const MailHistory = ({
 
             let runningText = '';
             for (let i = elements.length - 1; i >= 0; i--) {
-              const text = (elements[i] as any).innerText;
+              const text = (elements[i] as HTMLElement).innerText;
               if (text?.length) {
                 runningText += text + '\n';
               }
@@ -347,7 +347,7 @@ const ForwardedThread = ({
           <div className="flex flex-row justify-center py-2">
             <button
               onClick={() => setShowHistory(!showHistory)}
-              className="hover:underlin text-sm  text-primary"
+              className="hover:underlin text-sm text-primary"
             >
               {showHistory ? t('Hide history') : t('Show history')}
             </button>

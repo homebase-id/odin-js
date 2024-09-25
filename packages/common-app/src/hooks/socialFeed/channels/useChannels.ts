@@ -52,7 +52,7 @@ export const useChannels = ({
           } as HomebaseFile<ChannelDefinitionVm>;
         });
       } catch (e) {
-        ('failed to fetch dynamic data');
+        console.error('[useChannels] failed to fetch dynamic data', e);
       }
     };
 
@@ -64,9 +64,7 @@ export const useChannels = ({
       // We are authenticated, so we might have more data when fetching non-static data; Let's do so async with timeout to allow other static info to load and render
       setTimeout(async () => {
         const dynamicData = await fetchDynamicData();
-        if (dynamicData) {
-          queryClient.setQueryData(['channels'], dynamicData);
-        }
+        if (dynamicData) queryClient.setQueryData(['channels'], dynamicData);
       }, 500);
     }
 

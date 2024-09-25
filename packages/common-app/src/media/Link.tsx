@@ -11,7 +11,6 @@ import {
 import { useDotYouClient } from '../hooks';
 import { LoadingBlock } from '../ui';
 import { getPayloadAsJsonOverPeerByGlobalTransitId } from '@homebase-id/js-lib/peer';
-import { OdinPreviewImage } from '@homebase-id/ui-lib';
 import { useMemo } from 'react';
 
 export const LinkPreviewTextual = ({
@@ -217,5 +216,8 @@ export const useLinkMetadata = ({
       if (!fileId) return [];
       return getPayloadAsJson<LinkPreview[]>(dotYouClient, targetDrive, fileId, payloadKey);
     },
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours
   });
 };

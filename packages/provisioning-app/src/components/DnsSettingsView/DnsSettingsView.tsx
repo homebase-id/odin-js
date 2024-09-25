@@ -306,7 +306,9 @@ const RecordView = ({
         {showStatus ? (
           <div
             className={`ml-auto flex flex-row items-center gap-2 text-sm ${
-              isInCorrectvalue ? 'cursor-pointer text-indigo-500 hover:underline' : ''
+              isInCorrectvalue
+                ? 'cursor-pointer text-indigo-500 hover:underline'
+                : `${!isGood ? 'text-orange-600' : ''}`
             }`}
             onClick={isInCorrectvalue ? () => setShowBadValue(true) : undefined}
           >

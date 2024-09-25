@@ -128,7 +128,7 @@ export const streamDecryptWithCbc = async (
               subtleKey,
               mergeByteArrays([chunk, encryptedPadding])
             );
-          } catch (ex) {
+          } catch {
             // Will fail if it contains the last block, so try again without padding
             decrypted = await innerDecrypt(lastBlock || iv, subtleKey, chunk);
           }

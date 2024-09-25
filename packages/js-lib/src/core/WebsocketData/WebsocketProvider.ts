@@ -1,4 +1,4 @@
-import { hasDebugFlag, jsonStringify64, tryJsonParse } from '../../helpers/helpers';
+import { hasDebugFlag, jsonStringify64, tryJsonParse, drivesEqual } from '../../helpers/helpers';
 import { ApiType, DotYouClient } from '../DotYouClient';
 import { decryptData, encryptData, getRandomIv } from '../InterceptionEncryptionUtil';
 import { TargetDrive } from '../core';
@@ -18,6 +18,8 @@ import {
 
 let webSocketClient: WebSocket | undefined;
 let activeSs: Uint8Array;
+
+let subscribedDrives: TargetDrive[] | undefined;
 
 let connectPromise: Promise<void> | undefined = undefined;
 let isConnected = false;
@@ -122,11 +124,10 @@ const ParseRawClientNotification = (
   } as ClientUnknownNotification;
 };
 
-// Socket connection can be tricky with multiple subscribers; For now, we only support multiple subscribers with the same drives;
 const ConnectSocket = async (
   dotYouClient: DotYouClient,
   drives: TargetDrive[],
-  args?: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this
+  args?: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...;
 ) => {
   if (webSocketClient) throw new Error('Socket already connected');
 
@@ -134,7 +135,10 @@ const ConnectSocket = async (
 
   // We're already connecting, return the existing promise
   if (connectPromise) return connectPromise;
+  // eslint-disable-next-line no-async-promise-executor
   connectPromise = new Promise<void>(async (resolve, reject) => {
+    subscribedDrives = drives;
+
     if (apiType === ApiType.App) {
       // we need to preauth before we can connect
       await dotYouClient
@@ -255,7 +259,7 @@ const DisconnectSocket = async () => {
   try {
     if (!webSocketClient) console.warn('No active client to disconnect');
     else webSocketClient.close(1000, 'Normal Disconnect');
-  } catch (e) {
+  } catch {
     // Ignore any errors on close, as we always want to clean up
   }
   if (isDebug) console.debug(`[NotificationProvider] Client disconnected`);
@@ -290,6 +294,14 @@ export const Subscribe = async (
 
   if (isDebug)
     console.debug(`[NotificationProvider] New subscriber (${subscribers.length})`, refId);
+
+  if (
+    subscribedDrives &&
+    (subscribedDrives.length !== drives.length ||
+      drives.some((drive) => !subscribedDrives?.find((d) => drivesEqual(d, drive))))
+  ) {
+    throw new Error('Socket already connected with different drives');
+  }
 
   // Already connected, no need to initiate a new connection
   if (webSocketClient) return Promise.resolve();

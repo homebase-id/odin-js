@@ -14,7 +14,6 @@ import {
   OWNER_APP_ID,
   CHAT_APP_ID,
   MAIL_APP_ID,
-  COMMUNITY_APP_ID,
   FEED_APP_ID,
   PHOTO_APP_ID,
 } from '@homebase-id/common-app';
@@ -77,7 +76,7 @@ const AppWrapper = ({
   options?: ActionGroupOptionProps[];
 }) => (
   <div className="group relative flex h-full flex-grow flex-col rounded-lg bg-background transition-shadow hover:shadow-lg">
-    <HybridLink href={href} className="mx-auto px-5 pt-5">
+    <HybridLink href={href} className="mx-auto w-full px-2 pt-5">
       <div className="relative flex flex-col items-center">
         <CompanyImage domain={undefined} appId={appId} className="mb-auto w-20" fallbackSize="xs" />
 
@@ -186,25 +185,25 @@ const MailApp = () => {
   );
 };
 
-const CommunityApp = () => {
-  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: COMMUNITY_APP_ID });
+// const CommunityApp = () => {
+//   const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: COMMUNITY_APP_ID });
 
-  return (
-    <AppWrapper
-      appId={COMMUNITY_APP_ID}
-      name={'Community'}
-      href={`/apps/community`}
-      unreadCount={unreadCount || 0}
-      options={[
-        {
-          label: t('Settings'),
-          icon: Cog,
-          href: `/owner/third-parties/apps/${COMMUNITY_APP_ID}`,
-        },
-      ]}
-    />
-  );
-};
+//   return (
+//     <AppWrapper
+//       appId={COMMUNITY_APP_ID}
+//       name={'Community'}
+//       href={`/apps/community`}
+//       unreadCount={unreadCount || 0}
+//       options={[
+//         {
+//           label: t('Settings'),
+//           icon: Cog,
+//           href: `/owner/third-parties/apps/${COMMUNITY_APP_ID}`,
+//         },
+//       ]}
+//     />
+//   );
+// };
 
 const FeedApp = () => {
   // const { data: appReg } = useApp({ appId: FEED_APP_ID }).fetch;

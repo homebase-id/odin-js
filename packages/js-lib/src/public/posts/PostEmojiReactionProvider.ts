@@ -123,8 +123,8 @@ export const getReactionSummary = async (
                   emoji: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
                   count: reaction.count,
                 };
-              } catch (ex) {
-                console.error('[DotYouCore-js] parse failed for', reaction);
+              } catch {
+                console.error('[odin-js] parse failed for', reaction);
                 return;
               }
             })
@@ -149,8 +149,8 @@ export const getReactionSummary = async (
                   emoji: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
                   count: reaction.count,
                 };
-              } catch (ex) {
-                console.error('[DotYouCore-js] parse failed for', reaction);
+              } catch {
+                console.error('[odin-js] parse failed for', reaction);
                 return;
               }
             })

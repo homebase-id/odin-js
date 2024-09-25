@@ -24,10 +24,10 @@ import {
   UploadResult,
 } from '@homebase-id/js-lib/core';
 import {
+  drivesEqual,
   getNewId,
   getRandom16ByteArray,
   jsonStringify64,
-  stringGuidsEqual,
   stringToUint8Array,
 } from '@homebase-id/js-lib/helpers';
 
@@ -119,10 +119,8 @@ export const saveCommunity = async (
     const securityContext = await getSecurityContext(dotYouClient);
     if (
       !securityContext?.permissionContext.permissionGroups.some((x) =>
-        x.driveGrants.some(
-          (driveGrant) =>
-            stringGuidsEqual(driveGrant.permissionedDrive.drive.alias, targetDrive.alias) &&
-            stringGuidsEqual(driveGrant.permissionedDrive.drive.type, targetDrive.type)
+        x.driveGrants.some((driveGrant) =>
+          drivesEqual(driveGrant.permissionedDrive.drive, targetDrive)
         )
       )
     ) {
@@ -213,6 +211,7 @@ export const getCommunityDefinition = async (
       return dsrToCommunity(dotYouClient, dsr, targetDrive, response.includeMetadataHeader);
     }
   } catch (ex) {
+    console.debug(`[CommunityDefinitionProvider] getCommunityDefinition: ${ex}`);
     // Catch al, as targetDrive might be inaccesible (when it doesn't exist yet)
   }
 

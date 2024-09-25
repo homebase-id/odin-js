@@ -56,7 +56,7 @@ const InvitationCodeCheck = () => {
 
           <p className="my-7 block border-y py-3 text-center italic">
             The Alpha release is by invitation only.
-            {isValid === false ? (
+            {invitationCode && isValid === false ? (
               <small className="block text-base text-red-700">
                 {t(`The code you supplied isn't valid (anymore)`)}
               </small>

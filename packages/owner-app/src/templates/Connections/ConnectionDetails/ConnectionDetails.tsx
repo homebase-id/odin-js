@@ -1,75 +1,74 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useMatch, useParams } from 'react-router-dom';
 import { t } from '@homebase-id/common-app';
 import { useConnection } from '../../../hooks/connections/useConnection';
 import { useContact } from '../../../hooks/contacts/useContact';
 import ContactInfo from '../../../components/Connection/ContactInfo/ContactInfo';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
-import { ConnectionInfo } from '@homebase-id/js-lib/network';
-import { ConnectionPermissionViewer } from './ConnectionPermissionViewer';
 import { IdentityPageMetaAndActions } from './IdentityPageMetaAndActions';
 import { IdentityAlerts } from './IdentityAlerts';
-import { useConnectionGrantStatus } from '../../../hooks/connections/useConnectionGrantStatus';
-import { CircleMembershipDialog } from '../../../components/Circles/CircleMembershipDialog/CircleMembershipDialog';
+import SubMenu from '../../../components/SubMenu/SubMenu';
+
+import { ConnectionDetailsAbout } from './ConnectionDetailsAbout';
+import { ConnectionDetailsLinks } from './ConnectionDetailsLinks';
+import { ConnectedDetailsSettings } from './ConnectionDetailsSettings';
 
 const ConnectionDetails = () => {
+  const settingsMatch = useMatch('/owner/connections/:odinId/settings');
+  const aboutMatch = useMatch('/owner/connections/:odinId/about');
+  const linksMatch = useMatch('/owner/connections/:odinId/links');
   const { odinId } = useParams();
-  const [isEditPermissionActive, setIsEditPermissionActive] = useState(false);
 
   const {
     fetch: { data: connectionInfo, isLoading: connectionInfoLoading },
   } = useConnection({ odinId: odinId });
+
   const { data: contactData, isLoading: contactDataLoading } = useContact({
     odinId: odinId,
     canSave: connectionInfo?.status === 'connected',
   }).fetch;
 
-  const { data: grantStatus } = useConnectionGrantStatus({
-    odinId: connectionInfo?.status === 'connected' ? odinId : undefined,
-  }).fetchStatus;
-
   if (connectionInfoLoading || contactDataLoading) return <LoadingDetailPage />;
   if (!odinId) return <>{t('No matching connection found')}</>;
 
-  const activeConnection = connectionInfo as ConnectionInfo;
-
   return (
     <>
-      <IdentityPageMetaAndActions
-        odinId={odinId}
-        // setIsEditPermissionActive={setIsEditPermissionActive}
-      />
+      <IdentityPageMetaAndActions odinId={odinId} />
 
+      <SubMenu
+        items={[
+          {
+            path: `/owner/connections/${odinId}`,
+            title: t('Info'),
+            end: true,
+          },
+          {
+            path: `/owner/connections/${odinId}/about`,
+            title: t('About'),
+          },
+          {
+            path: `/owner/connections/${odinId}/links`,
+            title: t('Links'),
+          },
+          connectionInfo?.status === 'connected'
+            ? {
+                path: `/owner/connections/${odinId}/settings`,
+                title: t('Settings'),
+              }
+            : undefined,
+        ]}
+        className="-mt-6 mb-4"
+      />
       <IdentityAlerts odinId={odinId} />
 
-      {contactData && <ContactInfo odinId={odinId} />}
-
-      {connectionInfo?.status === 'connected' ? (
-        <>
-          <ConnectionPermissionViewer
-            accessGrant={activeConnection.accessGrant}
-            grantStatus={grantStatus}
-            openEditCircleMembership={() => setIsEditPermissionActive(true)}
-          />
-          <CircleMembershipDialog
-            title={`${t('Edit Circle Membership for')} ${odinId}`}
-            isOpen={isEditPermissionActive}
-            odinId={odinId}
-            currentCircleGrants={activeConnection.accessGrant.circleGrants}
-            onCancel={() => {
-              setIsEditPermissionActive(false);
-            }}
-            onConfirm={() => {
-              setIsEditPermissionActive(false);
-            }}
-          />
-          <section>
-            <p className="text-sm">
-              {t('Connected since')}: {new Date(activeConnection.created).toLocaleDateString()}
-            </p>
-          </section>
-        </>
-      ) : null}
+      {aboutMatch ? (
+        <ConnectionDetailsAbout odinId={odinId} />
+      ) : linksMatch ? (
+        <ConnectionDetailsLinks odinId={odinId} />
+      ) : settingsMatch && connectionInfo?.status === 'connected' ? (
+        <ConnectedDetailsSettings odinId={odinId} connectionInfo={connectionInfo} />
+      ) : (
+        <>{contactData && <ContactInfo odinId={odinId} />}</>
+      )}
     </>
   );
 };

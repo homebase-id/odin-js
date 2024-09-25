@@ -274,8 +274,8 @@ const GroupChannelActions = ({
   postFile: HomebaseFile<PostContent>;
 }) => {
   const { getIdentity } = useDotYouClient();
-  const [isEditOpen, setIsEditOpen] = useState(false);
   const navigate = useNavigate();
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const identity = getIdentity();
   const isAuthor = postFile.fileMetadata.appData.content.authorOdinId === identity;

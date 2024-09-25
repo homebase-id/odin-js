@@ -15,7 +15,7 @@ import { useDrives } from '../../hooks/drives/useDrives';
 import { useState } from 'react';
 import { drivesParamToDriveGrantRequest, permissionParamToPermissionSet } from './RegisterApp';
 import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDrive } from '../../hooks/drives/useDrive';
 
 const ExtendAppPermissions = () => {
@@ -67,16 +67,8 @@ const ExtendAppPermissions = () => {
         drives: [
           ...(appRegistration?.grant?.driveGrants.filter(
             (existingGrant) =>
-              !driveGrants?.some(
-                (grant) =>
-                  stringGuidsEqual(
-                    grant.permissionedDrive.drive.alias,
-                    existingGrant.permissionedDrive.drive.alias
-                  ) &&
-                  stringGuidsEqual(
-                    grant.permissionedDrive.drive.type,
-                    existingGrant.permissionedDrive.drive.type
-                  )
+              !driveGrants?.some((grant) =>
+                drivesEqual(grant.permissionedDrive.drive, existingGrant.permissionedDrive.drive)
               )
           ) || []),
           ...(driveGrants || []),
@@ -141,19 +133,15 @@ const ExtendAppPermissions = () => {
 
   const { data: existingDrives } = useDrives().fetch;
   const extensionGrantsOnExistingDrives = driveGrants?.filter((grant) =>
-    existingDrives?.some(
-      (drive) =>
-        stringGuidsEqual(drive.targetDriveInfo.alias, grant.permissionedDrive.drive.alias) &&
-        stringGuidsEqual(drive.targetDriveInfo.type, grant.permissionedDrive.drive.type)
+    existingDrives?.some((drive) =>
+      drivesEqual(drive.targetDriveInfo, grant.permissionedDrive.drive)
     )
   );
 
   const newDrives = driveGrants?.filter(
     (grant) =>
-      !existingDrives?.some(
-        (drive) =>
-          stringGuidsEqual(drive.targetDriveInfo.alias, grant.permissionedDrive.drive.alias) &&
-          stringGuidsEqual(drive.targetDriveInfo.type, grant.permissionedDrive.drive.type)
+      !existingDrives?.some((drive) =>
+        drivesEqual(drive.targetDriveInfo, grant.permissionedDrive.drive)
       )
   );
 

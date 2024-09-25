@@ -54,7 +54,7 @@ export const ChatComposer = ({
       drafts[conversation.fileMetadata.appData.uniqueId] = message;
       try {
         localStorage.setItem(CHAT_DRAFTS_KEY, JSON.stringify(drafts));
-      } catch (e) {
+      } catch {
         /* empty */
       }
     }

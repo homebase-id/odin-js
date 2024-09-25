@@ -40,10 +40,10 @@ const ProvisionOwnDomain = () => {
     }
   }, [provisionState]);
 
-  if (!invitationCode || isValid === false) return <Navigate to="/" />;
+  if (isValid === false) return <Navigate to={`/${window.location.search}`} />;
 
   return (
-    <section className="mb-10 flex flex-grow flex-col ">
+    <section className="mb-10 flex flex-grow flex-col">
       <div className="container mx-auto flex h-full min-h-full flex-grow flex-col px-5">
         <div className={`${provisionState === 'DnsRecords' ? 'mt-10' : 'mt-20'} min-h-[20rem]`}>
           <h1 className="mb-10 text-4xl">

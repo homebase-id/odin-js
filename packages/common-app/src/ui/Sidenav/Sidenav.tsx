@@ -2,7 +2,7 @@ import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { BuiltInProfiles } from '@homebase-id/js-lib/profile';
 import { hasDebugFlag, isTouchDevice } from '@homebase-id/js-lib/helpers';
-import { FEED_APP_ID, CHAT_APP_ID, MAIL_APP_ID, COMMUNITY_APP_ID } from '../../constants';
+import { FEED_APP_ID, CHAT_APP_ID, MAIL_APP_ID } from '../../constants';
 import { HOME_ROOT_PATH } from '../../core';
 import { getVersion, t, ellipsisAtMaxChar } from '../../helpers';
 import {
@@ -36,7 +36,6 @@ import { Times } from '../Icons/Times';
 import { IconProps } from '../Icons/Types';
 import { Wallet } from '../Icons/Wallet';
 import { logoutOwnerAndAllApps } from '../../provider';
-import { RadioTower } from '../Icons/RadioTower';
 
 const STORAGE_KEY = 'sidenavIsOpen';
 
@@ -467,12 +466,12 @@ const MailNavItem = () => {
   return <NavItem icon={Envelope} label={'Mail'} to="/apps/mail" unread={!!unreadCount} />;
 };
 
-const CommunityNavItem = () => {
-  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: COMMUNITY_APP_ID });
-  return (
-    <NavItem icon={RadioTower} label={'Community'} to="/apps/community" unread={!!unreadCount} />
-  );
-};
+// const CommunityNavItem = () => {
+//   const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: COMMUNITY_APP_ID });
+//   return (
+//     <NavItem icon={RadioTower} label={'Community'} to="/apps/community" unread={!!unreadCount} />
+//   );
+// };
 
 const MobileDrawer = ({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) => {
   return (

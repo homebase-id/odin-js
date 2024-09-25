@@ -20,7 +20,7 @@ const Provision = () => {
 
   const { data: isValid } = useCheckInvitationCode(invitationCode || undefined).checkInvitationCode;
 
-  if (!invitationCode || isValid === false) return <Navigate to="/" />;
+  if (isValid === false) return <Navigate to={`/${window.location.search}`} />;
 
   return (
     <section className="mb-10 flex flex-grow flex-col">
@@ -37,6 +37,7 @@ const Provision = () => {
               setEmail={setEmail}
               provisionState={provisionState}
               setProvisionState={setProvisionState}
+              invitationCode={invitationCode}
             />
           ) : provisionState === 'Provisioning' && domain ? (
             <CreateIdentityView

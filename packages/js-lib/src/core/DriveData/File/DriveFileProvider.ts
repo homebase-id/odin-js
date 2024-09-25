@@ -282,6 +282,10 @@ export const getContentFromHeaderOrPayload = async <T>(
   systemFileType?: SystemFileType
 ): Promise<T | null> => {
   const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
+  if (!fileId || !fileMetadata) {
+    throw new Error('[odin-js] getContentFromHeaderOrPayload: fileId or fileMetadata is undefined');
+  }
+
   const contentIsComplete =
     fileMetadata.payloads.filter((payload) => payload.key === DEFAULT_PAYLOAD_KEY).length === 0;
   if (fileMetadata.isEncrypted && !sharedSecretEncryptedKeyHeader) return null;

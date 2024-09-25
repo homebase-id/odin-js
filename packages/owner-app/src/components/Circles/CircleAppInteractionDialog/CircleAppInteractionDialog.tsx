@@ -92,6 +92,7 @@ const CircleAppInteractionDialog = ({
                 })
               );
             } catch (ex) {
+              console.error("Failed to update app's authorized circles", ex);
               setUpdateState('error');
             }
 

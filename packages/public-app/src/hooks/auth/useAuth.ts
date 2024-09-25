@@ -152,12 +152,16 @@ export const useYouAuthAuthorization = () => {
       // Redirect to the returnUrl; With a fallback to home
       window.location.href = returnUrl || '/';
     } catch (e) {
-      console.error('Failed to finalize authorization', {
-        encryptedData,
-        remotePublicKey,
-        salt,
-        iv,
-      });
+      console.error(
+        'Failed to finalize authorization',
+        {
+          encryptedData,
+          remotePublicKey,
+          salt,
+          iv,
+        },
+        e
+      );
     }
   };
 

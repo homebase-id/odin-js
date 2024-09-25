@@ -36,6 +36,7 @@ import {
   jsonStringify64,
   stringToUint8Array,
   makeGrid,
+  getRandom16ByteArray,
 } from '@homebase-id/js-lib/helpers';
 import {
   LinkPreview,
@@ -132,6 +133,7 @@ export const uploadCommunityMessage = async (
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+  const aesKey = getRandom16ByteArray();
 
   if (!files?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
@@ -159,13 +161,14 @@ export const uploadCommunityMessage = async (
     const payloadKey = `${COMMUNITY_MESSAGE_PAYLOAD_KEY}${i}`;
     const newMediaFile = files[i];
     if (newMediaFile.file.type.startsWith('video/')) {
-      const { tinyThumb, additionalThumbnails, payload } = await processVideoFile(
-        newMediaFile,
-        payloadKey
-      );
+      const {
+        tinyThumb,
+        thumbnails: thumbnailsFromVideo,
+        payloads: payloadsFromVideo,
+      } = await processVideoFile(newMediaFile, payloadKey, aesKey);
 
-      thumbnails.push(...additionalThumbnails);
-      payloads.push(payload);
+      thumbnails.push(...thumbnailsFromVideo);
+      payloads.push(...payloadsFromVideo);
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
     } else if (newMediaFile.file.type.startsWith('image/')) {
@@ -202,7 +205,10 @@ export const uploadCommunityMessage = async (
     payloads,
     thumbnails,
     undefined,
-    onVersionConflict
+    onVersionConflict,
+    {
+      aesKey,
+    }
   );
 
   if (!uploadResult) return null;
@@ -415,7 +421,7 @@ export const dsrToMessage = async (
 
     return chatMessage;
   } catch (ex) {
-    console.error('[DotYouCore-js] failed to get the chatMessage payload of a dsr', dsr, ex);
+    console.error('[community] failed to get the chatMessage payload of a dsr', dsr, ex);
     return null;
   }
 };

@@ -8,12 +8,13 @@ import {
   DialogWrapper,
   ErrorBoundary,
   formatDateExludingYearIfCurrent,
+  LoadingBlock,
   t,
   useDotYouClient,
   usePortal,
 } from '@homebase-id/common-app';
 import { Arrow, ChevronLeft, Times } from '@homebase-id/common-app/icons';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
 import { CommunityChannel } from '../../providers/CommunityProvider';
@@ -44,14 +45,19 @@ export const CommunityChannelDetail = () => {
       </div>
     );
 
-  if (communityId && !community) {
-    // TODO: Repalce with loading state
-    return null;
-  }
-
-  if (channelId && !channelDsr) {
-    // TODO: Repalce with loading state
-    return null;
+  if ((communityId && !community) || (channelId && !channelDsr)) {
+    return (
+      <div className="h-full w-full flex-grow bg-background">
+        <LoadingBlock className="h-16 w-full" />
+        <div className="mt-8 flex flex-col gap-4 px-5">
+          <LoadingBlock className="h-16 w-full" />
+          <LoadingBlock className="h-16 w-full" />
+          <LoadingBlock className="h-16 w-full" />
+          <LoadingBlock className="h-16 w-full" />
+          <LoadingBlock className="h-16 w-full" />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -117,9 +123,9 @@ const CommunityChannelHeader = ({
     <>
       {/* <ErrorNotification error={clearChatError || deleteChatError} /> */}
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-        <ActionLink className="lg:hidden" type="mute" href={`${COMMUNITY_ROOT}/${communityId}`}>
-          <ChevronLeft className="h-5 w-5" />
-        </ActionLink>
+        <Link className="-m-1 p-1 lg:hidden" type="mute" to={`${COMMUNITY_ROOT}/${communityId}`}>
+          <ChevronLeft className="h-4 w-4" />
+        </Link>
 
         {channel ? (
           <a
@@ -141,21 +147,22 @@ const CommunityChannelHeader = ({
     </>
   );
 };
-const CommunityRootHeader = ({ community }: { community?: HomebaseFile<CommunityDefinition> }) => {
-  const communityId = community?.fileMetadata.appData.uniqueId;
 
-  return (
-    <>
-      <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-        <ActionLink className="lg:hidden" type="mute" href={`${COMMUNITY_ROOT}/${communityId}`}>
-          <ChevronLeft className="h-5 w-5" />
-        </ActionLink>
+// const CommunityRootHeader = ({ community }: { community?: HomebaseFile<CommunityDefinition> }) => {
+//   const communityId = community?.fileMetadata.appData.uniqueId;
 
-        {community ? <>{community.fileMetadata.appData.content?.title}</> : null}
-      </div>
-    </>
-  );
-};
+//   return (
+//     <>
+//       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
+//         <ActionLink className="lg:hidden" type="mute" href={`${COMMUNITY_ROOT}/${communityId}`}>
+//           <ChevronLeft className="h-5 w-5" />
+//         </ActionLink>
+
+//         {community ? <>{community.fileMetadata.appData.content?.title}</> : null}
+//       </div>
+//     </>
+//   );
+// };
 
 const ChannelInfo = ({
   channel,

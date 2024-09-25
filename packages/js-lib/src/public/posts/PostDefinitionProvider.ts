@@ -23,6 +23,7 @@ import {
   ensureDrive,
 } from '../../core/core';
 import {
+  drivesEqual,
   getRandom16ByteArray,
   jsonStringify64,
   stringGuidsEqual,
@@ -129,10 +130,8 @@ export const saveChannelDefinition = async (
     const securityContext = await getSecurityContext(dotYouClient);
     if (
       !securityContext?.permissionContext.permissionGroups.some((x) =>
-        x.driveGrants.some(
-          (driveGrant) =>
-            stringGuidsEqual(driveGrant.permissionedDrive.drive.alias, targetDrive.alias) &&
-            stringGuidsEqual(driveGrant.permissionedDrive.drive.type, targetDrive.type)
+        x.driveGrants.some((driveGrant) =>
+          drivesEqual(driveGrant.permissionedDrive.drive, targetDrive)
         )
       )
     ) {
@@ -248,7 +247,7 @@ const getChannelDefinitionInternal = async (
       const dsr = response.searchResults[0];
       return dsrToChannelFile(dotYouClient, dsr, targetDrive, response.includeMetadataHeader);
     }
-  } catch (ex) {
+  } catch {
     // Catch al, as targetDrive might be inaccesible (when it doesn't exist yet)
   }
 

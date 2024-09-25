@@ -2,6 +2,7 @@ import { DriveDefinition } from './DriveTypes';
 import { ApiType, DotYouClient } from '../../DotYouClient';
 import {
   assertIfDefined,
+  drivesEqual,
   hasDebugFlag,
   stringGuidsEqual,
   stringifyToQueryParams,
@@ -85,11 +86,7 @@ export const ensureDrive = async (
   const client = dotYouClient.createAxiosClient();
   const allDrives = await getDrives(dotYouClient, { pageNumber: 1, pageSize: 1000 });
 
-  const foundDrive = allDrives.results.find(
-    (d) =>
-      stringGuidsEqual(d.targetDriveInfo.alias, targetDrive.alias) &&
-      stringGuidsEqual(d.targetDriveInfo.type, targetDrive.type)
-  );
+  const foundDrive = allDrives.results.find((d) => drivesEqual(d.targetDriveInfo, targetDrive));
 
   if (foundDrive) return true;
 

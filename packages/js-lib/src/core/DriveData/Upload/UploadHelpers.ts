@@ -20,7 +20,13 @@ import {
   stringToUint8Array,
   getRandom16ByteArray,
 } from '../../../helpers/DataUtil';
-import { ThumbnailFile, SystemFileType, PayloadFile, KeyHeader } from '../File/DriveFileTypes';
+import {
+  ThumbnailFile,
+  SystemFileType,
+  PayloadFile,
+  KeyHeader,
+  PayloadFileWithManualEncryption,
+} from '../File/DriveFileTypes';
 import { AxiosRequestConfig } from 'axios';
 import { getSecuredBlob } from '../../../helpers/BlobHelpers';
 import { PeerAppendInstructionSet } from '../../../peer/peer';
@@ -65,14 +71,18 @@ export const buildManifest = (
       payloadKey: payload.key,
       descriptorContent: payload.descriptorContent,
       previewThumbnail: payload.previewThumbnail,
+      contentType: payload.payload.type,
       thumbnails: thumbnails
         ?.filter((thumb) => thumb.key === payload.key)
         .map((thumb) => ({
           thumbnailKey: thumb.key + thumb.pixelWidth,
           pixelWidth: thumb.pixelWidth,
           pixelHeight: thumb.pixelHeight,
+          contentType: thumb.payload.type,
         })),
-      iv: generateIv ? getRandom16ByteArray() : undefined,
+      iv:
+        (payload as PayloadFileWithManualEncryption).iv ||
+        (generateIv ? getRandom16ByteArray() : undefined),
     })),
   };
 };
@@ -124,14 +134,15 @@ export const buildFormData = async (
   if (payloads) {
     for (let i = 0; i < payloads.length; i++) {
       const payload = payloads[i];
-      const encryptedPayload = keyHeader
-        ? await encryptWithKeyheader(payload.payload, {
-            ...keyHeader,
-            iv:
-              manifest?.PayloadDescriptors?.find((p) => p.payloadKey === payload.key)?.iv ||
-              keyHeader.iv,
-          })
-        : payload.payload;
+      const encryptedPayload =
+        keyHeader && !payload.skipEncryption
+          ? await encryptWithKeyheader(payload.payload, {
+              ...keyHeader,
+              iv:
+                manifest?.PayloadDescriptors?.find((p) => p.payloadKey === payload.key)?.iv ||
+                keyHeader.iv,
+            })
+          : payload.payload;
 
       data.append('payload', encryptedPayload, payload.key);
     }
@@ -140,14 +151,15 @@ export const buildFormData = async (
   if (thumbnails) {
     for (let i = 0; i < thumbnails.length; i++) {
       const thumb = thumbnails[i];
-      const encryptedThumb = keyHeader
-        ? await encryptWithKeyheader(thumb.payload, {
-            ...keyHeader,
-            iv:
-              manifest?.PayloadDescriptors?.find((p) => p.payloadKey === thumb.key)?.iv ||
-              keyHeader.iv,
-          })
-        : thumb.payload;
+      const encryptedThumb =
+        keyHeader && !thumb.skipEncryption
+          ? await encryptWithKeyheader(thumb.payload, {
+              ...keyHeader,
+              iv:
+                manifest?.PayloadDescriptors?.find((p) => p.payloadKey === thumb.key)?.iv ||
+                keyHeader.iv,
+            })
+          : thumb.payload;
 
       data.append('thumbnail', encryptedThumb, thumb.key + thumb.pixelWidth);
     }
@@ -235,9 +247,9 @@ export const pureAppend = async (
     });
 };
 
-export const GenerateKeyHeader = (): KeyHeader => {
+export const GenerateKeyHeader = (aesKey?: Uint8Array): KeyHeader => {
   return {
     iv: getRandom16ByteArray(),
-    aesKey: getRandom16ByteArray(),
+    aesKey: aesKey || getRandom16ByteArray(),
   };
 };

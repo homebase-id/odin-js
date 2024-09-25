@@ -144,7 +144,7 @@ const CommunityTextMessageBody = ({
       className={`relative w-auto max-w-[75vw] rounded-lg md:max-w-xs lg:max-w-lg xl:max-w-[50vw]`}
     >
       <div className="flex flex-col md:flex-row md:flex-wrap md:gap-2">
-        <div className="flex min-w-0 flex-col gap-1">
+        <div className="flex w-full min-w-0 flex-col gap-1">
           {/* {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null} */}
 
           <MessageTextRenderer
@@ -189,7 +189,12 @@ const MessageTextRenderer = ({
           'value' in attributes &&
           typeof attributes.value === 'string'
         ) {
-          const tagGuid = formatGuidId(toGuidId(attributes.value));
+          const tagGuid =
+            ('uniqueId' in attributes &&
+              typeof attributes.uniqueId === 'string' &&
+              attributes.uniqueId) ||
+            formatGuidId(toGuidId(attributes.value));
+
           const hasChannel = !!channels?.find((channel) =>
             stringGuidsEqual(channel.fileMetadata.appData.uniqueId, tagGuid)
           );
@@ -200,11 +205,11 @@ const MessageTextRenderer = ({
                 to={`${COMMUNITY_ROOT}/${community?.fileMetadata.appData.uniqueId}/${tagGuid}`}
                 className="break-all text-primary hover:underline"
               >
-                #{attributes.value}{' '}
+                #{attributes.value.trim()}{' '}
               </Link>
             );
           } else {
-            return <span className="break-all text-primary"># {attributes.value} </span>;
+            return <span className="break-all text-primary">#{attributes.value} </span>;
           }
         }
 

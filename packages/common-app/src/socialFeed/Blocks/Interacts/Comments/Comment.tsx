@@ -90,7 +90,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
             <AuthorImage odinId={authorOdinId} size="xs" />
           </div>
           <div
-            className={`ml-2 rounded-lg bg-gray-500 bg-opacity-10 px-2 py-1 dark:bg-gray-300 dark:bg-opacity-20 ${
+            className={`ml-2 rounded-lg bg-gray-500 bg-opacity-10 px-2 py-1 dark:bg-gray-300 dark:bg-opacity-20 w-20 flex-grow ${
               isEdit ? 'flex-grow' : ''
             }`}
           >

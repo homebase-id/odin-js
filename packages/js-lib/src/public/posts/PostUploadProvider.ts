@@ -52,6 +52,7 @@ import {
   uploadHeaderOverPeer,
 } from '../../peer/peer';
 import { TransitInstructionSet, TransitUploadResult } from '../../peer/peerData/PeerTypes';
+import { AxiosRequestConfig } from 'axios';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
@@ -143,6 +144,7 @@ const uploadPost = async <T extends PostContent>(
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+  const aesKey = getRandom16ByteArray();
 
   if (!newMediaFiles?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
@@ -184,13 +186,14 @@ const uploadPost = async <T extends PostContent>(
     const newMediaFile = newMediaFiles[i];
     const payloadKey = newMediaFile.key || `${POST_MEDIA_PAYLOAD_KEY}${i}`;
     if (newMediaFile.file.type.startsWith('video/')) {
-      const { tinyThumb, additionalThumbnails, payload } = await processVideoFile(
-        newMediaFile,
-        payloadKey
-      );
+      const {
+        tinyThumb,
+        thumbnails: thumbnailsFromVideo,
+        payloads: payloadsFromVideo,
+      } = await processVideoFile(newMediaFile, payloadKey, aesKey);
 
-      thumbnails.push(...additionalThumbnails);
-      payloads.push(payload);
+      thumbnails.push(...thumbnailsFromVideo);
+      payloads.push(...payloadsFromVideo);
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
     } else if (newMediaFile.file.type.startsWith('image/')) {
@@ -319,7 +322,9 @@ const uploadPost = async <T extends PostContent>(
       metadata,
       payloads,
       thumbnails,
-      encrypt
+      encrypt,
+      undefined,
+      { aesKey }
     );
 
     if (!result) throw new Error(`[PostUploadProvider] Upload failed`);
@@ -339,7 +344,8 @@ const uploadPost = async <T extends PostContent>(
       metadata,
       payloads,
       thumbnails,
-      encrypt
+      encrypt,
+      { aesKey }
     );
 
     if (!result) throw new Error(`[PostUploadProvider] Upload over peer failed`);
@@ -380,10 +386,10 @@ const updatePost = async <T extends PostContent>(
     !file.serverMetadata?.accessControlList ||
     !file.fileMetadata.appData.content.id
   )
-    throw new Error(`[PostUploadProvider]: fileId is required to update a post`);
+    throw new Error(`[odin-js] PostProvider: fileId is required to update a post`);
 
   if (odinId && !file.fileMetadata.globalTransitId) {
-    throw new Error(`[PostUploadProvider]: globalTransitId is required to update a post over peer`);
+    throw new Error(`[odin-js]: globalTransitId is required to update a post over peer`);
   }
 
   if (!file.fileMetadata.appData.content.authorOdinId)
