@@ -27,7 +27,8 @@ const homebaseHostingConfig = {
   privacyPolicyLink: 'https://homebase.id/privacy-policy',
 };
 
-console.log(import.meta.env.brand);
-
 export const config =
-  import.meta.env.VITE_BRAND === ravenHostingConfig.id ? ravenHostingConfig : homebaseHostingConfig;
+  import.meta.env.VITE_BRAND === ravenHostingConfig.id ||
+  window.location.hostname.indexOf('ravenhosting') !== -1
+    ? ravenHostingConfig
+    : homebaseHostingConfig;
