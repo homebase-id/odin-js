@@ -32,7 +32,10 @@ export const uploadFileOverPeer = async (
   metadata: UploadFileMetadata,
   payloads?: PayloadFile[],
   thumbnails?: ThumbnailFile[],
-  encrypt = true
+  encrypt = true,
+  options?: {
+    aesKey?: Uint8Array | undefined;
+  }
 ) => {
   isDebug &&
     console.debug(
@@ -44,7 +47,9 @@ export const uploadFileOverPeer = async (
       }
     );
 
-  const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
+  metadata.isEncrypted = encrypt || !!options?.aesKey;
+
+  const keyHeader = encrypt ? GenerateKeyHeader(options?.aesKey) : undefined;
   const { systemFileType, ...strippedInstructions } = instructions;
 
   const manifest = buildManifest(payloads, thumbnails, encrypt);
