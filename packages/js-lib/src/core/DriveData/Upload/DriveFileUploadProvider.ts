@@ -7,6 +7,8 @@ import {
   UploadResult,
   AppendInstructionSet,
   AppendResult,
+  UpdateResult,
+  UpdateInstructionSet,
 } from './DriveUploadTypes';
 import { decryptKeyHeader, encryptKeyHeader, encryptWithSharedSecret } from '../SecurityHelpers';
 import {
@@ -17,6 +19,8 @@ import {
   pureUpload,
   pureAppend,
   buildManifest,
+  pureUpdate,
+  buildUpdateManifest,
 } from './UploadHelpers';
 import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFileProvider';
 import { getRandom16ByteArray } from '../../../helpers/DataUtil';
@@ -92,6 +96,72 @@ export const uploadFile = async (
   if (!uploadResult) return;
   uploadResult.keyHeader = keyHeader;
   return uploadResult;
+};
+
+export const patchFile = async (
+  dotYouClient: DotYouClient,
+  instructions: UpdateInstructionSet,
+  metadata: UploadFileMetadata,
+  payloads?: PayloadFile[],
+  thumbnails?: ThumbnailFile[],
+  toDeletePayloads?: { key: string }[],
+  encrypt = true,
+  onVersionConflict?: () => Promise<void | UpdateResult> | void,
+  options?: {
+    axiosConfig?: AxiosRequestConfig;
+    aesKey?: Uint8Array | undefined;
+  }
+): Promise<UpdateResult | void> => {
+  isDebug &&
+    console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/update`).pathname, {
+      instructions,
+      metadata,
+      payloads,
+      thumbnails,
+    });
+
+  // Force isEncrypted on the metadata to match the encrypt flag
+  metadata.isEncrypted = encrypt || !!options?.aesKey;
+
+  const keyHeader = encrypt ? GenerateKeyHeader(options?.aesKey) : undefined;
+
+  const { systemFileType, ...strippedInstructions } = instructions;
+
+  const manifest = buildUpdateManifest(payloads, toDeletePayloads, thumbnails, encrypt);
+  const instructionsWithManifest = {
+    ...strippedInstructions,
+    manifest,
+    transferIv: instructions.transferIv || getRandom16ByteArray(),
+  };
+
+  // Build package
+  const encryptedDescriptor = await buildDescriptor(
+    dotYouClient,
+    keyHeader,
+    instructionsWithManifest,
+    metadata
+  );
+
+  const data = await buildFormData(
+    instructionsWithManifest,
+    encryptedDescriptor,
+    payloads,
+    thumbnails,
+    keyHeader,
+    manifest
+  );
+
+  // Upload
+  const updateResult = await pureUpdate(
+    dotYouClient,
+    data,
+    systemFileType,
+    onVersionConflict,
+    options?.axiosConfig
+  );
+
+  if (!updateResult) return;
+  return updateResult;
 };
 
 export const uploadHeader = async (

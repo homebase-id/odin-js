@@ -144,7 +144,7 @@ export const saveChannelDefinition = async (
           true
         );
       } else {
-        console.warn(`[DotYouCore-js: PostDefinitionProvider] Save Channel: No access to drive`);
+        console.warn(`[odin-js: PostDefinitionProvider] Save Channel: No access to drive`);
         onMissingDrive && onMissingDrive();
         return;
       }

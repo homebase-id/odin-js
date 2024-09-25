@@ -39,7 +39,7 @@ export const deleteFile = async (
       return false;
     })
     .catch((error) => {
-      console.error('[DotYouCore-js:deleteFile]', error);
+      console.error('[odin-js:deleteFile]', error);
       throw error;
     });
 };
@@ -77,7 +77,7 @@ export const deleteFiles = async (
       return false;
     })
     .catch((error) => {
-      console.error('[DotYouCore-js:deleteFileByGroupId]', error);
+      console.error('[odin-js:deleteFileByGroupId]', error);
       throw error;
     });
 };
@@ -113,7 +113,7 @@ export const deleteFilesByGroupId = async (
       return false;
     })
     .catch((error) => {
-      console.error('[DotYouCore-js:deleteFileByGroupId]', error);
+      console.error('[odin-js:deleteFileByGroupId]', error);
       throw error;
     });
 };
@@ -148,7 +148,7 @@ export const deletePayload = async (
     .post('/drive/files/deletepayload', request, axiosConfig)
     .then((response) => response.data)
     .catch((error) => {
-      console.error('[DotYouCore-js:deleteFile]', error);
+      console.error('[odin-js:deleteFile]', error);
       throw error;
     });
 };

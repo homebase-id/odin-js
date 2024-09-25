@@ -8,6 +8,9 @@ import {
   UploadResult,
   UploadManifest,
   AppendResult,
+  UpdateResult,
+  UpdateInstructionSet,
+  UpdateManifest,
 } from './DriveUploadTypes';
 import {
   encryptWithKeyheader,
@@ -87,10 +90,44 @@ export const buildManifest = (
   };
 };
 
+export const buildUpdateManifest = (
+  payloads: PayloadFile[] | undefined,
+  toDeletePayloads: { key: string }[] | undefined,
+  thumbnails: ThumbnailFile[] | undefined,
+  generateIv?: boolean
+): UpdateManifest => {
+  return {
+    PayloadDescriptors: [
+      ...(payloads?.map((payload) => ({
+        payloadKey: payload.key,
+        descriptorContent: payload.descriptorContent,
+        previewThumbnail: payload.previewThumbnail,
+        contentType: payload.payload.type,
+        thumbnails: thumbnails
+          ?.filter((thumb) => thumb.key === payload.key)
+          .map((thumb) => ({
+            thumbnailKey: thumb.key + thumb.pixelWidth,
+            pixelWidth: thumb.pixelWidth,
+            pixelHeight: thumb.pixelHeight,
+            contentType: thumb.payload.type,
+          })),
+        iv:
+          (payload as PayloadFileWithManualEncryption).iv ||
+          (generateIv ? getRandom16ByteArray() : undefined),
+        payloadUpdateOperationType: 'appendOrOverwrite' as const,
+      })) || []),
+      ...(toDeletePayloads?.map((toDelete) => ({
+        payloadKey: toDelete.key,
+        payloadUpdateOperationType: 'deletePayload' as const,
+      })) || []),
+    ],
+  };
+};
+
 export const buildDescriptor = async (
   dotYouClient: DotYouClient,
   keyHeader: KeyHeader | undefined,
-  instructions: UploadInstructionSet | TransitInstructionSet,
+  instructions: UploadInstructionSet | TransitInstructionSet | UpdateInstructionSet,
   metadata: UploadFileMetadata
 ): Promise<Uint8Array> => {
   if (!instructions.transferIv) {
@@ -118,12 +155,13 @@ export const buildFormData = async (
     | UploadInstructionSet
     | TransitInstructionSet
     | AppendInstructionSet
-    | PeerAppendInstructionSet,
+    | PeerAppendInstructionSet
+    | UpdateInstructionSet,
   encryptedDescriptor: Uint8Array | undefined,
   payloads: PayloadFile[] | undefined,
   thumbnails: ThumbnailFile[] | undefined,
   keyHeader: KeyHeader | undefined,
-  manifest: UploadManifest | undefined
+  manifest: UploadManifest | UpdateManifest | undefined
 ) => {
   const data = new FormData();
   const instructionType =
@@ -201,8 +239,8 @@ export const pureUpload = async (
       }
 
       if (error.response?.status === 400)
-        console.error('[DotYouCore-js:pureUpload]', error.response?.data);
-      else console.error('[DotYouCore-js:pureUpload]', error);
+        console.error('[odin-js:pureUpload]', error.response?.data);
+      else console.error('[odin-js:pureUpload]', error);
       throw error;
     });
 };
@@ -242,7 +280,47 @@ export const pureAppend = async (
         }
       }
 
-      console.error('[DotYouCore-js:pureUpload]', error);
+      console.error('[odin-js:pureUpload]', error);
+      throw error;
+    });
+};
+
+export const pureUpdate = async (
+  dotYouClient: DotYouClient,
+  data: FormData,
+  systemFileType?: SystemFileType,
+  onVersionConflict?: () => Promise<void | UpdateResult> | void,
+  axiosConfig?: AxiosRequestConfig
+): Promise<UpdateResult | void> => {
+  const client = dotYouClient.createAxiosClient({
+    overrideEncryption: true,
+    systemFileType,
+  });
+  const url = '/drive/files/update';
+
+  const config = {
+    ...axiosConfig,
+    headers: {
+      'content-type': 'multipart/form-data',
+      ...axiosConfig?.headers,
+    },
+  };
+
+  return client
+    .patch(url, data, config)
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      if (error.response?.data?.errorCode === 'versionTagMismatch') {
+        if (!onVersionConflict) {
+          console.warn('VersionTagMismatch, to avoid this, add an onVersionConflict handler');
+        } else {
+          return onVersionConflict();
+        }
+      }
+
+      console.error('[odin-js:pureUpdate]', error);
       throw error;
     });
 };

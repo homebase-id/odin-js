@@ -1,6 +1,7 @@
 import { DotYouClient } from '../../core/DotYouClient';
 import {
   appendDataToFile,
+  patchFile,
   uploadFile,
   uploadHeader,
 } from '../../core/DriveData/Upload/DriveFileUploadProvider';
@@ -9,6 +10,8 @@ import {
   PriorityOptions,
   ScheduleOptions,
   SendContents,
+  UpdateInstructionSet,
+  UpdateResult,
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
@@ -69,7 +72,7 @@ export const savePost = async <T extends PostContent>(
   linkPreviews?: LinkPreview[],
   onVersionConflict?: () => void,
   onUpdate?: (progress: number) => void
-): Promise<UploadResult | TransitUploadResult> => {
+): Promise<UploadResult | TransitUploadResult | UpdateResult> => {
   // Enforce an ACL
   if (!file.serverMetadata?.accessControlList)
     throw new Error('[PostUploadProvider] ACL is required to save a post');
@@ -361,7 +364,7 @@ const updatePost = async <T extends PostContent>(
   existingAndNewMediaFiles?: (NewMediaFile | MediaFile)[],
   onVersionConflict?: () => void,
   onUpdate?: (progress: number) => void
-): Promise<UploadResult | TransitUploadResult> => {
+): Promise<UploadResult | UpdateResult> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const header = odinId
     ? await getFileHeaderBytesOverPeerByGlobalTransitId(
@@ -422,6 +425,18 @@ const updatePost = async <T extends PostContent>(
     if (!existingAndNewMediaFiles?.find((f) => f.key === existingMediaFile.key)) {
       deletedMediaFiles.push(existingMediaFile);
     }
+  }
+
+  if (odinId) {
+    return await patchPost(
+      dotYouClient,
+      odinId,
+      file,
+      channelId,
+      existingAndNewMediaFiles,
+      deletedMediaFiles,
+      onUpdate
+    );
   }
 
   // Remove the payloads that are removed from the post
@@ -560,7 +575,7 @@ const updatePost = async <T extends PostContent>(
   file.fileMetadata.versionTag = runningVersionTag;
   const result = await uploadPostHeader(
     dotYouClient,
-    odinId,
+    // odinId,
     file,
     channelId,
     targetDrive,
@@ -573,24 +588,16 @@ const updatePost = async <T extends PostContent>(
 
 const uploadPostHeader = async <T extends PostContent>(
   dotYouClient: DotYouClient,
-  odinId: string | undefined,
   file: HomebaseFile<T>,
   channelId: string,
   targetDrive: TargetDrive,
   onVersionConflict?: () => void
 ) => {
-  const existingPostWithThisSlug = odinId
-    ? await getPostBySlugOverPeer(
-        dotYouClient,
-        odinId,
-        channelId,
-        file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
-      )
-    : await getPostBySlug(
-        dotYouClient,
-        channelId,
-        file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
-      );
+  const existingPostWithThisSlug = await getPostBySlug(
+    dotYouClient,
+    channelId,
+    file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
+  );
 
   if (
     existingPostWithThisSlug &&
@@ -622,7 +629,7 @@ const uploadPostHeader = async <T extends PostContent>(
   const isDraft = file.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType;
   const metadata: UploadFileMetadata = {
     versionTag: file.fileMetadata.versionTag ?? undefined,
-    allowDistribution: !!odinId || !isDraft,
+    allowDistribution: !isDraft,
     appData: {
       tags: [file.fileMetadata.appData.content.id],
       uniqueId: uniqueId,
@@ -646,121 +653,164 @@ const uploadPostHeader = async <T extends PostContent>(
       },
     ];
 
-    if (odinId) {
-      const appendInstructionSet: PeerAppendInstructionSet = {
-        targetFile: {
-          globalTransitId: file.fileMetadata.globalTransitId as string,
-          targetDrive: targetDrive,
-        },
-        versionTag: runningVersionTag,
-        recipients: [odinId],
-      };
+    const appendInstructionSet: AppendInstructionSet = {
+      targetFile: {
+        fileId: file.fileId as string,
+        targetDrive: targetDrive,
+      },
+      versionTag: runningVersionTag,
+    };
 
-      await appendDataToFileOverPeer(
-        dotYouClient,
-        file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
-        appendInstructionSet,
-        payloads,
-        undefined,
-        onVersionConflict
-      );
-
-      await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait for the file to be available
-      runningVersionTag =
-        (
-          await getFileHeaderBytesOverPeerByGlobalTransitId(
-            dotYouClient,
-            odinId,
-            targetDrive,
-            file.fileMetadata.globalTransitId as string
-          )
-        ).fileMetadata.versionTag || runningVersionTag;
-    } else {
-      const appendInstructionSet: AppendInstructionSet = {
-        targetFile: {
-          fileId: file.fileId as string,
-          targetDrive: targetDrive,
-        },
-        versionTag: runningVersionTag,
-      };
-
-      runningVersionTag =
-        (
-          await appendDataToFile(
-            dotYouClient,
-            file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
-            appendInstructionSet,
-            payloads,
-            undefined,
-            onVersionConflict
-          )
-        )?.newVersionTag || runningVersionTag;
-    }
+    runningVersionTag =
+      (
+        await appendDataToFile(
+          dotYouClient,
+          file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
+          appendInstructionSet,
+          payloads,
+          undefined,
+          onVersionConflict
+        )
+      )?.newVersionTag || runningVersionTag;
   } else if (file.fileMetadata.payloads?.some((p) => p.key === DEFAULT_PAYLOAD_KEY)) {
     // Remove default payload if it was there before
-    if (odinId) {
-      runningVersionTag = (
-        await deletePayloadOverPeer(
-          dotYouClient,
-          targetDrive,
-          file.fileMetadata.globalTransitId as string,
-          DEFAULT_PAYLOAD_KEY,
-          file.fileMetadata.versionTag,
-          [odinId]
-        )
-      ).newVersionTag;
-    } else {
-      runningVersionTag = (
-        await deletePayload(
-          dotYouClient,
-          targetDrive,
-          file.fileId as string,
-          DEFAULT_PAYLOAD_KEY,
-          file.fileMetadata.versionTag
-        )
-      ).newVersionTag;
-    }
+    runningVersionTag = (
+      await deletePayload(
+        dotYouClient,
+        targetDrive,
+        file.fileId as string,
+        DEFAULT_PAYLOAD_KEY,
+        file.fileMetadata.versionTag
+      )
+    ).newVersionTag;
   }
 
   if (runningVersionTag) metadata.versionTag = runningVersionTag;
-  if (odinId) {
-    const instructionSet: TransitInstructionSet = {
-      transferIv: getRandom16ByteArray(),
-      remoteTargetDrive: targetDrive,
-      recipients: [odinId],
-      overwriteGlobalTransitFileId: file.fileMetadata.globalTransitId as string,
+  const instructionSet: UploadInstructionSet = {
+    transferIv: getRandom16ByteArray(),
+    storageOptions: {
+      overwriteFileId: file?.fileId ?? '',
+      drive: targetDrive,
+    },
+    transitOptions: {
+      recipients: [],
       schedule: ScheduleOptions.SendLater,
       priority: PriorityOptions.Medium,
-      storageIntent: 'metadataOnly',
-    };
+      sendContents: SendContents.All, // TODO: Should this be header only?
+    },
+  };
+  return await uploadHeader(
+    dotYouClient,
+    file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
+    instructionSet,
+    metadata,
+    onVersionConflict
+  );
+};
 
-    return await uploadHeaderOverPeer(
-      dotYouClient,
-      file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
-      instructionSet,
-      metadata,
-      onVersionConflict
-    );
-  } else {
-    const instructionSet: UploadInstructionSet = {
-      transferIv: getRandom16ByteArray(),
-      storageOptions: {
-        overwriteFileId: file?.fileId ?? '',
-        drive: targetDrive,
-      },
-      transitOptions: {
-        recipients: [],
-        schedule: ScheduleOptions.SendLater,
-        priority: PriorityOptions.Medium,
-        sendContents: SendContents.All, // TODO: Should this be header only?
-      },
-    };
-    return await uploadHeader(
-      dotYouClient,
-      file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
-      instructionSet,
-      metadata,
-      onVersionConflict
-    );
+const patchPost = async <T extends PostContent>(
+  dotYouClient: DotYouClient,
+  odinId: string,
+  file: HomebaseFile<T>,
+  channelId: string,
+  existingAndNewMediaFiles?: (NewMediaFile | MediaFile)[],
+  deletedMediaFiles?: MediaFile[],
+  onUpdate?: (progress: number) => void
+): Promise<UpdateResult> => {
+  const targetDrive = GetTargetDriveFromChannelId(channelId);
+  const encrypt = !(
+    file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+    file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+      SecurityGroupType.Authenticated
+  );
+
+  const existingPostWithThisSlug = await getPostBySlug(
+    dotYouClient,
+    channelId,
+    file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
+  );
+
+  if (
+    existingPostWithThisSlug &&
+    existingPostWithThisSlug?.fileMetadata.appData.content.id !==
+      file.fileMetadata.appData.content.id
+  ) {
+    // There is clash with an existing slug
+    file.fileMetadata.appData.content.slug = `${
+      file.fileMetadata.appData.content.slug
+    }-${new Date().getTime()}`;
   }
+
+  const uniqueId = file.fileMetadata.appData.content.slug
+    ? toGuidId(file.fileMetadata.appData.content.slug)
+    : file.fileMetadata.appData.content.id;
+
+  const payloadJson: string = jsonStringify64({
+    ...file.fileMetadata.appData.content,
+    fileId: undefined,
+  });
+  const payloadBytes = stringToUint8Array(payloadJson);
+
+  // Set max of 3kb for content so enough room is left for metadata
+  const shouldEmbedContent = payloadBytes.length < 3000;
+  const content = shouldEmbedContent
+    ? payloadJson
+    : jsonStringify64({ channelId: file.fileMetadata.appData.content.channelId });
+
+  const isDraft = file.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType;
+  const metadata: UploadFileMetadata = {
+    versionTag: file.fileMetadata.versionTag ?? undefined,
+    allowDistribution: !isDraft,
+    appData: {
+      tags: [file.fileMetadata.appData.content.id],
+      uniqueId: uniqueId,
+      fileType: isDraft ? BlogConfig.DraftPostFileType : BlogConfig.PostFileType,
+      content: content,
+      previewThumbnail: file.fileMetadata.appData.previewThumbnail,
+      userDate: file.fileMetadata.appData.userDate,
+      dataType: postTypeToDataType(file.fileMetadata.appData.content.type),
+    },
+    senderOdinId: file.fileMetadata.appData.content.authorOdinId,
+    isEncrypted: file.fileMetadata.isEncrypted ?? false,
+    accessControlList: file.serverMetadata?.accessControlList,
+  };
+
+  const payloads: PayloadFile[] = [];
+  const thumbnails: ThumbnailFile[] = [];
+
+  if (!shouldEmbedContent) {
+    payloads.push({
+      key: DEFAULT_PAYLOAD_KEY,
+      payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
+    });
+  }
+
+  const instructionSet: UpdateInstructionSet = {
+    transferIv: getRandom16ByteArray(),
+    locale: 'peer',
+    targetFile: {
+      globalTransitId: file.fileMetadata.globalTransitId as string,
+      targetDrive,
+    },
+    versionTag: file.fileMetadata.versionTag,
+    recipients: [odinId],
+  };
+
+  const deletedPayloads = deletedMediaFiles?.map((payload) => {
+    return { key: payload.key };
+  });
+
+  const updateResult = await patchFile(
+    dotYouClient,
+    instructionSet,
+    metadata,
+    payloads,
+    thumbnails,
+    deletedPayloads,
+    encrypt,
+    undefined
+  );
+
+  if (!updateResult) throw new Error(`[PostUploadProvider]: Post update failed`);
+  return updateResult;
 };

@@ -179,6 +179,15 @@ export interface UploadPayloadDescriptor {
   iv: Uint8Array | undefined;
 }
 
+interface AppendPayloadInstruction extends UploadPayloadDescriptor {
+  payloadUpdateOperationType: 'appendOrOverwrite';
+}
+
+interface DeletePayloadInstruction extends Partial<UploadPayloadDescriptor> {
+  payloadUpdateOperationType: 'deletePayload';
+}
+
+export type UpdatePayloadInstruction = AppendPayloadInstruction | DeletePayloadInstruction;
 export interface UploadThumbnailDescriptor extends ImageSize {
   thumbnailKey: string;
 }

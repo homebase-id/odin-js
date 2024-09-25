@@ -35,7 +35,7 @@ export const deleteFileOverPeer = async (
       return false;
     })
     .catch((error) => {
-      console.error('[DotYouCore-js:deleteFileOverPeer]', error);
+      console.error('[odin-js:deleteFileOverPeer]', error);
       throw error;
     });
 };
@@ -71,7 +71,7 @@ export const deletePayloadOverPeer = async (
     .post('/transit/sender/files/deletepayload', request, axiosConfig)
     .then((response) => response.data)
     .catch((error) => {
-      console.error('[DotYouCore-js:deleteFile]', error);
+      console.error('[odin-js:deleteFile]', error);
       throw error;
     });
 };

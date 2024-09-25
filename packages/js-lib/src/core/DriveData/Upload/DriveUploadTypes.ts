@@ -9,6 +9,7 @@ import {
   AccessControlList,
   EncryptedKeyHeader,
   KeyHeader,
+  UpdatePayloadInstruction,
 } from '../File/DriveFileTypes';
 
 export interface UploadInstructionSet {
@@ -19,12 +20,19 @@ export interface UploadInstructionSet {
 }
 
 export interface AppendInstructionSet {
-  targetFile: {
-    fileId: string;
-    targetDrive: TargetDrive;
-  };
+  targetFile: FileIdFileIdentifier;
   versionTag: string | undefined;
   systemFileType?: SystemFileType;
+}
+
+export interface UpdateInstructionSet {
+  targetFile: GlobalTransitIdFileIdentifier;
+  versionTag: string | undefined;
+  transferIv?: Uint8Array;
+  systemFileType?: SystemFileType;
+
+  locale: 'peer'; // |'local'
+  recipients?: string[];
 }
 
 export interface StorageOptions {
@@ -99,6 +107,10 @@ export interface UploadManifest {
   PayloadDescriptors?: UploadPayloadDescriptor[];
 }
 
+export interface UpdateManifest {
+  PayloadDescriptors?: UpdatePayloadInstruction[];
+}
+
 export interface UploadAppFileMetaData {
   uniqueId?: string;
   tags?: string[];
@@ -121,6 +133,11 @@ export interface UploadResult {
 
 export interface AppendResult {
   newVersionTag: string;
+}
+
+export interface UpdateResult {
+  newVersionTag: string;
+  recipientStatus: { [key: string]: TransferUploadStatus };
 }
 
 export enum TransferUploadStatus {

@@ -100,7 +100,7 @@ export const uploadFileOverPeer = async (
       return response.data;
     })
     .catch((error) => {
-      console.error('[DotYouCore-js:uploadFileOverPeerUsingKeyHeader]', error);
+      console.error('[odin-js:uploadFileOverPeerUsingKeyHeader]', error);
       throw error;
     });
 
@@ -138,7 +138,7 @@ export const uploadHeaderOverPeer = async (
       : keyHeader;
 
   if (!decryptKeyHeader && metadata.isEncrypted)
-    throw new Error('[DotYouCore-JS] Missing existing keyHeader for appending encrypted metadata.');
+    throw new Error('[odin-js] Missing existing keyHeader for appending encrypted metadata.');
 
   if (plainKeyHeader) {
     plainKeyHeader.iv = getRandom16ByteArray();
@@ -204,7 +204,7 @@ export const uploadHeaderOverPeer = async (
       return response.data;
     })
     .catch((error) => {
-      console.error('[DotYouCore-js:uploadFileOverPeerUsingKeyHeader]', error);
+      console.error('[odin-js:uploadFileOverPeerUsingKeyHeader]', error);
       throw error;
     });
 
@@ -299,7 +299,7 @@ export const appendDataToFileOverPeer = async (
       return response.data;
     })
     .catch((error) => {
-      console.error('[DotYouCore-js:appendDataToFileOverPeer]', error);
+      console.error('[odin-js:appendDataToFileOverPeer]', error);
       throw error;
     });
 
