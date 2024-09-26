@@ -30,6 +30,7 @@ import {
   queryBatch,
   deleteFile,
   RichText,
+  UpdateHeaderInstructionSet,
 } from '@homebase-id/js-lib/core';
 import {
   getNewId,
@@ -262,7 +263,7 @@ export const updateCommunityMessage = async (
   const messageContent = message.fileMetadata.appData.content;
   const distribute = recipients?.length > 0;
 
-  const uploadInstructions: UploadInstructionSet = {
+  const uploadInstructions: UpdateHeaderInstructionSet = {
     storageOptions: {
       drive: targetDrive,
       overwriteFileId: message.fileId,
@@ -275,6 +276,7 @@ export const updateCommunityMessage = async (
           sendContents: SendContents.All,
         }
       : undefined,
+    storageIntent: 'header',
   };
 
   const payloadJson: string = jsonStringify64({ ...messageContent });

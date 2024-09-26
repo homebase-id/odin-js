@@ -10,6 +10,7 @@ import {
   PriorityOptions,
   ScheduleOptions,
   SendContents,
+  UpdateHeaderInstructionSet,
   UpdateInstructionSet,
   UpdateResult,
   UploadInstructionSet,
@@ -621,7 +622,7 @@ const uploadPostHeader = async <T extends PostContent>(
   }
 
   if (runningVersionTag) metadata.versionTag = runningVersionTag;
-  const instructionSet: UploadInstructionSet = {
+  const instructionSet: UpdateHeaderInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
       overwriteFileId: file?.fileId ?? '',
@@ -633,6 +634,7 @@ const uploadPostHeader = async <T extends PostContent>(
       priority: PriorityOptions.Medium,
       sendContents: SendContents.All, // TODO: Should this be header only?
     },
+    storageIntent: 'header',
   };
   return await uploadHeader(
     dotYouClient,

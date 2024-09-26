@@ -9,6 +9,7 @@ import {
   AppendResult,
   UpdateResult,
   UpdateInstructionSet,
+  UpdateHeaderInstructionSet,
 } from './DriveUploadTypes';
 import { decryptKeyHeader, encryptKeyHeader, encryptWithSharedSecret } from '../SecurityHelpers';
 import {
@@ -171,7 +172,7 @@ export const patchFile = async (
 export const uploadHeader = async (
   dotYouClient: DotYouClient,
   keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
-  instructions: UploadInstructionSet,
+  instructions: UpdateHeaderInstructionSet,
   metadata: UploadFileMetadata,
   onVersionConflict?: () => Promise<void | UploadResult> | void,
   axiosConfig?: AxiosRequestConfig
@@ -200,6 +201,8 @@ export const uploadHeader = async (
 
   strippedInstructions.storageOptions.storageIntent = 'metadataOnly';
   strippedInstructions.transferIv = instructions.transferIv || getRandom16ByteArray();
+
+  console.log('uploadHeader strippedInstructions', strippedInstructions);
 
   const encryptedDescriptor = await buildDescriptor(
     dotYouClient,
