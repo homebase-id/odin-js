@@ -48,6 +48,7 @@ const enLocale = [
   ['sendpushnotifications', 'Send Push Notifications'],
   ['publishstaticcontent', 'Publish Static Content'],
   ['managefeed', 'Manage feed'],
+  ['sendintroductions', 'Send introductions'],
 
   // Transfer Statusses:
   [
