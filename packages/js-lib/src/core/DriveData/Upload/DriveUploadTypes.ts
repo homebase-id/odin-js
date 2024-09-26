@@ -12,28 +12,50 @@ import {
   UpdatePayloadInstruction,
 } from '../File/DriveFileTypes';
 
-export interface UploadInstructionSet {
+export interface BaseUploadInstructionSet {
   storageOptions: StorageOptions | null;
   transitOptions?: TransitOptions;
   transferIv?: Uint8Array;
   systemFileType?: SystemFileType;
 }
 
-export interface AppendInstructionSet {
+export type UploadInstructionSet = BaseUploadInstructionSet;
+
+export interface UpdateHeaderInstructionSet extends BaseUploadInstructionSet {
+  storageIntent: 'header';
+}
+
+export const isUpdateHeaderInstructionSet = (
+  instructionSet: unknown
+): instructionSet is UpdateHeaderInstructionSet => {
+  return (
+    !!instructionSet &&
+    typeof instructionSet === 'object' &&
+    'storageIntent' in instructionSet &&
+    instructionSet.storageIntent === 'header'
+  );
+};
+
+export interface AppendInstructionSet extends Omit<BaseUploadInstructionSet, 'storageOptions'> {
+  storageIntent: 'append';
+
   targetFile: FileIdFileIdentifier;
   versionTag: string | undefined;
-  systemFileType?: SystemFileType;
 }
 
-export interface UpdateInstructionSet {
+export interface UpdateInstructionSet extends Partial<BaseUploadInstructionSet> {
   file: GlobalTransitIdFileIdentifier;
   versionTag: string | undefined;
-  transferIv?: Uint8Array;
-  systemFileType?: SystemFileType;
 
-  locale: 'peer'; // |'local'
+  locale: 'peer'; // |'local'; Not implemented on the BE yet
   recipients?: string[];
 }
+
+export const isUpdateInstructionSet = (
+  instructionSet: unknown
+): instructionSet is UpdateInstructionSet => {
+  return !!instructionSet && typeof instructionSet === 'object' && 'locale' in instructionSet;
+};
 
 export interface StorageOptions {
   drive: TargetDrive;

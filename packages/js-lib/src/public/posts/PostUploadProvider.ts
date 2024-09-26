@@ -400,12 +400,12 @@ const patchPost = async <T extends PostContent>(
 
   const updateResult = await patchFile(
     dotYouClient,
+    file.sharedSecretEncryptedKeyHeader,
     instructionSet,
     metadata,
     payloads,
     thumbnails,
     deletedPayloads,
-    encrypt,
     undefined
   );
 
@@ -531,6 +531,7 @@ const patchLocalPost = async <T extends PostContent>(
           targetDrive: targetDrive,
         },
         versionTag: runningVersionTag,
+        storageIntent: 'append',
       };
 
       runningVersionTag =
@@ -591,6 +592,7 @@ const uploadPostHeader = async <T extends PostContent>(
         targetDrive: targetDrive,
       },
       versionTag: runningVersionTag,
+      storageIntent: 'append',
     };
 
     runningVersionTag =

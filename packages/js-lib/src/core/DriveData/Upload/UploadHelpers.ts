@@ -11,6 +11,9 @@ import {
   UpdateResult,
   UpdateInstructionSet,
   UpdateManifest,
+  UpdateHeaderInstructionSet,
+  isUpdateHeaderInstructionSet,
+  isUpdateInstructionSet,
 } from './DriveUploadTypes';
 import {
   encryptWithKeyheader,
@@ -127,7 +130,11 @@ export const buildUpdateManifest = (
 export const buildDescriptor = async (
   dotYouClient: DotYouClient,
   keyHeader: KeyHeader | undefined,
-  instructions: UploadInstructionSet | TransitInstructionSet | UpdateInstructionSet,
+  instructions:
+    | UploadInstructionSet
+    | UpdateHeaderInstructionSet
+    | TransitInstructionSet
+    | UpdateInstructionSet,
   metadata: UploadFileMetadata
 ): Promise<Uint8Array> => {
   if (!instructions.transferIv) throw new Error('Transfer IV is required');
@@ -135,18 +142,27 @@ export const buildDescriptor = async (
   return await encryptWithSharedSecret(
     dotYouClient,
     {
-      ...('locale' in instructions
+      ...(isUpdateInstructionSet(instructions)
         ? {
-            // TODO: Update this to use a new IV every time
             keyHeaderIv: keyHeader?.iv,
           }
-        : {
-            encryptedKeyHeader: await encryptKeyHeader(
-              dotYouClient,
-              keyHeader ?? EMPTY_KEY_HEADER,
-              instructions.transferIv
-            ),
-          }),
+        : isUpdateHeaderInstructionSet(instructions)
+          ? {
+              encryptedKeyHeader: keyHeader
+                ? await encryptKeyHeader(
+                    dotYouClient,
+                    { aesKey: new Uint8Array(Array(16).fill(0)), iv: keyHeader?.iv },
+                    instructions.transferIv
+                  )
+                : undefined,
+            }
+          : {
+              encryptedKeyHeader: await encryptKeyHeader(
+                dotYouClient,
+                keyHeader ?? EMPTY_KEY_HEADER,
+                instructions.transferIv
+              ),
+            }),
       fileMetadata: await encryptMetaData(metadata, keyHeader),
     },
     instructions.transferIv
