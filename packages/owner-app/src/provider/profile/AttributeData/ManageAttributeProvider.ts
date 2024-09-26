@@ -166,6 +166,7 @@ export const saveProfileAttribute = async (
                 targetDrive: targetDrive,
               },
               versionTag: runningVersionTag,
+              storageIntent: 'append',
             },
             payloads,
             thumbnails

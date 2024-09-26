@@ -267,6 +267,7 @@ export const uploadMail = async (
               targetDrive: MailDrive,
             },
             versionTag: headerUploadResult.newVersionTag,
+            storageIntent: 'append',
           },
           payloads,
           thumbnails,
