@@ -26,7 +26,7 @@ export interface AppendInstructionSet {
 }
 
 export interface UpdateInstructionSet {
-  targetFile: GlobalTransitIdFileIdentifier;
+  file: GlobalTransitIdFileIdentifier;
   versionTag: string | undefined;
   transferIv?: Uint8Array;
   systemFileType?: SystemFileType;

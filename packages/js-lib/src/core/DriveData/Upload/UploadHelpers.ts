@@ -130,18 +130,23 @@ export const buildDescriptor = async (
   instructions: UploadInstructionSet | TransitInstructionSet | UpdateInstructionSet,
   metadata: UploadFileMetadata
 ): Promise<Uint8Array> => {
-  if (!instructions.transferIv) {
-    throw new Error('Transfer IV is required');
-  }
+  if (!instructions.transferIv) throw new Error('Transfer IV is required');
 
   return await encryptWithSharedSecret(
     dotYouClient,
     {
-      encryptedKeyHeader: await encryptKeyHeader(
-        dotYouClient,
-        keyHeader ?? EMPTY_KEY_HEADER,
-        instructions.transferIv
-      ),
+      ...('locale' in instructions
+        ? {
+            // TODO: Update this to use a new IV every time
+            keyHeaderIv: keyHeader?.iv,
+          }
+        : {
+            encryptedKeyHeader: await encryptKeyHeader(
+              dotYouClient,
+              keyHeader ?? EMPTY_KEY_HEADER,
+              instructions.transferIv
+            ),
+          }),
       fileMetadata: await encryptMetaData(metadata, keyHeader),
     },
     instructions.transferIv
@@ -165,9 +170,11 @@ export const buildFormData = async (
 ) => {
   const data = new FormData();
   const instructionType =
-    'targetFile' in instructionSet ? 'payloadUploadInstructions' : 'instructions';
+    'targetFile' in instructionSet && !('locale' in instructionSet)
+      ? 'payloadUploadInstructions'
+      : 'instructions';
   data.append(instructionType, await toBlob(instructionSet));
-  if (encryptedDescriptor) data.append('metaData', await getSecuredBlob([encryptedDescriptor]));
+  if (encryptedDescriptor) data.append('metadata', await getSecuredBlob([encryptedDescriptor]));
 
   if (payloads) {
     for (let i = 0; i < payloads.length; i++) {
