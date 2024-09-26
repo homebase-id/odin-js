@@ -26,7 +26,9 @@ export const IntroductionSettings = () => {
                 {t('Auto accept introductions')}
                 <small className="text-sm text-gray-400">
                   {t(
-                    'A connected identity can introduce you to another identity. If introductions are auto accepted, the connection will be created without your approval'
+                    `Connected identities within a Circle that have "Send Introduction" permissions
+                    can introduce you to others. When you are introduced, you will receive a connection request.
+                    When enabled, this feature will automatically accept connection requests from those introduced to you.`
                   )}
                 </small>
               </div>
@@ -34,9 +36,7 @@ export const IntroductionSettings = () => {
           >
             <RadioOption
               label={t('Enabled')}
-              description={t(
-                'An introduction will be automatically accepted and a connection will be created'
-              )}
+              description={t('Accept all connection requests following an introduction')}
               name="disableAutoAcceptIntroductions"
               id="enableAutoAcceptIntroductions"
               defaultChecked={!systemSettings?.disableAutoAcceptIntroductions}
@@ -46,7 +46,7 @@ export const IntroductionSettings = () => {
             <RadioOption
               label={t('Disabled')}
               description={t(
-                'An introduction will not be automatically accepted and a regular connection request will be shown'
+                'Connection requests will not be immediately accepted. And I will review any requests following an introduction'
               )}
               name="disableAutoAcceptIntroductions"
               id="disableAutoAcceptIntroductions"

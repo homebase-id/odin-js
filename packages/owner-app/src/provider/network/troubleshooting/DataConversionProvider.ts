@@ -21,7 +21,7 @@ export const ensureVerificationHash = async (dotYouClient: DotYouClient) => {
 
   const client = dotYouClient.createAxiosClient();
   return await client
-    .post<unknown>(`${dataConverionRoot}/ensure-verification-hash`, {})
+    .post<unknown>(`${dataConverionRoot}/prepare-introductions-release`, {})
     .then((response) => {
       if (response.status !== 200) {
         throw new Error('Auto fix connections failed with status ' + response.status);
