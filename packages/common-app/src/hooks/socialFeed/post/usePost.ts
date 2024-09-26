@@ -30,8 +30,8 @@ export const usePost = ({ odinId, channelKey, postKey }: usePostProps = {}) => {
 
   const getLocalCachedBlogs = (channelId?: string) => {
     const infinite =
-      queryClient.getQueryData<InfiniteData<usePostsInfiniteReturn>>(['blogs', channelId]) ||
-      queryClient.getQueryData<InfiniteData<usePostsInfiniteReturn>>(['blogs', undefined]);
+      queryClient.getQueryData<InfiniteData<usePostsInfiniteReturn>>(['posts', channelId]) ||
+      queryClient.getQueryData<InfiniteData<usePostsInfiniteReturn>>(['posts', undefined]);
     if (infinite) return infinite.pages.flatMap((page) => page.results);
 
     return (

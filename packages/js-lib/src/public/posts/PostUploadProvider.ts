@@ -66,7 +66,7 @@ export const savePost = async <T extends PostContent>(
 ): Promise<UploadResult | TransitUploadResult | UpdateResult> => {
   // Enforce an ACL
   if (!file.serverMetadata?.accessControlList)
-    throw new Error('[PostUploadProvider] ACL is required to save a post');
+    throw new Error('[odin-js] PostUploadProvider: ACL is required to save a post');
 
   if (!file.fileMetadata.appData.content.id) {
     // The content id is set once, and then never updated to keep the permalinks correct at all times; Even when the slug changes
@@ -80,7 +80,6 @@ export const savePost = async <T extends PostContent>(
       undefined;
   }
 
-  // Set authorOdinId if not set
   if (!file.fileMetadata.appData.content.authorOdinId)
     file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
 
@@ -92,7 +91,7 @@ export const savePost = async <T extends PostContent>(
   if (file.fileId) {
     if (linkPreviews?.length) {
       throw new Error(
-        '[PostUploadProvider] Changing Link previews are not supported for post updates'
+        '[odin-js] PostUploadProvider: Changing Link previews are not supported for post updates'
       );
     }
     return await updatePost(
@@ -107,7 +106,7 @@ export const savePost = async <T extends PostContent>(
   } else {
     if (toSaveFiles?.some((file) => 'fileKey' in file)) {
       throw new Error(
-        '[PostUploadProvider] Cannot upload a new post with an existing media file. Use updatePost instead'
+        '[odin-js] PostUploadProvider: Cannot upload a new post with an existing media file. Use updatePost instead'
       );
     }
 
@@ -159,7 +158,6 @@ const uploadPost = async <T extends PostContent>(
   payloads.push(...newMediaPayloads);
   thumbnails.push(...newMediaThumbnails);
 
-  // Don't force the primaryMediaFile on articles
   if (file.fileMetadata.appData.content.type !== 'Article') {
     file.fileMetadata.appData.content.primaryMediaFile = payloads[0]
       ? {
@@ -209,7 +207,7 @@ const uploadPost = async <T extends PostContent>(
       { aesKey }
     );
 
-    if (!result) throw new Error(`[PostUploadProvider] Upload failed`);
+    if (!result) throw new Error(`[odin-js] PostUploadProvider: Upload failed`);
     return result;
   } else {
     const transitInstructionSet: TransitInstructionSet = {
@@ -230,7 +228,7 @@ const uploadPost = async <T extends PostContent>(
       { aesKey }
     );
 
-    if (!result) throw new Error(`[PostUploadProvider] Upload over peer failed`);
+    if (!result) throw new Error(`[odin-js] PostUploadProvider: Upload over peer failed`);
     return result;
   }
 };
@@ -254,13 +252,14 @@ const updatePost = async <T extends PostContent>(
       )
     : await getFileHeader(dotYouClient, targetDrive, file.fileId as string);
 
-  if (!header) throw new Error('[PostUploadProvider] Cannot update a post that does not exist');
+  if (!header)
+    throw new Error('[odin-js] PostUploadProvider: Cannot update a post that does not exist');
   if (header?.fileMetadata.versionTag !== file.fileMetadata.versionTag) {
     if (odinId) {
       // There's a conflict, but we will just force ahead
       file.fileMetadata.versionTag = header.fileMetadata.versionTag;
     } else {
-      throw new Error('[PostUploadProvider] Version conflict');
+      throw new Error('[odin-js] PostUploadProvider: Version conflict');
     }
   }
   if (
@@ -268,10 +267,12 @@ const updatePost = async <T extends PostContent>(
     !file.serverMetadata?.accessControlList ||
     !file.fileMetadata.appData.content.id
   )
-    throw new Error(`[odin-js] PostProvider: fileId is required to update a post`);
+    throw new Error(`[odin-js] PostUploadProvider: fileId is required to update a post`);
 
   if (odinId && !file.fileMetadata.globalTransitId) {
-    throw new Error(`[odin-js]: globalTransitId is required to update a post over peer`);
+    throw new Error(
+      `[odin-js] PostUploadProvider: globalTransitId is required to update a post over peer`
+    );
   }
 
   if (!file.fileMetadata.appData.content.authorOdinId)
@@ -429,7 +430,7 @@ const patchLocalPost = async <T extends PostContent>(
     !file.serverMetadata?.accessControlList ||
     !file.fileMetadata.appData.content.id
   )
-    throw new Error(`[odin-js] PostProvider: fileId is required to update a post`);
+    throw new Error(`[odin-js] PostUploadProvider: fileId is required to update a post`);
 
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   let runningVersionTag: string = file.fileMetadata.versionTag;

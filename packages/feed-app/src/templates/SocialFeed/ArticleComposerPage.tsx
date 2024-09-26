@@ -50,7 +50,7 @@ export const ArticleComposerPage = () => {
 
     // Data updates
     setPostFile,
-    setGroupOdinId,
+    setOdinId,
     setChannel,
     setFiles,
 
@@ -299,7 +299,7 @@ export const ArticleComposerPage = () => {
                   onChange={({ channel: newChannel, odinId }) => {
                     if (!newChannel) return;
                     setChannel(newChannel);
-                    setGroupOdinId(odinId);
+                    setOdinId(odinId);
                   }}
                   disabled={isPublished}
                   excludeMore={true}
