@@ -7,7 +7,7 @@ import { ImageDialog, t, useDotYouClient } from '@homebase-id/common-app';
 import { ImageIcon, Trash } from '@homebase-id/common-app/icons';
 import { ToolbarButton, ToolbarButtonProps } from '../../components/plate-ui/toolbar';
 import { OdinThumbnailImage } from '@homebase-id/ui-lib';
-import { insertImage } from './createImagePlugin';
+import { ELEMENT_IMAGE, insertImage, TImageElement } from './createImagePlugin';
 
 export interface MediaOptions {
   odinId?: string;
