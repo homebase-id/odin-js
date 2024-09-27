@@ -7,7 +7,14 @@ import {
   Value,
 } from '@udecode/plate-common';
 import { getImagesFromPasteEvent } from '../../../../common-app/src';
-import { ELEMENT_IMAGE, ImageElementBlock, MediaOptions, TImageElement } from './ImagePlugin';
+import { ImageElementBlock, MediaOptions } from './ImagePlugin';
+
+export interface TImageElement extends TElement {
+  fileKey: string;
+  lastModified?: number;
+}
+
+export const ELEMENT_IMAGE = 'local_image';
 
 export const insertImage = <V extends Value>(editor: PlateEditor<V>, fileKey: string) => {
   const text = { text: '' };

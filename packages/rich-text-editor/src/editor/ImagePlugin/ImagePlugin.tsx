@@ -1,5 +1,5 @@
 import { useEventPlateId, useEditorRef, PlateRenderElementProps } from '@udecode/plate-core';
-import { Value, TElement, getPluginOptions, removeNodes } from '@udecode/plate-common';
+import { Value, getPluginOptions, removeNodes } from '@udecode/plate-common';
 import { ReactEditor } from 'slate-react';
 import { TargetDrive, NewMediaFile } from '@homebase-id/js-lib/core';
 import { useMemo, useState } from 'react';
@@ -8,13 +8,6 @@ import { ImageIcon, Trash } from '@homebase-id/common-app/icons';
 import { ToolbarButton, ToolbarButtonProps } from '../../components/plate-ui/toolbar';
 import { OdinThumbnailImage } from '@homebase-id/ui-lib';
 import { insertImage } from './createImagePlugin';
-
-export interface TImageElement extends TElement {
-  fileKey: string;
-  lastModified?: number;
-}
-
-export const ELEMENT_IMAGE = 'local_image';
 
 export interface MediaOptions {
   odinId?: string;
