@@ -48,10 +48,10 @@
     "eslint": "9.9.1",
     "eslint-plugin-react": "7.35.0",
     "prettier": "3.3.3",
-    "rollup": "4.21.1",
+    "rollup": "4.22.4",
     "tslib": "2.7.0",
     "typescript": "5.5.4",
-    "vite": "5.4.2",
+    "vite": "5.4.8",
     "vite-plugin-dts": "4.0.3"
   },
   "optionalDependencies": {
