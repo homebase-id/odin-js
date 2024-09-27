@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { formatToTimeAgo } from '../../helpers/timeago';
 import { t } from '../../helpers';
 import { Alert } from '../Alert/Alert';
-import { ActionButtonState } from './ActionButton';
+import { ActionButtonState } from './util';
 
 export const SaveStatus = ({
   className,

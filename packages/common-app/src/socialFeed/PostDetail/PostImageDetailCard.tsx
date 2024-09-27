@@ -21,7 +21,7 @@ import { AuthorImage } from '../Blocks/Author/Image';
 import { AuthorName } from '../Blocks/Author/Name';
 import { PostInteracts } from '../Blocks/Interacts/PostInteracts';
 import { BoringFile } from '../Blocks/Media/PrimaryMedia';
-import { PostMeta } from '../Blocks/Meta/Meta';
+import { PostMeta, ToGroupBlock } from '../Blocks/Meta/Meta';
 import { Image } from '../../media/Image';
 
 export const PostImageDetailCard = ({
@@ -193,14 +193,21 @@ export const PostImageDetailCard = ({
             </div>
 
             <div className="bg-background flex-shrink-0 lg:max-h-screen flex-grow md:block lg:w-[27rem] lg:flex-grow-0 lg:overflow-auto">
-              <div className="grid grid-flow-col grid-cols-[3rem_auto] gap-3 p-5 pb-0">
-                <AuthorImage odinId={odinId} size="sm" />
-                <div className="flex max-w-lg flex-grow flex-col">
-                  <div className="text-foreground mb-2 text-opacity-60">
-                    <h2 className="mr-4">
-                      <AuthorName odinId={odinId} />
-                    </h2>
-                    {post && channel ? (
+              {post && channel ? (
+                <div className="grid grid-flow-col grid-cols-[3rem_auto] gap-3 p-5 pb-0">
+                  <AuthorImage odinId={post.authorOdinId || odinId} size="sm" />
+                  <div className="flex max-w-lg flex-grow flex-col">
+                    <div className="text-foreground mb-2 text-opacity-60">
+                      <h2 className="mr-4">
+                        <AuthorName odinId={post.authorOdinId || odinId} />
+                        <ToGroupBlock
+                          channel={channel || undefined}
+                          odinId={odinId}
+                          authorOdinId={post.authorOdinId}
+                          className="ml-1"
+                        />
+                      </h2>
+
                       <PostMeta
                         odinId={odinId}
                         channel={channel}
@@ -208,14 +215,14 @@ export const PostImageDetailCard = ({
                         authorOdinId={post.authorOdinId || odinId}
                         excludeContextMenu={true}
                       />
-                    ) : null}
+                    </div>
+                    <p>{post?.caption}</p>
                   </div>
-                  <p>{post?.caption}</p>
                 </div>
-              </div>
+              ) : null}
               {postFile ? (
                 <PostInteracts
-                  authorOdinId={odinId || window.location.hostname}
+                  authorOdinId={post?.authorOdinId || odinId || window.location.hostname}
                   postFile={postFile}
                   defaultExpanded={true}
                   className="p-5"

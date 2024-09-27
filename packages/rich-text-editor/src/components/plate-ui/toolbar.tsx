@@ -7,11 +7,12 @@ import { cn } from '../../lib/utils';
 import { Icons } from '../../components/icons';
 
 import { Separator } from './separator';
-import { ToggleProps, toggleVariants } from './toggle';
+import { ToggleProps } from './toggle';
+import { toggleVariants } from './toggle/toggle-variants';
 
 const toolbarVariants = cva('relative flex select-none items-stretch gap-1 bg-background');
 
-export const linkVariants = cva('font-medium underline underline-offset-4');
+const linkVariants = cva('font-medium underline underline-offset-4');
 
 const ToolbarToggleGroup = ToolbarPrimitive.ToggleGroup;
 
