@@ -35,6 +35,13 @@ function App() {
         <meta name="v" content={import.meta.env.VITE_VERSION} />
         <meta name="description" content={`${config.brandName} - ${config.brandSlogan} `} />
         <title>Signup | {config.brandName}</title>
+
+        <link rel="apple-touch-icon" sizes="180x180" href={`/${config.id}/apple-touch-icon.png`} />
+        <link rel="icon" type="image/png" sizes="32x32" href={`/${config.id}/favicon-32x32.png`} />
+        <link rel="icon" type="image/png" sizes="16x16" href={`/${config.id}/favicon-16x16.png`} />
+        <link rel="manifest" href={`/${config.id}/site.webmanifest`} />
+        <meta name="msapplication-TileColor" content="#2b5797" />
+        <meta name="theme-color" content="#ff0000" />
       </Helmet>
       <QueryClientProvider client={queryClient}>
         <Router>

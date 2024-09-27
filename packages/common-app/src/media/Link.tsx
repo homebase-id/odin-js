@@ -1,16 +1,9 @@
 import { getHostFromUrl, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { LinkPreview, LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 import { ellipsisAtMaxChar } from '../helpers';
-import { useQuery } from '@tanstack/react-query';
-import {
-  EmbeddedThumb,
-  getPayloadAsJson,
-  PayloadDescriptor,
-  TargetDrive,
-} from '@homebase-id/js-lib/core';
-import { useDotYouClient } from '../hooks';
+import { EmbeddedThumb, PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
+import { useLinkMetadata } from '../hooks';
 import { LoadingBlock } from '../ui';
-import { getPayloadAsJsonOverPeerByGlobalTransitId } from '@homebase-id/js-lib/peer';
 import { useMemo } from 'react';
 
 export const LinkPreviewTextual = ({
@@ -183,41 +176,4 @@ export const LinkPreviewItem = ({
       ) : null}
     </div>
   );
-};
-
-export const useLinkMetadata = ({
-  odinId,
-  globalTransitId,
-  targetDrive,
-  fileId,
-  payloadKey,
-}: {
-  odinId?: string;
-  globalTransitId?: string;
-  targetDrive: TargetDrive;
-  fileId?: string;
-  payloadKey: string;
-}) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
-
-  return useQuery({
-    queryKey: ['link-metadata', targetDrive.alias, fileId, payloadKey],
-    queryFn: async () => {
-      if (odinId && globalTransitId) {
-        return getPayloadAsJsonOverPeerByGlobalTransitId<LinkPreview[]>(
-          dotYouClient,
-          odinId,
-          targetDrive,
-          globalTransitId,
-          payloadKey
-        );
-      }
-
-      if (!fileId) return [];
-      return getPayloadAsJson<LinkPreview[]>(dotYouClient, targetDrive, fileId, payloadKey);
-    },
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    staleTime: 1000 * 60 * 60 * 24, // 24 hours
-  });
 };

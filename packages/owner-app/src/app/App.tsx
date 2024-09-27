@@ -16,11 +16,15 @@ const Setup = lazy(() => import('../templates/Setup/Setup').then((m) => ({ defau
 
 const Home = lazy(() => import('../templates/Dashboard/Dashboard'));
 const RegisterApp = lazy(() => import('../templates/AppDefinition/RegisterApp'));
-const ExtendAppDrivePermissions = lazy(
-  () => import('../templates/AppDefinition/ExtendAppPermissions')
+const ExtendAppDrivePermissions = lazy(() =>
+  import('../templates/AppDefinition/ExtendAppPermissions').then((m) => ({
+    default: m.ExtendAppPermissions,
+  }))
 );
-const ExtendCirclePermissionsFromApp = lazy(
-  () => import('../templates/AppDefinition/ExtendCirclePermissionsFromApp')
+const ExtendCirclePermissionsFromApp = lazy(() =>
+  import('../templates/AppDefinition/ExtendCirclePermissionsFromApp').then((m) => ({
+    default: m.ExtendCirclePermissionsFromApp,
+  }))
 );
 const UpdateDriveDetailsFromApp = lazy(
   () => import('../templates/AppDefinition/UpdateDriveDetailsFromApp')

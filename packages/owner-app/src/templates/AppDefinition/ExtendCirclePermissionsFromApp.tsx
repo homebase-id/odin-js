@@ -11,12 +11,12 @@ import { Arrow } from '@homebase-id/common-app/icons';
 import Section from '../../components/ui/Sections/Section';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useApp } from '../../hooks/apps/useApp';
-import { drivesParamToDriveGrantRequest } from './RegisterApp';
+import { drivesParamToDriveGrantRequest, circleToCircleIds } from './util';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { DriveGrant } from '@homebase-id/js-lib/network';
 import { useEffect } from 'react';
 
-const ExtendCirclePermissionsFromApp = () => {
+export const ExtendCirclePermissionsFromApp = () => {
   // Read the queryString
   const [searchParams] = useSearchParams();
 
@@ -192,10 +192,4 @@ const ExtendCirclePermissionsFromApp = () => {
       </section>
     </>
   );
-};
-
-export default ExtendCirclePermissionsFromApp;
-
-export const circleToCircleIds = (queryParamVal: string | undefined): string[] => {
-  return queryParamVal?.split(',') || [];
 };

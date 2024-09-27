@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
+  LoadingBlock,
   SubtleMessage,
   t,
   useActiveConnections,
@@ -17,16 +18,18 @@ const Connections = ({ className }: { className?: string }) => {
   );
 };
 
+const PAGE_SIZE = 30;
 const ConnectionSection = ({ className }: { className?: string }) => {
   const [activePage, setActivePage] = useState(1);
   const {
     data: connections,
     isFetched: connectionsFetched,
+    isLoading: connectionsLoading,
     hasNextPage: hasNextPageOnServer,
     fetchNextPage,
     isFetchedAfterMount,
   } = useActiveConnections({
-    pageSize: 10,
+    pageSize: PAGE_SIZE,
   }).fetch;
 
   useEffect(() => {
@@ -64,6 +67,12 @@ const ConnectionSection = ({ className }: { className?: string }) => {
               <IdentityTeaser key={index} odinId={item?.odinId} className="p-2" />
             ))}
           </div>
+        ) : connectionsLoading ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from(Array(PAGE_SIZE)).map((_val, index) => (
+              <LoadingBlock key={index} className="h-24 w-full" />
+            ))}
+          </div>
         ) : null}
       </div>
     </div>
@@ -74,6 +83,7 @@ const FollowingSection = ({ className }: { className?: string }) => {
   const {
     data: identitiesIFollow,
     isFetched: identitiesFetched,
+    isLoading: identitiesLoading,
     hasNextPage: hasNextPageOnServer,
     fetchNextPage,
     isFetchedAfterMount,
@@ -119,6 +129,12 @@ const FollowingSection = ({ className }: { className?: string }) => {
               if (!item) return null;
               return <IdentityTeaser key={index} odinId={item} className="p-2" />;
             })}
+          </div>
+        ) : identitiesLoading ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from(Array(PAGE_SIZE)).map((_val, index) => (
+              <LoadingBlock key={index} className="h-24 w-full" />
+            ))}
           </div>
         ) : null}
       </div>
