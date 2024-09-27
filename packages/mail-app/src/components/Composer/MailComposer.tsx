@@ -274,8 +274,6 @@ export const MailComposer = ({
     [setFiles, autosavedDsr.fileId, files]
   );
 
-  console.log(autosavedDsr);
-
   return (
     <>
       <ErrorNotification error={removeDraftError || saveDraftError || sendMailError} />

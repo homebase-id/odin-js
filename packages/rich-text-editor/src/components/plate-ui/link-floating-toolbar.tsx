@@ -11,9 +11,9 @@ import {
 import { cn } from '../../lib/utils';
 import { Icons } from '../icons';
 
-import { buttonVariants } from './button';
-import { inputVariants } from './input';
-import { popoverVariants } from './popover';
+import { buttonVariants } from './button-variants';
+import { inputVariants } from './input/input-variants';
+import { popoverVariants } from './popover/popover-variants';
 import { Separator } from './separator';
 
 // const floatingOptions: UseVirtualFloatingOptions = {

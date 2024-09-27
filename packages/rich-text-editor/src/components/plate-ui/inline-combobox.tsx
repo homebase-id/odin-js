@@ -58,7 +58,7 @@ interface InlineComboboxContextValue {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const InlineComboboxContext = createContext<InlineComboboxContextValue>(null as any);
 
-export const defaultFilter: FilterFn = ({ keywords = [], value }, search) =>
+const defaultFilter: FilterFn = ({ keywords = [], value }, search) =>
   [value, ...keywords].some((keyword) => filterWords(keyword, search));
 
 interface InlineComboboxProps {

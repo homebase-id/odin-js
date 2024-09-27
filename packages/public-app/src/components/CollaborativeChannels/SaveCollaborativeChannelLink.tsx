@@ -6,8 +6,9 @@ import {
   ChannelDefinition,
 } from '@homebase-id/js-lib/public';
 import { useAuth } from '../../hooks/auth/useAuth';
-import { useCheckWriteAccessOnChannel } from './PublicPostComposer';
+
 import { Plus } from '@homebase-id/common-app/icons';
+import { useCheckWriteAccessOnChannel } from './useCheckWriteAccessOnChannel';
 
 export const SaveCollaborativeChannelLink = ({
   channel,

@@ -15,6 +15,7 @@ export * from './Buttons/ActionLink';
 export * from './Buttons/SaveStatus';
 export * from './Buttons/FakeAnchor';
 export * from './Buttons/HybridLink';
+export * from './Buttons/util';
 
 export * from './DarkModeToggle/DarkModeToggle';
 export * from './Sidenav/Sidenav';
