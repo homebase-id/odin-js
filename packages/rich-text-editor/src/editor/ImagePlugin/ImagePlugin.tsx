@@ -78,7 +78,7 @@ export const ImageElementBlock = <V extends Value = Value>(
     }
   };
 
-  if (!options || !options.mediaDrive) return <></>;
+  if (!options || !options.mediaDrive) return <>{children}</>;
 
   const pendingUrl = useMemo(() => {
     const pendingUpload = options.pendingUploadFiles?.find((file) => file.key === element.fileKey);
