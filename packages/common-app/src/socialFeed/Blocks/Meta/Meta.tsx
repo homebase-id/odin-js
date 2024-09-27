@@ -5,7 +5,6 @@ import { OwnerActions } from './OwnerActions';
 import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { aclEqual } from '@homebase-id/js-lib/helpers';
 import { AclSummary } from '../../../acl';
-import { HOME_ROOT_PATH } from '../../../core';
 import { t } from '../../../helpers';
 import { ActionGroupOptionProps, ActionGroup, ErrorNotification } from '../../../ui';
 import { ChannelDefinitionVm, useManagePost, useManageSocialFeed } from '../../../hooks/socialFeed';
@@ -13,6 +12,7 @@ import { useDotYouClient } from '../../../hooks/auth/useDotYouClient';
 import { useIsConnected } from '../../../hooks/connections/useIsConnected';
 import { EditPostDialog } from '../../EditPostDialog/EditPostDialog';
 import { Persons, UserX, Times, Flag, Block, Link, Trash, Lock, Pencil } from '../../../ui/Icons';
+import { FEED_ROOT_PATH, HOME_ROOT_PATH } from '../../../constants';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;
@@ -229,11 +229,17 @@ const ExternalActions = ({
       onClick: (e) => {
         e.stopPropagation();
         if (postFile.fileMetadata.appData.content.type === 'Article') {
-          const targetUrl = `/apps/feed/edit/${odinId}/${
+          const targetUrl = `/apps/feed/${odinId || window.location.host}/${
             channel?.fileMetadata.appData.content.slug || channel?.fileMetadata.appData.uniqueId
           }/${postFile.fileMetadata.appData.content.id}`;
-          if (window.location.pathname.startsWith('/owner')) navigate(targetUrl);
-          else window.location.href = targetUrl;
+
+          if (window.location.host === odinId) {
+            // Navigate to own identity
+            window.location.href = `${host}${targetUrl}`;
+          } else {
+            if (window.location.pathname.startsWith(FEED_ROOT_PATH)) navigate(targetUrl);
+            else window.location.href = targetUrl;
+          }
         } else {
           setIsEditOpen(true);
         }
@@ -279,6 +285,7 @@ const GroupChannelActions = ({
 
   const identity = getIdentity();
   const isAuthor = postFile.fileMetadata.appData.content.authorOdinId === identity;
+  const host = new DotYouClient({ api: ApiType.Guest, identity: identity || undefined }).getRoot();
 
   const {
     removeFromFeed: { mutateAsync: removeFromMyFeed },
@@ -289,7 +296,7 @@ const GroupChannelActions = ({
 
   const options: (ActionGroupOptionProps | undefined)[] = [];
 
-  if (window.location.pathname.startsWith('/apps/feed')) {
+  if (window.location.pathname.startsWith(FEED_ROOT_PATH)) {
     if (channelLink)
       options.push({
         icon: Link,
@@ -314,11 +321,17 @@ const GroupChannelActions = ({
         onClick: (e) => {
           e.stopPropagation();
           if (postFile.fileMetadata.appData.content.type === 'Article') {
-            const targetUrl = `/apps/feed/edit/${odinId}/${
+            const targetUrl = `/apps/feed/${odinId || window.location.host}/${
               channel?.fileMetadata.appData.content.slug || channel?.fileMetadata.appData.uniqueId
             }/${postFile.fileMetadata.appData.content.id}`;
-            if (window.location.pathname.startsWith('/apps/feed')) navigate(targetUrl);
-            else window.location.href = targetUrl;
+
+            if (window.location.host === odinId) {
+              // Navigate to own identity
+              window.location.href = `${host}${targetUrl}`;
+            } else {
+              if (window.location.pathname.startsWith(FEED_ROOT_PATH)) navigate(targetUrl);
+              else window.location.href = targetUrl;
+            }
           } else {
             setIsEditOpen(true);
           }

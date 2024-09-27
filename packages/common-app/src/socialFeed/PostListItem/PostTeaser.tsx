@@ -3,7 +3,6 @@ import { FC } from 'react';
 import { PostMeta } from '../Blocks/Meta/Meta';
 import { useNavigate } from 'react-router-dom';
 import { HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
-import { HOME_ROOT_PATH } from '../../core';
 import { FakeAnchor, ErrorBoundary } from '../../ui';
 import { AuthorImage } from '../Blocks/Author/Image';
 import { AuthorName } from '../Blocks/Author/Name';
@@ -12,6 +11,7 @@ import { PostInteracts } from '../Blocks/Interacts/PostInteracts';
 import { DoubleClickHeartForMedia } from '../Blocks/Media/DoubleClickHeartForMedia';
 import { useChannel } from '../../hooks/socialFeed/channels/useChannel';
 import { useDotYouClient } from '../../hooks/auth/useDotYouClient';
+import { HOME_ROOT_PATH } from '../../constants';
 
 interface PostTeaserProps {
   className?: string;

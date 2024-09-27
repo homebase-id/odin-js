@@ -10,6 +10,7 @@ import {
   SubtleMessage,
   usePostsInfinite,
   useDrafts,
+  FEED_ROOT_PATH,
 } from '@homebase-id/common-app';
 import { Article as ArticleIcon, Pencil, Plus } from '@homebase-id/common-app/icons';
 import { flattenInfinteData } from '@homebase-id/common-app';
@@ -19,7 +20,6 @@ import { useChannels } from '@homebase-id/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { ROOT_PATH } from '../../app/App';
 
 export const ArticlesPage = () => {
   return (
@@ -27,9 +27,9 @@ export const ArticlesPage = () => {
       <PageMeta
         title={t('Articles')}
         icon={ArticleIcon}
-        breadCrumbs={[{ title: t('Feed'), href: ROOT_PATH }, { title: t('Articles') }]}
+        breadCrumbs={[{ title: t('Feed'), href: FEED_ROOT_PATH }, { title: t('Articles') }]}
         actions={
-          <ActionLink onClick={() => (window.location.href = `${ROOT_PATH}/new`)} icon={Plus}>
+          <ActionLink onClick={() => (window.location.href = `${FEED_ROOT_PATH}/new`)} icon={Plus}>
             {t('New Article')}
           </ActionLink>
         }
@@ -73,7 +73,7 @@ const DraftsView = () => {
                   channel={channel}
                   key={draft.fileId ?? index}
                   className="bg-background"
-                  linkRoot={`${ROOT_PATH}/edit`}
+                  linkRoot={`${FEED_ROOT_PATH}/edit`}
                 />
               );
             })}
@@ -142,7 +142,7 @@ const PublishedArticlesView = () => {
                       type="mute"
                       size="none"
                       className="opacity-60 hover:opacity-100"
-                      href={`${ROOT_PATH}/edit/${
+                      href={`${FEED_ROOT_PATH}/edit/${
                         channel?.fileMetadata.appData.content.slug ||
                         channel?.fileMetadata.appData.uniqueId
                       }/${draft.fileMetadata.appData.content.id}`}

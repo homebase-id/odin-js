@@ -1,6 +1,7 @@
 import {
   ActionGroup,
   ActionLink,
+  CHAT_ROOT_PATH,
   ConnectionImage,
   ConnectionName,
   ErrorBoundary,
@@ -31,7 +32,6 @@ import { ChatComposer } from '../../components/Chat/Composer/ChatComposer';
 import { ChatInfo } from '../../components/Chat/Detail/ChatInfo';
 import { useNavigate } from 'react-router-dom';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { ROOT_PATH } from '../../app/App';
 
 export const ChatDetail = ({
   conversationId,
@@ -42,7 +42,7 @@ export const ChatDetail = ({
   communityTagId?: string;
   rootPath?: string;
 }) => {
-  const rootPath = _rootPath || ROOT_PATH;
+  const rootPath = _rootPath || CHAT_ROOT_PATH;
   const { data: conversation, isLoading, isFetched } = useConversation({ conversationId }).single;
   const { mutate: inviteRecipient } = useConversation().inviteRecipient;
   const [replyMsg, setReplyMsg] = useState<HomebaseFile<ChatMessage> | undefined>();

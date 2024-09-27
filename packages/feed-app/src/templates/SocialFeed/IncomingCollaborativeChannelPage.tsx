@@ -4,10 +4,10 @@ import {
   CollaborativeChannelItem,
   useCollaborativeChannel,
   useCollaborativeChannels,
+  FEED_ROOT_PATH,
 } from '@homebase-id/common-app';
 import { Quote, Save } from '@homebase-id/common-app/icons';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { ROOT_PATH } from '../../app/App';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { stringGuidsEqual, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { RemoteCollaborativeChannelDefinition } from '@homebase-id/js-lib/public';
@@ -27,7 +27,7 @@ export const IncomingCollaborativeChannelPage = () => {
   const navigate = useNavigate();
   useEffect(() => {
     if (saveStatus === 'success') {
-      navigate(`${ROOT_PATH}/channels`);
+      navigate(`${FEED_ROOT_PATH}/channels`);
     }
   }, [saveStatus]);
 
@@ -57,7 +57,7 @@ export const IncomingCollaborativeChannelPage = () => {
     );
 
     if (exists) {
-      navigate(`${ROOT_PATH}/channels`);
+      navigate(`${FEED_ROOT_PATH}/channels`);
     }
   }, [existingChannelLinks]);
 
@@ -67,8 +67,8 @@ export const IncomingCollaborativeChannelPage = () => {
         title={t('Incoming Collaborative Channel')}
         icon={Quote}
         breadCrumbs={[
-          { title: t('Feed'), href: ROOT_PATH },
-          { title: t('Channels'), href: `${ROOT_PATH}/channels` },
+          { title: t('Feed'), href: FEED_ROOT_PATH },
+          { title: t('Channels'), href: `${FEED_ROOT_PATH}/channels` },
           { title: t('Incoming collaborative channel') },
         ]}
       />

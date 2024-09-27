@@ -2,21 +2,28 @@ import { ChannelDefinition, PostContent } from '@homebase-id/js-lib/public';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useManagePost } from '../../../hooks/socialFeed/post/useManagePost';
-import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { ActionGroup, ActionGroupOptionProps } from '../../../ui/Buttons/ActionGroup';
 import { Pencil } from '../../../ui/Icons/Pencil';
 import { t } from '../../../helpers/i18n/dictionary';
 import { Clipboard, Globe, Trash } from '../../../ui/Icons';
 import { EditPostDialog } from '../../EditPostDialog/EditPostDialog';
+import { useDotYouClient, useDotYouClientContext } from '../../../hooks';
+import { FEED_ROOT_PATH } from '../../../constants';
 
 export const OwnerActions = ({
+  odinId,
+  authorOdinId,
   postFile,
   channel,
 }: {
+  odinId?: string;
+  authorOdinId?: string;
   postFile: HomebaseFile<PostContent>;
   channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition> | undefined;
 }) => {
+  const identity = useDotYouClient().getIdentity();
   const postContent = postFile.fileMetadata.appData.content;
 
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -25,6 +32,8 @@ export const OwnerActions = ({
   const { mutateAsync: editPost } = useManagePost().update;
 
   const navigate = useNavigate();
+  const host = new DotYouClient({ api: ApiType.Guest, identity: identity || undefined }).getRoot();
+
   return (
     <div className="ml-auto" onClick={(e) => e.stopPropagation()}>
       <ErrorNotification error={asyncError} />
@@ -41,12 +50,19 @@ export const OwnerActions = ({
                   onClick: (e) => {
                     e.stopPropagation();
                     if (postContent.type === 'Article') {
-                      const targetUrl = `/apps/feed/edit/${
+                      const targetUrl = `/apps/feed/edit/${odinId || window.location.host}/${
                         channel?.fileMetadata.appData.content.slug ||
                         channel?.fileMetadata.appData.uniqueId
                       }/${postContent.id}`;
-                      if (window.location.pathname.startsWith('/owner')) navigate(targetUrl);
-                      else window.location.href = targetUrl;
+
+                      if (!odinId || window.location.host === odinId) {
+                        // Navigate to own identity
+                        window.location.href = `${host}${targetUrl}`;
+                      } else {
+                        if (window.location.pathname.startsWith(FEED_ROOT_PATH))
+                          navigate(targetUrl);
+                        else window.location.href = targetUrl;
+                      }
                     } else {
                       setIsEditOpen(true);
                     }

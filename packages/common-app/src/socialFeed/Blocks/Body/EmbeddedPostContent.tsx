@@ -9,6 +9,7 @@ import { FakeAnchor } from '../../../ui';
 import { SecurityGroupType } from '@homebase-id/js-lib/core';
 import { PostBody } from './Body';
 import { PostMedia } from '../Media/Media';
+import { FEED_ROOT_PATH } from '../../../constants';
 
 export const EmbeddedPostContent = ({
   content,
@@ -34,7 +35,7 @@ export const EmbeddedPostContent = ({
 
   // When on the feed use the preview link
   const postPath =
-    window.location.pathname === '/apps/feed'
+    window.location.pathname === FEED_ROOT_PATH
       ? `preview/${content.authorOdinId}/${channel?.fileMetadata.appData.uniqueId}/${content.id}`
       : content.permalink;
 

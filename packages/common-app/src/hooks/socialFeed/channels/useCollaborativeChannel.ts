@@ -9,7 +9,14 @@ import {
   saveChannelLink,
 } from '@homebase-id/js-lib/public';
 
-import { FEED_APP_ID, t, useChannelDrives, useCircles, useDotYouClient } from '../../../..';
+import {
+  FEED_APP_ID,
+  FEED_ROOT_PATH,
+  t,
+  useChannelDrives,
+  useCircles,
+  useDotYouClient,
+} from '../../../..';
 import { drivesEqual, stringGuidsEqual, stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import {
   ApiType,
@@ -20,7 +27,6 @@ import {
   SecurityGroupType,
   TargetDrive,
 } from '@homebase-id/js-lib/core';
-const FEED_ROOT_PATH = '/apps/feed';
 import { useChannel } from './useChannel';
 import { ALL_CONNECTIONS_CIRCLE_ID } from '@homebase-id/js-lib/network';
 

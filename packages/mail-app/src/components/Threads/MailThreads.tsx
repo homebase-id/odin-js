@@ -5,6 +5,7 @@ import {
   LoadingBlock,
   ErrorNotification,
   ActionGroup,
+  MAIL_ROOT_PATH,
 } from '@homebase-id/common-app';
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
@@ -14,7 +15,6 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { useMailThread } from '../../hooks/mail/useMailThread';
-import { ROOT_PATH } from '../../app/App';
 import { MailThreadsFilter, useFilteredMailThreads } from '../../hooks/mail/useFilteredMailThreads';
 import { useMailConversation } from '../../hooks/mail/useMailConversation';
 import { MailConversationItem } from './MailConversationItem';
@@ -157,7 +157,7 @@ export const MailThreads = ({
                       query={query}
                       data-key={lastConversation.fileId}
                       mailThread={mailThread}
-                      pathPrefix={`${ROOT_PATH}/${filter}/`}
+                      pathPrefix={`${MAIL_ROOT_PATH}/${filter}/`}
                       toggleSelection={() => {
                         setIsAllSelected(false);
                         setSelection(
@@ -296,7 +296,7 @@ const MailConversationsHeader = ({
           archiveThreadError
         }
       />
-      <div className="sticky left-0 right-0 top-[3.7rem] z-10 flex flex-row items-center border-b border-b-slate-100 px-2 py-2 dark:border-b-slate-700 ">
+      <div className="sticky left-0 right-0 top-[3.7rem] z-10 flex flex-row items-center border-b border-b-slate-100 px-2 py-2 dark:border-b-slate-700">
         <div className="p-2">
           <button
             className="absolute bottom-0 left-0 top-0 z-10 w-10"

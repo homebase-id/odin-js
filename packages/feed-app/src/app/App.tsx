@@ -27,10 +27,9 @@ import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import { useAuth } from '../hooks/auth/useAuth';
 
-export const ROOT_PATH = '/apps/feed';
-const AUTH_PATH = ROOT_PATH + '/auth';
+const AUTH_PATH = FEED_ROOT_PATH + '/auth';
 
-import { ErrorBoundary, NotFound, OdinQueryClient } from '@homebase-id/common-app';
+import { ErrorBoundary, FEED_ROOT_PATH, NotFound, OdinQueryClient } from '@homebase-id/common-app';
 
 export const REACT_QUERY_CACHE_KEY = 'FEED_REACT_QUERY_OFFLINE_CACHE';
 const INCLUDED_QUERY_KEYS = ['common-image', 'collaborative-channels'];
@@ -40,7 +39,7 @@ function App() {
     createRoutesFromElements(
       <>
         <Route
-          path={ROOT_PATH}
+          path={FEED_ROOT_PATH}
           element={
             <ErrorBoundary>
               <Suspense fallback={<></>}>

@@ -39,10 +39,14 @@ import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import { useAuth } from '../hooks/auth/useAuth';
 
-export const ROOT_PATH = '/apps/chat';
-const AUTH_PATH = ROOT_PATH + '/auth';
+const AUTH_PATH = CHAT_ROOT_PATH + '/auth';
 
-import { ErrorBoundary, NotFound, DotYouClientProvider } from '@homebase-id/common-app';
+import {
+  ErrorBoundary,
+  NotFound,
+  DotYouClientProvider,
+  CHAT_ROOT_PATH,
+} from '@homebase-id/common-app';
 import VideoPlayer from '../templates/VideoPlayer/VideoPlayer';
 import { OdinQueryClient } from '@homebase-id/common-app';
 
@@ -51,7 +55,7 @@ function App() {
     createRoutesFromElements(
       <>
         <Route
-          path={ROOT_PATH}
+          path={CHAT_ROOT_PATH}
           element={
             <ErrorBoundary>
               <Suspense fallback={<></>}>
