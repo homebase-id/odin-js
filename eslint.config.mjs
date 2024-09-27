@@ -1,4 +1,5 @@
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
+import reactRefreshEslint from 'eslint-plugin-react-refresh';
 import tsParser from '@typescript-eslint/parser';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -34,6 +35,7 @@ export default [
   {
     plugins: {
       '@typescript-eslint': typescriptEslint,
+      'react-refresh': reactRefreshEslint,
     },
 
     languageOptions: {
@@ -52,6 +54,7 @@ export default [
       '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/no-unused-expressions': ['error', { allowShortCircuit: true }],
       'react/prop-types': 'off',
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
 ];

@@ -80,7 +80,7 @@ import { FixedToolbarButtons } from '../components/plate-ui/fixed-toolbar-button
 import { RichText } from '@homebase-id/js-lib/core';
 import { useDarkMode } from '@homebase-id/common-app';
 
-import { createImagePlugin, ELEMENT_IMAGE, MediaOptions } from './ImagePlugin/ImagePlugin';
+import { ELEMENT_IMAGE, MediaOptions } from './ImagePlugin/ImagePlugin';
 import {
   useState,
   useEffect,
@@ -94,6 +94,7 @@ import { autoformatRules } from '../lib/autoFormatRules';
 import { EmojiInputElement } from './Combobox/EmojiCombobox';
 import { MentionElement } from '../components/plate-ui/mention-element';
 import { Mentionable, MentionInputElement } from '../components/plate-ui/mention-input-element';
+import { createImagePlugin } from './ImagePlugin/createImagePlugin';
 
 interface RTEProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

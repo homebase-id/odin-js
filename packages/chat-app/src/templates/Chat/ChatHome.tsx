@@ -19,6 +19,7 @@ import {
 import { drives, circleDrives, permissions } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const CHAT_ROOT = ROOT_PATH;
 
 export const ChatHome = () => {

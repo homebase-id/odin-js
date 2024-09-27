@@ -5,16 +5,13 @@ import {
   COMMUNITY_MESSAGE_FILE_TYPE,
   CommunityMessage,
 } from '../../../providers/CommunityMessageProvider';
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { ErrorNotification, formatToDateAgoWithRelativeDetail, t } from '@homebase-id/common-app';
 import { CommunityMessageItem } from '../Message/CommunityMessageItem';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
 import { CommunityActions } from './ContextMenu';
 import { usecommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
-
-export const useIsomorphicLayoutEffect =
-  typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export const CommunityHistory = ({
   community,

@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  createNodeHOC,
-  createNodesHOC,
-  PlaceholderProps,
-  usePlaceholderState,
-} from '@udecode/plate-common';
-import { ELEMENT_H1 } from '@udecode/plate-heading';
-import { ELEMENT_PARAGRAPH } from '@udecode/plate-paragraph';
+import { PlaceholderProps, usePlaceholderState } from '@udecode/plate-common';
 
 import { cn } from '../../lib/utils';
 
@@ -30,23 +23,22 @@ export const Placeholder = (props: PlaceholderProps) => {
   });
 };
 
-export const withPlaceholder = createNodeHOC(Placeholder);
-export const withPlaceholdersPrimitive = createNodesHOC(Placeholder);
+// export const withPlaceholder = createNodeHOC(Placeholder);
+// const withPlaceholdersPrimitive = createNodesHOC(Placeholder);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const withPlaceholders = (components: any) =>
-  withPlaceholdersPrimitive(components, [
-    {
-      key: ELEMENT_PARAGRAPH,
-      placeholder: 'Type a paragraph',
-      hideOnBlur: true,
-      query: {
-        maxLevel: 1,
-      },
-    },
-    {
-      key: ELEMENT_H1,
-      placeholder: 'Untitled',
-      hideOnBlur: false,
-    },
-  ]);
+// const withPlaceholders = (components: any) =>
+//   withPlaceholdersPrimitive(components, [
+//     {
+//       key: ELEMENT_PARAGRAPH,
+//       placeholder: 'Type a paragraph',
+//       hideOnBlur: true,
+//       query: {
+//         maxLevel: 1,
+//       },
+//     },
+//     {
+//       key: ELEMENT_H1,
+//       placeholder: 'Untitled',
+//       hideOnBlur: false,
+//     },
+//   ]);

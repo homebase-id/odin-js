@@ -6,14 +6,11 @@ import { ChatMessage } from '../../providers/ChatProvider';
 import { UnifiedConversation } from '../../providers/ConversationProvider';
 import { ChatMessageItem } from './Detail/ChatMessageItem';
 import { ChatActions } from './Detail/ContextMenu';
-import { useMemo, useRef, useEffect, useLayoutEffect } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 // Following: https://codesandbox.io/p/devbox/frosty-morse-scvryz?file=%2Fpages%2Findex.js%3A175%2C23
 // and https://github.com/TanStack/virtual/discussions/195
-
-export const useIsomorphicLayoutEffect =
-  typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export const ChatHistory = ({
   conversation,

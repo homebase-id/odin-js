@@ -9,9 +9,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  useOpenState,
 } from './dropdown-menu';
 import { ToolbarButton } from './toolbar';
+import { useOpenState } from './dropdown-menu/use-open-state';
 
 export function MoreDropdownMenu(props: DropdownMenuProps) {
   const editor = useEditorState();

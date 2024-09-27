@@ -13,12 +13,16 @@ import DrivePermissionRequestView from '../../components/PermissionViews/DrivePe
 import { useApp } from '../../hooks/apps/useApp';
 import { useDrives } from '../../hooks/drives/useDrives';
 import { useState } from 'react';
-import { drivesParamToDriveGrantRequest, permissionParamToPermissionSet } from './RegisterApp';
+import {
+  circleToCircleIds,
+  drivesParamToDriveGrantRequest,
+  permissionParamToPermissionSet,
+} from './util';
 import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
 import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDrive } from '../../hooks/drives/useDrive';
 
-const ExtendAppPermissions = () => {
+export const ExtendAppPermissions = () => {
   // Read the queryString
   const [searchParams] = useSearchParams();
   const [error, setError] = useState<unknown | undefined>();
@@ -297,10 +301,4 @@ const ExtendAppPermissions = () => {
       </section>
     </>
   );
-};
-
-export default ExtendAppPermissions;
-
-export const circleToCircleIds = (queryParamVal: string | undefined): string[] => {
-  return queryParamVal?.split(',') || [];
 };

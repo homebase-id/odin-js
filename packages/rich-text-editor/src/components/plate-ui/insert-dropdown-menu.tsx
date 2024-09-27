@@ -14,9 +14,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  useOpenState,
 } from './dropdown-menu';
 import { ToolbarButton } from './toolbar';
+import { useOpenState } from './dropdown-menu/use-open-state';
 
 const items = [
   {
