@@ -14,12 +14,13 @@ import {
   retrieveEccKey,
   throwAwayTheECCKey,
 } from '@homebase-id/js-lib/auth';
-import { REACT_QUERY_CACHE_KEY, ROOT_PATH } from '../../app/App';
+import { REACT_QUERY_CACHE_KEY } from '../../app/App';
 import { ALL_CONNECTIONS_CIRCLE_ID, AppPermissionType } from '@homebase-id/js-lib/network';
 import {
   APP_AUTH_TOKEN,
   APP_SHARED_SECRET,
   CHAT_APP_ID,
+  CHAT_ROOT_PATH,
   useDotYouClient,
 } from '@homebase-id/common-app';
 import { ChatDrive } from '../../providers/ConversationProvider';
@@ -129,7 +130,7 @@ export const useYouAuthAuthorization = () => {
     // Persist key for usage on finalize
     await saveEccKey(eccKey);
 
-    const finalizeUrl = `${window.location.origin}${ROOT_PATH}/auth/finalize`;
+    const finalizeUrl = `${window.location.origin}${CHAT_ROOT_PATH}/auth/finalize`;
     return getRegistrationParams(
       finalizeUrl,
       appName,

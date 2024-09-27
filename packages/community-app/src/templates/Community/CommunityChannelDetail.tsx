@@ -5,6 +5,7 @@ import {
   ActionLink,
   AuthorImage,
   AuthorName,
+  COMMUNITY_ROOT_PATH,
   DialogWrapper,
   ErrorBoundary,
   formatDateExludingYearIfCurrent,
@@ -16,7 +17,6 @@ import {
 import { Arrow, ChevronLeft, Times } from '@homebase-id/common-app/icons';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
-import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
 import { CommunityChannel } from '../../providers/CommunityProvider';
 import { useCommunityChannel } from '../../hooks/community/channels/useCommunityChannel';
 import { createPortal } from 'react-dom';
@@ -79,7 +79,7 @@ export const CommunityChannelDetail = () => {
                   origin={community || undefined}
                   doOpenThread={(thread) =>
                     navigate(
-                      `${COMMUNITY_ROOT}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
+                      `${COMMUNITY_ROOT_PATH}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
                     )
                   }
                 />
@@ -123,7 +123,11 @@ const CommunityChannelHeader = ({
     <>
       {/* <ErrorNotification error={clearChatError || deleteChatError} /> */}
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-        <Link className="-m-1 p-1 lg:hidden" type="mute" to={`${COMMUNITY_ROOT}/${communityId}`}>
+        <Link
+          className="-m-1 p-1 lg:hidden"
+          type="mute"
+          to={`${COMMUNITY_ROOT_PATH}/${communityId}`}
+        >
           <ChevronLeft className="h-4 w-4" />
         </Link>
 
@@ -154,7 +158,7 @@ const CommunityChannelHeader = ({
 //   return (
 //     <>
 //       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-//         <ActionLink className="lg:hidden" type="mute" href={`${COMMUNITY_ROOT}/${communityId}`}>
+//         <ActionLink className="lg:hidden" type="mute" href={`${COMMUNITY_ROOT_PATH}/${communityId}`}>
 //           <ChevronLeft className="h-5 w-5" />
 //         </ActionLink>
 
@@ -269,13 +273,13 @@ const CommunityThread = ({
           className="p-2 xl:hidden"
           size="none"
           type="mute"
-          href={`${COMMUNITY_ROOT}/${communityKey}/${channelKey || 'all'}`}
+          href={`${COMMUNITY_ROOT_PATH}/${communityKey}/${channelKey || 'all'}`}
         >
           <ChevronLeft className="h-5 w-5" />
         </ActionLink>
         {t('Thread')}
         <ActionLink
-          href={`${COMMUNITY_ROOT}/${communityKey}/${channelKey || 'all'}`}
+          href={`${COMMUNITY_ROOT_PATH}/${communityKey}/${channelKey || 'all'}`}
           icon={Times}
           size="none"
           type="mute"

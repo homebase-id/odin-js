@@ -68,7 +68,7 @@ function App() {
     createRoutesFromElements(
       <>
         <Route
-          path={ROOT_PATH}
+          path={MAIL_ROOT_PATH}
           element={
             <ErrorBoundary>
               <Suspense fallback={<></>}>

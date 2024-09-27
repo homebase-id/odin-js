@@ -14,12 +14,13 @@ import {
   retrieveEccKey,
   throwAwayTheECCKey,
 } from '@homebase-id/js-lib/auth';
-import { REACT_QUERY_CACHE_KEY, ROOT_PATH } from '../../app/App';
+import { REACT_QUERY_CACHE_KEY } from '../../app/App';
 import { ALL_CONNECTIONS_CIRCLE_ID, AppPermissionType } from '@homebase-id/js-lib/network';
 import {
   APP_AUTH_TOKEN,
   APP_SHARED_SECRET,
   MAIL_APP_ID,
+  MAIL_ROOT_PATH,
   useDotYouClient,
 } from '@homebase-id/common-app';
 import { clear } from 'idb-keyval';
@@ -132,7 +133,7 @@ export const useYouAuthAuthorization = () => {
     // Persist key for usage on finalize
     await saveEccKey(eccKey);
 
-    const finalizeUrl = `${window.location.origin}${ROOT_PATH}/auth/finalize`;
+    const finalizeUrl = `${window.location.origin}${MAIL_ROOT_PATH}/auth/finalize`;
     return getRegistrationParams(
       finalizeUrl,
       appName,
