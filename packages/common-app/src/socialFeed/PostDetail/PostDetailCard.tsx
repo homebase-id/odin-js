@@ -15,6 +15,7 @@ import {
   MediaGallery,
   EmbeddedPostContent,
   PrimaryMedia,
+  ToGroupBlock,
 } from '../../..';
 import {
   DEFAULT_PAYLOAD_KEY,
@@ -62,11 +63,17 @@ export const PostDetailCard = ({
               {showAuthorDetail ? (
                 <>
                   <AuthorImage
-                    odinId={odinId}
+                    odinId={post.authorOdinId || odinId}
                     className="mr-2 h-[2rem] w-[2rem] rounded-full sm:h-[2.5rem] sm:w-[2.5rem]"
                   />
                   <h2>
-                    <AuthorName odinId={odinId} />
+                    <AuthorName odinId={post.authorOdinId || odinId} />
+                    <ToGroupBlock
+                      channel={channel || undefined}
+                      odinId={odinId}
+                      authorOdinId={post.authorOdinId}
+                      className="ml-1"
+                    />
                   </h2>
                   <span className="px-2 leading-4">·</span>
                 </>
