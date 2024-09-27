@@ -9,7 +9,7 @@ const ConnectionCard = (props: PersonCardProps) => {
   }).fetch;
   const nameData = contactData?.fileMetadata.appData.content?.name;
   const fullName = nameData
-    ? nameData.displayName ?? `${nameData.givenName ?? ''} ${nameData.surname ?? ''}`
+    ? (nameData.displayName ?? `${nameData.givenName ?? ''} ${nameData.surname ?? ''}`)
     : props.odinId;
 
   if (isLoading) {
@@ -20,9 +20,11 @@ const ConnectionCard = (props: PersonCardProps) => {
     <>
       <PersonCard {...props}>
         <h2 className="font-thiner flex flex-col dark:text-white">
-          <span className="break-words">{fullName ?? props.odinId}</span>
+          <span className="break-words hover:underline">{fullName ?? props.odinId}</span>
           {fullName ? (
-            <small className="d-block break-words text-sm text-slate-500 dark:text-slate-400">
+            <small
+              className={`d-block relative overflow-hidden text-nowrap break-words text-sm text-slate-500 after:absolute after:inset-0 after:left-auto after:w-4 after:bg-gradient-to-l after:from-background after:to-transparent after:content-[''] dark:text-slate-400`}
+            >
               {props.odinId}
             </small>
           ) : (

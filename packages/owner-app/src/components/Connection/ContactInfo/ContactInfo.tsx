@@ -134,7 +134,7 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
             {odinId ? (
               <ContactImage
                 odinId={odinId}
-                className="mx-auto h-[12rem] w-[12rem]"
+                className="mx-auto h-[12rem] w-[12rem] overflow-hidden rounded-md"
                 canSave={true}
               />
             ) : null}

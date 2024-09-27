@@ -23,13 +23,13 @@ const PersonCard = ({
   canSave,
 }: PersonCardProps) => {
   return (
-    <HybridLink className={`${className}`} href={href}>
+    <HybridLink className={`group ${className}`} href={href}>
       <div
-        className={`h-full rounded-md border bg-white transition-colors dark:bg-gray-800 ${
+        className={`h-full overflow-hidden rounded-md border bg-background transition-colors ${
           isChecked
-            ? 'border-4 border-indigo-500 dark:border-indigo-500'
+            ? 'border-2 border-indigo-500 dark:border-indigo-500'
             : isChecked === false
-              ? 'border-4 dark:border-gray-800'
+              ? 'border-2'
               : 'border-gray-200 border-opacity-60 dark:border-gray-900'
         } ${href ? 'cursor-pointer hover:shadow-md hover:dark:shadow-slate-600' : ''}`}
         onClick={onClick}
