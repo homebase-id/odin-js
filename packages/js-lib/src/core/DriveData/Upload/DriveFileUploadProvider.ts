@@ -202,8 +202,6 @@ export const uploadHeader = async (
   strippedInstructions.storageOptions.storageIntent = 'metadataOnly';
   strippedInstructions.transferIv = instructions.transferIv || getRandom16ByteArray();
 
-  console.log('uploadHeader strippedInstructions', strippedInstructions);
-
   const encryptedDescriptor = await buildDescriptor(
     dotYouClient,
     decryptedKeyHeader,
