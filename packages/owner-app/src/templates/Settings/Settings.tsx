@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 import { NetworkVisibilitySettings } from './NetworkVisibilitySettings';
 import { ReactionSettings } from './ReactionSettings';
 import { SecuritySettings } from './SecuritySettings';
+import { IntroductionSettings } from './IntroductionSettings';
 import { DeleteAccountSettings } from './DeleteAccountSettings';
 import { Cog } from '@homebase-id/common-app/icons';
 
@@ -25,6 +26,10 @@ const Settings = () => {
             path: `/owner/settings/reactions`,
           },
           {
+            title: `Introductions`,
+            path: `/owner/settings/introductions`,
+          },
+          {
             title: `Security`,
             path: `/owner/settings/security`,
           },
@@ -42,6 +47,7 @@ const Settings = () => {
       {(sectionId === 'privacy' || !sectionId) && <NetworkVisibilitySettings />}
       {sectionId === 'reactions' && <ReactionSettings />}
       {sectionId === 'security' && <SecuritySettings />}
+      {sectionId === 'introductions' && <IntroductionSettings />}
       {sectionId === 'delete' && <DeleteAccountSettings />}
       {/* {sectionId === 'ui' && <UiSettings />} */}
     </>

@@ -262,7 +262,7 @@ export const uploadChatMessage = async (
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList || {
-      requiredSecurityGroup: SecurityGroupType.Connected,
+      requiredSecurityGroup: SecurityGroupType.AutoConnected,
     },
   };
 
@@ -446,7 +446,7 @@ export const updateChatMessage = async (
     senderOdinId: (message.fileMetadata as FileMetadata<ChatMessage>).senderOdinId,
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList || {
-      requiredSecurityGroup: SecurityGroupType.Connected,
+      requiredSecurityGroup: SecurityGroupType.AutoConnected,
     },
   };
 

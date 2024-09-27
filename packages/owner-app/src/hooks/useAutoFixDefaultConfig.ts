@@ -13,10 +13,12 @@ import {
 import { useEffect, useRef } from 'react';
 import { useAttribute } from './profiles/useAttribute';
 import { useSettings } from './settings/useSettings';
-import { DotYouClient } from '@homebase-id/js-lib/core';
-import { autoFixConnections } from '../provider/network/troubleshooting/AutoFixConnectionProvider';
+import {
+  autoFixConnections,
+  ensureVerificationHash,
+} from '../provider/network/troubleshooting/DataConversionProvider';
 
-export const AUTO_FIX_VERSION = '0.0.1';
+export const AUTO_FIX_VERSION = '0.0.3';
 export const useAutofixDefaultConfig = () => {
   const { add: addError } = useErrors();
 
@@ -40,7 +42,8 @@ export const useAutofixDefaultConfig = () => {
     (async () => {
       try {
         await fixDefaultProfileImage();
-        await fixConnections(dotYouClient);
+        await autoFixConnections(dotYouClient);
+        await ensureVerificationHash(dotYouClient);
 
         updateUiSetting({ ...uiSettings, lastRunAutoFix: AUTO_FIX_VERSION });
         console.log('[useAutoFixDefaultConfig] Finished ', AUTO_FIX_VERSION);
@@ -53,11 +56,6 @@ export const useAutofixDefaultConfig = () => {
       }
     })();
   }, [isUiSettingsFetched]);
-};
-
-const fixConnections = async (dotYouClient: DotYouClient) => {
-  const result = await autoFixConnections(dotYouClient);
-  if (result?.status !== 200) throw new Error('Failed to fix connections');
 };
 
 const useFixDefaultProfileImage = () => {

@@ -2,6 +2,7 @@ export * from './Input';
 export * from './Label';
 export * from './CircleSelector';
 export * from './Checkbox';
+export * from './CheckboxFancy';
 export * from './CheckboxToggle';
 export * from './Radio';
 export * from './Select';

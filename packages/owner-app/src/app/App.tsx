@@ -78,9 +78,10 @@ import {
   NotFound,
   OdinQueryClient,
 } from '@homebase-id/common-app';
+import { useInboxProcessor } from '../hooks/inbox/useInboxProcessor';
 
 export const REACT_QUERY_CACHE_KEY = 'OWNER_REACT_QUERY_OFFLINE_CACHE';
-const INCLUDED_QUERY_KEYS = ['contact'];
+const INCLUDED_QUERY_KEYS = ['contact', 'process-inbox'];
 
 function App() {
   const router = createBrowserRouter(
@@ -242,6 +243,7 @@ function App() {
 const RootRoute = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated } = useAuth();
   const { data: isConfigured, isFetched } = useIsConfigured().isConfigured;
+  useInboxProcessor();
 
   if (!isAuthenticated) {
     if (window.location.pathname === FIRSTRUN_PATH || window.location.pathname === RECOVERY_PATH) {

@@ -120,21 +120,33 @@ test('ACLs are equal', () => {
   expect(
     aclEqual(
       { requiredSecurityGroup: SecurityGroupType.Connected },
-      { requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: [circleIdA, circleIdB] }
+      {
+        requiredSecurityGroup: SecurityGroupType.Connected,
+        circleIdList: [circleIdA, circleIdB],
+      }
     )
   ).toBe(false);
 
   expect(
     aclEqual(
       { requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: [circleIdA] },
-      { requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: [circleIdA, circleIdB] }
+      {
+        requiredSecurityGroup: SecurityGroupType.Connected,
+        circleIdList: [circleIdA, circleIdB],
+      }
     )
   ).toBe(false);
 
   expect(
     aclEqual(
-      { requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: [circleIdA, circleIdB] },
-      { requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: [circleIdA, circleIdB] }
+      {
+        requiredSecurityGroup: SecurityGroupType.Connected,
+        circleIdList: [circleIdA, circleIdB],
+      },
+      {
+        requiredSecurityGroup: SecurityGroupType.Connected,
+        circleIdList: [circleIdA, circleIdB],
+      }
     )
   ).toBe(true);
 });

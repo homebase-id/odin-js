@@ -147,7 +147,7 @@ export const saveCommunityChannel = async (
     },
     isEncrypted: true,
     accessControlList: {
-      requiredSecurityGroup: SecurityGroupType.Connected,
+      requiredSecurityGroup: SecurityGroupType.AutoConnected,
     },
   };
 

@@ -4,6 +4,7 @@ import {
   useDotYouClient,
   ErrorNotification,
   ActionButton,
+  mergeStates,
   ActionLink,
 } from '@homebase-id/common-app';
 import {
@@ -15,12 +16,15 @@ import {
   Phone,
   Refresh,
   ChatBubble,
+  Check,
+  Exclamation,
 } from '@homebase-id/common-app/icons';
 import Section from '../../ui/Sections/Section';
 import ContactImage from '../ContactImage/ContactImage';
 import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import { ContactFile } from '@homebase-id/js-lib/network';
 import { useConnection } from '../../../hooks/connections/useConnection';
+import { useVerifyConnection } from '../../../hooks/connections/useVerifyConnection';
 
 interface ContactInfoProps {
   odinId?: string;
@@ -35,9 +39,20 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
   // Disable saving so we can support manual refresh;
 
   const {
+    mutate: verifyConnection,
+    status: verifyConnectionState,
+    error: verifyError,
+    data: verifyData,
+  } = useVerifyConnection().confirmConnection;
+
+  const {
     fetch: { data: connectionInfo },
   } = useConnection({ odinId: odinId });
   const { getIdentity } = useDotYouClient();
+
+  const {
+    fetch: { data: introducerConnectioInfo },
+  } = useConnection({ odinId: connectionInfo?.introducerOdinId });
 
   if (!contact) return null;
 
@@ -46,23 +61,52 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
   const isConnected = connectionInfo?.status === 'connected';
   const identity = getIdentity();
 
+  const isConnectedWithIntroducer = introducerConnectioInfo?.status === 'connected';
+
   return (
     <>
-      <ErrorNotification error={refreshError} />
+      <ErrorNotification error={refreshError || verifyError} />
       <Section
         title={
           <>
             {t('Details')}
-            <a
-              href={`${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${
-                isConnected && identity ? '?youauth-logon=' + identity : ''
-              }`}
-              rel="noopener noreferrer"
-              target="_blank"
-              className="block text-sm text-primary hover:underline"
-            >
-              {odinId}
-            </a>
+
+            {connectionInfo?.connectionRequestOrigin === 'introduction' ? (
+              <p className="flex gap-1 text-sm">
+                <a
+                  href={`${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${
+                    isConnected && identity ? '?youauth-logon=' + identity : ''
+                  }`}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  className="block text-sm text-primary hover:underline"
+                >
+                  {odinId}
+                </a>
+                {t('was introduced by')}
+                <a
+                  href={`${new DotYouClient({ identity: connectionInfo?.introducerOdinId, api: ApiType.Guest }).getRoot()}${
+                    isConnectedWithIntroducer && identity ? '?youauth-logon=' + identity : ''
+                  }`}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  className="block text-sm text-primary hover:underline"
+                >
+                  {connectionInfo?.introducerOdinId}
+                </a>
+              </p>
+            ) : (
+              <a
+                href={`${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${
+                  isConnected && identity ? '?youauth-logon=' + identity : ''
+                }`}
+                rel="noopener noreferrer"
+                target="_blank"
+                className="block text-sm text-primary hover:underline"
+              >
+                {odinId}
+              </a>
+            )}
           </>
         }
         actions={
@@ -70,18 +114,15 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
           contact?.fileId && (
             <ActionButton
               className="text-base"
-              state={refreshState}
-              onClick={() => refresh({ contact: contact as HomebaseFile<ContactFile> })}
-              icon={Refresh}
-              confirmOptions={{
-                type: 'info',
-                title: t('Refresh data'),
-                buttonText: t('Refresh'),
-                body: t(
-                  'Are you sure you want to refresh data, overwritten data cannot be recovered.'
-                ),
+              state={isConnected ? mergeStates(refreshState, verifyConnectionState) : refreshState}
+              onClick={() => {
+                refresh({ contact: contact as HomebaseFile<ContactFile> });
+                if (isConnected) {
+                  verifyConnection(odinId);
+                }
               }}
               type="secondary"
+              icon={Refresh}
             >
               {t('Refresh')}
             </ActionButton>
@@ -93,7 +134,7 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
             {odinId ? (
               <ContactImage
                 odinId={odinId}
-                className="mx-auto h-[12rem] w-[12rem]"
+                className="mx-auto h-[12rem] w-[12rem] overflow-hidden rounded-md"
                 canSave={true}
               />
             ) : null}
@@ -102,7 +143,7 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
             {contactContent.name && (
               <div className="flex flex-row items-center">
                 <IconFrame className="mr-2">
-                  <Person className="h-5 w-5" />
+                  <Person className="h-4 w-4" />
                 </IconFrame>
                 {contactContent.name.displayName ??
                   `${contactContent.name.givenName ?? ''} ${contactContent.name.surname ?? ''}`}
@@ -141,21 +182,40 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
               </div>
             ) : null}
           </div>
-          {isConnected ? (
-            <div className="mt-5 flex flex-col-reverse gap-1 sm:ml-auto">
-              <div className="flex flex-row items-center gap-2 sm:flex-row-reverse">
-                <ActionLink icon={ChatBubble} href={`/apps/chat/open/${odinId}`} type="secondary" />
-                <ActionLink
-                  icon={Envelope}
-                  href={`/apps/mail/new?recipients=${odinId}`}
-                  type="secondary"
-                />
-              </div>
-              <p className="text-sm text-slate-400">
-                {t('Reach out to')} {contactContent.name?.displayName ?? odinId}:
+          <div className="mt-5 flex flex-col-reverse gap-1 sm:ml-auto">
+            {isConnected ? (
+              <>
+                <div className="flex flex-row items-center gap-2 sm:flex-row-reverse">
+                  <ActionLink
+                    icon={ChatBubble}
+                    href={`/apps/chat/open/${odinId}`}
+                    type="secondary"
+                  />
+                  <ActionLink
+                    icon={Envelope}
+                    href={`/apps/mail/new?recipients=${odinId}`}
+                    type="secondary"
+                  />
+                </div>
+                <p className="text-sm text-slate-400">
+                  {t('Reach out to')} {contactContent.name?.displayName ?? odinId}:
+                </p>
+              </>
+            ) : null}
+            {verifyConnectionState === 'success' ? (
+              <p className="flex flex-row items-center gap-2">
+                {verifyData ? (
+                  <>
+                    <Check className="h-5 w-5" /> {t('Verified')}
+                  </>
+                ) : (
+                  <>
+                    <Exclamation className="h-5 w-5" /> {t('Failed to verify')}
+                  </>
+                )}
               </p>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
       </Section>
     </>

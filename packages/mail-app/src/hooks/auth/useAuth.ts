@@ -111,6 +111,7 @@ export const permissions = [
   AppPermissionType.ReadConnectionRequests,
   AppPermissionType.ReadConnections,
   AppPermissionType.SendPushNotifications,
+  AppPermissionType.SendIntroductions,
 ];
 
 const circleDrives = [
