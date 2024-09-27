@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 
 import ContactImage from '../ContactImage/ContactImage';
-import { Checkbox, HybridLink } from '@homebase-id/common-app';
+import { CheckboxFancy, HybridLink } from '@homebase-id/common-app';
 
 export interface PersonCardProps {
   odinId: string;
@@ -37,7 +37,7 @@ const PersonCard = ({
         <ContactImage odinId={odinId} canSave={canSave} />
         <div className="p-2">{children}</div>
         {isChecked === undefined ? null : (
-          <Checkbox checked={isChecked} className="absolute right-2 top-2" />
+          <CheckboxFancy checked={isChecked} readOnly className="absolute right-3 top-3" />
         )}
       </div>
     </HybridLink>

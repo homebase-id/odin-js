@@ -20,7 +20,7 @@ import {
   FEED_APP_ID,
   COMMUNITY_APP_ID,
 } from '../../constants';
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { hasDebugFlag, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 interface LiveNotification {
   title: string;
@@ -29,6 +29,8 @@ interface LiveNotification {
   href?: string;
   key: string;
 }
+
+const isDebug = hasDebugFlag();
 
 export const useLiveNotifications = (props: { drives?: TargetDrive[] } | undefined = {}) => {
   const { drives } = props || {};
@@ -42,7 +44,7 @@ export const useLiveNotifications = (props: { drives?: TargetDrive[] } | undefin
       wsNotification.notificationType === 'connectionRequestAccepted' ||
       wsNotification.notificationType === 'connectionRequestReceived'
     ) {
-      console.debug(clientNotification);
+      isDebug && console.debug(clientNotification);
 
       const otherId =
         clientNotification.notificationType === 'connectionRequestReceived'
