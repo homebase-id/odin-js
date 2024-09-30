@@ -116,7 +116,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
           />
           <MediaStillUploading postFile={postFile} />
           <PostInteracts
-            authorOdinId={odinId || window.location.hostname}
+            odinId={odinId || window.location.hostname}
             postFile={postFile}
             className="px-4"
             showSummary={showSummary}

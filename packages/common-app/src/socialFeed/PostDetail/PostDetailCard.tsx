@@ -211,7 +211,7 @@ export const PostDetailCard = ({
       )}
       {postFile ? (
         <PostInteracts
-          authorOdinId={odinId || window.location.hostname}
+          odinId={odinId || window.location.hostname}
           postFile={postFile}
           defaultExpanded={true}
           isAuthenticated={isAuthenticated}

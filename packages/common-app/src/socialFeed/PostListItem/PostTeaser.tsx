@@ -106,7 +106,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
               />
             </div>
             <PostInteracts
-              authorOdinId={window.location.hostname}
+              odinId={window.location.hostname}
               postFile={postFile}
               allowExpand={!!allowExpand}
               className="px-4"

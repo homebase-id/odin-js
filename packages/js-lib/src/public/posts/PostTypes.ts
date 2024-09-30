@@ -147,7 +147,7 @@ export interface Tweet extends PostContent {
 }
 
 export interface ReactionContext {
-  authorOdinId: string;
+  odinId: string;
   channelId: string;
   target: { fileId: string; globalTransitId: string; isEncrypted: boolean };
 }

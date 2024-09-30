@@ -222,9 +222,7 @@ export const PostImageDetailCard = ({
               ) : null}
               {postFile ? (
                 <PostInteracts
-                  authorOdinId={
-                    postFile.fileMetadata.originalAuthor || odinId || window.location.hostname
-                  }
+                  odinId={odinId || postFile.fileMetadata.senderOdinId || window.location.hostname}
                   postFile={postFile}
                   defaultExpanded={true}
                   className="p-5"
