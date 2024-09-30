@@ -1,5 +1,5 @@
 {
-  "version": "0.0.4-alpha.35",
+  "version": "0.0.5-alpha.0",
   "name": "@homebase-id/js-lib",
   "author": "YouFoundation",
   "description": "JavaScript SDK for the DotYouCore api",
