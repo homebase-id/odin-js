@@ -27,7 +27,7 @@ export const DoubleClickHeartForMedia = ({
 
   const postContent = postFile.fileMetadata.appData.content;
   const reactionContext: ReactionContext = {
-    authorOdinId: odinId || window.location.hostname,
+    odinId: odinId || window.location.hostname,
     channelId: postContent.channelId,
     target: {
       globalTransitId: postFile.fileMetadata.globalTransitId ?? 'unknown',

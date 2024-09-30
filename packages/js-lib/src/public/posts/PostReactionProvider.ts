@@ -52,7 +52,7 @@ export const saveComment = async (
     | HomebaseFile<RawReactionContent>
 ): Promise<string> => {
   const encrypt = context.target.isEncrypted;
-  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
 
   const payloads: PayloadFile[] = [];
@@ -154,7 +154,7 @@ export const saveComment = async (
       remoteTargetDrive: targetDrive,
       schedule: ScheduleOptions.SendLater,
       priority: PriorityOptions.Medium,
-      recipients: [context.authorOdinId],
+      recipients: [context.odinId],
       systemFileType: 'Comment',
     };
 
@@ -168,10 +168,9 @@ export const saveComment = async (
     );
 
     if (
-      TransferUploadStatus.EnqueuedFailed ===
-      result.recipientStatus[context.authorOdinId].toLowerCase()
+      TransferUploadStatus.EnqueuedFailed === result.recipientStatus[context.odinId].toLowerCase()
     ) {
-      throw new Error(result.recipientStatus[context.authorOdinId].toString());
+      throw new Error(result.recipientStatus[context.odinId].toString());
     }
 
     return result.remoteGlobalTransitIdFileIdentifier.globalTransitId;
@@ -183,7 +182,7 @@ export const removeComment = async (
   context: ReactionContext,
   commentFile: HomebaseFile<ReactionFile>
 ) => {
-  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
 
   if (isLocal) {
@@ -197,7 +196,7 @@ export const removeComment = async (
       dotYouClient,
       targetDrive,
       commentFile.fileMetadata.globalTransitId,
-      [context.authorOdinId],
+      [context.odinId],
       'Comment'
     );
   }
@@ -209,7 +208,7 @@ export const getComments = async (
   pageSize = 25,
   cursorState?: string
 ): Promise<{ comments: HomebaseFile<ReactionFile>[]; cursorState: string }> => {
-  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
@@ -225,18 +224,12 @@ export const getComments = async (
 
   const result = isLocal
     ? await queryBatch(dotYouClient, qp, ro)
-    : await queryBatchOverPeer(dotYouClient, context.authorOdinId, qp, ro);
+    : await queryBatchOverPeer(dotYouClient, context.odinId, qp, ro);
 
   const comments: HomebaseFile<ReactionFile>[] = (
     await Promise.all(
       result.searchResults.map(async (dsr) =>
-        dsrToComment(
-          dotYouClient,
-          context.authorOdinId,
-          dsr,
-          targetDrive,
-          result.includeMetadataHeader
-        )
+        dsrToComment(dotYouClient, context.odinId, dsr, targetDrive, result.includeMetadataHeader)
       )
     )
   ).filter((attr) => !!attr) as HomebaseFile<ReactionFile>[];

@@ -23,7 +23,7 @@ export const useComments = ({ context }: { context: ReactionContext }) => {
     context: ReactionContext;
     pageParam?: string;
   }): Promise<UseCommentsVal> => {
-    if (!context.authorOdinId || !context.channelId || !context.target.globalTransitId)
+    if (!context.odinId || !context.channelId || !context.target.globalTransitId)
       return { comments: [] as HomebaseFile<ReactionFile>[], cursorState: undefined };
 
     const response = await getComments(dotYouClient, context, PAGE_SIZE, pageParam);
@@ -31,7 +31,7 @@ export const useComments = ({ context }: { context: ReactionContext }) => {
       queryClient.invalidateQueries({
         queryKey: [
           'comments-summary',
-          context.authorOdinId,
+          context.odinId,
           context.channelId,
           context.target.globalTransitId,
         ],
@@ -42,12 +42,7 @@ export const useComments = ({ context }: { context: ReactionContext }) => {
 
   return {
     fetch: useInfiniteQuery({
-      queryKey: [
-        'comments',
-        context.authorOdinId,
-        context.channelId,
-        context.target.globalTransitId,
-      ],
+      queryKey: ['comments', context.odinId, context.channelId, context.target.globalTransitId],
       initialPageParam: undefined as string | undefined,
       queryFn: ({ pageParam }) => fetch({ context, pageParam }),
       getNextPageParam: (lastPage) =>
@@ -56,7 +51,7 @@ export const useComments = ({ context }: { context: ReactionContext }) => {
           : undefined,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
-      enabled: !!context.authorOdinId && !!context.channelId && !!context.target.globalTransitId,
+      enabled: !!context.odinId && !!context.channelId && !!context.target.globalTransitId,
     }),
   };
 };

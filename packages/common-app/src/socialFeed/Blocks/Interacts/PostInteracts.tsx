@@ -283,7 +283,7 @@ export const CommentSummary = ({
   reactionPreview?: CommentsReactionSummary;
 }) => {
   const { data: totalCount } = useCommentSummary({
-    authorOdinId: context.authorOdinId,
+    authorOdinId: context.odinId,
     channelId: context.channelId,
     postGlobalTransitId: context.target.globalTransitId,
     reactionPreview: reactionPreview,
