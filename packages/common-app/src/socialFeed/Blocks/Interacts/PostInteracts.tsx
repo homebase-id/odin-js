@@ -213,6 +213,7 @@ export const RepostButton = ({
         <RepostDialog
           embeddedPost={{
             ...postContent,
+            authorOdinId: postFile.fileMetadata.originalAuthor,
             fileId: postFile.fileId,
             globalTransitId: postFile.fileMetadata.globalTransitId,
             lastModified: postFile.fileMetadata.updated,

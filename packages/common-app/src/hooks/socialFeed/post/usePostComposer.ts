@@ -60,7 +60,6 @@ export const usePostComposer = () => {
           appData: {
             userDate: new Date().getTime(),
             content: {
-              authorOdinId: loggedInIdentity || dotYouClient.getIdentity(),
               type: mediaFiles && mediaFiles.length > 1 ? 'Media' : 'Tweet',
               caption: caption?.trim() || '',
               id: postId,

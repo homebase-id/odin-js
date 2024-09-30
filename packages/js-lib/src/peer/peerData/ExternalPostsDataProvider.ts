@@ -283,7 +283,7 @@ const dsrToPostFile = async <T extends PostContent>(
           content: postContent,
         },
         // Fallback to the author odin id if the sender odin id is not set; (Sanity after the issues we had with the senderOdinId being reset)
-        senderOdinId: dsr.fileMetadata.senderOdinId || postContent.authorOdinId,
+        senderOdinId: dsr.fileMetadata.senderOdinId || dsr.fileMetadata.originalAuthor,
       },
     };
 

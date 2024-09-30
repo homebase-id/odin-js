@@ -254,7 +254,7 @@ const GroupChannelActions = ({
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const identity = getIdentity();
-  const isAuthor = postFile.fileMetadata.appData.content.authorOdinId === identity;
+  const isAuthor = postFile.fileMetadata.originalAuthor === identity;
 
   const {
     removeFromFeed: { mutateAsync: removeFromMyFeed },

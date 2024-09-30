@@ -24,7 +24,6 @@ import { useChannel } from '../channels/useChannel';
 
 export const EMPTY_POST: Article = {
   id: '',
-  authorOdinId: '',
   channelId: BlogConfig.PublicChannelId,
   slug: '',
   type: 'Article',
@@ -44,7 +43,6 @@ export const useArticleComposer = ({
   postKey?: string;
   caption?: string;
 }) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
   const { data: serverChannel, isPending: isLoadingServerChannel } = useChannel({
     odinId: odinKey,
     channelKey,
@@ -70,7 +68,6 @@ export const useArticleComposer = ({
         content: {
           ...EMPTY_POST,
           caption: caption ?? EMPTY_POST.caption,
-          authorOdinId: dotYouClient.getIdentity(),
           id: getNewId(),
           ...serverPost?.fileMetadata.appData.content,
           type: 'Article',

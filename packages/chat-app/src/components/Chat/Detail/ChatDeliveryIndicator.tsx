@@ -12,8 +12,7 @@ export const ChatDeliveryIndicator = ({
 }) => {
   const identity = useDotYouClient().getIdentity();
   const content = msg.fileMetadata.appData.content;
-  const authorOdinId =
-    msg.fileMetadata.senderOdinId || msg.fileMetadata.appData.content.authorOdinId || '';
+  const authorOdinId = msg.fileMetadata.senderOdinId || '';
   const messageFromMe = !authorOdinId || authorOdinId === identity;
 
   if (!messageFromMe) return null;
@@ -53,7 +52,7 @@ export const InnerDeliveryIndicator = ({
   return (
     <div
       className={`${isDelivered ? '-ml-2' : ''} flex flex-row drop-shadow-md ${
-        isRead ? 'text-blue-600 ' : 'text-foreground/50'
+        isRead ? 'text-blue-600' : 'text-foreground/50'
       } ${className || ''}`}
     >
       {isFailed ? (

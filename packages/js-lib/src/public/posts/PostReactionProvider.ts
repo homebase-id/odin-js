@@ -22,7 +22,6 @@ import {
   NewHomebaseFile,
   PriorityOptions,
   ReactionFile,
-  ReactionFileBody,
 } from '../../core/core';
 import {
   jsonStringify64,
@@ -88,7 +87,6 @@ export const saveComment = async (
     // allowDistribution: true, // Disable
     versionTag: comment.fileMetadata.versionTag,
     allowDistribution: false,
-    senderOdinId: comment.fileMetadata.appData.content.authorOdinId,
     referencedFile: {
       targetDrive,
       globalTransitId: comment.fileMetadata.appData.groupId || context.target.globalTransitId,
@@ -342,7 +340,7 @@ export const parseReactionPreview = (
 
                 ...(commentPreview.isEncrypted && !commentPreview.content.length
                   ? { body: '' }
-                  : tryJsonParse<ReactionFileBody>(commentPreview.content)),
+                  : tryJsonParse<ReactionFile>(commentPreview.content)),
 
                 isEncrypted: commentPreview.isEncrypted,
                 reactions: parseReactions(commentPreview.reactions),

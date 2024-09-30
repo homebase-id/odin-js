@@ -46,7 +46,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
   }/${post.id}`;
   const clickable = post.type === 'Article'; // Post is only clickable if it's an article; While media posts are clickable only on the media itself
 
-  const authorOdinId = post.authorOdinId || odinId;
+  const authorOdinId = postFile.fileMetadata.originalAuthor || odinId;
 
   if (identityAccessible === false && isExternal)
     return <UnreachableIdentity postFile={postFile} className={className} odinId={odinId} />;

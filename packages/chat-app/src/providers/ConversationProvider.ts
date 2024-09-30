@@ -35,6 +35,7 @@ export const ConversationWithYourself: HomebaseFile<UnifiedConversation> = {
     updated: 0,
     isEncrypted: false,
     senderOdinId: '',
+    originalAuthor: '',
     appData: {
       uniqueId: ConversationWithYourselfId,
       fileType: CHAT_CONVERSATION_FILE_TYPE,

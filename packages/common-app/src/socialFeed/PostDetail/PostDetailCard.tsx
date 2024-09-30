@@ -63,15 +63,15 @@ export const PostDetailCard = ({
               {showAuthorDetail ? (
                 <>
                   <AuthorImage
-                    odinId={post.authorOdinId || odinId}
+                    odinId={postFile.fileMetadata.originalAuthor || odinId}
                     className="mr-2 h-[2rem] w-[2rem] rounded-full sm:h-[2.5rem] sm:w-[2.5rem]"
                   />
                   <h2>
-                    <AuthorName odinId={post.authorOdinId || odinId} />
+                    <AuthorName odinId={postFile.fileMetadata.originalAuthor || odinId} />
                     <ToGroupBlock
                       channel={channel || undefined}
                       odinId={odinId}
-                      authorOdinId={post.authorOdinId}
+                      authorOdinId={postFile.fileMetadata.originalAuthor}
                       className="ml-1"
                     />
                   </h2>
@@ -92,7 +92,7 @@ export const PostDetailCard = ({
                 postFile={postFile}
                 channel={channel}
                 odinId={odinId}
-                authorOdinId={post.authorOdinId || odinId}
+                authorOdinId={postFile.fileMetadata.originalAuthor || odinId}
                 size="text-sm"
               />
             </>

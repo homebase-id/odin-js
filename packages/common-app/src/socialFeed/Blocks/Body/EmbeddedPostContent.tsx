@@ -20,10 +20,9 @@ export const EmbeddedPostContent = ({
   hideMedia?: boolean;
 }) => {
   const [shouldHideMedia, setShouldHideMedia] = useState(hideMedia);
-  const isExternal = !content.authorOdinId || content.authorOdinId !== window.location.hostname;
 
   const { data: channel, status: channelStatus } = useChannel({
-    odinId: isExternal ? content.authorOdinId : undefined,
+    odinId: content.authorOdinId,
     channelKey: content.channelId,
   }).fetch;
 
