@@ -42,9 +42,5 @@ export * from './ReactionData/GroupReactionsProvider';
 // Notifications
 export * from './NotificationData/PushNotificationsProvider';
 
-// CommandData
-export * from './CommandData/CommandProvider';
-export * from './CommandData/CommandTypes';
-
 // ErrorHandling
 export * from './ErrorHandling/KnownErrors';
