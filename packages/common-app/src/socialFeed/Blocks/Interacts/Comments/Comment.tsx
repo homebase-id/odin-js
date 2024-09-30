@@ -45,7 +45,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
 
   const fileId = commentData.fileId;
   const commentContent = commentData.fileMetadata.appData.content;
-  const authorOdinId = commentContent.authorOdinId;
+  const authorOdinId = commentContent.authorOdinId || commentData.fileMetadata.originalAuthor || '';
 
   const threadContext: dirtyReactionContext = {
     ...context,

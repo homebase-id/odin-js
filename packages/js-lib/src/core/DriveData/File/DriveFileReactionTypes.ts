@@ -12,8 +12,8 @@ export interface ReactionPreview {
   totalCommentCount: number;
 }
 
-export interface ReactionFileBody {
-  authorOdinId: string;
+export interface ReactionFile {
+  authorOdinId?: string;
   body: string;
   bodyAsRichText?: RichText;
   mediaPayloadKey?: string;
