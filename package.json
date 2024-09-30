@@ -37,7 +37,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/YouFoundation/dotyoucore-js.git"
+    "url": "https://github.com/homebase-id/odin-js"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.1.0",
