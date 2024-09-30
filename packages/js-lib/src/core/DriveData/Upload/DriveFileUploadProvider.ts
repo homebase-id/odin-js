@@ -11,10 +11,9 @@ import {
   UpdateInstructionSet,
   UpdateHeaderInstructionSet,
 } from './DriveUploadTypes';
-import { decryptKeyHeader, encryptKeyHeader, encryptWithSharedSecret } from '../SecurityHelpers';
+import { decryptKeyHeader } from '../SecurityHelpers';
 import {
   GenerateKeyHeader,
-  encryptMetaData,
   buildDescriptor,
   buildFormData,
   pureUpload,

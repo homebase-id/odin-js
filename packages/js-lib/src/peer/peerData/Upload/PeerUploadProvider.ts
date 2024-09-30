@@ -80,7 +80,7 @@ export const uploadFileOverPeer = async (
     systemFileType: systemFileType,
   });
 
-  const url = 'transit/sender/files/send';
+  const url = '/transit/sender/files/send';
   const config = {
     headers: {
       'content-type': 'multipart/form-data',
