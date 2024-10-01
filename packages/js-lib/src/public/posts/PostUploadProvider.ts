@@ -97,8 +97,6 @@ export const savePost = async <T extends PostContent>(
     }
   }
 
-  if (!file.serverMetadata?.accessControlList) throw 'ACL is required to save a post';
-
   // Delete embeddedPost of embeddedPost (we don't want to embed an embed)
   if (file.fileMetadata.appData.content.embeddedPost) {
     delete (file.fileMetadata.appData.content.embeddedPost as PostContent)['embeddedPost'];
@@ -284,13 +282,7 @@ const updatePost = async <T extends PostContent>(
     !file.serverMetadata?.accessControlList ||
     !file.fileMetadata.appData.content.id
   ) {
-    throw new Error(`[odin-js] PostUploadProvider: fileId is required to update a post`);
-  }
-
-  if (odinId && !file.fileMetadata.globalTransitId) {
-    throw new Error(
-      `[odin-js] PostUploadProvider: globalTransitId is required to update a post over peer`
-    );
+    throw new Error(`[odin-js] PostUploadProvider: File is missing required data to update a post`);
   }
 
   const encrypt = !(

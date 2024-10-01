@@ -216,6 +216,10 @@ export const removeChannelDefinition = async (dotYouClient: DotYouClient, channe
 };
 
 export const GetTargetDriveFromChannelId = (channelId: string): TargetDrive => {
+  if (!channelId || channelId.toLowerCase().replace(/-/g, '').length !== 32) {
+    throw new Error(`GetTargetDriveFromChannelId: Invalid channelId: "${channelId}"`);
+  }
+
   return {
     alias: channelId,
     type: BlogConfig.DriveType,

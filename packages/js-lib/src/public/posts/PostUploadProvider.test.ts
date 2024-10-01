@@ -1,7 +1,7 @@
 import { test, expect, vi, describe } from 'vitest';
 import { savePost } from './PostUploadProvider';
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
-import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '../../core/core';
+import { HomebaseFile, NewHomebaseFile, NewMediaFile, SecurityGroupType } from '../../core/core';
 import { BlogConfig, Tweet } from './PostTypes';
 import { encryptKeyHeader } from '../../core/DriveData/SecurityHelpers';
 
@@ -28,11 +28,9 @@ const mockAxios = vi.hoisted(() => ({
   },
 }));
 
-vi.mock('axios', () => {
-  return {
-    default: mockAxios,
-  };
-});
+vi.mock('axios', () => ({
+  default: mockAxios,
+}));
 
 const dotYouClient = new DotYouClient({
   api: ApiType.Guest,
@@ -161,6 +159,168 @@ describe('PostUploadProvider for local files', () => {
     const instructions = JSON.parse(instructionsAsString);
     expect(instructions.storageOptions.overwriteFileId).toBe(existingPostFile.fileId);
   });
+
+  test('SavePost of an existing post with less payloads should cleanup the payloads', async () => {
+    vi.clearAllMocks();
+
+    const existPostFileWithPayloads: HomebaseFile<Tweet> = {
+      ...existingPostFile,
+      fileMetadata: {
+        ...existingPostFile.fileMetadata,
+        payloads: [
+          {
+            key: 'old-pyld',
+            descriptorContent: undefined,
+            contentType: '',
+            bytesWritten: 0,
+            lastModified: 0,
+            thumbnails: [],
+            previewThumbnail: undefined,
+            iv: undefined,
+          },
+        ],
+      },
+    };
+
+    mockAxios.get
+      .mockResolvedValueOnce({
+        status: 200,
+        data: existingPostFile,
+      })
+      .mockResolvedValueOnce({
+        status: 200,
+        data: existingPostFile,
+      });
+
+    mockAxios.post
+      .mockResolvedValueOnce({
+        status: 200,
+        data: {
+          newVersionTag: 'newVersionTag',
+        },
+      })
+      .mockResolvedValueOnce({
+        status: 200,
+        data: {
+          keyHeader: undefined,
+          file: {
+            fileId: 'fileId',
+            versionTag: 'versionTag',
+          },
+          globalTransitIdFileIdentifier: 'globalTransitIdFileIdentifier',
+          recipientStatus: {},
+          newVersionTag: 'newVersionTag',
+        },
+      });
+
+    await savePost(dotYouClient, existPostFileWithPayloads, undefined, channelId);
+    expect(mockAxios.post.mock.calls.length).toBe(2);
+    expect(mockAxios.post.mock.calls[0][0]).toBe('/drive/files/deletepayload');
+
+    expect(mockAxios.post.mock.calls[1][0]).toBe('/drive/files/upload');
+    const formDataBody = mockAxios.post.mock.calls[1][1];
+    const instructionsAsString = await (formDataBody.get('instructions') as Blob).text();
+    const instructions = JSON.parse(instructionsAsString);
+    expect(instructions.storageOptions.overwriteFileId).toBe(existingPostFile.fileId);
+  });
+
+  test('SavePost of an existing post with more payloads should append the payloads', async () => {
+    vi.clearAllMocks();
+
+    mockAxios.get
+      .mockResolvedValueOnce({
+        status: 200,
+        data: existingPostFile,
+      })
+      .mockResolvedValueOnce({
+        status: 200,
+        data: existingPostFile,
+      });
+
+    mockAxios.post
+      .mockResolvedValueOnce({
+        status: 200,
+        data: {
+          newVersionTag: 'newVersionTag',
+        },
+      })
+      .mockResolvedValueOnce({
+        status: 200,
+        data: {
+          keyHeader: undefined,
+          file: {
+            fileId: 'fileId',
+            versionTag: 'versionTag',
+          },
+          globalTransitIdFileIdentifier: 'globalTransitIdFileIdentifier',
+          recipientStatus: {},
+          newVersionTag: 'newVersionTag',
+        },
+      });
+
+    const toSaveFiles: NewMediaFile[] = [
+      {
+        file: new Blob(),
+      },
+    ];
+
+    await savePost(dotYouClient, existingPostFile, undefined, channelId, toSaveFiles);
+    expect(mockAxios.post.mock.calls.length).toBe(2);
+    expect(mockAxios.post.mock.calls[0][0]).toBe('/drive/files/uploadpayload');
+    const appendFormDataBody = mockAxios.post.mock.calls[0][1];
+    expect(appendFormDataBody.get('payload').name).toBe('pst_mdi0');
+
+    expect(mockAxios.post.mock.calls[1][0]).toBe('/drive/files/upload');
+    const formDataBody = mockAxios.post.mock.calls[1][1];
+    const instructionsAsString = await (formDataBody.get('instructions') as Blob).text();
+    const instructions = JSON.parse(instructionsAsString);
+    expect(instructions.storageOptions.overwriteFileId).toBe(existingPostFile.fileId);
+  });
+
+  test('SavePost should throw an error if the file is missing info', async () => {
+    vi.clearAllMocks();
+
+    const newPostFileMissingInfo: NewHomebaseFile<Tweet> = {
+      fileMetadata: {
+        appData: {
+          content: {
+            id: '',
+            channelId: '',
+            authorOdinId: '',
+            caption: '',
+            slug: '',
+            type: 'Tweet',
+          },
+        },
+      },
+    } as NewHomebaseFile<Tweet>;
+
+    await expect(
+      savePost(dotYouClient, newPostFileMissingInfo, undefined, channelId)
+    ).rejects.toThrow();
+  });
+
+  test('SavePost should throw an error if the file is not found', async () => {
+    vi.clearAllMocks();
+
+    mockAxios.get.mockRejectedValueOnce({
+      response: {
+        status: 404,
+        data: null,
+      },
+    });
+    await expect(savePost(dotYouClient, existingPostFile, undefined, channelId)).rejects.toThrow(
+      '[odin-js] PostUploadProvider: Cannot update a post that does not exist'
+    );
+  });
+
+  test('SavePost should throw an error if the channelId is incorrect', async () => {
+    vi.clearAllMocks();
+
+    await expect(
+      savePost(dotYouClient, existingPostFile, undefined, 'some channel id')
+    ).rejects.toThrow('GetTargetDriveFromChannelId: Invalid channelId: "some channel id"');
+  });
 });
 
 describe('PostUploadProvider for remote files', () => {
@@ -217,5 +377,21 @@ describe('PostUploadProvider for remote files', () => {
     const instructions = JSON.parse(instructionsAsString);
     expect(instructions.recipients).toEqual(['collaborative.com']);
     expect(instructions.file.globalTransitId).toBe(existingPostFile.fileMetadata.globalTransitId);
+  });
+
+  test('SavePost should throw an error if the global transit id is not set when saving over peer', async () => {
+    vi.clearAllMocks();
+
+    await expect(
+      savePost(
+        dotYouClient,
+        {
+          ...existingPostFile,
+          fileMetadata: { ...existingPostFile.fileMetadata, globalTransitId: undefined },
+        },
+        'example.org',
+        channelId
+      )
+    ).rejects.toThrow(`[odin-js]: assertIfDefined GlobalTransitId undefined`);
   });
 });
