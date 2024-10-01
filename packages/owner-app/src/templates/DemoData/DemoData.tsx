@@ -635,7 +635,6 @@ const DemoDataBlog = ({
 
           const blogContent: Article = {
             id: getNewId(),
-            authorOdinId: domain,
             channelId: channel.fileMetadata.appData.uniqueId as string,
             caption: randomTitle,
             slug: slugify(randomTitle),

@@ -284,7 +284,7 @@ const GroupChannelActions = ({
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const identity = getIdentity();
-  const isAuthor = postFile.fileMetadata.appData.content.authorOdinId === identity;
+  const isAuthor = postFile.fileMetadata.originalAuthor === identity;
   const host = new DotYouClient({ api: ApiType.Guest, identity: identity || undefined }).getRoot();
 
   const {

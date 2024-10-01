@@ -27,7 +27,7 @@ import { HomebaseFile, ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { Bubble, Share, Repost } from '../../../ui/Icons';
 
 export const PostInteracts = ({
-  authorOdinId,
+  odinId,
   postFile,
 
   isAuthenticated,
@@ -39,7 +39,7 @@ export const PostInteracts = ({
   className,
   login,
 }: {
-  authorOdinId: string;
+  odinId: string;
   postFile: HomebaseFile<PostContent>;
 
   isAuthenticated?: boolean;
@@ -65,7 +65,7 @@ export const PostInteracts = ({
     (postContent.reactAccess === false || postContent.reactAccess === 'emoji');
 
   const { data: canReact } = useCanReact({
-    authorOdinId,
+    odinId,
     channelId: postContent.channelId,
     postContent: postContent,
     isEnabled: !!isExpanded || !!hasIntentToReact,
@@ -76,7 +76,7 @@ export const PostInteracts = ({
   if (!postFile.fileMetadata.globalTransitId || !postFile.fileId) return null;
 
   const reactionContext: ReactionContext = {
-    authorOdinId: authorOdinId,
+    odinId: odinId,
     channelId: postContent.channelId,
     target: {
       globalTransitId: postFile.fileMetadata.globalTransitId,
@@ -85,7 +85,7 @@ export const PostInteracts = ({
     },
   };
 
-  const permalink = `${new DotYouClient({ identity: authorOdinId || undefined, api: ApiType.Guest }).getRoot()}${HOME_ROOT_PATH}posts/${postContent.channelId}/${
+  const permalink = `${new DotYouClient({ identity: odinId || undefined, api: ApiType.Guest }).getRoot()}${HOME_ROOT_PATH}posts/${postContent.channelId}/${
     postContent.slug ?? postContent.id
   }`;
 
@@ -213,6 +213,7 @@ export const RepostButton = ({
         <RepostDialog
           embeddedPost={{
             ...postContent,
+            authorOdinId: postFile.fileMetadata.originalAuthor,
             fileId: postFile.fileId,
             globalTransitId: postFile.fileMetadata.globalTransitId,
             lastModified: postFile.fileMetadata.updated,
@@ -282,7 +283,7 @@ export const CommentSummary = ({
   reactionPreview?: CommentsReactionSummary;
 }) => {
   const { data: totalCount } = useCommentSummary({
-    authorOdinId: context.authorOdinId,
+    authorOdinId: context.odinId,
     channelId: context.channelId,
     postGlobalTransitId: context.target.globalTransitId,
     reactionPreview: reactionPreview,

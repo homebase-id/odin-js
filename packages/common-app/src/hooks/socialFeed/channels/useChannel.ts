@@ -25,7 +25,7 @@ export const useChannel = ({ odinId, channelKey }: useChannelsProps) => {
   const fetchChannelData = async ({ channelKey }: useChannelsProps) => {
     if (!channelKey) return null;
 
-    if (!odinId) {
+    if (!odinId || odinId === dotYouClient.getIdentity()) {
       const cachedChannels = queryClient.getQueryData<HomebaseFile<ChannelDefinitionVm>[]>([
         'channels',
       ]);

@@ -16,7 +16,6 @@ import {
   MediaFile,
   UploadResult,
 } from '@homebase-id/js-lib/core';
-import { useDotYouClient } from '../../auth/useDotYouClient';
 import { usePost } from '../post/usePost';
 import { getReadingTime } from '../../../helpers/richTextHelper';
 import { useChannel } from '../channels/useChannel';
@@ -24,7 +23,6 @@ import { FEED_ROOT_PATH, HOME_ROOT_PATH } from '../../../constants';
 
 export const EMPTY_POST: Article = {
   id: '',
-  authorOdinId: '',
   channelId: BlogConfig.PublicChannelId,
   slug: '',
   type: 'Article',
@@ -44,7 +42,6 @@ export const useArticleComposer = ({
   postKey?: string;
   caption?: string;
 }) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
   const { data: serverChannel, isPending: isLoadingServerChannel } = useChannel({
     odinId: odinKey,
     channelKey,
@@ -70,7 +67,6 @@ export const useArticleComposer = ({
         content: {
           ...EMPTY_POST,
           caption: caption ?? EMPTY_POST.caption,
-          authorOdinId: dotYouClient.getIdentity(),
           id: getNewId(),
           ...serverPost?.fileMetadata.appData.content,
           type: 'Article',

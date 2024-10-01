@@ -51,7 +51,7 @@ export const CommentBody = ({
           )}
           {content.mediaPayloadKey && context ? (
             <CommentMedia
-              postAuthorOdinId={context.authorOdinId}
+              postAuthorOdinId={context.odinId}
               targetDrive={sourceTargetDrive}
               fileId={commentFileId}
               fileKey={content.mediaPayloadKey}

@@ -31,8 +31,7 @@ export const ChatMessageItem = ({
   chatActions?: ChatActions;
 }) => {
   const identity = useDotYouClient().getIdentity();
-  const authorOdinId =
-    msg.fileMetadata.senderOdinId || msg.fileMetadata.appData.content.authorOdinId || '';
+  const authorOdinId = msg.fileMetadata.senderOdinId || '';
 
   const messageFromMe = !authorOdinId || authorOdinId === identity;
   const hasMedia = !!msg.fileMetadata.payloads.length;
@@ -133,7 +132,7 @@ const ChatTextMessageBody = ({
         showBackground
           ? messageFromMe
             ? 'bg-primary/10 dark:bg-primary/30'
-            : 'bg-gray-500/10  dark:bg-gray-300/20'
+            : 'bg-gray-500/10 dark:bg-gray-300/20'
           : ''
       }`}
     >

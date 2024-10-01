@@ -26,7 +26,7 @@ export const saveEmojiReaction = async (
   emoji: RawReactionContent,
   context: ReactionContext
 ): Promise<string> => {
-  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getIdentity();
   const client = dotYouClient.createAxiosClient();
 
   const data = {
@@ -49,7 +49,7 @@ export const saveEmojiReaction = async (
   } else {
     const url = emojiRootTransit + '/add';
     return client
-      .post(url, { odinId: context.authorOdinId, request: data })
+      .post(url, { odinId: context.odinId, request: data })
       .then((response) => ({ ...response.data, status: response.data?.status?.toLowerCase() }))
       .catch(dotYouClient.handleErrorResponse);
   }
@@ -60,7 +60,7 @@ export const removeEmojiReaction = async (
   emoji: RawReactionContent,
   context: ReactionContext
 ): Promise<string> => {
-  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getIdentity();
   const client = dotYouClient.createAxiosClient();
 
   const data = {
@@ -84,7 +84,7 @@ export const removeEmojiReaction = async (
   } else {
     const url = emojiRootTransit + '/delete';
     return client
-      .post(url, { odinId: context.authorOdinId, request: data })
+      .post(url, { odinId: context.odinId, request: data })
       .then((response) => {
         return { ...response.data, status: response.data?.status?.toLowerCase() };
       })
@@ -96,7 +96,7 @@ export const getReactionSummary = async (
   dotYouClient: DotYouClient,
   context: ReactionContext
 ): Promise<EmojiReactionSummary> => {
-  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getIdentity();
 
   const client = dotYouClient.createAxiosClient();
 
@@ -139,7 +139,7 @@ export const getReactionSummary = async (
   } else {
     const url = emojiRootTransit + '/summary';
     return client
-      .post<ServerReactionsSummary>(url, { odinId: context.authorOdinId, request: data })
+      .post<ServerReactionsSummary>(url, { odinId: context.odinId, request: data })
       .then((response) => {
         return {
           reactions: response.data.reactions
@@ -171,7 +171,7 @@ export const getReactions = async (
   pageSize = 15,
   cursor?: string
 ): Promise<{ reactions: ReactionFile[]; cursor: string } | undefined> => {
-  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getIdentity();
   const client = dotYouClient.createAxiosClient();
 
   const data = {
@@ -203,7 +203,7 @@ export const getReactions = async (
   } else {
     const url = emojiRootTransit + '/list';
     return client
-      .post<ServerReactionsListWithCursor>(url, { odinId: context.authorOdinId, request: data })
+      .post<ServerReactionsListWithCursor>(url, { odinId: context.odinId, request: data })
       .then((response) => {
         return {
           reactions: response.data.reactions.map((reaction) => {
@@ -226,7 +226,7 @@ export const getMyReactions = async (
   pageSize = 15,
   cursor?: string
 ): Promise<string[] | undefined> => {
-  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getIdentity();
   const client = dotYouClient.createAxiosClient();
 
   const data = {
@@ -253,7 +253,7 @@ export const getMyReactions = async (
   } else {
     const url = emojiRootTransit + '/listbyidentity';
     return client
-      .post<string[]>(url, { odinId: context.authorOdinId, ...data })
+      .post<string[]>(url, { odinId: context.odinId, ...data })
       .then((response) => {
         return response.data?.map(
           (emojiString) => tryJsonParse<{ emoji: string }>(emojiString).emoji

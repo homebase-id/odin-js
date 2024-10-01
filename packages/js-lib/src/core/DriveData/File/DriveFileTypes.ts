@@ -10,6 +10,7 @@ export interface FileMetadata<T = string> {
 
   globalTransitId?: string;
   isEncrypted: boolean;
+  originalAuthor: string;
   senderOdinId: string;
   appData: AppFileMetaData<T>;
   reactionPreview?: ReactionPreview;

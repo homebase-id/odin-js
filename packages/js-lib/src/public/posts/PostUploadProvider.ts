@@ -69,6 +69,9 @@ export const savePost = async <T extends PostContent>(
   if (!file.serverMetadata?.accessControlList)
     throw new Error('[odin-js] PostUploadProvider: ACL is required to save a post');
 
+  if (!file.fileMetadata.appData.content.authorOdinId)
+    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
+
   if (!file.fileMetadata.appData.content.id) {
     // The content id is set once, and then never updated to keep the permalinks correct at all times; Even when the slug changes
     file.fileMetadata.appData.content.id = file.fileMetadata.appData.content.slug
@@ -83,6 +86,18 @@ export const savePost = async <T extends PostContent>(
 
   if (!file.fileMetadata.appData.content.authorOdinId)
     file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
+
+  if (file.fileId) {
+    return await updatePost(dotYouClient, odinId, file as HomebaseFile<T>, channelId, toSaveFiles);
+  } else {
+    if (toSaveFiles?.some((file) => 'fileKey' in file)) {
+      throw new Error(
+        'Cannot upload a new post with an existing media file. Use updatePost instead'
+      );
+    }
+  }
+
+  if (!file.serverMetadata?.accessControlList) throw 'ACL is required to save a post';
 
   // Delete embeddedPost of embeddedPost (we don't want to embed an embed)
   if (file.fileMetadata.appData.content.embeddedPost) {
@@ -275,9 +290,6 @@ const updatePost = async <T extends PostContent>(
       `[odin-js] PostUploadProvider: globalTransitId is required to update a post over peer`
     );
   }
-
-  if (!file.fileMetadata.appData.content.authorOdinId)
-    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
 
   const encrypt = !(
     file.serverMetadata.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||

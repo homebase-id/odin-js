@@ -77,11 +77,11 @@ export const PostTeaser: FC<PostTeaserProps> = ({
                 {showAuthor ? (
                   <>
                     <AuthorImage
-                      odinId={post.authorOdinId}
+                      odinId={postFile.fileMetadata.originalAuthor}
                       className="h-10 w-10 rounded-full sm:h-12 sm:w-12 md:h-[2rem] md:w-[2rem]"
                     />
                     <h2 className="ml-2">
-                      <AuthorName odinId={post.authorOdinId} />
+                      <AuthorName odinId={postFile.fileMetadata.originalAuthor} />
                     </h2>
                     <span className="hidden px-2 leading-4 md:block">·</span>
                   </>
@@ -91,7 +91,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
                   <PostMeta
                     postFile={postFile}
                     channel={showChannel ? channel : undefined}
-                    authorOdinId={post.authorOdinId}
+                    authorOdinId={postFile.fileMetadata.originalAuthor}
                   />
                 ) : null}
               </div>
@@ -106,7 +106,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
               />
             </div>
             <PostInteracts
-              authorOdinId={window.location.hostname}
+              odinId={window.location.hostname}
               postFile={postFile}
               allowExpand={!!allowExpand}
               className="px-4"

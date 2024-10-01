@@ -117,7 +117,6 @@ export interface UploadFileDescriptor {
 
 export interface UploadFileMetadata {
   allowDistribution: boolean;
-  senderOdinId?: string;
   isEncrypted: boolean;
   accessControlList?: AccessControlList;
   appData: UploadAppFileMetaData;

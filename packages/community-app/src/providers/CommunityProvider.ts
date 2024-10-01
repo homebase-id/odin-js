@@ -42,6 +42,7 @@ export const COMMUNITY_GENERAL_CHANNEL: HomebaseFile<CommunityChannel> = {
     created: 0,
     updated: 0,
     isEncrypted: true,
+    originalAuthor: '',
     senderOdinId: '',
     versionTag: '',
     payloads: [],

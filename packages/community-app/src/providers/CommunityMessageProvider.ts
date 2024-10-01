@@ -292,7 +292,6 @@ export const updateCommunityMessage = async (
       fileType: COMMUNITY_MESSAGE_FILE_TYPE,
       content: payloadJson,
     },
-    senderOdinId: (message.fileMetadata as FileMetadata<CommunityMessage>).senderOdinId,
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList || {
       requiredSecurityGroup: SecurityGroupType.AutoConnected,

@@ -42,7 +42,7 @@ export const PostTextListItem = ({
                   <PostMeta
                     postFile={draft}
                     channel={channel}
-                    authorOdinId={draft.fileMetadata.appData.content.authorOdinId}
+                    authorOdinId={draft.fileMetadata.originalAuthor}
                   />
                 ) : null}
               </div>
