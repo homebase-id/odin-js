@@ -160,7 +160,7 @@ describe('PostUploadProvider for local files', () => {
     expect(instructions.storageOptions.overwriteFileId).toBe(existingPostFile.fileId);
   });
 
-  test('SavePost of an existing post with less payloads should cleanup the payloads', async () => {
+  test('SavePost of an existing post with less payloads should delete the old payloads', async () => {
     vi.clearAllMocks();
 
     const existPostFileWithPayloads: HomebaseFile<Tweet> = {
@@ -224,7 +224,7 @@ describe('PostUploadProvider for local files', () => {
     expect(instructions.storageOptions.overwriteFileId).toBe(existingPostFile.fileId);
   });
 
-  test('SavePost of an existing post with more payloads should append the payloads', async () => {
+  test('SavePost of an existing post with more payloads should append the new payloads', async () => {
     vi.clearAllMocks();
 
     mockAxios.get

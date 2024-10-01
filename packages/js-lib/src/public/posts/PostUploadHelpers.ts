@@ -135,11 +135,21 @@ export const hasConflictingSlug = async <T extends PostContent>(
         file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
       );
 
+  if (!existingPostWithThisSlug) {
+    return false;
+  }
+
   return (
     !stringGuidsEqual(
       existingPostWithThisSlug?.fileMetadata.appData.content.id,
       file.fileMetadata.appData.content.id
-    ) && !stringGuidsEqual(existingPostWithThisSlug?.fileId, file.fileId)
+    ) &&
+    (odinId
+      ? !stringGuidsEqual(
+          existingPostWithThisSlug?.fileMetadata.globalTransitId,
+          file?.fileMetadata.globalTransitId
+        )
+      : !stringGuidsEqual(existingPostWithThisSlug?.fileId, file.fileId))
   );
 };
 
