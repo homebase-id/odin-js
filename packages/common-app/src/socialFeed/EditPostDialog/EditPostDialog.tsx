@@ -1,4 +1,8 @@
-import { PostContent, getChannelDrive } from '@homebase-id/js-lib/public';
+import {
+  PostContent,
+  RemoteCollaborativeChannelDefinition,
+  getChannelDrive,
+} from '@homebase-id/js-lib/public';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useManagePost } from '../../hooks/socialFeed/post/useManagePost';
@@ -11,7 +15,7 @@ import {
 } from '@homebase-id/js-lib/core';
 import { VolatileInput, FileOverview } from '../../form';
 import { t } from '../../helpers';
-import { usePortal } from '../../hooks';
+import { useChannel, usePortal } from '../../hooks';
 import { ErrorNotification, DialogWrapper, ActionButton } from '../../ui';
 import { Save } from '../../ui/Icons';
 
@@ -32,6 +36,11 @@ export const EditPostDialog = ({
   const {
     update: { mutate: updatePost, error: updatePostError, status: updatePostStatus },
   } = useManagePost();
+  const { data: channel } = useChannel({
+    odinId: odinId,
+    channelKey: incomingPostFile.fileMetadata.appData.content.channelId,
+  }).fetch;
+
   const [postFile, setPostFile] = useState<HomebaseFile<PostContent>>({ ...incomingPostFile });
   const [newMediaFiles, setNewMediaFiles] = useState<(MediaFile | NewMediaFile)[]>(
     postFile.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || []
@@ -55,10 +64,13 @@ export const EditPostDialog = ({
   const doUpdate = async () => {
     const newPostFile = {
       ...postFile,
-      serverMetadata: postFile.serverMetadata || {
-        accessControlList: {
-          requiredSecurityGroup: SecurityGroupType.Connected,
-        },
+      serverMetadata: {
+        accessControlList: (channel?.fileId &&
+          (channel as unknown as HomebaseFile<RemoteCollaborativeChannelDefinition>).fileMetadata
+            .appData.content.acl) ||
+          channel?.serverMetadata?.accessControlList || {
+            requiredSecurityGroup: SecurityGroupType.Connected,
+          },
       },
     };
 

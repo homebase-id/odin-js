@@ -365,7 +365,6 @@ export const ChannelOrAclSelector = React.forwardRef(
     const { data: collaborativeChannels } = useCollaborativeChannels().fetch;
     const [isChnlMgmtOpen, setIsChnlMgmtOpen] = useState(false);
     const [isCustomAclOpen, setIsCustomAclOpen] = useState(false);
-
     const publicChannel = useMemo(
       () =>
         channels?.find((chnl) =>

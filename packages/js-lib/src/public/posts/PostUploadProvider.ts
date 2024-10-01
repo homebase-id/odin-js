@@ -270,6 +270,7 @@ const updatePost = async <T extends PostContent>(
 
   if (!header)
     throw new Error('[odin-js] PostUploadProvider: Cannot update a post that does not exist');
+
   if (header?.fileMetadata.versionTag !== file.fileMetadata.versionTag) {
     if (odinId) {
       // There's a conflict, but we will just force ahead
@@ -282,8 +283,9 @@ const updatePost = async <T extends PostContent>(
     !file.fileId ||
     !file.serverMetadata?.accessControlList ||
     !file.fileMetadata.appData.content.id
-  )
+  ) {
     throw new Error(`[odin-js] PostUploadProvider: fileId is required to update a post`);
+  }
 
   if (odinId && !file.fileMetadata.globalTransitId) {
     throw new Error(
