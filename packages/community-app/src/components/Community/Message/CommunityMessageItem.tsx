@@ -43,11 +43,7 @@ export const CommunityMessageItem = ({
   className?: string;
 }) => {
   const identity = useDotYouClient().getIdentity();
-  const authorOdinId =
-    msg.fileMetadata.senderOdinId ||
-    msg.fileMetadata.appData.content.authorOdinId ||
-    identity ||
-    '';
+  const authorOdinId = msg.fileMetadata.senderOdinId || identity || '';
 
   const messageFromMe = !authorOdinId || authorOdinId === identity;
   const hasMedia = !!msg.fileMetadata.payloads.length;

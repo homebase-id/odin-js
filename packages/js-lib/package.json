@@ -1,5 +1,5 @@
 {
-  "version": "0.0.4-alpha.36",
+  "version": "0.0.5-alpha.2",
   "name": "@homebase-id/js-lib",
   "author": "YouFoundation",
   "description": "JavaScript SDK for the DotYouCore api",
@@ -72,7 +72,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/YouFoundation/dotyoucore-js.git"
+    "url": "https://github.com/homebase-id/odin-js"
   },
   "dependencies": {
     "guid-typescript": "^1.0.9"

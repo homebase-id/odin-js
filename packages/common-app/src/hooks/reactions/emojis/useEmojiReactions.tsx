@@ -17,7 +17,7 @@ export const useEmojiReactions = (context?: ReactionContext) => {
     pageParam?: string;
   }) => {
     if (
-      !context?.authorOdinId ||
+      !context?.odinId ||
       !context?.channelId ||
       (!context?.target?.fileId && !context?.target?.globalTransitId)
     ) {
@@ -30,7 +30,7 @@ export const useEmojiReactions = (context?: ReactionContext) => {
     fetch: useInfiniteQuery({
       queryKey: [
         'emojis',
-        context?.authorOdinId,
+        context?.odinId,
         context?.channelId,
         context?.target?.fileId,
         context?.target?.globalTransitId,
@@ -45,7 +45,7 @@ export const useEmojiReactions = (context?: ReactionContext) => {
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       enabled:
-        !!context?.authorOdinId &&
+        !!context?.odinId &&
         !!context?.channelId &&
         (!!context?.target?.fileId || !!context?.target?.globalTransitId),
     }),

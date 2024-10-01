@@ -68,6 +68,9 @@ export const savePost = async <T extends PostContent>(
     );
   }
 
+  if (!file.fileMetadata.appData.content.authorOdinId)
+    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
+
   if (!file.fileMetadata.appData.content.id) {
     // The content id is set once, and then never updated to keep the permalinks correct at all times; Even when the slug changes
     file.fileMetadata.appData.content.id = file.fileMetadata.appData.content.slug
@@ -91,8 +94,6 @@ export const savePost = async <T extends PostContent>(
   }
   const newMediaFiles = toSaveFiles as NewMediaFile[];
 
-  if (!file.fileMetadata.appData.content.authorOdinId)
-    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
   if (!file.serverMetadata?.accessControlList) throw 'ACL is required to save a post';
 
   // Delete embeddedPost of embeddedPost (we don't want to embed an embed)
@@ -305,7 +306,6 @@ const uploadPost = async <T extends PostContent>(
       userDate: file.fileMetadata.appData.userDate,
       dataType: postTypeToDataType(file.fileMetadata.appData.content.type),
     },
-    senderOdinId: file.fileMetadata.appData.content.authorOdinId,
     isEncrypted: encrypt,
     accessControlList: file.serverMetadata?.accessControlList,
   };
@@ -413,7 +413,6 @@ const uploadPostHeader = async <T extends PostContent>(
       userDate: file.fileMetadata.appData.userDate,
       dataType: postTypeToDataType(file.fileMetadata.appData.content.type),
     },
-    senderOdinId: file.fileMetadata.appData.content.authorOdinId,
     isEncrypted: file.fileMetadata.isEncrypted ?? false,
     accessControlList: file.serverMetadata?.accessControlList,
   };
@@ -484,9 +483,6 @@ const updatePost = async <T extends PostContent>(
     !file.fileMetadata.appData.content.id
   )
     throw new Error(`[odin-js] PostProvider: fileId is required to update a post`);
-
-  if (!file.fileMetadata.appData.content.authorOdinId)
-    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
 
   const encrypt = !(
     file.serverMetadata.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||

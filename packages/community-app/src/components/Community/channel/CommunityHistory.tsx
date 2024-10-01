@@ -199,17 +199,11 @@ export const CommunityHistory = ({
               }
 
               const msg = flattenedMsgs[item.index];
-              const currentAuthor =
-                msg?.fileMetadata?.appData?.content.authorOdinId ||
-                msg?.fileMetadata.senderOdinId ||
-                '';
+              const currentAuthor = msg?.fileMetadata.senderOdinId || '';
               const currentDate = msg?.fileMetadata.created;
 
               const previousVisibleMsg = flattenedMsgs[item.index + 1];
-              const previousAuthor =
-                previousVisibleMsg?.fileMetadata?.appData?.content.authorOdinId ||
-                previousVisibleMsg?.fileMetadata.senderOdinId ||
-                '';
+              const previousAuthor = previousVisibleMsg?.fileMetadata.senderOdinId || '';
               const previousDate = previousVisibleMsg?.fileMetadata.created;
 
               return (

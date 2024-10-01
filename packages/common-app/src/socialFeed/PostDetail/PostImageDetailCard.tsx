@@ -195,15 +195,15 @@ export const PostImageDetailCard = ({
             <div className="bg-background flex-shrink-0 lg:max-h-screen flex-grow md:block lg:w-[27rem] lg:flex-grow-0 lg:overflow-auto">
               {post && channel ? (
                 <div className="grid grid-flow-col grid-cols-[3rem_auto] gap-3 p-5 pb-0">
-                  <AuthorImage odinId={post.authorOdinId || odinId} size="sm" />
+                  <AuthorImage odinId={postFile.fileMetadata.originalAuthor || odinId} size="sm" />
                   <div className="flex max-w-lg flex-grow flex-col">
                     <div className="text-foreground mb-2 text-opacity-60">
                       <h2 className="mr-4">
-                        <AuthorName odinId={post.authorOdinId || odinId} />
+                        <AuthorName odinId={postFile.fileMetadata.originalAuthor || odinId} />
                         <ToGroupBlock
                           channel={channel || undefined}
                           odinId={odinId}
-                          authorOdinId={post.authorOdinId}
+                          authorOdinId={postFile.fileMetadata.originalAuthor}
                           className="ml-1"
                         />
                       </h2>
@@ -212,7 +212,7 @@ export const PostImageDetailCard = ({
                         odinId={odinId}
                         channel={channel}
                         postFile={postFile}
-                        authorOdinId={post.authorOdinId || odinId}
+                        authorOdinId={postFile.fileMetadata.originalAuthor || odinId}
                         excludeContextMenu={true}
                       />
                     </div>
@@ -222,7 +222,7 @@ export const PostImageDetailCard = ({
               ) : null}
               {postFile ? (
                 <PostInteracts
-                  authorOdinId={post?.authorOdinId || odinId || window.location.hostname}
+                  odinId={odinId || postFile.fileMetadata.senderOdinId || window.location.hostname}
                   postFile={postFile}
                   defaultExpanded={true}
                   className="p-5"

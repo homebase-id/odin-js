@@ -66,13 +66,16 @@ export enum ChatDeliveryStatus {
 export interface ChatMessage {
   replyId?: string;
 
-  /// Content of the message
+  // Content of the message
   message: string;
 
-  // After an update to a message on the receiving end, the senderOdinId is emptied; So we have an authorOdinId to keep track of the original sender
+  // The author of the message
+  /**
+   * @deprecated Use fileMetadata.originalAuthor instead
+   */
   authorOdinId?: string;
 
-  /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
+  // DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;
   deliveryDetails?: Record<string, ChatDeliveryStatus>;
 }
@@ -155,6 +158,8 @@ export const dsrToMessage = async (
       ...dsr,
       fileMetadata: {
         ...dsr.fileMetadata,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        originalAuthor: dsr.fileMetadata.originalAuthor || (msgContent as any)?.authorOdinId,
         appData: {
           ...dsr.fileMetadata.appData,
           content: msgContent,
@@ -248,7 +253,10 @@ export const uploadChatMessage = async (
       : undefined,
   };
 
-  const jsonContent: string = jsonStringify64({ ...messageContent });
+  const jsonContent: string = jsonStringify64({
+    ...messageContent,
+    authorOdinId: dotYouClient.getIdentity(),
+  });
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: distribute,
@@ -498,7 +506,6 @@ export const softDeleteChatMessage = async (
 
   message.fileMetadata.versionTag = runningVersionTag;
   message.fileMetadata.appData.content.message = '';
-  message.fileMetadata.appData.content.authorOdinId = message.fileMetadata.senderOdinId;
   return await updateChatMessage(dotYouClient, message, deleteForEveryone ? recipients : []);
 };
 
