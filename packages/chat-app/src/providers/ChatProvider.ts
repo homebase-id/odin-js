@@ -66,10 +66,16 @@ export enum ChatDeliveryStatus {
 export interface ChatMessage {
   replyId?: string;
 
-  /// Content of the message
+  // Content of the message
   message: string;
 
-  /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
+  // The author of the message
+  /**
+   * @deprecated Use fileMetadata.originalAuthor instead
+   */
+  authorOdinId?: string;
+
+  // DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;
   deliveryDetails?: Record<string, ChatDeliveryStatus>;
 }
@@ -247,7 +253,10 @@ export const uploadChatMessage = async (
       : undefined,
   };
 
-  const jsonContent: string = jsonStringify64({ ...messageContent });
+  const jsonContent: string = jsonStringify64({
+    ...messageContent,
+    authorOdinId: dotYouClient.getIdentity(),
+  });
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: distribute,

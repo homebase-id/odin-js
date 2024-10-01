@@ -123,6 +123,11 @@ export interface PostContent {
   primaryMediaFile?: PrimaryMediaFile;
   type: 'Article' | 'Media' | 'Tweet';
 
+  /**
+   * @deprecated Use fileMetadata.originalAuthor instead
+   */
+  authorOdinId?: string;
+
   embeddedPost?: EmbeddedPost;
 }
 

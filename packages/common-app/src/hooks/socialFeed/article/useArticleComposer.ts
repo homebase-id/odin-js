@@ -16,7 +16,6 @@ import {
   MediaFile,
   UploadResult,
 } from '@homebase-id/js-lib/core';
-import { useDotYouClient } from '../../auth/useDotYouClient';
 import { usePost } from '../post/usePost';
 import { getReadingTime } from '../../../helpers/richTextHelper';
 import { HOME_ROOT_PATH } from '../../../core/paths';

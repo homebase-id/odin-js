@@ -18,14 +18,11 @@ import {
 import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useState } from 'react';
 import { useManagePost } from './useManagePost';
-import { useDotYouClient } from '../../auth/useDotYouClient';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 
 export const usePostComposer = () => {
   const [postState, setPostState] = useState<'uploading' | 'encrypting' | 'error' | undefined>();
   const [processingProgress, setProcessingProgress] = useState<number>(0);
-  const loggedInIdentity = useDotYouClient().getIdentity();
-  const dotYouClient = useDotYouClient().getDotYouClient();
   const { mutateAsync: savePostFile, error: savePostError } = useManagePost().save;
 
   const savePost = async (

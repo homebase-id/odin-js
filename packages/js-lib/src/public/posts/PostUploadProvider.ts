@@ -68,6 +68,9 @@ export const savePost = async <T extends PostContent>(
     );
   }
 
+  if (!file.fileMetadata.appData.content.authorOdinId)
+    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
+
   if (!file.fileMetadata.appData.content.id) {
     // The content id is set once, and then never updated to keep the permalinks correct at all times; Even when the slug changes
     file.fileMetadata.appData.content.id = file.fileMetadata.appData.content.slug
