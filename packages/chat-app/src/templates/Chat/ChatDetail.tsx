@@ -206,10 +206,12 @@ const ChatHeader = ({
                 label: t('Chat info'),
                 onClick: () => setShowChatInfo(true),
               },
-              {
-                label: t('Introduce everyone'),
-                onClick: makeIntroduction,
-              },
+              !singleRecipient
+                ? {
+                    label: t('Introduce everyone'),
+                    onClick: makeIntroduction,
+                  }
+                : undefined,
               {
                 label: t('Delete'),
                 confirmOptions: {

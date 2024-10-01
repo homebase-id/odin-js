@@ -503,7 +503,6 @@ export const ChannelOrAclSelector = React.forwardRef(
           }
           title={t('Who can see your post?')}
           onConfirm={(acl) => {
-            console.log('custom acl', acl);
             onChange({ channel: publicChannel, acl, odinId: undefined });
             setIsCustomAclOpen(false);
           }}
