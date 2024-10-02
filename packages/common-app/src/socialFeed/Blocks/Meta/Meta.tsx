@@ -229,7 +229,7 @@ const ExternalActions = ({
       onClick: (e) => {
         e.stopPropagation();
         if (postFile.fileMetadata.appData.content.type === 'Article') {
-          const targetUrl = `/apps/feed/${odinId || window.location.host}/${
+          const targetUrl = `/apps/feed/edit/${odinId || window.location.host}/${
             channel?.fileMetadata.appData.content.slug || channel?.fileMetadata.appData.uniqueId
           }/${postFile.fileMetadata.appData.content.id}`;
 

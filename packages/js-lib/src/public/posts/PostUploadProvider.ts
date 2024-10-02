@@ -249,13 +249,15 @@ const uploadPost = async <T extends PostContent>(
 
 const updatePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
-  odinId: string | undefined,
+  remoteOdinId: string | undefined,
   file: HomebaseFile<T>,
   channelId: string,
   existingAndNewMediaFiles?: (NewMediaFile | MediaFile)[],
   onVersionConflict?: () => void,
   onUpdate?: (progress: number) => void
 ): Promise<UploadResult | UpdateResult> => {
+  const odinId = remoteOdinId === dotYouClient.getIdentity() ? undefined : remoteOdinId;
+
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const header = odinId
     ? await getFileHeaderBytesOverPeerByGlobalTransitId(

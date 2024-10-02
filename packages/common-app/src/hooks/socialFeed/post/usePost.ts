@@ -26,6 +26,7 @@ export const usePost = ({ odinId, channelKey, postKey }: usePostProps = {}) => {
 
   const { getDotYouClient, isOwner } = useDotYouClient();
   const dotYouClient = getDotYouClient();
+  const identity = dotYouClient.getIdentity();
   const queryClient = useQueryClient();
 
   const getLocalCachedBlogs = (channelId?: string) => {
@@ -43,7 +44,7 @@ export const usePost = ({ odinId, channelKey, postKey }: usePostProps = {}) => {
   const fetchBlog = async ({ postKey }: usePostProps) => {
     if (!channel || !postKey) return null;
 
-    if (!odinId) {
+    if (!odinId || odinId === identity) {
       // Search in cache
       const localBlogs = getLocalCachedBlogs(channel.fileMetadata.appData.uniqueId);
       if (localBlogs) {
