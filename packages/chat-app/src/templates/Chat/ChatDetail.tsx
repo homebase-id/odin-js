@@ -61,7 +61,7 @@ export const ChatDetail = ({
     if (
       !conversation ||
       stringGuidsEqual(conversationId, ConversationWithYourselfId) ||
-      conversation?.fileMetadata.senderOdinId
+      conversation?.fileMetadata.senderOdinId !== identity
     ) {
       return;
     }
