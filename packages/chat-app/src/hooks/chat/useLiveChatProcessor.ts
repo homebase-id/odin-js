@@ -80,7 +80,6 @@ const useInboxProcessor = (connected?: boolean) => {
       );
       isDebug && console.debug('[InboxProcessor] new messages', updatedMessages.length);
       await processChatMessagesBatch(dotYouClient, queryClient, updatedMessages);
-
       const updatedConversations = await findChangesSinceTimestamp(
         dotYouClient,
         lastProcessedWithBuffer,
