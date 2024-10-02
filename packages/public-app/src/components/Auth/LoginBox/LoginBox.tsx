@@ -10,7 +10,7 @@ import { Loader } from '@homebase-id/common-app/icons';
 const AUTO_LOGON_PARAM = 'youauth-logon';
 const AUTHORIZE_PATH = '/api/owner/v1/youauth/authorize';
 
-export const useParams = (returnUrl: string) => {
+const useParams = (returnUrl: string) => {
   const { getAuthorizationParameters } = useYouAuthAuthorization();
   return useQuery({
     queryKey: ['params', returnUrl],

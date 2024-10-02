@@ -251,6 +251,11 @@ export const dsrToPostFile = async <T extends PostContent>(
       ...dsr,
       fileMetadata: {
         ...dsr.fileMetadata,
+        originalAuthor:
+          dsr.fileMetadata.originalAuthor ||
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (postContent as any)?.authorOdinId ||
+          dsr.fileMetadata.senderOdinId,
         appData: {
           ...dsr.fileMetadata.appData,
           content: postContent,

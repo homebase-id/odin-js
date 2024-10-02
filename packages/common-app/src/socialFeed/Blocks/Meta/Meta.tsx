@@ -250,11 +250,12 @@ const GroupChannelActions = ({
     | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
   postFile: HomebaseFile<PostContent>;
 }) => {
-  const { getIdentity } = useDotYouClient();
+  const { getIdentity, getDotYouClient } = useDotYouClient();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
+  const localIdentity = getDotYouClient().getIdentity();
   const identity = getIdentity();
-  const isAuthor = postFile.fileMetadata.appData.content.authorOdinId === identity;
+  const isAuthor = postFile.fileMetadata.originalAuthor === identity;
 
   const {
     removeFromFeed: { mutateAsync: removeFromMyFeed },
@@ -296,7 +297,7 @@ const GroupChannelActions = ({
   }
 
   // If the channel has serverMetadata, it is a collaborative channel from this identity so we can remove the post
-  if (channel && channel.serverMetadata) {
+  if (channel?.serverMetadata && identity === localIdentity) {
     options.push({
       icon: Trash,
       label: t(

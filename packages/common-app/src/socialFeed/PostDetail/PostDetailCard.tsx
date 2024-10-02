@@ -15,6 +15,7 @@ import {
   MediaGallery,
   EmbeddedPostContent,
   PrimaryMedia,
+  ToGroupBlock,
 } from '../../..';
 import {
   DEFAULT_PAYLOAD_KEY,
@@ -62,11 +63,17 @@ export const PostDetailCard = ({
               {showAuthorDetail ? (
                 <>
                   <AuthorImage
-                    odinId={odinId}
+                    odinId={postFile.fileMetadata.originalAuthor || odinId}
                     className="mr-2 h-[2rem] w-[2rem] rounded-full sm:h-[2.5rem] sm:w-[2.5rem]"
                   />
                   <h2>
-                    <AuthorName odinId={odinId} />
+                    <AuthorName odinId={postFile.fileMetadata.originalAuthor || odinId} />
+                    <ToGroupBlock
+                      channel={channel || undefined}
+                      odinId={odinId}
+                      authorOdinId={postFile.fileMetadata.originalAuthor}
+                      className="ml-1"
+                    />
                   </h2>
                   <span className="px-2 leading-4">·</span>
                 </>
@@ -85,7 +92,7 @@ export const PostDetailCard = ({
                 postFile={postFile}
                 channel={channel}
                 odinId={odinId}
-                authorOdinId={post.authorOdinId || odinId}
+                authorOdinId={postFile.fileMetadata.originalAuthor || odinId}
                 size="text-sm"
               />
             </>
@@ -204,7 +211,7 @@ export const PostDetailCard = ({
       )}
       {postFile ? (
         <PostInteracts
-          authorOdinId={odinId || window.location.hostname}
+          odinId={odinId || window.location.hostname}
           postFile={postFile}
           defaultExpanded={true}
           isAuthenticated={isAuthenticated}

@@ -71,7 +71,7 @@ const PostTeaser = ({
     channelKey: post.channelId,
   }).fetch;
 
-  const authorOdinId = post.authorOdinId || odinId;
+  const authorOdinId = postFile.fileMetadata.originalAuthor || odinId;
 
   if (identityAccessible === false && isExternal)
     return <UnreachableIdentity postFile={postFile} className={className} odinId={odinId} />;
@@ -102,7 +102,7 @@ const PostTeaser = ({
                   postFile={postFile}
                   channel={channel || undefined}
                   odinId={odinId}
-                  authorOdinId={post.authorOdinId || odinId}
+                  authorOdinId={authorOdinId}
                   excludeContextMenu={true}
                 />
               </div>

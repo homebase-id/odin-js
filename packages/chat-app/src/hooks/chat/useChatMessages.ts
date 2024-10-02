@@ -96,7 +96,6 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
           : undefined,
       enabled: !!conversationId,
       refetchOnMount: false,
-      refetchOnReconnect: false,
       staleTime: 1000 * 60 * 60 * 24, // 24 hour
     }),
     markAsRead: useMutation({
@@ -132,17 +131,20 @@ export const insertNewMessagesForConversation = (
     }>
   >(['chat-messages', conversationId]);
 
-  if (newMessages.length > PAGE_SIZE || !extistingMessages) {
-    queryClient.setQueryData(
-      ['chat-messages', conversationId],
-      (data: InfiniteData<unknown, unknown>) => {
-        return {
-          pages: data?.pages?.slice(0, 1) ?? [],
-          pageParams: data?.pageParams?.slice(0, 1) || [undefined],
-        };
-      }
-    );
-    queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+  if (newMessages.length > PAGE_SIZE || !extistingMessages || !extistingMessages.pages.length) {
+    if (extistingMessages) {
+      // Only reset the first page if we have data;
+      queryClient.setQueryData(
+        ['chat-messages', conversationId],
+        (data: InfiniteData<unknown, unknown>) => {
+          return {
+            pages: data?.pages?.slice(0, 1) ?? [],
+            pageParams: data?.pageParams?.slice(0, 1) || [undefined],
+          };
+        }
+      );
+    }
+    queryClient.refetchQueries({ queryKey: ['chat-messages', conversationId] });
     return;
   }
 

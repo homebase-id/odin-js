@@ -21,8 +21,8 @@ import {
   VolatileInput,
   FileOverview,
   FileSelector,
-  useLinkPreviewBuilder,
   LinkOverview,
+  AllContactMentionDropdown,
 } from '../../form';
 import { t, getImagesFromPasteEvent, getVideosFromPasteEvent } from '../../helpers';
 import {
@@ -31,6 +31,7 @@ import {
   useChannels,
   useCollaborativeChannels,
   useChannel,
+  useLinkPreviewBuilder,
 } from '../../hooks';
 
 import { EmbeddedPostContent } from '../Blocks/Body/EmbeddedPostContent';
@@ -179,6 +180,7 @@ export const PostComposer = ({
                 }
           }
           key={stateIndex}
+          autoCompleters={[AllContactMentionDropdown]}
         />
 
         <FileOverview files={files} setFiles={setFiles} className="mt-2" cols={4} />

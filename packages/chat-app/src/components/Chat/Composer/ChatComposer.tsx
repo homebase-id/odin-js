@@ -22,6 +22,7 @@ import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
 import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { Plus, PaperPlane, Times } from '@homebase-id/common-app/icons';
+import { ConversationMentionDropdown } from './ConversationMentionDropdown';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const CHAT_DRAFTS_KEY = 'CHAT_LOCAL_DRAFTS';
@@ -161,6 +162,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
               }
             }}
             onSubmit={isTouchDevice() ? undefined : doSend}
+            autoCompleters={[ConversationMentionDropdown]}
           />
           <span className="my-auto">
             <ActionButton

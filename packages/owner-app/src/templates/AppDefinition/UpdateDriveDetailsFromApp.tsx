@@ -4,8 +4,8 @@ import { Arrow } from '@homebase-id/common-app/icons';
 import Section from '../../components/ui/Sections/Section';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useApp } from '../../hooks/apps/useApp';
-import { drivesParamToDriveGrantRequest } from './RegisterApp';
 import { useDrive } from '../../hooks/drives/useDrive';
+import { drivesParamToDriveGrantRequest } from './util';
 
 const UpdateDriveDetailsFromApp = () => {
   // Read the queryString

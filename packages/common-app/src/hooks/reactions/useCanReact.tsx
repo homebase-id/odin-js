@@ -7,7 +7,7 @@ import { useSecurityContext } from '../securityContext/useSecurityContext';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 interface UseCanReactProps {
-  authorOdinId: string;
+  odinId: string;
   channelId: string;
   postContent: PostContent;
   isEnabled: boolean;
@@ -35,7 +35,7 @@ export type CantReact = {
 export type CanReactInfo = CanReact | CantReact;
 
 export const useCanReact = ({
-  authorOdinId,
+  odinId,
   channelId,
   postContent,
   isEnabled,
@@ -43,9 +43,9 @@ export const useCanReact = ({
   isAuthenticated,
 }: UseCanReactProps) => {
   const { getIdentity } = useDotYouClient();
-  const isAuthor = authorOdinId === (getIdentity() || window.location.hostname);
+  const isAuthor = odinId === (getIdentity() || window.location.hostname);
   const { data: securityContext, isFetched: securityFetched } = useSecurityContext(
-    authorOdinId,
+    odinId,
     isEnabled
   ).fetch;
 
@@ -83,7 +83,7 @@ export const useCanReact = ({
   };
 
   return useQuery({
-    queryKey: ['can-react', authorOdinId, channelId, postContent.id],
+    queryKey: ['can-react', odinId, channelId, postContent.id],
     queryFn: isCanReact,
     refetchOnMount: false,
     refetchOnWindowFocus: false,

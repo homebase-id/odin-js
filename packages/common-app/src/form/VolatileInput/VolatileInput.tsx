@@ -1,21 +1,20 @@
 import { FC, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { getRichTextFromString, useDebounce } from '../..';
-import { EmojiDropdown } from './VolatileInput/EmojiDropdown';
-import { MentionDropdown } from './VolatileInput/MentionDropdown';
+import { getRichTextFromString, useDebounce } from '../../..';
+import { EmojiDropdown } from './EmojiDropdown';
 import {
   SelectionData,
   getAbsoluteOffsetToParent,
   getRelativeOffset,
   restoreSelection,
   saveSelection,
-} from '../helpers/selection';
+} from '../../helpers/selection';
 
 export interface VolatileInputRef {
   focus: () => void;
   clear: () => void;
 }
 
-const VolatileInput = forwardRef(
+export const VolatileInput = forwardRef(
   (
     {
       onSubmit,
@@ -124,7 +123,11 @@ const VolatileInput = forwardRef(
 
       const richTextData = getRichTextFromString(textContents);
       const innerHtml = richTextData?.map((part) =>
-        part.type === 'a' ? `<span class="text-primary">${part?.text}</span>` : part.text
+        part.type === 'a'
+          ? `<span class="text-primary">${part?.text}</span>`
+          : part.type === 'mention'
+            ? `<span class="text-primary">@${part?.value}</span>`
+            : part.text
       );
 
       if (!innerHtml || !divRef.current) return;
@@ -218,10 +221,24 @@ const VolatileInput = forwardRef(
     useEffect(() => {
       if (!divRef.current) return;
       const clearEmptyNodes = (parent: Node) => {
-        parent.childNodes.forEach((node) => {
+        const childNodes = Array.from(parent.childNodes);
+
+        const allEmpty = childNodes.every(
+          (node) =>
+            node.nodeName === 'BR' || (node.textContent === '' && node.childNodes.length === 0)
+        );
+        if (allEmpty) {
+          childNodes.forEach((node) => parent.removeChild(node));
+          return;
+        }
+
+        childNodes.forEach((node) => {
+          // Remove empty nodes (except for br)
           if (
             divRef.current &&
-            (node.nodeName === 'BR' || (node.textContent === '' && node.childNodes.length === 0))
+            node.nodeName !== 'BR' &&
+            node.textContent === '' &&
+            node.childNodes.length === 0
           ) {
             parent.removeChild(node);
           } else {
@@ -266,23 +283,6 @@ const VolatileInput = forwardRef(
           }}
           position={rect}
         />
-        <MentionDropdown
-          query={wordTillCaret}
-          onInput={(link) => {
-            if (onChange && link && wordTillCaret) {
-              setLastInsertedContent(link);
-
-              const escapedCompleteHandle = link.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-              const pattern = new RegExp(
-                `${wordTillCaret}(?!${escapedCompleteHandle.substring(wordTillCaret.length)})`,
-                'g'
-              );
-
-              onChange(`${divRef.current?.innerText.replace(pattern, link) || ''}`);
-            }
-          }}
-          position={rect}
-        />
         {autoCompleters?.map((AutoCompleter, index) => (
           <AutoCompleter
             key={index}
@@ -309,8 +309,6 @@ const VolatileInput = forwardRef(
 );
 
 VolatileInput.displayName = 'VolatileInput';
-export { VolatileInput };
-
 export interface VolatileInputAutoCompleteProps {
   query: string | undefined;
   onInput: (val: string | undefined) => void;

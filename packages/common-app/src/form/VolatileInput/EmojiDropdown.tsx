@@ -3,7 +3,7 @@ import { NativeEmoji } from 'emoji-picker-element/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useMostSpace, usePortal } from '../../hooks';
-import { VolatileInputAutoCompleteProps } from '../VolatileInput';
+import { VolatileInputAutoCompleteProps } from './VolatileInput';
 const database = new Database({
   dataSource: '/emoji/emoji-data.json',
 });

@@ -146,7 +146,6 @@ export const getCommunityMessagesInfiniteQueryOptions: (
     : undefined,
   enabled: !!communityId,
   refetchOnMount: true,
-  refetchOnReconnect: false,
   staleTime: 1000 * 60 * 60 * 24, // 24 hour
 });
 

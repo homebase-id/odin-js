@@ -15,8 +15,7 @@ export const getRichTextFromString = (body: string): RichText | undefined => {
       if (!part || !part.length) return;
 
       if (urlRegex.test(part)) return { type: 'a', url: part, text: part };
-      if (mentionRegex.test(part))
-        return { type: 'a', url: `https://${part.slice(1)}`, text: part, odinId: part.slice(1) };
+      if (mentionRegex.test(part)) return { type: 'mention', value: part.slice(1) };
       else return { text: part };
     })
     .filter(Boolean) as RichText;
