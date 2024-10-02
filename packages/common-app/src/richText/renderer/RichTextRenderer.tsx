@@ -3,6 +3,7 @@ import React, { ReactNode } from 'react';
 import { Image } from '../../media/Image';
 import { ActionLink } from '../../ui/Buttons/ActionLink';
 import { highlightQuery } from './HighlightQuery';
+import { AuthorName } from '../../socialFeed';
 
 export const RichTextRenderer = ({
   body,
@@ -211,7 +212,7 @@ export const RichTextRenderer = ({
               rel="noreferrer noopener"
               className="text-primary hover:underline break-words"
             >
-              @{attributes.value}
+              @<AuthorName odinId={attributes.value} excludeLink={true} />
             </a>
           );
         } else return <></>;
