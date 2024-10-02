@@ -1,7 +1,12 @@
 import { NewMediaFile } from '@homebase-id/js-lib/core';
 import { ReactionContext } from '@homebase-id/js-lib/public';
 import { useMemo, useState } from 'react';
-import { VolatileInput, FileOverview, FileSelector } from '../../../../form';
+import {
+  VolatileInput,
+  FileOverview,
+  FileSelector,
+  AllContactMentionDropdown,
+} from '../../../../form';
 import { t, getImagesFromPasteEvent } from '../../../../helpers';
 import { CanReactInfo, useDotYouClient, useReaction } from '../../../../hooks';
 import { ErrorNotification, ActionButtonState, ActionButton } from '../../../../ui';
@@ -131,6 +136,7 @@ export const CommentEditor = ({
             }
           }}
           onChange={(val) => setBody(val)}
+          autoCompleters={[AllContactMentionDropdown]}
         />
         <FileOverview
           files={files}
