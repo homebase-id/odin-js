@@ -17,7 +17,13 @@ import {
 } from '@homebase-id/js-lib/core';
 import { AclIcon, AclSummary, AclDialog } from '../../acl';
 import { ChannelsDialog } from '../../channels';
-import { VolatileInput, FileOverview, FileSelector, LinkOverview } from '../../form';
+import {
+  VolatileInput,
+  FileOverview,
+  FileSelector,
+  LinkOverview,
+  AllContactMentionDropdown,
+} from '../../form';
 import { t, getImagesFromPasteEvent, getVideosFromPasteEvent } from '../../helpers';
 import {
   useDotYouClient,
@@ -174,6 +180,7 @@ export const PostComposer = ({
                 }
           }
           key={stateIndex}
+          autoCompleters={[AllContactMentionDropdown]}
         />
 
         <FileOverview files={files} setFiles={setFiles} className="mt-2" cols={4} />

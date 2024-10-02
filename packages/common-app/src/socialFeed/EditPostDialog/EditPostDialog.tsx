@@ -1,6 +1,7 @@
 import {
-  PostContent,
+  POST_LINKS_PAYLOAD_KEY,
   RemoteCollaborativeChannelDefinition,
+  PostContent,
   getChannelDrive,
 } from '@homebase-id/js-lib/public';
 import { useEffect, useState } from 'react';
@@ -13,7 +14,7 @@ import {
   NewMediaFile,
   SecurityGroupType,
 } from '@homebase-id/js-lib/core';
-import { VolatileInput, FileOverview } from '../../form';
+import { VolatileInput, FileOverview, AllContactMentionDropdown } from '../../form';
 import { t } from '../../helpers';
 import { useChannel, usePortal } from '../../hooks';
 import { ErrorNotification, DialogWrapper, ActionButton } from '../../ui';
@@ -43,14 +44,18 @@ export const EditPostDialog = ({
 
   const [postFile, setPostFile] = useState<HomebaseFile<PostContent>>({ ...incomingPostFile });
   const [newMediaFiles, setNewMediaFiles] = useState<(MediaFile | NewMediaFile)[]>(
-    postFile.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || []
+    postFile.fileMetadata.payloads?.filter(
+      (p) => p.key !== DEFAULT_PAYLOAD_KEY && p.key !== POST_LINKS_PAYLOAD_KEY
+    ) || []
   );
 
   useEffect(() => {
     if (incomingPostFile) {
       setPostFile({ ...incomingPostFile });
       setNewMediaFiles(
-        incomingPostFile.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY)
+        incomingPostFile.fileMetadata.payloads?.filter(
+          (p) => p.key !== DEFAULT_PAYLOAD_KEY && p.key !== POST_LINKS_PAYLOAD_KEY
+        )
       );
     }
   }, [incomingPostFile]);
@@ -110,6 +115,7 @@ export const EditPostDialog = ({
             }}
             placeholder={t("What's up?")}
             className={`w-full resize-none rounded-md border bg-transparent p-2 relative`}
+            autoCompleters={[AllContactMentionDropdown]}
           />
           <FileOverview
             className="mt-2"
