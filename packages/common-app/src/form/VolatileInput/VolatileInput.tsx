@@ -1,14 +1,13 @@
 import { FC, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { getRichTextFromString, useDebounce } from '../..';
-import { EmojiDropdown } from './VolatileInput/EmojiDropdown';
-import { MentionDropdown } from './VolatileInput/MentionDropdown';
+import { getRichTextFromString, useDebounce } from '../../..';
+import { EmojiDropdown } from './EmojiDropdown';
 import {
   SelectionData,
   getAbsoluteOffsetToParent,
   getRelativeOffset,
   restoreSelection,
   saveSelection,
-} from '../helpers/selection';
+} from '../../helpers/selection';
 
 export interface VolatileInputRef {
   focus: () => void;
@@ -266,7 +265,7 @@ const VolatileInput = forwardRef(
           }}
           position={rect}
         />
-        <MentionDropdown
+        {/* <MentionDropdown
           query={wordTillCaret}
           onInput={(link) => {
             if (onChange && link && wordTillCaret) {
@@ -282,7 +281,7 @@ const VolatileInput = forwardRef(
             }
           }}
           position={rect}
-        />
+        /> */}
         {autoCompleters?.map((AutoCompleter, index) => (
           <AutoCompleter
             key={index}

@@ -9,7 +9,7 @@ import {
   NewMediaFile,
   SecurityGroupType,
 } from '@homebase-id/js-lib/core';
-import { VolatileInput, FileOverview } from '../../form';
+import { VolatileInput, FileOverview, AllContactMentionDropdown } from '../../form';
 import { t } from '../../helpers';
 import { usePortal } from '../../hooks';
 import { ErrorNotification, DialogWrapper, ActionButton } from '../../ui';
@@ -98,6 +98,7 @@ export const EditPostDialog = ({
             }}
             placeholder={t("What's up?")}
             className={`w-full resize-none rounded-md border bg-transparent p-2 relative`}
+            autoCompleters={[AllContactMentionDropdown]}
           />
           <FileOverview
             className="mt-2"

@@ -14,5 +14,6 @@ export * from './files/ExtensionThumbnail';
 export * from './files/FileOverview';
 export * from './files/FileSelector';
 export * from './links/LinkOverview';
-export * from './VolatileInput';
+export * from './VolatileInput/VolatileInput';
+export * from './VolatileInput/MentionDropdown';
 export * from './DictionaryEditor';
