@@ -166,7 +166,8 @@ export const Toast = ({
     'relative after:content-[""] after:absolute after:top-[1.6rem] after:w-[50%] after:h-[1.4rem] after:bg-gradient-to-l after:from-white dark:after:from-black after:to-transparent';
 
   const doOpen = () => {
-    if (href && href.startsWith(OWNER_ROOT)) navigate(href);
+    if (href && href.startsWith(OWNER_ROOT) && window.location.pathname.startsWith(OWNER_ROOT))
+      navigate(href);
     else if (href) {
       onOpen && onOpen();
       window.location.href = href;
