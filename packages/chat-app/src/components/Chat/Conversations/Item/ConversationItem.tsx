@@ -145,13 +145,18 @@ const ConversationBody = ({
   const unreadCount =
     conversationMetadata &&
     flatMessages &&
-    flatMessages?.[0]?.fileMetadata.senderOdinId !== identity
+    (!lastMessage?.fileMetadata.senderOdinId || lastMessage?.fileMetadata.senderOdinId !== identity)
       ? flatMessages.filter(
           (msg) =>
             msg.fileMetadata.senderOdinId !== identity &&
             (msg.fileMetadata.transitCreated || msg.fileMetadata.created) > lastReadTime
         )?.length
       : 0;
+
+  if (conversationId === '456894ee-9dcb-4b8d-9384-6a782025c031') {
+    console.log('lastMessage', lastMessage);
+    console.log('unreadCount', unreadCount);
+  }
 
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
 
