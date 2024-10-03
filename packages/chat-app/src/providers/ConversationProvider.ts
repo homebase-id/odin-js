@@ -19,7 +19,9 @@ import {
   PriorityOptions,
   NewMediaFile,
   PayloadFile,
-  getPayloadBytes,
+  appendDataToFile,
+  uploadHeader,
+  EmbeddedThumb,
 } from '@homebase-id/js-lib/core';
 import { jsonStringify64, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { createThumbnails } from '@homebase-id/js-lib/media';
@@ -256,42 +258,50 @@ export const updateConversation = async (
 ): Promise<UploadResult | void> => {
   const identity = dotYouClient.getIdentity();
 
-  const imageFile: Blob | undefined = await (async () => {
-    if (newImage?.file) return newImage.file;
+  let runningVersionTag = conversation.fileMetadata.versionTag;
+  let tinyThumb: EmbeddedThumb | undefined = conversation.fileMetadata.appData.previewThumbnail;
 
-    const existingPayloadDescriptor = conversation.fileMetadata.payloads.find(
-      (payload) => payload.key === CONVERSATION_IMAGE_PAYLOAD_KEY
-    );
-    if (!existingPayloadDescriptor) return;
-    const existingPayload = await getPayloadBytes(
-      dotYouClient,
-      ChatDrive,
-      conversation.fileId,
-      CONVERSATION_IMAGE_PAYLOAD_KEY
-    );
-    if (!existingPayload) return;
+  if (newImage?.file) {
+    const payloads: PayloadFile[] | undefined = newImage.file
+      ? [
+          {
+            payload: newImage.file,
+            key: CONVERSATION_IMAGE_PAYLOAD_KEY,
+            descriptorContent: jsonStringify64({}),
+          },
+        ]
+      : undefined;
+    const { additionalThumbnails: thumbnails, tinyThumb: newTinyThumb } = newImage.file
+      ? await createThumbnails(newImage.file, CONVERSATION_IMAGE_PAYLOAD_KEY, [
+          {
+            height: 250,
+            width: 250,
+            quality: 0.8,
+          },
+        ])
+      : { additionalThumbnails: undefined, tinyThumb: undefined };
 
-    return new Blob([existingPayload.bytes], { type: existingPayload.contentType });
-  })();
-
-  const payloads: PayloadFile[] | undefined = imageFile
-    ? [
-        {
-          payload: imageFile,
-          key: CONVERSATION_IMAGE_PAYLOAD_KEY,
-          descriptorContent: jsonStringify64({}),
-        },
-      ]
-    : undefined;
-  const { additionalThumbnails: thumbnails, tinyThumb } = imageFile
-    ? await createThumbnails(imageFile, CONVERSATION_IMAGE_PAYLOAD_KEY, [
-        {
-          height: 250,
-          width: 250,
-          quality: 0.8,
-        },
-      ])
-    : { additionalThumbnails: undefined, tinyThumb: undefined };
+    runningVersionTag =
+      (
+        await appendDataToFile(
+          dotYouClient,
+          conversation.sharedSecretEncryptedKeyHeader,
+          {
+            targetFile: {
+              fileId: conversation.fileId as string,
+              targetDrive: ChatDrive,
+            },
+            versionTag: conversation.fileMetadata.versionTag,
+            recipients: conversation.fileMetadata.appData.content.recipients.filter(
+              (recipient) => recipient !== identity
+            ),
+          },
+          payloads,
+          thumbnails
+        )
+      )?.newVersionTag || runningVersionTag;
+    tinyThumb = newTinyThumb;
+  }
 
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
@@ -314,7 +324,7 @@ export const updateConversation = async (
   const contentJson: string = jsonStringify64({ ...conversationContent });
 
   const uploadMetadata: UploadFileMetadata = {
-    versionTag: conversation.fileMetadata.versionTag,
+    versionTag: runningVersionTag,
     allowDistribution: distribute,
     appData: {
       archivalStatus: conversation.fileMetadata.appData.archivalStatus,
@@ -329,13 +339,11 @@ export const updateConversation = async (
     },
   };
 
-  return await uploadFile(
+  return await uploadHeader(
     dotYouClient,
+    conversation.sharedSecretEncryptedKeyHeader,
     uploadInstructions,
     uploadMetadata,
-    payloads,
-    thumbnails,
-    true,
     !ignoreConflict
       ? async () => {
           const existingConversation = await getConversation(

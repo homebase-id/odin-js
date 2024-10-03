@@ -77,12 +77,15 @@ export const ChatInfo = ({
           ) : conversation.fileMetadata.payloads.some(
               (payload) => payload.key === CONVERSATION_IMAGE_PAYLOAD_KEY
             ) ? (
-            <Image
-              fileId={conversation.fileId}
-              fileKey={CONVERSATION_IMAGE_PAYLOAD_KEY}
-              targetDrive={ChatDrive}
-              className="h-24 w-24 border border-neutral-200 dark:border-neutral-800"
-            />
+            <div className="w-full max-w-[250px]">
+              <Image
+                fileId={conversation.fileId}
+                fileKey={CONVERSATION_IMAGE_PAYLOAD_KEY}
+                targetDrive={ChatDrive}
+                className="m-auto border border-neutral-200 dark:border-neutral-800"
+                fit="contain"
+              />
+            </div>
           ) : (
             <div className="rounded-full bg-primary/20 p-7">
               <Persons className="h-10 w-10" />
