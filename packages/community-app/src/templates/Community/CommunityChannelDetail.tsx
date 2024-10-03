@@ -191,7 +191,7 @@ const ChannelInfo = ({
               new Date(channel.fileMetadata.created || community.fileMetadata.created)
             )}{' '}
             {t('by')}{' '}
-            {channel.fileMetadata.senderOdinId ? (
+            {channel.fileMetadata.senderOdinId && channel.fileMetadata.senderOdinId !== identity ? (
               <AuthorName odinId={channel.fileMetadata.senderOdinId} />
             ) : (
               t('You')
