@@ -12,16 +12,13 @@ import {
   getFileHeaderByUniqueId,
   queryBatch,
   uploadFile,
-  uploadHeader,
   EncryptedKeyHeader,
   ScheduleOptions,
   SendContents,
   UploadResult,
   PriorityOptions,
   NewMediaFile,
-  appendDataToFile,
   PayloadFile,
-  ThumbnailFile,
   getPayloadBytes,
 } from '@homebase-id/js-lib/core';
 import { jsonStringify64, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
