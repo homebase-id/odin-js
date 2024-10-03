@@ -66,9 +66,11 @@ export const useFiles = ({
 export const useFileQuery = ({
   targetDrive,
   id,
+  systemFileType,
 }: {
   targetDrive: TargetDrive | undefined;
   id: string | undefined;
+  systemFileType?: SystemFileType;
 }) => {
   const dotYouClient = useAuth().getDotYouClient();
 
@@ -78,11 +80,13 @@ export const useFileQuery = ({
       if (!id || !targetDrive) return null;
 
       // Search by fileId
-      const fileByFileId = await getFileHeader(dotYouClient, targetDrive, id);
+      const fileByFileId = await getFileHeader(dotYouClient, targetDrive, id, { systemFileType });
       if (fileByFileId) return fileByFileId;
 
       // Search by uniqueId
-      const fileByUniqueId = await getFileHeaderByUniqueId(dotYouClient, targetDrive, id);
+      const fileByUniqueId = await getFileHeaderByUniqueId(dotYouClient, targetDrive, id, {
+        systemFileType,
+      });
       if (fileByUniqueId) return fileByUniqueId;
 
       // Search by globalTransitId
@@ -90,7 +94,8 @@ export const useFileQuery = ({
         dotYouClient,
         window.location.hostname,
         targetDrive,
-        id
+        id,
+        { systemFileType }
       );
       if (fileByGlobalTransitId) return fileByGlobalTransitId;
     },
@@ -110,7 +115,9 @@ export const useFile = ({
 
   const fetchFile = async (result: HomebaseFile | DeletedHomebaseFile, payloadKey?: string) => {
     if (payloadKey) {
-      const payload = await getPayloadBytes(dotYouClient, targetDrive, result.fileId, payloadKey);
+      const payload = await getPayloadBytes(dotYouClient, targetDrive, result.fileId, payloadKey, {
+        systemFileType: result.fileSystemType,
+      });
       if (!payload) return null;
 
       return window.URL.createObjectURL(
@@ -153,9 +160,12 @@ export const useFile = ({
             dotYouClient,
             targetDrive,
             result,
-            includeMetadataHeader
+            includeMetadataHeader,
+            result.fileSystemType
           )
-        : await getPayloadBytes(dotYouClient, targetDrive, result.fileId, DEFAULT_PAYLOAD_KEY),
+        : await getPayloadBytes(dotYouClient, targetDrive, result.fileId, DEFAULT_PAYLOAD_KEY, {
+            systemFileType: result.fileSystemType,
+          }),
     };
 
     const stringified = jsonStringify64(exportable);
