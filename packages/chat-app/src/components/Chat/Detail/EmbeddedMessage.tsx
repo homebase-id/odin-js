@@ -30,18 +30,17 @@ export const EmbeddedMessage = ({
   msg: HomebaseFile<ChatMessage> | undefined;
   className?: string;
 }) => {
+  const identity = useDotYouClientContext().getIdentity();
   const hasMedia = msg && !!msg.fileMetadata.payloads?.length;
 
   return (
-    <div
-      className={`w-full flex-grow overflow-hidden rounded-lg  bg-primary/10 ${className || ''}`}
-    >
-      <div className="flex flex-row items-center gap-2 border-l-4 border-l-primary p-1 ">
+    <div className={`w-full flex-grow overflow-hidden rounded-lg bg-primary/10 ${className || ''}`}>
+      <div className="flex flex-row items-center gap-2 border-l-4 border-l-primary p-1">
         {msg ? (
           <>
             <div className="px-2">
               <p className="font-semibold">
-                {msg.fileMetadata.senderOdinId ? (
+                {msg.fileMetadata.senderOdinId && msg.fileMetadata.senderOdinId !== identity ? (
                   <ConnectionName odinId={msg.fileMetadata.senderOdinId} />
                 ) : (
                   t('You')
