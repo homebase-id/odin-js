@@ -35,7 +35,7 @@ export const useMarkMessagesAsRead = ({
         (msg) =>
           (msg?.fileMetadata.transitCreated || msg?.fileMetadata.created) >
             (conversationMetadata.fileMetadata.appData.content.lastReadTime || 0) &&
-          msg.fileMetadata.senderOdinId !== identity
+          (!msg.fileMetadata.senderOdinId || msg.fileMetadata.senderOdinId !== identity)
       );
 
       const newestMessageCreated = unreadMessages.reduce((acc, msg) => {

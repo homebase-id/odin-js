@@ -145,7 +145,8 @@ const ConversationBody = ({
   const unreadCount =
     conversationMetadata &&
     flatMessages &&
-    (!lastMessage?.fileMetadata.senderOdinId || lastMessage?.fileMetadata.senderOdinId !== identity)
+    lastMessage?.fileMetadata.senderOdinId &&
+    lastMessage?.fileMetadata.senderOdinId !== identity
       ? flatMessages.filter(
           (msg) =>
             msg.fileMetadata.senderOdinId !== identity &&
