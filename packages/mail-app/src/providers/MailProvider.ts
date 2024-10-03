@@ -70,7 +70,7 @@ export interface MailConversation {
   plainMessage?: string; // Used purely for search purposes
   plainAttachment?: string; // Used purely for search purposes
 
-  sender: string; // Copy of the senderOdinId which is reset when the recipient marks the message as read
+  sender: string; // Copy of the senderOdinId which is reset when the recipient marks the message as read => TODO: Remove this in favor of the fileMetadata.originalAuthor
   recipients: string[];
   isRead?: boolean;
 

@@ -1,7 +1,13 @@
 import { useParams, useMatch, Link } from 'react-router-dom';
 
 import { useEffect, useState } from 'react';
-import { ActionButton, ConnectionImage, ConnectionName, t } from '@homebase-id/common-app';
+import {
+  ActionButton,
+  ConnectionImage,
+  ConnectionName,
+  t,
+  useDotYouClientContext,
+} from '@homebase-id/common-app';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { useCommunity } from '../../hooks/community/useCommunity';
@@ -124,6 +130,7 @@ const ChannelItem = ({
   communityId: string;
   channel: ChannelWithRecentMessage;
 }) => {
+  const identity = useDotYouClientContext().getIdentity();
   const channelId = channel.fileMetadata.appData.uniqueId;
   const href = `${COMMUNITY_ROOT}/${communityId}/${channelId}`;
   const isActive = !!useMatch({ path: href, end: false });
@@ -156,7 +163,7 @@ const ChannelItem = ({
     channel.lastMessage?.fileMetadata.created &&
     (metadata?.fileMetadata.appData.content?.channelLastReadTime[channelId] || 0) <
       channel.lastMessage?.fileMetadata.created &&
-    !!channel.lastMessage.fileMetadata.senderOdinId;
+    channel.lastMessage.fileMetadata.senderOdinId !== identity;
 
   return (
     <Link

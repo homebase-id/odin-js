@@ -138,6 +138,7 @@ const useInboxProcessor = (communityId: string | undefined, connected?: boolean)
 
 const useCommunityWebsocket = (communityId: string | undefined, isEnabled: boolean) => {
   const dotYouClient = useDotYouClientContext();
+  const identity = dotYouClient.getIdentity();
   const queryClient = useQueryClient();
   const targetDrive = getTargetDriveFromCommunityId(communityId || '');
 
@@ -173,7 +174,7 @@ const useCommunityWebsocket = (communityId: string | undefined, isEnabled: boole
           return;
         }
 
-        if (updatedChatMessage.fileMetadata.senderOdinId !== '') {
+        if (updatedChatMessage.fileMetadata.senderOdinId !== identity) {
           // Messages from others are processed immediately
           insertNewMessage(queryClient, updatedChatMessage, communityId);
         } else {
