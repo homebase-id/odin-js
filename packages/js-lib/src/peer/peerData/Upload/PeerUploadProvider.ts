@@ -23,6 +23,11 @@ import { getRandom16ByteArray } from '../../../helpers/DataUtil';
 import { AxiosRequestConfig } from 'axios';
 import { encryptKeyHeader, encryptWithSharedSecret } from '../../../core/DriveData/SecurityHelpers';
 
+const EMPTY_KEY_HEADER: KeyHeader = {
+  iv: new Uint8Array(Array(16).fill(0)),
+  aesKey: new Uint8Array(Array(16).fill(0)),
+};
+
 const isDebug = hasDebugFlag();
 
 /// Upload methods
@@ -132,10 +137,11 @@ export const uploadHeaderOverPeer = async (
       }
     );
 
-  const plainKeyHeader =
-    keyHeader && 'encryptionVersion' in keyHeader
+  const plainKeyHeader = metadata.isEncrypted
+    ? keyHeader && 'encryptionVersion' in keyHeader
       ? await decryptKeyHeader(dotYouClient, keyHeader)
-      : keyHeader;
+      : keyHeader
+    : undefined;
 
   if (!decryptKeyHeader && metadata.isEncrypted)
     throw new Error('[odin-js] Missing existing keyHeader for appending encrypted metadata.');
@@ -157,13 +163,13 @@ export const uploadHeaderOverPeer = async (
     dotYouClient,
     {
       fileMetadata: encryptedMetaData,
-      encryptedKeyHeader: plainKeyHeader
-        ? await encryptKeyHeader(
-            dotYouClient,
-            { aesKey: new Uint8Array(Array(16).fill(0)), iv: plainKeyHeader.iv },
-            strippedInstructions.transferIv
-          )
-        : undefined,
+      encryptedKeyHeader: {
+        encryptedKeyHeader: await encryptKeyHeader(
+          dotYouClient,
+          plainKeyHeader ?? EMPTY_KEY_HEADER,
+          instructions.transferIv
+        ),
+      },
     },
     strippedInstructions.transferIv
   );

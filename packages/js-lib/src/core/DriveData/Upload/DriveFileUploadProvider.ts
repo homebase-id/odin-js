@@ -182,10 +182,11 @@ export const uploadHeader = async (
       metadata,
     });
 
-  const decryptedKeyHeader =
-    keyHeader && 'encryptionVersion' in keyHeader
+  const decryptedKeyHeader = metadata.isEncrypted
+    ? keyHeader && 'encryptionVersion' in keyHeader
       ? await decryptKeyHeader(dotYouClient, keyHeader)
-      : keyHeader;
+      : keyHeader
+    : undefined;
 
   if (!decryptedKeyHeader && metadata.isEncrypted)
     throw new Error('[odin-js] Missing existing keyHeader for appending encrypted metadata.');
