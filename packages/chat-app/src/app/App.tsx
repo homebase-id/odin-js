@@ -15,12 +15,13 @@ const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'chat-message',
   'chat-messages',
   'conversations',
+  'conversation-metadata',
   'chat-reaction',
   'connection-details',
   'process-inbox',
 ];
 
-import { MinimalLayout, NoLayout } from '../components/ui/Layout/Layout';
+import { MinimalLayout, Layout } from '../components/ui/Layout/Layout';
 
 const Auth = lazy(() => import('../templates/Auth/Auth'));
 const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
@@ -28,18 +29,22 @@ const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
 const ChatHome = lazy(() =>
   import('../templates/Chat/ChatHome').then((chatApp) => ({ default: chatApp.ChatHome }))
 );
+const ChatCreateAndOrRedirect = lazy(() =>
+  import('../templates/Chat/ChatCreateAndOrRedirect').then((chatApp) => ({
+    default: chatApp.ChatCreateAndOrRedirect,
+  }))
+);
 
-import '@youfoundation/ui-lib/dist/style.css';
+import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import { useAuth } from '../hooks/auth/useAuth';
 
 export const ROOT_PATH = '/apps/chat';
 const AUTH_PATH = ROOT_PATH + '/auth';
 
-import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
-import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
+import { ErrorBoundary, NotFound, DotYouClientProvider } from '@homebase-id/common-app';
 import VideoPlayer from '../templates/VideoPlayer/VideoPlayer';
-import { OdinQueryClient } from '@youfoundation/common-app';
+import { OdinQueryClient } from '@homebase-id/common-app';
 
 function App() {
   const router = createBrowserRouter(
@@ -64,9 +69,9 @@ function App() {
             element={
               <RootRoute>
                 <DotYouClientProvider>
-                  <NoLayout>
+                  <Layout>
                     <Outlet />
-                  </NoLayout>
+                  </Layout>
                 </DotYouClientProvider>
               </RootRoute>
             }
@@ -74,6 +79,7 @@ function App() {
             <Route index={true} element={<ChatHome />} />
             <Route path={':conversationKey'} element={<ChatHome />} />
             <Route path={'new'} element={<ChatHome />} />
+            <Route path={'open/:odinId'} element={<ChatCreateAndOrRedirect />} />
             <Route path={'new-group'} element={<ChatHome />} />
             <Route path={':conversationKey/:chatMessageKey'} element={<ChatHome />} />
             <Route path={':conversationKey/:chatMessageKey/:mediaKey'} element={<ChatHome />} />
@@ -133,4 +139,4 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
   return <>{children}</>;
 };
 
-export default App;
+export { App };

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { t } from '../../../../helpers';
 import { usePortal } from '../../../../hooks';
 import { DialogWrapper } from '../../../../ui';
-import { EmbeddedPost } from '@youfoundation/js-lib/public';
+import { EmbeddedPost } from '@homebase-id/js-lib/public';
 import PostComposer from '../../../Composer/PostComposer';
 
 export const RepostDialog = ({

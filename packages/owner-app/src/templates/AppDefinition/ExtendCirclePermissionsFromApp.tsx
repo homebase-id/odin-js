@@ -1,22 +1,22 @@
 import { useSearchParams } from 'react-router-dom';
 import {
   ActionButton,
-  Arrow,
   CirclePermissionView,
   ErrorNotification,
   t,
   useCircle,
   useCircles,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
 import Section from '../../components/ui/Sections/Section';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useApp } from '../../hooks/apps/useApp';
-import { drivesParamToDriveGrantRequest } from './RegisterApp';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { DriveGrant } from '@youfoundation/js-lib/network';
+import { drivesParamToDriveGrantRequest, circleToCircleIds } from './util';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { DriveGrant } from '@homebase-id/js-lib/network';
 import { useEffect } from 'react';
 
-const ExtendCirclePermissionsFromApp = () => {
+export const ExtendCirclePermissionsFromApp = () => {
   // Read the queryString
   const [searchParams] = useSearchParams();
 
@@ -147,10 +147,6 @@ const ExtendCirclePermissionsFromApp = () => {
               {t('The app')} &quot;{appRegistration?.name}&quot;{' '}
               {t('has requested extra access for your circles')}.
             </p>
-            {/* <p className="mt-2">
-              {t('By allowing this, the circles listed below')} &quot;{appRegistration?.name}&quot;{' '}
-              {t('will receive the following extra access on your identity')}:
-            </p> */}
 
             {applicableCircles?.length ? (
               <>
@@ -183,12 +179,7 @@ const ExtendCirclePermissionsFromApp = () => {
             ) : null}
 
             <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
-              <ActionButton
-                onClick={doUpdateCirclePermissions}
-                type="primary"
-                // state={mergeStates(extendPermissionStatus, extendPermissionStatus)}
-                icon={Arrow}
-              >
+              <ActionButton onClick={doUpdateCirclePermissions} type="primary" icon={Arrow}>
                 {t('Allow')}
               </ActionButton>
 
@@ -201,10 +192,4 @@ const ExtendCirclePermissionsFromApp = () => {
       </section>
     </>
   );
-};
-
-export default ExtendCirclePermissionsFromApp;
-
-export const circleToCircleIds = (queryParamVal: string | undefined): string[] => {
-  return queryParamVal?.split(',') || [];
 };

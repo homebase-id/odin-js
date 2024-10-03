@@ -1,17 +1,21 @@
-import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
-import { ActionButton, ActionGroup, Times, t } from '@youfoundation/common-app';
+import { HomePageAttributes, HomePageConfig } from '@homebase-id/js-lib/public';
 import { useHomeAttributes } from '../../hooks/profiles/useHomeAttributes';
-import { useStaticFiles } from '@youfoundation/common-app';
-import { ErrorNotification } from '@youfoundation/common-app';
 import AttributeGroup from '../../components/Attribute/AttributeGroup/AttributeGroup';
-import { Cloud } from '@youfoundation/common-app';
-import { LoadingBlock } from '@youfoundation/common-app';
 import Section from '../../components/ui/Sections/Section';
 import { AttributeVm } from '../../hooks/profiles/useAttributes';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { AttributeDefinitions } from '../../hooks/profiles/AttributeDefinitions';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { getNewId } from '@homebase-id/js-lib/helpers';
+import {
+  t,
+  ActionGroup,
+  LoadingBlock,
+  useStaticFiles,
+  ErrorNotification,
+  ActionButton,
+} from '@homebase-id/common-app';
+import { Cloud, Times } from '@homebase-id/common-app/icons';
 
 const defaultThemeAttribute: HomebaseFile<AttributeVm> = {
   fileMetadata: {

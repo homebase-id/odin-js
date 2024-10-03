@@ -1,12 +1,18 @@
-import { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
+import { lazy, ReactNode, Suspense } from 'react';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Outlet,
+  Navigate,
+  useMatch,
+} from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import Layout from '../components/ui/Layout/Layout';
+import { Layout } from '../components/ui/Layout/Layout';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import './App.css';
-import { ErrorBoundary } from '../components/ui/Layout/ErrorBoundary/ErrorBoundary';
 
 import DomainChoice from '../templates/Provision/DomainChoice';
 import InvitationCodeCheck from '../templates/InvitationCode/InvitationCodeCheck';
@@ -18,7 +24,9 @@ const queryClient = new QueryClient();
 export const ROOT_PATH = '/sign-up';
 
 import { config } from './config';
-import { NotFound } from '@youfoundation/common-app';
+import { ErrorBoundary, NotFound } from '@homebase-id/common-app';
+import { useConfiguration } from '../hooks/configuration/useConfiguration';
+import { Loader } from '@homebase-id/common-app/icons';
 
 function App() {
   return (
@@ -27,6 +35,13 @@ function App() {
         <meta name="v" content={import.meta.env.VITE_VERSION} />
         <meta name="description" content={`${config.brandName} - ${config.brandSlogan} `} />
         <title>Signup | {config.brandName}</title>
+
+        <link rel="apple-touch-icon" sizes="180x180" href={`/${config.id}/apple-touch-icon.png`} />
+        <link rel="icon" type="image/png" sizes="32x32" href={`/${config.id}/favicon-32x32.png`} />
+        <link rel="icon" type="image/png" sizes="16x16" href={`/${config.id}/favicon-16x16.png`} />
+        <link rel="manifest" href={`/${config.id}/site.webmanifest`} />
+        <meta name="msapplication-TileColor" content="#2b5797" />
+        <meta name="theme-color" content="#ff0000" />
       </Helmet>
       <QueryClientProvider client={queryClient}>
         <Router>
@@ -38,7 +53,9 @@ function App() {
                   <Layout>
                     <Suspense>
                       <ErrorBoundary>
-                        <Outlet />
+                        <RootRoute>
+                          <Outlet />
+                        </RootRoute>
                       </ErrorBoundary>
                     </Suspense>
                   </Layout>
@@ -67,5 +84,23 @@ function App() {
     </HelmetProvider>
   );
 }
+
+const RootRoute = ({ children }: { children: ReactNode }) => {
+  const { data: configuration, isLoading } = useConfiguration();
+  const isRoot = useMatch('/');
+
+  if (isLoading)
+    return (
+      <div className="flex flex-grow flex-col">
+        <Loader className="m-auto h-20 w-20" />
+      </div>
+    );
+
+  if (!configuration?.invitationCodeEnabled && !!isRoot) {
+    return <Navigate to={ROOT_PATH} />;
+  }
+
+  return <>{children}</>;
+};
 
 export default App;

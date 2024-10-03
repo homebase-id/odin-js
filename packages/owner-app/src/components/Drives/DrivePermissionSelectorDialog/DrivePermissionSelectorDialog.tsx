@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t, ActionButton, ActionButtonState, Arrow } from '@youfoundation/common-app';
-import { usePortal } from '@youfoundation/common-app';
-import { DialogWrapper } from '@youfoundation/common-app';
-import { ErrorNotification } from '@youfoundation/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
+import { t, ActionButton, ActionButtonState } from '@homebase-id/common-app';
+import { usePortal } from '@homebase-id/common-app';
+import { DialogWrapper } from '@homebase-id/common-app';
+import { ErrorNotification } from '@homebase-id/common-app';
 import { useDrives } from '../../../hooks/drives/useDrives';
 import DrivePermissionSelector from '../../Form/DrivePermissionSelector';
-import { DriveGrant } from '@youfoundation/js-lib/network';
+import { DriveGrant } from '@homebase-id/js-lib/network';
 
 const DrivePermissionSelectorDialog = ({
   title,

@@ -1,22 +1,31 @@
 import { jsonStringify64 } from '../../helpers/DataUtil';
 import {
   EmbeddedThumb,
+  KeyHeader,
   PayloadFile,
   ThumbnailFile,
 } from '../../core/DriveData/File/DriveFileTypes';
 import { createThumbnails } from '../Thumbs/ThumbnailProvider';
 import { segmentVideoFileWithFfmpeg, getThumbnailWithFfmpeg } from './VideoSegmenterFfmpeg';
+import { GenerateKeyHeader } from '../../core/DriveData/Upload/UploadHelpers';
 
 const megaByte = 1024 * 1024;
 
 export const processVideoFile = async (
   videoFile: { file: File | Blob; thumbnail?: ThumbnailFile },
-  payloadKey: string
+  payloadKey: string,
+  aesKey?: Uint8Array
 ): Promise<{
-  payload: PayloadFile;
   tinyThumb: EmbeddedThumb | undefined;
-  additionalThumbnails: ThumbnailFile[];
+  payloads: PayloadFile[];
+  thumbnails: ThumbnailFile[];
 }> => {
+  const keyHeader: KeyHeader | undefined = aesKey ? GenerateKeyHeader(aesKey) : undefined;
+
+  const payloads: PayloadFile[] = [];
+  const thumbnails: ThumbnailFile[] = [];
+
+  // Creating video thumbnail
   const thumbnail = await (async () => {
     const passedThumbnail = 'thumbnail' in videoFile ? videoFile.thumbnail?.payload : undefined;
 
@@ -24,7 +33,7 @@ export const processVideoFile = async (
     if (!passedThumbnail || passedThumbnail?.size < 1 * megaByte) {
       try {
         return (await getThumbnailWithFfmpeg(videoFile.file)) || passedThumbnail;
-      } catch (e) {
+      } catch {
         // Ignore; Grabbing can fail (it's not that important)
       }
     }
@@ -36,14 +45,33 @@ export const processVideoFile = async (
     ? await createThumbnails(thumbnail, payloadKey, [{ quality: 100, width: 250, height: 250 }])
     : { tinyThumb: undefined, additionalThumbnails: [] };
 
-  const { data: segmentedVideoData, metadata } = await segmentVideoFileWithFfmpeg(videoFile.file);
+  thumbnails.push(...additionalThumbnails);
+
+  // Processing video
+  const { metadata, ...videoData } = await segmentVideoFileWithFfmpeg(videoFile.file, keyHeader);
+
+  if ('segments' in videoData) {
+    const { segments } = videoData;
+    payloads.push({
+      key: payloadKey,
+      payload: segments,
+      descriptorContent: jsonStringify64(metadata),
+
+      ...(keyHeader && keyHeader.iv
+        ? { skipEncryption: true, iv: keyHeader.iv }
+        : { skipEncryption: false }),
+    });
+  } else {
+    payloads.push({
+      key: payloadKey,
+      payload: videoData.video,
+      descriptorContent: metadata ? jsonStringify64(metadata) : undefined,
+    });
+  }
+
   return {
     tinyThumb,
-    additionalThumbnails,
-    payload: {
-      payload: segmentedVideoData,
-      descriptorContent: jsonStringify64(metadata),
-      key: payloadKey,
-    },
+    thumbnails,
+    payloads,
   };
 };

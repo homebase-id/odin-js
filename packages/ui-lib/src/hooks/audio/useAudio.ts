@@ -1,17 +1,17 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import {
   TargetDrive,
   SystemFileType,
   DotYouClient,
   getPayloadBytes,
-} from '@youfoundation/js-lib/core';
-import { getDecryptedMediaUrl } from '@youfoundation/js-lib/media';
+} from '@homebase-id/js-lib/core';
+import { getDecryptedMediaUrl } from '@homebase-id/js-lib/media';
 import {
   getDecryptedMediaUrlOverPeer,
   getDecryptedMediaUrlOverPeerByGlobalTransitId,
   getPayloadBytesOverPeer,
   getPayloadBytesOverPeerByGlobalTransitId,
-} from '@youfoundation/js-lib/peer';
+} from '@homebase-id/js-lib/peer';
 
 export const useAudio = (
   dotYouClient: DotYouClient,
@@ -25,7 +25,10 @@ export const useAudio = (
 
   systemFileType?: SystemFileType,
   lastModified?: number
-) => {
+): {
+  fetchUrl: UseQueryResult<string | null, Error>;
+  fetch: UseQueryResult<{ bytes: Uint8Array; contentType: string } | null, Error>;
+} => {
   const localHost = dotYouClient.getIdentity() || window.location.hostname;
 
   const fetchAudioData = async (

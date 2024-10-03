@@ -1,5 +1,6 @@
-import { Persons, t } from '@youfoundation/common-app';
-import { AppPermissionType } from '@youfoundation/js-lib/network';
+import { t } from '@homebase-id/common-app';
+import { Persons } from '@homebase-id/common-app/icons';
+import { AppPermissionType } from '@homebase-id/js-lib/network';
 
 const PermissionView = ({ permission, className }: { permission: number; className?: string }) => {
   const permissionLevel = AppPermissionType[permission];

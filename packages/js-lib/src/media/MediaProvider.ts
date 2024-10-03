@@ -23,6 +23,7 @@ export const getDecryptedMediaUrl = async (
     size?: ImageSize; // Passing size will get a thumb, otherwise the payload
     systemFileType?: SystemFileType;
     fileSizeLimit?: number;
+    preferObjectUrl?: boolean;
   }
 ): Promise<string> => {
   const { size, systemFileType, fileSizeLimit } = options || {};
@@ -64,7 +65,7 @@ export const getDecryptedMediaUrl = async (
           { systemFileType, lastModified }
         );
         if (thumbBytes) return thumbBytes;
-      } catch (ex) {
+      } catch {
         // Failed to get thumb data, try to get payload data
       }
     }
@@ -79,7 +80,12 @@ export const getDecryptedMediaUrl = async (
 
   return getBytes().then((data) => {
     if (!data) return '';
-    return `data:${data.contentType};base64,${uint8ArrayToBase64(new Uint8Array(data.bytes))}`;
+    if (options?.preferObjectUrl) {
+      const blob = new Blob([new Uint8Array(data.bytes)], { type: data.contentType });
+      return URL.createObjectURL(blob);
+    } else {
+      return `data:${data.contentType};base64,${uint8ArrayToBase64(new Uint8Array(data.bytes))}`;
+    }
   });
 };
 

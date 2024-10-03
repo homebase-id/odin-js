@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { createOrUpdateFollow, fetchFollowing, FollowRequest } from '@youfoundation/js-lib/network';
+import { createOrUpdateFollow, fetchFollowing, FollowRequest } from '@homebase-id/js-lib/network';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 const PAGE_SIZE = 30;
@@ -12,6 +12,7 @@ export const useFollowingInfinite = () => {
       const response = await fetchFollowing(dotYouClient, pageParam, PAGE_SIZE);
       if (response) return response;
     } catch (ex) {
+      console.error('Failed to fetch following', ex);
       //
     }
     return {

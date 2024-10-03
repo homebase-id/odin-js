@@ -1,11 +1,17 @@
-import { DriveDefinition } from '@youfoundation/js-lib/core';
+import { DriveDefinition } from '@homebase-id/js-lib/core';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ActionButton, ActionButtonState, Arrow, t } from '@youfoundation/common-app';
-import { usePortal } from '@youfoundation/common-app';
-import { ErrorNotification } from '@youfoundation/common-app';
+import {
+  usePortal,
+  ActionButton,
+  ActionButtonState,
+  t,
+  ErrorNotification,
+  DialogWrapper,
+} from '@homebase-id/common-app';
+
+import { Arrow } from '@homebase-id/common-app/icons';
 import DrivePermissionFlagEditor from '../../Form/DrivePermissionFlagEditor';
-import { DialogWrapper } from '@youfoundation/common-app';
 import { useApp } from '../../../hooks/apps/useApp';
 import { useApps } from '../../../hooks/apps/useApps';
 import { PermissionUpdateRequest } from '../../../provider/app/AppManagementProviderTypes';
@@ -59,6 +65,7 @@ const DriveAppAccessDialog = ({
                 newAppPermission.map(async (newAppPerm) => await updateAppPermission(newAppPerm))
               );
             } catch (ex) {
+              console.error('Failed to update apps', ex);
               setSaveState('error');
             }
             setSaveState('success');

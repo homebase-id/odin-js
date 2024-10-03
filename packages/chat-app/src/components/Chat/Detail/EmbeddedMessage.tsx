@@ -1,19 +1,25 @@
-import { ConnectionName, ExtensionThumbnail, t } from '@youfoundation/common-app';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import {
+  ConnectionName,
+  ExtensionThumbnail,
+  t,
+  useDotYouClientContext,
+} from '@homebase-id/common-app';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { ChatMessage } from '../../../providers/ChatProvider';
-import { OdinImage } from '@youfoundation/ui-lib';
+import { OdinImage } from '@homebase-id/ui-lib';
 import { ChatDrive } from '../../../providers/ConversationProvider';
-import { useDotYouClientContext } from '../../../hooks/auth/useDotYouClientContext';
 
 export const EmbeddedMessageWithId = ({
+  conversationId,
   msgId,
   className,
 }: {
+  conversationId: string | undefined;
   msgId: string;
   className?: string;
 }) => {
-  const { data: msg } = useChatMessage({ messageId: msgId }).get;
+  const { data: msg } = useChatMessage({ conversationId, messageId: msgId }).get;
   return <EmbeddedMessage msg={msg || undefined} className={className} />;
 };
 

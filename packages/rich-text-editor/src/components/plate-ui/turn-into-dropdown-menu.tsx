@@ -22,9 +22,9 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-  useOpenState,
 } from './dropdown-menu';
 import { ToolbarButton } from './toolbar';
+import { useOpenState } from './dropdown-menu/use-open-state';
 
 const items = [
   {
@@ -73,7 +73,10 @@ const items = [
 
 const defaultItem = items.find((item) => item.value === ELEMENT_PARAGRAPH)!;
 
-export function TurnIntoDropdownMenu(props: DropdownMenuProps) {
+export interface TurnIntoDropdownMenuProps extends DropdownMenuProps {
+  filterValues?: string[];
+}
+export function TurnIntoDropdownMenu({ filterValues, ...props }: TurnIntoDropdownMenuProps) {
   const editor = useEditorState();
   const openState = useOpenState();
 
@@ -118,12 +121,14 @@ export function TurnIntoDropdownMenu(props: DropdownMenuProps) {
             focusEditor(editor);
           }}
         >
-          {items.map(({ value: itemValue, label, icon: Icon }) => (
-            <DropdownMenuRadioItem key={itemValue} value={itemValue} className="min-w-[180px]">
-              <Icon className="mr-2 h-5 w-5" />
-              {label}
-            </DropdownMenuRadioItem>
-          ))}
+          {items
+            ?.filter((item) => !filterValues || !filterValues.includes(item.value))
+            .map(({ value: itemValue, label, icon: Icon }) => (
+              <DropdownMenuRadioItem key={itemValue} value={itemValue} className="min-w-[180px]">
+                <Icon className="mr-2 h-5 w-5" />
+                {label}
+              </DropdownMenuRadioItem>
+            ))}
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>

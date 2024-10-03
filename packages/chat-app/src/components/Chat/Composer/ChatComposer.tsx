@@ -4,26 +4,25 @@ import {
   FileSelector,
   VolatileInput,
   ActionButton,
-  Times,
-  PaperPlane,
   getImagesFromPasteEvent,
-  Plus,
   useErrors,
   t,
   ellipsisAtMaxChar,
   VolatileInputRef,
   LinkOverview,
   useLinkPreviewBuilder,
-} from '@youfoundation/common-app';
-import { HomebaseFile, NewMediaFile } from '@youfoundation/js-lib/core';
+} from '@homebase-id/common-app';
+import { HomebaseFile, NewMediaFile } from '@homebase-id/js-lib/core';
 
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import { UnifiedConversation } from '../../../providers/ConversationProvider';
 import { useState, useEffect, useRef } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
-import { getNewId, isTouchDevice } from '@youfoundation/js-lib/helpers';
-import { LinkPreview } from '@youfoundation/js-lib/media';
+import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
+import { LinkPreview } from '@homebase-id/js-lib/media';
+import { Plus, PaperPlane, Times } from '@homebase-id/common-app/icons';
+import { ConversationMentionDropdown } from './ConversationMentionDropdown';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const CHAT_DRAFTS_KEY = 'CHAT_LOCAL_DRAFTS';
@@ -33,11 +32,13 @@ export const ChatComposer = ({
   replyMsg,
   clearReplyMsg,
   onSend,
+  tags,
 }: {
   conversation: HomebaseFile<UnifiedConversation> | undefined;
   replyMsg: HomebaseFile<ChatMessage> | undefined;
   clearReplyMsg: () => void;
   onSend?: () => void;
+  tags?: string[];
 }) => {
   const volatileRef = useRef<VolatileInputRef>(null);
 
@@ -54,7 +55,7 @@ export const ChatComposer = ({
       drafts[conversation.fileMetadata.appData.uniqueId] = message;
       try {
         localStorage.setItem(CHAT_DRAFTS_KEY, JSON.stringify(drafts));
-      } catch (e) {
+      } catch {
         /* empty */
       }
     }
@@ -93,6 +94,7 @@ export const ChatComposer = ({
         chatId: getNewId(),
         userDate: new Date().getTime(),
         linkPreviews: Object.values(linkPreviews).filter(Boolean) as LinkPreview[],
+        tags,
       });
       onSend && onSend();
     } catch (err) {
@@ -145,7 +147,7 @@ export const ChatComposer = ({
           <VolatileInput
             placeholder="Your message"
             defaultValue={message}
-            className="w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"
+            className="relative w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"
             onChange={(newVal) => setMessage(newVal)}
             autoFocus={!isTouchDevice()}
             ref={volatileRef}
@@ -158,6 +160,7 @@ export const ChatComposer = ({
               }
             }}
             onSubmit={isTouchDevice() ? undefined : doSend}
+            autoCompleters={[ConversationMentionDropdown]}
           />
           <span className="my-auto">
             <ActionButton

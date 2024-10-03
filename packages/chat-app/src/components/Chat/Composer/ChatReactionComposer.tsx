@@ -1,12 +1,12 @@
+import { Lol } from '@homebase-id/common-app/icons';
 import {
-  Lol,
   ReactionsBar,
   t,
   useDotYouClient,
   useMostSpace,
   useOutsideTrigger,
-} from '@youfoundation/common-app';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+} from '@homebase-id/common-app';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useState, useRef } from 'react';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import { UnifiedConversation } from '../../../providers/ConversationProvider';
@@ -20,9 +20,6 @@ export const ChatReactionComposer = ({
   msg: HomebaseFile<ChatMessage>;
 }) => {
   const identity = useDotYouClient().getIdentity();
-  const authorOdinId = msg.fileMetadata.senderOdinId;
-  const messageFromMe = !authorOdinId || authorOdinId === identity;
-
   const [isReact, setIsReact] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOutsideTrigger(wrapperRef, () => setIsReact(false));
@@ -32,15 +29,17 @@ export const ChatReactionComposer = ({
 
   const { mutate: addReaction } = useChatReaction().add;
   const { mutate: removeReaction } = useChatReaction().remove;
+
+  const hasReactions =
+    msg.fileMetadata.reactionPreview?.reactions &&
+    Object.keys(msg.fileMetadata.reactionPreview?.reactions).length;
+
   const { data } = useChatReaction({
-    conversationId: conversation.fileMetadata.appData.uniqueId,
-    messageId: msg.fileMetadata.appData.uniqueId,
+    messageFileId: hasReactions ? msg.fileId : undefined,
+    messageGlobalTransitId: msg.fileMetadata.globalTransitId,
   }).get;
 
-  const myReactions = data?.filter(
-    (reaction) =>
-      reaction?.fileMetadata.senderOdinId === identity || !reaction?.fileMetadata.senderOdinId
-  );
+  const myReactions = data?.filter((reaction) => reaction?.authorOdinId === identity);
 
   return (
     <div
@@ -55,22 +54,19 @@ export const ChatReactionComposer = ({
           onClick={() => setIsReact(false)}
         >
           <ReactionsBar
-            className={`xl:absolute ${
+            className={`rounded-lg bg-background px-1 py-2 text-foreground shadow-md dark:bg-slate-900 xl:absolute ${
               verticalSpace === 'top' ? 'xl:bottom-8' : 'xl:top-8'
             } ${horizontalSpace === 'left' ? 'right-0' : 'left-0'} z-20`}
             emojis={['👍️', '❤️', '😂', '😮', '😥']}
-            defaultValue={
-              myReactions?.map((reaction) => reaction.fileMetadata.appData.content.message) || []
-            }
+            defaultValue={myReactions?.map((reaction) => reaction.body) || []}
             doLike={(emoji) => {
               addReaction({ conversation, message: msg, reaction: emoji });
               setIsReact(false);
             }}
             doUnlike={(emoji) => {
-              const dsr = myReactions?.find(
-                (reaction) => reaction.fileMetadata.appData.content.message === emoji
-              );
-              if (dsr) removeReaction({ conversation, message: msg, reaction: dsr });
+              const reactionFile = myReactions?.find((reaction) => reaction.body === emoji);
+              if (reactionFile)
+                removeReaction({ conversation, message: msg, reaction: reactionFile });
               setIsReact(false);
             }}
           />

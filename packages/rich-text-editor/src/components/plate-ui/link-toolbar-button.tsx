@@ -10,7 +10,7 @@ export function LinkToolbarButton() {
 
   return (
     <ToolbarButton tooltip="Link" {...props}>
-      <Icons.link />
+      <Icons.link className="h-5 w-5" />
     </ToolbarButton>
   );
 }

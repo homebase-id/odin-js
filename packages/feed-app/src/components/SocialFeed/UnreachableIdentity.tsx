@@ -1,13 +1,7 @@
-import {
-  ActionGroup,
-  Times,
-  UserX,
-  t,
-  useDotYouClient,
-  useManageSocialFeed,
-} from '@youfoundation/common-app';
-import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
-import { PostContent } from '@youfoundation/js-lib/public';
+import { ActionGroup, t, useDotYouClient, useManageSocialFeed } from '@homebase-id/common-app';
+import { Times, UserX } from '@homebase-id/common-app/icons';
+import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
+import { PostContent } from '@homebase-id/js-lib/public';
 
 interface UnreachableIdentityProps {
   className?: string;

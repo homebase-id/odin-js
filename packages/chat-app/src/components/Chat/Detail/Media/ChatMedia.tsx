@@ -4,13 +4,18 @@ import {
   PayloadDescriptor,
   NewHomebaseFile,
   NewPayloadDescriptor,
-} from '@youfoundation/js-lib/core';
-import { OdinImage, OdinThumbnailImage, OdinAudio, OdinAudioWaveForm } from '@youfoundation/ui-lib';
+} from '@homebase-id/js-lib/core';
+import { OdinImage, OdinThumbnailImage, OdinAudio, OdinAudioWaveForm } from '@homebase-id/ui-lib';
 import { CHAT_LINKS_PAYLOAD_KEY, ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
-import { BoringFile, Triangle, useDarkMode, LinkPreviewItem } from '@youfoundation/common-app';
+import {
+  BoringFile,
+  useDarkMode,
+  LinkPreviewItem,
+  useDotYouClientContext,
+} from '@homebase-id/common-app';
+import { Triangle } from '@homebase-id/common-app/icons';
 import { useNavigate } from 'react-router-dom';
-import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 import { useMemo, useState } from 'react';
 
 export const ChatMedia = ({
@@ -59,7 +64,9 @@ const MediaItem = ({
 }) => {
   const { isDarkMode } = useDarkMode();
   const dotYouClient = useDotYouClientContext();
-  const isVideo = payload.contentType?.startsWith('video');
+  const isVideo =
+    payload.contentType?.startsWith('video') ||
+    payload.contentType === 'application/vnd.apple.mpegurl';
   const isAudio = payload.contentType?.startsWith('audio');
   const isImage = payload.contentType?.startsWith('image');
   const isLink = payload.key === CHAT_LINKS_PAYLOAD_KEY;
@@ -83,7 +90,7 @@ const MediaItem = ({
                 lastModified={payload.lastModified || fileLastModified}
                 targetDrive={ChatDrive}
                 className={`w-full blur-sm`}
-                loadSize={{ pixelWidth: 1920, pixelHeight: 1080 }}
+                loadSize={{ pixelWidth: 200, pixelHeight: 200 }}
               />
               <div className="absolute inset-0 flex items-center justify-center">
                 <Triangle className="h-16 w-16 text-background" />
@@ -201,7 +208,9 @@ const MediaGallery = ({
 
   return (
     <div
-      className={`relative ${totalCount === 2 ? 'aspect-[2.02]' : 'aspect-square'} w-[75vw] max-w-xs overflow-hidden rounded-lg bg-background`}
+      className={`relative ${
+        totalCount === 2 ? 'aspect-[2.02]' : 'aspect-square'
+      } w-[75vw] overflow-hidden rounded-lg bg-background md:max-w-xs lg:max-w-xl`}
     >
       {tinyThumbUrl ? (
         <MediaGalleryLoading tinyThumbUrl={tinyThumbUrl} totalCount={totalCount} />
@@ -249,9 +258,9 @@ const MediaGalleryItem = ({
   return (
     <div
       key={payload.key}
-      className={`relative h-full w-full ${
-        isColSpan2 ? 'aspect-[2/1]' : 'aspect-square'
-      } ${isColSpan2 ? 'col-span-2' : ''} ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+      className={`relative h-full w-full ${isColSpan2 ? 'aspect-[2/1]' : 'aspect-square'} ${
+        isColSpan2 ? 'col-span-2' : ''
+      } ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
     >
       <MediaItem
         fileId={msg.fileId}

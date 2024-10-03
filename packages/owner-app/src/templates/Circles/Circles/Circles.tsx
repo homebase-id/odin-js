@@ -1,21 +1,22 @@
-import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
+import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { useState } from 'react';
-import { Plus, SubtleMessage, t } from '@youfoundation/common-app';
-import { useCircles } from '@youfoundation/common-app';
-import { Circles as CirclesIcon } from '@youfoundation/common-app';
-import { ActionButton } from '@youfoundation/common-app';
-
-import { LoadingBlock } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
-import { useCircle } from '@youfoundation/common-app';
-import { Ellipsis } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { ALL_CONNECTIONS_CIRCLE_ID, CircleDefinition } from '@youfoundation/js-lib/network';
+import { ALL_CONNECTIONS_CIRCLE_ID, CircleDefinition } from '@homebase-id/js-lib/network';
 import ContactImage from '../../../components/Connection/ContactImage/ContactImage';
 import { CompanyImage } from '../../../components/Connection/CompanyImage/CompanyImage';
-import { DrivePermissionType } from '@youfoundation/js-lib/core';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { DrivePermissionType } from '@homebase-id/js-lib/core';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import CircleDialog from '../../../components/Circles/CircleDialog/CircleDialog';
+import {
+  ActionButton,
+  LoadingBlock,
+  SubtleMessage,
+  t,
+  useCircle,
+  useCircles,
+} from '@homebase-id/common-app';
+import { Plus, Ellipsis, Circles as CirclesIcon } from '@homebase-id/common-app/icons';
 
 const Circles = () => {
   const {

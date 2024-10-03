@@ -1,26 +1,31 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ActionButton, ActionGroup, HeartBeat, Pencil, t } from '@youfoundation/common-app';
 import { useDrive } from '../../../hooks/drives/useDrive';
-
-import { HardDrive } from '@youfoundation/common-app';
-
 import Section from '../../../components/ui/Sections/Section';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import { useExport } from '../../../hooks/drives/useExport';
 import AppMembershipView from '../../../components/PermissionViews/AppPermissionView/AppPermissionView';
-import { CirclePermissionView } from '@youfoundation/common-app';
 import { useApps } from '../../../hooks/apps/useApps';
-import { useCircles } from '@youfoundation/common-app';
-import { Download } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { getDrivePermissionFromNumber, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { TRANSIENT_TEMP_DRIVE_ALIAS } from '@youfoundation/js-lib/core';
+import {
+  drivesEqual,
+  getDrivePermissionFromNumber,
+  stringGuidsEqual,
+} from '@homebase-id/js-lib/helpers';
+import { TRANSIENT_TEMP_DRIVE_ALIAS } from '@homebase-id/js-lib/core';
 import DriveAppAccessDialog from '../../../components/Drives/DriveAppAccessDialog/DriveAppAccessDialog';
 import DriveCircleAccessDialog from '../../../components/Drives/DriveCircleAccessDialog/DriveCircleAccessDialog';
 import DriveMetadataEditDialog from '../../../components/Drives/DriveCircleAccessDialog/DriveMetadataEditDialog';
 import { DriveStatusDialog } from '../../../components/Drives/DriveStatusDialog/DriveStatusDialog';
 import FileBrowser from '../../../components/Drives/FileBrowser/FileBrowser';
+import {
+  ActionButton,
+  ActionGroup,
+  CirclePermissionView,
+  t,
+  useCircles,
+} from '@homebase-id/common-app';
+import { HardDrive, Download, HeartBeat, Pencil } from '@homebase-id/common-app/icons';
 
 const DriveDetails = () => {
   const { driveKey } = useParams();
@@ -51,18 +56,12 @@ const DriveDetails = () => {
   const targetDriveInfo = driveDef?.targetDriveInfo;
 
   const circlesWithAGrantOnThis = circles?.filter((circle) =>
-    circle.driveGrants?.some(
-      (grant) =>
-        stringGuidsEqual(grant.permissionedDrive.drive.alias, targetDriveInfo.alias) &&
-        stringGuidsEqual(grant.permissionedDrive.drive.type, targetDriveInfo.type)
-    )
+    circle.driveGrants?.some((grant) => drivesEqual(grant.permissionedDrive.drive, targetDriveInfo))
   );
 
   const appsWithAGrantOnThis = apps?.filter((app) =>
-    app.grant.driveGrants.some(
-      (grant) =>
-        stringGuidsEqual(grant.permissionedDrive.drive.alias, targetDriveInfo.alias) &&
-        stringGuidsEqual(grant.permissionedDrive.drive.type, targetDriveInfo.type)
+    app.grant.driveGrants.some((grant) =>
+      drivesEqual(grant.permissionedDrive.drive, targetDriveInfo)
     )
   );
 
@@ -146,10 +145,8 @@ const DriveDetails = () => {
         >
           <ul className="flex flex-col items-start gap-4">
             {circlesWithAGrantOnThis.map((circle) => {
-              const matchingGrants = circle.driveGrants?.filter(
-                (grant) =>
-                  stringGuidsEqual(grant.permissionedDrive.drive.alias, targetDriveInfo.alias) &&
-                  stringGuidsEqual(grant.permissionedDrive.drive.type, targetDriveInfo.type)
+              const matchingGrants = circle.driveGrants?.filter((grant) =>
+                drivesEqual(grant.permissionedDrive.drive, targetDriveInfo)
               );
 
               const matchingGrant = matchingGrants?.reduce(

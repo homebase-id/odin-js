@@ -5,16 +5,16 @@ import {
   ActionButton,
   ActionButtonState,
   t,
-  Arrow,
   CheckboxToggle,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { useApps } from '../../../hooks/apps/useApps';
 import { useApp } from '../../../hooks/apps/useApp';
 import AppPermissionView from '../../PermissionViews/AppPermissionView/AppPermissionView';
-import { CircleDefinition } from '@youfoundation/js-lib/network';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { ErrorNotification } from '@youfoundation/common-app';
-import { DialogWrapper } from '@youfoundation/common-app';
+import { CircleDefinition } from '@homebase-id/js-lib/network';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { ErrorNotification } from '@homebase-id/common-app';
+import { DialogWrapper } from '@homebase-id/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
 
 const CircleAppInteractionDialog = ({
   title,
@@ -92,6 +92,7 @@ const CircleAppInteractionDialog = ({
                 })
               );
             } catch (ex) {
+              console.error("Failed to update app's authorized circles", ex);
               setUpdateState('error');
             }
 

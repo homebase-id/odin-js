@@ -1,6 +1,6 @@
 import { t } from '../../../helpers';
 import { CanReactInfo, CantReact } from '../../../hooks';
-import { Loader } from '../../../ui';
+import { Loader } from '../../../ui/Icons';
 
 export const CantReactInfo = ({
   cantReact,

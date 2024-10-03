@@ -10,13 +10,12 @@ import {
   DialogWrapper,
   useIdentityIFollow,
   Alert,
-  Quote,
-  Persons,
   CheckboxToggle,
   LoadingBlock,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
+import { Quote, Persons } from '@homebase-id/common-app/icons';
 
-import { BlogConfig } from '@youfoundation/js-lib/public';
+import { BlogConfig } from '@homebase-id/js-lib/public';
 
 const IdentityIFollowEditDialog = ({
   odinId,

@@ -28,6 +28,7 @@ import {
   MediaFile,
 } from '../../core/core';
 import {
+  base64ToUint8Array,
   getNewId,
   getRandom16ByteArray,
   jsonStringify64,
@@ -43,6 +44,7 @@ import { processVideoFile } from '../../media/Video/VideoProcessor';
 import { createThumbnails, LinkPreview, LinkPreviewDescriptor } from '../../media/media';
 import { uploadFileOverPeer } from '../../peer/peer';
 import { TransitInstructionSet, TransitUploadResult } from '../../peer/peerData/PeerTypes';
+import { AxiosRequestConfig } from 'axios';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
@@ -65,6 +67,9 @@ export const savePost = async <T extends PostContent>(
       '[PostUploadProvider] Editing a post to a group channel is not supported (yet)'
     );
   }
+
+  if (!file.fileMetadata.appData.content.authorOdinId)
+    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
 
   if (!file.fileMetadata.appData.content.id) {
     // The content id is set once, and then never updated to keep the permalinks correct at all times; Even when the slug changes
@@ -89,8 +94,6 @@ export const savePost = async <T extends PostContent>(
   }
   const newMediaFiles = toSaveFiles as NewMediaFile[];
 
-  if (!file.fileMetadata.appData.content.authorOdinId)
-    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
   if (!file.serverMetadata?.accessControlList) throw 'ACL is required to save a post';
 
   // Delete embeddedPost of embeddedPost (we don't want to embed an embed)
@@ -98,11 +101,18 @@ export const savePost = async <T extends PostContent>(
     delete (file.fileMetadata.appData.content.embeddedPost as PostContent)['embeddedPost'];
   }
 
+  const encrypt = !(
+    file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+    file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+      SecurityGroupType.Authenticated
+  );
+
   const targetDrive = GetTargetDriveFromChannelId(channelId);
 
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+  const aesKey: Uint8Array | undefined = encrypt ? getRandom16ByteArray() : undefined;
 
   if (!newMediaFiles?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
@@ -117,12 +127,25 @@ export const savePost = async <T extends PostContent>(
       })
     );
 
+    const imageUrl = linkPreviews.find((preview) => preview.imageUrl)?.imageUrl;
+
+    const imageBlob = imageUrl
+      ? new Blob([base64ToUint8Array(imageUrl.split(',')[1])], {
+          type: imageUrl.split(';')[0].split(':')[1],
+        })
+      : undefined;
+
+    const { tinyThumb } = imageBlob
+      ? await createThumbnails(imageBlob, '', [])
+      : { tinyThumb: undefined };
+
     payloads.push({
       key: POST_LINKS_PAYLOAD_KEY,
       payload: new Blob([stringToUint8Array(JSON.stringify(linkPreviews))], {
         type: 'application/json',
       }),
       descriptorContent,
+      previewThumbnail: tinyThumb,
     });
   }
 
@@ -131,13 +154,14 @@ export const savePost = async <T extends PostContent>(
     const newMediaFile = newMediaFiles[i];
     const payloadKey = newMediaFile.key || `${POST_MEDIA_PAYLOAD_KEY}${i}`;
     if (newMediaFile.file.type.startsWith('video/')) {
-      const { tinyThumb, additionalThumbnails, payload } = await processVideoFile(
-        newMediaFile,
-        payloadKey
-      );
+      const {
+        tinyThumb,
+        thumbnails: thumbnailsFromVideo,
+        payloads: payloadsFromVideo,
+      } = await processVideoFile(newMediaFile, payloadKey, aesKey);
 
-      thumbnails.push(...additionalThumbnails);
-      payloads.push(payload);
+      thumbnails.push(...thumbnailsFromVideo);
+      payloads.push(...payloadsFromVideo);
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
 
@@ -189,7 +213,10 @@ export const savePost = async <T extends PostContent>(
     previewThumbnail,
     channelId,
     targetDrive,
-    onVersionConflict
+    onVersionConflict,
+    {
+      aesKey,
+    }
   );
 };
 
@@ -202,7 +229,11 @@ const uploadPost = async <T extends PostContent>(
   previewThumbnail: EmbeddedThumb | undefined,
   channelId: string,
   targetDrive: TargetDrive,
-  onVersionConflict?: () => void
+  onVersionConflict?: () => void,
+  options?: {
+    axiosConfig?: AxiosRequestConfig;
+    aesKey?: Uint8Array | undefined;
+  }
 ) => {
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
@@ -220,7 +251,7 @@ const uploadPost = async <T extends PostContent>(
       recipients: [],
       schedule: ScheduleOptions.SendLater,
       priority: PriorityOptions.Medium,
-      sendContents: SendContents.All, // TODO: Should this be header only?
+      sendContents: SendContents.All,
     },
   };
 
@@ -275,7 +306,6 @@ const uploadPost = async <T extends PostContent>(
       userDate: file.fileMetadata.appData.userDate,
       dataType: postTypeToDataType(file.fileMetadata.appData.content.type),
     },
-    senderOdinId: file.fileMetadata.appData.content.authorOdinId,
     isEncrypted: encrypt,
     accessControlList: file.serverMetadata?.accessControlList,
   };
@@ -288,7 +318,8 @@ const uploadPost = async <T extends PostContent>(
       payloads,
       thumbnails,
       encrypt,
-      onVersionConflict
+      onVersionConflict,
+      options
     );
 
     if (!result) throw new Error(`Upload failed`);
@@ -332,7 +363,7 @@ const uploadPostHeader = async <T extends PostContent>(
       recipients: [],
       schedule: ScheduleOptions.SendLater,
       priority: PriorityOptions.Medium,
-      sendContents: SendContents.All, // TODO: Should this be header only?
+      sendContents: SendContents.All,
     },
   };
 
@@ -382,7 +413,6 @@ const uploadPostHeader = async <T extends PostContent>(
       userDate: file.fileMetadata.appData.userDate,
       dataType: postTypeToDataType(file.fileMetadata.appData.content.type),
     },
-    senderOdinId: file.fileMetadata.appData.content.authorOdinId,
     isEncrypted: file.fileMetadata.isEncrypted ?? false,
     accessControlList: file.serverMetadata?.accessControlList,
   };
@@ -452,10 +482,7 @@ const updatePost = async <T extends PostContent>(
     !file.serverMetadata?.accessControlList ||
     !file.fileMetadata.appData.content.id
   )
-    throw new Error(`[DotYouCore-js] PostProvider: fileId is required to update a post`);
-
-  if (!file.fileMetadata.appData.content.authorOdinId)
-    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
+    throw new Error(`[odin-js] PostProvider: fileId is required to update a post`);
 
   const encrypt = !(
     file.serverMetadata.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
@@ -567,7 +594,7 @@ const updatePost = async <T extends PostContent>(
   file.fileMetadata.isEncrypted = encrypt;
   file.fileMetadata.versionTag = runningVersionTag;
   const result = await uploadPostHeader(dotYouClient, file, channelId, targetDrive);
-  if (!result) throw new Error(`[DotYouCore-js] PostProvider: Post update failed`);
+  if (!result) throw new Error(`[odin-js] PostProvider: Post update failed`);
 
   return result;
 };

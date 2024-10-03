@@ -2,15 +2,8 @@ import { useState } from 'react';
 import { t } from '../../helpers/i18n/dictionary';
 import InfoDialog from '../Dialog/InfoDialog/InfoDialog';
 import { DnsConfig, DnsRecord, DnsRecordStatus } from '../../hooks/commonDomain/commonDomain';
-import {
-  Alert,
-  Arrow,
-  Check,
-  DialogWrapper,
-  Exclamation,
-  ExternalLink,
-  Loader,
-} from '@youfoundation/common-app';
+import { Alert, DialogWrapper } from '@homebase-id/common-app';
+import { Arrow, Check, Exclamation, ExternalLink, Loader } from '@homebase-id/common-app/icons';
 import { useApexDomain } from '../../hooks/ownDomain/useOwnDomain';
 
 const DnsSettingsView = ({
@@ -313,7 +306,9 @@ const RecordView = ({
         {showStatus ? (
           <div
             className={`ml-auto flex flex-row items-center gap-2 text-sm ${
-              isInCorrectvalue ? 'cursor-pointer text-indigo-500 hover:underline' : ''
+              isInCorrectvalue
+                ? 'cursor-pointer text-indigo-500 hover:underline'
+                : `${!isGood ? 'text-orange-600' : ''}`
             }`}
             onClick={isInCorrectvalue ? () => setShowBadValue(true) : undefined}
           >

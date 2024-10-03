@@ -1,39 +1,33 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAllContacts, useMostSpace, usePortal } from '../../hooks';
+import { VolatileInputAutoCompleteProps } from './VolatileInput';
 
-export const MentionDropdown = ({
+export interface BaseMentionDropdownProps extends VolatileInputAutoCompleteProps {
+  mentionTargets: { name: string; odinId: string }[];
+}
+
+export const BaseMentionDropdown = ({
   query,
   onInput,
   position,
-}: {
-  query?: string;
-  onInput: (emoji: string | undefined) => void;
-  position?: { x: number; y: number };
-}) => {
+  mentionTargets,
+}: BaseMentionDropdownProps) => {
   const target = usePortal('emoji-container');
   const enabled = !!(query && query.startsWith('@'));
-  const { data: mentionTargets } = useAllContacts(enabled);
 
   const slicedQuery = query?.slice(1);
   const identities = useMemo(
     () =>
       slicedQuery && mentionTargets?.length
-        ? (mentionTargets
-            ?.map((dsr) => dsr.fileMetadata.appData.content)
-            ?.filter(
-              (trgt) =>
-                trgt.name?.displayName &&
-                trgt.odinId &&
-                (trgt.name.displayName.includes(slicedQuery) ||
-                  trgt.odinId.includes(slicedQuery)) &&
-                slicedQuery !== trgt.name.displayName &&
-                slicedQuery !== trgt.odinId
-            )
-            ?.map((trgt) => ({
-              name: trgt.name?.displayName,
-              odinId: trgt.odinId,
-            })) as { name: string; odinId: string }[])
+        ? mentionTargets?.filter(
+            (trgt) =>
+              trgt.name &&
+              trgt.odinId &&
+              (trgt.name.includes(slicedQuery) || trgt.odinId.includes(slicedQuery)) &&
+              slicedQuery !== trgt.name &&
+              slicedQuery !== trgt.odinId
+          )
         : [],
     [slicedQuery, mentionTargets]
   );
@@ -103,4 +97,23 @@ export const MentionDropdown = ({
   );
 
   return createPortal(dialog, target);
+};
+
+export const AllContactMentionDropdown = (props: VolatileInputAutoCompleteProps) => {
+  const enabled = !!(props.query && props.query.startsWith('@'));
+
+  const { data: allContacts } = useAllContacts(enabled);
+  const mentionTargets = useMemo(() => {
+    return allContacts
+      ?.map((contact) => ({
+        name:
+          contact.fileMetadata.appData.content.name?.displayName ||
+          contact.fileMetadata.appData.content.name?.surname ||
+          contact.fileMetadata.appData.content.odinId,
+        odinId: contact.fileMetadata.appData.content.odinId,
+      }))
+      .filter(Boolean) as { name: string; odinId: string }[];
+  }, [allContacts]);
+
+  return <BaseMentionDropdown {...props} mentionTargets={mentionTargets} />;
 };

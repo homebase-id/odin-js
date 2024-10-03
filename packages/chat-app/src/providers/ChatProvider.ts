@@ -31,22 +31,24 @@ import {
   FailedTransferStatuses,
   RecipientTransferHistory,
   deleteFile,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import {
   getNewId,
   jsonStringify64,
   stringToUint8Array,
   makeGrid,
-} from '@youfoundation/js-lib/helpers';
+  base64ToUint8Array,
+  getRandom16ByteArray,
+} from '@homebase-id/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
 import {
   createThumbnails,
   LinkPreview,
   LinkPreviewDescriptor,
   processVideoFile,
-} from '@youfoundation/js-lib/media';
-import { sendReadReceipt } from '@youfoundation/js-lib/peer';
+} from '@homebase-id/js-lib/media';
+import { sendReadReceipt } from '@homebase-id/js-lib/peer';
 
 export const CHAT_MESSAGE_FILE_TYPE = 7878;
 export const ChatDeletedArchivalStaus = 2;
@@ -64,13 +66,16 @@ export enum ChatDeliveryStatus {
 export interface ChatMessage {
   replyId?: string;
 
-  /// Content of the message
+  // Content of the message
   message: string;
 
-  // After an update to a message on the receiving end, the senderOdinId is emptied; So we have an authorOdinId to keep track of the original sender
+  // The author of the message
+  /**
+   * @deprecated Use fileMetadata.originalAuthor instead
+   */
   authorOdinId?: string;
 
-  /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
+  // DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;
   deliveryDetails?: Record<string, ChatDeliveryStatus>;
 }
@@ -153,6 +158,8 @@ export const dsrToMessage = async (
       ...dsr,
       fileMetadata: {
         ...dsr.fileMetadata,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        originalAuthor: dsr.fileMetadata.originalAuthor || (msgContent as any)?.authorOdinId,
         appData: {
           ...dsr.fileMetadata.appData,
           content: msgContent,
@@ -162,7 +169,7 @@ export const dsrToMessage = async (
 
     return chatMessage;
   } catch (ex) {
-    console.error('[DotYouCore-js] failed to get the chatMessage payload of a dsr', dsr, ex);
+    console.error('[chat] failed to get the chatMessage payload of a dsr', dsr, ex);
     return null;
   }
 };
@@ -246,7 +253,10 @@ export const uploadChatMessage = async (
       : undefined,
   };
 
-  const jsonContent: string = jsonStringify64({ ...messageContent });
+  const jsonContent: string = jsonStringify64({
+    ...messageContent,
+    authorOdinId: dotYouClient.getIdentity(),
+  });
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: distribute,
@@ -266,6 +276,7 @@ export const uploadChatMessage = async (
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+  const aesKey = getRandom16ByteArray();
 
   if (!files?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
@@ -280,12 +291,25 @@ export const uploadChatMessage = async (
       })
     );
 
+    const imageUrl = linkPreviews.find((preview) => preview.imageUrl)?.imageUrl;
+
+    const imageBlob = imageUrl
+      ? new Blob([base64ToUint8Array(imageUrl.split(',')[1])], {
+          type: imageUrl.split(';')[0].split(':')[1],
+        })
+      : undefined;
+
+    const { tinyThumb } = imageBlob
+      ? await createThumbnails(imageBlob, '', [])
+      : { tinyThumb: undefined };
+
     payloads.push({
       key: CHAT_LINKS_PAYLOAD_KEY,
       payload: new Blob([stringToUint8Array(JSON.stringify(linkPreviews))], {
         type: 'application/json',
       }),
       descriptorContent,
+      previewThumbnail: tinyThumb,
     });
   }
 
@@ -293,13 +317,14 @@ export const uploadChatMessage = async (
     const payloadKey = `${CHAT_MESSAGE_PAYLOAD_KEY}${i}`;
     const newMediaFile = files[i];
     if (newMediaFile.file.type.startsWith('video/')) {
-      const { tinyThumb, additionalThumbnails, payload } = await processVideoFile(
-        newMediaFile,
-        payloadKey
-      );
+      const {
+        tinyThumb,
+        thumbnails: thumbnailsFromVideo,
+        payloads: payloadsFromVideo,
+      } = await processVideoFile(newMediaFile, payloadKey, aesKey);
 
-      thumbnails.push(...additionalThumbnails);
-      payloads.push(payload);
+      thumbnails.push(...thumbnailsFromVideo);
+      payloads.push(...payloadsFromVideo);
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
     } else if (newMediaFile.file.type.startsWith('image/')) {
@@ -336,10 +361,15 @@ export const uploadChatMessage = async (
     payloads,
     thumbnails,
     undefined,
-    onVersionConflict
+    onVersionConflict,
+    {
+      aesKey,
+    }
   );
 
-  if (!uploadResult) return null;
+  if (!uploadResult) {
+    throw new Error('Failed to upload chat message');
+  }
 
   if (
     recipients.some(
@@ -348,6 +378,8 @@ export const uploadChatMessage = async (
         TransferUploadStatus.EnqueuedFailed
     )
   ) {
+    message.fileId = uploadResult.file.fileId;
+    message.fileMetadata.versionTag = uploadResult.newVersionTag;
     message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Failed;
     message.fileMetadata.appData.content.deliveryDetails = {};
     for (const recipient of recipients) {
@@ -358,15 +390,26 @@ export const uploadChatMessage = async (
           : ChatDeliveryStatus.Delivered;
     }
 
-    await updateChatMessage(dotYouClient, message, recipients, uploadResult.keyHeader);
-
-    console.error('Not all recipients received the message: ', uploadResult);
-    throw new Error(`Not all recipients received the message: ${recipients.join(', ')}`);
+    const updateResult = await updateChatMessage(
+      dotYouClient,
+      message,
+      recipients,
+      uploadResult.keyHeader
+    );
+    console.warn('Not all recipients received the message: ', uploadResult);
+    // We don't throw an error as it is not a critical failure; And the message is still saved locally
+    return {
+      ...uploadResult,
+      newVersionTag: updateResult?.newVersionTag || uploadResult?.newVersionTag,
+      previewThumbnail: uploadMetadata.appData.previewThumbnail,
+      chatDeliveryStatus: ChatDeliveryStatus.Failed, // Should we set failed, or does an enqueueFailed have a retry? (Either way it should auto-solve if it does)
+    };
   }
 
   return {
     ...uploadResult,
     previewThumbnail: uploadMetadata.appData.previewThumbnail,
+    chatDeliveryStatus: ChatDeliveryStatus.Sent,
   };
 };
 
@@ -448,7 +491,7 @@ export const softDeleteChatMessage = async (
 
   for (let i = 0; i < message.fileMetadata.payloads.length; i++) {
     const payload = message.fileMetadata.payloads[i];
-    // TODO: Should the payload be deleted for everyone? With "TransitOptions"
+    // TODO: Should the payload be deleted for everyone? With "TransitOptions"; Needs server side support for it;
     const deleteResult = await deletePayload(
       dotYouClient,
       ChatDrive,
@@ -463,7 +506,6 @@ export const softDeleteChatMessage = async (
 
   message.fileMetadata.versionTag = runningVersionTag;
   message.fileMetadata.appData.content.message = '';
-  message.fileMetadata.appData.content.authorOdinId = message.fileMetadata.senderOdinId;
   return await updateChatMessage(dotYouClient, message, deleteForEveryone ? recipients : []);
 };
 
@@ -476,7 +518,8 @@ export const requestMarkAsRead = async (
     .filter(
       (msg) =>
         msg.fileMetadata.appData.content.deliveryStatus !== ChatDeliveryStatus.Read &&
-        msg.fileMetadata.senderOdinId
+        msg.fileMetadata.senderOdinId &&
+        msg.fileMetadata.senderOdinId !== dotYouClient.getIdentity()
     )
     .map((msg) => msg.fileId) as string[];
 

@@ -1,6 +1,11 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { PagingOptions } from '@youfoundation/js-lib/core';
-import { getConnections, getPendingRequests, getSentRequests } from '@youfoundation/js-lib/network';
+import { NumberCursoredResult, PagingOptions } from '@homebase-id/js-lib/core';
+import {
+  DotYouProfile,
+  getConnections,
+  getPendingRequests,
+  getSentRequests,
+} from '@homebase-id/js-lib/network';
 
 import { useDotYouClient } from '../auth/useDotYouClient';
 
@@ -28,7 +33,7 @@ export const usePendingConnections = ({
 
   return {
     fetch: useQuery({
-      queryKey: ['pendingConnections', pendingPageSize, pendingPage],
+      queryKey: ['pending-connections', pendingPageSize, pendingPage],
       queryFn: () =>
         fetchPendingConnections({ pageSize: pendingPageSize, pageNumber: pendingPage }),
 
@@ -56,7 +61,7 @@ export const useSentConnections = ({
 
   return {
     fetch: useQuery({
-      queryKey: ['sentRequests', sentPageSize, sentPage],
+      queryKey: ['sent-requests', sentPageSize, sentPage],
       queryFn: () => fetchSentRequests({ pageSize: sentPageSize, pageNumber: sentPage }),
       refetchOnWindowFocus: false,
       enabled: !!sentPage,
@@ -87,16 +92,17 @@ export const useActiveConnections = (
         count: pageSize,
       });
     } catch (ex) {
+      console.warn('[useActiveConnections] Failed to fetch connections', ex);
       return {
-        cursor: undefined,
+        cursor: 0,
         results: [],
-      };
+      } as NumberCursoredResult<DotYouProfile>;
     }
   };
 
   return {
     fetch: useInfiniteQuery({
-      queryKey: ['activeConnections', activePageSize, activePage],
+      queryKey: ['active-connections', activePageSize, activePage],
       initialPageParam: undefined as number | undefined,
       queryFn: ({ pageParam }) => fetchConnections({ pageSize: activePageSize, cursor: pageParam }),
       getNextPageParam: (lastPage) =>

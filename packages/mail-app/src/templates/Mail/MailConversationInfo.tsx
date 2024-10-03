@@ -1,23 +1,15 @@
 import { createPortal } from 'react-dom';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   AuthorImage,
   AuthorName,
   DialogWrapper,
-  Exclamation,
   t,
   usePortal,
-} from '@youfoundation/common-app';
+  formatDateExludingYearIfCurrent,
+} from '@homebase-id/common-app';
 import { MailConversation, MailDeliveryStatus } from '../../providers/MailProvider';
-import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
-
-const dateTimeFormat: Intl.DateTimeFormatOptions = {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-  hour: 'numeric',
-  minute: 'numeric',
-};
+import { Exclamation } from '@homebase-id/common-app/icons';
 
 export const MailConversationInfo = ({
   mailConversation,

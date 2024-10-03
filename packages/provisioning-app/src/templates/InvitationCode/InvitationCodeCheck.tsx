@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useCheckInvitationCode } from '../../hooks/invitationCode/useCheckInvitationCode';
 import { t } from '../../helpers/i18n/dictionary';
-import { Loader, Label, Input } from '@youfoundation/common-app';
+import { Loader } from '@homebase-id/common-app/icons';
+import { Label, Input } from '@homebase-id/common-app';
 import ActionLink from '../../components/ui/Buttons/ActionLink';
 import ActionButton from '../../components/ui/Buttons/ActionButton';
 
@@ -55,7 +56,7 @@ const InvitationCodeCheck = () => {
 
           <p className="my-7 block border-y py-3 text-center italic">
             The Alpha release is by invitation only.
-            {isValid === false ? (
+            {invitationCode && isValid === false ? (
               <small className="block text-base text-red-700">
                 {t(`The code you supplied isn't valid (anymore)`)}
               </small>

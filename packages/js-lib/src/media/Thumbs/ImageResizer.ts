@@ -46,7 +46,6 @@ const getMimeType = (format: 'png' | 'webp' | 'bmp' | 'jpeg' | 'gif' | null) => 
  * @returns {Size} Returns the image width and height
  */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getTargetSize = (
   img: HTMLImageElement,
   maxWidth: number | undefined,
@@ -83,7 +82,7 @@ const getTargetSize = (
  * @returns {Promise} Returns promise with compressed, resized and converted image.
  */
 
-const fromBlob = (
+export const resizeImageFromBlob = (
   imgBlob: Blob,
   quality = 100,
   width: number,
@@ -137,5 +136,3 @@ const fromBlob = (
     };
   });
 };
-
-export { fromBlob };

@@ -1,11 +1,11 @@
 import { useQueryClient, useQuery, useMutation, QueryClient } from '@tanstack/react-query';
-import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import {
   ConversationMetadata,
   uploadConversationMetadata,
   getConversationMetadata,
 } from '../../providers/ConversationProvider';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useConversationMetadata = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
@@ -63,7 +63,7 @@ export const useConversationMetadata = (props?: { conversationId?: string | unde
       queryKey: ['conversation-metadata', conversationId],
       queryFn: () => getMetadata(conversationId as string),
       enabled: !!conversationId,
-      // TODO: Cache long time and update based on websocket events
+      staleTime: 1000 * 60 * 60 * 24, // 24h, updates will come in via websocket
     }),
     update: useMutation({
       mutationFn: saveMetadata,
@@ -78,9 +78,10 @@ export const useConversationMetadata = (props?: { conversationId?: string | unde
           variables.conversation as HomebaseFile<ConversationMetadata>
         );
       },
-      onError: (error, variables, context) => {
+      onError: (error) => {
         console.error('Error saving conversation metadata', error);
       },
+      retry: 1,
     }),
   };
 };

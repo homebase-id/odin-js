@@ -1,36 +1,35 @@
 import {
-  OpenLock,
-  Lock,
   t,
   usePost,
-  Article as ArticleIcon,
   ChannelOrAclSelector,
   ActionButton,
-  Clipboard,
   useManagePost,
   ErrorNotification,
-} from '@youfoundation/common-app';
+  useChannel,
+} from '@homebase-id/common-app';
+import { OpenLock, Lock, Article as ArticleIcon, Clipboard } from '@homebase-id/common-app/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { ROOT_PATH } from '../../app/App';
 import { useEffect, useState } from 'react';
-import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
-import { BlogConfig, ChannelDefinition } from '@youfoundation/js-lib/public';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
+import { BlogConfig, ChannelDefinition } from '@homebase-id/js-lib/public';
+import { getNewId } from '@homebase-id/js-lib/helpers';
 
 export const ArticleDuplicatePage = () => {
   const { channelKey, postKey } = useParams();
-  const { data: serverData, isLoading: isLoadingServerData } = usePost({
-    channelSlug: channelKey,
-    channelId: channelKey,
-    blogSlug: postKey,
+  const { data: channel, isPending: isLoadingServerChannel } = useChannel({
+    channelKey,
+  }).fetch;
+  const { data: postFile, isPending: isLoadingServerPost } = usePost({
+    channelKey,
+    postKey,
   });
   const {
     mutate: duplicatePost,
     status: duplicatePostStatus,
     error: duplictePostError,
   } = useManagePost().duplicate;
-  const { activePost: postFile, activeChannel: channel } = serverData || {};
   const [newPostId] = useState(getNewId());
 
   const [targetChannel, setTargetChannel] = useState<
@@ -59,7 +58,7 @@ export const ArticleDuplicatePage = () => {
     }
   }, [duplicatePostStatus]);
 
-  if (isLoadingServerData) {
+  if (isLoadingServerChannel || isLoadingServerPost) {
     return null;
   }
 

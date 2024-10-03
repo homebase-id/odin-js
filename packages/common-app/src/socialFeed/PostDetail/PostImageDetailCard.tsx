@@ -3,30 +3,26 @@ import {
   GetTargetDriveFromChannelId,
   PostContent,
   getChannelDrive,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 import { useEffect } from 'react';
-import {
-  Loader,
-  Video,
-  ActionButton,
-  AuthorImage,
-  AuthorName,
-  PostMeta,
-  PostInteracts,
-  Image,
-  Times,
-  ArrowLeft,
-  Arrow,
-  BoringFile,
-} from '../../..';
+
 import {
   DEFAULT_PAYLOAD_KEY,
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
-import { getAnonymousDirectImageUrl } from '@youfoundation/js-lib/media';
+} from '@homebase-id/js-lib/core';
+import { getAnonymousDirectImageUrl } from '@homebase-id/js-lib/media';
 import { Helmet } from 'react-helmet-async';
+import { Video } from '../../media/Video';
+import { ActionButton } from '../../ui';
+import { Loader, Times, ArrowLeft, Arrow } from '../../ui/Icons';
+import { AuthorImage } from '../Blocks/Author/Image';
+import { AuthorName } from '../Blocks/Author/Name';
+import { PostInteracts } from '../Blocks/Interacts/PostInteracts';
+import { BoringFile } from '../Blocks/Media/PrimaryMedia';
+import { PostMeta, ToGroupBlock } from '../Blocks/Meta/Meta';
+import { Image } from '../../media/Image';
 
 export const PostImageDetailCard = ({
   odinId,
@@ -141,7 +137,8 @@ export const PostImageDetailCard = ({
                   probablyEncrypted={postFile.fileMetadata.isEncrypted}
                   key={(postFile.fileId || '') + (currentMediaFile?.key || currIndex)}
                 />
-              ) : currentMediaFile?.contentType.startsWith('video') ? (
+              ) : currentMediaFile?.contentType.startsWith('video') ||
+                currentMediaFile?.contentType === 'application/vnd.apple.mpegurl' ? (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Video
                     fileId={postFile.fileId}
@@ -196,29 +193,36 @@ export const PostImageDetailCard = ({
             </div>
 
             <div className="bg-background flex-shrink-0 lg:max-h-screen flex-grow md:block lg:w-[27rem] lg:flex-grow-0 lg:overflow-auto">
-              <div className="grid grid-flow-col grid-cols-[3rem_auto] gap-3 p-5 pb-0">
-                <AuthorImage odinId={odinId} size="sm" />
-                <div className="flex max-w-lg flex-grow flex-col">
-                  <div className="text-foreground mb-2 text-opacity-60">
-                    <h2 className="mr-4">
-                      <AuthorName odinId={odinId} />
-                    </h2>
-                    {post && channel ? (
+              {post && channel ? (
+                <div className="grid grid-flow-col grid-cols-[3rem_auto] gap-3 p-5 pb-0">
+                  <AuthorImage odinId={postFile.fileMetadata.originalAuthor || odinId} size="sm" />
+                  <div className="flex max-w-lg flex-grow flex-col">
+                    <div className="text-foreground mb-2 text-opacity-60">
+                      <h2 className="mr-4">
+                        <AuthorName odinId={postFile.fileMetadata.originalAuthor || odinId} />
+                        <ToGroupBlock
+                          channel={channel || undefined}
+                          odinId={odinId}
+                          authorOdinId={postFile.fileMetadata.originalAuthor}
+                          className="ml-1"
+                        />
+                      </h2>
+
                       <PostMeta
                         odinId={odinId}
                         channel={channel}
                         postFile={postFile}
-                        authorOdinId={post.authorOdinId || odinId}
+                        authorOdinId={postFile.fileMetadata.originalAuthor || odinId}
                         excludeContextMenu={true}
                       />
-                    ) : null}
+                    </div>
+                    <p>{post?.caption}</p>
                   </div>
-                  <p>{post?.caption}</p>
                 </div>
-              </div>
+              ) : null}
               {postFile ? (
                 <PostInteracts
-                  authorOdinId={odinId || window.location.hostname}
+                  odinId={odinId || postFile.fileMetadata.senderOdinId || window.location.hostname}
                   postFile={postFile}
                   defaultExpanded={true}
                   className="p-5"

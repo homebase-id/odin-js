@@ -4,7 +4,7 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
   NewMediaFile,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import {
   Tweet,
   Media,
@@ -14,18 +14,15 @@ import {
   ReactAccess,
   CollaborativeChannelDefinition,
   RemoteCollaborativeChannelDefinition,
-} from '@youfoundation/js-lib/public';
-import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/public';
+import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useState } from 'react';
 import { useManagePost } from './useManagePost';
-import { useDotYouClient } from '../../auth/useDotYouClient';
-import { LinkPreview } from '@youfoundation/js-lib/media';
+import { LinkPreview } from '@homebase-id/js-lib/media';
 
 export const usePostComposer = () => {
   const [postState, setPostState] = useState<'uploading' | 'encrypting' | 'error' | undefined>();
   const [processingProgress, setProcessingProgress] = useState<number>(0);
-  const loggedInIdentity = useDotYouClient().getIdentity();
-  const dotYouClient = useDotYouClient().getDotYouClient();
   const { mutateAsync: savePostFile, error: savePostError } = useManagePost().save;
 
   const savePost = async (
@@ -60,7 +57,6 @@ export const usePostComposer = () => {
           appData: {
             userDate: new Date().getTime(),
             content: {
-              authorOdinId: loggedInIdentity || dotYouClient.getIdentity(),
               type: mediaFiles && mediaFiles.length > 1 ? 'Media' : 'Tweet',
               caption: caption?.trim() || '',
               id: postId,
@@ -97,6 +93,7 @@ export const usePostComposer = () => {
         onUpdate: (progress) => setProcessingProgress(progress),
       });
     } catch (ex) {
+      console.error('Error saving post', ex);
       setPostState('error');
     }
 

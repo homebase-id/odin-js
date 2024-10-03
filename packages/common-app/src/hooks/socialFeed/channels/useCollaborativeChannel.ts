@@ -7,10 +7,10 @@ import {
   removeChannelLink,
   saveChannelDefinition,
   saveChannelLink,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 
-import { FEED_APP_ID, t, useCircles, useDotYouClient } from '../../../..';
-import { stringGuidsEqual, stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
+import { FEED_APP_ID, t, useChannelDrives, useCircles, useDotYouClient } from '../../../..';
+import { drivesEqual, stringGuidsEqual, stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import {
   ApiType,
   DotYouClient,
@@ -19,11 +19,10 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
   TargetDrive,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 const FEED_ROOT_PATH = '/apps/feed';
 import { useChannel } from './useChannel';
-import { ALL_CONNECTIONS_CIRCLE_ID } from '@youfoundation/js-lib/network';
-import { useChannelDrives } from '../../socialFeed/useChannelDrives';
+import { ALL_CONNECTIONS_CIRCLE_ID } from '@homebase-id/js-lib/network';
 
 const getExtendDriveDetailsUrl = (
   identity: string,
@@ -38,6 +37,11 @@ const getExtendDriveDetailsUrl = (
       t: targetDrive.type,
       r: allowAnonymousReads,
       at: JSON.stringify(attributes),
+      p:
+        DrivePermissionType.Read +
+        DrivePermissionType.Write +
+        DrivePermissionType.React +
+        DrivePermissionType.Comment, // Permission
     },
   ];
 
@@ -92,7 +96,9 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
   const dotYouClient = getDotYouClient();
   const queryClient = useQueryClient();
 
-  const { data: channelDef, isFetched: isChannelFetched } = useChannel({ channelId }).fetch;
+  const { data: channelDef, isFetched: isChannelFetched } = useChannel({
+    channelKey: channelId,
+  }).fetch;
   const { data: circles } = useCircles().fetch;
   const { data: channelDrives } = useChannelDrives(true);
 
@@ -122,8 +128,7 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
 
       const writeGrant = circle?.driveGrants?.find((grant) => {
         if (
-          stringGuidsEqual(grant.permissionedDrive?.drive.alias, targetDrive.alias) &&
-          stringGuidsEqual(grant.permissionedDrive?.drive.type, targetDrive.type) &&
+          drivesEqual(grant.permissionedDrive?.drive, targetDrive) &&
           grant.permissionedDrive.permission.includes(DrivePermissionType.Write)
         ) {
           return true;
@@ -140,11 +145,7 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
     }
 
     // We don't have to check both.. As one fail is enough
-    const channelDrive = channelDrives?.find(
-      (d) =>
-        stringGuidsEqual(d.targetDriveInfo.alias, targetDrive.alias) &&
-        stringGuidsEqual(d.targetDriveInfo.type, targetDrive.type)
-    );
+    const channelDrive = channelDrives?.find((d) => drivesEqual(d.targetDriveInfo, targetDrive));
     if (channelDrive?.attributes.IsCollaborativeChannel !== 'true') {
       return { invalidDriveAttribute: true };
     }
@@ -175,7 +176,7 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
       channelDef.serverMetadata.accessControlList;
     await saveChannelDefinition(dotYouClient, collaborativeChannelDef);
 
-    const intermediaReturnUrl = getExtendDriveDetailsUrl(
+    const intermediateReturnUrl = getExtendDriveDetailsUrl(
       identity,
       targetDrive,
       returnUrl,
@@ -189,7 +190,7 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
       t('Drive for "{0}" channel posts', channelDef.fileMetadata.appData.content.name),
       targetDrive,
       collaborativeCircleIds,
-      intermediaReturnUrl
+      intermediateReturnUrl
     );
   };
 

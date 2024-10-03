@@ -1,12 +1,12 @@
-import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
-import { OwnerClient } from '@youfoundation/common-app';
+import { base64ToUint8Array } from '@homebase-id/js-lib/helpers';
+import { OwnerClient } from '@homebase-id/common-app';
 import {
   NonceData,
   PublicKeyData,
   encryptRecoveryKey,
   prepareAuthPassword,
 } from './AuthenticationHelper';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 
 interface AuthenticationResponse {
   sharedSecret: Uint8Array;

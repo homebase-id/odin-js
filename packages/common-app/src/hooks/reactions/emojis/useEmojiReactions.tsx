@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { getReactions, ReactionContext } from '@youfoundation/js-lib/public';
+import { getReactions, ReactionContext } from '@homebase-id/js-lib/public';
 
-import { ReactionFile } from '@youfoundation/js-lib/core';
+import { ReactionFile } from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../../auth/useDotYouClient';
 
 const PAGE_SIZE = 15;
@@ -17,7 +17,7 @@ export const useEmojiReactions = (context?: ReactionContext) => {
     pageParam?: string;
   }) => {
     if (
-      !context?.authorOdinId ||
+      !context?.odinId ||
       !context?.channelId ||
       (!context?.target?.fileId && !context?.target?.globalTransitId)
     ) {
@@ -30,7 +30,7 @@ export const useEmojiReactions = (context?: ReactionContext) => {
     fetch: useInfiniteQuery({
       queryKey: [
         'emojis',
-        context?.authorOdinId,
+        context?.odinId,
         context?.channelId,
         context?.target?.fileId,
         context?.target?.globalTransitId,
@@ -45,7 +45,7 @@ export const useEmojiReactions = (context?: ReactionContext) => {
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       enabled:
-        !!context?.authorOdinId &&
+        !!context?.odinId &&
         !!context?.channelId &&
         (!!context?.target?.fileId || !!context?.target?.globalTransitId),
     }),

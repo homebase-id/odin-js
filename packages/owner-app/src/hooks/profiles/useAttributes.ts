@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Attribute, getProfileAttributes } from '@youfoundation/js-lib/profile';
+import { Attribute, getProfileAttributes } from '@homebase-id/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
 import { AttributeDefinition, AttributeDefinitions } from './AttributeDefinitions';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { removeProfileAttribute } from '../../provider/profile/AttributeData/ManageAttributeProvider';
 
 export interface AttributeVm extends Attribute {
@@ -27,7 +27,7 @@ export const useAttributes = ({
       profileId,
       sectionId,
       undefined,
-      100 // TODO: Should we page this properly, or how many profile attributes do we expect as normal?
+      200 // TODO: Should we page this properly, or how many profile attributes do we expect being "normal"?
     );
 
     return foundAttributes.map((attr) => {

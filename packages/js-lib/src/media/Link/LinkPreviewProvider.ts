@@ -1,5 +1,4 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { getCacheKey } from '../../core/DriveData/File/DriveFileHelper';
 
 interface LinkPreviewFromServer {
   title: string;
@@ -42,14 +41,15 @@ export const getLinkPreview = async (
   if (cacheEntry) return cacheEntry;
 
   const promise = axiosClient
-    .get<LinkPreviewFromServer>(`/utils/links/extract?url=${standardizedUrl}`)
+    .get<LinkPreviewFromServer>(`/utils/links/extract?url=${encodeURIComponent(standardizedUrl)}`)
     .then((response) => {
+      if (!response.data) return null;
       return {
         title: response.data.title || '',
         description: response.data.description || '',
         imageUrl: response.data.imageUrl || undefined,
-        imageWidth: response.data.imageWidth || undefined, // TODO: Should we find a way to always get one from the dataUri?
-        imageHeight: response.data.imageHeight || undefined, // TODO: Should we find a way to always get one from the dataUri?
+        imageWidth: response.data.imageWidth || undefined,
+        imageHeight: response.data.imageHeight || undefined,
         url: response.data.url,
       };
     })

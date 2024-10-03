@@ -1,20 +1,3 @@
-import {
-  ActionButton,
-  t,
-  ActionGroupOptionProps,
-  House,
-  Trash,
-  Block,
-  ErrorNotification,
-  Persons,
-  ActionGroup,
-  useDotYouClient,
-  ConfirmDialog,
-  Ellipsis,
-  useIdentityIFollow,
-  HeartBeat,
-  useErrors,
-} from '@youfoundation/common-app';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { useConnection } from '../../../hooks/connections/useConnection';
@@ -22,9 +5,29 @@ import { useContact } from '../../../hooks/contacts/useContact';
 import { useEffect, useState } from 'react';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
 import { useConnectionGrantStatus } from '../../../hooks/connections/useConnectionGrantStatus';
-import { hasDebugFlag, jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import { hasDebugFlag, jsonStringify64 } from '@homebase-id/js-lib/helpers';
 import OutgoingConnectionDialog from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import {
+  useDotYouClient,
+  useIdentityIFollow,
+  ActionButton,
+  t,
+  ActionGroupOptionProps,
+  useErrors,
+  ErrorNotification,
+  ActionGroup,
+  ConfirmDialog,
+} from '@homebase-id/common-app';
+import {
+  House,
+  Block,
+  Trash,
+  HeartBeat,
+  Persons,
+  Ellipsis,
+  Bubble,
+} from '@homebase-id/common-app/icons';
 
 export const IdentityPageMetaAndActions = ({
   odinId, // setIsEditPermissionActive,
@@ -138,18 +141,11 @@ export const IdentityPageMetaAndActions = ({
     },
   ];
 
-  const blockConfirmOptions = {
-    title: `${t('Block')} ${odinId}`,
-    buttonText: t('Block'),
-    body: `${t('Are you sure you want to block')} ${odinId}`,
-  };
-
-  if (connectionInfo?.status !== 'blocked' && connectionInfo?.status) {
+  if (isFollowing === false) {
     actionGroupOptions.push({
-      icon: Block,
-      label: t('Block'),
-      onClick: () => block(odinId),
-      confirmOptions: blockConfirmOptions,
+      icon: Persons,
+      label: t('Follow'),
+      href: `/owner/follow/following/${odinId}`,
     });
   }
 
@@ -172,6 +168,20 @@ export const IdentityPageMetaAndActions = ({
   };
 
   if (connectionInfo?.status === 'connected') {
+    actionGroupOptions.push({
+      label: t('Open chat'),
+      href: `/apps/chat/open/${odinId}`,
+      icon: Bubble,
+    });
+
+    if (hasDebugFlag()) {
+      actionGroupOptions.push({
+        icon: HeartBeat,
+        label: t('Grant Status'),
+        onClick: doDownloadStatusUrl,
+      });
+    }
+
     actionGroupOptions.push({
       icon: Trash,
       label: t('Disconnect'),
@@ -225,21 +235,20 @@ export const IdentityPageMetaAndActions = ({
         ],
       },
     });
-
-    if (hasDebugFlag()) {
-      actionGroupOptions.push({
-        icon: HeartBeat,
-        label: t('Grant Status'),
-        onClick: doDownloadStatusUrl,
-      });
-    }
   }
 
-  if (isFollowing === false) {
+  const blockConfirmOptions = {
+    title: `${t('Block')} ${odinId}`,
+    buttonText: t('Block'),
+    body: `${t('Are you sure you want to block')} ${odinId}`,
+  };
+
+  if (connectionInfo?.status !== 'blocked' && connectionInfo?.status) {
     actionGroupOptions.push({
-      icon: Persons,
-      label: t('Follow'),
-      href: `/owner/follow/following/${odinId}`,
+      icon: Block,
+      label: t('Block'),
+      onClick: () => block(odinId),
+      confirmOptions: blockConfirmOptions,
     });
   }
 
@@ -255,8 +264,8 @@ export const IdentityPageMetaAndActions = ({
               <span className="block leading-tight">
                 {`${
                   contactContent?.name
-                    ? contactContent.name.displayName ??
-                      `${contactContent.name.givenName || ''} ${contactContent.name.surname || ''}`
+                    ? (contactContent.name.displayName ??
+                      `${contactContent.name.givenName || ''} ${contactContent.name.surname || ''}`)
                     : odinId
                 }`}
               </span>
@@ -281,8 +290,8 @@ export const IdentityPageMetaAndActions = ({
         breadCrumbs={[{ href: '/owner/connections', title: 'Contacts' }, { title: odinId }]}
         browserTitle={
           connectionInfo?.status === 'connected' && contactContent?.name
-            ? contactContent.name.displayName ??
-              `${contactContent.name.givenName} ${contactContent.name.surname}`
+            ? (contactContent.name.displayName ??
+              `${contactContent.name.givenName} ${contactContent.name.surname}`)
             : odinId
         }
       />

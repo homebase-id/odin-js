@@ -4,13 +4,12 @@ import {
   useChannels,
   useCollaborativeChannels,
   HybridLink,
-  Persons,
-  Quote,
   LoadingBlock,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
+import { Persons, Quote } from '@homebase-id/common-app/icons';
 import React from 'react';
 import { ROOT_PATH } from '../../../../app/App';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 
 const ChannelsOverview = ({ className }: { className?: string }) => {
   const { getIdentity } = useDotYouClient();

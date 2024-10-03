@@ -1,5 +1,12 @@
 // DotYouClient
 export * from './DotYouClient';
+import { encryptUrl, encryptData, buildIvFromQueryString } from './InterceptionEncryptionUtil';
+export type { SharedSecretEncryptedPayload } from './InterceptionEncryptionUtil';
+export const InterceptionEncryptionUtil = {
+  encryptUrl,
+  encryptData,
+  buildIvFromQueryString,
+};
 
 // SecurityData
 export * from './SecurityData/SecurityTypes';
@@ -19,6 +26,7 @@ export * from './DriveData/Query/DriveQueryProvider';
 export * from './DriveData/Query/DriveQueryTypes';
 
 export * from './DriveData/Upload/DriveFileUploadProvider';
+export { GenerateKeyHeader } from './DriveData/Upload/UploadHelpers';
 export * from './DriveData/Upload/DriveUploadTypes';
 
 export { decryptJsonContent, decryptKeyHeader } from './DriveData/SecurityHelpers';
@@ -28,12 +36,11 @@ export { DEFAULT_PAYLOAD_KEY } from './DriveData/Upload/UploadHelpers';
 export * from './WebsocketData/WebsocketProvider';
 export * from './WebsocketData/WebsocketTypes';
 
+// Reactions
+export * from './ReactionData/GroupReactionsProvider';
+
 // Notifications
 export * from './NotificationData/PushNotificationsProvider';
-
-// CommandData
-export * from './CommandData/CommandProvider';
-export * from './CommandData/CommandTypes';
 
 // ErrorHandling
 export * from './ErrorHandling/KnownErrors';

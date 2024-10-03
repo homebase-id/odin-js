@@ -1,14 +1,6 @@
-import {
-  ActionButton,
-  Arrow,
-  DomainHighlighter,
-  Label,
-  Select,
-  t,
-} from '@youfoundation/common-app';
 import { useSearchParams } from 'react-router-dom';
 import { RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
-import { getDomainFromUrl } from '@youfoundation/js-lib/helpers';
+import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
 import { Helmet } from 'react-helmet-async';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import { useApp } from '../../hooks/apps/useApp';
@@ -17,6 +9,8 @@ import { useEffect, useMemo, useState } from 'react';
 import DrivePermissionView from '../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
 import Section from '../../components/ui/Sections/Section';
+import { t, Label, Select, ActionButton, DomainHighlighter } from '@homebase-id/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
 
 type AuthDuration = 'always' | 'for-1-year' | 'for-1-month' | 'for-1-week' | 'for-1-day' | 'never';
 
@@ -124,7 +118,6 @@ const YouAuthConsent = () => {
               ) : null}
 
               <div className="mt-8 flex flex-col gap-2 sm:flex-row-reverse">
-                {/* TODO: Check if this would be better with a normal XHR request... Having a form is pretty uncommon, and doesn't add anything in terms of security */}
                 <form action="/api/owner/v1/youauth/authorize" method="post" className="contents">
                   <input type="hidden" name="return_url" value={returnUrl} />
                   {consentRequirements ? (
@@ -134,12 +127,12 @@ const YouAuthConsent = () => {
                       value={JSON.stringify(consentRequirements)}
                     />
                   ) : null}
-                  <ActionButton type="primary" className="w-1/2 sm:w-auto" icon={Arrow}>
+                  <ActionButton type="primary" className="w-full sm:w-auto" icon={Arrow}>
                     {t('Login')}
                   </ActionButton>
                 </form>
 
-                <ActionButton type="secondary" onClick={doCancel} className="w-1/2 sm:w-auto">
+                <ActionButton type="secondary" onClick={doCancel} className="w-full sm:w-auto">
                   {t('Cancel')}
                 </ActionButton>
               </div>
@@ -161,7 +154,7 @@ const ServiceDetails = ({ targetDomain }: { targetDomain: string }) => {
           fallbackSize="md"
         />
 
-        <h1 className="text-3xl md:text-4xl ">
+        <h1 className="text-3xl md:text-4xl">
           {t('Login to')} &quot;<DomainHighlighter>{targetDomain}</DomainHighlighter>
           &quot;
           <small className="block text-sm dark:text-white dark:text-opacity-80">
@@ -213,7 +206,7 @@ const AppDetails = ({
           fallbackSize="md"
         />
 
-        <h1 className="text-3xl md:text-4xl ">
+        <h1 className="text-3xl md:text-4xl">
           {t('Login to')}{' '}
           {!appRegistration ? (
             <>

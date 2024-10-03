@@ -1,15 +1,3 @@
-import {
-  formatToTimeAgoWithRelativeDetail,
-  Checkbox,
-  highlightQuery,
-  ActionButton,
-  Trash,
-  Archive,
-  t,
-  Envelope,
-  EnvelopeOpen,
-  ErrorNotification,
-} from '@youfoundation/common-app';
 import { Link } from 'react-router-dom';
 import { useMemo } from 'react';
 import {
@@ -18,13 +6,22 @@ import {
   MailConversation,
   REMOVE_ARCHIVAL_STATUS,
 } from '../../providers/MailProvider';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import {
+  ActionButton,
+  Checkbox,
+  ErrorNotification,
+  formatToTimeAgoWithRelativeDetail,
+  highlightQuery,
+  t,
+  useDotYouClientContext,
+} from '@homebase-id/common-app';
 import { ROOT_PATH } from '../../app/App';
 import { MailAttachmentOverview } from '../../templates/Mail/MailAttachmentOverview';
 import { RecipientsList } from './RecipientsList';
 import { useMailThread } from '../../hooks/mail/useMailThread';
 import { useMailConversation } from '../../hooks/mail/useMailConversation';
+import { Trash, Archive, Envelope, EnvelopeOpen } from '@homebase-id/common-app/icons';
 
 export const MailConversationItem = ({
   mailThread,

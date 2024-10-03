@@ -1,6 +1,6 @@
 {
-  "version": "0.0.3-alpha.19",
-  "name": "@youfoundation/js-lib",
+  "version": "0.0.5-alpha.3",
+  "name": "@homebase-id/js-lib",
   "author": "YouFoundation",
   "description": "JavaScript SDK for the DotYouCore api",
   "files": [
@@ -72,20 +72,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/YouFoundation/dotyoucore-js.git"
+    "url": "https://github.com/homebase-id/odin-js"
   },
   "dependencies": {
     "guid-typescript": "^1.0.9"
   },
   "optionalDependencies": {
     "@ffmpeg/util": "^0.12.1",
-    "@youfoundation/ffmpeg": "0.12.10",
+    "@homebase-id/ffmpeg": "0.12.10",
     "mp4box": "^0.5.2"
   },
   "devDependencies": {
     "vitest": "^0.34.6"
   },
   "peerDependencies": {
-    "axios": "1.6.7"
+    "axios": "^1.7.5"
   }
 }

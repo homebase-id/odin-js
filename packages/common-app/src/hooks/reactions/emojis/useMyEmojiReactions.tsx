@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getMyReactions, ReactionContext } from '@youfoundation/js-lib/public';
+import { getMyReactions, ReactionContext } from '@homebase-id/js-lib/public';
 import { useDotYouClient } from '../../auth/useDotYouClient';
 
 const PAGE_SIZE = 10;
@@ -16,7 +16,7 @@ export const useMyEmojiReactions = (context?: ReactionContext) => {
     pageParam?: string;
   }) => {
     if (
-      !context?.authorOdinId ||
+      !context?.odinId ||
       !context?.channelId ||
       (!context?.target?.fileId && !context?.target?.globalTransitId)
     ) {
@@ -37,7 +37,7 @@ export const useMyEmojiReactions = (context?: ReactionContext) => {
     fetch: useQuery({
       queryKey: [
         'my-emojis',
-        context?.authorOdinId,
+        context?.odinId,
         context?.channelId,
         context?.target?.fileId,
         context?.target?.globalTransitId,
@@ -48,7 +48,7 @@ export const useMyEmojiReactions = (context?: ReactionContext) => {
       refetchOnWindowFocus: false,
 
       enabled:
-        !!context?.authorOdinId &&
+        !!context?.odinId &&
         !!context?.channelId &&
         (!!context?.target?.fileId || !!context?.target?.globalTransitId),
     }),

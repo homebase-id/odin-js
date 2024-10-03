@@ -1,5 +1,6 @@
 import { FC, ReactNode } from 'react';
-import { IconProps, HybridLink } from '@youfoundation/common-app';
+import { HybridLink } from '@homebase-id/common-app';
+import { IconProps } from '@homebase-id/common-app/icons';
 
 const CardLink = ({
   className,

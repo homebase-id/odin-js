@@ -6,25 +6,24 @@ import {
   ActionGroupOptionProps,
   ErrorBoundary,
   SaveStatus,
-  Times,
   t,
   useDebounce,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { useAttribute } from '../../../hooks/profiles/useAttribute';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
-import { ActionButton } from '@youfoundation/common-app';
+import { ActionButton } from '@homebase-id/common-app';
 
 import Section from '../../ui/Sections/Section';
 import AttributeFields from '../AttributeFields/AttributeFields';
-import { ActionGroup } from '@youfoundation/common-app';
-import { Trash, Shield, ArrowDown, ArrowUp } from '@youfoundation/common-app';
-import { HomePageAttributes } from '@youfoundation/js-lib/public';
+import { ActionGroup } from '@homebase-id/common-app';
+import { Trash, Shield, Times, ArrowDown, ArrowUp } from '@homebase-id/common-app/icons';
+import { HomePageAttributes } from '@homebase-id/js-lib/public';
 import {
   HomebaseFile,
   EmbeddedThumb,
   NewHomebaseFile,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { OptionalACLHomebaseFile } from '../AttributeCreator/AttributeCreator';
 
 const AttributeEditor = ({

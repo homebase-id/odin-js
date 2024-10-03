@@ -1,4 +1,4 @@
-import { DotYouClient, ImageSize } from '@youfoundation/js-lib/core';
+import { DotYouClient, ImageSize } from '@homebase-id/js-lib/core';
 import { useImage } from '../../hooks/image/useImage';
 import { useEffect } from 'react';
 import { ImageEvents, ImageSource } from './types';
@@ -14,8 +14,6 @@ export interface OdinThumbnailImageProps
 
   loadSize: ImageSize | undefined;
   naturalSize?: ImageSize;
-
-  probablyEncrypted?: boolean;
 }
 
 // Component to render a tiny thumb image;
@@ -35,6 +33,7 @@ export const OdinThumbnailImage = ({
   probablyEncrypted,
 
   onError,
+  preferObjectUrl,
   ...props
 }: OdinThumbnailImageProps) => {
   const fetchThumb = loadSize !== undefined;
@@ -43,19 +42,20 @@ export const OdinThumbnailImage = ({
     data: imageData,
     error: imageError,
     isFetched: isImageFetched,
-  } = useImage(
+  } = useImage({
     dotYouClient,
     odinId,
-    fetchThumb ? fileId : undefined,
-    fetchThumb ? globalTransitId : undefined,
-    fileKey,
-    targetDrive,
-    loadSize,
+    imageFileId: fetchThumb ? fileId : undefined,
+    imageGlobalTransitId: fetchThumb ? globalTransitId : undefined,
+    imageFileKey: fileKey,
+    imageDrive: targetDrive,
+    size: loadSize,
     probablyEncrypted,
     naturalSize,
     systemFileType,
-    lastModified
-  ).fetch;
+    lastModified,
+    preferObjectUrl,
+  }).fetch;
 
   // Error handling
   useEffect(() => {

@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import {
   AuthorImage,
@@ -8,10 +8,10 @@ import {
   t,
   useDotYouClient,
   usePortal,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { FailedDeliveryDetails, InnerDeliveryIndicator } from './ChatDeliveryIndicator';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
-import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
+import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
 import { UnifiedConversation } from '../../../providers/ConversationProvider';
 
 export const ChatMessageInfo = ({
@@ -28,14 +28,14 @@ export const ChatMessageInfo = ({
   const messageContent = msg.fileMetadata.appData.content;
   const conversationContent = conversation.fileMetadata.appData.content;
   const recipients = conversationContent.recipients.filter(
-    (recipient) => recipient && recipient !== identity
+    (recipient) => recipient && recipient !== msg.fileMetadata.originalAuthor
   );
 
   const isAuthor = msg.fileMetadata.senderOdinId === identity || !msg.fileMetadata.senderOdinId;
 
   const { data: reactions } = useChatReaction({
-    conversationId: conversation?.fileMetadata.appData.uniqueId,
-    messageId: msg.fileMetadata.appData.uniqueId,
+    messageFileId: msg.fileId,
+    messageGlobalTransitId: msg.fileMetadata.globalTransitId,
   }).get;
 
   const dialog = (
@@ -103,16 +103,10 @@ export const ChatMessageInfo = ({
             <div className="flex flex-col gap-4">
               {reactions?.map((reaction) => {
                 return (
-                  <div className="flex flex-row items-center text-lg" key={reaction.fileId}>
-                    <AuthorImage
-                      odinId={reaction.fileMetadata.senderOdinId}
-                      size="xs"
-                      className="mr-2"
-                    />
-                    <AuthorName odinId={reaction.fileMetadata.senderOdinId} />
-                    <p className="ml-auto text-3xl">
-                      {reaction.fileMetadata.appData.content.message}
-                    </p>
+                  <div className="flex flex-row items-center text-lg" key={reaction.body}>
+                    <AuthorImage odinId={reaction.authorOdinId} size="xs" className="mr-2" />
+                    <AuthorName odinId={reaction.authorOdinId} />
+                    <p className="ml-auto text-3xl">{reaction.body}</p>
                   </div>
                 );
               })}

@@ -1,11 +1,10 @@
-import { getHostFromUrl, tryJsonParse } from '@youfoundation/js-lib/helpers';
-import { LinkPreview, LinkPreviewDescriptor } from '@youfoundation/js-lib/media';
+import { getHostFromUrl, tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { LinkPreview, LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 import { ellipsisAtMaxChar } from '../helpers';
-import { useQuery } from '@tanstack/react-query';
-import { getPayloadAsJson, PayloadDescriptor, TargetDrive } from '@youfoundation/js-lib/core';
-import { useDotYouClient } from '../hooks';
+import { EmbeddedThumb, PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
+import { useLinkMetadata } from '../hooks';
 import { LoadingBlock } from '../ui';
-import { getPayloadAsJsonOverPeerByGlobalTransitId } from '@youfoundation/js-lib/peer';
+import { useMemo } from 'react';
 
 export const LinkPreviewTextual = ({
   linkPreview,
@@ -56,11 +55,13 @@ export const LinkPreviewImage = ({
   width,
   height,
   className,
+  previewThumbnail,
 }: {
   linkPreview?: LinkPreview;
   width?: number;
   height?: number;
   className?: string;
+  previewThumbnail?: EmbeddedThumb;
 }) => {
   const aspectRatio =
     width && height
@@ -69,19 +70,42 @@ export const LinkPreviewImage = ({
         ? linkPreview?.imageWidth / linkPreview.imageHeight
         : undefined;
 
-  if (!linkPreview)
-    return (
-      <LoadingBlock
-        className="w-full aspect-video"
-        style={
-          aspectRatio
-            ? {
-                aspectRatio: `${aspectRatio}`,
-              }
-            : undefined
-        }
-      />
-    );
+  const embeddedThumbUrl = useMemo(
+    () =>
+      previewThumbnail && `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`,
+    [previewThumbnail]
+  );
+
+  if (!linkPreview) {
+    if (previewThumbnail) {
+      return (
+        <img
+          src={embeddedThumbUrl}
+          className={`${className} blur-sm`}
+          style={
+            aspectRatio
+              ? {
+                  aspectRatio: `${aspectRatio}`,
+                }
+              : undefined
+          }
+        />
+      );
+    } else {
+      return (
+        <LoadingBlock
+          className="w-full aspect-video"
+          style={
+            aspectRatio
+              ? {
+                  aspectRatio: `${aspectRatio}`,
+                }
+              : undefined
+          }
+        />
+      );
+    }
+  }
   if (!linkPreview.imageUrl) return null;
 
   return (
@@ -147,42 +171,9 @@ export const LinkPreviewItem = ({
           className="w-full"
           width={descriptorInfo.imageWidth}
           height={descriptorInfo.imageHeight}
+          previewThumbnail={payload.previewThumbnail}
         />
       ) : null}
     </div>
   );
-};
-
-export const useLinkMetadata = ({
-  odinId,
-  globalTransitId,
-  targetDrive,
-  fileId,
-  payloadKey,
-}: {
-  odinId?: string;
-  globalTransitId?: string;
-  targetDrive: TargetDrive;
-  fileId?: string;
-  payloadKey: string;
-}) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
-
-  return useQuery({
-    queryKey: ['link-metadata', targetDrive.alias, fileId, payloadKey],
-    queryFn: async () => {
-      if (odinId && globalTransitId) {
-        return getPayloadAsJsonOverPeerByGlobalTransitId<LinkPreview[]>(
-          dotYouClient,
-          odinId,
-          targetDrive,
-          globalTransitId,
-          payloadKey
-        );
-      }
-
-      if (!fileId) return [];
-      return getPayloadAsJson<LinkPreview[]>(dotYouClient, targetDrive, fileId, payloadKey);
-    },
-  });
 };

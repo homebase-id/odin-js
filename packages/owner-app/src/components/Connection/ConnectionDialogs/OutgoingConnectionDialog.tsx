@@ -1,19 +1,27 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Alert, Arrow, Textarea, t, useCheckIdentity } from '@youfoundation/common-app';
 import { useConnection } from '../../../hooks/connections/useConnection';
 import { useFocusedEditing } from '../../../hooks/focusedEditing/useFocusedEditing';
-import { usePortal } from '@youfoundation/common-app';
-import { ErrorNotification } from '@youfoundation/common-app';
-import { ActionButton } from '@youfoundation/common-app';
+import {
+  Alert,
+  Textarea,
+  t,
+  useCheckIdentity,
+  usePortal,
+  ErrorNotification,
+  ActionButton,
+  CircleSelector,
+  useFollowingInfinite,
+  Input,
+  Label,
+  DialogWrapper,
+  CheckboxToggle,
+} from '@homebase-id/common-app';
 import YourInfo from '../../Connection/YourInfo/YourInfo';
 import YourSignature from '../../Connection/YourSignature/YourSignature';
-import { CircleSelector, useFollowingInfinite } from '@youfoundation/common-app';
-import { Input } from '@youfoundation/common-app';
-import { Label } from '@youfoundation/common-app';
-import { DialogWrapper, CheckboxToggle } from '@youfoundation/common-app';
-import { getDomainFromUrl } from '@youfoundation/js-lib/helpers';
+import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
+import { Arrow } from '@homebase-id/common-app/icons';
 
 const DEFAULT_MESSAGE = t('Hi, I would like to connect with you');
 

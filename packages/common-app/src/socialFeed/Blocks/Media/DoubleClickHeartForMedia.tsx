@@ -1,5 +1,5 @@
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { PostContent, ReactionContext } from '@youfoundation/js-lib/public';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { PostContent, ReactionContext } from '@homebase-id/js-lib/public';
 import React, { useMemo } from 'react';
 import { useRef } from 'react';
 import { useReaction, useDotYouClient, useDoubleTap } from '../../../hooks';
@@ -27,7 +27,7 @@ export const DoubleClickHeartForMedia = ({
 
   const postContent = postFile.fileMetadata.appData.content;
   const reactionContext: ReactionContext = {
-    authorOdinId: odinId || window.location.hostname,
+    odinId: odinId || window.location.hostname,
     channelId: postContent.channelId,
     target: {
       globalTransitId: postFile.fileMetadata.globalTransitId ?? 'unknown',

@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { HomePageAttributes } from '@youfoundation/js-lib/public';
+import { HomePageAttributes } from '@homebase-id/js-lib/public';
 import {
   BirthdayFields,
   BuiltInAttributes,
@@ -11,20 +11,20 @@ import {
   NicknameFields,
   PhoneFields,
   SocialFields,
-} from '@youfoundation/js-lib/profile';
+} from '@homebase-id/js-lib/profile';
 import { ClipboardEventHandler, useState } from 'react';
-import { t } from '@youfoundation/common-app';
+import { t } from '@homebase-id/common-app';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
-import { Input } from '@youfoundation/common-app';
-import { Label } from '@youfoundation/common-app';
+import { Input } from '@homebase-id/common-app';
+import { Label } from '@homebase-id/common-app';
 import { AsYouType } from 'libphonenumber-js';
 
-import { generateDisplayLocation, generateDisplayName } from '@youfoundation/js-lib/helpers';
+import { generateDisplayLocation, generateDisplayName } from '@homebase-id/js-lib/helpers';
 import { ThemeAttributeEditor } from './ThemeAttributeEditor';
 import { PhotoAttributeEditor } from './PhotoAttributeEditor';
 import { ExperienceAttributeEditor } from './ExperienceAttributeEditor';
 const RichTextEditor = lazy(() =>
-  import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
+  import('@homebase-id/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
 );
 
 const AttributeFields = ({
@@ -346,7 +346,7 @@ const NameAttributeEditor = ({
           />
         </div>
       ) : null}
-      <button onClick={() => setShowMore(!showMore)} className="text-indigo-500">
+      <button onClick={() => setShowMore(!showMore)} className="text-primary">
         {showMore ? 'Show less' : 'Show more'}
       </button>
     </>

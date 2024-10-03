@@ -1,9 +1,8 @@
-import { BlogConfig, PostContent } from '@youfoundation/js-lib/public';
+import { BlogConfig, PostContent } from '@homebase-id/js-lib/public';
 import { FC } from 'react';
 import { PostMeta } from '../Blocks/Meta/Meta';
 import { useNavigate } from 'react-router-dom';
-import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
-import { HOME_ROOT_PATH } from '../../core';
+import { HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import { FakeAnchor, ErrorBoundary } from '../../ui';
 import { AuthorImage } from '../Blocks/Author/Image';
 import { AuthorName } from '../Blocks/Author/Name';
@@ -12,6 +11,7 @@ import { PostInteracts } from '../Blocks/Interacts/PostInteracts';
 import { DoubleClickHeartForMedia } from '../Blocks/Media/DoubleClickHeartForMedia';
 import { useChannel } from '../../hooks/socialFeed/channels/useChannel';
 import { useDotYouClient } from '../../hooks/auth/useDotYouClient';
+import { HOME_ROOT_PATH } from '../../core/paths';
 
 interface PostTeaserProps {
   className?: string;
@@ -37,7 +37,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
   showAuthor,
 }) => {
   const post = postFile.fileMetadata.appData.content;
-  const { data: channel } = useChannel({ channelId: post.channelId }).fetch;
+  const { data: channel } = useChannel({ channelKey: post.channelId }).fetch;
   const { isOwner, getIdentity } = useDotYouClient();
   const navigate = useNavigate();
   const isAuthenticated = !!getIdentity();
@@ -77,11 +77,11 @@ export const PostTeaser: FC<PostTeaserProps> = ({
                 {showAuthor ? (
                   <>
                     <AuthorImage
-                      odinId={post.authorOdinId}
+                      odinId={postFile.fileMetadata.originalAuthor}
                       className="h-10 w-10 rounded-full sm:h-12 sm:w-12 md:h-[2rem] md:w-[2rem]"
                     />
                     <h2 className="ml-2">
-                      <AuthorName odinId={post.authorOdinId} />
+                      <AuthorName odinId={postFile.fileMetadata.originalAuthor} />
                     </h2>
                     <span className="hidden px-2 leading-4 md:block">·</span>
                   </>
@@ -91,7 +91,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
                   <PostMeta
                     postFile={postFile}
                     channel={showChannel ? channel : undefined}
-                    authorOdinId={post.authorOdinId}
+                    authorOdinId={postFile.fileMetadata.originalAuthor}
                   />
                 ) : null}
               </div>
@@ -106,7 +106,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
               />
             </div>
             <PostInteracts
-              authorOdinId={window.location.hostname}
+              odinId={window.location.hostname}
               postFile={postFile}
               allowExpand={!!allowExpand}
               className="px-4"

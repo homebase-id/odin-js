@@ -1,6 +1,6 @@
 import { FC, ReactNode } from 'react';
 
-import { Check, Exclamation, IconProps, Loader } from '@youfoundation/common-app';
+import { Check, Exclamation, IconProps, Loader } from '@homebase-id/common-app/icons';
 import { config } from '../../../app/config';
 export type ActionButtonState = 'loading' | 'pending' | 'success' | 'error' | 'idle';
 

@@ -1,7 +1,5 @@
-import { Times, t } from '@youfoundation/common-app';
-import { ErrorNotification } from '@youfoundation/common-app';
-import { ActionButton } from '@youfoundation/common-app';
-import { DomainHighlighter } from '@youfoundation/common-app';
+import { Times } from '@homebase-id/common-app/icons';
+import { t, ErrorNotification, ActionButton, DomainHighlighter } from '@homebase-id/common-app';
 import PersonCard from '../PersonCard/PersonCard';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
 

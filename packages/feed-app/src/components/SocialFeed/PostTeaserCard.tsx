@@ -1,4 +1,4 @@
-import { PostContent } from '@youfoundation/js-lib/public';
+import { PostContent } from '@homebase-id/js-lib/public';
 import { FC } from 'react';
 import {
   AuthorImage,
@@ -7,17 +7,16 @@ import {
   PostInteracts,
   PostMeta,
   useChannel,
-  useSocialChannel,
   ErrorBoundary,
   PostBody,
   useCheckIdentity,
   LoadingBlock,
   t,
   ToGroupBlock,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { useNavigate } from 'react-router-dom';
-import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
-import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DoubleClickHeartForMedia } from '@homebase-id/common-app';
+import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { UnreachableIdentity } from './UnreachableIdentity';
 
@@ -37,21 +36,17 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
 
   const { data: identityAccessible } = useCheckIdentity(isExternal ? odinId : undefined);
 
-  const { data: externalChannel } = useSocialChannel({
+  const { data: channel } = useChannel({
     odinId: isExternal ? odinId : undefined,
-    channelId: post.channelId,
-  }).fetch;
-  const { data: internalChannel } = useChannel({
-    channelId: isExternal ? undefined : post.channelId,
+    channelKey: post.channelId,
   }).fetch;
 
-  const channel = externalChannel || internalChannel;
   const postPath = `preview/${isExternal ? odinId : identity}/${
     channel?.fileMetadata.appData.uniqueId
   }/${post.id}`;
   const clickable = post.type === 'Article'; // Post is only clickable if it's an article; While media posts are clickable only on the media itself
 
-  const authorOdinId = post.authorOdinId || odinId;
+  const authorOdinId = postFile.fileMetadata.originalAuthor || odinId;
 
   if (identityAccessible === false && isExternal)
     return <UnreachableIdentity postFile={postFile} className={className} odinId={odinId} />;
@@ -121,7 +116,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
           />
           <MediaStillUploading postFile={postFile} />
           <PostInteracts
-            authorOdinId={odinId || window.location.hostname}
+            odinId={odinId || window.location.hostname}
             postFile={postFile}
             className="px-4"
             showSummary={showSummary}

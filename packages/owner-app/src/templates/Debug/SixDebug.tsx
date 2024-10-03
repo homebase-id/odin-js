@@ -1,6 +1,6 @@
-import { ActionButton, useDotYouClient } from '@youfoundation/common-app';
+import { ActionButton, useDotYouClient } from '@homebase-id/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { hasDebugFlag, toGuidId } from '@youfoundation/js-lib/helpers';
+import { hasDebugFlag, toGuidId } from '@homebase-id/js-lib/helpers';
 import {
   HomebaseFile,
   KeyHeader,
@@ -11,8 +11,8 @@ import {
   getFileHeaderByUniqueId,
   uploadFile,
   uploadHeader,
-} from '@youfoundation/js-lib/core';
-import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
+} from '@homebase-id/js-lib/core';
+import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { useEffect, useState } from 'react';
 
 const SixDebug = () => {

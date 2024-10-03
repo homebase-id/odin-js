@@ -1,5 +1,4 @@
 import {
-  Persons,
   ConnectionImage,
   ConnectionName,
   ellipsisAtMaxChar,
@@ -7,14 +6,16 @@ import {
   OwnerImage,
   OwnerName,
   LoadingBlock,
-} from '@youfoundation/common-app';
+  useDotYouClient,
+} from '@homebase-id/common-app';
+import { Persons } from '@homebase-id/common-app/icons';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useChatMessages } from '../../../../hooks/chat/useChatMessages';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDeliveryIndicator } from '../../Detail/ChatDeliveryIndicator';
 import { MessageDeletedInnerBody } from '../../Detail/ChatMessageItem';
 import { ChatSentTimeIndicator } from '../../Detail/ChatSentTimeIndicator';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ConversationWithYourselfId } from '../../../../providers/ConversationProvider';
 import { useConversationMetadata } from '../../../../hooks/chat/useConversationMetadata';
 
@@ -128,6 +129,7 @@ const ConversationBody = ({
   conversationId?: string;
   setOrder?: (order: number) => void;
 }) => {
+  const identity = useDotYouClient().getIdentity();
   const { data: conversationMetadata } = useConversationMetadata({ conversationId }).single;
   const { data, isFetched: fetchedMessages } = useChatMessages({ conversationId }).all;
   const flatMessages = useMemo(
@@ -141,10 +143,10 @@ const ConversationBody = ({
 
   const lastReadTime = conversationMetadata?.fileMetadata.appData.content.lastReadTime || 0;
   const unreadCount =
-    conversationMetadata && flatMessages
+    conversationMetadata && flatMessages && !!flatMessages?.[0]?.fileMetadata.senderOdinId
       ? flatMessages.filter(
           (msg) =>
-            msg.fileMetadata.senderOdinId &&
+            msg.fileMetadata.senderOdinId !== identity &&
             (msg.fileMetadata.transitCreated || msg.fileMetadata.created) > lastReadTime
         )?.length
       : 0;

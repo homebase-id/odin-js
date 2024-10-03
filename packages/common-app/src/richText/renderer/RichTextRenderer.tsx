@@ -1,13 +1,16 @@
-import { PayloadDescriptor, TargetDrive } from '@youfoundation/js-lib/core';
+import { PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
 import React, { ReactNode } from 'react';
 import { Image } from '../../media/Image';
 import { ActionLink } from '../../ui/Buttons/ActionLink';
+import { highlightQuery } from './HighlightQuery';
+import { AuthorName } from '../../socialFeed';
 
 export const RichTextRenderer = ({
   body,
   odinId,
   options,
   className,
+  renderElement: renderElementProp,
 }: {
   body: string | Record<string, unknown>[] | undefined;
   odinId?: string;
@@ -19,6 +22,10 @@ export const RichTextRenderer = ({
     previewThumbnails?: PayloadDescriptor[];
     query?: string;
   };
+  renderElement?: (
+    node: { type?: string; attributes?: Record<string, unknown> },
+    children: ReactNode
+  ) => ReactNode;
   className?: string;
 }) => {
   if (!body || typeof body === 'string') return <p className={className}>{body}</p>;
@@ -59,7 +66,11 @@ export const RichTextRenderer = ({
     }
 
     if (leaf.code) {
-      children = <code>{highlightedText}</code>;
+      children = (
+        <code className="bg-slate-100 px-1 py-1 rounded-lg text-foreground font-mono text-sm dark:bg-slate-700">
+          {highlightedText}
+        </code>
+      );
     }
 
     if (leaf.italic) {
@@ -95,7 +106,10 @@ export const RichTextRenderer = ({
         );
       case 'code_block':
         return (
-          <code {...attributes} className="">
+          <code
+            {...attributes}
+            className="bg-slate-100 px-4 py-4 w-full rounded-lg text-foreground font-mono text-sm flex flex-col whitespace-pre-wrap dark:bg-slate-700"
+          >
             {children}
           </code>
         );
@@ -198,12 +212,13 @@ export const RichTextRenderer = ({
               rel="noreferrer noopener"
               className="text-primary hover:underline break-words"
             >
-              {attributes.value}
+              @<AuthorName odinId={attributes.value} excludeLink={true} />
             </a>
           );
         } else return <></>;
+
       default:
-        return <span {...attributes}>{children}</span>;
+        return renderElementProp?.(node, children) || <span {...attributes}>{children}</span>;
     }
   };
 
@@ -214,21 +229,4 @@ export const RichTextRenderer = ({
       })}
     </div>
   );
-};
-
-export const highlightQuery = (text: string | undefined, query: string | undefined | null) => {
-  if (!query || !text || !(typeof text === 'string')) return text;
-
-  const regEscape = (v: string) => v.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-  const strArr = text.split(new RegExp(regEscape(query), 'ig'));
-
-  return strArr.map((str, index) => {
-    if (index === strArr.length - 1) return str;
-    return (
-      <React.Fragment key={index}>
-        {str}
-        <span className="bg-amber-200 dark:bg-yellow-600">{query}</span>
-      </React.Fragment>
-    );
-  });
 };

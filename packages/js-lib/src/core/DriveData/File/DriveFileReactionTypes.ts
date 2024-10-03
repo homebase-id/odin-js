@@ -12,31 +12,8 @@ export interface ReactionPreview {
   totalCommentCount: number;
 }
 
-export interface ParsedReactionPreview {
-  reactions: EmojiReactionSummary;
-  comments: CommentsReactionSummary;
-}
-
-export interface EmojiReactionSummary {
-  reactions: { emoji: string; count: number }[];
-  totalCount: number;
-}
-
-export interface CommentsReactionSummary {
-  comments: CommentReactionPreview[];
-  totalCount: number;
-}
-
-export interface CommentReactionPreview extends ReactionFile {
-  reactions: EmojiReactionSummary;
-  isEncrypted: boolean;
-}
-
-export interface ReactionFile extends ReactionFileBody {
-  authorOdinId: string;
-}
-
-export interface ReactionFileBody {
+export interface ReactionFile {
+  authorOdinId?: string;
   body: string;
   bodyAsRichText?: RichText;
   mediaPayloadKey?: string;

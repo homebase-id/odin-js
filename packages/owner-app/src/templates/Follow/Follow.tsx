@@ -1,29 +1,27 @@
 import { useRef } from 'react';
 import { useMatch, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import {
-  ActionGroup,
-  Block,
-  useIntersection,
-  useFollowerInfinite,
-  useFollowingInfinite,
-  SubtleMessage,
-  IdentityTeaser,
-  useIsConnected,
-  useDotYouClient,
-  House,
-  AddressBook,
-  OWNER_APP_ID,
-  useRemoveNotifications,
-} from '@youfoundation/common-app';
-import { Persons } from '@youfoundation/common-app';
-import { Times } from '@youfoundation/common-app';
-import { t, useIdentityIFollow } from '@youfoundation/common-app';
+
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import Submenu from '../../components/SubMenu/SubMenu';
 import { useConnectionActions } from '../../hooks/connections/useConnectionActions';
 import IdentityIFollowEditDialog from '../../components/Followers/IdentityIFollowEditDialog/IdentityIFollowEditDialog';
 import IdentityThatFollowsDialog from '../../components/Followers/IdentityIFollowEditDialog/IdentityThatFollowsDialog';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import {
+  useRemoveNotifications,
+  OWNER_APP_ID,
+  useFollowingInfinite,
+  useIntersection,
+  SubtleMessage,
+  t,
+  useFollowerInfinite,
+  useDotYouClient,
+  useIsConnected,
+  IdentityTeaser,
+  ActionGroup,
+  useIdentityIFollow,
+} from '@homebase-id/common-app';
+import { Persons, AddressBook, House, Block, Times } from '@homebase-id/common-app/icons';
 
 const Follow = () => {
   const followersMatch = useMatch({ path: 'owner/follow/followers/*' });

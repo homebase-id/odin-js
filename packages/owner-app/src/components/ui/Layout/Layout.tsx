@@ -1,6 +1,6 @@
 import { FC, ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useDarkMode, Toaster, Sidenav } from '@youfoundation/common-app';
+import { useDarkMode, Toaster, Sidenav } from '@homebase-id/common-app';
 import { CriticalOwnerAlerts } from '../../OwnerAlerts/CriticalOwnerAlerts';
 
 interface LayoutProps {
@@ -15,11 +15,15 @@ const SharedStyleTag = () => (
     --color-page-background: 246 248 250;
     --color-background: 255 255 255;
     --color-foreground: 22 22 22;
+    --color-button: 99 101 241;
+    --color-button-text: 255 255 255;
   }`}
     {`html.dark {
     --color-page-background: 17 24 39;
     --color-background: 0 0 0;
     --color-foreground: 250 250 250;
+    --color-button: 99 101 141;
+    --color-button-text: 255 255 255;
   }`}
     {`html.dark { background-color: rgba(var(--color-page-background)); }`}
   </style>
@@ -28,7 +32,7 @@ const SharedStyleTag = () => (
 const SHADED_BG = 'bg-page-background text-foreground';
 const NOT_SHADED_BG = 'bg-white dark:bg-black text-foreground';
 
-const Layout: FC<LayoutProps> = ({ children, noShadedBg, noPadding }) => {
+export const Layout: FC<LayoutProps> = ({ children, noShadedBg, noPadding }) => {
   const [searchParams] = useSearchParams();
   const uiSetting = searchParams.get('ui');
 
@@ -83,5 +87,3 @@ export const NoLayout: FC<LayoutProps> = ({ children, noShadedBg }) => {
     </>
   );
 };
-
-export default Layout;

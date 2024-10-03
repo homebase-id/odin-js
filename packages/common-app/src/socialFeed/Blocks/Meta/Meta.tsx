@@ -1,27 +1,17 @@
-import { Suspense } from 'react';
-import { ChannelDefinition, EmbeddedPost, PostContent } from '@youfoundation/js-lib/public';
+import { Suspense, useState } from 'react';
+import { ChannelDefinition, EmbeddedPost, PostContent } from '@homebase-id/js-lib/public';
 import { OwnerActions } from './OwnerActions';
-import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
-import { aclEqual } from '@youfoundation/js-lib/helpers';
+import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
+import { aclEqual } from '@homebase-id/js-lib/helpers';
 import { AclSummary } from '../../../acl';
 import { HOME_ROOT_PATH } from '../../../core';
 import { t } from '../../../helpers';
-import {
-  ActionGroupOptionProps,
-  UserX,
-  Times,
-  Lock,
-  Flag,
-  Block,
-  ActionGroup,
-  Link,
-  Persons,
-  Trash,
-  ErrorNotification,
-} from '../../../ui';
+import { ActionGroupOptionProps, ActionGroup, ErrorNotification } from '../../../ui';
 import { ChannelDefinitionVm, useManagePost, useManageSocialFeed } from '../../../hooks/socialFeed';
 import { useDotYouClient } from '../../../hooks/auth/useDotYouClient';
 import { useIsConnected } from '../../../hooks/connections/useIsConnected';
+import { EditPostDialog } from '../../EditPostDialog/EditPostDialog';
+import { Persons, UserX, Times, Flag, Block, Link, Trash, Lock } from '../../../ui/Icons';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;
@@ -72,7 +62,8 @@ export const PostMeta = ({
   };
 
   const identity = getIdentity();
-  const groupPost = authorOdinId !== (odinId || identity) && (odinId || identity) && authorOdinId;
+  const isPostToMyCollaborativeChannel =
+    authorOdinId !== (odinId || identity) && (odinId || identity) && authorOdinId;
   const isAuthor = authorOdinId === identity;
 
   const isConnected = useIsConnected(odinId).data;
@@ -112,7 +103,7 @@ export const PostMeta = ({
 
       {excludeContextMenu || !postFile ? null : (
         <>
-          {groupPost ? (
+          {isPostToMyCollaborativeChannel ? (
             <GroupChannelActions
               odinId={odinId}
               postFile={postFile}
@@ -121,10 +112,10 @@ export const PostMeta = ({
             />
           ) : (!odinId && isOwner) || isAuthor ? (
             <Suspense>
-              <OwnerActions postFile={postFile} />
+              <OwnerActions postFile={postFile} channel={channel} />
             </Suspense>
           ) : odinId ? (
-            <ExternalActions odinId={odinId} postFile={postFile} />
+            <ExternalActions odinId={odinId} channel={channel} postFile={postFile} />
           ) : null}
         </>
       )}
@@ -180,12 +171,19 @@ export const ToGroupBlock = ({
 
 const ExternalActions = ({
   odinId,
+
   postFile,
 }: {
   odinId: string;
+  channel?:
+    | HomebaseFile<ChannelDefinitionVm | ChannelDefinition>
+    | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
   postFile: HomebaseFile<PostContent>;
 }) => {
   const identity = useDotYouClient().getIdentity();
+
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
   const {
     removeFromFeed: { mutateAsync: removeFromMyFeed },
     getReportContentUrl,
@@ -221,9 +219,21 @@ const ExternalActions = ({
   ];
 
   return (
-    <div className="ml-auto" onClick={(e) => e.stopPropagation()}>
-      <ActionGroup className="" type="mute" size="none" options={options} />
-    </div>
+    <>
+      <div className="ml-auto" onClick={(e) => e.stopPropagation()}>
+        <ActionGroup className="" type="mute" size="none" options={options} />
+      </div>
+
+      {isEditOpen ? (
+        <EditPostDialog
+          postFile={postFile}
+          odinId={odinId}
+          isOpen={isEditOpen}
+          onConfirm={() => setIsEditOpen(false)}
+          onCancel={() => setIsEditOpen(false)}
+        />
+      ) : null}
+    </>
   );
 };
 
@@ -240,10 +250,12 @@ const GroupChannelActions = ({
     | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
   postFile: HomebaseFile<PostContent>;
 }) => {
-  const { getIdentity } = useDotYouClient();
+  const { getIdentity, getDotYouClient } = useDotYouClient();
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
+  const localIdentity = getDotYouClient().getIdentity();
   const identity = getIdentity();
-  const isAuthor = postFile.fileMetadata.appData.content.authorOdinId === identity;
+  const isAuthor = postFile.fileMetadata.originalAuthor === identity;
 
   const {
     removeFromFeed: { mutateAsync: removeFromMyFeed },
@@ -270,7 +282,9 @@ const GroupChannelActions = ({
       },
     });
 
-    if (!isAuthor) {
+    if (isAuthor) {
+      // TODO editing collaborative posts
+    } else {
       options.push({
         icon: Flag,
         label: `${t('Report')}`,
@@ -283,7 +297,7 @@ const GroupChannelActions = ({
   }
 
   // If the channel has serverMetadata, it is a collaborative channel from this identity so we can remove the post
-  if (channel && channel.serverMetadata) {
+  if (channel?.serverMetadata && identity === localIdentity) {
     options.push({
       icon: Trash,
       label: t(
@@ -312,6 +326,15 @@ const GroupChannelActions = ({
     <div className="ml-auto" onClick={(e) => e.stopPropagation()}>
       <ErrorNotification error={removePostError} />
       <ActionGroup className="" type="mute" size="none" options={options} />
+      {isEditOpen ? (
+        <EditPostDialog
+          postFile={postFile}
+          odinId={odinId}
+          isOpen={isEditOpen}
+          onConfirm={() => setIsEditOpen(false)}
+          onCancel={() => setIsEditOpen(false)}
+        />
+      ) : null}
     </div>
   );
 };

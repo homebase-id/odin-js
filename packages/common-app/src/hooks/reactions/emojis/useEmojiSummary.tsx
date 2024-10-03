@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { getReactionSummary, ReactionContext } from '@youfoundation/js-lib/public';
-import { EmojiReactionSummary } from '@youfoundation/js-lib/core';
+import {
+  EmojiReactionSummary,
+  getReactionSummary,
+  ReactionContext,
+} from '@homebase-id/js-lib/public';
 import { useDotYouClient } from '../../auth/useDotYouClient';
 
 export const useEmojiSummary = ({
@@ -14,7 +17,7 @@ export const useEmojiSummary = ({
 
   const fetch = async (context: ReactionContext): Promise<EmojiReactionSummary> => {
     if (
-      !context.authorOdinId ||
+      !context.odinId ||
       !context.channelId ||
       (!context.target.globalTransitId && !context.target.fileId)
     ) {
@@ -28,7 +31,7 @@ export const useEmojiSummary = ({
     fetch: useQuery({
       queryKey: [
         'emojis-summary',
-        context.authorOdinId,
+        context.odinId,
         context.channelId,
         context.target.fileId,
         context.target.globalTransitId,
@@ -41,7 +44,7 @@ export const useEmojiSummary = ({
       initialData: reactionPreview,
       // By default, initialData is treated as totally fresh, as if it were just fetched. This also means that it will affect how it is interpreted by the staleTime option.
       enabled:
-        !!context.authorOdinId &&
+        !!context.odinId &&
         !!context.channelId &&
         (!!context.target.globalTransitId || !!context.target.fileId),
     }),

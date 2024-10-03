@@ -19,12 +19,9 @@ import {
   ReactionPreview,
   PayloadFile,
   EmbeddedThumb,
-  ParsedReactionPreview,
-  ReactionFile,
-  CommentReactionPreview,
   NewHomebaseFile,
-  ReactionFileBody,
   PriorityOptions,
+  ReactionFile,
 } from '../../core/core';
 import {
   jsonStringify64,
@@ -55,7 +52,7 @@ export const saveComment = async (
     | HomebaseFile<RawReactionContent>
 ): Promise<string> => {
   const encrypt = context.target.isEncrypted;
-  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
 
   const payloads: PayloadFile[] = [];
@@ -90,7 +87,6 @@ export const saveComment = async (
     // allowDistribution: true, // Disable
     versionTag: comment.fileMetadata.versionTag,
     allowDistribution: false,
-    senderOdinId: comment.fileMetadata.appData.content.authorOdinId,
     referencedFile: {
       targetDrive,
       globalTransitId: comment.fileMetadata.appData.groupId || context.target.globalTransitId,
@@ -158,7 +154,7 @@ export const saveComment = async (
       remoteTargetDrive: targetDrive,
       schedule: ScheduleOptions.SendLater,
       priority: PriorityOptions.Medium,
-      recipients: [context.authorOdinId],
+      recipients: [context.odinId],
       systemFileType: 'Comment',
     };
 
@@ -172,10 +168,9 @@ export const saveComment = async (
     );
 
     if (
-      TransferUploadStatus.EnqueuedFailed ===
-      result.recipientStatus[context.authorOdinId].toLowerCase()
+      TransferUploadStatus.EnqueuedFailed === result.recipientStatus[context.odinId].toLowerCase()
     ) {
-      throw new Error(result.recipientStatus[context.authorOdinId].toString());
+      throw new Error(result.recipientStatus[context.odinId].toString());
     }
 
     return result.remoteGlobalTransitIdFileIdentifier.globalTransitId;
@@ -187,7 +182,7 @@ export const removeComment = async (
   context: ReactionContext,
   commentFile: HomebaseFile<ReactionFile>
 ) => {
-  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
 
   if (isLocal) {
@@ -201,7 +196,7 @@ export const removeComment = async (
       dotYouClient,
       targetDrive,
       commentFile.fileMetadata.globalTransitId,
-      [context.authorOdinId],
+      [context.odinId],
       'Comment'
     );
   }
@@ -213,7 +208,7 @@ export const getComments = async (
   pageSize = 25,
   cursorState?: string
 ): Promise<{ comments: HomebaseFile<ReactionFile>[]; cursorState: string }> => {
-  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
@@ -229,18 +224,12 @@ export const getComments = async (
 
   const result = isLocal
     ? await queryBatch(dotYouClient, qp, ro)
-    : await queryBatchOverPeer(dotYouClient, context.authorOdinId, qp, ro);
+    : await queryBatchOverPeer(dotYouClient, context.odinId, qp, ro);
 
   const comments: HomebaseFile<ReactionFile>[] = (
     await Promise.all(
       result.searchResults.map(async (dsr) =>
-        dsrToComment(
-          dotYouClient,
-          context.authorOdinId,
-          dsr,
-          targetDrive,
-          result.includeMetadataHeader
-        )
+        dsrToComment(dotYouClient, context.odinId, dsr, targetDrive, result.includeMetadataHeader)
       )
     )
   ).filter((attr) => !!attr) as HomebaseFile<ReactionFile>[];
@@ -295,8 +284,8 @@ const parseReactions = (
             emoji: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
             count: parseInt(reaction.count),
           };
-        } catch (ex) {
-          console.error('[DotYouCore-js] parse failed for', reaction);
+        } catch {
+          console.error('[odin-js] parse failed for', reaction);
           return;
         }
       })
@@ -307,9 +296,29 @@ const parseReactions = (
   };
 };
 
+export interface ParsedReactionPreview {
+  reactions: EmojiReactionSummary;
+  comments: CommentsReactionSummary;
+}
+
+export interface EmojiReactionSummary {
+  reactions: { emoji: string; count: number }[];
+  totalCount: number;
+}
+
+export interface CommentsReactionSummary {
+  comments: CommentReactionPreview[];
+  totalCount: number;
+}
+
+export interface CommentReactionPreview extends ReactionFile {
+  reactions: EmojiReactionSummary;
+  isEncrypted: boolean;
+}
+
 export const parseReactionPreview = (
   reactionPreview: ReactionPreview | ParsedReactionPreview | undefined
-): ParsedReactionPreview | ReactionPreview => {
+): ParsedReactionPreview => {
   if (reactionPreview) {
     if ('count' in reactionPreview.reactions) return reactionPreview as ParsedReactionPreview;
 
@@ -324,13 +333,13 @@ export const parseReactionPreview = (
 
                 ...(commentPreview.isEncrypted && !commentPreview.content.length
                   ? { body: '' }
-                  : tryJsonParse<ReactionFileBody>(commentPreview.content)),
+                  : tryJsonParse<ReactionFile>(commentPreview.content)),
 
                 isEncrypted: commentPreview.isEncrypted,
                 reactions: parseReactions(commentPreview.reactions),
               };
-            } catch (ex) {
-              console.error('[DotYouCore-js] parse failed for', commentPreview);
+            } catch {
+              console.error('[odin-js] parse failed for', commentPreview);
               return {
                 authorOdinId: commentPreview.odinId,
                 content: { body: 'PROBABLY ENCRYPTED' },

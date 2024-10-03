@@ -1,5 +1,5 @@
 import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import {
   ContentType,
   HomebaseFile,
@@ -9,8 +9,8 @@ import {
   getPayloadBytes,
   MediaFile,
   NewMediaFile,
-} from '@youfoundation/js-lib/core';
-import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/core';
+import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import {
   MAIL_CONVERSATION_FILE_TYPE,
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
@@ -210,10 +210,6 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
       onError: (_error, _variables, context) => {
         queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
         console.error('Error sending mail message', _error);
-      },
-      onSettled: async () => {
-        // TODO: Should we really fully refetch the mail conversations and mail thread? Might be a lot of data...
-        queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
       },
     }),
     markAsRead: useMutation({
@@ -527,10 +523,6 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
         queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
 
         console.error('Error removing draft mail message', _error);
-      },
-      onSettled: async () => {
-        queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
-        // Should we fully refetch the mail conversations and mail thread? Might be a lot of data...
       },
     }),
   };

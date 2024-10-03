@@ -129,7 +129,7 @@ export const GetFile = async (
     _internalFileCache.set(`${dotYouClient.getRoot()}+${fileName}`, promise);
 
     return await promise;
-  } catch (ex) {
+  } catch {
     console.warn(`Fetching file with name ${fileName} failed`);
     return new Map();
   }

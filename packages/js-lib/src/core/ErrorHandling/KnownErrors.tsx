@@ -144,15 +144,6 @@ export interface OdinErrorDetails {
 }
 
 export const getOdinErrorDetails = (error: Error | unknown): OdinErrorDetails => {
-  if (isJavaScriptError(error)) {
-    return {
-      title: error.name,
-      stackTrace: error?.stack,
-      correlationId: undefined,
-      domain: typeof window === 'undefined' ? '' : window.location?.hostname,
-    };
-  }
-
   if (axios.isAxiosError(error)) {
     return {
       title: error?.response?.data?.title,
@@ -163,8 +154,17 @@ export const getOdinErrorDetails = (error: Error | unknown): OdinErrorDetails =>
     };
   }
 
+  if (isJavaScriptError(error)) {
+    return {
+      title: error.name,
+      stackTrace: error?.stack,
+      correlationId: undefined,
+      domain: typeof window === 'undefined' ? '' : window.location?.hostname,
+    };
+  }
+
   return {
-    title: (error as any)?.name || `Unknown error`,
-    stackTrace: (error as any)?.stack || error?.toString(),
+    title: (error as Error)?.name || `Unknown error`,
+    stackTrace: (error as Error)?.stack || error?.toString(),
   };
 };

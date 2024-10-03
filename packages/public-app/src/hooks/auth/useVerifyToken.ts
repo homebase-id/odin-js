@@ -3,7 +3,7 @@ import {
   HOME_SHARED_SECRET,
   OWNER_SHARED_SECRET,
   hasValidOwnerToken,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 
 import { hasValidToken as hasValidYouAuthToken } from '../../provider/AuthenticationProvider';
 

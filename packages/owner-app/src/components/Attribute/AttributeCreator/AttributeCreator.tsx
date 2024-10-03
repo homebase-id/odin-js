@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { t } from '@youfoundation/common-app';
+import { t } from '@homebase-id/common-app';
 import {
   AttributeGroups,
   AttributeDefinition,
@@ -7,9 +7,9 @@ import {
 } from '../../../hooks/profiles/AttributeDefinitions';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import AttributeEditor from '../AttributeEditor/AttributeEditor';
-import { getNewId } from '@youfoundation/js-lib/helpers';
-import { BuiltInProfiles } from '@youfoundation/js-lib/profile';
-import { AccessControlList, NewHomebaseFile } from '@youfoundation/js-lib/core';
+import { getNewId } from '@homebase-id/js-lib/helpers';
+import { BuiltInProfiles } from '@homebase-id/js-lib/profile';
+import { AccessControlList, NewHomebaseFile } from '@homebase-id/js-lib/core';
 
 const getAllowedAttributes = (sectionId: string) => {
   if (sectionId === BuiltInProfiles.PersonalInfoSectionId)

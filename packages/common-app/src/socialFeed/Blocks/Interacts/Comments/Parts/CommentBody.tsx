@@ -2,12 +2,12 @@ import {
   GetTargetDriveFromChannelId,
   RawReactionContent,
   ReactionContext,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 import { RichTextRenderer } from '../../../../../richText';
 import { CommentEditor } from '../CommentComposer';
 import { CommentMedia, CommentMediaPreview } from './CommentMedia';
 import { ActionButtonState } from '../../../../../ui';
-import { EmbeddedThumb, ReactionFile } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, ReactionFile } from '@homebase-id/js-lib/core';
 
 export const CommentBody = ({
   context,
@@ -51,7 +51,7 @@ export const CommentBody = ({
           )}
           {content.mediaPayloadKey && context ? (
             <CommentMedia
-              postAuthorOdinId={context.authorOdinId}
+              postAuthorOdinId={context.odinId}
               targetDrive={sourceTargetDrive}
               fileId={commentFileId}
               fileKey={content.mediaPayloadKey}

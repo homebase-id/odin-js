@@ -1,10 +1,10 @@
-import { getChannelDrive, POST_LINKS_PAYLOAD_KEY } from '@youfoundation/js-lib/public';
-import { EmbeddedThumb, PayloadDescriptor, TargetDrive } from '@youfoundation/js-lib/core';
+import { getChannelDrive, POST_LINKS_PAYLOAD_KEY } from '@homebase-id/js-lib/public';
+import { EmbeddedThumb, PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
 import { Image } from '../../../media/Image';
 import { Video, VideoClickToLoad } from '../../../media/Video';
 import { ExtensionThumbnail } from '../../../form/files/ExtensionThumbnail';
 import { useFile } from '../../../hooks';
-import { Download } from '../../../ui';
+import { Download } from '../../../ui/Icons';
 import { bytesToSize, t } from '../../../helpers';
 import { LinkPreviewItem } from '../../../media/Link';
 
@@ -39,7 +39,9 @@ export const PrimaryMedia = ({
     onClick && onClick(e);
   };
 
-  const isVideo = file.contentType?.startsWith('video');
+  const isVideo =
+    file.contentType?.startsWith('video') ||
+    file.contentType?.startsWith('application/vnd.apple.mpegurl');
   // const isAudio = file.contentType?.startsWith('audio');
   const isImage = file.contentType?.startsWith('image');
   const isLink = file.key === POST_LINKS_PAYLOAD_KEY;

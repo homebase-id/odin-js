@@ -1,18 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
 import { useDotYouClient } from '../../auth/useDotYouClient';
-import { getChannelsOverPeer } from '@youfoundation/js-lib/peer';
+import { getChannelsOverPeer } from '@homebase-id/js-lib/peer';
 import { useAllContacts } from '../../connections/useAllContacts';
 import {
   DrivePermissionType,
   HomebaseFile,
   getSecurityContextOverPeer,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import {
   RemoteCollaborativeChannelDefinition,
   getChannelDrive,
   getChannelLinkDefinitions,
-} from '@youfoundation/js-lib/public';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/public';
+import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const useCollaborativeChannels = (enableDiscovery?: boolean) => {
   const { data: alllContacts, isFetched: fetchedAllContacts } = useAllContacts(
@@ -41,7 +41,7 @@ export const useCollaborativeChannels = (enableDiscovery?: boolean) => {
                 (group) =>
                   group.driveGrants.some(
                     (grant) =>
-                      stringGuidsEqual(grant.permissionedDrive.drive.alias, targetDrive.alias) &&
+                      drivesEqual(grant.permissionedDrive.drive, targetDrive) &&
                       grant.permissionedDrive.permission.includes(DrivePermissionType.Write)
                   )
               );

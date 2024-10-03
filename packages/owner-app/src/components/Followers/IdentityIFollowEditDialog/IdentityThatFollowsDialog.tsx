@@ -1,13 +1,16 @@
 import { createPortal } from 'react-dom';
-import { t } from '@youfoundation/common-app';
-import { usePortal, useChannels, ChannelDefinitionVm } from '@youfoundation/common-app';
-import { ActionButton } from '@youfoundation/common-app';
-import { DialogWrapper } from '@youfoundation/common-app';
-import { Quote } from '@youfoundation/common-app';
-import { Persons } from '@youfoundation/common-app';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { t } from '@homebase-id/common-app';
+import {
+  usePortal,
+  useChannels,
+  ChannelDefinitionVm,
+  ActionButton,
+  DialogWrapper,
+} from '@homebase-id/common-app';
+import { Quote, Persons } from '@homebase-id/common-app/icons';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useFollower } from '../../../hooks/follow/useFollower';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 
 const IdentityThatFollowsDialog = ({
   odinId,

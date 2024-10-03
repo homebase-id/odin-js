@@ -9,18 +9,22 @@ import {
 } from 'react-router-dom';
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
+import { Layout, MinimalLayout } from '../components/ui/Layout/Layout';
 
 const YouAuthConsent = lazy(() => import('../templates/YouAuthConsent/YouAuthConsent'));
 const Setup = lazy(() => import('../templates/Setup/Setup').then((m) => ({ default: m.Setup })));
 
 const Home = lazy(() => import('../templates/Dashboard/Dashboard'));
 const RegisterApp = lazy(() => import('../templates/AppDefinition/RegisterApp'));
-const ExtendAppDrivePermissions = lazy(
-  () => import('../templates/AppDefinition/ExtendAppDrivePermissions')
+const ExtendAppDrivePermissions = lazy(() =>
+  import('../templates/AppDefinition/ExtendAppPermissions').then((m) => ({
+    default: m.ExtendAppPermissions,
+  }))
 );
-const ExtendCirclePermissionsFromApp = lazy(
-  () => import('../templates/AppDefinition/ExtendCirclePermissionsFromApp')
+const ExtendCirclePermissionsFromApp = lazy(() =>
+  import('../templates/AppDefinition/ExtendCirclePermissionsFromApp').then((m) => ({
+    default: m.ExtendCirclePermissionsFromApp,
+  }))
 );
 const UpdateDriveDetailsFromApp = lazy(
   () => import('../templates/AppDefinition/UpdateDriveDetailsFromApp')
@@ -58,7 +62,7 @@ const DemoData = lazy(() => import('../templates/DemoData/DemoData'));
 const Debug = lazy(() => import('../templates/Debug/Debug'));
 const SixDebug = lazy(() => import('../templates/Debug/SixDebug'));
 
-import '@youfoundation/ui-lib/dist/style.css';
+import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import {
@@ -69,7 +73,12 @@ import {
   SETUP_PATH,
 } from '../hooks/auth/useAuth';
 import { useIsConfigured } from '../hooks/configure/useIsConfigured';
-import { ErrorBoundary, NotFound, OdinQueryClient } from '@youfoundation/common-app';
+import {
+  DotYouClientProvider,
+  ErrorBoundary,
+  NotFound,
+  OdinQueryClient,
+} from '@homebase-id/common-app';
 
 export const REACT_QUERY_CACHE_KEY = 'OWNER_REACT_QUERY_OFFLINE_CACHE';
 const INCLUDED_QUERY_KEYS = ['contact'];
@@ -113,9 +122,11 @@ function App() {
           path="/owner"
           element={
             <RootRoute>
-              <Suspense>
-                <Outlet />
-              </Suspense>
+              <DotYouClientProvider>
+                <Suspense>
+                  <Outlet />
+                </Suspense>
+              </DotYouClientProvider>
             </RootRoute>
           }
         >
@@ -168,6 +179,9 @@ function App() {
             ></Route>
             <Route path="connections" element={<Connections />}></Route>
             <Route path="connections/:odinId" element={<ConnectionDetails />}></Route>
+            <Route path="connections/:odinId/about" element={<ConnectionDetails />}></Route>
+            <Route path="connections/:odinId/links" element={<ConnectionDetails />}></Route>
+            <Route path="connections/:odinId/settings" element={<ConnectionDetails />}></Route>
             <Route path="connections/:odinId/:action" element={<ConnectionDetails />}></Route>
             <Route path="circles" element={<Circles />}></Route>
             <Route path="circles/:circleKey" element={<CircleDetails />}></Route>

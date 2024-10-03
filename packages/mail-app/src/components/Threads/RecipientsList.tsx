@@ -1,7 +1,7 @@
-import { t, ConnectionName } from '@youfoundation/common-app';
+import { t, ConnectionName } from '@homebase-id/common-app';
 import { MailConversation, getAllRecipients } from '../../providers/MailProvider';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import React from 'react';
 
 export const RecipientsList = ({

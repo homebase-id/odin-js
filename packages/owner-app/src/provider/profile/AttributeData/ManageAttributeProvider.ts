@@ -20,17 +20,17 @@ import {
   ThumbnailFile,
   EmbeddedThumb,
   getFileHeader,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import {
   getNewId,
   getRandom16ByteArray,
   jsonStringify64,
   stringToUint8Array,
   getDisplayNameOfNameAttribute,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 
-import { HomePageThemeFields, HomePageAttributes } from '@youfoundation/js-lib/public';
-import { ThumbnailInstruction, createThumbnails } from '@youfoundation/js-lib/media';
+import { HomePageThemeFields, HomePageAttributes } from '@homebase-id/js-lib/public';
+import { ThumbnailInstruction, createThumbnails } from '@homebase-id/js-lib/media';
 import {
   Attribute,
   GetTargetDriveFromProfileId,
@@ -39,7 +39,7 @@ import {
   BuiltInAttributes,
   getProfileAttribute,
   homebaseFileToProfileAttribute,
-} from '@youfoundation/js-lib/profile';
+} from '@homebase-id/js-lib/profile';
 
 export const saveProfileAttribute = async (
   dotYouClient: DotYouClient,

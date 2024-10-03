@@ -1,16 +1,15 @@
 import { useState } from 'react';
-import { RawReactionContent, ReactionContext } from '@youfoundation/js-lib/public';
+import {
+  RawReactionContent,
+  ReactionContext,
+  CommentReactionPreview,
+} from '@homebase-id/js-lib/public';
 
 import { CommentHead } from './Parts/CommentHead';
 import { CommentBody } from './Parts/CommentBody';
 import { CommentMeta } from './Parts/CommentMeta';
 import { CommentThread } from './Parts/CommentThread';
-import {
-  CommentReactionPreview,
-  HomebaseFile,
-  NewHomebaseFile,
-  ReactionFile,
-} from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
 import { CanReactInfo } from '../../../../hooks/reactions/useCanReact';
 import { useReaction } from '../../../../hooks/reactions/useReaction';
 import { ErrorNotification } from '../../../../ui/Alert/ErrorNotification';
@@ -46,7 +45,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
 
   const fileId = commentData.fileId;
   const commentContent = commentData.fileMetadata.appData.content;
-  const authorOdinId = commentContent.authorOdinId;
+  const authorOdinId = commentContent.authorOdinId || commentData.fileMetadata.originalAuthor || '';
 
   const threadContext: dirtyReactionContext = {
     ...context,
@@ -91,7 +90,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
             <AuthorImage odinId={authorOdinId} size="xs" />
           </div>
           <div
-            className={`ml-2 rounded-lg bg-gray-500 bg-opacity-10 px-2 py-1 dark:bg-gray-300 dark:bg-opacity-20 ${
+            className={`ml-2 rounded-lg bg-gray-500 bg-opacity-10 px-2 py-1 dark:bg-gray-300 dark:bg-opacity-20 w-20 flex-grow ${
               isEdit ? 'flex-grow' : ''
             }`}
           >

@@ -1,6 +1,5 @@
 import { FC, ReactNode, useState } from 'react';
-
-export type ActionButtonState = 'pending' | 'loading' | 'success' | 'error' | 'idle';
+import type { ActionButtonState } from './util';
 import { ButtonColors } from './ColorConfig';
 import { ConfirmDialogProps, ConfirmDialog } from '../../dialogs';
 import { Check } from '../Icons/Check';
@@ -20,21 +19,6 @@ export interface ActionButtonProps extends React.HTMLAttributes<HTMLButtonElemen
   size?: 'large' | 'small' | 'square' | 'none';
   confirmOptions?: Omit<ConfirmDialogProps, 'onConfirm' | 'onCancel'>;
 }
-
-export const mergeStates = (
-  stateA: ActionButtonState,
-  stateB: ActionButtonState
-): ActionButtonState => {
-  if (stateA === 'error' || stateB === 'error') return 'error';
-  if (stateA === 'pending' || stateB === 'pending') return 'pending';
-  if (stateA === 'loading' || stateB === 'loading') return 'loading';
-  if (stateA === 'idle' && stateB === 'idle') return 'idle';
-  if (stateA === 'success' && stateB === 'success') return 'success';
-  if ((stateA === 'success' && stateB === 'idle') || (stateA === 'idle' && stateB === 'success'))
-    return 'success';
-
-  return 'idle';
-};
 
 export const ActionButton: FC<ActionButtonProps> = ({
   children,
@@ -72,7 +56,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
 
   const widthClasses =
     children && type !== 'mute' && size !== 'square'
-      ? `${className && className?.indexOf('w-full') !== -1 ? '' : 'w-full sm:w-auto'}`
+      ? `${className && className?.indexOf('w-') !== -1 ? '' : 'w-full sm:w-auto'}`
       : '';
 
   const sizeClasses =

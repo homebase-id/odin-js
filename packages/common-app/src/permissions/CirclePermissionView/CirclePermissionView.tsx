@@ -1,4 +1,4 @@
-import { CircleDefinition } from '@youfoundation/js-lib/network';
+import { CircleDefinition } from '@homebase-id/js-lib/network';
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useCircle } from '../../hooks/circles/useCircle';
@@ -7,7 +7,7 @@ import { Circles } from '../../ui/Icons/Circles';
 import { LoadingBlock } from '../../ui/LoadingBlock/LoadingBlock';
 import { Arrow } from '../../ui/Icons/Arrow';
 import { t } from '../../helpers/i18n/dictionary';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 
 export const CirclePermissionView = ({
   circleDef,

@@ -1,4 +1,4 @@
-import { SystemFileType, TargetDrive } from '@youfoundation/js-lib/core';
+import { SystemFileType, TargetDrive } from '@homebase-id/js-lib/core';
 
 export interface ImageSource {
   // Drive
@@ -15,6 +15,10 @@ export interface ImageSource {
   // File params
   systemFileType?: SystemFileType;
   lastModified?: number;
+  probablyEncrypted?: boolean;
+
+  // Url params
+  preferObjectUrl?: boolean;
 }
 
 export interface ImageEvents {

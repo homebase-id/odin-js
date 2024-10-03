@@ -1,7 +1,7 @@
 import {
   getDrivePermissionFromString,
   getPermissionNumberFromDrivePermission,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 import {
   AppClientRegistrationRequest,
   AppClientRegistrationResponse,
@@ -12,7 +12,7 @@ import {
   PermissionUpdateRequest,
   PermissionSetGrantRequest,
 } from './AppManagementProviderTypes';
-import { DotYouClient } from '@youfoundation/js-lib/core';
+import { DotYouClient } from '@homebase-id/js-lib/core';
 
 //adds the specified client to the list of allowed clients for a given app; returns a CAT
 export const RegisterAppClient = async (
@@ -192,7 +192,7 @@ export const AllowApp = async (
   request: GetAppRequest
 ): Promise<void> => {
   const client = dotYouClient.createAxiosClient();
-  const response = await client.post('appmanagement/allow', request);
+  return await client.post('appmanagement/allow', request).then((response) => response.data);
 };
 
 export const RemoveApp = async (
@@ -200,7 +200,7 @@ export const RemoveApp = async (
   request: GetAppRequest
 ): Promise<void> => {
   const client = dotYouClient.createAxiosClient();
-  const response = await client.post('appmanagement/deleteApp', request);
+  return await client.post('appmanagement/deleteApp', request).then((response) => response.data);
 };
 
 export const UpdateAuthorizedCircles = async (

@@ -10,7 +10,7 @@ import {
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 
-import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
+import { Layout, MinimalLayout } from '../components/ui/Layout/Layout';
 
 const Auth = lazy(() => import('../templates/Auth/Auth'));
 const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
@@ -35,15 +35,19 @@ const DebugDataPage = lazy(() =>
   import('../templates/Mail/DebugData').then((mailApp) => ({ default: mailApp.DebugDataPage }))
 );
 
-import '@youfoundation/ui-lib/dist/style.css';
+import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import { useAuth } from '../hooks/auth/useAuth';
 
 export const ROOT_PATH = '/apps/mail';
 const AUTH_PATH = ROOT_PATH + '/auth';
 
-import { ErrorBoundary, NotFound, OdinQueryClient } from '@youfoundation/common-app';
-import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
+import {
+  ErrorBoundary,
+  NotFound,
+  OdinQueryClient,
+  DotYouClientProvider,
+} from '@homebase-id/common-app';
 
 export const REACT_QUERY_CACHE_KEY = 'MAIL_REACT_QUERY_OFFLINE_CACHE';
 

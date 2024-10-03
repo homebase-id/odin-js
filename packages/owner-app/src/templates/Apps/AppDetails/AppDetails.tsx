@@ -1,27 +1,26 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { Pencil, Trash, t } from '@youfoundation/common-app';
 import { useApp } from '../../../hooks/apps/useApp';
-import { Alert } from '@youfoundation/common-app';
-import { ErrorNotification } from '@youfoundation/common-app';
-import { ActionButton } from '@youfoundation/common-app';
-import { Grid } from '@youfoundation/common-app';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import PermissionView from '../../../components/PermissionViews/PermissionView/PermissionView';
 import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
-import { CirclePermissionView } from '@youfoundation/common-app';
-import { useCircles } from '@youfoundation/common-app';
 import { AppClientRegistration } from '../../../provider/app/AppManagementProviderTypes';
-import { HardDrive } from '@youfoundation/common-app';
 import { useState } from 'react';
 import { useAppClients } from '../../../hooks/apps/useAppClients';
-import { Times } from '@youfoundation/common-app';
-import { Refresh } from '@youfoundation/common-app';
 import { useDrives } from '../../../hooks/drives/useDrives';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import CirclePermissionSelectorDialog from '../../../components/Apps/CirclePermissionSelectorDialog/CirclePermissionSelectorDialog';
 import PermissionSelectorDialog from '../../../components/Apps/PermissionSelectorDialog/PermissionSelectorDialog';
 import DrivePermissionSelectorDialog from '../../../components/Drives/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
+import {
+  useCircles,
+  t,
+  ErrorNotification,
+  ActionButton,
+  Alert,
+  CirclePermissionView,
+} from '@homebase-id/common-app';
+import { Grid, Refresh, Trash, Times, Pencil, HardDrive } from '@homebase-id/common-app/icons';
 
 const AppDetails = () => {
   const { appKey } = useParams();

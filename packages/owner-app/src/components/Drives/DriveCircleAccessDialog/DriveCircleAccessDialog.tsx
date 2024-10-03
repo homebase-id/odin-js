@@ -1,14 +1,15 @@
-import { DriveDefinition } from '@youfoundation/js-lib/core';
+import { DriveDefinition } from '@homebase-id/js-lib/core';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t, ActionButton, ActionButtonState, usePortal, Arrow } from '@youfoundation/common-app';
-import { useCircle } from '@youfoundation/common-app';
-import { useCircles } from '@youfoundation/common-app';
-import { ErrorNotification } from '@youfoundation/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
+import { t, ActionButton, ActionButtonState, usePortal } from '@homebase-id/common-app';
+import { useCircle } from '@homebase-id/common-app';
+import { useCircles } from '@homebase-id/common-app';
+import { ErrorNotification } from '@homebase-id/common-app';
 import DrivePermissionFlagEditor from '../../Form/DrivePermissionFlagEditor';
-import { CirclePermissionView } from '@youfoundation/common-app';
-import { DialogWrapper } from '@youfoundation/common-app';
-import { CircleDefinition } from '@youfoundation/js-lib/network';
+import { CirclePermissionView } from '@homebase-id/common-app';
+import { DialogWrapper } from '@homebase-id/common-app';
+import { CircleDefinition } from '@homebase-id/js-lib/network';
 
 const DriveCircleAccessDialog = ({
   title,
@@ -56,6 +57,7 @@ const DriveCircleAccessDialog = ({
             try {
               await Promise.all(newCircles.map(async (circle) => await updateCircle(circle)));
             } catch (ex) {
+              console.error('Failed to update circles', ex);
               setSaveState('error');
             }
             setSaveState('success');

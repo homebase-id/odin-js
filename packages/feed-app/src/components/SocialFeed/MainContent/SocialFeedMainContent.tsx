@@ -1,4 +1,4 @@
-import { PostContent } from '@youfoundation/js-lib/public';
+import { PostContent } from '@homebase-id/js-lib/public';
 import { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 
@@ -9,15 +9,18 @@ import {
   PostComposer,
   useSocialFeed,
   SubtleMessage,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import PostTeaserCard, { NewPostTeaserCard } from '../PostTeaserCard';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { useLiveFeedProcessor } from '../../../hooks/useLiveFeedProcessor';
 
 const PAGE_SIZE = 15; // We could increase this one, but also might not, as on mobile 10 items are rather far, and on desktop fetching more is fast...
 
 // Docs for combination of Virtual and infinite:
 // https://tanstack.com/virtual/v3/docs/examples/react/infinite-scroll
 const SocialFeedMainContent = () => {
+  useLiveFeedProcessor();
+
   const {
     data: posts,
     hasNextPage: hasMorePosts,

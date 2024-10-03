@@ -1,14 +1,17 @@
-import { PostContent, ReactionContext } from '@youfoundation/js-lib/public';
-import { Suspense, useState } from 'react';
 import {
-  Bubble,
+  parseReactionPreview,
+  PostContent,
+  ReactionContext,
+  CommentsReactionSummary,
+  EmojiReactionSummary,
+} from '@homebase-id/js-lib/public';
+import { Suspense, useMemo, useState } from 'react';
+import {
   t,
   useCanReact,
   useCommentSummary,
   useComments,
   useEmojiSummary,
-  Repost,
-  Share,
   HOME_ROOT_PATH,
   CanReactInfo,
 } from '../../../..';
@@ -20,17 +23,11 @@ import { LikeButton } from './Reactions/LikeButton';
 import { ReactionDetailsDialog } from './ReactionDetailsDialog/ReactionDetailsDialog';
 import { RepostDialog } from './RepostDialog/RepostDialog';
 import { ShareDialog } from './ShareDialog/ShareDialog';
-import {
-  CommentsReactionSummary,
-  HomebaseFile,
-  EmojiReactionSummary,
-  ParsedReactionPreview,
-  ApiType,
-  DotYouClient,
-} from '@youfoundation/js-lib/core';
+import { HomebaseFile, ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { Bubble, Share, Repost } from '../../../ui/Icons';
 
 export const PostInteracts = ({
-  authorOdinId,
+  odinId,
   postFile,
 
   isAuthenticated,
@@ -42,7 +39,7 @@ export const PostInteracts = ({
   className,
   login,
 }: {
-  authorOdinId: string;
+  odinId: string;
   postFile: HomebaseFile<PostContent>;
 
   isAuthenticated?: boolean;
@@ -68,7 +65,7 @@ export const PostInteracts = ({
     (postContent.reactAccess === false || postContent.reactAccess === 'emoji');
 
   const { data: canReact } = useCanReact({
-    authorOdinId,
+    odinId,
     channelId: postContent.channelId,
     postContent: postContent,
     isEnabled: !!isExpanded || !!hasIntentToReact,
@@ -79,7 +76,7 @@ export const PostInteracts = ({
   if (!postFile.fileMetadata.globalTransitId || !postFile.fileId) return null;
 
   const reactionContext: ReactionContext = {
-    authorOdinId: authorOdinId,
+    odinId: odinId,
     channelId: postContent.channelId,
     target: {
       globalTransitId: postFile.fileMetadata.globalTransitId,
@@ -88,9 +85,14 @@ export const PostInteracts = ({
     },
   };
 
-  const permalink = `${new DotYouClient({ identity: authorOdinId || undefined, api: ApiType.Guest }).getRoot()}${HOME_ROOT_PATH}posts/${postContent.channelId}/${
+  const permalink = `${new DotYouClient({ identity: odinId || undefined, api: ApiType.Guest }).getRoot()}${HOME_ROOT_PATH}posts/${postContent.channelId}/${
     postContent.slug ?? postContent.id
   }`;
+
+  const parsedReactionPreview = useMemo(
+    () => parseReactionPreview(postFile.fileMetadata.reactionPreview),
+    [postFile.fileMetadata.reactionPreview]
+  );
 
   return (
     <div className={`${className ?? ''}`}>
@@ -106,9 +108,7 @@ export const PostInteracts = ({
         ) : null}
         <EmojiSummary
           context={reactionContext}
-          reactionPreview={
-            (postFile.fileMetadata.reactionPreview as ParsedReactionPreview)?.reactions
-          }
+          reactionPreview={parsedReactionPreview.reactions}
           className="ml-2"
         />
         <div
@@ -135,9 +135,7 @@ export const PostInteracts = ({
           {!showSummary ? (
             <CommentSummary
               context={reactionContext}
-              reactionPreview={
-                (postFile.fileMetadata.reactionPreview as ParsedReactionPreview)?.comments
-              }
+              reactionPreview={parsedReactionPreview.comments}
               onToggle={() => toggleable && setIsExpanded(!isExpanded)}
             />
           ) : null}
@@ -155,9 +153,7 @@ export const PostInteracts = ({
         </div>
       ) : showSummary ? (
         <CommentTeaserList
-          reactionPreview={
-            (postFile.fileMetadata.reactionPreview as ParsedReactionPreview).comments
-          }
+          reactionPreview={parsedReactionPreview.comments}
           onExpand={() => setIsExpanded(true)}
         />
       ) : null}
@@ -217,6 +213,7 @@ export const RepostButton = ({
         <RepostDialog
           embeddedPost={{
             ...postContent,
+            authorOdinId: postFile.fileMetadata.originalAuthor,
             fileId: postFile.fileId,
             globalTransitId: postFile.fileMetadata.globalTransitId,
             lastModified: postFile.fileMetadata.updated,
@@ -286,7 +283,7 @@ export const CommentSummary = ({
   reactionPreview?: CommentsReactionSummary;
 }) => {
   const { data: totalCount } = useCommentSummary({
-    authorOdinId: context.authorOdinId,
+    authorOdinId: context.odinId,
     channelId: context.channelId,
     postGlobalTransitId: context.target.globalTransitId,
     reactionPreview: reactionPreview,

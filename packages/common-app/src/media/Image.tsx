@@ -1,4 +1,4 @@
-import { OdinImageProps, OdinImage } from '@youfoundation/ui-lib';
+import { OdinImageProps, OdinImage } from '@homebase-id/ui-lib';
 import { useDotYouClient } from '../hooks/auth/useDotYouClient';
 
 export type ImageProps = Omit<OdinImageProps, 'dotYouClient'>;

@@ -10,11 +10,10 @@ import {
   PostMeta,
   useChannel,
   useCheckIdentity,
-  useSocialChannel,
-} from '@youfoundation/common-app';
-import { UnreachableIdentity } from '@youfoundation/feed-app/src/components/SocialFeed/UnreachableIdentity';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { PostContent } from '@youfoundation/js-lib/dist';
+} from '@homebase-id/common-app';
+import { UnreachableIdentity } from '@homebase-id/feed-app/src/components/SocialFeed/UnreachableIdentity';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { PostContent } from '@homebase-id/js-lib/public';
 import { useAuth } from '../../hooks/auth/useAuth';
 
 const POSTS_TO_SHOW = 2;
@@ -67,16 +66,12 @@ const PostTeaser = ({
 
   const { data: identityAccessible } = useCheckIdentity(isExternal ? odinId : undefined);
 
-  const { data: externalChannel } = useSocialChannel({
+  const { data: channel } = useChannel({
     odinId: isExternal ? odinId : undefined,
-    channelId: post.channelId,
-  }).fetch;
-  const { data: internalChannel } = useChannel({
-    channelId: isExternal ? undefined : post.channelId,
+    channelKey: post.channelId,
   }).fetch;
 
-  const channel = externalChannel || internalChannel;
-  const authorOdinId = post.authorOdinId || odinId;
+  const authorOdinId = postFile.fileMetadata.originalAuthor || odinId;
 
   if (identityAccessible === false && isExternal)
     return <UnreachableIdentity postFile={postFile} className={className} odinId={odinId} />;
@@ -107,7 +102,7 @@ const PostTeaser = ({
                   postFile={postFile}
                   channel={channel || undefined}
                   odinId={odinId}
-                  authorOdinId={post.authorOdinId || odinId}
+                  authorOdinId={authorOdinId}
                   excludeContextMenu={true}
                 />
               </div>

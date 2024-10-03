@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 
 import ContactImage from '../ContactImage/ContactImage';
-import { HybridLink } from '@youfoundation/common-app';
+import { HybridLink } from '@homebase-id/common-app';
 
 export interface PersonCardProps {
   odinId: string;

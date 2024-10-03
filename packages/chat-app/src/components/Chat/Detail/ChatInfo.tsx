@@ -1,25 +1,19 @@
 import { createPortal } from 'react-dom';
-import { ApiType, DotYouClient, HomebaseFile, NewMediaFile } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile, NewMediaFile } from '@homebase-id/js-lib/core';
 import {
   ActionButton,
-  Arrow,
   ConnectionImage,
   ConnectionName,
   DialogWrapper,
-  House,
   Image,
-  ImageSelector,
   ImageUploadAndCrop,
   Input,
   OwnerImage,
   OwnerName,
-  Pencil,
-  Persons,
-  Save,
   t,
   useDotYouClient,
   usePortal,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import {
   ChatDrive,
   CONVERSATION_IMAGE_PAYLOAD_KEY,
@@ -28,6 +22,7 @@ import {
 } from '../../../providers/ConversationProvider';
 import { useEffect, useState } from 'react';
 import { useConversation } from '../../../hooks/chat/useConversation';
+import { Persons, House, Save, Pencil, Arrow } from '@homebase-id/common-app/icons';
 
 export const ChatInfo = ({
   conversation,
@@ -112,8 +107,7 @@ export const ChatInfo = ({
               </p>
             ) : withYourself ? (
               <p className="text-center text-xl">
-                <OwnerName />
-                <span className="text-sm text-foreground/50">({t('you')})</span>
+                <OwnerName /> <span className="text-sm text-foreground/50">({t('you')})</span>
               </p>
             ) : (
               <>

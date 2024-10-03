@@ -15,10 +15,11 @@ import {
   Sidenav,
   t,
   useRemoveNotifications,
-} from '@youfoundation/common-app';
-import { drives, permissions } from '../../hooks/auth/useAuth';
+} from '@homebase-id/common-app';
+import { drives, circleDrives, permissions } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const CHAT_ROOT = ROOT_PATH;
 
 export const ChatHome = () => {
@@ -37,8 +38,8 @@ export const ChatHome = () => {
         appName={t('Homebase Chat')}
         appId={CHAT_APP_ID}
         drives={drives}
+        circleDrives={circleDrives}
         permissions={permissions}
-        // needsAllConnected={true}
       />
       <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`}>
         <ChatSideNav isOnline={isOnline} />
@@ -72,8 +73,7 @@ const ChatSideNav = ({ isOnline }: { isOnline: boolean }) => {
       <div
         className={`${isActive ? 'translate-x-full' : 'translate-x-0'} ${
           isCreateNew || isCreateNewGroup ? '' : 'pb-14'
-        }
-        fixed bottom-0 left-[-100%] top-0 z-10 flex h-[100dvh] w-full flex-shrink-0 flex-col border-r bg-page-background transition-transform dark:border-r-slate-800 md:pl-[calc(env(safe-area-inset-left)+4.3rem)] lg:static lg:max-w-sm lg:translate-x-0 lg:pb-0 lg:pl-0`}
+        } fixed bottom-0 left-[-100%] top-0 z-10 flex h-[100dvh] w-full flex-shrink-0 flex-col border-r bg-page-background transition-transform dark:border-r-slate-800 md:pl-[calc(env(safe-area-inset-left)+4.3rem)] lg:static lg:max-w-sm lg:translate-x-0 lg:pb-0 lg:pl-0`}
       >
         <ErrorBoundary>
           {isCreateNew ? (

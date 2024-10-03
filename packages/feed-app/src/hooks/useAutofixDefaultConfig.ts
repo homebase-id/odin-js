@@ -1,12 +1,12 @@
-import { useChannel } from '@youfoundation/common-app';
-import { BlogConfig } from '@youfoundation/js-lib/public';
+import { useChannel, useManageChannel } from '@homebase-id/common-app';
+import { BlogConfig } from '@homebase-id/js-lib/public';
 import { useEffect } from 'react';
 
 const useFixMissingPublicChannel = () => {
   const { data: publicChannel, isFetched } = useChannel({
-    channelId: BlogConfig.PublicChannelId,
+    channelKey: BlogConfig.PublicChannelId,
   }).fetch;
-  const { mutateAsync: saveChannel } = useChannel({ channelId: BlogConfig.PublicChannelId }).save;
+  const { mutateAsync: saveChannel } = useManageChannel().save;
 
   useEffect(() => {
     if (isFetched) {

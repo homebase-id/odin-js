@@ -1,17 +1,3 @@
-import {
-  ActionButton,
-  ErrorNotification,
-  Eye,
-  Grid,
-  HybridLink,
-  LoadingBlock,
-  Pager,
-  Shield,
-  SubtleMessage,
-  Times,
-  t,
-  useDomains,
-} from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import Submenu from '../../../components/SubMenu/SubMenu';
 import { useState, useEffect } from 'react';
@@ -19,6 +5,17 @@ import Section from '../../../components/ui/Sections/Section';
 import { useDomain } from '../../../hooks/connections/useDomain';
 import { DomainMembership } from '../../../provider/network/domainNetwork/DomainProvider';
 import { CompanyImage } from '../../../components/Connection/CompanyImage/CompanyImage';
+import {
+  useDomains,
+  SubtleMessage,
+  t,
+  Pager,
+  LoadingBlock,
+  ErrorNotification,
+  HybridLink,
+  ActionButton,
+} from '@homebase-id/common-app';
+import { Grid, Shield, Eye, Times } from '@homebase-id/common-app/icons';
 
 const Domains = () => {
   const [activePage, setActivePage] = useState(1);

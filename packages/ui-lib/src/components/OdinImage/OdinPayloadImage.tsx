@@ -1,4 +1,4 @@
-import { DotYouClient, ImageSize } from '@youfoundation/js-lib/core';
+import { DotYouClient, ImageSize } from '@homebase-id/js-lib/core';
 import { useImage } from '../../hooks/image/useImage';
 import { useEffect } from 'react';
 import { ImageEvents, ImageSource } from './types';
@@ -13,8 +13,6 @@ export interface OdinPayloadImageProps
   dotYouClient: DotYouClient;
 
   naturalSize?: ImageSize;
-
-  probablyEncrypted?: boolean;
 }
 
 // Component to render a tiny thumb image;
@@ -33,25 +31,27 @@ export const OdinPayloadImage = ({
   probablyEncrypted,
 
   onError,
+  preferObjectUrl,
   ...props
 }: OdinPayloadImageProps) => {
   const {
     data: imageData,
     error: imageError,
     isFetched: isImageFetched,
-  } = useImage(
+  } = useImage({
     dotYouClient,
     odinId,
-    fileId,
-    globalTransitId,
-    fileKey,
-    targetDrive,
-    undefined,
+    imageFileId: fileId,
+    imageGlobalTransitId: globalTransitId,
+    imageFileKey: fileKey,
+    imageDrive: targetDrive,
+    size: undefined,
     probablyEncrypted,
     naturalSize,
     systemFileType,
-    lastModified
-  ).fetch;
+    lastModified,
+    preferObjectUrl,
+  }).fetch;
 
   // Error handling
   useEffect(() => {

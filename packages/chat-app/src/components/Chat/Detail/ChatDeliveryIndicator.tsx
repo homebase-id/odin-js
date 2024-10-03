@@ -1,5 +1,6 @@
-import { useDotYouClient, SubtleCheck, Clock, Times, t } from '@youfoundation/common-app';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { useDotYouClient, t } from '@homebase-id/common-app';
+import { Clock, SubtleCheck, Times } from '@homebase-id/common-app/icons';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatMessage, ChatDeliveryStatus } from '../../../providers/ChatProvider';
 
 export const ChatDeliveryIndicator = ({
@@ -11,8 +12,7 @@ export const ChatDeliveryIndicator = ({
 }) => {
   const identity = useDotYouClient().getIdentity();
   const content = msg.fileMetadata.appData.content;
-  const authorOdinId =
-    msg.fileMetadata.senderOdinId || msg.fileMetadata.appData.content.authorOdinId || '';
+  const authorOdinId = msg.fileMetadata.senderOdinId || '';
   const messageFromMe = !authorOdinId || authorOdinId === identity;
 
   if (!messageFromMe) return null;
@@ -52,7 +52,7 @@ export const InnerDeliveryIndicator = ({
   return (
     <div
       className={`${isDelivered ? '-ml-2' : ''} flex flex-row drop-shadow-md ${
-        isRead ? 'text-blue-600 ' : 'text-foreground/50'
+        isRead ? 'text-blue-600' : 'text-foreground/50'
       } ${className || ''}`}
     >
       {isFailed ? (

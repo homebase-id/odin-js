@@ -1,11 +1,9 @@
 import { createPortal } from 'react-dom';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useErrors, type Error } from '../../hooks/errors/useErrors';
 import { useNavigate } from 'react-router-dom';
 import { formatToTimeAgoWithRelativeDetail } from '../../helpers/timeago/format';
-import { ApiType } from '@youfoundation/js-lib/core';
-import { useDotYouClient } from '../../hooks/auth/useDotYouClient';
-import { useNotifications } from '../../hooks/notifications/useNotifications';
+import { useLiveNotifications } from '../../hooks/notifications/useLiveNotifications';
 import { t } from '../../helpers/i18n/dictionary';
 import { usePortal } from '../../hooks/portal/usePortal';
 import { OWNER_ROOT } from '../../core';
@@ -14,22 +12,19 @@ import { DialogWrapper } from '../Dialog/DialogWrapper';
 import { Exclamation } from '../Icons/Exclamation';
 import { Times } from '../Icons/Times';
 import { Clipboard } from '../Icons/Clipboard';
+import { TargetDrive } from '@homebase-id/js-lib/core';
 
-export const Toaster = ({ errorOnly }: { errorOnly?: boolean }) => {
-  const { getApiType } = useDotYouClient();
-  const isOwner = getApiType() === ApiType.Owner;
-  // Only when logged in via owner we have access to the live notifications;
-
+export const Toaster = ({ drives, errorOnly }: { drives?: TargetDrive[]; errorOnly?: boolean }) => {
   return (
     <div className="fixed bottom-2 left-2 right-2 z-50 grid grid-flow-row gap-4 sm:bottom-auto sm:left-auto sm:right-8 sm:top-8">
       <ErrorToaster />
-      {isOwner && !errorOnly ? <LiveToaster /> : null}
+      {!errorOnly ? <LiveToaster drives={drives} /> : null}
     </div>
   );
 };
 
-export const LiveToaster = () => {
-  const { liveNotifications, dismiss } = useNotifications();
+export const LiveToaster = ({ drives }: { drives?: TargetDrive[] }) => {
+  const { liveNotifications, dismiss } = useLiveNotifications({ drives });
 
   return (
     <>
@@ -40,6 +35,7 @@ export const LiveToaster = () => {
           key={index}
           onDismiss={() => dismiss(notification)}
           onOpen={() => dismiss(notification)}
+          autoDismiss={true}
         />
       ))}
       {liveNotifications.length > 5 ? (
@@ -150,6 +146,7 @@ export const Toast = ({
   href,
   type,
   isRead,
+  autoDismiss,
 }: {
   title: string;
   body?: string | ReactNode;
@@ -161,6 +158,7 @@ export const Toast = ({
   href?: string;
   type?: 'critical' | 'warning';
   isRead?: boolean;
+  autoDismiss?: boolean;
 }) => {
   const navigate = useNavigate();
 
@@ -176,6 +174,15 @@ export const Toast = ({
 
     onOpen && onOpen();
   };
+
+  useEffect(() => {
+    if (autoDismiss) {
+      const timeout = setTimeout(() => {
+        onDismiss && onDismiss();
+      }, 5000);
+      return () => clearTimeout(timeout);
+    }
+  }, []);
 
   return (
     <div

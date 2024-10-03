@@ -1,9 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import {
-  ApiType,
-  getSecurityContext,
-  getSecurityContextOverPeer,
-} from '@youfoundation/js-lib/core';
+import { ApiType, getSecurityContext, getSecurityContextOverPeer } from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 export const useSecurityContext = (odinId?: string, isEnabled?: boolean) => {

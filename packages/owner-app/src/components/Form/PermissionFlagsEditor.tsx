@@ -1,7 +1,7 @@
 import { ReactNode, useRef, useState } from 'react';
-import { Check, t, useOutsideTrigger } from '@youfoundation/common-app';
-import { Triangle } from '@youfoundation/common-app';
-import { CirclePermissionType } from '@youfoundation/js-lib/network';
+import { t, useOutsideTrigger } from '@homebase-id/common-app';
+import { Check, Triangle } from '@homebase-id/common-app/icons';
+import { CirclePermissionType } from '@homebase-id/js-lib/network';
 
 const PermissionFlagsEditor = ({
   className,

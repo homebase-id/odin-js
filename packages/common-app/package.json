@@ -1,5 +1,5 @@
 {
-  "name": "@youfoundation/common-app",
+  "name": "@homebase-id/common-app",
   "version": "0.1.0",
   "author": "YouFoundation",
   "description": "Common things for the Homebase apps",
@@ -9,21 +9,31 @@
   "type": "module",
   "module": "./index.ts",
   "types": "./index.ts",
+  "exports": {
+    ".": {
+      "import": "./index.ts",
+      "require": "./index.ts"
+    },
+    "./icons": {
+      "import": "./icons.ts",
+      "require": "./icons.ts"
+    }
+  },
   "sideEffects": false,
   "scripts": {
     "lint": "eslint src/*"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/YouFoundation/dotyoucore-js.git"
+    "url": "https://github.com/homebase-id/odin-js"
   },
   "dependencies": {
-    "@youfoundation/js-lib": "*"
+    "@homebase-id/js-lib": "*"
   },
   "peerDependencies": {
-    "@tanstack/react-query": "5.39.0",
-    "@tanstack/react-query-persist-client": "5.27.5",
-    "@tanstack/query-sync-storage-persister": "5.27.5",
+    "@tanstack/react-query": "5.51.1",
+    "@tanstack/react-query-persist-client": "5.51.1",
+    "@tanstack/query-sync-storage-persister": "5.51.1",
     "idb-keyval": "^6.2.1",
     "react": "^18.3.1"
   },

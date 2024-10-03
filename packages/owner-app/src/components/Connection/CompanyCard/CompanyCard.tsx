@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
-import { HybridLink, Shop } from '@youfoundation/common-app';
+import { HybridLink } from '@homebase-id/common-app';
+import { Shop } from '@homebase-id/common-app/icons';
 import { CompanyImage } from '../CompanyImage/CompanyImage';
 
 export interface CompanyCardProps {
@@ -29,8 +30,8 @@ const CompanyCard = ({
           isChecked
             ? 'border-4 border-indigo-500 dark:border-indigo-700'
             : isChecked === false
-            ? 'border-4'
-            : 'border-gray-200 border-opacity-60 dark:border-gray-800 dark:bg-gray-800'
+              ? 'border-4'
+              : 'border-gray-200 border-opacity-60 dark:border-gray-800 dark:bg-gray-800'
         }
         ${href ? 'cursor-pointer hover:shadow-md hover:dark:shadow-slate-600' : ''}`}
         onClick={onClick}

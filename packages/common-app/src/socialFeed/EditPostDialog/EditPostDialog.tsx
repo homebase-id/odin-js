@@ -1,4 +1,4 @@
-import { PostContent, getChannelDrive } from '@youfoundation/js-lib/public';
+import { POST_LINKS_PAYLOAD_KEY, PostContent, getChannelDrive } from '@homebase-id/js-lib/public';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useManagePost } from '../../hooks/socialFeed/post/useManagePost';
@@ -7,19 +7,23 @@ import {
   HomebaseFile,
   MediaFile,
   NewMediaFile,
-} from '@youfoundation/js-lib/core';
-import { VolatileInput, FileOverview } from '../../form';
+  SecurityGroupType,
+} from '@homebase-id/js-lib/core';
+import { VolatileInput, FileOverview, AllContactMentionDropdown } from '../../form';
 import { t } from '../../helpers';
 import { usePortal } from '../../hooks';
-import { ErrorNotification, DialogWrapper, ActionButton, Save } from '../../ui';
+import { ErrorNotification, DialogWrapper, ActionButton } from '../../ui';
+import { Save } from '../../ui/Icons';
 
 export const EditPostDialog = ({
   postFile: incomingPostFile,
+  odinId,
   isOpen,
   onConfirm,
   onCancel,
 }: {
   postFile: HomebaseFile<PostContent>;
+  odinId?: string;
   isOpen: boolean;
   onConfirm: () => void;
   onCancel: () => void;
@@ -30,14 +34,18 @@ export const EditPostDialog = ({
   } = useManagePost();
   const [postFile, setPostFile] = useState<HomebaseFile<PostContent>>({ ...incomingPostFile });
   const [newMediaFiles, setNewMediaFiles] = useState<(MediaFile | NewMediaFile)[]>(
-    postFile.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || []
+    postFile.fileMetadata.payloads?.filter(
+      (p) => p.key !== DEFAULT_PAYLOAD_KEY && p.key !== POST_LINKS_PAYLOAD_KEY
+    ) || []
   );
 
   useEffect(() => {
     if (incomingPostFile) {
       setPostFile({ ...incomingPostFile });
       setNewMediaFiles(
-        incomingPostFile.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY)
+        incomingPostFile.fileMetadata.payloads?.filter(
+          (p) => p.key !== DEFAULT_PAYLOAD_KEY && p.key !== POST_LINKS_PAYLOAD_KEY
+        )
       );
     }
   }, [incomingPostFile]);
@@ -49,11 +57,19 @@ export const EditPostDialog = ({
   if (!isOpen) return null;
 
   const doUpdate = async () => {
-    const newPostFile = { ...postFile };
+    const newPostFile = {
+      ...postFile,
+      serverMetadata: postFile.serverMetadata || {
+        accessControlList: {
+          requiredSecurityGroup: SecurityGroupType.Connected,
+        },
+      },
+    };
 
     await updatePost({
       channelId: incomingPostFile.fileMetadata.appData.content.channelId,
-      postFile: { ...newPostFile },
+      odinId,
+      postFile: newPostFile,
       mediaFiles: newMediaFiles,
     });
   };
@@ -85,7 +101,8 @@ export const EditPostDialog = ({
               setPostFile(dirtyPostFile);
             }}
             placeholder={t("What's up?")}
-            className={`w-full resize-none rounded-md border bg-transparent p-2`}
+            className={`w-full resize-none rounded-md border bg-transparent p-2 relative`}
+            autoCompleters={[AllContactMentionDropdown]}
           />
           <FileOverview
             className="mt-2"

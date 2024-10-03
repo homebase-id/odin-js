@@ -1,17 +1,14 @@
-import { IS_DARK_CLASSNAME } from '@youfoundation/common-app';
+import { IS_DARK_CLASSNAME } from '@homebase-id/common-app';
 import { useYouAuthAuthorization } from '../../../hooks/auth/useAuth';
-import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
+import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { Loader } from '@homebase-id/common-app/icons';
 
 const AUTO_LOGON_PARAM = 'youauth-logon';
 const AUTHORIZE_PATH = '/api/owner/v1/youauth/authorize';
-
-export const LoginBox = ({ returnUrl }: { returnUrl?: string }) => (
-  <CentralLoginBox returnUrl={returnUrl} />
-);
 
 const useParams = (returnUrl: string) => {
   const { getAuthorizationParameters } = useYouAuthAuthorization();
@@ -25,7 +22,7 @@ const useParams = (returnUrl: string) => {
 
 // Iframes and navigation is weird
 // https://www.aleksandrhovhannisyan.com/blog/react-iframes-back-navigation-bug/
-const CentralLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
+export const LoginBox = ({ returnUrl }: { returnUrl?: string }) => {
   const { data: authParams } = useParams(returnUrl || window.location.href.split('?')[0]);
   const stringifiedAuthParams = authParams && stringifyToQueryParams(authParams);
   const isDarkMode = document.documentElement.classList.contains(IS_DARK_CLASSNAME);
@@ -55,7 +52,9 @@ const CentralLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
             className="h-[16rem] w-full"
           ></iframe>
         </>
-      ) : null}
+      ) : (
+        <Loader className="m-auto h-20 w-20" />
+      )}
     </>
   );
 };

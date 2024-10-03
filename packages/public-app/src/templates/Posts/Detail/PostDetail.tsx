@@ -5,27 +5,24 @@ import {
   PostDetailCard,
   RelatedArticles,
   t,
+  useChannel,
   usePost,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
 
 import { useAuth } from '../../../hooks/auth/useAuth';
-import { Article } from '@youfoundation/js-lib/public';
+import { Article } from '@homebase-id/js-lib/public';
 import { useState } from 'react';
 import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
 
 const PostDetail = () => {
   const navigate = useNavigate();
   const { channelKey, postKey } = useParams();
-  const { data: postData, isLoading: postDataLoading } = usePost(
-    channelKey && postKey
-      ? {
-          channelSlug: channelKey,
-          channelId: channelKey,
-          blogSlug: postKey,
-        }
-      : undefined
-  );
+  const { data: channel } = useChannel({ channelKey }).fetch;
+  const { data: postData, isLoading: postDataLoading } = usePost({
+    channelKey,
+    postKey,
+  });
 
   const { isOwner, isAuthenticated } = useAuth();
   const [isLogin, setIsLogin] = useState(false);
@@ -38,8 +35,7 @@ const PostDetail = () => {
     );
   }
 
-  const post = postData?.activePost.fileMetadata.appData.content;
-  const channel = postData?.activeChannel;
+  const post = postData?.fileMetadata.appData.content;
   return (
     <>
       <Helmet>
@@ -49,7 +45,7 @@ const PostDetail = () => {
         <meta name="og:title" content={post?.caption ?? ''} />
         <meta
           name="og:description"
-          content={post?.type === 'Article' ? (post as Article).abstract ?? '' : ''}
+          content={post?.type === 'Article' ? ((post as Article).abstract ?? '') : ''}
         />
       </Helmet>
 
@@ -67,8 +63,8 @@ const PostDetail = () => {
             className="text-sm"
           />
           <PostDetailCard
-            channel={channel}
-            postFile={postData?.activePost}
+            channel={channel || undefined}
+            postFile={postData || undefined}
             isOwner={isOwner}
             isAuthenticated={isAuthenticated}
             onNavigate={(path: string) => navigate(path)}
@@ -77,8 +73,8 @@ const PostDetail = () => {
         </div>
       </section>
       <div className="container mx-auto sm:px-5">
-        {postData?.activePost.fileMetadata.appData.content.type === 'Article' && (
-          <RelatedArticles blog={postData.activePost} channel={channel} />
+        {postData?.fileMetadata.appData.content.type === 'Article' && (
+          <RelatedArticles blog={postData} channel={channel || undefined} />
         )}
       </div>
 

@@ -7,10 +7,11 @@ import {
   t,
   usePortal,
   ErrorNotification,
-  Arrow,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
+
 import PermissionSelector from '../../Form/PermissionSelector';
-import { PermissionSet } from '@youfoundation/js-lib/core';
+import { PermissionSet } from '@homebase-id/js-lib/core';
+import { Arrow } from '@homebase-id/common-app/icons';
 
 const PermissionSelectorDialog = ({
   title,

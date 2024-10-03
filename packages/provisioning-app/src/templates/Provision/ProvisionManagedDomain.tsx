@@ -2,10 +2,10 @@ import { useState } from 'react';
 import ActionButton from '../../components/ui/Buttons/ActionButton';
 import { t } from '../../helpers/i18n/dictionary';
 import EnteringDetails from '../../components/ManagedDomain/EnteringDetails';
-import CreateIdentityView from '../../components/CreateIdentityView.tsx/CreateIdentityView';
+import CreateIdentityView from '../../components/CreateIdentityView/CreateIdentityView';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useCheckInvitationCode } from '../../hooks/invitationCode/useCheckInvitationCode';
-import { Times } from '@youfoundation/common-app';
+import { Times } from '@homebase-id/common-app/icons';
 import { ManagedDomainProvisionState } from '../../hooks/managedDomain/useManagedDomain';
 
 const Provision = () => {
@@ -20,7 +20,7 @@ const Provision = () => {
 
   const { data: isValid } = useCheckInvitationCode(invitationCode || undefined).checkInvitationCode;
 
-  if (!invitationCode || isValid === false) return <Navigate to="/" />;
+  if (isValid === false) return <Navigate to={`/${window.location.search}`} />;
 
   return (
     <section className="mb-10 flex flex-grow flex-col">
@@ -37,6 +37,7 @@ const Provision = () => {
               setEmail={setEmail}
               provisionState={provisionState}
               setProvisionState={setProvisionState}
+              invitationCode={invitationCode}
             />
           ) : provisionState === 'Provisioning' && domain ? (
             <CreateIdentityView

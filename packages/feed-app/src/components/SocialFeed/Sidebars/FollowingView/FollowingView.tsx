@@ -1,5 +1,5 @@
-import { IdentityTeaser, LoadingBlock, useFollowingInfinite } from '@youfoundation/common-app';
-import { t } from '@youfoundation/common-app';
+import { IdentityTeaser, LoadingBlock, useFollowingInfinite } from '@homebase-id/common-app';
+import { t } from '@homebase-id/common-app';
 
 const FollowingView = ({ className }: { className?: string }) => {
   const {

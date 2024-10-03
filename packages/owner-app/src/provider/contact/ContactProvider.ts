@@ -10,15 +10,15 @@ import {
   NewHomebaseFile,
   UploadResult,
   getFileHeader,
-} from '@youfoundation/js-lib/core';
-import { createThumbnails } from '@youfoundation/js-lib/media';
+} from '@homebase-id/js-lib/core';
+import { createThumbnails } from '@homebase-id/js-lib/media';
 import {
   RawContact,
   getContactByUniqueId,
   ContactConfig,
   CONTACT_PROFILE_IMAGE_KEY,
   getContactByOdinId,
-} from '@youfoundation/js-lib/network';
+} from '@homebase-id/js-lib/network';
 import {
   base64ToUint8Array,
   getNewId,
@@ -26,7 +26,7 @@ import {
   toGuidId,
   jsonStringify64,
   getRandom16ByteArray,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 
 //Handles management of Contacts
 export const saveContact = async (

@@ -1,6 +1,6 @@
 {
   "version": "0.0.1-alpha.1",
-  "name": "@youfoundation/js-monorepo",
+  "name": "@homebase-id/js-monorepo",
   "author": "YouFoundation",
   "description": "Monorepo for the JS Libs of YouFoundation",
   "workspaces": [
@@ -20,12 +20,15 @@
     "build:public": "npm run build -w ./packages/public-app",
     "build:login": "npm run build -w ./packages/login-app",
     "build:provisioning": "npm run build -w ./packages/provisioning-app",
+    "build:community": "npm run build -w ./packages/community-app",
+    "start": "concurrently -n w: \"npm:start:*(!provisioning|login)\"",
     "start:owner": "npm start -w ./packages/owner-app",
     "start:feed": "npm start -w ./packages/feed-app",
     "start:chat": "npm start -w ./packages/chat-app",
     "start:mail": "npm start -w ./packages/mail-app",
     "start:public": "npm start -w ./packages/public-app",
     "start:provisioning": "npm start -w ./packages/provisioning-app",
+    "start:community": "npm start -w ./packages/community-app",
     "start:login": "npm start -w ./packages/login-app",
     "lint": "npm run lint -workspaces --if-present"
   },
@@ -34,24 +37,28 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/YouFoundation/dotyoucore-js.git"
+    "url": "https://github.com/homebase-id/odin-js"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "6.20.0",
-    "@typescript-eslint/parser": "6.20.0",
-    "eslint": "8.56.0",
-    "eslint-plugin-react": "7.33.2",
-    "prettier": "3.2.4",
-    "rollup": "4.9.6",
-    "tslib": "2.6.2",
-    "typescript": "5.3.3",
-    "vite": "5.2.9",
-    "vite-plugin-dts": "3.7.2"
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.9.1",
+    "@typescript-eslint/eslint-plugin": "8.3.0",
+    "@typescript-eslint/parser": "8.3.0",
+    "concurrently": "8.2.2",
+    "eslint": "9.9.1",
+    "eslint-plugin-react": "7.35.0",
+    "eslint-plugin-react-refresh": "^0.4.12",
+    "prettier": "3.3.3",
+    "rollup": "4.22.4",
+    "tslib": "2.7.0",
+    "typescript": "5.5.4",
+    "vite": "5.4.8",
+    "vite-plugin-dts": "4.0.3"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "4.6.1"
+    "@rollup/rollup-linux-x64-gnu": "4.21.1"
   },
   "dependencies": {
-    "patch-package": "^8.0.0"
+    "patch-package": "8.0.0"
   }
 }

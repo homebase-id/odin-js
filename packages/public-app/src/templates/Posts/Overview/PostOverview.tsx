@@ -1,7 +1,12 @@
 import { Helmet } from 'react-helmet-async';
 
 import { useParams } from 'react-router-dom';
-import { BlogConfig, ChannelTemplate, PostContent } from '@youfoundation/js-lib/public';
+import {
+  BlogConfig,
+  ChannelDefinition,
+  ChannelTemplate,
+  PostContent,
+} from '@homebase-id/js-lib/public';
 import { useRef } from 'react';
 import {
   AclIcon,
@@ -16,7 +21,7 @@ import {
   NotFound,
   useDotYouClient,
   BLOG_POST_INFIITE_PAGE_SIZE,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 
 import CardPostOverview from '../../../components/Post/Overview/CardPostOverview/CardPostOverview';
 import ListPostOverview from '../../../components/Post/Overview/ListPostOverview/ListPostOverview';
@@ -24,16 +29,16 @@ import MasonryPostOverview from '../../../components/Post/Overview/MasonryPostOv
 
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
-import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import { SaveCollaborativeChannelLink } from '../../../components/CollaborativeChannels/SaveCollaborativeChannelLink';
 import { PublicPostComposer } from '../../../components/CollaborativeChannels/PublicPostComposer';
 
 const PostOverview = () => {
   const { isOwner } = useDotYouClient();
   const { channelKey } = useParams();
-  const { data: activeChannel, isFetched: channelFetched } = useChannel(
-    channelKey ? { channelSlug: channelKey } : { channelId: BlogConfig.PublicChannelId }
-  ).fetch;
+  const { data: activeChannel, isFetched: channelFetched } = useChannel({
+    channelKey: channelKey || BlogConfig.PublicChannelId,
+  }).fetch;
 
   const {
     data,
@@ -57,9 +62,9 @@ const PostOverview = () => {
   );
 
   const ListComponent = activeChannel
-    ? activeChannel.fileMetadata.appData.content.template === ChannelTemplate.LargeCards
+    ? activeChannel.fileMetadata.appData.content.templateId === ChannelTemplate.LargeCards
       ? CardPostOverview
-      : activeChannel.fileMetadata.appData.content.template === ChannelTemplate.MasonryLayout
+      : activeChannel.fileMetadata.appData.content.templateId === ChannelTemplate.MasonryLayout
         ? MasonryPostOverview
         : ListPostOverview
     : ListPostOverview;
@@ -115,13 +120,22 @@ const PostOverview = () => {
             </div>
             {activeChannel ? (
               <div className="flex flex-row gap-2 sm:ml-auto">
-                <FollowLink className="sm:ml-auto" channel={activeChannel} />
-                <SaveCollaborativeChannelLink channel={activeChannel} />
+                <FollowLink
+                  className="sm:ml-auto"
+                  channel={(activeChannel as HomebaseFile<ChannelDefinition>) || undefined}
+                />
+                <SaveCollaborativeChannelLink
+                  channel={(activeChannel as HomebaseFile<ChannelDefinition>) || undefined}
+                />
               </div>
             ) : null}
           </div>
 
-          {activeChannel ? <PublicPostComposer activeChannel={activeChannel} /> : null}
+          {activeChannel ? (
+            <PublicPostComposer
+              activeChannel={(activeChannel as HomebaseFile<ChannelDefinition>) || undefined}
+            />
+          ) : null}
 
           {isLoading ? (
             <>

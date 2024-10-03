@@ -1,12 +1,10 @@
 import { useState } from 'react';
-import { ActionButton, Plus, t } from '@youfoundation/common-app';
-import { useProfiles } from '@youfoundation/common-app';
-import { Heart } from '@youfoundation/common-app';
-import { LoadingBlock } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
-import { BuiltInProfiles } from '@youfoundation/js-lib/profile';
+import { BuiltInProfiles } from '@homebase-id/js-lib/profile';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import ProfileDialog from '../../../components/Attribute/ProfileDialog/ProfileDialog';
+import { ActionButton, LoadingBlock, t, useProfiles } from '@homebase-id/common-app';
+import { Heart, Plus } from '@homebase-id/common-app/icons';
 
 const Profiles = () => {
   const { data: profiles, isLoading } = useProfiles().fetchProfiles;

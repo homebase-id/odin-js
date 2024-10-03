@@ -32,11 +32,16 @@ import {
   TransferStatus,
   FailedTransferStatuses,
   RecipientTransferHistory,
-} from '@youfoundation/js-lib/core';
-import { getNewId, jsonStringify64, makeGrid } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/core';
+import {
+  getNewId,
+  getRandom16ByteArray,
+  jsonStringify64,
+  makeGrid,
+} from '@homebase-id/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
-import { processVideoFile, createThumbnails } from '@youfoundation/js-lib/media';
-import { getTextRootsRecursive } from '@youfoundation/common-app';
+import { processVideoFile, createThumbnails } from '@homebase-id/js-lib/media';
+import { getTextRootsRecursive } from '@homebase-id/common-app';
 
 export const MAIL_DRAFT_CONVERSATION_FILE_TYPE = 9001;
 export const MAIL_CONVERSATION_FILE_TYPE = 9000;
@@ -81,7 +86,7 @@ export const MailDrive: TargetDrive = {
   type: '2dfecc40311e41e5a12455e925144202',
 };
 
-export interface MailConversationsReturn extends CursoredResult<HomebaseFile<MailConversation>[]> {}
+export type MailConversationsReturn = CursoredResult<HomebaseFile<MailConversation>[]>;
 
 export const getMailConversations = async (
   dotYouClient: DotYouClient,
@@ -176,6 +181,7 @@ export const uploadMail = async (
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
+  const aesKey = getRandom16ByteArray();
 
   for (let i = 0; files && i < files?.length; i++) {
     let newMediaFile = files[i];
@@ -204,13 +210,14 @@ export const uploadMail = async (
     }
 
     if (newMediaFile.file.type.startsWith('video/')) {
-      const { tinyThumb, additionalThumbnails, payload } = await processVideoFile(
-        newMediaFile,
-        payloadKey
-      );
+      const {
+        tinyThumb,
+        thumbnails: thumbnailsFromVideo,
+        payloads: payloadsFromVideo,
+      } = await processVideoFile(newMediaFile, payloadKey, aesKey);
 
-      thumbnails.push(...additionalThumbnails);
-      payloads.push(payload);
+      thumbnails.push(...thumbnailsFromVideo);
+      payloads.push(...payloadsFromVideo);
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
     } else if (newMediaFile.file.type.startsWith('image/')) {
@@ -279,7 +286,10 @@ export const uploadMail = async (
       payloads,
       thumbnails,
       true,
-      onVersionConflict
+      onVersionConflict,
+      {
+        aesKey,
+      }
     );
 
     return uploadResult || null;
@@ -299,6 +309,9 @@ export const uploadMail = async (
           TransferUploadStatus.EnqueuedFailed
       )
     ) {
+      conversation.fileId = (uploadResult as UploadResult).file.fileId;
+      conversation.fileMetadata.versionTag = uploadResult.newVersionTag;
+
       conversation.fileMetadata.appData.content.deliveryStatus = MailDeliveryStatus.Failed;
       conversation.fileMetadata.appData.content.deliveryDetails = {};
       for (const recipient of recipients) {
@@ -411,7 +424,7 @@ export const dsrToMailConversation = async (
 
     return conversation;
   } catch (ex) {
-    console.error('[DotYouCore-js] failed to get the conversation payload of a dsr', dsr, ex);
+    console.error('[mail] failed to get the conversation payload of a dsr', dsr, ex);
     return null;
   }
 };

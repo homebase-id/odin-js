@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useDotYouClient } from '@youfoundation/common-app';
+import { useDotYouClient } from '@homebase-id/common-app';
 import { getDomains } from '../../provider/network/domainNetwork/DomainProvider';
 
 interface useActiveDomainsProps {
@@ -25,6 +25,7 @@ export const useDomains = (
         count: pageSize,
       });
     } catch (ex) {
+      console.warn('[useDomains] Failed to fetch domains', ex);
       return {
         cursor: undefined,
         results: [],
@@ -34,7 +35,7 @@ export const useDomains = (
 
   return {
     fetch: useInfiniteQuery({
-      queryKey: ['activeDomains', activePageSize, activePage],
+      queryKey: ['active-domains', activePageSize, activePage],
       queryFn: ({ pageParam }) => fetchDomains({ pageSize: activePageSize, cursor: pageParam }),
       initialPageParam: undefined as number | undefined,
       getNextPageParam: (lastPage) =>

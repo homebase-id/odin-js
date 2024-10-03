@@ -1,8 +1,8 @@
-import { ActionButton, Times } from '../../ui';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { useDotYouClient } from '../../hooks';
-import { LinkPreview, getLinkPreview } from '@youfoundation/js-lib/media';
+import { ActionButton } from '../../ui';
+import { Dispatch, SetStateAction } from 'react';
+import { LinkPreview } from '@homebase-id/js-lib/media';
 import { LinkPreviewTextual } from '../../media/Link';
+import { Times } from '../../ui/Icons';
 
 export const LinkOverview = ({
   linkPreviews,
@@ -56,41 +56,4 @@ export const LinkOverview = ({
       })}
     </div>
   );
-};
-
-export const useLinkPreviewBuilder = (textToSearchIn: string) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
-
-  useEffect(() => {
-    const foundLinks = textToSearchIn
-      ?.split(new RegExp(/(https?:\/\/[^\s]+)/))
-      .filter((link) => link && link.startsWith('http'));
-    if (!foundLinks) return;
-
-    const removedLinks = Object.keys(linkPreviews).filter((link) => !foundLinks.includes(link));
-    setLinkPreviews((old) => {
-      const LinkPreviews = { ...old };
-      removedLinks.forEach((link) => delete LinkPreviews[link]);
-      return LinkPreviews;
-    });
-
-    const newLinks = foundLinks.filter(
-      (link) => link && link.startsWith('http') && linkPreviews[link] === undefined // Explit check on undefined, as when clared by the user it's null
-    );
-    if (!newLinks.length) return;
-
-    (async () => {
-      const LinkPreviews = (
-        await Promise.all(newLinks.map(async (link) => await getLinkPreview(dotYouClient, link)))
-      ).filter(Boolean) as LinkPreview[];
-
-      setLinkPreviews((old) => ({
-        ...old,
-        ...Object.fromEntries(LinkPreviews.map((link) => [link.url, link])),
-      }));
-    })();
-  }, [textToSearchIn]);
-
-  const [linkPreviews, setLinkPreviews] = useState<Record<string, LinkPreview | null>>({});
-  return { linkPreviews, setLinkPreviews };
 };

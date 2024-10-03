@@ -1,4 +1,4 @@
-import { PostImageDetailCard, t, usePost } from '@youfoundation/common-app';
+import { PostImageDetailCard, t, useChannel, usePost } from '@homebase-id/common-app';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../hooks/auth/useAuth';
 import { useMemo, useState } from 'react';
@@ -7,15 +7,11 @@ import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
 
 const PostImageDetail = () => {
   const { channelKey, postKey, attachmentKey } = useParams();
-  const { data: postData } = usePost(
-    channelKey && postKey
-      ? {
-          channelSlug: channelKey,
-          channelId: channelKey,
-          blogSlug: postKey,
-        }
-      : undefined
-  );
+  const { data: channel } = useChannel({ channelKey }).fetch;
+  const { data: postData } = usePost({
+    channelKey,
+    postKey,
+  });
 
   const { isAuthenticated, isOwner } = useAuth();
   const [isLogin, setIsLogin] = useState(false);
@@ -29,8 +25,7 @@ const PostImageDetail = () => {
     return paths.join('/');
   }, [window.location.pathname]);
 
-  const post = postData?.activePost.fileMetadata.appData.content;
-  const channel = postData?.activeChannel;
+  const post = postData?.fileMetadata.appData.content;
 
   return (
     <>
@@ -42,8 +37,8 @@ const PostImageDetail = () => {
       </Helmet>
       <div className="absolute inset-0 z-40 bg-page-background bg-opacity-90 backdrop-blur-sm lg:fixed lg:overflow-hidden">
         <PostImageDetailCard
-          channel={postData?.activeChannel}
-          postFile={postData?.activePost}
+          channel={channel || undefined}
+          postFile={postData || undefined}
           attachmentKey={attachmentKey}
           onClose={() => navigate(state?.referrer || -1, { preventScrollReset: true })}
           navigate={(path: string) =>

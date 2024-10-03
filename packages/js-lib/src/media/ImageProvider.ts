@@ -75,7 +75,6 @@ export const getDecryptedThumbnailMeta = (
 
 // Retrieves an image/thumb, decrypts, then returns a url to be passed to an image control
 export const getDecryptedImageUrl = getDecryptedMediaUrl;
-
 export const getDecryptedImageData = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
@@ -102,7 +101,7 @@ export const getDecryptedImageData = async (
         { systemFileType, lastModified }
       );
       if (thumbBytes) return thumbBytes;
-    } catch (ex) {
+    } catch {
       // Failed to get thumb data, try to get payload data
     }
   }

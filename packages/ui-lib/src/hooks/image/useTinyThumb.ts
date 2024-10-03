@@ -1,8 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
-import { TargetDrive, DotYouClient, SystemFileType } from '@youfoundation/js-lib/core';
-import { getDecryptedThumbnailMeta } from '@youfoundation/js-lib/media';
-import { getDecryptedThumbnailMetaOverPeer } from '@youfoundation/js-lib/peer';
+import { TargetDrive, DotYouClient, SystemFileType } from '@homebase-id/js-lib/core';
+import { getDecryptedThumbnailMeta, ThumbnailMeta } from '@homebase-id/js-lib/media';
+import { getDecryptedThumbnailMetaOverPeer } from '@homebase-id/js-lib/peer';
 
 export const useTinyThumb = (
   dotYouClient: DotYouClient,
@@ -12,7 +12,7 @@ export const useTinyThumb = (
   imageFileKey?: string,
   imageDrive?: TargetDrive,
   systemFileType?: SystemFileType
-) => {
+): UseQueryResult<ThumbnailMeta | null | undefined, Error> => {
   const localHost = dotYouClient.getIdentity() || window.location.hostname;
 
   const fetchImageData = async (

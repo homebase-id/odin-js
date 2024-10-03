@@ -1,5 +1,5 @@
-import { BuiltInAttributes } from '@youfoundation/js-lib/profile';
-import { HomePageAttributes } from '@youfoundation/js-lib/public';
+import { BuiltInAttributes } from '@homebase-id/js-lib/profile';
+import { HomePageAttributes } from '@homebase-id/js-lib/public';
 
 export interface AttributeDefinition {
   type: string;

@@ -73,7 +73,11 @@ export const ActionGroup = ({
             />
           );
         })}
-        <ActionOption onClick={() => setIsOpen(false)} label={'Close'} className="md:hidden" />
+        <ActionOption
+          onClick={() => setIsOpen(false)}
+          label={'Close'}
+          className="text-foreground/60 md:hidden"
+        />
       </ul>
     </div>
   );
@@ -154,20 +158,20 @@ const ActionOption = ({
                   return false;
                 }
               : actionOptions
-                ? (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setNeedsOption(true);
-                    setMouseEvent(e);
-                    return false;
-                  }
-                : onClick
-                  ? (e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onClick(e);
-                    }
-                  : undefined
+              ? (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setNeedsOption(true);
+                  setMouseEvent(e);
+                  return false;
+                }
+              : onClick
+              ? (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onClick(e);
+                }
+              : undefined
           }
           className="flex w-full flex-row px-5 py-3 md:px-3 md:py-2"
         >

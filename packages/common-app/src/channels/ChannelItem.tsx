@@ -4,12 +4,12 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { useState } from 'react';
 
 import { ChannelTemplateSelector } from './ChannelTemplateSelector';
-import { BlogConfig, ChannelTemplate } from '@youfoundation/js-lib/public';
-import { slugify, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { BlogConfig, ChannelTemplate } from '@homebase-id/js-lib/public';
+import { slugify, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ActionButton } from '../ui/Buttons/ActionButton';
 import { t } from '../helpers/i18n/dictionary';
 import { AclIcon, AclSummary } from '../acl/AclInfo/AclInfo';
@@ -21,12 +21,13 @@ import { Label } from '../form/Label';
 import { Input } from '../form/Input';
 import { Textarea } from '../form/Textarea';
 import { CheckboxToggle } from '../form/CheckboxToggle';
-import { Pencil } from '../ui/Icons/Pencil';
-import { ActionLink, Alert, Exclamation, ExternalLink } from '../ui';
+import { Exclamation, ExternalLink, Pencil } from '../ui/Icons';
+import { ActionLink, Alert } from '../ui';
 import { useDotYouClient } from '../hooks/auth/useDotYouClient';
 import { useCollaborativeChannel } from '../hooks/socialFeed/channels/useCollaborativeChannel';
 import { ChannelDefinitionVm } from '../hooks/socialFeed/channels/useChannels';
-import { useChannel } from '../hooks/socialFeed/channels/useChannel';
+
+import { useManageChannel } from '../hooks/socialFeed/channels/useManageChannel';
 
 export const ChannelItem = ({
   chnl: chnlDsr,
@@ -48,7 +49,7 @@ export const ChannelItem = ({
   const {
     save: { mutateAsync: saveChannel, status: saveStatus },
     remove: { mutateAsync: removeChannel },
-  } = useChannel({});
+  } = useManageChannel();
 
   const {
     validate: { data: validateCollaborativeData },

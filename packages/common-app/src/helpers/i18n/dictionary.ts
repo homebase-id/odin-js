@@ -1,4 +1,4 @@
-import { TransferStatus } from '@youfoundation/js-lib/core';
+import { TransferStatus } from '@homebase-id/js-lib/core';
 
 const enLocale = [
   ['login', 'Login'],
@@ -23,6 +23,7 @@ const enLocale = [
 
   // PermssionTypes
   ['readandwrite', 'Read & Write'],
+  ['reactandwrite', 'React & Write'],
   ['reactandcomment', 'React & Comment'],
   ['full', 'Full'],
   ['comment', 'Comment'],
@@ -32,6 +33,7 @@ const enLocale = [
   ['none', 'None'],
   ['react', 'React'],
   ['readandwritereactionsandcomments', 'React/Comment'],
+  ['readwriteandreact', 'Read, Write & React'],
   ['readcirclemembers', 'Read Circle Members'],
   ['readconnections', 'Read Connections'],
   ['reader', 'Read'],

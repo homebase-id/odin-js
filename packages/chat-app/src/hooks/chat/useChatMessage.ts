@@ -5,23 +5,47 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
   NewMediaFile,
-} from '@youfoundation/js-lib/core';
-import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/core';
+import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { updateChatMessage, uploadChatMessage } from '../../providers/ChatProvider';
 
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../providers/ConversationProvider';
-import { LinkPreview } from '@youfoundation/js-lib/media';
+import { LinkPreview } from '@homebase-id/js-lib/media';
+import { useDotYouClientContext } from '@homebase-id/common-app';
+import { insertNewMessage } from './useChatMessages';
 
-export const useChatMessage = (props?: { messageId: string | undefined }) => {
+export const useChatMessage = (props?: {
+  conversationId?: string | undefined; // Optional: if we have it we can use the cache
+  messageId: string | undefined;
+}) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
-  const getMessageByUniqueId = async (messageId: string) => {
-    // TODO: Improve by fetching the message from the cache on conversations first
+  const getMessageByUniqueId = async (conversationId: string | undefined, messageId: string) => {
+    const extistingMessages = conversationId
+      ? queryClient.getQueryData<
+          InfiniteData<{
+            searchResults: (HomebaseFile<ChatMessage> | null)[];
+            cursorState: string;
+            queryTime: number;
+            includeMetadataHeader: boolean;
+          }>
+        >(['chat-messages', conversationId])
+      : undefined;
+
+    if (extistingMessages) {
+      const message = extistingMessages.pages
+        .flatMap((page) => page.searchResults)
+        .find((msg) => stringGuidsEqual(msg?.fileMetadata.appData.uniqueId, messageId));
+
+      if (message) {
+        return message;
+      }
+    }
+
     return await getChatMessage(dotYouClient, messageId);
   };
 
@@ -33,6 +57,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     linkPreviews,
     chatId,
     userDate,
+    tags,
   }: {
     conversation: HomebaseFile<UnifiedConversation>;
     replyId?: string;
@@ -41,6 +66,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     linkPreviews?: LinkPreview[];
     chatId?: string;
     userDate?: number;
+    tags?: string[];
   }): Promise<NewHomebaseFile<ChatMessage> | null> => {
     const conversationId = conversation.fileMetadata.appData.uniqueId as string;
     const conversationContent = conversation.fileMetadata.appData.content;
@@ -63,6 +89,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
             replyId: replyId,
           },
           userDate: userDate || new Date().getTime(),
+          tags,
         },
       },
       serverMetadata: {
@@ -84,7 +111,8 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     newChat.fileId = uploadResult.file.fileId;
     newChat.fileMetadata.versionTag = uploadResult.newVersionTag;
     newChat.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
-    newChat.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Sent;
+    newChat.fileMetadata.appData.content.deliveryStatus =
+      uploadResult.chatDeliveryStatus || ChatDeliveryStatus.Sent;
 
     return newChat;
   };
@@ -106,14 +134,14 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
   return {
     get: useQuery({
       queryKey: ['chat-message', props?.messageId],
-      queryFn: () => getMessageByUniqueId(props?.messageId as string),
+      queryFn: () => getMessageByUniqueId(props?.conversationId, props?.messageId as string),
       enabled: !!props?.messageId,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
     }),
     send: useMutation({
       mutationFn: sendMessage,
-      onMutate: async ({ conversation, replyId, files, message, chatId, userDate }) => {
+      onMutate: async ({ conversation, replyId, files, message, chatId, userDate, tags }) => {
         const existingData = queryClient.getQueryData<
           InfiniteData<{
             searchResults: (HomebaseFile<ChatMessage> | null)[];
@@ -137,6 +165,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
                 replyId: replyId,
               },
               userDate,
+              tags,
             },
             payloads: files?.map((file) => ({
               contentType: file.file.type,
@@ -150,20 +179,11 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
           },
         };
 
-        const newData = {
-          ...existingData,
-          pages: existingData?.pages?.map((page, index) => ({
-            ...page,
-            searchResults:
-              index === 0 ? [newMessageDsr, ...page.searchResults] : page.searchResults,
-          })),
-        };
-
-        queryClient.setQueryData(
-          ['chat-messages', conversation.fileMetadata.appData.uniqueId],
-          newData
-        );
-        return { existingData };
+        const { extistingMessages } = insertNewMessage(queryClient, newMessageDsr);
+        if (!extistingMessages) {
+          return;
+        }
+        return { existingData: extistingMessages };
       },
       onSuccess: async (newMessage, params) => {
         if (!newMessage) return;
@@ -219,11 +239,6 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
           ['chat-messages', messageParams.conversation.fileMetadata.appData.uniqueId],
           context?.existingData
         );
-      },
-      onSettled: async (_data, _error, variables) => {
-        // queryClient.invalidateQueries({
-        //   queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
-        // });
       },
     }),
     update: useMutation({

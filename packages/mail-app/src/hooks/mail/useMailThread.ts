@@ -1,4 +1,4 @@
-import { HomebaseFile, deleteFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile, deleteFile } from '@homebase-id/js-lib/core';
 import {
   ARCHIVE_ARCHIVAL_STATUS,
   DEFAULT_ARCHIVAL_STATUS,
@@ -9,9 +9,9 @@ import {
   REMOVE_ARCHIVAL_STATUS,
   updateLocalMailHeader,
 } from '../../providers/MailProvider';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useMailConversations } from './useMailConversations';
 
 export const useMailThread = (props?: { threadId: string | undefined }) => {
@@ -112,11 +112,6 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
         queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
 
         console.error('Error removing messages', error);
-      },
-      onSettled: () => {
-        // TODO: This can be optimized to use the uploadResults to update the versionTag;
-        //   Just not sure if it should live here, or be part fo the websocket connection?
-        queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
       },
     }),
     archive: useMutation({

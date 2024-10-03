@@ -11,8 +11,10 @@ import {
   MAIL_APP_ID,
   HomebaseMail,
   FEED_CHAT_APP_ID,
-} from '@youfoundation/common-app';
-import { getTwoLettersFromDomain, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+  COMMUNITY_APP_ID,
+  HomebaseCommunity,
+} from '@homebase-id/common-app';
+import { getTwoLettersFromDomain, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useState, useMemo } from 'react';
 
 export const CompanyImage = ({
@@ -70,4 +72,5 @@ export const AppSpecificIcon = (appId: string | undefined) => {
   if (stringGuidsEqual(appId, FEED_CHAT_APP_ID)) return HomebaseFeed;
   if (stringGuidsEqual(appId, PHOTO_APP_ID)) return HomebasePhoto;
   if (stringGuidsEqual(appId, MAIL_APP_ID)) return HomebaseMail;
+  if (stringGuidsEqual(appId, COMMUNITY_APP_ID)) return HomebaseCommunity;
 };

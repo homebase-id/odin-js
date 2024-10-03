@@ -1,4 +1,4 @@
-import { ParsedReactionPreview, ReactionPreview } from './DriveFileReactionTypes';
+import { ReactionPreview } from './DriveFileReactionTypes';
 
 export type SystemFileType = 'Standard' | 'Comment';
 
@@ -10,9 +10,10 @@ export interface FileMetadata<T = string> {
 
   globalTransitId?: string;
   isEncrypted: boolean;
+  originalAuthor: string;
   senderOdinId: string;
   appData: AppFileMetaData<T>;
-  reactionPreview?: ReactionPreview | ParsedReactionPreview;
+  reactionPreview?: ReactionPreview;
   versionTag: string;
 
   payloads: PayloadDescriptor[];
@@ -82,14 +83,28 @@ export interface EmbeddedThumb extends ImageSize {
 export interface ThumbnailFile extends ImageSize {
   key: string;
   payload: File | Blob;
+  skipEncryption?: boolean;
 }
 
-export interface PayloadFile {
+export interface BasePayloadFile {
   key: string;
   payload: File | Blob;
   previewThumbnail?: EmbeddedThumb;
   descriptorContent?: string;
+  skipEncryption?: boolean;
 }
+
+export interface PayloadFileWithRegularEncryption extends BasePayloadFile {
+  skipEncryption?: false | undefined;
+}
+
+export interface PayloadFileWithManualEncryption extends BasePayloadFile {
+  // Options to skip encryption for payloads and hav it handled outside
+  skipEncryption: true;
+  iv: Uint8Array;
+}
+
+export type PayloadFile = PayloadFileWithRegularEncryption | PayloadFileWithManualEncryption;
 
 type None = 0;
 type Archived = 1;
@@ -108,16 +123,23 @@ export interface AppFileMetaData<T = string> {
   previewThumbnail?: EmbeddedThumb;
   archivalStatus?: ArchivalStatus;
 }
-
-export interface ExternalFileIdentifier {
+interface BaseFileIdentifier {
+  targetDrive: TargetDrive;
+}
+export interface FileIdFileIdentifier extends BaseFileIdentifier {
   fileId: string;
-  targetDrive: TargetDrive;
+}
+export interface GlobalTransitIdFileIdentifier extends BaseFileIdentifier {
+  globalTransitId: string;
+}
+export interface UniqueIdFileIdentifier extends BaseFileIdentifier {
+  uniqueId: string;
 }
 
-export interface GlobalTransitIdFileIdentifier {
-  globalTransitId: string;
-  targetDrive: TargetDrive;
-}
+export type FileIdentifier =
+  | FileIdFileIdentifier
+  | GlobalTransitIdFileIdentifier
+  | UniqueIdFileIdentifier;
 
 export type ImageContentType =
   | 'image/webp'
@@ -154,6 +176,7 @@ export interface UploadPayloadDescriptor {
   descriptorContent: string | undefined;
   thumbnails?: UploadThumbnailDescriptor[];
   previewThumbnail?: EmbeddedThumb;
+  contentType: ContentType;
   iv: Uint8Array | undefined;
 }
 

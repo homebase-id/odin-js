@@ -23,9 +23,9 @@ import {
   PayloadFile,
   ThumbnailFile,
   getPayloadBytes,
-} from '@youfoundation/js-lib/core';
-import { jsonStringify64, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { createThumbnails } from '@youfoundation/js-lib/media';
+} from '@homebase-id/js-lib/core';
+import { jsonStringify64, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { createThumbnails } from '@homebase-id/js-lib/media';
 
 export const CHAT_CONVERSATION_FILE_TYPE = 8888;
 export const CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE = 8889;
@@ -42,6 +42,7 @@ export const ConversationWithYourself: HomebaseFile<UnifiedConversation> = {
     updated: 0,
     isEncrypted: false,
     senderOdinId: '',
+    originalAuthor: '',
     appData: {
       uniqueId: ConversationWithYourselfId,
       fileType: CHAT_CONVERSATION_FILE_TYPE,
@@ -192,7 +193,7 @@ export const dsrToConversation = async (
 
     return conversation;
   } catch (ex) {
-    console.error('[DotYouCore-js] failed to get the conversation payload of a dsr', dsr, ex);
+    console.error('[chat] failed to get the conversation payload of a dsr', dsr, ex);
     return null;
   }
 };
@@ -416,7 +417,7 @@ export const dsrToConversationMetadata = async (
 
     return conversation;
   } catch (ex) {
-    console.error('[DotYouCore-js] failed to get the ConversationMetadata of a dsr', dsr, ex);
+    console.error('[chat] failed to get the ConversationMetadata of a dsr', dsr, ex);
     return null;
   }
 };

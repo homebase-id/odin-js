@@ -1,20 +1,19 @@
 import { useState } from 'react';
 import {
   ActionButton,
-  Arrow,
   ConnectionImage,
   ConnectionName,
   ErrorBoundary,
   Input,
   Label,
-  Times,
   t,
   useAllContacts,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
+import { Arrow, Times } from '@homebase-id/common-app/icons';
 import { useNavigate } from 'react-router-dom';
-import { ContactFile } from '@youfoundation/js-lib/network';
+import { ContactFile } from '@homebase-id/js-lib/network';
 import { useConversation } from '../../../../hooks/chat/useConversation';
-import { CHAT_ROOT } from '../../../../templates/Chat/ChatHome';
+import { ROOT_PATH } from '../../../../app/App';
 import { SingleConversationItem } from '../Item/ConversationItem';
 
 export const NewConversationGroup = () => {
@@ -45,7 +44,7 @@ export const NewConversationGroup = () => {
     if (!recipients?.length) return;
     try {
       const result = await createNew({ recipients: recipients, title: groupTitle });
-      navigate(`${CHAT_ROOT}/${result.newConversationId}`);
+      navigate(`${ROOT_PATH}/${result.newConversationId}`);
     } catch (e) {
       console.error(e);
     }
@@ -55,7 +54,7 @@ export const NewConversationGroup = () => {
     <ErrorBoundary>
       <div className="flex flex-row items-center justify-between bg-primary/20 p-5">
         <h2 className="font-semibold">{t('New Group')}</h2>
-        <ActionButton onClick={() => navigate(`${CHAT_ROOT}/`)} icon={Times} type="mute" />
+        <ActionButton onClick={() => navigate(`${ROOT_PATH}/`)} icon={Times} type="mute" />
       </div>
       {newRecipients?.length ? (
         <div className="flex flex-col gap-2 bg-primary/10 p-5">

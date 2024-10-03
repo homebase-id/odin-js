@@ -11,14 +11,14 @@ import {
   RawContact,
   getContactByOdinId,
   getContactByUniqueId,
-} from '@youfoundation/js-lib/network';
+} from '@homebase-id/js-lib/network';
 import {
   ApiType,
   DotYouClient,
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 
 export const useContact = ({
   odinId,
@@ -58,7 +58,6 @@ export const useContact = ({
 
     // Direct fetch with odinId:
     // Use the data from the contact book, if it exists and if it's a contact level source or we are not allowed to save anyway
-    // TODO: Not sure if this is the best way yet... But it works for now
     const contactBookContact = await getContactByOdinId(dotYouClient, odinId);
     if (
       !hasCache && // If we have a contact on drive, and we don't have cache, we need a fast return; Otherwise we trigger a refresh

@@ -1,19 +1,20 @@
 import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { TypedConnectionNotification } from '@youfoundation/js-lib/core';
+import { TypedConnectionNotification } from '@homebase-id/js-lib/core';
 
-import { processInbox } from '@youfoundation/js-lib/peer';
+import { processInbox } from '@homebase-id/js-lib/peer';
 
-import { useNotificationSubscriber } from '@youfoundation/common-app';
+import { useWebsocketSubscriber } from '@homebase-id/common-app';
 import { useCallback } from 'react';
 
-import { hasDebugFlag, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { hasDebugFlag, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import {
   MAIL_CONVERSATION_FILE_TYPE,
   MailConversationsReturn,
   MailDrive,
   dsrToMailConversation,
 } from '../../providers/MailProvider';
+import { websocketDrives } from '../auth/useAuth';
 
 const MINUTE_IN_MS = 60000;
 
@@ -56,7 +57,6 @@ const isDebug = hasDebugFlag();
 const useMailWebsocket = (isEnabled: boolean) => {
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClientContext();
-  const identity = dotYouClient.getIdentity();
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
     isDebug && console.debug('[MailWebsocket] Got notification', notification);
@@ -76,15 +76,6 @@ const useMailWebsocket = (isEnabled: boolean) => {
           true
         );
         if (!updatedChatMessage) return;
-
-        const sender =
-          notification.header.fileMetadata.senderOdinId ||
-          updatedChatMessage.fileMetadata.appData.content.sender;
-
-        if (!sender || sender === identity) {
-          // Ignore messages sent by the current user
-          return;
-        }
 
         const existingConversations = queryClient.getQueryData<
           InfiniteData<MailConversationsReturn>
@@ -120,12 +111,14 @@ const useMailWebsocket = (isEnabled: boolean) => {
     }
   }, []);
 
-  return useNotificationSubscriber(
+  return useWebsocketSubscriber(
     isEnabled ? handler : undefined,
     ['fileAdded', 'fileModified'],
-    [MailDrive],
+    websocketDrives,
     () => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
-    }
+    },
+    undefined,
+    'useLiveMailProcessor'
   );
 };

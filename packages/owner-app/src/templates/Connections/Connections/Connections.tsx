@@ -1,22 +1,24 @@
-import {
-  ActionButton,
-  OWNER_APP_ID,
-  Plus,
-  SubtleMessage,
-  useRemoveNotifications,
-} from '@youfoundation/common-app';
 import PersonIncomingRequest from '../../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
 import PersonOutgoingRequest from '../../../components/Connection/PersonOutgoingRequest/PersonOutgoingRequest';
-import { t, usePendingConnections, useSentConnections } from '@youfoundation/common-app';
 import { SectionTitle } from '../../../components/ui/Sections/Section';
 import { useEffect, useState } from 'react';
-import { Pager, Persons } from '@youfoundation/common-app';
-import { LoadingBlock } from '@youfoundation/common-app';
 import PersonActive from '../../../components/Connection/PersonActive/PersonActive';
-import { DotYouProfile } from '@youfoundation/js-lib/network';
-import { useActiveConnections } from '@youfoundation/common-app';
+import { DotYouProfile } from '@homebase-id/js-lib/network';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import OutgoingConnectionDialog from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
+import {
+  useRemoveNotifications,
+  OWNER_APP_ID,
+  ActionButton,
+  t,
+  SubtleMessage,
+  usePendingConnections,
+  Pager,
+  LoadingBlock,
+  useSentConnections,
+  useActiveConnections,
+} from '@homebase-id/common-app';
+import { Persons, Plus } from '@homebase-id/common-app/icons';
 
 const Connections = () => {
   const [hasActiveConnections, setActiveConnections] = useState(true);

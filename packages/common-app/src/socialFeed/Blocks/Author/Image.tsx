@@ -1,9 +1,9 @@
-import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
+import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@homebase-id/js-lib/profile';
 import { Image } from '../../../media/Image';
 import { t } from '../../../helpers/i18n/dictionary';
 import { Person } from '../../../ui/Icons/Person';
 import { useSiteData } from '../../../hooks/siteData/useSiteData';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 
 interface ImageProps {
   className?: string;
@@ -47,10 +47,10 @@ export const OwnerImage = ({ className, size }: ImageProps) => {
         size === 'xs'
           ? 'h-[2rem] w-[2rem]'
           : size === 'sm'
-          ? 'h-[3rem] w-[3rem]'
-          : size === 'md'
-          ? 'h-[5rem] w-[5rem]'
-          : ''
+            ? 'h-[3rem] w-[3rem]'
+            : size === 'md'
+              ? 'h-[5rem] w-[5rem]'
+              : ''
       } rounded-full ${className ?? ''}`}
       fit="cover"
       alt={t('You')}
@@ -70,12 +70,12 @@ export const ConnectionImage = ({ odinId, className, size }: ConnectionImageProp
             size === 'xxs'
               ? 'h-[1.5rem] w-[1.5rem]'
               : size === 'xs'
-              ? 'h-[2rem] w-[2rem]'
-              : size === 'sm'
-              ? 'h-[3rem] w-[3rem]'
-              : size === 'md'
-              ? 'h-[5rem] w-[5rem]'
-              : ''
+                ? 'h-[2rem] w-[2rem]'
+                : size === 'sm'
+                  ? 'h-[3rem] w-[3rem]'
+                  : size === 'md'
+                    ? 'h-[5rem] w-[5rem]'
+                    : ''
           } rounded-full ${className ?? ''}`}
           alt={`${odinId}`}
           title={`${odinId}`}
@@ -90,10 +90,10 @@ export const ConnectionImage = ({ odinId, className, size }: ConnectionImageProp
               size === 'xs'
                 ? 'h-[2rem] w-[2rem]'
                 : size === 'sm'
-                ? 'h-[3rem] w-[3rem]'
-                : size === 'md'
-                ? 'h-[5rem] w-[5rem]'
-                : ''
+                  ? 'h-[3rem] w-[3rem]'
+                  : size === 'md'
+                    ? 'h-[5rem] w-[5rem]'
+                    : ''
             }
           />
         </div>

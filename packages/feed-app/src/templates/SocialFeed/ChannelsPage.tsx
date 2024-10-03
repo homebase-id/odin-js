@@ -2,20 +2,17 @@ import { useMemo, useState } from 'react';
 import {
   ChannelDefinitionVm,
   ChannelItem,
-  Loader,
-  MagnifyingGlass,
   ManageCollaborativeChannelItem,
-  Plus,
   useCollaborativeChannels,
-} from '@youfoundation/common-app';
-import { Quote } from '@youfoundation/common-app';
-import { t } from '@youfoundation/common-app';
-import { useChannels } from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
+import { Loader, MagnifyingGlass, Plus, Quote } from '@homebase-id/common-app/icons';
+import { t } from '@homebase-id/common-app';
+import { useChannels } from '@homebase-id/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { ROOT_PATH } from '../../app/App';
 import { useSearchParams } from 'react-router-dom';
-import { NewHomebaseFile } from '@youfoundation/js-lib/core';
-import { tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { NewHomebaseFile } from '@homebase-id/js-lib/core';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import React from 'react';
 
 export const ChannelsPage = () => {

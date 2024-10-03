@@ -1,16 +1,8 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import {
-  ActionGroup,
-  Article,
-  Ellipsis,
-  FEED_APP_ID,
-  FEED_CHAT_APP_ID,
-  Quote,
-  t,
-  useRemoveNotifications,
-} from '@youfoundation/common-app';
+import { ActionGroup, FEED_CHAT_APP_ID, t, useRemoveNotifications } from '@homebase-id/common-app';
+import { Feed, Article, Ellipsis, Quote } from '@homebase-id/common-app/icons';
 import SocialFeedMainContent from '../../components/SocialFeed/MainContent/SocialFeedMainContent';
 
 const ConnectionsView = lazy(
@@ -34,7 +26,7 @@ const FollowHomebase = lazy(
 
 const PostPreview = lazy(() => import('../../components/SocialFeed/MainContent/PostPreview'));
 
-import { Feed, ExtendPermissionDialog } from '@youfoundation/common-app';
+import { FEED_APP_ID, ExtendPermissionDialog } from '@homebase-id/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { ROOT_PATH } from '../../app/App';
 import { drives, permissions } from '../../hooks/auth/useAuth';
@@ -108,7 +100,7 @@ export const SocialFeed = () => {
             <SocialFeedMainContent />
           </div>
           <div className="hidden flex-col gap-4 lg:flex xl:contents">
-            <div className="order-1 hidden lg:block ">
+            <div className="order-1 hidden lg:block">
               {isDesktop ? (
                 <div className="sticky top-4 flex flex-col gap-4">
                   <Suspense>

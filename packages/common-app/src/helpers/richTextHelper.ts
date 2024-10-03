@@ -1,5 +1,5 @@
-import { ReadTimeStats } from '@youfoundation/js-lib/public';
-import { RichText } from '@youfoundation/js-lib/core';
+import { ReadTimeStats } from '@homebase-id/js-lib/public';
+import { RichText } from '@homebase-id/js-lib/core';
 
 const urlAndMentionRegex = new RegExp(/(https?:\/\/[^\s]+|@[^\s]+)/);
 
@@ -15,8 +15,7 @@ export const getRichTextFromString = (body: string): RichText | undefined => {
       if (!part || !part.length) return;
 
       if (urlRegex.test(part)) return { type: 'a', url: part, text: part };
-      if (mentionRegex.test(part))
-        return { type: 'a', url: `https://${part.slice(1)}`, text: part, odinId: part.slice(1) };
+      if (mentionRegex.test(part)) return { type: 'mention', value: part.slice(1) };
       else return { text: part };
     })
     .filter(Boolean) as RichText;
@@ -24,12 +23,18 @@ export const getRichTextFromString = (body: string): RichText | undefined => {
   return richText.some((part) => part.type) ? richText : undefined;
 };
 
-export const getTextRootsRecursive = (children: RichText): string[] => {
+export const getTextRootsRecursive = (children: RichText | string): string[] => {
+  if (!Array.isArray(children)) return [children as string];
+
   return children
-    .map((child) =>
-      child.children
-        ? getTextRootsRecursive(child.children as RichText).join(' ')
-        : (child.text as string)
+    .map(
+      (child) =>
+        [
+          child.children ? getTextRootsRecursive(child.children as RichText).join(' ') : undefined,
+          (child.text || child.value || undefined) as string,
+        ]
+          .filter(Boolean)
+          .join(' ') || ''
     )
     .filter((child) => child.length);
 };

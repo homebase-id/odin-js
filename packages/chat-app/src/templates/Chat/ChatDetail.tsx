@@ -1,20 +1,24 @@
 import {
   ActionGroup,
   ActionLink,
-  ChevronDown,
-  ChevronLeft,
   ConnectionImage,
   ConnectionName,
   ErrorBoundary,
   ErrorNotification,
+  HybridLink,
   OwnerImage,
   OwnerName,
-  Persons,
   t,
   useDotYouClient,
   useIsConnected,
-} from '@youfoundation/common-app';
-import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
+} from '@homebase-id/common-app';
+import { ChevronDown, ChevronLeft, Persons } from '@homebase-id/common-app/icons';
+import {
+  ApiType,
+  DotYouClient,
+  FailedTransferStatuses,
+  HomebaseFile,
+} from '@homebase-id/js-lib/core';
 import {
   ConversationWithYourselfId,
   UnifiedConversation,
@@ -26,15 +30,23 @@ import { ChatHistory } from '../../components/Chat/ChatHistory';
 import { ChatComposer } from '../../components/Chat/Composer/ChatComposer';
 import { ChatInfo } from '../../components/Chat/Detail/ChatInfo';
 import { useNavigate } from 'react-router-dom';
-import { CHAT_ROOT } from './ChatHome';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { ROOT_PATH } from '../../app/App';
 
-export const ChatDetail = ({ conversationId }: { conversationId: string | undefined }) => {
-  const [isEmptyChat, setIsEmptyChat] = useState<boolean>(false);
-
+export const ChatDetail = ({
+  conversationId,
+  communityTagId,
+  rootPath: _rootPath,
+}: {
+  conversationId: string | undefined;
+  communityTagId?: string;
+  rootPath?: string;
+}) => {
+  const rootPath = _rootPath || ROOT_PATH;
   const { data: conversation, isLoading, isFetched } = useConversation({ conversationId }).single;
   const { mutate: inviteRecipient } = useConversation().inviteRecipient;
   const [replyMsg, setReplyMsg] = useState<HomebaseFile<ChatMessage> | undefined>();
+  const identity = useDotYouClient().getIdentity();
 
   if (!conversationId || isLoading || (!conversation && isFetched))
     return (
@@ -45,10 +57,25 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
 
   const onSend = async () => {
     if (
-      isEmptyChat &&
-      conversation &&
-      !stringGuidsEqual(conversationId, ConversationWithYourselfId)
+      !conversation ||
+      stringGuidsEqual(conversationId, ConversationWithYourselfId) ||
+      conversation?.fileMetadata.senderOdinId !== identity
     ) {
+      return;
+    }
+
+    const filteredRecipients = conversation.fileMetadata.appData.content.recipients.filter(
+      (recipient) => recipient !== identity
+    );
+
+    const anyRecipientMissingConversation = filteredRecipients.some((recipient) => {
+      const latestTransferStatus =
+        conversation.serverMetadata?.transferHistory?.recipients[recipient].latestTransferStatus;
+
+      if (!latestTransferStatus) return true;
+      return FailedTransferStatuses.includes(latestTransferStatus);
+    });
+    if (anyRecipientMissingConversation) {
       console.log('invite recipient');
       inviteRecipient({ conversation });
     }
@@ -57,17 +84,14 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
   return (
     <ErrorBoundary>
       <div className="flex h-full flex-grow flex-col overflow-hidden">
-        <ChatHeader conversation={conversation || undefined} />
+        <ChatHeader conversation={conversation || undefined} rootPath={rootPath} />
         <GroupChatConnectedState conversation={conversation || undefined} />
         <ErrorBoundary>
-          <ChatHistory
-            conversation={conversation || undefined}
-            setReplyMsg={setReplyMsg}
-            setIsEmptyChat={setIsEmptyChat}
-          />
+          <ChatHistory conversation={conversation || undefined} setReplyMsg={setReplyMsg} />
         </ErrorBoundary>
         <ErrorBoundary>
           <ChatComposer
+            tags={communityTagId ? [communityTagId] : undefined}
             conversation={conversation || undefined}
             replyMsg={replyMsg}
             clearReplyMsg={() => setReplyMsg(undefined)}
@@ -82,8 +106,10 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
 
 const ChatHeader = ({
   conversation: conversationDsr,
+  rootPath,
 }: {
   conversation: HomebaseFile<UnifiedConversation> | undefined;
+  rootPath: string;
 }) => {
   const navigate = useNavigate();
   const identity = useDotYouClient().getIdentity();
@@ -107,16 +133,16 @@ const ChatHeader = ({
   } = useConversation().deleteChat;
 
   useEffect(() => {
-    if (deleteChatStatus === 'success') navigate(CHAT_ROOT);
+    if (deleteChatStatus === 'success') navigate(rootPath);
   }, [deleteChatStatus]);
 
   return (
     <>
       <ErrorNotification error={clearChatError || deleteChatError} />
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-        <ActionLink className="lg:hidden" type="mute" href={CHAT_ROOT}>
-          <ChevronLeft className="h-5 w-5" />
-        </ActionLink>
+        <HybridLink className="-m-1 p-1 lg:hidden" type="mute" href={rootPath}>
+          <ChevronLeft className="h-4 w-4" />
+        </HybridLink>
 
         <a
           onClick={() => setShowChatInfo(true)}
@@ -125,8 +151,8 @@ const ChatHeader = ({
           {singleRecipient ? (
             <ConnectionImage
               odinId={singleRecipient}
-              className="border border-neutral-200 dark:border-neutral-800"
-              size="sm"
+              className="h-[2rem] w-[2rem] border border-neutral-200 dark:border-neutral-800 lg:h-[3rem] lg:w-[3rem]"
+              size="custom"
             />
           ) : withYourself ? (
             <div className="h-[3rem] w-[3rem] flex-shrink-0">
@@ -227,11 +253,11 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
   const { data: isConnected, isFetched } = useIsConnected(recipient);
   const host = useDotYouClient().getDotYouClient().getRoot();
 
-  if (isConnected || !isFetched) return null;
+  if (isConnected === null || isConnected || !isFetched) return null;
   return (
     <div className="flex w-full flex-row items-center justify-between bg-page-background px-5 py-2">
       <p>
-        {t('You can only chat with connected identites, messages will not be delivered to')}:{' '}
+        {t('You can only chat with connected identities, messages will not be delivered to')}:{' '}
         <a
           href={`${new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}`}
           className="underline"

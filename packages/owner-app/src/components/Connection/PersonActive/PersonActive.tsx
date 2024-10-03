@@ -1,5 +1,5 @@
 import ConnectionCard from '../ConnectionCard/ConnectionCard';
-import { DotYouProfile } from '@youfoundation/js-lib/network';
+import { DotYouProfile } from '@homebase-id/js-lib/network';
 
 const PersonActive = ({
   dotYouProfile,

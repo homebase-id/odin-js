@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { ActionLink, Alert, DomainHighlighter, t } from '@youfoundation/common-app';
+import { ActionLink, Alert, DomainHighlighter, t } from '@homebase-id/common-app';
 import { useAuth } from '../../hooks/auth/useAuth';
-import { ActionButton } from '@youfoundation/common-app';
-import { Label } from '@youfoundation/common-app';
+import { ActionButton } from '@homebase-id/common-app';
+import { Label } from '@homebase-id/common-app';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import { PasswordInput } from '../../components/Password/PasswordInput';

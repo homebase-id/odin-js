@@ -1,16 +1,18 @@
-import { t } from '@youfoundation/common-app';
+import { t } from '@homebase-id/common-app';
 import { useDrive } from '../../../hooks/drives/useDrive';
 import { DriveGrantRequest } from '../../../provider/app/AppManagementProviderTypes';
-import { HardDrive } from '@youfoundation/common-app';
-import { LoadingBlock } from '@youfoundation/common-app';
-import { getDrivePermissionFromNumber } from '@youfoundation/js-lib/helpers';
+import { Arrow, HardDrive } from '@homebase-id/common-app/icons';
+import { LoadingBlock } from '@homebase-id/common-app';
+import { getDrivePermissionFromNumber } from '@homebase-id/js-lib/helpers';
 
 const DrivePermissionRequestView = ({
   driveGrant,
+  existingGrant,
   permissionTree,
   className,
 }: {
   driveGrant: DriveGrantRequest;
+  existingGrant?: DriveGrantRequest;
   permissionTree?: string;
   className?: string;
 }) => {
@@ -19,6 +21,12 @@ const DrivePermissionRequestView = ({
   }).fetch;
 
   const isNew = !drive?.name;
+
+  const totalExistingPermissions = existingGrant?.permissionedDrive.permission.reduce(
+    (a, b) => a + b,
+    0
+  );
+  const totalNewPermission = driveGrant?.permissionedDrive.permission.reduce((a, b) => a + b, 0);
 
   return (
     <div
@@ -32,15 +40,31 @@ const DrivePermissionRequestView = ({
       ) : (
         <div className="flex flex-col">
           <div className={`leading-none ${!permissionTree ? 'my-auto' : ''}`}>
-            <p>
-              {drive?.name ?? (
+            <p className="flex flex-row gap-1">
+              {drive?.name ?? <span className="font-bold">* {driveGrant.driveMeta?.name}</span>}
+
+              {!isNew ? (
                 <>
-                  <span className="font-bold">*</span> {driveGrant.driveMeta?.name}
+                  {':'}
+                  {totalExistingPermissions && totalExistingPermissions !== totalNewPermission ? (
+                    <>
+                      <span className="line-through">
+                        {t(getDrivePermissionFromNumber([totalExistingPermissions]))}
+                      </span>
+                      <Arrow className="h-4 w-4" />
+                    </>
+                  ) : null}
+                  <span
+                    className={
+                      totalExistingPermissions && totalExistingPermissions !== totalNewPermission
+                        ? 'font-bold'
+                        : ''
+                    }
+                  >
+                    {`${t(getDrivePermissionFromNumber(driveGrant.permissionedDrive.permission))}`}
+                  </span>
                 </>
-              )}
-              {!isNew
-                ? `: ${t(getDrivePermissionFromNumber(driveGrant.permissionedDrive.permission))}`
-                : null}
+              ) : null}
             </p>
 
             {driveGrant.driveMeta?.attributes ? (

@@ -99,9 +99,6 @@ export interface PrimaryMediaFile {
   type: string;
 }
 
-// export type PostFile<T extends PostContent> = HomebaseFile<T>;
-// export type NewPostFile<T extends PostContent> = NewHomebaseFile<T>;
-
 export interface EmbeddedPost extends Omit<PostContent, 'embeddedPost'> {
   permalink: string;
   previewThumbnail?: EmbeddedThumb;
@@ -110,14 +107,14 @@ export interface EmbeddedPost extends Omit<PostContent, 'embeddedPost'> {
   lastModified: number | undefined;
   userDate: number;
   payloads: PayloadDescriptor[];
+  authorOdinId: string;
 }
 
 export type ReactAccess = 'emoji' | 'comment' | boolean;
 
 export interface PostContent {
-  id: string;
+  id: string; // id that is set once and never changes; Used for permalink;
   channelId: string;
-  authorOdinId: string;
   reactAccess?: ReactAccess;
 
   caption: string;
@@ -125,6 +122,11 @@ export interface PostContent {
   slug: string;
   primaryMediaFile?: PrimaryMediaFile;
   type: 'Article' | 'Media' | 'Tweet';
+
+  /**
+   * @deprecated Use fileMetadata.originalAuthor instead
+   */
+  authorOdinId?: string;
 
   embeddedPost?: EmbeddedPost;
 }
@@ -145,21 +147,12 @@ export interface Media extends PostContent {
   type: 'Media';
 }
 
-// On hold for now, needs a proxy to get the linkMeta externally
-// export interface LinkMeta {
-//   url: string;
-//   title: string;
-//   description?: string;
-//   imageUrl?: string;
-// }
-
 export interface Tweet extends PostContent {
   type: 'Tweet';
-  // linkMeta?: LinkMeta;
 }
 
 export interface ReactionContext {
-  authorOdinId: string;
+  odinId: string;
   channelId: string;
   target: { fileId: string; globalTransitId: string; isEncrypted: boolean };
 }

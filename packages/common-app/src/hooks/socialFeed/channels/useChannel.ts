@@ -1,269 +1,92 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ChannelDefinition,
-  GetTargetDriveFromChannelId,
+  BlogConfig,
   getChannelDefinition,
   getChannelDefinitionBySlug,
-  removeChannelDefinition,
-  saveChannelDefinition,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 
 import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
-import { FEED_APP_ID, t, useDotYouClient, useStaticFiles } from '../../../..';
-import { stringGuidsEqual, stringifyToQueryParams, toGuidId } from '@youfoundation/js-lib/helpers';
-import {
-  ApiType,
-  DotYouClient,
-  DrivePermissionType,
-  HomebaseFile,
-  NewHomebaseFile,
-  TargetDrive,
-} from '@youfoundation/js-lib/core';
+import { useDotYouClient } from '../../../..';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { fetchCachedPublicChannels } from '../post/cachedDataHelpers';
-const FEED_ROOT_PATH = '/apps/feed';
+import { getChannelOverPeer, getChannelBySlugOverPeer } from '@homebase-id/js-lib/peer';
 
 type useChannelsProps = {
-  channelSlug?: string;
-  channelId?: string;
+  odinId?: string;
+  channelKey?: string;
 };
 
-const getExtendAuthorizationUrl = (
-  identity: string,
-  name: string,
-  description: string,
-  targetDrive: TargetDrive,
-  returnUrl: string,
-  allowAnonymousReads?: boolean,
-  allowSubscriptions?: boolean
-) => {
-  const drives = [
-    {
-      a: targetDrive.alias,
-      t: targetDrive.type,
-      p:
-        DrivePermissionType.Read +
-        DrivePermissionType.Write +
-        DrivePermissionType.React +
-        DrivePermissionType.Comment, // Permission
-      n: name,
-      d: description,
-      r: allowAnonymousReads,
-      s: allowSubscriptions,
-    },
-  ];
-
-  const params = {
-    appId: FEED_APP_ID,
-    d: JSON.stringify(drives),
-  };
-
-  const host = new DotYouClient({ identity: identity || undefined, api: ApiType.App }).getRoot();
-  return `${host}/owner/appupdate?${stringifyToQueryParams(params)}&return=${encodeURIComponent(
-    returnUrl
-  )}`;
-};
-
-export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
+export const useChannel = ({ odinId, channelKey }: useChannelsProps) => {
   const { getDotYouClient, isOwner } = useDotYouClient();
   const dotYouClient = getDotYouClient();
   const queryClient = useQueryClient();
-  const { mutate: publishStaticFiles } = useStaticFiles().publish;
 
-  const fetchChannelData = async ({ channelSlug, channelId }: useChannelsProps) => {
-    if (!channelSlug && !channelId) return null;
+  const fetchChannelData = async ({ channelKey }: useChannelsProps) => {
+    if (!channelKey) return null;
 
-    const cachedChannels = queryClient.getQueryData<HomebaseFile<ChannelDefinitionVm>[]>([
-      'channels',
-    ]);
-    if (cachedChannels) {
-      const foundChannel = cachedChannels.find(
-        (chnl) =>
-          stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, channelId) ||
-          chnl.fileMetadata.appData.content.slug === channelSlug
-      );
-      if (foundChannel) return foundChannel;
-    }
-
-    const channel = (await fetchCachedPublicChannels(dotYouClient))?.find(
-      (chnl) =>
-        stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, channelId) ||
-        chnl.fileMetadata.appData.content.slug === channelSlug
-    );
-    if (channel && !isOwner) return channel;
-
-    const directFetchOfChannel =
-      (channelSlug ? await getChannelDefinitionBySlug(dotYouClient, channelSlug) : undefined) ||
-      (channelId ? await getChannelDefinition(dotYouClient, channelId) : undefined);
-
-    if (directFetchOfChannel) {
-      return {
-        ...directFetchOfChannel,
-        fileMetadata: {
-          ...directFetchOfChannel.fileMetadata,
-          appData: {
-            ...directFetchOfChannel.fileMetadata.appData,
-            content: {
-              ...directFetchOfChannel.fileMetadata.appData.content,
-              template: parseChannelTemplate(
-                directFetchOfChannel?.fileMetadata.appData.content?.templateId
-              ),
-            },
-          },
-        },
-      } as HomebaseFile<ChannelDefinitionVm>;
-    }
-    return null;
-  };
-
-  const saveData = async (
-    channelDef: NewHomebaseFile<ChannelDefinition> | HomebaseFile<ChannelDefinition>
-  ) => {
-    if (!channelDef.fileId) {
-      if (!channelDef.fileMetadata.appData.uniqueId)
-        channelDef.fileMetadata.appData.uniqueId = toGuidId(
-          channelDef.fileMetadata.appData.content.name
+    if (!odinId || odinId === dotYouClient.getIdentity()) {
+      const cachedChannels = queryClient.getQueryData<HomebaseFile<ChannelDefinitionVm>[]>([
+        'channels',
+      ]);
+      if (cachedChannels) {
+        const foundChannel = cachedChannels.find(
+          (chnl) =>
+            stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, channelKey) ||
+            chnl.fileMetadata.appData.content.slug === channelKey
         );
-    }
+        if (foundChannel) return foundChannel;
+      }
 
-    const onMissingDrive = () => {
-      if (!channelDef.fileMetadata.appData.uniqueId)
-        throw new Error('Channel unique id is not set');
-
-      const host = dotYouClient.getIdentity();
-      const returnUrl = `${FEED_ROOT_PATH}/channels?new=${JSON.stringify(channelDef)}`;
-
-      const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);
-
-      window.location.href = getExtendAuthorizationUrl(
-        host,
-        channelDef.fileMetadata.appData.content.name,
-        t('Drive for "{0}" channel posts', channelDef.fileMetadata.appData.content.name),
-        targetDrive,
-        returnUrl,
-        true,
-        true
+      const channel = (await fetchCachedPublicChannels(dotYouClient))?.find(
+        (chnl) =>
+          stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, channelKey) ||
+          chnl.fileMetadata.appData.content.slug === channelKey
       );
-    };
+      if (channel && !isOwner) return channel;
 
-    return await saveChannelDefinition(dotYouClient, { ...channelDef }, onMissingDrive);
-  };
+      const directFetchOfChannel =
+        (await getChannelDefinitionBySlug(dotYouClient, channelKey)) ||
+        (await getChannelDefinition(dotYouClient, channelKey));
 
-  const removeChannel = async (channelDef: HomebaseFile<ChannelDefinition>) => {
-    await removeChannelDefinition(dotYouClient, channelDef.fileMetadata.appData.uniqueId as string);
-  };
-
-  return {
-    fetch: useQuery({
-      queryKey: ['channel', channelSlug || channelId],
-      queryFn: () => fetchChannelData({ channelSlug, channelId }),
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      enabled: !!channelId || !!channelSlug,
-    }),
-    save: useMutation({
-      mutationFn: saveData,
-      onMutate: async (toSaveChannel) => {
-        await queryClient.cancelQueries({ queryKey: ['channels'] });
-
-        const toSaveChannelAsVm = {
-          ...toSaveChannel,
+      if (directFetchOfChannel) {
+        return {
+          ...directFetchOfChannel,
           fileMetadata: {
-            ...toSaveChannel.fileMetadata,
+            ...directFetchOfChannel.fileMetadata,
             appData: {
-              ...toSaveChannel.fileMetadata.appData,
+              ...directFetchOfChannel.fileMetadata.appData,
               content: {
-                ...toSaveChannel.fileMetadata.appData.content,
+                ...directFetchOfChannel.fileMetadata.appData.content,
                 template: parseChannelTemplate(
-                  toSaveChannel?.fileMetadata.appData.content?.templateId
+                  directFetchOfChannel?.fileMetadata.appData.content?.templateId
                 ),
               },
             },
           },
         } as HomebaseFile<ChannelDefinitionVm>;
+      }
+      return null;
+    } else {
+      // Optimization to not fetch similar content, might break if the public channel is adapted by the user... Perhaps we should always keep the slug?
+      if (channelKey === BlogConfig.PublicChannelId) return BlogConfig.PublicChannelNewDsr;
 
-        // Update channels
-        const previousChannels: HomebaseFile<ChannelDefinitionVm>[] | undefined =
-          queryClient.getQueryData(['channels']);
-        const updatedChannels = previousChannels?.map((chnl) =>
-          stringGuidsEqual(
-            chnl.fileMetadata.appData.uniqueId,
-            toSaveChannelAsVm.fileMetadata.appData.uniqueId
-          )
-            ? toSaveChannelAsVm
-            : chnl
-        );
-        queryClient.setQueryData(['channels'], updatedChannels);
+      return (
+        (await getChannelBySlugOverPeer(dotYouClient, odinId, channelKey)) ||
+        (await getChannelOverPeer(dotYouClient, odinId, channelKey)) ||
+        null
+      );
+    }
+  };
 
-        // Update channel
-        queryClient.setQueryData(
-          ['channel', toSaveChannelAsVm.fileMetadata.appData.content.slug],
-          toSaveChannelAsVm
-        );
-        queryClient.setQueryData(
-          ['channel', toSaveChannelAsVm.fileMetadata.appData.uniqueId],
-          toSaveChannelAsVm
-        );
-
-        return { toSaveChannelAsVm, previousChannels };
-      },
-      onError: (err, toRemoveAttr, context) => {
-        console.error(err);
-
-        // Revert local caches to what they were
-        queryClient.setQueryData(['channels'], context?.previousChannels);
-      },
-      onSettled: (_data, _error, variables) => {
-        // Boom baby!
-        if (
-          variables.fileMetadata.appData.uniqueId &&
-          variables.fileMetadata.appData.uniqueId !== ''
-        ) {
-          queryClient.invalidateQueries({
-            queryKey: ['channel', variables.fileMetadata.appData.uniqueId],
-          });
-          queryClient.invalidateQueries({
-            queryKey: ['channel', variables.fileMetadata.appData.content.slug],
-          });
-        }
-
-        queryClient.invalidateQueries({ queryKey: ['channel'] });
-        queryClient.invalidateQueries({ queryKey: ['channels'] });
-
-        // We don't invalidate channels by default, as fetching the channels is a combination of static and dynamic data
-        // queryClient.invalidateQueries(['channels']);
-
-        publishStaticFiles('channel');
-      },
-    }),
-    remove: useMutation({
-      mutationFn: removeChannel,
-      onMutate: async (toRemoveChannel) => {
-        await queryClient.cancelQueries({ queryKey: ['channels'] });
-
-        const previousChannels: HomebaseFile<ChannelDefinitionVm>[] | undefined =
-          queryClient.getQueryData(['channels']);
-        const newChannels = previousChannels?.filter(
-          (channel) =>
-            !stringGuidsEqual(
-              channel.fileMetadata.appData.uniqueId,
-              toRemoveChannel.fileMetadata.appData.uniqueId
-            )
-        );
-
-        queryClient.setQueryData(['channels'], newChannels);
-
-        return { previousChannels, toRemoveChannel };
-      },
-      onError: (err, newData, context) => {
-        console.error(err);
-
-        queryClient.setQueryData(['channels'], context?.previousChannels);
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ['channels'] });
-        publishStaticFiles('channel');
-      },
+  return {
+    fetch: useQuery({
+      queryKey: ['channel', odinId || dotYouClient.getIdentity(), channelKey],
+      queryFn: () => fetchChannelData({ channelKey }),
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
+      enabled: !!channelKey,
     }),
   };
 };

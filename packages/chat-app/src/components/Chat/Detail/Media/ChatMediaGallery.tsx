@@ -1,20 +1,18 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../../../../providers/ChatProvider';
 import {
   ActionButton,
-  Arrow,
-  ArrowLeft,
   BoringFile,
-  Times,
-  VideoClickToLoad,
   usePortal,
-} from '@youfoundation/common-app';
+  useDotYouClientContext,
+  OdinVideoWrapper,
+} from '@homebase-id/common-app';
+import { Arrow, ArrowLeft, Times } from '@homebase-id/common-app/icons';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
-import { OdinImage } from '@youfoundation/ui-lib';
+import { OdinImage } from '@homebase-id/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 
 export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) => {
   const target = usePortal('modal-container');
@@ -79,8 +77,6 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [msg, mediaKey]);
 
-  // TODO: Added previewThumbnail of the grid
-
   const payload = msg.fileMetadata.payloads.find((p) => p.key === mediaKey);
   const contentType = payload?.contentType;
   const dialog = (
@@ -88,9 +84,9 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
       <div className="inset-0 bg-black transition-opacity lg:fixed"></div>
       <div className="inset-0 z-10 lg:fixed lg:overflow-y-auto">
         <div className="relative flex h-full min-h-[100dvh] flex-row items-center justify-center">
-          {contentType?.startsWith('video') ? (
-            <VideoClickToLoad
-              preload={true}
+          {contentType?.startsWith('video') || contentType === 'application/vnd.apple.mpegurl' ? (
+            <OdinVideoWrapper
+              autoPlay={true}
               fileId={msg.fileId}
               fileKey={mediaKey}
               targetDrive={ChatDrive}

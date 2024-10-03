@@ -8,15 +8,12 @@ import {
   FileSelector,
   Input,
   Label,
-  PaperPlane,
-  Plus,
-  Save,
-  Trash,
   getTextRootsRecursive,
   t,
   useAllContacts,
   useOutsideTrigger,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
+
 import {
   NewHomebaseFile,
   SecurityGroupType,
@@ -24,8 +21,8 @@ import {
   NewMediaFile,
   MediaFile,
   RichText,
-} from '@youfoundation/js-lib/core';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/core';
+import { getNewId } from '@homebase-id/js-lib/helpers';
 import { useMailConversation, useMailDraft } from '../../hooks/mail/useMailConversation';
 import {
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
@@ -35,11 +32,12 @@ import {
   MailDrive,
 } from '../../providers/MailProvider';
 import { RecipientInput } from './RecipientInput';
-import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
-import { RichTextEditor } from '@youfoundation/rich-text-editor';
+import { useDotYouClientContext } from '@homebase-id/common-app';
+import { RichTextEditor } from '@homebase-id/rich-text-editor';
 import { useBlocker } from 'react-router-dom';
-import { MediaOptions } from '@youfoundation/rich-text-editor/src/editor/ImagePlugin/ImagePlugin';
+import { MediaOptions } from '@homebase-id/rich-text-editor/src/editor/ImagePlugin/ImagePlugin';
 import { useMailSettings } from '../../hooks/mail/useMailSettings';
+import { Plus, PaperPlane, Save, Trash } from '@homebase-id/common-app/icons';
 
 const FIFTY_MEGA_BYTES = 50 * 1024 * 1024;
 
@@ -280,7 +278,7 @@ export const MailComposer = ({
     <>
       <ErrorNotification error={removeDraftError || saveDraftError || sendMailError} />
       <form onSubmit={doSend}>
-        <div className="flex flex-col gap-2 ">
+        <div className="flex flex-col gap-2">
           <div ref={detailsRef} className="contents">
             {expanded ? (
               <>

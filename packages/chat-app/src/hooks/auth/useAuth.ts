@@ -1,4 +1,4 @@
-import { DrivePermissionType } from '@youfoundation/js-lib/core';
+import { DrivePermissionType } from '@homebase-id/js-lib/core';
 import { useEffect, useState } from 'react';
 import { useVerifyToken } from './useVerifyToken';
 import {
@@ -13,15 +13,15 @@ import {
   saveEccKey,
   retrieveEccKey,
   throwAwayTheECCKey,
-} from '@youfoundation/js-lib/auth';
+} from '@homebase-id/js-lib/auth';
 import { REACT_QUERY_CACHE_KEY, ROOT_PATH } from '../../app/App';
-import { ALL_CONNECTIONS_CIRCLE_ID, AppPermissionType } from '@youfoundation/js-lib/network';
+import { ALL_CONNECTIONS_CIRCLE_ID, AppPermissionType } from '@homebase-id/js-lib/network';
 import {
   APP_AUTH_TOKEN,
   APP_SHARED_SECRET,
   CHAT_APP_ID,
   useDotYouClient,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { ChatDrive } from '../../providers/ConversationProvider';
 import { clear } from 'idb-keyval';
 
@@ -74,13 +74,15 @@ export const useAuth = () => {
   };
 };
 
+export const websocketDrives = [ChatDrive];
+
 export const drives = [
   {
     a: ChatDrive.alias,
     t: ChatDrive.type,
     n: 'Chat Drive',
     d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
+    p: DrivePermissionType.Read + DrivePermissionType.Write + DrivePermissionType.React,
   },
   {
     // Standard profile Info
@@ -107,7 +109,7 @@ export const permissions = [
   AppPermissionType.SendPushNotifications,
 ];
 
-const circleDrives = [
+export const circleDrives = [
   {
     a: ChatDrive.alias,
     t: ChatDrive.type,

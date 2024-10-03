@@ -1,20 +1,19 @@
-import { NewMediaFile } from '@youfoundation/js-lib/core';
-import { ReactionContext } from '@youfoundation/js-lib/public';
+import { NewMediaFile } from '@homebase-id/js-lib/core';
+import { ReactionContext } from '@homebase-id/js-lib/public';
 import { useMemo, useState } from 'react';
-import { VolatileInput, FileOverview, FileSelector } from '../../../../form';
+import {
+  VolatileInput,
+  FileOverview,
+  FileSelector,
+  AllContactMentionDropdown,
+} from '../../../../form';
 import { t, getImagesFromPasteEvent } from '../../../../helpers';
 import { CanReactInfo, useDotYouClient, useReaction } from '../../../../hooks';
-import {
-  ErrorNotification,
-  ActionButtonState,
-  ImageIcon,
-  ActionButton,
-  Loader,
-  PaperPlane,
-} from '../../../../ui';
+import { ErrorNotification, ActionButtonState, ActionButton } from '../../../../ui';
 import { AuthorImage } from '../../Author/Image';
 import { CantReactInfo } from '../CantReactInfo';
 import { EmojiSelector } from '../EmojiPicker/EmojiSelector';
+import { ImageIcon, Loader, PaperPlane } from '../../../../ui/Icons';
 
 const TEN_MEGA_BYTES = 10 * 1024 * 1024;
 
@@ -45,6 +44,7 @@ export const CommentComposer = ({
   const odinId = getIdentity() || '';
   const doPost = async (commentBody: string, attachment?: File) => {
     if (postState === 'pending') return;
+    if (commentBody.trim().length === 0 && !attachment) return;
 
     try {
       await postComment({
@@ -72,6 +72,7 @@ export const CommentComposer = ({
 
       setStateIndex((i) => i + 1);
     } catch (e) {
+      console.error('CommentComposer', e);
       setBodyAfterError(commentBody);
       setAttachementAfterError(attachment);
     }
@@ -119,7 +120,7 @@ export const CommentEditor = ({
   const hasContent = body?.length || attachment;
 
   return (
-    <div className="ml-2 flex-grow rounded-lg bg-gray-500 bg-opacity-10 px-2 py-1 dark:bg-gray-300 dark:bg-opacity-10">
+    <div className="ml-2 flex-grow rounded-lg bg-gray-500 bg-opacity-10 px-2 py-1 dark:bg-gray-300 dark:bg-opacity-10 relative">
       <div className={`flex ${hasContent ? 'flex-col' : 'flex-row'}`}>
         <VolatileInput
           defaultValue={body}
@@ -135,6 +136,7 @@ export const CommentEditor = ({
             }
           }}
           onChange={(val) => setBody(val)}
+          autoCompleters={[AllContactMentionDropdown]}
         />
         <FileOverview
           files={files}
@@ -155,18 +157,19 @@ export const CommentEditor = ({
           >
             <ImageIcon className="h-5 w-5" />
           </FileSelector>
-          {hasContent ? (
-            <div className="flex flex-row ml-auto">
-              {onCancel ? (
-                <ActionButton
-                  onClick={onCancel}
-                  type="mute"
-                  size="none"
-                  className="px-1 py-1 mr-2 text-sm hover:underline"
-                >
-                  Cancel
-                </ActionButton>
-              ) : null}
+
+          <div className="flex flex-row ml-auto">
+            {onCancel ? (
+              <ActionButton
+                onClick={onCancel}
+                type="mute"
+                size="none"
+                className="px-1 py-1 mr-2 text-sm hover:underline"
+              >
+                Cancel
+              </ActionButton>
+            ) : null}
+            {hasContent ? (
               <ActionButton
                 type="mute"
                 size="none"
@@ -179,8 +182,8 @@ export const CommentEditor = ({
                   <PaperPlane className="h-5 w-5" />
                 )}
               </ActionButton>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
       </div>
     </div>

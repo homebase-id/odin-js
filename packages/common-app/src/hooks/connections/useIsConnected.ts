@@ -1,9 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  ConnectionInfo,
-  ConnectionRequest,
-  getConnectionInfo,
-} from '@youfoundation/js-lib/network';
+import { ConnectionInfo, ConnectionRequest, getConnectionInfo } from '@homebase-id/js-lib/network';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 export const useIsConnected = (odinId?: string) => {
@@ -20,7 +16,8 @@ export const useIsConnected = (odinId?: string) => {
       const connectionInfo = await getConnectionInfo(dotYouClient, odinId);
       return connectionInfo && connectionInfo.status.toLowerCase() === 'connected';
     } catch (e) {
-      return false;
+      console.warn('[useIsConnected] failed to fetch connection', e);
+      return null;
     }
   };
 

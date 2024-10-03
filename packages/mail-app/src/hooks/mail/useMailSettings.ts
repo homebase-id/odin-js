@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import {
   MailSettings,
   fetchMailSettings,
   uploadMailSettings,
 } from '../../providers/MailSettingsProvider';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useMailSettings = () => {
   const dotYouClient = useDotYouClientContext();

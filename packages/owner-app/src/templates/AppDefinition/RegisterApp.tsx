@@ -9,14 +9,22 @@ import PermissionView from '../../components/PermissionViews/PermissionView/Perm
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ActionButton, ActionButtonState, ErrorNotification } from '@youfoundation/common-app';
-import { t } from '@youfoundation/common-app';
-import { CircleSelector } from '@youfoundation/common-app';
-import { PermissionSet } from '@youfoundation/js-lib/core';
-import { DomainHighlighter } from '@youfoundation/common-app';
-import { Arrow } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  ActionButtonState,
+  ErrorNotification,
+  t,
+  CircleSelector,
+  DomainHighlighter,
+} from '@homebase-id/common-app';
+import { PermissionSet } from '@homebase-id/js-lib/core';
+import { Arrow } from '@homebase-id/common-app/icons';
 import { useDrives } from '../../hooks/drives/useDrives';
-import { tryJsonParse } from '@youfoundation/js-lib/helpers';
+import {
+  permissionParamToPermissionSet,
+  drivesParamToDriveGrantRequest,
+  circleParamToCircleIds,
+} from './util';
 
 // https://frodo.digital/owner/appreg?n=Chatr&appId=0babb1e6-7604-4bcd-b1fb-87e959226492&fn=My%20Phone&p=10,30&d=%5B%7B%22a%22%3A%229ff813aff2d61e2f9b9db189e72d1a11%22%2C%22t%22%3A%2266ea8355ae4155c39b5a719166b510e3%22%2C%22n%22%3A%22Chat%20Drive%22%2C%22d%22%3A%22Chat%20Drive%22%2C%22p%22%3A3%7D%2C%7B%22a%22%3A%222612429d1c3f037282b8d42fb2cc0499%22%2C%22t%22%3A%2270e92f0f94d05f5c7dcd36466094f3a5%22%2C%22n%22%3A%22Contacts%22%2C%22d%22%3A%22Contacts%22%2C%22p%22%3A3%7D%5D&ui=minimal&return=homebase-chat://&pk=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtP9KKODoOZpNGXQy4IdyyBJJO3HJPkbg%2FLXwR5SQGxWWuLpv2THnZoSHqaDl6YWQ3OWCndY22Q0RJZkDBuqqJyn%2B8ErpMdgtJuMhFOpEU2h9nLGeI7BIWENkuqlqBh56YC8qdfYhfpdcv53p106o%2Bi93%2Bzeb0GvfLN6fk1y8o4Rd56DBHXn9zjjDaLWa8m8EDXgZKs7waziPFArIphh0W06Wnb4wCa%2F%2B1HEULhH%2BsIY7bGpoQvgP7xucHZGrqkRmg5X2XhleBIXWYCD7QUM6PvKHdqUSrFkl9Z2UU1SkVAhUUH4UxfwyLQKHXxC7IhKu2VSOXK4%2FkjGua6iW%2BXUQtwIDAQAB
 // https://frodo.digital/owner/appreg?n=Chatr&appId=0babb1e6-7604-4bcd-b1fb-87e959226492&fn=My%20Phone&p=10,30&d=%5B%7B%22a%22%3A%229ff813aff2d61e2f9b9db189e72d1a11%22%2C%22t%22%3A%2266ea8355ae4155c39b5a719166b510e3%22%2C%22n%22%3A%22Chat%20Drive%22%2C%22d%22%3A%22Chat%20Drive%22%2C%22p%22%3A3%7D%2C%7B%22a%22%3A%222612429d1c3f037282b8d42fb2cc0499%22%2C%22t%22%3A%2270e92f0f94d05f5c7dcd36466094f3a5%22%2C%22n%22%3A%22Contacts%22%2C%22d%22%3A%22Contacts%22%2C%22p%22%3A3%7D%5D&cd=%5B%7B%22a%22%3A%229ff813aff2d61e2f9b9db189e72d1a11%22%2C%22t%22%3A%2266ea8355ae4155c39b5a719166b510e3%22%2C%22n%22%3A%22Chat%20Drive%22%2C%22d%22%3A%22Chat%20Drive%22%2C%22p%22%3A2%7D%5D&ui=minimal&return=homebase-chat://&pk=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtP9KKODoOZpNGXQy4IdyyBJJO3HJPkbg%2FLXwR5SQGxWWuLpv2THnZoSHqaDl6YWQ3OWCndY22Q0RJZkDBuqqJyn%2B8ErpMdgtJuMhFOpEU2h9nLGeI7BIWENkuqlqBh56YC8qdfYhfpdcv53p106o%2Bi93%2Bzeb0GvfLN6fk1y8o4Rd56DBHXn9zjjDaLWa8m8EDXgZKs7waziPFArIphh0W06Wnb4wCa%2F%2B1HEULhH%2BsIY7bGpoQvgP7xucHZGrqkRmg5X2XhleBIXWYCD7QUM6PvKHdqUSrFkl9Z2UU1SkVAhUUH4UxfwyLQKHXxC7IhKu2VSOXK4%2FkjGua6iW%2BXUQtwIDAQAB
@@ -323,48 +331,3 @@ const AppRegistration = ({
 //     },
 //   ])
 // );
-export const drivesParamToDriveGrantRequest = (
-  queryParamVal: string | undefined
-): DriveGrantRequest[] => {
-  if (!queryParamVal) return [];
-
-  try {
-    const drivesParamObject = queryParamVal && tryJsonParse(queryParamVal);
-    return (Array.isArray(drivesParamObject) ? drivesParamObject : [drivesParamObject]).map((d) => {
-      return {
-        permissionedDrive: {
-          drive: {
-            alias: d.a,
-            type: d.t,
-          },
-          permission: [d.p ? (Number.isNaN(parseInt(d.p)) ? 0 : parseInt(d.p)) : 0],
-        },
-        driveMeta: {
-          name: d.n,
-          description: d.d,
-          allowAnonymousReads: d.r || false,
-          allowSubscriptions: d.s || false,
-          attributes: (d.at && tryJsonParse(d.at)) || undefined,
-        },
-      };
-    });
-  } catch (ex) {
-    return [];
-  }
-};
-
-export const permissionParamToPermissionSet = (
-  queryParamVal: string | undefined
-): PermissionSet => {
-  return {
-    keys:
-      queryParamVal
-        ?.split(',')
-        .map((str) => parseInt(str))
-        .filter((val) => !!val) ?? [],
-  };
-};
-
-export const circleParamToCircleIds = (queryParamVal: string | undefined): string[] => {
-  return queryParamVal?.split(',') ?? [];
-};

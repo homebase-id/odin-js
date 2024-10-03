@@ -7,23 +7,23 @@ import {
   GetTargetDriveFromChannelId,
   BlogConfig,
   ChannelDefinition,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 import {
   NewMediaFile,
   MediaFile,
   getPayloadBytes,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import {
   HomebaseFile,
   MultiRequestCursoredResult,
   NewHomebaseFile,
   UploadResult,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../../auth/useDotYouClient';
 import { getRichTextFromString } from '../../../helpers/richTextHelper';
-import { TransitUploadResult } from '@youfoundation/js-lib/peer';
-import { LinkPreview } from '@youfoundation/js-lib/media';
+import { TransitUploadResult } from '@homebase-id/js-lib/peer';
+import { LinkPreview } from '@homebase-id/js-lib/media';
 
 export const useManagePost = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();

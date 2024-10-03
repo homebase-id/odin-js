@@ -1,15 +1,21 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Alert, Arrow, t, useFollowingInfinite, CheckboxToggle } from '@youfoundation/common-app';
 import { useFocusedEditing } from '../../../hooks/focusedEditing/useFocusedEditing';
-import { usePortal } from '@youfoundation/common-app';
-import { ErrorNotification } from '@youfoundation/common-app';
-import { ActionButton } from '@youfoundation/common-app';
-import { DomainHighlighter } from '@youfoundation/common-app';
+import {
+  Alert,
+  t,
+  useFollowingInfinite,
+  CheckboxToggle,
+  usePortal,
+  ErrorNotification,
+  ActionButton,
+  DomainHighlighter,
+  CircleSelector,
+  DialogWrapper,
+} from '@homebase-id/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
 import ContactImage from '../../Connection/ContactImage/ContactImage';
 import YourInfo from '../../Connection/YourInfo/YourInfo';
-import { CircleSelector } from '@youfoundation/common-app';
-import { DialogWrapper } from '@youfoundation/common-app';
 import { usePendingConnection } from '../../../hooks/connections/usePendingConnection';
 import { useConnection } from '../../../hooks/connections/useConnection';
 import { useContact } from '../../../hooks/contacts/useContact';

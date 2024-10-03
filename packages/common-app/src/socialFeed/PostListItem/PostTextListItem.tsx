@@ -1,10 +1,10 @@
-import { Article, BlogConfig } from '@youfoundation/js-lib/public';
+import { Article, BlogConfig } from '@homebase-id/js-lib/public';
 import { ellipsisAtMaxChar } from '../../helpers';
 import { ChannelDefinitionVm } from '../../hooks';
 import { FakeAnchor } from '../../ui';
 import { AuthorName } from '../Blocks/Author/Name';
 import { PostMeta } from '../Blocks/Meta/Meta';
-import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 
 export const PostTextListItem = ({
   draft,
@@ -42,7 +42,7 @@ export const PostTextListItem = ({
                   <PostMeta
                     postFile={draft}
                     channel={channel}
-                    authorOdinId={draft.fileMetadata.appData.content.authorOdinId}
+                    authorOdinId={draft.fileMetadata.originalAuthor}
                   />
                 ) : null}
               </div>

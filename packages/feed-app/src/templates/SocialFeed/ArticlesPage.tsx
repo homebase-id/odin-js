@@ -1,26 +1,24 @@
 import { InfiniteData } from '@tanstack/react-query';
-import { Article } from '@youfoundation/js-lib/public';
+import { Article } from '@homebase-id/js-lib/public';
 import {
   ActionButton,
   ActionLink,
-  Article as ArticleIcon,
   BLOG_POST_INFIITE_PAGE_SIZE,
   HOME_ROOT_PATH,
   LoadingBlock,
-  Pencil,
-  Plus,
   PostTextListItem,
   SubtleMessage,
   usePostsInfinite,
   useDrafts,
-} from '@youfoundation/common-app';
-import { flattenInfinteData } from '@youfoundation/common-app';
-import { t } from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
+import { Article as ArticleIcon, Pencil, Plus } from '@homebase-id/common-app/icons';
+import { flattenInfinteData } from '@homebase-id/common-app';
+import { t } from '@homebase-id/common-app';
 
-import { useChannels } from '@youfoundation/common-app';
+import { useChannels } from '@homebase-id/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ROOT_PATH } from '../../app/App';
 
 export const ArticlesPage = () => {

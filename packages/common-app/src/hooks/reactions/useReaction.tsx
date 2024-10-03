@@ -6,17 +6,13 @@ import {
   removeEmojiReaction,
   saveComment,
   saveEmojiReaction,
-} from '@youfoundation/js-lib/public';
+  EmojiReactionSummary,
+} from '@homebase-id/js-lib/public';
 
 import { getRichTextFromString } from '../../helpers/richTextHelper';
 import { UseCommentsVal } from './comments/useComments';
 
-import {
-  HomebaseFile,
-  EmojiReactionSummary,
-  NewHomebaseFile,
-  ReactionFile,
-} from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 export const useReaction = () => {
@@ -83,11 +79,11 @@ export const useReaction = () => {
     saveComment: useMutation({
       mutationFn: saveCommentData,
       onMutate: async (toSaveCommentData) => {
-        const { authorOdinId, channelId, target } = toSaveCommentData.context;
+        const { odinId, channelId, target } = toSaveCommentData.context;
 
         const prevInfinite = queryClient.getQueryData<InfiniteData<UseCommentsVal>>([
           'comments',
-          authorOdinId,
+          odinId,
           channelId,
           target.globalTransitId,
         ]);
@@ -130,7 +126,7 @@ export const useReaction = () => {
             };
           }
           queryClient.setQueryData(
-            ['comments', authorOdinId, channelId, target?.globalTransitId],
+            ['comments', odinId, channelId, target?.globalTransitId],
             newInfinite
           );
         }
@@ -144,17 +140,17 @@ export const useReaction = () => {
         }
 
         // Updated already mutated data with the new file id
-        const { authorOdinId, channelId, target } = savedCommentData.context;
+        const { odinId, channelId, target } = savedCommentData.context;
         const prevInfinite = queryClient.getQueryData<InfiniteData<UseCommentsVal>>([
           'comments',
-          authorOdinId,
+          odinId,
           channelId,
           target.globalTransitId,
         ]);
 
         if (!prevInfinite) {
           queryClient.invalidateQueries({
-            queryKey: ['comments', authorOdinId, channelId, target.globalTransitId],
+            queryKey: ['comments', odinId, channelId, target.globalTransitId],
           });
           return;
         }
@@ -170,7 +166,7 @@ export const useReaction = () => {
         };
         const newPages = [newFirstPage, ...prevInfinite.pages.slice(1)];
 
-        queryClient.setQueryData(['comments', authorOdinId, channelId, target.globalTransitId], {
+        queryClient.setQueryData(['comments', odinId, channelId, target.globalTransitId], {
           ...prevInfinite,
           pages: newPages,
         });
@@ -182,7 +178,7 @@ export const useReaction = () => {
             queryClient.invalidateQueries({
               queryKey: [
                 'comments',
-                _data.context.authorOdinId,
+                _data.context.odinId,
                 _data.context.channelId,
                 _data.context.target.globalTransitId,
               ],
@@ -198,7 +194,7 @@ export const useReaction = () => {
         queryClient.invalidateQueries({
           queryKey: [
             'comments',
-            _data.context.authorOdinId,
+            _data.context.odinId,
             _data.context.channelId,
             _data.context.target.globalTransitId,
           ],
@@ -209,7 +205,7 @@ export const useReaction = () => {
       mutationFn: saveEmojiReactionData,
       onMutate: (toSaveEmoji) => {
         const cacheKey = [
-          toSaveEmoji.context.authorOdinId,
+          toSaveEmoji.context.odinId,
           toSaveEmoji.context.channelId,
           toSaveEmoji.context.target.fileId,
           toSaveEmoji.context.target.globalTransitId,
@@ -262,7 +258,7 @@ export const useReaction = () => {
         queryClient.invalidateQueries({
           queryKey: [
             'my-emojis',
-            _data.context.authorOdinId,
+            _data.context.odinId,
             _data.context.channelId,
             _data.context.target.fileId,
             _data.context.target.globalTransitId,
@@ -271,7 +267,7 @@ export const useReaction = () => {
         queryClient.invalidateQueries({
           queryKey: [
             'emojis',
-            _data.context.authorOdinId,
+            _data.context.odinId,
             _data.context.channelId,
             _data.context.target.fileId,
             _data.context.target.globalTransitId,
@@ -280,7 +276,7 @@ export const useReaction = () => {
         queryClient.invalidateQueries({
           queryKey: [
             'emojis-summary',
-            _data.context.authorOdinId,
+            _data.context.odinId,
             _data.context.channelId,
             _data.context.target.fileId,
             _data.context.target.globalTransitId,
@@ -292,7 +288,7 @@ export const useReaction = () => {
       mutationFn: removeEmojiReactionData,
       onMutate: (toRemoveEmoji) => {
         const cacheKey = [
-          toRemoveEmoji.context.authorOdinId,
+          toRemoveEmoji.context.odinId,
           toRemoveEmoji.context.channelId,
           toRemoveEmoji.context.target.fileId,
           toRemoveEmoji.context.target.globalTransitId,
@@ -336,7 +332,7 @@ export const useReaction = () => {
         queryClient.invalidateQueries({
           queryKey: [
             'my-emojis',
-            _data.context.authorOdinId,
+            _data.context.odinId,
             _data.context.channelId,
             _data.context.target.fileId,
             _data.context.target.globalTransitId,
@@ -345,7 +341,7 @@ export const useReaction = () => {
         queryClient.invalidateQueries({
           queryKey: [
             'emojis',
-            _data.context.authorOdinId,
+            _data.context.odinId,
             _data.context.channelId,
             _data.context.target.fileId,
             _data.context.target.globalTransitId,
@@ -354,7 +350,7 @@ export const useReaction = () => {
         queryClient.invalidateQueries({
           queryKey: [
             'emojis-summary',
-            _data.context.authorOdinId,
+            _data.context.odinId,
             _data.context.channelId,
             _data.context.target.fileId,
             _data.context.target.globalTransitId,

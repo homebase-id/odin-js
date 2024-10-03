@@ -4,14 +4,13 @@ import {
   ActionLink,
   ErrorBoundary,
   Input,
-  Persons,
   SubtleMessage,
-  Times,
   t,
   useAllContacts,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
+import { Persons, Times } from '@homebase-id/common-app/icons';
 import { useNavigate } from 'react-router-dom';
-import { CHAT_ROOT } from '../../../../templates/Chat/ChatHome';
+import { ROOT_PATH as CHAT_ROOT } from '../../../../app/App';
 import { ConversationListItemWrapper } from '../Item/ConversationItem';
 import { NewConversationSearchItem } from '../Item/NewConversationSearchItem';
 

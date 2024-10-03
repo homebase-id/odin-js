@@ -1,35 +1,38 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import {
-  ActionButton,
-  ActionGroup,
-  ActionGroupOptionProps,
-  Alert,
-  Block,
-  CirclePermissionView,
-  ErrorNotification,
-  Globe,
-  HardDrive,
-  House,
-  LoadingBlock,
-  Pencil,
-  Refresh,
-  SubtleMessage,
-  Times,
-  Trash,
-  t,
-  useCircles,
-} from '@youfoundation/common-app';
+
 import { useDomain } from '../../../hooks/connections/useDomain';
 import { useState } from 'react';
 import Section from '../../../components/ui/Sections/Section';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
-import { CircleGrant } from '@youfoundation/js-lib/network';
+import { CircleGrant } from '@homebase-id/js-lib/network';
 import { useDomainClients } from '../../../hooks/connections/useDomainClients';
 import { DomainClient } from '../../../provider/network/domainNetwork/DomainProvider';
-import { getUniqueDrivesWithHighestPermission } from '@youfoundation/js-lib/helpers';
+import { getUniqueDrivesWithHighestPermission } from '@homebase-id/js-lib/helpers';
 import { CircleDomainMembershipDialog } from '../../../components/Circles/CircleMembershipDialog/CircleMembershipDialog';
+import {
+  ActionGroupOptionProps,
+  t,
+  ErrorNotification,
+  ActionButton,
+  ActionGroup,
+  Alert,
+  useCircles,
+  LoadingBlock,
+  CirclePermissionView,
+  SubtleMessage,
+} from '@homebase-id/common-app';
+import {
+  House,
+  Trash,
+  Refresh,
+  Block,
+  Globe,
+  Pencil,
+  HardDrive,
+  Times,
+} from '@homebase-id/common-app/icons';
 
 const DomainDetails = () => {
   const { domain } = useParams();

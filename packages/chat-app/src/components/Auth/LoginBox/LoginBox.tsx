@@ -1,12 +1,13 @@
 import { useYouAuthAuthorization } from '../../../hooks/auth/useAuth';
-import { IS_DARK_CLASSNAME, Loader, LoadingBlock } from '@youfoundation/common-app';
-import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
+import { IS_DARK_CLASSNAME, LoadingBlock } from '@homebase-id/common-app';
+import { Loader } from '@homebase-id/common-app/icons';
+import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
 import { ROOT_PATH } from '../../../app/App';
 import { useEffect } from 'react';
 import { MinimalLayout } from '../../ui/Layout/Layout';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 
 const AUTHORIZE_PATH = '/api/owner/v1/youauth/authorize';
 
@@ -72,7 +73,7 @@ export const AutoAuthorize = () => {
 
   return (
     <>
-      <MinimalLayout noShadedBg={true} noPadding={true}>
+      <MinimalLayout noShadedBg={true}>
         <div className="h-screen">
           <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col p-5">
             <div className="my-auto flex flex-col">

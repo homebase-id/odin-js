@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Arrow, t } from '@youfoundation/common-app';
-import { useCircle } from '@youfoundation/common-app';
-import { usePortal } from '@youfoundation/common-app';
-import { ErrorNotification } from '@youfoundation/common-app';
-import { ActionButton } from '@youfoundation/common-app';
-import { CircleSelector } from '@youfoundation/common-app';
-import { DialogWrapper } from '@youfoundation/common-app';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { CircleGrant } from '@youfoundation/js-lib/network';
+import {
+  t,
+  useCircle,
+  usePortal,
+  ErrorNotification,
+  ActionButton,
+  CircleSelector,
+  DialogWrapper,
+} from '@homebase-id/common-app';
+import { Arrow } from '@homebase-id/common-app/icons';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { CircleGrant } from '@homebase-id/js-lib/network';
 
 interface InnerCircleSelectionDialogProps {
   title: string;

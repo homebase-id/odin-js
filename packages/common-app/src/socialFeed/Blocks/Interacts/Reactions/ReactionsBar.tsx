@@ -1,4 +1,4 @@
-import { ReactionContext } from '@youfoundation/js-lib/public';
+import { ReactionContext } from '@homebase-id/js-lib/public';
 import { Suspense, useEffect, useState, useRef } from 'react';
 import { CanReactInfo } from '../../../../hooks/reactions/useCanReact';
 import { useErrors } from '../../../../hooks/errors/useErrors';
@@ -8,7 +8,7 @@ import { useMyEmojiReactions } from '../../../../hooks/reactions/emojis/useMyEmo
 import { CantReactInfo } from '../CantReactInfo';
 import { useMostSpace } from '../../../../hooks/intersection/useMostSpace';
 import { EmojiPicker } from '../EmojiPicker/EmojiPicker';
-import { Plus } from '../../../../ui';
+import { Plus } from '../../../../ui/Icons';
 import { t } from '../../../../helpers/i18n/dictionary';
 
 export const SocialReactionsBar = ({
@@ -83,7 +83,7 @@ export const SocialReactionsBar = ({
 
   return (
     <ReactionsBar
-      className={className}
+      className={`bg-background text-foreground flex flex-row rounded-lg px-1 py-2 shadow-md dark:bg-slate-900 ${className || ''}`}
       doLike={doLike}
       doUnlike={doUnlike}
       onMouseEnter={() => setIsHover(true)}
@@ -132,9 +132,7 @@ export const ReactionsBar = ({
   return (
     <>
       <div
-        className={`bg-background text-foreground flex flex-row rounded-lg px-1 py-2 shadow-md dark:bg-slate-900 ${
-          className ?? ''
-        }`}
+        className={`flex flex-row ${className || ''}`}
         onMouseEnter={onMouseEnter}
         onMouseLeave={() => {
           setIsCustomOpen(false);

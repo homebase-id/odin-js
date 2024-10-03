@@ -6,7 +6,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { useDotYouClient } from '@youfoundation/common-app';
+import { useDotYouClient } from '@homebase-id/common-app';
 import {
   UnifiedConversation,
   getConversation,
@@ -19,11 +19,11 @@ import {
   NewHomebaseFile,
   NewMediaFile,
   SecurityGroupType,
-} from '@youfoundation/js-lib/core';
-import { getNewId, getNewXorId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { ChatConversationsReturn, useConversations } from './useConversations';
+} from '@homebase-id/js-lib/core';
+import { formatGuidId, getNewId, getNewXorId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { ChatConversationsReturn } from './useConversations';
 import { deleteAllChatMessages } from '../../providers/ChatProvider';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const getSingleConversation = async (
   dotYouClient: DotYouClient,
@@ -38,36 +38,6 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const queryClient = useQueryClient();
   const identity = useDotYouClient().getIdentity();
 
-  // Already get the conversations in the cache, so we can use that on `getExistingConversationsForRecipient`
-  useConversations().all;
-
-  const getExistingConversationsForRecipient = async (
-    recipients: string[]
-  ): Promise<null | HomebaseFile<UnifiedConversation>> => {
-    const allConversationsInCache = await queryClient.fetchInfiniteQuery<{
-      searchResults: HomebaseFile<UnifiedConversation>[];
-    }>({ queryKey: ['conversations'], initialPageParam: undefined });
-
-    const filteredRecipients = recipients.filter((id) => id !== identity);
-
-    for (const page of allConversationsInCache?.pages || []) {
-      const matchedConversation = page.searchResults.find((conversation) => {
-        const conversationContent = conversation.fileMetadata.appData.content;
-        const conversationRecipients = conversationContent.recipients.filter(
-          (id) => id !== identity
-        );
-
-        return (
-          conversationRecipients.length === filteredRecipients.length &&
-          conversationRecipients.every((recipient) => filteredRecipients.includes(recipient))
-        );
-      });
-      if (matchedConversation) return matchedConversation;
-    }
-
-    return null;
-  };
-
   const createConversation = async ({
     recipients,
     title,
@@ -75,16 +45,15 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     recipients: string[];
     title?: string;
   }) => {
-    // Check if there is already a conversations with this recipient.. If so.. Don't create a new one
-    const existingConversation = await getExistingConversationsForRecipient(recipients);
-    if (existingConversation)
-      return {
-        ...existingConversation,
-        newConversationId: existingConversation.fileMetadata.appData.uniqueId as string,
-      };
-
     const newConversationId =
-      recipients.length === 1 ? await getNewXorId(identity as string, recipients[0]) : getNewId();
+      recipients.length === 1
+        ? await getNewXorId(identity as string, recipients[0])
+        : formatGuidId(getNewId());
+
+    if (recipients.length === 1) {
+      const existingConversation = await getConversation(dotYouClient, newConversationId);
+      if (existingConversation) return { ...existingConversation, newConversationId };
+    }
 
     const updatedRecipients = [...new Set([...recipients, identity as string])];
 

@@ -1,19 +1,19 @@
-import { DriveDefinition } from '@youfoundation/js-lib/core';
+import { DriveDefinition } from '@homebase-id/js-lib/core';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { Arrow } from '@homebase-id/common-app/icons';
 import {
   t,
   ActionButton,
   usePortal,
-  Arrow,
   Label,
   CheckboxToggle,
   mergeStates,
   Input,
   DictionaryEditor,
-} from '@youfoundation/common-app';
-import { ErrorNotification } from '@youfoundation/common-app';
-import { DialogWrapper } from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
+import { ErrorNotification } from '@homebase-id/common-app';
+import { DialogWrapper } from '@homebase-id/common-app';
 import { useDrive } from '../../../hooks/drives/useDrive';
 
 const DriveMetadataEditDialog = ({

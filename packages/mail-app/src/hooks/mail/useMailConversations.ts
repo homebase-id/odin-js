@@ -1,5 +1,5 @@
 import { MailConversationsReturn, getMailConversations } from '../../providers/MailProvider';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import { useInfiniteQuery, InfiniteData } from '@tanstack/react-query';
 
 export const MAIL_CONVERSATIONS_PAGE_SIZE = 100;

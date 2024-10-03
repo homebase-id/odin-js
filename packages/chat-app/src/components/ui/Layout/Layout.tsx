@@ -1,11 +1,11 @@
 import { FC, ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Toaster, useDarkMode } from '@youfoundation/common-app';
+import { Toaster, useDarkMode } from '@homebase-id/common-app';
+import { websocketDrives } from '../../../hooks/auth/useAuth';
 
 interface LayoutProps {
   children?: ReactNode;
   noShadedBg?: boolean;
-  noPadding?: boolean;
 }
 
 const SharedStyleTag = () => (
@@ -27,11 +27,9 @@ const SharedStyleTag = () => (
 const SHADED_BG = 'bg-page-background text-foreground';
 const NOT_SHADED_BG = 'bg-white dark:bg-black';
 
-const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
+export const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
   const [searchParams] = useSearchParams();
   const uiSetting = searchParams.get('ui');
-
-  if (uiSetting === 'none') return <NoLayout>{children}</NoLayout>;
 
   if (uiSetting === 'minimal' || uiSetting === 'focus')
     return <MinimalLayout>{children}</MinimalLayout>;
@@ -44,27 +42,14 @@ const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
           noShadedBg ? NOT_SHADED_BG : SHADED_BG
         }`}
       >
-        <div className="min-h-full px-2 py-4 sm:px-10 sm:py-8">{children}</div>
+        {children}
       </div>
-      <Toaster errorOnly={true} />
+      <Toaster drives={websocketDrives} />
     </>
   );
 };
 
-export const MinimalLayout: FC<LayoutProps> = ({ children, noShadedBg, noPadding }) => {
-  useDarkMode();
-  return (
-    <>
-      <SharedStyleTag />
-      <div className={`relative min-h-[100dvh] ${noShadedBg ? NOT_SHADED_BG : SHADED_BG}`}>
-        <div className={`${noPadding ? '' : 'px-5 py-4 sm:px-10 sm:py-8'}`}>{children}</div>
-      </div>
-      <Toaster errorOnly={true} />
-    </>
-  );
-};
-
-export const NoLayout: FC<LayoutProps> = ({ children, noShadedBg }) => {
+export const MinimalLayout: FC<LayoutProps> = ({ children, noShadedBg }) => {
   useDarkMode();
   return (
     <>
@@ -72,9 +57,7 @@ export const NoLayout: FC<LayoutProps> = ({ children, noShadedBg }) => {
       <div className={`relative min-h-[100dvh] ${noShadedBg ? NOT_SHADED_BG : SHADED_BG}`}>
         {children}
       </div>
-      <Toaster errorOnly={true} />
+      <Toaster drives={websocketDrives} errorOnly={true} />
     </>
   );
 };
-
-export default Layout;

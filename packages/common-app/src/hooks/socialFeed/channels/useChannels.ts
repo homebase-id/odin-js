@@ -3,9 +3,9 @@ import {
   ChannelDefinition,
   ChannelTemplate,
   getChannelDefinitions,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../../auth/useDotYouClient';
 import { fetchCachedPublicChannels } from '../post/cachedDataHelpers';
 export interface ChannelDefinitionVm extends ChannelDefinition {
@@ -52,21 +52,19 @@ export const useChannels = ({
           } as HomebaseFile<ChannelDefinitionVm>;
         });
       } catch (e) {
-        ('failed to fetch dynamic data');
+        console.error('[useChannels] failed to fetch dynamic data', e);
       }
     };
 
     const returnData = isOwner
       ? await fetchDynamicData()
-      : (await fetchCachedPublicChannels(dotYouClient)) ?? (await fetchDynamicData());
+      : ((await fetchCachedPublicChannels(dotYouClient)) ?? (await fetchDynamicData()));
 
-    if (isAuthenticated) {
+    if (isAuthenticated && !isOwner) {
       // We are authenticated, so we might have more data when fetching non-static data; Let's do so async with timeout to allow other static info to load and render
       setTimeout(async () => {
         const dynamicData = await fetchDynamicData();
-        if (dynamicData) {
-          queryClient.setQueryData(['channels'], dynamicData);
-        }
+        if (dynamicData) queryClient.setQueryData(['channels'], dynamicData);
       }, 500);
     }
 

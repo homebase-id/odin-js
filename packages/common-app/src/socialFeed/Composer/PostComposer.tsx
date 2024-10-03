@@ -3,25 +3,26 @@ import {
   ChannelDefinition,
   EmbeddedPost,
   ReactAccess,
-} from '@youfoundation/js-lib/public';
+  RemoteCollaborativeChannelDefinition,
+} from '@homebase-id/js-lib/public';
 import React, { Ref, useEffect, useMemo } from 'react';
 import { useRef, useState } from 'react';
-import { base64ToUint8Array, isTouchDevice, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { base64ToUint8Array, isTouchDevice, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import {
   AccessControlList,
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
   NewMediaFile,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { AclIcon, AclSummary, AclDialog } from '../../acl';
 import { ChannelsDialog } from '../../channels';
 import {
   VolatileInput,
   FileOverview,
   FileSelector,
-  useLinkPreviewBuilder,
   LinkOverview,
+  AllContactMentionDropdown,
 } from '../../form';
 import { t, getImagesFromPasteEvent, getVideosFromPasteEvent } from '../../helpers';
 import {
@@ -29,20 +30,15 @@ import {
   usePostComposer,
   useChannels,
   useCollaborativeChannels,
+  useChannel,
+  useLinkPreviewBuilder,
 } from '../../hooks';
-import {
-  ActionGroup,
-  Globe,
-  Article,
-  Pencil,
-  ActionButton,
-  Arrow,
-  ErrorNotification,
-  Lock,
-} from '../../ui';
+
 import { EmbeddedPostContent } from '../Blocks/Body/EmbeddedPostContent';
 import { EmojiSelector } from '../Blocks/Interacts/EmojiPicker/EmojiSelector';
-import { LinkPreview } from '@youfoundation/js-lib/media';
+import { LinkPreview } from '@homebase-id/js-lib/media';
+import { ActionGroup, ActionButton, ErrorNotification } from '../../ui';
+import { Article, Pencil, Globe, Arrow, Lock } from '../../ui/Icons';
 
 const FEED_ROOT_PATH = '/apps/feed';
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
@@ -70,13 +66,26 @@ export const PostComposer = ({
 
   const [caption, setCaption] = useState<string>('');
 
+  const { data: publicChannel } = useChannel({ channelKey: BlogConfig.PublicChannelId }).fetch;
   const [targetChannel, setTargetChannel] = useState<{
-    channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
+    channel:
+      | HomebaseFile<ChannelDefinition>
+      | NewHomebaseFile<ChannelDefinition>
+      | HomebaseFile<RemoteCollaborativeChannelDefinition>;
     acl?: AccessControlList | undefined;
     odinId?: string | undefined;
   }>({
-    channel: forcedChannel || BlogConfig.PublicChannelNewDsr,
+    channel: forcedChannel || publicChannel || BlogConfig.PublicChannelNewDsr,
   });
+
+  useEffect(() => {
+    if (
+      publicChannel &&
+      targetChannel.channel.fileMetadata.appData.uniqueId === BlogConfig.PublicChannelId
+    ) {
+      setTargetChannel((targetChannel) => ({ ...targetChannel, channel: publicChannel }));
+    }
+  }, [publicChannel]);
 
   const [files, setFiles] = useState<NewMediaFile[]>();
   const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(caption || '');
@@ -140,7 +149,7 @@ export const PostComposer = ({
   const canPost = caption?.length || files?.length || !!embeddedPost;
 
   return (
-    <div className={`${className ?? ''}`}>
+    <div className={`${className ?? ''} relative`}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -148,32 +157,32 @@ export const PostComposer = ({
           return false;
         }}
       >
-        <div className="relative">
-          <VolatileInput
-            defaultValue={caption}
-            onChange={(newCaption) => setCaption(newCaption)}
-            placeholder={embeddedPost ? t('Add a comment?') : t("What's up?")}
-            onPaste={(e) => {
-              const mediaFiles = [...getImagesFromPasteEvent(e), ...getVideosFromPasteEvent(e)].map(
-                (file) => ({ file })
-              );
+        <VolatileInput
+          defaultValue={caption}
+          onChange={(newCaption) => setCaption(newCaption)}
+          placeholder={embeddedPost ? t('Add a comment?') : t("What's up?")}
+          onPaste={(e) => {
+            const mediaFiles = [...getImagesFromPasteEvent(e), ...getVideosFromPasteEvent(e)].map(
+              (file) => ({ file })
+            );
 
-              if (mediaFiles.length && !embeddedPost) {
-                setFiles([...(files ?? []), ...mediaFiles]);
-                e.preventDefault();
-              }
-            }}
-            onSubmit={
-              isTouchDevice()
-                ? undefined
-                : () => {
-                    doPost();
-                    return false;
-                  }
+            if (mediaFiles.length && !embeddedPost) {
+              setFiles([...(files ?? []), ...mediaFiles]);
+              e.preventDefault();
             }
-            key={stateIndex}
-          />
-        </div>
+          }}
+          onSubmit={
+            isTouchDevice()
+              ? undefined
+              : () => {
+                  doPost();
+                  return false;
+                }
+          }
+          key={stateIndex}
+          autoCompleters={[AllContactMentionDropdown]}
+        />
+
         <FileOverview files={files} setFiles={setFiles} className="mt-2" cols={4} />
         {files?.length ? null : (
           <LinkOverview
@@ -296,10 +305,15 @@ export const PostComposer = ({
             }
             onClick={doPost}
           >
-            {targetChannel.channel.serverMetadata?.accessControlList && canPost ? (
+            {targetChannel && canPost ? (
               <AclIcon
                 className="mr-3 h-5 w-5"
-                acl={targetChannel.acl || targetChannel.channel.serverMetadata?.accessControlList}
+                acl={
+                  (targetChannel.acl ||
+                    targetChannel.channel.serverMetadata?.accessControlList ||
+                    (targetChannel.channel as HomebaseFile<RemoteCollaborativeChannelDefinition>)
+                      .fileMetadata.appData.content.acl) as AccessControlList
+                }
               />
             ) : null}
             <span className="flex flex-col">
@@ -340,7 +354,10 @@ export const ChannelOrAclSelector = React.forwardRef(
       defaultAcl?: AccessControlList;
       onChange: (data: {
         odinId: string | undefined;
-        channel: HomebaseFile<ChannelDefinition> | undefined;
+        channel:
+          | HomebaseFile<ChannelDefinition>
+          | HomebaseFile<RemoteCollaborativeChannelDefinition>
+          | undefined;
         acl: AccessControlList | undefined;
       }) => void;
       disabled?: boolean;

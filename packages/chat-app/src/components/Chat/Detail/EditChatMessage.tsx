@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import {
   ActionButton,
@@ -8,11 +8,11 @@ import {
   VolatileInput,
   t,
   usePortal,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { UnifiedConversation } from '../../../providers/ConversationProvider';
 import { useEffect, useState } from 'react';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
-import { isTouchDevice } from '@youfoundation/js-lib/helpers';
+import { isTouchDevice } from '@homebase-id/js-lib/helpers';
 
 export const EditChatMessage = ({
   msg,
@@ -63,7 +63,7 @@ export const EditChatMessage = ({
       <VolatileInput
         placeholder="Your message"
         defaultValue={message}
-        className="w-full rounded-md border bg-background p-2 dark:border-slate-800"
+        className="relative w-full rounded-md border bg-background p-2 dark:border-slate-800"
         onChange={setMessage}
         autoFocus={!isTouchDevice()}
         onSubmit={

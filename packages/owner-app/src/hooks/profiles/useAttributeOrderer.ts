@@ -1,4 +1,4 @@
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { moveElementInArray } from '../../templates/DemoData/helpers';
 import { useAttribute } from './useAttribute';
 import { AttributeVm } from './useAttributes';

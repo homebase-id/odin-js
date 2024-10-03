@@ -1,6 +1,7 @@
 import { FC, ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Sidenav, Toaster, useDarkMode } from '@youfoundation/common-app';
+import { Sidenav, Toaster, useDarkMode } from '@homebase-id/common-app';
+import { websocketDrives } from '../../../hooks/auth/useAuth';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -27,7 +28,7 @@ const SharedStyleTag = () => (
 const SHADED_BG = 'bg-page-background text-foreground';
 const NOT_SHADED_BG = 'bg-white dark:bg-black';
 
-const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
+export const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
   useDarkMode();
 
   const [searchParams] = useSearchParams();
@@ -56,7 +57,7 @@ const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
         >
           <div className="min-h-full px-2 py-4 sm:px-10 sm:py-8">{children}</div>
         </div>
-        <Toaster errorOnly={true} />
+        <Toaster drives={websocketDrives} />
       </div>
     </>
   );
@@ -87,5 +88,3 @@ export const NoLayout: FC<LayoutProps> = ({ children, noShadedBg }) => {
     </>
   );
 };
-
-export default Layout;

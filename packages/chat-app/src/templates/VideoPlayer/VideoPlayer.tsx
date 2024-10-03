@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { ErrorBoundary, VideoClickToLoad } from '@youfoundation/common-app';
+import { ErrorBoundary, VideoClickToLoad } from '@homebase-id/common-app';
 import { ChatDrive } from '../../providers/ConversationProvider';
 
 // /apps/chat/player/3354d418-f0c8-7400-8f50-87aa818141c9/chat_web0

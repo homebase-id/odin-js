@@ -1,19 +1,16 @@
-import { ErrorNotification, t } from '@youfoundation/common-app';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { ErrorNotification, formatToDateAgoWithRelativeDetail, t } from '@homebase-id/common-app';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
 import { ChatMessage } from '../../providers/ChatProvider';
 import { UnifiedConversation } from '../../providers/ConversationProvider';
 import { ChatMessageItem } from './Detail/ChatMessageItem';
 import { ChatActions } from './Detail/ContextMenu';
-import { useMemo, useRef, useEffect, useLayoutEffect } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 // Following: https://codesandbox.io/p/devbox/frosty-morse-scvryz?file=%2Fpages%2Findex.js%3A175%2C23
 // and https://github.com/TanStack/virtual/discussions/195
-
-export const useIsomorphicLayoutEffect =
-  typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export const ChatHistory = ({
   conversation,
@@ -22,7 +19,7 @@ export const ChatHistory = ({
 }: {
   conversation: HomebaseFile<UnifiedConversation> | undefined;
   setReplyMsg: (msg: HomebaseFile<ChatMessage>) => void;
-  setIsEmptyChat: (isEmpty: boolean) => void;
+  setIsEmptyChat?: (isEmpty: boolean) => void;
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +44,7 @@ export const ChatHistory = ({
 
   useEffect(() => {
     if (isFetched && (!flattenedMsgs || flattenedMsgs?.filter((msg) => msg.fileId).length === 0))
-      setIsEmptyChat(true);
+      setIsEmptyChat?.(true);
   }, [isFetched, flattenedMsgs]);
 
   useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
@@ -108,7 +105,7 @@ export const ChatHistory = ({
     <>
       <ErrorNotification error={deleteMessagesError} />
       <div
-        className="flex w-full flex-grow flex-col-reverse overflow-auto p-2 sm:p-5"
+        className="faded-scrollbar flex w-full flex-grow flex-col-reverse overflow-auto p-2 sm:p-5"
         ref={scrollRef}
         key={conversation?.fileId}
         onCopyCapture={(e) => {
@@ -122,7 +119,7 @@ export const ChatHistory = ({
 
           let runningText = '';
           for (let i = elements.length - 1; i >= 0; i--) {
-            const text = (elements[i] as any).innerText;
+            const text = (elements[i] as HTMLElement).innerText;
             if (text?.length) {
               runningText += text + '\n';
             }
@@ -166,6 +163,10 @@ export const ChatHistory = ({
               }
 
               const msg = flattenedMsgs[item.index];
+              const currentDate = msg?.fileMetadata.created;
+
+              const previousVisibleMsg = flattenedMsgs[item.index + 1];
+              const previousDate = previousVisibleMsg?.fileMetadata.created;
               return (
                 <div
                   key={item.key}
@@ -173,6 +174,7 @@ export const ChatHistory = ({
                   ref={virtualizer.measureElement}
                   className="flex-shrink-0 py-1"
                 >
+                  <DateSeperator previousDate={previousDate} date={currentDate} />
                   <ChatMessageItem
                     key={msg.fileId}
                     msg={msg}
@@ -186,5 +188,22 @@ export const ChatHistory = ({
         </div>
       </div>
     </>
+  );
+};
+
+const DateSeperator = ({ previousDate, date }: { previousDate?: number; date?: number }) => {
+  if (!date) return null;
+
+  const previousDay = previousDate && new Date(previousDate).getDate();
+  const day = new Date(date).getDate();
+
+  if (previousDay === day) return null;
+
+  return (
+    <div className="flex justify-center py-2">
+      <div className="rounded-full bg-page-background px-3 py-2 text-sm font-medium text-foreground">
+        {formatToDateAgoWithRelativeDetail(new Date(date))}
+      </div>
+    </div>
   );
 };

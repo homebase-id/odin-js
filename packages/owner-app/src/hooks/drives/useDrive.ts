@@ -7,9 +7,9 @@ import {
   getDrivesByType,
   TargetDrive,
   editDriveAttributes,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import { useAuth } from '../auth/useAuth';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { drivesEqual } from '@homebase-id/js-lib/helpers';
 
 export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?: boolean }) => {
   const { targetDrive, fetchOutboxStatus } = props || {};
@@ -20,23 +20,15 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
     // First check all drives cache for a drive
     const allDrivesInCache = queryClient.getQueryData<DriveDefinition[]>(['drives']);
     if (allDrivesInCache) {
-      const foundDrive = allDrivesInCache.find(
-        (drive) =>
-          stringGuidsEqual(drive.targetDriveInfo.alias, targetDrive.alias) &&
-          stringGuidsEqual(drive.targetDriveInfo.type, targetDrive.type)
+      const foundDrive = allDrivesInCache.find((drive) =>
+        drivesEqual(drive.targetDriveInfo, targetDrive)
       );
       if (foundDrive) return foundDrive;
     }
 
     const allDrives = await (await getDrivesByType(dotYouClient, targetDrive.type, 1, 100)).results;
 
-    return (
-      allDrives.find(
-        (drive) =>
-          stringGuidsEqual(drive.targetDriveInfo.alias, targetDrive.alias) &&
-          stringGuidsEqual(drive.targetDriveInfo.type, targetDrive.type)
-      ) || null
-    );
+    return allDrives.find((drive) => drivesEqual(drive.targetDriveInfo, targetDrive)) || null;
   };
 
   const fetchDriveDetail = async (targetDrive: TargetDrive) =>

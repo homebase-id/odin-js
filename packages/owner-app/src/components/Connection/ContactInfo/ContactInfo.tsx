@@ -1,12 +1,25 @@
-import { Envelope, t, useDotYouClient } from '@youfoundation/common-app';
 import { useContact } from '../../../hooks/contacts/useContact';
-import { ErrorNotification } from '@youfoundation/common-app';
-import { ActionButton } from '@youfoundation/common-app';
-import { Cake, House, IconFrame, Person, Phone, Refresh } from '@youfoundation/common-app';
+import {
+  t,
+  useDotYouClient,
+  ErrorNotification,
+  ActionButton,
+  ActionLink,
+} from '@homebase-id/common-app';
+import {
+  Envelope,
+  Cake,
+  House,
+  IconFrame,
+  Person,
+  Phone,
+  Refresh,
+  ChatBubble,
+} from '@homebase-id/common-app/icons';
 import Section from '../../ui/Sections/Section';
 import ContactImage from '../ContactImage/ContactImage';
-import { ApiType, DotYouClient, HomebaseFile } from '@youfoundation/js-lib/core';
-import { ContactFile } from '@youfoundation/js-lib/network';
+import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
+import { ContactFile } from '@homebase-id/js-lib/network';
 import { useConnection } from '../../../hooks/connections/useConnection';
 
 interface ContactInfoProps {
@@ -68,14 +81,15 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
                   'Are you sure you want to refresh data, overwritten data cannot be recovered.'
                 ),
               }}
+              type="secondary"
             >
               {t('Refresh')}
             </ActionButton>
           )
         }
       >
-        <div className="-mx-4 sm:flex sm:flex-row">
-          <div className="flex flex-row px-4 sm:mx-0">
+        <div className="gap-4 sm:flex sm:flex-row">
+          <div className="flex flex-row sm:mx-0">
             {odinId ? (
               <ContactImage
                 odinId={odinId}
@@ -84,9 +98,9 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
               />
             ) : null}
           </div>
-          <div className="px-4">
+          <div className="flex flex-col gap-3">
             {contactContent.name && (
-              <div className="my-3 flex flex-row">
+              <div className="flex flex-row items-center">
                 <IconFrame className="mr-2">
                   <Person className="h-5 w-5" />
                 </IconFrame>
@@ -94,31 +108,54 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
                   `${contactContent.name.givenName ?? ''} ${contactContent.name.surname ?? ''}`}
               </div>
             )}
-            <div className="my-3 flex flex-row">
-              <IconFrame className="mr-2">
-                <Phone className="h-5 w-5" />
-              </IconFrame>
-              {contactContent.phone?.number ?? ''}
-            </div>
-            <div className="my-3 flex flex-row">
-              <IconFrame className="mr-2">
-                <Envelope className="h-5 w-5" />
-              </IconFrame>
-              {contactContent.email?.email ?? ''}
-            </div>
-            <div className="my-3 flex flex-row">
-              <IconFrame className="mr-2">
-                <House className="h-5 w-5" />
-              </IconFrame>
-              {contactContent.location?.city ?? ''} {contactContent.location?.country ?? ''}
-            </div>
-            <div className="my-3 flex flex-row">
-              <IconFrame className="mr-2">
-                <Cake className="h-5 w-5" />
-              </IconFrame>
-              {contactContent.birthday?.date ?? ''}
-            </div>
+            {contactContent.phone?.number ? (
+              <div className="flex flex-row items-center">
+                <IconFrame className="mr-2">
+                  <Phone className="h-5 w-5" />
+                </IconFrame>
+                {contactContent.phone?.number ?? ''}
+              </div>
+            ) : null}
+            {contactContent.email?.email ? (
+              <div className="flex flex-row items-center">
+                <IconFrame className="mr-2">
+                  <Envelope className="h-5 w-5" />
+                </IconFrame>
+                {contactContent.email?.email ?? ''}
+              </div>
+            ) : null}
+            {contactContent.location?.city || contactContent.location?.country ? (
+              <div className="flex flex-row items-center">
+                <IconFrame className="mr-2">
+                  <House className="h-5 w-5" />
+                </IconFrame>
+                {contactContent.location?.city ?? ''} {contactContent.location?.country ?? ''}
+              </div>
+            ) : null}
+            {contactContent.birthday?.date ? (
+              <div className="flex flex-row items-center">
+                <IconFrame className="mr-2">
+                  <Cake className="h-5 w-5" />
+                </IconFrame>
+                {contactContent.birthday?.date ?? ''}
+              </div>
+            ) : null}
           </div>
+          {isConnected ? (
+            <div className="mt-5 flex flex-col-reverse gap-1 sm:ml-auto">
+              <div className="flex flex-row items-center gap-2 sm:flex-row-reverse">
+                <ActionLink icon={ChatBubble} href={`/apps/chat/open/${odinId}`} type="secondary" />
+                <ActionLink
+                  icon={Envelope}
+                  href={`/apps/mail/new?recipients=${odinId}`}
+                  type="secondary"
+                />
+              </div>
+              <p className="text-sm text-slate-400">
+                {t('Reach out to')} {contactContent.name?.displayName ?? odinId}:
+              </p>
+            </div>
+          ) : null}
         </div>
       </Section>
     </>

@@ -6,12 +6,12 @@ import {
   QueryBatchCollectionResponse,
   DEFAULT_QUERY_BATCH_RESULT_OPTION,
   HomebaseFile,
-} from '@youfoundation/js-lib/core';
+} from '@homebase-id/js-lib/core';
 import {
   stringGuidsEqual,
   stringifyArrayToQueryParams,
   tryJsonParse,
-} from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/js-lib/helpers';
 import {
   PostType,
   BlogConfig,
@@ -20,7 +20,7 @@ import {
   PostContent,
   ChannelDefinition,
   GetFile,
-} from '@youfoundation/js-lib/public';
+} from '@homebase-id/js-lib/public';
 import { parseChannelTemplate, ChannelDefinitionVm } from '../channels/useChannels';
 
 export const getCachedPosts = async (

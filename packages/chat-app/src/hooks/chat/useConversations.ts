@@ -1,8 +1,8 @@
 import { UnifiedConversation, getConversations } from '../../providers/ConversationProvider';
 import { InfiniteData, QueryClient, useInfiniteQuery } from '@tanstack/react-query';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { useDotYouClientContext } from '@homebase-id/common-app';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export interface ChatConversationsReturn {
   searchResults: HomebaseFile<UnifiedConversation>[];

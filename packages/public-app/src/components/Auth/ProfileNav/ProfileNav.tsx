@@ -1,12 +1,12 @@
 import { useRef } from 'react';
 import { MouseEventHandler } from 'react';
 import { useState } from 'react';
-import { ConnectionImage, OwnerImage, t } from '@youfoundation/common-app';
+import { ConnectionImage, OwnerImage, t } from '@homebase-id/common-app';
 import { useAuth } from '../../../hooks/auth/useAuth';
-import { Person, useOutsideTrigger } from '@youfoundation/common-app';
-import { Times } from '@youfoundation/common-app';
+import { useOutsideTrigger } from '@homebase-id/common-app';
 import { LoginBox } from '../LoginBox/LoginBox';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { Person, Times } from '@homebase-id/common-app/icons';
 
 const ProfileNav = () => {
   const { logout, isAuthenticated, getIdentity, isOwner } = useAuth();

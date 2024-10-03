@@ -2,13 +2,12 @@ import {
   useDotYouClient,
   ConnectionImage,
   ConnectionName,
-  Block,
   t,
   getOdinIdColor,
   useDarkMode,
-} from '@youfoundation/common-app';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+} from '@homebase-id/common-app';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ChatMessage, ChatDeletedArchivalStaus } from '../../../providers/ChatProvider';
 import { UnifiedConversation } from '../../../providers/ConversationProvider';
 import { ChatMedia } from './Media/ChatMedia';
@@ -19,8 +18,8 @@ import { ChatActions, ContextMenu } from './ContextMenu';
 import { EmbeddedMessageWithId } from './EmbeddedMessage';
 import { useParams } from 'react-router-dom';
 import { ChatReactionComposer } from '../Composer/ChatReactionComposer';
-import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 import { ChatReactions } from './ChatReactions';
+import { Block } from '@homebase-id/common-app/icons';
 
 export const ChatMessageItem = ({
   msg,
@@ -32,8 +31,7 @@ export const ChatMessageItem = ({
   chatActions?: ChatActions;
 }) => {
   const identity = useDotYouClient().getIdentity();
-  const authorOdinId =
-    msg.fileMetadata.senderOdinId || msg.fileMetadata.appData.content.authorOdinId || '';
+  const authorOdinId = msg.fileMetadata.senderOdinId || '';
 
   const messageFromMe = !authorOdinId || authorOdinId === identity;
   const hasMedia = !!msg.fileMetadata.payloads.length;
@@ -49,10 +47,9 @@ export const ChatMessageItem = ({
       ) || []
     )?.length > 1;
 
-  const hasReactions = useChatReaction({
-    messageId: msg.fileMetadata.appData.uniqueId,
-    conversationId: conversation?.fileMetadata.appData.uniqueId,
-  }).get.data?.length;
+  const hasReactions =
+    msg.fileMetadata.reactionPreview?.reactions &&
+    Object.keys(msg.fileMetadata.reactionPreview?.reactions).length;
 
   return (
     <>
@@ -119,10 +116,9 @@ const ChatTextMessageBody = ({
 }) => {
   const content = msg.fileMetadata.appData.content;
   const isEmojiOnly =
-    ((content.message?.match(/^\p{Extended_Pictographic}/u) &&
-      !content.message?.match(/[0-9a-zA-Z]/)) ||
-      (content.message?.match(/^\p{Emoji_Component}/u) &&
-        !content.message?.match(/[0-9a-zA-Z]/))) ??
+    ((content.message?.match(/^\p{Extended_Pictographic}/u) ||
+      content.message?.match(/^\p{Emoji_Component}/u)) &&
+      !content.message?.match(/[0-9a-zA-Z]/)) ??
     false;
 
   const isReply = !!content.replyId;
@@ -136,7 +132,7 @@ const ChatTextMessageBody = ({
         showBackground
           ? messageFromMe
             ? 'bg-primary/10 dark:bg-primary/30'
-            : 'bg-gray-500/10  dark:bg-gray-300/20'
+            : 'bg-gray-500/10 dark:bg-gray-300/20'
           : ''
       }`}
     >
@@ -150,7 +146,12 @@ const ChatTextMessageBody = ({
           <MessageDeletedInnerBody />
         ) : (
           <div className="flex min-w-0 flex-col gap-1">
-            {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
+            {content.replyId ? (
+              <EmbeddedMessageWithId
+                conversationId={conversation?.fileMetadata.appData.uniqueId}
+                msgId={content.replyId}
+              />
+            ) : null}
             <ParagraphWithLinks
               text={content.message}
               className={`copyable-content whitespace-pre-wrap break-words ${
@@ -275,13 +276,20 @@ const ChatMediaMessageBody = ({
       }`}
     >
       {isGroupChat && !messageFromMe ? (
-        <p className={`font-semibold`} style={{ color: getOdinIdColor(authorOdinId).darkTheme }}>
+        <p
+          className={`px-2 py-[0.4rem] font-semibold`}
+          style={{ color: getOdinIdColor(authorOdinId).darkTheme }}
+        >
           <ConnectionName odinId={authorOdinId} />
         </p>
       ) : null}
       <div className="relative">
         {content.replyId ? (
-          <EmbeddedMessageWithId msgId={content.replyId} className="mb-4" />
+          <EmbeddedMessageWithId
+            conversationId={conversation?.fileMetadata.appData.uniqueId}
+            msgId={content.replyId}
+            className="mb-4"
+          />
         ) : null}
         <ChatMedia msg={msg} />
         {!hasACaption ? <ChatFooter className="absolute bottom-0 right-0 px-2 py-1" /> : null}

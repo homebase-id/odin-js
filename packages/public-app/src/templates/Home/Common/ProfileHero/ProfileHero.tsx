@@ -1,5 +1,5 @@
-import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
-import { HomePageConfig } from '@youfoundation/js-lib/public';
+import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
+import { HomePageConfig } from '@homebase-id/js-lib/public';
 import Links from '../../../../components/ui/Layout/Links/Links';
 import Socials from '../../../../components/ui/Layout/Socials/Socials';
 import ConnectLink from '../../../../components/ConnectionActions/ConnectLink/ConnectLink';
@@ -10,11 +10,11 @@ import {
   useSiteData,
   ImageLightbox,
   ThemeLinksSettings,
-} from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
 import { useState } from 'react';
 
 const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
-  const { owner, home, social } = useSiteData().data ?? {};
+  const { owner, home } = useSiteData().data ?? {};
   const [isImageLightboxOpen, setIsImageLightboxOpen] = useState(false);
 
   const targetDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
@@ -67,10 +67,7 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
 
               <div className="my-3 flex flex-col justify-center md:my-auto md:ml-auto">
                 <div className="hidden md:contents">
-                  <Socials
-                    socialHandles={social}
-                    className="mt-4 justify-center sm:mt-0 md:ml-auto md:justify-start"
-                  />
+                  <Socials className="mt-4 justify-center sm:mt-0 md:ml-auto md:justify-start" />
                 </div>
 
                 <div

@@ -1,17 +1,17 @@
-import { AttributeConfig, ProfileConfig } from '@youfoundation/js-lib/profile';
+import { AttributeConfig, ProfileConfig } from '@homebase-id/js-lib/profile';
 import { useEffect, useMemo, useState } from 'react';
 import {
   AclIcon,
   AclSummary,
-  Exclamation,
   ExtensionThumbnail,
   HybridLink,
-  Trash,
   bytesToSize,
+  Image,
+  ActionButton,
   t,
-} from '@youfoundation/common-app';
-import { ActionButton } from '@youfoundation/common-app';
-import { Download, Image } from '@youfoundation/common-app';
+} from '@homebase-id/common-app';
+
+import { Exclamation, Trash, Download } from '@homebase-id/common-app/icons';
 import {
   DeletedHomebaseFile,
   HomebaseFile,
@@ -20,12 +20,13 @@ import {
   TargetDrive,
   decryptJsonContent,
   decryptKeyHeader,
-} from '@youfoundation/js-lib/core';
-import { BlogConfig, ReactionConfig } from '@youfoundation/js-lib/public';
-import { ContactConfig } from '@youfoundation/js-lib/network';
-import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app';
+} from '@homebase-id/js-lib/core';
+import { BlogConfig, ReactionConfig } from '@homebase-id/js-lib/public';
+import { ContactConfig } from '@homebase-id/js-lib/network';
+import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
 import { useFile } from '../../../hooks/files/useFiles';
 import { useAuth } from '../../../hooks/auth/useAuth';
+import { drivesEqual } from '@homebase-id/js-lib/helpers';
 
 export const FileCard = ({
   targetDrive,
@@ -56,23 +57,23 @@ export const FileCard = ({
         <FileExtLabel
           file={file}
           defaultPayload={firstPayload}
-          className={`${isRow ? '' : 'absolute right-2 top-2'}  z-10 bg-indigo-200 p-1 text-[0.7rem] uppercase dark:bg-indigo-800`}
+          className={`${isRow ? '' : 'absolute right-2 top-2'} z-10 bg-indigo-200 p-1 text-[0.7rem] uppercase dark:bg-indigo-800`}
         />
         <FileDownload
           file={file}
           targetDrive={targetDrive}
-          className={`${isRow ? '' : 'absolute left-2 top-2'}  z-10`}
+          className={`${isRow ? '' : 'absolute left-2 top-2'} z-10`}
         />
         <FileDelete
           file={file}
           targetDrive={targetDrive}
-          className={`${isRow ? '' : 'absolute right-2 top-8'}  z-10`}
+          className={`${isRow ? '' : 'absolute right-2 top-8'} z-10`}
         />
       </div>
 
       <div className={`${isRow ? 'w-32' : 'px-4 py-2 lg:px-5'} `}>
-        {isImage ? (
-          <div className="relative">
+        <div className="relative">
+          {isImage && !drivesEqual(targetDrive, BlogConfig.FeedDrive) ? (
             <div className="flex aspect-square overflow-hidden">
               <Image
                 targetDrive={targetDrive}
@@ -84,19 +85,20 @@ export const FileCard = ({
                 className="m-auto"
               />
             </div>
-
+          ) : (
+            <div className="flex aspect-square overflow-hidden p-2">
+              <ExtensionThumbnail
+                contentType={firstPayload?.contentType || 'application/json'}
+                className="m-auto h-auto w-full max-w-[2rem] opacity-50"
+              />
+            </div>
+          )}
+          {firstPayload ? (
             <div className="absolute inset-0 flex cursor-pointer flex-row items-center justify-center bg-slate-200 bg-opacity-50 opacity-0 hover:opacity-100">
               <FileDownload file={file} targetDrive={targetDrive} payloadKey={firstPayload.key} />
             </div>
-          </div>
-        ) : (
-          <div className="flex aspect-square overflow-hidden p-2">
-            <ExtensionThumbnail
-              contentType={firstPayload?.contentType || 'application/json'}
-              className="m-auto h-auto w-full max-w-[2rem] opacity-50"
-            />
-          </div>
-        )}
+          ) : null}
+        </div>
       </div>
       <div className={isRow ? 'w-24' : ''}>
         <FileTypeLabel file={file} />
@@ -207,6 +209,10 @@ const CHAT_CONVERSATION_FILE_TYPE = 8888;
 
 const MAIL_DRAFT_CONVERSATION_FILE_TYPE = 9001;
 const MAIL_CONVERSATION_FILE_TYPE = 9000;
+
+const COMMUNITY_FILE_TYPE = 7010;
+const COMMUNITY_MESSAGE_FILE_TYPE = 7020;
+const COMMUNITY_CHANNEL_FILE_TYPE = 7015;
 const FileTypeLabel = ({ file }: { file: HomebaseFile<string> | DeletedHomebaseFile<string> }) => {
   const fileType = file.fileMetadata.appData.fileType;
 
@@ -248,6 +254,14 @@ const FileTypeLabel = ({ file }: { file: HomebaseFile<string> | DeletedHomebaseF
       return 'Mail Conversation';
     case MAIL_DRAFT_CONVERSATION_FILE_TYPE:
       return 'Draft Mail Conversation';
+
+    // Community:
+    case COMMUNITY_CHANNEL_FILE_TYPE:
+      return 'Community Channel';
+    case COMMUNITY_FILE_TYPE:
+      return 'Community Defintion';
+    case COMMUNITY_MESSAGE_FILE_TYPE:
+      return 'Community Message';
 
     // Assets
     case 0:
@@ -339,11 +353,14 @@ const FileState = ({
         const parsedContent = await decryptJsonContent(file.fileMetadata, keyheader);
 
         setIsBroken(
-          file.fileMetadata.isEncrypted && typeof parsedContent === 'object'
+          file.fileMetadata?.appData.content?.length &&
+            file.fileMetadata.isEncrypted &&
+            typeof parsedContent === 'object'
             ? Object.keys(parsedContent).length === 0
             : false
         );
       } catch (e) {
+        console.warn('[FileCard] Failed to decrypt file', e);
         setIsBroken(true);
       }
     })();
