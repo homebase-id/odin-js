@@ -7,6 +7,7 @@ import {
   OwnerName,
   LoadingBlock,
   getPlainTextFromRichText,
+  useDotYouClient,
 } from '@homebase-id/common-app';
 import { Persons } from '@homebase-id/common-app/icons';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
@@ -129,6 +130,7 @@ const ConversationBody = ({
   conversationId?: string;
   setOrder?: (order: number) => void;
 }) => {
+  const identity = useDotYouClient().getIdentity();
   const { data: conversationMetadata } = useConversationMetadata({ conversationId }).single;
   const { data, isFetched: fetchedMessages } = useChatMessages({ conversationId }).all;
   const flatMessages = useMemo(
@@ -142,13 +144,21 @@ const ConversationBody = ({
 
   const lastReadTime = conversationMetadata?.fileMetadata.appData.content.lastReadTime || 0;
   const unreadCount =
-    conversationMetadata && flatMessages && !!flatMessages?.[0]?.fileMetadata.senderOdinId
+    conversationMetadata &&
+    flatMessages &&
+    lastMessage?.fileMetadata.senderOdinId &&
+    lastMessage?.fileMetadata.senderOdinId !== identity
       ? flatMessages.filter(
           (msg) =>
-            msg.fileMetadata.senderOdinId &&
+            msg.fileMetadata.senderOdinId !== identity &&
             (msg.fileMetadata.transitCreated || msg.fileMetadata.created) > lastReadTime
         )?.length
       : 0;
+
+  if (conversationId === '456894ee-9dcb-4b8d-9384-6a782025c031') {
+    console.log('lastMessage', lastMessage);
+    console.log('unreadCount', unreadCount);
+  }
 
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
   const plainLastMessageContent = getPlainTextFromRichText(lastMessageContent?.message);
