@@ -7,8 +7,9 @@ import { ImageDialog, t, useDotYouClient } from '@homebase-id/common-app';
 import { ImageIcon, Trash } from '@homebase-id/common-app/icons';
 import { ToolbarButton, ToolbarButtonProps } from '../../components/plate-ui/toolbar';
 import { OdinThumbnailImage } from '@homebase-id/ui-lib';
-import { ELEMENT_IMAGE, insertImage, TImageElement } from './createImagePlugin';
+import { insertImage, TImageElement } from './createImagePlugin';
 import { PlateRenderElementProps, useEditorRef, useEventPlateId } from '@udecode/plate-core/react';
+import { useMediaOptionsContext } from '../MediaOptionsContext/useMediaOptionsContext';
 
 export interface MediaOptions {
   odinId?: string;
@@ -22,13 +23,15 @@ export interface MediaOptions {
 
 type MediaOptionsConfig = MediaOptions & AnyPluginConfig;
 
-interface ImageToolbarButtonProps extends ToolbarButtonProps {
-  mediaOptions: MediaOptions;
-}
+type ImageToolbarButtonProps = ToolbarButtonProps;
+//  {
+// mediaOptions: MediaOptions;
+// }
 
-export const ImageToolbarButton = ({ mediaOptions, ...props }: ImageToolbarButtonProps) => {
+export const ImageToolbarButton = ({ ...props }: ImageToolbarButtonProps) => {
   const [isActive, setIsActive] = useState(false);
   const editor = useEditorRef(useEventPlateId());
+  const mediaOptions = useMediaOptionsContext().mediaOptions;
 
   return (
     <>
@@ -46,7 +49,7 @@ export const ImageToolbarButton = ({ mediaOptions, ...props }: ImageToolbarButto
         isOpen={isActive}
         onCancel={() => setIsActive(false)}
         onConfirm={async (image) => {
-          if (image) {
+          if (image && mediaOptions?.onAppend) {
             const uploadResult = await mediaOptions.onAppend(image);
             if (uploadResult) insertImage(editor, uploadResult.fileKey);
           }
@@ -71,7 +74,8 @@ export const ImageElementBlock = <N extends TImageElement = TImageElement>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const path = ReactEditor.findPath(editor as any, element as any);
 
-  const options: MediaOptions = editor.getOptions<MediaOptionsConfig>({ key: ELEMENT_IMAGE });
+  // const options: MediaOptions = editor.getOptions<MediaOptionsConfig>({ key: ELEMENT_IMAGE });
+  const options = useMediaOptionsContext().mediaOptions;
 
   const doRemove = async () => {
     if (await options?.onRemove({ fileId: options.fileId, fileKey: element.fileKey })) {
@@ -81,14 +85,13 @@ export const ImageElementBlock = <N extends TImageElement = TImageElement>(
     }
   };
 
-  console.log('options', options, attributes, options);
-
-  if (!options || !options.mediaDrive) return <>{children}</>;
-
   const pendingUrl = useMemo(() => {
+    if (!options) return undefined;
     const pendingUpload = options.pendingUploadFiles?.find((file) => file.key === element.fileKey);
     return pendingUpload ? URL.createObjectURL(pendingUpload.file) : undefined;
-  }, []);
+  }, [options]);
+
+  if (!options || !options.mediaDrive) return <>{children}</>;
 
   return (
     <>

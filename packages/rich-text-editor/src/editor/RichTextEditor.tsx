@@ -77,6 +77,8 @@ import { ImagePlugin } from './ImagePlugin/createImagePlugin';
 import { createPlateEditor, Plate, PlateContent, PlatePlugin } from '@udecode/plate-core/react';
 import { focusEditor, PlateElementProps, PlateLeaf } from '@udecode/plate-common/react';
 import { ListElement } from '../components/plate-ui/list-element';
+import { MediaOptionsContextProvider } from './MediaOptionsContext/MediaOptionsContext';
+import { useMediaOptionsContext } from './MediaOptionsContext/useMediaOptionsContext';
 
 interface RTEProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -130,6 +132,11 @@ const InnerRichTextEditor = memo(
       plugins: _plugins,
       components: _components,
     } = props;
+
+    const { setMediaOptions } = useMediaOptionsContext();
+    useEffect(() => {
+      if (mediaOptions) setMediaOptions(mediaOptions);
+    }, [mediaOptions]);
 
     const { isDarkMode } = useDarkMode();
 
@@ -259,7 +266,7 @@ const InnerRichTextEditor = memo(
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               MentionPlugin.configure({ options: { mentionables: mentionables || [] } as any })
             : undefined,
-          mediaOptions ? ImagePlugin.configure({ options: mediaOptions }) : undefined,
+          mediaOptions ? ImagePlugin : undefined,
           ...(_plugins || []),
         ].filter(Boolean) as PlatePlugin[],
         override: {
@@ -296,7 +303,6 @@ const InnerRichTextEditor = memo(
     );
 
     const editor = useMemo(() => {
-      console.log('createPlateEditor');
       return createPlateEditor({
         id: uniqueId || 'editor',
         value: defaultValAsRichText,
@@ -409,12 +415,14 @@ const RichTextEditor = memo(
     );
 
     return (
-      <InnerRichTextEditor
-        ref={ref}
-        {...props}
-        defaultValue={activeDefaultValue}
-        onChange={handleChange}
-      />
+      <MediaOptionsContextProvider>
+        <InnerRichTextEditor
+          ref={ref}
+          {...props}
+          defaultValue={activeDefaultValue}
+          onChange={handleChange}
+        />
+      </MediaOptionsContextProvider>
     );
   })
 );

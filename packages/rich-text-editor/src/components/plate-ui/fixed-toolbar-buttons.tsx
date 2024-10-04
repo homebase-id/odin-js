@@ -64,7 +64,7 @@ export function FixedToolbarButtons({
               <Icons.code className="h-5 w-5" />
             </MarkToolbarButton>
             <LinkToolbarButton />
-            {mediaOptions ? <ImageToolbarButton mediaOptions={mediaOptions} /> : null}
+            {mediaOptions ? <ImageToolbarButton /> : null}
           </ToolbarGroup>
         </>
       </div>
