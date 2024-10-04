@@ -176,11 +176,12 @@ const ChatTextMessageBody = ({
   );
 };
 
-const urlAndMentionRegex = new RegExp(/(https?:\/\/[^\s]+|@[^\s]+)/);
+const urlAndMentionRegex = new RegExp(/(https?:\/\/[^\s]|(?:^|\s|[\r\n])@[^\s]+)/);
 const urlRegex = new RegExp(
   /https?:\/\/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|(localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d{1,5})?)(\/[^\s]*)?/
 );
-const mentionRegex = new RegExp(/@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+const mentionRegex = new RegExp(/(?:^|\s|[\r\n])@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+
 const ParagraphWithLinks = ({
   text,
   className,
@@ -207,16 +208,20 @@ const ParagraphWithLinks = ({
             </a>
           );
         } else if (mentionRegex.test(part)) {
+          const trimmedPart = part.trim();
           return (
-            <a
-              key={index}
-              href={`https://${part.slice(1)}`}
-              target="_blank"
-              rel="noreferrer"
-              className="break-all text-primary underline"
-            >
-              {part}
-            </a>
+            <>
+              {part.slice(0, 1) === ' ' ? ' ' : null}
+              <a
+                key={index}
+                href={`https://${part.slice(1)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="break-all text-primary hover:underline"
+              >
+                {trimmedPart}
+              </a>
+            </>
           );
         }
         return part;
