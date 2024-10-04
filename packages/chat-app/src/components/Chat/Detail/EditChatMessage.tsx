@@ -6,6 +6,7 @@ import {
   DialogWrapper,
   ErrorNotification,
   VolatileInput,
+  getPlainTextFromRichText,
   t,
   usePortal,
 } from '@homebase-id/common-app';
@@ -13,6 +14,7 @@ import { UnifiedConversation } from '../../../providers/ConversationProvider';
 import { useEffect, useState } from 'react';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { isTouchDevice } from '@homebase-id/js-lib/helpers';
+import { RichTextEditor } from '@homebase-id/rich-text-editor';
 
 export const EditChatMessage = ({
   msg,
@@ -34,7 +36,8 @@ export const EditChatMessage = ({
   } = useChatMessage().update;
 
   const doSend = () => {
-    if (!message.trim()) return;
+    const plainMessage = getPlainTextFromRichText(message);
+    if (!plainMessage.trim()) return;
 
     const updatedMessage: HomebaseFile<ChatMessage> = {
       ...msg,
@@ -59,45 +62,58 @@ export const EditChatMessage = ({
 
   const dialog = (
     <DialogWrapper onClose={onClose} title={t('Edit message')} isSidePanel={false}>
-      <ErrorNotification error={updateError} />
-      <VolatileInput
-        placeholder="Your message"
-        defaultValue={message}
-        className="relative w-full rounded-md border bg-background p-2 dark:border-slate-800"
-        onChange={setMessage}
-        autoFocus={!isTouchDevice()}
-        onSubmit={
-          isTouchDevice()
-            ? undefined
-            : (val) => {
-                setMessage(val);
-                doSend();
-              }
-        }
-      />
-      <div className="mt-4 flex flex-row-reverse gap-2">
-        <ActionButton
-          type="primary"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            doSend();
-          }}
-          state={updateStatus}
-          size="square"
-          onMouseDown={(e) => e.preventDefault()}
-        >
-          {t('Save')}
-        </ActionButton>
-        <ActionButton
-          type="mute"
-          onClick={onClose}
-          size="square"
-          onMouseDown={(e) => e.preventDefault()}
-        >
-          {t('Cancel')}
-        </ActionButton>
-      </div>
+      <>
+        <ErrorNotification error={updateError} />
+        {typeof message === 'string' ? (
+          <VolatileInput
+            placeholder="Your message"
+            defaultValue={message}
+            className="relative w-full rounded-md border bg-background p-2 dark:border-slate-800"
+            onChange={setMessage}
+            autoFocus={!isTouchDevice()}
+            onSubmit={
+              isTouchDevice()
+                ? undefined
+                : (val) => {
+                    setMessage(val);
+                    doSend();
+                  }
+            }
+          />
+        ) : (
+          <RichTextEditor
+            placeholder="Your message"
+            defaultValue={message}
+            className="relative w-full rounded-md border bg-background p-2 dark:border-slate-800"
+            onChange={(e) => setMessage(e.target.value)}
+            autoFocus={!isTouchDevice()}
+            onSubmit={isTouchDevice() ? undefined : () => doSend()}
+          />
+        )}
+        <div className="mt-4 flex flex-row-reverse gap-2">
+          <ActionButton
+            type="primary"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              doSend();
+            }}
+            state={updateStatus}
+            size="square"
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            {t('Save')}
+          </ActionButton>
+          <ActionButton
+            type="mute"
+            onClick={onClose}
+            size="square"
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            {t('Cancel')}
+          </ActionButton>
+        </div>
+      </>
     </DialogWrapper>
   );
 

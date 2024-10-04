@@ -45,6 +45,9 @@ export const getTextRootsRecursive = (children: RichText | string): string[] => 
     .filter((child) => child.length);
 };
 
+export const getPlainTextFromRichText = (message: string | RichText) =>
+  getTextRootsRecursive(message).join(' ');
+
 export const getReadingTime = (body?: RichText | string): ReadTimeStats | undefined => {
   if (!body) return;
 

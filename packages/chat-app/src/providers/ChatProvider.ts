@@ -31,6 +31,7 @@ import {
   FailedTransferStatuses,
   RecipientTransferHistory,
   deleteFile,
+  RichText,
 } from '@homebase-id/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import {
@@ -66,8 +67,8 @@ export enum ChatDeliveryStatus {
 export interface ChatMessage {
   replyId?: string;
 
-  // Content of the message
-  message: string;
+  /// Content of the message
+  message: string | RichText;
 
   // The author of the message
   /**

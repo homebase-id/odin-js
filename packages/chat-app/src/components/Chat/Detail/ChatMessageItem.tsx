@@ -5,8 +5,10 @@ import {
   t,
   getOdinIdColor,
   useDarkMode,
+  RichTextRenderer,
+  getPlainTextFromRichText,
 } from '@homebase-id/common-app';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { HomebaseFile, RichText } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ChatMessage, ChatDeletedArchivalStaus } from '../../../providers/ChatProvider';
 import { UnifiedConversation } from '../../../providers/ConversationProvider';
@@ -115,10 +117,11 @@ const ChatTextMessageBody = ({
   isDeleted: boolean;
 }) => {
   const content = msg.fileMetadata.appData.content;
+  const plainMessage = getPlainTextFromRichText(content.message);
   const isEmojiOnly =
-    ((content.message?.match(/^\p{Extended_Pictographic}/u) ||
-      content.message?.match(/^\p{Emoji_Component}/u)) &&
-      !content.message?.match(/[0-9a-zA-Z]/)) ??
+    ((plainMessage?.match(/^\p{Extended_Pictographic}/u) ||
+      plainMessage?.match(/^\p{Emoji_Component}/u)) &&
+      !plainMessage?.match(/[0-9a-zA-Z]/)) ??
     false;
 
   const isReply = !!content.replyId;
@@ -179,9 +182,16 @@ const urlRegex = new RegExp(
 );
 const mentionRegex = new RegExp(/(?:^|\s|[\r\n])@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
 
-const ParagraphWithLinks = ({ text, className }: { text: string; className?: string }) => {
-  const splitUpText = text.split(urlAndMentionRegex);
+const ParagraphWithLinks = ({
+  text,
+  className,
+}: {
+  text: string | RichText;
+  className?: string;
+}) => {
+  if (typeof text !== 'string') return <RichTextRenderer body={text} className={className} />;
 
+  const splitUpText = text.split(urlAndMentionRegex);
   return (
     <p className={className}>
       {splitUpText.map((part, index) => {
