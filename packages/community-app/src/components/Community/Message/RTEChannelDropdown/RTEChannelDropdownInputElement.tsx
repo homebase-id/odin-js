@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 
 import { cn, withRef } from '@udecode/cn';
-import { PlateElement } from '@udecode/plate-common';
 
 import { TChannel, getChannelOnSelectItem } from './RTEChannelDropdownPlugin';
 
@@ -10,13 +9,14 @@ import {
   InlineComboboxContent,
   InlineComboboxInput,
   InlineComboboxItem,
-  InlineComboboxSeleactableEmpty,
 } from '@homebase-id/rich-text-editor';
 import { ErrorNotification, t } from '@homebase-id/common-app';
 import { useParams } from 'react-router-dom';
 import { useCommunityChannels } from '../../../../hooks/community/channels/useCommunityChannels';
 import { useCommunity } from '../../../../hooks/community/useCommunity';
 import { useCommunityChannel } from '../../../../hooks/community/channels/useCommunityChannel';
+
+import { PlateElement } from '@homebase-id/rich-text-editor';
 
 const onSelectItem = getChannelOnSelectItem();
 

@@ -1,8 +1,7 @@
 import { useState } from 'react';
 
 import { cn, withRef } from '@udecode/cn';
-import { getPluginOptions, PlateElement } from '@udecode/plate-common';
-import { ELEMENT_MENTION, getMentionOnSelectItem, TMentionItemBase } from '@udecode/plate-mention';
+import { getMentionOnSelectItem, TMentionItemBase } from '@udecode/plate-mention';
 
 export interface Mentionable extends TMentionItemBase {
   key: string;
@@ -15,10 +14,13 @@ import {
   InlineComboboxInput,
   InlineComboboxItem,
 } from './inline-combobox';
+import { AnyPluginConfig } from '@udecode/plate-core';
+import { PlateElement } from './plate-element';
+import { MentionPlugin } from '@udecode/plate-mention/react';
 
 const onSelectItem = getMentionOnSelectItem();
 
-interface MentionOptions {
+interface MentionOptions extends AnyPluginConfig {
   mentionables?: Mentionable[];
 }
 
@@ -26,7 +28,7 @@ export const MentionInputElement = withRef<typeof PlateElement>(({ className, ..
   const { children, editor, element } = props;
   const [search, setSearch] = useState('');
 
-  const options = getPluginOptions<MentionOptions | undefined>(editor, ELEMENT_MENTION);
+  const options: MentionOptions = editor.getOptions<MentionOptions>({ key: MentionPlugin.key });
   const mentionables = options?.mentionables;
 
   if (!mentionables) return null;

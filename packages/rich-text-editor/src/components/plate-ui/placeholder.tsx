@@ -1,10 +1,9 @@
 import React from 'react';
-import { PlaceholderProps, usePlaceholderState } from '@udecode/plate-common';
+import { type PlaceholderProps, usePlaceholderState } from '@udecode/plate-common/react';
 
 import { cn } from '../../lib/utils';
-
 export const Placeholder = (props: PlaceholderProps) => {
-  const { children, placeholder, nodeProps } = props;
+  const { children, nodeProps, placeholder } = props;
 
   const { enabled } = usePlaceholderState(props);
 

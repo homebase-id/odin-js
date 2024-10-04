@@ -1,68 +1,48 @@
 import {
-  createPlugins,
-  Plate,
-  RenderAfterEditable,
-  PlateElement,
-  PlateLeaf,
-  PlateEditor,
-  Value,
-  useEditorRef,
-  usePlateId,
   TElement,
-  createDeserializeHtmlPlugin,
-  PlateContent,
   TDescendant,
-  focusEditor,
   getStartPoint,
   resetEditor,
   isSelectionAtBlockStart,
   isBlockAboveEmpty,
-  PlatePlugin,
-  PlatePluginComponent,
 } from '@udecode/plate-common';
+import { ParagraphPlugin, PlateElement } from '@udecode/plate-common/react';
 import { withProps } from '@udecode/cn';
-import { createParagraphPlugin, ELEMENT_PARAGRAPH } from '@udecode/plate-paragraph';
-import { createHeadingPlugin, ELEMENT_H1, ELEMENT_H2, KEYS_HEADING } from '@udecode/plate-heading';
-import { createBlockquotePlugin, ELEMENT_BLOCKQUOTE } from '@udecode/plate-block-quote';
 import {
-  createCodeBlockPlugin,
-  ELEMENT_CODE_BLOCK,
-  ELEMENT_CODE_LINE,
   isCodeBlockEmpty,
   isSelectionAtCodeBlockStart,
   unwrapCodeBlock,
 } from '@udecode/plate-code-block';
-import { createLinkPlugin, ELEMENT_LINK } from '@udecode/plate-link';
-import { createListPlugin, ELEMENT_UL, ELEMENT_OL, ELEMENT_LI } from '@udecode/plate-list';
-import {
-  createBoldPlugin,
-  MARK_BOLD,
-  createItalicPlugin,
-  MARK_ITALIC,
-  createUnderlinePlugin,
-  MARK_UNDERLINE,
-  createStrikethroughPlugin,
-  MARK_STRIKETHROUGH,
-  createCodePlugin,
-  MARK_CODE,
-} from '@udecode/plate-basic-marks';
-import { createKbdPlugin, MARK_KBD } from '@udecode/plate-kbd';
-import { createAutoformatPlugin } from '@udecode/plate-autoformat';
-import { createBlockSelectionPlugin } from '@udecode/plate-selection';
-import { createExitBreakPlugin, createSoftBreakPlugin } from '@udecode/plate-break';
-import { createNodeIdPlugin } from '@udecode/plate-node-id';
-import { createResetNodePlugin } from '@udecode/plate-reset-node';
-import { createSelectOnBackspacePlugin } from '@udecode/plate-select';
-import { createTabbablePlugin } from '@udecode/plate-tabbable';
-import { createTrailingBlockPlugin } from '@udecode/plate-trailing-block';
-import { createDeserializeMdPlugin } from '@udecode/plate-serializer-md';
 
-import { createEmojiPlugin, ELEMENT_EMOJI_INPUT } from '@udecode/plate-emoji';
+import { LinkPlugin } from '@udecode/plate-link/react';
+import { HeadingPlugin } from '@udecode/plate-heading/react';
+import { BlockquotePlugin } from '@udecode/plate-block-quote/react';
+import { CodeBlockPlugin, CodeLinePlugin } from '@udecode/plate-code-block/react';
+import { MentionInputPlugin, MentionPlugin } from '@udecode/plate-mention/react';
 import {
-  createMentionPlugin,
-  ELEMENT_MENTION,
-  ELEMENT_MENTION_INPUT,
-} from '@udecode/plate-mention';
+  BoldPlugin,
+  ItalicPlugin,
+  UnderlinePlugin,
+  StrikethroughPlugin,
+  CodePlugin,
+} from '@udecode/plate-basic-marks/react';
+import { KbdPlugin } from '@udecode/plate-kbd/react';
+import { AutoformatPlugin } from '@udecode/plate-autoformat/react';
+import { BlockSelectionPlugin } from '@udecode/plate-selection/react';
+import { EmojiInputPlugin, EmojiPlugin } from '@udecode/plate-emoji/react';
+import { ExitBreakPlugin, SoftBreakPlugin } from '@udecode/plate-break/react';
+import { NodeIdPlugin } from '@udecode/plate-node-id';
+import { ResetNodePlugin } from '@udecode/plate-reset-node/react';
+import {
+  BulletedListPlugin,
+  ListItemPlugin,
+  ListPlugin,
+  NumberedListPlugin,
+} from '@udecode/plate-list/react';
+import { SelectOnBackspacePlugin } from '@udecode/plate-select';
+import { TabbablePlugin } from '@udecode/plate-tabbable/react';
+import { TrailingBlockPlugin } from '@udecode/plate-trailing-block';
+import { HEADING_KEYS } from '@udecode/plate-heading';
 
 import { BlockquoteElement } from '../components/plate-ui/blockquote-element';
 import { CodeBlockElement } from '../components/plate-ui/code-block-element';
@@ -70,7 +50,6 @@ import { CodeLineElement } from '../components/plate-ui/code-line-element';
 import { LinkElement } from '../components/plate-ui/link-element';
 import { LinkFloatingToolbar } from '../components/plate-ui/link-floating-toolbar';
 import { HeadingElement } from '../components/plate-ui/heading-element';
-import { ListElement } from '../components/plate-ui/list-element';
 import { ParagraphElement } from '../components/plate-ui/paragraph-element';
 import { CodeLeaf } from '../components/plate-ui/code-leaf';
 import { KbdLeaf } from '../components/plate-ui/kbd-leaf';
@@ -94,7 +73,10 @@ import { autoformatRules } from '../lib/autoFormatRules';
 import { EmojiInputElement } from './Combobox/EmojiCombobox';
 import { MentionElement } from '../components/plate-ui/mention-element';
 import { Mentionable, MentionInputElement } from '../components/plate-ui/mention-input-element';
-import { createImagePlugin, ELEMENT_IMAGE } from './ImagePlugin/createImagePlugin';
+import { ImagePlugin } from './ImagePlugin/createImagePlugin';
+import { createPlateEditor, Plate, PlateContent, PlatePlugin } from '@udecode/plate-core/react';
+import { focusEditor, PlateElementProps, PlateLeaf } from '@udecode/plate-common/react';
+import { ListElement } from '../components/plate-ui/list-element';
 
 interface RTEProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -113,17 +95,20 @@ interface RTEProps {
   children?: React.ReactNode;
 
   plugins?: PlatePlugin[];
-  components?: Record<string, PlatePluginComponent> | undefined;
+  components?: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    p: React.ForwardRefExoticComponent<Omit<PlateElementProps, 'ref'> & React.RefAttributes<any>>;
+  };
 }
 
 const resetBlockTypesCommonRule = {
-  types: [ELEMENT_BLOCKQUOTE],
-  defaultType: ELEMENT_PARAGRAPH,
+  types: [BlockquotePlugin.key],
+  defaultType: ParagraphPlugin.key,
 };
 
 const resetBlockTypesCodeBlockRule = {
-  types: [ELEMENT_CODE_BLOCK],
-  defaultType: ELEMENT_PARAGRAPH,
+  types: [CodeBlockPlugin.key],
+  defaultType: ParagraphPlugin.key,
   onReset: unwrapCodeBlock,
 };
 
@@ -164,191 +149,187 @@ const InnerRichTextEditor = memo(
     );
 
     const plugins = useMemo(
-      () =>
-        createPlugins(
-          [
-            createParagraphPlugin(),
-            createHeadingPlugin(),
-            createBlockquotePlugin(),
-            createCodeBlockPlugin(),
-            createLinkPlugin({
-              renderAfterEditable: LinkFloatingToolbar as RenderAfterEditable,
-            }),
-            createListPlugin(),
-            createBoldPlugin(),
-            createItalicPlugin(),
-            createUnderlinePlugin(),
-            createStrikethroughPlugin(),
-            createCodePlugin(),
-            createKbdPlugin(),
-            createAutoformatPlugin({
-              options: {
-                rules: autoformatRules,
-                enableUndoOnDelete: true,
-              },
-            }),
-            createBlockSelectionPlugin({
-              options: {
-                sizes: {
-                  top: 0,
-                  bottom: 0,
-                },
-              },
-            }),
-            createExitBreakPlugin({
-              options: {
-                rules: [
-                  {
-                    hotkey: 'mod+enter',
-                  },
-                  {
-                    hotkey: 'mod+shift+enter',
-                    before: true,
-                  },
-                ],
-              },
-            }),
-            createNodeIdPlugin(),
-            createResetNodePlugin({
-              options: {
-                rules: [
-                  // Usage: https://platejs.org/docs/reset-node
-                  {
-                    ...resetBlockTypesCommonRule,
-                    hotkey: 'Enter',
-                    predicate: isBlockAboveEmpty,
-                  },
-                  {
-                    ...resetBlockTypesCommonRule,
-                    hotkey: 'Backspace',
-                    predicate: isSelectionAtBlockStart,
-                  },
-                  {
-                    ...resetBlockTypesCodeBlockRule,
-                    hotkey: 'Enter',
-                    predicate: isCodeBlockEmpty,
-                    query: {
-                      start: true,
-                      end: true,
-                      allow: KEYS_HEADING,
-                    },
-                    // Type of query is not defined in the type, so we need to cast it to any
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  } as any,
-                  {
-                    ...resetBlockTypesCodeBlockRule,
-                    hotkey: 'Backspace',
-                    predicate: isSelectionAtCodeBlockStart,
-                  },
-                ],
-              },
-            }),
-            createSelectOnBackspacePlugin({
-              options: {
-                query: {
-                  allow: [ELEMENT_IMAGE],
-                },
-              },
-            }),
-            onSubmit
-              ? undefined
-              : createSoftBreakPlugin({
-                  options: {
-                    rules: [
-                      {
-                        hotkey: 'shift+enter',
-                        query: {
-                          // Only in specific elements so we can combine shift+enter for regular breaks when there's a onSubmit
-                          // allow: [ELEMENT_PARAGRAPH, ELEMENT_BLOCKQUOTE, ELEMENT_CODE_BLOCK],
-                          allow: [],
-                        },
-                      },
-                    ],
-                  },
-                }),
-            createTabbablePlugin(),
-            createTrailingBlockPlugin({
-              options: { type: ELEMENT_PARAGRAPH },
-            }),
-            createDeserializeHtmlPlugin(),
-            createDeserializeMdPlugin(),
-            createEmojiPlugin(),
-            // createMentionPlugin is not typed correctly to our custom implementation, so we need to cast it to any
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            createMentionPlugin({ options: { mentionables: mentionables || [] } as any }),
-            mediaOptions ? createImagePlugin({ options: mediaOptions }) : undefined,
-            ...(_plugins || []),
-          ].filter(Boolean) as PlatePlugin[],
-          {
-            components: {
-              [ELEMENT_BLOCKQUOTE]: BlockquoteElement,
-              [ELEMENT_CODE_BLOCK]: CodeBlockElement,
-              [ELEMENT_CODE_LINE]: CodeLineElement,
-              [ELEMENT_LINK]: LinkElement,
-              ...(disableHeadings
-                ? {}
-                : {
-                    [ELEMENT_H1]: withProps(HeadingElement, { variant: 'h1' }),
-                    [ELEMENT_H2]: withProps(HeadingElement, { variant: 'h2' }),
-                  }),
-              [ELEMENT_UL]: withProps(ListElement, { variant: 'ul' }),
-              [ELEMENT_OL]: withProps(ListElement, { variant: 'ol' }),
-              [ELEMENT_LI]: withProps(PlateElement, { as: 'li' }),
-              [ELEMENT_PARAGRAPH]: ParagraphElement,
-              [MARK_BOLD]: withProps(PlateLeaf, { as: 'strong' }),
-              [MARK_CODE]: CodeLeaf,
-              [MARK_ITALIC]: withProps(PlateLeaf, { as: 'em' }),
-              [MARK_KBD]: KbdLeaf,
-              [MARK_STRIKETHROUGH]: withProps(PlateLeaf, { as: 's' }),
-              [MARK_UNDERLINE]: withProps(PlateLeaf, { as: 'u' }),
-              [ELEMENT_EMOJI_INPUT]: EmojiInputElement,
-              [ELEMENT_MENTION]: MentionElement,
-              [ELEMENT_MENTION_INPUT]: MentionInputElement,
-              ...(_components || {}),
+      () => ({
+        plugins: [
+          ParagraphPlugin,
+          HeadingPlugin,
+          BlockquotePlugin,
+          CodeBlockPlugin,
+          LinkPlugin.configure({
+            render: { afterEditable: () => <LinkFloatingToolbar /> },
+          }),
+          ListPlugin,
+          BulletedListPlugin,
+          NumberedListPlugin,
+          BoldPlugin,
+          ItalicPlugin,
+          UnderlinePlugin,
+          StrikethroughPlugin,
+          CodePlugin,
+          KbdPlugin,
+          AutoformatPlugin.configure({
+            options: {
+              enableUndoOnDelete: true,
+              // Usage: https://platejs.org/docs/autoformat
+              rules: autoformatRules,
             },
-          }
-        ),
-      [mediaOptions, mentionables]
+          }),
+          BlockSelectionPlugin,
+          ExitBreakPlugin.configure({
+            options: {
+              rules: [
+                {
+                  hotkey: 'mod+enter',
+                },
+                {
+                  hotkey: 'mod+shift+enter',
+                  before: true,
+                },
+              ],
+            },
+          }),
+          EmojiInputPlugin,
+          NodeIdPlugin,
+          ResetNodePlugin.configure({
+            options: {
+              rules: [
+                // Usage: https://platejs.org/docs/reset-node
+                {
+                  ...resetBlockTypesCommonRule,
+                  hotkey: 'Enter',
+                  predicate: isBlockAboveEmpty,
+                },
+                {
+                  ...resetBlockTypesCommonRule,
+                  hotkey: 'Backspace',
+                  predicate: isSelectionAtBlockStart,
+                },
+                {
+                  ...resetBlockTypesCodeBlockRule,
+                  hotkey: 'Enter',
+                  predicate: isCodeBlockEmpty,
+                  // query: {
+                  //   start: true,
+                  //   end: true,
+                  //   allow: KEYS_HEADING,
+                  // },
+                  // Type of query is not defined in the type, so we need to cast it to any
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                } as any,
+                {
+                  ...resetBlockTypesCodeBlockRule,
+                  hotkey: 'Backspace',
+                  predicate: isSelectionAtCodeBlockStart,
+                },
+              ],
+            },
+          }),
+          SelectOnBackspacePlugin.configure({
+            options: {
+              query: {
+                allow: [ImagePlugin.key],
+              },
+            },
+          }),
+          onSubmit
+            ? undefined
+            : SoftBreakPlugin.configure({
+                options: {
+                  rules: [
+                    {
+                      hotkey: 'shift+enter',
+                      query: {
+                        // Only in specific elements so we can combine shift+enter for regular breaks when there's a onSubmit
+                        // allow: [ELEMENT_PARAGRAPH, ELEMENT_BLOCKQUOTE, ELEMENT_CODE_BLOCK],
+                        allow: [],
+                      },
+                    },
+                  ],
+                },
+              }),
+          TabbablePlugin,
+          TrailingBlockPlugin.configure({
+            options: { type: 'p' },
+          }),
+          // DeserializeHtmlPlugin,
+          // DeserializeMdPlugin,
+          EmojiPlugin,
+          mentionables
+            ? // MentionPlugin is not typed correctly to our custom implementation, so we need to cast it to any
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              MentionPlugin.configure({ options: { mentionables: mentionables || [] } as any })
+            : undefined,
+          mediaOptions ? ImagePlugin.configure({ options: mediaOptions }) : undefined,
+          ...(_plugins || []),
+        ].filter(Boolean) as PlatePlugin[],
+        override: {
+          components: {
+            [BlockquotePlugin.key]: BlockquoteElement,
+            [CodeBlockPlugin.key]: CodeBlockElement,
+            [CodeLinePlugin.key]: CodeLineElement,
+            [LinkPlugin.key]: LinkElement,
+            ...(disableHeadings
+              ? {}
+              : {
+                  [HEADING_KEYS.h1]: withProps(HeadingElement, { variant: 'h1' }),
+                  [HEADING_KEYS.h2]: withProps(HeadingElement, { variant: 'h2' }),
+                }),
+            [BulletedListPlugin.key]: withProps(ListElement, { variant: 'ul' }),
+            [NumberedListPlugin.key]: withProps(ListElement, { variant: 'ol' }),
+            [ListItemPlugin.key]: withProps(PlateElement, { as: 'li' }),
+
+            [ParagraphPlugin.key]: ParagraphElement,
+            [BoldPlugin.key]: withProps(PlateLeaf, { as: 'strong' }),
+            [CodePlugin.key]: CodeLeaf,
+            [ItalicPlugin.key]: withProps(PlateLeaf, { as: 'em' }),
+            [KbdPlugin.key]: KbdLeaf,
+            [StrikethroughPlugin.key]: withProps(PlateLeaf, { as: 's' }),
+            [UnderlinePlugin.key]: withProps(PlateLeaf, { as: 'u' }),
+            [EmojiInputPlugin.key]: EmojiInputElement,
+            [MentionInputPlugin.key]: MentionInputElement,
+            [MentionPlugin.key]: MentionElement,
+            ...(_components || {}),
+          },
+        },
+      }),
+      []
     );
 
-    const [innerEditor, setInnerEditor] = useState<PlateEditor<Value>>();
-    const EditorExposer = useCallback(() => {
-      const editor = useEditorRef(usePlateId());
-
-      useEffect(() => {
-        setInnerEditor(editor);
-      }, [editor]);
-
-      return null;
-    }, []);
+    const editor = useMemo(() => {
+      console.log('createPlateEditor');
+      return createPlateEditor({
+        id: uniqueId || 'editor',
+        value: defaultValAsRichText,
+        ...plugins,
+      });
+    }, [plugins]);
 
     const handleChange = useCallback(
       (newValue: TElement[]) => {
-        const isActualChange = innerEditor?.operations.some(
+        const isActualChange = editor?.operations.some(
           (op: { type: string }) => 'set_selection' !== op.type
         );
 
         if (isActualChange) onChange({ target: { name: name, value: newValue } });
       },
-      [innerEditor, onChange]
+      [editor, onChange]
     );
 
     useEffect(() => {
-      if (autoFocus && innerEditor)
-        setTimeout(() => focusEditor(innerEditor, getStartPoint(innerEditor, [0])), 0);
-    }, [autoFocus, innerEditor]);
+      if (autoFocus && editor) setTimeout(() => focusEditor(editor, getStartPoint(editor, [0])), 0);
+    }, [autoFocus, editor]);
 
     useImperativeHandle(
       ref,
       () => ({
         focus() {
-          if (innerEditor) focusEditor(innerEditor, getStartPoint(innerEditor, [0]));
+          if (editor) focusEditor(editor, getStartPoint(editor, [0]));
         },
         clear() {
-          if (innerEditor) resetEditor(innerEditor);
+          if (editor) resetEditor(editor);
         },
       }),
-      [innerEditor]
+      [editor]
     );
 
     return (
@@ -373,10 +354,8 @@ const InnerRichTextEditor = memo(
           onClick={disabled ? undefined : (e) => e.stopPropagation()}
         >
           <Plate
-            id={uniqueId}
-            initialValue={defaultValAsRichText}
-            plugins={plugins}
-            onChange={handleChange}
+            editor={editor}
+            onChange={(editor) => handleChange(editor.value)}
             readOnly={disabled}
             // Switch keys to reset the editor when going to enabled
             key={disabled ? 'disabled' : undefined}
@@ -395,14 +374,12 @@ const InnerRichTextEditor = memo(
                       onSubmit();
                     } else {
                       e.preventDefault();
-                      innerEditor?.insertBreak();
+                      editor?.insertBreak();
                     }
                   }
                 }
               }}
             />
-
-            <EditorExposer />
           </Plate>
           {props.children}
         </section>

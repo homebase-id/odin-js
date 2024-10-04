@@ -1,12 +1,13 @@
-import { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
+import { Icons } from '../../components/icons';
+
+import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
+
 import {
   focusEditor,
   useEditorReadOnly,
-  useEditorState,
+  useEditorRef,
   usePlateStore,
-} from '@udecode/plate-common';
-
-import { Icons } from '../../components/icons';
+} from '@udecode/plate-common/react';
 
 import {
   DropdownMenu,
@@ -19,25 +20,25 @@ import { ToolbarButton } from './toolbar';
 import { useOpenState } from './dropdown-menu/use-open-state';
 
 export function ModeDropdownMenu(props: DropdownMenuProps) {
-  const editor = useEditorState();
+  const editor = useEditorRef();
   const setReadOnly = usePlateStore().set.readOnly();
   const readOnly = useEditorReadOnly();
   const openState = useOpenState();
 
   let value = 'editing';
+
   if (readOnly) value = 'viewing';
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const item: any = {
     editing: (
       <>
-        <Icons.editing className="mr-2 h-5 w-5" />
+        <Icons.editing className="mr-2 size-5" />
         <span className="hidden lg:inline">Editing</span>
       </>
     ),
     viewing: (
       <>
-        <Icons.viewing className="mr-2 h-5 w-5" />
+        <Icons.viewing className="mr-2 size-5" />
         <span className="hidden lg:inline">Viewing</span>
       </>
     ),
@@ -47,16 +48,16 @@ export function ModeDropdownMenu(props: DropdownMenuProps) {
     <DropdownMenu modal={false} {...openState} {...props}>
       <DropdownMenuTrigger asChild>
         <ToolbarButton
+          className="min-w-[auto] lg:min-w-[130px]"
           pressed={openState.open}
           tooltip="Editing mode"
           isDropdown
-          className="min-w-[auto] lg:min-w-[130px]"
         >
           {item[value]}
         </ToolbarButton>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="start" className="min-w-[180px]">
+      <DropdownMenuContent className="min-w-[180px]" align="start">
         <DropdownMenuRadioGroup
           className="flex flex-col gap-0.5"
           value={value}
@@ -64,14 +65,14 @@ export function ModeDropdownMenu(props: DropdownMenuProps) {
             if (newValue !== 'viewing') {
               setReadOnly(false);
             }
-
             if (newValue === 'viewing') {
               setReadOnly(true);
+
               return;
             }
-
             if (newValue === 'editing') {
               focusEditor(editor);
+
               return;
             }
           }}

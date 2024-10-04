@@ -1,5 +1,5 @@
-import { useEventPlateId, useEditorRef, PlateRenderElementProps } from '@udecode/plate-core';
-import { Value, getPluginOptions, removeNodes } from '@udecode/plate-common';
+import { AnyPluginConfig } from '@udecode/plate-core';
+import { removeNodes } from '@udecode/plate-common';
 import { ReactEditor } from 'slate-react';
 import { TargetDrive, NewMediaFile } from '@homebase-id/js-lib/core';
 import { useMemo, useState } from 'react';
@@ -8,6 +8,7 @@ import { ImageIcon, Trash } from '@homebase-id/common-app/icons';
 import { ToolbarButton, ToolbarButtonProps } from '../../components/plate-ui/toolbar';
 import { OdinThumbnailImage } from '@homebase-id/ui-lib';
 import { ELEMENT_IMAGE, insertImage, TImageElement } from './createImagePlugin';
+import { PlateRenderElementProps, useEditorRef, useEventPlateId } from '@udecode/plate-core/react';
 
 export interface MediaOptions {
   odinId?: string;
@@ -18,6 +19,8 @@ export interface MediaOptions {
   onAppend: (file: Blob) => Promise<{ fileId: string; fileKey: string } | null>;
   onRemove: (payload: { fileId: string; fileKey: string }) => Promise<unknown | null>;
 }
+
+type MediaOptionsConfig = MediaOptions & AnyPluginConfig;
 
 interface ImageToolbarButtonProps extends ToolbarButtonProps {
   mediaOptions: MediaOptions;
@@ -57,8 +60,8 @@ export const ImageToolbarButton = ({ mediaOptions, ...props }: ImageToolbarButto
   );
 };
 
-export const ImageElementBlock = <V extends Value = Value>(
-  props: PlateRenderElementProps<V, TImageElement>
+export const ImageElementBlock = <N extends TImageElement = TImageElement>(
+  props: PlateRenderElementProps<N>
 ) => {
   const [isActive, setIsActive] = useState(false);
   const { attributes, children, nodeProps, element } = props;
@@ -68,7 +71,7 @@ export const ImageElementBlock = <V extends Value = Value>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const path = ReactEditor.findPath(editor as any, element as any);
 
-  const options = getPluginOptions<MediaOptions | undefined>(editor, ELEMENT_IMAGE);
+  const options: MediaOptions = editor.getOptions<MediaOptionsConfig>({ key: ELEMENT_IMAGE });
 
   const doRemove = async () => {
     if (await options?.onRemove({ fileId: options.fileId, fileKey: element.fileKey })) {
@@ -77,6 +80,8 @@ export const ImageElementBlock = <V extends Value = Value>(
       }, 10);
     }
   };
+
+  console.log('options', options, attributes, options);
 
   if (!options || !options.mediaDrive) return <>{children}</>;
 

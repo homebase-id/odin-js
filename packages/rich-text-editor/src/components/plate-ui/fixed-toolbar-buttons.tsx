@@ -1,12 +1,3 @@
-import {
-  MARK_BOLD,
-  MARK_CODE,
-  MARK_ITALIC,
-  MARK_STRIKETHROUGH,
-  MARK_UNDERLINE,
-} from '@udecode/plate-basic-marks';
-import { useEditorReadOnly } from '@udecode/plate-common';
-
 import { Icons } from '../../components/icons';
 
 import { InsertDropdownMenu } from './insert-dropdown-menu';
@@ -16,7 +7,15 @@ import { TurnIntoDropdownMenu } from './turn-into-dropdown-menu';
 import { ImageToolbarButton, MediaOptions } from '../../editor/ImagePlugin/ImagePlugin';
 import { Bold, Italic, Underline } from '@homebase-id/common-app/icons';
 import { LinkToolbarButton } from './link-toolbar-button';
-import { ELEMENT_H1, ELEMENT_H2 } from '@udecode/plate-heading';
+import { useEditorReadOnly } from '@udecode/plate-core/react';
+import {
+  BoldPlugin,
+  ItalicPlugin,
+  UnderlinePlugin,
+  StrikethroughPlugin,
+  CodePlugin,
+} from '@udecode/plate-basic-marks/react';
+import { HEADING_KEYS } from '@udecode/plate-heading';
 
 export function FixedToolbarButtons({
   disableHeadings,
@@ -39,29 +38,29 @@ export function FixedToolbarButtons({
           <ToolbarGroup noSeparator>
             {mediaOptions ? (
               <InsertDropdownMenu
-                filterValues={disableHeadings ? [ELEMENT_H1, ELEMENT_H2] : undefined}
+                filterValues={disableHeadings ? [HEADING_KEYS.h1, HEADING_KEYS.h2] : undefined}
               />
             ) : null}
             <TurnIntoDropdownMenu
-              filterValues={disableHeadings ? [ELEMENT_H1, ELEMENT_H2] : undefined}
+              filterValues={disableHeadings ? [HEADING_KEYS.h1, HEADING_KEYS.h2] : undefined}
             />
           </ToolbarGroup>
 
           <ToolbarGroup>
-            <MarkToolbarButton tooltip="Bold (⌘+B)" nodeType={MARK_BOLD}>
+            <MarkToolbarButton tooltip="Bold (⌘+B)" nodeType={BoldPlugin.key}>
               <Bold className="h-5 w-5" />
             </MarkToolbarButton>
-            <MarkToolbarButton tooltip="Italic (⌘+I)" nodeType={MARK_ITALIC}>
+            <MarkToolbarButton tooltip="Italic (⌘+I)" nodeType={ItalicPlugin.key}>
               <Italic className="h-5 w-5" />
             </MarkToolbarButton>
-            <MarkToolbarButton tooltip="Underline (⌘+U)" nodeType={MARK_UNDERLINE}>
+            <MarkToolbarButton tooltip="Underline (⌘+U)" nodeType={UnderlinePlugin.key}>
               <Underline className="h-5 w-5" />
             </MarkToolbarButton>
 
-            <MarkToolbarButton tooltip="Strikethrough (⌘+⇧+M)" nodeType={MARK_STRIKETHROUGH}>
+            <MarkToolbarButton tooltip="Strikethrough (⌘+⇧+M)" nodeType={StrikethroughPlugin.key}>
               <Icons.strikethrough className="h-5 w-5" />
             </MarkToolbarButton>
-            <MarkToolbarButton tooltip="Code (⌘+E)" nodeType={MARK_CODE}>
+            <MarkToolbarButton tooltip="Code (⌘+E)" nodeType={CodePlugin.key}>
               <Icons.code className="h-5 w-5" />
             </MarkToolbarButton>
             <LinkToolbarButton />

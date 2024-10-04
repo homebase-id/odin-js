@@ -1,6 +1,8 @@
 import { AutoformatBlockRule } from '@udecode/plate-autoformat';
-import { ELEMENT_CODE_BLOCK, ELEMENT_CODE_LINE } from '@udecode/plate-code-block';
-import { getParentNode, isElement, isType, PlateEditor } from '@udecode/plate-common';
+import { CodePlugin } from '@udecode/plate-basic-marks/react';
+import { CodeBlockPlugin } from '@udecode/plate-code-block/react';
+import { getParentNode, isElement, isType } from '@udecode/plate-common';
+import { PlateEditor } from '@udecode/plate-core/react';
 import { toggleList, unwrapList } from '@udecode/plate-list';
 
 export const preFormat: AutoformatBlockRule['preFormat'] = (editor) => unwrapList(editor);
@@ -13,8 +15,8 @@ export const format = (editor: PlateEditor, customFormatting: any) => {
     const [node] = parentEntry;
     if (
       isElement(node) &&
-      !isType(editor, node, ELEMENT_CODE_BLOCK) &&
-      !isType(editor, node, ELEMENT_CODE_LINE)
+      !isType(editor, node, CodeBlockPlugin.key) &&
+      !isType(editor, node, CodePlugin.key)
     ) {
       customFormatting();
     }
