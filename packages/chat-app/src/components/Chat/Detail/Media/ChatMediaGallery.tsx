@@ -108,6 +108,7 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
           ) : payload ? (
             <BoringFile
               odinId={undefined}
+              globalTransitId={undefined}
               targetDrive={ChatDrive}
               fileId={msg.fileId}
               file={payload}

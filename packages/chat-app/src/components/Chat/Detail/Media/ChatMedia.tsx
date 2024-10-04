@@ -142,6 +142,7 @@ const MediaItem = ({
             <BoringFile
               odinId={undefined}
               fileId={fileId}
+              globalTransitId={undefined}
               targetDrive={ChatDrive}
               file={payload as PayloadDescriptor}
             />

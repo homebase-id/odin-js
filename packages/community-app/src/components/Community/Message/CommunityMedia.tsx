@@ -155,6 +155,7 @@ const MediaItem = ({
               fileId={fileId}
               targetDrive={targetDrive}
               file={payload as PayloadDescriptor}
+              globalTransitId={undefined}
             />
           )}
         </>
