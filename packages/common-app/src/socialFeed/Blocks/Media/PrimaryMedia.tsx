@@ -104,6 +104,7 @@ export const PrimaryMedia = ({
           odinId={odinId}
           targetDrive={getChannelDrive(channelId)}
           fileId={fileId}
+          globalTransitId={globalTransitId}
           file={file}
           className="aspect-video"
         />
@@ -116,6 +117,7 @@ export const BoringFile = ({
   odinId,
   targetDrive,
   fileId,
+  globalTransitId,
   file,
   canDownload,
   className,
@@ -123,6 +125,7 @@ export const BoringFile = ({
   odinId: string | undefined;
   targetDrive: TargetDrive;
   fileId: string;
+  globalTransitId: string | undefined;
   file: PayloadDescriptor;
   canDownload?: boolean;
   className?: string;
@@ -143,7 +146,7 @@ export const BoringFile = ({
       onClick={
         canDownload
           ? async () => {
-              doDownload((await fetchFile(odinId, fileId, file.key)) || '');
+              doDownload((await fetchFile(odinId, globalTransitId, fileId, file.key)) || '');
             }
           : undefined
       }
