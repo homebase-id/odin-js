@@ -43,7 +43,7 @@ export const usePendingConnections = ({
         fetchPendingConnections({ pageSize: pendingPageSize, pageNumber: pendingPage }),
 
       refetchOnWindowFocus: false,
-      refetchOnMount: false,
+      refetchOnMount: true,
       enabled: !!pendingPage,
     }),
   };
