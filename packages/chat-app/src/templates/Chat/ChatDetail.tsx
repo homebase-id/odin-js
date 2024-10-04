@@ -25,11 +25,11 @@ import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../providers/ConversationProvider';
-import { useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { ChatMessage } from '../../providers/ChatProvider';
 import { ChatHistory } from '../../components/Chat/ChatHistory';
-import { ChatComposer } from '../../components/Chat/Composer/ChatComposer';
+import { ChatComposer, ChatComposerProps } from '../../components/Chat/Composer/ChatComposer';
 import { ChatInfo } from '../../components/Chat/Detail/ChatInfo';
 import { useNavigate } from 'react-router-dom';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
@@ -37,18 +37,23 @@ import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 export const ChatDetail = ({
   conversationId,
   communityTagId,
-  rootPath: _rootPath,
+  options,
 }: {
   conversationId: string | undefined;
   communityTagId?: string;
-  rootPath?: string;
+  options?: {
+    rootPath?: string;
+    composer?: FC<ChatComposerProps>;
+  };
 }) => {
-  const rootPath = _rootPath || CHAT_ROOT_PATH;
+  const rootPath = options?.rootPath || CHAT_ROOT_PATH;
   const { data: conversation, isLoading, isFetched } = useConversation({ conversationId }).single;
   const { mutate: inviteRecipient } = useConversation().inviteRecipient;
   const { mutate: introduceIdentities } = useIntroductions().introduceIdentities;
   const [replyMsg, setReplyMsg] = useState<HomebaseFile<ChatMessage> | undefined>();
   const identity = useDotYouClient().getIdentity();
+
+  const Composer = useMemo(() => options?.composer || ChatComposer, [options]);
 
   if (!conversationId || isLoading || (!conversation && isFetched))
     return (
@@ -98,8 +103,8 @@ export const ChatDetail = ({
         <ErrorBoundary>
           <ChatHistory conversation={conversation || undefined} setReplyMsg={setReplyMsg} />
         </ErrorBoundary>
-        <ErrorBoundary>
-          <ChatComposer
+        <ErrorBoundary key={conversationId}>
+          <Composer
             tags={communityTagId ? [communityTagId] : undefined}
             conversation={conversation || undefined}
             replyMsg={replyMsg}

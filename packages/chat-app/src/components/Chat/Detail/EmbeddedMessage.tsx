@@ -1,6 +1,7 @@
 import {
   ConnectionName,
   ExtensionThumbnail,
+  getPlainTextFromRichText,
   t,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
@@ -32,7 +33,7 @@ export const EmbeddedMessage = ({
 }) => {
   const identity = useDotYouClientContext().getIdentity();
   const hasMedia = msg && !!msg.fileMetadata.payloads?.length;
-
+  const plainText = msg && getPlainTextFromRichText(msg.fileMetadata.appData.content.message);
   return (
     <div className={`w-full flex-grow overflow-hidden rounded-lg bg-primary/10 ${className || ''}`}>
       <div className="flex flex-row items-center gap-2 border-l-4 border-l-primary p-1">
@@ -46,7 +47,7 @@ export const EmbeddedMessage = ({
                   t('You')
                 )}
               </p>
-              <p className="text-foreground">{msg.fileMetadata.appData.content.message}</p>
+              <p className="text-foreground">{plainText}</p>
             </div>
             {hasMedia ? <EmbeddedMessageMedia msg={msg} className="h-16 w-16" /> : null}
           </>

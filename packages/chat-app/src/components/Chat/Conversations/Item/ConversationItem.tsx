@@ -6,6 +6,7 @@ import {
   OwnerImage,
   OwnerName,
   LoadingBlock,
+  getPlainTextFromRichText,
   useDotYouClient,
 } from '@homebase-id/common-app';
 import { Persons } from '@homebase-id/common-app/icons';
@@ -160,6 +161,7 @@ const ConversationBody = ({
   }
 
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
+  const plainLastMessageContent = getPlainTextFromRichText(lastMessageContent?.message);
 
   useEffect(() => {
     if (!lastMessage) {
@@ -189,7 +191,7 @@ const ConversationBody = ({
                 <MessageDeletedInnerBody />
               ) : lastMessageContent.message ? (
                 <p className="overflow-hidden text-ellipsis whitespace-nowrap">
-                  {lastMessageContent.message}
+                  {plainLastMessageContent}
                 </p>
               ) : (
                 <p>📷 {t('Media')}</p>

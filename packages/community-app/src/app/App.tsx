@@ -36,14 +36,14 @@ import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import { useAuth } from '../hooks/auth/useAuth';
 
-export const ROOT_PATH = '/apps/community';
-const AUTH_PATH = ROOT_PATH + '/auth';
+const AUTH_PATH = COMMUNITY_ROOT_PATH + '/auth';
 
 import {
   ErrorBoundary,
   NotFound,
   DotYouClientProvider,
   OdinQueryClient,
+  COMMUNITY_ROOT_PATH,
 } from '@homebase-id/common-app';
 
 const CommunityChannelDetail = lazy(() =>
@@ -62,7 +62,7 @@ function App() {
     createRoutesFromElements(
       <>
         <Route
-          path={ROOT_PATH}
+          path={COMMUNITY_ROOT_PATH}
           element={
             <ErrorBoundary>
               <Suspense fallback={<></>}>
@@ -176,7 +176,9 @@ function App() {
 
 const CommunityRootRoute = () => {
   const { communityKey } = useParams();
-  return window.innerWidth > 1024 ? <Navigate to={`${ROOT_PATH}/${communityKey}/all`} /> : null;
+  return window.innerWidth > 1024 ? (
+    <Navigate to={`${COMMUNITY_ROOT_PATH}/${communityKey}/all`} />
+  ) : null;
 };
 
 const RootRoute = ({ children }: { children: ReactNode }) => {

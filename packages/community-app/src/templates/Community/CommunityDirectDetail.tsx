@@ -8,6 +8,7 @@ import { useDotYouClientContext } from '@homebase-id/common-app';
 import { getNewXorId } from '@homebase-id/js-lib/helpers';
 import { ConversationWithYourselfId } from '@homebase-id/chat-app/src/providers/ConversationProvider';
 import { useConversation } from '@homebase-id/chat-app/src/hooks/chat/useConversation';
+import { CommunityDirectComposer } from '../../components/Community/Message/CommunityDirectComposer';
 
 export const CommunityDirectDetail = () => {
   const identity = useDotYouClientContext().getIdentity();
@@ -57,7 +58,10 @@ export const CommunityDirectDetail = () => {
             conversationId={conversationId}
             communityTagId={communityId}
             key={conversationId || dmKey}
-            rootPath={`${COMMUNITY_ROOT_PATH}/${communityId}`}
+            options={{
+              rootPath: `${COMMUNITY_ROOT_PATH}/${communityId}`,
+              composer: CommunityDirectComposer,
+            }}
           />
         ) : null}
       </div>

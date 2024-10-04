@@ -287,7 +287,7 @@ export const IdentityPageMetaAndActions = ({
             />
           </>
         }
-        breadCrumbs={[{ href: '/owner/connections', title: 'Contacts' }, { title: odinId }]}
+        breadCrumbs={[{ href: '/owner/connections', title: 'Connections' }, { title: odinId }]}
         browserTitle={
           connectionInfo?.status === 'connected' && contactContent?.name
             ? (contactContent.name.displayName ??

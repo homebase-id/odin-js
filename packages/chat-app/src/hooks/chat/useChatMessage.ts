@@ -5,6 +5,7 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
   NewMediaFile,
+  RichText,
 } from '@homebase-id/js-lib/core';
 import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { updateChatMessage, uploadChatMessage } from '../../providers/ChatProvider';
@@ -62,7 +63,7 @@ export const useChatMessage = (props?: {
     conversation: HomebaseFile<UnifiedConversation>;
     replyId?: string;
     files?: NewMediaFile[];
-    message: string;
+    message: string | RichText;
     linkPreviews?: LinkPreview[];
     chatId?: string;
     userDate?: number;
