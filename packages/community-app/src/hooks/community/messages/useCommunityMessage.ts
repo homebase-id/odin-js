@@ -44,7 +44,7 @@ export const useCommunityMessage = (props?: {
     userDate,
   }: {
     community: HomebaseFile<CommunityDefinition>;
-    channel?: HomebaseFile<CommunityChannel>;
+    channel: HomebaseFile<CommunityChannel>;
     groupId?: string;
     replyId?: string;
     files?: NewMediaFile[];
@@ -76,6 +76,7 @@ export const useCommunityMessage = (props?: {
               //     ? CommunityDeliveryStatus.Read:
               CommunityDeliveryStatus.Sent,
             replyId: replyId,
+            channelId: channel.fileMetadata.appData.uniqueId as string,
           },
           userDate: userDate || new Date().getTime(),
         },
@@ -157,6 +158,7 @@ export const useCommunityMessage = (props?: {
                 message: message,
                 deliveryStatus: CommunityDeliveryStatus.Sending,
                 replyId: replyId,
+                channelId: channel.fileMetadata.appData.uniqueId as string,
               },
               userDate,
             },

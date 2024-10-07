@@ -6,7 +6,7 @@ import {
   useCommunityChannelsWithRecentMessages,
 } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 import { CommunityHistory } from './channel/CommunityHistory';
-import { ActionButton, ActionLink, t } from '@homebase-id/common-app';
+import { ActionButton, ActionLink, t, useDotYouClient } from '@homebase-id/common-app';
 import { RadioTower } from '@homebase-id/common-app/icons';
 import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
 import { useCallback, useState } from 'react';
@@ -17,6 +17,7 @@ export const CommunityCatchup = ({
 }: {
   community: HomebaseFile<CommunityDefinition> | undefined;
 }) => {
+  const identity = useDotYouClient().getIdentity();
   const { data: metadata } = usecommunityMetadata({
     communityId: community?.fileMetadata?.appData?.uniqueId,
   }).single;
@@ -35,7 +36,8 @@ export const CommunityCatchup = ({
     return (
       chnl.lastMessage?.fileMetadata.created &&
       chnl.lastMessage.fileMetadata.created > (lastReadTime || 0) &&
-      !!chnl.lastMessage.fileMetadata.senderOdinId
+      !!chnl.lastMessage.fileMetadata.senderOdinId &&
+      chnl.lastMessage.fileMetadata.senderOdinId !== identity
     );
   });
 

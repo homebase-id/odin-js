@@ -26,6 +26,7 @@ import { useCommunityMessages } from '../../../hooks/community/messages/useCommu
 import { ROOT_PATH as COMMUNITY_ROOT } from '../../../app/App';
 import { useCommunityChannels } from '../../../hooks/community/channels/useCommunityChannels';
 import { CommunityReactions } from './reactions/CommunityReactions';
+import { useCommunityChannel } from '../../../hooks/community/channels/useCommunityChannel';
 
 export const CommunityMessageItem = ({
   msg,
@@ -33,6 +34,7 @@ export const CommunityMessageItem = ({
   communityActions,
   hideDetails,
   hideThreads,
+  showChannelName,
   className,
 }: {
   msg: HomebaseFile<CommunityMessage>;
@@ -40,6 +42,7 @@ export const CommunityMessageItem = ({
   communityActions?: CommunityActions;
   hideDetails?: boolean;
   hideThreads?: boolean;
+  showChannelName?: boolean;
   className?: string;
 }) => {
   const identity = useDotYouClient().getIdentity();
@@ -52,6 +55,11 @@ export const CommunityMessageItem = ({
   const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey);
   const isMediaDetail =
     stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey) && mediaKey;
+
+  const { data: channel } = useCommunityChannel({
+    communityId: community?.fileMetadata.appData.uniqueId,
+    channelId: msg.fileMetadata.appData.content.channelId,
+  }).fetch;
 
   const [highlight, setHighlight] = useState(isDetail);
   useEffect(() => {
@@ -70,52 +78,62 @@ export const CommunityMessageItem = ({
         />
       ) : null}
       <div
-        className={`group relative flex flex-row gap-2 bg-background transition-colors duration-500 ${isDetail ? (highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000') : 'hover:bg-page-background'} ${className || ''}`}
+        className={`group relative flex flex-col bg-background transition-colors duration-500 ${isDetail ? (highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000') : 'hover:bg-page-background'} ${className || ''}`}
         data-unique-id={msg.fileMetadata.appData.uniqueId}
       >
-        {hideDetails ? (
-          <div className="w-8"></div>
-        ) : (
-          <>
-            {!messageFromMe ? (
-              <ConnectionImage
-                odinId={authorOdinId}
-                className={`flex-shrink-0 border border-neutral-200 dark:border-neutral-800`}
-                size="xs"
-              />
-            ) : (
-              <OwnerImage
-                className={`flex-shrink-0 border border-neutral-200 dark:border-neutral-800`}
-                size="xs"
-              />
-            )}
-          </>
-        )}
-
-        <div className="flex w-20 flex-grow flex-col">
-          <div className="flex flex-row items-center gap-2">
-            {hideDetails ? null : (
-              <>
-                <p
-                  className={`font-semibold`}
-                  style={{ color: getOdinIdColor(authorOdinId).darkTheme }}
-                >
-                  {messageFromMe ? <OwnerName /> : <ConnectionName odinId={authorOdinId} />}
-                </p>
-                <CommunitySentTimeIndicator className="text-sm" msg={msg} />
-                <CommunityDeliveryIndicator msg={msg} />
-              </>
-            )}
-
-            <ContextMenu communityActions={communityActions} msg={msg} community={community} />
-          </div>
-
-          {hasMedia ? (
-            <CommunityMediaMessageBody msg={msg} community={community} />
+        {showChannelName && !hideDetails ? (
+          <Link
+            className="mb-1 text-primary hover:underline"
+            to={`${COMMUNITY_ROOT}/${community?.fileMetadata.appData.uniqueId}/${msg.fileMetadata.appData.content.channelId}`}
+          >
+            #{channel?.fileMetadata.appData.content.title}
+          </Link>
+        ) : null}
+        <div className="flex flex-row gap-2">
+          {hideDetails ? (
+            <div className="w-8"></div>
           ) : (
-            <CommunityTextMessageBody msg={msg} community={community} />
+            <>
+              {!messageFromMe ? (
+                <ConnectionImage
+                  odinId={authorOdinId}
+                  className={`flex-shrink-0 border border-neutral-200 dark:border-neutral-800`}
+                  size="xs"
+                />
+              ) : (
+                <OwnerImage
+                  className={`flex-shrink-0 border border-neutral-200 dark:border-neutral-800`}
+                  size="xs"
+                />
+              )}
+            </>
           )}
-          {hideThreads ? null : <CommunityMessageThreadSummary community={community} msg={msg} />}
+
+          <div className="flex w-20 flex-grow flex-col">
+            <div className="flex flex-row items-center gap-2">
+              {hideDetails ? null : (
+                <>
+                  <p
+                    className={`font-semibold`}
+                    style={{ color: getOdinIdColor(authorOdinId).darkTheme }}
+                  >
+                    {messageFromMe ? <OwnerName /> : <ConnectionName odinId={authorOdinId} />}
+                  </p>
+                  <CommunitySentTimeIndicator className="text-sm" msg={msg} />
+                  <CommunityDeliveryIndicator msg={msg} />
+                </>
+              )}
+
+              <ContextMenu communityActions={communityActions} msg={msg} community={community} />
+            </div>
+
+            {hasMedia ? (
+              <CommunityMediaMessageBody msg={msg} community={community} />
+            ) : (
+              <CommunityTextMessageBody msg={msg} community={community} />
+            )}
+            {hideThreads ? null : <CommunityMessageThreadSummary community={community} msg={msg} />}
+          </div>
         </div>
       </div>
     </>

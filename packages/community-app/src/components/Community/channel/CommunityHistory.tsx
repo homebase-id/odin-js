@@ -232,6 +232,7 @@ export const CommunityHistory = ({
                     }
                     hideThreads={inAThread}
                     className="px-2 py-1 md:px-3"
+                    showChannelName={!channel}
                   />
                 </div>
               );

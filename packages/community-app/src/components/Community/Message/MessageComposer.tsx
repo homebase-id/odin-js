@@ -73,7 +73,7 @@ export const MessageComposer = ({
     const plainVal = (message && getTextRootsRecursive(message).join(' ')) || '';
     const newFiles = [...(files || [])];
 
-    if (((!message || !plainVal) && !files?.length) || !community) return;
+    if (((!message || !plainVal) && !files?.length) || !community || !channel) return;
 
     // Clear internal state and allow excessive senders
     setMessage(undefined);
