@@ -59,7 +59,6 @@ export const CommunityChannelDetail = () => {
       </div>
     );
   }
-
   return (
     <ErrorBoundary>
       <div className="h-full w-full flex-grow bg-background">

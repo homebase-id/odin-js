@@ -8,7 +8,7 @@ import { useMyEmojiReactions } from '../../../../hooks/reactions/emojis/useMyEmo
 import { CantReactInfo } from '../CantReactInfo';
 import { useMostSpace } from '../../../../hooks/intersection/useMostSpace';
 import { EmojiPicker } from '../EmojiPicker/EmojiPicker';
-import { Plus } from '../../../../ui/Icons';
+import { Emojis } from '../../../../ui/Icons';
 import { t } from '../../../../helpers/i18n/dictionary';
 
 export const SocialReactionsBar = ({
@@ -156,14 +156,13 @@ export const ReactionsBar = ({
             ))}
           </>
         )}
-        <span className="ml-2 mr-1 border-l border-l-slate-400 dark:border-r-slate-800"></span>
         <button
-          className="scale-100 rounded-full p-1 text-center hover:bg-slate-300 hover:dark:bg-slate-700"
+          className="flex-shrink-0 scale-100 rounded-full p-2 text-slate-400 text-center hover:bg-slate-300 hover:dark:bg-slate-700"
           title={t('Others')}
           onClick={() => setIsCustomOpen(true)}
           ref={wrapperRef}
         >
-          <Plus className="h-6 w-6 " />
+          <Emojis className="h-5 w-5" />
         </button>
         {isCustomOpen ? (
           <div
@@ -200,7 +199,7 @@ const EmojiButton = ({
 }) => {
   return (
     <button
-      className={`mr-[0.125rem] h-8 w-8 rounded-full  p-1 text-center text-xl last-of-type:-mr-0 ${
+      className={`mr-[0.125rem] h-8 w-8 rounded-full flex-shrink-0 p-1 text-center text-xl last-of-type:-mr-0 ${
         isActive
           ? 'bg-slate-300 dark:bg-slate-700'
           : 'bg-transparent hover:bg-slate-300 hover:dark:bg-slate-700'

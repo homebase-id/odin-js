@@ -79,6 +79,7 @@ export const MessageComposer = ({
     setMessage(undefined);
     setFiles([]);
     volatileRef.current?.clear();
+    volatileRef.current?.focus();
 
     try {
       await sendMessage({

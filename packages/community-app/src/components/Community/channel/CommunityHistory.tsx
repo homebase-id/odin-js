@@ -7,7 +7,12 @@ import {
 } from '../../../providers/CommunityMessageProvider';
 import { useEffect, useMemo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ErrorNotification, formatToDateAgoWithRelativeDetail, t } from '@homebase-id/common-app';
+import {
+  ErrorNotification,
+  formatToDateAgoWithRelativeDetail,
+  t,
+  useDotYouClient,
+} from '@homebase-id/common-app';
 import { CommunityMessageItem } from '../Message/CommunityMessageItem';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
 import { CommunityActions } from './ContextMenu';
@@ -30,6 +35,7 @@ export const CommunityHistory = ({
   alignTop?: boolean;
   onlyNew?: boolean;
 }) => {
+  const identity = useDotYouClient().getIdentity();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inAThread =
     !!origin && origin.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE;
@@ -199,11 +205,12 @@ export const CommunityHistory = ({
               }
 
               const msg = flattenedMsgs[item.index];
-              const currentAuthor = msg?.fileMetadata.senderOdinId || '';
+              const currentAuthor = msg?.fileMetadata.senderOdinId || identity || '';
               const currentDate = msg?.fileMetadata.created;
 
               const previousVisibleMsg = flattenedMsgs[item.index + 1];
-              const previousAuthor = previousVisibleMsg?.fileMetadata.senderOdinId || '';
+              const previousAuthor =
+                previousVisibleMsg?.fileMetadata.senderOdinId || identity || '';
               const previousDate = previousVisibleMsg?.fileMetadata.created;
 
               return (
