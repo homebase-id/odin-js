@@ -1,17 +1,13 @@
 import { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
-import { ELEMENT_BLOCKQUOTE } from '@udecode/plate-block-quote';
 import {
   collapseSelection,
   findNode,
-  focusEditor,
   isBlock,
   isCollapsed,
   TElement,
-  toggleNodeType,
-  useEditorState,
+  toggleBlock,
 } from '@udecode/plate-common';
-import { ELEMENT_H1, ELEMENT_H2 } from '@udecode/plate-heading';
-import { ELEMENT_PARAGRAPH } from '@udecode/plate-paragraph';
+import { HEADING_KEYS } from '@udecode/plate-heading';
 
 import { Icons } from '../../components/icons';
 
@@ -25,22 +21,25 @@ import {
 } from './dropdown-menu';
 import { ToolbarButton } from './toolbar';
 import { useOpenState } from './dropdown-menu/use-open-state';
+import { BlockquotePlugin } from '@udecode/plate-block-quote/react';
+import { useEditorState } from '@udecode/plate-core/react';
+import { focusEditor } from '@udecode/plate-common/react';
 
 const items = [
   {
-    value: ELEMENT_PARAGRAPH,
+    value: 'p',
     label: 'Paragraph',
     description: 'Paragraph',
     icon: Icons.paragraph,
   },
   {
-    value: ELEMENT_H1,
+    value: HEADING_KEYS.h1,
     label: 'Heading 1',
     description: 'Heading 1',
     icon: Icons.h1,
   },
   {
-    value: ELEMENT_H2,
+    value: HEADING_KEYS.h2,
     label: 'Heading 2',
     description: 'Heading 2',
     icon: Icons.h2,
@@ -52,7 +51,7 @@ const items = [
   //   icon: Icons.h3,
   // },
   {
-    value: ELEMENT_BLOCKQUOTE,
+    value: BlockquotePlugin.key,
     label: 'Quote',
     description: 'Quote (⌘+⇧+.)',
     icon: Icons.blockquote,
@@ -71,7 +70,7 @@ const items = [
   },
 ];
 
-const defaultItem = items.find((item) => item.value === ELEMENT_PARAGRAPH)!;
+const defaultItem = items.find((item) => item.value === 'p')!;
 
 export interface TurnIntoDropdownMenuProps extends DropdownMenuProps {
   filterValues?: string[];
@@ -80,14 +79,14 @@ export function TurnIntoDropdownMenu({ filterValues, ...props }: TurnIntoDropdow
   const editor = useEditorState();
   const openState = useOpenState();
 
-  let value: string = ELEMENT_PARAGRAPH;
+  let value: string = 'p';
   if (isCollapsed(editor?.selection)) {
     const entry = findNode<TElement>(editor!, {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       match: (n: any) => isBlock(editor, n),
     });
     if (entry) {
-      value = items.find((item) => item.value === entry[0].type)?.value ?? ELEMENT_PARAGRAPH;
+      value = items.find((item) => item.value === entry[0].type)?.value ?? 'p';
     }
   }
 
@@ -115,7 +114,7 @@ export function TurnIntoDropdownMenu({ filterValues, ...props }: TurnIntoDropdow
           className="flex flex-col gap-0.5"
           value={value}
           onValueChange={(type) => {
-            toggleNodeType(editor, { activeType: type });
+            toggleBlock(editor, { type });
 
             collapseSelection(editor);
             focusEditor(editor);

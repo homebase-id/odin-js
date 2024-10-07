@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react';
 
 import { cn, withRef } from '@udecode/cn';
-import { PlateElement } from '@udecode/plate-common';
 
-import { TChannel, getChannelOnSelectItem } from './RTEChannelDropdownPlugin';
+import { TChannel } from './RTEChannelDropdownPlugin';
 
 import {
   InlineCombobox,
@@ -17,6 +16,9 @@ import { useParams } from 'react-router-dom';
 import { useCommunityChannels } from '../../../../hooks/community/channels/useCommunityChannels';
 import { useCommunity } from '../../../../hooks/community/useCommunity';
 import { useCommunityChannel } from '../../../../hooks/community/channels/useCommunityChannel';
+
+import { PlateElement } from '@homebase-id/rich-text-editor';
+import { getChannelOnSelectItem } from './RTEChannelGetChannelOnSelect';
 
 const onSelectItem = getChannelOnSelectItem();
 
@@ -64,7 +66,7 @@ export const RTEChannelDropdownInputElement = withRef<typeof PlateElement>(
           >
             <span
               className={cn(
-                'bg-muted ring-ring inline-block rounded-md px-1.5 py-0.5 align-baseline text-sm focus-within:ring-2',
+                'inline-block cursor-pointer rounded-md bg-page-background px-1 py-1 align-baseline text-sm font-medium text-primary',
                 className
               )}
             >

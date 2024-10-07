@@ -1,10 +1,10 @@
-import { PlateLeaf, PlateLeafProps } from '@udecode/plate-common';
+import { cn, withRef } from '@udecode/cn';
+import { PlateLeaf } from '@udecode/plate-common/react';
 
-import { cn } from '../../lib/utils';
-
-export function CodeLeaf({ className, children, ...props }: PlateLeafProps) {
+export const CodeLeaf = withRef<typeof PlateLeaf>(({ children, className, ...props }, ref) => {
   return (
     <PlateLeaf
+      ref={ref}
       asChild
       className={cn(
         'rounded-lg bg-slate-100 px-1 py-1 font-mono text-sm text-foreground dark:bg-slate-700',
@@ -15,4 +15,4 @@ export function CodeLeaf({ className, children, ...props }: PlateLeafProps) {
       <code>{children}</code>
     </PlateLeaf>
   );
-}
+});
