@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 
 import { cn, withRef } from '@udecode/cn';
 
-import { TChannel, getChannelOnSelectItem } from './RTEChannelDropdownPlugin';
+import { TChannel } from './RTEChannelDropdownPlugin';
 
 import {
   InlineCombobox,
@@ -18,6 +18,7 @@ import { useCommunity } from '../../../../hooks/community/useCommunity';
 import { useCommunityChannel } from '../../../../hooks/community/channels/useCommunityChannel';
 
 import { PlateElement } from '@homebase-id/rich-text-editor';
+import { getChannelOnSelectItem } from './RTEChannelGetChannelOnSelect';
 
 const onSelectItem = getChannelOnSelectItem();
 

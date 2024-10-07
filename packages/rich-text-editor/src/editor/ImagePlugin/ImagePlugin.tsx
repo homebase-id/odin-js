@@ -1,4 +1,3 @@
-import { AnyPluginConfig } from '@udecode/plate-core';
 import { removeNodes } from '@udecode/plate-common';
 import { ReactEditor } from 'slate-react';
 import { TargetDrive, NewMediaFile } from '@homebase-id/js-lib/core';
