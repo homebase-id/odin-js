@@ -31,6 +31,7 @@ const HeadingElementVariants = withVariants(
 );
 
 export const HeadingElement = withRef<typeof HeadingElementVariants>(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ({ children, isFirstBlock, variant = 'h1', ...props }, ref) => {
     const { editor, element } = props;
 

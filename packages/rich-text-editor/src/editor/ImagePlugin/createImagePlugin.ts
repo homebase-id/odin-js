@@ -32,7 +32,7 @@ export const ImagePlugin = createTPlatePlugin({
     // isVoid: true,
     // isMarkableVoid: true,
   },
-}).extend(({ editor, type }) => ({
+}).extend(() => ({
   render: {
     node: ImageElementBlock,
   },

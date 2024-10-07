@@ -1,9 +1,4 @@
-'use client';
-
-import React from 'react';
-
 import { useFormInputProps } from '@udecode/plate-common/react';
-import { type UseVirtualFloatingOptions, flip, offset } from '@udecode/plate-floating';
 import {
   type LinkFloatingToolbarState,
   FloatingLinkUrlInput,

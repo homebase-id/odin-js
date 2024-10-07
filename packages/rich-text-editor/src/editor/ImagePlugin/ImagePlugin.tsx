@@ -21,12 +21,7 @@ export interface MediaOptions {
   onRemove: (payload: { fileId: string; fileKey: string }) => Promise<unknown | null>;
 }
 
-type MediaOptionsConfig = MediaOptions & AnyPluginConfig;
-
 type ImageToolbarButtonProps = ToolbarButtonProps;
-//  {
-// mediaOptions: MediaOptions;
-// }
 
 export const ImageToolbarButton = ({ ...props }: ImageToolbarButtonProps) => {
   const [isActive, setIsActive] = useState(false);

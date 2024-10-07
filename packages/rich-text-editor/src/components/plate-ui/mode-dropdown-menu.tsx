@@ -29,6 +29,7 @@ export function ModeDropdownMenu(props: DropdownMenuProps) {
 
   if (readOnly) value = 'viewing';
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const item: any = {
     editing: (
       <>
