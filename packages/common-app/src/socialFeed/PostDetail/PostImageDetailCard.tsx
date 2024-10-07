@@ -161,6 +161,7 @@ export const PostImageDetailCard = ({
                   odinId={odinId}
                   targetDrive={getChannelDrive(post.channelId)}
                   fileId={postFile.fileId}
+                  globalTransitId={postFile.fileMetadata.globalTransitId}
                   file={currentMediaFile}
                   canDownload={true}
                 />
