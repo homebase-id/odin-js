@@ -227,6 +227,7 @@ export const uploadChatMessage = async (
   recipients: string[],
   files: NewMediaFile[] | undefined,
   linkPreviews: LinkPreview[] | undefined,
+  notificationBody?: string,
   onVersionConflict?: () => void
 ) => {
   const messageContent = message.fileMetadata.appData.content;
@@ -249,6 +250,7 @@ export const uploadChatMessage = async (
             typeId: message.fileMetadata.appData.groupId || getNewId(),
             tagId: message.fileMetadata.appData.uniqueId || getNewId(),
             silent: false,
+            unEncryptedMessage: notificationBody,
           },
         }
       : undefined,
