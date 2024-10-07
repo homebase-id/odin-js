@@ -299,7 +299,7 @@ const InnerRichTextEditor = memo(
           },
         },
       }),
-      []
+      [mentionables]
     );
 
     const editor = useMemo(() => {

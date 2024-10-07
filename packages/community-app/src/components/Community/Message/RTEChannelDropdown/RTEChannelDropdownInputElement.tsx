@@ -66,7 +66,7 @@ export const RTEChannelDropdownInputElement = withRef<typeof PlateElement>(
           >
             <span
               className={cn(
-                'bg-muted ring-ring inline-block rounded-md px-1.5 py-0.5 align-baseline text-sm focus-within:ring-2',
+                'inline-block cursor-pointer rounded-md bg-page-background px-1 py-1 align-baseline text-sm font-medium text-primary',
                 className
               )}
             >

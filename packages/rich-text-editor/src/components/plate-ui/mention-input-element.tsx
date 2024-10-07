@@ -46,7 +46,7 @@ export const MentionInputElement = withRef<typeof PlateElement>(({ className, ..
       >
         <span
           className={cn(
-            'inline-block rounded-md bg-muted px-1.5 py-0.5 align-baseline text-sm ring-ring focus-within:ring-2',
+            'inline-block rounded-md bg-slate-100 px-1.5 py-0.5 align-baseline text-sm text-foreground ring-ring focus-within:ring-2 dark:bg-slate-700',
             className
           )}
         >

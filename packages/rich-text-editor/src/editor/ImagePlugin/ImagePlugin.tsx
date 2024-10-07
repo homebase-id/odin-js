@@ -9,6 +9,7 @@ import { OdinThumbnailImage } from '@homebase-id/ui-lib';
 import { insertImage, TImageElement } from './createImagePlugin';
 import { PlateRenderElementProps, useEditorRef, useEventPlateId } from '@udecode/plate-core/react';
 import { useMediaOptionsContext } from '../MediaOptionsContext/useMediaOptionsContext';
+import { useBlockSelected } from '@udecode/plate-selection/react';
 
 export interface MediaOptions {
   odinId?: string;
@@ -60,6 +61,7 @@ export const ImageToolbarButton = ({ ...props }: ImageToolbarButtonProps) => {
 export const ImageElementBlock = <N extends TImageElement = TImageElement>(
   props: PlateRenderElementProps<N>
 ) => {
+  const isBlockSelected = useBlockSelected();
   const [isActive, setIsActive] = useState(false);
   const { attributes, children, nodeProps, element } = props;
   const dotYouClient = useDotYouClient().getDotYouClient();
@@ -68,7 +70,6 @@ export const ImageElementBlock = <N extends TImageElement = TImageElement>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const path = ReactEditor.findPath(editor as any, element as any);
 
-  // const options: MediaOptions = editor.getOptions<MediaOptionsConfig>({ key: ELEMENT_IMAGE });
   const options = useMediaOptionsContext().mediaOptions;
 
   const doRemove = async () => {
@@ -92,7 +93,7 @@ export const ImageElementBlock = <N extends TImageElement = TImageElement>(
       <div
         {...attributes}
         {...nodeProps}
-        className="relative aspect-square w-full max-w-lg bg-slate-50 dark:bg-slate-800"
+        className={`relative aspect-square w-full max-w-lg bg-slate-50 dark:bg-slate-800 ${isBlockSelected ? 'bg-primary/20' : ''}`}
         data-file-id={options.fileId}
         data-file-key={element.fileKey}
       >

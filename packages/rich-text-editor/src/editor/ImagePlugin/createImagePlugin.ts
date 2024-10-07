@@ -29,8 +29,6 @@ export const ImagePlugin = createTPlatePlugin({
   key: ELEMENT_IMAGE,
   node: {
     isElement: true,
-    // isVoid: true,
-    // isMarkableVoid: true,
   },
 }).extend(() => ({
   render: {

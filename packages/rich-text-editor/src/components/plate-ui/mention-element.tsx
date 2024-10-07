@@ -28,7 +28,7 @@ export const MentionElement = withRef<
     <PlateElement
       ref={ref}
       className={cn(
-        'inline-block cursor-pointer rounded-md bg-muted px-1.5 py-0.5 align-baseline text-sm font-medium',
+        'bg-page-background inline-block cursor-pointer rounded-md px-1 py-1 align-baseline text-sm font-medium text-primary',
         selected && focused && 'ring-2 ring-ring',
         element.children[0].bold === true && 'font-bold',
         element.children[0].italic === true && 'italic',
