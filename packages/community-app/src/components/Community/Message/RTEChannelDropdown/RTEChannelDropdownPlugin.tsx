@@ -1,7 +1,8 @@
-import { TriggerComboboxPluginOptions } from '@udecode/plate-combobox';
-import { createTSlatePlugin, type TElement, type TNodeProps } from '@udecode/plate-common';
-import { withTriggerCombobox } from '@udecode/plate-combobox';
-import { PlateEditor } from '@udecode/plate-core/react';
+import { TriggerComboboxPluginOptions, withTriggerCombobox } from '@udecode/plate-combobox';
+import { insertNodes, PluginConfig, type TElement } from '@udecode/plate-common';
+import { createPlatePlugin, PlateEditor } from '@udecode/plate-core/react';
+import { RTEChannelDropdownInputElement } from './RTEChannelDropdownInputElement';
+import { RTEChannelDropdownElement } from './RTEChannelDropdownElement';
 
 export const ELEMENT_CHANNEL = 'channel';
 export const ELEMENT_CHANNEL_INPUT = 'channel_input';
@@ -23,35 +24,58 @@ export type MentionOnSelectItem<TItem extends TChannel = TChannel> = (
   search?: string
 ) => void;
 
-export interface ChannelPlugin<TItem extends TChannel = TChannel>
-  extends TriggerComboboxPluginOptions {
-  createChannelNode?: (item: TItem, search: string) => TNodeProps<TChannelElement>;
-  insertSpaceAfterMention?: boolean;
-}
+export type ChannelConfig = PluginConfig<
+  'channel',
+  {
+    insertSpaceAfterMention?: boolean;
+  } & TriggerComboboxPluginOptions,
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  {},
+  {
+    insert: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mention: (options: { search: string; value: any }) => void;
+    };
+  }
+>;
 
-/** Enables support for autocompleting #channels. */
-export const ChannelPlugin = createTSlatePlugin({
-  key: ELEMENT_CHANNEL,
-  extendEditor: withTriggerCombobox,
+export const ChannelInputPlugin = createPlatePlugin({
+  key: 'channel_input',
+  node: { isElement: true, isInline: true, isVoid: true },
+  render: {
+    node: RTEChannelDropdownInputElement,
+  },
+});
+
+/** Enables support for autocompleting @channels. */
+export const ChannelPlugin = createPlatePlugin({
+  key: 'channel',
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  extendEditor: withTriggerCombobox as any,
   node: { isElement: true, isInline: true, isMarkableVoid: true, isVoid: true },
-
   options: {
-    createComboboxInput: (trigger: string) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    createComboboxInput: (trigger: any) => ({
       children: [{ text: '' }],
       trigger,
-      type: ELEMENT_CHANNEL_INPUT,
+      type: ChannelInputPlugin.key,
     }),
-    createChannelNode: (item: TChannel) => ({ value: item.text, uniqueId: item.uniqueId }),
     trigger: '#',
     triggerPreviousCharPattern: /^\s?$/,
   },
-
-  plugins: [
-    {
-      isElement: true,
-      isInline: true,
-      isVoid: true,
-      key: ELEMENT_CHANNEL_INPUT,
+  plugins: [ChannelInputPlugin],
+  render: {
+    node: RTEChannelDropdownElement,
+  },
+}).extendEditorTransforms<ChannelConfig['transforms']>(({ editor, type }) => ({
+  insert: {
+    mention: ({ value }) => {
+      insertNodes<TChannelElement>(editor, {
+        children: [{ text: '' }],
+        type,
+        value,
+        uniqueId: value,
+      });
     },
-  ],
-});
+  },
+}));
