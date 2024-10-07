@@ -59,7 +59,6 @@ export const CommunityChannelDetail = () => {
       </div>
     );
   }
-
   return (
     <ErrorBoundary>
       <div className="h-full w-full flex-grow bg-background">
@@ -258,7 +257,7 @@ const CommunityThread = ({
     messageId: originId,
   }).get;
 
-  if (!community || !originId || !originMessage) {
+  if (!community || !originId) {
     return null;
   }
 
@@ -283,12 +282,20 @@ const CommunityThread = ({
         />
       </div>
       <div className="flex h-20 flex-grow flex-col overflow-auto bg-background">
-        <CommunityHistory
-          community={community}
-          origin={originMessage}
-          channel={channel}
-          alignTop={true}
-        />
+        {!originMessage ? (
+          <div className="flex flex-col gap-3 p-5">
+            <LoadingBlock className="h-12 w-full" />
+            <LoadingBlock className="h-12 w-full" />
+            <LoadingBlock className="h-12 w-full" />
+          </div>
+        ) : (
+          <CommunityHistory
+            community={community}
+            origin={originMessage}
+            channel={channel}
+            alignTop={true}
+          />
+        )}
 
         <ErrorBoundary>
           <MessageComposer

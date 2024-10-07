@@ -24,13 +24,7 @@ import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvi
 import { CommunityChannel } from '../../../providers/CommunityProvider';
 import { RichTextEditor } from '@homebase-id/rich-text-editor';
 
-import {
-  ChannelPlugin,
-  ELEMENT_CHANNEL,
-  ELEMENT_CHANNEL_INPUT,
-} from './RTEChannelDropdown/RTEChannelDropdownPlugin';
-import { RTEChannelDropdownElement } from './RTEChannelDropdown/RTEChannelDropdownElement';
-import { RTEChannelDropdownInputElement } from './RTEChannelDropdown/RTEChannelDropdownInputElement';
+import { ChannelPlugin } from './RTEChannelDropdown/RTEChannelDropdownPlugin';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const CHAT_DRAFTS_KEY = 'COMMUNITY_LOCAL_DRAFTS';
@@ -79,12 +73,13 @@ export const MessageComposer = ({
     const plainVal = (message && getTextRootsRecursive(message).join(' ')) || '';
     const newFiles = [...(files || [])];
 
-    if (((!message || !plainVal) && !files?.length) || !community) return;
+    if (((!message || !plainVal) && !files?.length) || !community || !channel) return;
 
     // Clear internal state and allow excessive senders
     setMessage(undefined);
     setFiles([]);
     volatileRef.current?.clear();
+    volatileRef.current?.focus();
 
     try {
       await sendMessage({
@@ -162,10 +157,6 @@ export const MessageComposer = ({
             disableHeadings={true}
             mentionables={mentionables}
             plugins={[ChannelPlugin]}
-            components={{
-              [ELEMENT_CHANNEL]: RTEChannelDropdownElement,
-              [ELEMENT_CHANNEL_INPUT]: RTEChannelDropdownInputElement,
-            }}
           >
             <div className="max-h-[30vh] overflow-auto">
               <FileOverview files={files} setFiles={setFiles} cols={8} />

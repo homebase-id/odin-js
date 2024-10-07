@@ -28,7 +28,12 @@ export const useCommunityChannelsWithRecentMessages = (props: { communityId?: st
       channels.map(async (chnl) => {
         const chnlId = chnl.fileMetadata.appData.uniqueId;
         const messagesA = await queryClient.fetchInfiniteQuery(
-          getCommunityMessagesInfiniteQueryOptions(dotYouClient, props.communityId, chnlId)
+          getCommunityMessagesInfiniteQueryOptions(
+            dotYouClient,
+            props.communityId,
+            chnlId,
+            props.communityId
+          )
         );
         return {
           ...chnl,
