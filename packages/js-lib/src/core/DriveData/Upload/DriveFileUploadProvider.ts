@@ -7,16 +7,20 @@ import {
   UploadResult,
   AppendInstructionSet,
   AppendResult,
+  UpdateResult,
+  UpdateInstructionSet,
+  UpdateHeaderInstructionSet,
 } from './DriveUploadTypes';
-import { decryptKeyHeader, encryptKeyHeader, encryptWithSharedSecret } from '../SecurityHelpers';
+import { decryptKeyHeader } from '../SecurityHelpers';
 import {
   GenerateKeyHeader,
-  encryptMetaData,
   buildDescriptor,
   buildFormData,
   pureUpload,
   pureAppend,
   buildManifest,
+  pureUpdate,
+  buildUpdateManifest,
 } from './UploadHelpers';
 import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFileProvider';
 import { getRandom16ByteArray } from '../../../helpers/DataUtil';
@@ -94,10 +98,80 @@ export const uploadFile = async (
   return uploadResult;
 };
 
+export const patchFile = async (
+  dotYouClient: DotYouClient,
+  keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
+  instructions: UpdateInstructionSet,
+  metadata: UploadFileMetadata,
+  payloads?: PayloadFile[],
+  thumbnails?: ThumbnailFile[],
+  toDeletePayloads?: { key: string }[],
+  onVersionConflict?: () => Promise<void | UpdateResult> | void,
+  options?: {
+    axiosConfig?: AxiosRequestConfig;
+  }
+): Promise<UpdateResult | void> => {
+  isDebug &&
+    console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/update`).pathname, {
+      instructions,
+      metadata,
+      payloads,
+      thumbnails,
+    });
+
+  const decryptedKeyHeader =
+    keyHeader && 'encryptionVersion' in keyHeader
+      ? await decryptKeyHeader(dotYouClient, keyHeader)
+      : keyHeader;
+
+  const { systemFileType, ...strippedInstructions } = instructions;
+
+  const manifest = buildUpdateManifest(
+    payloads,
+    toDeletePayloads,
+    thumbnails,
+    !!decryptedKeyHeader
+  );
+  const instructionsWithManifest = {
+    ...strippedInstructions,
+    manifest,
+    transferIv: instructions.transferIv || getRandom16ByteArray(),
+  };
+
+  // Build package
+  const encryptedDescriptor = await buildDescriptor(
+    dotYouClient,
+    decryptedKeyHeader,
+    instructionsWithManifest,
+    metadata
+  );
+
+  const data = await buildFormData(
+    instructionsWithManifest,
+    encryptedDescriptor,
+    payloads,
+    thumbnails,
+    decryptedKeyHeader,
+    manifest
+  );
+
+  // Upload
+  const updateResult = await pureUpdate(
+    dotYouClient,
+    data,
+    systemFileType,
+    onVersionConflict,
+    options?.axiosConfig
+  );
+
+  if (!updateResult) return;
+  return updateResult;
+};
+
 export const uploadHeader = async (
   dotYouClient: DotYouClient,
   keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
-  instructions: UploadInstructionSet,
+  instructions: UpdateHeaderInstructionSet,
   metadata: UploadFileMetadata,
   onVersionConflict?: () => Promise<void | UploadResult> | void,
   axiosConfig?: AxiosRequestConfig
@@ -108,16 +182,18 @@ export const uploadHeader = async (
       metadata,
     });
 
-  const plainKeyHeader =
-    keyHeader && 'encryptionVersion' in keyHeader
+  const decryptedKeyHeader = metadata.isEncrypted
+    ? keyHeader && 'encryptionVersion' in keyHeader
       ? await decryptKeyHeader(dotYouClient, keyHeader)
-      : keyHeader;
+      : keyHeader
+    : undefined;
 
-  if (!decryptKeyHeader && metadata.isEncrypted)
+  if (!decryptedKeyHeader && metadata.isEncrypted)
     throw new Error('[odin-js] Missing existing keyHeader for appending encrypted metadata.');
 
-  if (plainKeyHeader) {
-    plainKeyHeader.iv = getRandom16ByteArray();
+  if (decryptedKeyHeader) {
+    // Generate a new IV for the keyHeader
+    decryptedKeyHeader.iv = getRandom16ByteArray();
   }
 
   const { systemFileType, ...strippedInstructions } = instructions;
@@ -126,22 +202,11 @@ export const uploadHeader = async (
   strippedInstructions.storageOptions.storageIntent = 'metadataOnly';
   strippedInstructions.transferIv = instructions.transferIv || getRandom16ByteArray();
 
-  // Build package
-  const encryptedMetaData = await encryptMetaData(metadata, plainKeyHeader);
-  // Can't use buidDescriptor here, as it's a metadataOnly upload
-  const encryptedDescriptor = await encryptWithSharedSecret(
+  const encryptedDescriptor = await buildDescriptor(
     dotYouClient,
-    {
-      fileMetadata: encryptedMetaData,
-      encryptedKeyHeader: plainKeyHeader
-        ? await encryptKeyHeader(
-            dotYouClient,
-            { aesKey: new Uint8Array(Array(16).fill(0)), iv: plainKeyHeader.iv },
-            strippedInstructions.transferIv
-          )
-        : undefined,
-    },
-    strippedInstructions.transferIv
+    decryptedKeyHeader,
+    strippedInstructions,
+    metadata
   );
 
   const data = await buildFormData(

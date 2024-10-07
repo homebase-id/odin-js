@@ -1,7 +1,13 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ActionGroup, FEED_CHAT_APP_ID, t, useRemoveNotifications } from '@homebase-id/common-app';
+import {
+  ActionGroup,
+  FEED_CHAT_APP_ID,
+  FEED_ROOT_PATH,
+  t,
+  useRemoveNotifications,
+} from '@homebase-id/common-app';
 import { Feed, Article, Ellipsis, Quote } from '@homebase-id/common-app/icons';
 import SocialFeedMainContent from '../../components/SocialFeed/MainContent/SocialFeedMainContent';
 
@@ -28,7 +34,6 @@ const PostPreview = lazy(() => import('../../components/SocialFeed/MainContent/P
 
 import { FEED_APP_ID, ExtendPermissionDialog } from '@homebase-id/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { ROOT_PATH } from '../../app/App';
 import { drives, permissions } from '../../hooks/auth/useAuth';
 import { useAutofixDefaultConfig } from '../../hooks/useAutofixDefaultConfig';
 
@@ -68,12 +73,12 @@ export const SocialFeed = () => {
               options={[
                 {
                   label: t('Articles'),
-                  href: `${ROOT_PATH}/articles`,
+                  href: `${FEED_ROOT_PATH}/articles`,
                   icon: Article,
                 },
                 {
                   label: t('Channels'),
-                  href: `${ROOT_PATH}/channels`,
+                  href: `${FEED_ROOT_PATH}/channels`,
                   icon: Quote,
                 },
               ]}

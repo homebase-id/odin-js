@@ -38,6 +38,8 @@ const COMMUNITY_APP_ID = '77ed6136-6b33-4654-8088-3d89c91e6065';
 const OWNER_FOLLOWER_TYPE_ID = '2cc468af-109b-4216-8119-542401e32f4d';
 const OWNER_CONNECTION_REQUEST_TYPE_ID = '8ee62e9e-c224-47ad-b663-21851207f768';
 const OWNER_CONNECTION_ACCEPTED_TYPE_ID = '79f0932a-056e-490b-8208-3a820ad7c321';
+const OWNER_INTRODUCTION_RECEIVED_TYPE_ID = 'f100bfa0-ac4e-468a-9322-bdaf6059ec8a';
+const OWNER_INTRODUCTION_ACCEPTED_TYPE_ID = 'f56ee792-56dd-45fd-8f9e-f96bb5d0e3de';
 
 const FEED_NEW_CONTENT_TYPE_ID = 'ad695388-c2df-47a0-ad5b-fc9f9e1fffc9';
 const FEED_NEW_REACTION_TYPE_ID = '37dae95d-e137-4bd4-b782-8512aaa2c96a';
@@ -72,6 +74,10 @@ const buildNotificationBody = async (
       return `${sender} sent you a connection request`;
     } else if (payload.options.typeId === OWNER_CONNECTION_ACCEPTED_TYPE_ID) {
       return `${sender} accepted your connection request`;
+    } else if (payload.options.typeId === OWNER_INTRODUCTION_RECEIVED_TYPE_ID) {
+      return `${sender} introduced you to someone`;
+    } else if (payload.options.typeId === OWNER_INTRODUCTION_ACCEPTED_TYPE_ID) {
+      return `${sender} confirmed the introduction`;
     }
   } else if (payload.options.appId === CHAT_APP_ID) {
     const hasMultiple = existingNotifications.length;

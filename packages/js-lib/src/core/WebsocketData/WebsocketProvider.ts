@@ -14,6 +14,7 @@ import {
   TypedConnectionNotification,
   AppNotification,
   ReactionNotification,
+  ClientConnectionFinalizedNotification,
 } from './WebsocketTypes';
 
 let webSocketClient: WebSocket | undefined;
@@ -46,9 +47,9 @@ const isDebug = hasDebugFlag();
 const ParseRawClientNotification = (
   notification: RawClientNotification
 ): TypedConnectionNotification => {
-  const { targetDrive, header, sender, recipient, ...data } = tryJsonParse<Record<string, unknown>>(
-    notification.data
-  );
+  const { targetDrive, header, sender, recipient, identity, ...data } = tryJsonParse<
+    Record<string, unknown>
+  >(notification.data);
 
   if (notification.notificationType === 'inboxItemReceived') {
     return {
@@ -82,6 +83,14 @@ const ParseRawClientNotification = (
       recipient: recipient,
       data: data,
     } as ClientConnectionNotification;
+  }
+
+  if (['connectionFinalized'].includes(notification.notificationType)) {
+    return {
+      notificationType: notification.notificationType,
+      identity: identity,
+      data: data,
+    } as ClientConnectionFinalizedNotification;
   }
 
   if (

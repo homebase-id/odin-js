@@ -7,6 +7,7 @@ import {
   DialogWrapper,
   flattenInfinteData,
   formatToTimeAgoWithRelativeDetail,
+  MAIL_ROOT_PATH,
   t,
   usePortal,
 } from '@homebase-id/common-app';
@@ -15,7 +16,6 @@ import { MailConversation, getAllRecipients } from '../../providers/MailProvider
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { useMailOrigin } from '../../hooks/mail/useMailOrigin';
 import { RecipientsList } from '../../components/Threads/RecipientsList';
-import { ROOT_PATH } from '../../app/App';
 
 const PAGE_SIZE = 100;
 export const MailThreadInfo = ({
@@ -109,7 +109,7 @@ export const MailThreadInfo = ({
                 <a
                   className="flex flex-row bg-page-background px-2 py-2"
                   key={threadId}
-                  href={`${ROOT_PATH}/inbox/${threadId}`}
+                  href={`${MAIL_ROOT_PATH}/inbox/${threadId}`}
                 >
                   <div className="flex w-28 flex-shrink-0 flex-row gap-1">
                     <RecipientsList mailThread={messagesFromTheSameOrigin[threadId]} />

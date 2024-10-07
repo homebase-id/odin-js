@@ -3,7 +3,6 @@ import {
   DotYouClient,
   HomebaseFile,
   EmbeddedThumb,
-  FileMetadata,
   FileQueryParams,
   GetBatchQueryResultOptions,
   KeyHeader,
@@ -31,6 +30,7 @@ import {
   FailedTransferStatuses,
   RecipientTransferHistory,
   deleteFile,
+  UpdateHeaderInstructionSet,
   RichText,
 } from '@homebase-id/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
@@ -270,7 +270,7 @@ export const uploadChatMessage = async (
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList || {
-      requiredSecurityGroup: SecurityGroupType.Connected,
+      requiredSecurityGroup: SecurityGroupType.AutoConnected,
     },
   };
 
@@ -423,7 +423,7 @@ export const updateChatMessage = async (
   const messageContent = message.fileMetadata.appData.content;
   const distribute = recipients?.length > 0;
 
-  const uploadInstructions: UploadInstructionSet = {
+  const uploadInstructions: UpdateHeaderInstructionSet = {
     storageOptions: {
       drive: ChatDrive,
       overwriteFileId: message.fileId,
@@ -436,6 +436,7 @@ export const updateChatMessage = async (
           sendContents: SendContents.All,
         }
       : undefined,
+    storageIntent: 'header',
   };
 
   const payloadJson: string = jsonStringify64({ ...messageContent });
@@ -450,10 +451,9 @@ export const updateChatMessage = async (
       fileType: CHAT_MESSAGE_FILE_TYPE,
       content: payloadJson,
     },
-    senderOdinId: (message.fileMetadata as FileMetadata<ChatMessage>).senderOdinId,
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList || {
-      requiredSecurityGroup: SecurityGroupType.Connected,
+      requiredSecurityGroup: SecurityGroupType.AutoConnected,
     },
   };
 

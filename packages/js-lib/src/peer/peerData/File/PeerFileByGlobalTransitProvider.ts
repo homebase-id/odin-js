@@ -144,7 +144,7 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
     })
     .catch((error) => {
       if (error.response?.status === 404) return null;
-      console.error('[DotYouCore-js:getPayloadBytesOverPeerByGlobalTransitId]', error);
+      console.error('[odin-js:getPayloadBytesOverPeerByGlobalTransitId]', error);
       return null;
     });
 };
@@ -197,7 +197,7 @@ export const getThumbBytesOverPeerByGlobalTransitId = async (
     })
     .catch((error) => {
       if (error.response?.status === 404) return null;
-      console.error('[DotYouCore-js:getThumbBytesOverPeerByGlobalTransitId]', error);
+      console.error('[odin-js:getThumbBytesOverPeerByGlobalTransitId]', error);
       return null;
     });
 };
@@ -284,7 +284,7 @@ export const getFileHeaderBytesOverPeerByGlobalTransitId = async (
     })
     .catch((error) => {
       if (error.response?.status === 404) return null;
-      console.error('[DotYouCore-js:getFileHeaderBytesOverPeerByGlobalTransitId]', error);
+      console.error('[odin-js:getFileHeaderBytesOverPeerByGlobalTransitId]', error);
       throw error;
     });
 

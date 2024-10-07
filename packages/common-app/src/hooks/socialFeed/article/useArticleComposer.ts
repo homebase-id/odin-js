@@ -18,8 +18,8 @@ import {
 } from '@homebase-id/js-lib/core';
 import { usePost } from '../post/usePost';
 import { getReadingTime } from '../../../helpers/richTextHelper';
-import { HOME_ROOT_PATH } from '../../../core/paths';
 import { useChannel } from '../channels/useChannel';
+import { FEED_ROOT_PATH, HOME_ROOT_PATH } from '../../../constants';
 
 export const EMPTY_POST: Article = {
   id: '',
@@ -92,7 +92,7 @@ export const useArticleComposer = ({
       ? serverChannel
       : BlogConfig.PublicChannelNewDsr
   );
-  const [groupOdinId, setGroupOdinId] = useState<string | undefined>(odinKey);
+  const [odinId, setOdinId] = useState<string | undefined>(odinKey);
 
   // Update state when server data is fetched
   useEffect(() => {
@@ -180,7 +180,7 @@ export const useArticleComposer = ({
     // Save and process result
     const uploadResult = await savePost({
       postFile: toPostFile,
-      odinId: groupOdinId,
+      odinId: odinId,
       channelId:
         (targetChannel.fileMetadata.appData.content.isCollaborative
           ? ((targetChannel as HomebaseFile<RemoteCollaborativeChannelDefinition>).fileMetadata
@@ -189,11 +189,9 @@ export const useArticleComposer = ({
       mediaFiles: files,
     });
 
-    if (
-      uploadResult &&
-      (uploadResult as UploadResult).file &&
-      (uploadResult as UploadResult).newVersionTag
-    )
+    if (!uploadResult) throw new Error('Failed to save post');
+
+    if ((uploadResult as UploadResult).file && (uploadResult as UploadResult).newVersionTag) {
       setPostFile((oldPostFile) => {
         return {
           ...oldPostFile,
@@ -215,16 +213,23 @@ export const useArticleComposer = ({
           sharedSecretEncryptedKeyHeader: (uploadResult as UploadResult).keyHeader as any,
         };
       });
+    } else if (!postFile.fileId) {
+      // We didn't get any direct info from the upload; So we need to fully load the edit page again so it can get fetched;
+      window.location.href = `${FEED_ROOT_PATH}/edit/${odinId ? `${odinId}/` : ''}${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.id}`;
+    }
 
-    // TODO: Move to component as it has page context?
     if (isPublish && redirectOnPublish) {
-      window.location.href = `${HOME_ROOT_PATH}posts/${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.slug}`;
+      if (odinId && odinId !== window.location.host) {
+        window.location.href = `https://${odinId}/posts/${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.id}`;
+      } else {
+        window.location.href = `${HOME_ROOT_PATH}posts/${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.slug}`;
+      }
     } else {
       // Update url to support proper back browsing; And not losing the context when a refresh is needed
       window.history.replaceState(
         null,
         toPostFile.fileMetadata.appData.content.caption,
-        `/apps/feed/edit/${groupOdinId ? `${groupOdinId}/` : ''}${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.id}`
+        `${FEED_ROOT_PATH}/edit/${odinId ? `${odinId}/` : ''}${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.id}`
       );
     }
   };
@@ -253,7 +258,7 @@ export const useArticleComposer = ({
     // Data updates
     setPostFile,
     setChannel,
-    setGroupOdinId,
+    setOdinId,
     setFiles,
 
     // Status

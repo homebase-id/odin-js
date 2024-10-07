@@ -11,6 +11,7 @@ import {
   t,
   ChannelOrAclSelector,
   BlockerDialog,
+  FEED_ROOT_PATH,
 } from '@homebase-id/common-app';
 import {
   Arrow,
@@ -28,7 +29,6 @@ import { useArticleComposer } from '@homebase-id/common-app';
 import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { HomebaseFile, NewHomebaseFile, RichText } from '@homebase-id/js-lib/core';
-import { ROOT_PATH } from '../../app/App';
 
 export const ArticleComposerPage = () => {
   const { channelKey, postKey, odinKey } = useParams();
@@ -50,7 +50,7 @@ export const ArticleComposerPage = () => {
 
     // Data updates
     setPostFile,
-    setGroupOdinId,
+    setOdinId,
     setChannel,
     setFiles,
 
@@ -210,8 +210,8 @@ export const ArticleComposerPage = () => {
         browserTitle={postFile?.fileMetadata.appData.content?.caption || t('New article')}
         icon={ArticleIcon}
         breadCrumbs={[
-          { title: t('Feed'), href: `${ROOT_PATH}` },
-          { title: t('Articles'), href: `${ROOT_PATH}/articles` },
+          { title: t('Feed'), href: `${FEED_ROOT_PATH}` },
+          { title: t('Articles'), href: `${FEED_ROOT_PATH}/articles` },
           { title: isPublished ? t('Edit article') : t('New article') },
         ]}
         actions={
@@ -239,7 +239,7 @@ export const ArticleComposerPage = () => {
                       label: t('Remove'),
                       onClick: () => {
                         doRemovePost();
-                        navigate(`${ROOT_PATH}/articles`);
+                        navigate(`${FEED_ROOT_PATH}/articles`);
                       },
                       icon: Trash,
                       confirmOptions: {
@@ -299,7 +299,7 @@ export const ArticleComposerPage = () => {
                   onChange={({ channel: newChannel, odinId }) => {
                     if (!newChannel) return;
                     setChannel(newChannel);
-                    setGroupOdinId(odinId);
+                    setOdinId(odinId);
                   }}
                   disabled={isPublished}
                   excludeMore={true}

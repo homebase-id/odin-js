@@ -5,9 +5,10 @@ import { useDrive } from '../../../hooks/drives/useDrive';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { useFileQuery } from '../../../hooks/files/useFiles';
+import { SystemFileType } from '@homebase-id/js-lib/core';
 
 const DriveDetails = () => {
-  const { driveKey, fileQuery } = useParams();
+  const { driveKey, systemFileType, fileQuery } = useParams();
   const splittedDriveKey = driveKey ? driveKey.split('_') : undefined;
 
   const targetDrive = splittedDriveKey
@@ -22,6 +23,7 @@ const DriveDetails = () => {
   const { data: file, isLoading: fileLoading } = useFileQuery({
     targetDrive,
     id: fileQuery,
+    systemFileType: systemFileType as SystemFileType,
   });
 
   if (driveDefLoading || fileLoading) return <LoadingDetailPage />;

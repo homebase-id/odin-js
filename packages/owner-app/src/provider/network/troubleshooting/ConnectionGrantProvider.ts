@@ -34,3 +34,15 @@ export interface CircleMembershipStatusDriveGrantAnalysis {
   driveName: string;
   driveGrantIsValid: true;
 }
+
+const verifyPath = '/circles/connections/verify-connection';
+export const verifyConnection = async (dotYouClient: DotYouClient, odinId: string) => {
+  assertIfDefined('DotYouClient is required', dotYouClient);
+  assertIfDefined('OdinId is required', odinId);
+
+  const client = dotYouClient.createAxiosClient();
+  return await client
+    .post<{ isValid: boolean }>(verifyPath, { odinId: odinId })
+    .then((res) => res.data.isValid)
+    .catch(dotYouClient.handleErrorResponse);
+};

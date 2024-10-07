@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import {
   ChannelDefinitionVm,
   ChannelItem,
+  FEED_ROOT_PATH,
   ManageCollaborativeChannelItem,
   useCollaborativeChannels,
 } from '@homebase-id/common-app';
@@ -9,7 +10,6 @@ import { Loader, MagnifyingGlass, Plus, Quote } from '@homebase-id/common-app/ic
 import { t } from '@homebase-id/common-app';
 import { useChannels } from '@homebase-id/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { ROOT_PATH } from '../../app/App';
 import { useSearchParams } from 'react-router-dom';
 import { NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
@@ -41,7 +41,7 @@ export const ChannelsPage = () => {
       <PageMeta
         title={t('Channels')}
         icon={Quote}
-        breadCrumbs={[{ title: t('Feed'), href: ROOT_PATH }, { title: t('Channels') }]}
+        breadCrumbs={[{ title: t('Feed'), href: FEED_ROOT_PATH }, { title: t('Channels') }]}
       />
       <section className="pb-10">
         <div className="px-2 sm:px-10">

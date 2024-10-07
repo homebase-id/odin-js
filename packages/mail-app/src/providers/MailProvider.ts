@@ -32,6 +32,7 @@ import {
   TransferStatus,
   FailedTransferStatuses,
   RecipientTransferHistory,
+  UpdateHeaderInstructionSet,
 } from '@homebase-id/js-lib/core';
 import {
   getNewId,
@@ -252,7 +253,7 @@ export const uploadMail = async (
       const headerUploadResult = await uploadHeader(
         dotYouClient,
         conversation.sharedSecretEncryptedKeyHeader,
-        uploadInstructions,
+        { ...uploadInstructions, storageIntent: 'header' },
         uploadMetadata,
         onVersionConflict
       );
@@ -267,6 +268,7 @@ export const uploadMail = async (
               targetDrive: MailDrive,
             },
             versionTag: headerUploadResult.newVersionTag,
+            storageIntent: 'append',
           },
           payloads,
           thumbnails,
@@ -346,11 +348,12 @@ export const updateLocalMailHeader = async (
   onVersionConflict?: () => void,
   keyHeader?: KeyHeader
 ) => {
-  const uploadInstructions: UploadInstructionSet = {
+  const uploadInstructions: UpdateHeaderInstructionSet = {
     storageOptions: {
       drive: MailDrive,
       overwriteFileId: conversation.fileId,
     },
+    storageIntent: 'header',
   };
 
   const conversationContent = conversation.fileMetadata.appData.content;

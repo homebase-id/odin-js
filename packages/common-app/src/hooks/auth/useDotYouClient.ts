@@ -1,7 +1,8 @@
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { base64ToUint8Array, isLocalStorageAvailable } from '@homebase-id/js-lib/helpers';
-import { OWNER_ROOT, OWNER_APPS_ROOT, OwnerClient } from '../../core';
+import { OwnerClient } from '../../core';
 import { retrieveIdentity } from '@homebase-id/js-lib/auth';
+import { OWNER_APPS_ROOT, OWNER_ROOT } from '../../constants';
 
 export const HOME_SHARED_SECRET = 'HSS';
 export const OWNER_SHARED_SECRET = 'SS';

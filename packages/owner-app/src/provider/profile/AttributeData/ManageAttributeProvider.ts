@@ -20,6 +20,7 @@ import {
   ThumbnailFile,
   EmbeddedThumb,
   getFileHeader,
+  UpdateHeaderInstructionSet,
 } from '@homebase-id/js-lib/core';
 import {
   getNewId,
@@ -166,6 +167,7 @@ export const saveProfileAttribute = async (
                 targetDrive: targetDrive,
               },
               versionTag: runningVersionTag,
+              storageIntent: 'append',
             },
             payloads,
             thumbnails
@@ -187,12 +189,13 @@ export const saveProfileAttribute = async (
     }
 
     // Only save update header
-    const appendInstructions: UploadInstructionSet = {
+    const appendInstructions: UpdateHeaderInstructionSet = {
       transferIv: getRandom16ByteArray(),
       storageOptions: {
         overwriteFileId: toSaveAttribute.fileId,
         drive: targetDrive,
       },
+      storageIntent: 'header',
     };
 
     metadata.versionTag = runningVersionTag || metadata.versionTag;

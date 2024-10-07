@@ -9,23 +9,53 @@ import {
   AccessControlList,
   EncryptedKeyHeader,
   KeyHeader,
+  UpdatePayloadInstruction,
 } from '../File/DriveFileTypes';
 
-export interface UploadInstructionSet {
+export interface BaseUploadInstructionSet {
   storageOptions: StorageOptions | null;
   transitOptions?: TransitOptions;
   transferIv?: Uint8Array;
   systemFileType?: SystemFileType;
 }
 
-export interface AppendInstructionSet {
-  targetFile: {
-    fileId: string;
-    targetDrive: TargetDrive;
-  };
-  versionTag: string | undefined;
-  systemFileType?: SystemFileType;
+export type UploadInstructionSet = BaseUploadInstructionSet;
+
+export interface UpdateHeaderInstructionSet extends BaseUploadInstructionSet {
+  storageIntent: 'header';
 }
+
+export const isUpdateHeaderInstructionSet = (
+  instructionSet: unknown
+): instructionSet is UpdateHeaderInstructionSet => {
+  return (
+    !!instructionSet &&
+    typeof instructionSet === 'object' &&
+    'storageIntent' in instructionSet &&
+    instructionSet.storageIntent === 'header'
+  );
+};
+
+export interface AppendInstructionSet extends Omit<BaseUploadInstructionSet, 'storageOptions'> {
+  storageIntent: 'append';
+
+  targetFile: FileIdFileIdentifier;
+  versionTag: string | undefined;
+}
+
+export interface UpdateInstructionSet extends Partial<BaseUploadInstructionSet> {
+  file: GlobalTransitIdFileIdentifier;
+  versionTag: string | undefined;
+
+  locale: 'peer'; // |'local'; Not implemented on the BE yet
+  recipients?: string[];
+}
+
+export const isUpdateInstructionSet = (
+  instructionSet: unknown
+): instructionSet is UpdateInstructionSet => {
+  return !!instructionSet && typeof instructionSet === 'object' && 'locale' in instructionSet;
+};
 
 export interface StorageOptions {
   drive: TargetDrive;
@@ -87,7 +117,6 @@ export interface UploadFileDescriptor {
 
 export interface UploadFileMetadata {
   allowDistribution: boolean;
-  senderOdinId?: string;
   isEncrypted: boolean;
   accessControlList?: AccessControlList;
   appData: UploadAppFileMetaData;
@@ -97,6 +126,10 @@ export interface UploadFileMetadata {
 
 export interface UploadManifest {
   PayloadDescriptors?: UploadPayloadDescriptor[];
+}
+
+export interface UpdateManifest {
+  PayloadDescriptors?: UpdatePayloadInstruction[];
 }
 
 export interface UploadAppFileMetaData {
@@ -121,6 +154,11 @@ export interface UploadResult {
 
 export interface AppendResult {
   newVersionTag: string;
+}
+
+export interface UpdateResult {
+  newVersionTag: string;
+  recipientStatus: { [key: string]: TransferUploadStatus };
 }
 
 export enum TransferUploadStatus {

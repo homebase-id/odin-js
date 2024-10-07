@@ -82,6 +82,7 @@ export const useConnectionActions = () => {
           message: message,
           senderOdinId: dotYouClient.getIdentity(),
           receivedTimestampMilliseconds: Date.now(),
+          connectionRequestOrigin: 'identityowner',
         };
         queryClient.setQueryData<PagedResult<ConnectionRequest>>(['sent-requests'], {
           totalPages: 0,

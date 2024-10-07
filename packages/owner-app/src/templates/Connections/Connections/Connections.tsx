@@ -1,11 +1,3 @@
-import PersonIncomingRequest from '../../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
-import PersonOutgoingRequest from '../../../components/Connection/PersonOutgoingRequest/PersonOutgoingRequest';
-import { SectionTitle } from '../../../components/ui/Sections/Section';
-import { useEffect, useState } from 'react';
-import PersonActive from '../../../components/Connection/PersonActive/PersonActive';
-import { DotYouProfile } from '@homebase-id/js-lib/network';
-import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import OutgoingConnectionDialog from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
 import {
   useRemoveNotifications,
   OWNER_APP_ID,
@@ -17,15 +9,27 @@ import {
   LoadingBlock,
   useSentConnections,
   useActiveConnections,
+  ActionGroup,
 } from '@homebase-id/common-app';
+import PersonIncomingRequest from '../../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
+import PersonOutgoingRequest from '../../../components/Connection/PersonOutgoingRequest/PersonOutgoingRequest';
+import { SectionTitle } from '../../../components/ui/Sections/Section';
+import { useEffect, useState } from 'react';
+import PersonActive from '../../../components/Connection/PersonActive/PersonActive';
+import { DotYouProfile } from '@homebase-id/js-lib/network';
+import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { OutgoingConnectionDialog } from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
+import { IntroductionDialog } from '../../../components/Connection/ConnectionDialogs/IntroductionDialog';
 import { Persons, Plus } from '@homebase-id/common-app/icons';
 
 const Connections = () => {
   const [hasActiveConnections, setActiveConnections] = useState(true);
   const [hasPendingConnections, setPendingConnections] = useState(true);
   const [hasSentConnections, setSentConnections] = useState(true);
+  const [hasOutgoingIntroductions, setOutgoingIntroductions] = useState(true);
 
   const [isSentConnectionOpen, setIsSentConnectionOpen] = useState(false);
+  const [isIntroduceOpen, setIsIntroduceOpen] = useState(false);
   useRemoveNotifications({ appId: OWNER_APP_ID });
 
   return (
@@ -38,12 +42,25 @@ const Connections = () => {
             <ActionButton onClick={() => setIsSentConnectionOpen(true)} icon={Plus}>
               {t('Send Request')}
             </ActionButton>
+            <ActionGroup
+              options={[
+                {
+                  label: t('Introduce'),
+                  icon: Persons,
+                  onClick: () => setIsIntroduceOpen(true),
+                },
+              ]}
+              type="mute"
+            />
           </>
         }
       />
 
       <div className="-mt-6">
-        {!hasActiveConnections && !hasSentConnections && !hasPendingConnections ? (
+        {!hasActiveConnections &&
+        !hasSentConnections &&
+        !hasPendingConnections &&
+        !hasOutgoingIntroductions ? (
           <SubtleMessage className="flex flex-row items-center gap-3">
             <span>{t('Ready to add some connections?')}</span>
             <ActionButton
@@ -63,12 +80,20 @@ const Connections = () => {
 
         <PendingConnectionSection setNoPendingConnections={() => setPendingConnections(false)} />
         <SentConnectionSection setNoSentConnections={() => setSentConnections(false)} />
+        <OutgoingIntroductionsSection
+          setNoSentConnections={() => setOutgoingIntroductions(false)}
+        />
         <ActiveConnectionSection setNoActiveConnections={() => setActiveConnections(false)} />
         <OutgoingConnectionDialog
           title={t('Send connection request')}
           isOpen={isSentConnectionOpen}
           onConfirm={() => setIsSentConnectionOpen(false)}
           onCancel={() => setIsSentConnectionOpen(false)}
+        />
+        <IntroductionDialog
+          isOpen={isIntroduceOpen}
+          onConfirm={() => setIsIntroduceOpen(false)}
+          onCancel={() => setIsIntroduceOpen(false)}
         />
       </div>
     </>
@@ -137,12 +162,14 @@ const PendingConnectionSection = ({
     </>
   );
 };
+
 const SentConnectionSection = ({ setNoSentConnections }: { setNoSentConnections: () => void }) => {
   const [sentPage, setSentPage] = useState(1);
 
   const { data: sentRequests, isLoading: sentRequestsLoading } = useSentConnections({
     pageSize: 6,
     pageNumber: sentPage,
+    includeIntroductions: false,
   }).fetch;
 
   useEffect(() => {
@@ -157,6 +184,67 @@ const SentConnectionSection = ({ setNoSentConnections }: { setNoSentConnections:
     <>
       <SectionTitle
         title={t('Sent Connection Requests')}
+        actions={
+          <Pager
+            totalPages={sentRequests?.totalPages}
+            setPage={setSentPage}
+            currentPage={sentPage}
+          />
+        }
+      />
+      <div className="-m-1 mt-5 flex flex-row flex-wrap">
+        {sentRequestsLoading && (
+          <>
+            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
+            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
+          </>
+        )}
+
+        {sentRequests?.results?.map((sentRequest) => (
+          <PersonOutgoingRequest
+            className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6"
+            recipientOdinId={sentRequest.recipient}
+            key={sentRequest.recipient}
+          />
+        ))}
+      </div>
+      <div className="flex flex-row justify-center pt-5 md:hidden">
+        <Pager
+          totalPages={sentRequests?.totalPages}
+          setPage={setSentPage}
+          currentPage={sentPage}
+          size="xl"
+        />
+      </div>
+    </>
+  );
+};
+
+const OutgoingIntroductionsSection = ({
+  setNoSentConnections,
+}: {
+  setNoSentConnections: () => void;
+}) => {
+  const [sentPage, setSentPage] = useState(1);
+
+  const { data: sentRequests, isLoading: sentRequestsLoading } = useSentConnections({
+    pageSize: 6,
+    pageNumber: sentPage,
+    includeIntroductions: 'only',
+  }).fetch;
+
+  useEffect(() => {
+    if (!sentRequests?.results?.length) setNoSentConnections();
+  }, [sentRequests]);
+
+  if (!sentRequests?.results?.length) {
+    return null;
+  }
+
+  return (
+    <>
+      <SectionTitle
+        title={t('Outgoing introductions')}
         actions={
           <Pager
             totalPages={sentRequests?.totalPages}
