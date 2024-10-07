@@ -63,7 +63,7 @@ export interface ChannelPlugin<TItem extends TChannel = TChannel>
 }
 
 /** Enables support for autocompleting #channels. */
-export const createChannelPlugin = createTSlatePlugin({
+export const ChannelPlugin = createTSlatePlugin({
   key: ELEMENT_CHANNEL,
   extendEditor: withTriggerCombobox,
   node: { isElement: true, isInline: true, isMarkableVoid: true, isVoid: true },

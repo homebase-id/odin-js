@@ -5,6 +5,7 @@ import {
   resetEditor,
   isSelectionAtBlockStart,
   isBlockAboveEmpty,
+  SlatePlugin,
 } from '@udecode/plate-common';
 import { ParagraphPlugin, PlateElement } from '@udecode/plate-common/react';
 import { withProps } from '@udecode/cn';
@@ -68,6 +69,7 @@ import {
   useMemo,
   forwardRef,
   useImperativeHandle,
+  FunctionComponent,
 } from 'react';
 import { autoformatRules } from '../lib/autoFormatRules';
 import { EmojiInputElement } from './Combobox/EmojiCombobox';
@@ -75,7 +77,7 @@ import { MentionElement } from '../components/plate-ui/mention-element';
 import { Mentionable, MentionInputElement } from '../components/plate-ui/mention-input-element';
 import { ImagePlugin } from './ImagePlugin/createImagePlugin';
 import { createPlateEditor, Plate, PlateContent, PlatePlugin } from '@udecode/plate-core/react';
-import { focusEditor, PlateElementProps, PlateLeaf } from '@udecode/plate-common/react';
+import { focusEditor, PlateLeaf } from '@udecode/plate-common/react';
 import { ListElement } from '../components/plate-ui/list-element';
 import { MediaOptionsContextProvider } from './MediaOptionsContext/MediaOptionsContext';
 import { useMediaOptionsContext } from './MediaOptionsContext/useMediaOptionsContext';
@@ -96,11 +98,9 @@ interface RTEProps {
   disableHeadings?: boolean;
   children?: React.ReactNode;
 
-  plugins?: PlatePlugin[];
-  components?: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    p: React.ForwardRefExoticComponent<Omit<PlateElementProps, 'ref'> & React.RefAttributes<any>>;
-  };
+  plugins?: (PlatePlugin | SlatePlugin)[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  components?: Record<string, FunctionComponent<any>>;
 }
 
 const resetBlockTypesCommonRule = {

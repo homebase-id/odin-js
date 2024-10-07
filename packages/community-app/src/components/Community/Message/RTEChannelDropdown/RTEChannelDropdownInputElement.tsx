@@ -9,6 +9,7 @@ import {
   InlineComboboxContent,
   InlineComboboxInput,
   InlineComboboxItem,
+  InlineComboboxSeleactableEmpty,
 } from '@homebase-id/rich-text-editor';
 import { ErrorNotification, t } from '@homebase-id/common-app';
 import { useParams } from 'react-router-dom';
