@@ -1,8 +1,9 @@
-import { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
-import { MARK_SUBSCRIPT, MARK_SUPERSCRIPT } from '@udecode/plate-basic-marks';
-import { focusEditor, toggleMark, useEditorState } from '@udecode/plate-common';
-
 import { Icons } from '../../components/icons';
+
+import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
+
+import { SubscriptPlugin, SuperscriptPlugin } from '@udecode/plate-basic-marks/react';
+import { focusEditor, useEditorRef } from '@udecode/plate-common/react';
 
 import {
   DropdownMenu,
@@ -14,7 +15,7 @@ import { ToolbarButton } from './toolbar';
 import { useOpenState } from './dropdown-menu/use-open-state';
 
 export function MoreDropdownMenu(props: DropdownMenuProps) {
-  const editor = useEditorState();
+  const editor = useEditorRef();
   const openState = useOpenState();
 
   return (
@@ -26,32 +27,32 @@ export function MoreDropdownMenu(props: DropdownMenuProps) {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        align="start"
         className="flex max-h-[500px] min-w-[180px] flex-col gap-0.5 overflow-y-auto"
+        align="start"
       >
         <DropdownMenuItem
           onSelect={() => {
-            toggleMark(editor, {
-              key: MARK_SUBSCRIPT,
-              clear: MARK_SUPERSCRIPT,
+            editor.tf.toggle.mark({
+              key: SuperscriptPlugin.key,
+              clear: [SubscriptPlugin.key, SuperscriptPlugin.key],
             });
             focusEditor(editor);
           }}
         >
-          <Icons.superscript className="mr-2 h-5 w-5" />
+          <Icons.superscript className="mr-2 size-5" />
           Superscript
           {/* (⌘+,) */}
         </DropdownMenuItem>
         <DropdownMenuItem
           onSelect={() => {
-            toggleMark(editor, {
-              key: MARK_SUPERSCRIPT,
-              clear: MARK_SUBSCRIPT,
+            editor.tf.toggle.mark({
+              key: SubscriptPlugin.key,
+              clear: [SuperscriptPlugin.key, SubscriptPlugin.key],
             });
             focusEditor(editor);
           }}
         >
-          <Icons.subscript className="mr-2 h-5 w-5" />
+          <Icons.subscript className="mr-2 size-5" />
           Subscript
           {/* (⌘+.) */}
         </DropdownMenuItem>

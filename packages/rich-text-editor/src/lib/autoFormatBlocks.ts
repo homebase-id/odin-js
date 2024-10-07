@@ -1,33 +1,33 @@
+import {
+  BoldPlugin,
+  CodePlugin,
+  ItalicPlugin,
+  StrikethroughPlugin,
+  UnderlinePlugin,
+} from '@udecode/plate-basic-marks/react';
 import { preFormat } from './autoFormatUtils';
 import { AutoformatRule } from '@udecode/plate-autoformat';
-import {
-  MARK_BOLD,
-  MARK_CODE,
-  MARK_ITALIC,
-  MARK_STRIKETHROUGH,
-  MARK_UNDERLINE,
-} from '@udecode/plate-basic-marks';
-import { ELEMENT_CODE_BLOCK, insertEmptyCodeBlock } from '@udecode/plate-code-block';
-import { ELEMENT_H1, ELEMENT_H2 } from '@udecode/plate-heading';
-import { ELEMENT_PARAGRAPH } from '@udecode/plate-paragraph';
+import { insertEmptyCodeBlock } from '@udecode/plate-code-block';
+import { CodeBlockPlugin } from '@udecode/plate-code-block/react';
+import { HEADING_KEYS } from '@udecode/plate-heading';
 
 export const autoformatBlocks: AutoformatRule[] = [
   {
     mode: 'block',
-    type: ELEMENT_H1,
+    type: HEADING_KEYS.h1,
     match: '# ',
     preFormat,
   },
   {
     mode: 'block',
-    type: ELEMENT_H2,
+    type: HEADING_KEYS.h2,
     match: '## ',
     preFormat,
   },
   {
     format: (editor) => {
       insertEmptyCodeBlock(editor, {
-        defaultType: ELEMENT_PARAGRAPH,
+        defaultType: 'p',
         insertNodesOptions: { select: true },
       });
     },
@@ -35,7 +35,7 @@ export const autoformatBlocks: AutoformatRule[] = [
     mode: 'block',
     preFormat,
     triggerAtBlockStart: false,
-    type: ELEMENT_CODE_BLOCK,
+    type: CodeBlockPlugin.key,
   },
 ];
 
@@ -43,26 +43,26 @@ export const autoformatMarks: AutoformatRule[] = [
   {
     match: '**',
     mode: 'mark',
-    type: MARK_BOLD,
+    type: BoldPlugin.key,
   },
   {
     match: '__',
     mode: 'mark',
-    type: MARK_UNDERLINE,
+    type: UnderlinePlugin.key,
   },
   {
     match: '_',
     mode: 'mark',
-    type: MARK_ITALIC,
+    type: ItalicPlugin.key,
   },
   {
     match: '~~',
     mode: 'mark',
-    type: MARK_STRIKETHROUGH,
+    type: StrikethroughPlugin.key,
   },
   {
     match: '`',
     mode: 'mark',
-    type: MARK_CODE,
+    type: CodePlugin.key,
   },
 ];

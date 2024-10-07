@@ -1,5 +1,4 @@
-import { useEventPlateId, useEditorRef, PlateRenderElementProps } from '@udecode/plate-core';
-import { Value, getPluginOptions, removeNodes } from '@udecode/plate-common';
+import { removeNodes } from '@udecode/plate-common';
 import { ReactEditor } from 'slate-react';
 import { TargetDrive, NewMediaFile } from '@homebase-id/js-lib/core';
 import { useMemo, useState } from 'react';
@@ -7,7 +6,10 @@ import { ImageDialog, t, useDotYouClient } from '@homebase-id/common-app';
 import { ImageIcon, Trash } from '@homebase-id/common-app/icons';
 import { ToolbarButton, ToolbarButtonProps } from '../../components/plate-ui/toolbar';
 import { OdinThumbnailImage } from '@homebase-id/ui-lib';
-import { ELEMENT_IMAGE, insertImage, TImageElement } from './createImagePlugin';
+import { insertImage, TImageElement } from './createImagePlugin';
+import { PlateRenderElementProps, useEditorRef, useEventPlateId } from '@udecode/plate-core/react';
+import { useMediaOptionsContext } from '../MediaOptionsContext/useMediaOptionsContext';
+import { useBlockSelected } from '@udecode/plate-selection/react';
 
 export interface MediaOptions {
   odinId?: string;
@@ -19,13 +21,12 @@ export interface MediaOptions {
   onRemove: (payload: { fileId: string; fileKey: string }) => Promise<unknown | null>;
 }
 
-interface ImageToolbarButtonProps extends ToolbarButtonProps {
-  mediaOptions: MediaOptions;
-}
+type ImageToolbarButtonProps = ToolbarButtonProps;
 
-export const ImageToolbarButton = ({ mediaOptions, ...props }: ImageToolbarButtonProps) => {
+export const ImageToolbarButton = ({ ...props }: ImageToolbarButtonProps) => {
   const [isActive, setIsActive] = useState(false);
   const editor = useEditorRef(useEventPlateId());
+  const mediaOptions = useMediaOptionsContext().mediaOptions;
 
   return (
     <>
@@ -43,7 +44,7 @@ export const ImageToolbarButton = ({ mediaOptions, ...props }: ImageToolbarButto
         isOpen={isActive}
         onCancel={() => setIsActive(false)}
         onConfirm={async (image) => {
-          if (image) {
+          if (image && mediaOptions?.onAppend) {
             const uploadResult = await mediaOptions.onAppend(image);
             if (uploadResult) insertImage(editor, uploadResult.fileKey);
           }
@@ -57,9 +58,10 @@ export const ImageToolbarButton = ({ mediaOptions, ...props }: ImageToolbarButto
   );
 };
 
-export const ImageElementBlock = <V extends Value = Value>(
-  props: PlateRenderElementProps<V, TImageElement>
+export const ImageElementBlock = <N extends TImageElement = TImageElement>(
+  props: PlateRenderElementProps<N>
 ) => {
+  const isBlockSelected = useBlockSelected();
   const [isActive, setIsActive] = useState(false);
   const { attributes, children, nodeProps, element } = props;
   const dotYouClient = useDotYouClient().getDotYouClient();
@@ -68,7 +70,7 @@ export const ImageElementBlock = <V extends Value = Value>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const path = ReactEditor.findPath(editor as any, element as any);
 
-  const options = getPluginOptions<MediaOptions | undefined>(editor, ELEMENT_IMAGE);
+  const options = useMediaOptionsContext().mediaOptions;
 
   const doRemove = async () => {
     if (await options?.onRemove({ fileId: options.fileId, fileKey: element.fileKey })) {
@@ -78,19 +80,20 @@ export const ImageElementBlock = <V extends Value = Value>(
     }
   };
 
-  if (!options || !options.mediaDrive) return <>{children}</>;
-
   const pendingUrl = useMemo(() => {
+    if (!options) return undefined;
     const pendingUpload = options.pendingUploadFiles?.find((file) => file.key === element.fileKey);
     return pendingUpload ? URL.createObjectURL(pendingUpload.file) : undefined;
-  }, []);
+  }, [options]);
+
+  if (!options || !options.mediaDrive) return <>{children}</>;
 
   return (
     <>
       <div
         {...attributes}
         {...nodeProps}
-        className="relative aspect-square w-full max-w-lg bg-slate-50 dark:bg-slate-800"
+        className={`relative aspect-square w-full max-w-lg bg-slate-50 dark:bg-slate-800 ${isBlockSelected ? 'bg-primary/20' : ''}`}
         data-file-id={options.fileId}
         data-file-key={element.fileKey}
       >

@@ -1,13 +1,6 @@
-import {
-  createPluginFactory,
-  getPluginOptions,
-  insertNodes,
-  PlateEditor,
-  TElement,
-  Value,
-} from '@udecode/plate-common';
-import { getImagesFromPasteEvent } from '../../../../common-app/src';
-import { ImageElementBlock, MediaOptions } from './ImagePlugin';
+import { insertNodes, TElement } from '@udecode/plate-common';
+import { ImageElementBlock } from './ImagePlugin';
+import { createTPlatePlugin, PlateEditor } from '@udecode/plate-core/react';
 
 export interface TImageElement extends TElement {
   fileKey: string;
@@ -16,7 +9,7 @@ export interface TImageElement extends TElement {
 
 export const ELEMENT_IMAGE = 'local_image';
 
-export const insertImage = <V extends Value>(editor: PlateEditor<V>, fileKey: string) => {
+export const insertImage = (editor: PlateEditor, fileKey: string) => {
   const text = { text: '' };
   const image: TImageElement = {
     type: ELEMENT_IMAGE,
@@ -32,28 +25,34 @@ export const insertImage = <V extends Value>(editor: PlateEditor<V>, fileKey: st
   insertNodes<TImageElement | TElement>(editor, [image, paragraph]);
 };
 
-export const createImagePlugin = createPluginFactory({
+export const ImagePlugin = createTPlatePlugin({
   key: ELEMENT_IMAGE,
-  isElement: true,
-  component: (props) => ImageElementBlock({ ...props }),
-  handlers: {
-    onPaste: (editor) => (e) => {
-      const imageFiles = getImagesFromPasteEvent(e as React.ClipboardEvent<HTMLElement>);
-
-      if (!imageFiles || imageFiles.length === 0) return false;
-
-      e.stopPropagation();
-      e.preventDefault();
-
-      (async () => {
-        const options = getPluginOptions<MediaOptions | undefined>(editor, ELEMENT_IMAGE);
-        if (imageFiles.length > 0 && options?.onAppend) {
-          const uploadResult = await options.onAppend(imageFiles[0]);
-          if (uploadResult) insertImage(editor, uploadResult.fileKey);
-        }
-      })();
-
-      return true;
-    },
+  node: {
+    isElement: true,
   },
-});
+}).extend(() => ({
+  render: {
+    node: ImageElementBlock,
+  },
+  //TODO: Add onPaste handler with support for the mediaOptions
+  // handlers: {
+  //   onPaste: ({ event: e }) => {
+  //     const imageFiles = getImagesFromPasteEvent(e as React.ClipboardEvent<HTMLElement>);
+
+  //     if (!imageFiles || imageFiles.length === 0) return false;
+
+  //     e.stopPropagation();
+  //     e.preventDefault();
+
+  //     (async () => {
+  //       const options = editor.getOptions<MediaOptions>({ key: ELEMENT_IMAGE });
+  //       if (imageFiles.length > 0 && options?.onAppend) {
+  //         const uploadResult = await options.onAppend(imageFiles[0]);
+  //         if (uploadResult) insertImage(editor, uploadResult.fileKey);
+  //       }
+  //     })();
+
+  //     return true;
+  //   },
+  // },
+}));

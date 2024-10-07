@@ -1,12 +1,13 @@
+import { useFormInputProps } from '@udecode/plate-common/react';
 import {
+  type LinkFloatingToolbarState,
   FloatingLinkUrlInput,
-  LinkFloatingToolbarState,
   LinkOpenButton,
   useFloatingLinkEdit,
   useFloatingLinkEditState,
   useFloatingLinkInsert,
   useFloatingLinkInsertState,
-} from '@udecode/plate-link';
+} from '@udecode/plate-link/react';
 
 import { cn } from '../../lib/utils';
 import { Icons } from '../icons';
@@ -40,9 +41,9 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
     },
   });
   const {
+    hidden,
     props: insertProps,
     ref: insertRef,
-    hidden,
     textInputProps,
   } = useFloatingLinkInsert(insertState);
 
@@ -54,35 +55,36 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
     },
   });
   const {
+    editButtonProps,
     props: editProps,
     ref: editRef,
-    editButtonProps,
     unlinkButtonProps,
   } = useFloatingLinkEdit(editState);
+  const inputProps = useFormInputProps({
+    preventDefaultOnEnterKeydown: true,
+  });
 
   if (hidden) return null;
 
   const input = (
-    <div className="flex w-[330px] flex-col">
+    <div className="flex w-[330px] flex-col" {...inputProps}>
       <div className="flex items-center">
         <div className="flex items-center pl-3 text-muted-foreground">
-          <Icons.link className="h-5 w-5" />
+          <Icons.link className="size-4" />
         </div>
 
         <FloatingLinkUrlInput
-          className={inputVariants({ variant: 'ghost', h: 'sm' })}
+          className={inputVariants({ h: 'sm', variant: 'ghost' })}
           placeholder="Paste link"
         />
       </div>
-
       <Separator />
-
       <div className="flex items-center">
         <div className="flex items-center pl-3 text-muted-foreground">
-          <Icons.text className="h-5 w-5" />
+          <Icons.text className="size-4" />
         </div>
         <input
-          className={inputVariants({ variant: 'ghost', h: 'sm' })}
+          className={inputVariants({ h: 'sm', variant: 'ghost' })}
           placeholder="Text to display"
           {...textInputProps}
         />
@@ -95,8 +97,8 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
   ) : (
     <div className="box-content flex h-9 items-center gap-1">
       <button
+        className={buttonVariants({ size: 'sm', variant: 'ghost' })}
         type="button"
-        className={buttonVariants({ variant: 'ghost', size: 'sm' })}
         {...editButtonProps}
       >
         Edit link
@@ -106,8 +108,8 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
 
       <LinkOpenButton
         className={buttonVariants({
-          variant: 'ghost',
           size: 'sms',
+          variant: 'ghost',
         })}
       >
         <Icons.externalLink width={18} />
@@ -116,11 +118,11 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
       <Separator orientation="vertical" />
 
       <button
-        type="button"
         className={buttonVariants({
-          variant: 'ghost',
           size: 'sms',
+          variant: 'ghost',
         })}
+        type="button"
         {...unlinkButtonProps}
       >
         <Icons.unlink width={18} />

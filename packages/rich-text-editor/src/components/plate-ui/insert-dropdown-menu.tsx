@@ -1,9 +1,6 @@
 import React from 'react';
 import { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
-import { ELEMENT_BLOCKQUOTE } from '@udecode/plate-block-quote';
-import { focusEditor, insertEmptyElement, useEditorState } from '@udecode/plate-common';
-import { ELEMENT_H1, ELEMENT_H2 } from '@udecode/plate-heading';
-import { ELEMENT_PARAGRAPH } from '@udecode/plate-paragraph';
+import { insertEmptyElement } from '@udecode/plate-common';
 
 import { Icons } from '../../components/icons';
 
@@ -17,25 +14,29 @@ import {
 } from './dropdown-menu';
 import { ToolbarButton } from './toolbar';
 import { useOpenState } from './dropdown-menu/use-open-state';
+import { HEADING_KEYS } from '@udecode/plate-heading';
+import { ParagraphPlugin, useEditorState } from '@udecode/plate-core/react';
+import { BlockquotePlugin } from '@udecode/plate-block-quote/react';
+import { focusEditor } from '@udecode/plate-common/react';
 
 const items = [
   {
     label: 'Basic blocks',
     items: [
       {
-        value: ELEMENT_PARAGRAPH,
+        value: ParagraphPlugin.key,
         label: 'Paragraph',
         description: 'Paragraph',
         icon: Icons.paragraph,
       },
       {
-        value: ELEMENT_H1,
+        value: HEADING_KEYS.h1,
         label: 'Heading 1',
         description: 'Heading 1',
         icon: Icons.h1,
       },
       {
-        value: ELEMENT_H2,
+        value: HEADING_KEYS.h2,
         label: 'Heading 2',
         description: 'Heading 2',
         icon: Icons.h2,
@@ -47,7 +48,7 @@ const items = [
       //   icon: Icons.h3,
       // },
       {
-        value: ELEMENT_BLOCKQUOTE,
+        value: BlockquotePlugin.key,
         label: 'Quote',
         description: 'Quote (⌘+⇧+.)',
         icon: Icons.blockquote,

@@ -25,7 +25,7 @@ import { CommunityChannel } from '../../../providers/CommunityProvider';
 import { RichTextEditor } from '@homebase-id/rich-text-editor';
 
 import {
-  createChannelPlugin,
+  ChannelPlugin,
   ELEMENT_CHANNEL,
   ELEMENT_CHANNEL_INPUT,
 } from './RTEChannelDropdown/RTEChannelDropdownPlugin';
@@ -161,7 +161,7 @@ export const MessageComposer = ({
             onSubmit={isTouchDevice() ? undefined : doSend}
             disableHeadings={true}
             mentionables={mentionables}
-            plugins={[createChannelPlugin()]}
+            plugins={[ChannelPlugin]}
             components={{
               [ELEMENT_CHANNEL]: RTEChannelDropdownElement,
               [ELEMENT_CHANNEL_INPUT]: RTEChannelDropdownInputElement,

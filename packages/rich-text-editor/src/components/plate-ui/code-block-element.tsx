@@ -1,13 +1,13 @@
 import './code-block-element.css';
-import { forwardRef } from 'react';
-import { TCodeBlockElement, useCodeBlockElementState } from '@udecode/plate-code-block';
-import { PlateElement, PlateElementProps, Value } from '@udecode/plate-common';
 
 import { cn } from '../../lib/utils';
+import { useCodeBlockElementState } from '@udecode/plate-code-block/react';
+import { PlateElement } from '@udecode/plate-common/react';
+import { withRef } from '@udecode/cn';
 
-const CodeBlockElement = forwardRef<HTMLDivElement, PlateElementProps<Value, TCodeBlockElement>>(
-  ({ className, ...props }, ref) => {
-    const { children, element } = props;
+export const CodeBlockElement = withRef<typeof PlateElement>(
+  ({ children, className, ...props }, ref) => {
+    const { element } = props;
 
     const state = useCodeBlockElementState({ element });
 
@@ -21,5 +21,3 @@ const CodeBlockElement = forwardRef<HTMLDivElement, PlateElementProps<Value, TCo
   }
 );
 CodeBlockElement.displayName = 'CodeBlockElement';
-
-export { CodeBlockElement };

@@ -1,10 +1,10 @@
-import React from 'react';
-import { PlateElement, PlateElementProps } from '@udecode/plate-common';
+import { cn } from '@udecode/cn';
+import { withRef } from '@udecode/plate-common/react';
 
-import { cn } from '../../lib/utils';
+import { PlateElement } from './plate-element';
 
-const ParagraphElement = React.forwardRef<React.ElementRef<typeof PlateElement>, PlateElementProps>(
-  ({ className, children, ...props }: PlateElementProps, ref) => {
+export const ParagraphElement = withRef<typeof PlateElement>(
+  ({ children, className, ...props }, ref) => {
     return (
       <PlateElement ref={ref} className={cn('m-0 px-0 py-1', className)} {...props}>
         {children}
@@ -12,6 +12,3 @@ const ParagraphElement = React.forwardRef<React.ElementRef<typeof PlateElement>,
     );
   }
 );
-ParagraphElement.displayName = 'ParagraphElement';
-
-export { ParagraphElement };

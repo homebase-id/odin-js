@@ -1,18 +1,7 @@
-import type { TriggerComboboxPlugin } from '@udecode/plate-combobox';
-import type { TElement, TNodeProps } from '@udecode/plate-common';
+import { TriggerComboboxPluginOptions } from '@udecode/plate-combobox';
+import { createTSlatePlugin, type TElement, type TNodeProps } from '@udecode/plate-common';
 import { withTriggerCombobox } from '@udecode/plate-combobox';
-import {
-  createPluginFactory,
-  type PlateEditor,
-  type PlatePluginKey,
-  type Value,
-  getBlockAbove,
-  getPlugin,
-  insertNodes,
-  insertText,
-  isEndPoint,
-  moveSelection,
-} from '@udecode/plate-common/server';
+import { PlateEditor } from '@udecode/plate-core/react';
 
 export const ELEMENT_CHANNEL = 'channel';
 export const ELEMENT_CHANNEL_INPUT = 'channel_input';
@@ -28,56 +17,24 @@ export interface TChannel {
   uniqueId: string;
 }
 
-export type MentionOnSelectItem<TItem extends TChannel = TChannel> = <V extends Value>(
-  editor: PlateEditor<V>,
+export type MentionOnSelectItem<TItem extends TChannel = TChannel> = (
+  editor: PlateEditor,
   item: TItem,
   search?: string
 ) => void;
 
-export const getChannelOnSelectItem =
-  <TItem extends TChannel = TChannel>({
-    key = ELEMENT_CHANNEL,
-  }: PlatePluginKey = {}): MentionOnSelectItem<TItem> =>
-  (editor, item, search = '') => {
-    const {
-      options: { createChannelNode, insertSpaceAfterMention },
-      type,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } = getPlugin<ChannelPlugin>(editor as any, key);
-
-    const props = createChannelNode!(item, search);
-
-    insertNodes<TChannelElement>(editor, {
-      children: [{ text: '' }],
-      type,
-      ...props,
-    } as TChannelElement);
-
-    // move the selection after the element
-    moveSelection(editor, { unit: 'offset' });
-
-    const pathAbove = getBlockAbove(editor)?.[1];
-
-    const isBlockEnd =
-      editor.selection && pathAbove && isEndPoint(editor, editor.selection.anchor, pathAbove);
-
-    if (isBlockEnd && insertSpaceAfterMention) {
-      insertText(editor, ' ');
-    }
-  };
-
-export interface ChannelPlugin<TItem extends TChannel = TChannel> extends TriggerComboboxPlugin {
+export interface ChannelPlugin<TItem extends TChannel = TChannel>
+  extends TriggerComboboxPluginOptions {
   createChannelNode?: (item: TItem, search: string) => TNodeProps<TChannelElement>;
   insertSpaceAfterMention?: boolean;
 }
 
 /** Enables support for autocompleting #channels. */
-export const createChannelPlugin = createPluginFactory<ChannelPlugin>({
-  isElement: true,
-  isInline: true,
-  isMarkableVoid: true,
-  isVoid: true,
+export const ChannelPlugin = createTSlatePlugin({
   key: ELEMENT_CHANNEL,
+  extendEditor: withTriggerCombobox,
+  node: { isElement: true, isInline: true, isMarkableVoid: true, isVoid: true },
+
   options: {
     createComboboxInput: (trigger: string) => ({
       children: [{ text: '' }],
@@ -88,6 +45,7 @@ export const createChannelPlugin = createPluginFactory<ChannelPlugin>({
     trigger: '#',
     triggerPreviousCharPattern: /^\s?$/,
   },
+
   plugins: [
     {
       isElement: true,
@@ -96,5 +54,4 @@ export const createChannelPlugin = createPluginFactory<ChannelPlugin>({
       key: ELEMENT_CHANNEL_INPUT,
     },
   ],
-  withOverrides: withTriggerCombobox,
 });

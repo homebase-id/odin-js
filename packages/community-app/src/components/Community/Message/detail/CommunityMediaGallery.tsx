@@ -118,6 +118,7 @@ export const CommunityMediaGallery = ({
               odinId={undefined}
               targetDrive={targetDrive}
               fileId={msg.fileId}
+              globalTransitId={msg.fileMetadata.globalTransitId}
               file={payload}
               canDownload={true}
               className="h-full w-full"

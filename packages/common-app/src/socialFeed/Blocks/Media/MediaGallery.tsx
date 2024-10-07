@@ -109,6 +109,7 @@ export const MediaGallery = ({
                     ) : (
                       <BoringFile
                         odinId={odinId}
+                        globalTransitId={globalTransitId}
                         targetDrive={getChannelDrive(channelId)}
                         fileId={fileId}
                         file={file}

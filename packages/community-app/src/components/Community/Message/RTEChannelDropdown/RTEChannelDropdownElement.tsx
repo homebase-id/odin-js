@@ -1,7 +1,8 @@
 import { cn, withRef } from '@udecode/cn';
-import { PlateElement, getHandler, useElement } from '@udecode/plate-common';
+import { getHandler } from '@udecode/plate-common';
 import { useFocused, useSelected } from 'slate-react';
 import { TChannelElement } from './RTEChannelDropdownPlugin';
+import { PlateElement, useElement } from '@udecode/plate-common/react';
 
 export const RTEChannelDropdownElement = withRef<
   typeof PlateElement,

@@ -15,9 +15,9 @@ import React, {
 import type { PointRef } from 'slate';
 
 import {
+  type ComboboxItemProps,
   Combobox,
   ComboboxItem,
-  type ComboboxItemProps,
   ComboboxPopover,
   ComboboxProvider,
   Portal,
@@ -25,25 +25,23 @@ import {
   useComboboxStore,
 } from '@ariakit/react';
 import { cn } from '@udecode/cn';
+import { filterWords } from '@udecode/plate-combobox';
 import {
   type UseComboboxInputResult,
-  filterWords,
   useComboboxInput,
   useHTMLInputCursorState,
-} from '@udecode/plate-combobox';
+} from '@udecode/plate-combobox/react';
 import {
   type TElement,
   createPointRef,
-  findNodePath,
   getPointBefore,
   insertText,
   moveSelection,
-  useComposedRef,
-  useEditorRef,
 } from '@udecode/plate-common';
+import { findNodePath, useComposedRef, useEditorRef } from '@udecode/plate-common/react';
 import { cva } from 'class-variance-authority';
 
-type FilterFn = (item: { keywords?: string[]; value: string }, search: string) => boolean;
+type FilterFn = (item: { value: string; keywords?: string[] }, search: string) => boolean;
 
 interface InlineComboboxContextValue {
   filter: FilterFn | false;
@@ -127,12 +125,9 @@ const InlineCombobox = ({
   }, [editor, element]);
 
   const { props: inputProps, removeInput } = useComboboxInput({
-    cancelInputOnBlur: true,
-    cancelInputOnBackspace: true,
-    cancelInputOnEscape: true,
-    cancelInputOnDeselect: true,
-    cancelInputOnArrowLeftRight: true,
+    cancelInputOnBlur: false,
     cursorState,
+    ref: inputRef,
     onCancelInput: (cause) => {
       if (cause !== 'backspace') {
         insertText(editor, trigger + value, {
@@ -146,7 +141,6 @@ const InlineCombobox = ({
         });
       }
     },
-    ref: inputRef,
   });
 
   const [hasEmpty, setHasEmpty] = useState(false);
@@ -225,15 +219,15 @@ const InlineComboboxInput = forwardRef<HTMLInputElement, HTMLAttributes<HTMLInpu
         {showTrigger && trigger}
 
         <span className="relative min-h-[1lh]">
-          <span aria-hidden="true" className="invisible overflow-hidden text-nowrap">
+          <span className="invisible overflow-hidden text-nowrap" aria-hidden="true">
             {value || '\u200B'}
           </span>
 
           <Combobox
-            autoSelect
-            className={cn('absolute left-0 top-0 size-full bg-transparent outline-none', className)}
             ref={ref}
+            className={cn('absolute left-0 top-0 size-full bg-transparent outline-none', className)}
             value={value}
+            autoSelect
             {...inputProps}
             {...props}
           />
@@ -337,10 +331,9 @@ const InlineComboboxEmpty = ({ children, className }: HTMLAttributes<HTMLDivElem
   if (items.length > 0) return null;
 
   return (
-    <div className={cn(comboboxItemVariants({ interactive: true }), className)}>{children}</div>
+    <div className={cn(comboboxItemVariants({ interactive: false }), className)}>{children}</div>
   );
 };
-
 const InlineComboboxSeleactableEmpty = ({
   className,
   onClick,
