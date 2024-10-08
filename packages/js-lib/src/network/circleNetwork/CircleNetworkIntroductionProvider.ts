@@ -23,6 +23,14 @@ export const sendIntroduction = async (
   const promise: Promise<IntroductionResult | null> = client
     .post<IntroductionResult>('/circles/requests/introductions/send-introductions', introduction)
     .then((response) => response.data)
+    .then((introductionResult) => {
+      Object.keys(introductionResult.recipientStatus).forEach((key) => {
+        if (!introductionResult.recipientStatus[key]) {
+          throw new Error(`Failed to send introduction to ${key}`);
+        }
+      });
+      return introductionResult;
+    })
     .catch((error) => {
       console.error('[DotYouCore-js:sendIntroduction]', error);
       throw error;

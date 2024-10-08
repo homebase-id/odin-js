@@ -30,7 +30,13 @@ export const IntroductionDialog = ({
     mutate: introduceIdentities,
     error: sendIntroductionError,
     status: introduceIdentitiesStatus,
+    reset: resetIntroduceIdentities,
   } = useIntroductions().introduceIdentities;
+
+  const doCancel = () => {
+    resetIntroduceIdentities();
+    onCancel();
+  };
 
   if (!isOpen) return null;
 
@@ -38,7 +44,7 @@ export const IntroductionDialog = ({
     <DialogWrapper
       title={t('Introduce your connections to each other')}
       onClose={() => {
-        onCancel();
+        doCancel();
       }}
       size="4xlarge"
     >
@@ -101,7 +107,7 @@ export const IntroductionDialog = ({
               className="sm:mr-auto"
               type="secondary"
               onClick={() => {
-                onCancel();
+                doCancel();
               }}
             >
               {t('Cancel')}

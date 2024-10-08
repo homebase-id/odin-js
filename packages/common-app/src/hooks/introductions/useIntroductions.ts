@@ -11,6 +11,10 @@ export const useIntroductions = () => {
   return {
     introduceIdentities: useMutation({
       mutationFn: introduce,
+      onError: (error) => {
+        console.error('[useIntroductions:introduceIdentities]', error);
+        // throw error;
+      },
     }),
   };
 };
