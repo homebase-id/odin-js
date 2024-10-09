@@ -10,6 +10,10 @@ import {
   UpdateResult,
   UpdateInstructionSet,
   UpdateHeaderInstructionSet,
+  UpdateLocalInstructionSet,
+  ScheduleOptions,
+  PriorityOptions,
+  SendContents,
 } from './DriveUploadTypes';
 import { decryptKeyHeader } from '../SecurityHelpers';
 import {
@@ -25,6 +29,7 @@ import {
 import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFileProvider';
 import { getRandom16ByteArray } from '../../../helpers/DataUtil';
 import { AxiosRequestConfig } from 'axios';
+import { deletePayload } from '../File/DriveFileManageProvider';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
@@ -110,7 +115,21 @@ export const patchFile = async (
   options?: {
     axiosConfig?: AxiosRequestConfig;
   }
-): Promise<UpdateResult | void> => {
+): Promise<UpdateResult | UploadResult | void> => {
+  if (instructions.locale === 'local') {
+    return patchFileLocal(
+      dotYouClient,
+      keyHeader,
+      instructions,
+      metadata,
+      payloads,
+      thumbnails,
+      toDeletePayloads,
+      undefined,
+      options
+    );
+  }
+
   isDebug &&
     console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/update`).pathname, {
       instructions,
@@ -166,6 +185,89 @@ export const patchFile = async (
 
   if (!updateResult) return;
   return updateResult;
+};
+
+const patchFileLocal = async (
+  dotYouClient: DotYouClient,
+  keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
+  instructions: UpdateLocalInstructionSet,
+  metadata: UploadFileMetadata,
+  payloads?: PayloadFile[],
+  thumbnails?: ThumbnailFile[],
+  toDeletePayloads?: { key: string }[],
+  onVersionConflict?: () => Promise<void | UploadResult> | void,
+  options?: {
+    axiosConfig?: AxiosRequestConfig;
+  }
+): Promise<UploadResult | void> => {
+  if (!metadata.versionTag) {
+    throw new Error('metadata.versionTag is required');
+  }
+  let runningVersionTag: string = metadata.versionTag;
+
+  if (toDeletePayloads?.length) {
+    for (let i = 0; i < toDeletePayloads.length; i++) {
+      const mediaFile = toDeletePayloads[i];
+
+      runningVersionTag = (
+        await deletePayload(
+          dotYouClient,
+          instructions.file.targetDrive,
+          instructions.file.fileId,
+          mediaFile.key,
+          runningVersionTag
+        )
+      ).newVersionTag;
+    }
+  }
+
+  // Append new files:
+  if (payloads?.length) {
+    const appendInstructionSet: AppendInstructionSet = {
+      targetFile: instructions.file,
+      versionTag: runningVersionTag,
+      storageIntent: 'append',
+    };
+
+    runningVersionTag =
+      (
+        await appendDataToFile(
+          dotYouClient,
+          keyHeader,
+          appendInstructionSet,
+          payloads,
+          thumbnails,
+          onVersionConflict
+        )
+      )?.newVersionTag || runningVersionTag;
+  }
+
+  if (runningVersionTag) metadata.versionTag = runningVersionTag;
+  const instructionSet: UpdateHeaderInstructionSet = {
+    transferIv: getRandom16ByteArray(),
+    storageOptions: {
+      overwriteFileId: instructions.file.fileId,
+      drive: instructions.file.targetDrive,
+    },
+    transitOptions: instructions.recipients
+      ? {
+          recipients: instructions.recipients,
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.Medium,
+          sendContents: SendContents.All, // TODO: Should this be header only?
+        }
+      : undefined,
+    storageIntent: 'header',
+  };
+
+  return await uploadHeader(
+    dotYouClient,
+    keyHeader,
+    instructionSet,
+    metadata,
+    onVersionConflict,
+    options?.axiosConfig
+  );
 };
 
 export const uploadHeader = async (

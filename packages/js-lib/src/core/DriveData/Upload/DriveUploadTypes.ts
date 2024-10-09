@@ -43,13 +43,23 @@ export interface AppendInstructionSet extends Omit<BaseUploadInstructionSet, 'st
   versionTag: string | undefined;
 }
 
-export interface UpdateInstructionSet extends Partial<BaseUploadInstructionSet> {
+export interface UpdatePeerInstructionSet extends Partial<BaseUploadInstructionSet> {
   file: GlobalTransitIdFileIdentifier;
   versionTag: string | undefined;
 
-  locale: 'peer'; // |'local'; Not implemented on the BE yet
+  locale: 'peer';
   recipients?: string[];
 }
+
+export interface UpdateLocalInstructionSet extends Partial<BaseUploadInstructionSet> {
+  file: FileIdFileIdentifier;
+  versionTag: string | undefined;
+
+  locale: 'local';
+  recipients?: string[];
+}
+
+export type UpdateInstructionSet = UpdatePeerInstructionSet | UpdateLocalInstructionSet;
 
 export const isUpdateInstructionSet = (
   instructionSet: unknown
