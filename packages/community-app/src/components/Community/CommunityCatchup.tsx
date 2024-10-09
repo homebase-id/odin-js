@@ -149,14 +149,6 @@ const CommunityChannelCatchup = ({
       <div className="relative">
         <CommunityHistory community={community} channel={channel} alignTop={true} onlyNew={true} />
       </div>
-      {/* <ErrorBoundary>
-          <MessageComposer
-            community={community || undefined}
-            groupId={communityId}
-            channel={channel || undefined}
-            key={channel.fileMetadata.appData.uniqueId}
-          />
-        </ErrorBoundary> */}
     </div>
   );
 };

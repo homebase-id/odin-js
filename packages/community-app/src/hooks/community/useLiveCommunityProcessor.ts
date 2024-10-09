@@ -164,6 +164,7 @@ const useCommunityWebsocket = (communityId: string | undefined, isEnabled: boole
           targetDrive,
           true
         );
+
         if (
           !updatedChatMessage ||
           Object.keys(updatedChatMessage.fileMetadata.appData.content).length === 0
@@ -354,8 +355,7 @@ const processCommunityMessagesBatch = async (
         channelId,
         updatedcommunityMessages.filter((msg) =>
           stringGuidsEqual(msg.fileMetadata.appData.groupId, communityId)
-        ),
-        communityId
+        )
       );
     })
   );

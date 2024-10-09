@@ -26,6 +26,7 @@ export const useCommunityMessage = (props?: {
 }) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
+  const identity = dotYouClient.getIdentity();
 
   const getMessageByUniqueId = async (communityId: string, messageId: string) => {
     // TODO: Improve by fetching the message from the cache on conversations first
@@ -35,7 +36,7 @@ export const useCommunityMessage = (props?: {
   const sendMessage = async ({
     community,
     channel,
-    groupId,
+    threadId,
     replyId,
     files,
     message,
@@ -45,7 +46,7 @@ export const useCommunityMessage = (props?: {
   }: {
     community: HomebaseFile<CommunityDefinition>;
     channel: HomebaseFile<CommunityChannel>;
-    groupId?: string;
+    threadId?: string;
     replyId?: string;
     files?: NewMediaFile[];
     message: RichText | string;
@@ -55,7 +56,6 @@ export const useCommunityMessage = (props?: {
   }): Promise<NewHomebaseFile<CommunityMessage> | null> => {
     const communityId = community.fileMetadata.appData.uniqueId as string;
     const communityContent = community.fileMetadata.appData.content;
-    const identity = dotYouClient.getIdentity();
     const recipients = communityContent.recipients.filter((recipient) => recipient !== identity);
 
     // We prefer having the uniqueId set outside of the mutation, so that an auto-retry of the mutation doesn't create duplicates
@@ -65,19 +65,14 @@ export const useCommunityMessage = (props?: {
         created: userDate,
         appData: {
           uniqueId: newChatId,
-          groupId,
-          tags: channel?.fileMetadata.appData.uniqueId
-            ? [channel?.fileMetadata.appData.uniqueId]
-            : [],
+          groupId: threadId || channel?.fileMetadata.appData.uniqueId,
           content: {
             message: message,
-            deliveryStatus:
-              //   stringGuidsEqual(conversationId, ConversationWithYourselfId)
-              //     ? CommunityDeliveryStatus.Read:
-              CommunityDeliveryStatus.Sent,
+            deliveryStatus: CommunityDeliveryStatus.Sent,
             replyId: replyId,
             channelId: channel.fileMetadata.appData.uniqueId as string,
           },
+
           userDate: userDate || new Date().getTime(),
         },
       },
@@ -114,7 +109,6 @@ export const useCommunityMessage = (props?: {
     community: HomebaseFile<CommunityDefinition>;
   }) => {
     const communityContent = community.fileMetadata.appData.content;
-    const identity = dotYouClient.getIdentity();
     const recipients = communityContent.recipients.filter((recipient) => recipient !== identity);
 
     await updateCommunityMessage(
@@ -142,7 +136,7 @@ export const useCommunityMessage = (props?: {
         files,
         message,
         chatId,
-        groupId,
+        threadId,
         userDate,
       }) => {
         const newMessageDsr: NewHomebaseFile<CommunityMessage> = {
@@ -150,10 +144,7 @@ export const useCommunityMessage = (props?: {
             created: userDate,
             appData: {
               uniqueId: chatId,
-              groupId,
-              tags: channel?.fileMetadata.appData.uniqueId
-                ? [channel?.fileMetadata.appData.uniqueId]
-                : [],
+              groupId: threadId || channel?.fileMetadata.appData.uniqueId,
               content: {
                 message: message,
                 deliveryStatus: CommunityDeliveryStatus.Sending,
@@ -162,6 +153,7 @@ export const useCommunityMessage = (props?: {
               },
               userDate,
             },
+            senderOdinId: identity,
             payloads: files?.map((file) => ({
               contentType: file.file.type,
               pendingFile: file.file,
@@ -238,7 +230,7 @@ export const useCommunityMessage = (props?: {
     }),
     update: useMutation({
       mutationFn: updateMessage,
-      onMutate: async ({ community, updatedChatMessage }) => {
+      onMutate: async ({ updatedChatMessage }) => {
         // Update chat messages
         const extistingMessages = queryClient.getQueryData<
           InfiniteData<{
@@ -247,7 +239,7 @@ export const useCommunityMessage = (props?: {
             queryTime: number;
             includeMetadataHeader: boolean;
           }>
-        >(['community-messages', community.fileMetadata.appData.uniqueId]);
+        >(['community-messages', updatedChatMessage.fileMetadata.appData.groupId]);
 
         if (extistingMessages) {
           const newData = {
@@ -260,7 +252,7 @@ export const useCommunityMessage = (props?: {
             })),
           };
           queryClient.setQueryData(
-            ['community-messages', community.fileMetadata.appData.uniqueId],
+            ['community-messages', updatedChatMessage.fileMetadata.appData.groupId],
             newData
           );
         }
@@ -282,7 +274,7 @@ export const useCommunityMessage = (props?: {
       },
       onError: (err, messageParams, context) => {
         queryClient.setQueryData(
-          ['community-messages', messageParams.community.fileMetadata.appData.uniqueId],
+          ['community-messages', messageParams.updatedChatMessage.fileMetadata.appData.groupId],
           context?.extistingMessages
         );
 
