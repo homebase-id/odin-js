@@ -29,7 +29,7 @@ export const CommunityHistory = ({
 }: {
   community: HomebaseFile<CommunityDefinition> | undefined;
   channel?: HomebaseFile<CommunityChannel> | undefined;
-  origin?: HomebaseFile<CommunityDefinition> | HomebaseFile<CommunityMessage>;
+  origin?: HomebaseFile<CommunityMessage>;
   doOpenThread?: (msg: HomebaseFile<CommunityMessage>) => void;
   setIsEmptyChat?: (isEmpty: boolean) => void;
   alignTop?: boolean;
@@ -61,7 +61,7 @@ export const CommunityHistory = ({
     delete: { mutate: deleteMessages, error: deleteMessagesError },
   } = useCommunityMessages({
     communityId: community?.fileMetadata?.appData?.uniqueId,
-    originId: origin?.fileMetadata.appData.uniqueId,
+    threadId: origin?.fileMetadata.appData.uniqueId,
     channelId: channel?.fileMetadata?.appData?.uniqueId,
     maxAge: onlyNew ? lastReadTime : undefined,
   });
@@ -232,7 +232,7 @@ export const CommunityHistory = ({
                     }
                     hideThreads={inAThread}
                     className="px-2 py-1 md:px-3"
-                    showChannelName={!channel}
+                    showChannelName={!channel && !inAThread}
                   />
                 </div>
               );

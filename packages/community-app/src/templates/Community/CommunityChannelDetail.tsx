@@ -75,7 +75,6 @@ export const CommunityChannelDetail = () => {
                 <CommunityHistory
                   community={community || undefined}
                   channel={channelDsr || undefined}
-                  origin={community || undefined}
                   doOpenThread={(thread) =>
                     navigate(
                       `${COMMUNITY_ROOT}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
@@ -86,7 +85,6 @@ export const CommunityChannelDetail = () => {
               <ErrorBoundary>
                 <MessageComposer
                   community={community || undefined}
-                  groupId={communityId}
                   channel={channelDsr || undefined}
                   key={channelId}
                 />
@@ -98,7 +96,7 @@ export const CommunityChannelDetail = () => {
               <CommunityThread
                 community={community || undefined}
                 channel={channelDsr || undefined}
-                originId={threadKey}
+                threadId={threadKey}
               />
             </ErrorBoundary>
           ) : null}
@@ -244,20 +242,20 @@ const ChannelInfo = ({
 const CommunityThread = ({
   community,
   channel,
-  originId,
+  threadId,
 }: {
   community: HomebaseFile<CommunityDefinition> | undefined;
   channel: HomebaseFile<CommunityChannel> | undefined;
-  originId: string;
+  threadId: string;
 }) => {
   const { communityKey, channelKey } = useParams();
 
   const { data: originMessage } = useCommunityMessage({
     communityId: community?.fileMetadata.appData.uniqueId,
-    messageId: originId,
+    messageId: threadId,
   }).get;
 
-  if (!community || !originId) {
+  if (!community || !threadId) {
     return null;
   }
 
@@ -300,9 +298,9 @@ const CommunityThread = ({
         <ErrorBoundary>
           <MessageComposer
             community={community}
-            groupId={originId}
+            threadId={threadId}
             channel={channel}
-            key={originId}
+            key={threadId}
             className="mt-auto lg:mt-0"
           />
         </ErrorBoundary>
