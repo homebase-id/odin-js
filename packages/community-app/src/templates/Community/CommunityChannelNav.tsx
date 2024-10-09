@@ -19,10 +19,12 @@ import { usecommunityMetadata } from '../../hooks/community/useCommunityMetadata
 import { CommunityMetadata } from '../../providers/CommunityMetadataProvider';
 import { RadioTower, Chevron, Pin, Grid } from '@homebase-id/common-app/icons';
 import { COMMUNITY_ROOT } from './CommunityHome';
+import { CommunityInfoDialog } from '../../components/Community/CommunityInfoDialog';
 
 const maxChannels = 7;
 export const CommunityChannelNav = () => {
   const { communityKey } = useParams();
+  const [isCommunityInfoDialogOpen, setIsCommunityInfoDialogOpen] = useState(false);
   const { data: community, isLoading } = useCommunity({ communityId: communityKey }).fetch;
   const { data: metadata } = usecommunityMetadata({ communityId: communityKey }).single;
 
@@ -48,33 +50,29 @@ export const CommunityChannelNav = () => {
   if (!communityId || isLoading || !community) return null;
 
   return (
-    <div
-      className={`fixed ${isActive ? 'translate-x-full' : 'translate-x-0'} -left-full h-[100dvh] w-full bg-page-background transition-transform lg:relative lg:left-0 lg:max-w-[17rem] lg:translate-x-0 lg:border-r lg:shadow-inner`}
-    >
-      <div className="absolute inset-0 flex flex-col gap-5 overflow-auto px-2 py-5 md:pl-[calc(env(safe-area-inset-left)+4.3rem+0.5rem)] lg:pl-2">
-        <div className="flex flex-row items-center">
-          <Link className="-ml-2 p-2 lg:hidden" type="mute" to={`${COMMUNITY_ROOT}`}>
-            <Grid className="h-5 w-5" />
-          </Link>
+    <>
+      <div
+        className={`fixed ${isActive ? 'translate-x-full' : 'translate-x-0'} -left-full h-[100dvh] w-full bg-page-background transition-transform lg:relative lg:left-0 lg:max-w-[17rem] lg:translate-x-0 lg:border-r lg:shadow-inner`}
+      >
+        <div className="absolute inset-0 flex flex-col gap-5 overflow-auto px-2 py-5 md:pl-[calc(env(safe-area-inset-left)+4.3rem+0.5rem)] lg:pl-2">
+          <div className="flex flex-row items-center">
+            <Link className="-ml-2 p-2 lg:hidden" type="mute" to={`${COMMUNITY_ROOT}`}>
+              <Grid className="h-5 w-5" />
+            </Link>
 
-          <p className="text-xl font-semibold">{community.fileMetadata.appData.content?.title}</p>
-        </div>
+            <button
+              className="text-xl font-semibold"
+              onClick={() => setIsCommunityInfoDialogOpen(true)}
+            >
+              {community.fileMetadata.appData.content?.title}
+            </button>
+          </div>
 
-        <AllItem communityId={communityId} />
-        <div className="flex flex-col gap-1">
-          <h2 className="px-1">{t('Channels')}</h2>
+          <AllItem communityId={communityId} />
+          <div className="flex flex-col gap-1">
+            <h2 className="px-1">{t('Channels')}</h2>
 
-          {pinnedChannels?.map((channel) => (
-            <ChannelItem
-              communityId={communityId}
-              channel={channel}
-              key={channel.fileId || channel.fileMetadata.appData.uniqueId}
-            />
-          ))}
-
-          {unpinnedChannels
-            ?.slice(0, isExpanded ? undefined : maxChannels - (pinnedChannels?.length || 0))
-            .map((channel) => (
+            {pinnedChannels?.map((channel) => (
               <ChannelItem
                 communityId={communityId}
                 channel={channel}
@@ -82,29 +80,43 @@ export const CommunityChannelNav = () => {
               />
             ))}
 
-          {communityChannels?.length && communityChannels?.length > 7 ? (
-            <ActionButton
-              type="mute"
-              size="none"
-              className="text-sm opacity-50 hover:opacity-100"
-              onClick={() => setIsExpanded((val) => !val)}
-            >
-              {isExpanded ? t('See less') : t('See more')}
-              <Chevron
-                className={`ml-2 h-3 w-3 transition-transform ${isExpanded ? '-rotate-90' : 'rotate-90'}`}
-              />
-            </ActionButton>
-          ) : null}
-        </div>
+            {unpinnedChannels
+              ?.slice(0, isExpanded ? undefined : maxChannels - (pinnedChannels?.length || 0))
+              .map((channel) => (
+                <ChannelItem
+                  communityId={communityId}
+                  channel={channel}
+                  key={channel.fileId || channel.fileMetadata.appData.uniqueId}
+                />
+              ))}
 
-        <div className="flex flex-col gap-1">
-          <h2 className="px-1">{t('Direct messages')}</h2>
-          {recipients?.map((recipient) => (
-            <DirectMessageItem communityId={communityId} recipient={recipient} key={recipient} />
-          ))}
+            {communityChannels?.length && communityChannels?.length > 7 ? (
+              <ActionButton
+                type="mute"
+                size="none"
+                className="text-sm opacity-50 hover:opacity-100"
+                onClick={() => setIsExpanded((val) => !val)}
+              >
+                {isExpanded ? t('See less') : t('See more')}
+                <Chevron
+                  className={`ml-2 h-3 w-3 transition-transform ${isExpanded ? '-rotate-90' : 'rotate-90'}`}
+                />
+              </ActionButton>
+            ) : null}
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <h2 className="px-1">{t('Direct messages')}</h2>
+            {recipients?.map((recipient) => (
+              <DirectMessageItem communityId={communityId} recipient={recipient} key={recipient} />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+      {isCommunityInfoDialogOpen ? (
+        <CommunityInfoDialog onClose={() => setIsCommunityInfoDialogOpen(false)} />
+      ) : null}
+    </>
   );
 };
 
