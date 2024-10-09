@@ -239,16 +239,31 @@ export const insertNewMessage = (
         queryTime: number;
         includeMetadataHeader: boolean;
       }>
-    >(['community-messages', communityId, channelId || 'any', originId || 'root']);
+    >([
+      'community-messages',
+      communityId,
+      channelId || 'any',
+      originId ? (stringGuidsEqual(originId, communityId) ? 'root' : originId) : 'root',
+    ]);
 
     if (extistingMessages && newMessage.fileState !== 'deleted') {
       queryClient.setQueryData(
-        ['community-messages', communityId, channelId || 'any', originId || 'root'],
+        [
+          'community-messages',
+          communityId,
+          channelId || 'any',
+          originId ? (stringGuidsEqual(originId, communityId) ? 'root' : originId) : 'root',
+        ],
         internalInsertNewMessage(extistingMessages, newMessage)
       );
     } else {
       queryClient.invalidateQueries({
-        queryKey: ['community-messages', communityId, channelId || 'any', originId || 'root'],
+        queryKey: [
+          'community-messages',
+          communityId,
+          channelId || 'any',
+          originId ? (stringGuidsEqual(originId, communityId) ? 'root' : originId) : 'root',
+        ],
       });
     }
   };
@@ -263,6 +278,7 @@ export const insertNewMessage = (
       update(tag);
     });
   } else {
+    update(undefined, newMessage.fileMetadata.appData.groupId);
     // Thread message
     newMessage.fileMetadata.appData.tags?.forEach((tag) => {
       update(tag, newMessage.fileMetadata.appData.groupId);
