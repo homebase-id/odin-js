@@ -342,8 +342,7 @@ const processCommunityMessagesBatch = async (
         channelId,
         updatedcommunityMessages.filter((msg) =>
           stringGuidsEqual(msg.fileMetadata.appData.groupId, communityId)
-        ),
-        communityId
+        )
       );
     })
   );
