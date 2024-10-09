@@ -260,8 +260,21 @@ const useChatWebsocket = (isEnabled: boolean) => {
       timeout.current = null;
     }
 
-    // Filter out duplicate messages and selec the one with the latest updated property
-    const filteredMessages = queuedMessages.reduce((acc, message) => {
+    const queuedMessagesWithLastUpdated = queuedMessages.map((m) => ({
+      ...m,
+      fileMetadata: {
+        ...m.fileMetadata,
+        updated:
+          Object.values(m.serverMetadata?.transferHistory?.recipients || []).reduce((acc, cur) => {
+            return Math.max(acc, cur.lastUpdated || 0);
+          }, 0) ||
+          m.fileMetadata.updated ||
+          0,
+      },
+    }));
+
+    // Filter out duplicate messages and select the one with the latest updated property
+    const filteredMessages = queuedMessagesWithLastUpdated.reduce((acc, message) => {
       const existingMessage = acc.find((m) => stringGuidsEqual(m.fileId, message.fileId));
       if (!existingMessage) {
         acc.push(message);
