@@ -27,8 +27,7 @@ type useCommunityProps = {
   communityId?: string;
 };
 
-const ensureNewDriveAndPermission = (
-  identity: string,
+const getEnsureNewDriveAndPermissionPath = (
   name: string,
   description: string,
   targetDrive: TargetDrive,
@@ -71,8 +70,20 @@ const ensureNewDriveAndPermission = (
     returnUrl
   );
 
+  return `/owner/appupdate?${stringifyToQueryParams(params)}`;
+};
+
+const ensureNewDriveAndPermission = (
+  identity: string,
+  name: string,
+  description: string,
+  targetDrive: TargetDrive,
+  returnUrl: string
+) => {
+  const path = getEnsureNewDriveAndPermissionPath(name, description, targetDrive, returnUrl);
+
   const host = new DotYouClient({ identity: identity || undefined, api: ApiType.App }).getRoot();
-  return `${host}/owner/appupdate?${stringifyToQueryParams(params)}`;
+  return `${host}${path}`;
 };
 
 export const useCommunity = (props?: useCommunityProps) => {
@@ -111,10 +122,8 @@ export const useCommunity = (props?: useCommunityProps) => {
   };
 
   const getInviteLink = async ({
-    identity,
     communityDef,
   }: {
-    identity: string;
     communityDef: HomebaseFile<CommunityDefinition>;
   }) => {
     if (!communityDef.fileMetadata.appData.uniqueId) return '';
@@ -123,12 +132,14 @@ export const useCommunity = (props?: useCommunityProps) => {
 
     const targetDrive = getTargetDriveFromCommunityId(communityDef.fileMetadata.appData.uniqueId);
 
-    return ensureNewDriveAndPermission(
-      identity,
-      communityDef.fileMetadata.appData.content.title,
-      t('Drive for "{0}" community', communityDef.fileMetadata.appData.content.title),
-      targetDrive,
-      returnUrl
+    return (
+      `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect` +
+      getEnsureNewDriveAndPermissionPath(
+        communityDef.fileMetadata.appData.content.title,
+        t('Drive for "{0}" community', communityDef.fileMetadata.appData.content.title),
+        targetDrive,
+        returnUrl
+      )
     );
   };
 
