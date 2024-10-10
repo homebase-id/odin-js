@@ -2,7 +2,7 @@ const setupHtml = () => {
   document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <div class="max-w-sm m-auto px-3 w-full">
         <h1 class="text-xl">Open page in your Homebase identity?</h1>
-        <p>You've been linked to this page in your identity</p>
+        <p>You've been linked to this page in your Homebase identity</p>
         <input type="text" readonly id="target"/>
 
         <button class="open">Open link</button>
