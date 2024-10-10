@@ -21,8 +21,8 @@ import { useState, useEffect } from 'react';
 const PAGE_SIZE = 100;
 export const useCommunityMessages = (props?: {
   communityId: string | undefined;
+  channelId: string | undefined;
   threadId?: string;
-  channelId?: string;
   maxAge?: number;
 }) => {
   const { communityId, threadId, channelId, maxAge } = props || {};
@@ -89,10 +89,16 @@ const fetchMessages = async (
   threadId: string | undefined,
   cursorState: string | undefined
 ) => {
+  if (stringGuidsEqual(communityId, threadId)) {
+    throw new Error('ThreadId and CommunityId cannot be the same');
+  }
+
+  const groupIds = threadId ? [threadId] : channelId ? [channelId] : undefined;
+
   return await getCommunityMessages(
     dotYouClient,
     communityId,
-    threadId ? [threadId] : channelId ? [channelId] : undefined,
+    groupIds,
     undefined,
     cursorState,
     PAGE_SIZE
@@ -110,41 +116,51 @@ export const getCommunityMessagesInfiniteQueryOptions: (
   cursorState: string;
   queryTime: number;
   includeMetadataHeader: boolean;
-}> = (dotYouClient, communityId, channelId, threadId, maxAge) => ({
-  queryKey: ['community-messages', threadId || channelId || communityId],
-  initialPageParam: undefined as string | undefined,
-  queryFn: ({ pageParam }) =>
-    fetchMessages(
-      dotYouClient,
-      communityId as string,
-      channelId,
-      threadId,
-      pageParam as string | undefined
-    ),
-  getNextPageParam: (lastPage) =>
-    lastPage?.searchResults && lastPage?.searchResults?.length >= PAGE_SIZE
-      ? lastPage.cursorState
-      : undefined,
-  select: maxAge
-    ? (data) => {
-        const filteredData = { ...data };
-        filteredData.pages = data.pages.map((page) => {
-          const filteredPage = { ...page };
-
-          filteredPage.searchResults = page.searchResults.filter((msg) => {
-            if (!msg) return false;
-            return msg.fileMetadata.created > maxAge;
-          });
-
-          return filteredPage;
-        });
-        return filteredData;
+}> = (dotYouClient, communityId, channelId, threadId, maxAge) => {
+  if (stringGuidsEqual(communityId, threadId)) {
+    throw new Error('ThreadId and CommunityId cannot be the same');
+  }
+  return {
+    queryKey: ['community-messages', threadId || channelId || communityId],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) => {
+      if (stringGuidsEqual(communityId, threadId)) {
+        throw new Error('ThreadId and CommunityId cannot be the same');
       }
-    : undefined,
-  enabled: !!communityId,
-  refetchOnMount: true,
-  staleTime: 1000 * 60 * 60 * 24, // 24 hour
-});
+
+      return fetchMessages(
+        dotYouClient,
+        communityId as string,
+        channelId,
+        threadId,
+        pageParam as string | undefined
+      );
+    },
+    getNextPageParam: (lastPage) =>
+      lastPage?.searchResults && lastPage?.searchResults?.length >= PAGE_SIZE
+        ? lastPage.cursorState
+        : undefined,
+    select: maxAge
+      ? (data) => {
+          const filteredData = { ...data };
+          filteredData.pages = data.pages.map((page) => {
+            const filteredPage = { ...page };
+
+            filteredPage.searchResults = page.searchResults.filter((msg) => {
+              if (!msg) return false;
+              return msg.fileMetadata.created > maxAge;
+            });
+
+            return filteredPage;
+          });
+          return filteredData;
+        }
+      : undefined,
+    enabled: !!communityId && !!channelId,
+    refetchOnMount: true,
+    staleTime: 1000 * 60 * 60 * 24, // 24 hour
+  };
+};
 
 export const useLastUpdatedChatMessages = () => {
   const queryClient = useQueryClient();
