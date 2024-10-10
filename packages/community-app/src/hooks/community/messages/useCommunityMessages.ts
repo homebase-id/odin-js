@@ -21,7 +21,7 @@ import { useState, useEffect } from 'react';
 const PAGE_SIZE = 100;
 export const useCommunityMessages = (props?: {
   communityId: string | undefined;
-  channelId: string | undefined;
+  channelId?: string;
   threadId?: string;
   maxAge?: number;
 }) => {
@@ -156,7 +156,7 @@ export const getCommunityMessagesInfiniteQueryOptions: (
           return filteredData;
         }
       : undefined,
-    enabled: !!communityId && !!channelId,
+    enabled: !!communityId && (!!channelId || !!threadId),
     refetchOnMount: true,
     staleTime: 1000 * 60 * 60 * 24, // 24 hour
   };
