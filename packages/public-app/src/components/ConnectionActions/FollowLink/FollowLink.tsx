@@ -36,7 +36,7 @@ const FollowLink = ({
         href={
           (loggedInIdentity
             ? `${new DotYouClient({ identity: loggedInIdentity, api: ApiType.Guest }).getRoot()}/owner/follow/following/${window.location.hostname}`
-            : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect/follow/following/${window.location.hostname}`) +
+            : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect/owner/follow/following/${window.location.hostname}`) +
           (channel ? `?chnl=${channel.fileMetadata.appData.uniqueId}` : '')
         }
         icon={isFollowing ? Check : Feed}

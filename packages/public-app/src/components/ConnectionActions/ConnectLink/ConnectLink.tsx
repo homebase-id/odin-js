@@ -19,7 +19,7 @@ const ConnectLink = ({ className }: { className: string }) => {
         href={
           host && isConnected
             ? `${host}/owner/connections/${window.location.host}`
-            : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect/connections/${window.location.host}/connect`
+            : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect/owner/connections/${window.location.host}/connect`
         }
         icon={isConnected ? Check : Persons}
         type={isConnected ? 'secondary' : 'primary'}

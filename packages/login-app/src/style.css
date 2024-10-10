@@ -62,6 +62,10 @@ body {
   font-size: 1.125rem;
   line-height: 1.75rem;
 }
+.text-xl {
+  font-size: 1.75rem;
+  line-height: 2.25rem;
+}
 .text-sm {
   font-size: 0.875rem;
   line-height: 1.25rem;
@@ -118,6 +122,7 @@ input {
 }
 
 /* Button styling */
+button,
 .login,
 .signup {
   font-family: inherit;
@@ -137,7 +142,8 @@ input {
   text-align: center;
   text-decoration: none;
 }
-.login {
+.login,
+.open {
   background-color: rgb(34 197 94);
   color: rgb(255 255 255);
 }
@@ -150,6 +156,12 @@ input {
 }
 .signup:hover {
   background-color: rgb(86 89 240);
+}
+.justify-between {
+  justify-content: space-between;
+}
+.gap-2 {
+  gap: 0.5rem;
 }
 
 /* Error messages */
@@ -237,6 +249,10 @@ input {
 
 .flex-col {
   flex-direction: column;
+}
+
+.flex-row-reverse {
+  flex-direction: row-reverse;
 }
 
 .selectable-input {

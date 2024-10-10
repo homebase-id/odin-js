@@ -52,9 +52,7 @@ export const CommunityInfoDialog = ({ onClose }: { onClose: () => void }) => {
                     />
                     <AuthorName odinId={recipient} />
                   </div>
-                  {recipient !== identity ? (
-                    <InviteClickToCopy identity={recipient} community={community} />
-                  ) : null}
+                  {recipient !== identity ? <InviteClickToCopy community={community} /> : null}
                 </div>
               );
             })}
@@ -67,20 +65,13 @@ export const CommunityInfoDialog = ({ onClose }: { onClose: () => void }) => {
   return createPortal(dialog, target);
 };
 
-const InviteClickToCopy = ({
-  identity,
-  community,
-}: {
-  identity: string;
-  community: HomebaseFile<CommunityDefinition>;
-}) => {
+const InviteClickToCopy = ({ community }: { community: HomebaseFile<CommunityDefinition> }) => {
   const { mutateAsync: getInviteLink } = useCommunity().getInviteLink;
 
   const [showCopied, setShowCopied] = useState(false);
 
   const doCopy = async () => {
     const inviteLink = await getInviteLink({
-      identity,
       communityDef: community,
     });
 

@@ -38,7 +38,6 @@ export const NewCommunity = () => {
       if (!definitionFile) return;
       (async () => {
         await createNew(definitionFile);
-        navigator.clipboard.writeText(window.location.href);
         navigate(`${COMMUNITY_ROOT}/${definitionFile.fileMetadata.appData.uniqueId}`);
       })();
     }
