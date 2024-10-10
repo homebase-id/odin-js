@@ -17,7 +17,14 @@ import {
 } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 import { usecommunityMetadata } from '../../hooks/community/useCommunityMetadata';
 import { CommunityMetadata } from '../../providers/CommunityMetadataProvider';
-import { RadioTower, Chevron, Pin, Grid } from '@homebase-id/common-app/icons';
+import {
+  RadioTower,
+  Chevron,
+  Pin,
+  Grid,
+  ArrowDown,
+  ChevronDown,
+} from '@homebase-id/common-app/icons';
 import { COMMUNITY_ROOT } from './CommunityHome';
 import { CommunityInfoDialog } from '../../components/Community/CommunityInfoDialog';
 
@@ -61,10 +68,11 @@ export const CommunityChannelNav = () => {
             </Link>
 
             <button
-              className="text-xl font-semibold"
+              className="flex flex-row items-center gap-2 text-xl font-semibold"
               onClick={() => setIsCommunityInfoDialogOpen(true)}
             >
               {community.fileMetadata.appData.content?.title}
+              <ChevronDown className="h-4 w-4" />
             </button>
           </div>
 
