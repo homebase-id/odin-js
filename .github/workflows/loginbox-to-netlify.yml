@@ -35,7 +35,7 @@ jobs:
       - name: Publish to Netlify
         uses: netlify/actions/cli@master
         with:
-          args: deploy --dir=packages/login-app/dist --prod
+          args: deploy --dir=packages/login-app/dist --prod --filter '@homebase-id/login-app' --build false
         env:
           NETLIFY_SITE_ID: b63c83a3-1caf-486d-9a2f-4db2de190ee1
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
