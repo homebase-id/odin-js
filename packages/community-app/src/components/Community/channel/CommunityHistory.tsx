@@ -28,7 +28,7 @@ export const CommunityHistory = ({
   onlyNew,
 }: {
   community: HomebaseFile<CommunityDefinition> | undefined;
-  channel?: HomebaseFile<CommunityChannel> | undefined;
+  channel: HomebaseFile<CommunityChannel> | undefined;
   origin?: HomebaseFile<CommunityMessage>;
   doOpenThread?: (msg: HomebaseFile<CommunityMessage>) => void;
   setIsEmptyChat?: (isEmpty: boolean) => void;
@@ -61,8 +61,8 @@ export const CommunityHistory = ({
     delete: { mutate: deleteMessages, error: deleteMessagesError },
   } = useCommunityMessages({
     communityId: community?.fileMetadata?.appData?.uniqueId,
-    threadId: origin?.fileMetadata.appData.uniqueId,
     channelId: channel?.fileMetadata?.appData?.uniqueId,
+    threadId: origin?.fileMetadata.appData.uniqueId,
     maxAge: onlyNew ? lastReadTime : undefined,
   });
 

@@ -110,6 +110,28 @@ export const useCommunity = (props?: useCommunityProps) => {
     return await saveCommunity(dotYouClient, { ...communityDef }, onMissingDrive);
   };
 
+  const getInviteLink = async ({
+    identity,
+    communityDef,
+  }: {
+    identity: string;
+    communityDef: HomebaseFile<CommunityDefinition>;
+  }) => {
+    if (!communityDef.fileMetadata.appData.uniqueId) return '';
+
+    const returnUrl = `${COMMUNITY_ROOT}/new?draft=${JSON.stringify(communityDef)}`;
+
+    const targetDrive = getTargetDriveFromCommunityId(communityDef.fileMetadata.appData.uniqueId);
+
+    return ensureNewDriveAndPermission(
+      identity,
+      communityDef.fileMetadata.appData.content.title,
+      t('Drive for "{0}" community', communityDef.fileMetadata.appData.content.title),
+      targetDrive,
+      returnUrl
+    );
+  };
+
   const removeCommunity = async (communityDef: HomebaseFile<CommunityDefinition>) =>
     await removeCommunityDefinition(dotYouClient, communityDef);
 
@@ -197,6 +219,9 @@ export const useCommunity = (props?: useCommunityProps) => {
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ['communities'] });
       },
+    }),
+    getInviteLink: useMutation({
+      mutationFn: getInviteLink,
     }),
   };
 };

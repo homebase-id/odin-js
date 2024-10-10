@@ -9,7 +9,7 @@ import { CommunityHistory } from './channel/CommunityHistory';
 import { ActionButton, ActionLink, t, useDotYouClient } from '@homebase-id/common-app';
 import { RadioTower } from '@homebase-id/common-app/icons';
 import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { ChevronLeft } from '@homebase-id/common-app/icons';
 
 export const CommunityCatchup = ({
@@ -41,36 +41,19 @@ export const CommunityCatchup = ({
     );
   });
 
-  const [isShowAll, setIsShowAll] = useState(!channelsToCatchup?.length);
   if (!community) return null;
 
   return (
     <div className="flex h-full flex-grow flex-col">
       <CommunityChannelCatchupHeader community={community} />
-      {isShowAll ? (
-        <CommunityHistory community={community} />
+      {!channelsToCatchup?.length ? (
+        <p className="m-auto text-lg">{t('All done!')} 🎉</p>
       ) : (
-        <>
-          {channelsToCatchup?.length ? (
-            <div className="flex h-20 flex-grow flex-col gap-3 overflow-auto p-3">
-              {channelsToCatchup?.map((chnl) => (
-                <CommunityChannelCatchup community={community} channel={chnl} key={chnl.fileId} />
-              ))}
-            </div>
-          ) : (
-            <div className="m-auto flex flex-col items-center gap-2">
-              <p className="text-xl">{t('All done!')}</p>
-              <ActionButton
-                className="text-primary hover:underline"
-                type="mute"
-                size="none"
-                onClick={() => setIsShowAll(true)}
-              >
-                {t('See all activity')}
-              </ActionButton>
-            </div>
-          )}
-        </>
+        <div className="flex h-20 flex-grow flex-col gap-3 overflow-auto p-3">
+          {channelsToCatchup?.map((chnl) => (
+            <CommunityChannelCatchup community={community} channel={chnl} key={chnl.fileId} />
+          ))}
+        </div>
       )}
     </div>
   );

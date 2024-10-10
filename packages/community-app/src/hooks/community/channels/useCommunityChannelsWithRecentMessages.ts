@@ -32,7 +32,7 @@ export const useCommunityChannelsWithRecentMessages = (props: { communityId?: st
             dotYouClient,
             props.communityId,
             chnlId,
-            props.communityId
+            undefined
           )
         );
         return {
