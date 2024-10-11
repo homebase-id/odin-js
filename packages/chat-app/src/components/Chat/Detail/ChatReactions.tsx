@@ -77,13 +77,10 @@ const ChatReactionsDetail = ({
     messageGlobalTransitId: msg.fileMetadata.globalTransitId,
   }).get;
 
-  const filteredEmojis = useMemo(
-    () =>
-      reactions?.filter((reaction) =>
-        reactions?.some((reactionFile) => reactionFile?.body === reaction?.body)
-      ) || [],
-    [reactions]
-  );
+  const filteredEmojis = useMemo(() => {
+    const pureEmojis = reactions?.map((reaction) => reaction.body.trim());
+    return Array.from(new Set(pureEmojis));
+  }, [reactions]);
 
   if (!reactions?.length || !filteredEmojis?.length) return null;
 
@@ -109,23 +106,23 @@ const ChatReactionsDetail = ({
           </li>
         ) : null}
         {filteredEmojis.map((reaction) => {
-          const count = reactions?.filter((emoji) => emoji.body === reaction.body).length;
+          const count = reactions?.filter((emoji) => emoji.body === reaction).length;
           return (
-            <li className="" key={reaction.body}>
+            <li className="" key={reaction}>
               <ActionButton
                 type="mute"
                 className={`rounded-none border-b-primary hover:border-b-2 ${
-                  activeEmoji === reaction.body || filteredEmojis?.length === 1 ? 'border-b-2' : ''
+                  activeEmoji === reaction || filteredEmojis?.length === 1 ? 'border-b-2' : ''
                 }`}
-                onClick={() => setActiveEmoji(reaction.body)}
+                onClick={() => setActiveEmoji(reaction)}
               >
-                {reaction.body} {count}
+                {reaction} {count}
               </ActionButton>
             </li>
           );
         })}
       </ul>
-      <div className="grid grid-flow-row gap-4 px-4 py-4 sm:px-8">
+      <div className="grid grid-flow-row gap-4 px-4 py-4 sm:px-8" key={activeEmoji}>
         {reactions
           ?.filter((reaction) => reaction.body === activeEmoji || activeEmoji === 'all')
           .map((reaction) => {

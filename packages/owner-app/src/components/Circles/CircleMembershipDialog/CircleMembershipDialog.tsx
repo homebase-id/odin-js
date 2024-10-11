@@ -157,7 +157,7 @@ const InnerCircleSelectionDialog = ({
   }
 
   const dialog = (
-    <DialogWrapper title={title} onClose={onCancel}>
+    <DialogWrapper title={title}>
       <>
         <ErrorNotification error={error} />
         <form
@@ -175,7 +175,14 @@ const InnerCircleSelectionDialog = ({
 
           <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
             <ActionButton icon={Arrow}>{t('Save')}</ActionButton>
-            <ActionButton type="secondary" onClick={onCancel}>
+            <ActionButton
+              type="secondary"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                onCancel();
+              }}
+            >
               {t('Cancel')}
             </ActionButton>
           </div>
