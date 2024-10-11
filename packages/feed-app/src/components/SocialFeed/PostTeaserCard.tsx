@@ -19,6 +19,7 @@ import { DoubleClickHeartForMedia } from '@homebase-id/common-app';
 import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { UnreachableIdentity } from './UnreachableIdentity';
+import { useHighlightFeedItem } from '../../hooks/useHighlightFeedItem';
 
 interface PostTeaserCardProps {
   className?: string;
@@ -34,6 +35,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
   const isExternal = odinId && odinId !== identity;
   const navigate = useNavigate();
 
+  const highlight = useHighlightFeedItem(postFile);
   const { data: identityAccessible } = useCheckIdentity(isExternal ? odinId : undefined);
 
   const { data: channel } = useChannel({
@@ -52,7 +54,10 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
     return <UnreachableIdentity postFile={postFile} className={className} odinId={odinId} />;
 
   return (
-    <div className={`w-full break-words rounded-lg ${className ?? ''}`} data-odin-id={odinId}>
+    <div
+      className={`w-full break-words rounded-lg ${highlight ? 'bg-indigo-100 dark:bg-indigo-900' : ''} ${className ?? ''}`}
+      data-odin-id={odinId}
+    >
       <ErrorBoundary>
         <FakeAnchor
           href={clickable ? postPath : undefined}
