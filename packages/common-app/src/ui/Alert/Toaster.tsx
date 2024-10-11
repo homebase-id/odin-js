@@ -165,10 +165,12 @@ export const Toast = ({
   const fadeAfter =
     'relative after:content-[""] after:absolute after:top-[1.6rem] after:w-[50%] after:h-[1.4rem] after:bg-gradient-to-l after:from-white dark:after:from-black after:to-transparent';
 
-  const doOpen = () => {
-    if (href && href.startsWith(OWNER_ROOT) && window.location.pathname.startsWith(OWNER_ROOT))
+  const doOpen: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (href && href.startsWith(OWNER_ROOT) && window.location.pathname.startsWith(OWNER_ROOT)) {
       navigate(href);
-    else if (href) {
+    } else if (href) {
       onOpen && onOpen();
       window.location.href = href;
     }
@@ -186,62 +188,61 @@ export const Toast = ({
   }, []);
 
   return (
-    <div
-      className={`relative flex max-w-sm flex-row gap-2 rounded-md bg-white px-3 py-2 shadow-md dark:bg-black dark:text-slate-300 ${
-        href || onOpen ? 'cursor-pointer' : ''
-      }`}
-      onClick={doOpen}
-    >
-      {imgSrc ? (
-        <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full">
-          <img src={imgSrc} className="h-full w-full object-cover" />
-        </div>
-      ) : type === 'critical' ? (
-        <div className={`m-auto flex h-8 w-8 flex-shrink-0 text-red-400 dark:text-red-300`}>
-          <Exclamation />
-        </div>
-      ) : type === 'warning' ? (
-        <div className={`m-auto flex h-8 w-8 flex-shrink-0 text-orange-400`}>
-          <Exclamation />
-        </div>
-      ) : null}
+    <a href={href} onClick={doOpen} className={href || onOpen ? 'cursor-pointer' : ''}>
+      <div
+        className={`relative flex max-w-sm flex-row gap-2 rounded-md bg-white px-3 py-2 shadow-md dark:bg-black dark:text-slate-300`}
+      >
+        {imgSrc ? (
+          <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full">
+            <img src={imgSrc} className="h-full w-full object-cover" />
+          </div>
+        ) : type === 'critical' ? (
+          <div className={`m-auto flex h-8 w-8 flex-shrink-0 text-red-400 dark:text-red-300`}>
+            <Exclamation />
+          </div>
+        ) : type === 'warning' ? (
+          <div className={`m-auto flex h-8 w-8 flex-shrink-0 text-orange-400`}>
+            <Exclamation />
+          </div>
+        ) : null}
 
-      <div className="flex-grow-1">
-        <p
-          className={`max-h-12 w-full overflow-hidden text-ellipsis pr-8 font-medium ${fadeAfter} after:right-8`}
-        >
-          {title}
-          {isRead ? null : (
-            <span className="inline-block relative ml-2 bottom-[0.1rem] h-2 w-2 rounded-full bg-primary"></span>
-          )}
-        </p>
-        {body ? (
-          <p className={`max-h-12 overflow-hidden ${fadeAfter} after:right-0`}>{body}</p>
-        ) : null}
-        {timestamp ? (
-          <p className="text-foreground/80">
-            {formatToTimeAgoWithRelativeDetail(new Date(timestamp))}
+        <div className="flex-grow-1">
+          <p
+            className={`max-h-12 w-full overflow-hidden text-ellipsis pr-8 font-medium ${fadeAfter} after:right-8`}
+          >
+            {title}
+            {isRead ? null : (
+              <span className="inline-block relative ml-2 bottom-[0.1rem] h-2 w-2 rounded-full bg-primary"></span>
+            )}
           </p>
-        ) : null}
-        {groupCount ? (
-          <p className="text-primary">
-            {groupCount} {t('more')}
-          </p>
-        ) : null}
+          {body ? (
+            <p className={`max-h-12 overflow-hidden ${fadeAfter} after:right-0`}>{body}</p>
+          ) : null}
+          {timestamp ? (
+            <p className="text-foreground/80">
+              {formatToTimeAgoWithRelativeDetail(new Date(timestamp))}
+            </p>
+          ) : null}
+          {groupCount ? (
+            <p className="text-primary">
+              {groupCount} {t('more')}
+            </p>
+          ) : null}
+        </div>
+        {onDismiss && (
+          <ActionButton
+            icon={Times}
+            size="square"
+            className="absolute right-2 top-1 mb-auto rounded-full opacity-60 hover:opacity-100"
+            type="mute"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              onDismiss && onDismiss();
+            }}
+          />
+        )}
       </div>
-      {onDismiss && (
-        <ActionButton
-          icon={Times}
-          size="square"
-          className="absolute right-2 top-1 mb-auto rounded-full opacity-60 hover:opacity-100"
-          type="mute"
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            onDismiss && onDismiss();
-          }}
-        />
-      )}
-    </div>
+    </a>
   );
 };
