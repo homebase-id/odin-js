@@ -2,7 +2,7 @@ import { useMatch, useParams } from 'react-router-dom';
 import { t } from '@homebase-id/common-app';
 import { useConnection } from '../../../hooks/connections/useConnection';
 import { useContact } from '../../../hooks/contacts/useContact';
-import ContactInfo from '../../../components/Connection/ContactInfo/ContactInfo';
+import { ConnectionSummary } from '../../../components/Connection/ConnectionSummary/ConnectionSummary';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import { IdentityPageMetaAndActions } from './IdentityPageMetaAndActions';
 import { IdentityAlerts } from './IdentityAlerts';
@@ -67,7 +67,7 @@ const ConnectionDetails = () => {
       ) : settingsMatch && connectionInfo?.status === 'connected' ? (
         <ConnectedDetailsSettings odinId={odinId} connectionInfo={connectionInfo} />
       ) : (
-        <>{contactData && <ContactInfo odinId={odinId} />}</>
+        <>{contactData && <ConnectionSummary odinId={odinId} />}</>
       )}
     </>
   );

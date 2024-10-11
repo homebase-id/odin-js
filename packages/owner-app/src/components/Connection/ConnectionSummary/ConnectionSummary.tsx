@@ -5,6 +5,7 @@ import {
   ErrorNotification,
   ActionButton,
   ActionLink,
+  useIdentityIFollow,
 } from '@homebase-id/common-app';
 import {
   Envelope,
@@ -15,6 +16,8 @@ import {
   Phone,
   Refresh,
   ChatBubble,
+  Feed,
+  Check,
 } from '@homebase-id/common-app/icons';
 import Section from '../../ui/Sections/Section';
 import ContactImage from '../ContactImage/ContactImage';
@@ -27,7 +30,7 @@ interface ContactInfoProps {
   contactId?: string;
 }
 
-const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
+export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
   const {
     fetch: { data: contact },
     refresh: { mutate: refresh, status: refreshState, error: refreshError },
@@ -39,12 +42,29 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
   } = useConnection({ odinId: odinId });
   const { getIdentity } = useDotYouClient();
 
+  const {
+    fetch: { data: identityIfollow, isFetched: followStateFetched },
+    unfollow: { mutateAsync: unfollow },
+  } = useIdentityIFollow({
+    odinId,
+  });
+
   if (!contact) return null;
 
   const contactContent = contact?.fileMetadata.appData.content;
 
   const isConnected = connectionInfo?.status === 'connected';
   const identity = getIdentity();
+
+  const isFollowing = !followStateFetched ? undefined : !!identityIfollow;
+
+  if (isFollowing === false) {
+    actionGroupOptions.push({
+      icon: Persons,
+      label: t('Follow'),
+      href: `/owner/follow/following/${odinId}`,
+    });
+  }
 
   return (
     <>
@@ -150,10 +170,15 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
                   href={`/apps/mail/new?recipients=${odinId}`}
                   type="secondary"
                 />
+                <ActionLink
+                  icon={isFollowing ? Check : Feed}
+                  href={`/owner/follow/following/${odinId}`}
+                  type="secondary"
+                  className={isFollowing ? 'opacity-40 hover:opacity-100' : ''}
+                >
+                  {isFollowing ? t('Following') : t('Follow')}
+                </ActionLink>
               </div>
-              <p className="text-sm text-slate-400">
-                {t('Reach out to')} {contactContent.name?.displayName ?? odinId}:
-              </p>
             </div>
           ) : null}
         </div>
@@ -161,5 +186,3 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
     </>
   );
 };
-
-export default ContactInfo;
