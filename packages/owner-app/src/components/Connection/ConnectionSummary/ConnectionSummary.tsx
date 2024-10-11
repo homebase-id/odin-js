@@ -44,7 +44,6 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
 
   const {
     fetch: { data: identityIfollow, isFetched: followStateFetched },
-    unfollow: { mutateAsync: unfollow },
   } = useIdentityIFollow({
     odinId,
   });
@@ -57,14 +56,6 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
   const identity = getIdentity();
 
   const isFollowing = !followStateFetched ? undefined : !!identityIfollow;
-
-  if (isFollowing === false) {
-    actionGroupOptions.push({
-      icon: Persons,
-      label: t('Follow'),
-      href: `/owner/follow/following/${odinId}`,
-    });
-  }
 
   return (
     <>
