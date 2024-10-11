@@ -76,6 +76,8 @@ export interface CommunityMessage {
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: CommunityDeliveryStatus;
   deliveryDetails?: Record<string, CommunityDeliveryStatus>;
+
+  channelId: string;
 }
 
 export const uploadCommunityMessage = async (

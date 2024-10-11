@@ -17,20 +17,14 @@ import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 
-import { getNewId, isTouchDevice, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
 import { RichTextEditor } from '@homebase-id/rich-text-editor';
 
-import {
-  ChannelPlugin,
-  ELEMENT_CHANNEL,
-  ELEMENT_CHANNEL_INPUT,
-} from './RTEChannelDropdown/RTEChannelDropdownPlugin';
-import { RTEChannelDropdownElement } from './RTEChannelDropdown/RTEChannelDropdownElement';
-import { RTEChannelDropdownInputElement } from './RTEChannelDropdown/RTEChannelDropdownInputElement';
+import { ChannelPlugin } from './RTEChannelDropdown/RTEChannelDropdownPlugin';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const CHAT_DRAFTS_KEY = 'COMMUNITY_LOCAL_DRAFTS';
@@ -38,13 +32,13 @@ const CHAT_DRAFTS_KEY = 'COMMUNITY_LOCAL_DRAFTS';
 export const MessageComposer = ({
   community,
   channel,
-  groupId,
+  threadId,
   onSend,
   className,
 }: {
   community: HomebaseFile<CommunityDefinition> | undefined;
   channel: HomebaseFile<CommunityChannel> | undefined;
-  groupId: string | undefined;
+  threadId?: string | undefined;
   onSend?: () => void;
   className?: string;
 }) => {
@@ -52,21 +46,23 @@ export const MessageComposer = ({
 
   const drafts = JSON.parse(localStorage.getItem(CHAT_DRAFTS_KEY) || '{}');
   const [message, setMessage] = useState<RichText | undefined>(
-    groupId ? drafts[groupId] || undefined : undefined
+    threadId || (channel && channel.fileMetadata.appData.uniqueId)
+      ? drafts[(threadId || channel?.fileMetadata.appData.uniqueId) as string]
+      : undefined
   );
 
   const [files, setFiles] = useState<NewMediaFile[]>();
 
   useEffect(() => {
-    if (groupId) {
-      drafts[groupId] = message;
+    if (threadId || (channel && channel.fileMetadata.appData.uniqueId)) {
+      drafts[threadId || ((channel && channel.fileMetadata.appData.uniqueId) as string)] = message;
       try {
         localStorage.setItem(CHAT_DRAFTS_KEY, JSON.stringify(drafts));
       } catch {
         /* empty */
       }
     }
-  }, [groupId, message]);
+  }, [threadId, channel, message]);
 
   const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(
     (message && getTextRootsRecursive(message)?.join(' ')) || ''
@@ -79,18 +75,19 @@ export const MessageComposer = ({
     const plainVal = (message && getTextRootsRecursive(message).join(' ')) || '';
     const newFiles = [...(files || [])];
 
-    if (((!message || !plainVal) && !files?.length) || !community) return;
+    if (((!message || !plainVal) && !files?.length) || !community || !channel) return;
 
     // Clear internal state and allow excessive senders
     setMessage(undefined);
     setFiles([]);
     volatileRef.current?.clear();
+    volatileRef.current?.focus();
 
     try {
       await sendMessage({
         community,
         channel,
-        groupId,
+        threadId,
         message: message || '',
         files: newFiles,
         chatId: getNewId(),
@@ -150,7 +147,7 @@ export const MessageComposer = ({
             onChange={(newVal) => setMessage(newVal.target.value)}
             defaultValue={message}
             placeholder={
-              !stringGuidsEqual(community?.fileMetadata.appData.uniqueId, groupId)
+              threadId
                 ? t(`Reply...`)
                 : channel?.fileMetadata.appData.content.title
                   ? `${t('Message')} # ${channel.fileMetadata.appData.content.title}`
@@ -162,10 +159,6 @@ export const MessageComposer = ({
             disableHeadings={true}
             mentionables={mentionables}
             plugins={[ChannelPlugin]}
-            components={{
-              [ELEMENT_CHANNEL]: RTEChannelDropdownElement,
-              [ELEMENT_CHANNEL_INPUT]: RTEChannelDropdownInputElement,
-            }}
           >
             <div className="max-h-[30vh] overflow-auto">
               <FileOverview files={files} setFiles={setFiles} cols={8} />

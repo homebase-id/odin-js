@@ -5,11 +5,11 @@ import {
   isEndPoint,
   moveSelection,
 } from '@udecode/plate-common';
-import { TChannel, ELEMENT_CHANNEL, MentionOnSelectItem } from './RTEChannelDropdownPlugin';
+import { TChannel, MentionOnSelectItem } from './RTEChannelDropdownPlugin';
 
 export const getChannelOnSelectItem =
   <TItem extends TChannel = TChannel>({
-    key = ELEMENT_CHANNEL,
+    key = 'channel',
   }: { key?: string } = {}): MentionOnSelectItem<TItem> =>
   (editor, item, search = '') => {
     const { getOptions, tf } = getEditorPlugin(editor, {

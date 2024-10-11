@@ -16,8 +16,6 @@ export const RTEChannelDropdownElement = withRef<
   const selected = useSelected();
   const focused = useFocused();
 
-  console.log(element);
-
   return (
     <PlateElement
       className={cn(

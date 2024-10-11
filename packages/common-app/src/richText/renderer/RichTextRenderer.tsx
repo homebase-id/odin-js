@@ -199,7 +199,7 @@ export const RichTextRenderer = ({
       case 'p':
       case 'paragraph':
         return (
-          <p {...attributes} className="mb-3 last-of-type:mb-0">
+          <p {...attributes} className="mb-2 last-of-type:mb-0">
             {children}
           </p>
         );

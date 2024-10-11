@@ -98,7 +98,8 @@ interface RTEProps {
   disableHeadings?: boolean;
   children?: React.ReactNode;
 
-  plugins?: (PlatePlugin | SlatePlugin)[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  plugins?: (PlatePlugin | PlatePlugin<any> | SlatePlugin)[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   components?: Record<string, FunctionComponent<any>>;
 }

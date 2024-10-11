@@ -26,8 +26,7 @@ type useCommunityProps = {
   communityId?: string;
 };
 
-const ensureNewDriveAndPermission = (
-  identity: string,
+const getEnsureNewDriveAndPermissionPath = (
   name: string,
   description: string,
   targetDrive: TargetDrive,
@@ -70,8 +69,20 @@ const ensureNewDriveAndPermission = (
     returnUrl
   );
 
+  return `/owner/appupdate?${stringifyToQueryParams(params)}`;
+};
+
+const ensureNewDriveAndPermission = (
+  identity: string,
+  name: string,
+  description: string,
+  targetDrive: TargetDrive,
+  returnUrl: string
+) => {
+  const path = getEnsureNewDriveAndPermissionPath(name, description, targetDrive, returnUrl);
+
   const host = new DotYouClient({ identity: identity || undefined, api: ApiType.App }).getRoot();
-  return `${host}/owner/appupdate?${stringifyToQueryParams(params)}`;
+  return `${host}${path}`;
 };
 
 export const useCommunity = (props?: useCommunityProps) => {
@@ -107,6 +118,28 @@ export const useCommunity = (props?: useCommunityProps) => {
     };
 
     return await saveCommunity(dotYouClient, { ...communityDef }, onMissingDrive);
+  };
+
+  const getInviteLink = async ({
+    communityDef,
+  }: {
+    communityDef: HomebaseFile<CommunityDefinition>;
+  }) => {
+    if (!communityDef.fileMetadata.appData.uniqueId) return '';
+
+    const returnUrl = `${COMMUNITY_ROOT}/new?draft=${JSON.stringify(communityDef)}`;
+
+    const targetDrive = getTargetDriveFromCommunityId(communityDef.fileMetadata.appData.uniqueId);
+
+    return (
+      `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect` +
+      getEnsureNewDriveAndPermissionPath(
+        communityDef.fileMetadata.appData.content.title,
+        t('Drive for "{0}" community', communityDef.fileMetadata.appData.content.title),
+        targetDrive,
+        returnUrl
+      )
+    );
   };
 
   const removeCommunity = async (communityDef: HomebaseFile<CommunityDefinition>) =>
@@ -196,6 +229,9 @@ export const useCommunity = (props?: useCommunityProps) => {
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ['communities'] });
       },
+    }),
+    getInviteLink: useMutation({
+      mutationFn: getInviteLink,
     }),
   };
 };

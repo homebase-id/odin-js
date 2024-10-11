@@ -1,6 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDotYouClientContext } from '@homebase-id/common-app';
-import { CommunityChannel, saveCommunityChannel } from '../../../providers/CommunityProvider';
+import {
+  COMMUNITY_GENERAL_CHANNEL,
+  CommunityChannel,
+  saveCommunityChannel,
+} from '../../../providers/CommunityProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual, toGuidId } from '@homebase-id/js-lib/helpers';
@@ -34,9 +38,11 @@ export const useCommunityChannel = (props?: { communityId?: string; channelId?: 
   return {
     fetch: {
       ...channelsQuery,
-      data: channelsQuery.data?.find((channel) =>
-        stringGuidsEqual(channel.fileMetadata.appData.uniqueId, channelId)
-      ),
+      data: stringGuidsEqual(channelId, COMMUNITY_GENERAL_CHANNEL.fileMetadata.appData.uniqueId)
+        ? COMMUNITY_GENERAL_CHANNEL
+        : channelsQuery.data?.find((channel) =>
+            stringGuidsEqual(channel.fileMetadata.appData.uniqueId, channelId)
+          ),
     },
     create: useMutation({
       mutationFn: createChannel,

@@ -16,6 +16,7 @@ import { useCommunityMessage } from '../../../hooks/community/messages/useCommun
 import { CommunityMessageInfo } from '../Message/detail/CommunityMessageInfo';
 import { EditCommunityMessage } from '../Message/detail/EditCommunityMessage';
 import { CommunityReactionComposer } from '../Message/reactions/CommunityReactionComposer';
+import { ReplyArrow } from '@homebase-id/common-app/icons';
 
 export interface CommunityActions {
   doReply?: (msg: HomebaseFile<CommunityMessage>) => void;
@@ -119,6 +120,14 @@ const CommunityContextActions = ({
           community={community}
           onClose={() => setEditMessage(false)}
         />
+      ) : null}
+      {communityActions.doReply ? (
+        <button
+          className="rounded-full p-2 text-slate-400 hover:bg-slate-300 hover:dark:bg-slate-700"
+          onClick={() => communityActions.doReply && communityActions.doReply(msg)}
+        >
+          <ReplyArrow className="h-5 w-5" />
+        </button>
       ) : null}
       <ActionGroup
         options={[

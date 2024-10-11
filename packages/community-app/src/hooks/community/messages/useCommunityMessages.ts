@@ -21,11 +21,11 @@ import { useState, useEffect } from 'react';
 const PAGE_SIZE = 100;
 export const useCommunityMessages = (props?: {
   communityId: string | undefined;
-  originId?: string;
   channelId?: string;
+  threadId?: string;
   maxAge?: number;
 }) => {
-  const { communityId, originId, channelId, maxAge } = props || {};
+  const { communityId, threadId, channelId, maxAge } = props || {};
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
@@ -62,7 +62,7 @@ export const useCommunityMessages = (props?: {
         dotYouClient,
         communityId,
         channelId,
-        originId,
+        threadId,
         maxAge
       )
     ),
@@ -70,8 +70,10 @@ export const useCommunityMessages = (props?: {
       mutationFn: removeMessage,
 
       onSettled: async (_data, _error, variables) => {
-        queryClient.invalidateQueries({
-          queryKey: ['community-messages', variables.community.fileMetadata.appData.uniqueId],
+        variables.messages.forEach((msg) => {
+          queryClient.invalidateQueries({
+            queryKey: ['community-messages', msg.fileMetadata.appData.groupId],
+          });
         });
 
         // TODO: Invalidate the threads?
@@ -83,15 +85,21 @@ export const useCommunityMessages = (props?: {
 const fetchMessages = async (
   dotYouClient: DotYouClient,
   communityId: string,
-  originId: string | undefined,
   channelId: string | undefined,
+  threadId: string | undefined,
   cursorState: string | undefined
 ) => {
+  if (stringGuidsEqual(communityId, threadId)) {
+    throw new Error('ThreadId and CommunityId cannot be the same');
+  }
+
+  const groupIds = threadId ? [threadId] : channelId ? [channelId] : undefined;
+
   return await getCommunityMessages(
     dotYouClient,
     communityId,
-    originId ? [originId] : undefined,
-    channelId ? [channelId] : undefined,
+    groupIds,
+    undefined,
     cursorState,
     PAGE_SIZE
   );
@@ -101,53 +109,58 @@ export const getCommunityMessagesInfiniteQueryOptions: (
   dotYouClient: DotYouClient,
   communityId?: string,
   channelId?: string,
-  originId?: string,
+  threadId?: string,
   maxAge?: number
 ) => UndefinedInitialDataInfiniteOptions<{
   searchResults: (HomebaseFile<CommunityMessage> | null)[];
   cursorState: string;
   queryTime: number;
   includeMetadataHeader: boolean;
-}> = (dotYouClient, communityId, channelId, originId, maxAge) => ({
-  queryKey: [
-    'community-messages',
-    communityId,
-    channelId || 'any',
-    originId ? (stringGuidsEqual(originId, communityId) ? 'root' : originId) : 'root',
-  ],
-  initialPageParam: undefined as string | undefined,
-  queryFn: ({ pageParam }) =>
-    fetchMessages(
-      dotYouClient,
-      communityId as string,
-      originId,
-      channelId,
-      pageParam as string | undefined
-    ),
-  getNextPageParam: (lastPage) =>
-    lastPage?.searchResults && lastPage?.searchResults?.length >= PAGE_SIZE
-      ? lastPage.cursorState
-      : undefined,
-  select: maxAge
-    ? (data) => {
-        const filteredData = { ...data };
-        filteredData.pages = data.pages.map((page) => {
-          const filteredPage = { ...page };
-
-          filteredPage.searchResults = page.searchResults.filter((msg) => {
-            if (!msg) return false;
-            return msg.fileMetadata.created > maxAge;
-          });
-
-          return filteredPage;
-        });
-        return filteredData;
+}> = (dotYouClient, communityId, channelId, threadId, maxAge) => {
+  if (stringGuidsEqual(communityId, threadId)) {
+    throw new Error('ThreadId and CommunityId cannot be the same');
+  }
+  return {
+    queryKey: ['community-messages', threadId || channelId || communityId],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) => {
+      if (stringGuidsEqual(communityId, threadId)) {
+        throw new Error('ThreadId and CommunityId cannot be the same');
       }
-    : undefined,
-  enabled: !!communityId,
-  refetchOnMount: true,
-  staleTime: 1000 * 60 * 60 * 24, // 24 hour
-});
+
+      return fetchMessages(
+        dotYouClient,
+        communityId as string,
+        channelId,
+        threadId,
+        pageParam as string | undefined
+      );
+    },
+    getNextPageParam: (lastPage) =>
+      lastPage?.searchResults && lastPage?.searchResults?.length >= PAGE_SIZE
+        ? lastPage.cursorState
+        : undefined,
+    select: maxAge
+      ? (data) => {
+          const filteredData = { ...data };
+          filteredData.pages = data.pages.map((page) => {
+            const filteredPage = { ...page };
+
+            filteredPage.searchResults = page.searchResults.filter((msg) => {
+              if (!msg) return false;
+              return msg.fileMetadata.created > maxAge;
+            });
+
+            return filteredPage;
+          });
+          return filteredData;
+        }
+      : undefined,
+    enabled: !!communityId && (!!channelId || !!threadId),
+    refetchOnMount: true,
+    staleTime: 1000 * 60 * 60 * 24, // 24 hour
+  };
+};
 
 export const useLastUpdatedChatMessages = () => {
   const queryClient = useQueryClient();
@@ -180,8 +193,7 @@ export const useLastUpdatedChatMessages = () => {
 export const insertNewMessagesForChannel = (
   queryClient: QueryClient,
   channelId: string,
-  newMessages: (HomebaseFile<CommunityMessage> | DeletedHomebaseFile)[],
-  communityId: string
+  newMessages: (HomebaseFile<CommunityMessage> | DeletedHomebaseFile)[]
 ) => {
   const extistingMessages = queryClient.getQueryData<
     InfiniteData<{
@@ -190,7 +202,7 @@ export const insertNewMessagesForChannel = (
       queryTime: number;
       includeMetadataHeader: boolean;
     }>
-  >(['community-messages', communityId, channelId || 'any', 'root']);
+  >(['community-messages', channelId]);
 
   if (
     newMessages.length > PAGE_SIZE ||
@@ -198,7 +210,7 @@ export const insertNewMessagesForChannel = (
     newMessages?.some((msg) => msg.fileState === 'deleted')
   ) {
     queryClient.setQueryData(
-      ['community-messages', communityId, channelId || 'any', 'root'],
+      ['community-messages', channelId],
       (data: InfiniteData<unknown, unknown>) => {
         return {
           pages: data?.pages?.slice(0, 1) ?? [],
@@ -207,7 +219,7 @@ export const insertNewMessagesForChannel = (
       }
     );
     queryClient.invalidateQueries({
-      queryKey: ['community-messages', communityId, channelId || 'any', 'root'],
+      queryKey: ['community-messages', channelId],
     });
     return;
   }
@@ -220,10 +232,7 @@ export const insertNewMessagesForChannel = (
     );
   });
 
-  queryClient.setQueryData(
-    ['community-messages', communityId, channelId || 'any', 'root'],
-    runningMessages
-  );
+  queryClient.setQueryData(['community-messages', channelId], runningMessages);
 };
 
 export const insertNewMessage = (
@@ -231,48 +240,25 @@ export const insertNewMessage = (
   newMessage: HomebaseFile<CommunityMessage> | DeletedHomebaseFile,
   communityId: string
 ) => {
-  const update = (channelId?: string, originId?: string) => {
-    const extistingMessages = queryClient.getQueryData<
-      InfiniteData<{
-        searchResults: (HomebaseFile<CommunityMessage> | null)[];
-        cursorState: string;
-        queryTime: number;
-        includeMetadataHeader: boolean;
-      }>
-    >(['community-messages', communityId, channelId || 'any', originId || 'root']);
+  const extistingMessages = queryClient.getQueryData<
+    InfiniteData<{
+      searchResults: (HomebaseFile<CommunityMessage> | null)[];
+      cursorState: string;
+      queryTime: number;
+      includeMetadataHeader: boolean;
+    }>
+  >(['community-messages', newMessage.fileMetadata.appData.groupId || communityId]);
 
-    if (extistingMessages && newMessage.fileState !== 'deleted') {
-      queryClient.setQueryData(
-        ['community-messages', communityId, channelId || 'any', originId || 'root'],
-        internalInsertNewMessage(extistingMessages, newMessage)
-      );
-    } else {
-      queryClient.invalidateQueries({
-        queryKey: ['community-messages', communityId, channelId || 'any', originId || 'root'],
-      });
-    }
-  };
-
-  // Update for all
-  update();
-
-  // Update for channels/threads
-  if (stringGuidsEqual(newMessage.fileMetadata.appData.groupId, communityId)) {
-    // Root message
-    newMessage.fileMetadata.appData.tags?.forEach((tag) => {
-      update(tag);
-    });
+  if (extistingMessages && newMessage.fileState !== 'deleted') {
+    queryClient.setQueryData(
+      ['community-messages', newMessage.fileMetadata.appData.groupId || communityId],
+      internalInsertNewMessage(extistingMessages, newMessage)
+    );
   } else {
-    // Thread message
-    newMessage.fileMetadata.appData.tags?.forEach((tag) => {
-      update(tag, newMessage.fileMetadata.appData.groupId);
+    queryClient.invalidateQueries({
+      queryKey: ['community-messages', newMessage.fileMetadata.appData.groupId || communityId],
     });
   }
-
-  queryClient.setQueryData(
-    ['community-message', newMessage.fileMetadata.appData.uniqueId],
-    newMessage
-  );
 };
 
 export const internalInsertNewMessage = (

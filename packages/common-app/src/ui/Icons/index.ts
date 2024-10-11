@@ -24,6 +24,7 @@ import { Collapse } from './Collapse';
 import { ConnectedPeople } from './ConnectedPeople';
 import { Crop } from './Crop';
 import { Discord } from './Discord';
+import { Emojis } from './Emojis';
 import { Snapchat } from './Snapchat';
 import { Download } from './Download';
 import { Ellipsis } from './Ellipsis';
@@ -133,6 +134,7 @@ export {
   Code,
   Cog,
   Collapse,
+  Emojis,
   ConnectedPeople,
   CoverPage,
   Crop,

@@ -89,7 +89,6 @@ export const saveComment = async (
   // Set max of 3kb for content so enough room is left for metadata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
-    // allowDistribution: true, // Disable
     versionTag: comment.fileMetadata.versionTag,
     allowDistribution: false,
     referencedFile: {
