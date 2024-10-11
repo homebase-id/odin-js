@@ -215,6 +215,11 @@ export const buildNotificationTargetLink = (payload: PushNotification) => {
   } else if (payload.options.appId === FEED_APP_ID) {
     if (payload.options.typeId === FEED_NEW_CONTENT_TYPE_ID)
       return `/apps/feed?post=${payload.options.tagId}`;
+    // Missing a getFileHeaderByGlobalTransitId to work good
+    // else if (payload.options.typeId === FEED_NEW_COMMENT_TYPE_ID)
+    //   return `/apps/feed/preview/${payload.options.tagId}`;
+    else if (payload.options.typeId === FEED_NEW_REACTION_TYPE_ID)
+      return `/apps/feed/preview/${payload.options.tagId}`;
     else return `/apps/feed`;
   } else if (payload.options.appId === COMMUNITY_APP_ID) {
     return `/apps/community/${payload.options.typeId}`;
