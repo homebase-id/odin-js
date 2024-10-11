@@ -129,7 +129,7 @@ export const getChannelsOverPeer = async (dotYouClient: DotYouClient, odinId: st
           return definition;
         })
       )
-    ).filter((channel) => channel !== undefined) as HomebaseFile<ChannelDefinition>[];
+    ).filter(Boolean) as HomebaseFile<ChannelDefinition>[];
   })();
 
   _internalChannelCache.set(cacheKey, promise);
