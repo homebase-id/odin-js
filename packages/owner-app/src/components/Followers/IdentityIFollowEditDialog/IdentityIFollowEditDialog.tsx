@@ -58,7 +58,7 @@ const IdentityIFollowEditDialog = ({
   );
 
   useEffect(() => {
-    //Already following
+    // Already following
     if (identityIFollow && identityIFollow.channels) {
       // Selected set of channels
       setChannelSelection(
@@ -192,9 +192,11 @@ const IdentityIFollowEditDialog = ({
             {t('Cancel')}
           </ActionButton>
 
-          <ActionButton className="mr-auto" type="secondary" onClick={doUnfollow}>
-            {t('Unfollow')}
-          </ActionButton>
+          {identityIFollow ? (
+            <ActionButton className="mr-auto" type="secondary" onClick={doUnfollow}>
+              {t('Unfollow')}
+            </ActionButton>
+          ) : null}
         </div>
       </DialogWrapper>
     </>

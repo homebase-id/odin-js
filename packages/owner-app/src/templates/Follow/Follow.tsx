@@ -94,8 +94,8 @@ const Following = () => {
         <IdentityIFollowEditDialog
           odinId={toFollowKey}
           isOpen={!!toFollowKey}
-          onConfirm={() => navigate(`/owner/follow/following`)}
-          onCancel={() => navigate(`/owner/follow/following`)}
+          onConfirm={() => navigate(-1)}
+          onCancel={() => navigate(-1)}
           defaultValues={toFollowKey ? channelsFromQueryString : undefined}
         />
       ) : null}
@@ -148,8 +148,8 @@ const Followers = () => {
         <IdentityThatFollowsDialog
           odinId={followerKey}
           isOpen={!!followerKey}
-          onConfirm={() => navigate(`/owner/follow/followers`)}
-          onCancel={() => navigate(`/owner/follow/followers`)}
+          onConfirm={() => navigate(-1)}
+          onCancel={() => navigate(-1)}
         />
       ) : null}
     </>
