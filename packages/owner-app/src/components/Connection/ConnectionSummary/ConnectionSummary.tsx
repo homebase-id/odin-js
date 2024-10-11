@@ -6,6 +6,7 @@ import {
   ActionButton,
   ActionLink,
   useIdentityIFollow,
+  useCircles,
 } from '@homebase-id/common-app';
 import {
   Envelope,
@@ -22,8 +23,14 @@ import {
 import Section from '../../ui/Sections/Section';
 import ContactImage from '../ContactImage/ContactImage';
 import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
-import { ContactFile } from '@homebase-id/js-lib/network';
+import {
+  ALL_CONNECTIONS_CIRCLE_ID,
+  ConnectionInfo,
+  ContactFile,
+} from '@homebase-id/js-lib/network';
 import { useConnection } from '../../../hooks/connections/useConnection';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { Link } from 'react-router-dom';
 
 interface ContactInfoProps {
   odinId?: string;
@@ -63,17 +70,21 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
       <Section
         title={
           <>
-            {t('Details')}
-            <a
-              href={`${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${
-                isConnected && identity ? '?youauth-logon=' + identity : ''
-              }`}
-              rel="noopener noreferrer"
-              target="_blank"
-              className="block text-sm text-primary hover:underline"
-            >
-              {odinId}
-            </a>
+            <span className="flex flex-col gap-1">
+              {t('Details')}
+              <a
+                href={`${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${
+                  isConnected && identity ? '?youauth-logon=' + identity : ''
+                }`}
+                rel="noopener noreferrer"
+                target="_blank"
+                className="text-sm text-primary hover:underline"
+              >
+                {odinId}
+              </a>
+
+              <CirclesSummary odinId={odinId} />
+            </span>
           </>
         }
         actions={
@@ -175,5 +186,45 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
         </div>
       </Section>
     </>
+  );
+};
+
+const CirclesSummary = ({ odinId }: { odinId?: string }) => {
+  const { data: circles } = useCircles().fetch;
+
+  const {
+    fetch: { data: connectionInfo },
+  } = useConnection({ odinId: odinId });
+
+  const circleGrants =
+    connectionInfo?.status === 'connected' &&
+    (connectionInfo as ConnectionInfo).accessGrant.circleGrants;
+
+  if (!circleGrants) return null;
+
+  const circleNames = circleGrants
+    .map((circleGrant) =>
+      circles
+        ?.find(
+          (circle) =>
+            stringGuidsEqual(circle.id, circleGrant.circleId) &&
+            !stringGuidsEqual(circle.id, ALL_CONNECTIONS_CIRCLE_ID)
+        )
+        ?.name.toLocaleLowerCase()
+    )
+    .filter(Boolean) as string[];
+
+  return (
+    <Link
+      to={`/owner/connections/${odinId}/settings/circles`}
+      className="text-sm text-primary hover:underline"
+    >
+      {t('Member of')}:{' '}
+      {circleNames.map(
+        (name, index) =>
+          name +
+          (index < circleNames.length - 2 ? ', ' : index < circleNames.length - 1 ? ' & ' : '')
+      )}
+    </Link>
   );
 };

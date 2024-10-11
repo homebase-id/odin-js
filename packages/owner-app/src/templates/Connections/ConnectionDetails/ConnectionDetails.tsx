@@ -14,6 +14,7 @@ import { ConnectedDetailsSettings } from './ConnectionDetailsSettings';
 
 const ConnectionDetails = () => {
   const settingsMatch = useMatch('/owner/connections/:odinId/settings');
+  const settingsActionMatch = useMatch('/owner/connections/:odinId/settings/:action');
   const aboutMatch = useMatch('/owner/connections/:odinId/about');
   const linksMatch = useMatch('/owner/connections/:odinId/links');
   const { odinId } = useParams();
@@ -64,7 +65,7 @@ const ConnectionDetails = () => {
         <ConnectionDetailsAbout odinId={odinId} />
       ) : linksMatch ? (
         <ConnectionDetailsLinks odinId={odinId} />
-      ) : settingsMatch && connectionInfo?.status === 'connected' ? (
+      ) : (settingsMatch || settingsActionMatch) && connectionInfo?.status === 'connected' ? (
         <ConnectedDetailsSettings odinId={odinId} connectionInfo={connectionInfo} />
       ) : (
         <>{contactData && <ConnectionSummary odinId={odinId} />}</>
