@@ -17,14 +17,7 @@ import {
 } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 import { usecommunityMetadata } from '../../hooks/community/useCommunityMetadata';
 import { CommunityMetadata } from '../../providers/CommunityMetadataProvider';
-import {
-  RadioTower,
-  Chevron,
-  Pin,
-  Grid,
-  ArrowDown,
-  ChevronDown,
-} from '@homebase-id/common-app/icons';
+import { RadioTower, Chevron, Pin, Grid, ChevronDown } from '@homebase-id/common-app/icons';
 import { COMMUNITY_ROOT } from './CommunityHome';
 import { CommunityInfoDialog } from '../../components/Community/CommunityInfoDialog';
 

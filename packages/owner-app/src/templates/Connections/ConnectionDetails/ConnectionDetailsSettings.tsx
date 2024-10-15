@@ -1,9 +1,9 @@
-import { useState } from 'react';
 import { t } from '@homebase-id/common-app';
 import { ConnectionInfo } from '@homebase-id/js-lib/network';
 import { ConnectionPermissionViewer } from './ConnectionPermissionViewer';
 import { useConnectionGrantStatus } from '../../../hooks/connections/useConnectionGrantStatus';
 import { CircleMembershipDialog } from '../../../components/Circles/CircleMembershipDialog/CircleMembershipDialog';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export const ConnectedDetailsSettings = ({
   odinId,
@@ -12,7 +12,9 @@ export const ConnectedDetailsSettings = ({
   odinId: string;
   connectionInfo: ConnectionInfo;
 }) => {
-  const [isEditPermissionActive, setIsEditPermissionActive] = useState(false);
+  const { action } = useParams();
+  const isEditPermissionActive = action === 'circles';
+  const navigate = useNavigate();
   const { data: grantStatus } = useConnectionGrantStatus({
     odinId: connectionInfo?.status === 'connected' ? odinId : undefined,
   }).fetchStatus;
@@ -24,7 +26,7 @@ export const ConnectedDetailsSettings = ({
       <ConnectionPermissionViewer
         accessGrant={activeConnection.accessGrant}
         grantStatus={grantStatus}
-        openEditCircleMembership={() => setIsEditPermissionActive(true)}
+        openEditCircleMembership={() => navigate('circles')}
       />
       <CircleMembershipDialog
         title={`${t('Edit Circle Membership for')} ${odinId}`}
@@ -32,10 +34,10 @@ export const ConnectedDetailsSettings = ({
         odinId={odinId}
         currentCircleGrants={activeConnection.accessGrant.circleGrants}
         onCancel={() => {
-          setIsEditPermissionActive(false);
+          navigate(-1);
         }}
         onConfirm={() => {
-          setIsEditPermissionActive(false);
+          navigate(-1);
         }}
       />
       <section>

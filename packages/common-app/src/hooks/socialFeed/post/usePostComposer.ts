@@ -105,6 +105,6 @@ export const usePostComposer = () => {
     savePost,
     postState,
     processingProgress,
-    error: postState === 'error' ? savePostError : undefined,
+    error: savePostError,
   };
 };

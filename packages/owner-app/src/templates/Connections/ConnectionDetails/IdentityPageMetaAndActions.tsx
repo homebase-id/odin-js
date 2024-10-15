@@ -141,14 +141,6 @@ export const IdentityPageMetaAndActions = ({
     },
   ];
 
-  if (isFollowing === false) {
-    actionGroupOptions.push({
-      icon: Persons,
-      label: t('Follow'),
-      href: `/owner/follow/following/${odinId}`,
-    });
-  }
-
   const { add: addError } = useErrors();
   const { data: grantStatus, refetch: refetchGrantStatus } = useConnectionGrantStatus({
     odinId: isConnected ? odinId : undefined,

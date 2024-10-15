@@ -6,6 +6,8 @@ import {
   ActionButton,
   mergeStates,
   ActionLink,
+  useIdentityIFollow,
+  useCircles,
 } from '@homebase-id/common-app';
 import {
   Envelope,
@@ -16,22 +18,29 @@ import {
   Phone,
   Refresh,
   ChatBubble,
-  Check,
   Exclamation,
+  Check,
+  Feed,
 } from '@homebase-id/common-app/icons';
 import Section from '../../ui/Sections/Section';
 import ContactImage from '../ContactImage/ContactImage';
 import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
-import { ContactFile } from '@homebase-id/js-lib/network';
+import {
+  ALL_CONNECTIONS_CIRCLE_ID,
+  ConnectionInfo,
+  ContactFile,
+} from '@homebase-id/js-lib/network';
 import { useConnection } from '../../../hooks/connections/useConnection';
 import { useVerifyConnection } from '../../../hooks/connections/useVerifyConnection';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { Link } from 'react-router-dom';
 
 interface ContactInfoProps {
   odinId?: string;
   contactId?: string;
 }
 
-const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
+export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
   const {
     fetch: { data: contact },
     refresh: { mutate: refresh, status: refreshState, error: refreshError },
@@ -54,6 +63,12 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
     fetch: { data: introducerConnectioInfo },
   } = useConnection({ odinId: connectionInfo?.introducerOdinId });
 
+  const {
+    fetch: { data: identityIfollow, isFetched: followStateFetched },
+  } = useIdentityIFollow({
+    odinId,
+  });
+
   if (!contact) return null;
 
   const contactContent = contact?.fileMetadata.appData.content;
@@ -62,6 +77,7 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
   const identity = getIdentity();
 
   const isConnectedWithIntroducer = introducerConnectioInfo?.status === 'connected';
+  const isFollowing = !followStateFetched ? undefined : !!identityIfollow;
 
   return (
     <>
@@ -69,10 +85,34 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
       <Section
         title={
           <>
-            {t('Details')}
+            <span className="flex flex-col gap-1">
+              {t('Details')}
 
-            {connectionInfo?.connectionRequestOrigin === 'introduction' ? (
-              <p className="flex gap-1 text-sm">
+              {connectionInfo?.connectionRequestOrigin === 'introduction' ? (
+                <p className="flex gap-1 text-sm">
+                  <a
+                    href={`${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${
+                      isConnected && identity ? '?youauth-logon=' + identity : ''
+                    }`}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    className="block text-sm text-primary hover:underline"
+                  >
+                    {odinId}
+                  </a>
+                  {t('was introduced by')}
+                  <a
+                    href={`${new DotYouClient({ identity: connectionInfo?.introducerOdinId, api: ApiType.Guest }).getRoot()}${
+                      isConnectedWithIntroducer && identity ? '?youauth-logon=' + identity : ''
+                    }`}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    className="block text-sm text-primary hover:underline"
+                  >
+                    {connectionInfo?.introducerOdinId}
+                  </a>
+                </p>
+              ) : (
                 <a
                   href={`${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${
                     isConnected && identity ? '?youauth-logon=' + identity : ''
@@ -83,30 +123,10 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
                 >
                   {odinId}
                 </a>
-                {t('was introduced by')}
-                <a
-                  href={`${new DotYouClient({ identity: connectionInfo?.introducerOdinId, api: ApiType.Guest }).getRoot()}${
-                    isConnectedWithIntroducer && identity ? '?youauth-logon=' + identity : ''
-                  }`}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  className="block text-sm text-primary hover:underline"
-                >
-                  {connectionInfo?.introducerOdinId}
-                </a>
-              </p>
-            ) : (
-              <a
-                href={`${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${
-                  isConnected && identity ? '?youauth-logon=' + identity : ''
-                }`}
-                rel="noopener noreferrer"
-                target="_blank"
-                className="block text-sm text-primary hover:underline"
-              >
-                {odinId}
-              </a>
-            )}
+              )}
+
+              <CirclesSummary odinId={odinId} />
+            </span>
           </>
         }
         actions={
@@ -196,6 +216,14 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
                     href={`/apps/mail/new?recipients=${odinId}`}
                     type="secondary"
                   />
+                  <ActionLink
+                    icon={isFollowing ? Check : Feed}
+                    href={`/owner/follow/following/${odinId}`}
+                    type="secondary"
+                    className={isFollowing ? 'opacity-40 hover:opacity-100' : ''}
+                  >
+                    {isFollowing ? t('Following') : t('Follow')}
+                  </ActionLink>
                 </div>
                 <p className="text-sm text-slate-400">
                   {t('Reach out to')} {contactContent.name?.displayName ?? odinId}:
@@ -222,4 +250,42 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
   );
 };
 
-export default ContactInfo;
+const CirclesSummary = ({ odinId }: { odinId?: string }) => {
+  const { data: circles } = useCircles().fetch;
+
+  const {
+    fetch: { data: connectionInfo },
+  } = useConnection({ odinId: odinId });
+
+  const circleGrants =
+    connectionInfo?.status === 'connected' &&
+    (connectionInfo as ConnectionInfo).accessGrant.circleGrants;
+
+  if (!circleGrants) return null;
+
+  const circleNames = circleGrants
+    .map((circleGrant) =>
+      circles
+        ?.find(
+          (circle) =>
+            stringGuidsEqual(circle.id, circleGrant.circleId) &&
+            !stringGuidsEqual(circle.id, ALL_CONNECTIONS_CIRCLE_ID)
+        )
+        ?.name.toLocaleLowerCase()
+    )
+    .filter(Boolean) as string[];
+
+  return (
+    <Link
+      to={`/owner/connections/${odinId}/settings/circles`}
+      className="text-sm text-primary hover:underline"
+    >
+      {t('Member of')}:{' '}
+      {circleNames.map(
+        (name, index) =>
+          name +
+          (index < circleNames.length - 2 ? ', ' : index < circleNames.length - 1 ? ' & ' : '')
+      )}
+    </Link>
+  );
+};

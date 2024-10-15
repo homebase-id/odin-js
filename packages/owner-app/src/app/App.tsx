@@ -182,6 +182,10 @@ function App() {
             <Route path="connections/:odinId/about" element={<ConnectionDetails />}></Route>
             <Route path="connections/:odinId/links" element={<ConnectionDetails />}></Route>
             <Route path="connections/:odinId/settings" element={<ConnectionDetails />}></Route>
+            <Route
+              path="connections/:odinId/settings/:action"
+              element={<ConnectionDetails />}
+            ></Route>
             <Route path="connections/:odinId/:action" element={<ConnectionDetails />}></Route>
             <Route path="circles" element={<Circles />}></Route>
             <Route path="circles/:circleKey" element={<CircleDetails />}></Route>
