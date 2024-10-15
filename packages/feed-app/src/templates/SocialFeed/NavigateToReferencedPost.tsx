@@ -9,24 +9,25 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { PostContent } from '@homebase-id/js-lib/public';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export const NavigateToReferencedPost = () => {
   const { postKey } = useParams();
+  const navigate = useNavigate();
   const identity = useDotYouClient().getIdentity();
 
   const post = useReferencedPost(postKey);
+  useEffect(() => {
+    if (post) {
+      navigate(
+        `${'/apps/feed/preview'}/${identity}/${post.fileMetadata.appData.content.channelId}/${post.fileMetadata.appData.content.slug}`,
+        { state: { referrer: `/apps/feed` } }
+      );
+    }
+  }, [post]);
 
   if (!postKey) {
     return <NotFound />;
-  }
-
-  if (post) {
-    return (
-      <Navigate
-        to={`${'/apps/feed/preview'}/${identity}/${post.fileMetadata.appData.content.channelId}/${post.fileMetadata.appData.content.slug}`}
-      />
-    );
   }
 
   return (

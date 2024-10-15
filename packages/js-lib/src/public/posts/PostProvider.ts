@@ -22,6 +22,7 @@ import {
   TargetDrive,
   deleteFilesByGroupId,
   getFileHeaderBytesByUniqueId,
+  getFileHeaderByGlobalTransitId,
 } from '../../core/core';
 import { toGuidId } from '../../helpers/DataUtil';
 
@@ -150,16 +151,16 @@ export const getPostByFileId = async <T extends PostContent>(
   return null;
 };
 
-// export const getPostByGlobalTransitId = async <T extends PostContent>(
-//   dotYouClient: DotYouClient,
-//   channelId: string,
-//   globalTransitId: string
-// ): Promise<HomebaseFile<T> | null> => {
-//   const targetDrive = GetTargetDriveFromChannelId(channelId);
-//   const header = await getFileHeaderByGlobaltransitId(dotYouClient, targetDrive, globalTransitId);
-//   if (header) return await dsrToPostFile(dotYouClient, header, targetDrive, true);
-//   return null;
-// };
+export const getPostByGlobalTransitId = async <T extends PostContent>(
+  dotYouClient: DotYouClient,
+  channelId: string,
+  globalTransitId: string
+): Promise<HomebaseFile<T> | null> => {
+  const targetDrive = GetTargetDriveFromChannelId(channelId);
+  const header = await getFileHeaderByGlobalTransitId(dotYouClient, targetDrive, globalTransitId);
+  if (header) return await dsrToPostFile(dotYouClient, header, targetDrive, true);
+  return null;
+};
 
 //Gets the content for a given post id
 export const getPost = async <T extends PostContent>(

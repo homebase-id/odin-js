@@ -9,7 +9,7 @@ import {
   ChannelDefinition,
   getPost,
   getPostByFileId,
-  // getPostByGlobalTransitId,
+  getPostByGlobalTransitId,
   getPostBySlug,
   PostContent,
 } from '@homebase-id/js-lib/public';
@@ -99,12 +99,12 @@ const fetchBlog = async ({
         dotYouClient,
         channel.fileMetadata.appData.uniqueId as string,
         postKey
+      )) ||
+      (await getPostByGlobalTransitId(
+        dotYouClient,
+        channel.fileMetadata.appData.uniqueId as string,
+        postKey
       ));
-    //  || (await getPostByGlobalTransitId(
-    //   dotYouClient,
-    //   channel.fileMetadata.appData.uniqueId as string,
-    //   postKey
-    // ));
 
     return postFile;
   } else {
