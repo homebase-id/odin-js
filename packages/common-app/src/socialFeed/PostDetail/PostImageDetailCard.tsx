@@ -6,12 +6,7 @@ import {
 } from '@homebase-id/js-lib/public';
 import { useEffect } from 'react';
 
-import {
-  DEFAULT_PAYLOAD_KEY,
-  HomebaseFile,
-  NewHomebaseFile,
-  SecurityGroupType,
-} from '@homebase-id/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { getAnonymousDirectImageUrl } from '@homebase-id/js-lib/media';
 import { Helmet } from 'react-helmet-async';
 import { Video } from '../../media/Video';
@@ -230,12 +225,6 @@ export const PostImageDetailCard = ({
                   isAuthenticated={isAuthenticated}
                   isOwner={isOwner}
                   login={login}
-                  isPublic={
-                    channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-                      SecurityGroupType.Anonymous ||
-                    channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-                      SecurityGroupType.Authenticated
-                  }
                 />
               ) : null}
             </div>

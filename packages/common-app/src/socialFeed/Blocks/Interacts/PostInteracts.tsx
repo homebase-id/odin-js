@@ -32,7 +32,6 @@ export const PostInteracts = ({
 
   isAuthenticated,
   isOwner,
-  isPublic,
   defaultExpanded,
   allowExpand = true,
   showSummary = false,
@@ -44,7 +43,6 @@ export const PostInteracts = ({
 
   isAuthenticated?: boolean;
   isOwner?: boolean;
-  isPublic?: boolean;
   defaultExpanded?: boolean;
   allowExpand?: boolean;
   showSummary?: boolean;
@@ -93,6 +91,8 @@ export const PostInteracts = ({
     () => parseReactionPreview(postFile.fileMetadata.reactionPreview),
     [postFile.fileMetadata.reactionPreview]
   );
+
+  const isPublic = !postFile.fileMetadata.isEncrypted;
 
   return (
     <div className={`${className ?? ''}`}>
