@@ -126,7 +126,7 @@ export const getKnownOdinErrorMessages = (error: unknown): string | undefined =>
     return t('Registration status not ready for finalization');
 
   console.error('[KnownErrors] Unknown error code', errorCode);
-  return t('Something went wrong, please try again later');
+  return undefined;
 };
 
 const isJavaScriptError = (err: Error | unknown): err is Error => {

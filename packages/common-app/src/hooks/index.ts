@@ -32,6 +32,7 @@ export * from './securityContext/useSecurityContext';
 export * from './siteData/useSiteData';
 export * from './socialFeed';
 export * from './staticFiles/useStaticFiles';
+export * from './introductions/useIntroductions';
 export * from './transitProcessor/useWebsocketSubscriber';
 export * from './attributes/biography/useBiography';
 export * from './attributes/links/useLinks';

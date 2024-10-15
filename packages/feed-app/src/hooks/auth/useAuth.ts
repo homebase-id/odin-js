@@ -14,7 +14,6 @@ import {
   retrieveEccKey,
   throwAwayTheECCKey,
 } from '@homebase-id/js-lib/auth';
-import { ROOT_PATH } from '../../app/App';
 import {
   ALL_CONNECTIONS_CIRCLE_ID,
   AppPermissionType,
@@ -22,7 +21,12 @@ import {
 } from '@homebase-id/js-lib/network';
 import { BlogConfig, HomePageConfig } from '@homebase-id/js-lib/public';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
-import { APP_AUTH_TOKEN, APP_SHARED_SECRET, useDotYouClient } from '@homebase-id/common-app';
+import {
+  APP_AUTH_TOKEN,
+  APP_SHARED_SECRET,
+  FEED_ROOT_PATH,
+  useDotYouClient,
+} from '@homebase-id/common-app';
 
 export const useAuth = () => {
   const { getDotYouClient, getSharedSecret, hasSharedSecret } = useDotYouClient();
@@ -142,7 +146,7 @@ export const useYouAuthAuthorization = () => {
     // Persist key for usage on finalize
     await saveEccKey(eccKey);
 
-    const finalizeUrl = `${window.location.origin}${ROOT_PATH}/auth/finalize`;
+    const finalizeUrl = `${window.location.origin}${FEED_ROOT_PATH}/auth/finalize`;
     return getRegistrationParams(
       finalizeUrl,
       appName,

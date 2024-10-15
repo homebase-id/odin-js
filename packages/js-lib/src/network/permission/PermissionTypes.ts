@@ -1,6 +1,7 @@
 export enum CirclePermissionType {
   None = 0,
   ReadConnections = 10,
+  IntroduceMe = 808,
 }
 
 export enum AppCirclePermissionType {
@@ -23,4 +24,5 @@ export enum AppPermissionType {
   ReceiveDataFromOtherIdentitiesOnMyBehalf = 305,
   SendPushNotifications = 405,
   PublishStaticContent = 505,
+  SendIntroductions = 909,
 }

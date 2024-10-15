@@ -9,6 +9,7 @@ import {
   DialogWrapper,
   ExtensionThumbnail,
   FakeAnchor,
+  MAIL_ROOT_PATH,
   OwnerImage,
   t,
   useDotYouClientContext,
@@ -16,7 +17,6 @@ import {
 } from '@homebase-id/common-app';
 import { OdinPreviewImage } from '@homebase-id/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ROOT_PATH } from '../../app/App';
 import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
 import { Chevron, Envelope, ImageIcon } from '@homebase-id/common-app/icons';
 
@@ -155,14 +155,12 @@ export const AttachmentFile = ({ file }: { file: ExtendedFile }) => {
     <FakeAnchor
       type="mute"
       key={file.key}
-      className={`flex cursor-pointer flex-row items-center gap-2
-      rounded-md border border-slate-200 bg-background px-1 py-1
-      transition-colors hover:bg-primary/10 hover:shadow-md dark:border-slate-700`}
+      className={`flex cursor-pointer flex-row items-center gap-2 rounded-md border border-slate-200 bg-background px-1 py-1 transition-colors hover:bg-primary/10 hover:shadow-md dark:border-slate-700`}
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
         navigate({
-          pathname: `${ROOT_PATH}/${filter || 'inbox'}/${file.conversationId}/${file.fileId}/${file.key}`,
+          pathname: `${MAIL_ROOT_PATH}/${filter || 'inbox'}/${file.conversationId}/${file.fileId}/${file.key}`,
           search: window.location.search,
         });
       }}
@@ -205,7 +203,7 @@ export const AttachmentFile = ({ file }: { file: ExtendedFile }) => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                navigate(`${ROOT_PATH}/inbox/${file.conversationId}/${file.fileId}`);
+                navigate(`${MAIL_ROOT_PATH}/inbox/${file.conversationId}/${file.fileId}`);
               }}
             >
               <Envelope className="h-5 w-5" />

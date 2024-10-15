@@ -102,7 +102,7 @@ export const ensureDrive = async (
     .post('/drive/mgmt/create', data)
     .then((response) => response.status === 200)
     .catch((error) => {
-      console.error('[DotYouCore-js:ensureDrive]', error);
+      console.error('[odin-js:ensureDrive]', error);
       throw error;
     });
 };
@@ -125,7 +125,7 @@ export const editDriveMetadata = async (
     .post('/drive/mgmt/updatemetadata', data)
     .then((response) => response.status === 200)
     .catch((error) => {
-      console.error('[DotYouCore-js:editDriveMetadata]', error);
+      console.error('[odin-js:editDriveMetadata]', error);
       throw error;
     });
 };
@@ -148,7 +148,7 @@ export const editDriveAllowAnonymousRead = async (
     .post('/drive/mgmt/setdrivereadmode', data)
     .then((response) => response.status === 200)
     .catch((error) => {
-      console.error('[DotYouCore-js:editDriveAllowAnonymousRead]', error);
+      console.error('[odin-js:editDriveAllowAnonymousRead]', error);
       throw error;
     });
 };
@@ -171,7 +171,7 @@ export const editDriveAttributes = async (
     .post('/drive/mgmt/updateattributes', data)
     .then((response) => response.status === 200)
     .catch((error) => {
-      console.error('[DotYouCore-js:editDriveAttributes]', error);
+      console.error('[odin-js:editDriveAttributes]', error);
       throw error;
     });
 };
@@ -205,7 +205,7 @@ export const getDriveStatus = async (
     .get<DriveStatus>('/drive/status?' + stringifyToQueryParams(targetDrive))
     .then((response) => response.data)
     .catch((error) => {
-      console.error('[DotYouCore-js:getDriveStatus]', error);
+      console.error('[odin-js:getDriveStatus]', error);
       throw error;
     });
 };

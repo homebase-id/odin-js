@@ -136,7 +136,7 @@ export const getPayloadBytesOverPeer = async (
     })
     .catch((error) => {
       if (error.response?.status === 404) return null;
-      console.error('[DotYouCore-js:getPayloadBytesOverPeer]', error);
+      console.error('[odin-js:getPayloadBytesOverPeer]', error);
       return null;
     });
 };
@@ -191,7 +191,7 @@ export const getThumbBytesOverPeer = async (
     })
     .catch((error) => {
       if (error.response?.status === 404) return null;
-      console.error('[DotYouCore-js:getThumbBytes]', error);
+      console.error('[odin-js:getThumbBytes]', error);
       return null;
     });
 };
@@ -270,7 +270,7 @@ export const getFileHeaderBytesOverPeer = async (
     })
     .catch((error) => {
       if (error.response?.status === 404) return null;
-      console.error('[DotYouCore-js:getFileHeaderBytesOverPeer]', error);
+      console.error('[odin-js:getFileHeaderBytesOverPeer]', error);
       throw error;
     });
 

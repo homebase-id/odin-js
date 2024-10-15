@@ -14,10 +14,15 @@ interface useConnectionsProps {
   pageNumber: number;
 }
 
+type usePendingConnectionsProps = useConnectionsProps;
+interface useSentConnectionsProps extends useConnectionsProps {
+  includeIntroductions?: true | false | 'only';
+}
+
 export const usePendingConnections = ({
   pageSize: pendingPageSize,
   pageNumber: pendingPage,
-}: useConnectionsProps) => {
+}: usePendingConnectionsProps) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetchPendingConnections = async (
@@ -38,7 +43,7 @@ export const usePendingConnections = ({
         fetchPendingConnections({ pageSize: pendingPageSize, pageNumber: pendingPage }),
 
       refetchOnWindowFocus: false,
-      refetchOnMount: false,
+      refetchOnMount: true,
       enabled: !!pendingPage,
     }),
   };
@@ -47,7 +52,8 @@ export const usePendingConnections = ({
 export const useSentConnections = ({
   pageSize: sentPageSize,
   pageNumber: sentPage,
-}: useConnectionsProps) => {
+  includeIntroductions,
+}: useSentConnectionsProps) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetchSentRequests = async (
@@ -65,6 +71,23 @@ export const useSentConnections = ({
       queryFn: () => fetchSentRequests({ pageSize: sentPageSize, pageNumber: sentPage }),
       refetchOnWindowFocus: false,
       enabled: !!sentPage,
+      select:
+        includeIntroductions !== true
+          ? (data) => {
+              if (includeIntroductions === 'only') {
+                return {
+                  ...data,
+                  results: data.results.filter((result) => result.introducerOdinId),
+                };
+              } else if (includeIntroductions === false) {
+                return {
+                  ...data,
+                  results: data.results.filter((result) => !result.introducerOdinId),
+                };
+              }
+              return data;
+            }
+          : undefined,
     }),
   };
 };

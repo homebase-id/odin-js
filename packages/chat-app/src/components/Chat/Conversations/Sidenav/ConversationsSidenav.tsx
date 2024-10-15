@@ -1,6 +1,7 @@
 import {
   ActionButton,
   ActionLink,
+  CHAT_ROOT_PATH,
   ErrorBoundary,
   Input,
   SubtleMessage,
@@ -21,7 +22,6 @@ import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../../../providers/ConversationProvider';
-import { ROOT_PATH as CHAT_ROOT } from '../../../../app/App';
 import {
   GroupConversationItem,
   SingleConversationItem,
@@ -107,7 +107,7 @@ const ConversationList = ({
                 <SubtleMessage className="">{t('No conversations found')}</SubtleMessage>
 
                 <ActionLink
-                  href={`${CHAT_ROOT}/new`}
+                  href={`${CHAT_ROOT_PATH}/new`}
                   icon={Plus}
                   type="secondary"
                   className="ml-auto"
@@ -132,7 +132,7 @@ const ConversationList = ({
       </div>
       {conversations?.length && conversations?.length < 15 ? (
         <div className="flex flex-row justify-center p-5">
-          <ActionLink href={`${CHAT_ROOT}/new`} icon={Plus} type="secondary">
+          <ActionLink href={`${CHAT_ROOT_PATH}/new`} icon={Plus} type="secondary">
             {t('New conversation')}
           </ActionLink>
         </div>
@@ -277,7 +277,7 @@ const SearchConversation = ({
             <ConversationListItemWrapper
               order={1}
               onClick={() => {
-                navigate(`${CHAT_ROOT}/new-group`);
+                navigate(`${CHAT_ROOT_PATH}/new-group`);
               }}
               isActive={false}
             >

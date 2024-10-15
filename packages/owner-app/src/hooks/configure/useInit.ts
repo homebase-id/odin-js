@@ -64,6 +64,7 @@ export const useInit = () => {
     await publishStaticFiles(undefined);
 
     const defaultServerSettings = getSettings(dotYouClient);
+
     await updateSettings(dotYouClient, {
       ...defaultServerSettings,
       lastRunAutoFix: AUTO_FIX_VERSION,

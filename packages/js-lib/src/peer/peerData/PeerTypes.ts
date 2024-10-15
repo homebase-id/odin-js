@@ -20,6 +20,7 @@ export interface TransitInstructionSet {
   priority?: PriorityOptions;
   recipients: string[];
   systemFileType?: SystemFileType;
+  storageIntent?: 'metadataOnly';
 }
 
 export interface TransitUploadResult {

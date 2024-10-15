@@ -2,6 +2,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import {
   ActionButton,
+  COMMUNITY_ROOT_PATH,
   ConnectionImage,
   ConnectionName,
   ErrorBoundary,
@@ -18,7 +19,6 @@ import { getNewId, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { useEffect, useState } from 'react';
 import { ContactFile } from '@homebase-id/js-lib/network';
 import { useCommunity } from '../../hooks/community/useCommunity';
-import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
 import { Times, Arrow } from '@homebase-id/common-app/icons';
 
 export const NewCommunity = () => {
@@ -38,7 +38,7 @@ export const NewCommunity = () => {
       if (!definitionFile) return;
       (async () => {
         await createNew(definitionFile);
-        navigate(`${COMMUNITY_ROOT}/${definitionFile.fileMetadata.appData.uniqueId}`);
+        navigate(`${COMMUNITY_ROOT_PATH}/${definitionFile.fileMetadata.appData.uniqueId}`);
       })();
     }
   }, [pendingDefinition]);
@@ -81,7 +81,7 @@ export const NewCommunity = () => {
       };
 
       await createNew(newCommunityDef); // Will in 99% of the cases first redirect to an ensure drive
-      navigate(`${COMMUNITY_ROOT}/${communityId}`);
+      navigate(`${COMMUNITY_ROOT_PATH}/${communityId}`);
     } catch (e) {
       console.error(e);
     }

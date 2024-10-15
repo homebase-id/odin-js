@@ -151,7 +151,9 @@ export const MailComposer = ({
           },
         },
       },
-      serverMetadata: { accessControlList: { requiredSecurityGroup: SecurityGroupType.Connected } },
+      serverMetadata: {
+        accessControlList: { requiredSecurityGroup: SecurityGroupType.AutoConnected },
+      },
     };
 
     sendMail({ conversation: newEmailConversation, files: files });

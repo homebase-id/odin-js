@@ -1,6 +1,7 @@
 import {
   ActionGroup,
   ActionLink,
+  CHAT_ROOT_PATH,
   ConnectionImage,
   ConnectionName,
   ErrorBoundary,
@@ -10,6 +11,7 @@ import {
   OwnerName,
   t,
   useDotYouClient,
+  useIntroductions,
   useIsConnected,
 } from '@homebase-id/common-app';
 import { ChevronDown, ChevronLeft, Persons } from '@homebase-id/common-app/icons';
@@ -31,7 +33,6 @@ import { ChatComposer, ChatComposerProps } from '../../components/Chat/Composer/
 import { ChatInfo } from '../../components/Chat/Detail/ChatInfo';
 import { useNavigate } from 'react-router-dom';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { ROOT_PATH } from '../../app/App';
 
 export const ChatDetail = ({
   conversationId,
@@ -45,9 +46,10 @@ export const ChatDetail = ({
     composer?: FC<ChatComposerProps>;
   };
 }) => {
-  const rootPath = options?.rootPath || ROOT_PATH;
+  const rootPath = options?.rootPath || CHAT_ROOT_PATH;
   const { data: conversation, isLoading, isFetched } = useConversation({ conversationId }).single;
   const { mutate: inviteRecipient } = useConversation().inviteRecipient;
+  const { mutate: introduceIdentities } = useIntroductions().introduceIdentities;
   const [replyMsg, setReplyMsg] = useState<HomebaseFile<ChatMessage> | undefined>();
   const identity = useDotYouClient().getIdentity();
 
@@ -83,6 +85,13 @@ export const ChatDetail = ({
     if (anyRecipientMissingConversation) {
       console.log('invite recipient');
       inviteRecipient({ conversation });
+      if (filteredRecipients.length > 1) {
+        // Group chat; Good to introduce everyone
+        await introduceIdentities({
+          message: t('{0} has added you to a group chat', identity || ''),
+          recipients: filteredRecipients,
+        });
+      }
     }
   };
 
@@ -136,6 +145,21 @@ const ChatHeader = ({
     error: deleteChatError,
     status: deleteChatStatus,
   } = useConversation().deleteChat;
+  const { mutate: introduceIdentities, error: makeIntroductionError } =
+    useIntroductions().introduceIdentities;
+
+  const makeIntroduction = async () => {
+    if (!conversation) return;
+
+    const filteredRecipients = conversation.recipients.filter(
+      (recipient) => recipient !== identity
+    );
+
+    await introduceIdentities({
+      message: t('{0} has added you to a group chat', identity || ''),
+      recipients: filteredRecipients,
+    });
+  };
 
   useEffect(() => {
     if (deleteChatStatus === 'success') navigate(rootPath);
@@ -143,7 +167,7 @@ const ChatHeader = ({
 
   return (
     <>
-      <ErrorNotification error={clearChatError || deleteChatError} />
+      <ErrorNotification error={clearChatError || deleteChatError || makeIntroductionError} />
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
         <HybridLink className="-m-1 p-1 lg:hidden" type="mute" href={rootPath}>
           <ChevronLeft className="h-4 w-4" />
@@ -187,6 +211,12 @@ const ChatHeader = ({
                 label: t('Chat info'),
                 onClick: () => setShowChatInfo(true),
               },
+              !singleRecipient
+                ? {
+                    label: t('Introduce everyone'),
+                    onClick: makeIntroduction,
+                  }
+                : undefined,
               {
                 label: t('Delete'),
                 confirmOptions: {

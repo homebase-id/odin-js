@@ -17,6 +17,7 @@ import {
   ErrorNotification,
   flattenInfinteData,
   highlightQuery,
+  MAIL_ROOT_PATH,
   t,
   useDotYouClient,
   useDotYouClientContext,
@@ -28,7 +29,6 @@ import { MailComposer } from '../../components/Composer/MailComposer';
 import { useSearchParams } from 'react-router-dom';
 import { MailAttachmentsInfo } from './MailAttachmentsInfo';
 import { MailAttachmentPreview } from '../../components/Thread/MailAttachmentPreview';
-import { ROOT_PATH } from '../../app/App';
 import {
   ReplyArrow,
   Share,
@@ -159,7 +159,7 @@ const MailThreadActions = ({
   }, [draftFileId]);
 
   return (
-    <div className={`border-t border-gray-100 dark:border-gray-800  ${className || ''}`}>
+    <div className={`border-t border-gray-100 dark:border-gray-800 ${className || ''}`}>
       {isReply ? (
         <ReplyAction
           {...threadProps}
@@ -316,7 +316,10 @@ const MailThreadHeader = ({
           <div className="order-1 flex flex-row gap-2">
             <ActionButton
               onClick={() =>
-                navigate({ pathname: `${ROOT_PATH}/${filter}`, search: window.location.search })
+                navigate({
+                  pathname: `${MAIL_ROOT_PATH}/${filter}`,
+                  search: window.location.search,
+                })
               }
               icon={ArrowLeft}
               type="mute"

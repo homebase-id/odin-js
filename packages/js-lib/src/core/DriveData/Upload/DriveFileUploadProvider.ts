@@ -7,20 +7,29 @@ import {
   UploadResult,
   AppendInstructionSet,
   AppendResult,
+  UpdateResult,
+  UpdateInstructionSet,
+  UpdateHeaderInstructionSet,
+  UpdateLocalInstructionSet,
+  ScheduleOptions,
+  PriorityOptions,
+  SendContents,
 } from './DriveUploadTypes';
-import { decryptKeyHeader, encryptKeyHeader, encryptWithSharedSecret } from '../SecurityHelpers';
+import { decryptKeyHeader } from '../SecurityHelpers';
 import {
   GenerateKeyHeader,
-  encryptMetaData,
   buildDescriptor,
   buildFormData,
   pureUpload,
   pureAppend,
   buildManifest,
+  pureUpdate,
+  buildUpdateManifest,
 } from './UploadHelpers';
 import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFileProvider';
 import { getRandom16ByteArray } from '../../../helpers/DataUtil';
 import { AxiosRequestConfig } from 'axios';
+import { deletePayload } from '../File/DriveFileManageProvider';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
@@ -94,10 +103,177 @@ export const uploadFile = async (
   return uploadResult;
 };
 
+export const patchFile = async (
+  dotYouClient: DotYouClient,
+  keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
+  instructions: UpdateInstructionSet,
+  metadata: UploadFileMetadata,
+  payloads?: PayloadFile[],
+  thumbnails?: ThumbnailFile[],
+  toDeletePayloads?: { key: string }[],
+  onVersionConflict?: () => Promise<void | UpdateResult> | void,
+  options?: {
+    axiosConfig?: AxiosRequestConfig;
+  }
+): Promise<UpdateResult | UploadResult | void> => {
+  if (instructions.locale === 'local') {
+    return patchFileLocal(
+      dotYouClient,
+      keyHeader,
+      instructions,
+      metadata,
+      payloads,
+      thumbnails,
+      toDeletePayloads,
+      undefined,
+      options
+    );
+  }
+
+  isDebug &&
+    console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/update`).pathname, {
+      instructions,
+      metadata,
+      payloads,
+      thumbnails,
+    });
+
+  const decryptedKeyHeader =
+    keyHeader && 'encryptionVersion' in keyHeader
+      ? await decryptKeyHeader(dotYouClient, keyHeader)
+      : keyHeader;
+
+  const { systemFileType, ...strippedInstructions } = instructions;
+
+  const manifest = buildUpdateManifest(
+    payloads,
+    toDeletePayloads,
+    thumbnails,
+    !!decryptedKeyHeader
+  );
+  const instructionsWithManifest = {
+    ...strippedInstructions,
+    manifest,
+    transferIv: instructions.transferIv || getRandom16ByteArray(),
+  };
+
+  // Build package
+  const encryptedDescriptor = await buildDescriptor(
+    dotYouClient,
+    decryptedKeyHeader,
+    instructionsWithManifest,
+    metadata
+  );
+
+  const data = await buildFormData(
+    instructionsWithManifest,
+    encryptedDescriptor,
+    payloads,
+    thumbnails,
+    decryptedKeyHeader,
+    manifest
+  );
+
+  // Upload
+  const updateResult = await pureUpdate(
+    dotYouClient,
+    data,
+    systemFileType,
+    onVersionConflict,
+    options?.axiosConfig
+  );
+
+  if (!updateResult) return;
+  return updateResult;
+};
+
+const patchFileLocal = async (
+  dotYouClient: DotYouClient,
+  keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
+  instructions: UpdateLocalInstructionSet,
+  metadata: UploadFileMetadata,
+  payloads?: PayloadFile[],
+  thumbnails?: ThumbnailFile[],
+  toDeletePayloads?: { key: string }[],
+  onVersionConflict?: () => Promise<void | UploadResult> | void,
+  options?: {
+    axiosConfig?: AxiosRequestConfig;
+  }
+): Promise<UploadResult | void> => {
+  if (!metadata.versionTag) {
+    throw new Error('metadata.versionTag is required');
+  }
+  let runningVersionTag: string = metadata.versionTag;
+
+  if (toDeletePayloads?.length) {
+    for (let i = 0; i < toDeletePayloads.length; i++) {
+      const mediaFile = toDeletePayloads[i];
+
+      runningVersionTag = (
+        await deletePayload(
+          dotYouClient,
+          instructions.file.targetDrive,
+          instructions.file.fileId,
+          mediaFile.key,
+          runningVersionTag
+        )
+      ).newVersionTag;
+    }
+  }
+
+  // Append new files:
+  if (payloads?.length) {
+    const appendInstructionSet: AppendInstructionSet = {
+      targetFile: instructions.file,
+      versionTag: runningVersionTag,
+      storageIntent: 'append',
+    };
+
+    runningVersionTag =
+      (
+        await appendDataToFile(
+          dotYouClient,
+          keyHeader,
+          appendInstructionSet,
+          payloads,
+          thumbnails,
+          onVersionConflict
+        )
+      )?.newVersionTag || runningVersionTag;
+  }
+
+  if (runningVersionTag) metadata.versionTag = runningVersionTag;
+  const instructionSet: UpdateHeaderInstructionSet = {
+    transferIv: getRandom16ByteArray(),
+    storageOptions: {
+      overwriteFileId: instructions.file.fileId,
+      drive: instructions.file.targetDrive,
+    },
+    transitOptions: instructions.recipients
+      ? {
+          recipients: instructions.recipients,
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.Medium,
+          sendContents: SendContents.All, // TODO: Should this be header only?
+        }
+      : undefined,
+    storageIntent: 'header',
+  };
+
+  return await uploadHeader(
+    dotYouClient,
+    keyHeader,
+    instructionSet,
+    metadata,
+    onVersionConflict,
+    options?.axiosConfig
+  );
+};
+
 export const uploadHeader = async (
   dotYouClient: DotYouClient,
   keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
-  instructions: UploadInstructionSet,
+  instructions: UpdateHeaderInstructionSet,
   metadata: UploadFileMetadata,
   onVersionConflict?: () => Promise<void | UploadResult> | void,
   axiosConfig?: AxiosRequestConfig
@@ -108,16 +284,18 @@ export const uploadHeader = async (
       metadata,
     });
 
-  const plainKeyHeader =
-    keyHeader && 'encryptionVersion' in keyHeader
+  const decryptedKeyHeader = metadata.isEncrypted
+    ? keyHeader && 'encryptionVersion' in keyHeader
       ? await decryptKeyHeader(dotYouClient, keyHeader)
-      : keyHeader;
+      : keyHeader
+    : undefined;
 
-  if (!decryptKeyHeader && metadata.isEncrypted)
+  if (!decryptedKeyHeader && metadata.isEncrypted)
     throw new Error('[odin-js] Missing existing keyHeader for appending encrypted metadata.');
 
-  if (plainKeyHeader) {
-    plainKeyHeader.iv = getRandom16ByteArray();
+  if (decryptedKeyHeader) {
+    // Generate a new IV for the keyHeader
+    decryptedKeyHeader.iv = getRandom16ByteArray();
   }
 
   const { systemFileType, ...strippedInstructions } = instructions;
@@ -126,22 +304,11 @@ export const uploadHeader = async (
   strippedInstructions.storageOptions.storageIntent = 'metadataOnly';
   strippedInstructions.transferIv = instructions.transferIv || getRandom16ByteArray();
 
-  // Build package
-  const encryptedMetaData = await encryptMetaData(metadata, plainKeyHeader);
-  // Can't use buidDescriptor here, as it's a metadataOnly upload
-  const encryptedDescriptor = await encryptWithSharedSecret(
+  const encryptedDescriptor = await buildDescriptor(
     dotYouClient,
-    {
-      fileMetadata: encryptedMetaData,
-      encryptedKeyHeader: plainKeyHeader
-        ? await encryptKeyHeader(
-            dotYouClient,
-            { aesKey: new Uint8Array(Array(16).fill(0)), iv: plainKeyHeader.iv },
-            strippedInstructions.transferIv
-          )
-        : undefined,
-    },
-    strippedInstructions.transferIv
+    decryptedKeyHeader,
+    strippedInstructions,
+    metadata
   );
 
   const data = await buildFormData(
