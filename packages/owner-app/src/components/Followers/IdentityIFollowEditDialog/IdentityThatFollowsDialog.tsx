@@ -10,7 +10,9 @@ import {
 import { Quote, Persons } from '@homebase-id/common-app/icons';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useFollower } from '../../../hooks/follow/useFollower';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
+import { useConnection } from '../../../hooks/connections/useConnection';
+import { ConnectionInfo } from '@homebase-id/js-lib/network';
 
 const IdentityThatFollowsDialog = ({
   odinId,
@@ -26,6 +28,7 @@ const IdentityThatFollowsDialog = ({
   onCancel: () => void;
 }) => {
   const target = usePortal('modal-container');
+  const { data: connectionInfo } = useConnection({ odinId }).fetch;
 
   const { data: follower } = useFollower({
     odinId,
@@ -45,7 +48,12 @@ const IdentityThatFollowsDialog = ({
             )
           )
           .filter(Boolean) as HomebaseFile<ChannelDefinitionVm>[])
-      : allChannels;
+      : allChannels?.filter((chnl) => {
+          return hasAccess(
+            chnl,
+            connectionInfo?.status === 'connected' ? connectionInfo : undefined
+          );
+        });
 
   const dialog = (
     <DialogWrapper
@@ -86,3 +94,38 @@ const IdentityThatFollowsDialog = ({
 };
 
 export default IdentityThatFollowsDialog;
+
+const hasAccess = (
+  chnl: HomebaseFile<ChannelDefinitionVm> | undefined,
+  connectionInfo: ConnectionInfo | undefined
+) => {
+  const acl = chnl?.serverMetadata?.accessControlList;
+  if (!acl) {
+    return false;
+  }
+
+  if (
+    acl.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+    acl.requiredSecurityGroup === SecurityGroupType.Authenticated
+  ) {
+    return true;
+  }
+
+  if (
+    acl.requiredSecurityGroup === SecurityGroupType.Connected &&
+    connectionInfo &&
+    connectionInfo.status === 'connected'
+  ) {
+    if (!acl.circleIdList || acl.circleIdList.length === 0) {
+      return true;
+    }
+
+    return acl.circleIdList.some((circleId) => {
+      return connectionInfo.accessGrant.circleGrants.some((grant) => {
+        return stringGuidsEqual(grant.circleId, circleId);
+      });
+    });
+  }
+
+  return false;
+};
