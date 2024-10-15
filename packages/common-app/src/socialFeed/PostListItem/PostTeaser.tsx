@@ -113,12 +113,6 @@ export const PostTeaser: FC<PostTeaserProps> = ({
               showSummary={true}
               isOwner={isOwner}
               isAuthenticated={isAuthenticated}
-              isPublic={
-                channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-                  SecurityGroupType.Anonymous ||
-                channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-                  SecurityGroupType.Authenticated
-              }
               login={login}
             />
           </div>

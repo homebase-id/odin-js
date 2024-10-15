@@ -217,12 +217,6 @@ export const PostDetailCard = ({
           isAuthenticated={isAuthenticated}
           isOwner={isOwner}
           login={login}
-          isPublic={
-            channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-              SecurityGroupType.Anonymous ||
-            channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-              SecurityGroupType.Authenticated
-          }
         />
       ) : null}
     </div>
