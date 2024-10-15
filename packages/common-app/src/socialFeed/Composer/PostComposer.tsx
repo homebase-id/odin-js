@@ -63,6 +63,7 @@ export const PostComposer = ({
 
   const { savePost, postState, processingProgress, error } = usePostComposer();
   const selectRef = useRef<HTMLSelectElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [caption, setCaption] = useState<string>('');
 
@@ -113,6 +114,7 @@ export const PostComposer = ({
     setCaption('');
     // setChannel(BlogConfig.PublicChannelNewDsr);
     setFiles(undefined);
+    fileInputRef.current?.value && (fileInputRef.current.value = '');
     setStateIndex((i) => i + 1);
   };
 
@@ -216,6 +218,7 @@ export const PostComposer = ({
                   accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4, application/pdf"
                   className="text-foreground hover:text-opacity-70"
                   maxSize={HUNDRED_MEGA_BYTES}
+                  ref={fileInputRef}
                 />
               </div>
 
