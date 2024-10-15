@@ -17,12 +17,7 @@ import {
   PrimaryMedia,
   ToGroupBlock,
 } from '../../..';
-import {
-  DEFAULT_PAYLOAD_KEY,
-  HomebaseFile,
-  NewHomebaseFile,
-  SecurityGroupType,
-} from '@homebase-id/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 
 export const PostDetailCard = ({
   odinId,
