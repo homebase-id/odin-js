@@ -77,7 +77,7 @@ const existingPostFile: HomebaseFile<Tweet> = {
     isEncrypted: false,
     senderOdinId: '',
     originalAuthor: '',
-    versionTag: '',
+    versionTag: 'oldVersionTag',
     payloads: [],
   },
   serverMetadata: {
