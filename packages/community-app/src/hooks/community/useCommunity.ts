@@ -127,7 +127,7 @@ export const useCommunity = (props?: useCommunityProps) => {
   }) => {
     if (!communityDef.fileMetadata.appData.uniqueId) return '';
 
-    const returnUrl = `${COMMUNITY_ROOT}/new?draft=${JSON.stringify(communityDef)}`;
+    const returnUrl = `${COMMUNITY_ROOT_PATH}/new?draft=${JSON.stringify(communityDef)}`;
 
     const targetDrive = getTargetDriveFromCommunityId(communityDef.fileMetadata.appData.uniqueId);
 

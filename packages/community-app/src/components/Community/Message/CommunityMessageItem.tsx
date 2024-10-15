@@ -84,7 +84,7 @@ export const CommunityMessageItem = ({
         {showChannelName && !hideDetails ? (
           <Link
             className="mb-1 text-primary hover:underline"
-            to={`${COMMUNITY_ROOT}/${community?.fileMetadata.appData.uniqueId}/${msg.fileMetadata.appData.content.channelId}`}
+            to={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.appData.uniqueId}/${msg.fileMetadata.appData.content.channelId}`}
           >
             #{channel?.fileMetadata.appData.content.title}
           </Link>
