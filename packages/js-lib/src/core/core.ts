@@ -19,6 +19,7 @@ export * from './DriveData/Drive/DriveTypes';
 export * from './DriveData/File/DriveFileManageProvider';
 export * from './DriveData/File/DriveFileProvider';
 export * from './DriveData/File/DriveFileByUniqueIdProvider';
+export * from './DriveData/File/DriveFileByGlobalTransitIdProvider';
 export * from './DriveData/File/DriveFileTypes';
 export * from './DriveData/File/DriveFileReactionTypes';
 
