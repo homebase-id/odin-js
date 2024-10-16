@@ -17,12 +17,7 @@ import {
   PrimaryMedia,
   ToGroupBlock,
 } from '../../..';
-import {
-  DEFAULT_PAYLOAD_KEY,
-  HomebaseFile,
-  NewHomebaseFile,
-  SecurityGroupType,
-} from '@homebase-id/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 
 export const PostDetailCard = ({
   odinId,
@@ -217,12 +212,6 @@ export const PostDetailCard = ({
           isAuthenticated={isAuthenticated}
           isOwner={isOwner}
           login={login}
-          isPublic={
-            channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-              SecurityGroupType.Anonymous ||
-            channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-              SecurityGroupType.Authenticated
-          }
         />
       ) : null}
     </div>

@@ -127,12 +127,6 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
             showSummary={showSummary}
             isAuthenticated={true}
             isOwner={true}
-            isPublic={
-              channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-                SecurityGroupType.Anonymous ||
-              channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-                SecurityGroupType.Authenticated
-            }
           />
         </FakeAnchor>
       </ErrorBoundary>
