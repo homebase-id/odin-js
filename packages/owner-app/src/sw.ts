@@ -175,7 +175,13 @@ self.addEventListener('notificationclick', (event) => {
       }
 
       if (event.notification?.data?.options?.appId === FEED_APP_ID) {
-        return { pathToOpen: `/apps/feed` };
+        if (event.notification.data.options.typeId === FEED_NEW_CONTENT_TYPE_ID)
+          return { pathToOpen: `/apps/feed?post=${event.notification.data.options.tagId}` };
+        else if (event.notification.data.options.typeId === FEED_NEW_COMMENT_TYPE_ID)
+          return { pathToOpen: `/apps/feed/preview/${event.notification.data.options.tagId}` };
+        else if (event.notification.data.options.typeId === FEED_NEW_REACTION_TYPE_ID)
+          return { pathToOpen: `/apps/feed/preview/${event.notification.data.options.tagId}` };
+        else return { pathToOpen: `/apps/feed` };
       }
 
       if (event.notification?.data?.options?.appId === COMMUNITY_APP_ID) {
