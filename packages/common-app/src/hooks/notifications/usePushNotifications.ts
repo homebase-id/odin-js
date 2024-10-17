@@ -19,7 +19,7 @@ import { useEffect } from 'react';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
-const PAGE_SIZE = 30;
+const PAGE_SIZE = 500;
 export const usePushNotifications = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
