@@ -23,6 +23,7 @@ import {
 import { BlogConfig, HomePageConfig } from '@homebase-id/js-lib/public';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { APP_AUTH_TOKEN, APP_SHARED_SECRET, useDotYouClient } from '@homebase-id/common-app';
+import { clear } from 'idb-keyval';
 
 export const useAuth = () => {
   const { getDotYouClient, getSharedSecret, hasSharedSecret } = useDotYouClient();
@@ -40,6 +41,7 @@ export const useAuth = () => {
     setAuthenticationState('anonymous');
 
     window.location.href = '/';
+    clear();
   };
 
   const preauth = async (): Promise<void> => await preauthApps(getDotYouClient());
