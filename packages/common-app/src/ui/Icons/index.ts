@@ -70,6 +70,7 @@ import { Reddit } from './Reddit';
 import { Refresh } from './Refresh';
 import { ReplyArrow } from './ReplyArrow';
 import { Repost } from './Repost';
+import { ThumbsUp } from './Thumbsup';
 import {
   Bold,
   Code,
@@ -81,7 +82,7 @@ import {
   UnorderedList,
 } from './RichTextIcons';
 import { RiotGames } from './RiotGames';
-import { Sad } from './Sad';
+import { Sad, SolidSad } from './Sad';
 import { Save } from './Save';
 import { Scissors } from './Scissors';
 import { Share } from './Share';
@@ -202,6 +203,7 @@ export {
   RichTextQuote,
   RiotGames,
   Sad,
+  SolidSad,
   Save,
   Scissors,
   Share,
@@ -227,6 +229,7 @@ export {
   Wallet,
   Whatsapp,
   Youtube,
+  ThumbsUp,
 };
 
 export * from './Types';
