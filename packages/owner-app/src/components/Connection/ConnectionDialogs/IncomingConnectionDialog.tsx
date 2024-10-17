@@ -48,7 +48,7 @@ const IncomingConnectionDialog = ({
 
   const {
     fetch: { data: pendingConnection },
-    acceptRequest: { mutateAsync: acceptPending, status: acceptPendingStatus, error: acceptError },
+    acceptRequest: { mutateAsync: acceptPending, status: acceptPendingStatus },
   } = usePendingConnection({ odinId: senderOdinId });
 
   const { data: introducerContactData } = useContact({
@@ -56,7 +56,7 @@ const IncomingConnectionDialog = ({
     canSave: false,
   }).fetch;
 
-  const { mutateAsync: follow, error: followError } = useFollowingInfinite().follow;
+  const { mutateAsync: follow } = useFollowingInfinite().follow;
 
   const checkReturnTo = useFocusedEditing();
 
@@ -64,6 +64,8 @@ const IncomingConnectionDialog = ({
 
   const [circleGrants, setCircleGrants] = useState<string[]>([]);
   const [shouldFollow, setShouldFollow] = useState(true);
+
+  const [runningError, setRunningError] = useState<Error | unknown | null>(null);
 
   if (!isOpen) {
     return null;
@@ -90,7 +92,7 @@ const IncomingConnectionDialog = ({
       size="2xlarge"
     >
       <>
-        <ErrorNotification error={acceptError || followError} />
+        <ErrorNotification error={runningError} />
         {!doubleChecked ? (
           <>
             {connectionInfo?.status === 'connected' ? (
@@ -165,7 +167,7 @@ const IncomingConnectionDialog = ({
                 {t('Cancel')}
               </ActionButton>
               <ActionButton
-                className=" sm:mr-auto"
+                className="sm:mr-auto"
                 type="secondary"
                 onClick={() => {
                   checkReturnTo('Ignored');
@@ -182,15 +184,22 @@ const IncomingConnectionDialog = ({
               onSubmit={async (e) => {
                 if (acceptPendingStatus === 'pending') return;
                 e.preventDefault();
-                await acceptPending({
-                  senderOdinId: senderOdinId,
-                  circleIds: circleGrants,
-                });
-                if (shouldFollow)
-                  await follow({ odinId: senderOdinId, notificationType: 'allNotifications' });
+                try {
+                  await acceptPending({
+                    senderOdinId: senderOdinId,
+                    circleIds: circleGrants,
+                  });
+                  if (shouldFollow)
+                    await follow({
+                      request: { odinId: senderOdinId, notificationType: 'allNotifications' },
+                      includeHistory: true,
+                    });
 
-                checkReturnTo('Approved');
-                onConfirm();
+                  checkReturnTo('Approved');
+                  onConfirm();
+                } catch (error) {
+                  setRunningError(error);
+                }
               }}
             >
               <div className="mb-4 pb-4">

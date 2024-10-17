@@ -4,6 +4,8 @@ import {
   t,
   DomainHighlighter,
   ActionButton,
+  CheckboxToggle,
+  Label,
 } from '@homebase-id/common-app';
 import { Times } from '@homebase-id/common-app/icons';
 import { useState } from 'react';
@@ -34,6 +36,7 @@ export const IdentityAlerts = ({ odinId }: { odinId: string | undefined }) => {
 
   const checkReturnTo = useFocusedEditing();
   const [isAcceptDialogOpen, setIsAcceptDialogOpen] = useState(false);
+  const [shouldFollow, setShouldFollow] = useState(true);
 
   if (connectionInfoLoading || !odinId) return null;
 
@@ -100,19 +103,33 @@ export const IdentityAlerts = ({ odinId }: { odinId: string | undefined }) => {
 
       {isUnconfirmedAutoConnection && confirmIntroductionState !== 'success' ? (
         <Alert type="info" className="bg-background">
-          <div className="flex flex-col justify-between gap-2 lg:flex-row">
-            <p>
-              {t('You were automatically connected to')} &quot;
-              <DomainHighlighter>{odinId}</DomainHighlighter>&quot;{' '}
-              {t('because of an introduction by')} &quot;{connectionInfo?.introducerOdinId}
-              &quot;
-              <br />
-              {t('Would you like to confirm this connection?')}
-            </p>
+          <div className="flex flex-col items-center justify-between gap-2 lg:flex-row">
+            <div className="flex flex-col gap-2">
+              <p>
+                {t('You were automatically connected to')} &quot;
+                <DomainHighlighter>{odinId}</DomainHighlighter>&quot;{' '}
+                {t('because of an introduction by')} &quot;{connectionInfo?.introducerOdinId}
+                &quot;
+                <br />
+                {t('Would you like to confirm this connection?')}
+              </p>
+              <div
+                className={`flex flex-row items-center gap-4 ${shouldFollow ? '' : 'opacity-60'}`}
+              >
+                <Label htmlFor="auto-follow" className="mb-0 cursor-pointer text-base font-normal">
+                  {t('Follow')} &quot;{odinId}&quot;
+                </Label>
+                <CheckboxToggle
+                  id="auto-follow"
+                  defaultChecked={shouldFollow}
+                  onChange={(e) => setShouldFollow(e.currentTarget.checked)}
+                />
+              </div>
+            </div>
 
             <ActionButton
               type="primary"
-              onClick={() => confirmIntroduction(odinId)}
+              onClick={() => confirmIntroduction({ odinId, autoFollow: shouldFollow })}
               state={confirmIntroductionState}
               confirmOptions={{
                 title: t('Confirm connection'),

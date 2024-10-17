@@ -7,6 +7,7 @@ import {
   AUTO_CONNECTIONS_CIRCLE_ID,
 } from '@homebase-id/js-lib/network';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { useFollowingInfinite } from '@homebase-id/common-app';
 
 export const useAutoConnection = ({ odinId }: { odinId?: string }) => {
   const queryClient = useQueryClient();
@@ -14,6 +15,8 @@ export const useAutoConnection = ({ odinId }: { odinId?: string }) => {
   const {
     fetch: { data: connectionInfo },
   } = useConnection({ odinId: odinId });
+
+  const { mutateAsync: follow } = useFollowingInfinite().follow;
 
   const isUnconfirmedAutoConnected = async () => {
     if (connectionInfo?.status !== 'connected') return false;
@@ -23,7 +26,20 @@ export const useAutoConnection = ({ odinId }: { odinId?: string }) => {
     });
   };
 
-  const doConfirmAutoConnection = async (odinId: string) => {
+  const doConfirmAutoConnection = async ({
+    odinId,
+    autoFollow,
+  }: {
+    odinId: string;
+    autoFollow?: boolean;
+  }) => {
+    if (autoFollow) {
+      await follow({
+        request: { odinId, notificationType: 'allNotifications' },
+        includeHistory: true,
+      });
+    }
+
     return confirmIntroduction(dotYouClient, odinId);
   };
 

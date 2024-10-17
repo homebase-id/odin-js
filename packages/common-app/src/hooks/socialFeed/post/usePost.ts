@@ -74,7 +74,7 @@ const fetchBlog = async ({
 }) => {
   if (!channel || !postKey) return null;
 
-  if (!odinId || odinId === identity) {
+  if (!odinId || odinId === dotYouClient.getIdentity()) {
     // Search in cache
     const localBlogs = getLocalCachedBlogs(queryClient, channel.fileMetadata.appData.uniqueId);
     if (localBlogs) {

@@ -109,8 +109,11 @@ export const OutgoingConnectionDialog = ({
               );
               if (shouldFollow) {
                 await follow({
-                  odinId: connectionTarget as string,
-                  notificationType: 'allNotifications',
+                  request: {
+                    odinId: connectionTarget as string,
+                    notificationType: 'allNotifications',
+                  },
+                  includeHistory: true,
                 });
               }
             } else {
