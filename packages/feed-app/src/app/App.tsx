@@ -15,6 +15,12 @@ const Auth = lazy(() => import('../templates/Auth/Auth'));
 const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
 
 const SocialFeed = lazy(() => import('../templates/SocialFeed/SocialFeed'));
+const NavigateToReferencedPost = lazy(() =>
+  import('../templates/SocialFeed/NavigateToReferencedPost').then((module) => ({
+    default: module.NavigateToReferencedPost,
+  }))
+);
+
 const ArticleComposerPage = lazy(() => import('../templates/SocialFeed/ArticleComposerPage'));
 const ArticleDuplicatePage = lazy(() => import('../templates/SocialFeed/ArticleDuplicatePage'));
 const ArticlesPage = lazy(() => import('../templates/SocialFeed/ArticlesPage'));
@@ -63,6 +69,7 @@ function App() {
             }
           >
             <Route index={true} element={<SocialFeed />} />
+            <Route path="preview/:postKey" element={<NavigateToReferencedPost />} />
             <Route path="preview/:identityKey/:channelKey/:postKey" element={<SocialFeed />} />
             <Route
               path="preview/:identityKey/:channelKey/:postKey/:attachmentKey"
