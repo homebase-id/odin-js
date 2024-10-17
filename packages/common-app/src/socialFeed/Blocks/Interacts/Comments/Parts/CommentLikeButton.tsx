@@ -7,19 +7,25 @@ import { useOutsideTrigger } from '../../../../../hooks/clickedOutsideTrigger/us
 import { SocialReactionsBar } from '../../Reactions/ReactionsBar';
 import { ErrorNotification } from '../../../../../ui/Alert/ErrorNotification';
 import { t } from '../../../../../helpers/i18n/dictionary';
+import { useMyEmojiReactions } from '../../../../../hooks';
 
 export const CommentLikeButton = ({ threadContext }: { threadContext: ReactionContext }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isReact, setIsReact] = useState(false);
 
   const { getIdentity } = useDotYouClient();
-  const { mutateAsync: postReaction, error: postReactionError } = useReaction().saveEmoji;
-
+  const {
+    saveEmoji: { mutate: postEmoji, error: postEmojiError },
+    removeEmoji: { mutate: removeEmoji, error: removeEmojiError },
+  } = useReaction();
   const isDesktop = document.documentElement.clientWidth >= 1024;
   useOutsideTrigger(wrapperRef, () => setIsReact(false));
 
+  const { data: myReactions } = useMyEmojiReactions(threadContext).fetch;
+  const hasReacted = myReactions?.length;
+
   const doLike = () => {
-    postReaction({
+    postEmoji({
       emojiData: {
         authorOdinId: getIdentity() || '',
         body: '❤️',
@@ -28,8 +34,17 @@ export const CommentLikeButton = ({ threadContext }: { threadContext: ReactionCo
     });
   };
 
+  const removeAny = () => {
+    if (!myReactions) return;
+    removeEmoji({
+      emojiData: { body: myReactions[0], authorOdinId: getIdentity() || '' },
+      context: threadContext,
+    });
+  };
+
   return (
     <>
+      <ErrorNotification error={postEmojiError || removeEmojiError} />
       <div className={`relative select-none`} ref={wrapperRef}>
         {/* Wrapper div that holds a bigger "hover target", which spans the likeButton itself as well */}
         <div
@@ -48,18 +63,22 @@ export const CommentLikeButton = ({ threadContext }: { threadContext: ReactionCo
           />
         </div>
         <button
-          className="text-primary ml-1 mr-1 text-opacity-80 hover:underline"
+          className={`text-primary ml-1 mr-1 text-opacity-80 hover:underline ${hasReacted ? 'font-bold' : 'font-normal'}`}
           onClick={() => {
+            if (hasReacted) {
+              removeAny();
+              return;
+            }
+
             if (isDesktop) doLike();
             else setIsReact(!isReact);
           }}
-          onMouseEnter={() => setIsReact(true)}
+          onMouseEnter={() => !hasReacted && setIsReact(true)}
           onMouseLeave={() => setIsReact(false)}
         >
           {t('Like')}
         </button>
       </div>
-      <ErrorNotification error={postReactionError} />
     </>
   );
 };

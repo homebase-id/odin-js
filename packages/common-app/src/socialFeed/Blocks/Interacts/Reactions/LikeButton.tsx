@@ -1,10 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { ReactionContext } from '@homebase-id/js-lib/public';
 import { t } from '../../../../helpers';
-import { CanReactInfo, useDotYouClient, useReaction, useOutsideTrigger } from '../../../../hooks';
+import {
+  CanReactInfo,
+  useDotYouClient,
+  useReaction,
+  useOutsideTrigger,
+  useMyEmojiReactions,
+  useIntersection,
+} from '../../../../hooks';
 import { ErrorNotification } from '../../../../ui';
 import { SocialReactionsBar } from './ReactionsBar';
-import { Heart } from '../../../../ui/Icons';
+import { Heart, Lol, SolidSad, ThumbsUp } from '../../../../ui/Icons';
+import { SolidHeart } from '../../../../ui/Icons/Heart';
 
 export const LikeButton = ({
   context,
@@ -19,10 +27,19 @@ export const LikeButton = ({
   const [isReact, setIsReact] = useState(false);
 
   const { getIdentity } = useDotYouClient();
-  const { mutateAsync: postEmoji, error: postEmojiError } = useReaction().saveEmoji;
+  const {
+    saveEmoji: { mutate: postEmoji, error: postEmojiError },
+    removeEmoji: { mutate: removeEmoji, error: removeEmojiError },
+  } = useReaction();
 
   const isDesktop = document.documentElement.clientWidth >= 1024;
   useOutsideTrigger(wrapperRef, () => setIsReact(false));
+
+  const [isInView, setIsInView] = useState(false);
+  useIntersection(wrapperRef, () => setIsInView(true));
+
+  const { data: myReactions } = useMyEmojiReactions(isInView ? context : undefined).fetch;
+  const hasReacted = myReactions?.length;
 
   const doLike = () =>
     postEmoji({
@@ -33,12 +50,21 @@ export const LikeButton = ({
       context,
     });
 
+  const removeAny = () => {
+    if (!myReactions) return;
+    removeEmoji({
+      emojiData: { body: myReactions[0], authorOdinId: getIdentity() || '' },
+      context,
+    });
+  };
+
   useEffect(() => {
     if (isReact && onIntentToReact) onIntentToReact();
   }, [isReact]);
 
   return (
     <>
+      <ErrorNotification error={postEmojiError || removeEmojiError} />
       <div
         className={`relative select-none ${
           canReact && canReact.canReact !== true && canReact.canReact !== 'emoji'
@@ -66,19 +92,57 @@ export const LikeButton = ({
         <button
           className={`hover:text-black dark:hover:text-white ${
             isReact ? 'text-black dark:text-white' : ''
-          }`}
+          } ${hasReacted ? 'cursor-pointer' : ''}`}
           onClick={() => {
+            if (hasReacted) {
+              removeAny();
+              return;
+            }
+
             if (isDesktop) doLike();
             else setIsReact(!isReact);
           }}
           onMouseLeave={() => setIsReact(false)}
-          onMouseEnter={() => setIsReact(true)}
+          onMouseEnter={() => !hasReacted && setIsReact(true)}
         >
-          <Heart className="mr-1 inline-block h-6 w-6" />
+          {myReactions?.length ? (
+            <UIEmoji emoji={myReactions[0]} />
+          ) : (
+            <Heart className="mr-1 inline-block h-6 w-6" />
+          )}
           <span className="sr-only">{t('Like')}</span>
         </button>
       </div>
-      <ErrorNotification error={postEmojiError} />
     </>
+  );
+};
+
+export const UIEmoji = ({ emoji: rawEmoji }: { emoji: string }) => {
+  const emoji = rawEmoji.trim();
+  if (emoji === '❤️') {
+    return <SolidHeart className="text-foreground mr-1 inline-block h-6 w-6" />;
+  } else if (emoji === '👍️') {
+    return <ThumbsUp className="text-foreground mr-1 inline-block h-6 w-6" />;
+  } else if (emoji === '😆' || emoji === '😂') {
+    return <Lol className="text-foreground mr-1 inline-block h-6 w-6" />;
+  } else if (
+    emoji === '😥' ||
+    emoji === '🥲' ||
+    emoji === '😢' ||
+    emoji === '😭' ||
+    emoji === '😿'
+  ) {
+    return <SolidSad className="text-foreground mr-1 inline-block h-6 w-6" />;
+  }
+
+  return (
+    <span
+      className="mr-1 text-transparent"
+      style={{
+        textShadow: '0 0 0 rgb(var(--color-foreground))',
+      }}
+    >
+      {emoji}
+    </span>
   );
 };
