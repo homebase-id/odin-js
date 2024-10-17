@@ -17,7 +17,6 @@ import {
   KeyHeader,
   UploadResult,
   AppFileMetaData,
-  FileMetadata,
   uploadHeader,
   getFileHeaderByUniqueId,
   FileQueryParams,

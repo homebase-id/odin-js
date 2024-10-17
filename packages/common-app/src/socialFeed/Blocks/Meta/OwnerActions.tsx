@@ -9,12 +9,11 @@ import { Pencil } from '../../../ui/Icons/Pencil';
 import { t } from '../../../helpers/i18n/dictionary';
 import { Clipboard, Globe, Trash } from '../../../ui/Icons';
 import { EditPostDialog } from '../../EditPostDialog/EditPostDialog';
-import { useDotYouClient, useDotYouClientContext } from '../../../hooks';
+import { useDotYouClient } from '../../../hooks';
 import { FEED_ROOT_PATH } from '../../../constants';
 
 export const OwnerActions = ({
   odinId,
-  authorOdinId,
   postFile,
   channel,
 }: {
