@@ -7,7 +7,7 @@ import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { useFileQuery } from '../../../hooks/files/useFiles';
 
 const DriveDetails = () => {
-  const { driveKey, fileQuery } = useParams();
+  const { driveKey, fileKey } = useParams();
   const splittedDriveKey = driveKey ? driveKey.split('_') : undefined;
 
   const targetDrive = splittedDriveKey
@@ -21,7 +21,7 @@ const DriveDetails = () => {
 
   const { data: file, isLoading: fileLoading } = useFileQuery({
     targetDrive,
-    id: fileQuery,
+    id: fileKey,
   });
 
   if (driveDefLoading || fileLoading) return <LoadingDetailPage />;
@@ -40,7 +40,7 @@ const DriveDetails = () => {
             href: `/owner/drives/${driveDef.targetDriveInfo.alias}_${driveDef.targetDriveInfo.type}`,
             title: driveDef.name ?? '',
           },
-          { title: fileQuery ?? '' },
+          { title: fileKey ?? '' },
         ]}
       />
 
