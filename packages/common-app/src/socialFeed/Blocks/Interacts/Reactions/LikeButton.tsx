@@ -92,7 +92,7 @@ export const LikeButton = ({
         <button
           className={`hover:text-black dark:hover:text-white ${
             isReact ? 'text-black dark:text-white' : ''
-          } ${hasReacted ? 'cursor-pointer' : ''}`}
+          } ${hasReacted ? 'cursor-pointer hover:opacity-60' : ''}`}
           onClick={() => {
             if (hasReacted) {
               removeAny();
