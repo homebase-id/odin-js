@@ -25,6 +25,7 @@ export interface AppendInstructionSet {
   };
   versionTag: string | undefined;
   systemFileType?: SystemFileType;
+  recipients?: string[];
 }
 
 export interface StorageOptions {
