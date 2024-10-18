@@ -92,7 +92,7 @@ export const LikeButton = ({
         <button
           className={`hover:text-black dark:hover:text-white ${
             isReact ? 'text-black dark:text-white' : ''
-          } ${hasReacted ? 'cursor-pointer hover:opacity-60' : ''}`}
+          } ${hasReacted ? 'cursor-pointer hover:opacity-10' : ''}`}
           onClick={() => {
             if (hasReacted) {
               removeAny();
@@ -120,11 +120,11 @@ export const LikeButton = ({
 export const UIEmoji = ({ emoji: rawEmoji }: { emoji: string }) => {
   const emoji = rawEmoji.trim();
   if (emoji === '❤️') {
-    return <SolidHeart className="text-foreground mr-1 inline-block h-6 w-6" />;
+    return <SolidHeart className="mr-1 inline-block h-6 w-6" />;
   } else if (emoji === '👍️') {
-    return <ThumbsUp className="text-foreground mr-1 inline-block h-6 w-6" />;
+    return <ThumbsUp className="mr-1 inline-block h-6 w-6" />;
   } else if (emoji === '😆' || emoji === '😂') {
-    return <Lol className="text-foreground mr-1 inline-block h-6 w-6" />;
+    return <Lol className="mr-1 inline-block h-6 w-6" />;
   } else if (
     emoji === '😥' ||
     emoji === '🥲' ||
@@ -132,14 +132,14 @@ export const UIEmoji = ({ emoji: rawEmoji }: { emoji: string }) => {
     emoji === '😭' ||
     emoji === '😿'
   ) {
-    return <SolidSad className="text-foreground mr-1 inline-block h-6 w-6" />;
+    return <SolidSad className="mr-1 inline-block h-6 w-6" />;
   }
 
   return (
     <span
       className="mr-1 text-transparent"
       style={{
-        textShadow: '0 0 0 rgb(var(--color-foreground))',
+        textShadow: '0 0 0 rgb(var(--color-foreground) / var(--tw-text-opacity))',
       }}
     >
       {emoji}
