@@ -272,7 +272,13 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
     );
   }
 
-  if (isAuthenticated && !isConfigured && isFetched && window.location.pathname !== SETUP_PATH) {
+  if (
+    isAuthenticated &&
+    // Check for explicit false, as undefined means we couldn't get the info from the server
+    isConfigured === false &&
+    isFetched &&
+    window.location.pathname !== SETUP_PATH
+  ) {
     console.debug('[NOT CONFIGURED]: Redirect to configure');
     return (
       <Navigate
