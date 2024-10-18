@@ -205,7 +205,7 @@ function App() {
 
             <Route path="drives" element={<Drives />}></Route>
             <Route path="drives/:driveKey" element={<DriveDetails />}></Route>
-            <Route path="drives/:driveKey/:fileQuery" element={<FileDetails />}></Route>
+            <Route path="drives/:driveKey/:fileKey" element={<FileDetails />}></Route>
             <Route path="settings" element={<Settings />}></Route>
             <Route path="settings/:sectionId" element={<Settings />}></Route>
 

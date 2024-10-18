@@ -13,10 +13,10 @@ import {
   TargetDrive,
   getFileHeader,
   getFileHeaderByUniqueId,
+  getFileHeaderBytesByGlobalTransitId,
 } from '@homebase-id/js-lib/core';
 import { useAuth } from '../auth/useAuth';
 import { jsonStringify64, tryJsonParse } from '@homebase-id/js-lib/helpers';
-import { getFileHeaderBytesOverPeerByGlobalTransitId } from '@homebase-id/js-lib/peer';
 
 const includeMetadataHeader = true;
 const includeTransferHistory = true;
@@ -86,9 +86,8 @@ export const useFileQuery = ({
       if (fileByUniqueId) return fileByUniqueId;
 
       // Search by globalTransitId
-      const fileByGlobalTransitId = await getFileHeaderBytesOverPeerByGlobalTransitId(
+      const fileByGlobalTransitId = await getFileHeaderBytesByGlobalTransitId(
         dotYouClient,
-        window.location.hostname,
         targetDrive,
         id
       );
