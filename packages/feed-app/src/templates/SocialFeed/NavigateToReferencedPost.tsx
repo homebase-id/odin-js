@@ -50,16 +50,14 @@ const useReferencedPost = (postKey: string | undefined) => {
   useEffect(() => {
     if (!postKey || !allChannels) return;
 
-    (async () => {
-      allChannels?.forEach(async (channel) => {
-        const post = await queryClient.fetchQuery(
-          getPostQueryOptions(dotYouClient, queryClient, true, undefined, channel, postKey)
-        );
-        if (post) {
-          setPost(post);
-        }
-      });
-    })();
+    allChannels?.forEach(async (channel) => {
+      const post = await queryClient.fetchQuery(
+        getPostQueryOptions(dotYouClient, queryClient, true, undefined, channel, postKey)
+      );
+      if (post) {
+        setPost(post);
+      }
+    });
   }, [allChannels]);
 
   return post;
