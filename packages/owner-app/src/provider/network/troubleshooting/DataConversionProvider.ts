@@ -15,17 +15,3 @@ export const autoFixConnections = async (dotYouClient: DotYouClient) => {
     })
     .catch(dotYouClient.handleErrorResponse);
 };
-
-export const ensureVerificationHash = async (dotYouClient: DotYouClient) => {
-  assertIfDefined('DotYouClient is required', dotYouClient);
-
-  const client = dotYouClient.createAxiosClient();
-  return await client
-    .post<unknown>(`${dataConverionRoot}/prepare-introductions-release`, {})
-    .then((response) => {
-      if (response.status !== 200) {
-        throw new Error('Auto fix connections failed with status ' + response.status);
-      }
-    })
-    .catch(dotYouClient.handleErrorResponse);
-};

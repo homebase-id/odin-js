@@ -43,7 +43,6 @@ export const useAutofixDefaultConfig = () => {
       try {
         await fixDefaultProfileImage();
         await autoFixConnections(dotYouClient);
-        await ensureVerificationHash(dotYouClient);
 
         updateUiSetting({ ...uiSettings, lastRunAutoFix: AUTO_FIX_VERSION });
         console.log('[useAutoFixDefaultConfig] Finished ', AUTO_FIX_VERSION);
