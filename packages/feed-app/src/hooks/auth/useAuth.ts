@@ -27,6 +27,7 @@ import {
   FEED_ROOT_PATH,
   useDotYouClient,
 } from '@homebase-id/common-app';
+import { clear } from 'idb-keyval';
 
 export const useAuth = () => {
   const { getDotYouClient, getSharedSecret, hasSharedSecret } = useDotYouClient();
@@ -44,6 +45,7 @@ export const useAuth = () => {
     setAuthenticationState('anonymous');
 
     window.location.href = '/';
+    clear();
   };
 
   const preauth = async (): Promise<void> => await preauthApps(getDotYouClient());

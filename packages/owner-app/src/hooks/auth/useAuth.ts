@@ -16,6 +16,7 @@ import {
   logoutOwner,
   useDotYouClient,
 } from '@homebase-id/common-app';
+import { clear } from 'idb-keyval';
 
 export const SETUP_PATH = '/owner/setup';
 
@@ -74,6 +75,8 @@ export const useAuth = () => {
     window.localStorage.removeItem(OWNER_SHARED_SECRET);
     window.localStorage.removeItem(HOME_SHARED_SECRET);
     window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
+
+    clear();
 
     window.location.href = redirectPath || LOGIN_PATH;
   };

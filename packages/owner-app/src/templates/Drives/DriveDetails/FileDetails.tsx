@@ -8,7 +8,7 @@ import { useFileQuery } from '../../../hooks/files/useFiles';
 import { SystemFileType } from '@homebase-id/js-lib/core';
 
 const DriveDetails = () => {
-  const { driveKey, systemFileType, fileQuery } = useParams();
+  const { driveKey, systemFileType, fileKey } = useParams();
   const splittedDriveKey = driveKey ? driveKey.split('_') : undefined;
 
   const targetDrive = splittedDriveKey
@@ -22,7 +22,7 @@ const DriveDetails = () => {
 
   const { data: file, isLoading: fileLoading } = useFileQuery({
     targetDrive,
-    id: fileQuery,
+    id: fileKey,
     systemFileType: systemFileType as SystemFileType,
   });
 
@@ -42,7 +42,7 @@ const DriveDetails = () => {
             href: `/owner/drives/${driveDef.targetDriveInfo.alias}_${driveDef.targetDriveInfo.type}`,
             title: driveDef.name ?? '',
           },
-          { title: fileQuery ?? '' },
+          { title: fileKey ?? '' },
         ]}
       />
 

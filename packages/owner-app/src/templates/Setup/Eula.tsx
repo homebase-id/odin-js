@@ -48,276 +48,227 @@ const EulaContents = () => {
   return (
     <div className="flex flex-col gap-5">
       <p className="text-lg">
-        <small className="block text-sm">Version: January 16, 2024</small>
-      </p>
-      <p>Essential quick points of the EULA:</p>
-      <ul className="list-outside list-disc pl-4">
-        <li>
-          <em className="font-medium not-italic">Free Use:</em> Individuals, educational
-          institutions, and organizations with less than 50 members can use Homebase at no cost for
-          managing their own personal or academic identities.
-        </li>
-        <li>
-          <em className="font-medium not-italic">Data Ownership: </em>The data you create with
-          Homebase belongs to you and only you.
-        </li>
-        <li>
-          <em className="font-medium not-italic">No Lawsuits: </em>By using this software, you agree
-          that you will not sue us or hold us responsible for any losses or damages that come from
-          using Homebase.
-        </li>
-        <li>
-          <em className="font-medium not-italic">Illegal Content: </em>You agree not to distribute
-          content that is universally regarded as illegal and extremely harmful, including child
-          pornography, revenge porn, and snuff. Violating this provision will result in the
-          immediate, permanent termination of your rights to use Homebase.
-        </li>
-      </ul>
-      <p>
-        Some of the points listed above supplement the terms in the Additional Legal Details below.
-        Such supplemental points provide additional information not covered in the Additional Legal
-        Details but remain equally binding.
-      </p>
-      <p>
-        If your identity is hosted by a hosting company, be sure to read their terms and conditions.{' '}
-      </p>
-      <p>
-        Please refer to Homebase&quot;s Hosting User License Agreement (HULA) for your general
-        rights when someone else is hosting your identity.
-      </p>
-      <p>
-        Please refer to Homebase&quot;s Open-Source License Agreement (OSLA) if you wish to inspect,
-        use, modify or distribute the source code.
-      </p>
-      <p className="text-xl">Additional Legal Details</p>
-      <p>
-        This End-User License Agreement (&quot;Agreement&quot;) is a legal agreement between you
-        (&quot;User&quot; or &quot;You&quot;) and Homebase and its developers (&quot;Licensor&quot;,
-        &quot;Us&quot;, or &quot;We&quot;) regarding your use of Homebase, a fully self-sovereign
-        identity, secure communication, secure personal storage and social media application
-        (&quot;Software&quot;).
-      </p>
-      <p className="text-xl">1. GRANT OF LICENSE</p>
-      <p>
-        Subject to the terms and conditions of this Agreement, the Licensor grants You a limited,
-        non-exclusive, non-transferable, and non-sublicensable right to download, install, and use
-        the Software on a computer, device, a cloud system, or other system owned or controlled by
-        You.
-      </p>
-      <p className="text-xl">2. RESTRICTIONS</p>
-      <p>
-        You may not redistribute, sublicense, lease, sell, or rent the Software. You may not
-        disassemble, decompile, reverse engineer, or attempt to discover any source code or
-        underlying ideas or algorithms of the Software. You may not modify or create derivative
-        works of the Software.
-      </p>
-      <p className="text-xl">3. NO LICENSOR CONTROL</p>
-      <p>You acknowledge and agree that:</p>
-      <ul className="list-outside list-disc pl-4">
-        <li>
-          The Software is decentralized and operates without oversight or control by the Licensor.
-        </li>
-        <li>
-          You are solely responsible for how You use the Software and any content You access, share,
-          or disseminate through it.
-        </li>
-        <li>
-          The Licensor has no ability to access, view, control, restrict or retrieve User data or
-          content within the Software.
-        </li>
-      </ul>
-      <p className="text-xl">4. PRIVACY AND SECURITY</p>
-      <p>
-        The Software is designed to provide enhanced privacy and security to its users. The Licensor
-        does not collect, store, or have access to any personal or private information or content
-        you generate or share through the Software.
-      </p>
-      <p>You acknowledge and agree that:</p>
-      <ul className="list-outside list-disc pl-4">
-        <li>
-          The privacy of storage and communication within the Software is a feature intended to
-          enhance your personal security.
-        </li>
-        <li>
-          You are solely responsible for the safekeeping and confidentiality of private keys,
-          passwords, or any other authentication methods associated with your use of the Software.
-        </li>
-        <li>
-          The Licensor is not responsible for any loss, damage, or unauthorized access resulting
-          from your failure to securely manage and maintain your private keys, passwords, or other
-          authentication credentials.
-        </li>
-        <li>
-          If you lose your Homebase password and recovery-key, then your data is lost forever.
-        </li>
-      </ul>
-      <p className="text-xl">5. FEES</p>
-      <p>
-        Individuals, educational institutions, and organizations with less than 50 members can use
-        Homebase at no cost for managing their own personal or academic identities.
-      </p>
-      <p>
-        Non-educational organizations with 50 members or more are required to pay an annual fee of
-        $12 per member to Homebase. This fee helps support the maintenance and development of the
-        non-profit open-source Homebase software. Failure to pay due fees will result in a doubling
-        of the fees for each year they remain overdue.
-      </p>
-      <p className="text-xl">6. ALPHA STATE WARNING</p>
-      <p>You acknowledge and agree that:</p>
-      <ul className="list-outside list-disc pl-4">
-        <li>
-          The Software is in alpha state, which means it will contain errors, bugs, or issues that
-          might lead to software crashes or data loss.
-        </li>
-        <li>The Software may not function as intended or might not function at all.</li>
-        <li>It is crucial to regularly backup any data or content you deem important.</li>
-      </ul>
-      <p className="text-xl">7. LIMITATION OF LIABILITY</p>
-      <p>
-        The Licensor shall not be liable for any direct losses or damages arising from or related to
-        Your use or inability to use the Software. This encompasses, without limitation:
-      </p>
-      <ul className="list-outside list-disc pl-4">
-        <li>Damage to property or hardware.</li>
-        <li>Loss of data.</li>
-        <li>Work stoppage.</li>
-        <li>Computer failure or malfunction.</li>
-        <li>Claims by third parties.</li>
-      </ul>
-      <p>
-        The Licensor shall also not be liable for any indirect, special, incidental, or
-        consequential damages arising out of Your use or inability to use the Software, even if
-        advised of the possibility of such damages. This encompasses, without limitation:
-      </p>
-      <ul className="list-outside list-disc pl-4">
-        <li>Loss of goodwill.</li>
-        <li>Loss of revenue or anticipated profits.</li>
-        <li>Loss of business.</li>
-        <li>Loss of opportunity or investment.</li>
-        <li>Any and all other commercial damages or losses.</li>
-      </ul>
-      <p className="text-xl">8. FORBIDDEN USES</p>
-      <p>
-        Illegal Activities: You may not use the Software for any illegal or unauthorized activities.
-        Examples of such activities include, but are not limited to:
-      </p>
-      <ul className="list-outside list-disc pl-4">
-        <li>Child pornography </li>
-        <li>Revenge porn or snuff.</li>
-        <li>Fraud or financial crimes.</li>
-        <li>Distribution, selling or production of illicit drugs.</li>
-        <li>Trafficking or promotion of illegal goods or terrorism.</li>
-        <li>Any other activities prohibited by applicable law</li>
-      </ul>
-      <p>
-        Violating the forbidden uses will result in the immediate, permanent termination of your
-        rights to use Homebase and be liable for any reputational damage you may have cause to
-        Homebase.
-      </p>
-      <p>
-        Violation of Third Party IPR: You are strictly prohibited from using the Software in a
-        manner that infringes, violates, or misappropriates any third- party intellectual property
-        rights, including but not limited to:
-      </p>
-      <ul className="list-outside list-disc pl-4">
-        <li>Copyrights.</li>
-        <li>Trademarks.</li>
-        <li>Patents.</li>
-        <li>Trade secrets.</li>
-      </ul>
-
-      <p className="text-xl">9. CRYPTOGRAPHIC NOTICE</p>
-      <p>
-        This distribution includes cryptographic software. The country in which you currently reside
-        may have restrictions on the import, possession, use, and/or re-export to another country,
-        of encryption software. BEFORE using any encryption software, please check your
-        country&quot;s laws, regulations and policies concerning the import, possession, or use, and
-        re-export of encryption software, to see if this is permitted. See http://www.wassenaar.org/
-        for more information.
+        <small className="block text-sm">Version: 1.1 October 21, 2024</small>
       </p>
 
-      <p className="text-xl">10. INDEMNIFICATION</p>
       <p>
-        You, the licensee, agree to indemnify, defend, and hold harmless the Licensor from and
-        against any claims or damages arising from:
+        By using the Software hosted by Raven Hosting, you acknowledge that you have read,
+        understood, and agreed to these Terms of Service.
       </p>
-      <ul className="list-outside list-disc pl-4">
-        <li>Your use of and access to the Software.</li>
-        <li>Your violation of any term of this Agreement.</li>
-        <li>Any claim that Your use of the Software caused damage to a third party.</li>
-      </ul>
-      <p className="text-xl">11. DISCLAIMER OF WARRANTIES</p>
+      <p className="text-xl">1. Introduction</p>
       <p>
-        The Software is provided &quot;as is&quot; and &quot;as available&quot;, without warranty of
-        any kind, express or implied, including but not limited to the warranties of
-        merchantability, fitness for a particular purpose, or non-infringement.
-      </p>
-      <p className="text-xl">12. TERMINATION AND TRANSITION</p>
-      <p>
-        Your license to use the Software is effective until terminated. It will terminate
-        automatically if you fail to comply with any of its terms. Additionally, the Licensor
-        reserves the right to terminate this Agreement, with reasonable notice, upon the decision to
-        conclude the Software&quot;s alpha phase.
+        Welcome to Raven Hosting (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;). These Terms
+        of Service (&quot;Agreement&quot;) govern your use of the Homebase software applications
+        (&quot;Software&quot;) hosted on our servers. The Software, licensed under the AGPLv3,
+        includes a suite of self-sovereign identity tools, secure communication platforms, personal
+        storage, and social media applications such as chat, photos, and feed apps.
       </p>
       <p>
-        Should the Software transition to a subsequent phase, whether it be another trial, testing,
-        or production stage, at the Licensor&quot;s full discretion, You may be offered a new
-        license agreement on standard terms for that phase or version of the Software.
+        By accessing or using the Software on our servers, you (&quot;you&quot; or &quot;user&quot;)
+        acknowledge that you have read, understood, and agree to be bound by this Agreement. If you
+        do not agree with any part of these terms, you must not use the Software hosted by Raven
+        Hosting.
+      </p>
+      <p className="text-xl">2. Grant of Service</p>
+      <p>
+        Subject to the terms and conditions of this Agreement, Raven Hosting grants you the right to
+        access and use the Software on our servers for both commercial and non-commercial purposes,
+        without any geographical limitations. This grant is contingent upon your compliance with all
+        applicable laws and the restrictions outlined in Section 3.
       </p>
       <p>
-        Upon termination for any reason, you must immediately cease using the Software and delete
-        all copies.
+        Please note that while the Software is licensed under the AGPLv3 and freely available, this
+        Agreement governs your use of the Software specifically on Raven Hosting&apos;s servers.
       </p>
-      <p className="text-xl">13. INTELLECTUAL PROPERTY RIGHTS (IPR)</p>
-      <p>You acknowledge and agree that:</p>
+      <p className="text-xl">3. Restrictions and Forbidden Use</p>
+      <p>
+        You agree not to use the Software hosted by Raven Hosting for any illegal activities or any
+        activities prohibited under this Agreement. Prohibited uses include, but are not limited to:
+      </p>
+      <p className="text-lg">Illegal Content and Activities:</p>
       <ul className="list-outside list-disc pl-4">
         <li>
-          All intellectual property rights in and to the Software, including but not limited to
-          patents, copyrights, trademarks, service marks, trade secrets, and any other proprietary
-          rights, belong exclusively to the Licensor.
+          Storage, distribution, or solicitation of child pornography, revenge porn, snuff content,
+          or any other illegal material.
         </li>
-        <li>The Licensor reserves all rights not expressly granted to You in this Agreement.</li>
+        <li>Committing or aiding in fraud, money laundering, or any financial crimes.</li>
         <li>
-          The Software is licensed, not sold, to You. Your license confers no title to, or ownership
-          in, the Software, and is not a sale of any rights in the Software.
+          Distribution, sale, or production of illicit or illegal drugs and trafficking or promotion
+          of illegal goods.
+        </li>
+        <li>Supporting, promoting, or engaging in terrorist activities.</li>
+        <li>
+          Infringing upon third-party intellectual property rights, including copyrights,
+          trademarks, patents, or trade secrets.
+        </li>
+        <li>Any other activities prohibited by applicable law.</li>
+      </ul>
+      <p className="text-lg">Prohibited Content Specific to Raven Hosting:</p>
+      <ul className="list-outside list-disc pl-4">
+        <li>Storage, sharing, or distribution of pornographic material of any kind.</li>
+        <li>
+          Any activities deemed inappropriate or not aligned with Raven Hosting&apos;s interests, at
+          our sole discretion.
         </li>
       </ul>
-      <p className="text-xl">14. GOVERNING LAW</p>
+      <p className="text-xl">4. Privacy and Security</p>
       <p>
-        This Agreement shall be governed by, and construed in accordance with, the laws of Denmark,
-        without regard to its conflict of laws principles. The Parties agree that any disputes
-        arising out of or in connection with this Agreement, including any question regarding its
-        existence, validity, or termination, shall be subject to the exclusive jurisdiction of the
-        courts of Denmark. Any and all legal proceeding shall be held in Danish.
+        The Software is designed to enhance your privacy and security. Your data is stored on our
+        servers and secured with zero-knowledge encryption, meaning we cannot decrypt or access your
+        data. Please note that public content, such as posts made public, is not encrypted.
       </p>
-      <p className="text-lg">International Application</p>
+      <p className="text-lg">Data Responsibility:</p>
       <p>
-        The Parties agree that this Agreement applies internationally and that regardless of their
-        place of residence, organization, or location of access to the Software, they will be
-        subject to the laws and jurisdiction specified above.
+        We do not collect, store, or have access to any personal or private information or content
+        that you generate or share using the Software.
       </p>
+      <p className="text-lg">Authentication Credentials:</p>
       <p>
-        By using the Software, you explicitly and unconditionally consent to be governed by the laws
-        and courts of Denmark, in Danish, regardless of your country of origin, language, residence,
-        or location. If you do not agree with this clause, you are not permitted to use the
-        Software.
+        You are solely responsible for safeguarding your private keys, passwords, and any other
+        authentication methods associated with your use of the Software.
       </p>
-      <p className="text-xl">15. ENTIRE AGREEMENT</p>
+      <p className="text-lg">Data Loss:</p>
       <p>
-        This Agreement constitutes the entire agreement between the parties concerning the subject
-        matter hereof and supersedes all prior and contemporaneous agreements and communications,
-        whether oral or written.
+        If you lose your Homebase password and recovery key, your data and content will be
+        irretrievable. We are not responsible for any loss resulting from your failure to securely
+        manage your authentication credentials.
       </p>
+      <p className="text-xl">5. Suspension of Service</p>
       <p>
-        If any provision of this Agreement is found by a court of competent jurisdiction to be
-        invalid, illegal, or unenforceable, that provision shall be limited or eliminated to the
-        minimum extent necessary so that this Agreement shall otherwise remain in full force and
-        effect and enforceable.
+        Raven Hosting reserves the right to suspend or restrict your access to the Software hosted
+        on our servers if we reasonably believe that such action is necessary to:
       </p>
+      <ul className="list-outside list-disc pl-4">
+        <li>Investigate suspected violations of this Agreement or illegal activities.</li>
+        <li>
+          Comply with legal obligations or requests from law enforcement or other governmental
+          entities.
+        </li>
+        <li>
+          Protect the security, integrity, or functionality of our services and infrastructure.
+        </li>
+        <li>Prevent harm to us, our users, or the public.</li>
+      </ul>
       <p>
-        By downloading, installing, or using the Software, you agree to be bound by the terms and
-        conditions of this Agreement. If you do not agree to these terms, do not download, install,
-        or use the Software.
+        We will make reasonable efforts to notify you of any suspension or restriction unless
+        prohibited by law or if providing notice could compromise an investigation.
+      </p>
+      <p className="text-xl">6. Disclaimer of Warranties and Limitation of Liability</p>
+      <p className="text-lg">&quot;As Is&quot; Provision:</p>
+      <p>
+        The Software is provided &quot;as is&quot; and &quot;as available,&quot; without any
+        warranties, express or implied, including but not limited to warranties of merchantability
+        or fitness for a particular purpose.
+      </p>
+      <p className="text-lg">Alpha/Beta State Acknowledgment:</p>
+      <p>
+        You acknowledge that the Software is in an alpha or beta state and may contain errors or
+        bugs that could lead to software crashes or data loss. Regular data backups are your
+        responsibility.
+      </p>
+      <p className="text-lg">Limitation of Liability:</p>
+      <p>
+        To the fullest extent permitted by law, Raven Hosting shall not be liable for any direct,
+        indirect, incidental, special, or consequential damages arising from your use or inability
+        to use the Software hosted on our servers.
+      </p>
+      <p className="text-lg">Maximum Liability:</p>
+      <p>
+        In no event shall Raven Hosting&apos;s total liability exceed the amount you have paid for
+        the use of the Software in the twelve (12) months preceding the claim.
+      </p>
+      <p className="text-xl">7. Cryptographic Notice</p>
+      <p>
+        The Software includes cryptographic features. The use, import, or export of encryption
+        software may be regulated or prohibited in your country or jurisdiction. Before using the
+        Software, you are responsible for complying with any laws and regulations concerning
+        encryption software. Raven Hosting is not liable for any legal consequences arising from
+        your use of the Software&apos;s cryptographic features.
+      </p>
+      <p className="text-xl">8. Indemnification</p>
+      <p>
+        You agree to indemnify, defend, and hold harmless Raven Hosting and its affiliates from any
+        claims, liabilities, damages, losses, and expenses, including reasonable legal fees, arising
+        from:
+      </p>
+      <ul className="list-outside list-disc pl-4">
+        <li>Your unauthorized or prohibited use of the Software hosted on our servers.</li>
+        <li>Your breach of any term of this Agreement.</li>
+        <li>Any claim that your use of the Software has directly caused harm to a third party.</li>
+      </ul>
+      <p>
+        We will provide you with prompt written notice of any such claim and cooperate with you, at
+        your expense, in the defense of such matters. You will have control over the defense or
+        settlement of any claim, subject to our reasonable approval.
+      </p>
+      <p className="text-xl">9. Termination</p>
+      <p className="text-lg">9.1 Duration and Termination</p>
+      <p>
+        This Agreement commences upon your acceptance and remains in effect until terminated as
+        outlined in this section.
+      </p>
+      <p className="text-lg">9.2 Termination by Raven Hosting</p>
+      <p>
+        We reserve the right to terminate this Agreement and your access to the Software hosted on
+        our servers under the following conditions:
+      </p>
+      <ul className="list-outside list-disc pl-4">
+        <li>
+          <strong>Immediate Termination for Breach:</strong> If you violate any terms of this
+          Agreement, your rights under this Agreement will terminate immediately without notice. You
+          must cease using the Software hosted by Raven Hosting.
+        </li>
+        <li>
+          <strong>Conclusion of Beta Phase:</strong> We may terminate this Agreement upon reasonable
+          notice if we decide to conclude the Software&apos;s alpha or beta phase. If the Software
+          transitions to a new phase, you may be offered a new license agreement applicable to that
+          phase.
+        </li>
+        <li>
+          <strong>End of License Period:</strong> If applicable, we may terminate this Agreement at
+          the end of a current license period by providing you with reasonable prior notice.
+        </li>
+      </ul>
+      <p className="text-lg">9.3 Obligations Upon Termination</p>
+      <p>
+        Upon termination, you must immediately cease all use of the Software hosted on our servers.
+        Any ongoing obligations under this Agreement will continue to apply to you.
+      </p>
+      <p className="text-lg">9.4 Survival of Terms</p>
+      <p>
+        Termination does not affect any rights or obligations accrued prior to the termination date.
+        Provisions concerning limitations of liability, indemnification, and governing law shall
+        survive termination.
+      </p>
+      <p className="text-xl">10. Miscellaneous</p>
+      <p className="text-lg">10.1 Entire Agreement</p>
+      <p>
+        This Agreement constitutes the entire agreement between you and Raven Hosting regarding the
+        use of the Software hosted on our servers and supersedes all prior agreements or
+        understandings.
+      </p>
+      <p className="text-lg">10.2 Severability</p>
+      <p>
+        If any provision of this Agreement is found to be invalid or unenforceable, that provision
+        will be enforced to the maximum extent permissible, and the remaining provisions will remain
+        in full force and effect.
+      </p>
+      <p className="text-lg">10.3 Headings</p>
+      <p>
+        Headings are for reference purposes only and do not limit the scope or extent of any
+        section.
+      </p>
+      <p className="text-lg">10.4 Waiver</p>
+      <p>
+        Our failure to enforce any right or provision of this Agreement will not constitute a waiver
+        of such right or provision unless acknowledged and agreed to by us in writing.
+      </p>
+      <p className="text-lg">10.5 Notices</p>
+      <p>
+        All notices under this Agreement shall be made by email or other communication channels
+        specified by Raven Hosting. It is your responsibility to provide us with your current
+        contact information and to update us promptly if it changes. Notices will be deemed given
+        when sent to the most recent contact information you have provided
       </p>
     </div>
   );
