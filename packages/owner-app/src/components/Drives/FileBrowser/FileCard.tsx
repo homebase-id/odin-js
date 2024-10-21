@@ -42,6 +42,7 @@ export const FileCard = ({
   const isImage = [
     'image/webp',
     'image/jpeg',
+    'image/jpg',
     'image/png',
     'image/svg+xml',
     'image/gif',
@@ -309,7 +310,6 @@ const FileIds = ({
   isRow?: boolean;
   driveRoot?: string;
 }) => {
-  console.log('file', file.fileSystemType);
   const IdWrapper = (label: string, id: string) => {
     return (
       <HybridLink
