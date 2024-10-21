@@ -13,10 +13,7 @@ import {
 import { useEffect, useRef } from 'react';
 import { useAttribute } from './profiles/useAttribute';
 import { useSettings } from './settings/useSettings';
-import {
-  autoFixConnections,
-  ensureVerificationHash,
-} from '../provider/network/troubleshooting/DataConversionProvider';
+import { autoFixConnections } from '../provider/network/troubleshooting/DataConversionProvider';
 
 export const AUTO_FIX_VERSION = '0.0.4';
 export const useAutofixDefaultConfig = () => {
