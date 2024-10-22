@@ -29,6 +29,7 @@ import { LinkPreview } from '@homebase-id/js-lib/media';
 export const useManagePost = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
+  const identity = useDotYouClient().getIdentity();
 
   const savePost = async ({
     postFile,
@@ -270,6 +271,7 @@ export const useManagePost = () => {
             fileMetadata: {
               ...newPost.postFile.fileMetadata,
               senderOdinId: newPost.odinId,
+              originalAuthor: identity,
               appData: {
                 ...newPost.postFile.fileMetadata.appData,
                 content: {
