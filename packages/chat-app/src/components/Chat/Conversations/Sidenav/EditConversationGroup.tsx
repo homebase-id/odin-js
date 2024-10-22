@@ -10,14 +10,13 @@ import {
   Label,
   NotFound,
   t,
-  useAllContacts,
   useDotYouClient,
   useIntroductions,
 } from '@homebase-id/common-app';
 import { Save, Times } from '@homebase-id/common-app/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useConversation } from '../../../../hooks/chat/useConversation';
-import { SingleConversationItem } from '../Item/ConversationItem';
+import { GroupContactSearch } from './ConversationGroupFIelds';
 
 export const EditConversationGroup = () => {
   const identity = useDotYouClient().getIdentity();
@@ -28,25 +27,10 @@ export const EditConversationGroup = () => {
   } = useConversation({ conversationId: conversationKey });
   const { mutate: introduceIdentities } = useIntroductions().introduceIdentities;
 
-  const [query, setQuery] = useState<string | undefined>(undefined);
-
   const [newRecipients, setNewRecipients] = useState<string[]>([]);
   const [groupTitle, setGroupTitle] = useState<string>();
 
   const navigate = useNavigate();
-
-  const { data: contacts } = useAllContacts(true);
-  const contactResults = contacts
-    ? contacts
-        .map((dsr) => dsr.fileMetadata.appData.content)
-        .filter(
-          (contact) =>
-            contact.odinId &&
-            (!query ||
-              contact.odinId?.includes(query) ||
-              contact.name?.displayName?.includes(query))
-        )
-    : [];
 
   const doUpdate = async () => {
     if (!conversation) return;
@@ -143,32 +127,12 @@ export const EditConversationGroup = () => {
         </div>
       </div>
 
-      <form onSubmit={(e) => e.preventDefault()} className="w-full">
-        <div className="flex w-full flex-col gap-2 p-5">
-          <Input
-            onChange={(e) => setQuery(e.target.value)}
-            defaultValue={query}
-            className="w-full"
-            placeholder={t('Search for contacts')}
-          />
-        </div>
-      </form>
-      <div className="flex-grow overflow-auto">
-        {contactResults.map((result, index) => (
-          <SingleConversationItem
-            odinId={result.odinId as string}
-            isActive={false}
-            key={result.odinId || index}
-            onClick={() => {
-              if (!result.odinId) return;
-              setNewRecipients([
-                ...newRecipients.filter((x) => x !== result.odinId),
-                result.odinId,
-              ]);
-            }}
-          />
-        ))}
-      </div>
+      <GroupContactSearch
+        addContact={(newContact) => {
+          setNewRecipients([...newRecipients.filter((x) => x !== newContact), newContact]);
+        }}
+        defaultValue={[...newRecipients, ...conversation.fileMetadata.appData.content.recipients]}
+      />
     </ErrorBoundary>
   );
 };

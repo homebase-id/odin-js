@@ -94,7 +94,18 @@ export const ChatInfo = ({
       </div>
       {recipients?.length > 1 ? (
         <div className="mt-10">
-          <p className="mb-4 text-lg">{t('Recipients')}</p>
+          <div className="flex flex-col items-center justify-between sm:flex-row">
+            <p className="mb-4 text-lg">{t('Recipients')}</p>
+            {isAdmin ? (
+              <ActionLink
+                type="mute"
+                size="none"
+                href={`${CHAT_ROOT_PATH}/${conversation.fileMetadata.appData.uniqueId}/edit`}
+              >
+                {t('Edit')}
+              </ActionLink>
+            ) : null}
+          </div>
           <div className="flex flex-col gap-4">
             {recipients.map((recipient) => (
               <a
@@ -117,18 +128,6 @@ export const ChatInfo = ({
               </a>
             ))}
           </div>
-        </div>
-      ) : null}
-
-      {isAdmin ? (
-        <div className="flex flex-row-reverse">
-          <ActionLink
-            type="secondary"
-            href={`${CHAT_ROOT_PATH}/${conversation.fileMetadata.appData.uniqueId}/edit`}
-            icon={Plus}
-          >
-            {t('Add')}
-          </ActionLink>
         </div>
       ) : null}
     </DialogWrapper>
