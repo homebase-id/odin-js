@@ -54,7 +54,14 @@ export const RichTextRenderer = ({
   };
 
   const renderLeaf = (
-    leaf: { text?: string; bold?: boolean; italic?: boolean; underline?: boolean; code?: boolean },
+    leaf: {
+      text?: string;
+      bold?: boolean;
+      italic?: boolean;
+      underline?: boolean;
+      strikethrough?: boolean;
+      code?: boolean;
+    },
     text: string,
     attributes: Record<string, unknown>
   ) => {
@@ -79,6 +86,10 @@ export const RichTextRenderer = ({
 
     if (leaf.underline) {
       children = <u>{highlightedText}</u>;
+    }
+
+    if (leaf.strikethrough) {
+      children = <del>{highlightedText}</del>;
     }
 
     return (
