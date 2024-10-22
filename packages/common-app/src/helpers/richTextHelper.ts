@@ -1,7 +1,7 @@
 import { ReadTimeStats } from '@homebase-id/js-lib/public';
 import { RichText } from '@homebase-id/js-lib/core';
 
-const urlAndMentionRegex = new RegExp(/(https?:\/\/[^\s]|(?:^|\s|[\r\n])@[^\s]+)/);
+const urlAndMentionRegex = new RegExp(/(https?:\/\/[^\s]+|(?:^|\s|[\r\n])@[^\s]+)/);
 
 const urlRegex = new RegExp(
   /https?:\/\/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|(localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d{1,5})?)(\/[^\s]*)?/
