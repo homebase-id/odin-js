@@ -55,7 +55,7 @@ export const useCommunityReaction = (props?: {
     if (!community || !message) return;
     const communityContent = community.fileMetadata.appData.content;
     const identity = dotYouClient.getIdentity();
-    const recipients = communityContent.recipients.filter((recipient) => recipient !== identity);
+    const members = communityContent.members.filter((recipient) => recipient !== identity);
     const targetDrive = getTargetDriveFromCommunityId(
       community.fileMetadata.appData.uniqueId as string
     );
@@ -68,7 +68,7 @@ export const useCommunityReaction = (props?: {
       targetDrive,
       message.fileMetadata.globalTransitId,
       reaction,
-      recipients
+      members
     );
   };
 
@@ -84,7 +84,7 @@ export const useCommunityReaction = (props?: {
     if (!community || !message) return;
     const communityContent = community.fileMetadata.appData.content;
     const identity = dotYouClient.getIdentity();
-    const recipients = communityContent.recipients.filter((recipient) => recipient !== identity);
+    const members = communityContent.members.filter((recipient) => recipient !== identity);
 
     const targetDrive = getTargetDriveFromCommunityId(
       community.fileMetadata.appData.uniqueId as string
@@ -93,7 +93,7 @@ export const useCommunityReaction = (props?: {
     if (!message.fileMetadata.globalTransitId)
       throw new Error('Message does not have a global transit id');
 
-    return await deleteGroupReaction(dotYouClient, targetDrive, recipients, reaction, {
+    return await deleteGroupReaction(dotYouClient, targetDrive, members, reaction, {
       fileId: message.fileId,
       globalTransitId: message.fileMetadata.globalTransitId,
       targetDrive: targetDrive,

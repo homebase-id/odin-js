@@ -29,7 +29,7 @@ export const CommunityChannelNav = () => {
   const { data: metadata } = usecommunityMetadata({ communityId: communityKey }).single;
 
   const communityId = community?.fileMetadata.appData.uniqueId;
-  const recipients = community?.fileMetadata.appData.content?.recipients;
+  const members = community?.fileMetadata.appData.content?.members;
 
   const isActive = !!useMatch({ path: `${COMMUNITY_ROOT}/${communityId}` });
 
@@ -108,7 +108,7 @@ export const CommunityChannelNav = () => {
 
           <div className="flex flex-col gap-1">
             <h2 className="px-1">{t('Direct messages')}</h2>
-            {recipients?.map((recipient) => (
+            {members?.map((recipient) => (
               <DirectMessageItem communityId={communityId} recipient={recipient} key={recipient} />
             ))}
           </div>

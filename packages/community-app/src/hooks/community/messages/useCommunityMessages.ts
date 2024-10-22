@@ -38,7 +38,7 @@ export const useCommunityMessages = (props?: {
   }) => {
     const communityContent = community.fileMetadata.appData.content;
     const identity = dotYouClient.getIdentity();
-    const recipients = communityContent.recipients.filter((recipient) => recipient !== identity);
+    const members = communityContent.members.filter((recipient) => recipient !== identity);
 
     if (!community.fileMetadata.appData.uniqueId) {
       throw new Error('Community unique id is not set');
@@ -50,7 +50,7 @@ export const useCommunityMessages = (props?: {
           dotYouClient,
           community.fileMetadata.appData.uniqueId as string,
           msg,
-          recipients
+          members
         );
       })
     );

@@ -24,15 +24,10 @@ export const useCommunityChannel = (props?: { communityId?: string; channelId?: 
     community: HomebaseFile<CommunityDefinition>;
     channelName: string;
   }) => {
-    const recipients = community.fileMetadata.appData.content.recipients.filter(
+    const members = community.fileMetadata.appData.content.members.filter(
       (recipient) => recipient !== identity
     );
-    return await saveCommunityChannel(
-      dotYouClient,
-      community.fileMetadata.appData.uniqueId as string,
-      recipients,
-      channelName
-    );
+    return await saveCommunityChannel(dotYouClient, community, members, channelName);
   };
 
   return {
@@ -64,7 +59,9 @@ export const useCommunityChannel = (props?: { communityId?: string; channelId?: 
             },
           },
           serverMetadata: {
-            accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+            accessControlList: community.fileMetadata.appData.content.acl || {
+              requiredSecurityGroup: SecurityGroupType.Owner,
+            },
           },
         };
 

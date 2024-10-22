@@ -175,7 +175,7 @@ const ChannelInfo = ({
   const identity = useDotYouClient().getIdentity() || window.location.host;
   const channelContent = channel.fileMetadata.appData.content;
   const communityContent = community.fileMetadata.appData.content;
-  const members = communityContent.recipients;
+  const members = communityContent.members;
 
   const dialog = (
     <DialogWrapper onClose={onClose} title={`# ${channelContent.title}`}>

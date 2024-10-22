@@ -45,7 +45,7 @@ import {
   createThumbnails,
 } from '@homebase-id/js-lib/media';
 import { appId } from '../hooks/auth/useAuth';
-import { getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
+import { CommunityDefinition, getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
 
 export const COMMUNITY_MESSAGE_FILE_TYPE = 7020;
 export const CommunityDeletedArchivalStaus = 2;
@@ -81,43 +81,28 @@ export interface CommunityMessage {
 
 export const uploadCommunityMessage = async (
   dotYouClient: DotYouClient,
-  communityId: string,
+  community: HomebaseFile<CommunityDefinition>,
   message: NewHomebaseFile<CommunityMessage>,
   recipients: string[],
   files: NewMediaFile[] | undefined,
   linkPreviews: LinkPreview[] | undefined,
   onVersionConflict?: () => void
 ) => {
+  const communityId = community.fileMetadata.appData.uniqueId as string;
   const targetDrive = getTargetDriveFromCommunityId(communityId);
   const messageContent = message.fileMetadata.appData.content;
-  const distribute = recipients?.length > 0;
 
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: targetDrive,
       overwriteFileId: message.fileId,
     },
-    transitOptions: distribute
-      ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.High,
-          sendContents: SendContents.All,
-          useAppNotification: true,
-          appNotificationOptions: {
-            appId: appId,
-            typeId: message.fileMetadata.appData.groupId || getNewId(),
-            tagId: message.fileMetadata.appData.uniqueId || getNewId(),
-            silent: false,
-          },
-        }
-      : undefined,
   };
 
   const jsonContent: string = jsonStringify64({ ...messageContent });
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
-    allowDistribution: distribute,
+    allowDistribution: false,
     appData: {
       uniqueId: message.fileMetadata.appData.uniqueId,
       groupId: message.fileMetadata.appData.groupId,
@@ -127,9 +112,10 @@ export const uploadCommunityMessage = async (
       content: jsonContent,
     },
     isEncrypted: true,
-    accessControlList: message.serverMetadata?.accessControlList || {
-      requiredSecurityGroup: SecurityGroupType.Connected,
-    },
+    accessControlList: message.serverMetadata?.accessControlList ||
+      community.fileMetadata.appData.content.acl || {
+        requiredSecurityGroup: SecurityGroupType.Connected,
+      },
   };
 
   const payloads: PayloadFile[] = [];
@@ -237,7 +223,7 @@ export const uploadCommunityMessage = async (
 
     await updateCommunityMessage(
       dotYouClient,
-      communityId,
+      community,
       message,
       recipients,
       uploadResult.keyHeader
@@ -255,34 +241,26 @@ export const uploadCommunityMessage = async (
 
 export const updateCommunityMessage = async (
   dotYouClient: DotYouClient,
-  communityId: string,
+  community: HomebaseFile<CommunityDefinition>,
   message: HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage>,
   recipients: string[],
   keyHeader?: KeyHeader
 ): Promise<UploadResult | void> => {
+  const communityId = community.fileMetadata.appData.uniqueId as string;
   const targetDrive = getTargetDriveFromCommunityId(communityId);
   const messageContent = message.fileMetadata.appData.content;
-  const distribute = recipients?.length > 0;
 
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: targetDrive,
       overwriteFileId: message.fileId,
     },
-    transitOptions: distribute
-      ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.High,
-          sendContents: SendContents.All,
-        }
-      : undefined,
   };
 
   const payloadJson: string = jsonStringify64({ ...messageContent });
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
-    allowDistribution: distribute,
+    allowDistribution: false,
     appData: {
       uniqueId: message.fileMetadata.appData.uniqueId,
       groupId: message.fileMetadata.appData.groupId,
@@ -294,9 +272,10 @@ export const updateCommunityMessage = async (
     },
     senderOdinId: (message.fileMetadata as FileMetadata<CommunityMessage>).senderOdinId,
     isEncrypted: true,
-    accessControlList: message.serverMetadata?.accessControlList || {
-      requiredSecurityGroup: SecurityGroupType.Connected,
-    },
+    accessControlList: message.serverMetadata?.accessControlList ||
+      community.fileMetadata.appData.content.acl || {
+        requiredSecurityGroup: SecurityGroupType.Connected,
+      },
   };
 
   return await uploadHeader(
@@ -312,13 +291,7 @@ export const updateCommunityMessage = async (
       );
       if (!existingChatMessage) return;
       message.fileMetadata.versionTag = existingChatMessage.fileMetadata.versionTag;
-      return await updateCommunityMessage(
-        dotYouClient,
-        communityId,
-        message,
-        recipients,
-        keyHeader
-      );
+      return await updateCommunityMessage(dotYouClient, community, message, recipients, keyHeader);
     }
   );
 };

@@ -54,9 +54,8 @@ export const useCommunityMessage = (props?: {
     chatId?: string;
     userDate?: number;
   }): Promise<NewHomebaseFile<CommunityMessage> | null> => {
-    const communityId = community.fileMetadata.appData.uniqueId as string;
     const communityContent = community.fileMetadata.appData.content;
-    const recipients = communityContent.recipients.filter((recipient) => recipient !== identity);
+    const members = communityContent.members.filter((recipient) => recipient !== identity);
 
     // We prefer having the uniqueId set outside of the mutation, so that an auto-retry of the mutation doesn't create duplicates
     const newChatId = chatId || getNewId();
@@ -77,7 +76,7 @@ export const useCommunityMessage = (props?: {
         },
       },
       serverMetadata: {
-        accessControlList: {
+        accessControlList: community.fileMetadata.appData.content.acl || {
           requiredSecurityGroup: SecurityGroupType.Connected,
         },
       },
@@ -85,9 +84,9 @@ export const useCommunityMessage = (props?: {
 
     const uploadResult = await uploadCommunityMessage(
       dotYouClient,
-      communityId,
+      community,
       newChat,
-      recipients,
+      members,
       files,
       linkPreviews
     );
@@ -109,14 +108,9 @@ export const useCommunityMessage = (props?: {
     community: HomebaseFile<CommunityDefinition>;
   }) => {
     const communityContent = community.fileMetadata.appData.content;
-    const recipients = communityContent.recipients.filter((recipient) => recipient !== identity);
+    const members = communityContent.members.filter((recipient) => recipient !== identity);
 
-    await updateCommunityMessage(
-      dotYouClient,
-      community.fileMetadata.appData.uniqueId as string,
-      updatedChatMessage,
-      recipients
-    );
+    await updateCommunityMessage(dotYouClient, community, updatedChatMessage, members);
   };
 
   return {
@@ -160,7 +154,7 @@ export const useCommunityMessage = (props?: {
             })),
           },
           serverMetadata: {
-            accessControlList: {
+            accessControlList: community.fileMetadata.appData.content.acl || {
               requiredSecurityGroup: SecurityGroupType.Connected,
             },
           },

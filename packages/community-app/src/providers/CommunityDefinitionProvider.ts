@@ -2,6 +2,7 @@ const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
 import {
+  AccessControlList,
   ApiType,
   DEFAULT_PAYLOAD_KEY,
   deleteFile,
@@ -33,7 +34,8 @@ import {
 
 export interface CommunityDefinition {
   title: string;
-  recipients: string[];
+  members: string[];
+  acl: AccessControlList;
 }
 
 export const COMMUNITY_DRIVE_TYPE = '63db75f1-e999-40b2-a321-41ebffa5e363';
@@ -163,7 +165,8 @@ export const saveCommunity = async (
       content: shouldEmbedContent ? payloadJson : undefined,
     },
     isEncrypted: encrypt,
-    accessControlList: definition.serverMetadata?.accessControlList,
+    accessControlList:
+      definition.fileMetadata.appData.content.acl || definition.serverMetadata?.accessControlList,
   };
 
   const result = await uploadFile(

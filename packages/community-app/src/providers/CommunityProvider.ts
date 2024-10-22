@@ -16,7 +16,7 @@ import {
   UploadFileMetadata,
   UploadInstructionSet,
 } from '@homebase-id/js-lib/core';
-import { getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
+import { CommunityDefinition, getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
 import { t } from '@homebase-id/common-app';
 import { jsonStringify64, toGuidId } from '@homebase-id/js-lib/helpers';
 
@@ -48,7 +48,7 @@ export const COMMUNITY_GENERAL_CHANNEL: HomebaseFile<CommunityChannel> = {
     payloads: [],
   },
   serverMetadata: {
-    accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+    accessControlList: { requiredSecurityGroup: SecurityGroupType.Connected },
     allowDistribution: false,
     doNotIndex: false,
   },
@@ -112,26 +112,18 @@ export const getCommunityChannel = async (
 
 export const saveCommunityChannel = async (
   dotYouClient: DotYouClient,
-  communityId: string,
+  community: HomebaseFile<CommunityDefinition>,
   recipients: string[],
   tag: string
 ) => {
+  const communityId = community.fileMetadata.appData.uniqueId as string;
   const targetDrive = getTargetDriveFromCommunityId(communityId);
-  const distribute = recipients?.length > 0;
   const uniqueId = toGuidId(tag);
 
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: targetDrive,
     },
-    transitOptions: distribute
-      ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.High,
-          sendContents: SendContents.All,
-        }
-      : undefined,
   };
 
   const jsonContent: string = jsonStringify64({
@@ -139,7 +131,7 @@ export const saveCommunityChannel = async (
     description: '',
   });
   const uploadMetadata: UploadFileMetadata = {
-    allowDistribution: distribute,
+    allowDistribution: false,
     appData: {
       uniqueId: uniqueId,
       groupId: communityId,
@@ -147,9 +139,7 @@ export const saveCommunityChannel = async (
       content: jsonContent,
     },
     isEncrypted: true,
-    accessControlList: {
-      requiredSecurityGroup: SecurityGroupType.Connected,
-    },
+    accessControlList: community.fileMetadata.appData.content.acl,
   };
 
   const uploadResult = await uploadFile(
