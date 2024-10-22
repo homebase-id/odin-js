@@ -82,6 +82,8 @@ function App() {
           >
             <Route index={true} element={<ChatHome />} />
             <Route path={':conversationKey'} element={<ChatHome />} />
+            <Route path={':conversationKey/info'} element={<ChatHome />} />
+            <Route path={':conversationKey/edit'} element={<ChatHome />} />
             <Route path={'new'} element={<ChatHome />} />
             <Route path={'open/:odinId'} element={<ChatCreateAndOrRedirect />} />
             <Route path={'new-group'} element={<ChatHome />} />

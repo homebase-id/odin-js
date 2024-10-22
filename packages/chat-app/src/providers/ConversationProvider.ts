@@ -194,7 +194,7 @@ export const dsrToConversation = async (
 
 export const uploadConversation = async (
   dotYouClient: DotYouClient,
-  conversation: NewHomebaseFile<UnifiedConversation>,
+  conversation: NewHomebaseFile<UnifiedConversation> | HomebaseFile<UnifiedConversation>,
   distribute: boolean = false,
   onVersionConflict?: () => void
 ) => {

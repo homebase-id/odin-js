@@ -18,6 +18,7 @@ import {
 } from '@homebase-id/common-app';
 import { drives, circleDrives, permissions } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
+import { EditConversationGroup } from '../../components/Chat/Conversations/Sidenav/EditConversationGroup';
 
 export const ChatHome = () => {
   const { conversationKey } = useParams();
@@ -59,6 +60,9 @@ const ChatSideNav = ({ isOnline }: { isOnline: boolean }) => {
   const newGroupChatMatch = useMatch({ path: `${CHAT_ROOT_PATH}/new-group` });
   const isCreateNewGroup = !!newGroupChatMatch;
 
+  const editChatMatch = useMatch({ path: `${CHAT_ROOT_PATH}/:conversationKey/edit` });
+  const isEditConversation = !!editChatMatch;
+
   const rootChatMatch = useMatch({ path: CHAT_ROOT_PATH });
   const isRoot = !!rootChatMatch;
 
@@ -77,6 +81,8 @@ const ChatSideNav = ({ isOnline }: { isOnline: boolean }) => {
             <NewConversation />
           ) : isCreateNewGroup ? (
             <NewConversationGroup />
+          ) : isEditConversation ? (
+            <EditConversationGroup />
           ) : (
             <>
               <NavHeader isOnline={isOnline} />

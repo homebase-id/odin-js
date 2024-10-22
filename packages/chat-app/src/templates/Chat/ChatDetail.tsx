@@ -31,7 +31,7 @@ import { ChatMessage } from '../../providers/ChatProvider';
 import { ChatHistory } from '../../components/Chat/ChatHistory';
 import { ChatComposer, ChatComposerProps } from '../../components/Chat/Composer/ChatComposer';
 import { ChatInfo } from '../../components/Chat/Detail/ChatInfo';
-import { useNavigate } from 'react-router-dom';
+import { Link, useMatch, useNavigate } from 'react-router-dom';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const ChatDetail = ({
@@ -137,7 +137,8 @@ const ChatHeader = ({
       ? recipients.filter((recipient) => recipient !== identity)[0]
       : undefined;
 
-  const [showChatInfo, setShowChatInfo] = useState<boolean>(false);
+  const infoChatMatch = useMatch({ path: `${CHAT_ROOT_PATH}/:conversationKey/info` });
+  const showChatInfo = !!infoChatMatch;
 
   const { mutate: clearChat, error: clearChatError } = useConversation().clearChat;
   const {
@@ -173,8 +174,8 @@ const ChatHeader = ({
           <ChevronLeft className="h-4 w-4" />
         </HybridLink>
 
-        <a
-          onClick={() => setShowChatInfo(true)}
+        <Link
+          to={`${rootPath}/${conversationDsr?.fileMetadata.appData.uniqueId}/info`}
           className="flex cursor-pointer flex-row items-center gap-2"
         >
           {singleRecipient ? (
@@ -202,14 +203,14 @@ const ChatHeader = ({
           ) : (
             conversation?.title
           )}
-        </a>
+        </Link>
 
         {conversationDsr && !withYourself ? (
           <ActionGroup
             options={[
               {
                 label: t('Chat info'),
-                onClick: () => setShowChatInfo(true),
+                href: `${rootPath}/${conversationDsr?.fileMetadata.appData.uniqueId}/info`,
               },
               !singleRecipient
                 ? {
@@ -256,7 +257,7 @@ const ChatHeader = ({
       </div>
 
       {showChatInfo && conversationDsr ? (
-        <ChatInfo conversation={conversationDsr} onClose={() => setShowChatInfo(false)} />
+        <ChatInfo conversation={conversationDsr} onClose={() => navigate(-1)} />
       ) : null}
     </>
   );
