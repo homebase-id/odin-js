@@ -12,6 +12,7 @@ import {
   t,
   useAllContacts,
   useDotYouClient,
+  useIntroductions,
 } from '@homebase-id/common-app';
 import { Save, Times } from '@homebase-id/common-app/icons';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -25,6 +26,7 @@ export const EditConversationGroup = () => {
     single: { data: conversation, isFetched: isConversationFetched },
     update: { mutate: updateConversation, status: updateStatus },
   } = useConversation({ conversationId: conversationKey });
+  const { mutate: introduceIdentities } = useIntroductions().introduceIdentities;
 
   const [query, setQuery] = useState<string | undefined>(undefined);
 
@@ -59,6 +61,11 @@ export const EditConversationGroup = () => {
         ...newConversation.fileMetadata.appData.content.recipients,
         ...newRecipients,
       ];
+
+      introduceIdentities({
+        recipients: newRecipients,
+        message: t('{0} has added you to a group chat', identity || ''),
+      });
     }
 
     updateConversation({ conversation: newConversation, distribute: true });
