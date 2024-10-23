@@ -41,6 +41,7 @@ import { CommunityDefinition, getTargetDriveFromCommunityId } from './CommunityD
 import {
   deleteFileOverPeer,
   getContentFromHeaderOrPayloadOverPeer,
+  getFileHeaderOverPeerByUniqueId,
   queryBatchOverPeer,
   TransitInstructionSet,
   TransitUploadResult,
@@ -341,16 +342,14 @@ export const getCommunityMessage = async (
   const targetDrive = getTargetDriveFromCommunityId(communityId);
 
   if (odinId !== dotYouClient.getIdentity()) {
-    throw new Error('Not implemented exception');
+    return await getFileHeaderOverPeerByUniqueId<CommunityMessage>(
+      dotYouClient,
+      odinId,
+      targetDrive,
+      chatMessageId
+    );
   }
-  const fileHeader = await getFileHeaderByUniqueId<CommunityMessage>(
-    dotYouClient,
-    targetDrive,
-    chatMessageId
-  );
-  if (!fileHeader) return null;
-
-  return fileHeader;
+  return await getFileHeaderByUniqueId<CommunityMessage>(dotYouClient, targetDrive, chatMessageId);
 };
 
 export const getCommunityMessages = async (

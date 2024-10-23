@@ -54,9 +54,9 @@ export const useLiveCommunityProcessor = (
   const { status: inboxStatus } = useInboxProcessor(odinId, communityId || '');
 
   // Only after the inbox is processed, we connect for live updates; So we avoid clearing the cache on each fileAdded update
-  const isOnline = useCommunityWebsocket(odinId, communityId, inboxStatus === 'success');
+  // const isOnline = useCommunityWebsocket(odinId, communityId, inboxStatus === 'success');
 
-  return isOnline;
+  return false;
 };
 
 const BATCH_SIZE = 2000;
