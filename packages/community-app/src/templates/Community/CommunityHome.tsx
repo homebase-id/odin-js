@@ -40,13 +40,13 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
     if (!communities) return;
     if (communityKey || newCommunity) return;
     if (window.innerWidth <= 1024) return;
-    // if (communities[0]) {
-    //   navigate(
-    //     `${COMMUNITY_ROOT}/${communities[0].fileMetadata.senderOdinId}/${communities[0].fileMetadata.appData.uniqueId}`
-    //   );
-    // } else {
-    //   navigate(`${COMMUNITY_ROOT}/new`);
-    // }
+    if (communities[0]) {
+      navigate(
+        `${COMMUNITY_ROOT}/${communities[0].fileMetadata.senderOdinId}/${communities[0].fileMetadata.appData.uniqueId}`
+      );
+    } else {
+      navigate(`${COMMUNITY_ROOT}/new`);
+    }
   }, [communityKey, communities]);
 
   return (

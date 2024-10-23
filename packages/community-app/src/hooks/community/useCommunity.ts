@@ -137,22 +137,7 @@ export const useCommunity = (props?: useCommunityProps) => {
   }: {
     communityDef: HomebaseFile<CommunityDefinition>;
   }) => {
-    if (!communityDef.fileMetadata.appData.uniqueId) return '';
-
-    const returnUrl = `${COMMUNITY_ROOT}/new?draft=${JSON.stringify(communityDef)}`;
-
-    const targetDrive = getTargetDriveFromCommunityId(communityDef.fileMetadata.appData.uniqueId);
-
-    return (
-      `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect` +
-      getEnsureNewDriveAndPermissionPath(
-        communityDef.fileMetadata.appData.content.title,
-        t('Drive for "{0}" community', communityDef.fileMetadata.appData.content.title),
-        targetDrive,
-        { IsCollaborativeChannel: 'true' },
-        returnUrl
-      )
-    );
+    return `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect${COMMUNITY_ROOT}/${communityDef.fileMetadata.senderOdinId}/${communityDef.fileMetadata.appData.uniqueId}`;
   };
 
   const removeCommunity = async (communityDef: HomebaseFile<CommunityDefinition>) =>
