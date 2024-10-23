@@ -46,7 +46,12 @@ const MINUTE_IN_MS = 60000;
 const isDebug = hasDebugFlag();
 
 // We first process the inbox, then we connect for live updates;
-export const useLiveCommunityProcessor = (communityId: string | undefined) => {
+export const useLiveCommunityProcessor = (
+  odinId: string | undefined,
+  communityId: string | undefined
+) => {
+  return;
+
   // Process the inbox on startup; As we want to cover the backlog of messages first
   const { status: inboxStatus } = useInboxProcessor(communityId || '', true);
 

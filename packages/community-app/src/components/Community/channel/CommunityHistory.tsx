@@ -60,6 +60,7 @@ export const CommunityHistory = ({
     },
     delete: { mutate: deleteMessages, error: deleteMessagesError },
   } = useCommunityMessages({
+    odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata?.appData?.uniqueId,
     channelId: channel?.fileMetadata?.appData?.uniqueId,
     threadId: origin?.fileMetadata.appData.uniqueId,

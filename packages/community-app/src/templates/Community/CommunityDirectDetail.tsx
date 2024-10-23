@@ -14,9 +14,13 @@ import { CommunityDirectComposer } from '../../components/Community/Message/Comm
 export const CommunityDirectDetail = () => {
   const identity = useDotYouClientContext().getIdentity();
 
-  const { communityKey, dmKey } = useParams();
+  const { odinKey, communityKey, dmKey } = useParams();
   const communityId = communityKey;
-  const { data: community, isLoading, isFetched } = useCommunity({ communityId }).fetch;
+  const {
+    data: community,
+    isLoading,
+    isFetched,
+  } = useCommunity({ odinId: odinKey, communityId }).fetch;
 
   const [conversationId, setConversationId] = useState<string | undefined>();
   useEffect(() => {

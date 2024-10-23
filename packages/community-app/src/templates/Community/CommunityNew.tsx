@@ -41,7 +41,9 @@ export const NewCommunity = () => {
       if (!definitionFile) return;
       (async () => {
         await createNew(definitionFile);
-        navigate(`${COMMUNITY_ROOT}/${definitionFile.fileMetadata.appData.uniqueId}`);
+        navigate(
+          `${COMMUNITY_ROOT}/${definitionFile.fileMetadata.senderOdinId}/${definitionFile.fileMetadata.appData.uniqueId}`
+        );
       })();
     }
   }, [pendingDefinition]);
@@ -73,7 +75,7 @@ export const NewCommunity = () => {
         },
       };
       await createNew(newCommunityDef); // Will in 99% of the cases first redirect to an ensure drive
-      navigate(`${COMMUNITY_ROOT}/${communityId}`);
+      navigate(`${COMMUNITY_ROOT}/${newCommunityDef.fileMetadata.senderOdinId}/${communityId}`);
     } catch (e) {
       console.error(e);
     }

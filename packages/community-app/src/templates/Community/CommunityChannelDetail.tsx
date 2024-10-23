@@ -27,11 +27,12 @@ import { useMarkCommunityAsRead } from '../../hooks/community/useMarkCommunityAs
 import { CommunityCatchup } from '../../components/Community/CommunityCatchup';
 
 export const CommunityChannelDetail = () => {
-  const { communityKey: communityId, channelKey: channelId, threadKey } = useParams();
-  const { data: community, isFetched } = useCommunity({ communityId }).fetch;
+  const { odinKey, communityKey: communityId, channelKey: channelId, threadKey } = useParams();
+  const { data: community, isFetched } = useCommunity({ odinId: odinKey, communityId }).fetch;
   const navigate = useNavigate();
 
   const { data: channelDsr } = useCommunityChannel({
+    odinId: odinKey,
     communityId: communityId,
     channelId: channelId,
   }).fetch;
@@ -77,7 +78,7 @@ export const CommunityChannelDetail = () => {
                   channel={channelDsr || undefined}
                   doOpenThread={(thread) =>
                     navigate(
-                      `${COMMUNITY_ROOT}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
+                      `${COMMUNITY_ROOT}/${odinKey}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
                     )
                   }
                 />
@@ -120,7 +121,11 @@ const CommunityChannelHeader = ({
     <>
       {/* <ErrorNotification error={clearChatError || deleteChatError} /> */}
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-        <Link className="-m-1 p-1 lg:hidden" type="mute" to={`${COMMUNITY_ROOT}/${communityId}`}>
+        <Link
+          className="-m-1 p-1 lg:hidden"
+          type="mute"
+          to={`${COMMUNITY_ROOT}/${community?.fileMetadata.senderOdinId}/${communityId}`}
+        >
           <ChevronLeft className="h-4 w-4" />
         </Link>
 
@@ -144,22 +149,6 @@ const CommunityChannelHeader = ({
     </>
   );
 };
-
-// const CommunityRootHeader = ({ community }: { community?: HomebaseFile<CommunityDefinition> }) => {
-//   const communityId = community?.fileMetadata.appData.uniqueId;
-
-//   return (
-//     <>
-//       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-//         <ActionLink className="lg:hidden" type="mute" href={`${COMMUNITY_ROOT}/${communityId}`}>
-//           <ChevronLeft className="h-5 w-5" />
-//         </ActionLink>
-
-//         {community ? <>{community.fileMetadata.appData.content?.title}</> : null}
-//       </div>
-//     </>
-//   );
-// };
 
 const ChannelInfo = ({
   channel,
@@ -248,7 +237,7 @@ const CommunityThread = ({
   channel: HomebaseFile<CommunityChannel> | undefined;
   threadId: string;
 }) => {
-  const { communityKey, channelKey } = useParams();
+  const { odinKey, communityKey, channelKey } = useParams();
 
   const { data: originMessage } = useCommunityMessage({
     communityId: community?.fileMetadata.appData.uniqueId,
@@ -266,13 +255,13 @@ const CommunityThread = ({
           className="p-2 xl:hidden"
           size="none"
           type="mute"
-          href={`${COMMUNITY_ROOT}/${communityKey}/${channelKey || 'all'}`}
+          href={`${COMMUNITY_ROOT}/${odinKey}/${communityKey}/${channelKey || 'all'}`}
         >
           <ChevronLeft className="h-5 w-5" />
         </ActionLink>
         {t('Thread')}
         <ActionLink
-          href={`${COMMUNITY_ROOT}/${communityKey}/${channelKey || 'all'}`}
+          href={`${COMMUNITY_ROOT}/${odinKey}/${communityKey}/${channelKey || 'all'}`}
           icon={Times}
           size="none"
           type="mute"

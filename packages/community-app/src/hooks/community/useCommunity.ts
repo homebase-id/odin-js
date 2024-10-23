@@ -24,7 +24,8 @@ import {
 } from '@homebase-id/js-lib/auth';
 
 type useCommunityProps = {
-  communityId?: string;
+  odinId: string | undefined;
+  communityId: string | undefined;
 };
 
 const getEnsureNewDriveAndPermissionPath = (
@@ -87,14 +88,14 @@ const ensureNewDriveAndPermission = (
 };
 
 export const useCommunity = (props?: useCommunityProps) => {
-  const { communityId } = props || {};
+  const { odinId, communityId } = props || {};
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
-  const fetchCommunity = async ({ communityId }: useCommunityProps) => {
-    if (!communityId) return null;
+  const fetchCommunity = async ({ odinId, communityId }: useCommunityProps) => {
+    if (!odinId || !communityId) return null;
 
-    return await getCommunityDefinition(dotYouClient, communityId);
+    return await getCommunityDefinition(dotYouClient, odinId, communityId);
   };
 
   const saveData = async (
@@ -149,11 +150,11 @@ export const useCommunity = (props?: useCommunityProps) => {
   return {
     fetch: useQuery({
       queryKey: ['community', communityId],
-      queryFn: () => fetchCommunity({ communityId }),
+      queryFn: () => fetchCommunity({ odinId, communityId }),
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,
-      enabled: !!communityId,
+      enabled: !!odinId && !!communityId,
     }),
     save: useMutation({
       mutationFn: saveData,
@@ -181,7 +182,7 @@ export const useCommunity = (props?: useCommunityProps) => {
         return { toSaveCommunity, previousCommunities };
       },
       onError: (err, toRemoveAttr, context) => {
-        console.error(err);
+        console.warn(err);
 
         // Revert local caches to what they were
         queryClient.setQueryData(['communities'], context?.previousCommunities);

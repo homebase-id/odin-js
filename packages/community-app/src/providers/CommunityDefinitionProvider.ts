@@ -31,6 +31,11 @@ import {
   jsonStringify64,
   stringToUint8Array,
 } from '@homebase-id/js-lib/helpers';
+import {
+  getContentFromHeaderOrPayloadOverPeer,
+  getDrivesByTypeOverPeer,
+  queryBatchOverPeer,
+} from '@homebase-id/js-lib/peer';
 
 export interface CommunityDefinition {
   title: string;
@@ -90,6 +95,78 @@ export const getCommunities = async (dotYouClient: DotYouClient) => {
   ) as HomebaseFile<CommunityDefinition>[];
 };
 
+export const getCommunitiesOverPeer = async (dotYouClient: DotYouClient, odinId: string) => {
+  const drives = await getDrivesByTypeOverPeer(dotYouClient, COMMUNITY_DRIVE_TYPE, 1, 1000, odinId);
+  const communityHeaders = drives.results.map((drive) => {
+    return {
+      id: drive.targetDriveInfo.alias,
+      name: drive.name,
+    };
+  });
+
+  return (async () => {
+    return (
+      await Promise.all(
+        communityHeaders.map(async (header) => {
+          const definition = await getCommunityOverPeer(dotYouClient, odinId, header.id);
+          return definition;
+        })
+      )
+    ).filter(Boolean) as HomebaseFile<CommunityDefinition>[];
+  })();
+};
+
+export const getCommunityOverPeer = async (
+  dotYouClient: DotYouClient,
+  odinId: string,
+  communityId: string
+): Promise<HomebaseFile<CommunityDefinition> | null> => {
+  const targetDrive = getTargetDriveFromCommunityId(communityId);
+
+  const queryParams: FileQueryParams = {
+    targetDrive: targetDrive,
+    fileType: [COMMUNITY_FILE_TYPE],
+  };
+
+  const ro: GetBatchQueryResultOptions = {
+    cursorState: undefined,
+    maxRecords: 1,
+    includeMetadataHeader: true,
+  };
+
+  const response = await queryBatchOverPeer(dotYouClient, odinId, queryParams, ro);
+
+  try {
+    if (response.searchResults.length == 1) {
+      const dsr = response.searchResults[0];
+      const definitionContent = await getContentFromHeaderOrPayloadOverPeer<CommunityDefinition>(
+        dotYouClient,
+        odinId,
+        targetDrive,
+        dsr,
+        response.includeMetadataHeader
+      );
+
+      if (!definitionContent) return null;
+
+      const file: HomebaseFile<CommunityDefinition> = {
+        ...dsr,
+        fileMetadata: {
+          ...dsr.fileMetadata,
+          appData: {
+            ...dsr.fileMetadata.appData,
+            content: definitionContent,
+          },
+        },
+      };
+      return file;
+    }
+  } catch {
+    // Catch al, as targetDrive might be inaccesible (when it doesn't exist yet)
+  }
+  return null;
+};
+
 export const saveCommunity = async (
   dotYouClient: DotYouClient,
   definition: NewHomebaseFile<CommunityDefinition>,
@@ -111,6 +188,7 @@ export const saveCommunity = async (
   const targetDrive = getTargetDriveFromCommunityId(definition.fileMetadata.appData.uniqueId);
   const existingCommunityDefinition = await getCommunityDefinition(
     dotYouClient,
+    definition.fileMetadata.senderOdinId || dotYouClient.getIdentity(),
     definition.fileMetadata.appData.uniqueId
   );
   const fileId = existingCommunityDefinition?.fileId;
@@ -191,6 +269,7 @@ export const saveCommunity = async (
 
 export const getCommunityDefinition = async (
   dotYouClient: DotYouClient,
+  odinId: string,
   communityId: string
 ): Promise<HomebaseFile<CommunityDefinition> | undefined> => {
   const targetDrive = getTargetDriveFromCommunityId(communityId);
@@ -207,7 +286,10 @@ export const getCommunityDefinition = async (
   };
 
   try {
-    const response = await queryBatch(dotYouClient, params, ro);
+    const response =
+      odinId && odinId !== dotYouClient.getIdentity()
+        ? await queryBatchOverPeer(dotYouClient, odinId, params, ro)
+        : await queryBatch(dotYouClient, params, ro);
 
     if (response.searchResults.length == 1) {
       const dsr = response.searchResults[0];
@@ -241,12 +323,21 @@ export const dsrToCommunity = async (
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<CommunityDefinition> | undefined> => {
-  const definitionContent = await getContentFromHeaderOrPayload<CommunityDefinition>(
-    dotYouClient,
-    targetDrive,
-    dsr,
-    includeMetadataHeader
-  );
+  const definitionContent =
+    dsr.fileMetadata.senderOdinId !== dotYouClient.getIdentity()
+      ? await getContentFromHeaderOrPayloadOverPeer<CommunityDefinition>(
+          dotYouClient,
+          dsr.fileMetadata.senderOdinId,
+          targetDrive,
+          dsr,
+          includeMetadataHeader
+        )
+      : await getContentFromHeaderOrPayload<CommunityDefinition>(
+          dotYouClient,
+          targetDrive,
+          dsr,
+          includeMetadataHeader
+        );
   if (!definitionContent) return undefined;
 
   const file: HomebaseFile<CommunityDefinition> = {

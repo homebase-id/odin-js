@@ -185,6 +185,7 @@ const MessageTextRenderer = ({
   className?: string;
 }) => {
   const { data: channels } = useCommunityChannels({
+    odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata.appData.uniqueId,
   }).fetch;
 
@@ -272,9 +273,10 @@ const CommunityMessageThreadSummary = ({
   community: HomebaseFile<CommunityDefinition> | undefined;
   msg: HomebaseFile<CommunityMessage>;
 }) => {
-  const { communityKey, channelKey } = useParams();
+  const { odinKey, communityKey, channelKey } = useParams();
 
   const { data: messages } = useCommunityMessages({
+    odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata.appData.uniqueId as string,
     threadId: msg.fileMetadata.appData.uniqueId,
   }).all;
@@ -296,7 +298,7 @@ const CommunityMessageThreadSummary = ({
   return (
     <Link
       className="mr-auto flex w-full max-w-xs flex-row items-center gap-2 rounded-lg px-1 py-1 text-indigo-500 transition-colors hover:bg-background hover:shadow-sm"
-      to={`${COMMUNITY_ROOT}/${communityKey}/${channelKey || 'all'}/${msg.fileMetadata.appData.uniqueId}/thread`}
+      to={`${COMMUNITY_ROOT}/${odinKey}/${communityKey}/${channelKey || 'all'}/${msg.fileMetadata.appData.uniqueId}/thread`}
     >
       {uniqueSenders.map((sender) => (
         <AuthorImage odinId={sender} key={sender} className="h-7 w-7" excludeLink={true} />

@@ -14,7 +14,7 @@ import {
   retrieveEccKey,
   throwAwayTheECCKey,
 } from '@homebase-id/js-lib/auth';
-import App, { REACT_QUERY_CACHE_KEY, ROOT_PATH } from '../../app/App';
+import { REACT_QUERY_CACHE_KEY, ROOT_PATH } from '../../app/App';
 import { ALL_CONNECTIONS_CIRCLE_ID, AppPermissionType } from '@homebase-id/js-lib/network';
 import {
   APP_AUTH_TOKEN,
@@ -117,6 +117,7 @@ const circleDrives = [
 
 export const permissions = [
   AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
+  AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
   AppPermissionType.ReadConnectionRequests,
   AppPermissionType.ReadConnections,
   AppPermissionType.SendPushNotifications,

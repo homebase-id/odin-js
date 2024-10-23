@@ -20,12 +20,13 @@ import { useState, useEffect } from 'react';
 
 const PAGE_SIZE = 100;
 export const useCommunityMessages = (props?: {
+  odinId: string | undefined;
   communityId: string | undefined;
   channelId?: string;
   threadId?: string;
   maxAge?: number;
 }) => {
-  const { communityId, threadId, channelId, maxAge } = props || {};
+  const { odinId, communityId, threadId, channelId, maxAge } = props || {};
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
@@ -60,6 +61,7 @@ export const useCommunityMessages = (props?: {
     all: useInfiniteQuery(
       getCommunityMessagesInfiniteQueryOptions(
         dotYouClient,
+        odinId,
         communityId,
         channelId,
         threadId,
@@ -84,6 +86,7 @@ export const useCommunityMessages = (props?: {
 
 const fetchMessages = async (
   dotYouClient: DotYouClient,
+  odinId: string,
   communityId: string,
   channelId: string | undefined,
   threadId: string | undefined,
@@ -97,6 +100,7 @@ const fetchMessages = async (
 
   return await getCommunityMessages(
     dotYouClient,
+    odinId,
     communityId,
     groupIds,
     undefined,
@@ -107,6 +111,7 @@ const fetchMessages = async (
 
 export const getCommunityMessagesInfiniteQueryOptions: (
   dotYouClient: DotYouClient,
+  odinId?: string,
   communityId?: string,
   channelId?: string,
   threadId?: string,
@@ -116,7 +121,7 @@ export const getCommunityMessagesInfiniteQueryOptions: (
   cursorState: string;
   queryTime: number;
   includeMetadataHeader: boolean;
-}> = (dotYouClient, communityId, channelId, threadId, maxAge) => {
+}> = (dotYouClient, odinId, communityId, channelId, threadId, maxAge) => {
   if (stringGuidsEqual(communityId, threadId)) {
     throw new Error('ThreadId and CommunityId cannot be the same');
   }
@@ -128,8 +133,11 @@ export const getCommunityMessagesInfiniteQueryOptions: (
         throw new Error('ThreadId and CommunityId cannot be the same');
       }
 
+      console.log('Fetching messages', { odinId, communityId });
+
       return fetchMessages(
         dotYouClient,
+        odinId as string,
         communityId as string,
         channelId,
         threadId,
@@ -156,7 +164,7 @@ export const getCommunityMessagesInfiniteQueryOptions: (
           return filteredData;
         }
       : undefined,
-    enabled: !!communityId && (!!channelId || !!threadId),
+    enabled: !!odinId && !!communityId && (!!channelId || !!threadId),
     refetchOnMount: true,
     staleTime: 1000 * 60 * 60 * 24, // 24 hour
   };

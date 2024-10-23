@@ -23,17 +23,24 @@ import { CommunityInfoDialog } from '../../components/Community/CommunityInfoDia
 
 const maxChannels = 7;
 export const CommunityChannelNav = () => {
-  const { communityKey } = useParams();
+  const { odinKey, communityKey } = useParams();
   const [isCommunityInfoDialogOpen, setIsCommunityInfoDialogOpen] = useState(false);
-  const { data: community, isLoading } = useCommunity({ communityId: communityKey }).fetch;
+  const { data: community, isLoading } = useCommunity({
+    odinId: odinKey,
+    communityId: communityKey,
+  }).fetch;
   const { data: metadata } = usecommunityMetadata({ communityId: communityKey }).single;
 
+  const odinId = odinKey;
   const communityId = community?.fileMetadata.appData.uniqueId;
   const members = community?.fileMetadata.appData.content?.members;
 
-  const isActive = !!useMatch({ path: `${COMMUNITY_ROOT}/${communityId}` });
+  const isActive = !!useMatch({ path: `${COMMUNITY_ROOT}/${odinKey}/${communityId}` });
 
-  const { data: communityChannels } = useCommunityChannelsWithRecentMessages({ communityId }).fetch;
+  const { data: communityChannels } = useCommunityChannelsWithRecentMessages({
+    odinId,
+    communityId,
+  }).fetch;
 
   const pinnedChannels = communityChannels?.filter(
     (channel) =>
@@ -47,7 +54,7 @@ export const CommunityChannelNav = () => {
   );
 
   const [isExpanded, setIsExpanded] = useState(false);
-  if (!communityId || isLoading || !community) return null;
+  if (!odinId || !communityId || isLoading || !community) return null;
 
   return (
     <>
@@ -69,12 +76,13 @@ export const CommunityChannelNav = () => {
             </button>
           </div>
 
-          <AllItem communityId={communityId} />
+          <AllItem odinId={odinId} communityId={communityId} />
           <div className="flex flex-col gap-1">
             <h2 className="px-1">{t('Channels')}</h2>
 
             {pinnedChannels?.map((channel) => (
               <ChannelItem
+                odinId={odinId}
                 communityId={communityId}
                 channel={channel}
                 key={channel.fileId || channel.fileMetadata.appData.uniqueId}
@@ -85,6 +93,7 @@ export const CommunityChannelNav = () => {
               ?.slice(0, isExpanded ? undefined : maxChannels - (pinnedChannels?.length || 0))
               .map((channel) => (
                 <ChannelItem
+                  odinId={odinId}
                   communityId={communityId}
                   channel={channel}
                   key={channel.fileId || channel.fileMetadata.appData.uniqueId}
@@ -109,7 +118,12 @@ export const CommunityChannelNav = () => {
           <div className="flex flex-col gap-1">
             <h2 className="px-1">{t('Direct messages')}</h2>
             {members?.map((recipient) => (
-              <DirectMessageItem communityId={communityId} recipient={recipient} key={recipient} />
+              <DirectMessageItem
+                odinId={odinId}
+                communityId={communityId}
+                recipient={recipient}
+                key={recipient}
+              />
             ))}
           </div>
         </div>
@@ -121,13 +135,13 @@ export const CommunityChannelNav = () => {
   );
 };
 
-const AllItem = ({ communityId }: { communityId: string }) => {
-  const href = `${COMMUNITY_ROOT}/${communityId}/all`;
+const AllItem = ({ odinId, communityId }: { odinId: string; communityId: string }) => {
+  const href = `${COMMUNITY_ROOT}/${odinId}/${communityId}/all`;
   const isActive = !!useMatch({ path: href, end: true });
 
   return (
     <Link
-      to={`${COMMUNITY_ROOT}/${communityId}/all`}
+      to={`${COMMUNITY_ROOT}/${odinId}/${communityId}/all`}
       className={`flex flex-row items-center gap-2 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
     >
       <RadioTower className="h-5 w-5" /> {t('Activity')}
@@ -137,15 +151,17 @@ const AllItem = ({ communityId }: { communityId: string }) => {
 
 const VISITS_STORAGE_KEY = 'community-sidebar-visited';
 const ChannelItem = ({
+  odinId,
   communityId,
   channel,
 }: {
+  odinId: string;
   communityId: string;
   channel: ChannelWithRecentMessage;
 }) => {
   const identity = useDotYouClientContext().getIdentity();
   const channelId = channel.fileMetadata.appData.uniqueId;
-  const href = `${COMMUNITY_ROOT}/${communityId}/${channelId}`;
+  const href = `${COMMUNITY_ROOT}/${odinId}/${communityId}/${channelId}`;
   const isActive = !!useMatch({ path: href, end: false });
 
   const vists = tryJsonParse<string[]>(sessionStorage.getItem(VISITS_STORAGE_KEY) || '[]') || [];
@@ -180,7 +196,7 @@ const ChannelItem = ({
 
   return (
     <Link
-      to={`${COMMUNITY_ROOT}/${communityId}/${channelId}`}
+      to={`${COMMUNITY_ROOT}/${odinId}/${communityId}/${channelId}`}
       className={`group flex flex-row items-center gap-1 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : `hover:bg-primary/10 ${isVisited ? 'text-purple-600' : ''}`} ${hasUnreadMessages ? 'font-bold' : ''}`}
     >
       # {channel.fileMetadata.appData.content?.title?.toLowerCase()}
@@ -219,13 +235,15 @@ const ChannelItem = ({
 };
 
 const DirectMessageItem = ({
+  odinId,
   communityId,
   recipient,
 }: {
+  odinId: string;
   communityId: string;
   recipient: string;
 }) => {
-  const href = `${COMMUNITY_ROOT}/${communityId}/direct/${recipient}`;
+  const href = `${COMMUNITY_ROOT}/${odinId}/${communityId}/direct/${recipient}`;
   const isActive = !!useMatch({ path: href });
 
   return (

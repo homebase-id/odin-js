@@ -14,28 +14,28 @@ export const usecommunityMetadata = (props?: { communityId?: string | undefined 
   const queryClient = useQueryClient();
 
   const getMetadata = async (communityId: string) => {
-    const serverFile = await getCommunityMetadata(dotYouClient, communityId);
-    if (!serverFile) {
-      const newMetadata: NewHomebaseFile<CommunityMetadata> = {
-        fileMetadata: {
-          appData: {
-            tags: [communityId],
-            content: {
-              communityId,
-              pinnedChannels: [],
-              lastReadTime: 0,
-              channelLastReadTime: {},
-            },
+    // const serverFile = await getCommunityMetadata(dotYouClient, communityId);
+    // if (!serverFile) {
+    const newMetadata: NewHomebaseFile<CommunityMetadata> = {
+      fileMetadata: {
+        appData: {
+          tags: [communityId],
+          content: {
+            communityId,
+            pinnedChannels: [],
+            lastReadTime: 0,
+            channelLastReadTime: {},
           },
         },
-        serverMetadata: {
-          accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
-        },
-      };
+      },
+      serverMetadata: {
+        accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+      },
+    };
 
-      return newMetadata;
-    }
-    return serverFile;
+    return newMetadata;
+    // }
+    // return serverFile;
   };
 
   const saveMetadata = async ({
@@ -43,6 +43,8 @@ export const usecommunityMetadata = (props?: { communityId?: string | undefined 
   }: {
     metadata: HomebaseFile<CommunityMetadata> | NewHomebaseFile<CommunityMetadata>;
   }) => {
+    return;
+
     return await uploadCommunityMetadata(dotYouClient, metadata, async () => {
       if (!metadata.fileMetadata.appData.tags?.[0]) return;
       const serverVersion = await getCommunityMetadata(

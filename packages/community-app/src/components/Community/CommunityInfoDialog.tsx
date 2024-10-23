@@ -17,8 +17,8 @@ import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 
 export const CommunityInfoDialog = ({ onClose }: { onClose: () => void }) => {
-  const { communityKey } = useParams();
-  const { data: community } = useCommunity({ communityId: communityKey }).fetch;
+  const { odinKey, communityKey } = useParams();
+  const { data: community } = useCommunity({ odinId: odinKey, communityId: communityKey }).fetch;
 
   const identity = useDotYouClient().getIdentity();
 

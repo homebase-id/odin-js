@@ -46,6 +46,10 @@ import {
 } from '@homebase-id/js-lib/media';
 import { appId } from '../hooks/auth/useAuth';
 import { CommunityDefinition, getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
+import {
+  getContentFromHeaderOrPayloadOverPeer,
+  queryBatchOverPeer,
+} from '@homebase-id/js-lib/peer';
 
 export const COMMUNITY_MESSAGE_FILE_TYPE = 7020;
 export const CommunityDeletedArchivalStaus = 2;
@@ -324,6 +328,7 @@ export const getCommunityMessage = async (
 
 export const getCommunityMessages = async (
   dotYouClient: DotYouClient,
+  odinId: string,
   communityId: string,
   groupIds: string[] | undefined,
   tagIds: string[] | undefined,
@@ -345,7 +350,10 @@ export const getCommunityMessages = async (
     includeTransferHistory: true,
   };
 
-  const response = await queryBatch(dotYouClient, params, ro);
+  const response =
+    odinId && odinId !== dotYouClient.getIdentity()
+      ? await queryBatchOverPeer(dotYouClient, odinId, params, ro)
+      : await queryBatch(dotYouClient, params, ro);
   return {
     ...response,
     searchResults:
@@ -364,12 +372,21 @@ export const dsrToMessage = async (
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<CommunityMessage> | null> => {
   try {
-    const msgContent = await getContentFromHeaderOrPayload<CommunityMessage>(
-      dotYouClient,
-      targetDrive,
-      dsr,
-      includeMetadataHeader
-    );
+    const msgContent =
+      dsr.fileMetadata.senderOdinId && dotYouClient.getIdentity() !== dsr.fileMetadata.senderOdinId
+        ? await getContentFromHeaderOrPayloadOverPeer<CommunityMessage>(
+            dotYouClient,
+            dsr.fileMetadata.senderOdinId,
+            targetDrive,
+            dsr,
+            includeMetadataHeader
+          )
+        : await getContentFromHeaderOrPayload<CommunityMessage>(
+            dotYouClient,
+            targetDrive,
+            dsr,
+            includeMetadataHeader
+          );
     if (!msgContent) return null;
 
     if (

@@ -4,19 +4,19 @@ import { CommunityChannel, getCommunityChannels } from '../../../providers/Commu
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
-export const useCommunityChannels = (props: { communityId?: string }) => {
-  const { communityId } = props;
+export const useCommunityChannels = (props: { odinId?: string; communityId?: string }) => {
+  const { odinId, communityId } = props;
   const dotYouClient = useDotYouClientContext();
 
-  const fetchChannels = async (communityId: string) => {
-    return await getCommunityChannels(dotYouClient, communityId);
+  const fetchChannels = async (odinId: string, communityId: string) => {
+    return await getCommunityChannels(dotYouClient, odinId, communityId);
   };
 
   return {
     fetch: useQuery({
       queryKey: ['community-channels', communityId],
-      queryFn: async () => fetchChannels(communityId as string),
-      enabled: !!communityId,
+      queryFn: async () => fetchChannels(odinId as string, communityId as string),
+      enabled: !!communityId && !!odinId,
     }),
   };
 };
