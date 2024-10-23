@@ -6,22 +6,23 @@ import {
   getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
   HomebaseFile,
-  PriorityOptions,
   queryBatch,
-  ScheduleOptions,
   SecurityGroupType,
-  SendContents,
   TargetDrive,
   uploadFile,
   UploadFileMetadata,
   UploadInstructionSet,
+  UploadResult,
 } from '@homebase-id/js-lib/core';
 import { CommunityDefinition, getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
 import { t } from '@homebase-id/common-app';
-import { jsonStringify64, toGuidId } from '@homebase-id/js-lib/helpers';
+import { getRandom16ByteArray, jsonStringify64, toGuidId } from '@homebase-id/js-lib/helpers';
 import {
   getContentFromHeaderOrPayloadOverPeer,
   queryBatchOverPeer,
+  TransitInstructionSet,
+  TransitUploadResult,
+  uploadFileOverPeer,
 } from '@homebase-id/js-lib/peer';
 
 export const COMMUNITY_CHANNEL_FILE_TYPE = 7015;
@@ -125,7 +126,6 @@ export const getCommunityChannel = async (
 export const saveCommunityChannel = async (
   dotYouClient: DotYouClient,
   community: HomebaseFile<CommunityDefinition>,
-  recipients: string[],
   tag: string
 ) => {
   const communityId = community.fileMetadata.appData.uniqueId as string;
@@ -154,14 +154,32 @@ export const saveCommunityChannel = async (
     accessControlList: community.fileMetadata.appData.content.acl,
   };
 
-  const uploadResult = await uploadFile(
-    dotYouClient,
-    uploadInstructions,
-    uploadMetadata,
-    undefined,
-    undefined,
-    undefined
-  );
+  let uploadResult: UploadResult | TransitUploadResult | void;
+  if (community.fileMetadata.senderOdinId !== dotYouClient.getIdentity()) {
+    const transitInstructions: TransitInstructionSet = {
+      remoteTargetDrive: targetDrive,
+      transferIv: getRandom16ByteArray(),
+      recipients: [community.fileMetadata.senderOdinId],
+    };
+    uploadResult = await uploadFileOverPeer(
+      dotYouClient,
+      transitInstructions,
+      uploadMetadata,
+      undefined,
+      undefined,
+      undefined
+    );
+  } else {
+    uploadResult = await uploadFile(
+      dotYouClient,
+      uploadInstructions,
+      uploadMetadata,
+      undefined,
+      undefined,
+      undefined
+    );
+  }
+
   if (!uploadResult) throw new Error('Upload failed');
 
   return uniqueId;
