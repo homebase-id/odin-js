@@ -240,6 +240,7 @@ const CommunityThread = ({
   const { odinKey, communityKey, channelKey } = useParams();
 
   const { data: originMessage } = useCommunityMessage({
+    odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata.appData.uniqueId,
     messageId: threadId,
   }).get;

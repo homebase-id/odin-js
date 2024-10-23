@@ -53,9 +53,6 @@ export const useCommunityReaction = (props?: {
     reaction: string;
   }) => {
     if (!community || !message) return;
-    const communityContent = community.fileMetadata.appData.content;
-    const identity = dotYouClient.getIdentity();
-    const members = communityContent.members.filter((recipient) => recipient !== identity);
     const targetDrive = getTargetDriveFromCommunityId(
       community.fileMetadata.appData.uniqueId as string
     );
@@ -68,7 +65,7 @@ export const useCommunityReaction = (props?: {
       targetDrive,
       message.fileMetadata.globalTransitId,
       reaction,
-      members
+      [community.fileMetadata.senderOdinId]
     );
   };
 

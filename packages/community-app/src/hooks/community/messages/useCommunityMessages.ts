@@ -37,10 +37,6 @@ export const useCommunityMessages = (props?: {
     community: HomebaseFile<CommunityDefinition>;
     messages: HomebaseFile<CommunityMessage>[];
   }) => {
-    const communityContent = community.fileMetadata.appData.content;
-    const identity = dotYouClient.getIdentity();
-    const members = communityContent.members.filter((recipient) => recipient !== identity);
-
     if (!community.fileMetadata.appData.uniqueId) {
       throw new Error('Community unique id is not set');
     }
@@ -49,9 +45,9 @@ export const useCommunityMessages = (props?: {
       messages.map(async (msg) => {
         await hardDeleteCommunityMessage(
           dotYouClient,
+          community.fileMetadata.senderOdinId,
           community.fileMetadata.appData.uniqueId as string,
-          msg,
-          members
+          msg
         );
       })
     );
@@ -132,8 +128,6 @@ export const getCommunityMessagesInfiniteQueryOptions: (
       if (stringGuidsEqual(communityId, threadId)) {
         throw new Error('ThreadId and CommunityId cannot be the same');
       }
-
-      console.log('Fetching messages', { odinId, communityId });
 
       return fetchMessages(
         dotYouClient,

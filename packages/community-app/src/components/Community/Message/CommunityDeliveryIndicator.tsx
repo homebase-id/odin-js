@@ -48,26 +48,12 @@ export const InnerDeliveryIndicator = ({
   className?: string;
 }) => {
   const isSent = state && state >= CommunityDeliveryStatus.Sent;
-  const isDelivered = state && state >= CommunityDeliveryStatus.Delivered;
-  const isFailed = state === CommunityDeliveryStatus.Failed;
-  const isRead = state === CommunityDeliveryStatus.Read;
+
+  if (isSent) return null;
 
   return (
-    <div
-      className={`${isDelivered ? '-ml-2' : ''} flex flex-row drop-shadow-md ${
-        isRead ? 'text-blue-600' : 'text-foreground/50'
-      } ${className || ''}`}
-    >
-      {isFailed ? (
-        <>
-          <Times className="h-6 w-6 text-red-500" />
-        </>
-      ) : (
-        <>
-          {isDelivered ? <SubtleCheck className="relative -right-2 z-10 h-4 w-4" /> : null}
-          {isSent ? <SubtleCheck className="h-4 w-4" /> : <Clock className="h-4 w-4 pb-1" />}
-        </>
-      )}
+    <div className={`flex flex-row drop-shadow-md ${className || ''}`}>
+      <Clock className="h-4 w-4 pb-1" />
     </div>
   );
 };

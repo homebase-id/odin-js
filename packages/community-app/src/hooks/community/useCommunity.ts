@@ -32,9 +32,10 @@ const getEnsureNewDriveAndPermissionPath = (
   name: string,
   description: string,
   targetDrive: TargetDrive,
+  attributes: Record<string, string> | undefined,
   returnUrl: string
 ) => {
-  const drives: AppDriveAuthorizationParams[] = [
+  const drives = [
     {
       a: targetDrive.alias,
       t: targetDrive.type,
@@ -45,6 +46,7 @@ const getEnsureNewDriveAndPermissionPath = (
         DrivePermissionType.Comment, // Permission
       n: name,
       d: description,
+      at: JSON.stringify(attributes),
     },
   ];
 
@@ -79,9 +81,16 @@ const ensureNewDriveAndPermission = (
   name: string,
   description: string,
   targetDrive: TargetDrive,
+  attributes: Record<string, string> | undefined,
   returnUrl: string
 ) => {
-  const path = getEnsureNewDriveAndPermissionPath(name, description, targetDrive, returnUrl);
+  const path = getEnsureNewDriveAndPermissionPath(
+    name,
+    description,
+    targetDrive,
+    attributes,
+    returnUrl
+  );
 
   const host = new DotYouClient({ identity: identity || undefined, api: ApiType.App }).getRoot();
   return `${host}${path}`;
@@ -115,6 +124,7 @@ export const useCommunity = (props?: useCommunityProps) => {
         communityDef.fileMetadata.appData.content.title,
         t('Drive for "{0}" community', communityDef.fileMetadata.appData.content.title),
         targetDrive,
+        { IsCollaborativeChannel: 'true' },
         returnUrl
       );
     };
@@ -139,6 +149,7 @@ export const useCommunity = (props?: useCommunityProps) => {
         communityDef.fileMetadata.appData.content.title,
         t('Drive for "{0}" community', communityDef.fileMetadata.appData.content.title),
         targetDrive,
+        { IsCollaborativeChannel: 'true' },
         returnUrl
       )
     );

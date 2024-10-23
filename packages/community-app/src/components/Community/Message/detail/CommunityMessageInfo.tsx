@@ -85,12 +85,7 @@ export const CommunityMessageInfo = ({
                         recipient={recipient}
                         className="sm:ml-auto"
                       />
-                      <InnerDeliveryIndicator
-                        state={
-                          messageContent.deliveryDetails?.[recipient] ||
-                          messageContent.deliveryStatus
-                        }
-                      />
+                      <InnerDeliveryIndicator state={messageContent.deliveryStatus} />
                     </div>
                   ) : null}
                 </div>

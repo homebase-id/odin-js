@@ -50,20 +50,18 @@ export const useLiveCommunityProcessor = (
   odinId: string | undefined,
   communityId: string | undefined
 ) => {
-  return;
-
   // Process the inbox on startup; As we want to cover the backlog of messages first
-  const { status: inboxStatus } = useInboxProcessor(communityId || '', true);
+  const { status: inboxStatus } = useInboxProcessor(odinId, communityId || '');
 
   // Only after the inbox is processed, we connect for live updates; So we avoid clearing the cache on each fileAdded update
-  const isOnline = useCommunityWebsocket(communityId, inboxStatus === 'success');
+  const isOnline = useCommunityWebsocket(odinId, communityId, inboxStatus === 'success');
 
   return isOnline;
 };
 
 const BATCH_SIZE = 2000;
 // Process the inbox on startup
-const useInboxProcessor = (communityId: string | undefined, connected?: boolean) => {
+const useInboxProcessor = (odinId: string | undefined, communityId: string | undefined) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
   const targetDrive = getTargetDriveFromCommunityId(communityId || '');
@@ -136,12 +134,19 @@ const useInboxProcessor = (communityId: string | undefined, connected?: boolean)
   return useQuery({
     queryKey: ['process-inbox'],
     queryFn: fetchData,
-    enabled: connected && !!communityId,
+    enabled: !!communityId && odinId === dotYouClient.getIdentity(),
     staleTime: 1000 * 10, // 10 seconds
   });
 };
 
-const useCommunityWebsocket = (communityId: string | undefined, isEnabled: boolean) => {
+const useCommunityWebsocket = (
+  odinId: string | undefined,
+  communityId: string | undefined,
+  isEnabled: boolean
+) => {
+  if (odinId) {
+    return;
+  }
   const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getIdentity();
   const queryClient = useQueryClient();

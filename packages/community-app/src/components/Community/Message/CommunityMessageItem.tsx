@@ -46,7 +46,7 @@ export const CommunityMessageItem = ({
   className?: string;
 }) => {
   const identity = useDotYouClient().getIdentity();
-  const authorOdinId = msg.fileMetadata.senderOdinId || identity || '';
+  const authorOdinId = msg.fileMetadata.originalAuthor || identity || '';
 
   const messageFromMe = !authorOdinId || authorOdinId === identity;
   const hasMedia = !!msg.fileMetadata.payloads.length;
@@ -287,7 +287,7 @@ const CommunityMessageThreadSummary = ({
       ?.filter(Boolean) || []) as HomebaseFile<CommunityMessage>[];
 
     const uniqueSenders = Array.from(
-      new Set(flattenedMsgs.map((msg) => msg.fileMetadata.senderOdinId))
+      new Set(flattenedMsgs.map((msg) => msg.fileMetadata.originalAuthor))
     );
 
     return { flattenedMsgs, uniqueSenders };
