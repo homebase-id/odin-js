@@ -197,7 +197,7 @@ const ChannelItem = ({
   return (
     <Link
       to={`${COMMUNITY_ROOT}/${odinId}/${communityId}/${channelId}`}
-      className={`group flex flex-row items-center gap-1 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : `hover:bg-primary/10 ${isVisited ? 'text-purple-600' : ''}`} ${hasUnreadMessages ? 'font-bold' : ''}`}
+      className={`group flex flex-row items-center gap-1 rounded-md px-2 py-[0.15rem] ${isActive ? 'bg-primary/100 text-white' : `hover:bg-primary/10 ${isVisited ? 'text-purple-600' : ''}`} ${hasUnreadMessages ? 'font-bold' : ''}`}
     >
       # {channel.fileMetadata.appData.content?.title?.toLowerCase()}
       <button
@@ -249,10 +249,11 @@ const DirectMessageItem = ({
   return (
     <Link
       to={href}
-      className={`flex flex-row items-center gap-1 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
+      className={`flex flex-row items-center gap-1 rounded-md px-2 py-[0.15rem] ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
     >
       <ConnectionImage odinId={recipient} size="xxs" />
-      <ConnectionName odinId={recipient} />
+      <ConnectionName odinId={recipient} />{' '}
+      <span className="text-sm text-slate-400">{recipient === odinId ? t('you') : ''}</span>
     </Link>
   );
 };
