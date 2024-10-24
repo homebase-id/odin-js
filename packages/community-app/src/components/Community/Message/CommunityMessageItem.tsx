@@ -159,8 +159,6 @@ const CommunityTextMessageBody = ({
     >
       <div className="flex flex-col md:flex-row md:flex-wrap md:gap-2">
         <div className="flex w-full min-w-0 flex-col gap-1">
-          {/* {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null} */}
-
           <MessageTextRenderer
             community={community}
             message={content.message}
@@ -190,7 +188,6 @@ const MessageTextRenderer = ({
   }).fetch;
 
   if (!message) return null;
-
   return (
     <RichTextRenderer
       body={message}
@@ -204,11 +201,7 @@ const MessageTextRenderer = ({
           'value' in attributes &&
           typeof attributes.value === 'string'
         ) {
-          const tagGuid =
-            ('uniqueId' in attributes &&
-              typeof attributes.uniqueId === 'string' &&
-              attributes.uniqueId) ||
-            formatGuidId(toGuidId(attributes.value));
+          const tagGuid = formatGuidId(toGuidId(attributes.value));
 
           const hasChannel = !!channels?.find((channel) =>
             stringGuidsEqual(channel.fileMetadata.appData.uniqueId, tagGuid)
@@ -217,7 +210,7 @@ const MessageTextRenderer = ({
           if (hasChannel) {
             return (
               <Link
-                to={`${COMMUNITY_ROOT}/${community?.fileMetadata.appData.uniqueId}/${tagGuid}`}
+                to={`${COMMUNITY_ROOT}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${tagGuid}`}
                 className="break-all text-primary hover:underline"
               >
                 #{attributes.value.trim()}{' '}

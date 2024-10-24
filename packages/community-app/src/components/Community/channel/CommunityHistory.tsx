@@ -80,11 +80,7 @@ export const CommunityHistory = ({
     }, [messages, origin]) || [];
 
   useEffect(() => {
-    if (
-      setIsEmptyChat &&
-      isFetched &&
-      (!flattenedMsgs || flattenedMsgs?.filter((msg) => msg.fileId).length === 0)
-    )
+    if (setIsEmptyChat && isFetched && (!flattenedMsgs || flattenedMsgs.length === 0))
       setIsEmptyChat(true);
   }, [isFetched, flattenedMsgs]);
 
