@@ -51,7 +51,8 @@ export const useLiveCommunityProcessor = (
   communityId: string | undefined
 ) => {
   // Process the inbox on startup; As we want to cover the backlog of messages first
-  const { status: inboxStatus } = useInboxProcessor(odinId, communityId || '');
+  useInboxProcessor(odinId, communityId || '');
+  // const { status: inboxStatus } = useInboxProcessor(odinId, communityId || '');
 
   // Only after the inbox is processed, we connect for live updates; So we avoid clearing the cache on each fileAdded update
   // const isOnline = useCommunityWebsocket(odinId, communityId, inboxStatus === 'success');
