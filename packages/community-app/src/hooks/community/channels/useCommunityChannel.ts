@@ -17,7 +17,6 @@ export const useCommunityChannel = (props?: {
 }) => {
   const { odinId, communityId, channelId } = props || {};
   const dotYouClient = useDotYouClientContext();
-  const identity = dotYouClient.getIdentity();
   const queryClient = useQueryClient();
 
   const channelsQuery = useCommunityChannels({ odinId, communityId }).fetch;
@@ -28,10 +27,7 @@ export const useCommunityChannel = (props?: {
     community: HomebaseFile<CommunityDefinition>;
     channelName: string;
   }) => {
-    const members = community.fileMetadata.appData.content.members.filter(
-      (recipient) => recipient !== identity
-    );
-    return await saveCommunityChannel(dotYouClient, community, members, channelName);
+    return await saveCommunityChannel(dotYouClient, community, channelName);
   };
 
   return {

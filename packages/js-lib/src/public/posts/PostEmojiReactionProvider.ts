@@ -3,7 +3,7 @@ import { ReactionFile } from '../../core/DriveData/File/DriveFileReactionTypes';
 import { tryJsonParse } from '../../helpers/DataUtil';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
 import { EmojiReactionSummary } from './PostReactionProvider';
-import { RawReactionContent, ReactionContext } from './PostTypes';
+import { ReactionContext } from './PostTypes';
 
 interface ServerReactionsSummary {
   reactions: { reactionContent: string; count: number }[];
@@ -23,7 +23,7 @@ const emojiRootTransit = '/transit/reactions';
 const emojiRoot = '/drive/files/reactions';
 export const saveEmojiReaction = async (
   dotYouClient: DotYouClient,
-  emoji: RawReactionContent,
+  emoji: { body: string },
   context: ReactionContext
 ): Promise<string> => {
   const isLocal = context.odinId === dotYouClient.getIdentity();
@@ -57,7 +57,7 @@ export const saveEmojiReaction = async (
 
 export const removeEmojiReaction = async (
   dotYouClient: DotYouClient,
-  emoji: RawReactionContent,
+  emoji: { body: string; authorOdinId?: string | undefined },
   context: ReactionContext
 ): Promise<string> => {
   const isLocal = context.odinId === dotYouClient.getIdentity();
