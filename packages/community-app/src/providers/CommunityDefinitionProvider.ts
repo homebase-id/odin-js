@@ -48,20 +48,20 @@ export const COMMUNITY_FILE_TYPE = 7010;
 
 export const getCommunities = async (dotYouClient: DotYouClient) => {
   const drives = await getDrivesByType(dotYouClient, COMMUNITY_DRIVE_TYPE, 1, 1000);
-  const channelHeaders = drives.results.map((drive) => {
+  const communityHeaders = drives.results.map((drive) => {
     return {
       id: drive.targetDriveInfo.alias,
       name: drive.name,
     };
   });
 
-  const queries = channelHeaders.map((header) => {
-    const channelId = header.id;
-    const targetDrive = getTargetDriveFromCommunityId(channelId);
+  const queries = communityHeaders.map((community) => {
+    const communityId = community.id;
+    const targetDrive = getTargetDriveFromCommunityId(communityId);
 
     const params: FileQueryParams = {
       targetDrive: targetDrive,
-      tagsMatchAtLeastOne: [channelId],
+      tagsMatchAtLeastOne: [communityId],
       fileType: [COMMUNITY_FILE_TYPE],
     };
 
@@ -72,7 +72,7 @@ export const getCommunities = async (dotYouClient: DotYouClient) => {
     };
 
     return {
-      name: channelId,
+      name: communityId,
       queryParams: params,
       resultOptions: ro,
     };

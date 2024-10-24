@@ -15,7 +15,13 @@ import { drivesParamToDriveGrantRequest, circleToCircleIds } from './util';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { DriveGrant } from '@homebase-id/js-lib/network';
 import { useEffect } from 'react';
+import { DrivePermissionType } from '@homebase-id/js-lib/core';
 
+const maxGrant =
+  DrivePermissionType.Comment +
+  DrivePermissionType.React +
+  DrivePermissionType.Read +
+  DrivePermissionType.Write;
 export const ExtendCirclePermissionsFromApp = () => {
   // Read the queryString
   const [searchParams] = useSearchParams();
@@ -61,13 +67,16 @@ export const ExtendCirclePermissionsFromApp = () => {
           if (existingGrant) {
             // If both have only one permission, take the highest one as they are probably combined bits
             if (
-              existingGrant.permissionedDrive.permission.length === 1 &&
-              grant.permissionedDrive.permission.length === 1
+              (existingGrant.permissionedDrive.permission.length === 1 &&
+                grant.permissionedDrive.permission.length === 1) ||
+              maxGrant ===
+                existingGrant.permissionedDrive.permission.reduce((acc, perm) => acc + perm, 0) ||
+              maxGrant === grant.permissionedDrive.permission.reduce((acc, perm) => acc + perm, 0)
             ) {
               existingGrant.permissionedDrive.permission = [
                 Math.max(
-                  existingGrant.permissionedDrive.permission[0],
-                  grant.permissionedDrive.permission[0]
+                  existingGrant.permissionedDrive.permission.reduce((acc, perm) => acc + perm, 0),
+                  grant.permissionedDrive.permission.reduce((acc, perm) => acc + perm, 0)
                 ),
               ];
             } else {

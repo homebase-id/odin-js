@@ -22,7 +22,7 @@ import { useLiveCommunityProcessor } from '../../hooks/community/useLiveCommunit
 import { RadioTower, Plus } from '@homebase-id/common-app/icons';
 import { CommunityChannelNav } from './CommunityChannelNav';
 import { useCommunityMemberUpdater } from '../../hooks/community/useCommunityMemberUpdater';
-import { useCommunityAccessVerifyer } from '../../hooks/community/useCommunityAccessVerifyer';
+import { ExtendCriclePermissionDialog } from '../../components/Auth/ExtendCirclePermissionDialog';
 
 export const COMMUNITY_ROOT = '/apps/community';
 
@@ -33,7 +33,6 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
 
   useLiveCommunityProcessor(odinKey, communityKey);
   useCommunityMemberUpdater(odinKey, communityKey);
-  useCommunityAccessVerifyer(odinKey, communityKey);
   useRemoveNotifications({ appId: COMMUNITY_APP_ID });
 
   const { data: communities } = useCommunities(true).all;
@@ -63,6 +62,7 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
         drives={drives}
         permissions={permissions}
       />
+      <ExtendCriclePermissionDialog />
       <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`}>
         <CommunitySideNav />
         {isCreateNew ? (

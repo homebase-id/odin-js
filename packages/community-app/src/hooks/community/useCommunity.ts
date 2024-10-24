@@ -119,13 +119,22 @@ export const useCommunity = (props?: useCommunityProps) => {
 
       const targetDrive = getTargetDriveFromCommunityId(communityDef.fileMetadata.appData.uniqueId);
 
+      const intermediateReturnUrl = getExtendCirclePermissionUrl(
+        host,
+        communityDef.fileMetadata.appData.content.title,
+        t('Drive for "{0}" community', communityDef.fileMetadata.appData.content.title),
+        targetDrive,
+        communityDef.serverMetadata?.accessControlList.circleIdList || [],
+        returnUrl
+      );
+
       window.location.href = ensureNewDriveAndPermission(
         host,
         communityDef.fileMetadata.appData.content.title,
         t('Drive for "{0}" community', communityDef.fileMetadata.appData.content.title),
         targetDrive,
         { IsCollaborativeChannel: 'true' },
-        returnUrl
+        intermediateReturnUrl
       );
     };
 
@@ -232,4 +241,38 @@ export const useCommunity = (props?: useCommunityProps) => {
       mutationFn: getInviteLink,
     }),
   };
+};
+
+export const getExtendCirclePermissionUrl = (
+  identity: string,
+  name: string,
+  description: string,
+  targetDrive: TargetDrive,
+  circleIds: string[],
+  returnUrl: string
+) => {
+  const drives = [
+    {
+      a: targetDrive.alias,
+      t: targetDrive.type,
+      p:
+        DrivePermissionType.Read +
+        DrivePermissionType.Write +
+        DrivePermissionType.React +
+        DrivePermissionType.Comment, // Permission
+      n: name,
+      d: description,
+    },
+  ];
+
+  const params = {
+    appId: COMMUNITY_APP_ID,
+    cd: JSON.stringify(drives),
+    c: circleIds.join(','),
+  };
+
+  const host = new DotYouClient({ identity: identity || undefined, api: ApiType.App }).getRoot();
+  return `${host}/owner/apprequest-circles?${stringifyToQueryParams(
+    params
+  )}&return=${encodeURIComponent(returnUrl)}`;
 };
