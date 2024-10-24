@@ -1,13 +1,13 @@
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
-  deleteGroupReaction,
-  getGroupReactions,
+  deleteReaction,
+  getReactions,
   GroupEmojiReaction,
   HomebaseFile,
-  ReactionFile,
+  EmojiReaction,
   ReactionPreview,
-  uploadGroupReaction,
+  uploadReaction,
 } from '@homebase-id/js-lib/core';
 import { getNewId, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
@@ -32,12 +32,16 @@ export const useCommunityReaction = (props?: {
     (communityId: string, messageGlobalTransitId: string) => async () => {
       const reactions =
         (
-          await getGroupReactions(dotYouClient, {
-            target: {
+          await getReactions(
+            dotYouClient,
+            community?.fileMetadata.senderOdinId,
+            {
+              fileId: messageFileId,
               globalTransitId: messageGlobalTransitId,
               targetDrive: getTargetDriveFromCommunityId(communityId),
             },
-          })
+            15
+          )
         )?.reactions || [];
 
       return reactions;
@@ -60,13 +64,11 @@ export const useCommunityReaction = (props?: {
     if (!message.fileMetadata.globalTransitId)
       throw new Error('Message does not have a global transit id');
 
-    return await uploadGroupReaction(
-      dotYouClient,
+    return await uploadReaction(dotYouClient, reaction, community.fileMetadata.senderOdinId, {
+      fileId: message.fileId,
+      globalTransitId: message.fileMetadata.globalTransitId,
       targetDrive,
-      message.fileMetadata.globalTransitId,
-      reaction,
-      [community.fileMetadata.senderOdinId]
-    );
+    });
   };
 
   const removeReaction = async ({
@@ -76,12 +78,9 @@ export const useCommunityReaction = (props?: {
   }: {
     community: HomebaseFile<CommunityDefinition>;
     message: HomebaseFile<CommunityMessage>;
-    reaction: ReactionFile;
+    reaction: EmojiReaction;
   }) => {
     if (!community || !message) return;
-    const communityContent = community.fileMetadata.appData.content;
-    const identity = dotYouClient.getIdentity();
-    const members = communityContent.members.filter((recipient) => recipient !== identity);
 
     const targetDrive = getTargetDriveFromCommunityId(
       community.fileMetadata.appData.uniqueId as string
@@ -90,10 +89,10 @@ export const useCommunityReaction = (props?: {
     if (!message.fileMetadata.globalTransitId)
       throw new Error('Message does not have a global transit id');
 
-    return await deleteGroupReaction(dotYouClient, targetDrive, members, reaction, {
+    return await deleteReaction(dotYouClient, reaction, community.fileMetadata.senderOdinId, {
+      targetDrive,
       fileId: message.fileId,
       globalTransitId: message.fileMetadata.globalTransitId,
-      targetDrive: targetDrive,
     });
   };
 
@@ -112,9 +111,9 @@ export const useCommunityReaction = (props?: {
       onMutate: async ({ community, message, reaction }) => {
         // Update the reaction overview
         const previousReactions =
-          queryClient.getQueryData<ReactionFile[]>(['community-reaction', message.fileId]) || [];
+          queryClient.getQueryData<EmojiReaction[]>(['community-reaction', message.fileId]) || [];
 
-        const newReaction: ReactionFile = {
+        const newReaction: EmojiReaction = {
           authorOdinId: dotYouClient.getIdentity(),
           body: reaction,
         };
@@ -158,7 +157,7 @@ export const useCommunityReaction = (props?: {
 
       onMutate: async ({ community, message, reaction }) => {
         // Update the reaction overview
-        const previousReactions = queryClient.getQueryData<ReactionFile[] | undefined>([
+        const previousReactions = queryClient.getQueryData<EmojiReaction[] | undefined>([
           'community-reaction',
           message.fileId,
         ]);
@@ -220,7 +219,7 @@ export const insertNewReaction = (
   messageLocalFileId: string,
   newReaction: GroupEmojiReaction
 ) => {
-  const currentReactions = queryClient.getQueryData<ReactionFile[] | undefined>([
+  const currentReactions = queryClient.getQueryData<EmojiReaction[] | undefined>([
     'community-reaction',
     messageLocalFileId,
   ]);
@@ -230,20 +229,20 @@ export const insertNewReaction = (
     return;
   }
 
-  const reactionAsReactionFile: ReactionFile = {
+  const reactionAsEmojiReaction: EmojiReaction = {
     authorOdinId: newReaction.odinId,
     body: tryJsonParse<{ emoji: string }>(newReaction.reactionContent).emoji,
   };
 
-  queryClient.setQueryData<ReactionFile[]>(
+  queryClient.setQueryData<EmojiReaction[]>(
     ['community-reaction', messageLocalFileId],
     [
       ...currentReactions.filter(
         (reaction) =>
-          reaction.authorOdinId !== reactionAsReactionFile.authorOdinId ||
-          reaction.body !== reactionAsReactionFile.body
+          reaction.authorOdinId !== reactionAsEmojiReaction.authorOdinId ||
+          reaction.body !== reactionAsEmojiReaction.body
       ),
-      reactionAsReactionFile,
+      reactionAsEmojiReaction,
     ]
   );
 };
@@ -253,7 +252,7 @@ export const removeReaction = (
   messageLocalFileId: string,
   removedReaction: GroupEmojiReaction
 ) => {
-  const currentReactions = queryClient.getQueryData<ReactionFile[] | undefined>([
+  const currentReactions = queryClient.getQueryData<EmojiReaction[] | undefined>([
     'community-reaction',
     messageLocalFileId,
   ]);
@@ -263,17 +262,17 @@ export const removeReaction = (
     return;
   }
 
-  const reactionAsReactionFile: ReactionFile = {
+  const reactionAsEmojiReaction: EmojiReaction = {
     authorOdinId: removedReaction.odinId,
     body: tryJsonParse<{ emoji: string }>(removedReaction.reactionContent).emoji,
   };
 
-  queryClient.setQueryData<ReactionFile[]>(
+  queryClient.setQueryData<EmojiReaction[]>(
     ['community-reaction', messageLocalFileId],
     currentReactions.filter(
       (reaction) =>
-        reaction.authorOdinId !== reactionAsReactionFile.authorOdinId ||
-        reaction.body !== reactionAsReactionFile.body
+        reaction.authorOdinId !== reactionAsEmojiReaction.authorOdinId ||
+        reaction.body !== reactionAsEmojiReaction.body
     )
   );
 };
