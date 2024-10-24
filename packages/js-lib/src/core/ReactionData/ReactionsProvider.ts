@@ -1,8 +1,11 @@
-import { FileIdFileIdentifier, GlobalTransitIdFileIdentifier } from '../../../core';
 import { tryJsonParse } from '../../helpers/DataUtil';
-import { EmojiReaction } from '../core';
 
 import { DotYouClient } from '../DotYouClient';
+import { EmojiReaction } from '../DriveData/File/DriveFileReactionTypes';
+import {
+  FileIdFileIdentifier,
+  GlobalTransitIdFileIdentifier,
+} from '../DriveData/File/DriveFileTypes';
 
 const emojiRootTransit = '/transit/reactions';
 const emojiRoot = '/drive/files/reactions';
