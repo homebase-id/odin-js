@@ -10,13 +10,16 @@ import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/j
 import { stringGuidsEqual, toGuidId } from '@homebase-id/js-lib/helpers';
 import { useCommunityChannels } from './useCommunityChannels';
 
-export const useCommunityChannel = (props?: { communityId?: string; channelId?: string }) => {
-  const { communityId, channelId } = props || {};
+export const useCommunityChannel = (props?: {
+  odinId?: string;
+  communityId?: string;
+  channelId?: string;
+}) => {
+  const { odinId, communityId, channelId } = props || {};
   const dotYouClient = useDotYouClientContext();
-  const identity = dotYouClient.getIdentity();
   const queryClient = useQueryClient();
 
-  const channelsQuery = useCommunityChannels({ communityId }).fetch;
+  const channelsQuery = useCommunityChannels({ odinId, communityId }).fetch;
   const createChannel = async ({
     community,
     channelName,
@@ -24,15 +27,7 @@ export const useCommunityChannel = (props?: { communityId?: string; channelId?: 
     community: HomebaseFile<CommunityDefinition>;
     channelName: string;
   }) => {
-    const recipients = community.fileMetadata.appData.content.recipients.filter(
-      (recipient) => recipient !== identity
-    );
-    return await saveCommunityChannel(
-      dotYouClient,
-      community.fileMetadata.appData.uniqueId as string,
-      recipients,
-      channelName
-    );
+    return await saveCommunityChannel(dotYouClient, community, channelName);
   };
 
   return {
@@ -64,7 +59,9 @@ export const useCommunityChannel = (props?: { communityId?: string; channelId?: 
             },
           },
           serverMetadata: {
-            accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+            accessControlList: community.fileMetadata.appData.content.acl || {
+              requiredSecurityGroup: SecurityGroupType.Owner,
+            },
           },
         };
 

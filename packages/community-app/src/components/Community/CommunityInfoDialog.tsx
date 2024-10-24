@@ -17,15 +17,15 @@ import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 
 export const CommunityInfoDialog = ({ onClose }: { onClose: () => void }) => {
-  const { communityKey } = useParams();
-  const { data: community } = useCommunity({ communityId: communityKey }).fetch;
+  const { odinKey, communityKey } = useParams();
+  const { data: community } = useCommunity({ odinId: odinKey, communityId: communityKey }).fetch;
 
   const identity = useDotYouClient().getIdentity();
 
   const target = usePortal('modal-container');
 
   if (!community) return null;
-  const recipients = community.fileMetadata.appData.content.recipients;
+  const members = community.fileMetadata.appData.content.members;
 
   const dialog = (
     <DialogWrapper onClose={onClose} title={community.fileMetadata.appData.content.title}>
@@ -41,7 +41,7 @@ export const CommunityInfoDialog = ({ onClose }: { onClose: () => void }) => {
         <div>
           <p className="mb-2 text-xl">{t('Members')}</p>
           <div className="flex flex-col gap-4">
-            {recipients.map((recipient) => {
+            {members.map((recipient) => {
               return (
                 <div className="flex flex-row items-center justify-between" key={recipient}>
                   <div className="flex flex-row items-center gap-2">

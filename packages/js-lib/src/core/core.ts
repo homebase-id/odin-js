@@ -39,6 +39,7 @@ export * from './WebsocketData/WebsocketTypes';
 
 // Reactions
 export * from './ReactionData/GroupReactionsProvider';
+export * from './ReactionData/ReactionsProvider';
 
 // Notifications
 export * from './NotificationData/PushNotificationsProvider';

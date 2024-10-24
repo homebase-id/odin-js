@@ -1,0 +1,88 @@
+import {
+  usePortal,
+  DialogWrapper,
+  t,
+  ActionLink,
+  useDotYouClientContext,
+  useCircle,
+} from '@homebase-id/common-app';
+import { Shield } from '@homebase-id/common-app/icons';
+import { DrivePermissionType } from '@homebase-id/js-lib/core';
+import { drivesEqual } from '@homebase-id/js-lib/helpers';
+import { createPortal } from 'react-dom';
+import { useParams } from 'react-router-dom';
+import { useCommunity, getExtendCirclePermissionUrl } from '../../hooks/community/useCommunity';
+import { getTargetDriveFromCommunityId } from '../../providers/CommunityDefinitionProvider';
+
+export const ExtendCriclePermissionDialog = () => {
+  const target = usePortal('modal-container');
+  const { odinKey, communityKey } = useParams();
+  const extendPermissionUrl = useCommunityAccessVerifyer(odinKey, communityKey);
+
+  if (!extendPermissionUrl) return null;
+
+  const dialog = (
+    <DialogWrapper title={t('Missing permissions')} isSidePanel={false}>
+      <p>
+        {t(
+          `The members of your community do not have the necessary permissions to use it. Without the necessary permissions their functionality will be limited.`
+        )}
+      </p>
+      <div className="mt-5 flex flex-row-reverse">
+        <ActionLink href={extendPermissionUrl} icon={Shield}>
+          {t('Extend permissions')}
+        </ActionLink>
+      </div>
+    </DialogWrapper>
+  );
+
+  return createPortal(dialog, target);
+};
+
+const useCommunityAccessVerifyer = (
+  odinId: string | undefined,
+  communityId: string | undefined
+) => {
+  const { data: community } = useCommunity({ odinId, communityId }).fetch;
+  const identity = useDotYouClientContext().getIdentity();
+  const isAdmin = community?.fileMetadata.originalAuthor === identity;
+
+  const communityCircleId = community?.fileMetadata.appData.content.acl.circleIdList?.[0];
+  const { data: circleDef } = useCircle({
+    circleId: isAdmin ? communityCircleId : undefined,
+  }).fetch;
+
+  if (!circleDef || !communityId || !community || !isAdmin || !communityCircleId) return;
+  const communityDrive = getTargetDriveFromCommunityId(communityId);
+
+  const circleHasAccess = circleDef.driveGrants?.some((grant) => {
+    if (drivesEqual(grant.permissionedDrive.drive, communityDrive)) {
+      const totalGrant = grant?.permissionedDrive?.permission?.reduce((acc, permission) => {
+        return acc + permission;
+      }, 0);
+
+      return (
+        totalGrant >=
+        DrivePermissionType.Comment +
+          DrivePermissionType.React +
+          DrivePermissionType.Read +
+          DrivePermissionType.Write
+      );
+    }
+  });
+
+  if (!circleHasAccess) {
+    const extendUrl = getExtendCirclePermissionUrl(
+      identity,
+      '',
+      '',
+      communityDrive,
+      [communityCircleId],
+      window.location.href
+    );
+
+    console.log(extendUrl);
+
+    return extendUrl;
+  }
+};

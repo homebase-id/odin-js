@@ -14,6 +14,7 @@ import {
 import { TransitInstructionSet, TransitUploadResult } from '../PeerTypes';
 import { hasDebugFlag } from '../../../helpers/BrowserUtil';
 import { getRandom16ByteArray } from '../../../helpers/DataUtil';
+import { AxiosRequestConfig } from 'axios';
 
 const isDebug = hasDebugFlag();
 
@@ -24,7 +25,11 @@ export const uploadFileOverPeer = async (
   metadata: UploadFileMetadata,
   payloads?: PayloadFile[],
   thumbnails?: ThumbnailFile[],
-  encrypt = true
+  encrypt = true,
+  options?: {
+    axiosConfig?: AxiosRequestConfig;
+    aesKey?: Uint8Array | undefined;
+  }
 ) => {
   isDebug &&
     console.debug(
@@ -36,7 +41,10 @@ export const uploadFileOverPeer = async (
       }
     );
 
-  const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
+  // Force isEncrypted on the metadata to match the encrypt flag
+  metadata.isEncrypted = encrypt || !!options?.aesKey;
+
+  const keyHeader = encrypt ? GenerateKeyHeader(options?.aesKey) : undefined;
   const strippedInstructions: TransitInstructionSet = {
     transferIv: instructions.transferIv,
     overwriteGlobalTransitFileId: instructions.overwriteGlobalTransitFileId,
@@ -74,9 +82,12 @@ export const uploadFileOverPeer = async (
   });
   const url = 'transit/sender/files/send';
 
-  const config = {
+  const axiosConfig = options?.axiosConfig || {};
+  const config: AxiosRequestConfig = {
+    ...axiosConfig,
     headers: {
       'content-type': 'multipart/form-data',
+      ...axiosConfig?.headers,
     },
   };
 

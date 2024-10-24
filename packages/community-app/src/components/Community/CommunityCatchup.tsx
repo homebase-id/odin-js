@@ -69,7 +69,11 @@ const CommunityChannelCatchupHeader = ({
   return (
     <>
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-        <ActionLink className="lg:hidden" type="mute" href={`${COMMUNITY_ROOT}/${communityId}`}>
+        <ActionLink
+          className="lg:hidden"
+          type="mute"
+          href={`${COMMUNITY_ROOT}/${community?.fileMetadata.senderOdinId}/${communityId}`}
+        >
           <ChevronLeft className="h-5 w-5" />
         </ActionLink>
         <RadioTower className="h-6 w-6" /> {t('Activity')}
@@ -113,7 +117,7 @@ const CommunityChannelCatchup = ({
           type="mute"
           size="none"
           className="text-lg hover:underline"
-          href={`${COMMUNITY_ROOT}/${communityId}/${channel.fileMetadata.appData.uniqueId}`}
+          href={`${COMMUNITY_ROOT}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}`}
         >
           # {channel.fileMetadata.appData.content.title}
         </ActionLink>

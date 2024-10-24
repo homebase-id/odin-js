@@ -12,7 +12,7 @@ import {
 import { getRichTextFromString } from '../../helpers/richTextHelper';
 import { UseCommentsVal } from './comments/useComments';
 
-import { HomebaseFile, NewHomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
+import { CommentReaction, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 export const useReaction = () => {
@@ -25,7 +25,7 @@ export const useReaction = () => {
   }: {
     context: ReactionContext;
     commentData:
-      | Omit<HomebaseFile<ReactionFile>, 'serverMetadata'>
+      | Omit<HomebaseFile<CommentReaction>, 'serverMetadata'>
       | Omit<NewHomebaseFile<RawReactionContent>, 'serverMetadata'>;
   }) => {
     return await saveComment(dotYouClient, context, {
@@ -50,7 +50,7 @@ export const useReaction = () => {
     commentFile,
   }: {
     context: ReactionContext;
-    commentFile: HomebaseFile<ReactionFile>;
+    commentFile: HomebaseFile<CommentReaction>;
   }) => {
     return await removeComment(dotYouClient, context, commentFile);
   };
@@ -91,7 +91,7 @@ export const useReaction = () => {
         let newInfinite: InfiniteData<UseCommentsVal>;
         if (prevInfinite) {
           if (
-            (toSaveCommentData.commentData as HomebaseFile<ReactionFile>).fileMetadata
+            (toSaveCommentData.commentData as HomebaseFile<CommentReaction>).fileMetadata
               .globalTransitId
           ) {
             newInfinite = {
@@ -101,11 +101,11 @@ export const useReaction = () => {
                   ...page,
                   comments: page.comments.map((comment) =>
                     comment.fileMetadata.globalTransitId ===
-                    (toSaveCommentData.commentData as HomebaseFile<ReactionFile>).fileMetadata
+                    (toSaveCommentData.commentData as HomebaseFile<CommentReaction>).fileMetadata
                       .globalTransitId
                       ? toSaveCommentData.commentData
                       : comment
-                  ) as HomebaseFile<ReactionFile>[],
+                  ) as HomebaseFile<CommentReaction>[],
                 };
               }),
             };
@@ -116,7 +116,7 @@ export const useReaction = () => {
               comments: [
                 toSaveCommentData.commentData,
                 ...firstPage.comments,
-              ] as HomebaseFile<ReactionFile>[],
+              ] as HomebaseFile<CommentReaction>[],
             };
             const newPages = [newFirtPage, ...prevInfinite.pages.slice(1)];
 
@@ -133,7 +133,8 @@ export const useReaction = () => {
       },
       onSuccess: (savedGlobalId, savedCommentData) => {
         if (
-          (savedCommentData.commentData as HomebaseFile<ReactionFile>).fileMetadata.globalTransitId
+          (savedCommentData.commentData as HomebaseFile<CommentReaction>).fileMetadata
+            .globalTransitId
         ) {
           // it was a normal update, already covered on the onMutate;
           return;

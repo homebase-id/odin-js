@@ -14,7 +14,10 @@ export type ChannelWithRecentMessage = HomebaseFile<CommunityChannel> & {
   lastMessage: HomebaseFile<CommunityMessage> | null;
 };
 
-export const useCommunityChannelsWithRecentMessages = (props: { communityId?: string }) => {
+export const useCommunityChannelsWithRecentMessages = (props: {
+  odinId?: string;
+  communityId?: string;
+}) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
@@ -30,6 +33,7 @@ export const useCommunityChannelsWithRecentMessages = (props: { communityId?: st
         const messagesA = await queryClient.fetchInfiniteQuery(
           getCommunityMessagesInfiniteQueryOptions(
             dotYouClient,
+            props.odinId,
             props.communityId,
             chnlId,
             undefined

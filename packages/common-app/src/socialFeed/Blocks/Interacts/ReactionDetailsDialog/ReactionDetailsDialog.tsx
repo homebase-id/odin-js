@@ -1,7 +1,7 @@
 import { ReactionContext } from '@homebase-id/js-lib/public';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ReactionFile } from '@homebase-id/js-lib/core';
+import { EmojiReaction } from '@homebase-id/js-lib/core';
 import { t } from '../../../../helpers';
 import { usePortal, useEmojiReactions, useEmojiSummary } from '../../../../hooks';
 import { DialogWrapper, ActionButton } from '../../../../ui';
@@ -34,10 +34,10 @@ export const ReactionDetailsDialog = ({
 
   const flattenedReactions = reactionDetails?.pages
     .flatMap((page) => page?.reactions)
-    .filter(Boolean) as ReactionFile[];
+    .filter(Boolean) as EmojiReaction[];
 
   const filteredEmojis = reactionSummary?.reactions?.filter((reaction) =>
-    flattenedReactions?.some((reactionFile) => reactionFile.body === reaction.emoji)
+    flattenedReactions?.some((rct) => rct.body === reaction.emoji)
   );
 
   useEffect(() => {

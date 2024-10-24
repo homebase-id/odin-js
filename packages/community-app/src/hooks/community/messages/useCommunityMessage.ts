@@ -21,6 +21,7 @@ import { CommunityChannel } from '../../../providers/CommunityProvider';
 import { insertNewMessage } from './useCommunityMessages';
 
 export const useCommunityMessage = (props?: {
+  odinId: string | undefined;
   communityId: string | undefined;
   messageId: string | undefined;
 }) => {
@@ -28,9 +29,9 @@ export const useCommunityMessage = (props?: {
   const queryClient = useQueryClient();
   const identity = dotYouClient.getIdentity();
 
-  const getMessageByUniqueId = async (communityId: string, messageId: string) => {
+  const getMessageByUniqueId = async (odinId: string, communityId: string, messageId: string) => {
     // TODO: Improve by fetching the message from the cache on conversations first
-    return await getCommunityMessage(dotYouClient, communityId, messageId);
+    return await getCommunityMessage(dotYouClient, odinId, communityId, messageId);
   };
 
   const sendMessage = async ({
@@ -54,10 +55,6 @@ export const useCommunityMessage = (props?: {
     chatId?: string;
     userDate?: number;
   }): Promise<NewHomebaseFile<CommunityMessage> | null> => {
-    const communityId = community.fileMetadata.appData.uniqueId as string;
-    const communityContent = community.fileMetadata.appData.content;
-    const recipients = communityContent.recipients.filter((recipient) => recipient !== identity);
-
     // We prefer having the uniqueId set outside of the mutation, so that an auto-retry of the mutation doesn't create duplicates
     const newChatId = chatId || getNewId();
     const newChat: NewHomebaseFile<CommunityMessage> = {
@@ -77,7 +74,7 @@ export const useCommunityMessage = (props?: {
         },
       },
       serverMetadata: {
-        accessControlList: {
+        accessControlList: community.fileMetadata.appData.content.acl || {
           requiredSecurityGroup: SecurityGroupType.Connected,
         },
       },
@@ -85,16 +82,21 @@ export const useCommunityMessage = (props?: {
 
     const uploadResult = await uploadCommunityMessage(
       dotYouClient,
-      communityId,
+      community,
       newChat,
-      recipients,
       files,
       linkPreviews
     );
     if (!uploadResult) throw new Error('Failed to send the chat message');
 
-    newChat.fileId = uploadResult.file.fileId;
-    newChat.fileMetadata.versionTag = uploadResult.newVersionTag;
+    if ('file' in uploadResult) {
+      newChat.fileId = uploadResult.file.fileId;
+      newChat.fileMetadata.versionTag = uploadResult.newVersionTag;
+    } else {
+      newChat.fileMetadata.globalTransitId =
+        uploadResult.remoteGlobalTransitIdFileIdentifier.globalTransitId;
+    }
+
     newChat.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
     newChat.fileMetadata.appData.content.deliveryStatus = CommunityDeliveryStatus.Sent;
 
@@ -108,22 +110,19 @@ export const useCommunityMessage = (props?: {
     updatedChatMessage: HomebaseFile<CommunityMessage>;
     community: HomebaseFile<CommunityDefinition>;
   }) => {
-    const communityContent = community.fileMetadata.appData.content;
-    const recipients = communityContent.recipients.filter((recipient) => recipient !== identity);
-
-    await updateCommunityMessage(
-      dotYouClient,
-      community.fileMetadata.appData.uniqueId as string,
-      updatedChatMessage,
-      recipients
-    );
+    await updateCommunityMessage(dotYouClient, community, updatedChatMessage);
   };
 
   return {
     get: useQuery({
       queryKey: ['community-message', props?.communityId, props?.messageId],
-      queryFn: () => getMessageByUniqueId(props?.communityId as string, props?.messageId as string),
-      enabled: !!props?.communityId && !!props?.messageId,
+      queryFn: () =>
+        getMessageByUniqueId(
+          props?.odinId as string,
+          props?.communityId as string,
+          props?.messageId as string
+        ),
+      enabled: !!props?.odinId && !!props?.communityId && !!props?.messageId,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
     }),
@@ -153,14 +152,15 @@ export const useCommunityMessage = (props?: {
               },
               userDate,
             },
-            senderOdinId: identity,
+            senderOdinId: community.fileMetadata.senderOdinId,
+            originalAuthor: identity,
             payloads: files?.map((file) => ({
               contentType: file.file.type,
               pendingFile: file.file,
             })),
           },
           serverMetadata: {
-            accessControlList: {
+            accessControlList: community.fileMetadata.appData.content.acl || {
               requiredSecurityGroup: SecurityGroupType.Connected,
             },
           },
@@ -181,7 +181,11 @@ export const useCommunityMessage = (props?: {
             queryTime: number;
             includeMetadataHeader: boolean;
           }>
-        >(['community-messages', params.community.fileMetadata.appData.uniqueId]);
+        >([
+          'community-messages',
+          newMessage.fileMetadata.appData.groupId || params.community.fileMetadata.appData.uniqueId,
+        ]);
+
         if (extistingMessages) {
           const newData = {
             ...extistingMessages,
@@ -222,10 +226,8 @@ export const useCommunityMessage = (props?: {
           );
         }
       },
-      onSettled: async () => {
-        // queryClient.invalidateQueries({
-        //   queryKey: ['community-messages', variables.conversation.fileMetadata.appData.uniqueId],
-        // });
+      onError: (err, messageParams) => {
+        console.error('Failed to update the chat message', err);
       },
     }),
     update: useMutation({

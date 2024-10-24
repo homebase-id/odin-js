@@ -28,7 +28,7 @@ export const CommunityMessageInfo = ({
   const target = usePortal('modal-container');
   const messageContent = msg.fileMetadata.appData.content;
   const communityContent = community.fileMetadata.appData.content;
-  const recipients = communityContent.recipients.filter(
+  const members = communityContent.members.filter(
     (recipient) => recipient && recipient !== identity
   );
 
@@ -61,11 +61,11 @@ export const CommunityMessageInfo = ({
           ) : null}
         </div>
 
-        {recipients?.length ? (
+        {members?.length ? (
           <div>
-            <p className="mb-2 text-xl">{t('Recipients')}</p>
+            <p className="mb-2 text-xl">{t('members')}</p>
             <div className="flex flex-col gap-4">
-              {recipients.map((recipient) => (
+              {members.map((recipient) => (
                 <div
                   className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center"
                   key={recipient}
@@ -85,12 +85,7 @@ export const CommunityMessageInfo = ({
                         recipient={recipient}
                         className="sm:ml-auto"
                       />
-                      <InnerDeliveryIndicator
-                        state={
-                          messageContent.deliveryDetails?.[recipient] ||
-                          messageContent.deliveryStatus
-                        }
-                      />
+                      <InnerDeliveryIndicator state={messageContent.deliveryStatus} />
                     </div>
                   ) : null}
                 </div>

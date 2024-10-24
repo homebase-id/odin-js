@@ -21,25 +21,30 @@ import { NewCommunity } from './CommunityNew';
 import { useLiveCommunityProcessor } from '../../hooks/community/useLiveCommunityProcessor';
 import { RadioTower, Plus } from '@homebase-id/common-app/icons';
 import { CommunityChannelNav } from './CommunityChannelNav';
+import { useCommunityMemberUpdater } from '../../hooks/community/useCommunityMemberUpdater';
+import { ExtendCriclePermissionDialog } from '../../components/Auth/ExtendCirclePermissionDialog';
 
 export const COMMUNITY_ROOT = '/apps/community';
 
 export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   const newCommunity = useMatch({ path: `${COMMUNITY_ROOT}/new` });
-  const { communityKey } = useParams();
+  const { odinKey, communityKey } = useParams();
   const isCreateNew = !!newCommunity;
 
-  useLiveCommunityProcessor(communityKey);
+  useLiveCommunityProcessor(odinKey, communityKey);
+  useCommunityMemberUpdater(odinKey, communityKey);
   useRemoveNotifications({ appId: COMMUNITY_APP_ID });
 
-  const { data: communities } = useCommunities().all;
+  const { data: communities } = useCommunities(true).all;
   const navigate = useNavigate();
   useEffect(() => {
     if (!communities) return;
     if (communityKey || newCommunity) return;
     if (window.innerWidth <= 1024) return;
     if (communities[0]) {
-      navigate(`${COMMUNITY_ROOT}/${communities[0].fileMetadata.appData.uniqueId}`);
+      navigate(
+        `${COMMUNITY_ROOT}/${communities[0].fileMetadata.senderOdinId}/${communities[0].fileMetadata.appData.uniqueId}`
+      );
     } else {
       navigate(`${COMMUNITY_ROOT}/new`);
     }
@@ -57,6 +62,7 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
         drives={drives}
         permissions={permissions}
       />
+      <ExtendCriclePermissionDialog />
       <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`}>
         <CommunitySideNav />
         {isCreateNew ? (
@@ -99,7 +105,7 @@ export const CommunitiesSidebar = ({
 }: {
   activeCommunityId: string | undefined;
 }) => {
-  const { data: communities } = useCommunities().all;
+  const { data: communities } = useCommunities(true).all;
 
   return (
     <ErrorBoundary>
@@ -167,7 +173,7 @@ const CommunityListItem = ({
   return (
     <div className={`px-2 py-2 ${isActive ? 'bg-primary/20' : ''}`}>
       <ActionLink
-        href={`${COMMUNITY_ROOT}/${community.fileMetadata.appData.uniqueId}`}
+        href={`${COMMUNITY_ROOT}/${community.fileMetadata.senderOdinId}/${community.fileMetadata.appData.uniqueId}`}
         className={`aspect-square w-full rounded-2xl p-4 uppercase hover:shadow-md`}
         style={{
           backgroundColor: getOdinIdColor(community.fileMetadata.appData.content.title).darkTheme,

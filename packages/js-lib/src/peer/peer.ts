@@ -2,6 +2,7 @@
 export * from './peerData/Drive/PeerDriveProvider';
 
 export * from './peerData/File/PeerFileByGlobalTransitProvider';
+export * from './peerData/File/PeerFileByUniqueIdProvider';
 export * from './peerData/File/PeerFileProvider';
 export * from './peerData/File/PeerFileManageProvider';
 

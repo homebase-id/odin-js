@@ -90,7 +90,7 @@ function App() {
             <Route index={true} element={<CommunityHome />} />
             <Route path={'new'} element={<CommunityHome />} />
             <Route
-              path={':communityKey'}
+              path={':odinKey/:communityKey'}
               element={
                 <CommunityHome>
                   <Outlet />
@@ -103,6 +103,7 @@ function App() {
               <Route path={'all'} element={<CommunityChannelDetail />} />
               <Route path={'all/:chatMessageKey'} element={<CommunityChannelDetail />} />
               <Route path={'all/:chatMessageKey/:mediaKey'} element={<CommunityChannelDetail />} />
+
               {/* Items for 'all' within a thread */}
               <Route path={'all/:threadKey/thread'} element={<CommunityChannelDetail />} />
               <Route
@@ -175,8 +176,10 @@ function App() {
 }
 
 const CommunityRootRoute = () => {
-  const { communityKey } = useParams();
-  return window.innerWidth > 1024 ? <Navigate to={`${ROOT_PATH}/${communityKey}/all`} /> : null;
+  const { odinKey, communityKey } = useParams();
+  return window.innerWidth > 1024 ? (
+    <Navigate to={`${ROOT_PATH}/${odinKey}/${communityKey}/all`} />
+  ) : null;
 };
 
 const RootRoute = ({ children }: { children: ReactNode }) => {

@@ -60,6 +60,7 @@ export const CommunityHistory = ({
     },
     delete: { mutate: deleteMessages, error: deleteMessagesError },
   } = useCommunityMessages({
+    odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata?.appData?.uniqueId,
     channelId: channel?.fileMetadata?.appData?.uniqueId,
     threadId: origin?.fileMetadata.appData.uniqueId,
@@ -79,11 +80,7 @@ export const CommunityHistory = ({
     }, [messages, origin]) || [];
 
   useEffect(() => {
-    if (
-      setIsEmptyChat &&
-      isFetched &&
-      (!flattenedMsgs || flattenedMsgs?.filter((msg) => msg.fileId).length === 0)
-    )
+    if (setIsEmptyChat && isFetched && (!flattenedMsgs || flattenedMsgs.length === 0))
       setIsEmptyChat(true);
   }, [isFetched, flattenedMsgs]);
 

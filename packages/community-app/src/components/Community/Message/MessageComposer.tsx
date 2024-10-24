@@ -111,7 +111,7 @@ export const MessageComposer = ({
         ?.filter(
           (contact) =>
             contact.fileMetadata.appData.content.odinId &&
-            community?.fileMetadata.appData.content.recipients.includes(
+            community?.fileMetadata.appData.content.members.includes(
               contact.fileMetadata.appData.content.odinId
             )
         )

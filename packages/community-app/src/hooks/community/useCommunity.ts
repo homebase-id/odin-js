@@ -24,16 +24,18 @@ import {
 } from '@homebase-id/js-lib/auth';
 
 type useCommunityProps = {
-  communityId?: string;
+  odinId: string | undefined;
+  communityId: string | undefined;
 };
 
 const getEnsureNewDriveAndPermissionPath = (
   name: string,
   description: string,
   targetDrive: TargetDrive,
+  attributes: Record<string, string> | undefined,
   returnUrl: string
 ) => {
-  const drives: AppDriveAuthorizationParams[] = [
+  const drives = [
     {
       a: targetDrive.alias,
       t: targetDrive.type,
@@ -44,6 +46,7 @@ const getEnsureNewDriveAndPermissionPath = (
         DrivePermissionType.Comment, // Permission
       n: name,
       d: description,
+      at: JSON.stringify(attributes),
     },
   ];
 
@@ -78,23 +81,30 @@ const ensureNewDriveAndPermission = (
   name: string,
   description: string,
   targetDrive: TargetDrive,
+  attributes: Record<string, string> | undefined,
   returnUrl: string
 ) => {
-  const path = getEnsureNewDriveAndPermissionPath(name, description, targetDrive, returnUrl);
+  const path = getEnsureNewDriveAndPermissionPath(
+    name,
+    description,
+    targetDrive,
+    attributes,
+    returnUrl
+  );
 
   const host = new DotYouClient({ identity: identity || undefined, api: ApiType.App }).getRoot();
   return `${host}${path}`;
 };
 
 export const useCommunity = (props?: useCommunityProps) => {
-  const { communityId } = props || {};
+  const { odinId, communityId } = props || {};
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
-  const fetchCommunity = async ({ communityId }: useCommunityProps) => {
-    if (!communityId) return null;
+  const fetchCommunity = async ({ odinId, communityId }: useCommunityProps) => {
+    if (!odinId || !communityId) return null;
 
-    return await getCommunityDefinition(dotYouClient, communityId);
+    return await getCommunityDefinition(dotYouClient, odinId, communityId);
   };
 
   const saveData = async (
@@ -109,12 +119,22 @@ export const useCommunity = (props?: useCommunityProps) => {
 
       const targetDrive = getTargetDriveFromCommunityId(communityDef.fileMetadata.appData.uniqueId);
 
+      const intermediateReturnUrl = getExtendCirclePermissionUrl(
+        host,
+        communityDef.fileMetadata.appData.content.title,
+        t('Drive for "{0}" community', communityDef.fileMetadata.appData.content.title),
+        targetDrive,
+        communityDef.serverMetadata?.accessControlList.circleIdList || [],
+        returnUrl
+      );
+
       window.location.href = ensureNewDriveAndPermission(
         host,
         communityDef.fileMetadata.appData.content.title,
         t('Drive for "{0}" community', communityDef.fileMetadata.appData.content.title),
         targetDrive,
-        returnUrl
+        { IsCollaborativeChannel: 'true' },
+        intermediateReturnUrl
       );
     };
 
@@ -126,21 +146,7 @@ export const useCommunity = (props?: useCommunityProps) => {
   }: {
     communityDef: HomebaseFile<CommunityDefinition>;
   }) => {
-    if (!communityDef.fileMetadata.appData.uniqueId) return '';
-
-    const returnUrl = `${COMMUNITY_ROOT}/new?draft=${JSON.stringify(communityDef)}`;
-
-    const targetDrive = getTargetDriveFromCommunityId(communityDef.fileMetadata.appData.uniqueId);
-
-    return (
-      `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect` +
-      getEnsureNewDriveAndPermissionPath(
-        communityDef.fileMetadata.appData.content.title,
-        t('Drive for "{0}" community', communityDef.fileMetadata.appData.content.title),
-        targetDrive,
-        returnUrl
-      )
-    );
+    return `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect${COMMUNITY_ROOT}/${communityDef.fileMetadata.senderOdinId}/${communityDef.fileMetadata.appData.uniqueId}`;
   };
 
   const removeCommunity = async (communityDef: HomebaseFile<CommunityDefinition>) =>
@@ -149,11 +155,11 @@ export const useCommunity = (props?: useCommunityProps) => {
   return {
     fetch: useQuery({
       queryKey: ['community', communityId],
-      queryFn: () => fetchCommunity({ communityId }),
+      queryFn: () => fetchCommunity({ odinId, communityId }),
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,
-      enabled: !!communityId,
+      enabled: !!odinId && !!communityId,
     }),
     save: useMutation({
       mutationFn: saveData,
@@ -181,7 +187,7 @@ export const useCommunity = (props?: useCommunityProps) => {
         return { toSaveCommunity, previousCommunities };
       },
       onError: (err, toRemoveAttr, context) => {
-        console.error(err);
+        console.warn(err);
 
         // Revert local caches to what they were
         queryClient.setQueryData(['communities'], context?.previousCommunities);
@@ -235,4 +241,38 @@ export const useCommunity = (props?: useCommunityProps) => {
       mutationFn: getInviteLink,
     }),
   };
+};
+
+export const getExtendCirclePermissionUrl = (
+  identity: string,
+  name: string,
+  description: string,
+  targetDrive: TargetDrive,
+  circleIds: string[],
+  returnUrl: string
+) => {
+  const drives = [
+    {
+      a: targetDrive.alias,
+      t: targetDrive.type,
+      p:
+        DrivePermissionType.Read +
+        DrivePermissionType.Write +
+        DrivePermissionType.React +
+        DrivePermissionType.Comment, // Permission
+      n: name,
+      d: description,
+    },
+  ];
+
+  const params = {
+    appId: COMMUNITY_APP_ID,
+    cd: JSON.stringify(drives),
+    c: circleIds.join(','),
+  };
+
+  const host = new DotYouClient({ identity: identity || undefined, api: ApiType.App }).getRoot();
+  return `${host}/owner/apprequest-circles?${stringifyToQueryParams(
+    params
+  )}&return=${encodeURIComponent(returnUrl)}`;
 };

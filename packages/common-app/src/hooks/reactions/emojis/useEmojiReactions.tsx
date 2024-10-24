@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { getReactions, ReactionContext } from '@homebase-id/js-lib/public';
+import { GetTargetDriveFromChannelId, ReactionContext } from '@homebase-id/js-lib/public';
 
-import { ReactionFile } from '@homebase-id/js-lib/core';
+import { getReactions, EmojiReaction } from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../../auth/useDotYouClient';
 
 const PAGE_SIZE = 15;
@@ -21,9 +21,19 @@ export const useEmojiReactions = (context?: ReactionContext) => {
       !context?.channelId ||
       (!context?.target?.fileId && !context?.target?.globalTransitId)
     ) {
-      return { reactions: [] as ReactionFile[], cursor: undefined };
+      return { reactions: [] as EmojiReaction[], cursor: undefined };
     }
-    return await getReactions(dotYouClient, context, PAGE_SIZE, pageParam);
+    return await getReactions(
+      dotYouClient,
+      context.odinId,
+      {
+        fileId: context.target.fileId,
+        globalTransitId: context.target.globalTransitId,
+        targetDrive: GetTargetDriveFromChannelId(context.channelId),
+      },
+      PAGE_SIZE,
+      pageParam
+    );
   };
 
   return {

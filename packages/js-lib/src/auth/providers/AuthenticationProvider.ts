@@ -116,14 +116,18 @@ export const getExtendAppRegistrationParams = (
   drives: AppDriveAuthorizationParams[],
   circleDrives: AppDriveAuthorizationParams[] | undefined,
   permissionKeys: number[] | undefined,
-  needsAllConnected: boolean | undefined,
+  needsAllConnectedOrCircleIds: boolean | string[] | undefined,
   returnUrl: string
 ): AppAuthorizationExtendParams => {
   const params: AppAuthorizationExtendParams = {
     appId: appId,
     d: JSON.stringify(drives),
     p: permissionKeys?.join(','),
-    c: needsAllConnected ? ALL_CONNECTIONS_CIRCLE_ID : undefined,
+    c: Array.isArray(needsAllConnectedOrCircleIds)
+      ? JSON.stringify(needsAllConnectedOrCircleIds)
+      : needsAllConnectedOrCircleIds
+        ? ALL_CONNECTIONS_CIRCLE_ID
+        : undefined,
     cd: circleDrives ? JSON.stringify(circleDrives) : undefined,
     return: returnUrl,
   };

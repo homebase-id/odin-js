@@ -3,16 +3,12 @@ import {
   NewHomebaseFile,
   NewMediaFile,
   UploadInstructionSet,
-  ScheduleOptions,
-  PriorityOptions,
-  SendContents,
   UploadFileMetadata,
   SecurityGroupType,
   PayloadFile,
   ThumbnailFile,
   EmbeddedThumb,
   uploadFile,
-  TransferUploadStatus,
   HomebaseFile,
   KeyHeader,
   UploadResult,
@@ -24,15 +20,12 @@ import {
   GetBatchQueryResultOptions,
   TargetDrive,
   getContentFromHeaderOrPayload,
-  RecipientTransferHistory,
-  TransferStatus,
-  FailedTransferStatuses,
   queryBatch,
   deleteFile,
   RichText,
+  TransferUploadStatus,
 } from '@homebase-id/js-lib/core';
 import {
-  getNewId,
   jsonStringify64,
   stringToUint8Array,
   makeGrid,
@@ -44,8 +37,16 @@ import {
   processVideoFile,
   createThumbnails,
 } from '@homebase-id/js-lib/media';
-import { appId } from '../hooks/auth/useAuth';
-import { getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
+import { CommunityDefinition, getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
+import {
+  deleteFileOverPeer,
+  getContentFromHeaderOrPayloadOverPeer,
+  getFileHeaderOverPeerByUniqueId,
+  queryBatchOverPeer,
+  TransitInstructionSet,
+  TransitUploadResult,
+  uploadFileOverPeer,
+} from '@homebase-id/js-lib/peer';
 
 export const COMMUNITY_MESSAGE_FILE_TYPE = 7020;
 export const CommunityDeletedArchivalStaus = 2;
@@ -54,12 +55,8 @@ const COMMUNITY_MESSAGE_PAYLOAD_KEY = 'comm_web';
 export const COMMUNITY_LINKS_PAYLOAD_KEY = 'comm_links';
 
 export enum CommunityDeliveryStatus {
-  // NotSent = 10, // NotSent is not a valid atm, when it's not sent, it doesn't "exist"
   Sending = 15, // When it's sending; Used for optimistic updates
-
-  Sent = 20, // when delivered to your identity
-  Delivered = 30, // when delivered to the recipient inbox
-  Read = 40, // when the recipient has read the message
+  Sent = 20, // when delivered to the central identity
   Failed = 50, // when the message failed to send to the recipient
 }
 
@@ -74,50 +71,26 @@ export interface CommunityMessage {
 
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: CommunityDeliveryStatus;
-  deliveryDetails?: Record<string, CommunityDeliveryStatus>;
 
   channelId: string;
 }
 
 export const uploadCommunityMessage = async (
   dotYouClient: DotYouClient,
-  communityId: string,
+  community: HomebaseFile<CommunityDefinition>,
   message: NewHomebaseFile<CommunityMessage>,
-  recipients: string[],
   files: NewMediaFile[] | undefined,
   linkPreviews: LinkPreview[] | undefined,
   onVersionConflict?: () => void
 ) => {
+  const communityId = community.fileMetadata.appData.uniqueId as string;
   const targetDrive = getTargetDriveFromCommunityId(communityId);
   const messageContent = message.fileMetadata.appData.content;
-  const distribute = recipients?.length > 0;
-
-  const uploadInstructions: UploadInstructionSet = {
-    storageOptions: {
-      drive: targetDrive,
-      overwriteFileId: message.fileId,
-    },
-    transitOptions: distribute
-      ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.High,
-          sendContents: SendContents.All,
-          useAppNotification: true,
-          appNotificationOptions: {
-            appId: appId,
-            typeId: message.fileMetadata.appData.groupId || getNewId(),
-            tagId: message.fileMetadata.appData.uniqueId || getNewId(),
-            silent: false,
-          },
-        }
-      : undefined,
-  };
 
   const jsonContent: string = jsonStringify64({ ...messageContent });
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
-    allowDistribution: distribute,
+    allowDistribution: true,
     appData: {
       uniqueId: message.fileMetadata.appData.uniqueId,
       groupId: message.fileMetadata.appData.groupId,
@@ -127,9 +100,10 @@ export const uploadCommunityMessage = async (
       content: jsonContent,
     },
     isEncrypted: true,
-    accessControlList: message.serverMetadata?.accessControlList || {
-      requiredSecurityGroup: SecurityGroupType.Connected,
-    },
+    accessControlList: message.serverMetadata?.accessControlList ||
+      community.fileMetadata.appData.content.acl || {
+        requiredSecurityGroup: SecurityGroupType.Connected,
+      },
   };
 
   const payloads: PayloadFile[] = [];
@@ -200,51 +174,75 @@ export const uploadCommunityMessage = async (
   uploadMetadata.appData.previewThumbnail =
     previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
-  const uploadResult = await uploadFile(
-    dotYouClient,
-    uploadInstructions,
-    uploadMetadata,
-    payloads,
-    thumbnails,
-    undefined,
-    onVersionConflict,
-    {
-      aesKey,
-    }
-  );
+  let uploadResult: UploadResult | TransitUploadResult | void;
+  if (
+    community.fileMetadata.senderOdinId &&
+    community.fileMetadata.senderOdinId !== dotYouClient.getIdentity()
+  ) {
+    const transitInstructions: TransitInstructionSet = {
+      remoteTargetDrive: targetDrive,
+      overwriteGlobalTransitFileId: message.fileMetadata.globalTransitId,
+      transferIv: getRandom16ByteArray(),
+      recipients: [community.fileMetadata.senderOdinId],
+    };
+
+    uploadResult = await uploadFileOverPeer(
+      dotYouClient,
+      transitInstructions,
+      uploadMetadata,
+      payloads,
+      thumbnails,
+      undefined,
+      {
+        aesKey,
+      }
+    );
+  } else {
+    const uploadInstructions: UploadInstructionSet = {
+      storageOptions: {
+        drive: targetDrive,
+        overwriteFileId: message.fileId,
+      },
+    };
+
+    uploadResult = await uploadFile(
+      dotYouClient,
+      uploadInstructions,
+      uploadMetadata,
+      payloads,
+      thumbnails,
+      undefined,
+      onVersionConflict,
+      {
+        aesKey,
+      }
+    );
+  }
 
   if (!uploadResult) return null;
 
-  if (
-    recipients.some(
-      (recipient) =>
-        uploadResult.recipientStatus?.[recipient].toLowerCase() ===
-        TransferUploadStatus.EnqueuedFailed
-    )
-  ) {
+  if ('file' in uploadResult) {
     message.fileId = uploadResult.file.fileId;
     message.fileMetadata.versionTag = uploadResult.newVersionTag;
+  } else {
+    message.fileMetadata.globalTransitId =
+      uploadResult.remoteGlobalTransitIdFileIdentifier.globalTransitId;
+  }
 
+  const recipientStatus = uploadResult.recipientStatus;
+  if (
+    recipientStatus &&
+    Object.values(recipientStatus).some(
+      (status) => status.toString().toLowerCase() === TransferUploadStatus.EnqueuedFailed
+    )
+  ) {
     message.fileMetadata.appData.content.deliveryStatus = CommunityDeliveryStatus.Failed;
-    message.fileMetadata.appData.content.deliveryDetails = {};
-    for (const recipient of recipients) {
-      message.fileMetadata.appData.content.deliveryDetails[recipient] =
-        uploadResult.recipientStatus?.[recipient].toLowerCase() ===
-        TransferUploadStatus.EnqueuedFailed
-          ? CommunityDeliveryStatus.Failed
-          : CommunityDeliveryStatus.Delivered;
-    }
-
     await updateCommunityMessage(
       dotYouClient,
-      communityId,
+      community,
       message,
-      recipients,
-      uploadResult.keyHeader
+      'keyHeader' in uploadResult ? uploadResult.keyHeader : undefined
     );
-
-    console.error('Not all recipients received the message: ', uploadResult);
-    throw new Error(`Not all recipients received the message: ${recipients.join(', ')}`);
   }
 
   return {
@@ -255,34 +253,25 @@ export const uploadCommunityMessage = async (
 
 export const updateCommunityMessage = async (
   dotYouClient: DotYouClient,
-  communityId: string,
+  community: HomebaseFile<CommunityDefinition>,
   message: HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage>,
-  recipients: string[],
   keyHeader?: KeyHeader
 ): Promise<UploadResult | void> => {
+  const communityId = community.fileMetadata.appData.uniqueId as string;
   const targetDrive = getTargetDriveFromCommunityId(communityId);
   const messageContent = message.fileMetadata.appData.content;
-  const distribute = recipients?.length > 0;
 
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: targetDrive,
       overwriteFileId: message.fileId,
     },
-    transitOptions: distribute
-      ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.High,
-          sendContents: SendContents.All,
-        }
-      : undefined,
   };
 
   const payloadJson: string = jsonStringify64({ ...messageContent });
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
-    allowDistribution: distribute,
+    allowDistribution: false,
     appData: {
       uniqueId: message.fileMetadata.appData.uniqueId,
       groupId: message.fileMetadata.appData.groupId,
@@ -294,10 +283,15 @@ export const updateCommunityMessage = async (
     },
     senderOdinId: (message.fileMetadata as FileMetadata<CommunityMessage>).senderOdinId,
     isEncrypted: true,
-    accessControlList: message.serverMetadata?.accessControlList || {
-      requiredSecurityGroup: SecurityGroupType.Connected,
-    },
+    accessControlList: message.serverMetadata?.accessControlList ||
+      community.fileMetadata.appData.content.acl || {
+        requiredSecurityGroup: SecurityGroupType.Connected,
+      },
   };
+
+  if (community.fileMetadata.senderOdinId !== dotYouClient.getIdentity()) {
+    throw new Error('Not implemented exception');
+  }
 
   return await uploadHeader(
     dotYouClient,
@@ -307,50 +301,61 @@ export const updateCommunityMessage = async (
     async () => {
       const existingChatMessage = await getCommunityMessage(
         dotYouClient,
+        community.fileMetadata.senderOdinId,
         communityId,
         message.fileMetadata.appData.uniqueId as string
       );
       if (!existingChatMessage) return;
       message.fileMetadata.versionTag = existingChatMessage.fileMetadata.versionTag;
-      return await updateCommunityMessage(
-        dotYouClient,
-        communityId,
-        message,
-        recipients,
-        keyHeader
-      );
+      return await updateCommunityMessage(dotYouClient, community, message, keyHeader);
     }
   );
 };
 
 export const hardDeleteCommunityMessage = async (
   dotYouClient: DotYouClient,
+  odinId: string,
   communityId: string,
-  message: HomebaseFile<CommunityMessage>,
-  recipients: string[]
+  message: HomebaseFile<CommunityMessage>
 ) => {
   const targetDrive = getTargetDriveFromCommunityId(communityId);
-  return await deleteFile(dotYouClient, targetDrive, message.fileId, recipients);
+  if (odinId !== dotYouClient.getIdentity()) {
+    if (!message.fileMetadata.globalTransitId) {
+      throw new Error('Global Transit Id is required for hard delete over peer');
+    }
+    return await deleteFileOverPeer(
+      dotYouClient,
+      targetDrive,
+      message.fileMetadata.globalTransitId,
+      [odinId]
+    );
+  }
+
+  return await deleteFile(dotYouClient, targetDrive, message.fileId);
 };
 
 export const getCommunityMessage = async (
   dotYouClient: DotYouClient,
+  odinId: string,
   communityId: string,
   chatMessageId: string
 ) => {
   const targetDrive = getTargetDriveFromCommunityId(communityId);
-  const fileHeader = await getFileHeaderByUniqueId<CommunityMessage>(
-    dotYouClient,
-    targetDrive,
-    chatMessageId
-  );
-  if (!fileHeader) return null;
 
-  return fileHeader;
+  if (odinId !== dotYouClient.getIdentity()) {
+    return await getFileHeaderOverPeerByUniqueId<CommunityMessage>(
+      dotYouClient,
+      odinId,
+      targetDrive,
+      chatMessageId
+    );
+  }
+  return await getFileHeaderByUniqueId<CommunityMessage>(dotYouClient, targetDrive, chatMessageId);
 };
 
 export const getCommunityMessages = async (
   dotYouClient: DotYouClient,
+  odinId: string,
   communityId: string,
   groupIds: string[] | undefined,
   tagIds: string[] | undefined,
@@ -372,7 +377,10 @@ export const getCommunityMessages = async (
     includeTransferHistory: true,
   };
 
-  const response = await queryBatch(dotYouClient, params, ro);
+  const response =
+    odinId && odinId !== dotYouClient.getIdentity()
+      ? await queryBatchOverPeer(dotYouClient, odinId, params, ro)
+      : await queryBatch(dotYouClient, params, ro);
   return {
     ...response,
     searchResults:
@@ -391,24 +399,22 @@ export const dsrToMessage = async (
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<CommunityMessage> | null> => {
   try {
-    const msgContent = await getContentFromHeaderOrPayload<CommunityMessage>(
-      dotYouClient,
-      targetDrive,
-      dsr,
-      includeMetadataHeader
-    );
+    const msgContent =
+      dsr.fileMetadata.senderOdinId && dotYouClient.getIdentity() !== dsr.fileMetadata.senderOdinId
+        ? await getContentFromHeaderOrPayloadOverPeer<CommunityMessage>(
+            dotYouClient,
+            dsr.fileMetadata.senderOdinId,
+            targetDrive,
+            dsr,
+            includeMetadataHeader
+          )
+        : await getContentFromHeaderOrPayload<CommunityMessage>(
+            dotYouClient,
+            targetDrive,
+            dsr,
+            includeMetadataHeader
+          );
     if (!msgContent) return null;
-
-    if (
-      (msgContent.deliveryStatus === CommunityDeliveryStatus.Sent ||
-        msgContent.deliveryStatus === CommunityDeliveryStatus.Failed) &&
-      dsr.serverMetadata?.transferHistory?.recipients
-    ) {
-      msgContent.deliveryDetails = buildDeliveryDetails(
-        dsr.serverMetadata.transferHistory.recipients
-      );
-      msgContent.deliveryStatus = buildDeliveryStatus(msgContent.deliveryDetails);
-    }
 
     const chatMessage: HomebaseFile<CommunityMessage> = {
       ...dsr,
@@ -416,7 +422,7 @@ export const dsrToMessage = async (
         ...dsr.fileMetadata,
         appData: {
           ...dsr.fileMetadata.appData,
-          content: msgContent,
+          content: { ...msgContent, deliveryStatus: CommunityDeliveryStatus.Sent },
         },
       },
     };
@@ -426,53 +432,4 @@ export const dsrToMessage = async (
     console.error('[community] failed to get the chatMessage payload of a dsr', dsr, ex);
     return null;
   }
-};
-
-const buildDeliveryDetails = (recipientTransferHistory: {
-  [key: string]: RecipientTransferHistory;
-}): Record<string, CommunityDeliveryStatus> => {
-  const deliveryDetails: Record<string, CommunityDeliveryStatus> = {};
-
-  for (const recipient of Object.keys(recipientTransferHistory)) {
-    if (recipientTransferHistory[recipient].latestSuccessfullyDeliveredVersionTag) {
-      if (recipientTransferHistory[recipient].isReadByRecipient) {
-        deliveryDetails[recipient] = CommunityDeliveryStatus.Read;
-      } else {
-        deliveryDetails[recipient] = CommunityDeliveryStatus.Delivered;
-      }
-    } else {
-      const latest = recipientTransferHistory[recipient].latestTransferStatus;
-      const transferStatus =
-        latest && typeof latest === 'string'
-          ? (latest?.toLocaleLowerCase() as TransferStatus)
-          : undefined;
-      if (transferStatus && FailedTransferStatuses.includes(transferStatus)) {
-        deliveryDetails[recipient] = CommunityDeliveryStatus.Failed;
-      } else {
-        deliveryDetails[recipient] = CommunityDeliveryStatus.Sent;
-      }
-    }
-  }
-
-  return deliveryDetails;
-};
-
-const buildDeliveryStatus = (
-  deliveryDetails: Record<string, CommunityDeliveryStatus>
-): CommunityDeliveryStatus => {
-  const values = Object.values(deliveryDetails);
-  // If any failed, the message is failed
-  if (values.includes(CommunityDeliveryStatus.Failed)) return CommunityDeliveryStatus.Failed;
-  if (values.every((val) => val === CommunityDeliveryStatus.Read))
-    return CommunityDeliveryStatus.Read;
-  // If all are delivered/read, the message is delivered/read
-  if (
-    values.every(
-      (val) => val === CommunityDeliveryStatus.Delivered || val === CommunityDeliveryStatus.Read
-    )
-  )
-    return CommunityDeliveryStatus.Delivered;
-
-  // If it exists, it's sent
-  return CommunityDeliveryStatus.Sent;
 };

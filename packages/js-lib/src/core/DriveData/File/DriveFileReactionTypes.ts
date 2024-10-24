@@ -12,11 +12,16 @@ export interface ReactionPreview {
   totalCommentCount: number;
 }
 
-export interface ReactionFile {
+interface ReactionBase {
   authorOdinId?: string;
   body: string;
+}
+
+export interface CommentReaction extends ReactionBase {
   bodyAsRichText?: RichText;
   mediaPayloadKey?: string;
 }
+
+export type EmojiReaction = ReactionBase;
 
 export type RichText = Record<string, unknown>[];

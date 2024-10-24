@@ -20,9 +20,10 @@ export const ChannelAutocompleteDropdown = ({
   const target = usePortal('channel-container');
   const enabled = !!(query && query.startsWith('#'));
 
-  const { communityKey } = useParams();
-  const { data: community } = useCommunity({ communityId: communityKey }).fetch;
+  const { odinKey, communityKey } = useParams();
+  const { data: community } = useCommunity({ odinId: odinKey, communityId: communityKey }).fetch;
   const { data: channelTargets } = useCommunityChannels({
+    odinId: odinKey,
     communityId: enabled ? communityKey : undefined,
   }).fetch;
   const {
@@ -101,8 +102,7 @@ export const ChannelAutocompleteDropdown = ({
       <ul
         className={`absolute flex flex-col overflow-hidden rounded-md bg-background py-2 text-foreground shadow-md ${
           verticalSpace === 'top' ? 'bottom-[100%]' : 'top-[100%]'
-        }
-        ${horizontalSpace === 'left' ? 'right-0' : 'left-0'}`}
+        } ${horizontalSpace === 'left' ? 'right-0' : 'left-0'}`}
       >
         {channels?.length ? (
           <>

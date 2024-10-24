@@ -19,7 +19,7 @@ export const usecommunityMetadata = (props?: { communityId?: string | undefined 
       const newMetadata: NewHomebaseFile<CommunityMetadata> = {
         fileMetadata: {
           appData: {
-            tags: [communityId],
+            uniqueId: communityId,
             content: {
               communityId,
               pinnedChannels: [],

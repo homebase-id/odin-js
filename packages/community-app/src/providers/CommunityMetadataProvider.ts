@@ -3,6 +3,7 @@ import {
   FileQueryParams,
   GetBatchQueryResultOptions,
   getContentFromHeaderOrPayload,
+  getFileHeaderByUniqueId,
   HomebaseFile,
   NewHomebaseFile,
   queryBatch,
@@ -14,7 +15,6 @@ import {
   UploadResult,
 } from '@homebase-id/js-lib/core';
 import { jsonStringify64, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
 
 export interface CommunityMetadata {
   lastReadTime: number;
@@ -23,6 +23,11 @@ export interface CommunityMetadata {
   communityId: string;
 }
 
+export const LOCAL_COMMUNITY_APP_DRIVE: TargetDrive = {
+  alias: '3e5de26f-8fa3-43c1-975a-d0dd2aa8564c',
+  type: '93a6e08d-14d9-479e-8d99-bae4e5348a16',
+};
+
 export const COMMUNITY_METADATA_FILE_TYPE = 7011;
 
 export const uploadCommunityMetadata = async (
@@ -30,25 +35,23 @@ export const uploadCommunityMetadata = async (
   definition: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata>,
   onVersionConflicht?: () => Promise<void | UploadResult> | void
 ): Promise<UploadResult | undefined> => {
-  if (!definition.fileMetadata.appData.tags) {
-    throw new Error('CommunityMetadata must have tags');
+  if (!definition.fileMetadata.appData.uniqueId) {
+    throw new Error('CommunityMetadata must have a uniqueId');
   }
 
   if (
-    !definition.fileMetadata.appData.tags.some((tag) =>
-      stringGuidsEqual(tag, definition.fileMetadata.appData.content.communityId)
+    !stringGuidsEqual(
+      definition.fileMetadata.appData.uniqueId,
+      definition.fileMetadata.appData.content.communityId
     )
   ) {
-    throw new Error('CommunityMetadata must have a tag that matches the communityId');
+    throw new Error('CommunityMetadata must have a uniqueId that matches the communityId');
   }
 
-  const targetDrive = getTargetDriveFromCommunityId(
-    definition.fileMetadata.appData.content.communityId
-  );
   const instructionSet: UploadInstructionSet = {
     storageOptions: {
       overwriteFileId: definition.fileId,
-      drive: targetDrive,
+      drive: LOCAL_COMMUNITY_APP_DRIVE,
     },
   };
 
@@ -85,22 +88,14 @@ export const getCommunityMetadata = async (
   dotYouClient: DotYouClient,
   communityId: string
 ): Promise<HomebaseFile<CommunityMetadata> | null> => {
-  const targetDrive = getTargetDriveFromCommunityId(communityId);
-  const params: FileQueryParams = {
-    targetDrive: targetDrive,
-    tagsMatchAtLeastOne: [communityId],
-    fileType: [COMMUNITY_METADATA_FILE_TYPE],
-  };
+  const header = await getFileHeaderByUniqueId(
+    dotYouClient,
+    LOCAL_COMMUNITY_APP_DRIVE,
+    communityId
+  );
 
-  const ro: GetBatchQueryResultOptions = {
-    maxRecords: 1,
-    includeMetadataHeader: true,
-  };
-
-  const response = await queryBatch(dotYouClient, params, ro);
-
-  if (!response || !response.searchResults?.length) return null;
-  return dsrToCommunityMetadata(dotYouClient, response.searchResults[0], targetDrive, true);
+  if (!header) return null;
+  return dsrToCommunityMetadata(dotYouClient, header, LOCAL_COMMUNITY_APP_DRIVE, true);
 };
 
 // Helpers

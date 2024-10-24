@@ -6,19 +6,24 @@ import {
   getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
   HomebaseFile,
-  PriorityOptions,
   queryBatch,
-  ScheduleOptions,
   SecurityGroupType,
-  SendContents,
   TargetDrive,
   uploadFile,
   UploadFileMetadata,
   UploadInstructionSet,
+  UploadResult,
 } from '@homebase-id/js-lib/core';
-import { getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
+import { CommunityDefinition, getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
 import { t } from '@homebase-id/common-app';
-import { jsonStringify64, toGuidId } from '@homebase-id/js-lib/helpers';
+import { getRandom16ByteArray, jsonStringify64, toGuidId } from '@homebase-id/js-lib/helpers';
+import {
+  getContentFromHeaderOrPayloadOverPeer,
+  queryBatchOverPeer,
+  TransitInstructionSet,
+  TransitUploadResult,
+  uploadFileOverPeer,
+} from '@homebase-id/js-lib/peer';
 
 export const COMMUNITY_CHANNEL_FILE_TYPE = 7015;
 export const COMMUNITY_DEFAULT_GENERAL_ID = '7d64f4e4-f8e2-4c3b-bc4b-48bbb86e8f9a';
@@ -48,7 +53,7 @@ export const COMMUNITY_GENERAL_CHANNEL: HomebaseFile<CommunityChannel> = {
     payloads: [],
   },
   serverMetadata: {
-    accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+    accessControlList: { requiredSecurityGroup: SecurityGroupType.Connected },
     allowDistribution: false,
     doNotIndex: false,
   },
@@ -61,6 +66,7 @@ export interface CommunityChannel {
 
 export const getCommunityChannels = async (
   dotYouClient: DotYouClient,
+  odinId: string,
   communityId: string,
   pageSize = 100
 ): Promise<HomebaseFile<CommunityChannel>[]> => {
@@ -77,7 +83,10 @@ export const getCommunityChannels = async (
     includeMetadataHeader: true,
   };
 
-  const response = await queryBatch(dotYouClient, params, ro);
+  const response =
+    odinId && dotYouClient.getIdentity() !== odinId
+      ? await queryBatchOverPeer(dotYouClient, odinId, params, ro)
+      : await queryBatch(dotYouClient, params, ro);
   const serverChannels =
     ((
       await Promise.all(
@@ -97,6 +106,7 @@ export const getCommunityChannels = async (
 
 export const getCommunityChannel = async (
   dotYouClient: DotYouClient,
+  odinId: string,
   communityId: string,
   channelId: string
 ): Promise<HomebaseFile<CommunityChannel> | undefined> => {
@@ -104,6 +114,9 @@ export const getCommunityChannel = async (
 
   const targetDrive = getTargetDriveFromCommunityId(communityId);
 
+  if (odinId && odinId !== dotYouClient.getIdentity()) {
+    throw new Error('Not implemented');
+  }
   const dsr = await getFileHeaderByUniqueId(dotYouClient, targetDrive, channelId);
 
   if (!dsr) return undefined;
@@ -112,26 +125,17 @@ export const getCommunityChannel = async (
 
 export const saveCommunityChannel = async (
   dotYouClient: DotYouClient,
-  communityId: string,
-  recipients: string[],
+  community: HomebaseFile<CommunityDefinition>,
   tag: string
 ) => {
+  const communityId = community.fileMetadata.appData.uniqueId as string;
   const targetDrive = getTargetDriveFromCommunityId(communityId);
-  const distribute = recipients?.length > 0;
   const uniqueId = toGuidId(tag);
 
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: targetDrive,
     },
-    transitOptions: distribute
-      ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.High,
-          sendContents: SendContents.All,
-        }
-      : undefined,
   };
 
   const jsonContent: string = jsonStringify64({
@@ -139,7 +143,7 @@ export const saveCommunityChannel = async (
     description: '',
   });
   const uploadMetadata: UploadFileMetadata = {
-    allowDistribution: distribute,
+    allowDistribution: true,
     appData: {
       uniqueId: uniqueId,
       groupId: communityId,
@@ -147,19 +151,35 @@ export const saveCommunityChannel = async (
       content: jsonContent,
     },
     isEncrypted: true,
-    accessControlList: {
-      requiredSecurityGroup: SecurityGroupType.Connected,
-    },
+    accessControlList: community.fileMetadata.appData.content.acl,
   };
 
-  const uploadResult = await uploadFile(
-    dotYouClient,
-    uploadInstructions,
-    uploadMetadata,
-    undefined,
-    undefined,
-    undefined
-  );
+  let uploadResult: UploadResult | TransitUploadResult | void;
+  if (community.fileMetadata.senderOdinId !== dotYouClient.getIdentity()) {
+    const transitInstructions: TransitInstructionSet = {
+      remoteTargetDrive: targetDrive,
+      transferIv: getRandom16ByteArray(),
+      recipients: [community.fileMetadata.senderOdinId],
+    };
+    uploadResult = await uploadFileOverPeer(
+      dotYouClient,
+      transitInstructions,
+      uploadMetadata,
+      undefined,
+      undefined,
+      undefined
+    );
+  } else {
+    uploadResult = await uploadFile(
+      dotYouClient,
+      uploadInstructions,
+      uploadMetadata,
+      undefined,
+      undefined,
+      undefined
+    );
+  }
+
   if (!uploadResult) throw new Error('Upload failed');
 
   return uniqueId;
@@ -173,12 +193,21 @@ export const dsrToCommunityChannel = async (
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<CommunityChannel> | undefined> => {
-  const definitionContent = await getContentFromHeaderOrPayload<CommunityChannel>(
-    dotYouClient,
-    targetDrive,
-    dsr,
-    includeMetadataHeader
-  );
+  const definitionContent =
+    dsr.fileMetadata.senderOdinId && dotYouClient.getIdentity() !== dsr.fileMetadata.senderOdinId
+      ? await getContentFromHeaderOrPayloadOverPeer<CommunityChannel>(
+          dotYouClient,
+          dsr.fileMetadata.senderOdinId,
+          targetDrive,
+          dsr,
+          includeMetadataHeader
+        )
+      : await getContentFromHeaderOrPayload<CommunityChannel>(
+          dotYouClient,
+          targetDrive,
+          dsr,
+          includeMetadataHeader
+        );
   if (!definitionContent) return undefined;
 
   const file: HomebaseFile<CommunityChannel> = {
