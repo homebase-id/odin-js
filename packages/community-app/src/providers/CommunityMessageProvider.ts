@@ -231,6 +231,7 @@ export const uploadCommunityMessage = async (
 
   const recipientStatus = uploadResult.recipientStatus;
   if (
+    recipientStatus &&
     Object.values(recipientStatus).some(
       (status) => status.toString().toLowerCase() === TransferUploadStatus.EnqueuedFailed
     )

@@ -226,6 +226,9 @@ export const useCommunityMessage = (props?: {
           );
         }
       },
+      onError: (err, messageParams) => {
+        console.error('Failed to update the chat message', err);
+      },
     }),
     update: useMutation({
       mutationFn: updateMessage,

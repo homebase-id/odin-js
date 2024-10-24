@@ -27,6 +27,7 @@ import { useMarkCommunityAsRead } from '../../hooks/community/useMarkCommunityAs
 import { CommunityCatchup } from '../../components/Community/CommunityCatchup';
 
 export const CommunityChannelDetail = () => {
+  const [isEmtpyChannel, setIsEmptyChannel] = useState<boolean>(false);
   const { odinKey, communityKey: communityId, channelKey: channelId, threadKey } = useParams();
   const { data: community, isFetched } = useCommunity({ odinId: odinKey, communityId }).fetch;
   const navigate = useNavigate();
@@ -73,21 +74,27 @@ export const CommunityChannelDetail = () => {
             <div className="flex h-full flex-grow flex-col overflow-hidden">
               <CommunityChannelHeader community={community || undefined} channel={channelDsr} />
               <ErrorBoundary>
-                <CommunityHistory
-                  community={community || undefined}
-                  channel={channelDsr || undefined}
-                  doOpenThread={(thread) =>
-                    navigate(
-                      `${COMMUNITY_ROOT}/${odinKey}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
-                    )
-                  }
-                />
+                {isEmtpyChannel ? (
+                  <EmptyChannel channel={channelDsr} />
+                ) : (
+                  <CommunityHistory
+                    community={community || undefined}
+                    channel={channelDsr || undefined}
+                    doOpenThread={(thread) =>
+                      navigate(
+                        `${COMMUNITY_ROOT}/${odinKey}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
+                      )
+                    }
+                    setIsEmptyChat={setIsEmptyChannel}
+                  />
+                )}
               </ErrorBoundary>
               <ErrorBoundary>
                 <MessageComposer
                   community={community || undefined}
                   channel={channelDsr || undefined}
                   key={channelId}
+                  onSend={() => setIsEmptyChannel(false)}
                 />
               </ErrorBoundary>
             </div>
@@ -294,6 +301,28 @@ const CommunityThread = ({
             className="mt-auto lg:mt-0"
           />
         </ErrorBoundary>
+      </div>
+    </div>
+  );
+};
+
+const EmptyChannel = ({ channel }: { channel: HomebaseFile<CommunityChannel> | undefined }) => {
+  const { odinKey, communityKey } = useParams();
+
+  if (!channel) return null;
+  return (
+    <div className="flex h-full flex-grow flex-col-reverse">
+      <div className="p-5">
+        <p className="mb-2 text-2xl"># {channel.fileMetadata.appData.content?.title}</p>
+        <Link
+          className="text-primary hover:underline"
+          to={`${COMMUNITY_ROOT}/${odinKey}/${communityKey}/direct/${channel.fileMetadata.senderOdinId}`}
+        >
+          @<AuthorName odinId={channel.fileMetadata.senderOdinId} excludeLink={true} />
+        </Link>{' '}
+        {t('created this channel on')}{' '}
+        {formatDateExludingYearIfCurrent(new Date(channel.fileMetadata.created))}
+        <p>{channel.fileMetadata.appData.content?.description}</p>
       </div>
     </div>
   );

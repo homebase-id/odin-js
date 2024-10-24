@@ -143,7 +143,7 @@ export const saveCommunityChannel = async (
     description: '',
   });
   const uploadMetadata: UploadFileMetadata = {
-    allowDistribution: false,
+    allowDistribution: true,
     appData: {
       uniqueId: uniqueId,
       groupId: communityId,
