@@ -4,6 +4,7 @@ import {
   insertNewNotification,
   useDotYouClientContext,
   useWebsocketSubscriber,
+  useWebsocketSubscriberOverPeer,
 } from '@homebase-id/common-app';
 import {
   drivesEqual,
@@ -50,14 +51,19 @@ export const useLiveCommunityProcessor = (
   odinId: string | undefined,
   communityId: string | undefined
 ) => {
+  const dotYouClient = useDotYouClientContext();
+
   // Process the inbox on startup; As we want to cover the backlog of messages first
-  useInboxProcessor(odinId, communityId || '');
-  // const { status: inboxStatus } = useInboxProcessor(odinId, communityId || '');
+  const { status: inboxStatus } = useInboxProcessor(odinId, communityId || '');
 
   // Only after the inbox is processed, we connect for live updates; So we avoid clearing the cache on each fileAdded update
-  // const isOnline = useCommunityWebsocket(odinId, communityId, inboxStatus === 'success');
+  const isOnline = useCommunityWebsocket(
+    odinId,
+    communityId,
+    inboxStatus === 'success' || odinId !== dotYouClient.getIdentity()
+  );
 
-  return false;
+  return isOnline;
 };
 
 const BATCH_SIZE = 2000;
@@ -145,9 +151,6 @@ const useCommunityWebsocket = (
   communityId: string | undefined,
   isEnabled: boolean
 ) => {
-  if (odinId) {
-    return;
-  }
   const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getIdentity();
   const queryClient = useQueryClient();
@@ -291,16 +294,30 @@ const useCommunityWebsocket = (
     }
   }, [processQueue, chatMessagesQueue]);
 
-  return useWebsocketSubscriber(
-    isEnabled ? handler : undefined,
-    ['fileAdded', 'fileModified'],
-    [targetDrive],
-    () => {
-      queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
-    },
-    undefined,
-    'useLiveCommunityProcessor'
-  );
+  if (!odinId || odinId === dotYouClient.getIdentity()) {
+    return useWebsocketSubscriber(
+      isEnabled ? handler : undefined,
+      ['fileAdded', 'fileModified'],
+      [targetDrive],
+      () => {
+        queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
+      },
+      undefined,
+      'useLiveCommunityProcessor'
+    );
+  } else {
+    return useWebsocketSubscriberOverPeer(
+      isEnabled ? handler : undefined,
+      odinId,
+      ['fileAdded', 'fileModified'],
+      [targetDrive],
+      () => {
+        queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
+      },
+      undefined,
+      'useLiveCommunityProcessor'
+    );
+  }
 };
 
 // Process batched updates after a processInbox

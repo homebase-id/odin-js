@@ -26,4 +26,7 @@ export * from './peerData/ExternalPostsDataProvider';
 // Profile
 export * from './peerData/ExternalProfileDataProvider';
 
+// Websocket
+export * from './WebsocketData/WebsocketProviderOverPeer';
+
 export * from './peerData/PeerTypes';
