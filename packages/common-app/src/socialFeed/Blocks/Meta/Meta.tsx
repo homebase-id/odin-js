@@ -1,17 +1,18 @@
 import { Suspense, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChannelDefinition, EmbeddedPost, PostContent } from '@homebase-id/js-lib/public';
 import { OwnerActions } from './OwnerActions';
 import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { aclEqual } from '@homebase-id/js-lib/helpers';
 import { AclSummary } from '../../../acl';
-import { HOME_ROOT_PATH } from '../../../core';
 import { t } from '../../../helpers';
 import { ActionGroupOptionProps, ActionGroup, ErrorNotification } from '../../../ui';
 import { ChannelDefinitionVm, useManagePost, useManageSocialFeed } from '../../../hooks/socialFeed';
 import { useDotYouClient } from '../../../hooks/auth/useDotYouClient';
 import { useIsConnected } from '../../../hooks/connections/useIsConnected';
 import { EditPostDialog } from '../../EditPostDialog/EditPostDialog';
-import { Persons, UserX, Times, Flag, Block, Link, Trash, Lock } from '../../../ui/Icons';
+import { Persons, UserX, Times, Flag, Block, Link, Trash, Lock, Pencil } from '../../../ui/Icons';
+import { FEED_ROOT_PATH, HOME_ROOT_PATH } from '../../../constants';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;
@@ -171,7 +172,7 @@ export const ToGroupBlock = ({
 
 const ExternalActions = ({
   odinId,
-
+  channel,
   postFile,
 }: {
   odinId: string;
@@ -181,7 +182,7 @@ const ExternalActions = ({
   postFile: HomebaseFile<PostContent>;
 }) => {
   const identity = useDotYouClient().getIdentity();
-
+  const navigate = useNavigate();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const {
@@ -218,6 +219,34 @@ const ExternalActions = ({
     },
   ];
 
+  // Only supported for posts that are marked as collaborative
+  if (postFile.fileMetadata.appData.content.isCollaborative) {
+    options.push({
+      icon: Pencil,
+      label: t(
+        postFile.fileMetadata.appData.content.type === 'Article' ? 'Edit Article' : 'Edit post'
+      ),
+      onClick: (e) => {
+        e.stopPropagation();
+        if (postFile.fileMetadata.appData.content.type === 'Article') {
+          const targetUrl = `/apps/feed/edit/${odinId || window.location.host}/${
+            channel?.fileMetadata.appData.content.slug || channel?.fileMetadata.appData.uniqueId
+          }/${postFile.fileMetadata.appData.content.id}`;
+
+          if (window.location.host === odinId) {
+            // Navigate to own identity
+            window.location.href = `${host}${targetUrl}`;
+          } else {
+            if (window.location.pathname.startsWith(FEED_ROOT_PATH)) navigate(targetUrl);
+            else window.location.href = targetUrl;
+          }
+        } else {
+          setIsEditOpen(true);
+        }
+      },
+    });
+  }
+
   return (
     <>
       <div className="ml-auto" onClick={(e) => e.stopPropagation()}>
@@ -250,12 +279,14 @@ const GroupChannelActions = ({
     | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
   postFile: HomebaseFile<PostContent>;
 }) => {
+  const navigate = useNavigate();
   const { getIdentity, getDotYouClient } = useDotYouClient();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const localIdentity = getDotYouClient().getIdentity();
   const identity = getIdentity();
   const isAuthor = postFile.fileMetadata.originalAuthor === identity;
+  const host = new DotYouClient({ api: ApiType.Guest, identity: identity || undefined }).getRoot();
 
   const {
     removeFromFeed: { mutateAsync: removeFromMyFeed },
@@ -266,7 +297,7 @@ const GroupChannelActions = ({
 
   const options: (ActionGroupOptionProps | undefined)[] = [];
 
-  if (window.location.pathname.startsWith('/apps/feed')) {
+  if (window.location.pathname.startsWith(FEED_ROOT_PATH)) {
     if (channelLink)
       options.push({
         icon: Link,
@@ -283,7 +314,30 @@ const GroupChannelActions = ({
     });
 
     if (isAuthor) {
-      // TODO editing collaborative posts
+      options.push({
+        icon: Pencil,
+        label: t(
+          postFile.fileMetadata.appData.content.type === 'Article' ? 'Edit Article' : 'Edit post'
+        ),
+        onClick: (e) => {
+          e.stopPropagation();
+          if (postFile.fileMetadata.appData.content.type === 'Article') {
+            const targetUrl = `/apps/feed/${odinId || window.location.host}/${
+              channel?.fileMetadata.appData.content.slug || channel?.fileMetadata.appData.uniqueId
+            }/${postFile.fileMetadata.appData.content.id}`;
+
+            if (window.location.host === odinId) {
+              // Navigate to own identity
+              window.location.href = `${host}${targetUrl}`;
+            } else {
+              if (window.location.pathname.startsWith(FEED_ROOT_PATH)) navigate(targetUrl);
+              else window.location.href = targetUrl;
+            }
+          } else {
+            setIsEditOpen(true);
+          }
+        },
+      });
     } else {
       options.push({
         icon: Flag,

@@ -7,7 +7,7 @@ import {
 } from '@homebase-id/js-lib/public';
 
 import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
-import { FEED_APP_ID, t, useDotYouClient, useStaticFiles } from '../../../..';
+import { FEED_APP_ID, FEED_ROOT_PATH, t, useDotYouClient, useStaticFiles } from '../../../..';
 import { stringGuidsEqual, stringifyToQueryParams, toGuidId } from '@homebase-id/js-lib/helpers';
 import {
   ApiType,
@@ -17,7 +17,6 @@ import {
   NewHomebaseFile,
   TargetDrive,
 } from '@homebase-id/js-lib/core';
-const FEED_ROOT_PATH = '/apps/feed';
 
 const getExtendAuthorizationUrl = (
   identity: string,

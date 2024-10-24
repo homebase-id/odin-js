@@ -33,6 +33,8 @@ export interface AccessGrant {
   appGrants: Record<string, AppGrant>;
 }
 
+export type ConnectionRequestOrigin = 'identityowner' | 'introduction';
+
 export interface ConnectionInfo {
   status: 'none' | 'connected' | 'blocked';
   created: number;
@@ -42,6 +44,8 @@ export interface ConnectionInfo {
   clientAccessTokenId: string;
   clientAccessTokenSharedSecret: string;
   contactData?: ContactData;
+  connectionRequestOrigin: ConnectionRequestOrigin;
+  introducerOdinId?: string;
 }
 
 export interface RedactedConnectionRequest {
@@ -55,6 +59,8 @@ export interface ConnectionRequest extends RedactedConnectionRequest {
   recipient: string;
   message: string;
   contactData?: ContactData;
+  connectionRequestOrigin: ConnectionRequestOrigin;
+  introducerOdinId?: string;
 }
 
 export interface ContactData {

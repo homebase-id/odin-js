@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 
 import ContactImage from '../ContactImage/ContactImage';
-import { HybridLink } from '@homebase-id/common-app';
+import { CheckboxFancy, HybridLink } from '@homebase-id/common-app';
 
 export interface PersonCardProps {
   odinId: string;
@@ -23,20 +23,22 @@ const PersonCard = ({
   canSave,
 }: PersonCardProps) => {
   return (
-    <HybridLink className={`${className}`} href={href}>
+    <HybridLink className={`group ${className}`} href={href}>
       <div
-        className={`h-full rounded-md border bg-white transition-colors dark:bg-gray-800 ${
+        className={`h-full overflow-hidden rounded-md border bg-background transition-colors ${
           isChecked
-            ? 'border-4 border-indigo-500 dark:border-indigo-700'
+            ? 'border-2 border-indigo-500 dark:border-indigo-500'
             : isChecked === false
-              ? 'border-4'
-              : 'border-gray-200 border-opacity-60 dark:border-gray-800'
-        }
-        ${href ? 'cursor-pointer hover:shadow-md hover:dark:shadow-slate-600' : ''}`}
+              ? 'border-2'
+              : 'border-gray-200 border-opacity-60 dark:border-gray-900'
+        } ${href ? 'cursor-pointer hover:shadow-md hover:dark:shadow-slate-600' : ''}`}
         onClick={onClick}
       >
         <ContactImage odinId={odinId} canSave={canSave} />
         <div className="p-2">{children}</div>
+        {isChecked === undefined ? null : (
+          <CheckboxFancy checked={isChecked} readOnly className="absolute right-3 top-3" />
+        )}
       </div>
     </HybridLink>
   );

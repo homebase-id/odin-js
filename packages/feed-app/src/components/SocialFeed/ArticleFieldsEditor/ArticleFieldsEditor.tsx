@@ -60,6 +60,7 @@ export const InnerFieldEditors = ({
 
   const [isEditTeaser, setIsEditTeaser] = useState(true);
   const { data: imageData } = useImage({
+    odinId,
     imageFileId: postFile.fileId,
     imageFileKey: postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey,
     imageDrive: getChannelDrive(channelId),

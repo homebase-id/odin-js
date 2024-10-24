@@ -104,7 +104,7 @@ export const getFileHeaderBytesByUniqueId = async (
     })
     .catch((error) => {
       if (error.response?.status === 404) return null;
-      console.error('[DotYouCore-js:getFileHeaderByUniqueId]', error);
+      console.error('[odin-js:getFileHeaderByUniqueId]', error);
       throw error;
     });
 
@@ -201,7 +201,7 @@ export const getPayloadBytesByUniqueId = async (
     })
     .catch((error) => {
       if (error.response?.status === 404) return null;
-      console.error('[DotYouCore-js:getPayloadBytes]', error);
+      console.error('[odin-js:getPayloadBytes]', error);
       return null;
     });
 };
@@ -251,7 +251,7 @@ export const getThumbBytesByUniqueId = async (
     })
     .catch((error) => {
       if (error.response?.status === 404) return null;
-      console.error('[DotYouCore-js:getThumbBytes]', error);
+      console.error('[odin-js:getThumbBytes]', error);
       return null;
     });
 };

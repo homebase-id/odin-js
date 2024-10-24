@@ -19,6 +19,8 @@ export const PostTextListItem = ({
   className?: string;
   children?: React.ReactNode;
 }) => {
+  const author = draft.fileMetadata.originalAuthor;
+
   const content = draft.fileMetadata.appData.content;
   return (
     <>
@@ -27,7 +29,7 @@ export const PostTextListItem = ({
         key={draft.fileId}
       >
         <FakeAnchor
-          href={`${linkRoot}/${channel?.fileMetadata.appData.content.slug ?? BlogConfig.PublicChannelSlug}/${
+          href={`${linkRoot}/${channel?.fileMetadata.appData.content.slug ?? channel?.fileMetadata.appData.uniqueId ?? BlogConfig.PublicChannelSlug}/${
             content.id
           }`}
         >
@@ -35,7 +37,7 @@ export const PostTextListItem = ({
             <div className="flex flex-grow flex-col px-4 py-3">
               <div className="text-foreground mb-1 flex flex-col text-opacity-60 md:flex-row md:flex-wrap md:items-center">
                 <h2>
-                  <AuthorName />
+                  <AuthorName odinId={author} />
                 </h2>
                 <span className="hidden px-2 leading-4 md:block">·</span>
                 {channel && draft ? (

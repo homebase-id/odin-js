@@ -1,9 +1,8 @@
 import { useParams, Navigate } from 'react-router-dom';
-import { ROOT_PATH } from '../../app/App';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { Loader } from '@homebase-id/common-app/icons';
 import { useEffect } from 'react';
-import { ErrorNotification } from '@homebase-id/common-app';
+import { CHAT_ROOT_PATH, ErrorNotification } from '@homebase-id/common-app';
 
 export const ChatCreateAndOrRedirect = () => {
   const { odinId } = useParams();
@@ -14,10 +13,10 @@ export const ChatCreateAndOrRedirect = () => {
     mutate({ recipients: [odinId] });
   }, []);
 
-  if (!odinId) return <Navigate to={`${ROOT_PATH}`} />;
+  if (!odinId) return <Navigate to={`${CHAT_ROOT_PATH}`} />;
 
   if (createResult?.newConversationId)
-    return <Navigate to={`${ROOT_PATH}/${createResult.newConversationId}`} />;
+    return <Navigate to={`${CHAT_ROOT_PATH}/${createResult.newConversationId}`} />;
 
   return (
     <div className="h-screen">

@@ -112,7 +112,7 @@ export const getFileHeaderBytes = async (
     })
     .catch((error) => {
       if (error.response?.status === 404) return null;
-      console.error('[DotYouCore-js:getFileHeader]', error);
+      console.error('[odin-js:getFileHeader]', error);
       throw error;
     });
 
@@ -213,7 +213,7 @@ export const getPayloadBytes = async (
     })
     .catch((error) => {
       if (error.response?.status === 404) return null;
-      console.error('[DotYouCore-js:getPayloadBytes]', error);
+      console.error('[odin-js:getPayloadBytes]', error);
       return null;
     });
 };
@@ -265,7 +265,7 @@ export const getThumbBytes = async (
     })
     .catch((error) => {
       if (error.response?.status === 404) return null;
-      console.error('[DotYouCore-js:getThumbBytes]', error);
+      console.error('[odin-js:getThumbBytes]', error);
       return null;
     });
 };

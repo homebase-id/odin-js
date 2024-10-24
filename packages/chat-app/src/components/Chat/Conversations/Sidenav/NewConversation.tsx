@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   ActionButton,
   ActionLink,
+  CHAT_ROOT_PATH,
   ErrorBoundary,
   Input,
   SubtleMessage,
@@ -10,7 +11,6 @@ import {
 } from '@homebase-id/common-app';
 import { Persons, Times } from '@homebase-id/common-app/icons';
 import { useNavigate } from 'react-router-dom';
-import { ROOT_PATH as CHAT_ROOT } from '../../../../app/App';
 import { ConversationListItemWrapper } from '../Item/ConversationItem';
 import { NewConversationSearchItem } from '../Item/NewConversationSearchItem';
 
@@ -38,7 +38,7 @@ export const NewConversation = () => {
     <ErrorBoundary>
       <div className="flex flex-row items-center justify-between bg-primary/20 p-5">
         <h2 className="font-semibold">{t('New Conversation')}</h2>
-        <ActionButton onClick={() => navigate(`${CHAT_ROOT}/`)} icon={Times} type="mute" />
+        <ActionButton onClick={() => navigate(`${CHAT_ROOT_PATH}/`)} icon={Times} type="mute" />
       </div>
       <form onSubmit={(e) => e.preventDefault()} className="w-full">
         <div className="flex w-full flex-row items-center p-5">
@@ -67,7 +67,7 @@ export const NewConversation = () => {
             <ConversationListItemWrapper
               order={1}
               onClick={() => {
-                navigate(`${CHAT_ROOT}/new-group`);
+                navigate(`${CHAT_ROOT_PATH}/new-group`);
               }}
               isActive={false}
             >
@@ -80,7 +80,7 @@ export const NewConversation = () => {
               <NewConversationSearchItem
                 key={result.odinId || index}
                 result={result}
-                onOpen={(newId) => navigate(`${CHAT_ROOT}/${newId}`)}
+                onOpen={(newId) => navigate(`${CHAT_ROOT_PATH}/${newId}`)}
               />
             ))}
           </>

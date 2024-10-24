@@ -60,7 +60,6 @@ const Settings = lazy(() => import('../templates/Settings/Settings'));
 
 const DemoData = lazy(() => import('../templates/DemoData/DemoData'));
 const Debug = lazy(() => import('../templates/Debug/Debug'));
-const SixDebug = lazy(() => import('../templates/Debug/SixDebug'));
 
 import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
@@ -79,9 +78,10 @@ import {
   NotFound,
   OdinQueryClient,
 } from '@homebase-id/common-app';
+import { useInboxProcessor } from '../hooks/inbox/useInboxProcessor';
 
 export const REACT_QUERY_CACHE_KEY = 'OWNER_REACT_QUERY_OFFLINE_CACHE';
-const INCLUDED_QUERY_KEYS = ['contact'];
+const INCLUDED_QUERY_KEYS = ['contact', 'process-inbox'];
 
 function App() {
   const router = createBrowserRouter(
@@ -206,12 +206,15 @@ function App() {
             <Route path="drives" element={<Drives />}></Route>
             <Route path="drives/:driveKey" element={<DriveDetails />}></Route>
             <Route path="drives/:driveKey/:fileKey" element={<FileDetails />}></Route>
+            <Route
+              path="drives/:driveKey/:systemFileType/:fileKey"
+              element={<FileDetails />}
+            ></Route>
             <Route path="settings" element={<Settings />}></Route>
             <Route path="settings/:sectionId" element={<Settings />}></Route>
 
             <Route path="demo-data" element={<DemoData />}></Route>
             <Route path="debug" element={<Debug />}></Route>
-            <Route path="six-debug" element={<SixDebug />}></Route>
           </Route>
 
           <Route
@@ -248,6 +251,7 @@ function App() {
 const RootRoute = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated } = useAuth();
   const { data: isConfigured, isFetched } = useIsConfigured().isConfigured;
+  useInboxProcessor();
 
   if (!isAuthenticated) {
     if (window.location.pathname === FIRSTRUN_PATH || window.location.pathname === RECOVERY_PATH) {
@@ -268,7 +272,13 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
     );
   }
 
-  if (isAuthenticated && !isConfigured && isFetched && window.location.pathname !== SETUP_PATH) {
+  if (
+    isAuthenticated &&
+    // Check for explicit false, as undefined means we couldn't get the info from the server
+    isConfigured === false &&
+    isFetched &&
+    window.location.pathname !== SETUP_PATH
+  ) {
     console.debug('[NOT CONFIGURED]: Redirect to configure');
     return (
       <Navigate

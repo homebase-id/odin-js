@@ -48,8 +48,8 @@ export const usePost = ({ odinId, channelKey, postKey }: usePostProps = {}) => {
 
 const getLocalCachedBlogs = (queryClient: QueryClient, channelId?: string) => {
   const infinite =
-    queryClient.getQueryData<InfiniteData<usePostsInfiniteReturn>>(['blogs', channelId]) ||
-    queryClient.getQueryData<InfiniteData<usePostsInfiniteReturn>>(['blogs', undefined]);
+    queryClient.getQueryData<InfiniteData<usePostsInfiniteReturn>>(['posts', channelId]) ||
+    queryClient.getQueryData<InfiniteData<usePostsInfiniteReturn>>(['posts', undefined]);
   if (infinite) return infinite.pages.flatMap((page) => page.results);
 
   return (
@@ -74,7 +74,7 @@ const fetchBlog = async ({
 }) => {
   if (!channel || !postKey) return null;
 
-  if (!odinId) {
+  if (!odinId || odinId === dotYouClient.getIdentity()) {
     // Search in cache
     const localBlogs = getLocalCachedBlogs(queryClient, channel.fileMetadata.appData.uniqueId);
     if (localBlogs) {

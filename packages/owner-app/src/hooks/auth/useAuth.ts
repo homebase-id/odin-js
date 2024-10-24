@@ -129,3 +129,5 @@ export const useAuth = () => {
     isAuthenticated: authenticationState !== 'anonymous',
   };
 };
+
+export const websocketDrives = [];

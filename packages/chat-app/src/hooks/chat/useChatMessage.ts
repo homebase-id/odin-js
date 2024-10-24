@@ -95,7 +95,7 @@ export const useChatMessage = (props?: {
       },
       serverMetadata: {
         accessControlList: {
-          requiredSecurityGroup: SecurityGroupType.Connected,
+          requiredSecurityGroup: SecurityGroupType.AutoConnected,
         },
       },
     };
@@ -180,7 +180,7 @@ export const useChatMessage = (props?: {
           },
           serverMetadata: {
             accessControlList: {
-              requiredSecurityGroup: SecurityGroupType.Connected,
+              requiredSecurityGroup: SecurityGroupType.AutoConnected,
             },
           },
         };

@@ -39,14 +39,14 @@ import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import { useAuth } from '../hooks/auth/useAuth';
 
-export const ROOT_PATH = '/apps/mail';
-const AUTH_PATH = ROOT_PATH + '/auth';
+const AUTH_PATH = MAIL_ROOT_PATH + '/auth';
 
 import {
   ErrorBoundary,
   NotFound,
   OdinQueryClient,
   DotYouClientProvider,
+  MAIL_ROOT_PATH,
 } from '@homebase-id/common-app';
 
 export const REACT_QUERY_CACHE_KEY = 'MAIL_REACT_QUERY_OFFLINE_CACHE';
@@ -68,7 +68,7 @@ function App() {
     createRoutesFromElements(
       <>
         <Route
-          path={ROOT_PATH}
+          path={MAIL_ROOT_PATH}
           element={
             <ErrorBoundary>
               <Suspense fallback={<></>}>

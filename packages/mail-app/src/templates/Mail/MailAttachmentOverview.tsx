@@ -1,9 +1,13 @@
-import { ExtensionThumbnail, FakeAnchor, highlightQuery } from '@homebase-id/common-app';
+import {
+  ExtensionThumbnail,
+  FakeAnchor,
+  highlightQuery,
+  MAIL_ROOT_PATH,
+} from '@homebase-id/common-app';
 import { PayloadDescriptor } from '@homebase-id/js-lib/core';
 import { OdinPreviewImage } from '@homebase-id/ui-lib';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { MailDrive } from '../../providers/MailProvider';
-import { ROOT_PATH } from '../../app/App';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export interface AttachmentItem extends PayloadDescriptor {
@@ -71,7 +75,7 @@ export const AttachmentFile = ({
         e.stopPropagation();
 
         navigate({
-          pathname: `${ROOT_PATH}/${filter || 'inbox'}/${file.conversationId}/${file.fileId}/${file.key}`,
+          pathname: `${MAIL_ROOT_PATH}/${filter || 'inbox'}/${file.conversationId}/${file.fileId}/${file.key}`,
           search: window.location.search,
         });
       }}

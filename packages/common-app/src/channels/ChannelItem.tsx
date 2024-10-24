@@ -26,7 +26,6 @@ import { ActionLink, Alert } from '../ui';
 import { useDotYouClient } from '../hooks/auth/useDotYouClient';
 import { useCollaborativeChannel } from '../hooks/socialFeed/channels/useCollaborativeChannel';
 import { ChannelDefinitionVm } from '../hooks/socialFeed/channels/useChannels';
-
 import { useManageChannel } from '../hooks/socialFeed/channels/useManageChannel';
 
 export const ChannelItem = ({

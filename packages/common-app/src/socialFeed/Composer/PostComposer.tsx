@@ -39,8 +39,8 @@ import { EmojiSelector } from '../Blocks/Interacts/EmojiPicker/EmojiSelector';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { ActionGroup, ActionButton, ErrorNotification } from '../../ui';
 import { Article, Pencil, Globe, Arrow, Lock } from '../../ui/Icons';
+import { FEED_ROOT_PATH } from '../../constants';
 
-const FEED_ROOT_PATH = '/apps/feed';
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const STORAGE_SKIP_NEXT_KEY = 'feed-skip-next-time';
 
@@ -375,7 +375,6 @@ export const ChannelOrAclSelector = React.forwardRef(
     const { data: collaborativeChannels } = useCollaborativeChannels().fetch;
     const [isChnlMgmtOpen, setIsChnlMgmtOpen] = useState(false);
     const [isCustomAclOpen, setIsCustomAclOpen] = useState(false);
-
     const publicChannel = useMemo(
       () =>
         channels?.find((chnl) =>
@@ -514,7 +513,6 @@ export const ChannelOrAclSelector = React.forwardRef(
           }
           title={t('Who can see your post?')}
           onConfirm={(acl) => {
-            console.log('custom acl', acl);
             onChange({ channel: publicChannel, acl, odinId: undefined });
             setIsCustomAclOpen(false);
           }}

@@ -98,14 +98,16 @@ const IdentityIFollowEditDialog = ({
       }
 
       await follow({
-        odinId: odinId,
-        notificationType: selectChannels ? 'selectedChannels' : 'allNotifications',
-        channels: selectChannels
-          ? channelSelection?.map((chnl) => {
-              return { alias: chnl, type: BlogConfig.DriveType };
-            })
-          : undefined,
-        // Pass undefined if all socialChannels are selected so it remains a follow all
+        request: {
+          odinId: odinId,
+          notificationType: selectChannels ? 'selectedChannels' : 'allNotifications',
+          channels: selectChannels
+            ? channelSelection?.map((chnl) => {
+                return { alias: chnl, type: BlogConfig.DriveType };
+              })
+            : undefined,
+          // Pass undefined if all socialChannels are selected so it remains a follow all
+        },
       });
     }
 

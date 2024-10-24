@@ -79,7 +79,7 @@ export const usePostsInfinite = ({
   };
 
   return useInfiniteQuery({
-    queryKey: ['blogs', channelId || '', postType || '', includeHidden],
+    queryKey: ['posts', channelId || '', postType || '', includeHidden],
     initialPageParam: undefined as string | Record<string, string> | undefined,
     queryFn: ({ pageParam }) => fetchBlogData({ channelId, pageParam }),
     getNextPageParam: (lastPage) =>

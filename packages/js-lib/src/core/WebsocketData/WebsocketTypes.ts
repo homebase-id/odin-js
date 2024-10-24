@@ -18,6 +18,7 @@ export type NotificationType =
   | 'fileModified'
   | 'connectionRequestReceived'
   | 'connectionRequestAccepted'
+  | 'connectionFinalized'
   | 'inboxItemReceived'
   | 'appNotificationAdded'
   | 'statisticsChanged'
@@ -60,6 +61,11 @@ export interface ClientConnectionNotification extends ClientNotification {
   recipient: string;
 }
 
+export interface ClientConnectionFinalizedNotification extends ClientNotification {
+  notificationType: 'connectionFinalized';
+  identity: string;
+}
+
 export interface ClientUnknownNotification extends ClientNotification {
   notificationType: 'unknown';
 }
@@ -69,6 +75,7 @@ export type TypedConnectionNotification =
   | ClientFileNotification
   | ClientDeviceNotification
   | ClientConnectionNotification
+  | ClientConnectionFinalizedNotification
   | ClientUnknownNotification
   | AppNotification
   | ReactionNotification;

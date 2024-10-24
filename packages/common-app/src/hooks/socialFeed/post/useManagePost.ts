@@ -13,6 +13,7 @@ import {
   MediaFile,
   getPayloadBytes,
   SecurityGroupType,
+  UpdateResult,
 } from '@homebase-id/js-lib/core';
 import {
   HomebaseFile,
@@ -28,6 +29,7 @@ import { LinkPreview } from '@homebase-id/js-lib/media';
 export const useManagePost = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
+  const identity = useDotYouClient().getIdentity();
 
   const savePost = async ({
     postFile,
@@ -44,7 +46,7 @@ export const useManagePost = () => {
     linkPreviews?: LinkPreview[];
     onUpdate?: (progress: number) => void;
   }) => {
-    return new Promise<TransitUploadResult | UploadResult>((resolve, reject) => {
+    return new Promise<TransitUploadResult | UploadResult | UpdateResult>((resolve, reject) => {
       const onVersionConflict = odinId
         ? undefined
         : async () => {
@@ -185,31 +187,49 @@ export const useManagePost = () => {
       onSuccess: (_data, variables) => {
         if (variables.postFile.fileMetadata.appData.content.slug) {
           queryClient.invalidateQueries({
-            queryKey: ['blog', variables.postFile.fileMetadata.appData.content.slug],
+            queryKey: [
+              'post',
+              variables.odinId || dotYouClient.getIdentity(),
+              variables.channelId,
+              variables.postFile.fileMetadata.appData.content.slug,
+            ],
             exact: false,
           });
         } else {
-          queryClient.invalidateQueries({ queryKey: ['blog'], exact: false });
+          queryClient.invalidateQueries({ queryKey: ['post'], exact: false });
         }
 
-        // Too many invalidates, but during article creation, the slug is not known
-        queryClient.invalidateQueries({ queryKey: ['blog', variables.postFile.fileId] });
         queryClient.invalidateQueries({
-          queryKey: ['blog', variables.postFile.fileMetadata.appData.content.id],
+          queryKey: [
+            'post',
+            variables.odinId || dotYouClient.getIdentity(),
+            variables.channelId,
+            variables.postFile.fileId,
+          ],
         });
         queryClient.invalidateQueries({
           queryKey: [
-            'blog',
+            'post',
+            variables.odinId || dotYouClient.getIdentity(),
+            variables.channelId,
+            variables.postFile.fileMetadata.appData.content.id,
+          ],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [
+            'post',
+            variables.odinId || dotYouClient.getIdentity(),
+            variables.channelId,
             variables.postFile.fileMetadata.appData.content.id?.replaceAll('-', ''),
           ],
         });
 
         queryClient.invalidateQueries({
-          queryKey: ['blogs', variables.postFile.fileMetadata.appData.content.channelId || ''],
+          queryKey: ['posts', variables.postFile.fileMetadata.appData.content.channelId || ''],
           exact: false,
         });
         queryClient.invalidateQueries({
-          queryKey: ['blogs', ''],
+          queryKey: ['posts', ''],
           exact: false,
         });
 
@@ -251,6 +271,7 @@ export const useManagePost = () => {
             fileMetadata: {
               ...newPost.postFile.fileMetadata,
               senderOdinId: newPost.odinId,
+              originalAuthor: identity,
               appData: {
                 ...newPost.postFile.fileMetadata.appData,
                 content: {
@@ -301,30 +322,30 @@ export const useManagePost = () => {
       onSuccess: (_data, variables) => {
         if (variables.postFile.fileMetadata.appData.content.slug) {
           queryClient.invalidateQueries({
-            queryKey: ['blog', variables.postFile.fileMetadata.appData.content.slug],
+            queryKey: ['post', variables.postFile.fileMetadata.appData.content.slug],
           });
         } else {
-          queryClient.invalidateQueries({ queryKey: ['blog'] });
+          queryClient.invalidateQueries({ queryKey: ['post'] });
         }
 
         // Too many invalidates, but during article creation, the slug is not known
-        queryClient.invalidateQueries({ queryKey: ['blog', variables.postFile.fileId] });
+        queryClient.invalidateQueries({ queryKey: ['post', variables.postFile.fileId] });
         queryClient.invalidateQueries({
-          queryKey: ['blog', variables.postFile.fileMetadata.appData.content.id],
+          queryKey: ['post', variables.postFile.fileMetadata.appData.content.id],
         });
         queryClient.invalidateQueries({
           queryKey: [
-            'blog',
+            'post',
             variables.postFile.fileMetadata.appData.content.id?.replaceAll('-', ''),
           ],
         });
 
         queryClient.invalidateQueries({
-          queryKey: ['blogs', variables.postFile.fileMetadata.appData.content.channelId || ''],
+          queryKey: ['posts', variables.postFile.fileMetadata.appData.content.channelId || ''],
           exact: false,
         });
         queryClient.invalidateQueries({
-          queryKey: ['blogs', ''],
+          queryKey: ['posts', ''],
           exact: false,
         });
 
@@ -367,18 +388,18 @@ export const useManagePost = () => {
 
         if (variables && variables.postFile.fileMetadata.appData.content.slug) {
           queryClient.invalidateQueries({
-            queryKey: ['blog', variables.postFile.fileMetadata.appData.content.slug],
+            queryKey: ['post', variables.postFile.fileMetadata.appData.content.slug],
           });
         } else {
-          queryClient.invalidateQueries({ queryKey: ['blog'] });
+          queryClient.invalidateQueries({ queryKey: ['post'] });
         }
 
         queryClient.invalidateQueries({
-          queryKey: ['blogs', variables.postFile.fileMetadata.appData.content.channelId || ''],
+          queryKey: ['posts', variables.postFile.fileMetadata.appData.content.channelId || ''],
           exact: false,
         });
         queryClient.invalidateQueries({
-          queryKey: ['blogs', ''],
+          queryKey: ['posts', ''],
           exact: false,
         });
         queryClient.invalidateQueries({

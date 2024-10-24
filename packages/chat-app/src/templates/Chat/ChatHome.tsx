@@ -3,13 +3,13 @@ import { useNavigate, useParams, useMatch } from 'react-router-dom';
 
 import { ChatDetail } from './ChatDetail';
 
-import { ROOT_PATH } from '../../app/App';
 import { NewConversation } from '../../components/Chat/Conversations/Sidenav/NewConversation';
 import { NewConversationGroup } from '../../components/Chat/Conversations/Sidenav/NewConversationGroup';
 import { ConversationsSidebar } from '../../components/Chat/Conversations/Sidenav/ConversationsSidenav';
 import { NavHeader } from '../../components/Chat/Conversations/Sidenav/NavHeader';
 import {
   CHAT_APP_ID,
+  CHAT_ROOT_PATH,
   ErrorBoundary,
   ExtendPermissionDialog,
   Sidenav,
@@ -18,9 +18,7 @@ import {
 } from '@homebase-id/common-app';
 import { drives, circleDrives, permissions } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const CHAT_ROOT = ROOT_PATH;
+import { EditConversationGroup } from '../../components/Chat/Conversations/Sidenav/EditConversationGroup';
 
 export const ChatHome = () => {
   const { conversationKey } = useParams();
@@ -56,13 +54,16 @@ const ChatSideNav = ({ isOnline }: { isOnline: boolean }) => {
 
   const navigate = useNavigate();
 
-  const newChatMatch = useMatch({ path: `${CHAT_ROOT}/new` });
+  const newChatMatch = useMatch({ path: `${CHAT_ROOT_PATH}/new` });
   const isCreateNew = !!newChatMatch;
 
-  const newGroupChatMatch = useMatch({ path: `${CHAT_ROOT}/new-group` });
+  const newGroupChatMatch = useMatch({ path: `${CHAT_ROOT_PATH}/new-group` });
   const isCreateNewGroup = !!newGroupChatMatch;
 
-  const rootChatMatch = useMatch({ path: CHAT_ROOT });
+  const editChatMatch = useMatch({ path: `${CHAT_ROOT_PATH}/:conversationKey/edit` });
+  const isEditConversation = !!editChatMatch;
+
+  const rootChatMatch = useMatch({ path: CHAT_ROOT_PATH });
   const isRoot = !!rootChatMatch;
 
   const isActive = isCreateNew || isCreateNewGroup || isRoot;
@@ -80,13 +81,15 @@ const ChatSideNav = ({ isOnline }: { isOnline: boolean }) => {
             <NewConversation />
           ) : isCreateNewGroup ? (
             <NewConversationGroup />
+          ) : isEditConversation ? (
+            <EditConversationGroup />
           ) : (
             <>
               <NavHeader isOnline={isOnline} />
               <ConversationsSidebar
                 activeConversationId={conversationKey}
                 openConversation={(newId) => {
-                  navigate(`${CHAT_ROOT}/${newId}`);
+                  navigate(`${CHAT_ROOT_PATH}/${newId}`);
                 }}
               />
             </>

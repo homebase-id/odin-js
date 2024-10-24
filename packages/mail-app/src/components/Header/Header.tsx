@@ -1,8 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { t, Input, ActionButton, ActionLink } from '@homebase-id/common-app';
+import { t, Input, ActionButton, ActionLink, MAIL_ROOT_PATH } from '@homebase-id/common-app';
 import { Bars, MagnifyingGlass, Plus, Times } from '@homebase-id/common-app/icons';
 import { useSearchParams } from 'react-router-dom';
-import { ROOT_PATH } from '../../app/App';
 
 export const MailHomeHeader = ({ className }: { className?: string }) => {
   return (
@@ -26,7 +25,7 @@ const MenuButton = () => {
       icon={Bars}
       type="mute"
       size="square"
-      href={`${ROOT_PATH}${window.location.search}`}
+      href={`${MAIL_ROOT_PATH}${window.location.search}`}
       className="md:hidden"
     />
   );
@@ -76,7 +75,7 @@ const MailHomeHeaderSearch = ({ className }: { className?: string }) => {
 
 const MailComposerButton = () => {
   return (
-    <ActionLink icon={Plus} type="primary" href={`${ROOT_PATH}/new`}>
+    <ActionLink icon={Plus} type="primary" href={`${MAIL_ROOT_PATH}/new`}>
       {t('New')}
     </ActionLink>
   );

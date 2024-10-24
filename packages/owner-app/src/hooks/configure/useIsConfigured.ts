@@ -28,6 +28,7 @@ export const useIsConfigured = () => {
       import.meta.env.PROD
     )
       return true;
+
     const result = await isConfigured(dotYouClient);
     if (result) {
       localStorage.setItem(LOCAL_STORAGE_KEY, import.meta.env.VITE_VERSION);
