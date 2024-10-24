@@ -17,6 +17,7 @@ import {
   DotYouClient,
   HomebaseFile,
   NewHomebaseFile,
+  NewMediaFile,
   SecurityGroupType,
 } from '@homebase-id/js-lib/core';
 import { formatGuidId, getNewId, getNewXorId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
@@ -68,7 +69,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       },
       serverMetadata: {
         accessControlList: {
-          requiredSecurityGroup: SecurityGroupType.Owner,
+          requiredSecurityGroup: SecurityGroupType.Connected,
         },
       },
     };
@@ -91,15 +92,17 @@ export const useConversation = (props?: { conversationId?: string | undefined })
 
   const updateExistingConversation = async ({
     conversation,
+    newImage,
     distribute = false,
   }: {
     conversation: HomebaseFile<UnifiedConversation>;
+    newImage?: NewMediaFile;
     distribute?: boolean;
   }) => {
     if (distribute && conversation.fileMetadata.appData.content.recipients?.length >= 2) {
-      return await updateConversation(dotYouClient, conversation, distribute);
+      return await updateConversation(dotYouClient, conversation, newImage, distribute);
     } else {
-      return await updateConversation(dotYouClient, conversation);
+      return await updateConversation(dotYouClient, conversation, newImage);
     }
   };
 

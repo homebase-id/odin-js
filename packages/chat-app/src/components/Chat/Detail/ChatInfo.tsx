@@ -1,10 +1,12 @@
 import { createPortal } from 'react-dom';
-import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile, NewMediaFile } from '@homebase-id/js-lib/core';
 import {
   ActionButton,
   ConnectionImage,
   ConnectionName,
   DialogWrapper,
+  Image,
+  ImageUploadAndCrop,
   Input,
   OwnerImage,
   OwnerName,
@@ -13,6 +15,8 @@ import {
   usePortal,
 } from '@homebase-id/common-app';
 import {
+  ChatDrive,
+  CONVERSATION_IMAGE_PAYLOAD_KEY,
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../../providers/ConversationProvider';
@@ -38,6 +42,7 @@ export const ChatInfo = ({
 
   const [isEditTitle, setIsEditTitle] = useState<boolean>(false);
   const [newTitle, setNewTitle] = useState<string>(conversationContent.title || '');
+  const [newImage, setNewImage] = useState<NewMediaFile | undefined>(undefined);
 
   const { mutate: updateConversation, status: updateStatus } = useConversation().update;
   const doSubmit = (e: React.FormEvent) => {
@@ -46,6 +51,7 @@ export const ChatInfo = ({
     updateConversation({
       conversation,
       distribute: true,
+      newImage,
     });
   };
 
@@ -68,6 +74,18 @@ export const ChatInfo = ({
               className="h-24 w-24 border border-neutral-200 dark:border-neutral-800"
               size="custom"
             />
+          ) : conversation.fileMetadata.payloads.some(
+              (payload) => payload.key === CONVERSATION_IMAGE_PAYLOAD_KEY
+            ) ? (
+            <div className="w-full max-w-[250px]">
+              <Image
+                fileId={conversation.fileId}
+                fileKey={CONVERSATION_IMAGE_PAYLOAD_KEY}
+                targetDrive={ChatDrive}
+                className="m-auto border border-neutral-200 dark:border-neutral-800"
+                fit="contain"
+              />
+            </div>
           ) : (
             <div className="rounded-full bg-primary/20 p-7">
               <Persons className="h-10 w-10" />
@@ -98,6 +116,19 @@ export const ChatInfo = ({
               <>
                 {isEditTitle ? (
                   <form className="flex flex-col items-center gap-2" onSubmit={doSubmit}>
+                    <ImageUploadAndCrop
+                      onChange={(newImage) =>
+                        newImage &&
+                        setNewImage({
+                          file: newImage,
+                          key: CONVERSATION_IMAGE_PAYLOAD_KEY,
+                        })
+                      }
+                      expectedAspectRatio={1}
+                      maxHeight={500}
+                      maxWidth={500}
+                    />
+
                     <Input
                       required
                       defaultValue={conversationContent?.title}
