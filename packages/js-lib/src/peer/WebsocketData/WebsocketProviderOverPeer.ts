@@ -11,7 +11,12 @@ import {
   TypedConnectionNotification,
   WebsocketCommand,
 } from '../../core/WebsocketData/WebsocketTypes';
-import { hasDebugFlag, jsonStringify64, drivesEqual } from '../../helpers/helpers';
+import {
+  hasDebugFlag,
+  jsonStringify64,
+  drivesEqual,
+  base64ToUint8Array,
+} from '../../helpers/helpers';
 
 let webSocketClient: WebSocket | undefined;
 let activeSs: Uint8Array;
@@ -54,7 +59,10 @@ const ConnectSocket = async (
     // we need to preauth before we can connect
     const tokenToConnectOverPeer = await dotYouClient
       .createAxiosClient()
-      .post(
+      .post<{
+        authenticationToken64: string;
+        sharedSecret: string;
+      }>(
         '/notify/peer/token',
         {
           identity: odinId,
@@ -63,93 +71,115 @@ const ConnectSocket = async (
           validateStatus: () => true,
         }
       )
+      .then((response) => {
+        return response.data;
+      })
+      .catch((error) => {
+        console.error({ error });
+        return null;
+      });
+
+    if (!tokenToConnectOverPeer) {
+      reject('[WebsocketProvider] Preauth failed');
+      return;
+    }
+
+    activeSs = base64ToUint8Array(tokenToConnectOverPeer.sharedSecret);
+    const directGuestClient = new DotYouClient({
+      api: ApiType.Guest,
+      identity: odinId,
+      headers: {
+        SUB32: tokenToConnectOverPeer.authenticationToken64,
+      },
+    });
+
+    // we need to preauth before we can connect
+    await directGuestClient
+      .createAxiosClient()
+      .post('/notify/peer/preauth', undefined, {
+        validateStatus: () => true,
+      })
       .catch((error) => {
         console.error({ error });
         reject('[WebsocketProvider] Preauth failed');
       });
 
-    console.log({ tokenToConnectOverPeer });
+    const url = `wss://${directGuestClient.getRoot().split('//')[1]}/api/guest/v1/notify/peer/ws`;
 
-    throw new Error('Token to connect over peer is not implemented');
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    webSocketClient = new WebSocket(url, undefined, args);
+    if (isDebug) console.debug(`[NotificationProviderOverPeer] Client connected`);
 
-    // const url = `wss://${dotYouClient.getRoot().split('//')[1]}/api/${
-    //   apiType === ApiType.Owner ? 'owner' : 'apps'
-    // }/v1/notify/ws`;
+    webSocketClient.onopen = () => {
+      const establishConnectionRequest: EstablishConnectionRequest = {
+        drives,
+        waitTimeMs: 2000,
+        batchSize: 1,
+      };
 
-    // // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // // @ts-ignore
-    // webSocketClient = new WebSocket(url, undefined, args);
-    // if (isDebug) console.debug(`[NotificationProvider] Client connected`);
+      NotifyOverPeer({
+        command: 'establishConnectionRequest',
+        data: JSON.stringify(establishConnectionRequest),
+      });
+    };
 
-    // webSocketClient.onopen = () => {
-    //   const establishConnectionRequest: EstablishConnectionRequest = {
-    //     drives,
-    //     waitTimeMs: 2000,
-    //     batchSize: 1,
-    //   };
+    const setupPing = () => {
+      lastPong = Date.now();
+      pingInterval = setInterval(() => {
+        if (lastPong && Date.now() - lastPong > PING_INTERVAL * 2) {
+          // 2 ping intervals have passed without a pong, reconnect
+          if (isDebug) console.debug(`[NotificationProviderOverPeer] Ping timeout`);
+          ReconnectSocket(dotYouClient, odinId, drives, args);
+          return;
+        }
+        NotifyOverPeer({
+          command: 'ping',
+        } as WebsocketCommand);
+      }, PING_INTERVAL);
+    };
 
-    //   NotifyOverPeer({
-    //     command: 'establishConnectionRequest',
-    //     data: JSON.stringify(establishConnectionRequest),
-    //   });
-    // };
+    webSocketClient.onmessage = async (e) => {
+      const notification: RawClientNotification = await parseMessage(e, activeSs);
 
-    // const setupPing = () => {
-    //   lastPong = Date.now();
-    //   pingInterval = setInterval(() => {
-    //     if (lastPong && Date.now() - lastPong > PING_INTERVAL * 2) {
-    //       // 2 ping intervals have passed without a pong, reconnect
-    //       if (isDebug) console.debug(`[NotificationProvider] Ping timeout`);
-    //       ReconnectSocket(dotYouClient, odinId, drives, args);
-    //       return;
-    //     }
-    //     NotifyOverPeer({
-    //       command: 'ping',
-    //     } as WebsocketCommand);
-    //   }, PING_INTERVAL);
-    // };
+      if (notification.notificationType === 'error') {
+        console.warn('[NotificationProviderOverPeer] Error:', notification.data);
+      }
 
-    // webSocketClient.onmessage = async (e) => {
-    //   const notification: RawClientNotification = await parseMessage(e, activeSs);
+      if (!isConnected) {
+        // First message must be acknowledgement of successful handshake
+        if (notification.notificationType == 'deviceHandshakeSuccess') {
+          if (isDebug) console.debug(`[NotificationProviderOverPeer] Device handshake success`);
+          isConnected = true;
+          setupPing();
+          resolve();
+          return;
+        }
+      }
 
-    //   if (notification.notificationType === 'error') {
-    //     console.warn('[NotificationProvider] Error:', notification.data);
-    //   }
+      if (isDebug) console.debug(`[NotificationProviderOverPeer] `, notification);
+      if (notification.notificationType === 'pong') lastPong = Date.now();
 
-    //   if (!isConnected) {
-    //     // First message must be acknowledgement of successful handshake
-    //     if (notification.notificationType == 'deviceHandshakeSuccess') {
-    //       if (isDebug) console.debug(`[NotificationProvider] Device handshake success`);
-    //       isConnected = true;
-    //       setupPing();
-    //       resolve();
-    //       return;
-    //     }
-    //   }
+      const parsedNotification = ParseRawClientNotification(notification);
+      subscribers.map(async (subscriber) => await subscriber.handler(parsedNotification));
+    };
 
-    //   if (isDebug) console.debug(`[NotificationProvider] `, notification);
-    //   if (notification.notificationType === 'pong') lastPong = Date.now();
+    webSocketClient.onerror = (e) => {
+      console.error('[NotificationProvider]', e);
+    };
 
-    //   const parsedNotification = ParseRawClientNotification(notification);
-    //   subscribers.map(async (subscriber) => await subscriber.handler(parsedNotification));
-    // };
+    webSocketClient.onclose = (e) => {
+      if (isDebug) {
+        if (e.wasClean) {
+          console.debug('[NotificationProviderOverPeer] Connection closed cleanly', e);
+        } else {
+          console.debug('[NotificationProviderOverPeer] Connection closed unexpectedly', e);
+        }
+      }
 
-    // webSocketClient.onerror = (e) => {
-    //   console.error('[NotificationProvider]', e);
-    // };
-
-    // webSocketClient.onclose = (e) => {
-    //   if (isDebug) {
-    //     if (e.wasClean) {
-    //       console.debug('[NotificationProvider] Connection closed cleanly', e);
-    //     } else {
-    //       console.debug('[NotificationProvider] Connection closed unexpectedly', e);
-    //     }
-    //   }
-
-    //   subscribers.map((subscriber) => subscriber.onDisconnect && subscriber.onDisconnect());
-    //   ReconnectSocket(dotYouClient, odinId, drives, args);
-    // };
+      subscribers.map((subscriber) => subscriber.onDisconnect && subscriber.onDisconnect());
+      ReconnectSocket(dotYouClient, odinId, drives, args);
+    };
   });
 };
 
@@ -169,7 +199,7 @@ const ReconnectSocket = async (
     connectPromise = undefined;
     clearInterval(pingInterval);
 
-    if (isDebug) console.debug('[NotificationProvider] Reconnecting');
+    if (isDebug) console.debug('[NotificationProviderOverPeer] Reconnecting');
 
     await ConnectSocket(dotYouClient, odinId, drives, args);
     subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
@@ -183,7 +213,7 @@ const DisconnectSocket = async () => {
   } catch {
     // Ignore any errors on close, as we always want to clean up
   }
-  if (isDebug) console.debug(`[NotificationProvider] Client disconnected`);
+  if (isDebug) console.debug(`[NotificationProviderOverPeer] Client disconnected`);
 
   isConnected = false;
   connectPromise = undefined;
@@ -215,7 +245,7 @@ export const SubscribeOverPeer = async (
   subscribers.push({ handler, onDisconnect, onReconnect });
 
   if (isDebug)
-    console.debug(`[NotificationProvider] New subscriber (${subscribers.length})`, refId);
+    console.debug(`[NotificationProviderOverPeer] New subscriber (${subscribers.length})`, refId);
 
   if (
     subscribedDrives &&
@@ -243,7 +273,8 @@ export const UnsubscribeOverPeer = (handler: (data: TypedConnectionNotification)
 
 const NotifyOverPeer = async (command: WebsocketCommand | EstablishConnectionRequest) => {
   if (!webSocketClient) throw new Error('No active websocket to message across');
-  if (isDebug) console.debug(`[NotificationProvider] Send command (${JSON.stringify(command)})`);
+  if (isDebug)
+    console.debug(`[NotificationProviderOverPeer] Send command (${JSON.stringify(command)})`);
 
   const json = jsonStringify64(command);
   const payload = await encryptData(json, getRandomIv(), activeSs);

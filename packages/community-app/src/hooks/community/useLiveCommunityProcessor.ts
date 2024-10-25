@@ -139,7 +139,6 @@ const useCommunityWebsocket = (
     if (!communityId) return;
     isDebug && console.debug('[CommunityWebsocket] Got notification', notification);
 
-    // TODO: Handle fileDeleted
     if (
       (notification.notificationType === 'fileAdded' ||
         notification.notificationType === 'fileModified') &&
@@ -203,6 +202,11 @@ const useCommunityWebsocket = (
         }
         insertNewcommunityMetadata(queryClient, communityChannel);
       }
+    }
+
+    if (notification.notificationType === 'fileDeleted') {
+      // TODO: Handle fileDeleted
+      // Cleanup
     }
 
     if (notification.notificationType === 'appNotificationAdded') {
@@ -276,7 +280,7 @@ const useCommunityWebsocket = (
   if (!odinId || odinId === dotYouClient.getIdentity()) {
     return useWebsocketSubscriber(
       isEnabled ? handler : undefined,
-      ['fileAdded', 'fileModified'],
+      ['fileAdded', 'fileModified', 'fileDeleted'],
       [targetDrive],
       () => {
         queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
@@ -288,7 +292,7 @@ const useCommunityWebsocket = (
     return useWebsocketSubscriberOverPeer(
       isEnabled ? handler : undefined,
       odinId,
-      ['fileAdded', 'fileModified'],
+      ['fileAdded', 'fileModified', 'fileDeleted'],
       [targetDrive],
       () => {
         queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
