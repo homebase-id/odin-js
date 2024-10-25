@@ -16,7 +16,7 @@ import {
 import { CommunityMessageItem } from '../Message/CommunityMessageItem';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
 import { CommunityActions } from './ContextMenu';
-import { usecommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
+import { useCommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
 
 export const CommunityHistory = ({
   community,
@@ -40,7 +40,7 @@ export const CommunityHistory = ({
   const inAThread =
     !!origin && origin.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE;
 
-  const { data: metadata } = usecommunityMetadata({
+  const { data: metadata } = useCommunityMetadata({
     odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata?.appData?.uniqueId,
   }).single;

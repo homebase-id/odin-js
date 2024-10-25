@@ -8,7 +8,7 @@ import {
 } from '../../providers/CommunityMetadataProvider';
 import { formatGuidId } from '@homebase-id/js-lib/helpers';
 
-export const usecommunityMetadata = (props?: {
+export const useCommunityMetadata = (props?: {
   odinId: string | undefined;
   communityId: string | undefined;
 }) => {

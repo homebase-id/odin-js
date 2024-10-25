@@ -15,7 +15,7 @@ import {
   ChannelWithRecentMessage,
   useCommunityChannelsWithRecentMessages,
 } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
-import { usecommunityMetadata } from '../../hooks/community/useCommunityMetadata';
+import { useCommunityMetadata } from '../../hooks/community/useCommunityMetadata';
 import { CommunityMetadata } from '../../providers/CommunityMetadataProvider';
 import { RadioTower, Chevron, Pin, Grid, ChevronDown } from '@homebase-id/common-app/icons';
 import { COMMUNITY_ROOT } from './CommunityHome';
@@ -29,7 +29,7 @@ export const CommunityChannelNav = () => {
     odinId: odinKey,
     communityId: communityKey,
   }).fetch;
-  const { data: metadata } = usecommunityMetadata({
+  const { data: metadata } = useCommunityMetadata({
     odinId: odinKey,
     communityId: communityKey,
   }).single;
@@ -184,7 +184,7 @@ const ChannelItem = ({
   const {
     single: { data: metadata },
     update: { mutate: updateMetadata },
-  } = usecommunityMetadata({ odinId, communityId });
+  } = useCommunityMetadata({ odinId, communityId });
 
   const isPinned =
     channelId && metadata?.fileMetadata.appData.content?.pinnedChannels?.includes(channelId);

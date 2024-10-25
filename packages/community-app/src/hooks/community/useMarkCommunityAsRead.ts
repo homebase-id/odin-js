@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { usecommunityMetadata } from './useCommunityMetadata';
+import { useCommunityMetadata } from './useCommunityMetadata';
 import { useLastUpdatedChatMessages } from './messages/useCommunityMessages';
 
 export const useMarkCommunityAsRead = ({
@@ -14,7 +14,7 @@ export const useMarkCommunityAsRead = ({
   const {
     single: { data: metadata },
     update: { mutate: updateMetadata, status: updateStatus },
-  } = usecommunityMetadata({ odinId, communityId });
+  } = useCommunityMetadata({ odinId, communityId });
   const { lastUpdate } = useLastUpdatedChatMessages();
 
   useEffect(() => {

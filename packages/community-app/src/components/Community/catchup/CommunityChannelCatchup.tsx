@@ -1,66 +1,15 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
-import { usecommunityMetadata } from '../../hooks/community/useCommunityMetadata';
-import {
-  ChannelWithRecentMessage,
-  useCommunityChannelsWithRecentMessages,
-} from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
-import { CommunityHistory } from './channel/CommunityHistory';
-import { ActionButton, ActionLink, t, useDotYouClient } from '@homebase-id/common-app';
+import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
+import { useCommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
+import { ChannelWithRecentMessage } from '../../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
+import { CommunityHistory } from '../channel/CommunityHistory';
+import { ActionButton, ActionLink, t } from '@homebase-id/common-app';
 import { RadioTower } from '@homebase-id/common-app/icons';
-import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
+import { ROOT_PATH as COMMUNITY_ROOT } from '../../../app/App';
 import { useCallback } from 'react';
 import { ChevronLeft } from '@homebase-id/common-app/icons';
 
-export const CommunityCatchup = ({
-  community,
-}: {
-  community: HomebaseFile<CommunityDefinition> | undefined;
-}) => {
-  const identity = useDotYouClient().getIdentity();
-  const { data: metadata } = usecommunityMetadata({
-    odinId: community?.fileMetadata.senderOdinId,
-    communityId: community?.fileMetadata?.appData?.uniqueId,
-  }).single;
-
-  const { data: channels } = useCommunityChannelsWithRecentMessages({
-    communityId: community?.fileMetadata?.appData?.uniqueId,
-  }).fetch;
-
-  const channelsToCatchup = channels?.filter((chnl) => {
-    if (!chnl.fileMetadata.appData.uniqueId) return false;
-    const lastReadTime =
-      metadata?.fileMetadata.appData.content.channelLastReadTime[
-        chnl.fileMetadata.appData.uniqueId
-      ];
-
-    return (
-      chnl.lastMessage?.fileMetadata.created &&
-      chnl.lastMessage.fileMetadata.created > (lastReadTime || 0) &&
-      !!chnl.lastMessage.fileMetadata.senderOdinId &&
-      chnl.lastMessage.fileMetadata.senderOdinId !== identity
-    );
-  });
-
-  if (!community) return null;
-
-  return (
-    <div className="flex h-full flex-grow flex-col">
-      <CommunityChannelCatchupHeader community={community} />
-      {!channelsToCatchup?.length ? (
-        <p className="m-auto text-lg">{t('All done!')} 🎉</p>
-      ) : (
-        <div className="flex h-20 flex-grow flex-col gap-3 overflow-auto p-3">
-          {channelsToCatchup?.map((chnl) => (
-            <CommunityChannelCatchup community={community} channel={chnl} key={chnl.fileId} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const CommunityChannelCatchupHeader = ({
+export const CommunityChannelCatchupHeader = ({
   community,
 }: {
   community?: HomebaseFile<CommunityDefinition>;
@@ -83,7 +32,7 @@ const CommunityChannelCatchupHeader = ({
   );
 };
 
-const CommunityChannelCatchup = ({
+export const CommunityChannelCatchup = ({
   community,
   channel,
 }: {
@@ -94,7 +43,7 @@ const CommunityChannelCatchup = ({
   const {
     single: { data: metadata },
     update: { mutate: updateMeta, status: updateStatus },
-  } = usecommunityMetadata({ odinId: community.fileMetadata.senderOdinId, communityId });
+  } = useCommunityMetadata({ odinId: community.fileMetadata.senderOdinId, communityId });
 
   const doMarkAsRead = useCallback(() => {
     if (

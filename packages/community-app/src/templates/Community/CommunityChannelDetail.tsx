@@ -2,7 +2,6 @@ import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import {
-  ActionLink,
   AuthorImage,
   AuthorName,
   DialogWrapper,
@@ -13,7 +12,7 @@ import {
   useDotYouClient,
   usePortal,
 } from '@homebase-id/common-app';
-import { Arrow, ChevronDown, ChevronLeft, Times } from '@homebase-id/common-app/icons';
+import { Arrow, ChevronLeft } from '@homebase-id/common-app/icons';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
@@ -22,12 +21,11 @@ import { useCommunityChannel } from '../../hooks/community/channels/useCommunity
 import { createPortal } from 'react-dom';
 import { MessageComposer } from '../../components/Community/Message/MessageComposer';
 import { CommunityHistory } from '../../components/Community/channel/CommunityHistory';
-import { useCommunityMessage } from '../../hooks/community/messages/useCommunityMessage';
 import { useMarkCommunityAsRead } from '../../hooks/community/useMarkCommunityAsRead';
-import { CommunityCatchup } from '../../components/Community/CommunityCatchup';
+import { CommunityThread } from '../../components/Community/CommunityThread';
 
 export const CommunityChannelDetail = () => {
-  const [isEmtpyChannel, setIsEmptyChannel] = useState<boolean>(false);
+  const [isEmptyChannel, setIsEmptyChannel] = useState<boolean>(false);
   const { odinKey, communityKey: communityId, channelKey: channelId, threadKey } = useParams();
   const { data: community, isFetched } = useCommunity({ odinId: odinKey, communityId }).fetch;
   const navigate = useNavigate();
@@ -65,40 +63,34 @@ export const CommunityChannelDetail = () => {
     <ErrorBoundary>
       <div className="h-full w-full flex-grow bg-background">
         <div className="relative flex h-full flex-row">
-          {!channelId ? (
-            <div className="flex h-full flex-grow flex-col overflow-hidden">
-              {/* <CommunityRootHeader community={community || undefined} /> */}
-              <CommunityCatchup community={community || undefined} />
-            </div>
-          ) : (
-            <div className="flex h-full flex-grow flex-col overflow-hidden">
-              <CommunityChannelHeader community={community || undefined} channel={channelDsr} />
-              <ErrorBoundary>
-                {isEmtpyChannel ? (
-                  <EmptyChannel channel={channelDsr} />
-                ) : (
-                  <CommunityHistory
-                    community={community || undefined}
-                    channel={channelDsr || undefined}
-                    doOpenThread={(thread) =>
-                      navigate(
-                        `${COMMUNITY_ROOT}/${odinKey}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
-                      )
-                    }
-                    setIsEmptyChat={setIsEmptyChannel}
-                  />
-                )}
-              </ErrorBoundary>
-              <ErrorBoundary>
-                <MessageComposer
+          <div className="flex h-full flex-grow flex-col overflow-hidden">
+            <CommunityChannelHeader community={community || undefined} channel={channelDsr} />
+            <ErrorBoundary>
+              {isEmptyChannel ? (
+                <EmptyChannel channel={channelDsr} />
+              ) : (
+                <CommunityHistory
                   community={community || undefined}
                   channel={channelDsr || undefined}
-                  key={channelId}
-                  onSend={() => setIsEmptyChannel(false)}
+                  doOpenThread={(thread) =>
+                    navigate(
+                      `${COMMUNITY_ROOT}/${odinKey}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
+                    )
+                  }
+                  setIsEmptyChat={setIsEmptyChannel}
                 />
-              </ErrorBoundary>
-            </div>
-          )}
+              )}
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <MessageComposer
+                community={community || undefined}
+                channel={channelDsr || undefined}
+                key={channelId}
+                onSend={() => setIsEmptyChannel(false)}
+              />
+            </ErrorBoundary>
+          </div>
+
           {threadKey ? (
             <ErrorBoundary>
               <CommunityThread
@@ -205,7 +197,10 @@ const ChannelInfo = ({
             <div className="flex flex-col gap-4">
               {members.map((recipient) => (
                 <a
-                  href={`${new DotYouClient({ identity: identity, api: ApiType.Guest }).getRoot()}/owner/connections/${recipient}`}
+                  href={`${new DotYouClient({
+                    identity: identity,
+                    api: ApiType.Guest,
+                  }).getRoot()}/owner/connections/${recipient}`}
                   rel="noreferrer noopener"
                   target="_blank"
                   className="group flex flex-row items-center gap-3"
@@ -232,77 +227,6 @@ const ChannelInfo = ({
   );
 
   return createPortal(dialog, target);
-};
-
-const CommunityThread = ({
-  community,
-  channel,
-  threadId,
-}: {
-  community: HomebaseFile<CommunityDefinition> | undefined;
-  channel: HomebaseFile<CommunityChannel> | undefined;
-  threadId: string;
-}) => {
-  const { odinKey, communityKey, channelKey } = useParams();
-
-  const { data: originMessage } = useCommunityMessage({
-    odinId: community?.fileMetadata.senderOdinId,
-    communityId: community?.fileMetadata.appData.uniqueId,
-    messageId: threadId,
-  }).get;
-
-  if (!community || !threadId) {
-    return null;
-  }
-
-  return (
-    <div className="absolute inset-0 flex h-full w-full flex-col shadow-lg xl:static xl:max-w-sm">
-      <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-        <ActionLink
-          className="p-2 xl:hidden"
-          size="none"
-          type="mute"
-          href={`${COMMUNITY_ROOT}/${odinKey}/${communityKey}/${channelKey || 'all'}`}
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </ActionLink>
-        {t('Thread')}
-        <ActionLink
-          href={`${COMMUNITY_ROOT}/${odinKey}/${communityKey}/${channelKey || 'all'}`}
-          icon={Times}
-          size="none"
-          type="mute"
-          className="hidden p-2 lg:-m-2 lg:ml-auto xl:flex"
-        />
-      </div>
-      <div className="flex h-20 flex-grow flex-col overflow-auto bg-background">
-        {!originMessage ? (
-          <div className="flex flex-col gap-3 p-5">
-            <LoadingBlock className="h-12 w-full" />
-            <LoadingBlock className="h-12 w-full" />
-            <LoadingBlock className="h-12 w-full" />
-          </div>
-        ) : (
-          <CommunityHistory
-            community={community}
-            origin={originMessage}
-            channel={channel}
-            alignTop={true}
-          />
-        )}
-
-        <ErrorBoundary>
-          <MessageComposer
-            community={community}
-            threadId={threadId}
-            channel={channel}
-            key={threadId}
-            className="mt-auto lg:mt-0"
-          />
-        </ErrorBoundary>
-      </div>
-    </div>
-  );
 };
 
 const EmptyChannel = ({ channel }: { channel: HomebaseFile<CommunityChannel> | undefined }) => {

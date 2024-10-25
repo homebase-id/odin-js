@@ -1,15 +1,25 @@
 import { lazy, ReactNode, Suspense } from 'react';
 import {
-  Route,
-  Outlet,
-  Navigate,
-  RouterProvider,
   createBrowserRouter,
   createRoutesFromElements,
+  Navigate,
+  Outlet,
+  Route,
+  RouterProvider,
   useParams,
 } from 'react-router-dom';
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
+import { Layout, MinimalLayout } from '../components/ui/Layout/Layout';
+import '@homebase-id/ui-lib/dist/style.css';
+import './App.css';
+import { useAuth } from '../hooks/auth/useAuth';
+import {
+  DotYouClientProvider,
+  ErrorBoundary,
+  NotFound,
+  OdinQueryClient,
+} from '@homebase-id/common-app';
 
 export const REACT_QUERY_CACHE_KEY = 'COMMUNITY_REACT_QUERY_OFFLINE_CACHE';
 const REACT_QUERY_INCLUDED_QUERY_KEYS = [
@@ -21,8 +31,6 @@ const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'channels-with-recent-message',
 ];
 
-import { Layout, MinimalLayout } from '../components/ui/Layout/Layout';
-
 const Auth = lazy(() => import('../templates/Auth/Auth'));
 const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
 
@@ -32,22 +40,16 @@ const CommunityHome = lazy(() =>
   }))
 );
 
-import '@homebase-id/ui-lib/dist/style.css';
-import './App.css';
-import { useAuth } from '../hooks/auth/useAuth';
-
 export const ROOT_PATH = '/apps/community';
 const AUTH_PATH = ROOT_PATH + '/auth';
 
-import {
-  ErrorBoundary,
-  NotFound,
-  DotYouClientProvider,
-  OdinQueryClient,
-} from '@homebase-id/common-app';
-
 const CommunityChannelDetail = lazy(() =>
   import('../templates/Community/CommunityChannelDetail').then((communityApp) => ({
+    default: communityApp.CommunityChannelDetail,
+  }))
+);
+const CommunityCatchup = lazy(() =>
+  import('../templates/Community/CommunityCatchup').then((communityApp) => ({
     default: communityApp.CommunityChannelDetail,
   }))
 );
@@ -100,19 +102,19 @@ function App() {
               <Route index={true} element={<CommunityRootRoute />} />
 
               {/* Items for 'all' */}
-              <Route path={'all'} element={<CommunityChannelDetail />} />
-              <Route path={'all/:chatMessageKey'} element={<CommunityChannelDetail />} />
-              <Route path={'all/:chatMessageKey/:mediaKey'} element={<CommunityChannelDetail />} />
+              <Route path={'all'} element={<CommunityCatchup />} />
+              <Route path={'all/:chatMessageKey'} element={<CommunityCatchup />} />
+              <Route path={'all/:chatMessageKey/:mediaKey'} element={<CommunityCatchup />} />
 
               {/* Items for 'all' within a thread */}
-              <Route path={'all/:threadKey/thread'} element={<CommunityChannelDetail />} />
+              <Route path={'all/:threadKey/thread'} element={<CommunityCatchup />} />
               <Route
                 path={'all/:threadKey/thread/:chatMessageKey'}
-                element={<CommunityChannelDetail />}
+                element={<CommunityCatchup />}
               />
               <Route
                 path={'all/:threadKey/thread/:chatMessageKey/:mediaKey'}
-                element={<CommunityChannelDetail />}
+                element={<CommunityCatchup />}
               />
 
               {/* Items for 'channel' */}
