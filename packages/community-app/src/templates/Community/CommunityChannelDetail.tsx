@@ -1,4 +1,4 @@
-import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import {
@@ -157,6 +157,7 @@ const ChannelInfo = ({
   community: HomebaseFile<CommunityDefinition>;
   onClose: () => void;
 }) => {
+  const { odinKey, communityKey } = useParams();
   const target = usePortal('modal-container');
 
   const identity = useDotYouClient().getIdentity() || window.location.host;
@@ -196,15 +197,15 @@ const ChannelInfo = ({
             <p className="mb-4 text-lg">{t('Members')}</p>
             <div className="flex flex-col gap-4">
               {members.map((recipient) => (
-                <a
-                  href={`${new DotYouClient({
-                    identity: identity,
-                    api: ApiType.Guest,
-                  }).getRoot()}/owner/connections/${recipient}`}
-                  rel="noreferrer noopener"
-                  target="_blank"
+                <Link
+                  to={`${COMMUNITY_ROOT}/${odinKey}/${communityKey}/direct/${recipient}`}
                   className="group flex flex-row items-center gap-3"
                   key={recipient}
+                  style={{
+                    order: Array.from(recipient)
+                      .map((char) => char.charCodeAt(0))
+                      .reduce((acc, curr) => acc + curr, 0),
+                  }}
                 >
                   <AuthorImage
                     odinId={recipient}
@@ -214,10 +215,10 @@ const ChannelInfo = ({
                   />
                   <div className="flex flex-col group-hover:underline">
                     <AuthorName odinId={recipient} excludeLink={true} />
-                    <p>{recipient}</p>
+                    <p className="text-slate-400">{recipient}</p>
                   </div>
                   <Arrow className="ml-auto h-5 w-5" />
-                </a>
+                </Link>
               ))}
             </div>
           </div>
