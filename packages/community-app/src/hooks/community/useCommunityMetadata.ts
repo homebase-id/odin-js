@@ -36,6 +36,9 @@ export const usecommunityMetadata = (props?: {
           accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
         },
       };
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['communities'] });
+      }, 1000);
 
       return newMetadata;
     }

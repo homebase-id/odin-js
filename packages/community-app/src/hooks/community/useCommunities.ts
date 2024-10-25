@@ -118,7 +118,7 @@ export const useCommunities = (enableDiscovery?: boolean) => {
     all: useQuery({
       queryKey: ['communities'],
       queryFn: () => fetchCommunities(),
-      staleTime: 1000 * 60 * 60, // 1h before new communities are fetched on this one
+      staleTime: Infinity,
       enabled: !enableDiscovery || (enableDiscovery && fetchedAllContacts),
     }),
   };
