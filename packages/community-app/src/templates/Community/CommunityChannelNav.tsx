@@ -15,7 +15,7 @@ import {
   ChannelWithRecentMessage,
   useCommunityChannelsWithRecentMessages,
 } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
-import { usecommunityMetadata } from '../../hooks/community/useCommunityMetadata';
+import { useCommunityMetadata } from '../../hooks/community/useCommunityMetadata';
 import { CommunityMetadata } from '../../providers/CommunityMetadataProvider';
 import { RadioTower, Chevron, Pin, Grid, ChevronDown } from '@homebase-id/common-app/icons';
 import { COMMUNITY_ROOT } from './CommunityHome';
@@ -29,17 +29,18 @@ export const CommunityChannelNav = () => {
     odinId: odinKey,
     communityId: communityKey,
   }).fetch;
-  const { data: metadata } = usecommunityMetadata({ communityId: communityKey }).single;
+  const { data: metadata } = useCommunityMetadata({
+    odinId: odinKey,
+    communityId: communityKey,
+  }).single;
 
-  const odinId = odinKey;
-  const communityId = community?.fileMetadata.appData.uniqueId;
   const members = community?.fileMetadata.appData.content?.members;
 
-  const isActive = !!useMatch({ path: `${COMMUNITY_ROOT}/${odinKey}/${communityId}` });
+  const isActive = !!useMatch({ path: `${COMMUNITY_ROOT}/${odinKey}/${communityKey}` });
 
   const { data: communityChannels } = useCommunityChannelsWithRecentMessages({
-    odinId,
-    communityId,
+    odinId: odinKey,
+    communityId: communityKey,
   }).fetch;
 
   const pinnedChannels = communityChannels?.filter(
@@ -54,7 +55,7 @@ export const CommunityChannelNav = () => {
   );
 
   const [isExpanded, setIsExpanded] = useState(false);
-  if (!odinId || !communityId || isLoading || !community) return null;
+  if (!odinKey || !communityKey || isLoading || !community) return null;
 
   return (
     <>
@@ -76,14 +77,14 @@ export const CommunityChannelNav = () => {
             </button>
           </div>
 
-          <AllItem odinId={odinId} communityId={communityId} />
+          <AllItem odinId={odinKey} communityId={communityKey} />
           <div className="flex flex-col gap-1">
             <h2 className="px-1">{t('Channels')}</h2>
 
             {pinnedChannels?.map((channel) => (
               <ChannelItem
-                odinId={odinId}
-                communityId={communityId}
+                odinId={odinKey}
+                communityId={communityKey}
                 channel={channel}
                 key={channel.fileId || channel.fileMetadata.appData.uniqueId}
               />
@@ -93,8 +94,8 @@ export const CommunityChannelNav = () => {
               ?.slice(0, isExpanded ? undefined : maxChannels - (pinnedChannels?.length || 0))
               .map((channel) => (
                 <ChannelItem
-                  odinId={odinId}
-                  communityId={communityId}
+                  odinId={odinKey}
+                  communityId={communityKey}
                   channel={channel}
                   key={channel.fileId || channel.fileMetadata.appData.uniqueId}
                 />
@@ -119,8 +120,8 @@ export const CommunityChannelNav = () => {
             <h2 className="px-1">{t('Direct messages')}</h2>
             {members?.map((recipient) => (
               <DirectMessageItem
-                odinId={odinId}
-                communityId={communityId}
+                odinId={odinKey}
+                communityId={communityKey}
                 recipient={recipient}
                 key={recipient}
               />
@@ -181,7 +182,7 @@ const ChannelItem = ({
   const {
     single: { data: metadata },
     update: { mutate: updateMetadata },
-  } = usecommunityMetadata({ communityId });
+  } = useCommunityMetadata({ odinId, communityId });
 
   const isPinned =
     channelId && metadata?.fileMetadata.appData.content?.pinnedChannels?.includes(channelId);
@@ -225,7 +226,7 @@ const ChannelItem = ({
         }}
       >
         <Pin
-          className={`hidden h-5 w-5 flex-shrink-0 transition-opacity md:block ${
+          className={`hidden h-5 w-5 flex-shrink-0 transition-opacity lg:block ${
             isPinned ? 'opacity-100 hover:opacity-60' : `opacity-60 hover:opacity-100`
           }`}
         />
@@ -243,6 +244,7 @@ const DirectMessageItem = ({
   communityId: string;
   recipient: string;
 }) => {
+  const dotYouClient = useDotYouClientContext();
   const href = `${COMMUNITY_ROOT}/${odinId}/${communityId}/direct/${recipient}`;
   const isActive = !!useMatch({ path: href });
 
@@ -253,7 +255,9 @@ const DirectMessageItem = ({
     >
       <ConnectionImage odinId={recipient} size="xxs" />
       <ConnectionName odinId={recipient} />{' '}
-      <span className="text-sm text-slate-400">{recipient === odinId ? t('you') : ''}</span>
+      <span className="text-sm text-slate-400">
+        {recipient === dotYouClient.getIdentity() ? t('you') : ''}
+      </span>
     </Link>
   );
 };

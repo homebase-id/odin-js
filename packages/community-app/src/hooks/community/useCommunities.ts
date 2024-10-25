@@ -7,11 +7,13 @@ import {
   CommunityDefinition,
   getCommunities,
   getCommunitiesOverPeer,
+  getCommunityDefinition,
   getTargetDriveFromCommunityId,
 } from '../../providers/CommunityDefinitionProvider';
 import { useAllContacts, useDotYouClientContext } from '@homebase-id/common-app';
 import { useQuery } from '@tanstack/react-query';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
+import { getCommunitiesMetadata } from '../../providers/CommunityMetadataProvider';
 
 export const useCommunities = (enableDiscovery?: boolean) => {
   const { data: alllContacts, isFetched: fetchedAllContacts } = useAllContacts(
@@ -20,11 +22,36 @@ export const useCommunities = (enableDiscovery?: boolean) => {
   const dotYouClient = useDotYouClientContext();
 
   const fetchCommunities = async (): Promise<HomebaseFile<CommunityDefinition>[] | null> => {
-    const discoveredByOdinId = enableDiscovery ? await discoverByOdinId() : [];
     const localCommunities = await getCommunities(dotYouClient);
+    const localMetdatas = await getCommunitiesMetadata(dotYouClient);
+    const remoteCommunitesForMetadata = (
+      await Promise.all(
+        localMetdatas.map(async (metadata) => {
+          if (
+            !metadata?.fileMetadata.appData.content.odinId ||
+            !metadata?.fileMetadata.appData.uniqueId
+          )
+            return null;
+          return await getCommunityDefinition(
+            dotYouClient,
+            metadata?.fileMetadata.appData.content.odinId,
+            metadata?.fileMetadata.appData.uniqueId
+          );
+        })
+      )
+    ).filter((community) => community !== null) as HomebaseFile<CommunityDefinition>[];
+
+    const discoveredByOdinId = enableDiscovery ? await discoverByOdinId() : [];
+
+    console.log({
+      localCommunities,
+      remoteCommunitesForMetadata,
+      discoveredByOdinId,
+    });
 
     return [
       ...localCommunities,
+      ...remoteCommunitesForMetadata,
       ...discoveredByOdinId.map((discovered) => discovered.communities).flat(),
     ];
   };
@@ -90,8 +117,8 @@ export const useCommunities = (enableDiscovery?: boolean) => {
   return {
     all: useQuery({
       queryKey: ['communities'],
-      queryFn: () => fetchCommunities(),
-      staleTime: 1000 * 60 * 5, // 5min before new conversations from another device are fetched on this one
+      queryFn: fetchCommunities,
+      staleTime: Infinity,
       enabled: !enableDiscovery || (enableDiscovery && fetchedAllContacts),
     }),
   };

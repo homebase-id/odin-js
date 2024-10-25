@@ -8,12 +8,15 @@ import {
 } from '../../providers/CommunityMetadataProvider';
 import { formatGuidId } from '@homebase-id/js-lib/helpers';
 
-export const usecommunityMetadata = (props?: { communityId?: string | undefined }) => {
-  const { communityId } = props || {};
+export const useCommunityMetadata = (props?: {
+  odinId: string | undefined;
+  communityId: string | undefined;
+}) => {
+  const { communityId, odinId } = props || {};
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
-  const getMetadata = async (communityId: string) => {
+  const getMetadata = async (odinId: string, communityId: string) => {
     const serverFile = await getCommunityMetadata(dotYouClient, communityId);
     if (!serverFile) {
       const newMetadata: NewHomebaseFile<CommunityMetadata> = {
@@ -21,6 +24,7 @@ export const usecommunityMetadata = (props?: { communityId?: string | undefined 
           appData: {
             uniqueId: communityId,
             content: {
+              odinId,
               communityId,
               pinnedChannels: [],
               lastReadTime: 0,
@@ -32,6 +36,9 @@ export const usecommunityMetadata = (props?: { communityId?: string | undefined 
           accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
         },
       };
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['communities'] });
+      }, 1000);
 
       return newMetadata;
     }
@@ -64,9 +71,9 @@ export const usecommunityMetadata = (props?: { communityId?: string | undefined 
   return {
     single: useQuery({
       queryKey: ['community-metadata', communityId],
-      queryFn: () => getMetadata(communityId as string),
-      enabled: !!communityId,
-      staleTime: 1000 * 60 * 60 * 24, // 24h, updates will come in via websocket
+      queryFn: () => getMetadata(odinId as string, communityId as string),
+      enabled: !!odinId && !!communityId,
+      staleTime: 1000 * 60 * 60 * 24, // 1 day, updates from other clients will come in via websocket
     }),
     update: useMutation({
       mutationFn: saveMetadata,

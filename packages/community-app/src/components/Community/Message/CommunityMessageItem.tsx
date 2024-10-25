@@ -280,8 +280,8 @@ const CommunityMessageThreadSummary = ({
       ?.filter(Boolean) || []) as HomebaseFile<CommunityMessage>[];
 
     const uniqueSenders = Array.from(
-      new Set(flattenedMsgs.map((msg) => msg.fileMetadata.originalAuthor))
-    );
+      new Set(flattenedMsgs.map((msg) => msg.fileMetadata.originalAuthor?.trim()))
+    ).filter(Boolean);
 
     return { flattenedMsgs, uniqueSenders };
   }, [messages]);

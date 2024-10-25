@@ -1,7 +1,8 @@
 import { useParams, useMatch, useNavigate } from 'react-router-dom';
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import {
+  ActionGroup,
   ActionLink,
   COMMUNITY_APP_ID,
   ErrorBoundary,
@@ -19,7 +20,7 @@ import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useCommunities } from '../../hooks/community/useCommunities';
 import { NewCommunity } from './CommunityNew';
 import { useLiveCommunityProcessor } from '../../hooks/community/useLiveCommunityProcessor';
-import { RadioTower, Plus } from '@homebase-id/common-app/icons';
+import { RadioTower, Plus, Ellipsis, MagnifyingGlass, Loader } from '@homebase-id/common-app/icons';
 import { CommunityChannelNav } from './CommunityChannelNav';
 import { useCommunityMemberUpdater } from '../../hooks/community/useCommunityMemberUpdater';
 import { ExtendCriclePermissionDialog } from '../../components/Auth/ExtendCirclePermissionDialog';
@@ -35,7 +36,7 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   useCommunityMemberUpdater(odinKey, communityKey);
   useRemoveNotifications({ appId: COMMUNITY_APP_ID });
 
-  const { data: communities } = useCommunities(true).all;
+  const { data: communities } = useCommunities().all;
   const navigate = useNavigate();
   useEffect(() => {
     if (!communities) return;
@@ -79,8 +80,6 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
 };
 
 const CommunitySideNav = () => {
-  const { communityKey } = useParams();
-
   const rootChatMatch = useMatch({ path: COMMUNITY_ROOT });
   const isRoot = !!rootChatMatch;
 
@@ -90,54 +89,34 @@ const CommunitySideNav = () => {
     <>
       <Sidenav disablePinning={true} hideMobileDrawer={!isRoot} />
       <div
-        className={`${isActive ? 'translate-x-full' : 'translate-x-0'} fixed bottom-0 left-[-100%] top-0 flex h-[100dvh] w-full flex-shrink-0 flex-col bg-page-background transition-transform lg:relative lg:left-0 lg:max-w-[4rem] lg:translate-x-0`}
+        className={`${isActive ? 'translate-x-full' : 'translate-x-0'} fixed bottom-0 left-[-100%] top-0 z-[1] flex h-[100dvh] w-full flex-shrink-0 flex-col bg-page-background transition-transform lg:relative lg:left-0 lg:max-w-[4rem] lg:translate-x-0`}
       >
         <ErrorBoundary>
-          <CommunitiesSidebar activeCommunityId={communityKey} />
+          <div className="absolute inset-0 flex flex-grow flex-row flex-wrap md:pl-[calc(env(safe-area-inset-left)+4.3rem)] lg:flex-col lg:items-center lg:pl-0">
+            <div className="px-4 pb-2 pt-4">
+              <RadioTower className="h-7 w-7" />
+            </div>
+            <CommunitiesList />
+          </div>
         </ErrorBoundary>
       </div>
     </>
   );
 };
 
-export const CommunitiesSidebar = ({
-  activeCommunityId,
-}: {
-  activeCommunityId: string | undefined;
-}) => {
-  const { data: communities } = useCommunities(true).all;
+const CommunitiesList = () => {
+  const [isEnableDiscovery, setIsEnableDiscovery] = useState(false);
+  const {
+    data: communities,
+    isFetched,
+    refetch: refetchCommunities,
+    isRefetching: isRefetchingCommunities,
+  } = useCommunities().all;
+  const { communityKey: activeCommunityId } = useParams();
 
-  return (
-    <ErrorBoundary>
-      <div className="absolute inset-0 flex flex-grow flex-row flex-wrap overflow-auto md:pl-[calc(env(safe-area-inset-left)+4.3rem)] lg:flex-col lg:items-center lg:pl-0">
-        <div className="px-4 pb-2 pt-4">
-          <RadioTower className="h-7 w-7" />
-        </div>
-        <CommunitiesList
-          communities={
-            communities?.filter(
-              (community) =>
-                community.fileMetadata.appData.archivalStatus !== 2 ||
-                community.fileMetadata.appData.uniqueId === activeCommunityId
-            ) || []
-          }
-          activeCommunityId={activeCommunityId}
-        />
-      </div>
-    </ErrorBoundary>
-  );
-};
+  const navigate = useNavigate();
 
-const CommunitiesList = ({
-  communities,
-  activeCommunityId,
-}: {
-  communities: HomebaseFile<CommunityDefinition>[];
-  activeCommunityId: string | undefined;
-}) => {
-  const newHref = `${COMMUNITY_ROOT}/new`;
-  const newCommunity = useMatch({ path: newHref });
-  const isCreateNew = !!newCommunity;
+  if (!isFetched) return null;
 
   return (
     <>
@@ -149,15 +128,34 @@ const CommunitiesList = ({
         />
       ))}
 
-      <div className={`px-2 py-2 ${isCreateNew ? 'bg-primary/20' : ''}`}>
-        <ActionLink
-          href={newHref}
-          type={communities?.length ? 'secondary' : 'primary'}
+      <div className={`px-2 py-2`}>
+        <ActionGroup
+          options={[
+            {
+              label: 'Discover accessible communities',
+              onClick: () => {
+                setIsEnableDiscovery(true);
+
+                setTimeout(() => refetchCommunities(), 100);
+              },
+              icon: MagnifyingGlass,
+            },
+            {
+              label: 'Create a new community',
+              onClick: () => navigate(`${COMMUNITY_ROOT}/new`),
+              icon: Plus,
+            },
+          ]}
+          type={'mute'}
           size={'none'}
-          className={`flex aspect-square w-full items-center justify-center rounded-2xl p-[0.606rem] hover:shadow-md`}
+          className={`flex aspect-square w-full items-center justify-center rounded-2xl p-[0.606rem]`}
         >
-          <Plus className="h-6 w-6" />
-        </ActionLink>
+          {isRefetchingCommunities && isEnableDiscovery ? (
+            <Loader className="h-6 w-6" />
+          ) : (
+            <Ellipsis className="h-6 w-6" />
+          )}
+        </ActionGroup>
       </div>
     </>
   );

@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import {
   usePortal,
@@ -15,6 +15,7 @@ import { Clipboard } from '@homebase-id/common-app/icons';
 import { useState } from 'react';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { COMMUNITY_ROOT } from '../../templates/Community/CommunityHome';
 
 export const CommunityInfoDialog = ({ onClose }: { onClose: () => void }) => {
   const { odinKey, communityKey } = useParams();
@@ -43,16 +44,34 @@ export const CommunityInfoDialog = ({ onClose }: { onClose: () => void }) => {
           <div className="flex flex-col gap-4">
             {members.map((recipient) => {
               return (
-                <div className="flex flex-row items-center justify-between" key={recipient}>
-                  <div className="flex flex-row items-center gap-2">
+                <div
+                  className="flex flex-col justify-between sm:flex-row sm:items-center"
+                  key={recipient}
+                  style={{
+                    order: Array.from(recipient)
+                      .map((char) => char.charCodeAt(0))
+                      .reduce((acc, curr) => acc + curr, 0),
+                  }}
+                >
+                  <Link
+                    to={`${COMMUNITY_ROOT}/${odinKey}/${communityKey}/direct/${recipient}`}
+                    className="group flex flex-shrink flex-row items-center gap-3"
+                    key={recipient}
+                  >
                     <AuthorImage
                       odinId={recipient}
                       className="border border-neutral-200 dark:border-neutral-800"
                       size="sm"
+                      excludeLink={true}
                     />
-                    <AuthorName odinId={recipient} />
-                  </div>
-                  {recipient !== identity ? <InviteClickToCopy community={community} /> : null}
+                    <div className="flex flex-col group-hover:underline">
+                      <AuthorName odinId={recipient} excludeLink={true} />
+                      <p className="text-slate-400">{recipient}</p>
+                    </div>
+                  </Link>
+                  {recipient !== identity ? (
+                    <InviteClickToCopy community={community} className="hidden sm:block" />
+                  ) : null}
                 </div>
               );
             })}
@@ -65,9 +84,14 @@ export const CommunityInfoDialog = ({ onClose }: { onClose: () => void }) => {
   return createPortal(dialog, target);
 };
 
-const InviteClickToCopy = ({ community }: { community: HomebaseFile<CommunityDefinition> }) => {
+const InviteClickToCopy = ({
+  community,
+  className,
+}: {
+  community: HomebaseFile<CommunityDefinition>;
+  className?: string;
+}) => {
   const { mutateAsync: getInviteLink } = useCommunity().getInviteLink;
-
   const [showCopied, setShowCopied] = useState(false);
 
   const doCopy = async () => {
@@ -81,7 +105,11 @@ const InviteClickToCopy = ({ community }: { community: HomebaseFile<CommunityDef
   };
 
   return (
-    <ActionButton className="relative cursor-pointer" type="mute" onClick={doCopy}>
+    <ActionButton
+      className={`relative cursor-pointer ${className || ''}`}
+      type="mute"
+      onClick={doCopy}
+    >
       <span className="flex flex-row items-center gap-2">
         {t('Copy invite link')}
 

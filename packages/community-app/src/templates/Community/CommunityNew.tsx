@@ -2,6 +2,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import {
   ActionButton,
+  ActionLink,
   AuthorImage,
   ErrorBoundary,
   Input,
@@ -131,10 +132,14 @@ export const NewCommunity = () => {
             </div>
           </div>
 
-          <div className="mt-5 flex flex-row-reverse">
+          <div className="mt-5 flex flex-col justify-between gap-2 sm:flex-row-reverse">
             <ActionButton icon={Arrow} state={createStatus}>
               {t('Create')}
             </ActionButton>
+
+            <ActionLink type="secondary" onClick={() => navigate(-1)}>
+              {t('Cancel')}
+            </ActionLink>
           </div>
         </div>
       </form>

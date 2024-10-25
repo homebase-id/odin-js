@@ -43,7 +43,6 @@ export const CommunityDirectDetail = () => {
 
   useEffect(() => {
     if (dmKey && !conversation && conversationFetched) {
-      // TODO: Check if we can do this better; Can be slow to create a conversation as fetching has a retry mechanism
       createConversation({ recipients: [dmKey] });
     }
   }, [conversation, conversationFetched]);
