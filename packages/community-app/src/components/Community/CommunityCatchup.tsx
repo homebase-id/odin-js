@@ -19,6 +19,7 @@ export const CommunityCatchup = ({
 }) => {
   const identity = useDotYouClient().getIdentity();
   const { data: metadata } = usecommunityMetadata({
+    odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata?.appData?.uniqueId,
   }).single;
 
@@ -93,7 +94,7 @@ const CommunityChannelCatchup = ({
   const {
     single: { data: metadata },
     update: { mutate: updateMeta, status: updateStatus },
-  } = usecommunityMetadata({ communityId });
+  } = usecommunityMetadata({ odinId: community.fileMetadata.senderOdinId, communityId });
 
   const doMarkAsRead = useCallback(() => {
     if (
@@ -112,7 +113,7 @@ const CommunityChannelCatchup = ({
 
   return (
     <div className="rounded-md border">
-      <div className="flex flex-row justify-between bg-slate-200 px-2 py-2">
+      <div className="flex flex-row justify-between bg-slate-200 px-2 py-2 dark:bg-slate-800">
         <ActionLink
           type="mute"
           size="none"

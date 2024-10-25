@@ -41,6 +41,7 @@ export const CommunityHistory = ({
     !!origin && origin.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE;
 
   const { data: metadata } = usecommunityMetadata({
+    odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata?.appData?.uniqueId,
   }).single;
   const lastReadTime =

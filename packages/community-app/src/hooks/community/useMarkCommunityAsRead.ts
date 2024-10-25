@@ -3,16 +3,18 @@ import { usecommunityMetadata } from './useCommunityMetadata';
 import { useLastUpdatedChatMessages } from './messages/useCommunityMessages';
 
 export const useMarkCommunityAsRead = ({
+  odinId,
   communityId,
   channelId,
 }: {
-  communityId?: string;
+  odinId: string | undefined;
+  communityId: string | undefined;
   channelId?: string;
 }) => {
   const {
     single: { data: metadata },
     update: { mutate: updateMetadata, status: updateStatus },
-  } = usecommunityMetadata({ communityId });
+  } = usecommunityMetadata({ odinId, communityId });
   const { lastUpdate } = useLastUpdatedChatMessages();
 
   useEffect(() => {

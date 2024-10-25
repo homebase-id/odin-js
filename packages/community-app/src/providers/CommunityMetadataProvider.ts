@@ -1,7 +1,5 @@
 import {
   DotYouClient,
-  FileQueryParams,
-  GetBatchQueryResultOptions,
   getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
   HomebaseFile,
@@ -20,6 +18,7 @@ export interface CommunityMetadata {
   lastReadTime: number;
   channelLastReadTime: Record<string, number>;
   pinnedChannels: string[];
+  odinId: string;
   communityId: string;
 }
 
@@ -96,6 +95,26 @@ export const getCommunityMetadata = async (
 
   if (!header) return null;
   return dsrToCommunityMetadata(dotYouClient, header, LOCAL_COMMUNITY_APP_DRIVE, true);
+};
+
+export const getCommunitiesMetadata = async (dotYouClient: DotYouClient) => {
+  const response = await queryBatch(
+    dotYouClient,
+    {
+      targetDrive: LOCAL_COMMUNITY_APP_DRIVE,
+      fileType: [COMMUNITY_METADATA_FILE_TYPE],
+    },
+    {
+      maxRecords: 100,
+      includeMetadataHeader: true,
+    }
+  );
+
+  return await Promise.all(
+    response.searchResults.map((dsr) =>
+      dsrToCommunityMetadata(dotYouClient, dsr, LOCAL_COMMUNITY_APP_DRIVE, true)
+    )
+  );
 };
 
 // Helpers

@@ -35,7 +35,7 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   useCommunityMemberUpdater(odinKey, communityKey);
   useRemoveNotifications({ appId: COMMUNITY_APP_ID });
 
-  const { data: communities } = useCommunities(true).all;
+  const { data: communities } = useCommunities().all;
   const navigate = useNavigate();
   useEffect(() => {
     if (!communities) return;
@@ -105,7 +105,7 @@ export const CommunitiesSidebar = ({
 }: {
   activeCommunityId: string | undefined;
 }) => {
-  const { data: communities } = useCommunities(true).all;
+  const { data: communities } = useCommunities().all;
 
   return (
     <ErrorBoundary>

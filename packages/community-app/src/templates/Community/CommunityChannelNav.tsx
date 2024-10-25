@@ -29,7 +29,10 @@ export const CommunityChannelNav = () => {
     odinId: odinKey,
     communityId: communityKey,
   }).fetch;
-  const { data: metadata } = usecommunityMetadata({ communityId: communityKey }).single;
+  const { data: metadata } = usecommunityMetadata({
+    odinId: odinKey,
+    communityId: communityKey,
+  }).single;
 
   const odinId = odinKey;
   const communityId = community?.fileMetadata.appData.uniqueId;
@@ -181,7 +184,7 @@ const ChannelItem = ({
   const {
     single: { data: metadata },
     update: { mutate: updateMetadata },
-  } = usecommunityMetadata({ communityId });
+  } = usecommunityMetadata({ odinId, communityId });
 
   const isPinned =
     channelId && metadata?.fileMetadata.appData.content?.pinnedChannels?.includes(channelId);

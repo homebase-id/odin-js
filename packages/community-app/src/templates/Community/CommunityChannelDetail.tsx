@@ -13,7 +13,7 @@ import {
   useDotYouClient,
   usePortal,
 } from '@homebase-id/common-app';
-import { Arrow, ChevronLeft, Times } from '@homebase-id/common-app/icons';
+import { Arrow, ChevronDown, ChevronLeft, Times } from '@homebase-id/common-app/icons';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
@@ -38,7 +38,7 @@ export const CommunityChannelDetail = () => {
     channelId: channelId,
   }).fetch;
 
-  useMarkCommunityAsRead({ communityId, channelId });
+  useMarkCommunityAsRead({ odinId: odinKey, communityId, channelId });
 
   if (!community && isFetched)
     return (
@@ -126,7 +126,6 @@ const CommunityChannelHeader = ({
 
   return (
     <>
-      {/* <ErrorNotification error={clearChatError || deleteChatError} /> */}
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
         <Link
           className="-m-1 p-1 lg:hidden"
@@ -137,12 +136,12 @@ const CommunityChannelHeader = ({
         </Link>
 
         {channel ? (
-          <a
+          <button
             onClick={() => setShowChatInfo(true)}
             className="flex cursor-pointer flex-row items-center gap-2"
           >
             # {channel.fileMetadata.appData.content?.title}
-          </a>
+          </button>
         ) : null}
       </div>
 
