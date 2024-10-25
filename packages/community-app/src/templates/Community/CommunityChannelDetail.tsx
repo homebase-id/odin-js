@@ -9,7 +9,6 @@ import {
   formatDateExludingYearIfCurrent,
   LoadingBlock,
   t,
-  useDotYouClient,
   usePortal,
 } from '@homebase-id/common-app';
 import { Arrow, ChevronLeft } from '@homebase-id/common-app/icons';

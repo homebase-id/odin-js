@@ -13,7 +13,7 @@ import {
 } from '../../../providers/CommunityMessageProvider';
 import { DeletedHomebaseFile, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { formatGuidId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { useState, useEffect } from 'react';
@@ -122,7 +122,7 @@ export const getCommunityMessagesInfiniteQueryOptions: (
     throw new Error('ThreadId and CommunityId cannot be the same');
   }
   return {
-    queryKey: ['community-messages', threadId || channelId || communityId],
+    queryKey: ['community-messages', formatGuidId(threadId || channelId || communityId)],
     initialPageParam: undefined as string | undefined,
     queryFn: ({ pageParam }) => {
       if (stringGuidsEqual(communityId, threadId)) {
@@ -204,7 +204,7 @@ export const insertNewMessagesForChannel = (
       queryTime: number;
       includeMetadataHeader: boolean;
     }>
-  >(['community-messages', channelId]);
+  >(['community-messages', formatGuidId(channelId)]);
 
   if (
     newMessages.length > PAGE_SIZE ||
@@ -212,7 +212,7 @@ export const insertNewMessagesForChannel = (
     newMessages?.some((msg) => msg.fileState === 'deleted')
   ) {
     queryClient.setQueryData(
-      ['community-messages', channelId],
+      ['community-messages', formatGuidId(channelId)],
       (data: InfiniteData<unknown, unknown>) => {
         return {
           pages: data?.pages?.slice(0, 1) ?? [],
@@ -221,7 +221,7 @@ export const insertNewMessagesForChannel = (
       }
     );
     queryClient.invalidateQueries({
-      queryKey: ['community-messages', channelId],
+      queryKey: ['community-messages', formatGuidId(channelId)],
     });
     return;
   }
@@ -234,7 +234,7 @@ export const insertNewMessagesForChannel = (
     );
   });
 
-  queryClient.setQueryData(['community-messages', channelId], runningMessages);
+  queryClient.setQueryData(['community-messages', formatGuidId(channelId)], runningMessages);
 };
 
 export const insertNewMessage = (
@@ -249,16 +249,19 @@ export const insertNewMessage = (
       queryTime: number;
       includeMetadataHeader: boolean;
     }>
-  >(['community-messages', newMessage.fileMetadata.appData.groupId || communityId]);
+  >(['community-messages', formatGuidId(newMessage.fileMetadata.appData.groupId || communityId)]);
 
   if (extistingMessages && newMessage.fileState !== 'deleted') {
     queryClient.setQueryData(
-      ['community-messages', newMessage.fileMetadata.appData.groupId || communityId],
+      ['community-messages', formatGuidId(newMessage.fileMetadata.appData.groupId || communityId)],
       internalInsertNewMessage(extistingMessages, newMessage)
     );
   } else {
     queryClient.invalidateQueries({
-      queryKey: ['community-messages', newMessage.fileMetadata.appData.groupId || communityId],
+      queryKey: [
+        'community-messages',
+        formatGuidId(newMessage.fileMetadata.appData.groupId || communityId),
+      ],
     });
   }
 };

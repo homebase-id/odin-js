@@ -7,6 +7,7 @@ import {
 } from '@homebase-id/common-app';
 import {
   drivesEqual,
+  formatGuidId,
   getQueryBatchCursorFromTime,
   getQueryModifiedCursorFromTime,
   hasDebugFlag,
@@ -158,7 +159,9 @@ const useCommunityWebsocket = (
         ) {
           // Something is up with the message, invalidate all messages for this conversation
           console.warn('[CommunityWebsocket] Invalid message received', notification, channelId);
-          queryClient.invalidateQueries({ queryKey: ['community-messages', channelId] });
+          queryClient.invalidateQueries({
+            queryKey: ['community-messages', formatGuidId(channelId)],
+          });
           return;
         }
 

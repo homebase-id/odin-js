@@ -16,7 +16,7 @@ import {
   uploadCommunityMessage,
 } from '../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
-import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { formatGuidId, getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
 import { insertNewMessage } from './useCommunityMessages';
 
@@ -183,7 +183,10 @@ export const useCommunityMessage = (props?: {
           }>
         >([
           'community-messages',
-          newMessage.fileMetadata.appData.groupId || params.community.fileMetadata.appData.uniqueId,
+          formatGuidId(
+            newMessage.fileMetadata.appData.groupId ||
+              params.community.fileMetadata.appData.uniqueId
+          ),
         ]);
 
         if (extistingMessages) {
@@ -223,8 +226,11 @@ export const useCommunityMessage = (props?: {
           queryClient.setQueryData(
             [
               'community-messages',
-              newMessage.fileMetadata.appData.groupId ||
-                params.community.fileMetadata.appData.uniqueId,
+              formatGuidId(
+                newMessage.fileMetadata.appData.groupId ||
+                  params.community.fileMetadata.appData.uniqueId ||
+                  ''
+              ),
             ],
             newData
           );
@@ -245,7 +251,7 @@ export const useCommunityMessage = (props?: {
             queryTime: number;
             includeMetadataHeader: boolean;
           }>
-        >(['community-messages', updatedChatMessage.fileMetadata.appData.groupId]);
+        >(['community-messages', formatGuidId(updatedChatMessage.fileMetadata.appData.groupId)]);
 
         if (extistingMessages) {
           const newData = {
@@ -258,7 +264,7 @@ export const useCommunityMessage = (props?: {
             })),
           };
           queryClient.setQueryData(
-            ['community-messages', updatedChatMessage.fileMetadata.appData.groupId],
+            ['community-messages', formatGuidId(updatedChatMessage.fileMetadata.appData.groupId)],
             newData
           );
         }
@@ -280,12 +286,18 @@ export const useCommunityMessage = (props?: {
       },
       onError: (err, messageParams, context) => {
         queryClient.setQueryData(
-          ['community-messages', messageParams.updatedChatMessage.fileMetadata.appData.groupId],
+          [
+            'community-messages',
+            formatGuidId(messageParams.updatedChatMessage.fileMetadata.appData.groupId),
+          ],
           context?.extistingMessages
         );
 
         queryClient.setQueryData(
-          ['community-message', messageParams.updatedChatMessage.fileMetadata.appData.uniqueId],
+          [
+            'community-message',
+            formatGuidId(messageParams.updatedChatMessage.fileMetadata.appData.uniqueId),
+          ],
           context?.existingMessage
         );
       },
