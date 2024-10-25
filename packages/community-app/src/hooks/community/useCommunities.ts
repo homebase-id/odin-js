@@ -117,7 +117,7 @@ export const useCommunities = (enableDiscovery?: boolean) => {
   return {
     all: useQuery({
       queryKey: ['communities'],
-      queryFn: () => fetchCommunities(),
+      queryFn: fetchCommunities,
       staleTime: Infinity,
       enabled: !enableDiscovery || (enableDiscovery && fetchedAllContacts),
     }),

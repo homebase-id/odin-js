@@ -246,6 +246,7 @@ const DirectMessageItem = ({
   communityId: string;
   recipient: string;
 }) => {
+  const dotYouClient = useDotYouClientContext();
   const href = `${COMMUNITY_ROOT}/${odinId}/${communityId}/direct/${recipient}`;
   const isActive = !!useMatch({ path: href });
 
@@ -256,7 +257,9 @@ const DirectMessageItem = ({
     >
       <ConnectionImage odinId={recipient} size="xxs" />
       <ConnectionName odinId={recipient} />{' '}
-      <span className="text-sm text-slate-400">{recipient === odinId ? t('you') : ''}</span>
+      <span className="text-sm text-slate-400">
+        {recipient === dotYouClient.getIdentity() ? t('you') : ''}
+      </span>
     </Link>
   );
 };

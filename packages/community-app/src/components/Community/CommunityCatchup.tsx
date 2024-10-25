@@ -104,10 +104,24 @@ const CommunityChannelCatchup = ({
       updateStatus !== 'idle'
     )
       return;
-    const newMetadata = { ...metadata };
-    metadata.fileMetadata.appData.content.channelLastReadTime[
-      channel.fileMetadata.appData.uniqueId
-    ] = channel.lastMessage.fileMetadata.created;
+
+    const newMetadata = {
+      ...metadata,
+      fileMetadata: {
+        ...metadata.fileMetadata,
+        appData: {
+          ...metadata.fileMetadata.appData,
+          content: {
+            ...metadata.fileMetadata.appData.content,
+            channelLastReadTime: {
+              ...metadata.fileMetadata.appData.content.channelLastReadTime,
+              [channel.fileMetadata.appData.uniqueId]: channel.lastMessage.fileMetadata.created,
+            },
+          },
+        },
+      },
+    };
+
     updateMeta({ metadata: newMetadata });
   }, []);
 

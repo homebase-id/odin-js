@@ -73,7 +73,7 @@ export const usecommunityMetadata = (props?: {
       queryKey: ['community-metadata', communityId],
       queryFn: () => getMetadata(odinId as string, communityId as string),
       enabled: !!odinId && !!communityId,
-      staleTime: 1000 * 60 * 60 * 24, // 24h, updates will come in via websocket
+      staleTime: 1000 * 60 * 60 * 24, // 1 day, updates from other clients will come in via websocket
     }),
     update: useMutation({
       mutationFn: saveMetadata,
