@@ -17,6 +17,7 @@ export const useCommunityChannels = (props: { odinId?: string; communityId?: str
       queryKey: ['community-channels', communityId],
       queryFn: async () => fetchChannels(odinId as string, communityId as string),
       enabled: !!communityId && !!odinId,
+      staleTime: 1000 * 60 * 60, // 1h
     }),
   };
 };

@@ -183,7 +183,7 @@ export const useLastUpdatedChatMessages = () => {
         return acc;
       }, 0)
     );
-  });
+  }, []);
 
   return {
     lastUpdate,

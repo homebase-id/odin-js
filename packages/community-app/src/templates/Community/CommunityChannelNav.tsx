@@ -34,15 +34,13 @@ export const CommunityChannelNav = () => {
     communityId: communityKey,
   }).single;
 
-  const odinId = odinKey;
-  const communityId = community?.fileMetadata.appData.uniqueId;
   const members = community?.fileMetadata.appData.content?.members;
 
-  const isActive = !!useMatch({ path: `${COMMUNITY_ROOT}/${odinKey}/${communityId}` });
+  const isActive = !!useMatch({ path: `${COMMUNITY_ROOT}/${odinKey}/${communityKey}` });
 
   const { data: communityChannels } = useCommunityChannelsWithRecentMessages({
-    odinId,
-    communityId,
+    odinId: odinKey,
+    communityId: communityKey,
   }).fetch;
 
   const pinnedChannels = communityChannels?.filter(
@@ -57,7 +55,7 @@ export const CommunityChannelNav = () => {
   );
 
   const [isExpanded, setIsExpanded] = useState(false);
-  if (!odinId || !communityId || isLoading || !community) return null;
+  if (!odinKey || !communityKey || isLoading || !community) return null;
 
   return (
     <>
@@ -79,14 +77,14 @@ export const CommunityChannelNav = () => {
             </button>
           </div>
 
-          <AllItem odinId={odinId} communityId={communityId} />
+          <AllItem odinId={odinKey} communityId={communityKey} />
           <div className="flex flex-col gap-1">
             <h2 className="px-1">{t('Channels')}</h2>
 
             {pinnedChannels?.map((channel) => (
               <ChannelItem
-                odinId={odinId}
-                communityId={communityId}
+                odinId={odinKey}
+                communityId={communityKey}
                 channel={channel}
                 key={channel.fileId || channel.fileMetadata.appData.uniqueId}
               />
@@ -96,8 +94,8 @@ export const CommunityChannelNav = () => {
               ?.slice(0, isExpanded ? undefined : maxChannels - (pinnedChannels?.length || 0))
               .map((channel) => (
                 <ChannelItem
-                  odinId={odinId}
-                  communityId={communityId}
+                  odinId={odinKey}
+                  communityId={communityKey}
                   channel={channel}
                   key={channel.fileId || channel.fileMetadata.appData.uniqueId}
                 />
@@ -122,8 +120,8 @@ export const CommunityChannelNav = () => {
             <h2 className="px-1">{t('Direct messages')}</h2>
             {members?.map((recipient) => (
               <DirectMessageItem
-                odinId={odinId}
-                communityId={communityId}
+                odinId={odinKey}
+                communityId={communityKey}
                 recipient={recipient}
                 key={recipient}
               />

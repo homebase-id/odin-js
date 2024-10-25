@@ -26,6 +26,8 @@ const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'connection-details',
   'process-inbox',
   'communities',
+  'community',
+  'community-metadata',
   'community-channels',
   'community-messages',
   'channels-with-recent-message',
@@ -67,7 +69,7 @@ function App() {
           path={ROOT_PATH}
           element={
             <ErrorBoundary>
-              <Suspense fallback={<></>}>
+              <Suspense fallback={<div className="h-full w-full bg-pink-500"></div>}>
                 <Outlet />
               </Suspense>
             </ErrorBoundary>

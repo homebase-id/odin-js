@@ -6,35 +6,42 @@ import { CommunityChannelCatchupHeader } from '../../components/Community/catchu
 import { useCommunityChannelsWithRecentMessages } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 import { useCommunityMetadata } from '../../hooks/community/useCommunityMetadata';
 import { CommunityThread } from '../../components/Community/CommunityThread';
+import { memo, useMemo } from 'react';
 
-export const CommunityChannelDetail = () => {
+export const CommunityChannelDetail = memo(() => {
   const { odinKey, communityKey: communityId, threadKey } = useParams();
   const { data: community, isFetched } = useCommunity({ odinId: odinKey, communityId }).fetch;
 
   const identity = useDotYouClient().getIdentity();
   const { data: metadata } = useCommunityMetadata({
-    odinId: community?.fileMetadata.senderOdinId,
-    communityId: community?.fileMetadata?.appData?.uniqueId,
+    odinId: odinKey,
+    communityId: communityId,
   }).single;
 
   const { data: channels } = useCommunityChannelsWithRecentMessages({
-    communityId: community?.fileMetadata?.appData?.uniqueId,
+    communityId: communityId,
   }).fetch;
 
-  const channelsToCatchup = channels?.filter((chnl) => {
-    if (!chnl.fileMetadata.appData.uniqueId) return false;
-    const lastReadTime =
-      metadata?.fileMetadata.appData.content.channelLastReadTime[
-        chnl.fileMetadata.appData.uniqueId
-      ];
+  const channelsToCatchup = useMemo(
+    () =>
+      metadata &&
+      channels &&
+      channels?.filter((chnl) => {
+        if (!chnl.fileMetadata.appData.uniqueId) return false;
+        const lastReadTime =
+          metadata?.fileMetadata.appData.content.channelLastReadTime[
+            chnl.fileMetadata.appData.uniqueId
+          ];
 
-    return (
-      chnl.lastMessage?.fileMetadata.created &&
-      chnl.lastMessage.fileMetadata.created > (lastReadTime || 0) &&
-      !!chnl.lastMessage.fileMetadata.senderOdinId &&
-      chnl.lastMessage.fileMetadata.senderOdinId !== identity
-    );
-  });
+        return (
+          chnl.lastMessage?.fileMetadata.created &&
+          chnl.lastMessage.fileMetadata.created > (lastReadTime || 0) &&
+          !!chnl.lastMessage.fileMetadata.senderOdinId &&
+          chnl.lastMessage.fileMetadata.senderOdinId !== identity
+        );
+      }),
+    [channels, metadata, identity]
+  );
 
   if (!community && isFetched)
     return (
@@ -94,4 +101,6 @@ export const CommunityChannelDetail = () => {
       </div>
     </ErrorBoundary>
   );
-};
+});
+
+CommunityChannelDetail.displayName = 'CommunityChannelDetail';
