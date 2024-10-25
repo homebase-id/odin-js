@@ -50,7 +50,7 @@ export const CommunityChannelCatchup = ({
       !metadata ||
       !channel.fileMetadata.appData.uniqueId ||
       !channel.lastMessage?.fileMetadata.created ||
-      updateStatus !== 'idle'
+      updateStatus === 'pending'
     )
       return;
 

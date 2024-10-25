@@ -160,36 +160,27 @@ const ChannelInfo = ({
   const { odinKey, communityKey } = useParams();
   const target = usePortal('modal-container');
 
-  const identity = useDotYouClient().getIdentity() || window.location.host;
   const channelContent = channel.fileMetadata.appData.content;
   const communityContent = community.fileMetadata.appData.content;
   const members = communityContent.members;
+
+  const creator = channel.fileMetadata.senderOdinId || community.fileMetadata.senderOdinId;
 
   const dialog = (
     <DialogWrapper onClose={onClose} title={`# ${channelContent.title}`}>
       <div className="flex flex-col gap-5">
         <div>
-          <p className="mb-2 text-xl">{t('Details')}</p>
-          <p>
-            {t('Created')}:{' '}
-            {formatDateExludingYearIfCurrent(
-              new Date(channel.fileMetadata.created || community.fileMetadata.created)
-            )}{' '}
-            {t('by')}{' '}
-            {channel.fileMetadata.senderOdinId && channel.fileMetadata.senderOdinId !== identity ? (
-              <AuthorName odinId={channel.fileMetadata.senderOdinId} />
-            ) : (
-              t('You')
-            )}
-          </p>
-          {channel.fileMetadata.updated !== channel.fileMetadata.created ? (
-            <p>
-              {t('Last updated')}:{' '}
-              {formatDateExludingYearIfCurrent(
-                new Date(channel.fileMetadata.updated || community.fileMetadata.updated)
-              )}
-            </p>
-          ) : null}
+          <Link
+            className="text-primary hover:underline"
+            to={`${COMMUNITY_ROOT}/${odinKey}/${communityKey}/direct/${creator}`}
+          >
+            @<AuthorName odinId={creator} excludeLink={true} />
+          </Link>{' '}
+          {t('created this channel on')}{' '}
+          {formatDateExludingYearIfCurrent(
+            new Date(channel.fileMetadata.created || community.fileMetadata.created)
+          )}
+          <p className="italic text-slate-400">{channelContent?.description}</p>
         </div>
 
         {members?.length > 1 ? (

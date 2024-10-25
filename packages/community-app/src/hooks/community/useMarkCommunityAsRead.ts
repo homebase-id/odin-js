@@ -18,7 +18,7 @@ export const useMarkCommunityAsRead = ({
   const { lastUpdate } = useLastUpdatedChatMessages();
 
   useEffect(() => {
-    if (!metadata || !lastUpdate || lastUpdate === 0 || updateStatus !== 'idle') return;
+    if (!metadata || !lastUpdate || lastUpdate === 0 || updateStatus === 'pending') return;
 
     const savedLastReadTime = metadata?.fileMetadata.appData.content.lastReadTime;
     const savedLastReadTimeChannel =

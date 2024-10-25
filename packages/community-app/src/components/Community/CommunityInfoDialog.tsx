@@ -45,7 +45,7 @@ export const CommunityInfoDialog = ({ onClose }: { onClose: () => void }) => {
             {members.map((recipient) => {
               return (
                 <div
-                  className="flex flex-row items-center justify-between"
+                  className="flex flex-col justify-between sm:flex-row sm:items-center"
                   key={recipient}
                   style={{
                     order: Array.from(recipient)
@@ -69,7 +69,9 @@ export const CommunityInfoDialog = ({ onClose }: { onClose: () => void }) => {
                       <p className="text-slate-400">{recipient}</p>
                     </div>
                   </Link>
-                  {recipient !== identity ? <InviteClickToCopy community={community} /> : null}
+                  {recipient !== identity ? (
+                    <InviteClickToCopy community={community} className="hidden sm:block" />
+                  ) : null}
                 </div>
               );
             })}
@@ -82,9 +84,14 @@ export const CommunityInfoDialog = ({ onClose }: { onClose: () => void }) => {
   return createPortal(dialog, target);
 };
 
-const InviteClickToCopy = ({ community }: { community: HomebaseFile<CommunityDefinition> }) => {
+const InviteClickToCopy = ({
+  community,
+  className,
+}: {
+  community: HomebaseFile<CommunityDefinition>;
+  className?: string;
+}) => {
   const { mutateAsync: getInviteLink } = useCommunity().getInviteLink;
-
   const [showCopied, setShowCopied] = useState(false);
 
   const doCopy = async () => {
@@ -98,7 +105,11 @@ const InviteClickToCopy = ({ community }: { community: HomebaseFile<CommunityDef
   };
 
   return (
-    <ActionButton className="relative cursor-pointer" type="mute" onClick={doCopy}>
+    <ActionButton
+      className={`relative cursor-pointer ${className || ''}`}
+      type="mute"
+      onClick={doCopy}
+    >
       <span className="flex flex-row items-center gap-2">
         {t('Copy invite link')}
 

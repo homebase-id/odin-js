@@ -226,7 +226,7 @@ const ChannelItem = ({
         }}
       >
         <Pin
-          className={`hidden h-5 w-5 flex-shrink-0 transition-opacity md:block ${
+          className={`hidden h-5 w-5 flex-shrink-0 transition-opacity lg:block ${
             isPinned ? 'opacity-100 hover:opacity-60' : `opacity-60 hover:opacity-100`
           }`}
         />

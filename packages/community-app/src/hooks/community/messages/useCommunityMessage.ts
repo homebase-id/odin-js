@@ -221,12 +221,16 @@ export const useCommunityMessage = (props?: {
           };
 
           queryClient.setQueryData(
-            ['community-messages', params.community.fileMetadata.appData.uniqueId],
+            [
+              'community-messages',
+              newMessage.fileMetadata.appData.groupId ||
+                params.community.fileMetadata.appData.uniqueId,
+            ],
             newData
           );
         }
       },
-      onError: (err, messageParams) => {
+      onError: (err) => {
         console.error('Failed to update the chat message', err);
       },
     }),
