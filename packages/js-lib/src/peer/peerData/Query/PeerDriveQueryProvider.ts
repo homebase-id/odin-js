@@ -1,5 +1,4 @@
 import { AxiosRequestConfig } from 'axios';
-import { QueryBatchResponseWithDeletedResults } from '../../../../dist/core/DriveData/Drive/DriveTypes';
 import { DotYouClient } from '../../../core/DotYouClient';
 import {
   FileQueryParams,
@@ -11,6 +10,7 @@ import {
   DEFAULT_QUERY_MODIFIED_RESULT_OPTION,
   GetModifiedResultOptions,
   QueryModifiedResponse,
+  QueryBatchResponseWithDeletedResults,
 } from '../../../core/core';
 
 interface TransitQueryBatchRequest {
