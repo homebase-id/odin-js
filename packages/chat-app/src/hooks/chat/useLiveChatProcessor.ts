@@ -79,7 +79,23 @@ const useInboxProcessor = (connected?: boolean) => {
         }
       );
       isDebug && console.debug('[InboxProcessor] new messages', updatedMessages.length);
-      await processChatMessagesBatch(dotYouClient, queryClient, updatedMessages);
+      if (updatedMessages.length > 0) {
+        const fullMessages = (
+          await Promise.all(
+            updatedMessages.map(
+              async (msg) =>
+                await dsrToMessage(
+                  dotYouClient,
+                  msg as unknown as HomebaseFile<string>,
+                  ChatDrive,
+                  false
+                )
+            )
+          )
+        ).filter(Boolean) as HomebaseFile<ChatMessage>[];
+        await processChatMessagesBatch(dotYouClient, queryClient, fullMessages);
+      }
+
       const updatedConversations = await findChangesSinceTimestamp(
         dotYouClient,
         lastProcessedWithBuffer,
