@@ -24,6 +24,7 @@ export const CommunityThread = ({
     odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata.appData.uniqueId,
     messageId: threadId,
+    fileSystemType: 'Standard',
   }).get;
 
   if (!community || !threadId) {

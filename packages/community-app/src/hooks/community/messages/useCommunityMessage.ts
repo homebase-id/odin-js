@@ -6,6 +6,7 @@ import {
   NewMediaFile,
   RichText,
   SecurityGroupType,
+  SystemFileType,
 } from '@homebase-id/js-lib/core';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import {
@@ -15,7 +16,10 @@ import {
   updateCommunityMessage,
   uploadCommunityMessage,
 } from '../../../providers/CommunityMessageProvider';
-import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
+import {
+  CommunityDefinition,
+  getTargetDriveFromCommunityId,
+} from '../../../providers/CommunityDefinitionProvider';
 import { formatGuidId, getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
 import { insertNewMessage } from './useCommunityMessages';
@@ -24,14 +28,20 @@ export const useCommunityMessage = (props?: {
   odinId: string | undefined;
   communityId: string | undefined;
   messageId: string | undefined;
+  fileSystemType?: SystemFileType;
 }) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
   const identity = dotYouClient.getIdentity();
 
-  const getMessageByUniqueId = async (odinId: string, communityId: string, messageId: string) => {
+  const getMessageByGlobalTransitId = async (
+    odinId: string,
+    communityId: string,
+    messageId: string,
+    fileSystemType?: SystemFileType
+  ) => {
     // TODO: Improve by fetching the message from the cache on conversations first
-    return await getCommunityMessage(dotYouClient, odinId, communityId, messageId);
+    return await getCommunityMessage(dotYouClient, odinId, communityId, messageId, fileSystemType);
   };
 
   const sendMessage = async ({
@@ -78,6 +88,7 @@ export const useCommunityMessage = (props?: {
           requiredSecurityGroup: SecurityGroupType.Connected,
         },
       },
+      fileSystemType: threadId ? 'Comment' : undefined,
     };
 
     const uploadResult = await uploadCommunityMessage(
@@ -85,7 +96,15 @@ export const useCommunityMessage = (props?: {
       community,
       newChat,
       files,
-      linkPreviews
+      linkPreviews,
+      threadId
+        ? {
+            targetDrive: getTargetDriveFromCommunityId(
+              community.fileMetadata.appData.uniqueId as string
+            ),
+            globalTransitId: threadId,
+          }
+        : undefined
     );
     if (!uploadResult) throw new Error('Failed to send the chat message');
 
@@ -117,10 +136,11 @@ export const useCommunityMessage = (props?: {
     get: useQuery({
       queryKey: ['community-message', props?.communityId, props?.messageId],
       queryFn: () =>
-        getMessageByUniqueId(
+        getMessageByGlobalTransitId(
           props?.odinId as string,
           props?.communityId as string,
-          props?.messageId as string
+          props?.messageId as string,
+          props?.fileSystemType
         ),
       enabled: !!props?.odinId && !!props?.communityId && !!props?.messageId,
       refetchOnMount: false,
@@ -159,6 +179,7 @@ export const useCommunityMessage = (props?: {
               pendingFile: file.file,
             })),
           },
+          fileSystemType: threadId ? 'Comment' : undefined,
           serverMetadata: {
             accessControlList: community.fileMetadata.appData.content.acl || {
               requiredSecurityGroup: SecurityGroupType.Connected,
@@ -206,10 +227,13 @@ export const useCommunityMessage = (props?: {
                 ) {
                   // We want to keep previewThumbnail and payloads from the existing message as that holds the optimistic updates from the onMutate
                   return {
+                    ...msg,
                     ...newMessage,
                     fileMetadata: {
+                      ...msg?.fileMetadata,
                       ...newMessage.fileMetadata,
                       appData: {
+                        ...msg?.fileMetadata.appData,
                         ...newMessage.fileMetadata.appData,
                         previewThumbnail: msg?.fileMetadata.appData.previewThumbnail,
                       },

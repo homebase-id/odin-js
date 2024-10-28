@@ -268,10 +268,14 @@ const CommunityMessageThreadSummary = ({
 }) => {
   const { odinKey, communityKey, channelKey } = useParams();
 
+  if (msg.fileMetadata.reactionPreview) {
+    console.log('msg', msg.fileMetadata.reactionPreview);
+  }
+
   const { data: messages } = useCommunityMessages({
     odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata.appData.uniqueId as string,
-    threadId: msg.fileMetadata.appData.uniqueId,
+    threadId: msg.fileMetadata.globalTransitId,
   }).all;
 
   const { flattenedMsgs, uniqueSenders } = useMemo(() => {
@@ -291,7 +295,7 @@ const CommunityMessageThreadSummary = ({
   return (
     <Link
       className="mr-auto flex w-full max-w-xs flex-row items-center gap-2 rounded-lg px-1 py-1 text-indigo-500 transition-colors hover:bg-background hover:shadow-sm"
-      to={`${COMMUNITY_ROOT}/${odinKey}/${communityKey}/${channelKey || 'all'}/${msg.fileMetadata.appData.uniqueId}/thread`}
+      to={`${COMMUNITY_ROOT}/${odinKey}/${communityKey}/${channelKey || 'all'}/${msg.fileMetadata.globalTransitId}/thread`}
     >
       {uniqueSenders.map((sender) => (
         <AuthorImage odinId={sender} key={sender} className="h-7 w-7" excludeLink={true} />

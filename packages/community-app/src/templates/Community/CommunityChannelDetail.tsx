@@ -73,7 +73,7 @@ export const CommunityChannelDetail = () => {
                   channel={channelDsr || undefined}
                   doOpenThread={(thread) =>
                     navigate(
-                      `${COMMUNITY_ROOT}/${odinKey}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
+                      `${COMMUNITY_ROOT}/${odinKey}/${communityId}/${channelId}/${thread.fileMetadata.globalTransitId}/thread`
                     )
                   }
                   setIsEmptyChat={setIsEmptyChannel}
