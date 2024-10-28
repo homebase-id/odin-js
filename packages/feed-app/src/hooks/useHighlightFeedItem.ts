@@ -1,11 +1,9 @@
-import { HomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { PostContent } from '@homebase-id/js-lib/public';
 import { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-export const useHighlightFeedItem = (
-  feedItem: HomebaseFile<PostContent> | HomebaseFile<ReactionFile>
-) => {
+export const useHighlightFeedItem = (feedItem: HomebaseFile<PostContent>) => {
   const [searchParams] = useSearchParams();
 
   const isHighlighted = useMemo(() => {

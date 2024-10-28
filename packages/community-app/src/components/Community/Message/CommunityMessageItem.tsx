@@ -46,7 +46,7 @@ export const CommunityMessageItem = ({
   className?: string;
 }) => {
   const identity = useDotYouClient().getIdentity();
-  const authorOdinId = msg.fileMetadata.senderOdinId || identity || '';
+  const authorOdinId = msg.fileMetadata.originalAuthor || identity || '';
 
   const messageFromMe = !authorOdinId || authorOdinId === identity;
   const hasMedia = !!msg.fileMetadata.payloads.length;
@@ -159,8 +159,6 @@ const CommunityTextMessageBody = ({
     >
       <div className="flex flex-col md:flex-row md:flex-wrap md:gap-2">
         <div className="flex w-full min-w-0 flex-col gap-1">
-          {/* {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null} */}
-
           <MessageTextRenderer
             community={community}
             message={content.message}
@@ -185,11 +183,11 @@ const MessageTextRenderer = ({
   className?: string;
 }) => {
   const { data: channels } = useCommunityChannels({
+    odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata.appData.uniqueId,
   }).fetch;
 
   if (!message) return null;
-
   return (
     <RichTextRenderer
       body={message}
@@ -203,11 +201,7 @@ const MessageTextRenderer = ({
           'value' in attributes &&
           typeof attributes.value === 'string'
         ) {
-          const tagGuid =
-            ('uniqueId' in attributes &&
-              typeof attributes.uniqueId === 'string' &&
-              attributes.uniqueId) ||
-            formatGuidId(toGuidId(attributes.value));
+          const tagGuid = formatGuidId(toGuidId(attributes.value));
 
           const hasChannel = !!channels?.find((channel) =>
             stringGuidsEqual(channel.fileMetadata.appData.uniqueId, tagGuid)
@@ -216,7 +210,7 @@ const MessageTextRenderer = ({
           if (hasChannel) {
             return (
               <Link
-                to={`${COMMUNITY_ROOT}/${community?.fileMetadata.appData.uniqueId}/${tagGuid}`}
+                to={`${COMMUNITY_ROOT}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${tagGuid}`}
                 className="break-all text-primary hover:underline"
               >
                 #{attributes.value.trim()}{' '}
@@ -272,9 +266,10 @@ const CommunityMessageThreadSummary = ({
   community: HomebaseFile<CommunityDefinition> | undefined;
   msg: HomebaseFile<CommunityMessage>;
 }) => {
-  const { communityKey, channelKey } = useParams();
+  const { odinKey, communityKey, channelKey } = useParams();
 
   const { data: messages } = useCommunityMessages({
+    odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata.appData.uniqueId as string,
     threadId: msg.fileMetadata.appData.uniqueId,
   }).all;
@@ -285,8 +280,8 @@ const CommunityMessageThreadSummary = ({
       ?.filter(Boolean) || []) as HomebaseFile<CommunityMessage>[];
 
     const uniqueSenders = Array.from(
-      new Set(flattenedMsgs.map((msg) => msg.fileMetadata.senderOdinId))
-    );
+      new Set(flattenedMsgs.map((msg) => msg.fileMetadata.originalAuthor?.trim()))
+    ).filter(Boolean);
 
     return { flattenedMsgs, uniqueSenders };
   }, [messages]);
@@ -296,7 +291,7 @@ const CommunityMessageThreadSummary = ({
   return (
     <Link
       className="mr-auto flex w-full max-w-xs flex-row items-center gap-2 rounded-lg px-1 py-1 text-indigo-500 transition-colors hover:bg-background hover:shadow-sm"
-      to={`${COMMUNITY_ROOT}/${communityKey}/${channelKey || 'all'}/${msg.fileMetadata.appData.uniqueId}/thread`}
+      to={`${COMMUNITY_ROOT}/${odinKey}/${communityKey}/${channelKey || 'all'}/${msg.fileMetadata.appData.uniqueId}/thread`}
     >
       {uniqueSenders.map((sender) => (
         <AuthorImage odinId={sender} key={sender} className="h-7 w-7" excludeLink={true} />

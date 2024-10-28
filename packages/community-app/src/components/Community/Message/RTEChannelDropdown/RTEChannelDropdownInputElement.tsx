@@ -27,8 +27,8 @@ export const RTEChannelDropdownInputElement = withRef<typeof PlateElement>(
     const { children, editor, element } = props;
     const [search, setSearch] = useState('');
 
-    const { communityKey } = useParams();
-    const { data: community } = useCommunity({ communityId: communityKey }).fetch;
+    const { odinKey, communityKey } = useParams();
+    const { data: community } = useCommunity({ odinId: odinKey, communityId: communityKey }).fetch;
     const {
       mutate: createCommunityChannel,
       status: creationStatus,
@@ -36,6 +36,7 @@ export const RTEChannelDropdownInputElement = withRef<typeof PlateElement>(
     } = useCommunityChannel().create;
 
     const { data: channelTargets } = useCommunityChannels({
+      odinId: odinKey,
       communityId: communityKey,
     }).fetch;
 

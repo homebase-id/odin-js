@@ -64,9 +64,8 @@ export const ChatReactionComposer = ({
               setIsReact(false);
             }}
             doUnlike={(emoji) => {
-              const reactionFile = myReactions?.find((reaction) => reaction.body === emoji);
-              if (reactionFile)
-                removeReaction({ conversation, message: msg, reaction: reactionFile });
+              const reaction = myReactions?.find((reaction) => reaction.body === emoji);
+              if (reaction) removeReaction({ conversation, message: msg, reaction: reaction });
               setIsReact(false);
             }}
           />

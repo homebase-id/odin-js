@@ -97,13 +97,6 @@ const CommunityContextActions = ({
     });
   }
 
-  if (communityActions.doReply) {
-    optionalOptions.push({
-      label: t('Reply in thread'),
-      onClick: () => communityActions.doReply && communityActions.doReply(msg),
-    });
-  }
-
   return (
     <>
       <ErrorNotification error={resendError} />

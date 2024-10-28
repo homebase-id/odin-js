@@ -7,7 +7,7 @@ import { RichTextRenderer } from '../../../../../richText';
 import { CommentEditor } from '../CommentComposer';
 import { CommentMedia, CommentMediaPreview } from './CommentMedia';
 import { ActionButtonState } from '../../../../../ui';
-import { EmbeddedThumb, ReactionFile } from '@homebase-id/js-lib/core';
+import { CommentReaction, EmbeddedThumb } from '@homebase-id/js-lib/core';
 
 export const CommentBody = ({
   context,
@@ -23,7 +23,7 @@ export const CommentBody = ({
   context?: ReactionContext;
   commentFileId?: string;
   commentLastModifed?: number;
-  content: RawReactionContent | ReactionFile;
+  content: RawReactionContent | CommentReaction;
   isEdit?: boolean;
   onUpdate?: (commentBody: string, attachment?: File) => void;
   onCancel?: () => void;

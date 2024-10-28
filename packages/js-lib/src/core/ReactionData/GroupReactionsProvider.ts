@@ -1,6 +1,6 @@
 import { stringifyToQueryParams, tryJsonParse } from '../../helpers/DataUtil';
 import { DotYouClient } from '../DotYouClient';
-import { ReactionFile } from '../DriveData/File/DriveFileReactionTypes';
+import { EmojiReaction } from '../DriveData/File/DriveFileReactionTypes';
 import { TargetDrive } from '../DriveData/File/DriveFileTypes';
 
 export interface GroupEmojiReaction {
@@ -29,7 +29,7 @@ export const getGroupReactions = async (
   },
   pageSize = 15,
   cursor?: string
-): Promise<{ reactions: ReactionFile[]; cursor: string } | undefined> => {
+): Promise<{ reactions: EmojiReaction[]; cursor: string } | undefined> => {
   const client = dotYouClient.createAxiosClient();
 
   const data = {
@@ -81,7 +81,7 @@ export const deleteGroupReaction = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   recipients: string[],
-  emoji: ReactionFile,
+  emoji: EmojiReaction,
   target: {
     fileId: string;
     globalTransitId: string;

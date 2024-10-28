@@ -1,22 +1,24 @@
 import { useEffect } from 'react';
-import { usecommunityMetadata } from './useCommunityMetadata';
+import { useCommunityMetadata } from './useCommunityMetadata';
 import { useLastUpdatedChatMessages } from './messages/useCommunityMessages';
 
 export const useMarkCommunityAsRead = ({
+  odinId,
   communityId,
   channelId,
 }: {
-  communityId?: string;
+  odinId: string | undefined;
+  communityId: string | undefined;
   channelId?: string;
 }) => {
   const {
     single: { data: metadata },
     update: { mutate: updateMetadata, status: updateStatus },
-  } = usecommunityMetadata({ communityId });
+  } = useCommunityMetadata({ odinId, communityId });
   const { lastUpdate } = useLastUpdatedChatMessages();
 
   useEffect(() => {
-    if (!metadata || !lastUpdate || lastUpdate === 0 || updateStatus !== 'idle') return;
+    if (!metadata || !lastUpdate || lastUpdate === 0 || updateStatus === 'pending') return;
 
     const savedLastReadTime = metadata?.fileMetadata.appData.content.lastReadTime;
     const savedLastReadTimeChannel =

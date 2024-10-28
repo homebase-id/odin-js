@@ -24,13 +24,6 @@ import { ChatConversationsReturn } from './useConversations';
 import { deleteAllChatMessages } from '../../providers/ChatProvider';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 
-export const getSingleConversation = async (
-  dotYouClient: DotYouClient,
-  conversationId: string | undefined
-) => {
-  return conversationId ? await getConversation(dotYouClient, conversationId) : null;
-};
-
 export const useConversation = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
   const dotYouClient = useDotYouClientContext();
@@ -272,7 +265,9 @@ const fetchSingleConversation = async (
     );
   if (conversationFromCache) return conversationFromCache;
 
-  const conversationFromServer = await getSingleConversation(dotYouClient, conversationId);
+  if (!conversationId) return null;
+
+  const conversationFromServer = await getConversation(dotYouClient, conversationId);
   // Don't cache if the conversation is not found
   if (!conversationFromServer) throw new Error('Conversation not found');
 
@@ -293,5 +288,12 @@ export const getConversationQueryOptions: (
   refetchOnMount: false,
   staleTime: 1000 * 60 * 5, // 5 minutes before updates to a conversation on another device are fetched on this one (when you were offline)
   enabled: !!conversationId,
+  retry: (failureCount, error) => {
+    if (error.message === 'Conversation not found') {
+      return false;
+    }
+
+    return failureCount < 5;
+  },
   networkMode: 'offlineFirst', // We want to try the useConversations cache first
 });
