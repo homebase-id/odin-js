@@ -21,8 +21,8 @@ import {
   EmbeddedThumb,
   NewHomebaseFile,
   PriorityOptions,
-  ReactionFile,
   uploadHeader,
+  CommentReaction,
 } from '../../core/core';
 import {
   jsonStringify64,
@@ -168,7 +168,7 @@ export const saveComment = async (
 
     const instructionSet: TransitInstructionSet = {
       transferIv: getRandom16ByteArray(),
-      overwriteGlobalTransitFileId: (comment as HomebaseFile<ReactionFile>).fileMetadata
+      overwriteGlobalTransitFileId: (comment as HomebaseFile<CommentReaction>).fileMetadata
         .globalTransitId,
       remoteTargetDrive: targetDrive,
       schedule: ScheduleOptions.SendLater,
@@ -218,7 +218,7 @@ export const saveComment = async (
 export const removeComment = async (
   dotYouClient: DotYouClient,
   context: ReactionContext,
-  commentFile: HomebaseFile<ReactionFile>
+  commentFile: HomebaseFile<CommentReaction>
 ) => {
   const isLocal = context.odinId === dotYouClient.getIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
@@ -245,7 +245,7 @@ export const getComments = async (
   context: ReactionContext,
   pageSize = 25,
   cursorState?: string
-): Promise<{ comments: HomebaseFile<ReactionFile>[]; cursorState: string }> => {
+): Promise<{ comments: HomebaseFile<CommentReaction>[]; cursorState: string }> => {
   const isLocal = context.odinId === dotYouClient.getIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
   const qp: FileQueryParams = {
@@ -264,13 +264,13 @@ export const getComments = async (
     ? await queryBatch(dotYouClient, qp, ro)
     : await queryBatchOverPeer(dotYouClient, context.odinId, qp, ro);
 
-  const comments: HomebaseFile<ReactionFile>[] = (
+  const comments: HomebaseFile<CommentReaction>[] = (
     await Promise.all(
       result.searchResults.map(async (dsr) =>
         dsrToComment(dotYouClient, context.odinId, dsr, targetDrive, result.includeMetadataHeader)
       )
     )
-  ).filter((attr) => !!attr) as HomebaseFile<ReactionFile>[];
+  ).filter((attr) => !!attr) as HomebaseFile<CommentReaction>[];
 
   return { comments, cursorState: result.cursorState };
 };
@@ -281,14 +281,14 @@ const dsrToComment = async (
   dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<HomebaseFile<ReactionFile> | null> => {
+): Promise<HomebaseFile<CommentReaction> | null> => {
   const isLocal = odinId === dotYouClient.getIdentity();
 
   const params = [targetDrive, dsr, includeMetadataHeader] as const;
 
   const contentData = isLocal
-    ? await getContentFromHeaderOrPayload<ReactionFile>(dotYouClient, ...params)
-    : await getContentFromHeaderOrPayloadOverPeer<ReactionFile>(dotYouClient, odinId, ...params);
+    ? await getContentFromHeaderOrPayload<CommentReaction>(dotYouClient, ...params)
+    : await getContentFromHeaderOrPayloadOverPeer<CommentReaction>(dotYouClient, odinId, ...params);
 
   if (!contentData) return null;
 
@@ -349,7 +349,7 @@ export interface CommentsReactionSummary {
   totalCount: number;
 }
 
-export interface CommentReactionPreview extends ReactionFile {
+export interface CommentReactionPreview extends CommentReaction {
   reactions: EmojiReactionSummary;
   isEncrypted: boolean;
 }
@@ -371,7 +371,7 @@ export const parseReactionPreview = (
 
                 ...(commentPreview.isEncrypted && !commentPreview.content.length
                   ? { body: '' }
-                  : tryJsonParse<ReactionFile>(commentPreview.content)),
+                  : tryJsonParse<CommentReaction>(commentPreview.content)),
 
                 isEncrypted: commentPreview.isEncrypted,
                 reactions: parseReactions(commentPreview.reactions),

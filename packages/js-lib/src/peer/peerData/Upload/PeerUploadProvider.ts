@@ -40,6 +40,7 @@ export const uploadFileOverPeer = async (
   encrypt = true,
   options?: {
     aesKey?: Uint8Array | undefined;
+    axiosConfig?: AxiosRequestConfig;
   }
 ) => {
   isDebug &&
@@ -87,8 +88,10 @@ export const uploadFileOverPeer = async (
 
   const url = '/transit/sender/files/send';
   const config = {
+    ...options?.axiosConfig,
     headers: {
       'content-type': 'multipart/form-data',
+      ...options?.axiosConfig?.headers,
     },
   };
 

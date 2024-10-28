@@ -3,10 +3,10 @@ import {
   TargetDrive,
   EmbeddedThumb,
   RichText,
-  ReactionFile,
   NewHomebaseFile,
   SecurityGroupType,
   AccessControlList,
+  CommentReaction,
 } from '../../core/core';
 import { toGuidId } from '../../helpers/helpers';
 
@@ -158,7 +158,7 @@ export interface ReactionContext {
   target: { fileId: string; globalTransitId: string; isEncrypted: boolean };
 }
 
-export interface RawReactionContent extends Omit<ReactionFile, 'attachments'> {
+export interface RawReactionContent extends Omit<CommentReaction, 'attachments'> {
   attachment?: File;
 }
 

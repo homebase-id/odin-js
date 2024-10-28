@@ -13,19 +13,20 @@ import {
 } from '../../../providers/CommunityMessageProvider';
 import { DeletedHomebaseFile, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { formatGuidId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { useState, useEffect } from 'react';
 
 const PAGE_SIZE = 100;
 export const useCommunityMessages = (props?: {
+  odinId: string | undefined;
   communityId: string | undefined;
   channelId?: string;
   threadId?: string;
   maxAge?: number;
 }) => {
-  const { communityId, threadId, channelId, maxAge } = props || {};
+  const { odinId, communityId, threadId, channelId, maxAge } = props || {};
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
@@ -36,10 +37,6 @@ export const useCommunityMessages = (props?: {
     community: HomebaseFile<CommunityDefinition>;
     messages: HomebaseFile<CommunityMessage>[];
   }) => {
-    const communityContent = community.fileMetadata.appData.content;
-    const identity = dotYouClient.getIdentity();
-    const recipients = communityContent.recipients.filter((recipient) => recipient !== identity);
-
     if (!community.fileMetadata.appData.uniqueId) {
       throw new Error('Community unique id is not set');
     }
@@ -48,9 +45,9 @@ export const useCommunityMessages = (props?: {
       messages.map(async (msg) => {
         await hardDeleteCommunityMessage(
           dotYouClient,
+          community.fileMetadata.senderOdinId,
           community.fileMetadata.appData.uniqueId as string,
-          msg,
-          recipients
+          msg
         );
       })
     );
@@ -60,6 +57,7 @@ export const useCommunityMessages = (props?: {
     all: useInfiniteQuery(
       getCommunityMessagesInfiniteQueryOptions(
         dotYouClient,
+        odinId,
         communityId,
         channelId,
         threadId,
@@ -84,6 +82,7 @@ export const useCommunityMessages = (props?: {
 
 const fetchMessages = async (
   dotYouClient: DotYouClient,
+  odinId: string,
   communityId: string,
   channelId: string | undefined,
   threadId: string | undefined,
@@ -97,6 +96,7 @@ const fetchMessages = async (
 
   return await getCommunityMessages(
     dotYouClient,
+    odinId,
     communityId,
     groupIds,
     undefined,
@@ -107,6 +107,7 @@ const fetchMessages = async (
 
 export const getCommunityMessagesInfiniteQueryOptions: (
   dotYouClient: DotYouClient,
+  odinId?: string,
   communityId?: string,
   channelId?: string,
   threadId?: string,
@@ -116,12 +117,12 @@ export const getCommunityMessagesInfiniteQueryOptions: (
   cursorState: string;
   queryTime: number;
   includeMetadataHeader: boolean;
-}> = (dotYouClient, communityId, channelId, threadId, maxAge) => {
+}> = (dotYouClient, odinId, communityId, channelId, threadId, maxAge) => {
   if (stringGuidsEqual(communityId, threadId)) {
     throw new Error('ThreadId and CommunityId cannot be the same');
   }
   return {
-    queryKey: ['community-messages', threadId || channelId || communityId],
+    queryKey: ['community-messages', formatGuidId(threadId || channelId || communityId)],
     initialPageParam: undefined as string | undefined,
     queryFn: ({ pageParam }) => {
       if (stringGuidsEqual(communityId, threadId)) {
@@ -130,6 +131,7 @@ export const getCommunityMessagesInfiniteQueryOptions: (
 
       return fetchMessages(
         dotYouClient,
+        odinId as string,
         communityId as string,
         channelId,
         threadId,
@@ -156,7 +158,7 @@ export const getCommunityMessagesInfiniteQueryOptions: (
           return filteredData;
         }
       : undefined,
-    enabled: !!communityId && (!!channelId || !!threadId),
+    enabled: !!odinId && !!communityId && (!!channelId || !!threadId),
     refetchOnMount: true,
     staleTime: 1000 * 60 * 60 * 24, // 24 hour
   };
@@ -181,7 +183,7 @@ export const useLastUpdatedChatMessages = () => {
         return acc;
       }, 0)
     );
-  });
+  }, []);
 
   return {
     lastUpdate,
@@ -202,7 +204,7 @@ export const insertNewMessagesForChannel = (
       queryTime: number;
       includeMetadataHeader: boolean;
     }>
-  >(['community-messages', channelId]);
+  >(['community-messages', formatGuidId(channelId)]);
 
   if (
     newMessages.length > PAGE_SIZE ||
@@ -210,7 +212,7 @@ export const insertNewMessagesForChannel = (
     newMessages?.some((msg) => msg.fileState === 'deleted')
   ) {
     queryClient.setQueryData(
-      ['community-messages', channelId],
+      ['community-messages', formatGuidId(channelId)],
       (data: InfiniteData<unknown, unknown>) => {
         return {
           pages: data?.pages?.slice(0, 1) ?? [],
@@ -219,7 +221,7 @@ export const insertNewMessagesForChannel = (
       }
     );
     queryClient.invalidateQueries({
-      queryKey: ['community-messages', channelId],
+      queryKey: ['community-messages', formatGuidId(channelId)],
     });
     return;
   }
@@ -232,7 +234,7 @@ export const insertNewMessagesForChannel = (
     );
   });
 
-  queryClient.setQueryData(['community-messages', channelId], runningMessages);
+  queryClient.setQueryData(['community-messages', formatGuidId(channelId)], runningMessages);
 };
 
 export const insertNewMessage = (
@@ -247,16 +249,19 @@ export const insertNewMessage = (
       queryTime: number;
       includeMetadataHeader: boolean;
     }>
-  >(['community-messages', newMessage.fileMetadata.appData.groupId || communityId]);
+  >(['community-messages', formatGuidId(newMessage.fileMetadata.appData.groupId || communityId)]);
 
   if (extistingMessages && newMessage.fileState !== 'deleted') {
     queryClient.setQueryData(
-      ['community-messages', newMessage.fileMetadata.appData.groupId || communityId],
+      ['community-messages', formatGuidId(newMessage.fileMetadata.appData.groupId || communityId)],
       internalInsertNewMessage(extistingMessages, newMessage)
     );
   } else {
     queryClient.invalidateQueries({
-      queryKey: ['community-messages', newMessage.fileMetadata.appData.groupId || communityId],
+      queryKey: [
+        'community-messages',
+        formatGuidId(newMessage.fileMetadata.appData.groupId || communityId),
+      ],
     });
   }
 };

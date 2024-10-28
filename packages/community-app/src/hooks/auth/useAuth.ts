@@ -24,6 +24,7 @@ import {
   useDotYouClient,
 } from '@homebase-id/common-app';
 import { clear } from 'idb-keyval';
+import { LOCAL_COMMUNITY_APP_DRIVE } from '../../providers/CommunityMetadataProvider';
 
 export const useAuth = () => {
   const { getDotYouClient, getSharedSecret, hasSharedSecret } = useDotYouClient();
@@ -103,6 +104,13 @@ export const drives = [
     d: '',
     p: DrivePermissionType.Read + DrivePermissionType.Write + DrivePermissionType.React,
   },
+  {
+    a: LOCAL_COMMUNITY_APP_DRIVE.alias,
+    t: LOCAL_COMMUNITY_APP_DRIVE.type,
+    n: 'Community Drive',
+    d: '',
+    p: DrivePermissionType.Read + DrivePermissionType.Write,
+  },
 ];
 
 const circleDrives = [
@@ -118,9 +126,11 @@ const circleDrives = [
 
 export const permissions = [
   AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
+  AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
   AppPermissionType.ReadConnectionRequests,
   AppPermissionType.ReadConnections,
   AppPermissionType.SendPushNotifications,
+  AppPermissionType.ReadCircleMembers,
 ];
 
 export const appName = 'Homebase - Community';

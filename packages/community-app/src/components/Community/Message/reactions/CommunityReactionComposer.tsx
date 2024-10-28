@@ -36,8 +36,8 @@ export const CommunityReactionComposer = ({
       defaultValue={[]}
       doLike={(emoji) => addReaction({ community, message: msg, reaction: emoji })}
       doUnlike={(emoji) => {
-        const reactionFile = myReactions?.find((reaction) => reaction.body === emoji);
-        if (reactionFile) removeReaction({ community, message: msg, reaction: reactionFile });
+        const reaction = myReactions?.find((reaction) => reaction.body === emoji);
+        if (reaction) removeReaction({ community, message: msg, reaction: reaction });
       }}
     />
   );

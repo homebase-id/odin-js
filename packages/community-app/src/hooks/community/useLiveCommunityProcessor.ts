@@ -7,17 +7,19 @@ import {
 } from '@homebase-id/common-app';
 import {
   drivesEqual,
+  formatGuidId,
   getQueryBatchCursorFromTime,
   getQueryModifiedCursorFromTime,
   hasDebugFlag,
   stringGuidsEqual,
 } from '@homebase-id/js-lib/helpers';
-import { processInbox } from '@homebase-id/js-lib/peer';
+import { processInbox, queryBatchOverPeer, queryModifiedOverPeer } from '@homebase-id/js-lib/peer';
 import { getTargetDriveFromCommunityId } from '../../providers/CommunityDefinitionProvider';
 import {
   AppNotification,
   DeletedHomebaseFile,
   DotYouClient,
+  FileQueryParams,
   HomebaseFile,
   queryBatch,
   queryModified,
@@ -46,19 +48,23 @@ const MINUTE_IN_MS = 60000;
 const isDebug = hasDebugFlag();
 
 // We first process the inbox, then we connect for live updates;
-export const useLiveCommunityProcessor = (communityId: string | undefined) => {
+export const useLiveCommunityProcessor = (
+  odinId: string | undefined,
+  communityId: string | undefined
+) => {
   // Process the inbox on startup; As we want to cover the backlog of messages first
-  const { status: inboxStatus } = useInboxProcessor(communityId || '', true);
+  useInboxProcessor(odinId, communityId || '');
+  // const { status: inboxStatus } = useInboxProcessor(odinId, communityId || '');
 
   // Only after the inbox is processed, we connect for live updates; So we avoid clearing the cache on each fileAdded update
-  const isOnline = useCommunityWebsocket(communityId, inboxStatus === 'success');
+  // const isOnline = useCommunityWebsocket(odinId, communityId, inboxStatus === 'success');
 
-  return isOnline;
+  return false;
 };
 
 const BATCH_SIZE = 2000;
 // Process the inbox on startup
-const useInboxProcessor = (communityId: string | undefined, connected?: boolean) => {
+const useInboxProcessor = (odinId: string | undefined, communityId: string | undefined) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
   const targetDrive = getTargetDriveFromCommunityId(communityId || '');
@@ -68,48 +74,23 @@ const useInboxProcessor = (communityId: string | undefined, connected?: boolean)
     const lastProcessedTime = queryClient.getQueryState(['process-inbox'])?.dataUpdatedAt;
     const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 2;
 
-    const processedresult = await processInbox(dotYouClient, targetDrive, BATCH_SIZE);
+    const processedresult =
+      !odinId || odinId === dotYouClient.getIdentity()
+        ? await processInbox(dotYouClient, targetDrive, BATCH_SIZE)
+        : null;
 
     isDebug && console.debug('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
     if (lastProcessedWithBuffer) {
-      const modifiedCursor = getQueryModifiedCursorFromTime(lastProcessedWithBuffer); // Friday, 31 May 2024 09:38:54.678
-      const batchCursor = getQueryBatchCursorFromTime(
-        new Date().getTime(),
-        lastProcessedWithBuffer
-      );
-
-      const newData = await queryBatch(
+      const newMessages = await findChangesSinceTimestamp(
         dotYouClient,
+        odinId,
+        lastProcessedWithBuffer,
         {
           targetDrive: targetDrive,
           fileType: [COMMUNITY_MESSAGE_FILE_TYPE],
           fileState: [0, 1],
-        },
-        {
-          maxRecords: BATCH_SIZE,
-          cursorState: batchCursor,
-          includeMetadataHeader: true,
-          includeTransferHistory: true,
         }
       );
-
-      const modifieData = await queryModified(
-        dotYouClient,
-        {
-          targetDrive: targetDrive,
-          fileType: [COMMUNITY_MESSAGE_FILE_TYPE],
-          fileState: [0, 1],
-        },
-        {
-          maxRecords: BATCH_SIZE,
-          cursor: modifiedCursor,
-          excludePreviewThumbnail: false,
-          includeHeaderContent: true,
-          includeTransferHistory: true,
-        }
-      );
-
-      const newMessages = modifieData.searchResults.concat(newData.searchResults);
       isDebug && console.debug('[InboxProcessor] new messages', newMessages.length);
 
       await processCommunityMessagesBatch(
@@ -131,12 +112,19 @@ const useInboxProcessor = (communityId: string | undefined, connected?: boolean)
   return useQuery({
     queryKey: ['process-inbox'],
     queryFn: fetchData,
-    enabled: connected && !!communityId,
+    enabled: !!communityId,
     staleTime: 1000 * 10, // 10 seconds
   });
 };
 
-const useCommunityWebsocket = (communityId: string | undefined, isEnabled: boolean) => {
+const useCommunityWebsocket = (
+  odinId: string | undefined,
+  communityId: string | undefined,
+  isEnabled: boolean
+) => {
+  if (odinId) {
+    return;
+  }
   const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getIdentity();
   const queryClient = useQueryClient();
@@ -171,7 +159,9 @@ const useCommunityWebsocket = (communityId: string | undefined, isEnabled: boole
         ) {
           // Something is up with the message, invalidate all messages for this conversation
           console.warn('[CommunityWebsocket] Invalid message received', notification, channelId);
-          queryClient.invalidateQueries({ queryKey: ['community-messages', channelId] });
+          queryClient.invalidateQueries({
+            queryKey: ['community-messages', formatGuidId(channelId)],
+          });
           return;
         }
 
@@ -359,4 +349,48 @@ const processCommunityMessagesBatch = async (
       );
     })
   );
+};
+
+const findChangesSinceTimestamp = async (
+  dotYouClient: DotYouClient,
+  odinId: string | undefined,
+  timeStamp: number,
+  params: FileQueryParams
+) => {
+  const modifiedCursor = getQueryModifiedCursorFromTime(timeStamp); // Friday, 31 May 2024 09:38:54.678
+  const batchCursor = getQueryBatchCursorFromTime(new Date().getTime(), timeStamp);
+
+  const newFiles =
+    odinId && dotYouClient.getIdentity() !== odinId
+      ? await queryBatchOverPeer(dotYouClient, odinId, params, {
+          maxRecords: BATCH_SIZE,
+          cursorState: batchCursor,
+          includeMetadataHeader: true,
+          includeTransferHistory: true,
+        })
+      : await queryBatch(dotYouClient, params, {
+          maxRecords: BATCH_SIZE,
+          cursorState: batchCursor,
+          includeMetadataHeader: true,
+          includeTransferHistory: true,
+        });
+
+  const modifiedFiles =
+    odinId && dotYouClient.getIdentity() !== odinId
+      ? await queryModifiedOverPeer(dotYouClient, odinId, params, {
+          maxRecords: BATCH_SIZE,
+          cursor: modifiedCursor,
+          excludePreviewThumbnail: false,
+          includeHeaderContent: true,
+          includeTransferHistory: true,
+        })
+      : await queryModified(dotYouClient, params, {
+          maxRecords: BATCH_SIZE,
+          cursor: modifiedCursor,
+          excludePreviewThumbnail: false,
+          includeHeaderContent: true,
+          includeTransferHistory: true,
+        });
+
+  return modifiedFiles.searchResults.concat(newFiles.searchResults);
 };

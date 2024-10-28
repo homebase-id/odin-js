@@ -3,29 +3,33 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ActionButton,
   COMMUNITY_ROOT_PATH,
-  ConnectionImage,
-  ConnectionName,
+  ActionLink,
+  AuthorImage,
   ErrorBoundary,
   Input,
   Label,
   Radio,
   t,
-  useAllContacts,
+  useCircle,
+  useCircles,
   useDotYouClient,
 } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import { NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
-import { getNewId, tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { getNewId, stringGuidsEqual, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { useEffect, useState } from 'react';
-import { ContactFile } from '@homebase-id/js-lib/network';
+import { CircleDefinition } from '@homebase-id/js-lib/network';
 import { useCommunity } from '../../hooks/community/useCommunity';
-import { Times, Arrow } from '@homebase-id/common-app/icons';
+import { Ellipsis, Arrow } from '@homebase-id/common-app/icons';
 
 export const NewCommunity = () => {
-  const [query, setQuery] = useState<string | undefined>(undefined);
   const identity = useDotYouClient().getIdentity();
+  const { data: circles } = useCircles(true).fetch;
 
-  const [newRecipients, setNewRecipients] = useState<ContactFile[]>([]);
+  const [selectedCircle, setSelectedCircle] = useState<{
+    circle: CircleDefinition;
+    members: string[];
+  }>();
   const [groupTitle, setGroupTitle] = useState<string>();
 
   const [searchParams] = useSearchParams();
@@ -38,37 +42,29 @@ export const NewCommunity = () => {
       if (!definitionFile) return;
       (async () => {
         await createNew(definitionFile);
-        navigate(`${COMMUNITY_ROOT_PATH}/${definitionFile.fileMetadata.appData.uniqueId}`);
+        navigate(
+          `${COMMUNITY_ROOT_PATH}/${definitionFile.fileMetadata.senderOdinId}/${definitionFile.fileMetadata.appData.uniqueId}`
+        );
       })();
     }
   }, [pendingDefinition]);
 
-  const { data: contacts } = useAllContacts(true);
-  const contactResults = contacts
-    ? contacts
-        .map((dsr) => dsr.fileMetadata.appData.content)
-        .filter(
-          (contact) =>
-            contact.odinId &&
-            (!query ||
-              contact.odinId?.includes(query) ||
-              contact.name?.displayName?.includes(query))
-        )
-    : [];
-
   const { mutateAsync: createNew, status: createStatus } = useCommunity().save;
   const doCreate = async () => {
-    const recipients = newRecipients.map((x) => x.odinId).filter(Boolean) as string[];
-    if (!identity || !recipients?.length || !groupTitle) return;
+    if (!selectedCircle || !selectedCircle.circle.id || !groupTitle || !identity) return;
+
     try {
       const communityId = getNewId();
-
       const newCommunityDef: NewHomebaseFile<CommunityDefinition> = {
         fileMetadata: {
           appData: {
             content: {
               title: groupTitle,
-              recipients: [...recipients, identity],
+              members: [...selectedCircle.members, identity],
+              acl: {
+                requiredSecurityGroup: SecurityGroupType.Connected,
+                circleIdList: [selectedCircle.circle.id],
+              },
             },
             uniqueId: communityId,
           },
@@ -79,9 +75,10 @@ export const NewCommunity = () => {
           },
         },
       };
-
       await createNew(newCommunityDef); // Will in 99% of the cases first redirect to an ensure drive
-      navigate(`${COMMUNITY_ROOT_PATH}/${communityId}`);
+      navigate(
+        `${COMMUNITY_ROOT_PATH}/${newCommunityDef.fileMetadata.senderOdinId}/${communityId}`
+      );
     } catch (e) {
       console.error(e);
     }
@@ -97,7 +94,14 @@ export const NewCommunity = () => {
         }}
       >
         <div className="w-full max-w-lg">
-          <h2 className="mb-5 text-3xl">{t('New Community')}</h2>
+          <h2 className="mb-5 text-3xl">
+            {t('New Community')}
+            <small className="block text-sm font-normal text-slate-400">
+              {t(
+                'Provides an easy way of communitication between a group of inviduals. Contrary to the rest of Homebase a community has their data stored centrally on a single identity.'
+              )}
+            </small>
+          </h2>
 
           <div className="mb-4">
             <Label>{t('Name')} </Label>
@@ -108,77 +112,36 @@ export const NewCommunity = () => {
             />
           </div>
           <div>
-            <Label>{t('Members')} </Label>
-            <div className="flex flex-row flex-wrap gap-2">
-              {newRecipients.map((recipient, index) => (
-                <div
-                  className="mb-5 flex flex-row items-center gap-1 rounded-lg bg-primary/20 px-1 py-1"
-                  key={recipient.odinId || index}
-                >
-                  <ConnectionImage odinId={recipient.odinId} size="xs" />
-                  <ConnectionName odinId={recipient.odinId} />
-                  <ActionButton
-                    icon={Times}
-                    type="mute"
-                    onClick={() =>
-                      setNewRecipients(newRecipients.filter((x) => x.odinId !== recipient.odinId))
-                    }
-                  />
-                </div>
+            <Label>
+              {t('Members')}
+              <small className="block text-sm font-normal text-slate-400">
+                {t(
+                  'The members of a community always match a circle to provide easy management of access to the centralized data stored on your identity'
+                )}
+              </small>
+            </Label>
+            <div className="flex flex-col gap-2">
+              {circles?.map((circle) => (
+                <CircleOption
+                  circle={circle}
+                  onSelect={(circle, members) => {
+                    setSelectedCircle({ circle, members });
+                  }}
+                  isActive={stringGuidsEqual(selectedCircle?.circle.id, circle.id)}
+                  key={circle.id}
+                />
               ))}
-            </div>
-
-            <div className="mb-5 flex flex-col gap-2">
-              <Input
-                onChange={(e) => {
-                  e.preventDefault();
-                  setQuery(e.target.value);
-                }}
-                defaultValue={query}
-                className="w-full"
-                placeholder={t('Search for contacts')}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }
-                }}
-              />
-
-              <div className="flex flex-grow flex-col gap-2 overflow-auto">
-                {contactResults.map((result, index) => {
-                  const isActive = newRecipients.some((x) => x.odinId === result.odinId);
-
-                  return (
-                    <SingleConversationItem
-                      odinId={result.odinId as string}
-                      isActive={isActive}
-                      key={result.odinId || index}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (isActive) {
-                          setNewRecipients([
-                            ...newRecipients.filter((x) => x.odinId !== result.odinId),
-                          ]);
-                        } else {
-                          setNewRecipients([
-                            ...newRecipients.filter((x) => x.odinId !== result.odinId),
-                            result,
-                          ]);
-                        }
-                      }}
-                    />
-                  );
-                })}
-              </div>
             </div>
           </div>
 
-          <div className="flex flex-row-reverse">
+          <div className="mt-5 flex flex-col justify-between gap-2 sm:flex-row-reverse">
             <ActionButton icon={Arrow} state={createStatus}>
               {t('Create')}
             </ActionButton>
+
+            <ActionLink type="secondary" onClick={() => navigate(-1)}>
+              {t('Cancel')}
+            </ActionLink>
           </div>
         </div>
       </form>
@@ -186,30 +149,58 @@ export const NewCommunity = () => {
   );
 };
 
-export const SingleConversationItem = ({
-  odinId,
-  onClick,
+export const CircleOption = ({
+  circle,
+  onSelect,
   isActive,
 }: {
-  onClick: React.MouseEventHandler<HTMLButtonElement> | undefined;
-  odinId: string | undefined;
+  onSelect: (circle: CircleDefinition, members: string[]) => void;
+  circle: CircleDefinition;
 
   isActive: boolean;
 }) => {
+  const { data: members } = useCircle({ circleId: circle.id }).fetchMembers;
+
   return (
     <button
-      onClick={onClick}
-      className={`flex w-full flex-row items-center gap-3 ${isActive ? 'opacity-40' : ''}`}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onSelect(
+          circle,
+          (members || []).map((x) => x.domain)
+        );
+      }}
+      className={`flex w-full flex-row items-center gap-3 rounded-lg bg-background px-3 py-3 hover:shadow-md ${isActive ? 'bg-primary/20' : ''}`}
     >
-      <Radio readOnly={true} checked={isActive} key={`${odinId}+${isActive}`} />
-      <ConnectionImage
-        odinId={odinId}
-        className="border border-neutral-200 dark:border-neutral-800"
-        size="sm"
-      />
-      <div className="flex flex-col items-start">
-        <ConnectionName odinId={odinId} />
-        <span className="text-sm text-slate-400">{odinId}</span>
+      <Radio readOnly={true} checked={isActive} key={`${circle.id}_${isActive}}`} />
+
+      <div className="flex w-full flex-row items-center">
+        <p>{circle.name}</p>
+
+        {members?.length ? (
+          <>
+            <div className="ml-auto mt-auto flex shrink-0 flex-row">
+              {members
+                ?.slice(0, 5)
+                ?.map((member) => (
+                  <AuthorImage
+                    odinId={member.domain}
+                    key={member.domain}
+                    className="-mr-2 h-7 w-7 overflow-hidden rounded-full border last:mr-0 dark:border-slate-500"
+                    excludeLink={true}
+                  />
+                ))}
+            </div>
+            {members.length > 5 ? (
+              <span className="mb-1 mt-auto pl-2 text-slate-400">
+                <Ellipsis className="h-5 w-5" />
+              </span>
+            ) : (
+              ''
+            )}
+          </>
+        ) : null}
       </div>
     </button>
   );

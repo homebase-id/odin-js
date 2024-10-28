@@ -1,27 +1,39 @@
 import { lazy, ReactNode, Suspense } from 'react';
 import {
-  Route,
-  Outlet,
-  Navigate,
-  RouterProvider,
   createBrowserRouter,
   createRoutesFromElements,
+  Navigate,
+  Outlet,
+  Route,
+  RouterProvider,
   useParams,
 } from 'react-router-dom';
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
+import { Layout, MinimalLayout } from '../components/ui/Layout/Layout';
+import '@homebase-id/ui-lib/dist/style.css';
+import './App.css';
+import { useAuth } from '../hooks/auth/useAuth';
+import {
+  COMMUNITY_ROOT_PATH,
+  DotYouClientProvider,
+  ErrorBoundary,
+  NotFound,
+  OdinQueryClient,
+} from '@homebase-id/common-app';
 
 export const REACT_QUERY_CACHE_KEY = 'COMMUNITY_REACT_QUERY_OFFLINE_CACHE';
 const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'connection-details',
   'process-inbox',
   'communities',
+  'community',
+  'community-metadata',
   'community-channels',
   'community-messages',
   'channels-with-recent-message',
 ];
-
-import { Layout, MinimalLayout } from '../components/ui/Layout/Layout';
+const AUTH_PATH = COMMUNITY_ROOT_PATH + '/auth';
 
 const Auth = lazy(() => import('../templates/Auth/Auth'));
 const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
@@ -32,22 +44,13 @@ const CommunityHome = lazy(() =>
   }))
 );
 
-import '@homebase-id/ui-lib/dist/style.css';
-import './App.css';
-import { useAuth } from '../hooks/auth/useAuth';
-
-const AUTH_PATH = COMMUNITY_ROOT_PATH + '/auth';
-
-import {
-  ErrorBoundary,
-  NotFound,
-  DotYouClientProvider,
-  OdinQueryClient,
-  COMMUNITY_ROOT_PATH,
-} from '@homebase-id/common-app';
-
 const CommunityChannelDetail = lazy(() =>
   import('../templates/Community/CommunityChannelDetail').then((communityApp) => ({
+    default: communityApp.CommunityChannelDetail,
+  }))
+);
+const CommunityCatchup = lazy(() =>
+  import('../templates/Community/CommunityCatchup').then((communityApp) => ({
     default: communityApp.CommunityChannelDetail,
   }))
 );
@@ -65,7 +68,7 @@ function App() {
           path={COMMUNITY_ROOT_PATH}
           element={
             <ErrorBoundary>
-              <Suspense fallback={<></>}>
+              <Suspense fallback={<div className="h-full w-full bg-pink-500"></div>}>
                 <Outlet />
               </Suspense>
             </ErrorBoundary>
@@ -90,7 +93,7 @@ function App() {
             <Route index={true} element={<CommunityHome />} />
             <Route path={'new'} element={<CommunityHome />} />
             <Route
-              path={':communityKey'}
+              path={':odinKey/:communityKey'}
               element={
                 <CommunityHome>
                   <Outlet />
@@ -100,18 +103,19 @@ function App() {
               <Route index={true} element={<CommunityRootRoute />} />
 
               {/* Items for 'all' */}
-              <Route path={'all'} element={<CommunityChannelDetail />} />
-              <Route path={'all/:chatMessageKey'} element={<CommunityChannelDetail />} />
-              <Route path={'all/:chatMessageKey/:mediaKey'} element={<CommunityChannelDetail />} />
+              <Route path={'all'} element={<CommunityCatchup />} />
+              <Route path={'all/:chatMessageKey'} element={<CommunityCatchup />} />
+              <Route path={'all/:chatMessageKey/:mediaKey'} element={<CommunityCatchup />} />
+
               {/* Items for 'all' within a thread */}
-              <Route path={'all/:threadKey/thread'} element={<CommunityChannelDetail />} />
+              <Route path={'all/:threadKey/thread'} element={<CommunityCatchup />} />
               <Route
                 path={'all/:threadKey/thread/:chatMessageKey'}
-                element={<CommunityChannelDetail />}
+                element={<CommunityCatchup />}
               />
               <Route
                 path={'all/:threadKey/thread/:chatMessageKey/:mediaKey'}
-                element={<CommunityChannelDetail />}
+                element={<CommunityCatchup />}
               />
 
               {/* Items for 'channel' */}
@@ -175,9 +179,9 @@ function App() {
 }
 
 const CommunityRootRoute = () => {
-  const { communityKey } = useParams();
+  const { odinKey, communityKey } = useParams();
   return window.innerWidth > 1024 ? (
-    <Navigate to={`${COMMUNITY_ROOT_PATH}/${communityKey}/all`} />
+    <Navigate to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/all`} />
   ) : null;
 };
 

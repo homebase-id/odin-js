@@ -89,10 +89,15 @@ export const getNewId = () => {
   return Guid.create().toString().replace(/-/g, '');
 };
 
-export const formatGuidId = (guid: string) => {
+export const formatGuidId = <
+  T extends string | undefined,
+  R = T extends string ? string : undefined,
+>(
+  guid: T
+): R => {
+  if (!guid) return undefined as R;
   const dashLessGuid = guid.replace(/-/g, '');
-  return (
-    dashLessGuid.slice(0, 8) +
+  return (dashLessGuid.slice(0, 8) +
     '-' +
     dashLessGuid.slice(8, 12) +
     '-' +
@@ -100,8 +105,7 @@ export const formatGuidId = (guid: string) => {
     '-' +
     dashLessGuid.slice(16, 20) +
     '-' +
-    dashLessGuid.slice(20)
-  );
+    dashLessGuid.slice(20)) as R;
 };
 
 // Creates a base64 encoded byte array of the given input

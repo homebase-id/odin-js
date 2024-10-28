@@ -9,7 +9,7 @@ import { CommentHead } from './Parts/CommentHead';
 import { CommentBody } from './Parts/CommentBody';
 import { CommentMeta } from './Parts/CommentMeta';
 import { CommentThread } from './Parts/CommentThread';
-import { HomebaseFile, NewHomebaseFile, ReactionFile } from '@homebase-id/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, CommentReaction } from '@homebase-id/js-lib/core';
 import { CanReactInfo } from '../../../../hooks/reactions/useCanReact';
 import { useReaction } from '../../../../hooks/reactions/useReaction';
 import { ErrorNotification } from '../../../../ui/Alert/ErrorNotification';
@@ -21,7 +21,7 @@ import { t } from '../../../../helpers/i18n/dictionary';
 export interface CommentProps {
   context: ReactionContext;
   canReact?: CanReactInfo;
-  commentData: HomebaseFile<ReactionFile> | NewHomebaseFile<RawReactionContent>;
+  commentData: HomebaseFile<CommentReaction> | NewHomebaseFile<RawReactionContent>;
   isThread: boolean;
   onReply?: () => void;
 }
@@ -51,8 +51,8 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
     ...context,
     target: {
       fileId: commentData.fileId,
-      globalTransitId: (commentData as HomebaseFile<ReactionFile>).fileMetadata.globalTransitId,
-      isEncrypted: (commentData as HomebaseFile<ReactionFile>).fileMetadata.isEncrypted || false,
+      globalTransitId: (commentData as HomebaseFile<CommentReaction>).fileMetadata.globalTransitId,
+      isEncrypted: (commentData as HomebaseFile<CommentReaction>).fileMetadata.isEncrypted || false,
     },
   };
 
@@ -103,7 +103,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
                   ? () =>
                       removeComment({
                         context,
-                        commentFile: commentData as HomebaseFile<ReactionFile>,
+                        commentFile: commentData as HomebaseFile<CommentReaction>,
                       })
                   : undefined
               }
@@ -113,7 +113,9 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
               content={commentContent}
               previewThumbnail={commentData.fileMetadata.appData.previewThumbnail}
               commentFileId={fileId}
-              commentLastModifed={(commentData as HomebaseFile<ReactionFile>).fileMetadata.updated}
+              commentLastModifed={
+                (commentData as HomebaseFile<CommentReaction>).fileMetadata.updated
+              }
               isEdit={isEdit}
               onCancel={() => setIsEdit(false)}
               onUpdate={doUpdate}
@@ -125,8 +127,8 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
           <CommentMeta
             canReact={canReact}
             threadContext={threadContext as ReactionContext}
-            created={(commentData as HomebaseFile<ReactionFile>).fileMetadata.created}
-            updated={(commentData as HomebaseFile<ReactionFile>).fileMetadata.updated}
+            created={(commentData as HomebaseFile<CommentReaction>).fileMetadata.created}
+            updated={(commentData as HomebaseFile<CommentReaction>).fileMetadata.updated}
             onReply={isThread ? undefined : () => (onReply ? onReply() : setIsReply(!isReply))}
           />
         ) : null}
