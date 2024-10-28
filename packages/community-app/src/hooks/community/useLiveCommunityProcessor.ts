@@ -59,7 +59,7 @@ export const useLiveCommunityProcessor = (
   // Only after the inbox is processed, we connect for live updates; So we avoid clearing the cache on each fileAdded update
   const isOnline = useCommunityPeerWebsocket(odinId, communityId, inboxStatus === 'success');
 
-  useCommunityWebsocket(communityId);
+  useCommunityWebsocket(odinId, communityId);
 
   return isOnline;
 };
@@ -201,7 +201,9 @@ const useCommunityPeerWebsocket = (
     isEnabled ? handler : undefined,
     odinId,
     ['fileAdded', 'fileModified', 'fileDeleted'],
-    [targetDrive],
+    [targetDrive, odinId === window.location.host ? LOCAL_COMMUNITY_APP_DRIVE : undefined].filter(
+      Boolean
+    ) as TargetDrive[],
     () => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
     },
@@ -323,7 +325,7 @@ const findChangesSinceTimestamp = async (
   return modifiedFiles.searchResults.concat(newFiles.searchResults);
 };
 
-const useCommunityWebsocket = (communityId: string | undefined) => {
+const useCommunityWebsocket = (odinId: string | undefined, communityId: string | undefined) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
   const targetDrive = LOCAL_COMMUNITY_APP_DRIVE;
@@ -364,7 +366,12 @@ const useCommunityWebsocket = (communityId: string | undefined) => {
     handler,
     undefined,
     ['fileAdded', 'fileModified', 'fileDeleted'],
-    [targetDrive],
+    [
+      targetDrive,
+      odinId === window.location.host && communityId
+        ? getTargetDriveFromCommunityId(communityId)
+        : undefined,
+    ].filter(Boolean) as TargetDrive[],
     undefined,
     undefined,
     'useLiveCommunityProcessor'
