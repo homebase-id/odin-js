@@ -335,6 +335,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
   return useWebsocketSubscriber(
     isEnabled ? handler : undefined,
+    undefined,
     [
       'fileAdded',
       'fileModified',

@@ -269,7 +269,7 @@ export const UnsubscribeOverPeer = (handler: (data: TypedConnectionNotification)
   }
 };
 
-const NotifyOverPeer = async (command: WebsocketCommand | EstablishConnectionRequest) => {
+export const NotifyOverPeer = async (command: WebsocketCommand | EstablishConnectionRequest) => {
   if (!webSocketClient) throw new Error('No active websocket to message across');
   if (isDebug)
     console.debug(`[WebsocketProviderOverPeer] Send command (${JSON.stringify(command)})`);

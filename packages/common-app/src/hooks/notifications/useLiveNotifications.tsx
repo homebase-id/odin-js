@@ -121,6 +121,7 @@ export const useLiveNotifications = (props: { drives?: TargetDrive[] } | undefin
 
   useWebsocketSubscriber(
     handler,
+    undefined,
     ['connectionRequestAccepted', 'connectionRequestReceived', 'appNotificationAdded', 'unknown'],
     drives || [],
     undefined,

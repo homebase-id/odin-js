@@ -10,20 +10,23 @@ import {
 import { useEffect, useState, useCallback } from 'react';
 import { useDotYouClient } from '../auth/useDotYouClient';
 import { hasDebugFlag } from '@homebase-id/js-lib/helpers';
+import { NotifyOverPeer, SubscribeOverPeer, UnsubscribeOverPeer } from '@homebase-id/js-lib/peer';
 
 const isDebug = hasDebugFlag();
 
 // Wrapper for the notification subscriber within DotYouCore-js to add client side filtering of the notifications
 export const useWebsocketSubscriber = (
   handler: ((notification: TypedConnectionNotification) => void) | undefined,
+  odinId: string | undefined,
   types: NotificationType[],
   drives: TargetDrive[],
   onDisconnect?: () => void,
   onReconnect?: () => void,
   refId?: string
 ) => {
-  const [isConnected, setIsConected] = useState<boolean>(false);
   const dotYouClient = useDotYouClient().getDotYouClient();
+  const isPeer = !!odinId && odinId !== dotYouClient.getIdentity();
+  const [isConnected, setIsConected] = useState<boolean>(false);
 
   const wrappedHandler = useCallback(
     (notification: TypedConnectionNotification) => {
@@ -33,13 +36,22 @@ export const useWebsocketSubscriber = (
             '[NotificationSubscriber] Replying to inboxItemReceived by sending processInbox'
           );
 
-        Notify({
-          command: 'processInbox',
-          data: JSON.stringify({
-            targetDrive: notification.targetDrive,
-            batchSize: 100,
-          }),
-        });
+        if (isPeer)
+          NotifyOverPeer({
+            command: 'processInbox',
+            data: JSON.stringify({
+              targetDrive: notification.targetDrive,
+              batchSize: 100,
+            }),
+          });
+        else
+          Notify({
+            command: 'processInbox',
+            data: JSON.stringify({
+              targetDrive: notification.targetDrive,
+              batchSize: 100,
+            }),
+          });
       }
 
       if (types?.length >= 1 && !types.includes(notification.notificationType)) return;
@@ -59,21 +71,40 @@ export const useWebsocketSubscriber = (
 
     if (!isConnected && localHandler) {
       (async () => {
-        await Subscribe(
-          dotYouClient,
-          drives,
-          localHandler,
-          () => {
-            setIsConected(false);
-            onDisconnect && onDisconnect();
-          },
-          () => {
-            setIsConected(true);
-            onReconnect && onReconnect();
-          },
-          undefined,
-          refId
-        );
+        if (isPeer)
+          await SubscribeOverPeer(
+            dotYouClient,
+            odinId,
+            drives,
+            localHandler,
+            () => {
+              setIsConected(false);
+              onDisconnect && onDisconnect();
+            },
+            () => {
+              setIsConected(true);
+              onReconnect && onReconnect();
+            },
+            undefined,
+            refId
+          );
+        else
+          await Subscribe(
+            dotYouClient,
+            drives,
+            localHandler,
+            () => {
+              setIsConected(false);
+              onDisconnect && onDisconnect();
+            },
+            () => {
+              setIsConected(true);
+              onReconnect && onReconnect();
+            },
+            undefined,
+            refId
+          );
+
         setIsConected(true);
       })();
     }
@@ -82,7 +113,8 @@ export const useWebsocketSubscriber = (
       if (isConnected && localHandler) {
         setIsConected(false);
         try {
-          Unsubscribe(localHandler);
+          if (isPeer) UnsubscribeOverPeer(localHandler);
+          else Unsubscribe(localHandler);
         } catch (e) {
           console.error(e);
         }

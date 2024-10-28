@@ -4,7 +4,6 @@ import {
   insertNewNotification,
   useDotYouClientContext,
   useWebsocketSubscriber,
-  useWebsocketSubscriberOverPeer,
 } from '@homebase-id/common-app';
 import {
   drivesEqual,
@@ -198,30 +197,17 @@ const useCommunityPeerWebsocket = (
     }
   }, []);
 
-  if (!odinId || odinId === dotYouClient.getIdentity()) {
-    return useWebsocketSubscriber(
-      isEnabled ? handler : undefined,
-      ['fileAdded', 'fileModified', 'fileDeleted'],
-      [targetDrive],
-      () => {
-        queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
-      },
-      undefined,
-      'useLiveCommunityPeerProcessor'
-    );
-  } else {
-    return useWebsocketSubscriberOverPeer(
-      isEnabled ? handler : undefined,
-      odinId,
-      ['fileAdded', 'fileModified', 'fileDeleted'],
-      [targetDrive],
-      () => {
-        queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
-      },
-      undefined,
-      'useLiveCommunityPeerProcessor'
-    );
-  }
+  return useWebsocketSubscriber(
+    isEnabled ? handler : undefined,
+    odinId,
+    ['fileAdded', 'fileModified', 'fileDeleted'],
+    [targetDrive],
+    () => {
+      queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
+    },
+    undefined,
+    'useLiveCommunityPeerProcessor'
+  );
 };
 
 // Process batched updates after a processInbox
@@ -376,6 +362,7 @@ const useCommunityWebsocket = (communityId: string | undefined) => {
 
   return useWebsocketSubscriber(
     handler,
+    undefined,
     ['fileAdded', 'fileModified', 'fileDeleted'],
     [targetDrive],
     undefined,
