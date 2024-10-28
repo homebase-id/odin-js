@@ -33,7 +33,7 @@ import {
   CommunityMessage,
   dsrToMessage,
 } from '../../providers/CommunityMessageProvider';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback } from 'react';
 import {
   COMMUNITY_CHANNEL_FILE_TYPE,
   dsrToCommunityChannel,
@@ -42,6 +42,7 @@ import { insertNewCommunityChannel } from './channels/useCommunityChannels';
 import {
   COMMUNITY_METADATA_FILE_TYPE,
   dsrToCommunityMetadata,
+  LOCAL_COMMUNITY_APP_DRIVE,
 } from '../../providers/CommunityMetadataProvider';
 import { insertNewcommunityMetadata } from './useCommunityMetadata';
 
@@ -53,17 +54,13 @@ export const useLiveCommunityProcessor = (
   odinId: string | undefined,
   communityId: string | undefined
 ) => {
-  const dotYouClient = useDotYouClientContext();
-
   // Process the inbox on startup; As we want to cover the backlog of messages first
   const { status: inboxStatus } = useInboxProcessor(odinId, communityId || '');
 
   // Only after the inbox is processed, we connect for live updates; So we avoid clearing the cache on each fileAdded update
-  const isOnline = useCommunityWebsocket(
-    odinId,
-    communityId,
-    inboxStatus === 'success' || odinId !== dotYouClient.getIdentity()
-  );
+  const isOnline = useCommunityPeerWebsocket(odinId, communityId, inboxStatus === 'success');
+
+  useCommunityWebsocket(communityId);
 
   return isOnline;
 };
@@ -123,17 +120,14 @@ const useInboxProcessor = (odinId: string | undefined, communityId: string | und
   });
 };
 
-const useCommunityWebsocket = (
+const useCommunityPeerWebsocket = (
   odinId: string | undefined,
   communityId: string | undefined,
   isEnabled: boolean
 ) => {
   const dotYouClient = useDotYouClientContext();
-  const identity = dotYouClient.getIdentity();
   const queryClient = useQueryClient();
   const targetDrive = getTargetDriveFromCommunityId(communityId || '');
-
-  const [messagesQueue, setMessagesQueue] = useState<HomebaseFile<CommunityMessage>[]>([]);
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
     if (!communityId) return;
@@ -167,12 +161,7 @@ const useCommunityWebsocket = (
           return;
         }
 
-        if (updatedChatMessage.fileMetadata.senderOdinId !== identity) {
-          // Messages from others are processed immediately
-          insertNewMessage(queryClient, updatedChatMessage, communityId);
-        } else {
-          setMessagesQueue((prev) => [...prev, updatedChatMessage]);
-        }
+        insertNewMessage(queryClient, updatedChatMessage, communityId);
       } else if (
         notification.header.fileMetadata.appData.fileType === COMMUNITY_CHANNEL_FILE_TYPE
       ) {
@@ -188,23 +177,6 @@ const useCommunityWebsocket = (
         }
         insertNewCommunityChannel(queryClient, communityChannel, communityId);
       }
-
-      // Needs to be handled on the local drive
-      // if (
-      //   notification.header.fileMetadata.appData.fileType === COMMUNITY_METADATA_FILE_TYPE
-      // ) {
-      //   const communityChannel = await dsrToCommunityMetadata(
-      //     dotYouClient,
-      //     notification.header,
-      //     targetDrive,
-      //     true
-      //   );
-      //   if (!communityChannel) {
-      //     console.warn('[CommunityWebsocket] Invalid channel received', notification);
-      //     return;
-      //   }
-      //   insertNewcommunityMetadata(queryClient, communityChannel);
-      // }
     }
 
     if (
@@ -224,74 +196,7 @@ const useCommunityWebsocket = (
         });
       }
     }
-
-    if (notification.notificationType === 'appNotificationAdded') {
-      const clientNotification = notification as AppNotification;
-
-      insertNewNotification(queryClient, clientNotification);
-      incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
-    }
   }, []);
-
-  const messagesQueueTunnel = useRef<HomebaseFile<CommunityMessage>[]>([]);
-  const processQueue = useCallback(async (queuedMessages: HomebaseFile<CommunityMessage>[]) => {
-    if (!communityId) return;
-    isDebug && console.debug('[CommunityWebsocket] Processing queue', queuedMessages.length);
-    setMessagesQueue([]);
-    if (timeout.current) {
-      clearTimeout(timeout.current);
-      timeout.current = null;
-    }
-
-    const queuedMessagesWithLastUpdated = queuedMessages.map((m) => ({
-      ...m,
-      fileMetadata: {
-        ...m.fileMetadata,
-        updated:
-          Object.values(m.serverMetadata?.transferHistory?.recipients || []).reduce((acc, cur) => {
-            return Math.max(acc, cur.lastUpdated || 0);
-          }, 0) ||
-          m.fileMetadata.updated ||
-          0,
-      },
-    }));
-
-    // Filter out duplicate messages and selec the one with the latest updated property
-    const filteredMessages = queuedMessagesWithLastUpdated.reduce((acc, message) => {
-      const existingMessage = acc.find((m) => stringGuidsEqual(m.fileId, message.fileId));
-      if (!existingMessage) {
-        acc.push(message);
-      } else if (existingMessage.fileMetadata.updated < message.fileMetadata.updated) {
-        acc[acc.indexOf(existingMessage)] = message;
-      }
-      return acc;
-    }, [] as HomebaseFile<CommunityMessage>[]);
-
-    await processCommunityMessagesBatch(
-      dotYouClient,
-      queryClient,
-      targetDrive,
-      communityId,
-      filteredMessages
-    );
-  }, []);
-
-  const timeout = useRef<NodeJS.Timeout | null>(null);
-  useEffect(() => {
-    // Using a ref as it's part of the global closure so we can easily pass the latest queue into the timeout
-    messagesQueueTunnel.current = [...messagesQueue];
-
-    if (messagesQueue.length >= 1) {
-      if (!timeout.current) {
-        // Start timeout to always process the queue after a certain time
-        timeout.current = setTimeout(() => processQueue(messagesQueueTunnel.current), 500);
-      }
-    }
-
-    if (messagesQueue.length > 25) {
-      processQueue(messagesQueue);
-    }
-  }, [processQueue, messagesQueue]);
 
   if (!odinId || odinId === dotYouClient.getIdentity()) {
     return useWebsocketSubscriber(
@@ -302,7 +207,7 @@ const useCommunityWebsocket = (
         queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
       },
       undefined,
-      'useLiveCommunityProcessor'
+      'useLiveCommunityPeerProcessor'
     );
   } else {
     return useWebsocketSubscriberOverPeer(
@@ -314,7 +219,7 @@ const useCommunityWebsocket = (
         queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
       },
       undefined,
-      'useLiveCommunityProcessor'
+      'useLiveCommunityPeerProcessor'
     );
   }
 };
@@ -430,4 +335,51 @@ const findChangesSinceTimestamp = async (
         });
 
   return modifiedFiles.searchResults.concat(newFiles.searchResults);
+};
+
+const useCommunityWebsocket = (communityId: string | undefined) => {
+  const dotYouClient = useDotYouClientContext();
+  const queryClient = useQueryClient();
+  const targetDrive = LOCAL_COMMUNITY_APP_DRIVE;
+
+  const handler = useCallback(async (notification: TypedConnectionNotification) => {
+    if (!communityId) return;
+    isDebug && console.debug('[CommunityWebsocket] Got notification', notification);
+
+    if (
+      (notification.notificationType === 'fileAdded' ||
+        notification.notificationType === 'fileModified') &&
+      drivesEqual(notification.targetDrive, targetDrive)
+    ) {
+      if (notification.header.fileMetadata.appData.fileType === COMMUNITY_METADATA_FILE_TYPE) {
+        const communityMetadata = await dsrToCommunityMetadata(
+          dotYouClient,
+          notification.header,
+          targetDrive,
+          true
+        );
+        if (!communityMetadata) {
+          console.warn('[CommunityWebsocket] Invalid channel received', notification);
+          return;
+        }
+        insertNewcommunityMetadata(queryClient, communityMetadata);
+      }
+    }
+
+    if (notification.notificationType === 'appNotificationAdded') {
+      const clientNotification = notification as AppNotification;
+
+      insertNewNotification(queryClient, clientNotification);
+      incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
+    }
+  }, []);
+
+  return useWebsocketSubscriber(
+    handler,
+    ['fileAdded', 'fileModified', 'fileDeleted'],
+    [targetDrive],
+    undefined,
+    undefined,
+    'useLiveCommunityProcessor'
+  );
 };

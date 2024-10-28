@@ -4,6 +4,7 @@ import { Toaster, useDarkMode } from '@homebase-id/common-app';
 import { websocketDrives } from '../../../hooks/auth/useAuth';
 import { getTargetDriveFromCommunityId } from '../../../providers/CommunityDefinitionProvider';
 import { TargetDrive } from '@homebase-id/js-lib/core';
+import { LOCAL_COMMUNITY_APP_DRIVE } from '../../../providers/CommunityMetadataProvider';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -52,7 +53,13 @@ export const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
       >
         {children}
       </div>
-      <Toaster drives={[...websocketDrives, targetDrive].filter(Boolean) as TargetDrive[]} />
+      <Toaster
+        drives={
+          [...websocketDrives, targetDrive, LOCAL_COMMUNITY_APP_DRIVE].filter(
+            Boolean
+          ) as TargetDrive[]
+        }
+      />
     </>
   );
 };
