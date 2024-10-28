@@ -240,6 +240,19 @@ const useChatWebsocket = (isEnabled: boolean) => {
       }
     }
 
+    if (
+      notification.notificationType === `fileDeleted` &&
+      drivesEqual(notification.targetDrive, ChatDrive)
+    ) {
+      if (notification.header.fileMetadata.appData.fileType === CHAT_MESSAGE_FILE_TYPE) {
+        const conversationId = notification.header.fileMetadata.appData.groupId;
+        queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+      }
+      if (notification.header.fileMetadata.appData.fileType === CHAT_CONVERSATION_FILE_TYPE) {
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      }
+    }
+
     if (notification.notificationType === 'appNotificationAdded') {
       const clientNotification = notification as AppNotification;
 
@@ -325,6 +338,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
     [
       'fileAdded',
       'fileModified',
+      'fileDeleted',
       'reactionContentAdded',
       'reactionContentDeleted',
       'statisticsChanged',

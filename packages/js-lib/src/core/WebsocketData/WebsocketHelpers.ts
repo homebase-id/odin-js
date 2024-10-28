@@ -1,15 +1,11 @@
-import { hasDebugFlag, jsonStringify64, tryJsonParse, drivesEqual } from '../../helpers/helpers';
-import { ApiType, DotYouClient } from '../DotYouClient';
-import { decryptData, encryptData, getRandomIv } from '../InterceptionEncryptionUtil';
-import { TargetDrive } from '../core';
+import { tryJsonParse } from '../../helpers/helpers';
+import { decryptData } from '../InterceptionEncryptionUtil';
 import {
   ClientConnectionNotification,
   ClientDeviceNotification,
   ClientFileNotification,
   ClientTransitNotification,
   ClientUnknownNotification,
-  WebsocketCommand,
-  EstablishConnectionRequest,
   NotificationType,
   TypedConnectionNotification,
   AppNotification,
@@ -24,9 +20,8 @@ export interface RawClientNotification {
 export const ParseRawClientNotification = (
   notification: RawClientNotification
 ): TypedConnectionNotification => {
-  const { targetDrive, header, sender, recipient, ...data } = tryJsonParse<Record<string, unknown>>(
-    notification.data
-  );
+  const { targetDrive, header, previousServerFileHeader, sender, recipient, ...data } =
+    tryJsonParse<Record<string, unknown>>(notification.data);
 
   if (notification.notificationType === 'inboxItemReceived') {
     return {
@@ -44,7 +39,7 @@ export const ParseRawClientNotification = (
     return {
       notificationType: notification.notificationType,
       targetDrive: targetDrive,
-      header: header,
+      header: previousServerFileHeader || header,
       data: data,
     } as ClientFileNotification;
   }

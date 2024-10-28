@@ -133,7 +133,7 @@ const useCommunityWebsocket = (
   const queryClient = useQueryClient();
   const targetDrive = getTargetDriveFromCommunityId(communityId || '');
 
-  const [chatMessagesQueue, setChatMessagesQueue] = useState<HomebaseFile<CommunityMessage>[]>([]);
+  const [messagesQueue, setMessagesQueue] = useState<HomebaseFile<CommunityMessage>[]>([]);
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
     if (!communityId) return;
@@ -171,7 +171,7 @@ const useCommunityWebsocket = (
           // Messages from others are processed immediately
           insertNewMessage(queryClient, updatedChatMessage, communityId);
         } else {
-          setChatMessagesQueue((prev) => [...prev, updatedChatMessage]);
+          setMessagesQueue((prev) => [...prev, updatedChatMessage]);
         }
       } else if (
         notification.header.fileMetadata.appData.fileType === COMMUNITY_CHANNEL_FILE_TYPE
@@ -187,26 +187,42 @@ const useCommunityWebsocket = (
           return;
         }
         insertNewCommunityChannel(queryClient, communityChannel, communityId);
-      } else if (
-        notification.header.fileMetadata.appData.fileType === COMMUNITY_METADATA_FILE_TYPE
-      ) {
-        const communityChannel = await dsrToCommunityMetadata(
-          dotYouClient,
-          notification.header,
-          targetDrive,
-          true
-        );
-        if (!communityChannel) {
-          console.warn('[CommunityWebsocket] Invalid channel received', notification);
-          return;
-        }
-        insertNewcommunityMetadata(queryClient, communityChannel);
       }
+
+      // Needs to be handled on the local drive
+      // if (
+      //   notification.header.fileMetadata.appData.fileType === COMMUNITY_METADATA_FILE_TYPE
+      // ) {
+      //   const communityChannel = await dsrToCommunityMetadata(
+      //     dotYouClient,
+      //     notification.header,
+      //     targetDrive,
+      //     true
+      //   );
+      //   if (!communityChannel) {
+      //     console.warn('[CommunityWebsocket] Invalid channel received', notification);
+      //     return;
+      //   }
+      //   insertNewcommunityMetadata(queryClient, communityChannel);
+      // }
     }
 
-    if (notification.notificationType === 'fileDeleted') {
-      // TODO: Handle fileDeleted
-      // Cleanup
+    if (
+      notification.notificationType === 'fileDeleted' &&
+      drivesEqual(notification.targetDrive, targetDrive)
+    ) {
+      if (notification.header.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE) {
+        const threadOrChannelId = notification.header.fileMetadata.appData.groupId;
+        queryClient.invalidateQueries({
+          queryKey: ['community-messages', formatGuidId(threadOrChannelId)],
+        });
+      } else if (
+        notification.header.fileMetadata.appData.fileType === COMMUNITY_CHANNEL_FILE_TYPE
+      ) {
+        queryClient.invalidateQueries({
+          queryKey: ['community-channels'],
+        });
+      }
     }
 
     if (notification.notificationType === 'appNotificationAdded') {
@@ -217,11 +233,11 @@ const useCommunityWebsocket = (
     }
   }, []);
 
-  const chatMessagesQueueTunnel = useRef<HomebaseFile<CommunityMessage>[]>([]);
+  const messagesQueueTunnel = useRef<HomebaseFile<CommunityMessage>[]>([]);
   const processQueue = useCallback(async (queuedMessages: HomebaseFile<CommunityMessage>[]) => {
     if (!communityId) return;
     isDebug && console.debug('[CommunityWebsocket] Processing queue', queuedMessages.length);
-    setChatMessagesQueue([]);
+    setMessagesQueue([]);
     if (timeout.current) {
       clearTimeout(timeout.current);
       timeout.current = null;
@@ -263,19 +279,19 @@ const useCommunityWebsocket = (
   const timeout = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     // Using a ref as it's part of the global closure so we can easily pass the latest queue into the timeout
-    chatMessagesQueueTunnel.current = [...chatMessagesQueue];
+    messagesQueueTunnel.current = [...messagesQueue];
 
-    if (chatMessagesQueue.length >= 1) {
+    if (messagesQueue.length >= 1) {
       if (!timeout.current) {
         // Start timeout to always process the queue after a certain time
-        timeout.current = setTimeout(() => processQueue(chatMessagesQueueTunnel.current), 500);
+        timeout.current = setTimeout(() => processQueue(messagesQueueTunnel.current), 500);
       }
     }
 
-    if (chatMessagesQueue.length > 25) {
-      processQueue(chatMessagesQueue);
+    if (messagesQueue.length > 25) {
+      processQueue(messagesQueue);
     }
-  }, [processQueue, chatMessagesQueue]);
+  }, [processQueue, messagesQueue]);
 
   if (!odinId || odinId === dotYouClient.getIdentity()) {
     return useWebsocketSubscriber(

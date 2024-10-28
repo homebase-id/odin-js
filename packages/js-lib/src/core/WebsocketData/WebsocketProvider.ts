@@ -70,7 +70,7 @@ const ConnectSocket = async (
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     webSocketClient = new WebSocket(url, undefined, args);
-    if (isDebug) console.debug(`[NotificationProvider] Client connected`);
+    if (isDebug) console.debug(`[WebsocketProvider] Client connected`);
 
     webSocketClient.onopen = () => {
       const establishConnectionRequest: EstablishConnectionRequest = {
@@ -90,7 +90,7 @@ const ConnectSocket = async (
       pingInterval = setInterval(() => {
         if (lastPong && Date.now() - lastPong > PING_INTERVAL * 2) {
           // 2 ping intervals have passed without a pong, reconnect
-          if (isDebug) console.debug(`[NotificationProvider] Ping timeout`);
+          if (isDebug) console.debug(`[WebsocketProvider] Ping timeout`);
           ReconnectSocket(dotYouClient, drives, args);
           return;
         }
@@ -104,13 +104,13 @@ const ConnectSocket = async (
       const notification: RawClientNotification = await parseMessage(e, activeSs);
 
       if (notification.notificationType === 'error') {
-        console.warn('[NotificationProvider] Error:', notification.data);
+        console.warn('[WebsocketProvider] Error:', notification.data);
       }
 
       if (!isConnected) {
         // First message must be acknowledgement of successful handshake
         if (notification.notificationType == 'deviceHandshakeSuccess') {
-          if (isDebug) console.debug(`[NotificationProvider] Device handshake success`);
+          if (isDebug) console.debug(`[WebsocketProvider] Device handshake success`);
           isConnected = true;
           setupPing();
           resolve();
@@ -118,7 +118,7 @@ const ConnectSocket = async (
         }
       }
 
-      if (isDebug) console.debug(`[NotificationProvider] `, notification);
+      if (isDebug) console.debug(`[WebsocketProvider] `, notification);
       if (notification.notificationType === 'pong') lastPong = Date.now();
 
       const parsedNotification = ParseRawClientNotification(notification);
@@ -126,15 +126,15 @@ const ConnectSocket = async (
     };
 
     webSocketClient.onerror = (e) => {
-      console.error('[NotificationProvider]', e);
+      console.error('[WebsocketProvider]', e);
     };
 
     webSocketClient.onclose = (e) => {
       if (isDebug) {
         if (e.wasClean) {
-          console.debug('[NotificationProvider] Connection closed cleanly', e);
+          console.debug('[WebsocketProvider] Connection closed cleanly', e);
         } else {
-          console.debug('[NotificationProvider] Connection closed unexpectedly', e);
+          console.debug('[WebsocketProvider] Connection closed unexpectedly', e);
         }
       }
 
@@ -159,7 +159,7 @@ const ReconnectSocket = async (
     connectPromise = undefined;
     clearInterval(pingInterval);
 
-    if (isDebug) console.debug('[NotificationProvider] Reconnecting');
+    if (isDebug) console.debug('[WebsocketProvider] Reconnecting');
 
     await ConnectSocket(dotYouClient, drives, args);
     subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
@@ -173,7 +173,7 @@ const DisconnectSocket = async () => {
   } catch {
     // Ignore any errors on close, as we always want to clean up
   }
-  if (isDebug) console.debug(`[NotificationProvider] Client disconnected`);
+  if (isDebug) console.debug(`[WebsocketProvider] Client disconnected`);
 
   isConnected = false;
   connectPromise = undefined;
@@ -197,14 +197,13 @@ export const Subscribe = async (
   const apiType = dotYouClient.getType();
   const sharedSecret = dotYouClient.getSharedSecret();
   if ((apiType !== ApiType.Owner && apiType !== ApiType.App) || !sharedSecret) {
-    throw new Error(`NotificationProvider is not supported for ApiType: ${apiType}`);
+    throw new Error(`[WebsocketProviderOverPeer] is not supported for ApiType: ${apiType}`);
   }
 
   activeSs = sharedSecret;
   subscribers.push({ handler, onDisconnect, onReconnect });
 
-  if (isDebug)
-    console.debug(`[NotificationProvider] New subscriber (${subscribers.length})`, refId);
+  if (isDebug) console.debug(`[WebsocketProvider] New subscriber (${subscribers.length})`, refId);
 
   if (
     subscribedDrives &&
@@ -232,7 +231,7 @@ export const Unsubscribe = (handler: (data: TypedConnectionNotification) => void
 
 export const Notify = async (command: WebsocketCommand | EstablishConnectionRequest) => {
   if (!webSocketClient) throw new Error('No active websocket to message across');
-  if (isDebug) console.debug(`[NotificationProvider] Send command (${JSON.stringify(command)})`);
+  if (isDebug) console.debug(`[WebsocketProvider] Send command (${JSON.stringify(command)})`);
 
   const json = jsonStringify64(command);
   const payload = await encryptData(json, getRandomIv(), activeSs);
