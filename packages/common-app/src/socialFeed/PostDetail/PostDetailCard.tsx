@@ -165,12 +165,6 @@ export const PostDetailCard = ({
         )
       ) : null}
 
-      {post?.type === 'Article' ? (
-        <p className="mb-5 text-base leading-relaxed text-gray-500">
-          {(post as Article)?.abstract}
-        </p>
-      ) : null}
-
       {post?.embeddedPost ? (
         <EmbeddedPostContent content={post.embeddedPost} className="my-5" />
       ) : null}
