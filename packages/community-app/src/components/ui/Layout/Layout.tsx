@@ -33,8 +33,11 @@ const NOT_SHADED_BG = 'bg-white dark:bg-black';
 export const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
   const [searchParams] = useSearchParams();
   const uiSetting = searchParams.get('ui');
-  const { communityKey } = useParams();
-  const targetDrive = getTargetDriveFromCommunityId(communityKey || '');
+  const { communityKey, odinKey } = useParams();
+  const targetDrive =
+    communityKey && odinKey === window.location.host
+      ? getTargetDriveFromCommunityId(communityKey || '')
+      : undefined;
 
   if (uiSetting === 'minimal' || uiSetting === 'focus')
     return <MinimalLayout>{children}</MinimalLayout>;
@@ -49,13 +52,7 @@ export const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
       >
         {children}
       </div>
-      <Toaster
-        drives={
-          [...websocketDrives, communityKey ? targetDrive : undefined].filter(
-            Boolean
-          ) as TargetDrive[]
-        }
-      />
+      <Toaster drives={[...websocketDrives, targetDrive].filter(Boolean) as TargetDrive[]} />
     </>
   );
 };
