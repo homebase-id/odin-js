@@ -25,6 +25,7 @@ import {
   queryModified,
   TargetDrive,
   TypedConnectionNotification,
+  WebsocketCommand,
 } from '@homebase-id/js-lib/core';
 import { insertNewMessage, insertNewMessagesForChannel } from './messages/useCommunityMessages';
 import {
@@ -32,7 +33,7 @@ import {
   CommunityMessage,
   dsrToMessage,
 } from '../../providers/CommunityMessageProvider';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
   COMMUNITY_CHANNEL_FILE_TYPE,
   dsrToCommunityChannel,

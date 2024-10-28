@@ -114,6 +114,7 @@ const ConnectSocket = async (
         drives,
         waitTimeMs: 2000,
         batchSize: 1,
+        otherOnlineIdentityKeys: ['3ef60676-36e1-4f8c-b95f-b5f73b3a1b17'],
       };
 
       NotifyOverPeer({

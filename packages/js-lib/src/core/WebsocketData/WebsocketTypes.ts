@@ -6,6 +6,7 @@ export interface EstablishConnectionRequest {
   drives: TargetDrive[];
   waitTimeMs: number;
   batchSize: number;
+  otherOnlineIdentityKeys?: string[];
 }
 
 export type NotificationType =
