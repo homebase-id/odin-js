@@ -90,8 +90,8 @@ export const getSocialFeed = async (
     return {
       results: [...allPostFiles, ...postsOfOwn].sort(
         (a, b) =>
-          (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
-          (a.fileMetadata.appData.userDate || a.fileMetadata.created)
+          (b.fileMetadata.transitCreated || b.fileMetadata.created) -
+          (a.fileMetadata.transitCreated || a.fileMetadata.created)
       ),
       cursorState: result.cursorState,
       ownerCursorState: resultOfOwn.cursorState,
