@@ -41,7 +41,7 @@ import {
   COMMUNITY_CHANNEL_FILE_TYPE,
   dsrToCommunityChannel,
 } from '../../providers/CommunityProvider';
-import { insertNewCommunityChannel } from './channels/useCommunityChannels';
+import { insertNewCommunityChannel, removeCommunityChannel } from './channels/useCommunityChannels';
 import {
   COMMUNITY_METADATA_FILE_TYPE,
   dsrToCommunityMetadata,
@@ -193,9 +193,7 @@ const useCommunityPeerWebsocket = (
       } else if (
         notification.header.fileMetadata.appData.fileType === COMMUNITY_CHANNEL_FILE_TYPE
       ) {
-        queryClient.invalidateQueries({
-          queryKey: ['community-channels'],
-        });
+        removeCommunityChannel(queryClient, notification.header, communityId);
       }
     }
   }, []);
