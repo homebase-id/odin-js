@@ -386,7 +386,9 @@ export const getCommunityMessages = async (
     searchResults:
       ((await Promise.all(
         response.searchResults
-          .map(async (result) => await dsrToMessage(dotYouClient, result, targetDrive, true))
+          .map(
+            async (result) => await dsrToMessage(dotYouClient, result, odinId, targetDrive, true)
+          )
           .filter(Boolean)
       )) as HomebaseFile<CommunityMessage>[]) || [],
   };
@@ -395,15 +397,16 @@ export const getCommunityMessages = async (
 export const dsrToMessage = async (
   dotYouClient: DotYouClient,
   dsr: HomebaseFile,
+  odinId: string | undefined,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<CommunityMessage> | null> => {
   try {
     const msgContent =
-      dsr.fileMetadata.senderOdinId && dotYouClient.getIdentity() !== dsr.fileMetadata.senderOdinId
+      odinId && dotYouClient.getIdentity() !== odinId
         ? await getContentFromHeaderOrPayloadOverPeer<CommunityMessage>(
             dotYouClient,
-            dsr.fileMetadata.senderOdinId,
+            odinId,
             targetDrive,
             dsr,
             includeMetadataHeader

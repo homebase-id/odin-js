@@ -98,6 +98,7 @@ const useInboxProcessor = (odinId: string | undefined, communityId: string | und
       await processCommunityMessagesBatch(
         dotYouClient,
         queryClient,
+        odinId,
         targetDrive,
         communityId,
         newMessages
@@ -144,6 +145,7 @@ const useCommunityPeerWebsocket = (
         const updatedChatMessage = await dsrToMessage(
           dotYouClient,
           notification.header,
+          odinId,
           targetDrive,
           true
         );
@@ -216,6 +218,7 @@ const useCommunityPeerWebsocket = (
 const processCommunityMessagesBatch = async (
   dotYouClient: DotYouClient,
   queryClient: QueryClient,
+  odinId: string | undefined,
   targetDrive: TargetDrive,
   communityId: string,
   communityMessages: (HomebaseFile<string | CommunityMessage> | DeletedHomebaseFile<string>)[]
@@ -256,6 +259,7 @@ const processCommunityMessagesBatch = async (
               ? await dsrToMessage(
                   dotYouClient,
                   newMessage as HomebaseFile<string>,
+                  odinId,
                   targetDrive,
                   true
                 )
