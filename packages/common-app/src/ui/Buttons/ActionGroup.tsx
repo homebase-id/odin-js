@@ -48,7 +48,9 @@ export const ActionGroup = ({
   const target = usePortal('action-group');
 
   const wrapperRef = useRef<HTMLDivElement>(null);
-  useOutsideTrigger(wrapperRef, () => !isSm && setIsOpen(false));
+  const portalRef = useRef<HTMLDivElement>(null);
+  useOutsideTrigger(wrapperRef, () => !isSm && !alwaysInPortal && setIsOpen(false));
+  useOutsideTrigger(portalRef, () => alwaysInPortal && setIsOpen(false));
   const { verticalSpace, horizontalSpace } = useMostSpace(wrapperRef);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -115,6 +117,7 @@ export const ActionGroup = ({
                     : 'fixed lg:contents'
                 }
                 onClick={() => setIsOpen(false)}
+                ref={portalRef}
               >
                 {ActionOptions}
               </div>,
@@ -132,6 +135,7 @@ export const ActionGroup = ({
                     width: wrapperRef.current ? wrapperRef.current.clientWidth : 0,
                     height: wrapperRef.current ? wrapperRef.current.clientHeight : 0,
                   }}
+                  ref={portalRef}
                   className="pointer-events-none"
                 >
                   {ActionOptions}

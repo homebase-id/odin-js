@@ -26,7 +26,11 @@ import {
   TargetDrive,
   TypedConnectionNotification,
 } from '@homebase-id/js-lib/core';
-import { insertNewMessage, insertNewMessagesForChannel } from './messages/useCommunityMessages';
+import {
+  insertNewMessage,
+  insertNewMessagesForChannel,
+  removeMessage,
+} from './messages/useCommunityMessages';
 import {
   COMMUNITY_MESSAGE_FILE_TYPE,
   CommunityMessage,
@@ -185,10 +189,7 @@ const useCommunityPeerWebsocket = (
       drivesEqual(notification.targetDrive, targetDrive)
     ) {
       if (notification.header.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE) {
-        const threadOrChannelId = notification.header.fileMetadata.appData.groupId;
-        queryClient.invalidateQueries({
-          queryKey: ['community-messages', formatGuidId(threadOrChannelId)],
-        });
+        removeMessage(queryClient, notification.header, communityId);
       } else if (
         notification.header.fileMetadata.appData.fileType === COMMUNITY_CHANNEL_FILE_TYPE
       ) {
