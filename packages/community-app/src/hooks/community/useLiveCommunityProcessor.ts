@@ -129,77 +129,79 @@ const useCommunityPeerWebsocket = (
   communityId: string | undefined,
   isEnabled: boolean
 ) => {
-  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
   const targetDrive = getTargetDriveFromCommunityId(communityId || '');
 
-  const handler = useCallback(async (notification: TypedConnectionNotification) => {
-    if (!communityId) return;
-    isDebug && console.debug('[CommunityWebsocket] Got notification', notification);
+  const handler = useCallback(
+    async (dotYouClient: DotYouClient, notification: TypedConnectionNotification) => {
+      if (!communityId) return;
+      isDebug && console.debug('[CommunityWebsocket] Got notification', notification);
 
-    if (
-      (notification.notificationType === 'fileAdded' ||
-        notification.notificationType === 'fileModified') &&
-      drivesEqual(notification.targetDrive, targetDrive)
-    ) {
-      if (notification.header.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE) {
-        const channelId = notification.header.fileMetadata.appData.groupId;
+      if (
+        (notification.notificationType === 'fileAdded' ||
+          notification.notificationType === 'fileModified') &&
+        drivesEqual(notification.targetDrive, targetDrive)
+      ) {
+        if (notification.header.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE) {
+          const channelId = notification.header.fileMetadata.appData.groupId;
 
-        // This skips the invalidation of all chat messages, as we only need to add/update this specific message
-        const updatedChatMessage = await dsrToMessage(
-          dotYouClient,
-          notification.header,
-          odinId,
-          targetDrive,
-          true
-        );
+          // This skips the invalidation of all chat messages, as we only need to add/update this specific message
+          const updatedChatMessage = await dsrToMessage(
+            dotYouClient,
+            notification.header,
+            odinId,
+            targetDrive,
+            true
+          );
 
-        if (
-          !updatedChatMessage ||
-          Object.keys(updatedChatMessage.fileMetadata.appData.content).length === 0
+          if (
+            !updatedChatMessage ||
+            Object.keys(updatedChatMessage.fileMetadata.appData.content).length === 0
+          ) {
+            // Something is up with the message, invalidate all messages for this conversation
+            console.warn('[CommunityWebsocket] Invalid message received', notification, channelId);
+            queryClient.invalidateQueries({
+              queryKey: ['community-messages', formatGuidId(channelId)],
+            });
+            return;
+          }
+
+          insertNewMessage(queryClient, updatedChatMessage, communityId);
+        } else if (
+          notification.header.fileMetadata.appData.fileType === COMMUNITY_CHANNEL_FILE_TYPE
         ) {
-          // Something is up with the message, invalidate all messages for this conversation
-          console.warn('[CommunityWebsocket] Invalid message received', notification, channelId);
-          queryClient.invalidateQueries({
-            queryKey: ['community-messages', formatGuidId(channelId)],
-          });
-          return;
+          const communityChannel = await dsrToCommunityChannel(
+            dotYouClient,
+            notification.header,
+            targetDrive,
+            true
+          );
+          if (!communityChannel) {
+            console.warn('[CommunityWebsocket] Invalid channel received', notification);
+            queryClient.invalidateQueries({
+              queryKey: ['community-channels', formatGuidId(communityId)],
+            });
+            return;
+          }
+          insertNewCommunityChannel(queryClient, communityChannel, communityId);
         }
+      }
 
-        insertNewMessage(queryClient, updatedChatMessage, communityId);
-      } else if (
-        notification.header.fileMetadata.appData.fileType === COMMUNITY_CHANNEL_FILE_TYPE
+      if (
+        notification.notificationType === 'fileDeleted' &&
+        drivesEqual(notification.targetDrive, targetDrive)
       ) {
-        const communityChannel = await dsrToCommunityChannel(
-          dotYouClient,
-          notification.header,
-          targetDrive,
-          true
-        );
-        if (!communityChannel) {
-          console.warn('[CommunityWebsocket] Invalid channel received', notification);
-          queryClient.invalidateQueries({
-            queryKey: ['community-channels', formatGuidId(communityId)],
-          });
-          return;
+        if (notification.header.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE) {
+          removeMessage(queryClient, notification.header, communityId);
+        } else if (
+          notification.header.fileMetadata.appData.fileType === COMMUNITY_CHANNEL_FILE_TYPE
+        ) {
+          removeCommunityChannel(queryClient, notification.header, communityId);
         }
-        insertNewCommunityChannel(queryClient, communityChannel, communityId);
       }
-    }
-
-    if (
-      notification.notificationType === 'fileDeleted' &&
-      drivesEqual(notification.targetDrive, targetDrive)
-    ) {
-      if (notification.header.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE) {
-        removeMessage(queryClient, notification.header, communityId);
-      } else if (
-        notification.header.fileMetadata.appData.fileType === COMMUNITY_CHANNEL_FILE_TYPE
-      ) {
-        removeCommunityChannel(queryClient, notification.header, communityId);
-      }
-    }
-  }, []);
+    },
+    []
+  );
 
   return useWebsocketSubscriber(
     isEnabled ? handler : undefined,
@@ -336,37 +338,40 @@ const useCommunityWebsocket = (odinId: string | undefined, communityId: string |
   const queryClient = useQueryClient();
   const targetDrive = LOCAL_COMMUNITY_APP_DRIVE;
 
-  const handler = useCallback(async (notification: TypedConnectionNotification) => {
-    if (!communityId) return;
-    isDebug && console.debug('[CommunityWebsocket] Got notification', notification);
+  const handler = useCallback(
+    async (_: DotYouClient, notification: TypedConnectionNotification) => {
+      if (!communityId) return;
+      isDebug && console.debug('[CommunityWebsocket] Got notification', notification);
 
-    if (
-      (notification.notificationType === 'fileAdded' ||
-        notification.notificationType === 'fileModified') &&
-      drivesEqual(notification.targetDrive, targetDrive)
-    ) {
-      if (notification.header.fileMetadata.appData.fileType === COMMUNITY_METADATA_FILE_TYPE) {
-        const communityMetadata = await dsrToCommunityMetadata(
-          dotYouClient,
-          notification.header,
-          targetDrive,
-          true
-        );
-        if (!communityMetadata) {
-          console.warn('[CommunityWebsocket] Invalid channel received', notification);
-          return;
+      if (
+        (notification.notificationType === 'fileAdded' ||
+          notification.notificationType === 'fileModified') &&
+        drivesEqual(notification.targetDrive, targetDrive)
+      ) {
+        if (notification.header.fileMetadata.appData.fileType === COMMUNITY_METADATA_FILE_TYPE) {
+          const communityMetadata = await dsrToCommunityMetadata(
+            dotYouClient,
+            notification.header,
+            targetDrive,
+            true
+          );
+          if (!communityMetadata) {
+            console.warn('[CommunityWebsocket] Invalid channel received', notification);
+            return;
+          }
+          insertNewcommunityMetadata(queryClient, communityMetadata);
         }
-        insertNewcommunityMetadata(queryClient, communityMetadata);
       }
-    }
 
-    if (notification.notificationType === 'appNotificationAdded') {
-      const clientNotification = notification as AppNotification;
+      if (notification.notificationType === 'appNotificationAdded') {
+        const clientNotification = notification as AppNotification;
 
-      insertNewNotification(queryClient, clientNotification);
-      incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
-    }
-  }, []);
+        insertNewNotification(queryClient, clientNotification);
+        incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
+      }
+    },
+    []
+  );
 
   return useWebsocketSubscriber(
     handler,

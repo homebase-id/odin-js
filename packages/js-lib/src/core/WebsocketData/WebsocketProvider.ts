@@ -28,7 +28,7 @@ let lastPong: number | undefined;
 let reconnectTimeout: NodeJS.Timeout | undefined;
 
 const subscribers: {
-  handler: (data: TypedConnectionNotification) => void;
+  handler: (dotYouClient: DotYouClient, data: TypedConnectionNotification) => void;
   onDisconnect?: () => void;
   onReconnect?: () => void;
 }[] = [];
@@ -122,7 +122,9 @@ const ConnectSocket = async (
       if (notification.notificationType === 'pong') lastPong = Date.now();
 
       const parsedNotification = ParseRawClientNotification(notification);
-      subscribers.map(async (subscriber) => await subscriber.handler(parsedNotification));
+      subscribers.map(
+        async (subscriber) => await subscriber.handler(dotYouClient, parsedNotification)
+      );
     };
 
     webSocketClient.onerror = (e) => {
@@ -188,7 +190,7 @@ const DisconnectSocket = async () => {
 export const Subscribe = async (
   dotYouClient: DotYouClient,
   drives: TargetDrive[],
-  handler: (data: TypedConnectionNotification) => void,
+  handler: (dotYouClient: DotYouClient, data: TypedConnectionNotification) => void,
   onDisconnect?: () => void,
   onReconnect?: () => void,
   args?: unknown, // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this,
@@ -218,7 +220,9 @@ export const Subscribe = async (
   return ConnectSocket(dotYouClient, drives, args);
 };
 
-export const Unsubscribe = (handler: (data: TypedConnectionNotification) => void) => {
+export const Unsubscribe = (
+  handler: (dotYouClient: DotYouClient, data: TypedConnectionNotification) => void
+) => {
   const index = subscribers.findIndex((subscriber) => subscriber.handler === handler);
   if (index !== -1) {
     subscribers.splice(index, 1);

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { TypedConnectionNotification } from '@homebase-id/js-lib/core';
+import { DotYouClient, TypedConnectionNotification } from '@homebase-id/js-lib/core';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
 import { useWebsocketSubscriber } from '@homebase-id/common-app';
 import { BlogConfig } from '@homebase-id/js-lib/public';
@@ -54,7 +54,7 @@ const useInboxProcessor = (isEnabled?: boolean) => {
 const useFeedWebSocket = (isEnabled: boolean) => {
   const queryClient = useQueryClient();
 
-  const handler = useCallback((notification: TypedConnectionNotification) => {
+  const handler = useCallback((_: DotYouClient, notification: TypedConnectionNotification) => {
     if (
       (notification.notificationType === 'fileAdded' ||
         notification.notificationType === 'fileModified') &&

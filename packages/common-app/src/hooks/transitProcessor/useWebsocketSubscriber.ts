@@ -6,6 +6,7 @@ import {
   TargetDrive,
   TypedConnectionNotification,
   Notify,
+  DotYouClient,
 } from '@homebase-id/js-lib/core';
 import { useEffect, useState, useCallback } from 'react';
 import { useDotYouClient } from '../auth/useDotYouClient';
@@ -16,7 +17,9 @@ const isDebug = hasDebugFlag();
 
 // Wrapper for the notification subscriber within DotYouCore-js to add client side filtering of the notifications
 export const useWebsocketSubscriber = (
-  handler: ((notification: TypedConnectionNotification) => void) | undefined,
+  handler:
+    | ((dotYouClient: DotYouClient, notification: TypedConnectionNotification) => void)
+    | undefined,
   odinId: string | undefined,
   types: NotificationType[],
   drives: TargetDrive[],
@@ -29,7 +32,7 @@ export const useWebsocketSubscriber = (
   const [isConnected, setIsConected] = useState<boolean>(false);
 
   const wrappedHandler = useCallback(
-    (notification: TypedConnectionNotification) => {
+    (dotYouClient: DotYouClient, notification: TypedConnectionNotification) => {
       if (notification.notificationType === 'inboxItemReceived') {
         isDebug &&
           console.debug(
@@ -55,7 +58,7 @@ export const useWebsocketSubscriber = (
       }
 
       if (types?.length >= 1 && !types.includes(notification.notificationType)) return;
-      handler && handler(notification);
+      handler && handler(dotYouClient, notification);
     },
     [handler]
   );
