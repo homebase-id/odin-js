@@ -178,6 +178,9 @@ const useCommunityPeerWebsocket = (
         );
         if (!communityChannel) {
           console.warn('[CommunityWebsocket] Invalid channel received', notification);
+          queryClient.invalidateQueries({
+            queryKey: ['community-channels', formatGuidId(communityId)],
+          });
           return;
         }
         insertNewCommunityChannel(queryClient, communityChannel, communityId);
