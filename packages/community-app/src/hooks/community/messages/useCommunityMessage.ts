@@ -34,7 +34,7 @@ export const useCommunityMessage = (props?: {
   const queryClient = useQueryClient();
   const identity = dotYouClient.getIdentity();
 
-  const getMessageByGlobalTransitId = async (
+  const getMessageByUniqueId = async (
     odinId: string,
     communityId: string,
     messageId: string,
@@ -136,7 +136,7 @@ export const useCommunityMessage = (props?: {
     get: useQuery({
       queryKey: ['community-message', props?.communityId, props?.messageId],
       queryFn: () =>
-        getMessageByGlobalTransitId(
+        getMessageByUniqueId(
           props?.odinId as string,
           props?.communityId as string,
           props?.messageId as string,
