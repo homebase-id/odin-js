@@ -108,6 +108,9 @@ export const RichTextRenderer = ({
   ) => {
     const { type, attributes } = node;
 
+    const customRendered = renderElementProp?.(node, children);
+    if (customRendered) return customRendered;
+
     switch (type) {
       case 'blockquote':
         return (
@@ -229,7 +232,7 @@ export const RichTextRenderer = ({
         } else return <></>;
 
       default:
-        return renderElementProp?.(node, children) || <span {...attributes}>{children}</span>;
+        return <div {...attributes}>{children}</div>;
     }
   };
 
