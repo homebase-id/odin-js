@@ -112,24 +112,45 @@ export const useChatReaction = (props?: {
         );
 
         // Update the message reaction preview
+        const hasReaction = Object.values(
+          message.fileMetadata.reactionPreview?.reactions || {}
+        ).some(
+          (reactionPrev) => reactionPrev.reactionContent === JSON.stringify({ emoji: reaction })
+        );
+
         const id = getNewId();
-        const reactionPreview: ReactionPreview = {
-          ...(message.fileMetadata.reactionPreview as ReactionPreview),
-          reactions: {
-            ...(message.fileMetadata.reactionPreview?.reactions as ReactionPreview['reactions']),
-            [id]: {
-              key: id,
-              count: '1',
-              reactionContent: JSON.stringify({ emoji: reaction }),
+        let newReactionPreview: ReactionPreview = message.fileMetadata
+          .reactionPreview as ReactionPreview;
+
+        if (hasReaction) {
+          const currentReactions = message.fileMetadata.reactionPreview?.reactions || {};
+          Object.keys(currentReactions).forEach((key) => {
+            if (currentReactions[key].reactionContent === JSON.stringify({ emoji: reaction })) {
+              newReactionPreview.reactions[key] = {
+                ...newReactionPreview.reactions[key],
+                count: (parseInt(currentReactions[key].count) + 1).toString(),
+              };
+            }
+          });
+        } else {
+          newReactionPreview = {
+            ...(message.fileMetadata.reactionPreview as ReactionPreview),
+            reactions: {
+              ...(message.fileMetadata.reactionPreview?.reactions as ReactionPreview['reactions']),
+              [id]: {
+                key: id,
+                count: '1',
+                reactionContent: JSON.stringify({ emoji: reaction }),
+              },
             },
-          },
-        };
+          };
+        }
 
         const messageWithReactionPreview: HomebaseFile<ChatMessage> = {
           ...message,
           fileMetadata: {
             ...message.fileMetadata,
-            reactionPreview,
+            reactionPreview: newReactionPreview,
           },
         };
 
@@ -160,25 +181,29 @@ export const useChatReaction = (props?: {
         }
 
         // Update the message reaction preview
-        const reactions = message.fileMetadata.reactionPreview?.reactions as
+        const newReactions = message.fileMetadata.reactionPreview?.reactions as
           | ReactionPreview['reactions']
           | undefined;
-        if (!reactions) return;
+        if (!newReactions) return;
 
-        const reactionKey = Object.keys(reactions).find(
+        const reactionKey = Object.keys(newReactions).find(
           (key) =>
-            tryJsonParse<{ emoji: string }>(reactions[key].reactionContent)?.emoji === reaction.body
+            tryJsonParse<{ emoji: string }>(newReactions[key].reactionContent)?.emoji ===
+            reaction.body
         );
         if (!reactionKey) return;
+
+        newReactions[reactionKey] = {
+          ...newReactions[reactionKey],
+          count: (parseInt(newReactions[reactionKey].count) - 1).toString(),
+        };
 
         const reactionPreview: ReactionPreview = {
           ...(message.fileMetadata.reactionPreview as ReactionPreview),
           reactions: {
-            ...reactions,
+            ...newReactions,
           },
         };
-
-        delete reactionPreview.reactions[reactionKey];
 
         const messageWithReactionPreview: HomebaseFile<ChatMessage> = {
           ...message,
