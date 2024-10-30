@@ -197,27 +197,29 @@ export const useCommunityReaction = (props?: {
         }
 
         // Update the message reaction preview
-        const reactions = message.fileMetadata.reactionPreview?.reactions as
+        const newReactions = message.fileMetadata.reactionPreview?.reactions as
           | ReactionPreview['reactions']
           | undefined;
-        if (!reactions) return;
+        if (!newReactions) return;
 
-        const reactionKey = Object.keys(reactions).find(
+        const reactionKey = Object.keys(newReactions).find(
           (key) =>
-            tryJsonParse<{ emoji: string }>(reactions[key].reactionContent)?.emoji === reaction.body
+            tryJsonParse<{ emoji: string }>(newReactions[key].reactionContent)?.emoji ===
+            reaction.body
         );
         if (!reactionKey) return;
+
+        newReactions[reactionKey] = {
+          ...newReactions[reactionKey],
+          count: (parseInt(newReactions[reactionKey].count) - 1).toString(),
+        };
 
         const reactionPreview: ReactionPreview = {
           ...(message.fileMetadata.reactionPreview as ReactionPreview),
           reactions: {
-            ...reactions,
+            ...newReactions,
           },
         };
-
-        // TODO: decrease the count of the reaction instead of removing it
-
-        delete reactionPreview.reactions[reactionKey];
 
         const messageWithReactionPreview: HomebaseFile<CommunityMessage> = {
           ...message,
