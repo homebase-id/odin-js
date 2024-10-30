@@ -42,6 +42,7 @@ export enum TransferStatus {
   RecipientIdentityReturnedServerError = 'recipientidentityreturnedservererror',
   RecipientIdentityReturnedBadRequest = 'recipientidentityreturnedbadrequest',
   UnknownServerError = 'unknownservererror',
+  SendingServerTooManyAttempts = 'sendingservertoomanyattempts',
 }
 
 export const FailedTransferStatuses = [
@@ -51,6 +52,7 @@ export const FailedTransferStatuses = [
   TransferStatus.RecipientIdentityReturnedServerError,
   TransferStatus.RecipientIdentityReturnedBadRequest,
   TransferStatus.UnknownServerError,
+  TransferStatus.SendingServerTooManyAttempts,
 ];
 
 export interface RecipientTransferHistory {

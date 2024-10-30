@@ -61,6 +61,10 @@ const enLocale = [
     'Recipient identity returned server error',
   ],
   [
+    TransferStatus.SendingServerTooManyAttempts.toLowerCase(),
+    "Too many failed attempts, won't try again",
+  ],
+  [
     TransferStatus.RecipientIdentityReturnedBadRequest.toLowerCase(),
     'Recipient identity returned bad request',
   ],
