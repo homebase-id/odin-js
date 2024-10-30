@@ -156,9 +156,7 @@ const CommunityTextMessageBody = ({
   const isReply = !!content.replyId;
 
   return (
-    <div
-      className={`relative w-auto max-w-[75vw] rounded-lg md:max-w-xs lg:max-w-lg xl:max-w-[50vw]`}
-    >
+    <div className={`relative w-auto rounded-lg`}>
       <div className="flex flex-col md:flex-row md:flex-wrap md:gap-2">
         <div className="flex w-full min-w-0 flex-col gap-1">
           <MessageTextRenderer
@@ -194,8 +192,16 @@ const MessageTextRenderer = ({
     <RichTextRenderer
       body={message}
       className={className}
-      renderElement={(element) => {
+      renderElement={(element, children) => {
         const { type, attributes } = element;
+
+        if (type === 'p' || type === 'paragraph') {
+          return (
+            <p {...attributes} className="min-h-2">
+              {children}
+            </p>
+          );
+        }
 
         if (
           type === 'channel' &&

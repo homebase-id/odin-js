@@ -51,6 +51,8 @@ export const MessageComposer = ({
       : undefined
   );
 
+  console.log('message', message);
+
   const [files, setFiles] = useState<NewMediaFile[]>();
 
   useEffect(() => {

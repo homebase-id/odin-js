@@ -159,6 +159,42 @@ const InnerRichTextEditor = memo(
     const plugins = useMemo(
       () => ({
         plugins: [
+          // Reset needs to get configured before anything else.. :shrug:
+          // https://github.com/udecode/plate/issues/2736
+          ResetNodePlugin.configure({
+            options: {
+              rules: [
+                // Usage: https://platejs.org/docs/reset-node
+                {
+                  ...resetBlockTypesCommonRule,
+                  hotkey: 'Enter',
+                  predicate: isBlockAboveEmpty,
+                },
+                {
+                  ...resetBlockTypesCommonRule,
+                  hotkey: 'Backspace',
+                  predicate: isSelectionAtBlockStart,
+                },
+                {
+                  ...resetBlockTypesCodeBlockRule,
+                  hotkey: 'Enter',
+                  predicate: isCodeBlockEmpty,
+                  // query: {
+                  //   start: true,
+                  //   end: true,
+                  //   allow: KEYS_HEADING,
+                  // },
+                  // Type of query is not defined in the type, so we need to cast it to any
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                } as any,
+                {
+                  ...resetBlockTypesCodeBlockRule,
+                  hotkey: 'Backspace',
+                  predicate: isSelectionAtCodeBlockStart,
+                },
+              ],
+            },
+          }),
           ParagraphPlugin,
           HeadingPlugin,
           BlockquotePlugin,
@@ -198,40 +234,6 @@ const InnerRichTextEditor = memo(
           }),
           EmojiInputPlugin,
           NodeIdPlugin,
-          ResetNodePlugin.configure({
-            options: {
-              rules: [
-                // Usage: https://platejs.org/docs/reset-node
-                {
-                  ...resetBlockTypesCommonRule,
-                  hotkey: 'Enter',
-                  predicate: isBlockAboveEmpty,
-                },
-                {
-                  ...resetBlockTypesCommonRule,
-                  hotkey: 'Backspace',
-                  predicate: isSelectionAtBlockStart,
-                },
-                {
-                  ...resetBlockTypesCodeBlockRule,
-                  hotkey: 'Enter',
-                  predicate: isCodeBlockEmpty,
-                  // query: {
-                  //   start: true,
-                  //   end: true,
-                  //   allow: KEYS_HEADING,
-                  // },
-                  // Type of query is not defined in the type, so we need to cast it to any
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                } as any,
-                {
-                  ...resetBlockTypesCodeBlockRule,
-                  hotkey: 'Backspace',
-                  predicate: isSelectionAtCodeBlockStart,
-                },
-              ],
-            },
-          }),
           SelectOnBackspacePlugin.configure({
             options: {
               query: {
