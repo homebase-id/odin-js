@@ -101,7 +101,8 @@ const fetchMessages = async (
     groupIds,
     undefined,
     cursorState,
-    PAGE_SIZE
+    PAGE_SIZE,
+    threadId ? 'Comment' : undefined
   );
 };
 

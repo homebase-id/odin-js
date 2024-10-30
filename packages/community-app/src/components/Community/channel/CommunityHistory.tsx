@@ -64,7 +64,7 @@ export const CommunityHistory = ({
     odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata?.appData?.uniqueId,
     channelId: channel?.fileMetadata?.appData?.uniqueId,
-    threadId: origin?.fileMetadata.appData.uniqueId,
+    threadId: origin?.fileMetadata.globalTransitId,
     maxAge: onlyNew ? lastReadTime : undefined,
   });
 

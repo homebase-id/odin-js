@@ -271,7 +271,7 @@ const CommunityMessageThreadSummary = ({
   const { data: messages } = useCommunityMessages({
     odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata.appData.uniqueId as string,
-    threadId: msg.fileMetadata.appData.uniqueId,
+    threadId: msg.fileMetadata.globalTransitId,
   }).all;
 
   const { flattenedMsgs, uniqueSenders } = useMemo(() => {

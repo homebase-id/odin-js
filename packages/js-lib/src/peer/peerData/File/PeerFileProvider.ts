@@ -53,13 +53,16 @@ export const getPayloadAsJsonOverPeer = async <T>(
   key: string,
   options?: {
     systemFileType?: SystemFileType;
+    axiosConfig?: AxiosRequestConfig;
+    lastModified?: number;
   }
 ): Promise<T | null> => {
-  const { systemFileType } = options ?? { systemFileType: 'Standard' };
+  const { systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
 
   return getPayloadBytesOverPeer(dotYouClient, odinId, targetDrive, fileId, key, {
     systemFileType,
     decrypt: true,
+    lastModified,
   }).then((bytes) => parseBytesToObject<T>(bytes));
 };
 
@@ -287,6 +290,7 @@ export const getContentFromHeaderOrPayloadOverPeer = async <T>(
     fileId: string;
     fileMetadata: FileMetadata;
     sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
+    fileSystemType?: SystemFileType;
   },
   includesJsonContent: boolean,
   systemFileType?: SystemFileType
@@ -307,19 +311,27 @@ export const getContentFromHeaderOrPayloadOverPeer = async <T>(
     } else {
       // When contentIsComplete but includesJsonContent == false the query before was done without including the content; So we just get and parse
       const fileHeader = await getFileHeaderOverPeer(dotYouClient, odinId, targetDrive, fileId, {
-        systemFileType,
+        systemFileType: dsr.fileSystemType || systemFileType,
       });
       if (!fileHeader) return null;
       decryptedJsonContent = await decryptJsonContent(fileHeader.fileMetadata, keyHeader);
     }
     return tryJsonParse<T>(decryptedJsonContent);
   } else {
+    const payloadDescriptor = dsr.fileMetadata.payloads.find(
+      (payload) => payload.key === DEFAULT_PAYLOAD_KEY
+    );
+
     return await getPayloadAsJsonOverPeer<T>(
       dotYouClient,
       odinId,
       targetDrive,
       fileId,
-      DEFAULT_PAYLOAD_KEY
+      DEFAULT_PAYLOAD_KEY,
+      {
+        systemFileType: dsr.fileSystemType || systemFileType,
+        lastModified: payloadDescriptor?.lastModified,
+      }
     );
   }
 };
