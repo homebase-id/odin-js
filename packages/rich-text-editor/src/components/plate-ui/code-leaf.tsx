@@ -7,7 +7,7 @@ export const CodeLeaf = withRef<typeof PlateLeaf>(({ children, className, ...pro
       ref={ref}
       asChild
       className={cn(
-        'rounded-lg bg-slate-100 px-1 py-1 font-mono text-sm text-foreground dark:bg-slate-700',
+        'rounded-md border bg-slate-100 px-1 py-1 font-mono text-sm text-red-500  dark:bg-slate-800 dark:text-orange-400',
         className
       )}
       {...props}
