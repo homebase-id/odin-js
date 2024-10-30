@@ -26,7 +26,6 @@ import {
   TransferUploadStatus,
   SystemFileType,
   GlobalTransitIdFileIdentifier,
-  getFileHeaderByGlobalTransitId,
 } from '@homebase-id/js-lib/core';
 import {
   jsonStringify64,
@@ -44,7 +43,6 @@ import { CommunityDefinition, getTargetDriveFromCommunityId } from './CommunityD
 import {
   deleteFileOverPeer,
   getContentFromHeaderOrPayloadOverPeer,
-  getFileHeaderOverPeerByGlobalTransitId,
   getFileHeaderOverPeerByUniqueId,
   queryBatchOverPeer,
   TransitInstructionSet,

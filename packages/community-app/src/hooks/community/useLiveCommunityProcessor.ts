@@ -48,6 +48,7 @@ import {
   LOCAL_COMMUNITY_APP_DRIVE,
 } from '../../providers/CommunityMetadataProvider';
 import { insertNewcommunityMetadata } from './useCommunityMetadata';
+import { useWebsocketDrives } from '../auth/useWebsocketDrives';
 
 const MINUTE_IN_MS = 60000;
 const isDebug = hasDebugFlag();
@@ -134,12 +135,16 @@ const useCommunityPeerWebsocket = (
 
   const handler = useCallback(
     async (dotYouClient: DotYouClient, notification: TypedConnectionNotification) => {
-      if (!communityId) return;
+      if (!communityId) {
+        console.warn('[CommunityWebsocket] No communityId', notification);
+        return;
+      }
       isDebug && console.debug('[CommunityWebsocket] Got notification', notification);
 
       if (
         (notification.notificationType === 'fileAdded' ||
-          notification.notificationType === 'fileModified') &&
+          notification.notificationType === 'fileModified' ||
+          notification.notificationType === 'statisticsChanged') &&
         drivesEqual(notification.targetDrive, targetDrive)
       ) {
         if (notification.header.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE) {
@@ -200,16 +205,17 @@ const useCommunityPeerWebsocket = (
         }
       }
     },
-    []
+    [communityId]
   );
 
+  const { localCommunityDrives, remoteCommunityDrives } = useWebsocketDrives();
+  const drives = odinId === window.location.host ? localCommunityDrives : remoteCommunityDrives;
+
   return useWebsocketSubscriber(
-    isEnabled ? handler : undefined,
+    isEnabled && !!communityId && !!drives ? handler : undefined,
     odinId,
-    ['fileAdded', 'fileModified', 'fileDeleted'],
-    [targetDrive, odinId === window.location.host ? LOCAL_COMMUNITY_APP_DRIVE : undefined].filter(
-      Boolean
-    ) as TargetDrive[],
+    ['fileAdded', 'fileModified', 'fileDeleted', 'statisticsChanged'],
+    drives as TargetDrive[],
     () => {
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
     },
@@ -373,16 +379,13 @@ const useCommunityWebsocket = (odinId: string | undefined, communityId: string |
     []
   );
 
+  const { localCommunityDrives } = useWebsocketDrives();
+
   return useWebsocketSubscriber(
-    handler,
+    localCommunityDrives ? handler : undefined,
     undefined,
     ['fileAdded', 'fileModified', 'fileDeleted'],
-    [
-      targetDrive,
-      odinId === window.location.host && communityId
-        ? getTargetDriveFromCommunityId(communityId)
-        : undefined,
-    ].filter(Boolean) as TargetDrive[],
+    localCommunityDrives as TargetDrive[],
     undefined,
     undefined,
     'useLiveCommunityProcessor'

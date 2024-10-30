@@ -132,7 +132,9 @@ export const CommunityMessageItem = ({
             ) : (
               <CommunityTextMessageBody msg={msg} community={community} />
             )}
-            {hideThreads ? null : <CommunityMessageThreadSummary community={community} msg={msg} />}
+            {hideThreads || !msg.fileMetadata.reactionPreview?.totalCommentCount ? null : (
+              <CommunityMessageThreadSummary community={community} msg={msg} />
+            )}
           </div>
         </div>
       </div>

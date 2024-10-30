@@ -1,10 +1,7 @@
 import { FC, ReactNode } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { Toaster, useDarkMode } from '@homebase-id/common-app';
-import { websocketDrives } from '../../../hooks/auth/useAuth';
-import { getTargetDriveFromCommunityId } from '../../../providers/CommunityDefinitionProvider';
-import { TargetDrive } from '@homebase-id/js-lib/core';
-import { LOCAL_COMMUNITY_APP_DRIVE } from '../../../providers/CommunityMetadataProvider';
+import { useWebsocketDrives } from '../../../hooks/auth/useWebsocketDrives';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -34,11 +31,8 @@ const NOT_SHADED_BG = 'bg-white dark:bg-black';
 export const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
   const [searchParams] = useSearchParams();
   const uiSetting = searchParams.get('ui');
-  const { communityKey, odinKey } = useParams();
-  const targetDrive =
-    communityKey && odinKey === window.location.host
-      ? getTargetDriveFromCommunityId(communityKey || '')
-      : undefined;
+
+  const { localCommunityDrives } = useWebsocketDrives();
 
   if (uiSetting === 'minimal' || uiSetting === 'focus')
     return <MinimalLayout>{children}</MinimalLayout>;
@@ -53,13 +47,7 @@ export const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
       >
         {children}
       </div>
-      <Toaster
-        drives={
-          [...websocketDrives, targetDrive, LOCAL_COMMUNITY_APP_DRIVE].filter(
-            Boolean
-          ) as TargetDrive[]
-        }
-      />
+      {localCommunityDrives ? <Toaster drives={localCommunityDrives} /> : null}
     </>
   );
 };

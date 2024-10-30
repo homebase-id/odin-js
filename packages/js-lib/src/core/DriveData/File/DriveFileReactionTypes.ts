@@ -12,7 +12,7 @@ export interface ReactionPreview {
   totalCommentCount: number;
 }
 
-interface ReactionBase {
+export interface ReactionBase {
   authorOdinId?: string;
   body: string;
 }
