@@ -20,6 +20,7 @@ import {
 } from '../../../providers/CommunityMetadataProvider';
 import { useWebsocketDrives } from '../../auth/useWebsocketDrives';
 import { insertNewcommunityMetadata } from '../useCommunityMetadata';
+import { useChatSocketHandler } from '@homebase-id/chat-app/src/hooks/chat/live/useChatWebsocket';
 
 const isDebug = hasDebugFlag();
 
@@ -31,8 +32,12 @@ export const useCommunityWebsocket = (
   const queryClient = useQueryClient();
   const targetDrive = LOCAL_COMMUNITY_APP_DRIVE;
 
+  const { chatHandler } = useChatSocketHandler();
+
   const handler = useCallback(
     async (_: DotYouClient, notification: TypedConnectionNotification) => {
+      await chatHandler(_, notification);
+
       if (!communityId) return;
       isDebug && console.debug('[CommunityWebsocket] Got notification', notification);
 
@@ -71,7 +76,7 @@ export const useCommunityWebsocket = (
   return useWebsocketSubscriber(
     localCommunityDrives ? handler : undefined,
     undefined,
-    ['fileAdded', 'fileModified', 'fileDeleted'],
+    ['fileAdded', 'fileModified', 'fileDeleted', 'statisticsChanged'],
     localCommunityDrives as TargetDrive[],
     undefined,
     undefined,

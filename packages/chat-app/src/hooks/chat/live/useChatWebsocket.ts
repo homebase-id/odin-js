@@ -26,25 +26,51 @@ import {
 import { websocketDrives } from '../../auth/useAuth';
 import { insertNewMessage, insertNewMessagesForConversation } from '../useChatMessages';
 import { insertNewReaction, removeReaction } from '../useChatReaction';
-import { useConversation, getConversationQueryOptions } from '../useConversation';
+import { getConversationQueryOptions, useConversation } from '../useConversation';
 import { insertNewConversationMetadata } from '../useConversationMetadata';
 import { insertNewConversation } from '../useConversations';
 
 const isDebug = hasDebugFlag();
 
 export const useChatWebsocket = (isEnabled: boolean) => {
+  const queryClient = useQueryClient();
+  const { chatHandler } = useChatSocketHandler();
+
+  return useWebsocketSubscriber(
+    isEnabled ? chatHandler : undefined,
+    undefined,
+    [
+      'fileAdded',
+      'fileModified',
+      'fileDeleted',
+      'reactionContentAdded',
+      'reactionContentDeleted',
+      'statisticsChanged',
+      'appNotificationAdded',
+    ],
+    websocketDrives,
+    () => {
+      queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
+    },
+    undefined,
+    'useLiveChatProcessor'
+  );
+};
+
+export const useChatSocketHandler = () => {
   const dotYouClient = useDotYouClientContext();
+  const queryClient = useQueryClient();
+
   const identity = dotYouClient.getIdentity();
 
   // Added to ensure we have the conversation query available
   const {
     restoreChat: { mutate: restoreChat },
   } = useConversation();
-  const queryClient = useQueryClient();
 
   const [chatMessagesQueue, setChatMessagesQueue] = useState<HomebaseFile<ChatMessage>[]>([]);
 
-  const handler = useCallback(
+  const chatHandler = useCallback(
     async (_: DotYouClient, notification: TypedConnectionNotification) => {
       isDebug && console.debug('[ChatWebsocket] Got notification', notification);
 
@@ -227,28 +253,10 @@ export const useChatWebsocket = (isEnabled: boolean) => {
     }
   }, [processQueue, chatMessagesQueue]);
 
-  return useWebsocketSubscriber(
-    isEnabled ? handler : undefined,
-    undefined,
-    [
-      'fileAdded',
-      'fileModified',
-      'fileDeleted',
-      'reactionContentAdded',
-      'reactionContentDeleted',
-      'statisticsChanged',
-      'appNotificationAdded',
-    ],
-    websocketDrives,
-    () => {
-      queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
-    },
-    undefined,
-    'useLiveChatProcessor'
-  );
+  return { chatHandler };
 };
 
-const processChatMessagesBatch = async (
+export const processChatMessagesBatch = async (
   dotYouClient: DotYouClient,
   queryClient: QueryClient,
   chatMessages: (HomebaseFile<string | ChatMessage> | DeletedHomebaseFile<string>)[]

@@ -24,6 +24,8 @@ import {
 } from '../../../providers/ConversationProvider';
 import { insertNewConversationMetadata } from '../useConversationMetadata';
 import { insertNewConversation } from '../useConversations';
+import { processChatMessagesBatch } from './useChatWebsocket';
+import { useCallback } from 'react';
 
 const isDebug = hasDebugFlag();
 
@@ -34,72 +36,15 @@ export const useInboxProcessor = (connected?: boolean) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
+  const chatPostProcessInboxHandler = useChatPostInboxHandler();
+
   const fetchData = async () => {
     const lastProcessedTime = queryClient.getQueryState(['process-inbox'])?.dataUpdatedAt;
     const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 5;
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
 
-    isDebug && console.debug('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
-    if (lastProcessedWithBuffer) {
-      const updatedMessages = await findChangesSinceTimestamp(
-        dotYouClient,
-        lastProcessedWithBuffer,
-        {
-          targetDrive: ChatDrive,
-          fileType: [CHAT_MESSAGE_FILE_TYPE],
-        }
-      );
-      isDebug && console.debug('[InboxProcessor] new messages', updatedMessages.length);
-      if (updatedMessages.length > 0) {
-        const fullMessages = (
-          await Promise.all(
-            updatedMessages.map(
-              async (msg) =>
-                await dsrToMessage(
-                  dotYouClient,
-                  msg as unknown as HomebaseFile<string>,
-                  ChatDrive,
-                  false
-                )
-            )
-          )
-        ).filter(Boolean) as HomebaseFile<ChatMessage>[];
-        await processChatMessagesBatch(dotYouClient, queryClient, fullMessages);
-      }
-
-      const updatedConversations = await findChangesSinceTimestamp(
-        dotYouClient,
-        lastProcessedWithBuffer,
-        {
-          targetDrive: ChatDrive,
-          fileType: [CHAT_CONVERSATION_FILE_TYPE],
-        }
-      );
-      isDebug && console.debug('[InboxProcessor] new conversations', updatedConversations.length);
-      await processConversationsBatch(dotYouClient, queryClient, updatedConversations);
-
-      const updatedConversationMetadatas = await findChangesSinceTimestamp(
-        dotYouClient,
-        lastProcessedWithBuffer,
-        {
-          targetDrive: ChatDrive,
-          fileType: [CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE],
-        }
-      );
-      isDebug &&
-        console.debug('[InboxProcessor] new metadata', updatedConversationMetadatas.length);
-      await processConversationsMetadataBatch(
-        dotYouClient,
-        queryClient,
-        updatedConversationMetadatas
-      );
-    } else {
-      // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
-      queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
-      queryClient.invalidateQueries({ queryKey: ['conversations'], exact: false });
-      queryClient.invalidateQueries({ queryKey: ['conversation-metadata'], exact: false });
-    }
+    await chatPostProcessInboxHandler(lastProcessedWithBuffer);
 
     return processedresult;
   };
@@ -112,6 +57,80 @@ export const useInboxProcessor = (connected?: boolean) => {
     staleTime: 500, // 500ms
   });
 };
+
+export const useChatPostInboxHandler = () => {
+  const dotYouClient = useDotYouClientContext();
+  const queryClient = useQueryClient();
+
+  const handler = useCallback(
+    async (lastProcessedWithBuffer: number | undefined) => {
+      isDebug && console.debug('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
+      if (lastProcessedWithBuffer) {
+        const updatedMessages = await findChangesSinceTimestamp(
+          dotYouClient,
+          lastProcessedWithBuffer,
+          {
+            targetDrive: ChatDrive,
+            fileType: [CHAT_MESSAGE_FILE_TYPE],
+          }
+        );
+        isDebug && console.debug('[InboxProcessor] new messages', updatedMessages.length);
+        if (updatedMessages.length > 0) {
+          const fullMessages = (
+            await Promise.all(
+              updatedMessages.map(
+                async (msg) =>
+                  await dsrToMessage(
+                    dotYouClient,
+                    msg as unknown as HomebaseFile<string>,
+                    ChatDrive,
+                    false
+                  )
+              )
+            )
+          ).filter(Boolean) as HomebaseFile<ChatMessage>[];
+          await processChatMessagesBatch(dotYouClient, queryClient, fullMessages);
+        }
+
+        const updatedConversations = await findChangesSinceTimestamp(
+          dotYouClient,
+          lastProcessedWithBuffer,
+          {
+            targetDrive: ChatDrive,
+            fileType: [CHAT_CONVERSATION_FILE_TYPE],
+          }
+        );
+        isDebug && console.debug('[InboxProcessor] new conversations', updatedConversations.length);
+        await processConversationsBatch(dotYouClient, queryClient, updatedConversations);
+
+        const updatedConversationMetadatas = await findChangesSinceTimestamp(
+          dotYouClient,
+          lastProcessedWithBuffer,
+          {
+            targetDrive: ChatDrive,
+            fileType: [CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE],
+          }
+        );
+        isDebug &&
+          console.debug('[InboxProcessor] new metadata', updatedConversationMetadatas.length);
+        await processConversationsMetadataBatch(
+          dotYouClient,
+          queryClient,
+          updatedConversationMetadatas
+        );
+      } else {
+        // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
+        queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
+        queryClient.invalidateQueries({ queryKey: ['conversations'], exact: false });
+        queryClient.invalidateQueries({ queryKey: ['conversation-metadata'], exact: false });
+      }
+    },
+    [dotYouClient, queryClient]
+  );
+
+  return handler;
+};
+
 const findChangesSinceTimestamp = async (
   dotYouClient: DotYouClient,
   timeStamp: number,

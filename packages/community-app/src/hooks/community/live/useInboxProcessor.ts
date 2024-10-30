@@ -23,6 +23,8 @@ import {
   stringGuidsEqual,
 } from '@homebase-id/js-lib/helpers';
 import { insertNewMessage, insertNewMessagesForChannel } from '../messages/useCommunityMessages';
+import { useChatPostInboxHandler } from '@homebase-id/chat-app/src/hooks/chat/live/useInboxProcessor';
+import { ChatDrive } from '@homebase-id/chat-app/src/providers/ConversationProvider';
 
 const isDebug = hasDebugFlag();
 
@@ -35,11 +37,18 @@ export const useInboxProcessor = (odinId: string | undefined, communityId: strin
   const queryClient = useQueryClient();
   const targetDrive = getTargetDriveFromCommunityId(communityId || '');
 
+  const chatPostProcessInboxHandler = useChatPostInboxHandler();
+
   const fetchData = async () => {
     if (!communityId) return;
     const lastProcessedTime = queryClient.getQueryState(['process-inbox'])?.dataUpdatedAt;
     const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 2;
 
+    // Process chat;
+    await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
+    await chatPostProcessInboxHandler(lastProcessedWithBuffer);
+
+    // Process community;
     const processedresult =
       !odinId || odinId === dotYouClient.getIdentity()
         ? await processInbox(dotYouClient, targetDrive, BATCH_SIZE)
