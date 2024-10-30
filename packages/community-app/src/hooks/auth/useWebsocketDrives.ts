@@ -4,6 +4,7 @@ import { getTargetDriveFromCommunityId } from '../../providers/CommunityDefiniti
 import { LOCAL_COMMUNITY_APP_DRIVE } from '../../providers/CommunityMetadataProvider';
 import { useCommunities } from '../community/useCommunities';
 import { useParams } from 'react-router-dom';
+import { ChatDrive } from '@homebase-id/chat-app/src/providers/ConversationProvider';
 
 export const useWebsocketDrives = () => {
   const dotYouClient = useDotYouClientContext();
@@ -25,6 +26,7 @@ export const useWebsocketDrives = () => {
     ) || [];
 
   const localCommunityDrives = [
+    ChatDrive,
     LOCAL_COMMUNITY_APP_DRIVE,
     ...localCommunities.map(
       (community) =>

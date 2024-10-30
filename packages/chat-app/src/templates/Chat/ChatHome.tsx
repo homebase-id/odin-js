@@ -1,4 +1,4 @@
-import { useLiveChatProcessor } from '../../hooks/chat/useLiveChatProcessor';
+import { useLiveChatProcessor } from '../../hooks/chat/live/useLiveChatProcessor';
 import { useNavigate, useParams, useMatch } from 'react-router-dom';
 
 import { ChatDetail } from './ChatDetail';
