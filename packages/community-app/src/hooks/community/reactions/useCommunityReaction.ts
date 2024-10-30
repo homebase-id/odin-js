@@ -124,24 +124,45 @@ export const useCommunityReaction = (props?: {
         );
 
         // Update the message reaction preview
+        const hasReaction = Object.values(
+          message.fileMetadata.reactionPreview?.reactions || {}
+        ).some(
+          (reactionPrev) => reactionPrev.reactionContent === JSON.stringify({ emoji: reaction })
+        );
+
         const id = getNewId();
-        const reactionPreview: ReactionPreview = {
-          ...(message.fileMetadata.reactionPreview as ReactionPreview),
-          reactions: {
-            ...(message.fileMetadata.reactionPreview?.reactions as ReactionPreview['reactions']),
-            [id]: {
-              key: id,
-              count: '1',
-              reactionContent: JSON.stringify({ emoji: reaction }),
+        let newReactionPreview: ReactionPreview = message.fileMetadata
+          .reactionPreview as ReactionPreview;
+
+        if (hasReaction) {
+          const currentReactions = message.fileMetadata.reactionPreview?.reactions || {};
+          Object.keys(currentReactions).forEach((key) => {
+            if (currentReactions[key].reactionContent === JSON.stringify({ emoji: reaction })) {
+              newReactionPreview.reactions[key] = {
+                ...newReactionPreview.reactions[key],
+                count: (parseInt(currentReactions[key].count) + 1).toString(),
+              };
+            }
+          });
+        } else {
+          newReactionPreview = {
+            ...(message.fileMetadata.reactionPreview as ReactionPreview),
+            reactions: {
+              ...(message.fileMetadata.reactionPreview?.reactions as ReactionPreview['reactions']),
+              [id]: {
+                key: id,
+                count: '1',
+                reactionContent: JSON.stringify({ emoji: reaction }),
+              },
             },
-          },
-        };
+          };
+        }
 
         const messageWithReactionPreview: HomebaseFile<CommunityMessage> = {
           ...message,
           fileMetadata: {
             ...message.fileMetadata,
-            reactionPreview,
+            reactionPreview: newReactionPreview,
           },
         };
 
@@ -193,6 +214,8 @@ export const useCommunityReaction = (props?: {
             ...reactions,
           },
         };
+
+        // TODO: decrease the count of the reaction instead of removing it
 
         delete reactionPreview.reactions[reactionKey];
 
