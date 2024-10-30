@@ -1,17 +1,22 @@
-import { hasDebugFlag, jsonStringify64, drivesEqual } from '../../helpers/helpers';
-import { ApiType, DotYouClient } from '../DotYouClient';
-import { encryptData, getRandomIv } from '../InterceptionEncryptionUtil';
-import { TargetDrive } from '../core';
+import { ApiType, DotYouClient } from '../../core/DotYouClient';
+import { TargetDrive } from '../../core/DriveData/File/DriveFileTypes';
+import { encryptData, getRandomIv } from '../../core/InterceptionEncryptionUtil';
 import {
+  RawClientNotification,
   parseMessage,
   ParseRawClientNotification,
-  RawClientNotification,
-} from './WebsocketHelpers';
+} from '../../core/WebsocketData/WebsocketHelpers';
 import {
-  WebsocketCommand,
   EstablishConnectionRequest,
   TypedConnectionNotification,
-} from './WebsocketTypes';
+  WebsocketCommand,
+} from '../../core/WebsocketData/WebsocketTypes';
+import {
+  hasDebugFlag,
+  jsonStringify64,
+  drivesEqual,
+  base64ToUint8Array,
+} from '../../helpers/helpers';
 
 let webSocketClient: WebSocket | undefined;
 let activeSs: Uint8Array;
@@ -37,12 +42,11 @@ const isDebug = hasDebugFlag();
 
 const ConnectSocket = async (
   dotYouClient: DotYouClient,
+  odinId: string,
   drives: TargetDrive[],
   args?: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...;
 ) => {
   if (webSocketClient) throw new Error('Socket already connected');
-
-  const apiType = dotYouClient.getType();
 
   // We're already connecting, return the existing promise
   if (connectPromise) return connectPromise;
@@ -50,27 +54,61 @@ const ConnectSocket = async (
   connectPromise = new Promise<void>(async (resolve, reject) => {
     subscribedDrives = drives;
 
-    if (apiType === ApiType.App) {
-      // we need to preauth before we can connect
-      await dotYouClient
-        .createAxiosClient()
-        .post('/notify/preauth', undefined, {
+    // we need to preauth before we can connect
+    const tokenToConnectOverPeer = await dotYouClient
+      .createAxiosClient()
+      .post<{
+        authenticationToken64: string;
+        sharedSecret: string;
+      }>(
+        '/notify/peer/token',
+        {
+          identity: odinId,
+        },
+        {
           validateStatus: () => true,
-        })
-        .catch((error) => {
-          console.error({ error });
-          reject('[WebsocketProvider] Preauth failed');
-        });
+        }
+      )
+      .then((response) => {
+        return response.data;
+      })
+      .catch((error) => {
+        console.error({ error });
+        return null;
+      });
+
+    if (!tokenToConnectOverPeer) {
+      reject('[WebsocketProviderOverPeer] Preauth failed');
+      return;
     }
 
-    const url = `wss://${dotYouClient.getRoot().split('//')[1]}/api/${
-      apiType === ApiType.Owner ? 'owner' : 'apps'
-    }/v1/notify/ws`;
+    activeSs = base64ToUint8Array(tokenToConnectOverPeer.sharedSecret);
+    const directGuestClient = new DotYouClient({
+      api: ApiType.Guest,
+      identity: odinId,
+      headers: {
+        SUB32: tokenToConnectOverPeer.authenticationToken64,
+      },
+      sharedSecret: activeSs,
+    });
+
+    // we need to preauth before we can connect
+    await directGuestClient
+      .createAxiosClient()
+      .post('/notify/peer/preauth', undefined, {
+        validateStatus: () => true,
+      })
+      .catch((error) => {
+        console.error({ error });
+        reject('[WebsocketProviderOverPeer] Preauth failed');
+      });
+
+    const url = `wss://${directGuestClient.getRoot().split('//')[1]}/api/guest/v1/notify/peer/ws`;
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     webSocketClient = new WebSocket(url, undefined, args);
-    if (isDebug) console.debug(`[WebsocketProvider] Client connected`);
+    if (isDebug) console.debug(`[WebsocketProviderOverPeer] Client connected`);
 
     webSocketClient.onopen = () => {
       const establishConnectionRequest: EstablishConnectionRequest = {
@@ -79,7 +117,7 @@ const ConnectSocket = async (
         batchSize: 1,
       };
 
-      Notify({
+      NotifyOverPeer({
         command: 'establishConnectionRequest',
         data: JSON.stringify(establishConnectionRequest),
       });
@@ -90,11 +128,11 @@ const ConnectSocket = async (
       pingInterval = setInterval(() => {
         if (lastPong && Date.now() - lastPong > PING_INTERVAL * 2) {
           // 2 ping intervals have passed without a pong, reconnect
-          if (isDebug) console.debug(`[WebsocketProvider] Ping timeout`);
-          ReconnectSocket(dotYouClient, drives, args);
+          if (isDebug) console.debug(`[WebsocketProviderOverPeer] Ping timeout`);
+          ReconnectSocket(dotYouClient, odinId, drives, args);
           return;
         }
-        Notify({
+        NotifyOverPeer({
           command: 'ping',
         } as WebsocketCommand);
       }, PING_INTERVAL);
@@ -104,13 +142,13 @@ const ConnectSocket = async (
       const notification: RawClientNotification = await parseMessage(e, activeSs);
 
       if (notification.notificationType === 'error') {
-        console.warn('[WebsocketProvider] Error:', notification.data);
+        console.warn('[WebsocketProviderOverPeer] Error:', notification.data);
       }
 
       if (!isConnected) {
         // First message must be acknowledgement of successful handshake
         if (notification.notificationType == 'deviceHandshakeSuccess') {
-          if (isDebug) console.debug(`[WebsocketProvider] Device handshake success`);
+          if (isDebug) console.debug(`[WebsocketProviderOverPeer] Device handshake success`);
           isConnected = true;
           setupPing();
           resolve();
@@ -118,36 +156,37 @@ const ConnectSocket = async (
         }
       }
 
-      if (isDebug) console.debug(`[WebsocketProvider] `, notification);
+      if (isDebug) console.debug(`[WebsocketProviderOverPeer] `, notification);
       if (notification.notificationType === 'pong') lastPong = Date.now();
 
       const parsedNotification = ParseRawClientNotification(notification);
       subscribers.map(
-        async (subscriber) => await subscriber.handler(dotYouClient, parsedNotification)
+        async (subscriber) => await subscriber.handler(directGuestClient, parsedNotification)
       );
     };
 
     webSocketClient.onerror = (e) => {
-      console.error('[WebsocketProvider]', e);
+      console.error('[NotificationProvider]', e);
     };
 
     webSocketClient.onclose = (e) => {
       if (isDebug) {
         if (e.wasClean) {
-          console.debug('[WebsocketProvider] Connection closed cleanly', e);
+          console.debug('[WebsocketProviderOverPeer] Connection closed cleanly', e);
         } else {
-          console.debug('[WebsocketProvider] Connection closed unexpectedly', e);
+          console.debug('[WebsocketProviderOverPeer] Connection closed unexpectedly', e);
         }
       }
 
       subscribers.map((subscriber) => subscriber.onDisconnect && subscriber.onDisconnect());
-      ReconnectSocket(dotYouClient, drives, args);
+      ReconnectSocket(dotYouClient, odinId, drives, args);
     };
   });
 };
 
 const ReconnectSocket = async (
   dotYouClient: DotYouClient,
+  odinId: string,
   drives: TargetDrive[],
   args?: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this
 ) => {
@@ -161,9 +200,9 @@ const ReconnectSocket = async (
     connectPromise = undefined;
     clearInterval(pingInterval);
 
-    if (isDebug) console.debug('[WebsocketProvider] Reconnecting');
+    if (isDebug) console.debug('[WebsocketProviderOverPeer] Reconnecting');
 
-    await ConnectSocket(dotYouClient, drives, args);
+    await ConnectSocket(dotYouClient, odinId, drives, args);
     subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
   }, 5000);
 };
@@ -175,7 +214,7 @@ const DisconnectSocket = async () => {
   } catch {
     // Ignore any errors on close, as we always want to clean up
   }
-  if (isDebug) console.debug(`[WebsocketProvider] Client disconnected`);
+  if (isDebug) console.debug(`[WebsocketProviderOverPeer] Client disconnected`);
 
   isConnected = false;
   connectPromise = undefined;
@@ -187,8 +226,9 @@ const DisconnectSocket = async () => {
   subscribers.length = 0;
 };
 
-export const Subscribe = async (
+export const SubscribeOverPeer = async (
   dotYouClient: DotYouClient,
+  odinId: string,
   drives: TargetDrive[],
   handler: (dotYouClient: DotYouClient, data: TypedConnectionNotification) => void,
   onDisconnect?: () => void,
@@ -199,13 +239,14 @@ export const Subscribe = async (
   const apiType = dotYouClient.getType();
   const sharedSecret = dotYouClient.getSharedSecret();
   if ((apiType !== ApiType.Owner && apiType !== ApiType.App) || !sharedSecret) {
-    throw new Error(`[WebsocketProviderOverPeer] is not supported for ApiType: ${apiType}`);
+    throw new Error(`NotificationProvider is not supported for ApiType: ${apiType}`);
   }
 
   activeSs = sharedSecret;
   subscribers.push({ handler, onDisconnect, onReconnect });
 
-  if (isDebug) console.debug(`[WebsocketProvider] New subscriber (${subscribers.length})`, refId);
+  if (isDebug)
+    console.debug(`[WebsocketProviderOverPeer] New subscriber (${subscribers.length})`, refId);
 
   if (
     subscribedDrives &&
@@ -217,10 +258,10 @@ export const Subscribe = async (
 
   // Already connected, no need to initiate a new connection
   if (webSocketClient) return Promise.resolve();
-  return ConnectSocket(dotYouClient, drives, args);
+  return ConnectSocket(dotYouClient, odinId, drives, args);
 };
 
-export const Unsubscribe = (
+export const UnsubscribeOverPeer = (
   handler: (dotYouClient: DotYouClient, data: TypedConnectionNotification) => void
 ) => {
   const index = subscribers.findIndex((subscriber) => subscriber.handler === handler);
@@ -233,9 +274,10 @@ export const Unsubscribe = (
   }
 };
 
-export const Notify = async (command: WebsocketCommand | EstablishConnectionRequest) => {
+export const NotifyOverPeer = async (command: WebsocketCommand | EstablishConnectionRequest) => {
   if (!webSocketClient) throw new Error('No active websocket to message across');
-  if (isDebug) console.debug(`[WebsocketProvider] Send command (${JSON.stringify(command)})`);
+  if (isDebug)
+    console.debug(`[WebsocketProviderOverPeer] Send command (${JSON.stringify(command)})`);
 
   const json = jsonStringify64(command);
   const payload = await encryptData(json, getRandomIv(), activeSs);

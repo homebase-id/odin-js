@@ -136,6 +136,7 @@ const CommunityContextActions = ({
         ]}
         type={'mute'}
         size="square"
+        alwaysInPortal={true}
       />
     </>
   );

@@ -33,6 +33,7 @@ export type ActionGroupOptionProps =
 export interface ActionGroupProps extends Omit<ActionButtonProps, 'onClick'> {
   buttonClassName?: string;
   options: (ActionGroupOptionProps | undefined)[];
+  alwaysInPortal?: boolean;
 }
 
 export const ActionGroup = ({
@@ -40,13 +41,16 @@ export const ActionGroup = ({
   className,
   children,
   buttonClassName,
+  alwaysInPortal,
   ...actionButtonProps
 }: ActionGroupProps) => {
   const isSm = document.documentElement.clientWidth < 768;
   const target = usePortal('action-group');
 
-  const wrapperRef = useRef(null);
-  useOutsideTrigger(wrapperRef, () => !isSm && setIsOpen(false));
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const portalRef = useRef<HTMLDivElement>(null);
+  useOutsideTrigger(wrapperRef, () => !isSm && !alwaysInPortal && setIsOpen(false));
+  useOutsideTrigger(portalRef, () => alwaysInPortal && setIsOpen(false));
   const { verticalSpace, horizontalSpace } = useMostSpace(wrapperRef);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -58,7 +62,7 @@ export const ActionGroup = ({
         verticalSpace === 'top' ? 'bottom-[100%]' : 'top-[100%]'
       } z-20 ${isOpen ? 'max-h-[15rem] border' : 'max-h-0'} ${
         isSm ? 'w-full' : 'absolute w-[14rem]'
-      } overflow-auto rounded-md border-gray-200 border-opacity-80 shadow-md dark:border-gray-700`}
+      } overflow-auto rounded-md border-gray-200 border-opacity-80 shadow-md dark:border-gray-700 pointer-events-auto`}
     >
       <ul className={`block`}>
         {(options.filter(Boolean) as ActionGroupOptionProps[]).map((option) => {
@@ -113,13 +117,33 @@ export const ActionGroup = ({
                     : 'fixed lg:contents'
                 }
                 onClick={() => setIsOpen(false)}
+                ref={portalRef}
               >
                 {ActionOptions}
               </div>,
               target
             )
           : null
-        : ActionOptions}
+        : alwaysInPortal
+          ? isOpen
+            ? createPortal(
+                <div
+                  style={{
+                    position: 'fixed',
+                    top: wrapperRef.current ? wrapperRef.current.getBoundingClientRect().top : 0,
+                    left: wrapperRef.current ? wrapperRef.current.getBoundingClientRect().left : 0,
+                    width: wrapperRef.current ? wrapperRef.current.clientWidth : 0,
+                    height: wrapperRef.current ? wrapperRef.current.clientHeight : 0,
+                  }}
+                  ref={portalRef}
+                  className="pointer-events-none"
+                >
+                  {ActionOptions}
+                </div>,
+                target
+              )
+            : null
+          : ActionOptions}
     </div>
   );
 };
@@ -158,20 +182,20 @@ const ActionOption = ({
                   return false;
                 }
               : actionOptions
-              ? (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setNeedsOption(true);
-                  setMouseEvent(e);
-                  return false;
-                }
-              : onClick
-              ? (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onClick(e);
-                }
-              : undefined
+                ? (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setNeedsOption(true);
+                    setMouseEvent(e);
+                    return false;
+                  }
+                : onClick
+                  ? (e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onClick(e);
+                    }
+                  : undefined
           }
           className="flex w-full flex-row px-5 py-3 md:px-3 md:py-2"
         >

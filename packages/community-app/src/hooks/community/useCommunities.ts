@@ -43,12 +43,6 @@ export const useCommunities = (enableDiscovery?: boolean) => {
 
     const discoveredByOdinId = enableDiscovery ? await discoverByOdinId() : [];
 
-    console.log({
-      localCommunities,
-      remoteCommunitesForMetadata,
-      discoveredByOdinId,
-    });
-
     return [
       ...localCommunities,
       ...remoteCommunitesForMetadata,

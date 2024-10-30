@@ -153,119 +153,135 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
   const [chatMessagesQueue, setChatMessagesQueue] = useState<HomebaseFile<ChatMessage>[]>([]);
 
-  const handler = useCallback(async (notification: TypedConnectionNotification) => {
-    isDebug && console.debug('[ChatWebsocket] Got notification', notification);
+  const handler = useCallback(
+    async (_: DotYouClient, notification: TypedConnectionNotification) => {
+      isDebug && console.debug('[ChatWebsocket] Got notification', notification);
 
-    if (
-      (notification.notificationType === 'fileAdded' ||
-        notification.notificationType === 'fileModified' ||
-        notification.notificationType === 'statisticsChanged') &&
-      drivesEqual(notification.targetDrive, ChatDrive)
-    ) {
-      if (notification.header.fileMetadata.appData.fileType === CHAT_MESSAGE_FILE_TYPE) {
-        const conversationId = notification.header.fileMetadata.appData.groupId;
-        const isNewMessageFile = notification.notificationType === 'fileAdded';
+      if (
+        (notification.notificationType === 'fileAdded' ||
+          notification.notificationType === 'fileModified' ||
+          notification.notificationType === 'statisticsChanged') &&
+        drivesEqual(notification.targetDrive, ChatDrive)
+      ) {
+        if (notification.header.fileMetadata.appData.fileType === CHAT_MESSAGE_FILE_TYPE) {
+          const conversationId = notification.header.fileMetadata.appData.groupId;
+          const isNewMessageFile = notification.notificationType === 'fileAdded';
 
-        if (isNewMessageFile) {
-          // Check if the message is orphaned from a conversation
-          const conversation = await queryClient.fetchQuery(
-            getConversationQueryOptions(dotYouClient, queryClient, conversationId)
+          if (isNewMessageFile) {
+            // Check if the message is orphaned from a conversation
+            const conversation = await queryClient.fetchQuery(
+              getConversationQueryOptions(dotYouClient, queryClient, conversationId)
+            );
+
+            if (!conversation) {
+              console.error('Orphaned message received', notification.header.fileId, conversation);
+              // Can't handle this one ATM.. How to resolve?
+            } else if (conversation.fileMetadata.appData.archivalStatus === 2) {
+              restoreChat({ conversation });
+            }
+          }
+
+          // This skips the invalidation of all chat messages, as we only need to add/update this specific message
+          const updatedChatMessage = await dsrToMessage(
+            dotYouClient,
+            notification.header,
+            ChatDrive,
+            true
+          );
+          if (
+            !updatedChatMessage ||
+            Object.keys(updatedChatMessage.fileMetadata.appData.content).length === 0
+          ) {
+            // Something is up with the message, invalidate all messages for this conversation
+            console.warn('[ChatWebsocket] Invalid message received', notification, conversationId);
+            queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+            return;
+          }
+
+          if (updatedChatMessage.fileMetadata.senderOdinId !== identity) {
+            // Messages from others are processed immediately
+            insertNewMessage(queryClient, updatedChatMessage);
+          } else {
+            setChatMessagesQueue((prev) => [...prev, updatedChatMessage]);
+          }
+        } else if (
+          notification.header.fileMetadata.appData.fileType === CHAT_CONVERSATION_FILE_TYPE
+        ) {
+          const isNewConversationFile = notification.notificationType === 'fileAdded';
+          const updatedConversation = await dsrToConversation(
+            dotYouClient,
+            notification.header,
+            ChatDrive,
+            true
           );
 
-          if (!conversation) {
-            console.error('Orphaned message received', notification.header.fileId, conversation);
-            // Can't handle this one ATM.. How to resolve?
-          } else if (conversation.fileMetadata.appData.archivalStatus === 2) {
-            restoreChat({ conversation });
+          if (
+            !updatedConversation ||
+            Object.keys(updatedConversation.fileMetadata.appData.content).length === 0
+          ) {
+            queryClient.invalidateQueries({ queryKey: ['conversations'] });
+            return;
           }
-        }
 
-        // This skips the invalidation of all chat messages, as we only need to add/update this specific message
-        const updatedChatMessage = await dsrToMessage(
-          dotYouClient,
-          notification.header,
-          ChatDrive,
-          true
-        );
-        if (
-          !updatedChatMessage ||
-          Object.keys(updatedChatMessage.fileMetadata.appData.content).length === 0
+          insertNewConversation(queryClient, updatedConversation, !isNewConversationFile);
+        } else if (
+          notification.header.fileMetadata.appData.fileType ===
+          CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE
         ) {
-          // Something is up with the message, invalidate all messages for this conversation
-          console.warn('[ChatWebsocket] Invalid message received', notification, conversationId);
+          const updatedMetadata = await dsrToConversationMetadata(
+            dotYouClient,
+            notification.header,
+            ChatDrive,
+            true
+          );
+
+          if (!updatedMetadata) return;
+
+          insertNewConversationMetadata(queryClient, updatedMetadata);
+        }
+      }
+
+      if (
+        notification.notificationType === `fileDeleted` &&
+        drivesEqual(notification.targetDrive, ChatDrive)
+      ) {
+        if (notification.header.fileMetadata.appData.fileType === CHAT_MESSAGE_FILE_TYPE) {
+          const conversationId = notification.header.fileMetadata.appData.groupId;
           queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
-          return;
         }
-
-        if (updatedChatMessage.fileMetadata.senderOdinId !== identity) {
-          // Messages from others are processed immediately
-          insertNewMessage(queryClient, updatedChatMessage);
-        } else {
-          setChatMessagesQueue((prev) => [...prev, updatedChatMessage]);
-        }
-      } else if (
-        notification.header.fileMetadata.appData.fileType === CHAT_CONVERSATION_FILE_TYPE
-      ) {
-        const isNewConversationFile = notification.notificationType === 'fileAdded';
-        const updatedConversation = await dsrToConversation(
-          dotYouClient,
-          notification.header,
-          ChatDrive,
-          true
-        );
-
-        if (
-          !updatedConversation ||
-          Object.keys(updatedConversation.fileMetadata.appData.content).length === 0
-        ) {
+        if (notification.header.fileMetadata.appData.fileType === CHAT_CONVERSATION_FILE_TYPE) {
           queryClient.invalidateQueries({ queryKey: ['conversations'] });
-          return;
         }
+      }
 
-        insertNewConversation(queryClient, updatedConversation, !isNewConversationFile);
-      } else if (
-        notification.header.fileMetadata.appData.fileType ===
-        CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE
+      if (notification.notificationType === 'appNotificationAdded') {
+        const clientNotification = notification as AppNotification;
+
+        insertNewNotification(queryClient, clientNotification);
+        incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
+      }
+
+      if (
+        notification.notificationType === 'reactionContentAdded' ||
+        notification.notificationType === 'reactionContentDeleted'
       ) {
-        const updatedMetadata = await dsrToConversationMetadata(
-          dotYouClient,
-          notification.header,
-          ChatDrive,
-          true
-        );
-
-        if (!updatedMetadata) return;
-
-        insertNewConversationMetadata(queryClient, updatedMetadata);
+        if (notification.notificationType === 'reactionContentAdded') {
+          insertNewReaction(
+            queryClient,
+            notification.fileId.fileId,
+            notification as ReactionNotification
+          );
+        } else if (notification.notificationType === 'reactionContentDeleted') {
+          removeReaction(
+            queryClient,
+            notification.fileId.fileId,
+            notification as ReactionNotification
+          );
+        }
       }
-    }
-
-    if (notification.notificationType === 'appNotificationAdded') {
-      const clientNotification = notification as AppNotification;
-
-      insertNewNotification(queryClient, clientNotification);
-      incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
-    }
-
-    if (
-      notification.notificationType === 'reactionContentAdded' ||
-      notification.notificationType === 'reactionContentDeleted'
-    ) {
-      if (notification.notificationType === 'reactionContentAdded') {
-        insertNewReaction(
-          queryClient,
-          notification.fileId.fileId,
-          notification as ReactionNotification
-        );
-      } else if (notification.notificationType === 'reactionContentDeleted') {
-        removeReaction(
-          queryClient,
-          notification.fileId.fileId,
-          notification as ReactionNotification
-        );
-      }
-    }
-  }, []);
+    },
+    []
+  );
 
   const chatMessagesQueueTunnel = useRef<HomebaseFile<ChatMessage>[]>([]);
   const processQueue = useCallback(async (queuedMessages: HomebaseFile<ChatMessage>[]) => {
@@ -322,9 +338,11 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
   return useWebsocketSubscriber(
     isEnabled ? handler : undefined,
+    undefined,
     [
       'fileAdded',
       'fileModified',
+      'fileDeleted',
       'reactionContentAdded',
       'reactionContentDeleted',
       'statisticsChanged',

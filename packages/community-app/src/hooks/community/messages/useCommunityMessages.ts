@@ -371,4 +371,74 @@ export const internalInsertNewMessage = (
 
   return newData;
 };
+
+export const removeMessage = (
+  queryClient: QueryClient,
+  toDeleteMessage: HomebaseFile<unknown> | DeletedHomebaseFile,
+  communityId: string
+) => {
+  const extistingMessages = queryClient.getQueryData<
+    InfiniteData<{
+      searchResults: (HomebaseFile<CommunityMessage> | null)[];
+      cursorState: string;
+      queryTime: number;
+      includeMetadataHeader: boolean;
+    }>
+  >([
+    'community-messages',
+    formatGuidId(toDeleteMessage.fileMetadata.appData.groupId || communityId),
+  ]);
+
+  if (extistingMessages) {
+    queryClient.setQueryData(
+      [
+        'community-messages',
+        formatGuidId(toDeleteMessage.fileMetadata.appData.groupId || communityId),
+      ],
+      internalRemoveMessage(extistingMessages, toDeleteMessage)
+    );
+  } else {
+    queryClient.invalidateQueries({
+      queryKey: [
+        'community-messages',
+        formatGuidId(toDeleteMessage.fileMetadata.appData.groupId || communityId),
+      ],
+    });
+  }
+};
+
+export const internalRemoveMessage = (
+  extistingMessages: InfiniteData<
+    {
+      searchResults: (HomebaseFile<CommunityMessage> | null)[];
+      cursorState: string;
+      queryTime: number;
+      includeMetadataHeader: boolean;
+    },
+    unknown
+  >,
+  toDeleteMessage: HomebaseFile<unknown> | DeletedHomebaseFile
+) => {
+  return {
+    ...extistingMessages,
+    pages: extistingMessages?.pages?.map((page) => {
+      return {
+        ...page,
+        searchResults: page.searchResults.filter(
+          (msg) =>
+            !msg ||
+            !stringGuidsEqual(msg.fileId, toDeleteMessage.fileId) ||
+            !stringGuidsEqual(
+              msg.fileMetadata.appData.uniqueId,
+              toDeleteMessage.fileMetadata.appData.uniqueId
+            ) ||
+            !stringGuidsEqual(
+              msg.fileMetadata.globalTransitId,
+              toDeleteMessage.fileMetadata.globalTransitId
+            )
+        ),
+      };
+    }),
+  };
+};
 //
