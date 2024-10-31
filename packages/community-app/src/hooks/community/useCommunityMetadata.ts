@@ -51,20 +51,25 @@ export const useCommunityMetadata = (props?: {
     metadata: HomebaseFile<CommunityMetadata> | NewHomebaseFile<CommunityMetadata>;
   }) => {
     return await uploadCommunityMetadata(dotYouClient, metadata, async () => {
-      if (!metadata.fileMetadata.appData.tags?.[0]) return;
       const serverVersion = await getCommunityMetadata(
         dotYouClient,
         metadata.fileMetadata.appData.content.communityId
       );
       if (!serverVersion) return;
 
-      return await uploadCommunityMetadata(dotYouClient, {
-        ...metadata,
-        fileMetadata: {
-          ...metadata.fileMetadata,
-          versionTag: serverVersion.fileMetadata.versionTag,
+      return await uploadCommunityMetadata(
+        dotYouClient,
+        {
+          ...metadata,
+          fileMetadata: {
+            ...metadata.fileMetadata,
+            versionTag: serverVersion.fileMetadata.versionTag,
+          },
         },
-      });
+        () => {
+          return;
+        }
+      );
     });
   };
 
@@ -90,8 +95,13 @@ export const useCommunityMetadata = (props?: {
       },
       onSuccess: (data, variables) => {
         if (!variables.metadata.fileId || !data) return;
-        const updatedMeta = variables.metadata as HomebaseFile<CommunityMetadata>;
-        updatedMeta.fileMetadata.versionTag = data.newVersionTag;
+        const updatedMeta = {
+          ...variables.metadata,
+          fileMetadata: {
+            ...variables.metadata.fileMetadata,
+            versionTag: data.newVersionTag,
+          },
+        } as HomebaseFile<CommunityMetadata>;
 
         queryClient.setQueryData<HomebaseFile<CommunityMetadata>>(
           ['community-metadata', updatedMeta.fileMetadata.appData.content.communityId],
