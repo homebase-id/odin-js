@@ -1,6 +1,6 @@
 import { useParams, useMatch, Link } from 'react-router-dom';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActionButton,
   ConnectionImage,
@@ -9,7 +9,7 @@ import {
   useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
-import { tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { getNewXorId, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import {
   ChannelWithRecentMessage,
@@ -20,6 +20,10 @@ import { CommunityMetadata } from '../../providers/CommunityMetadataProvider';
 import { RadioTower, Chevron, Pin, Grid, ChevronDown } from '@homebase-id/common-app/icons';
 import { COMMUNITY_ROOT } from './CommunityHome';
 import { CommunityInfoDialog } from '../../components/Community/CommunityInfoDialog';
+import { useConversationMetadata } from '@homebase-id/chat-app/src/hooks/chat/useConversationMetadata';
+import { useChatMessages } from '@homebase-id/chat-app/src/hooks/chat/useChatMessages';
+import { ChatMessage } from '@homebase-id/chat-app/src/providers/ChatProvider';
+import { ConversationWithYourselfId } from '@homebase-id/chat-app/src/providers/ConversationProvider';
 
 const maxChannels = 7;
 export const CommunityChannelNav = () => {
@@ -245,19 +249,59 @@ const DirectMessageItem = ({
   recipient: string;
 }) => {
   const dotYouClient = useDotYouClientContext();
+  const identity = dotYouClient.getIdentity();
   const href = `${COMMUNITY_ROOT}/${odinId}/${communityId}/direct/${recipient}`;
   const isActive = !!useMatch({ path: href });
+
+  const [conversationId, setConversationId] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (recipient === identity) {
+      setConversationId(ConversationWithYourselfId);
+    } else {
+      getNewXorId(identity as string, recipient).then((xorId) => setConversationId(xorId));
+    }
+  }, [recipient]);
+
+  const { data: conversationMetadata } = useConversationMetadata({ conversationId }).single;
+  const { data: messages } = useChatMessages({ conversationId }).all;
+  const flatMessages = useMemo(
+    () =>
+      messages?.pages
+        ?.flatMap((page) => page?.searchResults)
+        ?.filter(Boolean) as HomebaseFile<ChatMessage>[],
+    [messages]
+  );
+  const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
+
+  const lastReadTime = conversationMetadata?.fileMetadata.appData.content.lastReadTime || 0;
+  const unreadCount =
+    conversationMetadata &&
+    flatMessages &&
+    lastMessage?.fileMetadata.senderOdinId &&
+    lastMessage?.fileMetadata.senderOdinId !== identity
+      ? flatMessages.filter(
+          (msg) =>
+            msg.fileMetadata.senderOdinId !== identity &&
+            (msg.fileMetadata.transitCreated || msg.fileMetadata.created) > lastReadTime
+        )?.length
+      : 0;
 
   return (
     <Link
       to={href}
-      className={`flex flex-row items-center gap-1 rounded-md px-2 py-[0.15rem] ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
+      className={`flex flex-row items-center gap-1 rounded-md px-2 py-[0.15rem] ${unreadCount ? 'font-bold' : ''} ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
     >
       <ConnectionImage odinId={recipient} size="xxs" />
       <ConnectionName odinId={recipient} />{' '}
       <span className="text-sm text-slate-400">
         {recipient === dotYouClient.getIdentity() ? t('you') : ''}
       </span>
+      {unreadCount ? (
+        <span className="ml-auto flex h-6 w-6 items-center justify-center rounded-full bg-primary text-sm text-primary-contrast">
+          {unreadCount}
+        </span>
+      ) : null}
     </Link>
   );
 };
