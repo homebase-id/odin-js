@@ -283,7 +283,7 @@ export const IdentityPageMetaAndActions = ({
         browserTitle={
           connectionInfo?.status === 'connected' && contactContent?.name
             ? (contactContent.name.displayName ??
-              `${contactContent.name.givenName} ${contactContent.name.surname}`)
+              `${contactContent.name.givenName || ''} ${contactContent.name.surname || odinId}`)
             : odinId
         }
       />
