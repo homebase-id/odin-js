@@ -56,7 +56,7 @@ export const CommunityReactions = ({
             return (
               <button
                 key={emoji.emoji}
-                className={`flex flex-row items-center gap-2 rounded-3xl border bg-background px-2 py-1 shadow-sm hover:bg-primary hover:text-primary-contrast ${myReaction ? 'border-primary bg-primary/10' : 'border-transparent'}`}
+                className={`flex flex-row items-center gap-2 rounded-3xl border bg-background px-2 py-[0.1rem] shadow-sm hover:bg-primary hover:text-primary-contrast ${myReaction ? 'border-primary bg-primary/10' : 'border-transparent'}`}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
