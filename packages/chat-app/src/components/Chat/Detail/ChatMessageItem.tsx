@@ -8,7 +8,7 @@ import {
   RichTextRenderer,
   getPlainTextFromRichText,
 } from '@homebase-id/common-app';
-import { HomebaseFile, RichText } from '@homebase-id/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, HomebaseFile, RichText } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ChatMessage, ChatDeletedArchivalStaus } from '../../../providers/ChatProvider';
 import { UnifiedConversation } from '../../../providers/ConversationProvider';
@@ -36,7 +36,7 @@ export const ChatMessageItem = ({
   const authorOdinId = msg.fileMetadata.senderOdinId || '';
 
   const messageFromMe = !authorOdinId || authorOdinId === identity;
-  const hasMedia = !!msg.fileMetadata.payloads.length;
+  const hasMedia = !!msg.fileMetadata.payloads.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY).length;
 
   const { chatMessageKey, mediaKey } = useParams();
   const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey) && mediaKey;
