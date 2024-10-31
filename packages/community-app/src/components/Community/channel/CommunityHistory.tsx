@@ -203,12 +203,12 @@ export const CommunityHistory = ({
               }
 
               const msg = flattenedMsgs[item.index];
-              const currentAuthor = msg?.fileMetadata.senderOdinId || identity || '';
+              const currentAuthor = msg?.fileMetadata.originalAuthor || identity || '';
               const currentDate = msg?.fileMetadata.created;
 
               const previousVisibleMsg = flattenedMsgs[item.index + 1];
               const previousAuthor =
-                previousVisibleMsg?.fileMetadata.senderOdinId || identity || '';
+                previousVisibleMsg?.fileMetadata.originalAuthor || identity || '';
               const previousDate = previousVisibleMsg?.fileMetadata.created;
 
               return (

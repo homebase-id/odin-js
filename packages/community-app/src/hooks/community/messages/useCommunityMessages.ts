@@ -16,7 +16,7 @@ import { DeletedHomebaseFile, DotYouClient, HomebaseFile } from '@homebase-id/js
 import { formatGuidId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const PAGE_SIZE = 100;
 export const useCommunityMessages = (props?: {
@@ -169,7 +169,7 @@ export const useLastUpdatedChatMessages = () => {
   const queryClient = useQueryClient();
   const [lastUpdate, setLastUpdate] = useState<number | null>(null);
 
-  useEffect(() => {
+  const findAndSet = useCallback(() => {
     const lastUpdates = queryClient
       .getQueryCache()
       .findAll({ queryKey: ['community-messages'], exact: false })
@@ -184,6 +184,13 @@ export const useLastUpdatedChatMessages = () => {
         return acc;
       }, 0)
     );
+  }, [queryClient]);
+
+  useEffect(() => {
+    findAndSet();
+
+    const interval = setInterval(() => findAndSet(), 1000 * 60); // 1 minute
+    return () => clearInterval(interval);
   }, []);
 
   return {
@@ -219,6 +226,9 @@ export const insertNewMessagesForChannel = (
           pages: data?.pages?.slice(0, 1) ?? [],
           pageParams: data?.pageParams?.slice(0, 1) || [undefined],
         };
+      },
+      {
+        updatedAt: Date.now(),
       }
     );
     queryClient.invalidateQueries({
@@ -235,7 +245,9 @@ export const insertNewMessagesForChannel = (
     );
   });
 
-  queryClient.setQueryData(['community-messages', formatGuidId(channelId)], runningMessages);
+  queryClient.setQueryData(['community-messages', formatGuidId(channelId)], runningMessages, {
+    updatedAt: Date.now(),
+  });
 };
 
 export const insertNewMessage = (
@@ -255,7 +267,10 @@ export const insertNewMessage = (
   if (extistingMessages && newMessage.fileState !== 'deleted') {
     queryClient.setQueryData(
       ['community-messages', formatGuidId(newMessage.fileMetadata.appData.groupId || communityId)],
-      internalInsertNewMessage(extistingMessages, newMessage)
+      internalInsertNewMessage(extistingMessages, newMessage),
+      {
+        updatedAt: Date.now(),
+      }
     );
   } else {
     queryClient.invalidateQueries({
@@ -395,7 +410,10 @@ export const removeMessage = (
         'community-messages',
         formatGuidId(toDeleteMessage.fileMetadata.appData.groupId || communityId),
       ],
-      internalRemoveMessage(extistingMessages, toDeleteMessage)
+      internalRemoveMessage(extistingMessages, toDeleteMessage),
+      {
+        updatedAt: Date.now(),
+      }
     );
   } else {
     queryClient.invalidateQueries({
