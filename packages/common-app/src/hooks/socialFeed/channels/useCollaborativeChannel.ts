@@ -28,7 +28,7 @@ import {
   TargetDrive,
 } from '@homebase-id/js-lib/core';
 import { useChannel } from './useChannel';
-import { ALL_CONNECTIONS_CIRCLE_ID } from '@homebase-id/js-lib/network';
+import { CONFIRMED_CONNECTIONS_CIRCLE_ID } from '@homebase-id/js-lib/network';
 
 const getExtendDriveDetailsUrl = (
   identity: string,
@@ -124,7 +124,7 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
     if (!channelId || !channelDef?.fileMetadata.appData.content.isCollaborative) return null;
 
     const circleIds = channelDef.serverMetadata?.accessControlList.circleIdList || [
-      ALL_CONNECTIONS_CIRCLE_ID,
+      CONFIRMED_CONNECTIONS_CIRCLE_ID,
     ];
 
     const targetDrive = GetTargetDriveFromChannelId(channelId);
@@ -167,7 +167,7 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
       channelDef.serverMetadata?.accessControlList.requiredSecurityGroup ===
         SecurityGroupType.Connected && channelDef.serverMetadata?.accessControlList.circleIdList
         ? channelDef.serverMetadata?.accessControlList.circleIdList
-        : [ALL_CONNECTIONS_CIRCLE_ID];
+        : [CONFIRMED_CONNECTIONS_CIRCLE_ID];
 
     if (!collaborativeCircleIds.length) throw new Error('No circles found for channel');
 

@@ -7,8 +7,8 @@ import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
 import { AppInteractionPermissionOverview } from '../../../components/PermissionViews/AppInteractionPermissionView/AppInteractionPermissionView';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import {
-  ALL_CONNECTIONS_CIRCLE_ID,
   AUTO_CONNECTIONS_CIRCLE_ID,
+  CONFIRMED_CONNECTIONS_CIRCLE_ID,
   Membership,
 } from '@homebase-id/js-lib/network';
 import DomainCard from '../../../components/Connection/DomainCard/DomainCard';
@@ -67,7 +67,7 @@ const CircleDetails = () => {
 
   const circleId = circle.id;
   const isSystemCircle =
-    stringGuidsEqual(circleId, ALL_CONNECTIONS_CIRCLE_ID) ||
+    stringGuidsEqual(circleId, CONFIRMED_CONNECTIONS_CIRCLE_ID) ||
     stringGuidsEqual(circleId, AUTO_CONNECTIONS_CIRCLE_ID);
 
   return (

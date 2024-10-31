@@ -15,8 +15,8 @@ import {
   throwAwayTheECCKey,
 } from '@homebase-id/js-lib/auth';
 import {
-  ALL_CONNECTIONS_CIRCLE_ID,
   AppPermissionType,
+  CONFIRMED_CONNECTIONS_CIRCLE_ID,
   ContactConfig,
 } from '@homebase-id/js-lib/network';
 import { BlogConfig, HomePageConfig } from '@homebase-id/js-lib/public';
@@ -157,7 +157,7 @@ export const useYouAuthAuthorization = () => {
       undefined,
       drives,
       undefined,
-      [ALL_CONNECTIONS_CIRCLE_ID],
+      [CONFIRMED_CONNECTIONS_CIRCLE_ID],
       eccKey.publicKey,
       window.location.host,
       undefined,

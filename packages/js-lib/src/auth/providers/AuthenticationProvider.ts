@@ -1,7 +1,10 @@
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { cbcDecrypt } from '../../helpers/AesEncrypt';
 import { base64ToUint8Array, stringToUint8Array, uint8ArrayToBase64 } from '../../helpers/DataUtil';
-import { ALL_CONNECTIONS_CIRCLE_ID } from '../../network/circleNetwork/CircleProvider';
+import {
+  AUTO_CONNECTIONS_CIRCLE_ID,
+  CONFIRMED_CONNECTIONS_CIRCLE_ID,
+} from '../../network/circleNetwork/CircleProvider';
 import { getBrowser, getOperatingSystem } from '../helpers/browserInfo';
 import { getEccSharedSecret, importRemotePublicEccKey } from './EccKeyProvider';
 
@@ -126,7 +129,7 @@ export const getExtendAppRegistrationParams = (
     c: Array.isArray(needsAllConnectedOrCircleIds)
       ? JSON.stringify(needsAllConnectedOrCircleIds)
       : needsAllConnectedOrCircleIds
-        ? ALL_CONNECTIONS_CIRCLE_ID
+        ? JSON.stringify([AUTO_CONNECTIONS_CIRCLE_ID, CONFIRMED_CONNECTIONS_CIRCLE_ID])
         : undefined,
     cd: circleDrives ? JSON.stringify(circleDrives) : undefined,
     return: returnUrl,

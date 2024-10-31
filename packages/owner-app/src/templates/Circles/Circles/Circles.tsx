@@ -2,7 +2,11 @@ import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-li
 import { useState } from 'react';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { ALL_CONNECTIONS_CIRCLE_ID, CircleDefinition } from '@homebase-id/js-lib/network';
+import {
+  AUTO_CONNECTIONS_CIRCLE_ID,
+  CircleDefinition,
+  CONFIRMED_CONNECTIONS_CIRCLE_ID,
+} from '@homebase-id/js-lib/network';
 import ContactImage from '../../../components/Connection/ContactImage/ContactImage';
 import { CompanyImage } from '../../../components/Connection/CompanyImage/CompanyImage';
 import { DrivePermissionType } from '@homebase-id/js-lib/core';
@@ -88,7 +92,9 @@ const Circles = () => {
 
 const CircleCardLink = ({ circleDef }: { circleDef: CircleDefinition }) => {
   const { data: members } = useCircle({ circleId: circleDef.id }).fetchMembers;
-  const isSystemCircle = stringGuidsEqual(circleDef.id, ALL_CONNECTIONS_CIRCLE_ID);
+  const isSystemCircle =
+    stringGuidsEqual(circleDef.id, CONFIRMED_CONNECTIONS_CIRCLE_ID) ||
+    stringGuidsEqual(circleDef.id, AUTO_CONNECTIONS_CIRCLE_ID);
 
   return (
     <CardLink

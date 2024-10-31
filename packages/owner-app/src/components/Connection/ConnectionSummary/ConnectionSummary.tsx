@@ -26,7 +26,8 @@ import Section from '../../ui/Sections/Section';
 import ContactImage from '../ContactImage/ContactImage';
 import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import {
-  ALL_CONNECTIONS_CIRCLE_ID,
+  AUTO_CONNECTIONS_CIRCLE_ID,
+  CONFIRMED_CONNECTIONS_CIRCLE_ID,
   ConnectionInfo,
   ContactFile,
 } from '@homebase-id/js-lib/network';
@@ -269,7 +270,8 @@ const CirclesSummary = ({ odinId }: { odinId?: string }) => {
         ?.find(
           (circle) =>
             stringGuidsEqual(circle.id, circleGrant.circleId) &&
-            !stringGuidsEqual(circle.id, ALL_CONNECTIONS_CIRCLE_ID)
+            !stringGuidsEqual(circle.id, AUTO_CONNECTIONS_CIRCLE_ID) &&
+            !stringGuidsEqual(circle.id, CONFIRMED_CONNECTIONS_CIRCLE_ID)
         )
         ?.name.toLocaleLowerCase()
     )
