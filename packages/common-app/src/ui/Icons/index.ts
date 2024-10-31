@@ -8,6 +8,7 @@ import { Bell } from './Bell';
 import { Block } from './Block';
 import { Bubble } from './Bubble';
 import { Bullhorn } from './Bullhorn';
+import { Bookmark, BookmarkSolid } from './Bookmark';
 import { Cake } from './Cake';
 import { ChatBubble } from './ChatBubble';
 import { Check, SubtleCheck } from './Check';
@@ -120,6 +121,8 @@ export {
   Bold,
   Bubble,
   Bullhorn,
+  Bookmark,
+  BookmarkSolid,
   Cake,
   ChatBubble,
   Check,

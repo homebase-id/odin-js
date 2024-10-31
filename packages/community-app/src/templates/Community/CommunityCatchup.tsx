@@ -1,14 +1,23 @@
 import { useCommunity } from '../../hooks/community/useCommunity';
-import { ErrorBoundary, LoadingBlock, t, useDotYouClient } from '@homebase-id/common-app';
+import {
+  ActionLink,
+  ErrorBoundary,
+  LoadingBlock,
+  t,
+  useDotYouClient,
+} from '@homebase-id/common-app';
 import { useParams } from 'react-router-dom';
 import { CommunityChannelCatchup } from '../../components/Community/catchup/CommunityChannelCatchup';
-import { CommunityChannelCatchupHeader } from '../../components/Community/catchup/CommunityChannelCatchup';
 import { useCommunityChannelsWithRecentMessages } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 import { useCommunityMetadata } from '../../hooks/community/useCommunityMetadata';
 import { CommunityThread } from '../../components/Community/CommunityThread';
 import { memo, useMemo } from 'react';
+import { ChevronLeft, RadioTower } from '@homebase-id/common-app/icons';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
+import { COMMUNITY_ROOT } from './CommunityHome';
 
-export const CommunityChannelDetail = memo(() => {
+export const CommunityCatchup = memo(() => {
   const { odinKey, communityKey: communityId, threadKey } = useParams();
   const { data: community, isFetched } = useCommunity({ odinId: odinKey, communityId }).fetch;
 
@@ -71,7 +80,7 @@ export const CommunityChannelDetail = memo(() => {
         <div className="relative flex h-full flex-row">
           <div className="flex h-full flex-grow flex-col overflow-hidden">
             <div className="flex h-full flex-grow flex-col">
-              <CommunityChannelCatchupHeader community={community} />
+              <CommunityCatchupHeader community={community} />
               {!channelsToCatchup?.length ? (
                 <p className="m-auto text-lg">{t('All done!')} 🎉</p>
               ) : (
@@ -103,4 +112,27 @@ export const CommunityChannelDetail = memo(() => {
   );
 });
 
-CommunityChannelDetail.displayName = 'CommunityChannelDetail';
+CommunityCatchup.displayName = 'CommunityCatchup';
+
+const CommunityCatchupHeader = ({
+  community,
+}: {
+  community?: HomebaseFile<CommunityDefinition>;
+}) => {
+  const communityId = community?.fileMetadata.appData.uniqueId;
+
+  return (
+    <>
+      <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
+        <ActionLink
+          className="lg:hidden"
+          type="mute"
+          href={`${COMMUNITY_ROOT}/${community?.fileMetadata.senderOdinId}/${communityId}`}
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </ActionLink>
+        <RadioTower className="h-6 w-6" /> {t('Activity')}
+      </div>
+    </>
+  );
+};

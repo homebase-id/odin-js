@@ -4,33 +4,8 @@ import { useCommunityMetadata } from '../../../hooks/community/useCommunityMetad
 import { ChannelWithRecentMessage } from '../../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 import { CommunityHistory } from '../channel/CommunityHistory';
 import { ActionButton, ActionLink, t } from '@homebase-id/common-app';
-import { RadioTower } from '@homebase-id/common-app/icons';
 import { ROOT_PATH as COMMUNITY_ROOT } from '../../../app/App';
 import { useCallback } from 'react';
-import { ChevronLeft } from '@homebase-id/common-app/icons';
-
-export const CommunityChannelCatchupHeader = ({
-  community,
-}: {
-  community?: HomebaseFile<CommunityDefinition>;
-}) => {
-  const communityId = community?.fileMetadata.appData.uniqueId;
-
-  return (
-    <>
-      <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-        <ActionLink
-          className="lg:hidden"
-          type="mute"
-          href={`${COMMUNITY_ROOT}/${community?.fileMetadata.senderOdinId}/${communityId}`}
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </ActionLink>
-        <RadioTower className="h-6 w-6" /> {t('Activity')}
-      </div>
-    </>
-  );
-};
 
 export const CommunityChannelCatchup = ({
   community,

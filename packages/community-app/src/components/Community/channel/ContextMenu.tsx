@@ -16,7 +16,8 @@ import { useCommunityMessage } from '../../../hooks/community/messages/useCommun
 import { CommunityMessageInfo } from '../Message/detail/CommunityMessageInfo';
 import { EditCommunityMessage } from '../Message/detail/EditCommunityMessage';
 import { CommunityReactionComposer } from '../Message/reactions/CommunityReactionComposer';
-import { ReplyArrow } from '@homebase-id/common-app/icons';
+import { Bookmark, BookmarkSolid, ReplyArrow } from '@homebase-id/common-app/icons';
+import { useCommunityLater } from '../../../hooks/community/useCommunityLater';
 
 export interface CommunityActions {
   doReply?: (msg: HomebaseFile<CommunityMessage>) => void;
@@ -57,6 +58,14 @@ const CommunityContextActions = ({
   const [showMessageInfo, setShowMessageInfo] = useState(false);
   const [editMessage, setEditMessage] = useState(false);
 
+  const {
+    isSaved,
+    toggleSave: { mutate: toggleSave, error: toggleSaveError },
+  } = useCommunityLater({
+    messageId: msg.fileMetadata.appData.uniqueId,
+    systemFileType: msg.fileSystemType,
+  });
+
   const { mutate: resend, error: resendError } = useCommunityMessage().update;
 
   const identity = useDotYouClient().getIdentity();
@@ -70,15 +79,17 @@ const CommunityContextActions = ({
       label: t('Edit'),
       onClick: () => setEditMessage(true),
     });
-    optionalOptions.push({
-      label: t('Delete'),
-      confirmOptions: {
-        title: t('Delete message'),
-        body: t('Are you sure you want to delete this message?'),
-        buttonText: t('Delete'),
-      },
-      onClick: () => communityActions.doDelete(msg, true),
-    });
+    if (communityActions.doDelete) {
+      optionalOptions.push({
+        label: t('Delete'),
+        confirmOptions: {
+          title: t('Delete message'),
+          body: t('Are you sure you want to delete this message?'),
+          buttonText: t('Delete'),
+        },
+        onClick: () => communityActions.doDelete?.(msg, true),
+      });
+    }
   }
 
   if (community)
@@ -99,7 +110,7 @@ const CommunityContextActions = ({
 
   return (
     <>
-      <ErrorNotification error={resendError} />
+      <ErrorNotification error={resendError || toggleSaveError} />
       {showMessageInfo && community ? (
         <CommunityMessageInfo
           msg={msg}
@@ -122,6 +133,12 @@ const CommunityContextActions = ({
           <ReplyArrow className="h-5 w-5" />
         </button>
       ) : null}
+      <button
+        className="rounded-full p-2 text-slate-400 hover:bg-slate-300 hover:dark:bg-slate-700"
+        onClick={() => toggleSave()}
+      >
+        {isSaved ? <BookmarkSolid className="h-5 w-5" /> : <Bookmark className="h-5 w-5" />}
+      </button>
       <ActionGroup
         options={[
           {

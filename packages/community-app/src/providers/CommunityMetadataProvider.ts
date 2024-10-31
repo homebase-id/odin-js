@@ -6,6 +6,7 @@ import {
   NewHomebaseFile,
   queryBatch,
   SecurityGroupType,
+  SystemFileType,
   TargetDrive,
   uploadFile,
   UploadFileMetadata,
@@ -18,6 +19,7 @@ export interface CommunityMetadata {
   lastReadTime: number;
   channelLastReadTime: Record<string, number>;
   pinnedChannels: string[];
+  savedMessages: { messageId: string; systemFileType: SystemFileType }[];
   odinId: string;
   communityId: string;
 }
@@ -126,7 +128,7 @@ export const dsrToCommunityMetadata = async (
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<CommunityMetadata> | null> => {
   try {
-    const definitionContent = await getContentFromHeaderOrPayload<CommunityMetadata>(
+    const definitionContent = await getContentFromHeaderOrPayload<Partial<CommunityMetadata>>(
       dotYouClient,
       targetDrive,
       dsr,
@@ -140,7 +142,16 @@ export const dsrToCommunityMetadata = async (
         ...dsr.fileMetadata,
         appData: {
           ...dsr.fileMetadata.appData,
-          content: definitionContent,
+          content: {
+            // Default values
+            savedMessages: [],
+            channelLastReadTime: {},
+            pinnedChannels: [],
+            lastReadTime: 0,
+            communityId: dsr.fileMetadata.appData.uniqueId as string,
+            odinId: window.location.host,
+            ...definitionContent,
+          },
         },
       },
     };

@@ -27,6 +27,7 @@ export const useCommunityMetadata = (props?: {
               odinId,
               communityId,
               pinnedChannels: [],
+              savedMessages: [],
               lastReadTime: 0,
               channelLastReadTime: {},
             },

@@ -75,6 +75,7 @@ export interface CommunityMessage {
   deliveryStatus: CommunityDeliveryStatus;
 
   channelId: string;
+  threadId?: string;
 }
 
 export const uploadCommunityMessage = async (
@@ -339,7 +340,13 @@ export const hardDeleteCommunityMessage = async (
     );
   }
 
-  return await deleteFile(dotYouClient, targetDrive, message.fileId);
+  return await deleteFile(
+    dotYouClient,
+    targetDrive,
+    message.fileId,
+    undefined,
+    message.fileSystemType
+  );
 };
 
 export const getCommunityMessage = async (

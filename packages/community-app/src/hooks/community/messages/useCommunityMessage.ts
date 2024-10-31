@@ -66,7 +66,7 @@ export const useCommunityMessage = (props?: {
   const sendMessage = async ({
     community,
     channel,
-    threadId,
+    thread,
     replyId,
     files,
     message,
@@ -76,7 +76,7 @@ export const useCommunityMessage = (props?: {
   }: {
     community: HomebaseFile<CommunityDefinition>;
     channel: HomebaseFile<CommunityChannel>;
-    threadId?: string;
+    thread?: HomebaseFile<CommunityMessage>;
     replyId?: string;
     files?: NewMediaFile[];
     message: RichText | string;
@@ -91,12 +91,13 @@ export const useCommunityMessage = (props?: {
         created: userDate,
         appData: {
           uniqueId: newChatId,
-          groupId: threadId || channel?.fileMetadata.appData.uniqueId,
+          groupId: thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId,
           content: {
             message: message,
             deliveryStatus: CommunityDeliveryStatus.Sent,
             replyId: replyId,
             channelId: channel.fileMetadata.appData.uniqueId as string,
+            threadId: thread?.fileMetadata.appData.uniqueId as string,
           },
 
           userDate: userDate || new Date().getTime(),
@@ -107,7 +108,7 @@ export const useCommunityMessage = (props?: {
           requiredSecurityGroup: SecurityGroupType.Connected,
         },
       },
-      fileSystemType: threadId ? 'Comment' : undefined,
+      fileSystemType: thread ? 'Comment' : undefined,
     };
 
     const uploadResult = await uploadCommunityMessage(
@@ -116,12 +117,12 @@ export const useCommunityMessage = (props?: {
       newChat,
       files,
       linkPreviews,
-      threadId
+      thread && thread.fileMetadata.globalTransitId
         ? {
             targetDrive: getTargetDriveFromCommunityId(
               community.fileMetadata.appData.uniqueId as string
             ),
-            globalTransitId: threadId,
+            globalTransitId: thread.fileMetadata.globalTransitId,
           }
         : undefined
     );
@@ -175,7 +176,7 @@ export const useCommunityMessage = (props?: {
         files,
         message,
         chatId,
-        threadId,
+        thread,
         userDate,
       }) => {
         const newMessageDsr: NewHomebaseFile<CommunityMessage> = {
@@ -183,7 +184,8 @@ export const useCommunityMessage = (props?: {
             created: userDate,
             appData: {
               uniqueId: chatId,
-              groupId: threadId || channel?.fileMetadata.appData.uniqueId,
+              groupId:
+                thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId,
               content: {
                 message: message,
                 deliveryStatus: CommunityDeliveryStatus.Sending,
@@ -199,7 +201,7 @@ export const useCommunityMessage = (props?: {
               pendingFile: file.file,
             })),
           },
-          fileSystemType: threadId ? 'Comment' : undefined,
+          fileSystemType: thread ? 'Comment' : undefined,
           serverMetadata: {
             accessControlList: community.fileMetadata.appData.content.acl || {
               requiredSecurityGroup: SecurityGroupType.Connected,

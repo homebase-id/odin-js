@@ -71,7 +71,7 @@ export const CommunityThread = ({
         <ErrorBoundary>
           <MessageComposer
             community={community}
-            threadId={originMessage?.fileMetadata.globalTransitId}
+            thread={originMessage || undefined}
             channel={channel}
             key={threadId}
             className="mt-auto lg:mt-0"
