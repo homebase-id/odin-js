@@ -64,7 +64,7 @@ export const CommunityReactions = ({
                   if (myReaction) removeReaction({ community, message: msg, reaction: myReaction });
                   else addReaction({ community, message: msg, reaction: emoji.emoji });
                 }}
-                title={`${authors?.length ? authors.join(', ') : ''} ${t('reacted with')} ${emoji}`}
+                title={`${authors?.length ? authors.join(', ') : ''} ${t('reacted with')} ${emoji.emoji}`}
               >
                 <p>{emoji.emoji}</p>
                 <p className="text-sm">{emoji.count}</p>
