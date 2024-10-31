@@ -27,6 +27,7 @@ import { insertNewMessage } from './useCommunityMessages';
 export const useCommunityMessage = (props?: {
   odinId: string | undefined;
   communityId: string | undefined;
+  channelId?: string | undefined;
   messageId: string | undefined;
   fileSystemType?: SystemFileType;
 }) => {
@@ -37,10 +38,28 @@ export const useCommunityMessage = (props?: {
   const getMessageByUniqueId = async (
     odinId: string,
     communityId: string,
+    channelId: string | undefined,
     messageId: string,
     fileSystemType?: SystemFileType
   ) => {
-    // TODO: Improve by fetching the message from the cache on conversations first
+    const channelCache = queryClient.getQueryData<
+      InfiniteData<{
+        searchResults: (HomebaseFile<CommunityMessage> | null)[];
+        cursorState: string;
+        queryTime: number;
+        includeMetadataHeader: boolean;
+      }>
+    >(['community-messages', formatGuidId(channelId || communityId)]);
+
+    if (channelCache) {
+      const message = channelCache.pages
+        .map((page) => page.searchResults)
+        .flat()
+        .find((msg) => stringGuidsEqual(msg?.fileMetadata.appData.uniqueId, messageId));
+
+      if (message) return message;
+    }
+
     return await getCommunityMessage(dotYouClient, odinId, communityId, messageId, fileSystemType);
   };
 
@@ -139,6 +158,7 @@ export const useCommunityMessage = (props?: {
         getMessageByUniqueId(
           props?.odinId as string,
           props?.communityId as string,
+          props?.channelId,
           props?.messageId as string,
           props?.fileSystemType
         ),

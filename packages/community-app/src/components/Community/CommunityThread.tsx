@@ -23,6 +23,7 @@ export const CommunityThread = ({
   const { data: originMessage } = useCommunityMessage({
     odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata.appData.uniqueId,
+    channelId: channel?.fileMetadata.appData.uniqueId,
     messageId: threadId,
     fileSystemType: 'Standard',
   }).get;
