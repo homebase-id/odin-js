@@ -50,7 +50,8 @@ export const ActionGroup = ({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const portalRef = useRef<HTMLDivElement>(null);
   useOutsideTrigger(wrapperRef, () => !isSm && !alwaysInPortal && setIsOpen(false));
-  useOutsideTrigger(portalRef, () => alwaysInPortal && setIsOpen(false));
+  // TODO: Fix this, it fails when clicking a confirmation dialog:
+  // useOutsideTrigger(portalRef, () => alwaysInPortal && setIsOpen(false));
   const { verticalSpace, horizontalSpace } = useMostSpace(wrapperRef);
 
   const [isOpen, setIsOpen] = useState(false);
