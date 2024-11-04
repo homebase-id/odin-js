@@ -9,13 +9,13 @@ import {
   AuthorName,
   ActionButton,
   useDotYouClient,
+  COMMUNITY_ROOT_PATH,
 } from '@homebase-id/common-app';
 import { createPortal } from 'react-dom';
 import { Clipboard } from '@homebase-id/common-app/icons';
 import { useState } from 'react';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { COMMUNITY_ROOT } from '../../templates/Community/CommunityHome';
 
 export const CommunityInfoDialog = ({ onClose }: { onClose: () => void }) => {
   const { odinKey, communityKey } = useParams();
@@ -54,7 +54,7 @@ export const CommunityInfoDialog = ({ onClose }: { onClose: () => void }) => {
                   }}
                 >
                   <Link
-                    to={`${COMMUNITY_ROOT}/${odinKey}/${communityKey}/direct/${recipient}`}
+                    to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/direct/${recipient}`}
                     className="group flex flex-shrink flex-row items-center gap-3"
                     key={recipient}
                   >

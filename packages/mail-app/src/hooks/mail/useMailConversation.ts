@@ -1,5 +1,5 @@
 import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { t, useDotYouClientContext, useIntroductions } from '@homebase-id/common-app';
 import {
   ContentType,
   HomebaseFile,
@@ -29,6 +29,8 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
   const identity = dotYouClient.getIdentity();
+
+  const { mutateAsync: introduceRecipients } = useIntroductions().introduceIdentities;
 
   const getMessage = async (messageFileId: string) =>
     await getMailConversation(dotYouClient, messageFileId);
@@ -66,7 +68,7 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
       },
       serverMetadata: {
         accessControlList: {
-          requiredSecurityGroup: SecurityGroupType.Connected,
+          requiredSecurityGroup: SecurityGroupType.AutoConnected,
         },
       },
     };
@@ -78,6 +80,11 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
       'file' in uploadResult ? uploadResult.file.fileId : conversation.fileId;
     newMailConversation.fileMetadata.versionTag = uploadResult.newVersionTag;
     newMailConversation.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
+
+    await introduceRecipients({
+      message: t('{0} has added you to a mail thread', identity || ''),
+      recipients: conversationContent.recipients.filter((recipient) => recipient !== identity),
+    });
 
     return newMailConversation;
   };
@@ -416,7 +423,7 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
       },
       serverMetadata: {
         accessControlList: {
-          requiredSecurityGroup: SecurityGroupType.Connected,
+          requiredSecurityGroup: SecurityGroupType.AutoConnected,
         },
       },
     };

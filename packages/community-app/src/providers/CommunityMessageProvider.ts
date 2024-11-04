@@ -13,7 +13,6 @@ import {
   KeyHeader,
   UploadResult,
   AppFileMetaData,
-  FileMetadata,
   uploadHeader,
   getFileHeaderByUniqueId,
   FileQueryParams,
@@ -23,6 +22,7 @@ import {
   queryBatch,
   deleteFile,
   RichText,
+  UpdateHeaderInstructionSet,
   TransferUploadStatus,
   SystemFileType,
   GlobalTransitIdFileIdentifier,
@@ -107,7 +107,7 @@ export const uploadCommunityMessage = async (
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList ||
       community.fileMetadata.appData.content.acl || {
-        requiredSecurityGroup: SecurityGroupType.Connected,
+        requiredSecurityGroup: SecurityGroupType.AutoConnected,
       },
   };
 
@@ -268,12 +268,13 @@ export const updateCommunityMessage = async (
   const targetDrive = getTargetDriveFromCommunityId(communityId);
   const messageContent = message.fileMetadata.appData.content;
 
-  const uploadInstructions: UploadInstructionSet = {
+  const uploadInstructions: UpdateHeaderInstructionSet = {
     storageOptions: {
       drive: targetDrive,
       overwriteFileId: message.fileId,
     },
     systemFileType: message.fileSystemType,
+    storageIntent: 'header',
   };
 
   const payloadJson: string = jsonStringify64({ ...messageContent });
@@ -289,11 +290,10 @@ export const updateCommunityMessage = async (
       fileType: COMMUNITY_MESSAGE_FILE_TYPE,
       content: payloadJson,
     },
-    senderOdinId: (message.fileMetadata as FileMetadata<CommunityMessage>).senderOdinId,
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList ||
       community.fileMetadata.appData.content.acl || {
-        requiredSecurityGroup: SecurityGroupType.Connected,
+        requiredSecurityGroup: SecurityGroupType.AutoConnected,
       },
   };
 

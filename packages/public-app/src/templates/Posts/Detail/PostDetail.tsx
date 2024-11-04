@@ -69,6 +69,7 @@ const PostDetail = () => {
             isAuthenticated={isAuthenticated}
             onNavigate={(path: string) => navigate(path)}
             login={() => setIsLogin(true)}
+            showAuthorDetail={channel?.fileMetadata.appData.content.isCollaborative}
           />
         </div>
       </section>

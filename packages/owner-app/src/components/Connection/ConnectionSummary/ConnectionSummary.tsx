@@ -4,6 +4,7 @@ import {
   useDotYouClient,
   ErrorNotification,
   ActionButton,
+  mergeStates,
   ActionLink,
   useIdentityIFollow,
   useCircles,
@@ -17,18 +18,21 @@ import {
   Phone,
   Refresh,
   ChatBubble,
-  Feed,
+  Exclamation,
   Check,
+  Feed,
 } from '@homebase-id/common-app/icons';
 import Section from '../../ui/Sections/Section';
 import ContactImage from '../ContactImage/ContactImage';
 import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import {
-  ALL_CONNECTIONS_CIRCLE_ID,
+  AUTO_CONNECTIONS_CIRCLE_ID,
+  CONFIRMED_CONNECTIONS_CIRCLE_ID,
   ConnectionInfo,
   ContactFile,
 } from '@homebase-id/js-lib/network';
 import { useConnection } from '../../../hooks/connections/useConnection';
+import { useVerifyConnection } from '../../../hooks/connections/useVerifyConnection';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { Link } from 'react-router-dom';
 
@@ -45,9 +49,20 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
   // Disable saving so we can support manual refresh;
 
   const {
+    mutate: verifyConnection,
+    status: verifyConnectionState,
+    error: verifyError,
+    data: verifyData,
+  } = useVerifyConnection().confirmConnection;
+
+  const {
     fetch: { data: connectionInfo },
   } = useConnection({ odinId: odinId });
   const { getIdentity } = useDotYouClient();
+
+  const {
+    fetch: { data: introducerConnectioInfo },
+  } = useConnection({ odinId: connectionInfo?.introducerOdinId });
 
   const {
     fetch: { data: identityIfollow, isFetched: followStateFetched },
@@ -62,26 +77,54 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
   const isConnected = connectionInfo?.status === 'connected';
   const identity = getIdentity();
 
+  const isConnectedWithIntroducer = introducerConnectioInfo?.status === 'connected';
   const isFollowing = !followStateFetched ? undefined : !!identityIfollow;
 
   return (
     <>
-      <ErrorNotification error={refreshError} />
+      <ErrorNotification error={refreshError || verifyError} />
       <Section
         title={
           <>
             <span className="flex flex-col gap-1">
               {t('Details')}
-              <a
-                href={`${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${
-                  isConnected && identity ? '?youauth-logon=' + identity : ''
-                }`}
-                rel="noopener noreferrer"
-                target="_blank"
-                className="text-sm text-primary hover:underline"
-              >
-                {odinId}
-              </a>
+
+              {connectionInfo?.connectionRequestOrigin === 'introduction' ? (
+                <p className="flex gap-1 text-sm">
+                  <a
+                    href={`${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${
+                      isConnected && identity ? '?youauth-logon=' + identity : ''
+                    }`}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    className="block text-sm text-primary hover:underline"
+                  >
+                    {odinId}
+                  </a>
+                  {t('was introduced by')}
+                  <a
+                    href={`${new DotYouClient({ identity: connectionInfo?.introducerOdinId, api: ApiType.Guest }).getRoot()}${
+                      isConnectedWithIntroducer && identity ? '?youauth-logon=' + identity : ''
+                    }`}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    className="block text-sm text-primary hover:underline"
+                  >
+                    {connectionInfo?.introducerOdinId}
+                  </a>
+                </p>
+              ) : (
+                <a
+                  href={`${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${
+                    isConnected && identity ? '?youauth-logon=' + identity : ''
+                  }`}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  className="block text-sm text-primary hover:underline"
+                >
+                  {odinId}
+                </a>
+              )}
 
               <CirclesSummary odinId={odinId} />
             </span>
@@ -92,18 +135,15 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
           contact?.fileId && (
             <ActionButton
               className="text-base"
-              state={refreshState}
-              onClick={() => refresh({ contact: contact as HomebaseFile<ContactFile> })}
-              icon={Refresh}
-              confirmOptions={{
-                type: 'info',
-                title: t('Refresh data'),
-                buttonText: t('Refresh'),
-                body: t(
-                  'Are you sure you want to refresh data, overwritten data cannot be recovered.'
-                ),
+              state={isConnected ? mergeStates(refreshState, verifyConnectionState) : refreshState}
+              onClick={() => {
+                refresh({ contact: contact as HomebaseFile<ContactFile> });
+                if (isConnected) {
+                  verifyConnection(odinId);
+                }
               }}
               type="secondary"
+              icon={Refresh}
             >
               {t('Refresh')}
             </ActionButton>
@@ -115,7 +155,7 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
             {odinId ? (
               <ContactImage
                 odinId={odinId}
-                className="mx-auto h-[12rem] w-[12rem]"
+                className="mx-auto h-[12rem] w-[12rem] overflow-hidden rounded-md"
                 canSave={true}
               />
             ) : null}
@@ -124,7 +164,7 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
             {contactContent.name && (
               <div className="flex flex-row items-center">
                 <IconFrame className="mr-2">
-                  <Person className="h-5 w-5" />
+                  <Person className="h-4 w-4" />
                 </IconFrame>
                 {contactContent.name.displayName ??
                   `${contactContent.name.givenName ?? ''} ${contactContent.name.surname ?? ''}`}
@@ -163,26 +203,48 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
               </div>
             ) : null}
           </div>
-          {isConnected ? (
-            <div className="mt-5 flex flex-col-reverse gap-1 sm:ml-auto">
-              <div className="flex flex-row items-center gap-2 sm:flex-row-reverse">
-                <ActionLink icon={ChatBubble} href={`/apps/chat/open/${odinId}`} type="secondary" />
-                <ActionLink
-                  icon={Envelope}
-                  href={`/apps/mail/new?recipients=${odinId}`}
-                  type="secondary"
-                />
-                <ActionLink
-                  icon={isFollowing ? Check : Feed}
-                  href={`/owner/follow/following/${odinId}`}
-                  type="secondary"
-                  className={isFollowing ? 'opacity-40 hover:opacity-100' : ''}
-                >
-                  {isFollowing ? t('Following') : t('Follow')}
-                </ActionLink>
-              </div>
-            </div>
-          ) : null}
+          <div className="mt-5 flex flex-col-reverse gap-1 sm:ml-auto">
+            {isConnected ? (
+              <>
+                <div className="flex flex-row items-center gap-2 sm:flex-row-reverse">
+                  <ActionLink
+                    icon={ChatBubble}
+                    href={`/apps/chat/open/${odinId}`}
+                    type="secondary"
+                  />
+                  <ActionLink
+                    icon={Envelope}
+                    href={`/apps/mail/new?recipients=${odinId}`}
+                    type="secondary"
+                  />
+                  <ActionLink
+                    icon={isFollowing ? Check : Feed}
+                    href={`/owner/follow/following/${odinId}`}
+                    type="secondary"
+                    className={isFollowing ? 'opacity-40 hover:opacity-100' : ''}
+                  >
+                    {isFollowing ? t('Following') : t('Follow')}
+                  </ActionLink>
+                </div>
+                <p className="text-sm text-slate-400">
+                  {t('Reach out to')} {contactContent.name?.displayName ?? odinId}:
+                </p>
+              </>
+            ) : null}
+            {verifyConnectionState === 'success' ? (
+              <p className="flex flex-row items-center gap-2">
+                {verifyData ? (
+                  <>
+                    <Check className="h-5 w-5" /> {t('Verified')}
+                  </>
+                ) : (
+                  <>
+                    <Exclamation className="h-5 w-5" /> {t('Failed to verify')}
+                  </>
+                )}
+              </p>
+            ) : null}
+          </div>
         </div>
       </Section>
     </>
@@ -208,7 +270,8 @@ const CirclesSummary = ({ odinId }: { odinId?: string }) => {
         ?.find(
           (circle) =>
             stringGuidsEqual(circle.id, circleGrant.circleId) &&
-            !stringGuidsEqual(circle.id, ALL_CONNECTIONS_CIRCLE_ID)
+            !stringGuidsEqual(circle.id, AUTO_CONNECTIONS_CIRCLE_ID) &&
+            !stringGuidsEqual(circle.id, CONFIRMED_CONNECTIONS_CIRCLE_ID)
         )
         ?.name.toLocaleLowerCase()
     )

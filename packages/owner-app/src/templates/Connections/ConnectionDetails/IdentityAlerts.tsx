@@ -4,6 +4,8 @@ import {
   t,
   DomainHighlighter,
   ActionButton,
+  CheckboxToggle,
+  Label,
 } from '@homebase-id/common-app';
 import { Times } from '@homebase-id/common-app/icons';
 import { useState } from 'react';
@@ -12,6 +14,7 @@ import { useConnection } from '../../../hooks/connections/useConnection';
 import { useFocusedEditing } from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePendingConnection } from '../../../hooks/connections/usePendingConnection';
 import IncomingConnectionDialog from '../../../components/Connection/ConnectionDialogs/IncomingConnectionDialog';
+import { useAutoConnection } from '../../../hooks/connections/useAutoConnection';
 
 export const IdentityAlerts = ({ odinId }: { odinId: string | undefined }) => {
   const navigate = useNavigate();
@@ -22,15 +25,24 @@ export const IdentityAlerts = ({ odinId }: { odinId: string | undefined }) => {
   const {
     ignoreRequest: { mutateAsync: ignoreRequest, status: ignoreRequestStatus, error: ignoreError },
   } = usePendingConnection({ odinId: odinId });
+  const {
+    isUnconfirmedAutoConnected: { data: isUnconfirmedAutoConnection },
+    confirmAutoConnection: {
+      mutate: confirmIntroduction,
+      error: confirmIntroductionError,
+      status: confirmIntroductionState,
+    },
+  } = useAutoConnection({ odinId: odinId });
 
   const checkReturnTo = useFocusedEditing();
   const [isAcceptDialogOpen, setIsAcceptDialogOpen] = useState(false);
+  const [shouldFollow, setShouldFollow] = useState(true);
 
-  if (connectionInfoLoading) return null;
+  if (connectionInfoLoading || !odinId) return null;
 
   return (
     <>
-      <ErrorNotification error={ignoreError} />
+      <ErrorNotification error={ignoreError || confirmIntroductionError} />
 
       {connectionInfo?.status === 'blocked' ? (
         <>
@@ -87,6 +99,76 @@ export const IdentityAlerts = ({ odinId }: { odinId: string | undefined }) => {
             }}
           />
         </>
+      ) : null}
+
+      {isUnconfirmedAutoConnection && confirmIntroductionState !== 'success' ? (
+        <Alert type="info" className="bg-background">
+          <div className="flex flex-col items-center justify-between gap-2 lg:flex-row">
+            <div className="flex flex-col gap-2">
+              <p>
+                {t('You were automatically connected to')} &quot;
+                <DomainHighlighter>{odinId}</DomainHighlighter>&quot;{' '}
+                {t('because of an introduction by')} &quot;{connectionInfo?.introducerOdinId}
+                &quot;
+                <br />
+                {t('Would you like to confirm this connection?')}
+              </p>
+              <div
+                className={`flex flex-row items-center gap-4 ${shouldFollow ? '' : 'opacity-60'}`}
+              >
+                <Label htmlFor="auto-follow" className="mb-0 cursor-pointer text-base font-normal">
+                  {t('Follow')} &quot;{odinId}&quot;
+                </Label>
+                <CheckboxToggle
+                  id="auto-follow"
+                  defaultChecked={shouldFollow}
+                  onChange={(e) => setShouldFollow(e.currentTarget.checked)}
+                />
+              </div>
+            </div>
+
+            <ActionButton
+              type="primary"
+              onClick={() => confirmIntroduction({ odinId, autoFollow: shouldFollow })}
+              state={confirmIntroductionState}
+              confirmOptions={{
+                title: t('Confirm connection'),
+                body: t(
+                  'Are you sure you want to confirm this connection? This action cannot be undone.'
+                ),
+                buttonText: t('Confirm'),
+                type: 'info',
+              }}
+              className="ml-auto"
+            >
+              {t('Confirm connection')}
+            </ActionButton>
+            {/* <div className="my-auto ml-auto grid grid-flow-col gap-2">
+                <ActionButton
+                  type="primary"
+                  onClick={() => {
+                    setIsAcceptDialogOpen(true);
+                  }}
+                >
+                  {t('View request')}...
+                </ActionButton>
+                <ActionButton
+                  type="secondary"
+                  onClick={async () => {
+                    await ignoreRequest(
+                      { senderOdinId: connectionInfo.senderOdinId },
+                      { onSuccess: () => navigate('/owner/connections') }
+                    );
+                    checkReturnTo('Ignored');
+                  }}
+                  state={ignoreRequestStatus}
+                  icon={Times}
+                >
+                  {t('Ignore request')}
+                </ActionButton>
+              </div> */}
+          </div>
+        </Alert>
       ) : null}
 
       <LimboStateAlert odinId={odinId} />

@@ -3,6 +3,7 @@ import { useParams, useMatch, Link } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActionButton,
+  COMMUNITY_ROOT_PATH,
   ConnectionImage,
   ConnectionName,
   t,
@@ -25,7 +26,6 @@ import {
   ChevronDown,
   Bookmark,
 } from '@homebase-id/common-app/icons';
-import { COMMUNITY_ROOT } from './CommunityHome';
 import { CommunityInfoDialog } from '../../components/Community/CommunityInfoDialog';
 import { useConversationMetadata } from '@homebase-id/chat-app/src/hooks/chat/useConversationMetadata';
 import { useChatMessages } from '@homebase-id/chat-app/src/hooks/chat/useChatMessages';
@@ -47,7 +47,7 @@ export const CommunityChannelNav = () => {
 
   const members = community?.fileMetadata.appData.content?.members;
 
-  const isActive = !!useMatch({ path: `${COMMUNITY_ROOT}/${odinKey}/${communityKey}` });
+  const isActive = !!useMatch({ path: `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}` });
 
   const { data: communityChannels } = useCommunityChannelsWithRecentMessages({
     odinId: odinKey,
@@ -75,7 +75,7 @@ export const CommunityChannelNav = () => {
       >
         <div className="absolute inset-0 flex flex-col gap-5 overflow-auto px-2 py-5 md:pl-[calc(env(safe-area-inset-left)+4.3rem+0.5rem)] lg:pl-2">
           <div className="flex flex-row items-center">
-            <Link className="-ml-2 p-2 lg:hidden" type="mute" to={`${COMMUNITY_ROOT}`}>
+            <Link className="-ml-2 p-2 lg:hidden" type="mute" to={`${COMMUNITY_ROOT_PATH}`}>
               <Grid className="h-5 w-5" />
             </Link>
 
@@ -152,7 +152,7 @@ export const CommunityChannelNav = () => {
 };
 
 const AllItem = ({ odinId, communityId }: { odinId: string; communityId: string }) => {
-  const href = `${COMMUNITY_ROOT}/${odinId}/${communityId}/all`;
+  const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/all`;
   const isActive = !!useMatch({ path: href, end: true });
 
   return (
@@ -166,7 +166,7 @@ const AllItem = ({ odinId, communityId }: { odinId: string; communityId: string 
 };
 
 const LaterItem = ({ odinId, communityId }: { odinId: string; communityId: string }) => {
-  const href = `${COMMUNITY_ROOT}/${odinId}/${communityId}/later`;
+  const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/later`;
   const isActive = !!useMatch({ path: href, end: true });
 
   return (
@@ -191,7 +191,7 @@ const ChannelItem = ({
 }) => {
   const identity = useDotYouClientContext().getIdentity();
   const channelId = channel.fileMetadata.appData.uniqueId;
-  const href = `${COMMUNITY_ROOT}/${odinId}/${communityId}/${channelId}`;
+  const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/${channelId}`;
   const isActive = !!useMatch({ path: href, end: false });
 
   const vists = tryJsonParse<string[]>(sessionStorage.getItem(VISITS_STORAGE_KEY) || '[]') || [];
@@ -226,7 +226,7 @@ const ChannelItem = ({
 
   return (
     <Link
-      to={`${COMMUNITY_ROOT}/${odinId}/${communityId}/${channelId}`}
+      to={`${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/${channelId}`}
       className={`group flex flex-row items-center gap-1 rounded-md px-2 py-[0.15rem] ${isActive ? 'bg-primary/100 text-white' : `hover:bg-primary/10 ${isVisited ? 'text-purple-600' : ''}`} ${hasUnreadMessages ? 'font-bold' : ''}`}
     >
       # {channel.fileMetadata.appData.content?.title?.toLowerCase()}
@@ -275,7 +275,7 @@ const DirectMessageItem = ({
 }) => {
   const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getIdentity();
-  const href = `${COMMUNITY_ROOT}/${odinId}/${communityId}/direct/${recipient}`;
+  const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/direct/${recipient}`;
   const isActive = !!useMatch({ path: href });
 
   const [conversationId, setConversationId] = useState<string | undefined>();

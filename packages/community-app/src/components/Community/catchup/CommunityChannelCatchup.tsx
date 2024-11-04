@@ -3,8 +3,7 @@ import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvi
 import { useCommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
 import { ChannelWithRecentMessage } from '../../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 import { CommunityHistory } from '../channel/CommunityHistory';
-import { ActionButton, ActionLink, t } from '@homebase-id/common-app';
-import { ROOT_PATH as COMMUNITY_ROOT } from '../../../app/App';
+import { ActionButton, ActionLink, COMMUNITY_ROOT_PATH, t } from '@homebase-id/common-app';
 import { useCallback } from 'react';
 
 export const CommunityChannelCatchup = ({
@@ -56,7 +55,7 @@ export const CommunityChannelCatchup = ({
           type="mute"
           size="none"
           className="text-lg hover:underline"
-          href={`${COMMUNITY_ROOT}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}`}
+          href={`${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}`}
         >
           # {channel.fileMetadata.appData.content.title}
         </ActionLink>

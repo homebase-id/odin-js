@@ -42,6 +42,7 @@ export const FileCard = ({
   const isImage = [
     'image/webp',
     'image/jpeg',
+    'image/jpg',
     'image/png',
     'image/svg+xml',
     'image/gif',
@@ -83,6 +84,7 @@ export const FileCard = ({
                 fit="contain"
                 position="center"
                 className="m-auto"
+                systemFileType={file.fileSystemType}
               />
             </div>
           ) : (
@@ -312,7 +314,7 @@ const FileIds = ({
     return (
       <HybridLink
         className={`relative flex ${isRow ? 'flex-row items-center gap-2' : 'flex-col'} group justify-between`}
-        href={`${driveRoot}/${id}`}
+        href={`${driveRoot}/${file.fileSystemType.toLowerCase() === 'comment' ? 'comment/' : ''}${id}`}
       >
         <span className="flex-shrink-0 text-sm">{label}:</span>
         <p className="ml-auto bg-transparent font-mono text-xs text-slate-400 group-hover:underline">

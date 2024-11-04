@@ -21,8 +21,13 @@ export const useFollowingInfinite = () => {
     };
   };
 
-  const createOrUpdateFollowInternal = async (request: FollowRequest) =>
-    await createOrUpdateFollow(dotYouClient, request);
+  const createOrUpdateFollowInternal = async ({
+    request,
+    includeHistory,
+  }: {
+    request: FollowRequest;
+    includeHistory?: boolean;
+  }) => await createOrUpdateFollow(dotYouClient, request, includeHistory);
 
   return {
     fetch: useInfiniteQuery({

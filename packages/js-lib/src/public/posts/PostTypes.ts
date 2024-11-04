@@ -116,6 +116,7 @@ export interface PostContent {
   id: string; // id that is set once and never changes; Used for permalink;
   channelId: string;
   reactAccess?: ReactAccess;
+  isCollaborative?: boolean; // A collaborative post; => Anyone with access can edit it; (Only supported on collaborative channels)
 
   caption: string;
   captionAsRichText?: RichText;

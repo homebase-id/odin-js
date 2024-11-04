@@ -2,7 +2,12 @@ import { DotYouClient } from '../../core/DotYouClient';
 import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
 import { deleteFile } from '../../core/DriveData/File/DriveFileManageProvider';
 import { getContentFromHeaderOrPayload } from '../../core/DriveData/File/DriveFileProvider';
-import { HomebaseFile, NewHomebaseFile } from '../../core/DriveData/File/DriveFileTypes';
+import {
+  AccessControlList,
+  HomebaseFile,
+  NewHomebaseFile,
+  SecurityGroupType,
+} from '../../core/DriveData/File/DriveFileTypes';
 import { queryBatch } from '../../core/DriveData/Query/DriveQueryProvider';
 import { uploadFile } from '../../core/DriveData/Upload/DriveFileUploadProvider';
 import {
@@ -112,11 +117,22 @@ const dsrToChannelLink = async (
       ...dsr.fileMetadata,
       appData: {
         ...dsr.fileMetadata.appData,
-        content: definitionContent,
+        content: { ...definitionContent, acl: parseAcl(definitionContent.acl) },
       },
     },
     serverMetadata: undefined,
   };
 
   return file;
+};
+
+const parseAcl = (acl: AccessControlList) => {
+  if (acl.requiredSecurityGroup.toLowerCase() === 'connected') {
+    return {
+      ...acl,
+      requiredSecurityGroup: SecurityGroupType.Connected,
+    };
+  }
+
+  return acl;
 };

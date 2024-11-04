@@ -1,15 +1,11 @@
 import { DotYouClient } from '../../core/DotYouClient';
+import { patchFile, uploadFile } from '../../core/DriveData/Upload/DriveFileUploadProvider';
 import {
-  appendDataToFile,
-  uploadFile,
-  uploadHeader,
-} from '../../core/DriveData/Upload/DriveFileUploadProvider';
-import {
-  AppendInstructionSet,
   PriorityOptions,
   ScheduleOptions,
   SendContents,
-  UploadFileMetadata,
+  UpdateInstructionSet,
+  UpdateResult,
   UploadInstructionSet,
   UploadResult,
 } from '../../core/DriveData/Upload/DriveUploadTypes';
@@ -20,36 +16,28 @@ import {
   NewHomebaseFile,
   EmbeddedThumb,
   PayloadFile,
-  TargetDrive,
   ThumbnailFile,
-  deletePayload,
   getFileHeader,
   NewMediaFile,
   MediaFile,
+  decryptKeyHeader,
 } from '../../core/core';
-import {
-  base64ToUint8Array,
-  getNewId,
-  getRandom16ByteArray,
-  jsonStringify64,
-  stringGuidsEqual,
-  stringToUint8Array,
-  toGuidId,
-} from '../../helpers/DataUtil';
+import { getNewId, getRandom16ByteArray, toGuidId } from '../../helpers/DataUtil';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
-import { getPost, getPostBySlug } from './PostProvider';
-import { PostContent, BlogConfig, postTypeToDataType } from './PostTypes';
+import { getPost } from './PostProvider';
+import { PostContent } from './PostTypes';
 import { makeGrid } from '../../helpers/ImageMerger';
-import { processVideoFile } from '../../media/Video/VideoProcessor';
-import { createThumbnails, LinkPreview, LinkPreviewDescriptor } from '../../media/media';
-import { uploadFileOverPeer } from '../../peer/peer';
+import { LinkPreview } from '../../media/media';
+import { getFileHeaderBytesOverPeerByGlobalTransitId, uploadFileOverPeer } from '../../peer/peer';
 import { TransitInstructionSet, TransitUploadResult } from '../../peer/peerData/PeerTypes';
-import { AxiosRequestConfig } from 'axios';
-const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
-  Blob;
 
-const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
+import {
+  getPayloadForLinkPreview,
+  getPayloadsAndThumbnailsForNewMedia,
+  getUploadFileMetadata,
+  hasConflictingSlug,
+} from './PostUploadHelpers';
+
 export const POST_LINKS_PAYLOAD_KEY = 'pst_links';
 
 export const savePost = async <T extends PostContent>(
@@ -61,12 +49,10 @@ export const savePost = async <T extends PostContent>(
   linkPreviews?: LinkPreview[],
   onVersionConflict?: () => void,
   onUpdate?: (progress: number) => void
-): Promise<UploadResult | TransitUploadResult> => {
-  if (odinId && file.fileId) {
-    throw new Error(
-      '[PostUploadProvider] Editing a post to a group channel is not supported (yet)'
-    );
-  }
+): Promise<UploadResult | TransitUploadResult | UpdateResult> => {
+  // Enforce an ACL
+  if (!file.serverMetadata?.accessControlList)
+    throw new Error('[odin-js] PostUploadProvider: ACL is required to save a post');
 
   if (!file.fileMetadata.appData.content.authorOdinId)
     file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
@@ -77,11 +63,14 @@ export const savePost = async <T extends PostContent>(
       ? toGuidId(file.fileMetadata.appData.content.slug)
       : getNewId();
   } else if (!file.fileId && !odinId) {
-    // Check if fileMetadata.appData.content.id exists and with which fileId
+    // Check if fileMetadata.appData.content.id already exists and with which fileId if it does
     file.fileId =
       (await getPost(dotYouClient, channelId, file.fileMetadata.appData.content.id))?.fileId ??
       undefined;
   }
+
+  if (!file.fileMetadata.appData.content.authorOdinId)
+    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
 
   if (file.fileId) {
     return await updatePost(dotYouClient, odinId, file as HomebaseFile<T>, channelId, toSaveFiles);
@@ -92,14 +81,57 @@ export const savePost = async <T extends PostContent>(
       );
     }
   }
-  const newMediaFiles = toSaveFiles as NewMediaFile[];
-
-  if (!file.serverMetadata?.accessControlList) throw 'ACL is required to save a post';
 
   // Delete embeddedPost of embeddedPost (we don't want to embed an embed)
   if (file.fileMetadata.appData.content.embeddedPost) {
     delete (file.fileMetadata.appData.content.embeddedPost as PostContent)['embeddedPost'];
   }
+
+  if (file.fileId) {
+    if (linkPreviews?.length) {
+      throw new Error(
+        '[odin-js] PostUploadProvider: Changing Link previews are not supported for post updates'
+      );
+    }
+    return await updatePost(
+      dotYouClient,
+      odinId,
+      file as HomebaseFile<T>,
+      channelId,
+      toSaveFiles,
+      onVersionConflict,
+      onUpdate
+    );
+  } else {
+    if (toSaveFiles?.some((file) => 'fileKey' in file)) {
+      throw new Error(
+        '[odin-js] PostUploadProvider: Cannot upload a new post with an existing media file. Use updatePost instead'
+      );
+    }
+
+    return await uploadPost(
+      dotYouClient,
+      odinId,
+      file as NewHomebaseFile<T>,
+      channelId,
+      toSaveFiles as NewMediaFile[] | undefined,
+      linkPreviews,
+      onUpdate
+    );
+  }
+};
+
+const uploadPost = async <T extends PostContent>(
+  dotYouClient: DotYouClient,
+  odinId: string | undefined,
+  file: NewHomebaseFile<T>,
+  channelId: string,
+  toSaveFiles?: NewMediaFile[],
+  linkPreviews?: LinkPreview[],
+  onUpdate?: (progress: number) => void
+) => {
+  const newMediaFiles = toSaveFiles as NewMediaFile[];
+  const targetDrive = GetTargetDriveFromChannelId(channelId);
 
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
@@ -107,90 +139,24 @@ export const savePost = async <T extends PostContent>(
       SecurityGroupType.Authenticated
   );
 
-  const targetDrive = GetTargetDriveFromChannelId(channelId);
-
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
-  const previewThumbnails: EmbeddedThumb[] = [];
-  const aesKey: Uint8Array | undefined = encrypt ? getRandom16ByteArray() : undefined;
+  const aesKey = encrypt ? getRandom16ByteArray() : undefined;
 
   if (!newMediaFiles?.length && linkPreviews?.length) {
-    // We only support link previews when there is no media
-    const descriptorContent = JSON.stringify(
-      linkPreviews.map((preview) => {
-        return {
-          url: preview.url,
-          hasImage: !!preview.imageUrl,
-          imageWidth: preview.imageWidth,
-          imageHeight: preview.imageHeight,
-        } as LinkPreviewDescriptor;
-      })
-    );
-
-    const imageUrl = linkPreviews.find((preview) => preview.imageUrl)?.imageUrl;
-
-    const imageBlob = imageUrl
-      ? new Blob([base64ToUint8Array(imageUrl.split(',')[1])], {
-          type: imageUrl.split(';')[0].split(':')[1],
-        })
-      : undefined;
-
-    const { tinyThumb } = imageBlob
-      ? await createThumbnails(imageBlob, '', [])
-      : { tinyThumb: undefined };
-
-    payloads.push({
-      key: POST_LINKS_PAYLOAD_KEY,
-      payload: new Blob([stringToUint8Array(JSON.stringify(linkPreviews))], {
-        type: 'application/json',
-      }),
-      descriptorContent,
-      previewThumbnail: tinyThumb,
-    });
+    const linkPayload = await getPayloadForLinkPreview(linkPreviews);
+    if (linkPayload) payloads.push(linkPayload);
   }
 
-  // Handle image files:
-  for (let i = 0; newMediaFiles && i < newMediaFiles?.length; i++) {
-    const newMediaFile = newMediaFiles[i];
-    const payloadKey = newMediaFile.key || `${POST_MEDIA_PAYLOAD_KEY}${i}`;
-    if (newMediaFile.file.type.startsWith('video/')) {
-      const {
-        tinyThumb,
-        thumbnails: thumbnailsFromVideo,
-        payloads: payloadsFromVideo,
-      } = await processVideoFile(newMediaFile, payloadKey, aesKey);
+  const {
+    payloads: newMediaPayloads,
+    thumbnails: newMediaThumbnails,
+    previewThumbnails,
+  } = await getPayloadsAndThumbnailsForNewMedia(newMediaFiles, aesKey, onUpdate);
 
-      thumbnails.push(...thumbnailsFromVideo);
-      payloads.push(...payloadsFromVideo);
+  payloads.push(...newMediaPayloads);
+  thumbnails.push(...newMediaThumbnails);
 
-      if (tinyThumb) previewThumbnails.push(tinyThumb);
-
-      onUpdate?.((i + 1) / newMediaFiles.length);
-    } else if (newMediaFile.file.type.startsWith('image/')) {
-      const { additionalThumbnails, tinyThumb } = await createThumbnails(
-        newMediaFile.file,
-        payloadKey
-      );
-
-      thumbnails.push(...additionalThumbnails);
-      payloads.push({
-        key: payloadKey,
-        payload: newMediaFile.file,
-        previewThumbnail: tinyThumb,
-      });
-
-      if (tinyThumb) previewThumbnails.push(tinyThumb);
-    } else {
-      payloads.push({
-        key: payloadKey,
-        payload: newMediaFile.file,
-        descriptorContent: (newMediaFile.file as File).name || newMediaFile.file.type,
-      });
-    }
-    onUpdate?.((i + 1) / newMediaFiles.length);
-  }
-
-  // Don't force the primaryMediaFile on articles
   if (file.fileMetadata.appData.content.type !== 'Article') {
     file.fileMetadata.appData.content.primaryMediaFile = payloads[0]
       ? {
@@ -203,43 +169,6 @@ export const savePost = async <T extends PostContent>(
 
   const previewThumbnail: EmbeddedThumb | undefined =
     previewThumbnails?.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
-
-  return await uploadPost(
-    dotYouClient,
-    odinId,
-    file,
-    payloads,
-    thumbnails,
-    previewThumbnail,
-    channelId,
-    targetDrive,
-    onVersionConflict,
-    {
-      aesKey,
-    }
-  );
-};
-
-const uploadPost = async <T extends PostContent>(
-  dotYouClient: DotYouClient,
-  odinId: string | undefined,
-  file: HomebaseFile<T> | NewHomebaseFile<T>,
-  payloads: PayloadFile[],
-  thumbnails: ThumbnailFile[],
-  previewThumbnail: EmbeddedThumb | undefined,
-  channelId: string,
-  targetDrive: TargetDrive,
-  onVersionConflict?: () => void,
-  options?: {
-    axiosConfig?: AxiosRequestConfig;
-    aesKey?: Uint8Array | undefined;
-  }
-) => {
-  const encrypt = !(
-    file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
-    file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-      SecurityGroupType.Authenticated
-  );
 
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
@@ -255,60 +184,15 @@ const uploadPost = async <T extends PostContent>(
     },
   };
 
-  if (!odinId) {
-    const existingPostWithThisSlug = await getPostBySlug(
-      dotYouClient,
-      channelId,
-      file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
-    );
-
-    if (
-      existingPostWithThisSlug &&
-      !stringGuidsEqual(existingPostWithThisSlug?.fileId, file.fileId)
-    ) {
-      // There is clash with an existing slug
-      file.fileMetadata.appData.content.slug = `${
-        file.fileMetadata.appData.content.slug
-      }-${new Date().getTime()}`;
-    }
+  if (await hasConflictingSlug(dotYouClient, odinId, file, channelId)) {
+    // There is clash with an existing slug
+    file.fileMetadata.appData.content.slug = `${
+      file.fileMetadata.appData.content.slug
+    }-${new Date().getTime()}`;
   }
 
-  const uniqueId = file.fileMetadata.appData.content.slug
-    ? toGuidId(file.fileMetadata.appData.content.slug)
-    : file.fileMetadata.appData.content.id;
-
-  const payloadJson: string = jsonStringify64({ ...file.fileMetadata.appData.content });
-  const payloadBytes = stringToUint8Array(payloadJson);
-
-  // Set max of 3kb for content so enough room is left for metadata
-  const shouldEmbedContent = payloadBytes.length < 3000;
-  const content = shouldEmbedContent
-    ? payloadJson
-    : jsonStringify64({ channelId: file.fileMetadata.appData.content.channelId }); // If the full payload can't be embedded into the header file, at least pass the channelId so when getting, the location is known
-
-  if (!shouldEmbedContent) {
-    payloads.push({
-      key: DEFAULT_PAYLOAD_KEY,
-      payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
-    });
-  }
-
-  const isDraft = file.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType;
-  const metadata: UploadFileMetadata = {
-    versionTag: file?.fileMetadata.versionTag ?? undefined,
-    allowDistribution: !isDraft || !!odinId,
-    appData: {
-      tags: [file.fileMetadata.appData.content.id],
-      uniqueId: uniqueId,
-      fileType: isDraft ? BlogConfig.DraftPostFileType : BlogConfig.PostFileType,
-      content: content,
-      previewThumbnail: previewThumbnail,
-      userDate: file.fileMetadata.appData.userDate,
-      dataType: postTypeToDataType(file.fileMetadata.appData.content.type),
-    },
-    isEncrypted: encrypt,
-    accessControlList: file.serverMetadata?.accessControlList,
-  };
+  const { metadata, defaultPayload } = await getUploadFileMetadata(odinId, file, previewThumbnail);
+  if (defaultPayload) payloads.push(defaultPayload);
 
   if (!odinId) {
     const result = await uploadFile(
@@ -318,11 +202,11 @@ const uploadPost = async <T extends PostContent>(
       payloads,
       thumbnails,
       encrypt,
-      onVersionConflict,
-      options
+      undefined,
+      { aesKey }
     );
 
-    if (!result) throw new Error(`Upload failed`);
+    if (!result) throw new Error(`[odin-js] PostUploadProvider: Upload failed`);
     return result;
   } else {
     const transitInstructionSet: TransitInstructionSet = {
@@ -339,150 +223,54 @@ const uploadPost = async <T extends PostContent>(
       metadata,
       payloads,
       thumbnails,
-      encrypt
+      encrypt,
+      { aesKey }
     );
 
-    if (!result) throw new Error(`Upload over peer failed`);
+    if (!result) throw new Error(`[odin-js] PostUploadProvider: Upload over peer failed`);
     return result;
   }
 };
 
-const uploadPostHeader = async <T extends PostContent>(
-  dotYouClient: DotYouClient,
-  file: HomebaseFile<T>,
-  channelId: string,
-  targetDrive: TargetDrive
-) => {
-  const instructionSet: UploadInstructionSet = {
-    transferIv: getRandom16ByteArray(),
-    storageOptions: {
-      overwriteFileId: file?.fileId ?? '',
-      drive: targetDrive,
-    },
-    transitOptions: {
-      recipients: [],
-      schedule: ScheduleOptions.SendLater,
-      priority: PriorityOptions.Medium,
-      sendContents: SendContents.All,
-    },
-  };
-
-  const existingPostWithThisSlug = await getPostBySlug(
-    dotYouClient,
-    channelId,
-    file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
-  );
-
-  if (
-    existingPostWithThisSlug &&
-    existingPostWithThisSlug?.fileMetadata.appData.content.id !==
-      file.fileMetadata.appData.content.id
-  ) {
-    // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${
-      file.fileMetadata.appData.content.slug
-    }-${new Date().getTime()}`;
-  }
-
-  const uniqueId = file.fileMetadata.appData.content.slug
-    ? toGuidId(file.fileMetadata.appData.content.slug)
-    : file.fileMetadata.appData.content.id;
-
-  const payloadJson: string = jsonStringify64({
-    ...file.fileMetadata.appData.content,
-    fileId: undefined,
-  });
-  const payloadBytes = stringToUint8Array(payloadJson);
-
-  // Set max of 3kb for content so enough room is left for metadata
-  const shouldEmbedContent = payloadBytes.length < 3000;
-  const content = shouldEmbedContent
-    ? payloadJson
-    : jsonStringify64({ channelId: file.fileMetadata.appData.content.channelId });
-
-  const isDraft = file.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType;
-  const metadata: UploadFileMetadata = {
-    versionTag: file.fileMetadata.versionTag ?? undefined,
-    allowDistribution: !isDraft,
-    appData: {
-      tags: [file.fileMetadata.appData.content.id],
-      uniqueId: uniqueId,
-      fileType: isDraft ? BlogConfig.DraftPostFileType : BlogConfig.PostFileType,
-      content: content,
-      previewThumbnail: file.fileMetadata.appData.previewThumbnail,
-      userDate: file.fileMetadata.appData.userDate,
-      dataType: postTypeToDataType(file.fileMetadata.appData.content.type),
-    },
-    isEncrypted: file.fileMetadata.isEncrypted ?? false,
-    accessControlList: file.serverMetadata?.accessControlList,
-  };
-
-  let runningVersionTag;
-  if (!shouldEmbedContent) {
-    // Append/update payload
-    runningVersionTag =
-      (
-        await appendDataToFile(
-          dotYouClient,
-          file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
-          {
-            targetFile: {
-              fileId: file.fileId as string,
-              targetDrive: targetDrive,
-            },
-            versionTag: file.fileMetadata.versionTag,
-          },
-          [
-            {
-              key: DEFAULT_PAYLOAD_KEY,
-              payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
-            },
-          ],
-          undefined
-        )
-      )?.newVersionTag || runningVersionTag;
-  } else if (file.fileMetadata.payloads?.some((p) => p.key === DEFAULT_PAYLOAD_KEY)) {
-    // Remove default payload if it was there before
-    runningVersionTag = (
-      await deletePayload(
-        dotYouClient,
-        targetDrive,
-        file.fileId as string,
-        DEFAULT_PAYLOAD_KEY,
-        file.fileMetadata.versionTag
-      )
-    ).newVersionTag;
-  }
-
-  if (runningVersionTag) metadata.versionTag = runningVersionTag;
-  return await uploadHeader(
-    dotYouClient,
-    file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
-    instructionSet,
-    metadata
-  );
-};
-
 const updatePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
-  odinId: string | undefined,
+  remoteOdinId: string | undefined,
   file: HomebaseFile<T>,
   channelId: string,
-  existingAndNewMediaFiles?: (NewMediaFile | MediaFile)[]
-): Promise<UploadResult> => {
+  existingAndNewMediaFiles?: (NewMediaFile | MediaFile)[],
+  onVersionConflict?: () => void,
+  onUpdate?: (progress: number) => void
+): Promise<UploadResult | UpdateResult> => {
+  const odinId = remoteOdinId === dotYouClient.getIdentity() ? undefined : remoteOdinId;
+
   const targetDrive = GetTargetDriveFromChannelId(channelId);
-  const header = await getFileHeader(dotYouClient, targetDrive, file.fileId as string);
+  const header = odinId
+    ? await getFileHeaderBytesOverPeerByGlobalTransitId(
+        dotYouClient,
+        odinId,
+        targetDrive,
+        file.fileMetadata.globalTransitId as string
+      )
+    : await getFileHeader(dotYouClient, targetDrive, file.fileId as string);
 
-  if (!header) throw new Error('Cannot update a post that does not exist');
-  if (header?.fileMetadata.versionTag !== file.fileMetadata.versionTag)
-    throw new Error('Version conflict');
+  if (!header)
+    throw new Error('[odin-js] PostUploadProvider: Cannot update a post that does not exist');
 
+  if (header?.fileMetadata.versionTag !== file.fileMetadata.versionTag) {
+    if (odinId) {
+      // There's a conflict, but we will just force ahead
+      file.fileMetadata.versionTag = header.fileMetadata.versionTag;
+    } else {
+      throw new Error('[odin-js] PostUploadProvider: Version conflict');
+    }
+  }
   if (
     !file.fileId ||
     !file.serverMetadata?.accessControlList ||
     !file.fileMetadata.appData.content.id
-  )
-    throw new Error(`[odin-js] PostProvider: fileId is required to update a post`);
+  ) {
+    throw new Error(`[odin-js] PostUploadProvider: File is missing required data to update a post`);
+  }
 
   const encrypt = !(
     file.serverMetadata.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
@@ -493,7 +281,6 @@ const updatePost = async <T extends PostContent>(
     : undefined;
   if (keyHeader) file.sharedSecretEncryptedKeyHeader = keyHeader;
 
-  let runningVersionTag: string = file.fileMetadata.versionTag;
   const existingMediaFiles =
     file.fileMetadata.payloads?.filter(
       (p) => p.key !== DEFAULT_PAYLOAD_KEY && p.key !== POST_LINKS_PAYLOAD_KEY
@@ -513,88 +300,107 @@ const updatePost = async <T extends PostContent>(
     }
   }
 
-  // Remove the payloads that are removed from the post
-  if (deletedMediaFiles.length) {
-    for (let i = 0; i < deletedMediaFiles.length; i++) {
-      const mediaFile = deletedMediaFiles[i];
-      runningVersionTag = (
-        await deletePayload(
-          dotYouClient,
-          targetDrive,
-          file.fileId as string,
-          mediaFile.key,
-          runningVersionTag
-        )
-      ).newVersionTag;
-    }
+  return await patchPost(
+    dotYouClient,
+    odinId,
+    file,
+    channelId,
+    newMediaFiles,
+    deletedMediaFiles,
+    onUpdate
+  );
+};
+
+const patchPost = async <T extends PostContent>(
+  dotYouClient: DotYouClient,
+  odinId: string | undefined,
+  file: HomebaseFile<T>,
+  channelId: string,
+  newMediaFiles?: NewMediaFile[],
+  deletedMediaFiles?: MediaFile[],
+  onUpdate?: (progress: number) => void
+): Promise<UpdateResult> => {
+  const targetDrive = GetTargetDriveFromChannelId(channelId);
+  const encrypt = !(
+    file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+    file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+      SecurityGroupType.Authenticated
+  );
+
+  if (await hasConflictingSlug(dotYouClient, odinId, file, channelId)) {
+    // There is clash with an existing slug
+    file.fileMetadata.appData.content.slug = `${
+      file.fileMetadata.appData.content.slug
+    }-${new Date().getTime()}`;
   }
 
-  // When all media is removed from the post, remove the preview thumbnail
-  if (existingMediaFiles.length === deletedMediaFiles.length)
-    file.fileMetadata.appData.previewThumbnail = undefined;
-
-  // Process new files:
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
-  let previewThumbnail: EmbeddedThumb | undefined;
-  for (let i = 0; newMediaFiles && i < newMediaFiles.length; i++) {
-    const newMediaFile = newMediaFiles[i];
-    // We ignore existing files as they are just kept
-    if (!('file' in newMediaFile)) {
-      continue;
-    }
 
-    const payloadKey =
-      newMediaFile.key ||
-      `${POST_MEDIA_PAYLOAD_KEY}${(existingAndNewMediaFiles || newMediaFiles).length + i}`;
+  const encryptedKeyHeader = encrypt
+    ? file.sharedSecretEncryptedKeyHeader || GenerateKeyHeader()
+    : undefined;
 
-    const { additionalThumbnails, tinyThumb } = await createThumbnails(
-      newMediaFile.file,
-      payloadKey
-    );
+  // decrypt keyheader;
+  const decryptedKeyHeader = encryptedKeyHeader
+    ? await decryptKeyHeader(dotYouClient, encryptedKeyHeader)
+    : undefined;
 
-    payloads.push({
-      payload: newMediaFile.file,
-      key: payloadKey,
-      previewThumbnail: tinyThumb,
-    });
-    thumbnails.push(...additionalThumbnails);
-    previewThumbnail = previewThumbnail || tinyThumb;
-  }
+  const {
+    payloads: newMediaPayloads,
+    thumbnails: newMediaThumbnails,
+    previewThumbnails,
+  } = await getPayloadsAndThumbnailsForNewMedia(
+    newMediaFiles || [],
+    decryptedKeyHeader?.aesKey,
+    onUpdate
+  );
 
-  // Append new files:
-  if (payloads.length) {
-    const appendInstructionSet: AppendInstructionSet = {
-      targetFile: {
-        fileId: file.fileId as string,
-        targetDrive: targetDrive,
-      },
-      versionTag: runningVersionTag,
-    };
+  payloads.push(...newMediaPayloads);
+  thumbnails.push(...newMediaThumbnails);
 
-    runningVersionTag =
-      (await appendDataToFile(dotYouClient, keyHeader, appendInstructionSet, payloads, thumbnails))
-        ?.newVersionTag || runningVersionTag;
-  }
+  const previewThumbnail: EmbeddedThumb | undefined =
+    previewThumbnails?.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
-  if (file.fileMetadata.appData.content.type !== 'Article') {
-    if (existingMediaFiles?.length)
-      file.fileMetadata.appData.content.primaryMediaFile = {
-        fileId: file.fileId,
-        fileKey: existingMediaFiles[0].key,
-        type: existingMediaFiles[0].contentType,
+  const { metadata, defaultPayload } = await getUploadFileMetadata(odinId, file, previewThumbnail);
+  if (defaultPayload) payloads.push(defaultPayload);
+
+  const deletedPayloads = deletedMediaFiles?.map((payload) => {
+    return { key: payload.key };
+  });
+
+  const instructionSet: UpdateInstructionSet = odinId
+    ? {
+        transferIv: getRandom16ByteArray(),
+        locale: 'peer',
+        file: {
+          globalTransitId: file.fileMetadata.globalTransitId as string,
+          targetDrive,
+        },
+        versionTag: file.fileMetadata.versionTag,
+        recipients: [odinId],
+      }
+    : {
+        transferIv: getRandom16ByteArray(),
+        locale: 'local',
+        file: {
+          fileId: file.fileId,
+          targetDrive,
+        },
+        versionTag: file.fileMetadata.versionTag,
       };
-  }
 
-  file.fileMetadata.appData.previewThumbnail =
-    deletedMediaFiles.length && existingMediaFiles.length === 1
-      ? previewThumbnail
-      : file.fileMetadata.appData.previewThumbnail || previewThumbnail;
+  const updateResult = await patchFile(
+    dotYouClient,
+    encryptedKeyHeader,
+    instructionSet,
+    metadata,
+    payloads,
+    thumbnails,
+    deletedPayloads,
+    undefined
+  );
 
-  file.fileMetadata.isEncrypted = encrypt;
-  file.fileMetadata.versionTag = runningVersionTag;
-  const result = await uploadPostHeader(dotYouClient, file, channelId, targetDrive);
-  if (!result) throw new Error(`[odin-js] PostProvider: Post update failed`);
-
-  return result;
+  if (!updateResult) throw new Error(`[PostUploadProvider]: Post update failed`);
+  return updateResult;
 };

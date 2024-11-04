@@ -34,7 +34,7 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
   };
 
   const createOrUpdate = async (circleDefinition: CircleDefinition) => {
-    if (circleDefinition.lastUpdated) {
+    if (circleDefinition.id) {
       return await updateCircleDefinition(dotYouClient, circleDefinition);
     } else {
       return await createCircleDefinition(dotYouClient, circleDefinition);

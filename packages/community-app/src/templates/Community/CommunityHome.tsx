@@ -5,6 +5,7 @@ import {
   ActionGroup,
   ActionLink,
   COMMUNITY_APP_ID,
+  COMMUNITY_ROOT_PATH,
   ErrorBoundary,
   ExtendPermissionDialog,
   getOdinIdColor,
@@ -25,10 +26,8 @@ import { CommunityChannelNav } from './CommunityChannelNav';
 import { useCommunityMemberUpdater } from '../../hooks/community/useCommunityMemberUpdater';
 import { ExtendCriclePermissionDialog } from '../../components/Auth/ExtendCirclePermissionDialog';
 
-export const COMMUNITY_ROOT = '/apps/community';
-
 export const CommunityHome = ({ children }: { children?: ReactNode }) => {
-  const newCommunity = useMatch({ path: `${COMMUNITY_ROOT}/new` });
+  const newCommunity = useMatch({ path: `${COMMUNITY_ROOT_PATH}/new` });
   const { odinKey, communityKey } = useParams();
   const isCreateNew = !!newCommunity;
 
@@ -44,10 +43,10 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
     if (window.innerWidth <= 1024) return;
     if (communities[0]) {
       navigate(
-        `${COMMUNITY_ROOT}/${communities[0].fileMetadata.senderOdinId}/${communities[0].fileMetadata.appData.uniqueId}`
+        `${COMMUNITY_ROOT_PATH}/${communities[0].fileMetadata.senderOdinId}/${communities[0].fileMetadata.appData.uniqueId}`
       );
     } else {
-      navigate(`${COMMUNITY_ROOT}/new`);
+      navigate(`${COMMUNITY_ROOT_PATH}/new`);
     }
   }, [communityKey, communities]);
 
@@ -80,7 +79,7 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
 };
 
 const CommunitySideNav = () => {
-  const rootChatMatch = useMatch({ path: COMMUNITY_ROOT });
+  const rootChatMatch = useMatch({ path: COMMUNITY_ROOT_PATH });
   const isRoot = !!rootChatMatch;
 
   const isActive = isRoot;
@@ -142,7 +141,7 @@ const CommunitiesList = () => {
             },
             {
               label: 'Create a new community',
-              onClick: () => navigate(`${COMMUNITY_ROOT}/new`),
+              onClick: () => navigate(`${COMMUNITY_ROOT_PATH}/new`),
               icon: Plus,
             },
           ]}
@@ -171,7 +170,7 @@ const CommunityListItem = ({
   return (
     <div className={`px-2 py-2 ${isActive ? 'bg-primary/20' : ''}`}>
       <ActionLink
-        href={`${COMMUNITY_ROOT}/${community.fileMetadata.senderOdinId}/${community.fileMetadata.appData.uniqueId}`}
+        href={`${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${community.fileMetadata.appData.uniqueId}`}
         className={`aspect-square w-full rounded-2xl p-4 uppercase hover:shadow-md`}
         style={{
           backgroundColor: getOdinIdColor(community.fileMetadata.appData.content.title).darkTheme,

@@ -10,6 +10,7 @@ import {
   TypedConnectionNotification,
   AppNotification,
   ReactionNotification,
+  ClientConnectionFinalizedNotification,
 } from './WebsocketTypes';
 
 export interface RawClientNotification {
@@ -20,7 +21,7 @@ export interface RawClientNotification {
 export const ParseRawClientNotification = (
   notification: RawClientNotification
 ): TypedConnectionNotification => {
-  const { targetDrive, header, previousServerFileHeader, sender, recipient, ...data } =
+  const { targetDrive, header, previousServerFileHeader, sender, recipient, identity, ...data } =
     tryJsonParse<Record<string, unknown>>(notification.data);
 
   if (notification.notificationType === 'inboxItemReceived') {
@@ -55,6 +56,14 @@ export const ParseRawClientNotification = (
       recipient: recipient,
       data: data,
     } as ClientConnectionNotification;
+  }
+
+  if (['connectionFinalized'].includes(notification.notificationType)) {
+    return {
+      notificationType: notification.notificationType,
+      identity: identity,
+      data: data,
+    } as ClientConnectionFinalizedNotification;
   }
 
   if (

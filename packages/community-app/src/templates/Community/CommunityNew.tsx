@@ -2,6 +2,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import {
   ActionButton,
+  COMMUNITY_ROOT_PATH,
   ActionLink,
   AuthorImage,
   ErrorBoundary,
@@ -19,8 +20,7 @@ import { getNewId, stringGuidsEqual, tryJsonParse } from '@homebase-id/js-lib/he
 import { useEffect, useState } from 'react';
 import { CircleDefinition } from '@homebase-id/js-lib/network';
 import { useCommunity } from '../../hooks/community/useCommunity';
-import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
-import { Arrow, Ellipsis } from '@homebase-id/common-app/icons';
+import { Ellipsis, Arrow } from '@homebase-id/common-app/icons';
 
 export const NewCommunity = () => {
   const identity = useDotYouClient().getIdentity();
@@ -43,7 +43,7 @@ export const NewCommunity = () => {
       (async () => {
         await createNew(definitionFile);
         navigate(
-          `${COMMUNITY_ROOT}/${definitionFile.fileMetadata.senderOdinId}/${definitionFile.fileMetadata.appData.uniqueId}`
+          `${COMMUNITY_ROOT_PATH}/${definitionFile.fileMetadata.senderOdinId}/${definitionFile.fileMetadata.appData.uniqueId}`
         );
       })();
     }
@@ -76,7 +76,9 @@ export const NewCommunity = () => {
         },
       };
       await createNew(newCommunityDef); // Will in 99% of the cases first redirect to an ensure drive
-      navigate(`${COMMUNITY_ROOT}/${newCommunityDef.fileMetadata.senderOdinId}/${communityId}`);
+      navigate(
+        `${COMMUNITY_ROOT_PATH}/${newCommunityDef.fileMetadata.senderOdinId}/${communityId}`
+      );
     } catch (e) {
       console.error(e);
     }

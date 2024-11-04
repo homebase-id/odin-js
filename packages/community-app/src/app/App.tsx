@@ -15,6 +15,7 @@ import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import { useAuth } from '../hooks/auth/useAuth';
 import {
+  COMMUNITY_ROOT_PATH,
   DotYouClientProvider,
   ErrorBoundary,
   NotFound,
@@ -32,6 +33,7 @@ const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'community-messages',
   'channels-with-recent-message',
 ];
+const AUTH_PATH = COMMUNITY_ROOT_PATH + '/auth';
 
 const Auth = lazy(() => import('../templates/Auth/Auth'));
 const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
@@ -41,9 +43,6 @@ const CommunityHome = lazy(() =>
     default: communityApp.CommunityHome,
   }))
 );
-
-export const ROOT_PATH = '/apps/community';
-const AUTH_PATH = ROOT_PATH + '/auth';
 
 const CommunityChannelDetail = lazy(() =>
   import('../templates/Community/CommunityChannelDetail').then((communityApp) => ({
@@ -71,7 +70,7 @@ function App() {
     createRoutesFromElements(
       <>
         <Route
-          path={ROOT_PATH}
+          path={COMMUNITY_ROOT_PATH}
           element={
             <ErrorBoundary>
               <Suspense fallback={<div className="h-full w-full bg-pink-500"></div>}>
@@ -190,7 +189,7 @@ function App() {
 const CommunityRootRoute = () => {
   const { odinKey, communityKey } = useParams();
   return window.innerWidth > 1024 ? (
-    <Navigate to={`${ROOT_PATH}/${odinKey}/${communityKey}/all`} />
+    <Navigate to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/all`} />
   ) : null;
 };
 

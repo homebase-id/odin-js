@@ -15,6 +15,7 @@ import {
   RichTextRenderer,
   ActionGroup,
   highlightQuery,
+  MAIL_ROOT_PATH,
 } from '@homebase-id/common-app';
 import { ChevronDown, Exclamation } from '@homebase-id/common-app/icons';
 import { useEffect, useRef, useState } from 'react';
@@ -24,7 +25,6 @@ import { MailConversationInfo } from './MailConversationInfo';
 import { useNavigate } from 'react-router-dom';
 import { MailAttachmentOverview } from './MailAttachmentOverview';
 import { useSearchParams, useParams } from 'react-router-dom';
-import { ROOT_PATH } from '../../app/App';
 
 const DEFAULT_SIZE = 500;
 export const MailHistory = ({
@@ -289,7 +289,7 @@ const MailMessage = ({
                 label: t('Message info'),
                 onClick: () =>
                   navigate(
-                    `${ROOT_PATH}/${filter}/${conversationKey}/${message.fileId}?message-info`
+                    `${MAIL_ROOT_PATH}/${filter}/${conversationKey}/${message.fileId}?message-info`
                   ),
               },
             ]}
@@ -307,7 +307,7 @@ const MailMessage = ({
       {showMessageInfo ? (
         <MailConversationInfo
           mailConversation={message}
-          onClose={() => navigate(`${ROOT_PATH}/${filter}/${conversationKey}`)}
+          onClose={() => navigate(`${MAIL_ROOT_PATH}/${filter}/${conversationKey}`)}
         />
       ) : null}
     </div>

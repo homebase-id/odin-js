@@ -5,10 +5,10 @@ import {
   useCollaborativeChannels,
   HybridLink,
   LoadingBlock,
+  FEED_ROOT_PATH,
 } from '@homebase-id/common-app';
 import { Persons, Quote } from '@homebase-id/common-app/icons';
 import React from 'react';
-import { ROOT_PATH } from '../../../../app/App';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 
 const ChannelsOverview = ({ className }: { className?: string }) => {
@@ -70,7 +70,10 @@ const ChannelsOverview = ({ className }: { className?: string }) => {
         </div>
       ) : null}
 
-      <HybridLink href={`${ROOT_PATH}/channels`} className="text-sm text-slate-400 hover:underline">
+      <HybridLink
+        href={`${FEED_ROOT_PATH}/channels`}
+        className="text-sm text-slate-400 hover:underline"
+      >
         {t('Manage channels')}
       </HybridLink>
     </div>

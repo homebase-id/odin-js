@@ -1,11 +1,11 @@
 import { createPortal } from 'react-dom';
 import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import {
-  ActionButton,
+  ActionLink,
+  CHAT_ROOT_PATH,
   ConnectionImage,
   ConnectionName,
   DialogWrapper,
-  Input,
   OwnerImage,
   OwnerName,
   t,
@@ -16,9 +16,8 @@ import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../../providers/ConversationProvider';
-import { useEffect, useState } from 'react';
-import { useConversation } from '../../../hooks/chat/useConversation';
-import { Persons, House, Save, Pencil, Arrow } from '@homebase-id/common-app/icons';
+import { Persons, House, Pencil, Arrow, Plus } from '@homebase-id/common-app/icons';
+import { Link } from 'react-router-dom';
 
 export const ChatInfo = ({
   conversation,
@@ -36,22 +35,7 @@ export const ChatInfo = ({
   const withYourself = conversation?.fileMetadata.appData.uniqueId === ConversationWithYourselfId;
   const recipient = recipients.length === 1 ? recipients[0] : undefined;
 
-  const [isEditTitle, setIsEditTitle] = useState<boolean>(false);
-  const [newTitle, setNewTitle] = useState<string>(conversationContent.title || '');
-
-  const { mutate: updateConversation, status: updateStatus } = useConversation().update;
-  const doSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    conversation.fileMetadata.appData.content.title = newTitle;
-    updateConversation({
-      conversation,
-      distribute: true,
-    });
-  };
-
-  useEffect(() => {
-    updateStatus === 'success' && setIsEditTitle(false);
-  }, [updateStatus]);
+  const isAdmin = conversation.fileMetadata.senderOdinId === identity;
 
   const dialog = (
     <DialogWrapper onClose={onClose} title={t('Chat info')}>
@@ -94,47 +78,34 @@ export const ChatInfo = ({
               <p className="text-center text-xl">
                 <OwnerName /> <span className="text-sm text-foreground/50">({t('you')})</span>
               </p>
+            ) : isAdmin ? (
+              <Link
+                to={`${CHAT_ROOT_PATH}/${conversation.fileMetadata.appData.uniqueId}/edit`}
+                className="flex cursor-pointer flex-row items-center gap-2"
+              >
+                <span className="text-center text-xl">{conversationContent?.title}</span>
+                <Pencil className="h-5 w-5" />
+              </Link>
             ) : (
-              <>
-                {isEditTitle ? (
-                  <form className="flex flex-col items-center gap-2" onSubmit={doSubmit}>
-                    <Input
-                      required
-                      defaultValue={conversationContent?.title}
-                      onChange={(e) => setNewTitle(e.currentTarget.value)}
-                    />
-                    <span className="flex flex-row">
-                      <ActionButton
-                        type="mute"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setIsEditTitle(false);
-                        }}
-                      >
-                        {t('Cancel')}
-                      </ActionButton>
-                      <ActionButton type="mute" icon={Save}>
-                        {t('Save')}
-                      </ActionButton>
-                    </span>
-                  </form>
-                ) : (
-                  <a
-                    onClick={() => setIsEditTitle(true)}
-                    className="flex cursor-pointer flex-row items-center gap-2"
-                  >
-                    <span className="text-center text-xl">{conversationContent?.title}</span>
-                    <Pencil className="h-5 w-5" />
-                  </a>
-                )}
-              </>
+              <span className="text-center text-xl">{conversationContent?.title}</span>
             )}
           </>
         </div>
       </div>
       {recipients?.length > 1 ? (
         <div className="mt-10">
-          <p className="mb-4 text-lg">{t('Recipients')}</p>
+          <div className="flex flex-col items-center justify-between sm:flex-row">
+            <p className="mb-4 text-lg">{t('Recipients')}</p>
+            {isAdmin ? (
+              <ActionLink
+                type="mute"
+                size="none"
+                href={`${CHAT_ROOT_PATH}/${conversation.fileMetadata.appData.uniqueId}/edit`}
+              >
+                {t('Edit')}
+              </ActionLink>
+            ) : null}
+          </div>
           <div className="flex flex-col gap-4">
             {recipients.map((recipient) => (
               <a

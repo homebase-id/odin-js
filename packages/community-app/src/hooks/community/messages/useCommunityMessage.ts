@@ -105,7 +105,7 @@ export const useCommunityMessage = (props?: {
       },
       serverMetadata: {
         accessControlList: community.fileMetadata.appData.content.acl || {
-          requiredSecurityGroup: SecurityGroupType.Connected,
+          requiredSecurityGroup: SecurityGroupType.AutoConnected,
         },
       },
       fileSystemType: thread ? 'Comment' : undefined,
@@ -204,7 +204,7 @@ export const useCommunityMessage = (props?: {
           fileSystemType: thread ? 'Comment' : undefined,
           serverMetadata: {
             accessControlList: community.fileMetadata.appData.content.acl || {
-              requiredSecurityGroup: SecurityGroupType.Connected,
+              requiredSecurityGroup: SecurityGroupType.AutoConnected,
             },
           },
         };

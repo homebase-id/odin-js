@@ -11,7 +11,7 @@ import { PostInteracts } from '../Blocks/Interacts/PostInteracts';
 import { DoubleClickHeartForMedia } from '../Blocks/Media/DoubleClickHeartForMedia';
 import { useChannel } from '../../hooks/socialFeed/channels/useChannel';
 import { useDotYouClient } from '../../hooks/auth/useDotYouClient';
-import { HOME_ROOT_PATH } from '../../core/paths';
+import { HOME_ROOT_PATH } from '../../constants';
 
 interface PostTeaserProps {
   className?: string;

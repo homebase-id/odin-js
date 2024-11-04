@@ -144,7 +144,7 @@ export const saveChannelDefinition = async (
           true
         );
       } else {
-        console.warn(`[DotYouCore-js: PostDefinitionProvider] Save Channel: No access to drive`);
+        console.warn(`[odin-js: PostDefinitionProvider] Save Channel: No access to drive`);
         onMissingDrive && onMissingDrive();
         return;
       }
@@ -216,6 +216,10 @@ export const removeChannelDefinition = async (dotYouClient: DotYouClient, channe
 };
 
 export const GetTargetDriveFromChannelId = (channelId: string): TargetDrive => {
+  if (!channelId || channelId.toLowerCase().replace(/-/g, '').length !== 32) {
+    throw new Error(`GetTargetDriveFromChannelId: Invalid channelId: "${channelId}"`);
+  }
+
   return {
     alias: channelId,
     type: BlogConfig.DriveType,

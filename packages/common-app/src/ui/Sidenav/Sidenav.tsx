@@ -2,8 +2,15 @@ import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { BuiltInProfiles } from '@homebase-id/js-lib/profile';
 import { hasDebugFlag, isTouchDevice } from '@homebase-id/js-lib/helpers';
-import { FEED_APP_ID, CHAT_APP_ID, MAIL_APP_ID } from '../../constants';
-import { HOME_ROOT_PATH } from '../../core';
+import {
+  FEED_APP_ID,
+  CHAT_APP_ID,
+  MAIL_APP_ID,
+  FEED_ROOT_PATH,
+  CHAT_ROOT_PATH,
+  MAIL_ROOT_PATH,
+  HOME_ROOT_PATH,
+} from '../../constants';
 import { getVersion, t, ellipsisAtMaxChar } from '../../helpers';
 import {
   useOutsideTrigger,
@@ -458,12 +465,12 @@ const FeedNavItem = () => {
 
 const ChatNavItem = () => {
   const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
-  return <NavItem icon={ChatBubble} label={'Chat'} to="/apps/chat" unread={!!unreadCount} />;
+  return <NavItem icon={ChatBubble} label={'Chat'} to={CHAT_ROOT_PATH} unread={!!unreadCount} />;
 };
 
 const MailNavItem = () => {
   const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: MAIL_APP_ID });
-  return <NavItem icon={Envelope} label={'Mail'} to="/apps/mail" unread={!!unreadCount} />;
+  return <NavItem icon={Envelope} label={'Mail'} to={MAIL_ROOT_PATH} unread={!!unreadCount} />;
 };
 
 // const CommunityNavItem = () => {
@@ -480,8 +487,8 @@ const MobileDrawer = ({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) =
     >
       <div className="flex flex-row justify-between">
         <NavItem icon={House} to={'/owner'} end={true} />
-        <NavItem icon={Feed} to={'/apps/feed'} end={true} />
-        <NavItem icon={ChatBubble} to="/apps/chat" />
+        <NavItem icon={Feed} to={FEED_ROOT_PATH} end={true} />
+        <NavItem icon={ChatBubble} to={CHAT_ROOT_PATH} />
 
         <button className={navItemClassName} onClick={() => setIsOpen(true)}>
           <Bars className={iconClassName} />
