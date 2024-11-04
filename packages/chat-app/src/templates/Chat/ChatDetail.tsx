@@ -317,7 +317,7 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
     return (
       <div className="flex w-full flex-row items-center justify-between bg-page-background px-5 py-2">
         <p>
-          {t('You were automatically connected to')}
+          {t('You were automatically connected to')}{' '}
           <a
             href={`${new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}`}
             className="underline"
