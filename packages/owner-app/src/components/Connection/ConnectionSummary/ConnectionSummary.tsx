@@ -277,6 +277,8 @@ const CirclesSummary = ({ odinId }: { odinId?: string }) => {
     )
     .filter(Boolean) as string[];
 
+  if (!circleNames.length) return null;
+
   return (
     <Link
       to={`/owner/connections/${odinId}/settings/circles`}

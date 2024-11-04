@@ -102,7 +102,7 @@ export const IdentityAlerts = ({ odinId }: { odinId: string | undefined }) => {
       ) : null}
 
       {isUnconfirmedAutoConnection && confirmIntroductionState !== 'success' ? (
-        <Alert type="info" className="bg-background">
+        <Alert type="warning" className="bg-background">
           <div className="flex flex-col items-center justify-between gap-2 lg:flex-row">
             <div className="flex flex-col gap-2">
               <p>
@@ -143,30 +143,6 @@ export const IdentityAlerts = ({ odinId }: { odinId: string | undefined }) => {
             >
               {t('Confirm connection')}
             </ActionButton>
-            {/* <div className="my-auto ml-auto grid grid-flow-col gap-2">
-                <ActionButton
-                  type="primary"
-                  onClick={() => {
-                    setIsAcceptDialogOpen(true);
-                  }}
-                >
-                  {t('View request')}...
-                </ActionButton>
-                <ActionButton
-                  type="secondary"
-                  onClick={async () => {
-                    await ignoreRequest(
-                      { senderOdinId: connectionInfo.senderOdinId },
-                      { onSuccess: () => navigate('/owner/connections') }
-                    );
-                    checkReturnTo('Ignored');
-                  }}
-                  state={ignoreRequestStatus}
-                  icon={Times}
-                >
-                  {t('Ignore request')}
-                </ActionButton>
-              </div> */}
           </div>
         </Alert>
       ) : null}
