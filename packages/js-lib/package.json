@@ -1,8 +1,8 @@
 {
-  "version": "0.0.6-alpha.0",
+  "version": "0.0.6-alpha.1",
   "name": "@homebase-id/js-lib",
   "author": "YouFoundation",
-  "description": "JavaScript SDK for the DotYouCore api",
+  "description": "Monorepo that contains all the main homebase apps, together with the JavaScript libraries",
   "files": [
     "dist",
     "core.js",
