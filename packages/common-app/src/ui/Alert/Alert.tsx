@@ -20,7 +20,7 @@ export const Alert = ({ type, title, children, className, isCompact }: AlertProp
     type === 'critical'
       ? 'border-red-100 dark:border-red-800 dark:text-white'
       : type === 'warning'
-        ? 'border-orange-100'
+        ? 'border-orange-200 dark:border-orange-900'
         : 'dark:border-gray-700';
 
   return (
