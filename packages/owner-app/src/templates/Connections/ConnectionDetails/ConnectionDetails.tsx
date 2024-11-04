@@ -1,6 +1,5 @@
 import { useMatch, useParams } from 'react-router-dom';
-import { t } from '@homebase-id/common-app';
-import { useConnection } from '../../../hooks/connections/useConnection';
+import { t, useConnection } from '@homebase-id/common-app';
 import { useContact } from '../../../hooks/contacts/useContact';
 import { ConnectionSummary } from '../../../components/Connection/ConnectionSummary/ConnectionSummary';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';

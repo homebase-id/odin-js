@@ -6,12 +6,12 @@ import {
   ChannelDefinitionVm,
   ActionButton,
   DialogWrapper,
+  useConnection,
 } from '@homebase-id/common-app';
 import { Quote, Persons } from '@homebase-id/common-app/icons';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useFollower } from '../../../hooks/follow/useFollower';
 import { HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
-import { useConnection } from '../../../hooks/connections/useConnection';
 import { ConnectionInfo } from '@homebase-id/js-lib/network';
 
 const IdentityThatFollowsDialog = ({

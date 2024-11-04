@@ -9,6 +9,8 @@ export * from './connections/useConnections';
 export * from './connections/useAllContacts';
 export * from './connections/useExternalOdinId';
 export * from './connections/useIsConnected';
+export * from './connections/useConnection';
+export * from './connections/useAutoConnection';
 export * from './darkMode/useDarkMode';
 export * from './debounce/useDebounce';
 export * from './doubleClick/useDoubleTap';

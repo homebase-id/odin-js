@@ -12,12 +12,12 @@ import {
   DomainHighlighter,
   CircleSelector,
   DialogWrapper,
+  useConnection,
 } from '@homebase-id/common-app';
 import { Arrow } from '@homebase-id/common-app/icons';
 import ContactImage from '../../Connection/ContactImage/ContactImage';
 import YourInfo from '../../Connection/YourInfo/YourInfo';
 import { usePendingConnection } from '../../../hooks/connections/usePendingConnection';
-import { useConnection } from '../../../hooks/connections/useConnection';
 import { useContact } from '../../../hooks/contacts/useContact';
 
 const IncomingConnectionDialog = ({
