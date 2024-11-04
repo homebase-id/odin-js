@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useConnection } from '../../../hooks/connections/useConnection';
 import { useFocusedEditing } from '../../../hooks/focusedEditing/useFocusedEditing';
 import {
   Alert,
@@ -16,6 +15,7 @@ import {
   Label,
   DialogWrapper,
   CheckboxToggle,
+  useConnection,
 } from '@homebase-id/common-app';
 import YourInfo from '../../Connection/YourInfo/YourInfo';
 import YourSignature from '../../Connection/YourSignature/YourSignature';
