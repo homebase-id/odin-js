@@ -1,10 +1,10 @@
 import { Link, useParams } from 'react-router-dom';
 import { useCommunityMetadata } from '../../hooks/community/useCommunityMetadata';
 import { useCommunityMessage } from '../../hooks/community/messages/useCommunityMessage';
-import { CommunityMessageItem } from '../../components/Community/Message/CommunityMessageItem';
 import { HomebaseFile, SystemFileType } from '@homebase-id/js-lib/core';
 import {
   ActionLink,
+  COMMUNITY_ROOT_PATH,
   ConnectionImage,
   ConnectionName,
   ellipsisAtMaxChar,
@@ -20,7 +20,6 @@ import {
 } from '@homebase-id/common-app';
 import { Bookmark, BookmarkSolid, ChevronLeft } from '@homebase-id/common-app/icons';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
-import { COMMUNITY_ROOT } from './CommunityHome';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import { useMemo } from 'react';
 import { useCommunityChannel } from '../../hooks/community/channels/useCommunityChannel';
@@ -92,11 +91,11 @@ const SavedMessage = ({
     if (!msg) return null;
 
     if (message.systemFileType === 'Standard') {
-      return `${COMMUNITY_ROOT}/${odinKey}/${communityKey}/${msg.fileMetadata.appData.content.channelId}/${msg.fileMetadata.appData.uniqueId}`;
+      return `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${msg.fileMetadata.appData.content.channelId}/${msg.fileMetadata.appData.uniqueId}`;
     } else {
       if (!msg.fileMetadata.appData.content.channelId || !msg.fileMetadata.appData.content.threadId)
         return null;
-      return `${COMMUNITY_ROOT}/${odinKey}/${communityKey}/${msg.fileMetadata.appData.content.channelId}/${msg.fileMetadata.appData.content.threadId}/thread/${msg.fileMetadata.appData.uniqueId}`;
+      return `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${msg.fileMetadata.appData.content.channelId}/${msg.fileMetadata.appData.content.threadId}/thread/${msg.fileMetadata.appData.uniqueId}`;
     }
   }, [msg]);
 
@@ -183,7 +182,7 @@ const CommunityLaterHeader = ({ community }: { community?: HomebaseFile<Communit
         <ActionLink
           className="lg:hidden"
           type="mute"
-          href={`${COMMUNITY_ROOT}/${community?.fileMetadata.senderOdinId}/${communityId}`}
+          href={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${communityId}`}
         >
           <ChevronLeft className="h-5 w-5" />
         </ActionLink>

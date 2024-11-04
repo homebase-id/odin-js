@@ -5,6 +5,7 @@ import {
   LoadingBlock,
   t,
   useDotYouClient,
+  COMMUNITY_ROOT_PATH,
 } from '@homebase-id/common-app';
 import { useParams } from 'react-router-dom';
 import { CommunityChannelCatchup } from '../../components/Community/catchup/CommunityChannelCatchup';
@@ -15,7 +16,6 @@ import { memo, useMemo } from 'react';
 import { ChevronLeft, RadioTower } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
-import { COMMUNITY_ROOT } from './CommunityHome';
 
 export const CommunityCatchup = memo(() => {
   const { odinKey, communityKey: communityId, threadKey } = useParams();
@@ -127,7 +127,7 @@ const CommunityCatchupHeader = ({
         <ActionLink
           className="lg:hidden"
           type="mute"
-          href={`${COMMUNITY_ROOT}/${community?.fileMetadata.senderOdinId}/${communityId}`}
+          href={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${communityId}`}
         >
           <ChevronLeft className="h-5 w-5" />
         </ActionLink>
