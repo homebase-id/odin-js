@@ -1,6 +1,5 @@
-import { ActionLink, t } from '@homebase-id/common-app';
+import { ActionLink, CHAT_ROOT_PATH, t } from '@homebase-id/common-app';
 import { Plus } from '@homebase-id/common-app/icons';
-import { ROOT_PATH as CHAT_ROOT } from '../../../../app/App';
 
 export const NavHeader = ({ isOnline }: { isOnline: boolean }) => {
   return (
@@ -16,7 +15,7 @@ export const NavHeader = ({ isOnline }: { isOnline: boolean }) => {
         <p className="text-2xl dark:text-white">Homebase Chat</p>
       </div>
       <div className="ml-auto flex flex-row items-center gap-2">
-        <ActionLink href={`${CHAT_ROOT}/new`} icon={Plus} type="secondary">
+        <ActionLink href={`${CHAT_ROOT_PATH}/new`} icon={Plus} type="secondary">
           {t('New')}
         </ActionLink>
       </div>

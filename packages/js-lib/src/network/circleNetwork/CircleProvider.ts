@@ -10,7 +10,8 @@ import { CircleDefinition, DriveGrant } from './CircleDataTypes';
 //Handles management of Circles
 const root = '/circles/definitions';
 
-export const ALL_CONNECTIONS_CIRCLE_ID = 'bb2683fa402aff866e771a6495765a15';
+export const CONFIRMED_CONNECTIONS_CIRCLE_ID = 'ba4f80d2-eac4-4b31-afc1-a3dfe7043411';
+export const AUTO_CONNECTIONS_CIRCLE_ID = '9e22b429-52f7-4d25-80e1-1250b651d343';
 
 interface ServerCircleUpdateRequest extends Omit<CircleDefinition, 'driveGrants'> {
   driveGrants: {

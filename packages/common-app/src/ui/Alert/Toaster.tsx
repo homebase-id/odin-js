@@ -6,13 +6,13 @@ import { formatToTimeAgoWithRelativeDetail } from '../../helpers/timeago/format'
 import { useLiveNotifications } from '../../hooks/notifications/useLiveNotifications';
 import { t } from '../../helpers/i18n/dictionary';
 import { usePortal } from '../../hooks/portal/usePortal';
-import { OWNER_ROOT } from '../../core';
 import { ActionButton } from '../Buttons/ActionButton';
 import { DialogWrapper } from '../Dialog/DialogWrapper';
 import { Exclamation } from '../Icons/Exclamation';
 import { Times } from '../Icons/Times';
 import { Clipboard } from '../Icons/Clipboard';
 import { TargetDrive } from '@homebase-id/js-lib/core';
+import { OWNER_ROOT } from '../../constants';
 
 export const Toaster = ({ drives, errorOnly }: { drives?: TargetDrive[]; errorOnly?: boolean }) => {
   return (

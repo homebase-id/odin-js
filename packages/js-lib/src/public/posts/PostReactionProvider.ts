@@ -21,6 +21,7 @@ import {
   EmbeddedThumb,
   NewHomebaseFile,
   PriorityOptions,
+  uploadHeader,
   CommentReaction,
 } from '../../core/core';
 import {
@@ -29,14 +30,18 @@ import {
   getNewId,
   tryJsonParse,
 } from '../../helpers/DataUtil';
-import { TransitInstructionSet, TransitUploadResult } from '../../peer/peerData/PeerTypes';
+import { TransitInstructionSet } from '../../peer/peerData/PeerTypes';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
 import { RawReactionContent, ReactionConfig, ReactionContext } from './PostTypes';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
-import { uploadFileOverPeer } from '../../peer/peerData/Upload/PeerUploadProvider';
+import {
+  uploadFileOverPeer,
+  uploadHeaderOverPeer,
+} from '../../peer/peerData/Upload/PeerUploadProvider';
 import { deleteFileOverPeer } from '../../peer/peerData/File/PeerFileManageProvider';
 import { queryBatchOverPeer } from '../../peer/peerData/Query/PeerDriveQueryProvider';
 import { getContentFromHeaderOrPayloadOverPeer } from '../../peer/peerData/File/PeerFileProvider';
+import { getFileHeaderOverPeerByGlobalTransitId } from '../../peer/peer';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
@@ -100,7 +105,9 @@ export const saveComment = async (
     },
     isEncrypted: encrypt,
     accessControlList: {
-      requiredSecurityGroup: encrypt ? SecurityGroupType.Connected : SecurityGroupType.Anonymous,
+      requiredSecurityGroup: encrypt
+        ? SecurityGroupType.AutoConnected
+        : SecurityGroupType.Anonymous,
     },
   };
 
@@ -126,24 +133,37 @@ export const saveComment = async (
       systemFileType: 'Comment',
     };
 
-    // Use owner/youauth endpoint for reactions if the post to comment on is on the current root identity
-    const result = await uploadFile(
-      dotYouClient,
-      instructionSet,
-      metadata,
-      payloads,
-      thumbnails,
-      encrypt
-    );
-    if (!result) throw new Error(`Upload failed`);
+    // Use owner/guest endpoint for reactions if the post to comment on is on the current root identity
+    if (comment.fileId) {
+      const result = await uploadHeader(
+        dotYouClient,
+        comment.sharedSecretEncryptedKeyHeader,
+        { ...instructionSet, storageIntent: 'header' },
+        metadata
+      );
 
-    return result.globalTransitIdFileIdentifier.globalTransitId;
+      if (!result) throw new Error(`Upload failed`);
+
+      return result.globalTransitIdFileIdentifier.globalTransitId;
+    } else {
+      const result = await uploadFile(
+        dotYouClient,
+        instructionSet,
+        metadata,
+        payloads,
+        thumbnails,
+        encrypt
+      );
+      if (!result) throw new Error(`Upload failed`);
+
+      return result.globalTransitIdFileIdentifier.globalTransitId;
+    }
   } else {
     metadata.referencedFile = {
       targetDrive: targetDrive,
       globalTransitId: comment.fileMetadata.appData.groupId || context.target.globalTransitId,
     };
-    metadata.accessControlList = { requiredSecurityGroup: SecurityGroupType.Connected };
+    metadata.accessControlList = { requiredSecurityGroup: SecurityGroupType.AutoConnected };
     metadata.allowDistribution = true;
 
     const instructionSet: TransitInstructionSet = {
@@ -157,20 +177,39 @@ export const saveComment = async (
       systemFileType: 'Comment',
     };
 
-    const result: TransitUploadResult = await uploadFileOverPeer(
-      dotYouClient,
-      instructionSet,
-      metadata,
-      payloads,
-      thumbnails,
-      encrypt
-    );
+    const remoteHeader = comment.fileMetadata.globalTransitId
+      ? await getFileHeaderOverPeerByGlobalTransitId(
+          dotYouClient,
+          context.odinId,
+          targetDrive,
+          comment.fileMetadata.globalTransitId,
+          {
+            systemFileType: 'Comment',
+          }
+        )
+      : null;
 
+    const result = comment.fileMetadata.globalTransitId
+      ? await uploadHeaderOverPeer(
+          dotYouClient,
+          remoteHeader?.sharedSecretEncryptedKeyHeader,
+          instructionSet,
+          metadata
+        )
+      : await uploadFileOverPeer(
+          dotYouClient,
+          instructionSet,
+          metadata,
+          payloads,
+          thumbnails,
+          encrypt
+        );
+
+    if (!result) throw new Error(`Upload failed`);
     if (
       TransferUploadStatus.EnqueuedFailed === result.recipientStatus[context.odinId].toLowerCase()
-    ) {
+    )
       throw new Error(result.recipientStatus[context.odinId].toString());
-    }
 
     return result.remoteGlobalTransitIdFileIdentifier.globalTransitId;
   }

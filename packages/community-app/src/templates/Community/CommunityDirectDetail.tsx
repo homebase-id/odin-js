@@ -1,5 +1,5 @@
 import { useCommunity } from '../../hooks/community/useCommunity';
-import { ErrorBoundary } from '@homebase-id/common-app';
+import { COMMUNITY_ROOT_PATH, ErrorBoundary } from '@homebase-id/common-app';
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
@@ -8,7 +8,6 @@ import { useDotYouClientContext } from '@homebase-id/common-app';
 import { getNewXorId } from '@homebase-id/js-lib/helpers';
 import { ConversationWithYourselfId } from '@homebase-id/chat-app/src/providers/ConversationProvider';
 import { useConversation } from '@homebase-id/chat-app/src/hooks/chat/useConversation';
-import { ROOT_PATH } from '../../app/App';
 import { CommunityDirectComposer } from '../../components/Community/Message/CommunityDirectComposer';
 
 export const CommunityDirectDetail = () => {
@@ -62,7 +61,10 @@ export const CommunityDirectDetail = () => {
             conversationId={conversationId}
             communityTagId={communityId}
             key={conversationId || dmKey}
-            options={{ rootPath: `${ROOT_PATH}/${communityId}`, composer: CommunityDirectComposer }}
+            options={{
+              rootPath: `${COMMUNITY_ROOT_PATH}/${communityId}`,
+              composer: CommunityDirectComposer,
+            }}
           />
         ) : null}
       </div>

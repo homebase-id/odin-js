@@ -34,7 +34,6 @@ const ConnectionDetails = () => {
   return (
     <>
       <IdentityPageMetaAndActions odinId={odinId} />
-
       <SubMenu
         items={[
           {

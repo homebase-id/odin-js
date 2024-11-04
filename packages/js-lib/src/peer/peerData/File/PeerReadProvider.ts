@@ -38,7 +38,7 @@ export const sendReadReceipt = async (
       return response.data;
     })
     .catch((error) => {
-      console.error('[DotYouCore-js:sendReadReceipt]', error);
+      console.error('[odin-js:sendReadReceipt]', error);
       throw error;
     });
 };

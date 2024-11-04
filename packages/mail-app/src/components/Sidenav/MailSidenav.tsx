@@ -2,7 +2,13 @@ import { FC } from 'react';
 import { NavLink, useMatch } from 'react-router-dom';
 
 import { useLiveMailProcessor } from '../../hooks/mail/useLiveMailProcessor';
-import { useRemoveNotifications, MAIL_APP_ID, Sidenav, t } from '@homebase-id/common-app';
+import {
+  useRemoveNotifications,
+  MAIL_APP_ID,
+  Sidenav,
+  t,
+  MAIL_ROOT_PATH,
+} from '@homebase-id/common-app';
 import {
   Envelope,
   PaperPlane,
@@ -13,13 +19,11 @@ import {
   IconProps,
 } from '@homebase-id/common-app/icons';
 
-const ROOT_PATH = '/apps/mail';
-
 export const MailSidenav = () => {
   const isOnline = useLiveMailProcessor();
   useRemoveNotifications({ appId: MAIL_APP_ID });
 
-  const rootMailMatch = useMatch({ path: ROOT_PATH });
+  const rootMailMatch = useMatch({ path: MAIL_ROOT_PATH });
   const isRoot = !!rootMailMatch;
 
   const isActive = isRoot;
@@ -46,14 +50,14 @@ export const MailSidenav = () => {
             </div>
           </div>
           <div className="flex flex-col px-5">
-            <NavItem to={`${ROOT_PATH}/inbox`} icon={Envelope} label={t('Inbox')} />
-            <NavItem to={`${ROOT_PATH}/sent`} icon={PaperPlane} label={t('Sent')} />
-            <NavItem to={`${ROOT_PATH}/drafts`} icon={Pencil} label={t('Drafts')} />
+            <NavItem to={`${MAIL_ROOT_PATH}/inbox`} icon={Envelope} label={t('Inbox')} />
+            <NavItem to={`${MAIL_ROOT_PATH}/sent`} icon={PaperPlane} label={t('Sent')} />
+            <NavItem to={`${MAIL_ROOT_PATH}/drafts`} icon={Pencil} label={t('Drafts')} />
           </div>
           <div className="mt-auto flex flex-col px-5">
-            <NavItem to={`${ROOT_PATH}/trash`} icon={Trash} label={t('Trash')} />
-            <NavItem to={`${ROOT_PATH}/archive`} icon={Archive} label={t('Archive')} />
-            <NavItem to={`${ROOT_PATH}/settings`} icon={Cog} label={t('Settings')} />
+            <NavItem to={`${MAIL_ROOT_PATH}/trash`} icon={Trash} label={t('Trash')} />
+            <NavItem to={`${MAIL_ROOT_PATH}/archive`} icon={Archive} label={t('Archive')} />
+            <NavItem to={`${MAIL_ROOT_PATH}/settings`} icon={Cog} label={t('Settings')} />
           </div>
         </div>
       </div>

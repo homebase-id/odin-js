@@ -6,7 +6,11 @@ import DrivePermissionView from '../../../components/PermissionViews/DrivePermis
 import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
 import { AppInteractionPermissionOverview } from '../../../components/PermissionViews/AppInteractionPermissionView/AppInteractionPermissionView';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { ALL_CONNECTIONS_CIRCLE_ID, Membership } from '@homebase-id/js-lib/network';
+import {
+  AUTO_CONNECTIONS_CIRCLE_ID,
+  CONFIRMED_CONNECTIONS_CIRCLE_ID,
+  Membership,
+} from '@homebase-id/js-lib/network';
 import DomainCard from '../../../components/Connection/DomainCard/DomainCard';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import CircleAppInteractionDialog from '../../../components/Circles/CircleAppInteractionDialog/CircleAppInteractionDialog';
@@ -58,16 +62,13 @@ const CircleDetails = () => {
   const [isOpenAppInteractionDialog, setIsOpenAppInteractionDialog] = useState(false);
   const [isDrivesEditOpen, setIsDrivesEditOpen] = useState(false);
 
-  if (circleLoading) {
-    return <LoadingDetailPage />;
-  }
-
-  if (!circle || !circle.id || !decodedCircleKey) {
-    return <>{t('No matching circle found')}</>;
-  }
+  if (circleLoading) return <LoadingDetailPage />;
+  if (!circle || !circle.id || !decodedCircleKey) return <>{t('No matching circle found')}</>;
 
   const circleId = circle.id;
-  const isSystemCircle = stringGuidsEqual(circleId, ALL_CONNECTIONS_CIRCLE_ID);
+  const isSystemCircle =
+    stringGuidsEqual(circleId, CONFIRMED_CONNECTIONS_CIRCLE_ID) ||
+    stringGuidsEqual(circleId, AUTO_CONNECTIONS_CIRCLE_ID);
 
   return (
     <>
@@ -80,17 +81,11 @@ const CircleDetails = () => {
         icon={Circles}
         title={`${circle.name}`}
         actions={
-          !isSystemCircle && (
-            <>
-              <ActionButton
-                type="primary"
-                icon={Pencil}
-                onClick={() => {
-                  setIsOpenEdit(true);
-                }}
-              >
-                {t('Edit')}
-              </ActionButton>
+          <>
+            <ActionButton type="primary" icon={Pencil} onClick={() => setIsOpenEdit(true)}>
+              {t('Edit')}
+            </ActionButton>
+            {!isSystemCircle && (
               <ActionGroup
                 type="secondary"
                 size="square"
@@ -141,8 +136,8 @@ const CircleDetails = () => {
               >
                 {t('More')}
               </ActionGroup>
-            </>
-          )
+            )}
+          </>
         }
         breadCrumbs={[
           { href: '/owner/circles', title: 'My Circles' },
@@ -190,20 +185,20 @@ const CircleDetails = () => {
               />
             ))}
           </div>
+        ) : !isSystemCircle ? (
+          <SubtleMessage className="flex flex-row items-center">
+            <span>{t('Ready to add some connections?')}</span>
+            <ActionButton
+              onClick={() => setIsOpenMemberLookup(true)}
+              type="secondary"
+              className="ml-2"
+              icon={Plus}
+            >
+              {t('Add')}
+            </ActionButton>
+          </SubtleMessage>
         ) : (
-          !isSystemCircle && (
-            <SubtleMessage className="flex flex-row items-center">
-              <span>{t('Ready to add some connections?')}</span>
-              <ActionButton
-                onClick={() => setIsOpenMemberLookup(true)}
-                type="secondary"
-                className="ml-2"
-                icon={Plus}
-              >
-                {t('Add')}
-              </ActionButton>
-            </SubtleMessage>
-          )
+          <SubtleMessage className="flex flex-row items-center">{t('No members')}</SubtleMessage>
         )}
       </div>
 
@@ -269,12 +264,9 @@ const CircleDetails = () => {
         isOpen={isOpenEdit}
         confirmText={t('Update Circle')}
         defaultValue={circle}
-        onCancel={() => {
-          setIsOpenEdit(false);
-        }}
-        onConfirm={() => {
-          setIsOpenEdit(false);
-        }}
+        onCancel={() => setIsOpenEdit(false)}
+        onConfirm={() => setIsOpenEdit(false)}
+        permissionEditOnly={isSystemCircle}
       />
       <MemberLookupDialog
         isOpen={isOpenMemberLookup}

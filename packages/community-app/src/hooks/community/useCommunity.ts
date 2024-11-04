@@ -8,7 +8,7 @@ import {
   NewHomebaseFile,
   TargetDrive,
 } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { COMMUNITY_ROOT_PATH, useDotYouClientContext } from '@homebase-id/common-app';
 import {
   CommunityDefinition,
   getCommunityDefinition,
@@ -17,7 +17,6 @@ import {
   saveCommunity,
 } from '../../providers/CommunityDefinitionProvider';
 import { COMMUNITY_APP_ID, t } from '@homebase-id/common-app';
-import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
 import {
   AppDriveAuthorizationParams,
   getExtendAppRegistrationParams,
@@ -115,7 +114,7 @@ export const useCommunity = (props?: useCommunityProps) => {
         throw new Error('Community unique id is not set');
 
       const host = dotYouClient.getIdentity();
-      const returnUrl = `${COMMUNITY_ROOT}/new?draft=${JSON.stringify(communityDef)}`;
+      const returnUrl = `${COMMUNITY_ROOT_PATH}/new?draft=${JSON.stringify(communityDef)}`;
 
       const targetDrive = getTargetDriveFromCommunityId(communityDef.fileMetadata.appData.uniqueId);
 
@@ -146,7 +145,7 @@ export const useCommunity = (props?: useCommunityProps) => {
   }: {
     communityDef: HomebaseFile<CommunityDefinition>;
   }) => {
-    return `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect${COMMUNITY_ROOT}/${communityDef.fileMetadata.senderOdinId}/${communityDef.fileMetadata.appData.uniqueId}`;
+    return `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect${COMMUNITY_ROOT_PATH}/${communityDef.fileMetadata.senderOdinId}/${communityDef.fileMetadata.appData.uniqueId}`;
   };
 
   const removeCommunity = async (communityDef: HomebaseFile<CommunityDefinition>) =>

@@ -1,6 +1,7 @@
 import {
   ActionGroup,
   ActionLink,
+  CHAT_ROOT_PATH,
   ConnectionImage,
   ConnectionName,
   ErrorBoundary,
@@ -10,6 +11,7 @@ import {
   OwnerName,
   t,
   useDotYouClient,
+  useIntroductions,
   useIsConnected,
 } from '@homebase-id/common-app';
 import { ChevronDown, ChevronLeft, Persons } from '@homebase-id/common-app/icons';
@@ -29,9 +31,8 @@ import { ChatMessage } from '../../providers/ChatProvider';
 import { ChatHistory } from '../../components/Chat/ChatHistory';
 import { ChatComposer, ChatComposerProps } from '../../components/Chat/Composer/ChatComposer';
 import { ChatInfo } from '../../components/Chat/Detail/ChatInfo';
-import { useNavigate } from 'react-router-dom';
+import { Link, useMatch, useNavigate } from 'react-router-dom';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { ROOT_PATH } from '../../app/App';
 
 export const ChatDetail = ({
   conversationId,
@@ -45,9 +46,10 @@ export const ChatDetail = ({
     composer?: FC<ChatComposerProps>;
   };
 }) => {
-  const rootPath = options?.rootPath || ROOT_PATH;
+  const rootPath = options?.rootPath || CHAT_ROOT_PATH;
   const { data: conversation, isLoading, isFetched } = useConversation({ conversationId }).single;
   const { mutate: inviteRecipient } = useConversation().inviteRecipient;
+  const { mutate: introduceIdentities } = useIntroductions().introduceIdentities;
   const [replyMsg, setReplyMsg] = useState<HomebaseFile<ChatMessage> | undefined>();
   const identity = useDotYouClient().getIdentity();
 
@@ -83,6 +85,13 @@ export const ChatDetail = ({
     if (anyRecipientMissingConversation) {
       console.log('invite recipient');
       inviteRecipient({ conversation });
+      if (filteredRecipients.length > 1) {
+        // Group chat; Good to introduce everyone
+        await introduceIdentities({
+          message: t('{0} has added you to a group chat', identity || ''),
+          recipients: filteredRecipients,
+        });
+      }
     }
   };
 
@@ -128,7 +137,8 @@ const ChatHeader = ({
       ? recipients.filter((recipient) => recipient !== identity)[0]
       : undefined;
 
-  const [showChatInfo, setShowChatInfo] = useState<boolean>(false);
+  const infoChatMatch = useMatch({ path: `${CHAT_ROOT_PATH}/:conversationKey/info` });
+  const showChatInfo = !!infoChatMatch;
 
   const { mutate: clearChat, error: clearChatError } = useConversation().clearChat;
   const {
@@ -136,6 +146,21 @@ const ChatHeader = ({
     error: deleteChatError,
     status: deleteChatStatus,
   } = useConversation().deleteChat;
+  const { mutate: introduceIdentities, error: makeIntroductionError } =
+    useIntroductions().introduceIdentities;
+
+  const makeIntroduction = async () => {
+    if (!conversation) return;
+
+    const filteredRecipients = conversation.recipients.filter(
+      (recipient) => recipient !== identity
+    );
+
+    await introduceIdentities({
+      message: t('{0} has added you to a group chat', identity || ''),
+      recipients: filteredRecipients,
+    });
+  };
 
   useEffect(() => {
     if (deleteChatStatus === 'success') navigate(rootPath);
@@ -143,14 +168,14 @@ const ChatHeader = ({
 
   return (
     <>
-      <ErrorNotification error={clearChatError || deleteChatError} />
+      <ErrorNotification error={clearChatError || deleteChatError || makeIntroductionError} />
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
         <HybridLink className="-m-1 p-1 lg:hidden" type="mute" href={rootPath}>
           <ChevronLeft className="h-4 w-4" />
         </HybridLink>
 
-        <a
-          onClick={() => setShowChatInfo(true)}
+        <Link
+          to={`${rootPath}/${conversationDsr?.fileMetadata.appData.uniqueId}/info`}
           className="flex cursor-pointer flex-row items-center gap-2"
         >
           {singleRecipient ? (
@@ -178,15 +203,21 @@ const ChatHeader = ({
           ) : (
             conversation?.title
           )}
-        </a>
+        </Link>
 
         {conversationDsr && !withYourself ? (
           <ActionGroup
             options={[
               {
                 label: t('Chat info'),
-                onClick: () => setShowChatInfo(true),
+                href: `${rootPath}/${conversationDsr?.fileMetadata.appData.uniqueId}/info`,
               },
+              !singleRecipient
+                ? {
+                    label: t('Introduce everyone'),
+                    onClick: makeIntroduction,
+                  }
+                : undefined,
               {
                 label: t('Delete'),
                 confirmOptions: {
@@ -226,7 +257,7 @@ const ChatHeader = ({
       </div>
 
       {showChatInfo && conversationDsr ? (
-        <ChatInfo conversation={conversationDsr} onClose={() => setShowChatInfo(false)} />
+        <ChatInfo conversation={conversationDsr} onClose={() => navigate(-1)} />
       ) : null}
     </>
   );

@@ -6,11 +6,11 @@ import {
   useManagePost,
   ErrorNotification,
   useChannel,
+  FEED_ROOT_PATH,
 } from '@homebase-id/common-app';
 import { OpenLock, Lock, Article as ArticleIcon, Clipboard } from '@homebase-id/common-app/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { ROOT_PATH } from '../../app/App';
 import { useEffect, useState } from 'react';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { BlogConfig, ChannelDefinition } from '@homebase-id/js-lib/public';
@@ -54,7 +54,9 @@ export const ArticleDuplicatePage = () => {
 
   useEffect(() => {
     if (duplicatePostStatus === 'success') {
-      navigate(`${ROOT_PATH}/edit/${targetChannel.fileMetadata.appData.content.slug}/${newPostId}`);
+      navigate(
+        `${FEED_ROOT_PATH}/edit/${targetChannel.fileMetadata.appData.content.slug}/${newPostId}`
+      );
     }
   }, [duplicatePostStatus]);
 
@@ -84,8 +86,8 @@ export const ArticleDuplicatePage = () => {
         browserTitle={postFile?.fileMetadata.appData.content?.caption || t('New article')}
         icon={ArticleIcon}
         breadCrumbs={[
-          { title: t('Feed'), href: `${ROOT_PATH}` },
-          { title: t('Articles'), href: `${ROOT_PATH}/articles` },
+          { title: t('Feed'), href: `${FEED_ROOT_PATH}` },
+          { title: t('Articles'), href: `${FEED_ROOT_PATH}/articles` },
           { title: t('Duplicate article') },
         ]}
       />

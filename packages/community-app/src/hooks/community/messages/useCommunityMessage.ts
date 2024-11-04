@@ -75,7 +75,7 @@ export const useCommunityMessage = (props?: {
       },
       serverMetadata: {
         accessControlList: community.fileMetadata.appData.content.acl || {
-          requiredSecurityGroup: SecurityGroupType.Connected,
+          requiredSecurityGroup: SecurityGroupType.AutoConnected,
         },
       },
     };
@@ -161,7 +161,7 @@ export const useCommunityMessage = (props?: {
           },
           serverMetadata: {
             accessControlList: community.fileMetadata.appData.content.acl || {
-              requiredSecurityGroup: SecurityGroupType.Connected,
+              requiredSecurityGroup: SecurityGroupType.AutoConnected,
             },
           },
         };

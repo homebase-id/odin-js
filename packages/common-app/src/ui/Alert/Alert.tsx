@@ -30,7 +30,7 @@ export const Alert = ({ type, title, children, className, isCompact }: AlertProp
       ${!className?.includes('boder-') ? borderClass : ''}
        ${className ?? ''}`}
     >
-      <div className={`flex w-full flex-row flex-wrap gap-5 sm:flex-nowrap`}>
+      <div className={`flex w-full flex-row flex-wrap gap-5 sm:flex-nowrap items-center`}>
         {type === 'critical' ? (
           <div
             className={`flex h-8 w-8 flex-shrink-0 text-red-400 dark:text-red-300 ${
@@ -58,7 +58,7 @@ export const Alert = ({ type, title, children, className, isCompact }: AlertProp
         )}
         <div className={`flex-grow ${isCompact ? 'contents' : 'contents sm:block'}`}>
           {title && <p className="mb-2 ml-3 text-xl sm:ml-0">{title}</p>}
-          {children}
+          {typeof children === 'string' ? <p>{children}</p> : children}
         </div>
       </div>
     </section>

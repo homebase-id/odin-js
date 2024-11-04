@@ -3,11 +3,9 @@ import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvi
 import { useCommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
 import { ChannelWithRecentMessage } from '../../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 import { CommunityHistory } from '../channel/CommunityHistory';
-import { ActionButton, ActionLink, t } from '@homebase-id/common-app';
-import { RadioTower } from '@homebase-id/common-app/icons';
-import { ROOT_PATH as COMMUNITY_ROOT } from '../../../app/App';
+import { ActionButton, ActionLink, COMMUNITY_ROOT_PATH, t } from '@homebase-id/common-app';
 import { useCallback } from 'react';
-import { ChevronLeft } from '@homebase-id/common-app/icons';
+import { ChevronLeft, RadioTower } from '@homebase-id/common-app/icons';
 
 export const CommunityChannelCatchupHeader = ({
   community,
@@ -22,7 +20,7 @@ export const CommunityChannelCatchupHeader = ({
         <ActionLink
           className="lg:hidden"
           type="mute"
-          href={`${COMMUNITY_ROOT}/${community?.fileMetadata.senderOdinId}/${communityId}`}
+          href={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${communityId}`}
         >
           <ChevronLeft className="h-5 w-5" />
         </ActionLink>
@@ -81,7 +79,7 @@ export const CommunityChannelCatchup = ({
           type="mute"
           size="none"
           className="text-lg hover:underline"
-          href={`${COMMUNITY_ROOT}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}`}
+          href={`${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}`}
         >
           # {channel.fileMetadata.appData.content.title}
         </ActionLink>

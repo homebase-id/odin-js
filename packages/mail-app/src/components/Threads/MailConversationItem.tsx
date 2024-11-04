@@ -13,10 +13,10 @@ import {
   ErrorNotification,
   formatToTimeAgoWithRelativeDetail,
   highlightQuery,
+  MAIL_ROOT_PATH,
   t,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
-import { ROOT_PATH } from '../../app/App';
 import { MailAttachmentOverview } from '../../templates/Mail/MailAttachmentOverview';
 import { RecipientsList } from './RecipientsList';
 import { useMailThread } from '../../hooks/mail/useMailThread';
@@ -106,15 +106,13 @@ export const MailConversationItem = ({
       <Link
         to={{
           pathname: isDraft
-            ? `${ROOT_PATH}/new/${lastConversation.fileId}`
+            ? `${MAIL_ROOT_PATH}/new/${lastConversation.fileId}`
             : `${pathPrefix || ''}${threadId}`,
           search: window.location.search,
         }}
       >
         <div
-          className={`relative flex flex-col gap-2 border-t border-t-slate-100 p-4 py-3 transition-colors group-first-of-type:border-0 dark:border-t-slate-700
-            ${isSelected ? 'bg-primary/20 dark:bg-primary/50' : ''}
-            ${!isSelected ? `group-hover:bg-slate-50 dark:group-hover:bg-slate-800 ${isUnread ? 'bg-slate-50 dark:bg-slate-700' : 'bg-background dark:bg-background'}` : ''}`}
+          className={`relative flex flex-col gap-2 border-t border-t-slate-100 p-4 py-3 transition-colors group-first-of-type:border-0 dark:border-t-slate-700 ${isSelected ? 'bg-primary/20 dark:bg-primary/50' : ''} ${!isSelected ? `group-hover:bg-slate-50 dark:group-hover:bg-slate-800 ${isUnread ? 'bg-slate-50 dark:bg-slate-700' : 'bg-background dark:bg-background'}` : ''}`}
         >
           <div className={`flex flex-row items-center justify-between gap-4 md:gap-8`}>
             <button

@@ -25,13 +25,16 @@ export const AclSummary = ({
         ? t('Public')
         : acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Authenticated.toLowerCase()
           ? t('Authenticated')
-          : acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Connected.toLowerCase()
-            ? acl.circleIdList?.length
-              ? `${t('Circles')}: ${ellipsisAtMaxChar(circlesDetails?.join(', '), maxLength)}`
-              : t('Connections')
-            : acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Owner.toLowerCase()
-              ? t('Owner')
-              : t('Owner')}
+          : acl.requiredSecurityGroup.toLowerCase() ===
+              SecurityGroupType.AutoConnected.toLowerCase()
+            ? t('Auto Connected')
+            : acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Connected.toLowerCase()
+              ? acl.circleIdList?.length
+                ? `${t('Circles')}: ${ellipsisAtMaxChar(circlesDetails?.join(', '), maxLength)}`
+                : t('Connections')
+              : acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Owner.toLowerCase()
+                ? t('Owner')
+                : t('Owner')}
     </>
   );
 };

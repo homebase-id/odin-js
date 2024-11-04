@@ -10,6 +10,7 @@ import {
   Input,
   Label,
   DialogWrapper,
+  Alert,
 } from '@homebase-id/common-app';
 import PermissionFlagsEditor from '../../Form/PermissionFlagsEditor';
 import { CircleDefinition } from '@homebase-id/js-lib/network';
@@ -19,13 +20,14 @@ const CircleDialog = ({
   title,
   confirmText,
   isOpen,
+  permissionEditOnly,
   defaultValue,
   onConfirm,
   onCancel,
 }: {
   title: string;
   confirmText?: string;
-
+  permissionEditOnly?: boolean;
   isOpen: boolean;
   defaultValue: CircleDefinition;
 
@@ -70,39 +72,50 @@ const CircleDialog = ({
             return false;
           }}
         >
-          <div className="mb-5">
-            <Label htmlFor="name">{t('Name')}</Label>
-            <Input
-              id="name"
-              name="circleName"
-              defaultValue={newCircleDefinition?.name}
-              onChange={(e) => {
-                setNewCircleDefinition({ ...newCircleDefinition, name: e.target.value });
-              }}
-              required
-            />
-          </div>
-          <div className="mb-5">
-            <Label htmlFor="name">{t('Description')}</Label>
-            <Textarea
-              id="description"
-              name="circleDescription"
-              defaultValue={newCircleDefinition.description}
-              onChange={(e) => {
-                setNewCircleDefinition({
-                  ...newCircleDefinition,
-                  description: e.target.value,
-                });
-              }}
-            />
+          {permissionEditOnly ? (
+            <Alert type={'info'} isCompact={true} className="mb-2">
+              {t(`This is a system circle, you can't change the name and description`)}
+            </Alert>
+          ) : null}
+          <div
+            className={
+              permissionEditOnly ? 'pointer-events-none select-none opacity-50' : undefined
+            }
+          >
+            <div className="mb-5">
+              <Label htmlFor="name">{t('Name')}</Label>
+              <Input
+                id="name"
+                name="circleName"
+                defaultValue={newCircleDefinition?.name}
+                onChange={(e) => {
+                  setNewCircleDefinition({ ...newCircleDefinition, name: e.target.value });
+                }}
+                required
+              />
+            </div>
+            <div className="mb-5">
+              <Label htmlFor="name">{t('Description')}</Label>
+              <Textarea
+                id="description"
+                name="circleDescription"
+                defaultValue={newCircleDefinition.description}
+                onChange={(e) => {
+                  setNewCircleDefinition({
+                    ...newCircleDefinition,
+                    description: e.target.value,
+                  });
+                }}
+              />
+            </div>
           </div>
 
-          <div className="mb-5 flex flex-row">
+          <div className="mb-5 flex flex-col sm:flex-row">
             <Label htmlFor="name" className="my-auto mr-2">
               {t('Permissions')}
             </Label>
             <PermissionFlagsEditor
-              className="ml-auto"
+              className="sm:ml-auto"
               defaultValue={newCircleDefinition.permissions?.keys ?? [0]}
               onChange={(newValue) => {
                 setNewCircleDefinition({

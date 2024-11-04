@@ -4,6 +4,7 @@ import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider
 import {
   AuthorImage,
   AuthorName,
+  COMMUNITY_ROOT_PATH,
   DialogWrapper,
   ErrorBoundary,
   formatDateExludingYearIfCurrent,
@@ -14,7 +15,6 @@ import {
 import { Arrow, ChevronLeft } from '@homebase-id/common-app/icons';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
-import { ROOT_PATH as COMMUNITY_ROOT } from '../../app/App';
 import { CommunityChannel } from '../../providers/CommunityProvider';
 import { useCommunityChannel } from '../../hooks/community/channels/useCommunityChannel';
 import { createPortal } from 'react-dom';
@@ -73,7 +73,7 @@ export const CommunityChannelDetail = () => {
                   channel={channelDsr || undefined}
                   doOpenThread={(thread) =>
                     navigate(
-                      `${COMMUNITY_ROOT}/${odinKey}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
+                      `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
                     )
                   }
                   setIsEmptyChat={setIsEmptyChannel}
@@ -121,7 +121,7 @@ const CommunityChannelHeader = ({
         <Link
           className="-m-1 p-1 lg:hidden"
           type="mute"
-          to={`${COMMUNITY_ROOT}/${community?.fileMetadata.senderOdinId}/${communityId}`}
+          to={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${communityId}`}
         >
           <ChevronLeft className="h-4 w-4" />
         </Link>
@@ -171,7 +171,7 @@ const ChannelInfo = ({
         <div>
           <Link
             className="text-primary hover:underline"
-            to={`${COMMUNITY_ROOT}/${odinKey}/${communityKey}/direct/${creator}`}
+            to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/direct/${creator}`}
           >
             @<AuthorName odinId={creator} excludeLink={true} />
           </Link>{' '}
@@ -188,7 +188,7 @@ const ChannelInfo = ({
             <div className="flex flex-col gap-4">
               {members.map((recipient) => (
                 <Link
-                  to={`${COMMUNITY_ROOT}/${odinKey}/${communityKey}/direct/${recipient}`}
+                  to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/direct/${recipient}`}
                   className="group flex flex-row items-center gap-3"
                   key={recipient}
                   style={{
@@ -230,7 +230,7 @@ const EmptyChannel = ({ channel }: { channel: HomebaseFile<CommunityChannel> | u
         <p className="mb-2 text-2xl"># {channel.fileMetadata.appData.content?.title}</p>
         <Link
           className="text-primary hover:underline"
-          to={`${COMMUNITY_ROOT}/${odinKey}/${communityKey}/direct/${channel.fileMetadata.senderOdinId}`}
+          to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/direct/${channel.fileMetadata.senderOdinId}`}
         >
           @<AuthorName odinId={channel.fileMetadata.senderOdinId} excludeLink={true} />
         </Link>{' '}

@@ -1,11 +1,16 @@
-import { ActionLink, t, LoadingBlock, ErrorBoundary } from '@homebase-id/common-app';
+import {
+  ActionLink,
+  t,
+  LoadingBlock,
+  ErrorBoundary,
+  COMMUNITY_ROOT_PATH,
+} from '@homebase-id/common-app';
 import { ChevronLeft, Times } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useParams } from 'react-router-dom';
 import { useCommunityMessage } from '../../hooks/community/messages/useCommunityMessage';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import { CommunityChannel } from '../../providers/CommunityProvider';
-import { COMMUNITY_ROOT } from '../../templates/Community/CommunityHome';
 import { CommunityHistory } from './channel/CommunityHistory';
 import { MessageComposer } from './Message/MessageComposer';
 
@@ -37,13 +42,13 @@ export const CommunityThread = ({
           className="p-2 xl:hidden"
           size="none"
           type="mute"
-          href={`${COMMUNITY_ROOT}/${odinKey}/${communityKey}/${channelKey || 'all'}`}
+          href={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || 'all'}`}
         >
           <ChevronLeft className="h-5 w-5" />
         </ActionLink>
         {t('Thread')}
         <ActionLink
-          href={`${COMMUNITY_ROOT}/${odinKey}/${communityKey}/${channelKey || 'all'}`}
+          href={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || 'all'}`}
           icon={Times}
           size="none"
           type="mute"

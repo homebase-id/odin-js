@@ -2,12 +2,11 @@ import { Helmet } from 'react-helmet-async';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { Layout } from '../../components/ui/Layout/Layout';
-import { DialogWrapper, Alert, t } from '@homebase-id/common-app';
+import { DialogWrapper, Alert, t, MAIL_ROOT_PATH } from '@homebase-id/common-app';
 import { AutoAuthorize, LoginBox } from '../../components/Auth/LoginBox/LoginBox';
-import { ROOT_PATH } from '../../app/App';
 
 const Auth = () => {
-  const isAutoAuthorize = window.location.pathname.startsWith(ROOT_PATH);
+  const isAutoAuthorize = window.location.pathname.startsWith(MAIL_ROOT_PATH);
 
   const [searchParams] = useSearchParams();
   const isError = searchParams.get('state') === 'finalize-error';
