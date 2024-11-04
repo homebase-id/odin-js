@@ -6,11 +6,11 @@ import {
   ActionButton,
   CheckboxToggle,
   Label,
+  useConnection,
 } from '@homebase-id/common-app';
 import { Times } from '@homebase-id/common-app/icons';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useConnection } from '../../../hooks/connections/useConnection';
 import { useFocusedEditing } from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePendingConnection } from '../../../hooks/connections/usePendingConnection';
 import IncomingConnectionDialog from '../../../components/Connection/ConnectionDialogs/IncomingConnectionDialog';

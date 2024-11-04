@@ -10,6 +10,7 @@ import {
   OwnerImage,
   OwnerName,
   t,
+  useAutoConnection,
   useDotYouClient,
   useIntroductions,
   useIsConnected,
@@ -274,7 +275,7 @@ const GroupChatConnectedState = ({
 
   if (!conversation) return null;
   const recipients = conversation.fileMetadata.appData.content.recipients;
-  if (!recipients || recipients.length <= 2) return null;
+  if (!recipients) return null;
 
   return (
     <div className="border-t empty:hidden dark:border-t-slate-800">
@@ -288,24 +289,49 @@ const GroupChatConnectedState = ({
 };
 
 const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
-  const { data: isConnected, isFetched } = useIsConnected(recipient);
+  const { data: isUnconfirmed } = useAutoConnection({
+    odinId: recipient,
+  }).isUnconfirmedAutoConnected;
+
+  const { data: isConnected, isFetched: isFetchedConnected } = useIsConnected(recipient);
   const host = useDotYouClient().getDotYouClient().getRoot();
 
-  if (isConnected === null || isConnected || !isFetched) return null;
-  return (
-    <div className="flex w-full flex-row items-center justify-between bg-page-background px-5 py-2">
-      <p>
-        {t('You can only chat with connected identities, messages will not be delivered to')}:{' '}
-        <a
-          href={`${new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}`}
-          className="underline"
-        >
-          {recipient}
-        </a>
-      </p>
-      <ActionLink href={`${host}/owner/connections/${recipient}/connect`}>
-        {t('Connect')}
-      </ActionLink>
-    </div>
-  );
+  if (!isConnected && isFetchedConnected) {
+    return (
+      <div className="flex w-full flex-row items-center justify-between bg-page-background px-5 py-2">
+        <p>
+          {t('You can only chat with connected identities, messages will not be delivered to')}:{' '}
+          <a
+            href={`${new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}`}
+            className="underline"
+          >
+            {recipient}
+          </a>
+        </p>
+        <ActionLink href={`${host}/owner/connections/${recipient}/connect`}>
+          {t('Connect')}
+        </ActionLink>
+      </div>
+    );
+  }
+
+  if (isUnconfirmed) {
+    return (
+      <div className="flex w-full flex-row items-center justify-between bg-page-background px-5 py-2">
+        <p>
+          {t('You were automatically connected to')}
+          <a
+            href={`${new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}`}
+            className="underline"
+          >
+            {recipient}
+          </a>{' '}
+          {t('because of an introduction. Would you like to confirm this connection?')}
+        </p>
+
+        <ActionLink href={`${host}/owner/connections/${recipient}`}>{t('Confirm')}</ActionLink>
+      </div>
+    );
+  }
+  return null;
 };

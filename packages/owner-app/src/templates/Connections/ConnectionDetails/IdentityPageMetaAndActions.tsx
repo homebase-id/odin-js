@@ -1,6 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { useConnection } from '../../../hooks/connections/useConnection';
 import { useContact } from '../../../hooks/contacts/useContact';
 import { useEffect, useState } from 'react';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
@@ -18,6 +17,7 @@ import {
   ErrorNotification,
   ActionGroup,
   ConfirmDialog,
+  useConnection,
 } from '@homebase-id/common-app';
 import {
   House,

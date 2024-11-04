@@ -1,13 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
-import { useConnection } from './useConnection';
+
 import {
   ConnectionInfo,
   confirmIntroduction,
   AUTO_CONNECTIONS_CIRCLE_ID,
 } from '@homebase-id/js-lib/network';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { useFollowingInfinite } from '@homebase-id/common-app';
+import { useConnection, useFollowingInfinite } from '@homebase-id/common-app';
 
 export const useAutoConnection = ({ odinId }: { odinId?: string }) => {
   const queryClient = useQueryClient();

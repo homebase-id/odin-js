@@ -8,6 +8,7 @@ import {
   ActionLink,
   useIdentityIFollow,
   useCircles,
+  useConnection,
 } from '@homebase-id/common-app';
 import {
   Envelope,
@@ -31,7 +32,6 @@ import {
   ConnectionInfo,
   ContactFile,
 } from '@homebase-id/js-lib/network';
-import { useConnection } from '../../../hooks/connections/useConnection';
 import { useVerifyConnection } from '../../../hooks/connections/useVerifyConnection';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { Link } from 'react-router-dom';
