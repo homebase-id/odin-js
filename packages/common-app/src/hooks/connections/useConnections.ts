@@ -1,9 +1,11 @@
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { NumberCursoredResult, PagingOptions } from '@homebase-id/js-lib/core';
 import {
   DotYouProfile,
   getConnections,
   getPendingRequests,
+  getReceivedIntroductions,
+  removeAllReceivedIntroductions,
   getSentRequests,
 } from '@homebase-id/js-lib/network';
 
@@ -88,6 +90,29 @@ export const useSentConnections = ({
               return data;
             }
           : undefined,
+    }),
+  };
+};
+
+export const useReceivedIntroductions = () => {
+  const queryClient = useQueryClient();
+  const dotYouClient = useDotYouClient().getDotYouClient();
+
+  const fetchIncomingIntroductions = async () => {
+    return await getReceivedIntroductions(dotYouClient);
+  };
+
+  return {
+    fetch: useQuery({
+      queryKey: ['received-introductions'],
+      queryFn: () => fetchIncomingIntroductions(),
+      refetchOnWindowFocus: false,
+    }),
+    deleteAll: useMutation({
+      mutationFn: () => removeAllReceivedIntroductions(dotYouClient),
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ['received-introductions'] });
+      },
     }),
   };
 };

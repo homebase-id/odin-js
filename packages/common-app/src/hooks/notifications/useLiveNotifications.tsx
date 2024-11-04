@@ -215,6 +215,8 @@ export const buildNotificationTargetLink = (payload: PushNotification) => {
       ].includes(payload.options.typeId)
     ) {
       return `/owner/connections/${payload.senderId}`;
+    } else if (payload.options.typeId === OWNER_INTRODUCTION_RECEIVED_TYPE_ID) {
+      return `/owner/connections`;
     }
   } else if (payload.options.appId === CHAT_APP_ID) {
     return `/apps/chat/${payload.options.typeId}`;

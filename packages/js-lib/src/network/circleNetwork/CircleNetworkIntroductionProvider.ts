@@ -9,11 +9,6 @@ export interface IntroductionResult {
   recipientStatus: { [key: string]: boolean };
 }
 
-export interface Introduction {
-  identity: string;
-  timestamp: number;
-}
-
 export const sendIntroduction = async (
   dotYouClient: DotYouClient,
   introduction: IntroductionGroup
@@ -54,6 +49,14 @@ export const confirmIntroduction = async (
     });
 };
 
+export interface Introduction {
+  identity: string;
+  message: string;
+  introducerOdinId: string;
+  lastProcessed: number;
+  sendAttemptCount: number;
+}
+
 export const getReceivedIntroductions = async (
   dotYouClient: DotYouClient
 ): Promise<Introduction[] | null> => {
@@ -68,16 +71,16 @@ export const getReceivedIntroductions = async (
     });
 };
 
-export const getSentIntroductions = async (
+export const removeAllReceivedIntroductions = async (
   dotYouClient: DotYouClient
-): Promise<Introduction[] | null> => {
+): Promise<boolean> => {
   const client = dotYouClient.createAxiosClient();
 
   return client
-    .get<Introduction[]>('/circles/requests/introductions/sent')
-    .then((response) => response.data)
+    .delete<Introduction[]>('/circles/requests/introductions')
+    .then(() => true)
     .catch((error) => {
-      console.error('[DotYouCore-js:getSentIntroductions]', error);
+      console.error('[DotYouCore-js:removeAllReceivedIntroductions]', error);
       throw error;
     });
 };

@@ -16,7 +16,7 @@ import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../../providers/ConversationProvider';
-import { Persons, House, Pencil, Arrow, Plus } from '@homebase-id/common-app/icons';
+import { Persons, House, Pencil, Arrow } from '@homebase-id/common-app/icons';
 import { Link } from 'react-router-dom';
 
 export const ChatInfo = ({
