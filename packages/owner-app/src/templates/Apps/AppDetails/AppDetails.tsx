@@ -7,7 +7,7 @@ import { AppClientRegistration } from '../../../provider/app/AppManagementProvid
 import { useState } from 'react';
 import { useAppClients } from '../../../hooks/apps/useAppClients';
 import { useDrives } from '../../../hooks/drives/useDrives';
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import CirclePermissionSelectorDialog from '../../../components/Apps/CirclePermissionSelectorDialog/CirclePermissionSelectorDialog';
 import PermissionSelectorDialog from '../../../components/Apps/PermissionSelectorDialog/PermissionSelectorDialog';
@@ -21,6 +21,7 @@ import {
   CirclePermissionView,
 } from '@homebase-id/common-app';
 import { Grid, Refresh, Trash, Times, Pencil, HardDrive } from '@homebase-id/common-app/icons';
+import { DriveGrant } from '@homebase-id/js-lib/network';
 
 const AppDetails = () => {
   const { appKey } = useParams();
@@ -55,6 +56,23 @@ const AppDetails = () => {
   >();
   const [isPermissionEditOpen, setIsPermissionEditOpen] = useState(false);
   const [isDrivesEditOpen, setIsDrivesEditOpen] = useState(false);
+
+  const permissionKeys = app?.grant.permissionSet?.keys?.reduce((acc: number[], key: number) => {
+    if (!acc.includes(key)) acc.push(key);
+    else console.warn('Duplicate permission key', key);
+    return acc;
+  }, []);
+
+  const driveGrants = app?.grant.driveGrants?.reduce((acc: DriveGrant[], grant) => {
+    if (
+      !acc.some((drive) =>
+        drivesEqual(drive.permissionedDrive.drive, grant.permissionedDrive.drive)
+      )
+    )
+      acc.push(grant);
+    else console.warn('Duplicate drive grant', grant);
+    return acc;
+  }, [] as DriveGrant[]);
 
   if (appLoading) <>Loading</>;
   if (!app || !decodedAppKey) return <>{t('No matching app found')}</>;
@@ -187,9 +205,9 @@ const AppDetails = () => {
             <ActionButton type="mute" onClick={() => setIsPermissionEditOpen(true)} icon={Pencil} />
           }
         >
-          {app.grant.permissionSet?.keys?.length ? (
+          {permissionKeys?.length ? (
             <div className="-my-4">
-              {app.grant.permissionSet.keys.map((permissionLevel) => {
+              {permissionKeys.map((permissionLevel) => {
                 return (
                   <PermissionView
                     key={`${permissionLevel}`}
@@ -214,9 +232,9 @@ const AppDetails = () => {
             <ActionButton type="mute" onClick={() => setIsDrivesEditOpen(true)} icon={Pencil} />
           }
         >
-          {app.grant?.driveGrants?.length ? (
+          {driveGrants?.length ? (
             <div className="-my-4">
-              {app.grant?.driveGrants?.map((grant) => {
+              {driveGrants.map((grant) => {
                 return (
                   <DrivePermissionView
                     key={`${grant?.permissionedDrive?.drive?.alias}-${grant?.permissionedDrive?.drive?.type}`}
