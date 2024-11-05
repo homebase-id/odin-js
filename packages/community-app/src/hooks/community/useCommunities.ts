@@ -54,7 +54,7 @@ export const useCommunities = (enableDiscovery?: boolean) => {
           community.fileMetadata.appData.uniqueId
         )
       );
-      if (existingCommunity) {
+      if (existingCommunity || !community?.fileMetadata?.appData?.uniqueId) {
         return acc;
       }
       return acc.concat(community);
