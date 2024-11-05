@@ -1,4 +1,5 @@
 import {
+  drivesEqual,
   getDrivePermissionFromString,
   getPermissionNumberFromDrivePermission,
 } from '@homebase-id/js-lib/helpers';
@@ -13,6 +14,7 @@ import {
   PermissionSetGrantRequest,
 } from './AppManagementProviderTypes';
 import { DotYouClient } from '@homebase-id/js-lib/core';
+import { DriveGrant } from '@homebase-id/js-lib/network';
 
 //adds the specified client to the list of allowed clients for a given app; returns a CAT
 export const RegisterAppClient = async (
@@ -229,10 +231,29 @@ export const UpdatePermissions = async (
   dotYouClient: DotYouClient,
   request: PermissionUpdateRequest
 ) => {
+  const cleanedUpRequest: PermissionUpdateRequest = {
+    ...request,
+    permissionSet: {
+      ...request.permissionSet,
+      keys: request.permissionSet.keys.reduce((acc: number[], key: number) => {
+        if (!acc.includes(key)) acc.push(key);
+        return acc;
+      }, [] as number[]),
+    },
+    drives: request.drives.reduce((acc: DriveGrant[], driveGrant) => {
+      if (
+        !acc.find((d) => drivesEqual(d.permissionedDrive.drive, driveGrant.permissionedDrive.drive))
+      )
+        acc.push(driveGrant);
+
+      return acc;
+    }, [] as DriveGrant[]),
+  };
+
   const client = dotYouClient.createAxiosClient();
   const response = await client.post('appmanagement/register/updateapppermissions', {
-    ...request,
-    drives: request.drives.map((driveGrant) => ({
+    ...cleanedUpRequest,
+    drives: cleanedUpRequest.drives.map((driveGrant) => ({
       permissionedDrive: getPermissionNumberFromDrivePermission(driveGrant.permissionedDrive),
     })),
   });
