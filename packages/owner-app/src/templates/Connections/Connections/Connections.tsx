@@ -10,6 +10,10 @@ import {
   useSentConnections,
   useActiveConnections,
   ActionGroup,
+  useReceivedIntroductions,
+  DomainHighlighter,
+  AuthorName,
+  ErrorNotification,
 } from '@homebase-id/common-app';
 import PersonIncomingRequest from '../../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
 import PersonOutgoingRequest from '../../../components/Connection/PersonOutgoingRequest/PersonOutgoingRequest';
@@ -21,11 +25,13 @@ import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { OutgoingConnectionDialog } from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
 import { IntroductionDialog } from '../../../components/Connection/ConnectionDialogs/IntroductionDialog';
 import { Persons, Plus } from '@homebase-id/common-app/icons';
+import PersonCard from '../../../components/Connection/PersonCard/PersonCard';
 
 const Connections = () => {
   const [hasActiveConnections, setActiveConnections] = useState(true);
   const [hasPendingConnections, setPendingConnections] = useState(true);
   const [hasSentConnections, setSentConnections] = useState(true);
+  const [hasIncomingIntroductions, setIncomingIntroductions] = useState(true);
   const [hasOutgoingIntroductions, setOutgoingIntroductions] = useState(true);
 
   const [isSentConnectionOpen, setIsSentConnectionOpen] = useState(false);
@@ -60,7 +66,8 @@ const Connections = () => {
         {!hasActiveConnections &&
         !hasSentConnections &&
         !hasPendingConnections &&
-        !hasOutgoingIntroductions ? (
+        !hasOutgoingIntroductions &&
+        !hasIncomingIntroductions ? (
           <SubtleMessage className="flex flex-row items-center gap-3">
             <span>{t('Ready to add some connections?')}</span>
             <ActionButton
@@ -80,6 +87,9 @@ const Connections = () => {
 
         <PendingConnectionSection setNoPendingConnections={() => setPendingConnections(false)} />
         <SentConnectionSection setNoSentConnections={() => setSentConnections(false)} />
+        <IncomingIntroductionsSection
+          setNoIncomingIntroductions={() => setIncomingIntroductions(false)}
+        />
         <OutgoingIntroductionsSection
           setNoSentConnections={() => setOutgoingIntroductions(false)}
         />
@@ -215,6 +225,74 @@ const SentConnectionSection = ({ setNoSentConnections }: { setNoSentConnections:
           currentPage={sentPage}
           size="xl"
         />
+      </div>
+    </>
+  );
+};
+
+const IncomingIntroductionsSection = ({
+  setNoIncomingIntroductions,
+}: {
+  setNoIncomingIntroductions: () => void;
+}) => {
+  const {
+    fetch: { data: introductions, isLoading: introductionsLoading },
+    deleteAll: { mutate: deleteAllIntroductions, error: deleteError, status: deleteStatus },
+  } = useReceivedIntroductions();
+
+  useEffect(() => {
+    if (!introductions?.length) setNoIncomingIntroductions();
+  }, [introductions]);
+
+  if (!introductions?.length) return null;
+
+  return (
+    <>
+      <ErrorNotification error={deleteError} />
+      <SectionTitle
+        title={t('Incoming introductions')}
+        actions={
+          <ActionButton
+            type="mute"
+            confirmOptions={{
+              title: t('Delete all introductions'),
+              body: t(
+                'Are you sure you want to delete all introductions? This action cannot be undone.'
+              ),
+              buttonText: t('Delete all introductions'),
+            }}
+            onClick={() => deleteAllIntroductions()}
+            state={deleteStatus}
+          >
+            {t('Delete all introductions')}
+          </ActionButton>
+        }
+      />
+      <div className="-m-1 mt-5 flex flex-row flex-wrap">
+        {introductionsLoading && (
+          <>
+            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
+            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
+          </>
+        )}
+
+        {introductions?.map((introduction) => (
+          <PersonCard
+            className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6"
+            odinId={introduction.identity}
+            key={introduction.identity}
+            canSave={false}
+            href={`/owner/connections/${introduction.identity}`}
+          >
+            <h2 className="font-thiner dark:text-white">
+              <DomainHighlighter>{introduction.identity}</DomainHighlighter>
+            </h2>
+            <p className="text-sm text-slate-400">
+              {t('Introduced by')}{' '}
+              <AuthorName excludeLink={true} odinId={introduction?.introducerOdinId} />
+            </p>
+          </PersonCard>
+        ))}
       </div>
     </>
   );

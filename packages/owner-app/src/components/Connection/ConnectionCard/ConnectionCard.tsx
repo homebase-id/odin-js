@@ -1,6 +1,7 @@
 import { useContact } from '../../../hooks/contacts/useContact';
-import { LoadingBlock } from '@homebase-id/common-app';
+import { LoadingBlock, t, useAutoConnection } from '@homebase-id/common-app';
 import PersonCard, { PersonCardProps } from '../PersonCard/PersonCard';
+import { Exclamation } from '@homebase-id/common-app/icons';
 
 const ConnectionCard = (props: PersonCardProps) => {
   const { data: contactData, isLoading } = useContact({
@@ -12,9 +13,11 @@ const ConnectionCard = (props: PersonCardProps) => {
     ? (nameData.displayName ?? `${nameData.givenName ?? ''} ${nameData.surname ?? ''}`)
     : props.odinId;
 
-  if (isLoading) {
-    return <LoadingBlock className={`aspect-[3/5] ${props.className}`} />;
-  }
+  const {
+    isUnconfirmedAutoConnected: { data: isUnconfirmedAutoConnection },
+  } = useAutoConnection({ odinId: props.odinId });
+
+  if (isLoading) return <LoadingBlock className={`aspect-[3/5] ${props.className}`} />;
 
   return (
     <>
@@ -32,6 +35,14 @@ const ConnectionCard = (props: PersonCardProps) => {
           )}
         </h2>
         {props.children}
+        {isUnconfirmedAutoConnection ? (
+          <div
+            className="absolute left-3 top-3 rounded-full bg-background p-[0.2rem] text-orange-400"
+            title={t('Unconfirmed connection')}
+          >
+            <Exclamation className="h-5 w-5" />
+          </div>
+        ) : null}
       </PersonCard>
     </>
   );
