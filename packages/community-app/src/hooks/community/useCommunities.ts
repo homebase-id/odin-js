@@ -12,7 +12,7 @@ import {
 } from '../../providers/CommunityDefinitionProvider';
 import { useAllContacts, useDotYouClientContext } from '@homebase-id/common-app';
 import { useQuery } from '@tanstack/react-query';
-import { drivesEqual } from '@homebase-id/js-lib/helpers';
+import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { getCommunitiesMetadata } from '../../providers/CommunityMetadataProvider';
 
 export const useCommunities = (enableDiscovery?: boolean) => {
@@ -47,7 +47,18 @@ export const useCommunities = (enableDiscovery?: boolean) => {
       ...localCommunities,
       ...remoteCommunitesForMetadata,
       ...discoveredByOdinId.map((discovered) => discovered.communities).flat(),
-    ];
+    ].reduce((acc, community) => {
+      const existingCommunity = acc.find((existing) =>
+        stringGuidsEqual(
+          existing.fileMetadata.appData.uniqueId,
+          community.fileMetadata.appData.uniqueId
+        )
+      );
+      if (existingCommunity) {
+        return acc;
+      }
+      return acc.concat(community);
+    }, [] as HomebaseFile<CommunityDefinition>[]);
   };
 
   const discoverByOdinId = async () => {

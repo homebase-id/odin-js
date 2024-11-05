@@ -10,6 +10,8 @@ import {
   CHAT_ROOT_PATH,
   MAIL_ROOT_PATH,
   HOME_ROOT_PATH,
+  COMMUNITY_APP_ID,
+  COMMUNITY_ALLOWED_IDENTITIES,
 } from '../../constants';
 import { getVersion, t, ellipsisAtMaxChar } from '../../helpers';
 import {
@@ -43,6 +45,7 @@ import { Times } from '../Icons/Times';
 import { IconProps } from '../Icons/Types';
 import { Wallet } from '../Icons/Wallet';
 import { logoutOwnerAndAllApps } from '../../provider';
+import { RadioTower } from '../Icons';
 
 const STORAGE_KEY = 'sidenavIsOpen';
 
@@ -147,7 +150,7 @@ export const Sidenav = ({
               <FeedNavItem />
               <ChatNavItem />
               <MailNavItem />
-              {/* <CommunityNavItem /> */}
+              <CommunityNavItem />
             </div>
 
             <div className={`py-3`}>
@@ -473,12 +476,17 @@ const MailNavItem = () => {
   return <NavItem icon={Envelope} label={'Mail'} to={MAIL_ROOT_PATH} unread={!!unreadCount} />;
 };
 
-// const CommunityNavItem = () => {
-//   const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: COMMUNITY_APP_ID });
-//   return (
-//     <NavItem icon={RadioTower} label={'Community'} to="/apps/community" unread={!!unreadCount} />
-//   );
-// };
+const CommunityNavItem = () => {
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: COMMUNITY_APP_ID });
+
+  if (import.meta.env.PROD && !COMMUNITY_ALLOWED_IDENTITIES.includes(window.location.hostname)) {
+    return null;
+  }
+
+  return (
+    <NavItem icon={RadioTower} label={'Community'} to="/apps/community" unread={!!unreadCount} />
+  );
+};
 
 const MobileDrawer = ({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) => {
   return (

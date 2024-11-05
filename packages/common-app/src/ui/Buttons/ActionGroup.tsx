@@ -50,8 +50,9 @@ export const ActionGroup = ({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const portalRef = useRef<HTMLDivElement>(null);
   useOutsideTrigger(wrapperRef, () => !isSm && !alwaysInPortal && setIsOpen(false));
-  // TODO: Fix this, it fails when clicking a confirmation dialog:
-  // useOutsideTrigger(portalRef, () => alwaysInPortal && setIsOpen(false));
+  useOutsideTrigger([portalRef, wrapperRef], () => {
+    alwaysInPortal && setIsOpen(false);
+  });
   const { verticalSpace, horizontalSpace } = useMostSpace(wrapperRef);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -126,24 +127,22 @@ export const ActionGroup = ({
             )
           : null
         : alwaysInPortal
-          ? isOpen
-            ? createPortal(
-                <div
-                  style={{
-                    position: 'fixed',
-                    top: wrapperRef.current ? wrapperRef.current.getBoundingClientRect().top : 0,
-                    left: wrapperRef.current ? wrapperRef.current.getBoundingClientRect().left : 0,
-                    width: wrapperRef.current ? wrapperRef.current.clientWidth : 0,
-                    height: wrapperRef.current ? wrapperRef.current.clientHeight : 0,
-                  }}
-                  ref={portalRef}
-                  className="pointer-events-none"
-                >
-                  {ActionOptions}
-                </div>,
-                target
-              )
-            : null
+          ? createPortal(
+              <div
+                style={{
+                  position: 'fixed',
+                  top: wrapperRef.current ? wrapperRef.current.getBoundingClientRect().top : 0,
+                  left: wrapperRef.current ? wrapperRef.current.getBoundingClientRect().left : 0,
+                  width: wrapperRef.current ? wrapperRef.current.clientWidth : 0,
+                  height: wrapperRef.current ? wrapperRef.current.clientHeight : 0,
+                }}
+                ref={portalRef}
+                className={`pointer-events-none ${isOpen ? 'block' : 'hidden'}`}
+              >
+                {ActionOptions}
+              </div>,
+              target
+            )
           : ActionOptions}
     </div>
   );
