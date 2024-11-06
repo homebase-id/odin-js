@@ -62,7 +62,7 @@ export const CommunityDirectDetail = () => {
             communityTagId={communityId}
             key={conversationId || dmKey}
             options={{
-              rootPath: `${COMMUNITY_ROOT_PATH}/${communityId}`,
+              rootPath: `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}`,
               composer: CommunityDirectComposer,
             }}
           />
