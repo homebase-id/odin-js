@@ -25,6 +25,7 @@ import { CommunityChannel } from '../../../providers/CommunityProvider';
 import { RichTextEditor } from '@homebase-id/rich-text-editor';
 
 import { ChannelPlugin } from './RTEChannelDropdown/RTEChannelDropdownPlugin';
+import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const CHAT_DRAFTS_KEY = 'COMMUNITY_LOCAL_DRAFTS';
@@ -32,16 +33,17 @@ const CHAT_DRAFTS_KEY = 'COMMUNITY_LOCAL_DRAFTS';
 export const MessageComposer = ({
   community,
   channel,
-  threadId,
+  thread,
   onSend,
   className,
 }: {
   community: HomebaseFile<CommunityDefinition> | undefined;
   channel: HomebaseFile<CommunityChannel> | undefined;
-  threadId?: string | undefined;
+  thread?: HomebaseFile<CommunityMessage> | undefined;
   onSend?: () => void;
   className?: string;
 }) => {
+  const threadId = thread?.fileMetadata.globalTransitId;
   const volatileRef = useRef<VolatileInputRef>(null);
 
   const drafts = JSON.parse(localStorage.getItem(CHAT_DRAFTS_KEY) || '{}');
@@ -50,8 +52,6 @@ export const MessageComposer = ({
       ? drafts[(threadId || channel?.fileMetadata.appData.uniqueId) as string]
       : undefined
   );
-
-  console.log('message', message);
 
   const [files, setFiles] = useState<NewMediaFile[]>();
 
@@ -89,7 +89,7 @@ export const MessageComposer = ({
       await sendMessage({
         community,
         channel,
-        threadId,
+        thread,
         message: message || '',
         files: newFiles,
         chatId: getNewId(),

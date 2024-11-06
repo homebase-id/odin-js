@@ -42,3 +42,29 @@ export const insertNewCommunityChannel = (
   );
   queryClient.setQueryData(['community-channels', communityId], [...allButThisOne, updatedChannel]);
 };
+
+export const removeCommunityChannel = (
+  queryClient: QueryClient,
+  removedChannel: HomebaseFile<unknown>,
+  communityId: string
+) => {
+  const existingChannels = queryClient.getQueryData<HomebaseFile<CommunityChannel>[]>([
+    'community-channels',
+    communityId,
+  ]);
+  if (!existingChannels) return;
+
+  const allButThisOne = existingChannels.filter(
+    (channel) =>
+      !stringGuidsEqual(
+        channel.fileMetadata.appData.uniqueId,
+        removedChannel.fileMetadata.appData.uniqueId
+      ) ||
+      !stringGuidsEqual(
+        channel.fileMetadata.globalTransitId,
+        removedChannel.fileMetadata.globalTransitId
+      ) ||
+      !stringGuidsEqual(channel.fileId, removedChannel.fileId)
+  );
+  queryClient.setQueryData(['community-channels', communityId], allButThisOne);
+};

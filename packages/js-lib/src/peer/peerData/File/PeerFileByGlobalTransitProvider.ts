@@ -207,16 +207,16 @@ export const getFileHeaderOverPeerByGlobalTransitId = async <T = string>(
   odinId: string,
   targetDrive: TargetDrive,
   globalTransitId: string,
-  options?: { systemFileType?: SystemFileType }
+  options?: { decrypt?: boolean; systemFileType?: SystemFileType }
 ): Promise<HomebaseFile<T> | null> => {
-  const { systemFileType } = options ?? { systemFileType: 'Standard' };
+  const { decrypt, systemFileType } = options ?? { decrypt: true, systemFileType: 'Standard' };
   const fileHeader = await getFileHeaderBytesOverPeerByGlobalTransitId(
     dotYouClient,
     odinId,
     targetDrive,
     globalTransitId,
     {
-      decrypt: true,
+      decrypt,
       systemFileType,
     }
   );

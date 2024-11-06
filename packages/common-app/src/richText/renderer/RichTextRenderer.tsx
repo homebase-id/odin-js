@@ -74,7 +74,7 @@ export const RichTextRenderer = ({
 
     if (leaf.code) {
       children = (
-        <code className="bg-slate-100 px-1 py-1 rounded-lg text-foreground font-mono text-sm dark:bg-slate-700">
+        <code className="bg-slate-100 p-[2px_3px_1px] rounded-md text-red-500 dark:text-orange-400 font-mono text-sm dark:bg-slate-800 border">
           {highlightedText}
         </code>
       );
@@ -122,7 +122,7 @@ export const RichTextRenderer = ({
         return (
           <code
             {...attributes}
-            className="bg-slate-100 px-4 py-4 w-full rounded-lg text-foreground font-mono text-sm flex flex-col whitespace-pre-wrap dark:bg-slate-700"
+            className="bg-slate-100 px-3 py-3 w-full rounded-lg text-foreground font-mono text-sm flex flex-col whitespace-pre-wrap dark:bg-slate-800 border"
           >
             {children}
           </code>

@@ -16,7 +16,7 @@ import { DeletedHomebaseFile, DotYouClient, HomebaseFile } from '@homebase-id/js
 import { formatGuidId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const PAGE_SIZE = 100;
 export const useCommunityMessages = (props?: {
@@ -101,7 +101,8 @@ const fetchMessages = async (
     groupIds,
     undefined,
     cursorState,
-    PAGE_SIZE
+    PAGE_SIZE,
+    threadId ? 'Comment' : undefined
   );
 };
 
@@ -168,7 +169,7 @@ export const useLastUpdatedChatMessages = () => {
   const queryClient = useQueryClient();
   const [lastUpdate, setLastUpdate] = useState<number | null>(null);
 
-  useEffect(() => {
+  const findAndSet = useCallback(() => {
     const lastUpdates = queryClient
       .getQueryCache()
       .findAll({ queryKey: ['community-messages'], exact: false })
@@ -183,6 +184,13 @@ export const useLastUpdatedChatMessages = () => {
         return acc;
       }, 0)
     );
+  }, [queryClient]);
+
+  useEffect(() => {
+    findAndSet();
+
+    const interval = setInterval(() => findAndSet(), 1000 * 60); // 1 minute
+    return () => clearInterval(interval);
   }, []);
 
   return {
@@ -218,6 +226,9 @@ export const insertNewMessagesForChannel = (
           pages: data?.pages?.slice(0, 1) ?? [],
           pageParams: data?.pageParams?.slice(0, 1) || [undefined],
         };
+      },
+      {
+        updatedAt: Date.now(),
       }
     );
     queryClient.invalidateQueries({
@@ -234,7 +245,9 @@ export const insertNewMessagesForChannel = (
     );
   });
 
-  queryClient.setQueryData(['community-messages', formatGuidId(channelId)], runningMessages);
+  queryClient.setQueryData(['community-messages', formatGuidId(channelId)], runningMessages, {
+    updatedAt: Date.now(),
+  });
 };
 
 export const insertNewMessage = (
@@ -254,7 +267,10 @@ export const insertNewMessage = (
   if (extistingMessages && newMessage.fileState !== 'deleted') {
     queryClient.setQueryData(
       ['community-messages', formatGuidId(newMessage.fileMetadata.appData.groupId || communityId)],
-      internalInsertNewMessage(extistingMessages, newMessage)
+      internalInsertNewMessage(extistingMessages, newMessage),
+      {
+        updatedAt: Date.now(),
+      }
     );
   } else {
     queryClient.invalidateQueries({
@@ -369,5 +385,78 @@ export const internalInsertNewMessage = (
   };
 
   return newData;
+};
+
+export const removeMessage = (
+  queryClient: QueryClient,
+  toDeleteMessage: HomebaseFile<unknown> | DeletedHomebaseFile,
+  communityId: string
+) => {
+  const extistingMessages = queryClient.getQueryData<
+    InfiniteData<{
+      searchResults: (HomebaseFile<CommunityMessage> | null)[];
+      cursorState: string;
+      queryTime: number;
+      includeMetadataHeader: boolean;
+    }>
+  >([
+    'community-messages',
+    formatGuidId(toDeleteMessage.fileMetadata.appData.groupId || communityId),
+  ]);
+
+  if (extistingMessages) {
+    queryClient.setQueryData(
+      [
+        'community-messages',
+        formatGuidId(toDeleteMessage.fileMetadata.appData.groupId || communityId),
+      ],
+      internalRemoveMessage(extistingMessages, toDeleteMessage),
+      {
+        updatedAt: Date.now(),
+      }
+    );
+  } else {
+    queryClient.invalidateQueries({
+      queryKey: [
+        'community-messages',
+        formatGuidId(toDeleteMessage.fileMetadata.appData.groupId || communityId),
+      ],
+    });
+  }
+};
+
+export const internalRemoveMessage = (
+  extistingMessages: InfiniteData<
+    {
+      searchResults: (HomebaseFile<CommunityMessage> | null)[];
+      cursorState: string;
+      queryTime: number;
+      includeMetadataHeader: boolean;
+    },
+    unknown
+  >,
+  toDeleteMessage: HomebaseFile<unknown> | DeletedHomebaseFile
+) => {
+  return {
+    ...extistingMessages,
+    pages: extistingMessages?.pages?.map((page) => {
+      return {
+        ...page,
+        searchResults: page.searchResults.filter(
+          (msg) =>
+            !msg ||
+            !stringGuidsEqual(msg.fileId, toDeleteMessage.fileId) ||
+            !stringGuidsEqual(
+              msg.fileMetadata.appData.uniqueId,
+              toDeleteMessage.fileMetadata.appData.uniqueId
+            ) ||
+            !stringGuidsEqual(
+              msg.fileMetadata.globalTransitId,
+              toDeleteMessage.fileMetadata.globalTransitId
+            )
+        ),
+      };
+    }),
+  };
 };
 //

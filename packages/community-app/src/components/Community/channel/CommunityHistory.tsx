@@ -64,7 +64,7 @@ export const CommunityHistory = ({
     odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata?.appData?.uniqueId,
     channelId: channel?.fileMetadata?.appData?.uniqueId,
-    threadId: origin?.fileMetadata.appData.uniqueId,
+    threadId: origin?.fileMetadata.globalTransitId,
     maxAge: onlyNew ? lastReadTime : undefined,
   });
 
@@ -203,12 +203,12 @@ export const CommunityHistory = ({
               }
 
               const msg = flattenedMsgs[item.index];
-              const currentAuthor = msg?.fileMetadata.senderOdinId || identity || '';
+              const currentAuthor = msg?.fileMetadata.originalAuthor || identity || '';
               const currentDate = msg?.fileMetadata.created;
 
               const previousVisibleMsg = flattenedMsgs[item.index + 1];
               const previousAuthor =
-                previousVisibleMsg?.fileMetadata.senderOdinId || identity || '';
+                previousVisibleMsg?.fileMetadata.originalAuthor || identity || '';
               const previousDate = previousVisibleMsg?.fileMetadata.created;
 
               return (

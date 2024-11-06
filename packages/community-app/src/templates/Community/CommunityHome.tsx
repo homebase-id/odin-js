@@ -20,7 +20,7 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useCommunities } from '../../hooks/community/useCommunities';
 import { NewCommunity } from './CommunityNew';
-import { useLiveCommunityProcessor } from '../../hooks/community/useLiveCommunityProcessor';
+import { useLiveCommunityProcessor } from '../../hooks/community/live/useLiveCommunityProcessor';
 import { RadioTower, Plus, Ellipsis, MagnifyingGlass, Loader } from '@homebase-id/common-app/icons';
 import { CommunityChannelNav } from './CommunityChannelNav';
 import { useCommunityMemberUpdater } from '../../hooks/community/useCommunityMemberUpdater';

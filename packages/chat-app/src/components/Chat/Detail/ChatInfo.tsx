@@ -28,7 +28,7 @@ export const ChatInfo = ({
 }) => {
   const target = usePortal('modal-container');
 
-  const identity = useDotYouClient().getIdentity();
+  const identity = useDotYouClient().getIdentity() || window.location.hostname;
   const conversationContent = conversation.fileMetadata.appData.content;
   const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
@@ -109,7 +109,7 @@ export const ChatInfo = ({
           <div className="flex flex-col gap-4">
             {recipients.map((recipient) => (
               <a
-                href={`${new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}/owner/connections/${recipient}`}
+                href={`${new DotYouClient({ identity: identity, api: ApiType.Guest }).getRoot()}/owner/connections/${recipient}`}
                 rel="noreferrer noopener"
                 target="_blank"
                 className="group flex flex-row items-center gap-3"

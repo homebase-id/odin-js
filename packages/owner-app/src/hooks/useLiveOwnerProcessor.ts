@@ -1,19 +1,19 @@
 import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { TypedConnectionNotification } from '@homebase-id/js-lib/core';
+import { DotYouClient, TypedConnectionNotification } from '@homebase-id/js-lib/core';
 import { useWebsocketSubscriber } from '@homebase-id/common-app';
 import { websocketDrives } from './auth/useAuth';
 
 export const useLiveOwnerProcessor = () => {
-  const isOnline = useFeedWebSocket(true);
+  const isOnline = useOwnerWebSocket(true);
 
   return isOnline;
 };
 
-const useFeedWebSocket = (isEnabled: boolean) => {
+const useOwnerWebSocket = (isEnabled: boolean) => {
   const queryClient = useQueryClient();
 
-  const handler = useCallback((notification: TypedConnectionNotification) => {
+  const handler = useCallback((_: DotYouClient, notification: TypedConnectionNotification) => {
     if (notification.notificationType === 'connectionFinalized') {
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['pending-connections'], exact: false });
@@ -24,6 +24,7 @@ const useFeedWebSocket = (isEnabled: boolean) => {
 
   useWebsocketSubscriber(
     isEnabled ? handler : undefined,
+    undefined,
     ['connectionFinalized'],
     websocketDrives,
     undefined,

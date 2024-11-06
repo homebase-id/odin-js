@@ -27,6 +27,7 @@ export const useCommunityMetadata = (props?: {
               odinId,
               communityId,
               pinnedChannels: [],
+              savedMessages: [],
               lastReadTime: 0,
               channelLastReadTime: {},
             },
@@ -51,20 +52,25 @@ export const useCommunityMetadata = (props?: {
     metadata: HomebaseFile<CommunityMetadata> | NewHomebaseFile<CommunityMetadata>;
   }) => {
     return await uploadCommunityMetadata(dotYouClient, metadata, async () => {
-      if (!metadata.fileMetadata.appData.tags?.[0]) return;
       const serverVersion = await getCommunityMetadata(
         dotYouClient,
         metadata.fileMetadata.appData.content.communityId
       );
       if (!serverVersion) return;
 
-      return await uploadCommunityMetadata(dotYouClient, {
-        ...metadata,
-        fileMetadata: {
-          ...metadata.fileMetadata,
-          versionTag: serverVersion.fileMetadata.versionTag,
+      return await uploadCommunityMetadata(
+        dotYouClient,
+        {
+          ...metadata,
+          fileMetadata: {
+            ...metadata.fileMetadata,
+            versionTag: serverVersion.fileMetadata.versionTag,
+          },
         },
-      });
+        () => {
+          return;
+        }
+      );
     });
   };
 
@@ -73,25 +79,29 @@ export const useCommunityMetadata = (props?: {
       queryKey: ['community-metadata', communityId],
       queryFn: () => getMetadata(odinId as string, communityId as string),
       enabled: !!odinId && !!communityId,
-      staleTime: 1000 * 60 * 60 * 24, // 1 day, updates from other clients will come in via websocket
+      staleTime: 1000 * 60 * 5, // 5 minutes
     }),
     update: useMutation({
       mutationFn: saveMetadata,
       onMutate: async (variables) => {
-        if (!variables.metadata.fileId) {
-          // Ignore optimistic updates for new community metadata
-          return;
-        }
-
         queryClient.setQueryData<HomebaseFile<CommunityMetadata>>(
           ['community-metadata', variables.metadata.fileMetadata.appData.content.communityId],
           variables.metadata as HomebaseFile<CommunityMetadata>
         );
       },
       onSuccess: (data, variables) => {
-        if (!variables.metadata.fileId || !data) return;
-        const updatedMeta = variables.metadata as HomebaseFile<CommunityMetadata>;
-        updatedMeta.fileMetadata.versionTag = data.newVersionTag;
+        if (!data) return;
+
+        const updatedMeta = {
+          ...variables.metadata,
+          fileId: data?.file.fileId,
+
+          fileMetadata: {
+            ...variables.metadata.fileMetadata,
+            versionTag: data.newVersionTag,
+            globalTransitId: data.globalTransitIdFileIdentifier.globalTransitId,
+          },
+        } as HomebaseFile<CommunityMetadata>;
 
         queryClient.setQueryData<HomebaseFile<CommunityMetadata>>(
           ['community-metadata', updatedMeta.fileMetadata.appData.content.communityId],

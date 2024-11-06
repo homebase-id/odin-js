@@ -123,7 +123,7 @@ export const useCommunity = (props?: useCommunityProps) => {
         communityDef.fileMetadata.appData.content.title,
         t('Drive for "{0}" community', communityDef.fileMetadata.appData.content.title),
         targetDrive,
-        communityDef.serverMetadata?.accessControlList.circleIdList || [],
+        communityDef.fileMetadata.appData.content.acl.circleIdList || [],
         returnUrl
       );
 

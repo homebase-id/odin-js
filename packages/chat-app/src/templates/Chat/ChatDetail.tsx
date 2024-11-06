@@ -64,10 +64,12 @@ export const ChatDetail = ({
     );
 
   const onSend = async () => {
+    const firstOfSeptember2024 = new Date('2024-08-01').getTime();
     if (
       !conversation ||
       stringGuidsEqual(conversationId, ConversationWithYourselfId) ||
-      conversation?.fileMetadata.senderOdinId !== identity
+      conversation?.fileMetadata.senderOdinId !== identity ||
+      conversation.fileMetadata.created <= firstOfSeptember2024
     ) {
       return;
     }

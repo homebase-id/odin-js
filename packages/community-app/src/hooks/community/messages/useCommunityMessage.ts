@@ -6,6 +6,7 @@ import {
   NewMediaFile,
   RichText,
   SecurityGroupType,
+  SystemFileType,
 } from '@homebase-id/js-lib/core';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import {
@@ -15,7 +16,10 @@ import {
   updateCommunityMessage,
   uploadCommunityMessage,
 } from '../../../providers/CommunityMessageProvider';
-import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
+import {
+  CommunityDefinition,
+  getTargetDriveFromCommunityId,
+} from '../../../providers/CommunityDefinitionProvider';
 import { formatGuidId, getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
 import { insertNewMessage } from './useCommunityMessages';
@@ -23,21 +27,46 @@ import { insertNewMessage } from './useCommunityMessages';
 export const useCommunityMessage = (props?: {
   odinId: string | undefined;
   communityId: string | undefined;
+  channelId?: string | undefined;
   messageId: string | undefined;
+  fileSystemType?: SystemFileType;
 }) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
   const identity = dotYouClient.getIdentity();
 
-  const getMessageByUniqueId = async (odinId: string, communityId: string, messageId: string) => {
-    // TODO: Improve by fetching the message from the cache on conversations first
-    return await getCommunityMessage(dotYouClient, odinId, communityId, messageId);
+  const getMessageByUniqueId = async (
+    odinId: string,
+    communityId: string,
+    channelId: string | undefined,
+    messageId: string,
+    fileSystemType?: SystemFileType
+  ) => {
+    const channelCache = queryClient.getQueryData<
+      InfiniteData<{
+        searchResults: (HomebaseFile<CommunityMessage> | null)[];
+        cursorState: string;
+        queryTime: number;
+        includeMetadataHeader: boolean;
+      }>
+    >(['community-messages', formatGuidId(channelId || communityId)]);
+
+    if (channelCache) {
+      const message = channelCache.pages
+        .map((page) => page.searchResults)
+        .flat()
+        .find((msg) => stringGuidsEqual(msg?.fileMetadata.appData.uniqueId, messageId));
+
+      if (message) return message;
+    }
+
+    return await getCommunityMessage(dotYouClient, odinId, communityId, messageId, fileSystemType);
   };
 
   const sendMessage = async ({
     community,
     channel,
-    threadId,
+    thread,
     replyId,
     files,
     message,
@@ -47,7 +76,7 @@ export const useCommunityMessage = (props?: {
   }: {
     community: HomebaseFile<CommunityDefinition>;
     channel: HomebaseFile<CommunityChannel>;
-    threadId?: string;
+    thread?: HomebaseFile<CommunityMessage>;
     replyId?: string;
     files?: NewMediaFile[];
     message: RichText | string;
@@ -62,12 +91,13 @@ export const useCommunityMessage = (props?: {
         created: userDate,
         appData: {
           uniqueId: newChatId,
-          groupId: threadId || channel?.fileMetadata.appData.uniqueId,
+          groupId: thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId,
           content: {
             message: message,
             deliveryStatus: CommunityDeliveryStatus.Sent,
             replyId: replyId,
             channelId: channel.fileMetadata.appData.uniqueId as string,
+            threadId: thread?.fileMetadata.appData.uniqueId as string,
           },
 
           userDate: userDate || new Date().getTime(),
@@ -78,6 +108,7 @@ export const useCommunityMessage = (props?: {
           requiredSecurityGroup: SecurityGroupType.AutoConnected,
         },
       },
+      fileSystemType: thread ? 'Comment' : undefined,
     };
 
     const uploadResult = await uploadCommunityMessage(
@@ -85,7 +116,15 @@ export const useCommunityMessage = (props?: {
       community,
       newChat,
       files,
-      linkPreviews
+      linkPreviews,
+      thread && thread.fileMetadata.globalTransitId
+        ? {
+            targetDrive: getTargetDriveFromCommunityId(
+              community.fileMetadata.appData.uniqueId as string
+            ),
+            globalTransitId: thread.fileMetadata.globalTransitId,
+          }
+        : undefined
     );
     if (!uploadResult) throw new Error('Failed to send the chat message');
 
@@ -120,7 +159,9 @@ export const useCommunityMessage = (props?: {
         getMessageByUniqueId(
           props?.odinId as string,
           props?.communityId as string,
-          props?.messageId as string
+          props?.channelId,
+          props?.messageId as string,
+          props?.fileSystemType
         ),
       enabled: !!props?.odinId && !!props?.communityId && !!props?.messageId,
       refetchOnMount: false,
@@ -135,7 +176,7 @@ export const useCommunityMessage = (props?: {
         files,
         message,
         chatId,
-        threadId,
+        thread,
         userDate,
       }) => {
         const newMessageDsr: NewHomebaseFile<CommunityMessage> = {
@@ -143,7 +184,8 @@ export const useCommunityMessage = (props?: {
             created: userDate,
             appData: {
               uniqueId: chatId,
-              groupId: threadId || channel?.fileMetadata.appData.uniqueId,
+              groupId:
+                thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId,
               content: {
                 message: message,
                 deliveryStatus: CommunityDeliveryStatus.Sending,
@@ -159,6 +201,7 @@ export const useCommunityMessage = (props?: {
               pendingFile: file.file,
             })),
           },
+          fileSystemType: thread ? 'Comment' : undefined,
           serverMetadata: {
             accessControlList: community.fileMetadata.appData.content.acl || {
               requiredSecurityGroup: SecurityGroupType.AutoConnected,
@@ -206,10 +249,13 @@ export const useCommunityMessage = (props?: {
                 ) {
                   // We want to keep previewThumbnail and payloads from the existing message as that holds the optimistic updates from the onMutate
                   return {
+                    ...msg,
                     ...newMessage,
                     fileMetadata: {
+                      ...msg?.fileMetadata,
                       ...newMessage.fileMetadata,
                       appData: {
+                        ...msg?.fileMetadata.appData,
                         ...newMessage.fileMetadata.appData,
                         previewThumbnail: msg?.fileMetadata.appData.previewThumbnail,
                       },

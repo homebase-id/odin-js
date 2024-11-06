@@ -16,6 +16,8 @@ import {
   MAIL_APP_ID,
   FEED_APP_ID,
   PHOTO_APP_ID,
+  COMMUNITY_APP_ID,
+  COMMUNITY_ALLOWED_IDENTITIES,
 } from '@homebase-id/common-app';
 import { House, Cog, Download } from '@homebase-id/common-app/icons';
 
@@ -51,7 +53,7 @@ const Dashboard = () => {
         <FeedApp />
         <ChatApp />
         <MailApp />
-        {/* <CommunityApp /> */}
+        <CommunityApp />
         <PhotoApp />
       </div>
 
@@ -185,25 +187,29 @@ const MailApp = () => {
   );
 };
 
-// const CommunityApp = () => {
-//   const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: COMMUNITY_APP_ID });
+const CommunityApp = () => {
+  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: COMMUNITY_APP_ID });
 
-//   return (
-//     <AppWrapper
-//       appId={COMMUNITY_APP_ID}
-//       name={'Community'}
-//       href={`/apps/community`}
-//       unreadCount={unreadCount || 0}
-//       options={[
-//         {
-//           label: t('Settings'),
-//           icon: Cog,
-//           href: `/owner/third-parties/apps/${COMMUNITY_APP_ID}`,
-//         },
-//       ]}
-//     />
-//   );
-// };
+  if (import.meta.env.PROD && !COMMUNITY_ALLOWED_IDENTITIES.includes(window.location.hostname)) {
+    return null;
+  }
+
+  return (
+    <AppWrapper
+      appId={COMMUNITY_APP_ID}
+      name={'Community'}
+      href={`/apps/community`}
+      unreadCount={unreadCount || 0}
+      options={[
+        {
+          label: t('Settings'),
+          icon: Cog,
+          href: `/owner/third-parties/apps/${COMMUNITY_APP_ID}`,
+        },
+      ]}
+    />
+  );
+};
 
 const FeedApp = () => {
   // const { data: appReg } = useApp({ appId: FEED_APP_ID }).fetch;

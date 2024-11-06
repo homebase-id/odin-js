@@ -79,10 +79,6 @@ export const useAuth = () => {
   };
 };
 
-export const websocketDrives = [
-  // TODO: Compile community drives
-];
-
 export const drives = [
   {
     // Standard profile Info

@@ -28,7 +28,9 @@ export const CommunityThread = ({
   const { data: originMessage } = useCommunityMessage({
     odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata.appData.uniqueId,
+    channelId: channel?.fileMetadata.appData.uniqueId,
     messageId: threadId,
+    fileSystemType: 'Standard',
   }).get;
 
   if (!community || !threadId) {
@@ -74,7 +76,7 @@ export const CommunityThread = ({
         <ErrorBoundary>
           <MessageComposer
             community={community}
-            threadId={threadId}
+            thread={originMessage || undefined}
             channel={channel}
             key={threadId}
             className="mt-auto lg:mt-0"

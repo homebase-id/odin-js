@@ -277,6 +277,7 @@ export const getContentFromHeaderOrPayload = async <T>(
     fileId: string;
     fileMetadata: FileMetadata;
     sharedSecretEncryptedKeyHeader: EncryptedKeyHeader | undefined;
+    fileSystemType?: SystemFileType;
   },
   includesJsonContent: boolean,
   systemFileType?: SystemFileType
@@ -300,7 +301,9 @@ export const getContentFromHeaderOrPayload = async <T>(
       decryptedJsonContent = await decryptJsonContent(fileMetadata, keyHeader);
     } else {
       // When contentIsComplete but includesJsonContent == false the query before was done without including the content; So we just get and parse
-      const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType });
+      const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, {
+        systemFileType: dsr.fileSystemType || systemFileType,
+      });
       if (!fileHeader) return null;
       decryptedJsonContent = await decryptJsonContent(fileHeader.fileMetadata, keyHeader);
     }
@@ -310,7 +313,7 @@ export const getContentFromHeaderOrPayload = async <T>(
       (payload) => payload.key === DEFAULT_PAYLOAD_KEY
     );
     return await getPayloadAsJson<T>(dotYouClient, targetDrive, fileId, DEFAULT_PAYLOAD_KEY, {
-      systemFileType,
+      systemFileType: dsr.fileSystemType || systemFileType,
       lastModified: payloadDescriptor?.lastModified,
     });
   }

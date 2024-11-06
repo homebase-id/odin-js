@@ -27,11 +27,14 @@ export const ChatReactions = ({
     return null;
   }
 
-  const reactions = Object.values(msg.fileMetadata.reactionPreview?.reactions).map((reaction) => {
-    return tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji;
-  });
+  const reactions = Object.values(msg.fileMetadata.reactionPreview?.reactions).map((reaction) => ({
+    emoji: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
+    count: parseInt(reaction.count),
+  }));
   const uniqueEmojis = Array.from(new Set(reactions)).slice(0, 5);
-  const count = reactions?.length;
+  const count = reactions?.reduce((acc, curr) => {
+    return acc + curr.count;
+  }, 0);
 
   if (!reactions?.length) return null;
 
@@ -42,7 +45,7 @@ export const ChatReactions = ({
           className="flex cursor-pointer flex-row items-center gap-1 rounded-3xl bg-background px-2 py-1 shadow-sm"
           onClick={() => setShowDetail(true)}
         >
-          {uniqueEmojis?.map((emoji) => <p key={emoji}>{emoji}</p>)}
+          {uniqueEmojis?.map((emoji) => <p key={emoji.emoji}>{emoji.emoji}</p>)}
           {count && uniqueEmojis && count > uniqueEmojis?.length ? (
             <p className="text-sm text-foreground/80">{count}</p>
           ) : null}

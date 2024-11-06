@@ -28,11 +28,13 @@ export const CommunityReactions = ({
   }).get;
 
   const myReactions = data?.filter((reaction) => reaction?.authorOdinId === identity);
-
   if (!msg.fileMetadata.reactionPreview?.reactions || !community) return null;
 
   const reactions = Object.values(msg.fileMetadata.reactionPreview?.reactions).map((reaction) => {
-    return tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji;
+    return {
+      emoji: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
+      count: reaction.count,
+    };
   });
   const uniqueEmojis = Array.from(new Set(reactions));
   if (!reactions?.length) return null;
@@ -42,30 +44,30 @@ export const CommunityReactions = ({
       <div className="mt-2 flex flex-row">
         <div className="flex cursor-pointer flex-row items-center gap-1">
           {uniqueEmojis?.map((emoji) => {
-            const myReaction = myReactions?.find((reaction) => reaction.body === emoji);
+            const myReaction = myReactions?.find((reaction) => reaction.body === emoji.emoji);
             const authors = data
-              ?.filter((reaction) => reaction.body === emoji)
-              .map((reaction) => reaction.authorOdinId);
+              ?.filter((reaction) => reaction.body === emoji.emoji)
+              .map((reaction) =>
+                reaction.authorOdinId === identity ? t('You') : reaction.authorOdinId
+              );
+
+            if (!emoji.count || emoji.count === '0') return null;
 
             return (
               <button
-                key={emoji}
-                className={`flex flex-row items-center gap-2 rounded-3xl
-                  border border-transparent bg-background px-2 py-1
-                  shadow-sm hover:bg-primary hover:text-primary-contrast ${myReaction ? 'border-primary bg-primary/10' : ''}`}
+                key={emoji.emoji}
+                className={`flex flex-row items-center gap-2 rounded-3xl border bg-background px-2 py-[0.1rem] shadow-sm hover:bg-primary hover:text-primary-contrast ${myReaction ? 'border-primary bg-primary/10' : 'border-transparent'}`}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
 
                   if (myReaction) removeReaction({ community, message: msg, reaction: myReaction });
-                  else addReaction({ community, message: msg, reaction: emoji });
+                  else addReaction({ community, message: msg, reaction: emoji.emoji });
                 }}
-                title={`${authors?.length ? authors.join(', ') : ''} ${t('reacted with')} ${emoji}`}
+                title={`${authors?.length ? authors.join(', ') : ''} ${t('reacted with')} ${emoji.emoji}`}
               >
-                <p>{emoji}</p>
-                <p className="text-sm">
-                  {reactions.filter((reaction) => reaction === emoji).length}
-                </p>
+                <p>{emoji.emoji}</p>
+                <p className="text-sm">{emoji.count}</p>
               </button>
             );
           })}

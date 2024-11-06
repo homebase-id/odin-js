@@ -84,7 +84,7 @@ export const CommunityMessageItem = ({
         {showChannelName && !hideDetails ? (
           <Link
             className="mb-1 text-primary hover:underline"
-            to={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.appData.uniqueId}/${msg.fileMetadata.appData.content.channelId}`}
+            to={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${msg.fileMetadata.appData.content.channelId}`}
           >
             #{channel?.fileMetadata.appData.content.title}
           </Link>
@@ -132,7 +132,9 @@ export const CommunityMessageItem = ({
             ) : (
               <CommunityTextMessageBody msg={msg} community={community} />
             )}
-            {hideThreads ? null : <CommunityMessageThreadSummary community={community} msg={msg} />}
+            {hideThreads || !msg.fileMetadata.reactionPreview?.totalCommentCount ? null : (
+              <CommunityMessageThreadSummary community={community} msg={msg} />
+            )}
           </div>
         </div>
       </div>
@@ -277,7 +279,7 @@ const CommunityMessageThreadSummary = ({
   const { data: messages } = useCommunityMessages({
     odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata.appData.uniqueId as string,
-    threadId: msg.fileMetadata.appData.uniqueId,
+    threadId: msg.fileMetadata.globalTransitId,
   }).all;
 
   const { flattenedMsgs, uniqueSenders } = useMemo(() => {

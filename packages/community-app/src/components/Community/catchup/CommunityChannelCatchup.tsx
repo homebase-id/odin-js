@@ -5,30 +5,6 @@ import { ChannelWithRecentMessage } from '../../../hooks/community/channels/useC
 import { CommunityHistory } from '../channel/CommunityHistory';
 import { ActionButton, ActionLink, COMMUNITY_ROOT_PATH, t } from '@homebase-id/common-app';
 import { useCallback } from 'react';
-import { ChevronLeft, RadioTower } from '@homebase-id/common-app/icons';
-
-export const CommunityChannelCatchupHeader = ({
-  community,
-}: {
-  community?: HomebaseFile<CommunityDefinition>;
-}) => {
-  const communityId = community?.fileMetadata.appData.uniqueId;
-
-  return (
-    <>
-      <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-        <ActionLink
-          className="lg:hidden"
-          type="mute"
-          href={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${communityId}`}
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </ActionLink>
-        <RadioTower className="h-6 w-6" /> {t('Activity')}
-      </div>
-    </>
-  );
-};
 
 export const CommunityChannelCatchup = ({
   community,

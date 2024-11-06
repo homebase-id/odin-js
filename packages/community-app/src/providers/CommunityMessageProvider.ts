@@ -24,6 +24,8 @@ import {
   RichText,
   UpdateHeaderInstructionSet,
   TransferUploadStatus,
+  SystemFileType,
+  GlobalTransitIdFileIdentifier,
 } from '@homebase-id/js-lib/core';
 import {
   jsonStringify64,
@@ -73,6 +75,7 @@ export interface CommunityMessage {
   deliveryStatus: CommunityDeliveryStatus;
 
   channelId: string;
+  threadId?: string;
 }
 
 export const uploadCommunityMessage = async (
@@ -81,6 +84,7 @@ export const uploadCommunityMessage = async (
   message: NewHomebaseFile<CommunityMessage>,
   files: NewMediaFile[] | undefined,
   linkPreviews: LinkPreview[] | undefined,
+  referencedFile?: GlobalTransitIdFileIdentifier,
   onVersionConflict?: () => void
 ) => {
   const communityId = community.fileMetadata.appData.uniqueId as string;
@@ -91,9 +95,10 @@ export const uploadCommunityMessage = async (
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: true,
+    referencedFile,
     appData: {
       uniqueId: message.fileMetadata.appData.uniqueId,
-      groupId: message.fileMetadata.appData.groupId,
+      groupId: !referencedFile ? message.fileMetadata.appData.groupId : undefined,
       userDate: message.fileMetadata.appData.userDate,
       tags: message.fileMetadata.appData.tags,
       fileType: COMMUNITY_MESSAGE_FILE_TYPE,
@@ -184,6 +189,7 @@ export const uploadCommunityMessage = async (
       overwriteGlobalTransitFileId: message.fileMetadata.globalTransitId,
       transferIv: getRandom16ByteArray(),
       recipients: [community.fileMetadata.senderOdinId],
+      systemFileType: message.fileSystemType,
     };
 
     uploadResult = await uploadFileOverPeer(
@@ -203,6 +209,7 @@ export const uploadCommunityMessage = async (
         drive: targetDrive,
         overwriteFileId: message.fileId,
       },
+      systemFileType: message.fileSystemType,
     };
 
     uploadResult = await uploadFile(
@@ -266,6 +273,7 @@ export const updateCommunityMessage = async (
       drive: targetDrive,
       overwriteFileId: message.fileId,
     },
+    systemFileType: message.fileSystemType,
     storageIntent: 'header',
   };
 
@@ -327,18 +335,26 @@ export const hardDeleteCommunityMessage = async (
       dotYouClient,
       targetDrive,
       message.fileMetadata.globalTransitId,
-      [odinId]
+      [odinId],
+      message.fileSystemType
     );
   }
 
-  return await deleteFile(dotYouClient, targetDrive, message.fileId);
+  return await deleteFile(
+    dotYouClient,
+    targetDrive,
+    message.fileId,
+    undefined,
+    message.fileSystemType
+  );
 };
 
 export const getCommunityMessage = async (
   dotYouClient: DotYouClient,
   odinId: string,
   communityId: string,
-  chatMessageId: string
+  chatMessageId: string,
+  systemFileType?: SystemFileType
 ) => {
   const targetDrive = getTargetDriveFromCommunityId(communityId);
 
@@ -347,10 +363,17 @@ export const getCommunityMessage = async (
       dotYouClient,
       odinId,
       targetDrive,
-      chatMessageId
+      chatMessageId,
+      {
+        decrypt: true,
+        systemFileType,
+      }
     );
   }
-  return await getFileHeaderByUniqueId<CommunityMessage>(dotYouClient, targetDrive, chatMessageId);
+  return await getFileHeaderByUniqueId<CommunityMessage>(dotYouClient, targetDrive, chatMessageId, {
+    decrypt: true,
+    systemFileType,
+  });
 };
 
 export const getCommunityMessages = async (
@@ -360,7 +383,8 @@ export const getCommunityMessages = async (
   groupIds: string[] | undefined,
   tagIds: string[] | undefined,
   cursorState: string | undefined,
-  pageSize: number
+  pageSize: number,
+  systemFileType?: SystemFileType
 ) => {
   const targetDrive = getTargetDriveFromCommunityId(communityId);
   const params: FileQueryParams = {
@@ -368,6 +392,7 @@ export const getCommunityMessages = async (
     fileType: [COMMUNITY_MESSAGE_FILE_TYPE],
     groupId: groupIds,
     tagsMatchAtLeastOne: tagIds,
+    systemFileType,
   };
 
   const ro: GetBatchQueryResultOptions = {
@@ -386,7 +411,9 @@ export const getCommunityMessages = async (
     searchResults:
       ((await Promise.all(
         response.searchResults
-          .map(async (result) => await dsrToMessage(dotYouClient, result, targetDrive, true))
+          .map(
+            async (result) => await dsrToMessage(dotYouClient, result, odinId, targetDrive, true)
+          )
           .filter(Boolean)
       )) as HomebaseFile<CommunityMessage>[]) || [],
   };
@@ -395,15 +422,16 @@ export const getCommunityMessages = async (
 export const dsrToMessage = async (
   dotYouClient: DotYouClient,
   dsr: HomebaseFile,
+  odinId: string | undefined,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<CommunityMessage> | null> => {
   try {
     const msgContent =
-      dsr.fileMetadata.senderOdinId && dotYouClient.getIdentity() !== dsr.fileMetadata.senderOdinId
+      odinId && dotYouClient.getIdentity() !== odinId
         ? await getContentFromHeaderOrPayloadOverPeer<CommunityMessage>(
             dotYouClient,
-            dsr.fileMetadata.senderOdinId,
+            odinId,
             targetDrive,
             dsr,
             includeMetadataHeader

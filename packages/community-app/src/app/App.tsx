@@ -51,7 +51,12 @@ const CommunityChannelDetail = lazy(() =>
 );
 const CommunityCatchup = lazy(() =>
   import('../templates/Community/CommunityCatchup').then((communityApp) => ({
-    default: communityApp.CommunityChannelDetail,
+    default: communityApp.CommunityCatchup,
+  }))
+);
+const CommunityLater = lazy(() =>
+  import('../templates/Community/CommunityLater').then((communityApp) => ({
+    default: communityApp.CommunityLater,
   }))
 );
 const CommunityDirectDetail = lazy(() =>
@@ -117,6 +122,9 @@ function App() {
                 path={'all/:threadKey/thread/:chatMessageKey/:mediaKey'}
                 element={<CommunityCatchup />}
               />
+
+              {/* Items for 'later' */}
+              <Route path={'later'} element={<CommunityLater />} />
 
               {/* Items for 'channel' */}
               <Route path={':channelKey'} element={<CommunityChannelDetail />} />

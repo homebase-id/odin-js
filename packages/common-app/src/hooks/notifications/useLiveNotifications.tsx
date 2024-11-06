@@ -37,7 +37,7 @@ export const useLiveNotifications = (props: { drives?: TargetDrive[] } | undefin
   const [liveNotifications, setLiveNotifications] = useState<LiveNotification[]>([]);
   const queryClient = useQueryClient();
 
-  const handler = useCallback((wsNotification: TypedConnectionNotification) => {
+  const handler = useCallback((_: DotYouClient, wsNotification: TypedConnectionNotification) => {
     const clientNotification = wsNotification as ClientConnectionNotification;
 
     if (
@@ -123,6 +123,7 @@ export const useLiveNotifications = (props: { drives?: TargetDrive[] } | undefin
 
   useWebsocketSubscriber(
     handler,
+    undefined,
     ['connectionRequestAccepted', 'connectionRequestReceived', 'appNotificationAdded', 'unknown'],
     drives || [],
     undefined,
