@@ -84,32 +84,22 @@ export const useCommunityMetadata = (props?: {
     update: useMutation({
       mutationFn: saveMetadata,
       onMutate: async (variables) => {
-        if (!variables.metadata.fileId) {
-          // Ignore optimistic updates for new community metadata
-          return;
-        }
-
         queryClient.setQueryData<HomebaseFile<CommunityMetadata>>(
           ['community-metadata', variables.metadata.fileMetadata.appData.content.communityId],
           variables.metadata as HomebaseFile<CommunityMetadata>
         );
       },
       onSuccess: (data, variables) => {
-        if (!variables.metadata.fileId || !data) {
-          // Clear cache for new community metadata save
-          queryClient.invalidateQueries({
-            queryKey: [
-              'community-metadata',
-              variables.metadata.fileMetadata.appData.content.communityId,
-            ],
-          });
-          return;
-        }
+        if (!data) return;
+
         const updatedMeta = {
           ...variables.metadata,
+          fileId: data?.file.fileId,
+
           fileMetadata: {
             ...variables.metadata.fileMetadata,
             versionTag: data.newVersionTag,
+            globalTransitId: data.globalTransitIdFileIdentifier.globalTransitId,
           },
         } as HomebaseFile<CommunityMetadata>;
 
