@@ -79,7 +79,7 @@ export const useCommunityMetadata = (props?: {
       queryKey: ['community-metadata', communityId],
       queryFn: () => getMetadata(odinId as string, communityId as string),
       enabled: !!odinId && !!communityId,
-      staleTime: 1000 * 60 * 60 * 24, // 1 day, updates from other clients will come in via websocket
+      staleTime: 1000 * 60 * 5, // 5 minutes
     }),
     update: useMutation({
       mutationFn: saveMetadata,
@@ -95,7 +95,16 @@ export const useCommunityMetadata = (props?: {
         );
       },
       onSuccess: (data, variables) => {
-        if (!variables.metadata.fileId || !data) return;
+        if (!variables.metadata.fileId || !data) {
+          // Clear cache for new community metadata save
+          queryClient.invalidateQueries({
+            queryKey: [
+              'community-metadata',
+              variables.metadata.fileMetadata.appData.content.communityId,
+            ],
+          });
+          return;
+        }
         const updatedMeta = {
           ...variables.metadata,
           fileMetadata: {

@@ -17,10 +17,11 @@ import {
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import { NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import { getNewId, stringGuidsEqual, tryJsonParse } from '@homebase-id/js-lib/helpers';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { CircleDefinition } from '@homebase-id/js-lib/network';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import { Ellipsis, Arrow } from '@homebase-id/common-app/icons';
+import { useEffect } from 'react';
 
 export const NewCommunity = () => {
   const identity = useDotYouClient().getIdentity();
@@ -36,6 +37,7 @@ export const NewCommunity = () => {
   const pendingDefinition = searchParams.get('draft');
 
   const navigate = useNavigate();
+
   useEffect(() => {
     if (pendingDefinition) {
       const definitionFile = tryJsonParse<NewHomebaseFile<CommunityDefinition>>(pendingDefinition);
@@ -43,7 +45,7 @@ export const NewCommunity = () => {
       (async () => {
         await createNew(definitionFile);
         navigate(
-          `${COMMUNITY_ROOT_PATH}/${definitionFile.fileMetadata.senderOdinId}/${definitionFile.fileMetadata.appData.uniqueId}`
+          `${COMMUNITY_ROOT_PATH}/${identity}/${definitionFile.fileMetadata.appData.uniqueId}`
         );
       })();
     }
@@ -76,9 +78,7 @@ export const NewCommunity = () => {
         },
       };
       await createNew(newCommunityDef); // Will in 99% of the cases first redirect to an ensure drive
-      navigate(
-        `${COMMUNITY_ROOT_PATH}/${newCommunityDef.fileMetadata.senderOdinId}/${communityId}`
-      );
+      navigate(`${COMMUNITY_ROOT_PATH}/${identity}/${communityId}`);
     } catch (e) {
       console.error(e);
     }
