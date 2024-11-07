@@ -73,6 +73,7 @@ export const CommunityMessageItem = ({
     <>
       {isMediaDetail ? (
         <CommunityMediaGallery
+          odinId={community?.fileMetadata.senderOdinId as string}
           msg={msg}
           communityId={community?.fileMetadata.appData.uniqueId as string}
         />
@@ -252,6 +253,7 @@ const CommunityMediaMessageBody = ({
         <CommunityMedia
           msg={msg}
           communityId={community?.fileMetadata.appData.uniqueId as string}
+          odinId={community?.fileMetadata.senderOdinId as string}
         />
       </div>
       {hasACaption ? (

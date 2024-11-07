@@ -23,9 +23,11 @@ import {
 import { getTargetDriveFromCommunityId } from '../../../providers/CommunityDefinitionProvider';
 
 export const CommunityMedia = ({
+  odinId,
   communityId,
   msg,
 }: {
+  odinId: string;
   communityId: string;
   msg: HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage>;
 }) => {
@@ -39,6 +41,7 @@ export const CommunityMedia = ({
   return (
     <div className={`overflow-hidden rounded-lg`}>
       <MediaItem
+        odinId={odinId}
         communityId={communityId}
         fileId={msg.fileId}
         fileLastModified={msg.fileMetadata.updated}
@@ -51,6 +54,7 @@ export const CommunityMedia = ({
 };
 
 const MediaItem = ({
+  odinId,
   communityId,
   fileId,
   fileLastModified,
@@ -61,6 +65,7 @@ const MediaItem = ({
   previewThumbnail,
   onLoad,
 }: {
+  odinId: string;
   communityId: string;
   fileId: string | undefined;
   fileLastModified: number | undefined;
@@ -96,6 +101,7 @@ const MediaItem = ({
             <>
               <OdinThumbnailImage
                 dotYouClient={dotYouClient}
+                odinId={odinId}
                 fileId={fileId}
                 fileKey={payload.key}
                 lastModified={payload.lastModified || fileLastModified}
@@ -111,6 +117,7 @@ const MediaItem = ({
             <>
               <OdinAudio
                 dotYouClient={dotYouClient}
+                odinId={odinId}
                 fileId={fileId}
                 fileKey={payload.key}
                 lastModified={payload.lastModified || fileLastModified}
@@ -120,6 +127,7 @@ const MediaItem = ({
               />
               <OdinAudioWaveForm
                 dotYouClient={dotYouClient}
+                odinId={odinId}
                 fileId={fileId}
                 fileKey={payload.key}
                 lastModified={payload.lastModified || fileLastModified}
@@ -132,6 +140,7 @@ const MediaItem = ({
           ) : isImage ? (
             <OdinImage
               dotYouClient={dotYouClient}
+              odinId={odinId}
               fileId={fileId}
               fileKey={payload.key}
               lastModified={payload.lastModified || fileLastModified}
@@ -145,13 +154,14 @@ const MediaItem = ({
           ) : isLink ? (
             <LinkPreviewItem
               targetDrive={targetDrive}
+              odinId={odinId}
               fileId={fileId}
               payload={payload as PayloadDescriptor}
               className="p-1"
             />
           ) : (
             <BoringFile
-              odinId={undefined}
+              odinId={odinId}
               fileId={fileId}
               targetDrive={targetDrive}
               file={payload as PayloadDescriptor}
