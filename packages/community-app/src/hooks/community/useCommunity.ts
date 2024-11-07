@@ -101,7 +101,7 @@ export const useCommunity = (props?: useCommunityProps) => {
   const queryClient = useQueryClient();
 
   const fetchCommunity = async ({ odinId, communityId }: useCommunityProps) => {
-    if (!odinId || !communityId) return null;
+    if (!odinId || !communityId) return;
 
     return await getCommunityDefinition(dotYouClient, odinId, communityId);
   };

@@ -27,8 +27,11 @@ export const useCommunityChannelsWithRecentMessages = (props: {
   useEffect(() => {
     if (lastUpdate === null || !channels || !channels.length) return;
 
-    const currentCacheUpdate = queryClient.getQueryState(['channels-with-recent-message']);
+    const currentCacheUpdate = queryClient.getQueryState<ChannelWithRecentMessage[]>([
+      'channels-with-recent-message',
+    ]);
     if (
+      currentCacheUpdate?.data?.length === channels.length &&
       currentCacheUpdate?.dataUpdatedAt &&
       lastUpdate !== 0 &&
       lastUpdate <= currentCacheUpdate?.dataUpdatedAt

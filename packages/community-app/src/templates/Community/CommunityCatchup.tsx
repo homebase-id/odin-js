@@ -99,11 +99,7 @@ export const CommunityCatchup = memo(() => {
 
           {threadKey ? (
             <ErrorBoundary>
-              <CommunityThread
-                community={community || undefined}
-                channel={undefined}
-                threadId={threadKey}
-              />
+              <CommunityThread community={community} channel={undefined} threadId={threadKey} />
             </ErrorBoundary>
           ) : null}
         </div>
