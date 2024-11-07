@@ -52,7 +52,7 @@ export const CommunityLater = () => {
               {!savedMessages?.length ? (
                 <p className="m-auto text-lg">{t('All done!')} 🎉</p>
               ) : (
-                <div className="flex h-20 flex-grow flex-col gap-3 overflow-auto py-3 pt-[2rem]">
+                <div className="flex h-20 flex-grow flex-col overflow-auto">
                   {savedMessages.map((message) => {
                     return <SavedMessage message={message} key={message.messageId} />;
                   })}
@@ -90,7 +90,7 @@ const SavedMessage = ({
   const link = useMemo(() => {
     if (!msg) return null;
 
-    if (message.systemFileType === 'Standard') {
+    if (message.systemFileType.toLowerCase() === 'standard') {
       return `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${msg.fileMetadata.appData.content.channelId}/${msg.fileMetadata.appData.uniqueId}`;
     } else {
       if (!msg.fileMetadata.appData.content.channelId || !msg.fileMetadata.appData.content.threadId)
@@ -104,8 +104,6 @@ const SavedMessage = ({
     channelId: msg?.fileMetadata.appData.content.channelId,
   }).fetch;
 
-  if (!msg) return null;
-
   const identity = useDotYouClient().getIdentity();
   const authorOdinId = msg?.fileMetadata.originalAuthor || identity || '';
 
@@ -115,8 +113,8 @@ const SavedMessage = ({
     isSaved,
     toggleSave: { mutate: toggleSave, error: toggleSaveError },
   } = useCommunityLater({
-    messageId: msg.fileMetadata.appData.uniqueId,
-    systemFileType: msg.fileSystemType,
+    messageId: msg?.fileMetadata.appData.uniqueId,
+    systemFileType: msg?.fileSystemType,
   });
 
   if (!msg || !link) return null;
@@ -127,8 +125,10 @@ const SavedMessage = ({
     <>
       <ErrorNotification error={toggleSaveError} />
 
-      <Link to={link} className="group px-2 py-1 hover:bg-page-background md:px-3">
-        <p className="mb-1 text-primary">#{channel?.fileMetadata.appData.content.title}</p>
+      <Link to={link} className="group border-b px-2 py-3 hover:bg-page-background md:px-3">
+        <p className="mb-2 text-sm text-slate-400">
+          #{channel?.fileMetadata.appData.content.title}
+        </p>
 
         <div className="flex flex-row gap-2">
           {!messageFromMe ? (
@@ -162,7 +162,11 @@ const SavedMessage = ({
           <div className="invisible my-auto flex flex-row group-hover:visible">
             <button
               className="rounded-full p-2 text-slate-400 hover:bg-slate-300 hover:dark:bg-slate-700"
-              onClick={() => toggleSave()}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleSave();
+              }}
             >
               {isSaved ? <BookmarkSolid className="h-5 w-5" /> : <Bookmark className="h-5 w-5" />}
             </button>

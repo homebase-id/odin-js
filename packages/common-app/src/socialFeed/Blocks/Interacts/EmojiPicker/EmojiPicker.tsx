@@ -1,6 +1,7 @@
 import 'emoji-picker-element';
 import React, { useEffect } from 'react';
 import { IS_DARK_CLASSNAME } from '../../../../hooks/darkMode/useDarkMode';
+import { Database } from 'emoji-picker-element';
 
 interface EmojiPickerElement extends HTMLElement {
   skinToneEmoji: string;
@@ -9,6 +10,9 @@ interface EmojiPickerElement extends HTMLElement {
 
 interface EmojiDetail {
   unicode: string;
+  tags: string[];
+  skins?: { tone: number; unicode: string }[];
+  skintone?: number;
 }
 
 interface EmojiEvent {
@@ -17,6 +21,8 @@ interface EmojiEvent {
   };
 }
 
+const database = new Database();
+
 export const EmojiPicker = ({ onInput }: { onInput: (val: EmojiDetail) => void }) => {
   const ref = React.useRef<EmojiPickerElement>(null);
   const isDarkMode = document.documentElement.classList.contains(IS_DARK_CLASSNAME);
@@ -24,10 +30,20 @@ export const EmojiPicker = ({ onInput }: { onInput: (val: EmojiDetail) => void }
   useEffect(() => {
     if (!ref.current) return;
 
-    const handler: EventListener = (event) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const emojiDetail = (event as any as EmojiEvent).detail.emoji;
-      onInput(emojiDetail);
+    const handler: EventListener = async (event) => {
+      const emojiDetail = (event as unknown as EmojiEvent).detail.emoji;
+
+      const skintone = await database.getPreferredSkinTone();
+      const unicode =
+        (emojiDetail.skins && skintone
+          ? emojiDetail.skins.find((skin) => skin.tone === skintone)?.unicode
+          : undefined) || emojiDetail.unicode;
+
+      onInput({
+        ...emojiDetail,
+        unicode: unicode,
+        skintone,
+      });
     };
 
     ref.current.addEventListener('emoji-click', handler);
