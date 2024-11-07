@@ -36,7 +36,7 @@ export const CommunityMedia = ({
   const navigate = useNavigate();
 
   if (!payloads) return null;
-  if (isGallery) return <MediaGallery communityId={communityId} msg={msg} />;
+  if (isGallery) return <MediaGallery odinId={odinId} communityId={communityId} msg={msg} />;
 
   return (
     <div className={`overflow-hidden rounded-lg`}>
@@ -212,9 +212,11 @@ const getEmbeddedThumbUrl = (previewThumbnail: EmbeddedThumb) =>
   `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
 
 const MediaGallery = ({
+  odinId,
   communityId,
   msg,
 }: {
+  odinId: string;
   communityId: string;
   msg: HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage>;
 }) => {
@@ -241,6 +243,7 @@ const MediaGallery = ({
       <div className={`${tinyThumbUrl ? 'absolute inset-0' : ''} grid grid-cols-2 gap-1`}>
         {msg.fileMetadata.payloads?.slice(0, 4)?.map((payload, index) => (
           <MediaGalleryItem
+            odinId={odinId}
             communityId={communityId}
             key={payload.key || index}
             payload={payload}
@@ -265,6 +268,7 @@ const MediaGallery = ({
 };
 
 const MediaGalleryItem = ({
+  odinId,
   communityId,
   payload,
   msg,
@@ -272,6 +276,7 @@ const MediaGalleryItem = ({
   children,
   onClick,
 }: {
+  odinId: string;
   communityId: string;
   payload: PayloadDescriptor | NewPayloadDescriptor;
   msg: HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage>;
@@ -288,6 +293,7 @@ const MediaGalleryItem = ({
       } ${isColSpan2 ? 'col-span-2' : ''} ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
     >
       <MediaItem
+        odinId={odinId}
         communityId={communityId}
         fileId={msg.fileId}
         fileLastModified={msg.fileMetadata.updated}
