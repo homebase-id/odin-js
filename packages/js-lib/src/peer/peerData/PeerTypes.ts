@@ -1,10 +1,12 @@
+import { BaseUploadInstructionSet } from '../../../dist';
 import { FileQueryParams, GetBatchQueryResultOptions } from '../../core/DriveData/Drive/DriveTypes';
 import {
   PriorityOptions,
+  PushNotificationOptions,
   ScheduleOptions,
   TransferUploadStatus,
 } from '../../core/DriveData/Upload/DriveUploadTypes';
-import { TargetDrive, SystemFileType } from '../../core/core';
+import { TargetDrive } from '../../core/core';
 
 export interface TransitQueryBatchRequest {
   queryParams: FileQueryParams;
@@ -12,15 +14,23 @@ export interface TransitQueryBatchRequest {
   odinId: string;
 }
 
-export interface TransitInstructionSet {
+export interface TransitInstructionSet
+  extends Omit<BaseUploadInstructionSet, 'storageOptions' | 'transitOptions'> {
   transferIv: Uint8Array;
   overwriteGlobalTransitFileId?: string | null;
   remoteTargetDrive?: TargetDrive;
   schedule?: ScheduleOptions;
   priority?: PriorityOptions;
+
   recipients: string[];
-  systemFileType?: SystemFileType;
   storageIntent?: 'metadataOnly';
+
+  notificationOptions?: PeerPushNotificationOptions;
+}
+
+export interface PeerPushNotificationOptions extends PushNotificationOptions {
+  peerSubscriptionId?: string;
+  recipients?: string[];
 }
 
 export interface TransitUploadResult {

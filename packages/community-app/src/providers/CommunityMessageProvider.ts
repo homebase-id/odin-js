@@ -49,6 +49,7 @@ import {
   TransitUploadResult,
   uploadFileOverPeer,
 } from '@homebase-id/js-lib/peer';
+import { COMMUNITY_APP_ID } from '@homebase-id/common-app';
 
 export const COMMUNITY_MESSAGE_FILE_TYPE = 7020;
 export const CommunityDeletedArchivalStaus = 2;
@@ -190,6 +191,14 @@ export const uploadCommunityMessage = async (
       transferIv: getRandom16ByteArray(),
       recipients: [community.fileMetadata.senderOdinId],
       systemFileType: message.fileSystemType,
+      notificationOptions: {
+        appId: COMMUNITY_APP_ID,
+        tagId: message.fileMetadata.appData.uniqueId as string,
+        typeId: communityId,
+        peerSubscriptionId: communityId,
+        recipients: community.fileMetadata.appData.content.members,
+        silent: false,
+      },
     };
 
     uploadResult = await uploadFileOverPeer(
