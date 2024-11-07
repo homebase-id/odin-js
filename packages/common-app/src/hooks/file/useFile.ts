@@ -1,8 +1,14 @@
-import { TargetDrive, getPayloadBytes } from '@homebase-id/js-lib/core';
+import { SystemFileType, TargetDrive, getPayloadBytes } from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../auth/useDotYouClient';
 import { getPayloadBytesOverPeerByGlobalTransitId } from '@homebase-id/js-lib/peer';
 
-export const useFile = ({ targetDrive }: { targetDrive: TargetDrive }) => {
+export const useFile = ({
+  targetDrive,
+  systemFileType,
+}: {
+  targetDrive: TargetDrive;
+  systemFileType?: SystemFileType;
+}) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const identity = dotYouClient.getIdentity();
 
@@ -25,6 +31,7 @@ export const useFile = ({ targetDrive }: { targetDrive: TargetDrive }) => {
             globalTransitId,
             payloadKey,
             {
+              systemFileType,
               decrypt: true,
             }
           )
@@ -35,10 +42,14 @@ export const useFile = ({ targetDrive }: { targetDrive: TargetDrive }) => {
             fileId,
             payloadKey,
             {
+              systemFileType,
               decrypt: true,
             }
           )
-      : await getPayloadBytes(dotYouClient, targetDrive, fileId, payloadKey, { decrypt: true });
+      : await getPayloadBytes(dotYouClient, targetDrive, fileId, payloadKey, {
+          systemFileType,
+          decrypt: true,
+        });
     if (!payload) return null;
 
     return window.URL.createObjectURL(

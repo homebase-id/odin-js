@@ -25,6 +25,11 @@ import {
 import { insertNewMessage, insertNewMessagesForChannel } from '../messages/useCommunityMessages';
 import { useChatPostInboxHandler } from '@homebase-id/chat-app/src/hooks/chat/live/useInboxProcessor';
 import { ChatDrive } from '@homebase-id/chat-app/src/providers/ConversationProvider';
+import {
+  COMMUNITY_CHANNEL_FILE_TYPE,
+  dsrToCommunityChannel,
+} from '../../../providers/CommunityProvider';
+import { insertNewCommunityChannel } from '../channels/useCommunityChannels';
 
 const isDebug = hasDebugFlag();
 
@@ -75,6 +80,26 @@ export const useInboxProcessor = (odinId: string | undefined, communityId: strin
         targetDrive,
         communityId,
         newMessages
+      );
+
+      const newChannels = await findChangesSinceTimestamp(
+        dotYouClient,
+        odinId,
+        lastProcessedWithBuffer,
+        { targetDrive: targetDrive, fileType: [COMMUNITY_CHANNEL_FILE_TYPE], fileState: [0, 1] }
+      );
+
+      isDebug && console.debug('[InboxProcessor] new channels', newChannels.length);
+      await Promise.all(
+        newChannels.map(async (updatedDsr) => {
+          const newChannel =
+            updatedDsr.fileState === 'active'
+              ? await dsrToCommunityChannel(dotYouClient, updatedDsr, targetDrive, true)
+              : updatedDsr;
+
+          if (!newChannel) return;
+          insertNewCommunityChannel(queryClient, newChannel, communityId);
+        })
       );
     } else {
       // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
@@ -136,6 +161,7 @@ const findChangesSinceTimestamp = async (
 
   return modifiedFiles.searchResults.concat(newFiles.searchResults);
 };
+
 // Process batched updates after a processInbox
 const processCommunityMessagesBatch = async (
   dotYouClient: DotYouClient,
@@ -198,6 +224,7 @@ const processCommunityMessagesBatch = async (
 
       insertNewMessagesForChannel(
         queryClient,
+        communityId,
         channelId,
         updatedcommunityMessages.filter((msg) =>
           stringGuidsEqual(msg.fileMetadata.appData.groupId, communityId)

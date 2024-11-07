@@ -49,7 +49,7 @@ export const useCommunityMessage = (props?: {
         queryTime: number;
         includeMetadataHeader: boolean;
       }>
-    >(['community-messages', formatGuidId(channelId || communityId)]);
+    >(['community-messages', formatGuidId(communityId), formatGuidId(channelId || communityId)]);
 
     if (channelCache) {
       const message = channelCache.pages
@@ -226,6 +226,7 @@ export const useCommunityMessage = (props?: {
           }>
         >([
           'community-messages',
+          formatGuidId(params.community.fileMetadata.appData.uniqueId),
           formatGuidId(
             newMessage.fileMetadata.appData.groupId ||
               params.community.fileMetadata.appData.uniqueId
@@ -272,6 +273,7 @@ export const useCommunityMessage = (props?: {
           queryClient.setQueryData(
             [
               'community-messages',
+              formatGuidId(params.community.fileMetadata.appData.uniqueId),
               formatGuidId(
                 newMessage.fileMetadata.appData.groupId ||
                   params.community.fileMetadata.appData.uniqueId ||
@@ -288,7 +290,7 @@ export const useCommunityMessage = (props?: {
     }),
     update: useMutation({
       mutationFn: updateMessage,
-      onMutate: async ({ updatedChatMessage }) => {
+      onMutate: async ({ updatedChatMessage, community }) => {
         // Update chat messages
         const extistingMessages = queryClient.getQueryData<
           InfiniteData<{
@@ -297,7 +299,11 @@ export const useCommunityMessage = (props?: {
             queryTime: number;
             includeMetadataHeader: boolean;
           }>
-        >(['community-messages', formatGuidId(updatedChatMessage.fileMetadata.appData.groupId)]);
+        >([
+          'community-messages',
+          formatGuidId(community.fileMetadata.appData.uniqueId),
+          formatGuidId(updatedChatMessage.fileMetadata.appData.groupId),
+        ]);
 
         if (extistingMessages) {
           const newData = {
@@ -310,7 +316,11 @@ export const useCommunityMessage = (props?: {
             })),
           };
           queryClient.setQueryData(
-            ['community-messages', formatGuidId(updatedChatMessage.fileMetadata.appData.groupId)],
+            [
+              'community-messages',
+              formatGuidId(community.fileMetadata.appData.uniqueId),
+              formatGuidId(updatedChatMessage.fileMetadata.appData.groupId),
+            ],
             newData
           );
         }
@@ -334,6 +344,7 @@ export const useCommunityMessage = (props?: {
         queryClient.setQueryData(
           [
             'community-messages',
+            formatGuidId(messageParams.community.fileMetadata.appData.uniqueId),
             formatGuidId(messageParams.updatedChatMessage.fileMetadata.appData.groupId),
           ],
           context?.extistingMessages

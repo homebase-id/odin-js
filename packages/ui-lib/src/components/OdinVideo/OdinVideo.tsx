@@ -1,4 +1,4 @@
-import { DotYouClient, HomebaseFile, TargetDrive } from '@homebase-id/js-lib/core';
+import { DotYouClient, HomebaseFile, SystemFileType, TargetDrive } from '@homebase-id/js-lib/core';
 import { SegmentedVideoMetadata } from '@homebase-id/js-lib/media';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useIntersection } from '../../hooks/intersection/useIntersection';
@@ -16,6 +16,7 @@ import { HlsSource } from './HlsSource';
 export interface OdinVideoProps {
   dotYouClient: DotYouClient;
   odinId?: string;
+  systemFileType?: SystemFileType;
   targetDrive: TargetDrive;
   fileId: string | undefined;
   globalTransitId?: string;

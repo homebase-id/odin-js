@@ -1,5 +1,10 @@
 import { getChannelDrive, POST_LINKS_PAYLOAD_KEY } from '@homebase-id/js-lib/public';
-import { EmbeddedThumb, PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
+import {
+  EmbeddedThumb,
+  PayloadDescriptor,
+  SystemFileType,
+  TargetDrive,
+} from '@homebase-id/js-lib/core';
 import { Image } from '../../../media/Image';
 import { Video, VideoClickToLoad } from '../../../media/Video';
 import { ExtensionThumbnail } from '../../../form/files/ExtensionThumbnail';
@@ -118,6 +123,7 @@ export const BoringFile = ({
   targetDrive,
   fileId,
   globalTransitId,
+  systemFileType,
   file,
   canDownload,
   className,
@@ -126,11 +132,12 @@ export const BoringFile = ({
   targetDrive: TargetDrive;
   fileId: string;
   globalTransitId: string | undefined;
+  systemFileType?: SystemFileType;
   file: PayloadDescriptor;
   canDownload?: boolean;
   className?: string;
 }) => {
-  const fetchFile = useFile({ targetDrive }).fetchFile;
+  const fetchFile = useFile({ targetDrive, systemFileType }).fetchFile;
   const doDownload = (url: string) => {
     // Dirty hack for easy download
     const link = document.createElement('a');

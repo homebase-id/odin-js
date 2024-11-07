@@ -93,7 +93,6 @@ export const useCommunities = (enableDiscovery?: boolean) => {
             .map((community) => {
               return {
                 ...community,
-                fileId: '',
                 fileMetadata: {
                   ...community.fileMetadata,
                   appData: {

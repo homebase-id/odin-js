@@ -19,6 +19,7 @@ export const MseSource = ({
   videoMetaData,
   videoRef,
   onFatalError,
+  systemFileType,
 }: OdinMseProps) => {
   const { data: videoUrl } = useVideoUrl(
     dotYouClient,
@@ -26,7 +27,9 @@ export const MseSource = ({
     fileId,
     globalTransitId,
     fileKey,
-    targetDrive
+    targetDrive,
+    undefined,
+    systemFileType
   ).fetch;
 
   useEffect(() => {

@@ -1,5 +1,11 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { DotYouClient, HomebaseFile, TargetDrive, getFileHeader } from '@homebase-id/js-lib/core';
+import {
+  DotYouClient,
+  HomebaseFile,
+  SystemFileType,
+  TargetDrive,
+  getFileHeader,
+} from '@homebase-id/js-lib/core';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import {
   getDecryptedVideoChunk,
@@ -22,7 +28,8 @@ export const useVideo = (
   videoFileId?: string | undefined,
   videoGlobalTransitId?: string | undefined,
   videoFileKey?: string | undefined,
-  videoDrive?: TargetDrive
+  videoDrive?: TargetDrive,
+  systemFileType?: SystemFileType
 ): {
   fetchMetadata: UseQueryResult<
     {
@@ -39,7 +46,8 @@ export const useVideo = (
     odinId: string,
     videoFileId: string | undefined,
     videoGlobalTransitId: string | undefined,
-    videoDrive?: TargetDrive
+    videoDrive?: TargetDrive,
+    systemFileType?: SystemFileType
   ): Promise<{
     fileHeader: HomebaseFile;
     metadata: PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata;
@@ -62,10 +70,13 @@ export const useVideo = (
                 dotYouClient,
                 odinId,
                 videoDrive,
-                videoGlobalTransitId
+                videoGlobalTransitId,
+                { systemFileType }
               )
-            : await getFileHeaderOverPeer(dotYouClient, odinId, videoDrive, videoFileId)
-          : await getFileHeader(dotYouClient, videoDrive, videoFileId);
+            : await getFileHeaderOverPeer(dotYouClient, odinId, videoDrive, videoFileId, {
+                systemFileType,
+              })
+          : await getFileHeader(dotYouClient, videoDrive, videoFileId, { systemFileType });
 
       if (!fileHeader) return undefined;
       const payloadData = fileHeader.fileMetadata.payloads.find((p) => p.key === videoFileKey);
@@ -92,7 +103,13 @@ export const useVideo = (
         videoGlobalTransitId || videoFileId,
       ],
       queryFn: () =>
-        fetchVideoData(odinId || identity, videoFileId, videoGlobalTransitId, videoDrive),
+        fetchVideoData(
+          odinId || identity,
+          videoFileId,
+          videoGlobalTransitId,
+          videoDrive,
+          systemFileType
+        ),
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       enabled: !!videoFileId && videoFileId !== '',
@@ -107,6 +124,7 @@ export const useVideo = (
         videoFileKey,
         chunkStart,
         chunkEnd,
+        systemFileType,
       ] as const;
       return odinId && odinId !== identity
         ? getDecryptedVideoChunkOverPeer(dotYouClient, odinId, ...params)
@@ -122,7 +140,8 @@ export const useVideoUrl = (
   videoGlobalTransitId?: string | undefined,
   videoFileKey?: string | undefined,
   videoDrive?: TargetDrive,
-  fileSizeLimit?: number
+  fileSizeLimit?: number,
+  systemFileType?: SystemFileType
 ): { fetch: UseQueryResult<string | null, Error> } => {
   const identity = dotYouClient.getIdentity();
 
@@ -150,7 +169,8 @@ export const useVideoUrl = (
               videoDrive,
               videoGlobalTransitId,
               videoFileKey,
-              undefined,
+
+              systemFileType,
               fileSizeLimit
             )
           : await getDecryptedVideoUrlOverPeer(
@@ -159,7 +179,7 @@ export const useVideoUrl = (
               videoDrive,
               videoFileId,
               videoFileKey,
-              undefined,
+              systemFileType,
               fileSizeLimit
             )
         : await getDecryptedVideoUrl(
@@ -168,7 +188,8 @@ export const useVideoUrl = (
             videoFileId,
             videoFileKey,
             undefined,
-            fileSizeLimit
+            fileSizeLimit,
+            { systemFileType }
           );
     };
 
