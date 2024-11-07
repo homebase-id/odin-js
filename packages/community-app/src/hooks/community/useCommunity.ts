@@ -32,6 +32,7 @@ const getEnsureNewDriveAndPermissionPath = (
   description: string,
   targetDrive: TargetDrive,
   attributes: Record<string, string> | undefined,
+  allowSubscriptions: boolean,
   returnUrl: string
 ) => {
   const drives = [
@@ -46,6 +47,7 @@ const getEnsureNewDriveAndPermissionPath = (
       n: name,
       d: description,
       at: JSON.stringify(attributes),
+      s: allowSubscriptions,
     },
   ];
 
@@ -88,6 +90,7 @@ const ensureNewDriveAndPermission = (
     description,
     targetDrive,
     attributes,
+    true,
     returnUrl
   );
 
@@ -103,7 +106,7 @@ export const useCommunity = (props?: useCommunityProps) => {
   const fetchCommunity = async ({ odinId, communityId }: useCommunityProps) => {
     if (!odinId || !communityId) return null;
 
-    return await getCommunityDefinition(dotYouClient, odinId, communityId);
+    return (await getCommunityDefinition(dotYouClient, odinId, communityId)) || null;
   };
 
   const saveData = async (
