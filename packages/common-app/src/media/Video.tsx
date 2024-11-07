@@ -5,7 +5,7 @@ import {
   OdinVideoProps,
   useImage,
 } from '@homebase-id/ui-lib';
-import { EmbeddedThumb } from '@homebase-id/js-lib/core';
+import { EmbeddedThumb, SystemFileType } from '@homebase-id/js-lib/core';
 import { useMemo, useState } from 'react';
 import { useDotYouClient } from '../hooks';
 import { Triangle } from '../ui/Icons';
@@ -36,6 +36,7 @@ export interface VideoClickToLoadProps extends Omit<OdinVideoProps, 'dotYouClien
   fit?: 'cover' | 'contain';
   preload?: boolean;
   previewThumbnail?: EmbeddedThumb;
+  systemFileType?: SystemFileType;
 }
 
 export const VideoClickToLoad = ({
@@ -67,6 +68,7 @@ export const VideoClickToLoad = ({
           {...props}
           className={`${props.className || ''} ${previewLoaded || preload || loadVideo ? 'opacity-0' : 'opacity-100'} blur-sm`}
           previewThumbnail={previewThumbnail}
+          systemFileType={props.systemFileType}
           onError={() => setImageHasError(true)}
         />
       ) : null}

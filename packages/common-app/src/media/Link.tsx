@@ -1,7 +1,12 @@
 import { getHostFromUrl, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { LinkPreview, LinkPreviewDescriptor } from '@homebase-id/js-lib/media';
 import { ellipsisAtMaxChar } from '../helpers';
-import { EmbeddedThumb, PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
+import {
+  EmbeddedThumb,
+  PayloadDescriptor,
+  SystemFileType,
+  TargetDrive,
+} from '@homebase-id/js-lib/core';
 import { useLinkMetadata } from '../hooks';
 import { LoadingBlock } from '../ui';
 import { useMemo } from 'react';
@@ -132,6 +137,7 @@ export const LinkPreviewItem = ({
   targetDrive,
   odinId,
   globalTransitId,
+  systemFileType,
   fileId,
   payload,
   className,
@@ -140,6 +146,7 @@ export const LinkPreviewItem = ({
   odinId?: string;
   fileId: string | undefined;
   globalTransitId?: string | undefined;
+  systemFileType?: SystemFileType;
   payload: PayloadDescriptor;
   className?: string;
 }) => {
@@ -149,6 +156,7 @@ export const LinkPreviewItem = ({
     fileId,
     payloadKey: payload.key,
     targetDrive,
+    systemFileType,
   });
 
   const descriptorInfo = payload.descriptorContent

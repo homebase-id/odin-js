@@ -110,7 +110,7 @@ const CommunitiesList = () => {
     isFetched,
     refetch: refetchCommunities,
     isRefetching: isRefetchingCommunities,
-  } = useCommunities().all;
+  } = useCommunities(isEnableDiscovery).all;
   const { communityKey: activeCommunityId } = useParams();
 
   const navigate = useNavigate();

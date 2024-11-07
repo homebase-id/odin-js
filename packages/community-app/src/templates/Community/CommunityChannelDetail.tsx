@@ -24,7 +24,6 @@ import { useMarkCommunityAsRead } from '../../hooks/community/useMarkCommunityAs
 import { CommunityThread } from '../../components/Community/CommunityThread';
 
 export const CommunityChannelDetail = () => {
-  const [isEmptyChannel, setIsEmptyChannel] = useState<boolean>(false);
   const { odinKey, communityKey: communityId, channelKey: channelId, threadKey } = useParams();
   const { data: community, isFetched } = useCommunity({ odinId: odinKey, communityId }).fetch;
   const navigate = useNavigate();
@@ -65,27 +64,22 @@ export const CommunityChannelDetail = () => {
           <div className="flex h-full flex-grow flex-col overflow-hidden">
             <CommunityChannelHeader community={community || undefined} channel={channelDsr} />
             <ErrorBoundary>
-              {isEmptyChannel ? (
-                <EmptyChannel channel={channelDsr} />
-              ) : (
-                <CommunityHistory
-                  community={community || undefined}
-                  channel={channelDsr || undefined}
-                  doOpenThread={(thread) =>
-                    navigate(
-                      `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
-                    )
-                  }
-                  setIsEmptyChat={setIsEmptyChannel}
-                />
-              )}
+              <CommunityHistory
+                community={community || undefined}
+                channel={channelDsr || undefined}
+                doOpenThread={(thread) =>
+                  navigate(
+                    `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
+                  )
+                }
+                emptyPlaceholder={<EmptyChannel channel={channelDsr} />}
+              />
             </ErrorBoundary>
             <ErrorBoundary>
               <MessageComposer
                 community={community || undefined}
                 channel={channelDsr || undefined}
                 key={channelId}
-                onSend={() => setIsEmptyChannel(false)}
               />
             </ErrorBoundary>
           </div>
