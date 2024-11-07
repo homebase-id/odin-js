@@ -22,7 +22,7 @@ export const useCommunityChannelsWithRecentMessages = (props: {
   const queryClient = useQueryClient();
 
   const { data: channels } = useCommunityChannels(props).fetch;
-  const { lastUpdate } = useLastUpdatedChatMessages();
+  const { lastUpdate } = useLastUpdatedChatMessages({ communityId: props.communityId });
 
   useEffect(() => {
     if (lastUpdate === null || !channels || !channels.length) return;

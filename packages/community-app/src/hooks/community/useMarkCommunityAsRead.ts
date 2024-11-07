@@ -15,7 +15,7 @@ export const useMarkCommunityAsRead = ({
     single: { data: metadata },
     update: { mutate: updateMetadata, status: updateStatus },
   } = useCommunityMetadata({ odinId, communityId });
-  const { lastUpdate } = useLastUpdatedChatMessages();
+  const { lastUpdate } = useLastUpdatedChatMessages({ communityId });
 
   useEffect(() => {
     if (

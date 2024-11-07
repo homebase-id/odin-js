@@ -21,6 +21,7 @@ export const DirectSource = ({
   directFileSizeLimit,
   videoRef,
   onFatalError,
+  systemFileType,
 }: OdinDirectProps) => {
   const { data: videoUrl } = useVideoUrl(
     dotYouClient,
@@ -29,7 +30,8 @@ export const DirectSource = ({
     globalTransitId,
     fileKey,
     targetDrive,
-    directFileSizeLimit
+    directFileSizeLimit,
+    systemFileType
   ).fetch;
 
   useEffect(() => {

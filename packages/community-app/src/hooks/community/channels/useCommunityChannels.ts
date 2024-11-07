@@ -1,7 +1,7 @@
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { CommunityChannel, getCommunityChannels } from '../../../providers/CommunityProvider';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { DeletedHomebaseFile, HomebaseFile } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const useCommunityChannels = (props: { odinId?: string; communityId?: string }) => {
@@ -24,7 +24,7 @@ export const useCommunityChannels = (props: { odinId?: string; communityId?: str
 
 export const insertNewCommunityChannel = (
   queryClient: QueryClient,
-  updatedChannel: HomebaseFile<CommunityChannel>,
+  updatedChannel: HomebaseFile<CommunityChannel> | DeletedHomebaseFile<unknown>,
   communityId: string
 ) => {
   const existingChannels = queryClient.getQueryData<HomebaseFile<CommunityChannel>[]>([
@@ -38,9 +38,12 @@ export const insertNewCommunityChannel = (
       !stringGuidsEqual(
         channel.fileMetadata.appData.uniqueId,
         updatedChannel.fileMetadata.appData.uniqueId
-      )
+      ) && !stringGuidsEqual(channel.fileId, updatedChannel.fileId)
   );
-  queryClient.setQueryData(['community-channels', communityId], [...allButThisOne, updatedChannel]);
+
+  const newChannels =
+    updatedChannel.fileState === 'active' ? [...allButThisOne, updatedChannel] : allButThisOne;
+  queryClient.setQueryData(['community-channels', communityId], newChannels);
 };
 
 export const removeCommunityChannel = (

@@ -4,6 +4,7 @@ import {
   PayloadDescriptor,
   NewHomebaseFile,
   NewPayloadDescriptor,
+  SystemFileType,
 } from '@homebase-id/js-lib/core';
 import { OdinImage, OdinThumbnailImage, OdinAudio, OdinAudioWaveForm } from '@homebase-id/ui-lib';
 
@@ -44,6 +45,7 @@ export const CommunityMedia = ({
         odinId={odinId}
         communityId={communityId}
         fileId={msg.fileId}
+        systemFileType={msg.fileSystemType}
         fileLastModified={msg.fileMetadata.updated}
         payload={payloads[0]}
         onClick={() => navigate(`${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`)}
@@ -57,6 +59,7 @@ const MediaItem = ({
   odinId,
   communityId,
   fileId,
+  systemFileType,
   fileLastModified,
   payload,
   fit,
@@ -68,6 +71,7 @@ const MediaItem = ({
   odinId: string;
   communityId: string;
   fileId: string | undefined;
+  systemFileType?: SystemFileType;
   fileLastModified: number | undefined;
   payload: PayloadDescriptor | NewPayloadDescriptor;
   fit?: 'contain' | 'cover';
@@ -104,6 +108,7 @@ const MediaItem = ({
                 odinId={odinId}
                 fileId={fileId}
                 fileKey={payload.key}
+                systemFileType={systemFileType}
                 lastModified={payload.lastModified || fileLastModified}
                 targetDrive={targetDrive}
                 className={`w-full blur-sm`}
@@ -120,6 +125,7 @@ const MediaItem = ({
                 odinId={odinId}
                 fileId={fileId}
                 fileKey={payload.key}
+                systemFileType={systemFileType}
                 lastModified={payload.lastModified || fileLastModified}
                 targetDrive={targetDrive}
                 onLoad={onLoad}
@@ -130,6 +136,7 @@ const MediaItem = ({
                 odinId={odinId}
                 fileId={fileId}
                 fileKey={payload.key}
+                systemFileType={systemFileType}
                 lastModified={payload.lastModified || fileLastModified}
                 targetDrive={targetDrive}
                 onLoad={onLoad}
@@ -143,6 +150,7 @@ const MediaItem = ({
               odinId={odinId}
               fileId={fileId}
               fileKey={payload.key}
+              systemFileType={systemFileType}
               lastModified={payload.lastModified || fileLastModified}
               targetDrive={targetDrive}
               avoidPayload={isVideo}
@@ -156,6 +164,7 @@ const MediaItem = ({
               targetDrive={targetDrive}
               odinId={odinId}
               fileId={fileId}
+              systemFileType={systemFileType}
               payload={payload as PayloadDescriptor}
               className="p-1"
             />
@@ -163,6 +172,7 @@ const MediaItem = ({
             <BoringFile
               odinId={odinId}
               fileId={fileId}
+              systemFileType={systemFileType}
               targetDrive={targetDrive}
               file={payload as PayloadDescriptor}
               globalTransitId={undefined}

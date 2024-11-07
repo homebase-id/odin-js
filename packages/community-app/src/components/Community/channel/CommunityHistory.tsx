@@ -5,7 +5,7 @@ import {
   COMMUNITY_MESSAGE_FILE_TYPE,
   CommunityMessage,
 } from '../../../providers/CommunityMessageProvider';
-import { useEffect, useMemo, useRef } from 'react';
+import { ReactNode, useEffect, useMemo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   ErrorNotification,
@@ -26,6 +26,7 @@ export const CommunityHistory = ({
   setIsEmptyChat,
   alignTop,
   onlyNew,
+  emptyPlaceholder,
 }: {
   community: HomebaseFile<CommunityDefinition> | undefined;
   channel: HomebaseFile<CommunityChannel> | undefined;
@@ -34,6 +35,7 @@ export const CommunityHistory = ({
   setIsEmptyChat?: (isEmpty: boolean) => void;
   alignTop?: boolean;
   onlyNew?: boolean;
+  emptyPlaceholder?: ReactNode;
 }) => {
   const identity = useDotYouClient().getIdentity();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -141,6 +143,10 @@ export const CommunityHistory = ({
     virtualizer.getVirtualItems(),
   ]);
 
+  if (emptyPlaceholder && isFetched && (!flattenedMsgs || flattenedMsgs.length === 0)) {
+    return <>{emptyPlaceholder}</>;
+  }
+
   return (
     <>
       <ErrorNotification error={deleteMessagesError} />
@@ -186,13 +192,7 @@ export const CommunityHistory = ({
               const isLoaderRow = item.index > flattenedMsgs?.length - 1;
               if (isLoaderRow) {
                 return (
-                  <div
-                    key={item.key}
-                    data-index={item.index}
-                    ref={virtualizer.measureElement}
-                    className={alignTop ? '' : 'sm:min-h-[22rem]'}
-                    // h-22rem keeps space for the context menu/emoji selector of the first item; otherwise the context menu would be cut off by the overflow-hidden
-                  >
+                  <div key={item.key} data-index={item.index} ref={virtualizer.measureElement}>
                     {hasMoreMessages || isFetchingNextPage ? (
                       <div className="animate-pulse" key={'loading'}>
                         {t('Loading...')}
