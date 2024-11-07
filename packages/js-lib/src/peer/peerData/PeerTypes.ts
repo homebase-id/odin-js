@@ -25,12 +25,7 @@ export interface TransitInstructionSet
   recipients: string[];
   storageIntent?: 'metadataOnly';
 
-  notificationOptions?: PeerPushNotificationOptions;
-}
-
-export interface PeerPushNotificationOptions extends PushNotificationOptions {
-  peerSubscriptionId?: string;
-  recipients?: string[];
+  notificationOptions?: PushNotificationOptions;
 }
 
 export interface TransitUploadResult {

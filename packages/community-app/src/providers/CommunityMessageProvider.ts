@@ -219,6 +219,17 @@ export const uploadCommunityMessage = async (
         overwriteFileId: message.fileId,
       },
       systemFileType: message.fileSystemType,
+      transitOptions: {
+        useAppNotification: true,
+        appNotificationOptions: {
+          appId: COMMUNITY_APP_ID,
+          tagId: message.fileMetadata.appData.uniqueId as string,
+          typeId: communityId,
+          peerSubscriptionId: communityId,
+          recipients: community.fileMetadata.appData.content.members,
+          silent: false,
+        },
+      },
     };
 
     uploadResult = await uploadFile(
