@@ -34,7 +34,7 @@ const MemberLookupDialog = ({
   onCancel: () => void;
 }) => {
   const target = usePortal('modal-container');
-  const [selection, setSelection] = useState<string[]>([]);
+  const [selection, setSelection] = useState<string[]>([...defaultMembers]);
 
   if (!isOpen) {
     return null;
