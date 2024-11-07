@@ -5,7 +5,7 @@ import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const useCommunityLater = (props?: {
   messageId?: string;
-  systemFileType: SystemFileType;
+  systemFileType?: SystemFileType;
 }) => {
   const { messageId, systemFileType } = props || {};
 
