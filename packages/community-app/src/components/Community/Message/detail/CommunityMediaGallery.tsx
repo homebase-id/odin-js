@@ -15,9 +15,11 @@ import { getTargetDriveFromCommunityId } from '../../../../providers/CommunityDe
 import { Times, ArrowLeft, Arrow } from '@homebase-id/common-app/icons';
 
 export const CommunityMediaGallery = ({
+  odinId,
   communityId,
   msg,
 }: {
+  odinId: string;
   communityId: string;
   msg: HomebaseFile<CommunityMessage>;
 }) => {
@@ -95,6 +97,7 @@ export const CommunityMediaGallery = ({
           {contentType?.startsWith('video') || contentType === 'application/vnd.apple.mpegurl' ? (
             <VideoClickToLoad
               preload={true}
+              odinId={odinId}
               fileId={msg.fileId}
               fileKey={mediaKey}
               targetDrive={targetDrive}
@@ -105,6 +108,7 @@ export const CommunityMediaGallery = ({
           ) : contentType?.startsWith('image') ? (
             <OdinImage
               className={`m-auto h-auto max-h-[100dvh] w-auto max-w-full object-contain`}
+              odinId={odinId}
               dotYouClient={dotYouClient}
               fileId={msg.fileId}
               fileKey={mediaKey}
@@ -115,7 +119,7 @@ export const CommunityMediaGallery = ({
             />
           ) : payload ? (
             <BoringFile
-              odinId={undefined}
+              odinId={odinId}
               targetDrive={targetDrive}
               fileId={msg.fileId}
               globalTransitId={msg.fileMetadata.globalTransitId}
