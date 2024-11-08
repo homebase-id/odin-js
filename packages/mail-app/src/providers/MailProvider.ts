@@ -33,12 +33,15 @@ import {
   FailedTransferStatuses,
   RecipientTransferHistory,
   UpdateHeaderInstructionSet,
+  DEFAULT_PAYLOAD_KEY,
+  AppendInstructionSet,
 } from '@homebase-id/js-lib/core';
 import {
   getNewId,
   getRandom16ByteArray,
   jsonStringify64,
   makeGrid,
+  stringToUint8Array,
 } from '@homebase-id/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
 import { processVideoFile, createThumbnails } from '@homebase-id/js-lib/media';
@@ -162,8 +165,11 @@ export const uploadMail = async (
 
   const conversationContent = conversation.fileMetadata.appData.content;
 
-  //TODO: Should we move an overload of content to a payload?
   const payloadJson: string = jsonStringify64({ ...conversationContent });
+  const payloadBytes = stringToUint8Array(payloadJson);
+
+  // Set max of 3kb for content so enough room is left for metedata
+  const shouldEmbedContent = payloadBytes.length < 3000;
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: conversation?.fileMetadata.versionTag,
@@ -171,7 +177,7 @@ export const uploadMail = async (
     appData: {
       ...conversation.fileMetadata.appData,
       fileType: conversation.fileMetadata.appData.fileType || MAIL_CONVERSATION_FILE_TYPE,
-      content: payloadJson,
+      content: shouldEmbedContent ? payloadJson : undefined,
     },
     isEncrypted: true,
     accessControlList: conversation.serverMetadata?.accessControlList || {
@@ -247,6 +253,13 @@ export const uploadMail = async (
 
   uploadMetadata.appData.previewThumbnail =
     previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
+
+  if (!shouldEmbedContent) {
+    payloads.push({
+      key: DEFAULT_PAYLOAD_KEY,
+      payload: new Blob([payloadBytes], { type: 'application/json' }),
+    });
+  }
 
   const uploadResult: AppendResult | UploadResult | void | null = await (async () => {
     if (!distribute && anyExistingFiles && 'sharedSecretEncryptedKeyHeader' in conversation) {
@@ -355,24 +368,57 @@ export const updateLocalMailHeader = async (
     },
     storageIntent: 'header',
   };
-
   const conversationContent = conversation.fileMetadata.appData.content;
 
-  //TODO: Should we move an excess of content to a payload?
   const payloadJson: string = jsonStringify64({ ...conversationContent });
+  const payloadBytes = stringToUint8Array(payloadJson);
+
+  // Set max of 3kb for content so enough room is left for metedata
+  const shouldEmbedContent = payloadBytes.length < 3000;
+
   const uploadMetadata: UploadFileMetadata = {
     versionTag: conversation?.fileMetadata.versionTag,
     allowDistribution: false,
     appData: {
       ...conversation.fileMetadata.appData,
       fileType: conversation.fileMetadata.appData.fileType || MAIL_CONVERSATION_FILE_TYPE,
-      content: payloadJson,
+      content: shouldEmbedContent ? payloadJson : undefined,
     },
     isEncrypted: true,
     accessControlList: conversation.serverMetadata?.accessControlList || {
       requiredSecurityGroup: SecurityGroupType.Owner,
     },
   };
+
+  if (!shouldEmbedContent) {
+    const appendInstructionSet: AppendInstructionSet = {
+      targetFile: {
+        fileId: conversation.fileId as string,
+        targetDrive: MailDrive,
+      },
+      versionTag: conversation.fileMetadata.versionTag,
+      storageIntent: 'append',
+    };
+
+    const newVersionTag = (
+      await appendDataToFile(
+        dotYouClient,
+        keyHeader || conversation.sharedSecretEncryptedKeyHeader,
+        appendInstructionSet,
+        [
+          {
+            key: DEFAULT_PAYLOAD_KEY,
+            payload: new Blob([payloadBytes], { type: 'application/json' }),
+            iv: getRandom16ByteArray(),
+          },
+        ],
+        undefined,
+        onVersionConflict
+      )
+    )?.newVersionTag;
+
+    uploadMetadata.versionTag = newVersionTag;
+  }
 
   return await uploadHeader(
     dotYouClient,
