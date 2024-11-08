@@ -15,6 +15,10 @@ export const sendIntroduction = async (
 ): Promise<IntroductionResult | null> => {
   const client = dotYouClient.createAxiosClient();
 
+  if (introduction.recipients.length < 2) {
+    return null;
+  }
+
   const promise: Promise<IntroductionResult | null> = client
     .post<IntroductionResult>('/circles/requests/introductions/send-introductions', introduction)
     .then((response) => response.data)
