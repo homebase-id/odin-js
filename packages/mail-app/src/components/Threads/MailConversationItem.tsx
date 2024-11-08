@@ -6,7 +6,7 @@ import {
   MailConversation,
   REMOVE_ARCHIVAL_STATUS,
 } from '../../providers/MailProvider';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   ActionButton,
   Checkbox,
@@ -185,11 +185,13 @@ export const MailConversationItem = ({
                 <MailAttachmentOverview
                   query={query}
                   files={mailThread.flatMap((thread) =>
-                    (thread.fileMetadata.payloads || []).map((file) => ({
-                      ...file,
-                      fileId: thread.fileId,
-                      conversationId: thread.fileMetadata.appData.groupId as string,
-                    }))
+                    (thread.fileMetadata.payloads || [])
+                      .filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY)
+                      .map((file) => ({
+                        ...file,
+                        fileId: thread.fileId,
+                        conversationId: thread.fileMetadata.appData.groupId as string,
+                      }))
                   )}
                 />
               </div>

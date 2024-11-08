@@ -1,4 +1,4 @@
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
   MailConversation,
@@ -274,11 +274,13 @@ const MailMessage = ({
           />
           <MailAttachmentOverview
             className="mt-5"
-            files={message.fileMetadata.payloads?.map((file) => ({
-              ...file,
-              fileId: message.fileId,
-              conversationId: message.fileMetadata.appData.groupId as string,
-            }))}
+            files={message.fileMetadata.payloads
+              ?.filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY)
+              ?.map((file) => ({
+                ...file,
+                fileId: message.fileId,
+                conversationId: message.fileMetadata.appData.groupId as string,
+              }))}
             maxVisible={null}
             query={query}
           />
