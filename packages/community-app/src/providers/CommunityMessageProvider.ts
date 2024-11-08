@@ -180,6 +180,7 @@ export const uploadCommunityMessage = async (
   uploadMetadata.appData.previewThumbnail =
     previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
+  const identity = dotYouClient.getIdentity();
   let uploadResult: UploadResult | TransitUploadResult | void;
   if (
     community.fileMetadata.senderOdinId &&
@@ -196,7 +197,9 @@ export const uploadCommunityMessage = async (
         tagId: message.fileMetadata.appData.uniqueId as string,
         typeId: communityId,
         peerSubscriptionId: communityId,
-        recipients: community.fileMetadata.appData.content.members,
+        recipients: community.fileMetadata.appData.content.members.filter(
+          (recipient) => recipient !== identity
+        ),
         silent: false,
       },
     };
@@ -226,7 +229,9 @@ export const uploadCommunityMessage = async (
           tagId: message.fileMetadata.appData.uniqueId as string,
           typeId: communityId,
           peerSubscriptionId: communityId,
-          recipients: community.fileMetadata.appData.content.members,
+          recipients: community.fileMetadata.appData.content.members.filter(
+            (recipient) => recipient !== identity
+          ),
           silent: false,
         },
       },
