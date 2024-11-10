@@ -124,7 +124,6 @@ export const useApp = ({ appId }: { appId?: string }) => {
       queryKey: ['app', appId],
       queryFn: () => fetch({ appId: appId as string }),
       refetchOnWindowFocus: false,
-      retry: false,
       enabled: !!appId,
     }),
     registerNewApp: useMutation({
