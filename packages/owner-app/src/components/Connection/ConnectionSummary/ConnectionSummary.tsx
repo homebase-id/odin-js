@@ -277,18 +277,22 @@ const CirclesSummary = ({ odinId }: { odinId?: string }) => {
     )
     .filter(Boolean) as string[];
 
-  if (!circleNames.length) return null;
-
   return (
     <Link
       to={`/owner/connections/${odinId}/settings/circles`}
       className="text-sm text-primary hover:underline"
     >
-      {t('Member of')}:{' '}
-      {circleNames.map(
-        (name, index) =>
-          name +
-          (index < circleNames.length - 2 ? ', ' : index < circleNames.length - 1 ? ' & ' : '')
+      {circleNames.length ? (
+        <>
+          {t('Member of')}:{' '}
+          {circleNames.map(
+            (name, index) =>
+              name +
+              (index < circleNames.length - 2 ? ', ' : index < circleNames.length - 1 ? ' & ' : '')
+          )}
+        </>
+      ) : (
+        t('Member of: None')
       )}
     </Link>
   );
