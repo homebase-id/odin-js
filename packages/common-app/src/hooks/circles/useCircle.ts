@@ -15,7 +15,8 @@ import {
 } from '@homebase-id/js-lib/network';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
-export const useCircle = ({ circleId }: { circleId?: string }) => {
+export const useCircle = (props?: { circleId?: string }) => {
+  const { circleId } = props || {};
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
 

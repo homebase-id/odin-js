@@ -321,13 +321,13 @@ const CircleMemberCard = ({
     mutate: revokeGrants,
     status: revokeGrantsStatus,
     error: revokeGrantsError,
-  } = useCircle({}).revokeIdentityGrants;
+  } = useCircle().revokeIdentityGrants;
 
   const {
     mutate: revokeDomainGrants,
     status: revokeDomainGrantsStatus,
     error: revokeDomainGrantsError,
-  } = useCircle({}).revokeDomainGrants;
+  } = useCircle().revokeDomainGrants;
 
   if (member.domainType === 'youAuth') {
     return (

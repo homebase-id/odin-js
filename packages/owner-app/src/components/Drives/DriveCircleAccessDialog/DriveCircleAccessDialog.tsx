@@ -37,7 +37,7 @@ const DriveCircleAccessDialog = ({
   const [saveState, setSaveState] = useState<ActionButtonState>('idle');
 
   const { data: circles } = useCircles().fetch;
-  const { mutateAsync: updateCircle, error: updateError } = useCircle({}).createOrUpdate;
+  const { mutateAsync: updateCircle, error: updateError } = useCircle().createOrUpdate;
 
   const [newCircles, setNewCircles] = useState<CircleDefinition[]>([]);
 

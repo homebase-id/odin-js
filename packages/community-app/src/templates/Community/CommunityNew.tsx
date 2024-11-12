@@ -87,13 +87,13 @@ export const NewCommunity = () => {
   return (
     <ErrorBoundary>
       <form
-        className="flex h-full w-full items-center justify-center p-5"
+        className="flex h-full w-full justify-center overflow-auto p-5"
         onSubmit={(e) => {
           e.preventDefault();
           doCreate();
         }}
       >
-        <div className="w-full max-w-lg">
+        <div className="my-auto w-full max-w-lg">
           <h2 className="mb-5 text-3xl">
             {t('New Community')}
             <small className="block text-sm font-normal text-slate-400">

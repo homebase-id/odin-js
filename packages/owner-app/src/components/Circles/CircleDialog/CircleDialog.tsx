@@ -39,7 +39,7 @@ const CircleDialog = ({
     mutateAsync: createOrUpdate,
     status: createOrUpdateStatus,
     error: updateError,
-  } = useCircle({}).createOrUpdate;
+  } = useCircle().createOrUpdate;
 
   const [newCircleDefinition, setNewCircleDefinition] = useState<CircleDefinition>(defaultValue);
 
