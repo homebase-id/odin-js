@@ -86,6 +86,7 @@ export const uploadCommunityMessage = async (
   files: NewMediaFile[] | undefined,
   linkPreviews: LinkPreview[] | undefined,
   referencedFile?: GlobalTransitIdFileIdentifier,
+  notificationRecipients?: string[],
   onVersionConflict?: () => void
 ) => {
   const communityId = community.fileMetadata.appData.uniqueId as string;
@@ -197,9 +198,9 @@ export const uploadCommunityMessage = async (
         tagId: message.fileMetadata.appData.uniqueId as string,
         typeId: communityId,
         peerSubscriptionId: communityId,
-        recipients: community.fileMetadata.appData.content.members.filter(
-          (recipient) => recipient !== identity
-        ),
+        recipients: (
+          notificationRecipients || community.fileMetadata.appData.content.members
+        ).filter((recipient) => recipient !== identity),
         silent: false,
       },
     };
@@ -229,9 +230,9 @@ export const uploadCommunityMessage = async (
           tagId: message.fileMetadata.appData.uniqueId as string,
           typeId: communityId,
           peerSubscriptionId: communityId,
-          recipients: community.fileMetadata.appData.content.members.filter(
-            (recipient) => recipient !== identity
-          ),
+          recipients: (
+            notificationRecipients || community.fileMetadata.appData.content.members
+          ).filter((recipient) => recipient !== identity),
           silent: false,
         },
       },

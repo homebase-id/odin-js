@@ -1,4 +1,4 @@
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { HomebaseFile, RichText } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
 import {
@@ -9,6 +9,7 @@ import { ReactNode, useEffect, useMemo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   ErrorNotification,
+  findMentionedInRichText,
   formatToDateAgoWithRelativeDetail,
   t,
   useDotYouClient,
@@ -27,6 +28,7 @@ export const CommunityHistory = ({
   alignTop,
   onlyNew,
   emptyPlaceholder,
+  setParticipants,
 }: {
   community: HomebaseFile<CommunityDefinition> | undefined;
   channel: HomebaseFile<CommunityChannel> | undefined;
@@ -36,6 +38,7 @@ export const CommunityHistory = ({
   alignTop?: boolean;
   onlyNew?: boolean;
   emptyPlaceholder?: ReactNode;
+  setParticipants?: React.Dispatch<React.SetStateAction<string[] | null | undefined>>;
 }) => {
   const identity = useDotYouClient().getIdentity();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -142,6 +145,21 @@ export const CommunityHistory = ({
     isFetchingNextPage,
     virtualizer.getVirtualItems(),
   ]);
+
+  useEffect(() => {
+    if (setParticipants && inAThread) {
+      const involvedAuthors = flattenedMsgs.map((msg) => msg.fileMetadata.originalAuthor);
+      const mentionedAuthors = flattenedMsgs
+        .map((msg) =>
+          Array.isArray(msg.fileMetadata.appData.content.message)
+            ? findMentionedInRichText(msg.fileMetadata.appData.content.message)
+            : []
+        )
+        .flat();
+
+      setParticipants(Array.from(new Set([...involvedAuthors, ...mentionedAuthors])) || []);
+    }
+  }, [flattenedMsgs, setParticipants]);
 
   if (emptyPlaceholder && isFetched && (!flattenedMsgs || flattenedMsgs.length === 0)) {
     return <>{emptyPlaceholder}</>;

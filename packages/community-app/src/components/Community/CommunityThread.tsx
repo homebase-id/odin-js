@@ -13,6 +13,7 @@ import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider
 import { CommunityChannel } from '../../providers/CommunityProvider';
 import { CommunityHistory } from './channel/CommunityHistory';
 import { MessageComposer } from './Message/MessageComposer';
+import { useState } from 'react';
 
 export const CommunityThread = ({
   community,
@@ -24,6 +25,7 @@ export const CommunityThread = ({
   threadId: string;
 }) => {
   const { odinKey, communityKey, channelKey } = useParams();
+  const [participants, setParticipants] = useState<string[] | null>();
 
   const { data: originMessage } = useCommunityMessage({
     odinId: community?.fileMetadata.senderOdinId,
@@ -69,6 +71,7 @@ export const CommunityThread = ({
             community={community}
             origin={originMessage}
             channel={channel}
+            setParticipants={setParticipants}
             alignTop={true}
           />
         )}
@@ -77,6 +80,7 @@ export const CommunityThread = ({
           <MessageComposer
             community={community}
             thread={originMessage || undefined}
+            threadParticipants={participants || undefined}
             channel={channel}
             key={threadId}
             className="mt-auto lg:mt-0"

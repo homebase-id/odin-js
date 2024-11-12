@@ -67,6 +67,7 @@ export const useCommunityMessage = (props?: {
     community,
     channel,
     thread,
+    threadParticipants,
     replyId,
     files,
     message,
@@ -77,6 +78,7 @@ export const useCommunityMessage = (props?: {
     community: HomebaseFile<CommunityDefinition>;
     channel: HomebaseFile<CommunityChannel>;
     thread?: HomebaseFile<CommunityMessage>;
+    threadParticipants?: string[];
     replyId?: string;
     files?: NewMediaFile[];
     message: RichText | string;
@@ -124,7 +126,8 @@ export const useCommunityMessage = (props?: {
             ),
             globalTransitId: thread.fileMetadata.globalTransitId,
           }
-        : undefined
+        : undefined,
+      threadParticipants
     );
     if (!uploadResult) throw new Error('Failed to send the chat message');
 
