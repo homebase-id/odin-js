@@ -107,6 +107,11 @@ export const useCommunityMetadata = (props?: {
           ['community-metadata', updatedMeta.fileMetadata.appData.content.communityId],
           updatedMeta
         );
+
+        if (!variables.metadata.fileId) {
+          // It's a new metadata file, so we need to invalidate the communities query
+          queryClient.invalidateQueries({ queryKey: ['communities'] });
+        }
       },
       onError: (error) => {
         console.error('Error saving community metadata', error);

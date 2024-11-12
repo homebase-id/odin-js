@@ -21,6 +21,7 @@ import {
   AppDriveAuthorizationParams,
   getExtendAppRegistrationParams,
 } from '@homebase-id/js-lib/auth';
+import { COMMUNITY_DEFAULT_GENERAL_ID } from '../../providers/CommunityProvider';
 
 type useCommunityProps = {
   odinId: string | undefined;
@@ -145,7 +146,7 @@ export const useCommunity = (props?: useCommunityProps) => {
   }: {
     communityDef: HomebaseFile<CommunityDefinition>;
   }) => {
-    return `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect${COMMUNITY_ROOT_PATH}/${communityDef.fileMetadata.senderOdinId}/${communityDef.fileMetadata.appData.uniqueId}`;
+    return `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect${COMMUNITY_ROOT_PATH}/${communityDef.fileMetadata.senderOdinId}/${communityDef.fileMetadata.appData.uniqueId}/${COMMUNITY_DEFAULT_GENERAL_ID}`;
   };
 
   const removeCommunity = async (communityDef: HomebaseFile<CommunityDefinition>) =>
