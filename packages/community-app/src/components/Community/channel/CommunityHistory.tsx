@@ -1,4 +1,4 @@
-import { HomebaseFile, RichText } from '@homebase-id/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
 import {
