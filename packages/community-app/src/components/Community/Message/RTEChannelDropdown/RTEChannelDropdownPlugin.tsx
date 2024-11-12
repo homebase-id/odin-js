@@ -54,10 +54,9 @@ export const ChannelPlugin = createPlatePlugin({
   extendEditor: withTriggerCombobox as any,
   node: { isElement: true, isInline: true, isMarkableVoid: true, isVoid: true },
   options: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    createComboboxInput: (trigger: any) => ({
+    createComboboxInput: () => ({
       children: [{ text: '' }],
-      trigger,
+      trigger: '#',
       type: ChannelInputPlugin.key,
     }),
     trigger: '#',
