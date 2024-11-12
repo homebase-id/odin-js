@@ -1,6 +1,6 @@
-import { BaseUploadInstructionSet } from '../../../dist';
 import { FileQueryParams, GetBatchQueryResultOptions } from '../../core/DriveData/Drive/DriveTypes';
 import {
+  BaseUploadInstructionSet,
   PriorityOptions,
   PushNotificationOptions,
   ScheduleOptions,
