@@ -113,17 +113,6 @@ export const drives = [
   },
 ];
 
-const circleDrives = [
-  {
-    // Chat Drive
-    a: '9ff813aff2d61e2f9b9db189e72d1a11',
-    t: '66ea8355ae4155c39b5a719166b510e3',
-    n: 'Chat Drive',
-    d: '',
-    p: DrivePermissionType.Write + DrivePermissionType.React,
-  },
-];
-
 export const permissions = [
   AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
   AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
@@ -151,8 +140,8 @@ export const useYouAuthAuthorization = () => {
       permissions,
       undefined,
       drives,
-      circleDrives,
-      [CONFIRMED_CONNECTIONS_CIRCLE_ID, AUTO_CONNECTIONS_CIRCLE_ID],
+      undefined,
+      undefined,
       eccKey.publicKey,
       undefined,
       undefined,
