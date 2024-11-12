@@ -38,6 +38,11 @@ const AUTH_PATH = COMMUNITY_ROOT_PATH + '/auth';
 const Auth = lazy(() => import('../templates/Auth/Auth'));
 const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
 
+const CommunityNotificationRedirect = lazy(() =>
+  import('../templates/Community/CommunityNotificationRedirect').then((communityApp) => ({
+    default: communityApp.CommunityNotificationRedirect,
+  }))
+);
 const CommunityHome = lazy(() =>
   import('../templates/Community/CommunityHome').then((communityApp) => ({
     default: communityApp.CommunityHome,
@@ -97,6 +102,10 @@ function App() {
           >
             <Route index={true} element={<CommunityHome />} />
             <Route path={'new'} element={<CommunityHome />} />
+            <Route
+              path={'redirect/:communityKey/:messageKey'}
+              element={<CommunityNotificationRedirect />}
+            />
             <Route
               path={':odinKey/:communityKey'}
               element={

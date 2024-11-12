@@ -185,7 +185,9 @@ self.addEventListener('notificationclick', (event) => {
       }
 
       if (event.notification?.data?.options?.appId === COMMUNITY_APP_ID) {
-        return { pathToOpen: `/apps/community/${event.notification?.data?.options?.typeId}` };
+        return {
+          pathToOpen: `/apps/community/redirect/${event.notification?.data?.options?.typeId}/${event.notification?.data?.options?.tagId}`,
+        };
       }
 
       const tagId = event.notification?.data?.options?.tagId;

@@ -154,7 +154,12 @@ export const useCommunityMessage = (props?: {
 
   return {
     get: useQuery({
-      queryKey: ['community-message', props?.communityId, props?.messageId],
+      queryKey: [
+        'community-message',
+        props?.communityId,
+        props?.messageId,
+        props?.fileSystemType?.toLowerCase() || 'standard',
+      ],
       queryFn: () =>
         getMessageByUniqueId(
           props?.odinId as string,
@@ -328,12 +333,19 @@ export const useCommunityMessage = (props?: {
         // Update chat message
         const existingMessage = queryClient.getQueryData<HomebaseFile<CommunityMessage>>([
           'community-message',
+          community.fileMetadata.appData.uniqueId,
           updatedChatMessage.fileMetadata.appData.uniqueId,
+          updatedChatMessage.fileSystemType.toLowerCase(),
         ]);
 
         if (existingMessage) {
           queryClient.setQueryData(
-            ['community-message', updatedChatMessage.fileMetadata.appData.uniqueId],
+            [
+              'community-message',
+              community.fileMetadata.appData.uniqueId,
+              updatedChatMessage.fileMetadata.appData.uniqueId,
+              updatedChatMessage.fileSystemType.toLowerCase(),
+            ],
             updatedChatMessage
           );
         }
@@ -353,7 +365,9 @@ export const useCommunityMessage = (props?: {
         queryClient.setQueryData(
           [
             'community-message',
-            formatGuidId(messageParams.updatedChatMessage.fileMetadata.appData.uniqueId),
+            messageParams.community.fileMetadata.appData.uniqueId,
+            messageParams.updatedChatMessage.fileMetadata.appData.uniqueId,
+            messageParams.updatedChatMessage.fileSystemType.toLowerCase(),
           ],
           context?.existingMessage
         );

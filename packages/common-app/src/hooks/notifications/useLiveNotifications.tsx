@@ -232,6 +232,6 @@ export const buildNotificationTargetLink = (payload: PushNotification) => {
       return `/apps/feed/preview/${payload.options.tagId}`;
     else return `/apps/feed`;
   } else if (payload.options.appId === COMMUNITY_APP_ID) {
-    return `/apps/community/${payload.options.typeId}`;
+    return `/apps/community/redirect/${payload.options.typeId}/${payload.options.tagId}`;
   }
 };
