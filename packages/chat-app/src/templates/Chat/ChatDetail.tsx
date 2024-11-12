@@ -10,7 +10,6 @@ import {
   OwnerImage,
   OwnerName,
   t,
-  useAutoConnection,
   useDotYouClient,
   useIntroductions,
   useIsConnected,
