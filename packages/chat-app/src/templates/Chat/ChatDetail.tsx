@@ -289,10 +289,6 @@ const GroupChatConnectedState = ({
 };
 
 const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
-  const { data: isUnconfirmed } = useAutoConnection({
-    odinId: recipient,
-  }).isUnconfirmedAutoConnected;
-
   const { data: isConnected, isFetched: isFetchedConnected } = useIsConnected(recipient);
   const host = useDotYouClient().getDotYouClient().getRoot();
 
@@ -315,23 +311,5 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
     );
   }
 
-  if (isUnconfirmed) {
-    return (
-      <div className="flex w-full flex-row items-center justify-between bg-page-background px-5 py-2">
-        <p>
-          {t('You were automatically connected to')}{' '}
-          <a
-            href={`${new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}`}
-            className="underline"
-          >
-            {recipient}
-          </a>{' '}
-          {t('because of an introduction. Would you like to confirm this connection?')}
-        </p>
-
-        <ActionLink href={`${host}/owner/connections/${recipient}`}>{t('Confirm')}</ActionLink>
-      </div>
-    );
-  }
   return null;
 };
