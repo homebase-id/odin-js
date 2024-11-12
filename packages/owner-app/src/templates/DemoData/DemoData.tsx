@@ -703,7 +703,7 @@ const CirclesAndConnections = ({ realmData }: { realmData: RealmData }) => {
   if (!('circles' in realmData)) return null;
 
   const { data: circles, isFetched: isCirclesFetched } = useCircles().fetch;
-  const { mutateAsync: createCircle } = useCircle({}).createOrUpdate;
+  const { mutateAsync: createCircle } = useCircle().createOrUpdate;
   const hasDemoCircles =
     isCirclesFetched &&
     circles?.some((existingCircle) =>
