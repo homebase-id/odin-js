@@ -62,35 +62,27 @@ export const CommunityChannelDetail = () => {
       <div className="h-full w-full flex-grow bg-background">
         <div className="relative flex h-full flex-row">
           <div className="flex h-full flex-grow flex-col overflow-hidden">
-            <CommunityChannelHeader community={community || undefined} channel={channelDsr} />
+            <CommunityChannelHeader community={community} channel={channelDsr} />
             <ErrorBoundary>
               <CommunityHistory
-                community={community || undefined}
-                channel={channelDsr || undefined}
+                community={community}
+                channel={channelDsr}
                 doOpenThread={(thread) =>
                   navigate(
                     `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
                   )
                 }
-                emptyPlaceholder={<EmptyChannel channel={channelDsr} />}
+                emptyPlaceholder={<EmptyChannel community={community} channel={channelDsr} />}
               />
             </ErrorBoundary>
             <ErrorBoundary>
-              <MessageComposer
-                community={community || undefined}
-                channel={channelDsr || undefined}
-                key={channelId}
-              />
+              <MessageComposer community={community} channel={channelDsr} key={channelId} />
             </ErrorBoundary>
           </div>
 
           {threadKey ? (
             <ErrorBoundary>
-              <CommunityThread
-                community={community || undefined}
-                channel={channelDsr || undefined}
-                threadId={threadKey}
-              />
+              <CommunityThread community={community} channel={channelDsr} threadId={threadKey} />
             </ErrorBoundary>
           ) : null}
         </div>
@@ -214,10 +206,19 @@ const ChannelInfo = ({
   return createPortal(dialog, target);
 };
 
-const EmptyChannel = ({ channel }: { channel: HomebaseFile<CommunityChannel> | undefined }) => {
+const EmptyChannel = ({
+  community,
+  channel,
+}: {
+  community: HomebaseFile<CommunityDefinition> | undefined;
+  channel: HomebaseFile<CommunityChannel> | undefined;
+}) => {
   const { odinKey, communityKey } = useParams();
 
-  if (!channel) return null;
+  if (!channel || !community) return null;
+
+  const creator = channel.fileMetadata.senderOdinId || community.fileMetadata.senderOdinId;
+
   return (
     <div className="flex h-full flex-grow flex-col-reverse">
       <div className="p-5">
@@ -226,11 +227,13 @@ const EmptyChannel = ({ channel }: { channel: HomebaseFile<CommunityChannel> | u
           className="text-primary hover:underline"
           to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/direct/${channel.fileMetadata.senderOdinId}`}
         >
-          @<AuthorName odinId={channel.fileMetadata.senderOdinId} excludeLink={true} />
+          @<AuthorName odinId={creator} excludeLink={true} />
         </Link>{' '}
         {t('created this channel on')}{' '}
-        {formatDateExludingYearIfCurrent(new Date(channel.fileMetadata.created))}
-        <p>{channel.fileMetadata.appData.content?.description}</p>
+        {formatDateExludingYearIfCurrent(
+          new Date(channel.fileMetadata.created || community.fileMetadata.created)
+        )}
+        <p className="italic text-slate-400">{channel.fileMetadata.appData.content?.description}</p>
       </div>
     </div>
   );

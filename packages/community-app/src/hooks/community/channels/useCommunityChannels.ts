@@ -2,7 +2,7 @@ import { QueryClient, useQuery } from '@tanstack/react-query';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { CommunityChannel, getCommunityChannels } from '../../../providers/CommunityProvider';
 import { DeletedHomebaseFile, HomebaseFile } from '@homebase-id/js-lib/core';
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { formatGuidId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const useCommunityChannels = (props: { odinId?: string; communityId?: string }) => {
   const { odinId, communityId } = props;
@@ -29,7 +29,7 @@ export const insertNewCommunityChannel = (
 ) => {
   const existingChannels = queryClient.getQueryData<HomebaseFile<CommunityChannel>[]>([
     'community-channels',
-    communityId,
+    formatGuidId(communityId),
   ]);
   if (!existingChannels) return;
 
@@ -43,7 +43,7 @@ export const insertNewCommunityChannel = (
 
   const newChannels =
     updatedChannel.fileState === 'active' ? [...allButThisOne, updatedChannel] : allButThisOne;
-  queryClient.setQueryData(['community-channels', communityId], newChannels);
+  queryClient.setQueryData(['community-channels', formatGuidId(communityId)], newChannels);
 };
 
 export const removeCommunityChannel = (

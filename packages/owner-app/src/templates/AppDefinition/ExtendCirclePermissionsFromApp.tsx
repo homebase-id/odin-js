@@ -43,7 +43,7 @@ export const ExtendCirclePermissionsFromApp = () => {
   const applicableCircles = circles?.filter((circle) =>
     circleIds?.some((circleId) => stringGuidsEqual(circleId, circle.id))
   );
-  const { mutateAsync: updateCircle, error: updateError } = useCircle({}).createOrUpdate;
+  const { mutateAsync: updateCircle, error: updateError } = useCircle().createOrUpdate;
 
   const doUpdateCirclePermissions = async () => {
     if (!appRegistration || !appRegistration?.appId) throw new Error('App registration not found');

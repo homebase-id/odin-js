@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, HomebaseFile } from '@homebase-id/js-lib/core';
 import { MailConversation, MailDrive } from '../../providers/MailProvider';
 import { AttachmentItem } from './MailAttachmentOverview';
 import {
@@ -33,14 +33,17 @@ export const MailAttachmentsInfo = ({
   const lastMessageContent = lastMessage.fileMetadata.appData.content;
 
   const allAttachmentsChronologically = mailThread.flatMap((conversation) =>
-    conversation.fileMetadata.payloads.map((payload) => ({
-      ...payload,
-      fileId: conversation.fileId,
-      conversationId: conversation.fileMetadata.appData.groupId as string,
-      created: conversation.fileMetadata.created,
-      sender:
-        conversation.fileMetadata.senderOdinId || conversation.fileMetadata.appData.content.sender,
-    }))
+    conversation.fileMetadata.payloads
+      .filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY)
+      .map((payload) => ({
+        ...payload,
+        fileId: conversation.fileId,
+        conversationId: conversation.fileMetadata.appData.groupId as string,
+        created: conversation.fileMetadata.created,
+        sender:
+          conversation.fileMetadata.senderOdinId ||
+          conversation.fileMetadata.appData.content.sender,
+      }))
   );
 
   const groupedWithFileName = allAttachmentsChronologically.reduce(

@@ -34,8 +34,17 @@ export interface OdinVideoProps {
 
 const MB = 1000000;
 export const OdinVideo = (videoProps: OdinVideoProps) => {
-  const { dotYouClient, odinId, targetDrive, fileId, globalTransitId, fileKey, className, onPlay } =
-    videoProps;
+  const {
+    dotYouClient,
+    odinId,
+    targetDrive,
+    fileId,
+    globalTransitId,
+    fileKey,
+    className,
+    onPlay,
+    systemFileType,
+  } = videoProps;
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isInView, setIsInView] = useState(false);
@@ -58,7 +67,8 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
     isInView ? fileId : undefined,
     globalTransitId,
     fileKey,
-    targetDrive
+    targetDrive,
+    systemFileType
   );
   const { metadata: videoMetaData, fileHeader } = data || {};
 
@@ -119,6 +129,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
       data-filekey={fileKey}
       data-playback={playback}
       data-probably-encrypted={videoProps.probablyEncrypted}
+      data-filesystem={systemFileType}
       playsInline={true}
       onPlaying={onPlay}
     >

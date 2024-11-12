@@ -1,6 +1,5 @@
 import { Icons } from '../../components/icons';
 
-import { InsertDropdownMenu } from './insert-dropdown-menu';
 import { MarkToolbarButton } from './mark-toolbar-button';
 import { ToolbarGroup } from './toolbar';
 import { TurnIntoDropdownMenu } from './turn-into-dropdown-menu';
@@ -16,6 +15,7 @@ import {
   CodePlugin,
 } from '@udecode/plate-basic-marks/react';
 import { HEADING_KEYS } from '@udecode/plate-heading';
+import { EmojiDropdownMenu } from './emoji-dropdown-menu/EmojiDropdownMenu';
 
 export function FixedToolbarButtons({
   disableHeadings,
@@ -36,11 +36,6 @@ export function FixedToolbarButtons({
       >
         <>
           <ToolbarGroup noSeparator>
-            {mediaOptions ? (
-              <InsertDropdownMenu
-                filterValues={disableHeadings ? [HEADING_KEYS.h1, HEADING_KEYS.h2] : undefined}
-              />
-            ) : null}
             <TurnIntoDropdownMenu
               filterValues={disableHeadings ? [HEADING_KEYS.h1, HEADING_KEYS.h2] : undefined}
             />
@@ -65,6 +60,7 @@ export function FixedToolbarButtons({
             </MarkToolbarButton>
             <LinkToolbarButton />
             {mediaOptions ? <ImageToolbarButton /> : null}
+            <EmojiDropdownMenu />
           </ToolbarGroup>
         </>
       </div>

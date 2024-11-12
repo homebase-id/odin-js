@@ -45,7 +45,7 @@ export const CircleMembershipDialog = ({
   const {
     provideGrant: { mutateAsync: provideGrant, error: errorProviderGrant },
     revokeGrant: { mutateAsync: revokeGrant, error: errorRevokeGrant },
-  } = useCircle({});
+  } = useCircle();
 
   const currentCircleGrantIds = currentCircleGrants.map((grant) => grant.circleId);
 
@@ -100,7 +100,7 @@ export const CircleDomainMembershipDialog = ({
   const {
     provideDomainGrant: { mutateAsync: provideGrant, error: errorProviderGrant },
     revokeDomainGrant: { mutateAsync: revokeGrant, error: errorRevokeGrant },
-  } = useCircle({});
+  } = useCircle();
 
   const currentCircleGrantIds = currentCircleGrants.map((grant) => grant.circleId);
 

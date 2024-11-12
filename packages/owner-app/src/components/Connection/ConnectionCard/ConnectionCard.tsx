@@ -1,7 +1,7 @@
 import { useContact } from '../../../hooks/contacts/useContact';
-import { LoadingBlock, t, useAutoConnection } from '@homebase-id/common-app';
+import { LoadingBlock, t, useAutoConnection, useConnection } from '@homebase-id/common-app';
 import PersonCard, { PersonCardProps } from '../PersonCard/PersonCard';
-import { Exclamation } from '@homebase-id/common-app/icons';
+import { Question } from '@homebase-id/common-app/icons';
 
 const ConnectionCard = (props: PersonCardProps) => {
   const { data: contactData, isLoading } = useContact({
@@ -9,13 +9,20 @@ const ConnectionCard = (props: PersonCardProps) => {
     canSave: props.canSave,
   }).fetch;
   const nameData = contactData?.fileMetadata.appData.content?.name;
-  const fullName = nameData
-    ? (nameData.displayName ?? `${nameData.givenName ?? ''} ${nameData.surname ?? ''}`)
-    : props.odinId;
+  const fullName =
+    nameData &&
+    (nameData.displayName ??
+      (nameData.givenName || nameData.surname
+        ? `${nameData.givenName ?? ''} ${nameData.surname ?? ''}`
+        : undefined));
 
   const {
     isUnconfirmedAutoConnected: { data: isUnconfirmedAutoConnection },
   } = useAutoConnection({ odinId: props.odinId });
+
+  const { data: connectionInfo } = useConnection({
+    odinId: isUnconfirmedAutoConnection ? props.odinId : undefined,
+  }).fetch;
 
   if (isLoading) return <LoadingBlock className={`aspect-[3/5] ${props.className}`} />;
 
@@ -33,14 +40,19 @@ const ConnectionCard = (props: PersonCardProps) => {
           ) : (
             ''
           )}
+          {isUnconfirmedAutoConnection && connectionInfo?.introducerOdinId ? (
+            <p className="text-sm text-slate-400">
+              {t('Introduced by')} {connectionInfo.introducerOdinId}
+            </p>
+          ) : null}
         </h2>
         {props.children}
         {isUnconfirmedAutoConnection ? (
           <div
-            className="absolute left-3 top-3 rounded-full bg-background p-[0.2rem] text-orange-400"
+            className="absolute left-3 top-3 rounded-full bg-background p-[0.2rem] text-blue-400"
             title={t('Unconfirmed connection')}
           >
-            <Exclamation className="h-5 w-5" />
+            <Question className="h-5 w-5" />
           </div>
         ) : null}
       </PersonCard>

@@ -89,6 +89,7 @@ export const CommunityMediaGallery = ({
 
   const payload = msg.fileMetadata.payloads.find((p) => p.key === mediaKey);
   const contentType = payload?.contentType;
+
   const dialog = (
     <div className="fixed inset-0 z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
       <div className="inset-0 bg-black transition-opacity lg:fixed"></div>
