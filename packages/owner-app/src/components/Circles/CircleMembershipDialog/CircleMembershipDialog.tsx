@@ -8,6 +8,8 @@ import {
   ActionButton,
   CircleSelector,
   DialogWrapper,
+  useAutoConnection,
+  Alert,
 } from '@homebase-id/common-app';
 import { Arrow } from '@homebase-id/common-app/icons';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
@@ -15,7 +17,6 @@ import { CircleGrant } from '@homebase-id/js-lib/network';
 
 interface InnerCircleSelectionDialogProps {
   title: string;
-  isOpen: boolean;
 
   currentCircleGrantIds: string[];
   error: unknown;
@@ -47,12 +48,27 @@ export const CircleMembershipDialog = ({
     revokeGrant: { mutateAsync: revokeGrant, error: errorRevokeGrant },
   } = useCircle();
 
+  const { data: isUnconfirmed } = useAutoConnection({ odinId }).isUnconfirmedAutoConnected;
+
   const currentCircleGrantIds = currentCircleGrants.map((grant) => grant.circleId);
+
+  if (!isOpen) return null;
+
+  if (isUnconfirmed) {
+    return (
+      <DialogWrapper title={title} onClose={onCancel}>
+        <Alert type="warning">
+          {t(
+            'You cannot add an identity to any circles while they are uncofirmed. Please confirm the connection first.'
+          )}
+        </Alert>
+      </DialogWrapper>
+    );
+  }
 
   return (
     <InnerCircleSelectionDialog
       title={title}
-      isOpen={isOpen}
       error={errorProviderGrant || errorRevokeGrant}
       onCancel={onCancel}
       currentCircleGrantIds={currentCircleGrantIds}
@@ -104,10 +120,13 @@ export const CircleDomainMembershipDialog = ({
 
   const currentCircleGrantIds = currentCircleGrants.map((grant) => grant.circleId);
 
+  if (!isOpen) {
+    return null;
+  }
+
   return (
     <InnerCircleSelectionDialog
       title={title}
-      isOpen={isOpen}
       error={errorProviderGrant || errorRevokeGrant}
       onCancel={onCancel}
       currentCircleGrantIds={currentCircleGrantIds}
@@ -136,7 +155,6 @@ export const CircleDomainMembershipDialog = ({
 
 const InnerCircleSelectionDialog = ({
   title,
-  isOpen,
 
   currentCircleGrantIds,
   error,
@@ -151,10 +169,6 @@ const InnerCircleSelectionDialog = ({
   useEffect(() => {
     setNewGrantIds(currentCircleGrantIds);
   }, [currentCircleGrantIds]);
-
-  if (!isOpen) {
-    return null;
-  }
 
   const dialog = (
     <DialogWrapper title={title}>

@@ -15,6 +15,7 @@ export const ConnectedDetailsSettings = ({
   const { action } = useParams();
   const isEditPermissionActive = action === 'circles';
   const navigate = useNavigate();
+
   const { data: grantStatus } = useConnectionGrantStatus({
     odinId: connectionInfo?.status === 'connected' ? odinId : undefined,
   }).fetchStatus;
