@@ -10,9 +10,12 @@ import {
   ActionButton,
   useDotYouClient,
   COMMUNITY_ROOT_PATH,
+  useCircle,
+  ActionLink,
+  OWNER_ROOT,
 } from '@homebase-id/common-app';
 import { createPortal } from 'react-dom';
-import { Clipboard } from '@homebase-id/common-app/icons';
+import { Circles, Clipboard } from '@homebase-id/common-app/icons';
 import { useState } from 'react';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
@@ -22,6 +25,7 @@ export const CommunityInfoDialog = ({ onClose }: { onClose: () => void }) => {
   const { data: community } = useCommunity({ odinId: odinKey, communityId: communityKey }).fetch;
 
   const identity = useDotYouClient().getIdentity();
+  const isCommunityOwner = community?.fileMetadata?.senderOdinId === identity;
 
   const target = usePortal('modal-container');
 
@@ -69,13 +73,34 @@ export const CommunityInfoDialog = ({ onClose }: { onClose: () => void }) => {
                       <p className="text-slate-400">{recipient}</p>
                     </div>
                   </Link>
-                  {recipient !== identity ? (
-                    <InviteClickToCopy community={community} className="hidden sm:block" />
-                  ) : null}
                 </div>
               );
             })}
           </div>
+        </div>
+
+        {members.length > 1 ? (
+          <div>
+            <InviteClickToCopy community={community} className="mb-1 mt-2" />
+            <p className="text-sm text-slate-400">
+              {t(
+                'This link only works for people that are already a member of the community. To add new members they first need to receive access to the community.'
+              )}
+            </p>
+          </div>
+        ) : null}
+
+        <div>
+          {isCommunityOwner ? (
+            <>
+              <CircleLink community={community} className="mb-1 mt-2" />
+              <p className="text-sm text-slate-400">
+                {t(
+                  'A community is directly linked to a circle. To add new members to the community, you have to add them into the circle.'
+                )}
+              </p>
+            </>
+          ) : null}
         </div>
       </div>
     </DialogWrapper>
@@ -108,10 +133,11 @@ const InviteClickToCopy = ({
     <ActionButton
       className={`relative cursor-pointer ${className || ''}`}
       type="mute"
+      size="none"
       onClick={doCopy}
     >
       <span className="flex flex-row items-center gap-2">
-        {t('Copy invite link')}
+        {t('Copy member link')}
 
         <Clipboard className="h-5 w-5" />
       </span>
@@ -123,5 +149,30 @@ const InviteClickToCopy = ({
         </div>
       )}
     </ActionButton>
+  );
+};
+
+const CircleLink = ({
+  community,
+  className,
+}: {
+  community: HomebaseFile<CommunityDefinition>;
+  className?: string;
+}) => {
+  const communityCircleId = community.fileMetadata.appData.content.acl.circleIdList?.[0];
+
+  const { data: circle } = useCircle({ circleId: communityCircleId }).fetch;
+  if (!communityCircleId || !circle) return null;
+
+  return (
+    <ActionLink
+      className={`${className || ''}`}
+      href={`${OWNER_ROOT}/circles/${communityCircleId}`}
+      type="mute"
+      size="none"
+      icon={Circles}
+    >
+      {t('Manage circle')}
+    </ActionLink>
   );
 };
