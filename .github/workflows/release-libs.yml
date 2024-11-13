@@ -7,8 +7,8 @@ on:
     branches:
       - 'main'
     paths:
-      - 'packages/js-lib/src/**'
-      - 'packages/ui-lib/src/**'
+      - 'packages/libs/js-lib/src/**'
+      - 'packages/libs/ui-lib/src/**'
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -21,9 +21,9 @@ jobs:
         with:
           filters: |
             jslib:
-              - 'packages/js-lib/src/**'
+              - 'packages/libs/js-lib/src/**'
             uilib:
-              - 'packages/ui-lib/src/**'
+              - 'packages/libs/ui-lib/src/**'
 
       - uses: actions/setup-node@v4
         with:
@@ -43,7 +43,7 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          npm version prerelease --w ./packages/js-lib
+          npm version prerelease --w ./packages/libs/js-lib
 
       # Set git User & Bump the version: https://docs.npmjs.com/cli/v8/commands/npm-version
       - name: Bump ui-lib version
@@ -51,28 +51,28 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          npm version prerelease --w ./packages/ui-lib
+          npm version prerelease --w ./packages/libs/ui-lib
 
       - run: npm ci
 
       - name: Build JS Lib
-        run: npm run build --w ./packages/js-lib
+        run: npm run build --w ./packages/libs/js-lib
 
       - name: Test JS Lib
-        run: npm run test -w ./packages/js-lib
+        run: npm run test -w ./packages/libs/js-lib
 
       - name: Publish JS Lib
         if: steps.filter.outputs.jslib == 'true'
-        run: npm publish --w ./packages/js-lib
+        run: npm publish --w ./packages/libs/js-lib
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build UI Lib
-        run: npm run build --w ./packages/ui-lib
+        run: npm run build --w ./packages/libs/ui-lib
 
       - name: Publish UI Lib
         if: steps.filter.outputs.uilib == 'true'
-        run: npm publish --w ./packages/ui-lib
+        run: npm publish --w ./packages/libs/ui-lib
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
