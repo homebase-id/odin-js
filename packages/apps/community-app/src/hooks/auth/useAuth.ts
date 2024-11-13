@@ -15,11 +15,7 @@ import {
   throwAwayTheECCKey,
 } from '@homebase-id/js-lib/auth';
 import { REACT_QUERY_CACHE_KEY } from '../../app/App';
-import {
-  AppPermissionType,
-  AUTO_CONNECTIONS_CIRCLE_ID,
-  CONFIRMED_CONNECTIONS_CIRCLE_ID,
-} from '@homebase-id/js-lib/network';
+import { AppPermissionType } from '@homebase-id/js-lib/network';
 import {
   APP_AUTH_TOKEN,
   APP_SHARED_SECRET,
