@@ -10,9 +10,9 @@ import { Smile } from 'lucide-react';
 
 import { ToolbarButton } from '../toolbar';
 import { EmojiToolbarDropdown } from './emoji-toolbar-dropdown';
-import { EmojiPicker } from '../../../../../common-app/src';
 import { insertEmoji } from '@udecode/plate-emoji';
 import { useEditorRef, useEventPlateId } from '@udecode/plate-core/react';
+import { EmojiPicker } from '@homebase-id/common-app';
 
 type EmojiDropdownMenuProps = {
   options?: EmojiDropdownMenuOptions;

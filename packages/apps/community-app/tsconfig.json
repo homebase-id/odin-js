@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "useDefineForClassFields": true,
     "allowJs": false,
@@ -12,6 +12,6 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "jsx": "react-jsx"
   },
-  "include": ["src", "../../common-app/src"],
+  "include": ["src", "../../common/common-app/src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
