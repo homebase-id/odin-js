@@ -8,7 +8,7 @@ import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import { CircleGrant } from '@homebase-id/js-lib/network';
 import { useDomainClients } from '../../../hooks/connections/useDomainClients';
-import { DomainClient } from '../../../provider/network/domainNetwork/DomainProvider';
+import { DomainClient } from '../../../provider/network/domainNetwork/DomainManager';
 import { getUniqueDrivesWithHighestPermission } from '@homebase-id/js-lib/helpers';
 import { CircleDomainMembershipDialog } from '../../../components/Circles/CircleMembershipDialog/CircleMembershipDialog';
 import {

@@ -3,7 +3,7 @@ import Submenu from '../../../components/SubMenu/SubMenu';
 import { useState, useEffect } from 'react';
 import Section from '../../../components/ui/Sections/Section';
 import { useDomain } from '../../../hooks/connections/useDomain';
-import { DomainMembership } from '../../../provider/network/domainNetwork/DomainProvider';
+import { DomainMembership } from '@homebase-id/common-app';
 import { CompanyImage } from '../../../components/Connection/CompanyImage/CompanyImage';
 import {
   useDomains,

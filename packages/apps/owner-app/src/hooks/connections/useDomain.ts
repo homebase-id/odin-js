@@ -6,7 +6,7 @@ import {
   getDomainInfo,
   restoreDomainAccess,
   revokeDomainAccess,
-} from '../../provider/network/domainNetwork/DomainProvider';
+} from '../../provider/network/domainNetwork/DomainManager';
 
 export const useDomain = ({ domain }: { domain?: string }) => {
   const queryClient = useQueryClient();

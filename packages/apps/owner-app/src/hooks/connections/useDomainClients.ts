@@ -3,7 +3,7 @@ import { useAuth } from '../auth/useAuth';
 import {
   getDomainClients,
   removeDomainClient,
-} from '../../provider/network/domainNetwork/DomainProvider';
+} from '../../provider/network/domainNetwork/DomainManager';
 
 export const useDomainClients = ({ domain }: { domain?: string }) => {
   const dotYouClient = useAuth().getDotYouClient();

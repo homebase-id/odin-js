@@ -62,6 +62,5 @@ export const logoutOwnerAndAllApps = async (): Promise<void> => {
 
 const removeCurrentRegisteredDevice = async (dotYouClient: DotYouClient) => {
   const axiosClient = dotYouClient.createAxiosClient();
-
   return await axiosClient.post(`/notify/push/unsubscribe/`);
 };
