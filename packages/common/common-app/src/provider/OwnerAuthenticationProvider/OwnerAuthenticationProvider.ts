@@ -1,6 +1,5 @@
-import { ApiType } from '@homebase-id/js-lib/core';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { OwnerClient } from '../../core/OwnerClient';
-import { removeCurrentRegisteredDevice } from '../../../../owner-app/src/provider/notifications/PushClientProvider';
 
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidOwnerToken = async (): Promise<boolean> => {
@@ -59,4 +58,10 @@ export const logoutOwnerAndAllApps = async (): Promise<void> => {
   indexedDB.deleteDatabase(`keyval-store`);
 
   window.location.href = '/owner/login';
+};
+
+const removeCurrentRegisteredDevice = async (dotYouClient: DotYouClient) => {
+  const axiosClient = dotYouClient.createAxiosClient();
+
+  return await axiosClient.post(`/notify/push/unsubscribe/`);
 };

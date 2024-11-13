@@ -14,8 +14,8 @@ export default defineConfig({
   server: {
     ...hostConfig,
     https: {
-      key: fs.readFileSync('../../dev-dotyou-cloud.key'),
-      cert: fs.readFileSync('../../dev-dotyou-cloud.crt'),
+      key: fs.readFileSync('../../../dev-dotyou-cloud.key'),
+      cert: fs.readFileSync('../../../dev-dotyou-cloud.crt'),
     },
     fs: {
       // Allow serving files from one level up to the project root

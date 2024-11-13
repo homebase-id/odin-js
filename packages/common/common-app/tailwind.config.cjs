@@ -1,5 +1,4 @@
 /** @type {import('tailwindcss').Config} */
-// eslint-disable-next-line no-undef
 
 // We only add this to support intellisense in VSCode within the common-app project
 module.exports = {

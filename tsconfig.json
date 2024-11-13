@@ -2,16 +2,16 @@
   "files": [],
   "references": [
     {
-      "path": "./packages/js-lib"
+      "path": "./packages/libs/js-lib"
     },
     {
-      "path": "./packages/ui-lib"
+      "path": "./packages/libs/ui-lib"
     },
     {
-      "path": "./packages/owner-app"
+      "path": "./packages/apps/owner-app"
     },
     {
-      "path": "./packages/public-app"
+      "path": "./packages/apps/public-app"
     }
   ]
 }

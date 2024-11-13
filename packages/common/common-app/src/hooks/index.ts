@@ -1,4 +1,3 @@
-export * from '../../../owner-app/src/hooks/connections/useDomains';
 export * from './auth/useDotYouClient';
 export * from './auth/useDotYouClientContext';
 export * from './checkIdentity/useCheckIdentity';
@@ -11,6 +10,7 @@ export * from './connections/useExternalOdinId';
 export * from './connections/useIsConnected';
 export * from './connections/useConnection';
 export * from './connections/useAutoConnection';
+export * from './connections/useDomains';
 export * from './darkMode/useDarkMode';
 export * from './debounce/useDebounce';
 export * from './doubleClick/useDoubleTap';

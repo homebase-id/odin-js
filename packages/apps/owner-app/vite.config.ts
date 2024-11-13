@@ -32,8 +32,8 @@ export default defineConfig({
   server: {
     ...hostConfig,
     https: {
-      key: fs.readFileSync('../../dev-dotyou-cloud.key'),
-      cert: fs.readFileSync('../../dev-dotyou-cloud.crt'),
+      key: fs.readFileSync('../../../dev-dotyou-cloud.key'),
+      cert: fs.readFileSync('../../../dev-dotyou-cloud.crt'),
     },
     fs: {
       // Allow serving files from one level up to the project root
@@ -51,7 +51,6 @@ export default defineConfig({
         warn(warning);
       },
       onLog(level, log, handler) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (
           log.cause &&
           (log.cause as any)?.message === `Can't resolve original location of error.`
