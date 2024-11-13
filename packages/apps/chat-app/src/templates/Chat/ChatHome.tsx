@@ -66,14 +66,14 @@ const ChatSideNav = ({ isOnline }: { isOnline: boolean }) => {
   const rootChatMatch = useMatch({ path: CHAT_ROOT_PATH });
   const isRoot = !!rootChatMatch;
 
-  const isActive = isCreateNew || isCreateNewGroup || isRoot;
+  const isActive = isCreateNew || isCreateNewGroup || isEditConversation || isRoot;
 
   return (
     <>
       <Sidenav disablePinning={true} hideMobileDrawer={!isRoot} />
       <div
         className={`${isActive ? 'translate-x-full' : 'translate-x-0'} ${
-          isCreateNew || isCreateNewGroup ? '' : 'pb-14'
+          isCreateNew || isCreateNewGroup || isEditConversation ? '' : 'pb-14'
         } fixed bottom-0 left-[-100%] top-0 z-10 flex h-[100dvh] w-full flex-shrink-0 flex-col border-r bg-page-background transition-transform dark:border-r-slate-800 md:pl-[calc(env(safe-area-inset-left)+4.3rem)] lg:static lg:max-w-sm lg:translate-x-0 lg:pb-0 lg:pl-0`}
       >
         <ErrorBoundary>
