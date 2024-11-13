@@ -242,7 +242,7 @@ InlineComboboxInput.displayName = 'InlineComboboxInput';
 const InlineComboboxContent: typeof ComboboxPopover = ({ className, ...props }) => {
   // Portal prevents CSS from leaking into popover
   return (
-    <Portal>
+    <Portal style={{ zIndex: 40, position: 'relative' }}>
       <ComboboxPopover
         className={cn(
           'z-[500] max-h-[288px] w-[300px] overflow-y-auto rounded-md bg-white shadow-md dark:bg-slate-800',
@@ -255,7 +255,7 @@ const InlineComboboxContent: typeof ComboboxPopover = ({ className, ...props }) 
 };
 
 const comboboxItemVariants = cva(
-  'relative flex h-9 select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none',
+  'relative flex z-10 h-9 select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none',
   {
     defaultVariants: {
       interactive: true,

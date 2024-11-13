@@ -31,6 +31,7 @@ import { useConversationMetadata } from '@homebase-id/chat-app/src/hooks/chat/us
 import { useChatMessages } from '@homebase-id/chat-app/src/hooks/chat/useChatMessages';
 import { ChatMessage } from '@homebase-id/chat-app/src/providers/ChatProvider';
 import { ConversationWithYourselfId } from '@homebase-id/chat-app/src/providers/ConversationProvider';
+import { useCommunityMessages } from '../../hooks/community/messages/useCommunityMessages';
 
 const maxChannels = 7;
 export const CommunityChannelNav = () => {
@@ -216,13 +217,17 @@ const ChannelItem = ({
   const isPinned =
     channelId && metadata?.fileMetadata.appData.content?.pinnedChannels?.includes(channelId);
 
+  const { data: messages } = useCommunityMessages({ odinId, communityId, channelId }).all;
+
+  const lastMessage = messages?.pages?.flatMap((page) => page?.searchResults)?.[0];
+
   const hasUnreadMessages =
     channelId &&
     metadata &&
-    channel.lastMessage?.fileMetadata.created &&
+    lastMessage?.fileMetadata.created &&
     (metadata?.fileMetadata.appData.content?.channelLastReadTime[channelId] || 0) <
-      channel.lastMessage?.fileMetadata.created &&
-    channel.lastMessage.fileMetadata.senderOdinId !== identity;
+      lastMessage?.fileMetadata.created &&
+    lastMessage.fileMetadata.senderOdinId !== identity;
 
   return (
     <Link
