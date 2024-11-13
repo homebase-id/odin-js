@@ -6,7 +6,7 @@ on:
     branches:
       - 'main'
     paths:
-      - 'packages/login-app/src/**'
+      - 'packages/apps/login-app/src/**'
 
 jobs:
   deploy:
@@ -30,7 +30,7 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run build -w packages/login-app
+      - run: npm run build -w packages/apps/login-app
 
       - name: Publish to Netlify
         uses: netlify/actions/cli@master
