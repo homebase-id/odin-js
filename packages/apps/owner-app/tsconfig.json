@@ -12,7 +12,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "jsx": "react-jsx"
   },
-  "include": ["src", "../../common/common-app/src"],
+  "include": ["src", "../../../common/common-app/src"],
   "exclude": ["src/sw.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

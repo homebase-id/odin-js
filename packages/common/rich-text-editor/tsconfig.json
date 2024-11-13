@@ -13,6 +13,6 @@
     "jsx": "react-jsx",
     "baseUrl": "."
   },
-  "include": ["src", "../../common/common-app/src"],
+  "include": ["src", "../../../common/common-app/src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
