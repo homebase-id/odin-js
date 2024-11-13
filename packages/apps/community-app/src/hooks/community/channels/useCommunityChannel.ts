@@ -7,7 +7,7 @@ import {
 } from '../../../providers/CommunityProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
-import { stringGuidsEqual, toGuidId } from '@homebase-id/js-lib/helpers';
+import { formatGuidId, stringGuidsEqual, toGuidId } from '@homebase-id/js-lib/helpers';
 import { useCommunityChannels } from './useCommunityChannels';
 
 export const useCommunityChannel = (props?: {
@@ -51,7 +51,7 @@ export const useCommunityChannel = (props?: {
         const newChannel: NewHomebaseFile<CommunityChannel> = {
           fileMetadata: {
             appData: {
-              uniqueId: toGuidId(channelName),
+              uniqueId: formatGuidId(toGuidId(channelName)),
               content: {
                 title: channelName,
                 description: '',
