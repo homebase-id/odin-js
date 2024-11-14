@@ -13,7 +13,6 @@ import {
   KeyHeader,
   UploadResult,
   AppFileMetaData,
-  uploadHeader,
   getFileHeaderByUniqueId,
   FileQueryParams,
   GetBatchQueryResultOptions,
@@ -22,13 +21,13 @@ import {
   queryBatch,
   deleteFile,
   RichText,
-  UpdateHeaderInstructionSet,
   TransferUploadStatus,
   SystemFileType,
   GlobalTransitIdFileIdentifier,
   DEFAULT_PAYLOAD_KEY,
-  AppendInstructionSet,
-  appendDataToFile,
+  patchFile,
+  UpdateInstructionSet,
+  UpdateResult,
 } from '@homebase-id/js-lib/core';
 import {
   jsonStringify64,
@@ -262,7 +261,7 @@ export const uploadCommunityMessage = async (
     await updateCommunityMessage(
       dotYouClient,
       community,
-      message,
+      message as HomebaseFile<CommunityMessage>,
       'keyHeader' in uploadResult ? uploadResult.keyHeader : undefined
     );
   }
@@ -276,21 +275,12 @@ export const uploadCommunityMessage = async (
 export const updateCommunityMessage = async (
   dotYouClient: DotYouClient,
   community: HomebaseFile<CommunityDefinition>,
-  message: HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage>,
+  message: HomebaseFile<CommunityMessage>,
   keyHeader?: KeyHeader
-): Promise<UploadResult | void> => {
+): Promise<void | UploadResult | UpdateResult> => {
   const communityId = community.fileMetadata.appData.uniqueId as string;
   const targetDrive = getTargetDriveFromCommunityId(communityId);
   const messageContent = message.fileMetadata.appData.content;
-
-  const uploadInstructions: UpdateHeaderInstructionSet = {
-    storageOptions: {
-      drive: targetDrive,
-      overwriteFileId: message.fileId,
-    },
-    systemFileType: message.fileSystemType,
-    storageIntent: 'header',
-  };
 
   const payloadJson: string = jsonStringify64({ ...messageContent });
   const payloadBytes = stringToUint8Array(payloadJson);
@@ -300,7 +290,7 @@ export const updateCommunityMessage = async (
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
-    allowDistribution: false,
+    allowDistribution: true,
     appData: {
       uniqueId: message.fileMetadata.appData.uniqueId,
       groupId: message.fileMetadata.appData.groupId,
@@ -317,44 +307,47 @@ export const updateCommunityMessage = async (
       },
   };
 
-  if (community.fileMetadata.senderOdinId !== dotYouClient.getIdentity()) {
-    throw new Error('Not implemented exception');
-  }
-
-  if (!shouldEmbedContent) {
-    const appendInstructionSet: AppendInstructionSet = {
-      targetFile: {
-        fileId: message.fileId as string,
-        targetDrive: targetDrive,
-      },
-      versionTag: message.fileMetadata.versionTag,
-      storageIntent: 'append',
-    };
-
-    const newVersionTag = (
-      await appendDataToFile(
-        dotYouClient,
-        keyHeader || message.sharedSecretEncryptedKeyHeader,
-        appendInstructionSet,
-        [
-          {
-            key: DEFAULT_PAYLOAD_KEY,
-            payload: new Blob([payloadBytes], { type: 'application/json' }),
-            iv: getRandom16ByteArray(),
+  const encryptedKeyHeader = message.sharedSecretEncryptedKeyHeader;
+  const odinId = community.fileMetadata.senderOdinId;
+  const instructionSet: UpdateInstructionSet =
+    odinId && odinId !== dotYouClient.getIdentity()
+      ? {
+          transferIv: getRandom16ByteArray(),
+          locale: 'peer',
+          file: {
+            globalTransitId: message.fileMetadata.globalTransitId as string,
+            targetDrive,
           },
-        ],
-        undefined
-      )
-    )?.newVersionTag;
+          versionTag: message.fileMetadata.versionTag,
+          recipients: [odinId],
+        }
+      : {
+          transferIv: getRandom16ByteArray(),
+          locale: 'local',
+          file: {
+            fileId: message.fileId,
+            targetDrive,
+          },
+          versionTag: message.fileMetadata.versionTag,
+        };
 
-    uploadMetadata.versionTag = newVersionTag;
+  const payloads: PayloadFile[] = [];
+  if (!shouldEmbedContent) {
+    payloads.push({
+      key: DEFAULT_PAYLOAD_KEY,
+      payload: new Blob([payloadBytes], { type: 'application/json' }),
+      iv: getRandom16ByteArray(),
+    });
   }
 
-  return await uploadHeader(
+  const updateResult = await patchFile(
     dotYouClient,
-    keyHeader || (message as HomebaseFile<CommunityMessage>).sharedSecretEncryptedKeyHeader,
-    uploadInstructions,
+    encryptedKeyHeader,
+    instructionSet,
     uploadMetadata,
+    payloads,
+    undefined,
+    undefined,
     async () => {
       const existingChatMessage = await getCommunityMessage(
         dotYouClient,
@@ -367,6 +360,8 @@ export const updateCommunityMessage = async (
       return await updateCommunityMessage(dotYouClient, community, message, keyHeader);
     }
   );
+
+  return updateResult;
 };
 
 export const hardDeleteCommunityMessage = async (

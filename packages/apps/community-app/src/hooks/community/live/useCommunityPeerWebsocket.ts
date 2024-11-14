@@ -183,6 +183,7 @@ const wsDsrToMessage = async (
 
   return {
     ...dsr,
+    sharedSecretEncryptedKeyHeader: keyHeader as unknown as EncryptedKeyHeader,
     fileMetadata: {
       ...fileMetadata,
       appData: {
