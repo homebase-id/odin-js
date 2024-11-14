@@ -61,39 +61,48 @@ export const EditCommunityMessage = ({
   }, [updateStatus]);
 
   const dialog = (
-    <DialogWrapper onClose={onClose} title={t('Edit message')} isSidePanel={false}>
+    <DialogWrapper
+      onClose={onClose}
+      title={t('Edit message')}
+      isSidePanel={false}
+      size="2xlarge"
+      isPaddingLess={true}
+    >
       <ErrorNotification error={updateError} />
       <RichTextEditor
         placeholder="Your message"
         defaultValue={message}
-        className="w-full rounded-md border bg-background p-2 dark:border-slate-800"
+        className="min-h-[10rem] w-full border bg-background p-2 dark:border-slate-800"
         contentClassName="max-h-[50vh] overflow-auto"
         onChange={(e) => setMessage(e.target.value)}
         autoFocus={!isTouchDevice()}
         onSubmit={isTouchDevice() ? undefined : doSend}
       />
-      <div className="mt-4 flex flex-row-reverse gap-2">
-        <ActionButton
-          type="primary"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            doSend();
-          }}
-          state={updateStatus}
-          size="square"
-          onMouseDown={(e) => e.preventDefault()}
-        >
-          {t('Save')}
-        </ActionButton>
-        <ActionButton
-          type="mute"
-          onClick={onClose}
-          size="square"
-          onMouseDown={(e) => e.preventDefault()}
-        >
-          {t('Cancel')}
-        </ActionButton>
+
+      <div className="mt-4 px-2 pb-4">
+        <div className="flex flex-row-reverse gap-2">
+          <ActionButton
+            type="primary"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              doSend();
+            }}
+            state={updateStatus}
+            size="square"
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            {t('Save')}
+          </ActionButton>
+          <ActionButton
+            type="mute"
+            onClick={onClose}
+            size="square"
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            {t('Cancel')}
+          </ActionButton>
+        </div>
       </div>
     </DialogWrapper>
   );
