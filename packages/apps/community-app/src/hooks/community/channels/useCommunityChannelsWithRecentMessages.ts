@@ -68,7 +68,7 @@ export const useCommunityChannelsWithRecentMessages = (props: {
         updatedAt: Date.now(),
       });
     })();
-  }, [lastUpdate, channels]);
+  }, [props, lastUpdate, channels]);
 
   return {
     // We only setup a cache entry that we will fill up with the setQueryData later; So we can cache the data for offline and faster startup;

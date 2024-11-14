@@ -28,6 +28,7 @@ export const CommunityCatchup = memo(() => {
   }).single;
 
   const { data: channels } = useCommunityChannelsWithRecentMessages({
+    odinId: odinKey,
     communityId: communityId,
   }).fetch;
 
