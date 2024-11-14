@@ -119,14 +119,12 @@ export const deleteAllChatMessages = async (dotYouClient: DotYouClient, conversa
 };
 
 export const getChatMessage = async (dotYouClient: DotYouClient, chatMessageId: string) => {
-  const fileHeader = await getFileHeaderByUniqueId<ChatMessage>(
-    dotYouClient,
-    ChatDrive,
-    chatMessageId
-  );
+  const fileHeader = await getFileHeaderByUniqueId<string>(dotYouClient, ChatDrive, chatMessageId, {
+    decrypt: false,
+  });
   if (!fileHeader) return null;
 
-  return fileHeader;
+  return await dsrToMessage(dotYouClient, fileHeader, ChatDrive, true);
 };
 
 export const dsrToMessage = async (

@@ -203,6 +203,7 @@ export const Subscribe = async (
   }
 
   activeSs = sharedSecret;
+  if (subscribers.some((subscriber) => subscriber.handler === handler)) return;
   subscribers.push({ handler, onDisconnect, onReconnect });
 
   if (isDebug) console.debug(`[WebsocketProvider] New subscriber (${subscribers.length})`, refId);

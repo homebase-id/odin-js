@@ -107,7 +107,6 @@ export const useWebsocketSubscriber = (
             undefined,
             refId
           );
-
         setIsConected(true);
       })();
     }

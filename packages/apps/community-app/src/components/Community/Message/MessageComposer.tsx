@@ -146,6 +146,7 @@ export const MessageComposer = ({
         >
           <RichTextEditor
             className="relative w-8 flex-grow border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border"
+            contentClassName="max-h-[50vh] overflow-auto"
             onChange={(newVal) => setMessage(newVal.target.value)}
             defaultValue={message}
             placeholder={
