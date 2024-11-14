@@ -243,6 +243,7 @@ export const SubscribeOverPeer = async (
   }
 
   activeSs = sharedSecret;
+  if (subscribers.some((subscriber) => subscriber.handler === handler)) return;
   subscribers.push({ handler, onDisconnect, onReconnect });
 
   if (isDebug)

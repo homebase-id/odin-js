@@ -47,7 +47,7 @@ export const useCommunityPeerWebsocket = (
         console.warn('[CommunityWebsocket] No communityId', notification);
         return;
       }
-      isDebug && console.debug('[CommunityWebsocket] Got notification', notification);
+      isDebug && console.debug('[PeerCommunityWebsocket] Got notification', notification);
 
       if (
         (notification.notificationType === 'fileAdded' ||
@@ -129,7 +129,7 @@ export const useCommunityPeerWebsocket = (
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
     },
     undefined,
-    'useLiveCommunityPeerProcessor'
+    'useCommunityPeerWebsocket'
   );
 };
 

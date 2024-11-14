@@ -80,6 +80,6 @@ export const useCommunityWebsocket = (
     localCommunityDrives as TargetDrive[],
     undefined,
     undefined,
-    'useLiveCommunityProcessor'
+    'useCommunityWebsocket'
   );
 };
