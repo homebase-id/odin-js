@@ -206,8 +206,14 @@ export const decryptChunkedBytesResponse = async (
 
 export const decryptKeyHeader = async (
   dotYouClient: DotYouClient,
-  encryptedKeyHeader: EncryptedKeyHeader
+  encryptedKeyHeader: EncryptedKeyHeader | KeyHeader
 ): Promise<KeyHeader> => {
+  const encryptedKeyHeaderIsAlreadyDecrypted =
+    'iv' in encryptedKeyHeader && 'aesKey' in encryptedKeyHeader;
+  if (encryptedKeyHeaderIsAlreadyDecrypted) {
+    return encryptedKeyHeader as KeyHeader;
+  }
+
   const ss = dotYouClient.getSharedSecret();
   if (!ss) throw new Error('attempting to decrypt but missing the shared secret');
 

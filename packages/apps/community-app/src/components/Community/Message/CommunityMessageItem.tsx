@@ -248,13 +248,6 @@ const CommunityMediaMessageBody = ({
 
   return (
     <div className={`relative w-full max-w-[75vw] rounded-lg md:max-w-[90%]`}>
-      <div className="my-1">
-        <CommunityMedia
-          msg={msg}
-          communityId={community?.fileMetadata.appData.uniqueId as string}
-          odinId={community?.fileMetadata.senderOdinId as string}
-        />
-      </div>
       {hasACaption ? (
         <div className="flex min-w-0 flex-col md:flex-row md:justify-between">
           <MessageTextRenderer
@@ -264,6 +257,13 @@ const CommunityMediaMessageBody = ({
           />
         </div>
       ) : null}
+      <div className="my-1">
+        <CommunityMedia
+          msg={msg}
+          communityId={community?.fileMetadata.appData.uniqueId as string}
+          odinId={community?.fileMetadata.senderOdinId as string}
+        />
+      </div>
     </div>
   );
 };

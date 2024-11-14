@@ -94,6 +94,7 @@ export const getCommunityChannels = async (
           return await dsrToCommunityChannel(
             dotYouClient,
             dsr,
+            odinId,
             targetDrive,
             response.includeMetadataHeader
           );
@@ -120,7 +121,7 @@ export const getCommunityChannel = async (
   const dsr = await getFileHeaderByUniqueId(dotYouClient, targetDrive, channelId);
 
   if (!dsr) return undefined;
-  return dsrToCommunityChannel(dotYouClient, dsr, targetDrive, true);
+  return dsrToCommunityChannel(dotYouClient, dsr, odinId, targetDrive, true);
 };
 
 export const saveCommunityChannel = async (
@@ -190,14 +191,15 @@ export const saveCommunityChannel = async (
 export const dsrToCommunityChannel = async (
   dotYouClient: DotYouClient,
   dsr: HomebaseFile,
+  odinId: string | undefined,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<CommunityChannel> | undefined> => {
   const definitionContent =
-    dsr.fileMetadata.senderOdinId && dotYouClient.getIdentity() !== dsr.fileMetadata.senderOdinId
+    odinId && dotYouClient.getIdentity() !== odinId
       ? await getContentFromHeaderOrPayloadOverPeer<CommunityChannel>(
           dotYouClient,
-          dsr.fileMetadata.senderOdinId,
+          odinId,
           targetDrive,
           dsr,
           includeMetadataHeader
