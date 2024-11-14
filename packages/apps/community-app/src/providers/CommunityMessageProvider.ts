@@ -407,22 +407,26 @@ export const getCommunityMessage = async (
 ) => {
   const targetDrive = getTargetDriveFromCommunityId(communityId);
 
-  if (odinId !== dotYouClient.getIdentity()) {
-    return await getFileHeaderOverPeerByUniqueId<CommunityMessage>(
-      dotYouClient,
-      odinId,
-      targetDrive,
-      chatMessageId,
-      {
-        decrypt: true,
-        systemFileType,
-      }
-    );
-  }
-  return await getFileHeaderByUniqueId<CommunityMessage>(dotYouClient, targetDrive, chatMessageId, {
-    decrypt: true,
-    systemFileType,
-  });
+  const fileHeader =
+    odinId !== dotYouClient.getIdentity()
+      ? await getFileHeaderOverPeerByUniqueId<string>(
+          dotYouClient,
+          odinId,
+          targetDrive,
+          chatMessageId,
+          {
+            decrypt: false,
+            systemFileType,
+          }
+        )
+      : await getFileHeaderByUniqueId<string>(dotYouClient, targetDrive, chatMessageId, {
+          decrypt: false,
+          systemFileType,
+        });
+
+  if (!fileHeader) return null;
+
+  return await dsrToMessage(dotYouClient, fileHeader, odinId, targetDrive, true);
 };
 
 export const getCommunityMessages = async (
