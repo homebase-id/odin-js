@@ -369,6 +369,7 @@ export const MailComposer = ({
                   mentionables={mentionables}
                   placeholder="Your message"
                   className="min-h-56 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-7 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                  contentClassName="max-h-[50vh] overflow-auto"
                 />
               ) : null}
             </ErrorBoundary>

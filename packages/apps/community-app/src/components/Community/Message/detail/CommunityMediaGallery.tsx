@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   ActionButton,
   BoringFile,
@@ -41,7 +41,9 @@ export const CommunityMediaGallery = ({
     navigate(toPaths.join('/'));
   };
 
-  const allkeys = msg.fileMetadata.payloads.map((p) => p.key);
+  const allkeys = msg.fileMetadata.payloads
+    .filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY)
+    .map((p) => p.key);
   const nextKey = allkeys[allkeys.indexOf(mediaKey) + 1];
   const prevKey = allkeys[allkeys.indexOf(mediaKey) - 1];
 

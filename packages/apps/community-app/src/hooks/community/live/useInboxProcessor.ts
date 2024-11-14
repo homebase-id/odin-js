@@ -72,15 +72,31 @@ export const useInboxProcessor = (odinId: string | undefined, communityId: strin
         }
       );
       isDebug && console.debug('[InboxProcessor] new messages', newMessages.length);
+      if (newMessages.length > 0) {
+        const fullMessages = (
+          await Promise.all(
+            newMessages.map(
+              async (msg) =>
+                await dsrToMessage(
+                  dotYouClient,
+                  msg as unknown as HomebaseFile<string>,
+                  odinId,
+                  targetDrive,
+                  false
+                )
+            )
+          )
+        ).filter(Boolean) as HomebaseFile<CommunityMessage>[];
 
-      await processCommunityMessagesBatch(
-        dotYouClient,
-        queryClient,
-        odinId,
-        targetDrive,
-        communityId,
-        newMessages
-      );
+        await processCommunityMessagesBatch(
+          dotYouClient,
+          queryClient,
+          odinId,
+          targetDrive,
+          communityId,
+          fullMessages
+        );
+      }
 
       const newChannels = await findChangesSinceTimestamp(
         dotYouClient,

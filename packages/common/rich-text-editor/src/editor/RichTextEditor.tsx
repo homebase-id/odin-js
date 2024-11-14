@@ -91,6 +91,7 @@ interface RTEProps {
   name?: string;
   onChange: (e: { target: { name: string; value: RichText } }) => void;
   className?: string;
+  contentClassName?: string;
   disabled?: boolean;
   uniqueId?: string;
   autoFocus?: boolean;
@@ -126,6 +127,7 @@ const InnerRichTextEditor = memo(
       onChange,
       onSubmit,
       className,
+      contentClassName,
       disabled,
       uniqueId,
       autoFocus,
@@ -374,6 +376,7 @@ const InnerRichTextEditor = memo(
             </FixedToolbar>
 
             <PlateContent
+              className={contentClassName}
               placeholder={placeholder}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {

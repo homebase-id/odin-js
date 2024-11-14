@@ -67,6 +67,7 @@ export const EditCommunityMessage = ({
         placeholder="Your message"
         defaultValue={message}
         className="w-full rounded-md border bg-background p-2 dark:border-slate-800"
+        contentClassName="max-h-[50vh] overflow-auto"
         onChange={(e) => setMessage(e.target.value)}
         autoFocus={!isTouchDevice()}
         onSubmit={isTouchDevice() ? undefined : doSend}

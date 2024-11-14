@@ -244,11 +244,10 @@ const CommunityMediaMessageBody = ({
   community?: HomebaseFile<CommunityDefinition>;
 }) => {
   const content = msg.fileMetadata.appData.content;
-
   const hasACaption = !!content.message;
 
   return (
-    <div className={`relative w-full max-w-[75vw] rounded-lg md:max-w-xs lg:max-w-xl`}>
+    <div className={`relative w-full max-w-[75vw] rounded-lg md:max-w-[90%]`}>
       <div className="my-1">
         <CommunityMedia
           msg={msg}

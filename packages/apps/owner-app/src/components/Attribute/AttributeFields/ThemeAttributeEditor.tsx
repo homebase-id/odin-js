@@ -170,6 +170,7 @@ const ThemeSpecificFields = ({
               name="leadText"
               onChange={onChange}
               className="min-h-[20vh]"
+              contentClassName="max-h-[50vh] overflow-auto"
             />
           </div>
         </>

@@ -26,6 +26,9 @@ import {
   TransferUploadStatus,
   SystemFileType,
   GlobalTransitIdFileIdentifier,
+  DEFAULT_PAYLOAD_KEY,
+  AppendInstructionSet,
+  appendDataToFile,
 } from '@homebase-id/js-lib/core';
 import {
   jsonStringify64,
@@ -91,7 +94,12 @@ export const uploadCommunityMessage = async (
   const targetDrive = getTargetDriveFromCommunityId(communityId);
   const messageContent = message.fileMetadata.appData.content;
 
-  const jsonContent: string = jsonStringify64({ ...messageContent });
+  const payloadJson: string = jsonStringify64({ ...messageContent });
+  const payloadBytes = stringToUint8Array(payloadJson);
+
+  // Set max of 3kb for content so enough room is left for metedata
+  const shouldEmbedContent = payloadBytes.length < 3000;
+
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: true,
@@ -102,7 +110,7 @@ export const uploadCommunityMessage = async (
       userDate: message.fileMetadata.appData.userDate,
       tags: message.fileMetadata.appData.tags,
       fileType: COMMUNITY_MESSAGE_FILE_TYPE,
-      content: jsonContent,
+      content: shouldEmbedContent ? payloadJson : undefined,
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList ||
@@ -178,6 +186,13 @@ export const uploadCommunityMessage = async (
 
   uploadMetadata.appData.previewThumbnail =
     previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
+
+  if (!shouldEmbedContent) {
+    payloads.push({
+      key: DEFAULT_PAYLOAD_KEY,
+      payload: new Blob([payloadBytes], { type: 'application/json' }),
+    });
+  }
 
   let uploadResult: UploadResult | TransitUploadResult | void;
   if (
@@ -278,6 +293,11 @@ export const updateCommunityMessage = async (
   };
 
   const payloadJson: string = jsonStringify64({ ...messageContent });
+  const payloadBytes = stringToUint8Array(payloadJson);
+
+  // Set max of 3kb for content so enough room is left for metedata
+  const shouldEmbedContent = payloadBytes.length < 3000;
+
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: false,
@@ -288,7 +308,7 @@ export const updateCommunityMessage = async (
         .archivalStatus,
       previewThumbnail: message.fileMetadata.appData.previewThumbnail,
       fileType: COMMUNITY_MESSAGE_FILE_TYPE,
-      content: payloadJson,
+      content: shouldEmbedContent ? payloadJson : undefined,
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList ||
@@ -299,6 +319,35 @@ export const updateCommunityMessage = async (
 
   if (community.fileMetadata.senderOdinId !== dotYouClient.getIdentity()) {
     throw new Error('Not implemented exception');
+  }
+
+  if (!shouldEmbedContent) {
+    const appendInstructionSet: AppendInstructionSet = {
+      targetFile: {
+        fileId: message.fileId as string,
+        targetDrive: targetDrive,
+      },
+      versionTag: message.fileMetadata.versionTag,
+      storageIntent: 'append',
+    };
+
+    const newVersionTag = (
+      await appendDataToFile(
+        dotYouClient,
+        keyHeader || message.sharedSecretEncryptedKeyHeader,
+        appendInstructionSet,
+        [
+          {
+            key: DEFAULT_PAYLOAD_KEY,
+            payload: new Blob([payloadBytes], { type: 'application/json' }),
+            iv: getRandom16ByteArray(),
+          },
+        ],
+        undefined
+      )
+    )?.newVersionTag;
+
+    uploadMetadata.versionTag = newVersionTag;
   }
 
   return await uploadHeader(
