@@ -20,6 +20,9 @@ export interface CommunityMetadata {
   channelLastReadTime: Record<string, number>;
   pinnedChannels: string[];
   savedMessages: { messageId: string; systemFileType: SystemFileType }[];
+  notifiationsEnabled?: boolean;
+
+  // Community info
   odinId: string;
   communityId: string;
 }

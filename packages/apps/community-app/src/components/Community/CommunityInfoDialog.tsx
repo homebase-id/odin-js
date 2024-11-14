@@ -9,31 +9,20 @@ import {
   AuthorName,
   ActionButton,
   useDotYouClient,
-  ErrorNotification,
   ActionLink,
   OWNER_ROOT,
   useCircle,
   COMMUNITY_ROOT_PATH,
 } from '@homebase-id/common-app';
 import { Circles, Clipboard } from '@homebase-id/common-app/icons';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { useCommunityNotifications } from '../../hooks/community/useCommunityNotifications';
 import { createPortal } from 'react-dom';
 
 export const CommunityInfoDialog = ({ onClose }: { onClose: () => void }) => {
   const { odinKey, communityKey } = useParams();
   const { data: community } = useCommunity({ odinId: odinKey, communityId: communityKey }).fetch;
-
-  const { mutate: enableNotifications, error: enableNotificationsError } =
-    useCommunityNotifications({ community }).enable;
-
-  useEffect(() => {
-    if (community) {
-      enableNotifications();
-    }
-  }, [community]);
 
   const identity = useDotYouClient().getIdentity();
   const isCommunityOwner = community?.fileMetadata?.senderOdinId === identity;
@@ -45,8 +34,11 @@ export const CommunityInfoDialog = ({ onClose }: { onClose: () => void }) => {
 
   const dialog = (
     <>
-      <ErrorNotification error={enableNotificationsError} />
-      <DialogWrapper onClose={onClose} title={community.fileMetadata.appData.content.title}>
+      <DialogWrapper
+        onClose={onClose}
+        title={community.fileMetadata.appData.content.title}
+        isSidePanel={false}
+      >
         <div className="flex flex-col gap-5">
           <div>
             <p className="mb-2 text-xl">{t('Details')}</p>
