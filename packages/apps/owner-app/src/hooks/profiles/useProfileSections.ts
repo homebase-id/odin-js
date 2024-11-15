@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getProfileSections,
   ProfileSection,
@@ -55,54 +55,57 @@ export const useProfileSections = ({ profileId }: { profileId?: string }) => {
     save: useMutation({
       mutationFn: saveSection,
       onMutate: async ({ profileId, profileSection: newSection }) => {
-        await queryClient.cancelQueries({ queryKey: ['profileSections', profileId] });
-
-        const previousSections: ProfileSection[] | undefined = queryClient.getQueryData([
-          'profileSections',
-          profileId,
-        ]);
-        const newSections = previousSections?.map((section) =>
-          section.sectionId === newSection.sectionId ? newSection : section
+        const previousSections = updateCacheProfileSections(queryClient, profileId, (data) =>
+          data?.map((section) =>
+            section.sectionId === newSection.sectionId ? newSection : section
+          )
         );
-
-        queryClient.setQueryData(['profileSections', profileId], newSections);
 
         return { previousSections, newSection };
       },
       onError: (err, newData, context) => {
         console.error(err);
 
-        queryClient.setQueryData(['profileSections', newData.profileId], context?.previousSections);
+        updateCacheProfileSections(queryClient, newData.profileId, () => context?.previousSections);
       },
       onSettled: (data) => {
-        queryClient.invalidateQueries({ queryKey: ['profileSections', data?.profileId] });
+        invalidateProfileSections(queryClient, data?.profileId);
       },
     }),
     remove: useMutation({
       mutationFn: removeSection,
       onMutate: async ({ profileId, profileSection: toRemoveSection }) => {
-        await queryClient.cancelQueries({ queryKey: ['profileSections', profileId] });
-
-        const previousSections: ProfileSection[] | undefined = queryClient.getQueryData([
-          'profileSections',
-          profileId,
-        ]);
-        const newSections = previousSections?.filter(
-          (section) => section.sectionId !== toRemoveSection.sectionId
+        const previousSections = updateCacheProfileSections(queryClient, profileId, (data) =>
+          data.filter((section) => section.sectionId !== toRemoveSection.sectionId)
         );
-
-        queryClient.setQueryData(['profileSections', profileId], newSections);
-
         return { previousSections, toRemoveSection };
       },
       onError: (err, newData, context) => {
         console.error(err);
 
-        queryClient.setQueryData(['profileSections', newData.profileId], context?.previousSections);
+        updateCacheProfileSections(queryClient, newData.profileId, () => context?.previousSections);
       },
-      onSettled: (data, err, variables) => {
-        queryClient.invalidateQueries({ queryKey: ['profileSections', variables.profileId] });
+      onSettled: (_data, _err, variables) => {
+        invalidateProfileSections(queryClient, variables.profileId);
       },
     }),
   };
+};
+
+export const invalidateProfileSections = (queryClient: QueryClient, profileId?: string) => {
+  queryClient.invalidateQueries({ queryKey: ['profileSections', profileId] });
+};
+
+export const updateCacheProfileSections = (
+  queryClient: QueryClient,
+  profileId: string,
+  transformFn: (sections: ProfileSection[]) => ProfileSection[] | undefined
+) => {
+  const currentData = queryClient.getQueryData<ProfileSection[]>(['profileSections', profileId]);
+  if (!currentData) return;
+
+  const newData = transformFn(currentData);
+  queryClient.setQueryData(['profileSections', profileId], newData);
+
+  return currentData;
 };

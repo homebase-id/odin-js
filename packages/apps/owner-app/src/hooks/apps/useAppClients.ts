@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   GetAppClients,
   RegisterAppClient,
@@ -75,42 +75,38 @@ export const useAppClients = ({ appId }: { appId?: string }) => {
     }),
     registerClient: useMutation({
       mutationFn: registerClient,
-      onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['app-clients', param.appId] });
-      },
+      onSuccess: (data, param) => invalidateAppClients(queryClient, param.appId),
       onError: (ex) => {
         console.error(ex);
       },
     }),
     removeClient: useMutation({
       mutationFn: removeClient,
-      onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['app-clients', param.appId] });
-        queryClient.invalidateQueries({ queryKey: ['app-clients'] });
-      },
+      onSuccess: (data, param) => invalidateAppClients(queryClient, param.appId),
       onError: (ex) => {
         console.error(ex);
       },
     }),
     revokeClient: useMutation({
       mutationFn: revokeClient,
-      onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['app-clients', param.appId] });
-        queryClient.invalidateQueries({ queryKey: ['app-clients'] });
-      },
+      onSuccess: (data, param) => invalidateAppClients(queryClient, param.appId),
       onError: (ex) => {
         console.error(ex);
       },
     }),
     allowClient: useMutation({
       mutationFn: allowClient,
-      onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['app-clients', param.appId] });
-        queryClient.invalidateQueries({ queryKey: ['app-clients'] });
-      },
+      onSuccess: (data, param) => invalidateAppClients(queryClient, param.appId),
       onError: (ex) => {
         console.error(ex);
       },
     }),
   };
+};
+
+export const invalidateAppClients = (queryClient: QueryClient, appId?: string | undefined) => {
+  queryClient.invalidateQueries({
+    queryKey: ['app-clients', appId].filter(Boolean),
+    exact: !!appId,
+  });
 };

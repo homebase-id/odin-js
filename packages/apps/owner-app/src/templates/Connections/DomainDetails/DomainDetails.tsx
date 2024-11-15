@@ -50,7 +50,7 @@ const DomainDetails = () => {
       error: restoreDomainError,
       status: restoreDomainStatus,
     },
-  } = useManageDomain({ domain: domain });
+  } = useManageDomain();
 
   const [isEditPermissionActive, setIsEditPermissionActive] = useState(false);
 

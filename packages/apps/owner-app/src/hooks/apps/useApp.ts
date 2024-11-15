@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ensureDrive } from '@homebase-id/js-lib/core';
 import { DriveGrant } from '@homebase-id/js-lib/network';
 import {
@@ -17,6 +17,7 @@ import {
   PermissionUpdateRequest,
 } from '../../provider/app/AppManagementProviderTypes';
 import { useAuth } from '../auth/useAuth';
+import { invalidateApps } from './useApps';
 
 interface PermissionExtensionRequest extends Omit<PermissionUpdateRequest, 'drives'> {
   drives?: (DriveGrantRequest | DriveGrant)[];
@@ -129,8 +130,8 @@ export const useApp = ({ appId }: { appId?: string }) => {
     registerNewApp: useMutation({
       mutationFn: registerNewApp,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
-        queryClient.invalidateQueries({ queryKey: ['apps'] });
+        invalidateApp(queryClient, param.appId);
+        invalidateApps(queryClient);
       },
       onError: (ex) => {
         console.error(ex);
@@ -139,8 +140,8 @@ export const useApp = ({ appId }: { appId?: string }) => {
     revokeApp: useMutation({
       mutationFn: revokeAppInternal,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
-        queryClient.invalidateQueries({ queryKey: ['apps'] });
+        invalidateApp(queryClient, param.appId);
+        invalidateApps(queryClient);
       },
       onError: (ex) => {
         console.error(ex);
@@ -149,8 +150,8 @@ export const useApp = ({ appId }: { appId?: string }) => {
     allowApp: useMutation({
       mutationFn: allowAppInternal,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
-        queryClient.invalidateQueries({ queryKey: ['apps'] });
+        invalidateApp(queryClient, param.appId);
+        invalidateApps(queryClient);
       },
       onError: (ex) => {
         console.error(ex);
@@ -159,8 +160,8 @@ export const useApp = ({ appId }: { appId?: string }) => {
     removeApp: useMutation({
       mutationFn: removeAppInternal,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
-        queryClient.invalidateQueries({ queryKey: ['apps'] });
+        invalidateApp(queryClient, param.appId);
+        invalidateApps(queryClient);
       },
       onError: (ex) => {
         console.error(ex);
@@ -169,8 +170,8 @@ export const useApp = ({ appId }: { appId?: string }) => {
     updateAuthorizedCircles: useMutation({
       mutationFn: updateAuthorizedCircles,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
-        queryClient.invalidateQueries({ queryKey: ['apps'] });
+        invalidateApp(queryClient, param.appId);
+        invalidateApps(queryClient);
       },
       onError: (ex) => {
         console.error(ex);
@@ -179,8 +180,8 @@ export const useApp = ({ appId }: { appId?: string }) => {
     updatePermissions: useMutation({
       mutationFn: updatePermissions,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
-        queryClient.invalidateQueries({ queryKey: ['apps'] });
+        invalidateApp(queryClient, param.appId);
+        invalidateApps(queryClient);
       },
       onError: (ex) => {
         console.error(ex);
@@ -189,12 +190,16 @@ export const useApp = ({ appId }: { appId?: string }) => {
     extendPermissions: useMutation({
       mutationFn: extendPermissions,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
-        queryClient.invalidateQueries({ queryKey: ['apps'] });
+        invalidateApp(queryClient, param.appId);
+        invalidateApps(queryClient);
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
   };
+};
+
+export const invalidateApp = (queryClient: QueryClient, appId: string) => {
+  queryClient.invalidateQueries({ queryKey: ['app', appId] });
 };

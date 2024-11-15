@@ -1,23 +1,16 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
 import {
   disconnectFromDomain,
-  getDomainClients,
   restoreDomainAccess,
   revokeDomainAccess,
 } from '../../provider/network/domainNetwork/DomainManager';
 import { invalidateDomainInfo, invalidateDomains } from '@homebase-id/common-app';
 
-export const useManageDomain = ({ domain }: { domain?: string }) => {
+export const useManageDomain = () => {
   const queryClient = useQueryClient();
 
   const dotYouClient = useAuth().getDotYouClient();
-
-  const fetchClients = async ({ domain }: { domain: string }) => {
-    if (!domain) return;
-
-    return await getDomainClients(dotYouClient, domain);
-  };
 
   const revokeDomain = async ({ domain }: { domain: string }) =>
     await revokeDomainAccess(dotYouClient, domain);
@@ -29,17 +22,9 @@ export const useManageDomain = ({ domain }: { domain?: string }) => {
     await disconnectFromDomain(dotYouClient, domain);
 
   return {
-    fetchClients: useQuery({
-      queryKey: ['domain-clients', domain],
-      queryFn: () => fetchClients({ domain: domain as string }),
-
-      refetchOnWindowFocus: false,
-      enabled: !!domain,
-    }),
-
     revokeDomain: useMutation({
       mutationFn: revokeDomain,
-      onSuccess: (data, param) => {
+      onSuccess: (_data, param) => {
         invalidateDomainInfo(queryClient, param.domain);
       },
       onError: (ex) => {
@@ -49,7 +34,7 @@ export const useManageDomain = ({ domain }: { domain?: string }) => {
 
     restoreDomain: useMutation({
       mutationFn: restoreDomain,
-      onSuccess: (data, param) => {
+      onSuccess: (_data, param) => {
         invalidateDomainInfo(queryClient, param.domain);
       },
       onError: (ex) => {
@@ -59,7 +44,7 @@ export const useManageDomain = ({ domain }: { domain?: string }) => {
 
     disconnect: useMutation({
       mutationFn: removeDomain,
-      onSuccess: (data, param) => {
+      onSuccess: (_data, param) => {
         invalidateDomains(queryClient);
         invalidateDomainInfo(queryClient, param.domain);
       },

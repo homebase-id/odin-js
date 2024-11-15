@@ -108,7 +108,7 @@ const DomainListItem = ({
   } = useDomain({ domain: domain.domain });
   const {
     disconnect: { mutate: disconnect, status: disconnectStatus, error: actionError },
-  } = useManageDomain({ domain: domain.domain });
+  } = useManageDomain();
 
   const hasExtendedPermissions =
     fullDomainInfo?.circleGrants?.length && fullDomainInfo?.circleGrants?.length > 0;
