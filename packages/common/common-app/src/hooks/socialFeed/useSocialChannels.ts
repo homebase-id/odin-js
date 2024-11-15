@@ -18,7 +18,7 @@ export const useSocialChannels = ({ odinId }: useSocialChannelsProps) => {
 
   return {
     fetch: useQuery({
-      queryKey: ['channels', odinId],
+      queryKey: ['peer-channels', odinId],
       queryFn: () => fetch({ odinId }),
       enabled: !!odinId,
       refetchOnMount: false,

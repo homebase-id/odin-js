@@ -1,6 +1,7 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   BlogConfig,
+  ChannelDefinition,
   getChannelDefinition,
   getChannelDefinitionBySlug,
 } from '@homebase-id/js-lib/public';
@@ -8,7 +9,7 @@ import {
 import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
 import { useDotYouClient } from '../../../..';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { fetchCachedPublicChannels } from '../post/cachedDataHelpers';
 import { getChannelOverPeer, getChannelBySlugOverPeer } from '@homebase-id/js-lib/peer';
 
@@ -89,4 +90,27 @@ export const useChannel = ({ odinId, channelKey }: useChannelsProps) => {
       enabled: !!channelKey,
     }),
   };
+};
+
+export const invalidateChannel = (queryClient: QueryClient, odinId: string, channelKey: string) => {
+  queryClient.invalidateQueries({ queryKey: ['channel', odinId, channelKey] });
+};
+
+export const updateCacheChannel = (
+  queryClient: QueryClient,
+  odinId: string,
+  channelKey: string,
+  transformFn: (
+    data: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition> | null
+  ) => HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition> | null
+) => {
+  const queryData = queryClient.getQueryData<
+    HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition> | null
+  >(['channel', odinId, channelKey]);
+  if (!queryData) return;
+
+  const newQueryData = transformFn(queryData);
+  if (!newQueryData) return;
+
+  queryClient.setQueryData(['channel', odinId, channelKey], newQueryData);
 };
