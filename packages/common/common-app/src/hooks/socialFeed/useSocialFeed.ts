@@ -1,5 +1,5 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { getSocialFeed } from '@homebase-id/js-lib/peer';
+import { InfiniteData, QueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import { getSocialFeed, RecentsFromConnectionsReturn } from '@homebase-id/js-lib/peer';
 import { useDotYouClient } from '../auth/useDotYouClient';
 import { useChannels } from './channels/useChannels';
 
@@ -39,4 +39,26 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
       enabled: channelsFetched,
     }),
   };
+};
+
+export const invalidateSocialFeeds = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
+};
+
+export const updateCacheSocialFeeds = (
+  queryClient: QueryClient,
+  transformFn: (
+    data: InfiniteData<RecentsFromConnectionsReturn>
+  ) => InfiniteData<RecentsFromConnectionsReturn> | undefined
+) => {
+  const currentData = queryClient.getQueryData<InfiniteData<RecentsFromConnectionsReturn>>([
+    'social-feeds',
+  ]);
+  if (!currentData) return;
+
+  const newData = transformFn(currentData);
+  if (!newData) return;
+
+  queryClient.setQueryData(['social-feeds'], newData);
+  return currentData;
 };

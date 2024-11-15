@@ -168,3 +168,15 @@ export const getPostQueryOptions: (
   gcTime: isOwner ? 0 : 10 * 60 * 1000,
   staleTime: isOwner ? 0 : 10 * 60 * 1000,
 });
+
+export const invalidatePost = (
+  queryClient: QueryClient,
+  odinId?: string | undefined,
+  channelId?: string | undefined,
+  postKey?: string | undefined
+) => {
+  queryClient.invalidateQueries({
+    queryKey: ['post', odinId, channelId, postKey].filter(Boolean),
+    exact: !!odinId && !!channelId && !!postKey,
+  });
+};
