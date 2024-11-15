@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Attribute, getProfileAttribute } from '@homebase-id/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
-import { useStaticFiles } from '@homebase-id/common-app';
+import { invalidateSiteData, useStaticFiles } from '@homebase-id/common-app';
 import { AttributeDefinitions } from './AttributeDefinitions';
 import { AttributeVm } from './useAttributes';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
@@ -171,7 +171,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
           queryClient.invalidateQueries({ queryKey: ['attribute'] });
         }
 
-        queryClient.invalidateQueries({ queryKey: ['site-data'] });
+        invalidateSiteData(queryClient);
         queryClient.invalidateQueries({ queryKey: getListItemCacheKey(newAttr) });
 
         if (!_variables.fileId) {
@@ -223,7 +223,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
         }
         // Settimeout to allow serverSide a bit more time to process remove before fetching the data again
         setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ['site-data'] });
+          invalidateSiteData(queryClient);
           queryClient.invalidateQueries({ queryKey: getListItemCacheKey(newAttr) });
 
           publishStaticFiles(variables.attribute?.fileMetadata?.appData?.content?.type);

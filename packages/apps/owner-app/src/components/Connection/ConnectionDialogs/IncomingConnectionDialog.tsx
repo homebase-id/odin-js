@@ -7,12 +7,12 @@ import {
   useFollowingInfinite,
   CheckboxToggle,
   usePortal,
-  ErrorNotification,
   ActionButton,
   DomainHighlighter,
   CircleSelector,
   DialogWrapper,
   useConnection,
+  useErrors,
 } from '@homebase-id/common-app';
 import { Arrow } from '@homebase-id/common-app/icons';
 import ContactImage from '../../Connection/ContactImage/ContactImage';
@@ -65,7 +65,7 @@ const IncomingConnectionDialog = ({
   const [circleGrants, setCircleGrants] = useState<string[]>([]);
   const [shouldFollow, setShouldFollow] = useState(true);
 
-  const [runningError, setRunningError] = useState<Error | unknown | null>(null);
+  const addError = useErrors().add;
 
   if (!isOpen) {
     return null;
@@ -92,7 +92,6 @@ const IncomingConnectionDialog = ({
       size="2xlarge"
     >
       <>
-        <ErrorNotification error={runningError} />
         {!doubleChecked ? (
           <>
             {connectionInfo?.status === 'connected' ? (
@@ -184,6 +183,7 @@ const IncomingConnectionDialog = ({
               onSubmit={async (e) => {
                 if (acceptPendingStatus === 'pending') return;
                 e.preventDefault();
+                e.stopPropagation();
                 try {
                   await acceptPending({
                     senderOdinId: senderOdinId,
@@ -198,7 +198,7 @@ const IncomingConnectionDialog = ({
                   checkReturnTo('Approved');
                   onConfirm();
                 } catch (error) {
-                  setRunningError(error);
+                  addError(error, t('Failed to accept connection request'));
                 }
               }}
             >

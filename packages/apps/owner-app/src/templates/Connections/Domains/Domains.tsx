@@ -2,8 +2,7 @@ import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import Submenu from '../../../components/SubMenu/SubMenu';
 import { useState, useEffect } from 'react';
 import Section from '../../../components/ui/Sections/Section';
-import { useDomain } from '../../../hooks/connections/useDomain';
-import { DomainMembership } from '@homebase-id/common-app';
+import { DomainMembership, useDomain } from '@homebase-id/common-app';
 import { CompanyImage } from '../../../components/Connection/CompanyImage/CompanyImage';
 import {
   useDomains,
@@ -16,6 +15,7 @@ import {
   ActionButton,
 } from '@homebase-id/common-app';
 import { Grid, Shield, Eye, Times } from '@homebase-id/common-app/icons';
+import { useManageDomain } from '../../../hooks/connections/useManageDomain';
 
 const Domains = () => {
   const [activePage, setActivePage] = useState(1);
@@ -105,8 +105,10 @@ const DomainListItem = ({
 }) => {
   const {
     fetch: { data: fullDomainInfo },
-    disconnect: { mutate: disconnect, status: disconnectStatus, error: actionError },
   } = useDomain({ domain: domain.domain });
+  const {
+    disconnect: { mutate: disconnect, status: disconnectStatus, error: actionError },
+  } = useManageDomain({ domain: domain.domain });
 
   const hasExtendedPermissions =
     fullDomainInfo?.circleGrants?.length && fullDomainInfo?.circleGrants?.length > 0;

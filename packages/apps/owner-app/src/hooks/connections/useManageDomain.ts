@@ -3,21 +3,15 @@ import { useAuth } from '../auth/useAuth';
 import {
   disconnectFromDomain,
   getDomainClients,
-  getDomainInfo,
   restoreDomainAccess,
   revokeDomainAccess,
 } from '../../provider/network/domainNetwork/DomainManager';
+import { invalidateDomainInfo, invalidateDomains } from '@homebase-id/common-app';
 
-export const useDomain = ({ domain }: { domain?: string }) => {
+export const useManageDomain = ({ domain }: { domain?: string }) => {
   const queryClient = useQueryClient();
 
   const dotYouClient = useAuth().getDotYouClient();
-
-  const fetchSingle = async ({ domain }: { domain: string }) => {
-    if (!domain) return;
-
-    return await getDomainInfo(dotYouClient, domain);
-  };
 
   const fetchClients = async ({ domain }: { domain: string }) => {
     if (!domain) return;
@@ -35,13 +29,6 @@ export const useDomain = ({ domain }: { domain?: string }) => {
     await disconnectFromDomain(dotYouClient, domain);
 
   return {
-    fetch: useQuery({
-      queryKey: ['domain-info', domain],
-      queryFn: () => fetchSingle({ domain: domain as string }),
-      refetchOnWindowFocus: false,
-      enabled: !!domain,
-    }),
-
     fetchClients: useQuery({
       queryKey: ['domain-clients', domain],
       queryFn: () => fetchClients({ domain: domain as string }),
@@ -53,7 +40,7 @@ export const useDomain = ({ domain }: { domain?: string }) => {
     revokeDomain: useMutation({
       mutationFn: revokeDomain,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['domain-info', param.domain] });
+        invalidateDomainInfo(queryClient, param.domain);
       },
       onError: (ex) => {
         console.error(ex);
@@ -63,7 +50,7 @@ export const useDomain = ({ domain }: { domain?: string }) => {
     restoreDomain: useMutation({
       mutationFn: restoreDomain,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['domain-info', param.domain] });
+        invalidateDomainInfo(queryClient, param.domain);
       },
       onError: (ex) => {
         console.error(ex);
@@ -73,8 +60,8 @@ export const useDomain = ({ domain }: { domain?: string }) => {
     disconnect: useMutation({
       mutationFn: removeDomain,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['active-domains'] });
-        queryClient.invalidateQueries({ queryKey: ['domain-info', param.domain] });
+        invalidateDomains(queryClient);
+        invalidateDomainInfo(queryClient, param.domain);
       },
       onError: (ex) => {
         console.error(ex);

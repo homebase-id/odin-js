@@ -1,13 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
 
-import {
-  ConnectionInfo,
-  confirmIntroduction,
-  AUTO_CONNECTIONS_CIRCLE_ID,
-} from '@homebase-id/js-lib/network';
+import { confirmIntroduction, AUTO_CONNECTIONS_CIRCLE_ID } from '@homebase-id/js-lib/network';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { useConnection, useFollowingInfinite } from '@homebase-id/common-app';
+import {
+  invalidateConnectionInfo,
+  updateCachedConnectionInfo,
+  useConnection,
+  useFollowingInfinite,
+} from '@homebase-id/common-app';
 
 export const useAutoConnection = ({ odinId }: { odinId?: string }) => {
   const queryClient = useQueryClient();
@@ -45,35 +46,26 @@ export const useAutoConnection = ({ odinId }: { odinId?: string }) => {
     confirmAutoConnection: useMutation({
       mutationFn: doConfirmAutoConnection,
       onSettled: async () => {
-        await queryClient.invalidateQueries({ queryKey: ['connection-info', odinId] });
+        odinId && invalidateConnectionInfo(queryClient, odinId);
       },
       onMutate: async ({ odinId }) => {
-        const previousConnectionInfo = queryClient.getQueryData<ConnectionInfo>([
-          'connection-info',
-          odinId,
-        ]);
-
-        if (!previousConnectionInfo) return;
-
-        queryClient.setQueryData<ConnectionInfo>(['connection-info', odinId], {
-          ...previousConnectionInfo,
-          status: 'connected',
-          accessGrant: {
-            ...previousConnectionInfo.accessGrant,
-            circleGrants: previousConnectionInfo.accessGrant.circleGrants.filter(
-              (circle) => !stringGuidsEqual(circle.circleId, AUTO_CONNECTIONS_CIRCLE_ID)
-            ),
-          },
-        });
-
-        return { previousConnectionInfo };
+        return {
+          previousConnectionInfo: await updateCachedConnectionInfo(queryClient, odinId, (info) => ({
+            ...info,
+            status: 'connected',
+            accessGrant: {
+              ...info.accessGrant,
+              circleGrants: info.accessGrant.circleGrants.filter(
+                (circle) => !stringGuidsEqual(circle.circleId, AUTO_CONNECTIONS_CIRCLE_ID)
+              ),
+            },
+          })),
+        };
       },
       onError(err, variables, context) {
         if (context?.previousConnectionInfo) {
-          queryClient.setQueryData<ConnectionInfo>(
-            ['connection-info', variables.odinId],
-            context.previousConnectionInfo
-          );
+          const previousConnectionInfo = context.previousConnectionInfo;
+          updateCachedConnectionInfo(queryClient, variables.odinId, () => previousConnectionInfo);
         }
       },
     }),

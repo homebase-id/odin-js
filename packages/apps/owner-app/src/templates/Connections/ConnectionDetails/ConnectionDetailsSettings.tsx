@@ -1,7 +1,6 @@
-import { t } from '@homebase-id/common-app';
+import { t, useConnectionGrantStatus } from '@homebase-id/common-app';
 import { ConnectionInfo } from '@homebase-id/js-lib/network';
 import { ConnectionPermissionViewer } from './ConnectionPermissionViewer';
-import { useConnectionGrantStatus } from '../../../hooks/connections/useConnectionGrantStatus';
 import { CircleMembershipDialog } from '../../../components/Circles/CircleMembershipDialog/CircleMembershipDialog';
 import { useNavigate, useParams } from 'react-router-dom';
 

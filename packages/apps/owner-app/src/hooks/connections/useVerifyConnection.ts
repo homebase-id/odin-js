@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
-import { verifyConnection } from '../../provider/network/troubleshooting/ConnectionGrantProvider';
+import { verifyConnection } from '@homebase-id/js-lib/network';
 
 export const useVerifyConnection = () => {
   const dotYouClient = useAuth().getDotYouClient();

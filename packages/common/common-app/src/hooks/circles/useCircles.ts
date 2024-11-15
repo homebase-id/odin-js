@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { QueryClient, useQuery } from '@tanstack/react-query';
 import { getCircles } from '@homebase-id/js-lib/network';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
@@ -17,4 +17,8 @@ export const useCircles = (excludeSystemCircles = false) => {
       refetchOnWindowFocus: false,
     }),
   };
+};
+
+export const invalidateCircles = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['circles'], exact: false });
 };
