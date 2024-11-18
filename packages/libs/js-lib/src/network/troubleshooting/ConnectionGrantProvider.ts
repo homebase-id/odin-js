@@ -1,5 +1,5 @@
-import { assertIfDefined } from '../../../helpers';
 import { DotYouClient } from '../../core/DotYouClient';
+import { assertIfDefined } from '../../helpers/DataUtil';
 
 const statusPath = '/circles/connections/troubleshooting-info';
 export const fetchCircleMembershipStatus = async (dotYouClient: DotYouClient, odinId: string) => {
