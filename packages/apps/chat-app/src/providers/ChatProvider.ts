@@ -32,6 +32,7 @@ import {
   deleteFile,
   UpdateHeaderInstructionSet,
   RichText,
+  DEFAULT_PAYLOAD_KEY,
 } from '@homebase-id/js-lib/core';
 import { ChatDrive, UnifiedConversation } from './ConversationProvider';
 import {
@@ -50,6 +51,7 @@ import {
   processVideoFile,
 } from '@homebase-id/js-lib/media';
 import { sendReadReceipt } from '@homebase-id/js-lib/peer';
+import { ellipsisAtMaxChar, getPlainTextFromRichText } from '@homebase-id/common-app';
 
 export const CHAT_MESSAGE_FILE_TYPE = 7878;
 export const ChatDeletedArchivalStaus = 2;
@@ -254,10 +256,32 @@ export const uploadChatMessage = async (
       : undefined,
   };
 
-  const jsonContent: string = jsonStringify64({
-    ...messageContent,
-    authorOdinId: dotYouClient.getIdentity(),
-  });
+  const payloads: PayloadFile[] = [];
+  const thumbnails: ThumbnailFile[] = [];
+  const previewThumbnails: EmbeddedThumb[] = [];
+  const aesKey = getRandom16ByteArray();
+
+  const jsonContent: string = jsonStringify64({ ...messageContent });
+  const payloadBytes = stringToUint8Array(jsonStringify64({ message: messageContent.message }));
+
+  // Set max of 3kb for content so enough room is left for metadata
+  const shouldEmbedContent = payloadBytes.length < 3000;
+  const content = shouldEmbedContent
+    ? jsonContent
+    : jsonStringify64({
+        message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
+        replyId: messageContent.replyId,
+        deliveryDetails: messageContent.deliveryDetails,
+        deliveryStatus: messageContent.deliveryStatus,
+      }); // We only embed the content if it's less than 3kb
+
+  if (!shouldEmbedContent) {
+    payloads.push({
+      key: DEFAULT_PAYLOAD_KEY,
+      payload: new Blob([payloadBytes], { type: 'application/json' }),
+    });
+  }
+
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: distribute,
@@ -266,18 +290,13 @@ export const uploadChatMessage = async (
       groupId: message.fileMetadata.appData.groupId,
       userDate: message.fileMetadata.appData.userDate,
       fileType: CHAT_MESSAGE_FILE_TYPE,
-      content: jsonContent,
+      content: content,
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList || {
       requiredSecurityGroup: SecurityGroupType.AutoConnected,
     },
   };
-
-  const payloads: PayloadFile[] = [];
-  const thumbnails: ThumbnailFile[] = [];
-  const previewThumbnails: EmbeddedThumb[] = [];
-  const aesKey = getRandom16ByteArray();
 
   if (!files?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
