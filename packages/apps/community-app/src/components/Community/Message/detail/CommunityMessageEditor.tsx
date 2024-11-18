@@ -1,13 +1,6 @@
-import { createPortal } from 'react-dom';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 
-import {
-  ActionButton,
-  DialogWrapper,
-  ErrorNotification,
-  t,
-  usePortal,
-} from '@homebase-id/common-app';
+import { ActionButton, ErrorNotification, t } from '@homebase-id/common-app';
 
 import { useEffect, useState } from 'react';
 
@@ -17,7 +10,7 @@ import { CommunityDefinition } from '../../../../providers/CommunityDefinitionPr
 import { useCommunityMessage } from '../../../../hooks/community/messages/useCommunityMessage';
 import { RichTextEditor } from '@homebase-id/rich-text-editor';
 
-export const EditCommunityMessage = ({
+export const CommunityMessageEditor = ({
   msg,
   community,
   onClose,
@@ -26,7 +19,6 @@ export const EditCommunityMessage = ({
   community: HomebaseFile<CommunityDefinition>;
   onClose: () => void;
 }) => {
-  const target = usePortal('modal-container');
   const messageContent = msg.fileMetadata.appData.content;
 
   const [message, setMessage] = useState(messageContent.message);
@@ -60,14 +52,8 @@ export const EditCommunityMessage = ({
     if (updateStatus === 'success') onClose();
   }, [updateStatus]);
 
-  const dialog = (
-    <DialogWrapper
-      onClose={onClose}
-      title={t('Edit message')}
-      isSidePanel={false}
-      size="2xlarge"
-      isPaddingLess={true}
-    >
+  return (
+    <div>
       <ErrorNotification error={updateError} />
       <RichTextEditor
         placeholder="Your message"
@@ -77,35 +63,33 @@ export const EditCommunityMessage = ({
         onChange={(e) => setMessage(e.target.value)}
         autoFocus={!isTouchDevice()}
         onSubmit={isTouchDevice() ? undefined : doSend}
-      />
-
-      <div className="mt-4 px-2 pb-4">
-        <div className="flex flex-row-reverse gap-2">
-          <ActionButton
-            type="primary"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              doSend();
-            }}
-            state={updateStatus}
-            size="square"
-            onMouseDown={(e) => e.preventDefault()}
-          >
-            {t('Save')}
-          </ActionButton>
-          <ActionButton
-            type="mute"
-            onClick={onClose}
-            size="square"
-            onMouseDown={(e) => e.preventDefault()}
-          >
-            {t('Cancel')}
-          </ActionButton>
+      >
+        <div className="">
+          <div className="flex flex-row-reverse gap-2">
+            <ActionButton
+              type="primary"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                doSend();
+              }}
+              state={updateStatus}
+              size="square"
+              onMouseDown={(e) => e.preventDefault()}
+            >
+              {t('Save')}
+            </ActionButton>
+            <ActionButton
+              type="mute"
+              onClick={onClose}
+              size="square"
+              onMouseDown={(e) => e.preventDefault()}
+            >
+              {t('Cancel')}
+            </ActionButton>
+          </div>
         </div>
-      </div>
-    </DialogWrapper>
+      </RichTextEditor>
+    </div>
   );
-
-  return createPortal(dialog, target);
 };

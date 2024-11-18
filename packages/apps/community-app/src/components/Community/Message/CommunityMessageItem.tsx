@@ -27,6 +27,7 @@ import { useCommunityMessages } from '../../../hooks/community/messages/useCommu
 import { useCommunityChannels } from '../../../hooks/community/channels/useCommunityChannels';
 import { CommunityReactions } from './reactions/CommunityReactions';
 import { useCommunityChannel } from '../../../hooks/community/channels/useCommunityChannel';
+import { CommunityMessageEditor } from './detail/CommunityMessageEditor';
 
 export const CommunityMessageItem = ({
   msg,
@@ -69,6 +70,16 @@ export const CommunityMessageItem = ({
     }, 5000);
   }, [highlight]);
 
+  const [isEdit, setIsEdit] = useState(false);
+
+  const extendedCommunityActions: CommunityActions | undefined = useMemo(() => {
+    if (!communityActions) return undefined;
+    return {
+      ...communityActions,
+      doEdit: () => setIsEdit(true),
+    };
+  }, []);
+
   return (
     <>
       {isMediaDetail ? (
@@ -79,7 +90,7 @@ export const CommunityMessageItem = ({
         />
       ) : null}
       <div
-        className={`group relative flex flex-col bg-background transition-colors duration-500 ${isDetail ? (highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000') : 'hover:bg-page-background'} ${className || ''}`}
+        className={`group relative flex flex-col transition-colors duration-500 ${isEdit ? 'bg-primary/20' : `bg-background ${isDetail ? (highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000') : 'hover:bg-page-background'}`} ${className || ''}`}
         data-unique-id={msg.fileMetadata.appData.uniqueId}
       >
         {showChannelName && !hideDetails ? (
@@ -125,13 +136,27 @@ export const CommunityMessageItem = ({
                 </>
               )}
 
-              <ContextMenu communityActions={communityActions} msg={msg} community={community} />
+              <ContextMenu
+                communityActions={extendedCommunityActions}
+                msg={msg}
+                community={community}
+              />
             </div>
 
-            {hasMedia ? (
-              <CommunityMediaMessageBody msg={msg} community={community} />
+            {isEdit && community ? (
+              <CommunityMessageEditor
+                msg={msg}
+                community={community}
+                onClose={() => setIsEdit(false)}
+              />
             ) : (
-              <CommunityTextMessageBody msg={msg} community={community} />
+              <>
+                {hasMedia ? (
+                  <CommunityMediaMessageBody msg={msg} community={community} />
+                ) : (
+                  <CommunityTextMessageBody msg={msg} community={community} />
+                )}
+              </>
             )}
             {hideThreads || !msg.fileMetadata.reactionPreview?.totalCommentCount ? null : (
               <CommunityMessageThreadSummary community={community} msg={msg} />
