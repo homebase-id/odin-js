@@ -14,6 +14,7 @@ import { CommunityChannel } from '../../providers/CommunityProvider';
 import { CommunityHistory } from './channel/CommunityHistory';
 import { MessageComposer } from './Message/MessageComposer';
 import { memo, ReactNode, useEffect, useMemo, useState } from 'react';
+import { useEditLastMessageShortcut } from '../../hooks/community/messages/useEditLastMessageShortcut';
 
 export const CommunityThread = memo(
   ({
@@ -34,6 +35,12 @@ export const CommunityThread = memo(
       messageId: threadId,
       fileSystemType: 'Standard',
     }).get;
+
+    const keyDownHandler = useEditLastMessageShortcut({
+      community,
+      channel,
+      origin: originMessage || undefined,
+    });
 
     if (!community || !threadId) {
       return null;
@@ -81,6 +88,7 @@ export const CommunityThread = memo(
               thread={originMessage || undefined}
               channel={channel}
               key={threadId}
+              onKeyDown={keyDownHandler}
               className="mt-auto lg:mt-0"
             />
           </ErrorBoundary>

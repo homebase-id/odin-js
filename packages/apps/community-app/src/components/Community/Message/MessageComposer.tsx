@@ -35,12 +35,14 @@ export const MessageComposer = ({
   channel,
   thread,
   onSend,
+  onKeyDown,
   className,
 }: {
   community: HomebaseFile<CommunityDefinition> | undefined;
   channel: HomebaseFile<CommunityChannel> | undefined;
   thread?: HomebaseFile<CommunityMessage> | undefined;
   onSend?: () => void;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
   className?: string;
 }) => {
   const threadId = thread?.fileMetadata.globalTransitId;
@@ -159,6 +161,7 @@ export const MessageComposer = ({
             autoFocus={!isTouchDevice()}
             ref={volatileRef}
             onSubmit={isTouchDevice() ? undefined : doSend}
+            onKeyDown={onKeyDown}
             disableHeadings={true}
             mentionables={mentionables}
             plugins={[ChannelPlugin]}

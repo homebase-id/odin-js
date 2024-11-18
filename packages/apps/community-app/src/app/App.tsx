@@ -130,6 +130,10 @@ function App() {
               <Route path={':channelKey'} element={<CommunityChannelDetail />} />
               <Route path={':channelKey/:chatMessageKey'} element={<CommunityChannelDetail />} />
               <Route
+                path={':channelKey/:chatMessageKey/edit'}
+                element={<CommunityChannelDetail />}
+              />
+              <Route
                 path={':channelKey/:chatMessageKey/:mediaKey'}
                 element={<CommunityChannelDetail />}
               />
@@ -138,6 +142,10 @@ function App() {
               <Route path={':channelKey/:threadKey/thread'} element={<CommunityChannelDetail />} />
               <Route
                 path={':channelKey/:threadKey/thread/:chatMessageKey'}
+                element={<CommunityChannelDetail />}
+              />
+              <Route
+                path={':channelKey/:threadKey/thread/:chatMessageKey/edit'}
                 element={<CommunityChannelDetail />}
               />
               <Route
