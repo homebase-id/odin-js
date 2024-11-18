@@ -17,7 +17,7 @@ import { formatGuidId, stringGuidsEqual, toGuidId } from '@homebase-id/js-lib/he
 import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { CommunityActions, ContextMenu } from '../channel/ContextMenu';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useMatch, useNavigate, useParams } from 'react-router-dom';
 import { CommunityDeliveryIndicator } from './CommunityDeliveryIndicator';
 import { CommunitySentTimeIndicator } from './CommunitySentTimeIndicator';
 import { CommunityMedia } from './CommunityMedia';
@@ -54,8 +54,7 @@ export const CommunityMessageItem = ({
 
   const { chatMessageKey, mediaKey } = useParams();
   const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey);
-  const isMediaDetail =
-    stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey) && mediaKey;
+  const isMediaDetail = isDetail && mediaKey;
 
   const { data: channel } = useCommunityChannel({
     communityId: community?.fileMetadata.appData.uniqueId,
@@ -70,13 +69,23 @@ export const CommunityMessageItem = ({
     }, 5000);
   }, [highlight]);
 
-  const [isEdit, setIsEdit] = useState(false);
+  const editMatch = useMatch(
+    `${COMMUNITY_ROOT_PATH}/:odinKey/:communityKey/:channelKey/:chatMessageKey/edit`
+  );
+  const editInThreadMatch = useMatch(
+    `${COMMUNITY_ROOT_PATH}/:odinKey/:communityKey/:channelKey/:threadKey/thread/:chatMessageKey/edit`
+  );
+  const isEdit = !!isDetail && !!(editMatch || editInThreadMatch);
 
+  const navigate = useNavigate();
   const extendedCommunityActions: CommunityActions | undefined = useMemo(() => {
     if (!communityActions) return undefined;
     return {
       ...communityActions,
-      doEdit: () => setIsEdit(true),
+      doEdit: () =>
+        navigate(
+          `${window.location.pathname}/${isDetail ? '' : `${msg.fileMetadata.appData.uniqueId}/`}edit`
+        ),
     };
   }, []);
 
@@ -147,7 +156,7 @@ export const CommunityMessageItem = ({
               <CommunityMessageEditor
                 msg={msg}
                 community={community}
-                onClose={() => setIsEdit(false)}
+                onClose={() => navigate(window.location.pathname.replace(/\/edit$/, ''))}
               />
             ) : (
               <>

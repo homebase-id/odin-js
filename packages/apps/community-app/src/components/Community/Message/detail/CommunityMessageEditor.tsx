@@ -63,6 +63,9 @@ export const CommunityMessageEditor = ({
         onChange={(e) => setMessage(e.target.value)}
         autoFocus={!isTouchDevice()}
         onSubmit={isTouchDevice() ? undefined : doSend}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') onClose();
+        }}
       >
         <div className="">
           <div className="flex flex-row-reverse gap-2">

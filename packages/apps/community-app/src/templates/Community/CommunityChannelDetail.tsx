@@ -14,7 +14,7 @@ import {
 } from '@homebase-id/common-app';
 import { Arrow, ChevronLeft } from '@homebase-id/common-app/icons';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CommunityChannel } from '../../providers/CommunityProvider';
 import { useCommunityChannel } from '../../hooks/community/channels/useCommunityChannel';
 import { createPortal } from 'react-dom';
@@ -22,6 +22,7 @@ import { MessageComposer } from '../../components/Community/Message/MessageCompo
 import { CommunityHistory } from '../../components/Community/channel/CommunityHistory';
 import { useMarkCommunityAsRead } from '../../hooks/community/useMarkCommunityAsRead';
 import { CommunityThread } from '../../components/Community/CommunityThread';
+import { useEditLastMessageShortcut } from '../../hooks/community/messages/useEditLastMessageShortcut';
 
 export const CommunityChannelDetail = () => {
   const { odinKey, communityKey: communityId, channelKey: channelId, threadKey } = useParams();
@@ -35,6 +36,7 @@ export const CommunityChannelDetail = () => {
   }).fetch;
 
   useMarkCommunityAsRead({ odinId: odinKey, communityId, channelId });
+  useEditLastMessageShortcut({ community, channel: channelDsr });
 
   if (!community && isFetched)
     return (

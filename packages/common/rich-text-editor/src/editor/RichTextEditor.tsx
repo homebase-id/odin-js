@@ -81,6 +81,7 @@ import { focusEditor, PlateLeaf } from '@udecode/plate-common/react';
 import { ListElement } from '../components/plate-ui/list-element';
 import { MediaOptionsContextProvider } from './MediaOptionsContext/MediaOptionsContext';
 import { useMediaOptionsContext } from './MediaOptionsContext/useMediaOptionsContext';
+import { on } from 'events';
 
 interface RTEProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -103,6 +104,8 @@ interface RTEProps {
   plugins?: (PlatePlugin | PlatePlugin<any> | SlatePlugin)[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   components?: Record<string, FunctionComponent<any>>;
+
+  onKeyDown?: (e: React.KeyboardEvent) => void;
 }
 
 const resetBlockTypesCommonRule = {
@@ -134,6 +137,7 @@ const InnerRichTextEditor = memo(
       disableHeadings,
       plugins: _plugins,
       components: _components,
+      onKeyDown,
     } = props;
 
     const { setMediaOptions } = useMediaOptionsContext();
@@ -390,6 +394,8 @@ const InnerRichTextEditor = memo(
                     }
                   }
                 }
+
+                onKeyDown?.(e);
               }}
             />
           </Plate>
