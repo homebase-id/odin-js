@@ -28,7 +28,11 @@ import {
   invalidateCommunityChannels,
   removeCommunityChannel,
 } from '../channels/useCommunityChannels';
-import { insertNewMessage, removeMessage } from '../messages/useCommunityMessages';
+import {
+  insertNewMessage,
+  invalidateCommunityMessages,
+  removeMessage,
+} from '../messages/useCommunityMessages';
 import { getPayloadAsJsonOverPeer } from '@homebase-id/js-lib/peer';
 
 const isDebug = hasDebugFlag();
@@ -74,9 +78,7 @@ export const useCommunityPeerWebsocket = (
           ) {
             // Something is up with the message, invalidate all messages for this conversation
             console.warn('[CommunityWebsocket] Invalid message received', notification, channelId);
-            queryClient.invalidateQueries({
-              queryKey: ['community-messages', formatGuidId(communityId), formatGuidId(channelId)],
-            });
+            invalidateCommunityMessages(queryClient, communityId, channelId);
             return;
           }
 
