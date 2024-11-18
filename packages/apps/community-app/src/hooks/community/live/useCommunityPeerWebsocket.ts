@@ -25,6 +25,7 @@ import {
 import { useWebsocketDrives } from '../../auth/useWebsocketDrives';
 import {
   insertNewCommunityChannel,
+  invalidateCommunityChannels,
   removeCommunityChannel,
 } from '../channels/useCommunityChannels';
 import { insertNewMessage, removeMessage } from '../messages/useCommunityMessages';
@@ -92,9 +93,7 @@ export const useCommunityPeerWebsocket = (
           );
           if (!communityChannel) {
             console.warn('[CommunityWebsocket] Invalid channel received', notification);
-            queryClient.invalidateQueries({
-              queryKey: ['community-channels', formatGuidId(communityId)],
-            });
+            invalidateCommunityChannels(queryClient, communityId);
             return;
           }
           insertNewCommunityChannel(queryClient, communityChannel, communityId);

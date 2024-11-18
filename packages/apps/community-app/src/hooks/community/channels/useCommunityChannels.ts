@@ -1,7 +1,7 @@
-import { QueryClient, useQuery } from '@tanstack/react-query';
+import { Query, QueryClient, useQuery } from '@tanstack/react-query';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { CommunityChannel, getCommunityChannels } from '../../../providers/CommunityProvider';
-import { DeletedHomebaseFile, HomebaseFile } from '@homebase-id/js-lib/core';
+import { DeletedHomebaseFile, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { formatGuidId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const useCommunityChannels = (props: { odinId?: string; communityId?: string }) => {
@@ -14,7 +14,7 @@ export const useCommunityChannels = (props: { odinId?: string; communityId?: str
 
   return {
     fetch: useQuery({
-      queryKey: ['community-channels', communityId],
+      queryKey: ['community-channels', formatGuidId(communityId)],
       queryFn: async () => fetchChannels(odinId as string, communityId as string),
       enabled: !!communityId && !!odinId,
       staleTime: 1000 * 60 * 60, // 1h
@@ -27,23 +27,19 @@ export const insertNewCommunityChannel = (
   updatedChannel: HomebaseFile<CommunityChannel> | DeletedHomebaseFile<unknown>,
   communityId: string
 ) => {
-  const existingChannels = queryClient.getQueryData<HomebaseFile<CommunityChannel>[]>([
-    'community-channels',
-    formatGuidId(communityId),
-  ]);
-  if (!existingChannels) return;
+  updateCacheCommunityChannels(queryClient, communityId, (data) => {
+    const allButThisOne = data.filter(
+      (channel) =>
+        !stringGuidsEqual(
+          channel.fileMetadata.appData.uniqueId,
+          updatedChannel.fileMetadata.appData.uniqueId
+        ) && !stringGuidsEqual(channel.fileId, updatedChannel.fileId)
+    );
 
-  const allButThisOne = existingChannels.filter(
-    (channel) =>
-      !stringGuidsEqual(
-        channel.fileMetadata.appData.uniqueId,
-        updatedChannel.fileMetadata.appData.uniqueId
-      ) && !stringGuidsEqual(channel.fileId, updatedChannel.fileId)
-  );
-
-  const newChannels =
-    updatedChannel.fileState === 'active' ? [...allButThisOne, updatedChannel] : allButThisOne;
-  queryClient.setQueryData(['community-channels', formatGuidId(communityId)], newChannels);
+    return updatedChannel.fileState === 'active'
+      ? [...allButThisOne, updatedChannel]
+      : allButThisOne;
+  });
 };
 
 export const removeCommunityChannel = (
@@ -51,23 +47,45 @@ export const removeCommunityChannel = (
   removedChannel: HomebaseFile<unknown>,
   communityId: string
 ) => {
-  const existingChannels = queryClient.getQueryData<HomebaseFile<CommunityChannel>[]>([
-    'community-channels',
-    communityId,
-  ]);
-  if (!existingChannels) return;
-
-  const allButThisOne = existingChannels.filter(
-    (channel) =>
-      !stringGuidsEqual(
-        channel.fileMetadata.appData.uniqueId,
-        removedChannel.fileMetadata.appData.uniqueId
-      ) ||
-      !stringGuidsEqual(
-        channel.fileMetadata.globalTransitId,
-        removedChannel.fileMetadata.globalTransitId
-      ) ||
-      !stringGuidsEqual(channel.fileId, removedChannel.fileId)
+  updateCacheCommunityChannels(queryClient, communityId, (data) =>
+    data.filter(
+      (channel) =>
+        !stringGuidsEqual(
+          channel.fileMetadata.appData.uniqueId,
+          removedChannel.fileMetadata.appData.uniqueId
+        ) ||
+        !stringGuidsEqual(
+          channel.fileMetadata.globalTransitId,
+          removedChannel.fileMetadata.globalTransitId
+        ) ||
+        !stringGuidsEqual(channel.fileId, removedChannel.fileId)
+    )
   );
-  queryClient.setQueryData(['community-channels', communityId], allButThisOne);
+};
+
+export const invalidateCommunityChannels = (queryClient: QueryClient, communityId?: string) => {
+  queryClient.invalidateQueries({
+    queryKey: ['community-channels', formatGuidId(communityId)].filter(Boolean),
+    exact: !!communityId,
+  });
+};
+
+export const updateCacheCommunityChannels = (
+  queryClient: QueryClient,
+  communityId: string,
+  transformFn: (
+    data: HomebaseFile<CommunityChannel>[]
+  ) => (HomebaseFile<CommunityChannel> | NewHomebaseFile<CommunityChannel>)[] | undefined
+) => {
+  const currentData = queryClient.getQueryData<HomebaseFile<CommunityChannel>[]>([
+    'community-channels',
+    formatGuidId(communityId),
+  ]);
+  if (!currentData) return;
+
+  const updatedData = transformFn(currentData);
+  if (!updatedData) return;
+
+  queryClient.setQueryData(['community-channels', formatGuidId(communityId)], updatedData);
+  return currentData;
 };

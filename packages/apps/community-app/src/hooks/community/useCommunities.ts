@@ -2,6 +2,7 @@ import {
   DrivePermissionType,
   getSecurityContextOverPeer,
   HomebaseFile,
+  NewHomebaseFile,
 } from '@homebase-id/js-lib/core';
 import {
   CommunityDefinition,
@@ -11,7 +12,7 @@ import {
   getTargetDriveFromCommunityId,
 } from '../../providers/CommunityDefinitionProvider';
 import { useAllContacts, useDotYouClientContext } from '@homebase-id/common-app';
-import { useQuery } from '@tanstack/react-query';
+import { QueryClient, useQuery } from '@tanstack/react-query';
 import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { getCommunitiesMetadata } from '../../providers/CommunityMetadataProvider';
 
@@ -126,4 +127,26 @@ export const useCommunities = (enableDiscovery?: boolean) => {
       enabled: !enableDiscovery || (enableDiscovery && fetchedAllContacts),
     }),
   };
+};
+
+export const invalidateCommunities = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['communities'] });
+};
+
+export const updateCacheCommunities = (
+  queryClient: QueryClient,
+  transformFn: (
+    data: HomebaseFile<CommunityDefinition>[]
+  ) => (HomebaseFile<CommunityDefinition> | NewHomebaseFile<CommunityDefinition>)[] | undefined
+) => {
+  const currentData = queryClient.getQueryData<HomebaseFile<CommunityDefinition>[]>([
+    'communities',
+  ]);
+  if (!currentData) return;
+
+  const newData = transformFn(currentData);
+  if (!newData) return;
+
+  queryClient.setQueryData(['communities'], newData);
+  return currentData;
 };

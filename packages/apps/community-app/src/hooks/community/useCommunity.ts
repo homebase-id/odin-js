@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { stringGuidsEqual, stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import {
   ApiType,
@@ -22,6 +22,7 @@ import {
   getExtendAppRegistrationParams,
 } from '@homebase-id/js-lib/auth';
 import { COMMUNITY_DEFAULT_GENERAL_ID } from '../../providers/CommunityProvider';
+import { invalidateCommunities, updateCacheCommunities } from './useCommunities';
 
 type useCommunityProps = {
   odinId: string | undefined;
@@ -164,24 +165,15 @@ export const useCommunity = (props?: useCommunityProps) => {
     save: useMutation({
       mutationFn: saveData,
       onMutate: async (toSaveCommunity) => {
-        await queryClient.cancelQueries({ queryKey: ['communities'] });
-
-        // Update communities
-        const previousCommunities: HomebaseFile<CommunityDefinition>[] | undefined =
-          queryClient.getQueryData(['communities']);
-        const updatedCommunities = previousCommunities?.map((chnl) =>
-          stringGuidsEqual(
-            chnl.fileMetadata.appData.uniqueId,
-            toSaveCommunity.fileMetadata.appData.uniqueId
+        const previousCommunities = updateCacheCommunities(queryClient, (data) =>
+          data?.map((chnl) =>
+            stringGuidsEqual(
+              chnl.fileMetadata.appData.uniqueId,
+              toSaveCommunity.fileMetadata.appData.uniqueId
+            )
+              ? toSaveCommunity
+              : chnl
           )
-            ? toSaveCommunity
-            : chnl
-        );
-        queryClient.setQueryData(['communities'], updatedCommunities);
-
-        queryClient.setQueryData(
-          ['community', toSaveCommunity.fileMetadata.appData.uniqueId],
-          toSaveCommunity
         );
 
         return { toSaveCommunity, previousCommunities };
@@ -190,51 +182,35 @@ export const useCommunity = (props?: useCommunityProps) => {
         console.warn(err);
 
         // Revert local caches to what they were
-        queryClient.setQueryData(['communities'], context?.previousCommunities);
+        updateCacheCommunities(queryClient, () => context?.previousCommunities);
       },
       onSettled: (_data, _error, variables) => {
-        // Boom baby!
-        if (
-          variables.fileMetadata.appData.uniqueId &&
-          variables.fileMetadata.appData.uniqueId !== ''
-        ) {
-          queryClient.invalidateQueries({
-            queryKey: ['community', variables.fileMetadata.appData.uniqueId],
-          });
-        }
-
-        queryClient.invalidateQueries({
-          queryKey: ['community', variables.fileMetadata.appData.uniqueId],
-        });
-        queryClient.invalidateQueries({ queryKey: ['communitities'] });
+        invalidateCommunity(queryClient, variables.fileMetadata.appData.uniqueId as string);
+        invalidateCommunities(queryClient);
       },
     }),
     remove: useMutation({
       mutationFn: removeCommunity,
       onMutate: async (toRemoveCommunity) => {
-        await queryClient.cancelQueries({ queryKey: ['communities'] });
-
-        const previousCommunities: HomebaseFile<CommunityDefinition>[] | undefined =
-          queryClient.getQueryData(['communities']);
-        const newCommunities = previousCommunities?.filter(
-          (community) =>
-            !stringGuidsEqual(
-              community.fileMetadata.appData.uniqueId,
-              toRemoveCommunity.fileMetadata.appData.uniqueId
-            )
+        const previousCommunities = updateCacheCommunities(queryClient, (data) =>
+          data.filter(
+            (community) =>
+              !stringGuidsEqual(
+                community.fileMetadata.appData.uniqueId,
+                toRemoveCommunity.fileMetadata.appData.uniqueId
+              )
+          )
         );
-
-        queryClient.setQueryData(['communities'], newCommunities);
 
         return { previousCommunities, toRemoveCommunity };
       },
       onError: (err, newData, context) => {
         console.error(err);
 
-        queryClient.setQueryData(['communities'], context?.previousCommunities);
+        updateCacheCommunities(queryClient, () => context?.previousCommunities);
       },
       onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ['communities'] });
+        invalidateCommunities(queryClient);
       },
     }),
     getInviteLink: useMutation({
@@ -275,4 +251,11 @@ export const getExtendCirclePermissionUrl = (
   return `${host}/owner/apprequest-circles?${stringifyToQueryParams(
     params
   )}&return=${encodeURIComponent(returnUrl)}`;
+};
+
+export const invalidateCommunity = (queryClient: QueryClient, communityId: string) => {
+  queryClient.invalidateQueries({
+    queryKey: ['community', communityId].filter(Boolean),
+    exact: !!communityId,
+  });
 };

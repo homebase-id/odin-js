@@ -8,7 +8,7 @@ import {
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import { formatGuidId, stringGuidsEqual, toGuidId } from '@homebase-id/js-lib/helpers';
-import { useCommunityChannels } from './useCommunityChannels';
+import { updateCacheCommunityChannels, useCommunityChannels } from './useCommunityChannels';
 
 export const useCommunityChannel = (props?: {
   odinId?: string;
@@ -42,12 +42,6 @@ export const useCommunityChannel = (props?: {
     create: useMutation({
       mutationFn: createChannel,
       onMutate: async ({ channelName, community }) => {
-        const existingChannels = queryClient.getQueryData<HomebaseFile<CommunityChannel>[]>([
-          'community-channels',
-          community.fileMetadata.appData.uniqueId,
-        ]);
-        if (!existingChannels) return;
-
         const newChannel: NewHomebaseFile<CommunityChannel> = {
           fileMetadata: {
             appData: {
@@ -65,11 +59,10 @@ export const useCommunityChannel = (props?: {
           },
         };
 
-        queryClient.setQueryData<
-          (HomebaseFile<CommunityChannel> | NewHomebaseFile<CommunityChannel>)[]
-        >(
-          ['community-channels', community.fileMetadata.appData.uniqueId],
-          [...existingChannels, newChannel]
+        updateCacheCommunityChannels(
+          queryClient,
+          community.fileMetadata.appData.uniqueId as string,
+          (data) => [...data, newChannel]
         );
       },
     }),
