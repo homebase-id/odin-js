@@ -1,4 +1,10 @@
-import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  InfiniteData,
+  QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { ChatDeliveryStatus, ChatMessage, getChatMessage } from '../../providers/ChatProvider';
 import {
   HomebaseFile,
@@ -16,7 +22,7 @@ import {
 } from '../../providers/ConversationProvider';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { useDotYouClientContext } from '@homebase-id/common-app';
-import { insertNewMessage } from './useChatMessages';
+import { insertNewMessage, updateCacheChatMessages } from './useChatMessages';
 
 export const useChatMessage = (props?: {
   conversationId?: string | undefined; // Optional: if we have it we can use the cache
@@ -148,17 +154,6 @@ export const useChatMessage = (props?: {
     send: useMutation({
       mutationFn: sendMessage,
       onMutate: async ({ conversation, replyId, files, message, chatId, userDate, tags }) => {
-        const existingData = queryClient.getQueryData<
-          InfiniteData<{
-            searchResults: (HomebaseFile<ChatMessage> | null)[];
-            cursorState: string;
-            queryTime: number;
-            includeMetadataHeader: boolean;
-          }>
-        >(['chat-messages', conversation.fileMetadata.appData.uniqueId]);
-
-        if (!existingData) return;
-
         const newMessageDsr: NewHomebaseFile<ChatMessage> = {
           fileMetadata: {
             created: userDate,
@@ -186,25 +181,19 @@ export const useChatMessage = (props?: {
         };
 
         const { extistingMessages } = insertNewMessage(queryClient, newMessageDsr);
-        if (!extistingMessages) {
-          return;
-        }
+        if (!extistingMessages) return;
+
         return { existingData: extistingMessages };
       },
       onSuccess: async (newMessage, params) => {
         if (!newMessage) return;
-        const extistingMessages = queryClient.getQueryData<
-          InfiniteData<{
-            searchResults: (HomebaseFile<ChatMessage> | null)[];
-            cursorState: string;
-            queryTime: number;
-            includeMetadataHeader: boolean;
-          }>
-        >(['chat-messages', params.conversation.fileMetadata.appData.uniqueId]);
-        if (extistingMessages) {
-          const newData = {
-            ...extistingMessages,
-            pages: extistingMessages?.pages?.map((page) => ({
+
+        const existingData = updateCacheChatMessages(
+          queryClient,
+          params.conversation.fileMetadata.appData.uniqueId as string,
+          (data) => ({
+            ...data,
+            pages: data?.pages?.map((page) => ({
               ...page,
               searchResults: page.searchResults.map((msg) => {
                 if (
@@ -232,76 +221,82 @@ export const useChatMessage = (props?: {
                 return msg;
               }),
             })),
-          };
+          })
+        );
 
-          queryClient.setQueryData(
-            ['chat-messages', params.conversation.fileMetadata.appData.uniqueId],
-            newData
-          );
-        }
+        return { existingData };
       },
       onError: (err, messageParams, context) => {
-        queryClient.setQueryData(
-          ['chat-messages', messageParams.conversation.fileMetadata.appData.uniqueId],
-          context?.existingData
+        updateCacheChatMessages(
+          queryClient,
+          messageParams.conversation.fileMetadata.appData.uniqueId as string,
+          () => context?.existingData
         );
       },
     }),
     update: useMutation({
       mutationFn: updateMessage,
       onMutate: async ({ conversation, updatedChatMessage }) => {
-        // Update chat messages
-        const extistingMessages = queryClient.getQueryData<
-          InfiniteData<{
-            searchResults: (HomebaseFile<ChatMessage> | null)[];
-            cursorState: string;
-            queryTime: number;
-            includeMetadataHeader: boolean;
-          }>
-        >(['chat-messages', conversation.fileMetadata.appData.uniqueId]);
-
-        if (extistingMessages) {
-          const newData = {
-            ...extistingMessages,
-            pages: extistingMessages?.pages?.map((page) => ({
+        const extistingMessages = updateCacheChatMessages(
+          queryClient,
+          conversation.fileMetadata.appData.uniqueId as string,
+          (data) => ({
+            ...data,
+            pages: data?.pages?.map((page) => ({
               ...page,
               searchResults: page.searchResults.map((msg) =>
                 stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId) ? updatedChatMessage : msg
               ),
             })),
-          };
-          queryClient.setQueryData(
-            ['chat-messages', conversation.fileMetadata.appData.uniqueId],
-            newData
-          );
-        }
+          })
+        );
 
-        // Update chat message
-        const existingMessage = queryClient.getQueryData<HomebaseFile<ChatMessage>>([
-          'chat-message',
-          updatedChatMessage.fileMetadata.appData.uniqueId,
-        ]);
-
-        if (existingMessage) {
-          queryClient.setQueryData(
-            ['chat-message', updatedChatMessage.fileMetadata.appData.uniqueId],
-            updatedChatMessage
-          );
-        }
+        const existingMessage = updateCacheChatMessage(
+          queryClient,
+          updatedChatMessage.fileMetadata.appData.uniqueId as string,
+          () => updatedChatMessage
+        );
 
         return { extistingMessages, existingMessage };
       },
       onError: (err, messageParams, context) => {
-        queryClient.setQueryData(
-          ['chat-messages', messageParams.conversation.fileMetadata.appData.uniqueId],
-          context?.extistingMessages
+        updateCacheChatMessages(
+          queryClient,
+          messageParams.conversation.fileMetadata.appData.uniqueId as string,
+          () => context?.extistingMessages
         );
 
-        queryClient.setQueryData(
-          ['chat-message', messageParams.updatedChatMessage.fileMetadata.appData.uniqueId],
-          context?.existingMessage
+        updateCacheChatMessage(
+          queryClient,
+          messageParams.updatedChatMessage.fileMetadata.appData.uniqueId as string,
+          () => context?.existingMessage
         );
       },
     }),
   };
+};
+
+export const invalidateChatMessage = (queryClient: QueryClient, messageId: string) => {
+  queryClient.invalidateQueries({ queryKey: ['chat-message', messageId] });
+};
+
+export const updateCacheChatMessage = (
+  queryClient: QueryClient,
+  messageId: string,
+  transformFn: (
+    msg: HomebaseFile<ChatMessage>
+  ) => HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage> | undefined
+) => {
+  const currentData = queryClient.getQueryData<HomebaseFile<ChatMessage>>([
+    'chat-message',
+    messageId,
+  ]);
+  if (!currentData) return;
+
+  const newData = transformFn(currentData);
+  if (!newData) return;
+
+  queryClient.setQueryData(['chat-message', messageId], newData);
+
+  return currentData;
 };
