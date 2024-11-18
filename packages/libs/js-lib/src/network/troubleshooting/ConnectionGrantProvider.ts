@@ -1,5 +1,5 @@
-import { DotYouClient } from '@homebase-id/js-lib/core';
-import { assertIfDefined } from '@homebase-id/js-lib/helpers';
+import { assertIfDefined } from '../../../helpers';
+import { DotYouClient } from '../../core/DotYouClient';
 
 const statusPath = '/circles/connections/troubleshooting-info';
 export const fetchCircleMembershipStatus = async (dotYouClient: DotYouClient, odinId: string) => {
