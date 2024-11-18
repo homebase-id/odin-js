@@ -22,7 +22,10 @@ import {
   dsrToConversation,
   dsrToConversationMetadata,
 } from '../../../providers/ConversationProvider';
-import { insertNewConversationMetadata } from '../useConversationMetadata';
+import {
+  insertNewConversationMetadata,
+  invalidateConversationMetadata,
+} from '../useConversationMetadata';
 import { insertNewConversation, invalidateConversations } from '../useConversations';
 import { processChatMessagesBatch } from './useChatWebsocket';
 import { useCallback } from 'react';
@@ -123,7 +126,7 @@ export const useChatPostInboxHandler = () => {
         // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
         invalidateChatMessages(queryClient);
         invalidateConversations(queryClient);
-        queryClient.invalidateQueries({ queryKey: ['conversation-metadata'], exact: false });
+        invalidateConversationMetadata(queryClient);
       }
     },
     [dotYouClient, queryClient]
@@ -195,7 +198,7 @@ const processConversationsMetadataBatch = async (
   await Promise.all(
     conversations.map(async (conversationsDsr) => {
       if (conversationsDsr.fileState === 'deleted') {
-        queryClient.invalidateQueries({ queryKey: ['conversation-metadata'], exact: false });
+        invalidateConversationMetadata(queryClient);
         return;
       }
 
@@ -207,7 +210,7 @@ const processConversationsMetadataBatch = async (
       );
 
       if (!updatedMetadata) {
-        queryClient.invalidateQueries({ queryKey: ['conversation-metadata'], exact: false });
+        invalidateConversationMetadata(queryClient);
         return;
       }
 

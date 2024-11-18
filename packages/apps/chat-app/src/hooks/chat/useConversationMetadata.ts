@@ -95,3 +95,13 @@ export const insertNewConversationMetadata = (
     newConversation
   );
 };
+
+export const invalidateConversationMetadata = (
+  queryClient: QueryClient,
+  conversationId?: string
+) => {
+  queryClient.invalidateQueries({
+    queryKey: ['conversation-metadata', conversationId].filter(Boolean),
+    exact: !!conversationId,
+  });
+};
