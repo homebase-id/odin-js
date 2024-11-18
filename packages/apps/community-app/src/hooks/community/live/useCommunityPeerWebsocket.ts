@@ -10,7 +10,7 @@ import {
   HomebaseFile,
   getPayloadAsJson,
 } from '@homebase-id/js-lib/core';
-import { drivesEqual, formatGuidId, hasDebugFlag, tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { drivesEqual, hasDebugFlag, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { getTargetDriveFromCommunityId } from '../../../providers/CommunityDefinitionProvider';

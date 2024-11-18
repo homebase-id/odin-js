@@ -14,7 +14,7 @@ import {
 } from '@homebase-id/common-app';
 import { Arrow, ChevronLeft } from '@homebase-id/common-app/icons';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { CommunityChannel } from '../../providers/CommunityProvider';
 import { useCommunityChannel } from '../../hooks/community/channels/useCommunityChannel';
 import { createPortal } from 'react-dom';
@@ -36,7 +36,7 @@ export const CommunityChannelDetail = () => {
   }).fetch;
 
   useMarkCommunityAsRead({ odinId: odinKey, communityId, channelId });
-  useEditLastMessageShortcut({ community, channel: channelDsr });
+  const keyDownHandler = useEditLastMessageShortcut({ community, channel: channelDsr });
 
   if (!community && isFetched)
     return (
@@ -78,7 +78,12 @@ export const CommunityChannelDetail = () => {
               />
             </ErrorBoundary>
             <ErrorBoundary>
-              <MessageComposer community={community} channel={channelDsr} key={channelId} />
+              <MessageComposer
+                community={community}
+                channel={channelDsr}
+                key={channelId}
+                onKeyDown={keyDownHandler}
+              />
             </ErrorBoundary>
           </div>
 

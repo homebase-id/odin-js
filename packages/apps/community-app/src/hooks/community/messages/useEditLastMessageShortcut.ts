@@ -1,6 +1,6 @@
 import { COMMUNITY_ROOT_PATH, useDotYouClient } from '@homebase-id/common-app';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
@@ -18,6 +18,7 @@ export const useEditLastMessageShortcut = ({
 }) => {
   const identity = useDotYouClient().getIdentity();
   const { odinKey, communityKey, channelKey, threadKey } = useParams();
+  const navigate = useNavigate();
 
   const {
     all: { data: messages },
@@ -36,22 +37,21 @@ export const useEditLastMessageShortcut = ({
       return flat;
     }, [messages, origin]) || [];
 
-  const navigate = useNavigate();
-  useEffect(() => {
-    if ((threadKey && !origin) || (!threadKey && origin)) return;
-
-    const myLastMessage = flattenedMsgs.find((msg) => msg.fileMetadata.originalAuthor === identity);
-
-    const handler = (e: KeyboardEvent) => {
+  const handler = useCallback(
+    (e: React.KeyboardEvent) => {
       if (e.key === 'ArrowUp' && (e.metaKey || e.ctrlKey)) {
-        console.log('myLastMessage', myLastMessage);
+        const myLastMessage = flattenedMsgs.find(
+          (msg) => msg.fileMetadata.originalAuthor === identity
+        );
+        if (!myLastMessage) return;
         navigate(
           `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey}/${threadKey ? `${threadKey}/thread/` : ``}${myLastMessage?.fileMetadata.appData.uniqueId}/edit`
         );
       }
-    };
+    },
+    [flattenedMsgs, threadKey]
+  );
 
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [flattenedMsgs, threadKey]);
+  if (!messages || (threadKey && !origin) || (!threadKey && origin)) return;
+  return handler;
 };

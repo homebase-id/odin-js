@@ -36,7 +36,11 @@ export const CommunityThread = memo(
       fileSystemType: 'Standard',
     }).get;
 
-    useEditLastMessageShortcut({ community, channel, origin: originMessage || undefined });
+    const keyDownHandler = useEditLastMessageShortcut({
+      community,
+      channel,
+      origin: originMessage || undefined,
+    });
 
     if (!community || !threadId) {
       return null;
@@ -84,6 +88,7 @@ export const CommunityThread = memo(
               thread={originMessage || undefined}
               channel={channel}
               key={threadId}
+              onKeyDown={keyDownHandler}
               className="mt-auto lg:mt-0"
             />
           </ErrorBoundary>

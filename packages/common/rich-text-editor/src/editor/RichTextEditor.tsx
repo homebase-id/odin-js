@@ -81,7 +81,6 @@ import { focusEditor, PlateLeaf } from '@udecode/plate-common/react';
 import { ListElement } from '../components/plate-ui/list-element';
 import { MediaOptionsContextProvider } from './MediaOptionsContext/MediaOptionsContext';
 import { useMediaOptionsContext } from './MediaOptionsContext/useMediaOptionsContext';
-import { on } from 'events';
 
 interface RTEProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
