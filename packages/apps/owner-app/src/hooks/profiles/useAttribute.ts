@@ -1,23 +1,21 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Attribute, getProfileAttribute } from '@homebase-id/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
-import { useStaticFiles } from '@homebase-id/common-app';
+import { invalidateSiteData, useStaticFiles } from '@homebase-id/common-app';
 import { AttributeDefinitions } from './AttributeDefinitions';
-import { AttributeVm } from './useAttributes';
+import { AttributeVm, invalidateAttributes, updateCacheAttributes } from './useAttributes';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { HomePageAttributes, HomePageConfig } from '@homebase-id/js-lib/public';
 import {
   removeProfileAttribute,
   saveProfileAttribute,
 } from '../../provider/profile/AttributeData/ManageAttributeProvider';
+import { invalidateAttributeVersions } from './useAttributeVersions';
 
 const getListItemCacheKey = (newAttrVm: Attribute) => {
-  return [
-    'attributes',
-    ...(newAttrVm.type !== HomePageAttributes.Theme
-      ? [newAttrVm.profileId, newAttrVm.sectionId]
-      : [HomePageConfig.DefaultDriveId, newAttrVm.type]),
-  ];
+  return newAttrVm.type !== HomePageAttributes.Theme
+    ? { profileId: newAttrVm.profileId, sectionId: newAttrVm.sectionId }
+    : { profileId: HomePageConfig.DefaultDriveId, sectionId: newAttrVm.type };
 };
 
 export const useAttribute = (props?: { profileId?: string; attributeId?: string }) => {
@@ -89,8 +87,6 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
       mutationFn: saveData,
       onMutate: async (newDsr) => {
         const newAttr = newDsr.fileMetadata.appData.content;
-        await queryClient.cancelQueries({ queryKey: ['attribute', newAttr.profileId, newAttr.id] });
-
         let typeDefinition = Object.values(AttributeDefinitions).find((def) => {
           return def.type.toString() === newAttr.type;
         });
@@ -111,7 +107,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
           typeDefinition,
         };
 
-        const updatedDsr: NewHomebaseFile<AttributeVm> = {
+        const updatedDsr: NewHomebaseFile<AttributeVm> | HomebaseFile<AttributeVm> = {
           ...newDsr,
           fileMetadata: {
             ...newDsr.fileMetadata,
@@ -122,30 +118,30 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
           },
         };
 
-        // Update single attribute
-        const singleItemCacheKey = ['attribute', newAttrVm.profileId, newAttrVm.id];
-        const previousAttr = queryClient.getQueryData(singleItemCacheKey);
-        queryClient.setQueryData(singleItemCacheKey, updatedDsr);
-
-        // Update section attributes
-        const listItemCacheKey = getListItemCacheKey(newAttrVm);
-        const previousAttributes: HomebaseFile<AttributeVm>[] | undefined =
-          queryClient.getQueryData(listItemCacheKey);
-
-        // if new attribute can't be found in existing list, then it's a new one, so can't update but need to add
-        // Sorting happens here, as it otherwise happens within the provider
-        const newAttributes = (
-          previousAttributes?.some((attr) => attr.fileMetadata.appData.content.id === newAttrVm.id)
-            ? previousAttributes?.map((attr) =>
-                attr.fileMetadata.appData.content.id === newAttrVm.id ? updatedDsr : attr
-              )
-            : [updatedDsr, ...(previousAttributes ?? [])]
-        )?.sort(
-          (a, b) =>
-            a.fileMetadata.appData.content.priority - b.fileMetadata.appData.content.priority
+        const previousAttr = updateCacheAttribute(
+          queryClient,
+          newAttrVm.profileId,
+          newAttrVm.id,
+          () => updatedDsr
         );
 
-        queryClient.setQueryData(listItemCacheKey, newAttributes);
+        // Update section attributes
+        const { profileId, sectionId } = getListItemCacheKey(newAttrVm);
+        const previousAttributes = updateCacheAttributes(
+          queryClient,
+          profileId,
+          sectionId,
+          (data) =>
+            (data?.some((attr) => attr.fileMetadata.appData.content.id === newAttrVm.id)
+              ? data?.map((attr) =>
+                  attr.fileMetadata.appData.content.id === newAttrVm.id ? updatedDsr : attr
+                )
+              : [updatedDsr, ...(data ?? [])]
+            )?.sort(
+              (a, b) =>
+                a.fileMetadata.appData.content.priority - b.fileMetadata.appData.content.priority
+            )
+        );
 
         return { previousAttr, newAttr, previousAttributes };
       },
@@ -153,33 +149,33 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
         console.error(err);
 
         // Revert local caches to what they were
-        queryClient.setQueryData(
-          ['attribute', newAttr.fileMetadata.appData.content.profileId, context?.newAttr.id],
-          context?.previousAttr
-        );
-        queryClient.setQueryData(
-          getListItemCacheKey(newAttr.fileMetadata.appData.content),
-          context?.previousAttributes
-        );
+        const previousAttr = context?.previousAttr;
+        previousAttr &&
+          updateCacheAttribute(
+            queryClient,
+            newAttr.fileMetadata.appData.content.profileId,
+            newAttr.fileMetadata.appData.content.id,
+            () => previousAttr
+          );
+
+        const { profileId, sectionId } =
+          (context?.newAttr && getListItemCacheKey(context?.newAttr)) || {};
+        const previousAttributes = context?.previousAttributes;
+        previousAttributes &&
+          profileId &&
+          sectionId &&
+          updateCacheAttributes(queryClient, profileId, sectionId, () => previousAttributes);
       },
       onSettled: (newDsr, _error, _variables) => {
         if (!newDsr) return;
         const newAttr = newDsr.fileMetadata.appData.content;
-        if (newAttr.id) {
-          queryClient.invalidateQueries({ queryKey: ['attribute', newAttr.profileId, newAttr.id] });
-        } else {
-          queryClient.invalidateQueries({ queryKey: ['attribute'] });
-        }
 
-        queryClient.invalidateQueries({ queryKey: ['site-data'] });
-        queryClient.invalidateQueries({ queryKey: getListItemCacheKey(newAttr) });
+        const { profileId, sectionId } = getListItemCacheKey(newAttr);
 
-        if (!_variables.fileId) {
-          queryClient.invalidateQueries({ queryKey: ['attributes'] });
-        }
-        queryClient.invalidateQueries({
-          queryKey: ['attributeVersions', newAttr.profileId, newAttr.type],
-        });
+        invalidateAttribute(queryClient, profileId, newAttr.id);
+        invalidateSiteData(queryClient);
+        invalidateAttributes(queryClient, profileId, _variables.fileId ? sectionId : undefined);
+        invalidateAttributeVersions(queryClient, profileId, newAttr.type);
       },
       onSuccess: (updatedAttr) => {
         if (!updatedAttr) return;
@@ -192,43 +188,86 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
         const toRemoveAttr = data.attribute.fileMetadata.appData.content;
         if (!toRemoveAttr) return;
 
-        await queryClient.cancelQueries({
-          queryKey: ['attributes', toRemoveAttr.profileId, toRemoveAttr.sectionId],
-        });
+        updateCacheAttributes(
+          queryClient,
+          toRemoveAttr.profileId,
+          toRemoveAttr.sectionId,
+          (data) => ({
+            ...data,
+            data: data.filter((attr) => attr.fileMetadata.appData.content.id !== toRemoveAttr.id),
+          })
+        );
 
         // Update section attributes
-        const listItemCacheKey = getListItemCacheKey(toRemoveAttr);
-        const previousAttributes: HomebaseFile<Attribute>[] | undefined =
-          queryClient.getQueryData(listItemCacheKey);
-
-        const updatedAttributes = previousAttributes?.filter(
-          (attr) => attr.fileMetadata.appData.content.id !== toRemoveAttr.id
+        const { profileId, sectionId } = getListItemCacheKey(toRemoveAttr);
+        const previousAttributes = updateCacheAttributes(
+          queryClient,
+          profileId,
+          sectionId,
+          (data) => data?.filter((attr) => attr.fileMetadata.appData.content.id !== toRemoveAttr.id)
         );
-        queryClient.setQueryData(listItemCacheKey, updatedAttributes);
 
         return { toRemoveAttr, previousAttributes };
       },
       onError: (err, data, context) => {
         console.error(err);
         const toRemoveAttr = data.attribute.fileMetadata.appData.content;
-        if (!toRemoveAttr) return;
+        if (!toRemoveAttr || !context?.previousAttributes) return;
+
+        const { profileId, sectionId } = getListItemCacheKey(toRemoveAttr);
         // Revert local caches to what they were
-        queryClient.setQueryData(getListItemCacheKey(toRemoveAttr), context?.previousAttributes);
+        updateCacheAttributes(queryClient, profileId, sectionId, () => context?.previousAttributes);
       },
       onSettled: (_data, _err, variables) => {
         const newAttr = variables.attribute.fileMetadata.appData.content;
         if (!newAttr) {
-          queryClient.invalidateQueries({ queryKey: ['attributes'], exact: false });
+          invalidateAttributes(
+            queryClient,
+            (variables.attribute.fileMetadata.appData.content as Attribute)?.profileId ||
+              variables.overrideProfileId
+          );
           return;
         }
         // Settimeout to allow serverSide a bit more time to process remove before fetching the data again
         setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ['site-data'] });
-          queryClient.invalidateQueries({ queryKey: getListItemCacheKey(newAttr) });
+          invalidateSiteData(queryClient);
+          const { profileId, sectionId } = getListItemCacheKey(newAttr);
+          invalidateAttributes(queryClient, profileId, sectionId);
 
           publishStaticFiles(variables.attribute?.fileMetadata?.appData?.content?.type);
         }, 1000);
       },
     }),
   };
+};
+
+export const invalidateAttribute = (
+  queryClient: QueryClient,
+  profileId?: string,
+  attributeId?: string
+) => {
+  queryClient.invalidateQueries({
+    queryKey: ['attribute', profileId, attributeId],
+    exact: !!profileId && !!attributeId,
+  });
+};
+
+export const updateCacheAttribute = (
+  queryClient: QueryClient,
+  profileId: string,
+  attributeId: string,
+  transformFn: (
+    data: HomebaseFile<Attribute>
+  ) => HomebaseFile<Attribute> | NewHomebaseFile<Attribute> | undefined
+) => {
+  const currentData = queryClient.getQueryData<HomebaseFile<Attribute>>([
+    'attribute',
+    profileId,
+    attributeId,
+  ]);
+  if (!currentData) return;
+
+  const newData = transformFn(currentData);
+  if (!newData) return;
+  queryClient.setQueryData(['attribute', profileId, attributeId], newData);
 };

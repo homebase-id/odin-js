@@ -6,8 +6,21 @@ import {
   saveChannelDefinition,
 } from '@homebase-id/js-lib/public';
 
-import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
-import { FEED_APP_ID, FEED_ROOT_PATH, t, useDotYouClient, useStaticFiles } from '../../../..';
+import {
+  ChannelDefinitionVm,
+  invalidateChannels,
+  parseChannelTemplate,
+  updateCacheChannels,
+} from './useChannels';
+import {
+  FEED_APP_ID,
+  FEED_ROOT_PATH,
+  invalidateChannel,
+  t,
+  updateCacheChannel,
+  useDotYouClient,
+  useStaticFiles,
+} from '../../../..';
 import { stringGuidsEqual, stringifyToQueryParams, toGuidId } from '@homebase-id/js-lib/helpers';
 import {
   ApiType,
@@ -101,8 +114,6 @@ export const useManageChannel = () => {
     save: useMutation({
       mutationFn: saveData,
       onMutate: async (toSaveChannel) => {
-        await queryClient.cancelQueries({ queryKey: ['channels'] });
-
         const toSaveChannelAsVm = {
           ...toSaveChannel,
           fileMetadata: {
@@ -120,26 +131,27 @@ export const useManageChannel = () => {
         } as HomebaseFile<ChannelDefinitionVm>;
 
         // Update channels
-        const previousChannels: HomebaseFile<ChannelDefinitionVm>[] | undefined =
-          queryClient.getQueryData(['channels']);
-        const updatedChannels = previousChannels?.map((chnl) =>
-          stringGuidsEqual(
-            chnl.fileMetadata.appData.uniqueId,
-            toSaveChannelAsVm.fileMetadata.appData.uniqueId
-          )
-            ? toSaveChannelAsVm
-            : chnl
-        );
-        queryClient.setQueryData(['channels'], updatedChannels);
+        const previousChannels = updateCacheChannels(queryClient, (data) => [
+          toSaveChannelAsVm,
+          ...data.filter(
+            (chnl) =>
+              chnl.fileMetadata.appData.uniqueId !== chnl.fileMetadata.appData.uniqueId &&
+              chnl.fileId !== toSaveChannelAsVm.fileId
+          ),
+        ]);
 
         // Update channel
-        queryClient.setQueryData(
-          ['channel', toSaveChannelAsVm.fileMetadata.appData.content.slug],
-          toSaveChannelAsVm
+        updateCacheChannel(
+          queryClient,
+          dotYouClient.getIdentity(),
+          toSaveChannelAsVm.fileMetadata.appData.content.slug,
+          () => toSaveChannelAsVm
         );
-        queryClient.setQueryData(
-          ['channel', toSaveChannelAsVm.fileMetadata.appData.uniqueId],
-          toSaveChannelAsVm
+        updateCacheChannel(
+          queryClient,
+          dotYouClient.getIdentity(),
+          toSaveChannelAsVm.fileMetadata.appData.uniqueId as string,
+          () => toSaveChannelAsVm
         );
 
         return { toSaveChannelAsVm, previousChannels };
@@ -148,57 +160,51 @@ export const useManageChannel = () => {
         console.error(err);
 
         // Revert local caches to what they were
-        queryClient.setQueryData(['channels'], context?.previousChannels);
+        updateCacheChannels(queryClient, () => context?.previousChannels);
       },
       onSettled: (_data, _error, variables) => {
-        // Boom baby!
         if (
           variables.fileMetadata.appData.uniqueId &&
           variables.fileMetadata.appData.uniqueId !== ''
         ) {
-          queryClient.invalidateQueries({
-            queryKey: ['channel', variables.fileMetadata.appData.uniqueId],
-          });
-          queryClient.invalidateQueries({
-            queryKey: ['channel', variables.fileMetadata.appData.content.slug],
-          });
+          invalidateChannel(
+            queryClient,
+            dotYouClient.getIdentity(),
+            variables.fileMetadata.appData.uniqueId
+          );
+          invalidateChannel(
+            queryClient,
+            dotYouClient.getIdentity(),
+            variables.fileMetadata.appData.content.slug
+          );
         }
 
-        queryClient.invalidateQueries({ queryKey: ['channel'] });
-        queryClient.invalidateQueries({ queryKey: ['channels'] });
-
-        // We don't invalidate channels by default, as fetching the channels is a combination of static and dynamic data
-        // queryClient.invalidateQueries(['channels']);
-
+        invalidateChannels(queryClient);
         publishStaticFiles('channel');
       },
     }),
     remove: useMutation({
       mutationFn: removeChannel,
       onMutate: async (toRemoveChannel) => {
-        await queryClient.cancelQueries({ queryKey: ['channels'] });
-
-        const previousChannels: HomebaseFile<ChannelDefinitionVm>[] | undefined =
-          queryClient.getQueryData(['channels']);
-        const newChannels = previousChannels?.filter(
-          (channel) =>
-            !stringGuidsEqual(
-              channel.fileMetadata.appData.uniqueId,
-              toRemoveChannel.fileMetadata.appData.uniqueId
-            )
+        const previousChannels = updateCacheChannels(queryClient, (data) =>
+          data.filter(
+            (chnl) =>
+              !stringGuidsEqual(
+                chnl.fileMetadata.appData.uniqueId,
+                toRemoveChannel.fileMetadata.appData.uniqueId
+              )
+          )
         );
-
-        queryClient.setQueryData(['channels'], newChannels);
 
         return { previousChannels, toRemoveChannel };
       },
       onError: (err, newData, context) => {
         console.error(err);
 
-        queryClient.setQueryData(['channels'], context?.previousChannels);
+        updateCacheChannels(queryClient, () => context?.previousChannels);
       },
       onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ['channels'] });
+        invalidateChannels(queryClient);
         publishStaticFiles('channel');
       },
     }),

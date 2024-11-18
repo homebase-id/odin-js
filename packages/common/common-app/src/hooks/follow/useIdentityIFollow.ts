@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchIdentityIFollow, Unfollow, UnfollowRequest } from '@homebase-id/js-lib/network';
 import { useDotYouClient } from '../auth/useDotYouClient';
+import { invalidateFollowing } from './useFollowing';
 
 type useIdentityIFollowProps = {
   odinId?: string;
@@ -22,7 +23,7 @@ export const useIdentityIFollow = ({ odinId }: useIdentityIFollowProps) => {
 
   return {
     fetch: useQuery({
-      queryKey: ['following', odinId],
+      queryKey: ['identity-following', odinId],
       queryFn: () => fetch({ odinId: odinId as string }),
       refetchOnMount: false,
       refetchOnWindowFocus: false,
@@ -32,7 +33,7 @@ export const useIdentityIFollow = ({ odinId }: useIdentityIFollowProps) => {
     unfollow: useMutation({
       mutationFn: unfollow,
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['following'] });
+        invalidateFollowing(queryClient);
       },
       onError: (ex) => {
         console.error(ex);

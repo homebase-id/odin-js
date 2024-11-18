@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { QueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import {
   BlogConfig,
   getPosts,
@@ -88,4 +88,8 @@ export const usePostsInfinite = ({
     staleTime: Infinity,
     enabled: enabled,
   });
+};
+
+export const invalidatePosts = (queryClient: QueryClient, channelId: string) => {
+  queryClient.invalidateQueries({ queryKey: ['posts', channelId], exact: false });
 };

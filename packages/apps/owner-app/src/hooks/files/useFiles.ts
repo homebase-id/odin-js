@@ -1,4 +1,10 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  QueryClient,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import {
   decryptJsonContent,
   decryptKeyHeader,
@@ -182,11 +188,18 @@ export const useFile = ({
     deleteFile: useMutation({
       mutationFn: removeFile,
       onSettled: () => {
-        queryClient.invalidateQueries({
-          queryKey: ['files', systemFileType?.toLowerCase() || 'standard', targetDrive.alias],
-          exact: false,
-        });
+        invalidateFiles(queryClient, targetDrive, systemFileType);
       },
     }),
   };
+};
+
+export const invalidateFiles = (
+  queryClient: QueryClient,
+  targetDrive: TargetDrive,
+  systemFileType?: SystemFileType
+) => {
+  queryClient.invalidateQueries({
+    queryKey: ['files', systemFileType?.toLowerCase() || 'standard', targetDrive.alias],
+  });
 };

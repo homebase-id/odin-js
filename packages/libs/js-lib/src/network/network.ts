@@ -8,6 +8,8 @@ export * from './circleNetwork/CircleMembershipProvider';
 export * from './circleNetwork/CircleDomainMembershipProvider';
 export * from './circleNetwork/CircleDataTypes';
 
+export * from './troubleshooting/ConnectionGrantProvider';
+
 // Contact
 export * from './contact/ContactProvider';
 export * from './contact/ContactTypes';

@@ -10,8 +10,15 @@ import {
 import { saveContact } from '../../provider/contact/ContactProvider';
 import { fetchConnectionInfo } from '../../provider/contact/ContactSourceProvider';
 import { useAuth } from '../auth/useAuth';
-import { PagedResult, SecurityGroupType } from '@homebase-id/js-lib/core';
+import { SecurityGroupType } from '@homebase-id/js-lib/core';
 import { getNewId } from '@homebase-id/js-lib/helpers';
+import {
+  invalidateActiveConnections,
+  invalidateConnectionInfo,
+  invalidatePendingConnections,
+  invalidateSentConnections,
+  updateCacheSentConnections,
+} from '@homebase-id/common-app';
 
 export const useConnectionActions = () => {
   const queryClient = useQueryClient();
@@ -58,8 +65,8 @@ export const useConnectionActions = () => {
     disconnect: useMutation({
       mutationFn: disconnect,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['active-connections'] });
-        queryClient.invalidateQueries({ queryKey: ['connection-info', param.connectionOdinId] });
+        invalidateActiveConnections(queryClient);
+        invalidateConnectionInfo(queryClient, param.connectionOdinId);
       },
       onError: (ex) => {
         console.error(ex);
@@ -69,12 +76,6 @@ export const useConnectionActions = () => {
     sendConnectionRequest: useMutation({
       mutationFn: sendConnectionRequest,
       onMutate: async ({ targetOdinId, message }) => {
-        await queryClient.cancelQueries({ queryKey: ['sent-requests'] });
-
-        const previousRequests = queryClient.getQueryData<PagedResult<ConnectionRequest>>([
-          'sent-requests',
-        ]);
-
         const newRequest: ConnectionRequest = {
           status: 'sent',
           recipient: targetOdinId,
@@ -84,29 +85,36 @@ export const useConnectionActions = () => {
           receivedTimestampMilliseconds: Date.now(),
           connectionRequestOrigin: 'identityowner',
         };
-        queryClient.setQueryData<PagedResult<ConnectionRequest>>(['sent-requests'], {
-          totalPages: 0,
-          ...previousRequests,
-          results: [newRequest, ...(previousRequests?.results || [])],
-        });
 
+        const previousRequests = updateCacheSentConnections(queryClient, (data) => {
+          return {
+            ...data,
+            pages: data.pages.map((page, index) =>
+              index === 0
+                ? {
+                    ...page,
+                    results: [newRequest, ...page.results],
+                  }
+                : page
+            ),
+          };
+        });
         return { previousRequests, newRequest };
       },
       onError: (err, newData, context) => {
         console.error(err);
-
-        queryClient.setQueryData(['sent-requests'], context?.previousRequests);
+        updateCacheSentConnections(queryClient, () => context?.previousRequests);
       },
       onSettled: (data) => {
-        queryClient.invalidateQueries({ queryKey: ['sent-requests'] });
-        queryClient.invalidateQueries({ queryKey: ['connection-info', data?.targetOdinId] });
+        invalidateSentConnections(queryClient);
+        data?.targetOdinId && invalidateConnectionInfo(queryClient, data.targetOdinId);
       },
     }),
     revokeConnectionRequest: useMutation({
       mutationFn: revokeConnectionRequest,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['sent-requests'] });
-        queryClient.invalidateQueries({ queryKey: ['connection-info', param.targetOdinId] });
+        invalidateSentConnections(queryClient);
+        invalidateConnectionInfo(queryClient, param.targetOdinId);
       },
       onError: (ex) => {
         console.error(ex);
@@ -115,17 +123,17 @@ export const useConnectionActions = () => {
     block: useMutation({
       mutationFn: block,
       onSettled: (_data, _err, odinId) => {
-        queryClient.invalidateQueries({ queryKey: ['pending-connections'] });
-        queryClient.invalidateQueries({ queryKey: ['active-connections'] });
-        queryClient.invalidateQueries({ queryKey: ['connection-info', odinId] });
+        invalidatePendingConnections(queryClient);
+        invalidateActiveConnections(queryClient);
+        invalidateConnectionInfo(queryClient, odinId);
       },
     }),
     unblock: useMutation({
       mutationFn: unblock,
       onSettled: (_data, _err, odinId) => {
-        queryClient.invalidateQueries({ queryKey: ['pending-connections'] });
-        queryClient.invalidateQueries({ queryKey: ['active-connections'] });
-        queryClient.invalidateQueries({ queryKey: ['connection-info', odinId] });
+        invalidatePendingConnections(queryClient);
+        invalidateActiveConnections(queryClient);
+        invalidateConnectionInfo(queryClient, odinId);
       },
     }),
   };

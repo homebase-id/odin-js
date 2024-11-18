@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { QueryClient, useQuery } from '@tanstack/react-query';
 
-import { getDetailedConnectionInfo } from '@homebase-id/js-lib/network';
+import { ConnectionInfo, getDetailedConnectionInfo } from '@homebase-id/js-lib/network';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 export const useConnection = ({ odinId }: { odinId?: string }) => {
@@ -18,4 +18,20 @@ export const useConnection = ({ odinId }: { odinId?: string }) => {
       enabled: !!odinId,
     }),
   };
+};
+
+export const invalidateConnectionInfo = async (queryClient: QueryClient, odinId: string) => {
+  await queryClient.invalidateQueries({ queryKey: ['connection-info', odinId] });
+};
+
+export const updateCachedConnectionInfo = (
+  queryClient: QueryClient,
+  odinId: string,
+  transformFn: (info: ConnectionInfo) => ConnectionInfo
+): ConnectionInfo | undefined => {
+  const queryData = queryClient.getQueryData<ConnectionInfo>(['connection-info', odinId]);
+  if (!queryData) return;
+  queryClient.setQueryData(['connection-info', odinId], transformFn(queryData));
+
+  return { ...queryData };
 };

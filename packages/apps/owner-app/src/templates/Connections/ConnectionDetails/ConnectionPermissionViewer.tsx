@@ -14,8 +14,7 @@ import AppMembershipView from '../../../components/PermissionViews/AppPermission
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import Section from '../../../components/ui/Sections/Section';
 import { useApps } from '../../../hooks/apps/useApps';
-import { AccessGrant } from '@homebase-id/js-lib/network';
-import { CircleMembershipStatus } from '../../../provider/network/troubleshooting/ConnectionGrantProvider';
+import { AccessGrant, CircleMembershipStatus } from '@homebase-id/js-lib/network';
 
 export const ConnectionPermissionViewer = ({
   accessGrant,
@@ -134,7 +133,7 @@ export const ConnectionPermissionViewer = ({
                         </div>
                       ) : (
                         <div className="flex flex-row items-center gap-1 opacity-50">
-                          <Check className="h-4 w-4 " />
+                          <Check className="h-4 w-4" />
                           <p className="text-sm">{t('Validated')}</p>
                         </div>
                       )}
@@ -167,7 +166,7 @@ export const ConnectionPermissionViewer = ({
                     </div>
                   ) : (
                     <div className="flex flex-row items-center gap-1 opacity-50">
-                      <Check className="h-4 w-4 " />
+                      <Check className="h-4 w-4" />
                       <p className="text-sm">{t('Validated')}</p>
                     </div>
                   )}

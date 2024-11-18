@@ -3,6 +3,7 @@ import { BlogConfig, PostContent } from '@homebase-id/js-lib/public';
 
 import { ApiType, DotYouClient, HomebaseFile, deleteFile } from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../auth/useDotYouClient';
+import { invalidateSocialFeeds } from './useSocialFeed';
 
 export const useManageSocialFeed = (props?: { odinId: string }) => {
   const odinId = props?.odinId;
@@ -41,12 +42,7 @@ export const useManageSocialFeed = (props?: { odinId: string }) => {
   return {
     removeFromFeed: useMutation({
       mutationFn: removeFromFeed,
-      onMutate: async () => {
-        //
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
-      },
+      onSettled: () => invalidateSocialFeeds(queryClient),
     }),
     getReportContentUrl: getContentReportUrl,
   };

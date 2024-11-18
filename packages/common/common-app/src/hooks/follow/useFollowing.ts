@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createOrUpdateFollow, fetchFollowing, FollowRequest } from '@homebase-id/js-lib/network';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
@@ -46,11 +46,15 @@ export const useFollowingInfinite = () => {
     follow: useMutation({
       mutationFn: createOrUpdateFollowInternal,
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['following'] });
+        invalidateFollowing(queryClient);
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
   };
+};
+
+export const invalidateFollowing = async (queryClient: QueryClient) => {
+  await queryClient.invalidateQueries({ queryKey: ['following'] });
 };

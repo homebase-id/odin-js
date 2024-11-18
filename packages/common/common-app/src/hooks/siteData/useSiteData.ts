@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { QueryClient, useQuery } from '@tanstack/react-query';
 import {
   BuiltInAttributes,
   BuiltInProfiles,
@@ -237,6 +237,10 @@ export const useSiteData = () => {
     refetchOnWindowFocus: false,
     staleTime: Infinity,
   });
+};
+
+export const invalidateSiteData = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['site-data'] });
 };
 
 const getOwnerDataStatic = (fileData: Map<string, ResponseEntry[]>): OwnerSiteData | undefined => {

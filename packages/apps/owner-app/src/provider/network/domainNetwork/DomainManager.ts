@@ -1,4 +1,3 @@
-import { DomainMembership } from '@homebase-id/common-app';
 import { DotYouClient } from '@homebase-id/js-lib/core';
 
 const root = '/youauthdomain';
@@ -11,15 +10,6 @@ export interface DomainClient {
   friendlyName: string;
   isRevoked: boolean;
 }
-
-export const getDomainInfo = async (dotYouClient: DotYouClient, domain: string) => {
-  const client = dotYouClient.createAxiosClient();
-  const url = root + '/domain';
-
-  return client.post<DomainMembership>(url, { domain }).then((response) => {
-    return response.data;
-  });
-};
 
 export const getDomainClients = async (dotYouClient: DotYouClient, domain: string) => {
   const client = dotYouClient.createAxiosClient();

@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
 import {
   getDomainClients,
@@ -36,11 +36,18 @@ export const useDomainClients = ({ domain }: { domain?: string }) => {
     removeClient: useMutation({
       mutationFn: removeClient,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries({ queryKey: ['domain-clients', param.domain] });
+        invalidateDomainClients(queryClient, param.domain);
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
   };
+};
+
+export const invalidateDomainClients = (queryClient: QueryClient, domain?: string | undefined) => {
+  queryClient.invalidateQueries({
+    queryKey: ['domain-clients', domain],
+    exact: !!domain,
+  });
 };

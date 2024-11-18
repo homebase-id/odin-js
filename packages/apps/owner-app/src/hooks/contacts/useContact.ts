@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { saveContact } from '../../provider/contact/ContactProvider';
 import {
   fetchConnectionInfo,
@@ -154,26 +154,48 @@ export const useContact = ({
     }),
     refresh: useMutation({
       mutationFn: refresh,
-      onMutate: async (newContact) => {
-        await queryClient.cancelQueries({ queryKey: ['contact', odinId ?? id] });
-
-        // Update single attribute
-        const previousContact = queryClient.getQueryData(['contact', odinId ?? id]);
-
-        return { previousContact, newContact };
+      onMutate: async ({ contact }) => {
+        const previousContact =
+          (odinId && updateCacheContact(queryClient, odinId, () => contact)) ||
+          (id && updateCacheContact(queryClient, id, () => contact));
+        return { previousContact, contact };
       },
       onError: (err, _newAttr, context) => {
         console.error(err);
 
         // Revert local caches to what they were
-        queryClient.setQueryData(['contact', odinId ?? id], context?.previousContact);
+        const previousContact = context?.previousContact;
+        previousContact && odinId && updateCacheContact(queryClient, odinId, () => previousContact);
+        previousContact && id && updateCacheContact(queryClient, id, () => previousContact);
       },
       onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ['contact', odinId] });
-        queryClient.invalidateQueries({ queryKey: ['contact', id] });
+        odinId && invalidateContact(queryClient, odinId);
+        id && invalidateContact(queryClient, id);
       },
     }),
   };
+};
+
+export const invalidateContact = (queryClient: QueryClient, odinId: string) => {
+  queryClient.invalidateQueries({ queryKey: ['contact', odinId] });
+};
+
+export const updateCacheContact = (
+  queryClient: QueryClient,
+  odinId: string,
+  transformFn: (data: HomebaseFile<ContactFile>) => HomebaseFile<ContactFile> | undefined
+) => {
+  const currentData = queryClient.getQueryData<HomebaseFile<ContactFile> | undefined>([
+    'contact',
+    odinId,
+  ]);
+  if (!currentData) return;
+
+  const newData = transformFn(currentData);
+  if (!newData) return;
+
+  queryClient.setQueryData(['contact', odinId], newData);
+  return currentData;
 };
 
 export const parseContact = (

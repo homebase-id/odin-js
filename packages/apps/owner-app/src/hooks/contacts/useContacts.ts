@@ -13,7 +13,7 @@ export const useContacts = () => {
   const fetch = async (
     cursorState?: string
   ): Promise<CursoredResult<NewHomebaseFile<ContactVm>[]>> => {
-    const data = await await getContacts(dotYouClient, cursorState, pageSize);
+    const data = await getContacts(dotYouClient, cursorState, pageSize);
     return { ...data, results: data.results.map((contact) => parseContact(contact)) };
   };
 

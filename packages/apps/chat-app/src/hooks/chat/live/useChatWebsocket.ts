@@ -24,11 +24,15 @@ import {
   dsrToConversationMetadata,
 } from '../../../providers/ConversationProvider';
 import { websocketDrives } from '../../auth/useAuth';
-import { insertNewMessage, insertNewMessagesForConversation } from '../useChatMessages';
+import {
+  insertNewMessage,
+  insertNewMessagesForConversation,
+  invalidateChatMessages,
+} from '../useChatMessages';
 import { insertNewReaction, removeReaction } from '../useChatReaction';
 import { getConversationQueryOptions, useConversation } from '../useConversation';
 import { insertNewConversationMetadata } from '../useConversationMetadata';
-import { insertNewConversation } from '../useConversations';
+import { insertNewConversation, invalidateConversations } from '../useConversations';
 
 const isDebug = hasDebugFlag();
 
@@ -81,7 +85,7 @@ export const useChatSocketHandler = () => {
         drivesEqual(notification.targetDrive, ChatDrive)
       ) {
         if (notification.header.fileMetadata.appData.fileType === CHAT_MESSAGE_FILE_TYPE) {
-          const conversationId = notification.header.fileMetadata.appData.groupId;
+          const conversationId = notification.header.fileMetadata.appData.groupId as string;
           const isNewMessageFile = notification.notificationType === 'fileAdded';
 
           if (isNewMessageFile) {
@@ -111,7 +115,7 @@ export const useChatSocketHandler = () => {
           ) {
             // Something is up with the message, invalidate all messages for this conversation
             console.warn('[ChatWebsocket] Invalid message received', notification, conversationId);
-            queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+            invalidateChatMessages(queryClient, conversationId);
             return;
           }
 
@@ -136,7 +140,7 @@ export const useChatSocketHandler = () => {
             !updatedConversation ||
             Object.keys(updatedConversation.fileMetadata.appData.content).length === 0
           ) {
-            queryClient.invalidateQueries({ queryKey: ['conversations'] });
+            invalidateConversations(queryClient);
             return;
           }
 
@@ -163,11 +167,11 @@ export const useChatSocketHandler = () => {
         drivesEqual(notification.targetDrive, ChatDrive)
       ) {
         if (notification.header.fileMetadata.appData.fileType === CHAT_MESSAGE_FILE_TYPE) {
-          const conversationId = notification.header.fileMetadata.appData.groupId;
-          queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+          const conversationId = notification.header.fileMetadata.appData.groupId as string;
+          invalidateChatMessages(queryClient, conversationId);
         }
         if (notification.header.fileMetadata.appData.fileType === CHAT_CONVERSATION_FILE_TYPE) {
-          queryClient.invalidateQueries({ queryKey: ['conversations'] });
+          invalidateConversations(queryClient);
         }
       }
 

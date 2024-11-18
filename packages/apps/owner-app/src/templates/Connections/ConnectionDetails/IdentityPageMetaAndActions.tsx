@@ -3,7 +3,6 @@ import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { useContact } from '../../../hooks/contacts/useContact';
 import { useEffect, useState } from 'react';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
-import { useConnectionGrantStatus } from '../../../hooks/connections/useConnectionGrantStatus';
 import { hasDebugFlag, jsonStringify64 } from '@homebase-id/js-lib/helpers';
 import { OutgoingConnectionDialog } from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
@@ -18,6 +17,7 @@ import {
   ActionGroup,
   ConfirmDialog,
   useConnection,
+  useConnectionGrantStatus,
 } from '@homebase-id/common-app';
 import {
   House,

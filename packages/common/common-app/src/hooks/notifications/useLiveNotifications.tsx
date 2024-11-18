@@ -21,6 +21,12 @@ import {
   COMMUNITY_APP_ID,
 } from '../../constants';
 import { hasDebugFlag, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import {
+  invalidateActiveConnections,
+  invalidatePendingConnection,
+  invalidatePendingConnections,
+  invalidateSentConnections,
+} from '../connections/useConnections';
 
 interface LiveNotification {
   title: string;
@@ -70,12 +76,11 @@ export const useLiveNotifications = (props: { drives?: TargetDrive[] } | undefin
       ]);
 
       if (wsNotification.notificationType === 'connectionRequestReceived') {
-        queryClient.invalidateQueries({ queryKey: ['pending-connections'] });
-        queryClient.invalidateQueries({ queryKey: ['pending-connection'] });
+        invalidatePendingConnections(queryClient);
+        invalidatePendingConnection(queryClient);
       } else {
-        // Accepted
-        queryClient.invalidateQueries({ queryKey: ['sent-requests'] });
-        queryClient.invalidateQueries({ queryKey: ['active-connections'] });
+        invalidateSentConnections(queryClient);
+        invalidateActiveConnections(queryClient);
       }
     } else if (wsNotification.notificationType === 'appNotificationAdded') {
       const clientNotification = wsNotification as AppNotification;

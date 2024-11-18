@@ -117,20 +117,24 @@ const PendingConnectionSection = ({
 }: {
   setNoPendingConnections: () => void;
 }) => {
-  const [pendingPage, setPendingPage] = useState(1);
+  const [activePage, setActivePage] = useState(1);
 
-  const { data: pendingConnections, isLoading: pendingConnectionsLoading } = usePendingConnections({
-    pageSize: 6,
-    pageNumber: pendingPage,
-  }).fetch;
+  const { data, isLoading, isFetchedAfterMount, hasNextPage, fetchNextPage } =
+    usePendingConnections().fetch;
+  const flatPendingConnections = data?.pages?.map((page) => page.results).flat();
 
   useEffect(() => {
-    if (!pendingConnections?.results?.length) setNoPendingConnections();
-  }, [pendingConnections]);
+    if (!isFetchedAfterMount) return;
+    if (data?.pages[0]?.results?.length === 0) setNoPendingConnections();
 
-  if (!pendingConnections?.results?.length) {
-    return null;
-  }
+    if (data?.pages[activePage - 1]) {
+      // already have that
+    } else {
+      fetchNextPage();
+    }
+  }, [activePage, isFetchedAfterMount]);
+
+  if (!flatPendingConnections?.length) return null;
 
   return (
     <>
@@ -138,21 +142,21 @@ const PendingConnectionSection = ({
         title={t('Connection requests')}
         actions={
           <Pager
-            totalPages={pendingConnections?.totalPages}
-            setPage={setPendingPage}
-            currentPage={pendingPage}
+            totalPages={hasNextPage ? activePage + 1 : activePage}
+            setPage={setActivePage}
+            currentPage={activePage}
           />
         }
       />
       <div className="-m-1 mt-5 flex flex-row flex-wrap">
-        {pendingConnectionsLoading && (
+        {isLoading && (
           <>
             <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
             <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
           </>
         )}
 
-        {pendingConnections?.results?.map((pendingConnection) => (
+        {flatPendingConnections?.map((pendingConnection) => (
           <PersonIncomingRequest
             className="w-full p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6"
             senderOdinId={pendingConnection.senderOdinId}
@@ -163,9 +167,9 @@ const PendingConnectionSection = ({
 
       <div className="flex flex-row justify-center pt-5 md:hidden">
         <Pager
-          totalPages={pendingConnections?.totalPages}
-          setPage={setPendingPage}
-          currentPage={pendingPage}
+          totalPages={hasNextPage ? activePage + 1 : activePage}
+          setPage={setActivePage}
+          currentPage={activePage}
           size="xl"
         />
       </div>
@@ -174,19 +178,25 @@ const PendingConnectionSection = ({
 };
 
 const SentConnectionSection = ({ setNoSentConnections }: { setNoSentConnections: () => void }) => {
-  const [sentPage, setSentPage] = useState(1);
-
-  const { data: sentRequests, isLoading: sentRequestsLoading } = useSentConnections({
-    pageSize: 6,
-    pageNumber: sentPage,
-    includeIntroductions: false,
-  }).fetch;
+  const [activePage, setActivePage] = useState(1);
+  const { data, isLoading, isFetchedAfterMount, hasNextPage, fetchNextPage } =
+    useSentConnections().fetch;
+  const flatSentConnections = data?.pages?.map((page) => page.results).flat();
 
   useEffect(() => {
-    if (!sentRequests?.results?.length) setNoSentConnections();
-  }, [sentRequests]);
+    if (!isFetchedAfterMount) return;
+    if (data?.pages[0]?.results?.length === 0) setNoSentConnections();
 
-  if (!sentRequests?.results?.length) {
+    if (data?.pages[activePage - 1]) {
+      // already have that
+    } else {
+      fetchNextPage();
+    }
+  }, [activePage, isFetchedAfterMount]);
+
+  if (!flatSentConnections?.length) return null;
+
+  if (!flatSentConnections?.length) {
     return null;
   }
 
@@ -196,21 +206,21 @@ const SentConnectionSection = ({ setNoSentConnections }: { setNoSentConnections:
         title={t('Sent Connection Requests')}
         actions={
           <Pager
-            totalPages={sentRequests?.totalPages}
-            setPage={setSentPage}
-            currentPage={sentPage}
+            totalPages={hasNextPage ? activePage + 1 : activePage}
+            setPage={setActivePage}
+            currentPage={activePage}
           />
         }
       />
       <div className="-m-1 mt-5 flex flex-row flex-wrap">
-        {sentRequestsLoading && (
+        {isLoading && (
           <>
             <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
             <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
           </>
         )}
 
-        {sentRequests?.results?.map((sentRequest) => (
+        {flatSentConnections?.map((sentRequest) => (
           <PersonOutgoingRequest
             className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6"
             recipientOdinId={sentRequest.recipient}
@@ -220,9 +230,9 @@ const SentConnectionSection = ({ setNoSentConnections }: { setNoSentConnections:
       </div>
       <div className="flex flex-row justify-center pt-5 md:hidden">
         <Pager
-          totalPages={sentRequests?.totalPages}
-          setPage={setSentPage}
-          currentPage={sentPage}
+          totalPages={hasNextPage ? activePage + 1 : activePage}
+          setPage={setActivePage}
+          currentPage={activePage}
           size="xl"
         />
       </div>
@@ -303,19 +313,26 @@ const OutgoingIntroductionsSection = ({
 }: {
   setNoSentConnections: () => void;
 }) => {
-  const [sentPage, setSentPage] = useState(1);
-
-  const { data: sentRequests, isLoading: sentRequestsLoading } = useSentConnections({
-    pageSize: 6,
-    pageNumber: sentPage,
+  const [activePage, setActivePage] = useState(1);
+  const { data, isLoading, isFetchedAfterMount, hasNextPage, fetchNextPage } = useSentConnections({
     includeIntroductions: 'only',
   }).fetch;
+  const flatSentConnections = data?.pages?.map((page) => page.results).flat();
 
   useEffect(() => {
-    if (!sentRequests?.results?.length) setNoSentConnections();
-  }, [sentRequests]);
+    if (!isFetchedAfterMount) return;
+    if (data?.pages[0]?.results?.length === 0) setNoSentConnections();
 
-  if (!sentRequests?.results?.length) {
+    if (data?.pages[activePage - 1]) {
+      // already have that
+    } else {
+      fetchNextPage();
+    }
+  }, [activePage, isFetchedAfterMount]);
+
+  if (!flatSentConnections?.length) return null;
+
+  if (!flatSentConnections?.length) {
     return null;
   }
 
@@ -325,21 +342,21 @@ const OutgoingIntroductionsSection = ({
         title={t('Outgoing introductions')}
         actions={
           <Pager
-            totalPages={sentRequests?.totalPages}
-            setPage={setSentPage}
-            currentPage={sentPage}
+            totalPages={hasNextPage ? activePage + 1 : activePage}
+            setPage={setActivePage}
+            currentPage={activePage}
           />
         }
       />
       <div className="-m-1 mt-5 flex flex-row flex-wrap">
-        {sentRequestsLoading && (
+        {isLoading && (
           <>
             <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
             <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
           </>
         )}
 
-        {sentRequests?.results?.map((sentRequest) => (
+        {flatSentConnections?.map((sentRequest) => (
           <PersonOutgoingRequest
             className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6"
             recipientOdinId={sentRequest.recipient}
@@ -349,9 +366,9 @@ const OutgoingIntroductionsSection = ({
       </div>
       <div className="flex flex-row justify-center pt-5 md:hidden">
         <Pager
-          totalPages={sentRequests?.totalPages}
-          setPage={setSentPage}
-          currentPage={sentPage}
+          totalPages={hasNextPage ? activePage + 1 : activePage}
+          setPage={setActivePage}
+          currentPage={activePage}
           size="xl"
         />
       </div>

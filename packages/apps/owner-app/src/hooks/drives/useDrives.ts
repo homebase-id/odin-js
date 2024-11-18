@@ -6,9 +6,7 @@ export const useDrives = () => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const fetchAll = async (): Promise<DriveDefinition[]> => {
-    return await (
-      await getDrives(dotYouClient, { pageNumber: 1, pageSize: 100 })
-    ).results;
+    return (await getDrives(dotYouClient, { pageNumber: 1, pageSize: 100 })).results;
   };
 
   return {

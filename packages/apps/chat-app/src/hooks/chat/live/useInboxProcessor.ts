@@ -22,10 +22,14 @@ import {
   dsrToConversation,
   dsrToConversationMetadata,
 } from '../../../providers/ConversationProvider';
-import { insertNewConversationMetadata } from '../useConversationMetadata';
-import { insertNewConversation } from '../useConversations';
+import {
+  insertNewConversationMetadata,
+  invalidateConversationMetadata,
+} from '../useConversationMetadata';
+import { insertNewConversation, invalidateConversations } from '../useConversations';
 import { processChatMessagesBatch } from './useChatWebsocket';
 import { useCallback } from 'react';
+import { invalidateChatMessages } from '../useChatMessages';
 
 const isDebug = hasDebugFlag();
 
@@ -120,9 +124,9 @@ export const useChatPostInboxHandler = () => {
         );
       } else {
         // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
-        queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
-        queryClient.invalidateQueries({ queryKey: ['conversations'], exact: false });
-        queryClient.invalidateQueries({ queryKey: ['conversation-metadata'], exact: false });
+        invalidateChatMessages(queryClient);
+        invalidateConversations(queryClient);
+        invalidateConversationMetadata(queryClient);
       }
     },
     [dotYouClient, queryClient]
@@ -165,7 +169,7 @@ const processConversationsBatch = async (
   await Promise.all(
     conversations.map(async (conversationsDsr) => {
       if (conversationsDsr.fileState === 'deleted') {
-        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+        invalidateConversations(queryClient);
         return;
       }
 
@@ -177,7 +181,7 @@ const processConversationsBatch = async (
       );
 
       if (!updatedConversation) {
-        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+        invalidateConversations(queryClient);
         return;
       }
 
@@ -194,7 +198,7 @@ const processConversationsMetadataBatch = async (
   await Promise.all(
     conversations.map(async (conversationsDsr) => {
       if (conversationsDsr.fileState === 'deleted') {
-        queryClient.invalidateQueries({ queryKey: ['conversation-metadata'], exact: false });
+        invalidateConversationMetadata(queryClient);
         return;
       }
 
@@ -206,7 +210,7 @@ const processConversationsMetadataBatch = async (
       );
 
       if (!updatedMetadata) {
-        queryClient.invalidateQueries({ queryKey: ['conversation-metadata'], exact: false });
+        invalidateConversationMetadata(queryClient);
         return;
       }
 
