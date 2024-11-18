@@ -31,7 +31,6 @@ import {
   dsrToCommunityChannel,
 } from '../../../providers/CommunityProvider';
 import { insertNewCommunityChannel } from '../channels/useCommunityChannels';
-import { invalidateChatMessage } from '@homebase-id/chat-app/src/hooks/chat/useChatMessage';
 import { invalidateChatMessages } from '@homebase-id/chat-app/src/hooks/chat/useChatMessages';
 
 const isDebug = hasDebugFlag();

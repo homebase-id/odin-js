@@ -20,11 +20,7 @@ import {
   SecurityGroupType,
 } from '@homebase-id/js-lib/core';
 import { formatGuidId, getNewId, getNewXorId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import {
-  ChatConversationsReturn,
-  invalidateConversations,
-  updateCacheConversations,
-} from './useConversations';
+import { invalidateConversations, updateCacheConversations } from './useConversations';
 import { deleteAllChatMessages } from '../../providers/ChatProvider';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { invalidateChatMessages } from './useChatMessages';

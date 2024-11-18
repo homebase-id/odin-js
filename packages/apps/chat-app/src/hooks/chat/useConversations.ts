@@ -3,7 +3,7 @@ import { InfiniteData, QueryClient, useInfiniteQuery } from '@tanstack/react-que
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { invalidatConversation, updateCacheConversation } from './useConversation';
+import { invalidateConversation, updateCacheConversation } from './useConversation';
 
 export interface ChatConversationsReturn {
   searchResults: HomebaseFile<UnifiedConversation>[];
@@ -86,7 +86,7 @@ export const insertNewConversation = (
     () => newConversation
   );
   if (!existingConversation) {
-    invalidatConversation(queryClient, newConversation.fileMetadata.appData.uniqueId);
+    invalidateConversation(queryClient, newConversation.fileMetadata.appData.uniqueId);
   }
 };
 

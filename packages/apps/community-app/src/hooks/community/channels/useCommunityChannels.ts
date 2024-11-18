@@ -1,4 +1,4 @@
-import { Query, QueryClient, useQuery } from '@tanstack/react-query';
+import { QueryClient, useQuery } from '@tanstack/react-query';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { CommunityChannel, getCommunityChannels } from '../../../providers/CommunityProvider';
 import { DeletedHomebaseFile, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
