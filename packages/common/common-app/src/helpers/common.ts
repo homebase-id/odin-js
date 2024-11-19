@@ -1,5 +1,5 @@
 import { InfiniteData } from '@tanstack/react-query';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { HomebaseFile, RichText } from '@homebase-id/js-lib/core';
 import { Attribute } from '@homebase-id/js-lib/profile';
 
 export const stringify = (obj: Record<string, unknown>) => {
@@ -42,7 +42,7 @@ export const flattenInfinteData = <T>(
     .slice(0, pageSize ? rawData?.pages.length * pageSize : undefined) || []) as T[];
 };
 
-export const ellipsisAtMaxChar = (str?: string, maxChar?: number) => {
+export const ellipsisAtMaxChar = (str: string | undefined, maxChar?: number) => {
   if (!str || !maxChar) {
     return str;
   }

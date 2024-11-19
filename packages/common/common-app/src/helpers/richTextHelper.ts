@@ -62,3 +62,31 @@ export const getReadingTime = (body?: RichText | string): ReadTimeStats | undefi
     minutes: Math.ceil(wordsCount / 200),
   };
 };
+
+export const ellipsisAtMaxCharOfRichText = (richText: RichText | undefined, maxChar: number) => {
+  if (richText === undefined) return [];
+
+  let charCount = 0;
+  const result: RichText = [];
+
+  for (let i = 0; i < richText.length; i++) {
+    const entry = richText[i];
+    if ('text' in entry && typeof entry.text === 'string') {
+      if (charCount + entry.text.length > maxChar) {
+        entry.text = entry.text.substring(0, maxChar - charCount) + '...';
+        return result;
+      }
+
+      charCount +=
+        ('text' in entry && typeof entry.text === 'string' ? entry.text?.length : undefined) || 0;
+    }
+
+    if ('children' in entry && entry.children !== undefined && Array.isArray(entry.children)) {
+      entry.children = ellipsisAtMaxCharOfRichText(entry.children, maxChar - charCount);
+    }
+
+    result.push(entry);
+  }
+
+  return result;
+};

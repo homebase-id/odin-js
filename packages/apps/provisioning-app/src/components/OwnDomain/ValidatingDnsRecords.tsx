@@ -7,7 +7,7 @@ import {
 } from '../../hooks/ownDomain/useOwnDomain';
 import { hasInvalidDnsRecords } from '../../hooks/commonDomain/commonDomain';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert } from '@homebase-id/common-app';
 import { Arrow } from '@homebase-id/common-app/icons';
 
@@ -38,13 +38,18 @@ const ValidatingDnsRecords = ({ domain, setProvisionState }: Props) => {
     [dnsConfig]
   );
 
-  const showStatus = isDnsStateFetched && !statePending;
+  const [showStatus, setShowStatus] = useState(false);
+  const canShowStatus = isDnsStateFetched && !statePending;
 
   return (
     <section className="max-w-3xl">
       <AlertError error={statusError || initialError} />
       {activeDnsConfig ? (
-        <DnsSettingsView domain={domain} dnsConfig={activeDnsConfig} showStatus={showStatus} />
+        <DnsSettingsView
+          domain={domain}
+          dnsConfig={activeDnsConfig}
+          showStatus={showStatus && canShowStatus}
+        />
       ) : null}
       {dnsConfig && hasInvalid && showStatus ? (
         <Alert type="info" className="mt-5">
@@ -56,7 +61,10 @@ const ValidatingDnsRecords = ({ domain, setProvisionState }: Props) => {
       <div className="mt-10 flex flex-row-reverse">
         {hasInvalid ? (
           <ActionButton
-            onClick={() => refetchDnsStatus()}
+            onClick={() => {
+              setShowStatus(true);
+              refetchDnsStatus();
+            }}
             icon={Arrow}
             state={isFetching ? 'loading' : undefined}
           >
