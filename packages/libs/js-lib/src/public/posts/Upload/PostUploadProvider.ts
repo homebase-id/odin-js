@@ -1,5 +1,5 @@
-import { DotYouClient } from '../../core/DotYouClient';
-import { patchFile, uploadFile } from '../../core/DriveData/Upload/DriveFileUploadProvider';
+import { DotYouClient } from '../../../core/DotYouClient';
+import { patchFile, uploadFile } from '../../../core/DriveData/Upload/DriveFileUploader';
 import {
   PriorityOptions,
   ScheduleOptions,
@@ -8,9 +8,12 @@ import {
   UpdateResult,
   UploadInstructionSet,
   UploadResult,
-} from '../../core/DriveData/Upload/DriveUploadTypes';
-import { SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
-import { DEFAULT_PAYLOAD_KEY, GenerateKeyHeader } from '../../core/DriveData/Upload/UploadHelpers';
+} from '../../../core/DriveData/Upload/DriveUploadTypes';
+import { SecurityGroupType } from '../../../core/DriveData/File/DriveFileTypes';
+import {
+  DEFAULT_PAYLOAD_KEY,
+  GenerateKeyHeader,
+} from '../../../core/DriveData/Upload/UploadHelpers';
 import {
   HomebaseFile,
   NewHomebaseFile,
@@ -21,15 +24,18 @@ import {
   NewMediaFile,
   MediaFile,
   decryptKeyHeader,
-} from '../../core/core';
-import { getNewId, getRandom16ByteArray, toGuidId } from '../../helpers/DataUtil';
-import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
-import { getPost } from './PostProvider';
-import { PostContent } from './PostTypes';
-import { makeGrid } from '../../helpers/ImageMerger';
-import { LinkPreview } from '../../media/media';
-import { getFileHeaderBytesOverPeerByGlobalTransitId, uploadFileOverPeer } from '../../peer/peer';
-import { TransitInstructionSet, TransitUploadResult } from '../../peer/peerData/PeerTypes';
+} from '../../../core/core';
+import { getNewId, getRandom16ByteArray, toGuidId } from '../../../helpers/DataUtil';
+import { GetTargetDriveFromChannelId } from '../Channel/PostChannelManager';
+import { getPost } from '../PostProvider';
+import { PostContent } from '../PostTypes';
+import { makeGrid } from '../../../helpers/ImageMerger';
+import { LinkPreview } from '../../../media/media';
+import {
+  getFileHeaderBytesOverPeerByGlobalTransitId,
+  uploadFileOverPeer,
+} from '../../../peer/peer';
+import { TransitInstructionSet, TransitUploadResult } from '../../../peer/peerData/PeerTypes';
 
 import {
   getPayloadForLinkPreview,

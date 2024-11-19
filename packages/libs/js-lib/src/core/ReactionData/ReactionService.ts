@@ -1,8 +1,8 @@
 import { tryJsonParse } from '../../helpers/DataUtil';
 
 import { DotYouClient } from '../DotYouClient';
-import { EmojiReaction } from '../DriveData/File/DriveFileReactionTypes';
 import {
+  EmojiReaction,
   FileIdFileIdentifier,
   GlobalTransitIdFileIdentifier,
 } from '../DriveData/File/DriveFileTypes';

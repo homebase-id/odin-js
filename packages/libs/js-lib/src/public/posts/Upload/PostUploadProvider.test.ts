@@ -1,9 +1,9 @@
 import { test, expect, vi, describe } from 'vitest';
 import { savePost } from './PostUploadProvider';
-import { ApiType, DotYouClient } from '../../core/DotYouClient';
-import { HomebaseFile, NewHomebaseFile, NewMediaFile, SecurityGroupType } from '../../core/core';
-import { BlogConfig, Tweet } from './PostTypes';
-import { encryptKeyHeader } from '../../core/DriveData/SecurityHelpers';
+import { ApiType, DotYouClient } from '../../../core/DotYouClient';
+import { HomebaseFile, NewHomebaseFile, NewMediaFile, SecurityGroupType } from '../../../core/core';
+import { BlogConfig, Tweet } from '../PostTypes';
+import { encryptKeyHeader } from '../../../core/DriveData/SecurityHelpers';
 
 // Mock axios module
 const mockAxios = vi.hoisted(() => ({

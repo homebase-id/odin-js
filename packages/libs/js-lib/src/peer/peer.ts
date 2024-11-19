@@ -4,13 +4,13 @@ export * from './peerData/Drive/PeerDriveProvider';
 export * from './peerData/File/PeerFileByGlobalTransitProvider';
 export * from './peerData/File/PeerFileByUniqueIdProvider';
 export * from './peerData/File/PeerFileProvider';
-export * from './peerData/File/PeerFileManageProvider';
+export * from './peerData/File/PeerFileManager';
 
-export * from './peerData/Query/PeerDriveQueryProvider';
+export * from './peerData/Query/PeerDriveQueryService';
 
-export * from './peerData/Upload/PeerUploadProvider';
+export * from './peerData/Upload/PeerFileUploader';
 
-export * from './peerData/File/PeerReadProvider';
+export * from './peerData/File/PeerReadReceiptManager';
 
 // Inbox
 export * from './peerData/InboxProvider';

@@ -1,6 +1,6 @@
 import { DotYouClient } from '../../core/DotYouClient';
 import { getContentFromHeaderOrPayload } from '../../core/DriveData/File/DriveFileProvider';
-import { queryBatch } from '../../core/DriveData/Query/DriveQueryProvider';
+import { queryBatch } from '../../core/DriveData/Query/DriveQueryService';
 import { CursoredResult } from '../../core/DriveData/Query/DriveQueryTypes';
 import { HomebaseFile } from '../../core/DriveData/File/DriveFileTypes';
 import { toGuidId } from '../../helpers/DataUtil';

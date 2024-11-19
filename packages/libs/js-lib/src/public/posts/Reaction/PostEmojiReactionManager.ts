@@ -1,9 +1,10 @@
-import { DotYouClient } from '../../core/DotYouClient';
-import { deleteReaction, uploadReaction } from '../../core/ReactionData/ReactionsProvider';
-import { tryJsonParse } from '../../helpers/DataUtil';
-import { getChannelDrive, GetTargetDriveFromChannelId } from './PostDefinitionProvider';
-import { EmojiReactionSummary } from './PostReactionProvider';
-import { RawReactionContent, ReactionContext } from './PostTypes';
+import { DotYouClient } from '../../../core/DotYouClient';
+import { deleteReaction, uploadReaction } from '../../../core/ReactionData/ReactionService';
+import { tryJsonParse } from '../../../helpers/DataUtil';
+import { getChannelDrive, GetTargetDriveFromChannelId } from '../Channel/PostChannelManager';
+import { RawReactionContent, ReactionContext } from '../PostTypes';
+
+import { EmojiReactionSummary } from './PostCommentReactionManager';
 
 interface ServerReactionsSummary {
   reactions: { reactionContent: string; count: number }[];

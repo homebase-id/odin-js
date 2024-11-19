@@ -1,6 +1,6 @@
-import { DotYouClient } from '../../core/DotYouClient';
-import { getRandom16ByteArray } from '../../helpers/DataUtil';
-import { createThumbnails } from '../../media/Thumbs/ThumbnailProvider';
+import { DotYouClient } from '../../../core/DotYouClient';
+import { getRandom16ByteArray } from '../../../helpers/DataUtil';
+import { createThumbnails } from '../../../media/Thumbs/ThumbnailProvider';
 import {
   ThumbnailFile,
   UploadFileMetadata,
@@ -23,25 +23,25 @@ import {
   PriorityOptions,
   uploadHeader,
   CommentReaction,
-} from '../../core/core';
+} from '../../../core/core';
 import {
   jsonStringify64,
   stringToUint8Array,
   getNewId,
   tryJsonParse,
-} from '../../helpers/DataUtil';
-import { TransitInstructionSet } from '../../peer/peerData/PeerTypes';
-import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
-import { RawReactionContent, ReactionConfig, ReactionContext } from './PostTypes';
-import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
+} from '../../../helpers/DataUtil';
+import { TransitInstructionSet } from '../../../peer/peerData/PeerTypes';
+import { GetTargetDriveFromChannelId } from '../Channel/PostChannelManager';
+import { RawReactionContent, ReactionConfig, ReactionContext } from '../PostTypes';
+import { DEFAULT_PAYLOAD_KEY } from '../../../core/DriveData/Upload/UploadHelpers';
 import {
   uploadFileOverPeer,
   uploadHeaderOverPeer,
-} from '../../peer/peerData/Upload/PeerUploadProvider';
-import { deleteFileOverPeer } from '../../peer/peerData/File/PeerFileManageProvider';
-import { queryBatchOverPeer } from '../../peer/peerData/Query/PeerDriveQueryProvider';
-import { getContentFromHeaderOrPayloadOverPeer } from '../../peer/peerData/File/PeerFileProvider';
-import { getFileHeaderOverPeerByGlobalTransitId } from '../../peer/peer';
+} from '../../../peer/peerData/Upload/PeerFileUploader';
+import { deleteFileOverPeer } from '../../../peer/peerData/File/PeerFileManager';
+import { queryBatchOverPeer } from '../../../peer/peerData/Query/PeerDriveQueryService';
+import { getContentFromHeaderOrPayloadOverPeer } from '../../../peer/peerData/File/PeerFileProvider';
+import { getFileHeaderOverPeerByGlobalTransitId } from '../../../peer/peer';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;

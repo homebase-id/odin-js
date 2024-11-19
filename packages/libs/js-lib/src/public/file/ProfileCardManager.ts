@@ -6,7 +6,7 @@ import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { HomebaseFile, SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
 import { getDecryptedImageData } from '../../media/ImageProvider';
 import { BuiltInProfiles, MinimalProfileFields } from '../../profile/ProfileData/ProfileConfig';
-import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';
+import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionManager';
 import { getProfileAttributes, BuiltInAttributes, Attribute } from '../../profile/profile';
 import { publishProfileCardFile, publishProfileImageFile } from './FileProvider';
 import { resizeImageFromBlob } from '../../media/media';

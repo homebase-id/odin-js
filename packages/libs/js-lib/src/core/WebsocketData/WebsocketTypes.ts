@@ -1,5 +1,5 @@
 import { HomebaseFile } from '../DriveData/File/DriveFileTypes';
-import { GroupEmojiReaction } from '../ReactionData/GroupReactionsProvider';
+import { GroupEmojiReaction } from '../ReactionData/GroupReactionService';
 import { TargetDrive, PushNotification } from '../core';
 
 export interface EstablishConnectionRequest {
