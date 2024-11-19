@@ -94,15 +94,17 @@ export const PostImageDetailCard = ({
   return (
     <>
       <Helmet>
-        <meta
-          name="og:image"
-          content={getAnonymousDirectImageUrl(
-            window.location.host,
-            GetTargetDriveFromChannelId(channel?.fileMetadata.appData.uniqueId || ''),
-            postFile?.fileId || '',
-            currentMediaFile?.key || ''
-          )}
-        />
+        {channel?.fileMetadata.appData.uniqueId ? (
+          <meta
+            name="og:image"
+            content={getAnonymousDirectImageUrl(
+              window.location.host,
+              GetTargetDriveFromChannelId(channel.fileMetadata.appData.uniqueId),
+              postFile?.fileId || '',
+              currentMediaFile?.key || ''
+            )}
+          />
+        ) : null}
       </Helmet>
       <div className="relative z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
         <div className="inset-0 bg-black transition-opacity lg:fixed"></div>

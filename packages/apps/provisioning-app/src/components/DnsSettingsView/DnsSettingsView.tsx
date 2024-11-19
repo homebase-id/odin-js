@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { t } from '../../helpers/i18n/dictionary';
 import InfoDialog from '../Dialog/InfoDialog/InfoDialog';
 import { DnsConfig, DnsRecord, DnsRecordStatus } from '../../hooks/commonDomain/commonDomain';
@@ -16,8 +16,6 @@ const DnsSettingsView = ({
   showStatus: boolean;
 }) => {
   const { data: apexDomain, isFetched: gotApexInfo } = useApexDomain(domain);
-  let subdomain = apexDomain ? domain.replace(apexDomain, '') : undefined;
-  subdomain = subdomain?.slice(0, -1);
 
   const isApexDomain = apexDomain === domain;
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
@@ -52,7 +50,6 @@ const DnsSettingsView = ({
           <SubdomainInfoBlock
             dnsConfig={dnsConfig}
             domain={domain}
-            subdomain={subdomain}
             showStatus={showStatus}
             yourDomain={domain}
             className="mb-10"
@@ -65,10 +62,9 @@ const DnsSettingsView = ({
               {subRecords.map((record) => (
                 <RecordView
                   key={record.name}
-                  subdomain={subdomain}
                   record={record}
+                  domain={domain}
                   showStatus={showStatus}
-                  appendDotOnValue={true}
                 />
               ))}
             </>
@@ -161,7 +157,6 @@ const ApexInfoBlock = ({
             status={uniformStatus}
             domain={domain}
             showStatus={showStatus}
-            appendDotOnValue={true}
           />
         </>
       ) : null}
@@ -182,6 +177,7 @@ const ApexInfoBlock = ({
             status={uniformStatus}
             domain={domain}
             showStatus={showStatus}
+            hideDotOnValue={true}
           />
         </>
       ) : null}
@@ -192,14 +188,12 @@ const ApexInfoBlock = ({
 const SubdomainInfoBlock = ({
   dnsConfig,
   domain,
-  subdomain,
   yourDomain,
   showStatus,
   className,
 }: {
   dnsConfig: DnsRecord[];
   domain: string;
-  subdomain?: string;
   yourDomain: string;
   showStatus: boolean;
   className: string;
@@ -222,9 +216,8 @@ const SubdomainInfoBlock = ({
           <RecordView
             record={{ ...aliasARecord, type: 'CNAME' }}
             status={fallbackOnlyCorrect ? 'success' : undefined}
-            subdomain={subdomain}
+            domain={domain}
             showStatus={showStatus}
-            appendDotOnValue={true}
           />
           {fallbackOnlyCorrect ? (
             <Alert type="info">
@@ -264,23 +257,29 @@ const RecordView = ({
   record,
   status,
   domain,
-  subdomain,
   showStatus,
-  appendDotOnValue,
+  hideDotOnValue,
 }: {
   record: DnsRecord;
   status?: DnsRecordStatus;
-  domain?: string;
-  subdomain?: string;
+  domain: string;
   showStatus: boolean;
-  appendDotOnValue?: boolean;
+  hideDotOnValue?: boolean;
 }) => {
+  const { data: apexDomain } = useApexDomain(domain);
   const [showBadValue, setShowBadValue] = useState(false);
 
   const simpleStatus = status || record.status;
   const isGood = simpleStatus === 'success';
 
   const isInCorrectvalue = simpleStatus === 'incorrectValue';
+
+  const recordValue = `${[record.name, domain].filter(Boolean).join('.')}`;
+  const recordIsApex = !record.name;
+
+  const subDomain = apexDomain
+    ? domain.replace(`.${apexDomain}`, '').replace(`${apexDomain}`, '')
+    : '';
 
   return (
     <>
@@ -296,13 +295,18 @@ const RecordView = ({
             : 'bg-gray-100'
         } px-4 py-3 font-mono text-base shadow-sm`}
       >
-        <ClickToCopy>
-          {[record.name || (domain ? `${domain}.` : undefined), subdomain]
-            .filter(Boolean)
-            .join('.')}
+        <ClickToCopy value={recordValue}>
+          {recordIsApex ? (
+            <>{domain}.</>
+          ) : (
+            <>
+              {[record.name, subDomain].filter(Boolean).join('.')}
+              <span className={record.name ? `text-slate-400` : ''}>.{apexDomain || domain}.</span>
+            </>
+          )}
         </ClickToCopy>
         <p>{record.type}</p>
-        <ClickToCopy>{`${record.value}${appendDotOnValue ? '.' : ''}`}</ClickToCopy>
+        <ClickToCopy>{`${record.value}${hideDotOnValue ? '' : '.'}`}</ClickToCopy>
         {showStatus ? (
           <div
             className={`ml-auto flex flex-row items-center gap-2 text-sm ${
@@ -345,7 +349,7 @@ const RecordView = ({
             Expected value:
             <span className="mt-1 block bg-gray-100 px-4 py-3 font-mono text-base">
               {record.value}
-              {appendDotOnValue ? '.' : ''}
+              {hideDotOnValue ? '' : '.'}
             </span>
           </p>
           <p>
@@ -360,13 +364,15 @@ const RecordView = ({
   );
 };
 
-const ClickToCopy = ({ children }: { children: string }) => {
+const ClickToCopy = (props: { children: string } | { children: ReactNode; value: string }) => {
+  const { children } = props;
+  const value = 'value' in props ? props.value : undefined;
   const [copied, setCopied] = useState(false);
 
   return (
     <div
       onClick={() => {
-        navigator.clipboard.writeText(children);
+        navigator.clipboard.writeText(value || (typeof children === 'string' ? children : ''));
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
       }}
