@@ -82,8 +82,7 @@ const ConfirmConnectionDialog = ({
                   await provideGrant({ circleId: circleToProvide, odinId: odinId });
                 }
 
-                checkReturnTo('Approved');
-                onConfirm();
+                if (!checkReturnTo('Approved')) onConfirm();
               } catch (error) {
                 setRunningError(error);
               }

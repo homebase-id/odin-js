@@ -5,11 +5,8 @@ export const useFocusedEditing = () => {
 
   const checkReturnTo = (state?: string) => {
     let returnUrl = searchParams.get('return');
-    if (
-      (searchParams.get('ui') !== 'focus' && searchParams.get('ui') !== 'minimal') ||
-      !returnUrl
-    ) {
-      return;
+    if (!returnUrl) {
+      return false;
     }
 
     if (state) {
@@ -21,6 +18,7 @@ export const useFocusedEditing = () => {
     }
 
     window.location.href = returnUrl;
+    return true;
   };
 
   return checkReturnTo;

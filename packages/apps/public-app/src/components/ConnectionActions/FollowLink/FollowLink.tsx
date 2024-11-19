@@ -35,8 +35,8 @@ const FollowLink = ({
         className={`w-auto ${className ?? ''}`}
         href={
           (loggedInIdentity
-            ? `${new DotYouClient({ identity: loggedInIdentity, api: ApiType.Guest }).getRoot()}/owner/follow/following/${window.location.hostname}`
-            : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect/owner/follow/following/${window.location.hostname}`) +
+            ? `${new DotYouClient({ identity: loggedInIdentity, api: ApiType.Guest }).getRoot()}/owner/follow/following/${window.location.hostname}?return=${encodeURIComponent(window.location.href)}`
+            : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect/owner/follow/following/${window.location.hostname}?return=${encodeURIComponent(window.location.href)}`) +
           (channel ? `?chnl=${channel.fileMetadata.appData.uniqueId}` : '')
         }
         icon={isFollowing ? Check : Feed}
