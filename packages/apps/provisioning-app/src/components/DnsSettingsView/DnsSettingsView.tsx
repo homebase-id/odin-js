@@ -277,7 +277,9 @@ const RecordView = ({
   const recordValue = `${[record.name, domain].filter(Boolean).join('.')}`;
   const recordIsApex = !record.name;
 
-  const subDomain = apexDomain ? domain.replace(apexDomain || '', '') : '';
+  const subDomain = apexDomain
+    ? domain.replace(`.${apexDomain}`, '').replace(`${apexDomain}`, '')
+    : '';
 
   return (
     <>
@@ -298,8 +300,8 @@ const RecordView = ({
             <>{domain}.</>
           ) : (
             <>
-              {record.name}.{subDomain}
-              <span className={record.name ? `text-slate-400` : ''}>{apexDomain || domain}.</span>
+              {[record.name, subDomain].filter(Boolean).join('.')}
+              <span className={record.name ? `text-slate-400` : ''}>.{apexDomain || domain}.</span>
             </>
           )}
         </ClickToCopy>
