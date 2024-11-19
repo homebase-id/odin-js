@@ -22,7 +22,7 @@ import { BlogConfig, PostContent, postTypeToDataType } from '../PostTypes';
 import { processVideoFile } from '../../../media/Video/VideoProcessor';
 import { createThumbnails, LinkPreview, LinkPreviewDescriptor } from '../../../media/media';
 import { getPostBySlugOverPeer } from '../../../peer/peer';
-import { POST_LINKS_PAYLOAD_KEY } from './PostUploadProvider';
+import { POST_LINKS_PAYLOAD_KEY } from './PostUploader';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;

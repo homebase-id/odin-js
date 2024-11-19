@@ -5,7 +5,7 @@ export * from './home/HomeTypes';
 // Posts
 export * from './posts/PostTypes';
 export * from './posts/PostProvider';
-export * from './posts/Upload/PostUploadProvider';
+export * from './posts/Upload/PostUploader';
 export * from './posts/Channel/PostChannelManager';
 export * from './posts/Channel/PostCollaborativeChannelsManager';
 export * from './posts/Reaction/PostCommentReactionManager';
