@@ -1,9 +1,14 @@
 import { test, expect, vi, describe } from 'vitest';
-import { savePost } from './PostUploadProvider';
-import { ApiType, DotYouClient } from '../../core/DotYouClient';
-import { HomebaseFile, NewHomebaseFile, NewMediaFile, SecurityGroupType } from '../../core/core';
-import { BlogConfig, Tweet } from './PostTypes';
-import { encryptKeyHeader } from '../../core/DriveData/SecurityHelpers';
+import { savePost } from './PostUploader';
+import { ApiType, DotYouClient } from '../../../core/DotYouClient';
+import { BlogConfig, Tweet } from '../PostTypes';
+import { encryptKeyHeader } from '../../../core/DriveData/SecurityHelpers';
+import {
+  HomebaseFile,
+  NewHomebaseFile,
+  NewMediaFile,
+  SecurityGroupType,
+} from '../../../core/DriveData/File/DriveFileTypes';
 
 // Mock axios module
 const mockAxios = vi.hoisted(() => ({
@@ -96,7 +101,7 @@ const existingPostFile: HomebaseFile<Tweet> = {
   priority: 0,
 };
 
-describe('PostUploadProvider for local files', () => {
+describe('PostUploader for local files', () => {
   test('SavePost with a new post should upload a new file', async () => {
     vi.clearAllMocks();
 
@@ -310,7 +315,7 @@ describe('PostUploadProvider for local files', () => {
       },
     });
     await expect(savePost(dotYouClient, existingPostFile, undefined, channelId)).rejects.toThrow(
-      '[odin-js] PostUploadProvider: Cannot update a post that does not exist'
+      '[odin-js] PostUploader: Cannot update a post that does not exist'
     );
   });
 
@@ -323,11 +328,16 @@ describe('PostUploadProvider for local files', () => {
   });
 });
 
-describe('PostUploadProvider for remote files', () => {
+describe('PostUploader for remote files', () => {
   test('SavePost with a new post should upload a new file', async () => {
     vi.clearAllMocks();
 
-    // Get over peer
+    vi.mock('../../../peer/peerData/ExternalPostsDataProvider', async () => {
+      return {
+        getPostBySlugOverPeer: () => null,
+      };
+    });
+
     mockAxios.post.mockResolvedValueOnce({
       status: 200,
       data: {
@@ -350,7 +360,7 @@ describe('PostUploadProvider for remote files', () => {
   test('SavePost with an existing post should update a file header', async () => {
     vi.clearAllMocks();
 
-    vi.mock('../../peer/peerData/ExternalPostsDataProvider', async () => {
+    vi.mock('../../../peer/peerData/ExternalPostsDataProvider', async () => {
       return {
         getPostBySlugOverPeer: () => null,
       };

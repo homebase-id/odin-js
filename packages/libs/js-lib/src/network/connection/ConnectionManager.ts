@@ -10,7 +10,7 @@ import {
   PagingOptions,
 } from '../../core/DriveData/Query/DriveQueryTypes';
 import { stringifyToQueryParams } from '../../helpers/DataUtil';
-import { ConnectionInfo, OdinIdRequest, DotYouProfile } from './CircleDataTypes';
+import { ConnectionInfo, OdinIdRequest, DotYouProfile } from '../circle/CircleDataTypes';
 
 const root = '/circles/connections';
 

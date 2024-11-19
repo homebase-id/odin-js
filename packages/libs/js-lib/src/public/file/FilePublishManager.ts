@@ -3,7 +3,7 @@ import { DotYouClient } from '../../core/DotYouClient';
 import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
 import { SecurityGroupType } from '../../core/core';
 import { stringGuidsEqual } from '../../helpers/DataUtil';
-import { getChannelDefinitions, getChannelDrive } from '../posts/PostDefinitionProvider';
+import { getChannelDefinitions, getChannelDrive } from '../posts/Channel/PostChannelManager';
 import { BlogConfig } from '../posts/PostTypes';
 import { DEFAULT_SECTIONS, BASE_RESULT_OPTIONS } from './FileBase';
 import { publishFile } from './FileProvider';
@@ -39,9 +39,8 @@ export const publishProfile = async (
   if (
     !dataType ||
     dataType === 'channel' ||
-    DEFAULT_SECTIONS.some(
-      (section) =>
-        section.queryParams.tagsMatchAtLeastOne?.some((tag) => stringGuidsEqual(tag, dataType))
+    DEFAULT_SECTIONS.some((section) =>
+      section.queryParams.tagsMatchAtLeastOne?.some((tag) => stringGuidsEqual(tag, dataType))
     )
   )
     publishActions.push(

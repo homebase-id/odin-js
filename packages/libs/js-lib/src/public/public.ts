@@ -5,13 +5,13 @@ export * from './home/HomeTypes';
 // Posts
 export * from './posts/PostTypes';
 export * from './posts/PostProvider';
-export * from './posts/PostUploadProvider';
-export * from './posts/PostDefinitionProvider';
-export * from './posts/PostCollaborativeChannelsProvider';
-export * from './posts/PostReactionProvider';
-export * from './posts/PostEmojiReactionProvider';
+export * from './posts/Upload/PostUploader';
+export * from './posts/Channel/PostChannelManager';
+export * from './posts/Channel/PostCollaborativeChannelsManager';
+export * from './posts/Reaction/PostCommentReactionManager';
+export * from './posts/Reaction/PostEmojiReactionManager';
 
 // File
 export * from './file/FileProvider';
-export * from './file/FilePublishProvider';
-export * from './file/ProfileCardProvider';
+export * from './file/FilePublishManager';
+export * from './file/ProfileCardManager';

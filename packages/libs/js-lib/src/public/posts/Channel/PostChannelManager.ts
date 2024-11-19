@@ -1,8 +1,8 @@
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
-import { ApiType, DotYouClient } from '../../core/DotYouClient';
-import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
+import { ApiType, DotYouClient } from '../../../core/DotYouClient';
+import { DEFAULT_PAYLOAD_KEY } from '../../../core/DriveData/Upload/UploadHelpers';
 import {
   getDrivesByType,
   FileQueryParams,
@@ -21,7 +21,7 @@ import {
   NewHomebaseFile,
   getSecurityContext,
   ensureDrive,
-} from '../../core/core';
+} from '../../../core/core';
 import {
   drivesEqual,
   getRandom16ByteArray,
@@ -29,8 +29,8 @@ import {
   stringGuidsEqual,
   stringToUint8Array,
   toGuidId,
-} from '../../helpers/helpers';
-import { ChannelDefinition, BlogConfig, CollaborativeChannelDefinition } from './PostTypes';
+} from '../../../helpers/helpers';
+import { ChannelDefinition, BlogConfig, CollaborativeChannelDefinition } from '../PostTypes';
 
 export const getChannelDefinitions = async (
   dotYouClient: DotYouClient

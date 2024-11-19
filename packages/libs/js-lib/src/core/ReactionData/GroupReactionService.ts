@@ -1,7 +1,6 @@
 import { stringifyToQueryParams, tryJsonParse } from '../../helpers/DataUtil';
 import { DotYouClient } from '../DotYouClient';
-import { EmojiReaction } from '../DriveData/File/DriveFileReactionTypes';
-import { TargetDrive } from '../DriveData/File/DriveFileTypes';
+import { EmojiReaction, TargetDrive } from '../DriveData/File/DriveFileTypes';
 
 export interface GroupEmojiReaction {
   odinId: string;

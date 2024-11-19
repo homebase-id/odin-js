@@ -5,11 +5,11 @@
   ConnectionRequestHeader,
   OdinIdRequest,
   RedactedConnectionRequest,
-} from './CircleDataTypes';
+} from '../circle/CircleDataTypes';
 import { DotYouClient } from '../../core/DotYouClient';
 import { PagingOptions, PagedResult } from '../../core/core';
 import { stringifyToQueryParams } from '../../helpers/helpers';
-import { getConnectionInfo } from './CircleNetworkProvider';
+import { getConnectionInfo } from './ConnectionManager';
 
 //Handles making and reading requests to connect with others
 const Root = '/circles/requests';

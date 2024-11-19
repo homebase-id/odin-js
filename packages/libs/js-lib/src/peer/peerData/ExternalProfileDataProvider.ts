@@ -1,9 +1,9 @@
 import { DotYouClient } from '../../core/DotYouClient';
 import { BuiltInProfiles } from '../../profile/ProfileData/ProfileConfig';
-import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';
+import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionManager';
 import { Attribute, AttributeConfig } from '../../profile/profile';
 import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
-import { queryBatchOverPeer } from './Query/PeerDriveQueryProvider';
+import { queryBatchOverPeer } from './Query/PeerDriveQueryService';
 import { getContentFromHeaderOrPayloadOverPeer } from './File/PeerFileProvider';
 import { HomebaseFile, TargetDrive } from '../../core/DriveData/File/DriveFileTypes';
 

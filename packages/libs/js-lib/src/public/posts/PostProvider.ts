@@ -1,4 +1,4 @@
-import { getChannelDefinitions, GetTargetDriveFromChannelId } from './PostDefinitionProvider';
+import { getChannelDefinitions, GetTargetDriveFromChannelId } from './Channel/PostChannelManager';
 import {
   BlogConfig,
   PostContent,
