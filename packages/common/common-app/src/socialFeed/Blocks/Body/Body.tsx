@@ -75,7 +75,9 @@ export const PostBody = ({
           )
         ) : (
           <>
-            {ellipsisAtMaxChar(post.caption, MAX_CHAR_FOR_SUMMARY)}{' '}
+            <span className="whitespace-pre-wrap">
+              {ellipsisAtMaxChar(post.caption, MAX_CHAR_FOR_SUMMARY)}{' '}
+            </span>
             <button
               onClick={(e) => {
                 e.stopPropagation();
