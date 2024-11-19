@@ -26,7 +26,7 @@ export const Eula = ({ onConfirm }: { onConfirm: () => void }) => {
         }
       }}
     >
-      <p className="text-2xl">HOMEBASE FULL END-USER LICENSE AGREEMENT (EULA)</p>
+      <p className="text-2xl">RAVEN HOSTING FULL END-USER LICENSE AGREEMENT (EULA)</p>
       <div className="my-7 h-[50vh] overflow-auto">
         <EulaContents />
       </div>
