@@ -64,6 +64,10 @@ export const PostBody = ({
     );
   }
 
+  // Only allow 7 new lines in caption; Remove the other new lines with regular spaces
+  const splitCaption = post.caption.split('\n');
+  const filteredCaption = splitCaption.slice(0, 7).join('\n') + splitCaption.slice(7).join(' ');
+
   return (
     <>
       <h1 className="text-foreground">
@@ -71,12 +75,14 @@ export const PostBody = ({
           post.captionAsRichText ? (
             <RichTextRenderer body={post.captionAsRichText} odinId={odinId} />
           ) : (
-            <span className="whitespace-pre-wrap">{post.caption}</span>
+            <span className="whitespace-pre-wrap">
+              {isExpanded ? post.caption : filteredCaption}
+            </span>
           )
         ) : (
           <>
             <span className="whitespace-pre-wrap">
-              {ellipsisAtMaxChar(post.caption, MAX_CHAR_FOR_SUMMARY)}{' '}
+              {ellipsisAtMaxChar(filteredCaption, MAX_CHAR_FOR_SUMMARY)}{' '}
             </span>
             <button
               onClick={(e) => {
