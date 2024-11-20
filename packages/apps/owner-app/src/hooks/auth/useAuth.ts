@@ -28,7 +28,7 @@ export const RETURN_URL_PARAM = 'returnUrl';
 export const HOME_PATH = '/owner';
 
 export const useAuth = () => {
-  const { hasSharedSecret, getDotYouClient } = useDotYouClient();
+  const { hasSharedSecret } = useDotYouClient();
 
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
@@ -65,7 +65,7 @@ export const useAuth = () => {
 
   const logout = async (redirectPath?: string) => {
     try {
-      await logoutOwnerAndAllApps(getDotYouClient());
+      await logoutOwnerAndAllApps();
     } catch (e) {
       // We ignore server error states; And continue cleaning local storage
       console.warn('Error logging out from server', e);

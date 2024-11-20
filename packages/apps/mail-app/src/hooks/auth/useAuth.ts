@@ -43,7 +43,7 @@ export const useAuth = () => {
   const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(getDotYouClient());
 
   const logout = async (): Promise<void> => {
-    await logoutOwnerAndAllApps(getDotYouClient());
+    await logoutOwnerAndAllApps();
 
     localStorage.removeItem(APP_SHARED_SECRET);
     localStorage.removeItem(APP_AUTH_TOKEN);

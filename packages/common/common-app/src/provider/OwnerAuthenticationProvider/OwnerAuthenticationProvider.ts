@@ -1,6 +1,8 @@
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { OwnerClient } from '../../core/OwnerClient';
 import { logout } from '@homebase-id/js-lib/auth';
+import { APP_KEYS } from '../../constants';
+import { base64ToUint8Array } from '@homebase-id/js-lib/helpers';
 
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidOwnerToken = async (): Promise<boolean> => {
@@ -25,7 +27,7 @@ export const logoutOwner = async (): Promise<boolean> => {
   });
 };
 
-export const logoutOwnerAndAllApps = async (dotYouClient: DotYouClient): Promise<void> => {
+export const logoutOwnerAndAllApps = async (): Promise<void> => {
   try {
     // Unsubscribe from notifications
     const dotYouClient = new OwnerClient({ api: ApiType.Owner });
@@ -35,8 +37,34 @@ export const logoutOwnerAndAllApps = async (dotYouClient: DotYouClient): Promise
   }
 
   try {
-    // Remove app sessions from server
-    await logout(dotYouClient);
+    await Promise.all(
+      APP_KEYS.map(async (key) => {
+        const authToken = localStorage.getItem(`BX0900_${key}`);
+        if (!authToken) return;
+        const rawApps = localStorage.getItem(`APPS_${key}`);
+        if (!rawApps) return;
+
+        const headers: Record<string, string> = {
+          bx0900: authToken,
+        };
+
+        const apss = base64ToUint8Array(rawApps);
+        const dotYouClient = new DotYouClient({
+          api: ApiType.App,
+          sharedSecret: apss,
+          hostIdentity: window.location ? window.location.host : '',
+          headers,
+        });
+
+        // Remove app sessions from server
+        await logout(dotYouClient);
+      })
+    );
+
+    APP_KEYS.forEach((key) => {
+      localStorage.removeItem(`BX0900_${key}`);
+      localStorage.removeItem(`APPS_${key}`);
+    });
   } catch (ex) {
     console.warn('Failed to logout on the server', ex);
   }
@@ -47,18 +75,6 @@ export const logoutOwnerAndAllApps = async (dotYouClient: DotYouClient): Promise
   } catch (ex) {
     console.warn('Failed to logout on the server', ex);
   }
-
-  // CAT
-  localStorage.removeItem(`BX0900_feed`);
-  localStorage.removeItem(`BX0900_mail`);
-  localStorage.removeItem(`BX0900_chat`);
-  localStorage.removeItem(`BX0900_community`);
-
-  // Shared Secret
-  localStorage.removeItem(`APPS_feed`);
-  localStorage.removeItem(`APPS_mail`);
-  localStorage.removeItem(`APPS_chat`);
-  localStorage.removeItem(`APPS_community`);
 
   // Caches
   localStorage.removeItem(`OWNER_REACT_QUERY_OFFLINE_CACHE`);
