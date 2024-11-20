@@ -52,15 +52,18 @@ export const logoutOwnerAndAllApps = async (dotYouClient: DotYouClient): Promise
   localStorage.removeItem(`BX0900_feed`);
   localStorage.removeItem(`BX0900_mail`);
   localStorage.removeItem(`BX0900_chat`);
+  localStorage.removeItem(`BX0900_community`);
 
   // Shared Secret
   localStorage.removeItem(`APPS_feed`);
   localStorage.removeItem(`APPS_mail`);
   localStorage.removeItem(`APPS_chat`);
+  localStorage.removeItem(`APPS_community`);
 
   // Caches
   localStorage.removeItem(`OWNER_REACT_QUERY_OFFLINE_CACHE`);
   localStorage.removeItem(`FEED_REACT_QUERY_OFFLINE_CACHE`);
+  localStorage.removeItem(`COMMUNITY_REACT_QUERY_OFFLINE_CACHE`);
   localStorage.removeItem(`CHAT_REACT_QUERY_OFFLINE_CACHE`);
 
   // IndexedDB
