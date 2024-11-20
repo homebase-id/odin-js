@@ -410,12 +410,12 @@ export const getCommunityMessage = async (
           targetDrive,
           chatMessageId,
           {
-            decrypt: false,
+            decrypt: true,
             systemFileType,
           }
         )
       : await getFileHeaderByUniqueId<string>(dotYouClient, targetDrive, chatMessageId, {
-          decrypt: false,
+          decrypt: true,
           systemFileType,
         });
 
