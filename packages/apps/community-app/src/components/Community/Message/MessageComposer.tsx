@@ -12,6 +12,7 @@ import {
   getTextRootsRecursive,
   useAllContacts,
   findMentionedInRichText,
+  useDotYouClient,
 } from '@homebase-id/common-app';
 import { PaperPlane, Plus } from '@homebase-id/common-app/icons';
 import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
@@ -75,6 +76,7 @@ export const MessageComposer = ({
 
   const addError = useErrors().add;
   const { mutateAsync: sendMessage } = useCommunityMessage().send;
+  const identity = useDotYouClient().getIdentity();
 
   const doSend = async () => {
     const plainVal = (message && getTextRootsRecursive(message).join(' ')) || '';
@@ -98,7 +100,9 @@ export const MessageComposer = ({
         community,
         channel,
         thread,
-        threadParticipants: extendedParticipants,
+        threadParticipants: extendedParticipants?.length
+          ? extendedParticipants
+          : community.fileMetadata.appData.content.members.filter((odinId) => odinId !== identity),
         message: message || '',
         files: newFiles,
         chatId: getNewId(),
