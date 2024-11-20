@@ -16,7 +16,7 @@ import {
 import { drives, permissions } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { HomebaseFile, WebsocketCommand } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useCommunities } from '../../hooks/community/useCommunities';
 import { NewCommunity } from './CommunityNew';
@@ -25,6 +25,7 @@ import { RadioTower, Plus, Ellipsis, MagnifyingGlass, Loader } from '@homebase-i
 import { CommunityChannelNav } from './CommunityChannelNav';
 import { useCommunityMemberUpdater } from '../../hooks/community/useCommunityMemberUpdater';
 import { ExtendCriclePermissionDialog } from '../../components/Auth/ExtendCirclePermissionDialog';
+import { NotifyOverPeer } from '@homebase-id/js-lib/peer';
 
 export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   const newCommunity = useMatch({ path: `${COMMUNITY_ROOT_PATH}/new` });
@@ -49,6 +50,14 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
       navigate(`${COMMUNITY_ROOT_PATH}/new`);
     }
   }, [communityKey, communities]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      NotifyOverPeer({
+        command: 'whoisonline',
+      } as WebsocketCommand);
+    }, 5000);
+  }, []);
 
   return (
     <>
