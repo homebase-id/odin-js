@@ -2,7 +2,6 @@ import { DrivePermissionType } from '@homebase-id/js-lib/core';
 import { useEffect, useState } from 'react';
 import { useVerifyToken } from './useVerifyToken';
 import {
-  logout as logoutYouauth,
   finalizeAuthentication as finalizeAuthenticationYouAuth,
   getRegistrationParams,
   preAuth as preauthApps,
@@ -21,13 +20,14 @@ import {
   APP_SHARED_SECRET,
   COMMUNITY_APP_ID,
   COMMUNITY_ROOT_PATH,
+  logoutOwnerAndAllApps,
   useDotYouClient,
 } from '@homebase-id/common-app';
 import { clear } from 'idb-keyval';
 import { LOCAL_COMMUNITY_APP_DRIVE } from '../../providers/CommunityMetadataProvider';
 
 export const useAuth = () => {
-  const { getDotYouClient, getSharedSecret, hasSharedSecret } = useDotYouClient();
+  const { getDotYouClient, hasSharedSecret } = useDotYouClient();
 
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
@@ -35,7 +35,7 @@ export const useAuth = () => {
   const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(getDotYouClient());
 
   const logout = async (): Promise<void> => {
-    await logoutYouauth(getDotYouClient());
+    await logoutOwnerAndAllApps(getDotYouClient());
 
     localStorage.removeItem(APP_SHARED_SECRET);
     localStorage.removeItem(APP_AUTH_TOKEN);
@@ -68,8 +68,6 @@ export const useAuth = () => {
   return {
     logout,
     preauth,
-    getDotYouClient,
-    getSharedSecret,
     getIdentity: retrieveIdentity,
     isAuthenticated: authenticationState !== 'anonymous',
   };

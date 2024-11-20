@@ -25,13 +25,14 @@ import {
   APP_SHARED_SECRET,
   CHAT_APP_ID,
   CHAT_ROOT_PATH,
+  logoutOwnerAndAllApps,
   useDotYouClient,
 } from '@homebase-id/common-app';
 import { ChatDrive } from '../../providers/ConversationProvider';
 import { clear } from 'idb-keyval';
 
 export const useAuth = () => {
-  const { getDotYouClient, getSharedSecret, hasSharedSecret } = useDotYouClient();
+  const { getDotYouClient, hasSharedSecret } = useDotYouClient();
 
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
@@ -39,7 +40,7 @@ export const useAuth = () => {
   const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(getDotYouClient());
 
   const logout = async (): Promise<void> => {
-    await logoutYouauth(getDotYouClient());
+    await logoutOwnerAndAllApps(getDotYouClient());
 
     localStorage.removeItem(APP_SHARED_SECRET);
     localStorage.removeItem(APP_AUTH_TOKEN);
@@ -72,8 +73,6 @@ export const useAuth = () => {
   return {
     logout,
     preauth,
-    getDotYouClient,
-    getSharedSecret,
     getIdentity: retrieveIdentity,
     isAuthenticated: authenticationState !== 'anonymous',
   };

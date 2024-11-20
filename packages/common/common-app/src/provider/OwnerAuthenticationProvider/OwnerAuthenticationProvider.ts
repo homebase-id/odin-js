@@ -1,5 +1,6 @@
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { OwnerClient } from '../../core/OwnerClient';
+import { logout } from '@homebase-id/js-lib/auth';
 
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidOwnerToken = async (): Promise<boolean> => {
@@ -24,7 +25,7 @@ export const logoutOwner = async (): Promise<boolean> => {
   });
 };
 
-export const logoutOwnerAndAllApps = async (): Promise<void> => {
+export const logoutOwnerAndAllApps = async (dotYouClient: DotYouClient): Promise<void> => {
   try {
     // Unsubscribe from notifications
     const dotYouClient = new OwnerClient({ api: ApiType.Owner });
@@ -32,6 +33,14 @@ export const logoutOwnerAndAllApps = async (): Promise<void> => {
   } catch (ex) {
     console.warn('Failed unregister push notifiations', ex);
   }
+
+  try {
+    // Remove app sessions from server
+    await logout(dotYouClient);
+  } catch (ex) {
+    console.warn('Failed to logout on the server', ex);
+  }
+
   try {
     // Remove session from server
     await logoutOwner();

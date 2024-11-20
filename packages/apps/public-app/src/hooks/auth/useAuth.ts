@@ -24,9 +24,10 @@ import {
   byteArrayToString,
   tryJsonParse,
 } from '@homebase-id/js-lib/helpers';
+import { clear } from 'idb-keyval';
 
 export const useAuth = () => {
-  const { getDotYouClient, hasSharedSecret, getSharedSecret, isOwner } = useDotYouClient();
+  const { hasSharedSecret, isOwner } = useDotYouClient();
 
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
@@ -42,6 +43,7 @@ export const useAuth = () => {
       window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
       window.localStorage.removeItem(HOME_SHARED_SECRET);
       window.localStorage.removeItem(OWNER_SHARED_SECRET);
+      clear();
 
       setAuthenticationState('anonymous');
     } catch (e) {
@@ -85,8 +87,6 @@ export const useAuth = () => {
   return {
     logout,
     isOwner,
-    getSharedSecret,
-    getDotYouClient,
     isAuthenticated: authenticationState !== 'anonymous',
   };
 };

@@ -23,6 +23,7 @@ import {
 import {
   APP_AUTH_TOKEN,
   APP_SHARED_SECRET,
+  logoutOwnerAndAllApps,
   MAIL_APP_ID,
   MAIL_ROOT_PATH,
   useDotYouClient,
@@ -35,7 +36,7 @@ const MailDrive: TargetDrive = {
 };
 
 export const useAuth = () => {
-  const { getDotYouClient, getSharedSecret, hasSharedSecret } = useDotYouClient();
+  const { getDotYouClient, hasSharedSecret } = useDotYouClient();
 
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
@@ -43,7 +44,7 @@ export const useAuth = () => {
   const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(getDotYouClient());
 
   const logout = async (): Promise<void> => {
-    await logoutYouauth(getDotYouClient());
+    await logoutOwnerAndAllApps(getDotYouClient());
 
     localStorage.removeItem(APP_SHARED_SECRET);
     localStorage.removeItem(APP_AUTH_TOKEN);
@@ -76,8 +77,6 @@ export const useAuth = () => {
   return {
     logout,
     preauth,
-    getDotYouClient,
-    getSharedSecret,
     getIdentity: retrieveIdentity,
     isAuthenticated: authenticationState !== 'anonymous',
   };

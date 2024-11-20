@@ -13,7 +13,7 @@ import {
   HOME_SHARED_SECRET,
   OWNER_SHARED_SECRET,
   STORAGE_IDENTITY_KEY,
-  logoutOwner,
+  logoutOwnerAndAllApps,
   useDotYouClient,
 } from '@homebase-id/common-app';
 import { clear } from 'idb-keyval';
@@ -28,7 +28,7 @@ export const RETURN_URL_PARAM = 'returnUrl';
 export const HOME_PATH = '/owner';
 
 export const useAuth = () => {
-  const { getDotYouClient, getSharedSecret, hasSharedSecret } = useDotYouClient();
+  const { hasSharedSecret, getDotYouClient } = useDotYouClient();
 
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
@@ -65,7 +65,7 @@ export const useAuth = () => {
 
   const logout = async (redirectPath?: string) => {
     try {
-      await logoutOwner();
+      await logoutOwnerAndAllApps(getDotYouClient());
     } catch (e) {
       // We ignore server error states; And continue cleaning local storage
       console.warn('Error logging out from server', e);
@@ -120,11 +120,9 @@ export const useAuth = () => {
     setFirstPassword: setFirstOwnerPassword,
     resetPassword: resetOwnerPassword,
     changePassword: setNewOwnerPassword,
-    getDotYouClient,
     finalizeRegistration,
     isPasswordSet: isPasswordSetOwner,
     // logout => always uses the `logoutOwnerAndAllApps`,
-    getSharedSecret,
     isAuthenticated: authenticationState !== 'anonymous',
   };
 };

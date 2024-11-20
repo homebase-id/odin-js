@@ -40,7 +40,9 @@ export const SecuritySettings = () => {
               {t('Your password has been changed successfully, please login again')}
             </p>
             <div className="mt-5 flex flex-row-reverse">
-              <ActionButton onClick={() => logoutOwnerAndAllApps()}>{t('Open login')}</ActionButton>
+              <ActionButton onClick={() => logoutOwnerAndAllApps(dotYouClient)}>
+                {t('Open login')}
+              </ActionButton>
             </div>
           </>
         ) : state === 'error' ? (
