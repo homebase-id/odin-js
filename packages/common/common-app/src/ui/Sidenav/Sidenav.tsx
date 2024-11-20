@@ -19,6 +19,7 @@ import {
   useDarkMode,
   useProfiles,
   useUnreadPushNotificationsCount,
+  useDotYouClientContext,
 } from '../../hooks';
 import { OwnerImage } from '../../socialFeed';
 import { MiniDarkModeToggle } from '../DarkModeToggle/DarkModeToggle';
@@ -66,6 +67,7 @@ export const Sidenav = ({
   disablePinning?: boolean;
   hideMobileDrawer?: boolean;
 }) => {
+  const dotYouClient = useDotYouClientContext();
   const isMd = document.documentElement.clientWidth >= 768;
   const isXl = document.documentElement.clientWidth >= 1280;
   const isTightHeight = isMd && document.documentElement.clientHeight < 740;
@@ -172,7 +174,7 @@ export const Sidenav = ({
 
             <MoreItems
               isOpen={isPinned || isOpen || isHoverOpen || isPeeking}
-              logout={logout || logoutOwnerAndAllApps}
+              logout={logout || (() => logoutOwnerAndAllApps(dotYouClient))}
             >
               {isTightHeight ? (
                 <>
