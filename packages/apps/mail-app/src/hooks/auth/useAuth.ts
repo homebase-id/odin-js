@@ -2,7 +2,6 @@ import { DrivePermissionType, TargetDrive } from '@homebase-id/js-lib/core';
 import { useEffect, useState } from 'react';
 import { useVerifyToken } from './useVerifyToken';
 import {
-  logout as logoutYouauth,
   finalizeAuthentication as finalizeAuthenticationYouAuth,
   getRegistrationParams,
   preAuth as preauthApps,
