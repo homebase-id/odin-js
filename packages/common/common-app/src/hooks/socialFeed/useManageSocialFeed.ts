@@ -2,13 +2,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { BlogConfig, PostContent } from '@homebase-id/js-lib/public';
 
 import { ApiType, DotYouClient, HomebaseFile, deleteFile } from '@homebase-id/js-lib/core';
-import { useDotYouClient } from '../auth/useDotYouClient';
 import { invalidateSocialFeeds } from './useSocialFeed';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 export const useManageSocialFeed = (props?: { odinId: string }) => {
   const odinId = props?.odinId;
 
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
   const removeFromFeed = async ({ postFile }: { postFile: HomebaseFile<PostContent> }) => {

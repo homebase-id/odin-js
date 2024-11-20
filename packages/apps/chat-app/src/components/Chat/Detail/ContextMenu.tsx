@@ -1,7 +1,6 @@
 import { useState } from 'react';
 
 import {
-  useDotYouClient,
   ActionGroupOptionProps,
   t,
   ActionGroup,

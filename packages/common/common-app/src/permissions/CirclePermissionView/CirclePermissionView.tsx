@@ -2,7 +2,6 @@ import { CircleDefinition } from '@homebase-id/js-lib/network';
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useCircle } from '../../hooks/circles/useCircle';
-import { useDotYouClient } from '../../hooks/auth/useDotYouClient';
 import { Circles } from '../../ui/Icons/Circles';
 import { LoadingBlock } from '../../ui/LoadingBlock/LoadingBlock';
 import { Arrow } from '../../ui/Icons/Arrow';

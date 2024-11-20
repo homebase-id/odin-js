@@ -2,7 +2,6 @@ import {
   getPostQueryOptions,
   NotFound,
   useChannels,
-  useDotYouClient,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { Loader } from '@homebase-id/common-app/icons';
@@ -44,7 +43,7 @@ export const NavigateToReferencedPost = () => {
 
 const useReferencedPost = (postKey: string | undefined) => {
   const [post, setPost] = useState<HomebaseFile<PostContent> | null>(null);
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
   const { data: allChannels } = useChannels({ isOwner: true, isAuthenticated: true });
 

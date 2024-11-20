@@ -6,7 +6,6 @@ import {
   AuthorName,
   DialogWrapper,
   t,
-  useDotYouClient,
   useDotYouClientContext,
   usePortal,
 } from '@homebase-id/common-app';

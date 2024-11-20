@@ -18,11 +18,10 @@ import {
   RedactedConnectionRequest,
   ConnectionRequest,
 } from '@homebase-id/js-lib/network';
-
-import { useDotYouClient } from '../auth/useDotYouClient';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 export const usePendingConnections = () => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const pageSize = 6;
 
   const fetchPendingConnections = async ({ pageNumber }: { pageNumber: number }) => {
@@ -77,7 +76,7 @@ interface useSentConnectionsProps {
 }
 export const useSentConnections = (props?: useSentConnectionsProps) => {
   const { includeIntroductions } = props || {};
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const pageSize = 6;
 
   const fetchSentRequests = async ({ pageNumber }: { pageNumber: number }) =>
@@ -149,7 +148,7 @@ export const updateCacheSentConnections = (
 
 export const useReceivedIntroductions = () => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchIncomingIntroductions = async () => {
     return await getReceivedIntroductions(dotYouClient);
@@ -179,7 +178,7 @@ export const useActiveConnections = (
     pageSize: 10,
   }
 ) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchConnections = async (
     { pageSize, cursor }: { pageSize: number; cursor?: number } = {

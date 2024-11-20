@@ -9,7 +9,6 @@ import {
   OwnerImage,
   OwnerName,
   t,
-  useDotYouClient,
   useDotYouClientContext,
   usePortal,
 } from '@homebase-id/common-app';

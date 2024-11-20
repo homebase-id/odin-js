@@ -10,7 +10,6 @@ import {
   Label,
   NotFound,
   t,
-  useDotYouClient,
   useDotYouClientContext,
   useIntroductions,
 } from '@homebase-id/common-app';

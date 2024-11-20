@@ -1,12 +1,12 @@
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '../auth/useAuth';
 import {
   getDomainClients,
   removeDomainClient,
 } from '../../provider/network/domainNetwork/DomainManager';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useDomainClients = ({ domain }: { domain?: string }) => {
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
   const fetchClients = async ({ domain }: { domain: string }) => {

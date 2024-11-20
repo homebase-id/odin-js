@@ -7,7 +7,6 @@ import {
   formatToTimeAgoWithRelativeDetail,
   usePushNotifications,
   OWNER_APP_ID,
-  useDotYouClient,
   ErrorNotification,
   useRemoveNotifications,
   buildNotificationTargetLink,

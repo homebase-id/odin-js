@@ -1,5 +1,4 @@
 import { QueryClient, useQuery } from '@tanstack/react-query';
-
 import { ConnectionInfo, getDetailedConnectionInfo } from '@homebase-id/js-lib/network';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 

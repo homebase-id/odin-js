@@ -19,7 +19,6 @@ import {
   highlightQuery,
   MAIL_ROOT_PATH,
   t,
-  useDotYouClient,
   useDotYouClientContext,
   useIsConnected,
 } from '@homebase-id/common-app';
@@ -415,7 +414,7 @@ const MailConnectedState = ({ recipients }: { recipients: string[] }) => {
 
 const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
   const { data: isConnected, isFetched } = useIsConnected(recipient);
-  const host = useDotYouClient().getDotYouClient().getRoot();
+  const host = useDotYouClientContext().getRoot();
 
   if (isConnected || !isFetched) return null;
   return (

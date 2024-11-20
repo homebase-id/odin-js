@@ -2,14 +2,22 @@ import { useState, useRef } from 'react';
 
 import { LoginBox } from '../LoginBox/LoginBox';
 import { useAuth } from '../../../hooks/auth/useAuth';
-import { useOutsideTrigger, ConnectionImage, t } from '@homebase-id/common-app';
+import {
+  useOutsideTrigger,
+  ConnectionImage,
+  t,
+  useDotYouClientContext,
+} from '@homebase-id/common-app';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { Times, Person } from '@homebase-id/common-app/icons';
 
 const LoginNav = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { isAuthenticated, getIdentity, logout } = useAuth();
-  const identity = getIdentity();
+  const { logout } = useAuth();
+
+  const dotYouClient = useDotYouClientContext();
+  const isAuthenticated = dotYouClient.isAuthenticated();
+  const identity = dotYouClient.getLoggedInIdentity();
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOutsideTrigger(wrapperRef, () => setIsOpen(false));

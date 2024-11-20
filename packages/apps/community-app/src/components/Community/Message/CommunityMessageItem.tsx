@@ -1,5 +1,4 @@
 import {
-  useDotYouClient,
   ConnectionImage,
   ConnectionName,
   t,

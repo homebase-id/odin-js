@@ -64,19 +64,14 @@ const Debug = lazy(() => import('../templates/Debug/Debug'));
 import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
-import {
-  useAuth,
-  FIRSTRUN_PATH,
-  LOGIN_PATH,
-  RECOVERY_PATH,
-  SETUP_PATH,
-} from '../hooks/auth/useAuth';
+import { FIRSTRUN_PATH, LOGIN_PATH, RECOVERY_PATH, SETUP_PATH } from '../hooks/auth/useAuth';
 import { useIsConfigured } from '../hooks/configure/useIsConfigured';
 import {
   DotYouClientProvider,
   ErrorBoundary,
   NotFound,
   OdinQueryClient,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { useInboxProcessor } from '../hooks/inbox/useInboxProcessor';
 
@@ -122,11 +117,9 @@ function App() {
           path="/owner"
           element={
             <RootRoute>
-              <DotYouClientProvider>
-                <Suspense>
-                  <Outlet />
-                </Suspense>
-              </DotYouClientProvider>
+              <Suspense>
+                <Outlet />
+              </Suspense>
             </RootRoute>
           }
         >
@@ -242,14 +235,16 @@ function App() {
         cachedQueryKeys={INCLUDED_QUERY_KEYS}
         type="local"
       >
-        <RouterProvider router={router} fallbackElement={<></>} />
+        <DotYouClientProvider>
+          <RouterProvider router={router} fallbackElement={<></>} />
+        </DotYouClientProvider>
       </OdinQueryClient>
     </HelmetProvider>
   );
 }
 
 const RootRoute = ({ children }: { children: ReactNode }) => {
-  const { isAuthenticated } = useAuth();
+  const isAuthenticated = useDotYouClientContext().isAuthenticated();
   const { data: isConfigured, isFetched } = useIsConfigured().isConfigured;
   useInboxProcessor();
 

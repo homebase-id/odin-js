@@ -1,6 +1,6 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
-import { t, useDotYouClient, useDotYouClientContext } from '@homebase-id/common-app';
+import { t, useDotYouClientContext } from '@homebase-id/common-app';
 import { useCommunityReaction } from '../../../../hooks/community/reactions/useCommunityReaction';
 import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';

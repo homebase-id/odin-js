@@ -1,14 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchIdentityIFollow, Unfollow, UnfollowRequest } from '@homebase-id/js-lib/network';
-import { useDotYouClient } from '../auth/useDotYouClient';
 import { invalidateFollowing } from './useFollowing';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 type useIdentityIFollowProps = {
   odinId?: string;
 };
 
 export const useIdentityIFollow = ({ odinId }: useIdentityIFollowProps) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
   const fetch = async ({ odinId }: { odinId: string }) => {

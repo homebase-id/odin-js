@@ -15,7 +15,7 @@ import {
   t,
   useChannelDrives,
   useCircles,
-  useDotYouClient,
+  useDotYouClientContext,
 } from '../../../..';
 import { drivesEqual, stringGuidsEqual, stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import {
@@ -104,8 +104,7 @@ const getExtendCirclePermissionUrl = (
 
 export const useCollaborativeChannel = (props?: { channelId: string }) => {
   const { channelId } = props || {};
-  const { getDotYouClient } = useDotYouClient();
-  const dotYouClient = getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
   const { data: channelDef, isFetched: isChannelFetched } = useChannel({

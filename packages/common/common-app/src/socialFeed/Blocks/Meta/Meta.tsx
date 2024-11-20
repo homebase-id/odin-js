@@ -8,7 +8,6 @@ import { AclSummary } from '../../../acl';
 import { t } from '../../../helpers';
 import { ActionGroupOptionProps, ActionGroup, ErrorNotification } from '../../../ui';
 import { ChannelDefinitionVm, useManagePost, useManageSocialFeed } from '../../../hooks/socialFeed';
-import { useDotYouClient } from '../../../hooks/auth/useDotYouClient';
 import { useIsConnected } from '../../../hooks/connections/useIsConnected';
 import { EditPostDialog } from '../../EditPostDialog/EditPostDialog';
 import { Persons, UserX, Times, Flag, Block, Link, Trash, Lock, Pencil } from '../../../ui/Icons';

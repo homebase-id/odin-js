@@ -19,8 +19,8 @@ import {
   useIntersection,
   LoadingBlock,
   NotFound,
-  useDotYouClient,
   BLOG_POST_INFIITE_PAGE_SIZE,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 
 import CardPostOverview from '../../../components/Post/Overview/CardPostOverview/CardPostOverview';
@@ -34,7 +34,7 @@ import { SaveCollaborativeChannelLink } from '../../../components/CollaborativeC
 import { PublicPostComposer } from '../../../components/CollaborativeChannels/PublicPostComposer';
 
 const PostOverview = () => {
-  const { isOwner } = useDotYouClient();
+  const isOwner = useDotYouClientContext().isOwner();
   const { channelKey } = useParams();
   const { data: activeChannel, isFetched: channelFetched } = useChannel({
     channelKey: channelKey || BlogConfig.PublicChannelId,

@@ -7,7 +7,6 @@ import {
   OwnerName,
   LoadingBlock,
   getPlainTextFromRichText,
-  useDotYouClient,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { Persons } from '@homebase-id/common-app/icons';

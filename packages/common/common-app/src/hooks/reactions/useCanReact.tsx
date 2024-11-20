@@ -4,7 +4,6 @@ import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 import { useQuery } from '@tanstack/react-query';
 import { useSecurityContext } from '../securityContext/useSecurityContext';
-import { useDotYouClient } from '../auth/useDotYouClient';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 interface UseCanReactProps {

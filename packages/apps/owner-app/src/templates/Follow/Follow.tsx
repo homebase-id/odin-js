@@ -15,7 +15,6 @@ import {
   SubtleMessage,
   t,
   useFollowerInfinite,
-  useDotYouClient,
   useIsConnected,
   IdentityTeaser,
   ActionGroup,

@@ -1,11 +1,11 @@
 import { ContactFile, getContacts } from '@homebase-id/js-lib/network';
-import { useDotYouClient } from '../auth/useDotYouClient';
 import { useQuery } from '@tanstack/react-query';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 const CHUNKSIZE = 200;
 export const useAllContacts = (enabled: boolean) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchMentionTargets = async () => {
     // self invoking function that fetches the contacts in blocks of a CHUNKSIZE untill there are no more contacts to fetch

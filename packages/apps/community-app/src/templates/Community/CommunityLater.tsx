@@ -16,7 +16,6 @@ import {
   OwnerImage,
   OwnerName,
   t,
-  useDotYouClient,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { Bookmark, BookmarkSolid, ChevronLeft } from '@homebase-id/common-app/icons';

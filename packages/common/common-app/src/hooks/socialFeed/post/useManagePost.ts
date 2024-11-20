@@ -16,7 +16,6 @@ import {
   UpdateResult,
 } from '@homebase-id/js-lib/core';
 import { HomebaseFile, NewHomebaseFile, UploadResult } from '@homebase-id/js-lib/core';
-import { useDotYouClient } from '../../auth/useDotYouClient';
 import { getRichTextFromString } from '../../../helpers/richTextHelper';
 import { TransitUploadResult } from '@homebase-id/js-lib/peer';
 import { LinkPreview } from '@homebase-id/js-lib/media';
@@ -25,9 +24,10 @@ import { invalidatePosts } from './usePostsInfinite';
 import { invalidateSocialFeeds, updateCacheSocialFeeds } from '../useSocialFeed';
 import { invalidatePost } from './usePost';
 import { formatGuidId } from '@homebase-id/js-lib/helpers';
+import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
 
 export const useManagePost = () => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
   const loggedInIdentity = dotYouClient.getLoggedInIdentity();
 

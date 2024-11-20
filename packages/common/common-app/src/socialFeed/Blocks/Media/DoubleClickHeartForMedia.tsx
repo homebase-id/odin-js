@@ -2,7 +2,7 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { PostContent, ReactionContext } from '@homebase-id/js-lib/public';
 import React, { useMemo } from 'react';
 import { useRef } from 'react';
-import { useReaction, useDotYouClient, useDoubleTap, useDotYouClientContext } from '../../../hooks';
+import { useReaction, useDoubleTap, useDotYouClientContext } from '../../../hooks';
 import { ErrorNotification } from '../../../ui';
 import { PostMedia } from './Media';
 

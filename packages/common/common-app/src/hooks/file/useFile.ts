@@ -1,6 +1,6 @@
 import { SystemFileType, TargetDrive, getPayloadBytes } from '@homebase-id/js-lib/core';
-import { useDotYouClient } from '../auth/useDotYouClient';
 import { getPayloadBytesOverPeerByGlobalTransitId } from '@homebase-id/js-lib/peer';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 export const useFile = ({
   targetDrive,
@@ -9,7 +9,7 @@ export const useFile = ({
   targetDrive: TargetDrive;
   systemFileType?: SystemFileType;
 }) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getHostIdentity();
 
   const fetchFile = async (

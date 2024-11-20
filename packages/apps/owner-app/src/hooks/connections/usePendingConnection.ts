@@ -1,5 +1,4 @@
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '../auth/useAuth';
 import {
   DotYouProfile,
   acceptConnectionRequest,
@@ -15,11 +14,12 @@ import {
   invalidatePendingConnections,
   updateCacheActiveConnections,
   updateCachePendingConnections,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 
 export const usePendingConnection = ({ odinId }: { odinId?: string }) => {
   const queryClient = useQueryClient();
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const getPendingConnectionInfo = async ({ odinId }: { odinId: string }) => {
     if (!odinId) return null;

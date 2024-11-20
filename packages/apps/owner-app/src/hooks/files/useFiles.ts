@@ -21,8 +21,8 @@ import {
   getFileHeaderByUniqueId,
   getFileHeaderBytesByGlobalTransitId,
 } from '@homebase-id/js-lib/core';
-import { useAuth } from '../auth/useAuth';
 import { jsonStringify64, tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 const includeMetadataHeader = true;
 const includeTransferHistory = true;
@@ -35,7 +35,7 @@ export const useFiles = ({
   targetDrive: TargetDrive;
   systemFileType?: SystemFileType;
 }) => {
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchFiles = async ({
     targetDrive,
@@ -78,7 +78,7 @@ export const useFileQuery = ({
   id: string | undefined;
   systemFileType?: SystemFileType;
 }) => {
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   return useQuery({
     queryKey: ['file', targetDrive?.alias, id],
@@ -116,7 +116,7 @@ export const useFile = ({
   systemFileType?: SystemFileType;
 }) => {
   const queryClient = useQueryClient();
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchFile = async (result: HomebaseFile | DeletedHomebaseFile, payloadKey?: string) => {
     if (payloadKey) {

@@ -15,7 +15,6 @@ import {
 import { UnreachableIdentity } from '@homebase-id/feed-app/src/components/SocialFeed/UnreachableIdentity';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { PostContent } from '@homebase-id/js-lib/public';
-import { useAuth } from '../../hooks/auth/useAuth';
 
 const POSTS_TO_SHOW = 2;
 export const FeedTeaser = ({ className }: { className?: string }) => {

@@ -5,7 +5,6 @@ import {
 } from '../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import {
-  useDotYouClient,
   ActionGroupOptionProps,
   t,
   ErrorNotification,

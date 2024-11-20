@@ -10,7 +10,6 @@ import {
   OwnerImage,
   OwnerName,
   t,
-  useDotYouClient,
   useDotYouClientContext,
   useIntroductions,
   useIsConnected,
@@ -289,7 +288,7 @@ const GroupChatConnectedState = ({
 
 const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
   const { data: isConnected, isFetched: isFetchedConnected } = useIsConnected(recipient);
-  const host = useDotYouClient().getDotYouClient().getRoot();
+  const host = useDotYouClientContext().getRoot();
 
   if (!isConnected && isFetchedConnected) {
     return (

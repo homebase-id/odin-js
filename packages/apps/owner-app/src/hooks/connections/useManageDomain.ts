@@ -1,16 +1,19 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '../auth/useAuth';
 import {
   disconnectFromDomain,
   restoreDomainAccess,
   revokeDomainAccess,
 } from '../../provider/network/domainNetwork/DomainManager';
-import { invalidateDomainInfo, invalidateDomains } from '@homebase-id/common-app';
+import {
+  invalidateDomainInfo,
+  invalidateDomains,
+  useDotYouClientContext,
+} from '@homebase-id/common-app';
 
 export const useManageDomain = () => {
   const queryClient = useQueryClient();
 
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const revokeDomain = async ({ domain }: { domain: string }) =>
     await revokeDomainAccess(dotYouClient, domain);

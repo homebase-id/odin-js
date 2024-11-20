@@ -7,7 +7,6 @@ import {
   Label,
   SubtleMessage,
   usePostsInfinite,
-  useDotYouClient,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { Select } from '@homebase-id/common-app';
@@ -16,7 +15,6 @@ import { t } from '@homebase-id/common-app';
 import { useChannels } from '@homebase-id/common-app';
 import ChannelTeaser from '../ChannelTeaser/ChannelTeaser';
 import { LoadingBlock } from '@homebase-id/common-app';
-import { useAuth } from '../../../../hooks/auth/useAuth';
 import { PostTeaser } from '@homebase-id/common-app';
 import LoginDialog from '../../../../components/Dialog/LoginDialog/LoginDialog';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
@@ -35,7 +33,10 @@ const VerticalPosts = ({ className }: { className?: string }) => {
 };
 
 const ChannelSidebar = ({ className }: { className: string }) => {
-  const { isAuthenticated, isOwner } = useAuth();
+  const dotYouClient = useDotYouClientContext();
+  const isOwner = dotYouClient.isOwner();
+  const isAuthenticated = dotYouClient.isAuthenticated();
+
   const navigate = useNavigate();
   const { data: channels } = useChannels({ isAuthenticated, isOwner });
   if (!channels?.length || channels.length === 1) return null;

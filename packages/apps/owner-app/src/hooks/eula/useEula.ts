@@ -1,8 +1,8 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useDotYouClient } from '@homebase-id/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useEula = () => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchRequired = async (): Promise<string | false> => {
     const client = dotYouClient.createAxiosClient();

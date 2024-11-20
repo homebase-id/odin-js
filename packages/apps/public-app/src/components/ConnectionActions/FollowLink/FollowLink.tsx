@@ -1,6 +1,5 @@
 import { ActionLink, ellipsisAtMaxChar, useDotYouClientContext } from '@homebase-id/common-app';
 import { t } from '@homebase-id/common-app';
-import { useAuth } from '../../../hooks/auth/useAuth';
 
 import { Feed, Check } from '@homebase-id/common-app/icons';
 import { useFollowDetail } from '../../../hooks/follow/useFollowDetail';

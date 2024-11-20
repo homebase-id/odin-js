@@ -6,12 +6,12 @@ import {
   DarkModeToggle,
   HOME_ROOT_PATH,
   OwnerName,
+  useDotYouClientContext,
   useSiteData,
 } from '@homebase-id/common-app';
-import { useAuth } from '../../../../hooks/auth/useAuth';
 
 const Header = () => {
-  const { isOwner } = useAuth();
+  const isOwner = useDotYouClientContext().isOwner();
   const { owner } = useSiteData().data ?? {};
 
   return (

@@ -31,11 +31,17 @@ const IncomingCollaborativeChannelPage = lazy(
 
 import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
-import { useAuth } from '../hooks/auth/useAuth';
 
 const AUTH_PATH = FEED_ROOT_PATH + '/auth';
 
-import { ErrorBoundary, FEED_ROOT_PATH, NotFound, OdinQueryClient } from '@homebase-id/common-app';
+import {
+  DotYouClientProvider,
+  ErrorBoundary,
+  FEED_ROOT_PATH,
+  NotFound,
+  OdinQueryClient,
+  useDotYouClientContext,
+} from '@homebase-id/common-app';
 
 export const REACT_QUERY_CACHE_KEY = 'FEED_REACT_QUERY_OFFLINE_CACHE';
 const INCLUDED_QUERY_KEYS = ['common-image', 'collaborative-channels'];
@@ -113,14 +119,16 @@ function App() {
         cachedQueryKeys={INCLUDED_QUERY_KEYS}
         type="indexeddb"
       >
-        <RouterProvider router={router} fallbackElement={<></>} />
+        <DotYouClientProvider>
+          <RouterProvider router={router} fallbackElement={<></>} />
+        </DotYouClientProvider>
       </OdinQueryClient>
     </HelmetProvider>
   );
 }
 
 const RootRoute = ({ children }: { children: ReactNode }) => {
-  const { isAuthenticated } = useAuth();
+  const isAuthenticated = useDotYouClientContext().isAuthenticated();
 
   if (!isAuthenticated) {
     if (window.location.pathname === AUTH_PATH) return <>{children}</>;

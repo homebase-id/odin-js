@@ -1,4 +1,9 @@
-import { ActionGroup, t, useDotYouClient, useManageSocialFeed } from '@homebase-id/common-app';
+import {
+  ActionGroup,
+  t,
+  useDotYouClientContext,
+  useManageSocialFeed,
+} from '@homebase-id/common-app';
 import { Times, UserX } from '@homebase-id/common-app/icons';
 import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import { PostContent } from '@homebase-id/js-lib/public';
@@ -10,7 +15,7 @@ interface UnreachableIdentityProps {
 }
 
 export const UnreachableIdentity = ({ className, postFile, odinId }: UnreachableIdentityProps) => {
-  const host = useDotYouClient().getDotYouClient().getRoot;
+  const host = useDotYouClientContext().getRoot;
 
   const {
     removeFromFeed: { mutateAsync: removeFromMyFeed },

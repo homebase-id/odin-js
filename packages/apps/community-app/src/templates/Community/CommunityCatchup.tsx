@@ -4,7 +4,6 @@ import {
   ErrorBoundary,
   LoadingBlock,
   t,
-  useDotYouClient,
   COMMUNITY_ROOT_PATH,
   useDotYouClientContext,
 } from '@homebase-id/common-app';

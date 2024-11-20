@@ -1,5 +1,5 @@
 import { MouseEventHandler, ReactNode, useRef, useState } from 'react';
-import { useDotYouClient, useExternalOdinId, useIntersection, useIsConnected } from '../..';
+import { useDotYouClientContext, useExternalOdinId, useIntersection, useIsConnected } from '../..';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 
 export const IdentityTeaser = ({
@@ -17,8 +17,7 @@ export const IdentityTeaser = ({
   isBorderLess?: boolean;
   children?: ReactNode;
 }) => {
-  const { getDotYouClient } = useDotYouClient();
-  const dotYouClient = getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getLoggedInIdentity();
   const [isInView, setIsInView] = useState(false);
   const wrapperRef = useRef<HTMLAnchorElement>(null);

@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchFollowDetail } from '@homebase-id/js-lib/network';
-import { useAuth } from '../auth/useAuth';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useFollowDetail = () => {
-  const { getDotYouClient, isAuthenticated, isOwner } = useAuth();
-  const dotYouClient = getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
+
+  const isOwner = dotYouClient.isOwner();
+  const isAuthenticated = dotYouClient.isAuthenticated();
 
   const fetchDetail = async () => {
     if (!isAuthenticated || isOwner) {

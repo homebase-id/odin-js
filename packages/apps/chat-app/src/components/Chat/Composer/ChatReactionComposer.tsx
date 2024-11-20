@@ -2,7 +2,6 @@ import { Lol } from '@homebase-id/common-app/icons';
 import {
   ReactionsBar,
   t,
-  useDotYouClient,
   useDotYouClientContext,
   useMostSpace,
   useOutsideTrigger,

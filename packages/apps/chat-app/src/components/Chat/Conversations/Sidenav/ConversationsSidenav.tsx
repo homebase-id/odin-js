@@ -7,7 +7,6 @@ import {
   SubtleMessage,
   t,
   useAllContacts,
-  useDotYouClient,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { MagnifyingGlass, Persons, Plus, Times } from '@homebase-id/common-app/icons';

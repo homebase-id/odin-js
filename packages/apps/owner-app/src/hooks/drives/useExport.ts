@@ -12,7 +12,7 @@ import {
   DEFAULT_PAYLOAD_KEY,
 } from '@homebase-id/js-lib/core';
 import { jsonStringify64 } from '@homebase-id/js-lib/helpers';
-import { useAuth } from '../auth/useAuth';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 const includeMetadataHeader = true;
 const pageSize = 10;
@@ -73,7 +73,7 @@ export const isImportable = (obj: unknown): obj is importable => {
 };
 
 export const useExport = () => {
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const getAllFilesOnDrive = async (drive: TargetDrive) => {
     const queryBatchPart = async (cursorState: string | undefined) => {

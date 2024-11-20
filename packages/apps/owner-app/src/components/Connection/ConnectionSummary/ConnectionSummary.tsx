@@ -1,7 +1,6 @@
 import { useContact } from '../../../hooks/contacts/useContact';
 import {
   t,
-  useDotYouClient,
   ErrorNotification,
   ActionButton,
   mergeStates,

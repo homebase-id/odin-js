@@ -7,7 +7,6 @@ import { hasDebugFlag, jsonStringify64 } from '@homebase-id/js-lib/helpers';
 import { OutgoingConnectionDialog } from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import {
-  useDotYouClient,
   useIdentityIFollow,
   ActionButton,
   t,

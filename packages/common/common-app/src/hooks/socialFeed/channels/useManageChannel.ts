@@ -18,7 +18,7 @@ import {
   invalidateChannel,
   t,
   updateCacheChannel,
-  useDotYouClient,
+  useDotYouClientContext,
   useStaticFiles,
 } from '../../../..';
 import { stringGuidsEqual, stringifyToQueryParams, toGuidId } from '@homebase-id/js-lib/helpers';
@@ -71,8 +71,7 @@ const getExtendAuthorizationUrl = (
 };
 
 export const useManageChannel = () => {
-  const { getDotYouClient } = useDotYouClient();
-  const dotYouClient = getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
   const { mutate: publishStaticFiles } = useStaticFiles().publish;
 

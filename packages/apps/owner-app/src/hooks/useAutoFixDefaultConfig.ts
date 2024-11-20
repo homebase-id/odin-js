@@ -1,4 +1,4 @@
-import { getOdinIdColor, useDotYouClient, useErrors } from '@homebase-id/common-app';
+import { getOdinIdColor, useDotYouClientContext, useErrors } from '@homebase-id/common-app';
 import {
   base64ToUint8Array,
   byteArrayToString,
@@ -27,7 +27,7 @@ export const useAutofixDefaultConfig = () => {
   const lastRunAutoFix = uiSettings?.lastRunAutoFix;
   const shouldRun = lastRunAutoFix !== AUTO_FIX_VERSION;
 
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const isRunning = useRef<boolean>();
 
   const { fixDefaultProfileImage } = useFixDefaultProfileImage();
@@ -55,7 +55,7 @@ export const useAutofixDefaultConfig = () => {
 };
 
 const useFixDefaultProfileImage = () => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const { mutateAsync: saveAttr } = useAttribute().save;
 
   return {

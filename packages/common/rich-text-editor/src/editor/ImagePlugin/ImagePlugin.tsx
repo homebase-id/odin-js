@@ -2,7 +2,7 @@ import { removeNodes } from '@udecode/plate-common';
 import { ReactEditor } from 'slate-react';
 import { TargetDrive, NewMediaFile } from '@homebase-id/js-lib/core';
 import { useMemo, useState } from 'react';
-import { ImageDialog, t, useDotYouClient } from '@homebase-id/common-app';
+import { ImageDialog, t, useDotYouClientContext } from '@homebase-id/common-app';
 import { ImageIcon, Trash } from '@homebase-id/common-app/icons';
 import { ToolbarButton, ToolbarButtonProps } from '../../components/plate-ui/toolbar';
 import { OdinThumbnailImage } from '@homebase-id/ui-lib';
@@ -64,7 +64,7 @@ export const ImageElementBlock = <N extends TImageElement = TImageElement>(
   const isBlockSelected = useBlockSelected();
   const [isActive, setIsActive] = useState(false);
   const { attributes, children, nodeProps, element } = props;
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const editor = useEditorRef(useEventPlateId());
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

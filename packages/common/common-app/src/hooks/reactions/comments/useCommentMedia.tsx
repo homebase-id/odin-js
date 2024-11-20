@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { TargetDrive } from '@homebase-id/js-lib/core';
 import { getDecryptedImageUrl } from '@homebase-id/js-lib/media';
 import { getDecryptedImageUrlOverPeer } from '@homebase-id/js-lib/peer';
-import { useDotYouClient } from '../../auth/useDotYouClient';
+import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
 
 export const useCommentMedia = ({
   odinId,
@@ -15,7 +15,7 @@ export const useCommentMedia = ({
   fileId: string | undefined;
   fileKey: string | undefined;
 }) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetch = async ({
     odinId,

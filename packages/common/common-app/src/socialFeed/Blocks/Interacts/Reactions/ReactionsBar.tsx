@@ -3,7 +3,6 @@ import { Suspense, useEffect, useState, useRef } from 'react';
 import { CanReactInfo } from '../../../../hooks/reactions/useCanReact';
 import { useErrors } from '../../../../hooks/errors/useErrors';
 import { useReaction } from '../../../../hooks/reactions/useReaction';
-import { useDotYouClient } from '../../../../hooks/auth/useDotYouClient';
 import { useMyEmojiReactions } from '../../../../hooks/reactions/emojis/useMyEmojiReactions';
 import { CantReactInfo } from '../CantReactInfo';
 import { useMostSpace } from '../../../../hooks/intersection/useMostSpace';

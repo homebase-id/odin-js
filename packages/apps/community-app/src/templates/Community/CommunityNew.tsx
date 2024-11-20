@@ -12,7 +12,6 @@ import {
   t,
   useCircle,
   useCircles,
-  useDotYouClient,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';

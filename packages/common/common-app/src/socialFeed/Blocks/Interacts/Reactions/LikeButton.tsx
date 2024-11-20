@@ -3,7 +3,6 @@ import { ReactionContext } from '@homebase-id/js-lib/public';
 import { t } from '../../../../helpers';
 import {
   CanReactInfo,
-  useDotYouClient,
   useReaction,
   useOutsideTrigger,
   useMyEmojiReactions,

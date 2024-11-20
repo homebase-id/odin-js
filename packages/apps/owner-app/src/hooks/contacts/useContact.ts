@@ -4,7 +4,6 @@ import {
   fetchConnectionInfo,
   fetchDataFromPublic,
 } from '../../provider/contact/ContactSourceProvider';
-import { useAuth } from '../auth/useAuth';
 import {
   ContactFile,
   ContactVm,
@@ -19,6 +18,7 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
 } from '@homebase-id/js-lib/core';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useContact = ({
   odinId,
@@ -29,7 +29,7 @@ export const useContact = ({
   id?: string;
   canSave: boolean;
 }) => {
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
   const fetchSingle = async ({

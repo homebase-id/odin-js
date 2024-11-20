@@ -6,7 +6,6 @@ import {
   QueryBatchCollectionResponse,
   DEFAULT_QUERY_BATCH_RESULT_OPTION,
   HomebaseFile,
-  ApiType,
 } from '@homebase-id/js-lib/core';
 import {
   stringGuidsEqual,
