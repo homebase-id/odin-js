@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-import { useAllContacts, ActionButton, useDotYouClient } from '@homebase-id/common-app';
+import { useAllContacts, ActionButton, useDotYouClientContext } from '@homebase-id/common-app';
 import { Times } from '@homebase-id/common-app/icons';
 import { ContactFile } from '@homebase-id/js-lib/network';
 
@@ -19,10 +19,10 @@ export const RecipientInput = ({
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [inputStateIndex, setInputStateIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
 
   const ownContactFile: ContactFile = {
-    odinId: identity || window.location.host,
+    odinId: loggedOnIdentity,
     name: {
       displayName: 'You',
     },
@@ -85,8 +85,7 @@ export const RecipientInput = ({
   return (
     <div className="relative">
       <div
-        className={`flex w-full flex-row flex-wrap items-center gap-1 rounded border
-            border-gray-300 bg-white px-2 py-1 text-gray-700 transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 ${isFocused ? 'border-indigo-500 ring-2 ring-indigo-300' : ''}`}
+        className={`flex w-full flex-row flex-wrap items-center gap-1 rounded border border-gray-300 bg-white px-2 py-1 text-gray-700 transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 ${isFocused ? 'border-indigo-500 ring-2 ring-indigo-300' : ''}`}
       >
         {recipients.map((recipient) => (
           <p

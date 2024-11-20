@@ -24,7 +24,7 @@ export const useManageSocialFeed = (props?: { odinId: string }) => {
   };
 
   const getContentReportUrl = () => {
-    const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
+    const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot();
 
     // Fetch the reporting url from the other identities config
     return fetch(`${host}/config/reporting`)

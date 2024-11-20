@@ -57,7 +57,7 @@ export const useInboxProcessor = (odinId: string | undefined, communityId: strin
 
     // Process community;
     const processedresult =
-      !odinId || odinId === dotYouClient.getIdentity()
+      !odinId || odinId === dotYouClient.getHostIdentity()
         ? await processInbox(dotYouClient, targetDrive, BATCH_SIZE)
         : null;
 
@@ -130,7 +130,7 @@ const findChangesSinceTimestamp = async (
   const batchCursor = getQueryBatchCursorFromTime(new Date().getTime(), timeStamp);
 
   const newFiles =
-    odinId && dotYouClient.getIdentity() !== odinId
+    odinId && dotYouClient.getHostIdentity() !== odinId
       ? await queryBatchOverPeer(dotYouClient, odinId, params, {
           maxRecords: BATCH_SIZE,
           cursorState: batchCursor,
@@ -145,7 +145,7 @@ const findChangesSinceTimestamp = async (
         });
 
   const modifiedFiles =
-    odinId && dotYouClient.getIdentity() !== odinId
+    odinId && dotYouClient.getHostIdentity()
       ? await queryModifiedOverPeer(dotYouClient, odinId, params, {
           maxRecords: BATCH_SIZE,
           cursor: modifiedCursor,

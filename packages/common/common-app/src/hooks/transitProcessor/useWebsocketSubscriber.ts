@@ -28,7 +28,7 @@ export const useWebsocketSubscriber = (
   refId?: string
 ) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
-  const isPeer = !!odinId && odinId !== dotYouClient.getIdentity();
+  const isPeer = !!odinId && odinId !== dotYouClient.getHostIdentity();
   const [isConnected, setIsConected] = useState<boolean>(false);
 
   const wrappedHandler = useCallback(

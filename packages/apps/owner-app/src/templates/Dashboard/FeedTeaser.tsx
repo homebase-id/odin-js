@@ -10,6 +10,7 @@ import {
   PostMeta,
   useChannel,
   useCheckIdentity,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { UnreachableIdentity } from '@homebase-id/feed-app/src/components/SocialFeed/UnreachableIdentity';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
@@ -59,10 +60,9 @@ const PostTeaser = ({
   odinId?: string;
   className?: string;
 }) => {
-  const { getDotYouClient } = useAuth();
   const post = postFile.fileMetadata.appData.content;
-  const identity = getDotYouClient().getIdentity();
-  const isExternal = odinId && odinId !== identity;
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const isExternal = odinId && odinId !== loggedOnIdentity;
 
   const { data: identityAccessible } = useCheckIdentity(isExternal ? odinId : undefined);
 

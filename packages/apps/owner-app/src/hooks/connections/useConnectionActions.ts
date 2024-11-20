@@ -81,7 +81,7 @@ export const useConnectionActions = () => {
           recipient: targetOdinId,
           id: getNewId(),
           message: message,
-          senderOdinId: dotYouClient.getIdentity(),
+          senderOdinId: dotYouClient.getHostIdentity(),
           receivedTimestampMilliseconds: Date.now(),
           connectionRequestOrigin: 'identityowner',
         };

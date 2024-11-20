@@ -19,9 +19,7 @@ const LoginNav = () => {
       {isOpen ? (
         <button
           key={'close'}
-          className={`inline-flex h-8 w-8 flex-shrink-0 items-center justify-center
-              rounded-full bg-slate-300
-            dark:bg-slate-500`}
+          className={`inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-300 dark:bg-slate-500`}
         >
           <Times className="h-5 w-5" />
         </button>
@@ -50,7 +48,9 @@ const LoginNav = () => {
                   {t('Logged in as: ')}{' '}
                   <a
                     href={
-                      identity ? new DotYouClient({ identity, api: ApiType.Guest }).getRoot() : ''
+                      identity
+                        ? new DotYouClient({ hostIdentity: identity, api: ApiType.Guest }).getRoot()
+                        : ''
                     }
                     className="underline"
                     target={'_blank'}
@@ -61,7 +61,7 @@ const LoginNav = () => {
                 </p>
                 <button
                   onClick={logout}
-                  className="mt-2 block w-full rounded border-0 bg-green-500 px-4 py-2 text-white hover:bg-green-600 focus:outline-none "
+                  className="mt-2 block w-full rounded border-0 bg-green-500 px-4 py-2 text-white hover:bg-green-600 focus:outline-none"
                 >
                   {t('logout')}
                 </button>

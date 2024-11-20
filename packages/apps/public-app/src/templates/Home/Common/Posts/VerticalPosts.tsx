@@ -8,6 +8,7 @@ import {
   SubtleMessage,
   usePostsInfinite,
   useDotYouClient,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { Select } from '@homebase-id/common-app';
 import { flattenInfinteData } from '@homebase-id/common-app';
@@ -85,8 +86,9 @@ const ChannelSidebar = ({ className }: { className: string }) => {
 // Docs for combination of Virtual and infinite:
 // https://tanstack.com/virtual/v3/docs/examples/react/infinite-scroll
 const MainVerticalPosts = ({ className, channelId }: { className: string; channelId?: string }) => {
-  const { isOwner, getIdentity } = useDotYouClient();
-  const isAuthenticated = isOwner || !!getIdentity();
+  const dotYouClient = useDotYouClientContext();
+  const isOwner = dotYouClient.isOwner();
+  const isAuthenticated = dotYouClient.isAuthenticated();
   const { data: channels } = useChannels({ isAuthenticated, isOwner });
   const showAuthor =
     !!channels?.find(

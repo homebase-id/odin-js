@@ -17,13 +17,13 @@ import {
 import { usePostsInfiniteReturn } from './usePostsInfinite';
 import { DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { useChannel } from '../channels/useChannel';
-import { useDotYouClient } from '../../auth/useDotYouClient';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import {
   getPostBySlugOverPeer,
   getPostOverPeer,
   RecentsFromConnectionsReturn,
 } from '@homebase-id/js-lib/peer';
+import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
 
 type usePostProps = {
   odinId?: string;
@@ -37,8 +37,8 @@ export const usePost = ({ odinId, channelKey, postKey }: usePostProps = {}) => {
     channelKey,
   }).fetch;
 
-  const { getDotYouClient, isOwner } = useDotYouClient();
-  const dotYouClient = getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
+  const isOwner = dotYouClient.isOwner();
   const queryClient = useQueryClient();
 
   return useQuery(
@@ -74,7 +74,7 @@ const fetchBlog = async ({
 }) => {
   if (!channel || !postKey) return null;
 
-  if (!odinId || odinId === dotYouClient.getIdentity()) {
+  if (!odinId || odinId === dotYouClient.getHostIdentity()) {
     // Search in cache
     const localBlogs = getLocalCachedBlogs(queryClient, channel.fileMetadata.appData.uniqueId);
     if (localBlogs) {
@@ -157,7 +157,7 @@ export const getPostQueryOptions: (
 ) => ({
   queryKey: [
     'post',
-    odinId || dotYouClient.getIdentity(),
+    odinId || dotYouClient.getHostIdentity(),
     channel?.fileMetadata.appData.uniqueId,
     postKey,
   ],

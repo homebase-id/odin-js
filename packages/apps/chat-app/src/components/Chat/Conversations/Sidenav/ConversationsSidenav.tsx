@@ -8,6 +8,7 @@ import {
   t,
   useAllContacts,
   useDotYouClient,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { MagnifyingGlass, Persons, Plus, Times } from '@homebase-id/common-app/icons';
 
@@ -160,9 +161,9 @@ const ConversationListItem = ({
   onClick: () => void;
   isActive: boolean;
 }) => {
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const recipients = conversation.fileMetadata.appData.content.recipients.filter(
-    (recipient) => recipient !== identity
+    (recipient) => recipient !== loggedOnIdentity
   );
 
   if (recipients && recipients.length > 1)

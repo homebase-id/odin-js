@@ -20,6 +20,7 @@ import {
   IdentityTeaser,
   ActionGroup,
   useIdentityIFollow,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { Persons, AddressBook, House, Block, Times } from '@homebase-id/common-app/icons';
 import { useFocusedEditing } from '../../hooks/focusedEditing/useFocusedEditing';
@@ -170,7 +171,7 @@ const Followers = () => {
 const FollowIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void }) => {
   const { mutate: block } = useConnectionActions().block;
 
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const { data: isConnected } = useIsConnected(odinId);
 
   return (
@@ -199,7 +200,7 @@ const FollowIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void
               label: t('Open homepage'),
               onClick: () => {
                 window.open(
-                  `${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
+                  `${new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}${isConnected && loggedOnIdentity ? '?youauth-logon=' + loggedOnIdentity : ''}`,
                   '_blank'
                 );
               },
@@ -231,7 +232,7 @@ const FollowIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void
 const FollowingIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void }) => {
   const { mutate: unfollow } = useIdentityIFollow({ odinId }).unfollow;
 
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const { data: isConnected } = useIsConnected(odinId);
 
   return (
@@ -260,7 +261,7 @@ const FollowingIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => v
               label: t('Open homepage'),
               onClick: () => {
                 window.open(
-                  `${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
+                  `${new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}${isConnected && loggedOnIdentity ? '?youauth-logon=' + loggedOnIdentity : ''}`,
                   '_blank'
                 );
               },

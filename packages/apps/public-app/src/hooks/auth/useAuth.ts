@@ -26,12 +26,12 @@ import {
 } from '@homebase-id/js-lib/helpers';
 
 export const useAuth = () => {
-  const { getDotYouClient, getIdentity, getApiType, hasSharedSecret, getSharedSecret, isOwner } =
-    useDotYouClient();
+  const { getDotYouClient, hasSharedSecret, getSharedSecret, isOwner } = useDotYouClient();
 
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
   >(hasSharedSecret ? 'unknown' : 'anonymous');
+
   const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(isOwner);
 
   const logout = async (): Promise<void> => {
@@ -84,9 +84,7 @@ export const useAuth = () => {
 
   return {
     logout,
-    getIdentity,
     isOwner,
-    getApiType,
     getSharedSecret,
     getDotYouClient,
     isAuthenticated: authenticationState !== 'anonymous',

@@ -61,7 +61,10 @@ const getExtendAuthorizationUrl = (
     d: JSON.stringify(drives),
   };
 
-  const host = new DotYouClient({ identity: identity || undefined, api: ApiType.App }).getRoot();
+  const host = new DotYouClient({
+    hostIdentity: identity || undefined,
+    api: ApiType.App,
+  }).getRoot();
   return `${host}/owner/appupdate?${stringifyToQueryParams(params)}&return=${encodeURIComponent(
     returnUrl
   )}`;
@@ -87,7 +90,7 @@ export const useManageChannel = () => {
       if (!channelDef.fileMetadata.appData.uniqueId)
         throw new Error('Channel unique id is not set');
 
-      const host = dotYouClient.getIdentity();
+      const host = dotYouClient.getHostIdentity();
       const returnUrl = `${FEED_ROOT_PATH}/channels?new=${JSON.stringify(channelDef)}`;
 
       const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);
@@ -143,13 +146,13 @@ export const useManageChannel = () => {
         // Update channel
         updateCacheChannel(
           queryClient,
-          dotYouClient.getIdentity(),
+          dotYouClient.getHostIdentity(),
           toSaveChannelAsVm.fileMetadata.appData.content.slug,
           () => toSaveChannelAsVm
         );
         updateCacheChannel(
           queryClient,
-          dotYouClient.getIdentity(),
+          dotYouClient.getHostIdentity(),
           toSaveChannelAsVm.fileMetadata.appData.uniqueId as string,
           () => toSaveChannelAsVm
         );
@@ -169,12 +172,12 @@ export const useManageChannel = () => {
         ) {
           invalidateChannel(
             queryClient,
-            dotYouClient.getIdentity(),
+            dotYouClient.getHostIdentity(),
             variables.fileMetadata.appData.uniqueId
           );
           invalidateChannel(
             queryClient,
-            dotYouClient.getIdentity(),
+            dotYouClient.getHostIdentity(),
             variables.fileMetadata.appData.content.slug
           );
         }

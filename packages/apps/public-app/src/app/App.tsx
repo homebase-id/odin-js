@@ -47,15 +47,15 @@ function App() {
         <Route
           path={HOME_ROOT_PATH}
           element={
-            <Layout>
-              <ErrorBoundary>
-                <DotYouClientProvider>
+            <DotYouClientProvider>
+              <Layout>
+                <ErrorBoundary>
                   <Suspense fallback={<></>}>
                     <Outlet />
                   </Suspense>
-                </DotYouClientProvider>
-              </ErrorBoundary>
-            </Layout>
+                </ErrorBoundary>
+              </Layout>
+            </DotYouClientProvider>
           }
         >
           <Route path="action" element={<ActionRedirect />} />

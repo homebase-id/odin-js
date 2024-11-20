@@ -11,6 +11,7 @@ import {
   getTextRootsRecursive,
   RichTextRenderer,
   COMMUNITY_ROOT_PATH,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { HomebaseFile, RichText } from '@homebase-id/js-lib/core';
 import { formatGuidId, stringGuidsEqual, toGuidId } from '@homebase-id/js-lib/helpers';
@@ -46,10 +47,10 @@ export const CommunityMessageItem = ({
   showChannelName?: boolean;
   className?: string;
 }) => {
-  const identity = useDotYouClient().getIdentity();
-  const authorOdinId = msg.fileMetadata.originalAuthor || identity || '';
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const authorOdinId = msg.fileMetadata.originalAuthor || loggedOnIdentity || '';
 
-  const messageFromMe = !authorOdinId || authorOdinId === identity;
+  const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;
   const hasMedia = !!msg.fileMetadata.payloads.length;
 
   const { chatMessageKey, mediaKey } = useParams();

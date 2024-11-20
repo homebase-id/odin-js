@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { MouseEventHandler } from 'react';
 import { useState } from 'react';
-import { ConnectionImage, OwnerImage, t } from '@homebase-id/common-app';
+import { ConnectionImage, OwnerImage, t, useDotYouClientContext } from '@homebase-id/common-app';
 import { useAuth } from '../../../hooks/auth/useAuth';
 import { useOutsideTrigger } from '@homebase-id/common-app';
 import { LoginBox } from '../LoginBox/LoginBox';
@@ -9,8 +9,11 @@ import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { Person, Times } from '@homebase-id/common-app/icons';
 
 const ProfileNav = () => {
-  const { logout, isAuthenticated, getIdentity, isOwner } = useAuth();
-  const identity = getIdentity();
+  const { logout } = useAuth();
+  const dotYouClient = useDotYouClientContext();
+  const isOwner = dotYouClient.isOwner();
+  const isAuthenticated = dotYouClient.isAuthenticated();
+  const loggedOnIdentity = dotYouClient.getLoggedInIdentity();
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -29,9 +32,7 @@ const ProfileNav = () => {
       {isOpen ? (
         <button
           key={'close'}
-          className={`inline-flex h-8 w-8 flex-shrink-0 items-center justify-center
-            rounded-full bg-slate-300
-          dark:bg-slate-500`}
+          className={`inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-300 dark:bg-slate-500`}
         >
           <Times className="h-5 w-5" />
         </button>
@@ -43,8 +44,12 @@ const ProfileNav = () => {
         >
           {isAuthenticated && isOwner ? (
             <OwnerImage className="h-8 w-8 rounded-full" size="custom" />
-          ) : isAuthenticated && identity ? (
-            <ConnectionImage odinId={identity} className="h-8 w-8 rounded-full" size="custom" />
+          ) : isAuthenticated && loggedOnIdentity ? (
+            <ConnectionImage
+              odinId={loggedOnIdentity}
+              className="h-8 w-8 rounded-full"
+              size="custom"
+            />
           ) : (
             <Person className="h-5 w-5" />
           )}
@@ -68,22 +73,25 @@ const ProfileNav = () => {
                     {t('Logged in with: ')}{' '}
                     <a
                       href={
-                        identity
-                          ? new DotYouClient({ identity, api: ApiType.Guest }).getRoot()
+                        loggedOnIdentity
+                          ? new DotYouClient({
+                              hostIdentity: loggedOnIdentity,
+                              api: ApiType.Guest,
+                            }).getRoot()
                           : undefined
                       }
                       className="underline"
                       target={'_blank'}
                       rel="noopener noreferrer"
                     >
-                      {identity}
+                      {loggedOnIdentity}
                     </a>
                   </>
                 )}
               </p>
               <button
                 onClick={doLogout}
-                className="mt-2 block w-full rounded border-0 bg-green-500 px-4 py-2 text-white hover:bg-green-600 focus:outline-none "
+                className="mt-2 block w-full rounded border-0 bg-green-500 px-4 py-2 text-white hover:bg-green-600 focus:outline-none"
               >
                 {t('logout')}
               </button>

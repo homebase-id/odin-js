@@ -17,6 +17,7 @@ import {
   OwnerName,
   t,
   useDotYouClient,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { Bookmark, BookmarkSolid, ChevronLeft } from '@homebase-id/common-app/icons';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
@@ -104,10 +105,10 @@ const SavedMessage = ({
     channelId: msg?.fileMetadata.appData.content.channelId,
   }).fetch;
 
-  const identity = useDotYouClient().getIdentity();
-  const authorOdinId = msg?.fileMetadata.originalAuthor || identity || '';
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const authorOdinId = msg?.fileMetadata.originalAuthor || loggedOnIdentity || '';
 
-  const messageFromMe = !authorOdinId || authorOdinId === identity;
+  const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;
 
   const {
     isSaved,

@@ -8,7 +8,12 @@ import {
   AllContactMentionDropdown,
 } from '../../../../form';
 import { t, getImagesFromPasteEvent } from '../../../../helpers';
-import { CanReactInfo, useDotYouClient, useReaction } from '../../../../hooks';
+import {
+  CanReactInfo,
+  useDotYouClient,
+  useDotYouClientContext,
+  useReaction,
+} from '../../../../hooks';
 import { ErrorNotification, ActionButtonState, ActionButton } from '../../../../ui';
 import { AuthorImage } from '../../Author/Image';
 import { CantReactInfo } from '../CantReactInfo';
@@ -31,7 +36,8 @@ export const CommentComposer = ({
   login?: () => void;
 }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
-  const { getIdentity } = useDotYouClient();
+
+  const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
   const {
     mutateAsync: postComment,
     error: postCommentError,
@@ -41,7 +47,7 @@ export const CommentComposer = ({
   const [bodyAfterError, setBodyAfterError] = useState<string | undefined>();
   const [attachementAfterError, setAttachementAfterError] = useState<File | undefined>();
 
-  const odinId = getIdentity() || '';
+  const odinId = loggedInIdentity;
   const doPost = async (commentBody: string, attachment?: File) => {
     if (postState === 'pending') return;
     if (commentBody.trim().length === 0 && !attachment) return;

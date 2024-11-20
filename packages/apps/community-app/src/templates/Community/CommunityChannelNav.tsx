@@ -190,7 +190,7 @@ const ChannelItem = ({
   communityId: string;
   channel: ChannelWithRecentMessage;
 }) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const channelId = channel.fileMetadata.appData.uniqueId;
   const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/${channelId}`;
   const isActive = !!useMatch({ path: href, end: false });
@@ -227,7 +227,7 @@ const ChannelItem = ({
     lastMessage?.fileMetadata.created &&
     (metadata?.fileMetadata.appData.content?.channelLastReadTime[channelId] || 0) <
       lastMessage?.fileMetadata.created &&
-    lastMessage.fileMetadata.senderOdinId !== identity;
+    lastMessage.fileMetadata.senderOdinId !== loggedOnIdentity;
 
   return (
     <Link
@@ -279,7 +279,7 @@ const DirectMessageItem = ({
   recipient: string;
 }) => {
   const dotYouClient = useDotYouClientContext();
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getHostIdentity();
   const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/direct/${recipient}`;
   const isActive = !!useMatch({ path: href });
 
@@ -325,7 +325,7 @@ const DirectMessageItem = ({
       <ConnectionImage odinId={recipient} size="xxs" />
       <ConnectionName odinId={recipient} />{' '}
       <span className="text-sm text-slate-400">
-        {recipient === dotYouClient.getIdentity() ? t('you') : ''}
+        {recipient === dotYouClient.getHostIdentity() ? t('you') : ''}
       </span>
       {unreadCount ? (
         <span className="ml-auto flex h-6 w-6 items-center justify-center rounded-full bg-primary text-sm text-primary-contrast">

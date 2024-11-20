@@ -11,7 +11,7 @@ export const useCheckIdentity = (odinId?: string) => {
     const isValid = domainRegex.test(strippedIdentity || '');
     if (!isValid) return false;
 
-    const dotYouClient = new DotYouClient({ api: ApiType.Guest, identity: strippedIdentity });
+    const dotYouClient = new DotYouClient({ api: ApiType.Guest, hostIdentity: strippedIdentity });
     return await fetch(`${dotYouClient.getEndpoint()}/auth/ident`)
       .then((response) => {
         if (response.status !== 200) return;

@@ -11,6 +11,7 @@ import {
   NotFound,
   t,
   useDotYouClient,
+  useDotYouClientContext,
   useIntroductions,
 } from '@homebase-id/common-app';
 import { Save, Times } from '@homebase-id/common-app/icons';
@@ -19,7 +20,7 @@ import { useConversation } from '../../../../hooks/chat/useConversation';
 import { GroupContactSearch } from './ConversationGroupFIelds';
 
 export const EditConversationGroup = () => {
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const { conversationKey } = useParams();
   const {
     single: { data: conversation, isFetched: isConversationFetched },
@@ -48,7 +49,7 @@ export const EditConversationGroup = () => {
 
       introduceIdentities({
         recipients: newRecipients,
-        message: t('{0} has added you to a group chat', identity || ''),
+        message: t('{0} has added you to a group chat', loggedOnIdentity || ''),
       });
     }
 
@@ -63,7 +64,7 @@ export const EditConversationGroup = () => {
 
   if (
     (!conversation && isConversationFetched) ||
-    conversation?.fileMetadata.senderOdinId !== identity
+    conversation?.fileMetadata.senderOdinId !== loggedOnIdentity
   )
     return <NotFound />;
   if (!conversation) return null;

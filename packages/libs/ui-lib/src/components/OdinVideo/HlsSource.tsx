@@ -50,7 +50,7 @@ export const HlsSource = ({
       (!videoRef.current?.canPlayType('application/vnd.apple.mpegurl') ||
         (dotYouClient.getType() === ApiType.App &&
           odinId &&
-          odinId !== dotYouClient.getIdentity())),
+          odinId !== dotYouClient.getHostIdentity())),
     [videoRef]
   );
 

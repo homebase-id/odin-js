@@ -77,7 +77,7 @@ export const useChatMessage = (props?: {
   }): Promise<NewHomebaseFile<ChatMessage> | null> => {
     const conversationId = conversation.fileMetadata.appData.uniqueId as string;
     const conversationContent = conversation.fileMetadata.appData.content;
-    const identity = dotYouClient.getIdentity();
+    const identity = dotYouClient.getHostIdentity();
     const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     // We prefer having the uniqueId set outside of the mutation, so that an auto-retry of the mutation doesn't create duplicates
@@ -137,7 +137,7 @@ export const useChatMessage = (props?: {
     conversation: HomebaseFile<UnifiedConversation>;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
-    const identity = dotYouClient.getIdentity();
+    const identity = dotYouClient.getHostIdentity();
     const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     await updateChatMessage(dotYouClient, updatedChatMessage, recipients);

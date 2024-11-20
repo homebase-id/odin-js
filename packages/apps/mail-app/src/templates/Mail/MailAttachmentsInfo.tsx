@@ -150,7 +150,7 @@ const FileGroup = ({
 
 export const AttachmentFile = ({ file }: { file: ExtendedFile }) => {
   const dotYouClient = useDotYouClientContext();
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getHostIdentity();
   const navigate = useNavigate();
   const { filter } = useParams();
 

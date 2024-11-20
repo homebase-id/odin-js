@@ -205,7 +205,7 @@ export const parseContact = (
 
   const imageUrl = pureContent.image
     ? `data:${pureContent.image.contentType};base64,${pureContent.image.content}`
-    : `${new DotYouClient({ identity: pureContent.odinId, api: ApiType.Guest }).getRoot()}/pub/image`;
+    : `${new DotYouClient({ hostIdentity: pureContent.odinId, api: ApiType.Guest }).getRoot()}/pub/image`;
 
   const { name, location, phone, birthday, odinId, source } = pureContent;
 

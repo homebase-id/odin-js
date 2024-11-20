@@ -19,7 +19,7 @@ export const AuthorImage = ({ odinId, ...props }: ConnectionImageProps) => {
   const ownerHost = window.location.hostname;
 
   if (odinId && ownerHost !== odinId) {
-    const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
+    const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot();
     if (props.excludeLink) {
       return <ConnectionImage {...props} odinId={odinId} />;
     }
@@ -60,7 +60,7 @@ export const OwnerImage = ({ className, size }: ImageProps) => {
 };
 
 export const ConnectionImage = ({ odinId, className, size }: ConnectionImageProps) => {
-  const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
+  const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot();
   return (
     <>
       {odinId ? (

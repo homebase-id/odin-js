@@ -46,7 +46,7 @@ export const GetProfileCard = async (odinId: string): Promise<ProfileCard | unde
       return await _internalFileCache.get(odinId);
     }
 
-    const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
+    const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot();
 
     const httpClient = axios.create();
     const fetchProfileCard = async () => {
@@ -138,7 +138,7 @@ export const GetProfileImage = async (odinId: string): Promise<Blob | undefined>
   try {
     const httpClient = axios.create();
     const fetchProfileCard = async () => {
-      const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
+      const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot();
 
       return await httpClient
         .get(`${host}/pub/image`, {

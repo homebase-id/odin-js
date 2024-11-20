@@ -132,7 +132,7 @@ export const uploadMail = async (
   files: (NewMediaFile | MediaFile)[] | undefined,
   onVersionConflict?: () => void
 ) => {
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getHostIdentity();
   const recipients = conversation.fileMetadata.appData.content.recipients.filter(
     (recipient) => recipient !== identity
   );

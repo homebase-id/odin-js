@@ -10,7 +10,7 @@ export const useFile = ({
   systemFileType?: SystemFileType;
 }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getHostIdentity();
 
   const fetchFile = async (
     odinId: string | undefined,

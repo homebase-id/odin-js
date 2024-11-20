@@ -3,6 +3,7 @@ import {
   ReactionsBar,
   t,
   useDotYouClient,
+  useDotYouClientContext,
   useMostSpace,
   useOutsideTrigger,
 } from '@homebase-id/common-app';
@@ -19,7 +20,7 @@ export const ChatReactionComposer = ({
   conversation: HomebaseFile<UnifiedConversation>;
   msg: HomebaseFile<ChatMessage>;
 }) => {
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const [isReact, setIsReact] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOutsideTrigger(wrapperRef, () => setIsReact(false));
@@ -39,7 +40,7 @@ export const ChatReactionComposer = ({
     messageGlobalTransitId: msg.fileMetadata.globalTransitId,
   }).get;
 
-  const myReactions = data?.filter((reaction) => reaction?.authorOdinId === identity);
+  const myReactions = data?.filter((reaction) => reaction?.authorOdinId === loggedOnIdentity);
 
   return (
     <div

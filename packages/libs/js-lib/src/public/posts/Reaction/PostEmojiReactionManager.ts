@@ -39,7 +39,7 @@ export const getReactionSummary = async (
   dotYouClient: DotYouClient,
   context: ReactionContext
 ): Promise<EmojiReactionSummary> => {
-  const isLocal = context.odinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getHostIdentity();
 
   const client = dotYouClient.createAxiosClient();
 
@@ -115,7 +115,7 @@ export const getMyReactions = async (
   pageSize = 15,
   cursor?: string
 ): Promise<string[] | undefined> => {
-  const isLocal = context.odinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getHostIdentity();
   const client = dotYouClient.createAxiosClient();
 
   const data = {
@@ -124,7 +124,7 @@ export const getMyReactions = async (
       fileId: context.target.fileId,
       globalTransitId: context.target.globalTransitId,
     },
-    identity: odinId || dotYouClient.getIdentity(),
+    identity: odinId || dotYouClient.getHostIdentity(),
     cursor: cursor,
     maxRecords: pageSize,
   };

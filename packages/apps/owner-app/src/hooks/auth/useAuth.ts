@@ -28,7 +28,7 @@ export const RETURN_URL_PARAM = 'returnUrl';
 export const HOME_PATH = '/owner';
 
 export const useAuth = () => {
-  const { getDotYouClient, getApiType, getSharedSecret, hasSharedSecret } = useDotYouClient();
+  const { getDotYouClient, getSharedSecret, hasSharedSecret } = useDotYouClient();
 
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
@@ -121,7 +121,6 @@ export const useAuth = () => {
     resetPassword: resetOwnerPassword,
     changePassword: setNewOwnerPassword,
     getDotYouClient,
-    getApiType,
     finalizeRegistration,
     isPasswordSet: isPasswordSetOwner,
     // logout => always uses the `logoutOwnerAndAllApps`,

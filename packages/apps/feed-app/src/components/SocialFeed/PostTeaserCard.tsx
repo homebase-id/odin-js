@@ -13,11 +13,11 @@ import {
   LoadingBlock,
   t,
   ToGroupBlock,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { useNavigate } from 'react-router-dom';
 import { DoubleClickHeartForMedia } from '@homebase-id/common-app';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
-import { useAuth } from '../../hooks/auth/useAuth';
 import { UnreachableIdentity } from './UnreachableIdentity';
 import { useHighlightFeedItem } from '../../hooks/useHighlightFeedItem';
 
@@ -29,9 +29,9 @@ interface PostTeaserCardProps {
 }
 
 const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, showSummary }) => {
-  const { getDotYouClient } = useAuth();
+  const dotYouClient = useDotYouClientContext();
   const post = postFile.fileMetadata.appData.content;
-  const identity = getDotYouClient().getIdentity();
+  const identity = dotYouClient.getHostIdentity();
   const isExternal = odinId && odinId !== identity;
   const navigate = useNavigate();
 

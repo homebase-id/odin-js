@@ -1,4 +1,4 @@
-import { COMMUNITY_ROOT_PATH, useDotYouClient } from '@homebase-id/common-app';
+import { COMMUNITY_ROOT_PATH, useDotYouClientContext } from '@homebase-id/common-app';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -16,7 +16,7 @@ export const useEditLastMessageShortcut = ({
   channel: HomebaseFile<CommunityChannel> | undefined;
   origin?: HomebaseFile<CommunityMessage>;
 }) => {
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const { odinKey, communityKey, channelKey, threadKey } = useParams();
   const navigate = useNavigate();
 
@@ -41,7 +41,7 @@ export const useEditLastMessageShortcut = ({
     (e: React.KeyboardEvent) => {
       if (e.key === 'ArrowUp' && (e.metaKey || e.ctrlKey)) {
         const myLastMessage = flattenedMsgs.find(
-          (msg) => msg.fileMetadata.originalAuthor === identity
+          (msg) => msg.fileMetadata.originalAuthor === loggedOnIdentity
         );
         if (!myLastMessage) return;
         navigate(

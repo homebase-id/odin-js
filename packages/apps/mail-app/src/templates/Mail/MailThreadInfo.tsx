@@ -25,13 +25,13 @@ export const MailThreadInfo = ({
   mailThread: HomebaseFile<MailConversation>[];
   onClose: () => void;
 }) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const target = usePortal('modal-container');
   const lastMessage = mailThread[mailThread.length - 1];
   const host = useDotYouClientContext().getRoot();
 
   const lastMessageContent = lastMessage.fileMetadata.appData.content;
-  const recipients = getAllRecipients(lastMessage, identity);
+  const recipients = getAllRecipients(lastMessage, loggedOnIdentity);
 
   const { data: originalThread } = useMailOrigin({
     originId: lastMessage.fileMetadata.appData.content.originId,

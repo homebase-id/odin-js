@@ -31,7 +31,7 @@ export const LoginBox = () => {
 
   useEffect(() => {
     const host = new DotYouClient({
-      identity: window.location.hostname,
+      hostIdentity: window.location.hostname,
       api: ApiType.Guest,
     }).getRoot();
     if (isAutoAuthorize && stringifiedAuthParams)

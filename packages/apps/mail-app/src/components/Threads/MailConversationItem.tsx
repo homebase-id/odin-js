@@ -36,12 +36,13 @@ export const MailConversationItem = ({
   pathPrefix?: string;
   query?: string;
 }) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
 
   const lastConversation = mailThread[0];
   const lastReceivedConversation = mailThread.find(
     (conv) =>
-      (conv.fileMetadata.senderOdinId || conv.fileMetadata.appData.content.sender) !== identity
+      (conv.fileMetadata.senderOdinId || conv.fileMetadata.appData.content.sender) !==
+      loggedOnIdentity
   );
 
   const threadId = lastConversation.fileMetadata.appData.groupId as string;

@@ -6,6 +6,7 @@ import {
   t,
   ActionGroup,
   ErrorNotification,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { ChevronDown } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
@@ -39,10 +40,10 @@ export const ContextMenu = ({
 
   const { mutate: resend, error: resendError } = useChatMessage().update;
 
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const authorOdinId = msg.fileMetadata.senderOdinId;
 
-  const messageFromMe = !authorOdinId || authorOdinId === identity;
+  const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;
   const conversationWithYourself = stringGuidsEqual(
     conversation?.fileMetadata.appData.uniqueId,
     ConversationWithYourselfId

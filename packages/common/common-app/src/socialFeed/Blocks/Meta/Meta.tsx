@@ -13,6 +13,7 @@ import { useIsConnected } from '../../../hooks/connections/useIsConnected';
 import { EditPostDialog } from '../../EditPostDialog/EditPostDialog';
 import { Persons, UserX, Times, Flag, Block, Link, Trash, Lock, Pencil } from '../../../ui/Icons';
 import { FEED_ROOT_PATH, HOME_ROOT_PATH } from '../../../constants';
+import { useDotYouClientContext } from '../../../hooks/auth/useDotYouClientContext';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;
@@ -50,7 +51,10 @@ export const PostMeta = ({
   size = 'text-xs',
   excludeContextMenu,
 }: PostMetaWithPostFileProps | PostMetaWithEmbeddedPostContentProps) => {
-  const { isOwner, getIdentity } = useDotYouClient();
+  const dotYouClient = useDotYouClientContext();
+  const isOwner = dotYouClient.isOwner();
+  const loggedInIdentity = dotYouClient.getLoggedInIdentity();
+
   const now = new Date();
   const date = new Date(postFile?.fileMetadata.appData.userDate || embeddedPost?.userDate || now);
   const yearsAgo = Math.abs(new Date(now.getTime() - date.getTime()).getUTCFullYear() - 1970);
@@ -62,16 +66,15 @@ export const PostMeta = ({
     minute: 'numeric',
   };
 
-  const identity = getIdentity();
   const isPostToMyCollaborativeChannel =
-    authorOdinId !== (odinId || identity) && (odinId || identity) && authorOdinId;
-  const isAuthor = authorOdinId === identity;
+    authorOdinId !== (odinId || loggedInIdentity) && (odinId || loggedInIdentity) && authorOdinId;
+  const isAuthor = authorOdinId === loggedInIdentity;
 
   const isConnected = useIsConnected(odinId).data;
   const channelLink = channel
-    ? `${odinId ? new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot() : ''}${HOME_ROOT_PATH}posts/${
+    ? `${odinId ? new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot() : ''}${HOME_ROOT_PATH}posts/${
         channel.fileMetadata.appData.content.slug
-      }${isConnected && identity ? '?youauth-logon=' + identity : ''}`
+      }${isConnected && loggedInIdentity ? '?youauth-logon=' + loggedInIdentity : ''}`
     : undefined;
 
   return (
@@ -137,20 +140,18 @@ export const ToGroupBlock = ({
     | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
   className?: string;
 }) => {
-  const { getIdentity } = useDotYouClient();
-
-  const identity = getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const groupPost =
     channel?.fileMetadata.appData.content.isCollaborative ||
-    (authorOdinId !== (odinId || identity) && (odinId || identity) && authorOdinId);
+    (authorOdinId !== (odinId || loggedOnIdentity) && (odinId || loggedOnIdentity) && authorOdinId);
   const isConnected = useIsConnected(odinId).data;
 
   if (!groupPost) return null;
 
   const channelLink = channel
-    ? `${odinId ? new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot() : ''}${HOME_ROOT_PATH}posts/${
+    ? `${odinId ? new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot() : ''}${HOME_ROOT_PATH}posts/${
         channel.fileMetadata.appData.content.slug
-      }${isConnected && identity ? '?youauth-logon=' + identity : ''}`
+      }${isConnected && loggedOnIdentity ? '?youauth-logon=' + loggedOnIdentity : ''}`
     : undefined;
 
   return (
@@ -181,7 +182,7 @@ const ExternalActions = ({
     | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
   postFile: HomebaseFile<PostContent>;
 }) => {
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const navigate = useNavigate();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -190,7 +191,7 @@ const ExternalActions = ({
     getReportContentUrl,
   } = useManageSocialFeed({ odinId });
 
-  const host = new DotYouClient({ api: ApiType.Guest, identity: identity || undefined }).getRoot();
+  const host = new DotYouClient({ api: ApiType.Guest, hostIdentity: loggedOnIdentity }).getRoot();
   const options: ActionGroupOptionProps[] = [
     {
       icon: UserX,
@@ -280,13 +281,16 @@ const GroupChannelActions = ({
   postFile: HomebaseFile<PostContent>;
 }) => {
   const navigate = useNavigate();
-  const { getIdentity, getDotYouClient } = useDotYouClient();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
-  const localIdentity = getDotYouClient().getIdentity();
-  const identity = getIdentity();
-  const isAuthor = postFile.fileMetadata.originalAuthor === identity;
-  const host = new DotYouClient({ api: ApiType.Guest, identity: identity || undefined }).getRoot();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const hostIdentity = useDotYouClientContext().getHostIdentity();
+
+  const isAuthor = postFile.fileMetadata.originalAuthor === loggedOnIdentity;
+  const host = new DotYouClient({
+    api: ApiType.Guest,
+    hostIdentity: loggedOnIdentity || undefined,
+  }).getRoot();
 
   const {
     removeFromFeed: { mutateAsync: removeFromMyFeed },
@@ -351,7 +355,7 @@ const GroupChannelActions = ({
   }
 
   // If the channel has serverMetadata, it is a collaborative channel from this identity so we can remove the post
-  if (channel?.serverMetadata && identity === localIdentity) {
+  if (channel?.serverMetadata && loggedOnIdentity === hostIdentity) {
     options.push({
       icon: Trash,
       label: t(

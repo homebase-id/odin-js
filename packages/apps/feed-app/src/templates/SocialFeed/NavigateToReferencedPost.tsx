@@ -3,6 +3,7 @@ import {
   NotFound,
   useChannels,
   useDotYouClient,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { Loader } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
@@ -14,7 +15,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 export const NavigateToReferencedPost = () => {
   const { postKey } = useParams();
   const navigate = useNavigate();
-  const identity = useDotYouClient().getIdentity();
+  const identity = useDotYouClientContext().getHostIdentity();
 
   const post = useReferencedPost(postKey);
   useEffect(() => {

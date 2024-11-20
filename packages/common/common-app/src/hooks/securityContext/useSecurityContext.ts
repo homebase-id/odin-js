@@ -3,14 +3,14 @@ import { ApiType, getSecurityContext, getSecurityContextOverPeer } from '@homeba
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 export const useSecurityContext = (odinId?: string, isEnabled?: boolean) => {
-  const { getApiType, getDotYouClient } = useDotYouClient();
+  const { getDotYouClient } = useDotYouClient();
   const dotYouClient = getDotYouClient();
 
   const fetch = async (odinId?: string) => {
     if (
       !odinId ||
       odinId === window.location.hostname ||
-      (getApiType() === ApiType.App && odinId === dotYouClient.getIdentity())
+      (dotYouClient.getType() === ApiType.App && odinId === dotYouClient.getHostIdentity())
     )
       return await getSecurityContext(dotYouClient);
     else return await getSecurityContextOverPeer(dotYouClient, odinId);

@@ -13,7 +13,7 @@ export const useTinyThumb = (
   imageDrive?: TargetDrive,
   systemFileType?: SystemFileType
 ): UseQueryResult<ThumbnailMeta | null | undefined, Error> => {
-  const localHost = dotYouClient.getIdentity() || window.location.hostname;
+  const localHost = dotYouClient.getHostIdentity();
 
   const fetchImageData = async (
     odinId: string,

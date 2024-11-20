@@ -8,6 +8,7 @@ import {
   useOutsideTrigger,
   useMyEmojiReactions,
   useIntersection,
+  useDotYouClientContext,
 } from '../../../../hooks';
 import { ErrorNotification } from '../../../../ui';
 import { SocialReactionsBar } from './ReactionsBar';
@@ -26,7 +27,7 @@ export const LikeButton = ({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isReact, setIsReact] = useState(false);
 
-  const { getIdentity } = useDotYouClient();
+  const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
   const {
     saveEmoji: { mutate: postEmoji, error: postEmojiError },
     removeEmoji: { mutate: removeEmoji, error: removeEmojiError },
@@ -44,7 +45,7 @@ export const LikeButton = ({
   const doLike = () =>
     postEmoji({
       emojiData: {
-        authorOdinId: getIdentity() || '',
+        authorOdinId: loggedInIdentity,
         body: '❤️',
       },
       context,
@@ -53,7 +54,7 @@ export const LikeButton = ({
   const removeAny = () => {
     if (!myReactions) return;
     removeEmoji({
-      emojiData: { body: myReactions[0], authorOdinId: getIdentity() || '' },
+      emojiData: { body: myReactions[0], authorOdinId: loggedInIdentity },
       context,
     });
   };

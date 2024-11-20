@@ -7,6 +7,7 @@ import {
   DialogWrapper,
   t,
   useDotYouClient,
+  useDotYouClientContext,
   usePortal,
 } from '@homebase-id/common-app';
 import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
@@ -24,15 +25,16 @@ export const CommunityMessageInfo = ({
   community: HomebaseFile<CommunityDefinition>;
   onClose: () => void;
 }) => {
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const target = usePortal('modal-container');
   const messageContent = msg.fileMetadata.appData.content;
   const communityContent = community.fileMetadata.appData.content;
   const members = communityContent.members.filter(
-    (recipient) => recipient && recipient !== identity
+    (recipient) => recipient && recipient !== loggedOnIdentity
   );
 
-  const isAuthor = msg.fileMetadata.senderOdinId === identity || !msg.fileMetadata.senderOdinId;
+  const isAuthor =
+    msg.fileMetadata.senderOdinId === loggedOnIdentity || !msg.fileMetadata.senderOdinId;
 
   const { data: reactions } = useCommunityReaction({
     community: community,

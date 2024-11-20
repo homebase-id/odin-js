@@ -47,7 +47,6 @@ export const useDotYouClient = () => {
       : undefined;
 
   const hasSharedSecret = !!getRawSharedSecret();
-
   const getSharedSecret = () => {
     const raw = getRawSharedSecret();
     if (raw) return base64ToUint8Array(raw);
@@ -55,11 +54,9 @@ export const useDotYouClient = () => {
 
   // Get the logged in user's identity
   const getIdentity = () => {
-    return _app === 'owner' ||
-      (_app === 'home' && _isOwner) ||
-      window.location.pathname.startsWith(OWNER_APPS_ROOT)
+    return _app === 'owner' || (_app === 'home' && _isOwner)
       ? window.location.hostname
-      : localStorage.getItem(STORAGE_IDENTITY_KEY);
+      : localStorage.getItem(STORAGE_IDENTITY_KEY) || undefined;
   };
 
   const getDotYouClient = () => {
@@ -85,18 +82,17 @@ export const useDotYouClient = () => {
       return new DotYouClient({
         sharedSecret: getSharedSecret(),
         api: ApiType.App,
-        identity: retrieveIdentity(),
+        hostIdentity: retrieveIdentity(),
+        loggedInIdentity: getIdentity(),
         headers: headers,
       });
     }
   };
 
   return {
-    getApiType,
     hasSharedSecret,
     getSharedSecret,
     getDotYouClient,
     isOwner: _isOwner,
-    getIdentity,
   };
 };

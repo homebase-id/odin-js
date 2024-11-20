@@ -17,9 +17,9 @@ export const IdentityTeaser = ({
   isBorderLess?: boolean;
   children?: ReactNode;
 }) => {
-  const { getIdentity, getDotYouClient } = useDotYouClient();
+  const { getDotYouClient } = useDotYouClient();
   const dotYouClient = getDotYouClient();
-  const identity = getIdentity();
+  const identity = dotYouClient.getLoggedInIdentity();
   const [isInView, setIsInView] = useState(false);
   const wrapperRef = useRef<HTMLAnchorElement>(null);
 
@@ -29,12 +29,12 @@ export const IdentityTeaser = ({
   }).fetch;
 
   // isLocal when both the logged in user and the api host is the same
-  const isLocal = identity === dotYouClient.getIdentity();
+  const isLocal = identity === dotYouClient.getHostIdentity();
   const { data: isConnected } = useIsConnected(isInView && isLocal ? odinId : undefined);
   useIntersection(wrapperRef, () => setIsInView(true));
 
   const imageSizeClass = size === 'sm' ? 'h-10 w-10 mr-2' : 'h-16 w-16 mr-4';
-  const link = `${new DotYouClient({ identity: odinId || undefined, api: ApiType.App }).getRoot()}${isConnected && identity ? '?youauth-logon=' + identity : ''}`;
+  const link = `${new DotYouClient({ hostIdentity: odinId || undefined, api: ApiType.App }).getRoot()}${isConnected && identity ? '?youauth-logon=' + identity : ''}`;
 
   return (
     <a

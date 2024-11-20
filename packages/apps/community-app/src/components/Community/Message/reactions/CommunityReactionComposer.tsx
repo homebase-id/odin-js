@@ -1,4 +1,4 @@
-import { ReactionsBar, useDotYouClient } from '@homebase-id/common-app';
+import { ReactionsBar, useDotYouClientContext } from '@homebase-id/common-app';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
@@ -11,7 +11,7 @@ export const CommunityReactionComposer = ({
   community: HomebaseFile<CommunityDefinition> | undefined;
   msg: HomebaseFile<CommunityMessage>;
 }) => {
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
 
   const { mutate: addReaction } = useCommunityReaction().add;
   const { mutate: removeReaction } = useCommunityReaction().remove;
@@ -26,7 +26,7 @@ export const CommunityReactionComposer = ({
     messageGlobalTransitId: msg.fileMetadata.globalTransitId,
   }).get;
 
-  const myReactions = data?.filter((reaction) => reaction?.authorOdinId === identity);
+  const myReactions = data?.filter((reaction) => reaction?.authorOdinId === loggedOnIdentity);
 
   if (!community) return null;
   return (
