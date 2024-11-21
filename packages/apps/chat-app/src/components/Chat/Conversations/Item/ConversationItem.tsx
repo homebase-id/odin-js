@@ -19,6 +19,7 @@ import { ChatSentTimeIndicator } from '../../Detail/ChatSentTimeIndicator';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ConversationWithYourselfId } from '../../../../providers/ConversationProvider';
 import { useConversationMetadata } from '../../../../hooks/chat/useConversationMetadata';
+import { useConversation } from '../../../../hooks/chat/useConversation';
 
 const ListItemWrapper = ({
   onClick,
@@ -132,6 +133,7 @@ const ConversationBody = ({
 }) => {
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const { data: conversationMetadata } = useConversationMetadata({ conversationId }).single;
+  const { data: conversation } = useConversation({ conversationId }).single;
   const { data, isFetched: fetchedMessages } = useChatMessages({ conversationId }).all;
   const flatMessages = useMemo(
     () =>
@@ -160,12 +162,15 @@ const ConversationBody = ({
 
   useEffect(() => {
     if (!lastMessage) {
-      setOrder && setOrder(2);
+      if (conversation) {
+        const date = conversation?.fileMetadata.updated;
+        setOrder && date && setOrder(Math.max(new Date().getTime() - date, 2));
+      }
       return;
     }
     const date = lastMessage?.fileMetadata.created;
     setOrder && date && setOrder(Math.max(new Date().getTime() - date, 2));
-  }, [lastMessage]);
+  }, [lastMessage, conversation]);
 
   return (
     <>
