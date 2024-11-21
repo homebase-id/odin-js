@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { QueryClient, useQuery } from '@tanstack/react-query';
 import { useDotYouClient } from '@homebase-id/common-app';
-import { fetchCircleMembershipStatus } from '../../provider/network/troubleshooting/ConnectionGrantProvider';
+import { fetchCircleMembershipStatus } from '@homebase-id/js-lib/network';
 
 export const useConnectionGrantStatus = ({ odinId }: { odinId?: string }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
@@ -15,4 +15,8 @@ export const useConnectionGrantStatus = ({ odinId }: { odinId?: string }) => {
       refetchOnMount: false,
     }),
   };
+};
+
+export const invalidateConnectionGrantStatus = async (queryClient: QueryClient, odinId: string) => {
+  await queryClient.invalidateQueries({ queryKey: ['connection-grant-status', odinId] });
 };

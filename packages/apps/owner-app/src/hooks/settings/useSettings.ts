@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getFlags,
   getSettings,
@@ -30,26 +30,34 @@ export const useSettings = () => {
 
   return {
     fetchFlags: useQuery({
-      queryKey: ['systemFlags'],
+      queryKey: ['system-flags'],
       queryFn: () => fetchFlags(),
       refetchOnWindowFocus: false,
     }),
     updateFlag: useMutation({
       mutationFn: updateFlagInternal,
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['systemFlags'] });
+        invalidateSystemFlags(queryClient);
       },
     }),
     fetchUiSettings: useQuery({
-      queryKey: ['uiSettings'],
+      queryKey: ['ui-settings'],
       queryFn: () => fetchUiSettings(),
       refetchOnWindowFocus: false,
     }),
     updateUiSetting: useMutation({
       mutationFn: updateUiSetting,
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['uiSettings'] });
+        invalidateUiSettings(queryClient);
       },
     }),
   };
+};
+
+export const invalidateSystemFlags = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['system-flags'] });
+};
+
+export const invalidateUiSettings = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['ui-settings'] });
 };

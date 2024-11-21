@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   DriveDefinition,
   editDriveAllowAnonymousRead,
@@ -80,26 +80,26 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
     editDescription: useMutation({
       mutationFn: editDescription,
       onSettled: (_data, _error, variables) => {
-        queryClient.invalidateQueries({
-          queryKey: ['drive', `${variables.targetDrive?.alias}_${variables.targetDrive?.type}`],
-        });
+        invalidateDrive(queryClient, variables.targetDrive);
       },
     }),
     editAttributes: useMutation({
       mutationFn: editAttributes,
       onSettled: (_data, _error, variables) => {
-        queryClient.invalidateQueries({
-          queryKey: ['drive', `${variables.targetDrive?.alias}_${variables.targetDrive?.type}`],
-        });
+        invalidateDrive(queryClient, variables.targetDrive);
       },
     }),
     editAnonymousRead: useMutation({
       mutationFn: editAnonymousRead,
       onSettled: (_data, _error, variables) => {
-        queryClient.invalidateQueries({
-          queryKey: ['drive', `${variables.targetDrive?.alias}_${variables.targetDrive?.type}`],
-        });
+        invalidateDrive(queryClient, variables.targetDrive);
       },
     }),
   };
+};
+
+export const invalidateDrive = (queryClient: QueryClient, targetDrive: TargetDrive) => {
+  queryClient.invalidateQueries({
+    queryKey: ['drive', `${targetDrive?.alias}_${targetDrive?.type}`],
+  });
 };

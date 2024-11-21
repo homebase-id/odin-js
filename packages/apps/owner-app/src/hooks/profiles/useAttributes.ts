@@ -1,8 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Attribute, getProfileAttributes } from '@homebase-id/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
 import { AttributeDefinition, AttributeDefinitions } from './AttributeDefinitions';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { removeProfileAttribute } from '../../provider/profile/AttributeData/ManageAttributeProvider';
 
 export interface AttributeVm extends Attribute {
@@ -90,10 +90,44 @@ export const useAttributes = ({
         console.error(err);
       },
       onSettled: (data, err, variables) => {
-        queryClient.invalidateQueries({
-          queryKey: ['attributes', variables.profileId, variables.sectionId],
-        });
+        invalidateAttributes(queryClient, variables.profileId, variables.sectionId);
       },
     }),
   };
+};
+
+export const invalidateAttributes = (
+  queryClient: QueryClient,
+  profileId?: string,
+  sectionId?: string
+) => {
+  queryClient.invalidateQueries({
+    queryKey: ['attributes', profileId, sectionId].filter(Boolean),
+    exact: !!profileId && !!sectionId,
+  });
+};
+
+export const updateCacheAttributes = (
+  queryClient: QueryClient,
+  profileId: string,
+  sectionId: string,
+  transformFn: (
+    attributes: HomebaseFile<AttributeVm>[]
+  ) => (HomebaseFile<AttributeVm> | NewHomebaseFile<AttributeVm>)[] | undefined
+) => {
+  const currentData = queryClient.getQueryData<HomebaseFile<AttributeVm>[]>([
+    'attributes',
+    profileId,
+    sectionId,
+  ]);
+  if (!currentData) return;
+
+  const updatedData = transformFn(currentData);
+  if (!updatedData) return;
+  queryClient.setQueryData<(HomebaseFile<AttributeVm> | NewHomebaseFile<AttributeVm>)[]>(
+    ['attributes', profileId, sectionId],
+    updatedData
+  );
+
+  return currentData;
 };

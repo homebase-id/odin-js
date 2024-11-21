@@ -20,9 +20,10 @@ import {
   SecurityGroupType,
 } from '@homebase-id/js-lib/core';
 import { formatGuidId, getNewId, getNewXorId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { ChatConversationsReturn } from './useConversations';
+import { invalidateConversations, updateCacheConversations } from './useConversations';
 import { deleteAllChatMessages } from '../../providers/ChatProvider';
 import { useDotYouClientContext } from '@homebase-id/common-app';
+import { invalidateChatMessages } from './useChatMessages';
 
 export const useConversation = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
@@ -151,97 +152,108 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     create: useMutation({
       mutationFn: createConversation,
       onSettled: async (_data) => {
-        queryClient.invalidateQueries({ queryKey: ['conversation', _data?.newConversationId] });
-        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+        invalidateConversation(queryClient, _data?.newConversationId);
+        invalidateConversations(queryClient);
       },
     }),
     inviteRecipient: useMutation({
       mutationFn: sendJoinCommand,
       onSettled: async (_data, _error, variables) => {
-        queryClient.invalidateQueries({
-          queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
-        });
-        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+        invalidateConversation(queryClient, variables.conversation.fileMetadata.appData.uniqueId);
+        invalidateConversations(queryClient);
       },
     }),
     update: useMutation({
       mutationFn: updateExistingConversation,
       onMutate: async (variables) => {
-        queryClient.setQueryData<HomebaseFile<UnifiedConversation>>(
-          ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
-          variables.conversation
+        updateCacheConversation(
+          queryClient,
+          variables.conversation.fileMetadata.appData.uniqueId as string,
+          () => variables.conversation
         );
-        const existingData = queryClient.getQueryData<InfiniteData<ChatConversationsReturn>>([
-          'conversations',
-        ]);
-        if (existingData) {
-          const newConversations = {
-            ...existingData,
-            pages: existingData.pages.map((page) => ({
-              ...page,
-              searchResults: page.searchResults.map((conversation) =>
-                stringGuidsEqual(
-                  conversation.fileMetadata.appData.uniqueId,
-                  variables.conversation.fileMetadata.appData.uniqueId
-                )
-                  ? variables.conversation
-                  : conversation
-              ),
-            })),
-          };
-          queryClient.setQueryData(['conversations'], newConversations);
-        }
+        updateCacheConversations(queryClient, (data) => ({
+          ...data,
+          pages: data.pages.map((page) => ({
+            ...page,
+            searchResults: page.searchResults.map((conversation) =>
+              stringGuidsEqual(
+                conversation.fileMetadata.appData.uniqueId,
+                variables.conversation.fileMetadata.appData.uniqueId
+              )
+                ? variables.conversation
+                : conversation
+            ),
+          })),
+        }));
       },
       onSettled: async (_data, _error, variables) => {
-        queryClient.invalidateQueries({ queryKey: ['conversations'] });
-        queryClient.invalidateQueries({
-          queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
-        });
+        invalidateConversations(queryClient);
+        invalidateConversation(queryClient, variables.conversation.fileMetadata.appData.uniqueId);
       },
     }),
     clearChat: useMutation({
       mutationFn: clearChat,
 
       onSettled: async (_data, _error, variables) => {
-        queryClient.invalidateQueries({
-          queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
-        });
+        invalidateConversation(queryClient, variables.conversation.fileMetadata.appData.uniqueId);
+        invalidateChatMessages(
+          queryClient,
+          variables.conversation.fileMetadata.appData.uniqueId as string
+        );
       },
     }),
     deleteChat: useMutation({
       mutationFn: deleteChat,
 
       onSettled: async (_data, _error, variables) => {
-        queryClient.invalidateQueries({
-          queryKey: ['conversations'],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
-        });
+        invalidateConversations(queryClient);
+        invalidateConversation(queryClient, variables.conversation.fileMetadata.appData.uniqueId);
+        invalidateChatMessages(
+          queryClient,
+          variables.conversation.fileMetadata.appData.uniqueId as string
+        );
       },
     }),
     restoreChat: useMutation({
       mutationFn: restoreChat,
 
       onSettled: async (_data, _error, variables) => {
-        queryClient.invalidateQueries({
-          queryKey: ['conversations'],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
-        });
+        invalidateConversations(queryClient);
+        invalidateConversation(queryClient, variables.conversation.fileMetadata.appData.uniqueId);
+        invalidateChatMessages(
+          queryClient,
+          variables.conversation.fileMetadata.appData.uniqueId as string
+        );
       },
     }),
   };
+};
+
+export const invalidateConversation = (queryClient: QueryClient, conversationId?: string) => {
+  queryClient.invalidateQueries({
+    queryKey: ['conversation', conversationId].filter(Boolean),
+    exact: !!conversationId,
+  });
+};
+
+export const updateCacheConversation = (
+  queryClient: QueryClient,
+  conversationId: string,
+  transformFn: (
+    data: HomebaseFile<UnifiedConversation>
+  ) => HomebaseFile<UnifiedConversation> | undefined
+) => {
+  const conversation = queryClient.getQueryData<HomebaseFile<UnifiedConversation>>([
+    'conversation',
+    conversationId,
+  ]);
+  if (!conversation) return;
+
+  const updatedConversation = transformFn(conversation);
+  if (!updatedConversation) return;
+
+  queryClient.setQueryData(['conversation', conversationId], updatedConversation);
+  return conversation;
 };
 
 const fetchSingleConversation = async (

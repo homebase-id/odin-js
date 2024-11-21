@@ -11,7 +11,12 @@ import {
   getCommunityMessages,
   hardDeleteCommunityMessage,
 } from '../../../providers/CommunityMessageProvider';
-import { DeletedHomebaseFile, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
+import {
+  DeletedHomebaseFile,
+  DotYouClient,
+  HomebaseFile,
+  NewHomebaseFile,
+} from '@homebase-id/js-lib/core';
 
 import { formatGuidId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
@@ -69,19 +74,90 @@ export const useCommunityMessages = (props?: {
 
       onSettled: async (_data, _error, variables) => {
         variables.messages.forEach((msg) => {
-          queryClient.invalidateQueries({
-            queryKey: [
-              'community-messages',
-              formatGuidId(variables.community.fileMetadata.appData.uniqueId),
-              formatGuidId(msg.fileMetadata.appData.groupId),
-            ],
-          });
+          invalidateCommunityMessages(
+            queryClient,
+            variables.community.fileMetadata.appData.uniqueId as string,
+            msg.fileMetadata.appData.groupId
+          );
         });
-
-        // TODO: Invalidate the threads?
       },
     }),
   };
+};
+
+export const invalidateCommunityMessages = (
+  queryClient: QueryClient,
+  communityId: string,
+  channelId?: string,
+  threadId?: string
+) => {
+  const queryKey = [
+    'community-messages',
+    communityId,
+    formatGuidId(threadId || channelId || communityId),
+  ].filter(Boolean);
+
+  // Clear the excess pages
+  queryClient.setQueryData(queryKey, (data: InfiniteData<unknown, unknown>) => {
+    return {
+      pages: data?.pages?.slice(0, 1) ?? [],
+      pageParams: data?.pageParams?.slice(0, 1) || [undefined],
+    };
+  });
+
+  queryClient.invalidateQueries({
+    queryKey: queryKey,
+    exact: !!(threadId || channelId || communityId),
+  });
+};
+
+export const updateCacheCommunityMessages = (
+  queryClient: QueryClient,
+  communityId: string,
+  channelId: string | undefined,
+  threadId: string | undefined,
+  transformFn: (
+    data: InfiniteData<{
+      searchResults: (HomebaseFile<CommunityMessage> | null)[];
+      cursorState: string;
+      queryTime: number;
+      includeMetadataHeader: boolean;
+    }>
+  ) =>
+    | InfiniteData<{
+        searchResults: (
+          | HomebaseFile<CommunityMessage>
+          | NewHomebaseFile<CommunityMessage>
+          | null
+        )[];
+        cursorState: string;
+        queryTime: number;
+        includeMetadataHeader: boolean;
+      }>
+    | undefined
+) => {
+  const queryKey = [
+    'community-messages',
+    communityId,
+    formatGuidId(threadId || channelId || communityId),
+  ];
+
+  const currentData = queryClient.getQueryData<
+    InfiniteData<{
+      searchResults: (HomebaseFile<CommunityMessage> | null)[];
+      cursorState: string;
+      queryTime: number;
+      includeMetadataHeader: boolean;
+    }>
+  >(queryKey);
+  if (!currentData) return;
+
+  const newData = transformFn(currentData);
+  if (!newData) return;
+
+  queryClient.setQueryData(queryKey, newData);
+
+  return currentData;
 };
 
 const fetchMessages = async (
@@ -220,53 +296,32 @@ export const insertNewMessagesForChannel = (
   channelId: string,
   newMessages: (HomebaseFile<CommunityMessage> | DeletedHomebaseFile)[]
 ) => {
-  const extistingMessages = queryClient.getQueryData<
-    InfiniteData<{
-      searchResults: (HomebaseFile<CommunityMessage> | null)[];
-      cursorState: string;
-      queryTime: number;
-      includeMetadataHeader: boolean;
-    }>
-  >(['community-messages', formatGuidId(communityId), formatGuidId(channelId)]);
+  const extistingMessages = updateCacheCommunityMessages(
+    queryClient,
+    communityId,
+    channelId,
+    channelId,
+    (data) => {
+      let runningMessages = data;
+      newMessages.forEach((newMessage) => {
+        runningMessages = internalInsertNewMessage(
+          runningMessages,
+          newMessage as HomebaseFile<CommunityMessage>
+        );
+      });
+
+      return runningMessages;
+    }
+  );
 
   if (
     newMessages.length > PAGE_SIZE ||
     !extistingMessages ||
     newMessages?.some((msg) => msg.fileState === 'deleted')
   ) {
-    queryClient.setQueryData(
-      ['community-messages', formatGuidId(communityId), formatGuidId(channelId)],
-      (data: InfiniteData<unknown, unknown>) => {
-        return {
-          pages: data?.pages?.slice(0, 1) ?? [],
-          pageParams: data?.pageParams?.slice(0, 1) || [undefined],
-        };
-      },
-      {
-        updatedAt: Date.now(),
-      }
-    );
-    queryClient.invalidateQueries({
-      queryKey: ['community-messages', formatGuidId(communityId), formatGuidId(channelId)],
-    });
+    invalidateCommunityMessages(queryClient, communityId, channelId);
     return;
   }
-
-  let runningMessages = extistingMessages;
-  newMessages.forEach((newMessage) => {
-    runningMessages = internalInsertNewMessage(
-      runningMessages,
-      newMessage as HomebaseFile<CommunityMessage>
-    );
-  });
-
-  queryClient.setQueryData(
-    ['community-messages', formatGuidId(communityId), formatGuidId(channelId)],
-    runningMessages,
-    {
-      updatedAt: Date.now(),
-    }
-  );
 };
 
 export const insertNewMessage = (
@@ -274,39 +329,26 @@ export const insertNewMessage = (
   newMessage: HomebaseFile<CommunityMessage> | DeletedHomebaseFile,
   communityId: string
 ) => {
-  const extistingMessages = queryClient.getQueryData<
-    InfiniteData<{
-      searchResults: (HomebaseFile<CommunityMessage> | null)[];
-      cursorState: string;
-      queryTime: number;
-      includeMetadataHeader: boolean;
-    }>
-  >([
-    'community-messages',
-    formatGuidId(communityId),
-    formatGuidId(newMessage.fileMetadata.appData.groupId || communityId),
-  ]);
-
-  if (extistingMessages && newMessage.fileState !== 'deleted') {
-    queryClient.setQueryData(
-      [
-        'community-messages',
-        formatGuidId(communityId),
-        formatGuidId(newMessage.fileMetadata.appData.groupId || communityId),
-      ],
-      internalInsertNewMessage(extistingMessages, newMessage),
-      {
-        updatedAt: Date.now(),
+  const extistingMessages = updateCacheCommunityMessages(
+    queryClient,
+    communityId,
+    newMessage.fileMetadata.appData.groupId as string,
+    undefined,
+    (data) => {
+      if (newMessage.fileState === 'deleted') {
+        return internalRemoveMessage(data, newMessage);
+      } else {
+        return internalInsertNewMessage(data, newMessage);
       }
+    }
+  );
+
+  if (!extistingMessages) {
+    invalidateCommunityMessages(
+      queryClient,
+      communityId,
+      newMessage.fileMetadata.appData.groupId as string
     );
-  } else {
-    queryClient.invalidateQueries({
-      queryKey: [
-        'community-messages',
-        formatGuidId(communityId),
-        formatGuidId(newMessage.fileMetadata.appData.groupId || communityId),
-      ],
-    });
   }
 };
 
@@ -420,39 +462,25 @@ export const removeMessage = (
   toDeleteMessage: HomebaseFile<unknown> | DeletedHomebaseFile,
   communityId: string
 ) => {
-  const extistingMessages = queryClient.getQueryData<
-    InfiniteData<{
-      searchResults: (HomebaseFile<CommunityMessage> | null)[];
-      cursorState: string;
-      queryTime: number;
-      includeMetadataHeader: boolean;
-    }>
-  >([
-    'community-messages',
-    formatGuidId(communityId),
-    formatGuidId(toDeleteMessage.fileMetadata.appData.groupId || communityId),
-  ]);
+  const extistingMessages = updateCacheCommunityMessages(
+    queryClient,
+    communityId,
+    toDeleteMessage.fileMetadata.appData.groupId,
+    undefined,
+    (data) => {
+      return internalRemoveMessage(
+        data,
+        toDeleteMessage as HomebaseFile<CommunityMessage> | DeletedHomebaseFile
+      );
+    }
+  );
 
-  if (extistingMessages) {
-    queryClient.setQueryData(
-      [
-        'community-messages',
-        formatGuidId(communityId),
-        formatGuidId(toDeleteMessage.fileMetadata.appData.groupId || communityId),
-      ],
-      internalRemoveMessage(extistingMessages, toDeleteMessage),
-      {
-        updatedAt: Date.now(),
-      }
+  if (!extistingMessages) {
+    invalidateCommunityMessages(
+      queryClient,
+      communityId,
+      toDeleteMessage.fileMetadata.appData.groupId
     );
-  } else {
-    queryClient.invalidateQueries({
-      queryKey: [
-        'community-messages',
-        formatGuidId(communityId),
-        formatGuidId(toDeleteMessage.fileMetadata.appData.groupId || communityId),
-      ],
-    });
   }
 };
 

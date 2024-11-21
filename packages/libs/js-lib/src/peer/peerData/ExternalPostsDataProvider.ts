@@ -19,7 +19,7 @@ import {
 import { getDrivesByTypeOverPeer } from './Drive/PeerDriveProvider';
 import { getContentFromHeaderOrPayloadOverPeerByGlobalTransitId } from './File/PeerFileByGlobalTransitProvider';
 import { getContentFromHeaderOrPayloadOverPeer } from './File/PeerFileProvider';
-import { queryBatchOverPeer } from './Query/PeerDriveQueryProvider';
+import { queryBatchOverPeer } from './Query/PeerDriveQueryService';
 
 const _internalChannelCache = new Map<string, Promise<HomebaseFile<ChannelDefinition>[]>>();
 

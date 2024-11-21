@@ -66,8 +66,8 @@ export const makeGrid = async (thumbs: EmbeddedThumb[]) => {
 
         blob.arrayBuffer().then((buffer) => {
           resolve({
-            pixelHeight: GRID_PIXEL_SIZE,
             pixelWidth: GRID_PIXEL_SIZE,
+            pixelHeight: imgs.length > 2 ? GRID_PIXEL_SIZE : GRID_PIXEL_SIZE / 2,
             contentType: MIME_TYPE,
             content: uint8ArrayToBase64(new Uint8Array(buffer)),
           });

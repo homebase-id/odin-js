@@ -1,6 +1,6 @@
-import { DotYouClient } from '../../core/DotYouClient';
-import { getRandom16ByteArray } from '../../helpers/DataUtil';
-import { createThumbnails } from '../../media/Thumbs/ThumbnailProvider';
+import { DotYouClient } from '../../../core/DotYouClient';
+import { getRandom16ByteArray } from '../../../helpers/DataUtil';
+import { createThumbnails } from '../../../media/Thumbs/ThumbnailProvider';
 import {
   ThumbnailFile,
   UploadFileMetadata,
@@ -23,25 +23,24 @@ import {
   PriorityOptions,
   uploadHeader,
   CommentReaction,
-} from '../../core/core';
+  patchFile,
+  UpdateInstructionSet,
+} from '../../../core/core';
 import {
   jsonStringify64,
   stringToUint8Array,
   getNewId,
   tryJsonParse,
-} from '../../helpers/DataUtil';
-import { TransitInstructionSet } from '../../peer/peerData/PeerTypes';
-import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
-import { RawReactionContent, ReactionConfig, ReactionContext } from './PostTypes';
-import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
-import {
-  uploadFileOverPeer,
-  uploadHeaderOverPeer,
-} from '../../peer/peerData/Upload/PeerUploadProvider';
-import { deleteFileOverPeer } from '../../peer/peerData/File/PeerFileManageProvider';
-import { queryBatchOverPeer } from '../../peer/peerData/Query/PeerDriveQueryProvider';
-import { getContentFromHeaderOrPayloadOverPeer } from '../../peer/peerData/File/PeerFileProvider';
-import { getFileHeaderOverPeerByGlobalTransitId } from '../../peer/peer';
+} from '../../../helpers/DataUtil';
+import { TransitInstructionSet } from '../../../peer/peerData/PeerTypes';
+import { GetTargetDriveFromChannelId } from '../Channel/PostChannelManager';
+import { RawReactionContent, ReactionConfig, ReactionContext } from '../PostTypes';
+import { DEFAULT_PAYLOAD_KEY } from '../../../core/DriveData/Upload/UploadHelpers';
+import { uploadFileOverPeer } from '../../../peer/peerData/Upload/PeerFileUploader';
+import { deleteFileOverPeer } from '../../../peer/peerData/File/PeerFileManager';
+import { queryBatchOverPeer } from '../../../peer/peerData/Query/PeerDriveQueryService';
+import { getContentFromHeaderOrPayloadOverPeer } from '../../../peer/peerData/File/PeerFileProvider';
+import { getFileHeaderOverPeerByGlobalTransitId } from '../../../peer/peer';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
@@ -166,17 +165,6 @@ export const saveComment = async (
     metadata.accessControlList = { requiredSecurityGroup: SecurityGroupType.AutoConnected };
     metadata.allowDistribution = true;
 
-    const instructionSet: TransitInstructionSet = {
-      transferIv: getRandom16ByteArray(),
-      overwriteGlobalTransitFileId: (comment as HomebaseFile<CommentReaction>).fileMetadata
-        .globalTransitId,
-      remoteTargetDrive: targetDrive,
-      schedule: ScheduleOptions.SendLater,
-      priority: PriorityOptions.Medium,
-      recipients: [context.odinId],
-      systemFileType: 'Comment',
-    };
-
     const remoteHeader = comment.fileMetadata.globalTransitId
       ? await getFileHeaderOverPeerByGlobalTransitId(
           dotYouClient,
@@ -189,29 +177,71 @@ export const saveComment = async (
         )
       : null;
 
-    const result = comment.fileMetadata.globalTransitId
-      ? await uploadHeaderOverPeer(
-          dotYouClient,
-          remoteHeader?.sharedSecretEncryptedKeyHeader,
-          instructionSet,
-          metadata
-        )
-      : await uploadFileOverPeer(
-          dotYouClient,
-          instructionSet,
-          metadata,
-          payloads,
-          thumbnails,
-          encrypt
-        );
+    // await uploadHeaderOverPeer(
+    //   dotYouClient,
+    //   remoteHeader?.sharedSecretEncryptedKeyHeader,
+    //   instructionSet,
+    //   metadata
+    // )
 
+    let result;
+    if (comment.fileMetadata.globalTransitId) {
+      const instructionSet: UpdateInstructionSet = {
+        transferIv: getRandom16ByteArray(),
+        file: {
+          globalTransitId: comment.fileMetadata.globalTransitId,
+          targetDrive: targetDrive,
+        },
+        locale: 'peer',
+        versionTag: comment.fileMetadata.versionTag,
+        recipients: [context.odinId],
+        systemFileType: 'Comment',
+      };
+
+      console.log(
+        'patchFile',
+        remoteHeader?.sharedSecretEncryptedKeyHeader,
+        instructionSet,
+        metadata
+      );
+      result = await patchFile(
+        dotYouClient,
+        remoteHeader?.fileMetadata.isEncrypted
+          ? remoteHeader?.sharedSecretEncryptedKeyHeader
+          : undefined,
+        instructionSet,
+        metadata
+      );
+    } else {
+      const instructionSet: TransitInstructionSet = {
+        transferIv: getRandom16ByteArray(),
+        overwriteGlobalTransitFileId: (comment as HomebaseFile<CommentReaction>).fileMetadata
+          .globalTransitId,
+        remoteTargetDrive: targetDrive,
+        schedule: ScheduleOptions.SendLater,
+        priority: PriorityOptions.Medium,
+        recipients: [context.odinId],
+        systemFileType: 'Comment',
+      };
+
+      result = await uploadFileOverPeer(
+        dotYouClient,
+        instructionSet,
+        metadata,
+        payloads,
+        thumbnails,
+        encrypt
+      );
+    }
     if (!result) throw new Error(`Upload failed`);
     if (
       TransferUploadStatus.EnqueuedFailed === result.recipientStatus[context.odinId].toLowerCase()
     )
       throw new Error(result.recipientStatus[context.odinId].toString());
 
-    return result.remoteGlobalTransitIdFileIdentifier.globalTransitId;
+    return 'remoteGlobalTransitIdFileIdentifier' in result
+      ? result.remoteGlobalTransitIdFileIdentifier.globalTransitId
+      : (comment.fileMetadata.globalTransitId as string);
   }
 };
 
@@ -369,7 +399,7 @@ export const parseReactionPreview = (
               return {
                 authorOdinId: commentPreview.odinId,
 
-                ...(commentPreview.isEncrypted && !commentPreview.content.length
+                ...(commentPreview.isEncrypted || !commentPreview.content.length
                   ? { body: '' }
                   : tryJsonParse<CommentReaction>(commentPreview.content)),
 

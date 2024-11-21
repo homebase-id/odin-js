@@ -176,6 +176,7 @@ const AttributeFields = ({
               defaultValue={attribute.data?.[MinimalProfileFields.ShortBioId] ?? ''}
               onChange={onChange}
               className="rounded border border-gray-300 px-2 pb-3 dark:border-gray-700"
+              contentClassName="max-h-[50vh] overflow-auto"
             />
           </div>
         </>

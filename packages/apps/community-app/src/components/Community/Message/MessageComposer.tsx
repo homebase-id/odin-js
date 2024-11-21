@@ -12,7 +12,6 @@ import {
   getTextRootsRecursive,
   useAllContacts,
   findMentionedInRichText,
-  useDotYouClient,
 } from '@homebase-id/common-app';
 import { PaperPlane, Plus } from '@homebase-id/common-app/icons';
 import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
@@ -38,6 +37,7 @@ export const MessageComposer = ({
   thread,
   threadParticipants,
   onSend,
+  onKeyDown,
   className,
 }: {
   community: HomebaseFile<CommunityDefinition> | undefined;
@@ -45,6 +45,7 @@ export const MessageComposer = ({
   thread?: HomebaseFile<CommunityMessage> | undefined;
   threadParticipants?: string[];
   onSend?: () => void;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
   className?: string;
 }) => {
   const threadId = thread?.fileMetadata.globalTransitId;
@@ -156,6 +157,7 @@ export const MessageComposer = ({
         >
           <RichTextEditor
             className="relative w-8 flex-grow border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border"
+            contentClassName="max-h-[50vh] overflow-auto"
             onChange={(newVal) => setMessage(newVal.target.value)}
             defaultValue={message}
             placeholder={
@@ -168,6 +170,7 @@ export const MessageComposer = ({
             autoFocus={!isTouchDevice()}
             ref={volatileRef}
             onSubmit={isTouchDevice() ? undefined : doSend}
+            onKeyDown={onKeyDown}
             disableHeadings={true}
             mentionables={mentionables}
             plugins={[ChannelPlugin]}

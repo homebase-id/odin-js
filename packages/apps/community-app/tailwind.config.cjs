@@ -5,7 +5,7 @@ module.exports = {
     './src/**/*.{js,jsx,ts,tsx}',
     '../../common/common-app/src/**/*.{js,jsx,ts,tsx}',
     '../chat-app/src/**/*.{js,jsx,ts,tsx}',
-    '../rich-text-editor/src/**/*.{js,jsx,ts,tsx}',
+    '../../common/rich-text-editor/src/**/*.{js,jsx,ts,tsx}',
   ],
   theme: {
     extend: {

@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ChannelDefinition,
   ChannelTemplate,
@@ -78,4 +78,24 @@ export const useChannels = ({
     refetchOnWindowFocus: false,
     staleTime: Infinity,
   });
+};
+
+export const invalidateChannels = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['channels'] });
+};
+
+export const updateCacheChannels = (
+  queryClient: QueryClient,
+  transformFn: (
+    data: HomebaseFile<ChannelDefinitionVm>[]
+  ) => HomebaseFile<ChannelDefinitionVm>[] | undefined
+) => {
+  const queryData = queryClient.getQueryData<HomebaseFile<ChannelDefinitionVm>[]>(['channels']);
+  if (!queryData) return;
+
+  const newQueryData = transformFn(queryData);
+  if (!newQueryData) return;
+
+  queryClient.setQueryData(['channels'], newQueryData);
+  return queryData;
 };

@@ -1,5 +1,13 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { NumberCursoredResult, PagingOptions } from '@homebase-id/js-lib/core';
+import {
+  InfiniteData,
+  QueryClient,
+  QueryKey,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { NumberCursoredResult, PagedResult } from '@homebase-id/js-lib/core';
 import {
   DotYouProfile,
   getConnections,
@@ -7,91 +15,136 @@ import {
   getReceivedIntroductions,
   removeAllReceivedIntroductions,
   getSentRequests,
+  RedactedConnectionRequest,
+  ConnectionRequest,
 } from '@homebase-id/js-lib/network';
 
 import { useDotYouClient } from '../auth/useDotYouClient';
 
-interface useConnectionsProps {
-  pageSize: number;
-  pageNumber: number;
-}
-
-type usePendingConnectionsProps = useConnectionsProps;
-interface useSentConnectionsProps extends useConnectionsProps {
-  includeIntroductions?: true | false | 'only';
-}
-
-export const usePendingConnections = ({
-  pageSize: pendingPageSize,
-  pageNumber: pendingPage,
-}: usePendingConnectionsProps) => {
+export const usePendingConnections = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
+  const pageSize = 6;
 
-  const fetchPendingConnections = async (
-    { pageSize, pageNumber }: PagingOptions = { pageSize: 10, pageNumber: 1 }
-  ) => {
+  const fetchPendingConnections = async ({ pageNumber }: { pageNumber: number }) => {
     return (
       (await getPendingRequests(dotYouClient, {
         pageNumber: pageNumber,
-        pageSize: pageSize,
+        pageSize,
       })) || null
     );
   };
 
   return {
-    fetch: useQuery({
-      queryKey: ['pending-connections', pendingPageSize, pendingPage],
-      queryFn: () =>
-        fetchPendingConnections({ pageSize: pendingPageSize, pageNumber: pendingPage }),
-
+    fetch: useInfiniteQuery({
+      initialPageParam: 1 as number,
+      queryKey: ['pending-connections'],
+      queryFn: ({ pageParam }) => fetchPendingConnections({ pageNumber: pageParam }),
+      getNextPageParam: (_lastPage, _pages, lastPageParam) => lastPageParam + 1,
       refetchOnWindowFocus: false,
       refetchOnMount: true,
-      enabled: !!pendingPage,
     }),
   };
 };
 
-export const useSentConnections = ({
-  pageSize: sentPageSize,
-  pageNumber: sentPage,
-  includeIntroductions,
-}: useSentConnectionsProps) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+export const invalidatePendingConnections = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['pending-connections'] });
+};
 
-  const fetchSentRequests = async (
-    { pageSize, pageNumber }: PagingOptions = { pageSize: 10, pageNumber: 1 }
-  ) => {
-    return await await getSentRequests(dotYouClient, {
+export const invalidatePendingConnection = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['pending-connection'] });
+};
+
+export const updateCachePendingConnections = (
+  queryClient: QueryClient,
+  transformFn: (
+    data: InfiniteData<PagedResult<RedactedConnectionRequest>>
+  ) => InfiniteData<PagedResult<RedactedConnectionRequest>> | undefined
+) => {
+  const queryData = queryClient.getQueryData<InfiniteData<PagedResult<RedactedConnectionRequest>>>([
+    'pending-connections',
+  ]);
+  if (!queryData) return;
+
+  const newQueryData = transformFn(queryData);
+  if (newQueryData) {
+    queryClient.setQueryData(['pending-connections'], newQueryData);
+  }
+  return queryData;
+};
+
+interface useSentConnectionsProps {
+  includeIntroductions?: true | false | 'only';
+}
+export const useSentConnections = (props?: useSentConnectionsProps) => {
+  const { includeIntroductions } = props || {};
+  const dotYouClient = useDotYouClient().getDotYouClient();
+  const pageSize = 6;
+
+  const fetchSentRequests = async ({ pageNumber }: { pageNumber: number }) =>
+    await getSentRequests(dotYouClient, {
       pageNumber: pageNumber,
       pageSize: pageSize,
     });
-  };
 
   return {
-    fetch: useQuery({
-      queryKey: ['sent-requests', sentPageSize, sentPage],
-      queryFn: () => fetchSentRequests({ pageSize: sentPageSize, pageNumber: sentPage }),
+    fetch: useInfiniteQuery<
+      PagedResult<ConnectionRequest>,
+      Error,
+      InfiniteData<PagedResult<ConnectionRequest>, unknown>,
+      QueryKey,
+      number
+    >({
+      queryKey: ['sent-requests'],
+      initialPageParam: 1 as number,
+      getNextPageParam: (_lastPage, _allPages, lastPageParam) => lastPageParam + 1,
+      queryFn: ({ pageParam }) => fetchSentRequests({ pageNumber: pageParam }),
       refetchOnWindowFocus: false,
-      enabled: !!sentPage,
       select:
         includeIntroductions !== true
           ? (data) => {
               if (includeIntroductions === 'only') {
                 return {
                   ...data,
-                  results: data.results.filter((result) => result.introducerOdinId),
+                  pages: data.pages.map((page) => ({
+                    ...page,
+                    results: page.results.filter((result) => result.introducerOdinId),
+                  })),
                 };
-              } else if (includeIntroductions === false) {
+              } else {
                 return {
                   ...data,
-                  results: data.results.filter((result) => !result.introducerOdinId),
+                  pages: data.pages.map((page) => ({
+                    ...page,
+                    results: page.results.filter((result) => !result.introducerOdinId),
+                  })),
                 };
               }
-              return data;
             }
           : undefined,
     }),
   };
+};
+
+export const invalidateSentConnections = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['sent-requests'] });
+};
+
+export const updateCacheSentConnections = (
+  queryClient: QueryClient,
+  transformFn: (
+    data: InfiniteData<PagedResult<ConnectionRequest>>
+  ) => InfiniteData<PagedResult<ConnectionRequest>> | undefined
+) => {
+  const queryData = queryClient.getQueryData<InfiniteData<PagedResult<ConnectionRequest>>>([
+    'sent-requests',
+  ]);
+  if (!queryData) return;
+
+  const newQueryData = transformFn(queryData);
+  if (newQueryData) {
+    queryClient.setQueryData(['sent-requests'], newQueryData);
+  }
+  return queryData;
 };
 
 export const useReceivedIntroductions = () => {
@@ -119,11 +172,10 @@ export const useReceivedIntroductions = () => {
 
 interface useActiveConnectionsProps {
   pageSize: number;
-  cursor?: number;
 }
 
 export const useActiveConnections = (
-  { pageSize: activePageSize, cursor: activePage }: useActiveConnectionsProps = {
+  { pageSize }: useActiveConnectionsProps = {
     pageSize: 10,
   }
 ) => {
@@ -150,14 +202,36 @@ export const useActiveConnections = (
 
   return {
     fetch: useInfiniteQuery({
-      queryKey: ['active-connections', activePageSize, activePage],
+      queryKey: ['active-connections', pageSize],
       initialPageParam: undefined as number | undefined,
-      queryFn: ({ pageParam }) => fetchConnections({ pageSize: activePageSize, cursor: pageParam }),
+      queryFn: ({ pageParam }) => fetchConnections({ pageSize: pageSize, cursor: pageParam }),
       getNextPageParam: (lastPage) =>
-        lastPage.results?.length >= activePageSize && lastPage.cursor !== 0
-          ? lastPage.cursor
-          : undefined,
+        lastPage.results?.length >= pageSize && lastPage.cursor !== 0 ? lastPage.cursor : undefined,
       refetchOnWindowFocus: false,
     }),
   };
+};
+
+export const invalidateActiveConnections = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['active-connections'], exact: false });
+};
+
+export const updateCacheActiveConnections = (
+  queryClient: QueryClient,
+  transformFn: (
+    data: InfiniteData<NumberCursoredResult<DotYouProfile>>
+  ) => InfiniteData<NumberCursoredResult<DotYouProfile>> | undefined
+) => {
+  const queries = queryClient.getQueriesData<InfiniteData<NumberCursoredResult<DotYouProfile>>>({
+    queryKey: ['active-connections'],
+    exact: false,
+  });
+  queries.forEach(([queryKey, queryData]) => {
+    if (!queryData) return;
+
+    const newQueryData = transformFn(queryData);
+    if (newQueryData) {
+      queryClient.setQueryData(queryKey, newQueryData);
+    }
+  });
 };

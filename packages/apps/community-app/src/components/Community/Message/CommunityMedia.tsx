@@ -5,6 +5,7 @@ import {
   NewHomebaseFile,
   NewPayloadDescriptor,
   SystemFileType,
+  DEFAULT_PAYLOAD_KEY,
 } from '@homebase-id/js-lib/core';
 import { OdinImage, OdinThumbnailImage, OdinAudio, OdinAudioWaveForm } from '@homebase-id/ui-lib';
 
@@ -32,11 +33,11 @@ export const CommunityMedia = ({
   communityId: string;
   msg: HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage>;
 }) => {
-  const payloads = msg.fileMetadata.payloads;
+  const payloads = msg.fileMetadata.payloads?.filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY);
   const isGallery = payloads && payloads.length >= 2;
   const navigate = useNavigate();
 
-  if (!payloads) return null;
+  if (!payloads?.length) return null;
   if (isGallery) return <MediaGallery odinId={odinId} communityId={communityId} msg={msg} />;
 
   return (
@@ -230,7 +231,9 @@ const MediaGallery = ({
   communityId: string;
   msg: HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage>;
 }) => {
-  const payloads = msg.fileMetadata.payloads;
+  const payloads = msg.fileMetadata.payloads?.filter(
+    (pyld) => pyld.key !== COMMUNITY_LINKS_PAYLOAD_KEY
+  );
   const totalCount = (payloads && payloads.length) || 0;
   const maxVisible = 4;
   const countExcludedFromView = (payloads && payloads.length - maxVisible) || 0;

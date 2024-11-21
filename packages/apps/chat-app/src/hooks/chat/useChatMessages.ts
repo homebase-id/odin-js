@@ -21,6 +21,7 @@ import {
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { SendReadReceiptResponseRecipientStatus } from '@homebase-id/js-lib/peer';
 import { useDotYouClientContext } from '@homebase-id/common-app';
+import { updateCacheChatMessage } from './useChatMessage';
 
 const PAGE_SIZE = 100;
 export const useChatMessages = (props?: { conversationId: string | undefined }) => {
@@ -109,12 +110,56 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
       mutationFn: removeMessage,
 
       onSettled: async (_data, _error, variables) => {
-        queryClient.invalidateQueries({
-          queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
-        });
+        invalidateChatMessages(
+          queryClient,
+          variables.conversation.fileMetadata.appData.uniqueId as string
+        );
       },
     }),
   };
+};
+
+export const invalidateChatMessages = (queryClient: QueryClient, conversationId?: string) => {
+  queryClient.invalidateQueries({
+    queryKey: ['chat-messages', conversationId].filter(Boolean),
+    exact: !!conversationId,
+  });
+};
+
+export const updateCacheChatMessages = (
+  queryClient: QueryClient,
+  conversationId: string,
+  transformFn: (
+    data: InfiniteData<{
+      searchResults: HomebaseFile<ChatMessage>[];
+      cursorState: string;
+      queryTime: number;
+      includeMetadataHeader: boolean;
+    }>
+  ) =>
+    | InfiniteData<{
+        searchResults: (HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>)[];
+        cursorState: string;
+        queryTime: number;
+        includeMetadataHeader: boolean;
+      }>
+    | undefined
+) => {
+  const currentData = queryClient.getQueryData<
+    InfiniteData<{
+      searchResults: HomebaseFile<ChatMessage>[];
+      cursorState: string;
+      queryTime: number;
+      includeMetadataHeader: boolean;
+    }>
+  >(['chat-messages', conversationId]);
+  if (!currentData) return;
+
+  const newData = transformFn(currentData);
+  if (!newData) return;
+
+  queryClient.setQueryData(['chat-messages', conversationId], newData);
+  return currentData;
 };
 
 export const insertNewMessagesForConversation = (
@@ -162,27 +207,20 @@ export const insertNewMessage = (
   queryClient: QueryClient,
   newMessage: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>
 ) => {
-  const conversationId = newMessage.fileMetadata.appData.groupId;
+  const conversationId = newMessage.fileMetadata.appData.groupId as string;
 
-  const extistingMessages = queryClient.getQueryData<
-    InfiniteData<{
-      searchResults: (HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage> | null)[];
-      cursorState: string;
-      queryTime: number;
-      includeMetadataHeader: boolean;
-    }>
-  >(['chat-messages', conversationId]);
-
-  if (extistingMessages) {
-    queryClient.setQueryData(
-      ['chat-messages', conversationId],
-      internalInsertNewMessage(extistingMessages, newMessage)
-    );
-  } else {
-    queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+  const extistingMessages = updateCacheChatMessages(queryClient, conversationId, (data) =>
+    internalInsertNewMessage(data, newMessage)
+  );
+  if (!extistingMessages) {
+    invalidateChatMessages(queryClient, conversationId);
   }
 
-  queryClient.setQueryData(['chat-message', newMessage.fileMetadata.appData.uniqueId], newMessage);
+  updateCacheChatMessage(
+    queryClient,
+    newMessage.fileMetadata.appData.uniqueId as string,
+    () => newMessage
+  );
 
   return { extistingMessages };
 };
@@ -198,10 +236,24 @@ export const internalInsertNewMessage = (
     unknown
   >,
   newMessage: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>
-) => {
+): InfiniteData<{
+  searchResults: (HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>)[];
+  cursorState: string;
+  queryTime: number;
+  includeMetadataHeader: boolean;
+}> => {
   if (!newMessage.fileMetadata.appData.uniqueId || !newMessage.fileMetadata.appData.groupId) {
     console.warn('Message does not have uniqueId or groupId', newMessage);
-    return extistingMessages;
+    return {
+      ...extistingMessages,
+      pages: extistingMessages.pages.map((page) => ({
+        ...page,
+        searchResults: page.searchResults.filter(Boolean) as (
+          | HomebaseFile<ChatMessage>
+          | NewHomebaseFile<ChatMessage>
+        )[],
+      })),
+    };
   }
 
   const isNewFile = !extistingMessages.pages.some((page) =>

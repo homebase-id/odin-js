@@ -95,7 +95,7 @@ export const OutgoingConnectionDialog = ({
                 },
                 {
                   onSuccess: () => {
-                    checkReturnTo();
+                    if (checkReturnTo()) return;
 
                     resetConnectionRequest();
                     setConnectionTarget('');

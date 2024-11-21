@@ -12,7 +12,7 @@ export const useRecoveryKey = () => {
 
   return {
     fetchKey: useQuery({
-      queryKey: ['recoveryKey'],
+      queryKey: ['recovery-key'],
       queryFn: fetchKey,
       gcTime: Infinity, // Recovery key can only be fetch once at the moment.. If it fails, you're screwed
       staleTime: Infinity,

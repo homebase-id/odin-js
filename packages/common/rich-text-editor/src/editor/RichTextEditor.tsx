@@ -91,6 +91,7 @@ interface RTEProps {
   name?: string;
   onChange: (e: { target: { name: string; value: RichText } }) => void;
   className?: string;
+  contentClassName?: string;
   disabled?: boolean;
   uniqueId?: string;
   autoFocus?: boolean;
@@ -102,6 +103,8 @@ interface RTEProps {
   plugins?: (PlatePlugin | PlatePlugin<any> | SlatePlugin)[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   components?: Record<string, FunctionComponent<any>>;
+
+  onKeyDown?: (e: React.KeyboardEvent) => void;
 }
 
 const resetBlockTypesCommonRule = {
@@ -126,12 +129,14 @@ const InnerRichTextEditor = memo(
       onChange,
       onSubmit,
       className,
+      contentClassName,
       disabled,
       uniqueId,
       autoFocus,
       disableHeadings,
       plugins: _plugins,
       components: _components,
+      onKeyDown,
     } = props;
 
     const { setMediaOptions } = useMediaOptionsContext();
@@ -374,6 +379,7 @@ const InnerRichTextEditor = memo(
             </FixedToolbar>
 
             <PlateContent
+              className={contentClassName}
               placeholder={placeholder}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -387,6 +393,8 @@ const InnerRichTextEditor = memo(
                     }
                   }
                 }
+
+                onKeyDown?.(e);
               }}
             />
           </Plate>

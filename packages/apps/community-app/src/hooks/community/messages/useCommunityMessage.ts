@@ -1,4 +1,10 @@
-import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  InfiniteData,
+  QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import {
   HomebaseFile,
@@ -22,7 +28,7 @@ import {
 } from '../../../providers/CommunityDefinitionProvider';
 import { formatGuidId, getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
-import { insertNewMessage } from './useCommunityMessages';
+import { insertNewMessage, updateCacheCommunityMessages } from './useCommunityMessages';
 
 export const useCommunityMessage = (props?: {
   odinId: string | undefined;
@@ -225,26 +231,15 @@ export const useCommunityMessage = (props?: {
       },
       onSuccess: async (newMessage, params) => {
         if (!newMessage) return;
-        const extistingMessages = queryClient.getQueryData<
-          InfiniteData<{
-            searchResults: (HomebaseFile<CommunityMessage> | null)[];
-            cursorState: string;
-            queryTime: number;
-            includeMetadataHeader: boolean;
-          }>
-        >([
-          'community-messages',
-          formatGuidId(params.community.fileMetadata.appData.uniqueId),
-          formatGuidId(
-            newMessage.fileMetadata.appData.groupId ||
-              params.community.fileMetadata.appData.uniqueId
-          ),
-        ]);
 
-        if (extistingMessages) {
-          const newData = {
-            ...extistingMessages,
-            pages: extistingMessages?.pages?.map((page) => ({
+        updateCacheCommunityMessages(
+          queryClient,
+          params.community.fileMetadata.appData.uniqueId as string,
+          newMessage.fileMetadata.appData.groupId,
+          undefined,
+          (data) => ({
+            ...data,
+            pages: data.pages.map((page) => ({
               ...page,
               searchResults: page.searchResults.map((msg) => {
                 if (
@@ -276,21 +271,8 @@ export const useCommunityMessage = (props?: {
                 return msg;
               }),
             })),
-          };
-
-          queryClient.setQueryData(
-            [
-              'community-messages',
-              formatGuidId(params.community.fileMetadata.appData.uniqueId),
-              formatGuidId(
-                newMessage.fileMetadata.appData.groupId ||
-                  params.community.fileMetadata.appData.uniqueId ||
-                  ''
-              ),
-            ],
-            newData
-          );
-        }
+          })
+        );
       },
       onError: (err) => {
         console.error('Failed to update the chat message', err);
@@ -299,82 +281,89 @@ export const useCommunityMessage = (props?: {
     update: useMutation({
       mutationFn: updateMessage,
       onMutate: async ({ updatedChatMessage, community }) => {
-        // Update chat messages
-        const extistingMessages = queryClient.getQueryData<
-          InfiniteData<{
-            searchResults: (HomebaseFile<CommunityMessage> | null)[];
-            cursorState: string;
-            queryTime: number;
-            includeMetadataHeader: boolean;
-          }>
-        >([
-          'community-messages',
-          formatGuidId(community.fileMetadata.appData.uniqueId),
-          formatGuidId(updatedChatMessage.fileMetadata.appData.groupId),
-        ]);
-
-        if (extistingMessages) {
-          const newData = {
-            ...extistingMessages,
-            pages: extistingMessages?.pages?.map((page) => ({
+        const extistingMessages = updateCacheCommunityMessages(
+          queryClient,
+          community.fileMetadata.appData.uniqueId as string,
+          updatedChatMessage.fileMetadata.appData.groupId,
+          undefined,
+          (data) => ({
+            ...data,
+            pages: data.pages.map((page) => ({
               ...page,
               searchResults: page.searchResults.map((msg) =>
-                stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId) ? updatedChatMessage : msg
+                stringGuidsEqual(msg?.fileMetadata.appData.uniqueId, updatedChatMessage.fileId)
+                  ? updatedChatMessage
+                  : msg
               ),
             })),
-          };
-          queryClient.setQueryData(
-            [
-              'community-messages',
-              formatGuidId(community.fileMetadata.appData.uniqueId),
-              formatGuidId(updatedChatMessage.fileMetadata.appData.groupId),
-            ],
-            newData
-          );
-        }
+          })
+        );
 
-        // Update chat message
-        const existingMessage = queryClient.getQueryData<HomebaseFile<CommunityMessage>>([
-          'community-message',
-          community.fileMetadata.appData.uniqueId,
-          updatedChatMessage.fileMetadata.appData.uniqueId,
-          updatedChatMessage.fileSystemType.toLowerCase(),
-        ]);
+        const existingMessage = updateCacheCommunityMessage(
+          queryClient,
+          community.fileMetadata.appData.uniqueId as string,
+          updatedChatMessage.fileMetadata.appData.uniqueId as string,
+          updatedChatMessage.fileSystemType,
 
-        if (existingMessage) {
-          queryClient.setQueryData(
-            [
-              'community-message',
-              community.fileMetadata.appData.uniqueId,
-              updatedChatMessage.fileMetadata.appData.uniqueId,
-              updatedChatMessage.fileSystemType.toLowerCase(),
-            ],
-            updatedChatMessage
-          );
-        }
+          () => updatedChatMessage
+        );
 
         return { extistingMessages, existingMessage };
       },
       onError: (err, messageParams, context) => {
-        queryClient.setQueryData(
-          [
-            'community-messages',
-            formatGuidId(messageParams.community.fileMetadata.appData.uniqueId),
-            formatGuidId(messageParams.updatedChatMessage.fileMetadata.appData.groupId),
-          ],
-          context?.extistingMessages
+        updateCacheCommunityMessages(
+          queryClient,
+          messageParams.community.fileMetadata.appData.uniqueId as string,
+          messageParams.updatedChatMessage.fileMetadata.appData.groupId,
+          undefined,
+          () => context?.extistingMessages
         );
 
-        queryClient.setQueryData(
-          [
-            'community-message',
-            messageParams.community.fileMetadata.appData.uniqueId,
-            messageParams.updatedChatMessage.fileMetadata.appData.uniqueId,
-            messageParams.updatedChatMessage.fileSystemType.toLowerCase(),
-          ],
-          context?.existingMessage
+        updateCacheCommunityMessage(
+          queryClient,
+          messageParams.community.fileMetadata.appData.uniqueId as string,
+          messageParams.updatedChatMessage.fileMetadata.appData.uniqueId as string,
+          messageParams.updatedChatMessage.fileSystemType,
+          () => context?.existingMessage
         );
       },
     }),
   };
+};
+
+export const invalidateCommunityMessage = (
+  queryClient: QueryClient,
+  communityId: string,
+  messageId?: string,
+  fileSystemType?: SystemFileType
+) => {
+  queryClient.invalidateQueries({
+    queryKey: ['community-message', communityId, messageId, fileSystemType?.toLowerCase()].filter(
+      Boolean
+    ),
+    exact: !!messageId && !!fileSystemType && !!communityId,
+  });
+};
+
+export const updateCacheCommunityMessage = (
+  queryClient: QueryClient,
+  communityId: string,
+  messageId: string,
+  fileSystemType: SystemFileType | undefined,
+  transformFn: (data: HomebaseFile<CommunityMessage>) => HomebaseFile<CommunityMessage> | undefined
+) => {
+  const currentData = queryClient.getQueryData<HomebaseFile<CommunityMessage>>([
+    'community-message',
+    communityId,
+
+    messageId,
+    fileSystemType?.toLowerCase() || 'standard',
+  ]);
+  if (!currentData) return;
+
+  const updatedData = transformFn(currentData);
+  if (!updatedData) return;
+
+  queryClient.setQueryData(['community-message', messageId], updatedData);
+  return currentData;
 };

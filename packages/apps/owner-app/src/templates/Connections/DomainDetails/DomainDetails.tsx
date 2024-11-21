@@ -1,7 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 
-import { useDomain } from '../../../hooks/connections/useDomain';
 import { useState } from 'react';
 import Section from '../../../components/ui/Sections/Section';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
@@ -22,6 +21,7 @@ import {
   LoadingBlock,
   CirclePermissionView,
   SubtleMessage,
+  useDomain,
 } from '@homebase-id/common-app';
 import {
   House,
@@ -33,12 +33,15 @@ import {
   HardDrive,
   Times,
 } from '@homebase-id/common-app/icons';
+import { useManageDomain } from '../../../hooks/connections/useManageDomain';
 
 const DomainDetails = () => {
   const { domain } = useParams();
   const navigate = useNavigate();
   const {
     fetch: { data: domainInfo, isLoading: domainInfoLoading },
+  } = useDomain({ domain: domain });
+  const {
     disconnect: { mutate: disconnect, error: disconnectError },
 
     revokeDomain: { mutate: revokeDomain, error: revokeDomainError },
@@ -47,7 +50,7 @@ const DomainDetails = () => {
       error: restoreDomainError,
       status: restoreDomainStatus,
     },
-  } = useDomain({ domain: domain });
+  } = useManageDomain();
 
   const [isEditPermissionActive, setIsEditPermissionActive] = useState(false);
 

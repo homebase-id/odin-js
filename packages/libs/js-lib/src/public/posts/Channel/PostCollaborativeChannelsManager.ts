@@ -1,22 +1,22 @@
-import { DotYouClient } from '../../core/DotYouClient';
-import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
-import { deleteFile } from '../../core/DriveData/File/DriveFileManageProvider';
-import { getContentFromHeaderOrPayload } from '../../core/DriveData/File/DriveFileProvider';
+import { DotYouClient } from '../../../core/DotYouClient';
+import { FileQueryParams } from '../../../core/DriveData/Drive/DriveTypes';
+import { deleteFile } from '../../../core/DriveData/File/DriveFileManager';
+import { getContentFromHeaderOrPayload } from '../../../core/DriveData/File/DriveFileProvider';
 import {
   AccessControlList,
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
-} from '../../core/DriveData/File/DriveFileTypes';
-import { queryBatch } from '../../core/DriveData/Query/DriveQueryProvider';
-import { uploadFile } from '../../core/DriveData/Upload/DriveFileUploadProvider';
+} from '../../../core/DriveData/File/DriveFileTypes';
+import { queryBatch } from '../../../core/DriveData/Query/DriveQueryService';
+import { uploadFile } from '../../../core/DriveData/Upload/DriveFileUploader';
 import {
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
-} from '../../core/DriveData/Upload/DriveUploadTypes';
-import { getRandom16ByteArray, jsonStringify64, toGuidId } from '../../helpers/DataUtil';
-import { BlogConfig, RemoteCollaborativeChannelDefinition } from './PostTypes';
+} from '../../../core/DriveData/Upload/DriveUploadTypes';
+import { getRandom16ByteArray, jsonStringify64, toGuidId } from '../../../helpers/DataUtil';
+import { BlogConfig, RemoteCollaborativeChannelDefinition } from '../PostTypes';
 
 export const getChannelLinkDefinitions = async (
   dotYouClient: DotYouClient

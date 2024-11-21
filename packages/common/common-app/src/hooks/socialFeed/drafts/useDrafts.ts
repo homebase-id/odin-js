@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Article, PostContent, getPosts, removePost } from '@homebase-id/js-lib/public';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../../auth/useDotYouClient';
@@ -44,28 +44,38 @@ export const useDrafts = () => {
     remove: useMutation({
       mutationFn: remove,
       onMutate: async (toRemoveDetails) => {
-        await queryClient.cancelQueries({ queryKey: ['drafts'] });
-
-        // Updates
-        const previousDrafts: HomebaseFile<Article>[] | undefined = queryClient.getQueryData([
-          'drafts',
-        ]);
-        const updatedDrafts = previousDrafts?.filter(
-          (post) => post.fileId !== toRemoveDetails.postFile.fileId
+        const previousDrafts = updateCacheDrafts(queryClient, (drafts) =>
+          drafts.filter((post) => post.fileId !== toRemoveDetails.postFile.fileId)
         );
-        queryClient.setQueryData(['drafts'], updatedDrafts);
-
         return { toRemoveDetails, previousDrafts };
       },
-      onError: (err, toRemoveAttr, context) => {
+      onError: (err, _toRemoveAttr, context) => {
         console.error(err);
 
         // Revert local caches to what they were
-        queryClient.setQueryData(['drafts'], context?.previousDrafts);
+        updateCacheDrafts(queryClient, () => context?.previousDrafts);
       },
       onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ['drafts'] });
+        invalidateDrafts(queryClient);
       },
     }),
   };
+};
+
+export const invalidateDrafts = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['drafts'] });
+};
+
+export const updateCacheDrafts = (
+  queryClient: QueryClient,
+  transformFn: (drafts: HomebaseFile<Article>[]) => HomebaseFile<Article>[] | undefined
+) => {
+  const currentData = queryClient.getQueryData<HomebaseFile<Article>[]>(['drafts']);
+  if (!currentData) return;
+
+  const updatedData = transformFn(currentData);
+  if (!updatedData) return;
+  queryClient.setQueryData(['drafts'], updatedData);
+
+  return currentData;
 };

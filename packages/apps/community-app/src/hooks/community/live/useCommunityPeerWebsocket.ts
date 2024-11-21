@@ -1,12 +1,22 @@
-import { useWebsocketSubscriber } from '@homebase-id/common-app';
-import { DotYouClient, TypedConnectionNotification, TargetDrive } from '@homebase-id/js-lib/core';
-import { drivesEqual, formatGuidId, hasDebugFlag } from '@homebase-id/js-lib/helpers';
+import { useDotYouClientContext, useWebsocketSubscriber } from '@homebase-id/common-app';
+import {
+  DotYouClient,
+  TypedConnectionNotification,
+  TargetDrive,
+  DEFAULT_PAYLOAD_KEY,
+  decryptKeyHeader,
+  EncryptedKeyHeader,
+  decryptJsonContent,
+  HomebaseFile,
+  getPayloadAsJson,
+} from '@homebase-id/js-lib/core';
+import { drivesEqual, hasDebugFlag, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { getTargetDriveFromCommunityId } from '../../../providers/CommunityDefinitionProvider';
 import {
   COMMUNITY_MESSAGE_FILE_TYPE,
-  dsrToMessage,
+  CommunityMessage,
 } from '../../../providers/CommunityMessageProvider';
 import {
   COMMUNITY_CHANNEL_FILE_TYPE,
@@ -15,9 +25,15 @@ import {
 import { useWebsocketDrives } from '../../auth/useWebsocketDrives';
 import {
   insertNewCommunityChannel,
+  invalidateCommunityChannels,
   removeCommunityChannel,
 } from '../channels/useCommunityChannels';
-import { insertNewMessage, removeMessage } from '../messages/useCommunityMessages';
+import {
+  insertNewMessage,
+  invalidateCommunityMessages,
+  removeMessage,
+} from '../messages/useCommunityMessages';
+import { getPayloadAsJsonOverPeer } from '@homebase-id/js-lib/peer';
 
 const isDebug = hasDebugFlag();
 
@@ -28,14 +44,15 @@ export const useCommunityPeerWebsocket = (
 ) => {
   const queryClient = useQueryClient();
   const targetDrive = getTargetDriveFromCommunityId(communityId || '');
+  const dotYouClient = useDotYouClientContext();
 
   const handler = useCallback(
-    async (dotYouClient: DotYouClient, notification: TypedConnectionNotification) => {
+    async (decryptionClient: DotYouClient, notification: TypedConnectionNotification) => {
       if (!communityId) {
         console.warn('[CommunityWebsocket] No communityId', notification);
         return;
       }
-      isDebug && console.debug('[CommunityWebsocket] Got notification', notification);
+      isDebug && console.debug('[PeerCommunityWebsocket] Got notification', notification);
 
       if (
         (notification.notificationType === 'fileAdded' ||
@@ -47,12 +64,12 @@ export const useCommunityPeerWebsocket = (
           const channelId = notification.header.fileMetadata.appData.groupId;
 
           // This skips the invalidation of all chat messages, as we only need to add/update this specific message
-          const updatedChatMessage = await dsrToMessage(
+          const updatedChatMessage = await wsDsrToMessage(
+            decryptionClient,
             dotYouClient,
             notification.header,
             odinId,
-            targetDrive,
-            true
+            targetDrive
           );
 
           if (
@@ -61,9 +78,7 @@ export const useCommunityPeerWebsocket = (
           ) {
             // Something is up with the message, invalidate all messages for this conversation
             console.warn('[CommunityWebsocket] Invalid message received', notification, channelId);
-            queryClient.invalidateQueries({
-              queryKey: ['community-messages', formatGuidId(communityId), formatGuidId(channelId)],
-            });
+            invalidateCommunityMessages(queryClient, communityId, channelId);
             return;
           }
 
@@ -72,16 +87,15 @@ export const useCommunityPeerWebsocket = (
           notification.header.fileMetadata.appData.fileType === COMMUNITY_CHANNEL_FILE_TYPE
         ) {
           const communityChannel = await dsrToCommunityChannel(
-            dotYouClient,
+            decryptionClient,
             notification.header,
+            odinId,
             targetDrive,
             true
           );
           if (!communityChannel) {
             console.warn('[CommunityWebsocket] Invalid channel received', notification);
-            queryClient.invalidateQueries({
-              queryKey: ['community-channels', formatGuidId(communityId)],
-            });
+            invalidateCommunityChannels(queryClient, communityId);
             return;
           }
           insertNewCommunityChannel(queryClient, communityChannel, communityId);
@@ -101,7 +115,7 @@ export const useCommunityPeerWebsocket = (
         }
       }
     },
-    [communityId]
+    [odinId, communityId]
   );
 
   const { localCommunityDrives, remoteCommunityDrives } = useWebsocketDrives();
@@ -116,6 +130,67 @@ export const useCommunityPeerWebsocket = (
       queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
     },
     undefined,
-    'useLiveCommunityPeerProcessor'
+    'useCommunityPeerWebsocket'
   );
+};
+
+const wsDsrToMessage = async (
+  websocketDotyouClient: DotYouClient,
+  dotYouClient: DotYouClient,
+  dsr: HomebaseFile,
+  odinId: string | undefined,
+  targetDrive: TargetDrive
+): Promise<HomebaseFile<CommunityMessage> | null> => {
+  const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
+  if (!fileId || !fileMetadata) {
+    throw new Error(
+      '[useCommunityPeerWebsocket] wsDsrToMessage: fileId or fileMetadata is undefined'
+    );
+  }
+
+  const contentIsComplete =
+    fileMetadata.payloads.filter((payload) => payload.key === DEFAULT_PAYLOAD_KEY).length === 0;
+  if (fileMetadata.isEncrypted && !sharedSecretEncryptedKeyHeader) return null;
+
+  const keyHeader = fileMetadata.isEncrypted
+    ? await decryptKeyHeader(
+        websocketDotyouClient,
+        sharedSecretEncryptedKeyHeader as EncryptedKeyHeader
+      )
+    : undefined;
+
+  let content: CommunityMessage | undefined;
+  if (contentIsComplete) {
+    content = tryJsonParse<CommunityMessage>(await decryptJsonContent(fileMetadata, keyHeader));
+  } else {
+    content =
+      (odinId && odinId !== dotYouClient.getIdentity()
+        ? await getPayloadAsJsonOverPeer<CommunityMessage>(
+            dotYouClient,
+            odinId,
+            targetDrive,
+            fileId,
+            DEFAULT_PAYLOAD_KEY
+          )
+        : await getPayloadAsJson<CommunityMessage>(
+            dotYouClient,
+            targetDrive,
+            fileId,
+            DEFAULT_PAYLOAD_KEY
+          )) || undefined;
+  }
+
+  if (!content) return null;
+
+  return {
+    ...dsr,
+    sharedSecretEncryptedKeyHeader: keyHeader as unknown as EncryptedKeyHeader,
+    fileMetadata: {
+      ...fileMetadata,
+      appData: {
+        ...fileMetadata.appData,
+        content: content,
+      },
+    },
+  };
 };

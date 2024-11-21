@@ -7,6 +7,7 @@ import {
   uploadCommunityMetadata,
 } from '../../providers/CommunityMetadataProvider';
 import { formatGuidId } from '@homebase-id/js-lib/helpers';
+import { invalidateCommunities } from './useCommunities';
 
 export const useCommunityMetadata = (props?: {
   odinId: string | undefined;
@@ -38,7 +39,7 @@ export const useCommunityMetadata = (props?: {
         },
       };
       setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['communities'] });
+        invalidateCommunities(queryClient);
       }, 1000);
 
       return newMetadata;
@@ -110,7 +111,7 @@ export const useCommunityMetadata = (props?: {
 
         if (!variables.metadata.fileId) {
           // It's a new metadata file, so we need to invalidate the communities query
-          queryClient.invalidateQueries({ queryKey: ['communities'] });
+          invalidateCommunities(queryClient);
         }
       },
       onError: (error) => {

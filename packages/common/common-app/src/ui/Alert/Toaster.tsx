@@ -96,6 +96,7 @@ const ErrorDialog = ({ error, onClose }: { error: Error; onClose: () => void }) 
               <pre>
                 <code>
                   {errorDetails.title}
+                  <br />
                   {errorDetails.stackTrace}
                 </code>
               </pre>
@@ -105,7 +106,7 @@ const ErrorDialog = ({ error, onClose }: { error: Error; onClose: () => void }) 
           <div className="flex flex-row-reverse mt-5">
             <ActionButton
               onClick={() => {
-                const details = `${errorDetails.domain}: ${errorDetails.correlationId}\n\n${errorDetails.title}\n${errorDetails.stackTrace}`;
+                const details = `${error.message}\n${errorDetails.domain}: ${errorDetails.correlationId || 'No correlation id'}\n\n${errorDetails.title}\n${errorDetails.stackTrace}`;
                 navigator.clipboard.writeText(details);
               }}
               type="primary"

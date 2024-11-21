@@ -13,7 +13,6 @@ import {
   KeyHeader,
   UploadResult,
   AppFileMetaData,
-  uploadHeader,
   getFileHeaderByUniqueId,
   FileQueryParams,
   GetBatchQueryResultOptions,
@@ -22,10 +21,13 @@ import {
   queryBatch,
   deleteFile,
   RichText,
-  UpdateHeaderInstructionSet,
   TransferUploadStatus,
   SystemFileType,
   GlobalTransitIdFileIdentifier,
+  DEFAULT_PAYLOAD_KEY,
+  patchFile,
+  UpdateInstructionSet,
+  UpdateResult,
 } from '@homebase-id/js-lib/core';
 import {
   jsonStringify64,
@@ -93,7 +95,12 @@ export const uploadCommunityMessage = async (
   const targetDrive = getTargetDriveFromCommunityId(communityId);
   const messageContent = message.fileMetadata.appData.content;
 
-  const jsonContent: string = jsonStringify64({ ...messageContent });
+  const payloadJson: string = jsonStringify64({ ...messageContent });
+  const payloadBytes = stringToUint8Array(payloadJson);
+
+  // Set max of 3kb for content so enough room is left for metedata
+  const shouldEmbedContent = payloadBytes.length < 3000;
+
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: true,
@@ -104,7 +111,7 @@ export const uploadCommunityMessage = async (
       userDate: message.fileMetadata.appData.userDate,
       tags: message.fileMetadata.appData.tags,
       fileType: COMMUNITY_MESSAGE_FILE_TYPE,
-      content: jsonContent,
+      content: shouldEmbedContent ? payloadJson : undefined,
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList ||
@@ -182,6 +189,13 @@ export const uploadCommunityMessage = async (
     previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
   const identity = dotYouClient.getIdentity();
+  if (!shouldEmbedContent) {
+    payloads.push({
+      key: DEFAULT_PAYLOAD_KEY,
+      payload: new Blob([payloadBytes], { type: 'application/json' }),
+    });
+  }
+
   let uploadResult: UploadResult | TransitUploadResult | void;
   if (
     community.fileMetadata.senderOdinId &&
@@ -273,7 +287,7 @@ export const uploadCommunityMessage = async (
     await updateCommunityMessage(
       dotYouClient,
       community,
-      message,
+      message as HomebaseFile<CommunityMessage>,
       'keyHeader' in uploadResult ? uploadResult.keyHeader : undefined
     );
   }
@@ -287,26 +301,22 @@ export const uploadCommunityMessage = async (
 export const updateCommunityMessage = async (
   dotYouClient: DotYouClient,
   community: HomebaseFile<CommunityDefinition>,
-  message: HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage>,
+  message: HomebaseFile<CommunityMessage>,
   keyHeader?: KeyHeader
-): Promise<UploadResult | void> => {
+): Promise<void | UploadResult | UpdateResult> => {
   const communityId = community.fileMetadata.appData.uniqueId as string;
   const targetDrive = getTargetDriveFromCommunityId(communityId);
   const messageContent = message.fileMetadata.appData.content;
 
-  const uploadInstructions: UpdateHeaderInstructionSet = {
-    storageOptions: {
-      drive: targetDrive,
-      overwriteFileId: message.fileId,
-    },
-    systemFileType: message.fileSystemType,
-    storageIntent: 'header',
-  };
-
   const payloadJson: string = jsonStringify64({ ...messageContent });
+  const payloadBytes = stringToUint8Array(payloadJson);
+
+  // Set max of 3kb for content so enough room is left for metedata
+  const shouldEmbedContent = payloadBytes.length < 3000;
+
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
-    allowDistribution: false,
+    allowDistribution: true,
     appData: {
       uniqueId: message.fileMetadata.appData.uniqueId,
       groupId: message.fileMetadata.appData.groupId,
@@ -314,7 +324,7 @@ export const updateCommunityMessage = async (
         .archivalStatus,
       previewThumbnail: message.fileMetadata.appData.previewThumbnail,
       fileType: COMMUNITY_MESSAGE_FILE_TYPE,
-      content: payloadJson,
+      content: shouldEmbedContent ? payloadJson : undefined,
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList ||
@@ -323,15 +333,47 @@ export const updateCommunityMessage = async (
       },
   };
 
-  if (community.fileMetadata.senderOdinId !== dotYouClient.getIdentity()) {
-    throw new Error('Not implemented exception');
+  const encryptedKeyHeader = message.sharedSecretEncryptedKeyHeader;
+  const odinId = community.fileMetadata.senderOdinId;
+  const instructionSet: UpdateInstructionSet =
+    odinId && odinId !== dotYouClient.getIdentity()
+      ? {
+          transferIv: getRandom16ByteArray(),
+          locale: 'peer',
+          file: {
+            globalTransitId: message.fileMetadata.globalTransitId as string,
+            targetDrive,
+          },
+          versionTag: message.fileMetadata.versionTag,
+          recipients: [odinId],
+        }
+      : {
+          transferIv: getRandom16ByteArray(),
+          locale: 'local',
+          file: {
+            fileId: message.fileId,
+            targetDrive,
+          },
+          versionTag: message.fileMetadata.versionTag,
+        };
+
+  const payloads: PayloadFile[] = [];
+  if (!shouldEmbedContent) {
+    payloads.push({
+      key: DEFAULT_PAYLOAD_KEY,
+      payload: new Blob([payloadBytes], { type: 'application/json' }),
+      iv: getRandom16ByteArray(),
+    });
   }
 
-  return await uploadHeader(
+  const updateResult = await patchFile(
     dotYouClient,
-    keyHeader || (message as HomebaseFile<CommunityMessage>).sharedSecretEncryptedKeyHeader,
-    uploadInstructions,
+    encryptedKeyHeader,
+    instructionSet,
     uploadMetadata,
+    payloads,
+    undefined,
+    undefined,
     async () => {
       const existingChatMessage = await getCommunityMessage(
         dotYouClient,
@@ -344,6 +386,8 @@ export const updateCommunityMessage = async (
       return await updateCommunityMessage(dotYouClient, community, message, keyHeader);
     }
   );
+
+  return updateResult;
 };
 
 export const hardDeleteCommunityMessage = async (
@@ -384,22 +428,26 @@ export const getCommunityMessage = async (
 ) => {
   const targetDrive = getTargetDriveFromCommunityId(communityId);
 
-  if (odinId !== dotYouClient.getIdentity()) {
-    return await getFileHeaderOverPeerByUniqueId<CommunityMessage>(
-      dotYouClient,
-      odinId,
-      targetDrive,
-      chatMessageId,
-      {
-        decrypt: true,
-        systemFileType,
-      }
-    );
-  }
-  return await getFileHeaderByUniqueId<CommunityMessage>(dotYouClient, targetDrive, chatMessageId, {
-    decrypt: true,
-    systemFileType,
-  });
+  const fileHeader =
+    odinId !== dotYouClient.getIdentity()
+      ? await getFileHeaderOverPeerByUniqueId<string>(
+          dotYouClient,
+          odinId,
+          targetDrive,
+          chatMessageId,
+          {
+            decrypt: false,
+            systemFileType,
+          }
+        )
+      : await getFileHeaderByUniqueId<string>(dotYouClient, targetDrive, chatMessageId, {
+          decrypt: false,
+          systemFileType,
+        });
+
+  if (!fileHeader) return null;
+
+  return await dsrToMessage(dotYouClient, fileHeader, odinId, targetDrive, true);
 };
 
 export const getCommunityMessages = async (

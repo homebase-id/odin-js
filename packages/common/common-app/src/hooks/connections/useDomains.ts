@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { QueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { useDotYouClient } from '@homebase-id/common-app';
 import { getDomains } from '../../provider/network/domainNetwork/DomainProvider';
 
@@ -43,4 +43,8 @@ export const useDomains = (
       refetchOnWindowFocus: false,
     }),
   };
+};
+
+export const invalidateDomains = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['active-domains'] });
 };

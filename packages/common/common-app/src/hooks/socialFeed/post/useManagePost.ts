@@ -1,4 +1,4 @@
-import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   PostContent,
   savePost as savePostFile,
@@ -15,16 +15,16 @@ import {
   SecurityGroupType,
   UpdateResult,
 } from '@homebase-id/js-lib/core';
-import {
-  HomebaseFile,
-  MultiRequestCursoredResult,
-  NewHomebaseFile,
-  UploadResult,
-} from '@homebase-id/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, UploadResult } from '@homebase-id/js-lib/core';
 import { useDotYouClient } from '../../auth/useDotYouClient';
 import { getRichTextFromString } from '../../../helpers/richTextHelper';
 import { TransitUploadResult } from '@homebase-id/js-lib/peer';
 import { LinkPreview } from '@homebase-id/js-lib/media';
+import { invalidateDrafts } from '../drafts/useDrafts';
+import { invalidatePosts } from './usePostsInfinite';
+import { invalidateSocialFeeds, updateCacheSocialFeeds } from '../useSocialFeed';
+import { invalidatePost } from './usePost';
+import { formatGuidId } from '@homebase-id/js-lib/helpers';
 
 export const useManagePost = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
@@ -186,119 +186,88 @@ export const useManagePost = () => {
       mutationFn: savePost,
       onSuccess: (_data, variables) => {
         if (variables.postFile.fileMetadata.appData.content.slug) {
-          queryClient.invalidateQueries({
-            queryKey: [
-              'post',
-              variables.odinId || dotYouClient.getIdentity(),
-              variables.channelId,
-              variables.postFile.fileMetadata.appData.content.slug,
-            ],
-            exact: false,
-          });
+          invalidatePost(
+            queryClient,
+            variables.odinId || dotYouClient.getIdentity(),
+            variables.channelId,
+            variables.postFile.fileMetadata.appData.content.slug
+          );
         } else {
-          queryClient.invalidateQueries({ queryKey: ['post'], exact: false });
+          invalidatePost(queryClient);
         }
 
-        queryClient.invalidateQueries({
-          queryKey: [
-            'post',
-            variables.odinId || dotYouClient.getIdentity(),
-            variables.channelId,
-            variables.postFile.fileId,
-          ],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [
-            'post',
-            variables.odinId || dotYouClient.getIdentity(),
-            variables.channelId,
-            variables.postFile.fileMetadata.appData.content.id,
-          ],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [
-            'post',
-            variables.odinId || dotYouClient.getIdentity(),
-            variables.channelId,
-            variables.postFile.fileMetadata.appData.content.id?.replaceAll('-', ''),
-          ],
-        });
+        invalidatePost(
+          queryClient,
+          variables.odinId || dotYouClient.getIdentity(),
+          variables.channelId,
+          variables.postFile.fileId
+        );
+        invalidatePost(
+          queryClient,
+          variables.odinId || dotYouClient.getIdentity(),
+          variables.channelId,
+          variables.postFile.fileMetadata.appData.content.id
+        );
+        invalidatePost(
+          queryClient,
+          variables.odinId || dotYouClient.getIdentity(),
+          variables.channelId,
+          formatGuidId(variables.postFile.fileMetadata.appData.content.id)
+        );
 
-        queryClient.invalidateQueries({
-          queryKey: ['posts', variables.postFile.fileMetadata.appData.content.channelId || ''],
-          exact: false,
-        });
-        queryClient.invalidateQueries({
-          queryKey: ['posts', ''],
-          exact: false,
-        });
+        invalidatePosts(queryClient, variables.postFile.fileMetadata.appData.content.channelId);
+        invalidatePosts(queryClient, '');
 
         // Update versionTag of post in social feeds cache
-        const previousFeed:
-          | InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>>
-          | undefined = queryClient.getQueryData(['social-feeds']);
-
-        if (previousFeed) {
-          const newFeed = { ...previousFeed };
-          newFeed.pages[0].results = newFeed.pages[0].results.map((post) =>
-            post.fileMetadata.appData.content.id ===
-            variables.postFile.fileMetadata.appData.content.id
-              ? {
-                  ...post,
-                  fileMetadata: {
-                    ...post.fileMetadata,
-                    versionTag:
-                      (_data as UploadResult).newVersionTag || post.fileMetadata.versionTag,
-                  },
-                }
-              : post
-          );
-
-          queryClient.setQueryData(['social-feeds'], newFeed);
-        }
+        updateCacheSocialFeeds(queryClient, (data) => ({
+          ...data,
+          pages: data.pages.map((page) => ({
+            ...page,
+            results: page.results.map((post) =>
+              post.fileMetadata.appData.content.id ===
+              variables.postFile.fileMetadata.appData.content.id
+                ? {
+                    ...post,
+                    fileMetadata: {
+                      ...post.fileMetadata,
+                      versionTag:
+                        (_data as UploadResult).newVersionTag || post.fileMetadata.versionTag,
+                    },
+                  }
+                : post
+            ),
+          })),
+        }));
       },
       onMutate: async (newPost) => {
-        await queryClient.cancelQueries({ queryKey: ['social-feeds'] });
-
-        // Update section attributes
-        const previousFeed:
-          | InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>>
-          | undefined = queryClient.getQueryData(['social-feeds']);
-
-        if (previousFeed) {
-          const newPostFile: HomebaseFile<PostContent> = {
-            ...newPost.postFile,
-            fileMetadata: {
-              ...newPost.postFile.fileMetadata,
-              senderOdinId: newPost.odinId,
-              originalAuthor: identity,
-              appData: {
-                ...newPost.postFile.fileMetadata.appData,
-                content: {
-                  ...newPost.postFile.fileMetadata.appData.content,
-                  primaryMediaFile: newPost.mediaFiles?.[0]
-                    ? {
-                        fileKey: newPost.mediaFiles?.[0].key,
-                        type: (newPost.mediaFiles?.[0] as MediaFile)?.contentType,
-                      }
-                    : undefined,
-                },
+        const newPostFile: HomebaseFile<PostContent> = {
+          ...newPost.postFile,
+          fileMetadata: {
+            ...newPost.postFile.fileMetadata,
+            senderOdinId: newPost.odinId,
+            originalAuthor: identity,
+            appData: {
+              ...newPost.postFile.fileMetadata.appData,
+              content: {
+                ...newPost.postFile.fileMetadata.appData.content,
+                primaryMediaFile: newPost.mediaFiles?.[0]
+                  ? {
+                      fileKey: newPost.mediaFiles?.[0].key,
+                      type: (newPost.mediaFiles?.[0] as MediaFile)?.contentType,
+                    }
+                  : undefined,
               },
             },
-          } as HomebaseFile<PostContent>;
+          },
+        } as HomebaseFile<PostContent>;
 
-          const newFeed: InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>> = {
-            ...previousFeed,
-            pages: previousFeed.pages.map((page, index) => {
-              return {
-                ...page,
-                results: [...(index === 0 ? [newPostFile] : []), ...page.results],
-              };
-            }),
-          };
-
-          queryClient.setQueryData(['social-feeds'], newFeed);
-        }
+        const previousFeed = updateCacheSocialFeeds(queryClient, (data) => ({
+          ...data,
+          pages: data.pages.map((page, index) => ({
+            ...page,
+            results: [...(index === 0 ? [newPostFile] : []), ...page.results],
+          })),
+        }));
 
         return { newPost, previousFeed };
       },
@@ -306,13 +275,12 @@ export const useManagePost = () => {
         console.error(err);
 
         // Revert local caches to what they were,
-
-        queryClient.setQueryData(['social-feeds'], context?.previousFeed);
+        updateCacheSocialFeeds(queryClient, () => context?.previousFeed);
       },
       onSettled: () => {
         // Invalidate with a small delay to allow the server to update
         setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
+          invalidateSocialFeeds(queryClient);
         }, 1000);
       },
     }),
@@ -321,90 +289,86 @@ export const useManagePost = () => {
       mutationFn: savePost,
       onSuccess: (_data, variables) => {
         if (variables.postFile.fileMetadata.appData.content.slug) {
-          queryClient.invalidateQueries({
-            queryKey: ['post', variables.postFile.fileMetadata.appData.content.slug],
-          });
+          invalidatePost(
+            queryClient,
+            dotYouClient.getIdentity(),
+            variables.channelId,
+            variables.postFile.fileMetadata.appData.content.slug
+          );
         } else {
-          queryClient.invalidateQueries({ queryKey: ['post'] });
+          invalidatePost(queryClient, dotYouClient.getIdentity(), variables.channelId);
         }
 
         // Too many invalidates, but during article creation, the slug is not known
-        queryClient.invalidateQueries({ queryKey: ['post', variables.postFile.fileId] });
-        queryClient.invalidateQueries({
-          queryKey: ['post', variables.postFile.fileMetadata.appData.content.id],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [
-            'post',
-            variables.postFile.fileMetadata.appData.content.id?.replaceAll('-', ''),
-          ],
-        });
+        invalidatePost(
+          queryClient,
+          dotYouClient.getIdentity(),
+          variables.channelId,
+          variables.postFile.fileId
+        );
+        invalidatePost(
+          queryClient,
+          dotYouClient.getIdentity(),
+          variables.channelId,
+          variables.postFile.fileMetadata.appData.content.slug
+        );
+        invalidatePost(
+          queryClient,
+          dotYouClient.getIdentity(),
+          variables.channelId,
+          formatGuidId(variables.postFile.fileMetadata.appData.content.id)
+        );
 
-        queryClient.invalidateQueries({
-          queryKey: ['posts', variables.postFile.fileMetadata.appData.content.channelId || ''],
-          exact: false,
-        });
-        queryClient.invalidateQueries({
-          queryKey: ['posts', ''],
-          exact: false,
-        });
+        invalidatePosts(queryClient, variables.postFile.fileMetadata.appData.content.channelId);
+        invalidatePosts(queryClient, '');
 
-        // Update versionTag of post in social feeds cache
-        const previousFeed:
-          | InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>>
-          | undefined = queryClient.getQueryData(['social-feeds']);
-
-        if (previousFeed) {
-          const newFeed = { ...previousFeed };
-          newFeed.pages[0].results = newFeed.pages[0].results.map((post) =>
-            post.fileMetadata.appData.content.id ===
-            variables.postFile.fileMetadata.appData.content.id
-              ? {
-                  ...post,
-                  fileMetadata: {
-                    ...post.fileMetadata,
-                    versionTag:
-                      (_data as UploadResult).newVersionTag || post.fileMetadata.versionTag,
-                  },
-                }
-              : post
-          );
-
-          queryClient.setQueryData(['social-feeds'], newFeed);
-        }
+        updateCacheSocialFeeds(queryClient, (data) => ({
+          ...data,
+          pages: data.pages.map((page) => ({
+            ...page,
+            results: page.results.map((post) =>
+              post.fileMetadata.appData.content.id ===
+              variables.postFile.fileMetadata.appData.content.id
+                ? {
+                    ...post,
+                    fileMetadata: {
+                      ...post.fileMetadata,
+                      versionTag:
+                        (_data as UploadResult).newVersionTag || post.fileMetadata.versionTag,
+                    },
+                  }
+                : post
+            ),
+          })),
+        }));
       },
       onError: (err) => {
         console.error(err);
       },
       onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
+        invalidateSocialFeeds(queryClient);
       },
     }),
 
     remove: useMutation({
       mutationFn: removeData,
       onSuccess: (_data, variables) => {
-        queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
+        invalidateSocialFeeds(queryClient);
 
         if (variables && variables.postFile.fileMetadata.appData.content.slug) {
-          queryClient.invalidateQueries({
-            queryKey: ['post', variables.postFile.fileMetadata.appData.content.slug],
-          });
+          invalidatePost(
+            queryClient,
+            dotYouClient.getIdentity(),
+            variables.channelId,
+            variables.postFile.fileMetadata.appData.content.slug
+          );
         } else {
-          queryClient.invalidateQueries({ queryKey: ['post'] });
+          invalidatePost(queryClient, dotYouClient.getIdentity(), variables.channelId);
         }
 
-        queryClient.invalidateQueries({
-          queryKey: ['posts', variables.postFile.fileMetadata.appData.content.channelId || ''],
-          exact: false,
-        });
-        queryClient.invalidateQueries({
-          queryKey: ['posts', ''],
-          exact: false,
-        });
-        queryClient.invalidateQueries({
-          queryKey: ['drafts'],
-        });
+        invalidatePosts(queryClient, variables.postFile.fileMetadata.appData.content.channelId);
+        invalidatePosts(queryClient, '');
+        invalidateDrafts(queryClient);
       },
     }),
 

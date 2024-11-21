@@ -4,7 +4,7 @@ import { base64ToUint8Array, stringToUint8Array, uint8ArrayToBase64 } from '../.
 import {
   AUTO_CONNECTIONS_CIRCLE_ID,
   CONFIRMED_CONNECTIONS_CIRCLE_ID,
-} from '../../network/circleNetwork/CircleProvider';
+} from '../../network/circle/CircleProvider';
 import { getBrowser, getOperatingSystem } from '../helpers/browserInfo';
 import { getEccSharedSecret, importRemotePublicEccKey } from './EccKeyProvider';
 

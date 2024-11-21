@@ -15,6 +15,7 @@ import {
   TargetDrive,
   HomebaseFile,
   DeletedHomebaseFile,
+  DEFAULT_PAYLOAD_KEY,
 } from '@homebase-id/js-lib/core';
 import {
   hasDebugFlag,
@@ -30,6 +31,7 @@ import {
   dsrToCommunityChannel,
 } from '../../../providers/CommunityProvider';
 import { insertNewCommunityChannel } from '../channels/useCommunityChannels';
+import { invalidateChatMessages } from '@homebase-id/chat-app/src/hooks/chat/useChatMessages';
 
 const isDebug = hasDebugFlag();
 
@@ -94,7 +96,7 @@ export const useInboxProcessor = (odinId: string | undefined, communityId: strin
         newChannels.map(async (updatedDsr) => {
           const newChannel =
             updatedDsr.fileState === 'active'
-              ? await dsrToCommunityChannel(dotYouClient, updatedDsr, targetDrive, true)
+              ? await dsrToCommunityChannel(dotYouClient, updatedDsr, odinId, targetDrive, true)
               : updatedDsr;
 
           if (!newChannel) return;
@@ -103,7 +105,7 @@ export const useInboxProcessor = (odinId: string | undefined, communityId: strin
       );
     } else {
       // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
-      queryClient.invalidateQueries({ queryKey: ['chat-messages'], exact: false });
+      invalidateChatMessages(queryClient);
     }
 
     return processedresult;
@@ -176,18 +178,17 @@ const processCommunityMessagesBatch = async (
       if (!dsr.fileMetadata?.appData?.groupId || dsr.fileState === 'deleted') {
         return acc;
       }
-      [...(dsr.fileMetadata.appData.tags || []), 'any'].forEach((tag) => {
-        if (!acc[tag]) {
-          acc[tag] = [];
-        }
+      const groupId = dsr.fileMetadata.appData.groupId;
 
-        if (acc[tag].some((m) => stringGuidsEqual(m.fileId, dsr.fileId))) {
-          return acc;
-        }
+      if (!acc[groupId]) {
+        acc[groupId] = [];
+      }
 
-        acc[tag].push(dsr);
-      });
+      if (acc[groupId].some((m) => stringGuidsEqual(m.fileId, dsr.fileId))) {
+        return acc;
+      }
 
+      acc[groupId].push(dsr);
       return acc;
     },
     {} as Record<string, HomebaseFile<string | CommunityMessage>[]>
@@ -203,7 +204,8 @@ const processCommunityMessagesBatch = async (
       const updatedcommunityMessages = (
         await Promise.all(
           uniqueMessagesPerChannel[channelId].map(async (newMessage) =>
-            typeof newMessage.fileMetadata.appData.content === 'string'
+            typeof newMessage.fileMetadata.appData.content === 'string' ||
+            newMessage.fileMetadata.payloads.some((pyld) => pyld.key === DEFAULT_PAYLOAD_KEY)
               ? await dsrToMessage(
                   dotYouClient,
                   newMessage as HomebaseFile<string>,

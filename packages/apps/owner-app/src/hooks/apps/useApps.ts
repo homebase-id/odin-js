@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { QueryClient, useQuery } from '@tanstack/react-query';
 import { GetAppRegistrations } from '../../provider/app/AppManagementProvider';
 import { useAuth } from '../auth/useAuth';
 
@@ -17,4 +17,8 @@ export const useApps = () => {
       refetchOnWindowFocus: false,
     }),
   };
+};
+
+export const invalidateApps = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['apps'] });
 };

@@ -17,7 +17,7 @@ import { formatGuidId, stringGuidsEqual, toGuidId } from '@homebase-id/js-lib/he
 import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { CommunityActions, ContextMenu } from '../channel/ContextMenu';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useMatch, useNavigate, useParams } from 'react-router-dom';
 import { CommunityDeliveryIndicator } from './CommunityDeliveryIndicator';
 import { CommunitySentTimeIndicator } from './CommunitySentTimeIndicator';
 import { CommunityMedia } from './CommunityMedia';
@@ -27,6 +27,7 @@ import { useCommunityMessages } from '../../../hooks/community/messages/useCommu
 import { useCommunityChannels } from '../../../hooks/community/channels/useCommunityChannels';
 import { CommunityReactions } from './reactions/CommunityReactions';
 import { useCommunityChannel } from '../../../hooks/community/channels/useCommunityChannel';
+import { CommunityMessageEditor } from './detail/CommunityMessageEditor';
 
 export const CommunityMessageItem = ({
   msg,
@@ -53,8 +54,7 @@ export const CommunityMessageItem = ({
 
   const { chatMessageKey, mediaKey } = useParams();
   const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey);
-  const isMediaDetail =
-    stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey) && mediaKey;
+  const isMediaDetail = isDetail && mediaKey;
 
   const { data: channel } = useCommunityChannel({
     communityId: community?.fileMetadata.appData.uniqueId,
@@ -69,6 +69,26 @@ export const CommunityMessageItem = ({
     }, 5000);
   }, [highlight]);
 
+  const editMatch = useMatch(
+    `${COMMUNITY_ROOT_PATH}/:odinKey/:communityKey/:channelKey/:chatMessageKey/edit`
+  );
+  const editInThreadMatch = useMatch(
+    `${COMMUNITY_ROOT_PATH}/:odinKey/:communityKey/:channelKey/:threadKey/thread/:chatMessageKey/edit`
+  );
+  const isEdit = !!isDetail && !!(editMatch || editInThreadMatch);
+
+  const navigate = useNavigate();
+  const extendedCommunityActions: CommunityActions | undefined = useMemo(() => {
+    if (!communityActions) return undefined;
+    return {
+      ...communityActions,
+      doEdit: () =>
+        navigate(
+          `${window.location.pathname}/${isDetail ? '' : `${msg.fileMetadata.appData.uniqueId}/`}edit`
+        ),
+    };
+  }, []);
+
   return (
     <>
       {isMediaDetail ? (
@@ -79,7 +99,7 @@ export const CommunityMessageItem = ({
         />
       ) : null}
       <div
-        className={`group relative flex flex-col bg-background transition-colors duration-500 ${isDetail ? (highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000') : 'hover:bg-page-background'} ${className || ''}`}
+        className={`group relative flex flex-col transition-colors duration-500 ${isEdit ? 'bg-primary/20' : `bg-background ${isDetail ? (highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000') : 'hover:bg-page-background'}`} ${className || ''}`}
         data-unique-id={msg.fileMetadata.appData.uniqueId}
       >
         {showChannelName && !hideDetails ? (
@@ -125,13 +145,27 @@ export const CommunityMessageItem = ({
                 </>
               )}
 
-              <ContextMenu communityActions={communityActions} msg={msg} community={community} />
+              <ContextMenu
+                communityActions={extendedCommunityActions}
+                msg={msg}
+                community={community}
+              />
             </div>
 
-            {hasMedia ? (
-              <CommunityMediaMessageBody msg={msg} community={community} />
+            {isEdit && community ? (
+              <CommunityMessageEditor
+                msg={msg}
+                community={community}
+                onClose={() => navigate(window.location.pathname.replace(/\/edit$/, ''))}
+              />
             ) : (
-              <CommunityTextMessageBody msg={msg} community={community} />
+              <>
+                {hasMedia ? (
+                  <CommunityMediaMessageBody msg={msg} community={community} />
+                ) : (
+                  <CommunityTextMessageBody msg={msg} community={community} />
+                )}
+              </>
             )}
             {hideThreads || !msg.fileMetadata.reactionPreview?.totalCommentCount ? null : (
               <CommunityMessageThreadSummary community={community} msg={msg} />
@@ -244,18 +278,10 @@ const CommunityMediaMessageBody = ({
   community?: HomebaseFile<CommunityDefinition>;
 }) => {
   const content = msg.fileMetadata.appData.content;
-
   const hasACaption = !!content.message;
 
   return (
-    <div className={`relative w-full max-w-[75vw] rounded-lg md:max-w-xs lg:max-w-xl`}>
-      <div className="my-1">
-        <CommunityMedia
-          msg={msg}
-          communityId={community?.fileMetadata.appData.uniqueId as string}
-          odinId={community?.fileMetadata.senderOdinId as string}
-        />
-      </div>
+    <div className={`relative w-full max-w-[75vw] rounded-lg md:max-w-[90%]`}>
       {hasACaption ? (
         <div className="flex min-w-0 flex-col md:flex-row md:justify-between">
           <MessageTextRenderer
@@ -265,6 +291,13 @@ const CommunityMediaMessageBody = ({
           />
         </div>
       ) : null}
+      <div className="my-1">
+        <CommunityMedia
+          msg={msg}
+          communityId={community?.fileMetadata.appData.uniqueId as string}
+          odinId={community?.fileMetadata.senderOdinId as string}
+        />
+      </div>
     </div>
   );
 };
