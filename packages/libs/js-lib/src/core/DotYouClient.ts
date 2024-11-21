@@ -57,8 +57,13 @@ export class BaseDotYouClient {
   }
 
   isOwner(): boolean {
-    return this._options && this.getLoggedInIdentity() === this.getHostIdentity();
+    return (
+      this._options &&
+      this.isAuthenticated() &&
+      this.getLoggedInIdentity() === this.getHostIdentity()
+    );
   }
+
   isAuthenticated(): boolean {
     return this._options && !!this.getSharedSecret();
   }

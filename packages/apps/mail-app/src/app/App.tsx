@@ -48,6 +48,7 @@ import {
   MAIL_ROOT_PATH,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
+import { useAuth, useValidateAuthorization } from '../hooks/auth/useAuth';
 
 export const REACT_QUERY_CACHE_KEY = 'MAIL_REACT_QUERY_OFFLINE_CACHE';
 
@@ -141,6 +142,8 @@ function App() {
 }
 
 const RootRoute = ({ children }: { children: ReactNode }) => {
+  useValidateAuthorization();
+
   const isAuthenticated = useDotYouClientContext().isAuthenticated();
 
   if (!isAuthenticated) {

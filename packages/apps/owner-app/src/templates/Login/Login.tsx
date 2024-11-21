@@ -21,7 +21,7 @@ const Login = () => {
   const [state, setState] = useState<'loading' | 'error' | 'success' | undefined>();
   const [error, setError] = useState<unknown | undefined>();
   const isAuthenticated = useDotYouClientContext().isAuthenticated();
-  const { authenticate, setFirstPassword, isPasswordSet } = useAuth();
+  const { authenticate, setFirstPassword, isPasswordSet, checkRedirectToReturn } = useAuth();
 
   const doLogin: FormEventHandler = async (e) => {
     e.preventDefault();
@@ -52,6 +52,10 @@ const Login = () => {
       })();
     }
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) checkRedirectToReturn();
+  }, [isAuthenticated]);
 
   if (passwordState === 'unknown' || passwordState === 'pending' || isAuthenticated) {
     return (

@@ -1,19 +1,18 @@
 import { useState, useRef } from 'react';
 
 import { LoginBox } from '../LoginBox/LoginBox';
-import { useAuth } from '../../../hooks/auth/useAuth';
 import {
   useOutsideTrigger,
   ConnectionImage,
   t,
   useDotYouClientContext,
+  logoutOwnerAndAllApps,
 } from '@homebase-id/common-app';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { Times, Person } from '@homebase-id/common-app/icons';
 
 const LoginNav = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { logout } = useAuth();
 
   const dotYouClient = useDotYouClientContext();
   const isAuthenticated = dotYouClient.isAuthenticated();
@@ -68,7 +67,7 @@ const LoginNav = () => {
                   </a>
                 </p>
                 <button
-                  onClick={logout}
+                  onClick={logoutOwnerAndAllApps}
                   className="mt-2 block w-full rounded border-0 bg-green-500 px-4 py-2 text-white hover:bg-green-600 focus:outline-none"
                 >
                   {t('logout')}

@@ -27,6 +27,7 @@ import Footer from '../components/ui/Layout/Footer/Footer';
 
 import { t, useSiteData } from '@homebase-id/common-app';
 import { LoginBox } from '../components/Auth/LoginBox/LoginBox';
+import { useAuth, useValidateAuthorization } from '../hooks/auth/useAuth';
 
 const Home = lazy(() => import('../templates/Home/Home'));
 const PostOverview = lazy(() => import('../templates/Posts/Overview/PostOverview'));
@@ -112,6 +113,8 @@ function App() {
 
 const PublicRoute = ({ children }: { children: ReactNode }) => {
   const dotYouClient = useDotYouClientContext();
+
+  useValidateAuthorization();
   const isAuthenticated = dotYouClient.isAuthenticated();
   const isOwner = dotYouClient.isOwner();
 

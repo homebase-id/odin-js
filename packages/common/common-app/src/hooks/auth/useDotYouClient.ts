@@ -20,7 +20,6 @@ export const useDotYouClient = () => {
   const _app = window.location.pathname.startsWith(OWNER_ROOT)
     ? 'owner'
     : window.location.hostname === 'dev.dotyou.cloud' ||
-        window.location.hostname === 'feed.homebase.id' ||
         window.location.pathname.startsWith(OWNER_APPS_ROOT)
       ? 'apps'
       : 'home';
@@ -62,7 +61,6 @@ export const useDotYouClient = () => {
   const getDotYouClient = () => {
     // When running in an iframe, use the public YouAuth Api;
     if (window.self !== window.top) return new DotYouClient({ api: ApiType.Guest });
-
     const apiType = getApiType();
 
     if (apiType === ApiType.Owner)
@@ -71,6 +69,7 @@ export const useDotYouClient = () => {
       return new DotYouClient({
         api: apiType,
         sharedSecret: getSharedSecret(),
+        loggedInIdentity: getIdentity(),
       });
     else {
       const headers: Record<string, string> = {};

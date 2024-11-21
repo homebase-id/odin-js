@@ -64,7 +64,14 @@ const Debug = lazy(() => import('../templates/Debug/Debug'));
 import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
-import { FIRSTRUN_PATH, LOGIN_PATH, RECOVERY_PATH, SETUP_PATH } from '../hooks/auth/useAuth';
+import {
+  FIRSTRUN_PATH,
+  LOGIN_PATH,
+  RECOVERY_PATH,
+  SETUP_PATH,
+  useAuth,
+  useValidateAuthorization,
+} from '../hooks/auth/useAuth';
 import { useIsConfigured } from '../hooks/configure/useIsConfigured';
 import {
   DotYouClientProvider,
@@ -244,6 +251,8 @@ function App() {
 }
 
 const RootRoute = ({ children }: { children: ReactNode }) => {
+  useValidateAuthorization();
+
   const isAuthenticated = useDotYouClientContext().isAuthenticated();
   const { data: isConfigured, isFetched } = useIsConfigured().isConfigured;
   useInboxProcessor();

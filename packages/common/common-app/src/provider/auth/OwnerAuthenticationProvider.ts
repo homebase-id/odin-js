@@ -3,6 +3,7 @@ import { OwnerClient } from '../../core/OwnerClient';
 import { logout } from '@homebase-id/js-lib/auth';
 import { APP_KEYS } from '../../constants';
 import { base64ToUint8Array } from '@homebase-id/js-lib/helpers';
+import { HOME_SHARED_SECRET, OWNER_SHARED_SECRET, STORAGE_IDENTITY_KEY } from '../../hooks';
 
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidOwnerToken = async (): Promise<boolean> => {
@@ -75,6 +76,11 @@ export const logoutOwnerAndAllApps = async (): Promise<void> => {
   } catch (ex) {
     console.warn('Failed to logout on the server', ex);
   }
+
+  // Auth SS states
+  window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
+  window.localStorage.removeItem(HOME_SHARED_SECRET);
+  window.localStorage.removeItem(OWNER_SHARED_SECRET);
 
   // Caches
   localStorage.removeItem(`OWNER_REACT_QUERY_OFFLINE_CACHE`);
