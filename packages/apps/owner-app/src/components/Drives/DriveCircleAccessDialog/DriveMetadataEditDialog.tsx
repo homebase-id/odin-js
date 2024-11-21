@@ -43,6 +43,12 @@ const DriveMetadataEditDialog = ({
       status: updateAnonymousReadStatus,
       reset: resetAnonymousRead,
     },
+    editAllowSubscriptions: {
+      mutate: updateAllowSubscription,
+      error: updateAllowSubscriptionError,
+      status: updateAllowSubscriptionStatus,
+      reset: resetAllowSubscription,
+    },
     editDescription: {
       mutate: updateDescription,
       error: updateDescriptionError,
@@ -60,21 +66,29 @@ const DriveMetadataEditDialog = ({
   const [allowAnonymousReads, setAllowAnonymousReads] = useState(
     driveDefinition.allowAnonymousReads
   );
+  const [allowSubscriptions, setAllowSubscriptions] = useState(driveDefinition.allowSubscriptions);
   const [metadata, setMetadata] = useState(driveDefinition.metadata);
   const [attributes, setAttributes] = useState(driveDefinition.attributes);
 
   useEffect(() => {
     if (
       updateAnonymousReadStatus === 'success' &&
+      updateAllowSubscriptionStatus === 'success' &&
       updateDescriptionStatus === 'success' &&
       updateAttributesStatus === 'success'
     ) {
       resetAnonymousRead();
+      resetAllowSubscription();
       resetDescription();
       resetAttributes();
       onConfirm();
     }
-  }, [updateAnonymousReadStatus, updateDescriptionStatus, updateAttributesStatus]);
+  }, [
+    updateAnonymousReadStatus,
+    updateAllowSubscriptionStatus,
+    updateDescriptionStatus,
+    updateAttributesStatus,
+  ]);
 
   if (!isOpen) return null;
 
@@ -82,7 +96,12 @@ const DriveMetadataEditDialog = ({
     <DialogWrapper title={title} onClose={onCancel}>
       <>
         <ErrorNotification
-          error={updateAnonymousReadError || updateDescriptionError || updateAttributesError}
+          error={
+            updateAnonymousReadError ||
+            updateAllowSubscriptionError ||
+            updateDescriptionError ||
+            updateAttributesError
+          }
         />
         <form
           onSubmit={(e) => {
@@ -92,6 +111,11 @@ const DriveMetadataEditDialog = ({
             updateAnonymousRead({
               targetDrive: driveDefinition.targetDriveInfo,
               newAllowAnonymousRead: allowAnonymousReads,
+            });
+
+            updateAllowSubscription({
+              targetDrive: driveDefinition.targetDriveInfo,
+              newAllowSubscriptions: allowSubscriptions,
             });
 
             updateDescription({
@@ -122,6 +146,24 @@ const DriveMetadataEditDialog = ({
                 <CheckboxToggle
                   defaultChecked={driveDefinition.allowAnonymousReads}
                   onChange={(e) => setAllowAnonymousReads(e.currentTarget.checked)}
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-row items-center justify-between gap-2">
+              <Label>
+                {t('Allow subscriptions')}
+                <small className="block text-sm text-slate-400">
+                  {t(
+                    'Can the drive be subscribed to? Subscriptions are used to notify users of new files.'
+                  )}
+                </small>
+              </Label>
+
+              <div>
+                <CheckboxToggle
+                  defaultChecked={driveDefinition.allowSubscriptions}
+                  onChange={(e) => setAllowSubscriptions(e.currentTarget.checked)}
                 />
               </div>
             </div>
