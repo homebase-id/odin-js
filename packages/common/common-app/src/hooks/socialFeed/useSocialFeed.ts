@@ -1,10 +1,10 @@
 import { InfiniteData, QueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { getSocialFeed, RecentsFromConnectionsReturn } from '@homebase-id/js-lib/peer';
-import { useDotYouClient } from '../auth/useDotYouClient';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { useChannels } from './channels/useChannels';
 
 export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const { data: ownChannels, isFetched: channelsFetched } = useChannels({
     isAuthenticated: true,
     isOwner: true,

@@ -1,5 +1,5 @@
 import { InfiniteData } from '@tanstack/react-query';
-import { HomebaseFile, RichText } from '@homebase-id/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { Attribute } from '@homebase-id/js-lib/profile';
 
 export const stringify = (obj: Record<string, unknown>) => {

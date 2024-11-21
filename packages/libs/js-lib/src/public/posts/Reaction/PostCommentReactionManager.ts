@@ -56,7 +56,7 @@ export const saveComment = async (
     | HomebaseFile<RawReactionContent>
 ): Promise<string> => {
   const encrypt = context.target.isEncrypted;
-  const isLocal = context.odinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getHostIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
 
   const payloads: PayloadFile[] = [];
@@ -250,7 +250,7 @@ export const removeComment = async (
   context: ReactionContext,
   commentFile: HomebaseFile<CommentReaction>
 ) => {
-  const isLocal = context.odinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getHostIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
 
   if (isLocal) {
@@ -276,7 +276,7 @@ export const getComments = async (
   pageSize = 25,
   cursorState?: string
 ): Promise<{ comments: HomebaseFile<CommentReaction>[]; cursorState: string }> => {
-  const isLocal = context.odinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getHostIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
@@ -312,7 +312,7 @@ const dsrToComment = async (
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<CommentReaction> | null> => {
-  const isLocal = odinId === dotYouClient.getIdentity();
+  const isLocal = odinId === dotYouClient.getHostIdentity();
 
   const params = [targetDrive, dsr, includeMetadataHeader] as const;
 

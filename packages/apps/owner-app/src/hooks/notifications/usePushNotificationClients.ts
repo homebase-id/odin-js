@@ -1,5 +1,5 @@
 import { useQueryClient, useMutation, useQuery } from '@tanstack/react-query';
-import { useDotYouClient, OWNER_APP_ID, t } from '@homebase-id/common-app';
+import { useDotYouClientContext, OWNER_APP_ID, t } from '@homebase-id/common-app';
 import { useState, useEffect } from 'react';
 import {
   getApplicationServerKey,
@@ -16,7 +16,7 @@ import { formatGuidId, getNewId, hasDebugFlag } from '@homebase-id/js-lib/helper
 const isDebug = hasDebugFlag();
 const TestGuid = '00000000-0000-0000-0000-000000000000';
 export const usePushNotificationClient = () => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
   const [isReady, setIsReady] = useState(false);
 
@@ -114,7 +114,7 @@ export const usePushNotificationClient = () => {
 
 export const usePushNotificationClients = () => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const getCurrentClient = async () => {
     return await getCurrentDeviceDetails(dotYouClient);

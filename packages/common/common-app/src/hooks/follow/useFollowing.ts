@@ -1,11 +1,11 @@
 import { QueryClient, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createOrUpdateFollow, fetchFollowing, FollowRequest } from '@homebase-id/js-lib/network';
-import { useDotYouClient } from '../auth/useDotYouClient';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 const PAGE_SIZE = 30;
 export const useFollowingInfinite = () => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchFollowingInternal = async ({ pageParam }: { pageParam?: string }) => {
     try {

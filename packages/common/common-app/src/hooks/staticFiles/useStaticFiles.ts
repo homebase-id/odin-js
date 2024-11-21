@@ -8,10 +8,10 @@ import {
 import { ApiType } from '@homebase-id/js-lib/core';
 import { BuiltInAttributes } from '@homebase-id/js-lib/profile';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { useDotYouClient } from '../auth/useDotYouClient';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 export const useStaticFiles = () => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const publishData = async (dataType?: 'channel' | typeof BuiltInAttributes.Name) => {
     console.debug('[STARTED] Static file publish', dataType);

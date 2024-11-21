@@ -210,10 +210,10 @@ const MailMessage = ({
   const showMessageInfo = isActive && searchParams.has('message-info');
   const query = searchParams.get('q');
 
-  const identity = useDotYouClientContext().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const sender = message.fileMetadata.senderOdinId || message.fileMetadata.appData.content.sender;
 
-  const messageFromMe = !sender || sender === identity;
+  const messageFromMe = !sender || sender === loggedOnIdentity;
   const isDraft = message.fileMetadata.appData.fileType === MAIL_DRAFT_CONVERSATION_FILE_TYPE;
 
   return (
@@ -321,9 +321,9 @@ const ForwardedThread = ({
 }: {
   mailThread: HomebaseFile<MailConversation>[] | undefined;
 }) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const filteredMailThread = mailThread?.filter(
-    (conv) => !getAllRecipients(conv).some((recipient) => recipient === identity)
+    (conv) => !getAllRecipients(conv).some((recipient) => recipient === loggedOnIdentity)
   );
 
   const [showHistory, setShowHistory] = useState(false);
@@ -369,11 +369,11 @@ const ConversationalAwareness = ({
   message: HomebaseFile<MailConversation>;
   query: string | undefined | null;
 }) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
 
   const lastSender =
     message.fileMetadata.senderOdinId || message.fileMetadata.appData.content.sender;
-  const youWereLastSender = lastSender === identity;
+  const youWereLastSender = lastSender === loggedOnIdentity;
 
   const Author = () => {
     return youWereLastSender ? t('You') : <ConnectionName odinId={lastSender} />;
@@ -403,8 +403,8 @@ const ConversationalAwareness = ({
   const previousSubject = previousMessage.fileMetadata.appData.content.subject;
   const currentSubject = message.fileMetadata.appData.content.subject;
 
-  const previousRecipients = getAllRecipients(previousMessage, identity);
-  const currentRecipients = getAllRecipients(message, identity);
+  const previousRecipients = getAllRecipients(previousMessage, loggedOnIdentity);
+  const currentRecipients = getAllRecipients(message, loggedOnIdentity);
 
   const addedRecipients = currentRecipients.filter(
     (current) => !previousRecipients.includes(current)

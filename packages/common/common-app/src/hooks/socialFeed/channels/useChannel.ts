@@ -7,7 +7,7 @@ import {
 } from '@homebase-id/js-lib/public';
 
 import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
-import { useDotYouClient } from '../../../..';
+import { useDotYouClientContext } from '../../../..';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { fetchCachedPublicChannels } from '../post/cachedDataHelpers';
@@ -19,14 +19,14 @@ type useChannelsProps = {
 };
 
 export const useChannel = ({ odinId, channelKey }: useChannelsProps) => {
-  const { getDotYouClient, isOwner } = useDotYouClient();
-  const dotYouClient = getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
+  const isOwner = dotYouClient.isOwner;
   const queryClient = useQueryClient();
 
   const fetchChannelData = async ({ channelKey }: useChannelsProps) => {
     if (!channelKey) return null;
 
-    if (!odinId || odinId === dotYouClient.getIdentity()) {
+    if (!odinId || odinId === dotYouClient.getHostIdentity()) {
       const cachedChannels = queryClient.getQueryData<HomebaseFile<ChannelDefinitionVm>[]>([
         'channels',
       ]);
@@ -82,7 +82,7 @@ export const useChannel = ({ odinId, channelKey }: useChannelsProps) => {
 
   return {
     fetch: useQuery({
-      queryKey: ['channel', odinId || dotYouClient.getIdentity(), channelKey],
+      queryKey: ['channel', odinId || dotYouClient.getHostIdentity(), channelKey],
       queryFn: () => fetchChannelData({ channelKey }),
       refetchOnMount: false,
       refetchOnWindowFocus: false,

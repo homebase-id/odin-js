@@ -20,7 +20,6 @@ export const useDotYouClient = () => {
   const _app = window.location.pathname.startsWith(OWNER_ROOT)
     ? 'owner'
     : window.location.hostname === 'dev.dotyou.cloud' ||
-        window.location.hostname === 'feed.homebase.id' ||
         window.location.pathname.startsWith(OWNER_APPS_ROOT)
       ? 'apps'
       : 'home';
@@ -47,7 +46,6 @@ export const useDotYouClient = () => {
       : undefined;
 
   const hasSharedSecret = !!getRawSharedSecret();
-
   const getSharedSecret = () => {
     const raw = getRawSharedSecret();
     if (raw) return base64ToUint8Array(raw);
@@ -55,17 +53,14 @@ export const useDotYouClient = () => {
 
   // Get the logged in user's identity
   const getIdentity = () => {
-    return _app === 'owner' ||
-      (_app === 'home' && _isOwner) ||
-      window.location.pathname.startsWith(OWNER_APPS_ROOT)
+    return _app === 'owner' || (_app === 'home' && _isOwner)
       ? window.location.hostname
-      : localStorage.getItem(STORAGE_IDENTITY_KEY);
+      : localStorage.getItem(STORAGE_IDENTITY_KEY) || undefined;
   };
 
   const getDotYouClient = () => {
     // When running in an iframe, use the public YouAuth Api;
     if (window.self !== window.top) return new DotYouClient({ api: ApiType.Guest });
-
     const apiType = getApiType();
 
     if (apiType === ApiType.Owner)
@@ -74,6 +69,7 @@ export const useDotYouClient = () => {
       return new DotYouClient({
         api: apiType,
         sharedSecret: getSharedSecret(),
+        loggedInIdentity: getIdentity(),
       });
     else {
       const headers: Record<string, string> = {};
@@ -85,18 +81,17 @@ export const useDotYouClient = () => {
       return new DotYouClient({
         sharedSecret: getSharedSecret(),
         api: ApiType.App,
-        identity: retrieveIdentity(),
+        hostIdentity: retrieveIdentity(),
+        loggedInIdentity: getIdentity(),
         headers: headers,
       });
     }
   };
 
   return {
-    getApiType,
     hasSharedSecret,
     getSharedSecret,
     getDotYouClient,
     isOwner: _isOwner,
-    getIdentity,
   };
 };

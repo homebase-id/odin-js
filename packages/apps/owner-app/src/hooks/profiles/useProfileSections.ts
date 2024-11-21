@@ -5,13 +5,13 @@ import {
   removeProfileSection,
   saveProfileSection,
 } from '@homebase-id/js-lib/profile';
-import { useAuth } from '../auth/useAuth';
 import { useAttributes } from './useAttributes';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useProfileSections = ({ profileId }: { profileId?: string }) => {
   const queryClient = useQueryClient();
   const { mutateAsync: removeAttributes } = useAttributes({}).removeAttributes;
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchSections = async ({ profileId }: { profileId: string }) => {
     if (!profileId) {

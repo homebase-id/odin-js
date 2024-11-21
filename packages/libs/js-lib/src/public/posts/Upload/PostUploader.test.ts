@@ -39,7 +39,7 @@ vi.mock('axios', () => ({
 
 const dotYouClient = new DotYouClient({
   api: ApiType.Guest,
-  identity: 'example.com',
+  hostIdentity: 'example.com',
   sharedSecret: new Uint8Array(16).fill(1),
 });
 

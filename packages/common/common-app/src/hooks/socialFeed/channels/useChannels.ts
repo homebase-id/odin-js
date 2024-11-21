@@ -6,8 +6,8 @@ import {
 } from '@homebase-id/js-lib/public';
 
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { useDotYouClient } from '../../auth/useDotYouClient';
 import { fetchCachedPublicChannels } from '../post/cachedDataHelpers';
+import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
 export interface ChannelDefinitionVm extends ChannelDefinition {
   template: ChannelTemplate;
 }
@@ -27,8 +27,7 @@ export const useChannels = ({
   isAuthenticated: boolean;
   isOwner: boolean;
 }) => {
-  const { getDotYouClient } = useDotYouClient();
-  const dotYouClient = getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
   const fetchChannelData = async () => {

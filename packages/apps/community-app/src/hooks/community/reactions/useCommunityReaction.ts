@@ -114,7 +114,7 @@ export const useCommunityReaction = (props?: {
           queryClient.getQueryData<EmojiReaction[]>(['community-reaction', message.fileId]) || [];
 
         const newReaction: EmojiReaction = {
-          authorOdinId: dotYouClient.getIdentity(),
+          authorOdinId: dotYouClient.getHostIdentity(),
           body: reaction,
         };
 

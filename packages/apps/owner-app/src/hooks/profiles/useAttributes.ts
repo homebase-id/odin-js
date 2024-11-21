@@ -1,9 +1,9 @@
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Attribute, getProfileAttributes } from '@homebase-id/js-lib/profile';
-import { useAuth } from '../auth/useAuth';
 import { AttributeDefinition, AttributeDefinitions } from './AttributeDefinitions';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { removeProfileAttribute } from '../../provider/profile/AttributeData/ManageAttributeProvider';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export interface AttributeVm extends Attribute {
   typeDefinition?: AttributeDefinition;
@@ -16,7 +16,7 @@ export const useAttributes = ({
   profileId?: string;
   sectionId?: string;
 }) => {
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
   const fetchData = async (profileId: string, sectionId: string) => {

@@ -26,12 +26,12 @@ import {
 } from '../../form';
 import { t, getImagesFromPasteEvent, getVideosFromPasteEvent } from '../../helpers';
 import {
-  useDotYouClient,
   usePostComposer,
   useChannels,
   useCollaborativeChannels,
   useChannel,
   useLinkPreviewBuilder,
+  useDotYouClientContext,
 } from '../../hooks';
 
 import { EmbeddedPostContent } from '../Blocks/Body/EmbeddedPostContent';
@@ -57,8 +57,9 @@ export const PostComposer = ({
   className?: string;
   excludeCustom?: boolean;
 }) => {
-  const { isOwner, getIdentity } = useDotYouClient();
-  const identity = getIdentity();
+  const dotYouClient = useDotYouClientContext();
+  const isOwner = dotYouClient.isOwner();
+  const loggedOnIdentity = dotYouClient.getLoggedInIdentity();
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
 
   const { savePost, postState, processingProgress, error } = usePostComposer();
@@ -299,7 +300,7 @@ export const PostComposer = ({
                     buttonText: t('Post'),
                     body: t(
                       'Posting this, will make it publicly available on your identity {0}. \n\nIf you want to hide this post from anonymos users, you have to change the security settings from the dropdown first.',
-                      `${identity}`
+                      `${loggedOnIdentity}`
                     ),
                     type: 'info',
                     allowSkipNextTime: true,
@@ -370,7 +371,7 @@ export const ChannelOrAclSelector = React.forwardRef(
     },
     ref: Ref<HTMLSelectElement>
   ) => {
-    const identity = useDotYouClient().getIdentity();
+    const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
     const { data: channels, isLoading } = useChannels({ isAuthenticated: true, isOwner: true });
     const { data: collaborativeChannels } = useCollaborativeChannels().fetch;
     const [isChnlMgmtOpen, setIsChnlMgmtOpen] = useState(false);
@@ -459,7 +460,7 @@ export const ChannelOrAclSelector = React.forwardRef(
           ref={ref}
           disabled={disabled}
         >
-          <optgroup label={showCollaborativeChannels ? identity || '' : t('Channels')}>
+          <optgroup label={showCollaborativeChannels ? loggedOnIdentity || '' : t('Channels')}>
             {channels.map((channel) => (
               <option
                 value={channel.fileMetadata.appData.uniqueId}

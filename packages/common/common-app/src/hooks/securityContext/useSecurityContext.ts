@@ -1,16 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
 import { ApiType, getSecurityContext, getSecurityContextOverPeer } from '@homebase-id/js-lib/core';
-import { useDotYouClient } from '../auth/useDotYouClient';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 export const useSecurityContext = (odinId?: string, isEnabled?: boolean) => {
-  const { getApiType, getDotYouClient } = useDotYouClient();
-  const dotYouClient = getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetch = async (odinId?: string) => {
     if (
       !odinId ||
       odinId === window.location.hostname ||
-      (getApiType() === ApiType.App && odinId === dotYouClient.getIdentity())
+      (dotYouClient.getType() === ApiType.App && odinId === dotYouClient.getHostIdentity())
     )
       return await getSecurityContext(dotYouClient);
     else return await getSecurityContextOverPeer(dotYouClient, odinId);

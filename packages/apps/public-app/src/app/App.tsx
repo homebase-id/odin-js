@@ -20,13 +20,14 @@ import {
   HOME_ROOT_PATH,
   NotFound,
   PREVIEW_ROOT,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
-import { useAuth } from '../hooks/auth/useAuth';
 import Header from '../components/ui/Layout/Header/Header';
 import Footer from '../components/ui/Layout/Footer/Footer';
 
 import { t, useSiteData } from '@homebase-id/common-app';
 import { LoginBox } from '../components/Auth/LoginBox/LoginBox';
+import { useValidateAuthorization } from '../hooks/auth/useAuth';
 
 const Home = lazy(() => import('../templates/Home/Home'));
 const PostOverview = lazy(() => import('../templates/Posts/Overview/PostOverview'));
@@ -49,11 +50,9 @@ function App() {
           element={
             <Layout>
               <ErrorBoundary>
-                <DotYouClientProvider>
-                  <Suspense fallback={<></>}>
-                    <Outlet />
-                  </Suspense>
-                </DotYouClientProvider>
+                <Suspense fallback={<></>}>
+                  <Outlet />
+                </Suspense>
               </ErrorBoundary>
             </Layout>
           }
@@ -104,14 +103,21 @@ function App() {
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} fallbackElement={<></>} />
+        <DotYouClientProvider>
+          <RouterProvider router={router} fallbackElement={<></>} />
+        </DotYouClientProvider>
       </QueryClientProvider>
     </HelmetProvider>
   );
 }
 
 const PublicRoute = ({ children }: { children: ReactNode }) => {
-  const { isOwner, isAuthenticated } = useAuth();
+  const dotYouClient = useDotYouClientContext();
+
+  useValidateAuthorization();
+  const isAuthenticated = dotYouClient.isAuthenticated();
+  const isOwner = dotYouClient.isOwner();
+
   const [searchParams] = useSearchParams();
   const { data: siteData, isFetched: siteDataFetched } = useSiteData();
 
@@ -175,10 +181,12 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
 };
 
 const ActionRedirect = () => {
-  const { isAuthenticated, getDotYouClient } = useAuth();
+  const dotYouClient = useDotYouClientContext();
+
+  const isAuthenticated = dotYouClient.isAuthenticated();
   const [searchParams] = useSearchParams();
 
-  const host = getDotYouClient().getRoot();
+  const host = dotYouClient.getRoot();
   if (isAuthenticated && host) {
     console.debug('[AUTHENTICATED]: Redirect to action after login');
     window.location.href = `${host}${searchParams.get('targetPath')}`;

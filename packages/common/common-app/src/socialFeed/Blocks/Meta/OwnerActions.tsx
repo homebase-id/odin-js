@@ -9,7 +9,7 @@ import { Pencil } from '../../../ui/Icons/Pencil';
 import { t } from '../../../helpers/i18n/dictionary';
 import { Clipboard, Globe, Trash } from '../../../ui/Icons';
 import { EditPostDialog } from '../../EditPostDialog/EditPostDialog';
-import { useDotYouClient } from '../../../hooks';
+import { useDotYouClientContext } from '../../../hooks';
 import { FEED_ROOT_PATH } from '../../../constants';
 
 export const OwnerActions = ({
@@ -22,7 +22,7 @@ export const OwnerActions = ({
   postFile: HomebaseFile<PostContent>;
   channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition> | undefined;
 }) => {
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const postContent = postFile.fileMetadata.appData.content;
 
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -31,7 +31,7 @@ export const OwnerActions = ({
   const { mutateAsync: editPost } = useManagePost().update;
 
   const navigate = useNavigate();
-  const host = new DotYouClient({ api: ApiType.Guest, identity: identity || undefined }).getRoot();
+  const host = new DotYouClient({ api: ApiType.Guest, hostIdentity: loggedOnIdentity }).getRoot();
 
   return (
     <div className="ml-auto" onClick={(e) => e.stopPropagation()}>

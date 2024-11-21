@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { ActionButton, useChannel, useDotYouClient } from '@homebase-id/common-app';
+import { ActionButton, useChannel, useDotYouClientContext } from '@homebase-id/common-app';
 import {
   PostDetailCard,
   PostImageDetailCard,
@@ -21,8 +21,11 @@ const PostPreview = ({
   postKey: string;
   attachmentKey?: string;
 }) => {
-  const { isOwner, getIdentity } = useDotYouClient();
-  const isLocal = identityKey === getIdentity();
+  const dotYouClient = useDotYouClientContext();
+  const isOwner = dotYouClient.isOwner();
+
+  const { getHostIdentity } = useDotYouClientContext();
+  const isLocal = identityKey === getHostIdentity();
 
   const { data: channel } = useChannel({
     odinId: !isLocal ? identityKey : undefined,

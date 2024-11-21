@@ -180,7 +180,7 @@ export const finalizeAuthentication = async (
 
   const dotYouClient = new DotYouClient({
     api: ApiType.App,
-    identity: identity,
+    hostIdentity: identity,
   });
 
   const token = await exchangeDigestForToken(dotYouClient, base64ExchangedSecretDigest);

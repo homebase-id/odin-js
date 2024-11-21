@@ -6,7 +6,7 @@ import {
   saveProfileDefinition,
 } from '@homebase-id/js-lib/profile';
 import { slugify } from '@homebase-id/js-lib/helpers';
-import { useDotYouClient } from '../auth/useDotYouClient';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 export interface ProfileDefinitionVm extends ProfileDefinition {
   slug: string;
@@ -14,7 +14,7 @@ export interface ProfileDefinitionVm extends ProfileDefinition {
 
 export const useProfiles = (disabled?: boolean) => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchAll = async () => {
     const definitions = (await getProfileDefinitions(dotYouClient))

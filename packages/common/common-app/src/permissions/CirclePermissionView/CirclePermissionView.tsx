@@ -2,12 +2,12 @@ import { CircleDefinition } from '@homebase-id/js-lib/network';
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useCircle } from '../../hooks/circles/useCircle';
-import { useDotYouClient } from '../../hooks/auth/useDotYouClient';
 import { Circles } from '../../ui/Icons/Circles';
 import { LoadingBlock } from '../../ui/LoadingBlock/LoadingBlock';
 import { Arrow } from '../../ui/Icons/Arrow';
 import { t } from '../../helpers/i18n/dictionary';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { useDotYouClientContext } from '../../hooks';
 
 export const CirclePermissionView = ({
   circleDef,
@@ -27,8 +27,7 @@ export const CirclePermissionView = ({
   const { data: members, isLoading: membersLoading } = useCircle({
     circleId: !hideMembers ? circleDef?.id : undefined,
   }).fetchMembers;
-  const { getIdentity } = useDotYouClient();
-  const odinId = getIdentity() || undefined;
+  const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
 
   if (!circleDef) return null;
 
@@ -39,7 +38,7 @@ export const CirclePermissionView = ({
       </a>
     ) : (
       <Link
-        to={`${new DotYouClient({ identity: odinId, api: ApiType.App }).getRoot()}/owner/circles/${encodeURIComponent(circleDef.id || '')}`}
+        to={`${new DotYouClient({ hostIdentity: loggedInIdentity, api: ApiType.App }).getRoot()}/owner/circles/${encodeURIComponent(circleDef.id || '')}`}
         className={`hover:text-slate-700 hover:underline dark:hover:text-slate-400 ${
           className ?? ''
         }`}

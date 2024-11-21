@@ -7,11 +7,11 @@ import {
   AllowClient,
 } from '../../provider/app/AppManagementProvider';
 import { AppClientRegistrationRequest } from '../../provider/app/AppManagementProviderTypes';
-import { useAuth } from '../auth/useAuth';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useAppClients = ({ appId }: { appId?: string }) => {
   const queryClient = useQueryClient();
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetch = async ({ appId }: { appId: string }) => {
     return await GetAppClients(dotYouClient, appId);

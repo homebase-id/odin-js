@@ -107,7 +107,7 @@ const sendOne = async (dotYouClient: DotYouClient, threadId: string, recipients:
         fileType: MAIL_CONVERSATION_FILE_TYPE,
         content: {
           subject: getFunName(),
-          sender: dotYouClient.getIdentity(),
+          sender: dotYouClient.getHostIdentity(),
           message: [
             {
               type: 'p',
@@ -172,7 +172,7 @@ export const BePolite = async (dotYouClient: DotYouClient) => {
   for (let i = 0; i < threads.length; i++) {
     const thread = threads[i][0];
     if (!thread) continue;
-    const recipients = getAllRecipients(thread, dotYouClient.getIdentity());
+    const recipients = getAllRecipients(thread, dotYouClient.getHostIdentity());
 
     await sendOne(dotYouClient, thread.fileMetadata.appData.content.threadId, recipients);
   }

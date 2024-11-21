@@ -13,7 +13,7 @@ interface ImageData {
 }
 
 export const useImageCache = (dotYouClient: DotYouClient) => {
-  const localHost = dotYouClient.getIdentity() || window.location.hostname;
+  const localHost = dotYouClient.getHostIdentity();
   const queryClient = useQueryClient();
 
   return {
@@ -73,7 +73,7 @@ export const useImage = (props: {
     preferObjectUrl,
   } = props;
 
-  const localHost = dotYouClient.getIdentity() || window.location.hostname;
+  const localHost = dotYouClient.getHostIdentity();
   const queryClient = useQueryClient();
 
   const checkIfWeHaveLargerCachedImage = (

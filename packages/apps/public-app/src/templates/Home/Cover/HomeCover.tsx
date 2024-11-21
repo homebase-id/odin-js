@@ -7,15 +7,17 @@ import {
   useSiteData,
   ThemeCoverSettings,
   RichTextRenderer,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import Links from '../../../components/ui/Layout/Links/Links';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import ConnectLink from '../../../components/ConnectionActions/ConnectLink/ConnectLink';
-import { useAuth } from '../../../hooks/auth/useAuth';
 
 const HomeCover = ({ templateSettings }: { templateSettings?: ThemeCoverSettings }) => {
   const { owner } = useSiteData().data ?? {};
-  const { isAuthenticated, isOwner } = useAuth();
+  const dotYouClient = useDotYouClientContext();
+  const isOwner = dotYouClient.isOwner();
+  const isAuthenticated = dotYouClient.isAuthenticated();
   const { data: channels } = useChannels({ isAuthenticated, isOwner });
   if (!owner) return null;
 

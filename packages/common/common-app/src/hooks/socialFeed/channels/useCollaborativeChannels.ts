@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useDotYouClient } from '../../auth/useDotYouClient';
+import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
 import { getChannelsOverPeer } from '@homebase-id/js-lib/peer';
 import { useAllContacts } from '../../connections/useAllContacts';
 import {
@@ -18,7 +18,7 @@ export const useCollaborativeChannels = (enableDiscovery?: boolean) => {
   const { data: alllContacts, isFetched: fetchedAllContacts } = useAllContacts(
     enableDiscovery || false
   );
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const discoverByOdinId = async () => {
     const discoveredByOdinId = await Promise.all(

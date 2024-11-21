@@ -6,7 +6,7 @@ import {
   AuthorName,
   DialogWrapper,
   t,
-  useDotYouClient,
+  useDotYouClientContext,
   usePortal,
 } from '@homebase-id/common-app';
 import { FailedDeliveryDetails, InnerDeliveryIndicator } from './ChatDeliveryIndicator';
@@ -23,7 +23,7 @@ export const ChatMessageInfo = ({
   conversation: HomebaseFile<UnifiedConversation>;
   onClose: () => void;
 }) => {
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const target = usePortal('modal-container');
   const messageContent = msg.fileMetadata.appData.content;
   const conversationContent = conversation.fileMetadata.appData.content;
@@ -31,7 +31,8 @@ export const ChatMessageInfo = ({
     (recipient) => recipient && recipient !== msg.fileMetadata.originalAuthor
   );
 
-  const isAuthor = msg.fileMetadata.senderOdinId === identity || !msg.fileMetadata.senderOdinId;
+  const isAuthor =
+    msg.fileMetadata.senderOdinId === loggedOnIdentity || !msg.fileMetadata.senderOdinId;
 
   const { data: reactions } = useChatReaction({
     messageFileId: msg.fileId,

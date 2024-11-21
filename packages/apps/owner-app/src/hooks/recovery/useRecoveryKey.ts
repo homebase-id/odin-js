@@ -1,10 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '../auth/useAuth';
 import { getRecoveryKey } from '../../provider/auth/RecoveryProvider';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useRecoveryKey = () => {
-  const { getDotYouClient } = useAuth();
-  const dotYouClient = getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchKey = async () => {
     return await getRecoveryKey(dotYouClient);

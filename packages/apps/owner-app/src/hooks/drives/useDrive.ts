@@ -8,12 +8,12 @@ import {
   TargetDrive,
   editDriveAttributes,
 } from '@homebase-id/js-lib/core';
-import { useAuth } from '../auth/useAuth';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?: boolean }) => {
   const { targetDrive, fetchOutboxStatus } = props || {};
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
   const fetch = async (targetDrive: TargetDrive) => {

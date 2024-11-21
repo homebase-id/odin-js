@@ -61,7 +61,7 @@ export const savePost = async <T extends PostContent>(
     throw new Error('[odin-js] PostUploader: ACL is required to save a post');
 
   if (!file.fileMetadata.appData.content.authorOdinId)
-    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
+    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getHostIdentity();
 
   if (!file.fileMetadata.appData.content.id) {
     // The content id is set once, and then never updated to keep the permalinks correct at all times; Even when the slug changes
@@ -76,7 +76,7 @@ export const savePost = async <T extends PostContent>(
   }
 
   if (!file.fileMetadata.appData.content.authorOdinId)
-    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
+    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getHostIdentity();
 
   if (file.fileId) {
     return await updatePost(dotYouClient, odinId, file as HomebaseFile<T>, channelId, toSaveFiles);
@@ -247,7 +247,7 @@ const updatePost = async <T extends PostContent>(
   onVersionConflict?: () => void,
   onUpdate?: (progress: number) => void
 ): Promise<UploadResult | UpdateResult> => {
-  const odinId = remoteOdinId === dotYouClient.getIdentity() ? undefined : remoteOdinId;
+  const odinId = remoteOdinId === dotYouClient.getHostIdentity() ? undefined : remoteOdinId;
 
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const header = odinId

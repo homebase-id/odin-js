@@ -3,13 +3,13 @@ import { Suspense, useEffect, useState, useRef } from 'react';
 import { CanReactInfo } from '../../../../hooks/reactions/useCanReact';
 import { useErrors } from '../../../../hooks/errors/useErrors';
 import { useReaction } from '../../../../hooks/reactions/useReaction';
-import { useDotYouClient } from '../../../../hooks/auth/useDotYouClient';
 import { useMyEmojiReactions } from '../../../../hooks/reactions/emojis/useMyEmojiReactions';
 import { CantReactInfo } from '../CantReactInfo';
 import { useMostSpace } from '../../../../hooks/intersection/useMostSpace';
 import { EmojiPicker } from '../EmojiPicker/EmojiPicker';
 import { Emojis } from '../../../../ui/Icons';
 import { t } from '../../../../helpers/i18n/dictionary';
+import { useDotYouClientContext } from '../../../../hooks';
 
 export const SocialReactionsBar = ({
   className,
@@ -29,7 +29,7 @@ export const SocialReactionsBar = ({
   const [isHover, setIsHover] = useState(false);
   const addError = useErrors().add;
 
-  const { getIdentity } = useDotYouClient();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const {
     saveEmoji: { mutate: postEmoji, error: postEmojiError },
     removeEmoji: { mutate: removeEmoji, error: removeEmojiError },
@@ -38,7 +38,7 @@ export const SocialReactionsBar = ({
   const { data: myEmojis } = useMyEmojiReactions(isActive || isHover ? context : undefined).fetch;
   const doLike = async (body: string) => {
     postEmoji({
-      emojiData: { body: body, authorOdinId: getIdentity() || '' },
+      emojiData: { body: body, authorOdinId: loggedOnIdentity },
       context,
     });
 
@@ -49,7 +49,7 @@ export const SocialReactionsBar = ({
   };
   const doUnlike = (body: string) => {
     removeEmoji({
-      emojiData: { body: body, authorOdinId: getIdentity() || '' },
+      emojiData: { body: body, authorOdinId: loggedOnIdentity },
       context,
     });
 

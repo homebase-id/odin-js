@@ -1,5 +1,4 @@
 import {
-  useDotYouClient,
   ConnectionImage,
   ConnectionName,
   t,
@@ -7,6 +6,7 @@ import {
   useDarkMode,
   RichTextRenderer,
   getPlainTextFromRichText,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { DEFAULT_PAYLOAD_KEY, HomebaseFile, RichText } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
@@ -32,10 +32,10 @@ export const ChatMessageItem = ({
   conversation?: HomebaseFile<UnifiedConversation>;
   chatActions?: ChatActions;
 }) => {
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const authorOdinId = msg.fileMetadata.senderOdinId || '';
 
-  const messageFromMe = !authorOdinId || authorOdinId === identity;
+  const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;
   const hasMedia = !!msg.fileMetadata.payloads.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY).length;
 
   const { chatMessageKey, mediaKey } = useParams();
@@ -45,7 +45,7 @@ export const ChatMessageItem = ({
   const isGroupChat =
     (
       conversation?.fileMetadata.appData.content?.recipients?.filter(
-        (recipient) => recipient !== identity
+        (recipient) => recipient !== loggedOnIdentity
       ) || []
     )?.length > 1;
 

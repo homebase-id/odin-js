@@ -1,19 +1,18 @@
 import {
   t,
-  useDotYouClient,
   useChannels,
   useCollaborativeChannels,
   HybridLink,
   LoadingBlock,
   FEED_ROOT_PATH,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { Persons, Quote } from '@homebase-id/common-app/icons';
 import React from 'react';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 
 const ChannelsOverview = ({ className }: { className?: string }) => {
-  const { getIdentity } = useDotYouClient();
-  const identity = getIdentity();
+  const identity = useDotYouClientContext().getHostIdentity();
   const { data: channels, isLoading } = useChannels({ isAuthenticated: true, isOwner: true });
   const { data: collaborativeChannels } = useCollaborativeChannels().fetch;
 
@@ -33,7 +32,7 @@ const ChannelsOverview = ({ className }: { className?: string }) => {
               {channels?.map((chnl) => (
                 <HybridLink
                   key={chnl.fileMetadata.appData.uniqueId}
-                  href={`${new DotYouClient({ identity: identity || undefined, api: ApiType.Guest }).getRoot()}/posts/${chnl?.fileMetadata.appData.content.slug}`}
+                  href={`${new DotYouClient({ hostIdentity: identity || undefined, api: ApiType.Guest }).getRoot()}/posts/${chnl?.fileMetadata.appData.content.slug}`}
                   className="relative flex w-full flex-row items-center gap-2 bg-background p-1 hover:z-10 hover:bg-gray-100 hover:shadow-md dark:hover:bg-gray-800 hover:dark:shadow-slate-600"
                 >
                   <Quote className="h-4 w-4 flex-shrink-0" />
@@ -54,7 +53,7 @@ const ChannelsOverview = ({ className }: { className?: string }) => {
                 {collaborative.channels.map((chnl) => (
                   <HybridLink
                     key={chnl.fileMetadata.appData.uniqueId}
-                    href={`${new DotYouClient({ identity: collaborative.odinId, api: ApiType.Guest }).getRoot()}/posts/${chnl?.fileMetadata.appData.content.slug}?youauth-logon=${identity}`}
+                    href={`${new DotYouClient({ hostIdentity: collaborative.odinId, api: ApiType.Guest }).getRoot()}/posts/${chnl?.fileMetadata.appData.content.slug}?youauth-logon=${identity}`}
                     className="relative flex w-full flex-row items-center gap-2 bg-background p-1 hover:z-10 hover:bg-gray-100 hover:shadow-md dark:hover:bg-gray-800 hover:dark:shadow-slate-600"
                   >
                     <Persons className="h-4 w-4 flex-shrink-0" />

@@ -7,7 +7,7 @@ import {
 } from '@homebase-id/ui-lib';
 import { EmbeddedThumb, SystemFileType } from '@homebase-id/js-lib/core';
 import { useMemo, useState } from 'react';
-import { useDotYouClient } from '../hooks';
+import { useDotYouClientContext } from '../hooks/auth/useDotYouClientContext';
 import { Triangle } from '../ui/Icons';
 
 export interface VideoProps extends Omit<OdinVideoProps, 'dotYouClient'> {
@@ -15,7 +15,7 @@ export interface VideoProps extends Omit<OdinVideoProps, 'dotYouClient'> {
 }
 
 export const Video = ({ previewThumbnail, ...props }: VideoProps) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const poster = useMemo(() => {
     if (!previewThumbnail || !!props.poster) return undefined;
@@ -45,7 +45,7 @@ export const VideoClickToLoad = ({
   probablyEncrypted,
   ...props
 }: VideoClickToLoadProps) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const [loadVideo, setLoadVideo] = useState(false);
   const [imageHasError, setImageHasError] = useState(false);
@@ -114,7 +114,7 @@ export const VideoClickToLoad = ({
 
 type OdinVideoWrapperProps = Omit<OdinVideoProps, 'dotYouClient'>;
 export const OdinVideoWrapper = ({ ...props }: OdinVideoWrapperProps) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const { data: image } = useImage({
     dotYouClient,

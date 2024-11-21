@@ -7,12 +7,12 @@ import {
   formatToTimeAgoWithRelativeDetail,
   usePushNotifications,
   OWNER_APP_ID,
-  useDotYouClient,
   ErrorNotification,
   useRemoveNotifications,
   buildNotificationTargetLink,
   buildNotificationBody,
   buildNotificationTitle,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { Cog, Times, Bell } from '@homebase-id/common-app/icons';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
@@ -321,8 +321,8 @@ const NotificationItem = ({
   groupCount: number;
   appName?: string;
 }) => {
-  const identity = useDotYouClient().getIdentity();
-  const isLocalNotification = notification.senderId === identity;
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const isLocalNotification = notification.senderId === loggedOnIdentity;
 
   const { data: contactFile } = useContact({
     odinId: isLocalNotification ? undefined : notification.senderId,
@@ -344,7 +344,7 @@ const NotificationItem = ({
       title={title}
       imgSrc={
         notification.senderId
-          ? `${new DotYouClient({ identity: notification.senderId, api: ApiType.Guest }).getRoot()}/pub/image`
+          ? `${new DotYouClient({ hostIdentity: notification.senderId, api: ApiType.Guest }).getRoot()}/pub/image`
           : undefined
       }
       // Keeping the hidden ones short

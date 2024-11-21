@@ -23,10 +23,10 @@ import { Textarea } from '../form/Textarea';
 import { CheckboxToggle } from '../form/CheckboxToggle';
 import { Exclamation, ExternalLink, Pencil } from '../ui/Icons';
 import { ActionLink, Alert } from '../ui';
-import { useDotYouClient } from '../hooks/auth/useDotYouClient';
 import { useCollaborativeChannel } from '../hooks/socialFeed/channels/useCollaborativeChannel';
 import { ChannelDefinitionVm } from '../hooks/socialFeed/channels/useChannels';
 import { useManageChannel } from '../hooks/socialFeed/channels/useManageChannel';
+import { useDotYouClientContext } from '../hooks';
 
 export const ChannelItem = ({
   chnl: chnlDsr,
@@ -39,8 +39,7 @@ export const ChannelItem = ({
   className?: string;
   isDefaultEdit?: boolean;
 }) => {
-  const { getIdentity } = useDotYouClient();
-  const identity = getIdentity();
+  const identity = useDotYouClientContext().getHostIdentity();
   const isNew = !chnlDsr;
 
   const [isEdit, setIsEdit] = useState(isDefaultEdit);
@@ -324,7 +323,7 @@ export const ChannelItem = ({
             icon={ExternalLink}
             size="square"
             type="mute"
-            href={`${new DotYouClient({ identity: identity || undefined, api: ApiType.Guest }).getRoot()}/posts/${chnl?.slug}`}
+            href={`${new DotYouClient({ hostIdentity: identity || undefined, api: ApiType.Guest }).getRoot()}/posts/${chnl?.slug}`}
           ></ActionLink>
         </div>
       )}
