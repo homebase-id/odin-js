@@ -76,7 +76,6 @@ export const MessageComposer = ({
 
   const addError = useErrors().add;
   const { mutateAsync: sendMessage } = useCommunityMessage().send;
-  const identity = useDotYouClient().getIdentity();
 
   const doSend = async () => {
     const plainVal = (message && getTextRootsRecursive(message).join(' ')) || '';
@@ -100,9 +99,7 @@ export const MessageComposer = ({
         community,
         channel,
         thread,
-        threadParticipants: extendedParticipants?.length
-          ? extendedParticipants
-          : community.fileMetadata.appData.content.members.filter((odinId) => odinId !== identity),
+        threadParticipants: extendedParticipants?.length ? extendedParticipants : undefined,
         message: message || '',
         files: newFiles,
         chatId: getNewId(),
