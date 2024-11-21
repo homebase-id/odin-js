@@ -1,8 +1,13 @@
 import { Helmet } from 'react-helmet-async';
 import { Navigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../../hooks/auth/useAuth';
 import { Layout } from '../../components/ui/Layout/Layout';
-import { DialogWrapper, Alert, t, MAIL_ROOT_PATH } from '@homebase-id/common-app';
+import {
+  DialogWrapper,
+  Alert,
+  t,
+  MAIL_ROOT_PATH,
+  useDotYouClientContext,
+} from '@homebase-id/common-app';
 import { AutoAuthorize, LoginBox } from '../../components/Auth/LoginBox/LoginBox';
 
 const Auth = () => {
@@ -11,7 +16,7 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const isError = searchParams.get('state') === 'finalize-error';
 
-  const { isAuthenticated } = useAuth();
+  const isAuthenticated = useDotYouClientContext().isAuthenticated();
 
   if (isAuthenticated) <Navigate to="/" />;
   if (isAutoAuthorize) return <AutoAuthorize />;

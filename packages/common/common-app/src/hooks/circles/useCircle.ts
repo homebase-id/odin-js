@@ -13,16 +13,16 @@ import {
   addDomainToCircle,
   removeDomainFromCircle,
 } from '@homebase-id/js-lib/network';
-import { useDotYouClient } from '../auth/useDotYouClient';
 import { invalidateCircles } from './useCircles';
 import { formatGuidId } from '@homebase-id/js-lib/helpers';
 import { invalidateDomainInfo } from '../connections/useDomain';
 import { invalidateConnectionInfo } from '../connections/useConnection';
 import { invalidateConnectionGrantStatus } from '../connections/useConnectionGrantStatus';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 export const useCircle = (props?: { circleId?: string }) => {
   const { circleId } = props || {};
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
   const fetch = async ({ circleId }: { circleId: string }) => {

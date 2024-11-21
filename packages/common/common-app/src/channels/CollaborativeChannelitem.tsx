@@ -53,7 +53,7 @@ export const CollaborativeChannelItem = ({
           icon={ExternalLink}
           size="square"
           type="mute"
-          href={`${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}/posts/${chnl?.slug}`}
+          href={`${new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}/posts/${chnl?.slug}`}
         ></ActionLink>
       </div>
     </div>

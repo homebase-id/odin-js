@@ -4,7 +4,7 @@ import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 import { useQuery } from '@tanstack/react-query';
 import { useSecurityContext } from '../securityContext/useSecurityContext';
-import { useDotYouClient } from '../auth/useDotYouClient';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 interface UseCanReactProps {
   odinId: string;
@@ -42,8 +42,8 @@ export const useCanReact = ({
   isOwner,
   isAuthenticated,
 }: UseCanReactProps) => {
-  const { getIdentity } = useDotYouClient();
-  const isAuthor = odinId === (getIdentity() || window.location.hostname);
+  const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const isAuthor = odinId === loggedInIdentity;
   const { data: securityContext, isFetched: securityFetched } = useSecurityContext(
     odinId,
     isEnabled

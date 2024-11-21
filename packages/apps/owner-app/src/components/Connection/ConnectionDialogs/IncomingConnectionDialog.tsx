@@ -159,8 +159,7 @@ const IncomingConnectionDialog = ({
                 className=""
                 type="mute"
                 onClick={() => {
-                  checkReturnTo('Canceled');
-                  onCancel();
+                  if (!checkReturnTo('Canceled')) onCancel();
                 }}
               >
                 {t('Cancel')}
@@ -169,8 +168,7 @@ const IncomingConnectionDialog = ({
                 className="sm:mr-auto"
                 type="secondary"
                 onClick={() => {
-                  checkReturnTo('Ignored');
-                  onCancel();
+                  if (!checkReturnTo('Ignored')) onCancel();
                 }}
               >
                 {t('Ignore request')}

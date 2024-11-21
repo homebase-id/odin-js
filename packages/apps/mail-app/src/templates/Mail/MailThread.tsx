@@ -19,7 +19,6 @@ import {
   highlightQuery,
   MAIL_ROOT_PATH,
   t,
-  useDotYouClient,
   useDotYouClientContext,
   useIsConnected,
 } from '@homebase-id/common-app';
@@ -43,7 +42,7 @@ export const MailThread = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
-  const identity = useDotYouClientContext().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const { conversationKey, messageKey, payloadKey } = useParams();
   const previewAttachment = !!messageKey && !!payloadKey;
 
@@ -70,7 +69,7 @@ export const MailThread = () => {
 
   const { subject, threadId, originId, recipients } = useMemo(() => {
     const lastMessage = mailThread?.[0];
-    const allRecipients = getAllRecipients(lastMessage, identity);
+    const allRecipients = getAllRecipients(lastMessage, loggedOnIdentity);
 
     return {
       ...lastMessage?.fileMetadata.appData.content,
@@ -415,7 +414,7 @@ const MailConnectedState = ({ recipients }: { recipients: string[] }) => {
 
 const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
   const { data: isConnected, isFetched } = useIsConnected(recipient);
-  const host = useDotYouClient().getDotYouClient().getRoot();
+  const host = useDotYouClientContext().getRoot();
 
   if (isConnected || !isFetched) return null;
   return (
@@ -423,7 +422,7 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
       <p>
         {t('You can only chat with connected identities, messages will not be delivered to')}:{' '}
         <a
-          href={new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}
+          href={new DotYouClient({ hostIdentity: recipient, api: ApiType.Guest }).getRoot()}
           className="underline"
         >
           {recipient}

@@ -13,11 +13,11 @@ import { getRichTextFromString } from '../../helpers/richTextHelper';
 import { UseCommentsVal } from './comments/useComments';
 
 import { CommentReaction, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
-import { useDotYouClient } from '../auth/useDotYouClient';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 export const useReaction = () => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const saveCommentData = async ({
     context,
@@ -80,6 +80,8 @@ export const useReaction = () => {
       mutationFn: saveCommentData,
       onMutate: async (toSaveCommentData) => {
         const { odinId, channelId, target } = toSaveCommentData.context;
+
+        console.log('toSaveCommentData', toSaveCommentData.commentData);
 
         const prevInfinite = queryClient.getQueryData<InfiniteData<UseCommentsVal>>([
           'comments',

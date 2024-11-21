@@ -7,7 +7,7 @@ import {
   Label,
   SubtleMessage,
   usePostsInfinite,
-  useDotYouClient,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { Select } from '@homebase-id/common-app';
 import { flattenInfinteData } from '@homebase-id/common-app';
@@ -15,7 +15,6 @@ import { t } from '@homebase-id/common-app';
 import { useChannels } from '@homebase-id/common-app';
 import ChannelTeaser from '../ChannelTeaser/ChannelTeaser';
 import { LoadingBlock } from '@homebase-id/common-app';
-import { useAuth } from '../../../../hooks/auth/useAuth';
 import { PostTeaser } from '@homebase-id/common-app';
 import LoginDialog from '../../../../components/Dialog/LoginDialog/LoginDialog';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
@@ -34,7 +33,10 @@ const VerticalPosts = ({ className }: { className?: string }) => {
 };
 
 const ChannelSidebar = ({ className }: { className: string }) => {
-  const { isAuthenticated, isOwner } = useAuth();
+  const dotYouClient = useDotYouClientContext();
+  const isOwner = dotYouClient.isOwner();
+  const isAuthenticated = dotYouClient.isAuthenticated();
+
   const navigate = useNavigate();
   const { data: channels } = useChannels({ isAuthenticated, isOwner });
   if (!channels?.length || channels.length === 1) return null;
@@ -85,8 +87,9 @@ const ChannelSidebar = ({ className }: { className: string }) => {
 // Docs for combination of Virtual and infinite:
 // https://tanstack.com/virtual/v3/docs/examples/react/infinite-scroll
 const MainVerticalPosts = ({ className, channelId }: { className: string; channelId?: string }) => {
-  const { isOwner, getIdentity } = useDotYouClient();
-  const isAuthenticated = isOwner || !!getIdentity();
+  const dotYouClient = useDotYouClientContext();
+  const isOwner = dotYouClient.isOwner();
+  const isAuthenticated = dotYouClient.isAuthenticated();
   const { data: channels } = useChannels({ isAuthenticated, isOwner });
   const showAuthor =
     !!channels?.find(

@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { WelcomeData } from '../../templates/Setup/Setup';
 import { DriveDefinitionParam, initialize } from '../../provider/system/SystemProvider';
-import { useAuth } from '../auth/useAuth';
 import { toGuidId } from '@homebase-id/js-lib/helpers';
 import { CircleDefinition } from '@homebase-id/js-lib/network';
 import {
@@ -12,18 +11,19 @@ import {
   SetupHome,
   SetupProfileDefinition,
 } from '../../provider/setup/SetupProvider';
-import { useStaticFiles } from '@homebase-id/common-app';
+import { useDotYouClientContext, useStaticFiles } from '@homebase-id/common-app';
 import { getSettings, updateSettings } from '../../provider/system/SettingsProvider';
 import { AUTO_FIX_VERSION } from '../useAutoFixDefaultConfig';
 
 export const FIRST_RUN_TOKEN_STORAGE_KEY = 'first-run-token';
 
 export const useInit = () => {
-  const { isAuthenticated } = useAuth();
   const firstRunToken = localStorage.getItem(FIRST_RUN_TOKEN_STORAGE_KEY);
 
+  const dotYouClient = useDotYouClientContext();
+  const isAuthenticated = dotYouClient.isAuthenticated();
+
   const queryClient = useQueryClient();
-  const dotYouClient = useAuth().getDotYouClient();
 
   const { mutateAsync: publishStaticFiles } = useStaticFiles().publish;
 

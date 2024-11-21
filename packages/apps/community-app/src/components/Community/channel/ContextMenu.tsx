@@ -5,16 +5,15 @@ import {
 } from '../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import {
-  useDotYouClient,
   ActionGroupOptionProps,
   t,
   ErrorNotification,
   ActionGroup,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { useState } from 'react';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { CommunityMessageInfo } from '../Message/detail/CommunityMessageInfo';
-import { EditCommunityMessage } from '../Message/detail/EditCommunityMessage';
 import { CommunityReactionComposer } from '../Message/reactions/CommunityReactionComposer';
 import { Bookmark, BookmarkSolid, ReplyArrow } from '@homebase-id/common-app/icons';
 import { useCommunityLater } from '../../../hooks/community/useCommunityLater';
@@ -22,6 +21,7 @@ import { useCommunityLater } from '../../../hooks/community/useCommunityLater';
 export interface CommunityActions {
   doReply?: (msg: HomebaseFile<CommunityMessage>) => void;
   doDelete: (msg: HomebaseFile<CommunityMessage>, deleteForEveryone: boolean) => void;
+  doEdit?: (msg: HomebaseFile<CommunityMessage>) => void;
 }
 
 export const ContextMenu = ({
@@ -56,7 +56,6 @@ const CommunityContextActions = ({
 }) => {
   if (!communityActions) return null;
   const [showMessageInfo, setShowMessageInfo] = useState(false);
-  const [editMessage, setEditMessage] = useState(false);
 
   const {
     isSaved,
@@ -68,17 +67,19 @@ const CommunityContextActions = ({
 
   const { mutate: resend, error: resendError } = useCommunityMessage().update;
 
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const authorOdinId = msg.fileMetadata.senderOdinId;
 
-  const messageFromMe = !authorOdinId || authorOdinId === identity;
+  const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;
 
   const optionalOptions: ActionGroupOptionProps[] = [];
   if (messageFromMe) {
-    optionalOptions.push({
-      label: t('Edit'),
-      onClick: () => setEditMessage(true),
-    });
+    if (communityActions.doEdit) {
+      optionalOptions.push({
+        label: t('Edit'),
+        onClick: () => communityActions.doEdit?.(msg),
+      });
+    }
     if (communityActions.doDelete) {
       optionalOptions.push({
         label: t('Delete'),
@@ -116,13 +117,6 @@ const CommunityContextActions = ({
           msg={msg}
           community={community}
           onClose={() => setShowMessageInfo(false)}
-        />
-      ) : null}
-      {editMessage && community ? (
-        <EditCommunityMessage
-          msg={msg}
-          community={community}
-          onClose={() => setEditMessage(false)}
         />
       ) : null}
       {communityActions.doReply ? (

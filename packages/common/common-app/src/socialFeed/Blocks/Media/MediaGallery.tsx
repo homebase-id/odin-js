@@ -3,7 +3,7 @@ import { useState, useRef, useMemo } from 'react';
 import { Image } from '../../../media/Image';
 import { getChannelDrive } from '@homebase-id/js-lib/public';
 import { useImageCache } from '@homebase-id/ui-lib';
-import { useIntersection, useDotYouClient, useDarkMode } from '../../../hooks';
+import { useIntersection, useDarkMode, useDotYouClientContext } from '../../../hooks';
 import { Triangle } from '../../../ui/Icons';
 import { BoringFile } from './PrimaryMedia';
 
@@ -48,7 +48,7 @@ export const MediaGallery = ({
   const slicedFiles = files.length > maxVisible ? files.slice(0, maxVisible) : files;
   const countExcludedFromView = files.length - slicedFiles.length;
 
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const { getFromCache } = useImageCache(dotYouClient);
 
   const targetDrive = getChannelDrive(channelId);

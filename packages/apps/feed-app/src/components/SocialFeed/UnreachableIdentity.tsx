@@ -1,4 +1,9 @@
-import { ActionGroup, t, useDotYouClient, useManageSocialFeed } from '@homebase-id/common-app';
+import {
+  ActionGroup,
+  t,
+  useDotYouClientContext,
+  useManageSocialFeed,
+} from '@homebase-id/common-app';
 import { Times, UserX } from '@homebase-id/common-app/icons';
 import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import { PostContent } from '@homebase-id/js-lib/public';
@@ -10,7 +15,7 @@ interface UnreachableIdentityProps {
 }
 
 export const UnreachableIdentity = ({ className, postFile, odinId }: UnreachableIdentityProps) => {
-  const host = useDotYouClient().getDotYouClient().getRoot;
+  const host = useDotYouClientContext().getRoot;
 
   const {
     removeFromFeed: { mutateAsync: removeFromMyFeed },
@@ -25,7 +30,7 @@ export const UnreachableIdentity = ({ className, postFile, odinId }: Unreachable
           {t('This content is no longer accessible')}.
           <span className="block text-sm text-slate-400">
             <a
-              href={new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}
+              href={new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}
               className="hover:underline"
               target="_blank"
               rel="nofollow noreferrer"

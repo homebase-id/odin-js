@@ -16,7 +16,7 @@ import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 export type MailThreadsFilter = 'inbox' | 'sent' | 'drafts' | 'archive' | 'trash';
 
 export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string | undefined) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const {
     data: conversations,
     hasNextPage: hasMorePosts,
@@ -71,7 +71,7 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
           conversation.fileMetadata.appData.archivalStatus === DEFAULT_ARCHIVAL_STATUS
         );
 
-      if (filter === 'sent') return !sender || sender === identity;
+      if (filter === 'sent') return !sender || sender === loggedOnIdentity;
 
       if (filter === 'archive')
         return conversation.fileMetadata.appData.archivalStatus === ARCHIVE_ARCHIVAL_STATUS;
@@ -157,14 +157,14 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
       if (filter === 'inbox') {
         return thread.some((conversation) => {
           const fromMeToMe = conversation.fileMetadata.appData.content.recipients.every(
-            (recipient) => recipient === identity
+            (recipient) => recipient === loggedOnIdentity
           );
           if (fromMeToMe) return true;
 
           const sender =
             conversation.fileMetadata.senderOdinId ||
             conversation.fileMetadata.appData.content.sender;
-          return sender !== identity;
+          return sender !== loggedOnIdentity;
         });
       }
 

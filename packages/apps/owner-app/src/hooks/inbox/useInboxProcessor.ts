@@ -1,10 +1,10 @@
 import { processInbox } from '@homebase-id/js-lib/peer';
 import { useQuery } from '@tanstack/react-query';
-import { useDotYouClient } from '@homebase-id/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 const BATCH_SIZE = 100;
 export const useInboxProcessor = (connected?: boolean) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchData = async () =>
     await processInbox(

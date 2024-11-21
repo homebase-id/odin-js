@@ -188,7 +188,7 @@ export const saveCommunity = async (
   const targetDrive = getTargetDriveFromCommunityId(definition.fileMetadata.appData.uniqueId);
   const existingCommunityDefinition = await getCommunityDefinition(
     dotYouClient,
-    definition.fileMetadata.senderOdinId || dotYouClient.getIdentity(),
+    definition.fileMetadata.senderOdinId || dotYouClient.getHostIdentity(),
     definition.fileMetadata.appData.uniqueId
   );
   const fileId = existingCommunityDefinition?.fileId;
@@ -287,7 +287,7 @@ export const getCommunityDefinition = async (
 
   try {
     const response =
-      odinId && odinId !== dotYouClient.getIdentity()
+      odinId && odinId !== dotYouClient.getHostIdentity()
         ? await queryBatchOverPeer(dotYouClient, odinId, params, ro)
         : await queryBatch(dotYouClient, params, ro);
 
@@ -324,7 +324,7 @@ export const dsrToCommunity = async (
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<CommunityDefinition> | undefined> => {
   const definitionContent =
-    dsr.fileMetadata.senderOdinId !== dotYouClient.getIdentity()
+    dsr.fileMetadata.senderOdinId !== dotYouClient.getHostIdentity()
       ? await getContentFromHeaderOrPayloadOverPeer<CommunityDefinition>(
           dotYouClient,
           dsr.fileMetadata.senderOdinId,

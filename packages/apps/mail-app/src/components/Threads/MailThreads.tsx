@@ -28,7 +28,7 @@ export const MailThreads = ({
 }) => {
   const [selection, setSelection] = useState<HomebaseFile<MailConversation>[][]>([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
-  const identity = useDotYouClientContext().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
 
   // Don't auto load next pages when there's a query
   const autoPage = !query;
@@ -138,7 +138,7 @@ export const MailThreads = ({
                   mailThread.find(
                     (conv) =>
                       (conv.fileMetadata.senderOdinId ||
-                        conv.fileMetadata.appData.content.sender) !== identity
+                        conv.fileMetadata.appData.content.sender) !== loggedOnIdentity
                   ) || mailThread[0];
                 const lastConversationId = lastConversation.fileMetadata.appData.groupId as string;
                 const isSelected = selection.some((select) =>
@@ -218,7 +218,7 @@ const MailConversationsHeader = ({
   clearSelection: () => void;
   filter?: MailThreadsFilter;
 }) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const hasASelection = selection.length > 0;
   const {
     mutate: removeThread,
@@ -251,7 +251,7 @@ const MailConversationsHeader = ({
           mailThread.find(
             (conv) =>
               (conv.fileMetadata.senderOdinId || conv.fileMetadata.appData.content.sender) !==
-              identity
+              loggedOnIdentity
           ) || mailThread[0]
       ),
     });
@@ -262,7 +262,7 @@ const MailConversationsHeader = ({
           mailThread.find(
             (conv) =>
               (conv.fileMetadata.senderOdinId || conv.fileMetadata.appData.content.sender) !==
-              identity
+              loggedOnIdentity
           ) || mailThread[0]
       ),
     });

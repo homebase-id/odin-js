@@ -1,8 +1,8 @@
 import { EmbeddedThumb, TargetDrive } from '@homebase-id/js-lib/core';
-import { useDotYouClient } from '../../../../../hooks';
 import { useMemo, useState } from 'react';
 import { OdinImage } from '@homebase-id/ui-lib';
 import { ImageLightbox } from '../../../../../dialogs/ImageLightbox/ImageLightbox';
+import { useDotYouClientContext } from '../../../../../hooks/auth/useDotYouClientContext';
 
 export const CommentMedia = ({
   postAuthorOdinId,
@@ -19,7 +19,7 @@ export const CommentMedia = ({
   lastModified?: number;
   previewThumbnail?: EmbeddedThumb;
 }) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const [isImageLightboxOpen, setIsImageLightboxOpen] = useState(false);
 
   if (!targetDrive) return null;

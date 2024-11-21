@@ -6,7 +6,7 @@ import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { HomebaseFile, SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
 import { getDecryptedImageData } from '../../media/ImageProvider';
 import { BuiltInProfiles, MinimalProfileFields } from '../../profile/ProfileData/ProfileConfig';
-import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';
+import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionManager';
 import { getProfileAttributes, BuiltInAttributes, Attribute } from '../../profile/profile';
 import { publishProfileCardFile, publishProfileImageFile } from './FileProvider';
 import { resizeImageFromBlob } from '../../media/media';
@@ -46,7 +46,7 @@ export const GetProfileCard = async (odinId: string): Promise<ProfileCard | unde
       return await _internalFileCache.get(odinId);
     }
 
-    const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
+    const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot();
 
     const httpClient = axios.create();
     const fetchProfileCard = async () => {
@@ -138,7 +138,7 @@ export const GetProfileImage = async (odinId: string): Promise<Blob | undefined>
   try {
     const httpClient = axios.create();
     const fetchProfileCard = async () => {
-      const host = new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot();
+      const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot();
 
       return await httpClient
         .get(`${host}/pub/image`, {

@@ -1,9 +1,10 @@
-import { DotYouClient } from '../../core/DotYouClient';
-import { deleteReaction, uploadReaction } from '../../core/ReactionData/ReactionsProvider';
-import { tryJsonParse } from '../../helpers/DataUtil';
-import { getChannelDrive, GetTargetDriveFromChannelId } from './PostDefinitionProvider';
-import { EmojiReactionSummary } from './PostReactionProvider';
-import { RawReactionContent, ReactionContext } from './PostTypes';
+import { DotYouClient } from '../../../core/DotYouClient';
+import { deleteReaction, uploadReaction } from '../../../core/ReactionData/ReactionService';
+import { tryJsonParse } from '../../../helpers/DataUtil';
+import { getChannelDrive, GetTargetDriveFromChannelId } from '../Channel/PostChannelManager';
+import { RawReactionContent, ReactionContext } from '../PostTypes';
+
+import { EmojiReactionSummary } from './PostCommentReactionManager';
 
 interface ServerReactionsSummary {
   reactions: { reactionContent: string; count: number }[];
@@ -38,7 +39,7 @@ export const getReactionSummary = async (
   dotYouClient: DotYouClient,
   context: ReactionContext
 ): Promise<EmojiReactionSummary> => {
-  const isLocal = context.odinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getHostIdentity();
 
   const client = dotYouClient.createAxiosClient();
 
@@ -114,7 +115,7 @@ export const getMyReactions = async (
   pageSize = 15,
   cursor?: string
 ): Promise<string[] | undefined> => {
-  const isLocal = context.odinId === dotYouClient.getIdentity();
+  const isLocal = context.odinId === dotYouClient.getHostIdentity();
   const client = dotYouClient.createAxiosClient();
 
   const data = {
@@ -123,7 +124,7 @@ export const getMyReactions = async (
       fileId: context.target.fileId,
       globalTransitId: context.target.globalTransitId,
     },
-    identity: odinId || dotYouClient.getIdentity(),
+    identity: odinId || dotYouClient.getHostIdentity(),
     cursor: cursor,
     maxRecords: pageSize,
   };

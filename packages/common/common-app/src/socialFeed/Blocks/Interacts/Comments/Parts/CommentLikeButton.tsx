@@ -1,19 +1,18 @@
 import { useRef, useState } from 'react';
 
 import { ReactionContext } from '@homebase-id/js-lib/public';
-import { useDotYouClient } from '../../../../../hooks/auth/useDotYouClient';
 import { useReaction } from '../../../../../hooks/reactions/useReaction';
 import { useOutsideTrigger } from '../../../../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';
 import { SocialReactionsBar } from '../../Reactions/ReactionsBar';
 import { ErrorNotification } from '../../../../../ui/Alert/ErrorNotification';
 import { t } from '../../../../../helpers/i18n/dictionary';
-import { useMyEmojiReactions } from '../../../../../hooks';
+import { useDotYouClientContext, useMyEmojiReactions } from '../../../../../hooks';
 
 export const CommentLikeButton = ({ threadContext }: { threadContext: ReactionContext }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isReact, setIsReact] = useState(false);
 
-  const { getIdentity } = useDotYouClient();
+  const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
   const {
     saveEmoji: { mutate: postEmoji, error: postEmojiError },
     removeEmoji: { mutate: removeEmoji, error: removeEmojiError },
@@ -27,7 +26,7 @@ export const CommentLikeButton = ({ threadContext }: { threadContext: ReactionCo
   const doLike = () => {
     postEmoji({
       emojiData: {
-        authorOdinId: getIdentity() || '',
+        authorOdinId: loggedInIdentity,
         body: '❤️',
       },
       context: threadContext,
@@ -37,7 +36,7 @@ export const CommentLikeButton = ({ threadContext }: { threadContext: ReactionCo
   const removeAny = () => {
     if (!myReactions) return;
     removeEmoji({
-      emojiData: { body: myReactions[0], authorOdinId: getIdentity() || '' },
+      emojiData: { body: myReactions[0], authorOdinId: loggedInIdentity },
       context: threadContext,
     });
   };

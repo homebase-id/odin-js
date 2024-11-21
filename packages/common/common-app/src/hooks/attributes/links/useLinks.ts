@@ -21,7 +21,7 @@ export const useLinks = (props?: { odinId: string } | undefined) => {
   const { odinId } = props || {};
 
   const dotYouClient = useDotYouClientContext();
-  const isAuthenticated = !!dotYouClient.getIdentity();
+  const isAuthenticated = !!dotYouClient.getHostIdentity();
   const queryClient = useQueryClient();
 
   const fetchData: (odinId?: string) => Promise<LinkData[] | undefined> = async () => {

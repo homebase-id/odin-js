@@ -1,4 +1,3 @@
-import { useAuth } from '../../hooks/auth/useAuth';
 import {
   SecurityGroupType,
   DrivePermissionType,
@@ -12,7 +11,7 @@ import { demoImageArray } from './DemoImages';
 import { attrHasData, base64ToArrayBuffer, getFunName, getRandomAbstract, rando } from './helpers';
 import { lotrRealm } from './DemoLotr';
 import { useAttribute } from '../../hooks/profiles/useAttribute';
-import { Select, useChannel } from '@homebase-id/common-app';
+import { Select, useChannel, useDotYouClientContext } from '@homebase-id/common-app';
 import { useManagePost } from '@homebase-id/common-app';
 
 import { useCircles } from '@homebase-id/common-app';
@@ -62,7 +61,7 @@ initalChar = ['merry.dotyou.cloud'].includes(domain) ? 'merry.dotyou.cloud' : in
 initalChar = ['pippin.dotyou.cloud'].includes(domain) ? 'pippin.dotyou.cloud' : initalChar;
 
 const DemoData = () => {
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const [character, setCharacter] = useState<RealmName>(initalChar);
 
   const realmData: RealmData = lotrRealm[character as keyof typeof lotrRealm];

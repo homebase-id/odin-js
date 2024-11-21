@@ -3,6 +3,7 @@ import { ConnectionInfo } from '@homebase-id/js-lib/network';
 import { ConnectionPermissionViewer } from './ConnectionPermissionViewer';
 import { CircleMembershipDialog } from '../../../components/Circles/CircleMembershipDialog/CircleMembershipDialog';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useFocusedEditing } from '../../../hooks/focusedEditing/useFocusedEditing';
 
 export const ConnectedDetailsSettings = ({
   odinId,
@@ -21,6 +22,8 @@ export const ConnectedDetailsSettings = ({
 
   const activeConnection = connectionInfo as ConnectionInfo;
 
+  const checkRedirectTo = useFocusedEditing();
+
   return (
     <>
       <ConnectionPermissionViewer
@@ -34,9 +37,11 @@ export const ConnectedDetailsSettings = ({
         odinId={odinId}
         currentCircleGrants={activeConnection.accessGrant.circleGrants}
         onCancel={() => {
+          if (checkRedirectTo()) return;
           navigate(-1);
         }}
         onConfirm={() => {
+          if (checkRedirectTo()) return;
           navigate(-1);
         }}
       />

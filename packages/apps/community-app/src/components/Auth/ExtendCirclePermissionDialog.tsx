@@ -44,8 +44,8 @@ const useCommunityAccessVerifyer = (
   communityId: string | undefined
 ) => {
   const { data: community } = useCommunity({ odinId, communityId }).fetch;
-  const identity = useDotYouClientContext().getIdentity();
-  const isAdmin = community?.fileMetadata.originalAuthor === identity;
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const isAdmin = community?.fileMetadata.originalAuthor === loggedOnIdentity;
 
   const communityCircleId = community?.fileMetadata.appData.content.acl.circleIdList?.[0];
   const { data: circleDef } = useCircle({
@@ -73,7 +73,7 @@ const useCommunityAccessVerifyer = (
 
   if (!circleHasAccess) {
     const extendUrl = getExtendCirclePermissionUrl(
-      identity,
+      loggedOnIdentity,
       '',
       '',
       communityDrive,

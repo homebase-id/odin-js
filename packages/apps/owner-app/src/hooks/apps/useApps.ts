@@ -1,9 +1,9 @@
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import { GetAppRegistrations } from '../../provider/app/AppManagementProvider';
-import { useAuth } from '../auth/useAuth';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useApps = () => {
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchRegistered = async () => {
     const apps = await GetAppRegistrations(dotYouClient);

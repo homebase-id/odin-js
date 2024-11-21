@@ -64,7 +64,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     deleteForEveryone?: boolean;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
-    const identity = dotYouClient.getIdentity();
+    const identity = dotYouClient.getHostIdentity();
     const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     const hardDelete = stringGuidsEqual(

@@ -1,4 +1,4 @@
-import { useDotYouClient, t } from '@homebase-id/common-app';
+import { t, useDotYouClientContext } from '@homebase-id/common-app';
 import { Clock, SubtleCheck, Times } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatMessage, ChatDeliveryStatus } from '../../../providers/ChatProvider';
@@ -10,10 +10,10 @@ export const ChatDeliveryIndicator = ({
   msg: HomebaseFile<ChatMessage>;
   className?: string;
 }) => {
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const content = msg.fileMetadata.appData.content;
   const authorOdinId = msg.fileMetadata.senderOdinId || '';
-  const messageFromMe = !authorOdinId || authorOdinId === identity;
+  const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;
 
   if (!messageFromMe) return null;
   return <InnerDeliveryIndicator state={content.deliveryStatus} className={className} />;

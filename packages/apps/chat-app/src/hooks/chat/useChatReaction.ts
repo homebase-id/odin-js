@@ -49,7 +49,7 @@ export const useChatReaction = (props?: {
     reaction: string;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
-    const identity = dotYouClient.getIdentity();
+    const identity = dotYouClient.getHostIdentity();
     const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     if (!message.fileMetadata.globalTransitId)
@@ -74,7 +74,7 @@ export const useChatReaction = (props?: {
     reaction: EmojiReaction;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
-    const identity = dotYouClient.getIdentity();
+    const identity = dotYouClient.getHostIdentity();
     const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     if (!message.fileMetadata.globalTransitId)
@@ -102,7 +102,7 @@ export const useChatReaction = (props?: {
           queryClient.getQueryData<EmojiReaction[]>(['chat-reaction', message.fileId]) || [];
 
         const newReaction: EmojiReaction = {
-          authorOdinId: dotYouClient.getIdentity(),
+          authorOdinId: dotYouClient.getHostIdentity(),
           body: reaction,
         };
 

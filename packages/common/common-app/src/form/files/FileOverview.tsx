@@ -7,12 +7,12 @@ import {
   NewMediaFile,
 } from '@homebase-id/js-lib/core';
 import { OdinThumbnailImage } from '@homebase-id/ui-lib';
-import { useDotYouClient } from '../../hooks/auth/useDotYouClient';
 import { Triangle } from '../../ui/Icons/Triangle';
 import { ExtensionThumbnail } from './ExtensionThumbnail';
 import { ActionButton } from '../../ui/Buttons/ActionButton';
 import { Trash } from '../../ui/Icons/Trash';
 import { bytesToSize, ellipsisAtMaxChar } from '../../helpers';
+import { useDotYouClientContext } from '../../hooks';
 
 type NewFileArray = NewMediaFile[];
 interface FileOverViewProps {
@@ -40,7 +40,7 @@ export const FileOverview = ({
   cols,
 }: FileOverViewProps | ExistingFileOverviewProps) => {
   if (!files || !files.length) return null;
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const grabThumb = async (video: HTMLVideoElement, file: NewMediaFile, fileIndex: number) => {
     if (!video) return;

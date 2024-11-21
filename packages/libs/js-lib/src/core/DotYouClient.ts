@@ -8,13 +8,13 @@ export enum ApiType {
   Owner,
   App,
   Guest,
-  // YouAuth,
 }
 
 export interface BaseProviderOptions {
   api: ApiType;
   sharedSecret?: Uint8Array;
-  identity?: string;
+  hostIdentity?: string;
+  loggedInIdentity?: string;
   headers?: Record<string, string>;
 }
 
@@ -42,15 +42,34 @@ export class BaseDotYouClient {
   }
 
   // Gets the identity to where the client is pointing to
-  getIdentity(): string {
+  getHostIdentity(): string {
     return (
-      this._options.identity ||
+      this._options?.hostIdentity ||
       (typeof window.location !== 'undefined' ? window.location.hostname : '')
     );
   }
 
+  getLoggedInIdentity(): string {
+    return (
+      this._options?.loggedInIdentity ||
+      (typeof window.location !== 'undefined' ? window.location.hostname : '')
+    );
+  }
+
+  isOwner(): boolean {
+    return (
+      this._options &&
+      this.isAuthenticated() &&
+      this.getLoggedInIdentity() === this.getHostIdentity()
+    );
+  }
+
+  isAuthenticated(): boolean {
+    return this._options && !!this.getSharedSecret();
+  }
+
   getRoot(): string {
-    return `https://${this.getIdentity()}`;
+    return `https://${this.getHostIdentity()}`;
   }
 
   //Returns the endpoint for the identity

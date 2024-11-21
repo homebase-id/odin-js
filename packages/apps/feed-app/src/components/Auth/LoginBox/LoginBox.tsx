@@ -1,5 +1,5 @@
 import { useYouAuthAuthorization } from '../../../hooks/auth/useAuth';
-import { COMMUNITY_ROOT_PATH, IS_DARK_CLASSNAME, LoadingBlock } from '@homebase-id/common-app';
+import { FEED_ROOT_PATH, IS_DARK_CLASSNAME, LoadingBlock } from '@homebase-id/common-app';
 import { Loader } from '@homebase-id/common-app/icons';
 import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import { Helmet } from 'react-helmet-async';
@@ -22,14 +22,17 @@ const useParams = (returnUrl: string) => {
 
 export const LoginBox = () => {
   const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
-  const { data: authParams, isLoading } = useParams(returnUrl || COMMUNITY_ROOT_PATH || '/');
+  const { data: authParams, isLoading } = useParams(returnUrl || FEED_ROOT_PATH || '/');
 
   const stringifiedAuthParams = authParams && stringifyToQueryParams(authParams);
   const isDarkMode = document.documentElement.classList.contains(IS_DARK_CLASSNAME);
 
-  const isAutoAuthorize = window.location.pathname.startsWith(COMMUNITY_ROOT_PATH);
+  const isAutoAuthorize = window.location.pathname.startsWith(FEED_ROOT_PATH);
 
-  const host = new DotYouClient({ api: ApiType.Guest, identity: window.location.host }).getRoot();
+  const host = new DotYouClient({
+    api: ApiType.Guest,
+    hostIdentity: window.location.host,
+  }).getRoot();
   useEffect(() => {
     if (isAutoAuthorize && stringifiedAuthParams)
       window.location.href = `${host}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
@@ -59,7 +62,7 @@ export const LoginBox = () => {
 
 export const AutoAuthorize = () => {
   const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
-  const { data: authParams } = useParams(returnUrl || COMMUNITY_ROOT_PATH || '/');
+  const { data: authParams } = useParams(returnUrl || FEED_ROOT_PATH || '/');
   const stringifiedAuthParams = authParams && stringifyToQueryParams(authParams);
 
   useEffect(() => {

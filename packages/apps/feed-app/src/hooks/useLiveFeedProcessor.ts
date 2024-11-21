@@ -3,10 +3,13 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { DotYouClient, TypedConnectionNotification } from '@homebase-id/js-lib/core';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
-import { invalidateSocialFeeds, useWebsocketSubscriber } from '@homebase-id/common-app';
+import {
+  invalidateSocialFeeds,
+  useDotYouClientContext,
+  useWebsocketSubscriber,
+} from '@homebase-id/common-app';
 import { BlogConfig } from '@homebase-id/js-lib/public';
 import { processInbox } from '@homebase-id/js-lib/peer';
-import { useDotYouClient } from '@homebase-id/common-app';
 import { useChannelDrives } from '@homebase-id/common-app';
 import { websocketDrives } from './auth/useAuth';
 
@@ -26,7 +29,7 @@ export const useLiveFeedProcessor = () => {
 // Process the inbox on startup
 const useInboxProcessor = (isEnabled?: boolean) => {
   const { data: chnlDrives, isFetchedAfterMount: channelsFetched } = useChannelDrives(!!isEnabled);
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchData = async () => {
     await processInbox(dotYouClient, BlogConfig.FeedDrive, 100);

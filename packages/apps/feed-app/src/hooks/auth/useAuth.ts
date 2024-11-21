@@ -1,12 +1,10 @@
 import { DrivePermissionType } from '@homebase-id/js-lib/core';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useVerifyToken } from './useVerifyToken';
 import {
-  logout as logoutYouauth,
   finalizeAuthentication as finalizeAuthenticationYouAuth,
   getRegistrationParams,
   preAuth as preauthApps,
-  retrieveIdentity,
   saveIdentity,
   createEccPair,
   YouAuthorizationParams,
@@ -25,54 +23,31 @@ import {
   APP_AUTH_TOKEN,
   APP_SHARED_SECRET,
   FEED_ROOT_PATH,
+  logoutOwnerAndAllApps,
   useDotYouClient,
 } from '@homebase-id/common-app';
-import { clear } from 'idb-keyval';
 
-export const useAuth = () => {
-  const { getDotYouClient, getSharedSecret, hasSharedSecret } = useDotYouClient();
+export const useValidateAuthorization = () => {
+  const { getDotYouClient, hasSharedSecret } = useDotYouClient();
 
-  const [authenticationState, setAuthenticationState] = useState<
-    'unknown' | 'anonymous' | 'authenticated'
-  >(hasSharedSecret ? 'unknown' : 'anonymous');
   const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(getDotYouClient());
-
-  const logout = async (): Promise<void> => {
-    await logoutYouauth(getDotYouClient());
-
-    localStorage.removeItem(APP_SHARED_SECRET);
-    localStorage.removeItem(APP_AUTH_TOKEN);
-    setAuthenticationState('anonymous');
-
-    window.location.href = '/';
-    clear();
-  };
-
-  const preauth = async (): Promise<void> => await preauthApps(getDotYouClient());
 
   useEffect(() => {
     if (isFetchedAfterMount && hasValidToken !== undefined) {
-      setAuthenticationState(hasValidToken ? 'authenticated' : 'anonymous');
-
-      if (!hasValidToken) {
-        setAuthenticationState('anonymous');
-        if (window.localStorage.getItem(APP_SHARED_SECRET)) {
-          console.warn('Token is invalid, logging out..');
-          // Auth state was presumed logged in, but not allowed.. Will attempt reload page?
-          //  (Browsers may ignore, as it's not a reload on user request)
-          logout();
-        }
+      if (!hasValidToken && hasSharedSecret) {
+        console.warn('Token is invalid, logging out..');
+        logoutOwnerAndAllApps();
       }
     }
-  }, [hasValidToken]);
+  }, [hasValidToken, hasSharedSecret]);
+};
+
+export const useAuth = () => {
+  const { getDotYouClient } = useDotYouClient();
+  const preauth = async (): Promise<void> => await preauthApps(getDotYouClient());
 
   return {
-    logout,
     preauth,
-    getDotYouClient,
-    getSharedSecret,
-    getIdentity: retrieveIdentity,
-    isAuthenticated: authenticationState !== 'anonymous',
   };
 };
 

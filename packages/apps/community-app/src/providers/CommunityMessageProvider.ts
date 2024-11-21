@@ -196,7 +196,7 @@ export const uploadCommunityMessage = async (
   let uploadResult: UploadResult | TransitUploadResult | void;
   if (
     community.fileMetadata.senderOdinId &&
-    community.fileMetadata.senderOdinId !== dotYouClient.getIdentity()
+    community.fileMetadata.senderOdinId !== dotYouClient.getHostIdentity()
   ) {
     const transitInstructions: TransitInstructionSet = {
       remoteTargetDrive: targetDrive,
@@ -310,7 +310,7 @@ export const updateCommunityMessage = async (
   const encryptedKeyHeader = message.sharedSecretEncryptedKeyHeader;
   const odinId = community.fileMetadata.senderOdinId;
   const instructionSet: UpdateInstructionSet =
-    odinId && odinId !== dotYouClient.getIdentity()
+    odinId && odinId !== dotYouClient.getHostIdentity()
       ? {
           transferIv: getRandom16ByteArray(),
           locale: 'peer',
@@ -371,7 +371,7 @@ export const hardDeleteCommunityMessage = async (
   message: HomebaseFile<CommunityMessage>
 ) => {
   const targetDrive = getTargetDriveFromCommunityId(communityId);
-  if (odinId !== dotYouClient.getIdentity()) {
+  if (odinId !== dotYouClient.getHostIdentity()) {
     if (!message.fileMetadata.globalTransitId) {
       throw new Error('Global Transit Id is required for hard delete over peer');
     }
@@ -403,19 +403,19 @@ export const getCommunityMessage = async (
   const targetDrive = getTargetDriveFromCommunityId(communityId);
 
   const fileHeader =
-    odinId !== dotYouClient.getIdentity()
+    odinId !== dotYouClient.getHostIdentity()
       ? await getFileHeaderOverPeerByUniqueId<string>(
           dotYouClient,
           odinId,
           targetDrive,
           chatMessageId,
           {
-            decrypt: false,
+            decrypt: true,
             systemFileType,
           }
         )
       : await getFileHeaderByUniqueId<string>(dotYouClient, targetDrive, chatMessageId, {
-          decrypt: false,
+          decrypt: true,
           systemFileType,
         });
 
@@ -451,7 +451,7 @@ export const getCommunityMessages = async (
   };
 
   const response =
-    odinId && odinId !== dotYouClient.getIdentity()
+    odinId && odinId !== dotYouClient.getHostIdentity()
       ? await queryBatchOverPeer(dotYouClient, odinId, params, ro)
       : await queryBatch(dotYouClient, params, ro);
   return {
@@ -476,7 +476,7 @@ export const dsrToMessage = async (
 ): Promise<HomebaseFile<CommunityMessage> | null> => {
   try {
     const msgContent =
-      odinId && dotYouClient.getIdentity() !== odinId
+      odinId && dotYouClient.getHostIdentity() !== odinId
         ? await getContentFromHeaderOrPayloadOverPeer<CommunityMessage>(
             dotYouClient,
             odinId,

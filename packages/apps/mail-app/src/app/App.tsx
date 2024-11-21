@@ -37,7 +37,6 @@ const DebugDataPage = lazy(() =>
 
 import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
-import { useAuth } from '../hooks/auth/useAuth';
 
 const AUTH_PATH = MAIL_ROOT_PATH + '/auth';
 
@@ -47,7 +46,9 @@ import {
   OdinQueryClient,
   DotYouClientProvider,
   MAIL_ROOT_PATH,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
+import { useValidateAuthorization } from '../hooks/auth/useAuth';
 
 export const REACT_QUERY_CACHE_KEY = 'MAIL_REACT_QUERY_OFFLINE_CACHE';
 
@@ -85,13 +86,11 @@ function App() {
             path=""
             element={
               <RootRoute>
-                <DotYouClientProvider>
-                  <Layout>
-                    <Suspense fallback={<></>}>
-                      <Outlet />
-                    </Suspense>
-                  </Layout>
-                </DotYouClientProvider>
+                <Layout>
+                  <Suspense fallback={<></>}>
+                    <Outlet />
+                  </Suspense>
+                </Layout>
               </RootRoute>
             }
           >
@@ -134,14 +133,18 @@ function App() {
         cachedQueryKeys={REACT_QUERY_INCLUDED_QUERY_KEYS}
         type="indexeddb"
       >
-        <RouterProvider router={router} fallbackElement={<></>} />
+        <DotYouClientProvider>
+          <RouterProvider router={router} fallbackElement={<></>} />
+        </DotYouClientProvider>
       </OdinQueryClient>
     </HelmetProvider>
   );
 }
 
 const RootRoute = ({ children }: { children: ReactNode }) => {
-  const { isAuthenticated } = useAuth();
+  useValidateAuthorization();
+
+  const isAuthenticated = useDotYouClientContext().isAuthenticated();
 
   if (!isAuthenticated) {
     if (window.location.pathname === AUTH_PATH) return <>{children}</>;

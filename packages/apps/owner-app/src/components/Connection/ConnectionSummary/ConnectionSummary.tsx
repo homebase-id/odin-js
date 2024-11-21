@@ -1,7 +1,6 @@
 import { useContact } from '../../../hooks/contacts/useContact';
 import {
   t,
-  useDotYouClient,
   ErrorNotification,
   ActionButton,
   mergeStates,
@@ -9,6 +8,7 @@ import {
   useIdentityIFollow,
   useCircles,
   useConnection,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import {
   Envelope,
@@ -58,7 +58,7 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
   const {
     fetch: { data: connectionInfo },
   } = useConnection({ odinId: odinId });
-  const { getIdentity } = useDotYouClient();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
 
   const {
     fetch: { data: introducerConnectioInfo },
@@ -75,7 +75,6 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
   const contactContent = contact?.fileMetadata.appData.content;
 
   const isConnected = connectionInfo?.status === 'connected';
-  const identity = getIdentity();
 
   const isConnectedWithIntroducer = introducerConnectioInfo?.status === 'connected';
   const isFollowing = !followStateFetched ? undefined : !!identityIfollow;
@@ -92,8 +91,8 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
               {connectionInfo?.connectionRequestOrigin === 'introduction' ? (
                 <p className="flex gap-1 text-sm">
                   <a
-                    href={`${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${
-                      isConnected && identity ? '?youauth-logon=' + identity : ''
+                    href={`${new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}${
+                      isConnected && loggedOnIdentity ? '?youauth-logon=' + loggedOnIdentity : ''
                     }`}
                     rel="noopener noreferrer"
                     target="_blank"
@@ -103,8 +102,10 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
                   </a>
                   {t('was introduced by')}
                   <a
-                    href={`${new DotYouClient({ identity: connectionInfo?.introducerOdinId, api: ApiType.Guest }).getRoot()}${
-                      isConnectedWithIntroducer && identity ? '?youauth-logon=' + identity : ''
+                    href={`${new DotYouClient({ hostIdentity: connectionInfo?.introducerOdinId, api: ApiType.Guest }).getRoot()}${
+                      isConnectedWithIntroducer && loggedOnIdentity
+                        ? '?youauth-logon=' + loggedOnIdentity
+                        : ''
                     }`}
                     rel="noopener noreferrer"
                     target="_blank"
@@ -115,8 +116,8 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
                 </p>
               ) : (
                 <a
-                  href={`${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${
-                    isConnected && identity ? '?youauth-logon=' + identity : ''
+                  href={`${new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}${
+                    isConnected && loggedOnIdentity ? '?youauth-logon=' + loggedOnIdentity : ''
                   }`}
                   rel="noopener noreferrer"
                   target="_blank"

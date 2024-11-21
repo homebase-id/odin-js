@@ -6,7 +6,6 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { useDotYouClient } from '@homebase-id/common-app';
 import {
   UnifiedConversation,
   getConversation,
@@ -29,7 +28,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const { conversationId } = props || {};
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
 
   const createConversation = async ({
     recipients,
@@ -40,7 +39,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   }) => {
     const newConversationId =
       recipients.length === 1
-        ? await getNewXorId(identity as string, recipients[0])
+        ? await getNewXorId(loggedOnIdentity as string, recipients[0])
         : formatGuidId(getNewId());
 
     if (recipients.length === 1) {
@@ -48,7 +47,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       if (existingConversation) return { ...existingConversation, newConversationId };
     }
 
-    const updatedRecipients = [...new Set([...recipients, identity as string])];
+    const updatedRecipients = [...new Set([...recipients, loggedOnIdentity as string])];
 
     const newConversation: NewHomebaseFile<UnifiedConversation> = {
       fileMetadata: {

@@ -1,6 +1,6 @@
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { t } from '../../../../../helpers';
-import { useDotYouClient } from '../../../../../hooks';
+import { useDotYouClientContext } from '../../../../../hooks';
 import { AuthorName } from '../../../Author/Name';
 import { Block, Pencil, Times } from '../../../../../ui/Icons';
 import { ActionGroup } from '../../../../../ui';
@@ -16,23 +16,22 @@ export const CommentHead = ({
   commentBody: string;
   onRemove?: () => void;
 }) => {
-  const { getIdentity } = useDotYouClient();
-  const identity = getIdentity();
-  const isAuthor = authorOdinId === identity;
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const isAuthor = authorOdinId === loggedOnIdentity;
 
   const actionOptions = [];
 
-  if (identity && isAuthor && setIsEdit && onRemove) {
+  if (loggedOnIdentity && isAuthor && setIsEdit && onRemove) {
     actionOptions.push({ label: t('Edit'), onClick: () => setIsEdit(true), icon: Pencil });
     actionOptions.push({ label: t('Remove'), onClick: onRemove, icon: Times });
   }
 
   // idenity && to make sure the user is logged in
-  if (identity && !isAuthor) {
+  if (loggedOnIdentity && !isAuthor) {
     actionOptions.push({
       icon: Block,
       label: `${t('Block this user')}`,
-      href: `${new DotYouClient({ identity, api: ApiType.Guest }).getRoot()}/owner/connections/${authorOdinId}/block`,
+      href: `${new DotYouClient({ hostIdentity: loggedOnIdentity, api: ApiType.Guest }).getRoot()}/owner/connections/${authorOdinId}/block`,
     });
   }
 

@@ -1,6 +1,11 @@
-import { PostImageDetailCard, t, useChannel, usePost } from '@homebase-id/common-app';
+import {
+  PostImageDetailCard,
+  t,
+  useChannel,
+  useDotYouClientContext,
+  usePost,
+} from '@homebase-id/common-app';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '../../../hooks/auth/useAuth';
 import { useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
@@ -13,7 +18,9 @@ const PostImageDetail = () => {
     postKey,
   });
 
-  const { isAuthenticated, isOwner } = useAuth();
+  const dotYouClient = useDotYouClientContext();
+  const isOwner = dotYouClient.isOwner();
+  const isAuthenticated = dotYouClient.isAuthenticated();
   const [isLogin, setIsLogin] = useState(false);
   const location = useLocation();
   const state = location.state as Record<string, unknown> | undefined;

@@ -16,6 +16,8 @@ export const CHAT_ROOT_PATH = '/apps/chat';
 export const MAIL_ROOT_PATH = '/apps/mail';
 export const COMMUNITY_ROOT_PATH = '/apps/community';
 
+export const APP_KEYS = ['feed', 'chat', 'mail', 'community'];
+
 export const COMMUNITY_ALLOWED_IDENTITIES = [
   'id.homebase.id',
   'michael.seifert.page',

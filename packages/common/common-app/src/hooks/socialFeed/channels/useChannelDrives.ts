@@ -1,11 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { BlogConfig } from '@homebase-id/js-lib/public';
 import { getDrivesByType } from '@homebase-id/js-lib/core';
-import { useDotYouClient } from '../../auth/useDotYouClient';
+import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
 
 export const useChannelDrives = (isEnabled: boolean) => {
-  const { getDotYouClient } = useDotYouClient();
-  const dotYouClient = getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchChannelData = async () => {
     return await (

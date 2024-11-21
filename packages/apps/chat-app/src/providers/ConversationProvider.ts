@@ -138,7 +138,7 @@ export const getConversation = async (dotYouClient: DotYouClient, conversationId
           recipients: (conversationHeader.fileMetadata.appData.content as GroupConversation)
             .recipients || [
             (conversationHeader.fileMetadata.appData.content as SingleConversation).recipient,
-            dotYouClient.getIdentity(),
+            dotYouClient.getHostIdentity(),
           ],
         },
       },
@@ -163,7 +163,7 @@ export const dsrToConversation = async (
     );
     if (!attrContent) return null;
 
-    const identity = dotYouClient.getIdentity();
+    const identity = dotYouClient.getHostIdentity();
     const conversation: HomebaseFile<UnifiedConversation> = {
       ...dsr,
       fileMetadata: {
@@ -198,7 +198,7 @@ export const uploadConversation = async (
   distribute: boolean = false,
   onVersionConflict?: () => void
 ) => {
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getHostIdentity();
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: ChatDrive,
@@ -250,7 +250,7 @@ export const updateConversation = async (
   distribute = false,
   ignoreConflict = false
 ): Promise<UploadResult | void> => {
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getHostIdentity();
   const uploadInstructions: UpdateHeaderInstructionSet = {
     storageOptions: {
       drive: ChatDrive,

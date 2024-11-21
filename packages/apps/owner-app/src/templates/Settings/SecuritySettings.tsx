@@ -1,4 +1,11 @@
-import { t, Alert, ActionButton, Label, logoutOwnerAndAllApps } from '@homebase-id/common-app';
+import {
+  t,
+  Alert,
+  ActionButton,
+  Label,
+  logoutOwnerAndAllApps,
+  useDotYouClientContext,
+} from '@homebase-id/common-app';
 import { useState } from 'react';
 import Section from '../../components/ui/Sections/Section';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -12,14 +19,15 @@ export const SecuritySettings = () => {
   const [password, setPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
 
-  const { changePassword, getDotYouClient } = useAuth();
+  const { changePassword } = useAuth();
+  const dotYouClient = useDotYouClientContext();
 
   const passwordIsValid = password === retypePassword && password !== '';
 
   const doSetNewPassword = async () => {
     setState('loading');
 
-    if (await changePassword(getDotYouClient(), oldPassword, password)) setState('success');
+    if (await changePassword(dotYouClient, oldPassword, password)) setState('success');
     else setState('error');
   };
 
@@ -32,7 +40,7 @@ export const SecuritySettings = () => {
               {t('Your password has been changed successfully, please login again')}
             </p>
             <div className="mt-5 flex flex-row-reverse">
-              <ActionButton onClick={() => logoutOwnerAndAllApps()}>{t('Open login')}</ActionButton>
+              <ActionButton onClick={logoutOwnerAndAllApps}>{t('Open login')}</ActionButton>
             </div>
           </>
         ) : state === 'error' ? (
@@ -84,7 +92,7 @@ export const SecuritySettings = () => {
             <PasswordStrength password={password} userInputs={[oldPassword]} className="mb-2" />
 
             <div className="mb-2">
-              <Label htmlFor="retypepassword" className="text-sm leading-7  dark:text-gray-400">
+              <Label htmlFor="retypepassword" className="text-sm leading-7 dark:text-gray-400">
                 {t('Retype your new password')}
               </Label>
               <PasswordInput

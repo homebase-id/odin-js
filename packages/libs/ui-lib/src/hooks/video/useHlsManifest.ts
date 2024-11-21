@@ -24,7 +24,7 @@ export const useHlsManifest = (
   videoDrive?: TargetDrive,
   systemFileType?: SystemFileType
 ): { fetch: UseQueryResult<string | null, Error> } => {
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getHostIdentity();
   const { data: videoFileData, isFetched: videoFileDataFetched } = useVideo(
     dotYouClient,
     odinId,
@@ -152,7 +152,7 @@ const getSegmentUrl = async (
   isEncrypted: boolean,
   systemFileType?: SystemFileType
 ) => {
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getHostIdentity();
   if (!isEncrypted)
     return await getAnonymousDirectImageUrl(
       odinId || identity,

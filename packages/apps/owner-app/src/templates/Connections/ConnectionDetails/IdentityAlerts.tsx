@@ -71,7 +71,7 @@ export const IdentityAlerts = ({ odinId }: { odinId: string | undefined }) => {
                       { senderOdinId: connectionInfo.senderOdinId },
                       { onSuccess: () => navigate('/owner/connections') }
                     );
-                    checkReturnTo('Ignored');
+                    if (checkReturnTo('Ignored')) return;
                   }}
                   state={ignoreRequestStatus}
                   icon={Times}

@@ -22,6 +22,7 @@ import { MessageComposer } from '../../components/Community/Message/MessageCompo
 import { CommunityHistory } from '../../components/Community/channel/CommunityHistory';
 import { useMarkCommunityAsRead } from '../../hooks/community/useMarkCommunityAsRead';
 import { CommunityThread } from '../../components/Community/CommunityThread';
+import { useEditLastMessageShortcut } from '../../hooks/community/messages/useEditLastMessageShortcut';
 
 export const CommunityChannelDetail = () => {
   const { odinKey, communityKey: communityId, channelKey: channelId, threadKey } = useParams();
@@ -35,6 +36,7 @@ export const CommunityChannelDetail = () => {
   }).fetch;
 
   useMarkCommunityAsRead({ odinId: odinKey, communityId, channelId });
+  const keyDownHandler = useEditLastMessageShortcut({ community, channel: channelDsr });
 
   if (!community && isFetched)
     return (
@@ -76,7 +78,12 @@ export const CommunityChannelDetail = () => {
               />
             </ErrorBoundary>
             <ErrorBoundary>
-              <MessageComposer community={community} channel={channelDsr} key={channelId} />
+              <MessageComposer
+                community={community}
+                channel={channelDsr}
+                key={channelId}
+                onKeyDown={keyDownHandler}
+              />
             </ErrorBoundary>
           </div>
 

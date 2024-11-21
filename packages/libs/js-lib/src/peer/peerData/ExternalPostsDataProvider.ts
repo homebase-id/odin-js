@@ -19,7 +19,7 @@ import {
 import { getDrivesByTypeOverPeer } from './Drive/PeerDriveProvider';
 import { getContentFromHeaderOrPayloadOverPeerByGlobalTransitId } from './File/PeerFileByGlobalTransitProvider';
 import { getContentFromHeaderOrPayloadOverPeer } from './File/PeerFileProvider';
-import { queryBatchOverPeer } from './Query/PeerDriveQueryProvider';
+import { queryBatchOverPeer } from './Query/PeerDriveQueryService';
 
 const _internalChannelCache = new Map<string, Promise<HomebaseFile<ChannelDefinition>[]>>();
 
@@ -71,7 +71,7 @@ export const getSocialFeed = async (
   ).filter(Boolean) as HomebaseFile<PostContent>[];
 
   if (ownOption) {
-    // const ownerDotYou = dotYouClient.getIdentity() || window.location.hostname;
+    // const ownerDotYou = dotYouClient.getHostIdentity() || window.location.hostname;
     const resultOfOwn = await getRecentPosts(
       dotYouClient,
       undefined,

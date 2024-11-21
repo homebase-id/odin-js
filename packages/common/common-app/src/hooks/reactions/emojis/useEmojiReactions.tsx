@@ -2,12 +2,12 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { GetTargetDriveFromChannelId, ReactionContext } from '@homebase-id/js-lib/public';
 
 import { getReactions, EmojiReaction } from '@homebase-id/js-lib/core';
-import { useDotYouClient } from '../../auth/useDotYouClient';
+import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
 
 const PAGE_SIZE = 15;
 
 export const useEmojiReactions = (context?: ReactionContext) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetch = async ({
     context,

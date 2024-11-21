@@ -1,9 +1,8 @@
 import { FC, ReactNode, Suspense, lazy } from 'react';
 import { useTheme } from '../../../hooks/theme/useTheme';
-import { useAuth } from '../../../hooks/auth/useAuth';
 import { ScrollRestoration } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Toaster, useImage } from '@homebase-id/common-app';
+import { Toaster, useDotYouClientContext, useImage } from '@homebase-id/common-app';
 import { GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { HomePageConfig } from '@homebase-id/js-lib/public';
 
@@ -19,7 +18,7 @@ interface LayoutProps {
 }
 
 export const Layout: FC<LayoutProps> = ({ children }) => {
-  const { isOwner } = useAuth();
+  const isOwner = useDotYouClientContext().isOwner();
 
   return (
     <NoLayout>
@@ -41,7 +40,7 @@ export const Layout: FC<LayoutProps> = ({ children }) => {
 };
 
 export const NoLayout: FC<LayoutProps> = ({ children }) => {
-  const { isOwner } = useAuth();
+  const isOwner = useDotYouClientContext().isOwner();
   const { colors, favicon, imageFileId } = useTheme();
 
   const { data: imageData } = useImage({

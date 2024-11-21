@@ -1,8 +1,8 @@
 import { tryJsonParse } from '../../helpers/DataUtil';
 
 import { DotYouClient } from '../DotYouClient';
-import { EmojiReaction } from '../DriveData/File/DriveFileReactionTypes';
 import {
+  EmojiReaction,
   FileIdFileIdentifier,
   GlobalTransitIdFileIdentifier,
 } from '../DriveData/File/DriveFileTypes';
@@ -24,7 +24,7 @@ export const uploadReaction = async (
   odinId: string | undefined,
   file: FileIdFileIdentifier | GlobalTransitIdFileIdentifier
 ): Promise<string> => {
-  const isLocal = odinId === dotYouClient.getIdentity();
+  const isLocal = odinId === dotYouClient.getHostIdentity();
   const client = dotYouClient.createAxiosClient();
 
   const data = {
@@ -55,7 +55,7 @@ export const deleteReaction = async (
   odinId: string | undefined,
   file: FileIdFileIdentifier | GlobalTransitIdFileIdentifier
 ): Promise<string> => {
-  const isLocal = odinId === dotYouClient.getIdentity();
+  const isLocal = odinId === dotYouClient.getHostIdentity();
   const client = dotYouClient.createAxiosClient();
 
   const data = {
@@ -90,7 +90,7 @@ export const getReactions = async (
   pageSize = 15,
   cursor?: string
 ): Promise<{ reactions: EmojiReaction[]; cursor: string } | undefined> => {
-  const isLocal = odinId === dotYouClient.getIdentity();
+  const isLocal = odinId === dotYouClient.getHostIdentity();
   const client = dotYouClient.createAxiosClient();
 
   const data = {

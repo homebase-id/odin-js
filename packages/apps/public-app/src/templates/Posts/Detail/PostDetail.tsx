@@ -6,11 +6,10 @@ import {
   RelatedArticles,
   t,
   useChannel,
+  useDotYouClientContext,
   usePost,
 } from '@homebase-id/common-app';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
-
-import { useAuth } from '../../../hooks/auth/useAuth';
 import { Article } from '@homebase-id/js-lib/public';
 import { useState } from 'react';
 import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
@@ -24,7 +23,9 @@ const PostDetail = () => {
     postKey,
   });
 
-  const { isOwner, isAuthenticated } = useAuth();
+  const dotYouClient = useDotYouClientContext();
+  const isOwner = dotYouClient.isOwner();
+  const isAuthenticated = dotYouClient.isAuthenticated();
   const [isLogin, setIsLogin] = useState(false);
 
   if (!postData && !postDataLoading) {

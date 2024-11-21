@@ -1,10 +1,12 @@
-import { SubtleMessage, t } from '@homebase-id/common-app';
+import { SubtleMessage, t, useDotYouClientContext } from '@homebase-id/common-app';
 import { useChannels } from '@homebase-id/common-app';
 import { PostChannelTeaser } from '../PostChannelTeaser/PostChannelTeaser';
-import { useAuth } from '../../../../hooks/auth/useAuth';
 
 const HorizontalPosts = () => {
-  const { isAuthenticated, isOwner } = useAuth();
+  const dotYouClient = useDotYouClientContext();
+  const isOwner = dotYouClient.isOwner();
+  const isAuthenticated = dotYouClient.isAuthenticated();
+
   const { data: channels } = useChannels({ isAuthenticated, isOwner });
 
   if (!channels?.length) {

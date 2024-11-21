@@ -84,7 +84,7 @@ export const getCommunityChannels = async (
   };
 
   const response =
-    odinId && dotYouClient.getIdentity() !== odinId
+    odinId && dotYouClient.getHostIdentity() !== odinId
       ? await queryBatchOverPeer(dotYouClient, odinId, params, ro)
       : await queryBatch(dotYouClient, params, ro);
   const serverChannels =
@@ -115,7 +115,7 @@ export const getCommunityChannel = async (
 
   const targetDrive = getTargetDriveFromCommunityId(communityId);
 
-  if (odinId && odinId !== dotYouClient.getIdentity()) {
+  if (odinId && odinId !== dotYouClient.getHostIdentity()) {
     throw new Error('Not implemented');
   }
   const dsr = await getFileHeaderByUniqueId(dotYouClient, targetDrive, channelId);
@@ -156,7 +156,7 @@ export const saveCommunityChannel = async (
   };
 
   let uploadResult: UploadResult | TransitUploadResult | void;
-  if (community.fileMetadata.senderOdinId !== dotYouClient.getIdentity()) {
+  if (community.fileMetadata.senderOdinId !== dotYouClient.getHostIdentity()) {
     const transitInstructions: TransitInstructionSet = {
       remoteTargetDrive: targetDrive,
       transferIv: getRandom16ByteArray(),
@@ -196,7 +196,7 @@ export const dsrToCommunityChannel = async (
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<CommunityChannel> | undefined> => {
   const definitionContent =
-    odinId && dotYouClient.getIdentity() !== odinId
+    odinId && dotYouClient.getHostIdentity() !== odinId
       ? await getContentFromHeaderOrPayloadOverPeer<CommunityChannel>(
           dotYouClient,
           odinId,

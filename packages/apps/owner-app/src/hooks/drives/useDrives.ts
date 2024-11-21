@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { DriveDefinition, getDrives } from '@homebase-id/js-lib/core';
-import { useAuth } from '../auth/useAuth';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useDrives = () => {
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchAll = async (): Promise<DriveDefinition[]> => {
     return (await getDrives(dotYouClient, { pageNumber: 1, pageSize: 100 })).results;

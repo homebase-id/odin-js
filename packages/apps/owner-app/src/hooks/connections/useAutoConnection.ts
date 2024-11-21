@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '../auth/useAuth';
 
 import { confirmIntroduction, AUTO_CONNECTIONS_CIRCLE_ID } from '@homebase-id/js-lib/network';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
@@ -7,12 +6,13 @@ import {
   invalidateConnectionInfo,
   updateCachedConnectionInfo,
   useConnection,
+  useDotYouClientContext,
   useFollowingInfinite,
 } from '@homebase-id/common-app';
 
 export const useAutoConnection = ({ odinId }: { odinId?: string }) => {
   const queryClient = useQueryClient();
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const { fetch: connectionInfoQuery } = useConnection({ odinId: odinId });
 
   const { mutateAsync: follow } = useFollowingInfinite().follow;

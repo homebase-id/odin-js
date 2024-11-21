@@ -3,9 +3,8 @@ import {
   HOME_SHARED_SECRET,
   OWNER_SHARED_SECRET,
   hasValidOwnerToken,
+  hasValidPublicToken,
 } from '@homebase-id/common-app';
-
-import { hasValidToken as hasValidYouAuthToken } from '../../provider/AuthenticationProvider';
 
 const MINUTE_IN_MS = 60000;
 
@@ -22,7 +21,7 @@ export const useVerifyToken = (isOwner?: boolean) => {
     if (!hasSharedSecret(isOwner)) return false;
 
     if (isOwner) return await hasValidOwnerToken();
-    else return await hasValidYouAuthToken();
+    else return await hasValidPublicToken();
   };
   return useQuery({
     queryKey: ['verifyToken'],

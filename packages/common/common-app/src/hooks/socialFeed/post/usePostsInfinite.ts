@@ -9,7 +9,7 @@ import {
 import { getCachedPosts, getCachedRecentPosts } from './cachedDataHelpers';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useChannels } from '../channels/useChannels';
-import { useDotYouClient } from '../../auth/useDotYouClient';
+import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
 
 type usePostsInfiniteProps = {
   channelId?: string;
@@ -30,9 +30,9 @@ export const usePostsInfinite = ({
   enabled = true,
   includeHidden = false,
 }: usePostsInfiniteProps) => {
-  const { getDotYouClient, isOwner, getIdentity } = useDotYouClient();
-  const dotYouClient = getDotYouClient();
-  const isAuthenticated = isOwner || !!getIdentity();
+  const dotYouClient = useDotYouClientContext();
+  const isOwner = dotYouClient.isOwner();
+  const isAuthenticated = dotYouClient.isAuthenticated();
   const { data: channels } = useChannels({ isAuthenticated, isOwner });
 
   const fetchBlogData = async ({

@@ -4,7 +4,7 @@ import {
   getReactionSummary,
   ReactionContext,
 } from '@homebase-id/js-lib/public';
-import { useDotYouClient } from '../../auth/useDotYouClient';
+import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
 
 export const useEmojiSummary = ({
   context,
@@ -13,7 +13,7 @@ export const useEmojiSummary = ({
   context: ReactionContext;
   reactionPreview?: EmojiReactionSummary;
 }) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetch = async (context: ReactionContext): Promise<EmojiReactionSummary> => {
     if (

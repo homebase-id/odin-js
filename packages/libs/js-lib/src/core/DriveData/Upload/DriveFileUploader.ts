@@ -29,7 +29,7 @@ import {
 import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFileProvider';
 import { getRandom16ByteArray } from '../../../helpers/DataUtil';
 import { AxiosRequestConfig } from 'axios';
-import { deletePayload } from '../File/DriveFileManageProvider';
+import { deletePayload } from '../File/DriveFileManager';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;

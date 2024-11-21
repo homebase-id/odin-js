@@ -16,7 +16,6 @@ import {
   UpdateResult,
 } from '@homebase-id/js-lib/core';
 import { HomebaseFile, NewHomebaseFile, UploadResult } from '@homebase-id/js-lib/core';
-import { useDotYouClient } from '../../auth/useDotYouClient';
 import { getRichTextFromString } from '../../../helpers/richTextHelper';
 import { TransitUploadResult } from '@homebase-id/js-lib/peer';
 import { LinkPreview } from '@homebase-id/js-lib/media';
@@ -25,11 +24,12 @@ import { invalidatePosts } from './usePostsInfinite';
 import { invalidateSocialFeeds, updateCacheSocialFeeds } from '../useSocialFeed';
 import { invalidatePost } from './usePost';
 import { formatGuidId } from '@homebase-id/js-lib/helpers';
+import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
 
 export const useManagePost = () => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
-  const identity = useDotYouClient().getIdentity();
+  const loggedInIdentity = dotYouClient.getLoggedInIdentity();
 
   const savePost = async ({
     postFile,
@@ -188,7 +188,7 @@ export const useManagePost = () => {
         if (variables.postFile.fileMetadata.appData.content.slug) {
           invalidatePost(
             queryClient,
-            variables.odinId || dotYouClient.getIdentity(),
+            variables.odinId || dotYouClient.getHostIdentity(),
             variables.channelId,
             variables.postFile.fileMetadata.appData.content.slug
           );
@@ -198,19 +198,19 @@ export const useManagePost = () => {
 
         invalidatePost(
           queryClient,
-          variables.odinId || dotYouClient.getIdentity(),
+          variables.odinId || dotYouClient.getHostIdentity(),
           variables.channelId,
           variables.postFile.fileId
         );
         invalidatePost(
           queryClient,
-          variables.odinId || dotYouClient.getIdentity(),
+          variables.odinId || dotYouClient.getHostIdentity(),
           variables.channelId,
           variables.postFile.fileMetadata.appData.content.id
         );
         invalidatePost(
           queryClient,
-          variables.odinId || dotYouClient.getIdentity(),
+          variables.odinId || dotYouClient.getHostIdentity(),
           variables.channelId,
           formatGuidId(variables.postFile.fileMetadata.appData.content.id)
         );
@@ -245,7 +245,7 @@ export const useManagePost = () => {
           fileMetadata: {
             ...newPost.postFile.fileMetadata,
             senderOdinId: newPost.odinId,
-            originalAuthor: identity,
+            originalAuthor: loggedInIdentity,
             appData: {
               ...newPost.postFile.fileMetadata.appData,
               content: {
@@ -291,30 +291,30 @@ export const useManagePost = () => {
         if (variables.postFile.fileMetadata.appData.content.slug) {
           invalidatePost(
             queryClient,
-            dotYouClient.getIdentity(),
+            dotYouClient.getHostIdentity(),
             variables.channelId,
             variables.postFile.fileMetadata.appData.content.slug
           );
         } else {
-          invalidatePost(queryClient, dotYouClient.getIdentity(), variables.channelId);
+          invalidatePost(queryClient, dotYouClient.getHostIdentity(), variables.channelId);
         }
 
         // Too many invalidates, but during article creation, the slug is not known
         invalidatePost(
           queryClient,
-          dotYouClient.getIdentity(),
+          dotYouClient.getHostIdentity(),
           variables.channelId,
           variables.postFile.fileId
         );
         invalidatePost(
           queryClient,
-          dotYouClient.getIdentity(),
+          dotYouClient.getHostIdentity(),
           variables.channelId,
           variables.postFile.fileMetadata.appData.content.slug
         );
         invalidatePost(
           queryClient,
-          dotYouClient.getIdentity(),
+          dotYouClient.getHostIdentity(),
           variables.channelId,
           formatGuidId(variables.postFile.fileMetadata.appData.content.id)
         );
@@ -358,12 +358,12 @@ export const useManagePost = () => {
         if (variables && variables.postFile.fileMetadata.appData.content.slug) {
           invalidatePost(
             queryClient,
-            dotYouClient.getIdentity(),
+            dotYouClient.getHostIdentity(),
             variables.channelId,
             variables.postFile.fileMetadata.appData.content.slug
           );
         } else {
-          invalidatePost(queryClient, dotYouClient.getIdentity(), variables.channelId);
+          invalidatePost(queryClient, dotYouClient.getHostIdentity(), variables.channelId);
         }
 
         invalidatePosts(queryClient, variables.postFile.fileMetadata.appData.content.channelId);

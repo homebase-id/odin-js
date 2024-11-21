@@ -1,14 +1,19 @@
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
-import { useSiteData, useExternalOdinId, useIsConnected, useDotYouClient } from '../../../..';
+import {
+  useSiteData,
+  useExternalOdinId,
+  useIsConnected,
+  useDotYouClientContext,
+} from '../../../..';
 
 export const AuthorName = ({ odinId, excludeLink }: { odinId?: string; excludeLink?: boolean }) => {
   if (!odinId || odinId === window.location.hostname) return <OwnerName />;
 
-  const identity = useDotYouClient().getIdentity();
+  const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
   const isConnected = useIsConnected(odinId).data;
 
   const host = new DotYouClient({
-    identity: odinId,
+    hostIdentity: odinId,
     api: ApiType.Guest,
   }).getRoot();
 
@@ -17,7 +22,7 @@ export const AuthorName = ({ odinId, excludeLink }: { odinId?: string; excludeLi
   }
   return (
     <a
-      href={`${host}${isConnected && identity ? '?youauth-logon=' + identity : ''}`}
+      href={`${host}${isConnected && loggedInIdentity ? '?youauth-logon=' + loggedInIdentity : ''}`}
       className="hover:underline"
     >
       <ConnectionName odinId={odinId} />

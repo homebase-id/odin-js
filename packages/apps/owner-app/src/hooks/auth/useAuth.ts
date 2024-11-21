@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useVerifyToken } from './useVerifyToken';
 import {
@@ -13,10 +13,10 @@ import {
   HOME_SHARED_SECRET,
   OWNER_SHARED_SECRET,
   STORAGE_IDENTITY_KEY,
-  logoutOwner,
+  logoutOwnerAndAllApps,
+  logoutPublicSession,
   useDotYouClient,
 } from '@homebase-id/common-app';
-import { clear } from 'idb-keyval';
 
 export const SETUP_PATH = '/owner/setup';
 
@@ -27,32 +27,37 @@ export const RECOVERY_PATH = '/owner/account-recovery';
 export const RETURN_URL_PARAM = 'returnUrl';
 export const HOME_PATH = '/owner';
 
-export const useAuth = () => {
-  const { getDotYouClient, getApiType, getSharedSecret, hasSharedSecret } = useDotYouClient();
-
-  const [authenticationState, setAuthenticationState] = useState<
-    'unknown' | 'anonymous' | 'authenticated'
-  >(hasSharedSecret ? 'unknown' : 'anonymous');
+export const useValidateAuthorization = () => {
+  const { hasSharedSecret } = useDotYouClient();
   const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken();
 
+  useEffect(() => {
+    if (isFetchedAfterMount && hasValidToken !== undefined) {
+      if (!hasValidToken && hasSharedSecret) {
+        console.warn('Token is invalid, logging out..');
+        logoutOwnerAndAllApps();
+      }
+    }
+  }, [hasValidToken, hasSharedSecret]);
+};
+
+export const useAuth = () => {
   const [searchParams] = useSearchParams();
 
   const authenticate = async (password: string) => {
-    const response = await authenticateOwner(password);
-    if (!response) return false;
+    // Cleanup the public session: (There might have been a public login already in place)
+    await logoutPublicSession();
 
-    // Cleanup the public items: (There might have been a public login already in place)
-    // This will corrupt the publicly logged in state when the owner logs out...
-    // TODO: Find a better way to handle this
     window.localStorage.removeItem(HOME_SHARED_SECRET);
     window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
 
+    const response = await authenticateOwner(password);
+    if (!response) return false;
+
     // Store the owner items:
     window.localStorage.setItem(OWNER_SHARED_SECRET, uint8ArrayToBase64(response.sharedSecret));
-    setAuthenticationState('authenticated');
 
     checkRedirectToReturn();
-
     return true;
   };
 
@@ -63,25 +68,7 @@ export const useAuth = () => {
     await setFirstOwnerPassword(newPassword, firstRunToken);
   };
 
-  const logout = async (redirectPath?: string) => {
-    try {
-      await logoutOwner();
-    } catch (e) {
-      // We ignore server error states; And continue cleaning local storage
-      console.warn('Error logging out from server', e);
-    }
-    setAuthenticationState('anonymous');
-
-    window.localStorage.removeItem(OWNER_SHARED_SECRET);
-    window.localStorage.removeItem(HOME_SHARED_SECRET);
-    window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
-
-    clear();
-
-    window.location.href = redirectPath || LOGIN_PATH;
-  };
-
-  /// Redirects back to returnUrls; Explicitly uses window navigation to ensure that the anonymous state doesn't stick on the rootRoute
+  // Redirects back to returnUrls; Explicitly uses window navigation to ensure that the anonymous state doesn't stick on the rootRoute
   const checkRedirectToReturn = () => {
     if (window.location.pathname === LOGIN_PATH || window.location.pathname === FIRSTRUN_PATH) {
       const returnUrl = searchParams.get(RETURN_URL_PARAM);
@@ -89,44 +76,14 @@ export const useAuth = () => {
     }
   };
 
-  useEffect(() => {
-    if (isFetchedAfterMount && hasValidToken !== undefined) {
-      setAuthenticationState(hasValidToken && hasSharedSecret ? 'authenticated' : 'anonymous');
-
-      if (hasValidToken && hasSharedSecret) {
-        // When authenticated check if on Login Pages and if so redirects to return or Home
-        checkRedirectToReturn();
-      } else if (hasSharedSecret) {
-        (async () => {
-          console.error('kicking identity');
-          await logout();
-          window.location.reload();
-        })();
-      } else if (
-        window.location.pathname !== LOGIN_PATH &&
-        window.location.pathname !== FIRSTRUN_PATH &&
-        window.location.pathname !== RECOVERY_PATH
-      ) {
-        // When not authenticated and not on either of the Login Pages on the Owner app => redirect to regular login
-        window.location.href = `${LOGIN_PATH}?returnUrl=${encodeURIComponent(
-          window.location.pathname + window.location.search
-        )}`;
-      }
-    }
-  }, [hasValidToken]);
-
   return {
     authenticate,
+    checkRedirectToReturn,
     setFirstPassword: setFirstOwnerPassword,
     resetPassword: resetOwnerPassword,
     changePassword: setNewOwnerPassword,
-    getDotYouClient,
-    getApiType,
     finalizeRegistration,
     isPasswordSet: isPasswordSetOwner,
-    // logout => always uses the `logoutOwnerAndAllApps`,
-    getSharedSecret,
-    isAuthenticated: authenticationState !== 'anonymous',
   };
 };
 

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ImageSize, TargetDrive } from '@homebase-id/js-lib/core';
 import { getDecryptedImageUrl } from '@homebase-id/js-lib/media';
 import { getDecryptedImageUrlOverPeer } from '@homebase-id/js-lib/peer';
-import { useDotYouClient } from '../auth/useDotYouClient';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 export interface ImageData {
   url: string;
@@ -29,7 +29,7 @@ export const useImage = ({
   lastModified?: number;
 }) => {
   const localHost = window.location.hostname;
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchImageData = async (
     odinId: string,

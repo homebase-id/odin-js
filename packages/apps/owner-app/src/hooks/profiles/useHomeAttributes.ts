@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { getProfileAttributes } from '@homebase-id/js-lib/profile';
 import { HomePageAttributes, HomePageConfig } from '@homebase-id/js-lib/public';
-import { useAuth } from '../auth/useAuth';
 import { AttributeVm } from './useAttributes';
 import { AttributeDefinitions } from './AttributeDefinitions';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useHomeAttributes = () => {
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchTheme = async () => {
     const foundThemeAttributes = (

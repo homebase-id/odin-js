@@ -539,7 +539,7 @@ export const requestMarkAsRead = async (
       (msg) =>
         msg.fileMetadata.appData.content.deliveryStatus !== ChatDeliveryStatus.Read &&
         msg.fileMetadata.senderOdinId &&
-        msg.fileMetadata.senderOdinId !== dotYouClient.getIdentity()
+        msg.fileMetadata.senderOdinId !== dotYouClient.getHostIdentity()
     )
     .map((msg) => msg.fileId) as string[];
 

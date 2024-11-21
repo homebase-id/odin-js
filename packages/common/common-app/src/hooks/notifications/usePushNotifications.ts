@@ -17,11 +17,11 @@ import {
 } from '@homebase-id/js-lib/core';
 import { useEffect } from 'react';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { useDotYouClient } from '../auth/useDotYouClient';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 const PAGE_SIZE = 500;
 export const usePushNotifications = () => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
   const getNotifications = async (cursor: number | undefined) =>
@@ -160,7 +160,7 @@ export const insertNewNotification = (
 };
 
 export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const getNotificationCounts = async () => getNotificationCountsByAppId(dotYouClient);
 
   const getCounts = async () => (await getNotificationCounts()).unreadCounts;
@@ -180,7 +180,7 @@ export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
 };
 
 export const useRemoveNotifications = (props: { disabled?: boolean; appId: string }) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
   const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: props.appId });
 

@@ -15,13 +15,14 @@ import {
   SubtleMessage,
   t,
   useFollowerInfinite,
-  useDotYouClient,
   useIsConnected,
   IdentityTeaser,
   ActionGroup,
   useIdentityIFollow,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { Persons, AddressBook, House, Block, Times } from '@homebase-id/common-app/icons';
+import { useFocusedEditing } from '../../hooks/focusedEditing/useFocusedEditing';
 
 const Follow = () => {
   const followersMatch = useMatch({ path: 'owner/follow/followers/*' });
@@ -69,6 +70,7 @@ const Following = () => {
 
   const [searchParams] = useSearchParams();
   const channelsFromQueryString = searchParams.get('chnl')?.split(',') || undefined;
+  const checkReturnTo = useFocusedEditing();
 
   return (
     <>
@@ -94,8 +96,12 @@ const Following = () => {
         <IdentityIFollowEditDialog
           odinId={toFollowKey}
           isOpen={!!toFollowKey}
-          onConfirm={() => navigate(-1)}
-          onCancel={() => navigate(-1)}
+          onConfirm={() => {
+            if (!checkReturnTo()) navigate(-1);
+          }}
+          onCancel={() => {
+            if (!checkReturnTo()) navigate(-1);
+          }}
           defaultValues={toFollowKey ? channelsFromQueryString : undefined}
         />
       ) : null}
@@ -122,6 +128,7 @@ const Followers = () => {
 
   const { followerKey } = useParams();
   const navigate = useNavigate();
+  const checkReturnTo = useFocusedEditing();
 
   return (
     <>
@@ -148,8 +155,12 @@ const Followers = () => {
         <IdentityThatFollowsDialog
           odinId={followerKey}
           isOpen={!!followerKey}
-          onConfirm={() => navigate(-1)}
-          onCancel={() => navigate(-1)}
+          onConfirm={() => {
+            if (!checkReturnTo()) navigate(-1);
+          }}
+          onCancel={() => {
+            if (!checkReturnTo()) navigate(-1);
+          }}
         />
       ) : null}
     </>
@@ -159,7 +170,7 @@ const Followers = () => {
 const FollowIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void }) => {
   const { mutate: block } = useConnectionActions().block;
 
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const { data: isConnected } = useIsConnected(odinId);
 
   return (
@@ -188,7 +199,7 @@ const FollowIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void
               label: t('Open homepage'),
               onClick: () => {
                 window.open(
-                  `${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
+                  `${new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}${isConnected && loggedOnIdentity ? '?youauth-logon=' + loggedOnIdentity : ''}`,
                   '_blank'
                 );
               },
@@ -220,7 +231,7 @@ const FollowIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void
 const FollowingIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void }) => {
   const { mutate: unfollow } = useIdentityIFollow({ odinId }).unfollow;
 
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const { data: isConnected } = useIsConnected(odinId);
 
   return (
@@ -249,7 +260,7 @@ const FollowingIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => v
               label: t('Open homepage'),
               onClick: () => {
                 window.open(
-                  `${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
+                  `${new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}${isConnected && loggedOnIdentity ? '?youauth-logon=' + loggedOnIdentity : ''}`,
                   '_blank'
                 );
               },

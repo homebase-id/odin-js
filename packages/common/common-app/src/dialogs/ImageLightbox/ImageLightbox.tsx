@@ -7,7 +7,7 @@ import { ButtonColors } from '../../ui/Buttons/ColorConfig';
 import { usePortal } from '../../hooks/portal/usePortal';
 import { Times } from '../../ui/Icons/Times';
 import { OdinImage } from '@homebase-id/ui-lib';
-import { useDotYouClient } from '../../hooks/auth/useDotYouClient';
+import { useDotYouClientContext } from '../../hooks';
 
 export const ImageLightbox = ({
   targetDrive,
@@ -26,7 +26,7 @@ export const ImageLightbox = ({
   systemFileType?: SystemFileType;
   onClose: () => void;
 }) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const target = usePortal('modal-container');
 
   useEffect(() => {

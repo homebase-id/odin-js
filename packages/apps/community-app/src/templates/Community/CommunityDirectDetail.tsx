@@ -11,7 +11,7 @@ import { useConversation } from '@homebase-id/chat-app/src/hooks/chat/useConvers
 import { CommunityDirectComposer } from '../../components/Community/Message/CommunityDirectComposer';
 
 export const CommunityDirectDetail = () => {
-  const identity = useDotYouClientContext().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
 
   const { odinKey, communityKey, dmKey } = useParams();
   const communityId = communityKey;
@@ -23,12 +23,12 @@ export const CommunityDirectDetail = () => {
 
   const [conversationId, setConversationId] = useState<string | undefined>();
   useEffect(() => {
-    if (!dmKey || !identity) return;
+    if (!dmKey || !loggedOnIdentity) return;
     (async () => {
-      if (dmKey === identity) {
+      if (dmKey === loggedOnIdentity) {
         setConversationId(ConversationWithYourselfId);
       } else {
-        setConversationId(await getNewXorId(identity as string, dmKey));
+        setConversationId(await getNewXorId(loggedOnIdentity, dmKey));
       }
     })();
   }, [dmKey]);
