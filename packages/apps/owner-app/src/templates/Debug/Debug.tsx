@@ -1,6 +1,13 @@
-import { Label, Input, Select, ActionButton, t, Textarea } from '@homebase-id/common-app';
+import {
+  Label,
+  Input,
+  Select,
+  ActionButton,
+  t,
+  Textarea,
+  useDotYouClientContext,
+} from '@homebase-id/common-app';
 import { Times } from '@homebase-id/common-app/icons';
-import { useAuth } from '../../hooks/auth/useAuth';
 import { useEffect, useState } from 'react';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import {
@@ -19,7 +26,7 @@ interface DefaulValue {
 }
 
 const Debug = () => {
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const defaultValues = tryJsonParse<DefaulValue>(window.localStorage.getItem(STORAGE_KEY) || '');
 

@@ -1,6 +1,5 @@
-import { ActionLink, ellipsisAtMaxChar } from '@homebase-id/common-app';
+import { ActionLink, ellipsisAtMaxChar, useDotYouClientContext } from '@homebase-id/common-app';
 import { t } from '@homebase-id/common-app';
-import { useAuth } from '../../../hooks/auth/useAuth';
 
 import { Feed, Check } from '@homebase-id/common-app/icons';
 import { useFollowDetail } from '../../../hooks/follow/useFollowDetail';
@@ -15,8 +14,9 @@ const FollowLink = ({
   className?: string;
   channel?: HomebaseFile<ChannelDefinition>;
 }) => {
-  const { isOwner, getIdentity } = useAuth();
-  const loggedInIdentity = getIdentity();
+  const dotYouClient = useDotYouClientContext();
+  const loggedInIdentity = dotYouClient.getLoggedInIdentity();
+  const isOwner = dotYouClient.isOwner();
   const { data } = useFollowDetail().fetch;
 
   if (isOwner) return null;
@@ -35,7 +35,7 @@ const FollowLink = ({
         className={`w-auto ${className ?? ''}`}
         href={
           (loggedInIdentity
-            ? `${new DotYouClient({ identity: loggedInIdentity, api: ApiType.Guest }).getRoot()}/owner/follow/following/${window.location.hostname}?return=${encodeURIComponent(window.location.href)}`
+            ? `${new DotYouClient({ hostIdentity: loggedInIdentity, api: ApiType.Guest }).getRoot()}/owner/follow/following/${window.location.hostname}?return=${encodeURIComponent(window.location.href)}`
             : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect/owner/follow/following/${window.location.hostname}?return=${encodeURIComponent(window.location.href)}`) +
           (channel ? `?chnl=${channel.fileMetadata.appData.uniqueId}` : '')
         }

@@ -15,7 +15,7 @@ import {
   t,
   useChannelDrives,
   useCircles,
-  useDotYouClient,
+  useDotYouClientContext,
 } from '../../../..';
 import { drivesEqual, stringGuidsEqual, stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import {
@@ -56,7 +56,10 @@ const getExtendDriveDetailsUrl = (
     d: JSON.stringify(drives),
   };
 
-  const host = new DotYouClient({ identity: identity || undefined, api: ApiType.App }).getRoot();
+  const host = new DotYouClient({
+    hostIdentity: identity || undefined,
+    api: ApiType.App,
+  }).getRoot();
   return `${host}/owner/apprequest-drives?${stringifyToQueryParams(
     params
   )}&return=${encodeURIComponent(returnUrl)}`;
@@ -90,7 +93,10 @@ const getExtendCirclePermissionUrl = (
     c: circleIds.join(','),
   };
 
-  const host = new DotYouClient({ identity: identity || undefined, api: ApiType.App }).getRoot();
+  const host = new DotYouClient({
+    hostIdentity: identity || undefined,
+    api: ApiType.App,
+  }).getRoot();
   return `${host}/owner/apprequest-circles?${stringifyToQueryParams(
     params
   )}&return=${encodeURIComponent(returnUrl)}`;
@@ -98,8 +104,7 @@ const getExtendCirclePermissionUrl = (
 
 export const useCollaborativeChannel = (props?: { channelId: string }) => {
   const { channelId } = props || {};
-  const { getDotYouClient } = useDotYouClient();
-  const dotYouClient = getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
   const { data: channelDef, isFetched: isChannelFetched } = useChannel({
@@ -171,7 +176,7 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
 
     if (!collaborativeCircleIds.length) throw new Error('No circles found for channel');
 
-    const identity = dotYouClient.getIdentity();
+    const identity = dotYouClient.getHostIdentity();
     const returnUrl = `${FEED_ROOT_PATH}/channels`;
 
     const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);
@@ -209,7 +214,7 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
     delete (collaborativeChannelDef.fileMetadata.appData.content as any).acl;
     await saveChannelDefinition(dotYouClient, collaborativeChannelDef);
 
-    const identity = dotYouClient.getIdentity();
+    const identity = dotYouClient.getHostIdentity();
     const returnUrl = `${FEED_ROOT_PATH}/channels`;
 
     const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);

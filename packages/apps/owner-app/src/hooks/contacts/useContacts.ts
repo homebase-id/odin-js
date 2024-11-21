@@ -1,14 +1,13 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { CursoredResult, NewHomebaseFile } from '@homebase-id/js-lib/core';
-
-import { useAuth } from '../auth/useAuth';
 import { parseContact } from './useContact';
 import { ContactVm, getContacts } from '@homebase-id/js-lib/network';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 const pageSize = 10;
 
 export const useContacts = () => {
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetch = async (
     cursorState?: string

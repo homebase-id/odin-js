@@ -29,7 +29,7 @@ export const useAudio = (
   fetchUrl: UseQueryResult<string | null, Error>;
   fetch: UseQueryResult<{ bytes: Uint8Array; contentType: string } | null, Error>;
 } => {
-  const localHost = dotYouClient.getIdentity() || window.location.hostname;
+  const localHost = dotYouClient.getHostIdentity();
 
   const fetchAudioData = async (
     odinId: string,

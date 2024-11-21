@@ -1,9 +1,9 @@
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import { getCircles } from '@homebase-id/js-lib/network';
-import { useDotYouClient } from '../auth/useDotYouClient';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 export const useCircles = (excludeSystemCircles = false) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchAll = async () => {
     const circles = await getCircles(dotYouClient, excludeSystemCircles);

@@ -14,8 +14,8 @@ import {
   ResponseEntry,
 } from '@homebase-id/js-lib/public';
 import { HomebaseFile, EmbeddedThumb, queryBatchCollection } from '@homebase-id/js-lib/core';
-import { useDotYouClient } from '../auth/useDotYouClient';
 import { getHighestPrioAttributesFromMultiTypes } from '../../helpers/common';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 interface DefaultTemplateSettings {
   imageFileId: string;
@@ -79,9 +79,8 @@ type SiteData = {
 };
 
 export const useSiteData = () => {
-  const { getDotYouClient, getIdentity, isOwner } = useDotYouClient();
-  const dotYouClient = getDotYouClient();
-  const isAuthenticated = !!getIdentity() || isOwner;
+  const dotYouClient = useDotYouClientContext();
+  const isAuthenticated = dotYouClient.isAuthenticated();
 
   const fetchData: () => Promise<SiteData> = async () => {
     const fileData = await GetFile(dotYouClient, 'sitedata.json');

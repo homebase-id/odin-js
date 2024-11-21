@@ -1,24 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
 import { isConfigured } from '../../provider/system/SystemProvider';
-import { useAuth } from '../auth/useAuth';
 import { FIRST_RUN_TOKEN_STORAGE_KEY } from './useInit';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 const LOCAL_STORAGE_KEY = 'isConfigured';
 const MINUTE_IN_MS = 60000;
 
 export const useIsConfigured = () => {
-  const { getSharedSecret, isAuthenticated } = useAuth();
-  const dotYouClient = useAuth().getDotYouClient();
-  const sharedSecret = getSharedSecret();
+  const isAuthenticated = useDotYouClientContext().isAuthenticated();
+  const dotYouClient = useDotYouClientContext();
 
   const getIsConfigured = async () => {
     if (!isAuthenticated) {
       console.warn('getIsConfigured: Not authenticated');
-      return;
-    }
-
-    if (!sharedSecret) {
-      console.warn('getIsConfigured: No shared secret');
       return;
     }
 
@@ -44,7 +38,7 @@ export const useIsConfigured = () => {
       queryFn: getIsConfigured,
       refetchOnMount: false,
       staleTime: MINUTE_IN_MS * 10,
-      enabled: isAuthenticated && !!sharedSecret,
+      enabled: isAuthenticated,
     }),
   };
 };

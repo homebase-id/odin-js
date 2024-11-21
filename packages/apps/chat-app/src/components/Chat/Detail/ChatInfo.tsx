@@ -9,7 +9,7 @@ import {
   OwnerImage,
   OwnerName,
   t,
-  useDotYouClient,
+  useDotYouClientContext,
   usePortal,
 } from '@homebase-id/common-app';
 import {
@@ -28,14 +28,16 @@ export const ChatInfo = ({
 }) => {
   const target = usePortal('modal-container');
 
-  const identity = useDotYouClient().getIdentity() || window.location.hostname;
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const conversationContent = conversation.fileMetadata.appData.content;
-  const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
+  const recipients = conversationContent.recipients.filter(
+    (recipient) => recipient !== loggedOnIdentity
+  );
 
   const withYourself = conversation?.fileMetadata.appData.uniqueId === ConversationWithYourselfId;
   const recipient = recipients.length === 1 ? recipients[0] : undefined;
 
-  const isAdmin = conversation.fileMetadata.senderOdinId === identity;
+  const isAdmin = conversation.fileMetadata.senderOdinId === loggedOnIdentity;
 
   const dialog = (
     <DialogWrapper onClose={onClose} title={t('Chat info')}>
@@ -65,7 +67,10 @@ export const ChatInfo = ({
                 <small className="flex flex-row gap-2 text-sm">
                   <House className="h-5 w-5" />
                   <a
-                    href={new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}
+                    href={new DotYouClient({
+                      hostIdentity: recipient,
+                      api: ApiType.Guest,
+                    }).getRoot()}
                     rel="noreferrer noopener"
                     target="_blank"
                     className="text-primary hover:underline"
@@ -109,7 +114,7 @@ export const ChatInfo = ({
           <div className="flex flex-col gap-4">
             {recipients.map((recipient) => (
               <a
-                href={`${new DotYouClient({ identity: identity, api: ApiType.Guest }).getRoot()}/owner/connections/${recipient}`}
+                href={`${new DotYouClient({ hostIdentity: loggedOnIdentity, api: ApiType.Guest }).getRoot()}/owner/connections/${recipient}`}
                 rel="noreferrer noopener"
                 target="_blank"
                 className="group flex flex-row items-center gap-3"

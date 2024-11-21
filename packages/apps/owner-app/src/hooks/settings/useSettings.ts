@@ -6,10 +6,10 @@ import {
   updateFlag,
   updateSettings,
 } from '../../provider/system/SettingsProvider';
-import { useAuth } from '../auth/useAuth';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useSettings = () => {
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
   const fetchFlags = async () => {

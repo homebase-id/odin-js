@@ -5,8 +5,8 @@ import {
 } from '@homebase-id/js-lib/helpers';
 import { AppPermissionType } from '@homebase-id/js-lib/network';
 import { useSecurityContext } from '../securityContext/useSecurityContext';
-import { useDotYouClient } from './useDotYouClient';
 import { getExtendAppRegistrationParams } from '@homebase-id/js-lib/auth';
+import { useDotYouClientContext } from './useDotYouClientContext';
 
 const getExtendAppRegistrationUrl = (
   host: string,
@@ -57,7 +57,7 @@ export const useMissingPermissions = ({
   needsAllConnected?: boolean;
 }) => {
   const { data: context } = useSecurityContext().fetch;
-  const host = useDotYouClient().getDotYouClient().getRoot();
+  const host = useDotYouClientContext().getRoot();
 
   if (!context || !host) return;
 

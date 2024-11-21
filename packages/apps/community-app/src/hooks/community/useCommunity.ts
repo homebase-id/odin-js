@@ -96,7 +96,10 @@ const ensureNewDriveAndPermission = (
     returnUrl
   );
 
-  const host = new DotYouClient({ identity: identity || undefined, api: ApiType.App }).getRoot();
+  const host = new DotYouClient({
+    hostIdentity: identity || undefined,
+    api: ApiType.App,
+  }).getRoot();
   return `${host}${path}`;
 };
 
@@ -118,7 +121,7 @@ export const useCommunity = (props?: useCommunityProps) => {
       if (!communityDef.fileMetadata.appData.uniqueId)
         throw new Error('Community unique id is not set');
 
-      const host = dotYouClient.getIdentity();
+      const host = dotYouClient.getHostIdentity();
       const returnUrl = `${COMMUNITY_ROOT_PATH}/new?draft=${JSON.stringify(communityDef)}`;
 
       const targetDrive = getTargetDriveFromCommunityId(communityDef.fileMetadata.appData.uniqueId);
@@ -250,7 +253,10 @@ export const getExtendCirclePermissionUrl = (
     c: circleIds.join(','),
   };
 
-  const host = new DotYouClient({ identity: identity || undefined, api: ApiType.App }).getRoot();
+  const host = new DotYouClient({
+    hostIdentity: identity || undefined,
+    api: ApiType.App,
+  }).getRoot();
   return `${host}/owner/apprequest-circles?${stringifyToQueryParams(
     params
   )}&return=${encodeURIComponent(returnUrl)}`;

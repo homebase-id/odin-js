@@ -1,4 +1,4 @@
-import { useDotYouClient, useSecurityContext } from '@homebase-id/common-app';
+import { useDotYouClientContext, useSecurityContext } from '@homebase-id/common-app';
 import { HomebaseFile, ApiType, DrivePermissionType } from '@homebase-id/js-lib/core';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
 import { ChannelDefinition, GetTargetDriveFromChannelId } from '@homebase-id/js-lib/public';
@@ -8,7 +8,7 @@ export const useCheckWriteAccessOnChannel = ({
 }: {
   activeChannel: HomebaseFile<ChannelDefinition>;
 }) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const { data: securityContext } = useSecurityContext().fetch;
 
   const channelDrive =

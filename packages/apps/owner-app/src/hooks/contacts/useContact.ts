@@ -4,7 +4,6 @@ import {
   fetchConnectionInfo,
   fetchDataFromPublic,
 } from '../../provider/contact/ContactSourceProvider';
-import { useAuth } from '../auth/useAuth';
 import {
   ContactFile,
   ContactVm,
@@ -19,6 +18,7 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
 } from '@homebase-id/js-lib/core';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useContact = ({
   odinId,
@@ -29,7 +29,7 @@ export const useContact = ({
   id?: string;
   canSave: boolean;
 }) => {
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
   const fetchSingle = async ({
@@ -205,7 +205,7 @@ export const parseContact = (
 
   const imageUrl = pureContent.image
     ? `data:${pureContent.image.contentType};base64,${pureContent.image.content}`
-    : `${new DotYouClient({ identity: pureContent.odinId, api: ApiType.Guest }).getRoot()}/pub/image`;
+    : `${new DotYouClient({ hostIdentity: pureContent.odinId, api: ApiType.Guest }).getRoot()}/pub/image`;
 
   const { name, location, phone, birthday, odinId, source } = pureContent;
 

@@ -65,7 +65,7 @@ export const useChatSocketHandler = () => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getHostIdentity();
 
   // Added to ensure we have the conversation query available
   const {

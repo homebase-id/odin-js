@@ -16,8 +16,8 @@ import {
   PermissionSetGrantRequest,
   PermissionUpdateRequest,
 } from '../../provider/app/AppManagementProviderTypes';
-import { useAuth } from '../auth/useAuth';
 import { invalidateApps } from './useApps';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 interface PermissionExtensionRequest extends Omit<PermissionUpdateRequest, 'drives'> {
   drives?: (DriveGrantRequest | DriveGrant)[];
@@ -25,7 +25,7 @@ interface PermissionExtensionRequest extends Omit<PermissionUpdateRequest, 'driv
 
 export const useApp = ({ appId }: { appId?: string }) => {
   const queryClient = useQueryClient();
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetch = async ({ appId }: { appId: string }) => {
     return (await GetAppRegistration(dotYouClient, { appId: appId })) || null;

@@ -1,8 +1,8 @@
 import { SystemFileType, TargetDrive, getPayloadAsJson } from '@homebase-id/js-lib/core';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { getPayloadAsJsonOverPeerByGlobalTransitId } from '@homebase-id/js-lib/peer';
-import { useDotYouClient } from '../auth/useDotYouClient';
 import { useQuery } from '@tanstack/react-query';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 export const useLinkMetadata = ({
   odinId,
@@ -19,7 +19,7 @@ export const useLinkMetadata = ({
   payloadKey: string;
   systemFileType?: SystemFileType;
 }) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   return useQuery({
     queryKey: ['link-metadata', targetDrive.alias, fileId, payloadKey],

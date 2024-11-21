@@ -1,10 +1,10 @@
 import { OdinImageProps, OdinImage } from '@homebase-id/ui-lib';
-import { useDotYouClient } from '../hooks/auth/useDotYouClient';
+import { useDotYouClientContext } from '../hooks';
 
 export type ImageProps = Omit<OdinImageProps, 'dotYouClient'>;
 
 export const Image = (props: ImageProps) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   return <OdinImage dotYouClient={dotYouClient} {...props} />;
 };

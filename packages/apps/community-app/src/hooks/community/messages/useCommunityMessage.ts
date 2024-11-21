@@ -39,7 +39,7 @@ export const useCommunityMessage = (props?: {
 }) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getHostIdentity();
 
   const getMessageByUniqueId = async (
     odinId: string,

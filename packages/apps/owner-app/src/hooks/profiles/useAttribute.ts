@@ -1,7 +1,10 @@
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Attribute, getProfileAttribute } from '@homebase-id/js-lib/profile';
-import { useAuth } from '../auth/useAuth';
-import { invalidateSiteData, useStaticFiles } from '@homebase-id/common-app';
+import {
+  invalidateSiteData,
+  useDotYouClientContext,
+  useStaticFiles,
+} from '@homebase-id/common-app';
 import { AttributeDefinitions } from './AttributeDefinitions';
 import { AttributeVm, invalidateAttributes, updateCacheAttributes } from './useAttributes';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
@@ -20,7 +23,7 @@ const getListItemCacheKey = (newAttrVm: Attribute) => {
 
 export const useAttribute = (props?: { profileId?: string; attributeId?: string }) => {
   const { profileId, attributeId } = props || {};
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const queryClient = useQueryClient();
   const { mutate: publishStaticFiles } = useStaticFiles().publish;

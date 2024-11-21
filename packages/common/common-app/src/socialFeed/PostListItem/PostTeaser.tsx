@@ -10,8 +10,8 @@ import { PostBody } from '../Blocks/Body/Body';
 import { PostInteracts } from '../Blocks/Interacts/PostInteracts';
 import { DoubleClickHeartForMedia } from '../Blocks/Media/DoubleClickHeartForMedia';
 import { useChannel } from '../../hooks/socialFeed/channels/useChannel';
-import { useDotYouClient } from '../../hooks/auth/useDotYouClient';
 import { HOME_ROOT_PATH } from '../../constants';
+import { useDotYouClientContext } from '../../hooks';
 
 interface PostTeaserProps {
   className?: string;
@@ -38,9 +38,10 @@ export const PostTeaser: FC<PostTeaserProps> = ({
 }) => {
   const post = postFile.fileMetadata.appData.content;
   const { data: channel } = useChannel({ channelKey: post.channelId }).fetch;
-  const { isOwner, getIdentity } = useDotYouClient();
+  const dotYouClient = useDotYouClientContext();
+  const isOwner = dotYouClient.isOwner();
+  const isAuthenticated = dotYouClient.isAuthenticated();
   const navigate = useNavigate();
-  const isAuthenticated = !!getIdentity();
   // Compared to PostTeaserCard, this one is always clickable as comments can't be loaded within;
   //   If there is any media linked and not an article, we load the blogImageDetailPage
   const postPath = `${HOME_ROOT_PATH}posts/${

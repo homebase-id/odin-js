@@ -1,19 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useDotYouClient } from '@homebase-id/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import {
   accountDeletionStatus,
   markAccountDeletion,
   unmarkAccountDeletion,
 } from '../../provider/system/RemoveProvider';
-import { useAuth } from '../auth/useAuth';
 
 const MINUTE_IN_MS = 60000;
 
 export const useAccountRemoval = () => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
-  const { isAuthenticated } = useAuth();
+  const isAuthenticated = useDotYouClientContext().isAuthenticated();
 
   const getAccountDeletionStatus = async () => {
     return accountDeletionStatus(dotYouClient);

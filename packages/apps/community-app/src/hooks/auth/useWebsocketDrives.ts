@@ -22,7 +22,7 @@ export const useWebsocketDrives = () => {
     communities?.filter(
       (community) =>
         !community.fileMetadata.senderOdinId ||
-        community.fileMetadata.senderOdinId === dotYouClient.getIdentity()
+        community.fileMetadata.senderOdinId === dotYouClient.getHostIdentity()
     ) || [];
 
   const localCommunityDrives = [

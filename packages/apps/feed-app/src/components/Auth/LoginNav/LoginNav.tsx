@@ -1,15 +1,22 @@
 import { useState, useRef } from 'react';
 
 import { LoginBox } from '../LoginBox/LoginBox';
-import { useAuth } from '../../../hooks/auth/useAuth';
-import { useOutsideTrigger, ConnectionImage, t } from '@homebase-id/common-app';
+import {
+  useOutsideTrigger,
+  ConnectionImage,
+  t,
+  useDotYouClientContext,
+  logoutOwnerAndAllApps,
+} from '@homebase-id/common-app';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { Times, Person } from '@homebase-id/common-app/icons';
 
 const LoginNav = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { isAuthenticated, getIdentity, logout } = useAuth();
-  const identity = getIdentity();
+
+  const dotYouClient = useDotYouClientContext();
+  const isAuthenticated = dotYouClient.isAuthenticated();
+  const identity = dotYouClient.getLoggedInIdentity();
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOutsideTrigger(wrapperRef, () => setIsOpen(false));
@@ -19,9 +26,7 @@ const LoginNav = () => {
       {isOpen ? (
         <button
           key={'close'}
-          className={`inline-flex h-8 w-8 flex-shrink-0 items-center justify-center
-              rounded-full bg-slate-300
-            dark:bg-slate-500`}
+          className={`inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-300 dark:bg-slate-500`}
         >
           <Times className="h-5 w-5" />
         </button>
@@ -50,7 +55,9 @@ const LoginNav = () => {
                   {t('Logged in as: ')}{' '}
                   <a
                     href={
-                      identity ? new DotYouClient({ identity, api: ApiType.Guest }).getRoot() : ''
+                      identity
+                        ? new DotYouClient({ hostIdentity: identity, api: ApiType.Guest }).getRoot()
+                        : ''
                     }
                     className="underline"
                     target={'_blank'}
@@ -60,8 +67,8 @@ const LoginNav = () => {
                   </a>
                 </p>
                 <button
-                  onClick={logout}
-                  className="mt-2 block w-full rounded border-0 bg-green-500 px-4 py-2 text-white hover:bg-green-600 focus:outline-none "
+                  onClick={logoutOwnerAndAllApps}
+                  className="mt-2 block w-full rounded border-0 bg-green-500 px-4 py-2 text-white hover:bg-green-600 focus:outline-none"
                 >
                   {t('logout')}
                 </button>

@@ -12,7 +12,7 @@ import {
   findMentionedInRichText,
   formatToDateAgoWithRelativeDetail,
   t,
-  useDotYouClient,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { CommunityMessageItem } from '../Message/CommunityMessageItem';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
@@ -40,7 +40,7 @@ export const CommunityHistory = ({
   emptyPlaceholder?: ReactNode;
   setParticipants?: React.Dispatch<React.SetStateAction<string[] | null | undefined>>;
 }) => {
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inAThread =
     !!origin && origin.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE;
@@ -199,12 +199,12 @@ export const CommunityHistory = ({
               }
 
               const msg = flattenedMsgs[item.index];
-              const currentAuthor = msg?.fileMetadata.originalAuthor || identity || '';
+              const currentAuthor = msg?.fileMetadata.originalAuthor || loggedOnIdentity || '';
               const currentDate = msg?.fileMetadata.created;
 
               const previousVisibleMsg = flattenedMsgs[item.index + 1];
               const previousAuthor =
-                previousVisibleMsg?.fileMetadata.originalAuthor || identity || '';
+                previousVisibleMsg?.fileMetadata.originalAuthor || loggedOnIdentity || '';
               const previousDate = previousVisibleMsg?.fileMetadata.created;
 
               return (

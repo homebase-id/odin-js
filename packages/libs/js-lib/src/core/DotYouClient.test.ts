@@ -6,7 +6,7 @@ import { base64ToUint8Array, byteArrayToString, cbcDecrypt } from '../helpers/he
 test('App DotYouClient', () => {
   const dotYouClient = new DotYouClient({
     api: ApiType.App,
-    identity: 'example.com',
+    hostIdentity: 'example.com',
   });
 
   expect(dotYouClient).toBeInstanceOf(DotYouClient);
@@ -18,7 +18,7 @@ test('App DotYouClient', () => {
 test('Guest DotYouClient', () => {
   const dotYouClient = new DotYouClient({
     api: ApiType.Guest,
-    identity: 'example.com',
+    hostIdentity: 'example.com',
   });
 
   expect(dotYouClient).toBeInstanceOf(DotYouClient);
@@ -31,7 +31,7 @@ test('DotYouClient GET request interceptor', async () => {
   const fixedSharedSecret = new Uint8Array(16).fill(1);
   const dotYouClient = new DotYouClient({
     api: ApiType.App,
-    identity: 'example.com',
+    hostIdentity: 'example.com',
     sharedSecret: fixedSharedSecret,
   });
 
@@ -57,7 +57,7 @@ test('DotYouClient POST request interceptor', async () => {
   const fixedSharedSecret = new Uint8Array(16).fill(1);
   const dotYouClient = new DotYouClient({
     api: ApiType.App,
-    identity: 'example.com',
+    hostIdentity: 'example.com',
     sharedSecret: fixedSharedSecret,
   });
 

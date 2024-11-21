@@ -7,9 +7,9 @@ export const useCommunityMemberUpdater = (
   communityId: string | undefined
 ) => {
   const { data: community } = useCommunity({ odinId, communityId }).fetch;
-  const identity = useDotYouClientContext().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
 
-  const isAdmin = community?.fileMetadata.originalAuthor === identity;
+  const isAdmin = community?.fileMetadata.originalAuthor === loggedOnIdentity;
 
   const communityCircleId = community?.fileMetadata.appData.content.acl.circleIdList?.[0];
   const { data: members, isFetched: membersFetched } = useCircle({
@@ -21,7 +21,7 @@ export const useCommunityMemberUpdater = (
   useEffect(() => {
     if (!membersFetched || !community || !isAdmin || !communityCircleId) return;
 
-    const circleMembers = [...(members?.map((member) => member.domain) || []), identity];
+    const circleMembers = [...(members?.map((member) => member.domain) || []), loggedOnIdentity];
     const communityMembers = community.fileMetadata.appData.content.members || [];
 
     if (

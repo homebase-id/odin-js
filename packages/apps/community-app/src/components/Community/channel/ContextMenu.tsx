@@ -5,11 +5,11 @@ import {
 } from '../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import {
-  useDotYouClient,
   ActionGroupOptionProps,
   t,
   ErrorNotification,
   ActionGroup,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { useState } from 'react';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
@@ -67,10 +67,10 @@ const CommunityContextActions = ({
 
   const { mutate: resend, error: resendError } = useCommunityMessage().update;
 
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const authorOdinId = msg.fileMetadata.senderOdinId;
 
-  const messageFromMe = !authorOdinId || authorOdinId === identity;
+  const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;
 
   const optionalOptions: ActionGroupOptionProps[] = [];
   if (messageFromMe) {

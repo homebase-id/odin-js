@@ -85,7 +85,7 @@ const ConnectSocket = async (
     activeSs = base64ToUint8Array(tokenToConnectOverPeer.sharedSecret);
     const directGuestClient = new DotYouClient({
       api: ApiType.Guest,
-      identity: odinId,
+      hostIdentity: odinId,
       headers: {
         SUB32: tokenToConnectOverPeer.authenticationToken64,
       },

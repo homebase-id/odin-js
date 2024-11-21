@@ -1,9 +1,11 @@
-import { useChannels } from '@homebase-id/common-app';
-import { useAuth } from '../../../../hooks/auth/useAuth';
+import { useChannels, useDotYouClientContext } from '@homebase-id/common-app';
 import ChannelTeaser from '../ChannelTeaser/ChannelTeaser';
 
 const Channels = ({ className }: { className?: string }) => {
-  const { isOwner, isAuthenticated } = useAuth();
+  const dotYouClient = useDotYouClientContext();
+  const isOwner = dotYouClient.isOwner();
+  const isAuthenticated = dotYouClient.isAuthenticated();
+
   const { data: channels } = useChannels({ isAuthenticated, isOwner });
 
   return channels?.length ? (

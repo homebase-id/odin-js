@@ -9,7 +9,7 @@ import {
   DotYouClient,
 } from '@homebase-id/js-lib/core';
 import { useEffect, useState, useCallback } from 'react';
-import { useDotYouClient } from '../auth/useDotYouClient';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { hasDebugFlag } from '@homebase-id/js-lib/helpers';
 import { NotifyOverPeer, SubscribeOverPeer, UnsubscribeOverPeer } from '@homebase-id/js-lib/peer';
 
@@ -27,8 +27,8 @@ export const useWebsocketSubscriber = (
   onReconnect?: () => void,
   refId?: string
 ) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
-  const isPeer = !!odinId && odinId !== dotYouClient.getIdentity();
+  const dotYouClient = useDotYouClientContext();
+  const isPeer = !!odinId && odinId !== dotYouClient.getHostIdentity();
   const [isConnected, setIsConected] = useState<boolean>(false);
 
   const wrappedHandler = useCallback(

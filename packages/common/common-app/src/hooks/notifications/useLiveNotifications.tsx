@@ -57,7 +57,7 @@ export const useLiveNotifications = (props: { drives?: TargetDrive[] } | undefin
           ? clientNotification.sender
           : clientNotification.recipient;
 
-      const host = new DotYouClient({ api: ApiType.Guest, identity: otherId }).getRoot();
+      const host = new DotYouClient({ api: ApiType.Guest, hostIdentity: otherId }).getRoot();
 
       const liveNotification: LiveNotification = {
         key: `incoming-${otherId}`,
@@ -91,7 +91,7 @@ export const useLiveNotifications = (props: { drives?: TargetDrive[] } | undefin
       // Add as live notification
       const host = new DotYouClient({
         api: ApiType.Guest,
-        identity: clientNotification.senderId,
+        hostIdentity: clientNotification.senderId,
       }).getRoot();
 
       const targetLink = buildNotificationTargetLink(clientNotification);

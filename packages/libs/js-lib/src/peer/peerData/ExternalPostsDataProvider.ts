@@ -71,7 +71,7 @@ export const getSocialFeed = async (
   ).filter(Boolean) as HomebaseFile<PostContent>[];
 
   if (ownOption) {
-    // const ownerDotYou = dotYouClient.getIdentity() || window.location.hostname;
+    // const ownerDotYou = dotYouClient.getHostIdentity() || window.location.hostname;
     const resultOfOwn = await getRecentPosts(
       dotYouClient,
       undefined,

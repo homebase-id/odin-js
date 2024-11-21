@@ -10,7 +10,7 @@ import {
   OwnerImage,
   OwnerName,
   t,
-  useDotYouClient,
+  useDotYouClientContext,
   useIntroductions,
   useIsConnected,
 } from '@homebase-id/common-app';
@@ -51,8 +51,7 @@ export const ChatDetail = ({
   const { mutate: inviteRecipient } = useConversation().inviteRecipient;
   const { mutate: introduceIdentities } = useIntroductions().introduceIdentities;
   const [replyMsg, setReplyMsg] = useState<HomebaseFile<ChatMessage> | undefined>();
-  const identity = useDotYouClient().getIdentity();
-
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const Composer = useMemo(() => options?.composer || ChatComposer, [options]);
 
   if (!conversationId || isLoading || (!conversation && isFetched))
@@ -67,14 +66,14 @@ export const ChatDetail = ({
     if (
       !conversation ||
       stringGuidsEqual(conversationId, ConversationWithYourselfId) ||
-      conversation?.fileMetadata.senderOdinId !== identity ||
+      conversation?.fileMetadata.senderOdinId !== loggedOnIdentity ||
       conversation.fileMetadata.created <= firstOfSeptember2024
     ) {
       return;
     }
 
     const filteredRecipients = conversation.fileMetadata.appData.content.recipients.filter(
-      (recipient) => recipient !== identity
+      (recipient) => recipient !== loggedOnIdentity
     );
 
     const anyRecipientMissingConversation = filteredRecipients.some((recipient) => {
@@ -90,7 +89,7 @@ export const ChatDetail = ({
       if (filteredRecipients.length > 1) {
         // Group chat; Good to introduce everyone
         await introduceIdentities({
-          message: t('{0} has added you to a group chat', identity || ''),
+          message: t('{0} has added you to a group chat', loggedOnIdentity || ''),
           recipients: filteredRecipients,
         });
       }
@@ -128,7 +127,7 @@ const ChatHeader = ({
   rootPath: string;
 }) => {
   const navigate = useNavigate();
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
 
   const withYourself =
     conversationDsr?.fileMetadata.appData.uniqueId === ConversationWithYourselfId;
@@ -136,7 +135,7 @@ const ChatHeader = ({
   const recipients = conversation?.recipients;
   const singleRecipient =
     recipients && recipients.length === 2
-      ? recipients.filter((recipient) => recipient !== identity)[0]
+      ? recipients.filter((recipient) => recipient !== loggedOnIdentity)[0]
       : undefined;
 
   const infoChatMatch = useMatch({ path: `${CHAT_ROOT_PATH}/:conversationKey/info` });
@@ -155,11 +154,11 @@ const ChatHeader = ({
     if (!conversation) return;
 
     const filteredRecipients = conversation.recipients.filter(
-      (recipient) => recipient !== identity
+      (recipient) => recipient !== loggedOnIdentity
     );
 
     await introduceIdentities({
-      message: t('{0} has added you to a group chat', identity || ''),
+      message: t('{0} has added you to a group chat', loggedOnIdentity || ''),
       recipients: filteredRecipients,
     });
   };
@@ -270,7 +269,7 @@ const GroupChatConnectedState = ({
 }: {
   conversation: HomebaseFile<UnifiedConversation> | undefined;
 }) => {
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
 
   if (!conversation) return null;
   const recipients = conversation.fileMetadata.appData.content.recipients;
@@ -279,7 +278,7 @@ const GroupChatConnectedState = ({
   return (
     <div className="border-t empty:hidden dark:border-t-slate-800">
       {recipients
-        .filter((recipient) => recipient !== identity)
+        .filter((recipient) => recipient !== loggedOnIdentity)
         .map((recipient) => {
           return <RecipientConnectedState recipient={recipient} key={recipient} />;
         })}
@@ -289,7 +288,7 @@ const GroupChatConnectedState = ({
 
 const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
   const { data: isConnected, isFetched: isFetchedConnected } = useIsConnected(recipient);
-  const host = useDotYouClient().getDotYouClient().getRoot();
+  const host = useDotYouClientContext().getRoot();
 
   if (!isConnected && isFetchedConnected) {
     return (
@@ -297,7 +296,7 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
         <p>
           {t('You can only chat with connected identities, messages will not be delivered to')}:{' '}
           <a
-            href={`${new DotYouClient({ identity: recipient, api: ApiType.Guest }).getRoot()}`}
+            href={`${new DotYouClient({ hostIdentity: recipient, api: ApiType.Guest }).getRoot()}`}
             className="underline"
           >
             {recipient}

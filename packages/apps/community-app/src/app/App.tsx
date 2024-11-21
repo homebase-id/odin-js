@@ -13,14 +13,15 @@ import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Layout, MinimalLayout } from '../components/ui/Layout/Layout';
 import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
-import { useAuth } from '../hooks/auth/useAuth';
 import {
   COMMUNITY_ROOT_PATH,
   DotYouClientProvider,
   ErrorBoundary,
   NotFound,
   OdinQueryClient,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
+import { useValidateAuthorization } from '../hooks/auth/useAuth';
 
 export const REACT_QUERY_CACHE_KEY = 'COMMUNITY_REACT_QUERY_OFFLINE_CACHE';
 const REACT_QUERY_INCLUDED_QUERY_KEYS = [
@@ -92,11 +93,9 @@ function App() {
             path=""
             element={
               <RootRoute>
-                <DotYouClientProvider>
-                  <Layout>
-                    <Outlet />
-                  </Layout>
-                </DotYouClientProvider>
+                <Layout>
+                  <Outlet />
+                </Layout>
               </RootRoute>
             }
           >
@@ -197,7 +196,9 @@ function App() {
         cachedQueryKeys={REACT_QUERY_INCLUDED_QUERY_KEYS}
         type="indexeddb"
       >
-        <RouterProvider router={router} fallbackElement={<></>} />
+        <DotYouClientProvider>
+          <RouterProvider router={router} fallbackElement={<></>} />
+        </DotYouClientProvider>
       </OdinQueryClient>
     </HelmetProvider>
   );
@@ -211,7 +212,9 @@ const CommunityRootRoute = () => {
 };
 
 const RootRoute = ({ children }: { children: ReactNode }) => {
-  const { isAuthenticated } = useAuth();
+  useValidateAuthorization();
+
+  const isAuthenticated = useDotYouClientContext().isAuthenticated();
 
   if (!isAuthenticated) {
     if (window.location.pathname === AUTH_PATH) return <>{children}</>;

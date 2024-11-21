@@ -40,7 +40,7 @@ export const useVideo = (
   >;
   getChunk: (chunkStart: number, chunkEnd?: number) => Promise<Uint8Array | null> | null;
 } => {
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getHostIdentity();
 
   const fetchVideoData = async (
     odinId: string,
@@ -143,7 +143,7 @@ export const useVideoUrl = (
   fileSizeLimit?: number,
   systemFileType?: SystemFileType
 ): { fetch: UseQueryResult<string | null, Error> } => {
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getHostIdentity();
 
   const fetchVideoData = async (
     odinId: string,

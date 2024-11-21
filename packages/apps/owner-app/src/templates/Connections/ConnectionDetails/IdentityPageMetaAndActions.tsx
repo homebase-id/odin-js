@@ -7,7 +7,6 @@ import { hasDebugFlag, jsonStringify64 } from '@homebase-id/js-lib/helpers';
 import { OutgoingConnectionDialog } from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import {
-  useDotYouClient,
   useIdentityIFollow,
   ActionButton,
   t,
@@ -18,6 +17,7 @@ import {
   ConfirmDialog,
   useConnection,
   useConnectionGrantStatus,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import {
   House,
@@ -39,7 +39,7 @@ export const IdentityPageMetaAndActions = ({
   const { action } = useParams();
   const [isSentConnectionOpen, setIsSentConnectionOpen] = useState(action === 'connect');
   const [isBlockConfirmationOpen, setIsBlockConfirmationOpen] = useState(action === 'block');
-  const { getIdentity } = useDotYouClient();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
 
   useEffect(() => {
     if (action === 'connect' && !isSentConnectionOpen) {
@@ -127,14 +127,14 @@ export const IdentityPageMetaAndActions = ({
     ) : null;
 
   const isConnected = connectionInfo?.status === 'connected';
-  const identity = getIdentity();
+
   const actionGroupOptions: ActionGroupOptionProps[] = [
     {
       icon: House,
       label: t('Open homepage'),
       onClick: () => {
         window.open(
-          `${new DotYouClient({ identity: odinId, api: ApiType.Guest }).getRoot()}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
+          `${new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}${isConnected && loggedOnIdentity ? '?youauth-logon=' + loggedOnIdentity : ''}`,
           '_blank'
         );
       },

@@ -1,11 +1,10 @@
-import { ActionLink, t } from '@homebase-id/common-app';
+import { ActionLink, t, useDotYouClientContext } from '@homebase-id/common-app';
 import { ApiType, DotYouClient, HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import {
   RemoteCollaborativeChannelDefinition,
   CollaborativeChannelDefinition,
   ChannelDefinition,
 } from '@homebase-id/js-lib/public';
-import { useAuth } from '../../hooks/auth/useAuth';
 
 import { Plus } from '@homebase-id/common-app/icons';
 import { useCheckWriteAccessOnChannel } from './useCheckWriteAccessOnChannel';
@@ -17,9 +16,10 @@ export const SaveCollaborativeChannelLink = ({
   channel: HomebaseFile<ChannelDefinition>;
   className?: string;
 }) => {
-  const { isOwner, getIdentity, getDotYouClient } = useAuth();
-  const loggedInIdentity = getIdentity();
-  const identity = getDotYouClient().getIdentity();
+  const dotYouClient = useDotYouClientContext();
+  const loggedInIdentity = dotYouClient.getLoggedInIdentity();
+  const ownerIdentity = dotYouClient.getHostIdentity();
+  const isOwner = dotYouClient.isOwner();
 
   const hasWriteAccess = useCheckWriteAccessOnChannel({ activeChannel: channel });
   if (
@@ -37,7 +37,7 @@ export const SaveCollaborativeChannelLink = ({
     ...('acl' in channel.fileMetadata.appData.content
       ? (channel.fileMetadata.appData.content as CollaborativeChannelDefinition)
       : channel.fileMetadata.appData.content),
-    odinId: identity,
+    odinId: ownerIdentity,
     uniqueId: channel.fileMetadata.appData.uniqueId,
     isCollaborative: true,
   };
@@ -45,7 +45,7 @@ export const SaveCollaborativeChannelLink = ({
   return (
     <ActionLink
       className={`w-auto ${className ?? ''}`}
-      href={`${new DotYouClient({ identity: loggedInIdentity, api: ApiType.Guest }).getRoot()}/apps/feed/channels/incoming-collaborative?channel=${JSON.stringify(remoteGroupChannel)}`}
+      href={`${new DotYouClient({ hostIdentity: loggedInIdentity, api: ApiType.Guest }).getRoot()}/apps/feed/channels/incoming-collaborative?channel=${JSON.stringify(remoteGroupChannel)}`}
       icon={Plus}
       type={'primary'}
     >

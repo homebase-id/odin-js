@@ -12,7 +12,7 @@ import {
   t,
   useCircle,
   useCircles,
-  useDotYouClient,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import { NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
@@ -24,7 +24,7 @@ import { Ellipsis, Arrow } from '@homebase-id/common-app/icons';
 import { useEffect } from 'react';
 
 export const NewCommunity = () => {
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const { data: circles } = useCircles(true).fetch;
 
   const [selectedCircle, setSelectedCircle] = useState<{
@@ -45,7 +45,7 @@ export const NewCommunity = () => {
       (async () => {
         await createNew(definitionFile);
         navigate(
-          `${COMMUNITY_ROOT_PATH}/${identity}/${definitionFile.fileMetadata.appData.uniqueId}`
+          `${COMMUNITY_ROOT_PATH}/${loggedOnIdentity}/${definitionFile.fileMetadata.appData.uniqueId}`
         );
       })();
     }
@@ -53,7 +53,7 @@ export const NewCommunity = () => {
 
   const { mutateAsync: createNew, status: createStatus } = useCommunity().save;
   const doCreate = async () => {
-    if (!selectedCircle || !selectedCircle.circle.id || !groupTitle || !identity) return;
+    if (!selectedCircle || !selectedCircle.circle.id || !groupTitle || !loggedOnIdentity) return;
 
     try {
       const communityId = getNewId();
@@ -62,7 +62,7 @@ export const NewCommunity = () => {
           appData: {
             content: {
               title: groupTitle,
-              members: [...selectedCircle.members, identity],
+              members: [...selectedCircle.members, loggedOnIdentity],
               acl: {
                 requiredSecurityGroup: SecurityGroupType.Connected,
                 circleIdList: [selectedCircle.circle.id],
@@ -78,7 +78,7 @@ export const NewCommunity = () => {
         },
       };
       await createNew(newCommunityDef); // Will in 99% of the cases first redirect to an ensure drive
-      navigate(`${COMMUNITY_ROOT_PATH}/${identity}/${communityId}`);
+      navigate(`${COMMUNITY_ROOT_PATH}/${loggedOnIdentity}/${communityId}`);
     } catch (e) {
       console.error(e);
     }

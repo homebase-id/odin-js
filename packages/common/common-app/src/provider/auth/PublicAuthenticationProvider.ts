@@ -1,7 +1,7 @@
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 
 //checks if the authentication token (stored in a cookie) is valid
-export const hasValidToken = async (): Promise<boolean> => {
+export const hasValidPublicToken = async (): Promise<boolean> => {
   const dotYouClient = new DotYouClient({ api: ApiType.Guest });
   const client = dotYouClient.createAxiosClient();
   const response = await client.get('/builtin/home/auth/is-authenticated', {
@@ -18,8 +18,23 @@ export const getEccPublicKey = async (): Promise<string> => {
     .then((response) => response.data);
 };
 
-export const logout = async (): Promise<void> => {
-  const dotYouClient = new DotYouClient({ api: ApiType.Guest });
-  const client = dotYouClient.createAxiosClient();
-  await client.get('/builtin/home/auth/delete-token');
+export const logoutPublicSession = async (): Promise<void> => {
+  try {
+    const dotYouClient = new DotYouClient({ api: ApiType.Guest });
+    const client = dotYouClient.createAxiosClient();
+    await client.get('/builtin/home/auth/delete-token');
+  } catch (ex) {
+    console.warn('Failed to logout on the server', ex);
+  }
+};
+
+export const logoutPublic = async (): Promise<void> => {
+  logoutPublicSession();
+
+  // Auth SS states
+  window.localStorage.removeItem('identity');
+  window.localStorage.removeItem('HSS');
+  window.localStorage.removeItem('SS');
+
+  window.location.href = '/';
 };

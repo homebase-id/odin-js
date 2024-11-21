@@ -164,7 +164,7 @@ const wsDsrToMessage = async (
     content = tryJsonParse<CommunityMessage>(await decryptJsonContent(fileMetadata, keyHeader));
   } else {
     content =
-      (odinId && odinId !== dotYouClient.getIdentity()
+      (odinId && odinId !== dotYouClient.getHostIdentity()
         ? await getPayloadAsJsonOverPeer<CommunityMessage>(
             dotYouClient,
             odinId,

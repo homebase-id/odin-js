@@ -9,7 +9,6 @@ import {
 } from '@homebase-id/js-lib/network';
 import { saveContact } from '../../provider/contact/ContactProvider';
 import { fetchConnectionInfo } from '../../provider/contact/ContactSourceProvider';
-import { useAuth } from '../auth/useAuth';
 import { SecurityGroupType } from '@homebase-id/js-lib/core';
 import { getNewId } from '@homebase-id/js-lib/helpers';
 import {
@@ -18,11 +17,12 @@ import {
   invalidatePendingConnections,
   invalidateSentConnections,
   updateCacheSentConnections,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 
 export const useConnectionActions = () => {
   const queryClient = useQueryClient();
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const disconnect = async ({ connectionOdinId }: { connectionOdinId: string }) => {
     return await disconnectFromContact(dotYouClient, connectionOdinId);
@@ -81,7 +81,7 @@ export const useConnectionActions = () => {
           recipient: targetOdinId,
           id: getNewId(),
           message: message,
-          senderOdinId: dotYouClient.getIdentity(),
+          senderOdinId: dotYouClient.getHostIdentity(),
           receivedTimestampMilliseconds: Date.now(),
           connectionRequestOrigin: 'identityowner',
         };

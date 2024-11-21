@@ -1,6 +1,6 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
-import { t, useDotYouClient } from '@homebase-id/common-app';
+import { t, useDotYouClientContext } from '@homebase-id/common-app';
 import { useCommunityReaction } from '../../../../hooks/community/reactions/useCommunityReaction';
 import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
@@ -12,7 +12,7 @@ export const CommunityReactions = ({
   msg: HomebaseFile<CommunityMessage>;
   community: HomebaseFile<CommunityDefinition> | undefined;
 }) => {
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
 
   const { mutate: addReaction } = useCommunityReaction().add;
   const { mutate: removeReaction } = useCommunityReaction().remove;
@@ -27,7 +27,7 @@ export const CommunityReactions = ({
     messageGlobalTransitId: msg.fileMetadata.globalTransitId,
   }).get;
 
-  const myReactions = data?.filter((reaction) => reaction?.authorOdinId === identity);
+  const myReactions = data?.filter((reaction) => reaction?.authorOdinId === loggedOnIdentity);
   if (!msg.fileMetadata.reactionPreview?.reactions || !community) return null;
 
   const reactions = Object.values(msg.fileMetadata.reactionPreview?.reactions).map((reaction) => {
@@ -48,7 +48,7 @@ export const CommunityReactions = ({
             const authors = data
               ?.filter((reaction) => reaction.body === emoji.emoji)
               .map((reaction) =>
-                reaction.authorOdinId === identity ? t('You') : reaction.authorOdinId
+                reaction.authorOdinId === loggedOnIdentity ? t('You') : reaction.authorOdinId
               );
 
             if (!emoji.count || emoji.count === '0') return null;

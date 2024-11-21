@@ -1,5 +1,9 @@
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { OwnerClient } from '../../core/OwnerClient';
+import { logout } from '@homebase-id/js-lib/auth';
+import { APP_KEYS } from '../../constants';
+import { base64ToUint8Array } from '@homebase-id/js-lib/helpers';
+import { HOME_SHARED_SECRET, OWNER_SHARED_SECRET, STORAGE_IDENTITY_KEY } from '../../hooks';
 
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidOwnerToken = async (): Promise<boolean> => {
@@ -32,6 +36,40 @@ export const logoutOwnerAndAllApps = async (): Promise<void> => {
   } catch (ex) {
     console.warn('Failed unregister push notifiations', ex);
   }
+
+  try {
+    await Promise.all(
+      APP_KEYS.map(async (key) => {
+        const authToken = localStorage.getItem(`BX0900_${key}`);
+        if (!authToken) return;
+        const rawApps = localStorage.getItem(`APPS_${key}`);
+        if (!rawApps) return;
+
+        const headers: Record<string, string> = {
+          bx0900: authToken,
+        };
+
+        const apss = base64ToUint8Array(rawApps);
+        const dotYouClient = new DotYouClient({
+          api: ApiType.App,
+          sharedSecret: apss,
+          hostIdentity: window.location ? window.location.host : '',
+          headers,
+        });
+
+        // Remove app sessions from server
+        await logout(dotYouClient);
+      })
+    );
+
+    APP_KEYS.forEach((key) => {
+      localStorage.removeItem(`BX0900_${key}`);
+      localStorage.removeItem(`APPS_${key}`);
+    });
+  } catch (ex) {
+    console.warn('Failed to logout on the server', ex);
+  }
+
   try {
     // Remove session from server
     await logoutOwner();
@@ -39,19 +77,15 @@ export const logoutOwnerAndAllApps = async (): Promise<void> => {
     console.warn('Failed to logout on the server', ex);
   }
 
-  // CAT
-  localStorage.removeItem(`BX0900_feed`);
-  localStorage.removeItem(`BX0900_mail`);
-  localStorage.removeItem(`BX0900_chat`);
-
-  // Shared Secret
-  localStorage.removeItem(`APPS_feed`);
-  localStorage.removeItem(`APPS_mail`);
-  localStorage.removeItem(`APPS_chat`);
+  // Auth SS states
+  window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
+  window.localStorage.removeItem(HOME_SHARED_SECRET);
+  window.localStorage.removeItem(OWNER_SHARED_SECRET);
 
   // Caches
   localStorage.removeItem(`OWNER_REACT_QUERY_OFFLINE_CACHE`);
   localStorage.removeItem(`FEED_REACT_QUERY_OFFLINE_CACHE`);
+  localStorage.removeItem(`COMMUNITY_REACT_QUERY_OFFLINE_CACHE`);
   localStorage.removeItem(`CHAT_REACT_QUERY_OFFLINE_CACHE`);
 
   // IndexedDB

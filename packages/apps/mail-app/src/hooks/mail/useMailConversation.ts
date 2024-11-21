@@ -28,7 +28,7 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
 
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
-  const identity = dotYouClient.getIdentity();
+  const identity = dotYouClient.getHostIdentity();
 
   const { mutateAsync: introduceRecipients } = useIntroductions().introduceIdentities;
 

@@ -4,8 +4,8 @@ import {
   ErrorBoundary,
   LoadingBlock,
   t,
-  useDotYouClient,
   COMMUNITY_ROOT_PATH,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { useParams } from 'react-router-dom';
 import { CommunityChannelCatchup } from '../../components/Community/catchup/CommunityChannelCatchup';
@@ -21,7 +21,7 @@ export const CommunityCatchup = memo(() => {
   const { odinKey, communityKey: communityId, threadKey } = useParams();
   const { data: community, isFetched } = useCommunity({ odinId: odinKey, communityId }).fetch;
 
-  const identity = useDotYouClient().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const { data: metadata } = useCommunityMetadata({
     odinId: odinKey,
     communityId: communityId,
@@ -47,10 +47,10 @@ export const CommunityCatchup = memo(() => {
           chnl.lastMessage?.fileMetadata.created &&
           chnl.lastMessage.fileMetadata.created > (lastReadTime || 0) &&
           !!chnl.lastMessage.fileMetadata.senderOdinId &&
-          chnl.lastMessage.fileMetadata.senderOdinId !== identity
+          chnl.lastMessage.fileMetadata.senderOdinId !== loggedOnIdentity
         );
       }),
-    [channels, metadata, identity]
+    [channels, metadata, loggedOnIdentity]
   );
 
   if (!community && isFetched)

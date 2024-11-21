@@ -1,10 +1,12 @@
-import { ActionLink, t, useSecurityContext } from '@homebase-id/common-app';
-import { useAuth } from '../../../hooks/auth/useAuth';
+import { ActionLink, t, useDotYouClientContext, useSecurityContext } from '@homebase-id/common-app';
 import { Check, Persons } from '@homebase-id/common-app/icons';
 
 const ConnectLink = ({ className }: { className: string }) => {
-  const { isOwner, getDotYouClient, isAuthenticated } = useAuth();
-  const host = getDotYouClient().getRoot();
+  const dotYouClient = useDotYouClientContext();
+  const isAuthenticated = dotYouClient.isAuthenticated();
+  const isOwner = dotYouClient.isOwner();
+
+  const host = dotYouClient.getRoot();
 
   const { data: securityContext } = useSecurityContext(undefined, isAuthenticated).fetch;
   const isConnected =

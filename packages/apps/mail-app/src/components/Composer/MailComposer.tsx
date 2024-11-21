@@ -65,7 +65,7 @@ export const MailComposer = ({
   const { data: mailSettings, isFetched: mailSettingsFetched } = useMailSettings().get;
 
   const [expanded, setExpanded] = useState(!forwardedMailThread || !currentRecipients?.length);
-  const identity = useDotYouClientContext().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const [autosavedDsr, setAutosavedDsr] = useState<
     NewHomebaseFile<MailConversation> | HomebaseFile<MailConversation>
   >(
@@ -78,7 +78,7 @@ export const MailComposer = ({
             message: [],
             originId: originId || getNewId(),
             threadId: threadId || getNewId(),
-            sender: identity,
+            sender: loggedOnIdentity,
             forwardedMailThread,
             deliveryStatus: MailDeliveryStatus.NotSent,
           },
@@ -133,7 +133,7 @@ export const MailComposer = ({
   const doSend: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     const content = autosavedDsr.fileMetadata.appData.content;
-    if (!identity || !content.subject || !content.message || !content.recipients.length) return;
+    if (!content.subject || !content.message || !content.recipients.length) return;
 
     const anyNewRecipients = content.recipients.some(
       (recipient) => !currentRecipients?.includes(recipient)

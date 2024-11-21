@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { LinkPreview, getLinkPreview } from '@homebase-id/js-lib/media';
-import { useDotYouClient } from '../auth/useDotYouClient';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 export const useLinkPreviewBuilder = (textToSearchIn: string) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const foundLinks = useMemo(
     () =>

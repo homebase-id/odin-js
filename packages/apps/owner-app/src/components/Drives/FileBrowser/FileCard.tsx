@@ -9,6 +9,7 @@ import {
   Image,
   ActionButton,
   t,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 
 import { Exclamation, Trash, Download } from '@homebase-id/common-app/icons';
@@ -25,7 +26,6 @@ import { BlogConfig, ReactionConfig } from '@homebase-id/js-lib/public';
 import { ContactConfig } from '@homebase-id/js-lib/network';
 import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
 import { useFile } from '../../../hooks/files/useFiles';
-import { useAuth } from '../../../hooks/auth/useAuth';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
 
 export const FileCard = ({
@@ -345,7 +345,7 @@ const FileState = ({
   className?: string;
 }) => {
   const [isBroken, setIsBroken] = useState(false);
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   useEffect(() => {
     (async () => {
       try {

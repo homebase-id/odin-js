@@ -29,7 +29,7 @@ export const getDecryptedMediaUrl = async (
   const { size, systemFileType, fileSizeLimit } = options || {};
   const getDirectImageUrl = () =>
     getAnonymousDirectImageUrl(
-      dotYouClient.getIdentity(),
+      dotYouClient.getHostIdentity(),
       targetDrive,
       fileId,
       fileKey,
@@ -98,7 +98,7 @@ export const getAnonymousDirectImageUrl = (
   systemFileType?: SystemFileType,
   lastModified?: number
 ) => {
-  const dotYouClient = new DotYouClient({ identity, api: ApiType.Guest });
+  const dotYouClient = new DotYouClient({ hostIdentity: identity, api: ApiType.Guest });
   return `${dotYouClient.getEndpoint()}/drive/files/${
     size ? 'thumb' : 'payload'
   }?${stringifyToQueryParams({

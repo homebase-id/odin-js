@@ -1,5 +1,5 @@
 import { QueryClient, useInfiniteQuery } from '@tanstack/react-query';
-import { useDotYouClient } from '@homebase-id/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import { getDomains } from '../../provider/network/domainNetwork/DomainProvider';
 
 interface useActiveDomainsProps {
@@ -12,7 +12,7 @@ export const useDomains = (
     pageSize: 10,
   }
 ) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchDomains = async (
     { pageSize, cursor }: { pageSize: number; cursor?: number } = {

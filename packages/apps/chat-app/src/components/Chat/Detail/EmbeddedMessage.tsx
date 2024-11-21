@@ -31,7 +31,7 @@ export const EmbeddedMessage = ({
   msg: HomebaseFile<ChatMessage> | undefined;
   className?: string;
 }) => {
-  const identity = useDotYouClientContext().getIdentity();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const hasMedia = msg && !!msg.fileMetadata.payloads?.length;
   const plainText = msg && getPlainTextFromRichText(msg.fileMetadata.appData.content.message);
   return (
@@ -41,7 +41,8 @@ export const EmbeddedMessage = ({
           <>
             <div className="px-2">
               <p className="font-semibold">
-                {msg.fileMetadata.senderOdinId && msg.fileMetadata.senderOdinId !== identity ? (
+                {msg.fileMetadata.senderOdinId &&
+                msg.fileMetadata.senderOdinId !== loggedOnIdentity ? (
                   <ConnectionName odinId={msg.fileMetadata.senderOdinId} />
                 ) : (
                   t('You')
