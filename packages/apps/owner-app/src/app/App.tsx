@@ -69,7 +69,6 @@ import {
   LOGIN_PATH,
   RECOVERY_PATH,
   SETUP_PATH,
-  useAuth,
   useValidateAuthorization,
 } from '../hooks/auth/useAuth';
 import { useIsConfigured } from '../hooks/configure/useIsConfigured';

@@ -5,7 +5,6 @@ import {
   finalizeAuthentication as finalizeAuthenticationYouAuth,
   getRegistrationParams,
   preAuth as preauthApps,
-  retrieveIdentity,
   saveIdentity,
   createEccPair,
   YouAuthorizationParams,

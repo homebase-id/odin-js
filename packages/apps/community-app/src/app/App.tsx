@@ -21,7 +21,7 @@ import {
   OdinQueryClient,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
-import { useAuth, useValidateAuthorization } from '../hooks/auth/useAuth';
+import { useValidateAuthorization } from '../hooks/auth/useAuth';
 
 export const REACT_QUERY_CACHE_KEY = 'COMMUNITY_REACT_QUERY_OFFLINE_CACHE';
 const REACT_QUERY_INCLUDED_QUERY_KEYS = [
