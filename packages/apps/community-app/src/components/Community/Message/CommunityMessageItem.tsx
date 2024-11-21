@@ -52,7 +52,7 @@ export const CommunityMessageItem = ({
   const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;
   const hasMedia = !!msg.fileMetadata.payloads.length;
 
-  const { chatMessageKey, mediaKey } = useParams();
+  const { chatMessageKey, mediaKey, channelKey, threadKey } = useParams();
   const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey);
   const isMediaDetail = isDetail && mediaKey;
 
@@ -79,12 +79,12 @@ export const CommunityMessageItem = ({
 
   const navigate = useNavigate();
   const extendedCommunityActions: CommunityActions | undefined = useMemo(() => {
-    if (!communityActions) return undefined;
+    if (!communityActions || !channelKey) return undefined;
     return {
       ...communityActions,
       doEdit: () =>
         navigate(
-          `${window.location.pathname}/${isDetail ? '' : `${msg.fileMetadata.appData.uniqueId}/`}edit`
+          `${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${channelKey}/${threadKey ? `${threadKey}/thread/` : ``}${msg.fileMetadata.appData.uniqueId}/edit`
         ),
     };
   }, []);
