@@ -188,7 +188,7 @@ const ConversationBody = ({
             {typeof title === 'string' ? ellipsisAtMaxChar(title, 25) : title}
           </p>
 
-          <div className="ml-auto flex translate-x-8 flex-row items-center gap-2 transition-transform duration-500 group-hover:translate-x-0">
+          <div className="ml-auto flex translate-x-8 flex-row items-center gap-2 transition-transform duration-500 md:group-hover:translate-x-0">
             {lastMessage ? <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} /> : null}
             {conversation ? <ConversationContextMenu conversation={conversation} /> : null}
           </div>
