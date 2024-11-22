@@ -88,9 +88,12 @@ const ChatSideNav = ({ isOnline }: { isOnline: boolean }) => {
               <NavHeader isOnline={isOnline} />
               <ConversationsSidebar
                 activeConversationId={conversationKey}
-                openConversation={(newId) => {
-                  navigate(`${CHAT_ROOT_PATH}/${newId}`);
-                }}
+                openConversation={(newId) =>
+                  navigate({
+                    pathname: `${CHAT_ROOT_PATH}/${newId}`,
+                    search: window.location.search,
+                  })
+                }
               />
             </>
           )}
