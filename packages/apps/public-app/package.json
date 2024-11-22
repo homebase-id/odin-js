@@ -19,7 +19,7 @@
     "@homebase-id/ui-lib": "*",
     "hls.js": "^1.5.15",
     "axios": "1.7.5",
-    "emoji-picker-element": "^1.21.3",
+    "emoji-picker-element": "^1.24.0",
     "lodash-es": "^4.17.21",
     "react": "^18.3.1",
     "react-cropper": "^2.3.3",
