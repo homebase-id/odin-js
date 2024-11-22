@@ -130,6 +130,22 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     return await updateConversation(dotYouClient, newConversation);
   };
 
+  const archiveChat = async ({
+    conversation,
+  }: {
+    conversation: HomebaseFile<UnifiedConversation>;
+  }) => {
+    const newConversation: HomebaseFile<UnifiedConversation> = {
+      ...conversation,
+      fileMetadata: {
+        ...conversation.fileMetadata,
+        appData: { ...conversation.fileMetadata.appData, archivalStatus: 3 },
+      },
+    };
+
+    return await updateConversation(dotYouClient, newConversation);
+  };
+
   const restoreChat = async ({
     conversation,
   }: {
@@ -203,6 +219,18 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }),
     deleteChat: useMutation({
       mutationFn: deleteChat,
+
+      onSettled: async (_data, _error, variables) => {
+        invalidateConversations(queryClient);
+        invalidateConversation(queryClient, variables.conversation.fileMetadata.appData.uniqueId);
+        invalidateChatMessages(
+          queryClient,
+          variables.conversation.fileMetadata.appData.uniqueId as string
+        );
+      },
+    }),
+    archiveChat: useMutation({
+      mutationFn: archiveChat,
 
       onSettled: async (_data, _error, variables) => {
         invalidateConversations(queryClient);

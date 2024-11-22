@@ -15,7 +15,7 @@ import { useEffect, useState } from 'react';
 import { ContactFile } from '@homebase-id/js-lib/network';
 
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useConversations } from '../../../../hooks/chat/useConversations';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
@@ -40,10 +40,18 @@ export const ConversationsSidebar = ({
   const [isSearchActive, setIsSearchActive] = useState(false);
   const { data: conversations } = useConversations().all;
 
-  const flatConversations =
+  const [searchParams] = useSearchParams();
+  const isArchivedType = searchParams.get('type') === 'archived';
+
+  const flatConversations = (
     (conversations?.pages
       ?.flatMap((page) => page?.searchResults)
-      ?.filter(Boolean) as HomebaseFile<UnifiedConversation>[]) || [];
+      ?.filter(Boolean) as HomebaseFile<UnifiedConversation>[]) || []
+  )?.filter((con) =>
+    isArchivedType
+      ? con.fileMetadata.appData.archivalStatus === 3
+      : !con.fileMetadata.appData.archivalStatus || con.fileMetadata.appData.archivalStatus === 0
+  );
 
   return (
     <ErrorBoundary>
@@ -86,13 +94,18 @@ const ConversationList = ({
   const { data: contacts } = useAllContacts(!conversations || !conversations?.length);
   const noContacts = !contacts || contacts.length === 0;
 
+  const [searchParams] = useSearchParams();
+  const isArchivedType = searchParams.get('type') === 'archived';
+
   return (
     <div className="flex flex-grow flex-col">
       <div className="flex flex-grow flex-col">
-        <ConversationListItemWithYourself
-          onClick={() => openConversation(ConversationWithYourselfId)}
-          isActive={stringGuidsEqual(activeConversationId, ConversationWithYourselfId)}
-        />
+        {!isArchivedType ? (
+          <ConversationListItemWithYourself
+            onClick={() => openConversation(ConversationWithYourselfId)}
+            isActive={stringGuidsEqual(activeConversationId, ConversationWithYourselfId)}
+          />
+        ) : null}
         {!conversations?.length ? (
           <div className="order-2 flex flex-row flex-wrap px-5">
             {noContacts ? (
@@ -106,14 +119,16 @@ const ConversationList = ({
               <>
                 <SubtleMessage className="">{t('No conversations found')}</SubtleMessage>
 
-                <ActionLink
-                  href={`${CHAT_ROOT_PATH}/new`}
-                  icon={Plus}
-                  type="secondary"
-                  className="ml-auto"
-                >
-                  {t('New conversation')}
-                </ActionLink>
+                {!isArchivedType ? (
+                  <ActionLink
+                    href={`${CHAT_ROOT_PATH}/new`}
+                    icon={Plus}
+                    type="secondary"
+                    className="ml-auto"
+                  >
+                    {t('New conversation')}
+                  </ActionLink>
+                ) : null}
               </>
             )}
           </div>
