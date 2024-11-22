@@ -154,6 +154,7 @@ export const useChatMessage = (props?: {
     send: useMutation({
       mutationFn: sendMessage,
       onMutate: async ({ conversation, replyId, files, message, chatId, userDate, tags }) => {
+        const identity = dotYouClient.getLoggedInIdentity();
         const newMessageDsr: NewHomebaseFile<ChatMessage> = {
           fileMetadata: {
             created: userDate,
@@ -168,6 +169,8 @@ export const useChatMessage = (props?: {
               userDate,
               tags,
             },
+            senderOdinId: identity,
+            originalAuthor: identity,
             payloads: files?.map((file) => ({
               contentType: file.file.type,
               pendingFile: file.file,
