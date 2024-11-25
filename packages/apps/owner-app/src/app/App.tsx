@@ -6,6 +6,7 @@ import {
   RouterProvider,
   createBrowserRouter,
   createRoutesFromElements,
+  useLocation,
 } from 'react-router-dom';
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -89,38 +90,7 @@ function App() {
     createRoutesFromElements(
       <>
         <Route
-          path={FIRSTRUN_PATH}
-          element={
-            <Suspense fallback={<LoadingDetailPage />}>
-              <ErrorBoundary>
-                <FirstRun />
-              </ErrorBoundary>
-            </Suspense>
-          }
-        />
-        <Route
-          path={LOGIN_PATH}
-          element={
-            <Suspense fallback={<LoadingDetailPage />}>
-              <ErrorBoundary>
-                <Login />
-              </ErrorBoundary>
-            </Suspense>
-          }
-        />
-        <Route
-          path={RECOVERY_PATH}
-          element={
-            <Suspense fallback={<LoadingDetailPage />}>
-              <ErrorBoundary>
-                <AccountRecovery />
-              </ErrorBoundary>
-            </Suspense>
-          }
-        />
-
-        <Route
-          path="/owner"
+          path=""
           element={
             <RootRoute>
               <Suspense>
@@ -129,103 +99,143 @@ function App() {
             </RootRoute>
           }
         >
-          <Route path="youauth/consent" element={<YouAuthConsent />} />
-
-          <Route path="setup" element={<Setup />} />
-
           <Route
-            path=""
+            path={FIRSTRUN_PATH}
             element={
-              <MinimalLayout>
-                <Suspense fallback={<LoadingDetailPage />}>
-                  <ErrorBoundary>
-                    <Outlet />
-                  </ErrorBoundary>
-                </Suspense>
-              </MinimalLayout>
-            }
-          >
-            <Route path="appreg" element={<RegisterApp />} />
-            <Route path="appupdate" element={<ExtendAppDrivePermissions />} />
-            <Route path="apprequest-circles" element={<ExtendCirclePermissionsFromApp />} />
-            <Route path="apprequest-drives" element={<UpdateDriveDetailsFromApp />} />
-          </Route>
-
-          <Route
-            path=""
-            element={
-              <Layout>
-                <Suspense fallback={<LoadingDetailPage />}>
-                  <ErrorBoundary>
-                    <Outlet />
-                  </ErrorBoundary>
-                </Suspense>
-              </Layout>
-            }
-          >
-            <Route index={true} element={<Home />} />
-
-            <Route path="notifications" element={<Notifications />}></Route>
-            <Route path="notifications/problems" element={<NotificationProblems />}></Route>
-
-            <Route path="profile" element={<Profile />}></Route>
-            <Route path="profile/homepage" element={<Website />}></Route>
-            <Route path="profile/:profileKey" element={<ProfileDetails />}></Route>
-            <Route path="profile/:profileKey/:sectionKey" element={<ProfileDetails />}></Route>
-            <Route
-              path="profile/:profileKey/:sectionKey/:typeKey"
-              element={<ProfileDetails />}
-            ></Route>
-            <Route path="connections" element={<Connections />}></Route>
-            <Route path="connections/:odinId" element={<ConnectionDetails />}></Route>
-            <Route path="connections/:odinId/about" element={<ConnectionDetails />}></Route>
-            <Route path="connections/:odinId/links" element={<ConnectionDetails />}></Route>
-            <Route path="connections/:odinId/settings" element={<ConnectionDetails />}></Route>
-            <Route
-              path="connections/:odinId/settings/:action"
-              element={<ConnectionDetails />}
-            ></Route>
-            <Route path="connections/:odinId/:action" element={<ConnectionDetails />}></Route>
-            <Route path="circles" element={<Circles />}></Route>
-            <Route path="circles/:circleKey" element={<CircleDetails />}></Route>
-
-            {/* Third parties */}
-            <Route path="third-parties/services" element={<Domains />}></Route>
-            <Route path="third-parties/services/:domain" element={<DomainDetails />}></Route>
-            <Route path="third-parties" element={<Apps />}></Route>
-            <Route path="third-parties/apps/" element={<Apps />}></Route>
-            <Route path="third-parties/apps/:appKey" element={<AppDetails />}></Route>
-
-            <Route path="follow" element={<Following />}></Route>
-            <Route path="follow/followers" element={<Following />}></Route>
-            <Route path="follow/followers/:followerKey" element={<Following />}></Route>
-            <Route path="follow/following" element={<Following />}></Route>
-            <Route path="follow/following/:toFollowKey" element={<Following />}></Route>
-
-            <Route path="drives" element={<Drives />}></Route>
-            <Route path="drives/:driveKey" element={<DriveDetails />}></Route>
-            <Route path="drives/:driveKey/:fileKey" element={<FileDetails />}></Route>
-            <Route
-              path="drives/:driveKey/:systemFileType/:fileKey"
-              element={<FileDetails />}
-            ></Route>
-            <Route path="settings" element={<Settings />}></Route>
-            <Route path="settings/:sectionId" element={<Settings />}></Route>
-
-            <Route path="demo-data" element={<DemoData />}></Route>
-            <Route path="debug" element={<Debug />}></Route>
-          </Route>
-
-          <Route
-            path="*"
-            element={
-              <Layout>
-                <Suspense fallback={<LoadingDetailPage />}>
-                  <NotFound />
-                </Suspense>
-              </Layout>
+              <Suspense fallback={<LoadingDetailPage />}>
+                <ErrorBoundary>
+                  <FirstRun />
+                </ErrorBoundary>
+              </Suspense>
             }
           />
+          <Route
+            path={LOGIN_PATH}
+            element={
+              <Suspense fallback={<LoadingDetailPage />}>
+                <ErrorBoundary>
+                  <Login />
+                </ErrorBoundary>
+              </Suspense>
+            }
+          />
+          <Route
+            path={RECOVERY_PATH}
+            element={
+              <Suspense fallback={<LoadingDetailPage />}>
+                <ErrorBoundary>
+                  <AccountRecovery />
+                </ErrorBoundary>
+              </Suspense>
+            }
+          />
+
+          <Route
+            path="/owner"
+            element={
+              <Suspense>
+                <Outlet />
+              </Suspense>
+            }
+          >
+            <Route path="youauth/consent" element={<YouAuthConsent />} />
+
+            <Route path="setup" element={<Setup />} />
+
+            <Route
+              path=""
+              element={
+                <MinimalLayout>
+                  <Suspense fallback={<LoadingDetailPage />}>
+                    <ErrorBoundary>
+                      <Outlet />
+                    </ErrorBoundary>
+                  </Suspense>
+                </MinimalLayout>
+              }
+            >
+              <Route path="appreg" element={<RegisterApp />} />
+              <Route path="appupdate" element={<ExtendAppDrivePermissions />} />
+              <Route path="apprequest-circles" element={<ExtendCirclePermissionsFromApp />} />
+              <Route path="apprequest-drives" element={<UpdateDriveDetailsFromApp />} />
+            </Route>
+
+            <Route
+              path=""
+              element={
+                <Layout>
+                  <Suspense fallback={<LoadingDetailPage />}>
+                    <ErrorBoundary>
+                      <Outlet />
+                    </ErrorBoundary>
+                  </Suspense>
+                </Layout>
+              }
+            >
+              <Route index={true} element={<Home />} />
+
+              <Route path="notifications" element={<Notifications />}></Route>
+              <Route path="notifications/problems" element={<NotificationProblems />}></Route>
+
+              <Route path="profile" element={<Profile />}></Route>
+              <Route path="profile/homepage" element={<Website />}></Route>
+              <Route path="profile/:profileKey" element={<ProfileDetails />}></Route>
+              <Route path="profile/:profileKey/:sectionKey" element={<ProfileDetails />}></Route>
+              <Route
+                path="profile/:profileKey/:sectionKey/:typeKey"
+                element={<ProfileDetails />}
+              ></Route>
+              <Route path="connections" element={<Connections />}></Route>
+              <Route path="connections/:odinId" element={<ConnectionDetails />}></Route>
+              <Route path="connections/:odinId/about" element={<ConnectionDetails />}></Route>
+              <Route path="connections/:odinId/links" element={<ConnectionDetails />}></Route>
+              <Route path="connections/:odinId/settings" element={<ConnectionDetails />}></Route>
+              <Route
+                path="connections/:odinId/settings/:action"
+                element={<ConnectionDetails />}
+              ></Route>
+              <Route path="connections/:odinId/:action" element={<ConnectionDetails />}></Route>
+              <Route path="circles" element={<Circles />}></Route>
+              <Route path="circles/:circleKey" element={<CircleDetails />}></Route>
+
+              {/* Third parties */}
+              <Route path="third-parties/services" element={<Domains />}></Route>
+              <Route path="third-parties/services/:domain" element={<DomainDetails />}></Route>
+              <Route path="third-parties" element={<Apps />}></Route>
+              <Route path="third-parties/apps/" element={<Apps />}></Route>
+              <Route path="third-parties/apps/:appKey" element={<AppDetails />}></Route>
+
+              <Route path="follow" element={<Following />}></Route>
+              <Route path="follow/followers" element={<Following />}></Route>
+              <Route path="follow/followers/:followerKey" element={<Following />}></Route>
+              <Route path="follow/following" element={<Following />}></Route>
+              <Route path="follow/following/:toFollowKey" element={<Following />}></Route>
+
+              <Route path="drives" element={<Drives />}></Route>
+              <Route path="drives/:driveKey" element={<DriveDetails />}></Route>
+              <Route path="drives/:driveKey/:fileKey" element={<FileDetails />}></Route>
+              <Route
+                path="drives/:driveKey/:systemFileType/:fileKey"
+                element={<FileDetails />}
+              ></Route>
+              <Route path="settings" element={<Settings />}></Route>
+              <Route path="settings/:sectionId" element={<Settings />}></Route>
+
+              <Route path="demo-data" element={<DemoData />}></Route>
+              <Route path="debug" element={<Debug />}></Route>
+            </Route>
+
+            <Route
+              path="*"
+              element={
+                <Layout>
+                  <Suspense fallback={<LoadingDetailPage />}>
+                    <NotFound />
+                  </Suspense>
+                </Layout>
+              }
+            />
+          </Route>
         </Route>
       </>
     )
@@ -251,26 +261,26 @@ function App() {
 
 const RootRoute = ({ children }: { children: ReactNode }) => {
   useValidateAuthorization();
+  const location = useLocation();
 
   const isAuthenticated = useDotYouClientContext().isAuthenticated();
   const { data: isConfigured, isFetched } = useIsConfigured().isConfigured;
   useInboxProcessor();
 
   if (!isAuthenticated) {
-    if (window.location.pathname === FIRSTRUN_PATH || window.location.pathname === RECOVERY_PATH) {
+    if (
+      location.pathname === FIRSTRUN_PATH ||
+      location.pathname === RECOVERY_PATH ||
+      location.pathname === LOGIN_PATH
+    ) {
       return <>{children}</>;
     }
 
     console.debug('[NOT AUTHENTICATED]: Redirect to login');
 
-    // It can happen that the RootRoute renders when we already are rendering Login, which would cause and endless url of returnUrls; So return early if it is the login already
-    if (window.location.pathname === LOGIN_PATH) return <></>;
-
     return (
       <Navigate
-        to={`${LOGIN_PATH}?returnUrl=${encodeURIComponent(
-          window.location.pathname + window.location.search
-        )}`}
+        to={`${LOGIN_PATH}?returnUrl=${encodeURIComponent(location.pathname + location.search)}`}
       />
     );
   }
