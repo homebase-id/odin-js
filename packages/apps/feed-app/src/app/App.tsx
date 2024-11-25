@@ -6,6 +6,7 @@ import {
   RouterProvider,
   createBrowserRouter,
   createRoutesFromElements,
+  useLocation,
 } from 'react-router-dom';
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -33,6 +34,7 @@ import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 
 const AUTH_PATH = FEED_ROOT_PATH + '/auth';
+const AUTH_FINALIZE_PATH = FEED_ROOT_PATH + '/auth/finalize';
 
 import {
   DotYouClientProvider,
@@ -55,9 +57,11 @@ function App() {
           path={FEED_ROOT_PATH}
           element={
             <ErrorBoundary>
-              <Suspense fallback={<></>}>
-                <Outlet />
-              </Suspense>
+              <RootRoute>
+                <Suspense fallback={<></>}>
+                  <Outlet />
+                </Suspense>
+              </RootRoute>
             </ErrorBoundary>
           }
         >
@@ -68,11 +72,9 @@ function App() {
           <Route
             path=""
             element={
-              <RootRoute>
-                <Layout>
-                  <Outlet />
-                </Layout>
-              </RootRoute>
+              <Layout>
+                <Outlet />
+              </Layout>
             }
           >
             <Route index={true} element={<SocialFeed />} />
@@ -130,21 +132,18 @@ function App() {
 
 const RootRoute = ({ children }: { children: ReactNode }) => {
   useValidateAuthorization();
+  const location = useLocation();
 
   const isAuthenticated = useDotYouClientContext().isAuthenticated();
 
   if (!isAuthenticated) {
-    if (window.location.pathname === AUTH_PATH) return <>{children}</>;
-
-    // It can happen that the RootRoute renders when we already are rendering Login, which would cause and endless url of returnUrls; So return early if it is the login already
-    if (window.location.pathname === AUTH_PATH) return <></>;
+    if (location.pathname === AUTH_PATH || location.pathname === AUTH_FINALIZE_PATH)
+      return <>{children}</>;
 
     console.debug('[NOT AUTHENTICATED]: Redirect to login');
     return (
       <Navigate
-        to={`${AUTH_PATH}?returnUrl=${encodeURIComponent(
-          window.location.pathname + window.location.search
-        )}`}
+        to={`${AUTH_PATH}?returnUrl=${encodeURIComponent(location.pathname + location.search)}`}
       />
     );
   }
