@@ -5,6 +5,7 @@ import {
   AuthorImage,
   AuthorName,
   DialogWrapper,
+  OWNER_ROOT,
   t,
   useDotYouClientContext,
   usePortal,
@@ -12,7 +13,7 @@ import {
 import { FailedDeliveryDetails, InnerDeliveryIndicator } from './ChatDeliveryIndicator';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
-import { UnifiedConversation } from '../../../providers/ConversationProvider';
+import { ChatDrive, UnifiedConversation } from '../../../providers/ConversationProvider';
 
 export const ChatMessageInfo = ({
   msg,
@@ -58,6 +59,15 @@ export const ChatMessageInfo = ({
               {formatDateExludingYearIfCurrent(new Date(msg.fileMetadata.transitCreated))}
             </p>
           ) : null}
+
+          <a
+            href={`${OWNER_ROOT}/drives/${ChatDrive.alias}_${ChatDrive.type}/${msg.fileId}`}
+            className="text-primary hover:underline"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {t('See file on your drive')}
+          </a>
         </div>
 
         {recipients?.length ? (
