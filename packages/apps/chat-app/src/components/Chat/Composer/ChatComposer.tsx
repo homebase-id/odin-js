@@ -157,7 +157,13 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
               const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
 
               if (mediaFiles.length) {
-                setFiles([...(files ?? []), ...mediaFiles]);
+                setFiles([
+                  ...(files ?? []),
+                  ...mediaFiles.filter(
+                    (newFile) =>
+                      !files?.some((oldFile) => (oldFile.file as File).name === newFile.file.name)
+                  ),
+                ]);
                 e.preventDefault();
               }
             }}

@@ -56,19 +56,16 @@ export const useHlsManifest = (
 
     const contents = await replaceSegmentUrls(
       videoFileData?.metadata.hlsPlaylist,
-      async (url) => {
-        return (
-          (await getSegmentUrl(
-            dotYouClient,
-            odinId,
-            videoDrive,
-            videoFile.fileId,
-            videoFileKey,
-            videoFileData?.fileHeader.fileMetadata.isEncrypted || false,
-            systemFileType
-          )) || url
-        );
-      },
+      async (url) =>
+        (await getSegmentUrl(
+          dotYouClient,
+          odinId,
+          videoDrive,
+          videoFile.fileId,
+          videoFileKey,
+          videoFileData?.fileHeader.fileMetadata.isEncrypted || false,
+          systemFileType
+        )) || url,
       async (url) => {
         if (!videoFileData?.fileHeader.sharedSecretEncryptedKeyHeader) return url;
         const keyHeader = await decryptKeyHeader(
@@ -90,6 +87,7 @@ export const useHlsManifest = (
         odinId || identity,
         videoDrive?.alias,
         videoGlobalTransitId || videoFileId,
+        videoFileKey,
       ],
       queryFn: () =>
         fetchManifest(odinId || identity, videoFileData?.fileHeader, videoDrive, videoFileKey),

@@ -119,7 +119,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
       data-state="video-placeholder"
       className={className}
       ref={videoRef}
-      key={shouldFallback ? 'fallback' : 'video'} // Get a new video element when we fallback to direct source
+      key={'' + (fileId || globalTransitId) + fileKey + (shouldFallback ? 'fallback' : 'video')} // Get a new video element when we fallback to direct source
       onClick={(e) => e.stopPropagation()}
       autoPlay={videoProps.autoPlay}
       poster={!shouldFallback ? videoProps.poster : undefined}
