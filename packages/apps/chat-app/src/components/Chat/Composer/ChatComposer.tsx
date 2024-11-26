@@ -155,13 +155,16 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
             ref={volatileRef}
             onPaste={(e) => {
               const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
-
               if (mediaFiles.length) {
                 setFiles([
                   ...(files ?? []),
                   ...mediaFiles.filter(
                     (newFile) =>
-                      !files?.some((oldFile) => (oldFile.file as File).name === newFile.file.name)
+                      !files?.some(
+                        (oldFile) =>
+                          (oldFile.file as File).name === newFile.file.name &&
+                          (oldFile.file as File).size === newFile.file.size
+                      )
                   ),
                 ]);
                 e.preventDefault();

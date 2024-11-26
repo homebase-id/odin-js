@@ -179,6 +179,7 @@ const ConversationBody = ({
     const date = lastMessage?.fileMetadata.created;
     setOrder && date && setOrder(Math.max(new Date().getTime() - date, 2));
   }, [lastMessage, conversation]);
+  const hasNoContextMenu = stringGuidsEqual(conversationId, ConversationWithYourselfId);
 
   return (
     <>
@@ -188,9 +189,19 @@ const ConversationBody = ({
             {typeof title === 'string' ? ellipsisAtMaxChar(title, 25) : title}
           </p>
 
-          <div className="ml-auto flex translate-x-8 flex-row items-center gap-2 transition-transform duration-500 md:group-hover:translate-x-0">
-            {lastMessage ? <ChatSentTimeIndicator msg={lastMessage} keepDetail={false} /> : null}
-            {conversation ? <ConversationContextMenu conversation={conversation} /> : null}
+          <div
+            className={`ml-auto flex flex-row items-center gap-2 duration-500 ${hasNoContextMenu ? '' : 'translate-x-8 transition-transform md:group-hover:translate-x-0'}`}
+          >
+            {lastMessage ? (
+              <ChatSentTimeIndicator
+                msg={lastMessage}
+                keepDetail={false}
+                className="whitespace-nowrap"
+              />
+            ) : null}
+            {conversation && !hasNoContextMenu ? (
+              <ConversationContextMenu conversation={conversation} />
+            ) : null}
           </div>
         </div>
         <div className="flex flex-row items-center gap-1">
