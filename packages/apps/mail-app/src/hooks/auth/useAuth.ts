@@ -34,12 +34,21 @@ const MailDrive: TargetDrive = {
 
 export const useValidateAuthorization = () => {
   const { getDotYouClient, hasSharedSecret } = useDotYouClient();
+  const {
+    data: hasValidToken,
+    isFetchedAfterMount,
+    isRefetching,
+    refetch,
+  } = useVerifyToken(getDotYouClient());
 
-  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(getDotYouClient());
+  useEffect(() => {
+    // We got a shared secret; We should reset the token verification
+    if (hasSharedSecret) refetch();
+  }, [hasSharedSecret]);
 
   useEffect(() => {
     if (isFetchedAfterMount && hasValidToken !== undefined) {
-      if (!hasValidToken && hasSharedSecret) {
+      if (!hasValidToken && !isRefetching && hasSharedSecret) {
         console.warn('Token is invalid, logging out..');
         logoutOwnerAndAllApps();
       }

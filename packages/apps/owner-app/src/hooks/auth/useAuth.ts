@@ -17,7 +17,7 @@ import {
   logoutPublicSession,
   useDotYouClient,
 } from '@homebase-id/common-app';
-import { QueryClient, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const SETUP_PATH = '/owner/setup';
 
@@ -30,11 +30,16 @@ export const HOME_PATH = '/owner';
 
 export const useValidateAuthorization = () => {
   const { hasSharedSecret } = useDotYouClient();
-  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken();
+  const { data: hasValidToken, isFetchedAfterMount, isRefetching, refetch } = useVerifyToken();
+
+  useEffect(() => {
+    // We got a shared secret; We should reset the token verification
+    if (hasSharedSecret) refetch();
+  }, [hasSharedSecret]);
 
   useEffect(() => {
     if (isFetchedAfterMount && hasValidToken !== undefined) {
-      if (!hasValidToken && hasSharedSecret) {
+      if (!hasValidToken && !isRefetching && hasSharedSecret) {
         console.warn('Token is invalid, logging out..');
         logoutOwnerAndAllApps();
       }
