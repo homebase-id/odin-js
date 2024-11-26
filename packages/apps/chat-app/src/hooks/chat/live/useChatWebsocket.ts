@@ -94,7 +94,6 @@ export const useChatSocketHandler = () => {
               getConversationQueryOptions(dotYouClient, queryClient, conversationId)
             );
 
-            console.log('check conversation state', conversation);
             if (!conversation) {
               console.error('Orphaned message received', notification.header.fileId, conversation);
               // Can't handle this one ATM.. How to resolve?

@@ -25,7 +25,7 @@ export const ChatMedia = ({
   msg: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>;
 }) => {
   const payloads = msg.fileMetadata.payloads?.filter(
-    (payload) => payload.key && payload.key !== DEFAULT_PAYLOAD_KEY
+    (payload) => payload.key !== DEFAULT_PAYLOAD_KEY
   );
   const isGallery = payloads && payloads.length >= 2;
   const navigate = useNavigate();
