@@ -22,13 +22,23 @@ import { useQueryClient } from '@tanstack/react-query';
 
 export const useValidateAuthorization = () => {
   const { hasSharedSecret, isOwner } = useDotYouClient();
-  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(isOwner);
+  const {
+    data: hasValidToken,
+    isFetchedAfterMount,
+    isRefetching,
+    refetch,
+  } = useVerifyToken(isOwner);
 
   const { logout } = useAuth();
 
   useEffect(() => {
+    // We got a shared secret; We should reset the token verification
+    if (hasSharedSecret && !hasValidToken) refetch();
+  }, [hasSharedSecret]);
+
+  useEffect(() => {
     if (isFetchedAfterMount && hasValidToken !== undefined) {
-      if (!hasValidToken && hasSharedSecret) {
+      if (!hasValidToken && !isRefetching && hasSharedSecret) {
         console.error('kicking identity');
         logout();
       } else {
