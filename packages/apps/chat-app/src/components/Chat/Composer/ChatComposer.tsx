@@ -158,7 +158,6 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
               if (mediaFiles.length) {
                 setFiles([
                   ...(files ?? []),
-                  // ...mediaFiles,
                   ...mediaFiles.filter(
                     (newFile) =>
                       !files?.some(
