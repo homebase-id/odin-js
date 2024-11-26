@@ -34,7 +34,7 @@ export const useValidateAuthorization = () => {
 
   useEffect(() => {
     // We got a shared secret; We should reset the token verification
-    if (hasSharedSecret && !hasValidToken) refetch();
+    if (isFetchedAfterMount && !hasValidToken && hasSharedSecret && !isRefetching) refetch();
   }, [hasSharedSecret]);
 
   useEffect(() => {
