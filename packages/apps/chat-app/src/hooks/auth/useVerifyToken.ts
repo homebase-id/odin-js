@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { QueryClient, useQuery } from '@tanstack/react-query';
 import { APP_SHARED_SECRET } from '@homebase-id/common-app';
 import { hasValidToken as hasValidYouAuthToken } from '@homebase-id/js-lib/auth';
 import { DotYouClient } from '@homebase-id/js-lib/core';
@@ -24,4 +24,8 @@ export const useVerifyToken = (dotYouClient: DotYouClient) => {
     staleTime: MINUTE_IN_MS * 10,
     gcTime: MINUTE_IN_MS * 10,
   });
+};
+
+export const invalidateVerifyToken = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['verifyToken'] });
 };

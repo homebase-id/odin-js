@@ -1,6 +1,6 @@
 import { DrivePermissionType } from '@homebase-id/js-lib/core';
 import { useEffect } from 'react';
-import { useVerifyToken } from './useVerifyToken';
+import { invalidateVerifyToken, useVerifyToken } from './useVerifyToken';
 import {
   finalizeAuthentication as finalizeAuthenticationYouAuth,
   getRegistrationParams,
@@ -22,6 +22,7 @@ import {
   useDotYouClient,
 } from '@homebase-id/common-app';
 import { LOCAL_COMMUNITY_APP_DRIVE } from '../../providers/CommunityMetadataProvider';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const useValidateAuthorization = () => {
   const { getDotYouClient, hasSharedSecret } = useDotYouClient();
@@ -94,6 +95,7 @@ export const appName = 'Homebase - Community';
 export const appId = COMMUNITY_APP_ID;
 
 export const useYouAuthAuthorization = () => {
+  const queryClient = useQueryClient();
   const getAuthorizationParameters = async (returnUrl: string): Promise<YouAuthorizationParams> => {
     const eccKey = await createEccPair();
 
@@ -132,6 +134,7 @@ export const useYouAuthAuthorization = () => {
       if (identity) saveIdentity(identity);
       localStorage.setItem(APP_SHARED_SECRET, sharedSecret);
       localStorage.setItem(APP_AUTH_TOKEN, clientAuthToken);
+      invalidateVerifyToken(queryClient);
 
       throwAwayTheECCKey();
     } catch (ex) {

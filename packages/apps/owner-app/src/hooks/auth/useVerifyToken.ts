@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { QueryClient, useQuery } from '@tanstack/react-query';
 import { hasValidOwnerToken } from '@homebase-id/common-app';
 
 const MINUTE_IN_MS = 60000;
@@ -13,4 +13,8 @@ export const useVerifyToken = () => {
     refetchOnMount: false,
     staleTime: MINUTE_IN_MS * 10,
   });
+};
+
+export const invalidateVerifyToken = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['verifyToken'] });
 };

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { QueryClient, useQuery } from '@tanstack/react-query';
 import {
   HOME_SHARED_SECRET,
   OWNER_SHARED_SECRET,
@@ -29,4 +29,8 @@ export const useVerifyToken = (isOwner?: boolean) => {
     refetchOnMount: false,
     staleTime: MINUTE_IN_MS * 10,
   });
+};
+
+export const invalidateVerifyToken = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['verifyToken'] });
 };
