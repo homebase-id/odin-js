@@ -7,8 +7,9 @@ import {
   t,
   usePortal,
   formatDateExludingYearIfCurrent,
+  OWNER_ROOT,
 } from '@homebase-id/common-app';
-import { MailConversation, MailDeliveryStatus } from '../../providers/MailProvider';
+import { MailConversation, MailDeliveryStatus, MailDrive } from '../../providers/MailProvider';
 import { Exclamation } from '@homebase-id/common-app/icons';
 
 export const MailConversationInfo = ({
@@ -44,6 +45,14 @@ export const MailConversationInfo = ({
               )}
             </p>
           ) : null}
+          <a
+            href={`${OWNER_ROOT}/drives/${MailDrive.alias}_${MailDrive.type}/${mailConversation.fileId}`}
+            className="text-primary hover:underline"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {t('See file on your drive')}
+          </a>
         </div>
 
         <div>
