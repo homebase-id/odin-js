@@ -265,7 +265,7 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
 
   const isAuthenticated = useDotYouClientContext().isAuthenticated();
   const { data: isConfigured, isFetched } = useIsConfigured().isConfigured;
-  useInboxProcessor();
+  useInboxProcessor(isAuthenticated);
 
   if (!isAuthenticated) {
     if (
