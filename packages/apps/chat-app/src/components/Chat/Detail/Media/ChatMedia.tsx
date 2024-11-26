@@ -76,7 +76,7 @@ const MediaItem = ({
 
   return (
     <div
-      className={`relative cursor-pointer ${fit === 'cover' ? 'aspect-square' : ''}`}
+      className={`relative cursor-pointer ${fit === 'cover' ? 'aspect-square overflow-hidden' : ''}`}
       onClick={onClick}
       data-thumb={!!previewThumbnail}
     >
@@ -92,7 +92,10 @@ const MediaItem = ({
                 fileKey={payload.key}
                 lastModified={payload.lastModified || fileLastModified}
                 targetDrive={ChatDrive}
-                className={`w-full blur-sm`}
+                className={
+                  fit === 'cover' ? 'h-full w-auto object-cover blur-sm' : `w-full blur-sm`
+                }
+                onLoad={onLoad}
                 loadSize={{ pixelWidth: 200, pixelHeight: 200 }}
               />
               <div className="absolute inset-0 flex items-center justify-center">

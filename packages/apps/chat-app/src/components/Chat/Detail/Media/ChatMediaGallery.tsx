@@ -89,6 +89,7 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
               autoPlay={true}
               fileId={msg.fileId}
               fileKey={mediaKey}
+              key={mediaKey}
               targetDrive={ChatDrive}
               lastModified={msg.fileMetadata.updated}
               probablyEncrypted={true}
@@ -100,6 +101,7 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
               dotYouClient={dotYouClient}
               fileId={msg.fileId}
               fileKey={mediaKey}
+              key={mediaKey}
               targetDrive={ChatDrive}
               alt="post"
               fit="contain"
