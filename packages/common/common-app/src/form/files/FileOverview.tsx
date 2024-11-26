@@ -123,7 +123,10 @@ export const FileOverview = ({
           : URL.createObjectURL(currFile.file);
 
       return (
-        <div key={(currFile.file as File).name || index} className="relative group">
+        <div
+          key={(currFile.file as File).size + '' + ((currFile.file as File).name || index)}
+          className="relative group"
+        >
           {currFile.file.type === 'video/mp4' ? (
             <>
               <video
@@ -165,7 +168,11 @@ export const FileOverview = ({
               setFiles([
                 ...(files.filter(
                   (file) =>
-                    'file' in file && (file.file as File).name !== (currFile.file as File).name
+                    'file' in file &&
+                    !(
+                      (file.file as File).name === (currFile.file as File).name &&
+                      (file.file as File).size === (currFile.file as File).size
+                    )
                 ) as NewFileArray),
               ]);
             }}
