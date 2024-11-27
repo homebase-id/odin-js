@@ -40,7 +40,6 @@ import { House } from '../Icons/House';
 import { Person } from '../Icons/Person';
 import { Persons } from '../Icons/Persons';
 import { Pin } from '../Icons/Pin';
-import { Scissors } from '../Icons/Scissors';
 import { Times } from '../Icons/Times';
 import { IconProps } from '../Icons/Types';
 import { Wallet } from '../Icons/Wallet';
@@ -218,8 +217,6 @@ export const Sidenav = ({
     </>
   );
 };
-
-const isDebug = hasDebugFlag();
 
 const MoreItems = ({
   isOpen: isNavOpen,

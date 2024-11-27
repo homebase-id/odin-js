@@ -1,5 +1,5 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { moveElementInArray } from '../../templates/DemoData/helpers';
+import { moveElementInArray } from '@homebase-id/common-app';
 import { useAttribute } from './useAttribute';
 import { AttributeVm } from './useAttributes';
 

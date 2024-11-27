@@ -98,3 +98,11 @@ export const getHighestPrioAttributesFromMultiTypes = (
     }
   }, [] as HomebaseFile<Attribute>[]);
 };
+
+export const moveElementInArray = (arr: Array<unknown>, fromIndex: number, toIndex: number) => {
+  const element = arr[fromIndex];
+  arr.splice(fromIndex, 1);
+  arr.splice(toIndex, 0, element);
+
+  return arr;
+};
