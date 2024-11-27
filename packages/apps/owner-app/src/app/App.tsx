@@ -59,7 +59,6 @@ const DriveDetails = lazy(() => import('../templates/Drives/DriveDetails/DriveDe
 const FileDetails = lazy(() => import('../templates/Drives/DriveDetails/FileDetails'));
 const Settings = lazy(() => import('../templates/Settings/Settings'));
 
-const DemoData = lazy(() => import('../templates/DemoData/DemoData'));
 const Debug = lazy(() => import('../templates/Debug/Debug'));
 
 import '@homebase-id/ui-lib/dist/style.css';
@@ -221,7 +220,6 @@ function App() {
               <Route path="settings" element={<Settings />}></Route>
               <Route path="settings/:sectionId" element={<Settings />}></Route>
 
-              <Route path="demo-data" element={<DemoData />}></Route>
               <Route path="debug" element={<Debug />}></Route>
             </Route>
 
