@@ -51,6 +51,7 @@ import {
 } from '@homebase-id/common-app';
 import VideoPlayer from '../templates/VideoPlayer/VideoPlayer';
 import { OdinQueryClient } from '@homebase-id/common-app';
+import { useValidateAuthorization } from '../hooks/auth/useAuth';
 
 function App() {
   const router = createBrowserRouter(
@@ -126,6 +127,8 @@ function App() {
 }
 
 const RootRoute = ({ children }: { children: ReactNode }) => {
+  useValidateAuthorization();
+
   const isAuthenticated = useDotYouClientContext().isAuthenticated();
   const location = useLocation();
 
