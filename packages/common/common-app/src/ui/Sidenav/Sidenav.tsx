@@ -352,7 +352,9 @@ const ExternalNavItem = ({
 const IdentityNavItem = () => {
   return (
     <a className={`relative flex py-2 pl-[0.2rem] pr-1`} href={HOME_ROOT_PATH}>
-      <OwnerImage className={`h-9 w-9 flex-shrink-0 rounded-full`} size="custom" />
+      <span className="h-9 w-9 flex-shrink-0">
+        <OwnerImage className={`h-9 w-9 rounded-full`} size="custom" />
+      </span>
       <span className={`my-auto ml-3 overflow-hidden text-lg font-medium`}>
         {' '}
         {ellipsisAtMaxChar(window.location.hostname, 20)}
