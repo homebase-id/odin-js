@@ -39,7 +39,7 @@ export const PageMeta = ({
             })}
           </ul>
         )}
-        <div className="flex flex-row items-end gap-5">
+        <div className="flex w-full flex-row flex-wrap items-end gap-5">
           {title && (
             <>
               <h1 className="my-auto flex flex-row text-2xl dark:text-white xl:text-4xl">
