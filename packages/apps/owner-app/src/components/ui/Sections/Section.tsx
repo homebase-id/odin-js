@@ -28,8 +28,7 @@ const Section = React.forwardRef(
           !isBorderLess
             ? 'rounded-lg border border-gray-200 border-opacity-80 dark:border-gray-700'
             : ''
-        }
-        bg-white px-5 dark:bg-black dark:text-slate-300 ${className ?? ''}`}
+        } bg-white px-5 dark:bg-black dark:text-slate-300 ${className ?? ''}`}
       >
         <SectionTitle title={title} actions={actions} />
         <div className="flex-grow py-5">{children}</div>
@@ -45,7 +44,7 @@ export const SectionTitle = ({ title, actions }: { title?: ReactNode; actions?: 
 
   return (
     <div
-      className={`relative flex flex-row flex-wrap-reverse items-center border-b-[1px] border-gray-200 border-opacity-80 py-5 transition-all duration-300 dark:border-gray-700`}
+      className={`relative flex flex-row flex-wrap-reverse items-center border-b-[1px] border-gray-200 border-opacity-80 py-4 transition-all duration-300 dark:border-gray-700`}
     >
       <h3 className="text-xl dark:text-white sm:text-2xl">{title}</h3>
       <div className="ml-auto">

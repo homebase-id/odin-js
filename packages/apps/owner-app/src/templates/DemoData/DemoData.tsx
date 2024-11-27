@@ -16,7 +16,7 @@ import { useManagePost } from '@homebase-id/common-app';
 
 import { useCircles } from '@homebase-id/common-app';
 import { useCircle } from '@homebase-id/common-app';
-import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import { useHomeAttributes } from '../../hooks/profiles/useHomeAttributes';
 import {
   Attribute,

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
 import { getOperatingSystem } from '@homebase-id/js-lib/auth';
 import { isTouchDevice } from '@homebase-id/js-lib/helpers';

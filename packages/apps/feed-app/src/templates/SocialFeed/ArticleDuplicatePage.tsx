@@ -10,7 +10,7 @@ import {
 } from '@homebase-id/common-app';
 import { OpenLock, Lock, Article as ArticleIcon, Clipboard } from '@homebase-id/common-app/icons';
 import { useNavigate, useParams } from 'react-router-dom';
-import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import { useEffect, useState } from 'react';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { BlogConfig, ChannelDefinition } from '@homebase-id/js-lib/public';

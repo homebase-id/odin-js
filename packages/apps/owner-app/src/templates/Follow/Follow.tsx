@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { useMatch, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
-import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import Submenu from '../../components/SubMenu/SubMenu';
 import { useConnectionActions } from '../../hooks/connections/useConnectionActions';
 import IdentityIFollowEditDialog from '../../components/Followers/IdentityIFollowEditDialog/IdentityIFollowEditDialog';
@@ -43,7 +43,7 @@ const Follow = () => {
             path: `/owner/follow/followers`,
           },
         ]}
-        className="-mt-6 mb-6"
+        className="mb-6"
       />
 
       {followersMatch ? <Followers /> : <Following />}

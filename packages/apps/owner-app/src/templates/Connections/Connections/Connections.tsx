@@ -19,13 +19,12 @@ import PersonIncomingRequest from '../../../components/Connection/PersonIncoming
 import PersonOutgoingRequest from '../../../components/Connection/PersonOutgoingRequest/PersonOutgoingRequest';
 import { SectionTitle } from '../../../components/ui/Sections/Section';
 import { useEffect, useState } from 'react';
-import PersonActive from '../../../components/Connection/PersonActive/PersonActive';
-import { DotYouProfile } from '@homebase-id/js-lib/network';
-import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import { OutgoingConnectionDialog } from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
 import { IntroductionDialog } from '../../../components/Connection/ConnectionDialogs/IntroductionDialog';
 import { Persons, Plus } from '@homebase-id/common-app/icons';
 import PersonCard from '../../../components/Connection/PersonCard/PersonCard';
+import ConnectionCard from '../../../components/Connection/ConnectionCard/ConnectionCard';
 
 const Connections = () => {
   const [hasActiveConnections, setActiveConnections] = useState(true);
@@ -62,50 +61,46 @@ const Connections = () => {
         }
       />
 
-      <div className="-mt-6">
-        {!hasActiveConnections &&
-        !hasSentConnections &&
-        !hasPendingConnections &&
-        !hasOutgoingIntroductions &&
-        !hasIncomingIntroductions ? (
-          <SubtleMessage className="flex flex-row items-center gap-3">
-            <span>{t('Ready to add some connections?')}</span>
-            <ActionButton
-              onClick={(e) => {
-                e.preventDefault();
-                setIsSentConnectionOpen(true);
+      {!hasActiveConnections &&
+      !hasSentConnections &&
+      !hasPendingConnections &&
+      !hasOutgoingIntroductions &&
+      !hasIncomingIntroductions ? (
+        <SubtleMessage className="flex flex-row items-center gap-3">
+          <span>{t('Ready to add some connections?')}</span>
+          <ActionButton
+            onClick={(e) => {
+              e.preventDefault();
+              setIsSentConnectionOpen(true);
 
-                return false;
-              }}
-              type="secondary"
-              icon={Plus}
-            >
-              {t('Add')}
-            </ActionButton>
-          </SubtleMessage>
-        ) : null}
+              return false;
+            }}
+            type="secondary"
+            icon={Plus}
+          >
+            {t('Add')}
+          </ActionButton>
+        </SubtleMessage>
+      ) : null}
 
-        <PendingConnectionSection setNoPendingConnections={() => setPendingConnections(false)} />
-        <SentConnectionSection setNoSentConnections={() => setSentConnections(false)} />
-        <IncomingIntroductionsSection
-          setNoIncomingIntroductions={() => setIncomingIntroductions(false)}
-        />
-        <OutgoingIntroductionsSection
-          setNoSentConnections={() => setOutgoingIntroductions(false)}
-        />
-        <ActiveConnectionSection setNoActiveConnections={() => setActiveConnections(false)} />
-        <OutgoingConnectionDialog
-          title={t('Send connection request')}
-          isOpen={isSentConnectionOpen}
-          onConfirm={() => setIsSentConnectionOpen(false)}
-          onCancel={() => setIsSentConnectionOpen(false)}
-        />
-        <IntroductionDialog
-          isOpen={isIntroduceOpen}
-          onConfirm={() => setIsIntroduceOpen(false)}
-          onCancel={() => setIsIntroduceOpen(false)}
-        />
-      </div>
+      <PendingConnectionSection setNoPendingConnections={() => setPendingConnections(false)} />
+      <SentConnectionSection setNoSentConnections={() => setSentConnections(false)} />
+      <IncomingIntroductionsSection
+        setNoIncomingIntroductions={() => setIncomingIntroductions(false)}
+      />
+      <OutgoingIntroductionsSection setNoSentConnections={() => setOutgoingIntroductions(false)} />
+      <ActiveConnectionSection setNoActiveConnections={() => setActiveConnections(false)} />
+      <OutgoingConnectionDialog
+        title={t('Send connection request')}
+        isOpen={isSentConnectionOpen}
+        onConfirm={() => setIsSentConnectionOpen(false)}
+        onCancel={() => setIsSentConnectionOpen(false)}
+      />
+      <IntroductionDialog
+        isOpen={isIntroduceOpen}
+        onConfirm={() => setIsIntroduceOpen(false)}
+        onCancel={() => setIsIntroduceOpen(false)}
+      />
     </>
   );
 };
@@ -432,9 +427,13 @@ const ActiveConnectionSection = ({
 
             {activeConnections?.pages?.[activePage - 1]?.results?.map((activeConnection) =>
               typeof activeConnection === 'object' ? (
-                <PersonActive
-                  className="min-w-[5rem]"
-                  dotYouProfile={activeConnection as DotYouProfile}
+                <ConnectionCard
+                  odinId={activeConnection.odinId}
+                  href={
+                    (activeConnection.odinId && `/owner/connections/${activeConnection.odinId}`) ??
+                    undefined
+                  }
+                  canSave={true}
                   key={activeConnection.odinId}
                 />
               ) : null

@@ -1,6 +1,6 @@
 import { Label, Input, ActionButton } from '@homebase-id/common-app';
 import { useState } from 'react';
-import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import { importRemotePublicEccKey } from '@homebase-id/js-lib/auth';
 import { hasDebugFlag } from '@homebase-id/js-lib/helpers';
 

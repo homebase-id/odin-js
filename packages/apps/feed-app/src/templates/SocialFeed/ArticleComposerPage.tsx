@@ -23,7 +23,7 @@ import {
   OpenLock,
 } from '@homebase-id/common-app/icons';
 import { InnerFieldEditors } from '../../components/SocialFeed/ArticleFieldsEditor/ArticleFieldsEditor';
-import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import { Article, ReactAccess } from '@homebase-id/js-lib/public';
 import { useArticleComposer } from '@homebase-id/common-app';
 import { useCallback, useEffect, useState } from 'react';

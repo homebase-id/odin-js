@@ -3,7 +3,7 @@ import { useApps } from '../../../hooks/apps/useApps';
 import { Grid } from '@homebase-id/common-app/icons';
 
 import Section from '../../../components/ui/Sections/Section';
-import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import Submenu from '../../../components/SubMenu/SubMenu';
 import { RedactedAppRegistration } from '../../../provider/app/AppManagementProviderTypes';
 import { CompanyImage } from '../../../components/Connection/CompanyImage/CompanyImage';
@@ -26,7 +26,7 @@ const Apps = () => {
             path: `/owner/third-parties/services`,
           },
         ]}
-        className="-mt-6 mb-6"
+        className="mb-6"
       />
       <p className="mb-6 max-w-2xl text-slate-400">
         Apps are third-parties that have authorized you with your Homebase identity. And have direct

@@ -1,7 +1,7 @@
-import { SaveStatus } from '@homebase-id/common-app';
 import { FC, ReactNode } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
+import { SaveStatus } from '../Buttons/SaveStatus';
 
 export const PageMeta = ({
   title,
@@ -19,23 +19,20 @@ export const PageMeta = ({
   icon?: FC;
 }) => {
   return (
-    <section className="-mx-2 -mt-4 mb-10 border-b border-gray-100 bg-white px-2 py-1 dark:border-gray-800 dark:bg-black sm:-mx-10 sm:-mt-8 sm:px-10 xl:py-8">
+    <section className="-mx-2 -mt-4 mb-4 border-b border-gray-100 bg-white px-2 py-1 dark:border-gray-800 dark:bg-black sm:-mx-10 sm:-mt-8 sm:px-10 xl:py-4">
       <div className="flex-col">
         {breadCrumbs && (
           <ul className="mb-2 hidden flex-row xl:flex">
             {breadCrumbs.map((crumb, index) => {
               return (
-                <li key={index} className="group mr-2">
+                <li key={index} className="mr-2">
                   {crumb.href ? (
                     <Link to={crumb.href} className="">
                       {crumb.title}
                       <span className="ml-2">{'>'}</span>
                     </Link>
                   ) : (
-                    <span className="text-slate-500">
-                      {crumb.title}
-                      <span className="ml-2 group-last:hidden">{'>'}</span>
-                    </span>
+                    <span className="text-slate-500">{crumb.title}</span>
                   )}
                 </li>
               );
@@ -45,10 +42,10 @@ export const PageMeta = ({
         <div className="flex w-full flex-row flex-wrap items-end gap-5">
           {title && (
             <>
-              <h1 className="my-auto flex flex-row text-2xl dark:text-white xl:text-4xl">
+              <h1 className="my-auto flex flex-row text-2xl dark:text-white xl:text-3xl">
                 {icon &&
                   icon({
-                    className: 'h-6 w-6 sm:h-8 sm:w-8 my-auto mr-2 sm:mr-4 flex-shrink-0',
+                    className: 'h-6 w-6 sm:h-7 sm:w-7 my-auto mr-2 flex-shrink-0',
                   })}{' '}
                 {title}
               </h1>
@@ -64,7 +61,7 @@ export const PageMeta = ({
           )}
           {actions ? (
             <div>
-              <div className="grid grid-flow-col gap-2">{actions}</div>
+              <div className="grid grid-flow-col items-center gap-2">{actions}</div>
               {saveStatus && <SaveStatus className="mt-1" state={saveStatus} />}
             </div>
           ) : null}

@@ -15,7 +15,7 @@ import {
   useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { Cog, Times, Bell } from '@homebase-id/common-app/icons';
-import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../../hooks/apps/useApp';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';

@@ -1,4 +1,4 @@
-import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import Submenu from '../../../components/SubMenu/SubMenu';
 import { useState, useEffect } from 'react';
 import Section from '../../../components/ui/Sections/Section';
@@ -57,7 +57,7 @@ const Domains = () => {
             path: `/owner/third-parties/services`,
           },
         ]}
-        className="-mt-6 mb-6"
+        className="mb-6"
       />
       <p className="mb-6 max-w-2xl text-slate-400">
         Services are third-parties that have authorized you with your Homebase identity. By default

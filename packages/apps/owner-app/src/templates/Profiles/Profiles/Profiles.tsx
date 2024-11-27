@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { BuiltInProfiles } from '@homebase-id/js-lib/profile';
-import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import ProfileDialog from '../../../components/Attribute/ProfileDialog/ProfileDialog';
 import { ActionButton, LoadingBlock, t, useProfiles } from '@homebase-id/common-app';
 import { Heart, Plus } from '@homebase-id/common-app/icons';

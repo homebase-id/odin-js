@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import { useContact } from '../../../hooks/contacts/useContact';
 import { useEffect, useState } from 'react';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';

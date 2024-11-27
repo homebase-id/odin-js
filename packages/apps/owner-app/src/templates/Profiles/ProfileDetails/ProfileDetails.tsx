@@ -9,7 +9,7 @@ import SectionEditor from '../../../components/SectionEditor/SectionEditor';
 import { useProfileSections } from '../../../hooks/profiles/useProfileSections';
 import Submenu from '../../../components/SubMenu/SubMenu';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
-import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import { ProfileSection } from '@homebase-id/js-lib/profile';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { BrokenAttribute } from '../../../components/Attribute/BrokenAttribute/BrokenAttribute';
@@ -128,7 +128,7 @@ const ProfileDetails = () => {
           },
         ]}
         isLoading={sectionsLoading}
-        className="-mt-6 mb-4"
+        className="mb-4"
       />
 
       {isCreateSection || !activeSection ? (

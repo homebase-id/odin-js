@@ -55,7 +55,7 @@ const ConnectionDetails = () => {
               }
             : undefined,
         ]}
-        className="-mt-6 mb-4"
+        className="mb-4"
       />
       <IdentityAlerts odinId={odinId} />
 

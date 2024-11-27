@@ -7,7 +7,7 @@ export interface PersonCardProps {
   odinId: string;
   href?: string;
   isChecked?: boolean;
-  className: string;
+  className?: string;
   children?: ReactNode;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
   canSave: boolean;
@@ -23,7 +23,7 @@ const PersonCard = ({
   canSave,
 }: PersonCardProps) => {
   return (
-    <HybridLink className={`group ${className}`} href={href}>
+    <HybridLink className={`group relative ${className || ''}`} href={href}>
       <div
         className={`h-full overflow-hidden rounded-md border bg-background transition-colors ${
           isChecked

@@ -113,7 +113,7 @@ const AttributeGroup = ({
         className={`border-l-[8px] sm:border-l-[16px] ${
           isActive
             ? 'border-slate-200 border-opacity-40 dark:border-slate-800'
-            : ' border-transparent opacity-90 grayscale hover:border-slate-200 hover:border-opacity-40 hover:dark:border-slate-800'
+            : 'border-transparent opacity-90 grayscale hover:border-slate-200 hover:border-opacity-40 hover:dark:border-slate-800'
         } transition-all ${
           isActive ? 'pl-2 sm:pl-5' : '-translate-x-2 md:-translate-x-4 md:hover:translate-x-0'
         }`}

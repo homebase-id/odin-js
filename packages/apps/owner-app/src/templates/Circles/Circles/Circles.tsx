@@ -1,7 +1,7 @@
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { useState } from 'react';
 import CardLink from '../../../components/ui/Buttons/CardLink';
-import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import {
   AUTO_CONNECTIONS_CIRCLE_ID,
   CircleDefinition,
