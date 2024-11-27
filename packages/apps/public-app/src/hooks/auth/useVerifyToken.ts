@@ -8,7 +8,7 @@ import {
 const MINUTE_IN_MS = 60000;
 
 export const useVerifyToken = (isOwner?: boolean) => {
-  const isAuthenticated = useDotYouClientContext().isAuthenticated;
+  const isAuthenticated = useDotYouClientContext().isAuthenticated();
 
   const fetchData = async () => {
     if (isOwner) return await hasValidOwnerToken();
