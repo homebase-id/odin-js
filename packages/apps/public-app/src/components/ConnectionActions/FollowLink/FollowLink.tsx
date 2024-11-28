@@ -34,7 +34,7 @@ const FollowLink = ({
       <ActionLink
         className={`w-auto ${className ?? ''}`}
         href={
-          (loggedInIdentity
+          (dotYouClient.isAuthenticated() && loggedInIdentity
             ? `${new DotYouClient({ hostIdentity: loggedInIdentity, api: ApiType.Guest }).getRoot()}/owner/follow/following/${window.location.hostname}?return=${encodeURIComponent(window.location.href)}`
             : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect/owner/follow/following/${window.location.hostname}?return=${encodeURIComponent(window.location.href)}`) +
           (channel ? `?chnl=${channel.fileMetadata.appData.uniqueId}` : '')
