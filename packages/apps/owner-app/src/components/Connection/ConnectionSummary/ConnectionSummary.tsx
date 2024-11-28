@@ -7,8 +7,10 @@ import {
   ActionLink,
   useIdentityIFollow,
   useCircles,
-  useConnection,
   useDotYouClientContext,
+  useConnectionInfo,
+  useDetailedConnectionInfo,
+  useIsConnected,
 } from '@homebase-id/common-app';
 import {
   Envelope,
@@ -57,12 +59,10 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
 
   const {
     fetch: { data: connectionInfo },
-  } = useConnection({ odinId: odinId });
+  } = useDetailedConnectionInfo({ odinId: odinId });
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
 
-  const {
-    fetch: { data: introducerConnectioInfo },
-  } = useConnection({ odinId: connectionInfo?.introducerOdinId });
+  const { data: isConnectedWithIntroducer } = useIsConnected(connectionInfo?.introducerOdinId);
 
   const {
     fetch: { data: identityIfollow, isFetched: followStateFetched },
@@ -76,7 +76,6 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
 
   const isConnected = connectionInfo?.status === 'connected';
 
-  const isConnectedWithIntroducer = introducerConnectioInfo?.status === 'connected';
   const isFollowing = !followStateFetched ? undefined : !!identityIfollow;
 
   return (
@@ -257,7 +256,7 @@ const CirclesSummary = ({ odinId }: { odinId?: string }) => {
 
   const {
     fetch: { data: connectionInfo },
-  } = useConnection({ odinId: odinId });
+  } = useConnectionInfo({ odinId: odinId });
 
   const circleGrants =
     connectionInfo?.status === 'connected' &&

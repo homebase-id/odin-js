@@ -1,5 +1,5 @@
 import { useMatch, useParams } from 'react-router-dom';
-import { t, useConnection } from '@homebase-id/common-app';
+import { t, useDetailedConnectionInfo } from '@homebase-id/common-app';
 import { useContact } from '../../../hooks/contacts/useContact';
 import { ConnectionSummary } from '../../../components/Connection/ConnectionSummary/ConnectionSummary';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
@@ -20,7 +20,7 @@ const ConnectionDetails = () => {
 
   const {
     fetch: { data: connectionInfo, isLoading: connectionInfoLoading },
-  } = useConnection({ odinId: odinId });
+  } = useDetailedConnectionInfo({ odinId: odinId });
 
   const { data: contactData, isLoading: contactDataLoading } = useContact({
     odinId: odinId,

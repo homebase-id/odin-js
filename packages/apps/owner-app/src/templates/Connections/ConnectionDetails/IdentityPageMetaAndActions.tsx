@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { PageMeta } from '@homebase-id/common-app';
+import { PageMeta, useDetailedConnectionInfo } from '@homebase-id/common-app';
 import { useContact } from '../../../hooks/contacts/useContact';
 import { useEffect, useState } from 'react';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
@@ -15,7 +15,6 @@ import {
   ErrorNotification,
   ActionGroup,
   ConfirmDialog,
-  useConnection,
   useConnectionGrantStatus,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
@@ -61,7 +60,7 @@ export const IdentityPageMetaAndActions = ({
   // Connection data:
   const {
     fetch: { data: connectionInfo },
-  } = useConnection({ odinId: odinId });
+  } = useDetailedConnectionInfo({ odinId: odinId });
   const {
     disconnect: { mutateAsync: disconnect },
     revokeConnectionRequest: {

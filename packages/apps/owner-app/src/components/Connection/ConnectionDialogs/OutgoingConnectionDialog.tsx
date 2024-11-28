@@ -15,7 +15,7 @@ import {
   Label,
   DialogWrapper,
   CheckboxToggle,
-  useConnection,
+  useIsConnected,
 } from '@homebase-id/common-app';
 import YourInfo from '../../Connection/YourInfo/YourInfo';
 import YourSignature from '../../Connection/YourSignature/YourSignature';
@@ -61,9 +61,7 @@ export const OutgoingConnectionDialog = ({
   const { data: isValidIdentity } = useCheckIdentity(connectionTarget);
   const [invalid, setInvalid] = useState(false);
 
-  const { data: connectionInfo } = useConnection({
-    odinId: isValidIdentity ? connectionTarget : undefined,
-  }).fetch;
+  const { data: isConnected } = useIsConnected(isValidIdentity ? connectionTarget : undefined);
 
   useEffect(() => setInvalid(false), [connectionTarget]);
 
@@ -127,7 +125,7 @@ export const OutgoingConnectionDialog = ({
         >
           {!doubleChecked ? (
             <>
-              {connectionInfo?.status === 'connected' ? (
+              {isConnected ? (
                 <Alert type={'warning'} className="mb-5">
                   {t(
                     'You are already connected, if this request is accepted, it will reset your connection keys'

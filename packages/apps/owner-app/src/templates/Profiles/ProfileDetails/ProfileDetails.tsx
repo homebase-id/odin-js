@@ -124,7 +124,7 @@ const ProfileDetails = () => {
             text: `-- ${t('Create new section')} --`,
             key: 'new',
             path: `/owner/profile/${profileKey}/new`,
-            className: 'ml-auto bg-background flex items-center rounded-lg',
+            className: 'ml-auto flex items-center',
           },
         ]}
         isLoading={sectionsLoading}

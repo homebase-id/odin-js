@@ -1,9 +1,9 @@
 import { AUTO_CONNECTIONS_CIRCLE_ID } from '@homebase-id/js-lib/network';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { useConnection } from './useConnection';
+import { useConnectionInfo } from './useConnectionInfo';
 
 export const useAutoConnection = ({ odinId }: { odinId?: string }) => {
-  const { fetch: connectionInfoQuery } = useConnection({ odinId: odinId });
+  const { fetch: connectionInfoQuery } = useConnectionInfo({ odinId: odinId });
 
   return {
     isUnconfirmedAutoConnected: {

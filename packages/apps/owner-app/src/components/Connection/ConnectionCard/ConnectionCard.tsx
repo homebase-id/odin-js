@@ -1,5 +1,10 @@
 import { useContact } from '../../../hooks/contacts/useContact';
-import { LoadingBlock, t, useAutoConnection, useConnection } from '@homebase-id/common-app';
+import {
+  LoadingBlock,
+  t,
+  useAutoConnection,
+  useDetailedConnectionInfo,
+} from '@homebase-id/common-app';
 import PersonCard, { PersonCardProps } from '../PersonCard/PersonCard';
 import { Question } from '@homebase-id/common-app/icons';
 
@@ -20,7 +25,7 @@ const ConnectionCard = (props: PersonCardProps) => {
     isUnconfirmedAutoConnected: { data: isUnconfirmedAutoConnection },
   } = useAutoConnection({ odinId: props.odinId });
 
-  const { data: connectionInfo } = useConnection({
+  const { data: connectionInfo } = useDetailedConnectionInfo({
     odinId: isUnconfirmedAutoConnection ? props.odinId : undefined,
   }).fetch;
 

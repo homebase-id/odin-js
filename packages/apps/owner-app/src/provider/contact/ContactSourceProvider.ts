@@ -16,7 +16,7 @@ import {
 } from '@homebase-id/js-lib/peer';
 import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import { GetProfileCard, GetProfileImage } from '@homebase-id/js-lib/public';
-import { RawContact, getDetailedConnectionInfo } from '@homebase-id/js-lib/network';
+import { RawContact, getConnectionInfo } from '@homebase-id/js-lib/network';
 
 //Handles fetching and parsing of Contact Source data
 
@@ -25,7 +25,7 @@ export const fetchConnectionInfo = async (
   odinId: string
 ): Promise<RawContact | undefined> => {
   const [connectionContactData, contactFromTransit] = await Promise.all([
-    getDetailedConnectionInfo(dotYouClient, odinId),
+    getConnectionInfo(dotYouClient, odinId),
     queryRemoteAttributes(dotYouClient, odinId),
   ]);
 

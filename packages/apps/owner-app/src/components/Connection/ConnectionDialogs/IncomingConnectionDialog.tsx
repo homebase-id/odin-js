@@ -11,8 +11,8 @@ import {
   DomainHighlighter,
   CircleSelector,
   DialogWrapper,
-  useConnection,
   useErrors,
+  useIsConnected,
 } from '@homebase-id/common-app';
 import { Arrow } from '@homebase-id/common-app/icons';
 import ContactImage from '../../Connection/ContactImage/ContactImage';
@@ -39,7 +39,7 @@ const IncomingConnectionDialog = ({
 }) => {
   const target = usePortal('modal-container');
 
-  const { data: connectionInfo } = useConnection({ odinId: senderOdinId }).fetch;
+  const { data: isConnected } = useIsConnected(senderOdinId);
 
   const { data: contactData } = useContact({
     odinId: senderOdinId,
@@ -94,7 +94,7 @@ const IncomingConnectionDialog = ({
       <>
         {!doubleChecked ? (
           <>
-            {connectionInfo?.status === 'connected' ? (
+            {isConnected ? (
               <Alert type={'warning'} className="mb-5">
                 {t(
                   'You are already connected, confirming this request, will reset your connection keys'
