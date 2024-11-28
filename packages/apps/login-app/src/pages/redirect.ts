@@ -1,6 +1,5 @@
 import { LoginBox } from '../components/loginBox';
 import { RedirectBox } from '../components/redirectBox';
-import { getIdentityFromStorage, requestStorageAccess } from '../helpers/identity';
 
 export const Redirect = () => {
   // 1. Parse target URL
@@ -18,21 +17,24 @@ export const Redirect = () => {
   })();
 
   // 2. Get identity
-  const getIdentity = () => {
-    return new Promise<string>((resolve) => {
-      requestStorageAccess()
-        .then(() => {
-          const previousIdentities = getIdentityFromStorage();
+  const getIdentity = () => new Promise<string>((resolve) => LoginBox(resolve, true));
 
-          if (previousIdentities?.length === 1) {
-            resolve(previousIdentities[0]);
-          } else LoginBox(resolve, true);
-        })
-        .catch(() => {
-          LoginBox(resolve, true);
-        });
-    });
-  };
+  // TODO: Make it a config option to directly redirect to the target
+  // const getIdentity = () => {
+  //   return new Promise<string>((resolve) => {
+  //     requestStorageAccess()
+  //       .then(() => {
+  //         const previousIdentities = getIdentityFromStorage();
+
+  //         if (previousIdentities?.length === 1) {
+  //           resolve(previousIdentities[0]);
+  //         } else LoginBox(resolve, true);
+  //       })
+  //       .catch(() => {
+  //         LoginBox(resolve, true);
+  //       });
+  //   });
+  // };
 
   // 3. Redirect or show redirect box
   const redirect = async () => {

@@ -1,12 +1,16 @@
 import { ActionLink, t, useDotYouClientContext, useSecurityContext } from '@homebase-id/common-app';
 import { Check, Persons } from '@homebase-id/common-app/icons';
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 
 const ConnectLink = ({ className }: { className: string }) => {
   const dotYouClient = useDotYouClientContext();
   const isAuthenticated = dotYouClient.isAuthenticated();
   const isOwner = dotYouClient.isOwner();
 
-  const host = dotYouClient.getRoot();
+  const host = new DotYouClient({
+    hostIdentity: dotYouClient.getLoggedInIdentity(),
+    api: ApiType.Guest,
+  }).getRoot();
 
   const { data: securityContext } = useSecurityContext(undefined, isAuthenticated).fetch;
   const isConnected =

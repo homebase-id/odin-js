@@ -26,22 +26,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ChatDrive } from '@homebase-id/chat-app/src/providers/ConversationProvider';
 
 export const useValidateAuthorization = () => {
-  const { getDotYouClient, hasSharedSecret } = useDotYouClient();
-  const {
-    data: hasValidToken,
-    isFetchedAfterMount,
-    isRefetching,
-    refetch,
-  } = useVerifyToken(getDotYouClient());
+  const { hasSharedSecret } = useDotYouClient();
+  const { data: hasValidToken, isFetched } = useVerifyToken();
 
   useEffect(() => {
-    // We got a shared secret; We should reset the token verification
-    if (isFetchedAfterMount && !hasValidToken && hasSharedSecret && !isRefetching) refetch();
-  }, [hasSharedSecret]);
-
-  useEffect(() => {
-    if (isFetchedAfterMount && hasValidToken !== undefined) {
-      if (!hasValidToken && !isRefetching && hasSharedSecret) {
+    if (isFetched && hasValidToken !== undefined) {
+      if (!hasValidToken && hasSharedSecret) {
         console.warn('Token is invalid, logging out..');
         logoutOwnerAndAllApps();
       }
