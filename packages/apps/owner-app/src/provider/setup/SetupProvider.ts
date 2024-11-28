@@ -23,9 +23,9 @@ import {
   getProfileAttributes,
   Attribute,
 } from '@homebase-id/js-lib/profile';
-import { fallbackHeaderImage } from '../../templates/Setup/fallbackImage';
 import { FollowRequest, createOrUpdateFollow } from '@homebase-id/js-lib/network';
 import { saveProfileAttribute } from '../profile/AttributeData/ManageAttributeProvider';
+import { fallbackHeaderImage } from '@homebase-id/common-app';
 
 export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
   const initialStandardProfile: ProfileDefinition = {

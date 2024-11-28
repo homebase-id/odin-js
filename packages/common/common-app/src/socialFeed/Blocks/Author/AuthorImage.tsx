@@ -41,7 +41,7 @@ export const AuthorImage = ({ odinId, ...props }: ConnectionImageProps) => {
   const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot();
   return (
     <a href={host}>
-      return <ConnectionImage odinId={odinId} {...props} />
+      <ConnectionImage odinId={odinId} {...props} />
     </a>
   );
 };
@@ -72,9 +72,6 @@ export const ConnectionImage = (props: ConnectionImageProps) => {
       {...props}
       odinId={props.odinId}
       className={`${getSizeClassname(props.size)} overflow-hidden rounded-full ${props.className ?? ''}`}
-      fallbackSize={
-        !props.size || ['xs', 'xxs', 'sm', 'custom'].includes(props.size) ? 'xs' : undefined
-      }
       canSave={!!isConnected}
     />
   );

@@ -126,7 +126,7 @@ const DomainListItem = ({
           }`}
         >
           <div className="flex flex-row gap-2 sm:contents">
-            <CompanyImage domain={domain.domain} className="w-12" fallbackSize="xs" />
+            <CompanyImage domain={domain.domain} className="w-12" />
 
             <h2 className="font-thiner dark:text-white">
               <span className="break-words">{domain.domain}</span>

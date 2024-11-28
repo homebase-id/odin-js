@@ -14,22 +14,19 @@ import {
   COMMUNITY_APP_ID,
   HomebaseCommunity,
 } from '@homebase-id/common-app';
-import { getTwoLettersFromDomain, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useState, useMemo } from 'react';
 
 export const CompanyImage = ({
   domain,
   appId,
   className,
-  fallbackSize,
 }: {
   domain: string | undefined;
   appId?: string;
   className?: string;
-  fallbackSize?: 'xs' | 'md';
 }) => {
   const [hasFailed, setHasFailed] = useState<boolean>(false);
-  const initials = useMemo(() => getTwoLettersFromDomain(domain || ''), [domain]);
 
   const bgClass = 'bg-white dark:bg-black';
 
@@ -41,11 +38,7 @@ export const CompanyImage = ({
         appIcon({ className: 'absolute inset-0 flex aspect-square w-full h-full' })
       ) : (
         <>
-          <FallbackImg
-            initials={initials}
-            size={fallbackSize}
-            className={'absolute inset-0 flex aspect-square w-full'}
-          />
+          <FallbackImg odinId={domain} className={'absolute inset-0 flex aspect-square w-full'} />
           {/* On failed we fully hide the picture element, only visually hiding it, stays on top for safari...  */}
           {!hasFailed ? (
             <picture className={`relative z-10`}>

@@ -112,7 +112,6 @@ const CircleCardLink = ({ circleDef }: { circleDef: CircleDefinition }) => {
                         odinId={member.domain}
                         key={member.domain}
                         className="-mr-2 h-7 w-7 overflow-hidden rounded-full border last:mr-0 dark:border-slate-500"
-                        fallbackSize="xs"
                         canSave={true}
                       />
                     ) : (
@@ -120,7 +119,6 @@ const CircleCardLink = ({ circleDef }: { circleDef: CircleDefinition }) => {
                         domain={member.domain}
                         key={member.domain}
                         className="-mr-2 h-7 w-7 overflow-hidden rounded-full border last:mr-0 dark:border-slate-500"
-                        fallbackSize="xs"
                       />
                     )
                   )}

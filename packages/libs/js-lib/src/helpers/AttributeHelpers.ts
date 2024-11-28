@@ -82,7 +82,7 @@ export const getDisplayNameOfNameAttribute = (attr: Attribute) => {
       );
 };
 
-export const getInitialsOfNameAttribute = (attr: Attribute) => {
+export const getInitialsOfNameAttribute = (attr: Attribute): string => {
   if (!attr) return '';
 
   return (

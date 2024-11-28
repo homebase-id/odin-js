@@ -1,40 +1,17 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useContact } from '@homebase-id/common-app';
 import { FallbackImg, Image, LoadingBlock } from '@homebase-id/common-app';
-import { getTwoLettersFromDomain } from '@homebase-id/js-lib/helpers';
 import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@homebase-id/js-lib/network';
-import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
-
-const getInitials = (
-  fullName: string | undefined,
-  first: string | undefined,
-  last: string | undefined,
-  domain: string
-) => {
-  if (fullName) {
-    return fullName
-      .split(' ')
-      .map((part) => part[0] ?? '')
-      .join('');
-  }
-
-  if (first || last) {
-    return (first?.[0] ?? '') + (last?.[0] ?? '') + '';
-  }
-
-  return getTwoLettersFromDomain(domain);
-};
+import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 
 export const ContactImage = ({
   odinId,
   canSave,
   className,
-  fallbackSize,
 }: {
   odinId: string | undefined | null;
   canSave: boolean;
   className?: string;
-  fallbackSize?: 'xs';
 }) => {
   const [fullError, setFullError] = useState(false);
 
@@ -45,21 +22,16 @@ export const ContactImage = ({
 
   const contactContent = contactData?.fileMetadata.appData.content;
   const nameData = contactData?.fileMetadata.appData.content.name;
-  const intials = useMemo(
-    () =>
-      odinId && getInitials(nameData?.displayName, nameData?.givenName, nameData?.surname, odinId),
-    [nameData, odinId]
-  );
 
   if (!odinId) return null;
 
   return (
     <div className={`relative aspect-square ${className || ''}`}>
       {fullError ? (
-        <FallbackImg initials={intials || odinId.slice(0, 2)} size={fallbackSize} />
+        <FallbackImg nameData={nameData} odinId={odinId} />
       ) : isLoading ? (
         <LoadingBlock className={`aspect-square`} />
-      ) : (contactData as HomebaseFile<unknown>)?.fileMetadata?.payloads?.some(
+      ) : contactData?.fileMetadata?.payloads?.some(
           (pyld) => pyld.key === CONTACT_PROFILE_IMAGE_KEY
         ) ? (
         <Image

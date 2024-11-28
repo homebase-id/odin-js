@@ -8,7 +8,6 @@ import {
 import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
 import { FallbackImg, LoadingBlock, useImage } from '@homebase-id/common-app';
 import { HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
-import { getInitialsOfNameAttribute } from '@homebase-id/js-lib/helpers';
 
 interface YourSignatureProps {
   className?: string;
@@ -54,21 +53,18 @@ const YourSignature = ({ className }: YourSignatureProps) => {
     filteredNameAttributes?.[0]?.fileMetadata.appData.content.data?.[
       MinimalProfileFields.DisplayName
     ];
-  const initials = getInitialsOfNameAttribute(
-    filteredNameAttributes?.[0]?.fileMetadata.appData.content
-  );
 
   return (
     <div className={`${className ?? ''}`}>
-      <div className="-mr-3 flex flex-row ">
+      <div className="-mr-3 flex flex-row">
         <div className="aspect-square w-1/4 max-w-[3rem]">
           {photoAttributesLoading ? (
             <LoadingBlock className={`aspect-square`} />
           ) : !imageUrl ? (
             <FallbackImg
-              initials={initials}
+              odinId={window.location.hostname}
+              nameData={filteredNameAttributes?.[0]?.fileMetadata.appData.content}
               className="aspect-square h-[3rem] w-[3rem] sm:text-4xl"
-              size="none"
             />
           ) : (
             <img src={imageUrl} className="aspect-square object-cover object-top" />

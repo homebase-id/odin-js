@@ -1,8 +1,14 @@
 import { base64ToUint8Array } from '@homebase-id/js-lib/helpers';
 import { useState } from 'react';
 import { WelcomeData } from '../../templates/Setup/Setup';
-import { fallbackProfileImage } from '../../templates/Setup/fallbackImage';
-import { ActionButton, Input, Label, getOdinIdColor, t } from '@homebase-id/common-app';
+import {
+  ActionButton,
+  Input,
+  Label,
+  fallbackProfileImage,
+  getOdinIdColor,
+  t,
+} from '@homebase-id/common-app';
 import { Arrow, Person } from '@homebase-id/common-app/icons';
 import { ImageUploadAndCrop } from '@homebase-id/common-app';
 
