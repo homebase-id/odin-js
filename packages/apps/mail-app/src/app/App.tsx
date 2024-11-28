@@ -58,6 +58,7 @@ export const REACT_QUERY_CACHE_KEY = 'MAIL_REACT_QUERY_OFFLINE_CACHE';
 const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'mail-conversations',
   'connection-details',
+  'contact',
   'push-notifications',
   'site-data',
   'mail-settings',
