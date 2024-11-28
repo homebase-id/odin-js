@@ -59,7 +59,8 @@ const ContactImage = ({
           fileId={contactData?.fileId}
           fileKey={CONTACT_PROFILE_IMAGE_KEY}
           targetDrive={ContactConfig.ContactTargetDrive}
-          lastModified={(contactData as HomebaseFile<unknown>).fileMetadata.updated}
+          lastModified={contactData?.fileMetadata.updated}
+          previewThumbnail={contactData?.fileMetadata.appData.previewThumbnail}
           fit="cover"
           className="h-full w-full"
         />

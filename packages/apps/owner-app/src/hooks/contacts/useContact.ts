@@ -147,8 +147,6 @@ export const useContact = ({
           canSave: canSave,
         }),
       staleTime: 1000 * 60 * 60 * 24, // 24 hours
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
       retry: false,
       enabled: !!odinId || !!id,
     }),

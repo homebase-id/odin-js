@@ -82,7 +82,7 @@ import {
 import { useInboxProcessor } from '../hooks/inbox/useInboxProcessor';
 
 export const REACT_QUERY_CACHE_KEY = 'OWNER_REACT_QUERY_OFFLINE_CACHE';
-const INCLUDED_QUERY_KEYS = ['contact', 'process-inbox'];
+const INCLUDED_QUERY_KEYS = ['image', 'contact', 'process-inbox', 'connection-info'];
 
 function App() {
   const router = createBrowserRouter(
@@ -247,7 +247,7 @@ function App() {
       <OdinQueryClient
         cacheKey={REACT_QUERY_CACHE_KEY}
         cachedQueryKeys={INCLUDED_QUERY_KEYS}
-        type="local"
+        type="indexeddb"
       >
         <DotYouClientProvider>
           <RouterProvider router={router} fallbackElement={<></>} />
