@@ -94,7 +94,7 @@ export const drives = [
     t: ContactConfig.ContactTargetDrive.type,
     n: '',
     d: '',
-    p: DrivePermissionType.Read,
+    p: DrivePermissionType.Read + DrivePermissionType.Write,
   },
   {
     // Public posts

@@ -2,7 +2,7 @@ import { Article, BlogConfig } from '@homebase-id/js-lib/public';
 import { ellipsisAtMaxChar } from '../../helpers';
 import { ChannelDefinitionVm } from '../../hooks';
 import { FakeAnchor } from '../../ui';
-import { AuthorName } from '../Blocks/Author/Name';
+import { AuthorName } from '../Blocks/Author/AuthorName';
 import { PostMeta } from '../Blocks/Meta/Meta';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 

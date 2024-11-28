@@ -19,6 +19,7 @@ const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'conversation-metadata',
   'chat-reaction',
   'connection-details',
+  'contact',
   'process-inbox',
 ];
 

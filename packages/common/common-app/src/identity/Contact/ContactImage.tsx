@@ -1,9 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useContact } from '@homebase-id/common-app';
 import { FallbackImg, Image, LoadingBlock } from '@homebase-id/common-app';
 import { getTwoLettersFromDomain } from '@homebase-id/js-lib/helpers';
 import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@homebase-id/js-lib/network';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 
 const getInitials = (
   fullName: string | undefined,
@@ -36,6 +36,8 @@ export const ContactImage = ({
   className?: string;
   fallbackSize?: 'xs';
 }) => {
+  const [fullError, setFullError] = useState(false);
+
   const { data: contactData, isLoading } = useContact({
     odinId: odinId || undefined,
     canSave: canSave,
@@ -49,9 +51,13 @@ export const ContactImage = ({
     [nameData, odinId]
   );
 
+  if (!odinId) return null;
+
   return (
     <div className={`relative aspect-square ${className || ''}`}>
-      {isLoading ? (
+      {fullError ? (
+        <FallbackImg initials={intials || odinId.slice(0, 2)} size={fallbackSize} />
+      ) : isLoading ? (
         <LoadingBlock className={`aspect-square`} />
       ) : (contactData as HomebaseFile<unknown>)?.fileMetadata?.payloads?.some(
           (pyld) => pyld.key === CONTACT_PROFILE_IMAGE_KEY
@@ -66,10 +72,18 @@ export const ContactImage = ({
           className="h-full w-full"
         />
       ) : contactContent?.imageUrl ? (
-        <img src={contactContent?.imageUrl} className="h-full w-full" />
-      ) : intials ? (
-        <FallbackImg initials={intials} size={fallbackSize} />
-      ) : null}
+        <img
+          src={contactContent?.imageUrl}
+          className="h-full w-full"
+          onError={() => setFullError(true)}
+        />
+      ) : (
+        <img
+          src={`${new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}/pub/image`}
+          className="h-full w-full"
+          onError={() => setFullError(true)}
+        />
+      )}
     </div>
   );
 };

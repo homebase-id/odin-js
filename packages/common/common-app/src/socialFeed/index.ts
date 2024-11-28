@@ -1,5 +1,5 @@
-export * from './Blocks/Author/Image';
-export * from './Blocks/Author/Name';
+export * from './Blocks/Author/AuthorImage';
+export * from './Blocks/Author/AuthorName';
 
 export * from './Blocks/Interacts/Comments/Comment';
 export * from './Blocks/Interacts/Comments/Parts/CommentThread';

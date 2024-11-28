@@ -60,6 +60,7 @@ export const useContact = ({
     // Direct fetch with odinId:
     // Use the data from the contact book, if it exists and if it's a contact level source or we are not allowed to save anyway
     const contactBookContact = await getContactByOdinId(dotYouClient, odinId);
+
     if (
       !hasCache && // If we have a contact on drive, and we don't have cache, we need a fast return; Otherwise we trigger a refresh
       contactBookContact &&

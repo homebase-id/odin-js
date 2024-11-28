@@ -16,6 +16,7 @@ import {
   AppPermissionType,
   AUTO_CONNECTIONS_CIRCLE_ID,
   CONFIRMED_CONNECTIONS_CIRCLE_ID,
+  ContactConfig,
 } from '@homebase-id/js-lib/network';
 import {
   APP_AUTH_TOKEN,
@@ -81,11 +82,11 @@ export const drives = [
   },
   {
     // Contacts
-    a: '2612429d1c3f037282b8d42fb2cc0499',
-    t: '70e92f0f94d05f5c7dcd36466094f3a5',
+    a: ContactConfig.ContactTargetDrive.alias,
+    t: ContactConfig.ContactTargetDrive.type,
     n: 'Contact Drive',
     d: '',
-    p: DrivePermissionType.Read,
+    p: DrivePermissionType.Read + DrivePermissionType.Write,
   },
 ];
 
@@ -95,6 +96,7 @@ export const permissions = [
   AppPermissionType.ReadConnections,
   AppPermissionType.SendPushNotifications,
   AppPermissionType.SendIntroductions,
+  AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
 ];
 
 export const circleDrives = [

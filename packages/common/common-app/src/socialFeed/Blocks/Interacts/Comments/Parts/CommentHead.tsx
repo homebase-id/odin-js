@@ -1,7 +1,7 @@
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { t } from '../../../../../helpers';
 import { useDotYouClientContext } from '../../../../../hooks';
-import { AuthorName } from '../../../Author/Name';
+import { AuthorName } from '../../../Author/AuthorName';
 import { Block, Pencil, Times } from '../../../../../ui/Icons';
 import { ActionGroup } from '../../../../../ui';
 

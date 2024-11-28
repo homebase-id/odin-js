@@ -73,7 +73,8 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
               <div className="h-10 w-10 sm:h-12 sm:w-12 md:h-[4rem] md:w-[4rem]">
                 <AuthorImage
                   odinId={authorOdinId}
-                  className="h-10 w-10 rounded-full sm:h-12 sm:w-12 md:h-[4rem] md:w-[4rem]"
+                  className="h-10 w-10 overflow-hidden rounded-full sm:h-12 sm:w-12 md:h-[4rem] md:w-[4rem]"
+                  size="custom"
                 />
               </div>
             </div>

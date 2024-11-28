@@ -1,8 +1,8 @@
 import { EmbeddedPost } from '@homebase-id/js-lib/public';
 import { useEffect, useState } from 'react';
 import { t } from '../../../helpers';
-import { AuthorImage } from '../Author/Image';
-import { AuthorName } from '../Author/Name';
+import { AuthorImage } from '../Author/AuthorImage';
+import { AuthorName } from '../Author/AuthorName';
 import { PostMeta } from '../Meta/Meta';
 import { useChannel } from '../../../hooks';
 import { FakeAnchor } from '../../../ui';

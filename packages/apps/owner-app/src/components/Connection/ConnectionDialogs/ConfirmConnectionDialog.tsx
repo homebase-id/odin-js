@@ -10,7 +10,6 @@ import {
   DomainHighlighter,
   CircleSelector,
   DialogWrapper,
-  useConnectionInfo,
   useCircle,
   useDetailedConnectionInfo,
 } from '@homebase-id/common-app';
