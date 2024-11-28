@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useContact } from '../../../hooks/contacts/useContact';
+import { useContact } from '@homebase-id/common-app';
 import { FallbackImg, Image, LoadingBlock } from '@homebase-id/common-app';
 import { getTwoLettersFromDomain } from '@homebase-id/js-lib/helpers';
 import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@homebase-id/js-lib/network';
@@ -25,26 +25,27 @@ const getInitials = (
   return getTwoLettersFromDomain(domain);
 };
 
-const ContactImage = ({
+export const ContactImage = ({
   odinId,
   canSave,
   className,
   fallbackSize,
 }: {
-  odinId: string;
+  odinId: string | undefined | null;
   canSave: boolean;
   className?: string;
   fallbackSize?: 'xs';
 }) => {
   const { data: contactData, isLoading } = useContact({
-    odinId: odinId,
+    odinId: odinId || undefined,
     canSave: canSave,
   }).fetch;
 
   const contactContent = contactData?.fileMetadata.appData.content;
   const nameData = contactData?.fileMetadata.appData.content.name;
   const intials = useMemo(
-    () => getInitials(nameData?.displayName, nameData?.givenName, nameData?.surname, odinId),
+    () =>
+      odinId && getInitials(nameData?.displayName, nameData?.givenName, nameData?.surname, odinId),
     [nameData, odinId]
   );
 
@@ -52,8 +53,8 @@ const ContactImage = ({
     <div className={`relative aspect-square ${className || ''}`}>
       {isLoading ? (
         <LoadingBlock className={`aspect-square`} />
-      ) : (contactData as HomebaseFile<unknown>)?.fileMetadata?.payloads?.some((pyld) =>
-          pyld.contentType.startsWith('image/')
+      ) : (contactData as HomebaseFile<unknown>)?.fileMetadata?.payloads?.some(
+          (pyld) => pyld.key === CONTACT_PROFILE_IMAGE_KEY
         ) ? (
         <Image
           fileId={contactData?.fileId}
@@ -66,11 +67,9 @@ const ContactImage = ({
         />
       ) : contactContent?.imageUrl ? (
         <img src={contactContent?.imageUrl} className="h-full w-full" />
-      ) : (
+      ) : intials ? (
         <FallbackImg initials={intials} size={fallbackSize} />
-      )}
+      ) : null}
     </div>
   );
 };
-
-export default ContactImage;

@@ -5,13 +5,14 @@ import {
   deletePendingRequest,
   getPendingRequest,
 } from '@homebase-id/js-lib/network';
-import { saveContact } from '../../provider/contact/ContactProvider';
-import { fetchConnectionInfo } from '../../provider/contact/ContactSourceProvider';
+
 import { SecurityGroupType } from '@homebase-id/js-lib/core';
 import {
+  fetchConnectionInfo,
   invalidateActiveConnections,
   invalidateConnectionInfo,
   invalidatePendingConnections,
+  saveContact,
   updateCacheActiveConnections,
   updateCachePendingConnections,
   useDotYouClientContext,

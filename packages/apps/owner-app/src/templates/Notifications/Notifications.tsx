@@ -20,7 +20,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../../hooks/apps/useApp';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useSearchParams } from 'react-router-dom';
-import { useContact } from '../../hooks/contacts/useContact';
+import { useContact } from '@homebase-id/common-app';
 import { ApiType, DotYouClient, PushNotification } from '@homebase-id/js-lib/core';
 import PushNotificationsDialog from '../../components/Notifications/PushNotificationsDialog/PushNotificationsDialog';
 

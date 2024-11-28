@@ -82,7 +82,13 @@ import {
 import { useInboxProcessor } from '../hooks/inbox/useInboxProcessor';
 
 export const REACT_QUERY_CACHE_KEY = 'OWNER_REACT_QUERY_OFFLINE_CACHE';
-const INCLUDED_QUERY_KEYS = ['image', 'contact', 'process-inbox', 'connection-info'];
+const INCLUDED_QUERY_KEYS = [
+  'image',
+  'contact',
+  'connection-details',
+  'process-inbox',
+  'connection-info',
+];
 
 function App() {
   const router = createBrowserRouter(

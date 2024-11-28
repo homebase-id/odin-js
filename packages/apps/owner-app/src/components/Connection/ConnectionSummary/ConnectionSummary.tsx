@@ -1,4 +1,4 @@
-import { useContact } from '../../../hooks/contacts/useContact';
+import { useContact, ContactName } from '@homebase-id/common-app';
 import {
   t,
   ErrorNotification,
@@ -11,6 +11,7 @@ import {
   useConnectionInfo,
   useDetailedConnectionInfo,
   useIsConnected,
+  ContactImage,
 } from '@homebase-id/common-app';
 import {
   Envelope,
@@ -26,7 +27,6 @@ import {
   Feed,
 } from '@homebase-id/common-app/icons';
 import Section from '../../ui/Sections/Section';
-import ContactImage from '../ContactImage/ContactImage';
 import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   AUTO_CONNECTIONS_CIRCLE_ID,
@@ -166,8 +166,7 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
                 <IconFrame className="mr-2">
                   <Person className="h-4 w-4" />
                 </IconFrame>
-                {contactContent.name.displayName ??
-                  `${contactContent.name.givenName ?? ''} ${contactContent.name.surname ?? ''}`}
+                <ContactName odinId={odinId} canSave={false} />
               </div>
             )}
             {contactContent.phone?.number ? (

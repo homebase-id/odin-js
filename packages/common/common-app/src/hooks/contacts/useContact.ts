@@ -1,9 +1,5 @@
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { saveContact } from '../../provider/contact/ContactProvider';
-import {
-  fetchConnectionInfo,
-  fetchDataFromPublic,
-} from '../../provider/contact/ContactSourceProvider';
+
 import {
   ContactFile,
   ContactVm,
@@ -18,7 +14,12 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
 } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import {
+  fetchConnectionInfo,
+  fetchDataFromPublic,
+} from '../../provider/contact/ContactSourceProvider';
+import { saveContact } from '../../provider/contact/ContactProvider';
 
 export const useContact = ({
   odinId,

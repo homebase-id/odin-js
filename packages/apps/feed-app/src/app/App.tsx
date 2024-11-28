@@ -47,7 +47,7 @@ import {
 import { useValidateAuthorization } from '../hooks/auth/useAuth';
 
 export const REACT_QUERY_CACHE_KEY = 'FEED_REACT_QUERY_OFFLINE_CACHE';
-const INCLUDED_QUERY_KEYS = ['common-image', 'collaborative-channels'];
+const INCLUDED_QUERY_KEYS = ['common-image', 'contact', 'image', 'collaborative-channels'];
 
 function App() {
   const router = createBrowserRouter(

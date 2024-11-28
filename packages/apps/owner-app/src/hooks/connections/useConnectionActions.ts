@@ -7,15 +7,15 @@ import {
   unblockOdinId,
   ConnectionRequest,
 } from '@homebase-id/js-lib/network';
-import { saveContact } from '../../provider/contact/ContactProvider';
-import { fetchConnectionInfo } from '../../provider/contact/ContactSourceProvider';
 import { SecurityGroupType } from '@homebase-id/js-lib/core';
 import { getNewId } from '@homebase-id/js-lib/helpers';
 import {
+  fetchConnectionInfo,
   invalidateActiveConnections,
   invalidateConnectionInfo,
   invalidatePendingConnections,
   invalidateSentConnections,
+  saveContact,
   updateCacheSentConnections,
   useDotYouClientContext,
 } from '@homebase-id/common-app';

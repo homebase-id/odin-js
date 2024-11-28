@@ -1,7 +1,6 @@
 import { ReactNode } from 'react';
 
-import ContactImage from '../ContactImage/ContactImage';
-import { CheckboxFancy, HybridLink } from '@homebase-id/common-app';
+import { CheckboxFancy, HybridLink, ContactImage } from '@homebase-id/common-app';
 
 export interface PersonCardProps {
   odinId: string;

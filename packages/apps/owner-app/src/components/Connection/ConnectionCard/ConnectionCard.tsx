@@ -1,25 +1,10 @@
-import { useContact } from '../../../hooks/contacts/useContact';
-import {
-  LoadingBlock,
-  t,
-  useAutoConnection,
-  useDetailedConnectionInfo,
-} from '@homebase-id/common-app';
+import { ContactName } from '@homebase-id/common-app';
+import { t, useAutoConnection, useDetailedConnectionInfo } from '@homebase-id/common-app';
 import PersonCard, { PersonCardProps } from '../PersonCard/PersonCard';
 import { Question } from '@homebase-id/common-app/icons';
 
 const ConnectionCard = (props: PersonCardProps) => {
-  const { data: contactData, isLoading } = useContact({
-    odinId: props.odinId,
-    canSave: props.canSave,
-  }).fetch;
-  const nameData = contactData?.fileMetadata.appData.content?.name;
-  const fullName =
-    nameData &&
-    (nameData.displayName ??
-      (nameData.givenName || nameData.surname
-        ? `${nameData.givenName ?? ''} ${nameData.surname ?? ''}`
-        : undefined));
+  const fullName = ContactName({ odinId: props.odinId, canSave: props.canSave });
 
   const {
     isUnconfirmedAutoConnected: { data: isUnconfirmedAutoConnection },
@@ -28,8 +13,6 @@ const ConnectionCard = (props: PersonCardProps) => {
   const { data: connectionInfo } = useDetailedConnectionInfo({
     odinId: isUnconfirmedAutoConnection ? props.odinId : undefined,
   }).fetch;
-
-  if (isLoading) return <LoadingBlock className={`aspect-[3/5] ${props.className}`} />;
 
   return (
     <>

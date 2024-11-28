@@ -13,12 +13,12 @@ import {
   DialogWrapper,
   useErrors,
   useIsConnected,
+  ContactImage,
 } from '@homebase-id/common-app';
 import { Arrow } from '@homebase-id/common-app/icons';
-import ContactImage from '../../Connection/ContactImage/ContactImage';
 import YourInfo from '../../Connection/YourInfo/YourInfo';
 import { usePendingConnection } from '../../../hooks/connections/usePendingConnection';
-import { useContact } from '../../../hooks/contacts/useContact';
+import { useContact } from '@homebase-id/common-app';
 
 const IncomingConnectionDialog = ({
   confirmText,

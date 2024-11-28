@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta, useDetailedConnectionInfo } from '@homebase-id/common-app';
-import { useContact } from '../../../hooks/contacts/useContact';
+import { useContact } from '@homebase-id/common-app';
 import { useEffect, useState } from 'react';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
 import { hasDebugFlag, jsonStringify64 } from '@homebase-id/js-lib/helpers';
