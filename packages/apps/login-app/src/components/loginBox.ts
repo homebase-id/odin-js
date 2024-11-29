@@ -1,6 +1,7 @@
 import {
   checkStorageAccess,
   getIdentityFromStorage,
+  removeIdentity,
   requestStorageAccess,
   storeIdentity,
   stripIdentity,
@@ -41,7 +42,7 @@ export const LoginBox = async (
 ) => {
   setupHtml(isStandalone, allowEmptySubmit);
 
-  const mainForm = document.getElementById('main');
+  const mainForm = document.getElementById('main') as HTMLFormElement;
   const dotyouInputBox: HTMLInputElement | null = document.getElementById(
     'homebase-id'
   ) as HTMLInputElement;
@@ -106,7 +107,7 @@ export const LoginBox = async (
       return;
     }
 
-    if (!(mainForm as HTMLFormElement).reportValidity()) {
+    if (!mainForm.reportValidity()) {
       return;
     }
 
@@ -136,17 +137,29 @@ export const LoginBox = async (
     if (previousIdentities?.length > 1) {
       selectableWrapper.classList.add('selectable-input');
       homebaseIdentities.innerHTML = previousIdentities
-        .map((identity) => `<li class="option" data-identity="${identity}">${identity}</li>`)
+        .map(
+          (identity) =>
+            `<li class="option" data-identity="${identity}">${identity}<a class="remove"></a></li>`
+        )
         .join('');
 
       homebaseIdentities.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        if (!e.target || !('attributes' in e.target)) return;
-        const identity = (e.target as HTMLElement).getAttribute('data-identity');
-        dotyouInputBox.value = identity || '';
-        selectableWrapper.classList.remove('show');
+        if (!e.target || !(e.target instanceof HTMLElement)) return;
+
+        if (e.target.classList.contains('remove')) {
+          const indentityListItem = e.target.parentElement;
+          const identity = indentityListItem?.getAttribute('data-identity');
+          if (!identity) return;
+          removeIdentity(identity);
+          indentityListItem?.remove();
+        } else {
+          const identity = e.target.getAttribute('data-identity');
+          dotyouInputBox.value = identity || '';
+          selectableWrapper.classList.remove('show');
+        }
       });
 
       document.addEventListener('click', (e) => {
@@ -169,8 +182,8 @@ export const LoginBox = async (
   // If storage is partioned, onclick of the input box, requestAccess to fill in with a previous known identity
   if (storagePartioned) {
     dotyouInputBox.addEventListener('click', async (e) => {
-      if (!e.target || !('value' in e.target)) return;
-      if ((e.target as HTMLInputElement).value) return;
+      if (!e.target || !(e.target instanceof HTMLInputElement)) return;
+      if (e.target.value) return;
 
       requestStorageAccess().then(() => fillIdentityFromStorage(true));
     });
