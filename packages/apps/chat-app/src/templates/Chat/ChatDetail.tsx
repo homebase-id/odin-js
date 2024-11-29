@@ -138,7 +138,7 @@ const ChatHeader = ({
       ? recipients.filter((recipient) => recipient !== loggedOnIdentity)[0]
       : undefined;
 
-  const infoChatMatch = useMatch({ path: `${CHAT_ROOT_PATH}/:conversationKey/info` });
+  const infoChatMatch = useMatch({ path: `${rootPath}/:conversationKey/info` });
   const showChatInfo = !!infoChatMatch;
 
   const { mutate: clearChat, error: clearChatError } = useConversation().clearChat;

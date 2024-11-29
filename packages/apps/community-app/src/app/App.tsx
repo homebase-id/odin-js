@@ -160,6 +160,7 @@ function App() {
               />
 
               {/* Items for 'direct'*/}
+              <Route path={'direct'} element={<NavigateToCommunityRoot />} />
               <Route path={'direct/:dmKey'} element={<CommunityDirectDetail />} />
               <Route path={'direct/:dmKey/:chatMessageKey'} element={<CommunityDirectDetail />} />
               <Route
@@ -207,6 +208,11 @@ const CommunityRootRoute = () => {
   return window.innerWidth > 1024 ? (
     <Navigate to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/all`} />
   ) : null;
+};
+
+const NavigateToCommunityRoot = () => {
+  const { odinKey, communityKey } = useParams();
+  return <Navigate to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}`} />;
 };
 
 const RootRoute = ({ children }: { children: ReactNode }) => {

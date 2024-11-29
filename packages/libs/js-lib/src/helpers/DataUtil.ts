@@ -113,6 +113,12 @@ export const toGuidId = (input: string): string => {
   return md5(input).toString();
 };
 
+export const isAGuidId = (input: string): boolean => {
+  if (!input) return false;
+  const filteredInput = input.replace(/-/g, '');
+  return filteredInput.length === 32 && /^[a-f0-9]+$/i.test(filteredInput);
+};
+
 /// Compares two Guids that are string formatted; It compares the guids after removing all dashes and converting to lowercase
 export const stringGuidsEqual = (a?: string, b?: string): boolean => {
   if (!a || !b) return false;
