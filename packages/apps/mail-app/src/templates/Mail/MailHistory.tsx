@@ -257,7 +257,7 @@ const MailMessage = ({
             </p>
             {isDraft ? <p>{t('Draft')}</p> : null}
             <div
-              className={`ml-auto flex flex-row items-center gap-2 ${`transition-transform md:translate-x-6 md:group-hover:translate-x-0`}`}
+              className={`ml-auto flex flex-row items-center gap-2 ${`transition-transform md:translate-x-7 md:group-hover:translate-x-0`}`}
             >
               <p className="select-none text-sm text-foreground/70">
                 {message.fileMetadata.created &&
@@ -278,7 +278,7 @@ const MailMessage = ({
                 size="none"
                 alwaysInPortal={true}
               >
-                <ChevronDown className="h-3 w-3" />
+                <ChevronDown className="h-4 w-4" />
                 <span className="sr-only ml-1">{t('More')}</span>
               </ActionGroup>
             </div>
