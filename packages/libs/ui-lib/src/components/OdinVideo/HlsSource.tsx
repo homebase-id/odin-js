@@ -23,6 +23,7 @@ export const HlsSource = ({
   videoRef,
   onFatalError,
   systemFileType,
+  lastModified,
 }: OdinHlsProps) => {
   const { data: hlsManifest } = useHlsManifest(
     dotYouClient,
@@ -31,7 +32,8 @@ export const HlsSource = ({
     globalTransitId,
     fileKey,
     targetDrive,
-    systemFileType
+    systemFileType,
+    lastModified
   ).fetch;
 
   useEffect(() => {

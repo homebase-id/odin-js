@@ -18,7 +18,6 @@ export const useVerifyToken = (isOwner?: boolean) => {
   return useQuery({
     queryKey: ['verify-token'],
     queryFn: fetchData,
-    refetchOnMount: false,
     staleTime: MINUTE_IN_MS * 10,
     enabled: isAuthenticated,
   });

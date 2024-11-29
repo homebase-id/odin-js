@@ -25,10 +25,8 @@ export const useCheckInvitationCode = (code?: string) => {
       queryFn: () => doCheckInvitationCode(code as string),
       enabled: configFetched,
       retry: false,
-      gcTime: 1000 * 60 * 60, // 1 hour
+      gcTime: Infinity,
       staleTime: 1000 * 60 * 60, // 1 hour
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
     }),
   };
 };

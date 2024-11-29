@@ -182,8 +182,6 @@ export const useBiography = (props?: { odinId: string } | undefined) => {
   return useQuery({
     queryKey: ['biography', odinId || ''],
     queryFn: () => fetchData(odinId),
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 60 * 24, // 24 hours
   });
 };

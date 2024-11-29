@@ -20,6 +20,7 @@ export const EncryptedMseSource = ({
   videoRef,
   onFatalError,
   systemFileType,
+  lastModified,
 }: OdinEncryptedMseProps) => {
   const { getChunk } = useVideo(
     dotYouClient,
@@ -28,7 +29,8 @@ export const EncryptedMseSource = ({
     globalTransitId,
     fileKey,
     targetDrive,
-    systemFileType
+    systemFileType,
+    lastModified
   );
 
   const codec = videoMetaData.isSegmented ? videoMetaData.codec : undefined;

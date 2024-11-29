@@ -76,9 +76,6 @@ export const useCommunityChannelsWithRecentMessages = (props: {
       queryKey: ['channels-with-recent-message'],
       queryFn: () => [] as ChannelWithRecentMessage[],
       staleTime: Infinity,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
     }),
   };
 };

@@ -73,11 +73,8 @@ export const useTinyThumb = (
         imageDrive,
         systemFileType
       ),
-
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    staleTime: 1000 * 60 * 10, // 10min
-    gcTime: 1000 * 60 * 60 * 24, // 24 hours
+    gcTime: Infinity,
+    staleTime: 1000 * 60 * 60, // 1 hour
     enabled: !!imageFileId && imageFileId !== '' && !!imageFileKey && imageFileKey !== '',
   });
 };

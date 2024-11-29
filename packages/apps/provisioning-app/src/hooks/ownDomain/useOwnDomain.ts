@@ -52,8 +52,7 @@ export const useFetchOwnDomainDnsConfig = (domain: string) => {
       enabled: !!domain,
       retry: (_failureCount, error) =>
         error?.response?.status ? error.response.status >= 500 : false,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 2, // 2 minutes
     }),
     fetchOwnDomainDnsStatus: useQuery<DnsConfig | null, AxiosError>({
       queryKey: ['own-domain-dns-config', domain],
@@ -62,8 +61,7 @@ export const useFetchOwnDomainDnsConfig = (domain: string) => {
       enabled: !!domain,
       retry: (_failureCount, error) =>
         error?.response?.status ? error.response.status >= 500 : false,
-      refetchOnMount: false,
-      gcTime: 1000 * 60 * 10,
+      gcTime: Infinity,
       staleTime: 1000 * 60 * 10,
       refetchInterval: 1000 * 15,
     }),

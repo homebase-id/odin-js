@@ -37,9 +37,7 @@ export const useMyEmojiReactions = (context?: ReactionContext) => {
         context?.target?.globalTransitId,
       ],
       queryFn: () => fetch({ context }),
-
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 2, // 2 minutes
 
       enabled:
         !!context?.odinId &&

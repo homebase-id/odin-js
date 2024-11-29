@@ -324,8 +324,7 @@ export const getConversationQueryOptions: (
 ) => ({
   queryKey: ['conversation', conversationId],
   queryFn: () => fetchSingleConversation(dotYouClient, queryClient, conversationId as string),
-  refetchOnMount: false,
-  staleTime: 1000 * 60 * 5, // 5 minutes before updates to a conversation on another device are fetched on this one (when you were offline)
+  staleTime: 1000 * 60 * 60 * 24, // 24 hours
   enabled: !!conversationId,
   retry: (failureCount, error) => {
     if (error.message === 'Conversation not found') {

@@ -31,7 +31,6 @@ export const useAccountRemoval = () => {
       queryKey: ['removal-status'],
       queryFn: getAccountDeletionStatus,
       enabled: isAuthenticated,
-      refetchOnMount: false,
       staleTime: MINUTE_IN_MS * 10,
     }),
     delete: useMutation({
