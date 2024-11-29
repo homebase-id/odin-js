@@ -405,7 +405,7 @@ const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
       >
         {Heart({ className: iconClassName })}
         <span className={`my-auto ml-3 flex w-full flex-row items-stretch overflow-hidden`}>
-          <span>{'Social Presence'} </span>
+          <span>{'Personal data'} </span>
           <button className={`${iconClassName} ml-auto opacity-80 `}>
             <ArrowDown className={`transition-transform ${isOpen ? '-rotate-90' : ''}`} />
           </button>

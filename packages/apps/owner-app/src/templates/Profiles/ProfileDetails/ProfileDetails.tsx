@@ -1,4 +1,4 @@
-import { getNewId, slugify } from '@homebase-id/js-lib/helpers';
+import { getNewId, slugify, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AttributeVm, useAttributes } from '../../../hooks/profiles/useAttributes';
@@ -10,7 +10,7 @@ import { useProfileSections } from '../../../hooks/profiles/useProfileSections';
 import Submenu from '../../../components/SubMenu/SubMenu';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import { PageMeta } from '@homebase-id/common-app';
-import { ProfileSection } from '@homebase-id/js-lib/profile';
+import { BuiltInProfiles, ProfileSection } from '@homebase-id/js-lib/profile';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { BrokenAttribute } from '../../../components/Attribute/BrokenAttribute/BrokenAttribute';
 import ProfileDialog from '../../../components/Attribute/ProfileDialog/ProfileDialog';
@@ -25,7 +25,8 @@ import {
   LoadingBlock,
   ErrorBoundary,
 } from '@homebase-id/common-app';
-import { Heart, Pencil, Trash, Plus } from '@homebase-id/common-app/icons';
+import { Heart, Pencil, Trash, Plus, Person, Wallet, Cloud } from '@homebase-id/common-app/icons';
+import { HomePageConfig } from '@homebase-id/js-lib/public';
 
 const ProfileDetails = () => {
   const {
@@ -77,7 +78,15 @@ const ProfileDetails = () => {
   return (
     <>
       <PageMeta
-        icon={Heart}
+        icon={
+          stringGuidsEqual(profileDef.profileId, BuiltInProfiles.StandardProfileId)
+            ? Person
+            : stringGuidsEqual(profileDef.profileId, HomePageConfig.DefaultDriveId)
+              ? Cloud
+              : stringGuidsEqual(profileDef.profileId, BuiltInProfiles.WalletId)
+                ? Wallet
+                : Heart
+        }
         title={profileDef.name}
         actions={
           profileDef.isSystemSection === true ? null : (
@@ -111,7 +120,7 @@ const ProfileDetails = () => {
           )
         }
         breadCrumbs={[
-          { href: '/owner/profile', title: 'Social Presence' },
+          { href: '/owner/profile', title: 'Personal data' },
           ...(profileKey ? [{ title: profileKey }] : []),
         ]}
       />

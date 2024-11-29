@@ -57,7 +57,7 @@ const Website = () => {
           </>
         }
         breadCrumbs={[
-          { href: '/owner/profile', title: 'Social Presence' },
+          { href: '/owner/profile', title: 'Personal data' },
           { title: t('Home settings') },
         ]}
       />
