@@ -16,7 +16,7 @@ export const useVerifyToken = (isOwner?: boolean) => {
   };
 
   return useQuery({
-    queryKey: ['verify-token'],
+    queryKey: ['verify-public-token'],
     queryFn: fetchData,
     staleTime: MINUTE_IN_MS * 10,
     enabled: isAuthenticated,
@@ -24,5 +24,5 @@ export const useVerifyToken = (isOwner?: boolean) => {
 };
 
 export const invalidateVerifyToken = (queryClient: QueryClient) => {
-  queryClient.invalidateQueries({ queryKey: ['verify-token'] });
+  queryClient.invalidateQueries({ queryKey: ['verify-public-token'] });
 };

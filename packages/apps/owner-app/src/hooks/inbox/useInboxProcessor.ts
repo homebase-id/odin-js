@@ -14,7 +14,7 @@ export const useInboxProcessor = (connected?: boolean) => {
     );
 
   return useQuery({
-    queryKey: ['process-inbox'],
+    queryKey: ['process-owner-inbox'],
     queryFn: fetchData,
     enabled: connected,
     staleTime: 1000 * 60 * 5, // 5 minutes

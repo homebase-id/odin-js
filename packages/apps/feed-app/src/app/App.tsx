@@ -45,7 +45,6 @@ import {
 } from '@homebase-id/common-app';
 import { useValidateAuthorization } from '../hooks/auth/useAuth';
 
-export const REACT_QUERY_CACHE_KEY = 'FEED_REACT_QUERY_OFFLINE_CACHE';
 const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'raw-image',
   'social-feeds',
@@ -54,6 +53,7 @@ const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'following',
   'channels',
   'channel',
+  'process-feed-inbox',
 ];
 
 function App() {
@@ -125,7 +125,7 @@ function App() {
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
       <OdinQueryClient
-        cacheKey={REACT_QUERY_CACHE_KEY}
+        cacheKey={'APP_REACT_QUERY_OFFLINE_CACHE'}
         cachedQueryKeys={REACT_QUERY_INCLUDED_QUERY_KEYS}
         type="indexeddb"
       >

@@ -44,7 +44,7 @@ const useInboxProcessor = (isEnabled?: boolean) => {
   };
 
   return useQuery({
-    queryKey: ['process-inbox'],
+    queryKey: ['process-feed-inbox'],
     queryFn: fetchData,
     staleTime: MINUTE_IN_MS * 5,
     enabled: channelsFetched,

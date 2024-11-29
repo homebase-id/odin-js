@@ -80,10 +80,9 @@ import {
 } from '@homebase-id/common-app';
 import { useInboxProcessor } from '../hooks/inbox/useInboxProcessor';
 
-export const REACT_QUERY_CACHE_KEY = 'OWNER_REACT_QUERY_OFFLINE_CACHE';
 const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'detailed-connection-info',
-  'process-inbox',
+  'process-owner-inbox',
   'social-feeds',
   'drives',
   'circles',
@@ -250,7 +249,7 @@ function App() {
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
       <OdinQueryClient
-        cacheKey={REACT_QUERY_CACHE_KEY}
+        cacheKey={'OWNER_REACT_QUERY_OFFLINE_CACHE'}
         cachedQueryKeys={REACT_QUERY_INCLUDED_QUERY_KEYS}
         type="indexeddb"
       >

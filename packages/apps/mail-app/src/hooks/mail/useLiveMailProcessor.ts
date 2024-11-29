@@ -42,7 +42,7 @@ const useInboxProcessor = (connected?: boolean) => {
   };
 
   return useQuery({
-    queryKey: ['process-inbox'],
+    queryKey: ['process-mail-inbox'],
     queryFn: fetchData,
     staleTime: MINUTE_IN_MS * 5,
     enabled: connected,
@@ -117,7 +117,7 @@ const useMailWebsocket = (isEnabled: boolean) => {
     ['fileAdded', 'fileModified'],
     websocketDrives,
     () => {
-      queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
+      queryClient.invalidateQueries({ queryKey: ['process-mail-inbox'] });
     },
     undefined,
     'useLiveMailProcessor'

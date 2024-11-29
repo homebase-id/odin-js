@@ -37,14 +37,17 @@ export const OdinQueryClient = ({
   cachedQueryKeys: string[];
   type: 'local' | 'indexeddb';
 }) => {
-  if (!cacheKey || !cachedQueryKeys || !type) {
+  if (import.meta.env.MODE !== 'production' && (!cacheKey || !cachedQueryKeys || !type)) {
     return (
       <Alert type="critical">[OdinQueryClient] Missing required props for OdinQueryClient</Alert>
     );
   }
 
   const allCachedQueryKeys = useMemo(() => {
-    if (cachedQueryKeys.some((key) => DEFAULT_QUERY_KEYS.includes(key))) {
+    if (
+      import.meta.env.MODE !== 'production' &&
+      cachedQueryKeys.some((key) => DEFAULT_QUERY_KEYS.includes(key))
+    ) {
       console.warn(
         `[OdinQueryClient] cachedQueryKeys contains default query keys: ${cachedQueryKeys.filter((key) => DEFAULT_QUERY_KEYS.includes(key)).join(', ')}`
       );

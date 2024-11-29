@@ -84,9 +84,8 @@ export const logoutOwnerAndAllApps = async (): Promise<void> => {
 
   // Caches
   localStorage.removeItem(`OWNER_REACT_QUERY_OFFLINE_CACHE`);
-  localStorage.removeItem(`FEED_REACT_QUERY_OFFLINE_CACHE`);
-  localStorage.removeItem(`COMMUNITY_REACT_QUERY_OFFLINE_CACHE`);
-  localStorage.removeItem(`CHAT_REACT_QUERY_OFFLINE_CACHE`);
+  localStorage.removeItem(`PUBLIC_REACT_QUERY_OFFLINE_CACHE`);
+  localStorage.removeItem(`APP_REACT_QUERY_OFFLINE_CACHE`);
 
   // IndexedDB
   indexedDB.deleteDatabase(`keyval-store`);

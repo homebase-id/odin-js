@@ -43,7 +43,7 @@ export const useInboxProcessor = (connected?: boolean) => {
   const chatPostProcessInboxHandler = useChatPostInboxHandler();
 
   const fetchData = async () => {
-    const lastProcessedTime = queryClient.getQueryState(['process-inbox'])?.dataUpdatedAt;
+    const lastProcessedTime = queryClient.getQueryState(['process-chat-inbox'])?.dataUpdatedAt;
     const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 5;
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
@@ -55,7 +55,7 @@ export const useInboxProcessor = (connected?: boolean) => {
 
   // We refetch this one on mount as each mount the websocket would reconnect, and there might be a backlog of messages
   return useQuery({
-    queryKey: ['process-inbox'],
+    queryKey: ['process-chat-inbox'],
     queryFn: fetchData,
     enabled: connected,
     staleTime: 500, // 500ms
