@@ -242,7 +242,7 @@ const MailMessage = ({
               : undefined
           }
         >
-          <div className={`flex flex-row gap-2`}>
+          <div className={`flex flex-row gap-2 overflow-hidden`}>
             {!message.fileMetadata.appData.content.isRead && !messageFromMe && !forceAsRead ? (
               <span className="my-auto block h-2 w-2 rounded-full bg-primary" />
             ) : null}
@@ -256,10 +256,32 @@ const MailMessage = ({
               {messageFromMe ? t('Me') : <ConnectionName odinId={sender} />}
             </p>
             {isDraft ? <p>{t('Draft')}</p> : null}
-            <p className="ml-auto select-none text-sm text-foreground/70">
-              {message.fileMetadata.created &&
-                formatToTimeAgoWithRelativeDetail(new Date(message.fileMetadata.created), true)}
-            </p>
+            <div
+              className={`ml-auto flex flex-row items-center gap-2 ${`transition-transform md:translate-x-6 md:group-hover:translate-x-0`}`}
+            >
+              <p className="select-none text-sm text-foreground/70">
+                {message.fileMetadata.created &&
+                  formatToTimeAgoWithRelativeDetail(new Date(message.fileMetadata.created), true)}
+              </p>
+              <ActionGroup
+                options={[
+                  {
+                    label: t('Message info'),
+                    onClick: () =>
+                      navigate(
+                        `${MAIL_ROOT_PATH}/${filter}/${conversationKey}/${message.fileId}?message-info`
+                      ),
+                  },
+                ]}
+                className="my-auto flex-shrink-0 rounded-md bg-background p-1"
+                type={'mute'}
+                size="none"
+                alwaysInPortal={true}
+              >
+                <ChevronDown className="h-3 w-3" />
+                <span className="sr-only ml-1">{t('More')}</span>
+              </ActionGroup>
+            </div>
           </div>
           <RichTextRenderer
             body={message.fileMetadata.appData.content.message}
@@ -284,26 +306,6 @@ const MailMessage = ({
             maxVisible={null}
             query={query}
           />
-
-          <ActionGroup
-            options={[
-              {
-                label: t('Message info'),
-                onClick: () =>
-                  navigate(
-                    `${MAIL_ROOT_PATH}/${filter}/${conversationKey}/${message.fileId}?message-info`
-                  ),
-              },
-            ]}
-            className="absolute right-1 top-[0.125rem] z-10 rounded-full bg-transparent group-hover:pointer-events-auto group-hover:bg-background/60"
-            type={'mute'}
-            size="square"
-          >
-            <span className="opacity-0 group-hover:opacity-100">
-              <ChevronDown className="h-3 w-3" />
-              <span className="sr-only ml-1">{t('More')}</span>
-            </span>
-          </ActionGroup>
         </div>
       </div>
       {showMessageInfo ? (
