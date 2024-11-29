@@ -135,8 +135,8 @@ const SetupWizard = ({ doInitWithData }: { doInitWithData: (data: WelcomeData) =
           <small className="block text-sm text-slate-400">{t('Help people find you')}</small>
         </h2>
 
-        <div className="-mx-2 flex-row sm:flex">
-          <div className="mb-5 px-2 sm:w-2/5">
+        <div className="flex-row gap-2 sm:flex">
+          <div className="mb-5 sm:w-2/5">
             <Label htmlFor="givenName">{t('Given name')}</Label>
             <Input
               id="givenName"
@@ -145,7 +145,7 @@ const SetupWizard = ({ doInitWithData }: { doInitWithData: (data: WelcomeData) =
               defaultValue={data.profile['givenName']}
             />
           </div>
-          <div className="mb-5 px-2 sm:w-3/5">
+          <div className="mb-5 sm:w-3/5">
             <Label htmlFor="surname">{t('Surname')}</Label>
             <Input
               id="surname"

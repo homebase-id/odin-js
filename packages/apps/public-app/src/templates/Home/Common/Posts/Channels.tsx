@@ -10,15 +10,15 @@ const Channels = ({ className }: { className?: string }) => {
 
   return channels?.length ? (
     <div className={className}>
-      <div className="-mx-2 flex max-w-7xl flex-col lg:flex-row xl:-mx-4">
-        <div className="px-2 py-2 lg:w-2/3 xl:px-4">
-          <div className="-m-2 flex flex-row flex-wrap">
+      <div className="flex max-w-7xl flex-col gap-2 lg:flex-row xl:gap-4">
+        <div className="lg:w-2/3">
+          <div className="flex flex-row flex-wrap gap-2">
             {channels.map((channel) => {
               return (
                 <ChannelTeaser
                   key={channel.fileMetadata.appData.uniqueId}
                   channel={channel}
-                  className={'w-full p-2 md:w-1/2'}
+                  className={'w-full md:w-1/2'}
                 />
               );
             })}

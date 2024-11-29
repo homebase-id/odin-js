@@ -80,10 +80,10 @@ const SocialFeedMainContent = () => {
         <PostComposer className="mb-2 w-full rounded-md border-gray-200 border-opacity-60 bg-background p-4 shadow-sm dark:border-gray-800 lg:border" />
       )}
       {postsLoading ? (
-        <div className="-mx-4">
-          <LoadingBlock className="m-4 h-10" />
-          <LoadingBlock className="m-4 h-10" />
-          <LoadingBlock className="m-4 h-10" />
+        <div className="flex flex-col gap-4">
+          <LoadingBlock className="my-4 h-10" />
+          <LoadingBlock className="my-4 h-10" />
+          <LoadingBlock className="my-4 h-10" />
         </div>
       ) : flattenedPosts?.length ? (
         <>
