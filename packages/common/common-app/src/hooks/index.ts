@@ -34,6 +34,8 @@ export * from './portal/usePortal';
 export * from './profiles/useProfiles';
 export * from './reactions';
 export * from './securityContext/useSecurityContext';
+export * from './securityContext/useHasWriteAccess';
+export * from './securityContext/useHasReadAccess';
 export * from './siteData/useSiteData';
 export * from './socialFeed';
 export * from './staticFiles/useStaticFiles';
