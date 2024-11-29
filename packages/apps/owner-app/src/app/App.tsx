@@ -81,14 +81,12 @@ import {
 import { useInboxProcessor } from '../hooks/inbox/useInboxProcessor';
 
 export const REACT_QUERY_CACHE_KEY = 'OWNER_REACT_QUERY_OFFLINE_CACHE';
-const INCLUDED_QUERY_KEYS = [
-  'site-data',
-  'image',
-  'contact',
-  'connection-details',
+const REACT_QUERY_INCLUDED_QUERY_KEYS = [
+  'detailed-connection-info',
   'process-inbox',
-  'connection-info',
   'social-feeds',
+  'drives',
+  'circles',
 ];
 
 function App() {
@@ -253,7 +251,7 @@ function App() {
       </Helmet>
       <OdinQueryClient
         cacheKey={REACT_QUERY_CACHE_KEY}
-        cachedQueryKeys={INCLUDED_QUERY_KEYS}
+        cachedQueryKeys={REACT_QUERY_INCLUDED_QUERY_KEYS}
         type="indexeddb"
       >
         <DotYouClientProvider>

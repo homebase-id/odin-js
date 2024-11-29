@@ -1,5 +1,5 @@
 import { Block } from '@homebase-id/common-app/icons';
-import { EmojiSelector, t, ImageSelector, useImage } from '@homebase-id/common-app';
+import { EmojiSelector, t, ImageSelector, useRawImage } from '@homebase-id/common-app';
 import { TargetDrive } from '@homebase-id/js-lib/core';
 import { ReactNode, useState } from 'react';
 
@@ -25,7 +25,7 @@ const FaviconSelector = ({
     | { emoji: string }
     | undefined;
 
-  const { data: imageData } = useImage({
+  const { data: imageData } = useRawImage({
     imageFileId: fileId,
     imageFileKey:
       valueObject && typeof valueObject === 'object' && 'fileKey' in valueObject

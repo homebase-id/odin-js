@@ -9,7 +9,7 @@ export const useExternalOdinId = ({ odinId }: { odinId?: string }) => {
 
   return {
     fetch: useQuery({
-      queryKey: ['connection-details', odinId],
+      queryKey: ['external-profile', odinId],
       queryFn: () => fetchSingle({ odinId }),
       refetchOnWindowFocus: false,
       refetchOnMount: false,

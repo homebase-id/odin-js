@@ -42,9 +42,7 @@ export const useHomeAttributes = () => {
     fetchTheme: useQuery({
       queryKey: ['attributes', HomePageConfig.DefaultDriveId, HomePageAttributes.Theme],
       queryFn: fetchTheme,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      staleTime: 1000 * 60 * 60, // 1 hour
       retry: 1,
     }),
   };

@@ -22,7 +22,7 @@ export * from './follow/useFollowers';
 export * from './follow/useFollowing';
 export * from './follow/useIdentityIFollow';
 export * from './file/useFile';
-export * from './image/useImage';
+export * from './image/useRawImage';
 export * from './intersection/useIntersection';
 export * from './intersection/useMostSpace';
 export * from './links/useLinkPreviewBuilder';

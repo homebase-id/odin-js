@@ -15,11 +15,9 @@ export const REACT_QUERY_CACHE_KEY = 'CHAT_REACT_QUERY_OFFLINE_CACHE';
 const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'chat-message',
   'chat-messages',
+  'chat-reaction',
   'conversations',
   'conversation-metadata',
-  'chat-reaction',
-  'connection-details',
-  'contact',
   'process-inbox',
 ];
 

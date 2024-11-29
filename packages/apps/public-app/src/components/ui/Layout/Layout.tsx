@@ -2,7 +2,7 @@ import { FC, ReactNode, Suspense, lazy } from 'react';
 import { useTheme } from '../../../hooks/theme/useTheme';
 import { ScrollRestoration } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Toaster, useDotYouClientContext, useImage } from '@homebase-id/common-app';
+import { Toaster, useDotYouClientContext, useRawImage } from '@homebase-id/common-app';
 import { GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { HomePageConfig } from '@homebase-id/js-lib/public';
 
@@ -43,7 +43,7 @@ export const NoLayout: FC<LayoutProps> = ({ children }) => {
   const isOwner = useDotYouClientContext().isOwner();
   const { colors, favicon, imageFileId } = useTheme();
 
-  const { data: imageData } = useImage({
+  const { data: imageData } = useRawImage({
     imageFileId,
     imageFileKey: favicon && 'fileKey' in favicon ? favicon.fileKey : undefined,
     imageDrive: GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId),

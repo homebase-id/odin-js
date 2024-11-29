@@ -46,7 +46,15 @@ import {
 import { useValidateAuthorization } from '../hooks/auth/useAuth';
 
 export const REACT_QUERY_CACHE_KEY = 'FEED_REACT_QUERY_OFFLINE_CACHE';
-const INCLUDED_QUERY_KEYS = ['common-image', 'contact', 'image', 'collaborative-channels'];
+const REACT_QUERY_INCLUDED_QUERY_KEYS = [
+  'raw-image',
+  'social-feeds',
+  'collaborative-channels',
+  'followers',
+  'following',
+  'channels',
+  'channel',
+];
 
 function App() {
   const router = createBrowserRouter(
@@ -118,7 +126,7 @@ function App() {
       </Helmet>
       <OdinQueryClient
         cacheKey={REACT_QUERY_CACHE_KEY}
-        cachedQueryKeys={INCLUDED_QUERY_KEYS}
+        cachedQueryKeys={REACT_QUERY_INCLUDED_QUERY_KEYS}
         type="indexeddb"
       >
         <DotYouClientProvider>

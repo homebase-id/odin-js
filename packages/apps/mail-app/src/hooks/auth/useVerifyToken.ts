@@ -13,7 +13,7 @@ export const useVerifyToken = () => {
     return (await hasValidYouAuthToken(dotYouClient)) ?? true;
   };
   return useQuery({
-    queryKey: ['verifyToken'],
+    queryKey: ['verify-token'],
     queryFn: fetchData,
     refetchOnMount: false,
     staleTime: MINUTE_IN_MS * 10,
@@ -23,5 +23,5 @@ export const useVerifyToken = () => {
 };
 
 export const invalidateVerifyToken = (queryClient: QueryClient) => {
-  queryClient.invalidateQueries({ queryKey: ['verifyToken'] });
+  queryClient.invalidateQueries({ queryKey: ['verify-token'] });
 };

@@ -6,7 +6,7 @@ import {
   Attribute,
 } from '@homebase-id/js-lib/profile';
 import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
-import { FallbackImg, LoadingBlock, useImage } from '@homebase-id/common-app';
+import { FallbackImg, LoadingBlock, useRawImage } from '@homebase-id/common-app';
 import { HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 
 interface YourSignatureProps {
@@ -39,7 +39,7 @@ const YourSignature = ({ className }: YourSignatureProps) => {
 
   const filteredPhotoAttributes = filterAttributes(photoAttributes || []);
 
-  const { data: imageData } = useImage({
+  const { data: imageData } = useRawImage({
     imageFileId: filteredPhotoAttributes?.[0]?.fileId,
     imageFileKey:
       filteredPhotoAttributes?.[0]?.fileMetadata.appData.content.data?.[

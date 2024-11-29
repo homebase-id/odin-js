@@ -10,7 +10,7 @@ import {
 } from '@homebase-id/js-lib/profile';
 import { HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { LoadingBlock, FallbackImg, t, useImage } from '@homebase-id/common-app';
+import { LoadingBlock, FallbackImg, t, useRawImage } from '@homebase-id/common-app';
 import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
 import { Cake, House, IconFrame, Phone } from '@homebase-id/common-app/icons';
 import InfoBox from '../../ui/InfoBox/InfoBox';
@@ -62,7 +62,7 @@ const YourInfo = ({ circleGrants, className }: YourInfoProps) => {
     circleGrants || []
   );
 
-  const { data: imageData } = useImage({
+  const { data: imageData } = useRawImage({
     imageFileId: filteredPhotoAttributes?.[0]?.fileId,
     imageFileKey:
       filteredPhotoAttributes?.[0]?.fileMetadata.appData.content.data?.[

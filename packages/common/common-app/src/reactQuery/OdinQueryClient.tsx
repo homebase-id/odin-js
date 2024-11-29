@@ -17,6 +17,15 @@ const queryClient = new QueryClient({
   },
 });
 
+const DEFAULT_QUERY_KEYS = [
+  'external-profile',
+  'connection-info',
+  'contact',
+  'image',
+  'push-notifications',
+  'site-data',
+];
+
 export const OdinQueryClient = ({
   children,
   cacheKey,
@@ -33,6 +42,15 @@ export const OdinQueryClient = ({
       <Alert type="critical">[OdinQueryClient] Missing required props for OdinQueryClient</Alert>
     );
   }
+
+  const allCachedQueryKeys = useMemo(() => {
+    if (cachedQueryKeys.some((key) => DEFAULT_QUERY_KEYS.includes(key))) {
+      console.warn(
+        `[OdinQueryClient] cachedQueryKeys contains default query keys: ${cachedQueryKeys.filter((key) => DEFAULT_QUERY_KEYS.includes(key)).join(', ')}`
+      );
+    }
+    return [...DEFAULT_QUERY_KEYS, ...cachedQueryKeys];
+  }, [cachedQueryKeys]);
 
   const persistOptions = useMemo(() => {
     const persister =
@@ -60,13 +78,13 @@ export const OdinQueryClient = ({
           )
             return false;
           const { queryKey } = query;
-          return cachedQueryKeys.some((key) => queryKey.includes(key));
+          return allCachedQueryKeys.some((key) => queryKey.includes(key));
         },
       },
     };
 
     return persistOptions;
-  }, [cacheKey, cachedQueryKeys]);
+  }, [cacheKey, allCachedQueryKeys]);
 
   return (
     <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
