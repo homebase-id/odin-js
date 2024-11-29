@@ -12,7 +12,6 @@ import { Layout, NoLayout } from '../components/ui/Layout/Layout';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import {
   DotYouClientProvider,

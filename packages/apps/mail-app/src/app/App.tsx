@@ -36,7 +36,6 @@ const DebugDataPage = lazy(() =>
   import('../templates/Mail/DebugData').then((mailApp) => ({ default: mailApp.DebugDataPage }))
 );
 
-import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 
 const AUTH_PATH = MAIL_ROOT_PATH + '/auth';

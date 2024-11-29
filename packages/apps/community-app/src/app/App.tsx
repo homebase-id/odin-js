@@ -12,7 +12,6 @@ import {
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Layout, MinimalLayout } from '../components/ui/Layout/Layout';
-import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import {
   COMMUNITY_ROOT_PATH,

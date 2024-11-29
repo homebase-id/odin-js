@@ -30,7 +30,6 @@ const IncomingCollaborativeChannelPage = lazy(
   () => import('../templates/SocialFeed/IncomingCollaborativeChannelPage')
 );
 
-import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 
 const AUTH_PATH = FEED_ROOT_PATH + '/auth';

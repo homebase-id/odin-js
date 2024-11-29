@@ -37,7 +37,6 @@ const ChatCreateAndOrRedirect = lazy(() =>
   }))
 );
 
-import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 
 const AUTH_PATH = CHAT_ROOT_PATH + '/auth';

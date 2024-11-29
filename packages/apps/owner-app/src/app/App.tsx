@@ -61,7 +61,6 @@ const Settings = lazy(() => import('../templates/Settings/Settings'));
 
 const Debug = lazy(() => import('../templates/Debug/Debug'));
 
-import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import {
