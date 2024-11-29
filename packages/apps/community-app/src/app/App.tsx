@@ -24,6 +24,7 @@ import {
 import { useValidateAuthorization } from '../hooks/auth/useAuth';
 
 const REACT_QUERY_INCLUDED_QUERY_KEYS = [
+  // Community specific
   'process-community-inbox',
   'communities',
   'community',
@@ -31,6 +32,13 @@ const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'community-channels',
   'community-messages',
   'channels-with-recent-message',
+
+  // Chat specific:
+  'chat-message',
+  'chat-messages',
+  'chat-reaction',
+  'conversations',
+  'conversation-metadata',
 ];
 const AUTH_PATH = COMMUNITY_ROOT_PATH + '/auth';
 const AUTH_FINALIZE_PATH = COMMUNITY_ROOT_PATH + '/auth/finalize';
