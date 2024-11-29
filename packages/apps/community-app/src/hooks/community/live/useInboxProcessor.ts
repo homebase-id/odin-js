@@ -145,7 +145,7 @@ const findChangesSinceTimestamp = async (
         });
 
   const modifiedFiles =
-    odinId && dotYouClient.getHostIdentity()
+    odinId && dotYouClient.getHostIdentity() !== odinId
       ? await queryModifiedOverPeer(dotYouClient, odinId, params, {
           maxRecords: BATCH_SIZE,
           cursor: modifiedCursor,
