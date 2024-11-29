@@ -78,16 +78,6 @@ export const savePost = async <T extends PostContent>(
   if (!file.fileMetadata.appData.content.authorOdinId)
     file.fileMetadata.appData.content.authorOdinId = dotYouClient.getHostIdentity();
 
-  if (file.fileId) {
-    return await updatePost(dotYouClient, odinId, file as HomebaseFile<T>, channelId, toSaveFiles);
-  } else {
-    if (toSaveFiles?.some((file) => 'fileKey' in file)) {
-      throw new Error(
-        'Cannot upload a new post with an existing media file. Use updatePost instead'
-      );
-    }
-  }
-
   // Delete embeddedPost of embeddedPost (we don't want to embed an embed)
   if (file.fileMetadata.appData.content.embeddedPost) {
     delete (file.fileMetadata.appData.content.embeddedPost as PostContent)['embeddedPost'];
@@ -370,9 +360,19 @@ const patchPost = async <T extends PostContent>(
   const { metadata, defaultPayload } = await getUploadFileMetadata(odinId, file, previewThumbnail);
   if (defaultPayload) payloads.push(defaultPayload);
 
-  const deletedPayloads = deletedMediaFiles?.map((payload) => {
-    return { key: payload.key };
-  });
+  const deletedPayloads =
+    deletedMediaFiles?.map((payload) => {
+      return { key: payload.key };
+    }) || [];
+
+  if (
+    !defaultPayload &&
+    file.fileMetadata.payloads.some((pyld) => pyld.key === DEFAULT_PAYLOAD_KEY)
+  ) {
+    deletedPayloads.push({
+      key: DEFAULT_PAYLOAD_KEY,
+    });
+  }
 
   const instructionSet: UpdateInstructionSet = odinId
     ? {

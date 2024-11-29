@@ -96,6 +96,7 @@ export const ImageElementBlock = <N extends TImageElement = TImageElement>(
         className={`relative aspect-square w-full max-w-lg bg-slate-50 dark:bg-slate-800 ${isBlockSelected ? 'bg-primary/20' : ''}`}
         data-file-id={options.fileId}
         data-file-key={element.fileKey}
+        contentEditable={false}
       >
         {children}
         <div className="absolute inset-4 mr-auto max-w-lg flex-grow">
