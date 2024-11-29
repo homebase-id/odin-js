@@ -48,13 +48,13 @@ const ExperienceBlock = ({
   imageFileId?: string;
   imageFileKey?: string;
   lastModified: number | undefined;
-  className: string;
+  className?: string;
 }) => {
   const domain = link ? new URL(link).hostname : undefined;
 
   return (
     <div
-      className={`relative flex flex-row gap-2 overflow-hidden rounded-lg bg-background px-5 py-8 sm:gap-4 sm:px-8 sm:py-12 ${className}`}
+      className={`relative flex flex-row gap-2 overflow-hidden rounded-lg bg-background px-5 py-8 sm:gap-4 sm:px-8 sm:py-12 ${className || ''}`}
     >
       {imageFileId ? (
         <Image
