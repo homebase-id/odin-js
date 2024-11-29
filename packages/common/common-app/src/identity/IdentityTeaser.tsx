@@ -42,11 +42,11 @@ export const IdentityTeaser = ({
       target="_blank"
       rel="noopener noreferrer"
       onClick={onClick}
-      className={`flex h-full w-full items-center rounded-lg ${
-        isBorderLess ? '-mx-1 p-1' : 'border border-gray-200 p-4 dark:border-gray-700'
-      } bg-background hover:shadow-md relative hover:z-10 hover:dark:shadow-slate-600 ${
-        className ?? ''
-      }`}
+      className={`group flex h-full w-full items-center rounded-lg ${
+        isBorderLess
+          ? '-mx-1 p-1'
+          : 'border border-gray-200 p-4 dark:border-gray-700 hover:shadow-md hover:z-10 hover:dark:shadow-slate-600'
+      } bg-background relative  ${className ?? ''}`}
       ref={wrapperRef}
     >
       <div className="flex h-full w-full items-center">
@@ -58,7 +58,7 @@ export const IdentityTeaser = ({
 
         <div className="flex-grow ">
           <h2
-            className={`title-font font-medium ${size === 'sm' ? 'text-sm' : ''}  text-opacity-60`}
+            className={`title-font font-medium ${size === 'sm' ? 'text-sm' : ''} ${isBorderLess ? 'group-hover:underline' : ''} text-opacity-60`}
           >
             {ContactName({ odinId: isInView ? odinId : null, canSave: !!isConnected }) || odinId}
           </h2>
