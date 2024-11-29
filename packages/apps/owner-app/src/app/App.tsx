@@ -82,11 +82,13 @@ import { useInboxProcessor } from '../hooks/inbox/useInboxProcessor';
 
 export const REACT_QUERY_CACHE_KEY = 'OWNER_REACT_QUERY_OFFLINE_CACHE';
 const INCLUDED_QUERY_KEYS = [
+  'site-data',
   'image',
   'contact',
   'connection-details',
   'process-inbox',
   'connection-info',
+  'social-feeds',
 ];
 
 function App() {

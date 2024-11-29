@@ -27,6 +27,7 @@ export const AuthorName = ({ odinId, excludeLink }: { odinId?: string; excludeLi
   if (excludeLink) {
     return nameOnly;
   }
+
   return (
     <a
       href={`${host}${isConnected && loggedInIdentity ? '?youauth-logon=' + loggedInIdentity : ''}`}

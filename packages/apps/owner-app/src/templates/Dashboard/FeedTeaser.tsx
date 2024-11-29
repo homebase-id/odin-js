@@ -11,6 +11,7 @@ import {
   useChannel,
   useCheckIdentity,
   useDotYouClientContext,
+  LoadingBlock,
 } from '@homebase-id/common-app';
 import { UnreachableIdentity } from '@homebase-id/feed-app/src/components/SocialFeed/UnreachableIdentity';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
@@ -18,7 +19,7 @@ import { PostContent } from '@homebase-id/js-lib/public';
 
 const POSTS_TO_SHOW = 2;
 export const FeedTeaser = ({ className }: { className?: string }) => {
-  const { data: posts } = useSocialFeed({ pageSize: POSTS_TO_SHOW }).fetchAll;
+  const { data: posts, isFetched } = useSocialFeed({ pageSize: POSTS_TO_SHOW }).fetchAll;
   const latestPosts = posts?.pages?.[0]?.results;
 
   const hasPosts = latestPosts && latestPosts?.length;
@@ -39,10 +40,15 @@ export const FeedTeaser = ({ className }: { className?: string }) => {
                 <PostTeaser postFile={post} odinId={post.fileMetadata.senderOdinId} />
               </div>
             ))
-          ) : (
+          ) : isFetched ? (
             <p className="rounded-md bg-background px-4 py-4 text-slate-400">
               {t('Fill up your feed, by following people, or connecting with other identtiies')}
             </p>
+          ) : (
+            <>
+              <LoadingBlock className="h-44 w-full bg-background" />
+              <LoadingBlock className="h-44 w-full bg-background" />
+            </>
           )}
         </div>
       </FakeAnchor>
