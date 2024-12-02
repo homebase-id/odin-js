@@ -1,11 +1,6 @@
 import { useEffect } from 'react';
 import { invalidateVerifyToken, useVerifyToken } from './useVerifyToken';
-import {
-  getEccPublicKey,
-  logoutOwner,
-  logoutOwnerAndAllApps,
-  logoutPublic,
-} from '@homebase-id/common-app';
+import { getEccPublicKey, logoutOwnerAndAllApps, logoutPublic } from '@homebase-id/common-app';
 import { HOME_SHARED_SECRET, STORAGE_IDENTITY_KEY, useDotYouClient } from '@homebase-id/common-app';
 import {
   YouAuthorizationParams,

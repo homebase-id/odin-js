@@ -80,41 +80,28 @@ export const VolatileInput = forwardRef(
     };
 
     const saveCaretPosition = () => {
-      if (!divRef.current) return { activeSelection: undefined, absoluteOffset: undefined };
-      const activeSelection = saveSelection();
-      const absoluteOffset = activeSelection
-        ? getAbsoluteOffsetToParent(activeSelection?.[2], activeSelection[3], divRef.current)
-        : undefined;
+      if (!divRef.current) return;
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return;
 
-      return { activeSelection, absoluteOffset };
+      const range = selection.getRangeAt(0);
+      const absoluteOffset = getAbsoluteOffsetToParent(
+        range.startContainer,
+        range.startOffset,
+        divRef.current
+      );
+
+      return absoluteOffset;
     };
 
-    const restoreCaretPosition = (
-      {
-        activeSelection,
-        absoluteOffset,
-      }: {
-        activeSelection?: SelectionData;
-        absoluteOffset?: number;
-      },
-      offset?: number
-    ) => {
-      if (!activeSelection) return;
-      if (!absoluteOffset || !divRef.current) {
-        restoreSelection(activeSelection);
-        return;
-      }
+    const restoreCaretPosition = (absoluteOffset: number | undefined, offset?: number) => {
+      if (!divRef.current || !absoluteOffset) return null;
 
       const relativeOffset = getRelativeOffset(absoluteOffset, divRef.current);
       if (!relativeOffset) return;
 
       relativeOffset.offset += offset || 0;
-      restoreSelection([
-        relativeOffset.node,
-        Math.max(0, relativeOffset.offset),
-        relativeOffset.node,
-        Math.max(0, relativeOffset.offset),
-      ]);
+      restoreSelection(relativeOffset.node, Math.max(0, relativeOffset.offset));
     };
 
     const wrapLinks = () => {
