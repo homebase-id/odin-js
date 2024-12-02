@@ -2,7 +2,6 @@ import { FC, forwardRef, useEffect, useImperativeHandle, useRef, useState } from
 import { getRichTextFromString, useDebounce } from '../../..';
 import { EmojiDropdown } from './EmojiDropdown';
 import {
-  SelectionData,
   getAbsoluteOffsetToParent,
   getRelativeOffset,
   restoreSelection,
@@ -183,12 +182,12 @@ export const VolatileInput = forwardRef(
       if (!divRef.current) return;
       const caretPositition = saveSelection();
       if (!caretPositition) return;
-      const textContent = caretPositition[0].textContent;
+      const textContent = caretPositition.node.textContent;
       if (!textContent) return;
-      const textTillCaret = textContent.slice(0, caretPositition[1]);
+      const textTillCaret = textContent.slice(0, caretPositition.relativeOffset);
       const lastPreceedingSpace = textTillCaret.lastIndexOf(' ');
       return textContent
-        .slice(lastPreceedingSpace === -1 ? 0 : lastPreceedingSpace, caretPositition[1])
+        .slice(lastPreceedingSpace === -1 ? 0 : lastPreceedingSpace, caretPositition.relativeOffset)
         .trim();
     };
 

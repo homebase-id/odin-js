@@ -1,5 +1,3 @@
-export type SelectionData = [Node, number, Node, number];
-
 export const getPreviousSiblings = (elem: Node) => {
   const sibs = [];
   while (elem.previousSibling) {
@@ -10,15 +8,11 @@ export const getPreviousSiblings = (elem: Node) => {
 };
 
 // Gets the selection of the current window
-export const saveSelection = (): SelectionData | undefined => {
+export const saveSelection = (): { node: Node; relativeOffset: number } | undefined => {
   const selection = window.getSelection();
+
   if (selection && selection.anchorNode && selection.focusNode) {
-    return [
-      selection.anchorNode,
-      selection.anchorOffset,
-      selection.focusNode,
-      selection.focusOffset,
-    ];
+    return { node: selection.anchorNode, relativeOffset: selection.anchorOffset };
   }
 };
 
