@@ -1,9 +1,9 @@
 import { PageMeta } from '@homebase-id/common-app';
-import Submenu from '../../../components/SubMenu/SubMenu';
+import Submenu from '../../components/SubMenu/SubMenu';
 import { useState, useEffect } from 'react';
-import Section from '../../../components/ui/Sections/Section';
+import Section from '../../components/ui/Sections/Section';
 import { DomainMembership, useDomain } from '@homebase-id/common-app';
-import { CompanyImage } from '../../../components/Connection/CompanyImage/CompanyImage';
+import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
 import {
   useDomains,
   SubtleMessage,
@@ -15,7 +15,7 @@ import {
   ActionButton,
 } from '@homebase-id/common-app';
 import { Grid, Shield, Eye, Times } from '@homebase-id/common-app/icons';
-import { useManageDomain } from '../../../hooks/connections/useManageDomain';
+import { useManageDomain } from '../../hooks/connections/useManageDomain';
 
 const Domains = () => {
   const [activePage, setActivePage] = useState(1);

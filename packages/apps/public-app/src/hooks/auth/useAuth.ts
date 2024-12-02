@@ -1,6 +1,11 @@
 import { useEffect } from 'react';
 import { invalidateVerifyToken, useVerifyToken } from './useVerifyToken';
-import { getEccPublicKey, logoutOwner, logoutPublic } from '@homebase-id/common-app';
+import {
+  getEccPublicKey,
+  logoutOwner,
+  logoutOwnerAndAllApps,
+  logoutPublic,
+} from '@homebase-id/common-app';
 import { HOME_SHARED_SECRET, STORAGE_IDENTITY_KEY, useDotYouClient } from '@homebase-id/common-app';
 import {
   YouAuthorizationParams,
@@ -49,7 +54,7 @@ export const useAuth = () => {
 
   const logout = async (): Promise<void> => {
     try {
-      if (isOwner) await logoutOwner();
+      if (isOwner) await logoutOwnerAndAllApps();
       else await logoutPublic();
     } catch (e) {
       console.error('Really bad auth state', e);

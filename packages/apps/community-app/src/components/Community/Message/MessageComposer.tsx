@@ -15,15 +15,18 @@ import {
 import { PaperPlane, Plus } from '@homebase-id/common-app/icons';
 import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, lazy } from 'react';
 
 import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
-import { RichTextEditor } from '@homebase-id/rich-text-editor';
-
+const RichTextEditor = lazy(() =>
+  import('@homebase-id/rich-text-editor').then((rootExport) => ({
+    default: rootExport.RichTextEditor,
+  }))
+);
 import { ChannelPlugin } from './RTEChannelDropdown/RTEChannelDropdownPlugin';
 import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 

@@ -39,12 +39,10 @@ const NotificationProblems = lazy(() => import('../templates/Notifications/Notif
 
 const Profile = lazy(() => import('../templates/Profiles/Profiles/Profiles'));
 const ProfileDetails = lazy(() => import('../templates/Profiles/ProfileDetails/ProfileDetails'));
-const Connections = lazy(() => import('../templates/Connections/Connections/Connections'));
-const ConnectionDetails = lazy(
-  () => import('../templates/Connections/ConnectionDetails/ConnectionDetails')
-);
-const Domains = lazy(() => import('../templates/Connections/Domains/Domains'));
-const DomainDetails = lazy(() => import('../templates/Connections/DomainDetails/DomainDetails'));
+const Connections = lazy(() => import('../templates/Connections/Connections'));
+const ConnectionDetails = lazy(() => import('../templates/Connections/Details/ConnectionDetails'));
+const Domains = lazy(() => import('../templates/Connections/Domains'));
+const DomainDetails = lazy(() => import('../templates/Connections/DomainDetails'));
 
 const Circles = lazy(() => import('../templates/Circles/Circles/Circles'));
 const CircleDetails = lazy(() => import('../templates/Circles/CircleDetails/CircleDetails'));

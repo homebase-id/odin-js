@@ -18,7 +18,7 @@ export const hasValidOwnerToken = async (): Promise<boolean> => {
   });
 };
 
-export const logoutOwner = async (): Promise<boolean> => {
+const logoutOwner = async (): Promise<boolean> => {
   const dotYouClient = new OwnerClient({ api: ApiType.Owner });
   const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
 

@@ -25,7 +25,7 @@ export const getContactByUniqueId = async (
       ContactConfig.ContactTargetDrive,
       uniqueId
     );
-  } catch (e) {
+  } catch {
     return null;
   }
 };

@@ -1,6 +1,5 @@
 import { useMatch, useParams } from 'react-router-dom';
 import { t, useDetailedConnectionInfo } from '@homebase-id/common-app';
-import { useContact } from '@homebase-id/common-app';
 import { ConnectionSummary } from '../../../components/Connection/ConnectionSummary/ConnectionSummary';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import { IdentityPageMetaAndActions } from './IdentityPageMetaAndActions';
