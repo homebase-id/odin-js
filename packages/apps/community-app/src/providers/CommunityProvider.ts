@@ -33,7 +33,6 @@ export const COMMUNITY_GENERAL_CHANNEL: HomebaseFile<CommunityChannel> = {
   fileState: 'active',
   fileSystemType: 'Standard',
   sharedSecretEncryptedKeyHeader: {} as EncryptedKeyHeader,
-  priority: 0,
   fileMetadata: {
     appData: {
       fileType: COMMUNITY_CHANNEL_FILE_TYPE,

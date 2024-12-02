@@ -228,8 +228,6 @@ interface BaseHomebaseFile<T = string> {
   fileMetadata: FileMetadata<T>;
   sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
   serverMetadata: ServerMetaData | undefined;
-
-  priority: number;
 }
 
 export interface HomebaseFile<T = string> extends BaseHomebaseFile<T> {

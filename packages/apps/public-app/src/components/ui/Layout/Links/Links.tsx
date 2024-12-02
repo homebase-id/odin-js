@@ -20,7 +20,6 @@ const Links = ({
     return null;
   }
   const flexDir = direction === 'col' ? 'flex-col' : 'flex-row';
-
   const allLinks: LinkType[] = [
     ...(includeSocials ? socials : []),
     ...(links || []).map((link) => ({

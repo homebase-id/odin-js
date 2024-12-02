@@ -8,6 +8,7 @@ import {
 import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
 import { FallbackImg, LoadingBlock, useRawImage } from '@homebase-id/common-app';
 import { HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
+import { compareAcl } from '@homebase-id/js-lib/helpers';
 
 interface YourSignatureProps {
   className?: string;
@@ -21,7 +22,9 @@ const filterAttributes = (attributes: HomebaseFile<Attribute>[]) => {
         Object.keys(attr.fileMetadata.appData.content.data)?.length !== 0 &&
         attr.serverMetadata?.accessControlList.requiredSecurityGroup === SecurityGroupType.Anonymous
     )
-    ?.sort((attrA, attrB) => attrA.priority - attrB.priority);
+    ?.sort((attrA, attrB) =>
+      compareAcl(attrA.serverMetadata?.accessControlList, attrB.serverMetadata?.accessControlList)
+    );
 };
 
 const YourSignature = ({ className }: YourSignatureProps) => {

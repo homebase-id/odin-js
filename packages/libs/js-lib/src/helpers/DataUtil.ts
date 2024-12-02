@@ -5,8 +5,10 @@ import {
   AccessControlList,
   EncryptedKeyHeader,
   PayloadDescriptor,
+  SecurityGroupType,
   TargetDrive,
-} from '../core/core';
+} from '../core/DriveData/File/DriveFileTypes';
+
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
@@ -167,6 +169,57 @@ export const aclEqual = (a: AccessControlList, b: AccessControlList): boolean =>
   }
 
   return true;
+};
+
+const getNumberForSecurityGroup = (securityGroup: SecurityGroupType) => {
+  switch (securityGroup) {
+    case SecurityGroupType.Anonymous:
+      return 5;
+    case SecurityGroupType.Authenticated:
+      return 4;
+    case SecurityGroupType.Connected:
+      return 3;
+    case SecurityGroupType.AutoConnected:
+      return 2;
+    case SecurityGroupType.Owner:
+      return 1;
+  }
+};
+
+export const compareAcl = (
+  a: AccessControlList | undefined,
+  b: AccessControlList | undefined
+): number => {
+  if (!a || !b) return 0;
+
+  if (
+    getNumberForSecurityGroup(a.requiredSecurityGroup) <
+    getNumberForSecurityGroup(b.requiredSecurityGroup)
+  )
+    return -1;
+
+  if (
+    getNumberForSecurityGroup(a.requiredSecurityGroup) >
+    getNumberForSecurityGroup(b.requiredSecurityGroup)
+  )
+    return 1;
+
+  if (!!a.circleIdList && !b.circleIdList) return -1;
+  if (!!b.circleIdList && !a.circleIdList) return 1;
+
+  if (a.circleIdList && b.circleIdList) {
+    if (a.circleIdList.length < b.circleIdList.length) return -1;
+    if (a.circleIdList.length > b.circleIdList.length) return 1;
+  }
+
+  if (!!a.odinIdList && !b.odinIdList) return -1;
+  if (!!b.odinIdList && !a.odinIdList) return 1;
+  if (a.odinIdList && b.odinIdList) {
+    if (a.odinIdList.length < b.odinIdList.length) return -1;
+    if (a.odinIdList.length > b.odinIdList.length) return 1;
+  }
+
+  return 0;
 };
 
 export const splitSharedSecretEncryptedKeyHeader = (

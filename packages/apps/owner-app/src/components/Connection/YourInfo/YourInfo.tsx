@@ -9,7 +9,7 @@ import {
   Attribute,
 } from '@homebase-id/js-lib/profile';
 import { HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { compareAcl, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { LoadingBlock, FallbackImg, t, useRawImage } from '@homebase-id/common-app';
 import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
 import { Cake, House, IconFrame, Phone } from '@homebase-id/common-app/icons';
@@ -31,7 +31,9 @@ const filterAttributesWithCircleGrants = (
         Object.keys(attr.fileMetadata.appData.content.data)?.length !== 0 &&
         attr.serverMetadata?.accessControlList.requiredSecurityGroup !== SecurityGroupType.Owner
     )
-    ?.sort((attrA, attrB) => attrA.priority - attrB.priority)
+    ?.sort((attrA, attrB) =>
+      compareAcl(attrA.serverMetadata?.accessControlList, attrB.serverMetadata?.accessControlList)
+    )
     ?.filter((attr) =>
       attr.serverMetadata?.accessControlList?.circleIdList?.length
         ? attr.serverMetadata?.accessControlList.circleIdList.some((allowedCircleId) =>

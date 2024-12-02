@@ -19,6 +19,7 @@ import {
   tryJsonParse,
   getQueryModifiedCursorFromTime,
   drivesEqual,
+  compareAcl,
 } from './DataUtil';
 import { SecurityGroupType } from '../core/DriveData/File/DriveFileTypes';
 
@@ -271,4 +272,62 @@ test('JSON.parse', () => {
 
 test('getQueryModifiedCursorFromTime', () => {
   expect(getQueryModifiedCursorFromTime(1712833436831)).toEqual(112252252116156420);
+});
+
+test('compareAcl', () => {
+  expect(
+    compareAcl(
+      { requiredSecurityGroup: SecurityGroupType.Connected },
+      { requiredSecurityGroup: SecurityGroupType.Connected }
+    )
+  ).toBe(0);
+
+  expect(
+    compareAcl(
+      { requiredSecurityGroup: SecurityGroupType.Owner },
+      { requiredSecurityGroup: SecurityGroupType.Connected }
+    )
+  ).toBe(-1);
+
+  expect(
+    compareAcl(
+      { requiredSecurityGroup: SecurityGroupType.Connected },
+      { requiredSecurityGroup: SecurityGroupType.Owner }
+    )
+  ).toBe(1);
+
+  expect(
+    compareAcl(
+      { requiredSecurityGroup: SecurityGroupType.Connected },
+      { requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: ['test'] }
+    )
+  ).toBe(1);
+
+  expect(
+    compareAcl(
+      { requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: ['test'] },
+      { requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: ['test'] }
+    )
+  ).toBe(0);
+
+  expect(
+    compareAcl(
+      { requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: ['test'] },
+      { requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: ['test', 'test2'] }
+    )
+  ).toBe(-1);
+
+  const aclArrayToSort = [
+    { requiredSecurityGroup: SecurityGroupType.Anonymous },
+    { requiredSecurityGroup: SecurityGroupType.Owner },
+    { requiredSecurityGroup: SecurityGroupType.Authenticated },
+    { requiredSecurityGroup: SecurityGroupType.Connected },
+  ];
+
+  expect(aclArrayToSort.sort(compareAcl)).toEqual([
+    { requiredSecurityGroup: SecurityGroupType.Owner },
+    { requiredSecurityGroup: SecurityGroupType.Connected },
+    { requiredSecurityGroup: SecurityGroupType.Authenticated },
+    { requiredSecurityGroup: SecurityGroupType.Anonymous },
+  ]);
 });
