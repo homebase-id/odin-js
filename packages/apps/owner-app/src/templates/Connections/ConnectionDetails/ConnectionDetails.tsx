@@ -22,12 +22,7 @@ const ConnectionDetails = () => {
     fetch: { data: connectionInfo, isLoading: connectionInfoLoading },
   } = useDetailedConnectionInfo({ odinId: odinId });
 
-  const { data: contactData, isLoading: contactDataLoading } = useContact({
-    odinId: odinId,
-    canSave: connectionInfo?.status === 'connected',
-  }).fetch;
-
-  if (connectionInfoLoading || contactDataLoading) return <LoadingDetailPage />;
+  if (connectionInfoLoading) return <LoadingDetailPage />;
   if (!odinId) return <>{t('No matching connection found')}</>;
 
   return (
@@ -66,7 +61,7 @@ const ConnectionDetails = () => {
       ) : (settingsMatch || settingsActionMatch) && connectionInfo?.status === 'connected' ? (
         <ConnectedDetailsSettings odinId={odinId} connectionInfo={connectionInfo} />
       ) : (
-        <>{contactData && <ConnectionSummary odinId={odinId} />}</>
+        <ConnectionSummary odinId={odinId} />
       )}
     </>
   );

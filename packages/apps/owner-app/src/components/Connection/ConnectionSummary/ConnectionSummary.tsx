@@ -73,9 +73,7 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
   if (!contact) return null;
 
   const contactContent = contact?.fileMetadata.appData.content;
-
   const isConnected = connectionInfo?.status === 'connected';
-
   const isFollowing = !followStateFetched ? undefined : !!identityIfollow;
 
   return (

@@ -156,7 +156,7 @@ export const useContact = ({
         }),
       staleTime: 1000 * 60 * 60 * 24, // 24 hours
       retry: false,
-      enabled: !!odinId || !!id,
+      enabled: (!!odinId || !!id) && !!hasContactDriveReadAccess,
     }),
     refresh: useMutation({
       mutationFn: refresh,
