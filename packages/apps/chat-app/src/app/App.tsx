@@ -6,6 +6,7 @@ import {
   RouterProvider,
   createBrowserRouter,
   createRoutesFromElements,
+  useLocation,
 } from 'react-router-dom';
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -39,6 +40,7 @@ import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 
 const AUTH_PATH = CHAT_ROOT_PATH + '/auth';
+const AUTH_FINALIZE_PATH = CHAT_ROOT_PATH + '/auth/finalize';
 
 import {
   ErrorBoundary,
@@ -49,6 +51,7 @@ import {
 } from '@homebase-id/common-app';
 import VideoPlayer from '../templates/VideoPlayer/VideoPlayer';
 import { OdinQueryClient } from '@homebase-id/common-app';
+import { useValidateAuthorization } from '../hooks/auth/useAuth';
 
 function App() {
   const router = createBrowserRouter(
@@ -58,9 +61,11 @@ function App() {
           path={CHAT_ROOT_PATH}
           element={
             <ErrorBoundary>
-              <Suspense fallback={<></>}>
-                <Outlet />
-              </Suspense>
+              <RootRoute>
+                <Suspense fallback={<></>}>
+                  <Outlet />
+                </Suspense>
+              </RootRoute>
             </ErrorBoundary>
           }
         >
@@ -71,11 +76,9 @@ function App() {
           <Route
             path=""
             element={
-              <RootRoute>
-                <Layout>
-                  <Outlet />
-                </Layout>
-              </RootRoute>
+              <Layout>
+                <Outlet />
+              </Layout>
             }
           >
             <Route index={true} element={<ChatHome />} />
@@ -124,20 +127,20 @@ function App() {
 }
 
 const RootRoute = ({ children }: { children: ReactNode }) => {
+  useValidateAuthorization();
+
   const isAuthenticated = useDotYouClientContext().isAuthenticated();
+  const location = useLocation();
 
   if (!isAuthenticated) {
-    if (window.location.pathname === AUTH_PATH) return <>{children}</>;
-
-    // It can happen that the RootRoute renders when we already are rendering Login, which would cause and endless url of returnUrls; So return early if it is the login already
-    if (window.location.pathname === AUTH_PATH) return <></>;
+    if (location.pathname === AUTH_PATH || location.pathname === AUTH_FINALIZE_PATH) {
+      return <>{children}</>;
+    }
 
     console.debug('[NOT AUTHENTICATED]: Redirect to login');
     return (
       <Navigate
-        to={`${AUTH_PATH}?returnUrl=${encodeURIComponent(
-          window.location.pathname + window.location.search
-        )}`}
+        to={`${AUTH_PATH}?returnUrl=${encodeURIComponent(location.pathname + location.search)}`}
       />
     );
   }

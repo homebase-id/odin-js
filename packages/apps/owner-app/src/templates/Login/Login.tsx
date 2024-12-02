@@ -1,6 +1,6 @@
 import { FormEventHandler, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useAuth } from '../../hooks/auth/useAuth';
+import { useAuth, useValidateAuthorization } from '../../hooks/auth/useAuth';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import { Link } from 'react-router-dom';
@@ -22,6 +22,7 @@ const Login = () => {
   const [error, setError] = useState<unknown | undefined>();
   const isAuthenticated = useDotYouClientContext().isAuthenticated();
   const { authenticate, setFirstPassword, isPasswordSet, checkRedirectToReturn } = useAuth();
+  useValidateAuthorization();
 
   const doLogin: FormEventHandler = async (e) => {
     e.preventDefault();

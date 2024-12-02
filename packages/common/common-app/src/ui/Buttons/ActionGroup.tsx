@@ -137,7 +137,7 @@ export const ActionGroup = ({
                   height: wrapperRef.current ? wrapperRef.current.clientHeight : 0,
                 }}
                 ref={portalRef}
-                className={`pointer-events-none ${isOpen ? 'block' : 'hidden'}`}
+                className={`pointer-events-none z-10 ${isOpen ? 'block' : 'hidden'}`}
               >
                 {ActionOptions}
               </div>,

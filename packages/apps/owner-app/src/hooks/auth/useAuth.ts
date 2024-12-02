@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useVerifyToken } from './useVerifyToken';
+import { invalidateVerifyToken, useVerifyToken } from './useVerifyToken';
 import {
   authenticate as authenticateOwner,
   isPasswordSet as isPasswordSetOwner,
@@ -17,6 +17,7 @@ import {
   logoutPublicSession,
   useDotYouClient,
 } from '@homebase-id/common-app';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const SETUP_PATH = '/owner/setup';
 
@@ -29,10 +30,10 @@ export const HOME_PATH = '/owner';
 
 export const useValidateAuthorization = () => {
   const { hasSharedSecret } = useDotYouClient();
-  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken();
+  const { data: hasValidToken, isFetched } = useVerifyToken();
 
   useEffect(() => {
-    if (isFetchedAfterMount && hasValidToken !== undefined) {
+    if (isFetched && hasValidToken !== undefined) {
       if (!hasValidToken && hasSharedSecret) {
         console.warn('Token is invalid, logging out..');
         logoutOwnerAndAllApps();
@@ -43,6 +44,7 @@ export const useValidateAuthorization = () => {
 
 export const useAuth = () => {
   const [searchParams] = useSearchParams();
+  const queryClient = useQueryClient();
 
   const authenticate = async (password: string) => {
     // Cleanup the public session: (There might have been a public login already in place)
@@ -56,6 +58,7 @@ export const useAuth = () => {
 
     // Store the owner items:
     window.localStorage.setItem(OWNER_SHARED_SECRET, uint8ArrayToBase64(response.sharedSecret));
+    invalidateVerifyToken(queryClient);
 
     checkRedirectToReturn();
     return true;

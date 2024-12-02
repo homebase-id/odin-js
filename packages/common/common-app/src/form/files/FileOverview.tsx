@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import {
   DEFAULT_PAYLOAD_KEY,
@@ -41,6 +41,29 @@ export const FileOverview = ({
 }: FileOverViewProps | ExistingFileOverviewProps) => {
   if (!files || !files.length) return null;
   const dotYouClient = useDotYouClientContext();
+
+  useEffect(() => {
+    if (!files) return;
+    (async () => {
+      const verifiedFiles = (
+        await Promise.all(
+          files.map(async (file) => {
+            if (!('file' in file) || !(file.file instanceof File)) return file;
+            try {
+              await file.file.slice(0, 10).text();
+            } catch (e) {
+              console.warn('File is no longer a valid file', file, e);
+              return null;
+            }
+
+            return file;
+          })
+        )
+      ).filter(Boolean) as NewFileArray;
+
+      if (verifiedFiles.length !== files.length) setFiles(verifiedFiles);
+    })();
+  }, [files]);
 
   const grabThumb = async (video: HTMLVideoElement, file: NewMediaFile, fileIndex: number) => {
     if (!video) return;
@@ -117,13 +140,15 @@ export const FileOverview = ({
           </div>
         ) : null;
 
-      const url =
-        'bytes' in currFile.file
-          ? window.URL.createObjectURL(currFile.file)
-          : URL.createObjectURL(currFile.file);
+      const url = URL.createObjectURL(currFile.file);
+
+      if (!url) return null;
 
       return (
-        <div key={(currFile.file as File).name || index} className="relative group">
+        <div
+          key={(currFile.file as File).size + '' + ((currFile.file as File).name || index)}
+          className="relative group"
+        >
           {currFile.file.type === 'video/mp4' ? (
             <>
               <video
@@ -165,7 +190,11 @@ export const FileOverview = ({
               setFiles([
                 ...(files.filter(
                   (file) =>
-                    'file' in file && (file.file as File).name !== (currFile.file as File).name
+                    'file' in file &&
+                    !(
+                      (file.file as File).name === (currFile.file as File).name &&
+                      (file.file as File).size === (currFile.file as File).size
+                    )
                 ) as NewFileArray),
               ]);
             }}

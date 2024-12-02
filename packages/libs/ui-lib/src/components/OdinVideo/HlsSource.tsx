@@ -2,7 +2,7 @@ import { SegmentedVideoMetadata } from '@homebase-id/js-lib/media';
 import { useEffect, useMemo } from 'react';
 import { useHlsManifest } from '../../hooks/video/useHlsManifest';
 import { OdinVideoProps } from './OdinVideo';
-import { ApiType, HomebaseFile } from '@homebase-id/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import hls from 'hls.js';
 
 interface OdinHlsProps extends OdinVideoProps {
@@ -19,7 +19,7 @@ export const HlsSource = ({
   fileId,
   globalTransitId,
   fileKey,
-  videoMetaData,
+  // videoMetaData,
   videoRef,
   onFatalError,
   systemFileType,
@@ -45,12 +45,12 @@ export const HlsSource = ({
   });
 
   const needsHlsJs = useMemo(
-    () =>
-      hls.isSupported() &&
-      (!videoRef.current?.canPlayType('application/vnd.apple.mpegurl') ||
-        (dotYouClient.getType() === ApiType.App &&
-          odinId &&
-          odinId !== dotYouClient.getHostIdentity())),
+    () => hls.isSupported(),
+    // hls.isSupported()
+    // && (!videoRef.current?.canPlayType('application/vnd.apple.mpegurl') ||
+    //   (dotYouClient.getType() === ApiType.App &&
+    //     odinId &&
+    //     odinId !== dotYouClient.getHostIdentity())),
     [videoRef]
   );
 
@@ -79,7 +79,9 @@ export const HlsSource = ({
 
   if (!hlsManifest) return null;
   if (videoRef.current?.canPlayType('application/vnd.apple.mpegurl')) {
-    return <source src={hlsManifest} type={videoMetaData?.mimeType} data-type="direct" />;
+    // Browsers that support HLS natively; But apparently not all of them actually do...
+    // return <source src={hlsManifest} type={videoMetaData?.mimeType} data-type="direct" />;
+    return null;
   } else {
     if (!hls.isSupported()) console.log('HLS is not supported');
     return null;

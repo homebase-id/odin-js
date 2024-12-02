@@ -6,6 +6,7 @@ import {
   Outlet,
   Route,
   RouterProvider,
+  useLocation,
   useParams,
 } from 'react-router-dom';
 
@@ -35,6 +36,7 @@ const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'channels-with-recent-message',
 ];
 const AUTH_PATH = COMMUNITY_ROOT_PATH + '/auth';
+const AUTH_FINALIZE_PATH = COMMUNITY_ROOT_PATH + '/auth/finalize';
 
 const Auth = lazy(() => import('../templates/Auth/Auth'));
 const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
@@ -79,9 +81,11 @@ function App() {
           path={COMMUNITY_ROOT_PATH}
           element={
             <ErrorBoundary>
-              <Suspense fallback={<div className="h-full w-full bg-pink-500"></div>}>
-                <Outlet />
-              </Suspense>
+              <RootRoute>
+                <Suspense fallback={<div className="h-full w-full bg-pink-500"></div>}>
+                  <Outlet />
+                </Suspense>
+              </RootRoute>
             </ErrorBoundary>
           }
         >
@@ -92,11 +96,9 @@ function App() {
           <Route
             path=""
             element={
-              <RootRoute>
-                <Layout>
-                  <Outlet />
-                </Layout>
-              </RootRoute>
+              <Layout>
+                <Outlet />
+              </Layout>
             }
           >
             <Route index={true} element={<CommunityHome />} />
@@ -213,21 +215,18 @@ const CommunityRootRoute = () => {
 
 const RootRoute = ({ children }: { children: ReactNode }) => {
   useValidateAuthorization();
+  const location = useLocation();
 
   const isAuthenticated = useDotYouClientContext().isAuthenticated();
 
   if (!isAuthenticated) {
-    if (window.location.pathname === AUTH_PATH) return <>{children}</>;
-
-    // It can happen that the RootRoute renders when we already are rendering Login, which would cause and endless url of returnUrls; So return early if it is the login already
-    if (window.location.pathname === AUTH_PATH) return <></>;
+    if (location.pathname === AUTH_PATH || location.pathname === AUTH_FINALIZE_PATH)
+      return <>{children}</>;
 
     console.debug('[NOT AUTHENTICATED]: Redirect to login');
     return (
       <Navigate
-        to={`${AUTH_PATH}?returnUrl=${encodeURIComponent(
-          window.location.pathname + window.location.search
-        )}`}
+        to={`${AUTH_PATH}?returnUrl=${encodeURIComponent(location.pathname + location.search)}`}
       />
     );
   }

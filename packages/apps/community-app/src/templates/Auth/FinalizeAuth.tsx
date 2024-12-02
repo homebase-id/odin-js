@@ -31,7 +31,12 @@ const AuthFinalize = () => {
   if (!identity || !public_key || !salt) return <Navigate to={`${COMMUNITY_ROOT_PATH}/auth`} />;
   if (finalizeState === 'error')
     return <Navigate to={`${COMMUNITY_ROOT_PATH}/auth?state=finalize-error`} />;
-  if (finalizeState === 'success') return <Navigate to={returnUrl || '/'} />;
+
+  useEffect(() => {
+    if (finalizeState === 'success') {
+      window.location.href = returnUrl || '/';
+    }
+  }, [finalizeState]);
 
   return (
     <>

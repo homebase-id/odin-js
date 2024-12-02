@@ -130,7 +130,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     return await updateConversation(dotYouClient, newConversation);
   };
 
-  const restoreChat = async ({
+  const archiveChat = async ({
     conversation,
   }: {
     conversation: HomebaseFile<UnifiedConversation>;
@@ -139,7 +139,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       ...conversation,
       fileMetadata: {
         ...conversation.fileMetadata,
-        appData: { ...conversation.fileMetadata.appData, archivalStatus: 0 },
+        appData: { ...conversation.fileMetadata.appData, archivalStatus: 3 },
       },
     };
 
@@ -213,8 +213,21 @@ export const useConversation = (props?: { conversationId?: string | undefined })
         );
       },
     }),
+    archiveChat: useMutation({
+      mutationFn: archiveChat,
+
+      onSettled: async (_data, _error, variables) => {
+        invalidateConversations(queryClient);
+        invalidateConversation(queryClient, variables.conversation.fileMetadata.appData.uniqueId);
+        invalidateChatMessages(
+          queryClient,
+          variables.conversation.fileMetadata.appData.uniqueId as string
+        );
+      },
+    }),
     restoreChat: useMutation({
-      mutationFn: restoreChat,
+      mutationFn: ({ conversation }: { conversation: HomebaseFile<UnifiedConversation> }) =>
+        restoreChat(dotYouClient, conversation),
 
       onSettled: async (_data, _error, variables) => {
         invalidateConversations(queryClient);
@@ -226,6 +239,21 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       },
     }),
   };
+};
+
+export const restoreChat = async (
+  dotYouClient: DotYouClient,
+  conversation: HomebaseFile<UnifiedConversation>
+) => {
+  const newConversation: HomebaseFile<UnifiedConversation> = {
+    ...conversation,
+    fileMetadata: {
+      ...conversation.fileMetadata,
+      appData: { ...conversation.fileMetadata.appData, archivalStatus: 0 },
+    },
+  };
+
+  return await updateConversation(dotYouClient, newConversation);
 };
 
 export const invalidateConversation = (queryClient: QueryClient, conversationId?: string) => {

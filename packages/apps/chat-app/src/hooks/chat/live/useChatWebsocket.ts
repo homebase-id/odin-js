@@ -30,7 +30,7 @@ import {
   invalidateChatMessages,
 } from '../useChatMessages';
 import { insertNewReaction, removeReaction } from '../useChatReaction';
-import { getConversationQueryOptions, useConversation } from '../useConversation';
+import { getConversationQueryOptions, restoreChat, useConversation } from '../useConversation';
 import { insertNewConversationMetadata } from '../useConversationMetadata';
 import { insertNewConversation, invalidateConversations } from '../useConversations';
 
@@ -97,7 +97,10 @@ export const useChatSocketHandler = () => {
             if (!conversation) {
               console.error('Orphaned message received', notification.header.fileId, conversation);
               // Can't handle this one ATM.. How to resolve?
-            } else if (conversation.fileMetadata.appData.archivalStatus === 2) {
+            } else if (
+              conversation.fileMetadata.appData.archivalStatus === 2 ||
+              conversation.fileMetadata.appData.archivalStatus === 3
+            ) {
               restoreChat({ conversation });
             }
           }
@@ -292,10 +295,10 @@ export const processChatMessagesBatch = async (
     );
 
   await Promise.all(
-    Object.keys(uniqueMessagesPerConversation).map(async (updatedConversation) => {
+    Object.keys(uniqueMessagesPerConversation).map(async (conversationId) => {
       const updatedChatMessages = (
         await Promise.all(
-          uniqueMessagesPerConversation[updatedConversation].map(async (newMessage) =>
+          uniqueMessagesPerConversation[conversationId].map(async (newMessage) =>
             typeof newMessage.fileMetadata.appData.content === 'string'
               ? await dsrToMessage(
                   dotYouClient,
@@ -307,7 +310,19 @@ export const processChatMessagesBatch = async (
           )
         )
       ).filter(Boolean) as HomebaseFile<ChatMessage>[];
-      insertNewMessagesForConversation(queryClient, updatedConversation, updatedChatMessages);
+      insertNewMessagesForConversation(queryClient, conversationId, updatedChatMessages);
+
+      // Check if the message is orphaned from a conversation
+      const conversation = await queryClient.fetchQuery(
+        getConversationQueryOptions(dotYouClient, queryClient, conversationId)
+      );
+      if (
+        conversation &&
+        (conversation.fileMetadata.appData.archivalStatus === 2 ||
+          conversation.fileMetadata.appData.archivalStatus === 3)
+      ) {
+        restoreChat(dotYouClient, conversation);
+      }
     })
   );
 };

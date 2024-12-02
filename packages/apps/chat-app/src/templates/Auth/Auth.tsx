@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 import {
   DialogWrapper,
@@ -10,6 +10,7 @@ import {
 } from '@homebase-id/common-app';
 import { AutoAuthorize, LoginBox } from '../../components/Auth/LoginBox/LoginBox';
 import { Layout } from '../../components/ui/Layout/Layout';
+import { useEffect } from 'react';
 
 const Auth = () => {
   const isAutoAuthorize = window.location.pathname.startsWith(CHAT_ROOT_PATH);
@@ -19,7 +20,9 @@ const Auth = () => {
 
   const isAuthenticated = useDotYouClientContext().isAuthenticated();
 
-  if (isAuthenticated) <Navigate to="/" />;
+  useEffect(() => {
+    if (isAuthenticated) window.location.href = '/';
+  }, [isAuthenticated]);
   if (isAutoAuthorize) return <AutoAuthorize />;
 
   return (

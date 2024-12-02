@@ -64,7 +64,8 @@ export const CommunityMessageEditor = ({
         autoFocus={!isTouchDevice()}
         onSubmit={isTouchDevice() ? undefined : doSend}
         onKeyDown={(e) => {
-          if (e.key === 'Escape') onClose();
+          if (e.key === 'Escape')
+            confirm(t('Are you sure? You will lose any pending changes')) && onClose();
         }}
       >
         <div className="">

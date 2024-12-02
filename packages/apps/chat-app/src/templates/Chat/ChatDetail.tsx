@@ -147,6 +147,12 @@ const ChatHeader = ({
     error: deleteChatError,
     status: deleteChatStatus,
   } = useConversation().deleteChat;
+  const {
+    mutate: archiveChat,
+    error: archiveChatError,
+    status: archiveChatStatus,
+  } = useConversation().archiveChat;
+  const { mutate: restoreChat, error: restoreChatError } = useConversation().restoreChat;
   const { mutate: introduceIdentities, error: makeIntroductionError } =
     useIntroductions().introduceIdentities;
 
@@ -167,9 +173,21 @@ const ChatHeader = ({
     if (deleteChatStatus === 'success') navigate(rootPath);
   }, [deleteChatStatus]);
 
+  useEffect(() => {
+    if (archiveChatStatus === 'success') navigate(rootPath);
+  }, [archiveChatStatus]);
+
   return (
     <>
-      <ErrorNotification error={clearChatError || deleteChatError || makeIntroductionError} />
+      <ErrorNotification
+        error={
+          clearChatError ||
+          deleteChatError ||
+          restoreChatError ||
+          archiveChatError ||
+          makeIntroductionError
+        }
+      />
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
         <HybridLink className="-m-1 p-1 lg:hidden" type="mute" href={rootPath}>
           <ChevronLeft className="h-4 w-4" />
@@ -211,7 +229,7 @@ const ChatHeader = ({
             options={[
               {
                 label: t('Chat info'),
-                href: `${rootPath}/${conversationDsr?.fileMetadata.appData.uniqueId}/info`,
+                href: `${rootPath}/${conversationDsr?.fileMetadata.appData.uniqueId}/info${window.location.search}`,
               },
               !singleRecipient
                 ? {
@@ -219,17 +237,40 @@ const ChatHeader = ({
                     onClick: makeIntroduction,
                   }
                 : undefined,
-              {
-                label: t('Delete'),
-                confirmOptions: {
-                  title: t('Delete chat'),
-                  buttonText: t('Delete'),
-                  body: t('Are you sure you want to delete this chat? All messages will be lost.'),
-                },
-                onClick: () => {
-                  deleteChat({ conversation: conversationDsr });
-                },
-              },
+              conversationDsr.fileMetadata.appData.archivalStatus !== 2
+                ? {
+                    label: t('Delete'),
+                    confirmOptions: {
+                      title: t('Delete chat'),
+                      buttonText: t('Delete'),
+                      body: t(
+                        `Are you sure you want to delete this chat and all messages? The messages will be lost and can't be recoved.`
+                      ),
+                    },
+                    onClick: () => {
+                      deleteChat({ conversation: conversationDsr });
+                    },
+                  }
+                : undefined,
+              conversationDsr.fileMetadata.appData.archivalStatus !== 3
+                ? {
+                    label: t('Archive'),
+                    confirmOptions: {
+                      title: t('Archive chat'),
+                      buttonText: t('Archive'),
+                      body: t(`Are you sure you want archive this chat?`),
+                      type: 'info',
+                    },
+                    onClick: () => {
+                      archiveChat({ conversation: conversationDsr });
+                    },
+                  }
+                : {
+                    label: t('Restore'),
+                    onClick: () => {
+                      restoreChat({ conversation: conversationDsr });
+                    },
+                  },
               {
                 label: t('Clear'),
                 confirmOptions: {

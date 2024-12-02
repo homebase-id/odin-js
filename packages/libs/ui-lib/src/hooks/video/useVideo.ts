@@ -101,6 +101,7 @@ export const useVideo = (
         odinId || identity,
         videoDrive?.alias,
         videoGlobalTransitId || videoFileId,
+        videoFileKey,
       ],
       queryFn: () =>
         fetchVideoData(
@@ -203,6 +204,7 @@ export const useVideoUrl = (
         odinId || identity,
         videoDrive?.alias,
         videoGlobalTransitId || videoFileId,
+        videoFileKey,
       ],
       queryFn: () =>
         fetchVideoData(odinId || identity, videoFileId, videoGlobalTransitId, videoDrive),

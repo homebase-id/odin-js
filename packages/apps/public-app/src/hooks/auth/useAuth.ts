@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useVerifyToken } from './useVerifyToken';
+import { invalidateVerifyToken, useVerifyToken } from './useVerifyToken';
 import { getEccPublicKey, logoutOwner, logoutPublic } from '@homebase-id/common-app';
 import { HOME_SHARED_SECRET, STORAGE_IDENTITY_KEY, useDotYouClient } from '@homebase-id/common-app';
 import {
@@ -18,6 +18,7 @@ import {
   byteArrayToString,
   tryJsonParse,
 } from '@homebase-id/js-lib/helpers';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const useValidateAuthorization = () => {
   const { hasSharedSecret, isOwner } = useDotYouClient();
@@ -62,6 +63,8 @@ export const useAuth = () => {
 };
 
 export const useYouAuthAuthorization = () => {
+  const queryClient = useQueryClient();
+
   const getAuthorizationParameters = async (returnUrl: string): Promise<YouAuthorizationParams> => {
     const eccKey = await createEccPair();
     saveEccKey(eccKey);
@@ -117,6 +120,7 @@ export const useYouAuthAuthorization = () => {
       window.localStorage.setItem(HOME_SHARED_SECRET, ss64);
       // Store the identity to the localStorage
       window.localStorage.setItem(STORAGE_IDENTITY_KEY, identity);
+      invalidateVerifyToken(queryClient);
       // Redirect to the returnUrl; With a fallback to home
       window.location.href = returnUrl || '/';
     } catch (e) {
