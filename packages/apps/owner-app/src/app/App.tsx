@@ -78,14 +78,6 @@ import {
 } from '@homebase-id/common-app';
 import { useInboxProcessor } from '../hooks/inbox/useInboxProcessor';
 
-const REACT_QUERY_INCLUDED_QUERY_KEYS = [
-  'detailed-connection-info',
-  'process-owner-inbox',
-  'social-feeds',
-  'drives',
-  'circles',
-];
-
 function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
