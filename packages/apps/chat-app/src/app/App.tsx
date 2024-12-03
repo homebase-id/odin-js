@@ -11,15 +11,6 @@ import {
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 
-const REACT_QUERY_INCLUDED_QUERY_KEYS = [
-  'chat-message',
-  'chat-messages',
-  'chat-reaction',
-  'conversations',
-  'conversation-metadata',
-  'process-chat-inbox',
-];
-
 import { MinimalLayout, Layout } from '../components/ui/Layout/Layout';
 
 const Auth = lazy(() => import('../templates/Auth/Auth'));
@@ -110,11 +101,7 @@ function App() {
       <Helmet>
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
-      <OdinQueryClient
-        cacheKey={'APP_REACT_QUERY_OFFLINE_CACHE'}
-        cachedQueryKeys={REACT_QUERY_INCLUDED_QUERY_KEYS}
-        type="indexeddb"
-      >
+      <OdinQueryClient app="app" type="indexeddb">
         <DotYouClientProvider>
           <RouterProvider router={router} fallbackElement={<></>} />
         </DotYouClientProvider>

@@ -51,13 +51,6 @@ import {
 } from '@homebase-id/common-app';
 import { useValidateAuthorization } from '../hooks/auth/useAuth';
 
-// Explicit includes to avoid persisting media items, or large data in general
-const REACT_QUERY_INCLUDED_QUERY_KEYS = [
-  'mail-conversations',
-  'mail-settings',
-  'process-mail-inbox',
-];
-
 function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -122,11 +115,7 @@ function App() {
       <Helmet>
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
-      <OdinQueryClient
-        cacheKey={'APP_REACT_QUERY_OFFLINE_CACHE'}
-        cachedQueryKeys={REACT_QUERY_INCLUDED_QUERY_KEYS}
-        type="indexeddb"
-      >
+      <OdinQueryClient app="app" type="indexeddb">
         <DotYouClientProvider>
           <RouterProvider router={router} fallbackElement={<></>} />
         </DotYouClientProvider>
