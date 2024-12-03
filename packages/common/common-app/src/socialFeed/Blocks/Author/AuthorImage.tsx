@@ -5,6 +5,7 @@ import { useSiteData } from '../../../hooks/siteData/useSiteData';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { ContactImage } from '../../../identity';
 import { useIsConnected } from '../../../hooks';
+import { FallbackImg } from '../../../ui';
 
 interface ImageProps {
   className?: string;
@@ -49,7 +50,7 @@ export const AuthorImage = ({ odinId, ...props }: ConnectionImageProps) => {
 export const OwnerImage = ({ className, size }: ImageProps) => {
   const { owner } = useSiteData().data ?? {};
   const targetDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
-  return (
+  return owner?.profileImageFileId ? (
     <Image
       fileId={owner?.profileImageFileId}
       fileKey={owner?.profileImageFileKey}
@@ -60,6 +61,11 @@ export const OwnerImage = ({ className, size }: ImageProps) => {
       fit="cover"
       alt={t('You')}
       title={t('You')}
+    />
+  ) : (
+    <FallbackImg
+      odinId={window.location.hostname}
+      className={`${getSizeClassname(size)} overflow-hidden rounded-full ${className ?? ''}`}
     />
   );
 };
