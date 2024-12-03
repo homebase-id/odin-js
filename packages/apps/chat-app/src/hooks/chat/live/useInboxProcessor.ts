@@ -44,12 +44,11 @@ export const useInboxProcessor = (connected?: boolean) => {
 
   const fetchData = async () => {
     const lastProcessedTime = queryClient.getQueryState(['process-chat-inbox'])?.dataUpdatedAt;
-    const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 5;
+    const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 2;
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
 
     await chatPostProcessInboxHandler(lastProcessedWithBuffer);
-
     return processedresult;
   };
 
@@ -58,7 +57,7 @@ export const useInboxProcessor = (connected?: boolean) => {
     queryKey: ['process-chat-inbox'],
     queryFn: fetchData,
     enabled: connected,
-    staleTime: 500, // 500ms
+    staleTime: 1000 * 10, // 10 seconds
   });
 };
 
@@ -122,7 +121,7 @@ export const useChatPostInboxHandler = () => {
           queryClient,
           updatedConversationMetadatas
         );
-      } else {
+      } else if (lastProcessedWithBuffer === undefined) {
         // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
         invalidateChatMessages(queryClient);
         invalidateConversations(queryClient);

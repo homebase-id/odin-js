@@ -23,7 +23,11 @@ import {
   getQueryBatchCursorFromTime,
   stringGuidsEqual,
 } from '@homebase-id/js-lib/helpers';
-import { insertNewMessage, insertNewMessagesForChannel } from '../messages/useCommunityMessages';
+import {
+  insertNewMessage,
+  insertNewMessagesForChannel,
+  invalidateCommunityMessages,
+} from '../messages/useCommunityMessages';
 import { useChatPostInboxHandler } from '@homebase-id/chat-app/src/hooks/chat/live/useInboxProcessor';
 import { ChatDrive } from '@homebase-id/chat-app/src/providers/ConversationProvider';
 import {
@@ -31,7 +35,6 @@ import {
   dsrToCommunityChannel,
 } from '../../../providers/CommunityProvider';
 import { insertNewCommunityChannel } from '../channels/useCommunityChannels';
-import { invalidateChatMessages } from '@homebase-id/chat-app/src/hooks/chat/useChatMessages';
 
 const isDebug = hasDebugFlag();
 
@@ -103,9 +106,9 @@ export const useInboxProcessor = (odinId: string | undefined, communityId: strin
           insertNewCommunityChannel(queryClient, newChannel, communityId);
         })
       );
-    } else {
+    } else if (lastProcessedWithBuffer === undefined) {
       // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
-      invalidateChatMessages(queryClient);
+      invalidateCommunityMessages(queryClient, communityId);
     }
 
     return processedresult;

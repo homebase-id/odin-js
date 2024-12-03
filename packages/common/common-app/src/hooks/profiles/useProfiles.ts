@@ -41,7 +41,7 @@ export const useProfiles = (disabled?: boolean) => {
     fetchProfiles: useQuery({
       queryKey: ['profiles'],
       queryFn: fetchAll,
-      staleTime: 1000 * 60 * 2, // 2 minutes
+      staleTime: 1000 * 60 * 60, // 1 hour
       enabled: !disabled,
     }),
     saveProfile: useMutation({
