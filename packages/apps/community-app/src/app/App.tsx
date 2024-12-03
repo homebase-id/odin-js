@@ -87,10 +87,6 @@ function App() {
             <Route index={true} element={<CommunityHome />} />
             <Route path={'new'} element={<CommunityHome />} />
             <Route
-              path={'redirect/:communityKey/:messageKey'}
-              element={<CommunityNotificationRedirect />}
-            />
-            <Route
               path={':odinKey/:communityKey'}
               element={
                 <CommunityHome>
