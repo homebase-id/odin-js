@@ -12,7 +12,7 @@ import { Alert } from '../ui';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours
+      gcTime: Infinity,
     },
   },
 });
@@ -24,6 +24,7 @@ const DEFAULT_QUERY_KEYS = [
   'image',
   'push-notifications',
   'site-data',
+  'profiles',
 ];
 
 const APP_QUERY_KEYS = [
@@ -118,6 +119,16 @@ export const OdinQueryClient = ({
             return false;
           const { queryKey } = query;
           return cachedQueryKeys.some((key) => queryKey.includes(key));
+        },
+        serializeData: (data) => {
+          // Keep the serialized data small by only including the first two pages of data for infinite queries
+          if (data?.pages?.length && data?.pages?.length > 2) {
+            const adjustedData = { ...data };
+            adjustedData.pages = adjustedData.pages.slice(0, 2);
+            return adjustedData;
+          }
+
+          return data;
         },
       },
     };

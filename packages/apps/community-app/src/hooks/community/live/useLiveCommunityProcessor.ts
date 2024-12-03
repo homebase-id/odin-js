@@ -1,4 +1,6 @@
-import { useInboxProcessor } from './useInboxProcessor';
+import { useCommunityInboxProcessor } from './useCommunityInboxProcessor';
+import { useChatInboxProcessor } from '@homebase-id/chat-app/src/hooks/chat/live/useChatInboxProcessor';
+
 import { useCommunityPeerWebsocket } from './useCommunityPeerWebsocket';
 import { useCommunityWebsocket } from './useCommunityWebsocket';
 
@@ -11,10 +13,15 @@ export const useLiveCommunityProcessor = (
   useCommunityWebsocket(odinId, communityId);
 
   // Process the inbox on startup; As we want to cover the backlog of messages first
-  const { status: inboxStatus } = useInboxProcessor(odinId, communityId || '');
+  const { status: communityInboxStatus } = useCommunityInboxProcessor(odinId, communityId || '');
+  const { status: chatInboxStatus } = useChatInboxProcessor(true);
 
   // Only after the inbox is processed, we connect for live remote updates; So we avoid clearing the cache on each fileAdded update
-  const isOnline = useCommunityPeerWebsocket(odinId, communityId, inboxStatus === 'success');
+  const isOnline = useCommunityPeerWebsocket(
+    odinId,
+    communityId,
+    communityInboxStatus === 'success' && chatInboxStatus === 'success'
+  );
 
   return isOnline;
 };

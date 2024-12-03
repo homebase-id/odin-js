@@ -31,13 +31,14 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
 
   const queryClient = useQueryClient();
 
-  const fetchMessages = async (conversationId: string, cursorState: string | undefined) =>
-    await getChatMessages(
+  const fetchMessages = async (conversationId: string, cursorState: string | undefined) => {
+    return await getChatMessages(
       dotYouClient,
       conversationId,
       cursorState,
       cursorState ? PAGE_SIZE : FIRST_PAGE_SIZE
     );
+  };
 
   const markAsRead = async ({
     conversation,

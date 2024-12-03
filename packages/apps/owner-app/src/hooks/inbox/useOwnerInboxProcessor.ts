@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 
 const BATCH_SIZE = 100;
-export const useInboxProcessor = (connected?: boolean) => {
+export const useOwnerInboxProcessor = (connected?: boolean) => {
   const dotYouClient = useDotYouClientContext();
 
   const fetchData = async () =>
