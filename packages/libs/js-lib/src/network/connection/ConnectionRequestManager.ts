@@ -195,8 +195,6 @@ export const getDetailedConnectionInfo = async (
   const connectionInfo = await getConnectionInfo(dotYouClient, odinId);
   if (connectionInfo && connectionInfo.status.toLowerCase() !== 'none') return connectionInfo;
 
-  console.log('connectionInfo', odinId, connectionInfo);
-
   const pendingRequest = await getPendingRequest(dotYouClient, odinId);
   if (pendingRequest) return { ...pendingRequest };
 
