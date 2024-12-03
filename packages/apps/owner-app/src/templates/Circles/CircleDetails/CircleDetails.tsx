@@ -5,7 +5,7 @@ import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
 import { AppInteractionPermissionOverview } from '../../../components/PermissionViews/AppInteractionPermissionView/AppInteractionPermissionView';
-import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import {
   AUTO_CONNECTIONS_CIRCLE_ID,
   CONFIRMED_CONNECTIONS_CIRCLE_ID,

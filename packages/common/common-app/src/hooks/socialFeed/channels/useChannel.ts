@@ -84,9 +84,7 @@ export const useChannel = ({ odinId, channelKey }: useChannelsProps) => {
     fetch: useQuery({
       queryKey: ['channel', odinId || dotYouClient.getHostIdentity(), channelKey],
       queryFn: () => fetchChannelData({ channelKey }),
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      staleTime: 1000 * 60 * 60, // 1 hour
       enabled: !!channelKey,
     }),
   };

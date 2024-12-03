@@ -12,7 +12,6 @@ import {
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Layout, MinimalLayout } from '../components/ui/Layout/Layout';
-import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import {
   COMMUNITY_ROOT_PATH,
@@ -24,16 +23,22 @@ import {
 } from '@homebase-id/common-app';
 import { useValidateAuthorization } from '../hooks/auth/useAuth';
 
-export const REACT_QUERY_CACHE_KEY = 'COMMUNITY_REACT_QUERY_OFFLINE_CACHE';
 const REACT_QUERY_INCLUDED_QUERY_KEYS = [
-  'connection-details',
-  'process-inbox',
+  // Community specific
+  'process-community-inbox',
   'communities',
   'community',
   'community-metadata',
   'community-channels',
   'community-messages',
   'channels-with-recent-message',
+
+  // Chat specific:
+  'chat-message',
+  'chat-messages',
+  'chat-reaction',
+  'conversations',
+  'conversation-metadata',
 ];
 const AUTH_PATH = COMMUNITY_ROOT_PATH + '/auth';
 const AUTH_FINALIZE_PATH = COMMUNITY_ROOT_PATH + '/auth/finalize';
@@ -155,6 +160,7 @@ function App() {
               />
 
               {/* Items for 'direct'*/}
+              <Route path={'direct'} element={<NavigateToCommunityRoot />} />
               <Route path={'direct/:dmKey'} element={<CommunityDirectDetail />} />
               <Route path={'direct/:dmKey/:chatMessageKey'} element={<CommunityDirectDetail />} />
               <Route
@@ -185,7 +191,7 @@ function App() {
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
       <OdinQueryClient
-        cacheKey={REACT_QUERY_CACHE_KEY}
+        cacheKey={'APP_REACT_QUERY_OFFLINE_CACHE'}
         cachedQueryKeys={REACT_QUERY_INCLUDED_QUERY_KEYS}
         type="indexeddb"
       >
@@ -202,6 +208,11 @@ const CommunityRootRoute = () => {
   return window.innerWidth > 1024 ? (
     <Navigate to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/all`} />
   ) : null;
+};
+
+const NavigateToCommunityRoot = () => {
+  const { odinKey, communityKey } = useParams();
+  return <Navigate to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}`} />;
 };
 
 const RootRoute = ({ children }: { children: ReactNode }) => {

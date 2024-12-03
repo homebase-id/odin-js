@@ -211,10 +211,10 @@ const Option = ({
 const ColorRow = ({ row, className }: { row: Record<string, string>; className?: string }) => {
   return (
     <div className={`py-4 ${className ?? ''}`}>
-      <div className="-mx-2 flex flex-row">
+      <div className="flex flex-row gap-2">
         {Object.keys(row).map((key) => (
           <div
-            className="mx-2 h-8 w-8 border p-1 shadow-sm"
+            className="h-8 w-8 border p-1 shadow-sm"
             style={{ backgroundColor: `rgb(${row[key]})` }}
             key={key}
           ></div>
@@ -342,7 +342,7 @@ const SingleColorSelection = ({
     <div className={`${className ?? ''}`}>
       <div className={`relative flex flex-row border shadow-sm`}>
         <div
-          className={`h-8 w-8 flex-shrink-0 flex-grow-0 p-1 `}
+          className={`h-8 w-8 flex-shrink-0 flex-grow-0 p-1`}
           style={{ backgroundColor: `rgb(${color})` }}
           key={id}
         ></div>

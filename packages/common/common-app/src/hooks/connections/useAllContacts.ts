@@ -27,10 +27,7 @@ export const useAllContacts = (enabled: boolean) => {
   return useQuery({
     queryKey: ['mention-targets'],
     queryFn: fetchMentionTargets,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    gcTime: Infinity,
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 60, // 1 hour
     enabled,
   });
 };

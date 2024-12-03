@@ -52,8 +52,6 @@ export const useEmojiReactions = (context?: ReactionContext) => {
         lastPage?.reactions && lastPage.reactions?.length >= PAGE_SIZE
           ? lastPage.cursor
           : undefined,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
       enabled:
         !!context?.odinId &&
         !!context?.channelId &&

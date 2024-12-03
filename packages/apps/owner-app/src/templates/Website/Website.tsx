@@ -3,7 +3,7 @@ import { useHomeAttributes } from '../../hooks/profiles/useHomeAttributes';
 import AttributeGroup from '../../components/Attribute/AttributeGroup/AttributeGroup';
 import Section from '../../components/ui/Sections/Section';
 import { AttributeVm } from '../../hooks/profiles/useAttributes';
-import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import { AttributeDefinitions } from '../../hooks/profiles/AttributeDefinitions';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { getNewId } from '@homebase-id/js-lib/helpers';
@@ -57,7 +57,7 @@ const Website = () => {
           </>
         }
         breadCrumbs={[
-          { href: '/owner/profile', title: 'Social Presence' },
+          { href: '/owner/profile', title: 'Personal data' },
           { title: t('Home settings') },
         ]}
       />

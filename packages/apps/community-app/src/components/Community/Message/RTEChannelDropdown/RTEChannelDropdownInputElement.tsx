@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { lazy, useMemo, useState } from 'react';
 
 import { cn, withRef } from '@udecode/cn';
 
@@ -17,7 +17,11 @@ import { useCommunityChannels } from '../../../../hooks/community/channels/useCo
 import { useCommunity } from '../../../../hooks/community/useCommunity';
 import { useCommunityChannel } from '../../../../hooks/community/channels/useCommunityChannel';
 
-import { PlateElement } from '@homebase-id/rich-text-editor';
+const PlateElement = lazy(() =>
+  import('@homebase-id/rich-text-editor').then((rootExport) => ({
+    default: rootExport.PlateElement,
+  }))
+);
 import { getChannelOnSelectItem } from './RTEChannelGetChannelOnSelect';
 
 const onSelectItem = getChannelOnSelectItem();

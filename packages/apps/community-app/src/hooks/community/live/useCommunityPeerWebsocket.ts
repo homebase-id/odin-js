@@ -127,7 +127,7 @@ export const useCommunityPeerWebsocket = (
     ['fileAdded', 'fileModified', 'fileDeleted', 'statisticsChanged'],
     drives as TargetDrive[],
     () => {
-      queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
+      queryClient.invalidateQueries({ queryKey: ['process-community-inbox'] });
     },
     undefined,
     'useCommunityPeerWebsocket'

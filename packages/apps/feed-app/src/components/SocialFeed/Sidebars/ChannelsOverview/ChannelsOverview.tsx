@@ -33,7 +33,7 @@ const ChannelsOverview = ({ className }: { className?: string }) => {
                 <HybridLink
                   key={chnl.fileMetadata.appData.uniqueId}
                   href={`${new DotYouClient({ hostIdentity: identity || undefined, api: ApiType.Guest }).getRoot()}/posts/${chnl?.fileMetadata.appData.content.slug}`}
-                  className="relative flex w-full flex-row items-center gap-2 bg-background p-1 hover:z-10 hover:bg-gray-100 hover:shadow-md dark:hover:bg-gray-800 hover:dark:shadow-slate-600"
+                  className="relative flex w-full flex-row items-center gap-2 bg-background p-1 hover:underline"
                 >
                   <Quote className="h-4 w-4 flex-shrink-0" />
                   {chnl.fileMetadata.appData.content.name}
@@ -54,7 +54,7 @@ const ChannelsOverview = ({ className }: { className?: string }) => {
                   <HybridLink
                     key={chnl.fileMetadata.appData.uniqueId}
                     href={`${new DotYouClient({ hostIdentity: collaborative.odinId, api: ApiType.Guest }).getRoot()}/posts/${chnl?.fileMetadata.appData.content.slug}?youauth-logon=${identity}`}
-                    className="relative flex w-full flex-row items-center gap-2 bg-background p-1 hover:z-10 hover:bg-gray-100 hover:shadow-md dark:hover:bg-gray-800 hover:dark:shadow-slate-600"
+                    className="relative flex w-full flex-row items-center gap-2 bg-background p-1 hover:underline"
                   >
                     <Persons className="h-4 w-4 flex-shrink-0" />
                     <span className="leading-none">

@@ -1,5 +1,11 @@
 import { MouseEventHandler, ReactNode, useRef, useState } from 'react';
-import { useDotYouClientContext, useExternalOdinId, useIntersection, useIsConnected } from '../..';
+import {
+  ContactImage,
+  ContactName,
+  useDotYouClientContext,
+  useIntersection,
+  useIsConnected,
+} from '../..';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 
 export const IdentityTeaser = ({
@@ -22,11 +28,6 @@ export const IdentityTeaser = ({
   const [isInView, setIsInView] = useState(false);
   const wrapperRef = useRef<HTMLAnchorElement>(null);
 
-  // Todo: check if we need to fetch Contact details as well, so we can use local overrides
-  const { data: connectionDetails } = useExternalOdinId({
-    odinId: isInView ? odinId : undefined,
-  }).fetch;
-
   // isLocal when both the logged in user and the api host is the same
   const isLocal = identity === dotYouClient.getHostIdentity();
   const { data: isConnected } = useIsConnected(isInView && isLocal ? odinId : undefined);
@@ -41,30 +42,25 @@ export const IdentityTeaser = ({
       target="_blank"
       rel="noopener noreferrer"
       onClick={onClick}
-      className={`flex h-full w-full items-center rounded-lg ${
-        isBorderLess ? '-mx-1 p-1' : 'border border-gray-200 p-4 dark:border-gray-700'
-      } bg-background hover:shadow-md relative hover:z-10 hover:dark:shadow-slate-600 ${
-        className ?? ''
-      }`}
+      className={`group flex h-full w-full items-center rounded-lg ${
+        isBorderLess
+          ? '-mx-1 p-1'
+          : 'border border-gray-200 p-4 dark:border-gray-700 hover:shadow-md hover:z-10 hover:dark:shadow-slate-600'
+      } bg-background relative  ${className ?? ''}`}
       ref={wrapperRef}
     >
       <div className="flex h-full w-full items-center">
-        {connectionDetails?.image ? (
-          <img
-            src={connectionDetails?.image}
-            className={`${imageSizeClass} flex-shrink-0 rounded-full bg-gray-100 object-cover object-center`}
-          />
-        ) : (
-          <div
-            className={`${imageSizeClass} flex-shrink-0 rounded-full bg-gray-100 object-cover object-center`}
-          ></div>
-        )}
+        <ContactImage
+          odinId={isInView ? odinId : undefined}
+          canSave={!!isConnected}
+          className={`${imageSizeClass} flex-shrink-0 rounded-full overflow-hidden bg-gray-100 object-cover object-center`}
+        />
 
         <div className="flex-grow ">
           <h2
-            className={`title-font font-medium ${size === 'sm' ? 'text-sm' : ''}  text-opacity-60`}
+            className={`title-font font-medium ${size === 'sm' ? 'text-sm' : ''} ${isBorderLess ? 'group-hover:underline' : ''} text-opacity-60`}
           >
-            {connectionDetails?.name ?? odinId}
+            {ContactName({ odinId: isInView ? odinId : null, canSave: !!isConnected }) || odinId}
           </h2>
           <p className={`${size === 'sm' ? 'text-xs' : 'text-sm'} text-foreground text-opacity-40`}>
             {odinId}

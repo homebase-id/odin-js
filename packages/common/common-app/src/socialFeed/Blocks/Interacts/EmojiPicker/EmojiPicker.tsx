@@ -62,6 +62,10 @@ export const EmojiPicker = ({ onInput }: { onInput: (val: EmojiDetail) => void }
   return React.createElement('emoji-picker', {
     ref,
     class: `${isDarkMode ? 'dark' : 'light'} max-h-[20rem]`,
-    style: { '--category-emoji-size': '1.125rem' },
+    style: {
+      '--category-emoji-size': '1.125rem',
+      '--border-radius': '0.375rem',
+      '--border-color': '#f3f4f6',
+    },
   });
 };

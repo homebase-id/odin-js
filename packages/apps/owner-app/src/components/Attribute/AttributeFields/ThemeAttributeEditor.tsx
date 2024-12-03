@@ -1,4 +1,4 @@
-import { Label, t, Input, Select, useImage } from '@homebase-id/common-app';
+import { Label, t, Input, Select, useRawImage } from '@homebase-id/common-app';
 import { ImageSelector } from '@homebase-id/common-app';
 import { HomePageThemeFields, HomePageConfig, HomePageTheme } from '@homebase-id/js-lib/public';
 import { GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
@@ -74,7 +74,7 @@ const ThemeSpecificFields = ({
 }) => {
   const targetDrive = GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId);
   const themeId = attribute.data?.[HomePageThemeFields.ThemeId];
-  const { data: imageData } = useImage({
+  const { data: imageData } = useRawImage({
     imageFileId: fileId,
     imageFileKey: attribute.data?.[HomePageThemeFields.HeaderImageKey],
     imageDrive: targetDrive,

@@ -5,15 +5,13 @@ import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import {
   invalidateConnectionInfo,
   updateCachedConnectionInfo,
-  useConnection,
   useDotYouClientContext,
   useFollowingInfinite,
 } from '@homebase-id/common-app';
 
-export const useAutoConnection = ({ odinId }: { odinId?: string }) => {
+export const useManageAutoConnection = ({ odinId }: { odinId?: string }) => {
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClientContext();
-  const { fetch: connectionInfoQuery } = useConnection({ odinId: odinId });
 
   const { mutateAsync: follow } = useFollowingInfinite().follow;
 
@@ -35,14 +33,6 @@ export const useAutoConnection = ({ odinId }: { odinId?: string }) => {
   };
 
   return {
-    isUnconfirmedAutoConnected: {
-      ...connectionInfoQuery,
-      data:
-        connectionInfoQuery.data?.status === 'connected' &&
-        connectionInfoQuery.data?.accessGrant.circleGrants.some((grant) =>
-          stringGuidsEqual(grant.circleId, AUTO_CONNECTIONS_CIRCLE_ID)
-        ),
-    },
     confirmAutoConnection: useMutation({
       mutationFn: doConfirmAutoConnection,
       onSettled: async () => {

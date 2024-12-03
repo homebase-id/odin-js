@@ -1,7 +1,7 @@
-import { useConnection } from './useConnection';
+import { useConnectionInfo } from './useConnectionInfo';
 
 export const useIsConnected = (odinId?: string) => {
-  const connectionInfoProps = useConnection({ odinId }).fetch;
+  const connectionInfoProps = useConnectionInfo({ odinId }).fetch;
 
   return {
     ...connectionInfoProps,

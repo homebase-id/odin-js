@@ -4,6 +4,7 @@ import {
   useExternalOdinId,
   useIsConnected,
   useDotYouClientContext,
+  ContactName,
 } from '../../../..';
 
 export const AuthorName = ({ odinId, excludeLink }: { odinId?: string; excludeLink?: boolean }) => {
@@ -17,15 +18,22 @@ export const AuthorName = ({ odinId, excludeLink }: { odinId?: string; excludeLi
     api: ApiType.Guest,
   }).getRoot();
 
+  const nameOnly = isConnected ? (
+    <ContactName odinId={odinId} canSave={true} />
+  ) : (
+    <ConnectionName odinId={odinId} />
+  );
+
   if (excludeLink) {
-    return <ConnectionName odinId={odinId} />;
+    return nameOnly;
   }
+
   return (
     <a
       href={`${host}${isConnected && loggedInIdentity ? '?youauth-logon=' + loggedInIdentity : ''}`}
       className="hover:underline"
     >
-      <ConnectionName odinId={odinId} />
+      {nameOnly}
     </a>
   );
 };

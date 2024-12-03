@@ -13,8 +13,8 @@ import { HomebaseFile, NewHomebaseFile, CommentReaction } from '@homebase-id/js-
 import { CanReactInfo } from '../../../../hooks/reactions/useCanReact';
 import { useReaction } from '../../../../hooks/reactions/useReaction';
 import { ErrorNotification } from '../../../../ui/Alert/ErrorNotification';
-import { AuthorImage } from '../../Author/Image';
-import { AuthorName } from '../../Author/Name';
+import { AuthorImage } from '../../Author/AuthorImage';
+import { AuthorName } from '../../Author/AuthorName';
 import { ellipsisAtMaxChar } from '../../../../helpers/common';
 import { t } from '../../../../helpers/i18n/dictionary';
 

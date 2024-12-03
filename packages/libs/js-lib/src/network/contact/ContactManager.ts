@@ -19,11 +19,15 @@ export const getContactByUniqueId = async (
   dotYouClient: DotYouClient,
   uniqueId: string
 ): Promise<HomebaseFile<ContactFile> | null> => {
-  return await getFileHeaderByUniqueId<ContactFile>(
-    dotYouClient,
-    ContactConfig.ContactTargetDrive,
-    uniqueId
-  );
+  try {
+    return await getFileHeaderByUniqueId<ContactFile>(
+      dotYouClient,
+      ContactConfig.ContactTargetDrive,
+      uniqueId
+    );
+  } catch {
+    return null;
+  }
 };
 
 export const getContacts = async (

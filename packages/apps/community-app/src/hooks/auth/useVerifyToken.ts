@@ -13,15 +13,13 @@ export const useVerifyToken = () => {
     return (await hasValidYouAuthToken(dotYouClient)) ?? true;
   };
   return useQuery({
-    queryKey: ['verifyToken'],
+    queryKey: ['verify-community-token'],
     queryFn: fetchData,
-    refetchOnMount: false,
     staleTime: MINUTE_IN_MS * 10,
-    gcTime: MINUTE_IN_MS * 10,
     enabled: isAuthenticated,
   });
 };
 
 export const invalidateVerifyToken = (queryClient: QueryClient) => {
-  queryClient.invalidateQueries({ queryKey: ['verifyToken'] });
+  queryClient.invalidateQueries({ queryKey: ['verify-community-token'] });
 };

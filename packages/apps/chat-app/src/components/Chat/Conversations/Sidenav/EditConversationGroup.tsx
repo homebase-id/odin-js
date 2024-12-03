@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import {
   ActionButton,
   ActionLink,
+  AuthorImage,
+  AuthorName,
   CHAT_ROOT_PATH,
   ConnectionImage,
   ConnectionName,
@@ -95,8 +97,8 @@ export const EditConversationGroup = () => {
               className="flex flex-row items-center gap-1 rounded-lg bg-background px-2 py-1 opacity-70"
               key={recipient}
             >
-              <ConnectionImage odinId={recipient} size="xs" />
-              <ConnectionName odinId={recipient} />
+              <AuthorImage odinId={recipient} size="xs" />
+              <AuthorName odinId={recipient} />
             </div>
           ))}
 

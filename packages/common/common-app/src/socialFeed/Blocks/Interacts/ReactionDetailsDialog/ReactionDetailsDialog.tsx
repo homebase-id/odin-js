@@ -5,8 +5,8 @@ import { EmojiReaction } from '@homebase-id/js-lib/core';
 import { t } from '../../../../helpers';
 import { usePortal, useEmojiReactions, useEmojiSummary } from '../../../../hooks';
 import { DialogWrapper, ActionButton } from '../../../../ui';
-import { AuthorImage } from '../../Author/Image';
-import { AuthorName } from '../../Author/Name';
+import { AuthorImage } from '../../Author/AuthorImage';
+import { AuthorName } from '../../Author/AuthorName';
 
 export const ReactionDetailsDialog = ({
   context,

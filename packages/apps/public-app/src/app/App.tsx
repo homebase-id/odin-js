@@ -10,15 +10,13 @@ import {
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Layout, NoLayout } from '../components/ui/Layout/Layout';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import {
   DotYouClientProvider,
   ErrorBoundary,
   HOME_ROOT_PATH,
   NotFound,
+  OdinQueryClient,
   PREVIEW_ROOT,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
@@ -38,8 +36,6 @@ const PreviewPage = lazy(() => import('../templates/PreviewPage/PreviewPage'));
 const YouAuthFinalizer = lazy(() => import('../templates/YouAuthFinalizer/YouAuthFinalizer'));
 
 const Ping = lazy(() => import('../templates/Ping/Ping'));
-
-const queryClient = new QueryClient();
 
 function App() {
   const router = createBrowserRouter(
@@ -102,11 +98,16 @@ function App() {
       <Helmet>
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
-      <QueryClientProvider client={queryClient}>
+      <OdinQueryClient
+        // The public cache key is explicitly different to avoid conflicts between authenticated and public states; It's the only app that can be anonymous
+        cacheKey={'PUBLIC_REACT_QUERY_OFFLINE_CACHE'}
+        cachedQueryKeys={[]}
+        type="indexeddb"
+      >
         <DotYouClientProvider>
           <RouterProvider router={router} fallbackElement={<></>} />
         </DotYouClientProvider>
-      </QueryClientProvider>
+      </OdinQueryClient>
     </HelmetProvider>
   );
 }

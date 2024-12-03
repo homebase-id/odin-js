@@ -4,10 +4,7 @@ import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useRecoveryKey = () => {
   const dotYouClient = useDotYouClientContext();
-
-  const fetchKey = async () => {
-    return await getRecoveryKey(dotYouClient);
-  };
+  const fetchKey = async () => await getRecoveryKey(dotYouClient);
 
   return {
     fetchKey: useQuery({

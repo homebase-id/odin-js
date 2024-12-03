@@ -1,4 +1,4 @@
-import { useContact } from '../../../hooks/contacts/useContact';
+import { useContact, ContactName } from '@homebase-id/common-app';
 import {
   t,
   ErrorNotification,
@@ -7,8 +7,11 @@ import {
   ActionLink,
   useIdentityIFollow,
   useCircles,
-  useConnection,
   useDotYouClientContext,
+  useConnectionInfo,
+  useDetailedConnectionInfo,
+  useIsConnected,
+  ContactImage,
 } from '@homebase-id/common-app';
 import {
   Envelope,
@@ -24,7 +27,6 @@ import {
   Feed,
 } from '@homebase-id/common-app/icons';
 import Section from '../../ui/Sections/Section';
-import ContactImage from '../ContactImage/ContactImage';
 import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   AUTO_CONNECTIONS_CIRCLE_ID,
@@ -57,12 +59,10 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
 
   const {
     fetch: { data: connectionInfo },
-  } = useConnection({ odinId: odinId });
+  } = useDetailedConnectionInfo({ odinId: odinId });
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
 
-  const {
-    fetch: { data: introducerConnectioInfo },
-  } = useConnection({ odinId: connectionInfo?.introducerOdinId });
+  const { data: isConnectedWithIntroducer } = useIsConnected(connectionInfo?.introducerOdinId);
 
   const {
     fetch: { data: identityIfollow, isFetched: followStateFetched },
@@ -73,10 +73,7 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
   if (!contact) return null;
 
   const contactContent = contact?.fileMetadata.appData.content;
-
   const isConnected = connectionInfo?.status === 'connected';
-
-  const isConnectedWithIntroducer = introducerConnectioInfo?.status === 'connected';
   const isFollowing = !followStateFetched ? undefined : !!identityIfollow;
 
   return (
@@ -167,8 +164,7 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
                 <IconFrame className="mr-2">
                   <Person className="h-4 w-4" />
                 </IconFrame>
-                {contactContent.name.displayName ??
-                  `${contactContent.name.givenName ?? ''} ${contactContent.name.surname ?? ''}`}
+                <ContactName odinId={odinId} canSave={false} />
               </div>
             )}
             {contactContent.phone?.number ? (
@@ -257,7 +253,7 @@ const CirclesSummary = ({ odinId }: { odinId?: string }) => {
 
   const {
     fetch: { data: connectionInfo },
-  } = useConnection({ odinId: odinId });
+  } = useConnectionInfo({ odinId: odinId });
 
   const circleGrants =
     connectionInfo?.status === 'connected' &&

@@ -29,7 +29,8 @@ export const useVideo = (
   videoGlobalTransitId?: string | undefined,
   videoFileKey?: string | undefined,
   videoDrive?: TargetDrive,
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  lastModified?: number
 ): {
   fetchMetadata: UseQueryResult<
     {
@@ -111,8 +112,8 @@ export const useVideo = (
           videoDrive,
           systemFileType
         ),
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
+      staleTime: lastModified ? Infinity : 1000 * 60 * 60, // 1 hour
+      gcTime: Infinity,
       enabled: !!videoFileId && videoFileId !== '',
     }),
     getChunk: (chunkStart: number, chunkEnd?: number) => {
@@ -142,7 +143,8 @@ export const useVideoUrl = (
   videoFileKey?: string | undefined,
   videoDrive?: TargetDrive,
   fileSizeLimit?: number,
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  lastModified?: number
 ): { fetch: UseQueryResult<string | null, Error> } => {
   const identity = dotYouClient.getHostIdentity();
 
@@ -208,8 +210,7 @@ export const useVideoUrl = (
       ],
       queryFn: () =>
         fetchVideoData(odinId || identity, videoFileId, videoGlobalTransitId, videoDrive),
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
+      staleTime: lastModified ? Infinity : 1000 * 60 * 60, // 1 hour
       enabled: !!videoFileId && videoFileId !== '',
     }),
   };

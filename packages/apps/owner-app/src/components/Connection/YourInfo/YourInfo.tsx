@@ -9,8 +9,8 @@ import {
   Attribute,
 } from '@homebase-id/js-lib/profile';
 import { HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
-import { getInitialsOfNameAttribute, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { LoadingBlock, FallbackImg, t, useImage } from '@homebase-id/common-app';
+import { compareAcl, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { LoadingBlock, FallbackImg, t, useRawImage } from '@homebase-id/common-app';
 import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
 import { Cake, House, IconFrame, Phone } from '@homebase-id/common-app/icons';
 import InfoBox from '../../ui/InfoBox/InfoBox';
@@ -31,7 +31,9 @@ const filterAttributesWithCircleGrants = (
         Object.keys(attr.fileMetadata.appData.content.data)?.length !== 0 &&
         attr.serverMetadata?.accessControlList.requiredSecurityGroup !== SecurityGroupType.Owner
     )
-    ?.sort((attrA, attrB) => attrA.priority - attrB.priority)
+    ?.sort((attrA, attrB) =>
+      compareAcl(attrA.serverMetadata?.accessControlList, attrB.serverMetadata?.accessControlList)
+    )
     ?.filter((attr) =>
       attr.serverMetadata?.accessControlList?.circleIdList?.length
         ? attr.serverMetadata?.accessControlList.circleIdList.some((allowedCircleId) =>
@@ -62,7 +64,7 @@ const YourInfo = ({ circleGrants, className }: YourInfoProps) => {
     circleGrants || []
   );
 
-  const { data: imageData } = useImage({
+  const { data: imageData } = useRawImage({
     imageFileId: filteredPhotoAttributes?.[0]?.fileId,
     imageFileKey:
       filteredPhotoAttributes?.[0]?.fileMetadata.appData.content.data?.[
@@ -106,9 +108,6 @@ const YourInfo = ({ circleGrants, className }: YourInfoProps) => {
     filteredNameAttributes?.[0]?.fileMetadata.appData.content.data?.[
       MinimalProfileFields.DisplayName
     ];
-  const initials = getInitialsOfNameAttribute(
-    filteredNameAttributes?.[0]?.fileMetadata.appData.content
-  );
   const phone =
     filteredPhoneAttributes?.[0]?.fileMetadata.appData.content.data?.[PhoneFields.PhoneNumber];
   const city =
@@ -120,14 +119,15 @@ const YourInfo = ({ circleGrants, className }: YourInfoProps) => {
 
   return (
     <div className={`relative border border-slate-100 dark:border-slate-800 ${className ?? ''}`}>
-      <div className="flex flex-row ">
+      <div className="flex flex-row">
         <div className="aspect-square w-1/4 max-w-[10rem]">
           {photoAttributesLoading ? (
             <LoadingBlock className={`aspect-square`} />
           ) : !imageUrl ? (
             <FallbackImg
-              initials={initials}
-              className="aspect-square h-[8rem] w-[8rem] sm:text-4xl"
+              odinId={window.location.hostname}
+              nameData={filteredNameAttributes?.[0]?.fileMetadata.appData.content}
+              className="aspect-square h-full w-full"
             />
           ) : (
             <img src={imageUrl} className="aspect-square object-cover object-top" />

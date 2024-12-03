@@ -11,7 +11,7 @@ import {
   useLinkPreviewBuilder,
   VolatileInputRef,
 } from '@homebase-id/common-app';
-import { useState, useEffect, FC, useRef } from 'react';
+import { useState, useEffect, FC, useRef, lazy } from 'react';
 
 import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { ChatComposerProps } from '@homebase-id/chat-app/src/components/Chat/Composer/ChatComposer';
@@ -19,7 +19,11 @@ import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
 import { useChatMessage } from '@homebase-id/chat-app/src/hooks/chat/useChatMessage';
 import { Plus, PaperPlane, Times } from '@homebase-id/common-app/icons';
 import { LinkPreview } from '@homebase-id/js-lib/media';
-import { RichTextEditor } from '@homebase-id/rich-text-editor';
+const RichTextEditor = lazy(() =>
+  import('@homebase-id/rich-text-editor').then((rootExport) => ({
+    default: rootExport.RichTextEditor,
+  }))
+);
 import { EmbeddedMessage } from '@homebase-id/chat-app/src/components/Chat/Detail/EmbeddedMessage';
 import { ChatMessage } from '@homebase-id/chat-app/src/providers/ChatProvider';
 

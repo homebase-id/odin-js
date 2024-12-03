@@ -4,7 +4,9 @@ import {
   t,
   DomainHighlighter,
   ActionButton,
-  useConnection,
+  useIsConnected,
+  useAutoConnection,
+  useDetailedConnectionInfo,
 } from '@homebase-id/common-app';
 import { Times } from '@homebase-id/common-app/icons';
 import { useState } from 'react';
@@ -12,7 +14,6 @@ import { useNavigate } from 'react-router-dom';
 import { useFocusedEditing } from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePendingConnection } from '../../../hooks/connections/usePendingConnection';
 import IncomingConnectionDialog from '../../../components/Connection/ConnectionDialogs/IncomingConnectionDialog';
-import { useAutoConnection } from '../../../hooks/connections/useAutoConnection';
 import ConfirmConnectionDialog from '../../../components/Connection/ConnectionDialogs/ConfirmConnectionDialog';
 
 export const IdentityAlerts = ({ odinId }: { odinId: string | undefined }) => {
@@ -20,7 +21,7 @@ export const IdentityAlerts = ({ odinId }: { odinId: string | undefined }) => {
 
   const {
     fetch: { data: connectionInfo, isLoading: connectionInfoLoading },
-  } = useConnection({ odinId: odinId });
+  } = useDetailedConnectionInfo({ odinId: odinId });
   const {
     ignoreRequest: { mutateAsync: ignoreRequest, status: ignoreRequestStatus, error: ignoreError },
   } = usePendingConnection({ odinId: odinId });
@@ -138,24 +139,16 @@ export const IdentityAlerts = ({ odinId }: { odinId: string | undefined }) => {
 const LimboStateAlert = ({ odinId }: { odinId: string | undefined }) => {
   const [isAcceptDialogOpen, setIsAcceptDialogOpen] = useState(false);
 
-  const {
-    fetch: { data: connectionInfo, isLoading: connectionInfoLoading },
-  } = useConnection({ odinId: odinId });
+  const { data: isConnected, isLoading: isConnectedLoading } = useIsConnected(odinId);
 
   const {
     fetch: { data: pendingConnection, isLoading: pendingConnectionLoading },
     ignoreRequest: { mutate: ignoreRequest, status: ignoreRequestStatus, error: ignoreError },
   } = usePendingConnection({
-    odinId: connectionInfo?.status === 'connected' ? odinId : undefined,
+    odinId: isConnected ? odinId : undefined,
   });
 
-  if (
-    connectionInfoLoading ||
-    !connectionInfo ||
-    connectionInfo.status !== 'connected' ||
-    pendingConnectionLoading ||
-    !pendingConnection
-  )
+  if (isConnectedLoading || !isConnected || pendingConnectionLoading || !pendingConnection)
     return null;
 
   return (

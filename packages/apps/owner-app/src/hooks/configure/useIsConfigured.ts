@@ -36,7 +36,6 @@ export const useIsConfigured = () => {
     isConfigured: useQuery({
       queryKey: ['initialized'],
       queryFn: getIsConfigured,
-      refetchOnMount: false,
       staleTime: MINUTE_IN_MS * 10,
       enabled: isAuthenticated,
     }),

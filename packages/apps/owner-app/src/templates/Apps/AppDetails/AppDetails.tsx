@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { useAppClients } from '../../../hooks/apps/useAppClients';
 import { useDrives } from '../../../hooks/drives/useDrives';
 import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import CirclePermissionSelectorDialog from '../../../components/Apps/CirclePermissionSelectorDialog/CirclePermissionSelectorDialog';
 import PermissionSelectorDialog from '../../../components/Apps/PermissionSelectorDialog/PermissionSelectorDialog';
 import DrivePermissionSelectorDialog from '../../../components/Drives/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';

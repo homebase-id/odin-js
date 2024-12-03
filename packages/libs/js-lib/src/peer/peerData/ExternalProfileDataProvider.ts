@@ -6,6 +6,7 @@ import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
 import { queryBatchOverPeer } from './Query/PeerDriveQueryService';
 import { getContentFromHeaderOrPayloadOverPeer } from './File/PeerFileProvider';
 import { HomebaseFile, TargetDrive } from '../../core/DriveData/File/DriveFileTypes';
+import { compareAcl } from '../../helpers/DataUtil';
 
 export const getProfileAttributesOverPeer = async (
   dotYouClient: DotYouClient,
@@ -42,7 +43,9 @@ export const getProfileAttributesOverPeer = async (
       )
     ).filter((attr) => !!attr) as HomebaseFile<Attribute>[];
 
-    attributes = attributes.sort((a, b) => (a.priority || 0) - (b.priority || 0));
+    attributes = attributes.sort((a, b) =>
+      compareAcl(a.serverMetadata?.accessControlList, b.serverMetadata?.accessControlList)
+    );
 
     return attributes;
   } catch (e) {

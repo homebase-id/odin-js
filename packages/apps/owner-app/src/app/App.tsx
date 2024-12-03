@@ -39,12 +39,10 @@ const NotificationProblems = lazy(() => import('../templates/Notifications/Notif
 
 const Profile = lazy(() => import('../templates/Profiles/Profiles/Profiles'));
 const ProfileDetails = lazy(() => import('../templates/Profiles/ProfileDetails/ProfileDetails'));
-const Connections = lazy(() => import('../templates/Connections/Connections/Connections'));
-const ConnectionDetails = lazy(
-  () => import('../templates/Connections/ConnectionDetails/ConnectionDetails')
-);
-const Domains = lazy(() => import('../templates/Connections/Domains/Domains'));
-const DomainDetails = lazy(() => import('../templates/Connections/DomainDetails/DomainDetails'));
+const Connections = lazy(() => import('../templates/Connections/Connections'));
+const ConnectionDetails = lazy(() => import('../templates/Connections/Details/ConnectionDetails'));
+const Domains = lazy(() => import('../templates/Connections/Domains'));
+const DomainDetails = lazy(() => import('../templates/Connections/DomainDetails'));
 
 const Circles = lazy(() => import('../templates/Circles/Circles/Circles'));
 const CircleDetails = lazy(() => import('../templates/Circles/CircleDetails/CircleDetails'));
@@ -59,10 +57,8 @@ const DriveDetails = lazy(() => import('../templates/Drives/DriveDetails/DriveDe
 const FileDetails = lazy(() => import('../templates/Drives/DriveDetails/FileDetails'));
 const Settings = lazy(() => import('../templates/Settings/Settings'));
 
-const DemoData = lazy(() => import('../templates/DemoData/DemoData'));
 const Debug = lazy(() => import('../templates/Debug/Debug'));
 
-import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import {
@@ -82,8 +78,13 @@ import {
 } from '@homebase-id/common-app';
 import { useInboxProcessor } from '../hooks/inbox/useInboxProcessor';
 
-export const REACT_QUERY_CACHE_KEY = 'OWNER_REACT_QUERY_OFFLINE_CACHE';
-const INCLUDED_QUERY_KEYS = ['contact', 'process-inbox'];
+const REACT_QUERY_INCLUDED_QUERY_KEYS = [
+  'detailed-connection-info',
+  'process-owner-inbox',
+  'social-feeds',
+  'drives',
+  'circles',
+];
 
 function App() {
   const router = createBrowserRouter(
@@ -221,7 +222,6 @@ function App() {
               <Route path="settings" element={<Settings />}></Route>
               <Route path="settings/:sectionId" element={<Settings />}></Route>
 
-              <Route path="demo-data" element={<DemoData />}></Route>
               <Route path="debug" element={<Debug />}></Route>
             </Route>
 
@@ -247,9 +247,9 @@ function App() {
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
       <OdinQueryClient
-        cacheKey={REACT_QUERY_CACHE_KEY}
-        cachedQueryKeys={INCLUDED_QUERY_KEYS}
-        type="local"
+        cacheKey={'OWNER_REACT_QUERY_OFFLINE_CACHE'}
+        cachedQueryKeys={REACT_QUERY_INCLUDED_QUERY_KEYS}
+        type="indexeddb"
       >
         <DotYouClientProvider>
           <RouterProvider router={router} fallbackElement={<></>} />

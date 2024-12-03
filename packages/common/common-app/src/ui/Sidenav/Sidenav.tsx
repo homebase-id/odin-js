@@ -1,7 +1,7 @@
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { BuiltInProfiles } from '@homebase-id/js-lib/profile';
-import { hasDebugFlag, isTouchDevice } from '@homebase-id/js-lib/helpers';
+import { isTouchDevice } from '@homebase-id/js-lib/helpers';
 import {
   FEED_APP_ID,
   CHAT_APP_ID,
@@ -40,7 +40,6 @@ import { House } from '../Icons/House';
 import { Person } from '../Icons/Person';
 import { Persons } from '../Icons/Persons';
 import { Pin } from '../Icons/Pin';
-import { Scissors } from '../Icons/Scissors';
 import { Times } from '../Icons/Times';
 import { IconProps } from '../Icons/Types';
 import { Wallet } from '../Icons/Wallet';
@@ -49,7 +48,7 @@ import { RadioTower } from '../Icons';
 
 const STORAGE_KEY = 'sidenavIsOpen';
 
-const navItemClassName = `my-1 py-2 px-2 flex`;
+const navItemClassName = `my-1 py-2 px-2 flex rounded-md hover:bg-indigo-200/40 dark:hover:bg-indigo-700/50`;
 const navItemActiveClassname = `bg-indigo-200 dark:bg-indigo-700`;
 const iconSize = 'h-6 w-6';
 const iconClassName = `${iconSize} flex-shrink-0`;
@@ -113,7 +112,7 @@ export const Sidenav = ({
               {canPin ? (
                 <button
                   className={`${navItemClassName} ${
-                    isPinned ? 'md:bg-indigo-200 md:dark:bg-indigo-700' : ''
+                    isPinned ? 'md:bg-indigo-200 md:dark:bg-indigo-700 rounded-md' : ''
                   }`}
                   onClick={() => setIsPinned(!isPinned)}
                 >
@@ -219,8 +218,6 @@ export const Sidenav = ({
   );
 };
 
-const isDebug = hasDebugFlag();
-
 const MoreItems = ({
   isOpen: isNavOpen,
   logout,
@@ -270,7 +267,6 @@ const MoreItems = ({
           </button>
         ) : null}
         <NavItem icon={Cog} label={'Settings'} to={'/owner/settings'} />
-        {isDebug ? <NavItem icon={Scissors} label={'Demo Data'} to={'/owner/demo-data'} /> : null}
         <hr className="border-b dark:border-slate-500" />
         <NavItem icon={HardDrive} label={'Drives'} to={'/owner/drives'} />
         <hr className="border-b dark:border-slate-500" />
@@ -356,7 +352,9 @@ const ExternalNavItem = ({
 const IdentityNavItem = () => {
   return (
     <a className={`relative flex py-2 pl-[0.2rem] pr-1`} href={HOME_ROOT_PATH}>
-      <OwnerImage className={`h-9 w-9 flex-shrink-0 rounded-full`} size="custom" />
+      <span className="h-9 w-9 flex-shrink-0">
+        <OwnerImage className={`h-9 w-9 rounded-full`} size="custom" />
+      </span>
       <span className={`my-auto ml-3 overflow-hidden text-lg font-medium`}>
         {' '}
         {ellipsisAtMaxChar(window.location.hostname, 20)}
@@ -407,7 +405,7 @@ const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
       >
         {Heart({ className: iconClassName })}
         <span className={`my-auto ml-3 flex w-full flex-row items-stretch overflow-hidden`}>
-          <span>{'Social Presence'} </span>
+          <span>{'Personal data'} </span>
           <button className={`${iconClassName} ml-auto opacity-80 `}>
             <ArrowDown className={`transition-transform ${isOpen ? '-rotate-90' : ''}`} />
           </button>

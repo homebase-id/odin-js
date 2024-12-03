@@ -48,8 +48,7 @@ export const useComments = ({ context }: { context: ReactionContext }) => {
         lastPage?.comments && lastPage.comments?.length >= PAGE_SIZE
           ? lastPage.cursorState
           : undefined,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 2, // 2 minutes
       enabled: !!context.odinId && !!context.channelId && !!context.target.globalTransitId,
     }),
   };

@@ -1,4 +1,3 @@
-export * from './comments/useCommentMedia';
 export * from './comments/useComments';
 export * from './comments/useCommentSummary';
 export * from './emojis/useEmojiReactions';

@@ -11,10 +11,15 @@ import {
   usePortal,
 } from '@homebase-id/common-app';
 import { UnifiedConversation } from '../../../providers/ConversationProvider';
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { isTouchDevice } from '@homebase-id/js-lib/helpers';
-import { RichTextEditor } from '@homebase-id/rich-text-editor';
+
+const RichTextEditor = lazy(() =>
+  import('@homebase-id/rich-text-editor').then((rootExport) => ({
+    default: rootExport.RichTextEditor,
+  }))
+);
 
 export const EditChatMessage = ({
   msg,
@@ -81,14 +86,16 @@ export const EditChatMessage = ({
             }
           />
         ) : (
-          <RichTextEditor
-            placeholder="Your message"
-            defaultValue={message}
-            className="relative w-full rounded-md border bg-background p-2 dark:border-slate-800"
-            onChange={(e) => setMessage(e.target.value)}
-            autoFocus={!isTouchDevice()}
-            onSubmit={isTouchDevice() ? undefined : () => doSend()}
-          />
+          <Suspense>
+            <RichTextEditor
+              placeholder="Your message"
+              defaultValue={message}
+              className="relative w-full rounded-md border bg-background p-2 dark:border-slate-800"
+              onChange={(e) => setMessage(e.target.value)}
+              autoFocus={!isTouchDevice()}
+              onSubmit={isTouchDevice() ? undefined : () => doSend()}
+            />
+          </Suspense>
         )}
         <div className="mt-4 flex flex-row-reverse gap-2">
           <ActionButton

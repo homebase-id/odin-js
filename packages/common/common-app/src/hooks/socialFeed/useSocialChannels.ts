@@ -21,9 +21,7 @@ export const useSocialChannels = ({ odinId }: useSocialChannelsProps) => {
       queryKey: ['peer-channels', odinId],
       queryFn: () => fetch({ odinId }),
       enabled: !!odinId,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      staleTime: 1000 * 60 * 60, // 1 hour
       retry: 1,
     }),
   };

@@ -2,9 +2,9 @@ import { Link } from 'react-router-dom';
 import ProfileNav from '../../../Auth/ProfileNav/ProfileNav';
 
 import {
-  AuthorImage,
   DarkModeToggle,
   HOME_ROOT_PATH,
+  OwnerImage,
   OwnerName,
   useDotYouClientContext,
   useSiteData,
@@ -21,7 +21,7 @@ const Header = () => {
       >
         <Link className="title-font flex items-center font-medium" to={HOME_ROOT_PATH}>
           {owner?.profileImageFileKey ? (
-            <AuthorImage className="h-8 w-8 rounded-full lg:h-[3rem] lg:w-[3rem]" />
+            <OwnerImage className="h-8 w-8 rounded-full lg:h-[3rem] lg:w-[3rem]" />
           ) : null}
           <span className={`ml-3 hidden text-xl font-normal sm:block`}>
             <OwnerName />

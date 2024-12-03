@@ -166,7 +166,7 @@ export const ReactionsBar = ({
         </button>
         {isCustomOpen ? (
           <div
-            className={`absolute z-20 ${verticalSpace === 'top' ? 'bottom-0' : 'top-0'} ${
+            className={`absolute rounded-md shadow-md z-20 ${verticalSpace === 'top' ? 'bottom-0' : 'top-0'} ${
               customDirection === 'right' || (!customDirection && horizontalSpace === 'right')
                 ? 'left-0'
                 : 'right-0'

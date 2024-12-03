@@ -10,11 +10,11 @@ import {
   DomainHighlighter,
   CircleSelector,
   DialogWrapper,
-  useConnection,
   useCircle,
+  useDetailedConnectionInfo,
 } from '@homebase-id/common-app';
 import { Arrow } from '@homebase-id/common-app/icons';
-import { useAutoConnection } from '../../../hooks/connections/useAutoConnection';
+import { useManageAutoConnection } from '../../../hooks/connections/useManageAutoConnection';
 
 const ConfirmConnectionDialog = ({
   odinId,
@@ -30,11 +30,11 @@ const ConfirmConnectionDialog = ({
   onCancel: () => void;
 }) => {
   const target = usePortal('modal-container');
-  const { data: connectionInfo } = useConnection({ odinId: odinId }).fetch;
+  const { data: connectionInfo } = useDetailedConnectionInfo({ odinId: odinId }).fetch;
 
   const {
     confirmAutoConnection: { mutate: confirmIntroduction, status: confirmIntroductionState },
-  } = useAutoConnection({ odinId: odinId });
+  } = useManageAutoConnection({ odinId: odinId });
 
   const {
     provideGrant: { mutateAsync: provideGrant },

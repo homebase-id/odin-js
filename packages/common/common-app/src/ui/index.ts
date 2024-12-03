@@ -7,6 +7,7 @@ export * from './ErrorBoundary/ErrorBoundary';
 export * from './LoadingBlock/LoadingBlock';
 export * from './Pager/Pager';
 export * from './NotFound/NotFound';
+export * from './PageMeta/PageMeta';
 
 export * from './Buttons/ActionButton';
 export * from './Buttons/ActionButtonWithOptions';
@@ -20,6 +21,7 @@ export * from './Buttons/util';
 export * from './DarkModeToggle/DarkModeToggle';
 export * from './Sidenav/Sidenav';
 export * from './FallbackImg/FallbackImg';
+export * from './FallbackImg/FallbackHelpers';
 
 export * from './BrandIcons/Homebase';
 export * from './BrandIcons/HomebaseChat';

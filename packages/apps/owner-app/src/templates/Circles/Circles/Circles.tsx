@@ -1,13 +1,12 @@
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { useState } from 'react';
 import CardLink from '../../../components/ui/Buttons/CardLink';
-import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { PageMeta, ContactImage } from '@homebase-id/common-app';
 import {
   AUTO_CONNECTIONS_CIRCLE_ID,
   CircleDefinition,
   CONFIRMED_CONNECTIONS_CIRCLE_ID,
 } from '@homebase-id/js-lib/network';
-import ContactImage from '../../../components/Connection/ContactImage/ContactImage';
 import { CompanyImage } from '../../../components/Connection/CompanyImage/CompanyImage';
 import { DrivePermissionType } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
@@ -113,7 +112,6 @@ const CircleCardLink = ({ circleDef }: { circleDef: CircleDefinition }) => {
                         odinId={member.domain}
                         key={member.domain}
                         className="-mr-2 h-7 w-7 overflow-hidden rounded-full border last:mr-0 dark:border-slate-500"
-                        fallbackSize="xs"
                         canSave={true}
                       />
                     ) : (
@@ -121,7 +119,6 @@ const CircleCardLink = ({ circleDef }: { circleDef: CircleDefinition }) => {
                         domain={member.domain}
                         key={member.domain}
                         className="-mr-2 h-7 w-7 overflow-hidden rounded-full border last:mr-0 dark:border-slate-500"
-                        fallbackSize="xs"
                       />
                     )
                   )}

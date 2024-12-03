@@ -1,5 +1,5 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { moveElementInArray } from '../../templates/DemoData/helpers';
+import { moveElementInArray } from '@homebase-id/common-app';
 import { useAttribute } from './useAttribute';
 import { AttributeVm } from './useAttributes';
 
@@ -46,7 +46,8 @@ export const useAttributeOrderer = ({
     const currentPos = flatAttributes.indexOf(attr);
     const toBecomePos = currentPos + dir;
 
-    if (toBecomePos === -1 || toBecomePos >= flatAttributes.length) return attr.priority;
+    if (toBecomePos === -1 || toBecomePos >= flatAttributes.length)
+      return attr.fileMetadata.appData.content.priority;
 
     if (
       flatAttributes[toBecomePos].fileMetadata.appData.content.type !==

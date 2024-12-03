@@ -15,9 +15,7 @@ export const useChannelDrives = (isEnabled: boolean) => {
   return useQuery({
     queryKey: ['channel-drives'],
     queryFn: fetchChannelData,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 60, // 1 hour
     enabled: isEnabled,
   });
 };

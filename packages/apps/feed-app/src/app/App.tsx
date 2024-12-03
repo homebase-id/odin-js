@@ -30,7 +30,6 @@ const IncomingCollaborativeChannelPage = lazy(
   () => import('../templates/SocialFeed/IncomingCollaborativeChannelPage')
 );
 
-import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 
 const AUTH_PATH = FEED_ROOT_PATH + '/auth';
@@ -46,8 +45,16 @@ import {
 } from '@homebase-id/common-app';
 import { useValidateAuthorization } from '../hooks/auth/useAuth';
 
-export const REACT_QUERY_CACHE_KEY = 'FEED_REACT_QUERY_OFFLINE_CACHE';
-const INCLUDED_QUERY_KEYS = ['common-image', 'collaborative-channels'];
+const REACT_QUERY_INCLUDED_QUERY_KEYS = [
+  'raw-image',
+  'social-feeds',
+  'collaborative-channels',
+  'followers',
+  'following',
+  'channels',
+  'channel',
+  'process-feed-inbox',
+];
 
 function App() {
   const router = createBrowserRouter(
@@ -118,8 +125,8 @@ function App() {
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
       <OdinQueryClient
-        cacheKey={REACT_QUERY_CACHE_KEY}
-        cachedQueryKeys={INCLUDED_QUERY_KEYS}
+        cacheKey={'APP_REACT_QUERY_OFFLINE_CACHE'}
+        cachedQueryKeys={REACT_QUERY_INCLUDED_QUERY_KEYS}
         type="indexeddb"
       >
         <DotYouClientProvider>

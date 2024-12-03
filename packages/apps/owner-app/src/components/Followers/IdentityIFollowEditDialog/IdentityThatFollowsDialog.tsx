@@ -1,12 +1,11 @@
 import { createPortal } from 'react-dom';
-import { t } from '@homebase-id/common-app';
+import { t, useConnectionInfo } from '@homebase-id/common-app';
 import {
   usePortal,
   useChannels,
   ChannelDefinitionVm,
   ActionButton,
   DialogWrapper,
-  useConnection,
 } from '@homebase-id/common-app';
 import { Quote, Persons } from '@homebase-id/common-app/icons';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
@@ -28,7 +27,7 @@ const IdentityThatFollowsDialog = ({
   onCancel: () => void;
 }) => {
   const target = usePortal('modal-container');
-  const { data: connectionInfo } = useConnection({ odinId }).fetch;
+  const { data: connectionInfo } = useConnectionInfo({ odinId }).fetch;
 
   const { data: follower } = useFollower({
     odinId,
@@ -49,10 +48,7 @@ const IdentityThatFollowsDialog = ({
           )
           .filter(Boolean) as HomebaseFile<ChannelDefinitionVm>[])
       : allChannels?.filter((chnl) => {
-          return hasAccess(
-            chnl,
-            connectionInfo?.status === 'connected' ? connectionInfo : undefined
-          );
+          return hasAccess(chnl, connectionInfo || undefined);
         });
 
   const dialog = (

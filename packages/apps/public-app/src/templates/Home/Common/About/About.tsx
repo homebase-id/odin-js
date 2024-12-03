@@ -1,6 +1,5 @@
-import { getTwoLettersFromDomain } from '@homebase-id/js-lib/helpers';
 import { FallbackImg, RichTextRenderer, t, Image, useBiography } from '@homebase-id/common-app';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { Arrow } from '@homebase-id/common-app/icons';
 
@@ -8,13 +7,13 @@ const About = ({ className }: { className?: string }) => {
   const { data: bioData } = useBiography();
   return (
     <div className={className ?? ''}>
-      <div className="-mx-2 flex max-w-7xl flex-col lg:flex-row xl:-mx-4">
-        <div className="px-2 py-2 lg:w-2/3 xl:px-4">
+      <div className="flex max-w-7xl flex-col gap-2 lg:flex-row xl:gap-4">
+        <div className="py-2 lg:w-2/3">
           {bioData?.shortBio && (
             <RichTextRenderer className="pb-10 leading-relaxed" body={bioData.shortBio.body} />
           )}
           {bioData?.experience ? (
-            <div className="-my-5">
+            <div className="flex flex-col gap-5">
               {bioData.experience.map((experienceItem) => (
                 <ExperienceBlock
                   title={experienceItem.title}
@@ -24,7 +23,6 @@ const About = ({ className }: { className?: string }) => {
                   imageFileKey={experienceItem.imageFileKey}
                   lastModified={experienceItem.lastModified}
                   key={experienceItem.id}
-                  className="my-5"
                 />
               ))}
             </div>
@@ -50,13 +48,13 @@ const ExperienceBlock = ({
   imageFileId?: string;
   imageFileKey?: string;
   lastModified: number | undefined;
-  className: string;
+  className?: string;
 }) => {
   const domain = link ? new URL(link).hostname : undefined;
 
   return (
     <div
-      className={`relative flex flex-row gap-2 overflow-hidden rounded-lg bg-background px-5 py-8 sm:gap-4 sm:px-8 sm:py-12 ${className}`}
+      className={`relative flex flex-row gap-2 overflow-hidden rounded-lg bg-background px-5 py-8 sm:gap-4 sm:px-8 sm:py-12 ${className || ''}`}
     >
       {imageFileId ? (
         <Image
@@ -69,7 +67,7 @@ const ExperienceBlock = ({
         />
       ) : domain ? (
         <div className="w-1/6 flex-shrink-0 flex-grow-0">
-          <ExternalLinkImage domain={domain} fallbackSize="md" />
+          <ExternalLinkImage domain={domain} />
         </div>
       ) : null}
       <div className="flex-grow">
@@ -94,27 +92,14 @@ const ExperienceBlock = ({
 };
 
 // Similar to CompanyImage, duplicated as it has a different goal
-const ExternalLinkImage = ({
-  domain,
-  className,
-  fallbackSize,
-}: {
-  domain: string;
-  className?: string;
-  fallbackSize?: 'xs' | 'md';
-}) => {
+const ExternalLinkImage = ({ domain, className }: { domain: string; className?: string }) => {
   const [hasFailed, setHasFailed] = useState<boolean>(false);
-  const initials = useMemo(() => getTwoLettersFromDomain(domain), [domain]);
 
   const bgClass = 'bg-white dark:bg-black';
 
   return (
     <div className={`relative z-0 aspect-square ${className || ''}`}>
-      <FallbackImg
-        initials={initials}
-        size={fallbackSize}
-        className={'absolute inset-0 flex aspect-square w-full'}
-      />
+      <FallbackImg odinId={domain} className={'absolute inset-0 flex aspect-square w-full'} />
       {/* On failed we fully hide the picture element, only visually hiding it, stays on top for safari...  */}
       {!hasFailed ? (
         <picture className={`relative z-10`}>

@@ -1,15 +1,15 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 
 import { useState } from 'react';
-import Section from '../../../components/ui/Sections/Section';
-import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
-import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
+import Section from '../../components/ui/Sections/Section';
+import LoadingDetailPage from '../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
+import DrivePermissionView from '../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import { CircleGrant } from '@homebase-id/js-lib/network';
-import { useDomainClients } from '../../../hooks/connections/useDomainClients';
-import { DomainClient } from '../../../provider/network/domainNetwork/DomainManager';
+import { useDomainClients } from '../../hooks/connections/useDomainClients';
+import { DomainClient } from '../../provider/network/domainNetwork/DomainManager';
 import { getUniqueDrivesWithHighestPermission } from '@homebase-id/js-lib/helpers';
-import { CircleDomainMembershipDialog } from '../../../components/Circles/CircleMembershipDialog/CircleMembershipDialog';
+import { CircleDomainMembershipDialog } from '../../components/Circles/CircleMembershipDialog/CircleMembershipDialog';
 import {
   ActionGroupOptionProps,
   t,
@@ -33,7 +33,7 @@ import {
   HardDrive,
   Times,
 } from '@homebase-id/common-app/icons';
-import { useManageDomain } from '../../../hooks/connections/useManageDomain';
+import { useManageDomain } from '../../hooks/connections/useManageDomain';
 
 const DomainDetails = () => {
   const { domain } = useParams();

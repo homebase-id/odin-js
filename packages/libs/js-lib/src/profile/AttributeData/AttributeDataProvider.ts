@@ -7,6 +7,7 @@ import {
   TargetDrive,
   getContentFromHeaderOrPayload,
 } from '../../core/core';
+import { compareAcl } from '../../helpers/DataUtil';
 import { GetTargetDriveFromProfileId } from '../profile';
 import { AttributeConfig } from './AttributeConfig';
 import { Attribute } from './AttributeDataTypes';
@@ -15,7 +16,7 @@ const sortAttrs = (
   a: HomebaseFile<Attribute | undefined>,
   b: HomebaseFile<Attribute | undefined>
 ) =>
-  (a.priority || 0) - (b.priority || 0) ||
+  compareAcl(a.serverMetadata?.accessControlList, b.serverMetadata?.accessControlList) ||
   (a.fileMetadata.appData.content?.priority || 0) - (b.fileMetadata.appData.content?.priority || 0);
 
 //Gets all attributes available to the caller

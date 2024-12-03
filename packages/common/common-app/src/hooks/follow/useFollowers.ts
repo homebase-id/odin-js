@@ -17,8 +17,6 @@ export const useFollowerInfinite = () => {
     queryFn: ({ pageParam }) => fetch({ pageParam }),
     getNextPageParam: (lastPage) =>
       lastPage?.results && lastPage.results.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 60, // 1 hour
   });
 };

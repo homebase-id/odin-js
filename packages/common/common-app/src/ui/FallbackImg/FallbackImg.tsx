@@ -1,27 +1,59 @@
+import { Attribute } from '@homebase-id/js-lib/profile';
+import { getOdinIdColor } from '../../helpers';
+import { getInitialsOfNameAttribute, getTwoLettersFromDomain } from '@homebase-id/js-lib/helpers';
+import { fallbackProfileImage } from './FallbackHelpers';
+
+const getInitials = (
+  domain: string | undefined,
+  nameData?:
+    | Attribute
+    | {
+        displayName?: string | undefined;
+        givenName?: string | undefined;
+        surname?: string | undefined;
+      }
+) => {
+  if (nameData && 'id' in nameData) {
+    return getInitialsOfNameAttribute(nameData);
+  }
+
+  if (nameData?.displayName) {
+    return nameData.displayName
+      .split(' ')
+      .map((part) => part[0] ?? '')
+      .join('');
+  }
+
+  if (nameData?.givenName || nameData?.surname) {
+    return ((nameData.givenName?.[0] ?? '') + (nameData.surname?.[0] ?? '') + '') as string;
+  }
+
+  return domain ? getTwoLettersFromDomain(domain) : '';
+};
+
 export const FallbackImg = ({
-  initials,
+  odinId,
+  nameData,
   className,
-  size,
 }: {
-  initials: string;
+  odinId: string | undefined;
+  nameData?:
+    | Attribute
+    | {
+        displayName?: string | undefined;
+        givenName?: string | undefined;
+        surname?: string | undefined;
+      };
   className?: string;
-  size?: 'xs' | 'md' | 'none';
 }) => {
+  const backgroundColor = odinId ? getOdinIdColor(odinId).lightTheme : '#000000';
+  const initials = getInitials(odinId, nameData);
+  const fallbackSvg = `data:image/svg+xml;base64,${fallbackProfileImage(initials, backgroundColor)}`;
+
   return (
-    <div
-      className={`flex bg-slate-100 font-light text-black dark:bg-slate-700 dark:text-white ${
-        size === 'xs'
-          ? 'text-sm'
-          : size === 'md'
-            ? 'text-3xl'
-            : size !== 'none'
-              ? 'text-6xl sm:text-8xl'
-              : ''
-      } ${className ?? ''} ${className?.includes('h-') ? '' : 'h-full'} ${
-        className?.includes('w-') ? '' : 'w-full'
-      }`}
-    >
-      <span className="m-auto uppercase">{initials}</span>
-    </div>
+    <img
+      src={fallbackSvg}
+      className={`${className?.includes('h-') ? '' : 'h-full'} ${className?.includes('w-') ? '' : 'w-full'}`}
+    />
   );
 };

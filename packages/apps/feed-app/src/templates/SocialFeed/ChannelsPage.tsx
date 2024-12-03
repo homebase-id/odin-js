@@ -9,7 +9,7 @@ import {
 import { Loader, MagnifyingGlass, Plus, Quote } from '@homebase-id/common-app/icons';
 import { t } from '@homebase-id/common-app';
 import { useChannels } from '@homebase-id/common-app';
-import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import { useSearchParams } from 'react-router-dom';
 import { NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
