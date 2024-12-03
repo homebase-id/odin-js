@@ -76,7 +76,7 @@ import {
   OdinQueryClient,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
-import { useInboxProcessor } from '../hooks/inbox/useInboxProcessor';
+import { useOwnerInboxProcessor } from '../hooks/inbox/useOwnerInboxProcessor';
 
 function App() {
   const router = createBrowserRouter(
@@ -253,7 +253,7 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
 
   const isAuthenticated = useDotYouClientContext().isAuthenticated();
   const { data: isConfigured, isFetched } = useIsConfigured().isConfigured;
-  useInboxProcessor(isAuthenticated);
+  useOwnerInboxProcessor(isAuthenticated);
 
   if (!isAuthenticated) {
     if (
