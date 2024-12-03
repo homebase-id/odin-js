@@ -127,8 +127,6 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
 };
 
 export const invalidateChatMessages = (queryClient: QueryClient, conversationId?: string) => {
-  console.log('invalidateChatMessages', conversationId);
-
   queryClient.invalidateQueries({
     queryKey: ['chat-messages', conversationId].filter(Boolean),
     exact: !!conversationId,
