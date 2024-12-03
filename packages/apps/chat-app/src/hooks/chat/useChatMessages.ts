@@ -96,7 +96,6 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
           ? lastPage.cursorState
           : undefined,
       enabled: !!conversationId,
-      refetchOnMount: false,
       staleTime: 1000 * 60 * 60 * 24, // 24 hour
     }),
     markAsRead: useMutation({

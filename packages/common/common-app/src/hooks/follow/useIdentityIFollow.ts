@@ -25,9 +25,7 @@ export const useIdentityIFollow = ({ odinId }: useIdentityIFollowProps) => {
     fetch: useQuery({
       queryKey: ['identity-following', odinId],
       queryFn: () => fetch({ odinId: odinId as string }),
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      staleTime: 1000 * 60 * 60, // 1 hour
       enabled: !!odinId,
     }),
     unfollow: useMutation({

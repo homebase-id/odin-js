@@ -16,14 +16,13 @@ export const useVerifyToken = (isOwner?: boolean) => {
   };
 
   return useQuery({
-    queryKey: ['verifyToken'],
+    queryKey: ['verify-public-token'],
     queryFn: fetchData,
-    refetchOnMount: false,
     staleTime: MINUTE_IN_MS * 10,
     enabled: isAuthenticated,
   });
 };
 
 export const invalidateVerifyToken = (queryClient: QueryClient) => {
-  queryClient.invalidateQueries({ queryKey: ['verifyToken'] });
+  queryClient.invalidateQueries({ queryKey: ['verify-public-token'] });
 };

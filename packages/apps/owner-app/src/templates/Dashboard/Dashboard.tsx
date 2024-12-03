@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
 import { getOperatingSystem } from '@homebase-id/js-lib/auth';
 import { isTouchDevice } from '@homebase-id/js-lib/helpers';
@@ -81,7 +81,7 @@ const AppWrapper = ({
   <div className="group relative flex h-full flex-grow flex-col rounded-lg bg-background transition-shadow hover:shadow-lg">
     <HybridLink href={href} className="mx-auto w-full px-2 pt-5">
       <div className="relative flex flex-col items-center">
-        <CompanyImage domain={undefined} appId={appId} className="mb-auto w-20" fallbackSize="xs" />
+        <CompanyImage domain={undefined} appId={appId} className="mb-auto w-20" />
 
         <p className="mx-auto mt-1 text-foreground/40">{name?.replace('Homebase - ', '')}</p>
 

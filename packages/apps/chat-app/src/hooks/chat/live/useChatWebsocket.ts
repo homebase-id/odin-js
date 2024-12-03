@@ -54,7 +54,7 @@ export const useChatWebsocket = (isEnabled: boolean) => {
     ],
     websocketDrives,
     () => {
-      queryClient.invalidateQueries({ queryKey: ['process-inbox'] });
+      queryClient.invalidateQueries({ queryKey: ['process-chat-inbox'] });
     },
     undefined,
     'useLiveChatProcessor'

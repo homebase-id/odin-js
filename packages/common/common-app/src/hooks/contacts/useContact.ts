@@ -1,10 +1,7 @@
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { saveContact } from '../../provider/contact/ContactProvider';
+
 import {
-  fetchConnectionInfo,
-  fetchDataFromPublic,
-} from '../../provider/contact/ContactSourceProvider';
-import {
+  ContactConfig,
   ContactFile,
   ContactVm,
   RawContact,
@@ -18,7 +15,14 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
 } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import {
+  fetchConnectionInfo,
+  fetchDataFromPublic,
+} from '../../provider/contact/ContactSourceProvider';
+import { saveContact } from '../../provider/contact/ContactProvider';
+import { useHasWriteAccess } from '../securityContext/useHasWriteAccess';
+import { useHasReadAccess } from '../securityContext/useHasReadAccess';
 
 export const useContact = ({
   odinId,
@@ -31,6 +35,8 @@ export const useContact = ({
 }) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
+  const hasContactDriveWriteAccess = useHasWriteAccess(ContactConfig.ContactTargetDrive);
+  const hasContactDriveReadAccess = useHasReadAccess(ContactConfig.ContactTargetDrive);
 
   const fetchSingle = async ({
     odinId,
@@ -40,17 +46,19 @@ export const useContact = ({
     odinId: string;
     id: string;
     canSave?: boolean;
-  }): Promise<HomebaseFile<ContactVm> | NewHomebaseFile<ContactVm> | undefined> => {
+  }): Promise<HomebaseFile<ContactVm> | NewHomebaseFile<ContactVm> | null> => {
+    if (!hasContactDriveReadAccess) return null;
+
     if (!odinId) {
-      if (!id) return;
+      if (!id) return null;
 
       //Direct fetch with id:
-      return (await getContactByUniqueId(dotYouClient, id)) || undefined;
+      return (await getContactByUniqueId(dotYouClient, id)) || null;
     }
 
     const hasCache =
       !!odinId &&
-      queryClient.getQueryData<HomebaseFile<ContactVm> | NewHomebaseFile<ContactVm> | undefined>([
+      queryClient.getQueryData<HomebaseFile<ContactVm> | NewHomebaseFile<ContactVm> | null>([
         'contact',
         odinId,
         canSave,
@@ -58,7 +66,7 @@ export const useContact = ({
 
     // Direct fetch with odinId:
     // Use the data from the contact book, if it exists and if it's a contact level source or we are not allowed to save anyway
-    const contactBookContact = await getContactByOdinId(dotYouClient, odinId);
+    const contactBookContact = (await getContactByOdinId(dotYouClient, odinId)) ?? null;
     if (
       !hasCache && // If we have a contact on drive, and we don't have cache, we need a fast return; Otherwise we trigger a refresh
       contactBookContact &&
@@ -74,7 +82,7 @@ export const useContact = ({
     const returnContact =
       (await fetchConnectionInfo(dotYouClient, odinId)) || (await fetchDataFromPublic(odinId));
 
-    if (!returnContact) return undefined;
+    if (!returnContact) return null;
 
     const contactFile: NewHomebaseFile<ContactFile> = {
       fileId: contactBookContact?.fileId,
@@ -87,7 +95,7 @@ export const useContact = ({
       },
     };
 
-    if (canSave) {
+    if (canSave && hasContactDriveWriteAccess) {
       const uploadResult = await saveContact(dotYouClient, contactFile);
       const savedContactFile = {
         ...contactFile,
@@ -147,10 +155,8 @@ export const useContact = ({
           canSave: canSave,
         }),
       staleTime: 1000 * 60 * 60 * 24, // 24 hours
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
       retry: false,
-      enabled: !!odinId || !!id,
+      enabled: (!!odinId || !!id) && !!hasContactDriveReadAccess,
     }),
     refresh: useMutation({
       mutationFn: refresh,

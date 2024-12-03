@@ -17,7 +17,7 @@ import { flattenInfinteData } from '@homebase-id/common-app';
 import { t } from '@homebase-id/common-app';
 
 import { useChannels } from '@homebase-id/common-app';
-import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 

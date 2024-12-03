@@ -4,7 +4,7 @@ import { useDrives } from '../../../hooks/drives/useDrives';
 import { SectionTitle } from '../../../components/ui/Sections/Section';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import CardLink from '../../../components/ui/Buttons/CardLink';
-import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import { ProfileConfig } from '@homebase-id/js-lib/profile';
 import { BlogConfig } from '@homebase-id/js-lib/public';
 import { ContactConfig } from '@homebase-id/js-lib/network';
@@ -57,9 +57,9 @@ const Drives = () => {
               <SectionTitle title={type.title} />
               <div className="grid grid-cols-2 gap-4 py-4 md:grid-cols-3 lg:grid-cols-4">
                 {(type.type
-                  ? drives?.filter((drive) =>
+                  ? (drives?.filter((drive) =>
                       type.type.some((type) => stringGuidsEqual(drive.targetDriveInfo.type, type))
-                    ) ?? []
+                    ) ?? [])
                   : appDrives
                 )?.map((driveDef) => (
                   <CardLink

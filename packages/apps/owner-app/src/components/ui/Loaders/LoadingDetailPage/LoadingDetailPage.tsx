@@ -6,10 +6,10 @@ const LoadingDetailPage = ({ children }: { children?: ReactNode }) => {
     <>
       <section>
         <div
-          className={`-mx-10 -mt-8 mb-10 h-[10rem] animate-pulse border-b-2 border-gray-100 bg-white px-10 pt-20 dark:border-gray-700 dark:bg-black sm:pt-8`}
+          className={`-mx-2 -mt-4 mb-4 border-b border-gray-100 bg-white px-2 py-1 dark:border-gray-800 dark:bg-black sm:-mx-10 sm:-mt-8 sm:px-10 xl:py-4`}
         >
           <LoadingBlock className="mb-2 h-4 max-w-xs" />
-          <LoadingBlock className="mb-5 flex h-10 max-w-md flex-row" />
+          <LoadingBlock className="flex h-10 max-w-md flex-row" />
         </div>
         {children}
       </section>

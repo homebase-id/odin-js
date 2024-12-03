@@ -48,7 +48,7 @@ export const useInboxProcessor = (odinId: string | undefined, communityId: strin
 
   const fetchData = async () => {
     if (!communityId) return;
-    const lastProcessedTime = queryClient.getQueryState(['process-inbox'])?.dataUpdatedAt;
+    const lastProcessedTime = queryClient.getQueryState(['process-community-inbox'])?.dataUpdatedAt;
     const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 2;
 
     // Process chat;
@@ -113,7 +113,7 @@ export const useInboxProcessor = (odinId: string | undefined, communityId: strin
 
   // We refetch this one on mount as each mount the websocket would reconnect, and there might be a backlog of messages
   return useQuery({
-    queryKey: ['process-inbox'],
+    queryKey: ['process-community-inbox'],
     queryFn: fetchData,
     enabled: !!communityId,
     staleTime: 1000 * 10, // 10 seconds
@@ -145,7 +145,7 @@ const findChangesSinceTimestamp = async (
         });
 
   const modifiedFiles =
-    odinId && dotYouClient.getHostIdentity()
+    odinId && dotYouClient.getHostIdentity() !== odinId
       ? await queryModifiedOverPeer(dotYouClient, odinId, params, {
           maxRecords: BATCH_SIZE,
           cursor: modifiedCursor,

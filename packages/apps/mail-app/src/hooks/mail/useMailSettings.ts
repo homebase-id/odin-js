@@ -25,9 +25,7 @@ export const useMailSettings = () => {
     get: useQuery({
       queryKey: ['mail-settings'],
       queryFn: () => getMailSettings(),
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      staleTime: Infinity,
+      staleTime: 1000 * 60 * 60, // 1 hour
     }),
     save: useMutation({
       mutationFn: saveMailSettings,

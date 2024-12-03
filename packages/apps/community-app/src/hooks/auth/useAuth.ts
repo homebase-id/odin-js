@@ -12,7 +12,7 @@ import {
   retrieveEccKey,
   throwAwayTheECCKey,
 } from '@homebase-id/js-lib/auth';
-import { AppPermissionType } from '@homebase-id/js-lib/network';
+import { AppPermissionType, ContactConfig } from '@homebase-id/js-lib/network';
 import {
   APP_AUTH_TOKEN,
   APP_SHARED_SECRET,
@@ -23,6 +23,7 @@ import {
 } from '@homebase-id/common-app';
 import { LOCAL_COMMUNITY_APP_DRIVE } from '../../providers/CommunityMetadataProvider';
 import { useQueryClient } from '@tanstack/react-query';
+import { ChatDrive } from '@homebase-id/chat-app/src/providers/ConversationProvider';
 
 export const useValidateAuthorization = () => {
   const { hasSharedSecret } = useDotYouClient();
@@ -58,16 +59,16 @@ export const drives = [
   },
   {
     // Contacts
-    a: '2612429d1c3f037282b8d42fb2cc0499',
-    t: '70e92f0f94d05f5c7dcd36466094f3a5',
+    a: ContactConfig.ContactTargetDrive.alias,
+    t: ContactConfig.ContactTargetDrive.type,
     n: 'Contact Drive',
     d: '',
-    p: DrivePermissionType.Read,
+    p: DrivePermissionType.Read + DrivePermissionType.Write,
   },
   {
     // Chat Drive
-    a: '9ff813aff2d61e2f9b9db189e72d1a11',
-    t: '66ea8355ae4155c39b5a719166b510e3',
+    a: ChatDrive.alias,
+    t: ChatDrive.type,
     n: 'Chat Drive',
     d: '',
     p: DrivePermissionType.Read + DrivePermissionType.Write + DrivePermissionType.React,

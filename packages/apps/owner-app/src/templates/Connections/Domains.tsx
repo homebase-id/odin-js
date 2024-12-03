@@ -1,9 +1,9 @@
-import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import Submenu from '../../../components/SubMenu/SubMenu';
+import { PageMeta } from '@homebase-id/common-app';
+import Submenu from '../../components/SubMenu/SubMenu';
 import { useState, useEffect } from 'react';
-import Section from '../../../components/ui/Sections/Section';
+import Section from '../../components/ui/Sections/Section';
 import { DomainMembership, useDomain } from '@homebase-id/common-app';
-import { CompanyImage } from '../../../components/Connection/CompanyImage/CompanyImage';
+import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
 import {
   useDomains,
   SubtleMessage,
@@ -15,7 +15,7 @@ import {
   ActionButton,
 } from '@homebase-id/common-app';
 import { Grid, Shield, Eye, Times } from '@homebase-id/common-app/icons';
-import { useManageDomain } from '../../../hooks/connections/useManageDomain';
+import { useManageDomain } from '../../hooks/connections/useManageDomain';
 
 const Domains = () => {
   const [activePage, setActivePage] = useState(1);
@@ -57,7 +57,7 @@ const Domains = () => {
             path: `/owner/third-parties/services`,
           },
         ]}
-        className="-mt-6 mb-6"
+        className="mb-6"
       />
       <p className="mb-6 max-w-2xl text-slate-400">
         Services are third-parties that have authorized you with your Homebase identity. By default
@@ -126,7 +126,7 @@ const DomainListItem = ({
           }`}
         >
           <div className="flex flex-row gap-2 sm:contents">
-            <CompanyImage domain={domain.domain} className="w-12" fallbackSize="xs" />
+            <CompanyImage domain={domain.domain} className="w-12" />
 
             <h2 className="font-thiner dark:text-white">
               <span className="break-words">{domain.domain}</span>

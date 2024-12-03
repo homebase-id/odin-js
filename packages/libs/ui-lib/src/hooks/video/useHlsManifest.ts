@@ -22,7 +22,8 @@ export const useHlsManifest = (
   videoGlobalTransitId?: string | undefined,
   videoFileKey?: string | undefined,
   videoDrive?: TargetDrive,
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  lastModified?: number
 ): { fetch: UseQueryResult<string | null, Error> } => {
   const identity = dotYouClient.getHostIdentity();
   const { data: videoFileData, isFetched: videoFileDataFetched } = useVideo(
@@ -32,7 +33,8 @@ export const useHlsManifest = (
     videoGlobalTransitId,
     videoFileKey,
     videoDrive,
-    systemFileType
+    systemFileType,
+    lastModified
   ).fetchMetadata;
 
   const fetchManifest = async (
@@ -88,11 +90,12 @@ export const useHlsManifest = (
         videoDrive?.alias,
         videoGlobalTransitId || videoFileId,
         videoFileKey,
+        lastModified,
       ],
       queryFn: () =>
         fetchManifest(odinId || identity, videoFileData?.fileHeader, videoDrive, videoFileKey),
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
+      staleTime: lastModified ? Infinity : 1000 * 60 * 60 * 1, // 1 hour
+      gcTime: Infinity,
       enabled: !!videoFileId && videoFileId !== '' && videoFileDataFetched,
     }),
   };

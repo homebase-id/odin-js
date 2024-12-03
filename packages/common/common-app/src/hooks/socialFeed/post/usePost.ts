@@ -163,10 +163,8 @@ export const getPostQueryOptions: (
   ],
   queryFn: () =>
     fetchBlog({ dotYouClient, queryClient, odinId, channel, postKey: postKey as string }),
-  refetchOnMount: false,
   enabled: !!channel && !!postKey,
-  gcTime: isOwner ? 0 : 10 * 60 * 1000,
-  staleTime: isOwner ? 0 : 10 * 60 * 1000,
+  staleTime: isOwner ? 0 : 1000 * 60 * 10, // 10 minutes
 });
 
 export const invalidatePost = (

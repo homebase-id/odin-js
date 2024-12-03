@@ -149,8 +149,6 @@ export const useSocials = (props?: { odinId: string } | undefined) => {
   return useQuery({
     queryKey: ['socials', odinId || ''],
     queryFn: () => fetchData(odinId),
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 60 * 24, // 24 hours
   });
 };

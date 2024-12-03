@@ -10,7 +10,7 @@ import {
 import { t, getImagesFromPasteEvent } from '../../../../helpers';
 import { CanReactInfo, useDotYouClientContext, useReaction } from '../../../../hooks';
 import { ErrorNotification, ActionButtonState, ActionButton } from '../../../../ui';
-import { AuthorImage } from '../../Author/Image';
+import { AuthorImage } from '../../Author/AuthorImage';
 import { CantReactInfo } from '../CantReactInfo';
 import { EmojiSelector } from '../EmojiPicker/EmojiSelector';
 import { ImageIcon, Loader, PaperPlane } from '../../../../ui/Icons';

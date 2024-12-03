@@ -232,9 +232,7 @@ export const useSiteData = () => {
   return useQuery({
     queryKey: ['site-data'],
     queryFn: fetchData,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 60, // 1 hour
   });
 };
 

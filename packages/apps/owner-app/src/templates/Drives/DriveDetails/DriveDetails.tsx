@@ -6,7 +6,7 @@ import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/
 import { useExport } from '../../../hooks/drives/useExport';
 import AppMembershipView from '../../../components/PermissionViews/AppPermissionView/AppPermissionView';
 import { useApps } from '../../../hooks/apps/useApps';
-import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import {
   drivesEqual,
   getDrivePermissionFromNumber,

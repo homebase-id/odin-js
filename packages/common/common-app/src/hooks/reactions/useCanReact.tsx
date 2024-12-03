@@ -85,9 +85,7 @@ export const useCanReact = ({
   return useQuery({
     queryKey: ['can-react', odinId, channelId, postContent.id],
     queryFn: isCanReact,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours
     enabled: isEnabled && securityFetched,
   });
 };

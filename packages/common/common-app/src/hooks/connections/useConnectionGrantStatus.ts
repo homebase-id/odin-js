@@ -12,7 +12,6 @@ export const useConnectionGrantStatus = ({ odinId }: { odinId?: string }) => {
       queryFn: () => fetchStatus(odinId as string),
       enabled: !!odinId,
       staleTime: 1000 * 60 * 5, // 5 minutes
-      refetchOnMount: false,
     }),
   };
 };

@@ -11,15 +11,13 @@ import {
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 
-export const REACT_QUERY_CACHE_KEY = 'CHAT_REACT_QUERY_OFFLINE_CACHE';
 const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'chat-message',
   'chat-messages',
+  'chat-reaction',
   'conversations',
   'conversation-metadata',
-  'chat-reaction',
-  'connection-details',
-  'process-inbox',
+  'process-chat-inbox',
 ];
 
 import { MinimalLayout, Layout } from '../components/ui/Layout/Layout';
@@ -36,7 +34,6 @@ const ChatCreateAndOrRedirect = lazy(() =>
   }))
 );
 
-import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 
 const AUTH_PATH = CHAT_ROOT_PATH + '/auth';
@@ -114,7 +111,7 @@ function App() {
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
       <OdinQueryClient
-        cacheKey={REACT_QUERY_CACHE_KEY}
+        cacheKey={'APP_REACT_QUERY_OFFLINE_CACHE'}
         cachedQueryKeys={REACT_QUERY_INCLUDED_QUERY_KEYS}
         type="indexeddb"
       >

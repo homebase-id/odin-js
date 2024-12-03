@@ -37,9 +37,7 @@ export const useEmojiSummary = ({
         context.target.globalTransitId,
       ],
       queryFn: () => fetch(context),
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      staleTime: 1000 * 30, // 30 seconds => Just for the initial render
+      staleTime: 1000 * 60 * 1, // 1 minute
       gcTime: Infinity,
       initialData: reactionPreview,
       // By default, initialData is treated as totally fresh, as if it were just fetched. This also means that it will affect how it is interpreted by the staleTime option.

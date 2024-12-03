@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { useContact } from '../../../hooks/contacts/useContact';
-import { useEffect, useState } from 'react';
+import { OWNER_ROOT, PageMeta, useDetailedConnectionInfo } from '@homebase-id/common-app';
+import { useContact } from '@homebase-id/common-app';
+import { useEffect } from 'react';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
 import { hasDebugFlag, jsonStringify64 } from '@homebase-id/js-lib/helpers';
 import { OutgoingConnectionDialog } from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
@@ -15,7 +15,6 @@ import {
   ErrorNotification,
   ActionGroup,
   ConfirmDialog,
-  useConnection,
   useConnectionGrantStatus,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
@@ -29,16 +28,12 @@ import {
   Bubble,
 } from '@homebase-id/common-app/icons';
 
-export const IdentityPageMetaAndActions = ({
-  odinId, // setIsEditPermissionActive,
-}: {
-  odinId: string;
-  // setIsEditPermissionActive: (newState: boolean) => void;
-}) => {
+export const IdentityPageMetaAndActions = ({ odinId }: { odinId: string }) => {
   const navigate = useNavigate();
   const { action } = useParams();
-  const [isSentConnectionOpen, setIsSentConnectionOpen] = useState(action === 'connect');
-  const [isBlockConfirmationOpen, setIsBlockConfirmationOpen] = useState(action === 'block');
+  const isSentConnectionOpen = action === 'connect';
+  const isBlockConfirmationOpen = action === 'block';
+
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
 
   useEffect(() => {
@@ -61,7 +56,7 @@ export const IdentityPageMetaAndActions = ({
   // Connection data:
   const {
     fetch: { data: connectionInfo },
-  } = useConnection({ odinId: odinId });
+  } = useDetailedConnectionInfo({ odinId: odinId });
   const {
     disconnect: { mutateAsync: disconnect },
     revokeConnectionRequest: {
@@ -119,11 +114,12 @@ export const IdentityPageMetaAndActions = ({
         {t('Unblock')}
       </ActionButton>
     ) : connectionInfo?.status !== 'pending' ? (
-      <>
-        <ActionButton type="primary" onClick={() => setIsSentConnectionOpen(true)}>
-          {t('Connect')}
-        </ActionButton>
-      </>
+      <ActionButton
+        type="primary"
+        onClick={() => navigate(`${OWNER_ROOT}/connections/${odinId}/connect`)}
+      >
+        {t('Connect')}
+      </ActionButton>
     ) : null;
 
   const isConnected = connectionInfo?.status === 'connected';
@@ -292,17 +288,17 @@ export const IdentityPageMetaAndActions = ({
         title={t('Send connection request')}
         isOpen={isSentConnectionOpen}
         targetOdinId={odinId}
-        onConfirm={() => setIsSentConnectionOpen(false)}
-        onCancel={() => setIsSentConnectionOpen(false)}
+        onConfirm={() => navigate(-1)}
+        onCancel={() => navigate(-1)}
       />
       {isBlockConfirmationOpen ? (
         <ConfirmDialog
           {...blockConfirmOptions}
           onConfirm={() => {
             block(odinId);
-            setIsBlockConfirmationOpen(false);
+            navigate(-1);
           }}
-          onCancel={() => setIsBlockConfirmationOpen(false)}
+          onCancel={() => navigate(-1)}
         />
       ) : null}
     </>

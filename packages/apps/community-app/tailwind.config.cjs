@@ -3,9 +3,10 @@
 module.exports = {
   content: [
     './src/**/*.{js,jsx,ts,tsx}',
+    '../../libs/ui-lib/src/**/*.{js,jsx,ts,tsx}',
     '../../common/common-app/src/**/*.{js,jsx,ts,tsx}',
-    '../chat-app/src/**/*.{js,jsx,ts,tsx}',
     '../../common/rich-text-editor/src/**/*.{js,jsx,ts,tsx}',
+    '../chat-app/src/**/*.{js,jsx,ts,tsx}',
   ],
   theme: {
     extend: {

@@ -1,5 +1,3 @@
-export type SelectionData = [Node, number, Node, number];
-
 export const getPreviousSiblings = (elem: Node) => {
   const sibs = [];
   while (elem.previousSibling) {
@@ -10,24 +8,29 @@ export const getPreviousSiblings = (elem: Node) => {
 };
 
 // Gets the selection of the current window
-export const saveSelection = (): SelectionData | undefined => {
+export const saveSelection = (): { node: Node; relativeOffset: number } | undefined => {
   const selection = window.getSelection();
+
   if (selection && selection.anchorNode && selection.focusNode) {
-    return [
-      selection.anchorNode,
-      selection.anchorOffset,
-      selection.focusNode,
-      selection.focusOffset,
-    ];
+    return { node: selection.anchorNode, relativeOffset: selection.anchorOffset };
   }
 };
 
 // Restores the selection of the current window
-export const restoreSelection = (saved: SelectionData) => {
+export const restoreSelection = (node: ChildNode, offset: number) => {
+  const selection = window.getSelection();
+
+  if (!selection) return;
   try {
-    const selection = window.getSelection();
-    if (selection) selection.setBaseAndExtent(saved[0], saved[1], saved[2], saved[3]);
+    // selection.setBaseAndExtent(node, offset, node, offset);
+
+    const range = document.createRange();
+    range.setStart(node, offset);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
   } catch {
+    console.warn('Failed to restore selection');
     // Fail silently, selection will have changed in the mean time. Worst case: position will just be off
   }
 };
@@ -54,7 +57,11 @@ export const getAbsoluteOffsetToParent = (
     // It's a text node
     const currentOffset = getTextLengthFromPreviousSiblings(elem) + relativeOffset;
     if (rootNode === elem.parentNode || !elem.parentNode) {
-      return currentOffset;
+      const allCharTillHere = Array.from(elem.textContent || '')
+        .slice(0, relativeOffset)
+        .join('');
+      const allNewLinesInText = allCharTillHere.split('\n').length - 1;
+      return currentOffset - allNewLinesInText;
     } else {
       return getAbsoluteOffsetToParent(elem.parentNode, 0, rootNode) + currentOffset;
     }
@@ -68,6 +75,7 @@ export const getAbsoluteOffsetToParent = (
       return getTextLengthFromPreviousSiblings(elem);
     } else {
       // 'How did you get that? Way too complex structure, not supported',
+      console.warn('[getAbsoluteOffsetToParent] Too complex structure, not supported');
       return 0;
     }
   }
@@ -85,7 +93,17 @@ export const getRelativeOffset = (absoluteOffset: number, parentNode: Node) => {
     runningOffset += Array.from(child.textContent?.replaceAll('\n', '') || '').length;
 
     const node = child.childNodes[0] || child;
+    if (runningOffset === absoluteOffset) {
+      const allCharTillHere = Array.from(node.textContent || '')
+        .slice(0, relativeOffset)
+        .join('');
+      const allNewLinesInText = allCharTillHere.split('\n').length - 1;
+
+      return { node: node, offset: relativeOffset + allNewLinesInText };
+    }
+
     if (runningOffset > absoluteOffset) {
+      // If we are past the offset, return the previous child, with the relative offset
       return { node: node, offset: relativeOffset };
     }
 

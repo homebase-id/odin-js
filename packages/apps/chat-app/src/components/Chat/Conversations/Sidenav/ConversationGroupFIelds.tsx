@@ -12,6 +12,7 @@ export const GroupContactSearch = ({
   const [query, setQuery] = useState<string | undefined>(undefined);
 
   const { data: contacts } = useAllContacts(true);
+
   const contactResults = contacts
     ? contacts
         .map((dsr) => dsr.fileMetadata.appData.content)

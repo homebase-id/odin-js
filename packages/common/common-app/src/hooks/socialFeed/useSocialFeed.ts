@@ -34,8 +34,7 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
         (lastPage?.cursorState || lastPage?.ownerCursorState)
           ? { cursorState: lastPage.cursorState, ownerCursorState: lastPage.ownerCursorState }
           : undefined,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 2, // 2 minutes
       enabled: channelsFetched,
     }),
   };

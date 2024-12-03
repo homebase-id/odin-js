@@ -15,12 +15,12 @@ import {
   useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { Cog, Times, Bell } from '@homebase-id/common-app/icons';
-import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../../hooks/apps/useApp';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useSearchParams } from 'react-router-dom';
-import { useContact } from '../../hooks/contacts/useContact';
+import { useContact } from '@homebase-id/common-app';
 import { ApiType, DotYouClient, PushNotification } from '@homebase-id/js-lib/core';
 import PushNotificationsDialog from '../../components/Notifications/PushNotificationsDialog/PushNotificationsDialog';
 
@@ -123,6 +123,17 @@ const Notifications = () => {
       />
       {flattenedNotifications?.length ? (
         <>
+          <div className="mx-2 -mb-5 mt-5 flex max-w-sm flex-row">
+            <ActionButton
+              type="mute"
+              size="none"
+              onClick={doClearAll}
+              state={removeStatus !== 'success' ? removeStatus : undefined}
+              className="ml-auto text-sm text-gray-500 hover:text-gray-800 dark:hover:text-gray-100"
+            >
+              {t('Clear all')}
+            </ActionButton>
+          </div>
           <div className="flex flex-col gap-3 px-2">
             {Object.keys(groupedNotificationsPerDay).map((day) => (
               <NotificationDay
@@ -144,13 +155,13 @@ const Notifications = () => {
               size="none"
               onClick={doClearAll}
               state={removeStatus !== 'success' ? removeStatus : undefined}
-              className="ml-auto opacity-50 hover:opacity-100"
+              className="ml-auto text-sm text-gray-500 hover:text-gray-800 dark:hover:text-gray-100"
             >
               {t('Clear all')}
             </ActionButton>
           </div>
         </>
-      ) : (
+      ) : fetchingNotifications ? null : (
         <SubtleMessage>{t('No notifications')}</SubtleMessage>
       )}
 

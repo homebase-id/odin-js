@@ -84,6 +84,18 @@ export const storeIdentity = (identity: string) => {
   }
 };
 
+export const removeIdentity = (identity: string) => {
+  try {
+    const previousIdentities = getIdentityFromStorage();
+    window.localStorage.setItem(
+      LOCAL_STORAGE_PREV_IDENTITY_KEY,
+      JSON.stringify([...previousIdentities.filter((id) => id !== identity)])
+    );
+  } catch (ex) {
+    console.debug('window.localStorage is not accessible');
+  }
+};
+
 export const authorize = async (identity: string, params: URLSearchParams) => {
   if (!window.top) throw new Error('window.top is not accessible');
 

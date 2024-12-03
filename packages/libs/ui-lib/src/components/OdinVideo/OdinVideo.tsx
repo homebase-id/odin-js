@@ -44,6 +44,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
     className,
     onPlay,
     systemFileType,
+    lastModified,
   } = videoProps;
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -68,7 +69,8 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
     globalTransitId,
     fileKey,
     targetDrive,
-    systemFileType
+    systemFileType,
+    lastModified
   );
   const { metadata: videoMetaData, fileHeader } = data || {};
 

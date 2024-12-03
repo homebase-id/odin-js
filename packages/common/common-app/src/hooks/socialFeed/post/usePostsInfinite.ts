@@ -84,8 +84,7 @@ export const usePostsInfinite = ({
     queryFn: ({ pageParam }) => fetchBlogData({ channelId, pageParam }),
     getNextPageParam: (lastPage) =>
       lastPage?.results?.length >= BLOG_POST_INFIITE_PAGE_SIZE ? lastPage.cursorState : undefined,
-    refetchOnWindowFocus: false,
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 60, // 1 hour
     enabled: enabled,
   });
 };

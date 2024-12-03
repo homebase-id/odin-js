@@ -16,7 +16,7 @@ import {
 import { invalidateCircles } from './useCircles';
 import { formatGuidId } from '@homebase-id/js-lib/helpers';
 import { invalidateDomainInfo } from '../connections/useDomain';
-import { invalidateConnectionInfo } from '../connections/useConnection';
+import { invalidateConnectionInfo } from '../connections/useConnectionInfo';
 import { invalidateConnectionGrantStatus } from '../connections/useConnectionGrantStatus';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 

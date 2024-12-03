@@ -9,7 +9,7 @@ import {
 } from '@homebase-id/common-app';
 import { Times } from '@homebase-id/common-app/icons';
 import { useEffect, useState } from 'react';
-import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import {
   hasDebugFlag,
   jsonStringify64,

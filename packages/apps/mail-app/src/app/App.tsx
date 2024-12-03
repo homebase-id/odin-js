@@ -36,7 +36,6 @@ const DebugDataPage = lazy(() =>
   import('../templates/Mail/DebugData').then((mailApp) => ({ default: mailApp.DebugDataPage }))
 );
 
-import '@homebase-id/ui-lib/dist/style.css';
 import './App.css';
 
 const AUTH_PATH = MAIL_ROOT_PATH + '/auth';
@@ -52,18 +51,11 @@ import {
 } from '@homebase-id/common-app';
 import { useValidateAuthorization } from '../hooks/auth/useAuth';
 
-export const REACT_QUERY_CACHE_KEY = 'MAIL_REACT_QUERY_OFFLINE_CACHE';
-
 // Explicit includes to avoid persisting media items, or large data in general
 const REACT_QUERY_INCLUDED_QUERY_KEYS = [
   'mail-conversations',
-  'connection-details',
-  'push-notifications',
-  'site-data',
   'mail-settings',
-
-  // Small data (blobs to local file Uri)
-  'image',
+  'process-mail-inbox',
 ];
 
 function App() {
@@ -131,7 +123,7 @@ function App() {
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
       <OdinQueryClient
-        cacheKey={REACT_QUERY_CACHE_KEY}
+        cacheKey={'APP_REACT_QUERY_OFFLINE_CACHE'}
         cachedQueryKeys={REACT_QUERY_INCLUDED_QUERY_KEYS}
         type="indexeddb"
       >

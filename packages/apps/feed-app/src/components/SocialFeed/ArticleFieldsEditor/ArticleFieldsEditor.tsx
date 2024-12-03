@@ -11,7 +11,7 @@ import {
   Label,
   ActionButton,
   Textarea,
-  useImage,
+  useRawImage,
   ImageSelector,
 } from '@homebase-id/common-app';
 import { Arrow } from '@homebase-id/common-app/icons';
@@ -59,7 +59,7 @@ export const InnerFieldEditors = ({
       .uniqueId || (channel.fileMetadata.appData.uniqueId as string);
 
   const [isEditTeaser, setIsEditTeaser] = useState(true);
-  const { data: imageData } = useImage({
+  const { data: imageData } = useRawImage({
     odinId,
     imageFileId: postFile.fileId,
     imageFileKey: postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey,

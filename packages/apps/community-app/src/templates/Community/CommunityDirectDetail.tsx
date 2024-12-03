@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 
 import { ChatDetail } from '@homebase-id/chat-app/src/templates/Chat/ChatDetail';
 import { useDotYouClientContext } from '@homebase-id/common-app';
-import { getNewXorId } from '@homebase-id/js-lib/helpers';
+import { getNewXorId, isAGuidId } from '@homebase-id/js-lib/helpers';
 import { ConversationWithYourselfId } from '@homebase-id/chat-app/src/providers/ConversationProvider';
 import { useConversation } from '@homebase-id/chat-app/src/hooks/chat/useConversation';
 import { CommunityDirectComposer } from '../../components/Community/Message/CommunityDirectComposer';
@@ -28,7 +28,7 @@ export const CommunityDirectDetail = () => {
       if (dmKey === loggedOnIdentity) {
         setConversationId(ConversationWithYourselfId);
       } else {
-        setConversationId(await getNewXorId(loggedOnIdentity, dmKey));
+        setConversationId(isAGuidId(dmKey) ? dmKey : await getNewXorId(loggedOnIdentity, dmKey));
       }
     })();
   }, [dmKey]);
@@ -62,7 +62,7 @@ export const CommunityDirectDetail = () => {
             communityTagId={communityId}
             key={conversationId || dmKey}
             options={{
-              rootPath: `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}`,
+              rootPath: `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/direct`,
               composer: CommunityDirectComposer,
             }}
           />

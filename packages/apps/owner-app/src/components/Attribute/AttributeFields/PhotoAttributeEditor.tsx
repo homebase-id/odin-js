@@ -1,4 +1,4 @@
-import { Label, t, ImageSelector, useImage } from '@homebase-id/common-app';
+import { Label, t, ImageSelector, useRawImage } from '@homebase-id/common-app';
 import { MinimalProfileFields, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 
@@ -14,7 +14,7 @@ export const PhotoAttributeEditor = ({
   onChange: (e: { target: { value: unknown; name: string } }) => void;
 }) => {
   const targetDrive = GetTargetDriveFromProfileId(attribute.profileId);
-  const { data: imageData } = useImage({
+  const { data: imageData } = useRawImage({
     imageFileId: fileId,
     imageFileKey: attribute.data?.[MinimalProfileFields.ProfileImageKey],
     imageDrive: targetDrive,

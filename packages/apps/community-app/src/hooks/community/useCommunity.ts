@@ -163,9 +163,7 @@ export const useCommunity = (props?: useCommunityProps) => {
     fetch: useQuery({
       queryKey: ['community', communityId],
       queryFn: () => fetchCommunity({ odinId, communityId }),
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      staleTime: 1000 * 60 * 10, // 10 minutes
       enabled: !!odinId && !!communityId,
     }),
     save: useMutation({

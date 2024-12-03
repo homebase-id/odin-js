@@ -33,7 +33,7 @@ const FollowHomebase = lazy(
 const PostPreview = lazy(() => import('../../components/SocialFeed/MainContent/PostPreview'));
 
 import { FEED_APP_ID, ExtendPermissionDialog } from '@homebase-id/common-app';
-import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import { drives, permissions } from '../../hooks/auth/useAuth';
 import { useAutofixDefaultConfig } from '../../hooks/useAutofixDefaultConfig';
 

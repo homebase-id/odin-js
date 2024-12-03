@@ -6,9 +6,9 @@ import {
   Attribute,
 } from '@homebase-id/js-lib/profile';
 import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
-import { FallbackImg, LoadingBlock, useImage } from '@homebase-id/common-app';
+import { FallbackImg, LoadingBlock, useRawImage } from '@homebase-id/common-app';
 import { HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
-import { getInitialsOfNameAttribute } from '@homebase-id/js-lib/helpers';
+import { compareAcl } from '@homebase-id/js-lib/helpers';
 
 interface YourSignatureProps {
   className?: string;
@@ -22,7 +22,9 @@ const filterAttributes = (attributes: HomebaseFile<Attribute>[]) => {
         Object.keys(attr.fileMetadata.appData.content.data)?.length !== 0 &&
         attr.serverMetadata?.accessControlList.requiredSecurityGroup === SecurityGroupType.Anonymous
     )
-    ?.sort((attrA, attrB) => attrA.priority - attrB.priority);
+    ?.sort((attrA, attrB) =>
+      compareAcl(attrA.serverMetadata?.accessControlList, attrB.serverMetadata?.accessControlList)
+    );
 };
 
 const YourSignature = ({ className }: YourSignatureProps) => {
@@ -40,7 +42,7 @@ const YourSignature = ({ className }: YourSignatureProps) => {
 
   const filteredPhotoAttributes = filterAttributes(photoAttributes || []);
 
-  const { data: imageData } = useImage({
+  const { data: imageData } = useRawImage({
     imageFileId: filteredPhotoAttributes?.[0]?.fileId,
     imageFileKey:
       filteredPhotoAttributes?.[0]?.fileMetadata.appData.content.data?.[
@@ -54,21 +56,18 @@ const YourSignature = ({ className }: YourSignatureProps) => {
     filteredNameAttributes?.[0]?.fileMetadata.appData.content.data?.[
       MinimalProfileFields.DisplayName
     ];
-  const initials = getInitialsOfNameAttribute(
-    filteredNameAttributes?.[0]?.fileMetadata.appData.content
-  );
 
   return (
     <div className={`${className ?? ''}`}>
-      <div className="-mr-3 flex flex-row ">
+      <div className="-mr-3 flex flex-row">
         <div className="aspect-square w-1/4 max-w-[3rem]">
           {photoAttributesLoading ? (
             <LoadingBlock className={`aspect-square`} />
           ) : !imageUrl ? (
             <FallbackImg
-              initials={initials}
+              odinId={window.location.hostname}
+              nameData={filteredNameAttributes?.[0]?.fileMetadata.appData.content}
               className="aspect-square h-[3rem] w-[3rem] sm:text-4xl"
-              size="none"
             />
           ) : (
             <img src={imageUrl} className="aspect-square object-cover object-top" />

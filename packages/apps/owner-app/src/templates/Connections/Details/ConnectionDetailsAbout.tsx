@@ -80,7 +80,7 @@ const ExperienceBlock = ({
         />
       ) : domain ? (
         <div className="w-1/6 flex-shrink-0 flex-grow-0">
-          <CompanyImage domain={domain} fallbackSize="md" />
+          <CompanyImage domain={domain} />
         </div>
       ) : null}
       <div className="flex-grow">

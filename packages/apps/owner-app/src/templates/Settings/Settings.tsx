@@ -1,5 +1,5 @@
 import { t } from '@homebase-id/common-app';
-import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import Submenu from '../../components/SubMenu/SubMenu';
 import { useParams } from 'react-router-dom';
 
@@ -42,7 +42,7 @@ const Settings = () => {
           //   path: `/owner/settings/ui`,
           // },
         ]}
-        className="-mt-6 mb-4"
+        className="mb-4"
       />
       {(sectionId === 'privacy' || !sectionId) && <NetworkVisibilitySettings />}
       {sectionId === 'reactions' && <ReactionSettings />}

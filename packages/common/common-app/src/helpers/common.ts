@@ -1,5 +1,6 @@
 import { InfiniteData } from '@tanstack/react-query';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { compareAcl } from '@homebase-id/js-lib/helpers';
 import { Attribute } from '@homebase-id/js-lib/profile';
 
 export const stringify = (obj: Record<string, unknown>) => {
@@ -78,10 +79,11 @@ export const getHighestPrioAttributesFromMultiTypes = (
 
     if (highAttr) {
       if (
-        (highAttr.priority || 0) < (attr.priority || 0) ||
-        ((highAttr.priority || 0) === (attr.priority || 0) &&
-          highAttr.fileMetadata.appData.content.priority <
-            attr.fileMetadata.appData.content.priority)
+        compareAcl(
+          highAttr.serverMetadata?.accessControlList,
+          attr.serverMetadata?.accessControlList
+        ) ||
+        highAttr.fileMetadata.appData.content.priority < attr.fileMetadata.appData.content.priority
       ) {
         return highestPrioArr;
       } else {
@@ -97,4 +99,12 @@ export const getHighestPrioAttributesFromMultiTypes = (
       return [...highestPrioArr, attr];
     }
   }, [] as HomebaseFile<Attribute>[]);
+};
+
+export const moveElementInArray = (arr: Array<unknown>, fromIndex: number, toIndex: number) => {
+  const element = arr[fromIndex];
+  arr.splice(fromIndex, 1);
+  arr.splice(toIndex, 0, element);
+
+  return arr;
 };

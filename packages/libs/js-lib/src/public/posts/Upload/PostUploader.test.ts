@@ -98,7 +98,6 @@ const existingPostFile: HomebaseFile<Tweet> = {
     { aesKey: new Uint8Array(16).fill(1), iv: new Uint8Array(16).fill(1) },
     new Uint8Array(16).fill(1)
   ),
-  priority: 0,
 };
 
 describe('PostUploader for local files', () => {

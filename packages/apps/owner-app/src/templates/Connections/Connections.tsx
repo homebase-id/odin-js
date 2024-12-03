@@ -15,24 +15,22 @@ import {
   AuthorName,
   ErrorNotification,
 } from '@homebase-id/common-app';
-import PersonIncomingRequest from '../../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
-import PersonOutgoingRequest from '../../../components/Connection/PersonOutgoingRequest/PersonOutgoingRequest';
-import { SectionTitle } from '../../../components/ui/Sections/Section';
+import PersonIncomingRequest from '../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
+import PersonOutgoingRequest from '../../components/Connection/PersonOutgoingRequest/PersonOutgoingRequest';
+import { SectionTitle } from '../../components/ui/Sections/Section';
 import { useEffect, useState } from 'react';
-import PersonActive from '../../../components/Connection/PersonActive/PersonActive';
-import { DotYouProfile } from '@homebase-id/js-lib/network';
-import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { OutgoingConnectionDialog } from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
-import { IntroductionDialog } from '../../../components/Connection/ConnectionDialogs/IntroductionDialog';
-import { Persons, Plus } from '@homebase-id/common-app/icons';
-import PersonCard from '../../../components/Connection/PersonCard/PersonCard';
+import { PageMeta } from '@homebase-id/common-app';
+import { OutgoingConnectionDialog } from '../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
+import { IntroductionDialog } from '../../components/Connection/ConnectionDialogs/IntroductionDialog';
+import { HeartBeat, Persons, Plus } from '@homebase-id/common-app/icons';
+import PersonCard from '../../components/Connection/PersonCard/PersonCard';
+import ConnectionCard from '../../components/Connection/ConnectionCard/ConnectionCard';
 
 const Connections = () => {
+  const [isShowDebugInfo, setIsShowDebugInfo] = useState(false);
   const [hasActiveConnections, setActiveConnections] = useState(true);
   const [hasPendingConnections, setPendingConnections] = useState(true);
   const [hasSentConnections, setSentConnections] = useState(true);
-  const [hasIncomingIntroductions, setIncomingIntroductions] = useState(true);
-  const [hasOutgoingIntroductions, setOutgoingIntroductions] = useState(true);
 
   const [isSentConnectionOpen, setIsSentConnectionOpen] = useState(false);
   const [isIntroduceOpen, setIsIntroduceOpen] = useState(false);
@@ -55,6 +53,17 @@ const Connections = () => {
                   icon: Persons,
                   onClick: () => setIsIntroduceOpen(true),
                 },
+                isShowDebugInfo
+                  ? {
+                      label: t('Hide introductions'),
+                      icon: HeartBeat,
+                      onClick: () => setIsShowDebugInfo(false),
+                    }
+                  : {
+                      label: t('Show introductions'),
+                      icon: HeartBeat,
+                      onClick: () => setIsShowDebugInfo(true),
+                    },
               ]}
               type="mute"
             />
@@ -62,50 +71,47 @@ const Connections = () => {
         }
       />
 
-      <div className="-mt-6">
-        {!hasActiveConnections &&
-        !hasSentConnections &&
-        !hasPendingConnections &&
-        !hasOutgoingIntroductions &&
-        !hasIncomingIntroductions ? (
-          <SubtleMessage className="flex flex-row items-center gap-3">
-            <span>{t('Ready to add some connections?')}</span>
-            <ActionButton
-              onClick={(e) => {
-                e.preventDefault();
-                setIsSentConnectionOpen(true);
+      {!hasActiveConnections && !hasSentConnections && !hasPendingConnections ? (
+        <SubtleMessage className="flex flex-row items-center gap-3">
+          <span>{t('Ready to add some connections?')}</span>
+          <ActionButton
+            onClick={(e) => {
+              e.preventDefault();
+              setIsSentConnectionOpen(true);
 
-                return false;
-              }}
-              type="secondary"
-              icon={Plus}
-            >
-              {t('Add')}
-            </ActionButton>
-          </SubtleMessage>
-        ) : null}
+              return false;
+            }}
+            type="secondary"
+            icon={Plus}
+          >
+            {t('Add')}
+          </ActionButton>
+        </SubtleMessage>
+      ) : null}
 
-        <PendingConnectionSection setNoPendingConnections={() => setPendingConnections(false)} />
-        <SentConnectionSection setNoSentConnections={() => setSentConnections(false)} />
-        <IncomingIntroductionsSection
-          setNoIncomingIntroductions={() => setIncomingIntroductions(false)}
-        />
-        <OutgoingIntroductionsSection
-          setNoSentConnections={() => setOutgoingIntroductions(false)}
-        />
-        <ActiveConnectionSection setNoActiveConnections={() => setActiveConnections(false)} />
-        <OutgoingConnectionDialog
-          title={t('Send connection request')}
-          isOpen={isSentConnectionOpen}
-          onConfirm={() => setIsSentConnectionOpen(false)}
-          onCancel={() => setIsSentConnectionOpen(false)}
-        />
-        <IntroductionDialog
-          isOpen={isIntroduceOpen}
-          onConfirm={() => setIsIntroduceOpen(false)}
-          onCancel={() => setIsIntroduceOpen(false)}
-        />
-      </div>
+      <PendingConnectionSection setNoPendingConnections={() => setPendingConnections(false)} />
+      <SentConnectionSection setNoSentConnections={() => setSentConnections(false)} />
+
+      <ActiveConnectionSection setNoActiveConnections={() => setActiveConnections(false)} />
+
+      {isShowDebugInfo ? (
+        <>
+          <IncomingIntroductionsSection />
+          <OutgoingIntroductionsSection />
+        </>
+      ) : null}
+
+      <OutgoingConnectionDialog
+        title={t('Send connection request')}
+        isOpen={isSentConnectionOpen}
+        onConfirm={() => setIsSentConnectionOpen(false)}
+        onCancel={() => setIsSentConnectionOpen(false)}
+      />
+      <IntroductionDialog
+        isOpen={isIntroduceOpen}
+        onConfirm={() => setIsIntroduceOpen(false)}
+        onCancel={() => setIsIntroduceOpen(false)}
+      />
     </>
   );
 };
@@ -243,7 +249,7 @@ const SentConnectionSection = ({ setNoSentConnections }: { setNoSentConnections:
 const IncomingIntroductionsSection = ({
   setNoIncomingIntroductions,
 }: {
-  setNoIncomingIntroductions: () => void;
+  setNoIncomingIntroductions?: () => void;
 }) => {
   const {
     fetch: { data: introductions, isLoading: introductionsLoading },
@@ -251,10 +257,8 @@ const IncomingIntroductionsSection = ({
   } = useReceivedIntroductions();
 
   useEffect(() => {
-    if (!introductions?.length) setNoIncomingIntroductions();
+    if (!introductions?.length && setNoIncomingIntroductions) setNoIncomingIntroductions();
   }, [introductions]);
-
-  if (!introductions?.length) return null;
 
   return (
     <>
@@ -286,23 +290,27 @@ const IncomingIntroductionsSection = ({
           </>
         )}
 
-        {introductions?.map((introduction) => (
-          <PersonCard
-            className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6"
-            odinId={introduction.identity}
-            key={introduction.identity}
-            canSave={false}
-            href={`/owner/connections/${introduction.identity}`}
-          >
-            <h2 className="font-thiner dark:text-white">
-              <DomainHighlighter>{introduction.identity}</DomainHighlighter>
-            </h2>
-            <p className="text-sm text-slate-400">
-              {t('Introduced by')}{' '}
-              <AuthorName excludeLink={true} odinId={introduction?.introducerOdinId} />
-            </p>
-          </PersonCard>
-        ))}
+        {!introductions?.length ? (
+          <p className="text-slate-400">{t('No incoming introductions')}</p>
+        ) : (
+          introductions?.map((introduction) => (
+            <PersonCard
+              className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6"
+              odinId={introduction.identity}
+              key={introduction.identity}
+              canSave={false}
+              href={`/owner/connections/${introduction.identity}`}
+            >
+              <h2 className="font-thiner dark:text-white">
+                <DomainHighlighter>{introduction.identity}</DomainHighlighter>
+              </h2>
+              <p className="text-sm text-slate-400">
+                {t('Introduced by')}{' '}
+                <AuthorName excludeLink={true} odinId={introduction?.introducerOdinId} />
+              </p>
+            </PersonCard>
+          ))
+        )}
       </div>
     </>
   );
@@ -311,7 +319,7 @@ const IncomingIntroductionsSection = ({
 const OutgoingIntroductionsSection = ({
   setNoSentConnections,
 }: {
-  setNoSentConnections: () => void;
+  setNoSentConnections?: () => void;
 }) => {
   const [activePage, setActivePage] = useState(1);
   const { data, isLoading, isFetchedAfterMount, hasNextPage, fetchNextPage } = useSentConnections({
@@ -320,7 +328,7 @@ const OutgoingIntroductionsSection = ({
   const flatSentConnections = data?.pages?.map((page) => page.results).flat();
 
   useEffect(() => {
-    if (!isFetchedAfterMount) return;
+    if (!isFetchedAfterMount || !setNoSentConnections) return;
     if (data?.pages[0]?.results?.length === 0) setNoSentConnections();
 
     if (data?.pages[activePage - 1]) {
@@ -329,12 +337,6 @@ const OutgoingIntroductionsSection = ({
       fetchNextPage();
     }
   }, [activePage, isFetchedAfterMount]);
-
-  if (!flatSentConnections?.length) return null;
-
-  if (!flatSentConnections?.length) {
-    return null;
-  }
 
   return (
     <>
@@ -356,13 +358,17 @@ const OutgoingIntroductionsSection = ({
           </>
         )}
 
-        {flatSentConnections?.map((sentRequest) => (
-          <PersonOutgoingRequest
-            className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6"
-            recipientOdinId={sentRequest.recipient}
-            key={sentRequest.recipient}
-          />
-        ))}
+        {!flatSentConnections?.length ? (
+          <p className="text-slate-400">{t('No outgoing introductions')}</p>
+        ) : (
+          flatSentConnections?.map((sentRequest) => (
+            <PersonOutgoingRequest
+              className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6"
+              recipientOdinId={sentRequest.recipient}
+              key={sentRequest.recipient}
+            />
+          ))
+        )}
       </div>
       <div className="flex flex-row justify-center pt-5 md:hidden">
         <Pager
@@ -432,9 +438,13 @@ const ActiveConnectionSection = ({
 
             {activeConnections?.pages?.[activePage - 1]?.results?.map((activeConnection) =>
               typeof activeConnection === 'object' ? (
-                <PersonActive
-                  className="min-w-[5rem]"
-                  dotYouProfile={activeConnection as DotYouProfile}
+                <ConnectionCard
+                  odinId={activeConnection.odinId}
+                  href={
+                    (activeConnection.odinId && `/owner/connections/${activeConnection.odinId}`) ??
+                    undefined
+                  }
+                  canSave={true}
                   key={activeConnection.odinId}
                 />
               ) : null

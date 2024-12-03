@@ -162,10 +162,10 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
     <>
       <div className={className}>
         {!isPostsLoaded ? (
-          <div className="-mx-4">
-            <LoadingBlock className="m-4 h-10" />
-            <LoadingBlock className="m-4 h-10" />
-            <LoadingBlock className="m-4 h-10" />
+          <div className="flex flex-col gap-4 px-4">
+            <LoadingBlock className="h-10" />
+            <LoadingBlock className="h-10" />
+            <LoadingBlock className="h-10" />
           </div>
         ) : flattenedPosts?.length ? (
           <div ref={parentRef}>

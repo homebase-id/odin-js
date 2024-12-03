@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import { ActionButton } from '@homebase-id/common-app';
+import { moveElementInArray, ActionButton } from '@homebase-id/common-app';
 import { ArrowDown, ArrowUp } from '@homebase-id/common-app/icons';
-import { moveElementInArray } from '../../templates/DemoData/helpers';
-
 const Order = ({
   elements,
   onChange,

@@ -151,7 +151,6 @@ const ServiceDetails = ({ targetDomain }: { targetDomain: string }) => {
         <CompanyImage
           domain={targetDomain}
           className="w-24 flex-shrink-0 overflow-hidden rounded-full sm:mr-4"
-          fallbackSize="md"
         />
 
         <h1 className="text-3xl md:text-4xl">
@@ -203,7 +202,6 @@ const AppDetails = ({
         <CompanyImage
           domain={targetDomain}
           className="w-24 flex-shrink-0 overflow-hidden rounded-full sm:mr-4"
-          fallbackSize="md"
         />
 
         <h1 className="text-3xl md:text-4xl">

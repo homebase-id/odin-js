@@ -2,14 +2,17 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 
 import { ActionButton, ErrorNotification, t } from '@homebase-id/common-app';
 
-import { useEffect, useState } from 'react';
+import { lazy, useEffect, useState } from 'react';
 
 import { isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
 import { useCommunityMessage } from '../../../../hooks/community/messages/useCommunityMessage';
-import { RichTextEditor } from '@homebase-id/rich-text-editor';
-
+const RichTextEditor = lazy(() =>
+  import('@homebase-id/rich-text-editor').then((rootExport) => ({
+    default: rootExport.RichTextEditor,
+  }))
+);
 export const CommunityMessageEditor = ({
   msg,
   community,

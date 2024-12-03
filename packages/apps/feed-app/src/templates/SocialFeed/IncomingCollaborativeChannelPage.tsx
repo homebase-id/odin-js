@@ -7,7 +7,7 @@ import {
   FEED_ROOT_PATH,
 } from '@homebase-id/common-app';
 import { Quote, Save } from '@homebase-id/common-app/icons';
-import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { PageMeta } from '@homebase-id/common-app';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { stringGuidsEqual, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { RemoteCollaborativeChannelDefinition } from '@homebase-id/js-lib/public';

@@ -8,7 +8,7 @@ export const useVerifyToken = () => {
   const fetchData = async () => await hasValidOwnerToken();
 
   return useQuery({
-    queryKey: ['verifyToken'],
+    queryKey: ['verify-owner-token'],
     queryFn: fetchData,
     refetchOnMount: false,
     staleTime: MINUTE_IN_MS * 10,
@@ -17,5 +17,5 @@ export const useVerifyToken = () => {
 };
 
 export const invalidateVerifyToken = (queryClient: QueryClient) => {
-  queryClient.invalidateQueries({ queryKey: ['verifyToken'] });
+  queryClient.invalidateQueries({ queryKey: ['verify-owner-token'] });
 };

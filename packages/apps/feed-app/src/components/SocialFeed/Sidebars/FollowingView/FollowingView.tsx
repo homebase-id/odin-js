@@ -30,15 +30,7 @@ const FollowingView = ({ className }: { className?: string }) => {
       ) : null}
       {followingFetched && followingList
         ? followingList.map((odinId, index) => {
-            return (
-              <IdentityTeaser
-                key={index}
-                odinId={odinId}
-                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
-                size="sm"
-                isBorderLess={true}
-              />
-            );
+            return <IdentityTeaser key={index} odinId={odinId} size="sm" isBorderLess={true} />;
           })
         : null}
     </div>

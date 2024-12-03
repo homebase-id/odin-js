@@ -1,6 +1,5 @@
 import { useMatch, useParams } from 'react-router-dom';
-import { t, useConnection } from '@homebase-id/common-app';
-import { useContact } from '../../../hooks/contacts/useContact';
+import { t, useDetailedConnectionInfo } from '@homebase-id/common-app';
 import { ConnectionSummary } from '../../../components/Connection/ConnectionSummary/ConnectionSummary';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import { IdentityPageMetaAndActions } from './IdentityPageMetaAndActions';
@@ -20,14 +19,9 @@ const ConnectionDetails = () => {
 
   const {
     fetch: { data: connectionInfo, isLoading: connectionInfoLoading },
-  } = useConnection({ odinId: odinId });
+  } = useDetailedConnectionInfo({ odinId: odinId });
 
-  const { data: contactData, isLoading: contactDataLoading } = useContact({
-    odinId: odinId,
-    canSave: connectionInfo?.status === 'connected',
-  }).fetch;
-
-  if (connectionInfoLoading || contactDataLoading) return <LoadingDetailPage />;
+  if (connectionInfoLoading) return <LoadingDetailPage />;
   if (!odinId) return <>{t('No matching connection found')}</>;
 
   return (
@@ -55,7 +49,7 @@ const ConnectionDetails = () => {
               }
             : undefined,
         ]}
-        className="-mt-6 mb-4"
+        className="mb-4"
       />
       <IdentityAlerts odinId={odinId} />
 
@@ -66,7 +60,7 @@ const ConnectionDetails = () => {
       ) : (settingsMatch || settingsActionMatch) && connectionInfo?.status === 'connected' ? (
         <ConnectedDetailsSettings odinId={odinId} connectionInfo={connectionInfo} />
       ) : (
-        <>{contactData && <ConnectionSummary odinId={odinId} />}</>
+        <ConnectionSummary odinId={odinId} />
       )}
     </>
   );

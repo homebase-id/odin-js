@@ -169,15 +169,17 @@ const ConversationBody = ({
   const plainLastMessageContent = getPlainTextFromRichText(lastMessageContent?.message);
 
   useEffect(() => {
-    if (!lastMessage) {
-      if (conversation) {
-        const date = conversation?.fileMetadata.updated;
-        setOrder && date && setOrder(Math.max(new Date().getTime() - date, 2));
-      }
+    if (lastMessage) {
+      const date = lastMessage?.fileMetadata.created;
+      setOrder && date && setOrder(Math.max(new Date().getTime() - date, 2));
       return;
     }
-    const date = lastMessage?.fileMetadata.created;
-    setOrder && date && setOrder(Math.max(new Date().getTime() - date, 2));
+    if (conversation) {
+      const date = conversation?.fileMetadata.updated;
+      setOrder && date && setOrder(Math.max(new Date().getTime() - date, 2));
+      return;
+    }
+    setOrder && setOrder(2);
   }, [lastMessage, conversation]);
   const hasNoContextMenu = stringGuidsEqual(conversationId, ConversationWithYourselfId);
 

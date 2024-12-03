@@ -47,8 +47,7 @@ export const useCommentSummary = ({
     fetch: useQuery({
       queryKey: ['comments-summary', authorOdinId, channelId, postGlobalTransitId],
       queryFn: () => fetch({ authorOdinId, channelId, postGlobalTransitId, reactionPreview }),
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 2, // 2 minutes
       enabled: !!authorOdinId && !!channelId && !!postGlobalTransitId,
     }),
   };

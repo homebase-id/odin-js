@@ -187,18 +187,12 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
     }),
     remove: useMutation({
       mutationFn: removeBroken,
-      onMutate: async (data) => {
-        const toRemoveAttr = data.attribute.fileMetadata.appData.content;
+      onMutate: async ({ attribute }) => {
+        const toRemoveAttr = attribute.fileMetadata.appData.content;
         if (!toRemoveAttr) return;
 
-        updateCacheAttributes(
-          queryClient,
-          toRemoveAttr.profileId,
-          toRemoveAttr.sectionId,
-          (data) => ({
-            ...data,
-            data: data.filter((attr) => attr.fileMetadata.appData.content.id !== toRemoveAttr.id),
-          })
+        updateCacheAttributes(queryClient, toRemoveAttr.profileId, toRemoveAttr.sectionId, (data) =>
+          data.filter((attr) => attr.fileMetadata.appData.content.id !== toRemoveAttr.id)
         );
 
         // Update section attributes
@@ -207,7 +201,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
           queryClient,
           profileId,
           sectionId,
-          (data) => data?.filter((attr) => attr.fileMetadata.appData.content.id !== toRemoveAttr.id)
+          (data) => data.filter((attr) => attr.fileMetadata.appData.content.id !== toRemoveAttr.id)
         );
 
         return { toRemoveAttr, previousAttributes };

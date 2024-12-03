@@ -50,7 +50,6 @@ export const ConversationWithYourself: HomebaseFile<UnifiedConversation> = {
     payloads: [],
   },
   serverMetadata: undefined,
-  priority: 0,
   sharedSecretEncryptedKeyHeader: {} as EncryptedKeyHeader,
 };
 

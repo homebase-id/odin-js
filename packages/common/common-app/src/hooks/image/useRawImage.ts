@@ -9,7 +9,7 @@ export interface ImageData {
   naturalSize?: ImageSize;
 }
 
-export const useImage = ({
+export const useRawImage = ({
   odinId,
   imageFileId,
   imageFileKey,
@@ -82,7 +82,7 @@ export const useImage = ({
   return {
     fetch: useQuery({
       queryKey: [
-        'common-image',
+        'raw-image',
         odinId || localHost,
         imageDrive?.alias,
         imageFileId,
@@ -100,9 +100,7 @@ export const useImage = ({
           probablyEncrypted,
           naturalSize
         ),
-      refetchOnMount: true,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      staleTime: 1000 * 60 * 60, // 1 hour
       enabled: !!imageFileId && imageFileId !== '' && !!imageFileKey && imageFileKey !== '',
     }),
   };

@@ -73,8 +73,8 @@ const AttributeFields = ({
       break;
     case BuiltInAttributes.Birthday:
       return (
-        <div className="-mx-2 flex flex-row">
-          <div className="mb-5 w-2/5 px-2">
+        <div className="flex flex-row">
+          <div className="mb-5 w-2/5">
             <Label htmlFor={`${fileId ?? 'new'}-Birthday`}>{t('Birthday')}</Label>
             <Input
               id={`${fileId ?? 'new'}-Birthday`}
@@ -92,8 +92,8 @@ const AttributeFields = ({
       break;
     case BuiltInAttributes.Email:
       return (
-        <div className="-mx-2 flex flex-row">
-          <div className="mb-5 w-2/5 px-2">
+        <div className="flex flex-row gap-2">
+          <div className="mb-5 w-2/5">
             <Label htmlFor={`${fileId ?? 'new'}-Label`}>{t('Label')}</Label>
             <Input
               id={`${fileId ?? 'new'}-Label`}
@@ -102,7 +102,7 @@ const AttributeFields = ({
               onChange={onChange}
             />
           </div>
-          <div className="mb-5 w-3/5 px-2">
+          <div className="mb-5 w-3/5">
             <Label htmlFor={`${fileId ?? 'new'}-Email`}>{t('Email')}</Label>
             <Input
               id={`${fileId ?? 'new'}-Email`}
@@ -236,8 +236,8 @@ const AttributeFields = ({
               onChange={onChange}
             />
           </div>
-          <div className="-mx-2 mb-5 flex flex-row">
-            <div className="w-1/2 px-2">
+          <div className="mb-5 flex flex-row gap-2">
+            <div className="w-1/2">
               <Label htmlFor={`${fileId ?? 'new'}-ccexpiration`}>
                 {t('Credit Card Expiration')}
               </Label>
@@ -248,7 +248,7 @@ const AttributeFields = ({
                 onChange={onChange}
               />
             </div>
-            <div className="w-1/2 px-2">
+            <div className="w-1/2">
               <Label htmlFor={`${fileId ?? 'new'}-cccvc`}>{t('Credit Card CVC')}</Label>
               <Input
                 id={`${fileId ?? 'new'}-cccvc`}
@@ -304,8 +304,8 @@ const NameAttributeEditor = ({
 
   return (
     <>
-      <div className="-mx-2 flex flex-col sm:flex-row">
-        <div className="mb-5 px-2 sm:w-2/5">
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="mb-5 sm:w-2/5">
           <Label htmlFor={`${fileId ?? 'new'}-givenName`}>{t('First name')}</Label>
           <Input
             id={`${fileId ?? 'new'}-givenName`}
@@ -315,7 +315,7 @@ const NameAttributeEditor = ({
           />
         </div>
         {showMore ? (
-          <div className="mb-5 px-2 sm:w-2/5">
+          <div className="mb-5 sm:w-2/5">
             <Label htmlFor={`${fileId ?? 'new'}-additionalName`}>{t('Additional Names')}</Label>
             <Input
               id={`${fileId ?? 'new'}-additionalName`}
@@ -325,7 +325,7 @@ const NameAttributeEditor = ({
             />
           </div>
         ) : null}
-        <div className="mb-5 px-2 sm:w-3/5">
+        <div className="mb-5 sm:w-3/5">
           <Label htmlFor={`${fileId ?? 'new'}-surname`}>{t('Surname')}</Label>
           <Input
             id={`${fileId ?? 'new'}-surname`}
@@ -404,8 +404,8 @@ const LocationAttributeEditor = ({
           />
         </div>
       ) : null}
-      <div className="flex-rox -mx-2 mb-5 flex">
-        <div className="w-2/5 px-2">
+      <div className="flex-rox mb-5 flex gap-2">
+        <div className="w-2/5">
           <Label htmlFor={`${fileId ?? 'new'}-Postcode`}>{t('Postcode')}</Label>
           <Input
             id={`${fileId ?? 'new'}-Postcode`}
@@ -414,7 +414,7 @@ const LocationAttributeEditor = ({
             onChange={onChange}
           />
         </div>
-        <div className="w-3/5 px-2">
+        <div className="w-3/5">
           <Label htmlFor={`${fileId ?? 'new'}-City`}>{t('City')}</Label>
           <Input
             id={`${fileId ?? 'new'}-City`}
@@ -480,8 +480,8 @@ const PhoneAttributeEditor = ({
   onChange: (e: { target: { value: unknown; name: string } }) => void;
 }) => {
   return (
-    <div className="-mx-2 flex flex-row">
-      <div className="mb-5 w-2/5 px-2">
+    <div className="flex flex-row gap-2">
+      <div className="mb-5 w-2/5">
         <Label htmlFor={`${fileId ?? 'new'}-Label`}>{t('Label')}</Label>
         <Input
           id={`${fileId ?? 'new'}-Label`}
@@ -490,7 +490,7 @@ const PhoneAttributeEditor = ({
           onChange={onChange}
         />
       </div>
-      <div className="mb-5 w-3/5 px-2">
+      <div className="mb-5 w-3/5">
         <Label htmlFor={`${fileId ?? 'new'}-Phone`}>{t('Phone')}</Label>
         <Input
           id={`${fileId ?? 'new'}-Phone`}
