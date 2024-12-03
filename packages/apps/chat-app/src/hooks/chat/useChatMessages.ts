@@ -23,6 +23,7 @@ import { SendReadReceiptResponseRecipientStatus } from '@homebase-id/js-lib/peer
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { updateCacheChatMessage } from './useChatMessage';
 
+const FIRST_PAGE_SIZE = 30;
 const PAGE_SIZE = 100;
 export const useChatMessages = (props?: { conversationId: string | undefined }) => {
   const { conversationId } = props || { conversationId: undefined };
@@ -31,7 +32,12 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
   const queryClient = useQueryClient();
 
   const fetchMessages = async (conversationId: string, cursorState: string | undefined) =>
-    await getChatMessages(dotYouClient, conversationId, cursorState, PAGE_SIZE);
+    await getChatMessages(
+      dotYouClient,
+      conversationId,
+      cursorState,
+      cursorState ? PAGE_SIZE : FIRST_PAGE_SIZE
+    );
 
   const markAsRead = async ({
     conversation,
@@ -91,8 +97,9 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
       queryKey: ['chat-messages', conversationId],
       initialPageParam: undefined as string | undefined,
       queryFn: ({ pageParam }) => fetchMessages(conversationId as string, pageParam),
-      getNextPageParam: (lastPage) =>
-        lastPage?.searchResults && lastPage?.searchResults?.length >= PAGE_SIZE
+      getNextPageParam: (lastPage, pages) =>
+        lastPage &&
+        lastPage.searchResults?.length >= (lastPage === pages[0] ? FIRST_PAGE_SIZE : PAGE_SIZE)
           ? lastPage.cursorState
           : undefined,
       enabled: !!conversationId,
@@ -175,7 +182,11 @@ export const insertNewMessagesForConversation = (
     }>
   >(['chat-messages', conversationId]);
 
-  if (newMessages.length > PAGE_SIZE || !extistingMessages || !extistingMessages.pages.length) {
+  if (
+    newMessages.length > FIRST_PAGE_SIZE ||
+    !extistingMessages ||
+    !extistingMessages.pages.length
+  ) {
     if (extistingMessages) {
       // Only reset the first page if we have data;
       queryClient.setQueryData(

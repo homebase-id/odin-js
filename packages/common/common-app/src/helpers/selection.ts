@@ -1,3 +1,6 @@
+import { hasDebugFlag } from '@homebase-id/js-lib/helpers';
+const isDebug = hasDebugFlag();
+
 export const getPreviousSiblings = (elem: Node) => {
   const sibs = [];
   while (elem.previousSibling) {
@@ -75,7 +78,7 @@ export const getAbsoluteOffsetToParent = (
       return getTextLengthFromPreviousSiblings(elem);
     } else {
       // 'How did you get that? Way too complex structure, not supported',
-      console.warn('[getAbsoluteOffsetToParent] Too complex structure, not supported');
+      isDebug && console.debug('[getAbsoluteOffsetToParent] Too complex structure, not supported');
       return 0;
     }
   }
