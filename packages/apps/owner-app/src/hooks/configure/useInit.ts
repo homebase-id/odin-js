@@ -52,7 +52,7 @@ export const useInit = () => {
     await SetupHome(dotYouClient);
 
     // Setup (default) Data
-    await SetupDefaultIdentity(dotYouClient, data);
+    await SetupDefaultIdentity(queryClient, dotYouClient, data);
     try {
       await SetupAutoFollow(dotYouClient);
     } catch (ex) {
