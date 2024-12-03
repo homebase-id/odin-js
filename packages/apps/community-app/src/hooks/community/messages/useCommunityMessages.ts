@@ -93,7 +93,7 @@ export const invalidateCommunityMessages = (
 ) => {
   const queryKey = [
     'community-messages',
-    communityId,
+    formatGuidId(communityId),
     formatGuidId(threadId || channelId || communityId),
   ].filter(Boolean);
 
@@ -138,7 +138,7 @@ export const updateCacheCommunityMessages = (
 ) => {
   const queryKey = [
     'community-messages',
-    communityId,
+    formatGuidId(communityId),
     formatGuidId(threadId || channelId || communityId),
   ];
 
@@ -205,7 +205,7 @@ export const getCommunityMessagesInfiniteQueryOptions: (
   return {
     queryKey: [
       'community-messages',
-      communityId,
+      formatGuidId(communityId),
       formatGuidId(threadId || channelId || communityId),
     ],
     initialPageParam: undefined as string | undefined,

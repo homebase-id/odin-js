@@ -218,8 +218,9 @@ const processCommunityMessagesBatch = async (
         )
       ).filter(Boolean) as (HomebaseFile<CommunityMessage> | DeletedHomebaseFile)[];
       const threadMessages = updatedcommunityMessages.filter(
-        (msg) => !stringGuidsEqual(msg.fileMetadata.appData.groupId, communityId)
+        (msg) => msg.fileSystemType.toLowerCase() === 'comment'
       );
+
       threadMessages.forEach((msg) => {
         insertNewMessage(queryClient, msg, communityId);
       });
@@ -228,9 +229,7 @@ const processCommunityMessagesBatch = async (
         queryClient,
         communityId,
         channelId,
-        updatedcommunityMessages.filter((msg) =>
-          stringGuidsEqual(msg.fileMetadata.appData.groupId, communityId)
-        )
+        updatedcommunityMessages.filter((msg) => msg.fileSystemType.toLowerCase() === 'standard')
       );
     })
   );

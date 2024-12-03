@@ -9,6 +9,7 @@ export const useCommunityNotifications = (
   odinId: string | undefined,
   communityId: string | undefined
 ) => {
+  const identity = useDotYouClientContext().getHostIdentity();
   const { data: community } = useCommunity({ odinId, communityId }).fetch;
 
   const {
@@ -22,7 +23,12 @@ export const useCommunityNotifications = (
   const dotYouClient = useDotYouClientContext();
 
   const enableCommunityNotifications = async () => {
-    if (!community) return;
+    if (
+      !community ||
+      !community.fileMetadata.senderOdinId ||
+      community.fileMetadata.senderOdinId === identity
+    )
+      return;
 
     return await SubscribeToPeerNotifications(
       dotYouClient,
