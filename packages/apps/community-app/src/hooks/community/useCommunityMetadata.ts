@@ -59,19 +59,13 @@ export const useCommunityMetadata = (props?: {
       );
       if (!serverVersion) return;
 
-      return await uploadCommunityMetadata(
-        dotYouClient,
-        {
-          ...metadata,
-          fileMetadata: {
-            ...metadata.fileMetadata,
-            versionTag: serverVersion.fileMetadata.versionTag,
-          },
+      return await uploadCommunityMetadata(dotYouClient, {
+        ...metadata,
+        fileMetadata: {
+          ...metadata.fileMetadata,
+          versionTag: serverVersion.fileMetadata.versionTag,
         },
-        () => {
-          return;
-        }
-      );
+      });
     });
   };
 
@@ -116,9 +110,17 @@ export const useCommunityMetadata = (props?: {
       },
       onError: (error) => {
         console.error('Error saving community metadata', error);
+        invalidateCommunityMetadata(queryClient, communityId);
       },
     }),
   };
+};
+
+export const invalidateCommunityMetadata = (queryClient: QueryClient, communityId?: string) => {
+  queryClient.invalidateQueries({
+    queryKey: ['community-metadata', communityId],
+    exact: !!communityId,
+  });
 };
 
 export const insertNewcommunityMetadata = (
