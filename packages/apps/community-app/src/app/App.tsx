@@ -23,23 +23,6 @@ import {
 } from '@homebase-id/common-app';
 import { useValidateAuthorization } from '../hooks/auth/useAuth';
 
-const REACT_QUERY_INCLUDED_QUERY_KEYS = [
-  // Community specific
-  'process-community-inbox',
-  'communities',
-  'community',
-  'community-metadata',
-  'community-channels',
-  'community-messages',
-  'channels-with-recent-message',
-
-  // Chat specific:
-  'chat-message',
-  'chat-messages',
-  'chat-reaction',
-  'conversations',
-  'conversation-metadata',
-];
 const AUTH_PATH = COMMUNITY_ROOT_PATH + '/auth';
 const AUTH_FINALIZE_PATH = COMMUNITY_ROOT_PATH + '/auth/finalize';
 
@@ -190,11 +173,7 @@ function App() {
       <Helmet>
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
-      <OdinQueryClient
-        cacheKey={'APP_REACT_QUERY_OFFLINE_CACHE'}
-        cachedQueryKeys={REACT_QUERY_INCLUDED_QUERY_KEYS}
-        type="indexeddb"
-      >
+      <OdinQueryClient app="app" type="indexeddb">
         <DotYouClientProvider>
           <RouterProvider router={router} fallbackElement={<></>} />
         </DotYouClientProvider>
