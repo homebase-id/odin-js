@@ -26,34 +26,70 @@ const DEFAULT_QUERY_KEYS = [
   'site-data',
 ];
 
+const APP_QUERY_KEYS = [
+  ...DEFAULT_QUERY_KEYS,
+  // Chat:
+  'chat-message',
+  'chat-messages',
+  'chat-reaction',
+  'conversations',
+  'conversation-metadata',
+  'process-chat-inbox',
+
+  // Feed:
+  'raw-image',
+  'social-feeds',
+  'collaborative-channels',
+  'followers',
+  'following',
+  'channels',
+  'channel',
+  'process-feed-inbox',
+
+  // Mail:
+  'mail-conversations',
+  'mail-settings',
+  'process-mail-inbox',
+
+  // Community:
+  'process-community-inbox',
+  'communities',
+  'community',
+  'community-metadata',
+  'community-channels',
+  'community-messages',
+  'channels-with-recent-message',
+];
+
+const PUBLIC_QUERY_KEYS: string[] = [...DEFAULT_QUERY_KEYS];
+
+const OWNER_QUERY_KEYS: string[] = [
+  ...DEFAULT_QUERY_KEYS,
+
+  'detailed-connection-info',
+  'process-owner-inbox',
+  'social-feeds',
+  'drives',
+  'circles',
+];
+
 export const OdinQueryClient = ({
   children,
-  cacheKey,
-  cachedQueryKeys,
+  app,
   type,
 }: {
   children: ReactNode;
-  cacheKey: string;
-  cachedQueryKeys: string[];
+  app: 'app' | 'owner' | 'public';
   type: 'local' | 'indexeddb';
 }) => {
-  if (import.meta.env.MODE !== 'production' && (!cacheKey || !cachedQueryKeys || !type)) {
+  if (import.meta.env.MODE !== 'production' && (!app || !type)) {
     return (
       <Alert type="critical">[OdinQueryClient] Missing required props for OdinQueryClient</Alert>
     );
   }
-
-  const allCachedQueryKeys = useMemo(() => {
-    if (
-      import.meta.env.MODE !== 'production' &&
-      cachedQueryKeys.some((key) => DEFAULT_QUERY_KEYS.includes(key))
-    ) {
-      console.warn(
-        `[OdinQueryClient] cachedQueryKeys contains default query keys: ${cachedQueryKeys.filter((key) => DEFAULT_QUERY_KEYS.includes(key)).join(', ')}`
-      );
-    }
-    return [...DEFAULT_QUERY_KEYS, ...cachedQueryKeys];
-  }, [cachedQueryKeys]);
+  const cacheKey = `${app.toUpperCase()}_REACT_QUERY_OFFLINE_CACHE`;
+  const cachedQueryKeys =
+    app === 'app' ? APP_QUERY_KEYS : app === 'public' ? PUBLIC_QUERY_KEYS : OWNER_QUERY_KEYS;
 
   const persistOptions = useMemo(() => {
     const persister =
@@ -81,13 +117,13 @@ export const OdinQueryClient = ({
           )
             return false;
           const { queryKey } = query;
-          return allCachedQueryKeys.some((key) => queryKey.includes(key));
+          return cachedQueryKeys.some((key) => queryKey.includes(key));
         },
       },
     };
 
     return persistOptions;
-  }, [cacheKey, allCachedQueryKeys]);
+  }, [cacheKey, cachedQueryKeys]);
 
   return (
     <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>

@@ -246,11 +246,7 @@ function App() {
       <Helmet>
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
-      <OdinQueryClient
-        cacheKey={'OWNER_REACT_QUERY_OFFLINE_CACHE'}
-        cachedQueryKeys={REACT_QUERY_INCLUDED_QUERY_KEYS}
-        type="indexeddb"
-      >
+      <OdinQueryClient app="owner" type="indexeddb">
         <DotYouClientProvider>
           <RouterProvider router={router} fallbackElement={<></>} />
         </DotYouClientProvider>

@@ -98,12 +98,7 @@ function App() {
       <Helmet>
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
-      <OdinQueryClient
-        // The public cache key is explicitly different to avoid conflicts between authenticated and public states; It's the only app that can be anonymous
-        cacheKey={'PUBLIC_REACT_QUERY_OFFLINE_CACHE'}
-        cachedQueryKeys={[]}
-        type="indexeddb"
-      >
+      <OdinQueryClient app="public" type="indexeddb">
         <DotYouClientProvider>
           <RouterProvider router={router} fallbackElement={<></>} />
         </DotYouClientProvider>
