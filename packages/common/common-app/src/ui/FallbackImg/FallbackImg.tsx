@@ -53,7 +53,7 @@ export const FallbackImg = ({
   return (
     <img
       src={fallbackSvg}
-      className={`${className?.includes('h-') ? '' : 'h-full'} ${className?.includes('w-') ? '' : 'w-full'}`}
+      className={`${className || ''} ${className?.includes('h-') ? '' : 'h-full'} ${className?.includes('w-') ? '' : 'w-full'}`}
     />
   );
 };

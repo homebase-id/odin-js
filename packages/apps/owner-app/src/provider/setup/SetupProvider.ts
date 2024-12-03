@@ -25,7 +25,8 @@ import {
 } from '@homebase-id/js-lib/profile';
 import { FollowRequest, createOrUpdateFollow } from '@homebase-id/js-lib/network';
 import { saveProfileAttribute } from '../profile/AttributeData/ManageAttributeProvider';
-import { fallbackHeaderImage } from '@homebase-id/common-app';
+import { fallbackHeaderImage, invalidateSiteData } from '@homebase-id/common-app';
+import { QueryClient } from '@tanstack/react-query';
 
 export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
   const initialStandardProfile: ProfileDefinition = {
@@ -209,7 +210,11 @@ export interface SocialSetupData {
 
 const ANONYMOUS_ACL = { requiredSecurityGroup: SecurityGroupType.Anonymous };
 
-const SetupProfileData = async (dotYouClient: DotYouClient, profileData: ProfileSetupData) => {
+const SetupProfileData = async (
+  queryClient: QueryClient,
+  dotYouClient: DotYouClient,
+  profileData: ProfileSetupData
+) => {
   // Default Photo Attribute
   const defaultPhotoAttrId = toGuidId('default_photo_attribute');
   const existingPhotoAttr = await getProfileAttribute(
@@ -316,9 +321,15 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
       await saveProfileAttribute(dotYouClient, newLocationAttr);
     }
   }
+
+  invalidateSiteData(queryClient);
 };
 
-const SetupSocialData = async (dotYouClient: DotYouClient, socialData: SocialSetupData) => {
+const SetupSocialData = async (
+  queryClient: QueryClient,
+  dotYouClient: DotYouClient,
+  socialData: SocialSetupData
+) => {
   const saveSocial = async (type: string, dataField: string, value: string, priority: number) => {
     // Search attribute:
     const foundAttributesOfType = await getProfileAttributes(
@@ -431,14 +442,17 @@ const SetupSocialData = async (dotYouClient: DotYouClient, socialData: SocialSet
         return await saveProfileAttribute(dotYouClient, linkAttribute);
       })
     );
+
+  invalidateSiteData(queryClient);
 };
 
 export const SetupDefaultIdentity = async (
+  queryClient: QueryClient,
   dotYouClient: DotYouClient,
   data: { profile: ProfileSetupData; social: SocialSetupData }
 ) => {
-  await SetupProfileData(dotYouClient, data.profile);
-  await SetupSocialData(dotYouClient, data.social);
+  await SetupProfileData(queryClient, dotYouClient, data.profile);
+  await SetupSocialData(queryClient, dotYouClient, data.social);
 };
 
 const DEFAULT_FOLLOW_REQUEST: FollowRequest = {
