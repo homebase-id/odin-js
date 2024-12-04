@@ -59,6 +59,7 @@ export interface Introduction {
   introducerOdinId: string;
   lastProcessed: number;
   sendAttemptCount: number;
+  received: number;
 }
 
 export const getReceivedIntroductions = async (
