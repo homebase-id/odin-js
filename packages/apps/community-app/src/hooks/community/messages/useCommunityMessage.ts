@@ -28,7 +28,11 @@ import {
 } from '../../../providers/CommunityDefinitionProvider';
 import { formatGuidId, getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
-import { insertNewMessage, updateCacheCommunityMessages } from './useCommunityMessages';
+import {
+  insertNewMessage,
+  invalidateCommunityMessages,
+  updateCacheCommunityMessages,
+} from './useCommunityMessages';
 
 export const useCommunityMessage = (props?: {
   odinId: string | undefined;
@@ -273,8 +277,12 @@ export const useCommunityMessage = (props?: {
           })
         );
       },
-      onError: (err) => {
+      onError: (err, params) => {
         console.error('Failed to update the chat message', err);
+        invalidateCommunityMessages(
+          queryClient,
+          params.community.fileMetadata.appData.uniqueId as string
+        );
       },
     }),
     update: useMutation({
