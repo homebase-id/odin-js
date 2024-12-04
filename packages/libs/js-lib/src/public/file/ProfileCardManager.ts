@@ -31,11 +31,12 @@ export const ProfileCardAttributeTypes = [
   ...BuiltInAttributes.AllSocial,
   ...BuiltInAttributes.AllGames,
 ];
+
 export const publishProfileCard = async (dotYouClient: DotYouClient) => {
   const profileNameAttributes = await getProfileAttributes(
     dotYouClient,
     BuiltInProfiles.StandardProfileId,
-    BuiltInProfiles.PersonalInfoSectionId,
+    undefined,
     [BuiltInAttributes.Name]
   );
 
@@ -54,7 +55,7 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
   const emailAttributes = await getProfileAttributes(
     dotYouClient,
     BuiltInProfiles.StandardProfileId,
-    BuiltInProfiles.PersonalInfoSectionId,
+    undefined,
     [BuiltInAttributes.Email]
   );
 
@@ -112,13 +113,12 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
     }))
     .filter((link) => link.type && link.url);
 
-  if (displayNames?.length)
-    await publishProfileCardFile(dotYouClient, {
-      name: displayNames[0],
-      image: `https://${dotYouClient.getHostIdentity()}/pub/image`,
-      email: emails,
-      links: [...socials, ...links],
-    });
+  await publishProfileCardFile(dotYouClient, {
+    name: displayNames?.[0] || dotYouClient.getHostIdentity(),
+    image: `https://${dotYouClient.getHostIdentity()}/pub/image`,
+    email: emails,
+    links: [...socials, ...links],
+  });
 };
 
 export const GetProfileCard = async (odinId: string): Promise<ProfileCard | undefined> => {
