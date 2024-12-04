@@ -216,6 +216,7 @@ export const useCommunityMessage = (props?: {
             payloads: files?.map((file) => ({
               contentType: file.file.type,
               pendingFile: file.file,
+              pendingFileUrl: URL.createObjectURL(file.file),
             })),
           },
           fileSystemType: thread ? 'Comment' : undefined,
