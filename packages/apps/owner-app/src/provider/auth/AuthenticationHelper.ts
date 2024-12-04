@@ -1,4 +1,11 @@
 import {
+  createEccPair,
+  getEccSharedSecret,
+  importRemotePublicEccKey,
+  aesGcmEncryptWithEccSharedSecret,
+  exportEccPublicKey,
+} from '@homebase-id/js-lib/auth';
+import {
   getRandom16ByteArray,
   base64ToUint8Array,
   cbcEncrypt,
@@ -7,11 +14,12 @@ import {
 } from '@homebase-id/js-lib/helpers';
 
 export interface NonceData {
-  saltPassword64: string;
-  saltKek64: string;
-  nonce64: string;
-  publicPem: string;
   crc: number;
+  id: string;
+  nonce64: string;
+  publicJwk: string;
+  saltKek64: string;
+  saltPassword64: string;
 }
 
 export interface PublicKeyData {
@@ -24,7 +32,8 @@ interface AuthenticationReplyNonce {
   nonce64: string;
   nonceHashedPassword64: string;
   crc: number;
-  rsaEncrypted: string;
+  gcmEncrypted64: string;
+  publicKeyJwk: string;
 }
 
 interface AuthenticationPayload {
@@ -47,35 +56,43 @@ export const prepareAuthPassword = async (
     interations,
     len
   );
+  const keK64 = await wrapPbkdf2HmacSha256(password, nonceData.saltKek64, interations, len);
+
   const hashNoncePassword64 = await wrapPbkdf2HmacSha256(
     hashedPassword64,
     nonceData.nonce64,
     interations,
     len
   );
-  const hashedKek64 = await wrapPbkdf2HmacSha256(password, nonceData.saltKek64, interations, len);
 
-  const base64Key = rsaPemStrip(nonceData.publicPem);
-  const key = await rsaImportKey(base64Key);
+  const hostBase64PublicJWK = uint8ArrayToBase64(stringToUint8Array(nonceData.publicJwk));
 
-  const secret = crypto.getRandomValues(new Uint8Array(16));
-  const secret64 = btoa(String.fromCharCode.apply(null, Array.from(secret)));
+  const clientEccKey = await createEccPair();
+  const privateKey = clientEccKey.privateKey;
+
+  const hostEccPublicKey = await importRemotePublicEccKey(hostBase64PublicJWK);
+  const exchangedSecret = new Uint8Array(
+    await getEccSharedSecret(privateKey, hostEccPublicKey, nonceData.nonce64)
+  );
 
   const payload: AuthenticationPayload = {
     hpwd64: hashedPassword64,
-    kek64: hashedKek64,
-    secret: secret64,
+    kek64: keK64,
+    secret: uint8ArrayToBase64(getRandom16ByteArray()),
   };
-
   const encryptable = JSON.stringify(payload);
-  const cipher = await rsaOaepEncrypt(key, stringToUint8Array(encryptable));
+  const encryptedGcm = await aesGcmEncryptWithEccSharedSecret(
+    exchangedSecret,
+    base64ToUint8Array(nonceData.nonce64),
+    stringToUint8Array(encryptable)
+  );
 
-  const cipher64 = btoa(String.fromCharCode.apply(null, Array.from(cipher)));
   return {
     nonce64: nonceData.nonce64,
     nonceHashedPassword64: hashNoncePassword64,
     crc: nonceData.crc,
-    rsaEncrypted: cipher64,
+    gcmEncrypted64: uint8ArrayToBase64(encryptedGcm),
+    publicKeyJwk: await exportEccPublicKey(clientEccKey.publicKey),
   };
 };
 
@@ -144,13 +161,6 @@ const wrapPbkdf2HmacSha256 = async (
     const base64 = window.btoa(String.fromCharCode.apply(null, Array.from(hashed)));
     return base64;
   });
-};
-
-const rsaPemStrip = (pem: string) => {
-  let s = pem.replace('-----BEGIN PUBLIC KEY-----', '');
-  s = s.replace('-----END PUBLIC KEY-----', '');
-
-  return s.replace('\n', '');
 };
 
 // key is base64 encoded

@@ -5,6 +5,7 @@ import { HOME_SHARED_SECRET, STORAGE_IDENTITY_KEY, useDotYouClient } from '@home
 import {
   YouAuthorizationParams,
   createEccPair,
+  exportEccPublicKey,
   getEccSharedSecret,
   importRemotePublicEccKey,
   retrieveEccKey,
@@ -69,10 +70,8 @@ export const useYouAuthAuthorization = () => {
     const eccKey = await createEccPair();
     saveEccKey(eccKey);
 
-    const rawEccKey = await crypto.subtle.exportKey('jwk', eccKey.publicKey);
-    delete rawEccKey.key_ops;
-    delete rawEccKey.ext;
-    const eccPk64 = uint8ArrayToBase64(stringToUint8Array(JSON.stringify(rawEccKey)));
+    const rawEccKey = await exportEccPublicKey(eccKey.publicKey);
+    const eccPk64 = uint8ArrayToBase64(stringToUint8Array(rawEccKey));
 
     const finalUrl = `/authorization-code-callback`;
     const state = { finalUrl: finalUrl, eccPk64: eccPk64, returnUrl };
