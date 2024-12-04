@@ -3,6 +3,7 @@ import {
   BuiltInAttributes,
   BuiltInProfiles,
   getProfileAttributes,
+  getSocialLink,
   SocialFields,
 } from '@homebase-id/js-lib/profile';
 import { getProfileAttributesOverPeer } from '@homebase-id/js-lib/peer';
@@ -37,15 +38,6 @@ export type LinkType = {
   children: ReactNode;
 };
 
-export const UNLINKABLE_SOCIALS = [
-  'minecraft',
-  'steam',
-  'discord',
-  'riot games',
-  'epic games',
-  'stackoverflow',
-];
-
 export const useSocials = (props?: { odinId: string } | undefined) => {
   const { odinId } = props || {};
 
@@ -58,10 +50,10 @@ export const useSocials = (props?: { odinId: string } | undefined) => {
       socialData: { type: string; username: string; priority: number } | null
     ) => {
       if (!socialData) return null;
-      const link = getLink(socialData.type, socialData.username);
+      const link = getSocialLink(socialData.type, socialData.username);
       return {
         icon: getLinkIcon(socialData.type),
-        link: link,
+        link: link || '',
         copyText: link ? undefined : socialData.username,
         priority: socialData.priority,
         children: link ? (
@@ -188,13 +180,4 @@ export const getLinkIcon = (type: string): React.FC<IconProps> => {
     default:
       return Globe;
   }
-};
-export const getLink = (type: string, username: string): string => {
-  if (UNLINKABLE_SOCIALS.includes(type)) return '';
-
-  return type !== 'dotyouid'
-    ? `https://${type}.com/${
-        type === SocialFields.LinkedIn ? 'in/' : type === SocialFields.Snapchat ? 'add/' : ''
-      }${username}`
-    : `https://${username}`;
 };

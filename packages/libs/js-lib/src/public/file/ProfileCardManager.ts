@@ -5,7 +5,13 @@ import axios from 'axios';
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { HomebaseFile, SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
 import { getDecryptedImageData } from '../../media/ImageProvider';
-import { BuiltInProfiles, MinimalProfileFields } from '../../profile/ProfileData/ProfileConfig';
+import {
+  BuiltInProfiles,
+  EmailFields,
+  getSocialLink,
+  LinkFields,
+  MinimalProfileFields,
+} from '../../profile/ProfileData/ProfileConfig';
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionManager';
 import { getProfileAttributes, BuiltInAttributes, Attribute } from '../../profile/profile';
 import { publishProfileCardFile, publishProfileImageFile } from './FileProvider';
@@ -17,6 +23,14 @@ export interface ProfileCard {
 }
 const _internalFileCache = new Map<string, Promise<ProfileCard | undefined>>();
 
+export const ProfileCardAttributeTypes = [
+  BuiltInAttributes.Name,
+  BuiltInAttributes.Email,
+  BuiltInAttributes.Link,
+  BuiltInAttributes.Photo,
+  ...BuiltInAttributes.AllSocial,
+  ...BuiltInAttributes.AllGames,
+];
 export const publishProfileCard = async (dotYouClient: DotYouClient) => {
   const profileNameAttributes = await getProfileAttributes(
     dotYouClient,
@@ -37,7 +51,74 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
     )
     .filter((fileId) => fileId !== undefined);
 
-  if (displayNames?.length) await publishProfileCardFile(dotYouClient, { name: displayNames[0] });
+  const emailAttributes = await getProfileAttributes(
+    dotYouClient,
+    BuiltInProfiles.StandardProfileId,
+    BuiltInProfiles.PersonalInfoSectionId,
+    [BuiltInAttributes.Email]
+  );
+
+  const emails = emailAttributes
+    ?.filter(
+      (attr) =>
+        attr.serverMetadata?.accessControlList.requiredSecurityGroup.toLowerCase() ===
+        SecurityGroupType.Anonymous.toLowerCase()
+    )
+    ?.map((attr) => ({
+      type: attr?.fileMetadata?.appData?.content?.data?.[EmailFields.Label] || '',
+      email: attr?.fileMetadata?.appData?.content?.data?.[EmailFields.Email] || '',
+    }))
+    .filter((email) => email.type && email.email);
+
+  const socialAttributes = await getProfileAttributes(
+    dotYouClient,
+    BuiltInProfiles.StandardProfileId,
+    undefined,
+    [...BuiltInAttributes.AllSocial, ...BuiltInAttributes.AllGames]
+  );
+  const socials = socialAttributes
+    ?.filter(
+      (attr) =>
+        attr.serverMetadata?.accessControlList.requiredSecurityGroup.toLowerCase() ===
+        SecurityGroupType.Anonymous.toLowerCase()
+    )
+    .map((attr) => {
+      const type = Object.keys(attr.fileMetadata.appData.content.data || {})?.[0];
+      const value = attr.fileMetadata.appData.content.data?.[type];
+
+      return {
+        type: type,
+        url: getSocialLink(type, value),
+      };
+    })
+    .filter((link) => link.type && link.url);
+
+  const linkAttributes = await getProfileAttributes(
+    dotYouClient,
+    BuiltInProfiles.StandardProfileId,
+    undefined,
+    [BuiltInAttributes.Link]
+  );
+
+  const links = linkAttributes
+    ?.filter(
+      (attr) =>
+        attr.serverMetadata?.accessControlList.requiredSecurityGroup.toLowerCase() ===
+        SecurityGroupType.Anonymous.toLowerCase()
+    )
+    .map((attr) => ({
+      type: attr.fileMetadata.appData.content.data?.[LinkFields.LinkText],
+      url: attr.fileMetadata.appData.content.data?.[LinkFields.LinkTarget],
+    }))
+    .filter((link) => link.type && link.url);
+
+  if (displayNames?.length)
+    await publishProfileCardFile(dotYouClient, {
+      name: displayNames[0],
+      image: `https://${dotYouClient.getHostIdentity()}/pub/image`,
+      email: emails,
+      links: [...socials, ...links],
+    });
 };
 
 export const GetProfileCard = async (odinId: string): Promise<ProfileCard | undefined> => {
