@@ -301,6 +301,7 @@ const CommunityMediaMessageBody = ({
         communityId={community?.fileMetadata.appData.uniqueId as string}
         odinId={community?.fileMetadata.senderOdinId as string}
       />
+      <CommunityReactions msg={msg} community={community} />
     </div>
   );
 };
