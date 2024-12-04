@@ -158,7 +158,7 @@ const MailThreadActions = ({
   }, [draftFileId]);
 
   return (
-    <div className={`border-t border-gray-100 dark:border-gray-800 ${className || ''}`}>
+    <div className={`relative border-t border-gray-100 dark:border-gray-800 ${className || ''}`}>
       {isReply ? (
         <ReplyAction
           {...threadProps}
