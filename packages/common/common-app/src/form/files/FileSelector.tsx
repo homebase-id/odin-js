@@ -1,5 +1,6 @@
 import { getNewId } from '@homebase-id/js-lib/helpers';
-import { forwardRef, ReactNode } from 'react';
+import { forwardRef, ReactNode, useEffect, useState } from 'react';
+import { t } from '../../helpers';
 
 export const FileSelector = forwardRef(
   (
@@ -53,9 +54,54 @@ export const FileSelector = forwardRef(
           className={`sr-only`}
           ref={ref}
         />
+        <DropZone onChange={onChange} />
       </>
     );
   }
 );
+
+const DropZone = ({ onChange }: { onChange?: (files: File[]) => void }) => {
+  const [dropZoneActive, setDropZoneActive] = useState(false);
+
+  useEffect(() => {
+    const onDragOver = (ev: DragEvent) => {
+      ev.preventDefault();
+      setDropZoneActive(true);
+    };
+
+    const onDragLeave = () => setDropZoneActive(false);
+    const opDrop = () => setDropZoneActive(false);
+
+    window.addEventListener('dragover', onDragOver);
+    window.addEventListener('dragleave', onDragLeave);
+    window.addEventListener('drop', opDrop);
+
+    return () => {
+      window.removeEventListener('dragover', onDragOver);
+      window.removeEventListener('dragleave', onDragLeave);
+      window.removeEventListener('drop', opDrop);
+    };
+  }, []);
+
+  return (
+    <div
+      className={`absolute inset-0 z-50 flex flex-row items-center justify-center border rounded-md bg-page-background p-5 ${dropZoneActive ? 'opacity-75' : 'pointer-events-none opacity-0'}`}
+      onDropCapture={(ev) => {
+        setDropZoneActive(false);
+
+        // Prevent default behavior (Prevent file from being opened)
+        ev.preventDefault();
+
+        const newFiles = ev.dataTransfer.items
+          ? [...ev.dataTransfer.items].map((itm) => itm.getAsFile())
+          : [...ev.dataTransfer.files];
+
+        onChange && onChange(newFiles.filter(Boolean) as File[]);
+      }}
+    >
+      <p className="text-lg">{t('Drop your file(s) here to add')}</p>
+    </div>
+  );
+};
 
 FileSelector.displayName = 'FileSelector';

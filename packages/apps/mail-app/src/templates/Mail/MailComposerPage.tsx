@@ -17,7 +17,7 @@ export const MailComposerPage = () => {
       <MailHomeHeader />
 
       <section className="flex flex-grow flex-col md:mx-5 md:my-5">
-        <div className="bg-background px-5 py-5">
+        <div className="relative bg-background px-5 py-5">
           {isDraft ? (
             draftDsr ? (
               <MailComposer
