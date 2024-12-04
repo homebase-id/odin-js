@@ -91,16 +91,19 @@ export const CommunityHistory = ({
   }, [isFetched, flattenedMsgs]);
 
   //   useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
-  const communityActions: CommunityActions = {
-    doDelete: async (msg: HomebaseFile<CommunityMessage>) => {
-      if (!community || !msg) return;
+  const communityActions: CommunityActions = useMemo(
+    () => ({
+      doDelete: async (msg: HomebaseFile<CommunityMessage>) => {
+        if (!community || !msg) return;
 
-      await deleteMessages({
-        community: community,
-        messages: [msg],
-      });
-    },
-  };
+        await deleteMessages({
+          community: community,
+          messages: [msg],
+        });
+      },
+    }),
+    [community, deleteMessages]
+  );
 
   if (doOpenThread && !inAThread)
     communityActions.doReply = (msg: HomebaseFile<CommunityMessage>) => doOpenThread(msg);
@@ -216,7 +219,7 @@ export const CommunityHistory = ({
                 >
                   <DateSeperator previousDate={previousDate} date={currentDate} />
                   <CommunityMessageItem
-                    key={msg.fileId}
+                    key={msg.fileId || msg.fileMetadata.appData.uniqueId}
                     msg={msg}
                     community={community}
                     communityActions={communityActions}

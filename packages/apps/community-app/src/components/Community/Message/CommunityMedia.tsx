@@ -200,8 +200,9 @@ const PendingFile = ({
 }) => {
   const fileUrl = useMemo(
     () =>
-      payload.pendingFile && payload.contentType?.includes('image/')
-        ? URL.createObjectURL(payload.pendingFile)
+      (payload.pendingFileUrl || payload.pendingFile) && payload.contentType?.includes('image/')
+        ? payload.pendingFileUrl ||
+          (payload.pendingFile && URL.createObjectURL(payload.pendingFile))
         : '',
     [payload.pendingFile]
   );

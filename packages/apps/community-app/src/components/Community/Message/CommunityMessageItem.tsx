@@ -22,160 +22,165 @@ import { CommunityDeliveryIndicator } from './CommunityDeliveryIndicator';
 import { CommunitySentTimeIndicator } from './CommunitySentTimeIndicator';
 import { CommunityMedia } from './CommunityMedia';
 import { CommunityMediaGallery } from './detail/CommunityMediaGallery';
-import { useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
 import { useCommunityChannels } from '../../../hooks/community/channels/useCommunityChannels';
 import { CommunityReactions } from './reactions/CommunityReactions';
 import { useCommunityChannel } from '../../../hooks/community/channels/useCommunityChannel';
 import { CommunityMessageEditor } from './detail/CommunityMessageEditor';
 
-export const CommunityMessageItem = ({
-  msg,
-  community,
-  communityActions,
-  hideDetails,
-  hideThreads,
-  showChannelName,
-  className,
-}: {
-  msg: HomebaseFile<CommunityMessage>;
-  community?: HomebaseFile<CommunityDefinition>;
-  communityActions?: CommunityActions;
-  hideDetails?: boolean;
-  hideThreads?: boolean;
-  showChannelName?: boolean;
-  className?: string;
-}) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
-  const authorOdinId = msg.fileMetadata.originalAuthor || loggedOnIdentity || '';
+export const CommunityMessageItem = memo(
+  (props: {
+    msg: HomebaseFile<CommunityMessage>;
+    community?: HomebaseFile<CommunityDefinition>;
+    communityActions?: CommunityActions;
+    hideDetails?: boolean;
+    hideThreads?: boolean;
+    showChannelName?: boolean;
+    className?: string;
+  }) => {
+    const {
+      msg,
+      community,
+      communityActions,
+      hideDetails,
+      hideThreads,
+      showChannelName,
+      className,
+    } = props;
 
-  const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;
-  const hasMedia = !!msg.fileMetadata.payloads.length;
+    const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+    const authorOdinId = msg.fileMetadata.originalAuthor || loggedOnIdentity || '';
 
-  const { chatMessageKey, mediaKey, channelKey, threadKey } = useParams();
-  const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey);
-  const isMediaDetail = isDetail && mediaKey;
+    const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;
+    const hasMedia = !!msg.fileMetadata.payloads.length;
 
-  const { data: channel } = useCommunityChannel({
-    communityId: community?.fileMetadata.appData.uniqueId,
-    channelId: msg.fileMetadata.appData.content.channelId,
-  }).fetch;
+    const { chatMessageKey, mediaKey, channelKey, threadKey } = useParams();
+    const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey);
+    const isMediaDetail = isDetail && mediaKey;
 
-  const [highlight, setHighlight] = useState(isDetail);
-  useEffect(() => {
-    if (!highlight) return;
-    setTimeout(() => {
-      setHighlight(false);
-    }, 5000);
-  }, [highlight]);
+    const { data: channel } = useCommunityChannel({
+      communityId: community?.fileMetadata.appData.uniqueId,
+      channelId: msg.fileMetadata.appData.content.channelId,
+    }).fetch;
 
-  const editMatch = useMatch(
-    `${COMMUNITY_ROOT_PATH}/:odinKey/:communityKey/:channelKey/:chatMessageKey/edit`
-  );
-  const editInThreadMatch = useMatch(
-    `${COMMUNITY_ROOT_PATH}/:odinKey/:communityKey/:channelKey/:threadKey/thread/:chatMessageKey/edit`
-  );
-  const isEdit = !!isDetail && !!(editMatch || editInThreadMatch);
+    const [highlight, setHighlight] = useState(isDetail);
+    useEffect(() => {
+      if (!highlight) return;
+      setTimeout(() => {
+        setHighlight(false);
+      }, 5000);
+    }, [highlight]);
 
-  const navigate = useNavigate();
-  const extendedCommunityActions: CommunityActions | undefined = useMemo(() => {
-    if (!communityActions || !channelKey) return undefined;
-    return {
-      ...communityActions,
-      doEdit: () =>
-        navigate(
-          `${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${channelKey}/${threadKey ? `${threadKey}/thread/` : ``}${msg.fileMetadata.appData.uniqueId}/edit`
-        ),
-    };
-  }, []);
+    const editMatch = useMatch(
+      `${COMMUNITY_ROOT_PATH}/:odinKey/:communityKey/:channelKey/:chatMessageKey/edit`
+    );
+    const editInThreadMatch = useMatch(
+      `${COMMUNITY_ROOT_PATH}/:odinKey/:communityKey/:channelKey/:threadKey/thread/:chatMessageKey/edit`
+    );
+    const isEdit = !!isDetail && !!(editMatch || editInThreadMatch);
 
-  return (
-    <>
-      {isMediaDetail ? (
-        <CommunityMediaGallery
-          odinId={community?.fileMetadata.senderOdinId as string}
-          msg={msg}
-          communityId={community?.fileMetadata.appData.uniqueId as string}
-        />
-      ) : null}
-      <div
-        className={`group relative flex flex-col transition-colors duration-500 ${isEdit ? 'bg-primary/20' : `bg-background ${isDetail ? (highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000') : 'hover:bg-page-background'}`} ${className || ''}`}
-        data-unique-id={msg.fileMetadata.appData.uniqueId}
-      >
-        {showChannelName && !hideDetails ? (
-          <Link
-            className="mb-1 text-primary hover:underline"
-            to={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${msg.fileMetadata.appData.content.channelId}`}
-          >
-            #{channel?.fileMetadata.appData.content.title}
-          </Link>
+    const navigate = useNavigate();
+    const extendedCommunityActions: CommunityActions | undefined = useMemo(() => {
+      if (!communityActions || !channelKey) return undefined;
+      return {
+        ...communityActions,
+        doEdit: () =>
+          navigate(
+            `${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${channelKey}/${threadKey ? `${threadKey}/thread/` : ``}${msg.fileMetadata.appData.uniqueId}/edit`
+          ),
+      };
+    }, []);
+
+    return (
+      <>
+        {isMediaDetail ? (
+          <CommunityMediaGallery
+            odinId={community?.fileMetadata.senderOdinId as string}
+            msg={msg}
+            communityId={community?.fileMetadata.appData.uniqueId as string}
+          />
         ) : null}
-        <div className="flex flex-row gap-2">
-          {hideDetails ? (
-            <div className="w-8"></div>
-          ) : (
-            <>
-              {!messageFromMe ? (
-                <ConnectionImage
-                  odinId={authorOdinId}
-                  className={`flex-shrink-0 border border-neutral-200 dark:border-neutral-800`}
-                  size="xs"
-                />
-              ) : (
-                <OwnerImage
-                  className={`flex-shrink-0 border border-neutral-200 dark:border-neutral-800`}
-                  size="xs"
-                />
-              )}
-            </>
-          )}
-
-          <div className="flex w-20 flex-grow flex-col">
-            <div className="flex flex-row items-center gap-2">
-              {hideDetails ? null : (
-                <>
-                  <p
-                    className={`font-semibold`}
-                    style={{ color: getOdinIdColor(authorOdinId).darkTheme }}
-                  >
-                    {messageFromMe ? <OwnerName /> : <ConnectionName odinId={authorOdinId} />}
-                  </p>
-                  <CommunitySentTimeIndicator className="text-sm" msg={msg} />
-                  <CommunityDeliveryIndicator msg={msg} />
-                </>
-              )}
-
-              <ContextMenu
-                communityActions={extendedCommunityActions}
-                msg={msg}
-                community={community}
-              />
-            </div>
-
-            {isEdit && community ? (
-              <CommunityMessageEditor
-                msg={msg}
-                community={community}
-                onClose={() => navigate(window.location.pathname.replace(/\/edit$/, ''))}
-              />
+        <div
+          className={`group relative flex flex-col transition-colors duration-500 ${isEdit ? 'bg-primary/20' : `bg-background ${isDetail ? (highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000') : 'hover:bg-page-background'}`} ${className || ''}`}
+          data-unique-id={msg.fileMetadata.appData.uniqueId}
+        >
+          {showChannelName && !hideDetails ? (
+            <Link
+              className="mb-1 text-primary hover:underline"
+              to={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${msg.fileMetadata.appData.content.channelId}`}
+            >
+              #{channel?.fileMetadata.appData.content.title}
+            </Link>
+          ) : null}
+          <div className="flex flex-row gap-2">
+            {hideDetails ? (
+              <div className="w-8"></div>
             ) : (
               <>
-                {hasMedia ? (
-                  <CommunityMediaMessageBody msg={msg} community={community} />
+                {!messageFromMe ? (
+                  <ConnectionImage
+                    odinId={authorOdinId}
+                    className={`flex-shrink-0 border border-neutral-200 dark:border-neutral-800`}
+                    size="xs"
+                  />
                 ) : (
-                  <CommunityTextMessageBody msg={msg} community={community} />
+                  <OwnerImage
+                    className={`flex-shrink-0 border border-neutral-200 dark:border-neutral-800`}
+                    size="xs"
+                  />
                 )}
               </>
             )}
-            {hideThreads || !msg.fileMetadata.reactionPreview?.totalCommentCount ? null : (
-              <CommunityMessageThreadSummary community={community} msg={msg} />
-            )}
+
+            <div className="flex w-20 flex-grow flex-col">
+              <div className="flex flex-row items-center gap-2">
+                {hideDetails ? null : (
+                  <>
+                    <p
+                      className={`font-semibold`}
+                      style={{ color: getOdinIdColor(authorOdinId).darkTheme }}
+                    >
+                      {messageFromMe ? <OwnerName /> : <ConnectionName odinId={authorOdinId} />}
+                    </p>
+                    <CommunitySentTimeIndicator className="text-sm" msg={msg} />
+                    <CommunityDeliveryIndicator msg={msg} />
+                  </>
+                )}
+
+                <ContextMenu
+                  communityActions={extendedCommunityActions}
+                  msg={msg}
+                  community={community}
+                />
+              </div>
+
+              {isEdit && community ? (
+                <CommunityMessageEditor
+                  msg={msg}
+                  community={community}
+                  onClose={() => navigate(window.location.pathname.replace(/\/edit$/, ''))}
+                />
+              ) : (
+                <>
+                  {hasMedia ? (
+                    <CommunityMediaMessageBody msg={msg} community={community} />
+                  ) : (
+                    <CommunityTextMessageBody msg={msg} community={community} />
+                  )}
+                </>
+              )}
+              {hideThreads || !msg.fileMetadata.reactionPreview?.totalCommentCount ? null : (
+                <CommunityMessageThreadSummary community={community} msg={msg} />
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </>
-  );
-};
+      </>
+    );
+  }
+);
+CommunityMessageItem.displayName = 'CommunityMessageItem';
 
 const CommunityTextMessageBody = ({
   msg,
