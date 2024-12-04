@@ -41,7 +41,7 @@ export const CommunityMedia = ({
   if (isGallery) return <MediaGallery odinId={odinId} communityId={communityId} msg={msg} />;
 
   return (
-    <div className={`overflow-hidden rounded-lg`}>
+    <div className={`my-1 w-full max-w-xs overflow-hidden rounded-lg`}>
       <MediaItem
         odinId={odinId}
         communityId={communityId}
@@ -49,6 +49,7 @@ export const CommunityMedia = ({
         systemFileType={msg.fileSystemType}
         fileLastModified={msg.fileMetadata.updated}
         payload={payloads[0]}
+        fit={'contain'}
         onClick={() => navigate(`${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`)}
         previewThumbnail={isGallery ? undefined : msg.fileMetadata.appData.previewThumbnail}
       />
@@ -156,7 +157,7 @@ const MediaItem = ({
               targetDrive={targetDrive}
               avoidPayload={isVideo}
               previewThumbnail={previewThumbnail}
-              className={`h-full w-auto`}
+              className={`h-full`}
               fit={fit}
               onLoad={onLoad}
             />

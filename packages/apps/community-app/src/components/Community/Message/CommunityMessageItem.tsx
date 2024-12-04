@@ -291,13 +291,11 @@ const CommunityMediaMessageBody = ({
           />
         </div>
       ) : null}
-      <div className="my-1">
-        <CommunityMedia
-          msg={msg}
-          communityId={community?.fileMetadata.appData.uniqueId as string}
-          odinId={community?.fileMetadata.senderOdinId as string}
-        />
-      </div>
+      <CommunityMedia
+        msg={msg}
+        communityId={community?.fileMetadata.appData.uniqueId as string}
+        odinId={community?.fileMetadata.senderOdinId as string}
+      />
     </div>
   );
 };
