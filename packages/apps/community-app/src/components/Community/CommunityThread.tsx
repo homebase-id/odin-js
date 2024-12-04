@@ -27,6 +27,7 @@ export const CommunityThread = memo(
     threadId: string;
   }) => {
     const { odinKey, communityKey, channelKey } = useParams();
+    const [participants, setParticipants] = useState<string[] | null>();
 
     const { data: originMessage } = useCommunityMessage({
       odinId: community?.fileMetadata.senderOdinId,
@@ -78,6 +79,7 @@ export const CommunityThread = memo(
               community={community}
               origin={originMessage}
               channel={channel}
+              setParticipants={setParticipants}
               alignTop={true}
             />
           )}
@@ -88,6 +90,7 @@ export const CommunityThread = memo(
               thread={originMessage || undefined}
               channel={channel}
               key={threadId}
+              threadParticipants={participants || undefined}
               onKeyDown={keyDownHandler}
               className="mt-auto lg:mt-0"
             />

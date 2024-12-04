@@ -51,6 +51,7 @@ import {
   TransitUploadResult,
   uploadFileOverPeer,
 } from '@homebase-id/js-lib/peer';
+import { COMMUNITY_APP_ID } from '@homebase-id/common-app';
 
 export const COMMUNITY_MESSAGE_FILE_TYPE = 7020;
 export const CommunityDeletedArchivalStaus = 2;
@@ -87,6 +88,7 @@ export const uploadCommunityMessage = async (
   files: NewMediaFile[] | undefined,
   linkPreviews: LinkPreview[] | undefined,
   referencedFile?: GlobalTransitIdFileIdentifier,
+  notificationRecipients?: string[],
   onVersionConflict?: () => void
 ) => {
   const communityId = community.fileMetadata.appData.uniqueId as string;
@@ -186,6 +188,7 @@ export const uploadCommunityMessage = async (
   uploadMetadata.appData.previewThumbnail =
     previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
+  const identity = dotYouClient.getLoggedInIdentity();
   if (!shouldEmbedContent) {
     payloads.push({
       key: DEFAULT_PAYLOAD_KEY,
@@ -204,6 +207,16 @@ export const uploadCommunityMessage = async (
       transferIv: getRandom16ByteArray(),
       recipients: [community.fileMetadata.senderOdinId],
       systemFileType: message.fileSystemType,
+      notificationOptions: {
+        appId: COMMUNITY_APP_ID,
+        tagId: message.fileMetadata.appData.uniqueId as string,
+        typeId: communityId,
+        peerSubscriptionId: communityId,
+        recipients: (
+          notificationRecipients || community.fileMetadata.appData.content.members
+        ).filter((recipient) => recipient !== identity),
+        silent: false,
+      },
     };
 
     uploadResult = await uploadFileOverPeer(
@@ -224,6 +237,19 @@ export const uploadCommunityMessage = async (
         overwriteFileId: message.fileId,
       },
       systemFileType: message.fileSystemType,
+      transitOptions: {
+        useAppNotification: true,
+        appNotificationOptions: {
+          appId: COMMUNITY_APP_ID,
+          tagId: message.fileMetadata.appData.uniqueId as string,
+          typeId: communityId,
+          peerSubscriptionId: communityId,
+          recipients: (
+            notificationRecipients || community.fileMetadata.appData.content.members
+          ).filter((recipient) => recipient !== identity),
+          silent: false,
+        },
+      },
     };
 
     uploadResult = await uploadFile(

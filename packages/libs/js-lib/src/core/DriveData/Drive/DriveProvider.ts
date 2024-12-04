@@ -153,6 +153,29 @@ export const editDriveAllowAnonymousRead = async (
     });
 };
 
+export const editDriveAllowSubscriptions = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  newAllowSubscriptions: boolean
+) => {
+  assertIfDefined('targetDrive', targetDrive);
+  assertIfDefined('newAllowSubscriptions', newAllowSubscriptions);
+
+  const client = dotYouClient.createAxiosClient();
+  const data = {
+    targetDrive: targetDrive,
+    allowSubscriptions: newAllowSubscriptions,
+  };
+
+  return client
+    .post('/drive/mgmt/set-allow-subscriptions', data)
+    .then((response) => response.status === 200)
+    .catch((error) => {
+      console.error('[odin-js:editDriveAllowSubscriptions]', error);
+      throw error;
+    });
+};
+
 export const editDriveAttributes = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,

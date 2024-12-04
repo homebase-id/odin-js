@@ -17,7 +17,7 @@ import { getTargetDriveFromCommunityId } from '../../providers/CommunityDefiniti
 export const ExtendCriclePermissionDialog = () => {
   const target = usePortal('modal-container');
   const { odinKey, communityKey } = useParams();
-  const extendPermissionUrl = useCommunityAccessVerifyer(odinKey, communityKey);
+  const extendPermissionUrl = useCommunityAccessVerifier(odinKey, communityKey);
 
   if (!extendPermissionUrl) return null;
 
@@ -39,7 +39,7 @@ export const ExtendCriclePermissionDialog = () => {
   return createPortal(dialog, target);
 };
 
-const useCommunityAccessVerifyer = (
+const useCommunityAccessVerifier = (
   odinId: string | undefined,
   communityId: string | undefined
 ) => {

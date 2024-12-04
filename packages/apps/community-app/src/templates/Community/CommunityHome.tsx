@@ -25,6 +25,7 @@ import { RadioTower, Plus, Ellipsis, MagnifyingGlass, Loader } from '@homebase-i
 import { CommunityChannelNav } from './CommunityChannelNav';
 import { useCommunityMemberUpdater } from '../../hooks/community/useCommunityMemberUpdater';
 import { ExtendCriclePermissionDialog } from '../../components/Auth/ExtendCirclePermissionDialog';
+import { useCommunityNotifications } from '../../hooks/community/useCommunityNotifications';
 
 export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   const newCommunity = useMatch({ path: `${COMMUNITY_ROOT_PATH}/new` });
@@ -34,6 +35,7 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   useLiveCommunityProcessor(odinKey, communityKey);
   useCommunityMemberUpdater(odinKey, communityKey);
   useRemoveNotifications({ appId: COMMUNITY_APP_ID });
+  useCommunityNotifications(odinKey, communityKey);
 
   const { data: communities } = useCommunities().all;
   const navigate = useNavigate();

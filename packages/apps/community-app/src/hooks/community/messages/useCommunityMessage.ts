@@ -73,6 +73,7 @@ export const useCommunityMessage = (props?: {
     community,
     channel,
     thread,
+    threadParticipants,
     replyId,
     files,
     message,
@@ -83,6 +84,7 @@ export const useCommunityMessage = (props?: {
     community: HomebaseFile<CommunityDefinition>;
     channel: HomebaseFile<CommunityChannel>;
     thread?: HomebaseFile<CommunityMessage>;
+    threadParticipants?: string[];
     replyId?: string;
     files?: NewMediaFile[];
     message: RichText | string;
@@ -130,7 +132,8 @@ export const useCommunityMessage = (props?: {
             ),
             globalTransitId: thread.fileMetadata.globalTransitId,
           }
-        : undefined
+        : undefined,
+      threadParticipants
     );
     if (!uploadResult) throw new Error('Failed to send the chat message');
 
@@ -160,7 +163,12 @@ export const useCommunityMessage = (props?: {
 
   return {
     get: useQuery({
-      queryKey: ['community-message', props?.communityId, props?.messageId],
+      queryKey: [
+        'community-message',
+        props?.communityId,
+        props?.messageId,
+        props?.fileSystemType?.toLowerCase() || 'standard',
+      ],
       queryFn: () =>
         getMessageByUniqueId(
           props?.odinId as string,
@@ -292,7 +300,10 @@ export const useCommunityMessage = (props?: {
 
         const existingMessage = updateCacheCommunityMessage(
           queryClient,
+          community.fileMetadata.appData.uniqueId as string,
           updatedChatMessage.fileMetadata.appData.uniqueId as string,
+          updatedChatMessage.fileSystemType,
+
           () => updatedChatMessage
         );
 
@@ -309,7 +320,9 @@ export const useCommunityMessage = (props?: {
 
         updateCacheCommunityMessage(
           queryClient,
+          messageParams.community.fileMetadata.appData.uniqueId as string,
           messageParams.updatedChatMessage.fileMetadata.appData.uniqueId as string,
+          messageParams.updatedChatMessage.fileSystemType,
           () => context?.existingMessage
         );
       },
@@ -317,21 +330,33 @@ export const useCommunityMessage = (props?: {
   };
 };
 
-export const invalidateCommunityMessage = (queryClient: QueryClient, messageId?: string) => {
+export const invalidateCommunityMessage = (
+  queryClient: QueryClient,
+  communityId: string,
+  messageId?: string,
+  fileSystemType?: SystemFileType
+) => {
   queryClient.invalidateQueries({
-    queryKey: ['community-message', messageId].filter(Boolean),
-    exact: !!messageId,
+    queryKey: ['community-message', communityId, messageId, fileSystemType?.toLowerCase()].filter(
+      Boolean
+    ),
+    exact: !!messageId && !!fileSystemType && !!communityId,
   });
 };
 
 export const updateCacheCommunityMessage = (
   queryClient: QueryClient,
+  communityId: string,
   messageId: string,
+  fileSystemType: SystemFileType | undefined,
   transformFn: (data: HomebaseFile<CommunityMessage>) => HomebaseFile<CommunityMessage> | undefined
 ) => {
   const currentData = queryClient.getQueryData<HomebaseFile<CommunityMessage>>([
     'community-message',
+    communityId,
+
     messageId,
+    fileSystemType?.toLowerCase() || 'standard',
   ]);
   if (!currentData) return;
 

@@ -52,6 +52,11 @@ export const useCommunityMetadata = (props?: {
   }: {
     metadata: HomebaseFile<CommunityMetadata> | NewHomebaseFile<CommunityMetadata>;
   }) => {
+    metadata.fileMetadata.appData.content.communityId = formatGuidId(
+      metadata.fileMetadata.appData.content.communityId
+    );
+    metadata.fileMetadata.appData.uniqueId = formatGuidId(metadata.fileMetadata.appData.uniqueId);
+
     return await uploadCommunityMetadata(dotYouClient, metadata, async () => {
       const serverVersion = await getCommunityMetadata(
         dotYouClient,
@@ -59,26 +64,20 @@ export const useCommunityMetadata = (props?: {
       );
       if (!serverVersion) return;
 
-      return await uploadCommunityMetadata(
-        dotYouClient,
-        {
-          ...metadata,
-          fileMetadata: {
-            ...metadata.fileMetadata,
-            versionTag: serverVersion.fileMetadata.versionTag,
-          },
+      return await uploadCommunityMetadata(dotYouClient, {
+        ...metadata,
+        fileMetadata: {
+          ...metadata.fileMetadata,
+          versionTag: serverVersion.fileMetadata.versionTag,
         },
-        () => {
-          return;
-        }
-      );
+      });
     });
   };
 
   return {
     single: useQuery({
       queryKey: ['community-metadata', communityId],
-      queryFn: () => getMetadata(odinId as string, communityId as string),
+      queryFn: () => getMetadata(odinId as string, formatGuidId(communityId) as string),
       enabled: !!odinId && !!communityId,
       staleTime: 1000 * 60 * 5, // 5 minutes
     }),
@@ -116,9 +115,17 @@ export const useCommunityMetadata = (props?: {
       },
       onError: (error) => {
         console.error('Error saving community metadata', error);
+        invalidateCommunityMetadata(queryClient, communityId);
       },
     }),
   };
+};
+
+export const invalidateCommunityMetadata = (queryClient: QueryClient, communityId?: string) => {
+  queryClient.invalidateQueries({
+    queryKey: ['community-metadata', communityId],
+    exact: !!communityId,
+  });
 };
 
 export const insertNewcommunityMetadata = (

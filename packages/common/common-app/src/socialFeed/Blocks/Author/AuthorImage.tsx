@@ -50,6 +50,7 @@ export const AuthorImage = ({ odinId, ...props }: ConnectionImageProps) => {
 export const OwnerImage = ({ className, size }: ImageProps) => {
   const { owner } = useSiteData().data ?? {};
   const targetDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
+
   return owner?.profileImageFileId ? (
     <Image
       fileId={owner?.profileImageFileId}

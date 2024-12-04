@@ -89,6 +89,9 @@ export interface PushNotificationOptions {
   tagId: string;
   silent: boolean;
   unEncryptedMessage?: string;
+
+  peerSubscriptionId?: string;
+  recipients?: string[];
 }
 
 interface TransitOptionsWithoutNotifications extends BaseTransitOptions {
@@ -100,7 +103,15 @@ interface TransitOptionsWithNotifications extends BaseTransitOptions {
   appNotificationOptions: PushNotificationOptions;
 }
 
-export type TransitOptions = TransitOptionsWithoutNotifications | TransitOptionsWithNotifications;
+interface TransitOptionsWithOnlyNotifications {
+  useAppNotification: true;
+  appNotificationOptions: PushNotificationOptions;
+}
+
+export type TransitOptions =
+  | TransitOptionsWithoutNotifications
+  | TransitOptionsWithNotifications
+  | TransitOptionsWithOnlyNotifications;
 
 export enum SendContents {
   HeaderOnly = 0,

@@ -114,6 +114,9 @@ const DriveDetails = () => {
         <p className="mb-2">{driveDef.metadata}</p>
         <ul>
           {driveDef.allowAnonymousReads ? <li>{t('Allow Anonymous Reads')}</li> : null}
+
+          {/* BE is never reporting allowSubscriptions */}
+          {driveDef.allowSubscriptions ? <li>{t('Allow subscriptions')}</li> : null}
           {driveDef.ownerOnly ? <li>{t('Owner only')}</li> : null}
           {driveDef?.attributes ? (
             <>

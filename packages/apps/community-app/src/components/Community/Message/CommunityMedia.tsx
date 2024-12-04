@@ -116,7 +116,7 @@ const MediaItem = ({
                 loadSize={{ pixelWidth: 1920, pixelHeight: 1080 }}
               />
               <div className="absolute inset-0 flex items-center justify-center">
-                <Triangle className="h-16 w-16 text-background" />
+                <Triangle className="h-16 w-16 text-black dark:text-white" />
               </div>
             </>
           ) : isAudio ? (

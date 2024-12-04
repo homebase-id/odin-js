@@ -63,6 +63,23 @@ export const getReadingTime = (body?: RichText | string): ReadTimeStats | undefi
   };
 };
 
+export const findMentionedInRichText = (richText: RichText | undefined): string[] => {
+  if (!richText) return [];
+
+  const checkNode = (node: Record<string, unknown>): string[] => {
+    if (node.type === 'mention' && node.value && typeof node.value === 'string') {
+      return [node.value];
+    }
+
+    if (node.children && Array.isArray(node.children)) {
+      return node.children?.flatMap(checkNode) || [];
+    }
+    return [];
+  };
+
+  return richText.flatMap(checkNode);
+};
+
 export const ellipsisAtMaxCharOfRichText = (richText: RichText | undefined, maxChar: number) => {
   if (richText === undefined) return [];
 

@@ -11,6 +11,7 @@ import {
   useLinkPreviewBuilder,
   getTextRootsRecursive,
   useAllContacts,
+  findMentionedInRichText,
 } from '@homebase-id/common-app';
 import { PaperPlane, Plus } from '@homebase-id/common-app/icons';
 import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
@@ -37,6 +38,7 @@ export const MessageComposer = ({
   community,
   channel,
   thread,
+  threadParticipants,
   onSend,
   onKeyDown,
   className,
@@ -44,6 +46,7 @@ export const MessageComposer = ({
   community: HomebaseFile<CommunityDefinition> | undefined;
   channel: HomebaseFile<CommunityChannel> | undefined;
   thread?: HomebaseFile<CommunityMessage> | undefined;
+  threadParticipants?: string[];
   onSend?: () => void;
   onKeyDown?: (e: React.KeyboardEvent) => void;
   className?: string;
@@ -90,11 +93,17 @@ export const MessageComposer = ({
     volatileRef.current?.clear();
     volatileRef.current?.focus();
 
+    const mentionedOdinIds = findMentionedInRichText(message);
+    const extendedParticipants = Array.from(
+      new Set(threadParticipants?.concat(mentionedOdinIds) || mentionedOdinIds)
+    );
+
     try {
       await sendMessage({
         community,
         channel,
         thread,
+        threadParticipants: extendedParticipants?.length ? extendedParticipants : undefined,
         message: message || '',
         files: newFiles,
         chatId: getNewId(),
