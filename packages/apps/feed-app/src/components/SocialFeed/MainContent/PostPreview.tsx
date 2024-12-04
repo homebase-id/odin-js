@@ -1,7 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { ActionButton, useChannel, useDotYouClientContext } from '@homebase-id/common-app';
+import {
+  ActionButton,
+  NotFound,
+  useChannel,
+  useDotYouClientContext,
+} from '@homebase-id/common-app';
 import {
   PostDetailCard,
   PostImageDetailCard,
@@ -24,15 +29,14 @@ const PostPreview = ({
   const dotYouClient = useDotYouClientContext();
   const isOwner = dotYouClient.isOwner();
 
-  const { getHostIdentity } = useDotYouClientContext();
-  const isLocal = identityKey === getHostIdentity();
+  const isLocal = identityKey === dotYouClient.getHostIdentity();
 
   const { data: channel } = useChannel({
     odinId: !isLocal ? identityKey : undefined,
     channelKey: channelKey,
   }).fetch;
 
-  const { data: post } = usePost({
+  const { data: post, isFetched: fetchedPost } = usePost({
     odinId: !isLocal ? identityKey : undefined,
     channelKey: channelKey,
     postKey: postKey,
@@ -66,6 +70,8 @@ const PostPreview = ({
   const paths = window.location.pathname.split('/');
   paths.pop();
   const rootUrl = paths.join('/');
+
+  if (fetchedPost && !post) return <NotFound />;
 
   return (
     <div
