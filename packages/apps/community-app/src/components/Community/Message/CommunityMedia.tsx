@@ -41,7 +41,7 @@ export const CommunityMedia = ({
   if (isGallery) return <MediaGallery odinId={odinId} communityId={communityId} msg={msg} />;
 
   return (
-    <div className={`my-1 w-full max-w-xs overflow-hidden rounded-lg`}>
+    <div className={`my-1 h-full max-h-[35rem] w-full max-w-xs overflow-hidden rounded-lg`}>
       <MediaItem
         odinId={odinId}
         communityId={communityId}
@@ -95,7 +95,7 @@ const MediaItem = ({
 
   return (
     <div
-      className={`relative cursor-pointer ${fit === 'cover' ? 'aspect-square' : ''}`}
+      className={`relative cursor-pointer ${fit === 'cover' ? 'aspect-square' : 'max-h-[inherit] max-w-[inherit]'}`}
       onClick={onClick}
       data-thumb={!!previewThumbnail}
     >
@@ -157,8 +157,9 @@ const MediaItem = ({
               targetDrive={targetDrive}
               avoidPayload={isVideo}
               previewThumbnail={previewThumbnail}
-              className={`h-full`}
+              className={`h-full max-h-[inherit]`}
               fit={fit}
+              position={fit === 'contain' ? 'left' : 'center'}
               onLoad={onLoad}
             />
           ) : isLink ? (
