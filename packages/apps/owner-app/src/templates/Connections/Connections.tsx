@@ -307,6 +307,11 @@ const IncomingIntroductionsSection = ({
               <p className="text-sm text-slate-400">
                 {t('Introduced by')}{' '}
                 <AuthorName excludeLink={true} odinId={introduction?.introducerOdinId} />
+                {introduction.received ? (
+                  <>
+                    {t(' on ')} {new Date(introduction.received).toLocaleDateString()}
+                  </>
+                ) : null}
               </p>
             </PersonCard>
           ))

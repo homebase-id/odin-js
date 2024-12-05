@@ -1,13 +1,12 @@
 import { useCommunity } from '../../hooks/community/useCommunity';
 import {
-  ActionLink,
   ErrorBoundary,
   LoadingBlock,
   t,
   COMMUNITY_ROOT_PATH,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { CommunityChannelCatchup } from '../../components/Community/catchup/CommunityChannelCatchup';
 import { useCommunityChannelsWithRecentMessages } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 import { useCommunityMetadata } from '../../hooks/community/useCommunityMetadata';
@@ -121,14 +120,14 @@ const CommunityCatchupHeader = ({
   return (
     <>
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-        <ActionLink
-          className="lg:hidden"
+        <Link
+          className="-m-1 p-1 lg:hidden"
           type="mute"
-          href={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${communityId}`}
+          to={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${communityId}`}
         >
-          <ChevronLeft className="h-5 w-5" />
-        </ActionLink>
-        <RadioTower className="h-6 w-6" /> {t('Activity')}
+          <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+        </Link>
+        <RadioTower className="h-4 w-4 sm:h-5 sm:w-5" /> {t('Activity')}
       </div>
     </>
   );

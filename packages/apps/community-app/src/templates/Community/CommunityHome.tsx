@@ -1,4 +1,4 @@
-import { useParams, useMatch, useNavigate } from 'react-router-dom';
+import { useParams, useMatch, useNavigate, useLocation, Navigate } from 'react-router-dom';
 
 import { ReactNode, useEffect, useState } from 'react';
 import {
@@ -27,6 +27,7 @@ import { useCommunityMemberUpdater } from '../../hooks/community/useCommunityMem
 import { ExtendCriclePermissionDialog } from '../../components/Auth/ExtendCirclePermissionDialog';
 import { useCommunityNotifications } from '../../hooks/community/useCommunityNotifications';
 
+const LOCAL_STORAGE_KEY = 'COMMUNITY_LATEST_PATH';
 export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   const newCommunity = useMatch({ path: `${COMMUNITY_ROOT_PATH}/new` });
   const { odinKey, communityKey } = useParams();
@@ -38,19 +39,28 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   useCommunityNotifications(odinKey, communityKey);
 
   const { data: communities } = useCommunities().all;
-  const navigate = useNavigate();
+
+  const location = useLocation();
   useEffect(() => {
-    if (!communities) return;
-    if (communityKey || newCommunity) return;
-    if (window.innerWidth <= 1024) return;
-    if (communities[0]) {
-      navigate(
-        `${COMMUNITY_ROOT_PATH}/${communities[0].fileMetadata.senderOdinId}/${communities[0].fileMetadata.appData.uniqueId}`
-      );
-    } else {
-      navigate(`${COMMUNITY_ROOT_PATH}/new`);
+    if (!communityKey || isCreateNew) return;
+    localStorage.setItem(LOCAL_STORAGE_KEY, location.pathname);
+  }, [location.pathname]);
+
+  if (communities && !communityKey && !isCreateNew) {
+    if (!location.state?.referrer || !location.state?.referrer.startsWith(COMMUNITY_ROOT_PATH)) {
+      const lastPath = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (lastPath) return <Navigate to={lastPath} replace />;
+
+      if (communities[0])
+        return (
+          <Navigate
+            to={`${COMMUNITY_ROOT_PATH}/${communities[0].fileMetadata.senderOdinId}/${communities[0].fileMetadata.appData.uniqueId}`}
+            replace
+          />
+        );
+      else return <Navigate to={`${COMMUNITY_ROOT_PATH}/new`} replace />;
     }
-  }, [communityKey, communities]);
+  }
 
   return (
     <>
@@ -82,9 +92,13 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
 
 const CommunitySideNav = () => {
   const rootChatMatch = useMatch({ path: COMMUNITY_ROOT_PATH });
-  const isRoot = !!rootChatMatch;
+  const communityHomeChatMatch = useMatch({
+    path: `${COMMUNITY_ROOT_PATH}/:odinKey/:communityKey`,
+    end: true,
+  });
+  const isRoot = !!rootChatMatch || !!communityHomeChatMatch;
 
-  const isActive = isRoot;
+  const isActive = !!rootChatMatch;
 
   return (
     <>
@@ -93,7 +107,7 @@ const CommunitySideNav = () => {
         className={`${isActive ? 'translate-x-full' : 'translate-x-0'} fixed bottom-0 left-[-100%] top-0 z-[1] flex h-[100dvh] w-full flex-shrink-0 flex-col bg-page-background transition-transform lg:relative lg:left-0 lg:max-w-[4rem] lg:translate-x-0`}
       >
         <ErrorBoundary>
-          <div className="absolute inset-0 flex flex-grow flex-row flex-wrap md:pl-[calc(env(safe-area-inset-left)+4.3rem)] lg:flex-col lg:items-center lg:pl-0">
+          <div className="absolute inset-0 flex flex-grow flex-row flex-wrap items-start md:pl-[calc(env(safe-area-inset-left)+4.3rem)] lg:flex-col lg:items-center lg:pl-0">
             <div className="px-4 pb-2 pt-4">
               <RadioTower className="h-7 w-7" />
             </div>

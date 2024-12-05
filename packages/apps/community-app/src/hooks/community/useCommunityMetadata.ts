@@ -1,6 +1,11 @@
 import { useQueryClient, useQuery, useMutation, QueryClient } from '@tanstack/react-query';
 import { useDotYouClientContext } from '@homebase-id/common-app';
-import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
+import {
+  DeletedHomebaseFile,
+  HomebaseFile,
+  NewHomebaseFile,
+  SecurityGroupType,
+} from '@homebase-id/js-lib/core';
 import {
   CommunityMetadata,
   getCommunityMetadata,
@@ -130,10 +135,15 @@ export const invalidateCommunityMetadata = (queryClient: QueryClient, communityI
 
 export const insertNewcommunityMetadata = (
   queryClient: QueryClient,
-  newMetadata: HomebaseFile<CommunityMetadata>
+  newMetadata: HomebaseFile<CommunityMetadata> | DeletedHomebaseFile<unknown>
 ) => {
-  queryClient.setQueryData(
-    ['community-metadata', formatGuidId(newMetadata.fileMetadata.appData.content.communityId)],
-    newMetadata
-  );
+  if (newMetadata.fileState === 'deleted') {
+    if (newMetadata.fileMetadata.appData.uniqueId)
+      invalidateCommunityMetadata(queryClient, newMetadata.fileMetadata.appData.uniqueId);
+  } else {
+    queryClient.setQueryData(
+      ['community-metadata', formatGuidId(newMetadata.fileMetadata.appData.content.communityId)],
+      newMetadata
+    );
+  }
 };

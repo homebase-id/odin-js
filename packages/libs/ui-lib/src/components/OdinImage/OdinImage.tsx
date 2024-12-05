@@ -16,7 +16,7 @@ export interface OdinImageProps
   onLoad?: () => void;
   avoidPayload?: boolean;
   fit?: 'cover' | 'contain';
-  position?: 'left' | 'right' | 'center';
+  position?: 'left' | 'center';
   preferObjectUrl?: boolean; // => Prefer image urls over base64; But the objectUrls are never cleared after use;
 
   maxWidth?: string;
@@ -30,12 +30,13 @@ export const OdinImage = ({
   probablyEncrypted,
   avoidPayload,
   fit,
+  position,
   onLoad,
   lazyLoad = true,
   maxWidth,
   ...props
 }: OdinImageProps) => {
-  const imgFitClassNames = `${fit === 'cover' ? 'w-full h-full object-cover' : fit === 'contain' ? 'max-h-[inherit] m-auto object-contain' : ''}`;
+  const imgFitClassNames = `${fit === 'cover' ? 'w-full h-full object-cover' : fit === 'contain' ? `max-h-[inherit] ${position === 'left' ? 'my-auto' : 'm-auto'} object-contain` : ''}`;
 
   const wrapperRef = useRef<HTMLPictureElement>(null);
   const previewImgRef = useRef<HTMLImageElement>(null);
@@ -105,7 +106,7 @@ export const OdinImage = ({
 
   return (
     <figure
-      className={`${className && className?.indexOf('absolute') !== -1 ? '' : 'relative'} overflow-hidden ${fit !== 'cover' ? 'm-auto h-auto w-full' : ''} ${
+      className={`${className && className?.indexOf('absolute') !== -1 ? '' : 'relative'} overflow-hidden ${fit !== 'cover' ? `${position === 'left' ? 'my-auto' : 'm-auto'} h-auto w-full` : ''} ${
         className ?? ''
       }`}
       ref={wrapperRef}
@@ -139,7 +140,7 @@ export const OdinImage = ({
           setTinyThumb(tinyThumb);
           setIsTinyLoaded(true);
         }}
-        className={`absolute inset-0 transition-opacity delay-500 ${imgFitClassNames} ${isFinal ? 'opacity-0' : 'opacity-100'}`}
+        className={`absolute inset-0 transition-opacity delay-500 ${imgFitClassNames} ${fit === 'contain' ? (position === 'left' ? 'object-left' : '') : ''} ${isFinal ? 'opacity-0' : 'opacity-100'}`}
         onError={() => setIsTinyLoaded(true)}
         ref={previewImgRef}
         blur="auto"

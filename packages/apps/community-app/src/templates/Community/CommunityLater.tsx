@@ -3,7 +3,6 @@ import { useCommunityMetadata } from '../../hooks/community/useCommunityMetadata
 import { useCommunityMessage } from '../../hooks/community/messages/useCommunityMessage';
 import { HomebaseFile, SystemFileType } from '@homebase-id/js-lib/core';
 import {
-  ActionLink,
   COMMUNITY_ROOT_PATH,
   ConnectionImage,
   ConnectionName,
@@ -183,14 +182,14 @@ const CommunityLaterHeader = ({ community }: { community?: HomebaseFile<Communit
   return (
     <>
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-        <ActionLink
-          className="lg:hidden"
+        <Link
+          className="-m-1 p-1 lg:hidden"
           type="mute"
-          href={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${communityId}`}
+          to={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${communityId}`}
         >
-          <ChevronLeft className="h-5 w-5" />
-        </ActionLink>
-        <Bookmark className="h-6 w-6" /> {t('Later')}
+          <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+        </Link>
+        <Bookmark className="h-4 w-4 sm:h-5 sm:w-5" /> {t('Later')}
       </div>
     </>
   );

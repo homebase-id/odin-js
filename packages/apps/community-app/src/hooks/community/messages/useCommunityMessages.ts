@@ -21,7 +21,7 @@ import {
 import { formatGuidId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 const PAGE_SIZE = 100;
 export const useCommunityMessages = (props?: {
@@ -255,37 +255,33 @@ export const useLastUpdatedChatMessages = ({
   communityId: string | undefined;
 }) => {
   const queryClient = useQueryClient();
-  const [lastUpdate, setLastUpdate] = useState<number | null>(null);
+  const [foceRefresh, setForceRefresh] = useState(0);
 
-  const findAndSet = useCallback(() => {
-    if (!communityId) return;
+  useEffect(() => {
+    setForceRefresh((prev) => prev + 1);
+
+    const interval = setInterval(() => setForceRefresh((prev) => prev + 1), 1000 * 60); // 1 minute
+    return () => clearInterval(interval);
+  }, []);
+
+  return useMemo(() => {
+    if (!communityId) return { lastUpdate: null };
 
     const lastUpdates = queryClient
       .getQueryCache()
       .findAll({ queryKey: ['community-messages', formatGuidId(communityId)], exact: false })
       .map((query) => query.state.dataUpdatedAt);
 
-    setLastUpdate(
-      lastUpdates.reduce((acc, val) => {
+    return {
+      lastUpdate: lastUpdates.reduce((acc, val) => {
         if (val > acc) {
           return val;
         }
 
         return acc;
-      }, 0)
-    );
-  }, [queryClient]);
-
-  useEffect(() => {
-    findAndSet();
-
-    const interval = setInterval(() => findAndSet(), 1000 * 60); // 1 minute
-    return () => clearInterval(interval);
-  }, []);
-
-  return {
-    lastUpdate,
-  };
+      }, 0),
+    };
+  }, [foceRefresh]);
 };
 
 // Inserters

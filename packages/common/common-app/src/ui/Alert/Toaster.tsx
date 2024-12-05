@@ -16,7 +16,7 @@ import { OWNER_ROOT } from '../../constants';
 
 export const Toaster = ({ drives, errorOnly }: { drives?: TargetDrive[]; errorOnly?: boolean }) => {
   return (
-    <div className="fixed bottom-2 left-2 right-2 z-50 grid grid-flow-row gap-4 sm:bottom-auto sm:left-auto sm:right-8 sm:top-8">
+    <div className="fixed top-2 left-2 right-2 z-50 grid grid-flow-row gap-4 sm:left-auto sm:right-8 sm:top-8">
       <ErrorToaster />
       {!errorOnly ? <LiveToaster drives={drives} /> : null}
     </div>
@@ -192,7 +192,7 @@ export const Toast = ({
     <a
       href={href}
       onClick={doOpen}
-      className={`relative flex max-w-sm flex-row gap-2 rounded-md bg-white px-3 py-2 shadow-md dark:bg-black dark:text-slate-300 ${href || onOpen ? 'cursor-pointer' : ''}`}
+      className={`relative flex md:max-w-sm flex-row gap-2 rounded-md bg-white px-3 py-2 shadow-md dark:bg-black dark:text-slate-300 ${href || onOpen ? 'cursor-pointer' : ''}`}
     >
       {imgSrc ? (
         <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full">
