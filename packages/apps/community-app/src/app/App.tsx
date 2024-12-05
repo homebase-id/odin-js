@@ -39,7 +39,6 @@ const CommunityHome = lazy(() =>
     default: communityApp.CommunityHome,
   }))
 );
-
 const CommunityChannelDetail = lazy(() =>
   import('../templates/Community/CommunityChannelDetail').then((communityApp) => ({
     default: communityApp.CommunityChannelDetail,

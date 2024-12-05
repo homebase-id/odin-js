@@ -33,6 +33,12 @@ import {
   dsrToCommunityChannel,
 } from '../../../providers/CommunityProvider';
 import { insertNewCommunityChannel } from '../channels/useCommunityChannels';
+import {
+  COMMUNITY_METADATA_FILE_TYPE,
+  dsrToCommunityMetadata,
+  LOCAL_COMMUNITY_APP_DRIVE,
+} from '../../../providers/CommunityMetadataProvider';
+import { insertNewcommunityMetadata } from '../useCommunityMetadata';
 
 const isDebug = hasDebugFlag();
 
@@ -99,6 +105,35 @@ export const useCommunityInboxProcessor = (
 
           if (!newChannel) return;
           insertNewCommunityChannel(queryClient, newChannel, communityId);
+        })
+      );
+
+      const newCommunityMetadata = await findChangesSinceTimestamp(
+        dotYouClient,
+        undefined,
+        lastProcessedWithBuffer,
+        {
+          targetDrive: LOCAL_COMMUNITY_APP_DRIVE,
+          fileType: [COMMUNITY_METADATA_FILE_TYPE],
+        }
+      );
+
+      isDebug &&
+        console.debug('[InboxProcessor] new community metadata', newCommunityMetadata.length);
+
+      await Promise.all(
+        newCommunityMetadata.map(async (updatedDsr) => {
+          const newMetadata =
+            updatedDsr.fileState === 'active'
+              ? await dsrToCommunityMetadata(
+                  dotYouClient,
+                  updatedDsr,
+                  LOCAL_COMMUNITY_APP_DRIVE,
+                  true
+                )
+              : updatedDsr;
+          if (!newMetadata) return;
+          insertNewcommunityMetadata(queryClient, newMetadata);
         })
       );
     } else {

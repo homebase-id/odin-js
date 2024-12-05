@@ -116,7 +116,7 @@ const CommunityChannelHeader = ({
           type="mute"
           to={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${communityId}`}
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
         </Link>
 
         {channel ? (

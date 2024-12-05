@@ -13,7 +13,12 @@ import {
   useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { HomebaseFile, RichText } from '@homebase-id/js-lib/core';
-import { formatGuidId, stringGuidsEqual, toGuidId } from '@homebase-id/js-lib/helpers';
+import {
+  formatGuidId,
+  isTouchDevice,
+  stringGuidsEqual,
+  toGuidId,
+} from '@homebase-id/js-lib/helpers';
 import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { CommunityActions, ContextMenu } from '../channel/ContextMenu';
@@ -102,7 +107,7 @@ export const CommunityMessageItem = memo(
           />
         ) : null}
         <div
-          className={`group relative flex flex-col transition-colors duration-500 ${isEdit ? 'bg-primary/20' : `bg-background ${isDetail ? (highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000') : 'hover:bg-page-background'}`} ${className || ''}`}
+          className={`group relative flex flex-col transition-colors duration-500 ${isEdit ? 'bg-primary/20' : `bg-background ${isDetail ? (highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000') : !isTouchDevice() ? 'hover:bg-page-background' : ''}`} ${className || ''}`}
           data-unique-id={msg.fileMetadata.appData.uniqueId}
         >
           {showChannelName && !hideDetails ? (

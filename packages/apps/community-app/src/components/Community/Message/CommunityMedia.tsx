@@ -41,19 +41,18 @@ export const CommunityMedia = ({
   if (isGallery) return <MediaGallery odinId={odinId} communityId={communityId} msg={msg} />;
 
   return (
-    <div className={`my-1 w-full max-w-xs overflow-hidden rounded-lg`}>
-      <MediaItem
-        odinId={odinId}
-        communityId={communityId}
-        fileId={msg.fileId}
-        systemFileType={msg.fileSystemType}
-        fileLastModified={msg.fileMetadata.updated}
-        payload={payloads[0]}
-        fit={'contain'}
-        onClick={() => navigate(`${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`)}
-        previewThumbnail={isGallery ? undefined : msg.fileMetadata.appData.previewThumbnail}
-      />
-    </div>
+    <MediaItem
+      odinId={odinId}
+      communityId={communityId}
+      fileId={msg.fileId}
+      systemFileType={msg.fileSystemType}
+      fileLastModified={msg.fileMetadata.updated}
+      payload={payloads[0]}
+      fit={'contain'}
+      onClick={() => navigate(`${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`)}
+      previewThumbnail={isGallery ? undefined : msg.fileMetadata.appData.previewThumbnail}
+      className={`my-1 h-full max-h-[35rem] w-full max-w-xs overflow-hidden rounded-lg`}
+    />
   );
 };
 
@@ -68,6 +67,7 @@ const MediaItem = ({
   children,
   onClick,
   previewThumbnail,
+  className,
   onLoad,
 }: {
   odinId: string;
@@ -80,6 +80,7 @@ const MediaItem = ({
   children?: React.ReactNode;
   onClick: (() => void) | undefined;
   previewThumbnail?: EmbeddedThumb;
+  className?: string;
   onLoad?: () => void;
 }) => {
   const { isDarkMode } = useDarkMode();
@@ -95,7 +96,7 @@ const MediaItem = ({
 
   return (
     <div
-      className={`relative cursor-pointer ${fit === 'cover' ? 'aspect-square' : ''}`}
+      className={`relative cursor-pointer ${fit === 'cover' ? 'aspect-square' : ''} ${className || ''}`}
       onClick={onClick}
       data-thumb={!!previewThumbnail}
     >
@@ -157,8 +158,9 @@ const MediaItem = ({
               targetDrive={targetDrive}
               avoidPayload={isVideo}
               previewThumbnail={previewThumbnail}
-              className={`h-full`}
+              className={`h-full max-h-[inherit]`}
               fit={fit}
+              position={fit === 'contain' ? 'left' : 'center'}
               onLoad={onLoad}
             />
           ) : isLink ? (
@@ -301,26 +303,23 @@ const MediaGalleryItem = ({
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   return (
-    <div
+    <MediaItem
       key={payload.key}
+      odinId={odinId}
+      communityId={communityId}
+      fileId={msg.fileId}
+      fileLastModified={msg.fileMetadata.updated}
+      payload={payload}
+      fit={'cover'}
+      onClick={onClick}
+      previewThumbnail={undefined}
+      onLoad={() => setIsLoaded(true)}
       className={`relative h-full w-full ${
         isColSpan2 ? 'aspect-[2/1]' : 'aspect-square'
       } ${isColSpan2 ? 'col-span-2' : ''} ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
     >
-      <MediaItem
-        odinId={odinId}
-        communityId={communityId}
-        fileId={msg.fileId}
-        fileLastModified={msg.fileMetadata.updated}
-        payload={payload}
-        fit={'cover'}
-        onClick={onClick}
-        previewThumbnail={undefined}
-        onLoad={() => setIsLoaded(true)}
-      >
-        {children}
-      </MediaItem>
-    </div>
+      {children}
+    </MediaItem>
   );
 };
 

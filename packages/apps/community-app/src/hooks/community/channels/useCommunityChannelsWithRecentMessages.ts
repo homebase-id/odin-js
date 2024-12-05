@@ -9,6 +9,7 @@ import {
   getCommunityMessagesInfiniteQueryOptions,
   useLastUpdatedChatMessages,
 } from '../messages/useCommunityMessages';
+import { formatGuidId } from '@homebase-id/js-lib/helpers';
 
 export type ChannelWithRecentMessage = HomebaseFile<CommunityChannel> & {
   lastMessage: HomebaseFile<CommunityMessage> | null;
@@ -20,23 +21,24 @@ export const useCommunityChannelsWithRecentMessages = (props: {
 }) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
+  const queryKey = ['channels-with-recent-message', formatGuidId(props.communityId)];
 
-  const { data: channels } = useCommunityChannels(props).fetch;
+  const { data: channels, isFetched } = useCommunityChannels(props).fetch;
   const { lastUpdate } = useLastUpdatedChatMessages({ communityId: props.communityId });
-
   useEffect(() => {
-    if (lastUpdate === null || !channels || !channels.length) return;
+    if (lastUpdate === null || !isFetched || !channels || !channels.length) {
+      return;
+    }
 
-    const currentCacheUpdate = queryClient.getQueryState<ChannelWithRecentMessage[]>([
-      'channels-with-recent-message',
-    ]);
+    const currentCacheUpdate = queryClient.getQueryState<ChannelWithRecentMessage[]>(queryKey);
     if (
       currentCacheUpdate?.data?.length === channels.length &&
       currentCacheUpdate?.dataUpdatedAt &&
       lastUpdate !== 0 &&
       lastUpdate <= currentCacheUpdate?.dataUpdatedAt
-    )
+    ) {
       return;
+    }
 
     (async () => {
       const convoWithMessage: ChannelWithRecentMessage[] = await Promise.all(
@@ -64,7 +66,7 @@ export const useCommunityChannelsWithRecentMessages = (props: {
         return b.lastMessage.fileMetadata.created - a.lastMessage.fileMetadata.created;
       });
 
-      queryClient.setQueryData(['channels-with-recent-message'], convoWithMessage, {
+      queryClient.setQueryData(queryKey, convoWithMessage, {
         updatedAt: Date.now(),
       });
     })();
@@ -73,7 +75,7 @@ export const useCommunityChannelsWithRecentMessages = (props: {
   return {
     // We only setup a cache entry that we will fill up with the setQueryData later; So we can cache the data for offline and faster startup;
     fetch: useQuery({
-      queryKey: ['channels-with-recent-message'],
+      queryKey: queryKey,
       queryFn: () => [] as ChannelWithRecentMessage[],
       staleTime: Infinity,
     }),
