@@ -134,7 +134,7 @@ const getSalts = async (dotYouClient: DotYouClient): Promise<NonceData> => {
 };
 
 export interface PublicKeyData {
-  publicKeyJwk: string;
+  publicKeyJwkBase64Url: string;
   crC32c: number;
   expiration: number;
 }
@@ -142,7 +142,7 @@ export interface PublicKeyData {
 const getPublicKey = async (dotYouClient: DotYouClient): Promise<PublicKeyData> => {
   const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
   return client
-    .get<PublicKeyData>('/authentication/publickey?keyType=offlineKey')
+    .get<PublicKeyData>('/authentication/publickey_ecc?keyType=offlineKey')
     .then((response) => {
       return response.data;
     });

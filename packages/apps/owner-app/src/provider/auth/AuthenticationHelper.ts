@@ -95,7 +95,7 @@ export const encryptRecoveryKey = async (
   nonceData: AuthenticationReplyNonce,
   publicKey: PublicKeyData
 ) => {
-  const hostEccPublicKey = await importRemotePublicEccKey(publicKey.publicKeyJwk);
+  const hostEccPublicKey = await importRemotePublicEccKey(publicKey.publicKeyJwkBase64Url);
 
   const clientEccKey = await createEccPair();
   const clientprivateKey = clientEccKey.privateKey;
