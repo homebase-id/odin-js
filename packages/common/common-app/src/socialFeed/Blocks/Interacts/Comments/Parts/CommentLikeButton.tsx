@@ -3,7 +3,7 @@ import { useRef, useState } from 'react';
 import { ReactionContext } from '@homebase-id/js-lib/public';
 import { useReaction } from '../../../../../hooks/reactions/useReaction';
 import { useOutsideTrigger } from '../../../../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';
-import { SocialReactionsBar } from '../../Reactions/ReactionsBar';
+import { ReactionsBarHandle, SocialReactionsBar } from '../../Reactions/ReactionsBar';
 import { ErrorNotification } from '../../../../../ui/Alert/ErrorNotification';
 import { t } from '../../../../../helpers/i18n/dictionary';
 import { useDotYouClientContext, useMyEmojiReactions } from '../../../../../hooks';
@@ -11,6 +11,7 @@ import { useDotYouClientContext, useMyEmojiReactions } from '../../../../../hook
 export const CommentLikeButton = ({ threadContext }: { threadContext: ReactionContext }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isReact, setIsReact] = useState(false);
+  const [isCustomReactOpen, setIsCustomReactOpen] = useState(false);
 
   const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
   const {
@@ -18,7 +19,11 @@ export const CommentLikeButton = ({ threadContext }: { threadContext: ReactionCo
     removeEmoji: { mutate: removeEmoji, error: removeEmojiError },
   } = useReaction();
   const isDesktop = document.documentElement.clientWidth >= 1024;
-  useOutsideTrigger(wrapperRef, () => setIsReact(false));
+  const reactionsBarRef = useRef<ReactionsBarHandle>(null);
+  useOutsideTrigger(wrapperRef, () => {
+    setIsReact(false);
+    reactionsBarRef.current?.close();
+  });
 
   const { data: myReactions } = useMyEmojiReactions(threadContext).fetch;
   const hasReacted = myReactions?.length;
@@ -47,18 +52,20 @@ export const CommentLikeButton = ({ threadContext }: { threadContext: ReactionCo
       <div className={`relative select-none`} ref={wrapperRef}>
         {/* Wrapper div that holds a bigger "hover target", which spans the likeButton itself as well */}
         <div
-          className={`${isReact ? 'absolute' : 'contents'} -left-1 -top-10 bottom-0 w-[10rem]`}
+          className={`${isReact || isCustomReactOpen ? 'absolute' : 'contents'} -left-1 -top-10 bottom-0 w-[10rem]`}
           onMouseLeave={() => setIsReact(false)}
           onMouseEnter={() => setIsReact(true)}
         >
           <SocialReactionsBar
             className="absolute left-0 top-0"
             customDirection="right"
-            isActive={isReact}
+            isActive={isReact || isCustomReactOpen}
             context={threadContext}
             // Forced to yes, as this component won't render if the user can't react
             canReact={{ canReact: true }}
-            onClose={() => setIsReact(false)}
+            onOpen={() => setIsCustomReactOpen(true)}
+            onClose={() => setIsCustomReactOpen(false)}
+            ref={reactionsBarRef}
           />
         </div>
         <button

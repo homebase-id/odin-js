@@ -11,88 +11,105 @@ import { Emojis } from '../../../../ui/Icons';
 import { t } from '../../../../helpers/i18n/dictionary';
 import { useDotYouClientContext } from '../../../../hooks';
 
-export const SocialReactionsBar = ({
-  className,
-  isActive,
-  context,
-  canReact,
-  onClose,
-  customDirection,
-}: {
-  className: string;
-  isActive: boolean;
-  context: ReactionContext;
-  canReact?: CanReactInfo;
-  onClose: () => void;
-  customDirection?: 'left' | 'right';
-}) => {
-  const [isHover, setIsHover] = useState(false);
-  const addError = useErrors().add;
-
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
-  const {
-    saveEmoji: { mutate: postEmoji, error: postEmojiError },
-    removeEmoji: { mutate: removeEmoji, error: removeEmojiError },
-  } = useReaction();
-
-  const { data: myEmojis } = useMyEmojiReactions(isActive || isHover ? context : undefined).fetch;
-  const doLike = async (body: string) => {
-    postEmoji({
-      emojiData: { body: body, authorOdinId: loggedOnIdentity },
+export const SocialReactionsBar = forwardRef(
+  (
+    {
+      className,
+      isActive,
       context,
-    });
+      canReact,
+      onOpen,
+      onClose,
+      customDirection,
+    }: {
+      className: string;
+      isActive: boolean;
+      context: ReactionContext;
+      canReact?: CanReactInfo;
+      onOpen: () => void;
+      onClose: () => void;
+      customDirection?: 'left' | 'right';
+    },
+    ref: Ref<ReactionsBarHandle>
+  ) => {
+    const [isHover, setIsHover] = useState(false);
+    const addError = useErrors().add;
 
-    if (onClose) {
-      setIsHover(false);
-      onClose();
+    const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+    const {
+      saveEmoji: { mutate: postEmoji, error: postEmojiError },
+      removeEmoji: { mutate: removeEmoji, error: removeEmojiError },
+    } = useReaction();
+
+    const { data: myEmojis } = useMyEmojiReactions(isActive || isHover ? context : undefined).fetch;
+    const doLike = async (body: string) => {
+      postEmoji({
+        emojiData: { body: body, authorOdinId: loggedOnIdentity },
+        context,
+      });
+
+      if (onClose) {
+        setIsHover(false);
+        onClose();
+      }
+    };
+    const doUnlike = (body: string) => {
+      removeEmoji({
+        emojiData: { body: body, authorOdinId: loggedOnIdentity },
+        context,
+      });
+
+      if (onClose) {
+        setIsHover(false);
+        onClose();
+      }
+    };
+
+    useEffect(() => {
+      if (postEmojiError || removeEmojiError) {
+        addError(postEmojiError || removeEmojiError);
+      }
+    }, [postEmojiError || removeEmojiError]);
+
+    // useEffect(() => {
+    //   if (isActive && !isHover && !isCustomOpen) {
+    //     onClose();
+    //   }
+    // }, [isHover, isCustomOpen]);
+
+    if (!isActive && !isHover) {
+      return null;
     }
-  };
-  const doUnlike = (body: string) => {
-    removeEmoji({
-      emojiData: { body: body, authorOdinId: loggedOnIdentity },
-      context,
-    });
 
-    if (onClose) {
-      setIsHover(false);
-      onClose();
+    if (!canReact || canReact?.canReact === false || canReact?.canReact === 'comment') {
+      return (
+        <div
+          className={`bg-background text-foreground flex flex-row rounded-lg px-1 py-2 shadow-md dark:bg-slate-900 ${
+            className ?? ''
+          }`}
+        >
+          <CantReactInfo cantReact={canReact} intent="emoji" />
+        </div>
+      );
     }
-  };
 
-  useEffect(() => {
-    if (postEmojiError || removeEmojiError) {
-      addError(postEmojiError || removeEmojiError);
-    }
-  }, [postEmojiError || removeEmojiError]);
-
-  if (!isActive && !isHover) {
-    return null;
-  }
-
-  if (!canReact || canReact?.canReact === false || canReact?.canReact === 'comment') {
     return (
-      <div
-        className={`bg-background text-foreground flex flex-row rounded-lg px-1 py-2 shadow-md dark:bg-slate-900 ${
-          className ?? ''
-        }`}
-      >
-        <CantReactInfo cantReact={canReact} intent="emoji" />
-      </div>
+      <ReactionsBar
+        className={`bg-background text-foreground flex flex-row rounded-lg px-1 py-2 shadow-md dark:bg-slate-900 ${className || ''}`}
+        doLike={doLike}
+        doUnlike={doUnlike}
+        onMouseEnter={() => setIsHover(true)}
+        onMouseLeave={() => setIsHover(false)}
+        defaultValue={myEmojis || []}
+        customDirection={customDirection}
+        ref={ref}
+        onOpen={onOpen}
+        onClose={onClose}
+      />
     );
   }
-
-  return (
-    <ReactionsBar
-      className={`bg-background text-foreground flex flex-row rounded-lg px-1 py-2 shadow-md dark:bg-slate-900 ${className || ''}`}
-      doLike={doLike}
-      doUnlike={doUnlike}
-      onMouseEnter={() => setIsHover(true)}
-      onMouseLeave={() => setIsHover(false)}
-      defaultValue={myEmojis || []}
-      customDirection={customDirection}
-    />
-  );
-};
+);
+SocialReactionsBar.displayName = 'SocialReactionsBar';
 
 const DEFAULT_EMOJIS = ['❤️', '😆', '😥'];
 
