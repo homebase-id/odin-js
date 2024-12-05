@@ -1,4 +1,4 @@
-import { useParams, useMatch, useNavigate } from 'react-router-dom';
+import { useParams, useMatch, useNavigate, useLocation, Navigate } from 'react-router-dom';
 
 import { ReactNode, useEffect, useState } from 'react';
 import {
@@ -27,6 +27,7 @@ import { useCommunityMemberUpdater } from '../../hooks/community/useCommunityMem
 import { ExtendCriclePermissionDialog } from '../../components/Auth/ExtendCirclePermissionDialog';
 import { useCommunityNotifications } from '../../hooks/community/useCommunityNotifications';
 
+const LOCAL_STORAGE_KEY = 'COMMUNITY_LATEST_PATH';
 export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   const newCommunity = useMatch({ path: `${COMMUNITY_ROOT_PATH}/new` });
   const { odinKey, communityKey } = useParams();
@@ -38,19 +39,28 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   useCommunityNotifications(odinKey, communityKey);
 
   const { data: communities } = useCommunities().all;
-  const navigate = useNavigate();
+
+  const location = useLocation();
   useEffect(() => {
-    if (!communities) return;
-    if (communityKey || newCommunity) return;
-    if (window.innerWidth <= 1024) return;
-    if (communities[0]) {
-      navigate(
-        `${COMMUNITY_ROOT_PATH}/${communities[0].fileMetadata.senderOdinId}/${communities[0].fileMetadata.appData.uniqueId}`
-      );
-    } else {
-      navigate(`${COMMUNITY_ROOT_PATH}/new`);
+    if (!communityKey || isCreateNew) return;
+    localStorage.setItem(LOCAL_STORAGE_KEY, location.pathname);
+  }, [location.pathname]);
+
+  if (communities && !communityKey && !isCreateNew) {
+    const lastPath = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (lastPath) return <Navigate to={lastPath} replace />;
+
+    if (window.innerWidth > 1024) {
+      if (communities[0])
+        return (
+          <Navigate
+            to={`${COMMUNITY_ROOT_PATH}/${communities[0].fileMetadata.senderOdinId}/${communities[0].fileMetadata.appData.uniqueId}`}
+            replace
+          />
+        );
+      else return <Navigate to={`${COMMUNITY_ROOT_PATH}/new`} replace />;
     }
-  }, [communityKey, communities]);
+  }
 
   return (
     <>
