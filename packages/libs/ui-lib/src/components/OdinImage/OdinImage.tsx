@@ -106,7 +106,7 @@ export const OdinImage = ({
 
   return (
     <figure
-      className={`${className && className?.indexOf('absolute') !== -1 ? '' : 'relative'} overflow-hidden ${fit !== 'contain' ? `${position === 'left' ? 'my-auto' : 'm-auto'} h-auto w-full` : ''} ${
+      className={`${className && className?.indexOf('absolute') !== -1 ? '' : 'relative'} overflow-hidden ${fit !== 'cover' ? `${position === 'left' ? 'my-auto' : 'm-auto'} h-auto w-full` : ''} ${
         className ?? ''
       }`}
       ref={wrapperRef}
