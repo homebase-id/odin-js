@@ -27,12 +27,6 @@ export const useCommunityChannelsWithRecentMessages = (props: {
   const { lastUpdate } = useLastUpdatedChatMessages({ communityId: props.communityId });
   useEffect(() => {
     if (lastUpdate === null || !isFetched || !channels || !channels.length) {
-      console.warn('Failed to fetch channels or lastUpdate is null', {
-        lastUpdate,
-        isFetched,
-        channels,
-        props,
-      });
       return;
     }
 
@@ -43,7 +37,6 @@ export const useCommunityChannelsWithRecentMessages = (props: {
       lastUpdate !== 0 &&
       lastUpdate <= currentCacheUpdate?.dataUpdatedAt
     ) {
-      console.warn('Cache is up to date', { currentCacheUpdate, lastUpdate });
       return;
     }
 
