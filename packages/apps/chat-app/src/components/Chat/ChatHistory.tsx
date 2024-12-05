@@ -65,12 +65,12 @@ export const ChatHistory = ({
     getScrollElement: () => scrollRef.current,
     count,
     estimateSize: () => 300,
-    // Custom scroll handler to support inverted rendering with flex-col-reverse
+    // Custom scroll handler to support inverted rendering
     observeElementOffset: (instance, cb) => {
       const element = instance.scrollElement;
       if (!element) return;
 
-      // Math.abs as the element.scrollTop will be negative with flex-col-reverse
+      // Math.abs as the element.scrollTop will be negative with the flex-col-reverse container
       const handler = () => cb(Math.abs(element.scrollTop));
       // Start scroll is always 0, as flex-col-reverse starts at the bottom
       cb(0);
@@ -81,6 +81,7 @@ export const ChatHistory = ({
 
       return () => element.removeEventListener('scroll', handler);
     },
+    initialOffset: 0,
     overscan: 5,
     getItemKey: (index) => flattenedMsgs[index]?.fileId || `loader-${index}`,
   });
@@ -88,7 +89,7 @@ export const ChatHistory = ({
   const items = virtualizer.getVirtualItems();
 
   useEffect(() => {
-    const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
+    const [lastItem] = virtualizer.getVirtualItems();
 
     if (!lastItem) return;
     if (lastItem.index >= flattenedMsgs?.length - 1 && hasMoreMessages && !isFetchingNextPage)
@@ -108,27 +109,6 @@ export const ChatHistory = ({
         className="faded-scrollbar flex w-full flex-grow flex-col-reverse overflow-auto p-2 sm:p-5"
         ref={scrollRef}
         key={conversation?.fileId}
-        onCopyCapture={(e) => {
-          const range = window.getSelection()?.getRangeAt(0),
-            rangeContents = range?.cloneContents(),
-            helper = document.createElement('div');
-
-          if (rangeContents) helper.appendChild(rangeContents);
-          const elements = helper.getElementsByClassName('copyable-content');
-          if (elements.length === 0) return;
-
-          let runningText = '';
-          for (let i = elements.length - 1; i >= 0; i--) {
-            const text = (elements[i] as HTMLElement).innerText;
-            if (text?.length) {
-              runningText += text + '\n';
-            }
-          }
-
-          e.clipboardData.setData('text/plain', runningText);
-          e.preventDefault();
-          return false;
-        }}
       >
         <div
           className="relative w-full flex-shrink-0 flex-grow-0 overflow-hidden" // This overflow-hidden cuts of the context-menu of the first chat-items; But we need it as it otherwise breaks the scroll edges
@@ -137,12 +117,12 @@ export const ChatHistory = ({
           }}
         >
           <div
-            className="absolute left-0 top-0 flex h-full w-full flex-col-reverse"
+            className="absolute bottom-0 left-0 flex h-full w-full flex-col justify-end"
             style={{
               transform: `translateY(-${items[0]?.start ?? 0}px)`,
             }}
           >
-            {items.map((item) => {
+            {items.reverse().map((item) => {
               const isLoaderRow = item.index > flattenedMsgs?.length - 1;
               if (isLoaderRow) {
                 return (
