@@ -47,10 +47,10 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   }, [location.pathname]);
 
   if (communities && !communityKey && !isCreateNew) {
-    const lastPath = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (lastPath) return <Navigate to={lastPath} replace />;
+    if (!location.state?.referrer || !location.state?.referrer.startsWith(COMMUNITY_ROOT_PATH)) {
+      const lastPath = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (lastPath) return <Navigate to={lastPath} replace />;
 
-    if (window.innerWidth > 1024) {
       if (communities[0])
         return (
           <Navigate
@@ -92,9 +92,13 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
 
 const CommunitySideNav = () => {
   const rootChatMatch = useMatch({ path: COMMUNITY_ROOT_PATH });
-  const isRoot = !!rootChatMatch;
+  const communityHomeChatMatch = useMatch({
+    path: `${COMMUNITY_ROOT_PATH}/:odinKey/:communityKey`,
+    end: true,
+  });
+  const isRoot = !!rootChatMatch || !!communityHomeChatMatch;
 
-  const isActive = isRoot;
+  const isActive = !!rootChatMatch;
 
   return (
     <>
@@ -103,7 +107,7 @@ const CommunitySideNav = () => {
         className={`${isActive ? 'translate-x-full' : 'translate-x-0'} fixed bottom-0 left-[-100%] top-0 z-[1] flex h-[100dvh] w-full flex-shrink-0 flex-col bg-page-background transition-transform lg:relative lg:left-0 lg:max-w-[4rem] lg:translate-x-0`}
       >
         <ErrorBoundary>
-          <div className="absolute inset-0 flex flex-grow flex-row flex-wrap md:pl-[calc(env(safe-area-inset-left)+4.3rem)] lg:flex-col lg:items-center lg:pl-0">
+          <div className="absolute inset-0 flex flex-grow flex-row flex-wrap items-start md:pl-[calc(env(safe-area-inset-left)+4.3rem)] lg:flex-col lg:items-center lg:pl-0">
             <div className="px-4 pb-2 pt-4">
               <RadioTower className="h-7 w-7" />
             </div>

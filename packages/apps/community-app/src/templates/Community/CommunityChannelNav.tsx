@@ -1,4 +1,4 @@
-import { useParams, useMatch, Link } from 'react-router-dom';
+import { useParams, useMatch, Link, useNavigate } from 'react-router-dom';
 
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -66,6 +66,8 @@ export const CommunityChannelNav = () => {
     (channel) => !pinnedChannels?.includes(channel)
   );
 
+  const navigate = useNavigate();
+
   const [isExpanded, setIsExpanded] = useState(false);
   if (!odinKey || !communityKey || isLoading || !community) return null;
 
@@ -76,9 +78,19 @@ export const CommunityChannelNav = () => {
       >
         <div className="absolute inset-0 flex flex-col gap-5 overflow-auto px-2 py-5 md:pl-[calc(env(safe-area-inset-left)+4.3rem+0.5rem)] lg:pl-2">
           <div className="flex flex-row items-center">
-            <Link className="-ml-2 p-2 lg:hidden" type="mute" to={`${COMMUNITY_ROOT_PATH}`}>
+            <a
+              className="-ml-2 p-2 lg:hidden"
+              type="mute"
+              href={COMMUNITY_ROOT_PATH}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(COMMUNITY_ROOT_PATH, {
+                  state: { referrer: window.location.pathname },
+                });
+              }}
+            >
               <Grid className="h-5 w-5" />
-            </Link>
+            </a>
 
             <button
               className="flex flex-row items-center gap-2 text-xl font-semibold"
