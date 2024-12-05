@@ -63,9 +63,11 @@ export const EmojiPicker = ({ onInput }: { onInput: (val: EmojiDetail) => void }
     ref,
     class: `${isDarkMode ? 'dark' : 'light'} max-h-[20rem]`,
     style: {
+      '--background': isDarkMode ? 'rgb(0 0 0)' : `rgb(255 255 255)`,
       '--category-emoji-size': '1.125rem',
       '--border-radius': '0.375rem',
-      '--border-color': '#f3f4f6',
+      '--border-color': isDarkMode ? 'rgb(30 41 59)' : '#f3f4f6',
+      '--input-border-color': isDarkMode ? 'rgb(30 41 59)' : '#f3f4f6',
     },
   });
 };

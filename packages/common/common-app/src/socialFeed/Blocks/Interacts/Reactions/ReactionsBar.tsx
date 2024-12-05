@@ -1,5 +1,5 @@
 import { ReactionContext } from '@homebase-id/js-lib/public';
-import { Suspense, useEffect, useState, useRef } from 'react';
+import { Suspense, useEffect, useState, useRef, forwardRef, Ref, useImperativeHandle } from 'react';
 import { CanReactInfo } from '../../../../hooks/reactions/useCanReact';
 import { useErrors } from '../../../../hooks/errors/useErrors';
 import { useReaction } from '../../../../hooks/reactions/useReaction';
@@ -96,97 +96,122 @@ export const SocialReactionsBar = ({
 
 const DEFAULT_EMOJIS = ['❤️', '😆', '😥'];
 
-export const ReactionsBar = ({
-  doLike,
-  doUnlike,
-  defaultValue,
-  emojis,
-  className,
-  onMouseEnter,
-  onMouseLeave,
-  customDirection,
-}: {
-  doLike: (body: string) => void;
-  doUnlike: (body: string) => void;
-  defaultValue: string[];
-  emojis?: string[];
-  className?: string;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
-  customDirection?: 'left' | 'right';
-}) => {
-  const wrapperRef = useRef<HTMLButtonElement>(null);
-  const { verticalSpace, horizontalSpace } = useMostSpace(wrapperRef);
-  const [isCustomOpen, setIsCustomOpen] = useState(false);
-
-  const handleLike = (emoji: string) => {
-    doLike(emoji);
-    setIsCustomOpen(false);
-  };
-
-  const handleUnlike = (emoji: string) => {
-    doUnlike(emoji);
-    setIsCustomOpen(false);
-  };
-
-  return (
-    <>
-      <div
-        className={`flex flex-row ${className || ''}`}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={() => {
-          setIsCustomOpen(false);
-          onMouseLeave?.();
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {defaultValue?.length ? (
-          defaultValue.map((emoji) => (
-            <EmojiButton
-              onClick={() => handleUnlike(emoji)}
-              emoji={emoji}
-              key={emoji}
-              isActive={true}
-            />
-          ))
-        ) : (
-          <>
-            {(emojis || DEFAULT_EMOJIS).map((emoji) => (
-              <EmojiButton key={emoji} onClick={() => handleLike(emoji)} emoji={emoji} />
-            ))}
-          </>
-        )}
-        <button
-          className="flex-shrink-0 scale-100 rounded-full p-2 text-slate-400 text-center hover:bg-slate-300 hover:dark:bg-slate-700"
-          title={t('Others')}
-          onClick={() => setIsCustomOpen(true)}
-          ref={wrapperRef}
-        >
-          <Emojis className="h-5 w-5" />
-        </button>
-        {isCustomOpen ? (
-          <div
-            className={`absolute rounded-md shadow-md z-20 ${verticalSpace === 'top' ? 'bottom-0' : 'top-0'} ${
-              customDirection === 'right' || (!customDirection && horizontalSpace === 'right')
-                ? 'left-0'
-                : 'right-0'
-            } overflow-hidden rounded-lg`}
-          >
-            <Suspense>
-              <EmojiPicker
-                onInput={(emojiDetail) => {
-                  handleLike(emojiDetail.unicode);
-                  setIsCustomOpen(false);
-                }}
-                key={'emoji-picker'}
-              />
-            </Suspense>
-          </div>
-        ) : null}
-      </div>
-    </>
-  );
+export type ReactionsBarHandle = {
+  close: () => void;
 };
+export const ReactionsBar = forwardRef(
+  (
+    {
+      doLike,
+      doUnlike,
+      defaultValue,
+      emojis,
+      className,
+      onMouseEnter,
+      onMouseLeave,
+      customDirection,
+      onOpen,
+      onClose,
+    }: {
+      doLike: (body: string) => void;
+      doUnlike: (body: string) => void;
+      defaultValue: string[];
+      emojis?: string[];
+      className?: string;
+      onMouseEnter?: () => void;
+      onMouseLeave?: () => void;
+      onOpen?: () => void;
+      onClose?: () => void;
+      customDirection?: 'left' | 'right';
+    },
+    ref: Ref<ReactionsBarHandle>
+  ) => {
+    const wrapperRef = useRef<HTMLButtonElement>(null);
+    const { verticalSpace, horizontalSpace } = useMostSpace(wrapperRef);
+    const [isCustomOpen, setIsCustomOpen] = useState(false);
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        close() {
+          setIsCustomOpen(false);
+        },
+      }),
+      []
+    );
+
+    useEffect(() => {
+      if (isCustomOpen && onOpen) onOpen();
+      if (!isCustomOpen && onClose) onClose();
+    }, [isCustomOpen]);
+
+    const handleLike = (emoji: string) => {
+      doLike(emoji);
+      setIsCustomOpen(false);
+    };
+
+    const handleUnlike = (emoji: string) => {
+      doUnlike(emoji);
+      setIsCustomOpen(false);
+    };
+
+    return (
+      <>
+        <div
+          className={`flex flex-row ${className || ''}`}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {defaultValue?.length ? (
+            defaultValue.map((emoji) => (
+              <EmojiButton
+                onClick={() => handleUnlike(emoji)}
+                emoji={emoji}
+                key={emoji}
+                isActive={true}
+              />
+            ))
+          ) : (
+            <>
+              {(emojis || DEFAULT_EMOJIS).map((emoji) => (
+                <EmojiButton key={emoji} onClick={() => handleLike(emoji)} emoji={emoji} />
+              ))}
+            </>
+          )}
+          <button
+            className="flex-shrink-0 scale-100 rounded-full p-2 text-slate-400 text-center hover:bg-slate-300 hover:dark:bg-slate-700"
+            title={t('Others')}
+            onClick={() => setIsCustomOpen(true)}
+            ref={wrapperRef}
+          >
+            <Emojis className="h-5 w-5" />
+          </button>
+          {isCustomOpen ? (
+            <div
+              className={`absolute rounded-md shadow-md z-20 ${verticalSpace === 'top' ? 'bottom-0' : 'top-0'} ${
+                customDirection === 'right' || (!customDirection && horizontalSpace === 'right')
+                  ? 'left-0'
+                  : 'right-0'
+              } overflow-hidden rounded-lg`}
+            >
+              <Suspense>
+                <EmojiPicker
+                  onInput={(emojiDetail) => {
+                    handleLike(emojiDetail.unicode);
+                    setIsCustomOpen(false);
+                  }}
+                  key={'emoji-picker'}
+                />
+              </Suspense>
+            </div>
+          ) : null}
+        </div>
+      </>
+    );
+  }
+);
+ReactionsBar.displayName = 'ReactionsBar';
 
 const EmojiButton = ({
   emoji,
