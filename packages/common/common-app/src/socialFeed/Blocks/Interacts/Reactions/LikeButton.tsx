@@ -10,7 +10,7 @@ import {
   useDotYouClientContext,
 } from '../../../../hooks';
 import { ErrorNotification } from '../../../../ui';
-import { SocialReactionsBar } from './ReactionsBar';
+import { ReactionsBarHandle, SocialReactionsBar } from './ReactionsBar';
 import { Heart, Lol, SolidSad, ThumbsUp } from '../../../../ui/Icons';
 import { SolidHeart } from '../../../../ui/Icons/Heart';
 
@@ -25,6 +25,7 @@ export const LikeButton = ({
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isReact, setIsReact] = useState(false);
+  const [isCustomReactOpen, setIsCustomReactOpen] = useState(false);
 
   const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
   const {
@@ -33,7 +34,11 @@ export const LikeButton = ({
   } = useReaction();
 
   const isDesktop = document.documentElement.clientWidth >= 1024;
-  useOutsideTrigger(wrapperRef, () => setIsReact(false));
+  const reactionsBarRef = useRef<ReactionsBarHandle>(null);
+  useOutsideTrigger(wrapperRef, () => {
+    setIsReact(false);
+    reactionsBarRef.current?.close();
+  });
 
   const [isInView, setIsInView] = useState(false);
   useIntersection(wrapperRef, () => setIsInView(true));
@@ -76,17 +81,19 @@ export const LikeButton = ({
       >
         {/* Wrapper div that holds a bigger "hover target", which spans the likeButton itself as well */}
         <div
-          className={`${isReact ? 'absolute' : 'contents'} -left-2 -top-12 bottom-0 w-[10rem]`}
+          className={`${isReact || isCustomReactOpen ? 'absolute' : 'contents'} -left-2 -top-12 bottom-0 w-[10rem]`}
           onMouseLeave={() => setIsReact(false)}
           onMouseEnter={() => setIsReact(true)}
         >
           <SocialReactionsBar
             className={`absolute left-0 top-0`}
-            isActive={isReact}
+            isActive={isReact || isCustomReactOpen}
             context={context}
             canReact={canReact}
-            onClose={() => setIsReact(false)}
+            onOpen={() => setIsCustomReactOpen(true)}
+            onClose={() => setIsCustomReactOpen(false)}
             customDirection="right"
+            ref={reactionsBarRef}
           />
         </div>
         <button

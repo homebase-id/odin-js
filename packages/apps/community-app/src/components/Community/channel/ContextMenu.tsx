@@ -10,8 +10,10 @@ import {
   ErrorNotification,
   ActionGroup,
   useDotYouClientContext,
+  useOutsideTrigger,
+  ReactionsBarHandle,
 } from '@homebase-id/common-app';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { CommunityMessageInfo } from '../Message/detail/CommunityMessageInfo';
 import { CommunityReactionComposer } from '../Message/reactions/CommunityReactionComposer';
@@ -33,9 +35,26 @@ export const ContextMenu = ({
   community?: HomebaseFile<CommunityDefinition>;
   communityActions?: CommunityActions;
 }) => {
+  const [isStickyOpen, setIsStickyOpen] = useState(false);
+  const reactionsBarRef = useRef<ReactionsBarHandle>(null);
+  const wrapperRef = useRef(null);
+  useOutsideTrigger(wrapperRef, () => {
+    reactionsBarRef.current?.close();
+    setIsStickyOpen(false);
+  });
+
   return (
-    <div className="invisible absolute right-5 top-[-2rem] z-10 flex flex-row items-center rounded-lg bg-background px-1 py-2 text-foreground shadow-md group-hover:pointer-events-auto group-hover:visible">
-      <CommunityReactionComposer msg={msg} community={community} />
+    <div
+      className={`absolute right-5 top-[-2rem] z-10 flex flex-row items-center rounded-lg bg-background px-1 py-2 text-foreground shadow-md ${isStickyOpen ? 'visible' : 'invisible group-hover:pointer-events-auto group-hover:visible'}`}
+      ref={wrapperRef}
+    >
+      <CommunityReactionComposer
+        ref={reactionsBarRef}
+        msg={msg}
+        community={community}
+        onOpen={() => setIsStickyOpen(true)}
+        onClose={() => setIsStickyOpen(false)}
+      />
       <CommunityContextActions
         msg={msg}
         community={community}

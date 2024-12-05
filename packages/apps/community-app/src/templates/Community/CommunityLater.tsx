@@ -3,7 +3,6 @@ import { useCommunityMetadata } from '../../hooks/community/useCommunityMetadata
 import { useCommunityMessage } from '../../hooks/community/messages/useCommunityMessage';
 import { HomebaseFile, SystemFileType } from '@homebase-id/js-lib/core';
 import {
-  ActionLink,
   COMMUNITY_ROOT_PATH,
   ConnectionImage,
   ConnectionName,
