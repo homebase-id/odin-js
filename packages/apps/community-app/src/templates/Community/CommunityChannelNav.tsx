@@ -10,7 +10,7 @@ import {
   useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
-import { getNewXorId, tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { getNewXorId, isTouchDevice, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import {
   ChannelWithRecentMessage,
@@ -171,7 +171,7 @@ const AllItem = ({ odinId, communityId }: { odinId: string; communityId: string 
   return (
     <Link
       to={href}
-      className={`flex flex-row items-center gap-2 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
+      className={`flex flex-row items-center gap-2 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`}`}
     >
       <RadioTower className="h-5 w-5" /> {t('Activity')}
     </Link>
@@ -185,7 +185,7 @@ const LaterItem = ({ odinId, communityId }: { odinId: string; communityId: strin
   return (
     <Link
       to={href}
-      className={`flex flex-row items-center gap-2 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
+      className={`flex flex-row items-center gap-2 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`}`}
     >
       <Bookmark className="h-5 w-5" /> {t('Later')}
     </Link>
@@ -244,11 +244,11 @@ const ChannelItem = ({
   return (
     <Link
       to={`${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/${channelId}`}
-      className={`group flex flex-row items-center gap-1 rounded-md px-2 py-[0.15rem] ${isActive ? 'bg-primary/100 text-white' : `hover:bg-primary/10 ${isVisited ? 'text-purple-600' : ''}`} ${hasUnreadMessages ? 'font-bold' : ''}`}
+      className={`group flex flex-row items-center gap-1 rounded-md px-2 py-[0.15rem] ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''} ${isVisited ? 'text-purple-600' : ''}`} ${hasUnreadMessages ? 'font-bold' : ''}`}
     >
       # {channel.fileMetadata.appData.content?.title?.toLowerCase()}
       <button
-        className={`-m-1 ml-auto rounded-sm p-1 ${isPinned ? '' : 'opacity-0 transition-opacity group-hover:opacity-100'}`}
+        className={`-m-1 ml-auto rounded-sm p-1 ${isPinned ? '' : `opacity-0 transition-opacity ${!isTouchDevice() ? 'group-hover:opacity-100' : ''}`}`}
         onClick={() => {
           if (!metadata || !channelId) return;
           let newPins: string[] = [];
@@ -332,7 +332,7 @@ const DirectMessageItem = ({
   return (
     <Link
       to={href}
-      className={`flex flex-row items-center gap-1 rounded-md px-2 py-[0.15rem] ${unreadCount ? 'font-bold' : ''} ${isActive ? 'bg-primary/100 text-white' : 'hover:bg-primary/10'}`}
+      className={`flex flex-row items-center gap-1 rounded-md px-2 py-[0.15rem] ${unreadCount ? 'font-bold' : ''} ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`}`}
     >
       <ConnectionImage odinId={recipient} size="xxs" />
       <ConnectionName odinId={recipient} />{' '}
