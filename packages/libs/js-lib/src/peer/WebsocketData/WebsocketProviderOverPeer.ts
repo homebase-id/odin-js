@@ -129,6 +129,7 @@ const ConnectSocket = async (
         if (lastPong && Date.now() - lastPong > PING_INTERVAL * 2) {
           // 2 ping intervals have passed without a pong, reconnect
           if (isDebug) console.debug(`[WebsocketProviderOverPeer] Ping timeout`);
+
           ReconnectSocket(dotYouClient, odinId, drives, args);
           return;
         }
@@ -177,9 +178,11 @@ const ConnectSocket = async (
           console.debug('[WebsocketProviderOverPeer] Connection closed unexpectedly', e);
         }
       }
-
-      subscribers.map((subscriber) => subscriber.onDisconnect && subscriber.onDisconnect());
-      ReconnectSocket(dotYouClient, odinId, drives, args);
+      // Only force reconnect if it wasn't clean/expected
+      if (!e.wasClean) {
+        subscribers.map((subscriber) => subscriber.onDisconnect && subscriber.onDisconnect());
+        ReconnectSocket(dotYouClient, odinId, drives, args);
+      }
     };
   });
 };
@@ -194,6 +197,7 @@ const ReconnectSocket = async (
 
   reconnectTimeout = setTimeout(async () => {
     reconnectTimeout = undefined;
+    if (webSocketClient) webSocketClient.close(1000, 'Disconnect after timeout');
     webSocketClient = undefined;
     lastPong = undefined;
     isConnected = false;
