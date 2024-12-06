@@ -172,6 +172,15 @@ export const ReactionsBar = forwardRef(
       setIsCustomOpen(false);
     };
 
+    useEffect(() => {
+      const onKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') setIsCustomOpen(false);
+      };
+
+      document.addEventListener('keydown', onKeyDown);
+      return () => document.removeEventListener('keydown', onKeyDown);
+    }, []);
+
     return (
       <>
         <div
