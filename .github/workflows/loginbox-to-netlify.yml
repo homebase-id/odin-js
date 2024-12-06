@@ -33,7 +33,7 @@ jobs:
       - run: npm run build -w packages/apps/login-app
 
       - run: 'npm install --global netlify-cli@17.36.1'
-      - run: "netlify deploy --dir=packages/apps/login-app/dist --prod --filter '@homebase-id/login-app' --build false"
+      - run: "netlify deploy --dir=packages/apps/login-app/dist --site b63c83a3-1caf-486d-9a2f-4db2de190ee1 --prod --filter '@homebase-id/login-app' --build false "
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: b63c83a3-1caf-486d-9a2f-4db2de190ee1
