@@ -92,7 +92,7 @@ export const CommunityThread = memo(
               key={threadId}
               threadParticipants={participants || undefined}
               onKeyDown={keyDownHandler}
-              className="mt-auto lg:mt-0"
+              className="mt-auto xl:mt-0"
             />
           </ErrorBoundary>
         </div>
