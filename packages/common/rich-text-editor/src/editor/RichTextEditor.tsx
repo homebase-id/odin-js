@@ -271,8 +271,10 @@ const InnerRichTextEditor = memo(
           EmojiPlugin,
           mentionables
             ? // MentionPlugin is not typed correctly to our custom implementation, so we need to cast it to any
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              MentionPlugin.configure({ options: { mentionables: mentionables || [] } as any })
+              MentionPlugin.configure({
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                options: { mentionables: mentionables || [], insertSpaceAfterMention: true } as any,
+              })
             : undefined,
           mediaOptions ? ImagePlugin : undefined,
           ...(_plugins || []),

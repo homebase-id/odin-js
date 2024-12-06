@@ -18,7 +18,7 @@ export interface TChannel {
   uniqueId: string;
 }
 
-export type MentionOnSelectItem<TItem extends TChannel = TChannel> = (
+export type ChannelOnSelectItem<TItem extends TChannel = TChannel> = (
   editor: PlateEditor,
   item: TItem,
   search?: string
@@ -27,14 +27,14 @@ export type MentionOnSelectItem<TItem extends TChannel = TChannel> = (
 export type ChannelConfig = PluginConfig<
   'channel',
   {
-    insertSpaceAfterMention?: boolean;
+    insertSpaceAfterChannel?: boolean;
   } & TriggerComboboxPluginOptions,
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   {},
   {
     insert: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mention: (options: { search: string; value: any }) => void;
+      channel: (options: { search: string; value: any }) => void;
     };
   }
 >;
@@ -68,7 +68,7 @@ export const ChannelPlugin = createPlatePlugin({
   },
 }).extendEditorTransforms<ChannelConfig['transforms']>(({ editor, type }) => ({
   insert: {
-    mention: ({ value }) => {
+    channel: ({ value }) => {
       insertNodes<TChannelElement>(editor, {
         children: [{ text: '' }],
         type,

@@ -176,7 +176,10 @@ export const MessageComposer = ({
             onKeyDown={onKeyDown}
             disableHeadings={true}
             mentionables={mentionables}
-            plugins={[ChannelPlugin]}
+            plugins={[
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
+            ]}
           >
             <div className="max-h-[30vh] overflow-auto">
               <FileOverview files={files} setFiles={setFiles} cols={8} />
@@ -193,7 +196,7 @@ export const MessageComposer = ({
               <FileSelector
                 onChange={(files) => setFiles(files.map((file) => ({ file })))}
                 className="my-auto px-2 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
-                accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4, audio/mp3, application/pdf"
+                accept="*"
                 maxSize={HUNDRED_MEGA_BYTES}
               >
                 <Plus className="h-5 w-5" />

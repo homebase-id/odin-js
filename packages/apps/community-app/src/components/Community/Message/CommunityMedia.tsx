@@ -51,7 +51,7 @@ export const CommunityMedia = ({
       fit={'contain'}
       onClick={() => navigate(`${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`)}
       previewThumbnail={isGallery ? undefined : msg.fileMetadata.appData.previewThumbnail}
-      className={`my-1 h-full max-h-[35rem] w-full max-w-xs overflow-hidden rounded-lg`}
+      className={`my-1 max-h-[35rem] max-w-xs overflow-hidden rounded-lg`}
     />
   );
 };
@@ -101,7 +101,12 @@ const MediaItem = ({
       data-thumb={!!previewThumbnail}
     >
       {!fileId || (payload as NewPayloadDescriptor)?.pendingFile ? (
-        <PendingFile payload={payload} className={`h-full w-auto`} fit={fit} onLoad={onLoad} />
+        <PendingFile
+          payload={payload}
+          className={fit === 'cover' ? 'h-full w-full' : `max-h-[inherit] max-w-[inherit]`}
+          fit={fit}
+          onLoad={onLoad}
+        />
       ) : (
         <>
           {isVideo ? (
@@ -158,7 +163,7 @@ const MediaItem = ({
               targetDrive={targetDrive}
               avoidPayload={isVideo}
               previewThumbnail={previewThumbnail}
-              className={`h-full max-h-[inherit]`}
+              className={fit === 'cover' ? 'h-full w-full' : `max-h-[inherit] max-w-[inherit]`}
               fit={fit}
               position={fit === 'contain' ? 'left' : 'center'}
               onLoad={onLoad}

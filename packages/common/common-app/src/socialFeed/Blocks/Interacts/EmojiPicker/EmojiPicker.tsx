@@ -30,6 +30,9 @@ export const EmojiPicker = ({ onInput }: { onInput: (val: EmojiDetail) => void }
   useEffect(() => {
     if (!ref.current) return;
 
+    const searchInput = ref.current.shadowRoot?.getElementById('search');
+    searchInput?.focus();
+
     const handler: EventListener = async (event) => {
       const emojiDetail = (event as unknown as EmojiEvent).detail.emoji;
 

@@ -35,6 +35,7 @@ import {
   type TElement,
   createPointRef,
   getPointBefore,
+  insertNodes,
   insertText,
   moveSelection,
 } from '@udecode/plate-common';
@@ -174,6 +175,13 @@ const InlineCombobox = ({
       store.setActiveId(store.first());
     }
   }, [items, store]);
+
+  useEffect(() => {
+    if (hideWhenSpace && value.includes(' ')) {
+      removeInput(true);
+      insertNodes(editor, { text: `${trigger}${value}` });
+    }
+  }, [value, hideWhenSpace, removeInput]);
 
   return (
     <span contentEditable={false}>

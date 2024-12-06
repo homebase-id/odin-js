@@ -140,8 +140,11 @@ const ConnectSocket = async (
         }
       }
 
-      subscribers.map((subscriber) => subscriber.onDisconnect && subscriber.onDisconnect());
-      ReconnectSocket(dotYouClient, drives, args);
+      // Only force reconnect if it wasn't clean/expected
+      if (!e.wasClean) {
+        subscribers.map((subscriber) => subscriber.onDisconnect && subscriber.onDisconnect());
+        ReconnectSocket(dotYouClient, drives, args);
+      }
     };
   });
 };
@@ -155,6 +158,7 @@ const ReconnectSocket = async (
 
   reconnectTimeout = setTimeout(async () => {
     reconnectTimeout = undefined;
+    if (webSocketClient) webSocketClient.close(1000, 'Disconnect after timeout');
     webSocketClient = undefined;
     lastPong = undefined;
     isConnected = false;

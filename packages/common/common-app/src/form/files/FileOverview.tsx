@@ -39,7 +39,6 @@ export const FileOverview = ({
   className,
   cols,
 }: FileOverViewProps | ExistingFileOverviewProps) => {
-  if (!files || !files.length) return null;
   const dotYouClient = useDotYouClientContext();
 
   useEffect(() => {
@@ -66,7 +65,7 @@ export const FileOverview = ({
   }, [files]);
 
   const grabThumb = async (video: HTMLVideoElement, file: NewMediaFile, fileIndex: number) => {
-    if (!video) return;
+    if (!video || !files) return;
     if ('thumbnail' in file) return;
 
     const canvas = document.createElement('canvas');
@@ -93,7 +92,7 @@ export const FileOverview = ({
   };
 
   const renderedFiles = useMemo(() => {
-    return files.map((currFile, index) => {
+    return files?.map((currFile, index) => {
       // Existing files:
       if (!('file' in currFile))
         return targetDrive ? (
@@ -143,6 +142,7 @@ export const FileOverview = ({
       const url = URL.createObjectURL(currFile.file);
 
       if (!url) return null;
+      if (!files || !files.length) return null;
 
       return (
         <div
