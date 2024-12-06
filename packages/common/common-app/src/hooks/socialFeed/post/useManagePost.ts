@@ -23,7 +23,7 @@ import { invalidateDrafts } from '../drafts/useDrafts';
 import { invalidatePosts } from './usePostsInfinite';
 import { invalidateSocialFeeds, updateCacheSocialFeeds } from '../useSocialFeed';
 import { invalidatePost } from './usePost';
-import { formatGuidId } from '@homebase-id/js-lib/helpers';
+import { formatGuidId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
 
 export const useManagePost = () => {
@@ -240,7 +240,7 @@ export const useManagePost = () => {
         }));
       },
       onMutate: async (newPost) => {
-        const newPostFile: HomebaseFile<PostContent> = {
+        const newPostFile: NewHomebaseFile<PostContent> = {
           ...newPost.postFile,
           fileMetadata: {
             ...newPost.postFile.fileMetadata,
@@ -250,24 +250,38 @@ export const useManagePost = () => {
               ...newPost.postFile.fileMetadata.appData,
               content: {
                 ...newPost.postFile.fileMetadata.appData.content,
-                primaryMediaFile: newPost.mediaFiles?.[0]
-                  ? {
-                      fileKey: newPost.mediaFiles?.[0].key,
-                      type: (newPost.mediaFiles?.[0] as MediaFile)?.contentType,
-                    }
-                  : undefined,
+                primaryMediaFile:
+                  newPost.mediaFiles?.[0] && newPost.mediaFiles?.[0].key
+                    ? {
+                        fileId: undefined,
+                        fileKey: newPost.mediaFiles?.[0].key,
+                        type: (newPost.mediaFiles?.[0] as MediaFile)?.contentType,
+                      }
+                    : undefined,
               },
             },
           },
-        } as HomebaseFile<PostContent>;
+        };
 
-        const previousFeed = updateCacheSocialFeeds(queryClient, (data) => ({
-          ...data,
-          pages: data.pages.map((page, index) => ({
-            ...page,
-            results: [...(index === 0 ? [newPostFile] : []), ...page.results],
-          })),
-        }));
+        const previousFeed =
+          newPostFile.fileMetadata.appData.fileType !== BlogConfig.DraftPostFileType
+            ? updateCacheSocialFeeds(queryClient, (data) => ({
+                ...data,
+                pages: data.pages.map((page, index) => ({
+                  ...page,
+                  results: [
+                    ...(index === 0 ? [newPostFile as HomebaseFile<PostContent>] : []),
+                    ...page.results.filter(
+                      (post) =>
+                        !stringGuidsEqual(
+                          post.fileMetadata.appData.uniqueId,
+                          newPostFile.fileMetadata.appData.uniqueId
+                        )
+                    ),
+                  ],
+                })),
+              }))
+            : undefined;
 
         return { newPost, previousFeed };
       },
@@ -275,7 +289,7 @@ export const useManagePost = () => {
         console.error(err);
 
         // Revert local caches to what they were,
-        updateCacheSocialFeeds(queryClient, () => context?.previousFeed);
+        if (context?.previousFeed) updateCacheSocialFeeds(queryClient, () => context?.previousFeed);
       },
       onSettled: () => {
         // Invalidate with a small delay to allow the server to update
