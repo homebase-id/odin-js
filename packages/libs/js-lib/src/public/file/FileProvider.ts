@@ -39,6 +39,9 @@ type PublishProfileImage = {
 
 type PublishProfileCard = {
   name: string;
+  image: string;
+  email: { type: string; email: string }[];
+  links: { type: string; url: string }[];
 };
 
 const _internalFileCache = new Map<string, Promise<Map<string, ResponseEntry[]>>>();
