@@ -176,7 +176,16 @@ export const OdinImage = ({
               ? { aspectRatio: `${naturalSize?.pixelWidth}/${naturalSize?.pixelHeight}` }
               : undefined
           }
-          onLoad={() => {
+          onLoad={(e) => {
+            // We re-set the natural size as this would be the max size/thumb of the image
+            setNaturalSize(
+              e.currentTarget.naturalWidth && e.currentTarget.naturalHeight
+                ? {
+                    pixelWidth: e.currentTarget.naturalWidth,
+                    pixelHeight: e.currentTarget.naturalHeight,
+                  }
+                : undefined
+            );
             setIsFinal(true);
             onLoad?.();
           }}
