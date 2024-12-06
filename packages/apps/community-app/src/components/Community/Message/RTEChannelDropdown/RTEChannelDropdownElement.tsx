@@ -8,8 +8,8 @@ export const RTEChannelDropdownElement = withRef<
   typeof PlateElement,
   {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onClick?: (mentionNode: any) => void;
-    renderLabel?: (mentionable: TChannelElement) => string;
+    onClick?: (channelNode: any) => void;
+    renderLabel?: (channel: TChannelElement) => string;
   }
 >(({ children, className, onClick, renderLabel, ...props }, ref) => {
   const element = useElement<TChannelElement>();

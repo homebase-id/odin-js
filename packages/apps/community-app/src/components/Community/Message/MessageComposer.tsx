@@ -176,7 +176,10 @@ export const MessageComposer = ({
             onKeyDown={onKeyDown}
             disableHeadings={true}
             mentionables={mentionables}
-            plugins={[ChannelPlugin]}
+            plugins={[
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
+            ]}
           >
             <div className="max-h-[30vh] overflow-auto">
               <FileOverview files={files} setFiles={setFiles} cols={8} />
