@@ -34,8 +34,9 @@ export const getDecryptedThumbnailMeta = (
         height: previewThumbnail?.pixelHeight || 0,
       };
       if (
-        header.fileMetadata.payloads.filter((payload) => payload.contentType.startsWith('image'))
-          .length > 1 ||
+        (header.fileMetadata.payloads &&
+          header.fileMetadata.payloads.filter((payload) => payload.contentType.startsWith('image'))
+            .length > 1) ||
         !previewThumbnail
       ) {
         url = await getDecryptedImageUrl(
@@ -51,7 +52,7 @@ export const getDecryptedThumbnailMeta = (
           }
         );
 
-        const correspondingPayload = header.fileMetadata.payloads.find(
+        const correspondingPayload = header.fileMetadata.payloads?.find(
           (payload) => payload.key === fileKey
         );
         const largestThumb = getLargestThumbOfPayload(correspondingPayload);
@@ -65,7 +66,8 @@ export const getDecryptedThumbnailMeta = (
       return {
         naturalSize: naturalSize,
         sizes:
-          header.fileMetadata.payloads.find((payload) => payload.key === fileKey)?.thumbnails ?? [],
+          header.fileMetadata.payloads?.find((payload) => payload.key === fileKey)?.thumbnails ??
+          [],
         contentType: contentType,
         url: url,
       };

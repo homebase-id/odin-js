@@ -106,7 +106,7 @@ export interface EmbeddedPost extends Omit<PostContent, 'embeddedPost'> {
   globalTransitId: string | undefined;
   lastModified: number | undefined;
   userDate: number;
-  payloads: PayloadDescriptor[];
+  payloads?: PayloadDescriptor[];
   authorOdinId: string;
 }
 

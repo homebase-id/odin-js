@@ -42,10 +42,10 @@ export const CommunityMediaGallery = ({
   };
 
   const allkeys = msg.fileMetadata.payloads
-    .filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY)
-    .map((p) => p.key);
-  const nextKey = allkeys[allkeys.indexOf(mediaKey) + 1];
-  const prevKey = allkeys[allkeys.indexOf(mediaKey) - 1];
+    ?.filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY)
+    ?.map((p) => p.key);
+  const nextKey = allkeys?.[allkeys.indexOf(mediaKey) + 1];
+  const prevKey = allkeys?.[allkeys.indexOf(mediaKey) - 1];
 
   const goNext = (e: MouseEvent | KeyboardEvent) => {
     e.stopPropagation();
@@ -89,7 +89,7 @@ export const CommunityMediaGallery = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [msg, mediaKey]);
 
-  const payload = msg.fileMetadata.payloads.find((p) => p.key === mediaKey);
+  const payload = msg.fileMetadata.payloads?.find((p) => p.key === mediaKey);
   const contentType = payload?.contentType;
 
   const dialog = (

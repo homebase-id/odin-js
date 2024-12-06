@@ -91,8 +91,7 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
   const dirtyScreenW = 'mx-[calc((100vw-100%)/-2)] w-[100vw] px-[calc((100vw-100%)/2)]';
   return (
     <section
-      className={`body-font mb-10 overflow-hidden rounded-lg border-gray-200 border-opacity-60 bg-background py-6 dark:border-gray-800 sm:mx-0 sm:w-auto
-      sm:max-w-none sm:px-5 lg:border ${dirtyScreenW} ${className ?? ''}`}
+      className={`body-font mb-10 overflow-hidden rounded-lg border-gray-200 border-opacity-60 bg-background py-6 dark:border-gray-800 sm:mx-0 sm:w-auto sm:max-w-none sm:px-5 lg:border ${dirtyScreenW} ${className ?? ''}`}
       style={{
         width: `${clientWidth}px`,
         marginLeft: `calc((${clientWidth}px - 100%) / -2)`,
@@ -140,7 +139,7 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
         {index !== 0 ? (
           <div className="absolute bottom-20 left-[-1.6rem] top-0 hidden w-14 flex-col justify-center bg-opacity-25 px-2 sm:flex">
             <button
-              className=" rounded-full bg-gray-100 p-2 dark:bg-gray-900"
+              className="rounded-full bg-gray-100 p-2 dark:bg-gray-900"
               onClick={() => doScroll(-1)}
             >
               <Arrow className="rotate-180" />
@@ -171,7 +170,7 @@ interface PostTeaserProps {
 const PostTeaser: FC<PostTeaserProps> = ({ className, postFile, linkRoot }) => {
   const postContent = postFile.fileMetadata.appData.content;
 
-  const primaryPayload = postFile.fileMetadata.payloads.find(
+  const primaryPayload = postFile.fileMetadata.payloads?.find(
     (pyld) => pyld.key === postContent.primaryMediaFile?.fileKey
   ) as PayloadDescriptor;
 

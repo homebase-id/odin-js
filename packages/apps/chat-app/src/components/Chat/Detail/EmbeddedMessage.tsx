@@ -68,7 +68,7 @@ export const EmbeddedMessageMedia = ({
   className?: string;
 }) => {
   const dotYouClient = useDotYouClientContext();
-  const firstPayload = msg.fileMetadata.payloads[0];
+  const firstPayload = msg.fileMetadata.payloads?.[0];
   if (!firstPayload) return null;
 
   if (firstPayload.contentType.includes('image/')) {

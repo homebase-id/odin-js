@@ -128,7 +128,7 @@ export const useFile = ({
       return window.URL.createObjectURL(
         new Blob([payload.bytes], {
           type: `${
-            result.fileMetadata.payloads.find((payload) => payload.key === payloadKey)?.contentType
+            result.fileMetadata.payloads?.find((payload) => payload.key === payloadKey)?.contentType
           };charset=utf-8`,
         })
       );
@@ -158,7 +158,7 @@ export const useFile = ({
         },
       },
       serverMetadata: result.serverMetadata,
-      defaultPayload: result.fileMetadata.payloads.some(
+      defaultPayload: result.fileMetadata.payloads?.some(
         (payload) => payload.contentType === 'application/json'
       )
         ? await getContentFromHeaderOrPayload(

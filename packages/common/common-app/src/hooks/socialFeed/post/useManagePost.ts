@@ -122,7 +122,7 @@ export const useManagePost = () => {
     // Fetch payloads from the original post
     const mediaFiles: NewMediaFile[] = (
       await Promise.all(
-        toDuplicatePostFile.fileMetadata.payloads.map(async (payload) => {
+        (toDuplicatePostFile.fileMetadata.payloads || []).map(async (payload) => {
           const bytes = await getPayloadBytes(
             dotYouClient,
             currentTargetDrive,

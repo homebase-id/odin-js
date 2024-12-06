@@ -58,7 +58,7 @@ export const CommunityMessageItem = memo(
     const authorOdinId = msg.fileMetadata.originalAuthor || loggedOnIdentity || '';
 
     const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;
-    const hasMedia = !!msg.fileMetadata.payloads.length;
+    const hasMedia = !!msg.fileMetadata.payloads?.length;
 
     const { chatMessageKey, mediaKey, channelKey, threadKey } = useParams();
     const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey);

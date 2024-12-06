@@ -79,7 +79,7 @@ export const FileCard = ({
               <Image
                 targetDrive={targetDrive}
                 fileId={file.fileId}
-                fileKey={firstPayload.key}
+                fileKey={firstPayload?.key}
                 lastModified={file.fileMetadata.updated}
                 fit="contain"
                 position="center"

@@ -32,22 +32,24 @@ export const MailAttachmentsInfo = ({
   if (!lastMessage) return null;
   const lastMessageContent = lastMessage.fileMetadata.appData.content;
 
-  const allAttachmentsChronologically = mailThread.flatMap((conversation) =>
-    conversation.fileMetadata.payloads
-      .filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY)
-      .map((payload) => ({
-        ...payload,
-        fileId: conversation.fileId,
-        conversationId: conversation.fileMetadata.appData.groupId as string,
-        created: conversation.fileMetadata.created,
-        sender:
-          conversation.fileMetadata.senderOdinId ||
-          conversation.fileMetadata.appData.content.sender,
-      }))
+  const allAttachmentsChronologically = mailThread.flatMap(
+    (conversation) =>
+      conversation.fileMetadata.payloads
+        ?.filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY)
+        ?.map((payload) => ({
+          ...payload,
+          fileId: conversation.fileId,
+          conversationId: conversation.fileMetadata.appData.groupId as string,
+          created: conversation.fileMetadata.created,
+          sender:
+            conversation.fileMetadata.senderOdinId ||
+            conversation.fileMetadata.appData.content.sender,
+        })) || []
   );
 
   const groupedWithFileName = allAttachmentsChronologically.reduce(
     (acc, file) => {
+      if (!file) return acc;
       const fileName = file.descriptorContent || file.key;
       if (!acc[fileName]) acc[fileName] = [];
       acc[fileName].push(file);

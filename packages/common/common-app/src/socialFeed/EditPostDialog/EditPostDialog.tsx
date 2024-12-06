@@ -52,11 +52,10 @@ export const EditPostDialog = ({
   useEffect(() => {
     if (incomingPostFile) {
       setPostFile({ ...incomingPostFile });
-      setNewMediaFiles(
-        incomingPostFile.fileMetadata.payloads?.filter(
-          (p) => p.key !== DEFAULT_PAYLOAD_KEY && p.key !== POST_LINKS_PAYLOAD_KEY
-        )
+      const newMediaFiles = incomingPostFile.fileMetadata.payloads?.filter(
+        (p) => p.key !== DEFAULT_PAYLOAD_KEY && p.key !== POST_LINKS_PAYLOAD_KEY
       );
+      if (newMediaFiles) setNewMediaFiles(newMediaFiles);
     }
   }, [incomingPostFile]);
 

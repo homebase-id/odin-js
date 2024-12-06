@@ -239,7 +239,7 @@ const processCommunityMessagesBatch = async (
         await Promise.all(
           uniqueMessagesPerChannel[channelId].map(async (newMessage) =>
             typeof newMessage.fileMetadata.appData.content === 'string' ||
-            newMessage.fileMetadata.payloads.some((pyld) => pyld.key === DEFAULT_PAYLOAD_KEY)
+            newMessage.fileMetadata.payloads?.some((pyld) => pyld.key === DEFAULT_PAYLOAD_KEY)
               ? await dsrToMessage(
                   dotYouClient,
                   newMessage as HomebaseFile<string>,
