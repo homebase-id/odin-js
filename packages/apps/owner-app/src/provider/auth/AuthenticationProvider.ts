@@ -1,11 +1,6 @@
 import { base64ToUint8Array } from '@homebase-id/js-lib/helpers';
 import { OwnerClient } from '@homebase-id/common-app';
-import {
-  NonceData,
-  PublicKeyData,
-  encryptRecoveryKey,
-  prepareAuthPassword,
-} from './AuthenticationHelper';
+import { NonceData, encryptRecoveryKey, prepareAuthPassword } from './AuthenticationHelper';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 
 interface AuthenticationResponse {
@@ -61,8 +56,8 @@ export const resetPassword = async (newPassword: string, recoveryKey: string): P
   const salts = await getSalts(dotYouClient);
   const passwordReply = await prepareAuthPassword(newPassword, salts);
 
-  const publicKey = await getPulicKey(dotYouClient);
-  const encryptedRecoveryKey = await encryptRecoveryKey(recoveryKey, publicKey);
+  const publicKey = await getPublicKey(dotYouClient);
+  const encryptedRecoveryKey = await encryptRecoveryKey(recoveryKey, passwordReply, publicKey);
 
   return dotYouClient
     .createAxiosClient({ overrideEncryption: true })
@@ -138,9 +133,17 @@ const getSalts = async (dotYouClient: DotYouClient): Promise<NonceData> => {
   });
 };
 
-const getPulicKey = async (dotYouClient: DotYouClient): Promise<PublicKeyData> => {
+export interface PublicKeyData {
+  publicKeyJwkBase64Url: string;
+  crC32c: number;
+  expiration: number;
+}
+
+const getPublicKey = async (dotYouClient: DotYouClient): Promise<PublicKeyData> => {
   const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
-  return client.get<PublicKeyData>('/authentication/publickey').then((response) => {
-    return response.data;
-  });
+  return client
+    .get<PublicKeyData>('/authentication/publickey_ecc?keyType=offlineKey')
+    .then((response) => {
+      return response.data;
+    });
 };

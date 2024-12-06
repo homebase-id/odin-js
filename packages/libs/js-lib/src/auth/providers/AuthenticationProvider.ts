@@ -6,7 +6,7 @@ import {
   CONFIRMED_CONNECTIONS_CIRCLE_ID,
 } from '../../network/circle/CircleProvider';
 import { getBrowser, getOperatingSystem } from '../helpers/browserInfo';
-import { getEccSharedSecret, importRemotePublicEccKey } from './EccKeyProvider';
+import { exportEccPublicKey, getEccSharedSecret, importRemotePublicEccKey } from './EccKeyProvider';
 
 export interface YouAuthorizationParams {
   client_id: string;
@@ -85,16 +85,13 @@ export const getRegistrationParams = async (
 
   if (host) permissionRequest.o = host;
 
-  const rawEccKey = await crypto.subtle.exportKey('jwk', eccPublicKey);
-  delete rawEccKey.key_ops;
-  delete rawEccKey.ext;
-  const publicEccKey = uint8ArrayToBase64(stringToUint8Array(JSON.stringify(rawEccKey)));
+  const publicEccKey = await exportEccPublicKey(eccPublicKey);
 
   return {
     client_id: appId,
     client_type: 'app',
     client_info: clientFriendly,
-    public_key: publicEccKey,
+    public_key: uint8ArrayToBase64(stringToUint8Array(publicEccKey)),
     permission_request: JSON.stringify(permissionRequest),
     state: state || '',
     redirect_uri: returnUrl,

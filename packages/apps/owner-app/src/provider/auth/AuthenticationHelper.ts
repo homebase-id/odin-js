@@ -1,30 +1,33 @@
 import {
+  createEccPair,
+  getEccSharedSecret,
+  importRemotePublicEccKey,
+  aesGcmEncryptWithEccSharedSecret,
+  exportEccPublicKey,
+} from '@homebase-id/js-lib/auth';
+import {
   getRandom16ByteArray,
   base64ToUint8Array,
-  cbcEncrypt,
   stringToUint8Array,
   uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
+import { PublicKeyData } from './AuthenticationProvider';
 
 export interface NonceData {
-  saltPassword64: string;
-  saltKek64: string;
-  nonce64: string;
-  publicPem: string;
   crc: number;
-}
-
-export interface PublicKeyData {
-  publicKey: string;
-  crc32: number;
-  expiration: number;
+  id: string;
+  nonce64: string;
+  publicJwk: string;
+  saltKek64: string;
+  saltPassword64: string;
 }
 
 interface AuthenticationReplyNonce {
   nonce64: string;
   nonceHashedPassword64: string;
   crc: number;
-  rsaEncrypted: string;
+  gcmEncrypted64: string;
+  publicKeyJwk: string;
 }
 
 interface AuthenticationPayload {
@@ -47,52 +50,71 @@ export const prepareAuthPassword = async (
     interations,
     len
   );
+  const keK64 = await wrapPbkdf2HmacSha256(password, nonceData.saltKek64, interations, len);
+
   const hashNoncePassword64 = await wrapPbkdf2HmacSha256(
     hashedPassword64,
     nonceData.nonce64,
     interations,
     len
   );
-  const hashedKek64 = await wrapPbkdf2HmacSha256(password, nonceData.saltKek64, interations, len);
 
-  const base64Key = rsaPemStrip(nonceData.publicPem);
-  const key = await rsaImportKey(base64Key);
+  const hostBase64PublicJWK = uint8ArrayToBase64(stringToUint8Array(nonceData.publicJwk));
+  const hostEccPublicKey = await importRemotePublicEccKey(hostBase64PublicJWK);
 
-  const secret = crypto.getRandomValues(new Uint8Array(16));
-  const secret64 = btoa(String.fromCharCode.apply(null, Array.from(secret)));
+  const clientEccKey = await createEccPair();
+  const clientprivateKey = clientEccKey.privateKey;
+
+  const exchangedSecret = new Uint8Array(
+    await getEccSharedSecret(clientprivateKey, hostEccPublicKey, nonceData.nonce64)
+  );
 
   const payload: AuthenticationPayload = {
     hpwd64: hashedPassword64,
-    kek64: hashedKek64,
-    secret: secret64,
+    kek64: keK64,
+    secret: uint8ArrayToBase64(getRandom16ByteArray()),
   };
-
   const encryptable = JSON.stringify(payload);
-  const cipher = await rsaOaepEncrypt(key, stringToUint8Array(encryptable));
+  const encryptedGcm = await aesGcmEncryptWithEccSharedSecret(
+    exchangedSecret,
+    base64ToUint8Array(nonceData.nonce64),
+    stringToUint8Array(encryptable)
+  );
 
-  const cipher64 = btoa(String.fromCharCode.apply(null, Array.from(cipher)));
   return {
     nonce64: nonceData.nonce64,
     nonceHashedPassword64: hashNoncePassword64,
     crc: nonceData.crc,
-    rsaEncrypted: cipher64,
+    gcmEncrypted64: uint8ArrayToBase64(encryptedGcm),
+    publicKeyJwk: await exportEccPublicKey(clientEccKey.publicKey),
   };
 };
 
-export const encryptRecoveryKey = async (recoveryKey: string, publicKey: PublicKeyData) => {
-  const cryptoKey = await rsaImportKey(publicKey.publicKey);
-  const keyHeader = getRandom16ByteArray();
-  const iv = getRandom16ByteArray();
+export const encryptRecoveryKey = async (
+  recoveryKey: string,
+  nonceData: AuthenticationReplyNonce,
+  publicKey: PublicKeyData
+) => {
+  const hostEccPublicKey = await importRemotePublicEccKey(publicKey.publicKeyJwkBase64Url);
 
-  const combined = [...Array.from(iv), ...Array.from(keyHeader)];
+  const clientEccKey = await createEccPair();
+  const clientprivateKey = clientEccKey.privateKey;
+
+  const exchangedSecret = new Uint8Array(
+    await getEccSharedSecret(clientprivateKey, hostEccPublicKey, nonceData.nonce64)
+  );
+  const encrytpedGcm = await aesGcmEncryptWithEccSharedSecret(
+    exchangedSecret,
+    base64ToUint8Array(nonceData.nonce64),
+    stringToUint8Array(recoveryKey)
+  );
+
   return {
-    rsaEncryptedKeyHeader: uint8ArrayToBase64(
-      await rsaOaepEncrypt(cryptoKey, new Uint8Array(combined))
-    ),
-    keyHeaderEncryptedData: uint8ArrayToBase64(
-      await cbcEncrypt(stringToUint8Array(recoveryKey), iv, keyHeader)
-    ),
-    crc32: publicKey.crc32,
+    remotePublicKeyJwk: await exportEccPublicKey(clientEccKey.publicKey),
+    salt: nonceData.nonce64,
+    iv: nonceData.nonce64,
+    encryptionPublicKeyCrc32: publicKey.crC32c,
+    encryptedData: uint8ArrayToBase64(encrytpedGcm),
   };
 };
 
@@ -144,43 +166,4 @@ const wrapPbkdf2HmacSha256 = async (
     const base64 = window.btoa(String.fromCharCode.apply(null, Array.from(hashed)));
     return base64;
   });
-};
-
-const rsaPemStrip = (pem: string) => {
-  let s = pem.replace('-----BEGIN PUBLIC KEY-----', '');
-  s = s.replace('-----END PUBLIC KEY-----', '');
-
-  return s.replace('\n', '');
-};
-
-// key is base64 encoded
-const rsaImportKey = async (key64: string): Promise<CryptoKey> => {
-  const binaryDer = base64ToUint8Array(key64);
-
-  return crypto.subtle.importKey(
-    'spki',
-    binaryDer,
-    {
-      name: 'RSA-OAEP',
-      //modulusLength: 256,
-      hash: { name: 'SHA-256' },
-    },
-    false,
-    ['encrypt'] //must be ["encrypt", "decrypt"] or ["wrapKey", "unwrapKey"]
-  );
-};
-
-const rsaOaepEncrypt = async (publicKey: CryptoKey, bytes: Uint8Array) => {
-  return crypto.subtle
-    .encrypt(
-      {
-        name: 'RSA-OAEP',
-        //label: Uint8Array([...]) //optional
-      },
-      publicKey, //from generateKey or importKey above
-      bytes //stringToUint8Array(str) //ArrayBuffer of data you want to encrypt
-    )
-    .then((encrypted) => {
-      return new Uint8Array(encrypted);
-    });
 };

@@ -13,7 +13,7 @@ const keyParams: EcKeyGenParams = {
 };
 
 export const createEccPair = async () => {
-  return await crypto.subtle.generateKey(keyParams, true, ['deriveKey']);
+  return await crypto.subtle.generateKey(keyParams, true, ['deriveKey', 'deriveBits']);
 };
 
 // Do something with the ECC Key;
@@ -91,7 +91,32 @@ export const retrieveEccKey = async () => {
     });
 };
 
+export const exportEccPublicKey = async (publicKey: CryptoKey) => {
+  const rawEccKey = await crypto.subtle.exportKey('jwk', publicKey);
+  delete rawEccKey.key_ops;
+  delete rawEccKey.ext;
+
+  return JSON.stringify(rawEccKey);
+};
+
 // Clears private key from storage
 export const throwAwayTheECCKey = () => {
   if (isLocalStorageAvailable()) localStorage.removeItem(STORAGE_KEY);
+};
+
+export const aesGcmEncryptWithEccSharedSecret = async (
+  exchangedSharedSecret: Uint8Array,
+  iv: Uint8Array,
+  data: Uint8Array
+) => {
+  const aesGcmKey = await crypto.subtle.importKey('raw', exchangedSharedSecret, 'AES-GCM', true, [
+    'encrypt',
+  ]);
+  const encryptedGcm = await window.crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv: iv.slice(0, 12) },
+    aesGcmKey,
+    data
+  );
+
+  return new Uint8Array(encryptedGcm);
 };
