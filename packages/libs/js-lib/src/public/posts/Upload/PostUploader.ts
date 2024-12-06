@@ -367,7 +367,7 @@ const patchPost = async <T extends PostContent>(
 
   if (
     !defaultPayload &&
-    file.fileMetadata.payloads.some((pyld) => pyld.key === DEFAULT_PAYLOAD_KEY)
+    file.fileMetadata?.payloads?.some((pyld) => pyld.key === DEFAULT_PAYLOAD_KEY)
   ) {
     deletedPayloads.push({
       key: DEFAULT_PAYLOAD_KEY,
