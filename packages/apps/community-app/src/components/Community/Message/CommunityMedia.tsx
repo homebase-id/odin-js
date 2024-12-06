@@ -103,7 +103,7 @@ const MediaItem = ({
       {!fileId || (payload as NewPayloadDescriptor)?.pendingFile ? (
         <PendingFile
           payload={payload}
-          className={`max-h-[inherit] max-w-[inherit]`}
+          className={fit === 'cover' ? 'h-full w-full' : `max-h-[inherit] max-w-[inherit]`}
           fit={fit}
           onLoad={onLoad}
         />
@@ -163,7 +163,7 @@ const MediaItem = ({
               targetDrive={targetDrive}
               avoidPayload={isVideo}
               previewThumbnail={previewThumbnail}
-              className={`max-h-[inherit] max-w-[inherit]`}
+              className={fit === 'cover' ? 'h-full w-full' : `max-h-[inherit] max-w-[inherit]`}
               fit={fit}
               position={fit === 'contain' ? 'left' : 'center'}
               onLoad={onLoad}
