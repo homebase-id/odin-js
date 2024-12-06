@@ -112,7 +112,7 @@ export const useWebsocketSubscriber = (
     }
 
     return () => {
-      if (isConnected && localHandler) {
+      if (localHandler) {
         setIsConected(false);
         try {
           if (isPeer) UnsubscribeOverPeer(localHandler);
