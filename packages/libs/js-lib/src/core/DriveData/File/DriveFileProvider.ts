@@ -288,7 +288,7 @@ export const getContentFromHeaderOrPayload = async <T>(
   }
 
   const contentIsComplete =
-    fileMetadata.payloads.filter((payload) => payload.key === DEFAULT_PAYLOAD_KEY).length === 0;
+    fileMetadata.payloads?.filter((payload) => payload.key === DEFAULT_PAYLOAD_KEY).length === 0;
   if (fileMetadata.isEncrypted && !sharedSecretEncryptedKeyHeader) return null;
 
   const keyHeader = fileMetadata.isEncrypted
@@ -309,7 +309,7 @@ export const getContentFromHeaderOrPayload = async <T>(
     }
     return tryJsonParse<T>(decryptedJsonContent);
   } else {
-    const payloadDescriptor = dsr.fileMetadata.payloads.find(
+    const payloadDescriptor = dsr.fileMetadata.payloads?.find(
       (payload) => payload.key === DEFAULT_PAYLOAD_KEY
     );
     return await getPayloadAsJson<T>(dotYouClient, targetDrive, fileId, DEFAULT_PAYLOAD_KEY, {

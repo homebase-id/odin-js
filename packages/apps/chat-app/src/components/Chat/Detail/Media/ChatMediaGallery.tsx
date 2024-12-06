@@ -31,9 +31,9 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
     navigate(toPaths.join('/'));
   };
 
-  const allkeys = msg.fileMetadata.payloads.map((p) => p.key);
-  const nextKey = allkeys[allkeys.indexOf(mediaKey) + 1];
-  const prevKey = allkeys[allkeys.indexOf(mediaKey) - 1];
+  const allkeys = msg.fileMetadata.payloads?.map((p) => p.key);
+  const nextKey = allkeys?.[allkeys.indexOf(mediaKey) + 1];
+  const prevKey = allkeys?.[allkeys.indexOf(mediaKey) - 1];
 
   const goNext = (e: MouseEvent | KeyboardEvent) => {
     e.stopPropagation();
@@ -77,7 +77,7 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [msg, mediaKey]);
 
-  const payload = msg.fileMetadata.payloads.find((p) => p.key === mediaKey);
+  const payload = msg.fileMetadata.payloads?.find((p) => p.key === mediaKey);
   const contentType = payload?.contentType;
   const dialog = (
     <div className="fixed inset-0 z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">

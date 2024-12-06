@@ -55,7 +55,7 @@ export const DoubleClickHeartForMedia = ({
   const previewThumbnail = useMemo(() => {
     if (postFile.fileMetadata.appData.content.type === 'Article') {
       const primaryKey = postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey;
-      return postFile.fileMetadata.payloads.find((payload) => payload.key === primaryKey)
+      return postFile.fileMetadata.payloads?.find((payload) => payload.key === primaryKey)
         ?.previewThumbnail;
     }
     return postFile.fileMetadata.appData.previewThumbnail;

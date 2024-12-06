@@ -509,7 +509,7 @@ export const softDeleteChatMessage = async (
   message.fileMetadata.appData.archivalStatus = ChatDeletedArchivalStaus;
   let runningVersionTag = message.fileMetadata.versionTag;
 
-  for (let i = 0; i < message.fileMetadata.payloads.length; i++) {
+  for (let i = 0; message.fileMetadata.payloads && i < message.fileMetadata.payloads.length; i++) {
     const payload = message.fileMetadata.payloads[i];
     // TODO: Should the payload be deleted for everyone? With "TransitOptions"; Needs server side support for it;
     const deleteResult = await deletePayload(

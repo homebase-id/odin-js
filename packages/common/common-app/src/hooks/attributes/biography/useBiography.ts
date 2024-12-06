@@ -56,7 +56,7 @@ export const useBiography = (props?: { odinId: string } | undefined) => {
             let attr: Attribute | undefined = entry.payload as Attribute;
             if (
               !attr &&
-              entry.header.fileMetadata.payloads.filter(
+              entry.header.fileMetadata.payloads?.filter(
                 (payload: PayloadDescriptor) => payload.contentType === 'application/json'
               ).length !== 0 &&
               entry.header.fileMetadata.appData.uniqueId

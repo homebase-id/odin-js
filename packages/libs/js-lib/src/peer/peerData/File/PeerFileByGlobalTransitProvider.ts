@@ -307,7 +307,7 @@ export const getContentFromHeaderOrPayloadOverPeerByGlobalTransitId = async <T>(
 ): Promise<T | null> => {
   const { globalTransitId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
   const contentIsComplete =
-    fileMetadata.payloads.filter((payload) => payload.key === DEFAULT_PAYLOAD_KEY).length === 0;
+    fileMetadata.payloads?.filter((payload) => payload.key === DEFAULT_PAYLOAD_KEY).length === 0;
   const keyHeader = fileMetadata.isEncrypted
     ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
     : undefined;

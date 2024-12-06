@@ -149,7 +149,7 @@ const wsDsrToMessage = async (
   }
 
   const contentIsComplete =
-    fileMetadata.payloads.filter((payload) => payload.key === DEFAULT_PAYLOAD_KEY).length === 0;
+    fileMetadata.payloads?.filter((payload) => payload.key === DEFAULT_PAYLOAD_KEY).length === 0;
   if (fileMetadata.isEncrypted && !sharedSecretEncryptedKeyHeader) return null;
 
   const keyHeader = fileMetadata.isEncrypted

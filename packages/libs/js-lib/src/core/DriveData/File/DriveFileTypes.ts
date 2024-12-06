@@ -14,7 +14,7 @@ export interface FileMetadata<T = string> {
   reactionPreview?: ReactionPreview;
   versionTag: string;
 
-  payloads: PayloadDescriptor[];
+  payloads?: PayloadDescriptor[];
 }
 
 export interface AccessControlList {

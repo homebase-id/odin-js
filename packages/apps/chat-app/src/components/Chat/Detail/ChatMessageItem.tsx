@@ -36,7 +36,7 @@ export const ChatMessageItem = ({
   const authorOdinId = msg.fileMetadata.senderOdinId || '';
 
   const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;
-  const hasMedia = !!msg.fileMetadata.payloads.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY).length;
+  const hasMedia = !!msg.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY).length;
 
   const { chatMessageKey, mediaKey } = useParams();
   const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey) && mediaKey;
@@ -271,7 +271,7 @@ const ChatMediaMessageBody = ({
           className={`dark:text-white/70 ${
             !hasACaption &&
             !isDarkMode &&
-            msg.fileMetadata.payloads.some(
+            msg.fileMetadata.payloads?.some(
               (payload) =>
                 payload.contentType.includes('image/') || payload.contentType.includes('video/')
             )

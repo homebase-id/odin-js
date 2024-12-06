@@ -464,8 +464,8 @@ export const dsrToMailConversation = async (
             ...mailContent,
             plainMessage: getTextRootsRecursive(mailContent.message).join(' '),
             plainAttachment: dsr.fileMetadata.payloads
-              .map((payload) => payload.descriptorContent)
-              .join(' '),
+              ?.map((payload) => payload.descriptorContent)
+              ?.join(' '),
           },
         },
       },
