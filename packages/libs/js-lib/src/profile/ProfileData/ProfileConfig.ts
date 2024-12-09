@@ -82,3 +82,22 @@ export class SocialFields {
   static readonly Tiktok: string = 'tiktok';
   static readonly Instagram: string = 'instagram';
 }
+
+export const UNLINKABLE_SOCIALS = [
+  'minecraft',
+  'steam',
+  'discord',
+  'riot games',
+  'epic games',
+  'stackoverflow',
+];
+
+export const getSocialLink = (type: string, username: string): string | undefined => {
+  if (UNLINKABLE_SOCIALS.includes(type)) return undefined;
+
+  return type !== 'dotyouid'
+    ? `https://${type}.com/${
+        type === SocialFields.LinkedIn ? 'in/' : type === SocialFields.Snapchat ? 'add/' : ''
+      }${username}`
+    : `https://${username}`;
+};
