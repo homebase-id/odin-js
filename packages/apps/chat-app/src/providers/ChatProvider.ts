@@ -387,9 +387,7 @@ export const uploadChatMessage = async (
     }
   );
 
-  if (!uploadResult) {
-    throw new Error('Failed to upload chat message');
-  }
+  if (!uploadResult) throw new Error('Failed to upload chat message');
 
   if (
     recipients.some(
@@ -400,7 +398,7 @@ export const uploadChatMessage = async (
   ) {
     message.fileId = uploadResult.file.fileId;
     message.fileMetadata.versionTag = uploadResult.newVersionTag;
-    message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Failed;
+    message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Sent;
     message.fileMetadata.appData.content.deliveryDetails = {};
     for (const recipient of recipients) {
       message.fileMetadata.appData.content.deliveryDetails[recipient] =
@@ -422,7 +420,7 @@ export const uploadChatMessage = async (
       ...uploadResult,
       newVersionTag: updateResult?.newVersionTag || uploadResult?.newVersionTag,
       previewThumbnail: uploadMetadata.appData.previewThumbnail,
-      chatDeliveryStatus: ChatDeliveryStatus.Failed, // Should we set failed, or does an enqueueFailed have a retry? (Either way it should auto-solve if it does)
+      chatDeliveryStatus: ChatDeliveryStatus.Sent, // Should we set failed, or does an enqueueFailed have a retry? (Either way it should auto-solve if it does)
     };
   }
 
