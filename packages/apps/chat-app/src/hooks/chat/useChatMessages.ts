@@ -1,6 +1,7 @@
 import {
   InfiniteData,
   QueryClient,
+  UndefinedInitialDataInfiniteOptions,
   useInfiniteQuery,
   useMutation,
   useQueryClient,
@@ -12,13 +13,13 @@ import {
   requestMarkAsRead,
   softDeleteChatMessage,
 } from '../../providers/ChatProvider';
-import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
+import { DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 
 import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../providers/ConversationProvider';
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { formatGuidId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { SendReadReceiptResponseRecipientStatus } from '@homebase-id/js-lib/peer';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { updateCacheChatMessage } from './useChatMessage';
@@ -30,15 +31,6 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
   const dotYouClient = useDotYouClientContext();
 
   const queryClient = useQueryClient();
-
-  const fetchMessages = async (conversationId: string, cursorState: string | undefined) => {
-    return await getChatMessages(
-      dotYouClient,
-      conversationId,
-      cursorState,
-      cursorState ? PAGE_SIZE : FIRST_PAGE_SIZE
-    );
-  };
 
   const markAsRead = async ({
     conversation,
@@ -94,18 +86,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
   };
 
   return {
-    all: useInfiniteQuery({
-      queryKey: ['chat-messages', conversationId],
-      initialPageParam: undefined as string | undefined,
-      queryFn: ({ pageParam }) => fetchMessages(conversationId as string, pageParam),
-      getNextPageParam: (lastPage, pages) =>
-        lastPage &&
-        lastPage.searchResults?.length >= (lastPage === pages[0] ? FIRST_PAGE_SIZE : PAGE_SIZE)
-          ? lastPage.cursorState
-          : undefined,
-      enabled: !!conversationId,
-      staleTime: 1000 * 60 * 60 * 24, // 24 hour
-    }),
+    all: useInfiniteQuery(getChatMessageInfiniteQueryOptions(dotYouClient, conversationId)),
     markAsRead: useMutation({
       mutationKey: ['markAsRead', conversationId],
       mutationFn: markAsRead,
@@ -125,6 +106,45 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     }),
   };
 };
+
+const fetchMessages = async (
+  dotYouClient: DotYouClient,
+  conversationId: string,
+  cursorState: string | undefined
+) => {
+  return await getChatMessages(
+    dotYouClient,
+    conversationId,
+    cursorState,
+    cursorState ? PAGE_SIZE : FIRST_PAGE_SIZE
+  );
+};
+
+export const getChatMessageInfiniteQueryOptions: (
+  dotYouClient: DotYouClient,
+  conversationId: string | undefined
+) => UndefinedInitialDataInfiniteOptions<{
+  searchResults: (HomebaseFile<ChatMessage> | null)[];
+  cursorState: string;
+  queryTime: number;
+  includeMetadataHeader: boolean;
+}> = (dotYouClient, conversationId) => ({
+  queryKey: ['chat-messages', formatGuidId(conversationId)],
+  initialPageParam: undefined as string | undefined,
+  queryFn: ({ pageParam }) =>
+    fetchMessages(
+      dotYouClient,
+      formatGuidId(conversationId as string),
+      pageParam as string | undefined
+    ),
+  getNextPageParam: (lastPage, pages) =>
+    lastPage &&
+    lastPage.searchResults?.length >= (lastPage === pages[0] ? FIRST_PAGE_SIZE : PAGE_SIZE)
+      ? lastPage.cursorState
+      : undefined,
+  enabled: !!conversationId,
+  staleTime: 1000 * 60 * 60 * 24, // 24 hour
+});
 
 export const invalidateChatMessages = (queryClient: QueryClient, conversationId?: string) => {
   queryClient.invalidateQueries({

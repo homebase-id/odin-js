@@ -21,7 +21,6 @@ const DEFAULT_QUERY_KEYS = [
   'external-profile',
   'connection-info',
   'contact',
-  'image',
   'push-notifications',
   'site-data',
   'profiles',
@@ -35,6 +34,7 @@ const APP_QUERY_KEYS = [
   'chat-reaction',
   'conversations',
   'conversation-metadata',
+  'conversations-with-recent-message',
   'process-chat-inbox',
 
   // Feed:

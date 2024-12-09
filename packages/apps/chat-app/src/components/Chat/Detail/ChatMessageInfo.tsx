@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { ChatMessage } from '../../../providers/ChatProvider';
+import { ChatDeliveryStatus, ChatMessage } from '../../../providers/ChatProvider';
 import {
   AuthorImage,
   AuthorName,
@@ -96,8 +96,7 @@ export const ChatMessageInfo = ({
                       />
                       <InnerDeliveryIndicator
                         state={
-                          messageContent.deliveryDetails?.[recipient] ||
-                          messageContent.deliveryStatus
+                          messageContent.deliveryDetails?.[recipient] || ChatDeliveryStatus.Failed
                         }
                       />
                     </div>

@@ -65,7 +65,6 @@ export const NewConversation = () => {
         ) : (
           <>
             <ConversationListItemWrapper
-              order={1}
               onClick={() => {
                 navigate(`${CHAT_ROOT_PATH}/new-group`);
               }}

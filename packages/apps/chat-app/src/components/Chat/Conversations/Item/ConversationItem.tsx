@@ -13,7 +13,7 @@ import {
   ErrorNotification,
 } from '@homebase-id/common-app';
 import { ChevronDown, Persons } from '@homebase-id/common-app/icons';
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { ReactNode, useEffect, useMemo } from 'react';
 import { useChatMessages } from '../../../../hooks/chat/useChatMessages';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDeliveryIndicator } from '../../Detail/ChatDeliveryIndicator';
@@ -33,14 +33,12 @@ const ListItemWrapper = ({
   onClick,
   isActive,
   children,
-  order,
 }: {
   onClick: (() => void) | undefined;
   isActive: boolean;
   children: ReactNode;
-  order: number | undefined;
 }) => (
-  <div className="group px-2" style={{ order: order, opacity: order ? 100 : 0 }}>
+  <div className="group px-2">
     <div
       onClick={onClick}
       className={`flex w-full cursor-pointer flex-row items-center gap-3 rounded-lg px-3 py-4 transition-colors hover:bg-primary/20 ${
@@ -63,14 +61,12 @@ export const GroupConversationItem = ({
   conversationId?: string;
   isActive: boolean;
 }) => {
-  const [order, setOrder] = useState<number>();
-
   return (
-    <ListItemWrapper {...props} order={order}>
+    <ListItemWrapper {...props}>
       <div className="rounded-full bg-primary/20 p-4">
         <Persons className="h-5 w-5" />
       </div>
-      <ConversationBody title={title} conversationId={conversationId} setOrder={setOrder} />
+      <ConversationBody title={title} conversationId={conversationId} />
     </ListItemWrapper>
   );
 };
@@ -85,17 +81,14 @@ export const SingleConversationItem = ({
   conversationId?: string;
   isActive: boolean;
 }) => {
-  const [order, setOrder] = useState<number>();
-
   return (
-    <ListItemWrapper {...props} order={order}>
+    <ListItemWrapper {...props}>
       <ConnectionImage
         odinId={odinId}
         className="border border-neutral-200 dark:border-neutral-800"
         size="sm"
       />
       <ConversationBody
-        setOrder={setOrder}
         title={<ConnectionName odinId={odinId} />}
         conversationId={conversationId}
       />
@@ -111,7 +104,7 @@ export const ConversationWithYourselfItem = ({
   isActive: boolean;
 }) => {
   return (
-    <ListItemWrapper isActive={isActive} onClick={onClick} order={1}>
+    <ListItemWrapper isActive={isActive} onClick={onClick}>
       <div className="h-[3rem] w-[3rem] flex-shrink-0">
         <OwnerImage
           className="flex-shrink-0 border border-neutral-200 dark:border-neutral-800"
@@ -133,11 +126,9 @@ export const ConversationWithYourselfItem = ({
 const ConversationBody = ({
   title,
   conversationId,
-  setOrder,
 }: {
   title: string | ReactNode | undefined;
   conversationId?: string;
-  setOrder?: (order: number) => void;
 }) => {
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const { data: conversationMetadata } = useConversationMetadata({ conversationId }).single;
@@ -167,20 +158,6 @@ const ConversationBody = ({
 
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
   const plainLastMessageContent = getPlainTextFromRichText(lastMessageContent?.message);
-
-  useEffect(() => {
-    if (lastMessage) {
-      const date = lastMessage?.fileMetadata.created;
-      setOrder && date && setOrder(Math.max(new Date().getTime() - date, 2));
-      return;
-    }
-    if (conversation) {
-      const date = conversation?.fileMetadata.updated;
-      setOrder && date && setOrder(Math.max(new Date().getTime() - date, 2));
-      return;
-    }
-    setOrder && setOrder(2);
-  }, [lastMessage, conversation]);
   const hasNoContextMenu = stringGuidsEqual(conversationId, ConversationWithYourselfId);
 
   return (
