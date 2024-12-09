@@ -126,7 +126,7 @@ const Login = () => {
                     ) : null}
                   </div>
                   <div className="mt-5 flex flex-row-reverse justify-between gap-2">
-                    <ActionButton state={state} isDisabled={!passwordIsValid}>
+                    <ActionButton state={state} disabled={!passwordIsValid}>
                       {t('Reset password')}
                     </ActionButton>
                     <ActionLink type="secondary" href="/owner/login">

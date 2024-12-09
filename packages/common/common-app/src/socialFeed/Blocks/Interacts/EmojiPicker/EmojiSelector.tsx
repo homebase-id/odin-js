@@ -1,6 +1,6 @@
 import { useState, useRef, Suspense, useEffect } from 'react';
 import { useOutsideTrigger, useMostSpace } from '../../../../hooks';
-import { ActionButton } from '../../../../ui';
+import { ActionButton, ActionButtonProps } from '../../../../ui';
 import { EmojiPicker } from './EmojiPicker';
 import { Lol } from '../../../../ui/Icons';
 
@@ -13,11 +13,13 @@ export const EmojiSelector = ({
   isOpen: isDefaultOpen,
   onClose,
 }: {
-  className?: string;
   wrapperClassName?: string;
   onInput: (val: string) => void;
   defaultValue?: string;
-  size?: 'large' | 'small' | 'square' | 'none';
+
+  className?: ActionButtonProps['className'];
+  size?: ActionButtonProps['size'];
+
   isOpen?: boolean;
   onClose?: () => void;
 }) => {

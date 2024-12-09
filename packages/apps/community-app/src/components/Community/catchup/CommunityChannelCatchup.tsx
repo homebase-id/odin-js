@@ -61,9 +61,9 @@ export const CommunityChannelCatchup = ({
         </ActionLink>
         {metadata ? (
           <ActionButton
-            size="small"
+            size="none"
             type={'secondary'}
-            className="w-auto"
+            className="w-auto px-3 py-1 text-sm"
             state={updateStatus}
             onClick={doMarkAsRead}
           >

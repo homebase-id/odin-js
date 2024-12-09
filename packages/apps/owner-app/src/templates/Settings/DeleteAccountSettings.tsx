@@ -54,7 +54,7 @@ export const DeleteAccountSettings = () => {
                   buttonText: t('Cancel delete account'),
                 }}
                 state={undeleteStatus}
-                isDisabled={!currentPassword}
+                disabled={!currentPassword}
                 onClick={() => undeleteAccount(currentPassword)}
               >
                 {t('Cancel delete account')}
@@ -102,7 +102,7 @@ export const DeleteAccountSettings = () => {
                   buttonText: t('Delete account'),
                 }}
                 state={deleteStatus}
-                isDisabled={!currentPassword}
+                disabled={!currentPassword}
                 onClick={() => deleteAccount(currentPassword)}
               >
                 {t('Delete account')}

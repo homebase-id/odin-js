@@ -98,7 +98,7 @@ export const IntroductionDialog = ({
             <ActionButton
               state={introduceIdentitiesStatus}
               icon={Arrow}
-              isDisabled={identities.length <= 1}
+              disabled={identities.length <= 1}
             >
               {t('Introduce')}
             </ActionButton>

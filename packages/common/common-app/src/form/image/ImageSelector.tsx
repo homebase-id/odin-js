@@ -77,7 +77,7 @@ export const ImageSelector = ({
                 setIsEdit(true);
                 return false;
               }}
-              isDisabled={disabled}
+              disabled={disabled}
             >
               <Pencil className="h-5 w-5 " />
             </ActionButton>
@@ -94,7 +94,7 @@ export const ImageSelector = ({
                 buttonText: t('Permanently remove'),
               }}
               onClick={removeData}
-              isDisabled={disabled}
+              disabled={disabled}
             >
               <Trash className="h-5 w-5 " />
             </ActionButton>
