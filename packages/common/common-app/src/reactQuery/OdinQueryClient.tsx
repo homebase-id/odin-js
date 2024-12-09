@@ -21,7 +21,6 @@ const DEFAULT_QUERY_KEYS = [
   'external-profile',
   'connection-info',
   'contact',
-  'image',
   'push-notifications',
   'site-data',
   'profiles',
