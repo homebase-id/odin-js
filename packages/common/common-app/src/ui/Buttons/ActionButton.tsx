@@ -13,30 +13,69 @@ export interface PureButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
   icon?: FC<IconProps>;
 }
 
-export interface ConfirmableButtonProps extends PureButtonProps {
-  confirmOptions?: Omit<ConfirmDialogProps, 'onConfirm' | 'onCancel'>;
-  onClick?: (e: React.MouseEvent<HTMLElement>, skipNextTime?: boolean) => void;
+export interface ConfirmableButtonProps extends Omit<StyledButtonProps, 'onClick'> {
+  confirmOptions: Omit<ConfirmDialogProps, 'onConfirm' | 'onCancel'>;
+
+  onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, skipNextTime?: boolean) => void;
 }
 
-export interface StyledButtonProps extends Omit<PureButtonProps, 'type'> {
+export interface StyledButtonProps extends Omit<Omit<PureButtonProps, 'type'>, 'onClick'> {
   type?: 'primary' | 'secondary' | 'remove' | 'mute';
   state?: ActionButtonState;
 
   size?: 'square' | 'none';
+  onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, skipNextTime?: boolean) => void;
 }
 
-export type ActionButtonProps = StyledButtonProps & Omit<ConfirmableButtonProps, 'type'>;
+export type ActionButtonProps = StyledButtonProps | ConfirmableButtonProps;
 
-export const ActionButton: FC<ActionButtonProps> = ({
-  className,
-  icon,
+export const ActionButton = (props: StyledButtonProps | ConfirmableButtonProps) => {
+  if ('confirmOptions' in props && props.confirmOptions) {
+    return <ConfirmableButton {...props} />;
+  } else {
+    return <StyledButton {...(props as StyledButtonProps)} />;
+  }
+};
+
+const ConfirmableButton = ({ confirmOptions, onClick, ...props }: ConfirmableButtonProps) => {
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const [mouseEvent, setMouseEvent] = useState<React.MouseEvent<HTMLButtonElement>>();
+
+  return (
+    <>
+      <StyledButton
+        {...props}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          setNeedsConfirmation(true);
+          setMouseEvent(e);
+          return false;
+        }}
+      />
+      {needsConfirmation ? (
+        <ConfirmDialog
+          {...confirmOptions}
+          onConfirm={(_e, skipNextTime) => {
+            setNeedsConfirmation(false);
+            onClick && mouseEvent && onClick(mouseEvent, skipNextTime);
+          }}
+          onCancel={() => setNeedsConfirmation(false)}
+        />
+      ) : null}
+    </>
+  );
+};
+
+const StyledButton = ({
   type,
   state,
+  icon,
   size,
-
-  confirmOptions,
+  className,
   ...buttonProps
-}) => {
+}: StyledButtonProps) => {
   const hasChildren = !!buttonProps.children;
   const hasIcon = (!!state && state !== 'idle') || !!icon;
 
@@ -97,61 +136,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
     ];
   })();
 
-  if (confirmOptions) {
-    return (
-      <ConfirmableButton
-        className={classNames.filter(Boolean).join(' ')}
-        disabled={buttonProps.disabled || state === 'loading' || state === 'pending'}
-        icon={updatedIcon}
-        confirmOptions={confirmOptions}
-        {...buttonProps}
-      />
-    );
-  } else {
-    return (
-      <PureButton
-        className={classNames.filter(Boolean).join(' ')}
-        disabled={buttonProps.disabled || state === 'loading' || state === 'pending'}
-        icon={updatedIcon}
-        {...buttonProps}
-      />
-    );
-  }
-};
-
-const ConfirmableButton = ({ confirmOptions, onClick, ...props }: ConfirmableButtonProps) => {
-  const [needsConfirmation, setNeedsConfirmation] = useState(false);
-  const [mouseEvent, setMouseEvent] = useState<React.MouseEvent<HTMLElement>>();
-
-  return (
-    <>
-      <PureButton
-        {...props}
-        onClick={
-          confirmOptions
-            ? (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-
-                setNeedsConfirmation(true);
-                setMouseEvent(e);
-                return false;
-              }
-            : onClick
-        }
-      />
-      {confirmOptions && onClick && needsConfirmation ? (
-        <ConfirmDialog
-          {...confirmOptions}
-          onConfirm={(_e, skipNextTime) => {
-            setNeedsConfirmation(false);
-            onClick && mouseEvent && onClick(mouseEvent, skipNextTime);
-          }}
-          onCancel={() => setNeedsConfirmation(false)}
-        />
-      ) : null}
-    </>
-  );
+  return <PureButton {...buttonProps} className={classNames.join(' ')} icon={updatedIcon} />;
 };
 
 const PureButton = ({ children, icon, ...props }: PureButtonProps) => {

@@ -269,7 +269,6 @@ export const IdentityPageMetaAndActions = ({ odinId }: { odinId: string }) => {
             <ActionGroup
               options={actionGroupOptions}
               type="secondary"
-              size="square"
               children={t('More')}
               icon={Ellipsis}
             />

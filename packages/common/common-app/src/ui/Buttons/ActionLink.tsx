@@ -1,80 +1,76 @@
 import { FC, ReactNode } from 'react';
-import { HybridLink } from './HybridLink';
+import { HybridLink, HybridLinkProps } from './HybridLink';
 
 import { ButtonColors } from './ColorConfig';
 import { IconProps } from '../Icons/Types';
-export type ActionLinkState = 'loading' | 'success' | 'error' | 'idle';
 
-type ActionLinkProps = {
-  children?: ReactNode;
-  className?: string;
-  type?: 'primary' | 'secondary' | 'remove' | 'mute' | 'none';
-  title?: string;
-  size?: 'large' | 'small' | 'square' | 'none';
-  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
+export interface ActionLinkProps extends Omit<HybridLinkProps, 'children'> {
+  type?: 'primary' | 'secondary' | 'remove' | 'mute';
+  size?: 'square' | 'none';
   icon?: FC<IconProps>;
-  download?: string;
-  href?: string;
-  target?: React.HTMLAttributeAnchorTarget;
-  rel?: string;
-  style?: React.CSSProperties;
-};
+  children?: ReactNode;
+}
 
 export const ActionLink: FC<ActionLinkProps> = ({
   children,
-  className,
   type,
-  title,
-  size,
-  onClick,
   icon,
-  download,
-  href,
-  target,
-  rel,
-  style,
+  size,
+  className,
+  ...linkProps
 }) => {
-  const Icon = (props: { className: string }) => (icon ? icon(props) : null);
-  const colorClasses =
-    type === 'secondary'
-      ? ButtonColors.secondary
-      : type === 'remove'
-        ? ButtonColors.remove
-        : type === 'mute'
-          ? ButtonColors.mute
-          : ButtonColors.primary;
+  const hasChildren = !!children;
+  const hasIcon = !!icon;
 
-  const widthClasses =
-    children && type !== 'mute'
-      ? `${className?.indexOf('w-') !== -1 ? '' : 'w-full sm:w-auto'}`
-      : '';
+  const classNames = (() => {
+    const colorClasses =
+      type === 'secondary'
+        ? ButtonColors.secondary
+        : type === 'remove'
+          ? ButtonColors.remove
+          : type === 'mute'
+            ? ButtonColors.mute
+            : ButtonColors.primary;
 
-  const sizeClasses =
-    size === 'large'
-      ? 'px-5 py-3'
-      : size === 'small'
-        ? 'px-3 py-1 text-sm'
-        : size === 'square'
-          ? 'p-2'
-          : size === 'none'
-            ? ''
-            : 'px-3 py-2';
+    const widthClasses =
+      hasChildren && type !== 'mute' && size !== 'square'
+        ? `${className && className?.indexOf('w-') !== -1 ? undefined : 'w-full sm:w-auto'}`
+        : undefined;
 
+    const sizeClasses =
+      size === 'square'
+        ? 'p-2'
+        : size === 'none'
+          ? undefined
+          : `px-3 py-2 ${hasIcon && hasChildren ? 'pl-4' : undefined}`;
+
+    const clickClassName = 'cursor-pointer';
+
+    const positionClassName =
+      className && (className.indexOf('absolute') !== -1 || className.indexOf('fixed') !== -1)
+        ? undefined
+        : 'relative';
+    const flexClassName = 'flex flex-row items-center';
+    const roundedClassName =
+      className && className.indexOf('rounded-') !== -1 ? undefined : 'rounded-md';
+    const baseTextClassName = 'text-left';
+
+    return [
+      positionClassName,
+      flexClassName,
+      roundedClassName,
+      baseTextClassName,
+      widthClasses,
+      sizeClasses,
+      colorClasses,
+      clickClassName,
+      className,
+    ];
+  })();
   return (
-    <HybridLink
-      className={`relative flex flex-row items-center rounded-md text-left ${
-        onClick ? 'cursor-pointer' : ''
-      } ${widthClasses} ${sizeClasses} ${colorClasses} ${className || ''}`}
-      download={download}
-      href={href}
-      title={title}
-      onClick={onClick}
-      target={target}
-      rel={rel}
-      style={style}
-    >
+    <HybridLink className={classNames.join(' ')} {...linkProps}>
       {children}
-      <Icon className={`my-auto ${children ? 'ml-2' : ''} h-5 w-5`} />
+      {icon && icon({ className: `my-auto ${hasChildren ? 'ml-2' : ''} h-5 w-5` })}
     </HybridLink>
   );
 };
