@@ -1,4 +1,8 @@
-import { CircleDefinition } from '@homebase-id/js-lib/network';
+import {
+  AUTO_CONNECTIONS_CIRCLE_ID,
+  CircleDefinition,
+  CONFIRMED_CONNECTIONS_CIRCLE_ID,
+} from '@homebase-id/js-lib/network';
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useCircle } from '../../hooks/circles/useCircle';
@@ -8,6 +12,7 @@ import { Arrow } from '../../ui/Icons/Arrow';
 import { t } from '../../helpers/i18n/dictionary';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from '../../hooks';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const CirclePermissionView = ({
   circleDef,
@@ -28,6 +33,9 @@ export const CirclePermissionView = ({
     circleId: !hideMembers ? circleDef?.id : undefined,
   }).fetchMembers;
   const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const isSystemCircle =
+    stringGuidsEqual(circleDef.id, CONFIRMED_CONNECTIONS_CIRCLE_ID) ||
+    stringGuidsEqual(circleDef.id, AUTO_CONNECTIONS_CIRCLE_ID);
 
   if (!circleDef) return null;
 
@@ -55,15 +63,18 @@ export const CirclePermissionView = ({
 
   return (
     <LinkWrapper
-      className={`flex flex-row ${className ?? ''} ${circleDef.disabled && 'opacity-50'} ${
+      className={`flex flex-row items-center ${className ?? ''} ${circleDef.disabled && 'opacity-50'} ${
         onClick && 'cursor-pointer'
       } ${checkedClasses}`}
     >
-      <Circles className="mb-auto mr-3 mt-1 h-6 w-6" />
+      <Circles className="mr-3 h-6 w-6" />
       <div className="mr-2 flex flex-col">
         <p className={`my-auto leading-none`}>
           {circleDef.disabled && t('Disabled:')} {circleDef?.name}
           {permissionDetails && `: ${permissionDetails}`}
+          <span className="text-sm block text-slate-400">
+            {isSystemCircle ? t('This is a built-in circle.') : circleDef.description || ' '}
+          </span>
         </p>
         {!hideMembers ? (
           membersLoading ? (
