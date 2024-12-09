@@ -1,34 +1,27 @@
 import {
-  ActionButton,
   ActionLink,
   CHAT_ROOT_PATH,
   ErrorBoundary,
-  Input,
   SubtleMessage,
   t,
   useAllContacts,
-  useDotYouClientContext,
 } from '@homebase-id/common-app';
-import { MagnifyingGlass, Persons, Plus, Times } from '@homebase-id/common-app/icons';
+import { Persons, Plus } from '@homebase-id/common-app/icons';
 
-import { useEffect, useState } from 'react';
-import { ContactFile } from '@homebase-id/js-lib/network';
+import { RefObject, useMemo, useRef, useState } from 'react';
 
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useConversations } from '../../../../hooks/chat/useConversations';
+import { useSearchParams } from 'react-router-dom';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../../../providers/ConversationProvider';
-import {
-  GroupConversationItem,
-  SingleConversationItem,
-  ConversationListItemWrapper,
-  ConversationWithYourselfItem,
-} from '../Item/ConversationItem';
-import { NewConversationSearchItem } from '../Item/NewConversationSearchItem';
+import { ConversationWithYourselfItem } from '../Item/ConversationItem';
+import { ConversationSearch } from './ConversationSearch';
+import { ConversationListItem } from '../Item/ConversationListItem';
+import { useConversationsWithRecentMessage } from '../../../../hooks/chat/useConversationWithRecentMessage';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 export const ConversationsSidebar = ({
   openConversation,
@@ -38,43 +31,42 @@ export const ConversationsSidebar = ({
   activeConversationId: string | undefined;
 }) => {
   const [isSearchActive, setIsSearchActive] = useState(false);
-  const { data: conversations } = useConversations().all;
+  const { data: conversations } = useConversationsWithRecentMessage().all;
 
   const [searchParams] = useSearchParams();
   const isArchivedType = searchParams.get('type') === 'archived';
 
-  const flatConversations = (
-    (conversations?.pages
-      ?.flatMap((page) => page?.searchResults)
-      ?.filter(Boolean) as HomebaseFile<UnifiedConversation>[]) || []
-  )?.filter((con) =>
-    isArchivedType
-      ? con.fileMetadata.appData.archivalStatus === 3
-      : !con.fileMetadata.appData.archivalStatus || con.fileMetadata.appData.archivalStatus === 0
+  const filteredConversations = useMemo(
+    () =>
+      (conversations || [])?.filter((con) =>
+        isArchivedType
+          ? con.fileMetadata.appData.archivalStatus === 3
+          : !con.fileMetadata.appData.archivalStatus ||
+            con.fileMetadata.appData.archivalStatus === 0
+      ),
+    [conversations, isArchivedType]
   );
+
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   return (
     <ErrorBoundary>
-      <div className="flex flex-grow flex-col overflow-auto">
-        <SearchConversation
+      <div className="flex flex-grow flex-col overflow-auto" ref={wrapperRef}>
+        <ConversationSearch
           setIsSearchActive={setIsSearchActive}
           isSearchActive={isSearchActive}
           openConversation={(id) => {
             setIsSearchActive(false);
             openConversation(id);
           }}
-          conversations={flatConversations}
+          conversations={filteredConversations}
           activeConversationId={activeConversationId}
         />
         {!isSearchActive ? (
-          <ConversationList
+          <ListConversations
             openConversation={(id) => openConversation(id)}
-            conversations={flatConversations.filter(
-              (chat) =>
-                chat.fileMetadata.appData.archivalStatus !== 2 ||
-                chat.fileMetadata.appData.uniqueId === activeConversationId
-            )}
             activeConversationId={activeConversationId}
+            scrollRef={wrapperRef}
           />
         ) : null}
       </div>
@@ -82,57 +74,142 @@ export const ConversationsSidebar = ({
   );
 };
 
+const ListConversations = ({
+  openConversation,
+  activeConversationId,
+  scrollRef,
+}: {
+  openConversation: (id: string | undefined) => void;
+  activeConversationId: string | undefined;
+  scrollRef: RefObject<HTMLDivElement>;
+}) => {
+  const [searchParams] = useSearchParams();
+  const isArchivedType = searchParams.get('type') === 'archived';
+
+  const { data: conversations } = useConversationsWithRecentMessage().all;
+
+  const filteredConversations = useMemo(
+    () =>
+      (conversations || []).filter((con) =>
+        isArchivedType
+          ? con.fileMetadata.appData.archivalStatus === 3
+          : con.fileMetadata.appData.archivalStatus !== 2 ||
+            con.fileMetadata.appData.uniqueId === activeConversationId
+      ),
+    [conversations, isArchivedType]
+  );
+
+  if (!filteredConversations?.length) return <EmptyConversations />;
+  return (
+    <ConversationList
+      conversations={filteredConversations}
+      openConversation={openConversation}
+      activeConversationId={activeConversationId}
+      scrollRef={scrollRef}
+    />
+  );
+};
+
+const EmptyConversations = () => {
+  const [searchParams] = useSearchParams();
+  const isArchivedType = searchParams.get('type') === 'archived';
+
+  const { data: contacts } = useAllContacts(true);
+  const noContacts = !contacts || contacts.length === 0;
+
+  return (
+    <div className="order-2 flex flex-row flex-wrap px-5">
+      {noContacts ? (
+        <SubtleMessage className="flex flex-row items-center gap-1">
+          <span>{t('To chat with someone on Homebase you need to be connected first.')}</span>
+          <ActionLink href="/owner/connections" type="secondary" icon={Persons}>
+            {t('Connect')}
+          </ActionLink>
+        </SubtleMessage>
+      ) : (
+        <>
+          <SubtleMessage className="">{t('No conversations found')}</SubtleMessage>
+
+          {!isArchivedType ? (
+            <ActionLink
+              href={`${CHAT_ROOT_PATH}/new`}
+              icon={Plus}
+              type="secondary"
+              className="ml-auto"
+            >
+              {t('New conversation')}
+            </ActionLink>
+          ) : null}
+        </>
+      )}
+    </div>
+  );
+};
+
 const ConversationList = ({
   conversations,
   openConversation,
   activeConversationId,
+  scrollRef,
 }: {
   conversations: HomebaseFile<UnifiedConversation>[];
   openConversation: (id: string | undefined) => void;
   activeConversationId: string | undefined;
+  scrollRef: RefObject<HTMLDivElement>;
 }) => {
-  const { data: contacts } = useAllContacts(!conversations || !conversations?.length);
-  const noContacts = !contacts || contacts.length === 0;
-
   const [searchParams] = useSearchParams();
   const isArchivedType = searchParams.get('type') === 'archived';
+
+  const virtualizer = useVirtualizer({
+    getScrollElement: () => scrollRef.current,
+    count: conversations.length,
+    estimateSize: () => 80,
+    overscan: 2,
+  });
+
+  const items = virtualizer.getVirtualItems();
 
   return (
     <div className="flex flex-grow flex-col">
       <div className="flex flex-grow flex-col">
         {!isArchivedType ? (
-          <ConversationListItemWithYourself
+          <ConversationWithYourselfItem
             onClick={() => openConversation(ConversationWithYourselfId)}
             isActive={stringGuidsEqual(activeConversationId, ConversationWithYourselfId)}
           />
         ) : null}
-        {!conversations?.length ? (
-          <div className="order-2 flex flex-row flex-wrap px-5">
-            {noContacts ? (
-              <SubtleMessage className="flex flex-row items-center gap-1">
-                <span>{t('To chat with someone on Homebase you need to be connected first.')}</span>
-                <ActionLink href="/owner/connections" type="secondary" icon={Persons}>
-                  {t('Connect')}
-                </ActionLink>
-              </SubtleMessage>
-            ) : (
-              <>
-                <SubtleMessage className="">{t('No conversations found')}</SubtleMessage>
 
-                {!isArchivedType ? (
-                  <ActionLink
-                    href={`${CHAT_ROOT_PATH}/new`}
-                    icon={Plus}
-                    type="secondary"
-                    className="ml-auto"
-                  >
-                    {t('New conversation')}
-                  </ActionLink>
-                ) : null}
-              </>
-            )}
+        <div
+          className="relative w-full"
+          style={{
+            height: virtualizer.getTotalSize(),
+          }}
+        >
+          <div
+            className="absolute left-0 top-0 z-10 w-full"
+            style={{
+              transform: `translateY(${items[0]?.start - virtualizer.options.scrollMargin}px)`,
+            }}
+          >
+            {items.map((item) => {
+              const conversation = conversations[item.index];
+              return (
+                <div key={item.key} data-index={item.index} ref={virtualizer.measureElement}>
+                  <ConversationListItem
+                    conversation={conversation}
+                    onClick={() => openConversation(conversation.fileMetadata.appData.uniqueId)}
+                    isActive={stringGuidsEqual(
+                      activeConversationId,
+                      conversation.fileMetadata.appData.uniqueId
+                    )}
+                  />
+                </div>
+              );
+            })}
           </div>
-        ) : null}
+        </div>
+
+        {/*
         {conversations?.map((conversation) => (
           <ConversationListItem
             key={conversation.fileId}
@@ -143,7 +220,7 @@ const ConversationList = ({
               conversation.fileMetadata.appData.uniqueId
             )}
           />
-        ))}
+        ))} */}
       </div>
       {conversations?.length && conversations?.length < 15 ? (
         <div className="flex flex-row justify-center p-5">
@@ -153,188 +230,5 @@ const ConversationList = ({
         </div>
       ) : null}
     </div>
-  );
-};
-
-const ConversationListItemWithYourself = ({
-  onClick,
-  isActive,
-}: {
-  onClick: () => void;
-  isActive: boolean;
-}) => {
-  return <ConversationWithYourselfItem onClick={onClick} isActive={isActive} />;
-};
-
-const ConversationListItem = ({
-  conversation,
-  onClick,
-  isActive,
-}: {
-  conversation: HomebaseFile<UnifiedConversation>;
-  onClick: () => void;
-  isActive: boolean;
-}) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
-  const recipients = conversation.fileMetadata.appData.content.recipients.filter(
-    (recipient) => recipient !== loggedOnIdentity
-  );
-
-  if (recipients && recipients.length > 1)
-    return (
-      <GroupConversationItem
-        onClick={onClick}
-        title={conversation.fileMetadata.appData.content.title}
-        conversationId={conversation.fileMetadata.appData.uniqueId}
-        isActive={isActive}
-      />
-    );
-
-  return (
-    <SingleConversationItem
-      onClick={onClick}
-      odinId={recipients[0]}
-      conversationId={conversation.fileMetadata.appData.uniqueId}
-      isActive={isActive}
-    />
-  );
-};
-
-const SearchConversation = ({
-  isSearchActive,
-  setIsSearchActive,
-  openConversation,
-  activeConversationId,
-  conversations,
-}: {
-  isSearchActive: boolean;
-  setIsSearchActive: (isActive: boolean) => void;
-  openConversation: (id: string | undefined) => void;
-  activeConversationId: string | undefined;
-  conversations: HomebaseFile<UnifiedConversation>[];
-}) => {
-  const navigate = useNavigate();
-  const [stateIndex, setStateIndex] = useState(0);
-  const [query, setQuery] = useState<string | undefined>(undefined);
-  const isActive = !!(query && query.length > 1);
-  useEffect(() => {
-    if (isActive) setIsSearchActive(isActive);
-    else setIsSearchActive(false);
-  }, [query]);
-
-  useEffect(() => {
-    if (!isSearchActive) {
-      setQuery(undefined);
-      setStateIndex(stateIndex + 1);
-    }
-  }, [isSearchActive]);
-
-  const { data: contacts } = useAllContacts(isActive);
-
-  const conversationResults =
-    query && conversations
-      ? conversations.filter((conversation) => {
-          const content = conversation.fileMetadata.appData.content;
-          return (
-            content.recipients?.some((recipient) => recipient?.toLowerCase().includes(query)) ||
-            content.title?.toLowerCase().includes(query)
-          );
-        })
-      : [];
-
-  const contactResults =
-    query && contacts
-      ? contacts
-          .map((contact) => contact.fileMetadata.appData.content)
-          .filter(
-            (contact) =>
-              contact.odinId &&
-              (contact.odinId?.toLowerCase().includes(query) ||
-                contact.name?.displayName?.toLowerCase().includes(query))
-          )
-      : [];
-
-  const contactsWithoutAConversation = contactResults.filter(
-    (contact) =>
-      contact.odinId &&
-      !conversationResults.some((conversation) => {
-        const content = conversation.fileMetadata.appData.content;
-        return content.recipients.includes(contact.odinId as string);
-      })
-  );
-
-  return (
-    <>
-      <form onSubmit={(e) => e.preventDefault()}>
-        <div className="flex flex-row gap-1 px-2 pb-2 pt-1 lg:px-5 lg:pb-5 lg:pt-3">
-          <Input
-            onChange={(e) => setQuery(e.target.value?.toLowerCase())}
-            onKeyDown={(e) => e.key === 'Escape' && setIsSearchActive(false)}
-            key={stateIndex}
-            defaultValue={query}
-            placeholder={t('Search or start a new chat')}
-          />
-          <ActionButton
-            type="mute"
-            icon={isActive ? Times : MagnifyingGlass}
-            onClick={() => {
-              if (!isActive) return null;
-
-              setQuery('');
-              setStateIndex(stateIndex + 1);
-            }}
-          />
-        </div>
-      </form>
-      <div>
-        {isActive ? (
-          <>
-            <ConversationListItemWrapper
-              order={1}
-              onClick={() => {
-                navigate(`${CHAT_ROOT_PATH}/new-group`);
-              }}
-              isActive={false}
-            >
-              <div className="rounded-full bg-primary/20 p-4">
-                <Persons className="h-5 w-5" />
-              </div>
-              {t('New group')}
-            </ConversationListItemWrapper>
-
-            {!conversationResults?.length && !contactsWithoutAConversation?.length ? (
-              <SubtleMessage className="px-5">{t('No contacts found')}</SubtleMessage>
-            ) : (
-              <>
-                {conversationResults?.length ? (
-                  <p className="mt-2 px-5 font-semibold">{t('Chats')}</p>
-                ) : null}
-                {conversationResults.map((result) => (
-                  <ConversationListItem
-                    conversation={result}
-                    onClick={() => openConversation(result.fileMetadata.appData.uniqueId)}
-                    isActive={
-                      activeConversationId ===
-                      (result as HomebaseFile<UnifiedConversation>).fileMetadata?.appData?.uniqueId
-                    }
-                    key={result.fileId}
-                  />
-                ))}
-                {contactsWithoutAConversation?.length ? (
-                  <p className="mt-2 px-5 font-semibold">{t('Contacts')}</p>
-                ) : null}
-                {contactsWithoutAConversation.map((result) => (
-                  <NewConversationSearchItem
-                    onOpen={(id) => openConversation(id)}
-                    result={result as ContactFile}
-                    key={result.odinId}
-                  />
-                ))}
-              </>
-            )}
-          </>
-        ) : null}
-      </div>
-    </>
   );
 };

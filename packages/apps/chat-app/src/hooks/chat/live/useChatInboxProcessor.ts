@@ -41,7 +41,7 @@ export const useChatInboxProcessor = (connected?: boolean) => {
 
   const fetchData = async () => {
     const lastProcessedTime = queryClient.getQueryState(['process-chat-inbox'])?.dataUpdatedAt;
-    const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 2;
+    const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 8;
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
     isDebug && console.debug('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
