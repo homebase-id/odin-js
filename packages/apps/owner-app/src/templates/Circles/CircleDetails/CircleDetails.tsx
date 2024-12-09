@@ -156,9 +156,7 @@ const CircleDetails = () => {
         <section>
           <div className="mr-auto max-w-2xl">
             {isSystemCircle
-              ? t(
-                  'This is a built-in circle, that contains all your connections. Because of that you cannot edit it.'
-                )
+              ? t('This is a built-in circle. You cannot edit it.')
               : circle.description}
           </div>
         </section>
