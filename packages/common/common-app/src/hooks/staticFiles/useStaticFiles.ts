@@ -3,6 +3,7 @@ import {
   publishProfile,
   publishProfileImage,
   publishProfileCard,
+  ProfileCardAttributeTypes,
 } from '@homebase-id/js-lib/public';
 
 import { ApiType } from '@homebase-id/js-lib/core';
@@ -22,7 +23,7 @@ export const useStaticFiles = () => {
       if (!dataType || stringGuidsEqual(dataType, BuiltInAttributes.Photo))
         publishActions.push(publishProfileImage(dotYouClient));
 
-      if (!dataType || stringGuidsEqual(dataType, BuiltInAttributes.Name))
+      if (!dataType || ProfileCardAttributeTypes.some((type) => stringGuidsEqual(dataType, type)))
         publishActions.push(publishProfileCard(dotYouClient));
     }
 
