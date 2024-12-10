@@ -51,8 +51,6 @@ export const useAuth = () => {
   };
 };
 
-export const websocketDrives = [BlogConfig.FeedDrive];
-
 const StandardProfileDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
 export const drives = [
   {

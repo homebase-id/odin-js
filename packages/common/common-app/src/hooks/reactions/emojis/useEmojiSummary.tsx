@@ -1,10 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
+import { QueryClient, useQuery } from '@tanstack/react-query';
 import {
   EmojiReactionSummary,
   getReactionSummary,
   ReactionContext,
 } from '@homebase-id/js-lib/public';
 import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { formatGuidId } from '@homebase-id/js-lib/helpers';
 
 export const useEmojiSummary = ({
   context,
@@ -32,9 +33,9 @@ export const useEmojiSummary = ({
       queryKey: [
         'emojis-summary',
         context.odinId,
-        context.channelId,
-        context.target.fileId,
-        context.target.globalTransitId,
+        formatGuidId(context.channelId),
+        formatGuidId(context.target.fileId),
+        formatGuidId(context.target.globalTransitId),
       ],
       queryFn: () => fetch(context),
       staleTime: 1000 * 60 * 1, // 1 minute
@@ -47,4 +48,23 @@ export const useEmojiSummary = ({
         (!!context.target.globalTransitId || !!context.target.fileId),
     }),
   };
+};
+
+export const invalidateEmojiSummary = (
+  queryClient: QueryClient,
+  senderOdinId?: string,
+  channelId?: string,
+  fileId?: string,
+  globalTransitId?: string
+) => {
+  queryClient.invalidateQueries({
+    queryKey: [
+      'emojis-summary',
+      senderOdinId,
+      formatGuidId(channelId),
+      formatGuidId(fileId),
+      formatGuidId(globalTransitId),
+    ],
+    exact: !!senderOdinId && !!channelId && !!fileId && !!globalTransitId,
+  });
 };

@@ -81,8 +81,6 @@ export const useReaction = () => {
       onMutate: async (toSaveCommentData) => {
         const { odinId, channelId, target } = toSaveCommentData.context;
 
-        console.log('toSaveCommentData', toSaveCommentData.commentData);
-
         const prevInfinite = queryClient.getQueryData<InfiniteData<UseCommentsVal>>([
           'comments',
           odinId,
