@@ -38,7 +38,7 @@ export const CommentHead = ({
   return (
     <div className="flex flex-row justify-space-between">
       <AuthorName odinId={authorOdinId} />
-      <ActionGroup options={actionOptions} type="mute" size="small" />
+      <ActionGroup options={actionOptions} type="mute" size="none" className="px-3 py-1 text-sm" />
     </div>
   );
 };

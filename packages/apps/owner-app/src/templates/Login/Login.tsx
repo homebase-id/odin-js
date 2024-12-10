@@ -106,11 +106,11 @@ const Login = () => {
                   />
                 </div>
                 <ActionButton
-                  className="mt-10 w-full"
+                  className="mt-10 w-full px-5 py-3"
                   type="primary"
                   icon={Arrow}
                   state={state}
-                  size="large"
+                  size="none"
                 >
                   {t('login')}
                 </ActionButton>

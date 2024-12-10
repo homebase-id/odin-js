@@ -145,7 +145,7 @@ export const MailConversationItem = ({
                       icon={Trash}
                       onClick={doRemove}
                       state={removeThreadStatus == 'success' ? undefined : removeThreadStatus}
-                      isDisabled={isTrash}
+                      disabled={isTrash}
                       title={t('Remove')}
                       className={quickActionsClassName}
                       size="none"
@@ -155,7 +155,7 @@ export const MailConversationItem = ({
                       icon={Archive}
                       onClick={doArchive}
                       state={archiveThreadStatus == 'success' ? undefined : archiveThreadStatus}
-                      isDisabled={isArchived}
+                      disabled={isArchived}
                       title={t('Archive')}
                       className={quickActionsClassName}
                       size="none"

@@ -109,7 +109,7 @@ export const SecuritySettings = () => {
               ) : null}
             </div>
             <div className="mt-5 flex flex-row-reverse">
-              <ActionButton state={state} isDisabled={!passwordIsValid}>
+              <ActionButton state={state} disabled={!passwordIsValid}>
                 {t('Change password')}
               </ActionButton>
             </div>

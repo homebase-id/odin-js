@@ -41,7 +41,7 @@ export const AclWizard = ({
       <div className="flex gap-2 w-full flex-col sm:flex-row-reverse">
         <ActionButton
           type="primary"
-          isDisabled={
+          disabled={
             (currentAcl.requiredSecurityGroup.toLowerCase() ===
               SecurityGroupType.Connected.toLowerCase() &&
               currentAcl.circleIdList &&

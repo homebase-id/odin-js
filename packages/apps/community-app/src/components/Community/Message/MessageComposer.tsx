@@ -212,7 +212,7 @@ export const MessageComposer = ({
                   className={`flex-shrink opacity-40 ${!message && !files?.length ? '' : 'hover:opacity-100'}`}
                   icon={PaperPlane}
                   size="square"
-                  isDisabled={!message && !files?.length}
+                  disabled={!message && !files?.length}
                   onMouseDown={(e) => e.preventDefault()}
                 />
               </span>
