@@ -106,6 +106,21 @@ export const useChatMessage = (props?: {
       },
     };
 
+    const messageType =
+      message.length > 0
+        ? 'a message'
+        : linkPreviews && linkPreviews?.length > 0
+          ? '🔗 a link'
+          : files && files?.length > 1
+            ? '📸 media'
+            : files?.some((file) => file.file.type.startsWith('image'))
+              ? 'a 📷 photo'
+              : files?.some((file) => file.file.type.startsWith('audio'))
+                ? 'an 🎵 audio file'
+                : files?.some((file) => file.file.type.startsWith('video'))
+                  ? 'a 🎥 video file'
+                  : 'a 📄 file';
+
     const uploadResult = await uploadChatMessage(
       dotYouClient,
       newChat,
@@ -114,9 +129,9 @@ export const useChatMessage = (props?: {
       linkPreviews,
       recipients.length > 1
         ? conversationContent.title
-          ? `${identity} sent a message to ${conversationContent.title}`
-          : `${identity} sent a message in a group chat`
-        : undefined
+          ? `${identity} sent ${messageType} to ${conversationContent.title}`
+          : `${identity} sent ${messageType} in a group chat`
+        : `${identity} sent ${messageType}`
     );
     if (!uploadResult) throw new Error('Failed to send the chat message');
 
