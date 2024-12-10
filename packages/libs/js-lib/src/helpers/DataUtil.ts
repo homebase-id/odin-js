@@ -401,6 +401,30 @@ export const getQueryModifiedCursorFromTime = (unixTimeInMs: number) => {
   return Number((topBits << BigInt(16)) | bottomBits);
 };
 
+const sanitizeJson = (str: string): string => {
+  const replaceAll = (str: string, find: string, replace: string) => {
+    return str.replace(new RegExp(find, 'g'), replace);
+  };
+
+  // Remove BOM if present
+  str = str.replace(/^\uFEFF/, '');
+
+  // Remove illegal control characters
+  // eslint-disable-next-line no-control-regex
+  str = str.replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
+
+  // Replace single quotes with double quotes (naively, may need refinement)
+  str = str.replace(/'/g, '"');
+
+  // Remove or fix improper backslashes
+  str = replaceAll(str, '\\', '\\\\');
+
+  // Remove trailing commas
+  str = str.replace(/,(\s*[}\]])/g, '$1');
+
+  return str;
+};
+
 export const tryJsonParse = <T>(json: string): T => {
   try {
     if (typeof json === 'object') return json as T;
@@ -409,20 +433,16 @@ export const tryJsonParse = <T>(json: string): T => {
     return o;
   } catch {
     console.warn('base JSON.parse failed', json);
+
     try {
-      const replaceAll = (str: string, find: string, replace: string) => {
-        return str.replace(new RegExp(find, 'g'), replace);
-      };
-
-      const jsonWithRemovedQuote = replaceAll(json, '\u0019', '');
-      const jsonWithRemovedEmDash = replaceAll(jsonWithRemovedQuote, '\u0014', '');
-
-      const o = JSON.parse(jsonWithRemovedEmDash);
+      // Sanitize and reattempt parsing
+      const sanitizedJson = sanitizeJson(json);
+      const o = JSON.parse(sanitizedJson);
 
       console.warn('... but we fixed it');
       return o;
     } catch (ex) {
-      console.error(ex);
+      console.error('Parsing failed after sanitization:', ex);
       return {} as T;
     }
   }

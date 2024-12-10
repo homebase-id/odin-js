@@ -29,7 +29,7 @@ export const ChatMessageInfo = ({
   const messageContent = msg.fileMetadata.appData.content;
   const conversationContent = conversation.fileMetadata.appData.content;
   const recipients = conversationContent.recipients.filter(
-    (recipient) => recipient && recipient !== msg.fileMetadata.originalAuthor
+    (recipient) => recipient && recipient !== msg.fileMetadata.senderOdinId
   );
 
   const isAuthor =
