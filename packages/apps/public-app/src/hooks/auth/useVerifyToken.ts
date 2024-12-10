@@ -1,15 +1,9 @@
 import { QueryClient, useQuery } from '@tanstack/react-query';
-import {
-  hasValidOwnerToken,
-  hasValidPublicToken,
-  useDotYouClientContext,
-} from '@homebase-id/common-app';
+import { hasValidOwnerToken, hasValidPublicToken } from '@homebase-id/common-app';
 
 const MINUTE_IN_MS = 60000;
 
 export const useVerifyToken = (isOwner?: boolean) => {
-  const isAuthenticated = useDotYouClientContext().isAuthenticated();
-
   const fetchData = async () => {
     if (isOwner) return await hasValidOwnerToken();
     else return await hasValidPublicToken();
@@ -19,7 +13,6 @@ export const useVerifyToken = (isOwner?: boolean) => {
     queryKey: ['verify-public-token'],
     queryFn: fetchData,
     staleTime: MINUTE_IN_MS * 10,
-    enabled: isAuthenticated,
   });
 };
 
