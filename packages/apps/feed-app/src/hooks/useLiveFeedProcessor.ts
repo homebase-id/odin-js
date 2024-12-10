@@ -1,8 +1,23 @@
 import { useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { DotYouClient, TargetDrive, TypedConnectionNotification } from '@homebase-id/js-lib/core';
-import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import {
+  DeletedHomebaseFile,
+  DotYouClient,
+  FileQueryParams,
+  HomebaseFile,
+  queryBatch,
+  queryModified,
+  TargetDrive,
+  TypedConnectionNotification,
+} from '@homebase-id/js-lib/core';
+import {
+  drivesEqual,
+  getQueryBatchCursorFromTime,
+  getQueryModifiedCursorFromTime,
+  hasDebugFlag,
+  stringGuidsEqual,
+} from '@homebase-id/js-lib/helpers';
 import {
   insertNewPostIntoFeed,
   invalidateEmojiSummary,
@@ -15,12 +30,14 @@ import { processInbox } from '@homebase-id/js-lib/peer';
 import { useChannelDrives } from '@homebase-id/common-app';
 import { useWebsocketDrives } from './auth/useWebsocketDrives';
 
+const isDebug = hasDebugFlag();
+
 const MINUTE_IN_MS = 60000;
 
 // We first process the inbox, then we connect for live updates;
 export const useLiveFeedProcessor = () => {
   // Process the inbox on startup; As we want to cover the backlog of files first
-  const { status: inboxStatus } = useInboxProcessor(true);
+  const { status: inboxStatus } = useFeedInboxProcessor(true);
 
   // Only after the inbox is processed, we connect for live updates; So we avoid clearing the cache on each fileAdded update
   const isOnline = useFeedWebSocket(inboxStatus === 'success');
@@ -29,18 +46,56 @@ export const useLiveFeedProcessor = () => {
 };
 
 // Process the inbox on startup
-const useInboxProcessor = (isEnabled?: boolean) => {
+const useFeedInboxProcessor = (isEnabled?: boolean) => {
   const { data: chnlDrives, isFetchedAfterMount: channelsFetched } = useChannelDrives(!!isEnabled);
+  const queryClient = useQueryClient();
   const dotYouClient = useDotYouClientContext();
 
   const fetchData = async () => {
+    const lastProcessedTime = queryClient.getQueryState(['process-feed-inbox'])?.dataUpdatedAt;
+    const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 2;
+
     await processInbox(dotYouClient, BlogConfig.FeedDrive, 100);
+
+    if (lastProcessedWithBuffer) {
+      const updatedPosts = await findChangesSinceTimestamp(dotYouClient, lastProcessedWithBuffer, {
+        targetDrive: BlogConfig.FeedDrive,
+        fileType: [BlogConfig.PostFileType],
+      });
+      isDebug && console.debug('[FeedInboxProcessor] new posts', updatedPosts.length);
+      await processPostsBatch(dotYouClient, queryClient, BlogConfig.FeedDrive, updatedPosts);
+    }
+
     if (chnlDrives)
       await Promise.all(
         chnlDrives.map(async (chnlDrive) => {
-          return await processInbox(dotYouClient, chnlDrive.targetDriveInfo, 100);
+          await processInbox(dotYouClient, chnlDrive.targetDriveInfo, 100);
+
+          if (lastProcessedWithBuffer) {
+            const updatedPosts = await findChangesSinceTimestamp(
+              dotYouClient,
+              lastProcessedWithBuffer,
+              {
+                targetDrive: chnlDrive.targetDriveInfo,
+                fileType: [BlogConfig.PostFileType],
+              }
+            );
+            isDebug &&
+              console.debug('[FeedInboxProcessor] new posts for channel', updatedPosts.length);
+            await processPostsBatch(
+              dotYouClient,
+              queryClient,
+              chnlDrive.targetDriveInfo,
+              updatedPosts
+            );
+          }
         })
       );
+
+    if (!lastProcessedWithBuffer) {
+      isDebug && console.warn('[FeedInboxProcessor] No lastProcessedWithBuffer');
+      invalidateSocialFeeds(queryClient);
+    }
 
     return true;
   };
@@ -48,7 +103,7 @@ const useInboxProcessor = (isEnabled?: boolean) => {
   return useQuery({
     queryKey: ['process-feed-inbox'],
     queryFn: fetchData,
-    staleTime: MINUTE_IN_MS * 5,
+    staleTime: 1000 * 10, // 10 seconds
     enabled: channelsFetched,
   });
 };
@@ -67,25 +122,12 @@ const useFeedWebSocket = (isEnabled: boolean) => {
         (drivesEqual(notification.targetDrive, BlogConfig.FeedDrive) ||
           stringGuidsEqual(BlogConfig.PublicChannelDrive.type, notification.targetDrive?.type))
       ) {
-        const post = await dsrToPostFile(
+        await internalProcessNewPost(
           dotYouClient,
-          notification.header,
+          queryClient,
           BlogConfig.FeedDrive,
-          true
+          notification.header
         );
-
-        if (post) insertNewPostIntoFeed(queryClient, post);
-        else invalidateSocialFeeds(queryClient);
-
-        if (notification.notificationType === 'statisticsChanged') {
-          invalidateEmojiSummary(
-            queryClient,
-            post?.fileMetadata.senderOdinId,
-            post?.fileMetadata.appData.content.channelId,
-            post?.fileId,
-            post?.fileMetadata.globalTransitId
-          );
-        }
       }
     },
     []
@@ -99,5 +141,70 @@ const useFeedWebSocket = (isEnabled: boolean) => {
     undefined,
     undefined,
     'useLiveFeedProcessor'
+  );
+};
+
+const BATCH_SIZE = 2000;
+const findChangesSinceTimestamp = async (
+  dotYouClient: DotYouClient,
+  timeStamp: number,
+  params: FileQueryParams
+) => {
+  const modifiedCursor = getQueryModifiedCursorFromTime(timeStamp); // Friday, 31 May 2024 09:38:54.678
+  const batchCursor = getQueryBatchCursorFromTime(new Date().getTime(), timeStamp);
+
+  const newFiles = await queryBatch(dotYouClient, params, {
+    maxRecords: BATCH_SIZE,
+    cursorState: batchCursor,
+    includeMetadataHeader: true,
+    includeTransferHistory: true,
+  });
+
+  const modifiedFiles = await queryModified(dotYouClient, params, {
+    maxRecords: BATCH_SIZE,
+    cursor: modifiedCursor,
+    excludePreviewThumbnail: false,
+    includeHeaderContent: true,
+    includeTransferHistory: true,
+  });
+
+  return modifiedFiles.searchResults.concat(newFiles.searchResults);
+};
+
+const processPostsBatch = async (
+  dotYouClient: DotYouClient,
+  queryClient: QueryClient,
+  targetDrive: TargetDrive,
+  posts: (HomebaseFile<string> | DeletedHomebaseFile<string>)[]
+) => {
+  await Promise.all(
+    posts.map(async (postDsr) =>
+      internalProcessNewPost(dotYouClient, queryClient, targetDrive, postDsr)
+    )
+  );
+};
+
+const internalProcessNewPost = async (
+  dotYouClient: DotYouClient,
+  queryClient: QueryClient,
+  targetDrive: TargetDrive,
+  dsr: HomebaseFile<string> | DeletedHomebaseFile<string>
+) => {
+  if (dsr.fileState === 'deleted') {
+    invalidateSocialFeeds(queryClient);
+    return;
+  }
+
+  const post = await dsrToPostFile(dotYouClient, dsr, targetDrive, true);
+
+  if (post) insertNewPostIntoFeed(queryClient, post);
+  else invalidateSocialFeeds(queryClient);
+
+  invalidateEmojiSummary(
+    queryClient,
+    post?.fileMetadata.senderOdinId,
+    post?.fileMetadata.appData.content.channelId,
+    post?.fileId,
+    post?.fileMetadata.globalTransitId
   );
 };
