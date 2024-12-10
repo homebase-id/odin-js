@@ -26,6 +26,7 @@ const RichTextEditor = lazy(() =>
 );
 import { EmbeddedMessage } from '@homebase-id/chat-app/src/components/Chat/Detail/EmbeddedMessage';
 import { ChatMessage } from '@homebase-id/chat-app/src/providers/ChatProvider';
+import { useParams } from 'react-router-dom';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const CHAT_DRAFTS_KEY = 'COMMUNITY_LOCAL_DRAFTS';
@@ -35,8 +36,8 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = ({
   clearReplyMsg,
   replyMsg,
   onSend,
-  tags,
 }) => {
+  const { communityKey } = useParams();
   const volatileRef = useRef<VolatileInputRef>(null);
   const drafts = JSON.parse(localStorage.getItem(CHAT_DRAFTS_KEY) || '{}');
   const [message, setMessage] = useState<RichText | undefined>(
@@ -91,7 +92,7 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = ({
         chatId: getNewId(),
         userDate: new Date().getTime(),
         linkPreviews: Object.values(linkPreviews).filter(Boolean) as LinkPreview[],
-        tags,
+        tags: communityKey ? [communityKey] : undefined,
       });
       onSend && onSend();
     } catch (err) {
