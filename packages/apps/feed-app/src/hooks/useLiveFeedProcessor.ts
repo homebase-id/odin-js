@@ -21,7 +21,6 @@ import {
 import {
   insertNewPostIntoFeed,
   invalidateComments,
-  invalidateCommentSummary,
   invalidateEmojiSummary,
   invalidateSocialFeeds,
   useDotYouClientContext,
