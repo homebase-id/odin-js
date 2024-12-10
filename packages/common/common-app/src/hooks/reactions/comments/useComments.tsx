@@ -1,7 +1,9 @@
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { getComments, ReactionContext } from '@homebase-id/js-lib/public';
 import { HomebaseFile, CommentReaction } from '@homebase-id/js-lib/core';
 import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { formatGuidId } from '@homebase-id/js-lib/helpers';
+import { invalidateCommentSummary } from './useCommentSummary';
 
 const PAGE_SIZE = 30;
 
@@ -27,21 +29,24 @@ export const useComments = ({ context }: { context: ReactionContext }) => {
 
     const response = await getComments(dotYouClient, context, PAGE_SIZE, pageParam);
     setTimeout(() => {
-      queryClient.invalidateQueries({
-        queryKey: [
-          'comments-summary',
-          context.odinId,
-          context.channelId,
-          context.target.globalTransitId,
-        ],
-      });
+      invalidateCommentSummary(
+        queryClient,
+        context.odinId,
+        context.channelId,
+        context.target.globalTransitId
+      );
     }, 100);
     return response;
   };
 
   return {
     fetch: useInfiniteQuery({
-      queryKey: ['comments', context.odinId, context.channelId, context.target.globalTransitId],
+      queryKey: [
+        'comments',
+        context.odinId,
+        formatGuidId(context.channelId),
+        formatGuidId(context.target.globalTransitId),
+      ],
       initialPageParam: undefined as string | undefined,
       queryFn: ({ pageParam }) => fetch({ context, pageParam }),
       getNextPageParam: (lastPage) =>
@@ -52,4 +57,16 @@ export const useComments = ({ context }: { context: ReactionContext }) => {
       enabled: !!context.odinId && !!context.channelId && !!context.target.globalTransitId,
     }),
   };
+};
+
+export const invalidateComments = (
+  queryClient: QueryClient,
+  senderOdinId?: string,
+  channelId?: string,
+  globalTransitId?: string
+) => {
+  queryClient.invalidateQueries({
+    queryKey: ['comments', senderOdinId, formatGuidId(channelId), formatGuidId(globalTransitId)],
+    exact: !!senderOdinId && !!channelId && !!globalTransitId,
+  });
 };

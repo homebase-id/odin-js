@@ -1,6 +1,7 @@
-import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
+import { InfiniteData, QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import { UseCommentsVal } from './useComments';
 import { CommentsReactionSummary } from '@homebase-id/js-lib/public';
+import { formatGuidId } from '@homebase-id/js-lib/helpers';
 
 export const useCommentSummary = ({
   authorOdinId,
@@ -45,10 +46,32 @@ export const useCommentSummary = ({
 
   return {
     fetch: useQuery({
-      queryKey: ['comments-summary', authorOdinId, channelId, postGlobalTransitId],
+      queryKey: [
+        'comments-summary',
+        authorOdinId,
+        formatGuidId(channelId),
+        formatGuidId(postGlobalTransitId),
+      ],
       queryFn: () => fetch({ authorOdinId, channelId, postGlobalTransitId, reactionPreview }),
       staleTime: 1000 * 60 * 2, // 2 minutes
       enabled: !!authorOdinId && !!channelId && !!postGlobalTransitId,
     }),
   };
+};
+
+export const invalidateCommentSummary = (
+  queryClient: QueryClient,
+  senderOdinId?: string,
+  channelId?: string,
+  globalTransitId?: string
+) => {
+  queryClient.invalidateQueries({
+    queryKey: [
+      'comments-summary',
+      senderOdinId,
+      formatGuidId(channelId),
+      formatGuidId(globalTransitId),
+    ],
+    exact: !!senderOdinId && !!channelId && !!globalTransitId,
+  });
 };

@@ -305,7 +305,7 @@ export const getComments = async (
   return { comments, cursorState: result.cursorState };
 };
 
-const dsrToComment = async (
+export const dsrToComment = async (
   dotYouClient: DotYouClient,
   odinId: string,
   dsr: HomebaseFile,

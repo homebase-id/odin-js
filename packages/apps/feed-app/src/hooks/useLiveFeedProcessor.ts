@@ -20,6 +20,8 @@ import {
 } from '@homebase-id/js-lib/helpers';
 import {
   insertNewPostIntoFeed,
+  invalidateComments,
+  invalidateCommentSummary,
   invalidateEmojiSummary,
   invalidateSocialFeeds,
   useDotYouClientContext,
@@ -120,7 +122,8 @@ const useFeedWebSocket = (isEnabled: boolean) => {
           notification.notificationType === 'fileModified' ||
           notification.notificationType === 'statisticsChanged') &&
         (drivesEqual(notification.targetDrive, BlogConfig.FeedDrive) ||
-          stringGuidsEqual(BlogConfig.PublicChannelDrive.type, notification.targetDrive?.type))
+          stringGuidsEqual(BlogConfig.PublicChannelDrive.type, notification.targetDrive?.type)) &&
+        notification.header.fileSystemType.toLowerCase() === 'standard'
       ) {
         await internalProcessNewPost(
           dotYouClient,
@@ -205,6 +208,13 @@ const internalProcessNewPost = async (
     post?.fileMetadata.senderOdinId,
     post?.fileMetadata.appData.content.channelId,
     post?.fileId,
+    post?.fileMetadata.globalTransitId
+  );
+
+  invalidateComments(
+    queryClient,
+    post?.fileMetadata.senderOdinId,
+    post?.fileMetadata.appData.content.channelId,
     post?.fileMetadata.globalTransitId
   );
 };
