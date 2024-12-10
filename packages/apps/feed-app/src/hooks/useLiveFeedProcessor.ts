@@ -1,17 +1,19 @@
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { DotYouClient, TypedConnectionNotification } from '@homebase-id/js-lib/core';
-import { drivesEqual } from '@homebase-id/js-lib/helpers';
+import { DotYouClient, TargetDrive, TypedConnectionNotification } from '@homebase-id/js-lib/core';
+import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import {
+  insertNewPostIntoFeed,
+  invalidateEmojiSummary,
   invalidateSocialFeeds,
   useDotYouClientContext,
   useWebsocketSubscriber,
 } from '@homebase-id/common-app';
-import { BlogConfig } from '@homebase-id/js-lib/public';
+import { BlogConfig, dsrToPostFile } from '@homebase-id/js-lib/public';
 import { processInbox } from '@homebase-id/js-lib/peer';
 import { useChannelDrives } from '@homebase-id/common-app';
-import { websocketDrives } from './auth/useAuth';
+import { useWebsocketDrives } from './auth/useWebsocketDrives';
 
 const MINUTE_IN_MS = 60000;
 
@@ -52,24 +54,48 @@ const useInboxProcessor = (isEnabled?: boolean) => {
 };
 
 const useFeedWebSocket = (isEnabled: boolean) => {
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
+  const websocketDrives = useWebsocketDrives();
 
-  const handler = useCallback((_: DotYouClient, notification: TypedConnectionNotification) => {
-    if (
-      (notification.notificationType === 'fileAdded' ||
-        notification.notificationType === 'fileModified') &&
-      drivesEqual(notification.targetDrive, BlogConfig.FeedDrive)
-    ) {
-      // TODO: insert the new post into th feed cache instead of invalidating the whole cache
-      invalidateSocialFeeds(queryClient);
-    }
-  }, []);
+  const handler = useCallback(
+    async (_: DotYouClient, notification: TypedConnectionNotification) => {
+      if (
+        (notification.notificationType === 'fileAdded' ||
+          notification.notificationType === 'fileModified' ||
+          notification.notificationType === 'statisticsChanged') &&
+        (drivesEqual(notification.targetDrive, BlogConfig.FeedDrive) ||
+          stringGuidsEqual(BlogConfig.PublicChannelDrive.type, notification.targetDrive?.type))
+      ) {
+        const post = await dsrToPostFile(
+          dotYouClient,
+          notification.header,
+          BlogConfig.FeedDrive,
+          true
+        );
+
+        if (post) insertNewPostIntoFeed(queryClient, post);
+        else invalidateSocialFeeds(queryClient);
+
+        if (notification.notificationType === 'statisticsChanged') {
+          invalidateEmojiSummary(
+            queryClient,
+            post?.fileMetadata.senderOdinId,
+            post?.fileMetadata.appData.content.channelId,
+            post?.fileId,
+            post?.fileMetadata.globalTransitId
+          );
+        }
+      }
+    },
+    []
+  );
 
   useWebsocketSubscriber(
-    isEnabled ? handler : undefined,
+    isEnabled && !!websocketDrives ? handler : undefined,
     undefined,
-    ['fileAdded', 'fileModified'],
-    websocketDrives,
+    ['fileAdded', 'fileModified', 'statisticsChanged'],
+    websocketDrives as TargetDrive[],
     undefined,
     undefined,
     'useLiveFeedProcessor'

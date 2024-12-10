@@ -1,7 +1,7 @@
 import { FC, ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Sidenav, Toaster, useDarkMode } from '@homebase-id/common-app';
-import { websocketDrives } from '../../../hooks/auth/useAuth';
+import { useWebsocketDrives } from '../../../hooks/auth/useWebsocketDrives';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -33,6 +33,7 @@ export const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
 
   const [searchParams] = useSearchParams();
   const uiSetting = searchParams.get('ui');
+  const websocketDrives = useWebsocketDrives();
   const isReactNative = window.localStorage.getItem('client_type')?.startsWith('react-native');
 
   if (uiSetting === 'none') {
@@ -57,7 +58,7 @@ export const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
         >
           <div className="min-h-full px-2 py-4 sm:px-10 sm:py-8">{children}</div>
         </div>
-        <Toaster drives={websocketDrives} />
+        {websocketDrives ? <Toaster drives={websocketDrives} /> : null}
       </div>
     </>
   );
