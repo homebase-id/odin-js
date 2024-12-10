@@ -204,7 +204,7 @@ export const buildNotificationBody = (
       return `${sender} commented to your post`;
     }
   } else if (payload.options.appId === COMMUNITY_APP_ID) {
-    return `${sender} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
+    return `${sender} sent ${hasMultiple ? 'multiple messages' : 'a message'}`;
   }
 
   return `${sender} sent you a notification via ${appName}`;

@@ -212,6 +212,7 @@ export const uploadCommunityMessage = async (
         tagId: message.fileMetadata.appData.uniqueId as string,
         typeId: communityId,
         peerSubscriptionId: communityId,
+        unEncryptedMessage: `New message from ${identity} in ${community.fileMetadata.appData.content.title}`,
         recipients: (
           notificationRecipients || community.fileMetadata.appData.content.members
         ).filter((recipient) => recipient !== identity),
@@ -244,6 +245,7 @@ export const uploadCommunityMessage = async (
           tagId: message.fileMetadata.appData.uniqueId as string,
           typeId: communityId,
           peerSubscriptionId: communityId,
+          unEncryptedMessage: `New message from ${identity} in "${community.fileMetadata.appData.content.title}"`,
           recipients: (
             notificationRecipients || community.fileMetadata.appData.content.members
           ).filter((recipient) => recipient !== identity),
