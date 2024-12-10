@@ -444,8 +444,7 @@ export const tryJsonParse = <T>(json: string): T => {
     } catch (ex) {
       console.error(
         'Parsing still failed after sanitization:',
-        ex,
-        ex && typeof ex === 'object' && 'stack' in ex && ex.stack
+        ex && typeof ex === 'object' && 'stack' in ex ? ex.stack : ex
       );
       return {} as T;
     }
