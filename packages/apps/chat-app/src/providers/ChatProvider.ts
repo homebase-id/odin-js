@@ -289,6 +289,7 @@ export const uploadChatMessage = async (
       uniqueId: message.fileMetadata.appData.uniqueId,
       groupId: message.fileMetadata.appData.groupId,
       userDate: message.fileMetadata.appData.userDate,
+      tags: message.fileMetadata.appData.tags,
       fileType: CHAT_MESSAGE_FILE_TYPE,
       content: content,
     },
