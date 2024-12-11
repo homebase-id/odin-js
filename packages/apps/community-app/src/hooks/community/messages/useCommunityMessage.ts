@@ -198,7 +198,7 @@ export const useCommunityMessage = (props?: {
               },
               userDate,
             },
-            senderOdinId: community.fileMetadata.senderOdinId,
+            senderOdinId: identity,
             originalAuthor: identity,
             payloads: files?.map((file) => ({
               contentType: file.file.type,
