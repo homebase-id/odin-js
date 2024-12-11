@@ -34,7 +34,7 @@ import { ConversationWithYourselfId } from '@homebase-id/chat-app/src/providers/
 import { useCommunityMessages } from '../../hooks/community/messages/useCommunityMessages';
 
 const maxChannels = 7;
-export const CommunityChannelNav = () => {
+export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
   const { odinKey, communityKey } = useParams();
   const [isCommunityInfoDialogOpen, setIsCommunityInfoDialogOpen] = useState(false);
   const { data: community, isLoading } = useCommunity({
@@ -96,6 +96,12 @@ export const CommunityChannelNav = () => {
               className="flex flex-row items-center gap-2 text-xl font-semibold"
               onClick={() => setIsCommunityInfoDialogOpen(true)}
             >
+              <span
+                className={`h-3 w-3 rounded-full transition-colors ${
+                  isOnline ? 'bg-green-400' : 'bg-red-400'
+                }`}
+                title={isOnline ? t('Connected') : t('Offline')}
+              />
               {community.fileMetadata.appData.content?.title}
               <ChevronDown className="h-4 w-4" />
             </button>
