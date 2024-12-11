@@ -265,7 +265,7 @@ const InnerRichTextEditor = memo(
               }),
           TabbablePlugin,
           TrailingBlockPlugin.configure({
-            options: { type: 'p' },
+            options: { level: 0, type: 'p' },
           }),
           // DeserializeHtmlPlugin,
           // DeserializeMdPlugin,
