@@ -522,13 +522,15 @@ export const dsrToMessage = async (
             odinId,
             targetDrive,
             dsr,
-            includeMetadataHeader
+            includeMetadataHeader,
+            dsr.fileSystemType
           )
         : await getContentFromHeaderOrPayload<CommunityMessage>(
             dotYouClient,
             targetDrive,
             dsr,
-            includeMetadataHeader
+            includeMetadataHeader,
+            dsr.fileSystemType
           );
     if (!msgContent) return null;
 

@@ -302,7 +302,9 @@ const ChannelItem = ({
       </button>
       {unreadMessagesCount ? (
         <span className="my-auto flex h-6 w-6 items-center justify-center rounded-full bg-current text-sm font-normal">
-          <span className={isActive ? 'text-black' : 'text-white'}>{unreadMessagesCount}</span>
+          <span className={isActive ? 'text-black dark:text-white' : 'text-white dark:text-black'}>
+            {unreadMessagesCount}
+          </span>
         </span>
       ) : null}
     </Link>
