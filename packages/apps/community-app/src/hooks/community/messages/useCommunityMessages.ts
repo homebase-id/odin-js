@@ -150,10 +150,10 @@ export const updateCacheCommunityMessages = (
       includeMetadataHeader: boolean;
     }>
   >(queryKey);
-  if (!currentData) return;
+  if (!currentData || !currentData.pages) return;
 
   const newData = transformFn(currentData);
-  if (!newData) return;
+  if (!newData || !newData.pages) return;
 
   queryClient.setQueryData(queryKey, newData);
 
