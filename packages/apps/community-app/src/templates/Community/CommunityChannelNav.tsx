@@ -244,7 +244,7 @@ const ChannelItem = ({
   return (
     <Link
       to={`${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/${channelId}`}
-      className={`group flex flex-row items-center gap-1 rounded-md px-2 py-[0.15rem] ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''} ${isVisited ? 'text-purple-600' : ''}`} ${hasUnreadMessages ? 'font-bold' : ''}`}
+      className={`group flex flex-row items-center gap-1 rounded-md px-2 py-[0.15rem] ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''} ${isVisited ? 'text-purple-700' : ''}`} ${hasUnreadMessages ? 'font-bold' : ''}`}
     >
       # {channel.fileMetadata.appData.content?.title?.toLowerCase()}
       <button
@@ -277,6 +277,13 @@ const ChannelItem = ({
           }`}
         />
       </button>
+      {hasUnreadMessages ? (
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-current text-sm font-normal">
+          <span className="text-white">
+            {messages?.pages?.flatMap((page) => page?.searchResults)?.filter(Boolean)?.length}
+          </span>
+        </span>
+      ) : null}
     </Link>
   );
 };
