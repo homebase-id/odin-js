@@ -231,15 +231,23 @@ const ChannelItem = ({
 
   const { data: messages } = useCommunityMessages({ odinId, communityId, channelId }).all;
 
-  const lastMessage = messages?.pages?.flatMap((page) => page?.searchResults)?.[0];
+  const unreadMessagesCount = useMemo(
+    () =>
+      channelId &&
+      metadata &&
+      messages?.pages
+        ?.flatMap((page) => page?.searchResults)
+        ?.filter(
+          (msg) =>
+            msg &&
+            (metadata?.fileMetadata.appData.content?.channelLastReadTime[channelId] || 0) <
+              msg.fileMetadata.created &&
+            msg.fileMetadata.senderOdinId !== loggedOnIdentity
+        )?.length,
+    [messages, metadata]
+  );
 
-  const hasUnreadMessages =
-    channelId &&
-    metadata &&
-    lastMessage?.fileMetadata.created &&
-    (metadata?.fileMetadata.appData.content?.channelLastReadTime[channelId] || 0) <
-      lastMessage?.fileMetadata.created &&
-    lastMessage.fileMetadata.senderOdinId !== loggedOnIdentity;
+  const hasUnreadMessages = !!unreadMessagesCount;
 
   return (
     <Link
@@ -277,11 +285,9 @@ const ChannelItem = ({
           }`}
         />
       </button>
-      {hasUnreadMessages ? (
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-current text-sm font-normal">
-          <span className="text-white">
-            {messages?.pages?.flatMap((page) => page?.searchResults)?.filter(Boolean)?.length}
-          </span>
+      {unreadMessagesCount ? (
+        <span className="my-auto flex h-6 w-6 items-center justify-center rounded-full bg-current text-sm font-normal">
+          <span className={isActive ? 'text-black' : 'text-white'}>{unreadMessagesCount}</span>
         </span>
       ) : null}
     </Link>
