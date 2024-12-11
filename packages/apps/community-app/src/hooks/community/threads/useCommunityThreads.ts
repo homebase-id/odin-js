@@ -133,7 +133,11 @@ const fetchCommunityThreads = async (
       Object.values(allThreads).filter((threadMeta) => {
         if (!threadMeta) return false;
 
-        if (onlyWithMe) return threadMeta.participants.includes(dotYouClient.getLoggedInIdentity());
+        if (onlyWithMe)
+          return (
+            threadMeta.participants.includes(dotYouClient.getLoggedInIdentity()) ||
+            threadMeta.participants.includes('@channel')
+          );
         else return true;
       }) as ThreadMeta[]
     ).sort((a, b) => b.lastMessageCreated - a.lastMessageCreated),

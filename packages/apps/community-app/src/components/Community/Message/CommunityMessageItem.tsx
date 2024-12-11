@@ -287,7 +287,7 @@ const MessageTextRenderer = ({
               rel="noreferrer noopener"
               className="break-words text-primary hover:underline"
             >
-              @{attributes.value}
+              @{attributes.value.replaceAll('@', '')}
             </a>
           );
         }

@@ -159,7 +159,16 @@ export const CommunityHistory = ({
         )
         .flat();
 
-      setParticipants(Array.from(new Set([...involvedAuthors, ...mentionedAuthors])) || []);
+      setParticipants(
+        Array.from(
+          new Set([
+            ...involvedAuthors,
+            ...((mentionedAuthors.includes('@channel')
+              ? community?.fileMetadata.appData.content.members
+              : undefined) || mentionedAuthors),
+          ])
+        ) || []
+      );
     }
   }, [flattenedMsgs, setParticipants]);
 

@@ -94,9 +94,9 @@ export const MessageComposer = ({
     volatileRef.current?.focus();
 
     const mentionedOdinIds = findMentionedInRichText(message);
-    const extendedParticipants = Array.from(
-      new Set(threadParticipants?.concat(mentionedOdinIds) || mentionedOdinIds)
-    );
+    const extendedParticipants = mentionedOdinIds.includes('@channel')
+      ? community.fileMetadata.appData.content.members
+      : Array.from(new Set(threadParticipants?.concat(mentionedOdinIds) || mentionedOdinIds));
 
     try {
       await sendMessage({
@@ -121,8 +121,8 @@ export const MessageComposer = ({
   };
 
   const { data: contacts } = useAllContacts(true);
-  const mentionables: { key: string; text: string }[] = useMemo(
-    () =>
+  const mentionables: { key: string; text: string }[] = useMemo(() => {
+    const filteredContacts =
       (contacts
         ?.filter(
           (contact) =>
@@ -139,9 +139,11 @@ export const MessageComposer = ({
               }
             : undefined
         )
-        .filter(Boolean) as { key: string; text: string }[]) || [],
-    [contacts]
-  );
+        .filter(Boolean) as { key: string; text: string }[]) || [];
+
+    filteredContacts.push({ key: '@channel', text: '@channel' });
+    return filteredContacts;
+  }, [contacts]);
 
   const plainMessage = useMemo(
     () => (message && getTextRootsRecursive(message).join(' ')) || '',
