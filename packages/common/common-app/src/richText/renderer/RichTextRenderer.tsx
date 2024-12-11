@@ -122,7 +122,6 @@ export const RichTextRenderer = ({
           </blockquote>
         );
       case 'code_block':
-        console.log(node);
         return (
           <code
             {...attributes}
