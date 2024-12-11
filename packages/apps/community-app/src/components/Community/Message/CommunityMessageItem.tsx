@@ -364,7 +364,7 @@ const CommunityMessageThreadSummary = ({
   }, [messages]);
 
   if (!flattenedMsgs?.length) {
-    if ((isFetched || isFetching) && !isRefetching) return null;
+    if (isFetching && !isRefetching) return null;
     return (
       <div className="rounded-md border bg-slate-100 p-2 dark:bg-slate-700">
         <p className="text-lg">{t('Bad data!')}</p>
