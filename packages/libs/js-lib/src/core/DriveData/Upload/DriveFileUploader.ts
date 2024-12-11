@@ -258,6 +258,7 @@ const patchFileLocal = async (
         }
       : undefined,
     storageIntent: 'header',
+    systemFileType: instructions.systemFileType,
   };
 
   return await uploadHeader(
