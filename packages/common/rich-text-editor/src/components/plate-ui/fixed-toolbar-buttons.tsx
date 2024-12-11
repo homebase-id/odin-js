@@ -16,6 +16,7 @@ import {
 } from '@udecode/plate-basic-marks/react';
 import { HEADING_KEYS } from '@udecode/plate-heading';
 import { EmojiDropdownMenu } from './emoji-dropdown-menu/EmojiDropdownMenu';
+import { CodeBlockToolbarButton } from './toolbar/CodeblockToolbarButton';
 
 export function FixedToolbarButtons({
   disableHeadings,
@@ -51,13 +52,15 @@ export function FixedToolbarButtons({
             <MarkToolbarButton tooltip="Underline (⌘+U)" nodeType={UnderlinePlugin.key}>
               <Underline className="h-5 w-5" />
             </MarkToolbarButton>
-
             <MarkToolbarButton tooltip="Strikethrough (⌘+⇧+M)" nodeType={StrikethroughPlugin.key}>
               <Icons.strikethrough className="h-5 w-5" />
             </MarkToolbarButton>
             <MarkToolbarButton tooltip="Code (⌘+E)" nodeType={CodePlugin.key}>
               <Icons.code className="h-5 w-5" />
             </MarkToolbarButton>
+            <CodeBlockToolbarButton>
+              <Icons.codeblock className="h-5 w-5" />
+            </CodeBlockToolbarButton>
             <LinkToolbarButton />
             {mediaOptions ? <ImageToolbarButton /> : null}
             <EmojiDropdownMenu />

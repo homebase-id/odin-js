@@ -55,7 +55,7 @@ export const CommunityDirectDetail = () => {
 
   return (
     <ErrorBoundary>
-      <div className="h-full w-full flex-grow bg-background">
+      <div className="h-full w-20 flex-grow bg-background">
         {conversationId ? (
           <ChatDetail
             conversationId={conversationId}

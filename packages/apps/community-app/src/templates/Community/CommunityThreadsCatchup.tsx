@@ -1,55 +1,27 @@
 import { useCommunity } from '../../hooks/community/useCommunity';
-import {
-  ErrorBoundary,
-  LoadingBlock,
-  t,
-  COMMUNITY_ROOT_PATH,
-  useDotYouClientContext,
-} from '@homebase-id/common-app';
+import { ErrorBoundary, LoadingBlock, t, COMMUNITY_ROOT_PATH } from '@homebase-id/common-app';
 import { Link, useParams } from 'react-router-dom';
-import { CommunityChannelCatchup } from '../../components/Community/catchup/CommunityChannelCatchup';
-import { useCommunityChannelsWithRecentMessages } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
-import { useCommunityMetadata } from '../../hooks/community/useCommunityMetadata';
 import { CommunityThread } from '../../components/Community/CommunityThread';
 import { memo, useMemo } from 'react';
-import { ChevronLeft, RadioTower } from '@homebase-id/common-app/icons';
+import { ChatBubble, ChevronLeft } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
+import { useCommunityThreads } from '../../hooks/community/threads/useCommunityThreads';
+import { CommunityThreadCatchup } from '../../components/Community/catchup/CommunityThreadCatchup';
 
-export const CommunityCatchup = memo(() => {
+export const CommunityThreadsCatchup = memo(() => {
   const { odinKey, communityKey: communityId, threadKey } = useParams();
   const { data: community, isFetched } = useCommunity({ odinId: odinKey, communityId }).fetch;
 
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
-  const { data: metadata } = useCommunityMetadata({
+  const { data: threadMetas, isFetching } = useCommunityThreads({
     odinId: odinKey,
     communityId: communityId,
-  }).single;
+    onlyWithMe: true,
+  }).all;
 
-  const { data: channels } = useCommunityChannelsWithRecentMessages({
-    odinId: odinKey,
-    communityId: communityId,
-  }).fetch;
-
-  const channelsToCatchup = useMemo(
-    () =>
-      metadata &&
-      channels &&
-      channels?.filter((chnl) => {
-        if (!chnl.fileMetadata.appData.uniqueId) return false;
-        const lastReadTime =
-          metadata?.fileMetadata.appData.content.channelLastReadTime[
-            chnl.fileMetadata.appData.uniqueId
-          ];
-
-        return (
-          chnl.lastMessage?.fileMetadata.created &&
-          chnl.lastMessage.fileMetadata.created > (lastReadTime || 0) &&
-          !!chnl.lastMessage.fileMetadata.senderOdinId &&
-          chnl.lastMessage.fileMetadata.senderOdinId !== loggedOnIdentity
-        );
-      }),
-    [channels, metadata, loggedOnIdentity]
+  const flatThreadMetas = useMemo(
+    () => threadMetas?.pages.flatMap((page) => page.searchResults),
+    [threadMetas]
   );
 
   if (!community && isFetched)
@@ -59,7 +31,7 @@ export const CommunityCatchup = memo(() => {
       </div>
     );
 
-  if (!community) {
+  if (!community || isFetching) {
     return (
       <div className="h-full w-20 flex-grow bg-background">
         <LoadingBlock className="h-16 w-full" />
@@ -81,15 +53,15 @@ export const CommunityCatchup = memo(() => {
           <div className="flex h-full flex-grow flex-col overflow-hidden">
             <div className="flex h-full flex-grow flex-col">
               <CommunityCatchupHeader community={community} />
-              {!channelsToCatchup?.length ? (
-                <p className="m-auto text-lg">{t('All done!')} 🎉</p>
+              {!flatThreadMetas?.length ? (
+                <p className="m-auto text-lg">{t('No threads found')}</p>
               ) : (
                 <div className="flex h-20 flex-grow flex-col gap-3 overflow-auto p-3">
-                  {channelsToCatchup?.map((chnl) => (
-                    <CommunityChannelCatchup
+                  {flatThreadMetas?.map((threadMeta) => (
+                    <CommunityThreadCatchup
                       community={community}
-                      channel={chnl}
-                      key={chnl.fileId}
+                      threadMeta={threadMeta}
+                      key={threadMeta.threadId}
                     />
                   ))}
                 </div>
@@ -108,7 +80,7 @@ export const CommunityCatchup = memo(() => {
   );
 });
 
-CommunityCatchup.displayName = 'CommunityCatchup';
+CommunityThreadsCatchup.displayName = 'CommunityThreadsCatchup';
 
 const CommunityCatchupHeader = ({
   community,
@@ -127,7 +99,7 @@ const CommunityCatchupHeader = ({
         >
           <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
         </Link>
-        <RadioTower className="h-4 w-4 sm:h-5 sm:w-5" /> {t('Activity')}
+        <ChatBubble className="h-4 w-4 sm:h-5 sm:w-5" /> {t('Threads')}
       </div>
     </>
   );

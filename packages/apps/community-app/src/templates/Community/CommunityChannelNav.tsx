@@ -19,12 +19,12 @@ import {
 import { useCommunityMetadata } from '../../hooks/community/useCommunityMetadata';
 import { CommunityMetadata } from '../../providers/CommunityMetadataProvider';
 import {
-  RadioTower,
   Chevron,
   Pin,
   Grid,
   ChevronDown,
   Bookmark,
+  ChatBubble,
 } from '@homebase-id/common-app/icons';
 import { CommunityInfoDialog } from '../../components/Community/CommunityInfoDialog';
 import { useConversationMetadata } from '@homebase-id/chat-app/src/hooks/chat/useConversationMetadata';
@@ -74,7 +74,7 @@ export const CommunityChannelNav = () => {
   return (
     <>
       <div
-        className={`fixed ${isActive ? 'translate-x-full' : 'translate-x-0'} -left-full h-[100dvh] w-full bg-page-background transition-transform lg:relative lg:left-0 lg:max-w-[17rem] lg:translate-x-0 lg:border-r lg:shadow-inner`}
+        className={`fixed ${isActive ? 'translate-x-full' : 'translate-x-0'} -left-full h-[100dvh] w-full flex-shrink-0 bg-page-background transition-transform lg:relative lg:left-0 lg:max-w-[17rem] lg:translate-x-0 lg:border-r lg:shadow-inner`}
       >
         <div className="absolute inset-0 flex flex-col gap-5 overflow-auto px-2 py-5 md:pl-[calc(env(safe-area-inset-left)+4.3rem+0.5rem)] lg:pl-2">
           <div className="flex flex-row items-center">
@@ -102,7 +102,8 @@ export const CommunityChannelNav = () => {
           </div>
 
           <div className="flex flex-col gap-1">
-            <AllItem odinId={odinKey} communityId={communityKey} />
+            <ThreadItem odinId={odinKey} communityId={communityKey} />
+            {/* <AllItem odinId={odinKey} communityId={communityKey} /> */}
             <LaterItem odinId={odinKey} communityId={communityKey} />
           </div>
 
@@ -164,8 +165,22 @@ export const CommunityChannelNav = () => {
   );
 };
 
-const AllItem = ({ odinId, communityId }: { odinId: string; communityId: string }) => {
-  const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/all`;
+// const AllItem = ({ odinId, communityId }: { odinId: string; communityId: string }) => {
+//   const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/all`;
+//   const isActive = !!useMatch({ path: href, end: true });
+
+//   return (
+//     <Link
+//       to={href}
+//       className={`flex flex-row items-center gap-2 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`}`}
+//     >
+//       <RadioTower className="h-5 w-5" /> {t('Activity')}
+//     </Link>
+//   );
+// };
+
+const ThreadItem = ({ odinId, communityId }: { odinId: string; communityId: string }) => {
+  const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/threads`;
   const isActive = !!useMatch({ path: href, end: true });
 
   return (
@@ -173,7 +188,7 @@ const AllItem = ({ odinId, communityId }: { odinId: string; communityId: string 
       to={href}
       className={`flex flex-row items-center gap-2 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`}`}
     >
-      <RadioTower className="h-5 w-5" /> {t('Activity')}
+      <ChatBubble className="h-5 w-5" /> {t('Threads')}
     </Link>
   );
 };
@@ -231,15 +246,23 @@ const ChannelItem = ({
 
   const { data: messages } = useCommunityMessages({ odinId, communityId, channelId }).all;
 
-  const lastMessage = messages?.pages?.flatMap((page) => page?.searchResults)?.[0];
+  const unreadMessagesCount = useMemo(
+    () =>
+      channelId &&
+      metadata &&
+      messages?.pages
+        ?.flatMap((page) => page?.searchResults)
+        ?.filter(
+          (msg) =>
+            msg &&
+            (metadata?.fileMetadata.appData.content?.channelLastReadTime[channelId] || 0) <
+              msg.fileMetadata.created &&
+            msg.fileMetadata.senderOdinId !== loggedOnIdentity
+        )?.length,
+    [messages, metadata]
+  );
 
-  const hasUnreadMessages =
-    channelId &&
-    metadata &&
-    lastMessage?.fileMetadata.created &&
-    (metadata?.fileMetadata.appData.content?.channelLastReadTime[channelId] || 0) <
-      lastMessage?.fileMetadata.created &&
-    lastMessage.fileMetadata.senderOdinId !== loggedOnIdentity;
+  const hasUnreadMessages = !!unreadMessagesCount;
 
   return (
     <Link
@@ -277,11 +300,9 @@ const ChannelItem = ({
           }`}
         />
       </button>
-      {hasUnreadMessages ? (
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-current text-sm font-normal">
-          <span className="text-white">
-            {messages?.pages?.flatMap((page) => page?.searchResults)?.filter(Boolean)?.length}
-          </span>
+      {unreadMessagesCount ? (
+        <span className="my-auto flex h-6 w-6 items-center justify-center rounded-full bg-current text-sm font-normal">
+          <span className={isActive ? 'text-black' : 'text-white'}>{unreadMessagesCount}</span>
         </span>
       ) : null}
     </Link>

@@ -10,6 +10,8 @@ import { AutoformatRule } from '@udecode/plate-autoformat';
 import { insertEmptyCodeBlock } from '@udecode/plate-code-block';
 import { CodeBlockPlugin } from '@udecode/plate-code-block/react';
 import { HEADING_KEYS } from '@udecode/plate-heading';
+import { toggleBulletedList } from '@udecode/plate-list';
+import { BlockquotePlugin } from '@udecode/plate-block-quote/react';
 
 export const autoformatBlocks: AutoformatRule[] = [
   {
@@ -36,6 +38,19 @@ export const autoformatBlocks: AutoformatRule[] = [
     preFormat,
     triggerAtBlockStart: false,
     type: CodeBlockPlugin.key,
+  },
+  {
+    match: '> ',
+    mode: 'block',
+    type: BlockquotePlugin.key,
+  },
+  {
+    format: (editor) => {
+      toggleBulletedList(editor);
+    },
+    match: ['* ', '- '],
+    mode: 'block',
+    type: 'list',
   },
 ];
 

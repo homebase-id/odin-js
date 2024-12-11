@@ -42,11 +42,11 @@ export const MentionInputElement = withRef<typeof PlateElement>(({ className, ..
         trigger="@"
         value={search}
         hideWhenSpace={true}
-        hideWhenNoValue={true}
+        // hideWhenNoValue={true}
       >
         <span
           className={cn(
-            'inline-block rounded-md bg-slate-100 px-1.5 py-0.5 align-baseline text-sm text-foreground ring-ring focus-within:ring-2 dark:bg-slate-700',
+            'ring-ring inline-block rounded-md bg-slate-100 px-1.5 py-0.5 align-baseline text-sm text-foreground focus-within:ring-2 dark:bg-slate-700',
             className
           )}
         >

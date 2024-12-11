@@ -7,9 +7,10 @@ export const useLinkPreviewBuilder = (textToSearchIn: string) => {
 
   const foundLinks = useMemo(
     () =>
-      textToSearchIn
-        ?.split(new RegExp(/(https?:\/\/[^\s]+)/))
-        .filter((link) => link && link.startsWith('http')),
+      textToSearchIn?.split(new RegExp(/(https?:\/\/[^\s]+)/)).filter((link, index, array) => {
+        const previousChar = array[index - 1]?.slice(-1);
+        return link && link.startsWith('http') && (!previousChar || /\s/.test(previousChar));
+      }),
     [textToSearchIn]
   );
 

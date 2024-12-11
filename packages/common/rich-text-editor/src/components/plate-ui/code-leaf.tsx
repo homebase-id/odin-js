@@ -1,7 +1,22 @@
 import { cn, withRef } from '@udecode/cn';
+import { CodePlugin } from '@udecode/plate-basic-marks/react';
+import { isHotkey, isSelectionAtBlockEnd } from '@udecode/plate-common';
 import { PlateLeaf } from '@udecode/plate-common/react';
+import { useEffect } from 'react';
 
 export const CodeLeaf = withRef<typeof PlateLeaf>(({ children, className, ...props }, ref) => {
+  const arrowRightPressed = isHotkey('arrowright');
+
+  useEffect(() => {
+    const eventHandler = (e: KeyboardEvent) => {
+      if (arrowRightPressed(e) && isSelectionAtBlockEnd(props.editor))
+        props.editor.removeMark(CodePlugin.key);
+    };
+
+    window.addEventListener('keydown', eventHandler);
+    return () => window.removeEventListener('keydown', eventHandler);
+  }, [props.editor]);
+
   return (
     <PlateLeaf
       ref={ref}

@@ -43,9 +43,7 @@ export const CommunityThread = memo(
       origin: originMessage || undefined,
     });
 
-    if (!community || !threadId) {
-      return null;
-    }
+    if (!community || !threadId) return null;
 
     return (
       <ResizablePane>
