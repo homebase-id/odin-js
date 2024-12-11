@@ -32,7 +32,10 @@ export const RichTextRenderer = ({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const render = (node: any): ReactNode => {
-    if ('text' in node && (!('type' in node) || node.type === 'text')) {
+    if (
+      'text' in node &&
+      (!('type' in node) || node.type === 'text' || node.type === 'code_line')
+    ) {
       return renderLeaf(node, node.text, {});
     } else {
       const { type, ...attributes } = node;
@@ -119,6 +122,7 @@ export const RichTextRenderer = ({
           </blockquote>
         );
       case 'code_block':
+        console.log(node);
         return (
           <code
             {...attributes}
