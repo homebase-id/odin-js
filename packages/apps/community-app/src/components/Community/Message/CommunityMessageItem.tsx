@@ -274,6 +274,24 @@ const MessageTextRenderer = ({
           }
         }
 
+        if (
+          type === 'mention' &&
+          attributes &&
+          'value' in attributes &&
+          typeof attributes.value === 'string'
+        ) {
+          return (
+            <a
+              href={`https://${attributes.value}`}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="break-words text-primary hover:underline"
+            >
+              @{attributes.value}
+            </a>
+          );
+        }
+
         return null;
       }}
     />

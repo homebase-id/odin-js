@@ -65,7 +65,8 @@ export const useCommunityInboxProcessor = (
         ? await processInbox(dotYouClient, targetDrive, BATCH_SIZE)
         : null;
 
-    isDebug && console.debug('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
+    isDebug &&
+      console.debug('[CommunityInboxProcessor] fetching updates since', lastProcessedWithBuffer);
     if (lastProcessedWithBuffer) {
       const newMessages = await findChangesSinceTimestamp(
         dotYouClient,
@@ -77,7 +78,7 @@ export const useCommunityInboxProcessor = (
           fileState: [0, 1],
         }
       );
-      isDebug && console.debug('[InboxProcessor] new messages', newMessages.length);
+      isDebug && console.debug('[CommunityInboxProcessor] new messages', newMessages);
 
       await processCommunityMessagesBatch(
         dotYouClient,
@@ -88,6 +89,28 @@ export const useCommunityInboxProcessor = (
         newMessages
       );
 
+      const newThreadMessages = await findChangesSinceTimestamp(
+        dotYouClient,
+        odinId,
+        lastProcessedWithBuffer,
+        {
+          targetDrive: targetDrive,
+          fileType: [COMMUNITY_MESSAGE_FILE_TYPE],
+          fileState: [0, 1],
+          systemFileType: 'Comment',
+        }
+      );
+      isDebug && console.debug('[CommunityInboxProcessor] new thread messages', newThreadMessages);
+
+      await processCommunityMessagesBatch(
+        dotYouClient,
+        queryClient,
+        odinId,
+        targetDrive,
+        communityId,
+        newThreadMessages
+      );
+
       const newChannels = await findChangesSinceTimestamp(
         dotYouClient,
         odinId,
@@ -95,7 +118,7 @@ export const useCommunityInboxProcessor = (
         { targetDrive: targetDrive, fileType: [COMMUNITY_CHANNEL_FILE_TYPE], fileState: [0, 1] }
       );
 
-      isDebug && console.debug('[InboxProcessor] new channels', newChannels.length);
+      isDebug && console.debug('[CommunityInboxProcessor] new channels', newChannels.length);
       await Promise.all(
         newChannels.map(async (updatedDsr) => {
           const newChannel =
@@ -119,7 +142,10 @@ export const useCommunityInboxProcessor = (
       );
 
       isDebug &&
-        console.debug('[InboxProcessor] new community metadata', newCommunityMetadata.length);
+        console.debug(
+          '[CommunityInboxProcessor] new community metadata',
+          newCommunityMetadata.length
+        );
 
       await Promise.all(
         newCommunityMetadata.map(async (updatedDsr) => {
@@ -229,7 +255,7 @@ const processCommunityMessagesBatch = async (
   );
   isDebug &&
     console.debug(
-      '[InboxProcessor] new conversation updates',
+      '[CommunityInboxProcessor] new conversation updates',
       Object.keys(uniqueMessagesPerChannel).length
     );
 

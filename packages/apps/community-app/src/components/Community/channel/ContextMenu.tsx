@@ -45,7 +45,7 @@ export const ContextMenu = ({
 
   return (
     <div
-      className={`absolute right-5 top-[-2rem] z-10 flex flex-row items-center rounded-lg bg-background px-1 py-2 text-foreground shadow-md ${isStickyOpen ? 'visible' : 'invisible group-hover:pointer-events-auto group-hover:visible'}`}
+      className={`absolute right-5 top-[-3rem] z-10 flex flex-row items-center rounded-lg bg-background px-1 py-2 text-foreground shadow-md ${isStickyOpen ? 'visible' : 'invisible group-hover:pointer-events-auto group-hover:visible'}`}
       ref={wrapperRef}
     >
       <CommunityReactionComposer

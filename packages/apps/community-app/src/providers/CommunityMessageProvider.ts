@@ -238,20 +238,20 @@ export const uploadCommunityMessage = async (
         overwriteFileId: message.fileId,
       },
       systemFileType: message.fileSystemType,
-      transitOptions: {
-        useAppNotification: true,
-        appNotificationOptions: {
-          appId: COMMUNITY_APP_ID,
-          tagId: message.fileMetadata.appData.uniqueId as string,
-          typeId: communityId,
-          peerSubscriptionId: communityId,
-          unEncryptedMessage: `New message from ${identity} in "${community.fileMetadata.appData.content.title}"`,
-          recipients: (
-            notificationRecipients || community.fileMetadata.appData.content.members
-          ).filter((recipient) => recipient !== identity),
-          silent: false,
-        },
-      },
+      transitOptions: notificationRecipients
+        ? {
+            useAppNotification: true,
+            appNotificationOptions: {
+              appId: COMMUNITY_APP_ID,
+              tagId: message.fileMetadata.appData.uniqueId as string,
+              typeId: communityId,
+              peerSubscriptionId: communityId,
+              unEncryptedMessage: `New message from ${identity} in "${community.fileMetadata.appData.content.title}"`,
+              recipients: notificationRecipients.filter((recipient) => recipient !== identity),
+              silent: false,
+            },
+          }
+        : undefined,
     };
 
     uploadResult = await uploadFile(
@@ -319,9 +319,19 @@ export const updateCommunityMessage = async (
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: true,
+    referencedFile:
+      message.fileSystemType.toLocaleLowerCase() === 'comment'
+        ? {
+            targetDrive,
+            globalTransitId: message.fileMetadata.appData.groupId as string,
+          }
+        : undefined,
     appData: {
       uniqueId: message.fileMetadata.appData.uniqueId,
-      groupId: message.fileMetadata.appData.groupId,
+      groupId:
+        message.fileSystemType.toLocaleLowerCase() === 'comment'
+          ? undefined
+          : message.fileMetadata.appData.groupId,
       archivalStatus: (message.fileMetadata.appData as AppFileMetaData<CommunityMessage>)
         .archivalStatus,
       previewThumbnail: message.fileMetadata.appData.previewThumbnail,
@@ -348,6 +358,7 @@ export const updateCommunityMessage = async (
           },
           versionTag: message.fileMetadata.versionTag,
           recipients: [odinId],
+          systemFileType: message.fileSystemType,
         }
       : {
           transferIv: getRandom16ByteArray(),
@@ -357,6 +368,7 @@ export const updateCommunityMessage = async (
             targetDrive,
           },
           versionTag: message.fileMetadata.versionTag,
+          systemFileType: message.fileSystemType,
         };
 
   const payloads: PayloadFile[] = [];

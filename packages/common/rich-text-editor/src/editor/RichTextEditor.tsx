@@ -98,7 +98,7 @@ interface RTEProps {
   onSubmit?: () => void;
   disableHeadings?: boolean;
   children?: React.ReactNode;
-
+  stickyToolbar?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   plugins?: (PlatePlugin | PlatePlugin<any> | SlatePlugin)[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -134,6 +134,7 @@ const InnerRichTextEditor = memo(
       uniqueId,
       autoFocus,
       disableHeadings,
+      stickyToolbar,
       plugins: _plugins,
       components: _components,
       onKeyDown,
@@ -376,7 +377,7 @@ const InnerRichTextEditor = memo(
             // Switch keys to reset the editor when going to enabled
             key={disabled ? 'disabled' : undefined}
           >
-            <FixedToolbar>
+            <FixedToolbar className={stickyToolbar ? 'md:sticky' : ''}>
               <FixedToolbarButtons disableHeadings={disableHeadings} mediaOptions={mediaOptions} />
             </FixedToolbar>
 

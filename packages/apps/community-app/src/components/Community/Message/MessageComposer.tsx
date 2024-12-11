@@ -103,7 +103,7 @@ export const MessageComposer = ({
         community,
         channel,
         thread,
-        threadParticipants: extendedParticipants?.length ? extendedParticipants : undefined,
+        threadParticipants: extendedParticipants,
         message: message || '',
         files: newFiles,
         chatId: getNewId(),
@@ -141,6 +141,11 @@ export const MessageComposer = ({
         )
         .filter(Boolean) as { key: string; text: string }[]) || [],
     [contacts]
+  );
+
+  const plainMessage = useMemo(
+    () => (message && getTextRootsRecursive(message).join(' ')) || '',
+    [message]
   );
 
   return (
@@ -209,10 +214,10 @@ export const MessageComposer = ({
                     e.stopPropagation();
                     doSend();
                   }}
-                  className={`flex-shrink opacity-40 ${!message && !files?.length ? '' : 'hover:opacity-100'}`}
+                  className={`flex-shrink opacity-40 transition-colors ${!plainMessage && !files?.length ? '' : 'bg-primary text-primary-contrast opacity-90 hover:opacity-100'}`}
                   icon={PaperPlane}
                   size="square"
-                  disabled={!message && !files?.length}
+                  disabled={!plainMessage && !files?.length}
                   onMouseDown={(e) => e.preventDefault()}
                 />
               </span>
