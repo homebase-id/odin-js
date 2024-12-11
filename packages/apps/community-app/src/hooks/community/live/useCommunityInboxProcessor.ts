@@ -277,6 +277,7 @@ const processCommunityMessagesBatch = async (
           )
         )
       ).filter(Boolean) as (HomebaseFile<CommunityMessage> | DeletedHomebaseFile)[];
+
       const threadMessages = updatedcommunityMessages.filter(
         (msg) => msg.fileSystemType.toLowerCase() === 'comment'
       );

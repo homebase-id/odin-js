@@ -11,6 +11,7 @@ import {
   RichTextRenderer,
   COMMUNITY_ROOT_PATH,
   useDotYouClientContext,
+  ActionButton,
 } from '@homebase-id/common-app';
 import { HomebaseFile, RichText } from '@homebase-id/js-lib/core';
 import {
@@ -338,7 +339,12 @@ const CommunityMessageThreadSummary = ({
 }) => {
   const { odinKey, communityKey, channelKey } = useParams();
 
-  const { data: messages } = useCommunityMessages({
+  const {
+    data: messages,
+    isFetching,
+    isRefetching,
+    refetch,
+  } = useCommunityMessages({
     odinId: community?.fileMetadata.senderOdinId,
     communityId: community?.fileMetadata.appData.uniqueId as string,
     threadId: msg.fileMetadata.globalTransitId,
@@ -356,7 +362,24 @@ const CommunityMessageThreadSummary = ({
     return { flattenedMsgs, uniqueSenders };
   }, [messages]);
 
-  if (!flattenedMsgs?.length) return null;
+  if (!flattenedMsgs?.length) {
+    if (!isFetching && !isRefetching) return null;
+    return (
+      <div className="rounded-md border bg-slate-100 p-2">
+        <p className="text-lg">{t('Bad data!')}</p>
+        <p>
+          {t("The message says there are replies, but we didn't find any")}{' '}
+          <ActionButton
+            type="secondary"
+            state={isRefetching ? 'loading' : undefined}
+            onClick={() => refetch()}
+          >
+            {t('Force fetch')}
+          </ActionButton>
+        </p>
+      </div>
+    );
+  }
 
   return (
     <Link
