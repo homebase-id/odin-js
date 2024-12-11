@@ -63,7 +63,9 @@ export const CommunityChannelDetail = () => {
     <ErrorBoundary>
       <div className="h-full w-20 flex-grow bg-background">
         <div className="relative flex h-full flex-row">
-          <div className="flex h-full flex-grow flex-col overflow-hidden">
+          <div
+            className={`h-full flex-grow flex-col overflow-hidden ${threadKey ? 'hidden xl:flex' : 'flex'}`}
+          >
             <CommunityChannelHeader community={community} channel={channelDsr} />
             <ErrorBoundary>
               <CommunityHistory
