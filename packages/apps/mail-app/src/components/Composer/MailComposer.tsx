@@ -354,6 +354,7 @@ export const MailComposer = ({
               {mailSettingsFetched ? (
                 <RichTextEditor
                   name="composer"
+                  stickyToolbar={true}
                   defaultValue={
                     autosavedDsr.fileMetadata.appData.content.message?.length
                       ? autosavedDsr.fileMetadata.appData.content.message

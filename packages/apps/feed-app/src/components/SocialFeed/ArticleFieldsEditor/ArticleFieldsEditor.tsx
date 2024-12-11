@@ -209,6 +209,7 @@ export const InnerFieldEditors = ({
               className="min-h-[50vh]"
               disabled={disabled}
               key={postFile.fileId ? 'editor' : 'editor-new'}
+              stickyToolbar={true}
             />
           </ErrorBoundary>
         </div>

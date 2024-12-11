@@ -77,6 +77,7 @@ export const MailSettingsPage = () => {
         <ErrorBoundary>
           {isMailSettingsFetched ? (
             <RichTextEditor
+              stickyToolbar={true}
               name="composer"
               defaultValue={serverMailSettings?.fileMetadata.appData.content.mailFooter}
               onChange={handleRTEChange}
