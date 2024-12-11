@@ -181,7 +181,8 @@ export const useFile = ({
     return url;
   };
 
-  const removeFile = async (fileId: string) => await deleteFile(dotYouClient, targetDrive, fileId);
+  const removeFile = async (fileId: string) =>
+    await deleteFile(dotYouClient, targetDrive, fileId, undefined, systemFileType);
 
   return {
     fetchFile: fetchFile,

@@ -25,6 +25,8 @@ import {
   Grid,
   ChevronDown,
   Bookmark,
+  ReplyArrow,
+  ChatBubble,
 } from '@homebase-id/common-app/icons';
 import { CommunityInfoDialog } from '../../components/Community/CommunityInfoDialog';
 import { useConversationMetadata } from '@homebase-id/chat-app/src/hooks/chat/useConversationMetadata';
@@ -102,7 +104,8 @@ export const CommunityChannelNav = () => {
           </div>
 
           <div className="flex flex-col gap-1">
-            <AllItem odinId={odinKey} communityId={communityKey} />
+            <ThreadItem odinId={odinKey} communityId={communityKey} />
+            {/* <AllItem odinId={odinKey} communityId={communityKey} /> */}
             <LaterItem odinId={odinKey} communityId={communityKey} />
           </div>
 
@@ -164,8 +167,22 @@ export const CommunityChannelNav = () => {
   );
 };
 
-const AllItem = ({ odinId, communityId }: { odinId: string; communityId: string }) => {
-  const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/all`;
+// const AllItem = ({ odinId, communityId }: { odinId: string; communityId: string }) => {
+//   const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/all`;
+//   const isActive = !!useMatch({ path: href, end: true });
+
+//   return (
+//     <Link
+//       to={href}
+//       className={`flex flex-row items-center gap-2 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`}`}
+//     >
+//       <RadioTower className="h-5 w-5" /> {t('Activity')}
+//     </Link>
+//   );
+// };
+
+const ThreadItem = ({ odinId, communityId }: { odinId: string; communityId: string }) => {
+  const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/threads`;
   const isActive = !!useMatch({ path: href, end: true });
 
   return (
@@ -173,7 +190,7 @@ const AllItem = ({ odinId, communityId }: { odinId: string; communityId: string 
       to={href}
       className={`flex flex-row items-center gap-2 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`}`}
     >
-      <RadioTower className="h-5 w-5" /> {t('Activity')}
+      <ChatBubble className="h-5 w-5" /> {t('Threads')}
     </Link>
   );
 };

@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-query';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import {
+  DotYouClient,
   HomebaseFile,
   NewHomebaseFile,
   NewMediaFile,
@@ -34,6 +35,37 @@ import {
   updateCacheCommunityMessages,
 } from './useCommunityMessages';
 
+export const getCommunityMessageQueryOptions = (
+  queryClient: QueryClient,
+  dotYouClient: DotYouClient,
+  props?: {
+    odinId: string | undefined;
+    communityId: string | undefined;
+    channelId?: string | undefined;
+    messageId: string | undefined;
+    fileSystemType?: SystemFileType;
+  }
+) => ({
+  queryKey: [
+    'community-message',
+    props?.communityId,
+    props?.messageId,
+    props?.fileSystemType?.toLowerCase() || 'standard',
+  ],
+  queryFn: () =>
+    getMessageByUniqueId(
+      queryClient,
+      dotYouClient,
+      props?.odinId as string,
+      props?.communityId as string,
+      props?.channelId,
+      props?.messageId as string,
+      props?.fileSystemType
+    ),
+  enabled: !!props?.odinId && !!props?.communityId && !!props?.messageId,
+  staleTime: 1000 * 60 * 2, // 2 minutes
+});
+
 export const useCommunityMessage = (props?: {
   odinId: string | undefined;
   communityId: string | undefined;
@@ -44,34 +76,6 @@ export const useCommunityMessage = (props?: {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
   const identity = dotYouClient.getHostIdentity();
-
-  const getMessageByUniqueId = async (
-    odinId: string,
-    communityId: string,
-    channelId: string | undefined,
-    messageId: string,
-    fileSystemType?: SystemFileType
-  ) => {
-    const channelCache = queryClient.getQueryData<
-      InfiniteData<{
-        searchResults: (HomebaseFile<CommunityMessage> | null)[];
-        cursorState: string;
-        queryTime: number;
-        includeMetadataHeader: boolean;
-      }>
-    >(['community-messages', formatGuidId(communityId), formatGuidId(channelId || communityId)]);
-
-    if (channelCache) {
-      const message = channelCache.pages
-        .map((page) => page.searchResults)
-        .flat()
-        .find((msg) => stringGuidsEqual(msg?.fileMetadata.appData.uniqueId, messageId));
-
-      if (message) return message;
-    }
-
-    return await getCommunityMessage(dotYouClient, odinId, communityId, messageId, fileSystemType);
-  };
 
   const sendMessage = async ({
     community,
@@ -166,24 +170,7 @@ export const useCommunityMessage = (props?: {
   };
 
   return {
-    get: useQuery({
-      queryKey: [
-        'community-message',
-        props?.communityId,
-        props?.messageId,
-        props?.fileSystemType?.toLowerCase() || 'standard',
-      ],
-      queryFn: () =>
-        getMessageByUniqueId(
-          props?.odinId as string,
-          props?.communityId as string,
-          props?.channelId,
-          props?.messageId as string,
-          props?.fileSystemType
-        ),
-      enabled: !!props?.odinId && !!props?.communityId && !!props?.messageId,
-      staleTime: 1000 * 60 * 2, // 2 minutes
-    }),
+    get: useQuery(getCommunityMessageQueryOptions(queryClient, dotYouClient, props)),
     send: useMutation({
       mutationFn: sendMessage,
       onMutate: async ({
@@ -337,6 +324,36 @@ export const useCommunityMessage = (props?: {
       },
     }),
   };
+};
+
+const getMessageByUniqueId = async (
+  queryClient: QueryClient,
+  dotYouClient: DotYouClient,
+  odinId: string,
+  communityId: string,
+  channelId: string | undefined,
+  messageId: string,
+  fileSystemType?: SystemFileType
+) => {
+  const channelCache = queryClient.getQueryData<
+    InfiniteData<{
+      searchResults: (HomebaseFile<CommunityMessage> | null)[];
+      cursorState: string;
+      queryTime: number;
+      includeMetadataHeader: boolean;
+    }>
+  >(['community-messages', formatGuidId(communityId), formatGuidId(channelId || communityId)]);
+
+  if (channelCache) {
+    const message = channelCache.pages
+      .map((page) => page.searchResults)
+      .flat()
+      .find((msg) => stringGuidsEqual(msg?.fileMetadata.appData.uniqueId, messageId));
+
+    if (message) return message;
+  }
+
+  return await getCommunityMessage(dotYouClient, odinId, communityId, messageId, fileSystemType);
 };
 
 export const invalidateCommunityMessage = (

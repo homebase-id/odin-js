@@ -49,6 +49,11 @@ const CommunityCatchup = lazy(() =>
     default: communityApp.CommunityCatchup,
   }))
 );
+const CommunityThreadsCatchup = lazy(() =>
+  import('../templates/Community/CommunityThreadsCatchup').then((communityApp) => ({
+    default: communityApp.CommunityThreadsCatchup,
+  }))
+);
 const CommunityLater = lazy(() =>
   import('../templates/Community/CommunityLater').then((communityApp) => ({
     default: communityApp.CommunityLater,
@@ -103,6 +108,8 @@ function App() {
               }
             >
               <Route index={true} element={<CommunityRootRoute />} />
+
+              <Route path={'threads'} element={<CommunityThreadsCatchup />} />
 
               {/* Items for 'all' */}
               <Route path={'all'} element={<CommunityCatchup />} />
