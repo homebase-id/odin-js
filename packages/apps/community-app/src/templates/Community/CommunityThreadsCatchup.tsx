@@ -3,7 +3,7 @@ import { ErrorBoundary, LoadingBlock, t, COMMUNITY_ROOT_PATH } from '@homebase-i
 import { Link, useParams } from 'react-router-dom';
 import { CommunityThread } from '../../components/Community/CommunityThread';
 import { memo, useMemo } from 'react';
-import { ChatBubble, ChevronLeft, ReplyArrow } from '@homebase-id/common-app/icons';
+import { ChatBubble, ChevronLeft } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import { useCommunityThreads } from '../../hooks/community/threads/useCommunityThreads';

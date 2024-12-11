@@ -7,7 +7,7 @@ import { useToggleCodeBlockButton } from '@udecode/plate-code-block/react';
 import { useEditorRef } from '@udecode/plate-core/react';
 import { someNode } from '@udecode/plate-common';
 
-export const CodeBlockToolbarButton = withRef<typeof ToolbarButton>(({}, ref) => {
+export const CodeBlockToolbarButton = withRef<typeof ToolbarButton>((_, ref) => {
   const { props } = useToggleCodeBlockButton();
 
   const editor = useEditorRef();

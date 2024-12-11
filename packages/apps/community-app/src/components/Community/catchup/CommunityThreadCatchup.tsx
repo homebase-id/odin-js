@@ -1,7 +1,7 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { CommunityHistory } from '../channel/CommunityHistory';
-import { AuthorName, COMMUNITY_ROOT_PATH, FakeAnchor, t } from '@homebase-id/common-app';
+import { AuthorName, COMMUNITY_ROOT_PATH, FakeAnchor } from '@homebase-id/common-app';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { useCommunityChannel } from '../../../hooks/community/channels/useCommunityChannel';
 import { ThreadMeta } from '../../../hooks/community/threads/useCommunityThreads';

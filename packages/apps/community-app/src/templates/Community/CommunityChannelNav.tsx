@@ -19,13 +19,11 @@ import {
 import { useCommunityMetadata } from '../../hooks/community/useCommunityMetadata';
 import { CommunityMetadata } from '../../providers/CommunityMetadataProvider';
 import {
-  RadioTower,
   Chevron,
   Pin,
   Grid,
   ChevronDown,
   Bookmark,
-  ReplyArrow,
   ChatBubble,
 } from '@homebase-id/common-app/icons';
 import { CommunityInfoDialog } from '../../components/Community/CommunityInfoDialog';
