@@ -103,7 +103,7 @@ export const MessageComposer = ({
         community,
         channel,
         thread,
-        threadParticipants: extendedParticipants?.length ? extendedParticipants : undefined,
+        threadParticipants: extendedParticipants,
         message: message || '',
         files: newFiles,
         chatId: getNewId(),

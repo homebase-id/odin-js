@@ -238,20 +238,20 @@ export const uploadCommunityMessage = async (
         overwriteFileId: message.fileId,
       },
       systemFileType: message.fileSystemType,
-      transitOptions: {
-        useAppNotification: true,
-        appNotificationOptions: {
-          appId: COMMUNITY_APP_ID,
-          tagId: message.fileMetadata.appData.uniqueId as string,
-          typeId: communityId,
-          peerSubscriptionId: communityId,
-          unEncryptedMessage: `New message from ${identity} in "${community.fileMetadata.appData.content.title}"`,
-          recipients: (
-            notificationRecipients || community.fileMetadata.appData.content.members
-          ).filter((recipient) => recipient !== identity),
-          silent: false,
-        },
-      },
+      transitOptions: notificationRecipients
+        ? {
+            useAppNotification: true,
+            appNotificationOptions: {
+              appId: COMMUNITY_APP_ID,
+              tagId: message.fileMetadata.appData.uniqueId as string,
+              typeId: communityId,
+              peerSubscriptionId: communityId,
+              unEncryptedMessage: `New message from ${identity} in "${community.fileMetadata.appData.content.title}"`,
+              recipients: notificationRecipients.filter((recipient) => recipient !== identity),
+              silent: false,
+            },
+          }
+        : undefined,
     };
 
     uploadResult = await uploadFile(
