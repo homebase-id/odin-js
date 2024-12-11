@@ -341,6 +341,7 @@ const CommunityMessageThreadSummary = ({
 
   const {
     data: messages,
+    isFetched,
     isFetching,
     isRefetching,
     refetch,
@@ -363,9 +364,9 @@ const CommunityMessageThreadSummary = ({
   }, [messages]);
 
   if (!flattenedMsgs?.length) {
-    if (!isFetching && !isRefetching) return null;
+    if ((isFetched || isFetching) && !isRefetching) return null;
     return (
-      <div className="rounded-md border bg-slate-100 p-2">
+      <div className="rounded-md border bg-slate-100 p-2 dark:bg-slate-700">
         <p className="text-lg">{t('Bad data!')}</p>
         <p>
           {t("The message says there are replies, but we didn't find any")}{' '}
