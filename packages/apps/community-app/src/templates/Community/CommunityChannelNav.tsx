@@ -74,7 +74,7 @@ export const CommunityChannelNav = () => {
   return (
     <>
       <div
-        className={`fixed ${isActive ? 'translate-x-full' : 'translate-x-0'} -left-full h-[100dvh] w-full bg-page-background transition-transform lg:relative lg:left-0 lg:max-w-[17rem] lg:translate-x-0 lg:border-r lg:shadow-inner`}
+        className={`fixed ${isActive ? 'translate-x-full' : 'translate-x-0'} -left-full h-[100dvh] w-full flex-shrink-0 bg-page-background transition-transform lg:relative lg:left-0 lg:max-w-[17rem] lg:translate-x-0 lg:border-r lg:shadow-inner`}
       >
         <div className="absolute inset-0 flex flex-col gap-5 overflow-auto px-2 py-5 md:pl-[calc(env(safe-area-inset-left)+4.3rem+0.5rem)] lg:pl-2">
           <div className="flex flex-row items-center">

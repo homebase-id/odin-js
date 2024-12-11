@@ -41,7 +41,7 @@ export const ChatHome = () => {
       />
       <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`}>
         <ChatSideNav isOnline={isOnline} />
-        <div className="h-full w-full flex-grow bg-background">
+        <div className="h-full w-20 flex-grow bg-background">
           <ChatDetail conversationId={conversationKey} />
         </div>
       </div>

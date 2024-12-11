@@ -43,7 +43,7 @@ export const CommunityLater = () => {
 
   return (
     <ErrorBoundary>
-      <div className="h-full w-full flex-grow bg-background">
+      <div className="h-full w-20 flex-grow bg-background">
         <div className="relative flex h-full flex-row">
           <div className="flex h-full flex-grow flex-col overflow-hidden">
             <div className="flex h-full flex-grow flex-col">
