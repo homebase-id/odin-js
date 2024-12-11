@@ -143,6 +143,11 @@ export const MessageComposer = ({
     [contacts]
   );
 
+  const plainMessage = useMemo(
+    () => (message && getTextRootsRecursive(message).join(' ')) || '',
+    [message]
+  );
+
   return (
     <>
       <div className={`bg-background pb-[env(safe-area-inset-bottom)] ${className || ''}`}>
@@ -209,10 +214,10 @@ export const MessageComposer = ({
                     e.stopPropagation();
                     doSend();
                   }}
-                  className={`flex-shrink opacity-40 ${!message && !files?.length ? '' : 'hover:opacity-100'}`}
+                  className={`flex-shrink opacity-40 transition-colors ${!plainMessage && !files?.length ? '' : 'bg-primary text-primary-contrast opacity-90 hover:opacity-100'}`}
                   icon={PaperPlane}
                   size="square"
-                  disabled={!message && !files?.length}
+                  disabled={!plainMessage && !files?.length}
                   onMouseDown={(e) => e.preventDefault()}
                 />
               </span>
