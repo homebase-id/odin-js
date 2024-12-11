@@ -33,7 +33,7 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   const { odinKey, communityKey } = useParams();
   const isCreateNew = !!newCommunity;
 
-  useLiveCommunityProcessor(odinKey, communityKey);
+  const isOnline = useLiveCommunityProcessor(odinKey, communityKey);
   useCommunityMemberUpdater(odinKey, communityKey);
   useRemoveNotifications({ appId: COMMUNITY_APP_ID });
   useCommunityNotifications(odinKey, communityKey);
@@ -81,7 +81,7 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
           <NewCommunity />
         ) : (
           <>
-            <CommunityChannelNav />
+            <CommunityChannelNav isOnline={isOnline} />
             {children ? <>{children}</> : null}
           </>
         )}

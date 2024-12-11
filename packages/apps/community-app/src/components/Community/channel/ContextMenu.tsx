@@ -87,7 +87,7 @@ const CommunityContextActions = ({
   const { mutate: resend, error: resendError } = useCommunityMessage().update;
 
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
-  const authorOdinId = msg.fileMetadata.senderOdinId;
+  const authorOdinId = msg.fileMetadata.originalAuthor;
 
   const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;
 
