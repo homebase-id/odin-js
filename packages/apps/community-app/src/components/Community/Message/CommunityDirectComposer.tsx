@@ -81,6 +81,7 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = ({
     setMessage(undefined);
     setFiles([]);
     volatileRef.current?.clear();
+    volatileRef.current?.focus();
     clearReplyMsg();
 
     try {
