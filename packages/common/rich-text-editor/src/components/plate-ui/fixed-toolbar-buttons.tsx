@@ -30,7 +30,7 @@ export function FixedToolbarButtons({
   return (
     <div className="w-full overflow-hidden">
       <div
-        className={`flex flex-wrap py-1 ${readOnly ? 'pointer-events-none cursor-not-allowed' : ''}`}
+        className={`flex overflow-x-auto py-1 ${readOnly ? 'pointer-events-none cursor-not-allowed' : ''}`}
         style={{
           transform: 'translateX(calc(-1px))',
         }}

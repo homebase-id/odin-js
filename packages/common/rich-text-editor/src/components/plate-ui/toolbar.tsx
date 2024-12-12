@@ -41,7 +41,7 @@ const ToolbarSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToolbarPrimitive.Separator
     ref={ref}
-    className={cn('shrink-0 bg-border', 'my-1 w-[1px]', className)}
+    className={cn('bg-border shrink-0', 'my-1 w-[1px]', className)}
     {...props}
   />
 ));
@@ -136,7 +136,7 @@ const ToolbarGroup = React.forwardRef<
         </div>
       )}
 
-      <div className="mx-1 flex items-center gap-1">{children}</div>
+      <div className="flex items-center gap-1 md:mx-1">{children}</div>
     </div>
   );
 });
