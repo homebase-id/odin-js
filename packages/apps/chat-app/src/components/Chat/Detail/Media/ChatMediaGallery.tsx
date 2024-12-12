@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { EmbeddedThumb, HomebaseFile, ImageSize } from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../../../../providers/ChatProvider';
 import {
   ActionButton,
@@ -11,7 +11,7 @@ import {
 } from '@homebase-id/common-app';
 import { Arrow, ArrowLeft, Times } from '@homebase-id/common-app/icons';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
-import { OdinImage } from '@homebase-id/ui-lib';
+import { ImageSource, OdinImage, OdinPayloadImage, OdinPreviewImage } from '@homebase-id/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) => {
@@ -96,14 +96,12 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
               className="h-full max-h-[100dvh] w-full object-contain"
             />
           ) : contentType?.startsWith('image') ? (
-            <OdinImage
+            <CustomOdinImage
               className={`m-auto h-auto max-h-[100dvh] w-auto max-w-full object-contain`}
-              dotYouClient={dotYouClient}
               fileId={msg.fileId}
               fileKey={mediaKey}
               key={mediaKey}
               targetDrive={ChatDrive}
-              alt="post"
               fit="contain"
               lastModified={msg.fileMetadata.updated}
             />
@@ -152,4 +150,64 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
   );
 
   return createPortal(dialog, target);
+};
+
+const CustomOdinImage = ({
+  className,
+  ...props
+}: { className?: string; previewThumbnail?: EmbeddedThumb } & ImageSource) => {
+  const dotYouClient = useDotYouClientContext();
+  const [tinyLoaded, setTinyLoaded] = useState(false);
+  const [finalLoaded, setFinalLoaded] = useState(false);
+
+  const [naturalSize, setNaturalSize] = useState<ImageSize | undefined>(props.previewThumbnail);
+
+  return (
+    <div
+      className={`relative h-full w-full ${className || ''}`}
+      style={
+        naturalSize?.pixelWidth && naturalSize?.pixelHeight
+          ? {
+              aspectRatio: `${naturalSize?.pixelWidth}/${naturalSize?.pixelHeight}`,
+              maxWidth: `${naturalSize.pixelWidth}px`,
+            }
+          : undefined
+      }
+    >
+      <OdinPreviewImage
+        className={`absolute inset-0 h-full w-full max-w-none object-contain object-center transition-opacity delay-500 ${finalLoaded ? 'opacity-0' : 'opacity-100'}`}
+        dotYouClient={dotYouClient}
+        {...props}
+        blur="auto"
+        onLoad={(naturalSize: ImageSize | undefined) => {
+          setTinyLoaded(true);
+          setNaturalSize((oldVal) => naturalSize || oldVal);
+        }}
+        style={
+          naturalSize?.pixelWidth && naturalSize?.pixelHeight
+            ? {
+                aspectRatio: `${naturalSize?.pixelWidth}/${naturalSize?.pixelHeight}`,
+                maxWidth: `${naturalSize.pixelWidth}px`,
+              }
+            : undefined
+        }
+        key={'preview'}
+      />
+      {tinyLoaded ? (
+        <OdinPayloadImage
+          className={`absolute inset-0 h-full w-full max-w-none object-contain object-center transition-opacity duration-300 ${finalLoaded ? 'opacity-100' : 'opacity-0'}`}
+          dotYouClient={dotYouClient}
+          {...props}
+          naturalSize={naturalSize}
+          style={
+            naturalSize?.pixelWidth && naturalSize?.pixelHeight
+              ? { aspectRatio: `${naturalSize?.pixelWidth}/${naturalSize?.pixelHeight}` }
+              : undefined
+          }
+          onLoad={() => setFinalLoaded(true)}
+          key={'original'}
+        />
+      ) : null}
+    </div>
+  );
 };
