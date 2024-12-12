@@ -69,7 +69,13 @@ export const useCommunityMetadata = (props?: {
       );
       if (!serverVersion) return;
 
-      return await uploadCommunityMetadata(dotYouClient, mergeMetadata(metadata, serverVersion));
+      const newlyMerged = mergeMetadata(metadata, serverVersion);
+      if (
+        metadata.fileMetadata.appData.content.lastReadTime >
+        newlyMerged.fileMetadata.appData.content.lastReadTime
+      ) {
+        return await uploadCommunityMetadata(dotYouClient, mergeMetadata(metadata, serverVersion));
+      }
     });
   };
 

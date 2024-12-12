@@ -260,7 +260,7 @@ export const useLastUpdatedChatMessages = ({
   useEffect(() => {
     setForceRefresh((prev) => prev + 1);
 
-    const interval = setInterval(() => setForceRefresh((prev) => prev + 1), 1000 * 60); // 1 minute
+    const interval = setInterval(() => setForceRefresh((prev) => prev + 1), 1000 * 10); // 10s
     return () => clearInterval(interval);
   }, []);
 
