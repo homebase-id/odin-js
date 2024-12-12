@@ -1,6 +1,9 @@
 import { SystemFileType, TargetDrive, getPayloadAsJson } from '@homebase-id/js-lib/core';
 import { LinkPreview } from '@homebase-id/js-lib/media';
-import { getPayloadAsJsonOverPeerByGlobalTransitId } from '@homebase-id/js-lib/peer';
+import {
+  getPayloadAsJsonOverPeer,
+  getPayloadAsJsonOverPeerByGlobalTransitId,
+} from '@homebase-id/js-lib/peer';
 import { useQuery } from '@tanstack/react-query';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
@@ -24,17 +27,28 @@ export const useLinkMetadata = ({
   return useQuery({
     queryKey: ['link-metadata', targetDrive.alias, fileId, payloadKey],
     queryFn: async () => {
-      if (odinId && globalTransitId) {
-        return getPayloadAsJsonOverPeerByGlobalTransitId<LinkPreview[]>(
-          dotYouClient,
-          odinId,
-          targetDrive,
-          globalTransitId,
-          payloadKey,
-          {
-            systemFileType,
-          }
-        );
+      if (odinId && dotYouClient.getHostIdentity() !== odinId) {
+        if (globalTransitId) {
+          return getPayloadAsJsonOverPeerByGlobalTransitId<LinkPreview[]>(
+            dotYouClient,
+            odinId,
+            targetDrive,
+            globalTransitId,
+            payloadKey,
+            {
+              systemFileType,
+            }
+          );
+        } else if (fileId) {
+          return getPayloadAsJsonOverPeer<LinkPreview[]>(
+            dotYouClient,
+            odinId,
+            targetDrive,
+            fileId,
+            payloadKey,
+            { systemFileType }
+          );
+        }
       }
 
       if (!fileId) return [];

@@ -150,7 +150,7 @@ export const updateCacheCommunityMessages = (
       includeMetadataHeader: boolean;
     }>
   >(queryKey);
-  if (!currentData || !currentData.pages) return;
+  if (!currentData || !currentData.pages?.length) return;
 
   const newData = transformFn(currentData);
   if (!newData || !newData.pages) return;
@@ -374,7 +374,7 @@ export const internalInsertNewMessage = (
 
   const newData = {
     ...extistingMessages,
-    pages: extistingMessages?.pages?.map((page, index) => {
+    pages: extistingMessages.pages.map((page, index) => {
       if (isNewFile) {
         const filteredSearchResults = page.searchResults.filter(
           // Remove messages with the same fileId but more importantly uniqueId so we avoid duplicates with the optimistic update
@@ -494,7 +494,7 @@ export const internalRemoveMessage = (
 ) => {
   return {
     ...extistingMessages,
-    pages: extistingMessages?.pages?.map((page) => {
+    pages: extistingMessages.pages.map((page) => {
       return {
         ...page,
         searchResults: page.searchResults.filter(

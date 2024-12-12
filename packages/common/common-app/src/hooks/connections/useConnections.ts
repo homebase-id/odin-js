@@ -62,7 +62,7 @@ export const updateCachePendingConnections = (
   const queryData = queryClient.getQueryData<InfiniteData<PagedResult<RedactedConnectionRequest>>>([
     'pending-connections',
   ]);
-  if (!queryData) return;
+  if (!queryData || !queryData?.pages?.length) return;
 
   const newQueryData = transformFn(queryData);
   if (newQueryData) {
@@ -137,7 +137,7 @@ export const updateCacheSentConnections = (
   const queryData = queryClient.getQueryData<InfiniteData<PagedResult<ConnectionRequest>>>([
     'sent-requests',
   ]);
-  if (!queryData) return;
+  if (!queryData || !queryData?.pages?.length) return;
 
   const newQueryData = transformFn(queryData);
   if (newQueryData) {
@@ -226,7 +226,7 @@ export const updateCacheActiveConnections = (
     exact: false,
   });
   queries.forEach(([queryKey, queryData]) => {
-    if (!queryData) return;
+    if (!queryData || !queryData?.pages?.length) return;
 
     const newQueryData = transformFn(queryData);
     if (newQueryData) {

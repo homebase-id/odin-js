@@ -56,7 +56,7 @@ export const updateCacheSocialFeeds = (
   const currentData = queryClient.getQueryData<InfiniteData<RecentsFromConnectionsReturn>>([
     'social-feeds',
   ]);
-  if (!currentData) return;
+  if (!currentData || !currentData?.pages?.length) return;
 
   const newData = transformFn(currentData);
   if (!newData) return;

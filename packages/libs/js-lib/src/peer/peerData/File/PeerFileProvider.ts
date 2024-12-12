@@ -297,8 +297,7 @@ export const getContentFromHeaderOrPayloadOverPeer = async <T>(
 ): Promise<T | null> => {
   const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
   const contentIsComplete =
-    fileMetadata.payloads?.filter((payload) => payload.contentType === 'application/json')
-      .length === 0;
+    fileMetadata.payloads?.filter((payload) => payload.key === DEFAULT_PAYLOAD_KEY).length === 0;
 
   const keyHeader = fileMetadata.isEncrypted
     ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)

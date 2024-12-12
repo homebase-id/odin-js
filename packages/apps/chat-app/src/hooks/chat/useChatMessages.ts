@@ -180,7 +180,7 @@ export const updateCacheChatMessages = (
       includeMetadataHeader: boolean;
     }>
   >(['chat-messages', conversationId]);
-  if (!currentData) return;
+  if (!currentData || !currentData?.pages?.length) return;
 
   const newData = transformFn(currentData);
   if (!newData) return;

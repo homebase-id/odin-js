@@ -40,7 +40,7 @@ export const MentionElement = withRef<
     >
       <React.Fragment>
         {prefix || '@'}
-        {renderLabel ? renderLabel(element) : element.value}
+        {(renderLabel ? renderLabel(element) : element.value).replaceAll('@', '')}
         {children}
       </React.Fragment>
     </PlateElement>

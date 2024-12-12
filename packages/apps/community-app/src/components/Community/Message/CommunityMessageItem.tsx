@@ -281,16 +281,26 @@ const MessageTextRenderer = ({
           'value' in attributes &&
           typeof attributes.value === 'string'
         ) {
-          return (
-            <a
-              href={`https://${attributes.value}`}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="break-words text-primary hover:underline"
-            >
-              @{attributes.value.replaceAll('@', '')}
-            </a>
-          );
+          const domainRegex =
+            /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]{2,25}(?::\d{1,5})?$/i;
+
+          if (domainRegex.test(attributes.value))
+            return (
+              <a
+                href={`https://${attributes.value}`}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="break-words text-primary hover:underline"
+              >
+                @{attributes.value.replaceAll('@', '')}
+              </a>
+            );
+          else
+            return (
+              <span className="break-all text-primary">
+                @{attributes.value.replaceAll('@', '')}
+              </span>
+            );
         }
 
         return null;
@@ -312,13 +322,11 @@ const CommunityMediaMessageBody = ({
   return (
     <div className={`relative w-full max-w-[75vw] rounded-lg md:max-w-[90%]`}>
       {hasACaption ? (
-        <div className="flex min-w-0 flex-col md:flex-row md:justify-between">
-          <MessageTextRenderer
-            community={community}
-            message={content.message}
-            className={`whitespace-pre-wrap break-words`}
-          />
-        </div>
+        <MessageTextRenderer
+          community={community}
+          message={content.message}
+          className={`whitespace-pre-wrap break-words`}
+        />
       ) : null}
       <CommunityMedia
         msg={msg}
@@ -341,7 +349,6 @@ const CommunityMessageThreadSummary = ({
 
   const {
     data: messages,
-    isFetched,
     isFetching,
     isRefetching,
     refetch,
