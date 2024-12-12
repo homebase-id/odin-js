@@ -98,8 +98,10 @@ export const trimRichText = (richText: RichText | undefined): RichText | undefin
   };
 
   trimmed.push(trimNodeRecursive(richText[0]));
-  trimmed.push(...richText.slice(1, -1));
-  trimmed.push(trimNodeRecursive(richText[richText.length - 1]));
+  if (richText.length >= 2) {
+    trimmed.push(...richText.slice(1, -1));
+    if (richText.length >= 3) trimmed.push(trimNodeRecursive(richText[richText.length - 1]));
+  }
 
   return trimmed;
 };

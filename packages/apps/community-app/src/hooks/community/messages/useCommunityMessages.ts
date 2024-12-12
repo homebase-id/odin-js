@@ -359,7 +359,15 @@ export const internalInsertNewMessage = (
     unknown
   >,
   newMessage: HomebaseFile<CommunityMessage>
-) => {
+): InfiniteData<
+  {
+    searchResults: (HomebaseFile<CommunityMessage> | null)[];
+    cursorState: string;
+    queryTime: number;
+    includeMetadataHeader: boolean;
+  },
+  unknown
+> => {
   const isNewFile = !extistingMessages.pages.some((page) =>
     page.searchResults.some(
       (msg) =>
