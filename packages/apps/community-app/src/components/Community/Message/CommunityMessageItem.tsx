@@ -281,16 +281,26 @@ const MessageTextRenderer = ({
           'value' in attributes &&
           typeof attributes.value === 'string'
         ) {
-          return (
-            <a
-              href={`https://${attributes.value}`}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="break-words text-primary hover:underline"
-            >
-              @{attributes.value.replaceAll('@', '')}
-            </a>
-          );
+          const domainRegex =
+            /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]{2,25}(?::\d{1,5})?$/i;
+
+          if (domainRegex.test(attributes.value))
+            return (
+              <a
+                href={`https://${attributes.value}`}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="break-words text-primary hover:underline"
+              >
+                @{attributes.value.replaceAll('@', '')}
+              </a>
+            );
+          else
+            return (
+              <span className="break-all text-primary">
+                @{attributes.value.replaceAll('@', '')}
+              </span>
+            );
         }
 
         return null;
@@ -341,7 +351,6 @@ const CommunityMessageThreadSummary = ({
 
   const {
     data: messages,
-    isFetched,
     isFetching,
     isRefetching,
     refetch,
