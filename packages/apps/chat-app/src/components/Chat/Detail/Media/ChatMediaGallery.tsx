@@ -11,12 +11,11 @@ import {
 } from '@homebase-id/common-app';
 import { Arrow, ArrowLeft, Times } from '@homebase-id/common-app/icons';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
-import { ImageSource, OdinImage, OdinPayloadImage, OdinPreviewImage } from '@homebase-id/ui-lib';
+import { ImageSource, OdinPayloadImage, OdinPreviewImage } from '@homebase-id/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) => {
   const target = usePortal('modal-container');
-  const dotYouClient = useDotYouClientContext();
 
   const navigate = useNavigate();
   const { mediaKey } = useParams();
@@ -102,7 +101,6 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
               fileKey={mediaKey}
               key={mediaKey}
               targetDrive={ChatDrive}
-              fit="contain"
               lastModified={msg.fileMetadata.updated}
             />
           ) : payload ? (
