@@ -121,7 +121,7 @@ export const updateCacheConversations = (
     }>
   >(['conversations']);
 
-  if (!existingConversations) return;
+  if (!existingConversations || !existingConversations?.pages?.length) return;
 
   const newData = transformFn(existingConversations);
   if (!newData) return;
