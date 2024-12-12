@@ -12,6 +12,7 @@ import {
   getTextRootsRecursive,
   useAllContacts,
   findMentionedInRichText,
+  trimRichText,
 } from '@homebase-id/common-app';
 import { PaperPlane, Plus } from '@homebase-id/common-app/icons';
 import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
@@ -104,7 +105,7 @@ export const MessageComposer = ({
         channel,
         thread,
         threadParticipants: extendedParticipants,
-        message: message || '',
+        message: trimRichText(message) || '',
         files: newFiles,
         chatId: getNewId(),
         userDate: new Date().getTime(),

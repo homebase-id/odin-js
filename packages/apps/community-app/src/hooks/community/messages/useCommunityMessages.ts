@@ -260,7 +260,7 @@ export const useLastUpdatedChatMessages = ({
   useEffect(() => {
     setForceRefresh((prev) => prev + 1);
 
-    const interval = setInterval(() => setForceRefresh((prev) => prev + 1), 1000 * 60); // 1 minute
+    const interval = setInterval(() => setForceRefresh((prev) => prev + 1), 1000 * 10); // 10s
     return () => clearInterval(interval);
   }, []);
 
@@ -359,7 +359,15 @@ export const internalInsertNewMessage = (
     unknown
   >,
   newMessage: HomebaseFile<CommunityMessage>
-) => {
+): InfiniteData<
+  {
+    searchResults: (HomebaseFile<CommunityMessage> | null)[];
+    cursorState: string;
+    queryTime: number;
+    includeMetadataHeader: boolean;
+  },
+  unknown
+> => {
   const isNewFile = !extistingMessages.pages.some((page) =>
     page.searchResults.some(
       (msg) =>

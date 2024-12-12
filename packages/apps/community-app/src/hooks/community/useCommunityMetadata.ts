@@ -69,13 +69,13 @@ export const useCommunityMetadata = (props?: {
       );
       if (!serverVersion) return;
 
-      return await uploadCommunityMetadata(dotYouClient, {
-        ...metadata,
-        fileMetadata: {
-          ...metadata.fileMetadata,
-          versionTag: serverVersion.fileMetadata.versionTag,
-        },
-      });
+      const newlyMerged = mergeMetadata(metadata, serverVersion);
+      if (
+        metadata.fileMetadata.appData.content.lastReadTime >
+        newlyMerged.fileMetadata.appData.content.lastReadTime
+      ) {
+        return await uploadCommunityMetadata(dotYouClient, mergeMetadata(metadata, serverVersion));
+      }
     });
   };
 
@@ -123,6 +123,45 @@ export const useCommunityMetadata = (props?: {
         invalidateCommunityMetadata(queryClient, communityId);
       },
     }),
+  };
+};
+
+const mergeMetadata = (
+  local: HomebaseFile<CommunityMetadata> | NewHomebaseFile<CommunityMetadata>,
+  server: HomebaseFile<CommunityMetadata>
+): HomebaseFile<CommunityMetadata> => {
+  const localContent = local.fileMetadata.appData.content;
+  const serverContent = server.fileMetadata.appData.content;
+
+  return {
+    ...server,
+    fileMetadata: {
+      ...server.fileMetadata,
+      appData: {
+        ...server.fileMetadata.appData,
+        content: {
+          ...local.fileMetadata.appData.content,
+          lastReadTime: Math.max(localContent.lastReadTime, serverContent.lastReadTime),
+          channelLastReadTime: (() => {
+            const mergedKeys = [
+              ...Object.keys(localContent.channelLastReadTime),
+              ...Object.keys(serverContent.channelLastReadTime),
+            ];
+            return mergedKeys.reduce(
+              (acc, key) => {
+                acc[key] = Math.max(
+                  localContent.channelLastReadTime[key] || 0,
+                  serverContent.channelLastReadTime[key] || 0
+                );
+                return acc;
+              },
+              {} as { [key: string]: number }
+            );
+          })(),
+        },
+      },
+      versionTag: server.fileMetadata.versionTag,
+    },
   };
 };
 

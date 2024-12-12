@@ -183,6 +183,11 @@ export const CommunityHistory = ({
         className={`flex w-full ${alignTop ? '' : 'flex-grow'} faded-scrollbar flex-col-reverse overflow-auto py-0 sm:py-1 lg:py-5`}
         ref={scrollRef}
         key={channel?.fileId || community?.fileId}
+        data-query-group-id={
+          origin?.fileMetadata.globalTransitId ||
+          channel?.fileMetadata?.appData?.uniqueId ||
+          community?.fileMetadata?.appData?.uniqueId
+        }
       >
         <div
           className="relative w-full flex-shrink-0 flex-grow-0 overflow-hidden" // This overflow-hidden cuts of the context-menu of the first chat-items; But we need it as it otherwise breaks the scroll edges

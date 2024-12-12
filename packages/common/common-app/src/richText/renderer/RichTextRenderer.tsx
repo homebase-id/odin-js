@@ -240,7 +240,7 @@ export const RichTextRenderer = ({
         } else return <></>;
 
       default:
-        return <div {...attributes}>{children}</div>;
+        return children ? <span {...attributes}>{children}</span> : null;
     }
   };
 

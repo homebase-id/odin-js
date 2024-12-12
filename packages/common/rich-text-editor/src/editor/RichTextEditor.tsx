@@ -29,7 +29,6 @@ import {
 } from '@udecode/plate-basic-marks/react';
 import { KbdPlugin } from '@udecode/plate-kbd/react';
 import { AutoformatPlugin } from '@udecode/plate-autoformat/react';
-import { BlockSelectionPlugin } from '@udecode/plate-selection/react';
 import { EmojiInputPlugin, EmojiPlugin } from '@udecode/plate-emoji/react';
 import { ExitBreakPlugin, SoftBreakPlugin } from '@udecode/plate-break/react';
 import { NodeIdPlugin } from '@udecode/plate-node-id';
@@ -224,7 +223,6 @@ const InnerRichTextEditor = memo(
               rules: autoformatRules,
             },
           }),
-          BlockSelectionPlugin,
           ExitBreakPlugin.configure({
             options: {
               rules: [

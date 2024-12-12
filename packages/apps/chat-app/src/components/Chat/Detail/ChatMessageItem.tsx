@@ -65,7 +65,7 @@ export const ChatMessageItem = ({
         {isGroupChat && !messageFromMe ? (
           <ConnectionImage
             odinId={authorOdinId}
-            className="border border-neutral-200 dark:border-neutral-800"
+            className="flex-shrink-0 border border-neutral-200 dark:border-neutral-800"
             size="sm"
           />
         ) : null}

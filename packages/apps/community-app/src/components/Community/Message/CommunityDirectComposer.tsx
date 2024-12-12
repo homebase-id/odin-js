@@ -7,6 +7,7 @@ import {
   getTextRootsRecursive,
   LinkOverview,
   t,
+  trimRichText,
   useErrors,
   useLinkPreviewBuilder,
   VolatileInputRef,
@@ -87,7 +88,7 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = ({
     try {
       await sendMessage({
         conversation,
-        message: message || '',
+        message: trimRichText(message) || '',
         replyId: replyId,
         files: newFiles,
         chatId: getNewId(),
