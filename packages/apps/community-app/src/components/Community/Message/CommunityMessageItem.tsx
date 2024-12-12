@@ -322,13 +322,11 @@ const CommunityMediaMessageBody = ({
   return (
     <div className={`relative w-full max-w-[75vw] rounded-lg md:max-w-[90%]`}>
       {hasACaption ? (
-        <div className="flex min-w-0 flex-col md:flex-row md:justify-between">
-          <MessageTextRenderer
-            community={community}
-            message={content.message}
-            className={`whitespace-pre-wrap break-words`}
-          />
-        </div>
+        <MessageTextRenderer
+          community={community}
+          message={content.message}
+          className={`whitespace-pre-wrap break-words`}
+        />
       ) : null}
       <CommunityMedia
         msg={msg}
