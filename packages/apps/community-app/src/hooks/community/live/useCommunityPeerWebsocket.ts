@@ -61,7 +61,7 @@ export const useCommunityPeerWebsocket = (
         drivesEqual(notification.targetDrive, targetDrive)
       ) {
         if (notification.header.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE) {
-          const channelId = notification.header.fileMetadata.appData.groupId;
+          const groupId = notification.header.fileMetadata.appData.groupId;
 
           // This skips the invalidation of all chat messages, as we only need to add/update this specific message
           const updatedChatMessage = await wsDsrToMessage(
@@ -77,8 +77,8 @@ export const useCommunityPeerWebsocket = (
             Object.keys(updatedChatMessage.fileMetadata.appData.content).length === 0
           ) {
             // Something is up with the message, invalidate all messages for this conversation
-            console.warn('[CommunityWebsocket] Invalid message received', notification, channelId);
-            invalidateCommunityMessages(queryClient, communityId, channelId);
+            console.warn('[CommunityWebsocket] Invalid message received', notification, groupId);
+            invalidateCommunityMessages(queryClient, communityId, groupId);
             return;
           }
 

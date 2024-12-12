@@ -233,7 +233,7 @@ const processCommunityMessagesBatch = async (
   communityId: string,
   communityMessages: (HomebaseFile<string | CommunityMessage> | DeletedHomebaseFile<string>)[]
 ) => {
-  const uniqueMessagesPerChannel = communityMessages.reduce(
+  const groupedMessages = communityMessages.reduce(
     (acc, dsr) => {
       if (!dsr.fileMetadata?.appData?.groupId || dsr.fileState === 'deleted') {
         return acc;
@@ -244,7 +244,12 @@ const processCommunityMessagesBatch = async (
         acc[groupId] = [];
       }
 
-      if (acc[groupId].some((m) => stringGuidsEqual(m.fileId, dsr.fileId))) {
+      if (
+        acc[groupId].some((m) => stringGuidsEqual(m.fileId, dsr.fileId)) ||
+        acc[groupId].some((m) =>
+          stringGuidsEqual(m.fileMetadata.appData.uniqueId, dsr.fileMetadata.appData.uniqueId)
+        )
+      ) {
         return acc;
       }
 
@@ -256,14 +261,14 @@ const processCommunityMessagesBatch = async (
   isDebug &&
     console.debug(
       '[CommunityInboxProcessor] new conversation updates',
-      Object.keys(uniqueMessagesPerChannel).length
+      Object.keys(groupedMessages).length
     );
 
   await Promise.all(
-    Object.keys(uniqueMessagesPerChannel).map(async (channelId) => {
+    Object.keys(groupedMessages).map(async (channelId) => {
       const updatedcommunityMessages = (
         await Promise.all(
-          uniqueMessagesPerChannel[channelId].map(async (newMessage) =>
+          groupedMessages[channelId].map(async (newMessage) =>
             typeof newMessage.fileMetadata.appData.content === 'string' ||
             newMessage.fileMetadata.payloads?.some((pyld) => pyld.key === DEFAULT_PAYLOAD_KEY)
               ? await dsrToMessage(
