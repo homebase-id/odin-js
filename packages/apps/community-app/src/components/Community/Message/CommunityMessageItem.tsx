@@ -243,7 +243,7 @@ const MessageTextRenderer = ({
 
         if (type === 'p' || type === 'paragraph') {
           return (
-            <p {...attributes} className="min-h-2">
+            <p {...attributes} className="min-h-2 empty:min-h-0">
               {children}
             </p>
           );
