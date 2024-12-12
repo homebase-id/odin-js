@@ -1,6 +1,6 @@
 import { useParams, useMatch, useNavigate, useLocation, Navigate } from 'react-router-dom';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import {
   ActionGroup,
   ActionLink,
@@ -46,6 +46,29 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
     localStorage.setItem(LOCAL_STORAGE_KEY, location.pathname);
   }, [location.pathname]);
 
+  const viewportWrapperRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handler = () => {
+      if (window.visualViewport?.height && window.visualViewport?.height !== window.innerHeight) {
+        viewportWrapperRef.current?.style.setProperty(
+          'height',
+          `${window.visualViewport.height}px`
+        );
+        viewportWrapperRef.current?.style.setProperty('position', `fixed`);
+        viewportWrapperRef.current?.style.setProperty('top', `0`);
+        viewportWrapperRef.current?.style.setProperty('left', `0`);
+        viewportWrapperRef.current?.style.setProperty('right', `0`);
+        viewportWrapperRef.current?.style.setProperty('width', `100%`);
+      } else {
+        viewportWrapperRef.current?.style.removeProperty('height');
+        viewportWrapperRef.current?.style.removeProperty('position');
+      }
+    };
+
+    window.visualViewport?.addEventListener('resize', handler);
+    return () => window.visualViewport?.removeEventListener('resize', handler);
+  }, []);
+
   if (communities && !communityKey && !isCreateNew) {
     if (!location.state?.referrer || !location.state?.referrer.startsWith(COMMUNITY_ROOT_PATH)) {
       const lastPath = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -75,7 +98,7 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
         permissions={permissions}
       />
       <ExtendCriclePermissionDialog />
-      <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`}>
+      <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`} ref={viewportWrapperRef}>
         <CommunitySideNav />
         {isCreateNew ? (
           <NewCommunity />
