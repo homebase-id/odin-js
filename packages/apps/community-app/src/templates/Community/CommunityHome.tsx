@@ -49,13 +49,19 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   const viewportWrapperRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const handler = () => {
-      if (window.visualViewport?.height && window.visualViewport?.height !== window.innerHeight) {
+      if (
+        window.visualViewport?.height &&
+        (window.visualViewport?.height !== window.innerHeight || !!window.visualViewport.offsetTop)
+      ) {
         viewportWrapperRef.current?.style.setProperty(
           'height',
           `${window.visualViewport.height}px`
         );
         viewportWrapperRef.current?.style.setProperty('position', `fixed`);
-        viewportWrapperRef.current?.style.setProperty('top', `0`);
+        viewportWrapperRef.current?.style.setProperty(
+          'top',
+          `${window.visualViewport.offsetTop || 0}px`
+        );
         viewportWrapperRef.current?.style.setProperty('left', `0`);
         viewportWrapperRef.current?.style.setProperty('right', `0`);
         viewportWrapperRef.current?.style.setProperty('width', `100%`);
