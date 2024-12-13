@@ -1,11 +1,10 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 import { findMentionedInRichText, useDotYouClientContext } from '@homebase-id/common-app';
 import { useCommunityMetadata } from '../useCommunityMetadata';
 import { useCommunityChannels } from '../channels/useCommunityChannels';
 import { getCommunityMessagesInfiniteQueryOptions } from '../messages/useCommunityMessages';
-import { useEffect, useState } from 'react';
 
 export interface ThreadMeta {
   threadId: string;
@@ -27,81 +26,82 @@ export const useCommunityThreads = ({
   const identity = dotYouClient.getLoggedInIdentity();
   const { data: channels, isFetched } = useCommunityChannels({ odinId, communityId }).fetch;
 
-  const [meta, setMeta] = useState<ThreadMeta[]>();
-  const [refreshInterval, setRefreshInterval] = useState<number>(0);
+  const queryFn = async () => {
+    if (!channels) return;
 
-  useEffect(() => {
-    setTimeout(() => setRefreshInterval((old) => old + 1), 1000 * 30);
-  }, [isFetched, refreshInterval]);
-
-  useEffect(() => {
-    (async () => {
-      if (!channels) return;
-
-      const threadOrigins = (
-        await Promise.all(
-          channels.map(async (channel) => {
-            const channelMessages = await queryClient.fetchInfiniteQuery(
-              getCommunityMessagesInfiniteQueryOptions(
-                dotYouClient,
-                odinId,
-                communityId,
-                channel.fileMetadata.appData.uniqueId,
-                undefined
-              )
-            );
-            const flattenedMessages = channelMessages.pages.flatMap((page) => page.searchResults);
-            return flattenedMessages.filter(
-              (msg) =>
-                !!msg?.fileMetadata.reactionPreview &&
-                !!msg.fileMetadata.reactionPreview.totalCommentCount
-            );
-          })
-        )
-      ).flat();
-
-      const allThreadMeta = await Promise.all(
-        (threadOrigins.filter(Boolean) as HomebaseFile<CommunityMessage>[]).map(async (origin) => {
-          const replies = await queryClient.fetchInfiniteQuery(
+    const threadOrigins = (
+      await Promise.all(
+        channels.map(async (channel) => {
+          const channelMessages = await queryClient.fetchInfiniteQuery(
             getCommunityMessagesInfiniteQueryOptions(
               dotYouClient,
               odinId,
               communityId,
-              origin.fileMetadata.appData.content.channelId,
-              origin.fileMetadata.globalTransitId as string
+              channel.fileMetadata.appData.uniqueId,
+              undefined
             )
           );
-
-          const flattenedReplies = replies.pages
-            .flatMap((page) => page.searchResults)
-            .filter(Boolean) as HomebaseFile<CommunityMessage>[];
-          const participants = flattenedReplies.concat(origin).flatMap((msg) => {
-            const currentMessageMentions =
-              typeof msg.fileMetadata.appData.content.message === 'string'
-                ? []
-                : findMentionedInRichText(msg.fileMetadata.appData.content.message);
-            return [...currentMessageMentions, msg.fileMetadata.senderOdinId];
-          });
-
-          return {
-            threadId: origin.fileMetadata.appData.uniqueId as string,
-            channelId: origin.fileMetadata.appData.content.channelId,
-            lastMessageCreated: flattenedReplies[0]?.fileMetadata.created || 0,
-            lastAuthor: flattenedReplies[0]?.fileMetadata.senderOdinId || '',
-            participants: Array.from(new Set(participants)),
-          };
+          const flattenedMessages = channelMessages.pages.flatMap((page) => page.searchResults);
+          return flattenedMessages.filter(
+            (msg) =>
+              !!msg?.fileMetadata.reactionPreview &&
+              !!msg.fileMetadata.reactionPreview.totalCommentCount
+          );
         })
-      );
+      )
+    ).flat();
 
-      setMeta(
-        allThreadMeta
-          .filter((meta) => meta.participants.includes(identity))
-          .sort((a, b) => b.lastMessageCreated - a.lastMessageCreated)
-      );
-    })();
-  }, [channels, isFetched, refreshInterval]);
+    const allThreadMeta = await Promise.all(
+      (threadOrigins.filter(Boolean) as HomebaseFile<CommunityMessage>[]).map(async (origin) => {
+        const replies = await queryClient.fetchInfiniteQuery(
+          getCommunityMessagesInfiniteQueryOptions(
+            dotYouClient,
+            odinId,
+            communityId,
+            origin.fileMetadata.appData.content.channelId,
+            origin.fileMetadata.globalTransitId as string
+          )
+        );
 
-  return meta;
+        const flattenedReplies = replies.pages
+          .flatMap((page) => page.searchResults)
+          .filter(Boolean) as HomebaseFile<CommunityMessage>[];
+        const participants = flattenedReplies.concat(origin).flatMap((msg) => {
+          const currentMessageMentions =
+            typeof msg.fileMetadata.appData.content.message === 'string'
+              ? []
+              : findMentionedInRichText(msg.fileMetadata.appData.content.message);
+          return [...currentMessageMentions, msg.fileMetadata.senderOdinId];
+        });
+
+        return {
+          threadId: origin.fileMetadata.appData.uniqueId as string,
+          channelId: origin.fileMetadata.appData.content.channelId,
+          lastMessageCreated: flattenedReplies[0]?.fileMetadata.created || 0,
+          lastAuthor: flattenedReplies[0]?.fileMetadata.senderOdinId || '',
+          participants: Array.from(new Set(participants)),
+        };
+      })
+    );
+
+    return allThreadMeta
+      .filter((meta) => meta.participants.includes(identity))
+      .sort((a, b) => b.lastMessageCreated - a.lastMessageCreated);
+  };
+
+  return useQuery({
+    queryKey: ['community-threads', communityId],
+    queryFn: queryFn,
+    enabled: isFetched,
+    staleTime: 500, // Just enough to avoid double fetching on load
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
+  });
+};
+
+export const invalidateCommunityThreads = (queryClient: QueryClient, communityId: string) => {
+  queryClient.invalidateQueries({ queryKey: ['community-threads', communityId] });
 };
 
 export const useLastUpdatedThreadExcludingMine = (props: {
@@ -109,7 +109,7 @@ export const useLastUpdatedThreadExcludingMine = (props: {
   communityId: string | undefined;
 }) => {
   const identity = useDotYouClientContext().getLoggedInIdentity();
-  const flattedThreads = useCommunityThreads(props);
+  const { data: flattedThreads } = useCommunityThreads(props);
 
   return flattedThreads
     ?.filter((thread) => thread.lastAuthor !== identity)

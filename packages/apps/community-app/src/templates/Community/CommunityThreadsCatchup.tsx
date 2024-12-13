@@ -16,7 +16,7 @@ export const CommunityThreadsCatchup = memo(() => {
 
   useMarkCommunityAsRead({ odinId: odinKey, communityId, threads: true });
 
-  const flatThreadMetas = useCommunityThreads({
+  const { data: flatThreadMetas } = useCommunityThreads({
     odinId: odinKey,
     communityId: communityId,
   });

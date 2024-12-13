@@ -34,6 +34,7 @@ import {
   removeMessage,
 } from '../messages/useCommunityMessages';
 import { getPayloadAsJsonOverPeer } from '@homebase-id/js-lib/peer';
+import { invalidateCommunityThreads } from '../threads/useCommunityThreads';
 
 const isDebug = hasDebugFlag();
 
@@ -83,6 +84,9 @@ export const useCommunityPeerWebsocket = (
           }
 
           insertNewMessage(queryClient, updatedChatMessage, communityId);
+
+          if (updatedChatMessage.fileSystemType.toLowerCase() === 'comment')
+            invalidateCommunityThreads(queryClient, communityId);
         } else if (
           notification.header.fileMetadata.appData.fileType === COMMUNITY_CHANNEL_FILE_TYPE
         ) {
