@@ -152,6 +152,7 @@ export const dsrToCommunityMetadata = async (
             channelLastReadTime: {},
             pinnedChannels: [],
             lastReadTime: 0,
+            threadsLastReadTime: 0,
             communityId: dsr.fileMetadata.appData.uniqueId as string,
             odinId: window.location.host,
             ...definitionContent,
