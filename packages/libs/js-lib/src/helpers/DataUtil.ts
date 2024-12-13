@@ -425,7 +425,7 @@ const sanitizeJson = (str: string): string => {
   return str;
 };
 
-export const tryJsonParse = <T>(json: string): T => {
+export const tryJsonParse = <T>(json: string, onError?: (ex: unknown) => void): T => {
   try {
     if (typeof json === 'object') return json as T;
     if (!json || !json.length) return {} as T;
@@ -442,10 +442,8 @@ export const tryJsonParse = <T>(json: string): T => {
       console.warn('... but we fixed it');
       return o;
     } catch (ex) {
-      console.error(
-        'Parsing still failed after sanitization:',
-        ex && typeof ex === 'object' && 'stack' in ex ? ex.stack : ex
-      );
+      console.error('Parsing still failed after sanitization', ex);
+      onError && onError(ex);
       return {} as T;
     }
   }
