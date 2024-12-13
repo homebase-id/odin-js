@@ -48,31 +48,41 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
 
   const viewportWrapperRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    const cleanupStyle = () => {
+      viewportWrapperRef.current?.style.removeProperty('height');
+      viewportWrapperRef.current?.style.removeProperty('position');
+      viewportWrapperRef.current?.style.removeProperty('top');
+      viewportWrapperRef.current?.style.removeProperty('bottom');
+    };
+
     const handler = () => {
+      const visualViewportHeight = window.visualViewport?.height;
+      const offsetTop = window.visualViewport?.offsetTop;
+
       if (
         window.visualViewport?.height &&
-        (window.visualViewport?.height !== window.innerHeight || !!window.visualViewport.offsetTop)
+        (window.visualViewport?.height !== window.innerHeight || !!offsetTop)
       ) {
-        viewportWrapperRef.current?.style.setProperty(
-          'height',
-          `${window.visualViewport.height}px`
-        );
+        viewportWrapperRef.current?.style.setProperty('height', `${visualViewportHeight}px`);
         viewportWrapperRef.current?.style.setProperty('position', `fixed`);
-        viewportWrapperRef.current?.style.setProperty(
-          'top',
-          `${window.visualViewport.offsetTop || 0}px`
-        );
+        if (offsetTop) {
+          viewportWrapperRef.current?.style.setProperty('top', `${offsetTop}px`);
+        } else {
+          viewportWrapperRef.current?.style.setProperty('bottom', `0`);
+        }
         viewportWrapperRef.current?.style.setProperty('left', `0`);
         viewportWrapperRef.current?.style.setProperty('right', `0`);
         viewportWrapperRef.current?.style.setProperty('width', `100%`);
       } else {
-        viewportWrapperRef.current?.style.removeProperty('height');
-        viewportWrapperRef.current?.style.removeProperty('position');
+        cleanupStyle();
       }
     };
 
     window.visualViewport?.addEventListener('resize', handler);
-    return () => window.visualViewport?.removeEventListener('resize', handler);
+    return () => {
+      window.visualViewport?.removeEventListener('resize', handler);
+      cleanupStyle();
+    };
   }, []);
 
   if (communities && !communityKey && !isCreateNew) {
