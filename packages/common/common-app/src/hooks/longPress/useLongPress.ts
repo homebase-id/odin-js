@@ -5,16 +5,19 @@ import { useCallback, useRef, useState } from 'react';
 export const useLongPress = (
   onLongPress: (e?: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void,
   onClick: (e?: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void,
-  { shouldPreventDefault = true, delay = 300 } = {}
+  { shouldPreventDefault = true, delay = 300 } = {},
+  scrollableRef?: React.RefObject<HTMLElement>
 ) => {
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const timeout = useRef<NodeJS.Timeout>();
   const target = useRef<EventTarget>();
   const beforeScrollY = useRef<number>();
+  const getScrollY = () =>
+    scrollableRef && scrollableRef.current ? scrollableRef.current.scrollTop : window.scrollY;
 
   const start = useCallback(
     (event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => {
-      beforeScrollY.current = window.scrollY;
+      beforeScrollY.current = getScrollY();
 
       if (shouldPreventDefault && event.target) {
         event.target.addEventListener('touchend', preventDefault, {
@@ -23,7 +26,7 @@ export const useLongPress = (
         target.current = event.target;
       }
       timeout.current = setTimeout(() => {
-        const afterScrollY = window.scrollY;
+        const afterScrollY = getScrollY();
 
         if (Math.abs((beforeScrollY.current || 0) - afterScrollY) <= 20) {
           onLongPress(event);
@@ -41,7 +44,7 @@ export const useLongPress = (
     ) => {
       timeout.current && clearTimeout(timeout.current);
       if (shouldTriggerClick && !longPressTriggered) {
-        const afterScrollY = window.scrollY;
+        const afterScrollY = getScrollY();
         if (Math.abs((beforeScrollY.current || 0) - afterScrollY) <= 20) {
           onClick(event);
         }

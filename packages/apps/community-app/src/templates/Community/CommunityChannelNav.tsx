@@ -1,6 +1,6 @@
 import { useParams, useMatch, Link, useNavigate } from 'react-router-dom';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActionButton,
   COMMUNITY_ROOT_PATH,
@@ -70,6 +70,20 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
   const navigate = useNavigate();
 
   const [isExpanded, setIsExpanded] = useState(false);
+  const [unreadCountsPerChannel, setUnreadCountsPerChannel] = useState<Record<string, number>>({});
+  useEffect(() => {
+    if ('setAppBadge' in navigator && unreadCountsPerChannel) {
+      navigator.setAppBadge(Object.values(unreadCountsPerChannel).reduce((a, b) => a + b, 0));
+    }
+  }, [unreadCountsPerChannel]);
+
+  const setUnreadCountCallback = useCallback((identifier: string, count: number) => {
+    setUnreadCountsPerChannel((current) => ({
+      ...current,
+      [identifier]: count,
+    }));
+  }, []);
+
   if (!odinKey || !communityKey || isLoading || !community) return null;
 
   return (
@@ -109,7 +123,11 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
           </div>
 
           <div className="flex flex-col gap-1">
-            <ThreadItem odinId={odinKey} communityId={communityKey} />
+            <ThreadItem
+              odinId={odinKey}
+              communityId={communityKey}
+              setUnreadCount={setUnreadCountCallback}
+            />
             {/* <AllItem odinId={odinKey} communityId={communityKey} /> */}
             <LaterItem odinId={odinKey} communityId={communityKey} />
           </div>
@@ -122,6 +140,7 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
                 odinId={odinKey}
                 communityId={communityKey}
                 channel={channel}
+                setUnreadCount={setUnreadCountCallback}
                 key={channel.fileId || channel.fileMetadata.appData.uniqueId}
               />
             ))}
@@ -133,6 +152,7 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
                   odinId={odinKey}
                   communityId={communityKey}
                   channel={channel}
+                  setUnreadCount={setUnreadCountCallback}
                   key={channel.fileId || channel.fileMetadata.appData.uniqueId}
                 />
               ))}
@@ -160,6 +180,7 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
                 communityId={communityKey}
                 recipient={recipient}
                 key={recipient}
+                setUnreadCount={setUnreadCountCallback}
               />
             ))}
           </div>
@@ -186,11 +207,21 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
 //   );
 // };
 
-const ThreadItem = ({ odinId, communityId }: { odinId: string; communityId: string }) => {
+const ThreadItem = ({
+  odinId,
+  communityId,
+  setUnreadCount,
+}: {
+  odinId: string;
+  communityId: string;
+  setUnreadCount: (identifier: string, count: number) => void;
+}) => {
   const hasUnreadMessages = useHasUnreadThreads({ odinId, communityId });
 
   const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/threads`;
   const isActive = !!useMatch({ path: href, end: true });
+
+  useEffect(() => setUnreadCount('threads', hasUnreadMessages ? 1 : 0), [hasUnreadMessages]);
 
   return (
     <Link
@@ -224,10 +255,13 @@ const ChannelItem = ({
   odinId,
   communityId,
   channel,
+  setUnreadCount,
 }: {
   odinId: string;
   communityId: string;
   channel: ChannelWithRecentMessage;
+
+  setUnreadCount: (identifier: string, count: number) => void;
 }) => {
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const channelId = channel.fileMetadata.appData.uniqueId;
@@ -274,6 +308,10 @@ const ChannelItem = ({
     [messages, metadata]
   );
 
+  useEffect(
+    () => setUnreadCount(channel.fileMetadata.appData.uniqueId as string, unreadMessagesCount || 0),
+    [unreadMessagesCount]
+  );
   const hasUnreadMessages = !!unreadMessagesCount;
 
   return (
@@ -327,10 +365,12 @@ const DirectMessageItem = ({
   odinId,
   communityId,
   recipient,
+  setUnreadCount,
 }: {
   odinId: string;
   communityId: string;
   recipient: string;
+  setUnreadCount: (identifier: string, count: number) => void;
 }) => {
   const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getHostIdentity();
@@ -349,27 +389,30 @@ const DirectMessageItem = ({
 
   const { data: conversationMetadata } = useConversationMetadata({ conversationId }).single;
   const { data: messages } = useChatMessages({ conversationId }).all;
-  const flatMessages = useMemo(
-    () =>
-      messages?.pages
-        ?.flatMap((page) => page?.searchResults)
-        ?.filter(Boolean) as HomebaseFile<ChatMessage>[],
-    [messages]
-  );
-  const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
 
-  const lastReadTime = conversationMetadata?.fileMetadata.appData.content.lastReadTime || 0;
-  const unreadCount =
-    conversationMetadata &&
-    flatMessages &&
-    lastMessage?.fileMetadata.senderOdinId &&
-    lastMessage?.fileMetadata.senderOdinId !== identity
+  const unreadCount = useMemo(() => {
+    const flatMessages = messages?.pages
+      ?.flatMap((page) => page?.searchResults)
+      ?.filter(Boolean) as HomebaseFile<ChatMessage>[];
+
+    const lastMessage = flatMessages?.[0];
+    const lastReadTime = conversationMetadata?.fileMetadata.appData.content.lastReadTime || 0;
+
+    return conversationMetadata &&
+      flatMessages &&
+      lastMessage?.fileMetadata.senderOdinId &&
+      lastMessage?.fileMetadata.senderOdinId !== identity
       ? flatMessages.filter(
           (msg) =>
             msg.fileMetadata.senderOdinId !== identity &&
             (msg.fileMetadata.transitCreated || msg.fileMetadata.created) > lastReadTime
         )?.length
       : 0;
+  }, [messages, conversationMetadata]);
+
+  useEffect(() => {
+    setUnreadCount(recipient, unreadCount || 0);
+  }, [unreadCount]);
 
   return (
     <Link
