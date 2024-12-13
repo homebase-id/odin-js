@@ -17,6 +17,7 @@ import { jsonStringify64, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export interface CommunityMetadata {
   lastReadTime: number;
+  threadsLastReadTime: number;
   channelLastReadTime: Record<string, number>;
   pinnedChannels: string[];
   savedMessages: { messageId: string; systemFileType: SystemFileType }[];
