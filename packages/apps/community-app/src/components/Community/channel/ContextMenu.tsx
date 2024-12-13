@@ -12,6 +12,7 @@ import {
   useDotYouClientContext,
   useOutsideTrigger,
   ReactionsBarHandle,
+  usePortal,
 } from '@homebase-id/common-app';
 import { useRef, useState } from 'react';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
@@ -19,6 +20,8 @@ import { CommunityMessageInfo } from '../Message/detail/CommunityMessageInfo';
 import { CommunityReactionComposer } from '../Message/reactions/CommunityReactionComposer';
 import { Bookmark, BookmarkSolid, ReplyArrow } from '@homebase-id/common-app/icons';
 import { useCommunityLater } from '../../../hooks/community/useCommunityLater';
+import { isTouchDevice } from '@homebase-id/js-lib/helpers';
+import { createPortal } from 'react-dom';
 
 export interface CommunityActions {
   doReply?: (msg: HomebaseFile<CommunityMessage>) => void;
@@ -30,10 +33,14 @@ export const ContextMenu = ({
   msg,
   community,
   communityActions,
+  isTouchOpen,
+  setIsTouchOpen,
 }: {
   msg: HomebaseFile<CommunityMessage>;
   community?: HomebaseFile<CommunityDefinition>;
   communityActions?: CommunityActions;
+  isTouchOpen?: boolean;
+  setIsTouchOpen?: (isTouchOpen: boolean) => void;
 }) => {
   const [isStickyOpen, setIsStickyOpen] = useState(false);
   const reactionsBarRef = useRef<ReactionsBarHandle>(null);
@@ -43,25 +50,64 @@ export const ContextMenu = ({
     setIsStickyOpen(false);
   });
 
-  return (
-    <div
-      className={`absolute right-5 top-[-3rem] z-10 flex flex-row items-center rounded-lg bg-background px-1 py-2 text-foreground shadow-md ${isStickyOpen ? 'visible' : 'invisible group-hover:pointer-events-auto group-hover:visible'}`}
-      ref={wrapperRef}
-    >
-      <CommunityReactionComposer
-        ref={reactionsBarRef}
-        msg={msg}
-        community={community}
-        onOpen={() => setIsStickyOpen(true)}
-        onClose={() => setIsStickyOpen(false)}
-      />
-      <CommunityContextActions
-        msg={msg}
-        community={community}
-        communityActions={communityActions}
-      />
-    </div>
+  const isTouch = isTouchDevice();
+
+  const desktopPositionClasses = 'absolute right-5 top-[-3rem] z-10';
+  const desktopStyleClasses =
+    'flex flex-row items-center rounded-lg bg-background px-1 py-2 text-foreground shadow-md';
+
+  const ReactionComposer = (
+    <CommunityReactionComposer
+      ref={reactionsBarRef}
+      msg={msg}
+      community={community}
+      onOpen={() => setIsStickyOpen(true)}
+      onClose={() => setIsStickyOpen(false)}
+    />
   );
+
+  if (!isTouch) {
+    return (
+      <div
+        className={[
+          desktopPositionClasses,
+          desktopStyleClasses,
+          isStickyOpen
+            ? 'visible'
+            : `invisible ${isTouch ? '' : 'group-hover:pointer-events-auto group-hover:visible'}`,
+        ].join(' ')}
+        ref={wrapperRef}
+      >
+        {ReactionComposer}
+        <CommunityContextActions
+          msg={msg}
+          community={community}
+          communityActions={communityActions}
+        />
+      </div>
+    );
+  }
+
+  const target = usePortal('context-menu');
+
+  if (isTouch) {
+    if (isTouchOpen) {
+      return createPortal(
+        <div
+          className={'fixed inset-0 z-20 flex flex-col justify-end bg-page-background/70'}
+          // onClick={() => setIsOpen(false)}
+        >
+          <div className="min-h-40 rounded-t-md bg-background px-2 py-2">
+            <div className="px-2 pb-2">{ReactionComposer}</div>
+            <hr />
+            {/* TODO: Context actions in a flex-col listing */}
+          </div>
+        </div>,
+        target
+      );
+    }
+    return null;
+  }
 };
 
 const CommunityContextActions = ({
