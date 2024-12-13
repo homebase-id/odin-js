@@ -7,9 +7,12 @@ import {
 import { findMentionedInRichText, useDotYouClientContext } from '@homebase-id/common-app';
 import { formatGuidId } from '@homebase-id/js-lib/helpers';
 import { getCommunityMessageQueryOptions } from '../messages/useCommunityMessage';
+import { useCommunityMetadata } from '../useCommunityMetadata';
 
 const PAGE_SIZE = 100;
 
+// TODO: Change to fetch threads based on all community messages we got in cache filtered based on their reactionPreview;
+// If they got a reactionPreview, then they are the origin of a thread;
 export const useCommunityThreads = ({
   odinId,
   communityId,
@@ -143,4 +146,21 @@ const fetchCommunityThreads = async (
     ).sort((a, b) => b.lastMessageCreated - a.lastMessageCreated),
     cursorState: allThreadMessages.cursorState,
   };
+};
+
+export const useHasUnreadThreads = (props: { odinId: string; communityId: string }) => {
+  const { data } = useCommunityThreads(props).all;
+  const { data: metadata } = useCommunityMetadata(props).single;
+
+  const flattedThreads = data?.pages.flatMap((page) => page.searchResults);
+
+  const anyThreadHasUnread =
+    flattedThreads &&
+    flattedThreads?.some((thread) => {
+      // TODO: Set the threadsLastReadTime in the metadata
+      const lastReadTime = metadata?.fileMetadata.appData.content.threadsLastReadTime;
+      return !lastReadTime || lastReadTime < thread.lastMessageCreated;
+    });
+
+  return anyThreadHasUnread;
 };
