@@ -2,27 +2,24 @@ import { useCommunity } from '../../hooks/community/useCommunity';
 import { ErrorBoundary, LoadingBlock, t, COMMUNITY_ROOT_PATH } from '@homebase-id/common-app';
 import { Link, useParams } from 'react-router-dom';
 import { CommunityThread } from '../../components/Community/CommunityThread';
-import { memo, useMemo } from 'react';
+import { memo } from 'react';
 import { ChatBubble, ChevronLeft } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import { useCommunityThreads } from '../../hooks/community/threads/useCommunityThreads';
 import { CommunityThreadCatchup } from '../../components/Community/catchup/CommunityThreadCatchup';
+import { useMarkCommunityAsRead } from '../../hooks/community/useMarkCommunityAsRead';
 
 export const CommunityThreadsCatchup = memo(() => {
   const { odinKey, communityKey: communityId, threadKey } = useParams();
   const { data: community, isFetched } = useCommunity({ odinId: odinKey, communityId }).fetch;
 
-  const { data: threadMetas, isFetching } = useCommunityThreads({
+  useMarkCommunityAsRead({ odinId: odinKey, communityId, threads: true });
+
+  const { data: flatThreadMetas } = useCommunityThreads({
     odinId: odinKey,
     communityId: communityId,
-    onlyWithMe: true,
-  }).all;
-
-  const flatThreadMetas = useMemo(
-    () => threadMetas?.pages.flatMap((page) => page.searchResults),
-    [threadMetas]
-  );
+  });
 
   if (!community && isFetched)
     return (
@@ -31,7 +28,7 @@ export const CommunityThreadsCatchup = memo(() => {
       </div>
     );
 
-  if (!community || isFetching) {
+  if (!community) {
     return (
       <div className="h-full w-20 flex-grow bg-background">
         <LoadingBlock className="h-16 w-full" />

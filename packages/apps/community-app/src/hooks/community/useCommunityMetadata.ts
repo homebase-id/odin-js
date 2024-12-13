@@ -35,6 +35,7 @@ export const useCommunityMetadata = (props?: {
               pinnedChannels: [],
               savedMessages: [],
               lastReadTime: 0,
+              threadsLastReadTime: 0,
               channelLastReadTime: {},
             },
           },

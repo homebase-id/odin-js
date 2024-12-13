@@ -349,6 +349,7 @@ const CommunityMessageThreadSummary = ({
 
   const {
     data: messages,
+    isFetched,
     isFetching,
     isRefetching,
     refetch,
@@ -370,13 +371,30 @@ const CommunityMessageThreadSummary = ({
     return { flattenedMsgs, uniqueSenders };
   }, [messages]);
 
+  // Auto heal bad data
+  const [refetchCount, setRefetchCount] = useState(0);
+  useEffect(() => {
+    setRefetchCount((old) => {
+      if (old <= 2) {
+        if (isFetched && !flattenedMsgs.length) {
+          console.warn(
+            `[CommunityMessageThreadSummary] The message indicates there are replies, but we didn't find any ${msg.fileId} (${old})`
+          );
+          refetch();
+        }
+      }
+
+      return old + 1;
+    });
+  }, [isFetched, flattenedMsgs]);
+
   if (!flattenedMsgs?.length) {
-    if (isFetching && !isRefetching) return null;
+    if (isFetching && !isRefetching && refetchCount <= 2) return null;
     return (
-      <div className="rounded-md border bg-slate-100 p-2 dark:bg-slate-700">
+      <div className="mt-1 rounded-md border bg-slate-100 p-2 dark:bg-slate-700">
         <p className="text-lg">{t('Bad data!')}</p>
         <p>
-          {t("The message says there are replies, but we didn't find any")}{' '}
+          {t("The message indicates there are replies, but we didn't find any")}{' '}
           <ActionButton
             type="secondary"
             state={isRefetching ? 'loading' : undefined}

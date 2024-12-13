@@ -61,8 +61,6 @@ export const ExtensionThumbnail = ({
   if (contentTypeExtension === 'json' || contentType === 'xml')
     return <FileIcon className={className} />;
 
-  console.log('contentTypeExtension', contentTypeExtension);
-
   return (
     <div
       className={`${className || ''} aspect-square flex flex-col items-center justify-center bg-indigo-200 text-[0.7rem] uppercase dark:bg-indigo-800 break-all overflow-hidden`}

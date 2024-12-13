@@ -315,7 +315,14 @@ export const getContentFromHeaderOrPayloadOverPeer = async <T>(
       if (!fileHeader) return null;
       decryptedJsonContent = await decryptJsonContent(fileHeader.fileMetadata, keyHeader);
     }
-    return tryJsonParse<T>(decryptedJsonContent);
+    return tryJsonParse<T>(decryptedJsonContent, (ex) => {
+      console.error(
+        '[odin-js] getContentFromHeaderOrPayloadOverPeer: Error parsing JSON',
+        ex && typeof ex === 'object' && 'stack' in ex ? ex.stack : ex,
+        dsr.fileId,
+        targetDrive
+      );
+    });
   } else {
     const payloadDescriptor = dsr.fileMetadata.payloads?.find(
       (payload) => payload.key === DEFAULT_PAYLOAD_KEY

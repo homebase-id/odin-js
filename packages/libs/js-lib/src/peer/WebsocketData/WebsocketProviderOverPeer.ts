@@ -24,13 +24,13 @@ let activeSs: Uint8Array;
 let subscribedDrives: TargetDrive[] | undefined;
 
 let connectPromise: Promise<void> | undefined = undefined;
-let isConnected = false;
+let isHandshaked = false;
 const PING_INTERVAL = 1000 * 5 * 1;
 
 let pingInterval: NodeJS.Timeout | undefined;
 let lastPong: number | undefined;
 
-let reconnectTimeout: NodeJS.Timeout | undefined;
+let reconnectPromise: Promise<void> | undefined = undefined;
 
 const subscribers: {
   handler: (dotYouClient: DotYouClient, data: TypedConnectionNotification) => void;
@@ -109,6 +109,8 @@ const ConnectSocket = async (
     // @ts-ignore
     webSocketClient = new WebSocket(url, undefined, args);
     if (isDebug) console.debug(`[WebsocketProviderOverPeer] Client connected`);
+    reconnectPromise = undefined;
+    isHandshaked = false;
 
     webSocketClient.onopen = () => {
       const establishConnectionRequest: EstablishConnectionRequest = {
@@ -146,11 +148,11 @@ const ConnectSocket = async (
         console.warn('[WebsocketProviderOverPeer] Error:', notification.data);
       }
 
-      if (!isConnected) {
+      if (!isHandshaked) {
         // First message must be acknowledgement of successful handshake
         if (notification.notificationType == 'deviceHandshakeSuccess') {
           if (isDebug) console.debug(`[WebsocketProviderOverPeer] Device handshake success`);
-          isConnected = true;
+          isHandshaked = true;
           setupPing();
           resolve();
           return;
@@ -178,11 +180,8 @@ const ConnectSocket = async (
           console.debug('[WebsocketProviderOverPeer] Connection closed unexpectedly', e);
         }
       }
-      // Only force reconnect if it wasn't clean/expected
-      if (!e.wasClean) {
-        subscribers.map((subscriber) => subscriber.onDisconnect && subscriber.onDisconnect());
-        ReconnectSocket(dotYouClient, odinId, drives, args);
-      }
+
+      ReconnectSocket(dotYouClient, odinId, drives, args);
     };
   });
 };
@@ -193,22 +192,26 @@ const ReconnectSocket = async (
   drives: TargetDrive[],
   args?: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this
 ) => {
-  if (reconnectTimeout) return;
+  if (reconnectPromise) return;
+  subscribers.map((subscriber) => subscriber.onDisconnect && subscriber.onDisconnect());
 
-  reconnectTimeout = setTimeout(async () => {
-    reconnectTimeout = undefined;
-    if (webSocketClient) webSocketClient.close(1000, 'Disconnect after timeout');
-    webSocketClient = undefined;
-    lastPong = undefined;
-    isConnected = false;
-    connectPromise = undefined;
-    clearInterval(pingInterval);
+  reconnectPromise = new Promise<void>((resolve) => {
+    // Delay the reconnect to avoid a tight loop on network issues
+    setTimeout(async () => {
+      if (webSocketClient) webSocketClient.close(1000, 'Disconnect after timeout');
+      webSocketClient = undefined;
+      lastPong = undefined;
+      connectPromise = undefined;
+      clearInterval(pingInterval);
 
-    if (isDebug) console.debug('[WebsocketProviderOverPeer] Reconnecting');
+      if (isDebug) console.debug('[WebsocketProviderOverPeer] Reconnecting');
 
-    await ConnectSocket(dotYouClient, odinId, drives, args);
-    subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
-  }, 5000);
+      await ConnectSocket(dotYouClient, odinId, drives, args);
+      subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
+
+      resolve();
+    }, 5000);
+  });
 };
 
 const DisconnectSocket = async () => {
@@ -220,7 +223,7 @@ const DisconnectSocket = async () => {
   }
   if (isDebug) console.debug(`[WebsocketProviderOverPeer] Client disconnected`);
 
-  isConnected = false;
+  isHandshaked = false;
   connectPromise = undefined;
   webSocketClient = undefined;
   clearInterval(pingInterval);
@@ -273,7 +276,7 @@ export const UnsubscribeOverPeer = (
   if (index !== -1) {
     subscribers.splice(index, 1);
 
-    if (subscribers.length === 0 && isConnected) {
+    if (subscribers.length === 0 && isHandshaked) {
       DisconnectSocket();
     }
   }

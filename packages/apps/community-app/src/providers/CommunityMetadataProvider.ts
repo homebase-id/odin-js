@@ -17,6 +17,7 @@ import { jsonStringify64, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export interface CommunityMetadata {
   lastReadTime: number;
+  threadsLastReadTime: number;
   channelLastReadTime: Record<string, number>;
   pinnedChannels: string[];
   savedMessages: { messageId: string; systemFileType: SystemFileType }[];
@@ -151,6 +152,7 @@ export const dsrToCommunityMetadata = async (
             channelLastReadTime: {},
             pinnedChannels: [],
             lastReadTime: 0,
+            threadsLastReadTime: 0,
             communityId: dsr.fileMetadata.appData.uniqueId as string,
             odinId: window.location.host,
             ...definitionContent,

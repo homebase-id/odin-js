@@ -32,6 +32,7 @@ import { useChatMessages } from '@homebase-id/chat-app/src/hooks/chat/useChatMes
 import { ChatMessage } from '@homebase-id/chat-app/src/providers/ChatProvider';
 import { ConversationWithYourselfId } from '@homebase-id/chat-app/src/providers/ConversationProvider';
 import { useCommunityMessages } from '../../hooks/community/messages/useCommunityMessages';
+import { useHasUnreadThreads } from '../../hooks/community/threads/useCommunityThreads';
 
 const maxChannels = 7;
 export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
@@ -186,15 +187,20 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
 // };
 
 const ThreadItem = ({ odinId, communityId }: { odinId: string; communityId: string }) => {
+  const hasUnreadMessages = useHasUnreadThreads({ odinId, communityId });
+
   const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/threads`;
   const isActive = !!useMatch({ path: href, end: true });
 
   return (
     <Link
       to={href}
-      className={`flex flex-row items-center gap-2 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`}`}
+      className={`flex flex-row items-center gap-2 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`} ${hasUnreadMessages && !isActive ? 'font-bold' : ''}`}
     >
       <ChatBubble className="h-5 w-5" /> {t('Threads')}
+      {hasUnreadMessages && !isActive ? (
+        <span className="my-auto flex h-3 w-3 items-center justify-center rounded-full bg-current text-sm font-normal" />
+      ) : null}
     </Link>
   );
 };
@@ -273,7 +279,7 @@ const ChannelItem = ({
   return (
     <Link
       to={`${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/${channelId}`}
-      className={`group flex flex-row items-center gap-1 rounded-md px-2 py-[0.15rem] ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''} ${isVisited ? 'text-purple-700' : ''}`} ${hasUnreadMessages ? 'font-bold' : ''}`}
+      className={`group flex flex-row items-center gap-1 rounded-md px-2 py-[0.15rem] ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''} ${isVisited ? 'text-purple-700' : ''}`} ${hasUnreadMessages && !isActive ? 'font-bold' : ''}`}
     >
       # {channel.fileMetadata.appData.content?.title?.toLowerCase()}
       <button
@@ -306,7 +312,7 @@ const ChannelItem = ({
           }`}
         />
       </button>
-      {unreadMessagesCount ? (
+      {unreadMessagesCount && !isActive ? (
         <span className="my-auto flex h-6 w-6 items-center justify-center rounded-full bg-current text-sm font-normal">
           <span className={isActive ? 'text-black dark:text-white' : 'text-white dark:text-black'}>
             {unreadMessagesCount}

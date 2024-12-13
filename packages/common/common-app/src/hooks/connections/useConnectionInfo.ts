@@ -7,11 +7,16 @@ import {
 } from '@homebase-id/js-lib/network';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
+const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]{2,25}(?::\d{1,5})?$/i;
 export const useConnectionInfo = ({ odinId }: { odinId?: string }) => {
   const dotYouClient = useDotYouClientContext();
 
   const doGetConnectionInfo = async (odinId: string) => {
     if (!odinId) return null;
+
+    if (!domainRegex.test(odinId)) {
+      return null;
+    }
 
     const connectionInfo = await getConnectionInfo(dotYouClient, odinId);
     if (connectionInfo && connectionInfo.status.toLowerCase() !== 'none')

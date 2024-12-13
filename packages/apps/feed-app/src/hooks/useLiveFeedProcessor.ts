@@ -140,8 +140,8 @@ const useFeedWebSocket = (isEnabled: boolean) => {
     undefined,
     ['fileAdded', 'fileModified', 'statisticsChanged'],
     websocketDrives as TargetDrive[],
-    undefined,
-    undefined,
+    () => queryClient.invalidateQueries({ queryKey: ['process-feed-inbox'] }),
+    () => queryClient.invalidateQueries({ queryKey: ['process-feed-inbox'] }),
     'useLiveFeedProcessor'
   );
 };

@@ -97,13 +97,16 @@ export const invalidateCommunityMessages = (
     formatGuidId(threadId || channelId || communityId),
   ].filter(Boolean);
 
-  // Clear the excess pages
-  queryClient.setQueryData(queryKey, (data: InfiniteData<unknown, unknown>) => {
-    return {
-      pages: data?.pages?.slice(0, 1) ?? [],
-      pageParams: data?.pageParams?.slice(0, 1) || [undefined],
-    };
-  });
+  if (queryKey.length > 2) {
+    queryClient.setQueryData(queryKey, (data: InfiniteData<unknown, unknown>) => {
+      if (!data?.pages?.length || data?.pages?.length === 1) return data;
+
+      return {
+        pages: data?.pages?.slice(0, 1) ?? [],
+        pageParams: data?.pageParams?.slice(0, 1) || [undefined],
+      };
+    });
+  }
 
   queryClient.invalidateQueries({
     queryKey: queryKey,

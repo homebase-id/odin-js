@@ -1,21 +1,36 @@
 import { useEffect } from 'react';
 import { useCommunityMetadata } from './useCommunityMetadata';
 import { useLastUpdatedChatMessages } from './messages/useCommunityMessages';
+import { useLastUpdatedThreadExcludingMine } from './threads/useCommunityThreads';
+
+interface MarkCommunityChannelAsReadProps {
+  odinId: string | undefined;
+  communityId: string | undefined;
+  channelId: string | undefined;
+}
+
+interface MarkCommunityThreadsAsReadProps {
+  odinId: string | undefined;
+  communityId: string | undefined;
+  threads: true;
+}
 
 export const useMarkCommunityAsRead = ({
   odinId,
   communityId,
-  channelId,
-}: {
-  odinId: string | undefined;
-  communityId: string | undefined;
-  channelId?: string;
-}) => {
+  ...props
+}: MarkCommunityChannelAsReadProps | MarkCommunityThreadsAsReadProps) => {
+  const channelId = (props as MarkCommunityChannelAsReadProps).channelId;
+  const threads = (props as MarkCommunityThreadsAsReadProps).threads;
+
   const {
     single: { data: metadata },
     update: { mutate: updateMetadata, status: updateStatus },
   } = useCommunityMetadata({ odinId, communityId });
   const { lastUpdate } = useLastUpdatedChatMessages({ communityId });
+  const lastUpdatedThreads =
+    (threads && useLastUpdatedThreadExcludingMine({ odinId, communityId })?.lastMessageCreated) ||
+    undefined;
 
   useEffect(() => {
     if (
@@ -34,7 +49,9 @@ export const useMarkCommunityAsRead = ({
     if (
       savedLastReadTime &&
       savedLastReadTime >= lastUpdate &&
-      (!channelId || (savedLastReadTimeChannel && savedLastReadTimeChannel >= lastUpdate))
+      (!channelId || (savedLastReadTimeChannel && savedLastReadTimeChannel >= lastUpdate)) &&
+      (!lastUpdatedThreads ||
+        lastUpdatedThreads <= metadata?.fileMetadata.appData.content.threadsLastReadTime)
     )
       return;
 
@@ -49,6 +66,10 @@ export const useMarkCommunityAsRead = ({
             content: {
               ...metadata.fileMetadata.appData.content,
               lastReadTime: lastUpdate,
+              threadsLastReadTime:
+                lastUpdatedThreads ||
+                metadata.fileMetadata.appData.content.threadsLastReadTime ||
+                0,
               channelLastReadTime: channelId
                 ? {
                     ...metadata.fileMetadata.appData.content.channelLastReadTime,
@@ -60,5 +81,5 @@ export const useMarkCommunityAsRead = ({
         },
       },
     });
-  }, [updateStatus, metadata, communityId, channelId, lastUpdate]);
+  }, [updateStatus, metadata, communityId, channelId, lastUpdate, lastUpdatedThreads]);
 };

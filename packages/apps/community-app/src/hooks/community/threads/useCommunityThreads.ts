@@ -1,146 +1,139 @@
-import { DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
-import { QueryClient, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  CommunityMessage,
-  getCommunityMessages,
-} from '../../../providers/CommunityMessageProvider';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
+import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 import { findMentionedInRichText, useDotYouClientContext } from '@homebase-id/common-app';
-import { formatGuidId } from '@homebase-id/js-lib/helpers';
-import { getCommunityMessageQueryOptions } from '../messages/useCommunityMessage';
-
-const PAGE_SIZE = 100;
-
-export const useCommunityThreads = ({
-  odinId,
-  communityId,
-  onlyWithMe,
-}: {
-  odinId?: string;
-  communityId?: string;
-  onlyWithMe?: boolean;
-}) => {
-  const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
-
-  return {
-    all: useInfiniteQuery({
-      queryFn: ({ pageParam }) =>
-        fetchCommunityThreads(
-          queryClient,
-          dotYouClient,
-          odinId as string,
-          communityId as string,
-          onlyWithMe,
-          pageParam
-        ),
-      queryKey: ['community-threads', formatGuidId(communityId), onlyWithMe ? 'me' : ''],
-      initialPageParam: undefined as string | undefined,
-      getNextPageParam: (lastPage) =>
-        lastPage?.searchResults && lastPage?.searchResults?.length >= PAGE_SIZE
-          ? lastPage.cursorState
-          : undefined,
-      staleTime: 1000 * 60 * 60 * 24, // 24 hour
-      enabled: !!odinId && !!communityId,
-    }),
-  };
-};
+import { useCommunityMetadata } from '../useCommunityMetadata';
+import { useCommunityChannels } from '../channels/useCommunityChannels';
+import { getCommunityMessagesInfiniteQueryOptions } from '../messages/useCommunityMessages';
 
 export interface ThreadMeta {
   threadId: string;
   channelId: string;
   lastMessageCreated: number;
+  lastAuthor: string;
   participants: string[];
 }
 
-const fetchCommunityThreads = async (
-  queryClient: QueryClient,
-  dotYouClient: DotYouClient,
-  odinId: string,
-  communityId: string,
-  onlyWithMe: boolean | undefined,
-  cursorState: string | undefined
-) => {
-  const allThreadMessages = await getCommunityMessages(
-    dotYouClient,
-    odinId,
-    communityId,
-    undefined,
-    undefined,
-    cursorState,
-    PAGE_SIZE,
-    'Comment'
-  );
+export const useCommunityThreads = ({
+  odinId,
+  communityId,
+}: {
+  odinId?: string;
+  communityId?: string;
+}) => {
+  const queryClient = useQueryClient();
+  const dotYouClient = useDotYouClientContext();
+  const identity = dotYouClient.getLoggedInIdentity();
+  const { data: channels, isFetched } = useCommunityChannels({ odinId, communityId }).fetch;
 
-  const extendMetaWithNewMessage = (
-    meta: ThreadMeta | undefined,
-    thread: HomebaseFile<CommunityMessage>
-  ) => {
-    if (!thread.fileMetadata.appData.content.threadId && !meta?.threadId) return meta;
+  const queryFn = async () => {
+    if (!channels) return;
 
-    const currentMessageMentions =
-      typeof thread.fileMetadata.appData.content.message === 'string'
-        ? []
-        : findMentionedInRichText(thread.fileMetadata.appData.content.message);
+    const threadOrigins = (
+      await Promise.all(
+        channels.map(async (channel) => {
+          const channelMessages = await queryClient.fetchInfiniteQuery(
+            getCommunityMessagesInfiniteQueryOptions(
+              dotYouClient,
+              odinId,
+              communityId,
+              channel.fileMetadata.appData.uniqueId,
+              undefined
+            )
+          );
+          const flattenedMessages = channelMessages.pages.flatMap((page) => page.searchResults);
+          return flattenedMessages.filter(
+            (msg) =>
+              !!msg?.fileMetadata.reactionPreview &&
+              !!msg.fileMetadata.reactionPreview.totalCommentCount
+          );
+        })
+      )
+    ).flat();
 
-    const threadMeta: ThreadMeta = {
-      ...meta,
-      threadId: (meta?.threadId || thread.fileMetadata.appData.content.threadId) as string,
-      channelId: thread.fileMetadata.appData.content.channelId,
-      lastMessageCreated: Math.max(meta?.lastMessageCreated || 0, thread.fileMetadata.created),
-      participants: Array.from(
-        new Set([
-          ...(meta?.participants || []),
-          ...currentMessageMentions,
-          thread.fileMetadata.senderOdinId,
-        ])
-      ),
-    };
+    const allThreadMeta = await Promise.all(
+      (threadOrigins.filter(Boolean) as HomebaseFile<CommunityMessage>[]).map(async (origin) => {
+        const replies = await queryClient.fetchInfiniteQuery(
+          getCommunityMessagesInfiniteQueryOptions(
+            dotYouClient,
+            odinId,
+            communityId,
+            origin.fileMetadata.appData.content.channelId,
+            origin.fileMetadata.globalTransitId as string
+          )
+        );
 
-    return threadMeta;
-  };
+        const flattenedReplies = replies.pages
+          .flatMap((page) => page.searchResults)
+          .filter(Boolean) as HomebaseFile<CommunityMessage>[];
+        const participants = flattenedReplies.concat(origin).flatMap((msg) => {
+          const currentMessageMentions =
+            typeof msg.fileMetadata.appData.content.message === 'string'
+              ? []
+              : findMentionedInRichText(msg.fileMetadata.appData.content.message);
+          return [...currentMessageMentions, msg.fileMetadata.senderOdinId];
+        });
 
-  const allThreads = allThreadMessages.searchResults.reduce(
-    (acc, thread) => {
-      if (!thread.fileMetadata.appData.content.threadId) return acc;
-
-      const existingThreadMeta = acc[formatGuidId(thread.fileMetadata.appData.content.threadId)];
-      const threadMeta = extendMetaWithNewMessage(existingThreadMeta, thread);
-
-      return {
-        ...acc,
-        [formatGuidId(thread.fileMetadata.appData.content.threadId)]: threadMeta,
-      };
-    },
-    {} as Record<string, ThreadMeta | undefined>
-  );
-
-  for (let i = 0; i < Object.keys(allThreads).length; i++) {
-    const threadId = Object.keys(allThreads)[i];
-    const originMessage = await queryClient.fetchQuery(
-      getCommunityMessageQueryOptions(queryClient, dotYouClient, {
-        odinId,
-        communityId,
-        messageId: threadId,
+        return {
+          threadId: origin.fileMetadata.appData.uniqueId as string,
+          channelId: origin.fileMetadata.appData.content.channelId,
+          lastMessageCreated: flattenedReplies[0]?.fileMetadata.created || 0,
+          lastAuthor: flattenedReplies[0]?.fileMetadata.senderOdinId || '',
+          participants: Array.from(new Set(participants)),
+        };
       })
     );
 
-    if (!originMessage) continue;
-    allThreads[threadId] = extendMetaWithNewMessage(allThreads[threadId], originMessage);
-  }
-
-  return {
-    searchResults: (
-      Object.values(allThreads).filter((threadMeta) => {
-        if (!threadMeta) return false;
-
-        if (onlyWithMe)
-          return (
-            threadMeta.participants.includes(dotYouClient.getLoggedInIdentity()) ||
-            threadMeta.participants.includes('@channel')
-          );
-        else return true;
-      }) as ThreadMeta[]
-    ).sort((a, b) => b.lastMessageCreated - a.lastMessageCreated),
-    cursorState: allThreadMessages.cursorState,
+    return allThreadMeta
+      .filter((meta) => meta.participants.includes(identity))
+      .sort((a, b) => b.lastMessageCreated - a.lastMessageCreated);
   };
+
+  return useQuery({
+    queryKey: ['community-threads', communityId],
+    queryFn: queryFn,
+    enabled: isFetched,
+    staleTime: 500, // Just enough to avoid double fetching on load
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
+  });
+};
+
+export const invalidateCommunityThreads = (queryClient: QueryClient, communityId: string) => {
+  queryClient.invalidateQueries({ queryKey: ['community-threads', communityId] });
+};
+
+export const useLastUpdatedThreadExcludingMine = (props: {
+  odinId: string | undefined;
+  communityId: string | undefined;
+}) => {
+  const identity = useDotYouClientContext().getLoggedInIdentity();
+  const { data: flattedThreads } = useCommunityThreads(props);
+
+  return flattedThreads
+    ?.filter((thread) => thread.lastAuthor !== identity)
+    ?.reduce(
+      (acc, thread) => {
+        if (thread.lastAuthor === identity) return acc;
+
+        if (!acc || acc.lastMessageCreated < thread.lastMessageCreated) {
+          return thread;
+        }
+        return acc;
+      },
+      undefined as ThreadMeta | undefined
+    );
+};
+
+export const useHasUnreadThreads = (props: { odinId: string; communityId: string }) => {
+  const { data: metadata } = useCommunityMetadata(props).single;
+  const lastUpdatedThread = useLastUpdatedThreadExcludingMine(props);
+
+  return (
+    lastUpdatedThread &&
+    (!metadata ||
+      metadata?.fileMetadata.appData.content.threadsLastReadTime <
+        lastUpdatedThread.lastMessageCreated)
+  );
 };

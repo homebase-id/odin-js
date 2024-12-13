@@ -99,7 +99,7 @@ export const trimRichText = (richText: RichText | undefined): RichText | undefin
 
   trimmed.push(trimNodeRecursive(richText[0]));
   if (richText.length >= 2) {
-    trimmed.push(...richText.slice(1, -1));
+    trimmed.push(...richText.slice(1, richText.length >= 3 ? -1 : undefined));
     if (richText.length >= 3) trimmed.push(trimNodeRecursive(richText[richText.length - 1]));
   }
 
