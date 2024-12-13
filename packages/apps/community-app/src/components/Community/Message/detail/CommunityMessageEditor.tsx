@@ -2,7 +2,7 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 
 import { ActionButton, ErrorNotification, t, useAllContacts } from '@homebase-id/common-app';
 
-import { lazy, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 
 import { isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
@@ -83,46 +83,48 @@ export const CommunityMessageEditor = ({
   return (
     <div>
       <ErrorNotification error={updateError} />
-      <RichTextEditor
-        placeholder="Your message"
-        defaultValue={message}
-        className="min-h-[10rem] w-full border bg-background p-2 dark:border-slate-800"
-        contentClassName="max-h-[50vh] overflow-auto"
-        onChange={(e) => setMessage(e.target.value)}
-        autoFocus={!isTouchDevice()}
-        onSubmit={isTouchDevice() ? undefined : doSend}
-        mentionables={mentionables}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape')
-            confirm(t('Are you sure? You will lose any pending changes')) && onClose();
-        }}
-      >
-        <div className="">
-          <div className="flex flex-row-reverse gap-2">
-            <ActionButton
-              type="primary"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                doSend();
-              }}
-              state={updateStatus}
-              size="square"
-              onMouseDown={(e) => e.preventDefault()}
-            >
-              {t('Save')}
-            </ActionButton>
-            <ActionButton
-              type="mute"
-              onClick={onClose}
-              size="square"
-              onMouseDown={(e) => e.preventDefault()}
-            >
-              {t('Cancel')}
-            </ActionButton>
+      <Suspense>
+        <RichTextEditor
+          placeholder="Your message"
+          defaultValue={message}
+          className="min-h-[10rem] w-full border bg-background p-2 dark:border-slate-800"
+          contentClassName="max-h-[50vh] overflow-auto"
+          onChange={(e) => setMessage(e.target.value)}
+          autoFocus={!isTouchDevice()}
+          onSubmit={isTouchDevice() ? undefined : doSend}
+          mentionables={mentionables}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape')
+              confirm(t('Are you sure? You will lose any pending changes')) && onClose();
+          }}
+        >
+          <div className="">
+            <div className="flex flex-row-reverse gap-2">
+              <ActionButton
+                type="primary"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  doSend();
+                }}
+                state={updateStatus}
+                size="square"
+                onMouseDown={(e) => e.preventDefault()}
+              >
+                {t('Save')}
+              </ActionButton>
+              <ActionButton
+                type="mute"
+                onClick={onClose}
+                size="square"
+                onMouseDown={(e) => e.preventDefault()}
+              >
+                {t('Cancel')}
+              </ActionButton>
+            </div>
           </div>
-        </div>
-      </RichTextEditor>
+        </RichTextEditor>
+      </Suspense>
     </div>
   );
 };
