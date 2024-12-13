@@ -180,6 +180,7 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
                 communityId={communityKey}
                 recipient={recipient}
                 key={recipient}
+                setUnreadCount={setUnreadCountCallback}
               />
             ))}
           </div>
@@ -364,10 +365,12 @@ const DirectMessageItem = ({
   odinId,
   communityId,
   recipient,
+  setUnreadCount,
 }: {
   odinId: string;
   communityId: string;
   recipient: string;
+  setUnreadCount: (identifier: string, count: number) => void;
 }) => {
   const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getHostIdentity();
@@ -386,27 +389,30 @@ const DirectMessageItem = ({
 
   const { data: conversationMetadata } = useConversationMetadata({ conversationId }).single;
   const { data: messages } = useChatMessages({ conversationId }).all;
-  const flatMessages = useMemo(
-    () =>
-      messages?.pages
-        ?.flatMap((page) => page?.searchResults)
-        ?.filter(Boolean) as HomebaseFile<ChatMessage>[],
-    [messages]
-  );
-  const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
 
-  const lastReadTime = conversationMetadata?.fileMetadata.appData.content.lastReadTime || 0;
-  const unreadCount =
-    conversationMetadata &&
-    flatMessages &&
-    lastMessage?.fileMetadata.senderOdinId &&
-    lastMessage?.fileMetadata.senderOdinId !== identity
+  const unreadCount = useMemo(() => {
+    const flatMessages = messages?.pages
+      ?.flatMap((page) => page?.searchResults)
+      ?.filter(Boolean) as HomebaseFile<ChatMessage>[];
+
+    const lastMessage = flatMessages?.[0];
+    const lastReadTime = conversationMetadata?.fileMetadata.appData.content.lastReadTime || 0;
+
+    return conversationMetadata &&
+      flatMessages &&
+      lastMessage?.fileMetadata.senderOdinId &&
+      lastMessage?.fileMetadata.senderOdinId !== identity
       ? flatMessages.filter(
           (msg) =>
             msg.fileMetadata.senderOdinId !== identity &&
             (msg.fileMetadata.transitCreated || msg.fileMetadata.created) > lastReadTime
         )?.length
       : 0;
+  }, [messages, conversationMetadata]);
+
+  useEffect(() => {
+    setUnreadCount(recipient, unreadCount || 0);
+  }, [unreadCount]);
 
   return (
     <Link
