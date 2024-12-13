@@ -1,8 +1,8 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 
-import { ActionButton, ErrorNotification, t } from '@homebase-id/common-app';
+import { ActionButton, ErrorNotification, t, useAllContacts } from '@homebase-id/common-app';
 
-import { lazy, useEffect, useState } from 'react';
+import { lazy, useEffect, useMemo, useState } from 'react';
 
 import { isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
@@ -55,6 +55,31 @@ export const CommunityMessageEditor = ({
     if (updateStatus === 'success') onClose();
   }, [updateStatus]);
 
+  const { data: contacts } = useAllContacts(true);
+  const mentionables: { key: string; text: string }[] = useMemo(() => {
+    const filteredContacts =
+      (contacts
+        ?.filter(
+          (contact) =>
+            contact.fileMetadata.appData.content.odinId &&
+            community?.fileMetadata.appData.content.members.includes(
+              contact.fileMetadata.appData.content.odinId
+            )
+        )
+        ?.map((contact) =>
+          contact.fileMetadata.appData.content.odinId
+            ? {
+                key: contact.fileMetadata.appData.content.odinId,
+                text: contact.fileMetadata.appData.content.odinId,
+              }
+            : undefined
+        )
+        .filter(Boolean) as { key: string; text: string }[]) || [];
+
+    filteredContacts.push({ key: '@channel', text: '@channel' });
+    return filteredContacts;
+  }, [contacts]);
+
   return (
     <div>
       <ErrorNotification error={updateError} />
@@ -66,6 +91,7 @@ export const CommunityMessageEditor = ({
         onChange={(e) => setMessage(e.target.value)}
         autoFocus={!isTouchDevice()}
         onSubmit={isTouchDevice() ? undefined : doSend}
+        mentionables={mentionables}
         onKeyDown={(e) => {
           if (e.key === 'Escape')
             confirm(t('Are you sure? You will lose any pending changes')) && onClose();
