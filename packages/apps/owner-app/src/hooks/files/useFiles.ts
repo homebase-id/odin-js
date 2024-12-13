@@ -8,7 +8,6 @@ import {
 import {
   decryptJsonContent,
   decryptKeyHeader,
-  DEFAULT_PAYLOAD_KEY,
   DeletedHomebaseFile,
   deleteFile,
   HomebaseFile,
