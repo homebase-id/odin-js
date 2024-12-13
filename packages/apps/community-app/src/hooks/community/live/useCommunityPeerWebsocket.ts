@@ -130,10 +130,8 @@ export const useCommunityPeerWebsocket = (
     odinId,
     ['fileAdded', 'fileModified', 'fileDeleted', 'statisticsChanged'],
     drives as TargetDrive[],
-    () => {
-      queryClient.invalidateQueries({ queryKey: ['process-community-inbox'] });
-    },
-    undefined,
+    () => queryClient.invalidateQueries({ queryKey: ['process-community-inbox'] }),
+    () => queryClient.invalidateQueries({ queryKey: ['process-community-inbox'] }),
     'useCommunityPeerWebsocket'
   );
 };

@@ -116,10 +116,8 @@ const useMailWebsocket = (isEnabled: boolean) => {
     undefined,
     ['fileAdded', 'fileModified'],
     websocketDrives,
-    () => {
-      queryClient.invalidateQueries({ queryKey: ['process-mail-inbox'] });
-    },
-    undefined,
+    () => queryClient.invalidateQueries({ queryKey: ['process-mail-inbox'] }),
+    () => queryClient.invalidateQueries({ queryKey: ['process-mail-inbox'] }),
     'useLiveMailProcessor'
   );
 };

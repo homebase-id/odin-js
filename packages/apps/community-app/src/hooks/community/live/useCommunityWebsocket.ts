@@ -78,8 +78,8 @@ export const useCommunityWebsocket = (
     undefined,
     ['fileAdded', 'fileModified', 'fileDeleted', 'statisticsChanged'],
     localCommunityDrives as TargetDrive[],
-    undefined,
-    undefined,
+    () => queryClient.invalidateQueries({ queryKey: ['process-community-inbox'] }),
+    () => queryClient.invalidateQueries({ queryKey: ['process-community-inbox'] }),
     'useCommunityWebsocket'
   );
 };

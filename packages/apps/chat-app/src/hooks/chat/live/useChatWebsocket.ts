@@ -53,10 +53,8 @@ export const useChatWebsocket = (isEnabled: boolean) => {
       'appNotificationAdded',
     ],
     websocketDrives,
-    () => {
-      queryClient.invalidateQueries({ queryKey: ['process-chat-inbox'] });
-    },
-    undefined,
+    () => queryClient.invalidateQueries({ queryKey: ['process-chat-inbox'] }),
+    () => queryClient.invalidateQueries({ queryKey: ['process-chat-inbox'] }),
     'useLiveChatProcessor'
   );
 };
