@@ -158,19 +158,13 @@ export const useFile = ({
         },
       },
       serverMetadata: result.serverMetadata,
-      defaultPayload: result.fileMetadata.payloads?.some(
-        (payload) => payload.contentType === 'application/json'
-      )
-        ? await getContentFromHeaderOrPayload(
-            dotYouClient,
-            targetDrive,
-            result,
-            includeMetadataHeader,
-            result.fileSystemType
-          )
-        : await getPayloadBytes(dotYouClient, targetDrive, result.fileId, DEFAULT_PAYLOAD_KEY, {
-            systemFileType: result.fileSystemType,
-          }),
+      defaultPayload: await getContentFromHeaderOrPayload(
+        dotYouClient,
+        targetDrive,
+        result,
+        includeMetadataHeader,
+        result.fileSystemType
+      ),
     };
 
     const stringified = jsonStringify64(exportable);
