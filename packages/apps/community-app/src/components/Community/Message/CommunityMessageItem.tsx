@@ -29,7 +29,7 @@ import { CommunityDeliveryIndicator } from './CommunityDeliveryIndicator';
 import { CommunitySentTimeIndicator } from './CommunitySentTimeIndicator';
 import { CommunityMedia } from './CommunityMedia';
 import { CommunityMediaGallery } from './detail/CommunityMediaGallery';
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
 import { useCommunityChannels } from '../../../hooks/community/channels/useCommunityChannels';
 import { CommunityReactions } from './reactions/CommunityReactions';
