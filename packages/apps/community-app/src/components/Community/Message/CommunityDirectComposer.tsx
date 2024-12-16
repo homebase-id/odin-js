@@ -8,6 +8,7 @@ import {
   LinkOverview,
   t,
   trimRichText,
+  useDebounce,
   useErrors,
   useLinkPreviewBuilder,
   VolatileInputRef,
@@ -16,7 +17,7 @@ import { useState, useEffect, FC, useRef, lazy } from 'react';
 
 import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { ChatComposerProps } from '@homebase-id/chat-app/src/components/Chat/Composer/ChatComposer';
-import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
 import { useChatMessage } from '@homebase-id/chat-app/src/hooks/chat/useChatMessage';
 import { Plus, PaperPlane, Times } from '@homebase-id/common-app/icons';
 import { LinkPreview } from '@homebase-id/js-lib/media';
@@ -28,9 +29,10 @@ const RichTextEditor = lazy(() =>
 import { EmbeddedMessage } from '@homebase-id/chat-app/src/components/Chat/Detail/EmbeddedMessage';
 import { ChatMessage } from '@homebase-id/chat-app/src/providers/ChatProvider';
 import { useParams } from 'react-router-dom';
+import { useCommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
+import { CommunityMetadata, Draft } from '../../../providers/CommunityMetadataProvider';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
-const CHAT_DRAFTS_KEY = 'COMMUNITY_LOCAL_DRAFTS';
 
 export const CommunityDirectComposer: FC<ChatComposerProps> = ({
   conversation,
@@ -38,26 +40,54 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = ({
   replyMsg,
   onSend,
 }) => {
-  const { communityKey } = useParams();
+  const { odinKey, communityKey } = useParams();
   const volatileRef = useRef<VolatileInputRef>(null);
-  const drafts = JSON.parse(localStorage.getItem(CHAT_DRAFTS_KEY) || '{}');
+
+  const {
+    single: { data: metadata },
+    update: { mutate: updateMetadata },
+  } = useCommunityMetadata({
+    odinId: odinKey,
+    communityId: communityKey,
+  });
+
+  const [toSaveMeta, setToSaveMeta] = useState<
+    HomebaseFile<CommunityMetadata> | NewHomebaseFile<CommunityMetadata> | undefined
+  >();
+  const drafts = (toSaveMeta || metadata)?.fileMetadata.appData.content.drafts || {};
   const [message, setMessage] = useState<RichText | undefined>(
     conversation?.fileMetadata.appData.uniqueId
-      ? drafts[conversation.fileMetadata.appData.uniqueId] || undefined
+      ? drafts[conversation.fileMetadata.appData.uniqueId]?.message
       : undefined
   );
   const [files, setFiles] = useState<NewMediaFile[]>();
 
+  const debouncedSave = useDebounce(() => toSaveMeta && updateMetadata({ metadata: toSaveMeta }), {
+    timeoutMillis: 2000,
+  });
   useEffect(() => {
-    if (conversation?.fileMetadata.appData.uniqueId) {
-      drafts[conversation.fileMetadata.appData.uniqueId] = message;
-      try {
-        localStorage.setItem(CHAT_DRAFTS_KEY, JSON.stringify(drafts));
-      } catch {
-        /* empty */
-      }
+    if (metadata && conversation && conversation?.fileMetadata.appData.uniqueId) {
+      const newDrafts: Record<string, Draft | undefined> = {
+        ...drafts,
+        [conversation.fileMetadata.appData.uniqueId]: {
+          message,
+          updatedAt: new Date().getTime(),
+        },
+      };
+
+      setToSaveMeta({
+        ...metadata,
+        fileMetadata: {
+          ...metadata?.fileMetadata,
+          appData: {
+            ...metadata?.fileMetadata.appData,
+            content: { ...metadata?.fileMetadata.appData.content, drafts: newDrafts },
+          },
+        },
+      });
+      debouncedSave();
     }
-  }, [conversation, message]);
+  }, [conversation, message, debouncedSave]);
 
   const plainMessage = message && getTextRootsRecursive(message).join(' ');
   const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(plainMessage || '');
