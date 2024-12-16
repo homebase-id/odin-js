@@ -85,8 +85,8 @@ export const trimRichText = (richText: RichText | undefined): RichText | undefin
 
   const trimmed: RichText = [];
   const trimNode = (node: Record<string, unknown>): Record<string, unknown> => {
-    const newText = (typeof node.text === 'string' && node.text?.trim()) ?? undefined;
-    const newValue = (typeof node.value === 'string' && node.value?.trim()) ?? undefined;
+    const newText = (typeof node.text === 'string' ? node.text?.trim() : undefined) ?? undefined;
+    const newValue = (typeof node.value === 'string' ? node.value?.trim() : undefined) ?? undefined;
 
     return {
       ...node,

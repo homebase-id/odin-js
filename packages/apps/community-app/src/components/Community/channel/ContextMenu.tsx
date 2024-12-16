@@ -61,6 +61,13 @@ export const ContextMenu = ({
 
   const isTouch = isTouchDevice();
 
+  const target = usePortal('context-menu');
+  const [clickable, setClickable] = useState(false);
+  useEffect(() => {
+    if (isTouchOpen) setTimeout(() => setClickable(true), 1000);
+    else setClickable(false);
+  }, [isTouchOpen]);
+
   const ReactionComposer = (
     <CommunityReactionComposer
       ref={reactionsBarRef}
@@ -68,6 +75,7 @@ export const ContextMenu = ({
       community={community}
       onOpen={() => setIsStickyOpen(true)}
       onClose={() => setIsStickyOpen(false)}
+      className={isTouch ? 'w-full gap-2' : ''}
     />
   );
 
@@ -93,13 +101,6 @@ export const ContextMenu = ({
       </div>
     );
   }
-
-  const target = usePortal('context-menu');
-  const [clickable, setClickable] = useState(false);
-  useEffect(() => {
-    if (isTouchOpen) setTimeout(() => setClickable(true), 1000);
-    else setClickable(false);
-  }, [isTouchOpen]);
 
   if (!isTouchOpen) return null;
   return createPortal(

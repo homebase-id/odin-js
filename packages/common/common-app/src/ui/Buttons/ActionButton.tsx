@@ -110,7 +110,7 @@ const StyledButton = ({
         ? 'p-2'
         : size === 'none'
           ? undefined
-          : `px-3 py-2 ${hasIcon && hasChildren ? 'pl-4' : undefined}`;
+          : `px-4 py-2 ${hasIcon && hasChildren ? 'pr-3' : undefined}`;
 
     const stateClasses = state === 'loading' || state === 'pending' ? 'animate-pulse' : undefined;
 
