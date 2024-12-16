@@ -420,10 +420,12 @@ const DirectMessageItem = ({
       className={`flex flex-row items-center gap-1 rounded-md px-2 py-[0.15rem] ${unreadCount ? 'font-bold' : ''} ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`}`}
     >
       <ConnectionImage odinId={recipient} size="xxs" />
-      <ConnectionName odinId={recipient} />{' '}
-      <span className="text-sm text-slate-400">
-        {recipient === dotYouClient.getHostIdentity() ? t('you') : ''}
-      </span>
+      <p>
+        <ConnectionName odinId={recipient} />
+      </p>{' '}
+      {recipient === dotYouClient.getHostIdentity() ? (
+        <span className="text-sm text-slate-400">{t('you')}</span>
+      ) : null}
       {unreadCount ? (
         <span className="ml-auto flex h-6 w-6 items-center justify-center rounded-full bg-primary text-sm text-primary-contrast">
           {unreadCount}
