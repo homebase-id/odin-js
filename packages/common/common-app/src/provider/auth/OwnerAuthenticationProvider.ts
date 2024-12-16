@@ -8,7 +8,6 @@ import { HOME_SHARED_SECRET, OWNER_SHARED_SECRET, STORAGE_IDENTITY_KEY } from '.
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidOwnerToken = async (): Promise<boolean> => {
   const dotYouClient = new OwnerClient({
-    hostIdentity: window.location.hostname,
     api: ApiType.Owner,
   });
   //Note: the token is in a cookie marked http-only so making
@@ -23,7 +22,6 @@ export const hasValidOwnerToken = async (): Promise<boolean> => {
 
 const logoutOwner = async (): Promise<boolean> => {
   const dotYouClient = new OwnerClient({
-    hostIdentity: window.location.hostname,
     api: ApiType.Owner,
   });
   const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
@@ -38,7 +36,6 @@ export const logoutOwnerAndAllApps = async (): Promise<void> => {
   try {
     // Unsubscribe from notifications
     const dotYouClient = new OwnerClient({
-      hostIdentity: window.location.hostname,
       api: ApiType.Owner,
     });
     await removeCurrentRegisteredDevice(dotYouClient);

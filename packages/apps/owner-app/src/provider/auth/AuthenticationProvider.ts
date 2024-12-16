@@ -10,7 +10,6 @@ interface AuthenticationResponse {
 // Authenticate the owner
 export const authenticate = async (password: string): Promise<AuthenticationResponse | null> => {
   const dotYouClient = new OwnerClient({
-    hostIdentity: window.location.hostname,
     api: ApiType.Owner,
   });
 
@@ -37,7 +36,6 @@ export const setFirstPassword = async (
   firstRunToken: string
 ): Promise<boolean> => {
   const dotYouClient = new OwnerClient({
-    hostIdentity: window.location.hostname,
     api: ApiType.Owner,
   });
 
@@ -58,7 +56,6 @@ export const setFirstPassword = async (
 
 export const resetPassword = async (newPassword: string, recoveryKey: string): Promise<boolean> => {
   const dotYouClient = new OwnerClient({
-    hostIdentity: window.location.hostname,
     api: ApiType.Owner,
   });
 
@@ -105,7 +102,6 @@ export const changePassword = async (
 
 export const finalizeRegistration = async (firstRunToken: string) => {
   const dotYouClient = new OwnerClient({
-    hostIdentity: window.location.hostname,
     api: ApiType.Owner,
   });
   const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
@@ -118,7 +114,6 @@ export const finalizeRegistration = async (firstRunToken: string) => {
 
 export const isPasswordSet = async (): Promise<boolean> => {
   const dotYouClient = new OwnerClient({
-    hostIdentity: window.location.hostname,
     api: ApiType.Owner,
   });
 

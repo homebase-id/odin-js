@@ -66,7 +66,6 @@ export const useDotYouClient = () => {
 
     if (apiType === ApiType.Owner)
       return new OwnerClient({
-        hostIdentity: window.location.hostname,
         api: apiType,
         sharedSecret: getSharedSecret(),
       });
