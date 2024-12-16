@@ -6,7 +6,7 @@ import { invalidateSocialFeeds } from './useSocialFeed';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 export const useManageSocialFeed = (props?: { odinId: string }) => {
-  const odinId = props?.odinId;
+  const odinId = props?.odinId || window.location.hostname;
 
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();

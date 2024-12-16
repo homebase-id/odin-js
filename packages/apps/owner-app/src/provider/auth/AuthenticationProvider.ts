@@ -9,7 +9,10 @@ interface AuthenticationResponse {
 
 // Authenticate the owner
 export const authenticate = async (password: string): Promise<AuthenticationResponse | null> => {
-  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
+  const dotYouClient = new OwnerClient({
+    hostIdentity: window.location.hostname,
+    api: ApiType.Owner,
+  });
 
   const noncePackage = await getNonce(dotYouClient);
   const reply = await prepareAuthPassword(password, noncePackage);
@@ -33,7 +36,10 @@ export const setFirstPassword = async (
   newPassword: string,
   firstRunToken: string
 ): Promise<boolean> => {
-  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
+  const dotYouClient = new OwnerClient({
+    hostIdentity: window.location.hostname,
+    api: ApiType.Owner,
+  });
 
   const salts = await getSalts(dotYouClient);
   const reply = await prepareAuthPassword(newPassword, salts);
@@ -51,7 +57,10 @@ export const setFirstPassword = async (
 };
 
 export const resetPassword = async (newPassword: string, recoveryKey: string): Promise<boolean> => {
-  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
+  const dotYouClient = new OwnerClient({
+    hostIdentity: window.location.hostname,
+    api: ApiType.Owner,
+  });
 
   const salts = await getSalts(dotYouClient);
   const passwordReply = await prepareAuthPassword(newPassword, salts);
@@ -95,7 +104,10 @@ export const changePassword = async (
 };
 
 export const finalizeRegistration = async (firstRunToken: string) => {
-  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
+  const dotYouClient = new OwnerClient({
+    hostIdentity: window.location.hostname,
+    api: ApiType.Owner,
+  });
   const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
   const url = '/config/registration/finalize?frid=' + firstRunToken;
 
@@ -105,7 +117,10 @@ export const finalizeRegistration = async (firstRunToken: string) => {
 };
 
 export const isPasswordSet = async (): Promise<boolean> => {
-  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
+  const dotYouClient = new OwnerClient({
+    hostIdentity: window.location.hostname,
+    api: ApiType.Owner,
+  });
 
   return dotYouClient
     .createAxiosClient({ overrideEncryption: true })

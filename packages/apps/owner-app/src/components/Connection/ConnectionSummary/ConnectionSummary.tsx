@@ -70,7 +70,7 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
     odinId,
   });
 
-  if (!contact) return null;
+  if (!contact || !odinId) return null;
 
   const contactContent = contact?.fileMetadata.appData.content;
   const isConnected = connectionInfo?.status === 'connected';
@@ -97,19 +97,23 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
                   >
                     {odinId}
                   </a>
-                  {t('was introduced by')}
-                  <a
-                    href={`${new DotYouClient({ hostIdentity: connectionInfo?.introducerOdinId, api: ApiType.Guest }).getRoot()}${
-                      isConnectedWithIntroducer && loggedOnIdentity
-                        ? '?youauth-logon=' + loggedOnIdentity
-                        : ''
-                    }`}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                    className="block text-sm text-primary hover:underline"
-                  >
-                    {connectionInfo?.introducerOdinId}
-                  </a>
+                  {connectionInfo?.introducerOdinId ? (
+                    <>
+                      {t('was introduced by')}
+                      <a
+                        href={`${new DotYouClient({ hostIdentity: connectionInfo?.introducerOdinId, api: ApiType.Guest }).getRoot()}${
+                          isConnectedWithIntroducer && loggedOnIdentity
+                            ? '?youauth-logon=' + loggedOnIdentity
+                            : ''
+                        }`}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                        className="block text-sm text-primary hover:underline"
+                      >
+                        {connectionInfo?.introducerOdinId}
+                      </a>
+                    </>
+                  ) : null}
                 </p>
               ) : (
                 <a

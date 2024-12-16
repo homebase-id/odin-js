@@ -60,13 +60,19 @@ export const useDotYouClient = () => {
 
   const getDotYouClient = () => {
     // When running in an iframe, use the public YouAuth Api;
-    if (window.self !== window.top) return new DotYouClient({ api: ApiType.Guest });
+    if (window.self !== window.top)
+      return new DotYouClient({ hostIdentity: window.location.hostname, api: ApiType.Guest });
     const apiType = getApiType();
 
     if (apiType === ApiType.Owner)
-      return new OwnerClient({ api: apiType, sharedSecret: getSharedSecret() });
+      return new OwnerClient({
+        hostIdentity: window.location.hostname,
+        api: apiType,
+        sharedSecret: getSharedSecret(),
+      });
     else if (apiType === ApiType.Guest)
       return new DotYouClient({
+        hostIdentity: window.location.hostname,
         api: apiType,
         sharedSecret: getSharedSecret(),
         loggedInIdentity: getIdentity(),
@@ -81,7 +87,7 @@ export const useDotYouClient = () => {
       return new DotYouClient({
         sharedSecret: getSharedSecret(),
         api: ApiType.App,
-        hostIdentity: retrieveIdentity(),
+        hostIdentity: retrieveIdentity() || window.location.hostname,
         loggedInIdentity: getIdentity(),
         headers: headers,
       });

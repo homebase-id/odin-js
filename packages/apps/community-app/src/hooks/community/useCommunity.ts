@@ -97,7 +97,7 @@ const ensureNewDriveAndPermission = (
   );
 
   const host = new DotYouClient({
-    hostIdentity: identity || undefined,
+    hostIdentity: identity,
     api: ApiType.App,
   }).getRoot();
   return `${host}${path}`;
@@ -252,7 +252,7 @@ export const getExtendCirclePermissionUrl = (
   };
 
   const host = new DotYouClient({
-    hostIdentity: identity || undefined,
+    hostIdentity: identity,
     api: ApiType.App,
   }).getRoot();
   return `${host}/owner/apprequest-circles?${stringifyToQueryParams(

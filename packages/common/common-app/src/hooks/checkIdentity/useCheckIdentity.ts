@@ -9,7 +9,7 @@ export const useCheckIdentity = (odinId?: string) => {
 
     const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]{2,25}(?::\d{1,5})?$/i;
     const isValid = domainRegex.test(strippedIdentity || '');
-    if (!isValid) return false;
+    if (!isValid || !strippedIdentity) return false;
 
     const dotYouClient = new DotYouClient({ api: ApiType.Guest, hostIdentity: strippedIdentity });
     return await fetch(`${dotYouClient.getEndpoint()}/auth/ident`)

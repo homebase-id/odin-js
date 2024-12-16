@@ -83,7 +83,7 @@ export const PostInteracts = ({
     },
   };
 
-  const permalink = `${new DotYouClient({ hostIdentity: odinId || undefined, api: ApiType.Guest }).getRoot()}${HOME_ROOT_PATH}posts/${postContent.channelId}/${
+  const permalink = `${new DotYouClient({ hostIdentity: odinId || window.location.hostname, api: ApiType.Guest }).getRoot()}${HOME_ROOT_PATH}posts/${postContent.channelId}/${
     postContent.slug ?? postContent.id
   }`;
 

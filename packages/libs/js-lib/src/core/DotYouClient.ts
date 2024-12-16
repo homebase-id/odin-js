@@ -13,7 +13,7 @@ export enum ApiType {
 export interface BaseProviderOptions {
   api: ApiType;
   sharedSecret?: Uint8Array;
-  hostIdentity?: string;
+  hostIdentity: string;
   loggedInIdentity?: string;
   headers?: Record<string, string>;
 }
@@ -50,10 +50,7 @@ export class BaseDotYouClient {
   }
 
   getLoggedInIdentity(): string {
-    return (
-      this._options?.loggedInIdentity ||
-      (typeof window.location !== 'undefined' ? window.location.hostname : '')
-    );
+    return this._options?.loggedInIdentity || this.getHostIdentity();
   }
 
   isOwner(): boolean {

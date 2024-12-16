@@ -288,7 +288,7 @@ const GroupChannelActions = ({
   const isAuthor = postFile.fileMetadata.originalAuthor === loggedOnIdentity;
   const host = new DotYouClient({
     api: ApiType.Guest,
-    hostIdentity: loggedOnIdentity || undefined,
+    hostIdentity: loggedOnIdentity,
   }).getRoot();
 
   const {
