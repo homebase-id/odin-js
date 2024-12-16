@@ -5,6 +5,7 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   queryBatch,
+  RichText,
   SecurityGroupType,
   SystemFileType,
   TargetDrive,
@@ -15,12 +16,18 @@ import {
 } from '@homebase-id/js-lib/core';
 import { jsonStringify64, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
+export interface Draft {
+  message: RichText | undefined;
+  updatedAt: number;
+}
+
 export interface CommunityMetadata {
   lastReadTime: number;
   threadsLastReadTime: number;
   channelLastReadTime: Record<string, number>;
   pinnedChannels: string[];
   savedMessages: { messageId: string; systemFileType: SystemFileType }[];
+  drafts?: Record<string, Draft | undefined>;
   notifiationsEnabled?: boolean;
 
   // Community info

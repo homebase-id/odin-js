@@ -13,9 +13,10 @@ import {
   useAllContacts,
   findMentionedInRichText,
   trimRichText,
+  useDebounce,
 } from '@homebase-id/common-app';
 import { PaperPlane, Plus } from '@homebase-id/common-app/icons';
-import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
 
 import { useState, useEffect, useRef, useMemo, lazy } from 'react';
 
@@ -31,10 +32,10 @@ const RichTextEditor = lazy(() =>
 );
 import { ChannelPlugin } from './RTEChannelDropdown/RTEChannelDropdownPlugin';
 import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
+import { useCommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
+import { CommunityMetadata, Draft } from '../../../providers/CommunityMetadataProvider';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
-const CHAT_DRAFTS_KEY = 'COMMUNITY_LOCAL_DRAFTS';
-
 export const MessageComposer = ({
   community,
   channel,
@@ -55,25 +56,52 @@ export const MessageComposer = ({
   const threadId = thread?.fileMetadata.globalTransitId;
   const volatileRef = useRef<VolatileInputRef>(null);
 
-  const drafts = JSON.parse(localStorage.getItem(CHAT_DRAFTS_KEY) || '{}');
+  const {
+    single: { data: metadata },
+    update: { mutate: updateMetadata },
+  } = useCommunityMetadata({
+    odinId: community?.fileMetadata.senderOdinId,
+    communityId: community?.fileMetadata.appData.uniqueId,
+  });
+
+  const [toSaveMeta, setToSaveMeta] = useState<
+    HomebaseFile<CommunityMetadata> | NewHomebaseFile<CommunityMetadata> | undefined
+  >();
+  const drafts = (toSaveMeta || metadata)?.fileMetadata.appData.content.drafts || {};
   const [message, setMessage] = useState<RichText | undefined>(
     threadId || (channel && channel.fileMetadata.appData.uniqueId)
-      ? drafts[(threadId || channel?.fileMetadata.appData.uniqueId) as string]
+      ? drafts[(threadId || channel?.fileMetadata.appData.uniqueId) as string]?.message
       : undefined
   );
 
   const [files, setFiles] = useState<NewMediaFile[]>();
 
+  const debouncedSave = useDebounce(() => toSaveMeta && updateMetadata({ metadata: toSaveMeta }), {
+    timeoutMillis: 2000,
+  });
   useEffect(() => {
-    if (threadId || (channel && channel.fileMetadata.appData.uniqueId)) {
-      drafts[threadId || ((channel && channel.fileMetadata.appData.uniqueId) as string)] = message;
-      try {
-        localStorage.setItem(CHAT_DRAFTS_KEY, JSON.stringify(drafts));
-      } catch {
-        /* empty */
-      }
+    if (metadata && (threadId || (channel && channel.fileMetadata.appData.uniqueId))) {
+      const newDrafts: Record<string, Draft | undefined> = {
+        ...drafts,
+        [threadId || ((channel && channel.fileMetadata.appData.uniqueId) as string)]: {
+          message,
+          updatedAt: new Date().getTime(),
+        },
+      };
+
+      setToSaveMeta({
+        ...metadata,
+        fileMetadata: {
+          ...metadata?.fileMetadata,
+          appData: {
+            ...metadata?.fileMetadata.appData,
+            content: { ...metadata?.fileMetadata.appData.content, drafts: newDrafts },
+          },
+        },
+      });
+      debouncedSave();
     }
-  }, [threadId, channel, message]);
+  }, [threadId, channel, message, debouncedSave]);
 
   const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(
     (message && getTextRootsRecursive(message)?.join(' ')) || ''

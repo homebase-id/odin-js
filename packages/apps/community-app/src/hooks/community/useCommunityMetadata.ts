@@ -8,6 +8,7 @@ import {
 } from '@homebase-id/js-lib/core';
 import {
   CommunityMetadata,
+  Draft,
   getCommunityMetadata,
   uploadCommunityMetadata,
 } from '../../providers/CommunityMetadataProvider';
@@ -82,16 +83,20 @@ export const useCommunityMetadata = (props?: {
 
   return {
     single: useQuery({
-      queryKey: ['community-metadata', communityId],
+      queryKey: ['community-metadata', formatGuidId(communityId)],
       queryFn: () => getMetadata(odinId as string, formatGuidId(communityId) as string),
       enabled: !!odinId && !!communityId,
       staleTime: 1000 * 60 * 5, // 5 minutes
     }),
     update: useMutation({
       mutationFn: saveMetadata,
+
       onMutate: async (variables) => {
         queryClient.setQueryData<HomebaseFile<CommunityMetadata>>(
-          ['community-metadata', variables.metadata.fileMetadata.appData.content.communityId],
+          [
+            'community-metadata',
+            formatGuidId(variables.metadata.fileMetadata.appData.content.communityId),
+          ],
           variables.metadata as HomebaseFile<CommunityMetadata>
         );
       },
@@ -157,6 +162,29 @@ const mergeMetadata = (
                 return acc;
               },
               {} as { [key: string]: number }
+            );
+          })(),
+          drafts: (() => {
+            const mergedKeys = [
+              ...Object.keys(localContent.drafts || {}),
+              ...Object.keys(serverContent.drafts || {}),
+            ];
+
+            return mergedKeys.reduce(
+              (acc, key) => {
+                const localDraft = localContent.drafts?.[key];
+                const serverDraft = serverContent.drafts?.[key];
+
+                const newestDraft =
+                  !serverDraft ||
+                  (localDraft?.updatedAt && localDraft?.updatedAt > serverDraft?.updatedAt)
+                    ? localDraft
+                    : serverDraft;
+
+                acc[key] = newestDraft;
+                return acc;
+              },
+              {} as Record<string, Draft | undefined>
             );
           })(),
         },
