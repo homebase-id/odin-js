@@ -34,7 +34,7 @@ export const IdentityTeaser = ({
   useIntersection(wrapperRef, () => setIsInView(true));
 
   const imageSizeClass = size === 'sm' ? 'h-10 w-10 mr-2' : 'h-16 w-16 mr-4';
-  const link = `${new DotYouClient({ hostIdentity: odinId || undefined, api: ApiType.App }).getRoot()}${isConnected && identity ? '?youauth-logon=' + identity : ''}`;
+  const link = `${new DotYouClient({ hostIdentity: odinId, api: ApiType.App }).getRoot()}${isConnected && identity ? '?youauth-logon=' + identity : ''}`;
 
   return (
     <a

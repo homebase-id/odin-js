@@ -57,7 +57,7 @@ const getExtendDriveDetailsUrl = (
   };
 
   const host = new DotYouClient({
-    hostIdentity: identity || undefined,
+    hostIdentity: identity,
     api: ApiType.App,
   }).getRoot();
   return `${host}/owner/apprequest-drives?${stringifyToQueryParams(
@@ -94,7 +94,7 @@ const getExtendCirclePermissionUrl = (
   };
 
   const host = new DotYouClient({
-    hostIdentity: identity || undefined,
+    hostIdentity: identity,
     api: ApiType.App,
   }).getRoot();
   return `${host}/owner/apprequest-circles?${stringifyToQueryParams(

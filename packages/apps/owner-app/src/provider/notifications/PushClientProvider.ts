@@ -3,7 +3,10 @@ import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { assertIfDefined } from '@homebase-id/js-lib/helpers';
 
 export const getApplicationServerKey = async () => {
-  const dotYouClient = new DotYouClient({ api: ApiType.Guest });
+  const dotYouClient = new DotYouClient({
+    hostIdentity: window.location.hostname,
+    api: ApiType.Guest,
+  });
   const client = dotYouClient.createAxiosClient();
   return await client
     .get<string>('/public/keys/notifications_pk', {

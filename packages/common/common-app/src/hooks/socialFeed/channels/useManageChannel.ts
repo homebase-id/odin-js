@@ -62,7 +62,7 @@ const getExtendAuthorizationUrl = (
   };
 
   const host = new DotYouClient({
-    hostIdentity: identity || undefined,
+    hostIdentity: identity,
     api: ApiType.App,
   }).getRoot();
   return `${host}/owner/appupdate?${stringifyToQueryParams(params)}&return=${encodeURIComponent(

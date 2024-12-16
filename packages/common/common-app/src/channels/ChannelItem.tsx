@@ -323,7 +323,7 @@ export const ChannelItem = ({
             icon={ExternalLink}
             size="square"
             type="mute"
-            href={`${new DotYouClient({ hostIdentity: identity || undefined, api: ApiType.Guest }).getRoot()}/posts/${chnl?.slug}`}
+            href={`${new DotYouClient({ hostIdentity: identity, api: ApiType.Guest }).getRoot()}/posts/${chnl?.slug}`}
           ></ActionLink>
         </div>
       )}
