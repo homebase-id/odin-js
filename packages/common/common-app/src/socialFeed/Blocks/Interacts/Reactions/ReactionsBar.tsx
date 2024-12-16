@@ -124,6 +124,7 @@ export const ReactionsBar = forwardRef(
       defaultValue,
       emojis,
       className,
+      onClick,
       onMouseEnter,
       onMouseLeave,
       customDirection,
@@ -135,6 +136,7 @@ export const ReactionsBar = forwardRef(
       defaultValue: string[];
       emojis?: string[];
       className?: string;
+      onClick?: () => void;
       onMouseEnter?: () => void;
       onMouseLeave?: () => void;
       onOpen?: () => void;
@@ -192,7 +194,10 @@ export const ReactionsBar = forwardRef(
           {defaultValue?.length ? (
             defaultValue.map((emoji) => (
               <EmojiButton
-                onClick={() => handleUnlike(emoji)}
+                onClick={() => {
+                  handleUnlike(emoji);
+                  onClick?.();
+                }}
                 emoji={emoji}
                 key={emoji}
                 isActive={true}
@@ -201,7 +206,14 @@ export const ReactionsBar = forwardRef(
           ) : (
             <>
               {(emojis || DEFAULT_EMOJIS).map((emoji) => (
-                <EmojiButton key={emoji} onClick={() => handleLike(emoji)} emoji={emoji} />
+                <EmojiButton
+                  key={emoji}
+                  onClick={() => {
+                    handleLike(emoji);
+                    onClick?.();
+                  }}
+                  emoji={emoji}
+                />
               ))}
             </>
           )}

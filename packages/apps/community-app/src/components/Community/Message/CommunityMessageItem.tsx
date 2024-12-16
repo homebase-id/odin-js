@@ -101,11 +101,10 @@ export const CommunityMessageItem = memo(
       };
     }, []);
 
-    const [isAlmostLongPress, setIsAlmostLongPress] = useState(false);
     const [isTouchContextMenuOpen, setIsTouchContextMenuOpen] = useState(false);
     const clickProps = useLongPress(
       () => setIsTouchContextMenuOpen(true),
-      () => setIsAlmostLongPress(true),
+      () => {},
       { shouldPreventDefault: false, delay: 300 },
       scrollRef
     );

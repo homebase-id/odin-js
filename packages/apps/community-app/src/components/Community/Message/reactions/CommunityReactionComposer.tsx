@@ -11,12 +11,14 @@ export const CommunityReactionComposer = forwardRef(
       community,
       msg,
       className,
+      onClick,
       onOpen,
       onClose,
     }: {
       community: HomebaseFile<CommunityDefinition> | undefined;
       msg: HomebaseFile<CommunityMessage>;
       className?: string;
+      onClick?: () => void;
       onOpen?: () => void;
       onClose?: () => void;
     },
@@ -46,6 +48,7 @@ export const CommunityReactionComposer = forwardRef(
         className={className}
         emojis={['👍️', '❤️', '😂']}
         defaultValue={[]}
+        onClick={onClick}
         doLike={(emoji) => addReaction({ community, message: msg, reaction: emoji })}
         doUnlike={(emoji) => {
           const reaction = myReactions?.find((reaction) => reaction.body === emoji);

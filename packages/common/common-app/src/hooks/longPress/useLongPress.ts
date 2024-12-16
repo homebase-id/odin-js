@@ -26,6 +26,7 @@ export const useLongPress = (
         target.current = event.target;
       }
       timeout.current = setTimeout(() => {
+        if (!document.contains(event.target as Node)) return;
         const afterScrollY = getScrollY();
 
         if (Math.abs((beforeScrollY.current || 0) - afterScrollY) <= 20) {

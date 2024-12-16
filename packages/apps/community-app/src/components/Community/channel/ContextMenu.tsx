@@ -64,20 +64,9 @@ export const ContextMenu = ({
   const target = usePortal('context-menu');
   const [clickable, setClickable] = useState(false);
   useEffect(() => {
-    if (isTouchOpen) setTimeout(() => setClickable(true), 1000);
+    if (isTouchOpen) setTimeout(() => setClickable(true), 750);
     else setClickable(false);
   }, [isTouchOpen]);
-
-  const ReactionComposer = (
-    <CommunityReactionComposer
-      ref={reactionsBarRef}
-      msg={msg}
-      community={community}
-      onOpen={() => setIsStickyOpen(true)}
-      onClose={() => setIsStickyOpen(false)}
-      className={isTouch ? 'w-full gap-2' : ''}
-    />
-  );
 
   if (!isTouch) {
     return (
@@ -91,7 +80,15 @@ export const ContextMenu = ({
         ].join(' ')}
         ref={wrapperRef}
       >
-        {ReactionComposer}
+        <CommunityReactionComposer
+          ref={reactionsBarRef}
+          msg={msg}
+          community={community}
+          onOpen={() => setIsStickyOpen(true)}
+          onClose={() => {
+            setIsStickyOpen(false);
+          }}
+        />
         <CommunityContextActions
           msg={msg}
           community={community}
@@ -112,7 +109,21 @@ export const ContextMenu = ({
         className="min-h-40 rounded-t-md bg-background px-2 py-2"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-2 pb-2">{ReactionComposer}</div>
+        <div className="px-2 pb-2">
+          <CommunityReactionComposer
+            ref={reactionsBarRef}
+            msg={msg}
+            community={community}
+            onClick={() => setIsTouchOpen?.(false)}
+            onOpen={() => setIsStickyOpen(true)}
+            onClose={() => {
+              if (!clickable) return;
+              setIsStickyOpen(false);
+              setIsTouchOpen?.(false);
+            }}
+            className={'w-full gap-2'}
+          />
+        </div>
         <hr />
         <CommunityContextActions
           msg={msg}
