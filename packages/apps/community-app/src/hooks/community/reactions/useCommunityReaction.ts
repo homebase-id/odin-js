@@ -131,8 +131,10 @@ export const useCommunityReaction = (props?: {
         );
 
         const id = getNewId();
-        let newReactionPreview: ReactionPreview = message.fileMetadata
-          .reactionPreview as ReactionPreview;
+        let newReactionPreview: ReactionPreview = {
+          ...message.fileMetadata.reactionPreview,
+          reactions: { ...message.fileMetadata.reactionPreview?.reactions },
+        } as ReactionPreview;
 
         if (hasReaction) {
           const currentReactions = message.fileMetadata.reactionPreview?.reactions || {};
@@ -171,6 +173,23 @@ export const useCommunityReaction = (props?: {
           messageWithReactionPreview,
           community.fileMetadata.appData.uniqueId as string
         );
+
+        return { previousReactions, previousMessage: message };
+      },
+      onError: (error, { community, message }, context) => {
+        if (context?.previousMessage)
+          insertNewMessage(
+            queryClient,
+            context.previousMessage,
+            community.fileMetadata.appData.uniqueId as string
+          );
+
+        if (context?.previousMessage) {
+          queryClient.setQueryData(
+            ['community-reaction', message.fileId],
+            context.previousReactions
+          );
+        }
       },
     }),
     remove: useMutation({

@@ -16,19 +16,12 @@ export const CommunityThreadsCatchup = memo(() => {
 
   useMarkCommunityAsRead({ odinId: odinKey, communityId, threads: true });
 
-  const { data: flatThreadMetas } = useCommunityThreads({
+  const { data: flatThreadMetas, isFetched: fetchedThreads } = useCommunityThreads({
     odinId: odinKey,
     communityId: communityId,
   });
 
-  if (!community && isFetched)
-    return (
-      <div className="flex h-full flex-grow flex-col items-center justify-center">
-        <p className="text-4xl">Homebase Community</p>
-      </div>
-    );
-
-  if (!community) {
+  if (!isFetched || !fetchedThreads) {
     return (
       <div className="h-full w-20 flex-grow bg-background">
         <LoadingBlock className="h-16 w-full" />
@@ -42,6 +35,13 @@ export const CommunityThreadsCatchup = memo(() => {
       </div>
     );
   }
+
+  if (!community || !flatThreadMetas)
+    return (
+      <div className="flex h-full flex-grow flex-col items-center justify-center">
+        <p className="text-4xl">Homebase Community</p>
+      </div>
+    );
 
   return (
     <ErrorBoundary>

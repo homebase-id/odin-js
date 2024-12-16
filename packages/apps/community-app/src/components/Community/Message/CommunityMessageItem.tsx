@@ -12,6 +12,7 @@ import {
   COMMUNITY_ROOT_PATH,
   useDotYouClientContext,
   ActionButton,
+  useLongPress,
 } from '@homebase-id/common-app';
 import { HomebaseFile, RichText } from '@homebase-id/js-lib/core';
 import {
@@ -44,6 +45,7 @@ export const CommunityMessageItem = memo(
     hideThreads?: boolean;
     showChannelName?: boolean;
     className?: string;
+    scrollRef?: React.RefObject<HTMLDivElement>;
   }) => {
     const {
       msg,
@@ -53,6 +55,7 @@ export const CommunityMessageItem = memo(
       hideThreads,
       showChannelName,
       className,
+      scrollRef,
     } = props;
 
     const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
@@ -98,6 +101,14 @@ export const CommunityMessageItem = memo(
       };
     }, []);
 
+    const [isTouchContextMenuOpen, setIsTouchContextMenuOpen] = useState(false);
+    const clickProps = useLongPress(
+      () => setIsTouchContextMenuOpen(true),
+      () => {},
+      { shouldPreventDefault: false, delay: 300 },
+      scrollRef
+    );
+
     return (
       <>
         {isMediaDetail ? (
@@ -110,6 +121,7 @@ export const CommunityMessageItem = memo(
         <div
           className={`group relative flex flex-col transition-colors duration-500 ${isEdit ? 'bg-primary/20' : `bg-background ${isDetail ? (highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000') : !isTouchDevice() ? 'hover:bg-page-background' : ''}`} ${className || ''}`}
           data-unique-id={msg.fileMetadata.appData.uniqueId}
+          {...clickProps}
         >
           {showChannelName && !hideDetails ? (
             <Link
@@ -158,6 +170,8 @@ export const CommunityMessageItem = memo(
                   communityActions={extendedCommunityActions}
                   msg={msg}
                   community={community}
+                  isTouchOpen={isTouchContextMenuOpen}
+                  setIsTouchOpen={setIsTouchContextMenuOpen}
                 />
               </div>
 

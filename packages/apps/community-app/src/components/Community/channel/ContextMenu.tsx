@@ -12,13 +12,25 @@ import {
   useDotYouClientContext,
   useOutsideTrigger,
   ReactionsBarHandle,
+  usePortal,
+  ActionButton,
 } from '@homebase-id/common-app';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { CommunityMessageInfo } from '../Message/detail/CommunityMessageInfo';
 import { CommunityReactionComposer } from '../Message/reactions/CommunityReactionComposer';
-import { Bookmark, BookmarkSolid, ReplyArrow } from '@homebase-id/common-app/icons';
+import {
+  Bookmark,
+  BookmarkSolid,
+  Clipboard,
+  Pencil,
+  Question,
+  ReplyArrow,
+  Trash,
+} from '@homebase-id/common-app/icons';
 import { useCommunityLater } from '../../../hooks/community/useCommunityLater';
+import { isTouchDevice } from '@homebase-id/js-lib/helpers';
+import { createPortal } from 'react-dom';
 
 export interface CommunityActions {
   doReply?: (msg: HomebaseFile<CommunityMessage>) => void;
@@ -30,10 +42,14 @@ export const ContextMenu = ({
   msg,
   community,
   communityActions,
+  isTouchOpen,
+  setIsTouchOpen,
 }: {
   msg: HomebaseFile<CommunityMessage>;
   community?: HomebaseFile<CommunityDefinition>;
   communityActions?: CommunityActions;
+  isTouchOpen?: boolean;
+  setIsTouchOpen?: (isTouchOpen: boolean) => void;
 }) => {
   const [isStickyOpen, setIsStickyOpen] = useState(false);
   const reactionsBarRef = useRef<ReactionsBarHandle>(null);
@@ -43,24 +59,91 @@ export const ContextMenu = ({
     setIsStickyOpen(false);
   });
 
-  return (
+  const isTouch = isTouchDevice();
+
+  const target = usePortal('context-menu');
+  const [clickable, setClickable] = useState(false);
+  useEffect(() => {
+    if (isTouchOpen) setTimeout(() => setClickable(true), 750);
+    else setClickable(false);
+  }, [isTouchOpen]);
+
+  if (!isTouch) {
+    return (
+      <div
+        className={[
+          'absolute right-5 top-[-3rem] z-10',
+          'flex flex-row items-center rounded-lg bg-background px-1 py-2 text-foreground shadow-md',
+          isStickyOpen
+            ? 'visible'
+            : `invisible ${isTouch ? '' : 'group-hover:pointer-events-auto group-hover:visible'}`,
+        ].join(' ')}
+        ref={wrapperRef}
+      >
+        <CommunityReactionComposer
+          ref={reactionsBarRef}
+          msg={msg}
+          community={community}
+          onOpen={() => setIsStickyOpen(true)}
+          onClose={() => {
+            setIsStickyOpen(false);
+          }}
+        />
+        <CommunityContextActions
+          msg={msg}
+          community={community}
+          communityActions={communityActions}
+          renderActionGroup={true}
+        />
+      </div>
+    );
+  }
+
+  if (!isTouchOpen) return null;
+  return createPortal(
     <div
-      className={`absolute right-5 top-[-3rem] z-10 flex flex-row items-center rounded-lg bg-background px-1 py-2 text-foreground shadow-md ${isStickyOpen ? 'visible' : 'invisible group-hover:pointer-events-auto group-hover:visible'}`}
-      ref={wrapperRef}
+      className={`fixed inset-0 z-20 flex flex-col justify-end bg-page-background/70 ${clickable ? 'pointer-events-auto' : 'pointer-events-none'}`}
+      onClick={() => setIsTouchOpen?.(false)}
     >
-      <CommunityReactionComposer
-        ref={reactionsBarRef}
-        msg={msg}
-        community={community}
-        onOpen={() => setIsStickyOpen(true)}
-        onClose={() => setIsStickyOpen(false)}
-      />
-      <CommunityContextActions
-        msg={msg}
-        community={community}
-        communityActions={communityActions}
-      />
-    </div>
+      <div
+        className="min-h-40 rounded-t-md bg-background px-2 py-2"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="px-2 pb-2">
+          <CommunityReactionComposer
+            ref={reactionsBarRef}
+            msg={msg}
+            community={community}
+            onClick={() => setIsTouchOpen?.(false)}
+            onOpen={() => setIsStickyOpen(true)}
+            onClose={() => {
+              if (!clickable) return;
+              setIsStickyOpen(false);
+              setIsTouchOpen?.(false);
+            }}
+            className={'w-full gap-2'}
+          />
+        </div>
+        <hr />
+        <CommunityContextActions
+          msg={msg}
+          community={community}
+          communityActions={communityActions}
+          renderActionGroup={false}
+        />
+        <hr />
+        {setIsTouchOpen ? (
+          <ActionButton
+            onClick={() => setIsTouchOpen?.(false)}
+            className="w-full px-2 py-2 text-center"
+            type="mute"
+          >
+            {t('Close')}
+          </ActionButton>
+        ) : null}
+      </div>
+    </div>,
+    target
   );
 };
 
@@ -68,10 +151,12 @@ const CommunityContextActions = ({
   msg,
   community,
   communityActions,
+  renderActionGroup,
 }: {
   msg: HomebaseFile<CommunityMessage>;
   community?: HomebaseFile<CommunityDefinition>;
   communityActions?: CommunityActions;
+  renderActionGroup: boolean;
 }) => {
   if (!communityActions) return null;
   const [showMessageInfo, setShowMessageInfo] = useState(false);
@@ -91,16 +176,28 @@ const CommunityContextActions = ({
 
   const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;
 
-  const optionalOptions: ActionGroupOptionProps[] = [];
+  const optionalOptions: ActionGroupOptionProps[] = [
+    {
+      icon: Clipboard,
+      label: t('Copy link'),
+      onClick: () => {
+        navigator.clipboard.writeText(
+          `${window.location.href}/${msg.fileMetadata.appData.uniqueId}`
+        );
+      },
+    },
+  ];
   if (messageFromMe) {
     if (communityActions.doEdit) {
       optionalOptions.push({
+        icon: Pencil,
         label: t('Edit'),
         onClick: () => communityActions.doEdit?.(msg),
       });
     }
     if (communityActions.doDelete) {
       optionalOptions.push({
+        icon: Trash,
         label: t('Delete'),
         confirmOptions: {
           title: t('Delete message'),
@@ -114,6 +211,7 @@ const CommunityContextActions = ({
 
   if (community)
     optionalOptions.push({
+      icon: Question,
       label: t('Message info'),
       onClick: () => setShowMessageInfo(true),
     });
@@ -138,36 +236,58 @@ const CommunityContextActions = ({
           onClose={() => setShowMessageInfo(false)}
         />
       ) : null}
-      {communityActions.doReply ? (
-        <button
-          className="rounded-full p-2 text-slate-400 hover:bg-slate-300 hover:dark:bg-slate-700"
-          onClick={() => communityActions.doReply && communityActions.doReply(msg)}
-        >
-          <ReplyArrow className="h-5 w-5" />
-        </button>
-      ) : null}
-      <button
-        className="rounded-full p-2 text-slate-400 hover:bg-slate-300 hover:dark:bg-slate-700"
-        onClick={() => toggleSave()}
-      >
-        {isSaved ? <BookmarkSolid className="h-5 w-5" /> : <Bookmark className="h-5 w-5" />}
-      </button>
-      <ActionGroup
-        options={[
-          {
-            label: t('Copy link'),
-            onClick: () => {
-              navigator.clipboard.writeText(
-                `${window.location.href}/${msg.fileMetadata.appData.uniqueId}`
-              );
-            },
-          },
-          ...optionalOptions,
-        ]}
-        type={'mute'}
-        size="square"
-        alwaysInPortal={true}
-      />
+
+      {renderActionGroup ? (
+        <>
+          {communityActions.doReply ? (
+            <button
+              className="rounded-full p-2 text-slate-400 hover:bg-slate-300 hover:dark:bg-slate-700"
+              onClick={() => communityActions.doReply && communityActions.doReply(msg)}
+            >
+              <ReplyArrow className="h-5 w-5" />
+            </button>
+          ) : null}
+          <button
+            className="rounded-full p-2 text-slate-400 hover:bg-slate-300 hover:dark:bg-slate-700"
+            onClick={() => toggleSave()}
+          >
+            {isSaved ? <BookmarkSolid className="h-5 w-5" /> : <Bookmark className="h-5 w-5" />}
+          </button>
+          <ActionGroup
+            options={optionalOptions.map((option) => ({ ...option, icon: undefined }))}
+            type={'mute'}
+            size="square"
+            alwaysInPortal={true}
+          />
+        </>
+      ) : (
+        <div className="flex flex-col items-start">
+          {communityActions.doReply ? (
+            <ActionButton
+              icon={ReplyArrow}
+              onClick={() => communityActions.doReply && communityActions.doReply(msg)}
+              type="mute"
+            >
+              {t('Reply')}
+            </ActionButton>
+          ) : null}
+          <ActionButton
+            onClick={() => toggleSave()}
+            icon={isSaved ? BookmarkSolid : Bookmark}
+            type="mute"
+            key={isSaved ? 'remove' : 'save'}
+          >
+            {isSaved ? t('Remove from later') : t('Save for later')}
+          </ActionButton>
+          {optionalOptions.map((option) => {
+            return (
+              <ActionButton key={option.label} {...option} type="mute">
+                {option.label}
+              </ActionButton>
+            );
+          })}
+        </div>
+      )}
     </>
   );
 };

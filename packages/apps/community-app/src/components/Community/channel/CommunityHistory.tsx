@@ -5,7 +5,7 @@ import {
   COMMUNITY_MESSAGE_FILE_TYPE,
   CommunityMessage,
 } from '../../../providers/CommunityMessageProvider';
-import { ReactNode, useEffect, useMemo, useRef } from 'react';
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   ErrorNotification,
@@ -18,6 +18,8 @@ import { CommunityMessageItem } from '../Message/CommunityMessageItem';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
 import { CommunityActions } from './ContextMenu';
 import { useCommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
+import { useParams } from 'react-router-dom';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const CommunityHistory = ({
   community,
@@ -172,9 +174,39 @@ export const CommunityHistory = ({
     }
   }, [flattenedMsgs, setParticipants]);
 
-  if (emptyPlaceholder && isFetched && (!flattenedMsgs || flattenedMsgs.length === 0)) {
+  // Scroll to chat message key; With setTimeout as the virtualizer needs to be rendered
+  //   per scroll position to know where we're scrolling to
+  const MAX_SCROLL_ATTEMPTS = 50;
+  const [, setScrollAttempt] = useState(0);
+  const { chatMessageKey } = useParams();
+  useEffect(() => {
+    if (!chatMessageKey) return;
+    const chatIndex = flattenedMsgs.findIndex((msg) =>
+      stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey)
+    );
+
+    if (chatIndex === -1) return;
+    const innerScroll = () => {
+      setScrollAttempt((scrollAttempt) => {
+        const [rawOffset] = virtualizer.getOffsetForIndex(chatIndex);
+        const offset = rawOffset * -1;
+
+        const scrollTop = scrollRef.current?.scrollTop;
+
+        if (scrollTop !== offset && scrollAttempt < MAX_SCROLL_ATTEMPTS) {
+          scrollRef.current?.scrollTo({ top: offset });
+          setTimeout(() => {
+            innerScroll();
+          });
+        }
+        return scrollAttempt + 1;
+      });
+    };
+    innerScroll();
+  }, [flattenedMsgs]);
+
+  if (emptyPlaceholder && isFetched && (!flattenedMsgs || flattenedMsgs.length === 0))
     return <>{emptyPlaceholder}</>;
-  }
 
   return (
     <>
@@ -244,6 +276,7 @@ export const CommunityHistory = ({
                     hideThreads={inAThread}
                     className="px-2 py-1 md:px-3"
                     showChannelName={!channel && !inAThread}
+                    scrollRef={scrollRef}
                   />
                 </div>
               );
