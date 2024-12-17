@@ -13,11 +13,13 @@ import {
   MarkNotificationsAsRead,
   PushNotification,
   getNotificationCountsByAppId,
+  markAllNotificationsOfAppAndTypeIdAsRead,
   markAllNotificationsOfAppAsRead,
 } from '@homebase-id/js-lib/core';
 import { useEffect } from 'react';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useRef } from 'react';
 
 const PAGE_SIZE = 500;
 export const usePushNotifications = () => {
@@ -41,12 +43,6 @@ export const usePushNotifications = () => {
       getNextPageParam: (lastPage) =>
         lastPage?.results && lastPage?.results?.length >= PAGE_SIZE ? lastPage.cursor : undefined,
       staleTime: 1000 * 60 * 5, // 5 minutes
-      // select: (data) => ({
-      //   ...data,
-      //   results: data.results.filter(
-      //     (n) => !props?.appId || stringGuidsEqual(n.options.appId, props.appId)
-      //   ),
-      // }),
     }),
     markAsRead: useMutation({
       mutationFn: markAsRead,
@@ -179,19 +175,30 @@ export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
   });
 };
 
-export const useRemoveNotifications = (props: { disabled?: boolean; appId: string }) => {
+export const useRemoveNotifications = (props: {
+  disabled?: boolean;
+  appId: string;
+  typeId?: string;
+}) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
-  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: props.appId });
+  const { data: unreadCount } = useUnreadPushNotificationsCount({
+    appId: props.appId,
+  });
 
-  const markAsRead = async (appId: string) => {
-    const response = await markAllNotificationsOfAppAsRead(dotYouClient, appId);
+  const markAsRead = async ({ appId, typeId }: { appId: string; typeId?: string }) => {
+    const response = typeId
+      ? await markAllNotificationsOfAppAndTypeIdAsRead(dotYouClient, appId, typeId)
+      : await markAllNotificationsOfAppAsRead(dotYouClient, appId);
     return response;
   };
 
   const mutation = useMutation({
     mutationFn: markAsRead,
-    onMutate: (appId: string) => {
+    onMutate: ({ appId, typeId }) => {
+      if (typeId) {
+        return;
+      }
       const existingCounts = queryClient.getQueryData<Record<string, number>>([
         'push-notifications-count',
       ]);
@@ -201,19 +208,38 @@ export const useRemoveNotifications = (props: { disabled?: boolean; appId: strin
       newCounts[appId] = 0;
       queryClient.setQueryData(['push-notifications-count'], newCounts);
     },
-    onSuccess: () => {
+    onSuccess: ({ typeId }) => {
+      if (typeId) {
+        queryClient.invalidateQueries({ queryKey: ['push-notifications-count'] });
+      }
       queryClient.invalidateQueries({ queryKey: ['push-notifications'] });
     },
   });
 
   useEffect(() => {
-    (async () => {
-      if (props?.disabled || !props.appId || mutation.status === 'pending' || !unreadCount) {
-        return;
-      }
-      mutation.mutate(props.appId);
-    })();
+    if (props?.typeId) return;
+
+    if (props?.disabled || !props.appId || mutation.status === 'pending' || !unreadCount) {
+      return;
+    }
+    mutation.mutate(props);
   }, [mutation, props?.disabled, props?.appId, unreadCount]);
+
+  const scheduled = useRef(false);
+  useEffect(() => {
+    if (props?.disabled || !props.appId || !props.typeId || !unreadCount) {
+      return;
+    }
+
+    if (scheduled.current) return;
+    scheduled.current = true;
+    setTimeout(() => {
+      console.log('marking typeid as read');
+      mutation.mutate(props);
+      scheduled.current = false;
+    }, 10 * 1000);
+    mutation.mutate(props);
+  }, [mutation, props?.disabled, props?.appId, props?.typeId]);
 };
 
 export const insertPushNotification = async (

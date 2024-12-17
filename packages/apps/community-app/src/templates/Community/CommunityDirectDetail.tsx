@@ -1,5 +1,10 @@
 import { useCommunity } from '../../hooks/community/useCommunity';
-import { COMMUNITY_ROOT_PATH, ErrorBoundary } from '@homebase-id/common-app';
+import {
+  CHAT_APP_ID,
+  COMMUNITY_ROOT_PATH,
+  ErrorBoundary,
+  useRemoveNotifications,
+} from '@homebase-id/common-app';
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
@@ -32,6 +37,8 @@ export const CommunityDirectDetail = () => {
       }
     })();
   }, [dmKey]);
+
+  useRemoveNotifications({ appId: CHAT_APP_ID, typeId: conversationId, disabled: !conversationId });
 
   const {
     single: { data: conversation, isFetched: conversationFetched },
