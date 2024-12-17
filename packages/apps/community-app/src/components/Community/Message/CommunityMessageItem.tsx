@@ -35,6 +35,8 @@ import { useCommunityChannels } from '../../../hooks/community/channels/useCommu
 import { CommunityReactions } from './reactions/CommunityReactions';
 import { useCommunityChannel } from '../../../hooks/community/channels/useCommunityChannel';
 import { CommunityMessageEditor } from './detail/CommunityMessageEditor';
+import { useCommunityLater } from '../../../hooks/community/useCommunityLater';
+import { BookmarkSolid } from '@homebase-id/common-app/icons';
 
 export const CommunityMessageItem = memo(
   (props: {
@@ -101,6 +103,11 @@ export const CommunityMessageItem = memo(
       };
     }, []);
 
+    const { isSaved } = useCommunityLater({
+      messageId: msg.fileMetadata.appData.uniqueId,
+      systemFileType: msg.fileSystemType,
+    });
+
     const [isTouchContextMenuOpen, setIsTouchContextMenuOpen] = useState(false);
     const clickProps = useLongPress(
       () => setIsTouchContextMenuOpen(true),
@@ -108,6 +115,15 @@ export const CommunityMessageItem = memo(
       { shouldPreventDefault: false, delay: 300 },
       scrollRef
     );
+
+    const backgroundClassName = (() => {
+      if (isSaved) return 'bg-primary/10';
+      if (isEdit) return 'bg-primary/20';
+      if (isDetail)
+        return highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000';
+
+      return `bg-background ${!isTouchDevice() ? 'hover:bg-page-background' : ''}`;
+    })();
 
     return (
       <>
@@ -119,7 +135,7 @@ export const CommunityMessageItem = memo(
           />
         ) : null}
         <div
-          className={`group relative flex flex-col transition-colors duration-500 ${isEdit ? 'bg-primary/20' : `bg-background ${isDetail ? (highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000') : !isTouchDevice() ? 'hover:bg-page-background' : ''}`} ${className || ''}`}
+          className={`group relative flex flex-col transition-colors duration-500 ${backgroundClassName} ${className || ''}`}
           data-unique-id={msg.fileMetadata.appData.uniqueId}
           {...clickProps}
         >
@@ -130,6 +146,12 @@ export const CommunityMessageItem = memo(
             >
               #{channel?.fileMetadata.appData.content.title}
             </Link>
+          ) : null}
+          {isSaved ? (
+            <div className="flex flex-row items-center gap-1 py-1 text-primary">
+              <BookmarkSolid className="h-3 w-3" />
+              <p className="text-sm">{t('Saved for later')}</p>
+            </div>
           ) : null}
           <div className="flex flex-row gap-2">
             {hideDetails ? (
