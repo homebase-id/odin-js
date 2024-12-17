@@ -66,20 +66,20 @@ const DropZone = ({ onChange }: { onChange?: (files: File[]) => void }) => {
   useEffect(() => {
     const onDragOver = (ev: DragEvent) => {
       ev.preventDefault();
-      setDropZoneActive(true);
+      if (ev.dataTransfer?.items?.length) setDropZoneActive(true);
     };
 
     const onDragLeave = () => setDropZoneActive(false);
-    const opDrop = () => setDropZoneActive(false);
+    const onDrop = () => setDropZoneActive(false);
 
     window.addEventListener('dragover', onDragOver);
     window.addEventListener('dragleave', onDragLeave);
-    window.addEventListener('drop', opDrop);
+    window.addEventListener('drop', onDrop);
 
     return () => {
       window.removeEventListener('dragover', onDragOver);
       window.removeEventListener('dragleave', onDragLeave);
-      window.removeEventListener('drop', opDrop);
+      window.removeEventListener('drop', onDrop);
     };
   }, []);
 

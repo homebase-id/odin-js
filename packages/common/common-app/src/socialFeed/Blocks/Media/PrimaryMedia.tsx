@@ -1,6 +1,7 @@
 import { getChannelDrive, POST_LINKS_PAYLOAD_KEY } from '@homebase-id/js-lib/public';
 import {
   EmbeddedThumb,
+  NewPayloadDescriptor,
   PayloadDescriptor,
   SystemFileType,
   TargetDrive,
@@ -118,26 +119,50 @@ export const PrimaryMedia = ({
   );
 };
 
+interface BaseBoringFileProps {
+  systemFileType?: SystemFileType;
+  file: PayloadDescriptor | NewPayloadDescriptor;
+  canDownload?: boolean;
+  className?: string;
+}
+
+interface BoringFilePayloadProps extends BaseBoringFileProps {
+  odinId: string | undefined;
+  globalTransitId: string | undefined;
+  fileId: string;
+  targetDrive: TargetDrive;
+  file: PayloadDescriptor;
+}
+
+interface BoringFileNewPayloadProps extends Omit<Partial<BoringFilePayloadProps>, 'file'> {
+  file: NewPayloadDescriptor;
+}
+
+type BoringFileProps = BoringFilePayloadProps | BoringFileNewPayloadProps;
+
 export const BoringFile = ({
   odinId,
-  targetDrive,
   fileId,
   globalTransitId,
+  targetDrive,
   systemFileType,
   file,
   canDownload,
   className,
-}: {
-  odinId: string | undefined;
-  targetDrive: TargetDrive;
-  fileId: string;
-  globalTransitId: string | undefined;
-  systemFileType?: SystemFileType;
-  file: PayloadDescriptor;
-  canDownload?: boolean;
-  className?: string;
-}) => {
-  const fetchFile = useFile({ targetDrive, systemFileType }).fetchFile;
+}: BoringFileProps) => {
+  const contentType =
+    (file as NewPayloadDescriptor)?.pendingFile?.type ||
+    file.contentType ||
+    'application/octet-stream';
+  const byteSize = (file as NewPayloadDescriptor)?.pendingFile?.size || file.bytesWritten || 0;
+
+  const fetchFileFromServer = useFile(targetDrive && { targetDrive, systemFileType }).fetchFile;
+
+  const fetchFile = (file as NewPayloadDescriptor)?.pendingFileUrl
+    ? () => (file as NewPayloadDescriptor).pendingFileUrl as string
+    : async () =>
+        (fileId && (await fetchFileFromServer(odinId, globalTransitId, fileId, file.key))) || '';
+
   const doDownload = (url: string) => {
     // Dirty hack for easy download
     const link = document.createElement('a');
@@ -153,18 +178,20 @@ export const BoringFile = ({
       onClick={
         canDownload
           ? async () => {
-              doDownload((await fetchFile(odinId, globalTransitId, fileId, file.key)) || '');
+              doDownload(await fetchFile());
             }
           : undefined
       }
       className={`${className || ''} relative ${className?.indexOf('aspect-') ? '' : 'aspect-square'} overflow-hidden bg-slate-50 text-slate-200 dark:bg-slate-700 dark:text-slate-600 mx-auto ${canDownload ? 'cursor-pointer' : ''}`}
     >
       <p className="absolute inset-0 p-2 text-9xl break-all">
-        {file.descriptorContent || file.contentType}
+        {((file as NewPayloadDescriptor)?.pendingFile as File)?.name ||
+          file.descriptorContent ||
+          contentType}
       </p>
       <div className="absolute inset-0 flex gap-3 items-center justify-center text-foreground">
         <ExtensionThumbnail
-          contentType={file.contentType}
+          contentType={contentType}
           className={`${canDownload ? 'h-64 w-64 text-slate-200 dark:text-slate-600' : 'h-32 w-32 text-slate-500 dark:text-slate-400'}`}
         />
       </div>
@@ -172,7 +199,7 @@ export const BoringFile = ({
       {canDownload ? (
         <div className="absolute inset-0 flex gap-3 items-center justify-center text-foreground">
           <span className="flex flex-col items-center">
-            <Download className="h-12 w-12 " /> {t('Download')} ({bytesToSize(file.bytesWritten)})
+            <Download className="h-12 w-12 " /> {t('Download')} ({bytesToSize(byteSize)})
           </span>
         </div>
       ) : null}
