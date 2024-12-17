@@ -6,6 +6,7 @@ import {
   COMMUNITY_ROOT_PATH,
   ConnectionImage,
   ConnectionName,
+  ErrorBoundary,
   t,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
@@ -134,55 +135,52 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
 
           <div className="flex flex-col gap-1">
             <h2 className="px-1">{t('Channels')}</h2>
-
-            {pinnedChannels?.map((channel) => (
-              <ChannelItem
-                odinId={odinKey}
-                communityId={communityKey}
-                channel={channel}
-                setUnreadCount={setUnreadCountCallback}
-                key={channel.fileId || channel.fileMetadata.appData.uniqueId}
-              />
-            ))}
-
-            {unpinnedChannels
-              ?.slice(0, isExpanded ? undefined : maxChannels - (pinnedChannels?.length || 0))
-              .map((channel) => (
+            <ErrorBoundary>
+              {pinnedChannels?.map((channel) => (
                 <ChannelItem
-                  odinId={odinKey}
-                  communityId={communityKey}
                   channel={channel}
                   setUnreadCount={setUnreadCountCallback}
                   key={channel.fileId || channel.fileMetadata.appData.uniqueId}
                 />
               ))}
 
-            {communityChannels?.length && communityChannels?.length > 7 ? (
-              <ActionButton
-                type="mute"
-                size="none"
-                className="text-sm opacity-50 hover:opacity-100"
-                onClick={() => setIsExpanded((val) => !val)}
-              >
-                {isExpanded ? t('See less') : t('See more')}
-                <Chevron
-                  className={`ml-2 h-3 w-3 transition-transform ${isExpanded ? '-rotate-90' : 'rotate-90'}`}
-                />
-              </ActionButton>
-            ) : null}
+              {unpinnedChannels
+                ?.slice(0, isExpanded ? undefined : maxChannels - (pinnedChannels?.length || 0))
+                .map((channel) => (
+                  <ChannelItem
+                    channel={channel}
+                    setUnreadCount={setUnreadCountCallback}
+                    key={channel.fileId || channel.fileMetadata.appData.uniqueId}
+                  />
+                ))}
+
+              {communityChannels?.length && communityChannels?.length > 7 ? (
+                <ActionButton
+                  type="mute"
+                  size="none"
+                  className="text-sm opacity-50 hover:opacity-100"
+                  onClick={() => setIsExpanded((val) => !val)}
+                >
+                  {isExpanded ? t('See less') : t('See more')}
+                  <Chevron
+                    className={`ml-2 h-3 w-3 transition-transform ${isExpanded ? '-rotate-90' : 'rotate-90'}`}
+                  />
+                </ActionButton>
+              ) : null}
+            </ErrorBoundary>
           </div>
 
           <div className="flex w-full flex-col gap-1">
             <h2 className="px-1">{t('Direct messages')}</h2>
-            {members?.map((recipient) => (
-              <DirectMessageItem
-                odinId={odinKey}
-                communityId={communityKey}
-                recipient={recipient}
-                key={recipient}
-                setUnreadCount={setUnreadCountCallback}
-              />
-            ))}
+            <ErrorBoundary>
+              {members?.map((recipient) => (
+                <DirectMessageItem
+                  recipient={recipient}
+                  key={recipient}
+                  setUnreadCount={setUnreadCountCallback}
+                />
+              ))}
+            </ErrorBoundary>
           </div>
         </div>
       </div>
@@ -252,20 +250,18 @@ const LaterItem = ({ odinId, communityId }: { odinId: string; communityId: strin
 
 const VISITS_STORAGE_KEY = 'community-sidebar-visited';
 const ChannelItem = ({
-  odinId,
-  communityId,
   channel,
   setUnreadCount,
 }: {
-  odinId: string;
-  communityId: string;
   channel: ChannelWithRecentMessage;
 
   setUnreadCount: (identifier: string, count: number) => void;
 }) => {
+  const { odinKey, communityKey } = useParams();
+
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const channelId = channel.fileMetadata.appData.uniqueId;
-  const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/${channelId}`;
+  const href = `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelId}`;
   const isActive = !!useMatch({ path: href, end: false });
 
   const vists = tryJsonParse<string[]>(sessionStorage.getItem(VISITS_STORAGE_KEY) || '[]') || [];
@@ -285,12 +281,16 @@ const ChannelItem = ({
   const {
     single: { data: metadata },
     update: { mutate: updateMetadata },
-  } = useCommunityMetadata({ odinId, communityId });
+  } = useCommunityMetadata({ odinId: odinKey, communityId: communityKey });
 
   const isPinned =
     channelId && metadata?.fileMetadata.appData.content?.pinnedChannels?.includes(channelId);
 
-  const { data: messages } = useCommunityMessages({ odinId, communityId, channelId }).all;
+  const { data: messages } = useCommunityMessages({
+    odinId: odinKey,
+    communityId: communityKey,
+    channelId,
+  }).all;
 
   const unreadMessagesCount = useMemo(
     () =>
@@ -316,7 +316,7 @@ const ChannelItem = ({
 
   return (
     <Link
-      to={`${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/${channelId}`}
+      to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelId}`}
       className={`group flex flex-row items-center gap-1 rounded-md px-2 py-[0.15rem] ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''} ${isVisited ? 'text-purple-700' : ''}`} ${hasUnreadMessages && !isActive ? 'font-bold' : ''}`}
     >
       # {channel.fileMetadata.appData.content?.title?.toLowerCase()}
@@ -362,29 +362,23 @@ const ChannelItem = ({
 };
 
 const DirectMessageItem = ({
-  odinId,
-  communityId,
   recipient,
   setUnreadCount,
 }: {
-  odinId: string;
-  communityId: string;
   recipient: string;
   setUnreadCount: (identifier: string, count: number) => void;
 }) => {
+  const { odinKey, communityKey } = useParams();
   const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getHostIdentity();
-  const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/direct/${recipient}`;
+  const href = `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/direct/${recipient}`;
   const isActive = !!useMatch({ path: href });
 
   const [conversationId, setConversationId] = useState<string | undefined>();
 
   useEffect(() => {
-    if (recipient === identity) {
-      setConversationId(ConversationWithYourselfId);
-    } else {
-      getNewXorId(identity as string, recipient).then((xorId) => setConversationId(xorId));
-    }
+    if (recipient === identity) setConversationId(ConversationWithYourselfId);
+    else getNewXorId(identity as string, recipient).then((xorId) => setConversationId(xorId));
   }, [recipient]);
 
   const { data: conversationMetadata } = useConversationMetadata({ conversationId }).single;
@@ -410,9 +404,7 @@ const DirectMessageItem = ({
       : 0;
   }, [messages, conversationMetadata]);
 
-  useEffect(() => {
-    setUnreadCount(recipient, unreadCount || 0);
-  }, [unreadCount]);
+  useEffect(() => setUnreadCount(recipient, unreadCount || 0), [unreadCount]);
 
   return (
     <Link

@@ -1,6 +1,6 @@
 import { AxiosRequestConfig } from 'axios';
 import { DotYouClient, NumberCursoredResult, PushNotificationOptions } from '../core';
-import { stringGuidsEqual, stringifyToQueryParams } from '../../helpers/helpers';
+import { stringifyToQueryParams } from '../../helpers/helpers';
 
 export interface PushNotification {
   id: string;
