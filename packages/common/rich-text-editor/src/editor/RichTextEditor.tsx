@@ -203,7 +203,33 @@ const InnerRichTextEditor = memo(
           ParagraphPlugin,
           HeadingPlugin,
           BlockquotePlugin,
-          CodeBlockPlugin,
+          CodeBlockPlugin.extend({
+            parsers: {
+              html: {
+                deserializer: {
+                  parse: ({ element }) => {
+                    // Replace <br> with \n so that it can be parsed as separate lines
+                    element.innerHTML = element.innerHTML.replace(/<br>/g, '\n');
+
+                    const textContent = element.textContent || '';
+                    const lines = textContent.split('\n');
+
+                    return {
+                      type: CodeBlockPlugin.key,
+                      children: lines.map((line) => ({
+                        type: CodeLinePlugin.key,
+                        children: [{ text: line }],
+                      })),
+                    };
+                  },
+                  rules: [
+                    ...(CodeBlockPlugin.parsers?.html?.deserializer?.rules || []),
+                    { validAttribute: 'data-language' },
+                  ],
+                },
+              },
+            },
+          }),
           LinkPlugin.configure({
             render: { afterEditable: () => <LinkFloatingToolbar /> },
           }),
@@ -367,6 +393,12 @@ const InnerRichTextEditor = memo(
           className={`relative flex w-[100%] flex-col ${className ?? ''} [&_.slate-selected]:!bg-primary/20 [&_.slate-selection-area]:border [&_.slate-selection-area]:bg-primary/10`}
           onSubmit={(e) => e.stopPropagation()}
           onClick={disabled ? undefined : (e) => e.stopPropagation()}
+          // onPaste={(e) => {
+          //   e.preventDefault();
+          //   const text = e.clipboardData.getData('text');
+          //   console.log('pure text', text);
+          //   editor?.insertText(text);
+          // }}
         >
           <Plate
             editor={editor}
