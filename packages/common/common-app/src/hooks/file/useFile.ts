@@ -2,13 +2,9 @@ import { SystemFileType, TargetDrive, getPayloadBytes } from '@homebase-id/js-li
 import { getPayloadBytesOverPeerByGlobalTransitId } from '@homebase-id/js-lib/peer';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
-export const useFile = ({
-  targetDrive,
-  systemFileType,
-}: {
-  targetDrive: TargetDrive;
-  systemFileType?: SystemFileType;
-}) => {
+export const useFile = (props?: { targetDrive: TargetDrive; systemFileType?: SystemFileType }) => {
+  const { targetDrive, systemFileType } = props || {};
+
   const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getHostIdentity();
 
@@ -18,7 +14,7 @@ export const useFile = ({
     fileId: string,
     payloadKey?: string
   ) => {
-    if (!fileId || !payloadKey) return null;
+    if (!fileId || !payloadKey || !targetDrive) return null;
 
     const isLocal = !odinId || odinId === identity;
 

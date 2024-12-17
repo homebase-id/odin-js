@@ -194,6 +194,7 @@ const MediaItem = ({
   );
 };
 
+const FIFTY_MEGBYTES = 50 * 1024 * 1024;
 const PendingFile = ({
   payload,
   fit,
@@ -207,24 +208,46 @@ const PendingFile = ({
 }) => {
   const fileUrl = useMemo(
     () =>
-      (payload.pendingFileUrl || payload.pendingFile) && payload.contentType?.includes('image/')
+      (payload.pendingFileUrl || payload.pendingFile) &&
+      (payload.contentType?.startsWith('video/') || payload.contentType?.startsWith('image/'))
         ? payload.pendingFileUrl ||
-          (payload.pendingFile && URL.createObjectURL(payload.pendingFile))
-        : '',
+          (payload.pendingFile &&
+            payload.pendingFile.size < FIFTY_MEGBYTES &&
+            URL.createObjectURL(payload.pendingFile))
+        : undefined,
     [payload.pendingFile]
   );
 
-  if (!fileUrl)
+  if (fileUrl && payload.contentType?.startsWith('video/'))
     return (
-      <div className="aspect-square h-full w-full animate-pulse bg-slate-400 dark:bg-slate-200"></div>
+      <video
+        src={fileUrl}
+        className={`${fit === 'cover' ? 'h-full w-full object-cover' : 'h-full w-full'} ${className || ''}`}
+        autoPlay={true}
+        muted={true}
+        loop={true}
+      />
+    );
+
+  if (fileUrl && payload.contentType?.startsWith('image/'))
+    return (
+      <img
+        src={fileUrl}
+        className={`${fit === 'cover' ? 'h-full w-full object-cover' : ''} ${className || ''}`}
+        onLoad={onLoad}
+      />
     );
 
   return (
-    <img
-      src={fileUrl}
-      className={`${fit === 'cover' ? 'h-full w-full object-cover' : ''} ${className || ''}`}
-      onLoad={onLoad}
-    />
+    <div
+      className="aspect-square h-full w-full"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+    >
+      <BoringFile file={payload} className={'pointer-events-none h-full w-full animate-pulse'} />
+    </div>
   );
 };
 
