@@ -108,7 +108,7 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
             </a>
 
             <button
-              className="flex flex-row items-center gap-2 text-xl font-semibold"
+              className="flex flex-grow flex-row items-center gap-2 text-xl font-semibold"
               onClick={() => setIsCommunityInfoDialogOpen(true)}
             >
               <span
@@ -122,7 +122,7 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
             </button>
           </div>
 
-          <div className="flex flex-col gap-1">
+          <div className="flex w-full flex-col gap-1">
             <ThreadItem
               odinId={odinKey}
               communityId={communityKey}
@@ -172,7 +172,7 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
             ) : null}
           </div>
 
-          <div className="flex flex-col gap-1">
+          <div className="flex w-full flex-col gap-1">
             <h2 className="px-1">{t('Direct messages')}</h2>
             {members?.map((recipient) => (
               <DirectMessageItem
