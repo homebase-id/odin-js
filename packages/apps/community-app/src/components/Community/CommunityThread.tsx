@@ -159,7 +159,9 @@ const ResizablePane = memo(({ children }: { children: ReactNode }) => {
         className="absolute bottom-0 left-0 top-0 z-10 hidden w-5 cursor-col-resize border-l border-transparent hover:border-slate-300 dark:hover:border-slate-600 xl:block"
         onDragStart={(e) => {
           if (!clientXStart) setClientXStart(e.clientX);
-          e.dataTransfer.setData('text', 'foo');
+        }}
+        onDragEnd={() => {
+          setClientXStart(undefined);
         }}
         draggable="true"
       ></div>
