@@ -32,16 +32,10 @@ export const GetNotifications = async (
       `/notify/list?${stringifyToQueryParams({
         count,
         cursor,
+        appId,
       })}`
     )
-    .then((res) => {
-      return {
-        ...res.data,
-        results: res.data.results.filter(
-          (push) => !appId || stringGuidsEqual(push.options.appId, appId)
-        ),
-      };
-    });
+    .then((res) => res.data);
 };
 
 export interface NotificationCountsByAppId {
@@ -74,6 +68,17 @@ export const markAllNotificationsOfAppAsRead = async (
 ) => {
   const axiosClient = dotYouClient.createAxiosClient();
   return await axiosClient.post(`/notify/list/mark-read-by-appid`, appId).then((res) => res.data);
+};
+
+export const markAllNotificationsOfAppAndTypeIdAsRead = async (
+  dotYouClient: DotYouClient,
+  appId: string,
+  typeId: string
+) => {
+  const axiosClient = dotYouClient.createAxiosClient();
+  return await axiosClient
+    .post(`/notify/list/mark-read-by-appid-and-typeid`, { appId, typeId })
+    .then((res) => res.data);
 };
 
 export const DeleteNotifications = async (
