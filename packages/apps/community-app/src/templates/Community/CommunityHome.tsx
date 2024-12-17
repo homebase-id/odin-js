@@ -115,12 +115,16 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
       />
       <ExtendCriclePermissionDialog />
       <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`} ref={viewportWrapperRef}>
-        <CommunitySideNav />
+        <ErrorBoundary>
+          <CommunitySideNav />
+        </ErrorBoundary>
         {isCreateNew ? (
           <NewCommunity />
         ) : (
           <>
-            <CommunityChannelNav isOnline={isOnline} />
+            <ErrorBoundary>
+              <CommunityChannelNav isOnline={isOnline} />
+            </ErrorBoundary>
             {children ? <>{children}</> : null}
           </>
         )}
