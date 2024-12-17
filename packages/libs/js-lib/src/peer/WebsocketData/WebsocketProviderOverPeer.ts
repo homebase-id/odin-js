@@ -196,15 +196,17 @@ const ReconnectSocket = async (
   subscribers.map((subscriber) => subscriber.onDisconnect && subscriber.onDisconnect());
 
   reconnectPromise = new Promise<void>((resolve) => {
+    if (isDebug) console.debug('[WebsocketProviderOverPeer] Reconnecting - Force disconnect');
+
+    if (webSocketClient) webSocketClient.close(1000, 'Disconnect after timeout');
+    webSocketClient = undefined;
+    lastPong = undefined;
+    connectPromise = undefined;
+    clearInterval(pingInterval);
+
     // Delay the reconnect to avoid a tight loop on network issues
     setTimeout(async () => {
-      if (webSocketClient) webSocketClient.close(1000, 'Disconnect after timeout');
-      webSocketClient = undefined;
-      lastPong = undefined;
-      connectPromise = undefined;
-      clearInterval(pingInterval);
-
-      if (isDebug) console.debug('[WebsocketProviderOverPeer] Reconnecting');
+      if (isDebug) console.debug('[WebsocketProviderOverPeer] Reconnecting - Delayed reconnect');
 
       await ConnectSocket(dotYouClient, odinId, drives, args);
       subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
