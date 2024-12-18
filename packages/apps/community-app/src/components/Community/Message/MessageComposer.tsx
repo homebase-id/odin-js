@@ -76,6 +76,9 @@ export const MessageComposer = ({
 
   const [files, setFiles] = useState<NewMediaFile[]>();
 
+  const instantSave = (
+    toSaveMeta: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata>
+  ) => updateMetadata({ metadata: toSaveMeta });
   const debouncedSave = useDebounce(() => toSaveMeta && updateMetadata({ metadata: toSaveMeta }), {
     timeoutMillis: 2000,
   });
@@ -89,7 +92,7 @@ export const MessageComposer = ({
         },
       };
 
-      setToSaveMeta({
+      const newMeta: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata> = {
         ...metadata,
         fileMetadata: {
           ...metadata?.fileMetadata,
@@ -98,7 +101,13 @@ export const MessageComposer = ({
             content: { ...metadata?.fileMetadata.appData.content, drafts: newDrafts },
           },
         },
-      });
+      };
+
+      if (message === undefined) {
+        instantSave(newMeta);
+        return;
+      }
+      setToSaveMeta(newMeta);
       debouncedSave();
     }
   }, [threadId, channel, message, debouncedSave]);

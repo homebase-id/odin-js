@@ -72,6 +72,7 @@ export const useCommunityMetadata = (props?: {
       if (!serverVersion) return;
 
       const newlyMerged = mergeMetadata(metadata, serverVersion);
+      insertNewcommunityMetadata(queryClient, newlyMerged);
       if (
         metadata.fileMetadata.appData.content.lastReadTime >
         newlyMerged.fileMetadata.appData.content.lastReadTime

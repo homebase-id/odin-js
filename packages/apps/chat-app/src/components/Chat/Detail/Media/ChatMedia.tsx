@@ -34,15 +34,15 @@ export const ChatMedia = ({
   if (isGallery) return <MediaGallery msg={msg} />;
 
   return (
-    <div className={`overflow-hidden rounded-lg`}>
-      <MediaItem
-        fileId={msg.fileId}
-        fileLastModified={msg.fileMetadata.updated}
-        payload={payloads[0]}
-        onClick={() => navigate(`${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`)}
-        previewThumbnail={isGallery ? undefined : msg.fileMetadata.appData.previewThumbnail}
-      />
-    </div>
+    <MediaItem
+      fileId={msg.fileId}
+      fileLastModified={msg.fileMetadata.updated}
+      payload={payloads[0]}
+      onClick={() => navigate(`${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`)}
+      previewThumbnail={isGallery ? undefined : msg.fileMetadata.appData.previewThumbnail}
+      fit="contain"
+      className="max-h-[35rem] w-full overflow-hidden rounded-lg"
+    />
   );
 };
 
@@ -54,6 +54,7 @@ const MediaItem = ({
   children,
   onClick,
   previewThumbnail,
+  className,
   onLoad,
 }: {
   fileId: string | undefined;
@@ -63,6 +64,7 @@ const MediaItem = ({
   children?: React.ReactNode;
   onClick: (() => void) | undefined;
   previewThumbnail?: EmbeddedThumb;
+  className?: string;
   onLoad?: () => void;
 }) => {
   const { isDarkMode } = useDarkMode();
@@ -76,7 +78,7 @@ const MediaItem = ({
 
   return (
     <div
-      className={`relative cursor-pointer ${fit === 'cover' ? 'aspect-square overflow-hidden' : ''}`}
+      className={`relative cursor-pointer ${fit === 'cover' ? 'aspect-square overflow-hidden' : ''} ${className || ''}`}
       onClick={onClick}
       data-thumb={!!previewThumbnail}
     >
@@ -85,7 +87,13 @@ const MediaItem = ({
       ) : (
         <>
           {isVideo ? (
-            <>
+            <div
+              style={
+                previewThumbnail
+                  ? { aspectRatio: `${previewThumbnail.pixelWidth / previewThumbnail.pixelHeight}` }
+                  : undefined
+              }
+            >
               <OdinThumbnailImage
                 dotYouClient={dotYouClient}
                 fileId={fileId}
@@ -101,7 +109,7 @@ const MediaItem = ({
               <div className="absolute inset-0 flex items-center justify-center">
                 <Triangle className="h-16 w-16 text-background" />
               </div>
-            </>
+            </div>
           ) : isAudio ? (
             <>
               <OdinAudio
@@ -133,7 +141,9 @@ const MediaItem = ({
               targetDrive={ChatDrive}
               avoidPayload={isVideo}
               previewThumbnail={previewThumbnail}
-              className={`h-full w-auto`}
+              className={
+                fit === 'cover' ? 'h-full w-full' : `max-h-[inherit] w-full max-w-[inherit]`
+              }
               fit={fit}
               onLoad={onLoad}
             />

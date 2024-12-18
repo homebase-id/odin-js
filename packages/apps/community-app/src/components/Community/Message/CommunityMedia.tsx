@@ -110,7 +110,13 @@ const MediaItem = ({
       ) : (
         <>
           {isVideo ? (
-            <>
+            <div
+              style={
+                previewThumbnail
+                  ? { aspectRatio: `${previewThumbnail.pixelWidth / previewThumbnail.pixelHeight}` }
+                  : undefined
+              }
+            >
               <OdinThumbnailImage
                 dotYouClient={dotYouClient}
                 odinId={odinId}
@@ -125,7 +131,7 @@ const MediaItem = ({
               <div className="absolute inset-0 flex items-center justify-center">
                 <Triangle className="h-16 w-16 text-black dark:text-white" />
               </div>
-            </>
+            </div>
           ) : isAudio ? (
             <>
               <OdinAudio
