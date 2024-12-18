@@ -34,6 +34,7 @@ import {
   stringToUint8Array,
   makeGrid,
   getRandom16ByteArray,
+  toGuidId,
 } from '@homebase-id/js-lib/helpers';
 import {
   LinkPreview,
@@ -58,6 +59,7 @@ export const CommunityDeletedArchivalStaus = 2;
 
 const COMMUNITY_MESSAGE_PAYLOAD_KEY = 'comm_web';
 export const COMMUNITY_LINKS_PAYLOAD_KEY = 'comm_links';
+export const COMMUNITY_PINNED_TAG = toGuidId('pinned-message');
 
 export enum CommunityDeliveryStatus {
   Sending = 15, // When it's sending; Used for optimistic updates
@@ -328,6 +330,7 @@ export const updateCommunityMessage = async (
         : undefined,
     appData: {
       uniqueId: message.fileMetadata.appData.uniqueId,
+      tags: message.fileMetadata.appData.tags,
       groupId:
         message.fileSystemType.toLocaleLowerCase() === 'comment'
           ? undefined

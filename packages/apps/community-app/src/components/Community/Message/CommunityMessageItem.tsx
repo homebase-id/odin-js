@@ -36,7 +36,8 @@ import { CommunityReactions } from './reactions/CommunityReactions';
 import { useCommunityChannel } from '../../../hooks/community/channels/useCommunityChannel';
 import { CommunityMessageEditor } from './detail/CommunityMessageEditor';
 import { useCommunityLater } from '../../../hooks/community/useCommunityLater';
-import { BookmarkSolid } from '@homebase-id/common-app/icons';
+import { BookmarkSolid, Pin } from '@homebase-id/common-app/icons';
+import { useCommunityPin } from '../../../hooks/community/useCommunityPin';
 
 export const CommunityMessageItem = memo(
   (props: {
@@ -107,6 +108,7 @@ export const CommunityMessageItem = memo(
       messageId: msg.fileMetadata.appData.uniqueId,
       systemFileType: msg.fileSystemType,
     });
+    const { isPinned } = useCommunityPin({ msg, community });
 
     const [isTouchContextMenuOpen, setIsTouchContextMenuOpen] = useState(false);
     const clickProps = useLongPress(
@@ -118,6 +120,7 @@ export const CommunityMessageItem = memo(
 
     const backgroundClassName = (() => {
       if (isSaved) return 'bg-primary/10';
+      if (isPinned) return 'bg-orange-500/15';
       if (isEdit) return 'bg-primary/20';
       if (isDetail)
         return highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000';
@@ -148,9 +151,14 @@ export const CommunityMessageItem = memo(
             </Link>
           ) : null}
           {isSaved ? (
-            <div className="flex flex-row items-center gap-1 py-1 text-primary">
+            <div className="flex flex-row items-center gap-1 py-1 font-semibold text-primary">
               <BookmarkSolid className="h-3 w-3" />
               <p className="text-sm">{t('Saved for later')}</p>
+            </div>
+          ) : isPinned ? (
+            <div className="flex flex-row items-center gap-1 py-1 font-semibold text-orange-600">
+              <Pin className="h-3 w-3" />
+              <p className="text-sm">{t('Pinned')}</p>
             </div>
           ) : null}
           <div className="flex flex-row gap-2">

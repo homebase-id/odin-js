@@ -24,6 +24,7 @@ import {
   BookmarkSolid,
   Clipboard,
   Pencil,
+  Pin,
   Question,
   ReplyArrow,
   Trash,
@@ -31,6 +32,7 @@ import {
 import { useCommunityLater } from '../../../hooks/community/useCommunityLater';
 import { isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { createPortal } from 'react-dom';
+import { useCommunityPin } from '../../../hooks/community/useCommunityPin';
 
 export interface CommunityActions {
   doReply?: (msg: HomebaseFile<CommunityMessage>) => void;
@@ -169,6 +171,11 @@ const CommunityContextActions = ({
     systemFileType: msg.fileSystemType,
   });
 
+  const {
+    isPinned,
+    togglePin: { mutate: togglePin },
+  } = useCommunityPin({ msg, community });
+
   const { mutate: resend, error: resendError } = useCommunityMessage().update;
 
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
@@ -185,6 +192,11 @@ const CommunityContextActions = ({
           `${window.location.href}/${msg.fileMetadata.appData.uniqueId}`
         );
       },
+    },
+    {
+      icon: Pin,
+      label: isPinned ? t('Unpin message') : t('Pin message'),
+      onClick: () => togglePin(),
     },
   ];
   if (messageFromMe) {
