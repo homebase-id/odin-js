@@ -62,6 +62,9 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = ({
   );
   const [files, setFiles] = useState<NewMediaFile[]>();
 
+  const instantSave = (
+    toSaveMeta: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata>
+  ) => updateMetadata({ metadata: toSaveMeta });
   const debouncedSave = useDebounce(() => toSaveMeta && updateMetadata({ metadata: toSaveMeta }), {
     timeoutMillis: 2000,
   });
@@ -75,7 +78,7 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = ({
         },
       };
 
-      setToSaveMeta({
+      const newMeta = {
         ...metadata,
         fileMetadata: {
           ...metadata?.fileMetadata,
@@ -84,7 +87,13 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = ({
             content: { ...metadata?.fileMetadata.appData.content, drafts: newDrafts },
           },
         },
-      });
+      };
+
+      if (message === undefined) {
+        instantSave(newMeta);
+        return;
+      }
+      setToSaveMeta(newMeta);
       debouncedSave();
     }
   }, [conversation, message, debouncedSave]);
