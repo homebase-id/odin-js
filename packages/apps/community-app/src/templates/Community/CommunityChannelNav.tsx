@@ -378,7 +378,7 @@ const DirectMessageItem = ({
 
   useEffect(() => {
     if (recipient === identity) setConversationId(ConversationWithYourselfId);
-    else getNewXorId(identity as string, recipient).then((xorId) => setConversationId(xorId));
+    else getNewXorId(identity, recipient).then((xorId) => setConversationId(xorId));
   }, [recipient]);
 
   const { data: conversationMetadata } = useConversationMetadata({ conversationId }).single;

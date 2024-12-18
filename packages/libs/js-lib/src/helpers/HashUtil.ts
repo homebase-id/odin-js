@@ -50,6 +50,10 @@ const uint8ArrayToGuid = (buffer: Uint8Array) => {
 };
 
 export const getNewXorId = async (a: string, b: string) => {
+  if (!a || !b) {
+    throw new Error('Both strings must be non-empty');
+  }
+
   const bufferA = await reduceSha256Hash(stringToUint8Array(a.toLowerCase()));
   const bufferB = await reduceSha256Hash(stringToUint8Array(b.toLowerCase()));
 
