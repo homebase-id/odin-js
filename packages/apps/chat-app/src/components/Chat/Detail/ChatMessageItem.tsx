@@ -286,7 +286,7 @@ const ChatMediaMessageBody = ({
 
   return (
     <div
-      className={`relative w-full max-w-[75vw] rounded-lg shadow-sm md:max-w-xs lg:max-w-xl ${
+      className={`relative w-auto max-w-[75vw] rounded-lg shadow-sm md:max-w-xs lg:max-w-xl ${
         messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10 dark:bg-gray-300/20'
       }`}
     >
@@ -310,7 +310,7 @@ const ChatMediaMessageBody = ({
         {!hasACaption ? <ChatFooter className="absolute bottom-0 right-0 px-2 py-1" /> : null}
       </div>
       {hasACaption ? (
-        <div className="flex min-w-0 flex-col px-2 py-2 md:flex-row md:justify-between">
+        <div className={`flex min-w-0 flex-col px-2 py-2 md:flex-row md:justify-between`}>
           <ParagraphWithLinks
             text={content.message}
             className={`whitespace-pre-wrap break-words`}
