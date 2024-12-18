@@ -157,9 +157,7 @@ export const insertNewNotification = (
 
 export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
   const dotYouClient = useDotYouClientContext();
-  const getNotificationCounts = async () => getNotificationCountsByAppId(dotYouClient);
-
-  const getCounts = async () => (await getNotificationCounts()).unreadCounts;
+  const getCounts = async () => (await getNotificationCountsByAppId(dotYouClient)).unreadCounts;
 
   return useQuery({
     queryKey: ['push-notifications-count'],
@@ -167,7 +165,6 @@ export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
       if (!props?.appId) {
         return Object.values(counts).reduce((acc, count) => acc + count, 0);
       }
-
       return counts[props.appId] || 0;
     },
     queryFn: getCounts,
@@ -208,7 +205,7 @@ export const useRemoveNotifications = (props: {
       newCounts[appId] = 0;
       queryClient.setQueryData(['push-notifications-count'], newCounts);
     },
-    onSuccess: ({ typeId }) => {
+    onSuccess: (_, { typeId }) => {
       if (typeId) {
         queryClient.invalidateQueries({ queryKey: ['push-notifications-count'] });
       }
@@ -234,7 +231,6 @@ export const useRemoveNotifications = (props: {
     if (scheduled.current) return;
     scheduled.current = true;
     setTimeout(() => {
-      console.log('marking typeid as read');
       mutation.mutate(props);
       scheduled.current = false;
     }, 10 * 1000);
