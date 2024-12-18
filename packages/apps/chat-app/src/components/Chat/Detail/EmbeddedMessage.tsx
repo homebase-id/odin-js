@@ -1,5 +1,6 @@
 import {
   ConnectionName,
+  ellipsisAtMaxChar,
   ExtensionThumbnail,
   getPlainTextFromRichText,
   t,
@@ -48,12 +49,12 @@ export const EmbeddedMessage = ({
                   t('You')
                 )}
               </p>
-              <p className="text-foreground">{plainText}</p>
+              <p className="text-foreground">{ellipsisAtMaxChar(plainText, 80)}</p>
             </div>
             {hasMedia ? <EmbeddedMessageMedia msg={msg} className="h-16 w-16" /> : null}
           </>
         ) : (
-          <p className="px-2 italic text-slate-400">{t('Message not found')}</p>
+          <p className="min-h-14 px-2 italic text-slate-400">{t('Message not found')}</p>
         )}
       </div>
     </div>
