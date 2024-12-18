@@ -2,6 +2,8 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import {
+  ActionButton,
+  ActionLink,
   AuthorImage,
   AuthorName,
   COMMUNITY_ROOT_PATH,
@@ -9,11 +11,12 @@ import {
   ErrorBoundary,
   formatDateExludingYearIfCurrent,
   LoadingBlock,
+  NotFound,
   t,
   usePortal,
 } from '@homebase-id/common-app';
-import { Arrow, ChevronLeft } from '@homebase-id/common-app/icons';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Arrow, ChatBubble, ChevronLeft, Pin } from '@homebase-id/common-app/icons';
+import { Link, NavLink, useMatch, useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { CommunityChannel } from '../../providers/CommunityProvider';
 import { useCommunityChannel } from '../../hooks/community/channels/useCommunityChannel';
@@ -23,11 +26,13 @@ import { CommunityHistory } from '../../components/Community/channel/CommunityHi
 import { useMarkCommunityAsRead } from '../../hooks/community/useMarkCommunityAsRead';
 import { CommunityThread } from '../../components/Community/CommunityThread';
 import { useEditLastMessageShortcut } from '../../hooks/community/messages/useEditLastMessageShortcut';
+import { useCommunityPins } from '../../hooks/community/useCommunityPin';
+import { CommunityMessageInfo } from '../../components/Community/Message/detail/CommunityMessageInfo';
+import { CommunityMessageItem } from '../../components/Community/Message/CommunityMessageItem';
 
 export const CommunityChannelDetail = () => {
   const { odinKey, communityKey: communityId, channelKey: channelId, threadKey } = useParams();
   const { data: community, isFetched } = useCommunity({ odinId: odinKey, communityId }).fetch;
-  const navigate = useNavigate();
 
   const { data: channelDsr } = useCommunityChannel({
     odinId: odinKey,
@@ -36,7 +41,6 @@ export const CommunityChannelDetail = () => {
   }).fetch;
 
   useMarkCommunityAsRead({ odinId: odinKey, communityId, channelId });
-  const keyDownHandler = useEditLastMessageShortcut({ community, channel: channelDsr });
 
   if (!community && isFetched)
     return (
@@ -59,6 +63,10 @@ export const CommunityChannelDetail = () => {
       </div>
     );
   }
+
+  const isPins = !!useMatch(`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelId}/pins`);
+  if (!community || !channelDsr) return <NotFound />;
+
   return (
     <ErrorBoundary>
       <div className="h-full w-20 flex-grow bg-background">
@@ -67,26 +75,11 @@ export const CommunityChannelDetail = () => {
             className={`h-full flex-grow flex-col overflow-hidden ${threadKey ? 'hidden xl:flex' : 'flex'}`}
           >
             <CommunityChannelHeader community={community} channel={channelDsr} />
-            <ErrorBoundary>
-              <CommunityHistory
-                community={community}
-                channel={channelDsr}
-                doOpenThread={(thread) =>
-                  navigate(
-                    `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
-                  )
-                }
-                emptyPlaceholder={<EmptyChannel community={community} channel={channelDsr} />}
-              />
-            </ErrorBoundary>
-            <ErrorBoundary>
-              <MessageComposer
-                community={community}
-                channel={channelDsr}
-                key={channelId}
-                onKeyDown={keyDownHandler}
-              />
-            </ErrorBoundary>
+            {!isPins ? (
+              <CommunityChannelMessages community={community} channel={channelDsr} />
+            ) : (
+              <CommunityChannelPins community={community} channel={channelDsr} />
+            )}
           </div>
 
           {threadKey ? (
@@ -100,6 +93,92 @@ export const CommunityChannelDetail = () => {
   );
 };
 
+const CommunityChannelMessages = ({
+  channel,
+  community,
+}: {
+  channel: HomebaseFile<CommunityChannel>;
+  community: HomebaseFile<CommunityDefinition>;
+}) => {
+  const { odinKey, communityKey: communityId, channelKey: channelId } = useParams();
+  const navigate = useNavigate();
+
+  const keyDownHandler = useEditLastMessageShortcut({ community, channel });
+
+  return (
+    <>
+      <ErrorBoundary>
+        <CommunityHistory
+          community={community}
+          channel={channel}
+          doOpenThread={(thread) =>
+            navigate(
+              `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
+            )
+          }
+          emptyPlaceholder={<EmptyChannel community={community} channel={channel} />}
+        />
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <MessageComposer
+          community={community}
+          channel={channel}
+          key={channelId}
+          onKeyDown={keyDownHandler}
+        />
+      </ErrorBoundary>
+    </>
+  );
+};
+
+const CommunityChannelPins = ({
+  channel,
+  community,
+}: {
+  channel: HomebaseFile<CommunityChannel>;
+  community: HomebaseFile<CommunityDefinition>;
+}) => {
+  const { odinKey, communityKey, channelKey } = useParams();
+
+  const { data: pinnedMessages, isFetching } = useCommunityPins({
+    odinId: community.fileMetadata.senderOdinId,
+    communityId: community.fileMetadata.appData.uniqueId,
+    channelId: channel.fileMetadata.appData.uniqueId,
+  }).all;
+
+  if (isFetching)
+    return (
+      <div className="p-5">
+        <LoadingBlock className="h-16 w-full" />
+      </div>
+    );
+
+  return (
+    <div className="flex flex-col gap-5 p-5">
+      {pinnedMessages?.searchResults?.length ? (
+        <>
+          {pinnedMessages?.searchResults.map((pinned, index) => {
+            return (
+              <Link
+                to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey}/${pinned.fileMetadata.appData.uniqueId}`}
+                key={pinned.fileId || index}
+              >
+                <CommunityMessageItem
+                  msg={pinned}
+                  community={community}
+                  className="cursor-pointer rounded-lg border px-2 py-1 hover:shadow-md md:px-3"
+                />
+              </Link>
+            );
+          })}
+        </>
+      ) : (
+        <p className="text-slate-400">{t('No pinned messages')}</p>
+      )}
+    </div>
+  );
+};
+
 const CommunityChannelHeader = ({
   community,
   channel,
@@ -107,12 +186,15 @@ const CommunityChannelHeader = ({
   community?: HomebaseFile<CommunityDefinition>;
   channel?: HomebaseFile<CommunityChannel>;
 }) => {
+  const { odinKey, channelKey } = useParams();
+
   const communityId = community?.fileMetadata.appData.uniqueId;
   const [showChatInfo, setShowChatInfo] = useState<boolean>(false);
+  const isPins = !!useMatch(`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelKey}/pins`);
 
   return (
     <>
-      <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
+      <div className="flex flex-row flex-wrap items-center gap-2 bg-page-background p-2 lg:p-5">
         <Link
           className="-m-1 p-1 lg:hidden"
           type="mute"
@@ -129,6 +211,27 @@ const CommunityChannelHeader = ({
             # {channel.fileMetadata.appData.content?.title}
           </button>
         ) : null}
+
+        <div className="-mb-2 ml-auto flex flex-row items-center gap-2 lg:-mb-5">
+          <NavLink
+            to={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${communityId}/${channel?.fileMetadata.appData.uniqueId}`}
+            type="secondary"
+            className={`flex flex-row items-center gap-1 border-b-2 px-3 py-2 transition-colors ${!isPins ? 'border-current' : 'border-transparent'}`}
+            end={true}
+          >
+            <ChatBubble className="h-4 w-4" />
+            {'Messages'}
+          </NavLink>
+          <NavLink
+            to={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${communityId}/${channel?.fileMetadata.appData.uniqueId}/pins`}
+            type="secondary"
+            className={`flex flex-row items-center gap-1 border-b-2 px-3 py-2 transition-colors ${isPins ? 'border-current' : 'border-transparent'}`}
+            end={true}
+          >
+            <Pin className="h-4 w-4" />
+            {'Pins'}
+          </NavLink>
+        </div>
       </div>
 
       {showChatInfo && community && channel ? (
