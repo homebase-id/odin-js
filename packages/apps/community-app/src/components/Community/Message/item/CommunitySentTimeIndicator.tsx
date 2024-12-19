@@ -1,7 +1,7 @@
 import { t } from '@homebase-id/common-app';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { formatToTimeAgoWithRelativeDetail } from '@homebase-id/common-app';
-import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
+import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
 
 export const CommunitySentTimeIndicator = ({
   msg,

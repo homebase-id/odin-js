@@ -4,7 +4,7 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   CommunityDeliveryStatus,
   CommunityMessage,
-} from '../../../providers/CommunityMessageProvider';
+} from '../../../../providers/CommunityMessageProvider';
 
 export const CommunityDeliveryIndicator = ({
   msg,

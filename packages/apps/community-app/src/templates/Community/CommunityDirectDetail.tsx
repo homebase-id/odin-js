@@ -13,7 +13,7 @@ import { useDotYouClientContext } from '@homebase-id/common-app';
 import { getNewXorId, isAGuidId } from '@homebase-id/js-lib/helpers';
 import { ConversationWithYourselfId } from '@homebase-id/chat-app/src/providers/ConversationProvider';
 import { useConversation } from '@homebase-id/chat-app/src/hooks/chat/useConversation';
-import { CommunityDirectComposer } from '../../components/Community/Message/CommunityDirectComposer';
+import { CommunityDirectComposer } from '../../components/Community/Message/composer/CommunityDirectComposer';
 
 export const CommunityDirectDetail = () => {
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();

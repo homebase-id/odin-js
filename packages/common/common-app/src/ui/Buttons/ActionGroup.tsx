@@ -1,4 +1,4 @@
-import { FC, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ConfirmDialogProps, ConfirmDialog, OptionDialogProps, OptionDialog } from '../../dialogs';
 import { t } from '../../helpers';
@@ -34,6 +34,8 @@ export interface ActionGroupProps extends Omit<ActionButtonProps, 'onClick'> {
   buttonClassName?: string;
   options: (ActionGroupOptionProps | undefined)[];
   alwaysInPortal?: boolean;
+  onOpen?: () => void;
+  onClose?: () => void;
 }
 
 export const ActionGroup = ({
@@ -42,6 +44,8 @@ export const ActionGroup = ({
   children,
   buttonClassName,
   alwaysInPortal,
+  onOpen,
+  onClose,
   ...actionButtonProps
 }: ActionGroupProps) => {
   const isSm = document.documentElement.clientWidth < 768;
@@ -57,6 +61,11 @@ export const ActionGroup = ({
 
   const [isOpen, setIsOpen] = useState(false);
   if (!options.length) return null;
+
+  useEffect(() => {
+    if (isOpen) onOpen?.();
+    else onClose?.();
+  }, [isOpen]);
 
   const ActionOptions = (
     <div

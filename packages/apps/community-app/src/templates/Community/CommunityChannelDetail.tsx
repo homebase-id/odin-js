@@ -2,8 +2,6 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import {
-  ActionButton,
-  ActionLink,
   AuthorImage,
   AuthorName,
   COMMUNITY_ROOT_PATH,
@@ -21,14 +19,13 @@ import { useState } from 'react';
 import { CommunityChannel } from '../../providers/CommunityProvider';
 import { useCommunityChannel } from '../../hooks/community/channels/useCommunityChannel';
 import { createPortal } from 'react-dom';
-import { MessageComposer } from '../../components/Community/Message/MessageComposer';
 import { CommunityHistory } from '../../components/Community/channel/CommunityHistory';
 import { useMarkCommunityAsRead } from '../../hooks/community/useMarkCommunityAsRead';
 import { CommunityThread } from '../../components/Community/CommunityThread';
 import { useEditLastMessageShortcut } from '../../hooks/community/messages/useEditLastMessageShortcut';
 import { useCommunityPins } from '../../hooks/community/useCommunityPin';
-import { CommunityMessageInfo } from '../../components/Community/Message/detail/CommunityMessageInfo';
-import { CommunityMessageItem } from '../../components/Community/Message/CommunityMessageItem';
+import { CommunityMessageItem } from '../../components/Community/Message/item/CommunityMessageItem';
+import { MessageComposer } from '../../components/Community/Message/composer/MessageComposer';
 
 export const CommunityChannelDetail = () => {
   const { odinKey, communityKey: communityId, channelKey: channelId, threadKey } = useParams();

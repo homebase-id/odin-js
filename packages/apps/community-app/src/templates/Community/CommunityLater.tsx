@@ -4,27 +4,23 @@ import { useCommunityMessage } from '../../hooks/community/messages/useCommunity
 import { HomebaseFile, SystemFileType } from '@homebase-id/js-lib/core';
 import {
   COMMUNITY_ROOT_PATH,
-  ConnectionImage,
-  ConnectionName,
   ellipsisAtMaxChar,
   ErrorBoundary,
   ErrorNotification,
-  getOdinIdColor,
   getTextRootsRecursive,
   NotFound,
-  OwnerImage,
-  OwnerName,
   t,
-  useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { Bookmark, BookmarkSolid, ChevronLeft } from '@homebase-id/common-app/icons';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import { useMemo } from 'react';
 import { useCommunityChannel } from '../../hooks/community/channels/useCommunityChannel';
-import { CommunityDeliveryIndicator } from '../../components/Community/Message/CommunityDeliveryIndicator';
-import { CommunitySentTimeIndicator } from '../../components/Community/Message/CommunitySentTimeIndicator';
+import { CommunityDeliveryIndicator } from '../../components/Community/Message/item/CommunityDeliveryIndicator';
+import { CommunitySentTimeIndicator } from '../../components/Community/Message/item/CommunitySentTimeIndicator';
 import { useCommunityLater } from '../../hooks/community/useCommunityLater';
+import { CommunityMessageAuthorName } from '../../components/Community/Message/item/CommunityMesageAuthorName';
+import { CommunityMessageAvatar } from '../../components/Community/Message/item/CommunityMessageAvatar';
 
 export const CommunityLater = () => {
   const { odinKey, communityKey } = useParams();
@@ -103,11 +99,6 @@ const SavedMessage = ({
     channelId: msg?.fileMetadata.appData.content.channelId,
   }).fetch;
 
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
-  const authorOdinId = msg?.fileMetadata.originalAuthor || loggedOnIdentity || '';
-
-  const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;
-
   const {
     isSaved,
     toggleSave: { mutate: toggleSave, error: toggleSaveError },
@@ -130,27 +121,11 @@ const SavedMessage = ({
         </p>
 
         <div className="flex flex-row gap-2">
-          {!messageFromMe ? (
-            <ConnectionImage
-              odinId={authorOdinId}
-              className={`flex-shrink-0 border border-neutral-200 dark:border-neutral-800`}
-              size="xs"
-            />
-          ) : (
-            <OwnerImage
-              className={`flex-shrink-0 border border-neutral-200 dark:border-neutral-800`}
-              size="xs"
-            />
-          )}
+          <CommunityMessageAvatar msg={msg} />
 
           <div className="flex w-20 flex-grow flex-col">
             <div className="flex flex-row items-center gap-2">
-              <p
-                className={`font-semibold`}
-                style={{ color: getOdinIdColor(authorOdinId).darkTheme }}
-              >
-                {messageFromMe ? <OwnerName /> : <ConnectionName odinId={authorOdinId} />}
-              </p>
+              <CommunityMessageAuthorName msg={msg} />
               <CommunitySentTimeIndicator className="text-sm" msg={msg} />
               <CommunityDeliveryIndicator msg={msg} />
             </div>

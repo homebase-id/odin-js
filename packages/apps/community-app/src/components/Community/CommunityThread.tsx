@@ -12,9 +12,9 @@ import { useCommunityMessage } from '../../hooks/community/messages/useCommunity
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import { CommunityChannel } from '../../providers/CommunityProvider';
 import { CommunityHistory } from './channel/CommunityHistory';
-import { MessageComposer } from './Message/MessageComposer';
 import { memo, ReactNode, useEffect, useMemo, useState } from 'react';
 import { useEditLastMessageShortcut } from '../../hooks/community/messages/useEditLastMessageShortcut';
+import { MessageComposer } from './Message/composer/MessageComposer';
 
 export const CommunityThread = memo(
   ({

@@ -68,15 +68,13 @@ export enum CommunityDeliveryStatus {
 }
 
 export interface CommunityMessage {
-  replyId?: string;
+  isCollaborative?: boolean;
+  collaborators?: string[];
 
   /// Content of the message
   message: string | RichText;
 
-  // After an update to a message on the receiving end, the senderOdinId is emptied; So we have an authorOdinId to keep track of the original sender
-  authorOdinId?: string;
-
-  /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
+  /// DeliveryStatus of the message. Indicates if the message is sent and/or delivered
   deliveryStatus: CommunityDeliveryStatus;
 
   channelId: string;

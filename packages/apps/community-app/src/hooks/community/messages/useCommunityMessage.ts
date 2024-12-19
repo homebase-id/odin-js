@@ -82,7 +82,6 @@ export const useCommunityMessage = (props?: {
     channel,
     thread,
     threadParticipants,
-    replyId,
     files,
     message,
     linkPreviews,
@@ -93,7 +92,6 @@ export const useCommunityMessage = (props?: {
     channel: HomebaseFile<CommunityChannel>;
     thread?: HomebaseFile<CommunityMessage>;
     threadParticipants?: string[];
-    replyId?: string;
     files?: NewMediaFile[];
     message: RichText | string;
     linkPreviews?: LinkPreview[];
@@ -111,7 +109,6 @@ export const useCommunityMessage = (props?: {
           content: {
             message: message,
             deliveryStatus: CommunityDeliveryStatus.Sent,
-            replyId: replyId,
             channelId: channel.fileMetadata.appData.uniqueId as string,
             threadId: thread?.fileMetadata.appData.uniqueId as string,
           },
@@ -166,23 +163,27 @@ export const useCommunityMessage = (props?: {
     updatedChatMessage: HomebaseFile<CommunityMessage>;
     community: HomebaseFile<CommunityDefinition>;
   }) => {
-    await updateCommunityMessage(dotYouClient, community, updatedChatMessage);
+    const transformedMessage = {
+      ...updatedChatMessage,
+    };
+    const identity = dotYouClient.getLoggedInIdentity();
+    if (identity !== updatedChatMessage.fileMetadata.originalAuthor) {
+      transformedMessage.fileMetadata.appData.content.collaborators = Array.from(
+        new Set([
+          ...(updatedChatMessage.fileMetadata.appData.content.collaborators || []),
+          identity,
+        ])
+      );
+    }
+
+    await updateCommunityMessage(dotYouClient, community, transformedMessage);
   };
 
   return {
     get: useQuery(getCommunityMessageQueryOptions(queryClient, dotYouClient, props)),
     send: useMutation({
       mutationFn: sendMessage,
-      onMutate: async ({
-        community,
-        channel,
-        replyId,
-        files,
-        message,
-        chatId,
-        thread,
-        userDate,
-      }) => {
+      onMutate: async ({ community, channel, files, message, chatId, thread, userDate }) => {
         const newMessageDsr: NewHomebaseFile<CommunityMessage> = {
           fileMetadata: {
             created: userDate,
@@ -193,7 +194,6 @@ export const useCommunityMessage = (props?: {
               content: {
                 message: message,
                 deliveryStatus: CommunityDeliveryStatus.Sending,
-                replyId: replyId,
                 channelId: channel.fileMetadata.appData.uniqueId as string,
               },
               userDate,
@@ -276,18 +276,29 @@ export const useCommunityMessage = (props?: {
     update: useMutation({
       mutationFn: updateMessage,
       onMutate: async ({ updatedChatMessage, community }) => {
+        const transformedMessage = { ...updatedChatMessage };
+        const identity = dotYouClient.getLoggedInIdentity();
+        if (identity !== updatedChatMessage.fileMetadata.originalAuthor) {
+          transformedMessage.fileMetadata.appData.content.collaborators = Array.from(
+            new Set([
+              ...(updatedChatMessage.fileMetadata.appData.content.collaborators || []),
+              identity,
+            ])
+          );
+        }
+
         const extistingMessages = updateCacheCommunityMessages(
           queryClient,
           community.fileMetadata.appData.uniqueId as string,
-          updatedChatMessage.fileMetadata.appData.groupId,
+          transformedMessage.fileMetadata.appData.groupId,
           undefined,
           (data) => ({
             ...data,
             pages: data.pages.map((page) => ({
               ...page,
               searchResults: page.searchResults.map((msg) =>
-                stringGuidsEqual(msg?.fileMetadata.appData.uniqueId, updatedChatMessage.fileId)
-                  ? updatedChatMessage
+                stringGuidsEqual(msg?.fileMetadata.appData.uniqueId, transformedMessage.fileId)
+                  ? transformedMessage
                   : msg
               ),
             })),
@@ -297,10 +308,10 @@ export const useCommunityMessage = (props?: {
         const existingMessage = updateCacheCommunityMessage(
           queryClient,
           community.fileMetadata.appData.uniqueId as string,
-          updatedChatMessage.fileMetadata.appData.uniqueId as string,
-          updatedChatMessage.fileSystemType,
+          transformedMessage.fileMetadata.appData.uniqueId as string,
+          transformedMessage.fileSystemType,
 
-          () => updatedChatMessage
+          () => transformedMessage
         );
 
         return { extistingMessages, existingMessage };

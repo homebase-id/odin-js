@@ -21,8 +21,8 @@ import { useMemo, useState } from 'react';
 import {
   COMMUNITY_LINKS_PAYLOAD_KEY,
   CommunityMessage,
-} from '../../../providers/CommunityMessageProvider';
-import { getTargetDriveFromCommunityId } from '../../../providers/CommunityDefinitionProvider';
+} from '../../../../providers/CommunityMessageProvider';
+import { getTargetDriveFromCommunityId } from '../../../../providers/CommunityDefinitionProvider';
 
 export const CommunityMedia = ({
   odinId,

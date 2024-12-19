@@ -7,10 +7,10 @@ import {
 } from '@homebase-id/common-app';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useCommunityChannels } from '../../../hooks/community/channels/useCommunityChannels';
+import { useCommunityChannels } from '../../../../hooks/community/channels/useCommunityChannels';
 import { useParams } from 'react-router-dom';
-import { useCommunity } from '../../../hooks/community/useCommunity';
-import { useCommunityChannel } from '../../../hooks/community/channels/useCommunityChannel';
+import { useCommunity } from '../../../../hooks/community/useCommunity';
+import { useCommunityChannel } from '../../../../hooks/community/channels/useCommunityChannel';
 
 export const ChannelAutocompleteDropdown = ({
   query,
