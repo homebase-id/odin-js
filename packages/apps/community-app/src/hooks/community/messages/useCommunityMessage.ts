@@ -5,7 +5,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { ellipsisAtMaxCharOfRichText, useDotYouClientContext } from '@homebase-id/common-app';
 import {
   DotYouClient,
   HomebaseFile,
@@ -20,6 +20,7 @@ import {
   CommunityDeliveryStatus,
   CommunityMessage,
   getCommunityMessage,
+  MESSAGE_CHARACTERS_LIMIT,
   updateCommunityMessage,
   uploadCommunityMessage,
 } from '../../../providers/CommunityMessageProvider';
@@ -93,7 +94,7 @@ export const useCommunityMessage = (props?: {
     thread?: HomebaseFile<CommunityMessage>;
     threadParticipants?: string[];
     files?: NewMediaFile[];
-    message: RichText | string;
+    message: RichText | undefined;
     linkPreviews?: LinkPreview[];
     chatId?: string;
     userDate?: number;
@@ -192,7 +193,7 @@ export const useCommunityMessage = (props?: {
               groupId:
                 thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId,
               content: {
-                message: message,
+                message: ellipsisAtMaxCharOfRichText(message, MESSAGE_CHARACTERS_LIMIT),
                 deliveryStatus: CommunityDeliveryStatus.Sending,
                 channelId: channel.fileMetadata.appData.uniqueId as string,
               },

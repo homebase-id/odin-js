@@ -24,6 +24,7 @@ const DEFAULT_QUERY_KEYS = [
   'push-notifications',
   'site-data',
   'profiles',
+  'payload-content',
 ];
 
 const APP_QUERY_KEYS = [

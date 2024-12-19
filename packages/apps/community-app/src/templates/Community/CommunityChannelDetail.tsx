@@ -38,6 +38,7 @@ export const CommunityChannelDetail = () => {
   }).fetch;
 
   useMarkCommunityAsRead({ odinId: odinKey, communityId, channelId });
+  const isPins = !!useMatch(`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelId}/pins`);
 
   if (!community && isFetched)
     return (
@@ -61,7 +62,6 @@ export const CommunityChannelDetail = () => {
     );
   }
 
-  const isPins = !!useMatch(`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelId}/pins`);
   if (!community || !channelDsr) return <NotFound />;
 
   return (

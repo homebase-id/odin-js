@@ -29,7 +29,8 @@ export const getRichTextFromString = (body: string): RichText | undefined => {
   return richText.some((part) => part.type) ? richText : undefined;
 };
 
-export const getTextRootsRecursive = (children: RichText | string): string[] => {
+export const getTextRootsRecursive = (children: RichText | string | undefined): string[] => {
+  if (!children) return [];
   if (!Array.isArray(children)) return [children as string];
 
   return children
@@ -107,27 +108,38 @@ export const trimRichText = (richText: RichText | undefined): RichText | undefin
 export const ellipsisAtMaxCharOfRichText = (richText: RichText | undefined, maxChar: number) => {
   if (richText === undefined) return [];
 
-  let charCount = 0;
-  const result: RichText = [];
+  const recursiveEllipsisAtMaxCharOfRichText = (richText: RichText, maxChar: number) => {
+    let charCount = 0;
+    const result: RichText = [];
 
-  for (let i = 0; i < richText.length; i++) {
-    const entry = richText[i];
-    if ('text' in entry && typeof entry.text === 'string') {
-      if (charCount + entry.text.length > maxChar) {
-        entry.text = entry.text.substring(0, maxChar - charCount) + '...';
-        return result;
+    for (let i = 0; i < richText.length; i++) {
+      if (charCount >= maxChar) return [result, charCount] as const;
+
+      const node = { ...richText[i] };
+      if ('text' in node && typeof node.text === 'string') {
+        if (charCount + node.text.length > maxChar) {
+          node.text = node.text.substring(0, maxChar - charCount) + '...';
+          result.push(node);
+          return [result, charCount + node.text.length] as const;
+        }
+
+        charCount +=
+          ('text' in node && typeof node.text === 'string' ? node.text?.length : undefined) || 0;
       }
 
-      charCount +=
-        ('text' in entry && typeof entry.text === 'string' ? entry.text?.length : undefined) || 0;
+      if ('children' in node && node.children !== undefined && Array.isArray(node.children)) {
+        const [newChildren, childrenCharCount] = recursiveEllipsisAtMaxCharOfRichText(
+          node.children,
+          maxChar - charCount
+        );
+        charCount += childrenCharCount;
+        node.children = newChildren;
+      }
+
+      result.push(node);
     }
 
-    if ('children' in entry && entry.children !== undefined && Array.isArray(entry.children)) {
-      entry.children = ellipsisAtMaxCharOfRichText(entry.children, maxChar - charCount);
-    }
-
-    result.push(entry);
-  }
-
-  return result;
+    return [result, charCount] as const;
+  };
+  return recursiveEllipsisAtMaxCharOfRichText(richText, maxChar)[0];
 };

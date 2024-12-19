@@ -17,7 +17,7 @@ import {
   FileQueryParams,
   GetBatchQueryResultOptions,
   TargetDrive,
-  getContentFromHeaderOrPayload,
+  getContentFromHeader,
   queryBatch,
   deleteFile,
   RichText,
@@ -28,6 +28,7 @@ import {
   patchFile,
   UpdateInstructionSet,
   UpdateResult,
+  getContentFromHeaderOrPayload,
 } from '@homebase-id/js-lib/core';
 import {
   jsonStringify64,
@@ -46,13 +47,14 @@ import { CommunityDefinition, getTargetDriveFromCommunityId } from './CommunityD
 import {
   deleteFileOverPeer,
   getContentFromHeaderOrPayloadOverPeer,
+  getContentFromHeaderOverPeer,
   getFileHeaderOverPeerByUniqueId,
   queryBatchOverPeer,
   TransitInstructionSet,
   TransitUploadResult,
   uploadFileOverPeer,
 } from '@homebase-id/js-lib/peer';
-import { COMMUNITY_APP_ID } from '@homebase-id/common-app';
+import { COMMUNITY_APP_ID, ellipsisAtMaxCharOfRichText } from '@homebase-id/common-app';
 
 export const COMMUNITY_MESSAGE_FILE_TYPE = 7020;
 export const CommunityDeletedArchivalStaus = 2;
@@ -60,6 +62,7 @@ export const CommunityDeletedArchivalStaus = 2;
 const COMMUNITY_MESSAGE_PAYLOAD_KEY = 'comm_web';
 export const COMMUNITY_LINKS_PAYLOAD_KEY = 'comm_links';
 export const COMMUNITY_PINNED_TAG = toGuidId('pinned-message');
+export const MESSAGE_CHARACTERS_LIMIT = 1600;
 
 export enum CommunityDeliveryStatus {
   Sending = 15, // When it's sending; Used for optimistic updates
@@ -72,7 +75,7 @@ export interface CommunityMessage {
   collaborators?: string[];
 
   /// Content of the message
-  message: string | RichText;
+  message: RichText | undefined;
 
   /// DeliveryStatus of the message. Indicates if the message is sent and/or delivered
   deliveryStatus: CommunityDeliveryStatus;
@@ -98,8 +101,8 @@ export const uploadCommunityMessage = async (
   const payloadJson: string = jsonStringify64({ ...messageContent });
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < 3000;
+  // Set max of 3kb + content of 1600 chars for content so enough room is left for metedata
+  const shouldEmbedContent = payloadBytes.length < 300 + MESSAGE_CHARACTERS_LIMIT * 4;
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
@@ -111,7 +114,12 @@ export const uploadCommunityMessage = async (
       userDate: message.fileMetadata.appData.userDate,
       tags: message.fileMetadata.appData.tags,
       fileType: COMMUNITY_MESSAGE_FILE_TYPE,
-      content: shouldEmbedContent ? payloadJson : undefined,
+      content: shouldEmbedContent
+        ? payloadJson
+        : jsonStringify64({
+            ...messageContent,
+            message: ellipsisAtMaxCharOfRichText(messageContent.message, MESSAGE_CHARACTERS_LIMIT),
+          }),
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList ||
@@ -313,8 +321,8 @@ export const updateCommunityMessage = async (
   const payloadJson: string = jsonStringify64({ ...messageContent });
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < 3000;
+  // Set max of 3kb + content of 1600 chars for content so enough room is left for metedata
+  const shouldEmbedContent = payloadBytes.length < 300 + MESSAGE_CHARACTERS_LIMIT * 4;
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
@@ -337,7 +345,12 @@ export const updateCommunityMessage = async (
         .archivalStatus,
       previewThumbnail: message.fileMetadata.appData.previewThumbnail,
       fileType: COMMUNITY_MESSAGE_FILE_TYPE,
-      content: shouldEmbedContent ? payloadJson : undefined,
+      content: shouldEmbedContent
+        ? payloadJson
+        : jsonStringify64({
+            ...messageContent,
+            message: ellipsisAtMaxCharOfRichText(messageContent.message, MESSAGE_CHARACTERS_LIMIT),
+          }),
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList ||
@@ -516,23 +529,45 @@ export const dsrToMessage = async (
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<CommunityMessage> | null> => {
   try {
-    const msgContent =
-      odinId && dotYouClient.getHostIdentity() !== odinId
-        ? await getContentFromHeaderOrPayloadOverPeer<CommunityMessage>(
-            dotYouClient,
-            odinId,
-            targetDrive,
-            dsr,
-            includeMetadataHeader,
-            dsr.fileSystemType
-          )
-        : await getContentFromHeaderOrPayload<CommunityMessage>(
-            dotYouClient,
-            targetDrive,
-            dsr,
-            includeMetadataHeader,
-            dsr.fileSystemType
-          );
+    const msgContent = await (async () => {
+      // Only here for backwards compatibility; Can be removed once Community is pushed live for all on production
+      const hasPartialOrFullContent = !!dsr.fileMetadata.appData.content?.length;
+      if (hasPartialOrFullContent)
+        return odinId && dotYouClient.getHostIdentity() !== odinId
+          ? await getContentFromHeaderOverPeer<CommunityMessage>(
+              dotYouClient,
+              odinId,
+              targetDrive,
+              dsr,
+              includeMetadataHeader,
+              dsr.fileSystemType
+            )
+          : await getContentFromHeader<CommunityMessage>(
+              dotYouClient,
+              targetDrive,
+              dsr,
+              includeMetadataHeader,
+              dsr.fileSystemType
+            );
+      else
+        return odinId && dotYouClient.getHostIdentity() !== odinId
+          ? await getContentFromHeaderOrPayloadOverPeer<CommunityMessage>(
+              dotYouClient,
+              odinId,
+              targetDrive,
+              dsr,
+              includeMetadataHeader,
+              dsr.fileSystemType
+            )
+          : await getContentFromHeaderOrPayload<CommunityMessage>(
+              dotYouClient,
+              targetDrive,
+              dsr,
+              includeMetadataHeader,
+              dsr.fileSystemType
+            );
+    })();
+
     if (!msgContent) return null;
 
     const chatMessage: HomebaseFile<CommunityMessage> = {

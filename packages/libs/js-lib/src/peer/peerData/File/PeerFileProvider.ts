@@ -282,6 +282,46 @@ export const getFileHeaderBytesOverPeer = async (
   return promise;
 };
 
+export const getContentFromHeaderOverPeer = async <T>(
+  dotYouClient: DotYouClient,
+  odinId: string,
+  targetDrive: TargetDrive,
+  dsr: {
+    fileId: string;
+    fileMetadata: FileMetadata;
+    sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
+    fileSystemType?: SystemFileType;
+  },
+  includesJsonContent: boolean,
+  systemFileType?: SystemFileType
+) => {
+  const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
+
+  const keyHeader = fileMetadata.isEncrypted
+    ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader as EncryptedKeyHeader)
+    : undefined;
+
+  let decryptedJsonContent;
+  if (includesJsonContent) {
+    decryptedJsonContent = await decryptJsonContent(fileMetadata, keyHeader);
+  } else {
+    // When contentIsComplete but includesJsonContent == false the query before was done without including the content; So we just get and parse
+    const fileHeader = await getFileHeaderOverPeer(dotYouClient, odinId, targetDrive, fileId, {
+      systemFileType: dsr.fileSystemType || systemFileType,
+    });
+    if (!fileHeader) return null;
+    decryptedJsonContent = await decryptJsonContent(fileHeader.fileMetadata, keyHeader);
+  }
+  return tryJsonParse<T>(decryptedJsonContent, (ex) => {
+    console.error(
+      '[odin-js] getContentFromHeaderOrPayloadOverPeer: Error parsing JSON',
+      ex && typeof ex === 'object' && 'stack' in ex ? ex.stack : ex,
+      dsr.fileId,
+      targetDrive
+    );
+  });
+};
+
 export const getContentFromHeaderOrPayloadOverPeer = async <T>(
   dotYouClient: DotYouClient,
   odinId: string,
@@ -298,31 +338,17 @@ export const getContentFromHeaderOrPayloadOverPeer = async <T>(
   const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
   const contentIsComplete =
     fileMetadata.payloads?.filter((payload) => payload.key === DEFAULT_PAYLOAD_KEY).length === 0;
-
-  const keyHeader = fileMetadata.isEncrypted
-    ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
-    : undefined;
+  if (fileMetadata.isEncrypted && !sharedSecretEncryptedKeyHeader) return null;
 
   if (contentIsComplete) {
-    let decryptedJsonContent;
-    if (includesJsonContent) {
-      decryptedJsonContent = await decryptJsonContent(fileMetadata, keyHeader);
-    } else {
-      // When contentIsComplete but includesJsonContent == false the query before was done without including the content; So we just get and parse
-      const fileHeader = await getFileHeaderOverPeer(dotYouClient, odinId, targetDrive, fileId, {
-        systemFileType: dsr.fileSystemType || systemFileType,
-      });
-      if (!fileHeader) return null;
-      decryptedJsonContent = await decryptJsonContent(fileHeader.fileMetadata, keyHeader);
-    }
-    return tryJsonParse<T>(decryptedJsonContent, (ex) => {
-      console.error(
-        '[odin-js] getContentFromHeaderOrPayloadOverPeer: Error parsing JSON',
-        ex && typeof ex === 'object' && 'stack' in ex ? ex.stack : ex,
-        dsr.fileId,
-        targetDrive
-      );
-    });
+    return getContentFromHeaderOverPeer<T>(
+      dotYouClient,
+      odinId,
+      targetDrive,
+      dsr,
+      includesJsonContent,
+      systemFileType
+    );
   } else {
     const payloadDescriptor = dsr.fileMetadata.payloads?.find(
       (payload) => payload.key === DEFAULT_PAYLOAD_KEY
