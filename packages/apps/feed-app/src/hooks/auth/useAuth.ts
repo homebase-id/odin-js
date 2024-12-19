@@ -24,6 +24,7 @@ import {
   APP_SHARED_SECRET,
   FEED_ROOT_PATH,
   logoutOwnerAndAllApps,
+  OWNER_APPS_ROOT,
   useDotYouClient,
 } from '@homebase-id/common-app';
 import { useQueryClient } from '@tanstack/react-query';
@@ -133,7 +134,7 @@ export const useYouAuthAuthorization = () => {
       undefined,
       [CONFIRMED_CONNECTIONS_CIRCLE_ID],
       eccKey.publicKey,
-      window.location.host,
+      FEED_ROOT_PATH.startsWith(OWNER_APPS_ROOT) ? undefined : window.location.host,
       undefined,
       returnUrl
     );

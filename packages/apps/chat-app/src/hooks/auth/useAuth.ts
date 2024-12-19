@@ -24,6 +24,7 @@ import {
   CHAT_APP_ID,
   CHAT_ROOT_PATH,
   logoutOwnerAndAllApps,
+  OWNER_APPS_ROOT,
   useDotYouClient,
 } from '@homebase-id/common-app';
 import { ChatDrive } from '../../providers/ConversationProvider';
@@ -121,7 +122,7 @@ export const useYouAuthAuthorization = () => {
       circleDrives,
       [CONFIRMED_CONNECTIONS_CIRCLE_ID, AUTO_CONNECTIONS_CIRCLE_ID],
       eccKey.publicKey,
-      undefined,
+      CHAT_ROOT_PATH.startsWith(OWNER_APPS_ROOT) ? undefined : window.location.host,
       undefined,
       returnUrl
     );

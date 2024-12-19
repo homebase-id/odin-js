@@ -24,6 +24,7 @@ import {
   logoutOwnerAndAllApps,
   MAIL_APP_ID,
   MAIL_ROOT_PATH,
+  OWNER_APPS_ROOT,
   useDotYouClient,
 } from '@homebase-id/common-app';
 import { useQueryClient } from '@tanstack/react-query';
@@ -124,7 +125,7 @@ export const useYouAuthAuthorization = () => {
       circleDrives,
       [AUTO_CONNECTIONS_CIRCLE_ID, CONFIRMED_CONNECTIONS_CIRCLE_ID],
       eccKey.publicKey,
-      undefined,
+      MAIL_ROOT_PATH.startsWith(OWNER_APPS_ROOT) ? undefined : window.location.host,
       undefined,
       returnUrl
     );

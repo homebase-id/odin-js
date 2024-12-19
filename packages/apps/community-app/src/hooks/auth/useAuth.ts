@@ -19,6 +19,7 @@ import {
   COMMUNITY_APP_ID,
   COMMUNITY_ROOT_PATH,
   logoutOwnerAndAllApps,
+  OWNER_APPS_ROOT,
   useDotYouClient,
 } from '@homebase-id/common-app';
 import { LOCAL_COMMUNITY_APP_DRIVE } from '../../providers/CommunityMetadataProvider';
@@ -113,7 +114,7 @@ export const useYouAuthAuthorization = () => {
       undefined,
       undefined,
       eccKey.publicKey,
-      undefined,
+      COMMUNITY_ROOT_PATH.startsWith(OWNER_APPS_ROOT) ? undefined : window.location.host,
       undefined,
       returnUrl
     );
