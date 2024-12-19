@@ -33,9 +33,7 @@ export const CommunityLater = () => {
 
   const savedMessages = communityMeta?.fileMetadata.appData.content.savedMessages;
 
-  if (!community) {
-    return <NotFound />;
-  }
+  if (!community) return <NotFound />;
 
   return (
     <ErrorBoundary>

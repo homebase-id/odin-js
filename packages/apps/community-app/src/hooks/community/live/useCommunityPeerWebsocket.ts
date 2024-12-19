@@ -33,7 +33,6 @@ import {
   invalidateCommunityMessages,
   removeMessage,
 } from '../messages/useCommunityMessages';
-import { getPayloadAsJsonOverPeer } from '@homebase-id/js-lib/peer';
 import { invalidateCommunityThreads } from '../threads/useCommunityThreads';
 
 const isDebug = hasDebugFlag();
@@ -45,7 +44,6 @@ export const useCommunityPeerWebsocket = (
 ) => {
   const queryClient = useQueryClient();
   const targetDrive = getTargetDriveFromCommunityId(communityId || '');
-  const dotYouClient = useDotYouClientContext();
 
   const handler = useCallback(
     async (decryptionClient: DotYouClient, notification: TypedConnectionNotification) => {
@@ -65,13 +63,7 @@ export const useCommunityPeerWebsocket = (
           const groupId = notification.header.fileMetadata.appData.groupId;
 
           // This skips the invalidation of all chat messages, as we only need to add/update this specific message
-          const updatedChatMessage = await wsDsrToMessage(
-            decryptionClient,
-            dotYouClient,
-            notification.header,
-            odinId,
-            targetDrive
-          );
+          const updatedChatMessage = await wsDsrToMessage(decryptionClient, notification.header);
 
           if (
             !updatedChatMessage ||
@@ -138,10 +130,7 @@ export const useCommunityPeerWebsocket = (
 
 const wsDsrToMessage = async (
   websocketDotyouClient: DotYouClient,
-  dotYouClient: DotYouClient,
-  dsr: HomebaseFile,
-  odinId: string | undefined,
-  targetDrive: TargetDrive
+  dsr: HomebaseFile
 ): Promise<HomebaseFile<CommunityMessage> | null> => {
   const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
   if (!fileId || !fileMetadata) {
@@ -150,10 +139,6 @@ const wsDsrToMessage = async (
     );
   }
 
-  const contentIsComplete =
-    fileMetadata.payloads?.filter((payload) => payload.key === DEFAULT_PAYLOAD_KEY).length === 0;
-  if (fileMetadata.isEncrypted && !sharedSecretEncryptedKeyHeader) return null;
-
   const keyHeader = fileMetadata.isEncrypted
     ? await decryptKeyHeader(
         websocketDotyouClient,
@@ -161,26 +146,7 @@ const wsDsrToMessage = async (
       )
     : undefined;
 
-  let content: CommunityMessage | undefined;
-  if (contentIsComplete) {
-    content = tryJsonParse<CommunityMessage>(await decryptJsonContent(fileMetadata, keyHeader));
-  } else {
-    content =
-      (odinId && odinId !== dotYouClient.getHostIdentity()
-        ? await getPayloadAsJsonOverPeer<CommunityMessage>(
-            dotYouClient,
-            odinId,
-            targetDrive,
-            fileId,
-            DEFAULT_PAYLOAD_KEY
-          )
-        : await getPayloadAsJson<CommunityMessage>(
-            dotYouClient,
-            targetDrive,
-            fileId,
-            DEFAULT_PAYLOAD_KEY
-          )) || undefined;
-  }
+  const content = tryJsonParse<CommunityMessage>(await decryptJsonContent(fileMetadata, keyHeader));
 
   if (!content) return null;
 

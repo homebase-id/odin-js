@@ -21,7 +21,8 @@
   },
   "sideEffects": false,
   "scripts": {
-    "lint": "eslint src/*"
+    "lint": "eslint src/*",
+    "test": "vitest"
   },
   "repository": {
     "type": "git",

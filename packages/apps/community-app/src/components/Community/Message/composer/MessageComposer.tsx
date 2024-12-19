@@ -143,7 +143,7 @@ export const MessageComposer = ({
         channel,
         thread,
         threadParticipants: extendedParticipants,
-        message: trimRichText(message) || '',
+        message: trimRichText(message),
         files: newFiles,
         chatId: getNewId(),
         userDate: new Date().getTime(),
