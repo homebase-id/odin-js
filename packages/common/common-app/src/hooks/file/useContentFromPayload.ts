@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
-import { getPayloadAsJson, TargetDrive } from '@homebase-id/js-lib/core';
+import { getPayloadAsJson, SystemFileType, TargetDrive } from '@homebase-id/js-lib/core';
 import { getPayloadAsJsonOverPeer } from '@homebase-id/js-lib/peer';
 
 export const useContentFromPayload = <T>(props?: {
@@ -9,8 +9,9 @@ export const useContentFromPayload = <T>(props?: {
   fileId: string | undefined;
   payloadKey: string | undefined;
   lastModified?: number;
+  systemFileType?: SystemFileType;
 }) => {
-  const { odinId, targetDrive, fileId, payloadKey, lastModified } = props || {};
+  const { odinId, targetDrive, fileId, payloadKey, lastModified, systemFileType } = props || {};
   const dotYouClient = useDotYouClientContext();
 
   const fetchContentFromPayload = async (
@@ -18,11 +19,13 @@ export const useContentFromPayload = <T>(props?: {
     targetDrive: TargetDrive,
     fileId: string,
     payloadKey: string,
-    lastModified: number | undefined
+    lastModified: number | undefined,
+    systemFileType: SystemFileType | undefined
   ) => {
     if (!odinId || odinId === dotYouClient.getHostIdentity()) {
       return await getPayloadAsJson<T>(dotYouClient, targetDrive, fileId, payloadKey, {
         lastModified,
+        systemFileType,
       });
     }
     return await getPayloadAsJsonOverPeer<T>(
@@ -33,6 +36,7 @@ export const useContentFromPayload = <T>(props?: {
       payloadKey,
       {
         lastModified,
+        systemFileType,
       }
     );
   };
@@ -52,7 +56,8 @@ export const useContentFromPayload = <T>(props?: {
         targetDrive as TargetDrive,
         fileId as string,
         payloadKey as string,
-        lastModified
+        lastModified,
+        systemFileType
       ),
     enabled: !!targetDrive && !!fileId && !!payloadKey,
     staleTime: 1000 * 60 * 60 * 24 * 14, // 14 Days, the lastModified is used to invalidate the cache

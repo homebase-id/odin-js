@@ -249,6 +249,7 @@ const CommunityTextMessageBody = ({
           payloadKey: DEFAULT_PAYLOAD_KEY,
           lastModified: msg.fileMetadata.payloads?.find((pyld) => pyld.key === DEFAULT_PAYLOAD_KEY)
             ?.lastModified,
+          systemFileType: msg.fileSystemType,
         }
       : undefined
   );
@@ -395,6 +396,7 @@ const CommunityMediaMessageBody = ({
           payloadKey: DEFAULT_PAYLOAD_KEY,
           lastModified: msg.fileMetadata.payloads?.find((pyld) => pyld.key === DEFAULT_PAYLOAD_KEY)
             ?.lastModified,
+          systemFileType: msg.fileSystemType,
         }
       : undefined
   );
