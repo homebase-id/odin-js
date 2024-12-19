@@ -8,8 +8,9 @@ import {
   COMMUNITY_ROOT_PATH,
   ActionButton,
   useLongPress,
+  useContentFromPayload,
 } from '@homebase-id/common-app';
-import { HomebaseFile, RichText } from '@homebase-id/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, HomebaseFile, RichText } from '@homebase-id/js-lib/core';
 import {
   formatGuidId,
   isTouchDevice,
@@ -17,7 +18,10 @@ import {
   toGuidId,
 } from '@homebase-id/js-lib/helpers';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
-import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
+import {
+  CommunityDefinition,
+  getTargetDriveFromCommunityId,
+} from '../../../../providers/CommunityDefinitionProvider';
 import { CommunityActions, ContextMenu } from '../../channel/ContextMenu';
 import { Link, useMatch, useNavigate, useParams } from 'react-router-dom';
 import { CommunityDeliveryIndicator } from './CommunityDeliveryIndicator';
@@ -59,7 +63,8 @@ export const CommunityMessageItem = memo(
       scrollRef,
     } = props;
 
-    const hasMedia = !!msg.fileMetadata.payloads?.length;
+    const hasMedia = !!msg.fileMetadata.payloads?.filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY)
+      ?.length;
 
     const { chatMessageKey, mediaKey, channelKey, threadKey } = useParams();
     const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey);
@@ -222,10 +227,31 @@ const CommunityTextMessageBody = ({
   msg: HomebaseFile<CommunityMessage>;
   community?: HomebaseFile<CommunityDefinition>;
 }) => {
+  const [loadMore, setLoadMore] = useState(false);
+
   const content = msg.fileMetadata.appData.content;
   const plainText = getTextRootsRecursive(content.message).join(' ');
   const isEmojiOnly =
     (plainText?.match(/^\p{Extended_Pictographic}/u) && !plainText?.match(/[0-9a-zA-Z]/)) ?? false;
+
+  const hasMoreContent = msg.fileMetadata.payloads?.some(
+    (payload) => payload.key === DEFAULT_PAYLOAD_KEY
+  );
+
+  const { data: fullContent } = useContentFromPayload<CommunityMessage>(
+    hasMoreContent && loadMore && community
+      ? {
+          odinId: community?.fileMetadata.senderOdinId,
+          targetDrive: getTargetDriveFromCommunityId(
+            community.fileMetadata.appData.uniqueId as string
+          ),
+          fileId: msg.fileId,
+          payloadKey: DEFAULT_PAYLOAD_KEY,
+          lastModified: msg.fileMetadata.payloads?.find((pyld) => pyld.key === DEFAULT_PAYLOAD_KEY)
+            ?.lastModified,
+        }
+      : undefined
+  );
 
   return (
     <div className={`relative w-auto rounded-lg`}>
@@ -233,11 +259,19 @@ const CommunityTextMessageBody = ({
         <div className="flex w-full min-w-0 flex-col gap-1">
           <MessageTextRenderer
             community={community}
-            message={content.message}
+            message={((loadMore && fullContent) || content).message}
             className={`copyable-content whitespace-pre-wrap break-words ${
               isEmojiOnly ? 'text-7xl' : ''
             }`}
           />
+          {hasMoreContent ? (
+            <a
+              className="mr-auto cursor-pointer text-primary hover:underline"
+              onClick={() => setLoadMore((old) => !old)}
+            >
+              {loadMore ? t('Less') : t('More')}
+            </a>
+          ) : null}
         </div>
       </div>
       <CommunityReactions msg={msg} community={community} />
@@ -345,14 +379,44 @@ const CommunityMediaMessageBody = ({
   const content = msg.fileMetadata.appData.content;
   const hasACaption = !!content.message;
 
+  const [loadMore, setLoadMore] = useState(false);
+  const hasMoreContent = msg.fileMetadata.payloads?.some(
+    (payload) => payload.key === DEFAULT_PAYLOAD_KEY
+  );
+
+  const { data: fullContent } = useContentFromPayload<CommunityMessage>(
+    hasMoreContent && loadMore && community
+      ? {
+          odinId: community?.fileMetadata.senderOdinId,
+          targetDrive: getTargetDriveFromCommunityId(
+            community.fileMetadata.appData.uniqueId as string
+          ),
+          fileId: msg.fileId,
+          payloadKey: DEFAULT_PAYLOAD_KEY,
+          lastModified: msg.fileMetadata.payloads?.find((pyld) => pyld.key === DEFAULT_PAYLOAD_KEY)
+            ?.lastModified,
+        }
+      : undefined
+  );
+
   return (
     <div className={`relative w-full max-w-[75vw] rounded-lg md:max-w-[90%]`}>
       {hasACaption ? (
-        <MessageTextRenderer
-          community={community}
-          message={content.message}
-          className={`whitespace-pre-wrap break-words`}
-        />
+        <>
+          <MessageTextRenderer
+            community={community}
+            message={((loadMore && fullContent) || content).message}
+            className={`whitespace-pre-wrap break-words`}
+          />
+          {hasMoreContent ? (
+            <a
+              className="mr-auto cursor-pointer text-primary hover:underline"
+              onClick={() => setLoadMore((old) => !old)}
+            >
+              {loadMore ? t('Less') : t('More')}
+            </a>
+          ) : null}
+        </>
       ) : null}
       <CommunityMedia
         msg={msg}
