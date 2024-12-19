@@ -1,5 +1,10 @@
 import { useYouAuthAuthorization } from '../../../hooks/auth/useAuth';
-import { COMMUNITY_ROOT_PATH, IS_DARK_CLASSNAME, LoadingBlock } from '@homebase-id/common-app';
+import {
+  COMMUNITY_ROOT_PATH,
+  IS_DARK_CLASSNAME,
+  LoadingBlock,
+  OWNER_APPS_ROOT,
+} from '@homebase-id/common-app';
 import { Loader } from '@homebase-id/common-app/icons';
 import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import { Helmet } from 'react-helmet-async';
@@ -27,7 +32,7 @@ export const LoginBox = () => {
   const stringifiedAuthParams = authParams && stringifyToQueryParams(authParams);
   const isDarkMode = document.documentElement.classList.contains(IS_DARK_CLASSNAME);
 
-  const isAutoAuthorize = window.location.pathname.startsWith(COMMUNITY_ROOT_PATH);
+  const isAutoAuthorize = window.location.pathname.startsWith(OWNER_APPS_ROOT);
 
   useEffect(() => {
     const host = new DotYouClient({
