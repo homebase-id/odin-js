@@ -5,14 +5,14 @@ import {
   DialogWrapper,
   Alert,
   t,
-  MAIL_ROOT_PATH,
   useDotYouClientContext,
+  OWNER_APPS_ROOT,
 } from '@homebase-id/common-app';
 import { AutoAuthorize, LoginBox } from '../../components/Auth/LoginBox/LoginBox';
 import { useEffect } from 'react';
 
 const Auth = () => {
-  const isAutoAuthorize = window.location.pathname.startsWith(MAIL_ROOT_PATH);
+  const isAutoAuthorize = window.location.pathname.startsWith(OWNER_APPS_ROOT);
 
   const [searchParams] = useSearchParams();
   const isError = searchParams.get('state') === 'finalize-error';
