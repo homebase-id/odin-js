@@ -29,8 +29,8 @@ const RichTextEditor = lazy(() =>
 import { EmbeddedMessage } from '@homebase-id/chat-app/src/components/Chat/Detail/EmbeddedMessage';
 import { ChatMessage } from '@homebase-id/chat-app/src/providers/ChatProvider';
 import { useParams } from 'react-router-dom';
-import { useCommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
-import { CommunityMetadata, Draft } from '../../../providers/CommunityMetadataProvider';
+import { useCommunityMetadata } from '../../../../hooks/community/useCommunityMetadata';
+import { CommunityMetadata, Draft } from '../../../../providers/CommunityMetadataProvider';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 

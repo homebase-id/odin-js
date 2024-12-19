@@ -22,18 +22,19 @@ import { useState, useEffect, useRef, useMemo, lazy } from 'react';
 
 import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { LinkPreview } from '@homebase-id/js-lib/media';
-import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
-import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
-import { CommunityChannel } from '../../../providers/CommunityProvider';
+import { useCommunityMessage } from '../../../../hooks/community/messages/useCommunityMessage';
+import { useCommunityMetadata } from '../../../../hooks/community/useCommunityMetadata';
+import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
+import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
+import { CommunityMetadata, Draft } from '../../../../providers/CommunityMetadataProvider';
+import { CommunityChannel } from '../../../../providers/CommunityProvider';
+import { ChannelPlugin } from '../RTEChannelDropdown/RTEChannelDropdownPlugin';
+
 const RichTextEditor = lazy(() =>
   import('@homebase-id/rich-text-editor').then((rootExport) => ({
     default: rootExport.RichTextEditor,
   }))
 );
-import { ChannelPlugin } from './RTEChannelDropdown/RTEChannelDropdownPlugin';
-import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
-import { useCommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
-import { CommunityMetadata, Draft } from '../../../providers/CommunityMetadataProvider';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 export const MessageComposer = ({

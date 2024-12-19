@@ -24,6 +24,8 @@ import {
   BookmarkSolid,
   Clipboard,
   Pencil,
+  Persons,
+  Pin,
   Question,
   ReplyArrow,
   Trash,
@@ -31,6 +33,8 @@ import {
 import { useCommunityLater } from '../../../hooks/community/useCommunityLater';
 import { isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { createPortal } from 'react-dom';
+import { useCommunityPin } from '../../../hooks/community/useCommunityPin';
+import { useCommunityCollaborativeMsg } from '../../../hooks/community/useCommunityCollaborativeMsg';
 
 export interface CommunityActions {
   doReply?: (msg: HomebaseFile<CommunityMessage>) => void;
@@ -52,6 +56,7 @@ export const ContextMenu = ({
   setIsTouchOpen?: (isTouchOpen: boolean) => void;
 }) => {
   const [isStickyOpen, setIsStickyOpen] = useState(false);
+  const [isContextOpen, setIsContextOpen] = useState(false);
   const reactionsBarRef = useRef<ReactionsBarHandle>(null);
   const wrapperRef = useRef(null);
   useOutsideTrigger(wrapperRef, () => {
@@ -74,7 +79,7 @@ export const ContextMenu = ({
         className={[
           'absolute right-5 top-[-3rem] z-10',
           'flex flex-row items-center rounded-lg bg-background px-1 py-2 text-foreground shadow-md',
-          isStickyOpen
+          isStickyOpen || isContextOpen
             ? 'visible'
             : `invisible ${isTouch ? '' : 'group-hover:pointer-events-auto group-hover:visible'}`,
         ].join(' ')}
@@ -94,6 +99,8 @@ export const ContextMenu = ({
           community={community}
           communityActions={communityActions}
           renderActionGroup={true}
+          onOpen={() => setIsContextOpen(true)}
+          onClose={() => setIsContextOpen(false)}
         />
       </div>
     );
@@ -152,11 +159,15 @@ const CommunityContextActions = ({
   community,
   communityActions,
   renderActionGroup,
+  onOpen,
+  onClose,
 }: {
   msg: HomebaseFile<CommunityMessage>;
   community?: HomebaseFile<CommunityDefinition>;
   communityActions?: CommunityActions;
   renderActionGroup: boolean;
+  onOpen?: () => void;
+  onClose?: () => void;
 }) => {
   if (!communityActions) return null;
   const [showMessageInfo, setShowMessageInfo] = useState(false);
@@ -168,6 +179,16 @@ const CommunityContextActions = ({
     messageId: msg.fileMetadata.appData.uniqueId,
     systemFileType: msg.fileSystemType,
   });
+
+  const {
+    isPinned,
+    togglePin: { mutate: togglePin },
+  } = useCommunityPin({ msg, community });
+
+  const {
+    isCollaborative,
+    toggleCollaborative: { mutate: toggleCollaborative },
+  } = useCommunityCollaborativeMsg({ msg, community });
 
   const { mutate: resend, error: resendError } = useCommunityMessage().update;
 
@@ -186,15 +207,22 @@ const CommunityContextActions = ({
         );
       },
     },
+    {
+      icon: Pin,
+      label: isPinned ? t('Unpin message') : t('Pin message'),
+      onClick: () => togglePin(),
+    },
   ];
+
+  if ((messageFromMe || isCollaborative) && communityActions.doEdit) {
+    optionalOptions.push({
+      icon: Pencil,
+      label: t('Edit'),
+      onClick: () => communityActions.doEdit?.(msg),
+    });
+  }
+
   if (messageFromMe) {
-    if (communityActions.doEdit) {
-      optionalOptions.push({
-        icon: Pencil,
-        label: t('Edit'),
-        onClick: () => communityActions.doEdit?.(msg),
-      });
-    }
     if (communityActions.doDelete) {
       optionalOptions.push({
         icon: Trash,
@@ -207,6 +235,12 @@ const CommunityContextActions = ({
         onClick: () => communityActions.doDelete?.(msg, true),
       });
     }
+
+    optionalOptions.push({
+      icon: Persons,
+      label: isCollaborative ? t('Make private') : t('Make collaborative'),
+      onClick: () => toggleCollaborative(),
+    });
   }
 
   if (community)
@@ -258,6 +292,8 @@ const CommunityContextActions = ({
             type={'mute'}
             size="square"
             alwaysInPortal={true}
+            onOpen={onOpen}
+            onClose={onClose}
           />
         </>
       ) : (

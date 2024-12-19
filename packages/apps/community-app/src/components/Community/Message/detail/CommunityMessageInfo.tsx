@@ -12,7 +12,7 @@ import {
 import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
-import { FailedDeliveryDetails, InnerDeliveryIndicator } from '../CommunityDeliveryIndicator';
+import { FailedDeliveryDetails, InnerDeliveryIndicator } from '../item/CommunityDeliveryIndicator';
 import { useCommunityReaction } from '../../../../hooks/community/reactions/useCommunityReaction';
 
 export const CommunityMessageInfo = ({

@@ -1,16 +1,11 @@
+import React from 'react';
 import {
-  ConnectionImage,
-  ConnectionName,
   t,
-  getOdinIdColor,
-  OwnerImage,
-  OwnerName,
   formatToTimeAgoWithRelativeDetail,
   AuthorImage,
   getTextRootsRecursive,
   RichTextRenderer,
   COMMUNITY_ROOT_PATH,
-  useDotYouClientContext,
   ActionButton,
   useLongPress,
 } from '@homebase-id/common-app';
@@ -21,22 +16,26 @@ import {
   stringGuidsEqual,
   toGuidId,
 } from '@homebase-id/js-lib/helpers';
-import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
-import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
-import { CommunityActions, ContextMenu } from '../channel/ContextMenu';
+import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
+import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
+import { CommunityActions, ContextMenu } from '../../channel/ContextMenu';
 import { Link, useMatch, useNavigate, useParams } from 'react-router-dom';
 import { CommunityDeliveryIndicator } from './CommunityDeliveryIndicator';
 import { CommunitySentTimeIndicator } from './CommunitySentTimeIndicator';
 import { CommunityMedia } from './CommunityMedia';
-import { CommunityMediaGallery } from './detail/CommunityMediaGallery';
+import { CommunityMediaGallery } from '../detail/CommunityMediaGallery';
 import { memo, useEffect, useMemo, useState } from 'react';
-import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
-import { useCommunityChannels } from '../../../hooks/community/channels/useCommunityChannels';
-import { CommunityReactions } from './reactions/CommunityReactions';
-import { useCommunityChannel } from '../../../hooks/community/channels/useCommunityChannel';
-import { CommunityMessageEditor } from './detail/CommunityMessageEditor';
-import { useCommunityLater } from '../../../hooks/community/useCommunityLater';
-import { BookmarkSolid } from '@homebase-id/common-app/icons';
+import { useCommunityMessages } from '../../../../hooks/community/messages/useCommunityMessages';
+import { useCommunityChannels } from '../../../../hooks/community/channels/useCommunityChannels';
+import { CommunityReactions } from '../reactions/CommunityReactions';
+import { useCommunityChannel } from '../../../../hooks/community/channels/useCommunityChannel';
+import { CommunityMessageEditor } from '../detail/CommunityMessageEditor';
+import { useCommunityLater } from '../../../../hooks/community/useCommunityLater';
+import { BookmarkSolid, Persons, Pin } from '@homebase-id/common-app/icons';
+import { useCommunityPin } from '../../../../hooks/community/useCommunityPin';
+import { useCommunityCollaborativeMsg } from '../../../../hooks/community/useCommunityCollaborativeMsg';
+import { CommunityMessageAuthorName } from './CommunityMesageAuthorName';
+import { CommunityMessageAvatar } from './CommunityMessageAvatar';
 
 export const CommunityMessageItem = memo(
   (props: {
@@ -60,10 +59,6 @@ export const CommunityMessageItem = memo(
       scrollRef,
     } = props;
 
-    const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
-    const authorOdinId = msg.fileMetadata.originalAuthor || loggedOnIdentity || '';
-
-    const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;
     const hasMedia = !!msg.fileMetadata.payloads?.length;
 
     const { chatMessageKey, mediaKey, channelKey, threadKey } = useParams();
@@ -107,6 +102,8 @@ export const CommunityMessageItem = memo(
       messageId: msg.fileMetadata.appData.uniqueId,
       systemFileType: msg.fileSystemType,
     });
+    const { isPinned } = useCommunityPin({ msg, community });
+    const { isCollaborative } = useCommunityCollaborativeMsg({ msg, community });
 
     const [isTouchContextMenuOpen, setIsTouchContextMenuOpen] = useState(false);
     const clickProps = useLongPress(
@@ -118,6 +115,7 @@ export const CommunityMessageItem = memo(
 
     const backgroundClassName = (() => {
       if (isSaved) return 'bg-primary/10';
+      if (isPinned) return 'bg-orange-500/15';
       if (isEdit) return 'bg-primary/20';
       if (isDetail)
         return highlight ? 'bg-primary/20 duration-1000' : 'bg-page-background duration-1000';
@@ -148,41 +146,34 @@ export const CommunityMessageItem = memo(
             </Link>
           ) : null}
           {isSaved ? (
-            <div className="flex flex-row items-center gap-1 py-1 text-primary">
+            <div className="flex flex-row items-center gap-1 py-1 font-semibold text-primary">
               <BookmarkSolid className="h-3 w-3" />
               <p className="text-sm">{t('Saved for later')}</p>
             </div>
+          ) : isPinned ? (
+            <div className="flex flex-row items-center gap-1 py-1 font-semibold text-orange-600">
+              <Pin className="h-3 w-3" />
+              <p className="text-sm">{t('Pinned')}</p>
+            </div>
+          ) : isCollaborative ? (
+            <div className="flex flex-row items-center gap-1 py-1 font-semibold text-green-600">
+              <Persons className="h-3 w-3" />
+              <p className="text-sm">{t('Collaborative')}</p>
+            </div>
           ) : null}
           <div className="flex flex-row gap-2">
-            {hideDetails ? (
+            {hideDetails && !isCollaborative ? (
               <div className="w-8"></div>
             ) : (
-              <>
-                {!messageFromMe ? (
-                  <ConnectionImage
-                    odinId={authorOdinId}
-                    className={`flex-shrink-0 border border-neutral-200 dark:border-neutral-800`}
-                    size="xs"
-                  />
-                ) : (
-                  <OwnerImage
-                    className={`flex-shrink-0 border border-neutral-200 dark:border-neutral-800`}
-                    size="xs"
-                  />
-                )}
-              </>
+              <CommunityMessageAvatar msg={msg} />
             )}
 
             <div className="flex w-20 flex-grow flex-col">
               <div className="flex flex-row items-center gap-2">
-                {hideDetails ? null : (
+                {hideDetails && !isCollaborative ? null : (
                   <>
-                    <p
-                      className={`font-semibold`}
-                      style={{ color: getOdinIdColor(authorOdinId).darkTheme }}
-                    >
-                      {messageFromMe ? <OwnerName /> : <ConnectionName odinId={authorOdinId} />}
-                    </p>
+                    <CommunityMessageAuthorName msg={msg} />
+
                     <CommunitySentTimeIndicator className="text-sm" msg={msg} />
                     <CommunityDeliveryIndicator msg={msg} />
                   </>
@@ -235,7 +226,6 @@ const CommunityTextMessageBody = ({
   const plainText = getTextRootsRecursive(content.message).join(' ');
   const isEmojiOnly =
     (plainText?.match(/^\p{Extended_Pictographic}/u) && !plainText?.match(/[0-9a-zA-Z]/)) ?? false;
-  const isReply = !!content.replyId;
 
   return (
     <div className={`relative w-auto rounded-lg`}>
@@ -245,7 +235,7 @@ const CommunityTextMessageBody = ({
             community={community}
             message={content.message}
             className={`copyable-content whitespace-pre-wrap break-words ${
-              isEmojiOnly && !isReply ? 'text-7xl' : ''
+              isEmojiOnly ? 'text-7xl' : ''
             }`}
           />
         </div>

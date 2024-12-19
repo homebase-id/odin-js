@@ -14,7 +14,7 @@ import {
   t,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
-import { CommunityMessageItem } from '../Message/CommunityMessageItem';
+import { CommunityMessageItem } from '../Message/item/CommunityMessageItem';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
 import { CommunityActions } from './ContextMenu';
 import { useCommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
@@ -250,11 +250,14 @@ export const CommunityHistory = ({
               const msg = flattenedMsgs[item.index];
               const currentAuthor = msg?.fileMetadata.originalAuthor || loggedOnIdentity || '';
               const currentDate = msg?.fileMetadata.created;
+              const currentCollaborative = msg?.fileMetadata.appData.content.isCollaborative;
 
               const previousVisibleMsg = flattenedMsgs[item.index + 1];
               const previousAuthor =
                 previousVisibleMsg?.fileMetadata.originalAuthor || loggedOnIdentity || '';
               const previousDate = previousVisibleMsg?.fileMetadata.created;
+              const previousCollaborative =
+                previousVisibleMsg?.fileMetadata.appData.content.isCollaborative;
 
               return (
                 <div
@@ -271,7 +274,9 @@ export const CommunityHistory = ({
                     communityActions={communityActions}
                     hideDetails={
                       previousAuthor === currentAuthor &&
-                      Math.abs(previousDate - currentDate) < 1000 * 60 * 5
+                      Math.abs(previousDate - currentDate) < 1000 * 60 * 5 &&
+                      !previousCollaborative &&
+                      !currentCollaborative
                     }
                     hideThreads={inAThread}
                     className="px-2 py-1 md:px-3"
