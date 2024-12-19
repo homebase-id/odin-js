@@ -120,7 +120,7 @@ const ResizablePane = memo(({ children }: { children: ReactNode }) => {
   }, [clientX, clientXStart]);
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
+    const dragOverHandler = (e: MouseEvent) => {
       if (!e.clientX || e.clientX === 0) return;
       const newClientX = e.clientX;
       if (clientXStart) {
@@ -132,8 +132,8 @@ const ResizablePane = memo(({ children }: { children: ReactNode }) => {
       }
     };
 
-    window.addEventListener('dragover', handler);
-    return () => window.removeEventListener('dragover', handler);
+    window.addEventListener('dragover', dragOverHandler);
+    return () => window.removeEventListener('dragover', dragOverHandler);
   }, [localStorageOffset, clientXStart]);
 
   const [isXlWidth, setXlWidth] = useState<boolean>(window.innerWidth > 1280);
@@ -159,9 +159,6 @@ const ResizablePane = memo(({ children }: { children: ReactNode }) => {
         className="absolute bottom-0 left-0 top-0 z-10 hidden w-5 cursor-col-resize border-l border-transparent hover:border-slate-300 dark:hover:border-slate-600 xl:block"
         onDragStart={(e) => {
           if (!clientXStart) setClientXStart(e.clientX);
-        }}
-        onDragEnd={() => {
-          setClientXStart(undefined);
         }}
         draggable="true"
       ></div>
