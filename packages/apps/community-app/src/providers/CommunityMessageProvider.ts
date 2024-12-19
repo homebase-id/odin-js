@@ -98,8 +98,8 @@ export const uploadCommunityMessage = async (
   const payloadJson: string = jsonStringify64({ ...messageContent });
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < 3000;
+  // Set max of 3kb + content of 1600 chars for content so enough room is left for metedata
+  const shouldEmbedContent = payloadBytes.length < 3000 + 6400;
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
@@ -115,7 +115,7 @@ export const uploadCommunityMessage = async (
         ? payloadJson
         : jsonStringify64({
             ...messageContent,
-            message: ellipsisAtMaxCharOfRichText(messageContent.message, 140),
+            message: ellipsisAtMaxCharOfRichText(messageContent.message, 1600),
           }),
     },
     isEncrypted: true,
@@ -318,8 +318,8 @@ export const updateCommunityMessage = async (
   const payloadJson: string = jsonStringify64({ ...messageContent });
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < 3000;
+  // Set max of 3kb + content of 1600 chars for content so enough room is left for metedata
+  const shouldEmbedContent = payloadBytes.length < 3000 + 6400;
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
@@ -346,7 +346,7 @@ export const updateCommunityMessage = async (
         ? payloadJson
         : jsonStringify64({
             ...messageContent,
-            message: ellipsisAtMaxCharOfRichText(messageContent.message, 140),
+            message: ellipsisAtMaxCharOfRichText(messageContent.message, 1600),
           }),
     },
     isEncrypted: true,
