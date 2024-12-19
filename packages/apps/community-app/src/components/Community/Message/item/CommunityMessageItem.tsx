@@ -251,7 +251,7 @@ const MessageTextRenderer = ({
   className,
 }: {
   community?: HomebaseFile<CommunityDefinition>;
-  message: RichText | string;
+  message: RichText | undefined;
   className?: string;
 }) => {
   const { data: channels } = useCommunityChannels({

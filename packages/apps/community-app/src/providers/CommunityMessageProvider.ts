@@ -17,7 +17,7 @@ import {
   FileQueryParams,
   GetBatchQueryResultOptions,
   TargetDrive,
-  getContentFromHeaderOrPayload,
+  getContentFromHeader,
   queryBatch,
   deleteFile,
   RichText,
@@ -45,14 +45,14 @@ import {
 import { CommunityDefinition, getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
 import {
   deleteFileOverPeer,
-  getContentFromHeaderOrPayloadOverPeer,
+  getContentFromHeaderOverPeer,
   getFileHeaderOverPeerByUniqueId,
   queryBatchOverPeer,
   TransitInstructionSet,
   TransitUploadResult,
   uploadFileOverPeer,
 } from '@homebase-id/js-lib/peer';
-import { COMMUNITY_APP_ID } from '@homebase-id/common-app';
+import { COMMUNITY_APP_ID, ellipsisAtMaxCharOfRichText } from '@homebase-id/common-app';
 
 export const COMMUNITY_MESSAGE_FILE_TYPE = 7020;
 export const CommunityDeletedArchivalStaus = 2;
@@ -72,7 +72,7 @@ export interface CommunityMessage {
   collaborators?: string[];
 
   /// Content of the message
-  message: string | RichText;
+  message: RichText | undefined;
 
   /// DeliveryStatus of the message. Indicates if the message is sent and/or delivered
   deliveryStatus: CommunityDeliveryStatus;
@@ -111,7 +111,12 @@ export const uploadCommunityMessage = async (
       userDate: message.fileMetadata.appData.userDate,
       tags: message.fileMetadata.appData.tags,
       fileType: COMMUNITY_MESSAGE_FILE_TYPE,
-      content: shouldEmbedContent ? payloadJson : undefined,
+      content: shouldEmbedContent
+        ? payloadJson
+        : jsonStringify64({
+            ...messageContent,
+            message: ellipsisAtMaxCharOfRichText(messageContent.message, 140),
+          }),
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList ||
@@ -337,7 +342,12 @@ export const updateCommunityMessage = async (
         .archivalStatus,
       previewThumbnail: message.fileMetadata.appData.previewThumbnail,
       fileType: COMMUNITY_MESSAGE_FILE_TYPE,
-      content: shouldEmbedContent ? payloadJson : undefined,
+      content: shouldEmbedContent
+        ? payloadJson
+        : jsonStringify64({
+            ...messageContent,
+            message: ellipsisAtMaxCharOfRichText(messageContent.message, 140),
+          }),
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList ||
@@ -518,7 +528,7 @@ export const dsrToMessage = async (
   try {
     const msgContent =
       odinId && dotYouClient.getHostIdentity() !== odinId
-        ? await getContentFromHeaderOrPayloadOverPeer<CommunityMessage>(
+        ? await getContentFromHeaderOverPeer<CommunityMessage>(
             dotYouClient,
             odinId,
             targetDrive,
@@ -526,7 +536,7 @@ export const dsrToMessage = async (
             includeMetadataHeader,
             dsr.fileSystemType
           )
-        : await getContentFromHeaderOrPayload<CommunityMessage>(
+        : await getContentFromHeader<CommunityMessage>(
             dotYouClient,
             targetDrive,
             dsr,

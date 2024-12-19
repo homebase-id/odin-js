@@ -93,7 +93,7 @@ export const useCommunityMessage = (props?: {
     thread?: HomebaseFile<CommunityMessage>;
     threadParticipants?: string[];
     files?: NewMediaFile[];
-    message: RichText | string;
+    message: RichText | undefined;
     linkPreviews?: LinkPreview[];
     chatId?: string;
     userDate?: number;

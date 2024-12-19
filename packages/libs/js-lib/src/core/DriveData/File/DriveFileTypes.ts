@@ -286,4 +286,11 @@ export interface CommentReaction extends ReactionBase {
 
 export type EmojiReaction = ReactionBase;
 
-export type RichText = Record<string, unknown>[];
+export type RichTextNode = {
+  type?: string;
+  id?: string;
+  value?: string;
+  text?: string;
+  children?: RichTextNode[];
+};
+export type RichText = RichTextNode[];
