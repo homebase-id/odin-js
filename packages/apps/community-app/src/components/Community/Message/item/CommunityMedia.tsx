@@ -51,7 +51,7 @@ export const CommunityMedia = ({
       fit={'contain'}
       onClick={() => navigate(`${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`)}
       previewThumbnail={isGallery ? undefined : msg.fileMetadata.appData.previewThumbnail}
-      className={`my-1 max-h-[35rem] max-w-xs select-none overflow-hidden rounded-lg`}
+      className={`my-1 max-h-[35rem] max-w-xs overflow-hidden rounded-lg`}
     />
   );
 };
