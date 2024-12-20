@@ -33,7 +33,7 @@ export const CommunityThreadCatchup = ({
   if (!channel || !originMessage) return null;
 
   return (
-    <div className="rounded-md border hover:shadow-md">
+    <div className="rounded-md border bg-background hover:shadow-md">
       <FakeAnchor
         href={`${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}/${threadMeta.threadId}/thread`}
       >
