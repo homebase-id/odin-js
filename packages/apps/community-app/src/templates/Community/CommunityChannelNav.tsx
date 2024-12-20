@@ -135,7 +135,7 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
           </div>
 
           <div className="flex flex-col gap-1">
-            <h2 className="px-1">{t('Channels')}</h2>
+            <h2 className="px-1 font-semibold">{t('Channels')}</h2>
             <ErrorBoundary>
               {pinnedChannels?.map((channel) => (
                 <ChannelItem
@@ -172,7 +172,7 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
           </div>
 
           <div className="flex w-full flex-col gap-1">
-            <h2 className="px-1">{t('Direct messages')}</h2>
+            <h2 className="px-1 font-semibold">{t('Direct messages')}</h2>
             <ErrorBoundary>
               {members?.map((recipient) => (
                 <DirectMessageItem
@@ -423,20 +423,22 @@ const DirectMessageItem = ({
   return (
     <Link
       to={href}
-      className={`flex flex-row items-center gap-1 rounded-md px-2 py-[0.15rem] ${unreadCount ? 'font-bold' : ''} ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`}`}
+      className={`flex flex-row gap-2 rounded-md px-2 py-[0.15rem] ${unreadCount ? 'font-bold' : ''} ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`}`}
     >
-      <ConnectionImage odinId={recipient} size="xxs" />
-      <p>
-        <ConnectionName odinId={recipient} />
-      </p>{' '}
-      {recipient === dotYouClient.getHostIdentity() ? (
-        <span className="text-sm text-slate-400">{t('you')}</span>
-      ) : null}
-      {unreadCount ? (
-        <span className="ml-auto flex h-6 w-6 items-center justify-center rounded-full bg-primary text-sm text-primary-contrast">
-          {unreadCount}
-        </span>
-      ) : null}
+      <ConnectionImage odinId={recipient} size="xxs" className="flex-shrink-0" />
+      <span className="my-auto flex w-full flex-grow flex-row flex-wrap items-center">
+        <p className="mr-1 leading-tight">
+          <ConnectionName odinId={recipient} />
+        </p>
+        {recipient === dotYouClient.getHostIdentity() ? (
+          <span className="text-sm leading-tight text-slate-400">{t('you')}</span>
+        ) : null}
+        {unreadCount ? (
+          <span className="ml-auto flex h-6 w-6 items-center justify-center rounded-full bg-primary text-sm text-primary-contrast">
+            {unreadCount}
+          </span>
+        ) : null}
+      </span>
     </Link>
   );
 };

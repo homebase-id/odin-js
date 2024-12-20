@@ -1,9 +1,8 @@
-import { useParams, useMatch, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { useParams, useMatch, useNavigate, useLocation, Navigate, Link } from 'react-router-dom';
 
 import { ReactNode, useEffect, useRef, useState } from 'react';
 import {
   ActionGroup,
-  ActionLink,
   COMMUNITY_APP_ID,
   COMMUNITY_ROOT_PATH,
   ErrorBoundary,
@@ -154,9 +153,10 @@ const CommunitySideNav = () => {
         className={`${isActive ? 'translate-x-full' : 'translate-x-0'} fixed bottom-0 left-[-100%] top-0 z-[1] flex h-[100dvh] w-full flex-shrink-0 flex-col bg-page-background transition-transform lg:relative lg:left-0 lg:max-w-[4rem] lg:translate-x-0`}
       >
         <ErrorBoundary>
-          <div className="absolute inset-0 flex flex-grow flex-row flex-wrap items-start md:pl-[calc(env(safe-area-inset-left)+4.3rem)] lg:flex-col lg:items-center lg:pl-0">
-            <div className="px-4 pb-2 pt-4">
+          <div className="absolute inset-0 flex flex-grow flex-col md:pl-[calc(env(safe-area-inset-left)+4.3rem)] lg:items-center lg:pl-0">
+            <div className="flex flex-row items-center gap-2 px-4 pb-2 pt-4 md:static">
               <RadioTower className="h-7 w-7" />
+              <span className="lg:hidden">{t('Homebase Community')}</span>
             </div>
             <CommunitiesList />
           </div>
@@ -210,7 +210,7 @@ const CommunitiesList = () => {
           ]}
           type={'mute'}
           size={'none'}
-          className={`flex aspect-square w-full items-center justify-center rounded-2xl p-[0.606rem]`}
+          className={`flex w-full items-center justify-center rounded-2xl p-[0.606rem] lg:aspect-square`}
         >
           {isRefetchingCommunities && isEnableDiscovery ? (
             <Loader className="h-6 w-6" />
@@ -231,16 +231,21 @@ const CommunityListItem = ({
   isActive: boolean;
 }) => {
   return (
-    <div className={`px-2 py-2 ${isActive ? 'bg-primary/20' : ''}`}>
-      <ActionLink
-        href={`${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${community.fileMetadata.appData.uniqueId}`}
-        className={`aspect-square w-full rounded-2xl p-4 uppercase hover:shadow-md`}
-        style={{
-          backgroundColor: getOdinIdColor(community.fileMetadata.appData.content.title).darkTheme,
-        }}
+    <div className={`w-full px-2 py-2 ${isActive ? 'bg-primary/20' : ''}`}>
+      <Link
+        to={`${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${community.fileMetadata.appData.uniqueId}`}
+        className="flex aspect-auto flex-row items-center gap-4 rounded-lg rounded-l-2xl border bg-background lg:block lg:aspect-square lg:rounded-none lg:border-0 lg:bg-transparent"
       >
-        {community.fileMetadata.appData.content.title.slice(0, 2)}
-      </ActionLink>
+        <span
+          className="flex aspect-square w-16 flex-row items-center justify-center rounded-2xl p-2 text-lg uppercase leading-none text-white hover:shadow-md lg:w-full"
+          style={{
+            backgroundColor: getOdinIdColor(community.fileMetadata.appData.content.title).darkTheme,
+          }}
+        >
+          {community.fileMetadata.appData.content.title.slice(0, 2)}
+        </span>
+        <span className="text-lg lg:hidden">{community.fileMetadata.appData.content.title}</span>
+      </Link>
     </div>
   );
 };
