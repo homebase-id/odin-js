@@ -34,6 +34,7 @@ import { ChatMessage } from '@homebase-id/chat-app/src/providers/ChatProvider';
 import { ConversationWithYourselfId } from '@homebase-id/chat-app/src/providers/ConversationProvider';
 import { useCommunityMessages } from '../../hooks/community/messages/useCommunityMessages';
 import { useHasUnreadThreads } from '../../hooks/community/threads/useCommunityThreads';
+import { MyProfileStatus, ProfileStatus } from '../../components/Community/status/MyProfileStatus';
 
 const maxChannels = 7;
 export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
@@ -419,6 +420,7 @@ const DirectMessageItem = ({
   }, [messages, conversationMetadata]);
 
   useEffect(() => setUnreadCount(recipient, unreadCount || 0), [unreadCount]);
+  const isYou = recipient === dotYouClient.getHostIdentity();
 
   return (
     <Link
@@ -429,14 +431,15 @@ const DirectMessageItem = ({
       <span className="my-auto flex w-full flex-grow flex-row flex-wrap items-center">
         <p className="mr-1 leading-tight">
           <ConnectionName odinId={recipient} />
+          {isYou ? null : <ProfileStatus odinId={recipient} className="ml-1" />}
         </p>
-        {recipient === dotYouClient.getHostIdentity() ? (
-          <span className="text-sm leading-tight text-slate-400">{t('you')}</span>
-        ) : null}
+        {isYou ? <span className="text-sm leading-tight text-slate-400">{t('you')}</span> : null}
         {unreadCount ? (
           <span className="ml-auto flex h-6 w-6 items-center justify-center rounded-full bg-primary text-sm text-primary-contrast">
             {unreadCount}
           </span>
+        ) : isYou ? (
+          <MyProfileStatus className="ml-auto" />
         ) : null}
       </span>
     </Link>

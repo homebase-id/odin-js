@@ -11,6 +11,7 @@ export const DialogWrapper = ({
   size = 'large',
   isSidePanel = true,
   isPaddingLess = false,
+  isOverflowLess = false,
 }: {
   children: ReactNode;
   title?: string | ReactNode;
@@ -19,6 +20,7 @@ export const DialogWrapper = ({
   size?: 'large' | 'normal' | '4xlarge' | '2xlarge';
   isSidePanel?: boolean;
   isPaddingLess?: boolean;
+  isOverflowLess?: boolean;
 }) => {
   const wrapperRef = useRef(null);
   useOutsideTrigger(wrapperRef, () => !keepOpenOnBlur && onClose && onClose());
@@ -55,7 +57,7 @@ export const DialogWrapper = ({
         >
           <div
             ref={wrapperRef}
-            className={`relative transform overflow-hidden rounded-lg shadow-xl ${
+            className={`relative transform ${isOverflowLess ? '' : 'overflow-hidden'} rounded-lg shadow-xl ${
               isSidePanel ? 'sm:overflow-auto sm:rounded-none sm:shadow-none' : ''
             } w-full bg-white  text-left transition-all dark:bg-black ${
               size === 'normal'
@@ -86,8 +88,9 @@ export const DialogWrapper = ({
                 </div>
               ) : null}
               <div
-                className={`overflow-auto flex-grow overflow-y-auto ${
-                  isPaddingLess ? '' : 'px-4 py-8 sm:px-8'
+                className={`flex-grow ${isPaddingLess ? '' : 'px-4 py-8 sm:px-8'}
+                ${
+                  isOverflowLess ? '' : 'overflow-auto overflow-y-auto'
                 } sm:max-h-[calc(100vh-5rem)] `}
               >
                 {children}

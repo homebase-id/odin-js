@@ -1,6 +1,5 @@
 import {
   DotYouClient,
-  getContentFromHeader,
   getFileHeaderBytesByUniqueId,
   HomebaseFile,
   NewHomebaseFile,
@@ -10,17 +9,21 @@ import {
   UploadInstructionSet,
 } from '@homebase-id/js-lib/core';
 import {
-  getContentFromHeaderOverPeer,
   getFileHeaderBytesOverPeerByUniqueId,
   TransitInstructionSet,
   uploadFileOverPeer,
 } from '@homebase-id/js-lib/peer';
 import { CommunityDefinition, getTargetDriveFromCommunityId } from './CommunityDefinitionProvider';
-import { getRandom16ByteArray, jsonStringify64, toGuidId } from '@homebase-id/js-lib/helpers';
+import {
+  getRandom16ByteArray,
+  jsonStringify64,
+  toGuidId,
+  tryJsonParse,
+} from '@homebase-id/js-lib/helpers';
 
 export interface CommunityStatus {
-  emoji: string;
-  status: string;
+  emoji?: string;
+  status?: string;
   validTill?: number;
 }
 
@@ -127,36 +130,28 @@ export const internalGetStatus = async (
       uniqueId
     );
     if (!header) return null;
-    const content = await getContentFromHeaderOverPeer<CommunityStatus>(
-      dotYouClient,
-      community.fileMetadata.senderOdinId,
-      targetDrive,
-      header,
-      true
-    );
-    if (!content) return null;
     return {
       ...header,
       fileMetadata: {
         ...header.fileMetadata,
-        appData: { ...header.fileMetadata.appData, content },
+        appData: {
+          ...header.fileMetadata.appData,
+          content: tryJsonParse<CommunityStatus>(header.fileMetadata.appData.content),
+        },
       },
     };
   } else {
     const header = await getFileHeaderBytesByUniqueId(dotYouClient, targetDrive, uniqueId);
     if (!header) return null;
-    const content = await getContentFromHeader<CommunityStatus>(
-      dotYouClient,
-      targetDrive,
-      header,
-      true
-    );
-    if (!content) return null;
+
     return {
       ...header,
       fileMetadata: {
         ...header.fileMetadata,
-        appData: { ...header.fileMetadata.appData, content },
+        appData: {
+          ...header.fileMetadata.appData,
+          content: tryJsonParse<CommunityStatus>(header.fileMetadata.appData.content),
+        },
       },
     };
   }
