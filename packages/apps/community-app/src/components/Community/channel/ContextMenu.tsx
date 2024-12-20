@@ -64,7 +64,7 @@ export const ContextMenu = ({
     setIsStickyOpen(false);
   });
 
-  const isTouch = isTouchDevice();
+  const isTouch = isTouchDevice() && window.innerWidth < 1024;
 
   const target = usePortal('context-menu');
   const [clickable, setClickable] = useState(false);

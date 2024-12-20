@@ -51,7 +51,7 @@ export const CommunityMedia = ({
       fit={'contain'}
       onClick={() => navigate(`${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`)}
       previewThumbnail={isGallery ? undefined : msg.fileMetadata.appData.previewThumbnail}
-      className={`my-1 max-h-[35rem] max-w-xs overflow-hidden rounded-lg`}
+      className={`my-1 max-h-[35rem] max-w-xs select-none overflow-hidden rounded-lg`}
     />
   );
 };
@@ -285,7 +285,7 @@ const MediaGallery = ({
 
   return (
     <div
-      className={`relative ${totalCount === 2 ? 'aspect-[2.02]' : 'aspect-square'} w-[75vw] max-w-[min(100%,20rem)] overflow-hidden rounded-lg bg-background`}
+      className={`relative select-none ${totalCount === 2 ? 'aspect-[2.02]' : 'aspect-square'} w-[75vw] max-w-[min(100%,20rem)] overflow-hidden rounded-lg bg-background`}
     >
       {tinyThumbUrl ? (
         <MediaGalleryLoading tinyThumbUrl={tinyThumbUrl} totalCount={totalCount} />
