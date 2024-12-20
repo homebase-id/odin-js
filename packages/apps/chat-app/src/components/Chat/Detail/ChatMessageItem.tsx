@@ -286,7 +286,7 @@ const ChatMediaMessageBody = ({
 
   return (
     <div
-      className={`relative w-auto max-w-[75vw] rounded-lg shadow-sm md:max-w-xs lg:max-w-xl ${
+      className={`relative ${hasACaption ? 'w-auto' : 'w-full'} max-w-[75vw] rounded-lg shadow-sm md:max-w-xs lg:max-w-xl ${
         messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10 dark:bg-gray-300/20'
       }`}
     >
