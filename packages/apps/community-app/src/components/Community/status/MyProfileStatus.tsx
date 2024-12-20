@@ -6,7 +6,7 @@ import {
   t,
   usePortal,
 } from '@homebase-id/common-app';
-import { Ellipsis } from '@homebase-id/common-app/icons';
+import { Ellipsis, Save, Times } from '@homebase-id/common-app/icons';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useMyStatus } from '../../../hooks/community/status/useMyStatus';
@@ -108,6 +108,18 @@ export const StatusDialog = ({
     });
   };
 
+  const doClear = async (
+    e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    if (!draftStatus) return;
+
+    setStatus({
+      community,
+      status: {},
+    });
+  };
+
   if (!isOpen) return null;
 
   const dialog = (
@@ -118,7 +130,7 @@ export const StatusDialog = ({
       isOverflowLess={true}
     >
       <form onSubmit={doSubmit}>
-        <div className="flex w-full flex-row rounded-lg border">
+        <div className="relative flex w-full flex-row rounded-lg border">
           <EmojiSelector
             wrapperClassName="relative flex flex-row justify-center items-center"
             className="text-xl text-foreground/70 hover:text-opacity-100"
@@ -133,12 +145,13 @@ export const StatusDialog = ({
             onChange={(e) => setDraftStatus((old) => ({ ...old, status: e.target.value }))}
           />
         </div>
-        <div className="mt-5 flex flex-row-reverse gap-4">
+        <div className="mt-5 flex flex-col gap-4 md:flex-row-reverse">
           <ActionButton
             type={'primary'}
             disabled={!draftStatus}
             state={saveStatus}
             onClick={doSubmit}
+            icon={Save}
           >
             {t('Save')}
           </ActionButton>
@@ -150,6 +163,9 @@ export const StatusDialog = ({
             }}
           >
             {t('Cancel')}
+          </ActionButton>
+          <ActionButton type={'secondary'} icon={Times} onClick={doClear} className="mr-auto">
+            {t('Clear')}
           </ActionButton>
         </div>
       </form>
