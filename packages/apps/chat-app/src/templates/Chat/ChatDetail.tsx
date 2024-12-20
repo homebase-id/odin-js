@@ -188,7 +188,7 @@ const ChatHeader = ({
           makeIntroductionError
         }
       />
-      <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
+      <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-3">
         <HybridLink className="-m-1 p-1 lg:hidden" type="mute" href={rootPath}>
           <ChevronLeft className="h-4 w-4" />
         </HybridLink>
@@ -200,16 +200,17 @@ const ChatHeader = ({
           {singleRecipient ? (
             <ConnectionImage
               odinId={singleRecipient}
-              className="h-[2rem] w-[2rem] border border-neutral-200 dark:border-neutral-800 lg:h-[3rem] lg:w-[3rem]"
+              className="h-[2rem] w-[2rem] border border-neutral-200 dark:border-neutral-800 lg:h-[2.5rem] lg:w-[2.5rem]"
               size="custom"
             />
           ) : withYourself ? (
-            <div className="h-[3rem] w-[3rem] flex-shrink-0">
-              <OwnerImage className="border border-neutral-200 dark:border-neutral-800" size="sm" />
-            </div>
+            <OwnerImage
+              className="h-[2rem] w-[2rem] flex-shrink-0 border border-neutral-200 dark:border-neutral-800 lg:h-[2.5rem] lg:w-[2.5rem]"
+              size="custom"
+            />
           ) : (
-            <div className="rounded-full bg-primary/20 p-3">
-              <Persons className="h-6 w-6" />
+            <div className="rounded-full bg-primary/20 p-2 lg:p-3">
+              <Persons className="h-[0.9rem] w-[0.9rem] lg:h-4 lg:w-4" />
             </div>
           )}
           {singleRecipient ? (

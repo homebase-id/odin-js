@@ -45,7 +45,7 @@ export const CommunityThreadsCatchup = memo(() => {
 
   return (
     <ErrorBoundary>
-      <div className="h-full w-20 flex-grow bg-background">
+      <div className="h-full w-20 flex-grow bg-page-background">
         <div className="relative flex h-full flex-row">
           <div className="flex h-full flex-grow flex-col overflow-hidden">
             <div className="flex h-full flex-grow flex-col">
