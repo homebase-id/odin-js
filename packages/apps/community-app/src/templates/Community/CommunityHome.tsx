@@ -53,19 +53,23 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
       viewportWrapperRef.current?.style.removeProperty('position');
       viewportWrapperRef.current?.style.removeProperty('top');
       viewportWrapperRef.current?.style.removeProperty('bottom');
+      viewportWrapperRef.current?.style.removeProperty('left');
+      viewportWrapperRef.current?.style.removeProperty('right');
     };
 
     const handler = () => {
       const visualViewportHeight = window.visualViewport?.height;
       const offsetTop = window.visualViewport?.offsetTop;
 
-      if (
-        window.visualViewport?.height &&
-        (window.visualViewport?.height !== window.innerHeight || !!offsetTop)
-      ) {
+      // Firefox on Android seems to have a bug where the visualViewport and innerHeight are not the exact same 0.1px differences
+      const roundedViewportHeight =
+        window.visualViewport?.height && Math.round(window.visualViewport?.height / 10) * 10;
+      const roundedInnerHeight = Math.round(window.innerHeight / 10) * 10;
+
+      if (roundedViewportHeight && (roundedViewportHeight !== roundedInnerHeight || !!offsetTop)) {
         viewportWrapperRef.current?.style.setProperty('height', `${visualViewportHeight}px`);
         viewportWrapperRef.current?.style.setProperty('position', `fixed`);
-        if (offsetTop) {
+        if (offsetTop !== undefined) {
           viewportWrapperRef.current?.style.setProperty('top', `${offsetTop}px`);
         } else {
           viewportWrapperRef.current?.style.setProperty('bottom', `0`);
