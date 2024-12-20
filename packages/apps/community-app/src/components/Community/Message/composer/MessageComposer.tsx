@@ -85,6 +85,12 @@ export const MessageComposer = ({
   });
   useEffect(() => {
     if (metadata && (threadId || (channel && channel.fileMetadata.appData.uniqueId))) {
+      if (
+        drafts[threadId || ((channel && channel.fileMetadata.appData.uniqueId) as string)]
+          ?.message === message
+      )
+        return;
+
       const newDrafts: Record<string, Draft | undefined> = {
         ...drafts,
         [threadId || ((channel && channel.fileMetadata.appData.uniqueId) as string)]: {

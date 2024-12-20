@@ -70,6 +70,8 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = ({
   });
   useEffect(() => {
     if (metadata && conversation && conversation?.fileMetadata.appData.uniqueId) {
+      if (drafts[conversation.fileMetadata.appData.uniqueId]?.message === message) return;
+
       const newDrafts: Record<string, Draft | undefined> = {
         ...drafts,
         [conversation.fileMetadata.appData.uniqueId]: {
