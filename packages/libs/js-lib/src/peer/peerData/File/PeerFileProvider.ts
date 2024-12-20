@@ -156,7 +156,7 @@ export const getThumbBytesOverPeer = async (
     systemFileType?: SystemFileType;
     lastModified?: number;
   }
-): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType } | null> => {
+): Promise<{ bytes: Uint8Array; contentType: ImageContentType } | null> => {
   assertIfDefined('OdinId', odinId);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);

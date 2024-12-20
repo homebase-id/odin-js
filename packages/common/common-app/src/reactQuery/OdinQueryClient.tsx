@@ -61,6 +61,7 @@ const APP_QUERY_KEYS = [
   'community-channels',
   'community-messages',
   'channels-with-recent-message',
+  'community-status',
 ];
 
 const PUBLIC_QUERY_KEYS: string[] = [...DEFAULT_QUERY_KEYS];
