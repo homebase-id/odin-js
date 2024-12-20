@@ -57,9 +57,9 @@ export const DialogWrapper = ({
         >
           <div
             ref={wrapperRef}
-            className={`relative transform ${isOverflowLess ? '' : 'overflow-hidden'} rounded-lg shadow-xl ${
+            className={`relative transform ${isOverflowLess ? '' : 'overflow-hidden'} shadow-xl ${
               isSidePanel ? 'sm:overflow-auto sm:rounded-none sm:shadow-none' : ''
-            } w-full bg-white  text-left transition-all dark:bg-black ${
+            } w-full text-left transition-all ${
               size === 'normal'
                 ? 'sm:max-w-lg'
                 : size === 'large'
@@ -69,9 +69,13 @@ export const DialogWrapper = ({
                     : 'sm:max-w-4xl'
             }`}
           >
-            <div className="flex h-full flex-col max-h-screen bg-white dark:bg-black dark:text-slate-50">
+            <div className="flex h-full flex-col max-h-screen">
               {title || onClose ? (
-                <div className="flex flex-row bg-slate-100 px-4 py-4 dark:bg-slate-700 sm:px-8">
+                <div
+                  className={`flex flex-row bg-slate-100 px-4 py-4 dark:bg-slate-700 sm:px-8 ${
+                    isSidePanel ? 'sm:rounded-none' : ''
+                  } rounded-t-lg overflow-hidden`}
+                >
                   {title ? (
                     <h3
                       className="w-20 flex-grow my-3 text-2xl font-medium leading-6 text-gray-900 dark:text-slate-50"
@@ -88,13 +92,18 @@ export const DialogWrapper = ({
                 </div>
               ) : null}
               <div
-                className={`flex-grow ${isPaddingLess ? '' : 'px-4 py-8 sm:px-8'}
+                className={`flex-grow bg-white dark:bg-black dark:text-slate-50 ${isPaddingLess ? '' : 'px-4 py-8 sm:px-8'}
                 ${
                   isOverflowLess ? '' : 'overflow-auto overflow-y-auto'
                 } sm:max-h-[calc(100vh-5rem)] `}
               >
                 {children}
               </div>
+              <div
+                className={`bg-white dark:bg-black pb-2 rounded-b-lg ${
+                  isSidePanel ? 'sm:rounded-none' : ''
+                }`}
+              ></div>
             </div>
           </div>
         </div>
