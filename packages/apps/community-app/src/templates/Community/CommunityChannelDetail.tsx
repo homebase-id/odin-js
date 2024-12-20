@@ -213,7 +213,7 @@ const CommunityChannelHeader = ({
           <NavLink
             to={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${communityId}/${channel?.fileMetadata.appData.uniqueId}`}
             type="secondary"
-            className={`flex flex-row items-center gap-1 border-b-2 px-3 py-2 transition-colors ${!isPins ? 'border-current' : 'border-transparent'}`}
+            className={`flex flex-row items-center gap-1 border-b-2 px-3 py-2 transition-colors hover:border-primary ${!isPins ? 'border-current' : 'border-transparent'}`}
             end={true}
           >
             <ChatBubble className="h-4 w-4" />
@@ -222,7 +222,7 @@ const CommunityChannelHeader = ({
           <NavLink
             to={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${communityId}/${channel?.fileMetadata.appData.uniqueId}/pins`}
             type="secondary"
-            className={`flex flex-row items-center gap-1 border-b-2 px-3 py-2 transition-colors ${isPins ? 'border-current' : 'border-transparent'}`}
+            className={`flex flex-row items-center gap-1 border-b-2 px-3 py-2 transition-colors hover:border-primary ${isPins ? 'border-current' : 'border-transparent'}`}
             end={true}
           >
             <Pin className="h-4 w-4" />
