@@ -151,7 +151,7 @@ const CommunityChannelPins = ({
     );
 
   return (
-    <div className="flex flex-col gap-5 p-5">
+    <div className="flex flex-col gap-5 overflow-auto p-5">
       {pinnedMessages?.searchResults?.length ? (
         <>
           {pinnedMessages?.searchResults.map((pinned, index) => {
