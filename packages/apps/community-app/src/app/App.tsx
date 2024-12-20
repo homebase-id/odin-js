@@ -54,6 +54,11 @@ const CommunityThreadsCatchup = lazy(() =>
     default: communityApp.CommunityThreadsCatchup,
   }))
 );
+const CommunityPins = lazy(() =>
+  import('../templates/Community/CommunityPins').then((communityApp) => ({
+    default: communityApp.CommunityPins,
+  }))
+);
 const CommunityLater = lazy(() =>
   import('../templates/Community/CommunityLater').then((communityApp) => ({
     default: communityApp.CommunityLater,
@@ -109,7 +114,10 @@ function App() {
             >
               <Route index={true} element={<CommunityRootRoute />} />
 
+              {/* Items for 'global' */}
+              <Route path={'pins'} element={<CommunityPins />} />
               <Route path={'threads'} element={<CommunityThreadsCatchup />} />
+              <Route path={'later'} element={<CommunityLater />} />
 
               {/* Items for 'all' */}
               <Route path={'all'} element={<CommunityCatchup />} />
@@ -126,9 +134,6 @@ function App() {
                 path={'all/:threadKey/thread/:chatMessageKey/:mediaKey'}
                 element={<CommunityCatchup />}
               />
-
-              {/* Items for 'later' */}
-              <Route path={'later'} element={<CommunityLater />} />
 
               {/* Items for 'channel' */}
               <Route path={':channelKey'} element={<CommunityChannelDetail />} />
