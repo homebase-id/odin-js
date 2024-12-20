@@ -138,7 +138,7 @@ export const CommunityMessageItem = memo(
           />
         ) : null}
         <div
-          className={`group relative flex flex-col transition-colors duration-500 ${backgroundClassName} ${className || ''}`}
+          className={`group relative flex select-none flex-col transition-colors duration-500 md:select-auto ${backgroundClassName} ${className || ''}`}
           data-unique-id={msg.fileMetadata.appData.uniqueId}
           {...clickProps}
         >
