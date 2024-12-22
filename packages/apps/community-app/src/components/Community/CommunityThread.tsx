@@ -83,15 +83,17 @@ export const CommunityThread = memo(
           )}
 
           <ErrorBoundary>
-            <MessageComposer
-              community={community}
-              thread={originMessage || undefined}
-              channel={channel}
-              key={threadId}
-              threadParticipants={participants || undefined}
-              onKeyDown={keyDownHandler}
-              className="mt-auto xl:mt-0"
-            />
+            {originMessage ? (
+              <MessageComposer
+                community={community}
+                thread={originMessage}
+                channel={channel}
+                key={threadId}
+                threadParticipants={participants || undefined}
+                onKeyDown={keyDownHandler}
+                className="mt-auto xl:mt-0"
+              />
+            ) : null}
           </ErrorBoundary>
         </div>
       </ResizablePane>

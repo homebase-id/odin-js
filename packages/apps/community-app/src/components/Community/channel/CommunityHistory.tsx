@@ -132,7 +132,7 @@ export const CommunityHistory = ({
       return () => element.removeEventListener('scroll', handler);
     },
     initialOffset: 0,
-    overscan: 5,
+    overscan: 10,
     getItemKey: (index) => flattenedMsgs[index]?.fileId || `loader-${index}`,
   });
 
