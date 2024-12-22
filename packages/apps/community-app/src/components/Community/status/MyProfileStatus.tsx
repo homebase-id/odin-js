@@ -66,7 +66,7 @@ export const ProfileStatus = ({ odinId, className }: { odinId: string; className
 
   return (
     <span title={myStatus.status} className={className}>
-      {myStatus?.emoji}
+      {myStatus?.emoji || '💬'}
     </span>
   );
 };

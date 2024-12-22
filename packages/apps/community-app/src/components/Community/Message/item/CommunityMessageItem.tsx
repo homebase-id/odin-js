@@ -155,12 +155,14 @@ export const CommunityMessageItem = memo(
               <BookmarkSolid className="h-3 w-3" />
               <p className="text-sm">{t('Saved for later')}</p>
             </div>
-          ) : isPinned ? (
+          ) : null}
+          {isPinned ? (
             <div className="flex flex-row items-center gap-1 py-1 font-semibold text-orange-600">
               <Pin className="h-3 w-3" />
               <p className="text-sm">{t('Pinned')}</p>
             </div>
-          ) : isCollaborative ? (
+          ) : null}
+          {isCollaborative ? (
             <div className="flex flex-row items-center gap-1 py-1 font-semibold text-green-600">
               <Persons className="h-3 w-3" />
               <p className="text-sm">{t('Collaborative')}</p>
