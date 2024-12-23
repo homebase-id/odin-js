@@ -491,7 +491,7 @@ export const removeMessage = (
   }
 };
 
-export const internalRemoveMessage = (
+const internalRemoveMessage = (
   extistingMessages: InfiniteData<
     {
       searchResults: (HomebaseFile<CommunityMessage> | null)[];
@@ -526,3 +526,25 @@ export const internalRemoveMessage = (
   };
 };
 //
+
+export const increaseCommentCountForMessage = (
+  queryClient: QueryClient,
+  community: HomebaseFile<CommunityDefinition>,
+  origin: HomebaseFile<CommunityMessage>
+) => {
+  const updatedOrigin = { ...origin };
+  if (!updatedOrigin.fileMetadata.reactionPreview) {
+    updatedOrigin.fileMetadata.reactionPreview = {
+      totalCommentCount: 0,
+      comments: [],
+      reactions: {},
+    };
+  }
+  updatedOrigin.fileMetadata.reactionPreview.totalCommentCount += 1;
+  console.log('updatedOrigin', updatedOrigin);
+  return insertNewMessage(
+    queryClient,
+    updatedOrigin,
+    community.fileMetadata.appData.uniqueId as string
+  );
+};

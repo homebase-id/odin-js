@@ -31,6 +31,7 @@ import {
 import { formatGuidId, getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
 import {
+  increaseCommentCountForMessage,
   insertNewMessage,
   invalidateCommunityMessages,
   updateCacheCommunityMessages,
@@ -220,6 +221,8 @@ export const useCommunityMessage = (props?: {
           newMessageDsr as HomebaseFile<CommunityMessage>,
           community.fileMetadata.appData.uniqueId as string
         );
+
+        if (thread) increaseCommentCountForMessage(queryClient, community, thread);
       },
       onSuccess: async (newMessage, params) => {
         if (!newMessage) return;
