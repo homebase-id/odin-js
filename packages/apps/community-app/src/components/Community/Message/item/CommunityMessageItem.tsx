@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   t,
   formatToTimeAgoWithRelativeDetail,
@@ -7,7 +6,6 @@ import {
   RichTextRenderer,
   COMMUNITY_ROOT_PATH,
   ActionButton,
-  useLongPress,
   useContentFromPayload,
 } from '@homebase-id/common-app';
 import { DEFAULT_PAYLOAD_KEY, HomebaseFile, RichText } from '@homebase-id/js-lib/core';
@@ -50,7 +48,6 @@ export const CommunityMessageItem = memo(
     hideThreads?: boolean;
     showChannelName?: boolean;
     className?: string;
-    scrollRef?: React.RefObject<HTMLDivElement>;
   }) => {
     const {
       msg,
@@ -60,7 +57,6 @@ export const CommunityMessageItem = memo(
       hideThreads,
       showChannelName,
       className,
-      scrollRef,
     } = props;
 
     const hasMedia = !!msg.fileMetadata.payloads?.filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY)
@@ -111,13 +107,6 @@ export const CommunityMessageItem = memo(
     const { isCollaborative } = useCommunityCollaborativeMsg({ msg, community });
 
     const [isTouchContextMenuOpen, setIsTouchContextMenuOpen] = useState(false);
-    const clickProps = useLongPress(
-      () => setIsTouchContextMenuOpen(true),
-      () => {},
-      { shouldPreventDefault: false, delay: 300 },
-      scrollRef
-    );
-
     const backgroundClassName = (() => {
       if (isSaved) return 'bg-primary/10';
       if (isPinned) return 'bg-orange-500/15';
@@ -140,7 +129,12 @@ export const CommunityMessageItem = memo(
         <div
           className={`group relative flex select-none flex-col transition-colors duration-500 md:select-auto ${backgroundClassName} ${className || ''}`}
           data-unique-id={msg.fileMetadata.appData.uniqueId}
-          {...clickProps}
+          onContextMenu={(e) => {
+            if (!(isTouchDevice() && window.innerWidth < 1024)) return;
+
+            e.preventDefault();
+            setIsTouchContextMenuOpen(true);
+          }}
         >
           {showChannelName && !hideDetails ? (
             <Link

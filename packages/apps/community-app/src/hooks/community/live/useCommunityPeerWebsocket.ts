@@ -1,14 +1,12 @@
-import { useDotYouClientContext, useWebsocketSubscriber } from '@homebase-id/common-app';
+import { useWebsocketSubscriber } from '@homebase-id/common-app';
 import {
   DotYouClient,
   TypedConnectionNotification,
   TargetDrive,
-  DEFAULT_PAYLOAD_KEY,
   decryptKeyHeader,
   EncryptedKeyHeader,
   decryptJsonContent,
   HomebaseFile,
-  getPayloadAsJson,
 } from '@homebase-id/js-lib/core';
 import { drivesEqual, hasDebugFlag, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { useQueryClient } from '@tanstack/react-query';

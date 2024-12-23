@@ -18,7 +18,7 @@ import {
 import { PaperPlane, Plus } from '@homebase-id/common-app/icons';
 import { HomebaseFile, NewHomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
 
-import { useState, useEffect, useRef, useMemo, lazy } from 'react';
+import { useState, useEffect, useRef, useMemo, lazy, Suspense } from 'react';
 
 import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { LinkPreview } from '@homebase-id/js-lib/media';
@@ -210,66 +210,68 @@ export const MessageComposer = ({
             }
           }}
         >
-          <RichTextEditor
-            className="relative w-8 flex-grow border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border"
-            contentClassName="max-h-[50vh] overflow-auto"
-            onChange={(newVal) => setMessage(newVal.target.value)}
-            defaultValue={message}
-            placeholder={
-              threadId
-                ? t(`Reply...`)
-                : channel?.fileMetadata.appData.content.title
-                  ? `${t('Message')} # ${channel.fileMetadata.appData.content.title}`
-                  : `${t('Message')} "${community?.fileMetadata.appData.content.title}"`
-            }
-            autoFocus={!isTouchDevice()}
-            ref={volatileRef}
-            onSubmit={isTouchDevice() ? undefined : doSend}
-            onKeyDown={onKeyDown}
-            disableHeadings={true}
-            mentionables={mentionables}
-            plugins={[
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
-            ]}
-          >
-            <div className="max-h-[30vh] overflow-auto">
-              <FileOverview files={files} setFiles={setFiles} cols={8} />
-              {files?.length ? null : (
-                <LinkOverview
-                  linkPreviews={linkPreviews}
-                  setLinkPreviews={setLinkPreviews}
-                  cols={4}
-                  className="p-2"
-                />
-              )}
-            </div>
-            <div className="-mx-1 flex flex-row justify-between">
-              <FileSelector
-                onChange={(files) => setFiles(files.map((file) => ({ file })))}
-                className="my-auto px-2 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
-                accept="*"
-                maxSize={HUNDRED_MEGA_BYTES}
-              >
-                <Plus className="h-5 w-5" />
-              </FileSelector>
-              <span className="my-auto">
-                <ActionButton
-                  type="mute"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    doSend();
-                  }}
-                  className={`flex-shrink opacity-40 transition-colors ${!plainMessage && !files?.length ? '' : 'bg-primary text-primary-contrast opacity-90 hover:opacity-100'}`}
-                  icon={PaperPlane}
-                  size="square"
-                  disabled={!plainMessage && !files?.length}
-                  onMouseDown={(e) => e.preventDefault()}
-                />
-              </span>
-            </div>
-          </RichTextEditor>
+          <Suspense>
+            <RichTextEditor
+              className="relative w-8 flex-grow border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border"
+              contentClassName="max-h-[50vh] overflow-auto"
+              onChange={(newVal) => setMessage(newVal.target.value)}
+              defaultValue={message}
+              placeholder={
+                threadId
+                  ? t(`Reply...`)
+                  : channel?.fileMetadata.appData.content.title
+                    ? `${t('Message')} # ${channel.fileMetadata.appData.content.title}`
+                    : `${t('Message')} "${community?.fileMetadata.appData.content.title}"`
+              }
+              autoFocus={!isTouchDevice()}
+              ref={volatileRef}
+              onSubmit={isTouchDevice() ? undefined : doSend}
+              onKeyDown={onKeyDown}
+              disableHeadings={true}
+              mentionables={mentionables}
+              plugins={[
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
+              ]}
+            >
+              <div className="max-h-[30vh] overflow-auto">
+                <FileOverview files={files} setFiles={setFiles} cols={8} />
+                {files?.length ? null : (
+                  <LinkOverview
+                    linkPreviews={linkPreviews}
+                    setLinkPreviews={setLinkPreviews}
+                    cols={4}
+                    className="p-2"
+                  />
+                )}
+              </div>
+              <div className="-mx-1 flex flex-row justify-between">
+                <FileSelector
+                  onChange={(files) => setFiles(files.map((file) => ({ file })))}
+                  className="my-auto px-2 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
+                  accept="*"
+                  maxSize={HUNDRED_MEGA_BYTES}
+                >
+                  <Plus className="h-5 w-5" />
+                </FileSelector>
+                <span className="my-auto">
+                  <ActionButton
+                    type="mute"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      doSend();
+                    }}
+                    className={`flex-shrink opacity-40 transition-colors ${!plainMessage && !files?.length ? '' : 'bg-primary text-primary-contrast opacity-90 hover:opacity-100'}`}
+                    icon={PaperPlane}
+                    size="square"
+                    disabled={!plainMessage && !files?.length}
+                    onMouseDown={(e) => e.preventDefault()}
+                  />
+                </span>
+              </div>
+            </RichTextEditor>
+          </Suspense>
         </div>
       </div>
     </>
