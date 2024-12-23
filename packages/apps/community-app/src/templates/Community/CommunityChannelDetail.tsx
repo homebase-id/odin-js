@@ -64,7 +64,6 @@ export const CommunityChannelDetail = () => {
     );
   }
 
-  console.log('CommunityChannelDetail', channelId);
   if (!community || !channelDsr) return <NotFound />;
   return (
     <ErrorBoundary>

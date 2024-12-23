@@ -208,10 +208,8 @@ export const CommunityHistory = memo(
       innerScroll();
     }, [flattenedMsgs]);
 
-    if (emptyPlaceholder && isFetched && (!flattenedMsgs || flattenedMsgs.length === 0)) {
-      console.log('emptyPlaceholder', emptyPlaceholder);
+    if (emptyPlaceholder && isFetched && (!flattenedMsgs || flattenedMsgs.length === 0))
       return <>{emptyPlaceholder}</>;
-    }
 
     return (
       <>
