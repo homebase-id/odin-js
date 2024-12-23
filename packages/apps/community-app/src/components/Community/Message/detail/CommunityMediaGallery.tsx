@@ -134,7 +134,7 @@ export const CommunityMediaGallery = ({
               globalTransitId={msg.fileMetadata.globalTransitId}
               file={payload}
               canDownload={true}
-              className="h-full w-full"
+              className="h-full min-h-[inherit] w-full"
             />
           ) : null}
 
