@@ -22,17 +22,7 @@ import { useParams } from 'react-router-dom';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const CommunityHistory = memo(
-  ({
-    community,
-    channel,
-    origin,
-    doOpenThread,
-    setIsEmptyChat,
-    alignTop,
-    onlyNew,
-    emptyPlaceholder,
-    setParticipants,
-  }: {
+  (props: {
     community: HomebaseFile<CommunityDefinition> | undefined;
     channel: HomebaseFile<CommunityChannel> | undefined;
     origin?: HomebaseFile<CommunityMessage>;
@@ -43,6 +33,18 @@ export const CommunityHistory = memo(
     emptyPlaceholder?: ReactNode;
     setParticipants?: React.Dispatch<React.SetStateAction<string[] | null | undefined>>;
   }) => {
+    const {
+      community,
+      channel,
+      origin,
+      doOpenThread,
+      setIsEmptyChat,
+      alignTop,
+      onlyNew,
+      emptyPlaceholder,
+      setParticipants,
+    } = props;
+
     const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
     const scrollRef = useRef<HTMLDivElement>(null);
     const inAThread =

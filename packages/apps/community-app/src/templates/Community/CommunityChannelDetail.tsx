@@ -15,7 +15,7 @@ import {
 } from '@homebase-id/common-app';
 import { Arrow, ChatBubble, ChevronLeft, Pin } from '@homebase-id/common-app/icons';
 import { Link, NavLink, useMatch, useNavigate, useParams } from 'react-router-dom';
-import { Suspense, useCallback, useState } from 'react';
+import { memo, Suspense, useCallback, useMemo, useState } from 'react';
 import { CommunityChannel } from '../../providers/CommunityProvider';
 import { useCommunityChannel } from '../../hooks/community/channels/useCommunityChannel';
 import { createPortal } from 'react-dom';
@@ -30,6 +30,7 @@ import { CommunityMessage } from '../../providers/CommunityMessageProvider';
 
 export const CommunityChannelDetail = () => {
   const { odinKey, communityKey: communityId, channelKey: channelId, threadKey } = useParams();
+
   const { data: community, isFetched } = useCommunity({ odinId: odinKey, communityId }).fetch;
 
   const { data: channelDsr } = useCommunityChannel({
@@ -63,8 +64,8 @@ export const CommunityChannelDetail = () => {
     );
   }
 
+  console.log('CommunityChannelDetail', channelId);
   if (!community || !channelDsr) return <NotFound />;
-
   return (
     <ErrorBoundary>
       <div className="h-full w-20 flex-grow bg-background">
@@ -93,47 +94,54 @@ export const CommunityChannelDetail = () => {
   );
 };
 
-const CommunityChannelMessages = ({
-  channel,
-  community,
-}: {
-  channel: HomebaseFile<CommunityChannel>;
-  community: HomebaseFile<CommunityDefinition>;
-}) => {
-  const { odinKey, communityKey: communityId, channelKey: channelId } = useParams();
-  const navigate = useNavigate();
+const CommunityChannelMessages = memo(
+  (props: {
+    channel: HomebaseFile<CommunityChannel>;
+    community: HomebaseFile<CommunityDefinition>;
+  }) => {
+    const { channel, community } = props;
 
-  const keyDownHandler = useEditLastMessageShortcut({ community, channel });
-  const doOpenThread = useCallback(
-    (thread: HomebaseFile<CommunityMessage>) => {
-      navigate(
-        `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
-      );
-    },
-    [odinKey, communityId, channelId]
-  );
+    const { odinKey, communityKey: communityId, channelKey: channelId } = useParams();
+    const navigate = useNavigate();
 
-  return (
-    <>
-      <ErrorBoundary>
-        <CommunityHistory
-          community={community}
-          channel={channel}
-          doOpenThread={doOpenThread}
-          emptyPlaceholder={<EmptyChannel community={community} channel={channel} />}
-        />
-      </ErrorBoundary>
-      <ErrorBoundary>
-        <MessageComposer
-          community={community}
-          channel={channel}
-          key={channelId}
-          onKeyDown={keyDownHandler}
-        />
-      </ErrorBoundary>
-    </>
-  );
-};
+    const keyDownHandler = useEditLastMessageShortcut({ community, channel });
+    const doOpenThread = useCallback(
+      (thread: HomebaseFile<CommunityMessage>) => {
+        navigate(
+          `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
+        );
+      },
+      [odinKey, communityId, channelId]
+    );
+
+    const Empty = useMemo(
+      () => <EmptyChannel community={community} channel={channel} />,
+      [community, channel]
+    );
+
+    return (
+      <>
+        <ErrorBoundary>
+          <CommunityHistory
+            community={community}
+            channel={channel}
+            doOpenThread={doOpenThread}
+            emptyPlaceholder={Empty}
+          />
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <MessageComposer
+            community={community}
+            channel={channel}
+            key={channelId}
+            onKeyDown={keyDownHandler}
+          />
+        </ErrorBoundary>
+      </>
+    );
+  }
+);
+CommunityChannelMessages.displayName = 'CommunityChannelMessages';
 
 const CommunityChannelPins = ({
   channel,
