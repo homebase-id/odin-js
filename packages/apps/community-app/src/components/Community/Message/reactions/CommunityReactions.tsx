@@ -1,5 +1,5 @@
 import { HomebaseFile, ReactionBase } from '@homebase-id/js-lib/core';
-import { tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { isTouchDevice, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import {
   ActionButton,
   AuthorImage,
@@ -7,7 +7,6 @@ import {
   DialogWrapper,
   t,
   useDotYouClientContext,
-  useLongPress,
   usePortal,
 } from '@homebase-id/common-app';
 import { useCommunityReaction } from '../../../../hooks/community/reactions/useCommunityReaction';
@@ -118,21 +117,22 @@ const ReactionButton = ({
       reaction.authorOdinId === loggedOnIdentity ? t('You') : reaction.authorOdinId
     );
 
-  const clickProps = useLongPress(
-    onLongPress,
-    () => {
-      if (myReaction) removeReaction({ community, message: msg, reaction: myReaction });
-      else addReaction({ community, message: msg, reaction: emoji.emoji });
-    },
-    { shouldPreventDefault: true, delay: 300 }
-  );
-
   if (!emoji.count || emoji.count === '0') return null;
 
   return (
     <button
       className={`flex flex-row items-center gap-2 rounded-3xl border bg-background px-2 py-[0.1rem] shadow-sm hover:bg-primary hover:text-primary-contrast ${myReaction ? 'border-primary bg-primary/10 dark:bg-primary/60' : 'border-transparent'}`}
-      {...clickProps}
+      onContextMenu={(e) => {
+        if (!(isTouchDevice() && window.innerWidth < 1024)) {
+          return;
+        }
+        e.preventDefault();
+        onLongPress(e);
+      }}
+      onClick={() => {
+        if (myReaction) removeReaction({ community, message: msg, reaction: myReaction });
+        else addReaction({ community, message: msg, reaction: emoji.emoji });
+      }}
       title={`${authors?.length ? authors.join(', ') : ''} ${t('reacted with')} ${emoji.emoji}`}
     >
       <p>{emoji.emoji}</p>
