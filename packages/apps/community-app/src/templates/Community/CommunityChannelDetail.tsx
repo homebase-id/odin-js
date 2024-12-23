@@ -15,7 +15,7 @@ import {
 } from '@homebase-id/common-app';
 import { Arrow, ChatBubble, ChevronLeft, Pin } from '@homebase-id/common-app/icons';
 import { Link, NavLink, useMatch, useNavigate, useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { Suspense, useCallback, useState } from 'react';
 import { CommunityChannel } from '../../providers/CommunityProvider';
 import { useCommunityChannel } from '../../hooks/community/channels/useCommunityChannel';
 import { createPortal } from 'react-dom';
@@ -26,6 +26,7 @@ import { useEditLastMessageShortcut } from '../../hooks/community/messages/useEd
 import { useCommunityPins } from '../../hooks/community/useCommunityPin';
 import { CommunityMessageItem } from '../../components/Community/Message/item/CommunityMessageItem';
 import { MessageComposer } from '../../components/Community/Message/composer/MessageComposer';
+import { CommunityMessage } from '../../providers/CommunityMessageProvider';
 
 export const CommunityChannelDetail = () => {
   const { odinKey, communityKey: communityId, channelKey: channelId, threadKey } = useParams();
@@ -81,7 +82,9 @@ export const CommunityChannelDetail = () => {
 
           {threadKey ? (
             <ErrorBoundary>
-              <CommunityThread community={community} channel={channelDsr} threadId={threadKey} />
+              <Suspense>
+                <CommunityThread community={community} channel={channelDsr} threadId={threadKey} />
+              </Suspense>
             </ErrorBoundary>
           ) : null}
         </div>
@@ -101,6 +104,14 @@ const CommunityChannelMessages = ({
   const navigate = useNavigate();
 
   const keyDownHandler = useEditLastMessageShortcut({ community, channel });
+  const doOpenThread = useCallback(
+    (thread: HomebaseFile<CommunityMessage>) => {
+      navigate(
+        `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
+      );
+    },
+    [odinKey, communityId, channelId]
+  );
 
   return (
     <>
@@ -108,11 +119,7 @@ const CommunityChannelMessages = ({
         <CommunityHistory
           community={community}
           channel={channel}
-          doOpenThread={(thread) =>
-            navigate(
-              `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelId}/${thread.fileMetadata.appData.uniqueId}/thread`
-            )
-          }
+          doOpenThread={doOpenThread}
           emptyPlaceholder={<EmptyChannel community={community} channel={channel} />}
         />
       </ErrorBoundary>

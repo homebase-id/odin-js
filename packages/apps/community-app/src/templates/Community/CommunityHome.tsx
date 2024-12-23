@@ -1,6 +1,5 @@
 import { useParams, useMatch, useNavigate, useLocation, Navigate, Link } from 'react-router-dom';
-
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { ReactNode, Suspense, useEffect, useRef, useState } from 'react';
 import {
   ActionGroup,
   COMMUNITY_APP_ID,
@@ -128,7 +127,7 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
             <ErrorBoundary>
               <CommunityChannelNav isOnline={isOnline} />
             </ErrorBoundary>
-            {children ? <>{children}</> : null}
+            {children ? <Suspense>{children}</Suspense> : null}
           </>
         )}
       </div>

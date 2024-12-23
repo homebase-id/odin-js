@@ -130,9 +130,7 @@ export const CommunityMessageItem = memo(
           className={`group relative flex select-none flex-col transition-colors duration-500 md:select-auto ${backgroundClassName} ${className || ''}`}
           data-unique-id={msg.fileMetadata.appData.uniqueId}
           onContextMenu={(e) => {
-            if (!(isTouchDevice() && window.innerWidth < 1024)) {
-              return;
-            }
+            if (!(isTouchDevice() && window.innerWidth < 1024)) return;
 
             e.preventDefault();
             setIsTouchContextMenuOpen(true);
