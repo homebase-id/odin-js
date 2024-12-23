@@ -541,7 +541,7 @@ export const increaseCommentCountForMessage = (
     };
   }
   updatedOrigin.fileMetadata.reactionPreview.totalCommentCount += 1;
-  console.log('updatedOrigin', updatedOrigin);
+
   return insertNewMessage(
     queryClient,
     updatedOrigin,
