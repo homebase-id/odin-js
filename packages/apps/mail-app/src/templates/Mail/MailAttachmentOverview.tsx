@@ -65,6 +65,9 @@ export const AttachmentFile = ({
   const navigate = useNavigate();
   const { filter } = useParams();
 
+  const fileName =
+    (file.contentType !== 'application/vnd.apple.mpegurl' && file.descriptorContent) || file.key;
+
   return (
     <FakeAnchor
       type="mute"
@@ -92,7 +95,7 @@ export const AttachmentFile = ({
       ) : (
         <ExtensionThumbnail contentType={file.contentType} className="h-6 w-6" />
       )}
-      <span>{highlightQuery(file.descriptorContent || file.key, query)}</span>
+      <span>{highlightQuery(fileName, query)}</span>
       {children}
     </FakeAnchor>
   );
