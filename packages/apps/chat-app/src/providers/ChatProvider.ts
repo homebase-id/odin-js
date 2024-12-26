@@ -34,7 +34,7 @@ import {
   RichText,
   DEFAULT_PAYLOAD_KEY,
 } from '@homebase-id/js-lib/core';
-import { ChatDrive, UnifiedConversation } from './ConversationProvider';
+import { ChatDrive, ConversationWithYourselfId, UnifiedConversation } from './ConversationProvider';
 import {
   getNewId,
   jsonStringify64,
@@ -42,6 +42,7 @@ import {
   makeGrid,
   base64ToUint8Array,
   getRandom16ByteArray,
+  stringGuidsEqual,
 } from '@homebase-id/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
 import {
@@ -152,7 +153,12 @@ export const dsrToMessage = async (
       msgContent.deliveryDetails = buildDeliveryDetails(
         dsr.serverMetadata.transferHistory.recipients
       );
-      msgContent.deliveryStatus = buildDeliveryStatus(msgContent.deliveryDetails);
+      msgContent.deliveryStatus = stringGuidsEqual(
+        dsr.fileMetadata.appData.groupId,
+        ConversationWithYourselfId
+      )
+        ? ChatDeliveryStatus.Read
+        : buildDeliveryStatus(msgContent.deliveryDetails);
     }
 
     const chatMessage: HomebaseFile<ChatMessage> = {

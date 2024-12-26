@@ -138,8 +138,12 @@ export const useChatMessage = (props?: {
     newChat.fileId = uploadResult.file.fileId;
     newChat.fileMetadata.versionTag = uploadResult.newVersionTag;
     newChat.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
-    newChat.fileMetadata.appData.content.deliveryStatus =
-      uploadResult.chatDeliveryStatus || ChatDeliveryStatus.Sent;
+    newChat.fileMetadata.appData.content.deliveryStatus = stringGuidsEqual(
+      conversationId,
+      ConversationWithYourselfId
+    )
+      ? ChatDeliveryStatus.Read
+      : uploadResult.chatDeliveryStatus || ChatDeliveryStatus.Sent;
 
     return newChat;
   };
