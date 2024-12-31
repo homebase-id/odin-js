@@ -57,13 +57,15 @@ export const useDetailedConnectionInfo = ({ odinId }: { odinId?: string }) => {
     enabled:
       !!odinId &&
       connectionInfoQuery.isFetched &&
-      connectionInfoQuery.data?.status.toLowerCase() !== 'connected',
+      connectionInfoQuery.data?.status.toLowerCase() !== 'connected' &&
+      connectionInfoQuery.data?.status.toLowerCase() !== 'blocked',
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   return {
     fetch:
       connectionInfoQuery.data?.status.toLowerCase() === 'connected' ||
+      connectionInfoQuery.data?.status.toLowerCase() === 'blocked' ||
       !connectionInfoQuery.isFetched
         ? connectionInfoQuery
         : detailedConnectionInfoQuery,
