@@ -428,18 +428,21 @@ const DirectMessageItem = ({
       className={`flex flex-row gap-2 rounded-md px-2 py-[0.15rem] ${unreadCount ? 'font-bold' : ''} ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`}`}
     >
       <ConnectionImage odinId={recipient} size="xxs" className="flex-shrink-0" />
-      <span className="my-auto flex w-full flex-grow flex-row flex-wrap items-center">
+      <span className="my-auto flex w-20 flex-grow flex-row flex-wrap items-center">
         <p className="mr-1 leading-tight">
           <ConnectionName odinId={recipient} />
-          {isYou ? null : <ProfileStatus odinId={recipient} className="ml-1" />}
         </p>
-        {isYou ? <span className="text-sm leading-tight text-slate-400">{t('you')}</span> : null}
+        {isYou ? (
+          <span className="text-sm leading-tight text-slate-400">{t('you')}</span>
+        ) : (
+          <ProfileStatus odinId={recipient} className="ml-1" />
+        )}
         {unreadCount ? (
           <span className="ml-auto flex h-6 w-6 items-center justify-center rounded-full bg-primary text-sm text-primary-contrast">
             {unreadCount}
           </span>
         ) : isYou ? (
-          <MyProfileStatus className="ml-auto" />
+          <MyProfileStatus className="ml-1" />
         ) : null}
       </span>
     </Link>

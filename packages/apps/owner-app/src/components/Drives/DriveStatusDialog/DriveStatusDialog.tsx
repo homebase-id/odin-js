@@ -1,4 +1,4 @@
-import { usePortal, DialogWrapper, ActionButton, t } from '@homebase-id/common-app';
+import { usePortal, DialogWrapper, ActionButton, t, bytesToSize } from '@homebase-id/common-app';
 import { Arrow } from '@homebase-id/common-app/icons';
 import { TargetDrive } from '@homebase-id/js-lib/core';
 import { createPortal } from 'react-dom';
@@ -75,7 +75,7 @@ export const DriveStatusDialog = ({
             </p>
             <p>
               <span className="block text-slate-400">{t('Total size')}</span>
-              {outboxStatus?.sizeInfo?.size}
+              {outboxStatus?.sizeInfo?.size ? bytesToSize(outboxStatus.sizeInfo.size) : '0 B'}
             </p>
           </div>
         </div>

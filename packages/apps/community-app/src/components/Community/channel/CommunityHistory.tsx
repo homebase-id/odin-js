@@ -271,6 +271,7 @@ export const CommunityHistory = memo(
                   >
                     <DateSeperator previousDate={previousDate} date={currentDate} />
                     <CommunityMessageItem
+                      scrollRef={scrollRef}
                       key={msg.fileId || msg.fileMetadata.appData.uniqueId}
                       msg={msg}
                       community={community}

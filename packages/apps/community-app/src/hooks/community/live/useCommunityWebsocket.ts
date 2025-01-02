@@ -54,7 +54,7 @@ export const useCommunityWebsocket = (
             true
           );
           if (!communityMetadata) {
-            console.warn('[CommunityWebsocket] Invalid channel received', notification);
+            console.warn('[CommunityWebsocket] Invalid community metadata received', notification);
             return;
           }
           insertNewcommunityMetadata(queryClient, communityMetadata);

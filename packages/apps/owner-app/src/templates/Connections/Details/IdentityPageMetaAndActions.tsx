@@ -76,7 +76,6 @@ export const IdentityPageMetaAndActions = ({ odinId }: { odinId: string }) => {
   });
 
   const isFollowing = !followStateFetched ? undefined : !!identityIfollow;
-
   // Contact data:
   const { data: contactData } = useContact({
     odinId: odinId,

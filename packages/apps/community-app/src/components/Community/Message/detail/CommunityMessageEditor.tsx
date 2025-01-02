@@ -1,12 +1,21 @@
-import { HomebaseFile } from '@homebase-id/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, HomebaseFile } from '@homebase-id/js-lib/core';
 
-import { ActionButton, ErrorNotification, t, useAllContacts } from '@homebase-id/common-app';
+import {
+  ActionButton,
+  ErrorNotification,
+  t,
+  useAllContacts,
+  useContentFromPayload,
+} from '@homebase-id/common-app';
 
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 
 import { isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
-import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
+import {
+  CommunityDefinition,
+  getTargetDriveFromCommunityId,
+} from '../../../../providers/CommunityDefinitionProvider';
 import { useCommunityMessage } from '../../../../hooks/community/messages/useCommunityMessage';
 const RichTextEditor = lazy(() =>
   import('@homebase-id/rich-text-editor').then((rootExport) => ({
@@ -22,9 +31,38 @@ export const CommunityMessageEditor = ({
   community: HomebaseFile<CommunityDefinition>;
   onClose: () => void;
 }) => {
+  const hasMoreContent = msg.fileMetadata.payloads?.some(
+    (payload) => payload.key === DEFAULT_PAYLOAD_KEY
+  );
+
   const messageContent = msg.fileMetadata.appData.content;
 
-  const [message, setMessage] = useState(messageContent.message);
+  const { data: fullMessageContent, isFetching: fetchingMoreContent } =
+    useContentFromPayload<CommunityMessage>(
+      hasMoreContent && community
+        ? {
+            odinId: community?.fileMetadata.senderOdinId,
+            targetDrive: getTargetDriveFromCommunityId(
+              community.fileMetadata.appData.uniqueId as string
+            ),
+            fileId: msg.fileId,
+            payloadKey: DEFAULT_PAYLOAD_KEY,
+            lastModified: msg.fileMetadata.payloads?.find(
+              (pyld) => pyld.key === DEFAULT_PAYLOAD_KEY
+            )?.lastModified,
+            systemFileType: msg.fileSystemType,
+          }
+        : undefined
+    );
+
+  const [message, setMessage] = useState(
+    hasMoreContent ? fullMessageContent?.message : messageContent.message
+  );
+  useEffect(
+    () => setMessage(hasMoreContent ? fullMessageContent?.message : messageContent.message),
+    [fullMessageContent]
+  );
+
   const {
     mutate: updateChatMessage,
     status: updateStatus,
@@ -79,6 +117,8 @@ export const CommunityMessageEditor = ({
     filteredContacts.push({ key: '@channel', text: '@channel' });
     return filteredContacts;
   }, [contacts]);
+
+  if (hasMoreContent && fetchingMoreContent) return <div>{t('Loading')}...</div>;
 
   return (
     <div>

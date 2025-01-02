@@ -7,6 +7,7 @@ import {
   COMMUNITY_ROOT_PATH,
   ActionButton,
   useContentFromPayload,
+  useLongPress,
 } from '@homebase-id/common-app';
 import { DEFAULT_PAYLOAD_KEY, HomebaseFile, RichText } from '@homebase-id/js-lib/core';
 import {
@@ -48,6 +49,7 @@ export const CommunityMessageItem = memo(
     hideThreads?: boolean;
     showChannelName?: boolean;
     className?: string;
+    scrollRef?: React.RefObject<HTMLDivElement>;
   }) => {
     const {
       msg,
@@ -57,6 +59,7 @@ export const CommunityMessageItem = memo(
       hideThreads,
       showChannelName,
       className,
+      scrollRef,
     } = props;
 
     const hasMedia = !!msg.fileMetadata.payloads?.filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY)
@@ -117,6 +120,18 @@ export const CommunityMessageItem = memo(
       return `bg-background ${!isTouchDevice() ? 'hover:bg-page-background' : ''}`;
     })();
 
+    const clickProps = useLongPress(
+      (e) => {
+        if (!(isTouchDevice() && window.innerWidth < 1024)) return;
+
+        e.preventDefault();
+        setIsTouchContextMenuOpen(true);
+      },
+      undefined,
+      { shouldPreventDefault: true },
+      scrollRef
+    );
+
     return (
       <>
         {isMediaDetail ? (
@@ -129,12 +144,7 @@ export const CommunityMessageItem = memo(
         <div
           className={`group relative flex select-none flex-col transition-colors duration-500 md:select-auto ${backgroundClassName} ${className || ''}`}
           data-unique-id={msg.fileMetadata.appData.uniqueId}
-          onContextMenu={(e) => {
-            if (!(isTouchDevice() && window.innerWidth < 1024)) return;
-
-            e.preventDefault();
-            setIsTouchContextMenuOpen(true);
-          }}
+          {...clickProps}
         >
           {showChannelName && !hideDetails ? (
             <Link
@@ -198,9 +208,17 @@ export const CommunityMessageItem = memo(
               ) : (
                 <>
                   {hasMedia ? (
-                    <CommunityMediaMessageBody msg={msg} community={community} />
+                    <CommunityMediaMessageBody
+                      msg={msg}
+                      community={community}
+                      scrollRef={scrollRef}
+                    />
                   ) : (
-                    <CommunityTextMessageBody msg={msg} community={community} />
+                    <CommunityTextMessageBody
+                      msg={msg}
+                      community={community}
+                      scrollRef={scrollRef}
+                    />
                   )}
                 </>
               )}
@@ -219,9 +237,11 @@ CommunityMessageItem.displayName = 'CommunityMessageItem';
 const CommunityTextMessageBody = ({
   msg,
   community,
+  scrollRef,
 }: {
   msg: HomebaseFile<CommunityMessage>;
   community?: HomebaseFile<CommunityDefinition>;
+  scrollRef?: React.RefObject<HTMLDivElement>;
 }) => {
   const [loadMore, setLoadMore] = useState(false);
 
@@ -271,7 +291,7 @@ const CommunityTextMessageBody = ({
           ) : null}
         </div>
       </div>
-      <CommunityReactions msg={msg} community={community} />
+      <CommunityReactions msg={msg} community={community} scrollRef={scrollRef} />
     </div>
   );
 };
@@ -369,9 +389,11 @@ const MessageTextRenderer = ({
 const CommunityMediaMessageBody = ({
   msg,
   community,
+  scrollRef,
 }: {
   msg: HomebaseFile<CommunityMessage>;
   community?: HomebaseFile<CommunityDefinition>;
+  scrollRef?: React.RefObject<HTMLDivElement>;
 }) => {
   const content = msg.fileMetadata.appData.content;
   const hasACaption = !!content.message;
@@ -421,7 +443,7 @@ const CommunityMediaMessageBody = ({
         communityId={community?.fileMetadata.appData.uniqueId as string}
         odinId={community?.fileMetadata.senderOdinId as string}
       />
-      <CommunityReactions msg={msg} community={community} />
+      <CommunityReactions msg={msg} community={community} scrollRef={scrollRef} />
     </div>
   );
 };

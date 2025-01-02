@@ -172,7 +172,8 @@ const ReconnectSocket = async (
       subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
 
       resolve();
-    }, 5000);
+      // We can't make a proper reconnect backoff here, as we don't have a way to know if the connection was closed due to network issues or not
+    }, 100);
   });
 };
 

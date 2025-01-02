@@ -50,7 +50,9 @@ export const MailAttachmentsInfo = ({
   const groupedWithFileName = allAttachmentsChronologically.reduce(
     (acc, file) => {
       if (!file) return acc;
-      const fileName = file.descriptorContent || file.key;
+      const fileName =
+        (file.contentType !== 'application/vnd.apple.mpegurl' && file.descriptorContent) ||
+        file.key;
       if (!acc[fileName]) acc[fileName] = [];
       acc[fileName].push(file);
       return acc;
@@ -155,7 +157,8 @@ export const AttachmentFile = ({ file }: { file: ExtendedFile }) => {
   const identity = dotYouClient.getHostIdentity();
   const navigate = useNavigate();
   const { filter } = useParams();
-
+  const fileName =
+    (file.contentType !== 'application/vnd.apple.mpegurl' && file.descriptorContent) || file.key;
   return (
     <FakeAnchor
       type="mute"
@@ -184,7 +187,7 @@ export const AttachmentFile = ({ file }: { file: ExtendedFile }) => {
       )}
 
       <div className="flex flex-col">
-        {file.descriptorContent || file.key}
+        {fileName}
         <p className="text-sm text-slate-400">
           {bytesToSize(file.bytesWritten)}
           <span className="ml-1 border-l border-slate-400 pl-1">
