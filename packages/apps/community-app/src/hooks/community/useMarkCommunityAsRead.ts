@@ -39,8 +39,9 @@ export const useMarkCommunityAsRead = ({
       lastUpdate === 0 ||
       updateStatus === 'pending' ||
       updateStatus === 'error'
-    )
+    ) {
       return;
+    }
 
     const savedLastReadTime = metadata?.fileMetadata.appData.content.lastReadTime;
     const savedLastReadTimeChannel =
@@ -52,8 +53,9 @@ export const useMarkCommunityAsRead = ({
       (!channelId || (savedLastReadTimeChannel && savedLastReadTimeChannel >= lastUpdate)) &&
       (!lastUpdatedThreads ||
         lastUpdatedThreads <= metadata?.fileMetadata.appData.content.threadsLastReadTime)
-    )
+    ) {
       return;
+    }
 
     updateMetadata({
       metadata: {
