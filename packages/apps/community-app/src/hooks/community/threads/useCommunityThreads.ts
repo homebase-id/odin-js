@@ -53,6 +53,8 @@ export const useCommunityThreads = ({
 
     const allThreadMeta = await Promise.all(
       (threadOrigins.filter(Boolean) as HomebaseFile<CommunityMessage>[]).map(async (origin) => {
+        if (!origin.fileMetadata.reactionPreview?.totalCommentCount) return;
+
         const replies = await queryClient.fetchInfiniteQuery(
           getCommunityMessagesInfiniteQueryOptions(
             dotYouClient,
