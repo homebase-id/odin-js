@@ -128,7 +128,7 @@ export const CommunityMessageItem = memo(
         setIsTouchContextMenuOpen(true);
       },
       undefined,
-      { shouldPreventDefault: true },
+      { shouldPreventDefault: false },
       scrollRef
     );
 

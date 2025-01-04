@@ -220,7 +220,10 @@ export const ReactionsBar = forwardRef(
           <button
             className="flex-shrink-0 scale-100 rounded-full p-2 text-slate-400 text-center hover:bg-slate-300 hover:dark:bg-slate-700"
             title={t('Others')}
-            onClick={() => setIsCustomOpen(true)}
+            onClick={() => {
+              setIsCustomOpen(true);
+              console.log('clicked');
+            }}
             ref={wrapperRef}
           >
             <Emojis className="h-5 w-5" />
