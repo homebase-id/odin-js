@@ -53,6 +53,8 @@ export const useCommunityThreads = ({
 
     const allThreadMeta = await Promise.all(
       (threadOrigins.filter(Boolean) as HomebaseFile<CommunityMessage>[]).map(async (origin) => {
+        if (!origin.fileMetadata.reactionPreview?.totalCommentCount) return;
+
         const replies = await queryClient.fetchInfiniteQuery(
           getCommunityMessagesInfiniteQueryOptions(
             dotYouClient,
@@ -84,9 +86,9 @@ export const useCommunityThreads = ({
       })
     );
 
-    return allThreadMeta
-      .filter((meta) => meta.participants.includes(identity))
-      .sort((a, b) => b.lastMessageCreated - a.lastMessageCreated);
+    return (
+      allThreadMeta.filter((meta) => meta && meta.participants.includes(identity)) as ThreadMeta[]
+    ).sort((a, b) => b.lastMessageCreated - a.lastMessageCreated);
   };
 
   return useQuery({

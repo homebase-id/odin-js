@@ -60,15 +60,15 @@ export const useLongPress = (
     [shouldPreventDefault, onClick, longPressTriggered]
   );
 
-  // if (/iPad|iPhone|iPod/i.test(navigator.platform)) {
-  return {
-    onMouseDown: (e: React.MouseEvent<HTMLElement>) => start(e),
-    onTouchStart: (e: React.TouchEvent<HTMLElement>) => start(e),
-    onMouseUp: (e: React.MouseEvent<HTMLElement>) => clear(e),
-    onTouchEnd: (e: React.TouchEvent<HTMLElement>) => clear(e),
-    onMouseLeave: (e: React.MouseEvent<HTMLElement>) => clear(e, false),
-  };
-  // }
+  if (/iPad|iPhone|iPod/i.test(navigator.platform)) {
+    return {
+      onMouseDown: (e: React.MouseEvent<HTMLElement>) => start(e),
+      onTouchStart: (e: React.TouchEvent<HTMLElement>) => start(e),
+      onMouseUp: (e: React.MouseEvent<HTMLElement>) => clear(e),
+      onTouchEnd: (e: React.TouchEvent<HTMLElement>) => clear(e),
+      onMouseLeave: (e: React.MouseEvent<HTMLElement>) => clear(e, false),
+    };
+  }
 
   // Only for non-iOS devices we can use a normal onContextMenu
   return {
