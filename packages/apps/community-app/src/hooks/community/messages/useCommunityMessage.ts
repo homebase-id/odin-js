@@ -161,9 +161,11 @@ export const useCommunityMessage = (props?: {
   const updateMessage = async ({
     updatedChatMessage,
     community,
+    storeBackup,
   }: {
     updatedChatMessage: HomebaseFile<CommunityMessage>;
     community: HomebaseFile<CommunityDefinition>;
+    storeBackup?: boolean;
   }) => {
     const transformedMessage = {
       ...updatedChatMessage,
@@ -178,7 +180,13 @@ export const useCommunityMessage = (props?: {
       );
     }
 
-    await updateCommunityMessage(dotYouClient, community, transformedMessage);
+    await updateCommunityMessage(
+      dotYouClient,
+      community,
+      transformedMessage,
+      undefined,
+      storeBackup
+    );
   };
 
   return {
