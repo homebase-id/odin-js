@@ -34,7 +34,7 @@ export const useCommunityCollaborativeMsg = ({
             },
           },
           community,
-          storeBackup: true,
+          storeBackup: !isCollaborative,
         });
       },
       updateProps,
