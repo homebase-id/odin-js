@@ -1,17 +1,18 @@
 import { useCommunity } from '../../hooks/community/useCommunity';
 import { ErrorBoundary, LoadingBlock, t, COMMUNITY_ROOT_PATH } from '@homebase-id/common-app';
 import { Link, useParams } from 'react-router-dom';
-import { CommunityThread } from '../../components/Community/CommunityThread';
-import { memo } from 'react';
+import { memo, useRef } from 'react';
 import { ChatBubble, ChevronLeft } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import { useCommunityThreads } from '../../hooks/community/threads/useCommunityThreads';
 import { CommunityThreadCatchup } from '../../components/Community/catchup/CommunityThreadCatchup';
 import { useMarkCommunityAsRead } from '../../hooks/community/useMarkCommunityAsRead';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 export const CommunityThreadsCatchup = memo(() => {
-  const { odinKey, communityKey: communityId, threadKey } = useParams();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { odinKey, communityKey: communityId } = useParams();
   const { data: community, isFetched } = useCommunity({ odinId: odinKey, communityId }).fetch;
 
   useMarkCommunityAsRead({ odinId: odinKey, communityId, threads: true });
@@ -20,6 +21,15 @@ export const CommunityThreadsCatchup = memo(() => {
     odinId: odinKey,
     communityId: communityId,
   });
+
+  const virtualizer = useVirtualizer({
+    getScrollElement: () => scrollRef.current,
+    count: flatThreadMetas?.length || 0,
+    estimateSize: () => 500,
+    overscan: 2,
+    getItemKey: (index) => flatThreadMetas?.[index]?.threadId || index,
+  });
+  const items = virtualizer.getVirtualItems();
 
   if (!isFetched || !fetchedThreads) {
     return (
@@ -36,7 +46,7 @@ export const CommunityThreadsCatchup = memo(() => {
     );
   }
 
-  if (!community || !flatThreadMetas)
+  if (!community)
     return (
       <div className="flex h-full flex-grow flex-col items-center justify-center">
         <p className="text-4xl">Homebase Community</p>
@@ -53,24 +63,47 @@ export const CommunityThreadsCatchup = memo(() => {
               {!flatThreadMetas?.length ? (
                 <p className="m-auto text-lg">{t('No threads found')}</p>
               ) : (
-                <div className="flex h-20 flex-grow flex-col gap-3 overflow-auto p-3">
-                  {flatThreadMetas?.map((threadMeta) => (
-                    <CommunityThreadCatchup
-                      community={community}
-                      threadMeta={threadMeta}
-                      key={threadMeta.threadId}
-                    />
-                  ))}
+                <div
+                  className="relative flex h-20 flex-grow flex-col overflow-auto p-3"
+                  ref={scrollRef}
+                >
+                  <div
+                    className="relative w-full flex-shrink-0 flex-grow-0 overflow-hidden"
+                    style={{
+                      height: virtualizer.getTotalSize(),
+                    }}
+                  >
+                    <div
+                      className="absolute left-0 top-0 flex h-full w-full flex-col"
+                      style={{
+                        transform: `translateY(${items[0]?.start ?? 0}px)`,
+                      }}
+                    >
+                      {items.map((item) => {
+                        const threadMeta = flatThreadMetas?.[item.index];
+                        return (
+                          <div
+                            key={item.key}
+                            data-index={item.index}
+                            ref={virtualizer.measureElement}
+                            className="flex-shrink-0 pb-3 last-of-type:pb-0"
+                          >
+                            {threadMeta ? (
+                              <CommunityThreadCatchup
+                                community={community}
+                                threadMeta={threadMeta}
+                                key={threadMeta.threadId}
+                              />
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
           </div>
-
-          {threadKey ? (
-            <ErrorBoundary>
-              <CommunityThread community={community} channel={undefined} threadId={threadKey} />
-            </ErrorBoundary>
-          ) : null}
         </div>
       </div>
     </ErrorBoundary>
