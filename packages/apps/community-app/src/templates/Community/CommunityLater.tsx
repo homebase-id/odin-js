@@ -113,7 +113,11 @@ const SavedMessage = ({
     <>
       <ErrorNotification error={toggleSaveError} />
 
-      <Link to={link} className="group border-b px-2 py-3 hover:bg-page-background md:px-3">
+      <Link
+        to={link}
+        className="group border-b px-2 py-3 hover:bg-page-background md:px-3"
+        style={{ order: new Date().getTime() - msg.fileMetadata.created }}
+      >
         <p className="mb-2 text-sm text-slate-400">
           #{channel?.fileMetadata.appData.content.title}
         </p>

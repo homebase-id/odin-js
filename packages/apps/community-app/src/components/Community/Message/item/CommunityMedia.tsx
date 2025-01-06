@@ -14,9 +14,10 @@ import {
   useDarkMode,
   LinkPreviewItem,
   useDotYouClientContext,
+  COMMUNITY_ROOT_PATH,
 } from '@homebase-id/common-app';
 import { Triangle } from '@homebase-id/common-app/icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import {
   COMMUNITY_LINKS_PAYLOAD_KEY,
@@ -36,6 +37,7 @@ export const CommunityMedia = ({
   const payloads = msg.fileMetadata.payloads?.filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY);
   const isGallery = payloads && payloads.length >= 2;
   const navigate = useNavigate();
+  const { odinKey, communityKey, channelKey } = useParams();
 
   if (!payloads?.length) return null;
   if (isGallery) return <MediaGallery odinId={odinId} communityId={communityId} msg={msg} />;
@@ -49,7 +51,11 @@ export const CommunityMedia = ({
       fileLastModified={msg.fileMetadata.updated}
       payload={payloads[0]}
       fit={'contain'}
-      onClick={() => navigate(`${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`)}
+      onClick={() =>
+        navigate(
+          `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey}/${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`
+        )
+      }
       previewThumbnail={isGallery ? undefined : msg.fileMetadata.appData.previewThumbnail}
       className={`my-1 max-h-[35rem] max-w-xs overflow-hidden rounded-lg`}
     />
