@@ -145,11 +145,6 @@ export const CommunityHistory = memo(
           element.removeEventListener('scrollend', endHandler);
         };
       },
-      onChange: (state) => {
-        if (inAThread) return;
-        console.log('onChange', state.getTotalSize(), state.getVirtualItems());
-        console.log(scrollRef.current?.scrollTop);
-      },
       scrollToFn: (offset, { adjustments, behavior }, instance) => {
         const toOffest = (offset + (adjustments || 0)) * -1;
 
@@ -159,7 +154,6 @@ export const CommunityHistory = memo(
       initialOffset: 0,
       overscan: 10,
       getItemKey: (index) => flattenedMsgs[index]?.fileId || `loader-${index}`,
-      debug: true,
     });
 
     const items = virtualizer.getVirtualItems();
