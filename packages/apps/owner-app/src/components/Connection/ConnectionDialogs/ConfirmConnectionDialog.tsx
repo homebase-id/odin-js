@@ -33,7 +33,7 @@ const ConfirmConnectionDialog = ({
   const { data: connectionInfo } = useDetailedConnectionInfo({ odinId: odinId }).fetch;
 
   const {
-    confirmAutoConnection: { mutate: confirmIntroduction, status: confirmIntroductionState },
+    confirmAutoConnection: { mutateAsync: confirmIntroduction, status: confirmIntroductionState },
   } = useManageAutoConnection({ odinId: odinId });
 
   const {
@@ -75,7 +75,7 @@ const ConfirmConnectionDialog = ({
                   autoFollow: shouldFollow,
                 });
 
-                // BE is slow at confirming the introduction, so we need to wait before providing grants
+                // BE can be slow at confirming the introduction, so we need to wait before providing grants
                 await new Promise<void>((resolve) => setTimeout(() => resolve(), 1000));
 
                 for (const circleToProvide of circleGrants) {
