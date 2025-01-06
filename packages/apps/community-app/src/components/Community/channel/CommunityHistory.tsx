@@ -123,20 +123,43 @@ export const CommunityHistory = memo(
         const element = instance.scrollElement;
         if (!element) return;
 
-        // Math.abs as the element.scrollTop will be negative with the flex-col-reverse container
-        const handler = () => cb(Math.abs(element.scrollTop));
+        const createHandler = (isScrolling: boolean) => () => {
+          // Math.abs as the element.scrollTop will be negative with the flex-col-reverse container
+          cb(Math.abs(element.scrollTop), isScrolling);
+        };
 
         // Start scroll is always 0, as the flex-col-reverse contents start at the bottom
-        cb(0);
+        cb(0, false);
 
+        const handler = createHandler(true);
+        const endHandler = createHandler(false);
         element.addEventListener('scroll', handler, {
           passive: true,
         });
-        return () => element.removeEventListener('scroll', handler);
+        element.addEventListener('scrollend', endHandler, {
+          passive: true,
+        });
+
+        return () => {
+          element.removeEventListener('scroll', handler);
+          element.removeEventListener('scrollend', endHandler);
+        };
+      },
+      onChange: (state) => {
+        if (inAThread) return;
+        console.log('onChange', state.getTotalSize(), state.getVirtualItems());
+        console.log(scrollRef.current?.scrollTop);
+      },
+      scrollToFn: (offset, { adjustments, behavior }, instance) => {
+        const toOffest = (offset + (adjustments || 0)) * -1;
+
+        instance.scrollElement?.scrollTo({ top: toOffest, behavior });
+        setTimeout(() => instance.scrollElement?.scrollTo({ top: toOffest, behavior }), 0);
       },
       initialOffset: 0,
       overscan: 10,
       getItemKey: (index) => flattenedMsgs[index]?.fileId || `loader-${index}`,
+      debug: true,
     });
 
     const items = virtualizer.getVirtualItems();
@@ -191,7 +214,7 @@ export const CommunityHistory = memo(
       if (chatIndex === -1) return;
       const innerScroll = () => {
         setScrollAttempt((scrollAttempt) => {
-          const [rawOffset] = virtualizer.getOffsetForIndex(chatIndex);
+          const [rawOffset] = virtualizer.getOffsetForIndex(chatIndex) || [0];
           const offset = rawOffset * -1;
 
           const scrollTop = scrollRef.current?.scrollTop;
@@ -218,6 +241,7 @@ export const CommunityHistory = memo(
           className={`flex w-full ${alignTop ? '' : 'flex-grow'} faded-scrollbar flex-col-reverse overflow-auto py-0 sm:py-1 lg:py-5`}
           ref={scrollRef}
           key={channel?.fileId || community?.fileId}
+          style={{ overflowAnchor: 'none' }}
           data-query-group-id={
             origin?.fileMetadata.globalTransitId ||
             channel?.fileMetadata?.appData?.uniqueId ||
