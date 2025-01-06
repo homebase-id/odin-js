@@ -8,6 +8,7 @@ import {
   ActionButton,
   useContentFromPayload,
   useLongPress,
+  ConnectionName,
 } from '@homebase-id/common-app';
 import { DEFAULT_PAYLOAD_KEY, HomebaseFile, RichText } from '@homebase-id/js-lib/core';
 import {
@@ -368,13 +369,14 @@ const MessageTextRenderer = ({
                 target="_blank"
                 rel="noreferrer noopener"
                 className="break-words text-primary hover:underline"
+                data-tooltip={`@${attributes.value.replaceAll('@', '')}`}
               >
-                @{attributes.value.replaceAll('@', '')}
+                @<ConnectionName odinId={attributes.value.replaceAll('@', '')} />
               </a>
             );
           else
             return (
-              <span className="break-all text-primary">
+              <span className="break-all font-semibold" data-tooltip={attributes.value}>
                 @{attributes.value.replaceAll('@', '')}
               </span>
             );
