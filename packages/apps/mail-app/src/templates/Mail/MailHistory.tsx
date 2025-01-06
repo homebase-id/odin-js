@@ -58,28 +58,36 @@ export const MailHistory = ({
       const element = instance.scrollElement;
       if (!element) return;
 
-      // Math.abs as the element.scrollTop will be negative with the flex-col-reverse container
-      const handler = () => cb(Math.abs(element.scrollTop));
-      // Start scroll is always 0, as flex-col-reverse starts at the bottom
-      cb(0);
+      const createHandler = (isScrolling: boolean) => () => {
+        // Math.abs as the element.scrollTop will be negative with the flex-col-reverse container
+        cb(Math.abs(element.scrollTop), isScrolling);
+      };
 
+      // Start scroll is always 0, as the flex-col-reverse contents start at the bottom
+      cb(0, false);
+
+      const handler = createHandler(true);
+      const endHandler = createHandler(false);
       element.addEventListener('scroll', handler, {
         passive: true,
       });
+      element.addEventListener('scrollend', endHandler, {
+        passive: true,
+      });
 
-      return () => element.removeEventListener('scroll', handler);
+      return () => {
+        element.removeEventListener('scroll', handler);
+        element.removeEventListener('scrollend', endHandler);
+      };
     },
     initialOffset: 0,
     overscan: 5,
     getItemKey: (index) => mailThread[index]?.fileId || `loader-${index}`,
-    scrollToFn(offset, options, instance) {
-      const element = instance.scrollElement;
-      if (!element) return;
+    scrollToFn: (offset, { adjustments, behavior }, instance) => {
+      const toOffest = (offset + (adjustments || 0)) * -1;
 
-      const toOffset = (offset + (options.adjustments || 0)) * -1;
-      instance.scrollElement?.scrollTo?.({
-        [instance.options.horizontal ? 'left' : 'top']: toOffset,
-      });
+      instance.scrollElement?.scrollTo({ top: toOffest, behavior });
+      setTimeout(() => instance.scrollElement?.scrollTo({ top: toOffest, behavior }), 0);
     },
   });
 
