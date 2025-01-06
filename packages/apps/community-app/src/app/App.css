@@ -38,3 +38,36 @@
 .faded-scrollbar::-webkit-scrollbar-track {
   background-color: rgba(0, 0, 0, 0);
 }
+
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]:after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 0.3rem); /* put it on the top */
+  background-color: rgba(var(--color-page-background));
+  border-radius: 0.2rem;
+  border: 1px solid rgba(var(--color-foreground) / 0.1);
+  font-size: 0.9rem;
+  padding: 0.05rem 0.2rem;
+  color: rgba(var(--color-foreground));
+  width: max-content;
+  opacity: 0;
+  -webkit-transition: opacity 0.3s ease-in-out;
+
+  --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000),
+    var(--tw-shadow);
+}
+[data-tooltip-dir='left']:after {
+  right: calc(100% + 0.3rem);
+  left: auto;
+}
+
+[data-tooltip]:hover:after {
+  opacity: 1;
+}

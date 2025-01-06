@@ -143,7 +143,7 @@ const ReactionButton = ({
     <button
       className={`flex flex-row items-center gap-2 rounded-3xl border bg-background px-2 py-[0.1rem] shadow-sm hover:bg-primary hover:text-primary-contrast ${myReaction ? 'border-primary bg-primary/10 dark:bg-primary/60' : 'border-transparent'}`}
       {...clickProps}
-      title={`${authors?.length ? authors.join(', ') : ''} ${t('reacted with')} ${emoji.emoji}`}
+      data-tooltip={`${authors?.length ? authors.join(', ') : ''} ${t('reacted with')} ${emoji.emoji}`}
     >
       <p>{emoji.emoji}</p>
       <p className="text-sm">{emoji.count}</p>

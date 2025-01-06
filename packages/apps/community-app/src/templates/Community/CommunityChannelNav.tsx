@@ -429,9 +429,9 @@ const DirectMessageItem = ({
     >
       <ConnectionImage odinId={recipient} size="xxs" className="flex-shrink-0" />
       <span className="my-auto flex w-20 flex-grow flex-row flex-wrap items-center">
-        <p className="mr-1 leading-tight">
+        <span className="mr-1 leading-tight">
           <ConnectionName odinId={recipient} />
-        </p>
+        </span>
         {isYou ? (
           <span className="text-sm leading-tight text-slate-400">{t('you')}</span>
         ) : (

@@ -26,7 +26,9 @@ export const MyProfileStatus = ({ className }: { className?: string }) => {
   const {
     get: { data: myStatus, isFetched },
   } = useMyStatus({ community });
-  const hasStatus = myStatus?.emoji || myStatus?.status;
+  const hasStatus =
+    (myStatus?.emoji || myStatus?.status) &&
+    (!myStatus?.validTill || new Date(myStatus.validTill) > new Date());
 
   if (!community || !isFetched) return null;
 
@@ -43,7 +45,8 @@ export const MyProfileStatus = ({ className }: { className?: string }) => {
           e.stopPropagation();
           setManageStatusDialogOpen(true);
         }}
-        title={
+        data-tooltip-dir="left"
+        data-tooltip={
           hasStatus
             ? `"${myStatus?.status || myStatus?.emoji}" ${myStatus?.validTill ? `${t('till')} ${formatDateExludingYearIfCurrent(new Date(myStatus.validTill))}` : ''}`
             : undefined
@@ -77,7 +80,8 @@ export const ProfileStatus = ({ odinId, className }: { odinId: string; className
 
   return (
     <span
-      title={
+      data-tooltip-dir="left"
+      data-tooltip={
         hasStatus
           ? `"${myStatus?.status || myStatus?.emoji}" ${myStatus?.validTill ? `${t('till')} ${formatDateExludingYearIfCurrent(new Date(myStatus.validTill))}` : ''}`
           : undefined
@@ -102,10 +106,12 @@ export const StatusDialog = ({
     get: { data: myStatus, isFetched },
     set: { mutate: setStatus, status: saveStatus },
   } = useMyStatus({ community });
-  const [draftStatus, setDraftStatus] = useState(myStatus);
+  const [draftStatus, setDraftStatus] = useState(
+    (myStatus && { ...myStatus, validTill: undefined }) || undefined
+  );
 
   useEffect(() => {
-    if (isFetched) setDraftStatus(myStatus);
+    if (isFetched) setDraftStatus({ ...myStatus, validTill: undefined });
   }, [isFetched, myStatus]);
   useEffect(() => {
     if (saveStatus === 'success') onClose();
@@ -122,7 +128,13 @@ export const StatusDialog = ({
 
     setStatus({
       community,
-      status: draftStatus,
+      status: {
+        ...draftStatus,
+        validTill:
+          draftStatus.validTill && draftStatus.validTill > new Date().getTime()
+            ? draftStatus.validTill
+            : undefined,
+      },
     });
   };
 
