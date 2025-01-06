@@ -17,6 +17,7 @@ import { useCommunity } from '../../../hooks/community/useCommunity';
 import { useParams } from 'react-router-dom';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
+import { CommunityStatus } from '../../../providers/CommunityStatusProvider';
 
 export const MyProfileStatus = ({ className }: { className?: string }) => {
   const { odinKey, communityKey } = useParams();
@@ -106,7 +107,7 @@ export const StatusDialog = ({
     get: { data: myStatus, isFetched },
     set: { mutate: setStatus, status: saveStatus },
   } = useMyStatus({ community });
-  const [draftStatus, setDraftStatus] = useState(
+  const [draftStatus, setDraftStatus] = useState<CommunityStatus | undefined>(
     (myStatus && { ...myStatus, validTill: undefined }) || undefined
   );
 
