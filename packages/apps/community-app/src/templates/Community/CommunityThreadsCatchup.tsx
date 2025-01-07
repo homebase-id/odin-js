@@ -26,7 +26,7 @@ export const CommunityThreadsCatchup = memo(() => {
     getScrollElement: () => scrollRef.current,
     count: flatThreadMetas?.length || 0,
     estimateSize: () => 500,
-    overscan: 2,
+    overscan: 5,
     getItemKey: (index) => flatThreadMetas?.[index]?.threadId || index,
   });
   const items = virtualizer.getVirtualItems();

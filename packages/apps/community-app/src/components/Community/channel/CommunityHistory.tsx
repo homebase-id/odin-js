@@ -18,7 +18,7 @@ import { CommunityMessageItem } from '../Message/item/CommunityMessageItem';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
 import { CommunityActions } from './ContextMenu';
 import { useCommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const CommunityHistory = memo(
@@ -30,6 +30,7 @@ export const CommunityHistory = memo(
     setIsEmptyChat?: (isEmpty: boolean) => void;
     alignTop?: boolean;
     onlyNew?: boolean;
+    maxShowOptions?: { count: number; targetLink: string };
     emptyPlaceholder?: ReactNode;
     setParticipants?: React.Dispatch<React.SetStateAction<string[] | null | undefined>>;
   }) => {
@@ -41,6 +42,7 @@ export const CommunityHistory = memo(
       setIsEmptyChat,
       alignTop,
       onlyNew,
+      maxShowOptions,
       emptyPlaceholder,
       setParticipants,
     } = props;
@@ -78,7 +80,7 @@ export const CommunityHistory = memo(
       maxAge: onlyNew ? lastReadTime : undefined,
     });
 
-    const flattenedMsgs =
+    const [flattenedMsgs, isSliced] =
       useMemo(() => {
         const flat = (messages?.pages?.flatMap((page) => page?.searchResults)?.filter(Boolean) ||
           []) as HomebaseFile<CommunityMessage>[];
@@ -87,8 +89,10 @@ export const CommunityHistory = memo(
           flat.push(origin as HomebaseFile<CommunityMessage>);
         }
 
-        return flat;
-      }, [messages, origin]) || [];
+        if (!maxShowOptions) return [flat, false];
+        const maxShow = maxShowOptions.count;
+        return [flat.slice(0, maxShow), maxShow && flat.length > maxShow];
+      }, [messages, origin, maxShowOptions]) || [];
 
     useEffect(() => {
       if (setIsEmptyChat && isFetched && (!flattenedMsgs || flattenedMsgs.length === 0))
@@ -160,7 +164,12 @@ export const CommunityHistory = memo(
     useEffect(() => {
       const [lastItem] = virtualizer.getVirtualItems();
       if (!lastItem) return;
-      if (lastItem.index >= flattenedMsgs?.length - 1 && hasMoreMessages && !isFetchingNextPage)
+      if (
+        lastItem.index >= flattenedMsgs?.length - 1 &&
+        hasMoreMessages &&
+        !isFetchingNextPage &&
+        !isSliced
+      )
         fetchNextPage();
     }, [
       hasMoreMessages,
@@ -259,9 +268,18 @@ export const CommunityHistory = memo(
                 if (isLoaderRow) {
                   return (
                     <div key={item.key} data-index={item.index} ref={virtualizer.measureElement}>
-                      {hasMoreMessages || isFetchingNextPage ? (
+                      {(hasMoreMessages || isFetchingNextPage) && (!maxShowOptions || !isSliced) ? (
                         <div className="animate-pulse" key={'loading'}>
                           {t('Loading...')}
+                        </div>
+                      ) : isSliced && maxShowOptions?.targetLink ? (
+                        <div key={'end'} className="flex flex-row justify-center">
+                          <Link
+                            to={maxShowOptions?.targetLink}
+                            className="rounded-full bg-page-background px-3 py-2 text-sm font-medium text-foreground opacity-50 hover:bg-primary hover:text-primary-contrast hover:opacity-100"
+                          >
+                            {t('See older messages')}
+                          </Link>
                         </div>
                       ) : null}
                     </div>

@@ -13,6 +13,7 @@ import { useCommunityChannel } from '../../../hooks/community/channels/useCommun
 import { ThreadMeta } from '../../../hooks/community/threads/useCommunityThreads';
 import React, { useState } from 'react';
 import { MessageComposer } from '../Message/composer/MessageComposer';
+import { ExternalLink } from '@homebase-id/common-app/icons';
 
 export const CommunityThreadCatchup = ({
   community,
@@ -42,42 +43,49 @@ export const CommunityThreadCatchup = ({
 
   return (
     <div className="rounded-md border bg-background hover:shadow-md">
-      <div className="flex flex-col bg-slate-200 px-2 py-2 dark:bg-slate-800">
-        <p className="text-lg"># {channel.fileMetadata.appData.content.title}</p>
-        <p className="text-sm text-slate-400">
-          {threadMeta.participants.map((participant, index) => (
-            <React.Fragment key={participant}>
-              <AuthorName odinId={participant} excludeLink={true} />
-              {threadMeta.participants.length > 1 ? (
-                <>
-                  {index < threadMeta.participants.length - 2
-                    ? ', '
-                    : index < threadMeta.participants.length - 1
-                      ? ' and '
-                      : ''}
-                </>
-              ) : null}
-            </React.Fragment>
-          ))}
-        </p>
+      <div className="flex flex-row items-center bg-slate-200 px-2 py-2 dark:bg-slate-800">
+        <div className="flex flex-col">
+          <p className="text-lg"># {channel.fileMetadata.appData.content.title}</p>
+          <p className="text-sm text-slate-400">
+            {threadMeta.participants.map((participant, index) => (
+              <React.Fragment key={participant}>
+                <AuthorName odinId={participant} excludeLink={true} />
+                {threadMeta.participants.length > 1 ? (
+                  <>
+                    {index < threadMeta.participants.length - 2
+                      ? ', '
+                      : index < threadMeta.participants.length - 1
+                        ? ' and '
+                        : ''}
+                  </>
+                ) : null}
+              </React.Fragment>
+            ))}
+          </p>
+        </div>
+        <div className="ml-auto">
+          <ActionLink
+            href={`${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}/${threadMeta.threadId}/thread`}
+            type="secondary"
+            size="none"
+            className="px-2 py-1 text-sm"
+          >
+            {t('See full thread')}
+            <ExternalLink className="ml-2 h-3 w-3" />
+          </ActionLink>
+        </div>
       </div>
 
-      {/* <div className="flex flex-row justify-center py-2">
-        <ActionLink
-          href={`${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}/${threadMeta.threadId}/thread`}
-          type="secondary"
-          size="none"
-          className="px-2 py-1 text-sm"
-        >
-          {t('See older messages')}
-        </ActionLink>
-      </div> */}
       <CommunityHistory
         community={community}
         channel={channel}
         origin={originMessage}
         setParticipants={setParticipants}
         alignTop={true}
+        maxShowOptions={{
+          count: 10,
+          targetLink: `${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}/${threadMeta.threadId}/thread`,
+        }}
       />
       <ErrorBoundary>
         {originMessage ? (
