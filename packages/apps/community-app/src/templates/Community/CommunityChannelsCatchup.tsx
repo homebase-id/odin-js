@@ -75,7 +75,7 @@ export const CommunityChannelsCatchup = memo(() => {
               {!channelsToCatchup?.length ? (
                 <p className="m-auto text-lg">{t('All done!')} 🎉</p>
               ) : (
-                <div className="flex h-20 flex-grow flex-col gap-3 overflow-auto p-3">
+                <div className="h-20 flex-grow overflow-auto p-3">
                   {channelsToCatchup?.map((chnl) => (
                     <CommunityChannelCatchup
                       community={community}

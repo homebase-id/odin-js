@@ -16,27 +16,34 @@ export const CommunityChannelCatchup = ({
   const channelLink = `${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}`;
 
   return (
-    <div className="overflow-hidden rounded-md border bg-background">
-      <div className="flex flex-row justify-between bg-slate-200 px-2 py-2 dark:bg-slate-800">
-        <ActionLink type="mute" size="none" className="text-lg hover:underline" href={channelLink}>
-          # {channel.fileMetadata.appData.content.title}
-        </ActionLink>
+    <div className="pb-3 last-of-type:pb-0">
+      <div className="overflow-hidden rounded-md border bg-background">
+        <div className="flex flex-row justify-between bg-slate-200 px-2 py-2 dark:bg-slate-800">
+          <ActionLink
+            type="mute"
+            size="none"
+            className="text-lg hover:underline"
+            href={channelLink}
+          >
+            # {channel.fileMetadata.appData.content.title}
+          </ActionLink>
 
-        <ActionLink href={channelLink} type="secondary" size="none" className="px-2 py-1 text-sm">
-          {t('Open channel')}
-          <ExternalLink className="ml-2 h-3 w-3" />
-        </ActionLink>
-      </div>
-      <div className="relative">
-        <CommunityHistory
-          community={community}
-          channel={channel}
-          alignTop={true}
-          maxShowOptions={{
-            count: 10,
-            targetLink: channelLink,
-          }}
-        />
+          <ActionLink href={channelLink} type="secondary" size="none" className="px-2 py-1 text-sm">
+            {t('Open channel')}
+            <ExternalLink className="ml-2 h-3 w-3" />
+          </ActionLink>
+        </div>
+        <div className="relative">
+          <CommunityHistory
+            community={community}
+            channel={channel}
+            alignTop={true}
+            maxShowOptions={{
+              count: 10,
+              targetLink: channelLink,
+            }}
+          />
+        </div>
       </div>
     </div>
   );
