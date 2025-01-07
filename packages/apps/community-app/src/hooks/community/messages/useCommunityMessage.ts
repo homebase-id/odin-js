@@ -50,8 +50,8 @@ export const getCommunityMessageQueryOptions = (
 ) => ({
   queryKey: [
     'community-message',
-    props?.communityId,
-    props?.messageId,
+    formatGuidId(props?.communityId),
+    formatGuidId(props?.messageId),
     props?.fileSystemType?.toLowerCase() || 'standard',
   ],
   queryFn: () =>
@@ -406,9 +406,8 @@ export const updateCacheCommunityMessage = (
 ) => {
   const currentData = queryClient.getQueryData<HomebaseFile<CommunityMessage>>([
     'community-message',
-    communityId,
-
-    messageId,
+    formatGuidId(communityId),
+    formatGuidId(messageId),
     fileSystemType?.toLowerCase() || 'standard',
   ]);
   if (!currentData) return;
@@ -416,6 +415,14 @@ export const updateCacheCommunityMessage = (
   const updatedData = transformFn(currentData);
   if (!updatedData) return;
 
-  queryClient.setQueryData(['community-message', messageId], updatedData);
+  queryClient.setQueryData(
+    [
+      'community-message',
+      formatGuidId(communityId),
+      formatGuidId(messageId),
+      fileSystemType?.toLowerCase() || 'standard',
+    ],
+    updatedData
+  );
   return currentData;
 };
