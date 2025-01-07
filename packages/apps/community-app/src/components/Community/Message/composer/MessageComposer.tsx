@@ -220,7 +220,11 @@ export const MessageComposer = ({
             }
           }}
         >
-          <Suspense>
+          <Suspense
+            fallback={
+              <div className="relative h-[119px] w-full border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border" />
+            }
+          >
             <RichTextEditor
               className="relative w-8 flex-grow border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border"
               contentClassName="max-h-[50vh] overflow-auto"

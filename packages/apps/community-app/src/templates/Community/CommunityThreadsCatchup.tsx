@@ -63,20 +63,17 @@ export const CommunityThreadsCatchup = memo(() => {
               {!flatThreadMetas?.length ? (
                 <p className="m-auto text-lg">{t('No threads found')}</p>
               ) : (
-                <div
-                  className="relative flex h-20 flex-grow flex-col overflow-auto p-3"
-                  ref={scrollRef}
-                >
+                <div className="relative h-20 flex-grow flex-col overflow-auto p-3" ref={scrollRef}>
                   <div
-                    className="relative w-full flex-shrink-0 flex-grow-0 overflow-hidden"
+                    className="relative w-full overflow-hidden"
                     style={{
                       height: virtualizer.getTotalSize(),
                     }}
                   >
                     <div
-                      className="absolute left-0 top-0 flex h-full w-full flex-col"
+                      className="absolute left-0 top-0 w-full"
                       style={{
-                        transform: `translateY(${items[0]?.start ?? 0}px)`,
+                        transform: `translateY(${items[0]?.start - virtualizer.options.scrollMargin}px)`,
                       }}
                     >
                       {items.map((item) => {
@@ -86,7 +83,7 @@ export const CommunityThreadsCatchup = memo(() => {
                             key={item.key}
                             data-index={item.index}
                             ref={virtualizer.measureElement}
-                            className="flex-shrink-0 pb-3 last-of-type:pb-0"
+                            className="pb-3 last-of-type:pb-0"
                           >
                             {threadMeta ? (
                               <CommunityThreadCatchup
