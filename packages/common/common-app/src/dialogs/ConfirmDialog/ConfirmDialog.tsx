@@ -88,7 +88,7 @@ export const ConfirmDialog = ({
                 </div>
               </div>
             </div>
-            <div className="bg-gray-50 px-4 py-3 dark:bg-slate-900 flex flex-col sm:flex-row-reverse px-6 gap-2">
+            <div className="bg-gray-50 py-3 dark:bg-slate-900 flex flex-col sm:flex-row-reverse px-6 gap-2">
               <button
                 type="button"
                 className={`${!isValid ? 'pointer-events-none opacity-40' : ''} ${
