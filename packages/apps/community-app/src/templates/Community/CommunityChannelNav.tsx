@@ -26,6 +26,7 @@ import {
   ChevronDown,
   Bookmark,
   ChatBubble,
+  RadioTower,
 } from '@homebase-id/common-app/icons';
 import { CommunityInfoDialog } from '../../components/Community/CommunityInfoDialog';
 import { useConversationMetadata } from '@homebase-id/chat-app/src/hooks/chat/useConversationMetadata';
@@ -130,7 +131,7 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
               communityId={communityKey}
               setUnreadCount={setUnreadCountCallback}
             />
-            {/* <AllItem odinId={odinKey} communityId={communityKey} /> */}
+            <ActivityItem odinId={odinKey} communityId={communityKey} />
             <LaterItem odinId={odinKey} communityId={communityKey} />
             <PinsItem odinId={odinKey} communityId={communityKey} />
           </div>
@@ -193,19 +194,19 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
   );
 };
 
-// const AllItem = ({ odinId, communityId }: { odinId: string; communityId: string }) => {
-//   const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/all`;
-//   const isActive = !!useMatch({ path: href, end: true });
+const ActivityItem = ({ odinId, communityId }: { odinId: string; communityId: string }) => {
+  const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/activity`;
+  const isActive = !!useMatch({ path: href, end: true });
 
-//   return (
-//     <Link
-//       to={href}
-//       className={`flex flex-row items-center gap-2 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`}`}
-//     >
-//       <RadioTower className="h-5 w-5" /> {t('Activity')}
-//     </Link>
-//   );
-// };
+  return (
+    <Link
+      to={href}
+      className={`flex flex-row items-center gap-2 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`}`}
+    >
+      <RadioTower className="h-5 w-5" /> {t('Activity')}
+    </Link>
+  );
+};
 
 const ThreadItem = ({
   odinId,

@@ -56,7 +56,7 @@ export const CommunityMedia = ({
       fit={'contain'}
       onClick={() =>
         navigate(
-          `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey}/${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`
+          `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || msg.fileMetadata.appData.content.channelId}/${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`
         )
       }
       previewThumbnail={isGallery ? undefined : msg.fileMetadata.appData.previewThumbnail}

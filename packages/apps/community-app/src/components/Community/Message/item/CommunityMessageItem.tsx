@@ -98,7 +98,7 @@ export const CommunityMessageItem = memo(
         ...communityActions,
         doEdit: () =>
           navigate(
-            `${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${channelKey}/${threadKey ? `${threadKey}/thread/` : ``}${msg.fileMetadata.appData.uniqueId}/edit`
+            `${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${channelKey || msg.fileMetadata.appData.content.channelId}/${threadKey ? `${threadKey}/thread/` : ``}${msg.fileMetadata.appData.uniqueId}/edit`
           ),
       };
     }, []);
@@ -522,7 +522,7 @@ const CommunityMessageThreadSummary = ({
   return (
     <Link
       className="mr-auto flex w-full max-w-xs flex-row items-center gap-2 rounded-lg px-1 py-1 text-indigo-500 transition-colors hover:bg-background hover:shadow-sm"
-      to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || 'all'}/${msg.fileMetadata.appData.uniqueId}/thread`}
+      to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || msg.fileMetadata.appData.content.channelId}/${msg.fileMetadata.appData.uniqueId}/thread`}
     >
       {uniqueSenders.map((sender) => (
         <AuthorImage odinId={sender} key={sender} className="h-7 w-7" excludeLink={true} />

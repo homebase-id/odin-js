@@ -31,26 +31,17 @@ export const CommunityCatchup = memo(() => {
     communityId: communityId,
   }).fetch;
 
-  const channelsToCatchup = useMemo(
-    () =>
-      metadata &&
-      channels &&
-      channels?.filter((chnl) => {
-        if (!chnl.fileMetadata.appData.uniqueId) return false;
-        const lastReadTime =
-          metadata?.fileMetadata.appData.content.channelLastReadTime[
-            chnl.fileMetadata.appData.uniqueId
-          ];
+  const channelsToCatchup = useMemo(() => {
+    if (!metadata || !channels) {
+      return [];
+    }
 
-        return (
-          chnl.lastMessage?.fileMetadata.created &&
-          chnl.lastMessage.fileMetadata.created > (lastReadTime || 0) &&
-          !!chnl.lastMessage.fileMetadata.senderOdinId &&
-          chnl.lastMessage.fileMetadata.senderOdinId !== loggedOnIdentity
-        );
-      }),
-    [channels, metadata, loggedOnIdentity]
-  );
+    return [...channels].sort(
+      (a, b) =>
+        (b.lastMessage?.fileMetadata.transitCreated || 0) -
+        (a.lastMessage?.fileMetadata.transitCreated || 0)
+    );
+  }, [channels, metadata, loggedOnIdentity]);
 
   if (!community && isFetched)
     return (

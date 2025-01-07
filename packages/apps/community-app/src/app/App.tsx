@@ -119,21 +119,10 @@ function App() {
               <Route path={'threads'} element={<CommunityThreadsCatchup />} />
               <Route path={'later'} element={<CommunityLater />} />
 
-              {/* Items for 'all' */}
-              <Route path={'all'} element={<CommunityCatchup />} />
-              <Route path={'all/:chatMessageKey'} element={<CommunityCatchup />} />
-              <Route path={'all/:chatMessageKey/:mediaKey'} element={<CommunityCatchup />} />
-
-              {/* Items for 'all' within a thread */}
-              <Route path={'all/:threadKey/thread'} element={<CommunityCatchup />} />
-              <Route
-                path={'all/:threadKey/thread/:chatMessageKey'}
-                element={<CommunityCatchup />}
-              />
-              <Route
-                path={'all/:threadKey/thread/:chatMessageKey/:mediaKey'}
-                element={<CommunityCatchup />}
-              />
+              {/* Items for 'activity' */}
+              <Route path={'activity'} element={<CommunityCatchup />} />
+              <Route path={'activity/:chatMessageKey'} element={<CommunityCatchup />} />
+              <Route path={'activity/:chatMessageKey/:mediaKey'} element={<CommunityCatchup />} />
 
               {/* Items for 'channel' */}
               <Route path={':channelKey'} element={<CommunityChannelDetail />} />
@@ -206,7 +195,7 @@ function App() {
 const CommunityRootRoute = () => {
   const { odinKey, communityKey } = useParams();
   return window.innerWidth > 1024 ? (
-    <Navigate to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/all`} />
+    <Navigate to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/activity`} />
   ) : null;
 };
 
