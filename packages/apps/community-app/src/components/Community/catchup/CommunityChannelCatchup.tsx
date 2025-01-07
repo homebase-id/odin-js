@@ -16,7 +16,7 @@ export const CommunityChannelCatchup = ({
   const channelLink = `${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}`;
 
   return (
-    <div className="rounded-md border">
+    <div className="overflow-hidden rounded-md border bg-background">
       <div className="flex flex-row justify-between bg-slate-200 px-2 py-2 dark:bg-slate-800">
         <ActionLink type="mute" size="none" className="text-lg hover:underline" href={channelLink}>
           # {channel.fileMetadata.appData.content.title}

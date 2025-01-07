@@ -33,7 +33,7 @@ export const CommunityThreadsCatchup = memo(() => {
 
   if (!isFetched || !fetchedThreads) {
     return (
-      <div className="h-full w-20 flex-grow bg-background">
+      <div className="h-full w-20 flex-grow bg-page-background">
         <LoadingBlock className="h-16 w-full" />
         <div className="mt-8 flex flex-col gap-4 px-5">
           <LoadingBlock className="h-16 w-full" />

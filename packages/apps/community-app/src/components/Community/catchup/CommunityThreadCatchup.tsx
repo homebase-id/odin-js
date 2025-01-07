@@ -42,7 +42,7 @@ export const CommunityThreadCatchup = ({
   if (!channel || !originMessage) return null;
 
   return (
-    <div className="rounded-md border bg-background hover:shadow-md">
+    <div className="overflow-hidden rounded-md border bg-background hover:shadow-md">
       <div className="flex flex-row items-center bg-slate-200 px-2 py-2 dark:bg-slate-800">
         <div className="flex flex-col">
           <p className="text-lg"># {channel.fileMetadata.appData.content.title}</p>

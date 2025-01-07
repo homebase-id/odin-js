@@ -16,7 +16,7 @@ import { ChevronLeft, RadioTower } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 
-export const CommunityCatchup = memo(() => {
+export const CommunityChannelsCatchup = memo(() => {
   const { odinKey, communityKey: communityId, threadKey } = useParams();
   const { data: community, isFetched } = useCommunity({ odinId: odinKey, communityId }).fetch;
 
@@ -52,7 +52,7 @@ export const CommunityCatchup = memo(() => {
 
   if (!community) {
     return (
-      <div className="h-full w-20 flex-grow bg-background">
+      <div className="h-full w-20 flex-grow bg-page-background">
         <LoadingBlock className="h-16 w-full" />
         <div className="mt-8 flex flex-col gap-4 px-5">
           <LoadingBlock className="h-16 w-full" />
@@ -67,7 +67,7 @@ export const CommunityCatchup = memo(() => {
 
   return (
     <ErrorBoundary>
-      <div className="h-full w-20 flex-grow bg-background">
+      <div className="h-full w-20 flex-grow bg-page-background">
         <div className="relative flex h-full flex-row">
           <div className="flex h-full flex-grow flex-col overflow-hidden">
             <div className="flex h-full flex-grow flex-col">
@@ -99,7 +99,7 @@ export const CommunityCatchup = memo(() => {
   );
 });
 
-CommunityCatchup.displayName = 'CommunityCatchup';
+CommunityChannelsCatchup.displayName = 'CommunityChannelsCatchup';
 
 const CommunityCatchupHeader = ({
   community,

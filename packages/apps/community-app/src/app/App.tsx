@@ -44,9 +44,9 @@ const CommunityChannelDetail = lazy(() =>
     default: communityApp.CommunityChannelDetail,
   }))
 );
-const CommunityCatchup = lazy(() =>
-  import('../templates/Community/CommunityCatchup').then((communityApp) => ({
-    default: communityApp.CommunityCatchup,
+const CommunityChannelsCatchup = lazy(() =>
+  import('../templates/Community/CommunityChannelsCatchup').then((communityApp) => ({
+    default: communityApp.CommunityChannelsCatchup,
   }))
 );
 const CommunityThreadsCatchup = lazy(() =>
@@ -120,9 +120,12 @@ function App() {
               <Route path={'later'} element={<CommunityLater />} />
 
               {/* Items for 'activity' */}
-              <Route path={'activity'} element={<CommunityCatchup />} />
-              <Route path={'activity/:chatMessageKey'} element={<CommunityCatchup />} />
-              <Route path={'activity/:chatMessageKey/:mediaKey'} element={<CommunityCatchup />} />
+              <Route path={'activity'} element={<CommunityChannelsCatchup />} />
+              <Route path={'activity/:chatMessageKey'} element={<CommunityChannelsCatchup />} />
+              <Route
+                path={'activity/:chatMessageKey/:mediaKey'}
+                element={<CommunityChannelsCatchup />}
+              />
 
               {/* Items for 'channel' */}
               <Route path={':channelKey'} element={<CommunityChannelDetail />} />
