@@ -45,7 +45,7 @@ export const useEditLastMessageShortcut = ({
         );
         if (!myLastMessage) return;
         navigate(
-          `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey}/${threadKey ? `${threadKey}/thread/` : ``}${myLastMessage?.fileMetadata.appData.uniqueId}/edit`
+          `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || 'activity'}/${threadKey ? `${threadKey}/thread/` : ``}${myLastMessage?.fileMetadata.appData.uniqueId}/edit`
         );
       }
     },

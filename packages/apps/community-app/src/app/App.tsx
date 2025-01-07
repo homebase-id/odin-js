@@ -44,9 +44,9 @@ const CommunityChannelDetail = lazy(() =>
     default: communityApp.CommunityChannelDetail,
   }))
 );
-const CommunityCatchup = lazy(() =>
-  import('../templates/Community/CommunityCatchup').then((communityApp) => ({
-    default: communityApp.CommunityCatchup,
+const CommunityChannelsCatchup = lazy(() =>
+  import('../templates/Community/CommunityChannelsCatchup').then((communityApp) => ({
+    default: communityApp.CommunityChannelsCatchup,
   }))
 );
 const CommunityThreadsCatchup = lazy(() =>
@@ -119,20 +119,12 @@ function App() {
               <Route path={'threads'} element={<CommunityThreadsCatchup />} />
               <Route path={'later'} element={<CommunityLater />} />
 
-              {/* Items for 'all' */}
-              <Route path={'all'} element={<CommunityCatchup />} />
-              <Route path={'all/:chatMessageKey'} element={<CommunityCatchup />} />
-              <Route path={'all/:chatMessageKey/:mediaKey'} element={<CommunityCatchup />} />
-
-              {/* Items for 'all' within a thread */}
-              <Route path={'all/:threadKey/thread'} element={<CommunityCatchup />} />
+              {/* Items for 'activity' */}
+              <Route path={'activity'} element={<CommunityChannelsCatchup />} />
+              <Route path={'activity/:chatMessageKey'} element={<CommunityChannelsCatchup />} />
               <Route
-                path={'all/:threadKey/thread/:chatMessageKey'}
-                element={<CommunityCatchup />}
-              />
-              <Route
-                path={'all/:threadKey/thread/:chatMessageKey/:mediaKey'}
-                element={<CommunityCatchup />}
+                path={'activity/:chatMessageKey/:mediaKey'}
+                element={<CommunityChannelsCatchup />}
               />
 
               {/* Items for 'channel' */}
@@ -206,7 +198,7 @@ function App() {
 const CommunityRootRoute = () => {
   const { odinKey, communityKey } = useParams();
   return window.innerWidth > 1024 ? (
-    <Navigate to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/all`} />
+    <Navigate to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/activity`} />
   ) : null;
 };
 

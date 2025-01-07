@@ -42,7 +42,7 @@ export const uploadFileOverPeer = async (
     aesKey?: Uint8Array | undefined;
     axiosConfig?: AxiosRequestConfig;
   }
-) => {
+): Promise<TransitUploadResult | void> => {
   isDebug &&
     console.debug(
       'request',
@@ -95,7 +95,7 @@ export const uploadFileOverPeer = async (
     },
   };
 
-  const response = await client
+  const uploadResult = await client
     .post<TransitUploadResult>(url, data, config)
     .then((response) => {
       const recipientStatus = response.data.recipientStatus;
@@ -116,10 +116,12 @@ export const uploadFileOverPeer = async (
     console.debug(
       'response',
       new URL(`${dotYouClient.getEndpoint()}/transit/sender/files/send'`).pathname,
-      response
+      uploadResult
     );
 
-  return response;
+  if (!uploadResult) return;
+  uploadResult.keyHeader = keyHeader;
+  return uploadResult;
 };
 
 export const uploadHeaderOverPeer = async (

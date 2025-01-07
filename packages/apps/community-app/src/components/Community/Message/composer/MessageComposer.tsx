@@ -29,6 +29,7 @@ import { CommunityMessage } from '../../../../providers/CommunityMessageProvider
 import { CommunityMetadata, Draft } from '../../../../providers/CommunityMetadataProvider';
 import { CommunityChannel } from '../../../../providers/CommunityProvider';
 import { ChannelPlugin } from '../RTEChannelDropdown/RTEChannelDropdownPlugin';
+import { Mentionable } from '@homebase-id/rich-text-editor/src/components/plate-ui/mention-input-element';
 
 const RichTextEditor = lazy(() =>
   import('@homebase-id/rich-text-editor').then((rootExport) => ({
@@ -166,7 +167,7 @@ export const MessageComposer = ({
   };
 
   const { data: contacts } = useAllContacts(true);
-  const mentionables: { key: string; text: string }[] = useMemo(() => {
+  const mentionables: Mentionable[] = useMemo(() => {
     const filteredContacts =
       (contacts
         ?.filter(
@@ -176,15 +177,24 @@ export const MessageComposer = ({
               contact.fileMetadata.appData.content.odinId
             )
         )
-        ?.map((contact) =>
-          contact.fileMetadata.appData.content.odinId
-            ? {
-                key: contact.fileMetadata.appData.content.odinId,
-                text: contact.fileMetadata.appData.content.odinId,
-              }
-            : undefined
-        )
-        .filter(Boolean) as { key: string; text: string }[]) || [];
+        ?.map((contact) => {
+          const content = contact.fileMetadata.appData.content;
+          if (!content?.odinId) return;
+          const name =
+            content.name &&
+            (content.name.displayName ??
+              (content.name.givenName || content.name.surname
+                ? `${content.name.givenName ?? ''} ${content.name.surname ?? ''}`
+                : undefined));
+
+          return {
+            key: `${content.odinId} (${name})`,
+            value: content.odinId,
+            text: content.odinId,
+            label: `${content.odinId} (${name})`,
+          };
+        })
+        .filter(Boolean) as Mentionable[]) || [];
 
     filteredContacts.push({ key: '@channel', text: '@channel' });
     return filteredContacts;
@@ -210,7 +220,11 @@ export const MessageComposer = ({
             }
           }}
         >
-          <Suspense>
+          <Suspense
+            fallback={
+              <div className="relative h-[119px] w-full border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border" />
+            }
+          >
             <RichTextEditor
               className="relative w-8 flex-grow border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border"
               contentClassName="max-h-[50vh] overflow-auto"

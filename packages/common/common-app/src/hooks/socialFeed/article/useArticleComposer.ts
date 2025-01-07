@@ -208,7 +208,7 @@ export const useArticleComposer = ({
             },
             versionTag: (uploadResult as UploadResult).newVersionTag,
           },
-          // We force set the keyHeader as it's returned from the server, and needed for fast saves afterwards
+          // We force set the keyHeader as it's returned from the upload, and needed for fast saves afterwards
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           sharedSecretEncryptedKeyHeader: (uploadResult as UploadResult).keyHeader as any,
         };

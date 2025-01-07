@@ -188,6 +188,8 @@ const CommunityContextActions = ({
   const {
     isCollaborative,
     toggleCollaborative: { mutate: toggleCollaborative },
+    canBackup,
+    restoreAndMakePrivate: { mutate: restoreAndMakePrivate },
   } = useCommunityCollaborativeMsg({ msg, community });
 
   const { mutate: resend, error: resendError } = useCommunityMessage().update;
@@ -236,11 +238,38 @@ const CommunityContextActions = ({
       });
     }
 
-    optionalOptions.push({
-      icon: Persons,
-      label: isCollaborative ? t('Make private') : t('Make collaborative'),
-      onClick: () => toggleCollaborative(),
-    });
+    if (!isCollaborative) {
+      optionalOptions.push({
+        icon: Persons,
+        label: t('Make collaborative'),
+        onClick: () => toggleCollaborative(),
+      });
+    } else {
+      optionalOptions.push({
+        icon: Persons,
+        label: t('Make private'),
+        actionOptions: {
+          title: t('Make private'),
+          body: t(
+            'Are you sure you want to make this message private again, other collaborators will no longer be able to edit the message?'
+          ),
+          type: 'info',
+          options: [
+            {
+              children: t('Make private'),
+              onClick: () => toggleCollaborative(),
+            },
+            canBackup
+              ? {
+                  children: t('Restore and make private'),
+                  onClick: () => restoreAndMakePrivate(),
+                  type: 'remove',
+                }
+              : undefined,
+          ],
+        },
+      });
+    }
   }
 
   if (community)
