@@ -154,6 +154,9 @@ export const useCommunityMessage = (props?: {
 
     newChat.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
     newChat.fileMetadata.appData.content.deliveryStatus = CommunityDeliveryStatus.Sent;
+    // We force set the keyHeader as it's returned from the upload, and needed for fast saves afterwards
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    newChat.sharedSecretEncryptedKeyHeader = uploadResult.keyHeader as any;
 
     return newChat;
   };
@@ -268,6 +271,7 @@ export const useCommunityMessage = (props?: {
                       },
                       payloads: msg?.fileMetadata.payloads,
                     },
+                    sharedSecretEncryptedKeyHeader: newMessage.sharedSecretEncryptedKeyHeader,
                   };
                 }
 

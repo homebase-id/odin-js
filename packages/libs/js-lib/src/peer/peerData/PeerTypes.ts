@@ -6,7 +6,7 @@ import {
   ScheduleOptions,
   TransferUploadStatus,
 } from '../../core/DriveData/Upload/DriveUploadTypes';
-import { TargetDrive } from '../../core/core';
+import { KeyHeader, TargetDrive } from '../../core/core';
 
 export interface TransitQueryBatchRequest {
   queryParams: FileQueryParams;
@@ -34,4 +34,5 @@ export interface TransitUploadResult {
     globalTransitId: string;
     targetDrive: TargetDrive;
   };
+  keyHeader: KeyHeader | undefined;
 }
