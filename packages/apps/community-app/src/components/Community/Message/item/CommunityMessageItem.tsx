@@ -89,7 +89,8 @@ export const CommunityMessageItem = memo(
     const editInThreadMatch = useMatch(
       `${COMMUNITY_ROOT_PATH}/:odinKey/:communityKey/:channelKey/:threadKey/thread/:chatMessageKey/edit`
     );
-    const isEdit = !!isDetail && !!(editMatch || editInThreadMatch);
+    const isEdit =
+      !!isDetail && ((!!editMatch && !hideThreads) || (!!editInThreadMatch && hideThreads));
 
     const navigate = useNavigate();
     const extendedCommunityActions: CommunityActions | undefined = useMemo(() => {
