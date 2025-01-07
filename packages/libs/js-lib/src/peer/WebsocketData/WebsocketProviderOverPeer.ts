@@ -92,17 +92,6 @@ const ConnectSocket = async (
       sharedSecret: activeSs,
     });
 
-    // we need to preauth before we can connect
-    await directGuestClient
-      .createAxiosClient()
-      .post('/notify/peer/preauth', undefined, {
-        validateStatus: () => true,
-      })
-      .catch((error) => {
-        console.error({ error });
-        reject('[WebsocketProviderOverPeer] Preauth failed');
-      });
-
     const url = `wss://${directGuestClient.getRoot().split('//')[1]}/api/guest/v1/notify/peer/ws`;
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -119,10 +108,13 @@ const ConnectSocket = async (
         batchSize: 1,
       };
 
-      NotifyOverPeer({
-        command: 'establishConnectionRequest',
-        data: JSON.stringify(establishConnectionRequest),
-      });
+      EstablishConnectionOverPeer(
+        {
+          command: 'establishConnectionRequest',
+          data: JSON.stringify(establishConnectionRequest),
+        },
+        tokenToConnectOverPeer.authenticationToken64
+      );
     };
 
     const setupPing = () => {
@@ -285,7 +277,26 @@ export const UnsubscribeOverPeer = (
   }
 };
 
-export const NotifyOverPeer = async (command: WebsocketCommand | EstablishConnectionRequest) => {
+const EstablishConnectionOverPeer = async (
+  command: WebsocketCommand,
+  clientAuthenticationToken64: string
+) => {
+  if (!webSocketClient) throw new Error('No active websocket to message across');
+  if (isDebug)
+    console.debug(`[WebsocketProviderOverPeer] Send command (${JSON.stringify(command)})`);
+
+  const json = jsonStringify64(command);
+  const establishConnectionMessage = await encryptData(json, getRandomIv(), activeSs);
+
+  webSocketClient.send(
+    JSON.stringify({
+      sharedEncryptEncryptedOptions64: establishConnectionMessage,
+      clientAuthToken64: clientAuthenticationToken64,
+    })
+  );
+};
+
+export const NotifyOverPeer = async (command: WebsocketCommand) => {
   if (!webSocketClient) throw new Error('No active websocket to message across');
   if (isDebug)
     console.debug(`[WebsocketProviderOverPeer] Send command (${JSON.stringify(command)})`);
