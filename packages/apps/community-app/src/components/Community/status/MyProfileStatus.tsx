@@ -1,5 +1,6 @@
 import {
   ActionButton,
+  ConnectionName,
   DialogWrapper,
   EmojiSelector,
   formatDateExludingYearIfCurrent,
@@ -17,7 +18,7 @@ import { useCommunity } from '../../../hooks/community/useCommunity';
 import { useParams } from 'react-router-dom';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
-import { CommunityStatus } from '../../../providers/CommunityStatusProvider';
+import { CommunityStatus, setStatus } from '../../../providers/CommunityStatusProvider';
 
 export const MyProfileStatus = ({ className }: { className?: string }) => {
   const { odinKey, communityKey } = useParams();
@@ -67,6 +68,7 @@ export const MyProfileStatus = ({ className }: { className?: string }) => {
 };
 
 export const ProfileStatus = ({ odinId, className }: { odinId: string; className?: string }) => {
+  const [isStatusDialogOpen, setStatusDialogOpen] = useState(false);
   const { odinKey, communityKey } = useParams();
   const { data: community } = useCommunity({ odinId: odinKey, communityId: communityKey }).fetch;
 
@@ -80,17 +82,31 @@ export const ProfileStatus = ({ odinId, className }: { odinId: string; className
   if (!community || !isFetched || !hasStatus) return null;
 
   return (
-    <span
-      data-tooltip-dir="left"
-      data-tooltip={
-        hasStatus
-          ? `"${myStatus?.status || myStatus?.emoji}" ${myStatus?.validTill ? `${t('till')} ${formatDateExludingYearIfCurrent(new Date(myStatus.validTill))}` : ''}`
-          : undefined
-      }
-      className={className}
-    >
-      {myStatus?.emoji || '💬'}
-    </span>
+    <>
+      <span
+        data-tooltip-dir="left"
+        data-tooltip={
+          hasStatus
+            ? `"${myStatus?.status || myStatus?.emoji}" ${myStatus?.validTill ? `${t('till')} ${formatDateExludingYearIfCurrent(new Date(myStatus.validTill))}` : ''}`
+            : undefined
+        }
+        className={className}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          setStatusDialogOpen(true);
+        }}
+      >
+        {myStatus?.emoji || '💬'}
+      </span>
+      {myStatus && isStatusDialogOpen ? (
+        <StatusDetailDialog
+          odinId={odinId}
+          status={myStatus}
+          onClose={() => setStatusDialogOpen(false)}
+        ></StatusDetailDialog>
+      ) : null}
+    </>
   );
 };
 
@@ -250,6 +266,49 @@ export const StatusDialog = ({
             ) : null}
           </div>
         </form>
+      </DialogWrapper>
+    </div>
+  );
+
+  return createPortal(dialog, target);
+};
+
+const StatusDetailDialog = ({
+  status,
+  odinId,
+  onClose,
+}: {
+  status: CommunityStatus;
+  odinId: string;
+  onClose: () => void;
+}) => {
+  const target = usePortal('modal-container');
+  if (!status) return null;
+
+  const dialog = (
+    <div onClick={(e) => e.stopPropagation()}>
+      <DialogWrapper
+        title={
+          <>
+            {t('Status')}{' '}
+            <small className="block text-sm text-slate-400">
+              <ConnectionName odinId={odinId} />
+            </small>
+          </>
+        }
+        onClose={onClose}
+        isSidePanel={false}
+        isOverflowLess={true}
+      >
+        <div className="flex flex-row items-center gap-3">
+          <span className="text-4xl">{status.emoji || '💬'}</span>
+          <span>{status.status}</span>
+        </div>
+        {status.validTill ? (
+          <p className="mt-1 text-sm text-slate-400">
+            {t('untill')} {formatDateExludingYearIfCurrent(new Date(status.validTill))}
+          </p>
+        ) : null}
       </DialogWrapper>
     </div>
   );
