@@ -393,12 +393,6 @@ const InnerRichTextEditor = memo(
           className={`relative flex w-[100%] flex-col ${className ?? ''} [&_.slate-selected]:!bg-primary/20 [&_.slate-selection-area]:border [&_.slate-selection-area]:bg-primary/10`}
           onSubmit={(e) => e.stopPropagation()}
           onClick={disabled ? undefined : (e) => e.stopPropagation()}
-          // onPaste={(e) => {
-          //   e.preventDefault();
-          //   const text = e.clipboardData.getData('text');
-          //   console.log('pure text', text);
-          //   editor?.insertText(text);
-          // }}
         >
           <Plate
             editor={editor}

@@ -357,6 +357,7 @@ const ChannelItem = ({
             ...metadata,
           };
           newMeta.fileMetadata.appData.content.pinnedChannels = newPins;
+          // console.log('pinning');
           updateMetadata({ metadata: newMeta });
         }}
       >
