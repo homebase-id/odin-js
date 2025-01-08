@@ -321,6 +321,7 @@ const MessageTextRenderer = ({
         const { type, attributes } = element;
 
         if (type === 'p' || type === 'paragraph') {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { text, ...renderableAttributes } = attributes || {};
           return (
             <p {...renderableAttributes} className="min-h-2 empty:min-h-0">

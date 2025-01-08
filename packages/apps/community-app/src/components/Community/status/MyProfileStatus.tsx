@@ -18,7 +18,7 @@ import { useCommunity } from '../../../hooks/community/useCommunity';
 import { useParams } from 'react-router-dom';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
-import { CommunityStatus, setStatus } from '../../../providers/CommunityStatusProvider';
+import { CommunityStatus } from '../../../providers/CommunityStatusProvider';
 
 export const MyProfileStatus = ({ className }: { className?: string }) => {
   const { odinKey, communityKey } = useParams();
