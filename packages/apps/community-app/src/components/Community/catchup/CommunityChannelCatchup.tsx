@@ -39,7 +39,7 @@ export const CommunityChannelCatchup = ({
             channel={channel}
             alignTop={true}
             maxShowOptions={{
-              count: 10,
+              count: 5,
               targetLink: channelLink,
             }}
           />

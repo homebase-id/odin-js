@@ -1,17 +1,10 @@
 import { useCommunity } from '../../hooks/community/useCommunity';
-import {
-  ErrorBoundary,
-  LoadingBlock,
-  t,
-  COMMUNITY_ROOT_PATH,
-  useDotYouClientContext,
-} from '@homebase-id/common-app';
+import { ErrorBoundary, LoadingBlock, t, COMMUNITY_ROOT_PATH } from '@homebase-id/common-app';
 import { Link, useParams } from 'react-router-dom';
 import { CommunityChannelCatchup } from '../../components/Community/catchup/CommunityChannelCatchup';
 import { useCommunityChannelsWithRecentMessages } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
-import { useCommunityMetadata } from '../../hooks/community/useCommunityMetadata';
 import { CommunityThread } from '../../components/Community/CommunityThread';
-import { memo, useMemo } from 'react';
+import { memo } from 'react';
 import { ChevronLeft, RadioTower } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
@@ -20,28 +13,10 @@ export const CommunityChannelsCatchup = memo(() => {
   const { odinKey, communityKey: communityId, threadKey } = useParams();
   const { data: community, isFetched } = useCommunity({ odinId: odinKey, communityId }).fetch;
 
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
-  const { data: metadata } = useCommunityMetadata({
-    odinId: odinKey,
-    communityId: communityId,
-  }).single;
-
   const { data: channels } = useCommunityChannelsWithRecentMessages({
     odinId: odinKey,
     communityId: communityId,
   }).fetch;
-
-  const channelsToCatchup = useMemo(() => {
-    if (!metadata || !channels) {
-      return [];
-    }
-
-    return [...channels].sort(
-      (a, b) =>
-        (b.lastMessage?.fileMetadata.transitCreated || 0) -
-        (a.lastMessage?.fileMetadata.transitCreated || 0)
-    );
-  }, [channels, metadata, loggedOnIdentity]);
 
   if (!community && isFetched)
     return (
@@ -72,11 +47,11 @@ export const CommunityChannelsCatchup = memo(() => {
           <div className="flex h-full flex-grow flex-col overflow-hidden">
             <div className="flex h-full flex-grow flex-col">
               <CommunityCatchupHeader community={community} />
-              {!channelsToCatchup?.length ? (
+              {!channels?.length ? (
                 <p className="m-auto text-lg">{t('All done!')} 🎉</p>
               ) : (
                 <div className="h-20 flex-grow overflow-auto p-3">
-                  {channelsToCatchup?.map((chnl) => (
+                  {channels?.map((chnl) => (
                     <CommunityChannelCatchup
                       community={community}
                       channel={chnl}
