@@ -13,23 +13,22 @@ import {
   useAllContacts,
   findMentionedInRichText,
   trimRichText,
-  useDebounce,
 } from '@homebase-id/common-app';
 import { PaperPlane, Plus } from '@homebase-id/common-app/icons';
-import { HomebaseFile, NewHomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
+import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
 
-import { useState, useEffect, useRef, useMemo, lazy, Suspense, useCallback } from 'react';
+import { useState, useRef, useMemo, lazy, Suspense, useCallback } from 'react';
 
 import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { useCommunityMessage } from '../../../../hooks/community/messages/useCommunityMessage';
-import { useCommunityMetadata } from '../../../../hooks/community/useCommunityMetadata';
 import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
-import { CommunityMetadata, Draft } from '../../../../providers/CommunityMetadataProvider';
 import { CommunityChannel } from '../../../../providers/CommunityProvider';
 import { ChannelPlugin } from '../RTEChannelDropdown/RTEChannelDropdownPlugin';
 import { Mentionable } from '@homebase-id/rich-text-editor/src/components/plate-ui/mention-input-element';
+import { useMessageDraft } from './useMessageDraft';
+import { DraftSaver } from './DraftSaver';
 
 const RichTextEditor = lazy(() =>
   import('@homebase-id/rich-text-editor').then((rootExport) => ({
@@ -63,18 +62,25 @@ export const MessageComposer = ({
     (message && getTextRootsRecursive(message)?.join(' ')) || ''
   );
 
-  const { draft, isLoaded: isDraftLoaded } = useMessageDraft(
-    !message ? { community, channel, thread } : undefined
+  const draft = useMessageDraft(
+    !message
+      ? {
+          community,
+          draftKey: thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId,
+        }
+      : undefined
   );
 
   const addError = useErrors().add;
   const { mutateAsync: sendMessage } = useCommunityMessage().send;
 
   const doSend = useCallback(async () => {
-    const plainVal = (message && getTextRootsRecursive(message).join(' ')) || '';
+    const toSendMessage = message || draft?.message;
+
+    const plainVal = (toSendMessage && getTextRootsRecursive(toSendMessage).join(' ')) || '';
     const newFiles = [...(files || [])];
 
-    if (((!message || !plainVal) && !files?.length) || !community || !channel) return;
+    if (((!toSendMessage || !plainVal) && !files?.length) || !community || !channel) return;
 
     // Clear internal state and allow excessive senders
     setMessage([]);
@@ -82,7 +88,7 @@ export const MessageComposer = ({
     volatileRef.current?.clear();
     volatileRef.current?.focus();
 
-    const mentionedOdinIds = findMentionedInRichText(message);
+    const mentionedOdinIds = findMentionedInRichText(toSendMessage);
     const extendedParticipants = mentionedOdinIds.includes('@channel')
       ? community.fileMetadata.appData.content.members
       : Array.from(new Set(threadParticipants?.concat(mentionedOdinIds) || mentionedOdinIds));
@@ -93,7 +99,7 @@ export const MessageComposer = ({
         channel,
         thread,
         threadParticipants: extendedParticipants,
-        message: trimRichText(message),
+        message: trimRichText(toSendMessage),
         files: newFiles,
         chatId: getNewId(),
         userDate: new Date().getTime(),
@@ -155,8 +161,10 @@ export const MessageComposer = ({
   }, [contacts]);
 
   const plainMessage = useMemo(
-    () => (message && getTextRootsRecursive(message).join(' ')) || '',
-    [message]
+    () =>
+      ((message || draft?.message) && getTextRootsRecursive(message || draft?.message).join(' ')) ||
+      '',
+    [message, draft]
   );
 
   const changeHandler = useCallback(
@@ -177,20 +185,17 @@ export const MessageComposer = ({
   }, []);
 
   const onSubmit = useMemo(() => (isTouchDevice() ? undefined : doSend), [doSend]);
+
   return (
     <>
-      {isDraftLoaded ? (
-        <DraftSaver
-          community={community}
-          channel={channel}
-          thread={thread}
-          message={message || draft?.message}
-        />
-      ) : null}
+      <DraftSaver
+        community={community}
+        draftKey={thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId}
+        message={message || draft?.message}
+      />
       <div className={`bg-background pb-[env(safe-area-inset-bottom)] ${className || ''}`}>
         <div
           className="flex flex-shrink-0 flex-row gap-2 px-0 md:px-3 md:pb-2 lg:pb-5"
-          data-default-value={message || draft?.message}
           onPaste={(e) => {
             const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
 
@@ -267,113 +272,4 @@ export const MessageComposer = ({
       </div>
     </>
   );
-};
-
-const useMessageDraft = (props?: {
-  community: HomebaseFile<CommunityDefinition> | undefined;
-  channel: HomebaseFile<CommunityChannel> | undefined;
-  thread: HomebaseFile<CommunityMessage> | undefined;
-}) => {
-  const { community, channel, thread } = props || {};
-  const threadId = thread?.fileMetadata.globalTransitId;
-
-  const {
-    single: { data: metadata },
-  } = useCommunityMetadata(
-    props
-      ? {
-          odinId: community?.fileMetadata.senderOdinId,
-          communityId: community?.fileMetadata.appData.uniqueId,
-        }
-      : undefined
-  );
-
-  const draftsKey = useMemo(
-    () => threadId || channel?.fileMetadata.appData.uniqueId,
-    [threadId, channel]
-  );
-
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [draft, setDraft] = useState<Draft | undefined>(undefined);
-
-  useEffect(() => {
-    if (!draftsKey || !metadata || draft) return;
-
-    setIsLoaded(true);
-    const drafts = metadata?.fileMetadata.appData.content.drafts || {};
-    setDraft(draftsKey ? drafts[draftsKey] : undefined);
-  }, [draftsKey, metadata]);
-
-  return { isLoaded, draft };
-};
-
-const DraftSaver = ({
-  community,
-  channel,
-  thread,
-  message,
-}: {
-  community: HomebaseFile<CommunityDefinition> | undefined;
-  channel: HomebaseFile<CommunityChannel> | undefined;
-  thread: HomebaseFile<CommunityMessage> | undefined;
-  message: RichText | undefined;
-}) => {
-  const threadId = thread?.fileMetadata.globalTransitId;
-
-  const {
-    single: { data: metadata },
-    update: { mutate: updateMetadata },
-  } = useCommunityMetadata({
-    odinId: community?.fileMetadata.senderOdinId,
-    communityId: community?.fileMetadata.appData.uniqueId,
-  });
-
-  const drafts = metadata?.fileMetadata.appData.content.drafts || {};
-  const draftsKey = useMemo(
-    () => threadId || channel?.fileMetadata.appData.uniqueId,
-    [threadId, channel]
-  );
-
-  const [toSaveMeta, setToSaveMeta] = useState<
-    HomebaseFile<CommunityMetadata> | NewHomebaseFile<CommunityMetadata> | undefined
-  >();
-
-  const debouncedSave = useDebounce(() => toSaveMeta && updateMetadata({ metadata: toSaveMeta }), {
-    timeoutMillis: 2000,
-  });
-
-  useEffect(() => {
-    if (metadata && draftsKey) {
-      if (drafts[draftsKey]?.message === message) return;
-
-      const newDrafts: Record<string, Draft | undefined> = {
-        ...drafts,
-        [draftsKey]: {
-          message,
-          updatedAt: new Date().getTime(),
-        },
-      };
-
-      const newMeta: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata> = {
-        ...metadata,
-        fileMetadata: {
-          ...metadata?.fileMetadata,
-          appData: {
-            ...metadata?.fileMetadata.appData,
-            content: { ...metadata?.fileMetadata.appData.content, drafts: newDrafts },
-          },
-        },
-      };
-
-      if (message === undefined || message.length === 0) {
-        updateMetadata({ metadata: newMeta });
-        return;
-      } else {
-        setToSaveMeta(newMeta);
-        debouncedSave();
-      }
-    }
-  }, [threadId, channel, message, debouncedSave]);
-
-  return null;
 };

@@ -8,16 +8,15 @@ import {
   LinkOverview,
   t,
   trimRichText,
-  useDebounce,
   useErrors,
   useLinkPreviewBuilder,
   VolatileInputRef,
 } from '@homebase-id/common-app';
-import { useState, useEffect, FC, useRef, lazy } from 'react';
+import { useState, FC, useRef, lazy, useMemo, useCallback } from 'react';
 
 import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { ChatComposerProps } from '@homebase-id/chat-app/src/components/Chat/Composer/ChatComposer';
-import { HomebaseFile, NewHomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
+import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
 import { useChatMessage } from '@homebase-id/chat-app/src/hooks/chat/useChatMessage';
 import { Plus, PaperPlane, Times } from '@homebase-id/common-app/icons';
 import { LinkPreview } from '@homebase-id/js-lib/media';
@@ -29,8 +28,9 @@ const RichTextEditor = lazy(() =>
 import { EmbeddedMessage } from '@homebase-id/chat-app/src/components/Chat/Detail/EmbeddedMessage';
 import { ChatMessage } from '@homebase-id/chat-app/src/providers/ChatProvider';
 import { useParams } from 'react-router-dom';
-import { useCommunityMetadata } from '../../../../hooks/community/useCommunityMetadata';
-import { CommunityMetadata, Draft } from '../../../../providers/CommunityMetadataProvider';
+import { DraftSaver } from './DraftSaver';
+import { useCommunity } from '../../../../hooks/community/useCommunity';
+import { useMessageDraft } from './useMessageDraft';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 
@@ -43,64 +43,29 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = ({
   const { odinKey, communityKey } = useParams();
   const volatileRef = useRef<VolatileInputRef>(null);
 
-  const {
-    single: { data: metadata },
-    update: { mutate: updateMetadata },
-  } = useCommunityMetadata({
+  const { data: community } = useCommunity({
     odinId: odinKey,
     communityId: communityKey,
-  });
+  }).fetch;
 
-  const [toSaveMeta, setToSaveMeta] = useState<
-    HomebaseFile<CommunityMetadata> | NewHomebaseFile<CommunityMetadata> | undefined
-  >();
-  const drafts = (toSaveMeta || metadata)?.fileMetadata.appData.content.drafts || {};
-  const [message, setMessage] = useState<RichText | undefined>(
-    conversation?.fileMetadata.appData.uniqueId
-      ? drafts[conversation.fileMetadata.appData.uniqueId]?.message
-      : undefined
-  );
+  const [message, setMessage] = useState<RichText | undefined>(undefined);
   const [files, setFiles] = useState<NewMediaFile[]>();
 
-  const instantSave = (
-    toSaveMeta: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata>
-  ) => updateMetadata({ metadata: toSaveMeta });
-  const debouncedSave = useDebounce(() => toSaveMeta && updateMetadata({ metadata: toSaveMeta }), {
-    timeoutMillis: 2000,
-  });
-  useEffect(() => {
-    if (metadata && conversation && conversation?.fileMetadata.appData.uniqueId) {
-      if (drafts[conversation.fileMetadata.appData.uniqueId]?.message === message) return;
+  const draft = useMessageDraft(
+    !message
+      ? {
+          community,
+          draftKey: conversation?.fileMetadata.appData.uniqueId,
+        }
+      : undefined
+  );
 
-      const newDrafts: Record<string, Draft | undefined> = {
-        ...drafts,
-        [conversation.fileMetadata.appData.uniqueId]: {
-          message,
-          updatedAt: new Date().getTime(),
-        },
-      };
-
-      const newMeta = {
-        ...metadata,
-        fileMetadata: {
-          ...metadata?.fileMetadata,
-          appData: {
-            ...metadata?.fileMetadata.appData,
-            content: { ...metadata?.fileMetadata.appData.content, drafts: newDrafts },
-          },
-        },
-      };
-
-      if (message === undefined) {
-        instantSave(newMeta);
-        return;
-      }
-      setToSaveMeta(newMeta);
-      debouncedSave();
-    }
-  }, [conversation, message, debouncedSave]);
-
-  const plainMessage = message && getTextRootsRecursive(message).join(' ');
+  const plainMessage = useMemo(
+    () =>
+      ((message || draft?.message) && getTextRootsRecursive(message || draft?.message).join(' ')) ||
+      '',
+    [message, draft]
+  );
   const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(plainMessage || '');
 
   const addError = useErrors().add;
@@ -108,6 +73,8 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = ({
 
   const conversationContent = conversation?.fileMetadata.appData.content;
   const doSend = async () => {
+    const toSendMessage = message || draft?.message;
+
     const trimmedVal = plainMessage?.trim();
     const replyId = replyMsg?.fileMetadata.appData.uniqueId;
     const newFiles = [...(files || [])];
@@ -120,7 +87,7 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = ({
       return;
 
     // Clear internal state and allow excessive senders
-    setMessage(undefined);
+    setMessage([]);
     setFiles([]);
     volatileRef.current?.clear();
     volatileRef.current?.focus();
@@ -129,7 +96,7 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = ({
     try {
       await sendMessage({
         conversation,
-        message: trimRichText(message) || '',
+        message: trimRichText(toSendMessage) || '',
         replyId: replyId,
         files: newFiles,
         chatId: getNewId(),
@@ -147,8 +114,26 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = ({
     }
   };
 
+  const changeHandler = useCallback(
+    (newVal: {
+      target: {
+        name: string;
+        value: RichText;
+      };
+    }) => setMessage(newVal.target.value),
+    []
+  );
+
+  const onSubmit = useMemo(() => (isTouchDevice() ? undefined : doSend), [doSend]);
+
   return (
     <>
+      <DraftSaver
+        community={community}
+        draftKey={conversation?.fileMetadata.appData.uniqueId}
+        message={message || draft?.message}
+      />
+
       <div className={`bg-background pb-[env(safe-area-inset-bottom)]`}>
         <div
           className="flex flex-shrink-0 flex-row gap-2 px-0 md:px-3 md:pb-2 lg:pb-5"
@@ -165,10 +150,10 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = ({
           <RichTextEditor
             className="relative w-8 flex-grow border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border"
             contentClassName="max-h-[50vh] overflow-auto"
-            onChange={(newVal) => setMessage(newVal.target.value)}
-            defaultValue={message}
+            onChange={changeHandler}
+            defaultValue={message || draft?.message}
             autoFocus={!isTouchDevice()}
-            onSubmit={isTouchDevice() ? undefined : doSend}
+            onSubmit={onSubmit}
             placeholder={t('Your message')}
             ref={volatileRef}
           >

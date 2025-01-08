@@ -4,6 +4,7 @@ import { useLastUpdatedChatMessages } from './messages/useCommunityMessages';
 import { useLastUpdatedThreadExcludingMine } from './threads/useCommunityThreads';
 import { useCommunityChannelsWithRecentMessages } from './channels/useCommunityChannelsWithRecentMessages';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 interface MarkCommunityChannelAsReadProps {
   odinId: string | undefined;
@@ -24,6 +25,7 @@ export const useMarkCommunityAsRead = ({
 }: MarkCommunityChannelAsReadProps | MarkCommunityThreadsAsReadProps) => {
   const channelId = (props as MarkCommunityChannelAsReadProps).channelId;
   const threads = (props as MarkCommunityThreadsAsReadProps).threads;
+  const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
 
   const { data: channelsWithRecent } = useCommunityChannelsWithRecentMessages({
     odinId,
@@ -58,13 +60,11 @@ export const useMarkCommunityAsRead = ({
       return;
     }
 
-    const savedLastReadTime = metadata?.fileMetadata.appData.content.lastReadTime;
-    const lastReadIsUpToDate = savedLastReadTime && savedLastReadTime >= lastUpdate;
-
     const savedLastReadTimeChannel =
       channelId && metadata?.fileMetadata.appData.content.channelLastReadTime[channelId];
     const channelReadIsUpToDate =
       !matchedChannel?.lastMessage ||
+      matchedChannel?.lastMessage.fileMetadata.originalAuthor === loggedInIdentity ||
       (savedLastReadTimeChannel &&
         savedLastReadTimeChannel >= matchedChannel.lastMessage.fileMetadata.created);
 
@@ -72,26 +72,26 @@ export const useMarkCommunityAsRead = ({
       !lastUpdatedThreads ||
       lastUpdatedThreads <= metadata?.fileMetadata.appData.content.threadsLastReadTime;
 
-    if (lastReadIsUpToDate && channelReadIsUpToDate && threadsReadIsUpToDate) {
-      // console.log('no need to update read time', {
-      //   matchedChannel,
-      //   created: matchedChannel?.lastMessage?.fileMetadata.created,
-      //   savedLastReadTimeChannel,
-      // });
+    if (channelReadIsUpToDate && threadsReadIsUpToDate) {
       return;
     }
 
     // console.log('marking as read', {
-    //   lastReadTime: lastUpdate || undefined,
-    //   threadsLastReadTime: lastUpdatedThreads || undefined,
-    //   channelLastReadTime:
-    //     matchedChannel && matchedChannel.lastMessage
-    //       ? {
-    //           ...metadata.fileMetadata.appData.content.channelLastReadTime,
-    //           [matchedChannel.fileMetadata.appData.uniqueId as string]:
-    //             matchedChannel.lastMessage.fileMetadata.created,
-    //         }
-    //       : undefined,
+    //   current: metadata.fileMetadata.appData.content,
+    //   new: {
+    //     ...metadata.fileMetadata.appData.content,
+    //     lastReadTime: lastUpdate,
+    //     threadsLastReadTime:
+    //       lastUpdatedThreads || metadata.fileMetadata.appData.content.threadsLastReadTime || 0,
+    //     channelLastReadTime:
+    //       matchedChannel && matchedChannel.lastMessage
+    //         ? {
+    //             ...metadata.fileMetadata.appData.content.channelLastReadTime,
+    //             [matchedChannel.fileMetadata.appData.uniqueId as string]:
+    //               matchedChannel.lastMessage.fileMetadata.created,
+    //           }
+    //         : metadata.fileMetadata.appData.content.channelLastReadTime,
+    //   },
     // });
     updateMetadata({
       metadata: {
