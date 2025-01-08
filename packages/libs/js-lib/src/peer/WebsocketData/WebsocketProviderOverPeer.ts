@@ -290,7 +290,7 @@ const EstablishConnectionOverPeer = async (
 
   webSocketClient.send(
     JSON.stringify({
-      sharedEncryptEncryptedOptions64: establishConnectionMessage,
+      sharedSecretEncryptedOptions: establishConnectionMessage,
       clientAuthToken64: clientAuthenticationToken64,
     })
   );
