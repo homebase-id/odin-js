@@ -70,10 +70,9 @@ export const MessageComposer = ({
     HomebaseFile<CommunityMetadata> | NewHomebaseFile<CommunityMetadata> | undefined
   >();
   const drafts = (toSaveMeta || metadata)?.fileMetadata.appData.content.drafts || {};
+  const draftsKey = threadId || channel?.fileMetadata.appData.uniqueId;
   const [message, setMessage] = useState<RichText | undefined>(
-    threadId || (channel && channel.fileMetadata.appData.uniqueId)
-      ? drafts[(threadId || channel?.fileMetadata.appData.uniqueId) as string]?.message
-      : undefined
+    draftsKey ? drafts[draftsKey]?.message : undefined
   );
 
   const [files, setFiles] = useState<NewMediaFile[]>();
@@ -85,20 +84,18 @@ export const MessageComposer = ({
     timeoutMillis: 2000,
   });
   useEffect(() => {
-    if (metadata && (threadId || (channel && channel.fileMetadata.appData.uniqueId))) {
-      if (
-        drafts[threadId || ((channel && channel.fileMetadata.appData.uniqueId) as string)]
-          ?.message === message
-      )
-        return;
+    if (metadata && draftsKey) {
+      if (drafts[draftsKey]?.message === message) return;
 
       const newDrafts: Record<string, Draft | undefined> = {
         ...drafts,
-        [threadId || ((channel && channel.fileMetadata.appData.uniqueId) as string)]: {
+        [draftsKey]: {
           message,
           updatedAt: new Date().getTime(),
         },
       };
+
+      // console.log('newDrafts', newDrafts);
 
       const newMeta: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata> = {
         ...metadata,
