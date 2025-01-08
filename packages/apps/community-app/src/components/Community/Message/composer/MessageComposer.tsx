@@ -18,7 +18,7 @@ import {
 import { PaperPlane, Plus } from '@homebase-id/common-app/icons';
 import { HomebaseFile, NewHomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
 
-import { useState, useEffect, useRef, useMemo, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, useMemo, lazy, Suspense, useCallback } from 'react';
 
 import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { LinkPreview } from '@homebase-id/js-lib/media';
@@ -55,83 +55,29 @@ export const MessageComposer = ({
   onKeyDown?: (e: React.KeyboardEvent) => void;
   className?: string;
 }) => {
-  const threadId = thread?.fileMetadata.globalTransitId;
   const volatileRef = useRef<VolatileInputRef>(null);
 
-  const {
-    single: { data: metadata },
-    update: { mutate: updateMetadata },
-  } = useCommunityMetadata({
-    odinId: community?.fileMetadata.senderOdinId,
-    communityId: community?.fileMetadata.appData.uniqueId,
-  });
-
-  const [toSaveMeta, setToSaveMeta] = useState<
-    HomebaseFile<CommunityMetadata> | NewHomebaseFile<CommunityMetadata> | undefined
-  >();
-  const drafts = (toSaveMeta || metadata)?.fileMetadata.appData.content.drafts || {};
-  const draftsKey = threadId || channel?.fileMetadata.appData.uniqueId;
-  const [message, setMessage] = useState<RichText | undefined>(
-    draftsKey ? drafts[draftsKey]?.message : undefined
-  );
-
+  const [message, setMessage] = useState<RichText | undefined>(undefined);
   const [files, setFiles] = useState<NewMediaFile[]>();
-
-  const instantSave = (
-    toSaveMeta: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata>
-  ) => updateMetadata({ metadata: toSaveMeta });
-  const debouncedSave = useDebounce(() => toSaveMeta && updateMetadata({ metadata: toSaveMeta }), {
-    timeoutMillis: 2000,
-  });
-  useEffect(() => {
-    if (metadata && draftsKey) {
-      if (drafts[draftsKey]?.message === message) return;
-
-      const newDrafts: Record<string, Draft | undefined> = {
-        ...drafts,
-        [draftsKey]: {
-          message,
-          updatedAt: new Date().getTime(),
-        },
-      };
-
-      // console.log('newDrafts', newDrafts);
-
-      const newMeta: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata> = {
-        ...metadata,
-        fileMetadata: {
-          ...metadata?.fileMetadata,
-          appData: {
-            ...metadata?.fileMetadata.appData,
-            content: { ...metadata?.fileMetadata.appData.content, drafts: newDrafts },
-          },
-        },
-      };
-
-      if (message === undefined) {
-        instantSave(newMeta);
-        return;
-      }
-      setToSaveMeta(newMeta);
-      debouncedSave();
-    }
-  }, [threadId, channel, message, debouncedSave]);
-
   const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(
     (message && getTextRootsRecursive(message)?.join(' ')) || ''
+  );
+
+  const { draft, isLoaded: isDraftLoaded } = useMessageDraft(
+    !message ? { community, channel, thread } : undefined
   );
 
   const addError = useErrors().add;
   const { mutateAsync: sendMessage } = useCommunityMessage().send;
 
-  const doSend = async () => {
+  const doSend = useCallback(async () => {
     const plainVal = (message && getTextRootsRecursive(message).join(' ')) || '';
     const newFiles = [...(files || [])];
 
     if (((!message || !plainVal) && !files?.length) || !community || !channel) return;
 
     // Clear internal state and allow excessive senders
-    setMessage(undefined);
+    setMessage([]);
     setFiles([]);
     volatileRef.current?.clear();
     volatileRef.current?.focus();
@@ -161,7 +107,18 @@ export const MessageComposer = ({
         t('Your message "{0}" was not sent', ellipsisAtMaxChar(plainVal || '', 20) || '')
       );
     }
-  };
+  }, [
+    addError,
+    channel,
+    community,
+    files,
+    linkPreviews,
+    message,
+    onSend,
+    sendMessage,
+    thread,
+    threadParticipants,
+  ]);
 
   const { data: contacts } = useAllContacts(true);
   const mentionables: Mentionable[] = useMemo(() => {
@@ -202,12 +159,38 @@ export const MessageComposer = ({
     [message]
   );
 
+  const changeHandler = useCallback(
+    (newVal: {
+      target: {
+        name: string;
+        value: RichText;
+      };
+    }) => setMessage(newVal.target.value),
+    []
+  );
+
+  const plugins = useMemo(() => {
+    return [
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
+    ];
+  }, []);
+
+  const onSubmit = useMemo(() => (isTouchDevice() ? undefined : doSend), [doSend]);
   return (
     <>
+      {isDraftLoaded ? (
+        <DraftSaver
+          community={community}
+          channel={channel}
+          thread={thread}
+          message={message || draft?.message}
+        />
+      ) : null}
       <div className={`bg-background pb-[env(safe-area-inset-bottom)] ${className || ''}`}>
         <div
           className="flex flex-shrink-0 flex-row gap-2 px-0 md:px-3 md:pb-2 lg:pb-5"
-          data-default-value={message}
+          data-default-value={message || draft?.message}
           onPaste={(e) => {
             const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
 
@@ -225,10 +208,10 @@ export const MessageComposer = ({
             <RichTextEditor
               className="relative w-8 flex-grow border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border"
               contentClassName="max-h-[50vh] overflow-auto"
-              onChange={(newVal) => setMessage(newVal.target.value)}
-              defaultValue={message}
+              onChange={changeHandler}
+              defaultValue={message || draft?.message}
               placeholder={
-                threadId
+                thread
                   ? t(`Reply...`)
                   : channel?.fileMetadata.appData.content.title
                     ? `${t('Message')} # ${channel.fileMetadata.appData.content.title}`
@@ -236,14 +219,11 @@ export const MessageComposer = ({
               }
               autoFocus={!isTouchDevice()}
               ref={volatileRef}
-              onSubmit={isTouchDevice() ? undefined : doSend}
+              onSubmit={onSubmit}
               onKeyDown={onKeyDown}
               disableHeadings={true}
               mentionables={mentionables}
-              plugins={[
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
-              ]}
+              plugins={plugins}
             >
               <div className="max-h-[30vh] overflow-auto">
                 <FileOverview files={files} setFiles={setFiles} cols={8} />
@@ -287,4 +267,113 @@ export const MessageComposer = ({
       </div>
     </>
   );
+};
+
+const useMessageDraft = (props?: {
+  community: HomebaseFile<CommunityDefinition> | undefined;
+  channel: HomebaseFile<CommunityChannel> | undefined;
+  thread: HomebaseFile<CommunityMessage> | undefined;
+}) => {
+  const { community, channel, thread } = props || {};
+  const threadId = thread?.fileMetadata.globalTransitId;
+
+  const {
+    single: { data: metadata },
+  } = useCommunityMetadata(
+    props
+      ? {
+          odinId: community?.fileMetadata.senderOdinId,
+          communityId: community?.fileMetadata.appData.uniqueId,
+        }
+      : undefined
+  );
+
+  const draftsKey = useMemo(
+    () => threadId || channel?.fileMetadata.appData.uniqueId,
+    [threadId, channel]
+  );
+
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [draft, setDraft] = useState<Draft | undefined>(undefined);
+
+  useEffect(() => {
+    if (!draftsKey || !metadata || draft) return;
+
+    setIsLoaded(true);
+    const drafts = metadata?.fileMetadata.appData.content.drafts || {};
+    setDraft(draftsKey ? drafts[draftsKey] : undefined);
+  }, [draftsKey, metadata]);
+
+  return { isLoaded, draft };
+};
+
+const DraftSaver = ({
+  community,
+  channel,
+  thread,
+  message,
+}: {
+  community: HomebaseFile<CommunityDefinition> | undefined;
+  channel: HomebaseFile<CommunityChannel> | undefined;
+  thread: HomebaseFile<CommunityMessage> | undefined;
+  message: RichText | undefined;
+}) => {
+  const threadId = thread?.fileMetadata.globalTransitId;
+
+  const {
+    single: { data: metadata },
+    update: { mutate: updateMetadata },
+  } = useCommunityMetadata({
+    odinId: community?.fileMetadata.senderOdinId,
+    communityId: community?.fileMetadata.appData.uniqueId,
+  });
+
+  const drafts = metadata?.fileMetadata.appData.content.drafts || {};
+  const draftsKey = useMemo(
+    () => threadId || channel?.fileMetadata.appData.uniqueId,
+    [threadId, channel]
+  );
+
+  const [toSaveMeta, setToSaveMeta] = useState<
+    HomebaseFile<CommunityMetadata> | NewHomebaseFile<CommunityMetadata> | undefined
+  >();
+
+  const debouncedSave = useDebounce(() => toSaveMeta && updateMetadata({ metadata: toSaveMeta }), {
+    timeoutMillis: 2000,
+  });
+
+  useEffect(() => {
+    if (metadata && draftsKey) {
+      if (drafts[draftsKey]?.message === message) return;
+
+      const newDrafts: Record<string, Draft | undefined> = {
+        ...drafts,
+        [draftsKey]: {
+          message,
+          updatedAt: new Date().getTime(),
+        },
+      };
+
+      const newMeta: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata> = {
+        ...metadata,
+        fileMetadata: {
+          ...metadata?.fileMetadata,
+          appData: {
+            ...metadata?.fileMetadata.appData,
+            content: { ...metadata?.fileMetadata.appData.content, drafts: newDrafts },
+          },
+        },
+      };
+
+      if (message === undefined || message.length === 0) {
+        updateMetadata({ metadata: newMeta });
+        return;
+      } else {
+        setToSaveMeta(newMeta);
+        debouncedSave();
+      }
+    }
+  }, [threadId, channel, message, debouncedSave]);
+
+  return null;
 };

@@ -321,8 +321,9 @@ const MessageTextRenderer = ({
         const { type, attributes } = element;
 
         if (type === 'p' || type === 'paragraph') {
+          const { text, ...renderableAttributes } = attributes || {};
           return (
-            <p {...attributes} className="min-h-2 empty:min-h-0">
+            <p {...renderableAttributes} className="min-h-2 empty:min-h-0">
               {children}
             </p>
           );

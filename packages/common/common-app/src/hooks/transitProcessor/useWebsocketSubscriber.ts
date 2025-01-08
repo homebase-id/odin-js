@@ -122,7 +122,7 @@ export const useWebsocketSubscriber = (
         }
       }
     };
-  }, [localHandler]);
+  }, [localHandler, setIsConected]);
 
   return isConnected;
 };
