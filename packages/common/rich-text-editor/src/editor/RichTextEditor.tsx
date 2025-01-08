@@ -80,6 +80,7 @@ import { focusEditor, PlateLeaf } from '@udecode/plate-common/react';
 import { ListElement } from '../components/plate-ui/list-element';
 import { MediaOptionsContextProvider } from './MediaOptionsContext/MediaOptionsContext';
 import { useMediaOptionsContext } from './MediaOptionsContext/useMediaOptionsContext';
+import { TextualEmojiPlugin } from './TextualEmojiPlugin/TextualEmojiPlugin';
 
 interface RTEProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -294,6 +295,7 @@ const InnerRichTextEditor = memo(
           // DeserializeHtmlPlugin,
           // DeserializeMdPlugin,
           EmojiPlugin,
+          TextualEmojiPlugin,
           mentionables
             ? // MentionPlugin is not typed correctly to our custom implementation, so we need to cast it to any
               MentionPlugin.configure({

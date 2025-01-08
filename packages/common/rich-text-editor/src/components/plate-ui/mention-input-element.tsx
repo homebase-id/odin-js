@@ -94,7 +94,7 @@ export const MentionInputElement = withRef<typeof PlateElement>(({ className, ..
             <InlineComboboxItem
               key={item.value || item.key}
               onClick={() => onSelectItem(editor, item, search)}
-              value={item.label || item.text}
+              value={item.label || item.text.replaceAll('@', '')}
             >
               {item.label || item.text}
             </InlineComboboxItem>
