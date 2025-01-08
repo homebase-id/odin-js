@@ -20,6 +20,7 @@ import { Triangle } from '@homebase-id/common-app/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import {
+  BACKEDUP_PAYLOAD_KEY,
   COMMUNITY_LINKS_PAYLOAD_KEY,
   CommunityMessage,
 } from '../../../../providers/CommunityMessageProvider';
@@ -34,7 +35,9 @@ export const CommunityMedia = ({
   communityId: string;
   msg: HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage>;
 }) => {
-  const payloads = msg.fileMetadata.payloads?.filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY);
+  const payloads = msg.fileMetadata.payloads?.filter(
+    (pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY && pyld.key !== BACKEDUP_PAYLOAD_KEY
+  );
   const isGallery = payloads && payloads.length >= 2;
   const navigate = useNavigate();
   const { odinKey, communityKey, channelKey } = useParams();
@@ -53,7 +56,7 @@ export const CommunityMedia = ({
       fit={'contain'}
       onClick={() =>
         navigate(
-          `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey}/${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`
+          `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || msg.fileMetadata.appData.content.channelId}/${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`
         )
       }
       previewThumbnail={isGallery ? undefined : msg.fileMetadata.appData.previewThumbnail}

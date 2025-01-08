@@ -13,22 +13,22 @@ import {
   useAllContacts,
   findMentionedInRichText,
   trimRichText,
-  useDebounce,
 } from '@homebase-id/common-app';
 import { PaperPlane, Plus } from '@homebase-id/common-app/icons';
-import { HomebaseFile, NewHomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
+import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
 
-import { useState, useEffect, useRef, useMemo, lazy, Suspense } from 'react';
+import { useState, useRef, useMemo, lazy, Suspense, useCallback } from 'react';
 
 import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { useCommunityMessage } from '../../../../hooks/community/messages/useCommunityMessage';
-import { useCommunityMetadata } from '../../../../hooks/community/useCommunityMetadata';
 import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
-import { CommunityMetadata, Draft } from '../../../../providers/CommunityMetadataProvider';
 import { CommunityChannel } from '../../../../providers/CommunityProvider';
 import { ChannelPlugin } from '../RTEChannelDropdown/RTEChannelDropdownPlugin';
+import { Mentionable } from '@homebase-id/rich-text-editor/src/components/plate-ui/mention-input-element';
+import { useMessageDraft } from './useMessageDraft';
+import { DraftSaver } from './DraftSaver';
 
 const RichTextEditor = lazy(() =>
   import('@homebase-id/rich-text-editor').then((rootExport) => ({
@@ -54,91 +54,41 @@ export const MessageComposer = ({
   onKeyDown?: (e: React.KeyboardEvent) => void;
   className?: string;
 }) => {
-  const threadId = thread?.fileMetadata.globalTransitId;
   const volatileRef = useRef<VolatileInputRef>(null);
 
-  const {
-    single: { data: metadata },
-    update: { mutate: updateMetadata },
-  } = useCommunityMetadata({
-    odinId: community?.fileMetadata.senderOdinId,
-    communityId: community?.fileMetadata.appData.uniqueId,
-  });
-
-  const [toSaveMeta, setToSaveMeta] = useState<
-    HomebaseFile<CommunityMetadata> | NewHomebaseFile<CommunityMetadata> | undefined
-  >();
-  const drafts = (toSaveMeta || metadata)?.fileMetadata.appData.content.drafts || {};
-  const [message, setMessage] = useState<RichText | undefined>(
-    threadId || (channel && channel.fileMetadata.appData.uniqueId)
-      ? drafts[(threadId || channel?.fileMetadata.appData.uniqueId) as string]?.message
-      : undefined
-  );
-
+  const [message, setMessage] = useState<RichText | undefined>(undefined);
   const [files, setFiles] = useState<NewMediaFile[]>();
-
-  const instantSave = (
-    toSaveMeta: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata>
-  ) => updateMetadata({ metadata: toSaveMeta });
-  const debouncedSave = useDebounce(() => toSaveMeta && updateMetadata({ metadata: toSaveMeta }), {
-    timeoutMillis: 2000,
-  });
-  useEffect(() => {
-    if (metadata && (threadId || (channel && channel.fileMetadata.appData.uniqueId))) {
-      if (
-        drafts[threadId || ((channel && channel.fileMetadata.appData.uniqueId) as string)]
-          ?.message === message
-      )
-        return;
-
-      const newDrafts: Record<string, Draft | undefined> = {
-        ...drafts,
-        [threadId || ((channel && channel.fileMetadata.appData.uniqueId) as string)]: {
-          message,
-          updatedAt: new Date().getTime(),
-        },
-      };
-
-      const newMeta: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata> = {
-        ...metadata,
-        fileMetadata: {
-          ...metadata?.fileMetadata,
-          appData: {
-            ...metadata?.fileMetadata.appData,
-            content: { ...metadata?.fileMetadata.appData.content, drafts: newDrafts },
-          },
-        },
-      };
-
-      if (message === undefined) {
-        instantSave(newMeta);
-        return;
-      }
-      setToSaveMeta(newMeta);
-      debouncedSave();
-    }
-  }, [threadId, channel, message, debouncedSave]);
-
   const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(
     (message && getTextRootsRecursive(message)?.join(' ')) || ''
+  );
+
+  const draft = useMessageDraft(
+    !message
+      ? {
+          community,
+          draftKey: thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId,
+        }
+      : undefined
   );
 
   const addError = useErrors().add;
   const { mutateAsync: sendMessage } = useCommunityMessage().send;
 
-  const doSend = async () => {
-    const plainVal = (message && getTextRootsRecursive(message).join(' ')) || '';
+  const doSend = useCallback(async () => {
+    const toSendMessage = message || draft?.message;
+
+    const plainVal = (toSendMessage && getTextRootsRecursive(toSendMessage).join(' ')) || '';
     const newFiles = [...(files || [])];
 
-    if (((!message || !plainVal) && !files?.length) || !community || !channel) return;
+    if (((!toSendMessage || !plainVal) && !files?.length) || !community || !channel) return;
 
     // Clear internal state and allow excessive senders
-    setMessage(undefined);
+    setMessage([]);
     setFiles([]);
     volatileRef.current?.clear();
     volatileRef.current?.focus();
 
-    const mentionedOdinIds = findMentionedInRichText(message);
+    const mentionedOdinIds = findMentionedInRichText(toSendMessage);
     const extendedParticipants = mentionedOdinIds.includes('@channel')
       ? community.fileMetadata.appData.content.members
       : Array.from(new Set(threadParticipants?.concat(mentionedOdinIds) || mentionedOdinIds));
@@ -149,7 +99,7 @@ export const MessageComposer = ({
         channel,
         thread,
         threadParticipants: extendedParticipants,
-        message: trimRichText(message),
+        message: trimRichText(toSendMessage),
         files: newFiles,
         chatId: getNewId(),
         userDate: new Date().getTime(),
@@ -163,10 +113,21 @@ export const MessageComposer = ({
         t('Your message "{0}" was not sent', ellipsisAtMaxChar(plainVal || '', 20) || '')
       );
     }
-  };
+  }, [
+    addError,
+    channel,
+    community,
+    files,
+    linkPreviews,
+    message,
+    onSend,
+    sendMessage,
+    thread,
+    threadParticipants,
+  ]);
 
   const { data: contacts } = useAllContacts(true);
-  const mentionables: { key: string; text: string }[] = useMemo(() => {
+  const mentionables: Mentionable[] = useMemo(() => {
     const filteredContacts =
       (contacts
         ?.filter(
@@ -176,31 +137,65 @@ export const MessageComposer = ({
               contact.fileMetadata.appData.content.odinId
             )
         )
-        ?.map((contact) =>
-          contact.fileMetadata.appData.content.odinId
-            ? {
-                key: contact.fileMetadata.appData.content.odinId,
-                text: contact.fileMetadata.appData.content.odinId,
-              }
-            : undefined
-        )
-        .filter(Boolean) as { key: string; text: string }[]) || [];
+        ?.map((contact) => {
+          const content = contact.fileMetadata.appData.content;
+          if (!content?.odinId) return;
+          const name =
+            content.name &&
+            (content.name.displayName ??
+              (content.name.givenName || content.name.surname
+                ? `${content.name.givenName ?? ''} ${content.name.surname ?? ''}`
+                : undefined));
+
+          return {
+            key: `${content.odinId} (${name})`,
+            value: content.odinId,
+            text: content.odinId,
+            label: `${content.odinId} (${name})`,
+          };
+        })
+        .filter(Boolean) as Mentionable[]) || [];
 
     filteredContacts.push({ key: '@channel', text: '@channel' });
     return filteredContacts;
   }, [contacts]);
 
   const plainMessage = useMemo(
-    () => (message && getTextRootsRecursive(message).join(' ')) || '',
-    [message]
+    () =>
+      ((message || draft?.message) && getTextRootsRecursive(message || draft?.message).join(' ')) ||
+      '',
+    [message, draft]
   );
+
+  const changeHandler = useCallback(
+    (newVal: {
+      target: {
+        name: string;
+        value: RichText;
+      };
+    }) => setMessage(newVal.target.value),
+    []
+  );
+
+  const plugins = useMemo(() => {
+    return [
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
+    ];
+  }, []);
+
+  const onSubmit = useMemo(() => (isTouchDevice() ? undefined : doSend), [doSend]);
 
   return (
     <>
+      <DraftSaver
+        community={community}
+        draftKey={thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId}
+        message={message || draft?.message}
+      />
       <div className={`bg-background pb-[env(safe-area-inset-bottom)] ${className || ''}`}>
         <div
           className="flex flex-shrink-0 flex-row gap-2 px-0 md:px-3 md:pb-2 lg:pb-5"
-          data-default-value={message}
           onPaste={(e) => {
             const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
 
@@ -210,14 +205,18 @@ export const MessageComposer = ({
             }
           }}
         >
-          <Suspense>
+          <Suspense
+            fallback={
+              <div className="relative h-[119px] w-full border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border" />
+            }
+          >
             <RichTextEditor
               className="relative w-8 flex-grow border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border"
               contentClassName="max-h-[50vh] overflow-auto"
-              onChange={(newVal) => setMessage(newVal.target.value)}
-              defaultValue={message}
+              onChange={changeHandler}
+              defaultValue={message || draft?.message}
               placeholder={
-                threadId
+                thread
                   ? t(`Reply...`)
                   : channel?.fileMetadata.appData.content.title
                     ? `${t('Message')} # ${channel.fileMetadata.appData.content.title}`
@@ -225,14 +224,11 @@ export const MessageComposer = ({
               }
               autoFocus={!isTouchDevice()}
               ref={volatileRef}
-              onSubmit={isTouchDevice() ? undefined : doSend}
+              onSubmit={onSubmit}
               onKeyDown={onKeyDown}
               disableHeadings={true}
               mentionables={mentionables}
-              plugins={[
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
-              ]}
+              plugins={plugins}
             >
               <div className="max-h-[30vh] overflow-auto">
                 <FileOverview files={files} setFiles={setFiles} cols={8} />

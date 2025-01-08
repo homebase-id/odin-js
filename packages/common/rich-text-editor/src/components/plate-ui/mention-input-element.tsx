@@ -1,10 +1,18 @@
 import { useState } from 'react';
 
 import { cn, withRef } from '@udecode/cn';
-import { getMentionOnSelectItem, TMentionItemBase } from '@udecode/plate-mention';
+import {
+  BaseMentionPlugin,
+  MentionConfig,
+  MentionOnSelectItem,
+  TMentionItemBase,
+} from '@udecode/plate-mention';
 
 export interface Mentionable extends TMentionItemBase {
-  key: string;
+  key: string; // unique key
+  text: string; // text to insert and used as search value
+  value?: string; // (optional) value to insert
+  label?: string; // (optional) label to display
 }
 
 import {
@@ -14,11 +22,38 @@ import {
   InlineComboboxInput,
   InlineComboboxItem,
 } from './inline-combobox';
-import { AnyPluginConfig } from '@udecode/plate-core';
 import { PlateElement } from './plate-element';
 import { MentionPlugin } from '@udecode/plate-mention/react';
+import {
+  moveSelection,
+  getBlockAbove,
+  isEndPoint,
+  insertText,
+  getEditorPlugin,
+  AnyPluginConfig,
+} from '@udecode/plate-common';
 
-const onSelectItem = getMentionOnSelectItem();
+const onSelectItem: MentionOnSelectItem<Mentionable> = (editor, item, search = '') => {
+  const { getOptions, tf } = getEditorPlugin<MentionConfig>(editor, {
+    key: BaseMentionPlugin.key,
+  });
+  const { insertSpaceAfterMention } = getOptions();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tf.insert.mention({ key: item.value || item.key, search, value: item.value || item.text } as any);
+
+  // move the selection after the element
+  moveSelection(editor, { unit: 'offset' });
+
+  const pathAbove = getBlockAbove(editor)?.[1];
+
+  const isBlockEnd =
+    editor.selection && pathAbove && isEndPoint(editor, editor.selection.anchor, pathAbove);
+
+  if (isBlockEnd && insertSpaceAfterMention) {
+    insertText(editor, ' ');
+  }
+};
 
 interface MentionOptions extends AnyPluginConfig {
   mentionables?: Mentionable[];
@@ -42,7 +77,6 @@ export const MentionInputElement = withRef<typeof PlateElement>(({ className, ..
         trigger="@"
         value={search}
         hideWhenSpace={true}
-        // hideWhenNoValue={true}
       >
         <span
           className={cn(
@@ -58,11 +92,11 @@ export const MentionInputElement = withRef<typeof PlateElement>(({ className, ..
 
           {mentionables.map((item) => (
             <InlineComboboxItem
-              key={item.key}
+              key={item.value || item.key}
               onClick={() => onSelectItem(editor, item, search)}
-              value={item.text.replaceAll('@', '')}
+              value={item.label || item.text}
             >
-              {item.text}
+              {item.label || item.text}
             </InlineComboboxItem>
           ))}
         </InlineComboboxContent>

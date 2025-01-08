@@ -52,13 +52,13 @@ export const CommunityThread = memo(
             className="p-2 xl:hidden"
             size="none"
             type="mute"
-            href={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || 'all'}`}
+            href={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || 'activity'}`}
           >
             <ChevronLeft className="h-5 w-5" />
           </ActionLink>
           {t('Thread')}
           <ActionLink
-            href={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || 'all'}`}
+            href={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || 'activity'}`}
             icon={Times}
             size="none"
             type="mute"

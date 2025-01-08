@@ -1,5 +1,6 @@
 import {
   ActionButton,
+  ConnectionName,
   DialogWrapper,
   EmojiSelector,
   formatDateExludingYearIfCurrent,
@@ -17,6 +18,7 @@ import { useCommunity } from '../../../hooks/community/useCommunity';
 import { useParams } from 'react-router-dom';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
+import { CommunityStatus } from '../../../providers/CommunityStatusProvider';
 
 export const MyProfileStatus = ({ className }: { className?: string }) => {
   const { odinKey, communityKey } = useParams();
@@ -26,7 +28,9 @@ export const MyProfileStatus = ({ className }: { className?: string }) => {
   const {
     get: { data: myStatus, isFetched },
   } = useMyStatus({ community });
-  const hasStatus = myStatus?.emoji || myStatus?.status;
+  const hasStatus =
+    (myStatus?.emoji || myStatus?.status) &&
+    (!myStatus?.validTill || new Date(myStatus.validTill) > new Date());
 
   if (!community || !isFetched) return null;
 
@@ -43,7 +47,8 @@ export const MyProfileStatus = ({ className }: { className?: string }) => {
           e.stopPropagation();
           setManageStatusDialogOpen(true);
         }}
-        title={
+        data-tooltip-dir="left"
+        data-tooltip={
           hasStatus
             ? `"${myStatus?.status || myStatus?.emoji}" ${myStatus?.validTill ? `${t('till')} ${formatDateExludingYearIfCurrent(new Date(myStatus.validTill))}` : ''}`
             : undefined
@@ -63,6 +68,7 @@ export const MyProfileStatus = ({ className }: { className?: string }) => {
 };
 
 export const ProfileStatus = ({ odinId, className }: { odinId: string; className?: string }) => {
+  const [isStatusDialogOpen, setStatusDialogOpen] = useState(false);
   const { odinKey, communityKey } = useParams();
   const { data: community } = useCommunity({ odinId: odinKey, communityId: communityKey }).fetch;
 
@@ -76,16 +82,31 @@ export const ProfileStatus = ({ odinId, className }: { odinId: string; className
   if (!community || !isFetched || !hasStatus) return null;
 
   return (
-    <span
-      title={
-        hasStatus
-          ? `"${myStatus?.status || myStatus?.emoji}" ${myStatus?.validTill ? `${t('till')} ${formatDateExludingYearIfCurrent(new Date(myStatus.validTill))}` : ''}`
-          : undefined
-      }
-      className={className}
-    >
-      {myStatus?.emoji || '💬'}
-    </span>
+    <>
+      <span
+        data-tooltip-dir="left"
+        data-tooltip={
+          hasStatus
+            ? `"${myStatus?.status || myStatus?.emoji}" ${myStatus?.validTill ? `${t('till')} ${formatDateExludingYearIfCurrent(new Date(myStatus.validTill))}` : ''}`
+            : undefined
+        }
+        className={className}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          setStatusDialogOpen(true);
+        }}
+      >
+        {myStatus?.emoji || '💬'}
+      </span>
+      {myStatus && isStatusDialogOpen ? (
+        <StatusDetailDialog
+          odinId={odinId}
+          status={myStatus}
+          onClose={() => setStatusDialogOpen(false)}
+        ></StatusDetailDialog>
+      ) : null}
+    </>
   );
 };
 
@@ -102,10 +123,12 @@ export const StatusDialog = ({
     get: { data: myStatus, isFetched },
     set: { mutate: setStatus, status: saveStatus },
   } = useMyStatus({ community });
-  const [draftStatus, setDraftStatus] = useState(myStatus);
+  const [draftStatus, setDraftStatus] = useState<CommunityStatus | undefined>(
+    (myStatus && { ...myStatus, validTill: undefined }) || undefined
+  );
 
   useEffect(() => {
-    if (isFetched) setDraftStatus(myStatus);
+    if (isFetched) setDraftStatus({ ...myStatus, validTill: undefined });
   }, [isFetched, myStatus]);
   useEffect(() => {
     if (saveStatus === 'success') onClose();
@@ -122,7 +145,13 @@ export const StatusDialog = ({
 
     setStatus({
       community,
-      status: draftStatus,
+      status: {
+        ...draftStatus,
+        validTill:
+          draftStatus.validTill && draftStatus.validTill > new Date().getTime()
+            ? draftStatus.validTill
+            : undefined,
+      },
     });
   };
 
@@ -237,6 +266,49 @@ export const StatusDialog = ({
             ) : null}
           </div>
         </form>
+      </DialogWrapper>
+    </div>
+  );
+
+  return createPortal(dialog, target);
+};
+
+const StatusDetailDialog = ({
+  status,
+  odinId,
+  onClose,
+}: {
+  status: CommunityStatus;
+  odinId: string;
+  onClose: () => void;
+}) => {
+  const target = usePortal('modal-container');
+  if (!status) return null;
+
+  const dialog = (
+    <div onClick={(e) => e.stopPropagation()}>
+      <DialogWrapper
+        title={
+          <>
+            {t('Status')}{' '}
+            <small className="block text-sm text-slate-400">
+              <ConnectionName odinId={odinId} />
+            </small>
+          </>
+        }
+        onClose={onClose}
+        isSidePanel={false}
+        isOverflowLess={true}
+      >
+        <div className="flex flex-row items-center gap-3">
+          <span className="text-4xl">{status.emoji || '💬'}</span>
+          <span>{status.status}</span>
+        </div>
+        {status.validTill ? (
+          <p className="mt-1 text-sm text-slate-400">
+            {t('untill')} {formatDateExludingYearIfCurrent(new Date(status.validTill))}
+          </p>
+        ) : null}
       </DialogWrapper>
     </div>
   );

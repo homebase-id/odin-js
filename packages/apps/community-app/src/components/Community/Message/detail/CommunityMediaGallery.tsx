@@ -15,7 +15,10 @@ import {
 } from '@homebase-id/common-app';
 import { ImageSource, OdinPayloadImage, OdinPreviewImage } from '@homebase-id/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
-import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
+import {
+  BACKEDUP_PAYLOAD_KEY,
+  CommunityMessage,
+} from '../../../../providers/CommunityMessageProvider';
 import { getTargetDriveFromCommunityId } from '../../../../providers/CommunityDefinitionProvider';
 import { Times, ArrowLeft, Arrow } from '@homebase-id/common-app/icons';
 
@@ -46,7 +49,7 @@ export const CommunityMediaGallery = ({
   };
 
   const allkeys = msg.fileMetadata.payloads
-    ?.filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY)
+    ?.filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY && pyld.key !== BACKEDUP_PAYLOAD_KEY)
     ?.map((p) => p.key);
   const nextKey = allkeys?.[allkeys.indexOf(mediaKey) + 1];
   const prevKey = allkeys?.[allkeys.indexOf(mediaKey) - 1];

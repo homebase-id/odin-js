@@ -213,7 +213,7 @@ const uploadPost = async <T extends PostContent>(
       recipients: [odinId],
     };
 
-    const result: TransitUploadResult = await uploadFileOverPeer(
+    const result = await uploadFileOverPeer(
       dotYouClient,
       transitInstructionSet,
       metadata,

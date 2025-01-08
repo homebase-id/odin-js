@@ -1,7 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useCommunityMetadata } from './useCommunityMetadata';
 import { useLastUpdatedChatMessages } from './messages/useCommunityMessages';
 import { useLastUpdatedThreadExcludingMine } from './threads/useCommunityThreads';
+import { useCommunityChannelsWithRecentMessages } from './channels/useCommunityChannelsWithRecentMessages';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 
 interface MarkCommunityChannelAsReadProps {
   odinId: string | undefined;
@@ -22,6 +25,19 @@ export const useMarkCommunityAsRead = ({
 }: MarkCommunityChannelAsReadProps | MarkCommunityThreadsAsReadProps) => {
   const channelId = (props as MarkCommunityChannelAsReadProps).channelId;
   const threads = (props as MarkCommunityThreadsAsReadProps).threads;
+  const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
+
+  const { data: channelsWithRecent } = useCommunityChannelsWithRecentMessages({
+    odinId,
+    communityId,
+  }).fetch;
+  const matchedChannel = useMemo(
+    () =>
+      channelsWithRecent?.find((channel) =>
+        stringGuidsEqual(channel.fileMetadata.appData.uniqueId, channelId)
+      ),
+    [channelsWithRecent, channelId]
+  );
 
   const {
     single: { data: metadata },
@@ -38,25 +54,45 @@ export const useMarkCommunityAsRead = ({
       !lastUpdate ||
       lastUpdate === 0 ||
       updateStatus === 'pending' ||
-      updateStatus === 'error'
+      updateStatus === 'error' ||
+      (!!channelId && !matchedChannel)
     ) {
       return;
     }
 
-    const savedLastReadTime = metadata?.fileMetadata.appData.content.lastReadTime;
     const savedLastReadTimeChannel =
-      metadata?.fileMetadata.appData.content.channelLastReadTime[channelId || ''];
+      channelId && metadata?.fileMetadata.appData.content.channelLastReadTime[channelId];
+    const channelReadIsUpToDate =
+      !matchedChannel?.lastMessage ||
+      matchedChannel?.lastMessage.fileMetadata.originalAuthor === loggedInIdentity ||
+      (savedLastReadTimeChannel &&
+        savedLastReadTimeChannel >= matchedChannel.lastMessage.fileMetadata.created);
 
-    if (
-      savedLastReadTime &&
-      savedLastReadTime >= lastUpdate &&
-      (!channelId || (savedLastReadTimeChannel && savedLastReadTimeChannel >= lastUpdate)) &&
-      (!lastUpdatedThreads ||
-        lastUpdatedThreads <= metadata?.fileMetadata.appData.content.threadsLastReadTime)
-    ) {
+    const threadsReadIsUpToDate =
+      !lastUpdatedThreads ||
+      lastUpdatedThreads <= metadata?.fileMetadata.appData.content.threadsLastReadTime;
+
+    if (channelReadIsUpToDate && threadsReadIsUpToDate) {
       return;
     }
 
+    // console.log('marking as read', {
+    //   current: metadata.fileMetadata.appData.content,
+    //   new: {
+    //     ...metadata.fileMetadata.appData.content,
+    //     lastReadTime: lastUpdate,
+    //     threadsLastReadTime:
+    //       lastUpdatedThreads || metadata.fileMetadata.appData.content.threadsLastReadTime || 0,
+    //     channelLastReadTime:
+    //       matchedChannel && matchedChannel.lastMessage
+    //         ? {
+    //             ...metadata.fileMetadata.appData.content.channelLastReadTime,
+    //             [matchedChannel.fileMetadata.appData.uniqueId as string]:
+    //               matchedChannel.lastMessage.fileMetadata.created,
+    //           }
+    //         : metadata.fileMetadata.appData.content.channelLastReadTime,
+    //   },
+    // });
     updateMetadata({
       metadata: {
         ...metadata,
@@ -72,16 +108,26 @@ export const useMarkCommunityAsRead = ({
                 lastUpdatedThreads ||
                 metadata.fileMetadata.appData.content.threadsLastReadTime ||
                 0,
-              channelLastReadTime: channelId
-                ? {
-                    ...metadata.fileMetadata.appData.content.channelLastReadTime,
-                    [channelId || '']: lastUpdate,
-                  }
-                : metadata.fileMetadata.appData.content.channelLastReadTime,
+              channelLastReadTime:
+                matchedChannel && matchedChannel.lastMessage
+                  ? {
+                      ...metadata.fileMetadata.appData.content.channelLastReadTime,
+                      [matchedChannel.fileMetadata.appData.uniqueId as string]:
+                        matchedChannel.lastMessage.fileMetadata.created,
+                    }
+                  : metadata.fileMetadata.appData.content.channelLastReadTime,
             },
           },
         },
       },
     });
-  }, [updateStatus, metadata, communityId, channelId, lastUpdate, lastUpdatedThreads]);
+  }, [
+    updateStatus,
+    metadata,
+    communityId,
+    channelId,
+    lastUpdate,
+    lastUpdatedThreads,
+    matchedChannel,
+  ]);
 };

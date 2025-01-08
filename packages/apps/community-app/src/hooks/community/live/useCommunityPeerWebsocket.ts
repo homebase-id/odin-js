@@ -50,7 +50,6 @@ export const useCommunityPeerWebsocket = (
         return;
       }
       isDebug && console.debug('[PeerCommunityWebsocket] Got notification', notification);
-
       if (
         (notification.notificationType === 'fileAdded' ||
           notification.notificationType === 'fileModified' ||

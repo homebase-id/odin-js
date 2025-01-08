@@ -50,8 +50,8 @@ export const getCommunityMessageQueryOptions = (
 ) => ({
   queryKey: [
     'community-message',
-    props?.communityId,
-    props?.messageId,
+    formatGuidId(props?.communityId),
+    formatGuidId(props?.messageId),
     props?.fileSystemType?.toLowerCase() || 'standard',
   ],
   queryFn: () =>
@@ -154,6 +154,9 @@ export const useCommunityMessage = (props?: {
 
     newChat.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
     newChat.fileMetadata.appData.content.deliveryStatus = CommunityDeliveryStatus.Sent;
+    // We force set the keyHeader as it's returned from the upload, and needed for fast saves afterwards
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    newChat.sharedSecretEncryptedKeyHeader = uploadResult.keyHeader as any;
 
     return newChat;
   };
@@ -161,9 +164,11 @@ export const useCommunityMessage = (props?: {
   const updateMessage = async ({
     updatedChatMessage,
     community,
+    storeBackup,
   }: {
     updatedChatMessage: HomebaseFile<CommunityMessage>;
     community: HomebaseFile<CommunityDefinition>;
+    storeBackup?: boolean;
   }) => {
     const transformedMessage = {
       ...updatedChatMessage,
@@ -178,7 +183,13 @@ export const useCommunityMessage = (props?: {
       );
     }
 
-    await updateCommunityMessage(dotYouClient, community, transformedMessage);
+    await updateCommunityMessage(
+      dotYouClient,
+      community,
+      transformedMessage,
+      undefined,
+      storeBackup
+    );
   };
 
   return {
@@ -260,6 +271,7 @@ export const useCommunityMessage = (props?: {
                       },
                       payloads: msg?.fileMetadata.payloads,
                     },
+                    sharedSecretEncryptedKeyHeader: newMessage.sharedSecretEncryptedKeyHeader,
                   };
                 }
 
@@ -394,9 +406,8 @@ export const updateCacheCommunityMessage = (
 ) => {
   const currentData = queryClient.getQueryData<HomebaseFile<CommunityMessage>>([
     'community-message',
-    communityId,
-
-    messageId,
+    formatGuidId(communityId),
+    formatGuidId(messageId),
     fileSystemType?.toLowerCase() || 'standard',
   ]);
   if (!currentData) return;
@@ -404,6 +415,14 @@ export const updateCacheCommunityMessage = (
   const updatedData = transformFn(currentData);
   if (!updatedData) return;
 
-  queryClient.setQueryData(['community-message', messageId], updatedData);
+  queryClient.setQueryData(
+    [
+      'community-message',
+      formatGuidId(communityId),
+      formatGuidId(messageId),
+      fileSystemType?.toLowerCase() || 'standard',
+    ],
+    updatedData
+  );
   return currentData;
 };

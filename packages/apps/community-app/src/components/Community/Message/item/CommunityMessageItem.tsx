@@ -8,6 +8,7 @@ import {
   ActionButton,
   useContentFromPayload,
   useLongPress,
+  ConnectionName,
 } from '@homebase-id/common-app';
 import { DEFAULT_PAYLOAD_KEY, HomebaseFile, RichText } from '@homebase-id/js-lib/core';
 import {
@@ -88,7 +89,8 @@ export const CommunityMessageItem = memo(
     const editInThreadMatch = useMatch(
       `${COMMUNITY_ROOT_PATH}/:odinKey/:communityKey/:channelKey/:threadKey/thread/:chatMessageKey/edit`
     );
-    const isEdit = !!isDetail && !!(editMatch || editInThreadMatch);
+    const isEdit =
+      !!isDetail && ((!!editMatch && !hideThreads) || (!!editInThreadMatch && hideThreads));
 
     const navigate = useNavigate();
     const extendedCommunityActions: CommunityActions | undefined = useMemo(() => {
@@ -97,7 +99,7 @@ export const CommunityMessageItem = memo(
         ...communityActions,
         doEdit: () =>
           navigate(
-            `${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${channelKey}/${threadKey ? `${threadKey}/thread/` : ``}${msg.fileMetadata.appData.uniqueId}/edit`
+            `${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${channelKey || msg.fileMetadata.appData.content.channelId}/${threadKey ? `${threadKey}/thread/` : ``}${msg.fileMetadata.appData.uniqueId}/edit`
           ),
       };
     }, []);
@@ -319,8 +321,10 @@ const MessageTextRenderer = ({
         const { type, attributes } = element;
 
         if (type === 'p' || type === 'paragraph') {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { text, ...renderableAttributes } = attributes || {};
           return (
-            <p {...attributes} className="min-h-2 empty:min-h-0">
+            <p {...renderableAttributes} className="min-h-2 empty:min-h-0">
               {children}
             </p>
           );
@@ -368,13 +372,14 @@ const MessageTextRenderer = ({
                 target="_blank"
                 rel="noreferrer noopener"
                 className="break-words text-primary hover:underline"
+                data-tooltip={`@${attributes.value.replaceAll('@', '')}`}
               >
-                @{attributes.value.replaceAll('@', '')}
+                @<ConnectionName odinId={attributes.value.replaceAll('@', '')} />
               </a>
             );
           else
             return (
-              <span className="break-all text-primary">
+              <span className="break-all font-semibold" data-tooltip={attributes.value}>
                 @{attributes.value.replaceAll('@', '')}
               </span>
             );
@@ -520,7 +525,7 @@ const CommunityMessageThreadSummary = ({
   return (
     <Link
       className="mr-auto flex w-full max-w-xs flex-row items-center gap-2 rounded-lg px-1 py-1 text-indigo-500 transition-colors hover:bg-background hover:shadow-sm"
-      to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || 'all'}/${msg.fileMetadata.appData.uniqueId}/thread`}
+      to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || msg.fileMetadata.appData.content.channelId}/${msg.fileMetadata.appData.uniqueId}/thread`}
     >
       {uniqueSenders.map((sender) => (
         <AuthorImage odinId={sender} key={sender} className="h-7 w-7" excludeLink={true} />

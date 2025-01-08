@@ -16,7 +16,7 @@ import { ChevronLeft, RadioTower } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 
-export const CommunityCatchup = memo(() => {
+export const CommunityChannelsCatchup = memo(() => {
   const { odinKey, communityKey: communityId, threadKey } = useParams();
   const { data: community, isFetched } = useCommunity({ odinId: odinKey, communityId }).fetch;
 
@@ -31,26 +31,17 @@ export const CommunityCatchup = memo(() => {
     communityId: communityId,
   }).fetch;
 
-  const channelsToCatchup = useMemo(
-    () =>
-      metadata &&
-      channels &&
-      channels?.filter((chnl) => {
-        if (!chnl.fileMetadata.appData.uniqueId) return false;
-        const lastReadTime =
-          metadata?.fileMetadata.appData.content.channelLastReadTime[
-            chnl.fileMetadata.appData.uniqueId
-          ];
+  const channelsToCatchup = useMemo(() => {
+    if (!metadata || !channels) {
+      return [];
+    }
 
-        return (
-          chnl.lastMessage?.fileMetadata.created &&
-          chnl.lastMessage.fileMetadata.created > (lastReadTime || 0) &&
-          !!chnl.lastMessage.fileMetadata.senderOdinId &&
-          chnl.lastMessage.fileMetadata.senderOdinId !== loggedOnIdentity
-        );
-      }),
-    [channels, metadata, loggedOnIdentity]
-  );
+    return [...channels].sort(
+      (a, b) =>
+        (b.lastMessage?.fileMetadata.transitCreated || 0) -
+        (a.lastMessage?.fileMetadata.transitCreated || 0)
+    );
+  }, [channels, metadata, loggedOnIdentity]);
 
   if (!community && isFetched)
     return (
@@ -61,7 +52,7 @@ export const CommunityCatchup = memo(() => {
 
   if (!community) {
     return (
-      <div className="h-full w-20 flex-grow bg-background">
+      <div className="h-full w-20 flex-grow bg-page-background">
         <LoadingBlock className="h-16 w-full" />
         <div className="mt-8 flex flex-col gap-4 px-5">
           <LoadingBlock className="h-16 w-full" />
@@ -76,7 +67,7 @@ export const CommunityCatchup = memo(() => {
 
   return (
     <ErrorBoundary>
-      <div className="h-full w-20 flex-grow bg-background">
+      <div className="h-full w-20 flex-grow bg-page-background">
         <div className="relative flex h-full flex-row">
           <div className="flex h-full flex-grow flex-col overflow-hidden">
             <div className="flex h-full flex-grow flex-col">
@@ -84,7 +75,7 @@ export const CommunityCatchup = memo(() => {
               {!channelsToCatchup?.length ? (
                 <p className="m-auto text-lg">{t('All done!')} 🎉</p>
               ) : (
-                <div className="flex h-20 flex-grow flex-col gap-3 overflow-auto p-3">
+                <div className="h-20 flex-grow overflow-auto p-3">
                   {channelsToCatchup?.map((chnl) => (
                     <CommunityChannelCatchup
                       community={community}
@@ -108,7 +99,7 @@ export const CommunityCatchup = memo(() => {
   );
 });
 
-CommunityCatchup.displayName = 'CommunityCatchup';
+CommunityChannelsCatchup.displayName = 'CommunityChannelsCatchup';
 
 const CommunityCatchupHeader = ({
   community,

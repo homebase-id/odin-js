@@ -308,11 +308,14 @@ export const uploadCommunityMessage = async (
   };
 };
 
+export const BACKEDUP_PAYLOAD_KEY = 'bckp_key';
+
 export const updateCommunityMessage = async (
   dotYouClient: DotYouClient,
   community: HomebaseFile<CommunityDefinition>,
   message: HomebaseFile<CommunityMessage>,
-  keyHeader?: KeyHeader
+  keyHeader?: KeyHeader,
+  storeBackup?: boolean
 ): Promise<void | UploadResult | UpdateResult> => {
   const communityId = community.fileMetadata.appData.uniqueId as string;
   const targetDrive = getTargetDriveFromCommunityId(communityId);
@@ -389,6 +392,14 @@ export const updateCommunityMessage = async (
   if (!shouldEmbedContent) {
     payloads.push({
       key: DEFAULT_PAYLOAD_KEY,
+      payload: new Blob([payloadBytes], { type: 'application/json' }),
+      iv: getRandom16ByteArray(),
+    });
+  }
+
+  if (storeBackup) {
+    payloads.push({
+      key: BACKEDUP_PAYLOAD_KEY,
       payload: new Blob([payloadBytes], { type: 'application/json' }),
       iv: getRandom16ByteArray(),
     });
