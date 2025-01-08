@@ -34,25 +34,4 @@ export const ImagePlugin = createTPlatePlugin({
   render: {
     node: ImageElementBlock,
   },
-  //TODO: Add onPaste handler with support for the mediaOptions
-  // handlers: {
-  //   onPaste: ({ event: e }) => {
-  //     const imageFiles = getImagesFromPasteEvent(e as React.ClipboardEvent<HTMLElement>);
-
-  //     if (!imageFiles || imageFiles.length === 0) return false;
-
-  //     e.stopPropagation();
-  //     e.preventDefault();
-
-  //     (async () => {
-  //       const options = editor.getOptions<MediaOptions>({ key: ELEMENT_IMAGE });
-  //       if (imageFiles.length > 0 && options?.onAppend) {
-  //         const uploadResult = await options.onAppend(imageFiles[0]);
-  //         if (uploadResult) insertImage(editor, uploadResult.fileKey);
-  //       }
-  //     })();
-
-  //     return true;
-  //   },
-  // },
 }));
