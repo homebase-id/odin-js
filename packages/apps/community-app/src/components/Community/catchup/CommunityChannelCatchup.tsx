@@ -2,7 +2,7 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { ChannelWithRecentMessage } from '../../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 import { CommunityHistory } from '../channel/CommunityHistory';
-import { ActionLink, COMMUNITY_ROOT_PATH, t } from '@homebase-id/common-app';
+import { ActionLink, COMMUNITY_ROOT_PATH } from '@homebase-id/common-app';
 import { ExternalLink } from '@homebase-id/common-app/icons';
 
 export const CommunityChannelCatchup = ({
