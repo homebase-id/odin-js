@@ -242,7 +242,7 @@ export const Unsubscribe = (
   }
 };
 
-export const Notify = async (command: WebsocketCommand | EstablishConnectionRequest) => {
+export const Notify = async (command: WebsocketCommand) => {
   if (!webSocketClient) throw new Error('No active websocket to message across');
   if (isDebug) console.debug(`[WebsocketProvider] Send command (${JSON.stringify(command)})`);
 

@@ -81,6 +81,13 @@ export type TypedConnectionNotification =
   | ReactionNotification;
 
 export interface WebsocketCommand {
-  command: string;
+  command: WebSocketCommands;
   data: string;
 }
+
+type WebSocketCommands =
+  | 'establishConnectionRequest'
+  | 'processTransitInstructions'
+  | 'processInbox'
+  | 'ping'
+  | 'whoIsOnline';
