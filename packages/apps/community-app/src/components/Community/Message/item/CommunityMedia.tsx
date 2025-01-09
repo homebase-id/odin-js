@@ -40,7 +40,7 @@ export const CommunityMedia = ({
   );
   const isGallery = payloads && payloads.length >= 2;
   const navigate = useNavigate();
-  const { odinKey, communityKey, channelKey } = useParams();
+  const { odinKey, communityKey, channelKey, threadKey } = useParams();
 
   if (!payloads?.length) return null;
   if (isGallery) return <MediaGallery odinId={odinId} communityId={communityId} msg={msg} />;
@@ -54,11 +54,14 @@ export const CommunityMedia = ({
       fileLastModified={msg.fileMetadata.updated}
       payload={payloads[0]}
       fit={'contain'}
-      onClick={() =>
+      onClick={() => {
+        const rootPath = `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || msg.fileMetadata.appData.content.channelId}`;
         navigate(
-          `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || msg.fileMetadata.appData.content.channelId}/${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`
-        )
-      }
+          threadKey
+            ? `${rootPath}/${threadKey}/thread/${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`
+            : `${rootPath}/${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`
+        );
+      }}
       previewThumbnail={isGallery ? undefined : msg.fileMetadata.appData.previewThumbnail}
       className={`my-1 max-h-[35rem] max-w-xs overflow-hidden rounded-lg`}
     />
