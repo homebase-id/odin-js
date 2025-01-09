@@ -185,7 +185,7 @@ const CustomOdinImage = ({
   const [tinyLoaded, setTinyLoaded] = useState(false);
   const [finalLoaded, setFinalLoaded] = useState(false);
 
-  const [naturalSize, setNaturalSize] = useState<ImageSize | undefined>(props.previewThumbnail);
+  const [naturalSize, setNaturalSize] = useState<ImageSize | undefined>(previewThumbnail);
 
   return (
     <div
