@@ -13,9 +13,13 @@ import {
   ErrorNotification,
 } from '@homebase-id/common-app';
 import { ChevronDown, Persons } from '@homebase-id/common-app/icons';
-import { ReactNode, useEffect, useMemo } from 'react';
+import { memo, ReactNode, useEffect, useMemo } from 'react';
 import { useChatMessages } from '../../../../hooks/chat/useChatMessages';
-import { ChatDeletedArchivalStaus, ChatMessage } from '../../../../providers/ChatProvider';
+import {
+  CHAT_LINKS_PAYLOAD_KEY,
+  ChatDeletedArchivalStaus,
+  ChatMessage,
+} from '../../../../providers/ChatProvider';
 import { ChatDeliveryIndicator } from '../../Detail/ChatDeliveryIndicator';
 import { MessageDeletedInnerBody } from '../../Detail/ChatMessageItem';
 import { ChatSentTimeIndicator } from '../../Detail/ChatSentTimeIndicator';
@@ -156,8 +160,6 @@ const ConversationBody = ({
         )?.length
       : 0;
 
-  const lastMessageContent = lastMessage?.fileMetadata.appData.content;
-  const plainLastMessageContent = getPlainTextFromRichText(lastMessageContent?.message);
   const hasNoContextMenu = stringGuidsEqual(conversationId, ConversationWithYourselfId);
 
   return (
@@ -187,16 +189,8 @@ const ConversationBody = ({
           {lastMessage ? <ChatDeliveryIndicator msg={lastMessage} /> : null}
 
           <div className="w-20 flex-grow leading-tight text-foreground/80">
-            {lastMessage && lastMessageContent ? (
-              lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus ? (
-                <MessageDeletedInnerBody />
-              ) : lastMessageContent.message ? (
-                <p className="overflow-hidden text-ellipsis whitespace-nowrap">
-                  {plainLastMessageContent}
-                </p>
-              ) : (
-                <p>📷 {t('Media')}</p>
-              )
+            {lastMessage ? (
+              <MessageContent {...lastMessage} />
             ) : !fetchedMessages && conversationId ? (
               <LoadingBlock className="h-5 w-full flex-grow bg-slate-300 dark:bg-slate-200" />
             ) : null}
@@ -213,6 +207,42 @@ const ConversationBody = ({
     </>
   );
 };
+
+export const MessageContent = memo((message: HomebaseFile<ChatMessage>) => {
+  const lastMessageContent = message.fileMetadata.appData.content;
+  const plainLastMessageContent = getPlainTextFromRichText(lastMessageContent?.message);
+
+  const textMessage = message.fileMetadata.appData.content.message;
+  const { payloads } = message.fileMetadata;
+  if (message.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus) {
+    return <MessageDeletedInnerBody />;
+  }
+  if (textMessage?.length > 0) {
+    return (
+      <p className="overflow-hidden text-ellipsis whitespace-nowrap">{plainLastMessageContent}</p>
+    );
+  } else if (payloads && payloads?.length > 1) {
+    return <p>📸 {t('Medias')}</p>;
+  } else {
+    const payload = payloads?.[0];
+    if (!payload) return null;
+    if (payload.contentType.startsWith('image')) {
+      return <p>📷 {t('Image')}</p>;
+    } else if (
+      payload.contentType.startsWith('video') ||
+      payload.contentType === 'application/vnd.apple.mpegurl'
+    ) {
+      return <p>🎥 {t('Video')}</p>;
+    } else if (payload.contentType.startsWith('audio')) {
+      return <p>🎵 {t('Audio')}</p>;
+    } else if (payload.key === CHAT_LINKS_PAYLOAD_KEY) {
+      return <p>🔗 {t('Link')}</p>;
+    } else {
+      return <p>📄 {t('File')}</p>;
+    }
+  }
+});
+MessageContent.displayName = 'MessageContent';
 
 export const ConversationContextMenu = ({
   conversation,

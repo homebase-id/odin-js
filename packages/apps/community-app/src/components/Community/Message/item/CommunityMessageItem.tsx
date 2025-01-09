@@ -48,6 +48,7 @@ export const CommunityMessageItem = memo(
     communityActions?: CommunityActions;
     hideDetails?: boolean;
     hideThreads?: boolean;
+    originId?: string;
     showChannelName?: boolean;
     className?: string;
     scrollRef?: React.RefObject<HTMLDivElement>;
@@ -58,6 +59,7 @@ export const CommunityMessageItem = memo(
       communityActions,
       hideDetails,
       hideThreads,
+      originId,
       showChannelName,
       className,
       scrollRef,
@@ -214,6 +216,7 @@ export const CommunityMessageItem = memo(
                       msg={msg}
                       community={community}
                       scrollRef={scrollRef}
+                      originId={originId}
                     />
                   ) : (
                     <CommunityTextMessageBody
@@ -394,10 +397,12 @@ const MessageTextRenderer = ({
 const CommunityMediaMessageBody = ({
   msg,
   community,
+  originId,
   scrollRef,
 }: {
   msg: HomebaseFile<CommunityMessage>;
   community?: HomebaseFile<CommunityDefinition>;
+  originId?: string;
   scrollRef?: React.RefObject<HTMLDivElement>;
 }) => {
   const content = msg.fileMetadata.appData.content;
@@ -447,6 +452,7 @@ const CommunityMediaMessageBody = ({
         msg={msg}
         communityId={community?.fileMetadata.appData.uniqueId as string}
         odinId={community?.fileMetadata.senderOdinId as string}
+        originId={originId}
       />
       <CommunityReactions msg={msg} community={community} scrollRef={scrollRef} />
     </div>

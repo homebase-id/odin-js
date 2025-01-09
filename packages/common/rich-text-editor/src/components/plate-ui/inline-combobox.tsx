@@ -347,7 +347,7 @@ const InlineComboboxEmpty = ({ children, className }: HTMLAttributes<HTMLDivElem
 const InlineComboboxSeleactableEmpty = ({
   className,
   onClick,
-  children,
+
   ...props
 }: Omit<InlineComboboxItemProps, 'value'>) => {
   const { setHasEmpty } = useContext(InlineComboboxContext);
@@ -363,15 +363,16 @@ const InlineComboboxSeleactableEmpty = ({
   }, [setHasEmpty]);
 
   if (items.length > 0) return null;
-
   return (
     <div
       className={cn(comboboxItemVariants({ interactive: true }), className)}
-      onClick={onClick}
       {...props}
-    >
-      {children}
-    </div>
+      onMouseDown={(e) => {
+        if (!onClick) return;
+        e.preventDefault();
+        onClick(e);
+      }}
+    />
   );
 
   // const { removeInput, setHasEmpty } = useContext(InlineComboboxContext);

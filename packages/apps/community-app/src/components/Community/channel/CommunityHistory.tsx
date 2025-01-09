@@ -321,6 +321,7 @@ export const CommunityHistory = memo(
                       hideThreads={inAThread}
                       className="px-2 py-1 md:px-3"
                       showChannelName={!channel && !inAThread}
+                      originId={origin?.fileMetadata.appData.uniqueId}
                     />
                   </div>
                 );

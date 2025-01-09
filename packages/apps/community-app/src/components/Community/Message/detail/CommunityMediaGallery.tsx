@@ -178,13 +178,14 @@ export const CommunityMediaGallery = ({
 
 const CustomOdinImage = ({
   className,
+  previewThumbnail,
   ...props
 }: { className?: string; previewThumbnail?: EmbeddedThumb } & ImageSource) => {
   const dotYouClient = useDotYouClientContext();
   const [tinyLoaded, setTinyLoaded] = useState(false);
   const [finalLoaded, setFinalLoaded] = useState(false);
 
-  const [naturalSize, setNaturalSize] = useState<ImageSize | undefined>(props.previewThumbnail);
+  const [naturalSize, setNaturalSize] = useState<ImageSize | undefined>(previewThumbnail);
 
   return (
     <div
@@ -202,6 +203,7 @@ const CustomOdinImage = ({
         className={`absolute inset-0 h-full w-full max-w-none object-contain object-center transition-opacity delay-500 ${finalLoaded ? 'opacity-0' : 'opacity-100'}`}
         dotYouClient={dotYouClient}
         {...props}
+        previewThumbnail={previewThumbnail}
         blur="auto"
         onLoad={(naturalSize: ImageSize | undefined) => {
           setTinyLoaded(true);
