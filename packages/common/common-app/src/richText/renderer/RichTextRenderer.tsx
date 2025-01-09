@@ -64,6 +64,7 @@ export const RichTextRenderer = ({
       underline?: boolean;
       strikethrough?: boolean;
       code?: boolean;
+      type?: string;
     },
     text: string,
     attributes: Record<string, unknown>
@@ -96,7 +97,7 @@ export const RichTextRenderer = ({
     }
 
     return (
-      <span data-type={'leaf'} {...attributes}>
+      <span data-type={leaf.type || 'leaf'} {...attributes}>
         {children || highlightedText}
       </span>
     );
@@ -130,7 +131,13 @@ export const RichTextRenderer = ({
             {children}
           </code>
         );
-
+      case 'code_line':
+        return (
+          // min height so empty code lines are still visible
+          <span {...attributes} className="min-h-4">
+            {children}
+          </span>
+        );
       case 'h1':
         return (
           <h1 {...attributes} className={'text-2xl'}>
@@ -220,6 +227,7 @@ export const RichTextRenderer = ({
             {children}
           </p>
         );
+
       case 'mention':
         if (attributes && 'value' in attributes && typeof attributes.value === 'string') {
           const domainRegex =
@@ -240,7 +248,11 @@ export const RichTextRenderer = ({
         } else return <></>;
 
       default:
-        return children ? <span {...attributes}>{children}</span> : null;
+        return children ? (
+          <span {...attributes} data-type={type}>
+            {children}
+          </span>
+        ) : null;
     }
   };
 

@@ -209,7 +209,6 @@ const InnerRichTextEditor = memo(
               html: {
                 deserializer: {
                   parse: ({ element }) => {
-                    // Replace <br> with \n so that it can be parsed as separate lines
                     element.innerHTML = element.innerHTML.replace(/<br>/g, '\n');
 
                     const textContent = element.textContent || '';
