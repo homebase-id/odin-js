@@ -11,7 +11,7 @@ import {
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { useCommunityChannel } from '../../../hooks/community/channels/useCommunityChannel';
 import { ThreadMeta } from '../../../hooks/community/threads/useCommunityThreads';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { MessageComposer } from '../Message/composer/MessageComposer';
 import { ExternalLink } from '@homebase-id/common-app/icons';
 
@@ -38,6 +38,15 @@ export const CommunityThreadCatchup = ({
     messageId: threadMeta.threadId,
     fileSystemType: 'Standard',
   }).get;
+
+  const showOptions = useMemo(() => {
+    return {
+      count: 10,
+      targetLink: channel
+        ? `${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}/${threadMeta.threadId}/thread`
+        : '',
+    };
+  }, [community, channel]);
 
   if (!channel || !originMessage) return null;
 
@@ -82,10 +91,7 @@ export const CommunityThreadCatchup = ({
         origin={originMessage}
         setParticipants={setParticipants}
         alignTop={true}
-        maxShowOptions={{
-          count: 10,
-          targetLink: `${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}/${threadMeta.threadId}/thread`,
-        }}
+        maxShowOptions={showOptions}
       />
       <ErrorBoundary>
         {originMessage ? (

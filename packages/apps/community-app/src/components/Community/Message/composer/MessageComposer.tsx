@@ -229,6 +229,9 @@ export const MessageComposer = ({
               disableHeadings={true}
               mentionables={mentionables}
               plugins={plugins}
+              uniqueId={
+                thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId
+              }
             >
               <div className="max-h-[30vh] overflow-auto">
                 <FileOverview files={files} setFiles={setFiles} cols={8} />
