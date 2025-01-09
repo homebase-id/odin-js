@@ -22,6 +22,7 @@ import { formatGuidId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { useState, useEffect, useMemo } from 'react';
+import { invalidateCommunityMessage, updateCacheCommunityMessage } from './useCommunityMessage';
 
 const PAGE_SIZE = 100;
 export const useCommunityMessages = (props?: {
@@ -347,6 +348,23 @@ export const insertNewMessage = (
       queryClient,
       communityId,
       newMessage.fileMetadata.appData.groupId as string
+    );
+  }
+
+  if (newMessage.fileState !== 'deleted') {
+    updateCacheCommunityMessage(
+      queryClient,
+      communityId,
+      newMessage.fileMetadata.appData.uniqueId as string,
+      newMessage.fileSystemType,
+      () => newMessage
+    );
+  } else {
+    invalidateCommunityMessage(
+      queryClient,
+      communityId,
+      newMessage.fileMetadata.appData.uniqueId,
+      newMessage.fileSystemType
     );
   }
 };
