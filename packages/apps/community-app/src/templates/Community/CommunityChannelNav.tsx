@@ -312,8 +312,10 @@ const ChannelItem = ({
     channelId,
   }).all;
 
-  const unreadMessagesCount = useMemo(
-    () =>
+  const unreadMessagesCount = useMemo(() => {
+    if (channel.lastMessage?.fileMetadata.senderOdinId === loggedOnIdentity) return 0;
+
+    return (
       channelId &&
       metadata &&
       messages?.pages
@@ -324,9 +326,9 @@ const ChannelItem = ({
             (metadata?.fileMetadata.appData.content?.channelLastReadTime[channelId] || 0) <
               msg.fileMetadata.created &&
             msg.fileMetadata.senderOdinId !== loggedOnIdentity
-        )?.length,
-    [messages, metadata]
-  );
+        )?.length
+    );
+  }, [messages, metadata]);
 
   useEffect(
     () => setUnreadCount(channel.fileMetadata.appData.uniqueId as string, unreadMessagesCount || 0),
