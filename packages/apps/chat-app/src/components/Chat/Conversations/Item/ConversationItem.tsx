@@ -160,8 +160,6 @@ const ConversationBody = ({
         )?.length
       : 0;
 
-  const lastMessageContent = lastMessage?.fileMetadata.appData.content;
-  const plainLastMessageContent = getPlainTextFromRichText(lastMessageContent?.message);
   const hasNoContextMenu = stringGuidsEqual(conversationId, ConversationWithYourselfId);
 
   return (
@@ -191,7 +189,7 @@ const ConversationBody = ({
           {lastMessage ? <ChatDeliveryIndicator msg={lastMessage} /> : null}
 
           <div className="w-20 flex-grow leading-tight text-foreground/80">
-            {lastMessage && lastMessageContent ? (
+            {lastMessage ? (
               <MessageContent {...lastMessage} />
             ) : !fetchedMessages && conversationId ? (
               <LoadingBlock className="h-5 w-full flex-grow bg-slate-300 dark:bg-slate-200" />

@@ -3,6 +3,7 @@ import { useParams, useMatch, Link, useNavigate } from 'react-router-dom';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActionButton,
+  ActionGroup,
   COMMUNITY_ROOT_PATH,
   ConnectionImage,
   ConnectionName,
@@ -146,6 +147,7 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
                   key={channel.fileId || channel.fileMetadata.appData.uniqueId}
                 />
               ))}
+              {pinnedChannels?.length && unpinnedChannels?.length ? <hr className="my-1" /> : null}
 
               {unpinnedChannels
                 ?.slice(0, isExpanded ? undefined : maxChannels - (pinnedChannels?.length || 0))
@@ -299,8 +301,10 @@ const ChannelItem = ({
     update: { mutate: updateMetadata },
   } = useCommunityMetadata({ odinId: odinKey, communityId: communityKey });
 
-  const isPinned =
-    channelId && metadata?.fileMetadata.appData.content?.pinnedChannels?.includes(channelId);
+  const isPinned = useMemo(
+    () => channelId && metadata?.fileMetadata.appData.content?.pinnedChannels?.includes(channelId),
+    [metadata, channelId]
+  );
 
   const { data: messages } = useCommunityMessages({
     odinId: odinKey,
@@ -330,45 +334,57 @@ const ChannelItem = ({
   );
   const hasUnreadMessages = !!unreadMessagesCount;
 
+  const linkBackground = `${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/20' : ''}`}`;
+
+  const togglePin = useCallback(() => {
+    if (!metadata || !channelId) return;
+    let newPins: string[] = [];
+    if (isPinned) {
+      newPins =
+        metadata?.fileMetadata.appData.content?.pinnedChannels?.filter(
+          (pin) => pin !== channelId
+        ) || [];
+    } else {
+      newPins = [...(metadata?.fileMetadata.appData.content?.pinnedChannels || []), channelId];
+    }
+
+    const newMeta: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata> = {
+      ...metadata,
+    };
+    newMeta.fileMetadata.appData.content.pinnedChannels = newPins;
+
+    updateMetadata({ metadata: newMeta });
+  }, [metadata, channelId, isPinned]);
+
   return (
     <Link
       to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelId}`}
-      className={`group flex flex-row items-center gap-1 rounded-md px-2 py-[0.15rem] ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''} ${isVisited ? 'text-purple-700' : ''}`} ${hasUnreadMessages && !isActive ? 'font-bold' : ''}`}
+      className={`group relative flex flex-row items-center gap-1 rounded-md py-[0.25rem] pl-2 pr-1 ${linkBackground} ${isVisited ? 'text-purple-700' : ''} ${hasUnreadMessages && !isActive ? 'font-semibold' : ''}`}
     >
-      # {channel.fileMetadata.appData.content?.title?.toLowerCase()}
-      <button
-        className={`-m-1 ml-auto rounded-sm p-1 ${isPinned ? '' : `opacity-0 transition-opacity ${!isTouchDevice() ? 'group-hover:opacity-100' : ''}`}`}
-        onClick={() => {
-          if (!metadata || !channelId) return;
-          let newPins: string[] = [];
-          if (isPinned) {
-            newPins =
-              metadata?.fileMetadata.appData.content?.pinnedChannels?.filter(
-                (pin) => pin !== channelId
-              ) || [];
-          } else {
-            newPins = [
-              ...(metadata?.fileMetadata.appData.content?.pinnedChannels || []),
-              channelId,
-            ];
-          }
-
-          const newMeta: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata> = {
-            ...metadata,
-          };
-          newMeta.fileMetadata.appData.content.pinnedChannels = newPins;
-          // console.log('pinning');
-          updateMetadata({ metadata: newMeta });
-        }}
+      <p
+        className={`flex-shrink overflow-hidden text-ellipsis whitespace-nowrap ${hasUnreadMessages && !isActive ? 'leading-tight' : 'leading-tight'}`}
       >
-        <Pin
-          className={`hidden h-5 w-5 flex-shrink-0 transition-opacity lg:block ${
-            isPinned ? 'opacity-100 hover:opacity-60' : `opacity-60 hover:opacity-100`
-          }`}
-        />
-      </button>
+        # {channel.fileMetadata.appData.content?.title?.toLowerCase()}
+      </p>
+      <ActionGroup
+        size="none"
+        type="mute"
+        className="absolute bottom-[0.1rem] right-[0.2rem] top-[0.1rem] my-auto hidden aspect-square flex-shrink-0 rounded-lg bg-background text-foreground opacity-0 group-hover:opacity-100 md:flex"
+        options={[
+          {
+            label: isPinned ? 'Unpin' : 'Pin',
+            icon: Pin,
+            onClick: togglePin,
+          },
+        ]}
+        alwaysInPortal={true}
+      >
+        <span className="block p-1">
+          <ChevronDown className="h-4 w-4" />
+        </span>
+      </ActionGroup>
       {unreadMessagesCount && !isActive ? (
-        <span className="my-auto flex h-6 w-6 items-center justify-center rounded-full bg-current text-sm font-normal">
+        <span className="-my-1 ml-auto flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-current text-sm font-normal">
           <span className={isActive ? 'text-black dark:text-white' : 'text-white dark:text-black'}>
             {unreadMessagesCount}
           </span>
@@ -430,10 +446,11 @@ const DirectMessageItem = ({
       className={`flex flex-row gap-2 rounded-md px-2 py-[0.15rem] ${unreadCount ? 'font-bold' : ''} ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`}`}
     >
       <ConnectionImage odinId={recipient} size="xxs" className="flex-shrink-0" />
-      <span className="my-auto flex w-20 flex-grow flex-row flex-wrap items-center">
-        <span className="mr-1 leading-tight">
+      <span className="my-auto flex w-20 flex-grow flex-row items-center">
+        <p className="flex-shrink overflow-hidden text-ellipsis whitespace-nowrap leading-tight">
           <ConnectionName odinId={recipient} />
-        </span>
+        </p>
+        <span className="ml-1"></span>
         {isYou ? (
           <span className="text-sm leading-tight text-slate-400">{t('you')}</span>
         ) : (
