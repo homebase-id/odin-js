@@ -30,10 +30,12 @@ export const CommunityMedia = ({
   odinId,
   communityId,
   msg,
+  originId,
 }: {
   odinId: string;
   communityId: string;
   msg: HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage>;
+  originId?: string;
 }) => {
   const payloads = msg.fileMetadata.payloads?.filter(
     (pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY && pyld.key !== BACKEDUP_PAYLOAD_KEY
@@ -55,10 +57,11 @@ export const CommunityMedia = ({
       payload={payloads[0]}
       fit={'contain'}
       onClick={() => {
+        const threadPathPart = originId || threadKey || undefined;
         const rootPath = `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || msg.fileMetadata.appData.content.channelId}`;
         navigate(
-          threadKey
-            ? `${rootPath}/${threadKey}/thread/${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`
+          threadPathPart
+            ? `${rootPath}/${threadPathPart}/thread/${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`
             : `${rootPath}/${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`
         );
       }}
