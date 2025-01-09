@@ -148,10 +148,10 @@ export const MessageComposer = ({
                 : undefined));
 
           return {
-            key: `${content.odinId} (${name})`,
+            key: `${content.odinId}`,
             value: content.odinId,
             text: content.odinId,
-            label: `${content.odinId} (${name})`,
+            label: `${content.odinId} - ${name}`,
           };
         })
         .filter(Boolean) as Mentionable[]) || [];
