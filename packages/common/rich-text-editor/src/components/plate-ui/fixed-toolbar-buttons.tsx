@@ -30,55 +30,53 @@ export function FixedToolbarButtons({
   const readOnly = useEditorReadOnly();
 
   return (
-    <div className="w-full overflow-hidden">
-      <div
-        className={`flex overflow-x-auto py-1 ${readOnly ? 'pointer-events-none cursor-not-allowed' : ''}`}
-        style={{
-          transform: 'translateX(calc(-1px))',
-        }}
-      >
-        <>
-          {!disableTurnInto ? (
-            <ToolbarGroup noSeparator>
-              <TurnIntoDropdownMenu />
-            </ToolbarGroup>
-          ) : null}
-
-          <ToolbarGroup noSeparator={disableTurnInto}>
-            <MarkToolbarButton tooltip="Bold (⌘+B)" nodeType={BoldPlugin.key}>
-              <Bold className="h-5 w-5" />
-            </MarkToolbarButton>
-            <MarkToolbarButton tooltip="Italic (⌘+I)" nodeType={ItalicPlugin.key}>
-              <Italic className="h-5 w-5" />
-            </MarkToolbarButton>
-            <MarkToolbarButton tooltip="Underline (⌘+U)" nodeType={UnderlinePlugin.key}>
-              <Underline className="h-5 w-5" />
-            </MarkToolbarButton>
-            <MarkToolbarButton tooltip="Strikethrough (⌘+⇧+M)" nodeType={StrikethroughPlugin.key}>
-              <Icons.strikethrough className="h-5 w-5" />
-            </MarkToolbarButton>
+    <div
+      className={`flex py-1 ${readOnly ? 'pointer-events-none cursor-not-allowed' : ''}`}
+      style={{
+        transform: 'translateX(calc(-1px))',
+      }}
+    >
+      <>
+        {!disableTurnInto ? (
+          <ToolbarGroup noSeparator>
+            <TurnIntoDropdownMenu />
           </ToolbarGroup>
+        ) : null}
 
-          <ToolbarGroup>
-            <LinkToolbarButton />
-            <ListToolbarButton nodeType={NumberedListPlugin.key} />
-            <ListToolbarButton nodeType={BulletedListPlugin.key} />
-          </ToolbarGroup>
+        <ToolbarGroup noSeparator={disableTurnInto}>
+          <MarkToolbarButton tooltip="Bold (⌘+B)" nodeType={BoldPlugin.key}>
+            <Bold className="h-5 w-5" />
+          </MarkToolbarButton>
+          <MarkToolbarButton tooltip="Italic (⌘+I)" nodeType={ItalicPlugin.key}>
+            <Italic className="h-5 w-5" />
+          </MarkToolbarButton>
+          <MarkToolbarButton tooltip="Underline (⌘+U)" nodeType={UnderlinePlugin.key}>
+            <Underline className="h-5 w-5" />
+          </MarkToolbarButton>
+          <MarkToolbarButton tooltip="Strikethrough (⌘+⇧+M)" nodeType={StrikethroughPlugin.key}>
+            <Icons.strikethrough className="h-5 w-5" />
+          </MarkToolbarButton>
+        </ToolbarGroup>
 
-          <ToolbarGroup>
-            {mediaOptions ? <ImageToolbarButton /> : null}
-            <QuoteToolbarButton />
-            <MarkToolbarButton tooltip="Code (⌘+E)" nodeType={CodePlugin.key}>
-              <Icons.code className="h-5 w-5" />
-            </MarkToolbarButton>
-            <CodeBlockToolbarButton>
-              <Icons.codeblock className="h-5 w-5" />
-            </CodeBlockToolbarButton>
+        <ToolbarGroup>
+          <LinkToolbarButton />
+          <ListToolbarButton nodeType={NumberedListPlugin.key} />
+          <ListToolbarButton nodeType={BulletedListPlugin.key} />
+        </ToolbarGroup>
 
-            <EmojiDropdownMenu />
-          </ToolbarGroup>
-        </>
-      </div>
+        <ToolbarGroup>
+          {mediaOptions ? <ImageToolbarButton /> : null}
+          <QuoteToolbarButton />
+          <MarkToolbarButton tooltip="Code (⌘+E)" nodeType={CodePlugin.key}>
+            <Icons.code className="h-5 w-5" />
+          </MarkToolbarButton>
+          <CodeBlockToolbarButton>
+            <Icons.codeblock className="h-5 w-5" />
+          </CodeBlockToolbarButton>
+
+          <EmojiDropdownMenu />
+        </ToolbarGroup>
+      </>
     </div>
   );
 }

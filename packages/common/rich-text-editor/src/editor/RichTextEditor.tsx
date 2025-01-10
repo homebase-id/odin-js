@@ -383,7 +383,7 @@ const InnerRichTextEditor = memo(
       flex-grow: 1;
     }.slate-ToolbarButton-active{
       color: rgb(0, 102, 204);
-    }[class^="styles__FloatingIconWrapper"]{color: inherit;}[data-slate-placeholder="true"]{width: auto !important; padding-top: 0.25rem;}
+    }[class^="styles__FloatingIconWrapper"]{color: inherit;}[data-slate-placeholder="true"]{width: auto !important;}
     .slate-SelectionArea{flex-grow:1;display:flex;}
     ${isDarkMode ? '[class^="PlateFloatingLink___"]{background-color:rgba(51, 65, 85, 1);}' : ''}`,
           }}
