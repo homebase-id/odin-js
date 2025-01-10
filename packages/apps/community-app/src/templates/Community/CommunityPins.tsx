@@ -41,25 +41,23 @@ export const CommunityPins = () => {
               {!pinnedMessages?.searchResults?.length ? (
                 <p className="m-auto text-lg">{t('All done!')} 🎉</p>
               ) : (
-                <div className="flex h-20 flex-grow flex-col gap-5 overflow-auto p-5">
+                <div className="flex h-20 flex-grow flex-col gap-3 overflow-auto p-5">
                   {pinnedMessages?.searchResults?.length ? (
-                    <>
-                      {pinnedMessages?.searchResults.map((pinned, index) => {
-                        return (
-                          <Link
-                            to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${pinned.fileMetadata.appData.content.channelId}/${pinned.fileMetadata.appData.uniqueId}`}
-                            key={pinned.fileId || index}
-                          >
-                            <CommunityMessageItem
-                              msg={pinned}
-                              community={community}
-                              className="pointer-events-none cursor-pointer rounded-lg border px-2 py-1 hover:shadow-md md:px-3"
-                              showChannelName={true}
-                            />
-                          </Link>
-                        );
-                      })}
-                    </>
+                    pinnedMessages?.searchResults.map((pinned, index) => {
+                      return (
+                        <Link
+                          to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${pinned.fileMetadata.appData.content.channelId}/${pinned.fileMetadata.appData.uniqueId}`}
+                          key={pinned.fileId || index}
+                        >
+                          <CommunityMessageItem
+                            msg={pinned}
+                            community={community}
+                            className="pointer-events-none cursor-pointer rounded-lg border px-2 py-1 hover:shadow-md md:px-3"
+                            showChannelName={true}
+                          />
+                        </Link>
+                      );
+                    })
                   ) : (
                     <p className="text-slate-400">{t('No pinned messages')}</p>
                   )}

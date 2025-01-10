@@ -7,6 +7,7 @@ import {
   ellipsisAtMaxChar,
   ErrorBoundary,
   ErrorNotification,
+  FakeAnchor,
   getTextRootsRecursive,
   NotFound,
   t,
@@ -46,9 +47,9 @@ export const CommunityLater = () => {
                 <p className="m-auto text-lg">{t('All done!')} 🎉</p>
               ) : (
                 <div className="flex h-20 flex-grow flex-col overflow-auto">
-                  {savedMessages.map((message) => {
-                    return <SavedMessage message={message} key={message.messageId} />;
-                  })}
+                  {savedMessages.map((message) => (
+                    <SavedMessage message={message} key={message.messageId} />
+                  ))}
                 </div>
               )}
             </div>
@@ -113,8 +114,8 @@ const SavedMessage = ({
     <>
       <ErrorNotification error={toggleSaveError} />
 
-      <Link
-        to={link}
+      <FakeAnchor
+        href={link}
         className="group border-b px-2 py-3 hover:bg-page-background md:px-3"
         style={{ order: new Date().getTime() - msg.fileMetadata.created }}
       >
@@ -148,7 +149,7 @@ const SavedMessage = ({
             </button>
           </div>
         </div>
-      </Link>
+      </FakeAnchor>
     </>
   );
 };
