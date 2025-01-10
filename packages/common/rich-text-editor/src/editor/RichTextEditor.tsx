@@ -291,8 +291,6 @@ const InnerRichTextEditor = memo(
           TrailingBlockPlugin.configure({
             options: { level: 0, type: 'p' },
           }),
-          // DeserializeHtmlPlugin,
-          // DeserializeMdPlugin,
           EmojiPlugin,
           TextualEmojiPlugin,
           mentionables
@@ -403,7 +401,7 @@ const InnerRichTextEditor = memo(
             key={disabled ? 'disabled' : undefined}
           >
             <FixedToolbar className={stickyToolbar ? 'md:sticky' : ''}>
-              <FixedToolbarButtons disableHeadings={disableHeadings} mediaOptions={mediaOptions} />
+              <FixedToolbarButtons disableTurnInto={disableHeadings} mediaOptions={mediaOptions} />
             </FixedToolbar>
 
             <PlateContent
