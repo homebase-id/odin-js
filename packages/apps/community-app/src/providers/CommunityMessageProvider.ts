@@ -512,7 +512,7 @@ export const getCommunityMessages = async (
     maxRecords: pageSize,
     cursorState: cursorState,
     includeMetadataHeader: true,
-    includeTransferHistory: true,
+    includeTransferHistory: false,
   };
 
   const response =

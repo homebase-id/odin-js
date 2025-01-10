@@ -195,13 +195,13 @@ const findChangesSinceTimestamp = async (
           maxRecords: BATCH_SIZE,
           cursorState: batchCursor,
           includeMetadataHeader: true,
-          includeTransferHistory: true,
+          includeTransferHistory: false,
         })
       : await queryBatch(dotYouClient, params, {
           maxRecords: BATCH_SIZE,
           cursorState: batchCursor,
           includeMetadataHeader: true,
-          includeTransferHistory: true,
+          includeTransferHistory: false,
         });
 
   const modifiedFiles =
@@ -211,14 +211,14 @@ const findChangesSinceTimestamp = async (
           cursor: modifiedCursor,
           excludePreviewThumbnail: false,
           includeHeaderContent: true,
-          includeTransferHistory: true,
+          includeTransferHistory: false,
         })
       : await queryModified(dotYouClient, params, {
           maxRecords: BATCH_SIZE,
           cursor: modifiedCursor,
           excludePreviewThumbnail: false,
           includeHeaderContent: true,
-          includeTransferHistory: true,
+          includeTransferHistory: false,
         });
 
   return modifiedFiles.searchResults.concat(newFiles.searchResults);
