@@ -1,8 +1,8 @@
 import { getOdinIdColor, AuthorName } from '@homebase-id/common-app';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import React from 'react';
 import { useCommunityCollaborativeMsg } from '../../../../hooks/community/useCommunityCollaborativeMsg';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
+import { ParticipantsList } from '../../participants/ParticipantsList';
 
 export const CommunityMessageAuthorName = ({ msg }: { msg: HomebaseFile<CommunityMessage> }) => {
   const { isCollaborative } = useCommunityCollaborativeMsg({ msg });
@@ -13,23 +13,11 @@ export const CommunityMessageAuthorName = ({ msg }: { msg: HomebaseFile<Communit
   if (isCollaborative && collaborators?.length) {
     return (
       <p>
-        {[...collaborators, msg.fileMetadata.originalAuthor]
-          .reverse()
-          .map((collaborator, index) => (
-            <React.Fragment key={collaborator}>
-              <span
-                className={`font-semibold`}
-                style={{ color: getOdinIdColor(collaborator).darkTheme }}
-              >
-                {<AuthorName odinId={collaborator} />}
-              </span>
-              {index < collaborators.length - 1 ? (
-                <span>, </span>
-              ) : index === collaborators.length - 1 ? (
-                <span> & </span>
-              ) : null}
-            </React.Fragment>
-          ))}
+        <ParticipantsList
+          participants={[...collaborators, msg.fileMetadata.originalAuthor].reverse()}
+          isShowColor={true}
+          participantClassName="font-semibold"
+        />
       </p>
     );
   }

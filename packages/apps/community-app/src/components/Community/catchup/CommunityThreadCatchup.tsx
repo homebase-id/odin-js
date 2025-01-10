@@ -1,19 +1,14 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { CommunityHistory } from '../channel/CommunityHistory';
-import {
-  ActionLink,
-  AuthorName,
-  COMMUNITY_ROOT_PATH,
-  ErrorBoundary,
-  t,
-} from '@homebase-id/common-app';
+import { ActionLink, COMMUNITY_ROOT_PATH, ErrorBoundary, t } from '@homebase-id/common-app';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { useCommunityChannel } from '../../../hooks/community/channels/useCommunityChannel';
 import { ThreadMeta } from '../../../hooks/community/threads/useCommunityThreads';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { MessageComposer } from '../Message/composer/MessageComposer';
 import { ExternalLink } from '@homebase-id/common-app/icons';
+import { ParticipantsList } from '../participants/ParticipantsList';
 
 export const CommunityThreadCatchup = ({
   community,
@@ -56,20 +51,7 @@ export const CommunityThreadCatchup = ({
         <div className="flex flex-col">
           <p className="text-lg"># {channel.fileMetadata.appData.content.title}</p>
           <p className="text-sm text-slate-400">
-            {threadMeta.participants.map((participant, index) => (
-              <React.Fragment key={participant}>
-                <AuthorName odinId={participant} excludeLink={true} />
-                {threadMeta.participants.length > 1 ? (
-                  <>
-                    {index < threadMeta.participants.length - 2
-                      ? ', '
-                      : index < threadMeta.participants.length - 1
-                        ? ' and '
-                        : ''}
-                  </>
-                ) : null}
-              </React.Fragment>
-            ))}
+            <ParticipantsList participants={threadMeta.participants} />
           </p>
         </div>
         <div className="ml-auto">
