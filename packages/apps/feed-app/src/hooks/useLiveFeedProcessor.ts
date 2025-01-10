@@ -159,7 +159,7 @@ const findChangesSinceTimestamp = async (
     maxRecords: BATCH_SIZE,
     cursorState: batchCursor,
     includeMetadataHeader: true,
-    includeTransferHistory: true,
+    includeTransferHistory: false,
   });
 
   const modifiedFiles = await queryModified(dotYouClient, params, {
@@ -167,7 +167,7 @@ const findChangesSinceTimestamp = async (
     cursor: modifiedCursor,
     excludePreviewThumbnail: false,
     includeHeaderContent: true,
-    includeTransferHistory: true,
+    includeTransferHistory: false,
   });
 
   return modifiedFiles.searchResults.concat(newFiles.searchResults);
