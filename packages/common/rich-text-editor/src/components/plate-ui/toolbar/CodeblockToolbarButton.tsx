@@ -9,7 +9,6 @@ import { someNode } from '@udecode/plate-common';
 
 export const CodeBlockToolbarButton = withRef<typeof ToolbarButton>((_, ref) => {
   const { props } = useToggleCodeBlockButton();
-
   const editor = useEditorRef();
 
   const codeBlockType = editor.getType(BaseCodeBlockPlugin);

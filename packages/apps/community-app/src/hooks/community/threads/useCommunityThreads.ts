@@ -73,7 +73,11 @@ export const useCommunityThreads = ({
             typeof msg.fileMetadata.appData.content.message === 'string'
               ? []
               : findMentionedInRichText(msg.fileMetadata.appData.content.message);
-          return [...currentMessageMentions, msg.fileMetadata.senderOdinId];
+          return [
+            ...currentMessageMentions,
+            ...(msg.fileMetadata.appData.content.collaborators || []),
+            msg.fileMetadata.senderOdinId,
+          ];
         });
 
         return {

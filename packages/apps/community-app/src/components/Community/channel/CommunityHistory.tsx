@@ -181,7 +181,10 @@ export const CommunityHistory = memo(
 
     useEffect(() => {
       if (setParticipants && inAThread) {
-        const involvedAuthors = flattenedMsgs.map((msg) => msg.fileMetadata.originalAuthor);
+        const involvedAuthors = flattenedMsgs.flatMap((msg) => [
+          msg.fileMetadata.originalAuthor,
+          ...(msg.fileMetadata.appData.content.collaborators || []),
+        ]);
         const mentionedAuthors = flattenedMsgs
           .map((msg) =>
             Array.isArray(msg.fileMetadata.appData.content.message)

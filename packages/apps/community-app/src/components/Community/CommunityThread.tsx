@@ -15,6 +15,7 @@ import { CommunityHistory } from './channel/CommunityHistory';
 import { memo, ReactNode, useEffect, useMemo, useState } from 'react';
 import { useEditLastMessageShortcut } from '../../hooks/community/messages/useEditLastMessageShortcut';
 import { MessageComposer } from './Message/composer/MessageComposer';
+import { ParticipantsList } from './participants/ParticipantsList';
 
 export const CommunityThread = memo(
   ({
@@ -56,7 +57,12 @@ export const CommunityThread = memo(
           >
             <ChevronLeft className="h-5 w-5" />
           </ActionLink>
-          {t('Thread')}
+          <div className="flex flex-col">
+            <p>{t('Thread')}</p>
+            <p className="text-sm text-slate-400">
+              <ParticipantsList participants={participants} />
+            </p>
+          </div>
           <ActionLink
             href={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || 'activity'}`}
             icon={Times}

@@ -25,6 +25,8 @@ import { useCommunityMemberUpdater } from '../../hooks/community/useCommunityMem
 import { ExtendCriclePermissionDialog } from '../../components/Auth/ExtendCirclePermissionDialog';
 import { useCommunityNotifications } from '../../hooks/community/useCommunityNotifications';
 
+const STORAGE_KEY = 'COMMUNITY_NAV_OPEN';
+
 const LOCAL_STORAGE_KEY = 'COMMUNITY_LATEST_PATH';
 export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   const newCommunity = useMatch({ path: `${COMMUNITY_ROOT_PATH}/new` });
@@ -87,6 +89,12 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
     };
   }, []);
 
+  const storedState = localStorage.getItem(STORAGE_KEY);
+  const [isPinned, setIsPinned] = useState(storedState ? storedState === '1' : false);
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, isPinned ? '1' : '0');
+  }, [isPinned]);
+
   if (communities && !communityKey && !isCreateNew) {
     if (!location.state?.referrer || !location.state?.referrer.startsWith(COMMUNITY_ROOT_PATH)) {
       const lastPath = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -118,16 +126,22 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
       <ExtendCriclePermissionDialog />
       <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`} ref={viewportWrapperRef}>
         <ErrorBoundary>
-          <CommunitySideNav />
+          <CommunitySideNav togglePin={(newVal) => setIsPinned((old) => newVal ?? !old)} />
         </ErrorBoundary>
+
         {isCreateNew ? (
           <NewCommunity />
         ) : (
           <>
             <ErrorBoundary>
-              <CommunityChannelNav isOnline={isOnline} />
+              <CommunityChannelNav isOnline={isOnline} isHidden={isPinned} />
             </ErrorBoundary>
-            {children ? <Suspense>{children}</Suspense> : null}
+
+            {children ? (
+              <Suspense>
+                <ErrorBoundary>{children}</ErrorBoundary>
+              </Suspense>
+            ) : null}
           </>
         )}
       </div>
@@ -135,7 +149,7 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   );
 };
 
-const CommunitySideNav = () => {
+const CommunitySideNav = ({ togglePin }: { togglePin: (newVal?: boolean) => void }) => {
   const rootChatMatch = useMatch({ path: COMMUNITY_ROOT_PATH });
   const communityHomeChatMatch = useMatch({
     path: `${COMMUNITY_ROOT_PATH}/:odinKey/:communityKey`,
@@ -157,7 +171,7 @@ const CommunitySideNav = () => {
               <RadioTower className="h-7 w-7" />
               <span className="lg:hidden">{t('Homebase Community')}</span>
             </div>
-            <CommunitiesList />
+            <CommunitiesList togglePin={togglePin} />
           </div>
         </ErrorBoundary>
       </div>
@@ -165,7 +179,7 @@ const CommunitySideNav = () => {
   );
 };
 
-const CommunitiesList = () => {
+const CommunitiesList = ({ togglePin }: { togglePin: (newVal?: boolean) => void }) => {
   const [isEnableDiscovery, setIsEnableDiscovery] = useState(false);
   const {
     data: communities,
@@ -186,6 +200,7 @@ const CommunitiesList = () => {
           key={conversation.fileId}
           community={conversation}
           isActive={stringGuidsEqual(activeCommunityId, conversation.fileMetadata.appData.uniqueId)}
+          togglePin={togglePin}
         />
       ))}
 
@@ -225,15 +240,27 @@ const CommunitiesList = () => {
 const CommunityListItem = ({
   community,
   isActive,
+  togglePin,
 }: {
   community: HomebaseFile<CommunityDefinition>;
   isActive: boolean;
+  togglePin: (newVal?: boolean) => void;
 }) => {
   return (
     <div className={`w-full px-2 py-2 ${isActive ? 'bg-primary/20' : ''}`}>
       <Link
         to={`${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${community.fileMetadata.appData.uniqueId}`}
         className="flex aspect-auto flex-row items-center gap-4 rounded-lg rounded-l-2xl border bg-background lg:block lg:aspect-square lg:rounded-none lg:border-0 lg:bg-transparent"
+        onClick={(e) => {
+          if (isActive) {
+            togglePin();
+            e.stopPropagation();
+            e.preventDefault();
+            return;
+          } else {
+            togglePin(true);
+          }
+        }}
       >
         <span
           className="flex aspect-square w-16 flex-row items-center justify-center rounded-2xl p-2 text-lg uppercase leading-none text-white hover:shadow-md lg:w-full"

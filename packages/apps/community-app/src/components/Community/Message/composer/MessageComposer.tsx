@@ -244,10 +244,10 @@ export const MessageComposer = ({
                   />
                 )}
               </div>
-              <div className="-mx-1 flex flex-row justify-between">
+              <div className="-mx-1 flex flex-row justify-between md:pt-2">
                 <FileSelector
                   onChange={(files) => setFiles(files.map((file) => ({ file })))}
-                  className="my-auto px-2 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
+                  className="my-auto px-1 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
                   accept="*"
                   maxSize={HUNDRED_MEGA_BYTES}
                 >
@@ -261,9 +261,9 @@ export const MessageComposer = ({
                       e.stopPropagation();
                       doSend();
                     }}
-                    className={`flex-shrink opacity-40 transition-colors ${!plainMessage && !files?.length ? '' : 'bg-primary text-primary-contrast opacity-90 hover:opacity-100'}`}
+                    className={`flex-shrink p-1 opacity-40 transition-colors ${!plainMessage && !files?.length ? '' : 'bg-primary text-primary-contrast opacity-90 hover:opacity-100'}`}
                     icon={PaperPlane}
-                    size="square"
+                    size="none"
                     disabled={!plainMessage && !files?.length}
                     onMouseDown={(e) => e.preventDefault()}
                   />

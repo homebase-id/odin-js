@@ -189,7 +189,27 @@ const ParagraphWithLinks = ({
   text: string | RichText;
   className?: string;
 }) => {
-  if (typeof text !== 'string') return <RichTextRenderer body={text} className={className} />;
+  if (typeof text !== 'string')
+    return (
+      <RichTextRenderer
+        body={text}
+        className={className}
+        renderElement={(element, children) => {
+          const { type, attributes } = element;
+
+          if (type === 'p' || type === 'paragraph') {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { text, ...renderableAttributes } = attributes || {};
+            return (
+              <p {...renderableAttributes} className="min-h-2 empty:min-h-0">
+                {children}
+              </p>
+            );
+          }
+          return null;
+        }}
+      />
+    );
 
   const splitUpText = text.split(urlAndMentionRegex);
   return (

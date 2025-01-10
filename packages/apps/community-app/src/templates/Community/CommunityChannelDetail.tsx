@@ -165,24 +165,22 @@ const CommunityChannelPins = ({
     );
 
   return (
-    <div className="flex flex-col gap-5 overflow-auto p-5">
+    <div className="flex flex-col gap-3 overflow-auto p-5">
       {pinnedMessages?.searchResults?.length ? (
-        <>
-          {pinnedMessages?.searchResults.map((pinned, index) => {
-            return (
-              <Link
-                to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey}/${pinned.fileMetadata.appData.uniqueId}`}
-                key={pinned.fileId || index}
-              >
-                <CommunityMessageItem
-                  msg={pinned}
-                  community={community}
-                  className="pointer-events-none cursor-pointer rounded-lg border px-2 py-1 hover:shadow-md md:px-3"
-                />
-              </Link>
-            );
-          })}
-        </>
+        pinnedMessages?.searchResults.map((pinned, index) => {
+          return (
+            <Link
+              to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey}/${pinned.fileMetadata.appData.uniqueId}`}
+              key={pinned.fileId || index}
+            >
+              <CommunityMessageItem
+                msg={pinned}
+                community={community}
+                className="pointer-events-none cursor-pointer rounded-lg border px-2 py-1 hover:shadow-md md:px-3"
+              />
+            </Link>
+          );
+        })
       ) : (
         <p className="text-slate-400">{t('No pinned messages')}</p>
       )}
