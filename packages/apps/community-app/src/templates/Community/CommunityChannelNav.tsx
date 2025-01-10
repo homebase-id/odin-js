@@ -39,7 +39,13 @@ import { useHasUnreadThreads } from '../../hooks/community/threads/useCommunityT
 import { MyProfileStatus, ProfileStatus } from '../../components/Community/status/MyProfileStatus';
 
 const maxChannels = 7;
-export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
+export const CommunityChannelNav = ({
+  isOnline,
+  isHidden,
+}: {
+  isOnline: boolean;
+  isHidden?: boolean;
+}) => {
   const { odinKey, communityKey } = useParams();
   const [isCommunityInfoDialogOpen, setIsCommunityInfoDialogOpen] = useState(false);
   const { data: community, isLoading } = useCommunity({
@@ -52,8 +58,7 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
   }).single;
 
   const members = community?.fileMetadata.appData.content?.members;
-
-  const isActive = !!useMatch({ path: `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}` });
+  const isRootPage = !!useMatch({ path: `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}` });
 
   const { data: communityChannels } = useCommunityChannelsWithRecentMessages({
     odinId: odinKey,
@@ -93,9 +98,9 @@ export const CommunityChannelNav = ({ isOnline }: { isOnline: boolean }) => {
   return (
     <>
       <div
-        className={`fixed ${isActive ? 'translate-x-full' : 'translate-x-0'} -left-full h-[100dvh] w-full flex-shrink-0 bg-page-background lg:relative lg:left-0 lg:max-w-[17rem] lg:translate-x-0 lg:border-r lg:shadow-inner`}
+        className={`${!isRootPage ? 'hidden' : ''} transition-all ${isHidden ? 'w-full lg:w-0 lg:overflow-hidden' : 'w-full'} relative h-[100dvh] flex-shrink-0 bg-page-background lg:block lg:max-w-[17rem] lg:border-r lg:shadow-inner`}
       >
-        <div className="absolute inset-0 flex flex-col gap-5 overflow-auto px-2 py-5 md:pl-[calc(env(safe-area-inset-left)+4.3rem+0.5rem)] lg:pl-2">
+        <div className="absolute inset-0 flex flex-col gap-5 overflow-auto px-2 py-5 lg:pl-2">
           <div className="flex flex-row items-center">
             <a
               className="-ml-2 p-2 lg:hidden"
