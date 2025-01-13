@@ -150,6 +150,8 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
 };
 
 const CommunitySideNav = ({ togglePin }: { togglePin: (newVal?: boolean) => void }) => {
+  const isReactNative = window.localStorage.getItem('client_type')?.startsWith('react-native');
+
   const rootChatMatch = useMatch({ path: COMMUNITY_ROOT_PATH });
   const communityHomeChatMatch = useMatch({
     path: `${COMMUNITY_ROOT_PATH}/:odinKey/:communityKey`,
@@ -161,7 +163,7 @@ const CommunitySideNav = ({ togglePin }: { togglePin: (newVal?: boolean) => void
 
   return (
     <>
-      <Sidenav disablePinning={true} hideMobileDrawer={!isRoot} />
+      {!isReactNative ? <Sidenav disablePinning={true} hideMobileDrawer={!isRoot} /> : null}
       <div
         className={`${isActive ? 'translate-x-full' : 'translate-x-0'} fixed bottom-0 left-[-100%] top-0 z-[1] flex h-[100dvh] w-full flex-shrink-0 flex-col bg-page-background transition-transform lg:relative lg:left-0 lg:max-w-[4rem] lg:translate-x-0`}
       >
