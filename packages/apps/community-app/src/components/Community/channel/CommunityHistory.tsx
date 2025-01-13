@@ -217,8 +217,12 @@ export const CommunityHistory = memo(
         stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey)
       );
 
-      if (chatIndex === -1) return;
+      if (chatIndex === -1) {
+        if (hasMoreMessages) fetchNextPage();
+        return;
+      }
       const innerScroll = () => {
+        console.log('attempting to scroll to chat message');
         setScrollAttempt((scrollAttempt) => {
           const [rawOffset] = virtualizer.getOffsetForIndex(chatIndex) || [0];
           const offset = rawOffset * -1;
