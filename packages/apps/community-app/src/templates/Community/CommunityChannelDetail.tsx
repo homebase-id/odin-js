@@ -15,7 +15,7 @@ import {
 } from '@homebase-id/common-app';
 import { Arrow, ChatBubble, ChevronLeft, Pin } from '@homebase-id/common-app/icons';
 import { Link, NavLink, useMatch, useNavigate, useParams } from 'react-router-dom';
-import { memo, Suspense, useCallback, useMemo, useState } from 'react';
+import { memo, Suspense, useCallback, useMemo } from 'react';
 import { CommunityChannel } from '../../providers/CommunityProvider';
 import { useCommunityChannel } from '../../hooks/community/channels/useCommunityChannel';
 import { createPortal } from 'react-dom';
@@ -184,6 +184,14 @@ const CommunityChannelPins = ({
       ) : (
         <p className="text-slate-400">{t('No pinned messages')}</p>
       )}
+      <div className="flex flex-row justify-center py-4">
+        <Link
+          to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/pins`}
+          className="text-primary hover:underline"
+        >
+          {t('See all pins')}
+        </Link>
+      </div>
     </div>
   );
 };
