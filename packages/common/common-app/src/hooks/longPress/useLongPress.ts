@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 
+const yDriftThreshold = 10;
 // Original Code from Stack Overflow: https://stackoverflow.com/questions/48048957/react-long-press-event#answer-48057286
 // Updated with Types
 export const useLongPress = (
@@ -8,7 +9,7 @@ export const useLongPress = (
   options?: { shouldPreventDefault?: boolean; delay?: number },
   scrollableRef?: React.RefObject<HTMLElement>
 ) => {
-  const { shouldPreventDefault = true, delay = 300 } = options || {};
+  const { shouldPreventDefault = true, delay = 1000 } = options || {};
 
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const timeout = useRef<NodeJS.Timeout>();
@@ -31,7 +32,7 @@ export const useLongPress = (
         if (!document.contains(event.target as Node)) return;
         const afterScrollY = getScrollY();
 
-        if (Math.abs((beforeScrollY.current || 0) - afterScrollY) <= 20) {
+        if (Math.abs((beforeScrollY.current || 0) - afterScrollY) <= yDriftThreshold) {
           onLongPress(event);
         }
         setLongPressTriggered(true);
@@ -48,7 +49,7 @@ export const useLongPress = (
       timeout.current && clearTimeout(timeout.current);
       if (shouldTriggerClick && !longPressTriggered) {
         const afterScrollY = getScrollY();
-        if (Math.abs((beforeScrollY.current || 0) - afterScrollY) <= 20) {
+        if (Math.abs((beforeScrollY.current || 0) - afterScrollY) <= yDriftThreshold) {
           onClick?.(event);
         }
       }
