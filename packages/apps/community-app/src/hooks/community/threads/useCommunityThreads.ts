@@ -99,7 +99,7 @@ export const useCommunityThreads = ({
     queryKey: ['community-threads', communityId],
     queryFn: queryFn,
     enabled: isFetched,
-    staleTime: 500, // Just enough to avoid double fetching on load
+    staleTime: 1000, // 1s just enough to avoid double fetching on load
     refetchOnMount: true,
     refetchOnReconnect: true,
     refetchOnWindowFocus: true,

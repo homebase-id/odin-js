@@ -28,6 +28,7 @@ import {
   Bookmark,
   ChatBubble,
   RadioTower,
+  Question,
 } from '@homebase-id/common-app/icons';
 import { CommunityInfoDialog } from '../../components/Community/CommunityInfoDialog';
 import { useConversationMetadata } from '@homebase-id/chat-app/src/hooks/chat/useConversationMetadata';
@@ -139,7 +140,6 @@ export const CommunityChannelNav = ({
             />
             <ActivityItem odinId={odinKey} communityId={communityKey} />
             <LaterItem odinId={odinKey} communityId={communityKey} />
-            <PinsItem odinId={odinKey} communityId={communityKey} />
           </div>
 
           <div className="flex flex-col gap-1">
@@ -246,27 +246,17 @@ const ThreadItem = ({
 
 const LaterItem = ({ odinId, communityId }: { odinId: string; communityId: string }) => {
   const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/later`;
-  const isActive = !!useMatch({ path: href, end: true });
+  const isLaterActive = !!useMatch({ path: href, end: true });
+
+  const pinsHref = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/pins`;
+  const isPinsActive = !!useMatch({ path: pinsHref, end: true });
 
   return (
     <Link
       to={href}
-      className={`flex flex-row items-center gap-2 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`}`}
+      className={`flex flex-row items-center gap-2 rounded-md px-2 py-1 ${isLaterActive || isPinsActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`}`}
     >
       <Bookmark className="h-5 w-5" /> {t('Later')}
-    </Link>
-  );
-};
-const PinsItem = ({ odinId, communityId }: { odinId: string; communityId: string }) => {
-  const href = `${COMMUNITY_ROOT_PATH}/${odinId}/${communityId}/pins`;
-  const isActive = !!useMatch({ path: href, end: true });
-
-  return (
-    <Link
-      to={href}
-      className={`flex flex-row items-center gap-2 rounded-md px-2 py-1 ${isActive ? 'bg-primary/100 text-white' : `${!isTouchDevice() ? 'hover:bg-primary/10' : ''}`}`}
-    >
-      <Pin className="h-5 w-5" /> {t('Pins')}
     </Link>
   );
 };
@@ -363,9 +353,11 @@ const ChannelItem = ({
     updateMetadata({ metadata: newMeta });
   }, [metadata, channelId, isPinned]);
 
+  const channelPath = `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelId}`;
+
   return (
     <Link
-      to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelId}`}
+      to={channelPath}
       className={`group relative flex flex-row items-center gap-1 rounded-md py-[0.25rem] pl-2 pr-1 ${linkBackground} ${isVisited ? 'text-purple-700' : ''} ${hasUnreadMessages && !isActive ? 'font-semibold' : ''}`}
     >
       <p
@@ -382,6 +374,11 @@ const ChannelItem = ({
             label: isPinned ? 'Unpin' : 'Pin',
             icon: Pin,
             onClick: togglePin,
+          },
+          {
+            label: 'Channel info',
+            icon: Question,
+            href: `${channelPath}/info`,
           },
         ]}
         alwaysInPortal={true}

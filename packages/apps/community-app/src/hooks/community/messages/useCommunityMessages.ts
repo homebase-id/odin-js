@@ -231,22 +231,23 @@ export const getCommunityMessagesInfiniteQueryOptions: (
       lastPage?.searchResults && lastPage?.searchResults?.length >= PAGE_SIZE
         ? lastPage.cursorState
         : undefined,
-    select: maxAge
-      ? (data) => {
-          const filteredData = { ...data };
-          filteredData.pages = data.pages.map((page) => {
-            const filteredPage = { ...page };
+    select: !maxAge
+      ? undefined
+      : (data) => ({
+          ...data,
+          pages: data.pages.map((page) => {
+            const filteredPage = {
+              ...page,
 
-            filteredPage.searchResults = page.searchResults.filter((msg) => {
-              if (!msg) return false;
-              return msg.fileMetadata.created > maxAge;
-            });
+              searchResults: page.searchResults.filter((msg) => {
+                if (!msg) return false;
+                return msg.fileMetadata.created > maxAge;
+              }),
+            };
 
             return filteredPage;
-          });
-          return filteredData;
-        }
-      : undefined,
+          }),
+        }),
     enabled: !!odinId && !!communityId && (!!channelId || !!threadId),
     refetchOnMount: true,
     staleTime: 1000 * 60 * 60 * 24, // 24 hour

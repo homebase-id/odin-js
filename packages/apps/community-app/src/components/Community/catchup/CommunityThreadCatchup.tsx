@@ -10,6 +10,8 @@ import { MessageComposer } from '../Message/composer/MessageComposer';
 import { ExternalLink } from '@homebase-id/common-app/icons';
 import { ParticipantsList } from '../participants/ParticipantsList';
 
+const OneDayInMs = 24 * 60 * 60 * 1000;
+
 export const CommunityThreadCatchup = ({
   community,
   threadMeta,
@@ -36,7 +38,7 @@ export const CommunityThreadCatchup = ({
 
   const showOptions = useMemo(() => {
     return {
-      count: 10,
+      count: 5,
       targetLink: channel
         ? `${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}/${threadMeta.threadId}/thread`
         : '',
@@ -47,25 +49,24 @@ export const CommunityThreadCatchup = ({
 
   return (
     <div className="overflow-hidden rounded-md border bg-background hover:shadow-md">
-      <div className="flex flex-row items-center bg-slate-200 px-2 py-2 dark:bg-slate-800">
+      <ActionLink
+        href={`${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}/${threadMeta.threadId}/thread`}
+        type="mute"
+        size="none"
+        className="group flex flex-col items-center justify-between rounded-b-none bg-slate-200 px-2 py-2 text-lg dark:bg-slate-800 md:flex-row"
+      >
         <div className="flex flex-col">
-          <p className="text-lg"># {channel.fileMetadata.appData.content.title}</p>
+          <p className="text-lg group-hover:underline">
+            # {channel.fileMetadata.appData.content.title}
+          </p>
           <p className="text-sm text-slate-400">
             <ParticipantsList participants={threadMeta.participants} />
           </p>
         </div>
         <div className="ml-auto">
-          <ActionLink
-            href={`${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}/${threadMeta.threadId}/thread`}
-            type="secondary"
-            size="none"
-            className="px-2 py-1 text-sm"
-          >
-            {t('See full thread')}
-            <ExternalLink className="ml-2 h-3 w-3" />
-          </ActionLink>
+          <ExternalLink className="ml-2 h-3 w-3" />
         </div>
-      </div>
+      </ActionLink>
 
       <CommunityHistory
         community={community}
@@ -74,6 +75,7 @@ export const CommunityThreadCatchup = ({
         setParticipants={setParticipants}
         alignTop={true}
         maxShowOptions={showOptions}
+        maxAge={threadMeta.lastMessageCreated - OneDayInMs}
       />
       <ErrorBoundary>
         {originMessage ? (

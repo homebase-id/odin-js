@@ -2,46 +2,77 @@
 
 ##### Open Decentralized Identity Network
 
-[![CI Build](https://github.com/YouFoundation/dotyoucore-js/actions/workflows/ci.yml/badge.svg)](https://github.com/YouFoundation/dotyoucore-js/actions/workflows/ci.yml)
+[![CI Build](https://github.com/homebase-id/odin-js/actions/workflows/ci.yml/badge.svg)](https://github.com/homebase-id/odin-js/actions/workflows/ci.yml)
 
-####
+---
 
-This monorepo contains the various JavaScript apps and libraries that are maintaned by Homebase. The libraries can easily be consumed by other app developers that want to work with a Homebase Identity backend.
+This monorepo contains the various JavaScript apps and libraries maintained by Homebase. These resources are designed to empower app developers to seamlessly integrate with a Homebase Identity backend, enabling secure, decentralized, and user-centric identity solutions. By leveraging these tools, developers can build powerful applications that prioritize privacy, interoperability, and user control.
 
-- 🚀 Feed app
-- 🚀 Chat app
-- 🚀 Mail app
-- 🚀 Community app
-- 🚀 Public app
-- 🚀 Owner app
-- 📚 JS Lib
-- ✨ UI Lib
+## Overview of Packages
 
-The feed, chat, mail, and community apps are designed as stand-alone platform apps and will likely at some point be pulled out of the mono-repo.
+### Apps
 
-## Installing Locally
+The following apps are built on the Homebase platform, showcasing its capabilities and providing ready-to-use functionality. Each app depends on **JS-Lib**, **UI-Lib**, and **Common-App** for shared logic and components:
 
-### Libraries:
+- 🚀 **Feed App**: A personalized content feed.
+- 🚀 **Chat App**: Secure messaging platform.
+- 🚀 **Mail App**: Decentralized email client.
+- 🚀 **Community App**: A platform for group collaboration and community building.
+- 🚀 **Public App**: Public-facing interfaces.
+- 🚀 **Owner App**: Administrative tools and dashboards.
 
-To use the libraries you can just install them from Github Packages: [JS-Lib](https://github.com/YouFoundation/dotyoucore-js/pkgs/npm/js-lib) & [UI-Lib](https://github.com/YouFoundation/dotyoucore-js/pkgs/npm/ui-lib)
+Each app is designed as a stand-alone platform app and can be independently extracted from the monorepo.
 
-The libraries expect a `DotYouClient`. The `DotYouClient` holds the authentication parameters for the specific request.
+### Libraries
 
-### Apps:
+- 📚 **JS-Lib**: Core JavaScript library for interacting with the Homebase Identity backend. Includes essential utilities and logic for building on the platform.
+- ✨ **UI-Lib**: A reusable UI component library, enabling consistent design and interaction patterns across Homebase-based apps.
+- 🛠 **Common-App**: A library of shared components and modules used by all platform apps. While tailored for Homebase's branded apps, this package is not designed for use outside of the Homebase ecosystem.
 
-In order to get everything running you'll need the back-end web server, see the repo [https://github.com/YouFoundation/dotyoucore](https://github.com/YouFoundation/dotyoucore)
+---
 
-Before you can use the actual apps, you need to install and build the dependencies:
+## Getting Started
 
-`npm install && npm run build:libs`
+### Installing Libraries
 
-After that you can run the apps locally:
+To use the libraries in your project, you can install them directly from GitHub Packages:
 
-All concurrently `npm run start` or one by one `npm run start:[feed/chat/mail/community/public/owner]`
+- [JS-Lib](https://github.com/homebase-id/odin-js/pkgs/npm/js-lib)
+- [UI-Lib](https://github.com/homebase-id/odin-js/pkgs/npm/ui-lib)
 
-and/or build them:
+#### Prerequisite: DotYouClient
 
-`npm run build`
+The libraries depend on a **DotYouClient** instance, which manages authentication parameters for API requests. Ensure you configure the `DotYouClient` correctly to interact with your Homebase Identity backend.
+
+### Running the Apps Locally
+
+Before starting the apps, ensure you have the backend server running. You can find it here: [HOMEBASE.ID (ODIN-CORE)](https://github.com/homebase-id/odin-core).
+
+1. **Install dependencies and build libraries**:
+
+```
+npm install && npm run build:libs
+```
+
+2. **Run the apps**:
+
+- Run all apps concurrently:
+
+```
+npm run start
+```
+
+- Or run a specific app:
+
+```
+npm run start:[feed/chat/mail/community/public/owner]
+```
+
+3. **Build the apps**:
+
+```
+npm run build
+```
 
 ## Security Disclosures
 

@@ -15,7 +15,7 @@ import {
 } from '@homebase-id/common-app';
 import { Arrow, ChatBubble, ChevronLeft, Pin } from '@homebase-id/common-app/icons';
 import { Link, NavLink, useMatch, useNavigate, useParams } from 'react-router-dom';
-import { memo, Suspense, useCallback, useMemo, useState } from 'react';
+import { memo, Suspense, useCallback, useMemo } from 'react';
 import { CommunityChannel } from '../../providers/CommunityProvider';
 import { useCommunityChannel } from '../../hooks/community/channels/useCommunityChannel';
 import { createPortal } from 'react-dom';
@@ -184,6 +184,14 @@ const CommunityChannelPins = ({
       ) : (
         <p className="text-slate-400">{t('No pinned messages')}</p>
       )}
+      <div className="flex flex-row justify-center py-4">
+        <Link
+          to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/pins`}
+          className="text-primary hover:underline"
+        >
+          {t('See all pins')}
+        </Link>
+      </div>
     </div>
   );
 };
@@ -197,9 +205,13 @@ const CommunityChannelHeader = ({
 }) => {
   const { odinKey, channelKey } = useParams();
 
+  const navigate = useNavigate();
   const communityId = community?.fileMetadata.appData.uniqueId;
-  const [showChatInfo, setShowChatInfo] = useState<boolean>(false);
-  const isPins = !!useMatch(`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelKey}/pins`);
+  const channelPath = `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelKey}`;
+
+  const isPins = !!useMatch(`${channelPath}/pins`);
+  const infoPath = `${channelPath}/info`;
+  const isInfo = !!useMatch(infoPath);
 
   return (
     <>
@@ -213,12 +225,9 @@ const CommunityChannelHeader = ({
         </Link>
 
         {channel ? (
-          <button
-            onClick={() => setShowChatInfo(true)}
-            className="flex cursor-pointer flex-row items-center gap-2"
-          >
+          <Link to={infoPath} className="flex cursor-pointer flex-row items-center gap-2">
             # {channel.fileMetadata.appData.content?.title}
-          </button>
+          </Link>
         ) : null}
 
         <div className="-mb-2 ml-auto flex flex-row items-center gap-2 lg:-mb-5">
@@ -243,11 +252,11 @@ const CommunityChannelHeader = ({
         </div>
       </div>
 
-      {showChatInfo && community && channel ? (
+      {isInfo && community && channel ? (
         <ChannelInfo
           community={community}
           channel={channel}
-          onClose={() => setShowChatInfo(false)}
+          onClose={() => navigate(channelPath)}
         />
       ) : null}
     </>
