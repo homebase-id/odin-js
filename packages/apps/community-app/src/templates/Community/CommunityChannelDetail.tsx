@@ -197,9 +197,13 @@ const CommunityChannelHeader = ({
 }) => {
   const { odinKey, channelKey } = useParams();
 
+  const navigate = useNavigate();
   const communityId = community?.fileMetadata.appData.uniqueId;
-  const [showChatInfo, setShowChatInfo] = useState<boolean>(false);
-  const isPins = !!useMatch(`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelKey}/pins`);
+  const channelPath = `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelKey}`;
+
+  const isPins = !!useMatch(`${channelPath}/pins`);
+  const infoPath = `${channelPath}/info`;
+  const isInfo = !!useMatch(infoPath);
 
   return (
     <>
@@ -213,12 +217,9 @@ const CommunityChannelHeader = ({
         </Link>
 
         {channel ? (
-          <button
-            onClick={() => setShowChatInfo(true)}
-            className="flex cursor-pointer flex-row items-center gap-2"
-          >
+          <Link to={infoPath} className="flex cursor-pointer flex-row items-center gap-2">
             # {channel.fileMetadata.appData.content?.title}
-          </button>
+          </Link>
         ) : null}
 
         <div className="-mb-2 ml-auto flex flex-row items-center gap-2 lg:-mb-5">
@@ -243,11 +244,11 @@ const CommunityChannelHeader = ({
         </div>
       </div>
 
-      {showChatInfo && community && channel ? (
+      {isInfo && community && channel ? (
         <ChannelInfo
           community={community}
           channel={channel}
-          onClose={() => setShowChatInfo(false)}
+          onClose={() => navigate(channelPath)}
         />
       ) : null}
     </>

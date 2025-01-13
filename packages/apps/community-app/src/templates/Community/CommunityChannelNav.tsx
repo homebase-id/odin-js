@@ -28,6 +28,7 @@ import {
   Bookmark,
   ChatBubble,
   RadioTower,
+  Question,
 } from '@homebase-id/common-app/icons';
 import { CommunityInfoDialog } from '../../components/Community/CommunityInfoDialog';
 import { useConversationMetadata } from '@homebase-id/chat-app/src/hooks/chat/useConversationMetadata';
@@ -363,9 +364,11 @@ const ChannelItem = ({
     updateMetadata({ metadata: newMeta });
   }, [metadata, channelId, isPinned]);
 
+  const channelPath = `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelId}`;
+
   return (
     <Link
-      to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelId}`}
+      to={channelPath}
       className={`group relative flex flex-row items-center gap-1 rounded-md py-[0.25rem] pl-2 pr-1 ${linkBackground} ${isVisited ? 'text-purple-700' : ''} ${hasUnreadMessages && !isActive ? 'font-semibold' : ''}`}
     >
       <p
@@ -382,6 +385,11 @@ const ChannelItem = ({
             label: isPinned ? 'Unpin' : 'Pin',
             icon: Pin,
             onClick: togglePin,
+          },
+          {
+            label: 'Channel info',
+            icon: Question,
+            href: `${channelPath}/info`,
           },
         ]}
         alwaysInPortal={true}

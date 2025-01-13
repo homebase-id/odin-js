@@ -222,7 +222,6 @@ export const CommunityHistory = memo(
         return;
       }
       const innerScroll = () => {
-        console.log('attempting to scroll to chat message');
         setScrollAttempt((scrollAttempt) => {
           const [rawOffset] = virtualizer.getOffsetForIndex(chatIndex) || [0];
           const offset = rawOffset * -1;
