@@ -17,7 +17,6 @@ import {
 import { CommunityMessageItem } from '../Message/item/CommunityMessageItem';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
 import { CommunityActions } from './ContextMenu';
-import { useCommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
 import { Link, useParams } from 'react-router-dom';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
@@ -29,7 +28,7 @@ export const CommunityHistory = memo(
     doOpenThread?: (msg: HomebaseFile<CommunityMessage>) => void;
     setIsEmptyChat?: (isEmpty: boolean) => void;
     alignTop?: boolean;
-    onlyNew?: boolean;
+    maxAge?: number | undefined;
     maxShowOptions?: { count: number; targetLink: string };
     emptyPlaceholder?: ReactNode;
     setParticipants?: React.Dispatch<React.SetStateAction<string[] | null | undefined>>;
@@ -41,7 +40,7 @@ export const CommunityHistory = memo(
       doOpenThread,
       setIsEmptyChat,
       alignTop,
-      onlyNew,
+      maxAge,
       maxShowOptions,
       emptyPlaceholder,
       setParticipants,
@@ -51,17 +50,6 @@ export const CommunityHistory = memo(
     const scrollRef = useRef<HTMLDivElement>(null);
     const inAThread =
       !!origin && origin.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE;
-
-    const { data: metadata } = useCommunityMetadata({
-      odinId: community?.fileMetadata.senderOdinId,
-      communityId: community?.fileMetadata?.appData?.uniqueId,
-    }).single;
-    const lastReadTime =
-      (channel?.fileMetadata.appData.uniqueId &&
-        metadata?.fileMetadata.appData.content.channelLastReadTime[
-          channel?.fileMetadata.appData.uniqueId
-        ]) ||
-      0;
 
     const {
       all: {
@@ -77,7 +65,7 @@ export const CommunityHistory = memo(
       communityId: community?.fileMetadata?.appData?.uniqueId,
       channelId: channel?.fileMetadata?.appData?.uniqueId,
       threadId: origin?.fileMetadata.globalTransitId,
-      maxAge: onlyNew ? lastReadTime : undefined,
+      maxAge: maxAge,
     });
 
     const [flattenedMsgs, isSliced] =
@@ -85,7 +73,7 @@ export const CommunityHistory = memo(
         const flat = (messages?.pages?.flatMap((page) => page?.searchResults)?.filter(Boolean) ||
           []) as HomebaseFile<CommunityMessage>[];
 
-        if (inAThread) {
+        if (inAThread && (!maxAge || origin.fileMetadata.created > maxAge)) {
           flat.push(origin as HomebaseFile<CommunityMessage>);
         }
 

@@ -5,6 +5,8 @@ import { CommunityHistory } from '../channel/CommunityHistory';
 import { ActionLink, COMMUNITY_ROOT_PATH } from '@homebase-id/common-app';
 import { ExternalLink } from '@homebase-id/common-app/icons';
 
+const OneDayInMs = 24 * 60 * 60 * 1000;
+
 export const CommunityChannelCatchup = ({
   community,
   channel,
@@ -14,6 +16,8 @@ export const CommunityChannelCatchup = ({
 }) => {
   const communityId = community.fileMetadata.appData.uniqueId;
   const channelLink = `${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}`;
+
+  if (!channel.lastMessage) return null;
 
   return (
     <div className="pb-3 last-of-type:pb-0">
@@ -37,6 +41,7 @@ export const CommunityChannelCatchup = ({
               count: 5,
               targetLink: channelLink,
             }}
+            maxAge={channel.lastMessage?.fileMetadata.created - OneDayInMs}
           />
         </div>
       </div>

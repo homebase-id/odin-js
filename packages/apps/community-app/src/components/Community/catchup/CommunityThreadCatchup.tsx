@@ -10,6 +10,8 @@ import { MessageComposer } from '../Message/composer/MessageComposer';
 import { ExternalLink } from '@homebase-id/common-app/icons';
 import { ParticipantsList } from '../participants/ParticipantsList';
 
+const OneDayInMs = 24 * 60 * 60 * 1000;
+
 export const CommunityThreadCatchup = ({
   community,
   threadMeta,
@@ -36,7 +38,7 @@ export const CommunityThreadCatchup = ({
 
   const showOptions = useMemo(() => {
     return {
-      count: 10,
+      count: 5,
       targetLink: channel
         ? `${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}/${threadMeta.threadId}/thread`
         : '',
@@ -74,6 +76,7 @@ export const CommunityThreadCatchup = ({
         setParticipants={setParticipants}
         alignTop={true}
         maxShowOptions={showOptions}
+        maxAge={threadMeta.lastMessageCreated - OneDayInMs}
       />
       <ErrorBoundary>
         {originMessage ? (
