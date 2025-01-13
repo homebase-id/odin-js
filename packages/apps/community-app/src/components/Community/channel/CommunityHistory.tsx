@@ -266,7 +266,7 @@ export const CommunityHistory = memo(
                         <div className="animate-pulse" key={'loading'}>
                           {t('Loading...')}
                         </div>
-                      ) : isSliced && maxShowOptions?.targetLink ? (
+                      ) : (isSliced || maxAge) && maxShowOptions?.targetLink ? (
                         <div key={'end'} className="flex flex-row justify-center">
                           <Link
                             to={maxShowOptions?.targetLink}
