@@ -205,7 +205,7 @@ const CommunityContextActions = ({
       label: t('Copy link'),
       onClick: () => {
         navigator.clipboard.writeText(
-          `${window.location.href}/${msg.fileMetadata.appData.uniqueId}`
+          `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect${window.location.pathname}/${msg.fileMetadata.appData.uniqueId}`
         );
       },
     },
