@@ -125,6 +125,7 @@ export const CommunityMessageEditor = ({
       <ErrorNotification error={updateError} />
       <Suspense>
         <RichTextEditor
+          disableHeadings={true}
           placeholder="Your message"
           defaultValue={message}
           className="min-h-[10rem] w-full border bg-background p-2 dark:border-slate-800"
