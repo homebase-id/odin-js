@@ -5,7 +5,6 @@ import {
   ActionLink,
   COMMUNITY_ROOT_PATH,
   ErrorBoundary,
-  t,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
@@ -16,8 +15,6 @@ import { MessageComposer } from '../Message/composer/MessageComposer';
 import { ExternalLink } from '@homebase-id/common-app/icons';
 import { ParticipantsList } from '../participants/ParticipantsList';
 import { useCommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
-
-const OneDayInMs = 24 * 60 * 60 * 1000;
 
 export const CommunityThreadCatchup = ({
   community,
