@@ -141,11 +141,7 @@ export const useCommunityInboxProcessor = (
         }
       );
 
-      isDebug &&
-        console.debug(
-          '[CommunityInboxProcessor] new community metadata',
-          newCommunityMetadata.length
-        );
+      isDebug && console.debug('[CommunityInboxProcessor] new community metadata');
 
       await Promise.all(
         newCommunityMetadata.map(async (updatedDsr) => {

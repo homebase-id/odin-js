@@ -25,11 +25,12 @@ let subscribedDrives: TargetDrive[] | undefined;
 
 let connectPromise: Promise<void> | undefined = undefined;
 let isHandshaked = false;
-const PING_INTERVAL = 1000 * 5 * 1;
+const PING_INTERVAL = 1000 * 8 * 1;
 
 let pingInterval: NodeJS.Timeout | undefined;
 let lastPong: number | undefined;
 
+let reconnectCounter = 0;
 let reconnectPromise: Promise<void> | undefined = undefined;
 
 const subscribers: {
@@ -185,10 +186,11 @@ const ReconnectSocket = async (
   args?: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this
 ) => {
   if (reconnectPromise) return;
-  subscribers.map((subscriber) => subscriber.onDisconnect && subscriber.onDisconnect());
 
   reconnectPromise = new Promise<void>((resolve) => {
     if (isDebug) console.debug('[WebsocketProviderOverPeer] Reconnecting - Force disconnect');
+    reconnectCounter++;
+    subscribers.map((subscriber) => subscriber.onDisconnect && subscriber.onDisconnect());
 
     if (webSocketClient) webSocketClient.close(1000, 'Disconnect after timeout');
     webSocketClient = undefined;
@@ -204,8 +206,7 @@ const ReconnectSocket = async (
       subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
 
       resolve();
-      // We can't make a proper reconnect backoff here, as we don't have a way to know if the connection was closed due to network issues or not
-    }, 100);
+    }, reconnectCounter * 100);
   });
 };
 
