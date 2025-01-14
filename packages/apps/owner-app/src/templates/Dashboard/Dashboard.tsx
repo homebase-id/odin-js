@@ -19,7 +19,6 @@ import {
   COMMUNITY_APP_ID,
 } from '@homebase-id/common-app';
 import { House, Cog, Download } from '@homebase-id/common-app/icons';
-import { useApp } from '../../hooks/apps/useApp';
 
 const Dashboard = () => {
   useAutofixDefaultConfig();
