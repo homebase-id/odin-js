@@ -306,14 +306,17 @@ export const useCommunityMessage = (props?: {
         const extistingMessages = updateCacheCommunityMessages(
           queryClient,
           community.fileMetadata.appData.uniqueId as string,
-          transformedMessage.fileMetadata.appData.groupId,
-          undefined,
+          transformedMessage.fileMetadata.appData.content.channelId,
+          transformedMessage.fileMetadata.appData.content.threadId,
           (data) => ({
             ...data,
             pages: data.pages.map((page) => ({
               ...page,
               searchResults: page.searchResults.map((msg) =>
-                stringGuidsEqual(msg?.fileMetadata.appData.uniqueId, transformedMessage.fileId)
+                stringGuidsEqual(
+                  msg?.fileMetadata.appData.uniqueId,
+                  transformedMessage.fileMetadata.appData.uniqueId
+                ) || stringGuidsEqual(msg?.fileId, transformedMessage.fileId)
                   ? transformedMessage
                   : msg
               ),
@@ -326,7 +329,6 @@ export const useCommunityMessage = (props?: {
           community.fileMetadata.appData.uniqueId as string,
           transformedMessage.fileMetadata.appData.uniqueId as string,
           transformedMessage.fileSystemType,
-
           () => transformedMessage
         );
 
