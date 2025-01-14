@@ -79,7 +79,7 @@
   },
   "optionalDependencies": {
     "@ffmpeg/util": "^0.12.1",
-    "@homebase-id/ffmpeg": "0.12.10",
+    "@homebase-id/ffmpeg": "0.12.15",
     "mp4box": "^0.5.2"
   },
   "devDependencies": {

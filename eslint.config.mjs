@@ -23,6 +23,7 @@ export default [
       '**/postcss.config.cjs',
       '**/.eslintrc',
       '**/env.d.ts',
+      '**/ffmpeg-wasm-worker-loader.js',
     ],
   },
   ...compat.extends(

@@ -5,7 +5,7 @@ import { hasDebugFlag } from '../../helpers/BrowserUtil';
 import { mergeByteArrays } from '../../helpers/DataUtil';
 import { SegmentedVideoMetadata } from '../MediaTypes';
 
-type ExtendedBuffer = ArrayBuffer & { fileStart?: number };
+type ExtendedBuffer = (ArrayBuffer | ArrayBufferLike) & { fileStart?: number };
 const MB = 1024 * 1024;
 const MB_PER_CHUNK = 5 * MB;
 
