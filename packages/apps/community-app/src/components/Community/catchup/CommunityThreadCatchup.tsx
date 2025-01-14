@@ -1,7 +1,13 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { CommunityHistory } from '../channel/CommunityHistory';
-import { ActionLink, COMMUNITY_ROOT_PATH, ErrorBoundary, t } from '@homebase-id/common-app';
+import {
+  ActionLink,
+  COMMUNITY_ROOT_PATH,
+  ErrorBoundary,
+  t,
+  useDotYouClientContext,
+} from '@homebase-id/common-app';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { useCommunityChannel } from '../../../hooks/community/channels/useCommunityChannel';
 import { ThreadMeta } from '../../../hooks/community/threads/useCommunityThreads';
@@ -9,6 +15,7 @@ import { useMemo, useState } from 'react';
 import { MessageComposer } from '../Message/composer/MessageComposer';
 import { ExternalLink } from '@homebase-id/common-app/icons';
 import { ParticipantsList } from '../participants/ParticipantsList';
+import { useCommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
 
 const OneDayInMs = 24 * 60 * 60 * 1000;
 
@@ -21,6 +28,13 @@ export const CommunityThreadCatchup = ({
 }) => {
   const communityId = community.fileMetadata.appData.uniqueId;
   const [participants, setParticipants] = useState<string[] | null>();
+
+  const { data: metadata } = useCommunityMetadata({
+    odinId: community.fileMetadata.senderOdinId,
+    communityId,
+  }).single;
+
+  const threadsLastRead = metadata?.fileMetadata.appData.content.threadsLastReadTime;
 
   const { data: channel } = useCommunityChannel({
     odinId: community.fileMetadata.senderOdinId,
@@ -44,6 +58,19 @@ export const CommunityThreadCatchup = ({
         : '',
     };
   }, [community, channel]);
+
+  const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
+
+  const todayDate = new Date(threadMeta.lastMessageCreated);
+  todayDate.setHours(0, 0, 0, 0);
+  const defaultMaxAge = todayDate.getTime();
+
+  const maxAge =
+    (threadMeta.lastAuthor !== loggedInIdentity &&
+      threadsLastRead &&
+      threadsLastRead < defaultMaxAge &&
+      threadsLastRead) ||
+    defaultMaxAge;
 
   if (!channel || !originMessage) return null;
 
@@ -75,7 +102,7 @@ export const CommunityThreadCatchup = ({
         setParticipants={setParticipants}
         alignTop={true}
         maxShowOptions={showOptions}
-        maxAge={threadMeta.lastMessageCreated - OneDayInMs}
+        maxAge={maxAge}
       />
       <ErrorBoundary>
         {originMessage ? (
