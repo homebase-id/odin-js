@@ -17,10 +17,8 @@ import {
   FEED_APP_ID,
   PHOTO_APP_ID,
   COMMUNITY_APP_ID,
-  COMMUNITY_ALLOWED_IDENTITIES,
 } from '@homebase-id/common-app';
 import { House, Cog, Download } from '@homebase-id/common-app/icons';
-import { useApp } from '../../hooks/apps/useApp';
 
 const Dashboard = () => {
   useAutofixDefaultConfig();
@@ -190,16 +188,6 @@ const MailApp = () => {
 
 const CommunityApp = () => {
   const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: COMMUNITY_APP_ID });
-  const { data: appRegistration } = useApp({ appId: COMMUNITY_APP_ID }).fetch;
-
-  if (
-    import.meta.env.PROD &&
-    !COMMUNITY_ALLOWED_IDENTITIES.includes(window.location.hostname) &&
-    !appRegistration
-  ) {
-    return null;
-  }
-
   return (
     <AppWrapper
       appId={COMMUNITY_APP_ID}

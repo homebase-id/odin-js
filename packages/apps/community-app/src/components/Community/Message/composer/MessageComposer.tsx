@@ -42,7 +42,6 @@ export const MessageComposer = ({
   channel,
   thread,
   threadParticipants,
-  onSend,
   onKeyDown,
   className,
 }: {
@@ -50,7 +49,6 @@ export const MessageComposer = ({
   channel: HomebaseFile<CommunityChannel> | undefined;
   thread?: HomebaseFile<CommunityMessage> | undefined;
   threadParticipants?: string[];
-  onSend?: () => void;
   onKeyDown?: (e: React.KeyboardEvent) => void;
   className?: string;
 }) => {
@@ -105,7 +103,6 @@ export const MessageComposer = ({
         userDate: new Date().getTime(),
         linkPreviews: Object.values(linkPreviews).filter(Boolean) as LinkPreview[],
       });
-      onSend && onSend();
     } catch (err) {
       addError(
         err,
@@ -120,7 +117,6 @@ export const MessageComposer = ({
     files,
     linkPreviews,
     message,
-    onSend,
     sendMessage,
     thread,
     threadParticipants,

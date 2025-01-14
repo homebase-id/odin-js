@@ -11,7 +11,6 @@ import {
   MAIL_ROOT_PATH,
   HOME_ROOT_PATH,
   COMMUNITY_APP_ID,
-  COMMUNITY_ALLOWED_IDENTITIES,
 } from '../../constants';
 import { getVersion, t, ellipsisAtMaxChar } from '../../helpers';
 import {
@@ -474,11 +473,6 @@ const MailNavItem = () => {
 
 const CommunityNavItem = () => {
   const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: COMMUNITY_APP_ID });
-
-  if (import.meta.env.PROD && !COMMUNITY_ALLOWED_IDENTITIES.includes(window.location.hostname)) {
-    return null;
-  }
-
   return (
     <NavItem icon={RadioTower} label={'Community'} to="/apps/community" unread={!!unreadCount} />
   );

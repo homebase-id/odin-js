@@ -14,6 +14,7 @@ import {
   ReactionsBarHandle,
   usePortal,
   ActionButton,
+  getTextRootsRecursive,
 } from '@homebase-id/common-app';
 import { useEffect, useRef, useState } from 'react';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
@@ -205,7 +206,16 @@ const CommunityContextActions = ({
       label: t('Copy link'),
       onClick: () => {
         navigator.clipboard.writeText(
-          `${window.location.href}/${msg.fileMetadata.appData.uniqueId}`
+          `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect${window.location.pathname}/${msg.fileMetadata.appData.uniqueId}`
+        );
+      },
+    },
+    {
+      icon: Clipboard,
+      label: t('Copy text'),
+      onClick: () => {
+        navigator.clipboard.writeText(
+          getTextRootsRecursive(msg.fileMetadata.appData.content.message).join(' ')
         );
       },
     },

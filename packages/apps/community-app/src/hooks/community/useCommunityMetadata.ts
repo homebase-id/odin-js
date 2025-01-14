@@ -64,24 +64,26 @@ export const useCommunityMetadata = (props?: {
     );
     metadata.fileMetadata.appData.uniqueId = formatGuidId(metadata.fileMetadata.appData.uniqueId);
 
-    return await uploadCommunityMetadata(dotYouClient, metadata, async () => {
+    let maxRetries = 3;
+    const onVersionConflict = async () => {
+      if (maxRetries <= 0) return;
+      maxRetries--;
+
       const serverVersion = await getCommunityMetadata(
         dotYouClient,
         metadata.fileMetadata.appData.content.communityId
       );
-      if (!serverVersion) return;
+      if (!serverVersion) {
+        return;
+      }
 
       const newlyMerged = mergeMetadata(metadata, serverVersion);
       insertNewcommunityMetadata(queryClient, newlyMerged);
-      if (
-        metadata.fileMetadata.appData.content.lastReadTime >
-        newlyMerged.fileMetadata.appData.content.lastReadTime
-      ) {
-        return await uploadCommunityMetadata(dotYouClient, newlyMerged, () => {
-          // Do nothing
-        });
-      }
-    });
+
+      return await uploadCommunityMetadata(dotYouClient, newlyMerged, onVersionConflict);
+    };
+
+    return await uploadCommunityMetadata(dotYouClient, metadata, onVersionConflict);
   };
 
   return {
