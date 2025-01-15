@@ -49,6 +49,7 @@ export const MessageComposer = memo(
   }) => {
     const { community, channel, thread, threadParticipants, onKeyDown, className } = props;
 
+    const formRef = useRef<HTMLFormElement>(null);
     const volatileRef = useRef<VolatileInputRef>(null);
 
     const [message, setMessage] = useState<RichText | undefined>(undefined);
@@ -179,8 +180,6 @@ export const MessageComposer = memo(
       ];
     }, []);
 
-    const onSubmit = useMemo(() => (isTouchDevice() ? undefined : doSend), [doSend]);
-
     useEffect(() => {
       // focus, clear message to allow draft to be loaded
       const onFocus = () => setMessage(undefined);
@@ -188,7 +187,50 @@ export const MessageComposer = memo(
       return () => window.removeEventListener('focus', onFocus);
     });
 
-    console.log('render messageComposer');
+    const isTouch = useMemo(isTouchDevice, [isTouchDevice]);
+    const onRTESubmit = useMemo(
+      () => (isTouch ? undefined : () => formRef.current?.requestSubmit()),
+      [isTouch, formRef]
+    );
+
+    const canSend = useMemo(() => !!plainMessage || !!files?.length, [plainMessage, files]);
+    const innerChildren = useMemo(() => {
+      return (
+        <>
+          <div className="max-h-[30vh] overflow-auto">
+            <FileOverview files={files} setFiles={setFiles} cols={8} />
+            {files?.length ? null : (
+              <LinkOverview
+                linkPreviews={linkPreviews}
+                setLinkPreviews={setLinkPreviews}
+                cols={4}
+                className="p-2"
+              />
+            )}
+          </div>
+          <div className="-mx-1 flex flex-row justify-between md:pt-2">
+            <FileSelector
+              onChange={(files) => setFiles(files.map((file) => ({ file })))}
+              className="my-auto px-1 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
+              accept="*"
+              maxSize={HUNDRED_MEGA_BYTES}
+            >
+              <Plus className="h-5 w-5" />
+            </FileSelector>
+            <span className="my-auto">
+              <ActionButton
+                type="mute"
+                className={`flex-shrink p-1 opacity-40 transition-colors ${!canSend ? '' : 'bg-primary text-primary-contrast opacity-90 hover:opacity-100'}`}
+                icon={PaperPlane}
+                size="none"
+                disabled={!canSend}
+                onMouseDown={(e) => e.preventDefault()}
+              />
+            </span>
+          </div>
+        </>
+      );
+    }, [files, canSend]);
 
     return (
       <>
@@ -198,7 +240,7 @@ export const MessageComposer = memo(
           message={message || draft?.message}
         />
         <div className={`bg-background pb-[env(safe-area-inset-bottom)] ${className || ''}`}>
-          <div
+          <form
             className="flex flex-shrink-0 flex-row gap-2 px-0 md:px-3 md:pb-2 lg:pb-5"
             onPaste={(e) => {
               const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
@@ -208,6 +250,13 @@ export const MessageComposer = memo(
                 e.preventDefault();
               }
             }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+
+              doSend();
+            }}
+            ref={formRef}
           >
             <Suspense
               fallback={
@@ -226,9 +275,9 @@ export const MessageComposer = memo(
                       ? `${t('Message')} # ${channel.fileMetadata.appData.content.title}`
                       : `${t('Message')} "${community?.fileMetadata.appData.content.title}"`
                 }
-                autoFocus={!isTouchDevice()}
+                autoFocus={!isTouch}
                 ref={volatileRef}
-                onSubmit={onSubmit}
+                onSubmit={onRTESubmit}
                 onKeyDown={onKeyDown}
                 disableHeadings={true}
                 mentionables={mentionables}
@@ -237,46 +286,10 @@ export const MessageComposer = memo(
                   thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId
                 }
                 key={draft?.updatedAt}
-              >
-                <div className="max-h-[30vh] overflow-auto">
-                  <FileOverview files={files} setFiles={setFiles} cols={8} />
-                  {files?.length ? null : (
-                    <LinkOverview
-                      linkPreviews={linkPreviews}
-                      setLinkPreviews={setLinkPreviews}
-                      cols={4}
-                      className="p-2"
-                    />
-                  )}
-                </div>
-                <div className="-mx-1 flex flex-row justify-between md:pt-2">
-                  <FileSelector
-                    onChange={(files) => setFiles(files.map((file) => ({ file })))}
-                    className="my-auto px-1 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
-                    accept="*"
-                    maxSize={HUNDRED_MEGA_BYTES}
-                  >
-                    <Plus className="h-5 w-5" />
-                  </FileSelector>
-                  <span className="my-auto">
-                    <ActionButton
-                      type="mute"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        doSend();
-                      }}
-                      className={`flex-shrink p-1 opacity-40 transition-colors ${!plainMessage && !files?.length ? '' : 'bg-primary text-primary-contrast opacity-90 hover:opacity-100'}`}
-                      icon={PaperPlane}
-                      size="none"
-                      disabled={!plainMessage && !files?.length}
-                      onMouseDown={(e) => e.preventDefault()}
-                    />
-                  </span>
-                </div>
-              </RichTextEditor>
+                children={innerChildren}
+              />
             </Suspense>
-          </div>
+          </form>
         </div>
       </>
     );
