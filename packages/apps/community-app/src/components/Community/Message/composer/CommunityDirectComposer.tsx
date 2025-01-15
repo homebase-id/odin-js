@@ -61,20 +61,14 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
     const addError = useErrors().add;
     const { mutateAsync: sendMessage } = useChatMessage().send;
 
-    const conversationContent = conversation?.fileMetadata.appData.content;
     const doSend = async () => {
       const toSendMessage = message || draft?.message;
 
-      const trimmedVal = plainMessage?.trim();
+      const trimmedVal = (toSendMessage && getTextRootsRecursive(toSendMessage).join(' ')) || '';
       const replyId = replyMsg?.fileMetadata.appData.uniqueId;
       const newFiles = [...(files || [])];
 
-      if (
-        (!trimmedVal && !files?.length) ||
-        !conversationContent ||
-        !conversation.fileMetadata.appData.uniqueId
-      )
-        return;
+      if (!conversation || (!trimmedVal && !files?.length)) return;
 
       // Clear internal state and allow excessive senders
       setMessage([]);

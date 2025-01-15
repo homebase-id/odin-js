@@ -74,10 +74,10 @@ export const MessageComposer = memo(
     const doSend = useCallback(async () => {
       const toSendMessage = message || draft?.message;
 
-      const plainVal = (toSendMessage && getTextRootsRecursive(toSendMessage).join(' ')) || '';
+      const trimmedVal = (toSendMessage && getTextRootsRecursive(toSendMessage).join(' ')) || '';
       const newFiles = [...(files || [])];
 
-      if (((!toSendMessage || !plainVal) && !files?.length) || !community || !channel) return;
+      if (!community || !channel || (!trimmedVal && !files?.length)) return;
 
       // Clear internal state and allow excessive senders
       setMessage([]);
@@ -106,7 +106,7 @@ export const MessageComposer = memo(
         addError(
           err,
           t('Failed to send'),
-          t('Your message "{0}" was not sent', ellipsisAtMaxChar(plainVal || '', 20) || '')
+          t('Your message "{0}" was not sent', ellipsisAtMaxChar(trimmedVal || '', 20) || '')
         );
       }
     }, [

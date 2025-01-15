@@ -1,7 +1,6 @@
 import {
   TElement,
   TDescendant,
-  getStartPoint,
   resetEditor,
   isSelectionAtBlockStart,
   isBlockAboveEmpty,
