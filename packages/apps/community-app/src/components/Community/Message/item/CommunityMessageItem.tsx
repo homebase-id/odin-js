@@ -188,7 +188,6 @@ export const CommunityMessageItem = memo(
                 {hideDetails && !isCollaborative ? null : (
                   <>
                     <CommunityMessageAuthorName msg={msg} />
-
                     <CommunitySentTimeIndicator className="text-sm" msg={msg} />
                     <CommunityDeliveryIndicator msg={msg} />
                   </>
