@@ -45,7 +45,7 @@ import {
 } from '@homebase-id/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
 import { processVideoFile, createThumbnails } from '@homebase-id/js-lib/media';
-import { getTextRootsRecursive } from '@homebase-id/common-app';
+import { getPlainTextFromRichText } from '@homebase-id/common-app';
 
 export const MAIL_DRAFT_CONVERSATION_FILE_TYPE = 9001;
 export const MAIL_CONVERSATION_FILE_TYPE = 9000;
@@ -462,7 +462,7 @@ export const dsrToMailConversation = async (
           ...dsr.fileMetadata.appData,
           content: {
             ...mailContent,
-            plainMessage: getTextRootsRecursive(mailContent.message).join(' '),
+            plainMessage: getPlainTextFromRichText(mailContent.message),
             plainAttachment: dsr.fileMetadata.payloads
               ?.map((payload) => payload.descriptorContent)
               ?.join(' '),

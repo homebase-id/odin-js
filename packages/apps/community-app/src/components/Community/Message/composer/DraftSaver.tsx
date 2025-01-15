@@ -1,4 +1,4 @@
-import { getTextRootsRecursive, useDebounce } from '@homebase-id/common-app';
+import { getPlainTextFromRichText, useDebounce } from '@homebase-id/common-app';
 import { HomebaseFile, RichText, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { useState, useEffect } from 'react';
 import {
@@ -46,8 +46,7 @@ export const DraftSaver = ({
 
     if (metadata && draftKey && updatedAt) {
       if (
-        getTextRootsRecursive(drafts[draftKey]?.message).join(' ') ===
-          getTextRootsRecursive(message).join(' ') ||
+        getPlainTextFromRichText(drafts[draftKey]?.message) === getPlainTextFromRichText(message) ||
         (drafts[draftKey] && drafts[draftKey]?.updatedAt >= updatedAt)
       )
         return;

@@ -2,13 +2,13 @@ import {
   t,
   formatToTimeAgoWithRelativeDetail,
   AuthorImage,
-  getTextRootsRecursive,
   RichTextRenderer,
   COMMUNITY_ROOT_PATH,
   ActionButton,
   useContentFromPayload,
   useLongPress,
   ConnectionName,
+  getPlainTextFromRichText,
 } from '@homebase-id/common-app';
 import { DEFAULT_PAYLOAD_KEY, HomebaseFile, RichText } from '@homebase-id/js-lib/core';
 import {
@@ -251,7 +251,7 @@ const CommunityTextMessageBody = ({
   const [loadMore, setLoadMore] = useState(false);
 
   const content = msg.fileMetadata.appData.content;
-  const plainText = getTextRootsRecursive(content.message).join(' ');
+  const plainText = getPlainTextFromRichText(content.message);
   const isEmojiOnly =
     (plainText?.match(/^\p{Extended_Pictographic}/u) && !plainText?.match(/[0-9a-zA-Z]/)) ?? false;
 

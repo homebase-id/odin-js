@@ -9,10 +9,10 @@ import {
   VolatileInputRef,
   LinkOverview,
   useLinkPreviewBuilder,
-  getTextRootsRecursive,
   useAllContacts,
   findMentionedInRichText,
   trimRichText,
+  getPlainTextFromRichText,
 } from '@homebase-id/common-app';
 import { PaperPlane, Plus } from '@homebase-id/common-app/icons';
 import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
@@ -55,7 +55,7 @@ export const MessageComposer = memo(
     const [message, setMessage] = useState<RichText | undefined>(undefined);
     const [files, setFiles] = useState<NewMediaFile[]>();
     const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(
-      (message && getTextRootsRecursive(message)?.join(' ')) || ''
+      getPlainTextFromRichText(message) || ''
     );
 
     const draft = useMessageDraft(
@@ -74,7 +74,7 @@ export const MessageComposer = memo(
     const doSend = useCallback(async () => {
       const toSendMessage = message || draft?.message;
 
-      const trimmedVal = (toSendMessage && getTextRootsRecursive(toSendMessage).join(' ')) || '';
+      const trimmedVal = getPlainTextFromRichText(toSendMessage) || '';
       const newFiles = [...(files || [])];
 
       if (!community || !channel || (!trimmedVal && !files?.length)) return;
@@ -156,10 +156,7 @@ export const MessageComposer = memo(
     }, [contacts]);
 
     const plainMessage = useMemo(
-      () =>
-        ((message || draft?.message) &&
-          getTextRootsRecursive(message || draft?.message).join(' ')) ||
-        '',
+      () => getPlainTextFromRichText(message || draft?.message) || '',
       [message, draft]
     );
 

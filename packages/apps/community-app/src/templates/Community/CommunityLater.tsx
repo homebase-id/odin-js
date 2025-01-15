@@ -8,7 +8,7 @@ import {
   ErrorBoundary,
   ErrorNotification,
   FakeAnchor,
-  getTextRootsRecursive,
+  getPlainTextFromRichText,
   LoadingBlock,
   NotFound,
   t,
@@ -111,7 +111,10 @@ const SavedMessage = ({
 
   if (!msg || !link) return null;
 
-  const plainText = getTextRootsRecursive(msg.fileMetadata.appData.content.message).join(' ');
+  const plainText = useMemo(
+    () => getPlainTextFromRichText(msg.fileMetadata.appData.content.message),
+    [msg]
+  );
 
   return (
     <>

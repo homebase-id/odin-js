@@ -4,7 +4,7 @@ import {
   FileOverview,
   FileSelector,
   getImagesFromPasteEvent,
-  getTextRootsRecursive,
+  getPlainTextFromRichText,
   LinkOverview,
   t,
   trimRichText,
@@ -64,7 +64,7 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
     const doSend = async () => {
       const toSendMessage = message || draft?.message;
 
-      const trimmedVal = (toSendMessage && getTextRootsRecursive(toSendMessage).join(' ')) || '';
+      const trimmedVal = getPlainTextFromRichText(toSendMessage) || '';
       const replyId = replyMsg?.fileMetadata.appData.uniqueId;
       const newFiles = [...(files || [])];
 
@@ -99,10 +99,7 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
     };
 
     const plainMessage = useMemo(
-      () =>
-        ((message || draft?.message) &&
-          getTextRootsRecursive(message || draft?.message).join(' ')) ||
-        '',
+      () => getPlainTextFromRichText(message || draft?.message) || '',
       [message, draft]
     );
     const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(plainMessage || '');
