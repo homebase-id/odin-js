@@ -64,7 +64,7 @@ export const useCommunityMetadata = (props?: {
     );
     metadata.fileMetadata.appData.uniqueId = formatGuidId(metadata.fileMetadata.appData.uniqueId);
 
-    let maxRetries = 3;
+    let maxRetries = 5;
     const onVersionConflict = async () => {
       if (maxRetries <= 0) return;
       maxRetries--;
