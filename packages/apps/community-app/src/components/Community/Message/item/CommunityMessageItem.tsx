@@ -530,7 +530,7 @@ const CommunityMessageThreadSummary = ({
 
   return (
     <Link
-      className="mr-auto flex w-full max-w-xs flex-row items-center gap-2 rounded-lg px-1 py-1 text-indigo-500 transition-colors hover:bg-background hover:shadow-sm"
+      className="mr-auto flex w-full max-w-sm flex-row items-center gap-2 rounded-lg px-1 py-1 text-indigo-500 transition-colors hover:bg-background hover:shadow-sm"
       to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || msg.fileMetadata.appData.content.channelId}/${msg.fileMetadata.appData.uniqueId}/thread`}
     >
       {uniqueSenders.map((sender) => (
