@@ -213,6 +213,7 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
                 ref={volatileRef}
                 key={draft?.updatedAt}
                 children={innerChildren}
+                disableHeadings={true}
               />
             </Suspense>
           </form>
