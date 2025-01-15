@@ -14,7 +14,7 @@ import {
   ReactionsBarHandle,
   usePortal,
   ActionButton,
-  getTextRootsRecursive,
+  getPlainTextFromRichText,
 } from '@homebase-id/common-app';
 import { useEffect, useRef, useState } from 'react';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
@@ -215,7 +215,7 @@ const CommunityContextActions = ({
       label: t('Copy text'),
       onClick: () => {
         navigator.clipboard.writeText(
-          getTextRootsRecursive(msg.fileMetadata.appData.content.message).join(' ')
+          getPlainTextFromRichText(msg.fileMetadata.appData.content.message, true) || ''
         );
       },
     },

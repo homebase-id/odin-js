@@ -42,7 +42,7 @@ export const EditChatMessage = ({
 
   const doSend = () => {
     const plainMessage = getPlainTextFromRichText(message);
-    if (!plainMessage.trim()) return;
+    if (!plainMessage || !plainMessage.trim()) return;
 
     const updatedMessage: HomebaseFile<ChatMessage> = {
       ...msg,

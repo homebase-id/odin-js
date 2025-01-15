@@ -77,7 +77,7 @@ export const CommunityThreadCatchup = ({
         href={`${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}/${threadMeta.threadId}/thread`}
         type="mute"
         size="none"
-        className="group flex flex-row items-center justify-between rounded-b-none bg-slate-200 px-2 py-2 text-lg dark:bg-slate-800"
+        className="group flex flex-row items-center justify-between rounded-b-none bg-slate-200 px-3 py-2 text-lg dark:bg-slate-800"
       >
         <div className="flex flex-col">
           <p className="text-lg group-hover:underline">
@@ -87,9 +87,7 @@ export const CommunityThreadCatchup = ({
             <ParticipantsList participants={threadMeta.participants} />
           </p>
         </div>
-        <div className="ml-auto">
-          <ExternalLink className="ml-2 h-3 w-3" />
-        </div>
+        <ExternalLink className="ml-auto mr-2 h-3 w-3" />
       </ActionLink>
 
       <CommunityHistory
@@ -110,6 +108,7 @@ export const CommunityThreadCatchup = ({
             key={threadMeta.threadId}
             threadParticipants={participants || undefined}
             className="mt-auto xl:mt-0"
+            autoFocus={false}
           />
         ) : null}
       </ErrorBoundary>

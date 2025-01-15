@@ -2,13 +2,13 @@ import {
   t,
   formatToTimeAgoWithRelativeDetail,
   AuthorImage,
-  getTextRootsRecursive,
   RichTextRenderer,
   COMMUNITY_ROOT_PATH,
   ActionButton,
   useContentFromPayload,
   useLongPress,
   ConnectionName,
+  getPlainTextFromRichText,
 } from '@homebase-id/common-app';
 import { DEFAULT_PAYLOAD_KEY, HomebaseFile, RichText } from '@homebase-id/js-lib/core';
 import {
@@ -188,7 +188,6 @@ export const CommunityMessageItem = memo(
                 {hideDetails && !isCollaborative ? null : (
                   <>
                     <CommunityMessageAuthorName msg={msg} />
-
                     <CommunitySentTimeIndicator className="text-sm" msg={msg} />
                     <CommunityDeliveryIndicator msg={msg} />
                   </>
@@ -251,7 +250,7 @@ const CommunityTextMessageBody = ({
   const [loadMore, setLoadMore] = useState(false);
 
   const content = msg.fileMetadata.appData.content;
-  const plainText = getTextRootsRecursive(content.message).join(' ');
+  const plainText = getPlainTextFromRichText(content.message);
   const isEmojiOnly =
     (plainText?.match(/^\p{Extended_Pictographic}/u) && !plainText?.match(/[0-9a-zA-Z]/)) ?? false;
 
@@ -530,7 +529,7 @@ const CommunityMessageThreadSummary = ({
 
   return (
     <Link
-      className="mr-auto flex w-full max-w-xs flex-row items-center gap-2 rounded-lg px-1 py-1 text-indigo-500 transition-colors hover:bg-background hover:shadow-sm"
+      className="mr-auto flex w-full max-w-sm flex-row items-center gap-2 rounded-lg px-1 py-1 text-indigo-500 transition-colors hover:bg-background hover:shadow-sm"
       to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || msg.fileMetadata.appData.content.channelId}/${msg.fileMetadata.appData.uniqueId}/thread`}
     >
       {uniqueSenders.map((sender) => (

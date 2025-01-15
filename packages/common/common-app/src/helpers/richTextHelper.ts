@@ -29,7 +29,10 @@ export const getRichTextFromString = (body: string): RichText | undefined => {
   return richText.some((part) => part.type) ? richText : undefined;
 };
 
-export const getTextRootsRecursive = (children: RichText | string | undefined): string[] => {
+export const getTextRootsRecursive = (
+  children: RichText | string | undefined,
+  keepNewLines?: boolean
+): string[] => {
   if (!children) return [];
   if (!Array.isArray(children)) return [children as string];
 
@@ -37,7 +40,9 @@ export const getTextRootsRecursive = (children: RichText | string | undefined): 
     .map(
       (child) =>
         [
-          child.children ? getTextRootsRecursive(child.children as RichText).join(' ') : undefined,
+          child.children
+            ? getTextRootsRecursive(child.children as RichText).join(keepNewLines ? '\n' : ' ')
+            : undefined,
           (child.text || child.value || undefined) as string,
         ]
           .filter(Boolean)
@@ -46,8 +51,13 @@ export const getTextRootsRecursive = (children: RichText | string | undefined): 
     .filter((child) => child.length);
 };
 
-export const getPlainTextFromRichText = (message: string | RichText) =>
-  getTextRootsRecursive(message).join(' ');
+export const getPlainTextFromRichText = (
+  message: string | RichText | undefined,
+  keepNewLines?: boolean
+) => {
+  if (!message) return undefined;
+  return getTextRootsRecursive(message, keepNewLines).join(keepNewLines ? '\n' : ' ');
+};
 
 export const getReadingTime = (body?: RichText | string): ReadTimeStats | undefined => {
   if (!body) return;

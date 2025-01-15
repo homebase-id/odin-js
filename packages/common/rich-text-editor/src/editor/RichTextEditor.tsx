@@ -1,7 +1,6 @@
 import {
   TElement,
   TDescendant,
-  getStartPoint,
   resetEditor,
   isSelectionAtBlockStart,
   isBlockAboveEmpty,
@@ -81,6 +80,7 @@ import { ListElement } from '../components/plate-ui/list-element';
 import { MediaOptionsContextProvider } from './MediaOptionsContext/MediaOptionsContext';
 import { useMediaOptionsContext } from './MediaOptionsContext/useMediaOptionsContext';
 import { TextualEmojiPlugin } from './TextualEmojiPlugin/TextualEmojiPlugin';
+import { Editor } from 'slate';
 
 interface RTEProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -356,14 +356,15 @@ const InnerRichTextEditor = memo(
     );
 
     useEffect(() => {
-      if (autoFocus && editor) setTimeout(() => focusEditor(editor, getStartPoint(editor, [0])), 0);
+      if (autoFocus && editor)
+        setTimeout(() => focusEditor(editor, Editor.end(editor as Editor, [])), 0);
     }, [autoFocus, editor]);
 
     useImperativeHandle(
       ref,
       () => ({
         focus() {
-          if (editor) focusEditor(editor, getStartPoint(editor, [0]));
+          if (editor) focusEditor(editor, Editor.end(editor as Editor, []));
         },
         clear() {
           if (editor) resetEditor(editor);
