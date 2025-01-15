@@ -215,7 +215,7 @@ const CommunityContextActions = ({
       label: t('Copy text'),
       onClick: () => {
         navigator.clipboard.writeText(
-          getPlainTextFromRichText(msg.fileMetadata.appData.content.message, true)
+          getPlainTextFromRichText(msg.fileMetadata.appData.content.message, true) || ''
         );
       },
     },
