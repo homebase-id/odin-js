@@ -110,6 +110,7 @@ export const CommunityThreadCatchup = ({
             key={threadMeta.threadId}
             threadParticipants={participants || undefined}
             className="mt-auto xl:mt-0"
+            autoFocus={false}
           />
         ) : null}
       </ErrorBoundary>

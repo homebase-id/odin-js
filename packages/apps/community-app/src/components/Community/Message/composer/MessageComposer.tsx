@@ -45,9 +45,11 @@ export const MessageComposer = memo(
     thread?: HomebaseFile<CommunityMessage> | undefined;
     threadParticipants?: string[];
     onKeyDown?: (e: React.KeyboardEvent) => void;
+    autoFocus?: boolean;
     className?: string;
   }) => {
     const { community, channel, thread, threadParticipants, onKeyDown, className } = props;
+    const autoFocus = props.autoFocus ?? true;
 
     const formRef = useRef<HTMLFormElement>(null);
     const volatileRef = useRef<VolatileInputRef>(null);
@@ -272,7 +274,7 @@ export const MessageComposer = memo(
                       ? `${t('Message')} # ${channel.fileMetadata.appData.content.title}`
                       : `${t('Message')} "${community?.fileMetadata.appData.content.title}"`
                 }
-                autoFocus={!isTouch}
+                autoFocus={!isTouch && autoFocus}
                 ref={volatileRef}
                 onSubmit={onRTESubmit}
                 onKeyDown={onKeyDown}
