@@ -126,7 +126,7 @@ export const RichTextRenderer = ({
         return (
           <code
             {...attributes}
-            className="bg-slate-100 px-3 py-3 w-full rounded-lg text-foreground font-mono text-sm flex flex-col whitespace-pre-wrap dark:bg-slate-800 border"
+            className="bg-slate-100 px-3 py-3 w-full rounded-lg text-foreground font-mono text-sm flex flex-col whitespace-pre-wrap break-all dark:bg-slate-800 border"
           >
             {children}
           </code>
