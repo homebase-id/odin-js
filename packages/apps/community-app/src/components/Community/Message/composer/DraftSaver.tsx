@@ -1,9 +1,13 @@
-import { useDebounce } from '@homebase-id/common-app';
+import { getPlainTextFromRichText, useDebounce } from '@homebase-id/common-app';
 import { HomebaseFile, RichText, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { useState, useEffect } from 'react';
-import { useCommunityMetadata } from '../../../../hooks/community/useCommunityMetadata';
+import {
+  insertNewcommunityMetadata,
+  useCommunityMetadata,
+} from '../../../../hooks/community/useCommunityMetadata';
 import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
 import { CommunityMetadata, Draft } from '../../../../providers/CommunityMetadataProvider';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const DraftSaver = ({
   community,
@@ -14,6 +18,7 @@ export const DraftSaver = ({
   draftKey: string | undefined;
   message: RichText | undefined;
 }) => {
+  const queryClient = useQueryClient();
   const {
     single: { data: metadata },
     update: { mutate: updateMetadata },
@@ -22,30 +27,35 @@ export const DraftSaver = ({
     communityId: community?.fileMetadata.appData.uniqueId,
   });
 
-  const drafts = metadata?.fileMetadata.appData.content.drafts || {};
-
-  const [toSaveMeta, setToSaveMeta] = useState<
-    HomebaseFile<CommunityMetadata> | NewHomebaseFile<CommunityMetadata> | undefined
-  >();
-
   const debouncedSave = useDebounce(
     () => {
-      toSaveMeta && updateMetadata({ metadata: toSaveMeta });
+      metadata && updateMetadata({ metadata: metadata });
     },
     {
-      timeoutMillis: 2000,
+      timeoutMillis: 1000,
     }
   );
 
+  const [updatedAt, setUpdatedAt] = useState<number | undefined>(undefined);
   useEffect(() => {
-    if (metadata && draftKey) {
-      if (drafts[draftKey]?.message === message) return;
+    setUpdatedAt(new Date().getTime());
+  }, [message]);
+
+  useEffect(() => {
+    const drafts = metadata?.fileMetadata.appData.content.drafts || {};
+
+    if (metadata && draftKey && updatedAt) {
+      if (
+        getPlainTextFromRichText(drafts[draftKey]?.message) === getPlainTextFromRichText(message) ||
+        (drafts[draftKey] && drafts[draftKey]?.updatedAt >= updatedAt)
+      )
+        return;
 
       const newDrafts: Record<string, Draft | undefined> = {
         ...drafts,
         [draftKey]: {
           message,
-          updatedAt: new Date().getTime(),
+          updatedAt: updatedAt || 0,
         },
       };
 
@@ -61,14 +71,15 @@ export const DraftSaver = ({
       };
 
       if (message === undefined || message.length === 0) {
+        insertNewcommunityMetadata(queryClient, newMeta as HomebaseFile<CommunityMetadata>);
         updateMetadata({ metadata: newMeta });
         return;
       } else {
-        setToSaveMeta(newMeta);
+        insertNewcommunityMetadata(queryClient, newMeta as HomebaseFile<CommunityMetadata>);
         debouncedSave();
       }
     }
-  }, [draftKey, message, debouncedSave]);
+  }, [metadata, draftKey, message, debouncedSave]);
 
   return null;
 };

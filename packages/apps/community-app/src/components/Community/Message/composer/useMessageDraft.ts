@@ -25,10 +25,10 @@ export const useMessageDraft = (props?: {
 
   const drafts = metadata?.fileMetadata.appData.content.drafts || {};
   useEffect(() => {
-    if (!draftKey || !metadata || draft) return;
+    if (!draftKey || !metadata || draft?.updatedAt === drafts[draftKey]?.updatedAt) return;
 
     setDraft(draftKey ? drafts[draftKey] : undefined);
-  }, [draftKey, metadata]);
+  }, [draftKey, metadata, draft]);
 
   return draft || (draftKey && drafts[draftKey]) || undefined;
 };

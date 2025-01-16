@@ -44,13 +44,13 @@ export const CommunityChannelCatchup = ({
         <ActionLink
           type="mute"
           size="none"
-          className="group flex flex-row items-center justify-between rounded-b-none bg-slate-200 px-2 py-2 text-lg dark:bg-slate-800"
+          className="group flex flex-row items-center justify-between rounded-b-none bg-slate-200 px-3 py-2 text-lg dark:bg-slate-800"
           href={channelLink}
         >
           <span className="group-hover:underline">
             # {channel.fileMetadata.appData.content.title}
           </span>
-          <ExternalLink className="ml-auto h-3 w-3" />
+          <ExternalLink className="ml-auto mr-2 h-3 w-3" />
         </ActionLink>
 
         <div className="relative">

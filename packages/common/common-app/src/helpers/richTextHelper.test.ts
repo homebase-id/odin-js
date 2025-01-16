@@ -65,6 +65,35 @@ const regularRichText: RichText = [
     ],
   },
 ];
+const newLinesInRichText: RichText = [
+  {
+    children: [
+      {
+        text: 'Line 1',
+      },
+    ],
+    type: 'p',
+    id: 'idvci',
+  },
+  {
+    type: 'p',
+    id: '6suaa',
+    children: [
+      {
+        text: 'Line 2',
+      },
+    ],
+  },
+  {
+    type: 'p',
+    id: '82u0i',
+    children: [
+      {
+        text: 'Line 3',
+      },
+    ],
+  },
+];
 
 import { getPlainTextFromRichText, ellipsisAtMaxCharOfRichText } from './richTextHelper';
 import { RichText } from '@homebase-id/js-lib/core';
@@ -72,6 +101,10 @@ test('getPlainTextFromRichText', () => {
   expect(getPlainTextFromRichText(regularRichText)).toBe(
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam aliquet arcu augue, a commodo enim volutpat ut. Vivamus congue enim sit amet odio placerat porta. Mauris semper semper lobortis. Maecenas bibendum augue vel massa efficitur dignissim. Donec et mauris venenatis, consectetur arcu ac, iaculis mauris. Nulla non turpis in ligula'
   );
+});
+
+test('getPlainTextFromRichText with new lines', () => {
+  expect(getPlainTextFromRichText(newLinesInRichText, true)).toBe('Line 1\nLine 2\nLine 3');
 });
 
 test('ellipsisAtMaxCharOfRichText', () => {
