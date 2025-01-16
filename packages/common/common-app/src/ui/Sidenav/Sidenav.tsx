@@ -11,6 +11,7 @@ import {
   MAIL_ROOT_PATH,
   HOME_ROOT_PATH,
   COMMUNITY_APP_ID,
+  OWNER_ROOT,
 } from '../../constants';
 import { getVersion, t, ellipsisAtMaxChar } from '../../helpers';
 import {
@@ -134,7 +135,7 @@ export const Sidenav = ({
             </div>
 
             <div className="pb-3">
-              <NavItem icon={House} label={'Dashboard'} to={'/owner'} end={true} />
+              <NavItem icon={House} label={'Dashboard'} to={`${OWNER_ROOT}/`} end={true} />
               <NotificationBell />
             </div>
 
@@ -150,19 +151,23 @@ export const Sidenav = ({
             </div>
 
             <div className={`py-3`}>
-              <NavItem icon={AddressBook} label={'Connections'} to={'/owner/connections'} />
+              <NavItem icon={AddressBook} label={'Connections'} to={`${OWNER_ROOT}/connections`} />
               {isTightHeight ? null : (
-                <NavItem icon={Persons} label={'Following & Followers'} to={'/owner/follow'} />
+                <NavItem
+                  icon={Persons}
+                  label={'Following & Followers'}
+                  to={`${OWNER_ROOT}/follow`}
+                />
               )}
               {isTightHeight ? null : (
                 <NavItem
                   icon={Grid}
                   label={'Third party apps & services'}
-                  to={'/owner/third-parties'}
+                  to={'${OWNER_ROOT}/third-parties'}
                 />
               )}
               {isTightHeight ? null : (
-                <NavItem icon={Circles} label={'Circles'} to={'/owner/circles'} />
+                <NavItem icon={Circles} label={'Circles'} to={`${OWNER_ROOT}/circles`} />
               )}
             </div>
 
@@ -172,13 +177,17 @@ export const Sidenav = ({
             >
               {isTightHeight ? (
                 <>
-                  <NavItem icon={Persons} label={'Following & Followers'} to={'/owner/follow'} />
+                  <NavItem
+                    icon={Persons}
+                    label={'Following & Followers'}
+                    to={`${OWNER_ROOT}/follow`}
+                  />
                   <NavItem
                     icon={Grid}
                     label={'Third party apps & services'}
-                    to={'/owner/third-parties'}
+                    to={`${OWNER_ROOT}/third-parties`}
                   />
-                  <NavItem icon={Circles} label={'Circles'} to={'/owner/circles'} />
+                  <NavItem icon={Circles} label={'Circles'} to={`${OWNER_ROOT}/circles`} />
                 </>
               ) : null}
             </MoreItems>
@@ -265,9 +274,9 @@ const MoreItems = ({
             <span className={`my-auto ml-3`}>Log out</span>
           </button>
         ) : null}
-        <NavItem icon={Cog} label={'Settings'} to={'/owner/settings'} />
+        <NavItem icon={Cog} label={'Settings'} to={`${OWNER_ROOT}/settings`} />
         <hr className="border-b dark:border-slate-500" />
-        <NavItem icon={HardDrive} label={'Drives'} to={'/owner/drives'} />
+        <NavItem icon={HardDrive} label={'Drives'} to={`${OWNER_ROOT}/drives`} />
         <hr className="border-b dark:border-slate-500" />
         <WalletLink />
         <hr className="border-b dark:border-slate-500" />
@@ -383,7 +392,7 @@ const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
           icon={Person}
           to={`/owner/profile/${standardProfile?.slug || 'standard-info'}`}
         />
-        <NavItem label={'Home Settings'} icon={Cloud} to={'/owner/profile/homepage'} />
+        <NavItem label={'Home Settings'} icon={Cloud} to={`${OWNER_ROOT}/profile/homepage`} />
       </>
     );
   }
@@ -395,7 +404,7 @@ const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
         className={({ isActive }) =>
           `${navItemClassName} ${isActive && navItemActiveClassname} relative`
         }
-        to={'/owner/profile'}
+        to={`${OWNER_ROOT}/profile`}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -413,18 +422,18 @@ const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
 
       {isOpen ? (
         <div className="ml-1 pl-1">
-          {/* <NavItem label={'Overview'} to={'/owner/profile'} end={true} /> */}
+          {/* <NavItem label={'Overview'} to={`${OWNER_ROOT}/profile`} end={true} /> */}
           {profiles
             ?.filter((profile) => ![BuiltInProfiles.WalletId].includes(profile.profileId))
             ?.slice(0, 5)
             ?.map((profile) => (
               <NavItem
                 label={profile.name}
-                to={`/owner/profile/${profile.slug}`}
+                to={`${OWNER_ROOT}/profile/${profile.slug}`}
                 key={profile.slug}
               />
             ))}
-          <NavItem label={'Home Settings'} to={'/owner/profile/homepage'} />
+          <NavItem label={'Home Settings'} to={`${OWNER_ROOT}/profile/homepage`} />
         </div>
       ) : null}
     </>
@@ -438,7 +447,7 @@ const WalletLink = () => {
   return (
     <NavItem
       label={t('Wallet')}
-      to={`/owner/profile/${walletProfile?.slug || 'wallet'}`}
+      to={`${OWNER_ROOT}/profile/${walletProfile?.slug || 'wallet'}`}
       icon={Wallet}
     />
   );
@@ -449,7 +458,7 @@ const NotificationBell = () => {
   return (
     <NavItem
       label={t('Notifications')}
-      to={'/owner/notifications'}
+      to={`${OWNER_ROOT}/notifications`}
       icon={Bell}
       unread={!!unreadCount}
     />
@@ -484,7 +493,7 @@ const MobileDrawer = ({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) =
       className={`fixed left-0 right-0 bottom-0 md:hidden z-20 px-4 py-1 pb-[env(safe-area-inset-bottom)] ${sidebarBg}`}
     >
       <div className="flex flex-row justify-between">
-        <NavItem icon={House} to={'/owner'} end={true} />
+        <NavItem icon={House} to={'/owner/'} end={true} />
         <NavItem icon={Feed} to={FEED_ROOT_PATH} end={true} />
         <NavItem icon={ChatBubble} to={CHAT_ROOT_PATH} />
 

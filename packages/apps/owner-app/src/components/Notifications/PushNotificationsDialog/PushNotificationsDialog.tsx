@@ -89,31 +89,24 @@ const Settings = () => {
             {t(`What does this mean?`)}
           </Link>
         </Alert>
-      ) : null}
-
-      {isSupported && !canEnable && !(isEnabled && current) ? (
-        <p>{t(`We can't enable notifications at the moment, please refresh and try again`)}</p>
-      ) : null}
-
-      {isSupported ? (
+      ) : (isEnabled && current) || enableStatus === 'success' ? (
+        <TestNotification />
+      ) : !canEnable ? (
+        <Alert type="info">
+          <p>{t(`We can't enable notifications at the moment, please refresh and try again`)}</p>
+        </Alert>
+      ) : (
         <>
-          {(isEnabled && current) || enableStatus === 'success' ? (
-            <></>
-          ) : (
-            <>
-              <SubtleMessage>
-                {t(
-                  `When push notifications are enabled, you will get notifications as they come in, even if you don't have your identity open`
-                )}
-                .
-              </SubtleMessage>
-              <ActionButton onClick={() => enable()} icon={Bubble} state={enableStatus}>
-                {t('Enable push notifications')}
-              </ActionButton>
-            </>
-          )}
+          <SubtleMessage>
+            {t(
+              `When push notifications are enabled, you will get notifications as they come in, even if you don't have your identity open.`
+            )}
+          </SubtleMessage>
+          <ActionButton onClick={() => enable()} icon={Bubble} state={enableStatus}>
+            {t('Enable push notifications')}
+          </ActionButton>
         </>
-      ) : null}
+      )}
 
       {enableError ? (
         <p className="my-2">
@@ -217,8 +210,6 @@ const AllDevicesDetail = ({ className }: { className?: string }) => {
           </div>
         </>
       )}
-
-      <TestNotification className="mt-5" />
     </div>
   );
 };
