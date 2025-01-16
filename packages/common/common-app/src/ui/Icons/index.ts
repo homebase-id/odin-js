@@ -32,6 +32,7 @@ import { Ellipsis } from './Ellipsis';
 import { EpicGames } from './EpicGames';
 import { Exclamation } from './Exclamation';
 import { Expand } from './Expand';
+import { Contract } from './Contract';
 import { ExternalLink } from './ExternalLink';
 import { Envelope, EnvelopeOpen } from './Envelope';
 import { Eye, CloseEye } from './Eye';
@@ -138,6 +139,7 @@ export {
   Code,
   Cog,
   Collapse,
+  Contract,
   Emojis,
   ConnectedPeople,
   CoverPage,
