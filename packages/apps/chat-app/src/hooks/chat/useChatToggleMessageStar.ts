@@ -10,7 +10,7 @@ import {
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { ChatDrive } from '../../providers/ConversationProvider';
 
-const STARRED_MSG_TAG = toGuidId('starred');
+export const STARRED_MSG_TAG = toGuidId('starred');
 export const useChatToggleMessageStar = (props?: { msg: HomebaseFile<ChatMessage> }) => {
   const dotYouClient = useDotYouClientContext();
 

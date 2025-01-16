@@ -19,6 +19,7 @@ import {
 import { drives, circleDrives, permissions } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
 import { EditConversationGroup } from '../../components/Chat/Conversations/Sidenav/EditConversationGroup';
+import { StarredChatMessages } from '../../components/Chat/Starred/StarredChatMessages';
 
 export const ChatHome = () => {
   const { conversationKey } = useParams();
@@ -63,6 +64,9 @@ const ChatSideNav = ({ isOnline }: { isOnline: boolean }) => {
   const editChatMatch = useMatch({ path: `${CHAT_ROOT_PATH}/:conversationKey/edit` });
   const isEditConversation = !!editChatMatch;
 
+  const starredMatch = useMatch({ path: `${CHAT_ROOT_PATH}/starred` });
+  const isStarred = !!starredMatch;
+
   const rootChatMatch = useMatch({ path: CHAT_ROOT_PATH });
   const isRoot = !!rootChatMatch;
 
@@ -83,6 +87,11 @@ const ChatSideNav = ({ isOnline }: { isOnline: boolean }) => {
             <NewConversationGroup />
           ) : isEditConversation ? (
             <EditConversationGroup />
+          ) : isStarred ? (
+            <>
+              <NavHeader isOnline={isOnline} />
+              <StarredChatMessages />
+            </>
           ) : (
             <>
               <NavHeader isOnline={isOnline} />
