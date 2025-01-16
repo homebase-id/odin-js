@@ -450,7 +450,7 @@ export const reUploadFile = async (
   );
 };
 
-interface LocalMetadataUploadResult {
+export interface LocalMetadataUploadResult {
   newLocalVersionTag: string;
 }
 

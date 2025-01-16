@@ -1,5 +1,5 @@
 import { HomebaseFile, uploadLocalMetadataTags } from '@homebase-id/js-lib/core';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChatMessage } from '../../providers/ChatProvider';
 import {
   getRandom16ByteArray,
@@ -9,13 +9,16 @@ import {
 } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { ChatDrive } from '../../providers/ConversationProvider';
+import { insertNewMessage } from './useChatMessages';
+import { invalidateStarredMessages } from './useStarredMessages';
 
 export const STARRED_MSG_TAG = toGuidId('starred');
 export const useChatToggleMessageStar = (props?: { msg: HomebaseFile<ChatMessage> }) => {
+  const queryClient = useQueryClient();
   const dotYouClient = useDotYouClientContext();
 
   const toggleStar = async (msg: HomebaseFile<ChatMessage>) => {
-    uploadLocalMetadataTags(
+    return uploadLocalMetadataTags(
       dotYouClient,
       {
         fileId: msg.fileId,
@@ -24,7 +27,9 @@ export const useChatToggleMessageStar = (props?: { msg: HomebaseFile<ChatMessage
       {
         iv: uint8ArrayToBase64(getRandom16ByteArray()),
         versionTag: msg.fileMetadata.localAppData?.versionTag,
-        tags: msg.fileMetadata.localAppData?.tags?.includes(STARRED_MSG_TAG)
+        tags: msg.fileMetadata.localAppData?.tags?.some((tag) =>
+          stringGuidsEqual(STARRED_MSG_TAG, tag)
+        )
           ? []
           : [STARRED_MSG_TAG],
       }
@@ -37,6 +42,46 @@ export const useChatToggleMessageStar = (props?: { msg: HomebaseFile<ChatMessage
     ),
     toggleStar: useMutation({
       mutationFn: toggleStar,
+      onMutate: async (msg) => {
+        if (!msg) return;
+        const updatedChatMessage: HomebaseFile<ChatMessage> = {
+          ...msg,
+          fileMetadata: {
+            ...msg.fileMetadata,
+            localAppData: {
+              ...msg.fileMetadata.localAppData,
+              tags: msg.fileMetadata.localAppData?.tags?.some((tag) =>
+                stringGuidsEqual(STARRED_MSG_TAG, tag)
+              )
+                ? []
+                : [STARRED_MSG_TAG],
+            },
+          },
+        };
+
+        insertNewMessage(queryClient, updatedChatMessage);
+      },
+      onSuccess: (data, msg) => {
+        if (!data) return;
+        const updatedChatMessage: HomebaseFile<ChatMessage> = {
+          ...msg,
+          fileMetadata: {
+            ...msg.fileMetadata,
+            localAppData: {
+              ...msg.fileMetadata.localAppData,
+              tags: msg.fileMetadata.localAppData?.tags?.some((tag) =>
+                stringGuidsEqual(STARRED_MSG_TAG, tag)
+              )
+                ? []
+                : [STARRED_MSG_TAG],
+              versionTag: data.newLocalVersionTag,
+            },
+          },
+        };
+
+        insertNewMessage(queryClient, updatedChatMessage);
+        invalidateStarredMessages(queryClient);
+      },
     }),
   };
 };

@@ -1,5 +1,9 @@
 import { DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
-import { UndefinedInitialDataInfiniteOptions, useInfiniteQuery } from '@tanstack/react-query';
+import {
+  QueryClient,
+  UndefinedInitialDataInfiniteOptions,
+  useInfiniteQuery,
+} from '@tanstack/react-query';
 import { ChatMessage, getStarredChatMessages } from '../../providers/ChatProvider';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 
@@ -34,7 +38,7 @@ const getStarredChatMessageInfiniteQueryOptions: (
       ? lastPage.cursorState
       : undefined,
 
-  staleTime: 1000 * 60, // 1 minute
+  staleTime: 1000 * 60 * 5, // 5 minutes
 });
 
 export const useStarredMessages = () => {
@@ -42,4 +46,8 @@ export const useStarredMessages = () => {
   return {
     all: useInfiniteQuery(getStarredChatMessageInfiniteQueryOptions(dotYouClient)),
   };
+};
+
+export const invalidateStarredMessages = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['starred-chat-messages'] });
 };
