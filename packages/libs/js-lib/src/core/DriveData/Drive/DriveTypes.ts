@@ -56,6 +56,8 @@ export interface FileQueryParams {
   userDate?: TimeRange;
   tagsMatchAtLeastOne?: string[] | undefined;
   tagsMatchAll?: string[] | undefined;
+  localTagsMatchAtLeastOne?: string[] | undefined;
+  localTagsMatchAll?: string[] | undefined;
   globalTransitId?: string[] | undefined;
   clientUniqueIdAtLeastOne?: string[] | undefined;
   systemFileType?: SystemFileType;
