@@ -127,6 +127,7 @@ export const OdinQueryClient = ({
           if (data?.pages?.length && data?.pages?.length > 2) {
             const adjustedData = { ...data };
             adjustedData.pages = adjustedData.pages.slice(0, 2);
+            adjustedData.pageParams = adjustedData.pageParams.slice(0, 2);
             return adjustedData;
           }
 
