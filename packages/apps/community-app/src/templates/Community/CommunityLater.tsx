@@ -109,12 +109,12 @@ const SavedMessage = ({
     systemFileType: msg?.fileSystemType,
   });
 
-  if (!msg || !link) return null;
-
   const plainText = useMemo(
-    () => getPlainTextFromRichText(msg.fileMetadata.appData.content.message),
+    () => getPlainTextFromRichText(msg?.fileMetadata.appData.content.message),
     [msg]
   );
+
+  if (!msg || !link) return null;
 
   return (
     <>
