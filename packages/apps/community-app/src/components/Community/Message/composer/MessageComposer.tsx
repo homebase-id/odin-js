@@ -240,7 +240,7 @@ export const MessageComposer = memo(
         />
         <div className={`bg-background pb-[env(safe-area-inset-bottom)] ${className || ''}`}>
           <form
-            className="flex flex-shrink-0 flex-row gap-2 px-0 md:px-3 md:pb-2 lg:pb-5"
+            className="flex flex-shrink-0 flex-row gap-2 px-0 md:px-3 md:pb-2 lg:pb-3"
             onPaste={(e) => {
               const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
 

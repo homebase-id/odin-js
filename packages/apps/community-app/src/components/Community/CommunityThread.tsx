@@ -125,11 +125,7 @@ export const CommunityThread = memo(
     );
 
     if (isFullScreen)
-      return (
-        <div className="absolute inset-0 flex h-full w-full flex-col shadow-lg dark:border-l dark:border-slate-800">
-          {innerContents}
-        </div>
-      );
+      return <div className="absolute inset-0 flex h-full w-full flex-col">{innerContents}</div>;
     return <ResizablePane>{innerContents}</ResizablePane>;
   }
 );
