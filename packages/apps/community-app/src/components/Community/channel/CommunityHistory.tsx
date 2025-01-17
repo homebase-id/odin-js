@@ -65,28 +65,33 @@ export const CommunityHistory = memo(
       communityId: community?.fileMetadata?.appData?.uniqueId,
       channelId: channel?.fileMetadata?.appData?.uniqueId,
       threadId: origin?.fileMetadata.globalTransitId,
-      maxAge: maxAge,
     });
 
-    const [flattenedMsgs, isSliced] = useMemo(() => {
+    const [flattenedMsgs, slicedCount] = useMemo(() => {
       const flat: HomebaseFile<CommunityMessage>[] = [];
+      let slicedCount = 0;
 
       messages?.pages?.forEach((page) => {
         page?.searchResults?.forEach((result) => {
-          if (result) flat.push(result);
+          if (result) {
+            if (maxAge && result.fileMetadata.created < maxAge) {
+              slicedCount++;
+              return;
+            }
+            flat.push(result);
+          }
         });
       });
 
       flat.sort((a, b) => b.fileMetadata.created - a.fileMetadata.created);
-
-      if (inAThread && (!maxAge || origin.fileMetadata.created > maxAge)) {
-        flat.push(origin as HomebaseFile<CommunityMessage>);
-      }
-
-      if (!maxShowOptions) return [flat, false];
+      if (inAThread) flat.push(origin as HomebaseFile<CommunityMessage>);
+      if (!maxShowOptions) return [flat, slicedCount];
 
       const maxShow = maxShowOptions.count;
-      return [flat.slice(0, maxShow), flat.length > maxShow];
+      return [
+        flat.slice(0, maxShow),
+        slicedCount + (flat.length > maxShow ? flat.length - maxShow : 0),
+      ];
     }, [messages, origin, maxShowOptions, inAThread, maxAge]);
 
     useEffect(() => {
@@ -163,7 +168,7 @@ export const CommunityHistory = memo(
         lastItem.index >= flattenedMsgs?.length - 1 &&
         hasMoreMessages &&
         !isFetchingNextPage &&
-        !isSliced
+        !slicedCount
       )
         fetchNextPage();
     }, [
@@ -268,18 +273,10 @@ export const CommunityHistory = memo(
                 if (isLoaderRow) {
                   return (
                     <div key={item.key} data-index={item.index} ref={virtualizer.measureElement}>
-                      {(hasMoreMessages || isFetchingNextPage) && (!maxShowOptions || !isSliced) ? (
+                      {(hasMoreMessages && !maxShowOptions && !slicedCount) ||
+                      isFetchingNextPage ? (
                         <div className="animate-pulse" key={'loading'}>
                           {t('Loading...')}
-                        </div>
-                      ) : (isSliced || maxAge) && maxShowOptions?.targetLink ? (
-                        <div key={'end'} className="flex flex-row justify-center">
-                          <Link
-                            to={maxShowOptions?.targetLink}
-                            className="rounded-full bg-page-background px-3 py-2 text-sm font-medium text-foreground opacity-50 hover:bg-primary hover:text-primary-contrast hover:opacity-100"
-                          >
-                            {t('See older messages')}
-                          </Link>
                         </div>
                       ) : null}
                     </div>
@@ -323,6 +320,16 @@ export const CommunityHistory = memo(
                       showChannelName={!channel && !inAThread}
                       originId={origin?.fileMetadata.appData.uniqueId}
                     />
+                    {msg === origin && slicedCount && maxShowOptions?.targetLink ? (
+                      <div className="flex flex-row justify-center">
+                        <Link
+                          to={maxShowOptions?.targetLink}
+                          className="rounded-full bg-page-background px-3 py-2 text-sm font-medium text-foreground opacity-50 hover:bg-primary hover:text-primary-contrast hover:opacity-100"
+                        >
+                          {t('See {0} more replies', slicedCount > 100 ? '100 +' : slicedCount)}
+                        </Link>
+                      </div>
+                    ) : null}
                   </div>
                 );
               })}
