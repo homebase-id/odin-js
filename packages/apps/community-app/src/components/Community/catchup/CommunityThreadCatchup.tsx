@@ -31,7 +31,10 @@ export const CommunityThreadCatchup = ({
     communityId,
   }).single;
 
-  const threadsLastRead = metadata?.fileMetadata.appData.content.threadsLastReadTime;
+  const threadsLastRead = useMemo(
+    () => metadata?.fileMetadata.appData.content.threadsLastReadTime,
+    [metadata]
+  );
 
   const { data: channel } = useCommunityChannel({
     odinId: community.fileMetadata.senderOdinId,
@@ -58,16 +61,21 @@ export const CommunityThreadCatchup = ({
 
   const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
 
-  const todayDate = new Date(threadMeta.lastMessageCreated);
-  todayDate.setHours(0, 0, 0, 0);
-  const defaultMaxAge = todayDate.getTime();
+  const defaultMaxAge = useMemo(() => {
+    const todayDate = new Date(threadMeta.lastMessageCreated);
+    todayDate.setHours(0, 0, 0, 0);
+    return todayDate.getTime();
+  }, [threadMeta]);
 
-  const maxAge =
-    (threadMeta.lastAuthor !== loggedInIdentity &&
-      threadsLastRead &&
-      threadsLastRead < defaultMaxAge &&
-      threadsLastRead) ||
-    defaultMaxAge;
+  const maxAge = useMemo(
+    () =>
+      (threadMeta.lastAuthor !== loggedInIdentity &&
+        threadsLastRead &&
+        threadsLastRead < defaultMaxAge &&
+        threadsLastRead) ||
+      defaultMaxAge,
+    [threadMeta, threadsLastRead, defaultMaxAge, loggedInIdentity]
+  );
 
   if (!channel || !originMessage) return null;
 

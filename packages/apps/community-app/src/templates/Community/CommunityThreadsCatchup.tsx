@@ -11,7 +11,6 @@ import { useMarkCommunityAsRead } from '../../hooks/community/useMarkCommunityAs
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 export const CommunityThreadsCatchup = memo(() => {
-  const scrollRef = useRef<HTMLDivElement>(null);
   const { odinKey, communityKey: communityId } = useParams();
   const { data: community, isFetched } = useCommunity({ odinId: odinKey, communityId }).fetch;
 
@@ -35,15 +34,6 @@ export const CommunityThreadsCatchup = memo(() => {
 
     return Object.values(uniqueThreads);
   }, [flatThreadMetas]);
-
-  const virtualizer = useVirtualizer({
-    getScrollElement: () => scrollRef.current,
-    count: uniqueFlatThreadMetas?.length || 0,
-    estimateSize: () => 500,
-    overscan: 4,
-    getItemKey: (index) => uniqueFlatThreadMetas?.[index]?.threadId || index,
-  });
-  const items = virtualizer.getVirtualItems();
 
   if (!isFetched || !fetchedThreads) {
     return (
@@ -69,59 +59,87 @@ export const CommunityThreadsCatchup = memo(() => {
 
   return (
     <ErrorBoundary>
-      <div className="h-full w-20 flex-grow bg-page-background">
-        <div className="relative flex h-full flex-row">
-          <div className="flex h-full flex-grow flex-col overflow-hidden">
-            <div className="flex h-full flex-grow flex-col">
-              <CommunityCatchupHeader community={community} />
-              {!uniqueFlatThreadMetas?.length ? (
-                <p className="m-auto text-lg">{t('No threads found')}</p>
-              ) : (
-                <div className="relative h-20 flex-grow flex-col overflow-auto p-3" ref={scrollRef}>
-                  <div
-                    className="relative w-full overflow-hidden"
-                    style={{
-                      height: virtualizer.getTotalSize(),
-                    }}
-                  >
-                    <div
-                      className="absolute left-0 top-0 w-full"
-                      style={{
-                        transform: `translateY(${items[0]?.start - virtualizer.options.scrollMargin}px)`,
-                      }}
-                    >
-                      {items.map((item) => {
-                        const threadMeta = uniqueFlatThreadMetas?.[item.index];
-                        return (
-                          <div
-                            key={item.key}
-                            data-index={item.index}
-                            ref={virtualizer.measureElement}
-                            className="pb-3 last-of-type:pb-0"
-                          >
-                            {threadMeta ? (
-                              <CommunityThreadCatchup
-                                community={community}
-                                threadMeta={threadMeta}
-                                key={threadMeta.threadId}
-                              />
-                            ) : null}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      <InnerThreadsCatchup community={community} threadMetas={uniqueFlatThreadMetas} />
     </ErrorBoundary>
   );
 });
 
 CommunityThreadsCatchup.displayName = 'CommunityThreadsCatchup';
+
+const InnerThreadsCatchup = memo(
+  (props: { community: HomebaseFile<CommunityDefinition>; threadMetas: ThreadMeta[] }) => {
+    const { community, threadMetas } = props;
+
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    const virtualizer = useVirtualizer({
+      getScrollElement: () => scrollRef.current,
+      count: threadMetas?.length || 0,
+      estimateSize: () => 500,
+      overscan: 4,
+      getItemKey: (index) => threadMetas?.[index]?.threadId || index,
+    });
+    const items = virtualizer.getVirtualItems();
+
+    return (
+      <ErrorBoundary>
+        <div className="h-full w-20 flex-grow bg-page-background">
+          <div className="relative flex h-full flex-row">
+            <div className="flex h-full flex-grow flex-col overflow-hidden">
+              <div className="flex h-full flex-grow flex-col">
+                <CommunityCatchupHeader community={community} />
+                {!threadMetas?.length ? (
+                  <p className="m-auto text-lg">{t('No threads found')}</p>
+                ) : (
+                  <div
+                    className="relative h-20 flex-grow flex-col overflow-auto p-3"
+                    ref={scrollRef}
+                  >
+                    <div
+                      className="relative w-full overflow-hidden"
+                      style={{
+                        height: virtualizer.getTotalSize(),
+                      }}
+                    >
+                      <div
+                        className="absolute left-0 top-0 w-full"
+                        style={{
+                          transform: `translateY(${items[0]?.start - virtualizer.options.scrollMargin}px)`,
+                        }}
+                      >
+                        {items.map((item) => {
+                          const threadMeta = threadMetas?.[item.index];
+                          return (
+                            <div
+                              key={item.key}
+                              data-index={item.index}
+                              ref={virtualizer.measureElement}
+                              className="pb-3 last-of-type:pb-0"
+                            >
+                              {threadMeta ? (
+                                <CommunityThreadCatchup
+                                  community={community}
+                                  threadMeta={threadMeta}
+                                  key={threadMeta.threadId}
+                                />
+                              ) : null}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </ErrorBoundary>
+    );
+  }
+);
+
+InnerThreadsCatchup.displayName = 'InnerThreadsCatchup';
 
 const CommunityCatchupHeader = ({
   community,

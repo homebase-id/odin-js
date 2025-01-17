@@ -5,6 +5,7 @@ import { CommunityHistory } from '../channel/CommunityHistory';
 import { ActionLink, COMMUNITY_ROOT_PATH, useDotYouClientContext } from '@homebase-id/common-app';
 import { ExternalLink } from '@homebase-id/common-app/icons';
 import { useCommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
+import { useMemo } from 'react';
 
 export const CommunityChannelCatchup = ({
   community,
@@ -14,29 +15,52 @@ export const CommunityChannelCatchup = ({
   channel: ChannelWithRecentMessage;
 }) => {
   const communityId = community.fileMetadata.appData.uniqueId;
-  const channelLink = `${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}`;
+  const channelLink = useMemo(
+    () =>
+      `${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}`,
+    [community, communityId, channel]
+  );
   const { data: metadata } = useCommunityMetadata({
     odinId: community.fileMetadata.senderOdinId,
     communityId,
   }).single;
-  const channelLastRead =
-    metadata?.fileMetadata.appData.content.channelLastReadTime[
-      channel.fileMetadata.appData.uniqueId as string
-    ];
+
+  const channelLastRead = useMemo(
+    () =>
+      metadata?.fileMetadata.appData.content.channelLastReadTime[
+        channel.fileMetadata.appData.uniqueId as string
+      ],
+    [metadata, channel]
+  );
 
   const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
+
+  const defaultMaxAge = useMemo(() => {
+    if (!channel.lastMessage) return 0;
+
+    const todayDate = new Date(channel.lastMessage?.fileMetadata.created);
+    todayDate.setHours(0, 0, 0, 0);
+    return todayDate.getTime();
+  }, [channel]);
+
+  const maxAge = useMemo(
+    () =>
+      (channel.lastMessage?.fileMetadata.originalAuthor !== loggedInIdentity &&
+        channelLastRead &&
+        channelLastRead < defaultMaxAge &&
+        channelLastRead) ||
+      defaultMaxAge,
+    [channel, channelLastRead, defaultMaxAge, loggedInIdentity]
+  );
+
+  const showOptions = useMemo(() => {
+    return {
+      count: 5,
+      targetLink: channelLink,
+    };
+  }, [channelLink]);
+
   if (!channel.lastMessage) return null;
-
-  const todayDate = new Date(channel.lastMessage?.fileMetadata.created);
-  todayDate.setHours(0, 0, 0, 0);
-  const defaultMaxAge = todayDate.getTime();
-
-  const maxAge =
-    (channel.lastMessage?.fileMetadata.originalAuthor !== loggedInIdentity &&
-      channelLastRead &&
-      channelLastRead < defaultMaxAge &&
-      channelLastRead) ||
-    defaultMaxAge;
 
   return (
     <div className="pb-3 last-of-type:pb-0">
@@ -58,10 +82,7 @@ export const CommunityChannelCatchup = ({
             community={community}
             channel={channel}
             alignTop={true}
-            maxShowOptions={{
-              count: 5,
-              targetLink: channelLink,
-            }}
+            maxShowOptions={showOptions}
             maxAge={maxAge}
           />
         </div>
