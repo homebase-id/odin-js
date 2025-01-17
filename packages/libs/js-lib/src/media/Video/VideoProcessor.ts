@@ -11,6 +11,12 @@ import { GenerateKeyHeader } from '../../core/DriveData/Upload/UploadHelpers';
 
 const megaByte = 1024 * 1024;
 
+/**
+ * Processes a video file by fragmenting and encrypting it into a single `.ts` file
+ * with byte-range fragmentation for HLS playback. This approach ensures standards
+ * compliance, reliable playback across HLS-compatible players, and full-file usability
+ * when downloaded. Replaces a prior custom implementation that faced browser compatibility issues.
+ */
 export const processVideoFile = async (
   videoFile: { file: File | Blob; thumbnail?: ThumbnailFile },
   payloadKey: string,
