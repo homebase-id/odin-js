@@ -65,6 +65,7 @@ export const CommunityChannelDetail = () => {
   }
 
   if (!community || !channelDsr) return <NotFound />;
+
   return (
     <ErrorBoundary>
       <div className="h-full w-20 flex-grow bg-background">
