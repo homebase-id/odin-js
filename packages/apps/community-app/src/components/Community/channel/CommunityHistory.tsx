@@ -230,7 +230,6 @@ export const CommunityHistory = memo(
 
     if (emptyPlaceholder && isFetched && (!flattenedMsgs || flattenedMsgs.length === 0))
       return <>{emptyPlaceholder}</>;
-
     return (
       <>
         <ErrorNotification error={deleteMessagesError} />
