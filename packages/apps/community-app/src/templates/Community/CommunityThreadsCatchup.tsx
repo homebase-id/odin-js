@@ -1,11 +1,11 @@
 import { useCommunity } from '../../hooks/community/useCommunity';
 import { ErrorBoundary, LoadingBlock, t, COMMUNITY_ROOT_PATH } from '@homebase-id/common-app';
 import { Link, useParams } from 'react-router-dom';
-import { memo, useRef } from 'react';
+import { memo, useMemo, useRef } from 'react';
 import { ChatBubble, ChevronLeft } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
-import { useCommunityThreads } from '../../hooks/community/threads/useCommunityThreads';
+import { ThreadMeta, useCommunityThreads } from '../../hooks/community/threads/useCommunityThreads';
 import { CommunityThreadCatchup } from '../../components/Community/catchup/CommunityThreadCatchup';
 import { useMarkCommunityAsRead } from '../../hooks/community/useMarkCommunityAsRead';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -21,13 +21,27 @@ export const CommunityThreadsCatchup = memo(() => {
     odinId: odinKey,
     communityId: communityId,
   });
+  const uniqueFlatThreadMetas = useMemo(() => {
+    if (!flatThreadMetas) return [];
+    const uniqueThreads: Record<string, ThreadMeta> = {};
+
+    for (let i = 0; i < flatThreadMetas?.length; i++) {
+      if (uniqueThreads[flatThreadMetas[i].threadId]) {
+        continue;
+      } else {
+        uniqueThreads[flatThreadMetas[i].threadId] = flatThreadMetas[i];
+      }
+    }
+
+    return Object.values(uniqueThreads);
+  }, [flatThreadMetas]);
 
   const virtualizer = useVirtualizer({
     getScrollElement: () => scrollRef.current,
-    count: flatThreadMetas?.length || 0,
+    count: uniqueFlatThreadMetas?.length || 0,
     estimateSize: () => 500,
-    overscan: 5,
-    getItemKey: (index) => flatThreadMetas?.[index]?.threadId || index,
+    overscan: 4,
+    getItemKey: (index) => uniqueFlatThreadMetas?.[index]?.threadId || index,
   });
   const items = virtualizer.getVirtualItems();
 
@@ -60,7 +74,7 @@ export const CommunityThreadsCatchup = memo(() => {
           <div className="flex h-full flex-grow flex-col overflow-hidden">
             <div className="flex h-full flex-grow flex-col">
               <CommunityCatchupHeader community={community} />
-              {!flatThreadMetas?.length ? (
+              {!uniqueFlatThreadMetas?.length ? (
                 <p className="m-auto text-lg">{t('No threads found')}</p>
               ) : (
                 <div className="relative h-20 flex-grow flex-col overflow-auto p-3" ref={scrollRef}>
@@ -77,7 +91,7 @@ export const CommunityThreadsCatchup = memo(() => {
                       }}
                     >
                       {items.map((item) => {
-                        const threadMeta = flatThreadMetas?.[item.index];
+                        const threadMeta = uniqueFlatThreadMetas?.[item.index];
                         return (
                           <div
                             key={item.key}

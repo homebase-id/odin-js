@@ -68,19 +68,26 @@ export const CommunityHistory = memo(
       maxAge: maxAge,
     });
 
-    const [flattenedMsgs, isSliced] =
-      useMemo(() => {
-        const flat = (messages?.pages?.flatMap((page) => page?.searchResults)?.filter(Boolean) ||
-          []) as HomebaseFile<CommunityMessage>[];
+    const [flattenedMsgs, isSliced] = useMemo(() => {
+      const flat: HomebaseFile<CommunityMessage>[] = [];
 
-        if (inAThread && (!maxAge || origin.fileMetadata.created > maxAge)) {
-          flat.push(origin as HomebaseFile<CommunityMessage>);
-        }
+      messages?.pages?.forEach((page) => {
+        page?.searchResults?.forEach((result) => {
+          if (result) flat.push(result);
+        });
+      });
 
-        if (!maxShowOptions) return [flat, false];
-        const maxShow = maxShowOptions.count;
-        return [flat.slice(0, maxShow), maxShow && flat.length > maxShow];
-      }, [messages, origin, maxShowOptions]) || [];
+      flat.sort((a, b) => b.fileMetadata.created - a.fileMetadata.created);
+
+      if (inAThread && (!maxAge || origin.fileMetadata.created > maxAge)) {
+        flat.push(origin as HomebaseFile<CommunityMessage>);
+      }
+
+      if (!maxShowOptions) return [flat, false];
+
+      const maxShow = maxShowOptions.count;
+      return [flat.slice(0, maxShow), flat.length > maxShow];
+    }, [messages, origin, maxShowOptions, inAThread, maxAge]);
 
     useEffect(() => {
       if (setIsEmptyChat && isFetched && (!flattenedMsgs || flattenedMsgs.length === 0))
