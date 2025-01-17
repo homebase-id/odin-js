@@ -91,18 +91,22 @@ export const CommunityMessageItem = memo(
     const editInThreadMatch = useMatch(
       `${COMMUNITY_ROOT_PATH}/:odinKey/:communityKey/:channelKey/:threadKey/thread/:chatMessageKey/edit`
     );
-    const isEdit =
-      !!isDetail && ((!!editMatch && !hideThreads) || (!!editInThreadMatch && hideThreads));
+    const isEditPath = useMemo(
+      () => !!isDetail && ((!!editMatch && !hideThreads) || (!!editInThreadMatch && hideThreads)),
+      [editMatch, editInThreadMatch]
+    );
+
+    const [isEdit, setIsLocalEdit] = useState(isEditPath);
+    useEffect(() => {
+      setIsLocalEdit(isEditPath);
+    }, [isEditPath]);
 
     const navigate = useNavigate();
     const extendedCommunityActions: CommunityActions | undefined = useMemo(() => {
-      if (!communityActions || !channelKey) return undefined;
+      if (!communityActions) return undefined;
       return {
         ...communityActions,
-        doEdit: () =>
-          navigate(
-            `${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${channelKey || msg.fileMetadata.appData.content.channelId}/${threadKey ? `${threadKey}/thread/` : ``}${msg.fileMetadata.appData.uniqueId}/edit`
-          ),
+        doEdit: () => setIsLocalEdit(true),
       };
     }, []);
 
@@ -206,7 +210,10 @@ export const CommunityMessageItem = memo(
                 <CommunityMessageEditor
                   msg={msg}
                   community={community}
-                  onClose={() => navigate(window.location.pathname.replace(/\/edit$/, ''))}
+                  onClose={() => {
+                    if (isEditPath) navigate(window.location.pathname.replace(/\/edit$/, ''));
+                    else setIsLocalEdit(false);
+                  }}
                 />
               ) : (
                 <>

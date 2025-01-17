@@ -51,7 +51,7 @@ export const CommunityThreadCatchup = ({
     return {
       count: 5,
       targetLink: channel
-        ? `${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}/${threadMeta.threadId}/thread`
+        ? `${COMMUNITY_ROOT_PATH}/${community.fileMetadata.senderOdinId}/${communityId}/${channel.fileMetadata.appData.uniqueId}/${threadMeta.threadId}/thread?ui=full`
         : '',
     };
   }, [community, channel]);

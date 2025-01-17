@@ -15,6 +15,7 @@ import {
   usePortal,
   ActionButton,
   getPlainTextFromRichText,
+  COMMUNITY_ROOT_PATH,
 } from '@homebase-id/common-app';
 import { useEffect, useRef, useState } from 'react';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
@@ -200,13 +201,15 @@ const CommunityContextActions = ({
 
   const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;
 
+  const channelId = msg.fileMetadata.appData.content.channelId;
+  const threadId = msg.fileMetadata.appData.content.threadId;
   const optionalOptions: ActionGroupOptionProps[] = [
     {
       icon: Clipboard,
       label: t('Copy link'),
       onClick: () => {
         navigator.clipboard.writeText(
-          `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect${window.location.pathname}/${msg.fileMetadata.appData.uniqueId}`
+          `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${channelId}/${threadId ? `${threadId}/thread/` : ``}${msg.fileMetadata.appData.uniqueId}`
         );
       },
     },

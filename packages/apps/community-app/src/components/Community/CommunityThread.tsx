@@ -5,9 +5,9 @@ import {
   ErrorBoundary,
   COMMUNITY_ROOT_PATH,
 } from '@homebase-id/common-app';
-import { ChevronLeft, Times } from '@homebase-id/common-app/icons';
+import { ChevronLeft, Contract, Expand, Times } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useCommunityMessage } from '../../hooks/community/messages/useCommunityMessage';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import { CommunityChannel } from '../../providers/CommunityProvider';
@@ -44,10 +44,13 @@ export const CommunityThread = memo(
       origin: originMessage || undefined,
     });
 
+    const [searchParams] = useSearchParams();
+    const isFullScreen = searchParams.get('ui') === 'full';
+
     if (!community || !threadId) return null;
 
-    return (
-      <ResizablePane>
+    const innerContents = (
+      <>
         <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
           <ActionLink
             className="p-2 xl:hidden"
@@ -58,18 +61,34 @@ export const CommunityThread = memo(
             <ChevronLeft className="h-5 w-5" />
           </ActionLink>
           <div className="flex flex-col">
-            <p>{t('Thread')}</p>
+            {isFullScreen && channel ? (
+              <p>
+                {t('Thread')} {t('in')} # {channel.fileMetadata.appData.content.title}
+              </p>
+            ) : (
+              <p>{t('Thread')}</p>
+            )}
             <p className="text-sm text-slate-400">
               <ParticipantsList participants={participants} />
             </p>
           </div>
-          <ActionLink
-            href={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || 'activity'}`}
-            icon={Times}
-            size="none"
-            type="mute"
-            className="hidden p-2 lg:-m-2 lg:ml-auto xl:flex"
-          />
+          <div className="flex flex-row gap-2 lg:ml-auto">
+            <ActionLink
+              href={isFullScreen ? window.location.pathname : `${window.location.pathname}?ui=full`}
+              size="none"
+              type="mute"
+              className="hidden p-2 text-foreground/65 lg:-m-2 xl:flex"
+            >
+              {isFullScreen ? <Contract className="h-4 w-4" /> : <Expand className="h-4 w-4" />}
+            </ActionLink>
+            <ActionLink
+              href={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || 'activity'}`}
+              icon={Times}
+              size="none"
+              type="mute"
+              className="hidden p-2 lg:-m-2 xl:flex"
+            />
+          </div>
         </div>
         <div className="flex h-20 flex-grow flex-col overflow-auto bg-background">
           {!originMessage ? (
@@ -84,7 +103,7 @@ export const CommunityThread = memo(
               origin={originMessage}
               channel={channel}
               setParticipants={setParticipants}
-              alignTop={true}
+              alignTop={!isFullScreen}
             />
           )}
 
@@ -102,8 +121,12 @@ export const CommunityThread = memo(
             ) : null}
           </ErrorBoundary>
         </div>
-      </ResizablePane>
+      </>
     );
+
+    if (isFullScreen)
+      return <div className="absolute inset-0 flex h-full w-full flex-col">{innerContents}</div>;
+    return <ResizablePane>{innerContents}</ResizablePane>;
   }
 );
 CommunityThread.displayName = 'CommunityThread';
