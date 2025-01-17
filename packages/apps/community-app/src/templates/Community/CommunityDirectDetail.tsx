@@ -30,15 +30,10 @@ export const CommunityDirectDetail = () => {
   useEffect(() => {
     if (!dmKey || !loggedOnIdentity) return;
     (async () => {
-      if (dmKey === loggedOnIdentity) {
-        setConversationId(ConversationWithYourselfId);
-      } else {
-        setConversationId(isAGuidId(dmKey) ? dmKey : await getNewXorId(loggedOnIdentity, dmKey));
-      }
+      if (dmKey === loggedOnIdentity) setConversationId(ConversationWithYourselfId);
+      else setConversationId(isAGuidId(dmKey) ? dmKey : await getNewXorId(loggedOnIdentity, dmKey));
     })();
   }, [dmKey]);
-
-  useRemoveNotifications({ appId: CHAT_APP_ID, typeId: conversationId, disabled: !conversationId });
 
   const {
     single: { data: conversation, isFetched: conversationFetched },
@@ -52,6 +47,8 @@ export const CommunityDirectDetail = () => {
       createConversation({ recipients: [dmKey] });
     }
   }, [conversation, conversationFetched]);
+
+  useRemoveNotifications({ appId: CHAT_APP_ID, typeId: conversationId, disabled: !conversationId });
 
   if (!communityId || isLoading || (!community && isFetched) || !conversation)
     return (

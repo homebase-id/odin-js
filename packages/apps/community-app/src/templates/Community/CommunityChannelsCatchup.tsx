@@ -3,14 +3,13 @@ import { ErrorBoundary, LoadingBlock, t, COMMUNITY_ROOT_PATH } from '@homebase-i
 import { Link, useParams } from 'react-router-dom';
 import { CommunityChannelCatchup } from '../../components/Community/catchup/CommunityChannelCatchup';
 import { useCommunityChannelsWithRecentMessages } from '../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
-import { CommunityThread } from '../../components/Community/CommunityThread';
 import { memo } from 'react';
 import { ChevronLeft, RadioTower } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 
 export const CommunityChannelsCatchup = memo(() => {
-  const { odinKey, communityKey: communityId, threadKey } = useParams();
+  const { odinKey, communityKey: communityId } = useParams();
   const { data: community, isFetched } = useCommunity({ odinId: odinKey, communityId }).fetch;
 
   const { data: channels } = useCommunityChannelsWithRecentMessages({
@@ -62,12 +61,6 @@ export const CommunityChannelsCatchup = memo(() => {
               )}
             </div>
           </div>
-
-          {threadKey ? (
-            <ErrorBoundary>
-              <CommunityThread community={community} channel={undefined} threadId={threadKey} />
-            </ErrorBoundary>
-          ) : null}
         </div>
       </div>
     </ErrorBoundary>
