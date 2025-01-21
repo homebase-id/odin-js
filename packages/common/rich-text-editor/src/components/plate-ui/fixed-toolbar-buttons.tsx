@@ -31,7 +31,7 @@ export function FixedToolbarButtons({
 
   return (
     <div
-      className={`flex py-1 ${readOnly ? 'pointer-events-none cursor-not-allowed' : ''}`}
+      className={`flex w-20 flex-grow py-1 ${readOnly ? 'pointer-events-none cursor-not-allowed' : ''}`}
       style={{
         transform: 'translateX(calc(-1px))',
       }}

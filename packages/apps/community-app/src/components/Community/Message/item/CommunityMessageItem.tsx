@@ -68,7 +68,7 @@ export const CommunityMessageItem = memo(
     const hasMedia = !!msg.fileMetadata.payloads?.filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY)
       ?.length;
 
-    const { chatMessageKey, mediaKey, channelKey, threadKey } = useParams();
+    const { chatMessageKey, mediaKey } = useParams();
     const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey);
     const isMediaDetail = isDetail && mediaKey;
 
