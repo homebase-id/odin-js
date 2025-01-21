@@ -387,15 +387,13 @@ export const uploadChatMessage = async (
   if (!uploadResult) throw new Error('Failed to upload chat message');
 
   if (
-    recipients.some(
-      (recipient) =>
-        uploadResult.recipientStatus?.[recipient].toLowerCase() ===
-        TransferUploadStatus.EnqueuedFailed
+    Object.values(uploadResult.recipientStatus).some(
+      (recipienStatus) => recipienStatus.toLowerCase() === TransferUploadStatus.EnqueuedFailed
     )
   ) {
     message.fileId = uploadResult.file.fileId;
     message.fileMetadata.versionTag = uploadResult.newVersionTag;
-    message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Sent;
+    message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Failed;
 
     const updateResult = await updateChatMessage(
       dotYouClient,

@@ -318,14 +318,10 @@ export const uploadMail = async (
 
   if (distribute) {
     if (
-      recipients.some(
-        (recipient) =>
-          (uploadResult as UploadResult).recipientStatus?.[recipient].toLowerCase() ===
-          TransferUploadStatus.EnqueuedFailed
+      Object.values((uploadResult as UploadResult).recipientStatus).some(
+        (recipienStatus) => recipienStatus.toLowerCase() === TransferUploadStatus.EnqueuedFailed
       )
     ) {
-      conversation.fileId = (uploadResult as UploadResult).file.fileId;
-      conversation.fileMetadata.versionTag = uploadResult.newVersionTag;
       conversation.fileMetadata.appData.content.deliveryStatus = MailDeliveryStatus.Failed;
 
       await updateLocalMailHeader(
