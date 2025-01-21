@@ -178,7 +178,7 @@ export const ChannelItem = ({
                 <Alert type="warning" title={t('Invalid configuration')} className="mb-4">
                   <p>
                     {t(
-                      'The channel is marked as colalborative, but is missing the necessary circle permissions or drive attribute'
+                      'The channel is marked as collaborative, but is missing the necessary circle permissions or drive attribute'
                     )}
                   </p>
                   <div className="mt-2 flex flex-row-reverse gap-4">
