@@ -23,6 +23,7 @@ export * from './follow/useFollowing';
 export * from './follow/useIdentityIFollow';
 export * from './file/useFile';
 export * from './file/useContentFromPayload';
+export * from './file/useTransferHistory';
 export * from './image/useRawImage';
 export * from './intersection/useIntersection';
 export * from './intersection/useMostSpace';

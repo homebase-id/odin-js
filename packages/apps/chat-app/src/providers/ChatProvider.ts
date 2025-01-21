@@ -26,13 +26,14 @@ import {
   UploadResult,
   PriorityOptions,
   TransferUploadStatus,
-  TransferStatus,
-  FailedTransferStatuses,
-  RecipientTransferHistory,
   deleteFile,
   UpdateHeaderInstructionSet,
   RichText,
   DEFAULT_PAYLOAD_KEY,
+  RecipientTransferSummary,
+  RecipientTransferHistory,
+  FailedTransferStatuses,
+  TransferStatus,
 } from '@homebase-id/js-lib/core';
 import { ChatDrive, ConversationWithYourselfId, UnifiedConversation } from './ConversationProvider';
 import {
@@ -81,7 +82,6 @@ export interface ChatMessage {
 
   // DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;
-  deliveryDetails?: Record<string, ChatDeliveryStatus>;
 }
 
 const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_web';
@@ -148,17 +148,18 @@ export const dsrToMessage = async (
     if (
       (msgContent.deliveryStatus === ChatDeliveryStatus.Sent ||
         msgContent.deliveryStatus === ChatDeliveryStatus.Failed) &&
-      dsr.serverMetadata?.transferHistory?.recipients
+      dsr.serverMetadata?.transferHistory?.summary &&
+      dsr.serverMetadata.originalRecipientCount
     ) {
-      msgContent.deliveryDetails = buildDeliveryDetails(
-        dsr.serverMetadata.transferHistory.recipients
-      );
       msgContent.deliveryStatus = stringGuidsEqual(
         dsr.fileMetadata.appData.groupId,
         ConversationWithYourselfId
       )
         ? ChatDeliveryStatus.Read
-        : buildDeliveryStatus(msgContent.deliveryDetails);
+        : buildDeliveryStatus(
+            dsr.serverMetadata.originalRecipientCount,
+            dsr.serverMetadata.transferHistory.summary
+          );
     }
 
     const chatMessage: HomebaseFile<ChatMessage> = {
@@ -181,49 +182,39 @@ export const dsrToMessage = async (
   }
 };
 
-const buildDeliveryDetails = (recipientTransferHistory: {
-  [key: string]: RecipientTransferHistory;
-}): Record<string, ChatDeliveryStatus> => {
-  const deliveryDetails: Record<string, ChatDeliveryStatus> = {};
+export const transferHistoryToChatDeliveryStatus = (
+  transferHistory: RecipientTransferHistory | undefined
+): ChatDeliveryStatus => {
+  if (!transferHistory) return ChatDeliveryStatus.Failed;
 
-  for (const recipient of Object.keys(recipientTransferHistory)) {
-    if (recipientTransferHistory[recipient].latestSuccessfullyDeliveredVersionTag) {
-      if (recipientTransferHistory[recipient].isReadByRecipient) {
-        deliveryDetails[recipient] = ChatDeliveryStatus.Read;
-      } else {
-        deliveryDetails[recipient] = ChatDeliveryStatus.Delivered;
-      }
+  if (transferHistory.latestSuccessfullyDeliveredVersionTag) {
+    if (transferHistory.isReadByRecipient) {
+      return ChatDeliveryStatus.Read;
     } else {
-      const latest = recipientTransferHistory[recipient].latestTransferStatus;
-      const transferStatus =
-        latest && typeof latest === 'string'
-          ? (latest?.toLocaleLowerCase() as TransferStatus)
-          : undefined;
-      if (transferStatus && FailedTransferStatuses.includes(transferStatus)) {
-        deliveryDetails[recipient] = ChatDeliveryStatus.Failed;
-      } else {
-        deliveryDetails[recipient] = ChatDeliveryStatus.Sent;
-      }
+      return ChatDeliveryStatus.Delivered;
     }
   }
 
-  return deliveryDetails;
+  const latest = transferHistory.latestTransferStatus;
+  const transferStatus =
+    latest && typeof latest === 'string'
+      ? (latest?.toLocaleLowerCase() as TransferStatus)
+      : undefined;
+  if (transferStatus && FailedTransferStatuses.includes(transferStatus)) {
+    return ChatDeliveryStatus.Failed;
+  }
+  return ChatDeliveryStatus.Sent;
 };
 
-const buildDeliveryStatus = (
-  deliveryDetails: Record<string, ChatDeliveryStatus>
+export const buildDeliveryStatus = (
+  recipientCount: number,
+  transferSummary: RecipientTransferSummary
 ): ChatDeliveryStatus => {
-  const values = Object.values(deliveryDetails);
-  // If any failed, the message is failed
-  if (values.includes(ChatDeliveryStatus.Failed)) return ChatDeliveryStatus.Failed;
-  if (values.every((val) => val === ChatDeliveryStatus.Read)) return ChatDeliveryStatus.Read;
-  // If all are delivered/read, the message is delivered/read
-  if (
-    values.every((val) => val === ChatDeliveryStatus.Delivered || val === ChatDeliveryStatus.Read)
-  )
-    return ChatDeliveryStatus.Delivered;
+  if (transferSummary.totalFailed > 0) return ChatDeliveryStatus.Failed;
 
-  // If it exists, it's sent
+  if (transferSummary.totalReadByRecipient === recipientCount) return ChatDeliveryStatus.Read;
+  if (transferSummary.totalDelivered === recipientCount) return ChatDeliveryStatus.Delivered;
+
   return ChatDeliveryStatus.Sent;
 };
 
@@ -277,7 +268,6 @@ export const uploadChatMessage = async (
     : jsonStringify64({
         message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
         replyId: messageContent.replyId,
-        deliveryDetails: messageContent.deliveryDetails,
         deliveryStatus: messageContent.deliveryStatus,
       }); // We only embed the content if it's less than 3kb
 
@@ -406,14 +396,6 @@ export const uploadChatMessage = async (
     message.fileId = uploadResult.file.fileId;
     message.fileMetadata.versionTag = uploadResult.newVersionTag;
     message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Sent;
-    message.fileMetadata.appData.content.deliveryDetails = {};
-    for (const recipient of recipients) {
-      message.fileMetadata.appData.content.deliveryDetails[recipient] =
-        uploadResult.recipientStatus?.[recipient].toLowerCase() ===
-        TransferUploadStatus.EnqueuedFailed
-          ? ChatDeliveryStatus.Failed
-          : ChatDeliveryStatus.Delivered;
-    }
 
     const updateResult = await updateChatMessage(
       dotYouClient,

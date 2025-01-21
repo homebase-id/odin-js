@@ -218,12 +218,7 @@ export const useChatSocketHandler = () => {
       ...m,
       fileMetadata: {
         ...m.fileMetadata,
-        updated:
-          Object.values(m.serverMetadata?.transferHistory?.recipients || []).reduce((acc, cur) => {
-            return Math.max(acc, cur.lastUpdated || 0);
-          }, 0) ||
-          m.fileMetadata.updated ||
-          0,
+        updated: m.fileMetadata.updated || 0,
       },
     }));
 
