@@ -41,6 +41,7 @@ import {
 } from '@udecode/plate-common';
 import { findNodePath, useComposedRef, useEditorRef } from '@udecode/plate-common/react';
 import { cva } from 'class-variance-authority';
+import { isTouchDevice } from '@homebase-id/js-lib/helpers';
 
 type FilterFn = (item: { value: string; keywords?: string[] }, search: string) => boolean;
 
@@ -125,8 +126,9 @@ const InlineCombobox = ({
     };
   }, [editor, element]);
 
+  const isTouch = useMemo(() => isTouchDevice(), []);
   const { props: inputProps, removeInput } = useComboboxInput({
-    cancelInputOnBlur: true,
+    cancelInputOnBlur: !isTouch,
     cancelInputOnEscape: true,
     cancelInputOnBackspace: true,
     cursorState,
