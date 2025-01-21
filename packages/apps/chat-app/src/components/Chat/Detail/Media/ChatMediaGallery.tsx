@@ -8,7 +8,6 @@ import {
   usePortal,
   useDotYouClientContext,
   OdinVideoWrapper,
-  formatDateExludingYearIfCurrent,
   bytesToSize,
   useFile,
 } from '@homebase-id/common-app';

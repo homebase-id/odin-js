@@ -1,12 +1,10 @@
 import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { t, useDotYouClientContext, useIntroductions } from '@homebase-id/common-app';
 import {
-  ContentType,
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
   deleteFile,
-  getPayloadBytes,
   MediaFile,
   NewMediaFile,
 } from '@homebase-id/js-lib/core';
