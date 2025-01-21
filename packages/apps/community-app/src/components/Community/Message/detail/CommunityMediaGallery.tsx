@@ -12,6 +12,9 @@ import {
   VideoClickToLoad,
   usePortal,
   useDotYouClientContext,
+  useFile,
+  bytesToSize,
+  formatDateExludingYearIfCurrent,
 } from '@homebase-id/common-app';
 import { ImageSource, OdinPayloadImage, OdinPreviewImage } from '@homebase-id/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -20,7 +23,7 @@ import {
   CommunityMessage,
 } from '../../../../providers/CommunityMessageProvider';
 import { getTargetDriveFromCommunityId } from '../../../../providers/CommunityDefinitionProvider';
-import { Times, ArrowLeft, Arrow } from '@homebase-id/common-app/icons';
+import { Times, ArrowLeft, Arrow, Download } from '@homebase-id/common-app/icons';
 
 export const CommunityMediaGallery = ({
   odinId,
@@ -99,9 +102,33 @@ export const CommunityMediaGallery = ({
   const payload = msg.fileMetadata.payloads?.find((p) => p.key === mediaKey);
   const contentType = payload?.contentType;
 
+  const fileName =
+    (payload?.contentType !== 'application/vnd.apple.mpegurl' &&
+      payload?.contentType !== 'video/mp2t' &&
+      payload?.descriptorContent) ||
+    payload?.key;
+
+  const getFileUrl = useFile({ targetDrive }).fetchFile;
+  const doDownload = async () => {
+    const url = await getFileUrl(undefined, undefined, msg.fileId, mediaKey);
+    if (!url) return;
+    // Dirty hack for easy download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName || url.substring(url.lastIndexOf('/') + 1);
+    link.click();
+  };
+
+  if (!payload) return null;
+
   const dialog = (
-    <div className="fixed inset-0 z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
-      <div className="inset-0 bg-black lg:fixed"></div>
+    <div
+      className="fixed inset-0 z-40 bg-slate-900 lg:bg-transparent"
+      role="dialog"
+      aria-modal="true"
+      onClick={onClose}
+    >
+      <div className="inset-0 bg-slate-900 transition-opacity lg:fixed"></div>
       <div className="inset-0 z-10 lg:fixed lg:overflow-y-auto">
         <div className="relative flex h-full min-h-[100dvh] flex-row items-center justify-center">
           {contentType?.startsWith('video') || contentType === 'application/vnd.apple.mpegurl' ? (
@@ -141,14 +168,39 @@ export const CommunityMediaGallery = ({
             />
           ) : null}
 
-          {onClose ? (
-            <button
-              onClick={onClose}
-              className={`absolute left-4 top-4 rounded-full border border-primary/50 bg-background p-3 text-foreground hover:brightness-90 hover:filter dark:border-primary/50`}
-            >
-              <Times className="h-5 w-5" />
-            </button>
-          ) : null}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="absolute left-0 right-0 top-0 flex w-full flex-row flex-wrap px-3 py-3 text-white"
+          >
+            <div className="flex flex-row items-center gap-2">
+              {onClose ? (
+                <ActionButton
+                  icon={Times}
+                  onClick={onClose}
+                  className="rounded-full p-3"
+                  size="square"
+                  type="secondary"
+                />
+              ) : null}
+              {/* <p>
+                {fileName}
+                <span className="ml-3 border-l border-slate-400 pl-3">
+                  {formatDateExludingYearIfCurrent(new Date(payload.lastModified))}
+                </span>
+              </p> */}
+            </div>
+            <div className="ml-auto flex flex-row items-center gap-2">
+              <p className="text-sm text-slate-400">{bytesToSize(payload.bytesWritten)}</p>
+
+              <ActionButton
+                icon={Download}
+                onClick={doDownload}
+                className="rounded-full p-3"
+                size="square"
+                type="secondary"
+              />
+            </div>
+          </div>
 
           {prevKey ? (
             <ActionButton

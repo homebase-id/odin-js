@@ -2,12 +2,13 @@ import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { MailDrive } from '../../providers/MailProvider';
-import { useMailAttachment, useMailConversation } from '../../hooks/mail/useMailConversation';
+import { useMailConversation } from '../../hooks/mail/useMailConversation';
 import {
   ActionButton,
   bytesToSize,
   ExtensionThumbnail,
   useDotYouClientContext,
+  useFile,
 } from '@homebase-id/common-app';
 import { OdinImage } from '@homebase-id/ui-lib';
 import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
@@ -86,15 +87,18 @@ export const MailAttachmentPreview = ({
     };
   }, [mailMessage, doSlide]);
 
-  const getFileUrl = useMailAttachment().fetchAttachment;
+  const fileName =
+    (payloadDescriptor?.contentType !== 'application/vnd.apple.mpegurl' &&
+      payloadDescriptor?.descriptorContent) ||
+    payloadDescriptor?.key;
+  const getFileUrl = useFile({ targetDrive: MailDrive }).fetchFile;
   const doDownload = async () => {
-    const url = await getFileUrl(messageId, payloadKey, payloadDescriptor?.contentType as string);
+    const url = await getFileUrl(undefined, undefined, messageId, payloadKey);
     if (!url) return;
     // Dirty hack for easy download
     const link = document.createElement('a');
     link.href = url;
-    link.download =
-      payloadDescriptor?.descriptorContent || payloadKey || url.substring(url.lastIndexOf('/') + 1);
+    link.download = fileName || url.substring(url.lastIndexOf('/') + 1);
     link.click();
   };
 
@@ -117,10 +121,11 @@ export const MailAttachmentPreview = ({
                 onClick={doClose}
                 className="rounded-full p-3"
                 size="square"
+                type="secondary"
               />
 
               <p>
-                {payloadDescriptor.descriptorContent || payloadDescriptor.key}
+                {fileName}
                 <span className="ml-3 border-l border-slate-400 pl-3">
                   {formatDateExludingYearIfCurrent(new Date(payloadDescriptor.lastModified))}
                 </span>
@@ -136,6 +141,7 @@ export const MailAttachmentPreview = ({
                 onClick={doDownload}
                 className="rounded-full p-3"
                 size="square"
+                type="secondary"
               />
             </div>
           </>

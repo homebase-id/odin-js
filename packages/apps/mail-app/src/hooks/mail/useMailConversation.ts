@@ -534,21 +534,3 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
     }),
   };
 };
-
-export const useMailAttachment = () => {
-  const dotYouClient = useDotYouClientContext();
-  const fetchAttachment = async (fileId: string, key: string, contentType: ContentType) => {
-    if (!fileId || !key) return null;
-
-    const payload = await getPayloadBytes(dotYouClient, MailDrive, fileId, key);
-    if (!payload) return null;
-
-    return window.URL.createObjectURL(
-      new Blob([payload.bytes], {
-        type: `${contentType};charset=utf-8`,
-      })
-    );
-  };
-
-  return { fetchAttachment };
-};
