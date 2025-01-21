@@ -1,5 +1,3 @@
-'use client';
-
 import { withRef } from '@udecode/cn';
 import { ToolbarButton } from './toolbar';
 import { RichTextQuote } from '../../../../common-app/src/ui/Icons';
