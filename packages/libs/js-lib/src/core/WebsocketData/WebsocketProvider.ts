@@ -146,6 +146,8 @@ const ConnectSocket = async (
       ReconnectSocket(dotYouClient, drives, args);
     };
   });
+
+  return connectPromise;
 };
 
 const ReconnectSocket = async (

@@ -79,6 +79,7 @@ const ConnectSocket = async (
       });
 
     if (!tokenToConnectOverPeer) {
+      reconnectPromise = undefined;
       reject('[WebsocketProviderOverPeer] Preauth failed');
       return;
     }
@@ -189,7 +190,7 @@ const ReconnectSocket = async (
 ) => {
   if (reconnectPromise) return;
 
-  reconnectPromise = new Promise<void>((resolve) => {
+  reconnectPromise = new Promise<void>((resolve, reject) => {
     if (isDebug) console.debug('[WebsocketProviderOverPeer] Reconnecting - Force disconnect');
     reconnectCounter++;
     subscribers.map((subscriber) => subscriber.onDisconnect && subscriber.onDisconnect());
@@ -207,7 +208,9 @@ const ReconnectSocket = async (
         await ConnectSocket(dotYouClient, odinId, drives, args);
       } catch (e) {
         console.error('[WebsocketProviderOverPeer] Reconnect failed', e);
-        resolve(ReconnectSocket(dotYouClient, odinId, drives, args));
+        reject();
+
+        ReconnectSocket(dotYouClient, odinId, drives, args);
         return;
       }
       subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
