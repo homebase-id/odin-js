@@ -17,7 +17,7 @@ if ('serviceWorker' in navigator) {
   } else {
     navigator.serviceWorker.register(
       import.meta.env.MODE === 'production' ? '/owner/sw.js' : '/owner/dev-sw.js?dev-sw',
-      { scope: `.${OWNER_ROOT}/` }
+      { scope: `${OWNER_ROOT}/` }
     );
   }
 }
