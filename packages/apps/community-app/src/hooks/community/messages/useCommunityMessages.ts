@@ -19,7 +19,7 @@ import {
 } from '@homebase-id/js-lib/core';
 
 import { formatGuidId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useDebounce, useDotYouClientContext } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { useState, useEffect, useMemo } from 'react';
 import { invalidateCommunityMessage, updateCacheCommunityMessage } from './useCommunityMessage';
@@ -262,12 +262,19 @@ export const useLastUpdatedChatMessages = ({
   const queryClient = useQueryClient();
   const [foceRefresh, setForceRefresh] = useState(0);
 
-  useEffect(() => {
-    setForceRefresh((prev) => prev + 1);
+  const debouncedRebuild = useDebounce(() => setForceRefresh((prev) => prev + 1), {
+    timeoutMillis: 1000,
+  });
 
-    const interval = setInterval(() => setForceRefresh((prev) => prev + 1), 1000 * 10); // 10s
-    return () => clearInterval(interval);
-  }, []);
+  useEffect(() => {
+    const queryCache = queryClient.getQueryCache();
+    const unsubscribe = queryCache.subscribe((e) => {
+      if (e.type === 'added' || e.type === 'updated' || e.type === 'removed')
+        if (e.query.queryKey[0] === 'community-messages') debouncedRebuild();
+    });
+
+    return () => unsubscribe();
+  }, [queryClient, debouncedRebuild]);
 
   return useMemo(() => {
     if (!communityId) return { lastUpdate: null };
