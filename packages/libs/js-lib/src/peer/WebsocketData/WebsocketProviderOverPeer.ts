@@ -187,7 +187,7 @@ const ReconnectSocket = async (
 ) => {
   if (reconnectPromise) return;
 
-  reconnectPromise = new Promise<void>((resolve) => {
+  reconnectPromise = new Promise<void>((resolve, reject) => {
     if (isDebug) console.debug('[WebsocketProviderOverPeer] Reconnecting - Force disconnect');
     reconnectCounter++;
     subscribers.map((subscriber) => subscriber.onDisconnect && subscriber.onDisconnect());
@@ -202,7 +202,11 @@ const ReconnectSocket = async (
     setTimeout(async () => {
       if (isDebug) console.debug('[WebsocketProviderOverPeer] Reconnecting - Delayed reconnect');
 
-      await ConnectSocket(dotYouClient, odinId, drives, args);
+      await ConnectSocket(dotYouClient, odinId, drives, args).catch((e) => {
+        console.error('[WebsocketProviderOverPeer] Reconnect failed', e);
+        reject();
+        ReconnectSocket(dotYouClient, odinId, drives, args);
+      });
       subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
 
       resolve();
