@@ -4,7 +4,12 @@ import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 import { findMentionedInRichText, useDotYouClientContext } from '@homebase-id/common-app';
 import { useCommunityMetadata } from '../useCommunityMetadata';
 import { useCommunityChannels } from '../channels/useCommunityChannels';
-import { getCommunityMessagesInfiniteQueryOptions } from '../messages/useCommunityMessages';
+import {
+  getCommunityMessagesInfiniteQueryOptions,
+  useLastUpdatedChatMessages,
+} from '../messages/useCommunityMessages';
+import { useEffect } from 'react';
+import { formatGuidId } from '@homebase-id/js-lib/helpers';
 
 export interface ThreadMeta {
   threadId: string;
@@ -25,6 +30,12 @@ export const useCommunityThreads = ({
   const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getLoggedInIdentity();
   const { data: channels, isFetched } = useCommunityChannels({ odinId, communityId }).fetch;
+
+  const { lastUpdate } = useLastUpdatedChatMessages({ communityId });
+  useEffect(() => {
+    if (lastUpdate)
+      queryClient.refetchQueries({ queryKey: ['community-threads', formatGuidId(communityId)] });
+  }, [lastUpdate]);
 
   const queryFn = async () => {
     if (!channels) return;
@@ -96,7 +107,7 @@ export const useCommunityThreads = ({
   };
 
   return useQuery({
-    queryKey: ['community-threads', communityId],
+    queryKey: ['community-threads', formatGuidId(communityId)],
     queryFn: queryFn,
     enabled: isFetched,
     staleTime: 1000, // 1s just enough to avoid double fetching on load
@@ -107,7 +118,7 @@ export const useCommunityThreads = ({
 };
 
 export const invalidateCommunityThreads = (queryClient: QueryClient, communityId: string) => {
-  queryClient.invalidateQueries({ queryKey: ['community-threads', communityId] });
+  queryClient.invalidateQueries({ queryKey: ['community-threads', formatGuidId(communityId)] });
 };
 
 export const useLastUpdatedThreadExcludingMine = (props: {
