@@ -12,6 +12,7 @@ const hostConfig = {
 export default defineConfig({
   plugins: [react()],
   server: {
+    // host: true,
     ...hostConfig,
     https: {
       key: fs.readFileSync('../../../dev-dotyou-cloud.key'),

@@ -84,14 +84,16 @@ export const CommunityHistory = memo(
       });
 
       flat.sort((a, b) => b.fileMetadata.created - a.fileMetadata.created);
-      if (inAThread) flat.push(origin as HomebaseFile<CommunityMessage>);
+      if (inAThread) flat.push(origin);
       if (!maxShowOptions) return [flat, slicedCount];
 
       const maxShow = maxShowOptions.count;
-      return [
-        flat.slice(0, maxShow),
-        slicedCount + (flat.length > maxShow ? flat.length - maxShow : 0),
-      ];
+      const slicedMsgs = flat.slice(0, maxShow);
+      if (inAThread && slicedMsgs.indexOf(origin) === -1) {
+        slicedMsgs.push(origin);
+      }
+
+      return [slicedMsgs, slicedCount + (flat.length > maxShow ? flat.length - maxShow : 0)];
     }, [messages, origin, maxShowOptions, inAThread, maxAge]);
 
     useEffect(() => {

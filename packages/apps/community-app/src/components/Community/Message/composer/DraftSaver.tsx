@@ -46,7 +46,9 @@ export const DraftSaver = ({
 
     if (metadata && draftKey && updatedAt) {
       if (
-        getPlainTextFromRichText(drafts[draftKey]?.message) === getPlainTextFromRichText(message) ||
+        (drafts[draftKey]?.message?.length === message?.length &&
+          getPlainTextFromRichText(drafts[draftKey]?.message) ===
+            getPlainTextFromRichText(message)) ||
         (drafts[draftKey] && drafts[draftKey]?.updatedAt >= updatedAt)
       )
         return;

@@ -243,7 +243,7 @@ export const insertPushNotification = async (
   clientNotification: PushNotification
 ) => {
   const existingNotificationData = queryClient.getQueryData<{
-    results: PushNotification[];
+    results: PushNotification[] | undefined;
     cursor: number;
   }>(['push-notifications']);
 
@@ -252,7 +252,7 @@ export const insertPushNotification = async (
       ...existingNotificationData,
       results: [
         clientNotification,
-        ...existingNotificationData.results.filter(
+        ...(existingNotificationData.results || []).filter(
           (notification) =>
             !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
         ),
