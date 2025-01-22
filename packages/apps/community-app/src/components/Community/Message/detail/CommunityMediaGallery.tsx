@@ -14,7 +14,6 @@ import {
   useDotYouClientContext,
   useFile,
   bytesToSize,
-  formatDateExludingYearIfCurrent,
 } from '@homebase-id/common-app';
 import { ImageSource, OdinPayloadImage, OdinPreviewImage } from '@homebase-id/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';

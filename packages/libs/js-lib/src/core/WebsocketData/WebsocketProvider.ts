@@ -58,8 +58,8 @@ const ConnectSocket = async (
         .post('/notify/preauth', undefined, {
           validateStatus: () => true,
         })
-        .catch((error) => {
-          console.error({ error });
+        .catch(() => {
+          reconnectPromise = undefined;
           reject('[WebsocketProvider] Preauth failed');
         });
     }
@@ -115,6 +115,7 @@ const ConnectSocket = async (
         if (notification.notificationType == 'deviceHandshakeSuccess') {
           if (isDebug) console.debug(`[WebsocketProvider] Device handshake success`);
           isHandshaked = true;
+          reconnectCounter = 0;
           setupPing();
           resolve();
           return;
@@ -146,6 +147,8 @@ const ConnectSocket = async (
       ReconnectSocket(dotYouClient, drives, args);
     };
   });
+
+  return connectPromise;
 };
 
 const ReconnectSocket = async (
@@ -155,7 +158,7 @@ const ReconnectSocket = async (
 ) => {
   if (reconnectPromise) return;
 
-  reconnectPromise = new Promise<void>((resolve) => {
+  reconnectPromise = new Promise<void>((resolve, reject) => {
     if (isDebug) console.debug('[WebsocketProvider] Reconnecting - Force disconnect');
     reconnectCounter++;
     subscribers.map((subscriber) => subscriber.onDisconnect && subscriber.onDisconnect());
@@ -170,7 +173,15 @@ const ReconnectSocket = async (
     setTimeout(async () => {
       if (isDebug) console.debug('[WebsocketProvider] Reconnecting - Delayed reconnect');
 
-      await ConnectSocket(dotYouClient, drives, args);
+      try {
+        await ConnectSocket(dotYouClient, drives, args);
+      } catch (e) {
+        console.error('[WebsocketProvider] Reconnect failed', e);
+        reject();
+
+        ReconnectSocket(dotYouClient, drives, args);
+        return;
+      }
       subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
 
       resolve();
