@@ -434,8 +434,7 @@ export const dsrToMailConversation = async (
     if (
       (mailContent.deliveryStatus === MailDeliveryStatus.Sent ||
         mailContent.deliveryStatus === MailDeliveryStatus.Failed) &&
-      dsr.serverMetadata?.transferHistory?.summary &&
-      dsr.serverMetadata.originalRecipientCount
+      dsr.serverMetadata?.transferHistory?.summary
     ) {
       mailContent.deliveryStatus = buildDeliveryStatus(
         dsr.serverMetadata.originalRecipientCount,
@@ -488,12 +487,12 @@ export const transferHistoryToMailDeliveryStatus = (
 };
 
 const buildDeliveryStatus = (
-  recipientCount: number,
+  recipientCount: number | undefined,
   transferSummary: RecipientTransferSummary
 ): MailDeliveryStatus => {
   if (transferSummary.totalFailed > 0) return MailDeliveryStatus.Failed;
 
-  if (transferSummary.totalDelivered === recipientCount) return MailDeliveryStatus.Delivered;
+  if (transferSummary.totalDelivered >= (recipientCount || 0)) return MailDeliveryStatus.Delivered;
 
   return MailDeliveryStatus.Sent;
 };

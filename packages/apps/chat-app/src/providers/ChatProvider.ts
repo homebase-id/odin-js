@@ -148,8 +148,7 @@ export const dsrToMessage = async (
     if (
       (msgContent.deliveryStatus === ChatDeliveryStatus.Sent ||
         msgContent.deliveryStatus === ChatDeliveryStatus.Failed) &&
-      dsr.serverMetadata?.transferHistory?.summary &&
-      dsr.serverMetadata.originalRecipientCount
+      dsr.serverMetadata?.transferHistory?.summary
     ) {
       msgContent.deliveryStatus = stringGuidsEqual(
         dsr.fileMetadata.appData.groupId,
@@ -207,13 +206,13 @@ export const transferHistoryToChatDeliveryStatus = (
 };
 
 export const buildDeliveryStatus = (
-  recipientCount: number,
+  recipientCount: number | undefined,
   transferSummary: RecipientTransferSummary
 ): ChatDeliveryStatus => {
   if (transferSummary.totalFailed > 0) return ChatDeliveryStatus.Failed;
 
-  if (transferSummary.totalReadByRecipient === recipientCount) return ChatDeliveryStatus.Read;
-  if (transferSummary.totalDelivered === recipientCount) return ChatDeliveryStatus.Delivered;
+  if (transferSummary.totalReadByRecipient >= (recipientCount || 0)) return ChatDeliveryStatus.Read;
+  if (transferSummary.totalDelivered >= (recipientCount || 0)) return ChatDeliveryStatus.Delivered;
 
   return ChatDeliveryStatus.Sent;
 };
