@@ -147,6 +147,7 @@ const ConnectSocket = async (
         if (notification.notificationType == 'deviceHandshakeSuccess') {
           if (isDebug) console.debug(`[WebsocketProviderOverPeer] Device handshake success`);
           isHandshaked = true;
+          reconnectCounter = 0;
           setupPing();
           resolve();
           return;
