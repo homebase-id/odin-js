@@ -84,7 +84,7 @@ export interface GetBatchQueryResultOptions {
 
 export interface QueryModifiedResponse {
   includeHeaderContent: boolean;
-  cursor: number;
+  cursor: unknown;
   searchResults: (HomebaseFile | DeletedHomebaseFile)[];
 }
 

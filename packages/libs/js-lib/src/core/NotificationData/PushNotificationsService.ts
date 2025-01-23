@@ -24,7 +24,7 @@ export const GetNotifications = async (
   dotYouClient: DotYouClient,
   appId: string | undefined,
   count: number | undefined = 50,
-  cursor: number | undefined
+  cursor: unknown | undefined
 ) => {
   const axiosClient = dotYouClient.createAxiosClient();
   return await axiosClient
