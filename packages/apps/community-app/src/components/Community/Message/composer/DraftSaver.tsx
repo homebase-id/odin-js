@@ -61,6 +61,20 @@ export const DraftSaver = ({
         },
       };
 
+      const oneWeekAgo = new Date().getTime() - 7 * 24 * 60 * 60 * 1000;
+      // Cleanup empty drafts
+      Object.keys(newDrafts).forEach((key) => {
+        if (newDrafts[key]?.message === undefined) {
+          delete newDrafts[key];
+        }
+
+        if (newDrafts[key]?.message?.length === 0) {
+          if (newDrafts[key]?.updatedAt < oneWeekAgo) {
+            delete newDrafts[key];
+          }
+        }
+      });
+
       const newMeta: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata> = {
         ...metadata,
         fileMetadata: {
