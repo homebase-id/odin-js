@@ -3,7 +3,7 @@ import { createPlatePlugin, PlateEditor } from '@udecode/plate-core/react';
 import { RTEChannelDropdownInputElement } from './RTEChannelDropdownInputElement';
 import { RTEChannelDropdownElement } from './RTEChannelDropdownElement';
 import { PluginConfig } from '@udecode/plate-core';
-import { TElement } from '@udecode/plate';
+import { Node, TElement } from '@udecode/plate';
 
 export const ELEMENT_CHANNEL = 'channel';
 export const ELEMENT_CHANNEL_INPUT = 'channel_input';
@@ -22,7 +22,8 @@ export interface TChannel {
 export type ChannelOnSelectItem<TItem extends TChannel = TChannel> = (
   editor: PlateEditor,
   item: TItem,
-  search?: string
+  search?: string,
+  element?: Node
 ) => void;
 
 export type ChannelConfig = PluginConfig<
@@ -42,7 +43,7 @@ export type ChannelConfig = PluginConfig<
 
 export const ChannelInputPlugin = createPlatePlugin({
   key: 'channel_input',
-  node: { isElement: true, isInline: true, isVoid: true },
+  node: { isElement: true, isInline: true },
   render: {
     node: RTEChannelDropdownInputElement,
   },
