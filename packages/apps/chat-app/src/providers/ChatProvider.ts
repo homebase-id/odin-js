@@ -53,6 +53,7 @@ import {
 } from '@homebase-id/js-lib/media';
 import { sendReadReceipt } from '@homebase-id/js-lib/peer';
 import { ellipsisAtMaxChar, getPlainTextFromRichText } from '@homebase-id/common-app';
+import { STARRED_MSG_TAG } from '../hooks/chat/useChatToggleMessageStar';
 
 export const CHAT_MESSAGE_FILE_TYPE = 7878;
 export const ChatDeletedArchivalStaus = 2;
@@ -96,6 +97,35 @@ export const getChatMessages = async (
   const params: FileQueryParams = {
     targetDrive: ChatDrive,
     groupId: [conversationId],
+  };
+
+  const ro: GetBatchQueryResultOptions = {
+    maxRecords: pageSize,
+    cursorState: cursorState,
+    includeMetadataHeader: true,
+    includeTransferHistory: true,
+  };
+
+  const response = await queryBatch(dotYouClient, params, ro);
+  return {
+    ...response,
+    searchResults:
+      ((await Promise.all(
+        response.searchResults
+          .map(async (result) => await dsrToMessage(dotYouClient, result, ChatDrive, true))
+          .filter(Boolean)
+      )) as HomebaseFile<ChatMessage>[]) || [],
+  };
+};
+
+export const getStarredChatMessages = async (
+  dotYouClient: DotYouClient,
+  cursorState: string | undefined,
+  pageSize: number
+) => {
+  const params: FileQueryParams = {
+    targetDrive: ChatDrive,
+    localTagsMatchAtLeastOne: [STARRED_MSG_TAG],
   };
 
   const ro: GetBatchQueryResultOptions = {
