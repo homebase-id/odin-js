@@ -1,6 +1,13 @@
 import { hasDebugFlag } from '../../../helpers/BrowserUtil';
-import { DotYouClient } from '../../DotYouClient';
-import { PayloadFile, ThumbnailFile, KeyHeader, EncryptedKeyHeader } from '../File/DriveFileTypes';
+import { assertIfDotYouClientIsOwnerOrApp, DotYouClient } from '../../DotYouClient';
+import {
+  PayloadFile,
+  ThumbnailFile,
+  KeyHeader,
+  EncryptedKeyHeader,
+  LocalAppData,
+  FileIdFileIdentifier,
+} from '../File/DriveFileTypes';
 import {
   UploadInstructionSet,
   UploadFileMetadata,
@@ -441,4 +448,73 @@ export const reUploadFile = async (
       axiosConfig,
     }
   );
+};
+
+export interface LocalMetadataUploadResult {
+  newLocalVersionTag: string;
+}
+
+export const uploadLocalMetadataTags = async (
+  dotYouClient: DotYouClient,
+  file: FileIdFileIdentifier,
+  localAppData: LocalAppData,
+  onVersionConflict?: () => Promise<void | LocalMetadataUploadResult> | void
+) => {
+  assertIfDotYouClientIsOwnerOrApp(dotYouClient);
+  const axiosClient = dotYouClient.createAxiosClient();
+
+  return await axiosClient
+    .patch<LocalMetadataUploadResult>('/drive/files/update-local-metadata-tags', {
+      localVersionTag: localAppData.versionTag,
+      file: file,
+      tags: localAppData.tags,
+    })
+    .then((response) => response.data)
+    .catch((error) => {
+      if (error.response?.data?.errorCode === 'versionTagMismatch') {
+        if (!onVersionConflict) {
+          console.warn('VersionTagMismatch, to avoid this, add an onVersionConflict handler');
+        } else {
+          return onVersionConflict();
+        }
+      }
+
+      if (error.response?.status === 400)
+        console.error('[odin-js:uploadLocalMetadataTags]', error.response?.data);
+      else console.error('[odin-js:uploadLocalMetadataTags]', error);
+      throw error;
+    });
+};
+
+export const uploadLocalMetadataContent = async (
+  dotYouClient: DotYouClient,
+  file: FileIdFileIdentifier,
+  localAppData: LocalAppData,
+  onVersionConflict?: () => Promise<void | LocalMetadataUploadResult> | void
+) => {
+  assertIfDotYouClientIsOwnerOrApp(dotYouClient);
+  const axiosClient = dotYouClient.createAxiosClient();
+
+  return await axiosClient
+    .patch<LocalMetadataUploadResult>('/drive/files/update-local-metadata-content', {
+      iv: localAppData.iv,
+      localVersionTag: localAppData.versionTag,
+      file: file,
+      content: localAppData.content,
+    })
+    .then((response) => response.data)
+    .catch((error) => {
+      if (error.response?.data?.errorCode === 'versionTagMismatch') {
+        if (!onVersionConflict) {
+          console.warn('VersionTagMismatch, to avoid this, add an onVersionConflict handler');
+        } else {
+          return onVersionConflict();
+        }
+      }
+
+      if (error.response?.status === 400)
+        console.error('[odin-js:uploadLocalMetadataContent]', error.response?.data);
+      else console.error('[odin-js:uploadLocalMetadataContent]', error);
+      throw error;
+    });
 };
