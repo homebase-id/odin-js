@@ -40,6 +40,9 @@ To use the libraries in your project, you can install them directly from GitHub 
 - [JS-Lib](https://github.com/homebase-id/odin-js/pkgs/npm/js-lib)
 - [UI-Lib](https://github.com/homebase-id/odin-js/pkgs/npm/ui-lib)
 
+You also need to create a GitHub Classic Token in order to read the repos in Homebase, follow this guide:
+https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry#authenticating-with-a-personal-access-token
+
 #### Prerequisite: DotYouClient
 
 The libraries depend on a **DotYouClient** instance, which manages authentication parameters for API requests. Ensure you configure the `DotYouClient` correctly to interact with your Homebase Identity backend.
