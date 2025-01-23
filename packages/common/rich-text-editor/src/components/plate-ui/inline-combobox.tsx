@@ -50,9 +50,10 @@ interface InlineComboboxContextValue {
   trigger: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const InlineComboboxContext = createContext<InlineComboboxContextValue>(null as any);
 
-export const defaultFilter: FilterFn = ({ group, keywords = [], label, value }, search) => {
+const defaultFilter: FilterFn = ({ group, keywords = [], label, value }, search) => {
   const uniqueTerms = new Set([value, ...keywords, group, label].filter(Boolean));
 
   return Array.from(uniqueTerms).some((keyword) => filterWords(keyword!, search));

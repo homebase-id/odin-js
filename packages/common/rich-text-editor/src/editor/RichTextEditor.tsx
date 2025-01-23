@@ -70,7 +70,7 @@ import { ImagePlugin } from './ImagePlugin/createImagePlugin';
 import { Plate, PlateContent, PlatePlugin } from '@udecode/plate-core/react';
 import { PlateLeaf } from '@udecode/plate/react';
 import { ListElement } from '../components/plate-ui/list-element';
-import { MediaOptionsContextProvider } from './MediaOptionsContext/MediaOptionsContext';
+import { MediaOptionsContextProvider } from './MediaOptionsContext/MediaOptionsContextProvider';
 import { useMediaOptionsContext } from './MediaOptionsContext/useMediaOptionsContext';
 import { TextualEmojiPlugin } from './TextualEmojiPlugin/TextualEmojiPlugin';
 
