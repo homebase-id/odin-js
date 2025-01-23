@@ -5,11 +5,9 @@ import { useCommunityChannels } from './useCommunityChannels';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 import { useEffect } from 'react';
-import {
-  getCommunityMessagesInfiniteQueryOptions,
-  useLastUpdatedChatMessages,
-} from '../messages/useCommunityMessages';
+import { getCommunityMessagesInfiniteQueryOptions } from '../messages/useCommunityMessages';
 import { formatGuidId } from '@homebase-id/js-lib/helpers';
+import { useLastUpdatedCommunityMessages } from '../messages/useLastUpdatedCommunityMessages';
 
 export type ChannelWithRecentMessage = HomebaseFile<CommunityChannel> & {
   lastMessage: HomebaseFile<CommunityMessage> | null;
@@ -24,7 +22,7 @@ export const useCommunityChannelsWithRecentMessages = (props: {
   const queryKey = ['channels-with-recent-message', formatGuidId(props.communityId)];
 
   const { data: channels, isFetched } = useCommunityChannels(props).fetch;
-  const { lastUpdate } = useLastUpdatedChatMessages({ communityId: props.communityId });
+  const lastUpdate = useLastUpdatedCommunityMessages({ communityId: props.communityId });
   useEffect(() => {
     if (lastUpdate === null || !isFetched || !channels || !channels.length) {
       return;
