@@ -24,34 +24,28 @@ import {
 } from './inline-combobox';
 import { PlateElement } from './plate-element';
 import { MentionPlugin } from '@udecode/plate-mention/react';
-import {
-  moveSelection,
-  getBlockAbove,
-  isEndPoint,
-  insertText,
-  getEditorPlugin,
-  AnyPluginConfig,
-} from '@udecode/plate-common';
+import { getEditorPlugin, AnyPluginConfig } from '@udecode/plate';
 
 const onSelectItem: MentionOnSelectItem<Mentionable> = (editor, item, search = '') => {
   const { getOptions, tf } = getEditorPlugin<MentionConfig>(editor, {
     key: BaseMentionPlugin.key,
   });
+
   const { insertSpaceAfterMention } = getOptions();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tf.insert.mention({ key: item.value || item.key, search, value: item.value || item.text } as any);
 
   // move the selection after the element
-  moveSelection(editor, { unit: 'offset' });
+  editor.tf.move({ unit: 'offset' });
 
-  const pathAbove = getBlockAbove(editor)?.[1];
+  const pathAbove = editor.api.block(editor)?.[1];
 
   const isBlockEnd =
-    editor.selection && pathAbove && isEndPoint(editor, editor.selection.anchor, pathAbove);
+    editor.selection && pathAbove && editor.api.isEnd(editor.selection.anchor, pathAbove);
 
   if (isBlockEnd && insertSpaceAfterMention) {
-    insertText(editor, ' ');
+    editor.tf.insertText(' ');
   }
 };
 

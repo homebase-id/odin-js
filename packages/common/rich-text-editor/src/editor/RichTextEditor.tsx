@@ -1,12 +1,5 @@
-import {
-  TElement,
-  TDescendant,
-  resetEditor,
-  isSelectionAtBlockStart,
-  isBlockAboveEmpty,
-  SlatePlugin,
-} from '@udecode/plate-common';
-import { ParagraphPlugin, PlateElement } from '@udecode/plate-common/react';
+import { TElement, SlatePlugin, Descendant } from '@udecode/plate';
+import { ParagraphPlugin, PlateElement, usePlateEditor } from '@udecode/plate/react';
 import { withProps } from '@udecode/cn';
 import {
   isCodeBlockEmpty,
@@ -74,13 +67,12 @@ import { EmojiInputElement } from './Combobox/EmojiCombobox';
 import { MentionElement } from '../components/plate-ui/mention-element';
 import { Mentionable, MentionInputElement } from '../components/plate-ui/mention-input-element';
 import { ImagePlugin } from './ImagePlugin/createImagePlugin';
-import { createPlateEditor, Plate, PlateContent, PlatePlugin } from '@udecode/plate-core/react';
-import { focusEditor, PlateLeaf } from '@udecode/plate-common/react';
+import { Plate, PlateContent, PlatePlugin } from '@udecode/plate-core/react';
+import { PlateLeaf } from '@udecode/plate/react';
 import { ListElement } from '../components/plate-ui/list-element';
 import { MediaOptionsContextProvider } from './MediaOptionsContext/MediaOptionsContext';
 import { useMediaOptionsContext } from './MediaOptionsContext/useMediaOptionsContext';
 import { TextualEmojiPlugin } from './TextualEmojiPlugin/TextualEmojiPlugin';
-import { Editor } from 'slate';
 
 interface RTEProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -155,7 +147,7 @@ const InnerRichTextEditor = memo(
             ? ([
                 {
                   type: 'paragraph',
-                  children: [{ text: defaultValue ?? '' }] as TDescendant[],
+                  children: [{ text: defaultValue ?? '' }] as Descendant[],
                 },
               ] as TElement[])
             : undefined,
@@ -174,12 +166,12 @@ const InnerRichTextEditor = memo(
                 {
                   ...resetBlockTypesCommonRule,
                   hotkey: 'Enter',
-                  predicate: isBlockAboveEmpty,
+                  predicate: (editor) => editor.api.isEmpty(editor.selection, { block: true }),
                 },
                 {
                   ...resetBlockTypesCommonRule,
                   hotkey: 'Backspace',
-                  predicate: isSelectionAtBlockStart,
+                  predicate: (editor) => editor.api.isAt({ start: true }),
                 },
                 {
                   ...resetBlockTypesCodeBlockRule,
@@ -336,13 +328,19 @@ const InnerRichTextEditor = memo(
       [mentionables]
     );
 
-    const editor = useMemo(() => {
-      return createPlateEditor({
-        id: uniqueId || 'editor',
-        value: defaultValAsRichText,
-        ...plugins,
-      });
-    }, [plugins]);
+    const editor = usePlateEditor({
+      id: uniqueId || 'editor',
+      value: defaultValAsRichText,
+      ...plugins,
+    });
+
+    // const editor = useMemo(() => {
+    //   return createPlateEditor({
+    //     id: uniqueId || 'editor',
+    //     value: defaultValAsRichText,
+    //     ...plugins,
+    //   });
+    // }, [plugins]);
 
     const handleChange = useCallback(
       (newValue: TElement[]) => {
@@ -356,18 +354,17 @@ const InnerRichTextEditor = memo(
     );
 
     useEffect(() => {
-      if (autoFocus && editor)
-        setTimeout(() => focusEditor(editor, Editor.end(editor as Editor, [])), 0);
+      if (autoFocus && editor) setTimeout(() => editor.tf.focus({ edge: 'endEditor' }));
     }, [autoFocus, editor]);
 
     useImperativeHandle(
       ref,
       () => ({
         focus() {
-          if (editor) focusEditor(editor, Editor.end(editor as Editor, []));
+          if (editor) editor.tf.focus({ edge: 'endEditor' });
         },
         clear() {
-          if (editor) resetEditor(editor);
+          if (editor) editor.tf.reset();
         },
       }),
       [editor]
@@ -416,7 +413,7 @@ const InnerRichTextEditor = memo(
                       onSubmit();
                     } else {
                       e.preventDefault();
-                      editor?.insertBreak();
+                      editor.tf.insertBreak();
                     }
                   }
                 }

@@ -1,8 +1,9 @@
 import { TriggerComboboxPluginOptions, withTriggerCombobox } from '@udecode/plate-combobox';
-import { insertNodes, PluginConfig, type TElement } from '@udecode/plate-common';
 import { createPlatePlugin, PlateEditor } from '@udecode/plate-core/react';
 import { RTEChannelDropdownInputElement } from './RTEChannelDropdownInputElement';
 import { RTEChannelDropdownElement } from './RTEChannelDropdownElement';
+import { PluginConfig } from '@udecode/plate-core';
+import { TElement } from '@udecode/plate';
 
 export const ELEMENT_CHANNEL = 'channel';
 export const ELEMENT_CHANNEL_INPUT = 'channel_input';
@@ -50,8 +51,8 @@ export const ChannelInputPlugin = createPlatePlugin({
 /** Enables support for autocompleting @channels. */
 export const ChannelPlugin = createPlatePlugin({
   key: 'channel',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  extendEditor: withTriggerCombobox as any,
+
+  // extendEditor: withTriggerCombobox as any,
   node: { isElement: true, isInline: true, isMarkableVoid: true, isVoid: true },
   options: {
     createComboboxInput: () => ({
@@ -66,15 +67,17 @@ export const ChannelPlugin = createPlatePlugin({
   render: {
     node: RTEChannelDropdownElement,
   },
-}).extendEditorTransforms<ChannelConfig['transforms']>(({ editor, type }) => ({
-  insert: {
-    channel: ({ value }) => {
-      insertNodes<TChannelElement>(editor, {
-        children: [{ text: '' }],
-        type,
-        value,
-        uniqueId: value,
-      });
+})
+  .extendEditorTransforms<ChannelConfig['transforms']>(({ editor, type }) => ({
+    insert: {
+      channel: ({ value }) => {
+        editor.tf.insertNodes({
+          children: [{ text: '' }],
+          type,
+          value,
+          uniqueId: value,
+        });
+      },
     },
-  },
-}));
+  }))
+  .overrideEditor(withTriggerCombobox as any);

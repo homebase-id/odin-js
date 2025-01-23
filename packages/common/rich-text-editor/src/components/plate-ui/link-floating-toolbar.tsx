@@ -1,4 +1,4 @@
-import { useFormInputProps } from '@udecode/plate-common/react';
+import { useFormInputProps } from '@udecode/plate/react';
 import {
   type LinkFloatingToolbarState,
   FloatingLinkUrlInput,
@@ -69,7 +69,7 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
   const input = (
     <div className="flex w-[330px] flex-col" {...inputProps}>
       <div className="flex items-center">
-        <div className="flex items-center pl-3 text-muted-foreground">
+        <div className="text-muted-foreground flex items-center pl-3">
           <Icons.link className="size-4" />
         </div>
 
@@ -80,7 +80,7 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
       </div>
       <Separator />
       <div className="flex items-center">
-        <div className="flex items-center pl-3 text-muted-foreground">
+        <div className="text-muted-foreground flex items-center pl-3">
           <Icons.text className="size-4" />
         </div>
         <input

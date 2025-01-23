@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { PortalBody, useComposedRef } from '@udecode/plate-common';
+import { PortalBody, useComposedRef } from '@udecode/plate';
 import {
   flip,
   FloatingToolbarState,
@@ -46,7 +46,7 @@ const FloatingToolbar = React.forwardRef<React.ElementRef<typeof Toolbar>, Float
         <Toolbar
           ref={ref}
           className={cn(
-            'absolute z-40 whitespace-nowrap border bg-popover px-1 opacity-100 shadow-md print:hidden'
+            'bg-popover absolute z-40 whitespace-nowrap border px-1 opacity-100 shadow-md print:hidden'
           )}
           {...rootProps}
           {...props}

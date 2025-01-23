@@ -1,10 +1,4 @@
-import {
-  getBlockAbove,
-  getEditorPlugin,
-  insertText,
-  isEndPoint,
-  moveSelection,
-} from '@udecode/plate-common';
+import { getEditorPlugin } from '@udecode/plate';
 import { TChannel, ChannelOnSelectItem } from './RTEChannelDropdownPlugin';
 
 export const getChannelOnSelectItem =
@@ -21,14 +15,14 @@ export const getChannelOnSelectItem =
     tf.insert.channel({ search, value: item.text });
 
     // move the selection after the element
-    moveSelection(editor, { unit: 'offset' });
+    editor.tf.move({ unit: 'offset' });
 
-    const pathAbove = getBlockAbove(editor)?.[1];
+    const pathAbove = editor.api.block({ above: true })?.[1];
 
     const isBlockEnd =
-      editor.selection && pathAbove && isEndPoint(editor, editor.selection.anchor, pathAbove);
+      editor.selection && pathAbove && editor.api.isEnd(editor.selection.anchor, pathAbove);
 
     if (isBlockEnd && insertSpaceAfterChannel) {
-      insertText(editor, ' ');
+      editor.tf.insertText(' ');
     }
   };

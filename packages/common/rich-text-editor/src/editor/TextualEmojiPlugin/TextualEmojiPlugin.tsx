@@ -1,4 +1,4 @@
-import { deleteText } from '@udecode/plate-common';
+import { TText } from '@udecode/plate';
 import { createPlatePlugin } from '@udecode/plate-core/react';
 
 // Emoji mapping
@@ -16,18 +16,18 @@ export const TextualEmojiPlugin = createPlatePlugin({
   handlers: {
     onKeyDown: ({ editor, event }) => {
       if (event.key === ' ') {
-        const { selection, insertText } = editor;
+        const { selection } = editor;
         if (!selection) return;
-        const [node] = editor.node(selection.anchor.path);
+        const [node] = editor.api.node({ at: selection.anchor.path }) || [];
 
         if (!node || !('text' in node)) return;
-        const textContent = node.text;
+        const textContent = (node as TText).text;
         const match = Object.keys(emojiMap).find((key) => textContent.endsWith(key));
 
         if (!match) return;
 
         const emoji = emojiMap[match];
-        deleteText(editor, {
+        editor.tf.delete({
           at: {
             anchor: {
               path: selection.anchor.path,
@@ -36,7 +36,7 @@ export const TextualEmojiPlugin = createPlatePlugin({
             focus: selection.anchor,
           },
         });
-        insertText(emoji);
+        editor.tf.insertText(emoji);
       }
     },
   },
