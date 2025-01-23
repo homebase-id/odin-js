@@ -5,6 +5,7 @@ import {
   UndefinedInitialDataInfiniteOptions,
   useMutation,
   useQueryClient,
+  SetDataOptions,
 } from '@tanstack/react-query';
 import {
   CommunityMessage,
@@ -19,9 +20,8 @@ import {
 } from '@homebase-id/js-lib/core';
 
 import { formatGuidId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { useDebounce, useDotYouClientContext } from '@homebase-id/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
-import { useState, useEffect, useMemo } from 'react';
 import { invalidateCommunityMessage, updateCacheCommunityMessage } from './useCommunityMessage';
 
 const PAGE_SIZE = 100;
@@ -115,6 +115,14 @@ export const invalidateCommunityMessages = (
   });
 };
 
+type TransformFnReturnData =
+  | InfiniteData<{
+      searchResults: (HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage> | null)[];
+      cursorState: string;
+      queryTime: number;
+      includeMetadataHeader: boolean;
+    }>
+  | undefined;
 export const updateCacheCommunityMessages = (
   queryClient: QueryClient,
   communityId: string,
@@ -127,18 +135,7 @@ export const updateCacheCommunityMessages = (
       queryTime: number;
       includeMetadataHeader: boolean;
     }>
-  ) =>
-    | InfiniteData<{
-        searchResults: (
-          | HomebaseFile<CommunityMessage>
-          | NewHomebaseFile<CommunityMessage>
-          | null
-        )[];
-        cursorState: string;
-        queryTime: number;
-        includeMetadataHeader: boolean;
-      }>
-    | undefined
+  ) => TransformFnReturnData | { data: TransformFnReturnData; options?: SetDataOptions }
 ) => {
   const queryKey = [
     'community-messages',
@@ -156,10 +153,17 @@ export const updateCacheCommunityMessages = (
   >(queryKey);
   if (!currentData || !currentData.pages?.length) return;
 
-  const newData = transformFn(currentData);
+  const transformResult = transformFn(currentData);
+  const newData =
+    (transformResult && 'data' in transformResult && transformResult?.data) ??
+    (transformResult as TransformFnReturnData);
   if (!newData || !newData.pages) return;
 
-  queryClient.setQueryData(queryKey, newData);
+  queryClient.setQueryData(
+    queryKey,
+    newData,
+    (transformResult && 'options' in transformResult && transformResult.options) || undefined
+  );
 
   return currentData;
 };
@@ -254,48 +258,6 @@ export const getCommunityMessagesInfiniteQueryOptions: (
   };
 };
 
-export const useLastUpdatedChatMessages = ({
-  communityId,
-}: {
-  communityId: string | undefined;
-}) => {
-  const queryClient = useQueryClient();
-  const [foceRefresh, setForceRefresh] = useState(0);
-
-  const debouncedRebuild = useDebounce(() => setForceRefresh((prev) => prev + 1), {
-    timeoutMillis: 1000,
-  });
-
-  useEffect(() => {
-    const queryCache = queryClient.getQueryCache();
-    const unsubscribe = queryCache.subscribe((e) => {
-      if (e.type === 'added' || e.type === 'updated' || e.type === 'removed')
-        if (e.query.queryKey[0] === 'community-messages') debouncedRebuild();
-    });
-
-    return () => unsubscribe();
-  }, [queryClient, debouncedRebuild]);
-
-  return useMemo(() => {
-    if (!communityId) return { lastUpdate: null };
-
-    const lastUpdates = queryClient
-      .getQueryCache()
-      .findAll({ queryKey: ['community-messages', formatGuidId(communityId)], exact: false })
-      .map((query) => query.state.dataUpdatedAt);
-
-    return {
-      lastUpdate: lastUpdates.reduce((acc, val) => {
-        if (val > acc) {
-          return val;
-        }
-
-        return acc;
-      }, 0),
-    };
-  }, [foceRefresh]);
-};
-
 // Inserters
 
 export const insertNewMessagesForChannel = (
@@ -318,7 +280,14 @@ export const insertNewMessagesForChannel = (
         );
       });
 
-      return runningMessages;
+      return {
+        data: runningMessages,
+        options: {
+          updatedAt:
+            newMessages.reduce((acc, msg) => Math.max(acc, msg.fileMetadata.created), 0) ||
+            undefined,
+        },
+      };
     }
   );
 
@@ -344,9 +313,15 @@ export const insertNewMessage = (
     undefined,
     (data) => {
       if (newMessage.fileState === 'deleted') {
-        return internalRemoveMessage(data, newMessage);
+        return {
+          data: internalRemoveMessage(data, newMessage),
+          options: { updatedAt: newMessage.fileMetadata.created || undefined },
+        };
       } else {
-        return internalInsertNewMessage(data, newMessage);
+        return {
+          data: internalInsertNewMessage(data, newMessage),
+          options: { updatedAt: newMessage.fileMetadata.created || undefined },
+        };
       }
     }
   );

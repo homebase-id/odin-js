@@ -1,10 +1,10 @@
 import { useEffect, useMemo } from 'react';
 import { useCommunityMetadata } from './useCommunityMetadata';
-import { useLastUpdatedChatMessages } from './messages/useCommunityMessages';
 import { useLastUpdatedThreadExcludingMine } from './threads/useCommunityThreads';
 import { useCommunityChannelsWithRecentMessages } from './channels/useCommunityChannelsWithRecentMessages';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useLastUpdatedCommunityMessages } from './messages/useLastUpdatedCommunityMessages';
 
 interface MarkCommunityChannelAsReadProps {
   odinId: string | undefined;
@@ -43,7 +43,7 @@ export const useMarkCommunityAsRead = ({
     single: { data: metadata },
     update: { mutate: updateMetadata, status: updateStatus },
   } = useCommunityMetadata({ odinId, communityId });
-  const { lastUpdate } = useLastUpdatedChatMessages({ communityId });
+  const lastUpdate = useLastUpdatedCommunityMessages({ communityId });
   const lastUpdatedThreads =
     (threads && useLastUpdatedThreadExcludingMine({ odinId, communityId })?.lastMessageCreated) ||
     undefined;

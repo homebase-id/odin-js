@@ -4,12 +4,10 @@ import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
 import { findMentionedInRichText, useDotYouClientContext } from '@homebase-id/common-app';
 import { useCommunityMetadata } from '../useCommunityMetadata';
 import { useCommunityChannels } from '../channels/useCommunityChannels';
-import {
-  getCommunityMessagesInfiniteQueryOptions,
-  useLastUpdatedChatMessages,
-} from '../messages/useCommunityMessages';
+import { getCommunityMessagesInfiniteQueryOptions } from '../messages/useCommunityMessages';
 import { useEffect } from 'react';
 import { formatGuidId } from '@homebase-id/js-lib/helpers';
+import { useLastUpdatedCommunityMessages } from '../messages/useLastUpdatedCommunityMessages';
 
 export interface ThreadMeta {
   threadId: string;
@@ -31,7 +29,7 @@ export const useCommunityThreads = ({
   const identity = dotYouClient.getLoggedInIdentity();
   const { data: channels, isFetched } = useCommunityChannels({ odinId, communityId }).fetch;
 
-  const { lastUpdate } = useLastUpdatedChatMessages({ communityId });
+  const lastUpdate = useLastUpdatedCommunityMessages({ communityId });
   useEffect(() => {
     if (lastUpdate)
       queryClient.refetchQueries({ queryKey: ['community-threads', formatGuidId(communityId)] });
