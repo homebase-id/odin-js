@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { ReactionContext } from '@homebase-id/js-lib/public';
 import { Suspense, useEffect, useState, useRef, forwardRef, Ref, useImperativeHandle } from 'react';
 import { CanReactInfo } from '../../../../hooks/reactions/useCanReact';
@@ -9,7 +10,7 @@ import { useMostSpace } from '../../../../hooks/intersection/useMostSpace';
 import { EmojiPicker } from '../EmojiPicker/EmojiPicker';
 import { Emojis } from '../../../../ui/Icons';
 import { t } from '../../../../helpers/i18n/dictionary';
-import { useDotYouClientContext } from '../../../../hooks';
+import { useDotYouClientContext, usePortal } from '../../../../hooks';
 
 export const SocialReactionsBar = forwardRef(
   (
@@ -148,6 +149,7 @@ export const ReactionsBar = forwardRef(
     const wrapperRef = useRef<HTMLButtonElement>(null);
     const { verticalSpace, horizontalSpace } = useMostSpace(wrapperRef);
     const [isCustomOpen, setIsCustomOpen] = useState(false);
+    const target = usePortal('emoji-picker');
 
     useImperativeHandle(
       ref,
@@ -222,31 +224,50 @@ export const ReactionsBar = forwardRef(
             title={t('Others')}
             onClick={() => {
               setIsCustomOpen(true);
-              console.log('clicked');
             }}
             ref={wrapperRef}
           >
             <Emojis className="h-5 w-5" />
           </button>
-          {isCustomOpen ? (
-            <div
-              className={`absolute rounded-md shadow-md z-20 ${verticalSpace === 'top' ? 'bottom-0' : 'top-0'} ${
-                customDirection === 'right' || (!customDirection && horizontalSpace === 'right')
-                  ? 'left-0'
-                  : 'right-0'
-              } overflow-hidden rounded-lg`}
-            >
-              <Suspense>
-                <EmojiPicker
-                  onInput={(emojiDetail) => {
-                    handleLike(emojiDetail.unicode);
-                    setIsCustomOpen(false);
+          {isCustomOpen
+            ? createPortal(
+                <div
+                  className={`shadow-md z-20 overflow-hidden rounded-lg`}
+                  style={{
+                    position: 'fixed',
+                    ...(verticalSpace === 'top'
+                      ? {
+                          bottom:
+                            window.innerHeight -
+                            (wrapperRef.current?.getBoundingClientRect().bottom || 0),
+                        }
+                      : { top: wrapperRef.current?.getBoundingClientRect().top || 0 }),
+
+                    ...(customDirection === 'right' ||
+                    (!customDirection && horizontalSpace === 'right')
+                      ? {
+                          left: wrapperRef.current?.getBoundingClientRect().left || 0,
+                        }
+                      : {
+                          right:
+                            window.innerWidth -
+                            (wrapperRef.current?.getBoundingClientRect().right || 0),
+                        }),
                   }}
-                  key={'emoji-picker'}
-                />
-              </Suspense>
-            </div>
-          ) : null}
+                >
+                  <Suspense>
+                    <EmojiPicker
+                      onInput={(emojiDetail) => {
+                        handleLike(emojiDetail.unicode);
+                        setIsCustomOpen(false);
+                      }}
+                      key={'emoji-picker'}
+                    />
+                  </Suspense>
+                </div>,
+                target
+              )
+            : null}
         </div>
       </>
     );
