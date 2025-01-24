@@ -3,7 +3,7 @@ import { useRef, useMemo, useState, useEffect, RefObject } from 'react';
 import { createPortal } from 'react-dom';
 
 export type DropdownValue = {
-  label: string;
+  label?: string;
   value: string;
 };
 
@@ -46,16 +46,16 @@ export const RTEDropdown = <T extends DropdownValue>({
     }
   };
 
-  const filteredItems = useMemo(
-    () =>
-      items.filter(
-        (chnl) =>
-          !searchVal ||
-          chnl.label.toLowerCase().includes(searchVal.toLowerCase()) ||
-          chnl.value.toLowerCase().includes(searchVal.toLowerCase())
-      ),
-    [items, searchVal]
-  );
+  const filteredItems = useMemo(() => {
+    const lowerSearchVal = searchVal?.toLowerCase();
+
+    return items.filter(
+      (item) =>
+        !lowerSearchVal ||
+        item.label?.toLowerCase().includes(lowerSearchVal) ||
+        item.value.toLowerCase().includes(lowerSearchVal)
+    );
+  }, [items, searchVal]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
