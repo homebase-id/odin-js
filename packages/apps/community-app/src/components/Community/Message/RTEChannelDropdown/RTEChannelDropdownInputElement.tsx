@@ -1,7 +1,5 @@
 import { lazy, RefObject, useEffect, useMemo, useRef, useState } from 'react';
-
 import { cn, withRef } from '@udecode/cn';
-
 import { TChannel } from './RTEChannelDropdownPlugin';
 
 import {
