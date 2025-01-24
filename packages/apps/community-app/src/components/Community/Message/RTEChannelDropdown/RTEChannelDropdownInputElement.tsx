@@ -1,4 +1,4 @@
-import { lazy, useEffect, useMemo, useState } from 'react';
+import { lazy, useMemo, useState } from 'react';
 import { cn, withRef } from '@udecode/cn';
 
 import { ErrorNotification, getPlainTextFromRichText } from '@homebase-id/common-app';
@@ -64,23 +64,14 @@ const onCancel = (editor: PlateEditor, value: string, node: TNode) => {
 export const RTEChannelDropdownInputElement = withRef<typeof PlateElement>(
   ({ className, ...props }, ref) => {
     const { children, editor, element } = props;
-
     const value = useMemo(() => getPlainTextFromRichText(element.children), [element.children]);
-
-    useEffect(() => {
-      if (value?.includes(' ')) {
-        onCancel(editor, `${element.trigger}${value}`, element);
-      }
-    }, [value]);
 
     return (
       <PlateElement as="span" ref={ref} {...props} className={cn('relative', className)}>
         <ChannelDropdown
           searchVal={value}
           onSelect={(channelItem) => onSelectItem(editor, channelItem, element)}
-          onCancel={(clear) => {
-            onCancel(editor, clear ? '' : `${element.trigger}${value}`, element);
-          }}
+          onCancel={(clear) => onCancel(editor, clear ? '' : `${element.trigger}${value}`, element)}
         />
         {children}
       </PlateElement>

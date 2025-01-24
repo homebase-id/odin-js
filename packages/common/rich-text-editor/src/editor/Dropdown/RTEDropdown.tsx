@@ -118,6 +118,10 @@ export const RTEDropdown = <T extends DropdownValue>({
     }
   }, [filteredItems, newItem, searchVal]);
 
+  useEffect(() => {
+    if (searchVal?.includes(' ')) onCancel();
+  }, [searchVal]);
+
   if (searchVal === undefined) return null;
 
   return (
