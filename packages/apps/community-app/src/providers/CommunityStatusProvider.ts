@@ -37,7 +37,7 @@ export const setStatus = async (
   const currentStatus = await internalGetStatus(
     dotYouClient,
     community,
-    dotYouClient.getLoggedInIdentity()
+    dotYouClient.getLoggedInIdentity() || ''
   );
 
   const newStatus: NewHomebaseFile<CommunityStatus> = {
@@ -67,7 +67,7 @@ const internalSaveStatusFile = async (
   const targetDrive = getTargetDriveFromCommunityId(
     community.fileMetadata.appData.uniqueId as string
   );
-  const uniqueId = toGuidId(dotYouClient.getLoggedInIdentity());
+  const uniqueId = toGuidId(dotYouClient.getLoggedInIdentity() || '');
   const metedata: UploadFileMetadata = {
     versionTag: status?.fileMetadata.versionTag,
     allowDistribution: true,

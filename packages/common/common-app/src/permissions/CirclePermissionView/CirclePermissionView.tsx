@@ -38,6 +38,7 @@ export const CirclePermissionView = ({
     stringGuidsEqual(circleDef.id, AUTO_CONNECTIONS_CIRCLE_ID);
 
   if (!circleDef) return null;
+  if (!loggedInIdentity) return null;
 
   const LinkWrapper = ({ children, className }: { children: ReactNode; className: string }) =>
     onClick ? (

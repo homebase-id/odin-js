@@ -100,7 +100,9 @@ export const useCommunityThreads = ({
     );
 
     return (
-      allThreadMeta.filter((meta) => meta && meta.participants.includes(identity)) as ThreadMeta[]
+      allThreadMeta.filter(
+        (meta) => meta && identity && meta.participants.includes(identity)
+      ) as ThreadMeta[]
     ).sort((a, b) => b.lastMessageCreated - a.lastMessageCreated);
   };
 

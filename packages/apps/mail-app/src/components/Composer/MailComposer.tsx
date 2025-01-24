@@ -79,7 +79,7 @@ export const MailComposer = ({
             message: [],
             originId: originId || getNewId(),
             threadId: threadId || getNewId(),
-            sender: loggedOnIdentity,
+            sender: loggedOnIdentity || '',
             forwardedMailThread,
             deliveryStatus: MailDeliveryStatus.NotSent,
           },
