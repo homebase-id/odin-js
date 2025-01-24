@@ -26,10 +26,10 @@ import { CommunityDefinition } from '../../../../providers/CommunityDefinitionPr
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
 import { CommunityChannel } from '../../../../providers/CommunityProvider';
 import { ChannelPlugin } from '../RTEChannelDropdown/RTEChannelDropdownPlugin';
-import { Mentionable } from '@homebase-id/rich-text-editor/src/components/plate-ui/mention-input-element';
 import { useMessageDraft } from './useMessageDraft';
 import { DraftSaver } from './DraftSaver';
 import React from 'react';
+import type { Mentionable } from '@homebase-id/rich-text-editor';
 
 const RichTextEditor = lazy(() =>
   import('@homebase-id/rich-text-editor').then((rootExport) => ({
@@ -123,7 +123,7 @@ export const MessageComposer = memo(
       threadParticipants,
     ]);
 
-    const { data: contacts } = useAllContacts(true);
+    const { data: contacts, isFetching: fetchingContacts } = useAllContacts(true);
     const mentionables: Mentionable[] = useMemo(() => {
       const filteredContacts =
         (contacts
@@ -145,15 +145,13 @@ export const MessageComposer = memo(
                   : undefined));
 
             return {
-              key: `${content.odinId}`,
               value: content.odinId,
-              text: content.odinId,
               label: `${content.odinId} - ${name}`,
             };
           })
           .filter(Boolean) as Mentionable[]) || [];
 
-      filteredContacts.push({ key: '@channel', text: '@channel' });
+      filteredContacts.push({ value: '@channel', label: 'channel' });
       return filteredContacts;
     }, [contacts]);
 
@@ -230,6 +228,8 @@ export const MessageComposer = memo(
         </>
       );
     }, [files, canSend]);
+
+    if (fetchingContacts) return null;
 
     return (
       <>
