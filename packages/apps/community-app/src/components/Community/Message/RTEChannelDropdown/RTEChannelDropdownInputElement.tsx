@@ -1,25 +1,33 @@
 import { lazy, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
+
 import { cn, withRef } from '@udecode/cn';
+import { PlateEditor } from '@udecode/plate-core/react';
+import { getEditorPlugin, TNode } from '@udecode/plate';
 
 import { ErrorNotification, getPlainTextFromRichText } from '@homebase-id/common-app';
-import { useParams } from 'react-router-dom';
 import { useCommunityChannels } from '../../../../hooks/community/channels/useCommunityChannels';
 import { useCommunity } from '../../../../hooks/community/useCommunity';
 import { useCommunityChannel } from '../../../../hooks/community/channels/useCommunityChannel';
-import { PlateEditor } from '@udecode/plate-core/react';
+
+import { ELEMENT_CHANNEL } from './RTEChannelDropdownPlugin';
 
 const PlateElement = lazy(() =>
   import('@homebase-id/rich-text-editor').then((rootExport) => ({
     default: rootExport.PlateElement,
   }))
 );
-import { getEditorPlugin, TNode } from '@udecode/plate';
-import { DropdownValue, RTEDropdown } from '@homebase-id/rich-text-editor';
 
-const channelPluginType = 'channel';
+const RTEDropdown = lazy(() =>
+  import('@homebase-id/rich-text-editor').then((rootExport) => ({
+    default: rootExport.RTEDropdown,
+  }))
+);
+import { type DropdownValue } from '@homebase-id/rich-text-editor';
+
 const onSelectItem = (editor: PlateEditor, item: DropdownValue, node: TNode) => {
   const { getOptions } = getEditorPlugin(editor, {
-    key: channelPluginType,
+    key: ELEMENT_CHANNEL,
   });
   const { insertSpaceAfterChannel } = getOptions();
 
@@ -30,7 +38,7 @@ const onSelectItem = (editor: PlateEditor, item: DropdownValue, node: TNode) => 
 
   editor.tf.insertNodes({
     children: [{ text: '' }],
-    type: channelPluginType,
+    type: ELEMENT_CHANNEL,
     value: item.label,
     uniqueId: item.value,
   });
@@ -39,7 +47,6 @@ const onSelectItem = (editor: PlateEditor, item: DropdownValue, node: TNode) => 
   editor.tf.move({ unit: 'offset' });
 
   const pathAbove = editor.api.block({ above: true })?.[1];
-
   const isBlockEnd =
     editor.selection && pathAbove && editor.api.isEnd(editor.selection.anchor, pathAbove);
 

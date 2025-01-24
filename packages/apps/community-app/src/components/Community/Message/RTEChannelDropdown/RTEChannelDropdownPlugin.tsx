@@ -1,8 +1,7 @@
-import { TriggerComboboxPluginOptions, withTriggerCombobox } from '@udecode/plate-combobox';
+import { withTriggerCombobox } from '@udecode/plate-combobox';
 import { createPlatePlugin } from '@udecode/plate-core/react';
 import { RTEChannelDropdownInputElement } from './RTEChannelDropdownInputElement';
 import { RTEChannelDropdownElement } from './RTEChannelDropdownElement';
-import { PluginConfig } from '@udecode/plate-core';
 import { TElement } from '@udecode/plate';
 
 export const ELEMENT_CHANNEL = 'channel';
@@ -11,23 +10,9 @@ export interface TChannelElement extends TElement {
   value: string;
   uniqueId: string;
 }
-export type ChannelConfig = PluginConfig<
-  'channel',
-  {
-    insertSpaceAfterChannel?: boolean;
-  } & TriggerComboboxPluginOptions,
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  {},
-  {
-    insert: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      channel: (options: { search: string; value: any }) => void;
-    };
-  }
->;
 
 export const ChannelInputPlugin = createPlatePlugin({
-  key: 'channel_input',
+  key: ELEMENT_CHANNEL_INPUT,
   node: { isElement: true, isInline: true },
   render: {
     node: RTEChannelDropdownInputElement,
