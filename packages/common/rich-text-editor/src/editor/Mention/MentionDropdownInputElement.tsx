@@ -72,7 +72,6 @@ export const MentionDropdownInputElement = withRef<typeof PlateElement>(
           onCancel={(clear) => onCancel(editor, clear ? '' : `${element.trigger}${value}`, element)}
           searchVal={value}
         />
-
         {children}
       </PlateElement>
     );

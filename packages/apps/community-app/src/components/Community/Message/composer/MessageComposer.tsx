@@ -123,7 +123,7 @@ export const MessageComposer = memo(
       threadParticipants,
     ]);
 
-    const { data: contacts } = useAllContacts(true);
+    const { data: contacts, isFetching: fetchingContacts } = useAllContacts(true);
     const mentionables: Mentionable[] = useMemo(() => {
       const filteredContacts =
         (contacts
@@ -228,6 +228,8 @@ export const MessageComposer = memo(
         </>
       );
     }, [files, canSend]);
+
+    if (fetchingContacts) return null;
 
     return (
       <>

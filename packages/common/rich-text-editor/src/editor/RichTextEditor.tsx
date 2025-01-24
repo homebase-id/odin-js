@@ -349,7 +349,8 @@ const InnerRichTextEditor = memo(
           (op: { type: string }) => 'set_selection' !== op.type
         );
 
-        if (isActualChange) onChange({ target: { name: name, value: newValue } });
+        if (isActualChange)
+          onChange({ target: { name: name, value: stripDropdownInputsFromValue(newValue) || [] } });
       },
       [editor, onChange]
     );
@@ -462,6 +463,25 @@ const RichTextEditor = memo(
     );
   })
 );
+
+// This is somewhat of a hack; The inputs shouldn't be stored in the value, but that the easiest way to build them without building a hacky hidden input; So we choose the lesser evil
+const stripDropdownInputsFromValue = (value: TElement[] | undefined): TElement[] | undefined => {
+  if (!value) return undefined;
+  return value
+    .flatMap((element) => {
+      if (element.type?.endsWith('_input')) {
+        return element.children;
+      } else if (element.children) {
+        return {
+          ...element,
+          children: stripDropdownInputsFromValue(element.children as TElement[]),
+        } as TElement;
+      } else {
+        return element;
+      }
+    })
+    .filter(Boolean) as TElement[];
+};
 
 RichTextEditor.displayName = 'RichTextEditor';
 export { RichTextEditor };
