@@ -71,7 +71,7 @@ const useCommunityAccessVerifier = (
     }
   });
 
-  if (!circleHasAccess) {
+  if (!circleHasAccess && loggedOnIdentity) {
     const extendUrl = getExtendCirclePermissionUrl(
       loggedOnIdentity,
       '',

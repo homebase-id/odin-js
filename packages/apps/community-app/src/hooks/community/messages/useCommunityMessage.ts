@@ -174,7 +174,7 @@ export const useCommunityMessage = (props?: {
       ...updatedChatMessage,
     };
     const identity = dotYouClient.getLoggedInIdentity();
-    if (identity !== updatedChatMessage.fileMetadata.originalAuthor) {
+    if (identity && identity !== updatedChatMessage.fileMetadata.originalAuthor) {
       transformedMessage.fileMetadata.appData.content.collaborators = Array.from(
         new Set([
           ...(updatedChatMessage.fileMetadata.appData.content.collaborators || []),
@@ -294,7 +294,7 @@ export const useCommunityMessage = (props?: {
       onMutate: async ({ updatedChatMessage, community }) => {
         const transformedMessage = { ...updatedChatMessage };
         const identity = dotYouClient.getLoggedInIdentity();
-        if (identity !== updatedChatMessage.fileMetadata.originalAuthor) {
+        if (identity && identity !== updatedChatMessage.fileMetadata.originalAuthor) {
           transformedMessage.fileMetadata.appData.content.collaborators = Array.from(
             new Set([
               ...(updatedChatMessage.fileMetadata.appData.content.collaborators || []),

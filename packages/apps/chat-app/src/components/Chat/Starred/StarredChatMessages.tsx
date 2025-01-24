@@ -1,6 +1,5 @@
 import {
   ActionGroup,
-  AuthorImage,
   AuthorName,
   CHAT_ROOT_PATH,
   ConnectionImage,

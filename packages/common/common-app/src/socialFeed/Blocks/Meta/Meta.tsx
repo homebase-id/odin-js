@@ -190,6 +190,7 @@ const ExternalActions = ({
     getReportContentUrl,
   } = useManageSocialFeed({ odinId });
 
+  if (!loggedOnIdentity) return null;
   const host = new DotYouClient({ api: ApiType.Guest, hostIdentity: loggedOnIdentity }).getRoot();
   const options: ActionGroupOptionProps[] = [
     {
@@ -286,10 +287,12 @@ const GroupChannelActions = ({
   const hostIdentity = useDotYouClientContext().getHostIdentity();
 
   const isAuthor = postFile.fileMetadata.originalAuthor === loggedOnIdentity;
-  const host = new DotYouClient({
-    api: ApiType.Guest,
-    hostIdentity: loggedOnIdentity,
-  }).getRoot();
+  const host = loggedOnIdentity
+    ? new DotYouClient({
+        api: ApiType.Guest,
+        hostIdentity: loggedOnIdentity,
+      }).getRoot()
+    : undefined;
 
   const {
     removeFromFeed: { mutateAsync: removeFromMyFeed },
@@ -316,7 +319,7 @@ const GroupChannelActions = ({
       },
     });
 
-    if (isAuthor) {
+    if (isAuthor && host) {
       options.push({
         icon: Pencil,
         label: t(
