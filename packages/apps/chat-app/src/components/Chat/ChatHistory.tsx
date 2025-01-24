@@ -8,6 +8,7 @@ import { ChatMessageItem } from './Detail/ChatMessageItem';
 import { ChatActions } from './Detail/ContextMenu';
 import { useMemo, useRef, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { useChatToggleMessageStar } from '../../hooks/chat/useChatToggleMessageStar';
 
 // Following: https://codesandbox.io/p/devbox/frosty-morse-scvryz?file=%2Fpages%2Findex.js%3A175%2C23
 // and https://github.com/TanStack/virtual/discussions/195
@@ -33,6 +34,7 @@ export const ChatHistory = ({
     },
     delete: { mutate: deleteMessages, error: deleteMessagesError },
   } = useChatMessages({ conversationId: conversation?.fileMetadata?.appData?.uniqueId });
+  const { mutate: toggleStar, error: toggleStarError } = useChatToggleMessageStar().toggleStar;
 
   const flattenedMsgs =
     useMemo(
@@ -50,6 +52,7 @@ export const ChatHistory = ({
   useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
   const chatActions: ChatActions = {
     doReply: (msg: HomebaseFile<ChatMessage>) => setReplyMsg(msg),
+    toggleStar: (msg: HomebaseFile<ChatMessage>) => toggleStar(msg),
     doDelete: async (msg: HomebaseFile<ChatMessage>, deleteForEveryone: boolean) => {
       if (!conversation || !msg) return;
       await deleteMessages({
@@ -121,7 +124,7 @@ export const ChatHistory = ({
 
   return (
     <>
-      <ErrorNotification error={deleteMessagesError} />
+      <ErrorNotification error={deleteMessagesError || toggleStarError} />
       <div
         className="faded-scrollbar flex w-full flex-grow flex-col-reverse overflow-auto p-2 sm:p-5"
         ref={scrollRef}

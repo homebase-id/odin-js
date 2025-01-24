@@ -363,6 +363,7 @@ const MediaGalleryItem = ({
       onClick={onClick}
       previewThumbnail={undefined}
       onLoad={() => setIsLoaded(true)}
+      systemFileType={msg.fileSystemType}
       className={`relative h-full w-full ${
         isColSpan2 ? 'aspect-[2/1]' : 'aspect-square'
       } ${isColSpan2 ? 'col-span-2' : ''} ${isLoaded ? 'opacity-100' : 'opacity-0'}`}

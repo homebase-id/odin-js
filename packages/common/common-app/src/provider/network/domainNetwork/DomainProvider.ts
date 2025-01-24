@@ -18,7 +18,7 @@ export const getDomains = async (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   data: {
     count: number;
-    cursor?: number;
+    cursor?: unknown;
   }
 ): Promise<NumberCursoredResult<DomainMembership>> => {
   const client = dotYouClient.createAxiosClient();
