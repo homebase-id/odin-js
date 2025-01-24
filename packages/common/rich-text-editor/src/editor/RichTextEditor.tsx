@@ -406,7 +406,7 @@ const InnerRichTextEditor = memo(
               className={contentClassName}
               placeholder={placeholder}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === 'Enter' && !e.defaultPrevented) {
                   if (onSubmit) {
                     if (!e.shiftKey) {
                       e.preventDefault();
