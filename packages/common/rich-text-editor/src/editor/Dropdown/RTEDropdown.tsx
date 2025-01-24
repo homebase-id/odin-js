@@ -133,11 +133,11 @@ export const RTEDropdown = <T extends DropdownValue>({
       ></span>
       <FixedPortalWrapper
         wrapperRef={wrapperRef}
-        className="z-10 flex flex-col rounded-md border border-gray-200 bg-white shadow-lg"
+        className="z-10 flex max-h-44 flex-col overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg"
       >
         {filteredItems.length === 0 && newItem ? (
           <a
-            className={`cursor-pointer px-2 py-1 transition-colors ${selectedItem === newItem ? 'bg-primary text-primary-contrast' : 'hover:bg-primary hover:text-primary-contrast'}`}
+            className={`block cursor-pointer px-2 py-1 transition-colors ${selectedItem === newItem ? 'bg-primary text-primary-contrast' : 'hover:bg-primary hover:text-primary-contrast'}`}
             onClick={() => doSelect(newItem)}
           >
             {t('Create "{0}"', searchVal)}
