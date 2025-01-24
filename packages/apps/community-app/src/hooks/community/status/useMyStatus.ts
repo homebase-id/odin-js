@@ -14,7 +14,11 @@ export const useMyStatus = (props: {
   const queryClient = useQueryClient();
 
   const fetchMyStatus = async (community: HomebaseFile<CommunityDefinition>) => {
-    return await getStatus(dotYouClient, community, odinId || dotYouClient.getLoggedInIdentity());
+    return await getStatus(
+      dotYouClient,
+      community,
+      odinId || dotYouClient.getLoggedInIdentity() || ''
+    );
   };
 
   const setMyStatus = async ({

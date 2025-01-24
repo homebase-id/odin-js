@@ -7,10 +7,13 @@ const ConnectLink = ({ className }: { className: string }) => {
   const isAuthenticated = dotYouClient.isAuthenticated();
   const isOwner = dotYouClient.isOwner();
 
-  const host = new DotYouClient({
-    hostIdentity: dotYouClient.getLoggedInIdentity(),
-    api: ApiType.Guest,
-  }).getRoot();
+  const loggedOnIdentity = dotYouClient.getLoggedInIdentity();
+  const host = loggedOnIdentity
+    ? new DotYouClient({
+        hostIdentity: loggedOnIdentity,
+        api: ApiType.Guest,
+      }).getRoot()
+    : undefined;
 
   const { data: securityContext } = useSecurityContext(undefined, isAuthenticated).fetch;
   const isConnected =
