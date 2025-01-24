@@ -57,6 +57,15 @@ export const RTEDropdown = <T extends DropdownValue>({
     );
   }, [items, searchVal]);
 
+  const [hadSearchVal, setHadSearchVal] = useState(false);
+  useEffect(() => {
+    if (searchVal && searchVal.length >= 1) {
+      setHadSearchVal(true);
+    } else if (searchVal === '' && hadSearchVal) {
+      onCancel();
+    }
+  }, [searchVal]);
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (['Tab', 'Enter'].includes(e.key) && selectedItem) {
@@ -122,6 +131,11 @@ export const RTEDropdown = <T extends DropdownValue>({
     if (searchVal?.includes(' ')) onCancel();
   }, [searchVal]);
 
+  // Cancel if the wrapper is removed from the DOM; On mobile, the wrapper is removed when the `:before` is removed
+  if (wrapperRef.current && !document.body.contains(wrapperRef.current)) {
+    onCancel();
+    return null;
+  }
   if (searchVal === undefined) return null;
 
   return (
@@ -129,7 +143,7 @@ export const RTEDropdown = <T extends DropdownValue>({
       <span
         ref={wrapperRef}
         data-before={trigger}
-        className="before:content-[attr(data-before)]"
+        className="min-h-[1lh] before:content-[attr(data-before)]"
       ></span>
       <FixedPortalWrapper
         wrapperRef={wrapperRef}
@@ -175,6 +189,8 @@ const FixedPortalWrapper = ({
   const target = usePortal('dropdown-root');
   const { verticalSpace, horizontalSpace } = useMostSpace(wrapperRef);
 
+  if (!wrapperRef.current || !document.body.contains(wrapperRef.current)) return null;
+
   return createPortal(
     <div
       className={className}
@@ -184,7 +200,7 @@ const FixedPortalWrapper = ({
           ? {
               bottom: `calc(${window.innerHeight - (wrapperRef.current?.getBoundingClientRect().bottom || 0)}px + 1lh)`,
             }
-          : { top: wrapperRef.current?.getBoundingClientRect().top || 0 }),
+          : { top: `calc(${wrapperRef.current?.getBoundingClientRect().top || 0}px + 1lh)` }),
 
         ...(horizontalSpace === 'right'
           ? {
