@@ -4,7 +4,7 @@ import { getDomains } from '../../provider/network/domainNetwork/DomainProvider'
 
 interface useActiveDomainsProps {
   pageSize: number;
-  cursor?: number;
+  cursor?: unknown;
 }
 
 export const useDomains = (
@@ -15,7 +15,7 @@ export const useDomains = (
   const dotYouClient = useDotYouClientContext();
 
   const fetchDomains = async (
-    { pageSize, cursor }: { pageSize: number; cursor?: number } = {
+    { pageSize, cursor }: { pageSize: number; cursor?: unknown } = {
       pageSize: 10,
     }
   ) => {
@@ -37,7 +37,7 @@ export const useDomains = (
     fetch: useInfiniteQuery({
       queryKey: ['active-domains', activePageSize, activePage],
       queryFn: ({ pageParam }) => fetchDomains({ pageSize: activePageSize, cursor: pageParam }),
-      initialPageParam: undefined as number | undefined,
+      initialPageParam: undefined as unknown | undefined,
       getNextPageParam: (lastPage) =>
         lastPage.results?.length >= activePageSize ? lastPage.cursor : undefined,
       refetchOnWindowFocus: false,

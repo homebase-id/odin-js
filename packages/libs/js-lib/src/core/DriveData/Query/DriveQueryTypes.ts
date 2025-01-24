@@ -10,7 +10,7 @@ export interface CursoredResult<T> {
 
 export interface NumberCursoredResult<T> {
   results: T[];
-  cursor: number;
+  cursor: unknown;
 }
 
 export interface MultiRequestCursoredResult<T> {
