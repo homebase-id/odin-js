@@ -1,31 +1,16 @@
 import { TriggerComboboxPluginOptions, withTriggerCombobox } from '@udecode/plate-combobox';
-import { createPlatePlugin, PlateEditor } from '@udecode/plate-core/react';
+import { createPlatePlugin } from '@udecode/plate-core/react';
 import { RTEChannelDropdownInputElement } from './RTEChannelDropdownInputElement';
 import { RTEChannelDropdownElement } from './RTEChannelDropdownElement';
 import { PluginConfig } from '@udecode/plate-core';
-import { Node, TElement } from '@udecode/plate';
+import { TElement } from '@udecode/plate';
 
 export const ELEMENT_CHANNEL = 'channel';
 export const ELEMENT_CHANNEL_INPUT = 'channel_input';
-
 export interface TChannelElement extends TElement {
   value: string;
   uniqueId: string;
 }
-
-export interface TChannel {
-  text: string;
-  key: string;
-  uniqueId: string;
-}
-
-export type ChannelOnSelectItem<TItem extends TChannel = TChannel> = (
-  editor: PlateEditor,
-  item: TItem,
-  search?: string,
-  element?: Node
-) => void;
-
 export type ChannelConfig = PluginConfig<
   'channel',
   {
@@ -92,17 +77,5 @@ export const ChannelPlugin = createPlatePlugin({
     node: RTEChannelDropdownElement,
   },
 })
-  .extendEditorTransforms<ChannelConfig['transforms']>(({ editor, type }) => ({
-    insert: {
-      channel: ({ value }) => {
-        editor.tf.insertNodes({
-          children: [{ text: '' }],
-          type,
-          value,
-          uniqueId: value,
-        });
-      },
-    },
-  }))
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   .overrideEditor(withTriggerCombobox as any);
