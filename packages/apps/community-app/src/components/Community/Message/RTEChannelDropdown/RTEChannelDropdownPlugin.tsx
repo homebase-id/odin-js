@@ -19,7 +19,7 @@ export const ChannelInputPlugin = createPlatePlugin({
   },
   handlers: {
     // We prevent the default behavior of the Enter key when the selection is in a
-    //   channel input; So we can avoid the onKeyDown handler on PlatContent to trigger;
+    //   channel input; So we can avoid the onKeyDown handler on PlateContent to trigger;
     // And allow the input component to actually handle it on the document level
     onKeyDown: ({ editor, event }) => {
       if (event.key !== 'Enter') return;

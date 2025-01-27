@@ -1,24 +1,15 @@
 import { withTriggerCombobox } from '@udecode/plate-combobox';
 import { createPlatePlugin } from '@udecode/plate-core/react';
-import { MentionDropdownInputElement } from './MentionDropdownInputElement';
-import { MentionDropdownElement } from './MentionDropdownElement';
-import { TElement } from '@udecode/plate';
-import { DropdownValue } from '../Dropdown/RTEDropdown';
+import { EmojiDropdownInputElement } from './EmojiDropdownInputElement';
 
-export const ELEMENT_MENTION = 'mention';
-export const ELEMENT_MENTION_INPUT = 'mention_input';
-export interface TMentionElement extends TElement {
-  value: string;
-  uniqueId: string;
-}
+export const ELEMENT_EMOJI = 'emoji';
+export const ELEMENT_EMOJI_INPUT = 'emoji_input';
 
-export type Mentionable = DropdownValue;
-
-export const MentionInputPlugin = createPlatePlugin({
-  key: ELEMENT_MENTION_INPUT,
+export const EmojiInputPlugin = createPlatePlugin({
+  key: ELEMENT_EMOJI_INPUT,
   node: { isElement: true, isInline: true },
   render: {
-    node: MentionDropdownInputElement,
+    node: EmojiDropdownInputElement,
   },
   handlers: {
     // We prevent the default behavior of the Enter key when the selection is in a
@@ -32,13 +23,13 @@ export const MentionInputPlugin = createPlatePlugin({
 
       const [node] = editor.api.node(selection) || [];
       if (!node) return;
-      if (node.type === ELEMENT_MENTION_INPUT) {
+      if (node.type === ELEMENT_EMOJI_INPUT) {
         event.preventDefault();
       }
 
       const [parent] = editor.api.parent(selection) || [];
       if (!parent) return;
-      if (parent.type === ELEMENT_MENTION_INPUT) {
+      if (parent.type === ELEMENT_EMOJI_INPUT) {
         event.preventDefault();
       }
     },
@@ -46,24 +37,21 @@ export const MentionInputPlugin = createPlatePlugin({
 });
 
 /** Enables support for autocompleting @channels. */
-export const MentionPlugin = createPlatePlugin({
-  key: ELEMENT_MENTION,
+export const EmojiPlugin = createPlatePlugin({
+  key: ELEMENT_EMOJI,
 
   // extendEditor: withTriggerCombobox as any,
   node: { isElement: true, isInline: true, isMarkableVoid: true, isVoid: true },
   options: {
     createComboboxInput: () => ({
       children: [{ text: '' }],
-      trigger: '@',
-      type: MentionInputPlugin.key,
+      trigger: ':',
+      type: EmojiInputPlugin.key,
     }),
-    trigger: '@',
+    trigger: ':',
     triggerPreviousCharPattern: /^\s?$/,
   },
-  plugins: [MentionInputPlugin],
-  render: {
-    node: MentionDropdownElement,
-  },
+  plugins: [EmojiInputPlugin],
 })
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   .overrideEditor(withTriggerCombobox as any);

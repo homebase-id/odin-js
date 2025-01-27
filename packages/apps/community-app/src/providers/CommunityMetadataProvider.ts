@@ -1,9 +1,11 @@
 import {
+  DEFAULT_PAYLOAD_KEY,
   DotYouClient,
   getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
   HomebaseFile,
   NewHomebaseFile,
+  PayloadFile,
   queryBatch,
   RichText,
   SecurityGroupType,
@@ -14,7 +16,7 @@ import {
   UploadInstructionSet,
   UploadResult,
 } from '@homebase-id/js-lib/core';
-import { jsonStringify64, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { jsonStringify64, stringGuidsEqual, stringToUint8Array } from '@homebase-id/js-lib/helpers';
 
 export interface Draft {
   message: RichText | undefined;
@@ -67,6 +69,28 @@ export const uploadCommunityMetadata = async (
     },
   };
 
+  const payloads: PayloadFile[] = [];
+
+  const jsonContent: string = jsonStringify64({ ...definition.fileMetadata.appData.content });
+  const payloadBytes = stringToUint8Array(
+    jsonStringify64({ ...definition.fileMetadata.appData.content })
+  );
+
+  const shouldEmbedContent = payloadBytes.length < 5000;
+  const content = shouldEmbedContent
+    ? jsonContent
+    : jsonStringify64({
+        ...definition.fileMetadata.appData.content,
+        drafts: undefined,
+      });
+
+  if (!shouldEmbedContent) {
+    payloads.push({
+      key: DEFAULT_PAYLOAD_KEY,
+      payload: new Blob([payloadBytes], { type: 'application/json' }),
+    });
+  }
+
   const metadata: UploadFileMetadata = {
     versionTag: definition.fileMetadata.versionTag,
     allowDistribution: false,
@@ -74,7 +98,7 @@ export const uploadCommunityMetadata = async (
       tags: definition.fileMetadata.appData.tags,
       uniqueId: definition.fileMetadata.appData.uniqueId,
       fileType: COMMUNITY_METADATA_FILE_TYPE,
-      content: jsonStringify64(definition.fileMetadata.appData.content),
+      content: content,
     },
     isEncrypted: true,
     accessControlList: {
@@ -86,7 +110,7 @@ export const uploadCommunityMetadata = async (
     dotYouClient,
     instructionSet,
     metadata,
-    undefined,
+    payloads,
     undefined,
     true,
     onVersionConflicht

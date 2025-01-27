@@ -14,6 +14,7 @@ export const RTEDropdown = <T extends DropdownValue>({
   onCreate,
   onCancel,
   searchVal,
+  options,
 }: {
   trigger: string;
   items: T[];
@@ -21,6 +22,7 @@ export const RTEDropdown = <T extends DropdownValue>({
   onCancel: (clear?: boolean) => void;
   onCreate?: () => Promise<T>;
   searchVal?: string;
+  options?: { hideTrigger?: boolean; manualFilter?: boolean };
 }) => {
   const wrapperRef = useRef<HTMLElement>(null);
 
@@ -47,6 +49,8 @@ export const RTEDropdown = <T extends DropdownValue>({
   };
 
   const filteredItems = useMemo(() => {
+    if (options?.manualFilter) return items;
+
     const lowerSearchVal = searchVal?.toLowerCase();
 
     return items.filter(
@@ -147,7 +151,7 @@ export const RTEDropdown = <T extends DropdownValue>({
       ></span>
       <FixedPortalWrapper
         wrapperRef={wrapperRef}
-        className="z-10 flex max-h-44 flex-col overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg"
+        className="z-10 flex max-h-44 flex-col overflow-auto rounded-lg border bg-background text-foreground shadow-lg"
       >
         {filteredItems.length === 0 && newItem ? (
           <a
@@ -166,7 +170,7 @@ export const RTEDropdown = <T extends DropdownValue>({
                 onClick={() => doSelect(item)}
                 className={`cursor-pointer px-2 py-1 transition-colors ${isSelected ? 'bg-primary text-primary-contrast' : 'hover:bg-primary hover:text-primary-contrast'}`}
               >
-                {trigger}
+                {!options?.hideTrigger ? trigger : null}
                 {item.label}
               </a>
             );
