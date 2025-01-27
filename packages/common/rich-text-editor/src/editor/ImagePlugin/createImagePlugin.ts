@@ -1,4 +1,4 @@
-import { insertNodes, TElement } from '@udecode/plate-common';
+import { TElement } from '@udecode/plate';
 import { ImageElementBlock } from './ImagePlugin';
 import { createTPlatePlugin, PlateEditor } from '@udecode/plate-core/react';
 
@@ -22,7 +22,7 @@ export const insertImage = (editor: PlateEditor, fileKey: string) => {
     children: [text],
   };
 
-  insertNodes<TImageElement | TElement>(editor, [image, paragraph]);
+  editor.tf.insertNodes<TImageElement | TElement>([image, paragraph]);
 };
 
 export const ImagePlugin = createTPlatePlugin({

@@ -1,4 +1,3 @@
-import { removeNodes } from '@udecode/plate-common';
 import { ReactEditor } from 'slate-react';
 import { TargetDrive, NewMediaFile } from '@homebase-id/js-lib/core';
 import { useMemo, useState } from 'react';
@@ -75,7 +74,7 @@ export const ImageElementBlock = <N extends TImageElement = TImageElement>(
   const doRemove = async () => {
     if (await options?.onRemove({ fileId: options.fileId, fileKey: element.fileKey })) {
       setTimeout(() => {
-        removeNodes(editor, { at: path });
+        editor.tf.removeNodes({ at: path });
       }, 10);
     }
   };

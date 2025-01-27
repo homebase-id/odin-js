@@ -1,15 +1,16 @@
 import { cn, withRef } from '@udecode/cn';
+import { useElement } from '@udecode/plate/react';
 import { useFocused, useSelected } from 'slate-react';
-import { TChannelElement } from './RTEChannelDropdownPlugin';
-import { PlateElement, useElement } from '@udecode/plate/react';
+import { PlateElement } from '../../components/plate-ui/plate-element';
+import { TMentionElement } from './MentionDropdownPlugin';
 
-export const RTEChannelDropdownElement = withRef<
+export const MentionDropdownElement = withRef<
   typeof PlateElement,
   {
-    renderLabel?: (channel: TChannelElement) => string;
+    renderLabel?: (mention: TMentionElement) => string;
   }
 >(({ children, className, renderLabel, ...props }, ref) => {
-  const element = useElement<TChannelElement>();
+  const element = useElement<TMentionElement>();
   const selected = useSelected();
   const focused = useFocused();
 
@@ -28,7 +29,7 @@ export const RTEChannelDropdownElement = withRef<
       ref={ref}
       {...props}
     >
-      #{renderLabel ? renderLabel(element) : element.value}
+      @{(renderLabel ? renderLabel(element) : element.value).replace('@', '')}
       {children}
     </PlateElement>
   );

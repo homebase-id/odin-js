@@ -1,5 +1,5 @@
 import React from 'react';
-import { type PlaceholderProps, usePlaceholderState } from '@udecode/plate-common/react';
+import { type PlaceholderProps, usePlaceholderState } from '@udecode/plate/react';
 
 import { cn } from '../../lib/utils';
 export const Placeholder = (props: PlaceholderProps) => {

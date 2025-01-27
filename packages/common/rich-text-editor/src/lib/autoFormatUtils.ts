@@ -1,7 +1,7 @@
 import { AutoformatBlockRule } from '@udecode/plate-autoformat';
 import { CodePlugin } from '@udecode/plate-basic-marks/react';
 import { CodeBlockPlugin } from '@udecode/plate-code-block/react';
-import { getParentNode, isElement, isType } from '@udecode/plate-common';
+import { ElementApi, isType } from '@udecode/plate';
 import { PlateEditor } from '@udecode/plate-core/react';
 import { toggleList, unwrapList } from '@udecode/plate-list';
 
@@ -10,11 +10,11 @@ export const preFormat: AutoformatBlockRule['preFormat'] = (editor) => unwrapLis
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const format = (editor: PlateEditor, customFormatting: any) => {
   if (editor.selection) {
-    const parentEntry = getParentNode(editor, editor.selection);
+    const parentEntry = editor.api.parent(editor.selection);
     if (!parentEntry) return;
     const [node] = parentEntry;
     if (
-      isElement(node) &&
+      ElementApi.isElement(node) &&
       !isType(editor, node, CodeBlockPlugin.key) &&
       !isType(editor, node, CodePlugin.key)
     ) {
@@ -32,5 +32,5 @@ export const formatList = (editor: PlateEditor, elementType: string) => {
 };
 
 export const formatText = (editor: PlateEditor, text: string) => {
-  format(editor, () => editor.insertText(text));
+  format(editor, () => editor.tf.insertText(text));
 };

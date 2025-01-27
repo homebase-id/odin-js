@@ -12,7 +12,7 @@ import React, {
   useState,
 } from 'react';
 
-import type { PointRef } from 'slate';
+import type { PointRef, TElement } from '@udecode/plate';
 
 import {
   type ComboboxItemProps,
@@ -25,30 +25,25 @@ import {
   useComboboxStore,
 } from '@ariakit/react';
 import { cn } from '@udecode/cn';
+import { useComposedRef, useEditorRef } from '@udecode/plate/react';
 import { filterWords } from '@udecode/plate-combobox';
 import {
   type UseComboboxInputResult,
   useComboboxInput,
   useHTMLInputCursorState,
 } from '@udecode/plate-combobox/react';
-import {
-  type TElement,
-  createPointRef,
-  getPointBefore,
-  insertNodes,
-  insertText,
-  moveSelection,
-} from '@udecode/plate-common';
-import { findNodePath, useComposedRef, useEditorRef } from '@udecode/plate-common/react';
 import { cva } from 'class-variance-authority';
 import { isTouchDevice } from '@homebase-id/js-lib/helpers';
 
-type FilterFn = (item: { value: string; keywords?: string[] }, search: string) => boolean;
+type FilterFn = (
+  item: { value: string; group?: string; keywords?: string[]; label?: string },
+  search: string
+) => boolean;
 
 interface InlineComboboxContextValue {
   filter: FilterFn | false;
   inputProps: UseComboboxInputResult['props'];
-  inputRef: RefObject<HTMLInputElement>;
+  inputRef: RefObject<HTMLInputElement | null>;
   removeInput: UseComboboxInputResult['removeInput'];
   setHasEmpty: (hasEmpty: boolean) => void;
   showTrigger: boolean;
@@ -58,8 +53,11 @@ interface InlineComboboxContextValue {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const InlineComboboxContext = createContext<InlineComboboxContextValue>(null as any);
 
-const defaultFilter: FilterFn = ({ keywords = [], value }, search) =>
-  [value, ...keywords].some((keyword) => filterWords(keyword, search));
+const defaultFilter: FilterFn = ({ group, keywords = [], label, value }, search) => {
+  const uniqueTerms = new Set([value, ...keywords, group, label].filter(Boolean));
+
+  return Array.from(uniqueTerms).some((keyword) => filterWords(keyword!, search));
+};
 
 interface InlineComboboxProps {
   children: ReactNode;
@@ -68,6 +66,7 @@ interface InlineComboboxProps {
   filter?: FilterFn | false;
   hideWhenNoValue?: boolean;
   hideWhenSpace?: boolean;
+
   setValue?: (value: string) => void;
   showTrigger?: boolean;
   value?: string;
@@ -110,15 +109,15 @@ const InlineCombobox = ({
   const [insertPoint, setInsertPoint] = useState<PointRef | null>(null);
 
   useEffect(() => {
-    const path = findNodePath(editor, element);
+    const path = editor.api.findPath(element);
 
     if (!path) return;
 
-    const point = getPointBefore(editor, path);
+    const point = editor.api.before(path);
 
     if (!point) return;
 
-    const pointRef = createPointRef(editor, point);
+    const pointRef = editor.api.pointRef(point);
     setInsertPoint(pointRef);
 
     return () => {
@@ -135,12 +134,12 @@ const InlineCombobox = ({
     ref: inputRef,
     onCancelInput: (cause) => {
       if (cause !== 'backspace') {
-        insertText(editor, trigger + value, {
+        editor.tf.insertText(trigger + value, {
           at: insertPoint?.current ?? undefined,
         });
       }
       if (cause === 'arrowLeft' || cause === 'arrowRight') {
-        moveSelection(editor, {
+        editor.tf.move({
           distance: 1,
           reverse: cause === 'arrowLeft',
         });
@@ -183,7 +182,7 @@ const InlineCombobox = ({
   useEffect(() => {
     if (hideWhenSpace && value.includes(' ')) {
       removeInput(true);
-      insertNodes(editor, { text: `${trigger}${value}` });
+      editor.tf.insertNodes({ text: `${trigger}${value}` });
     }
   }, [value, hideWhenSpace, removeInput]);
 
@@ -254,7 +253,7 @@ InlineComboboxInput.displayName = 'InlineComboboxInput';
 const InlineComboboxContent: typeof ComboboxPopover = ({ className, ...props }) => {
   // Portal prevents CSS from leaking into popover
   return (
-    <Portal style={{ zIndex: 40, position: 'relative' }}>
+    <Portal>
       <ComboboxPopover
         className={cn(
           'z-[500] max-h-[288px] w-[300px] overflow-y-auto rounded-md bg-white shadow-md dark:bg-slate-800',
@@ -282,13 +281,19 @@ const comboboxItemVariants = cva(
 );
 
 export type InlineComboboxItemProps = {
+  focusEditor?: boolean;
+  group?: string;
   keywords?: string[];
+  label?: string;
 } & ComboboxItemProps &
   Required<Pick<ComboboxItemProps, 'value'>>;
 
 const InlineComboboxItem = ({
   className,
+  focusEditor = true,
+  group,
   keywords,
+  label,
   onClick,
   ...props
 }: InlineComboboxItemProps) => {
@@ -302,8 +307,8 @@ const InlineComboboxItem = ({
   const search = filter && store.useState('value');
 
   const visible = useMemo(
-    () => !filter || filter({ keywords, value }, search as string),
-    [filter, value, keywords, search]
+    () => !filter || filter({ group, keywords, label, value }, search as string),
+    [filter, group, keywords, label, value, search]
   );
 
   if (!visible) return null;
@@ -312,7 +317,7 @@ const InlineComboboxItem = ({
     <ComboboxItem
       className={cn(comboboxItemVariants(), className)}
       onClick={(event) => {
-        removeInput(true);
+        removeInput(focusEditor);
         onClick?.(event);
       }}
       onKeyDown={(event) => {
@@ -346,6 +351,7 @@ const InlineComboboxEmpty = ({ children, className }: HTMLAttributes<HTMLDivElem
     <div className={cn(comboboxItemVariants({ interactive: false }), className)}>{children}</div>
   );
 };
+
 const InlineComboboxSeleactableEmpty = ({
   className,
   onClick,

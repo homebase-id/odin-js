@@ -2,7 +2,7 @@ import './code-block-element.css';
 
 import { cn } from '../../lib/utils';
 import { useCodeBlockElementState } from '@udecode/plate-code-block/react';
-import { PlateElement } from '@udecode/plate-common/react';
+import { PlateElement } from '@udecode/plate/react';
 import { withRef } from '@udecode/cn';
 
 export const CodeBlockElement = withRef<typeof PlateElement>(

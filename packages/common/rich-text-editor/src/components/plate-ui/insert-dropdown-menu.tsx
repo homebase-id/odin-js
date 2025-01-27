@@ -1,6 +1,6 @@
 import React from 'react';
 import { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
-import { insertEmptyElement } from '@udecode/plate-common';
+import { insertEmptyElement } from '@udecode/plate';
 
 import { Icons } from '../../components/icons';
 
@@ -17,7 +17,7 @@ import { useOpenState } from './dropdown-menu/use-open-state';
 import { HEADING_KEYS } from '@udecode/plate-heading';
 import { ParagraphPlugin, useEditorState } from '@udecode/plate-core/react';
 import { BlockquotePlugin } from '@udecode/plate-block-quote/react';
-import { focusEditor } from '@udecode/plate-common/react';
+import { focusEditor } from '@udecode/plate/react';
 
 const items = [
   {

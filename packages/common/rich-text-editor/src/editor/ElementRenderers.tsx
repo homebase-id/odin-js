@@ -1,5 +1,5 @@
 import { PlateRenderElementProps, PlateRenderLeafProps } from '@udecode/plate-core';
-import { Value, EText, EElement } from '@udecode/plate-common';
+import { Value, EText, EElement } from '@udecode/plate';
 
 // The custom element props interface should extend PlateRenderElementProps<V> where TElement is the element type.
 // The custom leaf props interface should extend PlateRenderLeafProps<V> where TText is the leaf type.

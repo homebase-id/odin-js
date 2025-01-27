@@ -5,14 +5,13 @@ import { FileCode } from 'lucide-react';
 import { ToolbarButton } from '../toolbar';
 import { useToggleCodeBlockButton } from '@udecode/plate-code-block/react';
 import { useEditorRef } from '@udecode/plate-core/react';
-import { someNode } from '@udecode/plate-common';
 
 export const CodeBlockToolbarButton = withRef<typeof ToolbarButton>((_, ref) => {
   const { props } = useToggleCodeBlockButton();
   const editor = useEditorRef();
 
   const codeBlockType = editor.getType(BaseCodeBlockPlugin);
-  const isActive = someNode(editor, {
+  const isActive = editor.api.some({
     match: { type: codeBlockType },
   });
 

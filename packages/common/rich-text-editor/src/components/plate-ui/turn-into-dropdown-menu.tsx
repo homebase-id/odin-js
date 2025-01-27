@@ -1,12 +1,4 @@
 import { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
-import {
-  collapseSelection,
-  findNode,
-  isBlock,
-  isCollapsed,
-  TElement,
-  toggleBlock,
-} from '@udecode/plate-common';
 import { HEADING_KEYS } from '@udecode/plate-heading';
 
 import { Icons } from '../../components/icons';
@@ -22,8 +14,9 @@ import {
 import { ToolbarButton } from './toolbar';
 import { useOpenState } from './dropdown-menu/use-open-state';
 import { BlockquotePlugin } from '@udecode/plate-block-quote/react';
-import { useEditorState } from '@udecode/plate-core/react';
-import { focusEditor } from '@udecode/plate-common/react';
+import { ParagraphPlugin, useEditorState } from '@udecode/plate-core/react';
+import { useSelectionFragmentProp } from '@udecode/plate/react';
+import { getBlockType, setBlockType } from '../editor/transforms';
 
 const items = [
   {
@@ -79,16 +72,11 @@ export function TurnIntoDropdownMenu({ filterValues, ...props }: TurnIntoDropdow
   const editor = useEditorState();
   const openState = useOpenState();
 
-  let value: string = 'p';
-  if (isCollapsed(editor?.selection)) {
-    const entry = findNode<TElement>(editor!, {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      match: (n: any) => isBlock(editor, n),
-    });
-    if (entry) {
-      value = items.find((item) => item.value === entry[0].type)?.value ?? 'p';
-    }
-  }
+  const value = useSelectionFragmentProp({
+    defaultValue: ParagraphPlugin.key,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    getProp: (node) => getBlockType(node as any),
+  });
 
   const selectedItem = items.find((item) => item.value === value) ?? defaultItem;
   const { icon: SelectedItemIcon, label: selectedItemLabel } = selectedItem;
@@ -107,17 +95,21 @@ export function TurnIntoDropdownMenu({ filterValues, ...props }: TurnIntoDropdow
         </ToolbarButton>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="start" className="min-w-0 bg-background">
+      <DropdownMenuContent
+        align="start"
+        className="min-w-0 bg-background"
+        onCloseAutoFocus={(e) => {
+          e.preventDefault();
+          editor.tf.focus();
+        }}
+      >
         <DropdownMenuLabel>Turn into</DropdownMenuLabel>
 
         <DropdownMenuRadioGroup
           className="flex flex-col gap-0.5"
           value={value}
           onValueChange={(type) => {
-            toggleBlock(editor, { type });
-
-            collapseSelection(editor);
-            focusEditor(editor);
+            setBlockType(editor, type);
           }}
         >
           {items

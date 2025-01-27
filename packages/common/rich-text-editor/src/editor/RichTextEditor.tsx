@@ -1,12 +1,5 @@
-import {
-  TElement,
-  TDescendant,
-  resetEditor,
-  isSelectionAtBlockStart,
-  isBlockAboveEmpty,
-  SlatePlugin,
-} from '@udecode/plate-common';
-import { ParagraphPlugin, PlateElement } from '@udecode/plate-common/react';
+import { TElement, SlatePlugin, Descendant } from '@udecode/plate';
+import { ParagraphPlugin, PlateElement, usePlateEditor } from '@udecode/plate/react';
 import { withProps } from '@udecode/cn';
 import {
   isCodeBlockEmpty,
@@ -18,7 +11,6 @@ import { LinkPlugin } from '@udecode/plate-link/react';
 import { HeadingPlugin } from '@udecode/plate-heading/react';
 import { BlockquotePlugin } from '@udecode/plate-block-quote/react';
 import { CodeBlockPlugin, CodeLinePlugin } from '@udecode/plate-code-block/react';
-import { MentionInputPlugin, MentionPlugin } from '@udecode/plate-mention/react';
 import {
   BoldPlugin,
   ItalicPlugin,
@@ -71,16 +63,17 @@ import {
 } from 'react';
 import { autoformatRules } from '../lib/autoFormatRules';
 import { EmojiInputElement } from './Combobox/EmojiCombobox';
-import { MentionElement } from '../components/plate-ui/mention-element';
-import { Mentionable, MentionInputElement } from '../components/plate-ui/mention-input-element';
 import { ImagePlugin } from './ImagePlugin/createImagePlugin';
-import { createPlateEditor, Plate, PlateContent, PlatePlugin } from '@udecode/plate-core/react';
-import { focusEditor, PlateLeaf } from '@udecode/plate-common/react';
+import { Plate, PlateContent, PlatePlugin } from '@udecode/plate-core/react';
+import { PlateLeaf } from '@udecode/plate/react';
 import { ListElement } from '../components/plate-ui/list-element';
-import { MediaOptionsContextProvider } from './MediaOptionsContext/MediaOptionsContext';
+import { MediaOptionsContextProvider } from './MediaOptionsContext/MediaOptionsContextProvider';
 import { useMediaOptionsContext } from './MediaOptionsContext/useMediaOptionsContext';
 import { TextualEmojiPlugin } from './TextualEmojiPlugin/TextualEmojiPlugin';
-import { Editor } from 'slate';
+import { MentionInputPlugin, MentionPlugin } from './Mention/MentionDropdownPlugin';
+import type { Mentionable } from './Mention/MentionDropdownPlugin';
+import { MentionDropdownInputElement } from './Mention/MentionDropdownInputElement';
+import { MentionDropdownElement } from './Mention/MentionDropdownElement';
 
 interface RTEProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -155,7 +148,7 @@ const InnerRichTextEditor = memo(
             ? ([
                 {
                   type: 'paragraph',
-                  children: [{ text: defaultValue ?? '' }] as TDescendant[],
+                  children: [{ text: defaultValue ?? '' }] as Descendant[],
                 },
               ] as TElement[])
             : undefined,
@@ -174,12 +167,12 @@ const InnerRichTextEditor = memo(
                 {
                   ...resetBlockTypesCommonRule,
                   hotkey: 'Enter',
-                  predicate: isBlockAboveEmpty,
+                  predicate: (editor) => editor.api.isEmpty(editor.selection, { block: true }),
                 },
                 {
                   ...resetBlockTypesCommonRule,
                   hotkey: 'Backspace',
-                  predicate: isSelectionAtBlockStart,
+                  predicate: (editor) => editor.api.isAt({ start: true }),
                 },
                 {
                   ...resetBlockTypesCodeBlockRule,
@@ -327,8 +320,8 @@ const InnerRichTextEditor = memo(
             [StrikethroughPlugin.key]: withProps(PlateLeaf, { as: 's' }),
             [UnderlinePlugin.key]: withProps(PlateLeaf, { as: 'u' }),
             [EmojiInputPlugin.key]: EmojiInputElement,
-            [MentionInputPlugin.key]: MentionInputElement,
-            [MentionPlugin.key]: MentionElement,
+            [MentionInputPlugin.key]: MentionDropdownInputElement,
+            [MentionPlugin.key]: MentionDropdownElement,
             ...(_components || {}),
           },
         },
@@ -336,13 +329,19 @@ const InnerRichTextEditor = memo(
       [mentionables]
     );
 
-    const editor = useMemo(() => {
-      return createPlateEditor({
-        id: uniqueId || 'editor',
-        value: defaultValAsRichText,
-        ...plugins,
-      });
-    }, [plugins]);
+    const editor = usePlateEditor({
+      id: uniqueId || 'editor',
+      value: defaultValAsRichText,
+      ...plugins,
+    });
+
+    // const editor = useMemo(() => {
+    //   return createPlateEditor({
+    //     id: uniqueId || 'editor',
+    //     value: defaultValAsRichText,
+    //     ...plugins,
+    //   });
+    // }, [plugins]);
 
     const handleChange = useCallback(
       (newValue: TElement[]) => {
@@ -350,24 +349,24 @@ const InnerRichTextEditor = memo(
           (op: { type: string }) => 'set_selection' !== op.type
         );
 
-        if (isActualChange) onChange({ target: { name: name, value: newValue } });
+        if (isActualChange)
+          onChange({ target: { name: name, value: stripDropdownInputsFromValue(newValue) || [] } });
       },
       [editor, onChange]
     );
 
     useEffect(() => {
-      if (autoFocus && editor)
-        setTimeout(() => focusEditor(editor, Editor.end(editor as Editor, [])), 0);
+      if (autoFocus && editor) setTimeout(() => editor.tf.focus({ edge: 'endEditor' }));
     }, [autoFocus, editor]);
 
     useImperativeHandle(
       ref,
       () => ({
         focus() {
-          if (editor) focusEditor(editor, Editor.end(editor as Editor, []));
+          if (editor) editor.tf.focus({ edge: 'endEditor' });
         },
         clear() {
-          if (editor) resetEditor(editor);
+          if (editor) editor.tf.reset();
         },
       }),
       [editor]
@@ -409,14 +408,14 @@ const InnerRichTextEditor = memo(
               className={contentClassName}
               placeholder={placeholder}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === 'Enter' && !e.defaultPrevented) {
                   if (onSubmit) {
                     if (!e.shiftKey) {
                       e.preventDefault();
                       onSubmit();
                     } else {
                       e.preventDefault();
-                      editor?.insertBreak();
+                      editor.tf.insertBreak();
                     }
                   }
                 }
@@ -464,6 +463,25 @@ const RichTextEditor = memo(
     );
   })
 );
+
+// This is somewhat of a hack; The inputs shouldn't be stored in the value, but that the easiest way to build them without building a hacky hidden input; So we choose the lesser evil
+const stripDropdownInputsFromValue = (value: TElement[] | undefined): TElement[] | undefined => {
+  if (!value) return undefined;
+  return value
+    .flatMap((element) => {
+      if (element.type?.endsWith('_input')) {
+        return element.children;
+      } else if (element.children) {
+        return {
+          ...element,
+          children: stripDropdownInputsFromValue(element.children as TElement[]),
+        } as TElement;
+      } else {
+        return element;
+      }
+    })
+    .filter(Boolean) as TElement[];
+};
 
 RichTextEditor.displayName = 'RichTextEditor';
 export { RichTextEditor };

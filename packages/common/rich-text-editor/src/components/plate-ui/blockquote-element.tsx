@@ -1,4 +1,4 @@
-import { PlateElement, PlateElementProps } from '@udecode/plate-common/react';
+import { PlateElement, PlateElementProps } from '@udecode/plate/react';
 import { cn } from '../../lib/utils';
 import React from 'react';
 

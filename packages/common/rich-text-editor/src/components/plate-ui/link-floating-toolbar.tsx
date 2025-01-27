@@ -1,4 +1,6 @@
-import { useFormInputProps } from '@udecode/plate-common/react';
+import { cn } from '@udecode/cn';
+import { useFormInputProps } from '@udecode/plate/react';
+import { type UseVirtualFloatingOptions, flip, offset } from '@udecode/plate-floating';
 import {
   type LinkFloatingToolbarState,
   FloatingLinkUrlInput,
@@ -8,25 +10,23 @@ import {
   useFloatingLinkInsert,
   useFloatingLinkInsertState,
 } from '@udecode/plate-link/react';
-
-import { cn } from '../../lib/utils';
-import { Icons } from '../icons';
+import { ExternalLink, Link, Text, Unlink } from 'lucide-react';
 
 import { buttonVariants } from './button-variants';
 import { inputVariants } from './input/input-variants';
 import { popoverVariants } from './popover/popover-variants';
 import { Separator } from './separator';
 
-// const floatingOptions: UseVirtualFloatingOptions = {
-//   placement: 'bottom-start',
-//   middleware: [
-//     offset(12),
-//     flip({
-//       padding: 12,
-//       fallbackPlacements: ['bottom-end', 'top-start', 'top-end'],
-//     }),
-//   ],
-// };
+const floatingOptions: UseVirtualFloatingOptions = {
+  middleware: [
+    offset(12),
+    flip({
+      fallbackPlacements: ['bottom-end', 'top-start', 'top-end'],
+      padding: 12,
+    }),
+  ],
+  placement: 'bottom-start',
+};
 
 export interface LinkFloatingToolbarProps {
   state?: LinkFloatingToolbarState;
@@ -36,7 +36,7 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
   const insertState = useFloatingLinkInsertState({
     ...state,
     floatingOptions: {
-      // ...floatingOptions,
+      ...floatingOptions,
       ...state?.floatingOptions,
     },
   });
@@ -50,7 +50,7 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
   const editState = useFloatingLinkEditState({
     ...state,
     floatingOptions: {
-      // ...floatingOptions,
+      ...floatingOptions,
       ...state?.floatingOptions,
     },
   });
@@ -69,23 +69,25 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
   const input = (
     <div className="flex w-[330px] flex-col" {...inputProps}>
       <div className="flex items-center">
-        <div className="flex items-center pl-3 text-muted-foreground">
-          <Icons.link className="size-4" />
+        <div className="text-muted-foreground flex items-center pl-2 pr-1">
+          <Link className="size-4" />
         </div>
 
         <FloatingLinkUrlInput
           className={inputVariants({ h: 'sm', variant: 'ghost' })}
           placeholder="Paste link"
+          data-plate-focus
         />
       </div>
-      <Separator />
+      <Separator className="my-1" />
       <div className="flex items-center">
-        <div className="flex items-center pl-3 text-muted-foreground">
-          <Icons.text className="size-4" />
+        <div className="text-muted-foreground flex items-center pl-2 pr-1">
+          <Text className="size-4" />
         </div>
         <input
           className={inputVariants({ h: 'sm', variant: 'ghost' })}
           placeholder="Text to display"
+          data-plate-focus
           {...textInputProps}
         />
       </div>
@@ -95,7 +97,7 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
   const editContent = editState.isEditing ? (
     input
   ) : (
-    <div className="box-content flex h-9 items-center gap-1">
+    <div className="box-content flex items-center">
       <button
         className={buttonVariants({ size: 'sm', variant: 'ghost' })}
         type="button"
@@ -108,24 +110,24 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
 
       <LinkOpenButton
         className={buttonVariants({
-          size: 'sms',
+          size: 'icon',
           variant: 'ghost',
         })}
       >
-        <Icons.externalLink width={18} />
+        <ExternalLink width={18} />
       </LinkOpenButton>
 
       <Separator orientation="vertical" />
 
       <button
         className={buttonVariants({
-          size: 'sms',
+          size: 'icon',
           variant: 'ghost',
         })}
         type="button"
         {...unlinkButtonProps}
       >
-        <Icons.unlink width={18} />
+        <Unlink width={18} />
       </button>
     </div>
   );
