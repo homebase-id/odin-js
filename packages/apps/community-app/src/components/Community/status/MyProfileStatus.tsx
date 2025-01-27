@@ -47,7 +47,7 @@ export const MyProfileStatus = ({ className }: { className?: string }) => {
           e.stopPropagation();
           setManageStatusDialogOpen(true);
         }}
-        data-tooltip-dir="left"
+        data-tooltip-dir="fixed-width"
         data-tooltip={
           hasStatus
             ? `"${myStatus?.status || myStatus?.emoji}" ${myStatus?.validTill ? `${t('till')} ${formatDateExludingYearIfCurrent(new Date(myStatus.validTill))}` : ''}`
@@ -84,7 +84,7 @@ export const ProfileStatus = ({ odinId, className }: { odinId: string; className
   return (
     <>
       <span
-        data-tooltip-dir="left"
+        data-tooltip-dir="fixed-width"
         data-tooltip={
           hasStatus
             ? `"${myStatus?.status || myStatus?.emoji}" ${myStatus?.validTill ? `${t('till')} ${formatDateExludingYearIfCurrent(new Date(myStatus.validTill))}` : ''}`
