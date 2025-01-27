@@ -42,7 +42,7 @@ export const usePushNotifications = () => {
       queryFn: ({ pageParam }) => getNotifications(pageParam),
       getNextPageParam: (lastPage) =>
         lastPage?.results && lastPage?.results?.length >= PAGE_SIZE ? lastPage.cursor : undefined,
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      staleTime: 1000, // 1s - just enough to avoid duplicate fetches in a page load
     }),
     markAsRead: useMutation({
       mutationFn: markAsRead,
@@ -236,30 +236,6 @@ export const useRemoveNotifications = (props: {
     }, 10 * 1000);
     mutation.mutate(props);
   }, [mutation, props?.disabled, props?.appId, props?.typeId]);
-};
-
-export const insertPushNotification = async (
-  queryClient: QueryClient,
-  clientNotification: PushNotification
-) => {
-  const existingNotificationData = queryClient.getQueryData<{
-    results: PushNotification[] | undefined;
-    cursor: unknown;
-  }>(['push-notifications']);
-
-  if (existingNotificationData) {
-    const newNotificationData = {
-      ...existingNotificationData,
-      results: [
-        clientNotification,
-        ...(existingNotificationData.results || []).filter(
-          (notification) =>
-            !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
-        ),
-      ],
-    };
-    queryClient.setQueryData(['push-notifications'], newNotificationData);
-  }
 };
 
 export const incrementAppIdNotificationCount = async (queryClient: QueryClient, appId: string) => {

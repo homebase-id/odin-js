@@ -12,7 +12,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { t } from '../../helpers/i18n/dictionary';
 import { DomainHighlighter } from '../../ui/DomainHighlighter/DomainHighlighter';
 import { useWebsocketSubscriber } from '../transitProcessor/useWebsocketSubscriber';
-import { incrementAppIdNotificationCount, insertPushNotification } from './usePushNotifications';
+import { incrementAppIdNotificationCount, insertNewNotification } from './usePushNotifications';
 import {
   OWNER_APP_ID,
   CHAT_APP_ID,
@@ -85,7 +85,7 @@ export const useLiveNotifications = (props: { drives?: TargetDrive[] } | undefin
     } else if (wsNotification.notificationType === 'appNotificationAdded') {
       const clientNotification = wsNotification as AppNotification;
 
-      insertPushNotification(queryClient, clientNotification);
+      insertNewNotification(queryClient, clientNotification);
       incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
 
       // Add as live notification
