@@ -20,7 +20,6 @@ import {
 } from '@udecode/plate-basic-marks/react';
 import { KbdPlugin } from '@udecode/plate-kbd/react';
 import { AutoformatPlugin } from '@udecode/plate-autoformat/react';
-import { EmojiInputPlugin, EmojiPlugin } from '@udecode/plate-emoji/react';
 import { ExitBreakPlugin, SoftBreakPlugin } from '@udecode/plate-break/react';
 import { NodeIdPlugin } from '@udecode/plate-node-id';
 import { ResetNodePlugin } from '@udecode/plate-reset-node/react';
@@ -62,14 +61,15 @@ import {
   FunctionComponent,
 } from 'react';
 import { autoformatRules } from '../lib/autoFormatRules';
-import { EmojiInputElement } from './Combobox/EmojiCombobox';
+import { EmojiDropdownInputElement } from './Emoji/EmojiDropdownInputElement';
+import { TextualEmojiPlugin } from './TextualEmojiPlugin/TextualEmojiPlugin';
+import { EmojiInputPlugin, EmojiPlugin } from './Emoji/EmojiDropdownPlugin';
 import { ImagePlugin } from './ImagePlugin/createImagePlugin';
 import { Plate, PlateContent, PlatePlugin } from '@udecode/plate-core/react';
 import { PlateLeaf } from '@udecode/plate/react';
 import { ListElement } from '../components/plate-ui/list-element';
 import { MediaOptionsContextProvider } from './MediaOptionsContext/MediaOptionsContextProvider';
 import { useMediaOptionsContext } from './MediaOptionsContext/useMediaOptionsContext';
-import { TextualEmojiPlugin } from './TextualEmojiPlugin/TextualEmojiPlugin';
 import { MentionInputPlugin, MentionPlugin } from './Mention/MentionDropdownPlugin';
 import type { Mentionable } from './Mention/MentionDropdownPlugin';
 import { MentionDropdownInputElement } from './Mention/MentionDropdownInputElement';
@@ -255,7 +255,6 @@ const InnerRichTextEditor = memo(
               ],
             },
           }),
-          EmojiInputPlugin,
           NodeIdPlugin,
           SelectOnBackspacePlugin.configure({
             options: {
@@ -319,9 +318,9 @@ const InnerRichTextEditor = memo(
             [KbdPlugin.key]: KbdLeaf,
             [StrikethroughPlugin.key]: withProps(PlateLeaf, { as: 's' }),
             [UnderlinePlugin.key]: withProps(PlateLeaf, { as: 'u' }),
-            [EmojiInputPlugin.key]: EmojiInputElement,
             [MentionInputPlugin.key]: MentionDropdownInputElement,
             [MentionPlugin.key]: MentionDropdownElement,
+            [EmojiInputPlugin.key]: EmojiDropdownInputElement,
             ...(_components || {}),
           },
         },
