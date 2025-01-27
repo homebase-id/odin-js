@@ -75,7 +75,7 @@ import type { Mentionable } from './Mention/MentionDropdownPlugin';
 import { MentionDropdownInputElement } from './Mention/MentionDropdownInputElement';
 import { MentionDropdownElement } from './Mention/MentionDropdownElement';
 
-interface RTEProps {
+interface innerRTEProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultValue?: any[] | string | undefined;
   placeholder?: string;
@@ -83,14 +83,13 @@ interface RTEProps {
   mentionables?: Mentionable[];
   name?: string;
   onChange: (e: { target: { name: string; value: RichText } }) => void;
-  className?: string;
   contentClassName?: string;
   disabled?: boolean;
   uniqueId?: string;
   autoFocus?: boolean;
   onSubmit?: () => void;
   disableHeadings?: boolean;
-  children?: React.ReactNode;
+
   stickyToolbar?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   plugins?: (PlatePlugin | PlatePlugin<any> | SlatePlugin)[];
@@ -98,6 +97,14 @@ interface RTEProps {
   components?: Record<string, FunctionComponent<any>>;
 
   onKeyDown?: (e: React.KeyboardEvent) => void;
+}
+
+interface RTEProps extends innerRTEProps {
+  children?: React.ReactNode;
+  className?: string;
+
+  // The rteKey is used to reset the RTE, without impacting the children
+  rteKey?: React.Key;
 }
 
 const resetBlockTypesCommonRule = {
@@ -112,7 +119,7 @@ const resetBlockTypesCodeBlockRule = {
 };
 
 const InnerRichTextEditor = memo(
-  forwardRef((props: RTEProps, ref) => {
+  forwardRef((props: innerRTEProps, ref) => {
     const {
       defaultValue,
       placeholder,
@@ -121,7 +128,6 @@ const InnerRichTextEditor = memo(
       name = 'richText',
       onChange,
       onSubmit,
-      className,
       contentClassName,
       disabled,
       uniqueId,
@@ -334,14 +340,6 @@ const InnerRichTextEditor = memo(
       ...plugins,
     });
 
-    // const editor = useMemo(() => {
-    //   return createPlateEditor({
-    //     id: uniqueId || 'editor',
-    //     value: defaultValAsRichText,
-    //     ...plugins,
-    //   });
-    // }, [plugins]);
-
     const handleChange = useCallback(
       (newValue: TElement[]) => {
         const isActualChange = editor?.operations.some(
@@ -387,57 +385,48 @@ const InnerRichTextEditor = memo(
     ${isDarkMode ? '[class^="PlateFloatingLink___"]{background-color:rgba(51, 65, 85, 1);}' : ''}`,
           }}
         />
-        <section
-          className={`relative flex w-[100%] flex-col ${className ?? ''} [&_.slate-selected]:!bg-primary/20 [&_.slate-selection-area]:border [&_.slate-selection-area]:bg-primary/10`}
-          onSubmit={(e) => e.stopPropagation()}
-          onClick={disabled ? undefined : (e) => e.stopPropagation()}
+        <Plate
+          editor={editor}
+          onChange={(editor) => handleChange(editor.value)}
+          readOnly={disabled}
+          // Switch keys to reset the editor when going to enabled
+          key={disabled ? 'disabled' : undefined}
         >
-          <Plate
-            editor={editor}
-            onChange={(editor) => handleChange(editor.value)}
-            readOnly={disabled}
-            // Switch keys to reset the editor when going to enabled
-            key={disabled ? 'disabled' : undefined}
-          >
-            <FixedToolbar className={stickyToolbar ? 'md:sticky' : ''}>
-              <FixedToolbarButtons disableTurnInto={disableHeadings} mediaOptions={mediaOptions} />
-            </FixedToolbar>
+          <FixedToolbar className={stickyToolbar ? 'md:sticky' : ''}>
+            <FixedToolbarButtons disableTurnInto={disableHeadings} mediaOptions={mediaOptions} />
+          </FixedToolbar>
 
-            <PlateContent
-              className={contentClassName}
-              placeholder={placeholder}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.defaultPrevented) {
-                  if (onSubmit) {
-                    if (!e.shiftKey) {
-                      e.preventDefault();
-                      onSubmit();
-                    } else {
-                      e.preventDefault();
-                      editor.tf.insertBreak();
-                    }
+          <PlateContent
+            className={contentClassName}
+            placeholder={placeholder}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.defaultPrevented) {
+                if (onSubmit) {
+                  if (!e.shiftKey) {
+                    e.preventDefault();
+                    onSubmit();
+                  } else {
+                    e.preventDefault();
+                    editor.tf.insertBreak();
                   }
                 }
+              }
 
-                onKeyDown?.(e);
-              }}
-            />
-          </Plate>
-          {props.children}
-        </section>
+              onKeyDown?.(e);
+            }}
+          />
+        </Plate>
       </>
     );
   })
 );
 InnerRichTextEditor.displayName = 'InnerRichTextEditor';
 
-const RichTextEditor = memo(
-  forwardRef(({ defaultValue, onChange, ...props }: RTEProps, ref) => {
+const DefaultValueCacheWrapper = memo(
+  forwardRef(({ defaultValue, onChange, disabled, ...props }: innerRTEProps, ref) => {
     const [activeDefaultValue, setActiveDefaultValue] = useState(defaultValue);
     useEffect(() => {
-      if (!activeDefaultValue) {
-        setActiveDefaultValue(defaultValue);
-      }
+      if (!activeDefaultValue) setActiveDefaultValue(defaultValue);
     }, [defaultValue]);
 
     const handleChange = useCallback(
@@ -451,13 +440,29 @@ const RichTextEditor = memo(
     );
 
     return (
+      <InnerRichTextEditor
+        ref={ref}
+        {...props}
+        disabled={disabled}
+        defaultValue={activeDefaultValue}
+        onChange={handleChange}
+      />
+    );
+  })
+);
+
+const RichTextEditor = memo(
+  forwardRef(({ disabled, className, children, rteKey, ...props }: RTEProps, ref) => {
+    return (
       <MediaOptionsContextProvider>
-        <InnerRichTextEditor
-          ref={ref}
-          {...props}
-          defaultValue={activeDefaultValue}
-          onChange={handleChange}
-        />
+        <section
+          className={`relative flex w-[100%] flex-col ${className ?? ''} [&_.slate-selected]:!bg-primary/20 [&_.slate-selection-area]:border [&_.slate-selection-area]:bg-primary/10`}
+          onSubmit={(e) => e.stopPropagation()}
+          onClick={disabled ? undefined : (e) => e.stopPropagation()}
+        >
+          <DefaultValueCacheWrapper ref={ref} {...props} disabled={disabled} key={rteKey} />
+          {children}
+        </section>
       </MediaOptionsContextProvider>
     );
   })
