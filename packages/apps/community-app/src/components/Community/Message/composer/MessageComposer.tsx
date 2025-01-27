@@ -227,7 +227,7 @@ export const MessageComposer = memo(
           </div>
         </>
       );
-    }, [files, canSend]);
+    }, [files, setFiles, canSend]);
 
     if (fetchingContacts) return null;
 
@@ -284,7 +284,7 @@ export const MessageComposer = memo(
                 uniqueId={
                   thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId
                 }
-                key={draft?.updatedAt}
+                rteKey={draft?.updatedAt}
                 children={innerChildren}
               />
             </Suspense>
