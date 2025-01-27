@@ -59,11 +59,22 @@ export const useCommunityChannel = (props?: {
           },
         };
 
-        updateCacheCommunityChannels(
+        const existingChannels = updateCacheCommunityChannels(
           queryClient,
           community.fileMetadata.appData.uniqueId as string,
           (data) => [...data, newChannel]
         );
+
+        return { existingChannels };
+      },
+      onError: (_, { community }, context) => {
+        if (context?.existingChannels) {
+          updateCacheCommunityChannels(
+            queryClient,
+            community.fileMetadata.appData.uniqueId as string,
+            () => context.existingChannels
+          );
+        }
       },
     }),
   };
