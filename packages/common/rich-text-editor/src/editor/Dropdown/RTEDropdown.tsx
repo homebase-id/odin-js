@@ -151,7 +151,7 @@ export const RTEDropdown = <T extends DropdownValue>({
       ></span>
       <FixedPortalWrapper
         wrapperRef={wrapperRef}
-        className="z-10 flex max-h-44 flex-col overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg"
+        className="z-10 flex max-h-44 flex-col overflow-auto rounded-lg border bg-background text-foreground shadow-lg"
       >
         {filteredItems.length === 0 && newItem ? (
           <a
