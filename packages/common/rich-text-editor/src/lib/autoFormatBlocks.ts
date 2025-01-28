@@ -5,38 +5,34 @@ import {
   StrikethroughPlugin,
   UnderlinePlugin,
 } from '@udecode/plate-basic-marks/react';
-import { preFormat } from './autoFormatUtils';
 import { AutoformatRule } from '@udecode/plate-autoformat';
 import { insertEmptyCodeBlock } from '@udecode/plate-code-block';
 import { CodeBlockPlugin } from '@udecode/plate-code-block/react';
 import { HEADING_KEYS } from '@udecode/plate-heading';
 import { toggleBulletedList } from '@udecode/plate-list';
 import { BlockquotePlugin } from '@udecode/plate-block-quote/react';
+import { ParagraphPlugin } from '@udecode/plate-core/react';
 
 export const autoformatBlocks: AutoformatRule[] = [
   {
+    match: '# ',
     mode: 'block',
     type: HEADING_KEYS.h1,
-    match: '# ',
-    preFormat,
   },
   {
+    match: '## ',
     mode: 'block',
     type: HEADING_KEYS.h2,
-    match: '## ',
-    preFormat,
   },
   {
     format: (editor) => {
       insertEmptyCodeBlock(editor, {
-        defaultType: 'p',
+        defaultType: ParagraphPlugin.key,
         insertNodesOptions: { select: true },
       });
     },
     match: '```',
     mode: 'block',
-    preFormat,
-    triggerAtBlockStart: false,
     type: CodeBlockPlugin.key,
   },
   {
