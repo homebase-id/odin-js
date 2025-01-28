@@ -131,13 +131,19 @@ export const RichTextRenderer = ({
             {children}
           </code>
         );
-      case 'code_line':
+      case 'code_line': {
+        const lang = attributes && 'lang' in attributes ? attributes.lang : undefined;
+
         return (
           // min height so empty code lines are still visible
-          <span {...attributes} className="min-h-4">
+          <span
+            {...attributes}
+            className={[`min-h-4`, lang ? 'contents' : undefined].filter(Boolean).join(' ')}
+          >
             {children}
           </span>
         );
+      }
       case 'h1':
         return (
           <h1 {...attributes} className={'text-2xl'}>

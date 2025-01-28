@@ -17,7 +17,6 @@ import {
   markAllNotificationsOfAppAsRead,
 } from '@homebase-id/js-lib/core';
 import { useEffect } from 'react';
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { useRef } from 'react';
 
