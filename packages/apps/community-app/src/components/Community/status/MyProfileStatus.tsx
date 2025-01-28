@@ -130,7 +130,7 @@ const TooltipHover = ({
         zIndex: 1000,
         padding: '0.05rem 0.2rem',
         backgroundColor: `rgba(var(--color-page-background))`,
-        color: `rgba(var(--color-foreground));`,
+        color: `rgba(var(--color-foreground))`,
         borderRadius: '0.2rem',
         boxShadow: `var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)`,
       }}
