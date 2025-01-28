@@ -30,13 +30,7 @@ const onCancel = (editor: PlateEditor, value: string, node: TNode) => {
   const path = editor.api.findPath(node);
   if (!path) return;
 
-  editor.tf.replaceNodes(
-    {
-      type: 'p',
-      children: [{ text: value }],
-    },
-    { at: path, select: true }
-  );
+  editor.tf.replaceNodes({ text: value }, { at: path, select: true });
 };
 
 export const EmojiDropdownInputElement = withRef<typeof PlateElement>(({ ...props }, ref) => {

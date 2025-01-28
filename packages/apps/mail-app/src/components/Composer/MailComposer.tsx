@@ -223,7 +223,7 @@ export const MailComposer = ({
 
           return {
             value: content.odinId,
-            label: `${content.odinId} - ${name}`,
+            label: `${content.odinId} ${name ? `- ${name}` : ''}`,
           };
         })
         .filter(Boolean) as Mentionable[]) || [],

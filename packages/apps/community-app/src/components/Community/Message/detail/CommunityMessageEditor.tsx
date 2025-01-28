@@ -121,7 +121,7 @@ export const CommunityMessageEditor = ({
 
           return {
             value: content.odinId,
-            label: `${content.odinId} - ${name}`,
+            label: `${content.odinId} ${name ? `- ${name}` : ''}`,
           };
         })
         .filter(Boolean) as Mentionable[]) || [];
