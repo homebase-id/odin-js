@@ -146,7 +146,7 @@ export const MessageComposer = memo(
 
             return {
               value: content.odinId,
-              label: `${content.odinId} - ${name}`,
+              label: `${content.odinId} ${name ? `- ${name}` : ''}`,
             };
           })
           .filter(Boolean) as Mentionable[]) || [];
@@ -230,7 +230,7 @@ export const MessageComposer = memo(
     }, [files, setFiles, canSend]);
 
     if (fetchingContacts) return null;
-
+    console.log(mentionables);
     return (
       <>
         <DraftSaver
@@ -259,7 +259,7 @@ export const MessageComposer = memo(
           >
             <Suspense
               fallback={
-                <div className="relative h-[119px] w-full border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border" />
+                <div className="relative h-[111px] w-full border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border" />
               }
             >
               <RichTextEditor
