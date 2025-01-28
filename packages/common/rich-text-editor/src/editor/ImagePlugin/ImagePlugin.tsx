@@ -7,7 +7,7 @@ import { ToolbarButton, ToolbarButtonProps } from '../../components/plate-ui/too
 import { OdinThumbnailImage } from '@homebase-id/ui-lib';
 import { insertImage, TImageElement } from './createImagePlugin';
 import { PlateRenderElementProps, useEditorRef, useEventPlateId } from '@udecode/plate-core/react';
-import { useMediaOptionsContext } from '../MediaOptionsContext/useMediaOptionsContext';
+import { useMediaOptionsContext } from './context/useMediaOptionsContext';
 import { useBlockSelected } from '@udecode/plate-selection/react';
 
 export interface MediaOptions {
@@ -25,7 +25,9 @@ type ImageToolbarButtonProps = ToolbarButtonProps;
 export const ImageToolbarButton = ({ ...props }: ImageToolbarButtonProps) => {
   const [isActive, setIsActive] = useState(false);
   const editor = useEditorRef(useEventPlateId());
-  const mediaOptions = useMediaOptionsContext().mediaOptions;
+  const mediaOptions = useMediaOptionsContext();
+
+  if (!mediaOptions) return null;
 
   return (
     <>
@@ -69,7 +71,7 @@ export const ImageElementBlock = <N extends TImageElement = TImageElement>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const path = ReactEditor.findPath(editor as any, element as any);
 
-  const options = useMediaOptionsContext().mediaOptions;
+  const options = useMediaOptionsContext();
 
   const doRemove = async () => {
     if (await options?.onRemove({ fileId: options.fileId, fileKey: element.fileKey })) {

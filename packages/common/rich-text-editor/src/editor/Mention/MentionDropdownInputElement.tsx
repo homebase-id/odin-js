@@ -2,11 +2,12 @@ import { useMemo } from 'react';
 
 import { cn, withRef } from '@udecode/cn';
 import { PlateEditor } from '@udecode/plate-core/react';
-import { AnyPluginConfig, getEditorPlugin, TNode } from '@udecode/plate';
+import { getEditorPlugin, TNode } from '@udecode/plate';
 import { DropdownValue, RTEDropdown } from '../Dropdown/RTEDropdown';
-import { ELEMENT_MENTION, Mentionable } from './MentionDropdownPlugin';
+import { ELEMENT_MENTION } from './MentionDropdownPlugin';
 import { getPlainTextFromRichText } from '@homebase-id/common-app';
 import { PlateElement } from '../../components/plate-ui/plate-element';
+import { useMentionableContext } from './context/useMentionableContext';
 
 const onSelectItem = (editor: PlateEditor, item: DropdownValue, node: TNode) => {
   const { getOptions } = getEditorPlugin(editor, {
@@ -44,16 +45,13 @@ const onCancel = (editor: PlateEditor, value: string, node: TNode) => {
   editor.tf.replaceNodes({ text: value }, { at: path, select: true });
 };
 
-interface MentionOptions extends AnyPluginConfig {
-  mentionables?: Mentionable[];
-}
-
 export const MentionDropdownInputElement = withRef<typeof PlateElement>(
   ({ className, ...props }, ref) => {
     const { children, editor, element } = props;
     const value = useMemo(() => getPlainTextFromRichText(element.children), [element.children]);
-    const options: MentionOptions = editor.getOptions<MentionOptions>({ key: ELEMENT_MENTION });
-    const mentionables = options?.mentionables;
+
+    const mentionables = useMentionableContext();
+    // const mentionables = options?.mentionables;
 
     if (!mentionables) return null;
 

@@ -68,19 +68,18 @@ import { ImagePlugin } from './ImagePlugin/createImagePlugin';
 import { Plate, PlateContent, PlatePlugin } from '@udecode/plate-core/react';
 import { PlateLeaf } from '@udecode/plate/react';
 import { ListElement } from '../components/plate-ui/list-element';
-import { MediaOptionsContextProvider } from './MediaOptionsContext/MediaOptionsContextProvider';
-import { useMediaOptionsContext } from './MediaOptionsContext/useMediaOptionsContext';
 import { MentionInputPlugin, MentionPlugin } from './Mention/MentionDropdownPlugin';
 import type { Mentionable } from './Mention/MentionDropdownPlugin';
 import { MentionDropdownInputElement } from './Mention/MentionDropdownInputElement';
 import { MentionDropdownElement } from './Mention/MentionDropdownElement';
+import { MentionableProvider } from './Mention/context/MentionableProvider';
+import { MediaOptionsProvider } from './ImagePlugin/context/MediaOptionsProvider';
 
 interface innerRTEProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultValue?: any[] | string | undefined;
   placeholder?: string;
   mediaOptions?: MediaOptions;
-  mentionables?: Mentionable[];
   name?: string;
   onChange: (e: { target: { name: string; value: RichText } }) => void;
   contentClassName?: string;
@@ -100,6 +99,8 @@ interface innerRTEProps {
 }
 
 interface RTEProps extends innerRTEProps {
+  mentionables?: Mentionable[];
+
   children?: React.ReactNode;
   className?: string;
 
@@ -124,7 +125,6 @@ const InnerRichTextEditor = memo(
       defaultValue,
       placeholder,
       mediaOptions,
-      mentionables,
       name = 'richText',
       onChange,
       onSubmit,
@@ -138,11 +138,6 @@ const InnerRichTextEditor = memo(
       components: _components,
       onKeyDown,
     } = props;
-
-    const { setMediaOptions } = useMediaOptionsContext();
-    useEffect(() => {
-      if (mediaOptions) setMediaOptions(mediaOptions);
-    }, [mediaOptions]);
 
     const { isDarkMode } = useDarkMode();
 
@@ -291,13 +286,10 @@ const InnerRichTextEditor = memo(
           }),
           EmojiPlugin,
           TextualEmojiPlugin,
-          mentionables
-            ? // MentionPlugin is not typed correctly to our custom implementation, so we need to cast it to any
-              MentionPlugin.configure({
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                options: { mentionables: mentionables || [], insertSpaceAfterMention: true } as any,
-              })
-            : undefined,
+          MentionPlugin.configure({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            options: { insertSpaceAfterMention: true } as any,
+          }),
           mediaOptions ? ImagePlugin : undefined,
           ...(_plugins || []),
         ].filter(Boolean) as PlatePlugin[],
@@ -331,7 +323,7 @@ const InnerRichTextEditor = memo(
           },
         },
       }),
-      [mentionables]
+      []
     );
 
     const editor = usePlateEditor({
@@ -371,7 +363,7 @@ const InnerRichTextEditor = memo(
 
     return (
       <>
-        {/* Very dirty way of overruling default styling that are applied to the RTE */}
+        {/* Dirty way of overruling default styling that are applied to the RTE */}
         <style
           dangerouslySetInnerHTML={{
             __html: `[data-slate-editor="true"]:focus-visible {
@@ -454,16 +446,18 @@ const DefaultValueCacheWrapper = memo(
 const RichTextEditor = memo(
   forwardRef(({ disabled, className, children, rteKey, ...props }: RTEProps, ref) => {
     return (
-      <MediaOptionsContextProvider>
-        <section
-          className={`relative flex w-[100%] flex-col ${className ?? ''} [&_.slate-selected]:!bg-primary/20 [&_.slate-selection-area]:border [&_.slate-selection-area]:bg-primary/10`}
-          onSubmit={(e) => e.stopPropagation()}
-          onClick={disabled ? undefined : (e) => e.stopPropagation()}
-        >
-          <DefaultValueCacheWrapper ref={ref} {...props} disabled={disabled} key={rteKey} />
-          {children}
-        </section>
-      </MediaOptionsContextProvider>
+      <MediaOptionsProvider mediaOptions={props.mediaOptions}>
+        <MentionableProvider mentionables={props.mentionables || []}>
+          <section
+            className={`relative flex w-[100%] flex-col ${className ?? ''} [&_.slate-selected]:!bg-primary/20 [&_.slate-selection-area]:border [&_.slate-selection-area]:bg-primary/10`}
+            onSubmit={(e) => e.stopPropagation()}
+            onClick={disabled ? undefined : (e) => e.stopPropagation()}
+          >
+            <DefaultValueCacheWrapper ref={ref} {...props} disabled={disabled} key={rteKey} />
+            {children}
+          </section>
+        </MentionableProvider>
+      </MediaOptionsProvider>
     );
   })
 );
