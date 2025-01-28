@@ -70,7 +70,7 @@ export interface GetModifiedResultOptions {
   includeTransferHistory?: boolean;
   excludePreviewThumbnail?: boolean;
   maxDate?: number | undefined;
-  cursor?: number | undefined;
+  cursor?: string | undefined;
 }
 
 export interface GetBatchQueryResultOptions {

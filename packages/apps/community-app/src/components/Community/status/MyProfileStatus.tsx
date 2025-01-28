@@ -120,7 +120,7 @@ const TooltipHover = ({
 }) => {
   return (
     <span
-      className="fixed hidden group-hover:block"
+      className="fixed hidden md:group-hover:block"
       style={{
         top: wrapperRef.current?.getBoundingClientRect().top,
         left: wrapperRef.current?.getBoundingClientRect().left,

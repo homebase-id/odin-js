@@ -135,7 +135,7 @@ const findChangesSinceTimestamp = async (
 
   const modifiedFiles = await queryModified(dotYouClient, params, {
     maxRecords: BATCH_SIZE,
-    cursor: modifiedCursor,
+    cursor: modifiedCursor + '',
     excludePreviewThumbnail: false,
     includeHeaderContent: true,
     includeTransferHistory: true,

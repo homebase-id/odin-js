@@ -204,14 +204,14 @@ const findChangesSinceTimestamp = async (
     odinId && dotYouClient.getHostIdentity() !== odinId
       ? await queryModifiedOverPeer(dotYouClient, odinId, params, {
           maxRecords: BATCH_SIZE,
-          cursor: modifiedCursor,
+          cursor: modifiedCursor + '',
           excludePreviewThumbnail: false,
           includeHeaderContent: true,
           includeTransferHistory: false,
         })
       : await queryModified(dotYouClient, params, {
           maxRecords: BATCH_SIZE,
-          cursor: modifiedCursor,
+          cursor: modifiedCursor + '',
           excludePreviewThumbnail: false,
           includeHeaderContent: true,
           includeTransferHistory: false,
