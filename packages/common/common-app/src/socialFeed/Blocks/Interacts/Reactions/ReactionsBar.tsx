@@ -159,7 +159,6 @@ export const ReactionsBar = forwardRef(
     }, [isCustomOpen]);
 
     const handleLike = (emoji: string) => {
-      console.log('liking');
       doLike(emoji);
       setIsCustomOpen(false);
     };
