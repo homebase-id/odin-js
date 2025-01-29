@@ -395,7 +395,10 @@ const ChannelItem = memo(
                 icon: Pin,
                 onClick: togglePin,
               },
-              stringGuidsEqual(channel.fileMetadata.appData.uniqueId, COMMUNITY_DEFAULT_GENERAL_ID)
+              stringGuidsEqual(
+                channel.fileMetadata.appData.uniqueId,
+                COMMUNITY_DEFAULT_GENERAL_ID
+              ) || channel.fileMetadata.originalAuthor !== loggedOnIdentity
                 ? undefined
                 : {
                     label: 'Rename',
