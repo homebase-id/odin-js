@@ -29,6 +29,8 @@ const SHADED_BG = 'bg-page-background text-foreground';
 const NOT_SHADED_BG = 'bg-white dark:bg-black';
 
 export const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
+  useDarkMode();
+
   const [searchParams] = useSearchParams();
   const uiSetting = searchParams.get('ui');
 

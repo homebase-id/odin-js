@@ -163,7 +163,7 @@ export const Sidenav = ({
                 <NavItem
                   icon={Grid}
                   label={'Third party apps & services'}
-                  to={'${OWNER_ROOT}/third-parties'}
+                  to={`${OWNER_ROOT}/third-parties`}
                 />
               )}
               {isTightHeight ? null : (
