@@ -3,13 +3,19 @@ const LOCALSTORAGE_KEY = 'prefersDark';
 export const IS_DARK_CLASSNAME = 'dark';
 
 export const useDarkMode = () => {
-  const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const localPreference = localStorage.getItem(LOCALSTORAGE_KEY);
+  const browserPreference = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-  const finalChoice =
-    localPreference !== undefined && localPreference !== null
-      ? localPreference === '1'
-      : prefersDarkMode;
+  const finalChoice = (() => {
+    const search = window.location.search;
+    const urlPreference = new URLSearchParams(search).get(LOCALSTORAGE_KEY);
+    if (urlPreference !== null) return urlPreference === '1';
+
+    const localPreference = localStorage.getItem(LOCALSTORAGE_KEY);
+    if (localPreference !== undefined && localPreference !== null) return localPreference === '1';
+
+    const browserPreference = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return browserPreference;
+  })();
 
   const [isDarkMode, setIsDarkMode] = useState(finalChoice);
 
@@ -21,10 +27,15 @@ export const useDarkMode = () => {
   setDocumentClass(finalChoice);
 
   const toggleDarkMode = () => {
+    // remove search params
+    const url = new URL(window.location.href);
+    url.searchParams.delete(LOCALSTORAGE_KEY);
+    window.history.replaceState({}, '', url.toString());
+
     const wasDarkMode = document.documentElement.classList.contains(IS_DARK_CLASSNAME);
 
     const isDarkMode = !wasDarkMode;
-    if ((isDarkMode && prefersDarkMode) || (!isDarkMode && !prefersDarkMode))
+    if ((isDarkMode && browserPreference) || (!isDarkMode && !browserPreference))
       localStorage.removeItem(LOCALSTORAGE_KEY);
     else localStorage.setItem(LOCALSTORAGE_KEY, isDarkMode ? '1' : '0');
 
