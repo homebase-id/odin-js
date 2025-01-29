@@ -52,7 +52,9 @@ export const getFileHeaderByUniqueId = async <T = string>(
       ...fileHeader.fileMetadata,
       appData: {
         ...fileHeader.fileMetadata.appData,
-        content: tryJsonParse<T>(fileHeader.fileMetadata.appData.content),
+        content: decrypt
+          ? tryJsonParse<T>(fileHeader.fileMetadata.appData.content)
+          : (fileHeader.fileMetadata.appData.content as T),
       },
     },
   };
