@@ -99,7 +99,7 @@ export const ChatMessageInfo = ({
                       />
                       <AuthorName odinId={recipient} />
                     </div>
-                    {isAuthor ? (
+                    {isAuthor && recipientTransferHistory ? (
                       <div className="flex flex-row justify-end gap-2 sm:contents">
                         <FailedDeliveryDetails
                           transferHistory={recipientTransferHistory}

@@ -85,7 +85,7 @@ export const MailConversationInfo = ({
                     />
                     <AuthorName odinId={recipient} />
                   </div>
-                  {deliveryStatus === MailDeliveryStatus.Failed ? (
+                  {recipientTransferHistory && deliveryStatus === MailDeliveryStatus.Failed ? (
                     <div className="flex flex-row items-center gap-2 text-red-500">
                       <Exclamation className="h-5 w-5" /> {t('Failed to deliver')}
                     </div>
