@@ -61,6 +61,10 @@ export const DraftSaver = ({
         },
       };
 
+      if (message === undefined) {
+        delete newDrafts[draftKey];
+      }
+
       const newMeta: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata> = {
         ...metadata,
         fileMetadata: {

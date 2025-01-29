@@ -17,6 +17,9 @@ import {
   getTargetDriveFromCommunityId,
 } from '../../../../providers/CommunityDefinitionProvider';
 import { useCommunityMessage } from '../../../../hooks/community/messages/useCommunityMessage';
+import { ChannelPlugin } from '../RTEChannelDropdown/RTEChannelDropdownPlugin';
+import type { Mentionable } from '@homebase-id/rich-text-editor';
+
 const RichTextEditor = lazy(() =>
   import('@homebase-id/rich-text-editor').then((rootExport) => ({
     default: rootExport.RichTextEditor,
@@ -37,23 +40,25 @@ export const CommunityMessageEditor = ({
 
   const messageContent = msg.fileMetadata.appData.content;
 
-  const { data: fullMessageContent, isFetching: fetchingMoreContent } =
-    useContentFromPayload<CommunityMessage>(
-      hasMoreContent && community
-        ? {
-            odinId: community?.fileMetadata.senderOdinId,
-            targetDrive: getTargetDriveFromCommunityId(
-              community.fileMetadata.appData.uniqueId as string
-            ),
-            fileId: msg.fileId,
-            payloadKey: DEFAULT_PAYLOAD_KEY,
-            lastModified: msg.fileMetadata.payloads?.find(
-              (pyld) => pyld.key === DEFAULT_PAYLOAD_KEY
-            )?.lastModified,
-            systemFileType: msg.fileSystemType,
-          }
-        : undefined
-    );
+  const {
+    data: fullMessageContent,
+    isFetching: fetchingMoreContent,
+    refetch,
+  } = useContentFromPayload<CommunityMessage>(
+    hasMoreContent && community
+      ? {
+          odinId: community?.fileMetadata.senderOdinId,
+          targetDrive: getTargetDriveFromCommunityId(
+            community.fileMetadata.appData.uniqueId as string
+          ),
+          fileId: msg.fileId,
+          payloadKey: DEFAULT_PAYLOAD_KEY,
+          lastModified: msg.fileMetadata.payloads?.find((pyld) => pyld.key === DEFAULT_PAYLOAD_KEY)
+            ?.lastModified,
+          systemFileType: msg.fileSystemType,
+        }
+      : undefined
+  );
 
   const [message, setMessage] = useState(
     hasMoreContent ? fullMessageContent?.message : messageContent.message
@@ -94,7 +99,7 @@ export const CommunityMessageEditor = ({
   }, [updateStatus]);
 
   const { data: contacts } = useAllContacts(true);
-  const mentionables: { key: string; text: string }[] = useMemo(() => {
+  const mentionables: Mentionable[] = useMemo(() => {
     const filteredContacts =
       (contacts
         ?.filter(
@@ -104,21 +109,44 @@ export const CommunityMessageEditor = ({
               contact.fileMetadata.appData.content.odinId
             )
         )
-        ?.map((contact) =>
-          contact.fileMetadata.appData.content.odinId
-            ? {
-                key: contact.fileMetadata.appData.content.odinId,
-                text: contact.fileMetadata.appData.content.odinId,
-              }
-            : undefined
-        )
-        .filter(Boolean) as { key: string; text: string }[]) || [];
+        ?.map((contact) => {
+          const content = contact.fileMetadata.appData.content;
+          if (!content?.odinId) return;
+          const name =
+            content.name &&
+            (content.name.displayName ??
+              (content.name.givenName || content.name.surname
+                ? `${content.name.givenName ?? ''} ${content.name.surname ?? ''}`
+                : undefined));
 
-    filteredContacts.push({ key: '@channel', text: '@channel' });
+          return {
+            value: content.odinId,
+            label: `${content.odinId} ${name ? `- ${name}` : ''}`,
+          };
+        })
+        .filter(Boolean) as Mentionable[]) || [];
+
+    filteredContacts.push({ value: '@channel', label: 'channel' });
     return filteredContacts;
   }, [contacts]);
 
+  const plugins = useMemo(() => {
+    return [
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
+    ];
+  }, []);
+
   if (hasMoreContent && fetchingMoreContent) return <div>{t('Loading')}...</div>;
+  if (hasMoreContent && !fullMessageContent)
+    return (
+      <div>
+        {t('Failed to load the full message to edit')}{' '}
+        <ActionButton onClick={() => refetch()} type="secondary">
+          {t('Retry')}
+        </ActionButton>
+      </div>
+    );
 
   return (
     <div>
@@ -134,6 +162,7 @@ export const CommunityMessageEditor = ({
           autoFocus={!isTouchDevice()}
           onSubmit={isTouchDevice() ? undefined : doSend}
           mentionables={mentionables}
+          plugins={plugins}
           onKeyDown={(e) => {
             if (e.key === 'Escape')
               confirm(t('Are you sure? You will lose any pending changes')) && onClose();

@@ -49,8 +49,12 @@ export class BaseDotYouClient {
     );
   }
 
-  getLoggedInIdentity(): string {
-    return this._options?.loggedInIdentity || this.getHostIdentity();
+  getLoggedInIdentity(): string | undefined {
+    return this._options?.loggedInIdentity ||
+      this.getType() === ApiType.Owner ||
+      this.getType() === ApiType.App
+      ? this.getHostIdentity()
+      : undefined;
   }
 
   isOwner(): boolean {
@@ -119,7 +123,7 @@ export class BaseDotYouClient {
 
         isDebug && console.debug('request', request.url, { ...request });
 
-        if (['POST', 'PUT', 'DELETE'].includes(request.method?.toUpperCase() || '')) {
+        if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method?.toUpperCase() || '')) {
           const json = jsonStringify64(request.data);
           const payload = await encryptData(json, getRandomIv(), ss);
 

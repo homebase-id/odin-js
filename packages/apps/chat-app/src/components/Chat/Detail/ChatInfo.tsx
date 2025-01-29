@@ -29,6 +29,7 @@ export const ChatInfo = ({
   const target = usePortal('modal-container');
 
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  if (!loggedOnIdentity) return null;
   const conversationContent = conversation.fileMetadata.appData.content;
   const recipients = conversationContent.recipients.filter(
     (recipient) => recipient !== loggedOnIdentity

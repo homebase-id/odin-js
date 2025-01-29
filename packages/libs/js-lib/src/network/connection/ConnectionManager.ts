@@ -33,7 +33,7 @@ export const getConnections = async (
   dotYouClient: DotYouClient,
   data: {
     count: number;
-    cursor?: number;
+    cursor?: unknown;
   }
 ): Promise<NumberCursoredResult<DotYouProfile>> => {
   const client = dotYouClient.createAxiosClient();

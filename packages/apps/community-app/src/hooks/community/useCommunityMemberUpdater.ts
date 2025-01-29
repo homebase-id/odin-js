@@ -21,7 +21,10 @@ export const useCommunityMemberUpdater = (
   useEffect(() => {
     if (!membersFetched || !community || !isAdmin || !communityCircleId) return;
 
-    const circleMembers = [...(members?.map((member) => member.domain) || []), loggedOnIdentity];
+    const circleMembers = [
+      ...(members?.map((member) => member.domain) || []),
+      loggedOnIdentity,
+    ].filter(Boolean) as string[];
     const communityMembers = community.fileMetadata.appData.content.members || [];
 
     if (

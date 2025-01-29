@@ -12,9 +12,17 @@ export interface FileMetadata<T = string> {
   senderOdinId: string;
   appData: AppFileMetaData<T>;
   reactionPreview?: ReactionPreview;
+  localAppData?: LocalAppData;
   versionTag: string;
 
   payloads?: PayloadDescriptor[];
+}
+
+export interface LocalAppData {
+  versionTag?: string;
+  iv?: string;
+  content?: string;
+  tags?: string[];
 }
 
 export interface AccessControlList {

@@ -56,6 +56,8 @@ export interface FileQueryParams {
   userDate?: TimeRange;
   tagsMatchAtLeastOne?: string[] | undefined;
   tagsMatchAll?: string[] | undefined;
+  localTagsMatchAtLeastOne?: string[] | undefined;
+  localTagsMatchAll?: string[] | undefined;
   globalTransitId?: string[] | undefined;
   clientUniqueIdAtLeastOne?: string[] | undefined;
   systemFileType?: SystemFileType;
@@ -68,7 +70,7 @@ export interface GetModifiedResultOptions {
   includeTransferHistory?: boolean;
   excludePreviewThumbnail?: boolean;
   maxDate?: number | undefined;
-  cursor?: number | undefined;
+  cursor?: string | undefined;
 }
 
 export interface GetBatchQueryResultOptions {
@@ -82,7 +84,7 @@ export interface GetBatchQueryResultOptions {
 
 export interface QueryModifiedResponse {
   includeHeaderContent: boolean;
-  cursor: number;
+  cursor: unknown;
   searchResults: (HomebaseFile | DeletedHomebaseFile)[];
 }
 

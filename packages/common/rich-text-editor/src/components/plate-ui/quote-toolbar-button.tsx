@@ -3,9 +3,8 @@ import { ToolbarButton } from './toolbar';
 import { RichTextQuote } from '../../../../common-app/src/ui/Icons';
 import { BlockquotePlugin } from '@udecode/plate-block-quote/react';
 import { useEditorState } from '@udecode/plate-core/react';
-import { toggleBlock } from '@udecode/plate-core';
-import { collapseSelection, findNode, isBlock, isCollapsed, TElement } from '@udecode/plate-common';
-import { focusEditor } from '@udecode/plate-common/react';
+
+import { RangeApi, TElement } from '@udecode/plate';
 
 export const QuoteToolbarButton = withRef<typeof ToolbarButton>((_props, ref) => {
   const editor = useEditorState();
@@ -13,10 +12,10 @@ export const QuoteToolbarButton = withRef<typeof ToolbarButton>((_props, ref) =>
   const type = BlockquotePlugin.key;
 
   let isQuote = false;
-  if (isCollapsed(editor?.selection)) {
-    const entry = findNode<TElement>(editor!, {
+  if (RangeApi.isCollapsed(editor?.selection)) {
+    const entry = editor.api.node<TElement>({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      match: (n: any) => isBlock(editor, n),
+      match: (n: any) => editor.api.isBlock(n),
     });
     if (entry) {
       isQuote = entry[0].type === type;
@@ -29,10 +28,10 @@ export const QuoteToolbarButton = withRef<typeof ToolbarButton>((_props, ref) =>
       tooltip={'Quote'}
       pressed={isQuote}
       onClick={() => {
-        toggleBlock(editor, { type });
+        editor.tf.toggleBlock(type);
 
-        collapseSelection(editor);
-        focusEditor(editor);
+        editor.tf.collapse();
+        editor.tf.focus();
       }}
     >
       <RichTextQuote className="h-5 w-5" />

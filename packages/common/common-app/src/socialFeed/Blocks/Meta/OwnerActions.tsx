@@ -31,6 +31,7 @@ export const OwnerActions = ({
   const { mutateAsync: editPost } = useManagePost().update;
 
   const navigate = useNavigate();
+  if (!loggedOnIdentity) return null;
   const host = new DotYouClient({ api: ApiType.Guest, hostIdentity: loggedOnIdentity }).getRoot();
 
   return (

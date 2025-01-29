@@ -29,6 +29,7 @@ import {
   ChatBubble,
   RadioTower,
   Question,
+  Plus,
 } from '@homebase-id/common-app/icons';
 import { CommunityInfoDialog } from '../../components/Community/CommunityInfoDialog';
 import { useConversationMetadata } from '@homebase-id/chat-app/src/hooks/chat/useConversationMetadata';
@@ -38,6 +39,7 @@ import { ConversationWithYourselfId } from '@homebase-id/chat-app/src/providers/
 import { useCommunityMessages } from '../../hooks/community/messages/useCommunityMessages';
 import { useHasUnreadThreads } from '../../hooks/community/threads/useCommunityThreads';
 import { MyProfileStatus, ProfileStatus } from '../../components/Community/status/MyProfileStatus';
+import { CreateChannelDialog } from '../../components/Community/channel/CreateChannelDialog';
 
 const maxChannels = 7;
 export const CommunityNav = memo(
@@ -140,7 +142,10 @@ export const CommunityNav = memo(
             </div>
 
             <div className="flex flex-col gap-1">
-              <h2 className="px-1 font-semibold">{t('Channels')}</h2>
+              <div className="group flex flex-row items-center justify-between px-1">
+                <h2 className="font-semibold">{t('Channels')}</h2>
+                <CreateNewChannelButton />
+              </div>
               <ErrorBoundary>
                 {pinnedChannels?.map((channel) => (
                   <ChannelItem
@@ -486,3 +491,24 @@ const DirectMessageItem = memo(
   }
 );
 DirectMessageItem.displayName = 'DirectMessageItem';
+
+const CreateNewChannelButton = memo(() => {
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
+  return (
+    <>
+      {isCreateDialogOpen ? (
+        <CreateChannelDialog onClose={() => setIsCreateDialogOpen(false)} />
+      ) : null}
+      <ActionButton
+        size="none"
+        type="mute"
+        className="group-hover:opacity-100 md:opacity-0"
+        onClick={() => setIsCreateDialogOpen(true)}
+      >
+        <Plus className="h-4 w-4" />
+      </ActionButton>
+    </>
+  );
+});
+CreateNewChannelButton.displayName = 'CreateNewChannelButton';

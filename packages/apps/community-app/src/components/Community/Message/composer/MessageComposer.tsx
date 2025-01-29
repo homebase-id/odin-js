@@ -26,10 +26,10 @@ import { CommunityDefinition } from '../../../../providers/CommunityDefinitionPr
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
 import { CommunityChannel } from '../../../../providers/CommunityProvider';
 import { ChannelPlugin } from '../RTEChannelDropdown/RTEChannelDropdownPlugin';
-import { Mentionable } from '@homebase-id/rich-text-editor/src/components/plate-ui/mention-input-element';
 import { useMessageDraft } from './useMessageDraft';
 import { DraftSaver } from './DraftSaver';
 import React from 'react';
+import type { Mentionable } from '@homebase-id/rich-text-editor';
 
 const RichTextEditor = lazy(() =>
   import('@homebase-id/rich-text-editor').then((rootExport) => ({
@@ -145,15 +145,13 @@ export const MessageComposer = memo(
                   : undefined));
 
             return {
-              key: `${content.odinId}`,
               value: content.odinId,
-              text: content.odinId,
-              label: `${content.odinId} - ${name}`,
+              label: `${content.odinId} ${name ? `- ${name}` : ''}`,
             };
           })
           .filter(Boolean) as Mentionable[]) || [];
 
-      filteredContacts.push({ key: '@channel', text: '@channel' });
+      filteredContacts.push({ value: '@channel', label: 'channel' });
       return filteredContacts;
     }, [contacts]);
 
@@ -229,7 +227,7 @@ export const MessageComposer = memo(
           </div>
         </>
       );
-    }, [files, canSend]);
+    }, [files, setFiles, canSend]);
 
     return (
       <>
@@ -259,7 +257,7 @@ export const MessageComposer = memo(
           >
             <Suspense
               fallback={
-                <div className="relative h-[119px] w-full border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border" />
+                <div className="relative h-[111px] w-full border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border" />
               }
             >
               <RichTextEditor
@@ -284,7 +282,7 @@ export const MessageComposer = memo(
                 uniqueId={
                   thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId
                 }
-                key={draft?.updatedAt}
+                rteKey={draft?.updatedAt}
                 children={innerChildren}
               />
             </Suspense>

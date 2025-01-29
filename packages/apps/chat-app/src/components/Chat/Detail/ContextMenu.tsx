@@ -18,9 +18,11 @@ import { ChatMessageInfo } from './ChatMessageInfo';
 import { EditChatMessage } from './EditChatMessage';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { useChatToggleMessageStar } from '../../../hooks/chat/useChatToggleMessageStar';
 
 export interface ChatActions {
   doReply: (msg: HomebaseFile<ChatMessage>) => void;
+  toggleStar: (msg: HomebaseFile<ChatMessage>) => void;
   doDelete: (msg: HomebaseFile<ChatMessage>, deleteForEveryone: boolean) => void;
 }
 
@@ -36,7 +38,7 @@ export const ContextMenu = ({
   if (!chatActions) return null;
   const [showMessageInfo, setShowMessageInfo] = useState(false);
   const [editMessage, setEditMessage] = useState(false);
-
+  const { isStarred } = useChatToggleMessageStar({ msg });
   const { mutate: resend, error: resendError } = useChatMessage().update;
 
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
@@ -115,6 +117,10 @@ export const ContextMenu = ({
           {
             label: t('Reply'),
             onClick: () => chatActions.doReply(msg),
+          },
+          {
+            label: isStarred ? t('Unstar') : t('Star'),
+            onClick: () => chatActions.toggleStar(msg),
           },
           ...optionalOptions,
         ]}

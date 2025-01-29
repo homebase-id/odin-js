@@ -83,7 +83,12 @@ export const useCommunityMetadata = (props?: {
       return await uploadCommunityMetadata(dotYouClient, newlyMerged, onVersionConflict);
     };
 
-    return await uploadCommunityMetadata(dotYouClient, metadata, onVersionConflict);
+    // We cleanup the drafts only for the inital save; When we retry we want to keep the drafts to avoid bad merging
+    const metadataCopy = { ...metadata };
+    metadataCopy.fileMetadata.appData.content.drafts = cleanupDrafts(
+      metadataCopy.fileMetadata.appData.content.drafts || {}
+    );
+    return await uploadCommunityMetadata(dotYouClient, metadataCopy, onVersionConflict);
   };
 
   return {
@@ -135,6 +140,28 @@ export const useCommunityMetadata = (props?: {
       },
     }),
   };
+};
+
+const cleanupDrafts = (drafts: Record<string, Draft | undefined>) => {
+  const newDrafts = { ...drafts };
+
+  const oneDayAgo = new Date().getTime() - 24 * 60 * 60 * 1000;
+  // Cleanup empty drafts
+  Object.keys(newDrafts).forEach((key) => {
+    // We assume that we don't have to store emtpy drafts
+    if (newDrafts[key]?.message === undefined) {
+      delete newDrafts[key];
+    }
+
+    // We assume that if a draft has cleared the message that other devices have synced it within a week and we can delete it
+    if (newDrafts[key]?.message?.length === 0) {
+      if (newDrafts[key]?.updatedAt < oneDayAgo) {
+        delete newDrafts[key];
+      }
+    }
+  });
+
+  return newDrafts;
 };
 
 const mergeMetadata = (

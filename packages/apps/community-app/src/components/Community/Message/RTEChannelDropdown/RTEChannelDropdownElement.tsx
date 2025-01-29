@@ -1,17 +1,14 @@
 import { cn, withRef } from '@udecode/cn';
-import { getHandler } from '@udecode/plate-common';
 import { useFocused, useSelected } from 'slate-react';
 import { TChannelElement } from './RTEChannelDropdownPlugin';
-import { PlateElement, useElement } from '@udecode/plate-common/react';
+import { PlateElement, useElement } from '@udecode/plate/react';
 
 export const RTEChannelDropdownElement = withRef<
   typeof PlateElement,
   {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onClick?: (channelNode: any) => void;
     renderLabel?: (channel: TChannelElement) => string;
   }
->(({ children, className, onClick, renderLabel, ...props }, ref) => {
+>(({ children, className, renderLabel, ...props }, ref) => {
   const element = useElement<TChannelElement>();
   const selected = useSelected();
   const focused = useFocused();
@@ -28,7 +25,6 @@ export const RTEChannelDropdownElement = withRef<
       )}
       contentEditable={false}
       data-slate-value={element.value}
-      onClick={getHandler(onClick, element)}
       ref={ref}
       {...props}
     >

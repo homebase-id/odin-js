@@ -37,7 +37,6 @@ import {
   CHAT_ROOT_PATH,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
-import VideoPlayer from '../templates/VideoPlayer/VideoPlayer';
 import { OdinQueryClient } from '@homebase-id/common-app';
 import { useValidateAuthorization } from '../hooks/auth/useAuth';
 
@@ -78,7 +77,7 @@ function App() {
             <Route path={'new-group'} element={<ChatHome />} />
             <Route path={':conversationKey/:chatMessageKey'} element={<ChatHome />} />
             <Route path={':conversationKey/:chatMessageKey/:mediaKey'} element={<ChatHome />} />
-            <Route path={'player/:videoFileId/:videoFileKey'} element={<VideoPlayer />} />
+            <Route path={'starred'} element={<ChatHome />} />
           </Route>
 
           <Route
@@ -93,7 +92,12 @@ function App() {
           />
         </Route>
       </>
-    )
+    ),
+    {
+      future: {
+        v7_relativeSplatPath: true,
+      },
+    }
   );
 
   return (
@@ -103,7 +107,13 @@ function App() {
       </Helmet>
       <OdinQueryClient app="app" type="indexeddb">
         <DotYouClientProvider>
-          <RouterProvider router={router} fallbackElement={<></>} />
+          <RouterProvider
+            router={router}
+            fallbackElement={<></>}
+            future={{
+              v7_startTransition: true,
+            }}
+          />
         </DotYouClientProvider>
       </OdinQueryClient>
     </HelmetProvider>

@@ -38,6 +38,7 @@ import { useBlocker } from 'react-router-dom';
 import { MediaOptions } from '@homebase-id/rich-text-editor/src/editor/ImagePlugin/ImagePlugin';
 import { useMailSettings } from '../../hooks/mail/useMailSettings';
 import { Plus, PaperPlane, Save, Trash } from '@homebase-id/common-app/icons';
+import type { Mentionable } from '@homebase-id/rich-text-editor';
 
 const FIFTY_MEGA_BYTES = 50 * 1024 * 1024;
 
@@ -78,7 +79,7 @@ export const MailComposer = ({
             message: [],
             originId: originId || getNewId(),
             threadId: threadId || getNewId(),
-            sender: loggedOnIdentity,
+            sender: loggedOnIdentity || '',
             forwardedMailThread,
             deliveryStatus: MailDeliveryStatus.NotSent,
           },
@@ -207,18 +208,25 @@ export const MailComposer = ({
   );
 
   const { data: contacts } = useAllContacts(true);
-  const mentionables: { key: string; text: string }[] = useMemo(
+  const mentionables: Mentionable[] = useMemo(
     () =>
       (contacts
-        ?.map((contact) =>
-          contact.fileMetadata.appData.content.odinId
-            ? {
-                key: contact.fileMetadata.appData.content.odinId,
-                text: contact.fileMetadata.appData.content.odinId,
-              }
-            : undefined
-        )
-        .filter(Boolean) as { key: string; text: string }[]) || [],
+        ?.map((contact) => {
+          const content = contact.fileMetadata.appData.content;
+          if (!content?.odinId) return;
+          const name =
+            content.name &&
+            (content.name.displayName ??
+              (content.name.givenName || content.name.surname
+                ? `${content.name.givenName ?? ''} ${content.name.surname ?? ''}`
+                : undefined));
+
+          return {
+            value: content.odinId,
+            label: `${content.odinId} ${name ? `- ${name}` : ''}`,
+          };
+        })
+        .filter(Boolean) as Mentionable[]) || [],
     [contacts]
   );
 

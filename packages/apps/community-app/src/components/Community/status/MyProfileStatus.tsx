@@ -11,7 +11,7 @@ import {
   usePortal,
 } from '@homebase-id/common-app';
 import { Ellipsis, Save, Times } from '@homebase-id/common-app/icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useMyStatus } from '../../../hooks/community/status/useMyStatus';
 import { useCommunity } from '../../../hooks/community/useCommunity';
@@ -32,30 +32,33 @@ export const MyProfileStatus = ({ className }: { className?: string }) => {
     (myStatus?.emoji || myStatus?.status) &&
     (!myStatus?.validTill || new Date(myStatus.validTill) > new Date());
 
+  const spanRef = useRef<HTMLSpanElement>(null);
+
   if (!community || !isFetched) return null;
 
   return (
     <>
-      <ActionButton
-        key={myStatus?.status || myStatus?.emoji || 'none'}
-        icon={hasStatus ? undefined : Ellipsis}
-        size="none"
-        type="mute"
-        className={`opacity-50 hover:opacity-100 ${className || ''}`}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setManageStatusDialogOpen(true);
-        }}
-        data-tooltip-dir="left"
-        data-tooltip={
-          hasStatus
-            ? `"${myStatus?.status || myStatus?.emoji}" ${myStatus?.validTill ? `${t('till')} ${formatDateExludingYearIfCurrent(new Date(myStatus.validTill))}` : ''}`
-            : undefined
-        }
-      >
-        {hasStatus && (myStatus?.emoji || '💬')}
-      </ActionButton>
+      <span ref={spanRef}>
+        <ActionButton
+          key={myStatus?.status || myStatus?.emoji || 'none'}
+          icon={hasStatus ? undefined : Ellipsis}
+          size="none"
+          type="mute"
+          className={`group opacity-50 hover:opacity-100 ${className || ''}`}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setManageStatusDialogOpen(true);
+          }}
+        >
+          {hasStatus && (myStatus?.emoji || '💬')}
+          {hasStatus ? (
+            <TooltipHover wrapperRef={spanRef}>
+              {`"${myStatus?.status || myStatus?.emoji}" ${myStatus?.validTill ? `${t('till')} ${formatDateExludingYearIfCurrent(new Date(myStatus.validTill))}` : ''}`}
+            </TooltipHover>
+          ) : null}
+        </ActionButton>
+      </span>
       {community && isManageStatusDialogOpen ? (
         <StatusDialog
           community={community}
@@ -79,18 +82,15 @@ export const ProfileStatus = ({ odinId, className }: { odinId: string; className
     (myStatus?.emoji || myStatus?.status) &&
     (!myStatus?.validTill || new Date(myStatus.validTill) > new Date());
 
+  const spanRef = useRef<HTMLSpanElement>(null);
+
   if (!community || !isFetched || !hasStatus) return null;
 
   return (
     <>
       <span
-        data-tooltip-dir="left"
-        data-tooltip={
-          hasStatus
-            ? `"${myStatus?.status || myStatus?.emoji}" ${myStatus?.validTill ? `${t('till')} ${formatDateExludingYearIfCurrent(new Date(myStatus.validTill))}` : ''}`
-            : undefined
-        }
-        className={className}
+        ref={spanRef}
+        className={`group ${className || ''}`}
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
@@ -98,6 +98,9 @@ export const ProfileStatus = ({ odinId, className }: { odinId: string; className
         }}
       >
         {myStatus?.emoji || '💬'}
+        <TooltipHover wrapperRef={spanRef}>
+          {`"${myStatus?.status || myStatus?.emoji}" ${myStatus?.validTill ? `${t('till')} ${formatDateExludingYearIfCurrent(new Date(myStatus.validTill))}` : ''}`}
+        </TooltipHover>
       </span>
       {myStatus && isStatusDialogOpen ? (
         <StatusDetailDialog
@@ -107,6 +110,35 @@ export const ProfileStatus = ({ odinId, className }: { odinId: string; className
         ></StatusDetailDialog>
       ) : null}
     </>
+  );
+};
+
+const TooltipHover = ({
+  wrapperRef,
+  children,
+}: {
+  wrapperRef: React.RefObject<HTMLSpanElement>;
+  children: React.ReactNode;
+}) => {
+  return (
+    <span
+      className="fixed hidden md:group-hover:block"
+      style={{
+        top: wrapperRef.current?.getBoundingClientRect().top,
+        left: wrapperRef.current?.getBoundingClientRect().left,
+        maxWidth: '10rem',
+        wordBreak: 'break-word',
+
+        zIndex: 1000,
+        padding: '0.05rem 0.2rem',
+        backgroundColor: `rgba(var(--color-page-background))`,
+        color: `rgba(var(--color-foreground))`,
+        borderRadius: '0.2rem',
+        boxShadow: `var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)`,
+      }}
+    >
+      {children}
+    </span>
   );
 };
 

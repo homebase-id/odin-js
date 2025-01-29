@@ -1,111 +1,147 @@
 import { lazy, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 import { cn, withRef } from '@udecode/cn';
+import { PlateEditor } from '@udecode/plate-core/react';
+import { getEditorPlugin, TNode } from '@udecode/plate';
 
-import { TChannel } from './RTEChannelDropdownPlugin';
-
-import {
-  InlineCombobox,
-  InlineComboboxContent,
-  InlineComboboxInput,
-  InlineComboboxItem,
-  InlineComboboxSeleactableEmpty,
-} from '@homebase-id/rich-text-editor';
-import { ErrorNotification, t } from '@homebase-id/common-app';
-import { useParams } from 'react-router-dom';
+import { ErrorNotification, getPlainTextFromRichText } from '@homebase-id/common-app';
 import { useCommunityChannels } from '../../../../hooks/community/channels/useCommunityChannels';
 import { useCommunity } from '../../../../hooks/community/useCommunity';
 import { useCommunityChannel } from '../../../../hooks/community/channels/useCommunityChannel';
+
+import { ELEMENT_CHANNEL } from './RTEChannelDropdownPlugin';
 
 const PlateElement = lazy(() =>
   import('@homebase-id/rich-text-editor').then((rootExport) => ({
     default: rootExport.PlateElement,
   }))
 );
-import { getChannelOnSelectItem } from './RTEChannelGetChannelOnSelect';
 
-const onSelectItem = getChannelOnSelectItem();
+const RTEDropdown = lazy(() =>
+  import('@homebase-id/rich-text-editor').then((rootExport) => ({
+    default: rootExport.RTEDropdown,
+  }))
+);
+import { type DropdownValue } from '@homebase-id/rich-text-editor';
+
+const onSelectItem = (editor: PlateEditor, item: DropdownValue, node: TNode) => {
+  const { getOptions } = getEditorPlugin(editor, {
+    key: ELEMENT_CHANNEL,
+  });
+  const { insertSpaceAfterChannel } = getOptions();
+
+  if (node) {
+    const path = editor.api.findPath(node);
+    editor.tf.removeNodes({ at: path });
+  }
+
+  editor.tf.insertNodes({
+    children: [{ text: '' }],
+    type: ELEMENT_CHANNEL,
+    value: item.label,
+    uniqueId: item.value,
+  });
+
+  // move the selection after the element
+  editor.tf.move({ unit: 'offset' });
+
+  const pathAbove = editor.api.block({ above: true })?.[1];
+  const isBlockEnd =
+    editor.selection && pathAbove && editor.api.isEnd(editor.selection.anchor, pathAbove);
+
+  if (isBlockEnd && insertSpaceAfterChannel) {
+    editor.tf.insertText(' ');
+  }
+};
+
+const onCancel = (editor: PlateEditor, value: string, node: TNode) => {
+  const path = editor.api.findPath(node);
+  if (!path) return;
+
+  editor.tf.replaceNodes({ text: value }, { at: path, select: true });
+};
 
 export const RTEChannelDropdownInputElement = withRef<typeof PlateElement>(
   ({ className, ...props }, ref) => {
     const { children, editor, element } = props;
-    const [search, setSearch] = useState('');
-
-    const { odinKey, communityKey } = useParams();
-    const { data: community } = useCommunity({ odinId: odinKey, communityId: communityKey }).fetch;
-    const {
-      mutate: createCommunityChannel,
-      status: creationStatus,
-      error: creationError,
-    } = useCommunityChannel().create;
-
-    const { data: channelTargets } = useCommunityChannels({
-      odinId: odinKey,
-      communityId: communityKey,
-    }).fetch;
-
-    const channels: TChannel[] = useMemo(
-      () =>
-        channelTargets?.map((chnl) => ({
-          key: chnl.fileId,
-          text: chnl.fileMetadata.appData.content.title,
-          uniqueId: chnl.fileMetadata.appData.uniqueId as string,
-        })) || [],
-      [channelTargets]
-    );
-
-    if (!channels) return null;
+    const value = useMemo(() => getPlainTextFromRichText(element.children), [element.children]);
 
     return (
-      <>
-        <ErrorNotification error={creationError} />
-        <PlateElement as="span" data-slate-value={element.value} ref={ref} {...props}>
-          <InlineCombobox
-            element={element}
-            setValue={setSearch}
-            showTrigger={true}
-            trigger="#"
-            value={search}
-            hideWhenSpace={true}
-            hideWhenNoValue={true}
-          >
-            <span
-              className={cn(
-                'inline-block cursor-pointer rounded-md bg-page-background px-1 py-1 align-baseline text-sm font-medium text-primary',
-                className
-              )}
-            >
-              <InlineComboboxInput />
-            </span>
-
-            <InlineComboboxContent className="my-1.5">
-              <InlineComboboxSeleactableEmpty
-                onClick={() => {
-                  if (!community || !search) return;
-                  createCommunityChannel({
-                    community,
-                    channelName: search,
-                  });
-                }}
-              >
-                {creationStatus === 'pending' ? t('Creating...') : t('Create "{0}"', search)}
-              </InlineComboboxSeleactableEmpty>
-
-              {channels.map((item, index) => (
-                <InlineComboboxItem
-                  key={item.key || item.text || index}
-                  onClick={() => onSelectItem(editor, item, search)}
-                  value={item.text}
-                >
-                  #{item.text}
-                </InlineComboboxItem>
-              ))}
-            </InlineComboboxContent>
-          </InlineCombobox>
-
-          {children}
-        </PlateElement>
-      </>
+      <PlateElement as="span" ref={ref} {...props} className={cn('relative', className)}>
+        <ChannelDropdown
+          searchVal={value}
+          onSelect={(channelItem) => onSelectItem(editor, channelItem, element)}
+          onCancel={(clear) => onCancel(editor, clear ? '' : `${element.trigger}${value}`, element)}
+        />
+        {children}
+      </PlateElement>
     );
   }
 );
+
+const ChannelDropdown = ({
+  searchVal,
+  onSelect,
+  onCancel,
+}: {
+  searchVal?: string;
+  onSelect: (value: DropdownValue) => void;
+  onCancel: (clear?: boolean) => void;
+}) => {
+  const { odinKey, communityKey } = useParams();
+  const { data: community } = useCommunity({ odinId: odinKey, communityId: communityKey }).fetch;
+  const { mutateAsync: createCommunityChannel } = useCommunityChannel().create;
+  const [creationError, setCreationError] = useState<unknown | null>(null);
+
+  const { data: channelTargets } = useCommunityChannels({
+    odinId: odinKey,
+    communityId: communityKey,
+  }).fetch;
+
+  const channels: DropdownValue[] = useMemo(
+    () =>
+      channelTargets?.map((chnl) => ({
+        label: chnl.fileMetadata.appData.content.title,
+        value: chnl.fileMetadata.appData.uniqueId as string,
+      })) || [],
+    [channelTargets]
+  );
+
+  const onCreate = community
+    ? () => {
+        const newChannelValue = createCommunityChannel({
+          community,
+          channelName: searchVal || '',
+        }).then(
+          (newUniqueId) => {
+            setCreationError(null);
+            return {
+              label: searchVal || '',
+              value: newUniqueId,
+            };
+          },
+          (error) => {
+            setCreationError(error);
+            return { label: '', value: '' };
+          }
+        );
+
+        return newChannelValue;
+      }
+    : undefined;
+
+  return (
+    <>
+      <ErrorNotification error={creationError} />
+      <RTEDropdown
+        trigger="#"
+        items={channels}
+        onSelect={onSelect}
+        onCancel={onCancel}
+        onCreate={onCreate}
+        searchVal={searchVal}
+      />
+    </>
+  );
+};

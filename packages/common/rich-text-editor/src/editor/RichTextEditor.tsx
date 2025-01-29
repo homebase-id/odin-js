@@ -1,12 +1,5 @@
-import {
-  TElement,
-  TDescendant,
-  resetEditor,
-  isSelectionAtBlockStart,
-  isBlockAboveEmpty,
-  SlatePlugin,
-} from '@udecode/plate-common';
-import { ParagraphPlugin, PlateElement } from '@udecode/plate-common/react';
+import { TElement, SlatePlugin, Descendant } from '@udecode/plate';
+import { ParagraphPlugin, PlateElement, usePlateEditor } from '@udecode/plate/react';
 import { withProps } from '@udecode/cn';
 import {
   isCodeBlockEmpty,
@@ -18,7 +11,6 @@ import { LinkPlugin } from '@udecode/plate-link/react';
 import { HeadingPlugin } from '@udecode/plate-heading/react';
 import { BlockquotePlugin } from '@udecode/plate-block-quote/react';
 import { CodeBlockPlugin, CodeLinePlugin } from '@udecode/plate-code-block/react';
-import { MentionInputPlugin, MentionPlugin } from '@udecode/plate-mention/react';
 import {
   BoldPlugin,
   ItalicPlugin,
@@ -28,7 +20,6 @@ import {
 } from '@udecode/plate-basic-marks/react';
 import { KbdPlugin } from '@udecode/plate-kbd/react';
 import { AutoformatPlugin } from '@udecode/plate-autoformat/react';
-import { EmojiInputPlugin, EmojiPlugin } from '@udecode/plate-emoji/react';
 import { ExitBreakPlugin, SoftBreakPlugin } from '@udecode/plate-break/react';
 import { NodeIdPlugin } from '@udecode/plate-node-id';
 import { ResetNodePlugin } from '@udecode/plate-reset-node/react';
@@ -70,34 +61,34 @@ import {
   FunctionComponent,
 } from 'react';
 import { autoformatRules } from '../lib/autoFormatRules';
-import { EmojiInputElement } from './Combobox/EmojiCombobox';
-import { MentionElement } from '../components/plate-ui/mention-element';
-import { Mentionable, MentionInputElement } from '../components/plate-ui/mention-input-element';
-import { ImagePlugin } from './ImagePlugin/createImagePlugin';
-import { createPlateEditor, Plate, PlateContent, PlatePlugin } from '@udecode/plate-core/react';
-import { focusEditor, PlateLeaf } from '@udecode/plate-common/react';
-import { ListElement } from '../components/plate-ui/list-element';
-import { MediaOptionsContextProvider } from './MediaOptionsContext/MediaOptionsContext';
-import { useMediaOptionsContext } from './MediaOptionsContext/useMediaOptionsContext';
+import { EmojiDropdownInputElement } from './Emoji/EmojiDropdownInputElement';
 import { TextualEmojiPlugin } from './TextualEmojiPlugin/TextualEmojiPlugin';
-import { Editor } from 'slate';
+import { EmojiInputPlugin, EmojiPlugin } from './Emoji/EmojiDropdownPlugin';
+import { ImagePlugin } from './ImagePlugin/createImagePlugin';
+import { Plate, PlateContent, PlatePlugin } from '@udecode/plate-core/react';
+import { PlateLeaf } from '@udecode/plate/react';
+import { ListElement } from '../components/plate-ui/list-element';
+import { MentionInputPlugin, MentionPlugin } from './Mention/MentionDropdownPlugin';
+import type { Mentionable } from './Mention/MentionDropdownPlugin';
+import { MentionDropdownInputElement } from './Mention/MentionDropdownInputElement';
+import { MentionDropdownElement } from './Mention/MentionDropdownElement';
+import { MentionableProvider } from './Mention/context/MentionableProvider';
+import { MediaOptionsProvider } from './ImagePlugin/context/MediaOptionsProvider';
 
-interface RTEProps {
+interface innerRTEProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultValue?: any[] | string | undefined;
   placeholder?: string;
   mediaOptions?: MediaOptions;
-  mentionables?: Mentionable[];
   name?: string;
   onChange: (e: { target: { name: string; value: RichText } }) => void;
-  className?: string;
   contentClassName?: string;
   disabled?: boolean;
   uniqueId?: string;
   autoFocus?: boolean;
   onSubmit?: () => void;
   disableHeadings?: boolean;
-  children?: React.ReactNode;
+
   stickyToolbar?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   plugins?: (PlatePlugin | PlatePlugin<any> | SlatePlugin)[];
@@ -105,6 +96,16 @@ interface RTEProps {
   components?: Record<string, FunctionComponent<any>>;
 
   onKeyDown?: (e: React.KeyboardEvent) => void;
+}
+
+interface RTEProps extends innerRTEProps {
+  mentionables?: Mentionable[];
+
+  children?: React.ReactNode;
+  className?: string;
+
+  // The rteKey is used to reset the RTE, without impacting the children
+  rteKey?: React.Key;
 }
 
 const resetBlockTypesCommonRule = {
@@ -119,16 +120,14 @@ const resetBlockTypesCodeBlockRule = {
 };
 
 const InnerRichTextEditor = memo(
-  forwardRef((props: RTEProps, ref) => {
+  forwardRef((props: innerRTEProps, ref) => {
     const {
       defaultValue,
       placeholder,
       mediaOptions,
-      mentionables,
       name = 'richText',
       onChange,
       onSubmit,
-      className,
       contentClassName,
       disabled,
       uniqueId,
@@ -140,11 +139,6 @@ const InnerRichTextEditor = memo(
       onKeyDown,
     } = props;
 
-    const { setMediaOptions } = useMediaOptionsContext();
-    useEffect(() => {
-      if (mediaOptions) setMediaOptions(mediaOptions);
-    }, [mediaOptions]);
-
     const { isDarkMode } = useDarkMode();
 
     const defaultValAsRichText: TElement[] | undefined = useMemo(
@@ -155,7 +149,7 @@ const InnerRichTextEditor = memo(
             ? ([
                 {
                   type: 'paragraph',
-                  children: [{ text: defaultValue ?? '' }] as TDescendant[],
+                  children: [{ text: defaultValue ?? '' }] as Descendant[],
                 },
               ] as TElement[])
             : undefined,
@@ -174,12 +168,12 @@ const InnerRichTextEditor = memo(
                 {
                   ...resetBlockTypesCommonRule,
                   hotkey: 'Enter',
-                  predicate: isBlockAboveEmpty,
+                  predicate: (editor) => editor.api.isEmpty(editor.selection, { block: true }),
                 },
                 {
                   ...resetBlockTypesCommonRule,
                   hotkey: 'Backspace',
-                  predicate: isSelectionAtBlockStart,
+                  predicate: (editor) => editor.api.isAt({ start: true }),
                 },
                 {
                   ...resetBlockTypesCodeBlockRule,
@@ -262,7 +256,6 @@ const InnerRichTextEditor = memo(
               ],
             },
           }),
-          EmojiInputPlugin,
           NodeIdPlugin,
           SelectOnBackspacePlugin.configure({
             options: {
@@ -293,13 +286,10 @@ const InnerRichTextEditor = memo(
           }),
           EmojiPlugin,
           TextualEmojiPlugin,
-          mentionables
-            ? // MentionPlugin is not typed correctly to our custom implementation, so we need to cast it to any
-              MentionPlugin.configure({
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                options: { mentionables: mentionables || [], insertSpaceAfterMention: true } as any,
-              })
-            : undefined,
+          MentionPlugin.configure({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            options: { insertSpaceAfterMention: true } as any,
+          }),
           mediaOptions ? ImagePlugin : undefined,
           ...(_plugins || []),
         ].filter(Boolean) as PlatePlugin[],
@@ -326,23 +316,21 @@ const InnerRichTextEditor = memo(
             [KbdPlugin.key]: KbdLeaf,
             [StrikethroughPlugin.key]: withProps(PlateLeaf, { as: 's' }),
             [UnderlinePlugin.key]: withProps(PlateLeaf, { as: 'u' }),
-            [EmojiInputPlugin.key]: EmojiInputElement,
-            [MentionInputPlugin.key]: MentionInputElement,
-            [MentionPlugin.key]: MentionElement,
+            [MentionInputPlugin.key]: MentionDropdownInputElement,
+            [MentionPlugin.key]: MentionDropdownElement,
+            [EmojiInputPlugin.key]: EmojiDropdownInputElement,
             ...(_components || {}),
           },
         },
       }),
-      [mentionables]
+      []
     );
 
-    const editor = useMemo(() => {
-      return createPlateEditor({
-        id: uniqueId || 'editor',
-        value: defaultValAsRichText,
-        ...plugins,
-      });
-    }, [plugins]);
+    const editor = usePlateEditor({
+      id: uniqueId || 'editor',
+      value: defaultValAsRichText,
+      ...plugins,
+    });
 
     const handleChange = useCallback(
       (newValue: TElement[]) => {
@@ -350,24 +338,24 @@ const InnerRichTextEditor = memo(
           (op: { type: string }) => 'set_selection' !== op.type
         );
 
-        if (isActualChange) onChange({ target: { name: name, value: newValue } });
+        if (isActualChange)
+          onChange({ target: { name: name, value: stripDropdownInputsFromValue(newValue) || [] } });
       },
       [editor, onChange]
     );
 
     useEffect(() => {
-      if (autoFocus && editor)
-        setTimeout(() => focusEditor(editor, Editor.end(editor as Editor, [])), 0);
+      if (autoFocus && editor) setTimeout(() => editor.tf.focus({ edge: 'endEditor' }));
     }, [autoFocus, editor]);
 
     useImperativeHandle(
       ref,
       () => ({
         focus() {
-          if (editor) focusEditor(editor, Editor.end(editor as Editor, []));
+          if (editor) editor.tf.focus({ edge: 'endEditor' });
         },
         clear() {
-          if (editor) resetEditor(editor);
+          if (editor) editor.tf.reset();
         },
       }),
       [editor]
@@ -375,7 +363,7 @@ const InnerRichTextEditor = memo(
 
     return (
       <>
-        {/* Very dirty way of overruling default styling that are applied to the RTE */}
+        {/* Dirty way of overruling default styling that are applied to the RTE */}
         <style
           dangerouslySetInnerHTML={{
             __html: `[data-slate-editor="true"]:focus-visible {
@@ -389,57 +377,48 @@ const InnerRichTextEditor = memo(
     ${isDarkMode ? '[class^="PlateFloatingLink___"]{background-color:rgba(51, 65, 85, 1);}' : ''}`,
           }}
         />
-        <section
-          className={`relative flex w-[100%] flex-col ${className ?? ''} [&_.slate-selected]:!bg-primary/20 [&_.slate-selection-area]:border [&_.slate-selection-area]:bg-primary/10`}
-          onSubmit={(e) => e.stopPropagation()}
-          onClick={disabled ? undefined : (e) => e.stopPropagation()}
+        <Plate
+          editor={editor}
+          onChange={(editor) => handleChange(editor.value)}
+          readOnly={disabled}
+          // Switch keys to reset the editor when going to enabled
+          key={disabled ? 'disabled' : undefined}
         >
-          <Plate
-            editor={editor}
-            onChange={(editor) => handleChange(editor.value)}
-            readOnly={disabled}
-            // Switch keys to reset the editor when going to enabled
-            key={disabled ? 'disabled' : undefined}
-          >
-            <FixedToolbar className={stickyToolbar ? 'md:sticky' : ''}>
-              <FixedToolbarButtons disableTurnInto={disableHeadings} mediaOptions={mediaOptions} />
-            </FixedToolbar>
+          <FixedToolbar className={stickyToolbar ? 'md:sticky' : ''}>
+            <FixedToolbarButtons disableTurnInto={disableHeadings} mediaOptions={mediaOptions} />
+          </FixedToolbar>
 
-            <PlateContent
-              className={contentClassName}
-              placeholder={placeholder}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  if (onSubmit) {
-                    if (!e.shiftKey) {
-                      e.preventDefault();
-                      onSubmit();
-                    } else {
-                      e.preventDefault();
-                      editor?.insertBreak();
-                    }
+          <PlateContent
+            className={contentClassName}
+            placeholder={placeholder}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.defaultPrevented) {
+                if (onSubmit) {
+                  if (!e.shiftKey) {
+                    e.preventDefault();
+                    onSubmit();
+                  } else {
+                    e.preventDefault();
+                    editor.tf.insertBreak();
                   }
                 }
+              }
 
-                onKeyDown?.(e);
-              }}
-            />
-          </Plate>
-          {props.children}
-        </section>
+              onKeyDown?.(e);
+            }}
+          />
+        </Plate>
       </>
     );
   })
 );
 InnerRichTextEditor.displayName = 'InnerRichTextEditor';
 
-const RichTextEditor = memo(
-  forwardRef(({ defaultValue, onChange, ...props }: RTEProps, ref) => {
+const DefaultValueCacheWrapper = memo(
+  forwardRef(({ defaultValue, onChange, disabled, ...props }: innerRTEProps, ref) => {
     const [activeDefaultValue, setActiveDefaultValue] = useState(defaultValue);
     useEffect(() => {
-      if (!activeDefaultValue) {
-        setActiveDefaultValue(defaultValue);
-      }
+      if (!activeDefaultValue) setActiveDefaultValue(defaultValue);
     }, [defaultValue]);
 
     const handleChange = useCallback(
@@ -453,17 +432,54 @@ const RichTextEditor = memo(
     );
 
     return (
-      <MediaOptionsContextProvider>
-        <InnerRichTextEditor
-          ref={ref}
-          {...props}
-          defaultValue={activeDefaultValue}
-          onChange={handleChange}
-        />
-      </MediaOptionsContextProvider>
+      <InnerRichTextEditor
+        ref={ref}
+        {...props}
+        disabled={disabled}
+        defaultValue={activeDefaultValue}
+        onChange={handleChange}
+      />
     );
   })
 );
+
+const RichTextEditor = memo(
+  forwardRef(({ disabled, className, children, rteKey, ...props }: RTEProps, ref) => {
+    return (
+      <MediaOptionsProvider mediaOptions={props.mediaOptions}>
+        <MentionableProvider mentionables={props.mentionables || []}>
+          <section
+            className={`relative flex w-[100%] flex-col ${className ?? ''} [&_.slate-selected]:!bg-primary/20 [&_.slate-selection-area]:border [&_.slate-selection-area]:bg-primary/10`}
+            onSubmit={(e) => e.stopPropagation()}
+            onClick={disabled ? undefined : (e) => e.stopPropagation()}
+          >
+            <DefaultValueCacheWrapper ref={ref} {...props} disabled={disabled} key={rteKey} />
+            {children}
+          </section>
+        </MentionableProvider>
+      </MediaOptionsProvider>
+    );
+  })
+);
+
+// This is somewhat of a hack; The inputs shouldn't be stored in the value, but that the easiest way to build them without building a hacky hidden input; So we choose the lesser evil
+const stripDropdownInputsFromValue = (value: TElement[] | undefined): TElement[] | undefined => {
+  if (!value) return undefined;
+  return value
+    .flatMap((element) => {
+      if (element.type?.endsWith('_input')) {
+        return element.children;
+      } else if (element.children) {
+        return {
+          ...element,
+          children: stripDropdownInputsFromValue(element.children as TElement[]),
+        } as TElement;
+      } else {
+        return element;
+      }
+    })
+    .filter(Boolean) as TElement[];
+};
 
 RichTextEditor.displayName = 'RichTextEditor';
 export { RichTextEditor };

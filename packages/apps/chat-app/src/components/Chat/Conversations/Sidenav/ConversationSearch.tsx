@@ -104,54 +104,53 @@ export const ConversationSearch = ({
           />
         </div>
       </form>
-      <div>
-        {isActive ? (
-          <>
-            <ConversationListItemWrapper
-              onClick={() => {
-                navigate(`${CHAT_ROOT_PATH}/new-group`);
-              }}
-              isActive={false}
-            >
-              <div className="rounded-full bg-primary/20 p-4">
-                <Persons className="h-5 w-5" />
-              </div>
-              {t('New group')}
-            </ConversationListItemWrapper>
 
-            {!conversationResults?.length && !contactsWithoutAConversation?.length ? (
-              <SubtleMessage className="px-5">{t('No contacts found')}</SubtleMessage>
-            ) : (
-              <>
-                {conversationResults?.length ? (
-                  <p className="mt-2 px-5 font-semibold">{t('Chats')}</p>
-                ) : null}
-                {conversationResults.map((result) => (
-                  <ConversationListItem
-                    conversation={result}
-                    onClick={() => openConversation(result.fileMetadata.appData.uniqueId)}
-                    isActive={
-                      activeConversationId ===
-                      (result as HomebaseFile<UnifiedConversation>).fileMetadata?.appData?.uniqueId
-                    }
-                    key={result.fileId}
-                  />
-                ))}
-                {contactsWithoutAConversation?.length ? (
-                  <p className="mt-2 px-5 font-semibold">{t('Contacts')}</p>
-                ) : null}
-                {contactsWithoutAConversation.map((result) => (
-                  <NewConversationSearchItem
-                    onOpen={(id) => openConversation(id)}
-                    result={result as ContactFile}
-                    key={result.odinId}
-                  />
-                ))}
-              </>
-            )}
-          </>
-        ) : null}
-      </div>
+      {isActive ? (
+        <div>
+          <ConversationListItemWrapper
+            onClick={() => {
+              navigate(`${CHAT_ROOT_PATH}/new-group`);
+            }}
+            isActive={false}
+          >
+            <div className="rounded-full bg-primary/20 p-4">
+              <Persons className="h-5 w-5" />
+            </div>
+            {t('New group')}
+          </ConversationListItemWrapper>
+
+          {!conversationResults?.length && !contactsWithoutAConversation?.length ? (
+            <SubtleMessage className="px-5">{t('No contacts found')}</SubtleMessage>
+          ) : (
+            <>
+              {conversationResults?.length ? (
+                <p className="mt-2 px-5 font-semibold">{t('Chats')}</p>
+              ) : null}
+              {conversationResults.map((result) => (
+                <ConversationListItem
+                  conversation={result}
+                  onClick={() => openConversation(result.fileMetadata.appData.uniqueId)}
+                  isActive={
+                    activeConversationId ===
+                    (result as HomebaseFile<UnifiedConversation>).fileMetadata?.appData?.uniqueId
+                  }
+                  key={result.fileId}
+                />
+              ))}
+              {contactsWithoutAConversation?.length ? (
+                <p className="mt-2 px-5 font-semibold">{t('Contacts')}</p>
+              ) : null}
+              {contactsWithoutAConversation.map((result) => (
+                <NewConversationSearchItem
+                  onOpen={(id) => openConversation(id)}
+                  result={result as ContactFile}
+                  key={result.odinId}
+                />
+              ))}
+            </>
+          )}
+        </div>
+      ) : null}
     </>
   );
 };
