@@ -27,7 +27,34 @@ export const useCommunityChannel = (props?: {
     community: HomebaseFile<CommunityDefinition>;
     channelName: string;
   }) => {
-    return await saveCommunityChannel(dotYouClient, community, channelName);
+    const newChannel: NewHomebaseFile<CommunityChannel> = {
+      fileMetadata: {
+        appData: {
+          uniqueId: formatGuidId(toGuidId(channelName)),
+          content: {
+            title: channelName,
+            description: '',
+          },
+        },
+      },
+      serverMetadata: {
+        accessControlList: community.fileMetadata.appData.content.acl || {
+          requiredSecurityGroup: SecurityGroupType.Owner,
+        },
+      },
+    };
+
+    return await saveCommunityChannel(dotYouClient, community, newChannel);
+  };
+
+  const updateChannel = async ({
+    community,
+    channel,
+  }: {
+    community: HomebaseFile<CommunityDefinition>;
+    channel: HomebaseFile<CommunityChannel>;
+  }) => {
+    return await saveCommunityChannel(dotYouClient, community, channel);
   };
 
   return {
@@ -63,6 +90,27 @@ export const useCommunityChannel = (props?: {
           queryClient,
           community.fileMetadata.appData.uniqueId as string,
           (data) => [...data, newChannel]
+        );
+
+        return { existingChannels };
+      },
+      onError: (_, { community }, context) => {
+        if (context?.existingChannels) {
+          updateCacheCommunityChannels(
+            queryClient,
+            community.fileMetadata.appData.uniqueId as string,
+            () => context.existingChannels
+          );
+        }
+      },
+    }),
+    update: useMutation({
+      mutationFn: updateChannel,
+      onMutate: async ({ channel, community }) => {
+        const existingChannels = updateCacheCommunityChannels(
+          queryClient,
+          community.fileMetadata.appData.uniqueId as string,
+          (data) => data.map((c) => (stringGuidsEqual(c.fileId, channel.fileId) ? channel : c))
         );
 
         return { existingChannels };

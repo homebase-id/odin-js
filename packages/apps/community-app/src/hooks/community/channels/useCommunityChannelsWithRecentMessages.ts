@@ -21,10 +21,15 @@ export const useCommunityChannelsWithRecentMessages = (props: {
   const queryClient = useQueryClient();
   const queryKey = ['channels-with-recent-message', formatGuidId(props.communityId)];
 
-  const { data: channels, isFetched } = useCommunityChannels(props).fetch;
-  const lastUpdate = useLastUpdatedCommunityMessages({ communityId: props.communityId });
+  const {
+    data: channels,
+    isFetched,
+    dataUpdatedAt: channelsUpdatedAt,
+  } = useCommunityChannels(props).fetch;
+
+  const messgesUpdatedAt = useLastUpdatedCommunityMessages({ communityId: props.communityId });
   useEffect(() => {
-    if (lastUpdate === null || !isFetched || !channels || !channels.length) {
+    if (messgesUpdatedAt === null || !isFetched || !channels || !channels.length) {
       return;
     }
 
@@ -32,8 +37,9 @@ export const useCommunityChannelsWithRecentMessages = (props: {
     if (
       currentCacheUpdate?.data?.length === channels.length &&
       currentCacheUpdate?.dataUpdatedAt &&
-      lastUpdate !== 0 &&
-      lastUpdate <= currentCacheUpdate?.dataUpdatedAt
+      messgesUpdatedAt !== 0 &&
+      messgesUpdatedAt <= currentCacheUpdate?.dataUpdatedAt &&
+      channelsUpdatedAt <= currentCacheUpdate?.dataUpdatedAt
     ) {
       return;
     }
@@ -68,7 +74,7 @@ export const useCommunityChannelsWithRecentMessages = (props: {
         updatedAt: Date.now(),
       });
     })();
-  }, [props, lastUpdate, channels]);
+  }, [props, messgesUpdatedAt, channels, channelsUpdatedAt]);
 
   return {
     // We only setup a cache entry that we will fill up with the setQueryData later; So we can cache the data for offline and faster startup;
