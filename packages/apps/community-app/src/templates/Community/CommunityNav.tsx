@@ -12,7 +12,12 @@ import {
   useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
-import { getNewXorId, isTouchDevice, tryJsonParse } from '@homebase-id/js-lib/helpers';
+import {
+  getNewXorId,
+  isTouchDevice,
+  stringGuidsEqual,
+  tryJsonParse,
+} from '@homebase-id/js-lib/helpers';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import {
   ChannelWithRecentMessage,
@@ -30,6 +35,7 @@ import {
   RadioTower,
   Question,
   Plus,
+  Pencil,
 } from '@homebase-id/common-app/icons';
 import { CommunityInfoDialog } from '../../components/Community/CommunityInfoDialog';
 import { useConversationMetadata } from '@homebase-id/chat-app/src/hooks/chat/useConversationMetadata';
@@ -39,7 +45,8 @@ import { ConversationWithYourselfId } from '@homebase-id/chat-app/src/providers/
 import { useCommunityMessages } from '../../hooks/community/messages/useCommunityMessages';
 import { useHasUnreadThreads } from '../../hooks/community/threads/useCommunityThreads';
 import { MyProfileStatus, ProfileStatus } from '../../components/Community/status/MyProfileStatus';
-import { CreateChannelDialog } from '../../components/Community/channel/CreateChannelDialog';
+import { CreateOrUpdateChannelDialog } from '../../components/Community/channel/CreateOrUpdateChannelDialog';
+import { COMMUNITY_DEFAULT_GENERAL_ID } from '../../providers/CommunityProvider';
 
 const maxChannels = 7;
 export const CommunityNav = memo(
@@ -281,6 +288,7 @@ const ChannelItem = memo(
     channel: ChannelWithRecentMessage;
     setUnreadCount: (identifier: string, count: number) => void;
   }) => {
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const { odinKey, communityKey } = useParams();
 
     const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
@@ -292,14 +300,11 @@ const ChannelItem = memo(
     const isVisited = channelId && vists.includes(channelId);
 
     useEffect(() => {
-      if (isActive) {
-        if (!isVisited) {
-          sessionStorage.setItem(
-            VISITS_STORAGE_KEY,
-            JSON.stringify(Array.from(new Set([...vists, channelId])))
-          );
-        }
-      }
+      if (isActive && !isVisited)
+        sessionStorage.setItem(
+          VISITS_STORAGE_KEY,
+          JSON.stringify(Array.from(new Set([...vists, channelId])))
+        );
     }, [isActive]);
 
     const {
@@ -366,50 +371,66 @@ const ChannelItem = memo(
       updateMetadata({ metadata: newMeta });
     }, [metadata, channelId, isPinned]);
 
+    const toggleEdit = useCallback(() => setIsEditDialogOpen(true), []);
     const channelPath = `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelId}`;
 
     return (
-      <Link
-        to={channelPath}
-        className={`group relative flex flex-row items-center gap-1 rounded-md py-[0.25rem] pl-2 pr-1 ${linkBackground} ${isVisited ? 'text-purple-700' : ''} ${hasUnreadMessages && !isActive ? 'font-semibold' : ''}`}
-      >
-        <p
-          className={`flex-shrink overflow-hidden text-ellipsis whitespace-nowrap ${hasUnreadMessages && !isActive ? 'leading-tight' : 'leading-tight'}`}
+      <>
+        <Link
+          to={channelPath}
+          className={`group relative flex flex-row items-center gap-1 rounded-md py-[0.25rem] pl-2 pr-1 ${linkBackground} ${isVisited ? 'text-purple-700' : ''} ${hasUnreadMessages && !isActive ? 'font-semibold' : ''}`}
         >
-          # {channel.fileMetadata.appData.content?.title?.toLowerCase()}
-        </p>
-        <ActionGroup
-          size="none"
-          type="mute"
-          className="absolute bottom-[0.1rem] right-[0.2rem] top-[0.1rem] my-auto hidden aspect-square flex-shrink-0 rounded-lg bg-background text-foreground opacity-0 group-hover:opacity-100 md:flex"
-          options={[
-            {
-              label: isPinned ? 'Unpin' : 'Pin',
-              icon: Pin,
-              onClick: togglePin,
-            },
-            {
-              label: 'Channel info',
-              icon: Question,
-              href: `${channelPath}/info`,
-            },
-          ]}
-          alwaysInPortal={true}
-        >
-          <span className="block p-1">
-            <ChevronDown className="h-4 w-4" />
-          </span>
-        </ActionGroup>
-        {unreadMessagesCount && !isActive ? (
-          <span className="-my-1 ml-auto flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-current text-sm font-normal">
-            <span
-              className={isActive ? 'text-black dark:text-white' : 'text-white dark:text-black'}
-            >
-              {unreadMessagesCount}
+          <p
+            className={`flex-shrink overflow-hidden text-ellipsis whitespace-nowrap ${hasUnreadMessages && !isActive ? 'leading-tight' : 'leading-tight'}`}
+          >
+            # {channel.fileMetadata.appData.content?.title?.toLowerCase()}
+          </p>
+          <ActionGroup
+            size="none"
+            type="mute"
+            className="absolute bottom-[0.1rem] right-[0.2rem] top-[0.1rem] my-auto hidden aspect-square flex-shrink-0 rounded-lg bg-background text-foreground opacity-0 group-hover:opacity-100 md:flex"
+            options={[
+              {
+                label: isPinned ? 'Unpin' : 'Pin',
+                icon: Pin,
+                onClick: togglePin,
+              },
+              stringGuidsEqual(channel.fileMetadata.appData.uniqueId, COMMUNITY_DEFAULT_GENERAL_ID)
+                ? undefined
+                : {
+                    label: 'Rename',
+                    icon: Pencil,
+                    onClick: toggleEdit,
+                  },
+              {
+                label: 'Channel info',
+                icon: Question,
+                href: `${channelPath}/info`,
+              },
+            ]}
+            alwaysInPortal={true}
+          >
+            <span className="block p-1">
+              <ChevronDown className="h-4 w-4" />
             </span>
-          </span>
+          </ActionGroup>
+          {unreadMessagesCount && !isActive ? (
+            <span className="-my-1 ml-auto flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-current text-sm font-normal">
+              <span
+                className={isActive ? 'text-black dark:text-white' : 'text-white dark:text-black'}
+              >
+                {unreadMessagesCount}
+              </span>
+            </span>
+          ) : null}
+        </Link>
+        {isEditDialogOpen ? (
+          <CreateOrUpdateChannelDialog
+            onClose={() => setIsEditDialogOpen(false)}
+            defaultValue={channel}
+          />
         ) : null}
-      </Link>
+      </>
     );
   }
 );
@@ -498,7 +519,7 @@ const CreateNewChannelButton = memo(() => {
   return (
     <>
       {isCreateDialogOpen ? (
-        <CreateChannelDialog onClose={() => setIsCreateDialogOpen(false)} />
+        <CreateOrUpdateChannelDialog onClose={() => setIsCreateDialogOpen(false)} />
       ) : null}
       <ActionButton
         size="none"

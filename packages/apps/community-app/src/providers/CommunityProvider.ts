@@ -6,6 +6,7 @@ import {
   getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
   HomebaseFile,
+  NewHomebaseFile,
   queryBatch,
   SecurityGroupType,
   TargetDrive,
@@ -126,25 +127,28 @@ export const getCommunityChannel = async (
 export const saveCommunityChannel = async (
   dotYouClient: DotYouClient,
   community: HomebaseFile<CommunityDefinition>,
-  tag: string
+  channel: NewHomebaseFile<CommunityChannel> | HomebaseFile<CommunityChannel>
 ) => {
   const communityId = community.fileMetadata.appData.uniqueId as string;
   const targetDrive = getTargetDriveFromCommunityId(communityId);
-  const uniqueId = toGuidId(tag);
+  const uniqueId =
+    channel.fileMetadata.appData.uniqueId || toGuidId(channel.fileMetadata.appData.content.title);
 
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: targetDrive,
+      overwriteFileId: channel.fileId,
     },
   };
 
   const jsonContent: string = jsonStringify64({
-    title: tag,
-    description: '',
+    ...channel.fileMetadata.appData.content,
   });
   const uploadMetadata: UploadFileMetadata = {
+    versionTag: channel.fileMetadata.versionTag,
     allowDistribution: true,
     appData: {
+      ...channel.fileMetadata.appData,
       uniqueId: uniqueId,
       groupId: communityId,
       fileType: COMMUNITY_CHANNEL_FILE_TYPE,
@@ -160,6 +164,7 @@ export const saveCommunityChannel = async (
       remoteTargetDrive: targetDrive,
       transferIv: getRandom16ByteArray(),
       recipients: [community.fileMetadata.senderOdinId],
+      overwriteGlobalTransitFileId: channel.fileMetadata.globalTransitId,
     };
     uploadResult = await uploadFileOverPeer(
       dotYouClient,
