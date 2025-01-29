@@ -1,5 +1,5 @@
 import { t, useMostSpace, usePortal } from '@homebase-id/common-app';
-import { useRef, useMemo, useState, useEffect, RefObject } from 'react';
+import { useRef, useMemo, useState, useEffect, RefObject, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 
 export type DropdownValue = {
@@ -70,6 +70,22 @@ export const RTEDropdown = <T extends DropdownValue>({
     }
   }, [searchVal]);
 
+  const scrollIntoView = useCallback((selectedElement: HTMLElement | undefined) => {
+    const container = selectedElement?.parentElement;
+    if (!container) return;
+
+    const { offsetTop, offsetHeight } = selectedElement;
+    const { scrollTop, clientHeight } = container;
+
+    if (offsetTop < scrollTop) {
+      // If the item is above the visible area, scroll up just enough
+      container.scrollTop = offsetTop;
+    } else if (offsetTop + offsetHeight > scrollTop + clientHeight) {
+      // If the item is below the visible area, scroll down just enough
+      container.scrollTop = offsetTop + offsetHeight - clientHeight;
+    }
+  }, []);
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (['Tab', 'Enter'].includes(e.key) && selectedItem) {
@@ -88,6 +104,7 @@ export const RTEDropdown = <T extends DropdownValue>({
           const index = filteredItems.indexOf(prev);
           return filteredItems[index - 1] || prev;
         });
+        scrollIntoView(document.querySelector('[data-selected="true"]') as HTMLElement);
       }
 
       if (e.key === 'ArrowDown') {
@@ -99,6 +116,7 @@ export const RTEDropdown = <T extends DropdownValue>({
           const index = filteredItems.indexOf(prev);
           return filteredItems[index + 1] || prev;
         });
+        scrollIntoView(document.querySelector('[data-selected="true"]') as HTMLElement);
       }
 
       if (e.key === 'Escape') {
@@ -118,7 +136,7 @@ export const RTEDropdown = <T extends DropdownValue>({
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [selectedItem, onCancel, searchVal]);
+  }, [selectedItem, onCancel, searchVal, scrollIntoView]);
 
   useEffect(() => {
     if (
@@ -169,6 +187,7 @@ export const RTEDropdown = <T extends DropdownValue>({
                 key={item.value || index}
                 onClick={() => doSelect(item)}
                 className={`cursor-pointer px-2 py-1 transition-colors ${isSelected ? 'bg-primary text-primary-contrast' : 'hover:bg-primary hover:text-primary-contrast'}`}
+                data-selected={isSelected}
               >
                 {!options?.hideTrigger ? trigger : null}
                 {item.label}
