@@ -35,6 +35,7 @@ export const useCommunityChannelsWithRecentMessages = (props: {
 
     const currentCacheUpdate = queryClient.getQueryState<ChannelWithRecentMessage[]>(queryKey);
     if (
+      currentCacheUpdate?.data?.length === channels.length &&
       currentCacheUpdate?.dataUpdatedAt &&
       messgesUpdatedAt !== 0 &&
       messgesUpdatedAt <= currentCacheUpdate?.dataUpdatedAt &&
