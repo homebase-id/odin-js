@@ -185,11 +185,9 @@ export const uploadMail = async (
       : undefined,
   };
 
-  console.log('uploading', conversation);
   const payloadJson: string = jsonStringify64({ ...conversation.fileMetadata.appData.content });
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  console.log('payloadBytes', payloadBytes.length);
   // Set max of 3kb for content so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;
 
@@ -211,7 +209,6 @@ export const uploadMail = async (
     previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
   if (!shouldEmbedContent) {
-    console.log('adding default payload');
     payloads.push({
       key: DEFAULT_PAYLOAD_KEY,
       payload: new Blob([payloadBytes], { type: 'application/json' }),
