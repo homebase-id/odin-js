@@ -1,10 +1,11 @@
-import { createThumbnails } from '../../media';
 import {
   EmbeddedThumb,
   NewMediaFile,
   PayloadFile,
   ThumbnailFile,
 } from '../core/DriveData/File/DriveFileTypes';
+import { ThumbnailInstruction } from '../media/MediaTypes';
+import { createThumbnails } from '../media/Thumbs/ThumbnailProvider';
 import { processVideoFile } from '../media/Video/VideoProcessor';
 
 const MEDIA_PAYLOAD_KEY = 'fil_mdi';
@@ -16,6 +17,7 @@ export const getPayloadsAndThumbnailsForNewMedia = async (
     onUpdate?: (progress: number) => void;
     keyPrefix?: string;
     keyIndex?: number;
+    thumbSizes?: ThumbnailInstruction[];
   }
 ) => {
   const payloads: PayloadFile[] = [];
@@ -41,7 +43,8 @@ export const getPayloadsAndThumbnailsForNewMedia = async (
     } else if (newMediaFile.file.type.startsWith('image/')) {
       const { additionalThumbnails, tinyThumb } = await createThumbnails(
         newMediaFile.file,
-        payloadKey
+        payloadKey,
+        options?.thumbSizes
       );
 
       thumbnails.push(...additionalThumbnails);
