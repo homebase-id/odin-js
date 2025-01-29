@@ -46,7 +46,7 @@ import { useCommunityMessages } from '../../hooks/community/messages/useCommunit
 import { useHasUnreadThreads } from '../../hooks/community/threads/useCommunityThreads';
 import { MyProfileStatus, ProfileStatus } from '../../components/Community/status/MyProfileStatus';
 import { CreateOrUpdateChannelDialog } from '../../components/Community/channel/CreateOrUpdateChannelDialog';
-import { COMMUNITY_DEFAULT_GENERAL_ID } from '../../providers/CommunityProvider';
+import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 
 const maxChannels = 7;
 export const CommunityNav = memo(
@@ -156,6 +156,7 @@ export const CommunityNav = memo(
               <ErrorBoundary>
                 {pinnedChannels?.map((channel) => (
                   <ChannelItem
+                    community={community}
                     channel={channel}
                     setUnreadCount={setUnreadCountCallback}
                     key={channel.fileId || channel.fileMetadata.appData.uniqueId}
@@ -169,6 +170,7 @@ export const CommunityNav = memo(
                   ?.slice(0, isExpanded ? undefined : maxChannels - (pinnedChannels?.length || 0))
                   .map((channel) => (
                     <ChannelItem
+                      community={community}
                       channel={channel}
                       setUnreadCount={setUnreadCountCallback}
                       key={channel.fileId || channel.fileMetadata.appData.uniqueId}
@@ -282,9 +284,11 @@ LaterItem.displayName = 'LaterItem';
 const VISITS_STORAGE_KEY = 'community-sidebar-visited';
 const ChannelItem = memo(
   ({
+    community,
     channel,
     setUnreadCount,
   }: {
+    community: HomebaseFile<CommunityDefinition>;
     channel: ChannelWithRecentMessage;
     setUnreadCount: (identifier: string, count: number) => void;
   }) => {
@@ -395,16 +399,14 @@ const ChannelItem = memo(
                 icon: Pin,
                 onClick: togglePin,
               },
-              stringGuidsEqual(
-                channel.fileMetadata.appData.uniqueId,
-                COMMUNITY_DEFAULT_GENERAL_ID
-              ) || channel.fileMetadata.originalAuthor !== loggedOnIdentity
-                ? undefined
-                : {
+              channel.fileMetadata.originalAuthor === loggedOnIdentity ||
+              community.fileMetadata.originalAuthor === loggedOnIdentity
+                ? {
                     label: 'Rename',
                     icon: Pencil,
                     onClick: toggleEdit,
-                  },
+                  }
+                : undefined,
               {
                 label: 'Channel info',
                 icon: Question,
