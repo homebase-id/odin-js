@@ -227,7 +227,7 @@ export const MessageComposer = memo(
           </div>
         </>
       );
-    }, [files, setFiles, canSend]);
+    }, [files, setFiles, linkPreviews, setLinkPreviews, canSend]);
 
     return (
       <>
