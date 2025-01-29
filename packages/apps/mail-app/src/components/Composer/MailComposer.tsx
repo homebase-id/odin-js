@@ -187,7 +187,8 @@ export const MailComposer = ({
     const handler = (e: BeforeUnloadEvent) => {
       if (
         getTextRootsRecursive(autosavedDsr.fileMetadata.appData.content.message).length &&
-        saveDraftStatus !== 'success'
+        saveDraftStatus !== 'success' &&
+        autosavedDsr !== existingDraft
       ) {
         e.preventDefault();
         e.returnValue = '';
