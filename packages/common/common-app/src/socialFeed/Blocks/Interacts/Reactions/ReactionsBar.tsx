@@ -72,15 +72,7 @@ export const SocialReactionsBar = forwardRef(
       }
     }, [postEmojiError || removeEmojiError]);
 
-    // useEffect(() => {
-    //   if (isActive && !isHover && !isCustomOpen) {
-    //     onClose();
-    //   }
-    // }, [isHover, isCustomOpen]);
-
-    if (!isActive && !isHover) {
-      return null;
-    }
+    if (!isActive && !isHover) return null;
 
     if (!canReact || canReact?.canReact === false || canReact?.canReact === 'comment') {
       return (
@@ -254,6 +246,8 @@ export const ReactionsBar = forwardRef(
                             (wrapperRef.current?.getBoundingClientRect().right || 0),
                         }),
                   }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onMouseDownCapture={(e) => e.stopPropagation()}
                 >
                   <Suspense>
                     <EmojiPicker

@@ -52,9 +52,11 @@ export const MyProfileStatus = ({ className }: { className?: string }) => {
           }}
         >
           {hasStatus && (myStatus?.emoji || '💬')}
-          <TooltipHover wrapperRef={spanRef}>
-            {`"${myStatus?.status || myStatus?.emoji}" ${myStatus?.validTill ? `${t('till')} ${formatDateExludingYearIfCurrent(new Date(myStatus.validTill))}` : ''}`}
-          </TooltipHover>
+          {hasStatus ? (
+            <TooltipHover wrapperRef={spanRef}>
+              {`"${myStatus?.status || myStatus?.emoji}" ${myStatus?.validTill ? `${t('till')} ${formatDateExludingYearIfCurrent(new Date(myStatus.validTill))}` : ''}`}
+            </TooltipHover>
+          ) : null}
         </ActionButton>
       </span>
       {community && isManageStatusDialogOpen ? (
