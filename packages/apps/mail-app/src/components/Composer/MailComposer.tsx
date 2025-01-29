@@ -21,6 +21,7 @@ import {
   NewMediaFile,
   MediaFile,
   RichText,
+  DEFAULT_PAYLOAD_KEY,
 } from '@homebase-id/js-lib/core';
 import { getNewId } from '@homebase-id/js-lib/helpers';
 import { useMailConversation, useMailDraft } from '../../hooks/mail/useMailConversation';
@@ -94,7 +95,7 @@ export const MailComposer = ({
   );
 
   const [files, setFiles] = useState<(NewMediaFile | MediaFile)[]>(
-    existingDraft?.fileMetadata.payloads || []
+    existingDraft?.fileMetadata.payloads?.filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY) || []
   );
 
   const {

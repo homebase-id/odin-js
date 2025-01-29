@@ -34,15 +34,18 @@ export const getFileHeader = async <T = string>(
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  options?: { systemFileType?: SystemFileType; axiosConfig?: AxiosRequestConfig }
+  options?: { systemFileType?: SystemFileType; decrypt?: boolean; axiosConfig?: AxiosRequestConfig }
 ): Promise<HomebaseFile<T> | null> => {
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
-  const { systemFileType, axiosConfig } = options ?? { systemFileType: 'Standard' };
-  const fileHeader = await getFileHeaderBytes(dotYouClient, targetDrive, fileId, {
+  const { systemFileType, decrypt, axiosConfig } = options ?? {
+    systemFileType: 'Standard',
     decrypt: true,
+  };
+  const fileHeader = await getFileHeaderBytes(dotYouClient, targetDrive, fileId, {
+    decrypt,
     systemFileType,
     axiosConfig,
   });

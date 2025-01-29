@@ -17,7 +17,7 @@ import {
   MailDeliveryStatus,
   MailDrive,
   getMailConversation,
-  updateLocalMailHeader,
+  updateMail,
   uploadMail,
 } from '../../providers/MailProvider';
 
@@ -39,7 +39,7 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
   }: {
     conversation: NewHomebaseFile<MailConversation> | HomebaseFile<MailConversation>;
     files?: (NewMediaFile | MediaFile)[] | undefined;
-  }): Promise<NewHomebaseFile<MailConversation> | null> => {
+  }): Promise<HomebaseFile<MailConversation> | null> => {
     const conversationContent = conversation.fileMetadata.appData.content;
     const uniqueId = conversation.fileMetadata.appData.uniqueId || getNewId();
     const threadId = conversationContent.threadId || getNewId();
@@ -71,11 +71,12 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
       },
     };
 
-    const uploadResult = await uploadMail(dotYouClient, newMailConversation, files);
+    const uploadResult = newMailConversation.fileId
+      ? await updateMail(dotYouClient, newMailConversation as HomebaseFile<MailConversation>, files)
+      : await uploadMail(dotYouClient, newMailConversation, files as NewMediaFile[]);
     if (!uploadResult) throw new Error('Failed to send the mail message');
 
-    newMailConversation.fileId =
-      'file' in uploadResult ? uploadResult.file.fileId : conversation.fileId;
+    newMailConversation.fileId = uploadResult.file.fileId;
     newMailConversation.fileMetadata.versionTag = uploadResult.newVersionTag;
     newMailConversation.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
 
@@ -84,7 +85,7 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
       recipients: conversationContent.recipients.filter((recipient) => recipient !== identity),
     });
 
-    return newMailConversation;
+    return newMailConversation as HomebaseFile<MailConversation>;
   };
 
   const markAsRead = async ({
@@ -117,12 +118,17 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
             },
           },
         };
-        return await updateLocalMailHeader(dotYouClient, updatedConversation, async () => {
-          const serverData = await getMailConversation(dotYouClient, conversation.fileId);
-          if (!serverData) return;
-          updatedConversation.fileMetadata.versionTag = serverData.fileMetadata.versionTag;
-          await updateLocalMailHeader(dotYouClient, updatedConversation);
-        });
+        return await updateMail(
+          dotYouClient,
+          updatedConversation,
+          updatedConversation.fileMetadata.payloads,
+          async () => {
+            const serverData = await getMailConversation(dotYouClient, conversation.fileId);
+            if (!serverData) return;
+            updatedConversation.fileMetadata.versionTag = serverData.fileMetadata.versionTag;
+            await updateMail(dotYouClient, updatedConversation);
+          }
+        );
       })
     );
 
@@ -159,12 +165,21 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
             },
           },
         };
-        return await updateLocalMailHeader(dotYouClient, updatedConversation, async () => {
-          const serverData = await getMailConversation(dotYouClient, conversation.fileId);
-          if (!serverData) return;
-          updatedConversation.fileMetadata.versionTag = serverData.fileMetadata.versionTag;
-          await updateLocalMailHeader(dotYouClient, updatedConversation);
-        });
+        return await updateMail(
+          dotYouClient,
+          updatedConversation,
+          updatedConversation.fileMetadata.payloads,
+          async () => {
+            const serverData = await getMailConversation(dotYouClient, conversation.fileId);
+            if (!serverData) return;
+            updatedConversation.fileMetadata.versionTag = serverData.fileMetadata.versionTag;
+            await updateMail(
+              dotYouClient,
+              updatedConversation,
+              updatedConversation.fileMetadata.payloads
+            );
+          }
+        );
       })
     );
 
@@ -426,7 +441,10 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
       },
     };
 
-    const uploadResult = await uploadMail(dotYouClient, newMailConversation, files);
+    const uploadResult = newMailConversation.fileId
+      ? await updateMail(dotYouClient, newMailConversation as HomebaseFile<MailConversation>, files)
+      : await uploadMail(dotYouClient, newMailConversation, files as NewMediaFile[]);
+
     if (!uploadResult) throw new Error('Failed to save the mail message draft');
 
     newMailConversation.fileId =
