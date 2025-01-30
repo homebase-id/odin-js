@@ -19,7 +19,9 @@ export const getFileHeaderByGlobalTransitId = async <T = string>(
   uniqueId: string,
   options?: { systemFileType?: SystemFileType; decrypt?: boolean }
 ): Promise<HomebaseFile<T> | null> => {
-  const { systemFileType, decrypt } = options ?? { systemFileType: 'Standard', decrypt: true };
+  const decrypt = options?.decrypt ?? true;
+  const systemFileType = options?.systemFileType ?? 'Standard';
+
   const fileHeader = await getFileHeaderBytesByGlobalTransitId(
     dotYouClient,
     targetDrive,
@@ -55,7 +57,9 @@ export const getFileHeaderBytesByGlobalTransitId = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
 
-  const { decrypt, systemFileType } = options ?? { decrypt: true, systemFileType: 'Standard' };
+  const decrypt = options?.decrypt ?? true;
+  const systemFileType = options?.systemFileType ?? 'Standard';
+
   const cacheKey = getCacheKey(targetDrive, uniqueId, !!decrypt);
   const cacheEntry =
     _internalMetadataPromiseCache.has(cacheKey) &&

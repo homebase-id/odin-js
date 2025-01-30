@@ -39,7 +39,9 @@ export const getFileHeaderByUniqueId = async <T = string>(
   uniqueId: string,
   options?: { systemFileType?: SystemFileType; decrypt?: boolean }
 ): Promise<HomebaseFile<T> | null> => {
-  const { systemFileType, decrypt } = options ?? { systemFileType: 'Standard', decrypt: true };
+  const decrypt = options?.decrypt ?? true;
+  const systemFileType = options?.systemFileType ?? 'Standard';
+
   const fileHeader = await getFileHeaderBytesByUniqueId(dotYouClient, targetDrive, uniqueId, {
     decrypt,
     systemFileType,
@@ -72,7 +74,9 @@ export const getFileHeaderBytesByUniqueId = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
 
-  const { decrypt, systemFileType } = options ?? { decrypt: true, systemFileType: 'Standard' };
+  const decrypt = options?.decrypt ?? true;
+  const systemFileType = options?.systemFileType ?? 'Standard';
+
   const cacheKey = getCacheKey(targetDrive, uniqueId, !!decrypt);
   const cacheEntry =
     _internalMetadataPromiseCache.has(cacheKey) &&
@@ -124,7 +128,8 @@ export const getPayloadAsJsonByUniqueId = async <T>(
     systemFileType?: SystemFileType;
   }
 ): Promise<T | null> => {
-  const { systemFileType } = options ?? { systemFileType: 'Standard' };
+  const systemFileType = options?.systemFileType ?? 'Standard';
+
   return getPayloadBytesByUniqueId(dotYouClient, targetDrive, uniqueId, key, {
     systemFileType,
     decrypt: true,
@@ -219,7 +224,7 @@ export const getThumbBytesByUniqueId = async (
     systemFileType?: SystemFileType;
     lastModified?: number;
   }
-): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType } | null> => {
+): Promise<{ bytes: Uint8Array; contentType: ImageContentType } | null> => {
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
@@ -227,7 +232,9 @@ export const getThumbBytesByUniqueId = async (
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
 
-  const { systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
+  const lastModified = options?.lastModified ?? true;
+  const systemFileType = options?.systemFileType ?? 'Standard';
+
   const client = getAxiosClient(dotYouClient, systemFileType);
   const request: GetFileThumbByUniqueIdRequest = {
     ...targetDrive,
