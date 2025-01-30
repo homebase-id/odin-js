@@ -1,6 +1,6 @@
 export type SystemFileType = 'Standard' | 'Comment';
 
-export interface FileMetadata<T = string> {
+export interface FileMetadata<T = string, L = string> {
   created: number;
   updated: number;
   transitCreated?: number;
@@ -12,16 +12,16 @@ export interface FileMetadata<T = string> {
   senderOdinId: string;
   appData: AppFileMetaData<T>;
   reactionPreview?: ReactionPreview;
-  localAppData?: LocalAppData;
+  localAppData?: LocalAppData<L>;
   versionTag: string;
 
   payloads?: PayloadDescriptor[];
 }
 
-export interface LocalAppData {
+export interface LocalAppData<L = string> {
   versionTag?: string;
   iv?: string;
-  content?: string;
+  content?: L;
   tags?: string[];
 }
 
@@ -249,32 +249,32 @@ export interface EncryptedKeyHeader {
   encryptedAesKey: Uint8Array;
 }
 
-interface BaseHomebaseFile<T = string> {
+interface BaseHomebaseFile<T = string, L = string> {
   fileId: string;
 
   fileSystemType: SystemFileType;
 
-  fileMetadata: FileMetadata<T>;
+  fileMetadata: FileMetadata<T, L>;
   sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
   serverMetadata: ServerMetaData | undefined;
 }
 
-export interface HomebaseFile<T = string> extends BaseHomebaseFile<T> {
+export interface HomebaseFile<T = string, L = string> extends BaseHomebaseFile<T, L> {
   fileState: 'active';
 }
 
-export interface DeletedHomebaseFile<T = string> extends BaseHomebaseFile<T> {
+export interface DeletedHomebaseFile<T = string, L = string> extends BaseHomebaseFile<T, L> {
   fileState: 'deleted';
 }
 
-export interface NewHomebaseFile<T = string>
+export interface NewHomebaseFile<T = string, L = string>
   extends Omit<Partial<BaseHomebaseFile<T>>, 'fileMetadata' | 'serverMetadata'> {
-  fileMetadata: NewFileMetadata<T>;
+  fileMetadata: NewFileMetadata<T, L>;
   serverMetadata: Omit<ServerMetaData, 'doNotIndex' | 'allowDistribution'> | undefined;
 }
 
-export interface NewFileMetadata<T = string>
-  extends Omit<Partial<FileMetadata<T>>, 'appData' | 'payloads'> {
+export interface NewFileMetadata<T = string, L = string>
+  extends Omit<Partial<FileMetadata<T, L>>, 'appData' | 'payloads'> {
   appData: NewAppFileMetaData<T>;
   payloads?: NewPayloadDescriptor[];
 }

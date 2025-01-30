@@ -14,6 +14,7 @@ import {
   decryptJsonContent,
   decryptChunkedBytesResponse,
   decryptBytesResponse,
+  decryptLocalContent,
 } from '../SecurityHelpers';
 import { getCacheKey, getAxiosClient, parseBytesToObject, getRangeHeader } from './DriveFileHelper';
 import { assertIfDefined, stringifyToQueryParams, tryJsonParse } from '../../../helpers/DataUtil';
@@ -393,4 +394,49 @@ export const getContentFromHeaderOrPayload = async <T>(
       lastModified: payloadDescriptor?.lastModified,
     });
   }
+};
+
+export const getLocalContentFromHeader = async <T>(
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  dsr: {
+    fileId: string;
+    fileMetadata: FileMetadata<unknown, string>;
+    sharedSecretEncryptedKeyHeader: EncryptedKeyHeader | undefined;
+    fileSystemType?: SystemFileType;
+  },
+  includesJsonContent: boolean,
+  systemFileType?: SystemFileType
+): Promise<T | null> => {
+  const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
+  if (!fileId || !fileMetadata) {
+    throw new Error('[odin-js] getLocalContentFromHeader: fileId or fileMetadata is undefined');
+  }
+
+  const keyHeader = fileMetadata.isEncrypted
+    ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader as EncryptedKeyHeader)
+    : undefined;
+
+  let decryptedLocalContent;
+  if (includesJsonContent) {
+    decryptedLocalContent = await decryptLocalContent(fileMetadata, keyHeader);
+  } else {
+    // When contentIsComplete but includesJsonContent == false the query before was done without including the content; So we just get and parse
+    const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, {
+      systemFileType: dsr.fileSystemType || systemFileType,
+    });
+    if (!fileHeader) return null;
+    decryptedLocalContent = await decryptLocalContent(fileHeader.fileMetadata, keyHeader);
+  }
+
+  if (!decryptedLocalContent) return null;
+
+  return tryJsonParse<T>(decryptedLocalContent, (ex) => {
+    console.error(
+      '[odin-js] getContentFromHeaderOrPayload: Error parsing JSON',
+      ex && typeof ex === 'object' && 'stack' in ex ? ex.stack : ex,
+      dsr.fileId,
+      targetDrive
+    );
+  });
 };
