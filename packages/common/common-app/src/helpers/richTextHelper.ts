@@ -155,3 +155,23 @@ export const ellipsisAtMaxCharOfRichText = (richText: RichText | undefined, maxC
   };
   return recursiveEllipsisAtMaxCharOfRichText(richText, maxChar)[0];
 };
+
+export const isRichTextEqual = (a: RichText | undefined, b: RichText | undefined) => {
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+
+  if (a.length !== b.length) return false;
+  // check types of each root item
+  for (let i = 0; i < a.length; i++) {
+    if (a[i].type !== b[i].type) return false;
+  }
+
+  if (getPlainTextFromRichText(a) === getPlainTextFromRichText(b)) return true;
+
+  return false;
+};
+
+export const isEmptyRichText = (richText: RichText | undefined) => {
+  const plainText = getPlainTextFromRichText(richText);
+  return !plainText || !plainText?.length || plainText === '';
+};

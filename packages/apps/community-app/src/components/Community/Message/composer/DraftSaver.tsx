@@ -1,4 +1,4 @@
-import { getPlainTextFromRichText, useDebounce } from '@homebase-id/common-app';
+import { isEmptyRichText, isRichTextEqual, useDebounce } from '@homebase-id/common-app';
 import { HomebaseFile, RichText, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { useState, useEffect } from 'react';
 import {
@@ -46,9 +46,7 @@ export const DraftSaver = ({
 
     if (metadata && draftKey && updatedAt) {
       if (
-        (drafts[draftKey]?.message?.length === message?.length &&
-          getPlainTextFromRichText(drafts[draftKey]?.message) ===
-            getPlainTextFromRichText(message)) ||
+        isRichTextEqual(drafts[draftKey]?.message, message) ||
         (drafts[draftKey] && drafts[draftKey]?.updatedAt >= updatedAt)
       )
         return;
@@ -56,7 +54,7 @@ export const DraftSaver = ({
       const newDrafts: Record<string, Draft | undefined> = {
         ...drafts,
         [draftKey]: {
-          message,
+          message: isEmptyRichText(message) ? undefined : message,
           updatedAt: updatedAt || 0,
         },
       };
