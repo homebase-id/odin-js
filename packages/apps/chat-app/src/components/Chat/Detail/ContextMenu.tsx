@@ -32,7 +32,7 @@ export const ContextMenu = ({
   chatActions,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation?: HomebaseFile<UnifiedConversation>;
+  conversation?: HomebaseFile<UnifiedConversation, unknown>;
   chatActions?: ChatActions;
 }) => {
   if (!chatActions) return null;

@@ -66,7 +66,7 @@ export const useChatMessage = (props?: {
     userDate,
     tags,
   }: {
-    conversation: HomebaseFile<UnifiedConversation>;
+    conversation: HomebaseFile<UnifiedConversation, unknown>;
     replyId?: string;
     files?: NewMediaFile[];
     message: string | RichText;
@@ -153,7 +153,7 @@ export const useChatMessage = (props?: {
     conversation,
   }: {
     updatedChatMessage: HomebaseFile<ChatMessage>;
-    conversation: HomebaseFile<UnifiedConversation>;
+    conversation: HomebaseFile<UnifiedConversation, unknown>;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
     const identity = dotYouClient.getHostIdentity();

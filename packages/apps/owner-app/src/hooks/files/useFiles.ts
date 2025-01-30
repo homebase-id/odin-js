@@ -119,7 +119,7 @@ export const useFileQuery = ({
             localAppData: await getLocalContentFromHeader(dotYouClient, targetDrive, rawFile, true),
           },
         };
-      } catch (e) {
+      } catch {
         return rawFile;
       }
     },

@@ -13,7 +13,10 @@ import { ContactFile } from '@homebase-id/js-lib/network';
 
 import { useNavigate } from 'react-router-dom';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { UnifiedConversation } from '../../../../providers/ConversationProvider';
+import {
+  ConversationMetadata,
+  UnifiedConversation,
+} from '../../../../providers/ConversationProvider';
 import { ConversationListItemWrapper } from '../Item/ConversationItem';
 import { NewConversationSearchItem } from '../Item/NewConversationSearchItem';
 import { ConversationListItem } from '../Item/ConversationListItem';
@@ -29,7 +32,7 @@ export const ConversationSearch = ({
   setIsSearchActive: (isActive: boolean) => void;
   openConversation: (id: string | undefined) => void;
   activeConversationId: string | undefined;
-  conversations: HomebaseFile<UnifiedConversation>[];
+  conversations: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
 }) => {
   const navigate = useNavigate();
   const [stateIndex, setStateIndex] = useState(0);
@@ -132,7 +135,8 @@ export const ConversationSearch = ({
                   onClick={() => openConversation(result.fileMetadata.appData.uniqueId)}
                   isActive={
                     activeConversationId ===
-                    (result as HomebaseFile<UnifiedConversation>).fileMetadata?.appData?.uniqueId
+                    (result as HomebaseFile<UnifiedConversation, ConversationMetadata>).fileMetadata
+                      ?.appData?.uniqueId
                   }
                   key={result.fileId}
                 />

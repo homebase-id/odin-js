@@ -27,7 +27,7 @@ export const EditChatMessage = ({
   onClose,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation: HomebaseFile<UnifiedConversation>;
+  conversation: HomebaseFile<UnifiedConversation, unknown>;
   onClose: () => void;
 }) => {
   const target = usePortal('modal-container');

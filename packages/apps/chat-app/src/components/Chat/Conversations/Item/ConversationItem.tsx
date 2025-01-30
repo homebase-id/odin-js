@@ -147,7 +147,7 @@ const ConversationBody = ({
   );
   const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
 
-  const lastReadTime = conversationMetadata?.lastReadTime || 0;
+  const lastReadTime = conversationMetadata?.fileMetadata?.localAppData?.content?.lastReadTime || 0;
   const unreadCount =
     conversationMetadata &&
     flatMessages &&
@@ -247,7 +247,7 @@ MessageContent.displayName = 'MessageContent';
 export const ConversationContextMenu = ({
   conversation,
 }: {
-  conversation: HomebaseFile<UnifiedConversation>;
+  conversation: HomebaseFile<UnifiedConversation, unknown>;
 }) => {
   const { mutate: clearChat, error: clearChatError } = useConversation().clearChat;
   const {

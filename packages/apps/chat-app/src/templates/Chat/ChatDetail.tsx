@@ -127,7 +127,7 @@ const ChatHeader = ({
   conversation: conversationDsr,
   rootPath,
 }: {
-  conversation: HomebaseFile<UnifiedConversation> | undefined;
+  conversation: HomebaseFile<UnifiedConversation, unknown> | undefined;
   rootPath: string;
 }) => {
   const navigate = useNavigate();
@@ -313,7 +313,7 @@ const ChatHeader = ({
 const GroupChatConnectedState = ({
   conversation,
 }: {
-  conversation: HomebaseFile<UnifiedConversation> | undefined;
+  conversation: HomebaseFile<UnifiedConversation, unknown> | undefined;
 }) => {
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
 

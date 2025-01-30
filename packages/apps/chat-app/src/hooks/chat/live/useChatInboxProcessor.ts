@@ -18,14 +18,8 @@ import { CHAT_MESSAGE_FILE_TYPE, dsrToMessage, ChatMessage } from '../../../prov
 import {
   ChatDrive,
   CHAT_CONVERSATION_FILE_TYPE,
-  CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE,
   dsrToConversation,
-  dsrToConversationMetadata,
 } from '../../../providers/ConversationProvider';
-import {
-  insertNewConversationMetadata,
-  invalidateConversationMetadata,
-} from '../useConversationMetadata';
 import { insertNewConversation, invalidateConversations } from '../useConversations';
 import { processChatMessagesBatch } from './useChatWebsocket';
 import { invalidateChatMessages } from '../useChatMessages';
@@ -82,28 +76,11 @@ export const useChatInboxProcessor = (connected?: boolean) => {
       );
       isDebug && console.debug('[InboxProcessor] new conversations', updatedConversations.length);
       await processConversationsBatch(dotYouClient, queryClient, updatedConversations);
-
-      const updatedConversationMetadatas = await findChangesSinceTimestamp(
-        dotYouClient,
-        lastProcessedWithBuffer,
-        {
-          targetDrive: ChatDrive,
-          fileType: [CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE],
-        }
-      );
-      isDebug &&
-        console.debug('[InboxProcessor] new metadata', updatedConversationMetadatas.length);
-      await processConversationsMetadataBatch(
-        dotYouClient,
-        queryClient,
-        updatedConversationMetadatas
-      );
     } else {
       console.warn('[useChatInboxProcessor] Invalidating all conversations & chat messages');
       // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
       invalidateChatMessages(queryClient);
       invalidateConversations(queryClient);
-      invalidateConversationMetadata(queryClient);
     }
 
     return processedresult;
@@ -169,35 +146,6 @@ const processConversationsBatch = async (
       }
 
       insertNewConversation(queryClient, updatedConversation);
-    })
-  );
-};
-
-const processConversationsMetadataBatch = async (
-  dotYouClient: DotYouClient,
-  queryClient: QueryClient,
-  conversations: (HomebaseFile<string> | DeletedHomebaseFile<string>)[]
-) => {
-  await Promise.all(
-    conversations.map(async (conversationsDsr) => {
-      if (conversationsDsr.fileState === 'deleted') {
-        invalidateConversationMetadata(queryClient);
-        return;
-      }
-
-      const updatedMetadata = await dsrToConversationMetadata(
-        dotYouClient,
-        conversationsDsr,
-        ChatDrive,
-        true
-      );
-
-      if (!updatedMetadata) {
-        invalidateConversationMetadata(queryClient);
-        return;
-      }
-
-      insertNewConversationMetadata(queryClient, updatedMetadata);
     })
   );
 };

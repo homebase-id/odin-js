@@ -361,7 +361,7 @@ export const getLocalContentFromHeader = async <T>(
   targetDrive: TargetDrive,
   dsr: {
     fileId: string;
-    fileMetadata: FileMetadata<unknown>;
+    fileMetadata: FileMetadata<unknown, string>;
     sharedSecretEncryptedKeyHeader: EncryptedKeyHeader | undefined;
     fileSystemType?: SystemFileType;
   },

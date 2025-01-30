@@ -44,7 +44,7 @@ export const useChatReaction = (props?: {
     message,
     reaction,
   }: {
-    conversation: HomebaseFile<UnifiedConversation>;
+    conversation: HomebaseFile<UnifiedConversation, unknown>;
     message: HomebaseFile<ChatMessage>;
     reaction: string;
   }) => {
@@ -69,7 +69,7 @@ export const useChatReaction = (props?: {
     message,
     reaction,
   }: {
-    conversation: HomebaseFile<UnifiedConversation>;
+    conversation: HomebaseFile<UnifiedConversation, unknown>;
     message: HomebaseFile<ChatMessage>;
     reaction: EmojiReaction;
   }) => {

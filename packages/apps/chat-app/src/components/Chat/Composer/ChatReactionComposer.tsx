@@ -16,7 +16,7 @@ export const ChatReactionComposer = ({
   conversation,
   msg,
 }: {
-  conversation: HomebaseFile<UnifiedConversation>;
+  conversation: HomebaseFile<UnifiedConversation, unknown>;
   msg: HomebaseFile<ChatMessage>;
 }) => {
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();

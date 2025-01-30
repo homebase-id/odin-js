@@ -6,9 +6,12 @@ import { getChatMessageInfiniteQueryOptions } from './useChatMessages';
 import { useConversations } from './useConversations';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { ChatMessage } from '../../providers/ChatProvider';
-import { UnifiedConversation } from '../../providers/ConversationProvider';
+import { ConversationMetadata, UnifiedConversation } from '../../providers/ConversationProvider';
 
-export type ConversationWithRecentMessage = HomebaseFile<UnifiedConversation> & {
+export type ConversationWithRecentMessage = HomebaseFile<
+  UnifiedConversation,
+  ConversationMetadata
+> & {
   lastMessage: HomebaseFile<ChatMessage> | null;
 };
 export const useConversationsWithRecentMessage = () => {
@@ -28,18 +31,21 @@ export const useConversationsWithRecentMessage = () => {
     if (!flatConversations || !flatConversations || flatConversations.length === 0) return;
 
     const convoWithMessage: ConversationWithRecentMessage[] = await Promise.all(
-      (flatConversations.filter(Boolean) as HomebaseFile<UnifiedConversation>[]).map(
-        async (convo) => {
-          const conversationId = convo.fileMetadata.appData.uniqueId;
-          const messages = await queryClient.fetchInfiniteQuery(
-            getChatMessageInfiniteQueryOptions(dotYouClient, conversationId)
-          );
-          return {
-            ...convo,
-            lastMessage: messages.pages[0].searchResults[0],
-          };
-        }
-      )
+      (
+        flatConversations.filter(Boolean) as HomebaseFile<
+          UnifiedConversation,
+          ConversationMetadata
+        >[]
+      ).map(async (convo) => {
+        const conversationId = convo.fileMetadata.appData.uniqueId;
+        const messages = await queryClient.fetchInfiniteQuery(
+          getChatMessageInfiniteQueryOptions(dotYouClient, conversationId)
+        );
+        return {
+          ...convo,
+          lastMessage: messages.pages[0].searchResults[0],
+        };
+      })
     );
 
     convoWithMessage.sort((a, b) => {

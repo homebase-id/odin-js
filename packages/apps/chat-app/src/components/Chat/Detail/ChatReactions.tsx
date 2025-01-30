@@ -19,7 +19,7 @@ export const ChatReactions = ({
   conversation,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation: HomebaseFile<UnifiedConversation> | undefined;
+  conversation: HomebaseFile<UnifiedConversation, unknown> | undefined;
 }) => {
   const [showDetail, setShowDetail] = useState(false);
 
@@ -68,7 +68,7 @@ const ChatReactionsDetail = ({
   onClose,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation: HomebaseFile<UnifiedConversation> | undefined;
+  conversation: HomebaseFile<UnifiedConversation, unknown> | undefined;
   onClose: () => void;
 }) => {
   const target = usePortal('modal-container');

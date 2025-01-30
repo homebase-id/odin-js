@@ -39,6 +39,7 @@ import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFile
 import {
   base64ToUint8Array,
   getRandom16ByteArray,
+  jsonStringify64,
   stringToUint8Array,
   uint8ArrayToBase64,
 } from '../../../helpers/DataUtil';
@@ -496,8 +497,8 @@ export const uploadLocalMetadataTags = async (
 export const uploadLocalMetadataContent = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
-  file: HomebaseFile<unknown>,
-  localAppData: LocalAppData,
+  file: HomebaseFile<unknown, unknown>,
+  localAppData: LocalAppData<unknown>,
   onVersionConflict?: () => Promise<void | LocalMetadataUploadResult> | void
 ) => {
   assertIfDotYouClientIsOwnerOrApp(dotYouClient);
@@ -528,7 +529,14 @@ export const uploadLocalMetadataContent = async (
   const encryptedContent =
     keyHeader && localAppData.content
       ? uint8ArrayToBase64(
-          await encryptWithKeyheader(stringToUint8Array(localAppData.content), keyHeader)
+          await encryptWithKeyheader(
+            stringToUint8Array(
+              typeof localAppData.content === 'string'
+                ? localAppData.content
+                : jsonStringify64(localAppData.content)
+            ),
+            keyHeader
+          )
         )
       : localAppData.content;
 

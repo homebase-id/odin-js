@@ -566,7 +566,7 @@ export const softDeleteChatMessage = async (
 
 export const requestMarkAsRead = async (
   dotYouClient: DotYouClient,
-  conversation: HomebaseFile<UnifiedConversation>,
+  conversation: HomebaseFile<UnifiedConversation, unknown>,
   messages: HomebaseFile<ChatMessage>[]
 ) => {
   const chatFileIds = messages

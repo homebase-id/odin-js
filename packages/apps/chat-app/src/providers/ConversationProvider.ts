@@ -19,15 +19,16 @@ import {
   UploadResult,
   PriorityOptions,
   UpdateHeaderInstructionSet,
+  getLocalContentFromHeader,
 } from '@homebase-id/js-lib/core';
-import { jsonStringify64, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { jsonStringify64 } from '@homebase-id/js-lib/helpers';
 
 export const CHAT_CONVERSATION_FILE_TYPE = 8888;
 export const CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE = 8889;
 export const ConversationWithYourselfId = 'e4ef2382-ab3c-405d-a8b5-ad3e09e980dd';
 export const CONVERSATION_PAYLOAD_KEY = 'convo_pk';
 
-export const ConversationWithYourself: HomebaseFile<UnifiedConversation> = {
+export const ConversationWithYourself: HomebaseFile<UnifiedConversation, ConversationMetadata> = {
   fileState: 'active',
   fileId: '',
   fileSystemType: 'Standard',
@@ -112,39 +113,21 @@ export const getConversations = async (
         response.searchResults
           .map(async (result) => await dsrToConversation(dotYouClient, result, ChatDrive, true))
           .filter(Boolean)
-      )) as HomebaseFile<UnifiedConversation>[]) || [],
+      )) as HomebaseFile<UnifiedConversation, ConversationMetadata>[]) || [],
   };
 };
 
 export const getConversation = async (dotYouClient: DotYouClient, conversationId: string) => {
   if (conversationId === ConversationWithYourselfId) return ConversationWithYourself;
 
-  const conversationHeader = await getFileHeaderByUniqueId<Conversation>(
+  const conversationHeader = await getFileHeaderByUniqueId<string>(
     dotYouClient,
     ChatDrive,
     conversationId
   );
   if (!conversationHeader) return null;
 
-  const unified: HomebaseFile<UnifiedConversation> = {
-    ...conversationHeader,
-    fileMetadata: {
-      ...conversationHeader.fileMetadata,
-      appData: {
-        ...conversationHeader.fileMetadata.appData,
-        content: {
-          ...conversationHeader.fileMetadata.appData.content,
-          recipients: (conversationHeader.fileMetadata.appData.content as GroupConversation)
-            .recipients || [
-            (conversationHeader.fileMetadata.appData.content as SingleConversation).recipient,
-            dotYouClient.getHostIdentity(),
-          ],
-        },
-      },
-    },
-  };
-
-  return unified;
+  return dsrToConversation(dotYouClient, conversationHeader, ChatDrive, true);
 };
 
 export const dsrToConversation = async (
@@ -152,7 +135,7 @@ export const dsrToConversation = async (
   dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<HomebaseFile<UnifiedConversation> | null> => {
+): Promise<HomebaseFile<UnifiedConversation, ConversationMetadata> | null> => {
   try {
     const attrContent = await getContentFromHeaderOrPayload<Conversation>(
       dotYouClient,
@@ -184,7 +167,46 @@ export const dsrToConversation = async (
       },
     };
 
-    return conversation;
+    const conversationMetadata = await (async () => {
+      const localContent = conversation?.fileMetadata.localAppData?.content;
+      if (localContent) {
+        try {
+          const localMetadata = await getLocalContentFromHeader<ConversationMetadata>(
+            dotYouClient,
+            ChatDrive,
+            conversation,
+            true
+          );
+
+          if (localMetadata) return localMetadata;
+        } catch (error) {
+          console.warn(
+            'Error getting local metadata, falling back to old conversation metadata',
+            error
+          );
+        }
+      }
+
+      // TODO: remove at any point after july 2025 (couple months after the deprecation of the local metadata file)
+      const serverFile = await getConversationMetadata(
+        dotYouClient,
+        conversation.fileMetadata.appData.uniqueId as string
+      );
+      return (
+        serverFile?.fileMetadata.appData.content || {
+          conversationId: conversation.fileMetadata.appData.uniqueId as string,
+          lastReadTime: 0,
+        }
+      );
+    })();
+
+    return {
+      ...conversation,
+      fileMetadata: {
+        ...conversation.fileMetadata,
+        localAppData: { ...conversation.fileMetadata.localAppData, content: conversationMetadata },
+      },
+    };
   } catch (ex) {
     console.error('[chat] failed to get the conversation payload of a dsr', dsr, ex);
     return null;
@@ -193,7 +215,9 @@ export const dsrToConversation = async (
 
 export const uploadConversation = async (
   dotYouClient: DotYouClient,
-  conversation: NewHomebaseFile<UnifiedConversation> | HomebaseFile<UnifiedConversation>,
+  conversation:
+    | NewHomebaseFile<UnifiedConversation, unknown>
+    | HomebaseFile<UnifiedConversation, unknown>,
   distribute: boolean = false,
   onVersionConflict?: () => void
 ) => {
@@ -245,7 +269,7 @@ export const uploadConversation = async (
 
 export const updateConversation = async (
   dotYouClient: DotYouClient,
-  conversation: HomebaseFile<UnifiedConversation>,
+  conversation: HomebaseFile<UnifiedConversation, unknown>,
   distribute = false,
   ignoreConflict = false
 ): Promise<UploadResult | void> => {
@@ -309,15 +333,14 @@ export const updateConversation = async (
   );
 };
 
-// export const getConversationMetadata = async ()=>{
-//   // CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE
-// }
-
 export interface ConversationMetadata {
   conversationId: string;
   lastReadTime?: number;
 }
 
+/**
+ * @deprecated Use getConversation instead
+ */
 export const getConversationMetadata = async (
   dotYouClient: DotYouClient,
   conversationId: string
@@ -339,7 +362,7 @@ export const getConversationMetadata = async (
   return dsrToConversationMetadata(dotYouClient, result.searchResults[0], ChatDrive, true);
 };
 
-export const dsrToConversationMetadata = async (
+const dsrToConversationMetadata = async (
   dotYouClient: DotYouClient,
   dsr: HomebaseFile,
   targetDrive: TargetDrive,
@@ -372,59 +395,6 @@ export const dsrToConversationMetadata = async (
     console.error('[chat] failed to get the ConversationMetadata of a dsr', dsr, ex);
     return null;
   }
-};
-
-export const uploadConversationMetadata = async (
-  dotYouClient: DotYouClient,
-  conversation: NewHomebaseFile<ConversationMetadata>,
-  onVersionConflict?: () => void
-) => {
-  if (!conversation.fileMetadata.appData.tags) {
-    throw new Error('ConversationMetadata must have tags');
-  }
-
-  if (
-    !conversation.fileMetadata.appData.tags.some((tag) =>
-      stringGuidsEqual(tag, conversation.fileMetadata.appData.content.conversationId)
-    )
-  ) {
-    throw new Error('ConversationMetadata must have a tag that matches the conversationId');
-  }
-
-  const uploadInstructions: UploadInstructionSet = {
-    storageOptions: {
-      drive: ChatDrive,
-      overwriteFileId: conversation.fileId,
-    },
-  };
-
-  const conversationContent = conversation.fileMetadata.appData.content;
-  const payloadJson: string = jsonStringify64({ ...conversationContent, version: 1 });
-
-  const uploadMetadata: UploadFileMetadata = {
-    versionTag: conversation?.fileMetadata.versionTag,
-    allowDistribution: false,
-    appData: {
-      tags: conversation.fileMetadata.appData.tags,
-      uniqueId: conversation.fileMetadata.appData.uniqueId,
-      fileType: CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE,
-      content: payloadJson,
-    },
-    isEncrypted: true,
-    accessControlList: {
-      requiredSecurityGroup: SecurityGroupType.Owner,
-    },
-  };
-
-  return await uploadFile(
-    dotYouClient,
-    uploadInstructions,
-    uploadMetadata,
-    undefined,
-    undefined,
-    undefined,
-    onVersionConflict
-  );
 };
 
 export const JOIN_CONVERSATION_COMMAND = 100;

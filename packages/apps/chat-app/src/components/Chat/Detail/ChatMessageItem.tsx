@@ -29,7 +29,7 @@ export const ChatMessageItem = ({
   chatActions,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation?: HomebaseFile<UnifiedConversation>;
+  conversation?: HomebaseFile<UnifiedConversation, unknown>;
   chatActions?: ChatActions;
 }) => {
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
@@ -108,7 +108,7 @@ const ChatTextMessageBody = ({
   isDeleted,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation?: HomebaseFile<UnifiedConversation>;
+  conversation?: HomebaseFile<UnifiedConversation, unknown>;
 
   isGroupChat?: boolean;
   messageFromMe: boolean;
@@ -270,7 +270,7 @@ const ChatMediaMessageBody = ({
   chatActions,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation?: HomebaseFile<UnifiedConversation>;
+  conversation?: HomebaseFile<UnifiedConversation, unknown>;
 
   isGroupChat?: boolean;
   messageFromMe: boolean;

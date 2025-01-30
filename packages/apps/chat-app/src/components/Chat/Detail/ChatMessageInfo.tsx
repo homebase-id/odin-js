@@ -21,7 +21,7 @@ export const ChatMessageInfo = ({
   onClose,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation: HomebaseFile<UnifiedConversation>;
+  conversation: HomebaseFile<UnifiedConversation, unknown>;
   onClose: () => void;
 }) => {
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();

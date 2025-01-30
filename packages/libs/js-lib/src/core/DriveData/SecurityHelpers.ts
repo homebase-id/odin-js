@@ -123,7 +123,7 @@ export const decryptJsonContent = async (
 };
 
 export const decryptLocalContent = async (
-  fileMetaData: FileMetadata<unknown>,
+  fileMetaData: FileMetadata<unknown, string>,
   keyheader: KeyHeader | undefined
 ): Promise<string | undefined> => {
   if (
