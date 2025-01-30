@@ -10,7 +10,7 @@ import {
   t,
   usePortal,
 } from '@homebase-id/common-app';
-import { UnifiedConversation } from '../../../providers/ConversationProvider';
+import { ConversationMetadata, UnifiedConversation } from '../../../providers/ConversationProvider';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { isTouchDevice } from '@homebase-id/js-lib/helpers';
@@ -27,7 +27,7 @@ export const EditChatMessage = ({
   onClose,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation: HomebaseFile<UnifiedConversation, unknown>;
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   onClose: () => void;
 }) => {
   const target = usePortal('modal-container');

@@ -100,14 +100,14 @@ export const updateCacheConversations = (
   queryClient: QueryClient,
   transformFn: (
     data: InfiniteData<{
-      searchResults: HomebaseFile<UnifiedConversation, unknown>[];
+      searchResults: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
       cursorState: string;
       queryTime: number;
       includeMetadataHeader: boolean;
     }>
   ) =>
     | InfiniteData<{
-        searchResults: HomebaseFile<UnifiedConversation, unknown>[];
+        searchResults: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
         cursorState: string;
         queryTime: number;
         includeMetadataHeader: boolean;
@@ -116,7 +116,7 @@ export const updateCacheConversations = (
 ) => {
   const existingConversations = queryClient.getQueryData<
     InfiniteData<{
-      searchResults: HomebaseFile<UnifiedConversation, unknown>[];
+      searchResults: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
       cursorState: string;
       queryTime: number;
       includeMetadataHeader: boolean;

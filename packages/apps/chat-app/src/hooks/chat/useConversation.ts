@@ -50,7 +50,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
 
     const updatedRecipients = [...new Set([...recipients, loggedOnIdentity as string])];
 
-    const newConversation: NewHomebaseFile<UnifiedConversation> = {
+    const newConversation: NewHomebaseFile<UnifiedConversation, ConversationMetadata> = {
       fileMetadata: {
         appData: {
           uniqueId: newConversationId,
@@ -78,7 +78,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const sendJoinCommand = async ({
     conversation,
   }: {
-    conversation: HomebaseFile<UnifiedConversation, unknown>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   }) => {
     return await uploadConversation(dotYouClient, conversation, true);
   };
@@ -100,7 +100,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const clearChat = async ({
     conversation,
   }: {
-    conversation: HomebaseFile<UnifiedConversation, unknown>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   }) => {
     return await deleteAllChatMessages(
       dotYouClient,
@@ -111,7 +111,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const deleteChat = async ({
     conversation,
   }: {
-    conversation: HomebaseFile<UnifiedConversation, unknown>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   }) => {
     const deletedResult = await deleteAllChatMessages(
       dotYouClient,
@@ -120,7 +120,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     if (!deletedResult) throw new Error('Failed to delete chat messages');
 
     // We soft delete the conversation, so we can still see newly received messages
-    const newConversation: HomebaseFile<UnifiedConversation, unknown> = {
+    const newConversation: HomebaseFile<UnifiedConversation, ConversationMetadata> = {
       ...conversation,
       fileMetadata: {
         ...conversation.fileMetadata,
@@ -134,9 +134,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const archiveChat = async ({
     conversation,
   }: {
-    conversation: HomebaseFile<UnifiedConversation, unknown>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   }) => {
-    const newConversation: HomebaseFile<UnifiedConversation, unknown> = {
+    const newConversation: HomebaseFile<UnifiedConversation, ConversationMetadata> = {
       ...conversation,
       fileMetadata: {
         ...conversation.fileMetadata,
@@ -230,7 +230,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       mutationFn: ({
         conversation,
       }: {
-        conversation: HomebaseFile<UnifiedConversation, unknown>;
+        conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
       }) => restoreChat(dotYouClient, conversation),
 
       onSettled: async (_data, _error, variables) => {
@@ -247,9 +247,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
 
 export const restoreChat = async (
   dotYouClient: DotYouClient,
-  conversation: HomebaseFile<UnifiedConversation, unknown>
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>
 ) => {
-  const newConversation: HomebaseFile<UnifiedConversation, unknown> = {
+  const newConversation: HomebaseFile<UnifiedConversation, ConversationMetadata> = {
     ...conversation,
     fileMetadata: {
       ...conversation.fileMetadata,

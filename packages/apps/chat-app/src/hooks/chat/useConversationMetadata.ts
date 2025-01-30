@@ -22,7 +22,7 @@ export const useConversationMetadata = (props?: { conversationId?: string | unde
     conversation,
     newMetadata,
   }: {
-    conversation: HomebaseFile<UnifiedConversation, unknown>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
     newMetadata: ConversationMetadata;
   }) => {
     return await uploadLocalMetadataContent(dotYouClient, ChatDrive, conversation, {

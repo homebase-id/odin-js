@@ -25,6 +25,7 @@ import { MessageDeletedInnerBody } from '../../Detail/ChatMessageItem';
 import { ChatSentTimeIndicator } from '../../Detail/ChatSentTimeIndicator';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
+  ConversationMetadata,
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../../../providers/ConversationProvider';
@@ -247,7 +248,7 @@ MessageContent.displayName = 'MessageContent';
 export const ConversationContextMenu = ({
   conversation,
 }: {
-  conversation: HomebaseFile<UnifiedConversation, unknown>;
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
 }) => {
   const { mutate: clearChat, error: clearChatError } = useConversation().clearChat;
   const {

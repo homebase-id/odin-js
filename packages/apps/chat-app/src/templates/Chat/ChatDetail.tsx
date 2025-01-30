@@ -22,6 +22,7 @@ import {
   HomebaseFile,
 } from '@homebase-id/js-lib/core';
 import {
+  ConversationMetadata,
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../providers/ConversationProvider';
@@ -127,7 +128,7 @@ const ChatHeader = ({
   conversation: conversationDsr,
   rootPath,
 }: {
-  conversation: HomebaseFile<UnifiedConversation, unknown> | undefined;
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata> | undefined;
   rootPath: string;
 }) => {
   const navigate = useNavigate();
@@ -313,7 +314,7 @@ const ChatHeader = ({
 const GroupChatConnectedState = ({
   conversation,
 }: {
-  conversation: HomebaseFile<UnifiedConversation, unknown> | undefined;
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata> | undefined;
 }) => {
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
 

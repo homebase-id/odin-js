@@ -17,6 +17,7 @@ import { getNewId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { updateChatMessage, uploadChatMessage } from '../../providers/ChatProvider';
 
 import {
+  ConversationMetadata,
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../providers/ConversationProvider';
@@ -66,7 +67,7 @@ export const useChatMessage = (props?: {
     userDate,
     tags,
   }: {
-    conversation: HomebaseFile<UnifiedConversation, unknown>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
     replyId?: string;
     files?: NewMediaFile[];
     message: string | RichText;
@@ -153,7 +154,7 @@ export const useChatMessage = (props?: {
     conversation,
   }: {
     updatedChatMessage: HomebaseFile<ChatMessage>;
-    conversation: HomebaseFile<UnifiedConversation, unknown>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
     const identity = dotYouClient.getHostIdentity();

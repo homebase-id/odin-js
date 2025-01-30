@@ -16,7 +16,7 @@ import { HomebaseFile, NewMediaFile } from '@homebase-id/js-lib/core';
 
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { ChatMessage } from '../../../providers/ChatProvider';
-import { UnifiedConversation } from '../../../providers/ConversationProvider';
+import { ConversationMetadata, UnifiedConversation } from '../../../providers/ConversationProvider';
 import { useState, useEffect, useRef } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
 import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
@@ -28,7 +28,7 @@ const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const CHAT_DRAFTS_KEY = 'CHAT_LOCAL_DRAFTS';
 
 export interface ChatComposerProps {
-  conversation: HomebaseFile<UnifiedConversation, unknown> | undefined;
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata> | undefined;
   replyMsg: HomebaseFile<ChatMessage> | undefined;
   clearReplyMsg: () => void;
   onSend?: () => void;

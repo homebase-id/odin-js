@@ -13,6 +13,7 @@ import {
   usePortal,
 } from '@homebase-id/common-app';
 import {
+  ConversationMetadata,
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../../providers/ConversationProvider';
@@ -23,7 +24,7 @@ export const ChatInfo = ({
   conversation,
   onClose,
 }: {
-  conversation: HomebaseFile<UnifiedConversation, unknown>;
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   onClose: () => void;
 }) => {
   const target = usePortal('modal-container');
