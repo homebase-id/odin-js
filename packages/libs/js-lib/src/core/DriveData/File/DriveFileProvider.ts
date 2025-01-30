@@ -40,10 +40,10 @@ export const getFileHeader = async <T = string>(
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
-  const { systemFileType, decrypt, axiosConfig } = options ?? {
-    systemFileType: 'Standard',
-    decrypt: true,
-  };
+  const decrypt = options?.decrypt ?? true;
+  const systemFileType = options?.systemFileType ?? 'Standard';
+  const axiosConfig = options?.axiosConfig;
+
   const fileHeader = await getFileHeaderBytes(dotYouClient, targetDrive, fileId, {
     decrypt,
     systemFileType,
@@ -138,6 +138,7 @@ export const getPayloadAsJson = async <T>(
   }
 ): Promise<T | null> => {
   const { systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
+
   return getPayloadBytes(dotYouClient, targetDrive, fileId, key, {
     systemFileType,
     decrypt: true,

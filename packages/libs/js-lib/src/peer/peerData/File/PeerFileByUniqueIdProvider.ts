@@ -25,7 +25,9 @@ export const getFileHeaderOverPeerByUniqueId = async <T = string>(
   uniqueId: string,
   options?: { decrypt?: boolean; systemFileType?: SystemFileType }
 ): Promise<HomebaseFile<T> | null> => {
-  const { decrypt, systemFileType } = options ?? { decrypt: true, systemFileType: 'Standard' };
+  const decrypt = options?.decrypt ?? true;
+  const systemFileType = options?.systemFileType ?? 'Standard';
+
   const fileHeader = await getFileHeaderBytesOverPeerByUniqueId(
     dotYouClient,
     odinId,

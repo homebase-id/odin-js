@@ -12,12 +12,7 @@ import {
   useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
-import {
-  getNewXorId,
-  isTouchDevice,
-  stringGuidsEqual,
-  tryJsonParse,
-} from '@homebase-id/js-lib/helpers';
+import { getNewXorId, isTouchDevice, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import {
   ChannelWithRecentMessage,
