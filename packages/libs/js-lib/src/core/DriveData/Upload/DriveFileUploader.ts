@@ -7,6 +7,8 @@ import {
   EncryptedKeyHeader,
   LocalAppData,
   FileIdFileIdentifier,
+  HomebaseFile,
+  TargetDrive,
 } from '../File/DriveFileTypes';
 import {
   UploadInstructionSet,
@@ -22,7 +24,7 @@ import {
   PriorityOptions,
   SendContents,
 } from './DriveUploadTypes';
-import { decryptKeyHeader } from '../SecurityHelpers';
+import { decryptKeyHeader, encryptWithKeyheader } from '../SecurityHelpers';
 import {
   GenerateKeyHeader,
   buildDescriptor,
@@ -34,7 +36,13 @@ import {
   buildUpdateManifest,
 } from './UploadHelpers';
 import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFileProvider';
-import { getRandom16ByteArray } from '../../../helpers/DataUtil';
+import {
+  base64ToUint8Array,
+  getRandom16ByteArray,
+  jsonStringify64,
+  stringToUint8Array,
+  uint8ArrayToBase64,
+} from '../../../helpers/DataUtil';
 import { AxiosRequestConfig } from 'axios';
 import { deletePayload } from '../File/DriveFileManager';
 const OdinBlob: typeof Blob =
@@ -488,19 +496,56 @@ export const uploadLocalMetadataTags = async (
 
 export const uploadLocalMetadataContent = async (
   dotYouClient: DotYouClient,
-  file: FileIdFileIdentifier,
-  localAppData: LocalAppData,
+  targetDrive: TargetDrive,
+  file: HomebaseFile<unknown, unknown>,
+  localAppData: LocalAppData<unknown>,
   onVersionConflict?: () => Promise<void | LocalMetadataUploadResult> | void
 ) => {
   assertIfDotYouClientIsOwnerOrApp(dotYouClient);
   const axiosClient = dotYouClient.createAxiosClient();
 
+  const fileIdentifier: FileIdFileIdentifier = {
+    fileId: file.fileId,
+    targetDrive,
+  };
+
+  const decryptedKeyHeader = file.sharedSecretEncryptedKeyHeader
+    ? await decryptKeyHeader(dotYouClient, file.sharedSecretEncryptedKeyHeader)
+    : undefined;
+
+  if (file.fileMetadata.isEncrypted && !decryptedKeyHeader) {
+    throw new Error('Missing keyHeader for encrypted file');
+  }
+
+  const keyHeader: KeyHeader | undefined =
+    file.fileMetadata.isEncrypted && decryptedKeyHeader
+      ? {
+          aesKey: decryptedKeyHeader.aesKey,
+          iv: (localAppData.iv && base64ToUint8Array(localAppData.iv)) || getRandom16ByteArray(),
+        }
+      : undefined;
+
+  const ivToSend = (keyHeader?.iv && uint8ArrayToBase64(keyHeader.iv)) || undefined;
+  const encryptedContent =
+    keyHeader && localAppData.content
+      ? uint8ArrayToBase64(
+          await encryptWithKeyheader(
+            stringToUint8Array(
+              typeof localAppData.content === 'string'
+                ? localAppData.content
+                : jsonStringify64(localAppData.content)
+            ),
+            keyHeader
+          )
+        )
+      : localAppData.content;
+
   return await axiosClient
     .patch<LocalMetadataUploadResult>('/drive/files/update-local-metadata-content', {
-      iv: localAppData.iv,
+      iv: ivToSend,
       localVersionTag: localAppData.versionTag,
-      file: file,
-      content: localAppData.content,
+      file: fileIdentifier,
+      content: encryptedContent,
     })
     .then((response) => response.data)
     .catch((error) => {
