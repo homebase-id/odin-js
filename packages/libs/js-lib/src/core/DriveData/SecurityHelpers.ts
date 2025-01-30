@@ -122,6 +122,35 @@ export const decryptJsonContent = async (
   }
 };
 
+export const decryptLocalContent = async (
+  fileMetaData: FileMetadata<unknown, string>,
+  keyheader: KeyHeader | undefined
+): Promise<string | undefined> => {
+  if (
+    !keyheader ||
+    !fileMetaData.localAppData?.content ||
+    typeof fileMetaData.localAppData?.content === 'object'
+  )
+    return fileMetaData.localAppData?.content;
+
+  try {
+    const updatedIv =
+      (fileMetaData.localAppData.iv && base64ToUint8Array(fileMetaData.localAppData.iv)) ||
+      keyheader.iv;
+
+    const cipher = base64ToUint8Array(fileMetaData.localAppData?.content);
+    return byteArrayToString(
+      await decryptUsingKeyHeader(cipher, {
+        aesKey: keyheader.aesKey,
+        iv: updatedIv,
+      })
+    );
+  } catch (err) {
+    console.warn('[odin-js]', 'Json local content Decryption failed', err);
+    throw new Error('[odin-js] Json local content Decryption failed');
+  }
+};
+
 export const decryptUsingKeyHeader = async (
   cipher: Uint8Array,
   keyHeader: KeyHeader
