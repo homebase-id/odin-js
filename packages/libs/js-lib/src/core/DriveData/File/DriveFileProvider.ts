@@ -138,6 +138,7 @@ export const getPayloadAsJson = async <T>(
   }
 ): Promise<T | null> => {
   const { systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
+
   return getPayloadBytes(dotYouClient, targetDrive, fileId, key, {
     systemFileType,
     decrypt: true,

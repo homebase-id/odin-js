@@ -89,7 +89,7 @@ export const getDecryptedImageData = async (
   pixelHeight?: number;
   pixelWidth?: number;
   contentType: ImageContentType;
-  bytes: ArrayBuffer;
+  bytes: Uint8Array;
 } | null> => {
   if (size) {
     try {

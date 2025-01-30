@@ -161,7 +161,7 @@ export const getThumbBytesOverPeerByGlobalTransitId = async (
     systemFileType?: SystemFileType;
     lastModified?: number;
   }
-): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType } | null> => {
+): Promise<{ bytes: Uint8Array; contentType: ImageContentType } | null> => {
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GlobalTransitId', globalTransitId);
@@ -209,7 +209,9 @@ export const getFileHeaderOverPeerByGlobalTransitId = async <T = string>(
   globalTransitId: string,
   options?: { decrypt?: boolean; systemFileType?: SystemFileType }
 ): Promise<HomebaseFile<T> | null> => {
-  const { decrypt, systemFileType } = options ?? { decrypt: true, systemFileType: 'Standard' };
+  const decrypt = options?.decrypt ?? true;
+  const systemFileType = options?.systemFileType ?? 'Standard';
+
   const fileHeader = await getFileHeaderBytesOverPeerByGlobalTransitId(
     dotYouClient,
     odinId,
