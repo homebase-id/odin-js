@@ -1,5 +1,5 @@
 {
-  "version": "0.0.7-alpha.35",
+  "version": "0.0.7-alpha.36",
   "name": "@homebase-id/js-lib",
   "author": "YouFoundation",
   "description": "Monorepo that contains all the main homebase apps, together with the JavaScript libraries",
