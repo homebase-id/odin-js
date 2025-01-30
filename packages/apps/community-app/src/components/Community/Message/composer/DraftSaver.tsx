@@ -51,10 +51,13 @@ export const DraftSaver = ({
       )
         return;
 
+      const emptiedDraft = isEmptyRichText(message) ? undefined : message;
+      if (drafts[draftKey]?.message === undefined && emptiedDraft === undefined) return;
+
       const newDrafts: Record<string, Draft | undefined> = {
         ...drafts,
         [draftKey]: {
-          message: isEmptyRichText(message) ? undefined : message,
+          message: emptiedDraft,
           updatedAt: updatedAt || 0,
         },
       };
