@@ -39,7 +39,9 @@ export const getFileHeaderByUniqueId = async <T = string>(
   uniqueId: string,
   options?: { systemFileType?: SystemFileType; decrypt?: boolean }
 ): Promise<HomebaseFile<T> | null> => {
-  const { systemFileType, decrypt } = options ?? { systemFileType: 'Standard', decrypt: true };
+  const decrypt = options?.decrypt ?? true;
+  const systemFileType = options?.systemFileType ?? 'Standard';
+
   const fileHeader = await getFileHeaderBytesByUniqueId(dotYouClient, targetDrive, uniqueId, {
     decrypt,
     systemFileType,
