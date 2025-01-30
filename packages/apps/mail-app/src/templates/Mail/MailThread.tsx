@@ -241,14 +241,12 @@ const ForwardAction = ({
   onDone: () => void;
 }) => {
   return (
-    // <div className="rounded-lg py-5">
     <MailComposer
       originId={originId}
       subject={subject}
       onDone={onDone}
       forwardedMailThread={mailThread}
     />
-    // </div>
   );
 };
 

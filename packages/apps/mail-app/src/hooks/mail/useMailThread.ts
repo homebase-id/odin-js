@@ -7,7 +7,7 @@ import {
   MailConversationsReturn,
   MailDrive,
   REMOVE_ARCHIVAL_STATUS,
-  updateLocalMailHeader,
+  updateMail,
 } from '../../providers/MailProvider';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -28,7 +28,7 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
 
         const updatedMailMessage = { ...message };
         updatedMailMessage.fileMetadata.appData.archivalStatus = REMOVE_ARCHIVAL_STATUS;
-        return updateLocalMailHeader(dotYouClient, message);
+        return updateMail(dotYouClient, message, message.fileMetadata.payloads);
       })
     );
   };
@@ -38,7 +38,7 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
       mailThread.map((message) => {
         const updatedMailMessage = { ...message };
         updatedMailMessage.fileMetadata.appData.archivalStatus = ARCHIVE_ARCHIVAL_STATUS;
-        return updateLocalMailHeader(dotYouClient, message);
+        return updateMail(dotYouClient, message, message.fileMetadata.payloads);
       })
     );
   };
@@ -48,7 +48,7 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
       mailThread.map((message) => {
         const updatedMailMessage = { ...message };
         updatedMailMessage.fileMetadata.appData.archivalStatus = DEFAULT_ARCHIVAL_STATUS;
-        return updateLocalMailHeader(dotYouClient, message);
+        return updateMail(dotYouClient, message, message.fileMetadata.payloads);
       })
     );
   };

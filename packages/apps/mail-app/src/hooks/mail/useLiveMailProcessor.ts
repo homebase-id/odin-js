@@ -37,6 +37,7 @@ const useInboxProcessor = (connected?: boolean) => {
   const fetchData = async () => {
     const processedresult = await processInbox(dotYouClient, MailDrive, 2000);
     // We don't know how many messages we have processed, so we can only invalidate the entire mail query
+    // TODO: Extend with a queryBatch + queryModified with a timestamp check to directly add the new messages into the cache
     queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
     return processedresult;
   };
