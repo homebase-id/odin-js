@@ -345,19 +345,25 @@ const MessageTextRenderer = ({
           'value' in attributes &&
           typeof attributes.value === 'string'
         ) {
-          const tagGuid = formatGuidId(toGuidId(attributes.value));
+          const uniqueId =
+            attributes.uniqueId && typeof attributes.uniqueId === 'string'
+              ? attributes.uniqueId
+              : undefined;
 
-          const hasChannel = !!channels?.find((channel) =>
+          // Fallback to the old way of storing the channel in the RichText
+          const tagGuid = uniqueId || formatGuidId(toGuidId(attributes.value));
+
+          const matchingChannel = channels?.find((channel) =>
             stringGuidsEqual(channel.fileMetadata.appData.uniqueId, tagGuid)
           );
 
-          if (hasChannel) {
+          if (matchingChannel) {
             return (
               <Link
                 to={`${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${tagGuid}`}
                 className="break-all text-primary hover:underline"
               >
-                #{attributes.value.trim()}{' '}
+                #{matchingChannel.fileMetadata.appData.content.title || attributes.value.trim()}{' '}
               </Link>
             );
           } else {

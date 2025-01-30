@@ -39,7 +39,7 @@ import { TransitInstructionSet, TransitUploadResult } from '../../../peer/peerDa
 
 import {
   getPayloadForLinkPreview,
-  getPayloadsAndThumbnailsForNewMedia,
+  getPayloadsAndThumbnailsForNewPostMedia,
   getUploadFileMetadata,
   hasConflictingSlug,
 } from './PostUploadHelpers';
@@ -148,7 +148,7 @@ const uploadPost = async <T extends PostContent>(
     payloads: newMediaPayloads,
     thumbnails: newMediaThumbnails,
     previewThumbnails,
-  } = await getPayloadsAndThumbnailsForNewMedia(newMediaFiles, aesKey, onUpdate);
+  } = await getPayloadsAndThumbnailsForNewPostMedia(newMediaFiles, aesKey, { onUpdate });
 
   payloads.push(...newMediaPayloads);
   thumbnails.push(...newMediaThumbnails);
@@ -345,10 +345,12 @@ const patchPost = async <T extends PostContent>(
     payloads: newMediaPayloads,
     thumbnails: newMediaThumbnails,
     previewThumbnails,
-  } = await getPayloadsAndThumbnailsForNewMedia(
+  } = await getPayloadsAndThumbnailsForNewPostMedia(
     newMediaFiles || [],
     decryptedKeyHeader?.aesKey,
-    onUpdate
+    {
+      onUpdate,
+    }
   );
 
   payloads.push(...newMediaPayloads);

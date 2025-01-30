@@ -21,6 +21,7 @@ import {
   NewMediaFile,
   MediaFile,
   RichText,
+  DEFAULT_PAYLOAD_KEY,
 } from '@homebase-id/js-lib/core';
 import { getNewId } from '@homebase-id/js-lib/helpers';
 import { useMailConversation, useMailDraft } from '../../hooks/mail/useMailConversation';
@@ -94,7 +95,7 @@ export const MailComposer = ({
   );
 
   const [files, setFiles] = useState<(NewMediaFile | MediaFile)[]>(
-    existingDraft?.fileMetadata.payloads || []
+    existingDraft?.fileMetadata.payloads?.filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY) || []
   );
 
   const {
@@ -170,6 +171,10 @@ export const MailComposer = ({
   };
 
   useEffect(() => {
+    if (saveDraftStatus === 'success') onDone();
+  }, [saveDraftStatus]);
+
+  useEffect(() => {
     if (sendMailStatus === 'success') onDone();
   }, [sendMailStatus]);
 
@@ -182,7 +187,8 @@ export const MailComposer = ({
     const handler = (e: BeforeUnloadEvent) => {
       if (
         getTextRootsRecursive(autosavedDsr.fileMetadata.appData.content.message).length &&
-        saveDraftStatus !== 'success'
+        saveDraftStatus !== 'success' &&
+        autosavedDsr !== existingDraft
       ) {
         e.preventDefault();
         e.returnValue = '';
@@ -204,7 +210,8 @@ export const MailComposer = ({
       sendMailStatus !== 'pending' && // We include pending state, as the status might not have updated through to the blocker;
       removeDraftStatus !== 'pending' &&
       saveDraftStatus !== 'success' &&
-      saveDraftStatus !== 'pending'
+      saveDraftStatus !== 'pending' &&
+      autosavedDsr !== existingDraft
   );
 
   const { data: contacts } = useAllContacts(true);
@@ -297,7 +304,7 @@ export const MailComposer = ({
                   <RecipientInput
                     id="recipients"
                     autoFocus={expanded}
-                    recipients={autosavedDsr.fileMetadata.appData.content.recipients}
+                    recipients={autosavedDsr.fileMetadata.appData.content.recipients || []}
                     setRecipients={(newRecipients) =>
                       setAutosavedDsr({
                         ...autosavedDsr,
@@ -421,7 +428,6 @@ export const MailComposer = ({
               e.preventDefault();
               e.stopPropagation();
               doAutoSave();
-              onDone();
             }}
           >
             {t('Save as draft')}

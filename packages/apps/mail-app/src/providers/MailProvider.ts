@@ -1,12 +1,9 @@
 import {
-  AppendResult,
   CursoredResult,
   DotYouClient,
   HomebaseFile,
-  EmbeddedThumb,
   FileQueryParams,
   GetBatchQueryResultOptions,
-  KeyHeader,
   NewHomebaseFile,
   PayloadFile,
   RichText,
@@ -19,21 +16,20 @@ import {
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
-  appendDataToFile,
   getContentFromHeaderOrPayload,
   getFileHeader,
-  getPayloadBytes,
   queryBatch,
   uploadFile,
-  uploadHeader,
   MediaFile,
   NewMediaFile,
   PriorityOptions,
-  UpdateHeaderInstructionSet,
+  patchFile,
+  UpdateInstructionSet,
+  GenerateKeyHeader,
+  decryptKeyHeader,
   DEFAULT_PAYLOAD_KEY,
-  AppendInstructionSet,
-  RecipientTransferSummary,
   RecipientTransferHistory,
+  RecipientTransferSummary,
   TransferStatus,
   FailedTransferStatuses,
 } from '@homebase-id/js-lib/core';
@@ -43,9 +39,9 @@ import {
   jsonStringify64,
   makeGrid,
   stringToUint8Array,
+  getPayloadsAndThumbnailsForNewMedia,
 } from '@homebase-id/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
-import { processVideoFile, createThumbnails } from '@homebase-id/js-lib/media';
 import { getPlainTextFromRichText } from '@homebase-id/common-app';
 
 export const MAIL_DRAFT_CONVERSATION_FILE_TYPE = 9001;
@@ -123,13 +119,19 @@ export const getMailConversations = async (
   };
 };
 
-export const getMailConversation = async (dotYouClient: DotYouClient, fileId: string) =>
-  await getFileHeader<MailConversation>(dotYouClient, MailDrive, fileId);
+export const getMailConversation = async (dotYouClient: DotYouClient, fileId: string) => {
+  const header = await getFileHeader<string>(dotYouClient, MailDrive, fileId, {
+    decrypt: false,
+  });
+  if (!header) return null;
+
+  return await dsrToMailConversation(dotYouClient, header, MailDrive, true);
+};
 
 export const uploadMail = async (
   dotYouClient: DotYouClient,
-  conversation: NewHomebaseFile<MailConversation> | HomebaseFile<MailConversation>,
-  files: (NewMediaFile | MediaFile)[] | undefined,
+  conversation: NewHomebaseFile<MailConversation>,
+  newMediaFiles: NewMediaFile[] | undefined,
   onVersionConflict?: () => void
 ) => {
   const identity = dotYouClient.getHostIdentity();
@@ -139,7 +141,27 @@ export const uploadMail = async (
   const distribute =
     recipients?.length > 0 &&
     conversation.fileMetadata.appData.fileType !== MAIL_DRAFT_CONVERSATION_FILE_TYPE;
-  const anyExistingFiles = files?.some((file) => !('file' in file));
+
+  const payloads: PayloadFile[] = [];
+  const thumbnails: ThumbnailFile[] = [];
+
+  const encryptedKeyHeader = conversation.sharedSecretEncryptedKeyHeader || GenerateKeyHeader();
+  const decryptedKeyHeader = encryptedKeyHeader
+    ? await decryptKeyHeader(dotYouClient, encryptedKeyHeader)
+    : undefined;
+
+  const aesKey = decryptedKeyHeader?.aesKey || getRandom16ByteArray();
+
+  const {
+    payloads: newMediaPayloads,
+    thumbnails: newMediaThumbnails,
+    previewThumbnails,
+  } = await getPayloadsAndThumbnailsForNewMedia(newMediaFiles || [], aesKey, {
+    keyPrefix: MAIL_MESSAGE_PAYLOAD_KEY,
+  });
+
+  payloads.push(...newMediaPayloads);
+  thumbnails.push(...newMediaThumbnails);
 
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
@@ -163,6 +185,131 @@ export const uploadMail = async (
       : undefined,
   };
 
+  const payloadJson: string = jsonStringify64({ ...conversation.fileMetadata.appData.content });
+  const payloadBytes = stringToUint8Array(payloadJson);
+
+  // Set max of 3kb for content so enough room is left for metedata
+  const shouldEmbedContent = payloadBytes.length < 3000;
+
+  const uploadMetadata: UploadFileMetadata = {
+    versionTag: conversation?.fileMetadata.versionTag,
+    allowDistribution: distribute,
+    appData: {
+      ...conversation.fileMetadata.appData,
+      fileType: conversation.fileMetadata.appData.fileType || MAIL_CONVERSATION_FILE_TYPE,
+      content: shouldEmbedContent ? payloadJson : undefined,
+    },
+    isEncrypted: true,
+    accessControlList: conversation.serverMetadata?.accessControlList || {
+      requiredSecurityGroup: SecurityGroupType.Owner,
+    },
+  };
+
+  uploadMetadata.appData.previewThumbnail =
+    previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
+
+  if (!shouldEmbedContent) {
+    payloads.push({
+      key: DEFAULT_PAYLOAD_KEY,
+      payload: new Blob([payloadBytes], { type: 'application/json' }),
+    });
+  }
+
+  const uploadResult = await uploadFile(
+    dotYouClient,
+    uploadInstructions,
+    uploadMetadata,
+    payloads,
+    thumbnails,
+    true,
+    onVersionConflict,
+    {
+      aesKey,
+    }
+  );
+
+  if (!uploadResult) return null;
+
+  conversation.fileId = conversation.fileId || (uploadResult as UploadResult).file.fileId;
+  conversation.fileMetadata.versionTag = uploadResult.newVersionTag;
+  conversation.fileMetadata.appData.previewThumbnail = uploadMetadata.appData.previewThumbnail;
+  // We force set the keyHeader as it's returned from the upload, and needed for fast saves afterwards
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  conversation.sharedSecretEncryptedKeyHeader = uploadResult.keyHeader as any;
+
+  if (distribute) {
+    if (
+      Object.values((uploadResult as UploadResult).recipientStatus).some(
+        (recipienStatus) => recipienStatus.toLowerCase() === TransferUploadStatus.EnqueuedFailed
+      )
+    ) {
+      conversation.fileMetadata.appData.content.deliveryStatus = MailDeliveryStatus.Failed;
+
+      await updateMail(
+        dotYouClient,
+        conversation as HomebaseFile<MailConversation>,
+        payloads.map((pyld) => {
+          return {
+            key: pyld.key,
+            contentType: pyld.payload.type,
+          };
+        }),
+        undefined
+      );
+
+      console.error('Not all recipients received the message: ', uploadResult);
+      throw new Error(`Not all recipients received the message: ${recipients.join(', ')}`);
+    }
+  }
+
+  return {
+    ...uploadResult,
+    previewThumbnail: uploadMetadata.appData.previewThumbnail,
+  };
+};
+
+export const updateMail = async (
+  dotYouClient: DotYouClient,
+  conversation: HomebaseFile<MailConversation>,
+  existingAndNewMediaFiles?: (NewMediaFile | MediaFile)[],
+  onVersionConflict?: () => void
+) => {
+  const identity = dotYouClient.getHostIdentity();
+  const recipients = conversation.fileMetadata.appData.content.recipients.filter(
+    (recipient) => recipient !== identity
+  );
+  const distribute =
+    recipients?.length > 0 &&
+    conversation.fileMetadata.appData.fileType !== MAIL_DRAFT_CONVERSATION_FILE_TYPE;
+
+  const uploadInstructions: UpdateInstructionSet = {
+    storageOptions: {
+      drive: MailDrive,
+      overwriteFileId: conversation.fileId,
+    },
+    locale: 'local',
+    file: {
+      fileId: conversation.fileId,
+      targetDrive: MailDrive,
+    },
+    versionTag: conversation.fileMetadata.versionTag,
+    transitOptions: distribute
+      ? {
+          recipients: recipients,
+          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.Medium,
+          sendContents: SendContents.All,
+          useAppNotification: true,
+          appNotificationOptions: {
+            appId: appId,
+            typeId: conversation.fileMetadata.appData.groupId || getNewId(),
+            tagId: conversation.fileMetadata.appData.uniqueId || getNewId(),
+            silent: false,
+          },
+        }
+      : undefined,
+    recipients: distribute ? recipients : undefined,
+  };
   const conversationContent = conversation.fileMetadata.appData.content;
 
   const payloadJson: string = jsonStringify64({ ...conversationContent });
@@ -185,235 +332,78 @@ export const uploadMail = async (
     },
   };
 
-  const payloads: PayloadFile[] = [];
-  const thumbnails: ThumbnailFile[] = [];
-  const previewThumbnails: EmbeddedThumb[] = [];
-  const aesKey = getRandom16ByteArray();
+  const existingMediaFiles =
+    conversation.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || [];
 
-  for (let i = 0; files && i < files?.length; i++) {
-    let newMediaFile = files[i];
-    const payloadKey = newMediaFile.key || `${MAIL_MESSAGE_PAYLOAD_KEY}${i}`;
+  const newMediaFiles: NewMediaFile[] =
+    (existingAndNewMediaFiles?.filter(
+      (f) => 'file' in f && f.file instanceof Blob
+    ) as NewMediaFile[]) || [];
 
-    if (!('file' in newMediaFile)) {
-      // We ignore existing files when not distributing as they are just kept
-      if (!distribute) continue;
-
-      // TODO: Is there a better way to handle this case?
-      // Fetch the file from the server
-      const payloadFromServer = await getPayloadBytes(
-        dotYouClient,
-        MailDrive,
-        newMediaFile.fileId || (conversation.fileId as string),
-        payloadKey
-      );
-
-      if (!payloadFromServer) continue;
-      const existingFile: NewMediaFile = {
-        key: payloadKey,
-        file: new Blob([payloadFromServer.bytes], { type: payloadFromServer.contentType }),
-      };
-
-      newMediaFile = existingFile;
-    }
-
-    if (newMediaFile.file.type.startsWith('video/')) {
-      const {
-        tinyThumb,
-        thumbnails: thumbnailsFromVideo,
-        payloads: payloadsFromVideo,
-      } = await processVideoFile(newMediaFile, payloadKey, aesKey);
-
-      thumbnails.push(...thumbnailsFromVideo);
-      payloads.push(...payloadsFromVideo);
-
-      if (tinyThumb) previewThumbnails.push(tinyThumb);
-    } else if (newMediaFile.file.type.startsWith('image/')) {
-      const { additionalThumbnails, tinyThumb } = await createThumbnails(
-        newMediaFile.file,
-        payloadKey
-      );
-
-      thumbnails.push(...additionalThumbnails);
-      payloads.push({
-        key: payloadKey,
-        payload: newMediaFile.file,
-        previewThumbnail: tinyThumb,
-        descriptorContent: (newMediaFile.file as File).name || newMediaFile.file.type,
-      });
-
-      if (tinyThumb) previewThumbnails.push(tinyThumb);
-    } else {
-      payloads.push({
-        key: payloadKey,
-        payload: newMediaFile.file,
-        descriptorContent: (newMediaFile.file as File).name || newMediaFile.file.type,
-      });
+  // Discover deleted files:
+  const toDeletePayloads: { key: string }[] = [];
+  for (let i = 0; existingMediaFiles && i < existingMediaFiles?.length; i++) {
+    const existingMediaFile = existingMediaFiles[i];
+    if (!existingAndNewMediaFiles?.find((f) => f.key === existingMediaFile.key)) {
+      toDeletePayloads.push({ key: existingMediaFile.key });
     }
   }
 
-  uploadMetadata.appData.previewThumbnail =
-    previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
+  const payloads: PayloadFile[] = [];
+  const thumbnails: ThumbnailFile[] = [];
+
+  const encryptedKeyHeader = conversation.sharedSecretEncryptedKeyHeader || GenerateKeyHeader();
+
+  // decrypt keyheader;
+  const decryptedKeyHeader = encryptedKeyHeader
+    ? await decryptKeyHeader(dotYouClient, encryptedKeyHeader)
+    : undefined;
+
+  const { payloads: newMediaPayloads, thumbnails: newMediaThumbnails } =
+    await getPayloadsAndThumbnailsForNewMedia(newMediaFiles || [], decryptedKeyHeader?.aesKey, {
+      keyPrefix: MAIL_MESSAGE_PAYLOAD_KEY,
+      keyIndex: conversation.fileMetadata.payloads?.length,
+    });
+
+  payloads.push(...newMediaPayloads);
+  thumbnails.push(...newMediaThumbnails);
 
   if (!shouldEmbedContent) {
     payloads.push({
       key: DEFAULT_PAYLOAD_KEY,
       payload: new Blob([payloadBytes], { type: 'application/json' }),
+      iv: getRandom16ByteArray(),
     });
-  }
-
-  const uploadResult: AppendResult | UploadResult | void | null = await (async () => {
-    if (!distribute && anyExistingFiles && 'sharedSecretEncryptedKeyHeader' in conversation) {
-      const headerUploadResult = await uploadHeader(
-        dotYouClient,
-        conversation.sharedSecretEncryptedKeyHeader,
-        { ...uploadInstructions, storageIntent: 'header' },
-        uploadMetadata,
-        onVersionConflict
-      );
-      if (!headerUploadResult) return;
-      if (payloads.length) {
-        const uploadResult = await appendDataToFile(
-          dotYouClient,
-          conversation.sharedSecretEncryptedKeyHeader,
-          {
-            targetFile: {
-              fileId: conversation.fileId as string,
-              targetDrive: MailDrive,
-            },
-            versionTag: headerUploadResult.newVersionTag,
-            storageIntent: 'append',
-          },
-          payloads,
-          thumbnails,
-          onVersionConflict
-        );
-        if (!uploadResult) return null;
-        return { ...uploadResult, file: { fileId: conversation.fileId } };
-      } else {
-        return headerUploadResult;
-      }
-    }
-
-    const uploadResult = await uploadFile(
-      dotYouClient,
-      uploadInstructions,
-      uploadMetadata,
-      payloads,
-      thumbnails,
-      true,
-      onVersionConflict,
-      {
-        aesKey,
-      }
-    );
-
-    return uploadResult || null;
-  })();
-
-  if (!uploadResult) return null;
-
-  conversation.fileId = conversation.fileId || (uploadResult as UploadResult).file.fileId;
-  conversation.fileMetadata.versionTag = uploadResult.newVersionTag;
-  conversation.fileMetadata.appData.previewThumbnail = uploadMetadata.appData.previewThumbnail;
-
-  if (distribute) {
-    if (
-      Object.values((uploadResult as UploadResult).recipientStatus).some(
-        (recipienStatus) => recipienStatus.toLowerCase() === TransferUploadStatus.EnqueuedFailed
-      )
-    ) {
-      conversation.fileMetadata.appData.content.deliveryStatus = MailDeliveryStatus.Failed;
-
-      await updateLocalMailHeader(
-        dotYouClient,
-        conversation as HomebaseFile<MailConversation>,
-        undefined,
-        (uploadResult as UploadResult).keyHeader
-      );
-
-      console.error('Not all recipients received the message: ', uploadResult);
-      throw new Error(`Not all recipients received the message: ${recipients.join(', ')}`);
+  } else {
+    if (conversation.fileMetadata?.payloads?.some((pyld) => pyld.key === DEFAULT_PAYLOAD_KEY)) {
+      toDeletePayloads.push({
+        key: DEFAULT_PAYLOAD_KEY,
+      });
     }
   }
 
-  return {
-    ...uploadResult,
-    previewThumbnail: uploadMetadata.appData.previewThumbnail,
-  };
-};
-
-export const updateLocalMailHeader = async (
-  dotYouClient: DotYouClient,
-  conversation: HomebaseFile<MailConversation>,
-  onVersionConflict?: () => void,
-  keyHeader?: KeyHeader
-) => {
-  const uploadInstructions: UpdateHeaderInstructionSet = {
-    storageOptions: {
-      drive: MailDrive,
-      overwriteFileId: conversation.fileId,
-    },
-    storageIntent: 'header',
-  };
-  const conversationContent = conversation.fileMetadata.appData.content;
-
-  const payloadJson: string = jsonStringify64({ ...conversationContent });
-  const payloadBytes = stringToUint8Array(payloadJson);
-
-  // Set max of 3kb for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < 3000;
-
-  const uploadMetadata: UploadFileMetadata = {
-    versionTag: conversation?.fileMetadata.versionTag,
-    allowDistribution: false,
-    appData: {
-      ...conversation.fileMetadata.appData,
-      fileType: conversation.fileMetadata.appData.fileType || MAIL_CONVERSATION_FILE_TYPE,
-      content: shouldEmbedContent ? payloadJson : undefined,
-    },
-    isEncrypted: true,
-    accessControlList: conversation.serverMetadata?.accessControlList || {
-      requiredSecurityGroup: SecurityGroupType.Owner,
-    },
-  };
-
-  if (!shouldEmbedContent) {
-    const appendInstructionSet: AppendInstructionSet = {
-      targetFile: {
-        fileId: conversation.fileId as string,
-        targetDrive: MailDrive,
-      },
-      versionTag: conversation.fileMetadata.versionTag,
-      storageIntent: 'append',
-    };
-
-    const newVersionTag = (
-      await appendDataToFile(
-        dotYouClient,
-        keyHeader || conversation.sharedSecretEncryptedKeyHeader,
-        appendInstructionSet,
-        [
-          {
-            key: DEFAULT_PAYLOAD_KEY,
-            payload: new Blob([payloadBytes], { type: 'application/json' }),
-            iv: getRandom16ByteArray(),
-          },
-        ],
-        undefined,
-        onVersionConflict
-      )
-    )?.newVersionTag;
-
-    uploadMetadata.versionTag = newVersionTag;
-  }
-
-  return await uploadHeader(
+  const patchResult = await patchFile(
     dotYouClient,
-    keyHeader || conversation.sharedSecretEncryptedKeyHeader,
+    conversation.sharedSecretEncryptedKeyHeader,
     uploadInstructions,
     uploadMetadata,
+    payloads,
+    thumbnails,
+    toDeletePayloads,
     onVersionConflict
   );
+
+  if (!patchResult) return null;
+
+  return {
+    ...patchResult,
+    file: {
+      fileId: conversation.fileId,
+      globalTransitId: conversation.fileMetadata.appData.groupId,
+    },
+    newVersionTag: patchResult.newVersionTag,
+    previewThumbnail: uploadMetadata.appData.previewThumbnail,
+  };
 };
 
 export const dsrToMailConversation = async (

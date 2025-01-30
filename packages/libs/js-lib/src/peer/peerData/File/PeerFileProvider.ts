@@ -204,11 +204,13 @@ export const getFileHeaderOverPeer = async <T = string>(
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
-  options?: { systemFileType?: SystemFileType }
+  options?: { decrypt?: boolean; systemFileType?: SystemFileType }
 ): Promise<HomebaseFile<T> | null> => {
-  const { systemFileType } = options ?? { systemFileType: 'Standard' };
+  const decrypt = options?.decrypt ?? true;
+  const systemFileType = options?.systemFileType ?? 'Standard';
+
   const fileHeader = await getFileHeaderBytesOverPeer(dotYouClient, odinId, targetDrive, fileId, {
-    decrypt: true,
+    decrypt,
     systemFileType,
   });
   if (!fileHeader) return null;
@@ -239,7 +241,8 @@ export const getFileHeaderBytesOverPeer = async (
   assertIfDefined('FileId', fileId);
   assertIfDefinedAndNotDefault('OdinId', odinId);
 
-  const { decrypt, systemFileType } = options ?? { decrypt: true, systemFileType: 'Standard' };
+  const decrypt = options?.decrypt ?? true;
+  const systemFileType = options?.systemFileType ?? 'Standard';
 
   const cacheKey = `${odinId}+${targetDrive.alias}-${targetDrive.type}+${fileId}+${decrypt}`;
   if (_internalMetadataPromiseCache.has(cacheKey)) {

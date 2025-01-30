@@ -11,16 +11,14 @@ import {
   DEFAULT_PAYLOAD_KEY,
   UploadFileMetadata,
   reUploadFile,
-  appendDataToFile,
-  deletePayload,
-  uploadHeader,
   uploadFile,
   deleteFile,
   PayloadFile,
   ThumbnailFile,
   EmbeddedThumb,
   getFileHeader,
-  UpdateHeaderInstructionSet,
+  patchFile,
+  UpdateLocalInstructionSet,
 } from '@homebase-id/js-lib/core';
 import {
   getNewId,
@@ -47,7 +45,6 @@ export const saveProfileAttribute = async (
   toSaveAttribute: HomebaseFile<Attribute> | NewHomebaseFile<Attribute>,
   onVersionConflict?: () => void
 ): Promise<HomebaseFile<Attribute> | NewHomebaseFile<Attribute> | undefined> => {
-  let runningVersionTag = toSaveAttribute.fileMetadata.versionTag as string;
   const targetDrive = GetTargetDriveFromProfileId(
     toSaveAttribute.fileMetadata.appData.content.profileId
   );
@@ -112,6 +109,8 @@ export const saveProfileAttribute = async (
   };
 
   if (toSaveAttribute.fileId) {
+    console.log(toSaveAttribute, payloads, thumbnails);
+
     const wasEncrypted =
       'isEncrypted' in toSaveAttribute.fileMetadata && toSaveAttribute.fileMetadata.isEncrypted;
 
@@ -155,61 +154,46 @@ export const saveProfileAttribute = async (
       throw new Error('We failed to find the IV of an attribute to upload with');
     }
 
-    if (payloads.length) {
-      runningVersionTag =
-        (
-          await appendDataToFile(
-            dotYouClient,
-            keyHeader,
-            {
-              targetFile: {
-                fileId: toSaveAttribute.fileId,
-                targetDrive: targetDrive,
-              },
-              versionTag: runningVersionTag,
-              storageIntent: 'append',
-            },
-            payloads,
-            thumbnails
-          )
-        )?.newVersionTag || runningVersionTag;
+    const toDeletePayloads: { key: string }[] = [];
+    if (!shouldEmbedContent) {
+      payloads.push({
+        key: DEFAULT_PAYLOAD_KEY,
+        payload: new Blob([payloadBytes], { type: 'application/json' }),
+        iv: getRandom16ByteArray(),
+      });
+    } else {
+      if (
+        toSaveAttribute.fileMetadata?.payloads?.some((pyld) => pyld.key === DEFAULT_PAYLOAD_KEY)
+      ) {
+        toDeletePayloads.push({
+          key: DEFAULT_PAYLOAD_KEY,
+        });
+      }
     }
 
-    // Cleanup the default payload if it existed, and we don't need it anymore
-    if (shouldEmbedContent && existingDefaultPayload) {
-      runningVersionTag = (
-        await deletePayload(
-          dotYouClient,
-          targetDrive,
-          toSaveAttribute.fileId,
-          DEFAULT_PAYLOAD_KEY,
-          runningVersionTag
-        )
-      ).newVersionTag;
-    }
-
-    // Only save update header
-    const appendInstructions: UpdateHeaderInstructionSet = {
+    const patchInstructions: UpdateLocalInstructionSet = {
       transferIv: getRandom16ByteArray(),
-      storageOptions: {
-        overwriteFileId: toSaveAttribute.fileId,
-        drive: targetDrive,
+      locale: 'local',
+      versionTag: toSaveAttribute.fileMetadata.versionTag,
+      file: {
+        fileId: toSaveAttribute.fileId,
+        targetDrive: targetDrive,
       },
-      storageIntent: 'header',
     };
 
-    metadata.versionTag = runningVersionTag || metadata.versionTag;
-    const result = await uploadHeader(
+    const result = await patchFile(
       dotYouClient,
       keyHeader,
-      appendInstructions,
+      patchInstructions,
       metadata,
+      payloads,
+      thumbnails,
+      toDeletePayloads,
       onVersionConflict
     );
     if (result) {
       return {
         ...toSaveAttribute,
-        fileId: result.file.fileId,
         fileMetadata: {
           ...toSaveAttribute.fileMetadata,
           versionTag: result.newVersionTag,

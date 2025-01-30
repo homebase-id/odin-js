@@ -207,10 +207,10 @@ const patchFileLocal = async (
     axiosConfig?: AxiosRequestConfig;
   }
 ): Promise<UploadResult | void> => {
-  if (!metadata.versionTag) {
-    throw new Error('metadata.versionTag is required');
+  if (!metadata.versionTag && !instructions.versionTag) {
+    throw new Error('versionTag is required');
   }
-  let runningVersionTag: string = metadata.versionTag;
+  let runningVersionTag: string = (instructions.versionTag || metadata.versionTag) as string;
 
   if (toDeletePayloads?.length) {
     for (let i = 0; i < toDeletePayloads.length; i++) {
