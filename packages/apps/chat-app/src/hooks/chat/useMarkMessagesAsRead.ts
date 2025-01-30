@@ -34,7 +34,7 @@ export const useMarkMessagesAsRead = ({
       const unreadMessages = messages.filter(
         (msg) =>
           (msg?.fileMetadata.transitCreated || msg?.fileMetadata.created) >
-            (conversationMetadata.fileMetadata.appData.content.lastReadTime || 0) &&
+            (conversationMetadata.lastReadTime || 0) &&
           (!msg.fileMetadata.senderOdinId || msg.fileMetadata.senderOdinId !== loggedOnIdentity)
       );
 
@@ -42,7 +42,7 @@ export const useMarkMessagesAsRead = ({
         return (msg?.fileMetadata.transitCreated || msg.fileMetadata.created) > acc
           ? msg?.fileMetadata.transitCreated || msg.fileMetadata.created
           : acc;
-      }, conversationMetadata.fileMetadata.appData.content.lastReadTime || 0);
+      }, conversationMetadata.lastReadTime || 0);
 
       setPendingReadTime(newestMessageCreated);
 
@@ -67,23 +67,15 @@ export const useMarkMessagesAsRead = ({
   }, [conversationMetadata, messages]);
 
   useEffect(() => {
-    if (!conversationMetadata || !messages || !pendingReadTime) return;
-    if (conversationMetadata.fileMetadata.appData.content.lastReadTime === pendingReadTime) return;
+    if (!conversation || !conversationMetadata || !messages || !pendingReadTime) return;
+    if (conversationMetadata.lastReadTime === pendingReadTime) return;
 
     if (messagesMarkedAsRead && pendingReadTime && conversationMetadata) {
       updateConversationMetadata({
-        conversation: {
+        conversation,
+        newMetadata: {
           ...conversationMetadata,
-          fileMetadata: {
-            ...conversationMetadata.fileMetadata,
-            appData: {
-              ...conversationMetadata.fileMetadata.appData,
-              content: {
-                ...conversationMetadata.fileMetadata.appData.content,
-                lastReadTime: pendingReadTime,
-              },
-            },
-          },
+          lastReadTime: pendingReadTime,
         },
       });
       setPendingReadTime(undefined);

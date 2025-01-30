@@ -77,8 +77,12 @@ export const ChatDetail = ({
     );
 
     const anyRecipientMissingConversation = filteredRecipients.some((recipient) => {
+      if (!conversation.serverMetadata?.transferHistory?.recipients[recipient]) {
+        console.log('missing?', conversation);
+      }
+
       const latestTransferStatus =
-        conversation.serverMetadata?.transferHistory?.recipients[recipient].latestTransferStatus;
+        conversation.serverMetadata?.transferHistory?.recipients[recipient]?.latestTransferStatus;
 
       if (!latestTransferStatus) return true;
       return FailedTransferStatuses.includes(latestTransferStatus);

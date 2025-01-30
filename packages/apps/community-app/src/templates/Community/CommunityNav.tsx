@@ -471,7 +471,7 @@ const DirectMessageItem = memo(
         ?.filter(Boolean) as HomebaseFile<ChatMessage>[];
 
       const lastMessage = flatMessages?.[0];
-      const lastReadTime = conversationMetadata?.fileMetadata.appData.content.lastReadTime || 0;
+      const lastReadTime = conversationMetadata?.lastReadTime || 0;
 
       return conversationMetadata &&
         flatMessages &&

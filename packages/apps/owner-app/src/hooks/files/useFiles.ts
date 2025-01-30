@@ -19,6 +19,7 @@ import {
   getFileHeader,
   getFileHeaderByUniqueId,
   getFileHeaderBytesByGlobalTransitId,
+  getLocalContentFromHeader,
 } from '@homebase-id/js-lib/core';
 import { jsonStringify64, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
@@ -84,24 +85,43 @@ export const useFileQuery = ({
     queryFn: async () => {
       if (!id || !targetDrive) return null;
 
-      // Search by fileId
-      const fileByFileId = await getFileHeader(dotYouClient, targetDrive, id, { systemFileType });
-      if (fileByFileId) return fileByFileId;
+      const rawFile = await (async () => {
+        // Search by fileId
+        const fileByFileId = await getFileHeader(dotYouClient, targetDrive, id, { systemFileType });
+        if (fileByFileId) return fileByFileId;
 
-      // Search by uniqueId
-      const fileByUniqueId = await getFileHeaderByUniqueId(dotYouClient, targetDrive, id, {
-        systemFileType,
-      });
-      if (fileByUniqueId) return fileByUniqueId;
+        // Search by uniqueId
+        const fileByUniqueId = await getFileHeaderByUniqueId(dotYouClient, targetDrive, id, {
+          systemFileType,
+        });
+        if (fileByUniqueId) return fileByUniqueId;
 
-      // Search by globalTransitId
-      const fileByGlobalTransitId = await getFileHeaderBytesByGlobalTransitId(
-        dotYouClient,
-        targetDrive,
-        id,
-        { systemFileType }
-      );
-      if (fileByGlobalTransitId) return fileByGlobalTransitId;
+        // Search by globalTransitId
+        const fileByGlobalTransitId = await getFileHeaderBytesByGlobalTransitId(
+          dotYouClient,
+          targetDrive,
+          id,
+          { systemFileType }
+        );
+        if (fileByGlobalTransitId) return fileByGlobalTransitId;
+      })();
+
+      if (!rawFile?.fileMetadata.localAppData) return rawFile;
+
+      try {
+        return {
+          ...rawFile,
+          fileMetadata: {
+            ...rawFile.fileMetadata,
+            appData: {
+              ...rawFile.fileMetadata.appData,
+            },
+            localAppData: await getLocalContentFromHeader(dotYouClient, targetDrive, rawFile, true),
+          },
+        };
+      } catch (e) {
+        return rawFile;
+      }
     },
     enabled: !!targetDrive && !!id,
   });

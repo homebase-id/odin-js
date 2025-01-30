@@ -1,60 +1,81 @@
 import { useQueryClient, useQuery, useMutation, QueryClient } from '@tanstack/react-query';
-import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
+import {
+  HomebaseFile,
+  uploadLocalMetadataContent,
+  getLocalContentFromHeader,
+} from '@homebase-id/js-lib/core';
 import {
   ConversationMetadata,
-  uploadConversationMetadata,
   getConversationMetadata,
+  UnifiedConversation,
+  ChatDrive,
 } from '../../providers/ConversationProvider';
 import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useConversation } from './useConversation';
+import { insertNewConversation } from './useConversations';
+import { useEffect } from 'react';
 
 export const useConversationMetadata = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
-  const getMetadata = async (conversationId: string) => {
-    const serverFile = await getConversationMetadata(dotYouClient, conversationId);
-    if (!serverFile) {
-      const newMetadata: NewHomebaseFile<ConversationMetadata> = {
-        fileMetadata: {
-          appData: {
-            tags: [conversationId],
-            content: {
-              conversationId,
-              lastReadTime: 0,
-            },
-          },
-        },
-        serverMetadata: {
-          accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
-        },
-      };
+  const { data: conversation, isFetched: conversationFetched } = useConversation({
+    conversationId,
+  }).single;
 
-      return newMetadata;
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ['conversation-metadata', conversationId] });
+  }, [conversation]);
+
+  const getMetadata = async (conversationId: string) => {
+    const localContent = conversation?.fileMetadata.localAppData?.content;
+    if (localContent) {
+      try {
+        const localMetadata = await getLocalContentFromHeader<ConversationMetadata>(
+          dotYouClient,
+          ChatDrive,
+          conversation,
+          true
+        );
+
+        if (localMetadata) {
+          return localMetadata;
+        } else {
+          console.log('localMetadata is undefined');
+          return {
+            conversationId,
+            lastReadTime: 0,
+          };
+        }
+      } catch (error) {
+        console.error('Error getting local metadata', error);
+        return {
+          conversationId,
+          lastReadTime: 0,
+        };
+      }
     }
-    return serverFile;
+
+    const serverFile = await getConversationMetadata(dotYouClient, conversationId);
+    return (
+      serverFile?.fileMetadata.appData.content || {
+        conversationId,
+        lastReadTime: 0,
+      }
+    );
   };
 
   const saveMetadata = async ({
     conversation,
+    newMetadata,
   }: {
-    conversation: HomebaseFile<ConversationMetadata> | NewHomebaseFile<ConversationMetadata>;
+    conversation: HomebaseFile<UnifiedConversation>;
+    newMetadata: ConversationMetadata;
   }) => {
-    return await uploadConversationMetadata(dotYouClient, conversation, async () => {
-      if (!conversation.fileMetadata.appData.tags?.[0]) return;
-      const serverVersion = await getConversationMetadata(
-        dotYouClient,
-        conversation.fileMetadata.appData.tags[0]
-      );
-      if (!serverVersion) return;
-
-      return await uploadConversationMetadata(dotYouClient, {
-        ...conversation,
-        fileMetadata: {
-          ...conversation.fileMetadata,
-          versionTag: serverVersion.fileMetadata.versionTag,
-        },
-      });
+    return await uploadLocalMetadataContent(dotYouClient, ChatDrive, conversation, {
+      ...conversation.fileMetadata.localAppData,
+      content: JSON.stringify(newMetadata),
     });
   };
 
@@ -62,7 +83,7 @@ export const useConversationMetadata = (props?: { conversationId?: string | unde
     single: useQuery({
       queryKey: ['conversation-metadata', conversationId],
       queryFn: () => getMetadata(conversationId as string),
-      enabled: !!conversationId,
+      enabled: !!conversationId && conversationFetched,
       staleTime: 1000 * 60 * 60 * 24, // 24h, updates will come in via websocket
     }),
     update: useMutation({
@@ -73,10 +94,17 @@ export const useConversationMetadata = (props?: { conversationId?: string | unde
           return;
         }
 
-        queryClient.setQueryData<HomebaseFile<ConversationMetadata>>(
-          ['conversation-metadata', variables.conversation.fileMetadata.appData.uniqueId],
-          variables.conversation as HomebaseFile<ConversationMetadata>
-        );
+        const newUnifiedConversation: HomebaseFile<UnifiedConversation> = {
+          ...variables.conversation,
+          fileMetadata: {
+            ...variables.conversation.fileMetadata,
+            localAppData: {
+              ...variables.conversation.fileMetadata.localAppData,
+              content: variables.newMetadata as unknown as string,
+            },
+          },
+        };
+        insertNewConversation(queryClient, newUnifiedConversation);
       },
       onError: (error) => {
         console.error('Error saving conversation metadata', error);

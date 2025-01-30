@@ -147,7 +147,7 @@ const ConversationBody = ({
   );
   const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
 
-  const lastReadTime = conversationMetadata?.fileMetadata.appData.content.lastReadTime || 0;
+  const lastReadTime = conversationMetadata?.lastReadTime || 0;
   const unreadCount =
     conversationMetadata &&
     flatMessages &&
