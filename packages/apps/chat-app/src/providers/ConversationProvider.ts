@@ -397,6 +397,56 @@ const dsrToConversationMetadata = async (
   }
 };
 
+/**
+ * @deprecated Use localAppData instead
+ */
+export const uploadConversationMetadata = async (
+  dotYouClient: DotYouClient,
+  conversation: ConversationMetadata,
+  onVersionConflict?: () => void
+) => {
+  const serverConversationMetadataFile = await getConversationMetadata(
+    dotYouClient,
+    conversation.conversationId
+  );
+  if (!serverConversationMetadataFile) {
+    return;
+  }
+
+  const uploadInstructions: UploadInstructionSet = {
+    storageOptions: {
+      drive: ChatDrive,
+      overwriteFileId: serverConversationMetadataFile.fileId,
+    },
+  };
+
+  const payloadJson: string = jsonStringify64({ ...conversation, version: 1 });
+  const uploadMetadata: UploadFileMetadata = {
+    versionTag: serverConversationMetadataFile?.fileMetadata.versionTag,
+    allowDistribution: false,
+    appData: {
+      tags: serverConversationMetadataFile.fileMetadata.appData.tags,
+      uniqueId: serverConversationMetadataFile.fileMetadata.appData.uniqueId,
+      fileType: CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE,
+      content: payloadJson,
+    },
+    isEncrypted: true,
+    accessControlList: {
+      requiredSecurityGroup: SecurityGroupType.Owner,
+    },
+  };
+
+  return await uploadFile(
+    dotYouClient,
+    uploadInstructions,
+    uploadMetadata,
+    undefined,
+    undefined,
+    undefined,
+    onVersionConflict
+  );
+};
+
 export const JOIN_CONVERSATION_COMMAND = 100;
 export const JOIN_GROUP_CONVERSATION_COMMAND = 110;
 // export const UPDATE_GROUP_CONVERSATION_COMMAND = 111;
