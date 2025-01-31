@@ -173,17 +173,18 @@ export const StatusDialog = ({
     e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     e.preventDefault();
-    if (!draftStatus) return;
 
     setStatus({
       community,
-      status: {
-        ...draftStatus,
-        validTill:
-          draftStatus.validTill && draftStatus.validTill > new Date().getTime()
-            ? draftStatus.validTill
-            : undefined,
-      },
+      status: draftStatus
+        ? {
+            ...draftStatus,
+            validTill:
+              draftStatus.validTill && draftStatus.validTill > new Date().getTime()
+                ? draftStatus.validTill
+                : undefined,
+          }
+        : {},
     });
   };
 
@@ -244,6 +245,7 @@ export const StatusDialog = ({
             <Input
               className="border-0"
               placeholder={t(`What's your status?`)}
+              defaultValue={draftStatus?.status}
               onChange={(e) => setDraftStatus((old) => ({ ...old, status: e.target.value }))}
             />
           </div>
