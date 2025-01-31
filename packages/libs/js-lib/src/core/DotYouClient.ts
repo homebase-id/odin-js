@@ -50,11 +50,12 @@ export class BaseDotYouClient {
   }
 
   getLoggedInIdentity(): string | undefined {
-    return this._options?.loggedInIdentity ||
-      this.getType() === ApiType.Owner ||
-      this.getType() === ApiType.App
-      ? this.getHostIdentity()
-      : undefined;
+    return (
+      this._options?.loggedInIdentity ||
+      (this.getType() === ApiType.Owner || this.getType() === ApiType.App
+        ? this.getHostIdentity()
+        : undefined)
+    );
   }
 
   isOwner(): boolean {
