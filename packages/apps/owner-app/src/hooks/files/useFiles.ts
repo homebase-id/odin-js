@@ -85,14 +85,18 @@ export const useFileQuery = ({
     queryFn: async () => {
       if (!id || !targetDrive) return null;
 
-      const rawFile = await (async () => {
+      const queryFile = async (decrypt = true) => {
         // Search by fileId
-        const fileByFileId = await getFileHeader(dotYouClient, targetDrive, id, { systemFileType });
+        const fileByFileId = await getFileHeader(dotYouClient, targetDrive, id, {
+          systemFileType,
+          decrypt,
+        });
         if (fileByFileId) return fileByFileId;
 
         // Search by uniqueId
         const fileByUniqueId = await getFileHeaderByUniqueId(dotYouClient, targetDrive, id, {
           systemFileType,
+          decrypt,
         });
         if (fileByUniqueId) return fileByUniqueId;
 
@@ -104,23 +108,37 @@ export const useFileQuery = ({
           { systemFileType }
         );
         if (fileByGlobalTransitId) return fileByGlobalTransitId;
-      })();
-
-      if (!rawFile?.fileMetadata.localAppData) return rawFile;
+      };
 
       try {
-        return {
-          ...rawFile,
-          fileMetadata: {
-            ...rawFile.fileMetadata,
-            appData: {
-              ...rawFile.fileMetadata.appData,
+        const decryptedFile = await queryFile();
+
+        if (!decryptedFile?.fileMetadata.localAppData) return decryptedFile;
+        try {
+          return {
+            ...decryptedFile,
+            fileMetadata: {
+              ...decryptedFile.fileMetadata,
+              appData: {
+                ...decryptedFile.fileMetadata.appData,
+              },
+              localAppData: await getLocalContentFromHeader(
+                dotYouClient,
+                targetDrive,
+                decryptedFile,
+                true
+              ),
             },
-            localAppData: await getLocalContentFromHeader(dotYouClient, targetDrive, rawFile, true),
-          },
-        };
-      } catch {
-        return rawFile;
+          };
+        } catch {
+          //
+        }
+
+        return decryptedFile;
+      } catch (e) {
+        console.warn('Failed to decrypt file', e);
+        const encryptedFile = await queryFile(false);
+        return encryptedFile;
       }
     },
     enabled: !!targetDrive && !!id,
