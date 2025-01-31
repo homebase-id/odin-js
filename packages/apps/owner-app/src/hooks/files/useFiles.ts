@@ -84,24 +84,38 @@ export const useFileQuery = ({
     queryFn: async () => {
       if (!id || !targetDrive) return null;
 
-      // Search by fileId
-      const fileByFileId = await getFileHeader(dotYouClient, targetDrive, id, { systemFileType });
-      if (fileByFileId) return fileByFileId;
+      const queryFile = async (decrypt = true) => {
+        // Search by fileId
+        const fileByFileId = await getFileHeader(dotYouClient, targetDrive, id, {
+          systemFileType,
+          decrypt,
+        });
+        if (fileByFileId) return fileByFileId;
 
-      // Search by uniqueId
-      const fileByUniqueId = await getFileHeaderByUniqueId(dotYouClient, targetDrive, id, {
-        systemFileType,
-      });
-      if (fileByUniqueId) return fileByUniqueId;
+        // Search by uniqueId
+        const fileByUniqueId = await getFileHeaderByUniqueId(dotYouClient, targetDrive, id, {
+          systemFileType,
+          decrypt,
+        });
+        if (fileByUniqueId) return fileByUniqueId;
 
-      // Search by globalTransitId
-      const fileByGlobalTransitId = await getFileHeaderBytesByGlobalTransitId(
-        dotYouClient,
-        targetDrive,
-        id,
-        { systemFileType }
-      );
-      if (fileByGlobalTransitId) return fileByGlobalTransitId;
+        // Search by globalTransitId
+        const fileByGlobalTransitId = await getFileHeaderBytesByGlobalTransitId(
+          dotYouClient,
+          targetDrive,
+          id,
+          { systemFileType, decrypt }
+        );
+        if (fileByGlobalTransitId) return fileByGlobalTransitId;
+      };
+      try {
+        const decryptedFile = await queryFile();
+        return decryptedFile;
+      } catch (e) {
+        console.warn('Failed to decrypt file', e);
+        const encryptedFile = await queryFile(false);
+        return encryptedFile;
+      }
     },
     enabled: !!targetDrive && !!id,
   });
