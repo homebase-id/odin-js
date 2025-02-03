@@ -16,8 +16,6 @@ import {
 } from '../../providers/MailProvider';
 import { websocketDrives } from '../auth/useAuth';
 
-const MINUTE_IN_MS = 60000;
-
 // We first process the inbox, then we connect for live updates;
 export const useLiveMailProcessor = () => {
   // Process the inbox on startup; As we want to cover the backlog of messages first
@@ -45,7 +43,7 @@ const useInboxProcessor = (connected?: boolean) => {
   return useQuery({
     queryKey: ['process-mail-inbox'],
     queryFn: fetchData,
-    staleTime: MINUTE_IN_MS * 5,
+    staleTime: 1000, // 1s to avoid duplicate requests on the same page load
     enabled: connected,
   });
 };

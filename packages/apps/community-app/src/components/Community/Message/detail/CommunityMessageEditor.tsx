@@ -1,4 +1,4 @@
-import { DEFAULT_PAYLOAD_KEY, HomebaseFile } from '@homebase-id/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, HomebaseFile, RichText } from '@homebase-id/js-lib/core';
 
 import {
   ActionButton,
@@ -25,6 +25,7 @@ const RichTextEditor = lazy(() =>
     default: rootExport.RichTextEditor,
   }))
 );
+
 export const CommunityMessageEditor = ({
   msg,
   community,
@@ -60,13 +61,13 @@ export const CommunityMessageEditor = ({
       : undefined
   );
 
-  const [message, setMessage] = useState(
-    hasMoreContent ? fullMessageContent?.message : messageContent.message
-  );
-  useEffect(
-    () => setMessage(hasMoreContent ? fullMessageContent?.message : messageContent.message),
-    [fullMessageContent]
-  );
+  const [newMessage, setNewMessage] = useState<RichText>();
+  const defaultValue = useMemo(() => {
+    return hasMoreContent ? fullMessageContent?.message : messageContent.message;
+  }, [hasMoreContent, fullMessageContent, messageContent]);
+
+  const [forcedUpdate, setForcedUpdate] = useState(0);
+  useEffect(() => setForcedUpdate(forcedUpdate - 1), [defaultValue]);
 
   const {
     mutate: updateChatMessage,
@@ -75,7 +76,7 @@ export const CommunityMessageEditor = ({
   } = useCommunityMessage().update;
 
   const doSend = () => {
-    if (!message) return;
+    if (!newMessage) return;
 
     const updatedMessage: HomebaseFile<CommunityMessage> = {
       ...msg,
@@ -83,7 +84,7 @@ export const CommunityMessageEditor = ({
         ...msg.fileMetadata,
         appData: {
           ...msg.fileMetadata.appData,
-          content: { ...msg.fileMetadata.appData.content, message },
+          content: { ...msg.fileMetadata.appData.content, message: newMessage },
         },
       },
     };
@@ -155,10 +156,10 @@ export const CommunityMessageEditor = ({
         <RichTextEditor
           disableHeadings={true}
           placeholder="Your message"
-          defaultValue={message}
+          defaultValue={newMessage || defaultValue}
           className="min-h-[10rem] w-full border bg-background p-2 dark:border-slate-800"
           contentClassName="max-h-[50vh] overflow-auto"
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => setNewMessage(e.target.value)}
           autoFocus={!isTouchDevice()}
           onSubmit={isTouchDevice() ? undefined : doSend}
           mentionables={mentionables}
@@ -167,6 +168,7 @@ export const CommunityMessageEditor = ({
             if (e.key === 'Escape')
               confirm(t('Are you sure? You will lose any pending changes')) && onClose();
           }}
+          key={`${msg.fileMetadata.versionTag || msg.fileId}_${forcedUpdate}`}
         >
           <div className="">
             <div className="flex flex-row-reverse gap-2">

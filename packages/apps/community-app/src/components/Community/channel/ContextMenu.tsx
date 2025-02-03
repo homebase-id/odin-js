@@ -139,6 +139,7 @@ export const ContextMenu = ({
           community={community}
           communityActions={communityActions}
           renderActionGroup={false}
+          onClose={() => setIsTouchOpen?.(false)}
         />
         <hr />
         {setIsTouchOpen ? (
@@ -233,7 +234,10 @@ const CommunityContextActions = ({
     optionalOptions.push({
       icon: Pencil,
       label: t('Edit'),
-      onClick: () => communityActions.doEdit?.(msg),
+      onClick: () => {
+        onClose && onClose();
+        communityActions.doEdit?.(msg);
+      },
     });
   }
 

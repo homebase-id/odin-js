@@ -34,6 +34,7 @@ import {
   RecipientTransferHistory,
   FailedTransferStatuses,
   TransferStatus,
+  MAX_HEADER_CONTENT_BYTES,
 } from '@homebase-id/js-lib/core';
 import { ChatDrive, ConversationWithYourselfId, UnifiedConversation } from './ConversationProvider';
 import {
@@ -291,7 +292,7 @@ export const uploadChatMessage = async (
   const payloadBytes = stringToUint8Array(jsonStringify64({ message: messageContent.message }));
 
   // Set max of 3kb for content so enough room is left for metadata
-  const shouldEmbedContent = payloadBytes.length < 3000;
+  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
   const content = shouldEmbedContent
     ? jsonContent
     : jsonStringify64({

@@ -3,8 +3,6 @@ import { useDotYouClientContext } from '@homebase-id/common-app';
 import { useInfiniteQuery, InfiniteData } from '@tanstack/react-query';
 
 export const MAIL_CONVERSATIONS_PAGE_SIZE = 100;
-const FIVE_MINUTES = 5 * 60 * 1000;
-
 export const useMailConversations = (
   select?:
     | ((
@@ -30,7 +28,7 @@ export const useMailConversations = (
       queryFn: ({ pageParam }) => fetchMailConversations(pageParam),
       getNextPageParam: (lastPage) =>
         lastPage.results?.length >= MAIL_CONVERSATIONS_PAGE_SIZE ? lastPage.cursorState : undefined,
-      staleTime: FIVE_MINUTES,
+      staleTime: 1000, // 1s to avoid duplicate requests on the same page load
       select,
     }),
   };

@@ -2,7 +2,7 @@ const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
 import { DotYouClient } from '../../core/DotYouClient';
-import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
+import { DEFAULT_PAYLOAD_KEY, MAX_HEADER_CONTENT_BYTES } from '../../core/constants';
 import {
   getDrivesByType,
   FileQueryParams,
@@ -128,7 +128,7 @@ export const saveProfileDefinition = async (
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < 3000;
+  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
 
   const metadata: UploadFileMetadata = {
     versionTag: versionTag,
@@ -195,7 +195,7 @@ export const saveProfileSection = async (
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < 3000;
+  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
 
   // Note: we tag it with the profile id AND also a tag indicating it is a definition
   const metadata: UploadFileMetadata = {

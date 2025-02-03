@@ -97,6 +97,9 @@ export const CommunityNav = memo(
 
     if (!odinKey || !communityKey || isLoading || !community) return null;
 
+    // Don't render the nav on mobile if not on the root page
+    if (!isRootPage && window.innerWidth < 1024) return null;
+
     return (
       <>
         <div
