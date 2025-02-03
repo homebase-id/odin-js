@@ -327,8 +327,7 @@ export const updateCommunityMessage = async (
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb + content of 1600 chars for content so enough room is left for metedata
-  const shouldEmbedContent =
-    payloadBytes.length < MAX_HEADER_CONTENT_BYTES + MESSAGE_CHARACTERS_LIMIT * 4;
+  const shouldEmbedContent = payloadBytes.length < MESSAGE_CHARACTERS_LIMIT * 4;
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
@@ -355,7 +354,10 @@ export const updateCommunityMessage = async (
         ? payloadJson
         : jsonStringify64({
             ...messageContent,
-            message: ellipsisAtMaxCharOfRichText(messageContent.message, MESSAGE_CHARACTERS_LIMIT),
+            message: ellipsisAtMaxCharOfRichText(
+              messageContent.message,
+              Math.round(MESSAGE_CHARACTERS_LIMIT * 0.75)
+            ),
           }),
     },
     isEncrypted: true,
