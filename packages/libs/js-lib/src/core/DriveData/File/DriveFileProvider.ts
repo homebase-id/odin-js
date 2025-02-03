@@ -12,7 +12,7 @@ import {
 } from '../SecurityHelpers';
 import { getCacheKey, getAxiosClient, parseBytesToObject, getRangeHeader } from './DriveFileHelper';
 import { assertIfDefined, stringifyToQueryParams, tryJsonParse } from '../../../helpers/DataUtil';
-import { DEFAULT_PAYLOAD_KEY } from '../Upload/UploadHelpers';
+import { DEFAULT_PAYLOAD_KEY } from '../../constants';
 
 interface GetFileRequest {
   alias: string;

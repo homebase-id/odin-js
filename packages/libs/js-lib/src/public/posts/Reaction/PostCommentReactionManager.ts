@@ -35,7 +35,7 @@ import {
 import { TransitInstructionSet } from '../../../peer/peerData/PeerTypes';
 import { GetTargetDriveFromChannelId } from '../Channel/PostChannelManager';
 import { RawReactionContent, ReactionConfig, ReactionContext } from '../PostTypes';
-import { DEFAULT_PAYLOAD_KEY } from '../../../core/DriveData/Upload/UploadHelpers';
+import { DEFAULT_PAYLOAD_KEY, MAX_HEADER_CONTENT_BYTES } from '../../../core/constants';
 import { uploadFileOverPeer } from '../../../peer/peerData/Upload/PeerFileUploader';
 import { deleteFileOverPeer } from '../../../peer/peerData/File/PeerFileManager';
 import { queryBatchOverPeer } from '../../../peer/peerData/Query/PeerDriveQueryService';
@@ -86,7 +86,7 @@ export const saveComment = async (
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metadata
-  const shouldEmbedContent = payloadBytes.length < 3000;
+  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
   const metadata: UploadFileMetadata = {
     versionTag: comment.fileMetadata.versionTag,
     allowDistribution: false,

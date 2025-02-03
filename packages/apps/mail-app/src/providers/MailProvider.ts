@@ -31,6 +31,7 @@ import {
   UpdateInstructionSet,
   GenerateKeyHeader,
   decryptKeyHeader,
+  MAX_HEADER_CONTENT_BYTES,
 } from '@homebase-id/js-lib/core';
 import {
   getNewId,
@@ -189,7 +190,7 @@ export const uploadMail = async (
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < 3000;
+  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: conversation?.fileMetadata.versionTag,
@@ -329,7 +330,7 @@ export const updateMail = async (
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < 3000;
+  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: conversation?.fileMetadata.versionTag,

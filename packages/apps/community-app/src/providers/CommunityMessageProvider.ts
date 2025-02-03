@@ -29,6 +29,7 @@ import {
   UpdateInstructionSet,
   UpdateResult,
   getContentFromHeaderOrPayload,
+  MAX_HEADER_CONTENT_BYTES,
 } from '@homebase-id/js-lib/core';
 import {
   jsonStringify64,
@@ -102,7 +103,8 @@ export const uploadCommunityMessage = async (
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb + content of 1600 chars for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < 300 + MESSAGE_CHARACTERS_LIMIT * 4;
+  const shouldEmbedContent =
+    payloadBytes.length < MAX_HEADER_CONTENT_BYTES + MESSAGE_CHARACTERS_LIMIT * 4;
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
@@ -325,7 +327,8 @@ export const updateCommunityMessage = async (
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb + content of 1600 chars for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < 300 + MESSAGE_CHARACTERS_LIMIT * 4;
+  const shouldEmbedContent =
+    payloadBytes.length < MAX_HEADER_CONTENT_BYTES + MESSAGE_CHARACTERS_LIMIT * 4;
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,

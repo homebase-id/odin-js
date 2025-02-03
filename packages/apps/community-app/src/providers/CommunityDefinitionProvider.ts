@@ -14,6 +14,7 @@ import {
   getDrivesByType,
   getSecurityContext,
   HomebaseFile,
+  MAX_HEADER_CONTENT_BYTES,
   NewHomebaseFile,
   queryBatch,
   queryBatchCollection,
@@ -232,7 +233,7 @@ export const saveCommunity = async (
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < 3000;
+  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
   const metadata: UploadFileMetadata = {
     versionTag: versionTag,
     allowDistribution: false,
