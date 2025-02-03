@@ -170,7 +170,7 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
           </div>
         </>
       );
-    }, [files, canSend, replyMsg, clearReplyMsg]);
+    }, [files, setFiles, linkPreviews, setLinkPreviews, canSend, replyMsg, clearReplyMsg]);
     return (
       <>
         <DraftSaver
