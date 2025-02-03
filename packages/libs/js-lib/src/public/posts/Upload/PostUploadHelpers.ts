@@ -8,6 +8,7 @@ import {
   UploadFileMetadata,
   DEFAULT_PAYLOAD_KEY,
   SecurityGroupType,
+  MAX_HEADER_CONTENT_BYTES,
 } from '../../../core/core';
 import {
   base64ToUint8Array,
@@ -138,7 +139,7 @@ export const getUploadFileMetadata = async <T extends PostContent>(
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metadata
-  const shouldEmbedContent = payloadBytes.length < 3000;
+  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
 
   const content = shouldEmbedContent
     ? payloadJson

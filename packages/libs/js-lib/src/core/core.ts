@@ -1,5 +1,7 @@
 // DotYouClient
+export * from './constants';
 export * from './DotYouClient';
+
 import { encryptUrl, encryptData, buildIvFromQueryString } from './InterceptionEncryptionUtil';
 export type { SharedSecretEncryptedPayload } from './InterceptionEncryptionUtil';
 export const InterceptionEncryptionUtil = {
@@ -30,7 +32,6 @@ export { GenerateKeyHeader } from './DriveData/Upload/UploadHelpers';
 export * from './DriveData/Upload/DriveUploadTypes';
 
 export { decryptJsonContent, decryptKeyHeader } from './DriveData/SecurityHelpers';
-export { DEFAULT_PAYLOAD_KEY } from './DriveData/Upload/UploadHelpers';
 
 // WebsocketData
 export * from './WebsocketData/WebsocketProvider';

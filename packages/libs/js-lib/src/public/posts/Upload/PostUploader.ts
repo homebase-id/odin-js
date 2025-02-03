@@ -10,10 +10,8 @@ import {
   UploadResult,
 } from '../../../core/DriveData/Upload/DriveUploadTypes';
 import { SecurityGroupType } from '../../../core/DriveData/File/DriveFileTypes';
-import {
-  DEFAULT_PAYLOAD_KEY,
-  GenerateKeyHeader,
-} from '../../../core/DriveData/Upload/UploadHelpers';
+import { GenerateKeyHeader } from '../../../core/DriveData/Upload/UploadHelpers';
+import { DEFAULT_PAYLOAD_KEY } from '../../../core/constants';
 import {
   HomebaseFile,
   NewHomebaseFile,

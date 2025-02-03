@@ -121,6 +121,11 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
       return () => window.removeEventListener('focus', onFocus);
     });
 
+    useEffect(() => {
+      // When replying to a message, focus the input
+      if (replyMsg) volatileRef.current?.focus();
+    }, [replyMsg]);
+
     const isTouch = useMemo(isTouchDevice, [isTouchDevice]);
     const onRTESubmit = useMemo(
       () => (isTouch ? undefined : () => formRef.current?.requestSubmit()),
@@ -165,7 +170,7 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
           </div>
         </>
       );
-    }, [files, canSend, replyMsg, clearReplyMsg]);
+    }, [files, setFiles, linkPreviews, setLinkPreviews, canSend, replyMsg, clearReplyMsg]);
     return (
       <>
         <DraftSaver

@@ -19,6 +19,7 @@ import {
   getFileHeader,
   patchFile,
   UpdateLocalInstructionSet,
+  MAX_HEADER_CONTENT_BYTES,
 } from '@homebase-id/js-lib/core';
 import {
   getNewId,
@@ -86,7 +87,7 @@ export const saveProfileAttribute = async (
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < 3000;
+  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
   if (!shouldEmbedContent)
     payloads.push({
       payload: new OdinBlob([payloadBytes], { type: 'application/json' }),

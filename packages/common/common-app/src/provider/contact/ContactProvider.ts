@@ -10,6 +10,7 @@ import {
   NewHomebaseFile,
   UploadResult,
   getFileHeader,
+  MAX_HEADER_CONTENT_BYTES,
 } from '@homebase-id/js-lib/core';
 import { createThumbnails } from '@homebase-id/js-lib/media';
 import {
@@ -100,7 +101,7 @@ export const saveContact = async (
   if (contact.fileMetadata.appData.content.odinId)
     tags.push(toGuidId(contact.fileMetadata.appData.content.odinId));
 
-  const shouldEmbedContent = payloadBytes.length < 3000;
+  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
   const metadata: UploadFileMetadata = {
     allowDistribution: false,
     appData: {

@@ -6,7 +6,7 @@ import {
   decryptChunkedBytesResponse,
   decryptBytesResponse,
 } from '../../../core/DriveData/SecurityHelpers';
-import { DEFAULT_PAYLOAD_KEY } from '../../../core/DriveData/Upload/UploadHelpers';
+import { DEFAULT_PAYLOAD_KEY } from '../../../core/constants';
 import {
   assertIfDefined,
   tryJsonParse,

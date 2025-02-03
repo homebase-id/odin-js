@@ -4,6 +4,7 @@ import {
   getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
   HomebaseFile,
+  MAX_HEADER_CONTENT_BYTES,
   NewHomebaseFile,
   PayloadFile,
   queryBatch,
@@ -76,7 +77,7 @@ export const uploadCommunityMetadata = async (
     jsonStringify64({ ...definition.fileMetadata.appData.content })
   );
 
-  const shouldEmbedContent = payloadBytes.length < 5000;
+  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
   const content = shouldEmbedContent
     ? jsonContent
     : jsonStringify64({

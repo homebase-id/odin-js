@@ -29,6 +29,7 @@ import {
   UpdateInstructionSet,
   UpdateResult,
   getContentFromHeaderOrPayload,
+  MAX_HEADER_CONTENT_BYTES,
 } from '@homebase-id/js-lib/core';
 import {
   jsonStringify64,
@@ -62,7 +63,7 @@ export const CommunityDeletedArchivalStaus = 2;
 const COMMUNITY_MESSAGE_PAYLOAD_KEY = 'comm_web';
 export const COMMUNITY_LINKS_PAYLOAD_KEY = 'comm_links';
 export const COMMUNITY_PINNED_TAG = toGuidId('pinned-message');
-export const MESSAGE_CHARACTERS_LIMIT = 1600;
+export const MESSAGE_CHARACTERS_LIMIT = 1500;
 
 export enum CommunityDeliveryStatus {
   Sending = 15, // When it's sending; Used for optimistic updates
@@ -101,9 +102,7 @@ export const uploadCommunityMessage = async (
   const payloadJson: string = jsonStringify64({ ...messageContent });
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb + content of 1600 chars for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < 300 + MESSAGE_CHARACTERS_LIMIT * 4;
-
+  const shouldEmbedContent = payloadBytes.length < MESSAGE_CHARACTERS_LIMIT * 4; // 4 bytes per character
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: true,
@@ -118,7 +117,10 @@ export const uploadCommunityMessage = async (
         ? payloadJson
         : jsonStringify64({
             ...messageContent,
-            message: ellipsisAtMaxCharOfRichText(messageContent.message, MESSAGE_CHARACTERS_LIMIT),
+            message: ellipsisAtMaxCharOfRichText(
+              messageContent.message,
+              Math.round(MESSAGE_CHARACTERS_LIMIT * 0.75)
+            ),
           }),
     },
     isEncrypted: true,
@@ -325,7 +327,7 @@ export const updateCommunityMessage = async (
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb + content of 1600 chars for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < 300 + MESSAGE_CHARACTERS_LIMIT * 4;
+  const shouldEmbedContent = payloadBytes.length < MESSAGE_CHARACTERS_LIMIT * 4;
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
@@ -352,7 +354,10 @@ export const updateCommunityMessage = async (
         ? payloadJson
         : jsonStringify64({
             ...messageContent,
-            message: ellipsisAtMaxCharOfRichText(messageContent.message, MESSAGE_CHARACTERS_LIMIT),
+            message: ellipsisAtMaxCharOfRichText(
+              messageContent.message,
+              Math.round(MESSAGE_CHARACTERS_LIMIT * 0.75)
+            ),
           }),
     },
     isEncrypted: true,
