@@ -77,6 +77,7 @@ export const useCommunityThreads = ({
         const flattenedReplies = replies.pages
           .flatMap((page) => page.searchResults)
           .filter(Boolean) as HomebaseFile<CommunityMessage>[];
+
         const participants = flattenedReplies.concat(origin).flatMap((msg) => {
           const currentMessageMentions =
             typeof msg.fileMetadata.appData.content.message === 'string'
@@ -89,11 +90,15 @@ export const useCommunityThreads = ({
           ];
         });
 
+        const repliesWithoutMine = flattenedReplies.filter(
+          (msg) => msg.fileMetadata.originalAuthor !== identity
+        );
+
         return {
           threadId: origin.fileMetadata.appData.uniqueId as string,
           channelId: origin.fileMetadata.appData.content.channelId,
-          lastMessageCreated: flattenedReplies[0]?.fileMetadata.created || 0,
-          lastAuthor: flattenedReplies[0]?.fileMetadata.senderOdinId || '',
+          lastMessageCreated: repliesWithoutMine[0]?.fileMetadata.created || 0,
+          lastAuthor: repliesWithoutMine[0]?.fileMetadata.senderOdinId || '',
           participants: Array.from(new Set(participants)),
         };
       })

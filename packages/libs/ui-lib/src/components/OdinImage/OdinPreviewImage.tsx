@@ -1,9 +1,10 @@
 import { DotYouClient, EmbeddedThumb, ImageSize } from '@homebase-id/js-lib/core';
 import { useTinyThumb } from '../../hooks/image/useTinyThumb';
-import { forwardRef, useEffect, useMemo } from 'react';
+import { forwardRef, useEffect, useMemo, useRef } from 'react';
 import { useImageCache } from '../../hooks/image/useImage';
 import { ImageEvents, ImageSource } from './types';
 import { ThumbnailMeta } from '@homebase-id/js-lib/media';
+import { hasDebugFlag } from '@homebase-id/js-lib/helpers';
 
 export interface OdinPreviewImageProps
   extends ImageSource,
@@ -24,6 +25,7 @@ export interface OdinPreviewImageProps
   onLoad?: (naturalSize: ImageSize | undefined, tinyThumb: ThumbnailMeta | undefined) => void;
 }
 
+const isDebug = hasDebugFlag();
 // Component to render a tiny thumb image;
 // Uses either the previewThumbnail provided or fetches the thumbnail from the server
 // eslint-disable-next-line react/display-name
@@ -100,14 +102,27 @@ export const OdinPreviewImage = forwardRef(
       : cachedImage?.naturalSize || previewThumbnail;
 
     const isTiny = !cachedImage?.url;
-
     const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
+
+    const onLoadCalled = useRef(false);
+
+    // Call onError if load hasn't happened in 5 seconds
+    useEffect(() => {
+      const timeout = setTimeout(() => {
+        if (onLoadCalled.current === false) {
+          isDebug && console.error('OdinPreviewImage: Image load timeout');
+          onError?.();
+        }
+      }, 5000);
+      return () => clearTimeout(timeout);
+    }, []);
+
     return (
       <img
         ref={ref}
         src={previewUrl}
         onError={onError}
-        onLoad={() =>
+        onLoad={() => {
           onLoad?.(
             tinyThumb
               ? {
@@ -116,8 +131,9 @@ export const OdinPreviewImage = forwardRef(
                 }
               : cachedImage?.naturalSize || previewThumbnail,
             tinyThumb || undefined
-          )
-        }
+          );
+          onLoadCalled.current = true;
+        }}
         width={naturalSize?.pixelWidth}
         height={naturalSize?.pixelHeight}
         className={[blur === 'auto' && isTiny ? 'blur-xl' : undefined, className]

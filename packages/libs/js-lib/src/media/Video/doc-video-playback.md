@@ -33,3 +33,9 @@ To overcome these challenges, we transitioned to a more standardized and robust 
 ## Summary
 
 The `processVideoFile` function is now optimized to produce HLS-compatible, byte-range-fragmented `.ts` files. This enables secure, reliable streaming with minimal custom logic while maintaining file versatility.
+
+## Code references:
+
+On web, the code [here](./VideoSegmenterFfmpeg.ts) in the js-lib triggers the HLS encoding by using [ffmpeg-wasm](https://github.com/homebase-id/ffmpeg.wasm), which is a fork of [ffmpegwasm/ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm) without any functional changes. Just a different approach to loading and parsing the source files so it plays along in the js-lib packaging;
+
+On react-native the [RNVideoPSegmenter.ts](https://github.com/homebase-id/homebase-id-app/blob/main/packages/mobile/src/provider/video/RNVideoSegmenter.ts) uses the [arthenica/ffmpeg-kit](https://github.com/arthenica/ffmpeg-kit) package to run the HLS encoding.
