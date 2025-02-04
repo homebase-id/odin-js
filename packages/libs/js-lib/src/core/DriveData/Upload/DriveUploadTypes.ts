@@ -36,13 +36,6 @@ export const isUpdateHeaderInstructionSet = (
   );
 };
 
-export interface AppendInstructionSet extends Omit<BaseUploadInstructionSet, 'storageOptions'> {
-  storageIntent: 'append';
-
-  targetFile: FileIdFileIdentifier;
-  versionTag: string | undefined;
-}
-
 export interface UpdatePeerInstructionSet extends Partial<BaseUploadInstructionSet> {
   file: GlobalTransitIdFileIdentifier;
   versionTag: string | undefined;
@@ -170,10 +163,6 @@ export interface UploadResult {
   file: FileIdFileIdentifier;
   globalTransitIdFileIdentifier: GlobalTransitIdFileIdentifier;
   recipientStatus: { [key: string]: TransferUploadStatus };
-  newVersionTag: string;
-}
-
-export interface AppendResult {
   newVersionTag: string;
 }
 

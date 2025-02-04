@@ -14,8 +14,6 @@ import {
   EncryptedKeyHeader,
   KeyHeader,
   decryptKeyHeader,
-  SystemFileType,
-  FileIdentifier,
 } from '../../../core/core';
 import { TransitInstructionSet, TransitUploadResult } from '../PeerTypes';
 import { hasDebugFlag } from '../../../helpers/BrowserUtil';
@@ -216,101 +214,6 @@ export const uploadHeaderOverPeer = async (
     })
     .catch((error) => {
       console.error('[odin-js:uploadFileOverPeerUsingKeyHeader]', error);
-      throw error;
-    });
-
-  isDebug &&
-    console.debug(
-      'response',
-      new URL(`${dotYouClient.getEndpoint()}/transit/sender/files/send'`).pathname,
-      response
-    );
-
-  return response;
-};
-
-export interface PeerAppendInstructionSet {
-  targetFile: FileIdentifier;
-  recipients: string[];
-  versionTag: string | undefined;
-  systemFileType?: SystemFileType;
-}
-
-export interface PeerAppendResult {
-  recipientStatus: { [key: string]: TransferUploadStatus };
-}
-
-export const appendDataToFileOverPeer = async (
-  dotYouClient: DotYouClient,
-  keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
-  instructions: PeerAppendInstructionSet,
-  payloads: PayloadFile[] | undefined,
-  thumbnails: ThumbnailFile[] | undefined,
-  onVersionConflict?: () => Promise<void | PeerAppendResult> | void,
-  axiosConfig?: AxiosRequestConfig
-) => {
-  isDebug &&
-    console.debug(
-      'request',
-      new URL(`${dotYouClient.getEndpoint()}/transit/sender/files/uploadpayload`).pathname,
-      {
-        instructions,
-        payloads,
-        thumbnails,
-      }
-    );
-
-  const encrypt = !!keyHeader;
-  const decryptedKeyHeader =
-    keyHeader && 'encryptionVersion' in keyHeader
-      ? await decryptKeyHeader(dotYouClient, keyHeader)
-      : keyHeader;
-
-  const { systemFileType, ...strippedInstructions } = instructions;
-
-  const manifest = buildManifest(payloads, thumbnails, encrypt);
-  const instructionsWithManifest = {
-    ...strippedInstructions,
-    manifest,
-  };
-
-  const data = await buildFormData(
-    instructionsWithManifest,
-    undefined,
-    payloads,
-    thumbnails,
-    decryptedKeyHeader,
-    manifest
-  );
-
-  const client = dotYouClient.createAxiosClient({
-    overrideEncryption: true,
-    systemFileType: systemFileType,
-  });
-  const url = 'transit/sender/files/uploadpayload';
-
-  const config = {
-    ...axiosConfig,
-    headers: {
-      'content-type': 'multipart/form-data',
-      ...axiosConfig?.headers,
-    },
-  };
-
-  const response = await client
-    .post<PeerAppendResult>(url, data, config)
-    .then((response) => {
-      const recipientStatus = response.data.recipientStatus;
-      Object.keys(recipientStatus).forEach((key) => {
-        if (recipientStatus[key].toString().toLowerCase() === TransferUploadStatus.EnqueuedFailed) {
-          throw new Error(`Recipient ${key} failed to receive file`);
-        }
-      });
-
-      return response.data;
-    })
-    .catch((error) => {
-      console.error('[odin-js:appendDataToFileOverPeer]', error);
       throw error;
     });
 

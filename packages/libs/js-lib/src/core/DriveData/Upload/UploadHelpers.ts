@@ -4,16 +4,13 @@ import { TransitInstructionSet } from '../../../peer/peerData/PeerTypes';
 import {
   UploadFileMetadata,
   UploadInstructionSet,
-  AppendInstructionSet,
   UploadResult,
   UploadManifest,
-  AppendResult,
   UpdateResult,
   UpdateInstructionSet,
   UpdateManifest,
   UpdateHeaderInstructionSet,
   isUpdateHeaderInstructionSet,
-  isUpdateInstructionSet,
 } from './DriveUploadTypes';
 import {
   encryptWithKeyheader,
@@ -35,7 +32,6 @@ import {
 } from '../File/DriveFileTypes';
 import { AxiosRequestConfig } from 'axios';
 import { getSecuredBlob } from '../../../helpers/BlobHelpers';
-import { PeerAppendInstructionSet } from '../../../peer/peer';
 
 const EMPTY_KEY_HEADER: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(0)),
@@ -142,27 +138,23 @@ export const buildDescriptor = async (
   return await encryptWithSharedSecret(
     dotYouClient,
     {
-      ...(isUpdateInstructionSet(instructions)
+      ...(isUpdateHeaderInstructionSet(instructions)
         ? {
-            keyHeaderIv: keyHeader?.iv,
+            encryptedKeyHeader: keyHeader
+              ? await encryptKeyHeader(
+                  dotYouClient,
+                  { aesKey: new Uint8Array(Array(16).fill(0)), iv: keyHeader?.iv },
+                  instructions.transferIv
+                )
+              : undefined,
           }
-        : isUpdateHeaderInstructionSet(instructions)
-          ? {
-              encryptedKeyHeader: keyHeader
-                ? await encryptKeyHeader(
-                    dotYouClient,
-                    { aesKey: new Uint8Array(Array(16).fill(0)), iv: keyHeader?.iv },
-                    instructions.transferIv
-                  )
-                : undefined,
-            }
-          : {
-              encryptedKeyHeader: await encryptKeyHeader(
-                dotYouClient,
-                keyHeader ?? EMPTY_KEY_HEADER,
-                instructions.transferIv
-              ),
-            }),
+        : {
+            encryptedKeyHeader: await encryptKeyHeader(
+              dotYouClient,
+              keyHeader ?? EMPTY_KEY_HEADER,
+              instructions.transferIv
+            ),
+          }),
       fileMetadata: await encryptMetaData(metadata, keyHeader),
     },
     instructions.transferIv
@@ -170,12 +162,7 @@ export const buildDescriptor = async (
 };
 
 export const buildFormData = async (
-  instructionSet:
-    | UploadInstructionSet
-    | TransitInstructionSet
-    | AppendInstructionSet
-    | PeerAppendInstructionSet
-    | UpdateInstructionSet,
+  instructionSet: UploadInstructionSet | TransitInstructionSet | UpdateInstructionSet,
   encryptedDescriptor: Uint8Array | undefined,
   payloads: PayloadFile[] | undefined,
   thumbnails: ThumbnailFile[] | undefined,
@@ -262,46 +249,6 @@ export const pureUpload = async (
       if (error.response?.status === 400)
         console.error('[odin-js:pureUpload]', error.response?.data);
       else console.error('[odin-js:pureUpload]', error);
-      throw error;
-    });
-};
-
-export const pureAppend = async (
-  dotYouClient: DotYouClient,
-  data: FormData,
-  systemFileType?: SystemFileType,
-  onVersionConflict?: () => Promise<void | AppendResult> | void,
-  axiosConfig?: AxiosRequestConfig
-): Promise<AppendResult | void> => {
-  const client = dotYouClient.createAxiosClient({
-    overrideEncryption: true,
-    systemFileType,
-  });
-  const url = '/drive/files/uploadpayload';
-
-  const config = {
-    ...axiosConfig,
-    headers: {
-      'content-type': 'multipart/form-data',
-      ...axiosConfig?.headers,
-    },
-  };
-
-  return client
-    .post(url, data, config)
-    .then((response) => {
-      return response.data;
-    })
-    .catch((error) => {
-      if (error.response?.data?.errorCode === 'versionTagMismatch') {
-        if (!onVersionConflict) {
-          console.warn('VersionTagMismatch, to avoid this, add an onVersionConflict handler');
-        } else {
-          return onVersionConflict();
-        }
-      }
-
-      console.error('[odin-js:pureUpload]', error);
       throw error;
     });
 };
