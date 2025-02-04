@@ -104,7 +104,7 @@ export const OdinQueryClient = ({
           });
 
     const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
-      buster: '202501',
+      buster: '202502',
       maxAge: Infinity,
       persister: persister,
       dehydrateOptions: {
