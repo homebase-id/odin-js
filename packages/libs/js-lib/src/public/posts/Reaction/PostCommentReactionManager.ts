@@ -1,5 +1,5 @@
 import { DotYouClient } from '../../../core/DotYouClient';
-import { getRandom16ByteArray } from '../../../helpers/DataUtil';
+import { getRandom16ByteArray, uint8ArrayToBase64 } from '../../../helpers/DataUtil';
 import { createThumbnails } from '../../../media/Thumbs/ThumbnailProvider';
 import {
   ThumbnailFile,
@@ -86,7 +86,7 @@ export const saveComment = async (
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metadata
-  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
+  const shouldEmbedContent = uint8ArrayToBase64(payloadBytes).length < MAX_HEADER_CONTENT_BYTES;
   const metadata: UploadFileMetadata = {
     versionTag: comment.fileMetadata.versionTag,
     allowDistribution: false,

@@ -40,6 +40,7 @@ import {
   makeGrid,
   stringToUint8Array,
   getPayloadsAndThumbnailsForNewMedia,
+  uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
 import { getPlainTextFromRichText } from '@homebase-id/common-app';
@@ -190,7 +191,7 @@ export const uploadMail = async (
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
+  const shouldEmbedContent = uint8ArrayToBase64(payloadBytes).length < MAX_HEADER_CONTENT_BYTES;
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: conversation?.fileMetadata.versionTag,
@@ -330,7 +331,7 @@ export const updateMail = async (
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
+  const shouldEmbedContent = uint8ArrayToBase64(payloadBytes).length < MAX_HEADER_CONTENT_BYTES;
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: conversation?.fileMetadata.versionTag,

@@ -44,6 +44,7 @@ import {
   base64ToUint8Array,
   getRandom16ByteArray,
   stringGuidsEqual,
+  uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
 import {
@@ -302,7 +303,7 @@ export const uploadChatMessage = async (
   const payloadBytes = stringToUint8Array(jsonStringify64({ message: messageContent.message }));
 
   // Set max of 3kb for content so enough room is left for metadata
-  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
+  const shouldEmbedContent = uint8ArrayToBase64(payloadBytes).length < MAX_HEADER_CONTENT_BYTES;
   const content = shouldEmbedContent
     ? jsonContent
     : jsonStringify64({
