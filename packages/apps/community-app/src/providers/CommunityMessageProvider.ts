@@ -29,7 +29,6 @@ import {
   UpdateInstructionSet,
   UpdateResult,
   getContentFromHeaderOrPayload,
-  MAX_HEADER_CONTENT_BYTES,
 } from '@homebase-id/js-lib/core';
 import {
   jsonStringify64,
@@ -37,6 +36,7 @@ import {
   makeGrid,
   getRandom16ByteArray,
   toGuidId,
+  uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
 import {
   LinkPreview,
@@ -63,7 +63,7 @@ export const CommunityDeletedArchivalStaus = 2;
 const COMMUNITY_MESSAGE_PAYLOAD_KEY = 'comm_web';
 export const COMMUNITY_LINKS_PAYLOAD_KEY = 'comm_links';
 export const COMMUNITY_PINNED_TAG = toGuidId('pinned-message');
-export const MESSAGE_CHARACTERS_LIMIT = 1500;
+export const MESSAGE_CHARACTERS_LIMIT = 1600;
 
 export enum CommunityDeliveryStatus {
   Sending = 15, // When it's sending; Used for optimistic updates
@@ -102,7 +102,7 @@ export const uploadCommunityMessage = async (
   const payloadJson: string = jsonStringify64({ ...messageContent });
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  const shouldEmbedContent = payloadBytes.length < MESSAGE_CHARACTERS_LIMIT * 4; // 4 bytes per character
+  const shouldEmbedContent = uint8ArrayToBase64(payloadBytes).length < MESSAGE_CHARACTERS_LIMIT * 4; // 4 bytes per character
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: true,
@@ -326,8 +326,8 @@ export const updateCommunityMessage = async (
   const payloadJson: string = jsonStringify64({ ...messageContent });
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb + content of 1600 chars for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < MESSAGE_CHARACTERS_LIMIT * 4;
+  // Set max of 1600 chars for content
+  const shouldEmbedContent = uint8ArrayToBase64(payloadBytes).length < MESSAGE_CHARACTERS_LIMIT * 4;
 
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,

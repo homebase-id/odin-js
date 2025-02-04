@@ -17,7 +17,12 @@ import {
   UploadInstructionSet,
   UploadResult,
 } from '@homebase-id/js-lib/core';
-import { jsonStringify64, stringGuidsEqual, stringToUint8Array } from '@homebase-id/js-lib/helpers';
+import {
+  jsonStringify64,
+  stringGuidsEqual,
+  stringToUint8Array,
+  uint8ArrayToBase64,
+} from '@homebase-id/js-lib/helpers';
 
 export interface Draft {
   message: RichText | undefined;
@@ -77,7 +82,7 @@ export const uploadCommunityMetadata = async (
     jsonStringify64({ ...definition.fileMetadata.appData.content })
   );
 
-  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
+  const shouldEmbedContent = uint8ArrayToBase64(payloadBytes).length < MAX_HEADER_CONTENT_BYTES;
   const content = shouldEmbedContent
     ? jsonContent
     : jsonStringify64({

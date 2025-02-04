@@ -27,6 +27,7 @@ import {
   toGuidId,
   jsonStringify64,
   getRandom16ByteArray,
+  uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
 
 //Handles management of Contacts
@@ -101,7 +102,7 @@ export const saveContact = async (
   if (contact.fileMetadata.appData.content.odinId)
     tags.push(toGuidId(contact.fileMetadata.appData.content.odinId));
 
-  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
+  const shouldEmbedContent = uint8ArrayToBase64(payloadBytes).length < MAX_HEADER_CONTENT_BYTES;
   const metadata: UploadFileMetadata = {
     allowDistribution: false,
     appData: {
