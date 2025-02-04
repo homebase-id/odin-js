@@ -35,7 +35,12 @@ import {
   DEFAULT_PAYLOAD_KEY,
   MAX_HEADER_CONTENT_BYTES,
 } from '@homebase-id/js-lib/core';
-import { ChatDrive, ConversationWithYourselfId, UnifiedConversation } from './ConversationProvider';
+import {
+  ChatDrive,
+  ConversationMetadata,
+  ConversationWithYourselfId,
+  UnifiedConversation,
+} from './ConversationProvider';
 import {
   getNewId,
   jsonStringify64,
@@ -568,7 +573,7 @@ export const softDeleteChatMessage = async (
 
 export const requestMarkAsRead = async (
   dotYouClient: DotYouClient,
-  conversation: HomebaseFile<UnifiedConversation>,
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>,
   messages: HomebaseFile<ChatMessage>[]
 ) => {
   const chatFileIds = messages

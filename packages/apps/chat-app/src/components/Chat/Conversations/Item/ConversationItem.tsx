@@ -25,6 +25,7 @@ import { MessageDeletedInnerBody } from '../../Detail/ChatMessageItem';
 import { ChatSentTimeIndicator } from '../../Detail/ChatSentTimeIndicator';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
+  ConversationMetadata,
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../../../providers/ConversationProvider';
@@ -147,7 +148,7 @@ const ConversationBody = ({
   );
   const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
 
-  const lastReadTime = conversationMetadata?.fileMetadata.appData.content.lastReadTime || 0;
+  const lastReadTime = conversationMetadata?.fileMetadata?.localAppData?.content?.lastReadTime || 0;
   const unreadCount =
     conversationMetadata &&
     flatMessages &&
@@ -247,7 +248,7 @@ MessageContent.displayName = 'MessageContent';
 export const ConversationContextMenu = ({
   conversation,
 }: {
-  conversation: HomebaseFile<UnifiedConversation>;
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
 }) => {
   const { mutate: clearChat, error: clearChatError } = useConversation().clearChat;
   const {

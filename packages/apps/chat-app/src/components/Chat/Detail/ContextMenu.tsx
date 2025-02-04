@@ -11,6 +11,7 @@ import { ChevronDown } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatDeliveryStatus, ChatMessage } from '../../../providers/ChatProvider';
 import {
+  ConversationMetadata,
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../../providers/ConversationProvider';
@@ -32,7 +33,7 @@ export const ContextMenu = ({
   chatActions,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation?: HomebaseFile<UnifiedConversation>;
+  conversation?: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   chatActions?: ChatActions;
 }) => {
   if (!chatActions) return null;

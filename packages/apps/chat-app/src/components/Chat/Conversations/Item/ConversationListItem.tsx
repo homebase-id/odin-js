@@ -1,6 +1,9 @@
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { UnifiedConversation } from '../../../../providers/ConversationProvider';
+import {
+  ConversationMetadata,
+  UnifiedConversation,
+} from '../../../../providers/ConversationProvider';
 import { GroupConversationItem, SingleConversationItem } from './ConversationItem';
 
 export const ConversationListItem = ({
@@ -8,7 +11,7 @@ export const ConversationListItem = ({
   onClick,
   isActive,
 }: {
-  conversation: HomebaseFile<UnifiedConversation>;
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   onClick: () => void;
   isActive: boolean;
 }) => {

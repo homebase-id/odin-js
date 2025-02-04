@@ -1,4 +1,8 @@
-import { UnifiedConversation, getConversations } from '../../providers/ConversationProvider';
+import {
+  ConversationMetadata,
+  UnifiedConversation,
+  getConversations,
+} from '../../providers/ConversationProvider';
 import { InfiniteData, QueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
@@ -6,7 +10,7 @@ import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { invalidateConversation, updateCacheConversation } from './useConversation';
 
 export interface ChatConversationsReturn {
-  searchResults: HomebaseFile<UnifiedConversation>[];
+  searchResults: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
   cursorState: string;
   queryTime: number;
   includeMetadataHeader: boolean;
@@ -37,7 +41,7 @@ export const useConversations = () => {
 
 export const insertNewConversation = (
   queryClient: QueryClient,
-  newConversation: HomebaseFile<UnifiedConversation>,
+  newConversation: HomebaseFile<UnifiedConversation, ConversationMetadata>,
   isUpdate?: boolean
 ) => {
   const extistingConversations = updateCacheConversations(queryClient, (data) => {
@@ -76,9 +80,7 @@ export const insertNewConversation = (
     };
   });
 
-  if (!extistingConversations) {
-    invalidateConversations(queryClient);
-  }
+  if (!extistingConversations) invalidateConversations(queryClient);
 
   const existingConversation = updateCacheConversation(
     queryClient,
@@ -98,14 +100,14 @@ export const updateCacheConversations = (
   queryClient: QueryClient,
   transformFn: (
     data: InfiniteData<{
-      searchResults: HomebaseFile<UnifiedConversation>[];
+      searchResults: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
       cursorState: string;
       queryTime: number;
       includeMetadataHeader: boolean;
     }>
   ) =>
     | InfiniteData<{
-        searchResults: HomebaseFile<UnifiedConversation>[];
+        searchResults: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
         cursorState: string;
         queryTime: number;
         includeMetadataHeader: boolean;
@@ -114,7 +116,7 @@ export const updateCacheConversations = (
 ) => {
   const existingConversations = queryClient.getQueryData<
     InfiniteData<{
-      searchResults: HomebaseFile<UnifiedConversation>[];
+      searchResults: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
       cursorState: string;
       queryTime: number;
       includeMetadataHeader: boolean;

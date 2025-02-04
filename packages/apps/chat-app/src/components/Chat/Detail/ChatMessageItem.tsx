@@ -11,7 +11,7 @@ import {
 import { DEFAULT_PAYLOAD_KEY, HomebaseFile, RichText } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ChatMessage, ChatDeletedArchivalStaus } from '../../../providers/ChatProvider';
-import { UnifiedConversation } from '../../../providers/ConversationProvider';
+import { ConversationMetadata, UnifiedConversation } from '../../../providers/ConversationProvider';
 import { ChatMedia } from './Media/ChatMedia';
 import { ChatMediaGallery } from './Media/ChatMediaGallery';
 import { ChatDeliveryIndicator } from './ChatDeliveryIndicator';
@@ -29,7 +29,7 @@ export const ChatMessageItem = ({
   chatActions,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation?: HomebaseFile<UnifiedConversation>;
+  conversation?: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   chatActions?: ChatActions;
 }) => {
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
@@ -108,7 +108,7 @@ const ChatTextMessageBody = ({
   isDeleted,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation?: HomebaseFile<UnifiedConversation>;
+  conversation?: HomebaseFile<UnifiedConversation, ConversationMetadata>;
 
   isGroupChat?: boolean;
   messageFromMe: boolean;
@@ -270,7 +270,7 @@ const ChatMediaMessageBody = ({
   chatActions,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation?: HomebaseFile<UnifiedConversation>;
+  conversation?: HomebaseFile<UnifiedConversation, ConversationMetadata>;
 
   isGroupChat?: boolean;
   messageFromMe: boolean;
