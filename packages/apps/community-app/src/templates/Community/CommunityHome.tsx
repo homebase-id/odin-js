@@ -84,10 +84,10 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   }, []);
 
   const storedState = localStorage.getItem(STORAGE_KEY);
-  const [isPinned, setIsPinned] = useState(storedState ? storedState === '1' : false);
+  const [isHidden, setIsHidden] = useState(storedState ? storedState !== '1' : true);
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, isPinned ? '1' : '0');
-  }, [isPinned]);
+    localStorage.setItem(STORAGE_KEY, !isHidden ? '1' : '0');
+  }, [isHidden]);
 
   if (communities && !communityKey && !isCreateNew) {
     if (!location.state?.referrer || !location.state?.referrer.startsWith(COMMUNITY_ROOT_PATH)) {
@@ -120,7 +120,7 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
       <ExtendCriclePermissionDialog />
       <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`} ref={viewportWrapperRef}>
         <ErrorBoundary>
-          <CommunitiesNav togglePin={(newVal) => setIsPinned((old) => newVal ?? !old)} />
+          <CommunitiesNav togglePin={(newVal) => setIsHidden((old) => newVal ?? !old)} />
         </ErrorBoundary>
 
         {isCreateNew ? (
@@ -128,7 +128,7 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
         ) : (
           <>
             <ErrorBoundary>
-              <CommunityNav isOnline={isOnline} isHidden={isPinned} />
+              <CommunityNav isOnline={isOnline} isHidden={!isHidden} />
             </ErrorBoundary>
 
             <Suspense>
