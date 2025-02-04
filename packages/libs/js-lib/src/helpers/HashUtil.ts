@@ -14,6 +14,9 @@ const reduceSha256Hash = async (buffer: Uint8Array) => {
 };
 
 const xorByteArrays = (a: Uint8Array, b: Uint8Array) => {
+  if (!a || !b) {
+    throw new Error('Both byte arrays must be non-empty');
+  }
   const maxLength = Math.max(a.length, b.length);
   const resultBuffer = new Uint8Array(maxLength);
 

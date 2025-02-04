@@ -452,6 +452,8 @@ const DirectMessageItem = memo(
     recipient: string;
     setUnreadCount: (identifier: string, count: number) => void;
   }) => {
+    if (!recipient) return null;
+
     const { odinKey, communityKey } = useParams();
     const dotYouClient = useDotYouClientContext();
     const identity = dotYouClient.getHostIdentity();
