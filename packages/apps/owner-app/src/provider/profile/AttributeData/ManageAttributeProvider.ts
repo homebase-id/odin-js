@@ -27,6 +27,7 @@ import {
   jsonStringify64,
   stringToUint8Array,
   getDisplayNameOfNameAttribute,
+  uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
 
 import { HomePageThemeFields, HomePageAttributes } from '@homebase-id/js-lib/public';
@@ -87,7 +88,7 @@ export const saveProfileAttribute = async (
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
+  const shouldEmbedContent = uint8ArrayToBase64(payloadBytes).length < MAX_HEADER_CONTENT_BYTES;
   if (!shouldEmbedContent)
     payloads.push({
       payload: new OdinBlob([payloadBytes], { type: 'application/json' }),

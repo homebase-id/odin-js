@@ -7,6 +7,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import {
+  ConversationMetadata,
   UnifiedConversation,
   getConversation,
   updateConversation,
@@ -49,7 +50,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
 
     const updatedRecipients = [...new Set([...recipients, loggedOnIdentity as string])];
 
-    const newConversation: NewHomebaseFile<UnifiedConversation> = {
+    const newConversation: NewHomebaseFile<UnifiedConversation, ConversationMetadata> = {
       fileMetadata: {
         appData: {
           uniqueId: newConversationId,
@@ -77,7 +78,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const sendJoinCommand = async ({
     conversation,
   }: {
-    conversation: HomebaseFile<UnifiedConversation>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   }) => {
     return await uploadConversation(dotYouClient, conversation, true);
   };
@@ -86,7 +87,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     conversation,
     distribute = false,
   }: {
-    conversation: HomebaseFile<UnifiedConversation>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
     distribute?: boolean;
   }) => {
     if (distribute && conversation.fileMetadata.appData.content.recipients?.length >= 2) {
@@ -99,7 +100,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const clearChat = async ({
     conversation,
   }: {
-    conversation: HomebaseFile<UnifiedConversation>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   }) => {
     return await deleteAllChatMessages(
       dotYouClient,
@@ -110,7 +111,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const deleteChat = async ({
     conversation,
   }: {
-    conversation: HomebaseFile<UnifiedConversation>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   }) => {
     const deletedResult = await deleteAllChatMessages(
       dotYouClient,
@@ -119,7 +120,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     if (!deletedResult) throw new Error('Failed to delete chat messages');
 
     // We soft delete the conversation, so we can still see newly received messages
-    const newConversation: HomebaseFile<UnifiedConversation> = {
+    const newConversation: HomebaseFile<UnifiedConversation, ConversationMetadata> = {
       ...conversation,
       fileMetadata: {
         ...conversation.fileMetadata,
@@ -133,9 +134,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const archiveChat = async ({
     conversation,
   }: {
-    conversation: HomebaseFile<UnifiedConversation>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   }) => {
-    const newConversation: HomebaseFile<UnifiedConversation> = {
+    const newConversation: HomebaseFile<UnifiedConversation, ConversationMetadata> = {
       ...conversation,
       fileMetadata: {
         ...conversation.fileMetadata,
@@ -226,8 +227,11 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       },
     }),
     restoreChat: useMutation({
-      mutationFn: ({ conversation }: { conversation: HomebaseFile<UnifiedConversation> }) =>
-        restoreChat(dotYouClient, conversation),
+      mutationFn: ({
+        conversation,
+      }: {
+        conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
+      }) => restoreChat(dotYouClient, conversation),
 
       onSettled: async (_data, _error, variables) => {
         invalidateConversations(queryClient);
@@ -243,9 +247,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
 
 export const restoreChat = async (
   dotYouClient: DotYouClient,
-  conversation: HomebaseFile<UnifiedConversation>
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>
 ) => {
-  const newConversation: HomebaseFile<UnifiedConversation> = {
+  const newConversation: HomebaseFile<UnifiedConversation, ConversationMetadata> = {
     ...conversation,
     fileMetadata: {
       ...conversation.fileMetadata,
@@ -267,13 +271,12 @@ export const updateCacheConversation = (
   queryClient: QueryClient,
   conversationId: string,
   transformFn: (
-    data: HomebaseFile<UnifiedConversation>
-  ) => HomebaseFile<UnifiedConversation> | undefined
+    data: HomebaseFile<UnifiedConversation, ConversationMetadata>
+  ) => HomebaseFile<UnifiedConversation, ConversationMetadata> | undefined
 ) => {
-  const conversation = queryClient.getQueryData<HomebaseFile<UnifiedConversation>>([
-    'conversation',
-    conversationId,
-  ]);
+  const conversation = queryClient.getQueryData<
+    HomebaseFile<UnifiedConversation, ConversationMetadata>
+  >(['conversation', conversationId]);
   if (!conversation) return;
 
   const updatedConversation = transformFn(conversation);
@@ -287,10 +290,10 @@ const fetchSingleConversation = async (
   dotYouClient: DotYouClient,
   queryClient: QueryClient,
   conversationId: string
-) => {
+): Promise<HomebaseFile<UnifiedConversation, ConversationMetadata> | null> => {
   const queryData = queryClient.getQueryData<
     InfiniteData<{
-      searchResults: HomebaseFile<UnifiedConversation>[];
+      searchResults: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
       cursorState: string;
       queryTime: number;
       includeMetadataHeader: boolean;
@@ -317,7 +320,7 @@ export const getConversationQueryOptions: (
   dotYouClient: DotYouClient,
   queryClient: QueryClient,
   conversationId: string | undefined
-) => UndefinedInitialDataOptions<HomebaseFile<UnifiedConversation> | null> = (
+) => UndefinedInitialDataOptions<HomebaseFile<UnifiedConversation, ConversationMetadata> | null> = (
   dotYouClient,
   queryClient,
   conversationId

@@ -19,6 +19,7 @@ import {
   getFileHeader,
   getFileHeaderByUniqueId,
   getFileHeaderBytesByGlobalTransitId,
+  getLocalContentFromHeader,
 } from '@homebase-id/js-lib/core';
 import { jsonStringify64, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
@@ -104,12 +105,35 @@ export const useFileQuery = ({
           dotYouClient,
           targetDrive,
           id,
-          { systemFileType, decrypt }
+          { systemFileType }
         );
         if (fileByGlobalTransitId) return fileByGlobalTransitId;
       };
+
       try {
         const decryptedFile = await queryFile();
+
+        if (!decryptedFile?.fileMetadata.localAppData) return decryptedFile;
+        try {
+          return {
+            ...decryptedFile,
+            fileMetadata: {
+              ...decryptedFile.fileMetadata,
+              appData: {
+                ...decryptedFile.fileMetadata.appData,
+              },
+              localAppData: await getLocalContentFromHeader(
+                dotYouClient,
+                targetDrive,
+                decryptedFile,
+                true
+              ),
+            },
+          };
+        } catch {
+          //
+        }
+
         return decryptedFile;
       } catch (e) {
         console.warn('Failed to decrypt file', e);

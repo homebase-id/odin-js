@@ -20,8 +20,6 @@ import {
   ChatDrive,
   CHAT_CONVERSATION_FILE_TYPE,
   dsrToConversation,
-  CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE,
-  dsrToConversationMetadata,
 } from '../../../providers/ConversationProvider';
 import { websocketDrives } from '../../auth/useAuth';
 import {
@@ -31,7 +29,6 @@ import {
 } from '../useChatMessages';
 import { insertNewReaction, removeReaction } from '../useChatReaction';
 import { getConversationQueryOptions, restoreChat, useConversation } from '../useConversation';
-import { insertNewConversationMetadata } from '../useConversationMetadata';
 import { insertNewConversation, invalidateConversations } from '../useConversations';
 
 const isDebug = hasDebugFlag();
@@ -146,20 +143,6 @@ export const useChatSocketHandler = () => {
           }
 
           insertNewConversation(queryClient, updatedConversation, !isNewConversationFile);
-        } else if (
-          notification.header.fileMetadata.appData.fileType ===
-          CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE
-        ) {
-          const updatedMetadata = await dsrToConversationMetadata(
-            dotYouClient,
-            notification.header,
-            ChatDrive,
-            true
-          );
-
-          if (!updatedMetadata) return;
-
-          insertNewConversationMetadata(queryClient, updatedMetadata);
         }
       }
 

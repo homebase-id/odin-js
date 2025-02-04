@@ -34,7 +34,6 @@ const APP_QUERY_KEYS = [
   'chat-messages',
   'chat-reaction',
   'conversations',
-  'conversation-metadata',
   'conversations-with-recent-message',
   'process-chat-inbox',
 

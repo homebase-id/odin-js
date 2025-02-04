@@ -29,6 +29,7 @@ import {
   stringGuidsEqual,
   stringToUint8Array,
   toGuidId,
+  uint8ArrayToBase64,
 } from '../../../helpers/helpers';
 import { ChannelDefinition, BlogConfig, CollaborativeChannelDefinition } from '../PostTypes';
 
@@ -168,7 +169,7 @@ export const saveChannelDefinition = async (
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
+  const shouldEmbedContent = uint8ArrayToBase64(payloadBytes).length < MAX_HEADER_CONTENT_BYTES;
   const metadata: UploadFileMetadata = {
     versionTag: versionTag,
     allowDistribution: false,

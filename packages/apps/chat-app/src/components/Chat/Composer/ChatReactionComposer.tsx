@@ -9,14 +9,14 @@ import {
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useState, useRef } from 'react';
 import { ChatMessage } from '../../../providers/ChatProvider';
-import { UnifiedConversation } from '../../../providers/ConversationProvider';
+import { ConversationMetadata, UnifiedConversation } from '../../../providers/ConversationProvider';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 
 export const ChatReactionComposer = ({
   conversation,
   msg,
 }: {
-  conversation: HomebaseFile<UnifiedConversation>;
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   msg: HomebaseFile<ChatMessage>;
 }) => {
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();

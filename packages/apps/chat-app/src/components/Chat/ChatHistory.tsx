@@ -3,7 +3,7 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
 import { ChatMessage } from '../../providers/ChatProvider';
-import { UnifiedConversation } from '../../providers/ConversationProvider';
+import { ConversationMetadata, UnifiedConversation } from '../../providers/ConversationProvider';
 import { ChatMessageItem } from './Detail/ChatMessageItem';
 import { ChatActions } from './Detail/ContextMenu';
 import { useMemo, useRef, useEffect } from 'react';
@@ -18,7 +18,7 @@ export const ChatHistory = ({
   setReplyMsg,
   setIsEmptyChat,
 }: {
-  conversation: HomebaseFile<UnifiedConversation> | undefined;
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata> | undefined;
   setReplyMsg: (msg: HomebaseFile<ChatMessage>) => void;
   setIsEmptyChat?: (isEmpty: boolean) => void;
 }) => {

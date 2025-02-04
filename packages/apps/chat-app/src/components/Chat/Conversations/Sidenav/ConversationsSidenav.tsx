@@ -14,6 +14,7 @@ import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useSearchParams } from 'react-router-dom';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
+  ConversationMetadata,
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../../../providers/ConversationProvider';
@@ -152,7 +153,7 @@ const ConversationList = ({
   activeConversationId,
   scrollRef,
 }: {
-  conversations: HomebaseFile<UnifiedConversation>[];
+  conversations: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
   openConversation: (id: string | undefined) => void;
   activeConversationId: string | undefined;
   scrollRef: RefObject<HTMLDivElement>;

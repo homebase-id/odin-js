@@ -23,6 +23,7 @@ import {
   getRandom16ByteArray,
   jsonStringify64,
   stringToUint8Array,
+  uint8ArrayToBase64,
 } from '../../helpers/helpers';
 import { ProfileConfig } from './ProfileConfig';
 import { ProfileDefinition, ProfileSection } from './ProfileTypes';
@@ -128,7 +129,7 @@ export const saveProfileDefinition = async (
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
+  const shouldEmbedContent = uint8ArrayToBase64(payloadBytes).length < MAX_HEADER_CONTENT_BYTES;
 
   const metadata: UploadFileMetadata = {
     versionTag: versionTag,
@@ -195,7 +196,7 @@ export const saveProfileSection = async (
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metedata
-  const shouldEmbedContent = payloadBytes.length < MAX_HEADER_CONTENT_BYTES;
+  const shouldEmbedContent = uint8ArrayToBase64(payloadBytes).length < MAX_HEADER_CONTENT_BYTES;
 
   // Note: we tag it with the profile id AND also a tag indicating it is a definition
   const metadata: UploadFileMetadata = {

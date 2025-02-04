@@ -16,6 +16,7 @@ import {
 import { DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 
 import {
+  ConversationMetadata,
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../providers/ConversationProvider';
@@ -36,7 +37,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     conversation,
     messages,
   }: {
-    conversation: HomebaseFile<UnifiedConversation>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
     messages: HomebaseFile<ChatMessage>[];
   }) => {
     const response = await requestMarkAsRead(dotYouClient, conversation, messages);
@@ -58,7 +59,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     messages,
     deleteForEveryone,
   }: {
-    conversation: HomebaseFile<UnifiedConversation>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
     messages: HomebaseFile<ChatMessage>[];
     deleteForEveryone?: boolean;
   }) => {

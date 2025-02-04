@@ -14,7 +14,11 @@ import {
 import { FailedDeliveryDetails, InnerDeliveryIndicator } from './ChatDeliveryIndicator';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
-import { ChatDrive, UnifiedConversation } from '../../../providers/ConversationProvider';
+import {
+  ChatDrive,
+  ConversationMetadata,
+  UnifiedConversation,
+} from '../../../providers/ConversationProvider';
 
 export const ChatMessageInfo = ({
   msg,
@@ -22,7 +26,7 @@ export const ChatMessageInfo = ({
   onClose,
 }: {
   msg: HomebaseFile<ChatMessage>;
-  conversation: HomebaseFile<UnifiedConversation>;
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   onClose: () => void;
 }) => {
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();

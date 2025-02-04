@@ -1,6 +1,6 @@
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { ChatDrive } from '../../providers/ConversationProvider';
+import { ChatDrive, ConversationMetadata } from '../../providers/ConversationProvider';
 import {
   deleteGroupReaction,
   getGroupReactions,
@@ -44,7 +44,7 @@ export const useChatReaction = (props?: {
     message,
     reaction,
   }: {
-    conversation: HomebaseFile<UnifiedConversation>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
     message: HomebaseFile<ChatMessage>;
     reaction: string;
   }) => {
@@ -69,7 +69,7 @@ export const useChatReaction = (props?: {
     message,
     reaction,
   }: {
-    conversation: HomebaseFile<UnifiedConversation>;
+    conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
     message: HomebaseFile<ChatMessage>;
     reaction: EmojiReaction;
   }) => {
