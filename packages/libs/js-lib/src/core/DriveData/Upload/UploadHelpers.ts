@@ -170,11 +170,7 @@ export const buildFormData = async (
   manifest: UploadManifest | UpdateManifest | undefined
 ) => {
   const data = new FormData();
-  const instructionType =
-    'targetFile' in instructionSet && !('locale' in instructionSet)
-      ? 'payloadUploadInstructions'
-      : 'instructions';
-  data.append(instructionType, await toBlob(instructionSet));
+  data.append('instructions', await toBlob(instructionSet));
   if (encryptedDescriptor) data.append('metadata', await getSecuredBlob([encryptedDescriptor]));
 
   if (payloads) {
