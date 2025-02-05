@@ -1,5 +1,11 @@
 import { AxiosRequestConfig } from 'axios';
-import { ContentType, HomebaseFile, EncryptedKeyHeader, SystemFileType } from './DriveFileTypes';
+import {
+  ContentType,
+  HomebaseFile,
+  EncryptedKeyHeader,
+  SystemFileType,
+  TransferHistory,
+} from './DriveFileTypes';
 import { TargetDrive, ImageContentType, FileMetadata } from './DriveFileTypes';
 
 import { DotYouClient } from '../../DotYouClient';
@@ -273,6 +279,40 @@ export const getThumbBytes = async (
     .catch((error) => {
       if (error.response?.status === 404) return null;
       console.error('[odin-js:getThumbBytes]', error);
+      return null;
+    });
+};
+
+export const getTransferHistory = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  fileId: string,
+  options?: {
+    systemFileType?: SystemFileType;
+    axiosConfig?: AxiosRequestConfig;
+  }
+) => {
+  assertIfDefined('DotYouClient', dotYouClient);
+  assertIfDefined('TargetDrive', targetDrive);
+  assertIfDefined('FileId', fileId);
+
+  const { systemFileType } = options ?? { systemFileType: 'Standard' };
+
+  const client = getAxiosClient(dotYouClient, systemFileType);
+  const request: GetFileRequest = {
+    ...targetDrive,
+    fileId,
+  };
+
+  return client
+    .get<TransferHistory>(
+      '/drive/files/transfer-history?' + stringifyToQueryParams(request),
+      options?.axiosConfig
+    )
+    .then((response) => response.data)
+    .catch((error) => {
+      if (error.response?.status === 404) return null;
+      console.error('[odin-js:getTransferHistory]', error);
       return null;
     });
 };

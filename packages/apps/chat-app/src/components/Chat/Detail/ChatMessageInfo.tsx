@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { ChatDeliveryStatus, ChatMessage } from '../../../providers/ChatProvider';
+import { ChatMessage, transferHistoryToChatDeliveryStatus } from '../../../providers/ChatProvider';
 import {
   AuthorImage,
   AuthorName,
@@ -9,6 +9,7 @@ import {
   t,
   useDotYouClientContext,
   usePortal,
+  useTransferHistory,
 } from '@homebase-id/common-app';
 import { FailedDeliveryDetails, InnerDeliveryIndicator } from './ChatDeliveryIndicator';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
@@ -30,7 +31,6 @@ export const ChatMessageInfo = ({
 }) => {
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const target = usePortal('modal-container');
-  const messageContent = msg.fileMetadata.appData.content;
   const conversationContent = conversation.fileMetadata.appData.content;
   const recipients = conversationContent.recipients.filter(
     (recipient) => recipient && recipient !== (msg.fileMetadata.senderOdinId || loggedOnIdentity)
@@ -43,6 +43,11 @@ export const ChatMessageInfo = ({
     messageFileId: msg.fileId,
     messageGlobalTransitId: msg.fileMetadata.globalTransitId,
   }).get;
+
+  const { data: transferHistory } = useTransferHistory({
+    fileId: msg.fileId,
+    targetDrive: ChatDrive,
+  }).fetch;
 
   const dialog = (
     <DialogWrapper onClose={onClose} title={t('Message info')}>
@@ -78,35 +83,38 @@ export const ChatMessageInfo = ({
           <div>
             <p className="mb-2 text-xl">{t('Recipients')}</p>
             <div className="flex flex-col gap-4">
-              {recipients.map((recipient) => (
-                <div
-                  className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center"
-                  key={recipient}
-                >
-                  <div className="flex flex-row items-center gap-2">
-                    <AuthorImage
-                      odinId={recipient}
-                      className="flex-shrink-0 border border-neutral-200 dark:border-neutral-800"
-                      size="sm"
-                    />
-                    <AuthorName odinId={recipient} />
-                  </div>
-                  {isAuthor ? (
-                    <div className="flex flex-row justify-end gap-2 sm:contents">
-                      <FailedDeliveryDetails
-                        msg={msg}
-                        recipient={recipient}
-                        className="sm:ml-auto"
+              {recipients.map((recipient) => {
+                const recipientTransferHistory = transferHistory?.history.results.find(
+                  (result) => result.recipient === recipient
+                );
+                const deliveryStatus =
+                  transferHistoryToChatDeliveryStatus(recipientTransferHistory);
+
+                return (
+                  <div
+                    className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center"
+                    key={recipient}
+                  >
+                    <div className="flex flex-row items-center gap-2">
+                      <AuthorImage
+                        odinId={recipient}
+                        className="flex-shrink-0 border border-neutral-200 dark:border-neutral-800"
+                        size="sm"
                       />
-                      <InnerDeliveryIndicator
-                        state={
-                          messageContent.deliveryDetails?.[recipient] || ChatDeliveryStatus.Failed
-                        }
-                      />
+                      <AuthorName odinId={recipient} />
                     </div>
-                  ) : null}
-                </div>
-              ))}
+                    {isAuthor && recipientTransferHistory ? (
+                      <div className="flex flex-row justify-end gap-2 sm:contents">
+                        <FailedDeliveryDetails
+                          transferHistory={recipientTransferHistory}
+                          className="sm:ml-auto"
+                        />
+                        <InnerDeliveryIndicator state={deliveryStatus} />
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
           </div>
         ) : null}
