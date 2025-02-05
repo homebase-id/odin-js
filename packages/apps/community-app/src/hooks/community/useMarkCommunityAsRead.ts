@@ -76,23 +76,6 @@ export const useMarkCommunityAsRead = ({
       return;
     }
 
-    // console.log('marking as read', {
-    //   current: metadata.fileMetadata.appData.content,
-    //   new: {
-    //     ...metadata.fileMetadata.appData.content,
-    //     lastReadTime: lastUpdate,
-    //     threadsLastReadTime:
-    //       lastUpdatedThreads || metadata.fileMetadata.appData.content.threadsLastReadTime || 0,
-    //     channelLastReadTime:
-    //       matchedChannel && matchedChannel.lastMessage
-    //         ? {
-    //             ...metadata.fileMetadata.appData.content.channelLastReadTime,
-    //             [matchedChannel.fileMetadata.appData.uniqueId as string]:
-    //               matchedChannel.lastMessage.fileMetadata.created,
-    //           }
-    //         : metadata.fileMetadata.appData.content.channelLastReadTime,
-    //   },
-    // });
     updateMetadata({
       metadata: {
         ...metadata,

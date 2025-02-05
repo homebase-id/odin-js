@@ -54,9 +54,11 @@ export const useCommunityInboxProcessor = (
   const queryClient = useQueryClient();
   const targetDrive = getTargetDriveFromCommunityId(communityId || '');
 
-  const fetchData = async () => {
-    if (!communityId) return;
-    const lastProcessedTime = queryClient.getQueryState(['process-community-inbox'])?.dataUpdatedAt;
+  const fetchData = async (communityId: string) => {
+    const lastProcessedTime = queryClient.getQueryState([
+      'process-community-inbox',
+      communityId,
+    ])?.dataUpdatedAt;
     const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 2;
 
     // Process community;
@@ -169,8 +171,8 @@ export const useCommunityInboxProcessor = (
 
   // We refetch this one on mount as each mount the websocket would reconnect, and there might be a backlog of messages
   return useQuery({
-    queryKey: ['process-community-inbox'],
-    queryFn: fetchData,
+    queryKey: ['process-community-inbox', communityId],
+    queryFn: () => fetchData(communityId as string),
     enabled: !!communityId,
     staleTime: 1000 * 10, // 10 seconds
   });

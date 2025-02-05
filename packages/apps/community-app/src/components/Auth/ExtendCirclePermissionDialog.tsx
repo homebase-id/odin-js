@@ -8,7 +8,7 @@ import {
 } from '@homebase-id/common-app';
 import { Shield } from '@homebase-id/common-app/icons';
 import { DrivePermissionType } from '@homebase-id/js-lib/core';
-import { drivesEqual } from '@homebase-id/js-lib/helpers';
+import { drivesEqual, hasDebugFlag } from '@homebase-id/js-lib/helpers';
 import { createPortal } from 'react-dom';
 import { useParams } from 'react-router-dom';
 import { useCommunity, getExtendCirclePermissionUrl } from '../../hooks/community/useCommunity';
@@ -81,7 +81,7 @@ const useCommunityAccessVerifier = (
       window.location.href
     );
 
-    console.log(extendUrl);
+    if (hasDebugFlag()) console.debug(extendUrl);
 
     return extendUrl;
   }

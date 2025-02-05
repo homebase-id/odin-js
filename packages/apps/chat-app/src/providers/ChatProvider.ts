@@ -463,7 +463,6 @@ export const updateChatMessage = async (
   const messageContent = message.fileMetadata.appData.content;
   const distribute = recipients?.length > 0;
 
-  console.log(recipients);
   if (!message.fileId) throw new Error('Message does not have a fileId');
   const uploadInstructions: UpdateLocalInstructionSet = {
     file: {

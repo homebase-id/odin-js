@@ -155,7 +155,7 @@ export const updateCacheCommunityMessages = (
 
   const transformResult = transformFn(currentData);
   const newData =
-    (transformResult && 'data' in transformResult && transformResult?.data) ??
+    (transformResult && 'data' in transformResult && transformResult?.data) ||
     (transformResult as TransformFnReturnData);
   if (!newData || !newData.pages) return;
 

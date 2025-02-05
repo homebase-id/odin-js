@@ -61,7 +61,6 @@ export const useCommunityPeerWebsocket = (
 
           // This skips the invalidation of all chat messages, as we only need to add/update this specific message
           const updatedChatMessage = await wsDsrToMessage(decryptionClient, notification.header);
-
           if (
             !updatedChatMessage ||
             Object.keys(updatedChatMessage.fileMetadata.appData.content).length === 0
