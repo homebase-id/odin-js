@@ -21,7 +21,6 @@ import {
   EmbeddedThumb,
   NewHomebaseFile,
   PriorityOptions,
-  uploadHeader,
   CommentReaction,
   patchFile,
   UpdateInstructionSet,
@@ -133,17 +132,28 @@ export const saveComment = async (
     };
 
     // Use owner/guest endpoint for reactions if the post to comment on is on the current root identity
-    if (comment.fileId) {
-      const result = await uploadHeader(
+    if (comment.fileId && comment.fileMetadata.globalTransitId) {
+      const result = await patchFile(
         dotYouClient,
         comment.sharedSecretEncryptedKeyHeader,
-        { ...instructionSet, storageIntent: 'header' },
-        metadata
+        {
+          file: {
+            fileId: comment.fileId,
+            targetDrive: targetDrive,
+          },
+          systemFileType: instructionSet.systemFileType,
+          versionTag: comment.fileMetadata.versionTag,
+          locale: 'local',
+        },
+        metadata,
+        undefined,
+        undefined,
+        undefined
       );
 
       if (!result) throw new Error(`Upload failed`);
 
-      return result.globalTransitIdFileIdentifier.globalTransitId;
+      return comment.fileMetadata.globalTransitId;
     } else {
       const result = await uploadFile(
         dotYouClient,
