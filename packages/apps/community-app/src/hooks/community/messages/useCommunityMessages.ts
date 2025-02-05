@@ -155,7 +155,7 @@ export const updateCacheCommunityMessages = (
 
   const transformResult = transformFn(currentData);
   const newData =
-    (transformResult && 'data' in transformResult && transformResult?.data) ??
+    (transformResult && 'data' in transformResult && transformResult?.data) ||
     (transformResult as TransformFnReturnData);
   if (!newData || !newData.pages) return;
 
@@ -306,6 +306,8 @@ export const insertNewMessage = (
   newMessage: HomebaseFile<CommunityMessage> | DeletedHomebaseFile,
   communityId: string
 ) => {
+  console.log('inserting new message', newMessage);
+
   const extistingMessages = updateCacheCommunityMessages(
     queryClient,
     communityId,
