@@ -340,7 +340,7 @@ const uploadHeader = async (
   return await pureUpload(dotYouClient, data, systemFileType, onVersionConflict, axiosConfig);
 };
 
-export const appendDataToFile = async (
+const appendDataToFile = async (
   dotYouClient: DotYouClient,
   keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
   instructions: AppendInstructionSet,
