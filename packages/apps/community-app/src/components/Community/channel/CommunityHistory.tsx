@@ -51,6 +51,10 @@ export const CommunityHistory = memo(
     const inAThread =
       !!origin && origin.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE;
 
+    if (inAThread && !origin.fileMetadata.globalTransitId) {
+      throw new Error('Origin message is missing globalTransitId');
+    }
+
     const {
       all: {
         data: messages,

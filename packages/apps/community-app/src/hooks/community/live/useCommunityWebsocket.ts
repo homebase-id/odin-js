@@ -57,7 +57,6 @@ export const useCommunityWebsocket = (
             console.warn('[CommunityWebsocket] Invalid community metadata received', notification);
             return;
           }
-          // console.log('new community metadata', communityMetadata);
           insertNewcommunityMetadata(queryClient, communityMetadata);
         }
       }

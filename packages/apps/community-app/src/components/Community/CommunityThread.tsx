@@ -97,7 +97,7 @@ export const CommunityThread = memo(
               <LoadingBlock className="h-12 w-full" />
               <LoadingBlock className="h-12 w-full" />
             </div>
-          ) : (
+          ) : originMessage?.fileMetadata.globalTransitId ? (
             <CommunityHistory
               community={community}
               origin={originMessage}
@@ -105,10 +105,15 @@ export const CommunityThread = memo(
               setParticipants={setParticipants}
               alignTop={!isFullScreen}
             />
+          ) : (
+            <div className="m-5 rounded-md border bg-slate-100 p-2 dark:bg-slate-700">
+              <p className="text-lg">{t('Something went wrong')}</p>
+              <p>{t('We are unable to load any messages in this thread')}</p>
+            </div>
           )}
 
           <ErrorBoundary>
-            {originMessage ? (
+            {originMessage?.fileMetadata.globalTransitId ? (
               <MessageComposer
                 community={community}
                 thread={originMessage}

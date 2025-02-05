@@ -8,7 +8,7 @@ import {
   Notify,
   DotYouClient,
 } from '@homebase-id/js-lib/core';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { hasDebugFlag } from '@homebase-id/js-lib/helpers';
 import { NotifyOverPeer, SubscribeOverPeer, UnsubscribeOverPeer } from '@homebase-id/js-lib/peer';
@@ -28,8 +28,10 @@ export const useWebsocketSubscriber = (
   refId?: string
 ) => {
   const dotYouClient = useDotYouClientContext();
-  const isPeer = !!odinId && odinId !== dotYouClient.getHostIdentity();
-  const [isConnected, setIsConected] = useState<boolean>(false);
+  const isPeer = useMemo(() => !!odinId && odinId !== dotYouClient.getHostIdentity(), [odinId]);
+  const [isConnected, setIsConected] = useState(false);
+  const connectedHandler =
+    useRef<(dotYouClient: DotYouClient, data: TypedConnectionNotification) => void | null>();
 
   const wrappedHandler = useCallback(
     (dotYouClient: DotYouClient, notification: TypedConnectionNotification) => {
@@ -65,64 +67,79 @@ export const useWebsocketSubscriber = (
 
   const localHandler = handler ? wrappedHandler : undefined;
 
+  const subscribe = useCallback(
+    async (handler: (dotYouClient: DotYouClient, data: TypedConnectionNotification) => void) => {
+      connectedHandler.current = handler;
+
+      if (isPeer)
+        await SubscribeOverPeer(
+          dotYouClient,
+          odinId as string,
+          drives,
+          handler,
+          () => {
+            setIsConected(false);
+            onDisconnect && onDisconnect();
+          },
+          () => {
+            setIsConected(true);
+            onReconnect && onReconnect();
+          },
+          undefined,
+          refId
+        );
+      else
+        await Subscribe(
+          dotYouClient,
+          drives,
+          handler,
+          () => {
+            setIsConected(false);
+            onDisconnect && onDisconnect();
+          },
+          () => {
+            setIsConected(true);
+            onReconnect && onReconnect();
+          },
+          undefined,
+          refId
+        );
+    },
+    [isPeer, drives]
+  );
+
+  const unsubscribe = useCallback(
+    (handler: (dotYouClient: DotYouClient, data: TypedConnectionNotification) => void) => {
+      try {
+        if (isPeer) UnsubscribeOverPeer(handler);
+        else Unsubscribe(handler);
+      } catch (e) {
+        console.error(e);
+      }
+    },
+    [isPeer]
+  );
+
   useEffect(() => {
     if (
       (dotYouClient.getType() !== ApiType.Owner && dotYouClient.getType() !== ApiType.App) ||
-      !dotYouClient.getSharedSecret()
+      !dotYouClient.getSharedSecret() ||
+      !localHandler
     )
       return;
 
-    if (!isConnected && localHandler) {
-      (async () => {
-        if (isPeer)
-          await SubscribeOverPeer(
-            dotYouClient,
-            odinId,
-            drives,
-            localHandler,
-            () => {
-              setIsConected(false);
-              onDisconnect && onDisconnect();
-            },
-            () => {
-              setIsConected(true);
-              onReconnect && onReconnect();
-            },
-            undefined,
-            refId
-          );
-        else
-          await Subscribe(
-            dotYouClient,
-            drives,
-            localHandler,
-            () => {
-              setIsConected(false);
-              onDisconnect && onDisconnect();
-            },
-            () => {
-              setIsConected(true);
-              onReconnect && onReconnect();
-            },
-            undefined,
-            refId
-          );
-        setIsConected(true);
-      })();
+    if (connectedHandler.current) {
+      setIsConected(false);
+      unsubscribe(connectedHandler.current);
     }
 
+    subscribe(localHandler).then(() => setIsConected(true));
+
     return () => {
-      if (localHandler) {
-        setIsConected(false);
-        try {
-          if (isPeer) UnsubscribeOverPeer(localHandler);
-          else Unsubscribe(localHandler);
-        } catch (e) {
-          console.error(e);
-        }
-      }
+      setIsConected(false);
+      unsubscribe(localHandler);
     };
-  }, [localHandler, setIsConected]);
+  }, [localHandler]);
 
   return isConnected;
 };

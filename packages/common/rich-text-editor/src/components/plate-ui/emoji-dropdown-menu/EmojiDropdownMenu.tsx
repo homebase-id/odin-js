@@ -36,6 +36,8 @@ export function EmojiDropdownMenu({ ...props }) {
               : undefined) || val.unicode;
 
           editor.tf.insertNodes({ text: unicode });
+          editor.tf.focus();
+
           setIsOpen(false);
         }}
       />
