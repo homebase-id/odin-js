@@ -1,4 +1,4 @@
-import { t, useDotYouClientContext } from '@homebase-id/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import { Clock } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
@@ -20,24 +20,6 @@ export const CommunityDeliveryIndicator = ({
 
   if (!messageFromMe) return null;
   return <InnerDeliveryIndicator state={content.deliveryStatus} className={className} />;
-};
-
-export const FailedDeliveryDetails = ({
-  msg,
-  recipient,
-  className,
-}: {
-  msg: HomebaseFile<CommunityMessage>;
-  recipient: string;
-  className?: string;
-}) => {
-  const deliveryDetails = msg.serverMetadata?.transferHistory?.recipients[recipient];
-  if (!deliveryDetails) return null;
-  if (deliveryDetails.latestSuccessfullyDeliveredVersionTag) return null;
-
-  return (
-    <p className={`text-red-500 ${className || ''}`}>{t(deliveryDetails.latestTransferStatus)}</p>
-  );
 };
 
 export const InnerDeliveryIndicator = ({

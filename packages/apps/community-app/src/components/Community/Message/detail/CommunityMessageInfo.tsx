@@ -12,7 +12,7 @@ import {
 import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
-import { FailedDeliveryDetails, InnerDeliveryIndicator } from '../item/CommunityDeliveryIndicator';
+import { InnerDeliveryIndicator } from '../item/CommunityDeliveryIndicator';
 import { useCommunityReaction } from '../../../../hooks/community/reactions/useCommunityReaction';
 
 export const CommunityMessageInfo = ({
@@ -81,11 +81,6 @@ export const CommunityMessageInfo = ({
                   </div>
                   {isAuthor ? (
                     <div className="flex flex-row justify-end gap-2 sm:contents">
-                      <FailedDeliveryDetails
-                        msg={msg}
-                        recipient={recipient}
-                        className="sm:ml-auto"
-                      />
                       <InnerDeliveryIndicator state={messageContent.deliveryStatus} />
                     </div>
                   ) : null}

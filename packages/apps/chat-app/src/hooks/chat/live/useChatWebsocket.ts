@@ -201,12 +201,14 @@ export const useChatSocketHandler = () => {
       ...m,
       fileMetadata: {
         ...m.fileMetadata,
-        updated:
-          Object.values(m.serverMetadata?.transferHistory?.recipients || []).reduce((acc, cur) => {
-            return Math.max(acc, cur.lastUpdated || 0);
-          }, 0) ||
-          m.fileMetadata.updated ||
-          0,
+        // updated:
+        //   Object.values(m.serverMetadata?.transferHistory?.recipients || []).reduce((acc, cur) => {
+        //     return Math.max(acc, cur.lastUpdated || 0);
+        //   }, 0) ||
+        //   m.fileMetadata.updated ||
+        //   0,
+        // TODO: Find a way to use the most up to date transfer history
+        updated: m.fileMetadata.updated || 0,
       },
     }));
 

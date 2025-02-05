@@ -23,14 +23,15 @@ import {
   MediaFile,
   NewMediaFile,
   PriorityOptions,
-  TransferStatus,
-  FailedTransferStatuses,
-  RecipientTransferHistory,
-  DEFAULT_PAYLOAD_KEY,
   patchFile,
   UpdateInstructionSet,
   GenerateKeyHeader,
   decryptKeyHeader,
+  DEFAULT_PAYLOAD_KEY,
+  RecipientTransferHistory,
+  RecipientTransferSummary,
+  TransferStatus,
+  FailedTransferStatuses,
   MAX_HEADER_CONTENT_BYTES,
 } from '@homebase-id/js-lib/core';
 import {
@@ -80,7 +81,6 @@ export interface MailConversation {
 
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: MailDeliveryStatus;
-  deliveryDetails?: Record<string, MailDeliveryStatus>;
 }
 
 export const MailDrive: TargetDrive = {
@@ -241,24 +241,11 @@ export const uploadMail = async (
 
   if (distribute) {
     if (
-      recipients.some(
-        (recipient) =>
-          (uploadResult as UploadResult).recipientStatus?.[recipient].toLowerCase() ===
-          TransferUploadStatus.EnqueuedFailed
+      Object.values((uploadResult as UploadResult).recipientStatus).some(
+        (recipienStatus) => recipienStatus.toLowerCase() === TransferUploadStatus.EnqueuedFailed
       )
     ) {
-      conversation.fileId = (uploadResult as UploadResult).file.fileId;
-      conversation.fileMetadata.versionTag = uploadResult.newVersionTag;
-
       conversation.fileMetadata.appData.content.deliveryStatus = MailDeliveryStatus.Failed;
-      conversation.fileMetadata.appData.content.deliveryDetails = {};
-      for (const recipient of recipients) {
-        conversation.fileMetadata.appData.content.deliveryDetails[recipient] =
-          (uploadResult as UploadResult).recipientStatus?.[recipient].toLowerCase() ===
-          TransferUploadStatus.DeliveredToInbox
-            ? MailDeliveryStatus.Delivered
-            : MailDeliveryStatus.Failed;
-      }
 
       await updateMail(
         dotYouClient,
@@ -437,13 +424,14 @@ export const dsrToMailConversation = async (
     if (!mailContent) return null;
 
     if (
-      mailContent.deliveryStatus === MailDeliveryStatus.Sent &&
-      dsr.serverMetadata?.transferHistory?.recipients
+      (mailContent.deliveryStatus === MailDeliveryStatus.Sent ||
+        mailContent.deliveryStatus === MailDeliveryStatus.Failed) &&
+      dsr.serverMetadata?.transferHistory?.summary
     ) {
-      mailContent.deliveryDetails = buildDeliveryDetails(
-        dsr.serverMetadata.transferHistory.recipients
+      mailContent.deliveryStatus = buildDeliveryStatus(
+        dsr.serverMetadata.originalRecipientCount,
+        dsr.serverMetadata.transferHistory.summary
       );
-      mailContent.deliveryStatus = buildDeliveryStatus(mailContent.deliveryDetails);
     }
 
     const conversation: HomebaseFile<MailConversation> = {
@@ -470,46 +458,34 @@ export const dsrToMailConversation = async (
   }
 };
 
-const buildDeliveryDetails = (recipientTransferHistory: {
-  [key: string]: RecipientTransferHistory;
-}): Record<string, MailDeliveryStatus> => {
-  const deliveryDetails: Record<string, MailDeliveryStatus> = {};
+export const transferHistoryToMailDeliveryStatus = (
+  transferHistory: RecipientTransferHistory | undefined
+): MailDeliveryStatus => {
+  if (!transferHistory) return MailDeliveryStatus.Failed;
 
-  for (const recipient of Object.keys(recipientTransferHistory)) {
-    if (recipientTransferHistory[recipient].latestSuccessfullyDeliveredVersionTag) {
-      // if (recipientTransferHistory[recipient].isReadByRecipient) {
-      //   deliveryDetails[recipient] = MailDeliveryStatus.Read;
-      // } else {
-      deliveryDetails[recipient] = MailDeliveryStatus.Delivered;
-      // }
-    } else {
-      const latest = recipientTransferHistory[recipient].latestTransferStatus;
-      const transferStatus =
-        latest && typeof latest === 'string'
-          ? (latest?.toLocaleLowerCase() as TransferStatus)
-          : undefined;
-      if (transferStatus && FailedTransferStatuses.includes(transferStatus)) {
-        deliveryDetails[recipient] = MailDeliveryStatus.Failed;
-      } else {
-        deliveryDetails[recipient] = MailDeliveryStatus.Sent;
-      }
-    }
+  if (transferHistory.latestSuccessfullyDeliveredVersionTag) {
+    return MailDeliveryStatus.Delivered;
   }
 
-  return deliveryDetails;
+  const latest = transferHistory.latestTransferStatus;
+  const transferStatus =
+    latest && typeof latest === 'string'
+      ? (latest?.toLocaleLowerCase() as TransferStatus)
+      : undefined;
+  if (transferStatus && FailedTransferStatuses.includes(transferStatus)) {
+    return MailDeliveryStatus.Failed;
+  }
+  return MailDeliveryStatus.Sent;
 };
 
 const buildDeliveryStatus = (
-  deliveryDetails: Record<string, MailDeliveryStatus>
+  recipientCount: number | undefined,
+  transferSummary: RecipientTransferSummary
 ): MailDeliveryStatus => {
-  const values = Object.values(deliveryDetails);
-  // If any failed, the message is failed
-  if (values.includes(MailDeliveryStatus.Failed)) return MailDeliveryStatus.Failed;
-  // If all are delivered, the message is delivered
-  if (values.every((val) => val === MailDeliveryStatus.Delivered))
-    return MailDeliveryStatus.Delivered;
+  if (transferSummary.totalFailed > 0) return MailDeliveryStatus.Failed;
 
-  // If it exists, it's sent
+  if (transferSummary.totalDelivered >= (recipientCount || 0)) return MailDeliveryStatus.Delivered;
+
   return MailDeliveryStatus.Sent;
 };
 

@@ -61,7 +61,25 @@ export const FailedTransferStatuses = [
   TransferStatus.SendingServerTooManyAttempts,
 ];
 
+export interface RecipientTransferSummary {
+  totalInOutbox: number;
+  totalFailed: number;
+  totalDelivered: number;
+  totalReadByRecipient: number;
+}
+
+export interface ServerMetaData {
+  doNotIndex: boolean;
+  allowDistribution: boolean;
+  accessControlList: AccessControlList;
+  originalRecipientCount?: number;
+  transferHistory?: {
+    summary: RecipientTransferSummary;
+  };
+}
+
 export interface RecipientTransferHistory {
+  recipient: string;
   lastUpdated: number;
   latestTransferStatus: TransferStatus;
   isInOutbox: string;
@@ -69,12 +87,15 @@ export interface RecipientTransferHistory {
   isReadByRecipient: boolean;
 }
 
-export interface ServerMetaData {
-  doNotIndex: boolean;
-  allowDistribution: boolean;
-  accessControlList: AccessControlList;
-  transferHistory?: {
-    recipients: { [key: string]: RecipientTransferHistory };
+export interface TransferHistory {
+  originalRecipientCount: number;
+  history: {
+    request: {
+      pageNumber: number;
+      pageSize: number;
+    };
+    totalPages: number;
+    results: RecipientTransferHistory[];
   };
 }
 

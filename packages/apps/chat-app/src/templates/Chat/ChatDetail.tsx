@@ -15,12 +15,7 @@ import {
   useIsConnected,
 } from '@homebase-id/common-app';
 import { ChevronDown, ChevronLeft, Persons } from '@homebase-id/common-app/icons';
-import {
-  ApiType,
-  DotYouClient,
-  FailedTransferStatuses,
-  HomebaseFile,
-} from '@homebase-id/js-lib/core';
+import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   ConversationMetadata,
   ConversationWithYourselfId,
@@ -77,17 +72,9 @@ export const ChatDetail = ({
       (recipient) => recipient !== loggedOnIdentity
     );
 
-    const anyRecipientMissingConversation = filteredRecipients.some((recipient) => {
-      if (!conversation.serverMetadata?.transferHistory?.recipients[recipient]) {
-        console.log('missing?', conversation);
-      }
-
-      const latestTransferStatus =
-        conversation.serverMetadata?.transferHistory?.recipients[recipient]?.latestTransferStatus;
-
-      if (!latestTransferStatus) return true;
-      return FailedTransferStatuses.includes(latestTransferStatus);
-    });
+    const anyRecipientMissingConversation =
+      conversation.serverMetadata?.originalRecipientCount !==
+      conversation.serverMetadata?.transferHistory?.summary.totalDelivered;
     if (anyRecipientMissingConversation) {
       console.log('invite recipient');
       inviteRecipient({ conversation });
