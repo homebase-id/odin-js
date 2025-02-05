@@ -57,7 +57,10 @@ export const CommunityNav = memo(
       communityId: communityKey,
     }).single;
 
-    const members = useMemo(() => community?.fileMetadata.appData.content?.members, [community]);
+    const members = useMemo(
+      () => community?.fileMetadata.appData.content?.members.filter(Boolean),
+      [community]
+    );
     const isRootPage = !!useMatch({ path: `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}` });
 
     const { data: communityChannels } = useCommunityChannelsWithRecentMessages({
@@ -195,11 +198,13 @@ export const CommunityNav = memo(
               <h2 className="px-1 font-semibold">{t('Direct messages')}</h2>
               <ErrorBoundary>
                 {members?.map((recipient) => (
-                  <DirectMessageItem
-                    recipient={recipient}
-                    key={recipient}
-                    setUnreadCount={setUnreadCountCallback}
-                  />
+                  <ErrorBoundary key={recipient}>
+                    <DirectMessageItem
+                      recipient={recipient}
+                      key={recipient}
+                      setUnreadCount={setUnreadCountCallback}
+                    />
+                  </ErrorBoundary>
                 ))}
               </ErrorBoundary>
             </div>
@@ -447,6 +452,8 @@ const DirectMessageItem = memo(
     recipient: string;
     setUnreadCount: (identifier: string, count: number) => void;
   }) => {
+    if (!recipient) return null;
+
     const { odinKey, communityKey } = useParams();
     const dotYouClient = useDotYouClientContext();
     const identity = dotYouClient.getHostIdentity();
@@ -498,17 +505,22 @@ const DirectMessageItem = memo(
             <ConnectionName odinId={recipient} />
           </p>
           <span className="ml-1"></span>
-          {isYou ? (
-            <span className="text-sm leading-tight text-slate-400">{t('you')}</span>
-          ) : (
-            <ProfileStatus odinId={recipient} className="ml-1" />
-          )}
+          <ErrorBoundary>
+            {isYou ? (
+              <span className="text-sm leading-tight text-slate-400">{t('you')}</span>
+            ) : (
+              <ProfileStatus odinId={recipient} className="ml-1" />
+            )}
+          </ErrorBoundary>
+
           {unreadCount ? (
             <span className="ml-auto flex h-6 w-6 items-center justify-center rounded-full bg-primary text-sm text-primary-contrast">
               {unreadCount}
             </span>
           ) : isYou ? (
-            <MyProfileStatus className="ml-1" />
+            <ErrorBoundary>
+              <MyProfileStatus className="ml-1" />
+            </ErrorBoundary>
           ) : null}
         </span>
       </Link>

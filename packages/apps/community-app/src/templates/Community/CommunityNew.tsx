@@ -124,9 +124,7 @@ export const NewCommunity = () => {
               {circles?.map((circle) => (
                 <CircleOption
                   circle={circle}
-                  onSelect={(circle, members) => {
-                    setSelectedCircle({ circle, members });
-                  }}
+                  onSelect={(circle, members) => setSelectedCircle({ circle, members })}
                   isActive={stringGuidsEqual(selectedCircle?.circle.id, circle.id)}
                   key={circle.id}
                 />
@@ -135,7 +133,11 @@ export const NewCommunity = () => {
           </div>
 
           <div className="mt-5 flex flex-col justify-between gap-2 sm:flex-row-reverse">
-            <ActionButton icon={Arrow} state={createStatus}>
+            <ActionButton
+              icon={Arrow}
+              state={createStatus}
+              disabled={!selectedCircle || !groupTitle}
+            >
               {t('Create')}
             </ActionButton>
 
