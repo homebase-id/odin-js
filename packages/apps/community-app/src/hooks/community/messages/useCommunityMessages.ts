@@ -306,8 +306,6 @@ export const insertNewMessage = (
   newMessage: HomebaseFile<CommunityMessage> | DeletedHomebaseFile,
   communityId: string
 ) => {
-  console.log('inserting new message', newMessage);
-
   const extistingMessages = updateCacheCommunityMessages(
     queryClient,
     communityId,
