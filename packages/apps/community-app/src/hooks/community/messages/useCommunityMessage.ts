@@ -17,6 +17,7 @@ import {
 } from '@homebase-id/js-lib/core';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import {
+  COMMUNITY_MESSAGE_FILE_TYPE,
   CommunityDeliveryStatus,
   CommunityMessage,
   getCommunityMessage,
@@ -114,7 +115,7 @@ export const useCommunityMessage = (props?: {
             channelId: channel.fileMetadata.appData.uniqueId as string,
             threadId: thread?.fileMetadata.appData.uniqueId as string,
           },
-
+          fileType: COMMUNITY_MESSAGE_FILE_TYPE,
           userDate: userDate || new Date().getTime(),
         },
       },
@@ -210,6 +211,7 @@ export const useCommunityMessage = (props?: {
                 channelId: channel.fileMetadata.appData.uniqueId as string,
               },
               userDate,
+              fileType: COMMUNITY_MESSAGE_FILE_TYPE,
             },
             senderOdinId: identity,
             originalAuthor: identity,
@@ -265,6 +267,7 @@ export const useCommunityMessage = (props?: {
                       ...msg?.fileMetadata,
                       ...newMessage.fileMetadata,
                       appData: {
+                        fileType: COMMUNITY_MESSAGE_FILE_TYPE,
                         ...msg?.fileMetadata.appData,
                         ...newMessage.fileMetadata.appData,
                         previewThumbnail: msg?.fileMetadata.appData.previewThumbnail,
