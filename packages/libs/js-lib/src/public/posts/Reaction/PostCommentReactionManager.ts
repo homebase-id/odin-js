@@ -187,13 +187,6 @@ export const saveComment = async (
         )
       : null;
 
-    // await uploadHeaderOverPeer(
-    //   dotYouClient,
-    //   remoteHeader?.sharedSecretEncryptedKeyHeader,
-    //   instructionSet,
-    //   metadata
-    // )
-
     let result;
     if (comment.fileMetadata.globalTransitId) {
       const instructionSet: UpdateInstructionSet = {
