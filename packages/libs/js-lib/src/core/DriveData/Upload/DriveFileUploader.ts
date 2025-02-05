@@ -16,7 +16,6 @@ import {
   UploadResult,
   UpdateResult,
   UpdateInstructionSet,
-  UpdateHeaderInstructionSet,
 } from './DriveUploadTypes';
 import { decryptKeyHeader, encryptWithKeyheader } from '../SecurityHelpers';
 import {
@@ -183,60 +182,6 @@ export const patchFile = async (
 
   if (!updateResult) return;
   return updateResult;
-};
-
-export const uploadHeader = async (
-  dotYouClient: DotYouClient,
-  keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
-  instructions: UpdateHeaderInstructionSet,
-  metadata: UploadFileMetadata,
-  onVersionConflict?: () => Promise<void | UploadResult> | void,
-  axiosConfig?: AxiosRequestConfig
-): Promise<UploadResult | void> => {
-  isDebug &&
-    console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/upload`).pathname, {
-      instructions,
-      metadata,
-    });
-
-  const decryptedKeyHeader = metadata.isEncrypted
-    ? keyHeader && 'encryptionVersion' in keyHeader
-      ? await decryptKeyHeader(dotYouClient, keyHeader)
-      : keyHeader
-    : undefined;
-
-  if (!decryptedKeyHeader && metadata.isEncrypted)
-    throw new Error('[odin-js] Missing existing keyHeader for appending encrypted metadata.');
-
-  if (decryptedKeyHeader) {
-    // Generate a new IV for the keyHeader
-    decryptedKeyHeader.iv = getRandom16ByteArray();
-  }
-
-  const { systemFileType, ...strippedInstructions } = instructions;
-  if (!strippedInstructions.storageOptions) throw new Error('storageOptions is required');
-
-  strippedInstructions.storageOptions.storageIntent = 'metadataOnly';
-  strippedInstructions.transferIv = instructions.transferIv || getRandom16ByteArray();
-
-  const encryptedDescriptor = await buildDescriptor(
-    dotYouClient,
-    decryptedKeyHeader,
-    strippedInstructions,
-    metadata
-  );
-
-  const data = await buildFormData(
-    strippedInstructions,
-    encryptedDescriptor,
-    undefined,
-    undefined,
-    undefined,
-    undefined
-  );
-
-  // Upload
-  return await pureUpload(dotYouClient, data, systemFileType, onVersionConflict, axiosConfig);
 };
 
 export const reUploadFile = async (

@@ -21,21 +21,6 @@ export interface BaseUploadInstructionSet {
 
 export type UploadInstructionSet = BaseUploadInstructionSet;
 
-export interface UpdateHeaderInstructionSet extends BaseUploadInstructionSet {
-  storageIntent: 'header';
-}
-
-export const isUpdateHeaderInstructionSet = (
-  instructionSet: unknown
-): instructionSet is UpdateHeaderInstructionSet => {
-  return (
-    !!instructionSet &&
-    typeof instructionSet === 'object' &&
-    'storageIntent' in instructionSet &&
-    instructionSet.storageIntent === 'header'
-  );
-};
-
 export interface UpdatePeerInstructionSet extends Partial<BaseUploadInstructionSet> {
   file: GlobalTransitIdFileIdentifier;
   versionTag: string | undefined;

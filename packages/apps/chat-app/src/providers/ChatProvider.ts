@@ -21,13 +21,10 @@ import {
   getFileHeaderByUniqueId,
   queryBatch,
   uploadFile,
-  uploadHeader,
   NewMediaFile,
-  UploadResult,
   PriorityOptions,
   TransferUploadStatus,
   deleteFile,
-  UpdateHeaderInstructionSet,
   RichText,
   DEFAULT_PAYLOAD_KEY,
   RecipientTransferSummary,
@@ -35,6 +32,9 @@ import {
   FailedTransferStatuses,
   TransferStatus,
   MAX_HEADER_CONTENT_BYTES,
+  patchFile,
+  UpdateLocalInstructionSet,
+  UpdateResult,
 } from '@homebase-id/js-lib/core';
 import {
   ChatDrive,
@@ -459,14 +459,16 @@ export const updateChatMessage = async (
   message: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>,
   recipients: string[],
   keyHeader?: KeyHeader
-): Promise<UploadResult | void> => {
+): Promise<UpdateResult | void> => {
   const messageContent = message.fileMetadata.appData.content;
   const distribute = recipients?.length > 0;
 
-  const uploadInstructions: UpdateHeaderInstructionSet = {
-    storageOptions: {
-      drive: ChatDrive,
-      overwriteFileId: message.fileId,
+  console.log(recipients);
+  if (!message.fileId) throw new Error('Message does not have a fileId');
+  const uploadInstructions: UpdateLocalInstructionSet = {
+    file: {
+      fileId: message.fileId,
+      targetDrive: ChatDrive,
     },
     transitOptions: distribute
       ? {
@@ -476,10 +478,33 @@ export const updateChatMessage = async (
           sendContents: SendContents.All,
         }
       : undefined,
-    storageIntent: 'header',
+    recipients: distribute ? [...recipients] : undefined,
+    versionTag: message.fileMetadata.versionTag,
+    locale: 'local',
   };
 
-  const payloadJson: string = jsonStringify64({ ...messageContent });
+  const jsonContent: string = jsonStringify64({ ...messageContent });
+  const payloadBytes = stringToUint8Array(jsonStringify64({ message: messageContent.message }));
+
+  // Set max of 3kb for content so enough room is left for metadata
+  const shouldEmbedContent = uint8ArrayToBase64(payloadBytes).length < MAX_HEADER_CONTENT_BYTES;
+
+  const content = shouldEmbedContent
+    ? jsonContent
+    : jsonStringify64({
+        message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
+        replyId: messageContent.replyId,
+        deliveryStatus: messageContent.deliveryStatus,
+      }); // We only embed the content if it's less than 3kb
+
+  const payloads: PayloadFile[] = [];
+  if (!shouldEmbedContent) {
+    payloads.push({
+      key: DEFAULT_PAYLOAD_KEY,
+      payload: new Blob([payloadBytes], { type: 'application/json' }),
+    });
+  }
+
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: distribute,
@@ -489,7 +514,7 @@ export const updateChatMessage = async (
       archivalStatus: (message.fileMetadata.appData as AppFileMetaData<ChatMessage>).archivalStatus,
       previewThumbnail: message.fileMetadata.appData.previewThumbnail,
       fileType: CHAT_MESSAGE_FILE_TYPE,
-      content: payloadJson,
+      content: content,
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList || {
@@ -497,11 +522,14 @@ export const updateChatMessage = async (
     },
   };
 
-  return await uploadHeader(
+  return await patchFile(
     dotYouClient,
     keyHeader || (message as HomebaseFile<ChatMessage>).sharedSecretEncryptedKeyHeader,
     uploadInstructions,
     uploadMetadata,
+    payloads,
+    undefined,
+    undefined,
     async () => {
       const existingChatMessage = await getChatMessage(
         dotYouClient,
