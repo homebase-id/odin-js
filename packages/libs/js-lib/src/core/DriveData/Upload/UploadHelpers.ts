@@ -35,7 +35,6 @@ import {
 } from '../File/DriveFileTypes';
 import { AxiosRequestConfig } from 'axios';
 import { getSecuredBlob } from '../../../helpers/BlobHelpers';
-import { PeerAppendInstructionSet } from '../../../peer/peer';
 
 const EMPTY_KEY_HEADER: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(0)),
@@ -174,7 +173,6 @@ export const buildFormData = async (
     | UploadInstructionSet
     | TransitInstructionSet
     | AppendInstructionSet
-    | PeerAppendInstructionSet
     | UpdateInstructionSet,
   encryptedDescriptor: Uint8Array | undefined,
   payloads: PayloadFile[] | undefined,

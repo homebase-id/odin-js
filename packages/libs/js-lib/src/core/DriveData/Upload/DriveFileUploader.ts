@@ -286,7 +286,7 @@ const patchFileLocal = async (
   );
 };
 
-export const uploadHeader = async (
+const uploadHeader = async (
   dotYouClient: DotYouClient,
   keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
   instructions: UpdateHeaderInstructionSet,
@@ -340,7 +340,7 @@ export const uploadHeader = async (
   return await pureUpload(dotYouClient, data, systemFileType, onVersionConflict, axiosConfig);
 };
 
-export const appendDataToFile = async (
+const appendDataToFile = async (
   dotYouClient: DotYouClient,
   keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
   instructions: AppendInstructionSet,

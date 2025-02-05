@@ -12,14 +12,14 @@ import {
   getFileHeaderByUniqueId,
   queryBatch,
   uploadFile,
-  uploadHeader,
   EncryptedKeyHeader,
   ScheduleOptions,
   SendContents,
-  UploadResult,
   PriorityOptions,
-  UpdateHeaderInstructionSet,
   getLocalContentFromHeader,
+  UpdateLocalInstructionSet,
+  patchFile,
+  UpdateResult,
 } from '@homebase-id/js-lib/core';
 import { jsonStringify64 } from '@homebase-id/js-lib/helpers';
 
@@ -272,24 +272,31 @@ export const updateConversation = async (
   conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>,
   distribute = false,
   ignoreConflict = false
-): Promise<UploadResult | void> => {
+): Promise<UpdateResult | void> => {
   const identity = dotYouClient.getHostIdentity();
-  const uploadInstructions: UpdateHeaderInstructionSet = {
-    storageOptions: {
-      drive: ChatDrive,
-      overwriteFileId: conversation.fileId,
+
+  if (!conversation.fileId) throw new Error('Message does not have a fileId');
+  const recipients = conversation.fileMetadata.appData.content.recipients.filter(
+    (recipient) => recipient !== identity
+  );
+
+  const uploadInstructions: UpdateLocalInstructionSet = {
+    file: {
+      fileId: conversation.fileId,
+      targetDrive: ChatDrive,
     },
     transitOptions: distribute
       ? {
-          recipients: conversation.fileMetadata.appData.content.recipients.filter(
-            (recipient) => recipient !== identity
-          ),
+          recipients,
           schedule: ScheduleOptions.SendLater,
           priority: PriorityOptions.Medium,
           sendContents: SendContents.All,
         }
       : undefined,
-    storageIntent: 'header',
+    recipients: distribute ? recipients : undefined,
+
+    versionTag: conversation.fileMetadata.versionTag,
+    locale: 'local',
   };
 
   const conversationContent = conversation.fileMetadata.appData.content;
@@ -310,11 +317,14 @@ export const updateConversation = async (
     },
   };
 
-  return await uploadHeader(
+  return await patchFile(
     dotYouClient,
     conversation.sharedSecretEncryptedKeyHeader,
     uploadInstructions,
     uploadMetadata,
+    undefined,
+    undefined,
+    undefined,
     !ignoreConflict
       ? async () => {
           const existingConversation = await getConversation(
