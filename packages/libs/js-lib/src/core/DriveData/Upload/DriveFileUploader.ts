@@ -286,7 +286,7 @@ const patchFileLocal = async (
   );
 };
 
-export const uploadHeader = async (
+const uploadHeader = async (
   dotYouClient: DotYouClient,
   keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
   instructions: UpdateHeaderInstructionSet,
