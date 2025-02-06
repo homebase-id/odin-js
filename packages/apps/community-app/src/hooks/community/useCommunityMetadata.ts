@@ -1,7 +1,14 @@
-import { useQueryClient, useQuery, useMutation, QueryClient } from '@tanstack/react-query';
+import {
+  useQueryClient,
+  useQuery,
+  useMutation,
+  QueryClient,
+  UndefinedInitialDataOptions,
+} from '@tanstack/react-query';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import {
   DeletedHomebaseFile,
+  DotYouClient,
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
@@ -22,37 +29,6 @@ export const useCommunityMetadata = (props?: {
   const { communityId, odinId } = props || {};
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
-
-  const getMetadata = async (odinId: string, communityId: string) => {
-    const serverFile = await getCommunityMetadata(dotYouClient, communityId);
-    if (!serverFile) {
-      const newMetadata: NewHomebaseFile<CommunityMetadata> = {
-        fileMetadata: {
-          appData: {
-            uniqueId: communityId,
-            content: {
-              odinId,
-              communityId,
-              pinnedChannels: [],
-              savedMessages: [],
-              lastReadTime: 0,
-              threadsLastReadTime: 0,
-              channelLastReadTime: {},
-            },
-          },
-        },
-        serverMetadata: {
-          accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
-        },
-      };
-      setTimeout(() => {
-        invalidateCommunities(queryClient);
-      }, 1000);
-
-      return newMetadata;
-    }
-    return serverFile;
-  };
 
   const saveMetadata = async ({
     metadata,
@@ -92,12 +68,9 @@ export const useCommunityMetadata = (props?: {
   };
 
   return {
-    single: useQuery({
-      queryKey: ['community-metadata', formatGuidId(communityId)],
-      queryFn: () => getMetadata(odinId as string, formatGuidId(communityId) as string),
-      enabled: !!odinId && !!communityId,
-      staleTime: 1000 * 60 * 5, // 5 minutes
-    }),
+    single: useQuery(
+      getCommunityMetadataQueryOptions(dotYouClient, queryClient, odinId, communityId)
+    ),
     update: useMutation({
       mutationFn: saveMetadata,
 
@@ -141,6 +114,58 @@ export const useCommunityMetadata = (props?: {
     }),
   };
 };
+
+const getMetadata = async (
+  dotYouClient: DotYouClient,
+  queryClient: QueryClient,
+  odinId: string,
+  communityId: string
+) => {
+  const serverFile = await getCommunityMetadata(dotYouClient, communityId);
+  if (!serverFile) {
+    const newMetadata: NewHomebaseFile<CommunityMetadata> = {
+      fileMetadata: {
+        appData: {
+          uniqueId: communityId,
+          content: {
+            odinId,
+            communityId,
+            pinnedChannels: [],
+            savedMessages: [],
+            lastReadTime: 0,
+            threadsLastReadTime: 0,
+            channelLastReadTime: {},
+          },
+        },
+      },
+      serverMetadata: {
+        accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+      },
+    };
+    setTimeout(() => {
+      invalidateCommunities(queryClient);
+    }, 1000);
+
+    return newMetadata;
+  }
+
+  return serverFile;
+};
+
+export const getCommunityMetadataQueryOptions: (
+  dotYouClient: DotYouClient,
+  queryClient: QueryClient,
+  odinId: string | undefined,
+  communityId: string | undefined
+) => UndefinedInitialDataOptions<
+  HomebaseFile<CommunityMetadata> | NewHomebaseFile<CommunityMetadata> | null
+> = (dotYouClient, queryClient, odinId, communityId) => ({
+  queryKey: ['community-metadata', formatGuidId(communityId)],
+  queryFn: () =>
+    getMetadata(dotYouClient, queryClient, odinId as string, formatGuidId(communityId) as string),
+  enabled: !!odinId && !!communityId,
+  staleTime: 1000 * 60 * 5, // 5 minutes
+});
 
 const cleanupDrafts = (drafts: Record<string, Draft | undefined>) => {
   const newDrafts = { ...drafts };
@@ -246,4 +271,26 @@ export const insertNewcommunityMetadata = (
       newMetadata
     );
   }
+};
+
+export const useCommunityMetadataSavedOnly = (props?: {
+  odinId: string | undefined;
+  communityId: string | undefined;
+}) => {
+  const { communityId, odinId } = props || {};
+  const dotYouClient = useDotYouClientContext();
+  const queryClient = useQueryClient();
+
+  return useQuery({
+    queryKey: ['community-metadata-saved', odinId, formatGuidId(communityId)],
+    enabled: !!odinId && !!communityId,
+    queryFn: async () => {
+      const communityMetadata = await queryClient.fetchQuery(
+        getCommunityMetadataQueryOptions(dotYouClient, queryClient, odinId, communityId)
+      );
+      return communityMetadata?.fileMetadata.appData.content.savedMessages || [];
+    },
+    refetchOnMount: false,
+    refetchOnWindowFocus: true,
+  });
 };

@@ -32,7 +32,10 @@ import {
   ReplyArrow,
   Trash,
 } from '@homebase-id/common-app/icons';
-import { useCommunityLater } from '../../../hooks/community/useCommunityLater';
+import {
+  useCommunityLater,
+  useManageCommunityLater,
+} from '../../../hooks/community/useCommunityLater';
 import { isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { createPortal } from 'react-dom';
 import { useCommunityPin } from '../../../hooks/community/useCommunityPin';
@@ -175,10 +178,12 @@ const CommunityContextActions = ({
   if (!communityActions) return null;
   const [showMessageInfo, setShowMessageInfo] = useState(false);
 
+  const { isSaved } = useCommunityLater({
+    messageId: msg.fileMetadata.appData.uniqueId,
+  });
   const {
-    isSaved,
     toggleSave: { mutate: toggleSave, error: toggleSaveError },
-  } = useCommunityLater({
+  } = useManageCommunityLater({
     messageId: msg.fileMetadata.appData.uniqueId,
     systemFileType: msg.fileSystemType,
   });

@@ -70,7 +70,6 @@ export const CommunityChannelDetail = () => {
 
   if (!community || !channelDsr) return <NotFound />;
 
-  console.log('render communitychanneldetail');
   return (
     <ErrorBoundary>
       <MarkCommunityAsRead odinId={odinKey} communityId={communityId} channelId={channelId} />

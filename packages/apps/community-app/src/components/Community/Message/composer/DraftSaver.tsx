@@ -78,7 +78,7 @@ export const DraftSaver = memo(
           },
         };
 
-        if (message === undefined || message.length === 0) {
+        if (emptiedDraft === undefined || message === undefined || message.length === 0) {
           insertNewcommunityMetadata(queryClient, newMeta as HomebaseFile<CommunityMetadata>);
           updateMetadata({ metadata: newMeta });
           return;

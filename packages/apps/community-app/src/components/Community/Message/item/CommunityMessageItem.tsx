@@ -111,7 +111,6 @@ export const CommunityMessageItem = memo(
 
     const { isSaved } = useCommunityLater({
       messageId: msg.fileMetadata.appData.uniqueId,
-      systemFileType: msg.fileSystemType,
     });
     const { isPinned } = useCommunityPin({ msg, community });
     const { isCollaborative } = useCommunityCollaborativeMsg({ msg, community });
