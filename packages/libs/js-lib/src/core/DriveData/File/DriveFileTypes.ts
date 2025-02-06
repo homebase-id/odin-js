@@ -41,6 +41,7 @@ export enum SecurityGroupType {
 }
 
 export enum TransferStatus {
+  None = 'none',
   Delivered = 'delivered',
   RecipientIdentityReturnedAccessDenied = 'recipientidentityreturnedaccessdenied',
   SourceFileDoesNotAllowDistribution = 'sourcefiledoesnotallowdistribution',

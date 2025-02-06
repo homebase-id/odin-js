@@ -1,6 +1,6 @@
 import { t, useDotYouClientContext } from '@homebase-id/common-app';
 import { Clock, SubtleCheck, Times } from '@homebase-id/common-app/icons';
-import { HomebaseFile, RecipientTransferHistory } from '@homebase-id/js-lib/core';
+import { HomebaseFile, RecipientTransferHistory, TransferStatus } from '@homebase-id/js-lib/core';
 import { ChatMessage, ChatDeliveryStatus } from '../../../providers/ChatProvider';
 
 export const ChatDeliveryIndicator = ({
@@ -26,9 +26,9 @@ export const FailedDeliveryDetails = ({
   transferHistory: RecipientTransferHistory | undefined;
   className?: string;
 }) => {
-  if (!transferHistory) return null;
+  if (!transferHistory?.latestTransferStatus) return null;
+  if (transferHistory.latestTransferStatus === TransferStatus.None) return null;
   if (transferHistory.latestSuccessfullyDeliveredVersionTag) return null;
-
   return (
     <p className={`text-red-500 ${className || ''}`}>{t(transferHistory.latestTransferStatus)}</p>
   );
