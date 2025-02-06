@@ -18,10 +18,9 @@ export const useCommunityLater = (props?: { messageId?: string }) => {
     odinId: odinKey,
     communityId: communityKey,
   });
-
   const isSaved = useMemo(
     () => savedMessages?.some((saved) => stringGuidsEqual(saved.messageId, messageId)),
-    [savedMessages]
+    [savedMessages, messageId]
   );
 
   return {
