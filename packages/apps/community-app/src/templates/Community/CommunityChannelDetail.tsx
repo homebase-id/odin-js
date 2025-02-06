@@ -14,7 +14,7 @@ import {
   usePortal,
 } from '@homebase-id/common-app';
 import { Arrow, ChatBubble, ChevronLeft, Pin } from '@homebase-id/common-app/icons';
-import { Link, NavLink, useMatch, useNavigate, useParams } from 'react-router-dom';
+import { Link, NavLink, useLocation, useMatch, useNavigate, useParams } from 'react-router-dom';
 import { memo, Suspense, useCallback, useMemo } from 'react';
 import { CommunityChannel } from '../../providers/CommunityProvider';
 import { useCommunityChannel } from '../../hooks/community/channels/useCommunityChannel';
@@ -39,8 +39,12 @@ export const CommunityChannelDetail = () => {
     channelId: channelId,
   }).fetch;
 
-  useMarkCommunityAsRead({ odinId: odinKey, communityId, channelId });
   const isPins = !!useMatch(`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelId}/pins`);
+
+  const location = useLocation();
+  const state = location.state as Record<string, unknown> | undefined;
+  const lastRead =
+    state?.lastRead && typeof state.lastRead === 'number' ? state.lastRead : undefined;
 
   if (!community && isFetched)
     return (
@@ -68,6 +72,7 @@ export const CommunityChannelDetail = () => {
 
   return (
     <ErrorBoundary>
+      <MarkCommunityAsRead odinId={odinKey} communityId={communityId} channelId={channelId} />
       <div className="h-full w-20 flex-grow bg-background">
         <div className="relative flex h-full flex-row">
           <div
@@ -75,7 +80,11 @@ export const CommunityChannelDetail = () => {
           >
             <CommunityChannelHeader community={community} channel={channelDsr} />
             {!isPins ? (
-              <CommunityChannelMessages community={community} channel={channelDsr} />
+              <CommunityChannelMessages
+                community={community}
+                channel={channelDsr}
+                lastRead={lastRead}
+              />
             ) : (
               <CommunityChannelPins community={community} channel={channelDsr} />
             )}
@@ -94,12 +103,30 @@ export const CommunityChannelDetail = () => {
   );
 };
 
+const MarkCommunityAsRead = memo(
+  ({
+    odinId,
+    communityId,
+    channelId,
+  }: {
+    odinId: string | undefined;
+    communityId: string | undefined;
+    channelId: string | undefined;
+  }) => {
+    useMarkCommunityAsRead({ odinId, communityId, channelId });
+
+    return null;
+  }
+);
+MarkCommunityAsRead.displayName = 'MarkCommunityAsRead';
+
 const CommunityChannelMessages = memo(
   (props: {
     channel: HomebaseFile<CommunityChannel>;
     community: HomebaseFile<CommunityDefinition>;
+    lastRead?: number;
   }) => {
-    const { channel, community } = props;
+    const { channel, community, lastRead } = props;
 
     const { odinKey, communityKey: communityId, channelKey: channelId } = useParams();
     const navigate = useNavigate();
@@ -127,6 +154,7 @@ const CommunityChannelMessages = memo(
             channel={channel}
             doOpenThread={doOpenThread}
             emptyPlaceholder={Empty}
+            highlightSince={lastRead}
           />
         </ErrorBoundary>
         <ErrorBoundary>

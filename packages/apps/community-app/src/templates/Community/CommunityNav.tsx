@@ -385,6 +385,12 @@ const ChannelItem = memo(
       <>
         <Link
           to={channelPath}
+          state={{
+            lastRead:
+              (channelId &&
+                metadata?.fileMetadata.appData.content?.channelLastReadTime[channelId]) ||
+              undefined,
+          }}
           className={`group relative flex flex-row items-center gap-1 rounded-md py-[0.25rem] pl-2 pr-1 ${linkBackground} ${isVisited ? 'text-purple-700' : ''} ${hasUnreadMessages && !isActive ? 'font-semibold' : ''}`}
         >
           <p

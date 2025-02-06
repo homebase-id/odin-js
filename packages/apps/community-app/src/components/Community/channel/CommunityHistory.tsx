@@ -29,6 +29,7 @@ export const CommunityHistory = memo(
     setIsEmptyChat?: (isEmpty: boolean) => void;
     alignTop?: boolean;
     maxAge?: number | undefined;
+    highlightSince?: number | undefined;
     maxShowOptions?: { count: number; targetLink: string };
     emptyPlaceholder?: ReactNode;
     setParticipants?: React.Dispatch<React.SetStateAction<string[] | null | undefined>>;
@@ -42,6 +43,7 @@ export const CommunityHistory = memo(
       alignTop,
       maxAge,
       maxShowOptions,
+      highlightSince,
       emptyPlaceholder,
       setParticipants,
     } = props;
@@ -309,6 +311,12 @@ export const CommunityHistory = memo(
                     className="flex-shrink-0"
                   >
                     <DateSeperator previousDate={previousDate} date={currentDate} />
+                    <ReadSeperator
+                      previousDate={previousDate}
+                      date={currentDate}
+                      readSince={highlightSince}
+                    />
+
                     <CommunityMessageItem
                       scrollRef={scrollRef}
                       key={msg.fileId || msg.fileMetadata.appData.uniqueId}
@@ -360,6 +368,31 @@ const DateSeperator = ({ previousDate, date }: { previousDate?: number; date?: n
     <div className="flex justify-center py-2">
       <div className="rounded-full bg-page-background px-3 py-2 text-sm font-medium text-foreground">
         {formatToDateAgoWithRelativeDetail(new Date(date))}
+      </div>
+    </div>
+  );
+};
+
+const ReadSeperator = ({
+  previousDate,
+  date,
+  readSince,
+}: {
+  previousDate?: number;
+  date?: number;
+  readSince?: number;
+}) => {
+  if (!date || !previousDate || !readSince) return null;
+
+  const unreadSeperator = previousDate <= readSince && date > readSince;
+
+  if (!unreadSeperator) return null;
+
+  return (
+    <div className="relative flex justify-center py-2">
+      <hr className="absolute left-3 right-3 top-[calc(50%-1px)] border-y border-primary/30" />
+      <div className="z-1 relative bg-background px-3 py-2 text-sm font-medium text-foreground">
+        {t('Unread Messages')}
       </div>
     </div>
   );

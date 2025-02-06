@@ -22,7 +22,6 @@ export const useMessageDraft = (props?: {
   );
 
   const [draft, setDraft] = useState<Draft | undefined>(undefined);
-
   const drafts = metadata?.fileMetadata.appData.content.drafts || {};
   useEffect(() => {
     if (!draftKey || !metadata || draft?.updatedAt === drafts[draftKey]?.updatedAt) return;

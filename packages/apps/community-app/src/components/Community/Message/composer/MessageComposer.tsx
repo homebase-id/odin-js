@@ -56,9 +56,6 @@ export const MessageComposer = memo(
 
     const [message, setMessage] = useState<RichText | undefined>(undefined);
     const [files, setFiles] = useState<NewMediaFile[]>();
-    const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(
-      getPlainTextFromRichText(message) || ''
-    );
 
     const draft = useMessageDraft(
       !message
@@ -72,6 +69,13 @@ export const MessageComposer = memo(
 
     const addError = useErrors().add;
     const { mutateAsync: sendMessage } = useCommunityMessage().send;
+
+    const plainMessage = useMemo(
+      () => getPlainTextFromRichText(message || draft?.message) || '',
+      [message, draft]
+    );
+
+    const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(plainMessage);
 
     const doSend = useCallback(async () => {
       const toSendMessage = message || draft?.message;
@@ -123,42 +127,7 @@ export const MessageComposer = memo(
       threadParticipants,
     ]);
 
-    const { data: contacts } = useAllContacts(true);
-    const mentionables: Mentionable[] = useMemo(() => {
-      const filteredContacts =
-        (contacts
-          ?.filter(
-            (contact) =>
-              contact.fileMetadata.appData.content.odinId &&
-              community?.fileMetadata.appData.content.members.includes(
-                contact.fileMetadata.appData.content.odinId
-              )
-          )
-          ?.map((contact) => {
-            const content = contact.fileMetadata.appData.content;
-            if (!content?.odinId) return;
-            const name =
-              content.name &&
-              (content.name.displayName ??
-                (content.name.givenName || content.name.surname
-                  ? `${content.name.givenName ?? ''} ${content.name.surname ?? ''}`
-                  : undefined));
-
-            return {
-              value: content.odinId,
-              label: `${content.odinId} ${name ? `- ${name}` : ''}`,
-            };
-          })
-          .filter(Boolean) as Mentionable[]) || [];
-
-      filteredContacts.push({ value: '@channel', label: 'channel' });
-      return filteredContacts;
-    }, [contacts]);
-
-    const plainMessage = useMemo(
-      () => getPlainTextFromRichText(message || draft?.message) || '',
-      [message, draft]
-    );
+    const mentionables = useMentionables({ community });
 
     const changeHandler = useCallback(
       (newVal: {
@@ -294,3 +263,41 @@ export const MessageComposer = memo(
 );
 
 MessageComposer.displayName = 'MessageComposer';
+
+const useMentionables = ({
+  community,
+}: {
+  community: HomebaseFile<CommunityDefinition> | undefined;
+}) => {
+  const { data: contacts } = useAllContacts(true);
+  return useMemo(() => {
+    const filteredContacts =
+      (contacts
+        ?.filter(
+          (contact) =>
+            contact.fileMetadata.appData.content.odinId &&
+            community?.fileMetadata.appData.content.members.includes(
+              contact.fileMetadata.appData.content.odinId
+            )
+        )
+        ?.map((contact) => {
+          const content = contact.fileMetadata.appData.content;
+          if (!content?.odinId) return;
+          const name =
+            content.name &&
+            (content.name.displayName ??
+              (content.name.givenName || content.name.surname
+                ? `${content.name.givenName ?? ''} ${content.name.surname ?? ''}`
+                : undefined));
+
+          return {
+            value: content.odinId,
+            label: `${content.odinId} ${name ? `- ${name}` : ''}`,
+          };
+        })
+        .filter(Boolean) as Mentionable[]) || [];
+
+    filteredContacts.push({ value: '@channel', label: 'channel' });
+    return filteredContacts;
+  }, [contacts]);
+};
