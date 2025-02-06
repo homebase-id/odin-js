@@ -39,13 +39,12 @@ export const CommunityChannelDetail = () => {
     channelId: channelId,
   }).fetch;
 
-  useMarkCommunityAsRead({ odinId: odinKey, communityId, channelId });
   const isPins = !!useMatch(`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityId}/${channelId}/pins`);
 
   const location = useLocation();
   const state = location.state as Record<string, unknown> | undefined;
   const lastRead =
-    (state?.lastRead && typeof state.lastRead === 'number' && state.lastRead) || undefined;
+    state?.lastRead && typeof state.lastRead === 'number' ? state.lastRead : undefined;
 
   if (!community && isFetched)
     return (
@@ -71,8 +70,10 @@ export const CommunityChannelDetail = () => {
 
   if (!community || !channelDsr) return <NotFound />;
 
+  console.log('render communitychanneldetail');
   return (
     <ErrorBoundary>
+      <MarkCommunityAsRead odinId={odinKey} communityId={communityId} channelId={channelId} />
       <div className="h-full w-20 flex-grow bg-background">
         <div className="relative flex h-full flex-row">
           <div
@@ -102,6 +103,23 @@ export const CommunityChannelDetail = () => {
     </ErrorBoundary>
   );
 };
+
+const MarkCommunityAsRead = memo(
+  ({
+    odinId,
+    communityId,
+    channelId,
+  }: {
+    odinId: string | undefined;
+    communityId: string | undefined;
+    channelId: string | undefined;
+  }) => {
+    useMarkCommunityAsRead({ odinId, communityId, channelId });
+
+    return null;
+  }
+);
+MarkCommunityAsRead.displayName = 'MarkCommunityAsRead';
 
 const CommunityChannelMessages = memo(
   (props: {
