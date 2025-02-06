@@ -80,9 +80,8 @@ export const CommunityMessageItem = memo(
     const [highlight, setHighlight] = useState(isDetail);
     useEffect(() => {
       if (!highlight) return;
-      setTimeout(() => {
-        setHighlight(false);
-      }, 5000);
+      const timeout = setTimeout(() => setHighlight(false), 5000);
+      return () => clearTimeout(timeout);
     }, [highlight]);
 
     const editMatch = useMatch(
