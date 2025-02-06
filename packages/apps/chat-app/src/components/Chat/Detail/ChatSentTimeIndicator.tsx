@@ -1,8 +1,9 @@
-import { t } from '@homebase-id/common-app';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import { formatToTimeAgoWithRelativeDetail } from '@homebase-id/common-app';
+import { useMemo, useState, useEffect } from 'react';
 
+const FIFTEEN_SECONDS = 15000;
 export const ChatSentTimeIndicator = ({
   msg,
   className,
@@ -16,10 +17,29 @@ export const ChatSentTimeIndicator = ({
     <p className={`select-none text-sm text-foreground/70 ${className || ''}`}>{children}</p>
   );
 
-  if (!msg.fileMetadata.created) return null;
+  const date = useMemo(
+    () => (msg.fileMetadata.created && new Date(msg.fileMetadata.created)) || undefined,
+    [msg.fileMetadata.created]
+  );
 
-  const date = new Date(msg.fileMetadata.created);
-  if (!date) return <Wrapper>{t('Unknown')}</Wrapper>;
+  const [forceRender, setForceRender] = useState<number>(0);
+  useEffect(() => {
+    if (!date) return;
+
+    const oneHourAgo = new Date();
+    oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+
+    if (date < oneHourAgo) return;
+
+    const timer = setTimeout(() => {
+      console.log('force render', msg);
+      setForceRender((prev) => prev + 1);
+    }, FIFTEEN_SECONDS);
+
+    return () => clearTimeout(timer);
+  }, [date, forceRender]);
+
+  if (!date) return null;
 
   return <Wrapper>{formatToTimeAgoWithRelativeDetail(date, keepDetail)}</Wrapper>;
 };
