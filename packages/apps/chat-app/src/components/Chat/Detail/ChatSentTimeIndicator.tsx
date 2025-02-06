@@ -30,11 +30,7 @@ export const ChatSentTimeIndicator = ({
     oneHourAgo.setHours(oneHourAgo.getHours() - 1);
 
     if (date < oneHourAgo) return;
-
-    const timer = setTimeout(() => {
-      console.log('force render', msg);
-      setForceRender((prev) => prev + 1);
-    }, FIFTEEN_SECONDS);
+    const timer = setTimeout(() => setForceRender((prev) => prev + 1), FIFTEEN_SECONDS);
 
     return () => clearTimeout(timer);
   }, [date, forceRender]);
