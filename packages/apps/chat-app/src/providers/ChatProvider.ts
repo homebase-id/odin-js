@@ -423,6 +423,7 @@ export const uploadChatMessage = async (
   if (!uploadResult) throw new Error('Failed to upload chat message');
 
   if (
+    uploadResult.recipientStatus &&
     Object.values(uploadResult.recipientStatus).some(
       (recipienStatus) => recipienStatus.toLowerCase() === TransferUploadStatus.EnqueuedFailed
     )

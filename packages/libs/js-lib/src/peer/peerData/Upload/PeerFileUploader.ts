@@ -14,8 +14,6 @@ import {
   EncryptedKeyHeader,
   KeyHeader,
   decryptKeyHeader,
-  SystemFileType,
-  FileIdentifier,
 } from '../../../core/core';
 import { TransitInstructionSet, TransitUploadResult } from '../PeerTypes';
 import { hasDebugFlag } from '../../../helpers/BrowserUtil';

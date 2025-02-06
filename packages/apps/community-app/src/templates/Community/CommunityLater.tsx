@@ -20,7 +20,10 @@ import { useMemo } from 'react';
 import { useCommunityChannel } from '../../hooks/community/channels/useCommunityChannel';
 import { CommunityDeliveryIndicator } from '../../components/Community/Message/item/CommunityDeliveryIndicator';
 import { CommunitySentTimeIndicator } from '../../components/Community/Message/item/CommunitySentTimeIndicator';
-import { useCommunityLater } from '../../hooks/community/useCommunityLater';
+import {
+  useCommunityLater,
+  useManageCommunityLater,
+} from '../../hooks/community/useCommunityLater';
 import { CommunityMessageAuthorName } from '../../components/Community/Message/item/CommunityMesageAuthorName';
 import { CommunityMessageAvatar } from '../../components/Community/Message/item/CommunityMessageAvatar';
 import { CommunityMessageItem } from '../../components/Community/Message/item/CommunityMessageItem';
@@ -101,10 +104,12 @@ const SavedMessage = ({
     channelId: msg?.fileMetadata.appData.content.channelId,
   }).fetch;
 
+  const { isSaved } = useCommunityLater({
+    messageId: msg?.fileMetadata.appData.uniqueId,
+  });
   const {
-    isSaved,
     toggleSave: { mutate: toggleSave, error: toggleSaveError },
-  } = useCommunityLater({
+  } = useManageCommunityLater({
     messageId: msg?.fileMetadata.appData.uniqueId,
     systemFileType: msg?.fileSystemType,
   });
