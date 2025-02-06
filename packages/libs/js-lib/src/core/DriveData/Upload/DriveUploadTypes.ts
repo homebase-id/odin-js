@@ -21,7 +21,14 @@ export interface BaseUploadInstructionSet {
 
 export type UploadInstructionSet = BaseUploadInstructionSet;
 
-export interface UpdatePeerInstructionSet extends Partial<BaseUploadInstructionSet> {
+export interface BaseUpdateInstructionSet {
+  transferIv?: Uint8Array;
+  systemFileType?: SystemFileType;
+
+  useAppNotification?: boolean;
+  appNotificationOptions?: PushNotificationOptions;
+}
+export interface UpdatePeerInstructionSet extends Partial<BaseUpdateInstructionSet> {
   file: GlobalTransitIdFileIdentifier;
   versionTag: string | undefined;
 
@@ -29,7 +36,7 @@ export interface UpdatePeerInstructionSet extends Partial<BaseUploadInstructionS
   recipients?: string[];
 }
 
-export interface UpdateLocalInstructionSet extends Partial<BaseUploadInstructionSet> {
+export interface UpdateLocalInstructionSet extends Partial<BaseUpdateInstructionSet> {
   file: FileIdFileIdentifier;
   versionTag: string | undefined;
 
