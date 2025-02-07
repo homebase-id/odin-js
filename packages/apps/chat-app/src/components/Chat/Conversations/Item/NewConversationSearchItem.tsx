@@ -17,7 +17,7 @@ export const NewConversationSearchItem = ({
   const onClick = async () => {
     if (!odinId) return;
     try {
-      const result = await createNew({ recipients: [odinId] });
+      const result = await createNew({ recipients: [odinId], imagePayload: undefined });
       onOpen(result.newConversationId);
     } catch (e) {
       console.error(e);

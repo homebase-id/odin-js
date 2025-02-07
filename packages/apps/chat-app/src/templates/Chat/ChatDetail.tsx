@@ -2,19 +2,15 @@ import {
   ActionGroup,
   ActionLink,
   CHAT_ROOT_PATH,
-  ConnectionImage,
-  ConnectionName,
   ErrorBoundary,
   ErrorNotification,
   HybridLink,
-  OwnerImage,
-  OwnerName,
   t,
   useDotYouClientContext,
   useIntroductions,
   useIsConnected,
 } from '@homebase-id/common-app';
-import { ChevronDown, ChevronLeft, Persons } from '@homebase-id/common-app/icons';
+import { ChevronDown, ChevronLeft } from '@homebase-id/common-app/icons';
 import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   ConversationMetadata,
@@ -29,6 +25,8 @@ import { ChatComposer, ChatComposerProps } from '../../components/Chat/Composer/
 import { ChatInfo } from '../../components/Chat/Detail/ChatInfo';
 import { Link, useMatch, useNavigate } from 'react-router-dom';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { ConversationAvatar } from '../../components/Chat/Conversations/Item/ConversationAvatar';
+import { ConversationTitle } from '../../components/Chat/Conversations/Item/ConversationTitle';
 
 export const ChatDetail = ({
   conversationId,
@@ -185,37 +183,18 @@ const ChatHeader = ({
           <ChevronLeft className="h-4 w-4" />
         </HybridLink>
 
-        <Link
-          to={`${rootPath}/${conversationDsr?.fileMetadata.appData.uniqueId}/info`}
-          className="flex cursor-pointer flex-row items-center gap-2"
-        >
-          {singleRecipient ? (
-            <ConnectionImage
-              odinId={singleRecipient}
-              className="h-[2rem] w-[2rem] border border-neutral-200 dark:border-neutral-800 lg:h-[2.5rem] lg:w-[2.5rem]"
-              size="custom"
+        {conversationDsr ? (
+          <Link
+            to={`${rootPath}/${conversationDsr?.fileMetadata.appData.uniqueId}/info`}
+            className="flex cursor-pointer flex-row items-center gap-2"
+          >
+            <ConversationAvatar
+              conversation={conversationDsr}
+              sizeClassName="h-[2rem] w-[2rem] lg:h-[2.5rem] lg:w-[2.5rem]"
             />
-          ) : withYourself ? (
-            <OwnerImage
-              className="h-[2rem] w-[2rem] flex-shrink-0 border border-neutral-200 dark:border-neutral-800 lg:h-[2.5rem] lg:w-[2.5rem]"
-              size="custom"
-            />
-          ) : (
-            <div className="rounded-full bg-primary/20 p-2 lg:p-3">
-              <Persons className="h-[0.9rem] w-[0.9rem] lg:h-4 lg:w-4" />
-            </div>
-          )}
-          {singleRecipient ? (
-            <ConnectionName odinId={singleRecipient} />
-          ) : withYourself ? (
-            <>
-              <OwnerName />
-              <span className="text-sm text-foreground/50">({t('you')})</span>
-            </>
-          ) : (
-            conversation?.title
-          )}
-        </Link>
+            <ConversationTitle conversation={conversationDsr} sizeClassName="" />
+          </Link>
+        ) : null}
 
         {conversationDsr && !withYourself ? (
           <ActionGroup
