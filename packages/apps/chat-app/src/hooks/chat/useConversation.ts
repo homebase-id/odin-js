@@ -34,9 +34,11 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const createConversation = async ({
     recipients,
     title,
+    imagePayload,
   }: {
     recipients: string[];
     title?: string;
+    imagePayload: Blob | undefined;
   }) => {
     const newConversationId =
       recipients.length === 1
@@ -69,7 +71,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
 
     const uploadResult = {
       newConversationId,
-      ...(await uploadConversation(dotYouClient, newConversation)),
+      ...(await uploadConversation(dotYouClient, newConversation, imagePayload)),
     };
 
     return uploadResult;
@@ -80,20 +82,22 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   }: {
     conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   }) => {
-    return await uploadConversation(dotYouClient, conversation, true);
+    return await updateConversation(dotYouClient, conversation, undefined, true);
   };
 
   const updateExistingConversation = async ({
     conversation,
+    imagePayload,
     distribute = false,
   }: {
     conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
+    imagePayload: Blob | null | undefined;
     distribute?: boolean;
   }) => {
     if (distribute && conversation.fileMetadata.appData.content.recipients?.length >= 2) {
-      return await updateConversation(dotYouClient, conversation, distribute);
+      return await updateConversation(dotYouClient, conversation, imagePayload, distribute);
     } else {
-      return await updateConversation(dotYouClient, conversation);
+      return await updateConversation(dotYouClient, conversation, imagePayload);
     }
   };
 
@@ -128,7 +132,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       },
     };
 
-    return await updateConversation(dotYouClient, newConversation);
+    return await updateConversation(dotYouClient, newConversation, undefined);
   };
 
   const archiveChat = async ({
@@ -144,7 +148,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       },
     };
 
-    return await updateConversation(dotYouClient, newConversation);
+    return await updateConversation(dotYouClient, newConversation, undefined);
   };
 
   return {
@@ -257,7 +261,7 @@ export const restoreChat = async (
     },
   };
 
-  return await updateConversation(dotYouClient, newConversation);
+  return await updateConversation(dotYouClient, newConversation, undefined);
 };
 
 export const invalidateConversation = (queryClient: QueryClient, conversationId?: string) => {

@@ -25,7 +25,7 @@ export const ConversationListItem = ({
       <GroupConversationItem
         onClick={onClick}
         title={conversation.fileMetadata.appData.content.title}
-        conversationId={conversation.fileMetadata.appData.uniqueId}
+        conversation={conversation}
         isActive={isActive}
       />
     );

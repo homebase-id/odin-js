@@ -44,7 +44,7 @@ export const CommunityDirectDetail = () => {
 
   useEffect(() => {
     if (dmKey && !conversation && conversationFetched) {
-      createConversation({ recipients: [dmKey] });
+      createConversation({ recipients: [dmKey], imagePayload: undefined });
     }
   }, [conversation, conversationFetched]);
 

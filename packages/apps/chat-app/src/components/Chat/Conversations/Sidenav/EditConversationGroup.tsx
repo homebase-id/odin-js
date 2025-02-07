@@ -8,17 +8,20 @@ import {
   ConnectionImage,
   ConnectionName,
   ErrorBoundary,
+  ImageSelector,
   Input,
   Label,
   NotFound,
   t,
   useDotYouClientContext,
   useIntroductions,
+  useRawImage,
 } from '@homebase-id/common-app';
 import { Save, Times } from '@homebase-id/common-app/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useConversation } from '../../../../hooks/chat/useConversation';
 import { GroupContactSearch } from './ConversationGroupFIelds';
+import { ChatDrive, CONVERSATION_IMAGE_KEY } from '../../../../providers/ConversationProvider';
 
 export const EditConversationGroup = () => {
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
@@ -31,6 +34,7 @@ export const EditConversationGroup = () => {
 
   const [newRecipients, setNewRecipients] = useState<string[]>([]);
   const [groupTitle, setGroupTitle] = useState<string>();
+  const [groupImage, setGroupImage] = useState<Blob | null>();
 
   const navigate = useNavigate();
 
@@ -38,9 +42,7 @@ export const EditConversationGroup = () => {
     if (!conversation) return;
     const newConversation = { ...conversation };
 
-    if (groupTitle) {
-      newConversation.fileMetadata.appData.content.title = groupTitle;
-    }
+    if (groupTitle) newConversation.fileMetadata.appData.content.title = groupTitle.trim();
 
     if (newRecipients.length) {
       newConversation.fileMetadata.appData.content.recipients = [
@@ -54,7 +56,11 @@ export const EditConversationGroup = () => {
       });
     }
 
-    updateConversation({ conversation: newConversation, distribute: true });
+    updateConversation({
+      conversation: newConversation,
+      distribute: true,
+      imagePayload: groupImage,
+    });
   };
 
   useEffect(() => {
@@ -62,6 +68,13 @@ export const EditConversationGroup = () => {
       navigate(`${CHAT_ROOT_PATH}/${conversationKey}`);
     }
   }, [updateStatus]);
+
+  const { data: imageData } = useRawImage({
+    imageFileId: conversation?.fileId,
+    imageFileKey: CONVERSATION_IMAGE_KEY,
+    imageDrive: ChatDrive,
+    lastModified: conversation?.fileMetadata.updated,
+  }).fetch;
 
   if (
     (!conversation && isConversationFetched) ||
@@ -81,6 +94,21 @@ export const EditConversationGroup = () => {
         </div>
 
         <div className="flex flex-col gap-2 bg-primary/10 p-5">
+          <div>
+            <Label>
+              {t('Group photo')}{' '}
+              <small className="text-sm text-foreground/80">({t('optional')})</small>
+            </Label>
+            <ImageSelector
+              defaultValue={groupImage || imageData?.url}
+              className="overflow-hidden rounded-full"
+              onChange={(e) => {
+                setGroupImage(e.target.value || null);
+              }}
+              expectedAspectRatio={1}
+            />
+          </div>
+
           <div>
             <Label>
               {t('Group name')}{' '}
