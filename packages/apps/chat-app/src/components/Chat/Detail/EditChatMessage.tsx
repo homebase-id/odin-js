@@ -66,7 +66,7 @@ export const EditChatMessage = ({
   }, [updateStatus]);
 
   const dialog = (
-    <DialogWrapper onClose={onClose} title={t('Edit message')} isSidePanel={false}>
+    <DialogWrapper onClose={onClose} title={t('Edit message')} isSidePanel={false} size="2xlarge">
       <>
         <ErrorNotification error={updateError} />
         {typeof message === 'string' ? (

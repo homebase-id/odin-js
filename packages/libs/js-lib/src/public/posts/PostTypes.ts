@@ -40,7 +40,7 @@ export class BlogConfig {
   static readonly DraftPostFileType: number = 102;
   static readonly ChannelDefinitionFileType: number = 103;
   static readonly RemoteChannelDefinitionFileType: number = 107;
-  static readonly DriveType: string = '8f448716e34cedf9014145e043ca6612'; //toGuidId('channel_drive');
+  static readonly DriveType: string = '8f448716e34cedf9014145e043ca6612';
 
   static readonly PublicChannelId = toGuidId('public_channel_drive');
   static readonly PublicChannelSlug = 'public-posts';
@@ -75,6 +75,14 @@ export class BlogConfig {
     alias: '4db49422ebad02e99ab96e9c477d1e08',
     type: 'a3227ffba87608beeb24fee9b70d92a6',
   };
+
+  static readonly TweetDataType: number = 100;
+  static readonly MediaDataType: number = 200;
+  static readonly ArticleDataType: number = 300;
+
+  static readonly XDataType: number = 500;
+  static readonly FacebookDataType: number = 510;
+  static readonly InstagramDataType: number = 520;
 }
 
 export type PostType = 'Article' | 'Media' | 'Tweet';
@@ -82,11 +90,11 @@ export type PostType = 'Article' | 'Media' | 'Tweet';
 export const postTypeToDataType = (type: PostType): number => {
   switch (type) {
     case 'Tweet':
-      return 100;
+      return BlogConfig.TweetDataType;
     case 'Media':
-      return 200;
+      return BlogConfig.MediaDataType;
     case 'Article':
-      return 300;
+      return BlogConfig.ArticleDataType;
   }
 
   throw 'Invalid post type';
@@ -128,8 +136,10 @@ export interface PostContent {
    * @deprecated Use fileMetadata.originalAuthor instead
    */
   authorOdinId?: string;
-
   embeddedPost?: EmbeddedPost;
+
+  // For posts from external sources
+  sourceUrl?: string;
 }
 
 export interface Article extends PostContent {

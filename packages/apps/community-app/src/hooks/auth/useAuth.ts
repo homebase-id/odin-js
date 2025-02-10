@@ -11,6 +11,7 @@ import {
   saveEccKey,
   retrieveEccKey,
   throwAwayTheECCKey,
+  TargetDriveAccessRequest,
 } from '@homebase-id/js-lib/auth';
 import { AppPermissionType, ContactConfig } from '@homebase-id/js-lib/network';
 import {
@@ -49,37 +50,37 @@ export const useAuth = () => {
   };
 };
 
-export const drives = [
+export const drives: TargetDriveAccessRequest[] = [
   {
     // Standard profile Info
-    a: '8f12d8c4933813d378488d91ed23b64c',
-    t: '597241530e3ef24b28b9a75ec3a5c45c',
-    n: 'Standard Profile info',
-    d: '',
-    p: DrivePermissionType.Read,
+    alias: '8f12d8c4933813d378488d91ed23b64c',
+    type: '597241530e3ef24b28b9a75ec3a5c45c',
+    name: 'Standard Profile info',
+    description: '',
+    permissions: [DrivePermissionType.Read],
   },
   {
     // Contacts
-    a: ContactConfig.ContactTargetDrive.alias,
-    t: ContactConfig.ContactTargetDrive.type,
-    n: 'Contact Drive',
-    d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
+    alias: ContactConfig.ContactTargetDrive.alias,
+    type: ContactConfig.ContactTargetDrive.type,
+    name: 'Contact Drive',
+    description: '',
+    permissions: [DrivePermissionType.Read, DrivePermissionType.Write],
   },
   {
     // Chat Drive
-    a: ChatDrive.alias,
-    t: ChatDrive.type,
-    n: 'Chat Drive',
-    d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write + DrivePermissionType.React,
+    alias: ChatDrive.alias,
+    type: ChatDrive.type,
+    name: 'Chat Drive',
+    description: '',
+    permissions: [DrivePermissionType.Read, DrivePermissionType.Write, DrivePermissionType.React],
   },
   {
-    a: LOCAL_COMMUNITY_APP_DRIVE.alias,
-    t: LOCAL_COMMUNITY_APP_DRIVE.type,
-    n: 'Community Drive',
-    d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
+    alias: LOCAL_COMMUNITY_APP_DRIVE.alias,
+    type: LOCAL_COMMUNITY_APP_DRIVE.type,
+    name: 'Community Drive',
+    description: '',
+    permissions: [DrivePermissionType.Read, DrivePermissionType.Write],
   },
 ];
 
