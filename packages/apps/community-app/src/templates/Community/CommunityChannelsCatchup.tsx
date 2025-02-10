@@ -17,26 +17,26 @@ export const CommunityChannelsCatchup = memo(() => {
     communityId: communityId,
   }).fetch;
 
-  if (!community && isFetched)
-    return (
-      <div className="flex h-full flex-grow flex-col items-center justify-center">
-        <p className="text-4xl">Homebase Community</p>
-      </div>
-    );
-
   if (!community) {
-    return (
-      <div className="h-full w-20 flex-grow bg-page-background">
-        <LoadingBlock className="h-16 w-full" />
-        <div className="mt-8 flex flex-col gap-4 px-5">
-          <LoadingBlock className="h-16 w-full" />
-          <LoadingBlock className="h-16 w-full" />
-          <LoadingBlock className="h-16 w-full" />
-          <LoadingBlock className="h-16 w-full" />
-          <LoadingBlock className="h-16 w-full" />
+    if (isFetched)
+      return (
+        <div className="flex h-full flex-grow flex-col items-center justify-center">
+          <p className="text-4xl">Homebase Community</p>
         </div>
-      </div>
-    );
+      );
+    else
+      return (
+        <div className="h-full w-20 flex-grow bg-page-background">
+          <LoadingBlock className="h-16 w-full" />
+          <div className="mt-8 flex flex-col gap-4 px-5">
+            <LoadingBlock className="h-16 w-full" />
+            <LoadingBlock className="h-16 w-full" />
+            <LoadingBlock className="h-16 w-full" />
+            <LoadingBlock className="h-16 w-full" />
+            <LoadingBlock className="h-16 w-full" />
+          </div>
+        </div>
+      );
   }
 
   return (
