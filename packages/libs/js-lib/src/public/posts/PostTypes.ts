@@ -76,9 +76,13 @@ export class BlogConfig {
     type: 'a3227ffba87608beeb24fee9b70d92a6',
   };
 
-  static readonly XDataType: number = 100;
-  static readonly FacebookDataType: number = 110;
-  static readonly InstagramDataType: number = 120;
+  static readonly TweetDataType: number = 100;
+  static readonly MediaDataType: number = 200;
+  static readonly ArticleDataType: number = 300;
+
+  static readonly XDataType: number = 500;
+  static readonly FacebookDataType: number = 510;
+  static readonly InstagramDataType: number = 520;
 }
 
 export type PostType = 'Article' | 'Media' | 'Tweet';
@@ -86,11 +90,11 @@ export type PostType = 'Article' | 'Media' | 'Tweet';
 export const postTypeToDataType = (type: PostType): number => {
   switch (type) {
     case 'Tweet':
-      return 100;
+      return BlogConfig.TweetDataType;
     case 'Media':
-      return 200;
+      return BlogConfig.MediaDataType;
     case 'Article':
-      return 300;
+      return BlogConfig.ArticleDataType;
   }
 
   throw 'Invalid post type';
