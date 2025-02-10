@@ -81,7 +81,7 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
           // viewportWrapperRef.current?.style.setProperty('width', `100%`);
 
           if (viewportWrapperRef.current?.parentElement?.classList.contains('min-h-[100dvh]'))
-            viewportWrapperRef.current?.parentElement?.style.setProperty('height', `auto`);
+            viewportWrapperRef.current?.parentElement?.style.setProperty('min-height', `auto`);
           viewportWrapperRef.current?.parentElement?.style.setProperty(
             'height',
             `${roundedViewportHeight}px`
