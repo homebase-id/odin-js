@@ -45,7 +45,8 @@ export const CommunityMedia = ({
   const { odinKey, communityKey, channelKey, threadKey } = useParams();
 
   if (!payloads?.length) return null;
-  if (isGallery) return <MediaGallery odinId={odinId} communityId={communityId} msg={msg} />;
+  if (isGallery)
+    return <MediaGallery odinId={odinId} communityId={communityId} msg={msg} originId={originId} />;
 
   return (
     <MediaItem
@@ -278,10 +279,12 @@ const getEmbeddedThumbUrl = (previewThumbnail: EmbeddedThumb) =>
 const MediaGallery = ({
   odinId,
   communityId,
+  originId,
   msg,
 }: {
   odinId: string;
   communityId: string;
+  originId?: string;
   msg: HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage>;
 }) => {
   const payloads = msg.fileMetadata.payloads?.filter(
@@ -291,6 +294,8 @@ const MediaGallery = ({
   const maxVisible = 4;
   const countExcludedFromView = (payloads && payloads.length - maxVisible) || 0;
   const navigate = useNavigate();
+
+  const { odinKey, communityKey, channelKey, threadKey } = useParams();
 
   const previewThumbnail = msg.fileMetadata.appData.previewThumbnail;
   const tinyThumbUrl = useMemo(
@@ -314,11 +319,20 @@ const MediaGallery = ({
             key={payload.key || index}
             payload={payload}
             msg={msg}
-            onClick={
-              msg.fileId
-                ? () => navigate(`${msg.fileMetadata.appData.uniqueId}/${payload.key}`)
-                : undefined
-            }
+            onClick={() => {
+              const threadPathPart = originId || threadKey || undefined;
+              const rootPath = `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || msg.fileMetadata.appData.content.channelId}`;
+              navigate(
+                threadPathPart
+                  ? `${rootPath}/${threadPathPart}/thread/${msg.fileMetadata.appData.uniqueId}/${payload.key}`
+                  : `${rootPath}/${msg.fileMetadata.appData.uniqueId}/${payload.key}`
+              );
+            }}
+            // onClick={
+            //   msg.fileId
+            //     ? () => navigate(`${msg.fileMetadata.appData.uniqueId}/${payload.key}`)
+            //     : undefined
+            // }
             isColSpan2={!!payloads && payloads.length === 3 && index === 2}
           >
             {index === maxVisible - 1 && countExcludedFromView > 0 ? (
