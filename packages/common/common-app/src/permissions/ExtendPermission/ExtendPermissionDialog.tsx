@@ -6,6 +6,7 @@ import { DialogWrapper } from '../../ui/Dialog/DialogWrapper';
 import { t } from '../../helpers';
 import { ActionLink } from '../../ui';
 import { Shield } from '../../ui/Icons';
+import { TargetDriveAccessRequest } from '@homebase-id/js-lib/auth';
 
 export const ExtendPermissionDialog = ({
   appId,
@@ -17,20 +18,8 @@ export const ExtendPermissionDialog = ({
 }: {
   appId: string;
   appName: string;
-  drives: {
-    a: string;
-    t: string;
-    n: string;
-    d: string;
-    p: number;
-  }[];
-  circleDrives?: {
-    a: string;
-    t: string;
-    n: string;
-    d: string;
-    p: number;
-  }[];
+  drives: TargetDriveAccessRequest[];
+  circleDrives?: TargetDriveAccessRequest[];
   permissions: AppPermissionType[];
   needsAllConnected?: boolean;
 }) => {

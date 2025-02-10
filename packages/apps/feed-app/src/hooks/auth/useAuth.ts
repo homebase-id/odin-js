@@ -11,6 +11,7 @@ import {
   saveEccKey,
   retrieveEccKey,
   throwAwayTheECCKey,
+  TargetDriveAccessRequest,
 } from '@homebase-id/js-lib/auth';
 import {
   AppPermissionType,
@@ -53,49 +54,50 @@ export const useAuth = () => {
 };
 
 const StandardProfileDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
-export const drives = [
+export const drives: TargetDriveAccessRequest[] = [
   {
-    a: BlogConfig.FeedDrive.alias,
-    t: BlogConfig.FeedDrive.type,
-    n: '',
-    d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
+    alias: BlogConfig.FeedDrive.alias,
+    type: BlogConfig.FeedDrive.type,
+    name: '',
+    description: '',
+    permissions: [DrivePermissionType.Read + DrivePermissionType.Write],
   },
   {
     // Standard profile Info
-    a: StandardProfileDrive.alias,
-    t: StandardProfileDrive.type,
-    n: '',
-    d: '',
-    p: DrivePermissionType.Read,
+    alias: StandardProfileDrive.alias,
+    type: StandardProfileDrive.type,
+    name: '',
+    description: '',
+    permissions: [DrivePermissionType.Read],
   },
   {
     // Homepage Drive
-    a: HomePageConfig.HomepageTargetDrive.alias,
-    t: HomePageConfig.HomepageTargetDrive.type,
-    n: '',
-    d: '',
-    p: DrivePermissionType.Read,
+    alias: HomePageConfig.HomepageTargetDrive.alias,
+    type: HomePageConfig.HomepageTargetDrive.type,
+    name: '',
+    description: '',
+    permissions: [DrivePermissionType.Read],
   },
   {
     // Contact Drive
-    a: ContactConfig.ContactTargetDrive.alias,
-    t: ContactConfig.ContactTargetDrive.type,
-    n: '',
-    d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
+    alias: ContactConfig.ContactTargetDrive.alias,
+    type: ContactConfig.ContactTargetDrive.type,
+    name: '',
+    description: '',
+    permissions: [DrivePermissionType.Read, DrivePermissionType.Write],
   },
   {
     // Public posts
-    a: BlogConfig.PublicChannelDrive.alias,
-    t: BlogConfig.PublicChannelDrive.type,
-    n: '',
-    d: '',
-    p:
-      DrivePermissionType.Read +
-      DrivePermissionType.Write +
-      DrivePermissionType.React +
+    alias: BlogConfig.PublicChannelDrive.alias,
+    type: BlogConfig.PublicChannelDrive.type,
+    name: '',
+    description: '',
+    permissions: [
+      DrivePermissionType.Read,
+      DrivePermissionType.Write,
+      DrivePermissionType.React,
       DrivePermissionType.Comment,
+    ],
   },
 ];
 

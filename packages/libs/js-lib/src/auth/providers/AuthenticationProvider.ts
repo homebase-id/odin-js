@@ -1,3 +1,4 @@
+import { DrivePermissionType, TargetDrive } from '../../../core';
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { cbcDecrypt } from '../../helpers/AesEncrypt';
 import { base64ToUint8Array, stringToUint8Array, uint8ArrayToBase64 } from '../../helpers/DataUtil';
@@ -39,6 +40,16 @@ export interface AppDriveAuthorizationParams {
   p: number;
   r?: boolean;
   s?: boolean;
+  at?: string;
+}
+
+export interface TargetDriveAccessRequest extends TargetDrive {
+  name: string;
+  description: string;
+  permissions: DrivePermissionType[];
+  attributes?: Record<string, string>;
+  allowAnonymousRead?: boolean;
+  allowSubscriptions?: boolean;
 }
 
 //checks if the authentication token (stored in a cookie) is valid
@@ -54,14 +65,31 @@ export const hasValidToken = async (dotYouClient: DotYouClient): Promise<boolean
   return null;
 };
 
+export const parseDriveAccessRequest = (
+  TargetDriveAccessRequest: TargetDriveAccessRequest
+): AppDriveAuthorizationParams => {
+  return {
+    a: TargetDriveAccessRequest.alias,
+    t: TargetDriveAccessRequest.type,
+    n: TargetDriveAccessRequest.name,
+    d: TargetDriveAccessRequest.description,
+    p: TargetDriveAccessRequest.permissions.reduce((acc, permission) => acc + permission, 0),
+    r: TargetDriveAccessRequest.allowAnonymousRead,
+    s: TargetDriveAccessRequest.allowSubscriptions,
+    at: TargetDriveAccessRequest.attributes
+      ? JSON.stringify(TargetDriveAccessRequest.attributes)
+      : undefined,
+  };
+};
+
 export const getRegistrationParams = async (
   returnUrl: string,
   appName: string,
   appId: string,
   permissionKeys: number[] | undefined,
   circlePermissionKeys: number[] | undefined,
-  drives: AppDriveAuthorizationParams[],
-  circleDrives: AppDriveAuthorizationParams[] | undefined,
+  drives: TargetDriveAccessRequest[],
+  circleDrives: TargetDriveAccessRequest[] | undefined,
   circles: string[] | undefined,
   eccPublicKey: CryptoKey,
   host?: string,
@@ -76,8 +104,8 @@ export const getRegistrationParams = async (
     fn: clientFriendly,
     p: permissionKeys?.join(','),
     cp: circlePermissionKeys?.join(','),
-    d: JSON.stringify(drives),
-    cd: circleDrives ? JSON.stringify(circleDrives) : undefined,
+    d: JSON.stringify(drives.map(parseDriveAccessRequest)),
+    cd: circleDrives ? JSON.stringify(circleDrives.map(parseDriveAccessRequest)) : undefined,
     c: circles?.join(','),
     return: 'backend-will-decide',
     o: undefined,
@@ -113,22 +141,22 @@ interface AppAuthorizationExtendParams {
 
 export const getExtendAppRegistrationParams = (
   appId: string,
-  drives: AppDriveAuthorizationParams[],
-  circleDrives: AppDriveAuthorizationParams[] | undefined,
+  drives: TargetDriveAccessRequest[],
+  circleDrives: TargetDriveAccessRequest[] | undefined,
   permissionKeys: number[] | undefined,
   needsAllConnectedOrCircleIds: boolean | string[] | undefined,
   returnUrl: string
 ): AppAuthorizationExtendParams => {
   const params: AppAuthorizationExtendParams = {
     appId: appId,
-    d: JSON.stringify(drives),
+    d: JSON.stringify(drives.map(parseDriveAccessRequest)),
     p: permissionKeys?.join(','),
     c: Array.isArray(needsAllConnectedOrCircleIds)
       ? JSON.stringify(needsAllConnectedOrCircleIds)
       : needsAllConnectedOrCircleIds
         ? JSON.stringify([AUTO_CONNECTIONS_CIRCLE_ID, CONFIRMED_CONNECTIONS_CIRCLE_ID])
         : undefined,
-    cd: circleDrives ? JSON.stringify(circleDrives) : undefined,
+    cd: circleDrives ? JSON.stringify(circleDrives.map(parseDriveAccessRequest)) : undefined,
     return: returnUrl,
   };
 
