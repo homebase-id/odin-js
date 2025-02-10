@@ -1,5 +1,6 @@
-import { DrivePermissionType, TargetDrive } from '../../../core';
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
+import { DrivePermissionType } from '../../core/DriveData/Drive/DriveTypes';
+import { TargetDrive } from '../../core/DriveData/File/DriveFileTypes';
 import { cbcDecrypt } from '../../helpers/AesEncrypt';
 import { base64ToUint8Array, stringToUint8Array, uint8ArrayToBase64 } from '../../helpers/DataUtil';
 import {
