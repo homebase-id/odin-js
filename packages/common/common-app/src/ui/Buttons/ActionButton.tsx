@@ -76,7 +76,7 @@ const StyledButton = ({
   className,
   confirmOptions, // eslint-disable-line @typescript-eslint/no-unused-vars
   ...buttonProps
-}: { confirmOptions: unknown } & StyledButtonProps) => {
+}: { confirmOptions?: unknown | undefined } & StyledButtonProps) => {
   const hasChildren = !!buttonProps.children;
   const hasIcon = (!!state && state !== 'idle') || !!icon;
 
