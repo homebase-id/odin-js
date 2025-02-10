@@ -1,6 +1,6 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { BlogConfig, PostContent } from '@homebase-id/js-lib/public';
-import { Facebook, Instagram, Twitter } from '../../../ui/Icons';
+import { Facebook, Instagram, Twitter, Youtube } from '../../../ui/Icons';
 
 export const PostSource = ({
   postFile,
@@ -37,7 +37,7 @@ export const PostSource = ({
         };
       case BlogConfig.YoutubeDataType:
         return {
-          icon: Instagram,
+          icon: Youtube,
           colors: 'text-[##ff0033]',
           text: 'Video from Youtube',
           rootUrl: 'https://youtube.com',
