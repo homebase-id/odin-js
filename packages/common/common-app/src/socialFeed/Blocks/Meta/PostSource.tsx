@@ -35,6 +35,13 @@ export const PostSource = ({
           text: 'Post from Instagram',
           rootUrl: 'https://instagram.com',
         };
+      case BlogConfig.YoutubeDataType:
+        return {
+          icon: Instagram,
+          colors: 'text-[##ff0033]',
+          text: 'Video from Youtube',
+          rootUrl: 'https://youtube.com',
+        };
     }
 
     return null;
