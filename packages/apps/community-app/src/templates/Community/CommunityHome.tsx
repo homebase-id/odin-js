@@ -52,6 +52,8 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
 
       viewportWrapperRef.current?.parentElement?.style.removeProperty('min-height');
       viewportWrapperRef.current?.parentElement?.style.removeProperty('height');
+
+      document.body.style.removeProperty('overflow');
     };
 
     const handler = () => {
@@ -79,6 +81,8 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
           // viewportWrapperRef.current?.style.setProperty('left', `0`);
           // viewportWrapperRef.current?.style.setProperty('right', `0`);
           // viewportWrapperRef.current?.style.setProperty('width', `100%`);
+
+          document.body.style.setProperty('overflow', 'hidden');
 
           if (viewportWrapperRef.current?.parentElement?.classList.contains('min-h-[100dvh]'))
             viewportWrapperRef.current?.parentElement?.style.setProperty('min-height', `auto`);
