@@ -23,6 +23,7 @@ export * from './Blocks/Body/Body';
 export * from './Blocks/Body/EmbeddedPostContent';
 
 export * from './Blocks/Meta/Meta';
+export * from './Blocks/Meta/PostSource';
 
 export * from './Composer/PostComposer';
 

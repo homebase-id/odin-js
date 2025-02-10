@@ -14,6 +14,7 @@ import {
   t,
   ToGroupBlock,
   useDotYouClientContext,
+  PostSource,
 } from '@homebase-id/common-app';
 import { useNavigate } from 'react-router-dom';
 import { DoubleClickHeartForMedia } from '@homebase-id/common-app';
@@ -68,6 +69,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
             clickable ? 'hover:shadow-md hover:dark:shadow-slate-600' : ''
           } dark:border-gray-800 lg:border`}
         >
+          <PostSource postFile={postFile} className="rounded-t-lg" />
           <div className="flex flex-row gap-4 px-3 py-3 sm:px-4">
             <div className="flex-shrink-0 py-1">
               <div className="h-10 w-10 sm:h-12 sm:w-12 md:h-[4rem] md:w-[4rem]">
