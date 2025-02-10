@@ -43,16 +43,6 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
   const viewportWrapperRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const cleanupStyle = () => {
-      // viewportWrapperRef.current?.style.removeProperty('height');
-      // viewportWrapperRef.current?.style.removeProperty('position');
-      // viewportWrapperRef.current?.style.removeProperty('top');
-      // viewportWrapperRef.current?.style.removeProperty('bottom');
-      // viewportWrapperRef.current?.style.removeProperty('left');
-      // viewportWrapperRef.current?.style.removeProperty('right');
-
-      // viewportWrapperRef.current?.parentElement?.style.removeProperty('min-height');
-      // viewportWrapperRef.current?.parentElement?.style.removeProperty('height');
-
       document.body.style.removeProperty('overflow');
     };
 
@@ -71,29 +61,12 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
           roundedViewportHeight &&
           (roundedViewportHeight !== roundedInnerHeight || !!offsetTop)
         ) {
-          // viewportWrapperRef.current?.style.setProperty('height', `${roundedViewportHeight}px`);
-          // // viewportWrapperRef.current?.style.setProperty('position', `fixed`);
-          // // if (offsetTop !== undefined) {
-          // //   viewportWrapperRef.current?.style.setProperty('top', `${offsetTop}px`);
-          // // } else {
-          // //   viewportWrapperRef.current?.style.setProperty('bottom', `0`);
-          // // }
-          // // viewportWrapperRef.current?.style.setProperty('left', `0`);
-          // // viewportWrapperRef.current?.style.setProperty('right', `0`);
-          // // viewportWrapperRef.current?.style.setProperty('width', `100%`);
-
+          // We try and disable the page from scrolling when the keyboard is open; To avoid scrolling past the visual page that is contained within the viewport
           document.body.style.setProperty('overflow', 'hidden');
-
-          // if (viewportWrapperRef.current?.parentElement?.classList.contains('min-h-[100dvh]'))
-          //   viewportWrapperRef.current?.parentElement?.style.setProperty('min-height', `auto`);
-          // viewportWrapperRef.current?.parentElement?.style.setProperty(
-          //   'height',
-          //   `${roundedViewportHeight}px`
-          // );
         } else {
           cleanupStyle();
         }
-      }, 10);
+      }, 0);
     };
 
     window.visualViewport?.addEventListener('resize', handler);
