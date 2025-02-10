@@ -285,29 +285,19 @@ export const updateMail = async (
     conversation.fileMetadata.appData.fileType !== MAIL_DRAFT_CONVERSATION_FILE_TYPE;
 
   const uploadInstructions: UpdateInstructionSet = {
-    storageOptions: {
-      drive: MailDrive,
-      overwriteFileId: conversation.fileId,
-    },
     locale: 'local',
     file: {
       fileId: conversation.fileId,
       targetDrive: MailDrive,
     },
     versionTag: conversation.fileMetadata.versionTag,
-    transitOptions: distribute
+    useAppNotification: distribute,
+    appNotificationOptions: distribute
       ? {
-          recipients: recipients,
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.Medium,
-          sendContents: SendContents.All,
-          useAppNotification: true,
-          appNotificationOptions: {
-            appId: appId,
-            typeId: conversation.fileMetadata.appData.groupId || getNewId(),
-            tagId: conversation.fileMetadata.appData.uniqueId || getNewId(),
-            silent: false,
-          },
+          appId: appId,
+          typeId: conversation.fileMetadata.appData.groupId || getNewId(),
+          tagId: conversation.fileMetadata.appData.uniqueId || getNewId(),
+          silent: false,
         }
       : undefined,
     recipients: distribute ? recipients : undefined,

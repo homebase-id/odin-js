@@ -4,16 +4,11 @@ import { TransitInstructionSet } from '../../../peer/peerData/PeerTypes';
 import {
   UploadFileMetadata,
   UploadInstructionSet,
-  AppendInstructionSet,
   UploadResult,
   UploadManifest,
-  AppendResult,
   UpdateResult,
   UpdateInstructionSet,
   UpdateManifest,
-  UpdateHeaderInstructionSet,
-  isUpdateHeaderInstructionSet,
-  isUpdateInstructionSet,
 } from './DriveUploadTypes';
 import {
   encryptWithKeyheader,
@@ -129,11 +124,7 @@ export const buildUpdateManifest = (
 export const buildDescriptor = async (
   dotYouClient: DotYouClient,
   keyHeader: KeyHeader | undefined,
-  instructions:
-    | UploadInstructionSet
-    | UpdateHeaderInstructionSet
-    | TransitInstructionSet
-    | UpdateInstructionSet,
+  instructions: UploadInstructionSet | TransitInstructionSet | UpdateInstructionSet,
   metadata: UploadFileMetadata
 ): Promise<Uint8Array> => {
   if (!instructions.transferIv) throw new Error('Transfer IV is required');
@@ -141,27 +132,11 @@ export const buildDescriptor = async (
   return await encryptWithSharedSecret(
     dotYouClient,
     {
-      ...(isUpdateInstructionSet(instructions)
-        ? {
-            keyHeaderIv: keyHeader?.iv,
-          }
-        : isUpdateHeaderInstructionSet(instructions)
-          ? {
-              encryptedKeyHeader: keyHeader
-                ? await encryptKeyHeader(
-                    dotYouClient,
-                    { aesKey: new Uint8Array(Array(16).fill(0)), iv: keyHeader?.iv },
-                    instructions.transferIv
-                  )
-                : undefined,
-            }
-          : {
-              encryptedKeyHeader: await encryptKeyHeader(
-                dotYouClient,
-                keyHeader ?? EMPTY_KEY_HEADER,
-                instructions.transferIv
-              ),
-            }),
+      encryptedKeyHeader: await encryptKeyHeader(
+        dotYouClient,
+        keyHeader ?? EMPTY_KEY_HEADER,
+        instructions.transferIv
+      ),
       fileMetadata: await encryptMetaData(metadata, keyHeader),
     },
     instructions.transferIv
@@ -169,11 +144,7 @@ export const buildDescriptor = async (
 };
 
 export const buildFormData = async (
-  instructionSet:
-    | UploadInstructionSet
-    | TransitInstructionSet
-    | AppendInstructionSet
-    | UpdateInstructionSet,
+  instructionSet: UploadInstructionSet | TransitInstructionSet | UpdateInstructionSet,
   encryptedDescriptor: Uint8Array | undefined,
   payloads: PayloadFile[] | undefined,
   thumbnails: ThumbnailFile[] | undefined,
@@ -181,11 +152,7 @@ export const buildFormData = async (
   manifest: UploadManifest | UpdateManifest | undefined
 ) => {
   const data = new FormData();
-  const instructionType =
-    'targetFile' in instructionSet && !('locale' in instructionSet)
-      ? 'payloadUploadInstructions'
-      : 'instructions';
-  data.append(instructionType, await toBlob(instructionSet));
+  data.append('instructions', await toBlob(instructionSet));
   if (encryptedDescriptor) data.append('metadata', await getSecuredBlob([encryptedDescriptor]));
 
   if (payloads) {
@@ -260,46 +227,6 @@ export const pureUpload = async (
       if (error.response?.status === 400)
         console.error('[odin-js:pureUpload]', error.response?.data);
       else console.error('[odin-js:pureUpload]', error);
-      throw error;
-    });
-};
-
-export const pureAppend = async (
-  dotYouClient: DotYouClient,
-  data: FormData,
-  systemFileType?: SystemFileType,
-  onVersionConflict?: () => Promise<void | AppendResult> | void,
-  axiosConfig?: AxiosRequestConfig
-): Promise<AppendResult | void> => {
-  const client = dotYouClient.createAxiosClient({
-    overrideEncryption: true,
-    systemFileType,
-  });
-  const url = '/drive/files/uploadpayload';
-
-  const config = {
-    ...axiosConfig,
-    headers: {
-      'content-type': 'multipart/form-data',
-      ...axiosConfig?.headers,
-    },
-  };
-
-  return client
-    .post(url, data, config)
-    .then((response) => {
-      return response.data;
-    })
-    .catch((error) => {
-      if (error.response?.data?.errorCode === 'versionTagMismatch') {
-        if (!onVersionConflict) {
-          console.warn('VersionTagMismatch, to avoid this, add an onVersionConflict handler');
-        } else {
-          return onVersionConflict();
-        }
-      }
-
-      console.error('[odin-js:pureUpload]', error);
       throw error;
     });
 };
