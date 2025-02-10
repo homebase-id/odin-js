@@ -39,6 +39,7 @@ type PublishProfileImage = {
 
 type PublishProfileCard = {
   name: string;
+  bio: string;
   image: string;
   email: { type: string; email: string }[];
   links: { type: string; url: string }[];

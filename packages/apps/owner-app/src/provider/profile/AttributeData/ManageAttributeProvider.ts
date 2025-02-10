@@ -111,8 +111,6 @@ export const saveProfileAttribute = async (
   };
 
   if (toSaveAttribute.fileId) {
-    console.log(toSaveAttribute, payloads, thumbnails);
-
     const wasEncrypted =
       'isEncrypted' in toSaveAttribute.fileMetadata && toSaveAttribute.fileMetadata.isEncrypted;
 

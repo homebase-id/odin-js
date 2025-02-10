@@ -28,6 +28,7 @@ export const ProfileCardAttributeTypes = [
   BuiltInAttributes.Email,
   BuiltInAttributes.Link,
   BuiltInAttributes.Photo,
+  BuiltInAttributes.ShortBio,
   ...BuiltInAttributes.AllSocial,
   ...BuiltInAttributes.AllGames,
 ];
@@ -51,6 +52,30 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
         attr?.fileMetadata?.appData?.content?.data?.[MinimalProfileFields.DisplayName] as string
     )
     .filter((fileId) => fileId !== undefined);
+
+  const bioAttributes = await getProfileAttributes(
+    dotYouClient,
+    BuiltInProfiles.StandardProfileId,
+    undefined,
+    [BuiltInAttributes.ShortBio]
+  );
+
+  const bios = bioAttributes
+    ?.filter(
+      (attr) =>
+        attr.serverMetadata?.accessControlList.requiredSecurityGroup.toLowerCase() ===
+        SecurityGroupType.Anonymous.toLowerCase()
+    )
+    ?.map(
+      (attr) =>
+        ellipsisAtMaxChar(
+          getPlainTextFromRichText(
+            attr?.fileMetadata?.appData?.content?.data?.[MinimalProfileFields.ShortBioId] as string
+          ),
+          260
+        ) || ''
+    )
+    .filter((data) => data !== undefined);
 
   const emailAttributes = await getProfileAttributes(
     dotYouClient,
@@ -115,6 +140,7 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
 
   await publishProfileCardFile(dotYouClient, {
     name: displayNames?.[0] || dotYouClient.getHostIdentity(),
+    bio: bios?.[0] || '',
     image: `https://${dotYouClient.getHostIdentity()}/pub/image`,
     email: emails,
     links: [...socials, ...links],
@@ -242,4 +268,48 @@ export const GetProfileImage = async (odinId: string): Promise<Blob | undefined>
     console.warn(`Fetching 'profileimage' failed`);
     return;
   }
+};
+
+const getTextRootsRecursive = (
+  children: { children?: unknown; text?: string; value?: string }[] | string | undefined,
+  keepNewLines?: boolean
+): string[] => {
+  if (!children) return [];
+  if (!Array.isArray(children)) return [children as string];
+
+  return children
+    .map(
+      (child) =>
+        [
+          child.children
+            ? getTextRootsRecursive(
+                child.children as { children?: unknown; text?: string; value?: string }[]
+              ).join(keepNewLines ? '\n' : ' ')
+            : undefined,
+          (child.text || child.value || undefined) as string,
+        ]
+          .filter(Boolean)
+          .join(' ') || ''
+    )
+    .filter((child) => child.length);
+};
+
+const getPlainTextFromRichText = (
+  message: string | { children?: unknown; text?: string; value?: string }[] | undefined,
+  keepNewLines?: boolean
+) => {
+  if (!message) return undefined;
+  return getTextRootsRecursive(message, keepNewLines).join(keepNewLines ? '\n' : ' ');
+};
+
+const ellipsisAtMaxChar = (str: string | undefined, maxChar?: number) => {
+  if (!str || !maxChar) {
+    return str;
+  }
+
+  if (str.length <= maxChar) {
+    return str;
+  }
+
+  return `${str.substring(0, maxChar)}...`;
 };
