@@ -51,6 +51,7 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
       viewportWrapperRef.current?.style.removeProperty('right');
 
       viewportWrapperRef.current?.parentElement?.style.removeProperty('min-height');
+      viewportWrapperRef.current?.parentElement?.style.removeProperty('height');
     };
 
     const handler = () => {
@@ -61,26 +62,30 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
 
         // Firefox on Android seems to have a bug where the visualViewport and innerHeight are not the exact same 0.1px differences
         const roundedViewportHeight =
-          window.visualViewport?.height && Math.round(window.visualViewport?.height / 10) * 10;
+          visualViewportHeight && Math.round(visualViewportHeight / 10) * 10;
         const roundedInnerHeight = Math.round(window.innerHeight / 10) * 10;
 
         if (
           roundedViewportHeight &&
           (roundedViewportHeight !== roundedInnerHeight || !!offsetTop)
         ) {
-          viewportWrapperRef.current?.style.setProperty('height', `${visualViewportHeight}px`);
-          viewportWrapperRef.current?.style.setProperty('position', `fixed`);
-          if (offsetTop !== undefined) {
-            viewportWrapperRef.current?.style.setProperty('top', `${offsetTop}px`);
-          } else {
-            viewportWrapperRef.current?.style.setProperty('bottom', `0`);
-          }
-          viewportWrapperRef.current?.style.setProperty('left', `0`);
-          viewportWrapperRef.current?.style.setProperty('right', `0`);
-          viewportWrapperRef.current?.style.setProperty('width', `100%`);
+          viewportWrapperRef.current?.style.setProperty('height', `${roundedViewportHeight}px`);
+          // viewportWrapperRef.current?.style.setProperty('position', `fixed`);
+          // if (offsetTop !== undefined) {
+          //   viewportWrapperRef.current?.style.setProperty('top', `${offsetTop}px`);
+          // } else {
+          //   viewportWrapperRef.current?.style.setProperty('bottom', `0`);
+          // }
+          // viewportWrapperRef.current?.style.setProperty('left', `0`);
+          // viewportWrapperRef.current?.style.setProperty('right', `0`);
+          // viewportWrapperRef.current?.style.setProperty('width', `100%`);
 
           if (viewportWrapperRef.current?.parentElement?.classList.contains('min-h-[100dvh]'))
-            viewportWrapperRef.current?.parentElement?.style.setProperty('min-height', `auto`);
+            viewportWrapperRef.current?.parentElement?.style.setProperty('height', `auto`);
+          viewportWrapperRef.current?.parentElement?.style.setProperty(
+            'height',
+            `${roundedViewportHeight}px`
+          );
         } else {
           cleanupStyle();
         }
