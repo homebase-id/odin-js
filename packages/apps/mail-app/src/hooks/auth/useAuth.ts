@@ -11,6 +11,7 @@ import {
   saveEccKey,
   retrieveEccKey,
   throwAwayTheECCKey,
+  TargetDriveAccessRequest,
 } from '@homebase-id/js-lib/auth';
 import {
   AppPermissionType,
@@ -58,29 +59,29 @@ export const useAuth = () => {
 };
 
 export const websocketDrives = [MailDrive];
-export const drives = [
+export const drives: TargetDriveAccessRequest[] = [
   {
-    a: MailDrive.alias,
-    t: MailDrive.type,
-    n: 'Mail Drive',
-    d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
+    alias: MailDrive.alias,
+    type: MailDrive.type,
+    name: 'Mail Drive',
+    description: '',
+    permissions: [DrivePermissionType.Read, DrivePermissionType.Write],
   },
   {
     // Standard profile Info
-    a: '8f12d8c4933813d378488d91ed23b64c',
-    t: '597241530e3ef24b28b9a75ec3a5c45c',
-    n: 'Standard Profile info',
-    d: '',
-    p: DrivePermissionType.Read,
+    alias: '8f12d8c4933813d378488d91ed23b64c',
+    type: '597241530e3ef24b28b9a75ec3a5c45c',
+    name: 'Standard Profile info',
+    description: '',
+    permissions: [DrivePermissionType.Read],
   },
   {
     // Contacts
-    a: ContactConfig.ContactTargetDrive.alias,
-    t: ContactConfig.ContactTargetDrive.type,
-    n: 'Contact Drive',
-    d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
+    alias: ContactConfig.ContactTargetDrive.alias,
+    type: ContactConfig.ContactTargetDrive.type,
+    name: 'Contact Drive',
+    description: '',
+    permissions: [DrivePermissionType.Read, DrivePermissionType.Write],
   },
 ];
 
@@ -93,13 +94,13 @@ export const permissions = [
   AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
 ];
 
-const circleDrives = [
+const circleDrives: TargetDriveAccessRequest[] = [
   {
-    a: MailDrive.alias,
-    t: MailDrive.type,
-    n: 'Mail Drive',
-    d: '',
-    p: DrivePermissionType.Write,
+    alias: MailDrive.alias,
+    type: MailDrive.type,
+    name: 'Mail Drive',
+    description: '',
+    permissions: [DrivePermissionType.Write],
   },
 ];
 

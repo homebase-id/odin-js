@@ -11,6 +11,7 @@ import {
   saveEccKey,
   retrieveEccKey,
   throwAwayTheECCKey,
+  TargetDriveAccessRequest,
 } from '@homebase-id/js-lib/auth';
 import {
   AppPermissionType,
@@ -55,29 +56,27 @@ export const useAuth = () => {
 
 export const websocketDrives = [ChatDrive];
 
-export const drives = [
+export const drives: TargetDriveAccessRequest[] = [
   {
-    a: ChatDrive.alias,
-    t: ChatDrive.type,
-    n: 'Chat Drive',
-    d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write + DrivePermissionType.React,
+    ...ChatDrive,
+    name: 'Chat Drive',
+    description: '',
+    permissions: [DrivePermissionType.Read, DrivePermissionType.Write, DrivePermissionType.React],
   },
   {
     // Standard profile Info
-    a: '8f12d8c4933813d378488d91ed23b64c',
-    t: '597241530e3ef24b28b9a75ec3a5c45c',
-    n: 'Standard Profile info',
-    d: '',
-    p: DrivePermissionType.Read,
+    alias: '8f12d8c4933813d378488d91ed23b64c',
+    type: '597241530e3ef24b28b9a75ec3a5c45c',
+    name: 'Standard Profile info',
+    description: '',
+    permissions: [DrivePermissionType.Read],
   },
   {
     // Contacts
-    a: ContactConfig.ContactTargetDrive.alias,
-    t: ContactConfig.ContactTargetDrive.type,
-    n: 'Contact Drive',
-    d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
+    ...ContactConfig.ContactTargetDrive,
+    name: 'Contact Drive',
+    description: '',
+    permissions: [DrivePermissionType.Read, DrivePermissionType.Write],
   },
 ];
 
@@ -90,13 +89,13 @@ export const permissions = [
   AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
 ];
 
-export const circleDrives = [
+export const circleDrives: TargetDriveAccessRequest[] = [
   {
-    a: ChatDrive.alias,
-    t: ChatDrive.type,
-    n: 'Chat Drive',
-    d: '',
-    p: DrivePermissionType.Write + DrivePermissionType.React,
+    alias: ChatDrive.alias,
+    type: ChatDrive.type,
+    name: 'Chat Drive',
+    description: '',
+    permissions: [DrivePermissionType.Write, DrivePermissionType.React],
   },
 ];
 

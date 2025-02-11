@@ -129,12 +129,12 @@ export const CommunityNav = memo(
                 onClick={() => setIsCommunityInfoDialogOpen(true)}
               >
                 <span
-                  className={`h-3 w-3 rounded-full transition-colors ${
+                  className={`h-3 w-3 shrink-0 rounded-full transition-colors ${
                     isOnline ? 'bg-green-400' : 'bg-red-400'
                   }`}
                   title={isOnline ? t('Connected') : t('Offline')}
                 />
-                {community.fileMetadata.appData.content?.title}
+                <p className="text-left">{community.fileMetadata.appData.content?.title}</p>
                 <ChevronDown className="h-4 w-4" />
               </button>
             </div>

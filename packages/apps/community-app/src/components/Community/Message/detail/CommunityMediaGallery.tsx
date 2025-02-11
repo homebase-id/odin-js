@@ -181,12 +181,6 @@ export const CommunityMediaGallery = ({
                   type="secondary"
                 />
               ) : null}
-              {/* <p>
-                {fileName}
-                <span className="ml-3 border-l border-slate-400 pl-3">
-                  {formatDateExludingYearIfCurrent(new Date(payload.lastModified))}
-                </span>
-              </p> */}
             </div>
             <div className="ml-auto flex flex-row items-center gap-2">
               <p className="text-sm text-slate-400">{bytesToSize(payload.bytesWritten)}</p>
@@ -204,7 +198,10 @@ export const CommunityMediaGallery = ({
           {prevKey ? (
             <ActionButton
               icon={ArrowLeft}
-              onClick={(e) => goPrev(e.nativeEvent)}
+              onClick={(e) => {
+                goPrev(e.nativeEvent);
+                e.stopPropagation();
+              }}
               className="absolute left-2 top-[calc(50%-1.25rem)] rounded-full p-3"
               size="square"
               type="secondary"
@@ -213,7 +210,10 @@ export const CommunityMediaGallery = ({
           {nextKey ? (
             <ActionButton
               icon={Arrow}
-              onClick={(e) => goNext(e.nativeEvent)}
+              onClick={(e) => {
+                goNext(e.nativeEvent);
+                e.stopPropagation();
+              }}
               className="absolute right-2 top-[calc(50%-1.25rem)] rounded-full p-3"
               size="square"
               type="secondary"
