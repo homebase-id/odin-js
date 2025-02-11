@@ -41,17 +41,21 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
     [BuiltInAttributes.Name]
   );
 
-  const displayNames = profileNameAttributes
-    ?.filter(
-      (attr) =>
-        attr.serverMetadata?.accessControlList.requiredSecurityGroup.toLowerCase() ===
-        SecurityGroupType.Anonymous.toLowerCase()
-    )
-    ?.map(
-      (attr) =>
-        attr?.fileMetadata?.appData?.content?.data?.[MinimalProfileFields.DisplayName] as string
-    )
-    .filter((fileId) => fileId !== undefined);
+  const publicNameAttribute = profileNameAttributes?.filter(
+    (attr) =>
+      attr.serverMetadata?.accessControlList.requiredSecurityGroup.toLowerCase() ===
+      SecurityGroupType.Anonymous.toLowerCase()
+  )[0];
+
+  const displayName = publicNameAttribute?.fileMetadata?.appData?.content?.data?.[
+    MinimalProfileFields.DisplayName
+  ] as string | undefined;
+  const givenName = publicNameAttribute?.fileMetadata?.appData?.content?.data?.[
+    MinimalProfileFields.GivenNameId
+  ] as string | undefined;
+  const familyName = publicNameAttribute?.fileMetadata?.appData?.content?.data?.[
+    MinimalProfileFields.SurnameId
+  ] as string | undefined;
 
   const bioAttributes = await getProfileAttributes(
     dotYouClient,
@@ -139,7 +143,9 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
     .filter((link) => link.type && link.url);
 
   await publishProfileCardFile(dotYouClient, {
-    name: displayNames?.[0] || dotYouClient.getHostIdentity(),
+    name: displayName || dotYouClient.getHostIdentity(),
+    givenName: (givenName?.length && givenName) || undefined,
+    familyName: (familyName?.length && familyName) || undefined,
     bio: bios?.[0] || '',
     image: `https://${dotYouClient.getHostIdentity()}/pub/image`,
     email: emails,
