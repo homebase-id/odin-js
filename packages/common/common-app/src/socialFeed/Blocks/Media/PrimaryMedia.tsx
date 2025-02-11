@@ -13,6 +13,7 @@ import { useFile } from '../../../hooks';
 import { Download } from '../../../ui/Icons';
 import { bytesToSize, t } from '../../../helpers';
 import { LinkPreviewItem } from '../../../media/Link';
+import { useEffect } from 'react';
 
 export const PrimaryMedia = ({
   odinId,
@@ -124,6 +125,7 @@ interface BaseBoringFileProps {
   file: PayloadDescriptor | NewPayloadDescriptor;
   canDownload?: boolean;
   className?: string;
+  onLoad?: () => void;
 }
 
 interface BoringFilePayloadProps extends BaseBoringFileProps {
@@ -149,6 +151,7 @@ export const BoringFile = ({
   file,
   canDownload,
   className,
+  onLoad,
 }: BoringFileProps) => {
   const contentType =
     (file as NewPayloadDescriptor)?.pendingFile?.type ||
@@ -170,6 +173,10 @@ export const BoringFile = ({
     link.download = file.descriptorContent || url.substring(url.lastIndexOf('/') + 1);
     link.click();
   };
+
+  useEffect(() => {
+    onLoad?.();
+  }, [onLoad]);
 
   if (!file) return null;
 

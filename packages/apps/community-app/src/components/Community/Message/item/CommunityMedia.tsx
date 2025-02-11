@@ -143,6 +143,7 @@ const MediaItem = ({
                 targetDrive={targetDrive}
                 className={`w-full blur-sm`}
                 loadSize={{ pixelWidth: 1920, pixelHeight: 1080 }}
+                onLoad={onLoad}
               />
               <div className="absolute inset-0 flex items-center justify-center">
                 <Triangle className="h-16 w-16 text-black dark:text-white" />
@@ -198,6 +199,7 @@ const MediaItem = ({
               systemFileType={systemFileType}
               payload={payload as PayloadDescriptor}
               className="p-1"
+              onLoad={onLoad}
             />
           ) : (
             <BoringFile
@@ -207,6 +209,7 @@ const MediaItem = ({
               targetDrive={targetDrive}
               file={payload as PayloadDescriptor}
               globalTransitId={undefined}
+              onLoad={onLoad}
             />
           )}
         </>
