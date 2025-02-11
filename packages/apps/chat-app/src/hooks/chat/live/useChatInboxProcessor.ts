@@ -75,7 +75,6 @@ export const useChatInboxProcessor = (connected?: boolean) => {
         }
       );
       isDebug && console.debug('[InboxProcessor] new conversations', updatedConversations.length);
-      console.log('new/updated conversations', updatedConversations);
       await processConversationsBatch(dotYouClient, queryClient, updatedConversations);
     } else {
       console.warn('[useChatInboxProcessor] Invalidating all conversations & chat messages');
