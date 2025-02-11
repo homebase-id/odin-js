@@ -153,6 +153,7 @@ const MediaItem = ({
               fileId={fileId}
               payload={payload as PayloadDescriptor}
               className="p-1"
+              onLoad={onLoad}
             />
           ) : (
             <BoringFile
@@ -161,6 +162,7 @@ const MediaItem = ({
               globalTransitId={undefined}
               targetDrive={ChatDrive}
               file={payload as PayloadDescriptor}
+              onLoad={onLoad}
             />
           )}
         </>

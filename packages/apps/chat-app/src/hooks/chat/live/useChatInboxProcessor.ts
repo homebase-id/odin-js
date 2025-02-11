@@ -91,7 +91,7 @@ export const useChatInboxProcessor = (connected?: boolean) => {
     queryKey: ['process-chat-inbox'],
     queryFn: fetchData,
     enabled: connected,
-    staleTime: 1000 * 10, // 10 seconds
+    staleTime: 1000,
   });
 };
 

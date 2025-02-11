@@ -143,6 +143,7 @@ const MediaItem = ({
                 targetDrive={targetDrive}
                 className={`w-full blur-sm`}
                 loadSize={{ pixelWidth: 1920, pixelHeight: 1080 }}
+                onLoad={onLoad}
               />
               <div className="absolute inset-0 flex items-center justify-center">
                 <Triangle className="h-16 w-16 text-black dark:text-white" />
@@ -198,6 +199,7 @@ const MediaItem = ({
               systemFileType={systemFileType}
               payload={payload as PayloadDescriptor}
               className="p-1"
+              onLoad={onLoad}
             />
           ) : (
             <BoringFile
@@ -207,6 +209,7 @@ const MediaItem = ({
               targetDrive={targetDrive}
               file={payload as PayloadDescriptor}
               globalTransitId={undefined}
+              onLoad={onLoad}
             />
           )}
         </>
@@ -288,7 +291,7 @@ const MediaGallery = ({
   msg: HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage>;
 }) => {
   const payloads = msg.fileMetadata.payloads?.filter(
-    (pyld) => pyld.key !== COMMUNITY_LINKS_PAYLOAD_KEY
+    (pyld) => pyld.key !== COMMUNITY_LINKS_PAYLOAD_KEY && pyld.key !== DEFAULT_PAYLOAD_KEY
   );
   const totalCount = (payloads && payloads.length) || 0;
   const maxVisible = 4;
@@ -312,7 +315,7 @@ const MediaGallery = ({
       ) : null}
 
       <div className={`${tinyThumbUrl ? 'absolute inset-0' : ''} grid grid-cols-2 gap-1`}>
-        {msg.fileMetadata.payloads?.slice(0, 4)?.map((payload, index) => (
+        {payloads?.slice(0, 4)?.map((payload, index) => (
           <MediaGalleryItem
             odinId={odinId}
             communityId={communityId}
@@ -328,11 +331,6 @@ const MediaGallery = ({
                   : `${rootPath}/${msg.fileMetadata.appData.uniqueId}/${payload.key}`
               );
             }}
-            // onClick={
-            //   msg.fileId
-            //     ? () => navigate(`${msg.fileMetadata.appData.uniqueId}/${payload.key}`)
-            //     : undefined
-            // }
             isColSpan2={!!payloads && payloads.length === 3 && index === 2}
           >
             {index === maxVisible - 1 && countExcludedFromView > 0 ? (
