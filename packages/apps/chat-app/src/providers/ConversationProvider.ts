@@ -285,14 +285,6 @@ export const updateConversation = async (
       fileId: conversation.fileId,
       targetDrive: ChatDrive,
     },
-    transitOptions: distribute
-      ? {
-          recipients,
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.Medium,
-          sendContents: SendContents.All,
-        }
-      : undefined,
     recipients: distribute ? recipients : undefined,
 
     versionTag: conversation.fileMetadata.versionTag,

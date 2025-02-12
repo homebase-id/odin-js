@@ -21,29 +21,14 @@ export interface BaseUploadInstructionSet {
 
 export type UploadInstructionSet = BaseUploadInstructionSet;
 
-export interface UpdateHeaderInstructionSet extends BaseUploadInstructionSet {
-  storageIntent: 'header';
+export interface BaseUpdateInstructionSet {
+  transferIv?: Uint8Array;
+  systemFileType?: SystemFileType;
+
+  useAppNotification?: boolean;
+  appNotificationOptions?: PushNotificationOptions;
 }
-
-export const isUpdateHeaderInstructionSet = (
-  instructionSet: unknown
-): instructionSet is UpdateHeaderInstructionSet => {
-  return (
-    !!instructionSet &&
-    typeof instructionSet === 'object' &&
-    'storageIntent' in instructionSet &&
-    instructionSet.storageIntent === 'header'
-  );
-};
-
-export interface AppendInstructionSet extends Omit<BaseUploadInstructionSet, 'storageOptions'> {
-  storageIntent: 'append';
-
-  targetFile: FileIdFileIdentifier;
-  versionTag: string | undefined;
-}
-
-export interface UpdatePeerInstructionSet extends Partial<BaseUploadInstructionSet> {
+export interface UpdatePeerInstructionSet extends Partial<BaseUpdateInstructionSet> {
   file: GlobalTransitIdFileIdentifier;
   versionTag: string | undefined;
 
@@ -51,7 +36,7 @@ export interface UpdatePeerInstructionSet extends Partial<BaseUploadInstructionS
   recipients?: string[];
 }
 
-export interface UpdateLocalInstructionSet extends Partial<BaseUploadInstructionSet> {
+export interface UpdateLocalInstructionSet extends Partial<BaseUpdateInstructionSet> {
   file: FileIdFileIdentifier;
   versionTag: string | undefined;
 
@@ -170,10 +155,6 @@ export interface UploadResult {
   file: FileIdFileIdentifier;
   globalTransitIdFileIdentifier: GlobalTransitIdFileIdentifier;
   recipientStatus: { [key: string]: TransferUploadStatus };
-  newVersionTag: string;
-}
-
-export interface AppendResult {
   newVersionTag: string;
 }
 
