@@ -109,8 +109,8 @@ export const OdinPreviewImage = forwardRef(
     // Call onError if load hasn't happened in 5 seconds
     useEffect(() => {
       const timeout = setTimeout(() => {
-        if (onLoadCalled.current === false) {
-          isDebug && console.error('OdinPreviewImage: Image load timeout');
+        if (onLoadCalled.current === false && previewUrl) {
+          isDebug && console.warn('OdinPreviewImage: image load timeout');
           onError?.();
         }
       }, 5000);

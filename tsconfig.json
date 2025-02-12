@@ -8,10 +8,34 @@
       "path": "./packages/libs/ui-lib"
     },
     {
+      "path": "./packages/apps/chat-app"
+    },
+    {
+      "path": "./packages/apps/community-app"
+    },
+    {
+      "path": "./packages/apps/feed-app"
+    },
+    {
+      "path": "./packages/apps/login-app"
+    },
+    {
+      "path": "./packages/apps/mail-app"
+    },
+    {
       "path": "./packages/apps/owner-app"
     },
     {
+      "path": "./packages/apps/provisioning-app"
+    },
+    {
       "path": "./packages/apps/public-app"
+    },
+    {
+      "path": "./packages/common/common-app"
+    },
+    {
+      "path": "./packages/common/rich-text-editor"
     }
   ]
 }
