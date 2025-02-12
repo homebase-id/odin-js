@@ -1,5 +1,5 @@
 import {
-  checkStorageAccess,
+  isPartitioned,
   getIdentityFromStorage,
   removeIdentity,
   requestStorageAccess,
@@ -9,29 +9,29 @@ import {
 import { debounce } from 'lodash-es';
 
 const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]{2,25}(?::\d{1,5})?$/i;
-const INVALID_CLASSNAME = 'invalid';
 const LOADING_CLASSNAME = 'loading';
 
-const setupHtml = (isStandalone?: boolean, allowEmptySubmit?: boolean) => {
+const setupHtml = (isStandalone?: boolean) => {
   document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-    <div ${isStandalone ? 'class="max-w-sm m-auto px-3 w-full"' : ''}>
-      <form id="main" class="form">
+    <div class="${isStandalone ? 'max-w-lg m-auto px-3 w-full' : 'max-w-4xl w-full mx-auto'}">
+      <form id="main" class="flex flex-col">
         <h1 class="text-lg">YouAuth</h1>
-        <div class="label-group">
+        <div class="flex flex-col">
           <label htmlFor="homebase-id" class="text-sm leading-7 text-gray-600">
             Homebase Id
           </label>
-          <span class="invalid-msg">Invalid identity</span>
+          <div id="selectable-wrapper" class="relative">
+            <input class="w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 peer invalid:border invalid:border-red-500" type="text" name="homebase-id" list="homebase-identities" id="homebase-id" inputmode="url" autoComplete="off" />
+            <span class="absolute -top-[1.7rem] right-0 hidden peer-invalid:block peer-invalid:text-red-500">Invalid identity</span>
+            <ul id="homebase-identities" class="bg-white dark:bg-slate-950 border border-gray-300 rounded-b dark:border-gray-700 hidden"></ul>
+            <a id="toggle"></a>
+          </div>
         </div>
-        <div id="selectable-wrapper">
-          <input type="text" name="homebase-id" list="homebase-identities" id="homebase-id" inputmode="url" autoComplete="off" ${!allowEmptySubmit ? 'required' : ''}/>
-          <ul id="homebase-identities"></ul>
-          <a id="toggle"></a>
-        </div>
-        <button class="login">Login</button>
+
+        <button class="cursor-pointer block my-3 rounded-md text-center w-full px-4 py-2 bg-indigo-500 text-white hover:filter hover:brightness-90">Login</button>
       </form>
-      <p class="my-3 text-center">or</p>
-      <a class="signup" href="https://homebase.id/sign-up" target="_blank">Signup</a>
+      <p class="text-center">or</p>
+      <a class="block my-3 rounded-md text-center w-full px-4 py-2 bg-slate-200 text-black hover:filter hover:brightness-90" href="https://homebase.id/sign-up" target="_blank">Signup</a>
     </div>`;
 };
 
@@ -40,7 +40,7 @@ export const LoginBox = async (
   isStandalone?: boolean,
   allowEmptySubmit?: boolean
 ) => {
-  setupHtml(isStandalone, allowEmptySubmit);
+  setupHtml(isStandalone);
 
   const mainForm = document.getElementById('main') as HTMLFormElement;
   const dotyouInputBox: HTMLInputElement | null = document.getElementById(
@@ -64,23 +64,23 @@ export const LoginBox = async (
     const strippedIdentity = stripIdentity(domain);
     if (strippedIdentity.split('.').length >= 2) return true;
 
-    mainForm.classList.remove(INVALID_CLASSNAME);
     return false;
   };
 
   const localDomainCheck = (domain: string) => {
     const strippedIdentity = stripIdentity(domain);
     if (domainRegex.test(strippedIdentity)) {
-      mainForm.classList.remove(INVALID_CLASSNAME);
+      dotyouInputBox.setCustomValidity('');
       return true;
     }
-    mainForm.classList.add(INVALID_CLASSNAME);
+
+    dotyouInputBox.setCustomValidity('Invalid identity');
     return false;
   };
 
   const debouncedDomainValidator = debounce(async (e) => {
     if (!localDomainComplete(e.target.value)) return;
-    mainForm.classList.toggle(INVALID_CLASSNAME, !localDomainCheck(e.target.value));
+    localDomainCheck(e.target.value);
   }, 500);
 
   const replaceSpacesWithDots = () => {
@@ -97,7 +97,7 @@ export const LoginBox = async (
       .catch(() => false);
   };
 
-  const storagePartioned = await checkStorageAccess();
+  const storagePartioned = await isPartitioned();
   console.debug('storagePartioned', storagePartioned);
   mainForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -107,17 +107,15 @@ export const LoginBox = async (
       return;
     }
 
-    if (!mainForm.reportValidity()) {
-      return;
-    }
+    if (!mainForm.reportValidity()) return;
 
     if (!localDomainCheck(dotyouInputBox.value)) return;
     mainForm.classList.add(LOADING_CLASSNAME);
 
     const strippedIdentity = stripIdentity(dotyouInputBox.value);
     if (!(await pingIdentity(strippedIdentity))) {
-      mainForm.classList.add(INVALID_CLASSNAME);
       mainForm.classList.remove(LOADING_CLASSNAME);
+      dotyouInputBox.setCustomValidity('Invalid identity');
       return;
     }
 
@@ -133,13 +131,15 @@ export const LoginBox = async (
     if (dotyouInputBox.value) return;
 
     const previousIdentities = getIdentityFromStorage();
+    dotyouInputBox.setCustomValidity('');
+
     if (previousIdentities?.length >= 1) dotyouInputBox.value = previousIdentities[0];
     if (previousIdentities?.length > 1) {
       selectableWrapper.classList.add('selectable-input');
       homebaseIdentities.innerHTML = previousIdentities
         .map(
           (identity) =>
-            `<li class="option" data-identity="${identity}">${identity}<a class="remove"></a></li>`
+            `<li class="group option hover:bg-slate-200 dark:hover:bg-slate-800 px-3 py-1 cursor-pointer relative" data-identity="${identity}">${identity}<a class="remove absolute inset-0 left-auto flex items-center justify-center px-2 py-1 opacity-50 md:opacity-0 transition-opacity group-hover:opacity-50 hover:opacity-100 "></a></li>`
         )
         .join('');
 
@@ -159,6 +159,7 @@ export const LoginBox = async (
           const identity = e.target.getAttribute('data-identity');
           dotyouInputBox.value = identity || '';
           selectableWrapper.classList.remove('show');
+          dotyouInputBox.setCustomValidity('');
         }
       });
 
@@ -181,11 +182,15 @@ export const LoginBox = async (
 
   // If storage is partioned, onclick of the input box, requestAccess to fill in with a previous known identity
   if (storagePartioned) {
-    dotyouInputBox.addEventListener('click', async (e) => {
+    dotyouInputBox.addEventListener('mousedown', (e) => {
       if (!e.target || !(e.target instanceof HTMLInputElement)) return;
       if (e.target.value) return;
 
-      requestStorageAccess().then(() => fillIdentityFromStorage(true));
+      // When we attempt a prefill we don't want to focus the input box
+      e.preventDefault();
+      e.stopPropagation();
+
+      requestStorageAccess().then(() => fillIdentityFromStorage());
     });
   } else fillIdentityFromStorage();
 };
