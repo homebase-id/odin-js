@@ -111,7 +111,10 @@ export const CommunityHome = ({ children }: { children?: ReactNode }) => {
         permissions={permissions}
       />
       <ExtendCriclePermissionDialog />
-      <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`} ref={viewportWrapperRef}>
+      <div
+        className={`flex h-[100dvh] w-full flex-row overflow-hidden pb-[env(safe-area-inset-bottom)]`}
+        ref={viewportWrapperRef}
+      >
         <ErrorBoundary>
           <CommunitiesNav togglePin={(newVal) => setIsHidden((old) => newVal ?? !old)} />
         </ErrorBoundary>
