@@ -1,4 +1,4 @@
-import './style.css';
+// import './style.css';
 
 (async () => {
   const pathName = window.location.pathname;

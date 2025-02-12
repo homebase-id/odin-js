@@ -177,7 +177,10 @@ export const LinkPreviewItem = ({
       className={`rounded-t-lg overflow-hidden ${className || ''}`}
       onClick={(e) => e.stopPropagation()}
     >
-      <LinkPreviewTextual linkPreview={linkPreview} className={`rounded-t-md  p-2 bg-primary/10`} />
+      <LinkPreviewTextual
+        linkPreview={linkPreview}
+        className={`rounded-t-md break-words p-2 bg-primary/10`}
+      />
       {descriptorInfo?.hasImage ? (
         <LinkPreviewImage
           linkPreview={linkPreview}

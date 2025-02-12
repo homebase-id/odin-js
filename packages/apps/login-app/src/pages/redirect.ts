@@ -2,6 +2,11 @@ import { LoginBox } from '../components/loginBox';
 import { RedirectBox } from '../components/redirectBox';
 
 export const Redirect = () => {
+  document.documentElement.classList.toggle(
+    'dark',
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  );
+
   // 1. Parse target URL
   const pathName = window.location.pathname + window.location.search;
   const rawTarget = pathName.split('/redirect')[1];
@@ -37,16 +42,11 @@ export const Redirect = () => {
   // };
 
   // 3. Redirect or show redirect box
-  const redirect = async () => {
-    const identity = await getIdentity();
-    window.location.href = `https://${identity}${target}`;
+  const redirect = async (identity?: string) => {
+    const href = `https://${identity || (await getIdentity())}${target}`;
+    window.location.href = href;
   };
 
   if (allowedToAutoRedirect.some((allowed) => target.startsWith(allowed))) redirect();
-  else
-    RedirectBox(
-      target,
-      () => redirect(),
-      () => history.back()
-    );
+  else RedirectBox(target, redirect);
 };
