@@ -1,10 +1,10 @@
 ﻿import {
   AcceptRequestHeader,
   ConnectionInfo,
-  ConnectionRequest,
   ConnectionRequestHeader,
+  IncomingConnectionRequest,
   OdinIdRequest,
-  RedactedConnectionRequest,
+  ConnectionRequest,
 } from '../circle/CircleDataTypes';
 import { DotYouClient } from '../../core/DotYouClient';
 import { PagingOptions, PagedResult } from '../../core/core';
@@ -19,7 +19,7 @@ const PendingPathRoot: string = Root + '/pending';
 export const getPendingRequests = async (
   dotYouClient: DotYouClient,
   params: PagingOptions
-): Promise<PagedResult<RedactedConnectionRequest>> => {
+): Promise<PagedResult<IncomingConnectionRequest>> => {
   const client = dotYouClient.createAxiosClient();
   const url = PendingPathRoot + '/list?' + stringifyToQueryParams(params);
 
