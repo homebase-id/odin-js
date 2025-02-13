@@ -18,6 +18,7 @@ import { PostInteracts } from '../Blocks/Interacts/PostInteracts';
 import { BoringFile } from '../Blocks/Media/PrimaryMedia';
 import { PostMeta, ToGroupBlock } from '../Blocks/Meta/Meta';
 import { Image } from '../../media/Image';
+import { PostSource } from '../Blocks/Meta/PostSource';
 
 export const PostImageDetailCard = ({
   odinId,
@@ -191,6 +192,7 @@ export const PostImageDetailCard = ({
             </div>
 
             <div className="bg-background flex-shrink-0 lg:max-h-screen flex-grow md:block lg:w-[27rem] lg:flex-grow-0 lg:overflow-auto">
+              <PostSource postFile={postFile} className="p-5" />
               {post && channel ? (
                 <div className="grid grid-flow-col grid-cols-[3rem_auto] gap-3 p-5 pb-0">
                   <AuthorImage odinId={postFile.fileMetadata.originalAuthor || odinId} size="sm" />

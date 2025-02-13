@@ -12,6 +12,7 @@ import { DoubleClickHeartForMedia } from '../Blocks/Media/DoubleClickHeartForMed
 import { useChannel } from '../../hooks/socialFeed/channels/useChannel';
 import { HOME_ROOT_PATH } from '../../constants';
 import { useDotYouClientContext } from '../../hooks';
+import { PostSource } from '../Blocks/Meta/PostSource';
 
 interface PostTeaserProps {
   className?: string;
@@ -58,6 +59,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
           <div
             className={`relative h-full rounded-lg border border-gray-200 border-opacity-60 transition-colors ${'hover:shadow-md hover:dark:shadow-slate-600'} bg-background dark:border-gray-800`}
           >
+            <PostSource postFile={postFile} className="rounded-t-lg" />
             <DoubleClickHeartForMedia
               postFile={postFile}
               showFallback={!hideImageWhenNone}

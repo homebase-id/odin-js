@@ -164,7 +164,9 @@ export const getUploadFileMetadata = async <T extends PostContent>(
       content: content,
       previewThumbnail: previewThumbnail ?? file.fileMetadata.appData.previewThumbnail,
       userDate: file.fileMetadata.appData.userDate,
-      dataType: postTypeToDataType(file.fileMetadata.appData.content.type),
+      dataType:
+        file.fileMetadata.appData.dataType ||
+        postTypeToDataType(file.fileMetadata.appData.content.type),
     },
     isEncrypted: encrypt,
     accessControlList: file.serverMetadata?.accessControlList,

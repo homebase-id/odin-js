@@ -45,7 +45,8 @@ export const CommunityMedia = ({
   const { odinKey, communityKey, channelKey, threadKey } = useParams();
 
   if (!payloads?.length) return null;
-  if (isGallery) return <MediaGallery odinId={odinId} communityId={communityId} msg={msg} />;
+  if (isGallery)
+    return <MediaGallery odinId={odinId} communityId={communityId} msg={msg} originId={originId} />;
 
   return (
     <MediaItem
@@ -142,6 +143,7 @@ const MediaItem = ({
                 targetDrive={targetDrive}
                 className={`w-full blur-sm`}
                 loadSize={{ pixelWidth: 1920, pixelHeight: 1080 }}
+                onLoad={onLoad}
               />
               <div className="absolute inset-0 flex items-center justify-center">
                 <Triangle className="h-16 w-16 text-black dark:text-white" />
@@ -197,6 +199,7 @@ const MediaItem = ({
               systemFileType={systemFileType}
               payload={payload as PayloadDescriptor}
               className="p-1"
+              onLoad={onLoad}
             />
           ) : (
             <BoringFile
@@ -206,6 +209,7 @@ const MediaItem = ({
               targetDrive={targetDrive}
               file={payload as PayloadDescriptor}
               globalTransitId={undefined}
+              onLoad={onLoad}
             />
           )}
         </>
@@ -278,19 +282,23 @@ const getEmbeddedThumbUrl = (previewThumbnail: EmbeddedThumb) =>
 const MediaGallery = ({
   odinId,
   communityId,
+  originId,
   msg,
 }: {
   odinId: string;
   communityId: string;
+  originId?: string;
   msg: HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage>;
 }) => {
   const payloads = msg.fileMetadata.payloads?.filter(
-    (pyld) => pyld.key !== COMMUNITY_LINKS_PAYLOAD_KEY
+    (pyld) => pyld.key !== COMMUNITY_LINKS_PAYLOAD_KEY && pyld.key !== DEFAULT_PAYLOAD_KEY
   );
   const totalCount = (payloads && payloads.length) || 0;
   const maxVisible = 4;
   const countExcludedFromView = (payloads && payloads.length - maxVisible) || 0;
   const navigate = useNavigate();
+
+  const { odinKey, communityKey, channelKey, threadKey } = useParams();
 
   const previewThumbnail = msg.fileMetadata.appData.previewThumbnail;
   const tinyThumbUrl = useMemo(
@@ -307,18 +315,22 @@ const MediaGallery = ({
       ) : null}
 
       <div className={`${tinyThumbUrl ? 'absolute inset-0' : ''} grid grid-cols-2 gap-1`}>
-        {msg.fileMetadata.payloads?.slice(0, 4)?.map((payload, index) => (
+        {payloads?.slice(0, 4)?.map((payload, index) => (
           <MediaGalleryItem
             odinId={odinId}
             communityId={communityId}
             key={payload.key || index}
             payload={payload}
             msg={msg}
-            onClick={
-              msg.fileId
-                ? () => navigate(`${msg.fileMetadata.appData.uniqueId}/${payload.key}`)
-                : undefined
-            }
+            onClick={() => {
+              const threadPathPart = originId || threadKey || undefined;
+              const rootPath = `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey || msg.fileMetadata.appData.content.channelId}`;
+              navigate(
+                threadPathPart
+                  ? `${rootPath}/${threadPathPart}/thread/${msg.fileMetadata.appData.uniqueId}/${payload.key}`
+                  : `${rootPath}/${msg.fileMetadata.appData.uniqueId}/${payload.key}`
+              );
+            }}
             isColSpan2={!!payloads && payloads.length === 3 && index === 2}
           >
             {index === maxVisible - 1 && countExcludedFromView > 0 ? (

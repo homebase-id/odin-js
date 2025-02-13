@@ -144,7 +144,7 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
                 linkPreviews={linkPreviews}
                 setLinkPreviews={setLinkPreviews}
                 cols={4}
-                className="p-2"
+                className="pt-2"
               />
             )}
           </div>

@@ -17,10 +17,7 @@ import {
   saveCommunity,
 } from '../../providers/CommunityDefinitionProvider';
 import { COMMUNITY_APP_ID, t } from '@homebase-id/common-app';
-import {
-  AppDriveAuthorizationParams,
-  getExtendAppRegistrationParams,
-} from '@homebase-id/js-lib/auth';
+import { getExtendAppRegistrationParams, TargetDriveAccessRequest } from '@homebase-id/js-lib/auth';
 import { COMMUNITY_DEFAULT_GENERAL_ID } from '../../providers/CommunityProvider';
 import { invalidateCommunities, updateCacheCommunities } from './useCommunities';
 
@@ -37,33 +34,35 @@ const getEnsureNewDriveAndPermissionPath = (
   allowSubscriptions: boolean,
   returnUrl: string
 ) => {
-  const drives = [
+  const drives: TargetDriveAccessRequest[] = [
     {
-      a: targetDrive.alias,
-      t: targetDrive.type,
-      p:
-        DrivePermissionType.Read +
-        DrivePermissionType.Write +
-        DrivePermissionType.React +
+      alias: targetDrive.alias,
+      type: targetDrive.type,
+      permissions: [
+        DrivePermissionType.Read,
+        DrivePermissionType.Write,
+        DrivePermissionType.React,
         DrivePermissionType.Comment, // Permission
-      n: name,
-      d: description,
-      at: JSON.stringify(attributes),
-      s: allowSubscriptions,
+      ],
+      name: name,
+      description: description,
+      attributes: attributes,
+      allowSubscriptions: allowSubscriptions,
     },
   ];
 
-  const circleDrives: AppDriveAuthorizationParams[] = [
+  const circleDrives: TargetDriveAccessRequest[] = [
     {
-      a: targetDrive.alias,
-      t: targetDrive.type,
-      p:
-        DrivePermissionType.Read +
-        DrivePermissionType.Write +
-        DrivePermissionType.React +
+      alias: targetDrive.alias,
+      type: targetDrive.type,
+      permissions: [
+        DrivePermissionType.Read,
+        DrivePermissionType.Write,
+        DrivePermissionType.React,
         DrivePermissionType.Comment, // Permission
-      n: name,
-      d: description,
+      ],
+      name: name,
+      description: description,
     },
   ];
 

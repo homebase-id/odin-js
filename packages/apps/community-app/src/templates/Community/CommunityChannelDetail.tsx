@@ -33,7 +33,7 @@ export const CommunityChannelDetail = () => {
 
   const { data: community, isFetched } = useCommunity({ odinId: odinKey, communityId }).fetch;
 
-  const { data: channelDsr } = useCommunityChannel({
+  const { data: channelDsr, isFetched: fetchedChannel } = useCommunityChannel({
     odinId: odinKey,
     communityId: communityId,
     channelId: channelId,
@@ -53,7 +53,7 @@ export const CommunityChannelDetail = () => {
       </div>
     );
 
-  if ((communityId && !community) || (channelId && !channelDsr)) {
+  if ((communityId && !isFetched) || (channelId && !fetchedChannel)) {
     return (
       <div className="h-full w-20 flex-grow bg-background">
         <LoadingBlock className="h-16 w-full" />

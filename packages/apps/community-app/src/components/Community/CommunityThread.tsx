@@ -30,7 +30,7 @@ export const CommunityThread = memo(
     const { odinKey, communityKey, channelKey } = useParams();
     const [participants, setParticipants] = useState<string[] | null>();
 
-    const { data: originMessage } = useCommunityMessage({
+    const { data: originMessage, isFetching: isFetchingOrigin } = useCommunityMessage({
       odinId: community?.fileMetadata.senderOdinId,
       communityId: community?.fileMetadata.appData.uniqueId,
       channelId: channel?.fileMetadata.appData.uniqueId,
@@ -91,7 +91,7 @@ export const CommunityThread = memo(
           </div>
         </div>
         <div className="flex h-20 flex-grow flex-col overflow-auto bg-background">
-          {!originMessage ? (
+          {!originMessage && isFetchingOrigin ? (
             <div className="flex flex-col gap-3 p-5">
               <LoadingBlock className="h-12 w-full" />
               <LoadingBlock className="h-12 w-full" />

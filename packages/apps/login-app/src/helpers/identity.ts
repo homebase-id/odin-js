@@ -5,28 +5,29 @@ export const stripIdentity = (identity: string) => {
 };
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Storage_Access_API/Using
-export const checkStorageAccess = async () => {
+export const isPartitioned = async () => {
   if (!document.hasStorageAccess) {
+    // Browser doesn't support Storage Access API
     console.debug('document.hasStorageAccess is not accessible');
     return false;
   }
 
   const hasAccess = await document.hasStorageAccess();
   console.debug('document.hasStorageAccess', hasAccess);
-  if (hasAccess) {
-    try {
-      const permission = await navigator.permissions.query({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        name: 'storage-access' as any,
-      });
+  if (hasAccess) return false;
 
-      console.debug('document.hasStorageAccess', permission.state);
-      if (permission.state === 'granted') {
-        return false;
-      }
-    } catch (ex) {
-      //
+  try {
+    const permission = await navigator.permissions.query({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      name: 'storage-access' as any,
+    });
+
+    console.debug('other embed with access we can re-use', permission.state);
+    if (permission.state === 'granted') {
+      return false;
     }
+  } catch (ex) {
+    //
   }
 
   return true;

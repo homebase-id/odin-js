@@ -10,8 +10,9 @@
     "emitDeclarationOnly": false,
     "noEmit": true,
     "lib": ["dom", "dom.iterable", "esnext"],
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": "."
   },
-  "include": ["src", "../../../common/common-app/src"],
+  "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

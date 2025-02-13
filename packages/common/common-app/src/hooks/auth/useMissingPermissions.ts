@@ -1,18 +1,18 @@
 import {
   stringifyToQueryParams,
   getUniqueDrivesWithHighestPermission,
-  stringGuidsEqual,
+  drivesEqual,
 } from '@homebase-id/js-lib/helpers';
 import { AppPermissionType } from '@homebase-id/js-lib/network';
 import { useSecurityContext } from '../securityContext/useSecurityContext';
-import { getExtendAppRegistrationParams } from '@homebase-id/js-lib/auth';
+import { getExtendAppRegistrationParams, TargetDriveAccessRequest } from '@homebase-id/js-lib/auth';
 import { useDotYouClientContext } from './useDotYouClientContext';
 
 const getExtendAppRegistrationUrl = (
   host: string,
   appId: string,
-  drives: { a: string; t: string; n: string; d: string; p: number }[],
-  circleDrives: { a: string; t: string; n: string; d: string; p: number }[] | undefined,
+  drives: TargetDriveAccessRequest[],
+  circleDrives: TargetDriveAccessRequest[] | undefined,
   permissionKeys: number[],
   needsAllConnected: boolean,
   returnUrl: string
@@ -37,22 +37,8 @@ export const useMissingPermissions = ({
   needsAllConnected,
 }: {
   appId: string;
-  drives: {
-    a: string;
-    t: string;
-    n: string;
-    d: string;
-    p: number;
-  }[];
-  circleDrives?:
-    | {
-        a: string;
-        t: string;
-        n: string;
-        d: string;
-        p: number;
-      }[]
-    | undefined;
+  drives: TargetDriveAccessRequest[];
+  circleDrives?: TargetDriveAccessRequest[] | undefined;
   permissions: AppPermissionType[];
   needsAllConnected?: boolean;
 }) => {
@@ -71,15 +57,14 @@ export const useMissingPermissions = ({
   );
 
   const missingDrives = drives.filter((drive) => {
-    const matchingGrants = uniqueDriveGrants.filter(
-      (grant) =>
-        stringGuidsEqual(grant.permissionedDrive.drive.alias, drive.a) &&
-        stringGuidsEqual(grant.permissionedDrive.drive.type, drive.t)
+    const matchingGrants = uniqueDriveGrants.filter((grant) =>
+      drivesEqual(grant.permissionedDrive.drive, drive)
     );
 
+    const requestingPermission = drive.permissions.reduce((a, b) => a + b, 0);
     const hasAccess = matchingGrants.some((grant) => {
       const allPermissions = grant.permissionedDrive.permission.reduce((a, b) => a + b, 0);
-      return allPermissions >= drive.p;
+      return allPermissions >= requestingPermission;
     });
 
     return !hasAccess;
