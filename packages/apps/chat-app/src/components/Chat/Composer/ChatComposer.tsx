@@ -123,7 +123,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
               linkPreviews={linkPreviews}
               setLinkPreviews={setLinkPreviews}
               cols={4}
-              className="p-2"
+              className="pt-2"
             />
           )}
         </div>

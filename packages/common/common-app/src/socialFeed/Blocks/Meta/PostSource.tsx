@@ -38,7 +38,7 @@ export const PostSource = ({
       case BlogConfig.YoutubeDataType:
         return {
           icon: Youtube,
-          colors: 'text-[##ff0033]',
+          colors: 'text-[#ff0033]',
           text: 'Video from Youtube',
           rootUrl: 'https://youtube.com',
         };

@@ -10,7 +10,7 @@ export const ChatCreateAndOrRedirect = () => {
 
   useEffect(() => {
     if (!odinId) return;
-    mutate({ recipients: [odinId] });
+    mutate({ recipients: [odinId], imagePayload: undefined });
   }, []);
 
   if (!odinId) return <Navigate to={`${CHAT_ROOT_PATH}`} />;

@@ -6,19 +6,15 @@ import {
   ConnectionImage,
   ConnectionName,
   DialogWrapper,
-  OwnerImage,
-  OwnerName,
   t,
   useDotYouClientContext,
   usePortal,
 } from '@homebase-id/common-app';
-import {
-  ConversationMetadata,
-  ConversationWithYourselfId,
-  UnifiedConversation,
-} from '../../../providers/ConversationProvider';
-import { Persons, House, Pencil, Arrow } from '@homebase-id/common-app/icons';
+import { ConversationMetadata, UnifiedConversation } from '../../../providers/ConversationProvider';
+import { Pencil, Arrow } from '@homebase-id/common-app/icons';
 import { Link } from 'react-router-dom';
+import { ConversationAvatar } from '../Conversations/Item/ConversationAvatar';
+import { ConversationTitle } from '../Conversations/Item/ConversationTitle';
 
 export const ChatInfo = ({
   conversation,
@@ -36,68 +32,23 @@ export const ChatInfo = ({
     (recipient) => recipient !== loggedOnIdentity
   );
 
-  const withYourself = conversation?.fileMetadata.appData.uniqueId === ConversationWithYourselfId;
-  const recipient = recipients.length === 1 ? recipients[0] : undefined;
-
   const isAdmin = conversation.fileMetadata.senderOdinId === loggedOnIdentity;
-
   const dialog = (
     <DialogWrapper onClose={onClose} title={t('Chat info')}>
-      <div>
-        <div className="flex flex-col items-center gap-4">
-          {recipient ? (
-            <ConnectionImage
-              odinId={recipient}
-              className="h-24 w-24 border border-neutral-200 dark:border-neutral-800"
-              size="custom"
-            />
-          ) : withYourself ? (
-            <OwnerImage
-              className="h-24 w-24 border border-neutral-200 dark:border-neutral-800"
-              size="custom"
-            />
-          ) : (
-            <div className="rounded-full bg-primary/20 p-7">
-              <Persons className="h-10 w-10" />
-            </div>
-          )}
+      <div className="flex flex-col items-center gap-4">
+        <ConversationAvatar conversation={conversation} sizeClassName={`h-36 w-36`} />
 
-          <>
-            {recipient ? (
-              <p className="text-center text-xl">
-                <ConnectionName odinId={recipient} />
-                <small className="flex flex-row gap-2 text-sm">
-                  <House className="h-5 w-5" />
-                  <a
-                    href={new DotYouClient({
-                      hostIdentity: recipient,
-                      api: ApiType.Guest,
-                    }).getRoot()}
-                    rel="noreferrer noopener"
-                    target="_blank"
-                    className="text-primary hover:underline"
-                  >
-                    {recipient}
-                  </a>
-                </small>
-              </p>
-            ) : withYourself ? (
-              <p className="text-center text-xl">
-                <OwnerName /> <span className="text-sm text-foreground/50">({t('you')})</span>
-              </p>
-            ) : isAdmin ? (
-              <Link
-                to={`${CHAT_ROOT_PATH}/${conversation.fileMetadata.appData.uniqueId}/edit`}
-                className="flex cursor-pointer flex-row items-center gap-2"
-              >
-                <span className="text-center text-xl">{conversationContent?.title}</span>
-                <Pencil className="h-5 w-5" />
-              </Link>
-            ) : (
-              <span className="text-center text-xl">{conversationContent?.title}</span>
-            )}
-          </>
-        </div>
+        {isAdmin && recipients?.length > 2 ? (
+          <Link
+            to={`${CHAT_ROOT_PATH}/${conversation.fileMetadata.appData.uniqueId}/edit`}
+            className="flex cursor-pointer flex-row items-center gap-2"
+          >
+            <ConversationTitle conversation={conversation} includeLink={true} />
+            <Pencil className="h-5 w-5" />
+          </Link>
+        ) : (
+          <ConversationTitle conversation={conversation} includeLink={true} />
+        )}
       </div>
       {recipients?.length > 1 ? (
         <div className="mt-10">

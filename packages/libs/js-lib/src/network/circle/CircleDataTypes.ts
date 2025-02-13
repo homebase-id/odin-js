@@ -15,6 +15,17 @@ export interface DotYouProfile {
   odinId: string;
 }
 
+export interface ActiveConnection extends DotYouProfile {
+  status: 'connected';
+  accessGrant: AccessGrant;
+  created: number;
+  lastUpdated: number;
+  introducerOdinId?: string;
+  connectionRequestOrigin: ConnectionRequestOrigin;
+  hasVerificationHash: boolean;
+  rku: boolean;
+}
+
 export interface CircleGrant {
   circleId: string;
   permissionSet: PermissionSet;
@@ -43,22 +54,20 @@ export interface ConnectionInfo {
   clientAccessTokenHalfKey: string;
   clientAccessTokenId: string;
   clientAccessTokenSharedSecret: string;
-  contactData?: ContactData;
   connectionRequestOrigin: ConnectionRequestOrigin;
   introducerOdinId?: string;
 }
 
-export interface RedactedConnectionRequest {
+export interface IncomingConnectionRequest {
   senderOdinId: string;
   receivedTimestampMilliseconds: number;
 }
 
-export interface ConnectionRequest extends RedactedConnectionRequest {
+export interface ConnectionRequest extends Omit<IncomingConnectionRequest, 'status'> {
   id: string;
   status: 'pending' | 'sent';
   recipient: string;
   message: string;
-  contactData?: ContactData;
   connectionRequestOrigin: ConnectionRequestOrigin;
   introducerOdinId?: string;
 }

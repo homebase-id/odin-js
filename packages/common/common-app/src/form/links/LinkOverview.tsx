@@ -33,24 +33,36 @@ export const LinkOverview = ({
         .map((link) => {
           const linkMeta = linkPreviews[link];
           if (!linkMeta) return null;
+
+          const removeLink = () => {
+            setLinkPreviews((prev) => {
+              const newPreviews = { ...prev };
+              newPreviews[link] = null;
+              return newPreviews;
+            });
+          };
           return (
-            <div className="group relative w-full max-w-lg" key={link}>
+            <div
+              className="relative w-full max-w-lg hover:bg-slate-200 cursor-pointer"
+              key={link}
+              onClick={() => {
+                removeLink();
+              }}
+            >
               <LinkPreviewTextual
                 key={link}
                 linkPreview={linkMeta || { url: link }}
-                className="border rounded-md overflow-hidden px-2 py-1"
+                className="border rounded-md overflow-hidden px-2 py-1 pointer-events-none"
                 size="sm"
               />
               <ActionButton
                 icon={Times}
                 type="mute"
-                className="absolute top-0 right-0"
-                onClick={() => {
-                  setLinkPreviews((prev) => {
-                    const newPreviews = { ...prev };
-                    newPreviews[link] = null;
-                    return newPreviews;
-                  });
+                className="absolute top-0 right-0 opacity-50"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  removeLink();
                 }}
               />
             </div>

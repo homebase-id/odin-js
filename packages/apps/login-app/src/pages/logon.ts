@@ -8,11 +8,5 @@ export const Logon = async () => {
 
   document.documentElement.classList.toggle('dark', isDarkMode);
 
-  LoginBox(
-    (identity) => {
-      authorize(identity, urlParams);
-    },
-    false,
-    true
-  );
+  LoginBox((identity) => authorize(identity, urlParams), false, true);
 };

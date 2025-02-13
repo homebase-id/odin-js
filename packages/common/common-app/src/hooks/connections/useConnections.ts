@@ -15,8 +15,9 @@ import {
   getReceivedIntroductions,
   removeAllReceivedIntroductions,
   getSentRequests,
-  RedactedConnectionRequest,
+  IncomingConnectionRequest,
   ConnectionRequest,
+  ActiveConnection,
 } from '@homebase-id/js-lib/network';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
@@ -56,10 +57,10 @@ export const invalidatePendingConnection = (queryClient: QueryClient) => {
 export const updateCachePendingConnections = (
   queryClient: QueryClient,
   transformFn: (
-    data: InfiniteData<PagedResult<RedactedConnectionRequest>>
-  ) => InfiniteData<PagedResult<RedactedConnectionRequest>> | undefined
+    data: InfiniteData<PagedResult<IncomingConnectionRequest>>
+  ) => InfiniteData<PagedResult<IncomingConnectionRequest>> | undefined
 ) => {
-  const queryData = queryClient.getQueryData<InfiniteData<PagedResult<RedactedConnectionRequest>>>([
+  const queryData = queryClient.getQueryData<InfiniteData<PagedResult<IncomingConnectionRequest>>>([
     'pending-connections',
   ]);
   if (!queryData || !queryData?.pages?.length) return;
@@ -195,7 +196,7 @@ export const useActiveConnections = (
       return {
         cursor: 0,
         results: [],
-      } as NumberCursoredResult<DotYouProfile>;
+      } as NumberCursoredResult<ActiveConnection>;
     }
   };
 
