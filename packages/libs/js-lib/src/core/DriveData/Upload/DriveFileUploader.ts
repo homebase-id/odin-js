@@ -16,6 +16,7 @@ import {
   UploadResult,
   UpdateResult,
   UpdateInstructionSet,
+  BaseTransitOptions,
 } from './DriveUploadTypes';
 import { decryptKeyHeader, encryptWithKeyheader } from '../SecurityHelpers';
 import {
@@ -68,6 +69,41 @@ export const uploadFile = async (
   metadata.isEncrypted = encrypt || !!options?.aesKey;
 
   const keyHeader = encrypt ? GenerateKeyHeader(options?.aesKey) : undefined;
+  if (instructions.storageOptions?.overwriteFileId) {
+    const updateInstructions: UpdateInstructionSet = {
+      file: {
+        fileId: instructions.storageOptions.overwriteFileId,
+        targetDrive: instructions.storageOptions.drive,
+      },
+      versionTag: metadata.versionTag,
+      locale: 'local',
+      systemFileType: instructions.systemFileType,
+      transferIv: instructions.transferIv,
+      recipients: (instructions.transitOptions as BaseTransitOptions)?.recipients,
+      useAppNotification: (instructions.transitOptions as BaseTransitOptions)?.useAppNotification,
+      appNotificationOptions: (instructions.transitOptions as BaseTransitOptions)
+        ?.appNotificationOptions,
+    };
+
+    const updateResult = await patchFile(
+      dotYouClient,
+      keyHeader,
+      updateInstructions,
+      metadata,
+      payloads,
+      thumbnails,
+      undefined,
+      onVersionConflict,
+      options
+    );
+    if (!updateResult) return;
+
+    return {
+      ...updateResult,
+      file: updateResult.file as FileIdFileIdentifier,
+      globalTransitIdFileIdentifier: undefined,
+    };
+  }
 
   const { systemFileType, ...strippedInstructions } = instructions;
 
@@ -121,7 +157,7 @@ export const patchFile = async (
   options?: {
     axiosConfig?: AxiosRequestConfig;
   }
-): Promise<UpdateResult | UploadResult | void> => {
+): Promise<UpdateResult | void> => {
   isDebug &&
     console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/update`).pathname, {
       instructions,
@@ -181,7 +217,11 @@ export const patchFile = async (
   );
 
   if (!updateResult) return;
-  return updateResult;
+  return {
+    ...updateResult,
+    keyHeader: decryptedKeyHeader,
+    file: instructions.file,
+  };
 };
 
 export const reUploadFile = async (

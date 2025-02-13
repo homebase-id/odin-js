@@ -11,6 +11,7 @@ import {
 import { queryBatch } from '../../../core/DriveData/Query/DriveQueryService';
 import { uploadFile } from '../../../core/DriveData/Upload/DriveFileUploader';
 import {
+  UpdateResult,
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
@@ -44,7 +45,7 @@ export const getChannelLinkDefinitions = async (
 export const saveChannelLink = async (
   dotYouClient: DotYouClient,
   definition: NewHomebaseFile<RemoteCollaborativeChannelDefinition>
-): Promise<UploadResult | undefined> => {
+): Promise<UpdateResult | UploadResult | undefined> => {
   const channelContent = definition.fileMetadata.appData.content;
 
   if (!definition.fileMetadata.appData.uniqueId) {

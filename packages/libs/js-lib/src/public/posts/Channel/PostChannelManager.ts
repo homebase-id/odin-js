@@ -21,6 +21,7 @@ import {
   NewHomebaseFile,
   getSecurityContext,
   ensureDrive,
+  UpdateResult,
 } from '../../../core/core';
 import {
   drivesEqual,
@@ -99,7 +100,7 @@ export const saveChannelDefinition = async (
   dotYouClient: DotYouClient,
   definition: NewHomebaseFile<ChannelDefinition>,
   onMissingDrive?: () => void
-): Promise<UploadResult | undefined> => {
+): Promise<UpdateResult | UploadResult | undefined> => {
   const channelContent = definition.fileMetadata.appData.content;
 
   if (!definition.fileMetadata.appData.uniqueId) {

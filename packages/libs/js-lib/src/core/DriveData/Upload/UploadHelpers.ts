@@ -237,7 +237,7 @@ export const pureUpdate = async (
   systemFileType?: SystemFileType,
   onVersionConflict?: () => Promise<void | UpdateResult> | void,
   axiosConfig?: AxiosRequestConfig
-): Promise<UpdateResult | void> => {
+): Promise<Omit<UpdateResult, 'file'> | void> => {
   const client = dotYouClient.createAxiosClient({
     overrideEncryption: true,
     systemFileType,

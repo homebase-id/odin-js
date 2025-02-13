@@ -93,7 +93,9 @@ export const useCommunityMetadata = (props?: {
           fileMetadata: {
             ...variables.metadata.fileMetadata,
             versionTag: data.newVersionTag,
-            globalTransitId: data.globalTransitIdFileIdentifier.globalTransitId,
+            globalTransitId:
+              data.globalTransitIdFileIdentifier?.globalTransitId ||
+              variables.metadata.fileMetadata.globalTransitId,
           },
         } as HomebaseFile<CommunityMetadata>;
 

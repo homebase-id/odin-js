@@ -165,7 +165,9 @@ export const saveComment = async (
       );
       if (!result) throw new Error(`Upload failed`);
 
-      return result.globalTransitIdFileIdentifier.globalTransitId;
+      const globalTransitId = result.globalTransitIdFileIdentifier?.globalTransitId;
+      if (!globalTransitId) throw new Error(`Upload failed`);
+      return globalTransitId;
     }
   } else {
     metadata.referencedFile = {

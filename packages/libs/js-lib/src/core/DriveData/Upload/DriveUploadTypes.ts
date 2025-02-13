@@ -56,16 +56,18 @@ export interface StorageOptions {
   drive: TargetDrive;
   overwriteFileId?: string;
   expiresTimestamp?: number;
-  storageIntent?: 'metadataOnly'; // 'overwrite' is default
 }
 
-interface BaseTransitOptions {
+export interface BaseTransitOptions {
   recipients: string[];
   isTransient?: boolean; // File is removed after it's received by all recipients
   schedule: ScheduleOptions;
   priority: PriorityOptions;
   sendContents: SendContents;
   remoteTargetDrive?: TargetDrive;
+
+  useAppNotification?: boolean;
+  appNotificationOptions?: PushNotificationOptions;
 }
 
 export interface PushNotificationOptions {
@@ -153,14 +155,16 @@ export interface UploadAppFileMetaData {
 export interface UploadResult {
   keyHeader: KeyHeader | undefined;
   file: FileIdFileIdentifier;
-  globalTransitIdFileIdentifier: GlobalTransitIdFileIdentifier;
+  globalTransitIdFileIdentifier: GlobalTransitIdFileIdentifier | undefined;
   recipientStatus: { [key: string]: TransferUploadStatus };
   newVersionTag: string;
 }
 
 export interface UpdateResult {
-  newVersionTag: string;
+  keyHeader: KeyHeader | undefined;
+  file: FileIdFileIdentifier | GlobalTransitIdFileIdentifier;
   recipientStatus: { [key: string]: TransferUploadStatus };
+  newVersionTag: string;
 }
 
 export enum TransferUploadStatus {
