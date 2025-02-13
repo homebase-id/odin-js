@@ -22,7 +22,7 @@ import { useEffect, useState } from 'react';
 import { PageMeta } from '@homebase-id/common-app';
 import { OutgoingConnectionDialog } from '../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
 import { IntroductionDialog } from '../../components/Connection/ConnectionDialogs/IntroductionDialog';
-import { HeartBeat, Persons, Plus } from '@homebase-id/common-app/icons';
+import { Exclamation, HeartBeat, Persons, Plus } from '@homebase-id/common-app/icons';
 import PersonCard from '../../components/Connection/PersonCard/PersonCard';
 import ConnectionCard from '../../components/Connection/ConnectionCard/ConnectionCard';
 
@@ -451,7 +451,16 @@ const ActiveConnectionSection = ({
                   }
                   canSave={true}
                   key={activeConnection.odinId}
-                />
+                >
+                  {!activeConnection.hasVerificationHash ? (
+                    <div
+                      className="absolute left-3 top-3 rounded-full bg-background p-[0.2rem] text-blue-400"
+                      title={t('Missing confirmation hash')}
+                    >
+                      <Exclamation className="h-5 w-5" />
+                    </div>
+                  ) : null}
+                </ConnectionCard>
               ) : null
             )}
             <div></div>

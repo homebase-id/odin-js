@@ -10,7 +10,12 @@ import {
   PagingOptions,
 } from '../../core/DriveData/Query/DriveQueryTypes';
 import { stringifyToQueryParams } from '../../helpers/DataUtil';
-import { ConnectionInfo, OdinIdRequest, DotYouProfile } from '../circle/CircleDataTypes';
+import {
+  ConnectionInfo,
+  OdinIdRequest,
+  DotYouProfile,
+  ActiveConnection,
+} from '../circle/CircleDataTypes';
 
 const root = '/circles/connections';
 
@@ -35,7 +40,7 @@ export const getConnections = async (
     count: number;
     cursor?: unknown;
   }
-): Promise<NumberCursoredResult<DotYouProfile>> => {
+): Promise<NumberCursoredResult<ActiveConnection>> => {
   const client = dotYouClient.createAxiosClient();
   const url = root + '/connected?' + stringifyToQueryParams(data);
 

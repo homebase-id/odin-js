@@ -43,10 +43,10 @@ export const useDetailedConnectionInfo = ({ odinId }: { odinId?: string }) => {
     if (!odinId) return;
 
     const pendingRequest = await getPendingRequest(dotYouClient, odinId);
-    if (pendingRequest) return { ...pendingRequest };
+    if (pendingRequest) return pendingRequest;
 
     const sentRequest = await getSentRequest(dotYouClient, odinId);
-    if (sentRequest) return { ...sentRequest };
+    if (sentRequest) return sentRequest;
 
     return null;
   };
