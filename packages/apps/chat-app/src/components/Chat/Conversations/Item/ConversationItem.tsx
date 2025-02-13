@@ -12,7 +12,7 @@ import {
   CHAT_ROOT_PATH,
   ErrorNotification,
 } from '@homebase-id/common-app';
-import { ChevronDown, Persons } from '@homebase-id/common-app/icons';
+import { ChevronDown } from '@homebase-id/common-app/icons';
 import { memo, ReactNode, useEffect, useMemo } from 'react';
 import { useChatMessages } from '../../../../hooks/chat/useChatMessages';
 import {
@@ -33,6 +33,7 @@ import { useConversationMetadata } from '../../../../hooks/chat/useConversationM
 import { useConversation } from '../../../../hooks/chat/useConversation';
 import { useNavigate, useParams } from 'react-router-dom';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { ConversationAvatar } from './ConversationAvatar';
 
 const ListItemWrapper = ({
   onClick,
@@ -58,20 +59,21 @@ export const ConversationListItemWrapper = ListItemWrapper;
 
 export const GroupConversationItem = ({
   title,
-  conversationId,
+  conversation,
   ...props
 }: {
   onClick: (() => void) | undefined;
   title: string | undefined;
-  conversationId?: string;
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   isActive: boolean;
 }) => {
   return (
     <ListItemWrapper {...props}>
-      <div className="rounded-full bg-primary/20 p-4">
-        <Persons className="h-5 w-5" />
-      </div>
-      <ConversationBody title={title} conversationId={conversationId} />
+      <ConversationAvatar conversation={conversation} sizeClassName="h-[3rem] w-[3rem]" />
+      <ConversationBody
+        title={title}
+        conversationId={conversation.fileMetadata.appData.uniqueId as string}
+      />
     </ListItemWrapper>
   );
 };

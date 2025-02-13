@@ -13,20 +13,21 @@ import {
   queryBatch,
   uploadFile,
   EncryptedKeyHeader,
-  ScheduleOptions,
-  SendContents,
-  PriorityOptions,
   getLocalContentFromHeader,
   UpdateLocalInstructionSet,
   patchFile,
   UpdateResult,
+  PayloadFile,
+  ThumbnailFile,
 } from '@homebase-id/js-lib/core';
 import { jsonStringify64 } from '@homebase-id/js-lib/helpers';
+import { createThumbnails } from '@homebase-id/js-lib/media';
 
 export const CHAT_CONVERSATION_FILE_TYPE = 8888;
 export const CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE = 8889;
 export const ConversationWithYourselfId = 'e4ef2382-ab3c-405d-a8b5-ad3e09e980dd';
 export const CONVERSATION_PAYLOAD_KEY = 'convo_pk';
+export const CONVERSATION_IMAGE_KEY = 'convo_img';
 
 export const ConversationWithYourself: HomebaseFile<UnifiedConversation, ConversationMetadata> = {
   fileState: 'active',
@@ -218,33 +219,42 @@ export const uploadConversation = async (
   conversation:
     | NewHomebaseFile<UnifiedConversation, ConversationMetadata>
     | HomebaseFile<UnifiedConversation, ConversationMetadata>,
-  distribute: boolean = false,
+  imagePayload: Blob | null | undefined, // undefined means no change
   onVersionConflict?: () => void
 ) => {
-  const identity = dotYouClient.getHostIdentity();
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: ChatDrive,
       overwriteFileId: conversation.fileId,
     },
-    transitOptions: distribute
-      ? {
-          recipients: conversation.fileMetadata.appData.content.recipients.filter(
-            (recipient) => recipient !== identity
-          ),
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.Medium,
-          sendContents: SendContents.All,
-        }
-      : undefined,
   };
 
   const conversationContent = conversation.fileMetadata.appData.content;
   const payloadJson: string = jsonStringify64({ ...conversationContent, version: 1 });
 
+  const payloads: PayloadFile[] | undefined = [];
+  const thumbnails: ThumbnailFile[] | undefined = [];
+  if (imagePayload) {
+    const { additionalThumbnails, tinyThumb } = await createThumbnails(
+      imagePayload,
+      CONVERSATION_IMAGE_KEY,
+      [
+        { height: 75, width: 75, quality: 0.8 },
+        { height: 300, width: 300, quality: 0.8 },
+      ]
+    );
+
+    payloads.push({
+      key: CONVERSATION_IMAGE_KEY,
+      payload: imagePayload,
+    });
+    thumbnails.push(...additionalThumbnails);
+    conversation.fileMetadata.appData.previewThumbnail = tinyThumb;
+  }
+
   const uploadMetadata: UploadFileMetadata = {
     versionTag: conversation?.fileMetadata.versionTag,
-    allowDistribution: distribute,
+    allowDistribution: false, // not yet, only on update is the conversation sent to recipients
     appData: {
       uniqueId: conversation.fileMetadata.appData.uniqueId,
       fileType: conversation.fileMetadata.appData.fileType || CHAT_CONVERSATION_FILE_TYPE,
@@ -260,9 +270,9 @@ export const uploadConversation = async (
     dotYouClient,
     uploadInstructions,
     uploadMetadata,
-    undefined,
-    undefined,
-    undefined,
+    payloads,
+    thumbnails,
+    true,
     onVersionConflict
   );
 };
@@ -270,6 +280,7 @@ export const uploadConversation = async (
 export const updateConversation = async (
   dotYouClient: DotYouClient,
   conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>,
+  imagePayload: Blob | null | undefined, // undefined means no change
   distribute = false,
   ignoreConflict = false
 ): Promise<UpdateResult | void> => {
@@ -294,6 +305,30 @@ export const updateConversation = async (
   const conversationContent = conversation.fileMetadata.appData.content;
   const payloadJson: string = jsonStringify64({ ...conversationContent });
 
+  const payloads: PayloadFile[] | undefined = [];
+  const thumbnails: ThumbnailFile[] | undefined = [];
+  const toDeletePayloads: { key: string }[] | undefined = [];
+  if (imagePayload) {
+    const { additionalThumbnails, tinyThumb } = await createThumbnails(
+      imagePayload,
+      CONVERSATION_IMAGE_KEY,
+      [
+        { height: 75, width: 75, quality: 0.8 },
+        { height: 300, width: 300, quality: 0.8 },
+      ]
+    );
+
+    payloads.push({
+      key: CONVERSATION_IMAGE_KEY,
+      payload: imagePayload,
+    });
+    thumbnails.push(...additionalThumbnails);
+    conversation.fileMetadata.appData.previewThumbnail = tinyThumb;
+  } else if (imagePayload === null) {
+    toDeletePayloads.push({ key: CONVERSATION_IMAGE_KEY });
+    conversation.fileMetadata.appData.previewThumbnail = undefined;
+  }
+
   const uploadMetadata: UploadFileMetadata = {
     versionTag: conversation?.fileMetadata.versionTag,
     allowDistribution: distribute,
@@ -302,6 +337,7 @@ export const updateConversation = async (
       uniqueId: conversation.fileMetadata.appData.uniqueId,
       fileType: conversation.fileMetadata.appData.fileType || CHAT_CONVERSATION_FILE_TYPE,
       content: payloadJson,
+      previewThumbnail: conversation.fileMetadata.appData.previewThumbnail,
     },
     isEncrypted: true,
     accessControlList: conversation.serverMetadata?.accessControlList || {
@@ -314,9 +350,9 @@ export const updateConversation = async (
     conversation.sharedSecretEncryptedKeyHeader,
     uploadInstructions,
     uploadMetadata,
-    undefined,
-    undefined,
-    undefined,
+    payloads,
+    thumbnails,
+    toDeletePayloads,
     !ignoreConflict
       ? async () => {
           const existingConversation = await getConversation(
@@ -327,7 +363,7 @@ export const updateConversation = async (
           conversation.fileMetadata.versionTag = existingConversation.fileMetadata.versionTag;
           conversation.sharedSecretEncryptedKeyHeader =
             existingConversation.sharedSecretEncryptedKeyHeader;
-          return updateConversation(dotYouClient, conversation, distribute, true);
+          return updateConversation(dotYouClient, conversation, imagePayload, distribute, true);
         }
       : () => {
           // We just supress the warning; As we are ignoring the conflict following @param ignoreConflict

@@ -5,6 +5,7 @@ import {
   ConnectionImage,
   ConnectionName,
   ErrorBoundary,
+  ImageSelector,
   Input,
   Label,
   t,
@@ -18,6 +19,7 @@ export const NewConversationGroup = () => {
   const [isStepOne, setIsStepOne] = useState<boolean>(true);
   const [newRecipients, setNewRecipients] = useState<string[]>([]);
   const [groupTitle, setGroupTitle] = useState<string>();
+  const [groupImage, setGroupImage] = useState<Blob>();
 
   const navigate = useNavigate();
 
@@ -25,7 +27,11 @@ export const NewConversationGroup = () => {
   const doCreate = async () => {
     if (!newRecipients?.length) return;
     try {
-      const result = await createNew({ recipients: newRecipients, title: groupTitle });
+      const result = await createNew({
+        recipients: newRecipients,
+        title: groupTitle,
+        imagePayload: groupImage,
+      });
       navigate(`${CHAT_ROOT_PATH}/${result.newConversationId}`);
     } catch (e) {
       console.error(e);
@@ -59,13 +65,29 @@ export const NewConversationGroup = () => {
               ))}
             </>
           ) : (
-            <div>
-              <Label>
-                {t('Group name')}{' '}
-                <small className="text-sm text-foreground/80">({t('optional')})</small>
-              </Label>
-              <Input onChange={(e) => setGroupTitle(e.target.value)} defaultValue={groupTitle} />
-            </div>
+            <>
+              <div>
+                <Label>
+                  {t('Group photo')}{' '}
+                  <small className="text-sm text-foreground/80">({t('optional')})</small>
+                </Label>
+                <ImageSelector
+                  defaultValue={groupImage}
+                  className="overflow-hidden rounded-full"
+                  onChange={(e) => {
+                    setGroupImage(e.target.value);
+                  }}
+                  expectedAspectRatio={1}
+                />
+              </div>
+              <div>
+                <Label>
+                  {t('Group name')}{' '}
+                  <small className="text-sm text-foreground/80">({t('optional')})</small>
+                </Label>
+                <Input onChange={(e) => setGroupTitle(e.target.value)} defaultValue={groupTitle} />
+              </div>
+            </>
           )}
           <div className="mt-3">
             {isStepOne ? (
