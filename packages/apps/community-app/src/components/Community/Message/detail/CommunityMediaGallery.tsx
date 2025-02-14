@@ -107,9 +107,9 @@ export const CommunityMediaGallery = ({
       payload?.descriptorContent) ||
     payload?.key;
 
-  const getFileUrl = useFile({ targetDrive }).fetchFile;
+  const getFileUrl = useFile({ targetDrive, systemFileType: msg.fileSystemType }).fetchFile;
   const doDownload = async () => {
-    const url = await getFileUrl(undefined, undefined, msg.fileId, mediaKey);
+    const url = await getFileUrl(odinId, msg.fileMetadata.globalTransitId, msg.fileId, mediaKey);
     if (!url) return;
     // Dirty hack for easy download
     const link = document.createElement('a');
