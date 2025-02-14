@@ -146,6 +146,9 @@ export const useChatMessage = (props?: {
       ? ChatDeliveryStatus.Read
       : uploadResult.chatDeliveryStatus || ChatDeliveryStatus.Sent;
 
+    newChat.fileMetadata.originalAuthor = identity;
+    newChat.fileMetadata.senderOdinId = identity;
+
     return newChat;
   };
 

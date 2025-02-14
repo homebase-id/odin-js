@@ -12,7 +12,7 @@ export const useFile = (props?: { targetDrive: TargetDrive; systemFileType?: Sys
     odinId: string | undefined,
     globalTransitId: string | undefined,
     fileId: string,
-    payloadKey?: string
+    payloadKey: string
   ) => {
     if (!fileId || !payloadKey || !targetDrive) return null;
 
