@@ -146,6 +146,9 @@ export const useChatMessage = (props?: {
       ? ChatDeliveryStatus.Read
       : uploadResult.chatDeliveryStatus || ChatDeliveryStatus.Sent;
 
+    newChat.fileMetadata.originalAuthor = identity;
+    newChat.fileMetadata.senderOdinId = identity;
+
     return newChat;
   };
 
@@ -209,7 +212,6 @@ export const useChatMessage = (props?: {
       },
       onSuccess: async (newMessage, params) => {
         if (!newMessage) return;
-        const identity = dotYouClient.getLoggedInIdentity();
 
         const existingData = updateCacheChatMessages(
           queryClient,
@@ -232,7 +234,6 @@ export const useChatMessage = (props?: {
                     ...newMessage,
                     fileMetadata: {
                       ...newMessage.fileMetadata,
-                      senderOdinId: identity,
                       appData: {
                         ...newMessage.fileMetadata.appData,
                         previewThumbnail: msg?.fileMetadata.appData.previewThumbnail,
