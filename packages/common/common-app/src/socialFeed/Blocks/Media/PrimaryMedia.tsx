@@ -164,7 +164,9 @@ export const BoringFile = ({
   const fetchFile = (file as NewPayloadDescriptor)?.pendingFileUrl
     ? () => (file as NewPayloadDescriptor).pendingFileUrl as string
     : async () =>
-        (fileId && (await fetchFileFromServer(odinId, globalTransitId, fileId, file.key))) || '';
+        (fileId &&
+          (await fetchFileFromServer(odinId, globalTransitId, fileId, file.key as string))) ||
+        '';
 
   const doDownload = (url: string) => {
     // Dirty hack for easy download
