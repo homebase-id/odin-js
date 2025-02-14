@@ -28,9 +28,6 @@
 `/api/owner/v1/drive/query/specialized/cuid/payload`\
 => [GET] `/api/{guest/apps/owner}/v2/drive/files/payload` (request object with option for fileId/uniqueId/globalTransitId)
 
-`/api/apps/v1/drive/files/deletepayload`\
-=> [DELETE] `/api/{guest/apps/owner}/v2/drive/files/payload`
-
 `/api/apps/v1/drive/files/send-read-receipt`\
 => [POST] `/api/{guest/apps/owner}/v2/drive/files/read-receipts`
 
@@ -45,9 +42,6 @@
 
 `/api/owner/v1/transit/sender/files/send`\
 => [POST] `/api/{apps/owner}/v2/peer/files`
-
-`/api/apps/v1/transit/files/deletepayload`\
-=> [DELETE] `/api/{apps/owner}/v2/peer/files/payload`
 
 `/api/apps/v1/transit/files/header`\
 `/api/owner/v1/transit/query/specialized/cuid/header`\
