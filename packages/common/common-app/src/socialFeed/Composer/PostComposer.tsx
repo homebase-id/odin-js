@@ -149,8 +149,7 @@ export const PostComposer = ({
     return () => window.removeEventListener('message', messageListener);
   }, []);
 
-  const canPost = caption?.length || files?.length || !!embeddedPost;
-
+  const canPost = caption?.replaceAll('\n', '')?.length || files?.length || !!embeddedPost;
   return (
     <div className={`${className ?? ''} relative`}>
       <form

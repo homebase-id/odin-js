@@ -117,38 +117,3 @@ export const deleteFilesByGroupId = async (
       throw error;
     });
 };
-
-export const deletePayload = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive,
-  fileId: string,
-  fileKey: string,
-  versionTag: string,
-  systemFileType?: SystemFileType,
-  axiosConfig?: AxiosRequestConfig
-): Promise<{ newVersionTag: string }> => {
-  assertIfDefined('TargetDrive', targetDrive);
-  assertIfDefined('FileId', fileId);
-  assertIfDefined('FileKey', fileKey);
-
-  const client = dotYouClient.createAxiosClient({
-    systemFileType,
-  });
-
-  const request = {
-    key: fileKey,
-    file: {
-      targetDrive: targetDrive,
-      fileId: fileId,
-    },
-    versionTag: versionTag,
-  };
-
-  return client
-    .post('/drive/files/deletepayload', request, axiosConfig)
-    .then((response) => response.data)
-    .catch((error) => {
-      console.error('[odin-js:deleteFile]', error);
-      throw error;
-    });
-};

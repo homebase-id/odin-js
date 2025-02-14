@@ -16,7 +16,6 @@ import {
   UploadFileMetadata,
   UploadInstructionSet,
   deleteFilesByGroupId,
-  deletePayload,
   getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
   queryBatch,
@@ -547,27 +546,46 @@ export const softDeleteChatMessage = async (
   recipients: string[],
   deleteForEveryone?: boolean
 ) => {
+  const _recipients = deleteForEveryone ? recipients : [];
+
   message.fileMetadata.appData.archivalStatus = ChatDeletedArchivalStaus;
-  let runningVersionTag = message.fileMetadata.versionTag;
-
-  for (let i = 0; message.fileMetadata.payloads && i < message.fileMetadata.payloads.length; i++) {
-    const payload = message.fileMetadata.payloads[i];
-    // TODO: Should the payload be deleted for everyone? With "TransitOptions"; Needs server side support for it;
-    const deleteResult = await deletePayload(
-      dotYouClient,
-      ChatDrive,
-      message.fileId,
-      payload.key,
-      runningVersionTag
-    );
-
-    if (!deleteResult) throw new Error('Failed to delete payload');
-    runningVersionTag = deleteResult.newVersionTag;
-  }
-
-  message.fileMetadata.versionTag = runningVersionTag;
   message.fileMetadata.appData.content.message = '';
-  return await updateChatMessage(dotYouClient, message, deleteForEveryone ? recipients : []);
+
+  const uploadMetadata: UploadFileMetadata = {
+    versionTag: message?.fileMetadata.versionTag,
+    allowDistribution: _recipients && _recipients.length > 0,
+    appData: {
+      uniqueId: message.fileMetadata.appData.uniqueId,
+      groupId: message.fileMetadata.appData.groupId,
+      archivalStatus: (message.fileMetadata.appData as AppFileMetaData<ChatMessage>).archivalStatus,
+      previewThumbnail: message.fileMetadata.appData.previewThumbnail,
+      fileType: CHAT_MESSAGE_FILE_TYPE,
+      content: jsonStringify64({ ...message.fileMetadata.appData.content }),
+    },
+    isEncrypted: true,
+    accessControlList: message.serverMetadata?.accessControlList || {
+      requiredSecurityGroup: SecurityGroupType.AutoConnected,
+    },
+  };
+
+  return await patchFile(
+    dotYouClient,
+    message.sharedSecretEncryptedKeyHeader,
+    {
+      file: {
+        fileId: message.fileId,
+        targetDrive: ChatDrive,
+      },
+      locale: 'local',
+      recipients: _recipients,
+      versionTag: message.fileMetadata.versionTag,
+      systemFileType: message.fileSystemType,
+    },
+    uploadMetadata,
+    [],
+    [],
+    message.fileMetadata.payloads // Delete all payloads
+  );
 };
 
 export const requestMarkAsRead = async (
