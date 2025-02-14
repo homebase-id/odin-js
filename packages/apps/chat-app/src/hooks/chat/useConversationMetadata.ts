@@ -4,7 +4,6 @@ import {
   ConversationMetadata,
   UnifiedConversation,
   ChatDrive,
-  uploadConversationMetadata,
 } from '../../providers/ConversationProvider';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { useConversation } from './useConversation';
@@ -26,13 +25,6 @@ export const useConversationMetadata = (props?: { conversationId?: string | unde
     conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
     newMetadata: ConversationMetadata;
   }) => {
-    // Add saving to the conversation metadata file to allow slow migration of the RN app:
-    try {
-      await uploadConversationMetadata(dotYouClient, newMetadata);
-    } catch {
-      // It's a backwards-compatible change, so we can ignore errors
-    }
-
     return await uploadLocalMetadataContent(dotYouClient, ChatDrive, conversation, {
       ...conversation.fileMetadata.localAppData,
       content: newMetadata,
