@@ -232,7 +232,7 @@ export const dsrToMessage = async (
       dsr,
       includeMetadataHeader
     );
-    console.log('msgContent', msgContent);
+
     if (!msgContent) return null;
 
     if (
