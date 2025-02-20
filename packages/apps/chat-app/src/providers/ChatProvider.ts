@@ -16,7 +16,6 @@ import {
   UploadFileMetadata,
   UploadInstructionSet,
   deleteFilesByGroupId,
-  getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
   queryBatch,
   uploadFile,
@@ -34,6 +33,11 @@ import {
   patchFile,
   UpdateLocalInstructionSet,
   UpdateResult,
+  FileMetadata,
+  EncryptedKeyHeader,
+  SystemFileType,
+  getContentFromHeader,
+  getPayloadAsJson,
 } from '@homebase-id/js-lib/core';
 import {
   ChatDrive,
@@ -166,6 +170,55 @@ export const getChatMessage = async (dotYouClient: DotYouClient, chatMessageId: 
   return await dsrToMessage(dotYouClient, fileHeader, ChatDrive, true);
 };
 
+export const getChatMessageContentFromHeaderOrPayload = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  dsr: {
+    fileId: string;
+    fileMetadata: FileMetadata;
+    sharedSecretEncryptedKeyHeader: EncryptedKeyHeader | undefined;
+    fileSystemType?: SystemFileType;
+  },
+  includesJsonContent: boolean,
+  systemFileType?: SystemFileType
+): Promise<ChatMessage | null> => {
+  const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
+  if (!fileId || !fileMetadata) {
+    throw new Error('[odin-js] getContentFromHeaderOrPayload: fileId or fileMetadata is undefined');
+  }
+
+  const contentIsComplete =
+    fileMetadata.payloads?.filter((payload) => payload.key === DEFAULT_PAYLOAD_KEY).length === 0;
+  if (fileMetadata.isEncrypted && !sharedSecretEncryptedKeyHeader) return null;
+
+  const messageContent = await getContentFromHeader<ChatMessage>(
+    dotYouClient,
+    targetDrive,
+    dsr,
+    includesJsonContent,
+    systemFileType
+  );
+
+  if (contentIsComplete) {
+    return messageContent;
+  } else {
+    const payloadDescriptor = dsr.fileMetadata.payloads?.find(
+      (payload) => payload.key === DEFAULT_PAYLOAD_KEY
+    );
+    const payload = await getPayloadAsJson<ChatMessage>(dotYouClient, targetDrive, fileId, DEFAULT_PAYLOAD_KEY, {
+      systemFileType: dsr.fileSystemType || systemFileType,
+      lastModified: payloadDescriptor?.lastModified,
+    });
+    if (!payload || !messageContent) return null;
+    return {
+      message: payload.message,
+      deliveryStatus: messageContent.deliveryStatus,
+      replyId: messageContent.replyId
+
+    }
+  }
+};
+
 export const dsrToMessage = async (
   dotYouClient: DotYouClient,
   dsr: HomebaseFile,
@@ -173,12 +226,13 @@ export const dsrToMessage = async (
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<ChatMessage> | null> => {
   try {
-    const msgContent = await getContentFromHeaderOrPayload<ChatMessage>(
+    const msgContent = await getChatMessageContentFromHeaderOrPayload(
       dotYouClient,
       targetDrive,
       dsr,
       includeMetadataHeader
     );
+    console.log('msgContent', msgContent);
     if (!msgContent) return null;
 
     if (
@@ -192,9 +246,9 @@ export const dsrToMessage = async (
       )
         ? ChatDeliveryStatus.Read
         : buildDeliveryStatus(
-            dsr.serverMetadata.originalRecipientCount,
-            dsr.serverMetadata.transferHistory.summary
-          );
+          dsr.serverMetadata.originalRecipientCount,
+          dsr.serverMetadata.transferHistory.summary
+        );
     }
 
     const chatMessage: HomebaseFile<ChatMessage> = {
@@ -272,19 +326,19 @@ export const uploadChatMessage = async (
     },
     transitOptions: distribute
       ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.High,
-          sendContents: SendContents.All,
-          useAppNotification: true,
-          appNotificationOptions: {
-            appId: appId,
-            typeId: message.fileMetadata.appData.groupId || getNewId(),
-            tagId: message.fileMetadata.appData.uniqueId || getNewId(),
-            silent: false,
-            unEncryptedMessage: notificationBody,
-          },
-        }
+        recipients: [...recipients],
+        schedule: ScheduleOptions.SendLater,
+        priority: PriorityOptions.High,
+        sendContents: SendContents.All,
+        useAppNotification: true,
+        appNotificationOptions: {
+          appId: appId,
+          typeId: message.fileMetadata.appData.groupId || getNewId(),
+          tagId: message.fileMetadata.appData.uniqueId || getNewId(),
+          silent: false,
+          unEncryptedMessage: notificationBody,
+        },
+      }
       : undefined,
   };
 
@@ -301,10 +355,10 @@ export const uploadChatMessage = async (
   const content = shouldEmbedContent
     ? jsonContent
     : jsonStringify64({
-        message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
-        replyId: messageContent.replyId,
-        deliveryStatus: messageContent.deliveryStatus,
-      }); // We only embed the content if it's less than 3kb
+      message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
+      replyId: messageContent.replyId,
+      deliveryStatus: messageContent.deliveryStatus,
+    }); // We only embed the content if it's less than 3kb
 
   if (!shouldEmbedContent) {
     payloads.push({
@@ -347,8 +401,8 @@ export const uploadChatMessage = async (
 
     const imageBlob = imageUrl
       ? new Blob([base64ToUint8Array(imageUrl.split(',')[1])], {
-          type: imageUrl.split(';')[0].split(':')[1],
-        })
+        type: imageUrl.split(';')[0].split(':')[1],
+      })
       : undefined;
 
     const { tinyThumb } = imageBlob
@@ -483,10 +537,10 @@ export const updateChatMessage = async (
   const content = shouldEmbedContent
     ? jsonContent
     : jsonStringify64({
-        message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
-        replyId: messageContent.replyId,
-        deliveryStatus: messageContent.deliveryStatus,
-      }); // We only embed the content if it's less than 3kb
+      message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
+      replyId: messageContent.replyId,
+      deliveryStatus: messageContent.deliveryStatus,
+    }); // We only embed the content if it's less than 3kb
 
   const payloads: PayloadFile[] = [];
   if (!shouldEmbedContent) {
