@@ -170,6 +170,8 @@ export const getChatMessage = async (dotYouClient: DotYouClient, chatMessageId: 
   return await dsrToMessage(dotYouClient, fileHeader, ChatDrive, true);
 };
 
+// Built on top of getContentFromHeaderOrPayload
+// This function fetches the full json payload(if exists) and extends deliveryDetails with the payload content
 export const getChatMessageContentFromHeaderOrPayload = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
