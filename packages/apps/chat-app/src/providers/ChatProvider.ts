@@ -182,7 +182,8 @@ export const dsrToMessage = async (
     if (!msgContent) return null;
 
     if (
-      (msgContent.deliveryStatus === ChatDeliveryStatus.Sent ||
+      (msgContent.deliveryStatus === undefined ||
+        msgContent.deliveryStatus === ChatDeliveryStatus.Sent ||
         msgContent.deliveryStatus === ChatDeliveryStatus.Failed) &&
       dsr.serverMetadata?.transferHistory?.summary
     ) {
