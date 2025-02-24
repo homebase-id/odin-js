@@ -113,7 +113,6 @@ export const encryptRecoveryKey = async (
     remotePublicKeyJwk: await exportEccPublicKey(clientEccKey.publicKey),
     salt: nonceData.nonce64,
     iv: nonceData.nonce64,
-    keyType : "OfflineKey",
     encryptionPublicKeyCrc32: publicKey.crC32c,
     encryptedData: uint8ArrayToBase64(encrytpedGcm),
   };
