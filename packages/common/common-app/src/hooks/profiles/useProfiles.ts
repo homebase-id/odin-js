@@ -18,15 +18,21 @@ export const useProfiles = (disabled?: boolean) => {
 
   const fetchAll = async () => {
     const definitions = (await getProfileDefinitions(dotYouClient))
+    const mappedDefinitions = definitions
       .map((def) => {
+        console.log(def);
         return {
           ...def,
           slug: slugify(def.name),
         } as ProfileDefinitionVm;
       })
       ?.sort((profileA, profileB) => profileA.name.localeCompare(profileB.name));
+    if (!mappedDefinitions.length) {
+      // throw new Error('No profile definitions found');
+      return;
+    }
+    return mappedDefinitions;
 
-    return definitions;
   };
 
   const saveProfile = async (profileDef: ProfileDefinition) => {
@@ -41,8 +47,9 @@ export const useProfiles = (disabled?: boolean) => {
     fetchProfiles: useQuery({
       queryKey: ['profiles'],
       queryFn: fetchAll,
-      staleTime: 1000 * 60 * 60, // 1 hour
+      staleTime: 1000 * 60 * 5, // 1 hour
       enabled: !disabled,
+
     }),
     saveProfile: useMutation({
       mutationFn: saveProfile,
