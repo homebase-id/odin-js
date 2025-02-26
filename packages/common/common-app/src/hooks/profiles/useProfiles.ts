@@ -18,6 +18,7 @@ export const useProfiles = (disabled?: boolean) => {
 
   const fetchAll = async () => {
     const definitions = (await getProfileDefinitions(dotYouClient))
+    const mappedDefinitions = definitions
       .map((def) => {
         return {
           ...def,
@@ -25,8 +26,11 @@ export const useProfiles = (disabled?: boolean) => {
         } as ProfileDefinitionVm;
       })
       ?.sort((profileA, profileB) => profileA.name.localeCompare(profileB.name));
+    if (!mappedDefinitions.length) {
+      return;
+    }
+    return mappedDefinitions;
 
-    return definitions;
   };
 
   const saveProfile = async (profileDef: ProfileDefinition) => {
@@ -43,6 +47,7 @@ export const useProfiles = (disabled?: boolean) => {
       queryFn: fetchAll,
       staleTime: 1000 * 60 * 60, // 1 hour
       enabled: !disabled,
+
     }),
     saveProfile: useMutation({
       mutationFn: saveProfile,
