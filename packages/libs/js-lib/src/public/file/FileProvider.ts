@@ -37,16 +37,16 @@ type PublishProfileImage = {
   contentType: string;
 };
 
-type PublishProfileCard = {
-  name: string;
-  givenName?: string;
-  familyName?: string;
-  bio: string;
-  image: string;
-  email: { type: string; email: string }[];
-  links: { type: string; url: string }[];
-  sameAs: { type: string; url: any }[]
-};
+// type PublishProfileCard = {
+//   name: string;
+//   givenName?: string;
+//   familyName?: string;
+//   bio: string;
+//   image: string;
+//   email: { type: string; email: string }[];
+//   links: { type: string; url: string }[];
+//   sameAs: { type: string; url: any }[]
+// };
 
 const _internalFileCache = new Map<string, Promise<Map<string, ResponseEntry[]>>>();
 
