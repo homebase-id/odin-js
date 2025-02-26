@@ -20,7 +20,6 @@ export const useProfiles = (disabled?: boolean) => {
     const definitions = (await getProfileDefinitions(dotYouClient))
     const mappedDefinitions = definitions
       .map((def) => {
-        console.log(def);
         return {
           ...def,
           slug: slugify(def.name),
@@ -28,7 +27,6 @@ export const useProfiles = (disabled?: boolean) => {
       })
       ?.sort((profileA, profileB) => profileA.name.localeCompare(profileB.name));
     if (!mappedDefinitions.length) {
-      // throw new Error('No profile definitions found');
       return;
     }
     return mappedDefinitions;
@@ -47,7 +45,7 @@ export const useProfiles = (disabled?: boolean) => {
     fetchProfiles: useQuery({
       queryKey: ['profiles'],
       queryFn: fetchAll,
-      staleTime: 1000 * 60 * 5, // 1 hour
+      staleTime: 1000 * 60 * 60, // 1 hour
       enabled: !disabled,
 
     }),
