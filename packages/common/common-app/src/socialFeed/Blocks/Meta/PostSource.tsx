@@ -1,6 +1,6 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { BlogConfig, PostContent } from '@homebase-id/js-lib/public';
-import { Facebook, Instagram, Twitter, Youtube } from '../../../ui/Icons';
+import { Facebook, Instagram, Twitter, Youtube, Wordpress } from '../../../ui/Icons';
 
 export const PostSource = ({
   postFile,
@@ -41,6 +41,13 @@ export const PostSource = ({
           colors: 'text-[#ff0033]',
           text: 'Video from Youtube',
           rootUrl: 'https://youtube.com',
+        };
+      case BlogConfig.WordpressDataType:
+        return {
+          icon: Wordpress,
+          colors: 'text-[#ff0033]',
+          text: 'Post from Wordpress',
+          rootUrl: 'https://wordpress.com',
         };
     }
 

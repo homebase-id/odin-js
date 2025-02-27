@@ -84,7 +84,8 @@ export class BlogConfig {
   static readonly FacebookDataType: number = 510;
   static readonly InstagramDataType: number = 520;
   static readonly YoutubeDataType: number = 530;
-  
+  static readonly WordpressDataType: number = 540;
+
 }
 
 export type PostType = 'Article' | 'Media' | 'Tweet';
