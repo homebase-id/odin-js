@@ -45,7 +45,7 @@ export const PostSource = ({
       case BlogConfig.WordpressDataType:
         return {
           icon: Wordpress,
-          colors: 'text-[#ff0033]',
+          colors: 'text-[#21759b]',
           text: 'Post from Wordpress',
           rootUrl: 'https://wordpress.com',
         };
