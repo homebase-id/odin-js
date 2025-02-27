@@ -106,6 +106,7 @@ import { UserX } from './UserX';
 import { Wallet } from './Wallet';
 import { Whatsapp } from './Whatsapp';
 import { Youtube } from './Youtube';
+import { Wordpress } from './Wordpress';
 
 export {
   AddressBook,
@@ -235,6 +236,7 @@ export {
   Whatsapp,
   Youtube,
   ThumbsUp,
+  Wordpress,
 };
 
 export * from './Types';
