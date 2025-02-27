@@ -78,9 +78,9 @@ export const publishProfileCardFile = async (
       familyName: string | undefined;
       name: string;
       bio: string;
-      links: ({ type: string; url: string | undefined } | { type: any; url: any })[];
-      email: { type: any; email: any }[];
-      sameAs: { type: string; url: any }[]
+      links: { type: string; url: string | undefined }[];
+      email: { type: string; email: string | undefined }[];
+      sameAs: { type: string; url: string | undefined }[]
     }
 ) => {
   const httpClient = dotYouClient.createAxiosClient();
