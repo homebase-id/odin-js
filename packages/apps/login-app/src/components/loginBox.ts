@@ -17,7 +17,7 @@ const setupHtml = (isStandalone?: boolean) => {
       <form id="main" class="flex flex-col">
         <h1 class="text-lg">YouAuth</h1>
         <div class="flex flex-col">
-          <label htmlFor="homebase-id" class="text-sm leading-7 text-gray-600">
+          <label htmlFor="homebase-id" class="text-sm leading-7 text-gray-600 dark:text-gray-500">
             Homebase Id
           </label>
           <div id="selectable-wrapper" class="relative">
