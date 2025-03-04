@@ -60,6 +60,7 @@ export const RichTextRenderer = ({
     leaf: {
       text?: string;
       bold?: boolean;
+      strong?: boolean;
       italic?: boolean;
       underline?: boolean;
       strikethrough?: boolean;
@@ -72,7 +73,7 @@ export const RichTextRenderer = ({
     let children: ReactNode;
     const highlightedText = highlightQuery(text, options?.query);
 
-    if (leaf.bold) {
+    if (leaf.bold || leaf.strong) {
       children = <strong className="font-bold">{highlightedText}</strong>;
     }
 
