@@ -37,15 +37,16 @@ type PublishProfileImage = {
   contentType: string;
 };
 
-type PublishProfileCard = {
-  name: string;
-  givenName?: string;
-  familyName?: string;
-  bio: string;
-  image: string;
-  email: { type: string; email: string }[];
-  links: { type: string; url: string }[];
-};
+// type PublishProfileCard = {
+//   name: string;
+//   givenName?: string;
+//   familyName?: string;
+//   bio: string;
+//   image: string;
+//   email: { type: string; email: string }[];
+//   links: { type: string; url: string }[];
+//   sameAs: { type: string; url: any }[]
+// };
 
 const _internalFileCache = new Map<string, Promise<Map<string, ResponseEntry[]>>>();
 
@@ -70,8 +71,17 @@ export const publishFile = async (
 };
 
 export const publishProfileCardFile = async (
-  dotYouClient: DotYouClient,
-  profileCard: PublishProfileCard
+    dotYouClient: DotYouClient,
+    profileCard: {
+      image: `https://${string}/pub/image`;
+      givenName: string | undefined;
+      familyName: string | undefined;
+      name: string;
+      bio: string;
+      links: { type: string; url: string | undefined }[];
+      email: { type: string; email: string | undefined }[];
+      sameAs: { type: string; url: string | undefined }[]
+    }
 ) => {
   const httpClient = dotYouClient.createAxiosClient();
 

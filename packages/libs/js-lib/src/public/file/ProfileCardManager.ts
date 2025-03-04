@@ -150,6 +150,7 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
     image: `https://${dotYouClient.getHostIdentity()}/pub/image`,
     email: emails,
     links: [...socials, ...links],
+    sameAs: [...socials]
   });
 };
 
