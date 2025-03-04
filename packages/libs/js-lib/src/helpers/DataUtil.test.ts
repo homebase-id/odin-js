@@ -271,7 +271,7 @@ test('JSON.parse', () => {
 });
 
 test('getQueryModifiedCursorFromTime', () => {
-  expect(getQueryModifiedCursorFromTime(1712833436831)).toEqual(112252252116156420);
+  expect(getQueryModifiedCursorFromTime(1712833436831)).toEqual(JSON.stringify({"time": 1712833436831, "row": null }));
 });
 
 test('compareAcl', () => {
