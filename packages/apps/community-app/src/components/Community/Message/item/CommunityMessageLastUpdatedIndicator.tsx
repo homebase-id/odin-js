@@ -19,7 +19,7 @@ export const CommunityMessageLastUpdatedIndicator = ({
   if (created === lastUpdated) return null;
   return (
     <div className="text-xs font-medium text-gray-500">
-      {'· '} {t('Last updated')} {formatToTimeAgo(new Date(lastUpdated))}
+      {'· '} {formatToTimeAgo(new Date(lastUpdated))}
       {lastUpdatedBy && (
         <>
           {t(' by ')}
