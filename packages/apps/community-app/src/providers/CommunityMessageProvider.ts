@@ -83,6 +83,9 @@ export interface CommunityMessage {
 
   channelId: string;
   threadId?: string;
+
+  /// lastEdited by Identity of the message
+  lastEditedBy?: string;
 }
 
 export const uploadCommunityMessage = async (
@@ -116,18 +119,18 @@ export const uploadCommunityMessage = async (
       content: shouldEmbedContent
         ? payloadJson
         : jsonStringify64({
-            ...messageContent,
-            message: ellipsisAtMaxCharOfRichText(
-              messageContent.message,
-              Math.round(MESSAGE_CHARACTERS_LIMIT * 0.75)
-            ),
-          }),
+          ...messageContent,
+          message: ellipsisAtMaxCharOfRichText(
+            messageContent.message,
+            Math.round(MESSAGE_CHARACTERS_LIMIT * 0.75)
+          ),
+        }),
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList ||
       community.fileMetadata.appData.content.acl || {
-        requiredSecurityGroup: SecurityGroupType.AutoConnected,
-      },
+      requiredSecurityGroup: SecurityGroupType.AutoConnected,
+    },
   };
 
   const payloads: PayloadFile[] = [];
@@ -250,17 +253,17 @@ export const uploadCommunityMessage = async (
       systemFileType: message.fileSystemType,
       transitOptions: notificationRecipients
         ? {
-            useAppNotification: true,
-            appNotificationOptions: {
-              appId: COMMUNITY_APP_ID,
-              tagId: message.fileMetadata.appData.uniqueId as string,
-              typeId: communityId,
-              peerSubscriptionId: communityId,
-              unEncryptedMessage: `New message from ${identity} in "${community.fileMetadata.appData.content.title}"`,
-              recipients: notificationRecipients.filter((recipient) => recipient !== identity),
-              silent: false,
-            },
-          }
+          useAppNotification: true,
+          appNotificationOptions: {
+            appId: COMMUNITY_APP_ID,
+            tagId: message.fileMetadata.appData.uniqueId as string,
+            typeId: communityId,
+            peerSubscriptionId: communityId,
+            unEncryptedMessage: `New message from ${identity} in "${community.fileMetadata.appData.content.title}"`,
+            recipients: notificationRecipients.filter((recipient) => recipient !== identity),
+            silent: false,
+          },
+        }
         : undefined,
     };
 
@@ -335,9 +338,9 @@ export const updateCommunityMessage = async (
     referencedFile:
       message.fileSystemType.toLocaleLowerCase() === 'comment'
         ? {
-            targetDrive,
-            globalTransitId: message.fileMetadata.appData.groupId as string,
-          }
+          targetDrive,
+          globalTransitId: message.fileMetadata.appData.groupId as string,
+        }
         : undefined,
     appData: {
       uniqueId: message.fileMetadata.appData.uniqueId,
@@ -353,18 +356,18 @@ export const updateCommunityMessage = async (
       content: shouldEmbedContent
         ? payloadJson
         : jsonStringify64({
-            ...messageContent,
-            message: ellipsisAtMaxCharOfRichText(
-              messageContent.message,
-              Math.round(MESSAGE_CHARACTERS_LIMIT * 0.75)
-            ),
-          }),
+          ...messageContent,
+          message: ellipsisAtMaxCharOfRichText(
+            messageContent.message,
+            Math.round(MESSAGE_CHARACTERS_LIMIT * 0.75)
+          ),
+        }),
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList ||
       community.fileMetadata.appData.content.acl || {
-        requiredSecurityGroup: SecurityGroupType.AutoConnected,
-      },
+      requiredSecurityGroup: SecurityGroupType.AutoConnected,
+    },
   };
 
   const encryptedKeyHeader = message.sharedSecretEncryptedKeyHeader;
@@ -372,26 +375,26 @@ export const updateCommunityMessage = async (
   const instructionSet: UpdateInstructionSet =
     odinId && odinId !== dotYouClient.getHostIdentity()
       ? {
-          transferIv: getRandom16ByteArray(),
-          locale: 'peer',
-          file: {
-            globalTransitId: message.fileMetadata.globalTransitId as string,
-            targetDrive,
-          },
-          versionTag: message.fileMetadata.versionTag,
-          recipients: [odinId],
-          systemFileType: message.fileSystemType,
-        }
+        transferIv: getRandom16ByteArray(),
+        locale: 'peer',
+        file: {
+          globalTransitId: message.fileMetadata.globalTransitId as string,
+          targetDrive,
+        },
+        versionTag: message.fileMetadata.versionTag,
+        recipients: [odinId],
+        systemFileType: message.fileSystemType,
+      }
       : {
-          transferIv: getRandom16ByteArray(),
-          locale: 'local',
-          file: {
-            fileId: message.fileId,
-            targetDrive,
-          },
-          versionTag: message.fileMetadata.versionTag,
-          systemFileType: message.fileSystemType,
-        };
+        transferIv: getRandom16ByteArray(),
+        locale: 'local',
+        file: {
+          fileId: message.fileId,
+          targetDrive,
+        },
+        versionTag: message.fileMetadata.versionTag,
+        systemFileType: message.fileSystemType,
+      };
 
   const payloads: PayloadFile[] = [];
   if (!shouldEmbedContent) {
@@ -475,19 +478,19 @@ export const getCommunityMessage = async (
   const fileHeader =
     odinId !== dotYouClient.getHostIdentity()
       ? await getFileHeaderOverPeerByUniqueId<string>(
-          dotYouClient,
-          odinId,
-          targetDrive,
-          chatMessageId,
-          {
-            decrypt: true,
-            systemFileType,
-          }
-        )
-      : await getFileHeaderByUniqueId<string>(dotYouClient, targetDrive, chatMessageId, {
+        dotYouClient,
+        odinId,
+        targetDrive,
+        chatMessageId,
+        {
           decrypt: true,
           systemFileType,
-        });
+        }
+      )
+      : await getFileHeaderByUniqueId<string>(dotYouClient, targetDrive, chatMessageId, {
+        decrypt: true,
+        systemFileType,
+      });
 
   if (!fileHeader) return null;
 
@@ -551,37 +554,37 @@ export const dsrToMessage = async (
       if (hasPartialOrFullContent)
         return odinId && dotYouClient.getHostIdentity() !== odinId
           ? await getContentFromHeaderOverPeer<CommunityMessage>(
-              dotYouClient,
-              odinId,
-              targetDrive,
-              dsr,
-              includeMetadataHeader,
-              dsr.fileSystemType
-            )
+            dotYouClient,
+            odinId,
+            targetDrive,
+            dsr,
+            includeMetadataHeader,
+            dsr.fileSystemType
+          )
           : await getContentFromHeader<CommunityMessage>(
-              dotYouClient,
-              targetDrive,
-              dsr,
-              includeMetadataHeader,
-              dsr.fileSystemType
-            );
+            dotYouClient,
+            targetDrive,
+            dsr,
+            includeMetadataHeader,
+            dsr.fileSystemType
+          );
       else
         return odinId && dotYouClient.getHostIdentity() !== odinId
           ? await getContentFromHeaderOrPayloadOverPeer<CommunityMessage>(
-              dotYouClient,
-              odinId,
-              targetDrive,
-              dsr,
-              includeMetadataHeader,
-              dsr.fileSystemType
-            )
+            dotYouClient,
+            odinId,
+            targetDrive,
+            dsr,
+            includeMetadataHeader,
+            dsr.fileSystemType
+          )
           : await getContentFromHeaderOrPayload<CommunityMessage>(
-              dotYouClient,
-              targetDrive,
-              dsr,
-              includeMetadataHeader,
-              dsr.fileSystemType
-            );
+            dotYouClient,
+            targetDrive,
+            dsr,
+            includeMetadataHeader,
+            dsr.fileSystemType
+          );
     })();
 
     if (!msgContent) return null;

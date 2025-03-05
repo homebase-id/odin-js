@@ -135,11 +135,11 @@ export const useCommunityMessage = (props?: {
       linkPreviews,
       thread && thread.fileMetadata.globalTransitId
         ? {
-            targetDrive: getTargetDriveFromCommunityId(
-              community.fileMetadata.appData.uniqueId as string
-            ),
-            globalTransitId: thread.fileMetadata.globalTransitId,
-          }
+          targetDrive: getTargetDriveFromCommunityId(
+            community.fileMetadata.appData.uniqueId as string
+          ),
+          globalTransitId: thread.fileMetadata.globalTransitId,
+        }
         : undefined,
       threadParticipants
     );
@@ -183,6 +183,8 @@ export const useCommunityMessage = (props?: {
         ])
       );
     }
+    // Set the lastEdited identity
+    transformedMessage.fileMetadata.appData.content.lastEditedBy = identity;
 
     await updateCommunityMessage(
       dotYouClient,
@@ -257,7 +259,7 @@ export const useCommunityMessage = (props?: {
                   ) &&
                   (!msg?.fileMetadata.appData.content.deliveryStatus ||
                     msg?.fileMetadata.appData.content.deliveryStatus <=
-                      CommunityDeliveryStatus.Sent)
+                    CommunityDeliveryStatus.Sent)
                 ) {
                   // We want to keep previewThumbnail and payloads from the existing message as that holds the optimistic updates from the onMutate
                   return {
