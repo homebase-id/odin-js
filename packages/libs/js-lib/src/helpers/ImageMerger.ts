@@ -4,7 +4,7 @@ const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
 
-const GRID_PIXEL_SIZE = 40;
+const GRID_PIXEL_SIZE = 20;
 const IMAGE_SIZE = GRID_PIXEL_SIZE / 2;
 const MIME_TYPE = 'image/webp';
 
