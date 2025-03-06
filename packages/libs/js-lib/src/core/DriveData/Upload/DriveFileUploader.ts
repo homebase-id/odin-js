@@ -128,6 +128,7 @@ export const patchFile = async (
       metadata,
       payloads,
       thumbnails,
+      toDeletePayloads,
     });
 
   const decryptedKeyHeader =
