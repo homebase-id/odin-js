@@ -40,6 +40,7 @@ import { useCommunityPin } from '../../../../hooks/community/useCommunityPin';
 import { useCommunityCollaborativeMsg } from '../../../../hooks/community/useCommunityCollaborativeMsg';
 import { CommunityMessageAuthorName } from './CommunityMesageAuthorName';
 import { CommunityMessageAvatar } from './CommunityMessageAvatar';
+import { CommunityMessageLastUpdatedIndicator } from './CommunityMessageLastUpdatedIndicator';
 
 export const CommunityMessageItem = memo(
   (props: {
@@ -176,6 +177,7 @@ export const CommunityMessageItem = memo(
             <div className="flex flex-row items-center gap-1 py-1 font-semibold text-green-600">
               <Persons className="h-3 w-3" />
               <p className="text-sm">{t('Collaborative')}</p>
+              <CommunityMessageLastUpdatedIndicator msg={msg} />
             </div>
           ) : null}
           <div className="flex flex-row gap-2">
