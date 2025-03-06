@@ -1,12 +1,6 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
-import {
-  AuthorName,
-  formatToTimeAgo,
-  formatToTimeAgoWithRelativeDetail,
-  getOdinIdColor,
-  t,
-} from '@homebase-id/common-app';
+import { AuthorName, formatToTimeAgo, getOdinIdColor, t } from '@homebase-id/common-app';
 
 export const CommunityMessageLastUpdatedIndicator = ({
   msg,
