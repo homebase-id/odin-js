@@ -4,6 +4,7 @@ import { logout } from '@homebase-id/js-lib/auth';
 import { APP_KEYS } from '../../constants';
 import { base64ToUint8Array } from '@homebase-id/js-lib/helpers';
 import { HOME_SHARED_SECRET, OWNER_SHARED_SECRET, STORAGE_IDENTITY_KEY } from '../../hooks';
+import { del } from 'idb-keyval';
 
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidOwnerToken = async (): Promise<boolean> => {
@@ -94,7 +95,10 @@ export const logoutOwnerAndAllApps = async (): Promise<void> => {
   localStorage.removeItem(`APP_REACT_QUERY_OFFLINE_CACHE`);
 
   // IndexedDB
-  indexedDB.deleteDatabase(`keyval-store`);
+  // indexedDB.deleteDatabase(`keyval-store`);
+  del(`OWNER_REACT_QUERY_OFFLINE_CACHE`);
+  del(`PUBLIC_REACT_QUERY_OFFLINE_CACHE`);
+  del(`APP_REACT_QUERY_OFFLINE_CACHE`);
 
   window.location.href = '/owner/login';
 };

@@ -126,7 +126,11 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
             const serverData = await getMailConversation(dotYouClient, conversation.fileId);
             if (!serverData) return;
             updatedConversation.fileMetadata.versionTag = serverData.fileMetadata.versionTag;
-            await updateMail(dotYouClient, updatedConversation);
+            return await updateMail(
+              dotYouClient,
+              updatedConversation,
+              updatedConversation.fileMetadata.payloads
+            );
           }
         );
       })

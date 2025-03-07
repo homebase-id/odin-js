@@ -367,38 +367,51 @@ const int64ToBytes = (value: number) => {
 
   return byte8;
 };
+// {"paging":{"time":41,"row":null},"stop":{"time":42,"row":69},"next":null}
 
 export const getQueryBatchCursorFromTime = (fromUnixTimeInMs: number, toUnixTimeInMs?: number) => {
-  let bytes = mergeByteArrays([
-    convertTimeToGuid(fromUnixTimeInMs),
-    toUnixTimeInMs ? convertTimeToGuid(toUnixTimeInMs) : new Uint8Array(new Array(16)),
-    new Uint8Array(new Array(16)),
-  ]);
+  // let bytes = mergeByteArrays([
+  //   convertTimeToGuid(fromUnixTimeInMs),
+  //   toUnixTimeInMs ? convertTimeToGuid(toUnixTimeInMs) : new Uint8Array(new Array(16)),
+  //   new Uint8Array(new Array(16)),
+  // ]);
 
-  const nullBytes = mergeByteArrays([
-    new Uint8Array([1]),
-    toUnixTimeInMs ? new Uint8Array([1]) : new Uint8Array([0]),
-    new Uint8Array([0]),
-  ]);
+  // const nullBytes = mergeByteArrays([
+  //   new Uint8Array([1]),
+  //   toUnixTimeInMs ? new Uint8Array([1]) : new Uint8Array([0]),
+  //   new Uint8Array([0]),
+  // ]);
 
-  const bytes2 = mergeByteArrays([
-    int64ToBytes(fromUnixTimeInMs),
-    toUnixTimeInMs ? int64ToBytes(toUnixTimeInMs) : new Uint8Array(new Array(8)),
-    new Uint8Array(new Array(8)),
-  ]);
+  // const bytes2 = mergeByteArrays([
+  //   int64ToBytes(fromUnixTimeInMs),
+  //   toUnixTimeInMs ? int64ToBytes(toUnixTimeInMs) : new Uint8Array(new Array(8)),
+  //   new Uint8Array(new Array(8)),
+  // ]);
 
-  bytes = mergeByteArrays([bytes, nullBytes, bytes2]);
+  // bytes = mergeByteArrays([bytes, nullBytes, bytes2]);
+  // // return string
 
-  return uint8ArrayToBase64(bytes);
+  // return uint8ArrayToBase64(bytes);
+  if (toUnixTimeInMs) {
+    // stop should be null
+    return JSON.stringify({ "paging": { "time": fromUnixTimeInMs, "row": null }, "stop": { "time": toUnixTimeInMs, "row": null }, "next": null });
+  }
+  else {
+    return JSON.stringify({ "paging": { "time": fromUnixTimeInMs, "row": null }, "stop": null, "next": null })
+  }
 };
 
 export const getQueryModifiedCursorFromTime = (unixTimeInMs: number) => {
   // Example top 48 bits and bottom 16 bits as BigInts
-  const topBits = BigInt(unixTimeInMs); // Replace with your top 48 bits
-  const bottomBits = BigInt(4); // Replace with your bottom 16 bits
+  // const topBits = BigInt(unixTimeInMs); // Replace with your top 48 bits
+  // const bottomBits = BigInt(4); // Replace with your bottom 16 bits
 
-  // Combine the top and bottom bits using bitwise left shift and bitwise OR operation
-  return Number((topBits << BigInt(16)) | bottomBits);
+  // // Combine the top and bottom bits using bitwise left shift and bitwise OR operation
+  // return Number((topBits << BigInt(16)) | bottomBits);
+  return JSON.stringify({
+    "time": unixTimeInMs,
+    "row": null
+  })
 };
 
 const sanitizeJson = (str: string): string => {
