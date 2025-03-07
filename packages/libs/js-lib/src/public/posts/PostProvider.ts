@@ -43,15 +43,17 @@ export const getPosts = async <T extends PostContent>(
       includeDrafts === 'only'
         ? [BlogConfig.DraftPostFileType]
         : [
-            BlogConfig.PostFileType,
-            ...(includeDrafts === true ? [BlogConfig.DraftPostFileType] : []),
-          ],
+          BlogConfig.PostFileType,
+          ...(includeDrafts === true ? [BlogConfig.DraftPostFileType] : []),
+        ],
   };
 
   const ro: GetBatchQueryResultOptions = {
     maxRecords: pageSize,
     cursorState: cursorState,
     includeMetadataHeader: true,
+    ordering: 'newestFirst',
+    sorting: 'userDate',
   };
 
   const response = await queryBatch(dotYouClient, params, ro);
@@ -92,9 +94,9 @@ export const getRecentPosts = async <T extends PostContent>(
           includeDrafts === 'only'
             ? [BlogConfig.DraftPostFileType]
             : [
-                BlogConfig.PostFileType,
-                ...(includeDrafts === true ? [BlogConfig.DraftPostFileType] : []),
-              ],
+              BlogConfig.PostFileType,
+              ...(includeDrafts === true ? [BlogConfig.DraftPostFileType] : []),
+            ],
       };
 
       const ro: GetBatchQueryResultOptions = {
