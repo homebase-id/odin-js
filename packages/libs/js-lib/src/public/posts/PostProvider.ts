@@ -103,6 +103,8 @@ export const getRecentPosts = async <T extends PostContent>(
         maxRecords: pageSize,
         cursorState: cursorState?.[chnl.fileMetadata.appData.uniqueId as string],
         includeMetadataHeader: true,
+        ordering: 'newestFirst',
+        sorting: 'userDate',
       };
 
       return {
