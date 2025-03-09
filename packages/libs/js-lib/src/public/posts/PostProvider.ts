@@ -106,6 +106,7 @@ export const getRecentPosts = async <T extends PostContent>(
         maxRecords: pageSize,
         cursorState: cursor,
         includeMetadataHeader: true,
+        ordering: 'newestFirst',
       };
 
       return {
