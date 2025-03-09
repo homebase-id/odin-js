@@ -25,6 +25,7 @@ import {
   getFileHeaderByGlobalTransitId,
 } from '../../core/core';
 import { toGuidId } from '../../helpers/DataUtil';
+import { getQueryBatchCursorFromTime } from '../../../dist';
 
 //Gets posts. if type is specified, returns a filtered list of the requested type; otherwise all types are returned
 export const getPosts = async <T extends PostContent>(
@@ -99,12 +100,12 @@ export const getRecentPosts = async <T extends PostContent>(
             ],
       };
 
+      const cursor = cursorState ? getQueryBatchCursorFromTime(Number(cursorState[chnl.fileMetadata.created])) : undefined;
+
       const ro: GetBatchQueryResultOptions = {
         maxRecords: pageSize,
-        cursorState: cursorState?.[chnl.fileMetadata.appData.uniqueId as string],
+        cursorState: cursor,
         includeMetadataHeader: true,
-        ordering: 'newestFirst',
-        sorting: 'userDate',
       };
 
       return {
