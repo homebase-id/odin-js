@@ -324,50 +324,49 @@ export const stringifyArrayToQueryParams = (arr: Record<string, unknown>[]) => {
   return arr.map((obj) => stringifyToQueryParams(obj)).join('&');
 };
 
-const convertTimeToGuid = (time: number) => {
-  //Convert time number to guid string
+// const convertTimeToGuid = (time: number) => {
+//   //Convert time number to guid string
 
-  // One year is 3600*24*365.25*1000 = 31,557,600,000 milliseconds (35 bits)
-  // Use 9 bits for the years, for a total of 44 bits (5½ bytes)
-  // Thus able to hold 557 years since 1970-01-01
-  // The counter is 12 bits, for a total of 4096, which gets us to ~1/4ns per guid before clash / wait()
-  // Total bit usage of millisecond time+counter is thus 44+12=56 bits aka 7 bytes
+//   // One year is 3600*24*365.25*1000 = 31,557,600,000 milliseconds (35 bits)
+//   // Use 9 bits for the years, for a total of 44 bits (5½ bytes)
+//   // Thus able to hold 557 years since 1970-01-01
+//   // The counter is 12 bits, for a total of 4096, which gets us to ~1/4ns per guid before clash / wait()
+//   // Total bit usage of millisecond time+counter is thus 44+12=56 bits aka 7 bytes
 
-  // Create 56 bits (7 bytes) {milliseconds (44 bits), _counter(12 bits)}
-  // The counter is naught, since we're constructing this from the UNIX timestamp
-  //
-  const millisecondsCtr = (BigInt(time) << BigInt(12)) | BigInt(0);
+//   // Create 56 bits (7 bytes) {milliseconds (44 bits), _counter(12 bits)}
+//   // The counter is naught, since we're constructing this from the UNIX timestamp
+//   //
+//   const millisecondsCtr = (BigInt(time) << BigInt(12)) | BigInt(0);
 
-  // I wonder if there is a neat way to not have to both create this and the GUID.
-  const byte16 = new Uint8Array(16);
-  byte16.fill(0);
-  byte16[0] = Number((millisecondsCtr >> BigInt(48)) & BigInt(0xff));
-  byte16[1] = Number((millisecondsCtr >> BigInt(40)) & BigInt(0xff));
-  byte16[2] = Number((millisecondsCtr >> BigInt(32)) & BigInt(0xff));
-  byte16[3] = Number((millisecondsCtr >> BigInt(24)) & BigInt(0xff));
-  byte16[4] = Number((millisecondsCtr >> BigInt(16)) & BigInt(0xff));
-  byte16[5] = Number((millisecondsCtr >> BigInt(8)) & BigInt(0xff));
-  byte16[6] = Number((millisecondsCtr >> BigInt(0)) & BigInt(0xff));
+//   // I wonder if there is a neat way to not have to both create this and the GUID.
+//   const byte16 = new Uint8Array(16);
+//   byte16.fill(0);
+//   byte16[0] = Number((millisecondsCtr >> BigInt(48)) & BigInt(0xff));
+//   byte16[1] = Number((millisecondsCtr >> BigInt(40)) & BigInt(0xff));
+//   byte16[2] = Number((millisecondsCtr >> BigInt(32)) & BigInt(0xff));
+//   byte16[3] = Number((millisecondsCtr >> BigInt(24)) & BigInt(0xff));
+//   byte16[4] = Number((millisecondsCtr >> BigInt(16)) & BigInt(0xff));
+//   byte16[5] = Number((millisecondsCtr >> BigInt(8)) & BigInt(0xff));
+//   byte16[6] = Number((millisecondsCtr >> BigInt(0)) & BigInt(0xff));
 
-  return byte16;
-};
+//   return byte16;
+// };
 
-const int64ToBytes = (value: number) => {
-  const byte8 = new Uint8Array(8);
-  const bigValue = BigInt(value);
+// const int64ToBytes = (value: number) => {
+//   const byte8 = new Uint8Array(8);
+//   const bigValue = BigInt(value);
 
-  byte8[0] = Number((bigValue >> BigInt(56)) & BigInt(0xff));
-  byte8[1] = Number((bigValue >> BigInt(48)) & BigInt(0xff));
-  byte8[2] = Number((bigValue >> BigInt(40)) & BigInt(0xff));
-  byte8[3] = Number((bigValue >> BigInt(32)) & BigInt(0xff));
-  byte8[4] = Number((bigValue >> BigInt(24)) & BigInt(0xff));
-  byte8[5] = Number((bigValue >> BigInt(16)) & BigInt(0xff));
-  byte8[6] = Number((bigValue >> BigInt(8)) & BigInt(0xff));
-  byte8[7] = Number(bigValue & BigInt(0xff));
+//   byte8[0] = Number((bigValue >> BigInt(56)) & BigInt(0xff));
+//   byte8[1] = Number((bigValue >> BigInt(48)) & BigInt(0xff));
+//   byte8[2] = Number((bigValue >> BigInt(40)) & BigInt(0xff));
+//   byte8[3] = Number((bigValue >> BigInt(32)) & BigInt(0xff));
+//   byte8[4] = Number((bigValue >> BigInt(24)) & BigInt(0xff));
+//   byte8[5] = Number((bigValue >> BigInt(16)) & BigInt(0xff));
+//   byte8[6] = Number((bigValue >> BigInt(8)) & BigInt(0xff));
+//   byte8[7] = Number(bigValue & BigInt(0xff));
 
-  return byte8;
-};
-// {"paging":{"time":41,"row":null},"stop":{"time":42,"row":69},"next":null}
+//   return byte8;
+// };
 
 export const getQueryBatchCursorFromTime = (fromUnixTimeInMs: number, toUnixTimeInMs?: number) => {
   // let bytes = mergeByteArrays([
