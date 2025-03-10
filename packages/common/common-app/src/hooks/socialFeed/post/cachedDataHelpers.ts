@@ -125,6 +125,8 @@ const cachedQuery = async (dotYouClient: DotYouClient) => {
         maxRecords: pageSize,
         cursorState: undefined,
         includeMetadataHeader: true,
+        ordering: 'newestFirst',
+        sorting: 'userDate',
       };
 
       return {
