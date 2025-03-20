@@ -78,7 +78,7 @@ export interface GetBatchQueryResultOptions {
   maxRecords: number;
   includeMetadataHeader?: boolean;
   includeTransferHistory?: boolean;
-  sorting?: 'fileId' | 'userDate'; // default is 'fileId'
+  sorting?: 'fileId' | 'userDate' // default is 'fileId'
   ordering?: 'default' | 'newestFirst' | 'oldestFirst'; // default is 'default'
 }
 
