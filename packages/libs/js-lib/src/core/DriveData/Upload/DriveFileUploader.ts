@@ -72,6 +72,11 @@ export const uploadFile = async (
   const { systemFileType, ...strippedInstructions } = instructions;
 
   const manifest = buildManifest(payloads, thumbnails, encrypt);
+
+
+  isDebug && console.debug(`manifest size`, jsonStringify64(manifest).length);
+
+
   const instructionsWithManifest = {
     ...strippedInstructions,
     manifest,
@@ -319,24 +324,24 @@ export const uploadLocalMetadataContent = async (
   const keyHeader: KeyHeader | undefined =
     file.fileMetadata.isEncrypted && decryptedKeyHeader
       ? {
-          aesKey: decryptedKeyHeader.aesKey,
-          iv: (localAppData.iv && base64ToUint8Array(localAppData.iv)) || getRandom16ByteArray(),
-        }
+        aesKey: decryptedKeyHeader.aesKey,
+        iv: (localAppData.iv && base64ToUint8Array(localAppData.iv)) || getRandom16ByteArray(),
+      }
       : undefined;
 
   const ivToSend = (keyHeader?.iv && uint8ArrayToBase64(keyHeader.iv)) || undefined;
   const encryptedContent =
     keyHeader && localAppData.content
       ? uint8ArrayToBase64(
-          await encryptWithKeyheader(
-            stringToUint8Array(
-              typeof localAppData.content === 'string'
-                ? localAppData.content
-                : jsonStringify64(localAppData.content)
-            ),
-            keyHeader
-          )
+        await encryptWithKeyheader(
+          stringToUint8Array(
+            typeof localAppData.content === 'string'
+              ? localAppData.content
+              : jsonStringify64(localAppData.content)
+          ),
+          keyHeader
         )
+      )
       : localAppData.content;
 
   return await axiosClient
