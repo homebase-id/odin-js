@@ -27,7 +27,7 @@
     "@homebase-id/rich-text-editor": "*",
     "@homebase-id/ui-lib": "*",
     "hls.js": "^1.5.15",
-    "axios": "1.7.5",
+    "axios": "1.8.2",
     "emoji-picker-element": "^1.24.0",
     "fuzzysort": "^2.0.4",
     "idb-keyval": "^6.2.1",
