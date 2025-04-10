@@ -23,6 +23,7 @@ export interface PermissionSet {
 }
 
 export interface DriveDefinition {
+  driveId: string;
   name: string;
   targetDriveInfo: TargetDrive;
   metadata: string;

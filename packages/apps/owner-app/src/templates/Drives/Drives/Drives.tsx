@@ -1,4 +1,4 @@
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import {hasDebugFlag, stringGuidsEqual} from '@homebase-id/js-lib/helpers';
 import React from 'react';
 import { useDrives } from '../../../hooks/drives/useDrives';
 import { SectionTitle } from '../../../components/ui/Sections/Section';
@@ -16,6 +16,8 @@ const Drives = () => {
     fetch: { data: drives, isLoading: isDrivesLoading },
   } = useDrives();
 
+  const isDebug = hasDebugFlag();
+  
   if (isDrivesLoading) <LoadingDetailPage />;
 
   const driveTypeDefinitions = [
@@ -67,6 +69,7 @@ const Drives = () => {
                     href={`/owner/drives/${driveDef.targetDriveInfo.alias}_${driveDef.targetDriveInfo.type}`}
                     key={`${driveDef.targetDriveInfo.alias}-${driveDef.targetDriveInfo.type}`}
                   >
+                    {isDebug && driveDef.driveId && <p>DriveId: {driveDef.driveId}</p>}
                     <h3 className="text-lg">Metadata</h3>
                     <p>{driveDef.metadata}</p>
                     <ul>{driveDef.allowAnonymousReads ? <li>Allow Anonymous Reads</li> : null}</ul>
