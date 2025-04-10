@@ -69,12 +69,8 @@ const Drives = () => {
                     href={`/owner/drives/${driveDef.targetDriveInfo.alias}_${driveDef.targetDriveInfo.type}`}
                     key={`${driveDef.targetDriveInfo.alias}-${driveDef.targetDriveInfo.type}`}
                   >
+                    {isDebug && driveDef.driveId && <p>DriveId: {driveDef.driveId}</p>}
                     <h3 className="text-lg">Metadata</h3>
-                    {isDebug && driveDef.driveId &&
-                        <>
-                            <p>DriveId</p>
-                            <ul>{driveDef.driveId}</ul>
-                        </>}
                     <p>{driveDef.metadata}</p>
                     <ul>{driveDef.allowAnonymousReads ? <li>Allow Anonymous Reads</li> : null}</ul>
                   </CardLink>
