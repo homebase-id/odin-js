@@ -70,7 +70,6 @@ export const uploadCommunityMetadata = async (
 
   const instructionSet: UploadInstructionSet = {
     storageOptions: {
-      overwriteFileId: definition.fileId,
       drive: LOCAL_COMMUNITY_APP_DRIVE,
     },
   };
@@ -86,9 +85,9 @@ export const uploadCommunityMetadata = async (
   const content = shouldEmbedContent
     ? jsonContent
     : jsonStringify64({
-        ...definition.fileMetadata.appData.content,
-        drafts: undefined,
-      });
+      ...definition.fileMetadata.appData.content,
+      drafts: undefined,
+    });
 
   if (!shouldEmbedContent) {
     payloads.push({

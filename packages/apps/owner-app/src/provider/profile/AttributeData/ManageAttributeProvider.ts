@@ -20,6 +20,7 @@ import {
   patchFile,
   UpdateLocalInstructionSet,
   MAX_HEADER_CONTENT_BYTES,
+  UpdateInstructionSet,
 } from '@homebase-id/js-lib/core';
 import {
   getNewId,
@@ -68,9 +69,9 @@ export const saveProfileAttribute = async (
 
   const encrypt = !(
     toSaveAttribute.serverMetadata?.accessControlList.requiredSecurityGroup ===
-      SecurityGroupType.Anonymous ||
+    SecurityGroupType.Anonymous ||
     toSaveAttribute.serverMetadata?.accessControlList.requiredSecurityGroup ===
-      SecurityGroupType.Authenticated
+    SecurityGroupType.Authenticated
   );
 
   if (!attrContent.id || !attrContent.profileId || !attrContent.type || !attrContent.sectionId)
@@ -79,7 +80,6 @@ export const saveProfileAttribute = async (
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
-      overwriteFileId: toSaveAttribute?.fileId ?? '',
       drive: targetDrive,
     },
   };
@@ -113,14 +113,28 @@ export const saveProfileAttribute = async (
   if (toSaveAttribute.fileId) {
     const wasEncrypted =
       'isEncrypted' in toSaveAttribute.fileMetadata && toSaveAttribute.fileMetadata.isEncrypted;
+    const updateInstructions: UpdateInstructionSet = {
+      transferIv: getRandom16ByteArray(),
+      locale: 'local',
+      versionTag: toSaveAttribute.fileMetadata.versionTag,
+      file: {
+        fileId: toSaveAttribute.fileId,
+        targetDrive: targetDrive,
+      },
+    }
+
+    const keyHeader =
+      wasEncrypted && encrypt && 'sharedSecretEncryptedKeyHeader' in toSaveAttribute
+        ? toSaveAttribute.sharedSecretEncryptedKeyHeader
+        : undefined;
 
     // When switching between encrypted and unencrypted, we need to re-upload the full file
     if (wasEncrypted !== encrypt) {
-      const result = await reUploadFile(dotYouClient, instructionSet, metadata, encrypt);
+      const result = await reUploadFile(dotYouClient, updateInstructions, metadata, keyHeader, encrypt);
       if (result)
         return {
           ...toSaveAttribute,
-          fileId: result.file.fileId,
+          fileId: toSaveAttribute.fileId,
           fileMetadata: {
             ...toSaveAttribute.fileMetadata,
             versionTag: result.newVersionTag,
@@ -138,10 +152,7 @@ export const saveProfileAttribute = async (
     );
     const existingPayloads = existingAttribute?.fileMetadata?.payloads || [];
 
-    const keyHeader =
-      wasEncrypted && encrypt && 'sharedSecretEncryptedKeyHeader' in toSaveAttribute
-        ? toSaveAttribute.sharedSecretEncryptedKeyHeader
-        : undefined;
+
 
     const existingDefaultPayload = existingPayloads.find(
       (payload) => payload.key === DEFAULT_PAYLOAD_KEY

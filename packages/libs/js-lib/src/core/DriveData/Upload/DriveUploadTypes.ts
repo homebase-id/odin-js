@@ -54,7 +54,7 @@ export const isUpdateInstructionSet = (
 
 export interface StorageOptions {
   drive: TargetDrive;
-  overwriteFileId?: string;
+  // overwriteFileId?: string; -- This is gone now
   expiresTimestamp?: number;
   storageIntent?: 'metadataOnly'; // 'overwrite' is default
 }

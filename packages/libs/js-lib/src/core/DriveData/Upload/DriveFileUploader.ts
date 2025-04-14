@@ -16,6 +16,7 @@ import {
   UploadResult,
   UpdateResult,
   UpdateInstructionSet,
+  UpdateLocalInstructionSet,
 } from './DriveUploadTypes';
 import { decryptKeyHeader, encryptWithKeyheader } from '../SecurityHelpers';
 import {
@@ -187,18 +188,19 @@ export const patchFile = async (
 
 export const reUploadFile = async (
   dotYouClient: DotYouClient,
-  instructions: UploadInstructionSet,
-  metadata: UploadFileMetadata,
+  instructions: UpdateLocalInstructionSet,
+  metaData: UploadFileMetadata,
+  keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
   encrypt: boolean,
   axiosConfig?: AxiosRequestConfig
 ) => {
-  const targetDrive = instructions.storageOptions?.drive;
-  const fileId = instructions.storageOptions?.overwriteFileId;
+  const targetDrive = instructions.file.targetDrive;
+  const fileId = instructions.file.fileId;
+  if (!fileId) throw new Error('instructions.file.fileId is required');
   if (!targetDrive) throw new Error('storageOptions.drive is required');
-  if (!fileId) throw new Error('storageOptions.overwriteFileId is required');
 
   const header = await getFileHeader(dotYouClient, targetDrive, fileId);
-
+  metaData.isEncrypted = encrypt;
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
 
@@ -243,18 +245,28 @@ export const reUploadFile = async (
     }
   }
 
-  return await uploadFile(
+  return await patchFile(
     dotYouClient,
-    instructions,
-    metadata,
+    keyHeader,
+    instructions, metaData,
     payloads,
     thumbnails,
-    encrypt,
     undefined,
-    {
-      axiosConfig,
-    }
-  );
+    undefined, {
+    axiosConfig,
+  })
+  // return await uploadFile(
+  //   dotYouClient,
+  //   instructions,
+  //   metadata,
+  //   payloads,
+  //   thumbnails,
+  //   encrypt,
+  //   undefined,
+  //   {
+  //     axiosConfig,
+  //   }
+  // );
 };
 
 export interface LocalMetadataUploadResult {
@@ -319,24 +331,24 @@ export const uploadLocalMetadataContent = async (
   const keyHeader: KeyHeader | undefined =
     file.fileMetadata.isEncrypted && decryptedKeyHeader
       ? {
-          aesKey: decryptedKeyHeader.aesKey,
-          iv: (localAppData.iv && base64ToUint8Array(localAppData.iv)) || getRandom16ByteArray(),
-        }
+        aesKey: decryptedKeyHeader.aesKey,
+        iv: (localAppData.iv && base64ToUint8Array(localAppData.iv)) || getRandom16ByteArray(),
+      }
       : undefined;
 
   const ivToSend = (keyHeader?.iv && uint8ArrayToBase64(keyHeader.iv)) || undefined;
   const encryptedContent =
     keyHeader && localAppData.content
       ? uint8ArrayToBase64(
-          await encryptWithKeyheader(
-            stringToUint8Array(
-              typeof localAppData.content === 'string'
-                ? localAppData.content
-                : jsonStringify64(localAppData.content)
-            ),
-            keyHeader
-          )
+        await encryptWithKeyheader(
+          stringToUint8Array(
+            typeof localAppData.content === 'string'
+              ? localAppData.content
+              : jsonStringify64(localAppData.content)
+          ),
+          keyHeader
         )
+      )
       : localAppData.content;
 
   return await axiosClient
