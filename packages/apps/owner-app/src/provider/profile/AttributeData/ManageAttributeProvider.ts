@@ -113,7 +113,7 @@ export const saveProfileAttribute = async (
   if (toSaveAttribute.fileId) {
     const wasEncrypted =
       'isEncrypted' in toSaveAttribute.fileMetadata && toSaveAttribute.fileMetadata.isEncrypted;
-    const updateInstructions: UpdateInstructionSet = {
+    const updateInstructions: UpdateLocalInstructionSet = {
       transferIv: getRandom16ByteArray(),
       locale: 'local',
       versionTag: toSaveAttribute.fileMetadata.versionTag,
