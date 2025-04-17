@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { ConnectionImage, OwnerImage, t, useDotYouClientContext } from '@homebase-id/common-app';
 import { useAuth } from '../../../hooks/auth/useAuth';
 import { useOutsideTrigger } from '@homebase-id/common-app';
-import { LoginBox } from '../LoginBox/LoginBox';
+import { AUTO_LOGON_PARAM, LoginBox } from '../LoginBox/LoginBox';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { Person, Times } from '@homebase-id/common-app/icons';
+import { useSearchParams } from 'react-router-dom';
 
 const ProfileNav = () => {
   const { logout } = useAuth();
@@ -26,6 +27,9 @@ const ProfileNav = () => {
     await logout();
     window.location.reload();
   };
+
+  const [searchParams] = useSearchParams();
+  const loadLogin = isOpen || searchParams.has(AUTO_LOGON_PARAM);
 
   return (
     <div className="relative h-8">
@@ -96,7 +100,7 @@ const ProfileNav = () => {
                 {t('logout')}
               </button>
             </>
-          ) : isOpen ? (
+          ) : loadLogin ? (
             <LoginBox />
           ) : null}
         </div>

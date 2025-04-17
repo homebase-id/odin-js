@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Loader } from '@homebase-id/common-app/icons';
 
-const AUTO_LOGON_PARAM = 'youauth-logon';
+export const AUTO_LOGON_PARAM = 'youauth-logon';
 const AUTHORIZE_PATH = '/api/owner/v1/youauth/authorize';
 
 const useParams = (returnUrl: string) => {
