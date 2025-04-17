@@ -96,9 +96,9 @@ const ProfileNav = () => {
                 {t('logout')}
               </button>
             </>
-          ) : (
+          ) : isOpen ? (
             <LoginBox />
-          )}
+          ) : null}
         </div>
       </div>
     </div>
