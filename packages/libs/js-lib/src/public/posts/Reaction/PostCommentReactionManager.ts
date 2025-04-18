@@ -119,7 +119,6 @@ export const saveComment = async (
     const instructionSet: UploadInstructionSet = {
       transferIv: getRandom16ByteArray(),
       storageOptions: {
-        overwriteFileId: comment.fileId || undefined,
         drive: targetDrive,
       },
       transitOptions: {
@@ -177,14 +176,14 @@ export const saveComment = async (
 
     const remoteHeader = comment.fileMetadata.globalTransitId
       ? await getFileHeaderOverPeerByGlobalTransitId(
-          dotYouClient,
-          context.odinId,
-          targetDrive,
-          comment.fileMetadata.globalTransitId,
-          {
-            systemFileType: 'Comment',
-          }
-        )
+        dotYouClient,
+        context.odinId,
+        targetDrive,
+        comment.fileMetadata.globalTransitId,
+        {
+          systemFileType: 'Comment',
+        }
+      )
       : null;
 
     let result;

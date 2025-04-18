@@ -130,7 +130,7 @@ const uploadPost = async <T extends PostContent>(
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-      SecurityGroupType.Authenticated
+    SecurityGroupType.Authenticated
   );
 
   const payloads: PayloadFile[] = [];
@@ -154,10 +154,10 @@ const uploadPost = async <T extends PostContent>(
   if (file.fileMetadata.appData.content.type !== 'Article') {
     file.fileMetadata.appData.content.primaryMediaFile = payloads[0]
       ? {
-          fileId: undefined,
-          fileKey: payloads[0].key,
-          type: payloads[0].payload.type,
-        }
+        fileId: undefined,
+        fileKey: payloads[0].key,
+        type: payloads[0].payload.type,
+      }
       : undefined;
   }
 
@@ -167,7 +167,6 @@ const uploadPost = async <T extends PostContent>(
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
-      overwriteFileId: file?.fileId ?? '',
       drive: targetDrive,
     },
     transitOptions: {
@@ -180,9 +179,8 @@ const uploadPost = async <T extends PostContent>(
 
   if (await hasConflictingSlug(dotYouClient, odinId, file, channelId)) {
     // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${
-      file.fileMetadata.appData.content.slug
-    }-${new Date().getTime()}`;
+    file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
+      }-${new Date().getTime()}`;
   }
 
   const { metadata, defaultPayload } = await getUploadFileMetadata(odinId, file, previewThumbnail);
@@ -240,11 +238,11 @@ const updatePost = async <T extends PostContent>(
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const header = odinId
     ? await getFileHeaderBytesOverPeerByGlobalTransitId(
-        dotYouClient,
-        odinId,
-        targetDrive,
-        file.fileMetadata.globalTransitId as string
-      )
+      dotYouClient,
+      odinId,
+      targetDrive,
+      file.fileMetadata.globalTransitId as string
+    )
     : await getFileHeader(dotYouClient, targetDrive, file.fileId as string);
 
   if (!header) throw new Error('[odin-js] PostUploader: Cannot update a post that does not exist');
@@ -317,14 +315,13 @@ const patchPost = async <T extends PostContent>(
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-      SecurityGroupType.Authenticated
+    SecurityGroupType.Authenticated
   );
 
   if (await hasConflictingSlug(dotYouClient, odinId, file, channelId)) {
     // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${
-      file.fileMetadata.appData.content.slug
-    }-${new Date().getTime()}`;
+    file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
+      }-${new Date().getTime()}`;
   }
 
   const payloads: PayloadFile[] = [];
@@ -376,24 +373,24 @@ const patchPost = async <T extends PostContent>(
 
   const instructionSet: UpdateInstructionSet = odinId
     ? {
-        transferIv: getRandom16ByteArray(),
-        locale: 'peer',
-        file: {
-          globalTransitId: file.fileMetadata.globalTransitId as string,
-          targetDrive,
-        },
-        versionTag: file.fileMetadata.versionTag,
-        recipients: [odinId],
-      }
+      transferIv: getRandom16ByteArray(),
+      locale: 'peer',
+      file: {
+        globalTransitId: file.fileMetadata.globalTransitId as string,
+        targetDrive,
+      },
+      versionTag: file.fileMetadata.versionTag,
+      recipients: [odinId],
+    }
     : {
-        transferIv: getRandom16ByteArray(),
-        locale: 'local',
-        file: {
-          fileId: file.fileId,
-          targetDrive,
-        },
-        versionTag: file.fileMetadata.versionTag,
-      };
+      transferIv: getRandom16ByteArray(),
+      locale: 'local',
+      file: {
+        fileId: file.fileId,
+        targetDrive,
+      },
+      versionTag: file.fileMetadata.versionTag,
+    };
 
   const updateResult = await patchFile(
     dotYouClient,

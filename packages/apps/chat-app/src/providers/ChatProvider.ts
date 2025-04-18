@@ -324,7 +324,6 @@ export const uploadChatMessage = async (
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: ChatDrive,
-      overwriteFileId: message.fileId,
     },
     transitOptions: distribute
       ? {

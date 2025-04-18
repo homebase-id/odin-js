@@ -113,9 +113,9 @@ export const saveChannelDefinition = async (
 
   const encrypt = !(
     definition.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-      SecurityGroupType.Anonymous ||
+    SecurityGroupType.Anonymous ||
     definition.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-      SecurityGroupType.Authenticated
+    SecurityGroupType.Authenticated
   );
 
   const targetDrive = GetTargetDriveFromChannelId(definition.fileMetadata.appData.uniqueId);
@@ -155,7 +155,6 @@ export const saveChannelDefinition = async (
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
-      overwriteFileId: fileId,
       drive: targetDrive,
     },
   };
@@ -190,11 +189,11 @@ export const saveChannelDefinition = async (
     shouldEmbedContent
       ? undefined
       : [
-          {
-            payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
-            key: DEFAULT_PAYLOAD_KEY,
-          },
-        ],
+        {
+          payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
+          key: DEFAULT_PAYLOAD_KEY,
+        },
+      ],
     undefined,
     encrypt
   );

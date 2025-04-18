@@ -137,7 +137,6 @@ export const saveCommunityChannel = async (
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: targetDrive,
-      overwriteFileId: channel.fileId,
     },
   };
 
@@ -202,18 +201,18 @@ export const dsrToCommunityChannel = async (
   const definitionContent =
     odinId && dotYouClient.getHostIdentity() !== odinId
       ? await getContentFromHeaderOrPayloadOverPeer<CommunityChannel>(
-          dotYouClient,
-          odinId,
-          targetDrive,
-          dsr,
-          includeMetadataHeader
-        )
+        dotYouClient,
+        odinId,
+        targetDrive,
+        dsr,
+        includeMetadataHeader
+      )
       : await getContentFromHeaderOrPayload<CommunityChannel>(
-          dotYouClient,
-          targetDrive,
-          dsr,
-          includeMetadataHeader
-        );
+        dotYouClient,
+        targetDrive,
+        dsr,
+        includeMetadataHeader
+      );
   if (!definitionContent) return undefined;
 
   const file: HomebaseFile<CommunityChannel> = {

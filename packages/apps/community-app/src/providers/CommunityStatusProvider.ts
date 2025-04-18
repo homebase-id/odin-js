@@ -80,8 +80,8 @@ const internalSaveStatusFile = async (
     isEncrypted: true,
     accessControlList: status.serverMetadata?.accessControlList ||
       community.fileMetadata.appData.content.acl || {
-        requiredSecurityGroup: SecurityGroupType.AutoConnected,
-      },
+      requiredSecurityGroup: SecurityGroupType.AutoConnected,
+    },
   };
 
   if (dotYouClient.getHostIdentity() !== community.fileMetadata.senderOdinId) {
@@ -104,7 +104,6 @@ const internalSaveStatusFile = async (
     const instructions: UploadInstructionSet = {
       storageOptions: {
         drive: targetDrive,
-        overwriteFileId: status.fileId,
       },
     };
 

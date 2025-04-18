@@ -157,11 +157,11 @@ export const dsrToConversation = async (
             ...attrContent,
             recipients: (attrContent as GroupConversation).recipients
               ? [
-                  ...(attrContent as GroupConversation).recipients.filter(
-                    (recipient) => recipient !== identity
-                  ),
-                  identity,
-                ]
+                ...(attrContent as GroupConversation).recipients.filter(
+                  (recipient) => recipient !== identity
+                ),
+                identity,
+              ]
               : [(attrContent as SingleConversation).recipient, identity],
           },
         },
@@ -225,7 +225,6 @@ export const uploadConversation = async (
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: ChatDrive,
-      overwriteFileId: conversation.fileId,
     },
   };
 
@@ -355,19 +354,19 @@ export const updateConversation = async (
     toDeletePayloads,
     !ignoreConflict
       ? async () => {
-          const existingConversation = await getConversation(
-            dotYouClient,
-            conversation.fileMetadata.appData.uniqueId as string
-          );
-          if (!existingConversation) return;
-          conversation.fileMetadata.versionTag = existingConversation.fileMetadata.versionTag;
-          conversation.sharedSecretEncryptedKeyHeader =
-            existingConversation.sharedSecretEncryptedKeyHeader;
-          return updateConversation(dotYouClient, conversation, imagePayload, distribute, true);
-        }
+        const existingConversation = await getConversation(
+          dotYouClient,
+          conversation.fileMetadata.appData.uniqueId as string
+        );
+        if (!existingConversation) return;
+        conversation.fileMetadata.versionTag = existingConversation.fileMetadata.versionTag;
+        conversation.sharedSecretEncryptedKeyHeader =
+          existingConversation.sharedSecretEncryptedKeyHeader;
+        return updateConversation(dotYouClient, conversation, imagePayload, distribute, true);
+      }
       : () => {
-          // We just supress the warning; As we are ignoring the conflict following @param ignoreConflict
-        }
+        // We just supress the warning; As we are ignoring the conflict following @param ignoreConflict
+      }
   );
 };
 

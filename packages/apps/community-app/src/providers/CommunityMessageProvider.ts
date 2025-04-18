@@ -248,7 +248,6 @@ export const uploadCommunityMessage = async (
     const uploadInstructions: UploadInstructionSet = {
       storageOptions: {
         drive: targetDrive,
-        overwriteFileId: message.fileId,
       },
       systemFileType: message.fileSystemType,
       transitOptions: notificationRecipients

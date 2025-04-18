@@ -168,22 +168,21 @@ export const uploadMail = async (
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: MailDrive,
-      overwriteFileId: conversation.fileId,
     },
     transitOptions: distribute
       ? {
-          recipients: recipients,
-          schedule: ScheduleOptions.SendLater,
-          priority: PriorityOptions.Medium,
-          sendContents: SendContents.All,
-          useAppNotification: true,
-          appNotificationOptions: {
-            appId: appId,
-            typeId: conversation.fileMetadata.appData.groupId || getNewId(),
-            tagId: conversation.fileMetadata.appData.uniqueId || getNewId(),
-            silent: false,
-          },
-        }
+        recipients: recipients,
+        schedule: ScheduleOptions.SendLater,
+        priority: PriorityOptions.Medium,
+        sendContents: SendContents.All,
+        useAppNotification: true,
+        appNotificationOptions: {
+          appId: appId,
+          typeId: conversation.fileMetadata.appData.groupId || getNewId(),
+          tagId: conversation.fileMetadata.appData.uniqueId || getNewId(),
+          silent: false,
+        },
+      }
       : undefined,
   };
 
@@ -294,11 +293,11 @@ export const updateMail = async (
     useAppNotification: distribute,
     appNotificationOptions: distribute
       ? {
-          appId: appId,
-          typeId: conversation.fileMetadata.appData.groupId || getNewId(),
-          tagId: conversation.fileMetadata.appData.uniqueId || getNewId(),
-          silent: false,
-        }
+        appId: appId,
+        typeId: conversation.fileMetadata.appData.groupId || getNewId(),
+        tagId: conversation.fileMetadata.appData.uniqueId || getNewId(),
+        silent: false,
+      }
       : undefined,
     recipients: distribute ? recipients : undefined,
   };
