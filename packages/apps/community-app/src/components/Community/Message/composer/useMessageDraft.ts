@@ -15,9 +15,9 @@ export const useMessageDraft = (props?: {
   } = useCommunityMetadata(
     props
       ? {
-          odinId: community?.fileMetadata.senderOdinId,
-          communityId: community?.fileMetadata.appData.uniqueId,
-        }
+        odinId: community?.fileMetadata.senderOdinId,
+        communityId: community?.fileMetadata.appData.uniqueId,
+      }
       : undefined
   );
 

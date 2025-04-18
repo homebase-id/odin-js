@@ -234,7 +234,7 @@ const mergeMetadata = (
 
                 const newestDraft =
                   !serverDraft ||
-                  (localDraft?.updatedAt && localDraft?.updatedAt > serverDraft?.updatedAt)
+                    (localDraft?.updatedAt && localDraft?.updatedAt > serverDraft?.updatedAt)
                     ? localDraft
                     : serverDraft;
 
@@ -266,9 +266,25 @@ export const insertNewcommunityMetadata = (
     if (newMetadata.fileMetadata.appData.uniqueId)
       invalidateCommunityMetadata(queryClient, newMetadata.fileMetadata.appData.uniqueId);
   } else {
-    queryClient.setQueryData(
-      ['community-metadata', formatGuidId(newMetadata.fileMetadata.appData.content.communityId)],
-      newMetadata
+    const queryKey = [
+      'community-metadata',
+      formatGuidId(newMetadata.fileMetadata.appData.content.communityId),
+    ];
+
+    const existingMetadata = queryClient.getQueryData<HomebaseFile<CommunityMetadata>>(queryKey)
+
+    if (!existingMetadata) {
+      queryClient.setQueryData(queryKey,
+        newMetadata
+      );
+      return;
+    }
+
+    const mergedMeta = mergeMetadata(
+      existingMetadata, newMetadata);
+
+    queryClient.setQueryData(queryKey,
+      mergedMeta
     );
   }
 };
