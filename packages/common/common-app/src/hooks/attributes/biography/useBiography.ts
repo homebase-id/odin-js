@@ -31,6 +31,7 @@ type ExperienceData = {
 
 export type BiographyData = {
   bioData?: BioData;
+  bioSummary?: BioData;
   experience: ExperienceData[];
 };
 
@@ -46,7 +47,7 @@ export const useBiography = (props?: { odinId: string } | undefined) => {
       if (odinId) return undefined;
 
       const fileData = await GetFile(dotYouClient, 'sitedata.json');
-      if (!fileData.has('short-bio') && !fileData.has('long-bio')) return;
+      if (!fileData.has('short-bio') && !fileData.has('long-bio') && !fileData.has('short-bio-summary')) return;
 
       const bioAttributes = await (async () => {
         const shortBioEntries = fileData.get('short-bio');
@@ -106,8 +107,47 @@ export const useBiography = (props?: { odinId: string } | undefined) => {
         })
         .sort((a, b) => a.priority - b.priority);
 
+      const bioSummaryAttributes = await (async () => {
+        const shortBioEntries = fileData.get('short-bio-summary');
+        if (!shortBioEntries) return undefined;
+        const allPromise = await Promise.all(
+          shortBioEntries.map(async (entry) => {
+            let attr: Attribute | undefined = entry.payload as Attribute;
+            if (
+              !attr &&
+              entry.header.fileMetadata.payloads?.filter(
+                (payload: PayloadDescriptor) => payload.contentType === 'application/json'
+              ).length !== 0 &&
+              entry.header.fileMetadata.appData.uniqueId
+            ) {
+              console.warn(entry, 'fetching attribute, not enough data in static file');
+              // Fetch attribute if it is not included in the static data
+              attr = (
+                await getProfileAttribute(
+                  dotYouClient,
+                  BuiltInProfiles.StandardProfileId,
+                  entry.header.fileMetadata.appData.uniqueId
+                )
+              )?.fileMetadata.appData.content;
+            }
+
+            if (!attr) return undefined;
+            return {
+              body: attr.data?.[MinimalProfileFields.BioId] as string,
+              id: attr.id,
+              priority: attr.priority,
+            };
+          })
+        );
+
+        return (allPromise.filter(Boolean) as BioData[]).sort(
+          (a, b) => a.priority - b.priority
+        );
+      })();
+
       return {
         bioData: bioAttributes?.[0],
+        bioSummary: bioSummaryAttributes?.[0],
         experience: experienceAttributes || [],
       };
     };
@@ -116,12 +156,12 @@ export const useBiography = (props?: { odinId: string } | undefined) => {
       try {
         const biographyAttributes = (
           odinId
-            ? await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.Bio)
+            ? await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.FullBio)
             : await getProfileAttributes(
               dotYouClient,
               BuiltInProfiles.StandardProfileId,
               undefined,
-              [BuiltInAttributes.Bio]
+              [BuiltInAttributes.FullBio]
             )
         )?.map((dsr) => {
           const attr = dsr.fileMetadata.appData.content;
@@ -157,8 +197,27 @@ export const useBiography = (props?: { odinId: string } | undefined) => {
           };
         });
 
+        const bioSummaryAttributes = (
+          odinId
+            ? await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.BioSummary)
+            : await getProfileAttributes(
+              dotYouClient,
+              BuiltInProfiles.StandardProfileId,
+              undefined,
+              [BuiltInAttributes.BioSummary]
+            )
+        )?.map((dsr) => {
+          const attr = dsr.fileMetadata.appData.content;
+          return {
+            body: attr.data?.[MinimalProfileFields.BioId] as string,
+            id: attr.id,
+            priority: attr.priority,
+          };
+        });
+
         return {
           bioData: biographyAttributes?.[0],
+          bioSummary: bioSummaryAttributes?.[0],
           experience: longBiographyAttributes || [],
         };
       } catch (e) {

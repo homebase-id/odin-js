@@ -13,7 +13,7 @@ import {
   SocialFields,
 } from '@homebase-id/js-lib/profile';
 import { ClipboardEventHandler, useState } from 'react';
-import { t } from '@homebase-id/common-app';
+import { t, Textarea } from '@homebase-id/common-app';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import { Input } from '@homebase-id/common-app';
 import { Label } from '@homebase-id/common-app';
@@ -165,7 +165,7 @@ const AttributeFields = ({
         />
       );
       break;
-    case BuiltInAttributes.Bio:
+    case BuiltInAttributes.FullBio:
       return (
         <>
           <div className="mb-5">
@@ -177,6 +177,25 @@ const AttributeFields = ({
               onChange={onChange}
               className="rounded border border-gray-300 px-2 pb-3 dark:border-gray-700"
               contentClassName="max-h-[50vh] overflow-auto"
+            />
+          </div>
+        </>
+      );
+      break;
+    case BuiltInAttributes.BioSummary:
+      return (
+        <>
+          <div className="mb-5">
+            <Label htmlFor={`${fileId ?? 'new'}-meta-bio`}>
+              {t('Short bio')}{' '}
+              <span className="text-sm text-slate-400">({t('Max 160 characters')})</span>
+            </Label>
+            <Textarea
+              maxLength={160}
+              name={MinimalProfileFields.BioId}
+              defaultValue={attribute.data?.[MinimalProfileFields.BioId] ?? ''}
+              onChange={onChange}
+              className="rounded border border-gray-300 px-2 pb-3 dark:border-gray-700"
             />
           </div>
         </>

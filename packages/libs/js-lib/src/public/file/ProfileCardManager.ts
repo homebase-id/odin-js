@@ -28,7 +28,8 @@ export const ProfileCardAttributeTypes = [
   BuiltInAttributes.Email,
   BuiltInAttributes.Link,
   BuiltInAttributes.Photo,
-  BuiltInAttributes.Bio,
+  BuiltInAttributes.FullBio,
+  BuiltInAttributes.BioSummary,
   ...BuiltInAttributes.AllSocial,
   ...BuiltInAttributes.AllGames,
 ];
@@ -61,10 +62,34 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
     dotYouClient,
     BuiltInProfiles.StandardProfileId,
     undefined,
-    [BuiltInAttributes.Bio]
+    [BuiltInAttributes.FullBio]
   );
 
   const bios = bioAttributes
+    ?.filter(
+      (attr) =>
+        attr.serverMetadata?.accessControlList.requiredSecurityGroup.toLowerCase() ===
+        SecurityGroupType.Anonymous.toLowerCase()
+    )
+    ?.map(
+      (attr) =>
+        ellipsisAtMaxChar(
+          getPlainTextFromRichText(
+            attr?.fileMetadata?.appData?.content?.data?.[MinimalProfileFields.BioId] as string
+          ),
+          260
+        ) || ''
+    )
+    .filter((data) => data !== undefined);
+
+  const bioSummaryAttributes = await getProfileAttributes(
+    dotYouClient,
+    BuiltInProfiles.StandardProfileId,
+    undefined,
+    [BuiltInAttributes.BioSummary]
+  );
+
+  const bioSummaries = bioSummaryAttributes
     ?.filter(
       (attr) =>
         attr.serverMetadata?.accessControlList.requiredSecurityGroup.toLowerCase() ===
@@ -147,6 +172,7 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
     givenName: (givenName?.length && givenName) || undefined,
     familyName: (familyName?.length && familyName) || undefined,
     bio: bios?.[0] || '',
+    bioSummary: bioSummaries?.[0] || '',
     image: `https://${dotYouClient.getHostIdentity()}/pub/image`,
     email: emails,
     links: [...socials, ...links],

@@ -9,6 +9,9 @@ const About = ({ className }: { className?: string }) => {
     <div className={className ?? ''}>
       <div className="flex max-w-7xl flex-col gap-2 lg:flex-row xl:gap-4">
         <div className="py-2 lg:w-2/3">
+          {bioData?.bioSummary && (
+            <p className="pb-10 text-foreground/70">{bioData?.bioSummary?.body}</p>
+          )}
           {bioData?.bioData && (
             <RichTextRenderer className="pb-10 leading-relaxed" body={bioData.bioData.body} />
           )}

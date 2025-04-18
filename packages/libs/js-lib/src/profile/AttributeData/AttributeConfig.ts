@@ -37,7 +37,8 @@ export class BuiltInAttributes {
 
   static readonly CreditCard = toGuidId('creditcard');
   static readonly Experience = toGuidId('full_bio');
-  static readonly Bio = toGuidId('short_bio');
+  static readonly FullBio = toGuidId('short_bio');
+  static readonly BioSummary = '1d89f51a-6e42-4074-8d6b-60916c0eec9a';
   static readonly Status = toGuidId('status');
 
   static readonly AllPersonal = [
