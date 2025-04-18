@@ -28,7 +28,7 @@ export const ProfileCardAttributeTypes = [
   BuiltInAttributes.Email,
   BuiltInAttributes.Link,
   BuiltInAttributes.Photo,
-  BuiltInAttributes.ShortBio,
+  BuiltInAttributes.Bio,
   ...BuiltInAttributes.AllSocial,
   ...BuiltInAttributes.AllGames,
 ];
@@ -61,7 +61,7 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
     dotYouClient,
     BuiltInProfiles.StandardProfileId,
     undefined,
-    [BuiltInAttributes.ShortBio]
+    [BuiltInAttributes.Bio]
   );
 
   const bios = bioAttributes
@@ -74,7 +74,7 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
       (attr) =>
         ellipsisAtMaxChar(
           getPlainTextFromRichText(
-            attr?.fileMetadata?.appData?.content?.data?.[MinimalProfileFields.ShortBioId] as string
+            attr?.fileMetadata?.appData?.content?.data?.[MinimalProfileFields.BioId] as string
           ),
           260
         ) || ''
@@ -197,14 +197,14 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
   const publicProfilePhotoAttr = profilePhotoAttributes?.find(
     (attr) =>
       attr.serverMetadata?.accessControlList?.requiredSecurityGroup.toLowerCase() ===
-        SecurityGroupType.Anonymous.toLowerCase() && attr.fileId !== undefined
+      SecurityGroupType.Anonymous.toLowerCase() && attr.fileId !== undefined
   ) as HomebaseFile<Attribute> | undefined;
 
   if (publicProfilePhotoAttr) {
     const size = { pixelWidth: 250, pixelHeight: 250 };
     const fileKey =
       publicProfilePhotoAttr.fileMetadata.appData.content.data?.[
-        MinimalProfileFields.ProfileImageKey
+      MinimalProfileFields.ProfileImageKey
       ];
 
     const payloadIsAnSvg =
@@ -290,8 +290,8 @@ const getTextRootsRecursive = (
         [
           child.children
             ? getTextRootsRecursive(
-                child.children as { children?: unknown; text?: string; value?: string }[]
-              ).join(keepNewLines ? '\n' : ' ')
+              child.children as { children?: unknown; text?: string; value?: string }[]
+            ).join(keepNewLines ? '\n' : ' ')
             : undefined,
           (child.text || child.value || undefined) as string,
         ]

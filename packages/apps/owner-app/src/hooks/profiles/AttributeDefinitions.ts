@@ -153,7 +153,7 @@ export const AttributeDefinitions = {
   },
 
   Bio: {
-    type: BuiltInAttributes.ShortBio,
+    type: BuiltInAttributes.Bio,
     name: 'Bio',
     description: 'A few lines describing yourself, your mission, your passions, etc.',
   },
@@ -186,7 +186,7 @@ export class AttributeGroups {
   ];
   static readonly AboutSectionAttributes = [
     BuiltInAttributes.Experience,
-    BuiltInAttributes.ShortBio,
+    BuiltInAttributes.Bio,
     BuiltInAttributes.Status,
   ];
   static readonly CreditCardSectionAttributes = [BuiltInAttributes.CreditCard];

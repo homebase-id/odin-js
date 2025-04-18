@@ -18,8 +18,8 @@ export const ConnectionDetailsAbout = ({ odinId }: { odinId: string }) => {
     <Section className="flex flex-col gap-10">
       {isLoading ? <LoadingBlock className="h-16" /> : null}
 
-      {bioData?.shortBio && (
-        <RichTextRenderer className="leading-relaxed" body={bioData.shortBio.body} />
+      {bioData?.bioData && (
+        <RichTextRenderer className="leading-relaxed" body={bioData.bioData.body} />
       )}
       {bioData?.experience ? (
         <div className="flex flex-col gap-5">

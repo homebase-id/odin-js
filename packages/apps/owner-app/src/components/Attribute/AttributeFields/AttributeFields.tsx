@@ -165,15 +165,15 @@ const AttributeFields = ({
         />
       );
       break;
-    case BuiltInAttributes.ShortBio:
+    case BuiltInAttributes.Bio:
       return (
         <>
           <div className="mb-5">
             <Label htmlFor={`${fileId ?? 'new'}-short-bio`}>{t('Bio')}</Label>
             <RichTextEditor
               uniqueId={fileId}
-              name={MinimalProfileFields.ShortBioId}
-              defaultValue={attribute.data?.[MinimalProfileFields.ShortBioId] ?? ''}
+              name={MinimalProfileFields.BioId}
+              defaultValue={attribute.data?.[MinimalProfileFields.BioId] ?? ''}
               onChange={onChange}
               className="rounded border border-gray-300 px-2 pb-3 dark:border-gray-700"
               contentClassName="max-h-[50vh] overflow-auto"

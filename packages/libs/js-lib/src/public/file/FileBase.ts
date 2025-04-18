@@ -56,7 +56,7 @@ const fullBioFileQueryParam: FileQueryParams = {
 const shortBioFileQueryParam: FileQueryParams = {
   targetDrive: profileDrive,
   fileType: [AttributeConfig.AttributeFileType],
-  tagsMatchAtLeastOne: [BuiltInAttributes.ShortBio.toString()],
+  tagsMatchAtLeastOne: [BuiltInAttributes.Bio.toString()],
 };
 
 const linkFileQueryParam: FileQueryParams = {
