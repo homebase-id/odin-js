@@ -94,7 +94,7 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
         content: {
           id: getNewId(),
           profileId: BuiltInProfiles.StandardProfileId,
-          type: BuiltInAttributes.ShortBio,
+          type: BuiltInAttributes.FullBio,
           priority: 10000,
           sectionId: BuiltInProfiles.AboutSectionId,
           data: {
@@ -113,7 +113,7 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
     dotYouClient,
     BuiltInProfiles.StandardProfileId,
     undefined,
-    [BuiltInAttributes.ShortBio],
+    [BuiltInAttributes.FullBio],
     1
   );
 

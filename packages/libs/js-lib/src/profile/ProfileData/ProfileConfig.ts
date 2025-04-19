@@ -18,7 +18,7 @@ export class BuiltInProfiles {
 
 export class MinimalProfileFields {
   static readonly ProfileImageKey: string = 'profileImageKey';
-  static readonly ShortBioId: string = 'short_bio';
+  static readonly BioId: string = 'short_bio';
   static readonly ExperienceTitleId: string = 'short_bio';
   static readonly ExperienceDecriptionId: string = 'full_bio';
   static readonly ExperienceLinkId: string = 'experience_link';
@@ -96,8 +96,7 @@ export const getSocialLink = (type: string, username: string): string | undefine
   if (UNLINKABLE_SOCIALS.includes(type)) return undefined;
 
   return type !== 'dotyouid'
-    ? `https://${type}.com/${
-        type === SocialFields.LinkedIn ? 'in/' : type === SocialFields.Snapchat ? 'add/' : ''
-      }${username}`
+    ? `https://${type}.com/${type === SocialFields.LinkedIn ? 'in/' : type === SocialFields.Snapchat ? 'add/' : ''
+    }${username}`
     : `https://${username}`;
 };
