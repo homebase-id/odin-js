@@ -14,6 +14,12 @@ export const tinyThumbSize: ThumbnailInstruction = {
   height: 20,
 };
 
+export const tinyGifThumbSize: ThumbnailInstruction = {
+  quality: 10,
+  width: 10,
+  height: 10,
+};
+
 const svgType = 'image/svg+xml';
 const gifType = 'image/gif';
 
@@ -60,7 +66,7 @@ export const createThumbnails = async (
 
   if (contentType === gifType) {
     const gifThumb = await createImageThumbnail(imageBytes, payloadKey, {
-      ...tinyThumbSize,
+      ...tinyGifThumbSize,
       type: 'gif',
     });
 
