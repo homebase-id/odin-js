@@ -7,10 +7,8 @@ import {
   MAX_HEADER_CONTENT_BYTES,
   NewHomebaseFile,
   PayloadFile,
-  queryBatch,
   RichText,
   SecurityGroupType,
-  SystemFileType,
   TargetDrive,
   uploadFile,
   UploadFileMetadata,
@@ -29,13 +27,8 @@ export interface Draft {
   updatedAt: number;
 }
 
-export interface CommunityMetadata {
-  lastReadTime: number;
-  threadsLastReadTime: number;
-  channelLastReadTime: Record<string, number>;
-  pinnedChannels: string[];
-  savedMessages: { messageId: string; systemFileType: SystemFileType }[];
-  notifiationsEnabled?: boolean;
+export interface CommunityDrafts {
+  drafts?: Record<string, Draft | undefined>;
 
   // Community info
   odinId: string;
@@ -47,15 +40,15 @@ export const LOCAL_COMMUNITY_APP_DRIVE: TargetDrive = {
   type: '93a6e08d-14d9-479e-8d99-bae4e5348a16',
 };
 
-export const COMMUNITY_METADATA_FILE_TYPE = 7011;
+export const COMMUNITY_DRAFTS_FILE_TYPE = 7012;
 
-export const uploadCommunityMetadata = async (
+export const uploadCommunityDrafts = async (
   dotYouClient: DotYouClient,
-  definition: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata>,
+  definition: NewHomebaseFile<CommunityDrafts> | HomebaseFile<CommunityDrafts>,
   onVersionConflicht?: () => Promise<void | UploadResult> | void
 ): Promise<UploadResult | undefined> => {
   if (!definition.fileMetadata.appData.uniqueId) {
-    throw new Error('CommunityMetadata must have a uniqueId');
+    throw new Error('CommunityDrafts must have a uniqueId');
   }
 
   if (
@@ -64,7 +57,7 @@ export const uploadCommunityMetadata = async (
       definition.fileMetadata.appData.content.communityId
     )
   ) {
-    throw new Error('CommunityMetadata must have a uniqueId that matches the communityId');
+    throw new Error('CommunityDrafts must have a uniqueId that matches the communityId');
   }
 
   const instructionSet: UploadInstructionSet = {
@@ -76,9 +69,6 @@ export const uploadCommunityMetadata = async (
 
   const payloads: PayloadFile[] = [];
 
-  // Remove drafts from the content
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  delete (definition.fileMetadata.appData.content as any).drafts;
   const jsonContent: string = jsonStringify64({ ...definition.fileMetadata.appData.content });
   const payloadBytes = stringToUint8Array(
     jsonStringify64({ ...definition.fileMetadata.appData.content })
@@ -105,7 +95,7 @@ export const uploadCommunityMetadata = async (
     appData: {
       tags: definition.fileMetadata.appData.tags,
       uniqueId: definition.fileMetadata.appData.uniqueId,
-      fileType: COMMUNITY_METADATA_FILE_TYPE,
+      fileType: COMMUNITY_DRAFTS_FILE_TYPE,
       content: content,
     },
     isEncrypted: true,
@@ -128,10 +118,10 @@ export const uploadCommunityMetadata = async (
   return result;
 };
 
-export const getCommunityMetadata = async (
+export const getCommunityDrafts = async (
   dotYouClient: DotYouClient,
   communityId: string
-): Promise<HomebaseFile<CommunityMetadata> | null> => {
+): Promise<HomebaseFile<CommunityDrafts> | null> => {
   const header = await getFileHeaderByUniqueId(
     dotYouClient,
     LOCAL_COMMUNITY_APP_DRIVE,
@@ -139,39 +129,19 @@ export const getCommunityMetadata = async (
   );
 
   if (!header) return null;
-  return dsrToCommunityMetadata(dotYouClient, header, LOCAL_COMMUNITY_APP_DRIVE, true);
-};
-
-export const getCommunitiesMetadata = async (dotYouClient: DotYouClient) => {
-  const response = await queryBatch(
-    dotYouClient,
-    {
-      targetDrive: LOCAL_COMMUNITY_APP_DRIVE,
-      fileType: [COMMUNITY_METADATA_FILE_TYPE],
-    },
-    {
-      maxRecords: 100,
-      includeMetadataHeader: true,
-    }
-  );
-
-  return await Promise.all(
-    response.searchResults.map((dsr) =>
-      dsrToCommunityMetadata(dotYouClient, dsr, LOCAL_COMMUNITY_APP_DRIVE, true)
-    )
-  );
+  return dsrToCommunityDrafts(dotYouClient, header, LOCAL_COMMUNITY_APP_DRIVE, true);
 };
 
 // Helpers
 
-export const dsrToCommunityMetadata = async (
+export const dsrToCommunityDrafts = async (
   dotYouClient: DotYouClient,
   dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<HomebaseFile<CommunityMetadata> | null> => {
+): Promise<HomebaseFile<CommunityDrafts> | null> => {
   try {
-    const definitionContent = await getContentFromHeaderOrPayload<Partial<CommunityMetadata>>(
+    const definitionContent = await getContentFromHeaderOrPayload<Partial<CommunityDrafts>>(
       dotYouClient,
       targetDrive,
       dsr,
@@ -179,7 +149,7 @@ export const dsrToCommunityMetadata = async (
     );
     if (!definitionContent) return null;
 
-    const file: HomebaseFile<CommunityMetadata> = {
+    const file: HomebaseFile<CommunityDrafts> = {
       ...dsr,
       fileMetadata: {
         ...dsr.fileMetadata,
@@ -187,11 +157,6 @@ export const dsrToCommunityMetadata = async (
           ...dsr.fileMetadata.appData,
           content: {
             // Default values
-            savedMessages: [],
-            channelLastReadTime: {},
-            pinnedChannels: [],
-            lastReadTime: 0,
-            threadsLastReadTime: 0,
             communityId: dsr.fileMetadata.appData.uniqueId as string,
             odinId: window.location.host,
             ...definitionContent,
@@ -202,7 +167,7 @@ export const dsrToCommunityMetadata = async (
 
     return file;
   } catch (ex) {
-    console.error('[community] failed to get the CommunityMetadata of a dsr', dsr, ex);
+    console.error('[community] failed to get the CommunityDrafts of a dsr', dsr, ex);
     return null;
   }
 };

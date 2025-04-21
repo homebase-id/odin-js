@@ -39,6 +39,8 @@ import {
   LOCAL_COMMUNITY_APP_DRIVE,
 } from '../../../providers/CommunityMetadataProvider';
 import { insertNewcommunityMetadata } from '../useCommunityMetadata';
+import { COMMUNITY_DRAFTS_FILE_TYPE, dsrToCommunityDrafts } from '../../../providers/CommunityDraftsProvider';
+import { insertNewcommunityDrafts } from '../useCommunityDrafts';
 
 const isDebug = hasDebugFlag();
 
@@ -158,6 +160,34 @@ export const useCommunityInboxProcessor = (
               : updatedDsr;
           if (!newMetadata) return;
           insertNewcommunityMetadata(queryClient, newMetadata);
+        })
+      );
+
+      const newCommunityDrafts = await findChangesSinceTimestamp(
+        dotYouClient,
+        undefined,
+        lastProcessedWithBuffer,
+        {
+          targetDrive: LOCAL_COMMUNITY_APP_DRIVE,
+          fileType: [COMMUNITY_DRAFTS_FILE_TYPE],
+        }
+      );
+
+      isDebug && console.debug('[CommunityInboxProcessor] new community drafts');
+
+      await Promise.all(
+        newCommunityDrafts.map(async (updatedDsr) => {
+          const newDrafts =
+            updatedDsr.fileState === 'active'
+              ? await dsrToCommunityDrafts(
+                dotYouClient,
+                updatedDsr,
+                LOCAL_COMMUNITY_APP_DRIVE,
+                true
+              )
+              : updatedDsr;
+          if (!newDrafts) return;
+          insertNewcommunityDrafts(queryClient, newDrafts);
         })
       );
     } else {
