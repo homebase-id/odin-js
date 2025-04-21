@@ -211,7 +211,6 @@ export const IdentityPageMetaAndActions = ({ odinId }: { odinId: string }) => {
                 type: 'secondary',
                 onClick: async () => {
                   try {
-                    console.log('unfollow');
                     await unfollow({ odinId });
                   } catch (e) {
                     addError(e, t('Failed to remove a connection'));

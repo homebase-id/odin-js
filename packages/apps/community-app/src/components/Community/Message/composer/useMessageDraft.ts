@@ -1,8 +1,8 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useState, useEffect } from 'react';
-import { useCommunityMetadata } from '../../../../hooks/community/useCommunityMetadata';
 import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
 import { Draft } from '../../../../providers/CommunityMetadataProvider';
+import { useCommunityDrafts } from '../../../../hooks/community/useCommunityDrafts';
 
 export const useMessageDraft = (props?: {
   community: HomebaseFile<CommunityDefinition> | undefined;
@@ -11,8 +11,8 @@ export const useMessageDraft = (props?: {
   const { community, draftKey } = props || {};
 
   const {
-    single: { data: metadata },
-  } = useCommunityMetadata(
+    single: { data: communityDrafts },
+  } = useCommunityDrafts(
     props
       ? {
         odinId: community?.fileMetadata.senderOdinId,
@@ -22,12 +22,12 @@ export const useMessageDraft = (props?: {
   );
 
   const [draft, setDraft] = useState<Draft | undefined>(undefined);
-  const drafts = metadata?.fileMetadata.appData.content.drafts || {};
+  const drafts = communityDrafts?.fileMetadata.appData.content.drafts || {};
   useEffect(() => {
-    if (!draftKey || !metadata || draft?.updatedAt === drafts[draftKey]?.updatedAt) return;
+    if (!draftKey || !communityDrafts || draft?.updatedAt === drafts[draftKey]?.updatedAt) return;
 
     setDraft(draftKey ? drafts[draftKey] : undefined);
-  }, [draftKey, metadata, draft]);
+  }, [draftKey, communityDrafts, draft]);
 
   return draft || (draftKey && drafts[draftKey]) || undefined;
 };
