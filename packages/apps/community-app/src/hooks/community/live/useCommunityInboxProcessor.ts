@@ -61,7 +61,7 @@ export const useCommunityInboxProcessor = (
       'process-community-inbox',
       communityId,
     ])?.dataUpdatedAt;
-    const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 2;
+    const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 15;
 
     // Process community;
     const processedresult =
