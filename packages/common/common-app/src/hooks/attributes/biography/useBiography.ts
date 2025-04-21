@@ -12,7 +12,7 @@ import { PayloadDescriptor } from '@homebase-id/js-lib/core';
 import { getProfileAttributesOverPeer } from '@homebase-id/js-lib/peer';
 import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
 
-type ShortBioData = {
+type BioData = {
   id: string;
   body: string;
   priority: number;
@@ -30,7 +30,8 @@ type ExperienceData = {
 };
 
 export type BiographyData = {
-  shortBio?: ShortBioData;
+  bioData?: BioData;
+  bioSummary?: BioData;
   experience: ExperienceData[];
 };
 
@@ -46,9 +47,9 @@ export const useBiography = (props?: { odinId: string } | undefined) => {
       if (odinId) return undefined;
 
       const fileData = await GetFile(dotYouClient, 'sitedata.json');
-      if (!fileData.has('short-bio') && !fileData.has('long-bio')) return;
+      if (!fileData.has('short-bio') && !fileData.has('long-bio') && !fileData.has('short-bio-summary')) return;
 
-      const shortBioAttributes = await (async () => {
+      const bioAttributes = await (async () => {
         const shortBioEntries = fileData.get('short-bio');
         if (!shortBioEntries) return undefined;
         const allPromise = await Promise.all(
@@ -74,19 +75,19 @@ export const useBiography = (props?: { odinId: string } | undefined) => {
 
             if (!attr) return undefined;
             return {
-              body: attr.data?.[MinimalProfileFields.ShortBioId] as string,
+              body: attr.data?.[MinimalProfileFields.BioId] as string,
               id: attr.id,
               priority: attr.priority,
             };
           })
         );
 
-        return (allPromise.filter(Boolean) as ShortBioData[]).sort(
+        return (allPromise.filter(Boolean) as BioData[]).sort(
           (a, b) => a.priority - b.priority
         );
       })();
 
-      const longBioAttributes: ExperienceData[] | undefined = fileData
+      const experienceAttributes: ExperienceData[] | undefined = fileData
         .get('long-bio')
         ?.map((entry) => {
           const attribute = entry.payload as Attribute;
@@ -106,27 +107,66 @@ export const useBiography = (props?: { odinId: string } | undefined) => {
         })
         .sort((a, b) => a.priority - b.priority);
 
+      const bioSummaryAttributes = await (async () => {
+        const shortBioEntries = fileData.get('short-bio-summary');
+        if (!shortBioEntries) return undefined;
+        const allPromise = await Promise.all(
+          shortBioEntries.map(async (entry) => {
+            let attr: Attribute | undefined = entry.payload as Attribute;
+            if (
+              !attr &&
+              entry.header.fileMetadata.payloads?.filter(
+                (payload: PayloadDescriptor) => payload.contentType === 'application/json'
+              ).length !== 0 &&
+              entry.header.fileMetadata.appData.uniqueId
+            ) {
+              console.warn(entry, 'fetching attribute, not enough data in static file');
+              // Fetch attribute if it is not included in the static data
+              attr = (
+                await getProfileAttribute(
+                  dotYouClient,
+                  BuiltInProfiles.StandardProfileId,
+                  entry.header.fileMetadata.appData.uniqueId
+                )
+              )?.fileMetadata.appData.content;
+            }
+
+            if (!attr) return undefined;
+            return {
+              body: attr.data?.[MinimalProfileFields.BioId] as string,
+              id: attr.id,
+              priority: attr.priority,
+            };
+          })
+        );
+
+        return (allPromise.filter(Boolean) as BioData[]).sort(
+          (a, b) => a.priority - b.priority
+        );
+      })();
+
       return {
-        shortBio: shortBioAttributes?.[0],
-        experience: longBioAttributes || [],
+        bioData: bioAttributes?.[0],
+        bioSummary: bioSummaryAttributes?.[0],
+        experience: experienceAttributes || [],
       };
     };
 
     const fetchDynamicData = async (): Promise<BiographyData | undefined> => {
       try {
-        const shortBiographyAttributes = (
+        const biographyAttributes = (
           odinId
-            ? await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.ShortBio)
+            ? await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.FullBio)
             : await getProfileAttributes(
-                dotYouClient,
-                BuiltInProfiles.StandardProfileId,
-                undefined,
-                [BuiltInAttributes.ShortBio]
-              )
+              dotYouClient,
+              BuiltInProfiles.StandardProfileId,
+              undefined,
+              [BuiltInAttributes.FullBio]
+            )
         )?.map((dsr) => {
           const attr = dsr.fileMetadata.appData.content;
           return {
-            body: attr.data?.[MinimalProfileFields.ShortBioId] as string,
+            body: attr.data?.[MinimalProfileFields.BioId] as string,
             id: attr.id,
             priority: attr.priority,
           };
@@ -136,11 +176,11 @@ export const useBiography = (props?: { odinId: string } | undefined) => {
           odinId
             ? await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.Experience)
             : await getProfileAttributes(
-                dotYouClient,
-                BuiltInProfiles.StandardProfileId,
-                undefined,
-                [BuiltInAttributes.Experience]
-              )
+              dotYouClient,
+              BuiltInProfiles.StandardProfileId,
+              undefined,
+              [BuiltInAttributes.Experience]
+            )
         )?.map((dsr) => {
           const attr = dsr.fileMetadata.appData.content;
           return {
@@ -157,8 +197,27 @@ export const useBiography = (props?: { odinId: string } | undefined) => {
           };
         });
 
+        const bioSummaryAttributes = (
+          odinId
+            ? await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.BioSummary)
+            : await getProfileAttributes(
+              dotYouClient,
+              BuiltInProfiles.StandardProfileId,
+              undefined,
+              [BuiltInAttributes.BioSummary]
+            )
+        )?.map((dsr) => {
+          const attr = dsr.fileMetadata.appData.content;
+          return {
+            body: attr.data?.[MinimalProfileFields.BioId] as string,
+            id: attr.id,
+            priority: attr.priority,
+          };
+        });
+
         return {
-          shortBio: shortBiographyAttributes?.[0],
+          bioData: biographyAttributes?.[0],
+          bioSummary: bioSummaryAttributes?.[0],
           experience: longBiographyAttributes || [],
         };
       } catch (e) {

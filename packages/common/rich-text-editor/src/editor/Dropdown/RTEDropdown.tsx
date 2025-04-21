@@ -132,6 +132,11 @@ export const RTEDropdown = <T extends DropdownValue>({
 
         onCancel(true);
       }
+
+      if (e.key === trigger) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
     };
 
     window.addEventListener('keydown', onKeyDown);

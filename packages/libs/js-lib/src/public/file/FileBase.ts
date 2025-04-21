@@ -47,7 +47,7 @@ const themeFileQueryParam: FileQueryParams = {
   tagsMatchAtLeastOne: [HomePageAttributes.Theme.toString()],
 };
 
-const fullBioFileQueryParam: FileQueryParams = {
+const experienceFileQueryParam: FileQueryParams = {
   targetDrive: profileDrive,
   fileType: [AttributeConfig.AttributeFileType],
   tagsMatchAtLeastOne: [BuiltInAttributes.Experience.toString()],
@@ -56,7 +56,13 @@ const fullBioFileQueryParam: FileQueryParams = {
 const shortBioFileQueryParam: FileQueryParams = {
   targetDrive: profileDrive,
   fileType: [AttributeConfig.AttributeFileType],
-  tagsMatchAtLeastOne: [BuiltInAttributes.ShortBio.toString()],
+  tagsMatchAtLeastOne: [BuiltInAttributes.FullBio.toString()],
+};
+
+const shortBioSummaryFileQueryParam: FileQueryParams = {
+  targetDrive: profileDrive,
+  fileType: [AttributeConfig.AttributeFileType],
+  tagsMatchAtLeastOne: [BuiltInAttributes.BioSummary.toString()],
 };
 
 const linkFileQueryParam: FileQueryParams = {
@@ -94,12 +100,17 @@ export const DEFAULT_SECTIONS = [
   },
   {
     name: 'long-bio',
-    queryParams: fullBioFileQueryParam,
+    queryParams: experienceFileQueryParam,
     resultOptions: BASE_RESULT_OPTIONS,
   },
   {
     name: 'short-bio',
     queryParams: shortBioFileQueryParam,
+    resultOptions: BASE_RESULT_OPTIONS,
+  },
+  {
+    name: 'short-bio-summary',
+    queryParams: shortBioSummaryFileQueryParam,
     resultOptions: BASE_RESULT_OPTIONS,
   },
   {
