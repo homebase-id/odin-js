@@ -54,7 +54,10 @@ export const isUpdateInstructionSet = (
 
 export interface StorageOptions {
   drive: TargetDrive;
-  // overwriteFileId?: string; -- This is gone now
+  /**
+   * @deprecated This property is deprecated and will be removed in future versions.
+   */
+  overwriteFileId?: string;
   expiresTimestamp?: number;
   storageIntent?: 'metadataOnly'; // 'overwrite' is default
 }

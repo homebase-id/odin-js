@@ -1,5 +1,5 @@
-import {hasDebugFlag} from '../../../helpers/BrowserUtil';
-import {assertIfDotYouClientIsOwnerOrApp, DotYouClient} from '../../DotYouClient';
+import { hasDebugFlag } from '../../../helpers/BrowserUtil';
+import { assertIfDotYouClientIsOwnerOrApp, DotYouClient } from '../../DotYouClient';
 import {
     PayloadFile,
     ThumbnailFile,
@@ -16,9 +16,8 @@ import {
     UploadResult,
     UpdateResult,
     UpdateInstructionSet,
-    UpdateLocalInstructionSet,
 } from './DriveUploadTypes';
-import {decryptKeyHeader, encryptWithKeyheader} from '../SecurityHelpers';
+import { decryptKeyHeader, encryptWithKeyheader } from '../SecurityHelpers';
 import {
     GenerateKeyHeader,
     buildDescriptor,
@@ -28,7 +27,7 @@ import {
     pureUpdate,
     buildUpdateManifest,
 } from './UploadHelpers';
-import {getFileHeader, getPayloadBytes, getThumbBytes} from '../File/DriveFileProvider';
+import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFileProvider';
 import {
     base64ToUint8Array,
     getRandom16ByteArray,
@@ -36,8 +35,7 @@ import {
     stringToUint8Array,
     uint8ArrayToBase64,
 } from '../../../helpers/DataUtil';
-import {AxiosRequestConfig} from 'axios';
-
+import { AxiosRequestConfig } from 'axios';
 const OdinBlob: typeof Blob =
     (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
     Blob;
@@ -59,19 +57,19 @@ export const uploadFile = async (
     }
 ): Promise<UploadResult | void> => {
     isDebug &&
-    console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/upload`).pathname, {
-        instructions,
-        metadata,
-        payloads,
-        thumbnails,
-    });
+        console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/upload`).pathname, {
+            instructions,
+            metadata,
+            payloads,
+            thumbnails,
+        });
 
     // Force isEncrypted on the metadata to match the encrypt flag
     metadata.isEncrypted = encrypt || !!options?.aesKey;
 
     const keyHeader = encrypt ? GenerateKeyHeader(options?.aesKey) : undefined;
 
-    const {systemFileType, ...strippedInstructions} = instructions;
+    const { systemFileType, ...strippedInstructions } = instructions;
 
     const manifest = buildManifest(payloads, thumbnails, encrypt);
     const instructionsWithManifest = {
@@ -125,13 +123,13 @@ export const patchFile = async (
     }
 ): Promise<UpdateResult | UploadResult | void> => {
     isDebug &&
-    console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/update`).pathname, {
-        instructions,
-        metadata,
-        payloads,
-        thumbnails,
-        toDeletePayloads,
-    });
+        console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/update`).pathname, {
+            instructions,
+            metadata,
+            payloads,
+            thumbnails,
+            toDeletePayloads,
+        });
 
     const decryptedKeyHeader =
         keyHeader && 'encryptionVersion' in keyHeader
@@ -143,7 +141,7 @@ export const patchFile = async (
         decryptedKeyHeader.iv = getRandom16ByteArray();
     }
 
-    const {systemFileType, ...strippedInstructions} = instructions;
+    const { systemFileType, ...strippedInstructions } = instructions;
 
     const manifest = buildUpdateManifest(
         payloads,
@@ -189,86 +187,74 @@ export const patchFile = async (
 
 export const reUploadFile = async (
     dotYouClient: DotYouClient,
-    instructions: UpdateLocalInstructionSet,
-    metaData: UploadFileMetadata,
-    keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
+    instructions: UploadInstructionSet,
+    metadata: UploadFileMetadata,
     encrypt: boolean,
     axiosConfig?: AxiosRequestConfig
 ) => {
-    const targetDrive = instructions.file.targetDrive;
-    const fileId = instructions.file.fileId;
-    if (!fileId) throw new Error('instructions.file.fileId is required');
+    const targetDrive = instructions.storageOptions?.drive;
+    const fileId = instructions.storageOptions?.overwriteFileId;
     if (!targetDrive) throw new Error('storageOptions.drive is required');
+    if (!fileId) throw new Error('storageOptions.overwriteFileId is required');
 
-    // const header = await getFileHeader(dotYouClient, targetDrive, fileId);
-    metaData.isEncrypted = encrypt;
-    // const payloads: PayloadFile[] = [];
-    // const thumbnails: ThumbnailFile[] = [];
+    const header = await getFileHeader(dotYouClient, targetDrive, fileId);
 
-    // const existingPayloads = header?.fileMetadata.payloads;
-    // for (let i = 0; existingPayloads && i < existingPayloads.length; i++) {
-    //     const existingPayload = existingPayloads[i];
-    //     const payloadData = await getPayloadBytes(
-    //         dotYouClient,
-    //         targetDrive,
-    //         fileId,
-    //         existingPayload.key,
-    //         {decrypt: true}
-    //     );
-    //     if (!payloadData) continue;
-    //
-    //     payloads.push({
-    //         key: existingPayload.key,
-    //         payload: new OdinBlob([payloadData.bytes], {type: existingPayload.contentType}),
-    //     });
-    //
-    //     const existingThumbnails = existingPayload.thumbnails;
-    //     for (let j = 0; j < existingThumbnails.length; j++) {
-    //         const existingThumbnail = existingThumbnails[j];
-    //         const thumbnailData = await getThumbBytes(
-    //             dotYouClient,
-    //             targetDrive,
-    //             fileId,
-    //             existingPayload.key,
-    //             existingThumbnail.pixelWidth,
-    //             existingThumbnail.pixelHeight,
-    //             {}
-    //         );
-    //         if (thumbnailData)
-    //             thumbnails.push({
-    //                 key: existingPayload.key,
-    //                 payload: new OdinBlob([thumbnailData.bytes], {
-    //                     type: existingThumbnail.contentType,
-    //                 }),
-    //                 pixelWidth: existingThumbnail.pixelWidth,
-    //                 pixelHeight: existingThumbnail.pixelHeight,
-    //             });
-    //     }
-    // }
+    const payloads: PayloadFile[] = [];
+    const thumbnails: ThumbnailFile[] = [];
 
-    return await patchFile(
+    const existingPayloads = header?.fileMetadata.payloads;
+    for (let i = 0; existingPayloads && i < existingPayloads.length; i++) {
+        const existingPayload = existingPayloads[i];
+        const payloadData = await getPayloadBytes(
+            dotYouClient,
+            targetDrive,
+            fileId,
+            existingPayload.key,
+            { decrypt: true }
+        );
+        if (!payloadData) continue;
+
+        payloads.push({
+            key: existingPayload.key,
+            payload: new OdinBlob([payloadData.bytes], { type: existingPayload.contentType }),
+        });
+
+        const existingThumbnails = existingPayload.thumbnails;
+        for (let j = 0; j < existingThumbnails.length; j++) {
+            const existingThumbnail = existingThumbnails[j];
+            const thumbnailData = await getThumbBytes(
+                dotYouClient,
+                targetDrive,
+                fileId,
+                existingPayload.key,
+                existingThumbnail.pixelWidth,
+                existingThumbnail.pixelHeight,
+                {}
+            );
+            if (thumbnailData)
+                thumbnails.push({
+                    key: existingPayload.key,
+                    payload: new OdinBlob([thumbnailData.bytes], {
+                        type: existingThumbnail.contentType,
+                    }),
+                    pixelWidth: existingThumbnail.pixelWidth,
+                    pixelHeight: existingThumbnail.pixelHeight,
+                });
+        }
+    }
+
+    return await uploadFile(
         dotYouClient,
-        keyHeader,
         instructions,
-        metaData,
+        metadata,
+        payloads,
+        thumbnails,
+        encrypt,
         undefined,
-        undefined,
-        undefined,
-        undefined, {
+        {
             axiosConfig,
-        })
-    // return await uploadFile(
-    //   dotYouClient,
-    //   instructions,
-    //   metadata,
-    //   payloads,
-    //   thumbnails,
-    //   encrypt,
-    //   undefined,
-    //   {
-    //     axiosConfig,
-    //   }
-    // );
+        }
+    );
 };
 
 export interface LocalMetadataUploadResult {

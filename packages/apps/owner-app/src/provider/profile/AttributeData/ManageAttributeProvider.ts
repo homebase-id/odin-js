@@ -20,7 +20,6 @@ import {
   patchFile,
   UpdateLocalInstructionSet,
   MAX_HEADER_CONTENT_BYTES,
-  UpdateInstructionSet,
 } from '@homebase-id/js-lib/core';
 import {
   getNewId,
@@ -80,6 +79,7 @@ export const saveProfileAttribute = async (
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
+      overwriteFileId: toSaveAttribute?.fileId ?? '',
       drive: targetDrive,
     },
   };
@@ -113,28 +113,14 @@ export const saveProfileAttribute = async (
   if (toSaveAttribute.fileId) {
     const wasEncrypted =
       'isEncrypted' in toSaveAttribute.fileMetadata && toSaveAttribute.fileMetadata.isEncrypted;
-    const updateInstructions: UpdateLocalInstructionSet = {
-      transferIv: getRandom16ByteArray(),
-      locale: 'local',
-      versionTag: toSaveAttribute.fileMetadata.versionTag,
-      file: {
-        fileId: toSaveAttribute.fileId,
-        targetDrive: targetDrive,
-      },
-    }
-
-    const keyHeader =
-      wasEncrypted && encrypt && 'sharedSecretEncryptedKeyHeader' in toSaveAttribute
-        ? toSaveAttribute.sharedSecretEncryptedKeyHeader
-        : undefined;
 
     // When switching between encrypted and unencrypted, we need to re-upload the full file
     if (wasEncrypted !== encrypt) {
-      const result = await reUploadFile(dotYouClient, updateInstructions, metadata, keyHeader, encrypt);
+      const result = await reUploadFile(dotYouClient, instructionSet, metadata, encrypt);
       if (result)
         return {
           ...toSaveAttribute,
-          fileId: toSaveAttribute.fileId,
+          fileId: result.file.fileId,
           fileMetadata: {
             ...toSaveAttribute.fileMetadata,
             versionTag: result.newVersionTag,
@@ -152,7 +138,10 @@ export const saveProfileAttribute = async (
     );
     const existingPayloads = existingAttribute?.fileMetadata?.payloads || [];
 
-
+    const keyHeader =
+      wasEncrypted && encrypt && 'sharedSecretEncryptedKeyHeader' in toSaveAttribute
+        ? toSaveAttribute.sharedSecretEncryptedKeyHeader
+        : undefined;
 
     const existingDefaultPayload = existingPayloads.find(
       (payload) => payload.key === DEFAULT_PAYLOAD_KEY
