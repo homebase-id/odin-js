@@ -4,7 +4,7 @@ import {
   getReactionSummary,
   ReactionContext,
 } from '@homebase-id/js-lib/public';
-import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../../auth/useOdinClientContext';
 import { formatGuidId } from '@homebase-id/js-lib/helpers';
 
 export const useEmojiSummary = ({
@@ -14,7 +14,7 @@ export const useEmojiSummary = ({
   context: ReactionContext;
   reactionPreview?: EmojiReactionSummary;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetch = async (context: ReactionContext): Promise<EmojiReactionSummary> => {
     if (
@@ -25,7 +25,7 @@ export const useEmojiSummary = ({
       return { reactions: [], totalCount: 0 };
     }
 
-    return await getReactionSummary(dotYouClient, context);
+    return await getReactionSummary(odinClient, context);
   };
 
   return {

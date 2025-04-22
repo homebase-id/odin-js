@@ -1,5 +1,5 @@
 import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { t, useDotYouClientContext, useIntroductions } from '@homebase-id/common-app';
+import { t, useOdinClientContext, useIntroductions } from '@homebase-id/common-app';
 import {
   HomebaseFile,
   NewHomebaseFile,
@@ -24,14 +24,14 @@ import {
 export const useMailConversation = (props?: { messageFileId: string }) => {
   const { messageFileId } = props || {};
 
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
-  const identity = dotYouClient.getHostIdentity();
+  const identity = odinClient.getHostIdentity();
 
   const { mutateAsync: introduceRecipients } = useIntroductions().introduceIdentities;
 
   const getMessage = async (messageFileId: string) =>
-    await getMailConversation(dotYouClient, messageFileId);
+    await getMailConversation(odinClient, messageFileId);
 
   const sendMessage = async ({
     conversation,
@@ -72,8 +72,8 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
     };
 
     const uploadResult = newMailConversation.fileId
-      ? await updateMail(dotYouClient, newMailConversation as HomebaseFile<MailConversation>, files)
-      : await uploadMail(dotYouClient, newMailConversation, files as NewMediaFile[]);
+      ? await updateMail(odinClient, newMailConversation as HomebaseFile<MailConversation>, files)
+      : await uploadMail(odinClient, newMailConversation, files as NewMediaFile[]);
     if (!uploadResult) throw new Error('Failed to send the mail message');
 
     newMailConversation.fileId = uploadResult.file.fileId;
@@ -119,15 +119,15 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
           },
         };
         return await updateMail(
-          dotYouClient,
+          odinClient,
           updatedConversation,
           updatedConversation.fileMetadata.payloads,
           async () => {
-            const serverData = await getMailConversation(dotYouClient, conversation.fileId);
+            const serverData = await getMailConversation(odinClient, conversation.fileId);
             if (!serverData) return;
             updatedConversation.fileMetadata.versionTag = serverData.fileMetadata.versionTag;
             return await updateMail(
-              dotYouClient,
+              odinClient,
               updatedConversation,
               updatedConversation.fileMetadata.payloads
             );
@@ -170,15 +170,15 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
           },
         };
         return await updateMail(
-          dotYouClient,
+          odinClient,
           updatedConversation,
           updatedConversation.fileMetadata.payloads,
           async () => {
-            const serverData = await getMailConversation(dotYouClient, conversation.fileId);
+            const serverData = await getMailConversation(odinClient, conversation.fileId);
             if (!serverData) return;
             updatedConversation.fileMetadata.versionTag = serverData.fileMetadata.versionTag;
             await updateMail(
-              dotYouClient,
+              odinClient,
               updatedConversation,
               updatedConversation.fileMetadata.payloads
             );
@@ -215,11 +215,11 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
                   results:
                     index === 0
                       ? [
-                          conversation as HomebaseFile<MailConversation>,
-                          ...(existingConversations?.pages[0].results.filter(
-                            (item) => !stringGuidsEqual(item.fileId, conversation.fileId)
-                          ) || []),
-                        ]
+                        conversation as HomebaseFile<MailConversation>,
+                        ...(existingConversations?.pages[0].results.filter(
+                          (item) => !stringGuidsEqual(item.fileId, conversation.fileId)
+                        ) || []),
+                      ]
                       : page.results,
                 };
               }),
@@ -256,18 +256,18 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
                       stringGuidsEqual(msg.fileId, conversation.fileId)
                     )
                       ? {
-                          ...conversation,
-                          fileMetadata: {
-                            ...conversation.fileMetadata,
-                            appData: {
-                              ...conversation.fileMetadata.appData,
-                              content: {
-                                ...conversation.fileMetadata.appData.content,
-                                isRead: true,
-                              },
+                        ...conversation,
+                        fileMetadata: {
+                          ...conversation.fileMetadata,
+                          appData: {
+                            ...conversation.fileMetadata.appData,
+                            content: {
+                              ...conversation.fileMetadata.appData.content,
+                              isRead: true,
                             },
                           },
-                        }
+                        },
+                      }
                       : conversation;
                   }),
                 };
@@ -338,18 +338,18 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
                       stringGuidsEqual(msg.fileId, conversation.fileId)
                     )
                       ? {
-                          ...conversation,
-                          fileMetadata: {
-                            ...conversation.fileMetadata,
-                            appData: {
-                              ...conversation.fileMetadata.appData,
-                              content: {
-                                ...conversation.fileMetadata.appData.content,
-                                isRead: false,
-                              },
+                        ...conversation,
+                        fileMetadata: {
+                          ...conversation.fileMetadata,
+                          appData: {
+                            ...conversation.fileMetadata.appData,
+                            content: {
+                              ...conversation.fileMetadata.appData.content,
+                              isRead: false,
                             },
                           },
-                        }
+                        },
+                      }
                       : conversation;
                   }),
                 };
@@ -405,7 +405,7 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
 };
 
 export const useMailDraft = (props?: { draftFileId: string }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const { draftFileId } = props || {};
@@ -446,8 +446,8 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
     };
 
     const uploadResult = newMailConversation.fileId
-      ? await updateMail(dotYouClient, newMailConversation as HomebaseFile<MailConversation>, files)
-      : await uploadMail(dotYouClient, newMailConversation, files as NewMediaFile[]);
+      ? await updateMail(odinClient, newMailConversation as HomebaseFile<MailConversation>, files)
+      : await uploadMail(odinClient, newMailConversation, files as NewMediaFile[]);
 
     if (!uploadResult) throw new Error('Failed to save the mail message draft');
 
@@ -459,10 +459,10 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
     return newMailConversation;
   };
 
-  const getDraft = async (fileId: string) => await getMailConversation(dotYouClient, fileId);
+  const getDraft = async (fileId: string) => await getMailConversation(odinClient, fileId);
 
   const removeDraft = async (draftConversation: HomebaseFile<MailConversation>) =>
-    deleteFile(dotYouClient, MailDrive, draftConversation.fileId);
+    deleteFile(odinClient, MailDrive, draftConversation.fileId);
 
   return {
     getDraft: useQuery({
@@ -492,14 +492,14 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
                   results:
                     index === 0 && !alreadyExisted
                       ? [
-                          draftedConversation as HomebaseFile<MailConversation>,
-                          ...(existingConversations?.pages[0].results || []),
-                        ]
+                        draftedConversation as HomebaseFile<MailConversation>,
+                        ...(existingConversations?.pages[0].results || []),
+                      ]
                       : page.results.map((result) => {
-                          return stringGuidsEqual(result.fileId, draftedConversation.fileId)
-                            ? (draftedConversation as HomebaseFile<MailConversation>)
-                            : result;
-                        }),
+                        return stringGuidsEqual(result.fileId, draftedConversation.fileId)
+                          ? (draftedConversation as HomebaseFile<MailConversation>)
+                          : result;
+                      }),
                 };
               }),
             ],

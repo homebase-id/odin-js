@@ -2,7 +2,7 @@ import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@homebase-id/js-li
 import { Image } from '../../../media/Image';
 import { t } from '../../../helpers/i18n/dictionary';
 import { useSiteData } from '../../../hooks/siteData/useSiteData';
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient } from '@homebase-id/js-lib/core';
 import { ContactImage } from '../../../identity';
 import { useIsConnected } from '../../../hooks';
 import { FallbackImg } from '../../../ui';
@@ -39,7 +39,7 @@ export const AuthorImage = ({ odinId, ...props }: ConnectionImageProps) => {
     return <ConnectionImage odinId={odinId} {...props} />;
   }
 
-  const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot();
+  const host = new OdinClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot();
   return (
     <a href={host}>
       <ConnectionImage odinId={odinId} {...props} />

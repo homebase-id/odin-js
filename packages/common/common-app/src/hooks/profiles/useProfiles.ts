@@ -6,7 +6,7 @@ import {
   saveProfileDefinition,
 } from '@homebase-id/js-lib/profile';
 import { slugify } from '@homebase-id/js-lib/helpers';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 
 export interface ProfileDefinitionVm extends ProfileDefinition {
   slug: string;
@@ -14,10 +14,10 @@ export interface ProfileDefinitionVm extends ProfileDefinition {
 
 export const useProfiles = (disabled?: boolean) => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchAll = async () => {
-    const definitions = (await getProfileDefinitions(dotYouClient))
+    const definitions = (await getProfileDefinitions(odinClient))
     const mappedDefinitions = definitions
       .map((def) => {
         return {
@@ -34,11 +34,11 @@ export const useProfiles = (disabled?: boolean) => {
   };
 
   const saveProfile = async (profileDef: ProfileDefinition) => {
-    return await saveProfileDefinition(dotYouClient, profileDef);
+    return await saveProfileDefinition(odinClient, profileDef);
   };
 
   const removeProfile = async (profileId: string) => {
-    return await removeProfileDefinition(dotYouClient, profileId);
+    return await removeProfileDefinition(odinClient, profileId);
   };
 
   return {

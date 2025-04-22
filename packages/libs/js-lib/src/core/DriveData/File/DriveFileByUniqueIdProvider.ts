@@ -1,6 +1,6 @@
 import { AxiosRequestConfig } from 'axios';
 
-import { DotYouClient } from '../../DotYouClient';
+import { OdinClient } from '../../OdinClient';
 import {
   decryptKeyHeader,
   decryptJsonContent,
@@ -34,7 +34,7 @@ const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile | nul
 
 /// Get methods by UniqueId
 export const getFileHeaderByUniqueId = async <T = string>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   uniqueId: string,
   options?: { systemFileType?: SystemFileType; decrypt?: boolean }
@@ -42,7 +42,7 @@ export const getFileHeaderByUniqueId = async <T = string>(
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
-  const fileHeader = await getFileHeaderBytesByUniqueId(dotYouClient, targetDrive, uniqueId, {
+  const fileHeader = await getFileHeaderBytesByUniqueId(odinClient, targetDrive, uniqueId, {
     decrypt,
     systemFileType,
   });
@@ -65,12 +65,12 @@ export const getFileHeaderByUniqueId = async <T = string>(
 };
 
 export const getFileHeaderBytesByUniqueId = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   uniqueId: string,
   options?: { decrypt?: boolean; systemFileType?: SystemFileType }
 ): Promise<HomebaseFile | null> => {
-  assertIfDefined('DotYouClient', dotYouClient);
+  assertIfDefined('OdinClient', odinClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
 
@@ -83,7 +83,7 @@ export const getFileHeaderBytesByUniqueId = async (
     (await _internalMetadataPromiseCache.get(cacheKey));
   if (cacheEntry) return cacheEntry;
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
+  const client = getAxiosClient(odinClient, systemFileType);
 
   const request: GetFileByUniqueIdRequest = {
     ...targetDrive,
@@ -96,7 +96,7 @@ export const getFileHeaderBytesByUniqueId = async (
     .then(async (fileHeader) => {
       if (decrypt) {
         const keyheader = fileHeader.fileMetadata.isEncrypted
-          ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)
+          ? await decryptKeyHeader(odinClient, fileHeader.sharedSecretEncryptedKeyHeader)
           : undefined;
 
         fileHeader.fileMetadata.appData.content = await decryptJsonContent(
@@ -120,7 +120,7 @@ export const getFileHeaderBytesByUniqueId = async (
 };
 
 export const getPayloadAsJsonByUniqueId = async <T>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   uniqueId: string,
   key: string,
@@ -130,14 +130,14 @@ export const getPayloadAsJsonByUniqueId = async <T>(
 ): Promise<T | null> => {
   const systemFileType = options?.systemFileType ?? 'Standard';
 
-  return getPayloadBytesByUniqueId(dotYouClient, targetDrive, uniqueId, key, {
+  return getPayloadBytesByUniqueId(odinClient, targetDrive, uniqueId, key, {
     systemFileType,
     decrypt: true,
   }).then((bytes) => parseBytesToObject<T>(bytes));
 };
 
 export const getPayloadBytesByUniqueId = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   uniqueId: string,
   key: string,
@@ -149,7 +149,7 @@ export const getPayloadBytesByUniqueId = async (
     lastModified?: number;
   }
 ): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
-  assertIfDefined('DotYouClient', dotYouClient);
+  assertIfDefined('OdinClient', odinClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
   assertIfDefined('Key', key);
@@ -159,7 +159,7 @@ export const getPayloadBytesByUniqueId = async (
     systemFileType: 'Standard',
   };
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
+  const client = getAxiosClient(odinClient, systemFileType);
   const request: GetFileByUniqueIdPayloadRequest = {
     ...targetDrive,
     clientUniqueId: uniqueId,
@@ -179,7 +179,7 @@ export const getPayloadBytesByUniqueId = async (
   return client
     .get<ArrayBuffer>(
       '/drive/query/specialized/cuid/payload?' +
-        stringifyToQueryParams({ ...request, lastModified }),
+      stringifyToQueryParams({ ...request, lastModified }),
       config
     )
     .then(async (response) => {
@@ -189,19 +189,19 @@ export const getPayloadBytesByUniqueId = async (
           ? new Uint8Array(response.data)
           : updatedChunkStart !== undefined
             ? (
-                await decryptChunkedBytesResponse(
-                  dotYouClient,
-                  response,
-                  startOffset,
-                  updatedChunkStart
-                )
-              ).slice(
-                0,
-                chunkEnd !== undefined && chunkStart !== undefined
-                  ? chunkEnd - chunkStart + 1
-                  : undefined
+              await decryptChunkedBytesResponse(
+                odinClient,
+                response,
+                startOffset,
+                updatedChunkStart
               )
-            : await decryptBytesResponse(dotYouClient, response),
+            ).slice(
+              0,
+              chunkEnd !== undefined && chunkStart !== undefined
+                ? chunkEnd - chunkStart + 1
+                : undefined
+            )
+            : await decryptBytesResponse(odinClient, response),
 
         contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };
@@ -214,7 +214,7 @@ export const getPayloadBytesByUniqueId = async (
 };
 
 export const getThumbBytesByUniqueId = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   uniqueId: string,
   payloadKey: string,
@@ -225,7 +225,7 @@ export const getThumbBytesByUniqueId = async (
     lastModified?: number;
   }
 ): Promise<{ bytes: Uint8Array; contentType: ImageContentType } | null> => {
-  assertIfDefined('DotYouClient', dotYouClient);
+  assertIfDefined('OdinClient', odinClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
   assertIfDefined('PayloadKey', payloadKey);
@@ -235,7 +235,7 @@ export const getThumbBytesByUniqueId = async (
   const lastModified = options?.lastModified ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
+  const client = getAxiosClient(odinClient, systemFileType);
   const request: GetFileThumbByUniqueIdRequest = {
     ...targetDrive,
     clientUniqueId: uniqueId,
@@ -248,13 +248,13 @@ export const getThumbBytesByUniqueId = async (
   return client
     .get<ArrayBuffer>(
       '/drive/query/specialized/cuid/thumb?' +
-        stringifyToQueryParams({ ...request, width, height, lastModified }),
+      stringifyToQueryParams({ ...request, width, height, lastModified }),
       config
     )
     .then(async (response) => {
       if (!response.data) return null;
       return {
-        bytes: await decryptBytesResponse(dotYouClient, response),
+        bytes: await decryptBytesResponse(odinClient, response),
         contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
       };
     })

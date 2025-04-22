@@ -1,6 +1,6 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import {
-  DotYouClient,
+  OdinClient,
   HomebaseFile,
   SystemFileType,
   TargetDrive,
@@ -16,7 +16,7 @@ import { getAnonymousDirectImageUrl } from '@homebase-id/js-lib/media';
 import { useVideo } from './useVideo';
 
 export const useHlsManifest = (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId?: string,
   videoFileId?: string | undefined,
   videoGlobalTransitId?: string | undefined,
@@ -25,9 +25,9 @@ export const useHlsManifest = (
   systemFileType?: SystemFileType,
   lastModified?: number
 ): { fetch: UseQueryResult<string | null, Error> } => {
-  const identity = dotYouClient.getHostIdentity();
+  const identity = odinClient.getHostIdentity();
   const { data: videoFileData, isFetched: videoFileDataFetched } = useVideo(
-    dotYouClient,
+    odinClient,
     odinId,
     videoFileId,
     videoGlobalTransitId,
@@ -60,7 +60,7 @@ export const useHlsManifest = (
       videoFileData?.metadata.hlsPlaylist,
       async (url) =>
         (await getSegmentUrl(
-          dotYouClient,
+          odinClient,
           odinId,
           videoDrive,
           videoFile.fileId,
@@ -71,7 +71,7 @@ export const useHlsManifest = (
       async (url) => {
         if (!videoFileData?.fileHeader.sharedSecretEncryptedKeyHeader) return url;
         const keyHeader = await decryptKeyHeader(
-          dotYouClient,
+          odinClient,
           videoFileData?.fileHeader.sharedSecretEncryptedKeyHeader
         );
 
@@ -145,7 +145,7 @@ const replaceSegmentUrls = async (
 };
 
 const getSegmentUrl = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   videoDrive: TargetDrive,
   videoFileId: string,
@@ -153,7 +153,7 @@ const getSegmentUrl = async (
   isEncrypted: boolean,
   systemFileType?: SystemFileType
 ) => {
-  const identity = dotYouClient.getHostIdentity();
+  const identity = odinClient.getHostIdentity();
   if (!isEncrypted)
     return await getAnonymousDirectImageUrl(
       odinId || identity,
@@ -164,7 +164,7 @@ const getSegmentUrl = async (
       systemFileType
     );
 
-  const ss = dotYouClient.getSharedSecret();
+  const ss = odinClient.getSharedSecret();
   if (!ss) {
     return null;
   }
@@ -178,8 +178,8 @@ const getSegmentUrl = async (
 
   const unenryptedThumbUrl =
     odinId !== identity
-      ? `${dotYouClient.getEndpoint()}/transit/query/payload?${stringifyToQueryParams({ odinId, ...params })}`
-      : `${dotYouClient.getEndpoint()}/drive/files/payload?${stringifyToQueryParams(params)}`;
+      ? `${odinClient.getEndpoint()}/transit/query/payload?${stringifyToQueryParams({ odinId, ...params })}`
+      : `${odinClient.getEndpoint()}/drive/files/payload?${stringifyToQueryParams(params)}`;
 
   return InterceptionEncryptionUtil.encryptUrl(unenryptedThumbUrl, ss);
 };

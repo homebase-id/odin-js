@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../../core/DotYouClient';
+import { OdinClient } from '../../../core/OdinClient';
 import { TargetDrive, SystemFileType, ImageSize, ImageContentType } from '../../../core/core';
 import { getLargestThumbOfPayload } from '../../../helpers/DataUtil';
 import { ThumbnailMeta } from '../../../media/MediaTypes';
@@ -19,7 +19,7 @@ import {
 } from './ExternalMediaProvider';
 
 export const getDecryptedThumbnailMetaOverPeer = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
@@ -30,15 +30,15 @@ export const getDecryptedThumbnailMetaOverPeer = async (
   return (
     globalTransitId
       ? getFileHeaderBytesOverPeerByGlobalTransitId(
-          dotYouClient,
-          odinId,
-          targetDrive,
-          globalTransitId,
-          {
-            systemFileType,
-          }
-        )
-      : getFileHeaderOverPeer(dotYouClient, odinId, targetDrive, fileId, { systemFileType })
+        odinClient,
+        odinId,
+        targetDrive,
+        globalTransitId,
+        {
+          systemFileType,
+        }
+      )
+      : getFileHeaderOverPeer(odinClient, odinId, targetDrive, fileId, { systemFileType })
   ).then(async (header) => {
     if (!header) return;
 
@@ -58,7 +58,7 @@ export const getDecryptedThumbnailMetaOverPeer = async (
       !previewThumbnail
     ) {
       url = await getDecryptedImageUrlOverPeer(
-        dotYouClient,
+        odinClient,
         odinId,
         targetDrive,
         header.fileId || fileId,
@@ -97,7 +97,7 @@ export const getDecryptedImageUrlOverPeerByGlobalTransitId =
 export const getDecryptedImageUrlOverPeer = getDecryptedMediaUrlOverPeer;
 
 export const getDecryptedImageDataOverPeerByGlobalTransitId = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   targetDrive: TargetDrive,
   globalTransitId: string,
@@ -114,7 +114,7 @@ export const getDecryptedImageDataOverPeerByGlobalTransitId = async (
   if (size) {
     try {
       const thumbData = await getThumbBytesOverPeerByGlobalTransitId(
-        dotYouClient,
+        odinClient,
         odinId,
         targetDrive,
         globalTransitId,
@@ -134,7 +134,7 @@ export const getDecryptedImageDataOverPeerByGlobalTransitId = async (
   }
 
   const payloadData = await getPayloadBytesOverPeerByGlobalTransitId(
-    dotYouClient,
+    odinClient,
     odinId,
     targetDrive,
     globalTransitId,
@@ -154,7 +154,7 @@ export const getDecryptedImageDataOverPeerByGlobalTransitId = async (
 };
 
 export const getDecryptedImageDataOverPeer = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
@@ -171,7 +171,7 @@ export const getDecryptedImageDataOverPeer = async (
   if (size) {
     try {
       const thumbData = await getThumbBytesOverPeer(
-        dotYouClient,
+        odinClient,
         odinId,
         targetDrive,
         fileId,
@@ -191,7 +191,7 @@ export const getDecryptedImageDataOverPeer = async (
   }
 
   const payloadData = await getPayloadBytesOverPeer(
-    dotYouClient,
+    odinClient,
     odinId,
     targetDrive,
     fileId,

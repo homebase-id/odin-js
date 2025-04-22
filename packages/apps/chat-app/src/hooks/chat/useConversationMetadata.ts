@@ -5,13 +5,13 @@ import {
   UnifiedConversation,
   ChatDrive,
 } from '../../providers/ConversationProvider';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { useConversation } from './useConversation';
 import { insertNewConversation } from './useConversations';
 
 export const useConversationMetadata = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const conversationQuery = useConversation({
@@ -25,7 +25,7 @@ export const useConversationMetadata = (props?: { conversationId?: string | unde
     conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
     newMetadata: ConversationMetadata;
   }) => {
-    return await uploadLocalMetadataContent(dotYouClient, ChatDrive, conversation, {
+    return await uploadLocalMetadataContent(odinClient, ChatDrive, conversation, {
       ...conversation.fileMetadata.localAppData,
       content: newMetadata,
     });

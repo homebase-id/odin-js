@@ -3,7 +3,7 @@ import { Attribute, getProfileAttributes } from '@homebase-id/js-lib/profile';
 import { AttributeDefinition, AttributeDefinitions } from './AttributeDefinitions';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { removeProfileAttribute } from '../../provider/profile/AttributeData/ManageAttributeProvider';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 export interface AttributeVm extends Attribute {
   typeDefinition?: AttributeDefinition;
@@ -16,14 +16,14 @@ export const useAttributes = ({
   profileId?: string;
   sectionId?: string;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const fetchData = async (profileId: string, sectionId: string) => {
     if (!profileId || !sectionId) return;
 
     const foundAttributes = await getProfileAttributes(
-      dotYouClient,
+      odinClient,
       profileId,
       sectionId,
       undefined,
@@ -39,11 +39,11 @@ export const useAttributes = ({
             ...attr.fileMetadata.appData,
             content: attr.fileMetadata.appData.content
               ? {
-                  ...attr.fileMetadata.appData.content,
-                  typeDefinition: Object.values(AttributeDefinitions).find((def) => {
-                    return def.type === attr.fileMetadata.appData.content?.type;
-                  }),
-                }
+                ...attr.fileMetadata.appData.content,
+                typeDefinition: Object.values(AttributeDefinitions).find((def) => {
+                  return def.type === attr.fileMetadata.appData.content?.type;
+                }),
+              }
               : undefined,
           },
         },
@@ -63,7 +63,7 @@ export const useAttributes = ({
     }
 
     const foundAttributes = await getProfileAttributes(
-      dotYouClient,
+      odinClient,
       profileId,
       sectionId,
       undefined,
@@ -72,7 +72,7 @@ export const useAttributes = ({
 
     return await Promise.all(
       foundAttributes.map(
-        async (attr) => attr?.fileId && removeProfileAttribute(dotYouClient, profileId, attr.fileId)
+        async (attr) => attr?.fileId && removeProfileAttribute(odinClient, profileId, attr.fileId)
       )
     );
   };

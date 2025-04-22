@@ -1,4 +1,4 @@
-import { DotYouClient, ImageSize } from '@homebase-id/js-lib/core';
+import { OdinClient, ImageSize } from '@homebase-id/js-lib/core';
 import { useImage } from '../../hooks/image/useImage';
 import { useEffect } from 'react';
 import { ImageEvents, ImageSource } from './types';
@@ -10,7 +10,7 @@ export interface OdinPayloadImageProps
       React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>,
       'onError'
     > {
-  dotYouClient: DotYouClient;
+  odinClient: OdinClient;
 
   naturalSize?: ImageSize;
 }
@@ -18,7 +18,7 @@ export interface OdinPayloadImageProps
 // Component to render a tiny thumb image;
 // Uses either the previewThumbnail provided or fetches the thumbnail from the server
 export const OdinPayloadImage = ({
-  dotYouClient,
+  odinClient,
   odinId,
   targetDrive,
   fileId,
@@ -39,7 +39,7 @@ export const OdinPayloadImage = ({
     error: imageError,
     isFetched: isImageFetched,
   } = useImage({
-    dotYouClient,
+    odinClient,
     odinId,
     imageFileId: fileId,
     imageGlobalTransitId: globalTransitId,

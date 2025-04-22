@@ -5,7 +5,7 @@ import {
   DialogWrapper,
   Alert,
   t,
-  useDotYouClientContext,
+  useOdinClientContext,
   OWNER_APPS_ROOT,
 } from '@homebase-id/common-app';
 import { AutoAuthorize, LoginBox } from '../../components/Auth/LoginBox/LoginBox';
@@ -17,7 +17,7 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const isError = searchParams.get('state') === 'finalize-error';
 
-  const isAuthenticated = useDotYouClientContext().isAuthenticated();
+  const isAuthenticated = useOdinClientContext().isAuthenticated();
   useEffect(() => {
     if (isAuthenticated) window.location.href = '/';
   }, [isAuthenticated]);

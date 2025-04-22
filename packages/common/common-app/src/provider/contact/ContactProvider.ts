@@ -1,7 +1,7 @@
 import {
   UploadFileMetadata,
   UploadInstructionSet,
-  DotYouClient,
+  OdinClient,
   uploadFile,
   DEFAULT_PAYLOAD_KEY,
   ThumbnailFile,
@@ -32,19 +32,19 @@ import {
 
 //Handles management of Contacts
 export const saveContact = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   contact: NewHomebaseFile<RawContact>
 ): Promise<UploadResult | void> => {
   console.debug('Saving contact', { ...contact });
 
   if (contact.fileMetadata.appData.uniqueId)
     contact.fileId = (
-      await getContactByUniqueId(dotYouClient, contact.fileMetadata.appData.uniqueId)
+      await getContactByUniqueId(odinClient, contact.fileMetadata.appData.uniqueId)
     )?.fileId;
 
   if (!contact.fileId && contact.fileMetadata.appData.content.odinId) {
     const existingContact = await getContactByOdinId(
-      dotYouClient,
+      odinClient,
       contact.fileMetadata.appData.content.odinId
     );
 
@@ -127,7 +127,7 @@ export const saveContact = async (
   }
 
   return await uploadFile(
-    dotYouClient,
+    odinClient,
     instructionSet,
     metadata,
     payloads,
@@ -136,13 +136,13 @@ export const saveContact = async (
     async () => {
       if (!contact.fileId) return;
       const existingContactFile = await getFileHeader(
-        dotYouClient,
+        odinClient,
         ContactConfig.ContactTargetDrive,
         contact.fileId
       );
       if (!existingContactFile) return;
       contact.fileMetadata.versionTag = existingContactFile.fileMetadata.versionTag;
-      return saveContact(dotYouClient, contact);
+      return saveContact(odinClient, contact);
     }
   );
   // if (!result) throw new Error('Failed to upload contact');

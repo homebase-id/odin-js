@@ -1,5 +1,5 @@
 import {
-  DotYouClient,
+  OdinClient,
   getFileHeaderBytesByUniqueId,
   HomebaseFile,
   NewHomebaseFile,
@@ -30,14 +30,14 @@ export interface CommunityStatus {
 export const COMMUNITY_STATUS_FILE_TYPE = 7030;
 
 export const setStatus = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   community: HomebaseFile<CommunityDefinition>,
   status: CommunityStatus
 ) => {
   const currentStatus = await internalGetStatus(
-    dotYouClient,
+    odinClient,
     community,
-    dotYouClient.getLoggedInIdentity() || ''
+    odinClient.getLoggedInIdentity() || ''
   );
 
   const newStatus: NewHomebaseFile<CommunityStatus> = {
@@ -56,18 +56,18 @@ export const setStatus = async (
       ...currentStatus?.serverMetadata,
     },
   };
-  return await internalSaveStatusFile(dotYouClient, community, newStatus);
+  return await internalSaveStatusFile(odinClient, community, newStatus);
 };
 
 const internalSaveStatusFile = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   community: HomebaseFile<CommunityDefinition>,
   status: HomebaseFile<CommunityStatus> | NewHomebaseFile<CommunityStatus>
 ) => {
   const targetDrive = getTargetDriveFromCommunityId(
     community.fileMetadata.appData.uniqueId as string
   );
-  const uniqueId = toGuidId(dotYouClient.getLoggedInIdentity() || '');
+  const uniqueId = toGuidId(odinClient.getLoggedInIdentity() || '');
   const metedata: UploadFileMetadata = {
     versionTag: status?.fileMetadata.versionTag,
     allowDistribution: true,
@@ -80,11 +80,11 @@ const internalSaveStatusFile = async (
     isEncrypted: true,
     accessControlList: status.serverMetadata?.accessControlList ||
       community.fileMetadata.appData.content.acl || {
-        requiredSecurityGroup: SecurityGroupType.AutoConnected,
-      },
+      requiredSecurityGroup: SecurityGroupType.AutoConnected,
+    },
   };
 
-  if (dotYouClient.getHostIdentity() !== community.fileMetadata.senderOdinId) {
+  if (odinClient.getHostIdentity() !== community.fileMetadata.senderOdinId) {
     const instructions: TransitInstructionSet = {
       remoteTargetDrive: targetDrive,
       overwriteGlobalTransitFileId: status.fileMetadata.globalTransitId,
@@ -93,7 +93,7 @@ const internalSaveStatusFile = async (
     };
 
     return await uploadFileOverPeer(
-      dotYouClient,
+      odinClient,
       instructions,
       metedata,
       undefined,
@@ -108,12 +108,12 @@ const internalSaveStatusFile = async (
       },
     };
 
-    return await uploadFile(dotYouClient, instructions, metedata, undefined, undefined, true);
+    return await uploadFile(odinClient, instructions, metedata, undefined, undefined, true);
   }
 };
 
 export const internalGetStatus = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   community: HomebaseFile<CommunityDefinition>,
   odinId: string
 ): Promise<HomebaseFile<CommunityStatus> | null> => {
@@ -122,9 +122,9 @@ export const internalGetStatus = async (
     community.fileMetadata.appData.uniqueId as string
   );
 
-  if (dotYouClient.getHostIdentity() !== community.fileMetadata.senderOdinId) {
+  if (odinClient.getHostIdentity() !== community.fileMetadata.senderOdinId) {
     const header = await getFileHeaderBytesOverPeerByUniqueId(
-      dotYouClient,
+      odinClient,
       community.fileMetadata.senderOdinId,
       targetDrive,
       uniqueId
@@ -141,7 +141,7 @@ export const internalGetStatus = async (
       },
     };
   } else {
-    const header = await getFileHeaderBytesByUniqueId(dotYouClient, targetDrive, uniqueId);
+    const header = await getFileHeaderBytesByUniqueId(odinClient, targetDrive, uniqueId);
     if (!header) return null;
 
     return {
@@ -158,11 +158,11 @@ export const internalGetStatus = async (
 };
 
 export const getStatus = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   community: HomebaseFile<CommunityDefinition>,
   odinId: string
 ): Promise<CommunityStatus | null> => {
   return (
-    (await internalGetStatus(dotYouClient, community, odinId))?.fileMetadata.appData.content || null
+    (await internalGetStatus(odinClient, community, odinId))?.fileMetadata.appData.content || null
   );
 };

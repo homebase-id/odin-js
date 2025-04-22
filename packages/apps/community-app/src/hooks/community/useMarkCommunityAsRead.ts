@@ -3,7 +3,7 @@ import { useCommunityMetadata } from './useCommunityMetadata';
 import { useLastUpdatedThreadExcludingMine } from './threads/useCommunityThreads';
 import { useCommunityChannelsWithRecentMessages } from './channels/useCommunityChannelsWithRecentMessages';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { useLastUpdatedCommunityMessages } from './messages/useLastUpdatedCommunityMessages';
 
 interface MarkCommunityChannelAsReadProps {
@@ -25,7 +25,7 @@ export const useMarkCommunityAsRead = ({
 }: MarkCommunityChannelAsReadProps | MarkCommunityThreadsAsReadProps) => {
   const channelId = (props as MarkCommunityChannelAsReadProps).channelId;
   const threads = (props as MarkCommunityThreadsAsReadProps).threads;
-  const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedInIdentity = useOdinClientContext().getLoggedInIdentity();
 
   const { data: channelsWithRecent } = useCommunityChannelsWithRecentMessages({
     odinId,
@@ -94,10 +94,10 @@ export const useMarkCommunityAsRead = ({
               channelLastReadTime:
                 matchedChannel && matchedChannel.lastMessage
                   ? {
-                      ...metadata.fileMetadata.appData.content.channelLastReadTime,
-                      [matchedChannel.fileMetadata.appData.uniqueId as string]:
-                        matchedChannel.lastMessage.fileMetadata.created,
-                    }
+                    ...metadata.fileMetadata.appData.content.channelLastReadTime,
+                    [matchedChannel.fileMetadata.appData.uniqueId as string]:
+                      matchedChannel.lastMessage.fileMetadata.created,
+                  }
                   : metadata.fileMetadata.appData.content.channelLastReadTime,
             },
           },

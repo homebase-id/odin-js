@@ -11,7 +11,7 @@ import {
   getCommunityDefinition,
   getTargetDriveFromCommunityId,
 } from '../../providers/CommunityDefinitionProvider';
-import { useAllContacts, useDotYouClientContext } from '@homebase-id/common-app';
+import { useAllContacts, useOdinClientContext } from '@homebase-id/common-app';
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { getCommunitiesMetadata } from '../../providers/CommunityMetadataProvider';
@@ -20,11 +20,11 @@ export const useCommunities = (enableDiscovery?: boolean) => {
   const { data: alllContacts, isFetched: fetchedAllContacts } = useAllContacts(
     enableDiscovery || false
   );
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchCommunities = async (): Promise<HomebaseFile<CommunityDefinition>[] | null> => {
-    const localCommunities = await getCommunities(dotYouClient);
-    const localMetdatas = await getCommunitiesMetadata(dotYouClient);
+    const localCommunities = await getCommunities(odinClient);
+    const localMetdatas = await getCommunitiesMetadata(odinClient);
     const remoteCommunitesForMetadata = (
       await Promise.all(
         localMetdatas.map(async (metadata) => {
@@ -34,7 +34,7 @@ export const useCommunities = (enableDiscovery?: boolean) => {
           )
             return null;
           return await getCommunityDefinition(
-            dotYouClient,
+            odinClient,
             metadata?.fileMetadata.appData.content.odinId,
             metadata?.fileMetadata.appData.uniqueId
           );
@@ -68,8 +68,8 @@ export const useCommunities = (enableDiscovery?: boolean) => {
         const odinId = contact.fileMetadata.appData.content.odinId;
         if (!odinId) return undefined;
 
-        const securityContext = await getSecurityContextOverPeer(dotYouClient, odinId);
-        const allCommunities = await getCommunitiesOverPeer(dotYouClient, odinId);
+        const securityContext = await getSecurityContextOverPeer(odinClient, odinId);
+        const allCommunities = await getCommunitiesOverPeer(odinClient, odinId);
 
         return {
           odinId,

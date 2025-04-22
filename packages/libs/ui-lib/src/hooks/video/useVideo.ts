@@ -1,6 +1,6 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import {
-  DotYouClient,
+  OdinClient,
   HomebaseFile,
   SystemFileType,
   TargetDrive,
@@ -23,7 +23,7 @@ import {
 } from '@homebase-id/js-lib/peer';
 
 export const useVideo = (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId?: string,
   videoFileId?: string | undefined,
   videoGlobalTransitId?: string | undefined,
@@ -41,7 +41,7 @@ export const useVideo = (
   >;
   getChunk: (chunkStart: number, chunkEnd?: number) => Promise<Uint8Array | null> | null;
 } => {
-  const identity = dotYouClient.getHostIdentity();
+  const identity = odinClient.getHostIdentity();
 
   const fetchVideoData = async (
     odinId: string,
@@ -68,16 +68,16 @@ export const useVideo = (
         odinId !== identity
           ? videoGlobalTransitId
             ? await getFileHeaderBytesOverPeerByGlobalTransitId(
-                dotYouClient,
-                odinId,
-                videoDrive,
-                videoGlobalTransitId,
-                { systemFileType }
-              )
-            : await getFileHeaderOverPeer(dotYouClient, odinId, videoDrive, videoFileId, {
-                systemFileType,
-              })
-          : await getFileHeader(dotYouClient, videoDrive, videoFileId, { systemFileType });
+              odinClient,
+              odinId,
+              videoDrive,
+              videoGlobalTransitId,
+              { systemFileType }
+            )
+            : await getFileHeaderOverPeer(odinClient, odinId, videoDrive, videoFileId, {
+              systemFileType,
+            })
+          : await getFileHeader(odinClient, videoDrive, videoFileId, { systemFileType });
 
       if (!fileHeader) return undefined;
       const payloadData = fileHeader.fileMetadata.payloads?.find((p) => p.key === videoFileKey);
@@ -129,14 +129,14 @@ export const useVideo = (
         systemFileType,
       ] as const;
       return odinId && odinId !== identity
-        ? getDecryptedVideoChunkOverPeer(dotYouClient, odinId, ...params)
-        : getDecryptedVideoChunk(dotYouClient, ...params);
+        ? getDecryptedVideoChunkOverPeer(odinClient, odinId, ...params)
+        : getDecryptedVideoChunk(odinClient, ...params);
     },
   };
 };
 
 export const useVideoUrl = (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId?: string,
   videoFileId?: string | undefined,
   videoGlobalTransitId?: string | undefined,
@@ -146,7 +146,7 @@ export const useVideoUrl = (
   systemFileType?: SystemFileType,
   lastModified?: number
 ): { fetch: UseQueryResult<string | null, Error> } => {
-  const identity = dotYouClient.getHostIdentity();
+  const identity = odinClient.getHostIdentity();
 
   const fetchVideoData = async (
     odinId: string,
@@ -167,33 +167,33 @@ export const useVideoUrl = (
       return odinId !== identity
         ? videoGlobalTransitId
           ? await getDecryptedVideoUrlOverPeerByGlobalTransitId(
-              dotYouClient,
-              odinId,
-              videoDrive,
-              videoGlobalTransitId,
-              videoFileKey,
+            odinClient,
+            odinId,
+            videoDrive,
+            videoGlobalTransitId,
+            videoFileKey,
 
-              systemFileType,
-              fileSizeLimit
-            )
+            systemFileType,
+            fileSizeLimit
+          )
           : await getDecryptedVideoUrlOverPeer(
-              dotYouClient,
-              odinId,
-              videoDrive,
-              videoFileId,
-              videoFileKey,
-              systemFileType,
-              fileSizeLimit
-            )
-        : await getDecryptedVideoUrl(
-            dotYouClient,
+            odinClient,
+            odinId,
             videoDrive,
             videoFileId,
             videoFileKey,
-            undefined,
-            fileSizeLimit,
-            { systemFileType }
-          );
+            systemFileType,
+            fileSizeLimit
+          )
+        : await getDecryptedVideoUrl(
+          odinClient,
+          videoDrive,
+          videoFileId,
+          videoFileKey,
+          undefined,
+          fileSizeLimit,
+          { systemFileType }
+        );
     };
 
     return await fetchUrl();

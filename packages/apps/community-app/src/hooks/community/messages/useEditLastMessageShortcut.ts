@@ -1,4 +1,4 @@
-import { COMMUNITY_ROOT_PATH, useDotYouClientContext } from '@homebase-id/common-app';
+import { COMMUNITY_ROOT_PATH, useOdinClientContext } from '@homebase-id/common-app';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -16,7 +16,7 @@ export const useEditLastMessageShortcut = ({
   channel: HomebaseFile<CommunityChannel> | undefined;
   origin?: HomebaseFile<CommunityMessage>;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const { odinKey, communityKey, channelKey, threadKey } = useParams();
   const navigate = useNavigate();
 

@@ -1,6 +1,6 @@
 import { test, expect, vi, describe } from 'vitest';
 import { savePost } from './PostUploader';
-import { ApiType, DotYouClient } from '../../../core/DotYouClient';
+import { ApiType, OdinClient } from '../../../core/OdinClient';
 import { BlogConfig, Tweet } from '../PostTypes';
 import { encryptKeyHeader } from '../../../core/DriveData/SecurityHelpers';
 import {
@@ -37,7 +37,7 @@ vi.mock('axios', () => ({
   default: mockAxios,
 }));
 
-const dotYouClient = new DotYouClient({
+const odinClient = new OdinClient({
   api: ApiType.Guest,
   hostIdentity: 'example.com',
   sharedSecret: new Uint8Array(16).fill(1),
@@ -94,7 +94,7 @@ const existingPostFile: HomebaseFile<Tweet> = {
   fileId: 'c18bfab0-2f02-42b7-a21b-bec77756a0a1',
   fileSystemType: 'Standard',
   sharedSecretEncryptedKeyHeader: await encryptKeyHeader(
-    dotYouClient,
+    odinClient,
     { aesKey: new Uint8Array(16).fill(1), iv: new Uint8Array(16).fill(1) },
     new Uint8Array(16).fill(1)
   ),
@@ -123,7 +123,7 @@ describe('PostUploader for local files', () => {
       },
     });
 
-    await savePost(dotYouClient, newPostFile, undefined, channelId);
+    await savePost(odinClient, newPostFile, undefined, channelId);
     expect(mockAxios.post.mock.calls.length).toBe(1);
     expect(mockAxios.post.mock.calls[0][0]).toBe('/drive/files/upload');
   });
@@ -155,7 +155,7 @@ describe('PostUploader for local files', () => {
       },
     });
 
-    await savePost(dotYouClient, existingPostFile, undefined, channelId);
+    await savePost(odinClient, existingPostFile, undefined, channelId);
     expect(mockAxios.patch.mock.calls.length).toBe(1);
     expect(mockAxios.patch.mock.calls[0][0]).toBe('/drive/files/update');
     const formDataBody = mockAxios.patch.mock.calls[0][1];
@@ -210,7 +210,7 @@ describe('PostUploader for local files', () => {
       },
     });
 
-    await savePost(dotYouClient, existPostFileWithPayloads, undefined, channelId);
+    await savePost(odinClient, existPostFileWithPayloads, undefined, channelId);
     expect(mockAxios.patch.mock.calls.length).toBe(1);
     expect(mockAxios.patch.mock.calls[0][0]).toBe('/drive/files/update');
 
@@ -253,7 +253,7 @@ describe('PostUploader for local files', () => {
       },
     ];
 
-    await savePost(dotYouClient, existingPostFile, undefined, channelId, toSaveFiles);
+    await savePost(odinClient, existingPostFile, undefined, channelId, toSaveFiles);
     expect(mockAxios.patch.mock.calls.length).toBe(1);
 
     expect(mockAxios.patch.mock.calls[0][0]).toBe('/drive/files/update');
@@ -284,7 +284,7 @@ describe('PostUploader for local files', () => {
     } as NewHomebaseFile<Tweet>;
 
     await expect(
-      savePost(dotYouClient, newPostFileMissingInfo, undefined, channelId)
+      savePost(odinClient, newPostFileMissingInfo, undefined, channelId)
     ).rejects.toThrow();
   });
 
@@ -297,7 +297,7 @@ describe('PostUploader for local files', () => {
         data: null,
       },
     });
-    await expect(savePost(dotYouClient, existingPostFile, undefined, channelId)).rejects.toThrow(
+    await expect(savePost(odinClient, existingPostFile, undefined, channelId)).rejects.toThrow(
       '[odin-js] PostUploader: Cannot update a post that does not exist'
     );
   });
@@ -306,7 +306,7 @@ describe('PostUploader for local files', () => {
     vi.clearAllMocks();
 
     await expect(
-      savePost(dotYouClient, existingPostFile, undefined, 'some channel id')
+      savePost(odinClient, existingPostFile, undefined, 'some channel id')
     ).rejects.toThrow('GetTargetDriveFromChannelId: Invalid channelId: "some channel id"');
   });
 });
@@ -337,7 +337,7 @@ describe('PostUploader for remote files', () => {
       },
     });
 
-    await savePost(dotYouClient, newPostFile, 'collaborative.com', channelId);
+    await savePost(odinClient, newPostFile, 'collaborative.com', channelId);
     // expect(mockAxios.post.mock.calls.length).toBe(1);
     // expect(mockAxios.post.mock.calls[0][0]).toBe('/transit/sender/files/send');
   });
@@ -364,7 +364,7 @@ describe('PostUploader for remote files', () => {
       },
     });
 
-    await savePost(dotYouClient, existingPostFile, 'collaborative.com', channelId);
+    await savePost(odinClient, existingPostFile, 'collaborative.com', channelId);
     expect(mockAxios.patch.mock.calls.length).toBe(1);
     expect(mockAxios.patch.mock.calls[0][0]).toBe('/drive/files/update');
     const formDataBody = mockAxios.patch.mock.calls[0][1];
@@ -379,7 +379,7 @@ describe('PostUploader for remote files', () => {
 
     await expect(
       savePost(
-        dotYouClient,
+        odinClient,
         {
           ...existingPostFile,
           fileMetadata: { ...existingPostFile.fileMetadata, globalTransitId: undefined },

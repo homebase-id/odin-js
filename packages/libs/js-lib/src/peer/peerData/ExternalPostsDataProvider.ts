@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../core/DotYouClient';
+import { OdinClient } from '../../core/OdinClient';
 import {
   CursoredResult,
   FileQueryParams,
@@ -28,7 +28,7 @@ export interface RecentsFromConnectionsReturn extends CursoredResult<HomebaseFil
 }
 
 export const getSocialFeed = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   pageSize = 10,
   cursorState?: string,
   ownOption?: {
@@ -53,7 +53,7 @@ export const getSocialFeed = async (
     sorting: 'userDate',
   };
 
-  const result = await queryBatch(dotYouClient, queryParams, ro);
+  const result = await queryBatch(odinClient, queryParams, ro);
 
   // Parse results and do getPayload (In most cases, data should be there in content, and nothing in actual payload);
   const allPostFiles = (
@@ -65,15 +65,15 @@ export const getSocialFeed = async (
           console.warn('[ExtenalPostsDataProvider] Post without odinId', dsr?.fileId);
           return undefined;
         }
-        return dsrToPostFile(dotYouClient, odinId, dsr, result.includeMetadataHeader);
+        return dsrToPostFile(odinClient, odinId, dsr, result.includeMetadataHeader);
       })
     )
   ).filter(Boolean) as HomebaseFile<PostContent>[];
 
   if (ownOption) {
-    // const ownerDotYou = dotYouClient.getHostIdentity() || window.location.hostname;
+    // const ownerDotYou = odinClient.getHostIdentity() || window.location.hostname;
     const resultOfOwn = await getRecentPosts(
-      dotYouClient,
+      odinClient,
       undefined,
       false,
       ownOption.ownCursorState,
@@ -104,7 +104,7 @@ export const getSocialFeed = async (
   };
 };
 
-export const getChannelsOverPeer = async (dotYouClient: DotYouClient, odinId: string) => {
+export const getChannelsOverPeer = async (odinClient: OdinClient, odinId: string) => {
   const cacheKey = `${odinId}`;
   if (_internalChannelCache.has(cacheKey)) {
     const cacheData = await _internalChannelCache.get(cacheKey);
@@ -113,7 +113,7 @@ export const getChannelsOverPeer = async (dotYouClient: DotYouClient, odinId: st
     }
   }
 
-  const drives = await getDrivesByTypeOverPeer(dotYouClient, BlogConfig.DriveType, 1, 1000, odinId);
+  const drives = await getDrivesByTypeOverPeer(odinClient, BlogConfig.DriveType, 1, 1000, odinId);
   const channelHeaders = drives.results.map((drive) => {
     return {
       id: drive.targetDriveInfo.alias,
@@ -125,7 +125,7 @@ export const getChannelsOverPeer = async (dotYouClient: DotYouClient, odinId: st
     return (
       await Promise.all(
         channelHeaders.map(async (header) => {
-          const definition = await getChannelOverPeer(dotYouClient, odinId, header.id);
+          const definition = await getChannelOverPeer(odinClient, odinId, header.id);
           return definition;
         })
       )
@@ -138,7 +138,7 @@ export const getChannelsOverPeer = async (dotYouClient: DotYouClient, odinId: st
 };
 
 export const getChannelOverPeer = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   channelId: string
 ): Promise<HomebaseFile<ChannelDefinition> | null> => {
@@ -155,13 +155,13 @@ export const getChannelOverPeer = async (
     includeMetadataHeader: true,
   };
 
-  const response = await queryBatchOverPeer(dotYouClient, odinId, queryParams, ro);
+  const response = await queryBatchOverPeer(odinClient, odinId, queryParams, ro);
 
   try {
     if (response.searchResults.length == 1) {
       const dsr = response.searchResults[0];
       const definitionContent = await getContentFromHeaderOrPayloadOverPeer<ChannelDefinition>(
-        dotYouClient,
+        odinClient,
         odinId,
         targetDrive,
         dsr,
@@ -189,16 +189,16 @@ export const getChannelOverPeer = async (
 };
 
 export const getChannelBySlugOverPeer = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   slug: string
 ) => {
-  const channels = await getChannelsOverPeer(dotYouClient, odinId);
+  const channels = await getChannelsOverPeer(odinClient, odinId);
   return channels.find((channel) => channel.fileMetadata.appData.content.slug === slug);
 };
 
 export const getPostOverPeer = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   channelId: string,
   postId: string
@@ -210,17 +210,17 @@ export const getPostOverPeer = async (
     fileType: [BlogConfig.PostFileType, BlogConfig.DraftPostFileType],
   };
 
-  const response = await queryBatchOverPeer(dotYouClient, odinId, params);
+  const response = await queryBatchOverPeer(odinClient, odinId, params);
   if (!response.searchResults || response.searchResults.length === 0) return null;
 
   if (response.searchResults.length > 1)
     console.warn(`Found more than one file with tag [${postId}].  Using first entry.`);
 
-  return dsrToPostFile(dotYouClient, odinId, response.searchResults[0], true);
+  return dsrToPostFile(odinClient, odinId, response.searchResults[0], true);
 };
 
 export const getPostBySlugOverPeer = async <T extends PostContent>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   channelId: string,
   postSlug: string
@@ -232,7 +232,7 @@ export const getPostBySlugOverPeer = async <T extends PostContent>(
     fileType: [BlogConfig.PostFileType, BlogConfig.DraftPostFileType],
   };
 
-  const response = await queryBatchOverPeer(dotYouClient, odinId, params);
+  const response = await queryBatchOverPeer(odinClient, odinId, params);
   if (!response.searchResults || response.searchResults.length === 0) return null;
 
   if (response.searchResults.length > 1)
@@ -240,11 +240,11 @@ export const getPostBySlugOverPeer = async <T extends PostContent>(
       `Found more than one file with uniqueId [${toGuidId(postSlug)}].  Using first entry.`
     );
 
-  return (await dsrToPostFile<T>(dotYouClient, odinId, response.searchResults[0], true)) || null;
+  return (await dsrToPostFile<T>(odinClient, odinId, response.searchResults[0], true)) || null;
 };
 
 const dsrToPostFile = async <T extends PostContent>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   dsr: HomebaseFile,
   includeMetadataHeader: boolean
@@ -253,7 +253,7 @@ const dsrToPostFile = async <T extends PostContent>(
     if (!dsr.fileMetadata.globalTransitId) return null;
     // The header as a mimimum should have the channel id
     const keyHeader = dsr.fileMetadata.isEncrypted
-      ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
+      ? await decryptKeyHeader(odinClient, dsr.sharedSecretEncryptedKeyHeader)
       : undefined;
     const decryptedJsonContent = await decryptJsonContent(dsr.fileMetadata, keyHeader);
 
@@ -262,7 +262,7 @@ const dsrToPostFile = async <T extends PostContent>(
       getChannelDrive(parsedHeaderContent?.channelId) || BlogConfig.PublicChannelDrive;
 
     const postContent = await getContentFromHeaderOrPayloadOverPeerByGlobalTransitId<T>(
-      dotYouClient,
+      odinClient,
       odinId,
       targetDrive,
       {

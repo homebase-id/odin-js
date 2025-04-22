@@ -12,7 +12,7 @@ import {
   findMentionedInRichText,
   formatToDateAgoWithRelativeDetail,
   t,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { CommunityMessageItem } from '../Message/item/CommunityMessageItem';
 import { useCommunityMessages } from '../../../hooks/community/messages/useCommunityMessages';
@@ -48,7 +48,7 @@ export const CommunityHistory = memo(
       setParticipants,
     } = props;
 
-    const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+    const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
     const scrollRef = useRef<HTMLDivElement>(null);
     const inAThread =
       !!origin && origin.fileMetadata.appData.fileType === COMMUNITY_MESSAGE_FILE_TYPE;

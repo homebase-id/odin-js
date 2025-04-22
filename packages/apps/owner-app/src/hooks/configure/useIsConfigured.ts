@@ -1,14 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { isConfigured } from '../../provider/system/SystemProvider';
 import { FIRST_RUN_TOKEN_STORAGE_KEY } from './useInit';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 const LOCAL_STORAGE_KEY = 'isConfigured';
 const MINUTE_IN_MS = 60000;
 
 export const useIsConfigured = () => {
-  const isAuthenticated = useDotYouClientContext().isAuthenticated();
-  const dotYouClient = useDotYouClientContext();
+  const isAuthenticated = useOdinClientContext().isAuthenticated();
+  const odinClient = useOdinClientContext();
 
   const getIsConfigured = async () => {
     if (!isAuthenticated) {
@@ -23,7 +23,7 @@ export const useIsConfigured = () => {
     )
       return true;
 
-    const result = await isConfigured(dotYouClient);
+    const result = await isConfigured(odinClient);
     if (result) {
       localStorage.setItem(LOCAL_STORAGE_KEY, import.meta.env.VITE_VERSION);
       localStorage.removeItem(FIRST_RUN_TOKEN_STORAGE_KEY);

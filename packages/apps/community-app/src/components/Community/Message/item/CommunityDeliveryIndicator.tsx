@@ -1,4 +1,4 @@
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { Clock } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
@@ -13,7 +13,7 @@ export const CommunityDeliveryIndicator = ({
   msg: HomebaseFile<CommunityMessage>;
   className?: string;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const content = msg.fileMetadata.appData.content;
   const authorOdinId = msg.fileMetadata.senderOdinId || '';
   const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;

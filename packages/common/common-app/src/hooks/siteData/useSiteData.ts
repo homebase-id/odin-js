@@ -15,7 +15,7 @@ import {
 } from '@homebase-id/js-lib/public';
 import { HomebaseFile, EmbeddedThumb, queryBatchCollection } from '@homebase-id/js-lib/core';
 import { getHighestPrioAttributesFromMultiTypes } from '../../helpers/common';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 
 interface DefaultTemplateSettings {
   imageFileId: string;
@@ -79,11 +79,11 @@ type SiteData = {
 };
 
 export const useSiteData = () => {
-  const dotYouClient = useDotYouClientContext();
-  const isAuthenticated = dotYouClient.isAuthenticated();
+  const odinClient = useOdinClientContext();
+  const isAuthenticated = odinClient.isAuthenticated();
 
   const fetchData: () => Promise<SiteData> = async () => {
-    const fileData = await GetFile(dotYouClient, 'sitedata.json');
+    const fileData = await GetFile(odinClient, 'sitedata.json');
 
     const parseOwnerData = async (
       nameAndPhotoAndStatusAttr?: HomebaseFile<Attribute>[]
@@ -138,7 +138,7 @@ export const useSiteData = () => {
       const homeDrive = HomePageConfig.HomepageTargetDrive;
 
       /// Query batch collection to improve performance instead of higher level `AttributeDataProvider.getProfileAttributes`
-      const collectionResult = await queryBatchCollection(dotYouClient, [
+      const collectionResult = await queryBatchCollection(odinClient, [
         {
           name: 'owner',
           queryParams: {
@@ -182,7 +182,7 @@ export const useSiteData = () => {
           ?.map(
             async (dsr) =>
               await homebaseFileToProfileAttribute(
-                dotYouClient,
+                odinClient,
                 dsr,
                 ownerDrive,
                 INCLUDE_METADATA_HEADER
@@ -195,7 +195,7 @@ export const useSiteData = () => {
           ?.map(
             async (dsr) =>
               await homebaseFileToProfileAttribute(
-                dotYouClient,
+                odinClient,
                 dsr,
                 homeDrive,
                 INCLUDE_METADATA_HEADER

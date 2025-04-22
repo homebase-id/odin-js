@@ -26,12 +26,12 @@ import {
   FEED_ROOT_PATH,
   logoutOwnerAndAllApps,
   OWNER_APPS_ROOT,
-  useDotYouClient,
+  useOdinClient,
 } from '@homebase-id/common-app';
 import { useQueryClient } from '@tanstack/react-query';
 
 export const useValidateAuthorization = () => {
-  const { hasSharedSecret } = useDotYouClient();
+  const { hasSharedSecret } = useOdinClient();
   const { data: hasValidToken, isFetched } = useVerifyToken();
 
   useEffect(() => {
@@ -45,8 +45,8 @@ export const useValidateAuthorization = () => {
 };
 
 export const useAuth = () => {
-  const { getDotYouClient } = useDotYouClient();
-  const preauth = async (): Promise<void> => await preauthApps(getDotYouClient());
+  const { getOdinClient } = useOdinClient();
+  const preauth = async (): Promise<void> => await preauthApps(getOdinClient());
 
   return {
     preauth,

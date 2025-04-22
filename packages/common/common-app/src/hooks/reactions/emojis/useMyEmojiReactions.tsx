@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { getMyReactions, ReactionContext } from '@homebase-id/js-lib/public';
-import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../../auth/useOdinClientContext';
 
 const PAGE_SIZE = 10;
 
 export const useMyEmojiReactions = (context?: ReactionContext) => {
-  const dotYouClient = useDotYouClientContext();
-  const loggedInIdentity = dotYouClient.getLoggedInIdentity();
+  const odinClient = useOdinClientContext();
+  const loggedInIdentity = odinClient.getLoggedInIdentity();
 
   const fetch = async ({
     context,
@@ -23,7 +23,7 @@ export const useMyEmojiReactions = (context?: ReactionContext) => {
       return [];
     }
     return (
-      (await getMyReactions(dotYouClient, loggedInIdentity, context, PAGE_SIZE, pageParam)) || []
+      (await getMyReactions(odinClient, loggedInIdentity, context, PAGE_SIZE, pageParam)) || []
     );
   };
 

@@ -7,7 +7,7 @@ import {
   SocialFields,
 } from '@homebase-id/js-lib/profile';
 import { getProfileAttributesOverPeer } from '@homebase-id/js-lib/peer';
-import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../../auth/useOdinClientContext';
 import { FC, ReactNode } from 'react';
 import {
   IconProps,
@@ -41,8 +41,8 @@ export type LinkType = {
 export const useSocials = (props?: { odinId: string } | undefined) => {
   const { odinId } = props || {};
 
-  const dotYouClient = useDotYouClientContext();
-  const isAuthenticated = !!dotYouClient.getHostIdentity();
+  const odinClient = useOdinClientContext();
+  const isAuthenticated = !!odinClient.getHostIdentity();
   const queryClient = useQueryClient();
 
   const fetchData: (odinId?: string) => Promise<LinkType[] | undefined> = async () => {
@@ -69,7 +69,7 @@ export const useSocials = (props?: { odinId: string } | undefined) => {
     const fetchStaticData = async () => {
       if (odinId) return null;
 
-      const fileData = await GetFile(dotYouClient, 'sitedata.json');
+      const fileData = await GetFile(odinClient, 'sitedata.json');
       if (fileData.has('socials')) {
         const fileBasedResponse = (
           fileData
@@ -96,11 +96,11 @@ export const useSocials = (props?: { odinId: string } | undefined) => {
     const fetchDynamicData = async () => {
       try {
         const socialAttributes = odinId
-          ? await getProfileAttributesOverPeer(dotYouClient, odinId, [
+          ? await getProfileAttributesOverPeer(odinClient, odinId, [
               ...BuiltInAttributes.AllSocial,
               ...BuiltInAttributes.AllGames,
             ])
-          : await getProfileAttributes(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
+          : await getProfileAttributes(odinClient, BuiltInProfiles.StandardProfileId, undefined, [
               ...BuiltInAttributes.AllSocial,
               ...BuiltInAttributes.AllGames,
             ]);

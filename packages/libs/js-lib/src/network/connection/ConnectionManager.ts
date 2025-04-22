@@ -1,9 +1,9 @@
 import {
   ApiType,
-  DotYouClient,
-  assertIfDotYouClientIsOwner,
-  assertIfDotYouClientIsOwnerOrApp,
-} from '../../core/DotYouClient';
+  OdinClient,
+  assertIfOdinClientIsOwner,
+  assertIfOdinClientIsOwnerOrApp,
+} from '../../core/OdinClient';
 import {
   NumberCursoredResult,
   PagedResult,
@@ -20,10 +20,10 @@ import {
 const root = '/circles/connections';
 
 export const disconnectFromContact = (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = root + '/disconnect';
   const data: OdinIdRequest = { odinId: odinId };
   return client
@@ -31,20 +31,20 @@ export const disconnectFromContact = (
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export const getConnections = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   data: {
     count: number;
     cursor?: unknown;
   }
 ): Promise<NumberCursoredResult<ActiveConnection>> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = root + '/connected?' + stringifyToQueryParams(data);
 
-  if (dotYouClient.getType() === ApiType.Owner) {
+  if (odinClient.getType() === ApiType.Owner) {
     // Post needed
     return client.post(url).then((response) => {
       return response.data;
@@ -57,27 +57,27 @@ export const getConnections = async (
 };
 
 export const getBlockedConnections = (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   params: PagingOptions
 ): Promise<PagedResult<DotYouProfile>> => {
-  assertIfDotYouClientIsOwner(dotYouClient);
-  const client = dotYouClient.createAxiosClient();
+  assertIfOdinClientIsOwner(odinClient);
+  const client = odinClient.createAxiosClient();
   const url = root + '/blocked?' + stringifyToQueryParams(params);
   return client
     .get(url)
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export const getConnectionInfo = (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string
 ): Promise<ConnectionInfo | undefined> => {
-  assertIfDotYouClientIsOwnerOrApp(dotYouClient);
+  assertIfOdinClientIsOwnerOrApp(odinClient);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = root + '/status';
 
   const data: OdinIdRequest = { odinId: odinId };
@@ -92,5 +92,5 @@ export const getConnectionInfo = (
         originalContactData: undefined,
       };
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };

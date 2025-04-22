@@ -1,10 +1,10 @@
-import { useChannels, useDotYouClientContext } from '@homebase-id/common-app';
+import { useChannels, useOdinClientContext } from '@homebase-id/common-app';
 import ChannelTeaser from '../ChannelTeaser/ChannelTeaser';
 
 const Channels = ({ className }: { className?: string }) => {
-  const dotYouClient = useDotYouClientContext();
-  const isOwner = dotYouClient.isOwner();
-  const isAuthenticated = dotYouClient.isAuthenticated();
+  const odinClient = useOdinClientContext();
+  const isOwner = odinClient.isOwner();
+  const isAuthenticated = odinClient.isAuthenticated();
 
   const { data: channels } = useChannels({ isAuthenticated, isOwner });
 

@@ -23,7 +23,7 @@ import { LikeButton } from './Reactions/LikeButton';
 import { ReactionDetailsDialog } from './ReactionDetailsDialog/ReactionDetailsDialog';
 import { RepostDialog } from './RepostDialog/RepostDialog';
 import { ShareDialog } from './ShareDialog/ShareDialog';
-import { HomebaseFile, ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { HomebaseFile, ApiType, OdinClient } from '@homebase-id/js-lib/core';
 import { Bubble, Share, Repost } from '../../../ui/Icons';
 
 export const PostInteracts = ({
@@ -83,7 +83,7 @@ export const PostInteracts = ({
     },
   };
 
-  const permalink = `${new DotYouClient({ hostIdentity: odinId || window.location.hostname, api: ApiType.Guest }).getRoot()}${HOME_ROOT_PATH}posts/${postContent.channelId}/${
+  const permalink = `${new OdinClient({ hostIdentity: odinId || window.location.hostname, api: ApiType.Guest }).getRoot()}${HOME_ROOT_PATH}posts/${postContent.channelId}/${
     postContent.slug ?? postContent.id
   }`;
 

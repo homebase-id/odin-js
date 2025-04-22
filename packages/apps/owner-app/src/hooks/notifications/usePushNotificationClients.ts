@@ -1,5 +1,5 @@
 import { useQueryClient, useMutation, useQuery } from '@tanstack/react-query';
-import { useDotYouClientContext, OWNER_APP_ID, t } from '@homebase-id/common-app';
+import { useOdinClientContext, OWNER_APP_ID, t } from '@homebase-id/common-app';
 import { useState, useEffect } from 'react';
 import {
   getApplicationServerKey,
@@ -16,7 +16,7 @@ import { formatGuidId, getNewId, hasDebugFlag } from '@homebase-id/js-lib/helper
 const isDebug = hasDebugFlag();
 const TestGuid = '00000000-0000-0000-0000-000000000000';
 export const usePushNotificationClient = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
   const [isReady, setIsReady] = useState(false);
 
@@ -41,7 +41,7 @@ export const usePushNotificationClient = () => {
         const correlationId = formatGuidId(getNewId());
 
         return await SendNotification(
-          dotYouClient,
+          odinClient,
           {
             appId: OWNER_APP_ID,
             typeId: TestGuid,
@@ -83,7 +83,7 @@ export const usePushNotificationClient = () => {
                 .subscribe(options)
                 .then(async (pushSubscription) => {
                   console.log('Push registration success, sending to server...');
-                  await registerNewDevice(dotYouClient, pushSubscription);
+                  await registerNewDevice(odinClient, pushSubscription);
 
                   queryClient.invalidateQueries({
                     queryKey: ['notification-clients', 'current'],
@@ -114,26 +114,26 @@ export const usePushNotificationClient = () => {
 
 export const usePushNotificationClients = () => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const getCurrentClient = async () => {
-    return await getCurrentDeviceDetails(dotYouClient);
+    return await getCurrentDeviceDetails(odinClient);
   };
 
   const removeCurrentDevice = async () => {
-    return await removeCurrentRegisteredDevice(dotYouClient);
+    return await removeCurrentRegisteredDevice(odinClient);
   };
 
   const _removeRegisteredDevice = async (key: string) => {
-    return await removeRegisteredDevice(dotYouClient, key);
+    return await removeRegisteredDevice(odinClient, key);
   };
 
   const getNotificationClients = async () => {
-    return await getRegisteredDevices(dotYouClient);
+    return await getRegisteredDevices(odinClient);
   };
 
   const removeAllClients = async () => {
-    return await removeAllRegisteredDevice(dotYouClient);
+    return await removeAllRegisteredDevice(odinClient);
   };
 
   return {

@@ -1,12 +1,12 @@
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import { getCircles } from '@homebase-id/js-lib/network';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 
 export const useCircles = (excludeSystemCircles = false) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchAll = async () => {
-    const circles = await getCircles(dotYouClient, excludeSystemCircles);
+    const circles = await getCircles(odinClient, excludeSystemCircles);
     return circles?.sort((a, b) => (a.disabled ? 1 : 0) - (b.disabled ? 1 : 0));
   };
 

@@ -13,7 +13,7 @@ import {
   requestMarkAsRead,
   softDeleteChatMessage,
 } from '../../providers/ChatProvider';
-import { DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
+import { OdinClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 
 import {
   ConversationMetadata,
@@ -22,14 +22,14 @@ import {
 } from '../../providers/ConversationProvider';
 import { formatGuidId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { SendReadReceiptResponseRecipientStatus } from '@homebase-id/js-lib/peer';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { updateCacheChatMessage } from './useChatMessage';
 
 const FIRST_PAGE_SIZE = 30;
 const PAGE_SIZE = 100;
 export const useChatMessages = (props?: { conversationId: string | undefined }) => {
   const { conversationId } = props || { conversationId: undefined };
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const queryClient = useQueryClient();
 
@@ -40,7 +40,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
     messages: HomebaseFile<ChatMessage>[];
   }) => {
-    const response = await requestMarkAsRead(dotYouClient, conversation, messages);
+    const response = await requestMarkAsRead(odinClient, conversation, messages);
 
     response.results.forEach((result) => {
       const someFailed = result.status.some(
@@ -64,7 +64,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     deleteForEveryone?: boolean;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
-    const identity = dotYouClient.getHostIdentity();
+    const identity = odinClient.getHostIdentity();
     const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     const hardDelete = stringGuidsEqual(
@@ -75,19 +75,19 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     return await Promise.all(
       messages.map(async (msg) =>
         hardDelete
-          ? await hardDeleteChatMessage(dotYouClient, msg)
+          ? await hardDeleteChatMessage(odinClient, msg)
           : await softDeleteChatMessage(
-              dotYouClient,
-              msg,
-              recipients.filter(Boolean),
-              deleteForEveryone
-            )
+            odinClient,
+            msg,
+            recipients.filter(Boolean),
+            deleteForEveryone
+          )
       )
     );
   };
 
   return {
-    all: useInfiniteQuery(getChatMessageInfiniteQueryOptions(dotYouClient, conversationId)),
+    all: useInfiniteQuery(getChatMessageInfiniteQueryOptions(odinClient, conversationId)),
     markAsRead: useMutation({
       mutationKey: ['markAsRead', conversationId],
       mutationFn: markAsRead,
@@ -109,12 +109,12 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
 };
 
 const fetchMessages = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   conversationId: string,
   cursorState: string | undefined
 ) => {
   return await getChatMessages(
-    dotYouClient,
+    odinClient,
     conversationId,
     cursorState,
     cursorState ? PAGE_SIZE : FIRST_PAGE_SIZE
@@ -122,25 +122,25 @@ const fetchMessages = async (
 };
 
 export const getChatMessageInfiniteQueryOptions: (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   conversationId: string | undefined
 ) => UndefinedInitialDataInfiniteOptions<{
   searchResults: (HomebaseFile<ChatMessage> | null)[];
   cursorState: string;
   queryTime: number;
   includeMetadataHeader: boolean;
-}> = (dotYouClient, conversationId) => ({
+}> = (odinClient, conversationId) => ({
   queryKey: ['chat-messages', formatGuidId(conversationId)],
   initialPageParam: undefined as string | undefined,
   queryFn: ({ pageParam }) =>
     fetchMessages(
-      dotYouClient,
+      odinClient,
       formatGuidId(conversationId as string),
       pageParam as string | undefined
     ),
   getNextPageParam: (lastPage, pages) =>
     lastPage &&
-    lastPage.searchResults?.length >= (lastPage === pages[0] ? FIRST_PAGE_SIZE : PAGE_SIZE)
+      lastPage.searchResults?.length >= (lastPage === pages[0] ? FIRST_PAGE_SIZE : PAGE_SIZE)
       ? lastPage.cursorState
       : undefined,
   enabled: !!conversationId,
@@ -166,11 +166,11 @@ export const updateCacheChatMessages = (
     }>
   ) =>
     | InfiniteData<{
-        searchResults: (HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>)[];
-        cursorState: string;
-        queryTime: number;
-        includeMetadataHeader: boolean;
-      }>
+      searchResults: (HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>)[];
+      cursorState: string;
+      queryTime: number;
+      includeMetadataHeader: boolean;
+    }>
     | undefined
 ) => {
   const currentData = queryClient.getQueryData<
@@ -327,8 +327,8 @@ export const internalInsertNewMessage = (
           searchResults:
             index === 0
               ? [newMessage, ...filteredSearchResults].sort(
-                  (a, b) => (b.fileMetadata.created || 0) - (a.fileMetadata.created || 0)
-                ) // Re-sort the first page, as the new message might be older than the first message in the page;
+                (a, b) => (b.fileMetadata.created || 0) - (a.fileMetadata.created || 0)
+              ) // Re-sort the first page, as the new message might be older than the first message in the page;
               : filteredSearchResults,
         };
       }

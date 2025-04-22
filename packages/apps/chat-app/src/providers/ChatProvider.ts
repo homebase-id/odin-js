@@ -1,6 +1,6 @@
 import {
   AppFileMetaData,
-  DotYouClient,
+  OdinClient,
   HomebaseFile,
   EmbeddedThumb,
   FileQueryParams,
@@ -99,7 +99,7 @@ const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_web';
 export const CHAT_LINKS_PAYLOAD_KEY = 'chat_links';
 
 export const getChatMessages = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   conversationId: string,
   cursorState: string | undefined,
   pageSize: number
@@ -116,20 +116,20 @@ export const getChatMessages = async (
     includeTransferHistory: true,
   };
 
-  const response = await queryBatch(dotYouClient, params, ro);
+  const response = await queryBatch(odinClient, params, ro);
   return {
     ...response,
     searchResults:
       ((await Promise.all(
         response.searchResults
-          .map(async (result) => await dsrToMessage(dotYouClient, result, ChatDrive, true))
+          .map(async (result) => await dsrToMessage(odinClient, result, ChatDrive, true))
           .filter(Boolean)
       )) as HomebaseFile<ChatMessage>[]) || [],
   };
 };
 
 export const getStarredChatMessages = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   cursorState: string | undefined,
   pageSize: number
 ) => {
@@ -145,35 +145,35 @@ export const getStarredChatMessages = async (
     includeTransferHistory: true,
   };
 
-  const response = await queryBatch(dotYouClient, params, ro);
+  const response = await queryBatch(odinClient, params, ro);
   return {
     ...response,
     searchResults:
       ((await Promise.all(
         response.searchResults
-          .map(async (result) => await dsrToMessage(dotYouClient, result, ChatDrive, true))
+          .map(async (result) => await dsrToMessage(odinClient, result, ChatDrive, true))
           .filter(Boolean)
       )) as HomebaseFile<ChatMessage>[]) || [],
   };
 };
 
-export const deleteAllChatMessages = async (dotYouClient: DotYouClient, conversationId: string) => {
-  return await deleteFilesByGroupId(dotYouClient, ChatDrive, [conversationId]);
+export const deleteAllChatMessages = async (odinClient: OdinClient, conversationId: string) => {
+  return await deleteFilesByGroupId(odinClient, ChatDrive, [conversationId]);
 };
 
-export const getChatMessage = async (dotYouClient: DotYouClient, chatMessageId: string) => {
-  const fileHeader = await getFileHeaderByUniqueId<string>(dotYouClient, ChatDrive, chatMessageId, {
+export const getChatMessage = async (odinClient: OdinClient, chatMessageId: string) => {
+  const fileHeader = await getFileHeaderByUniqueId<string>(odinClient, ChatDrive, chatMessageId, {
     decrypt: false,
   });
   if (!fileHeader) return null;
 
-  return await dsrToMessage(dotYouClient, fileHeader, ChatDrive, true);
+  return await dsrToMessage(odinClient, fileHeader, ChatDrive, true);
 };
 
 // Built on top of getContentFromHeaderOrPayload
 // This function fetches the full json payload(if exists) and extends deliveryDetails with the payload content
 export const getChatMessageContentFromHeaderOrPayload = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   dsr: {
     fileId: string;
@@ -194,7 +194,7 @@ export const getChatMessageContentFromHeaderOrPayload = async (
   if (fileMetadata.isEncrypted && !sharedSecretEncryptedKeyHeader) return null;
 
   const messageContent = await getContentFromHeader<ChatMessage>(
-    dotYouClient,
+    odinClient,
     targetDrive,
     dsr,
     includesJsonContent,
@@ -207,7 +207,7 @@ export const getChatMessageContentFromHeaderOrPayload = async (
     const payloadDescriptor = dsr.fileMetadata.payloads?.find(
       (payload) => payload.key === DEFAULT_PAYLOAD_KEY
     );
-    const payload = await getPayloadAsJson<ChatMessage>(dotYouClient, targetDrive, fileId, DEFAULT_PAYLOAD_KEY, {
+    const payload = await getPayloadAsJson<ChatMessage>(odinClient, targetDrive, fileId, DEFAULT_PAYLOAD_KEY, {
       systemFileType: dsr.fileSystemType || systemFileType,
       lastModified: payloadDescriptor?.lastModified,
     });
@@ -222,14 +222,14 @@ export const getChatMessageContentFromHeaderOrPayload = async (
 };
 
 export const dsrToMessage = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<ChatMessage> | null> => {
   try {
     const msgContent = await getChatMessageContentFromHeaderOrPayload(
-      dotYouClient,
+      odinClient,
       targetDrive,
       dsr,
       includeMetadataHeader
@@ -310,7 +310,7 @@ export const buildDeliveryStatus = (
 };
 
 export const uploadChatMessage = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   message: NewHomebaseFile<ChatMessage>,
   recipients: string[],
   files: NewMediaFile[] | undefined,
@@ -463,7 +463,7 @@ export const uploadChatMessage = async (
     previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
   const uploadResult = await uploadFile(
-    dotYouClient,
+    odinClient,
     uploadInstructions,
     uploadMetadata,
     payloads,
@@ -488,7 +488,7 @@ export const uploadChatMessage = async (
     message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Failed;
 
     const updateResult = await updateChatMessage(
-      dotYouClient,
+      odinClient,
       message,
       recipients,
       uploadResult.keyHeader
@@ -511,7 +511,7 @@ export const uploadChatMessage = async (
 };
 
 export const updateChatMessage = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   message: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>,
   recipients: string[],
   keyHeader?: KeyHeader
@@ -570,7 +570,7 @@ export const updateChatMessage = async (
   };
 
   return await patchFile(
-    dotYouClient,
+    odinClient,
     keyHeader || (message as HomebaseFile<ChatMessage>).sharedSecretEncryptedKeyHeader,
     uploadInstructions,
     uploadMetadata,
@@ -579,25 +579,25 @@ export const updateChatMessage = async (
     undefined,
     async () => {
       const existingChatMessage = await getChatMessage(
-        dotYouClient,
+        odinClient,
         message.fileMetadata.appData.uniqueId as string
       );
       if (!existingChatMessage) return;
       message.fileMetadata.versionTag = existingChatMessage.fileMetadata.versionTag;
-      return await updateChatMessage(dotYouClient, message, recipients, keyHeader);
+      return await updateChatMessage(odinClient, message, recipients, keyHeader);
     }
   );
 };
 
 export const hardDeleteChatMessage = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   message: HomebaseFile<ChatMessage>
 ) => {
-  return await deleteFile(dotYouClient, ChatDrive, message.fileId, []);
+  return await deleteFile(odinClient, ChatDrive, message.fileId, []);
 };
 
 export const softDeleteChatMessage = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   message: HomebaseFile<ChatMessage>,
   recipients: string[],
   deleteForEveryone?: boolean
@@ -625,7 +625,7 @@ export const softDeleteChatMessage = async (
   };
 
   return await patchFile(
-    dotYouClient,
+    odinClient,
     message.sharedSecretEncryptedKeyHeader,
     {
       file: {
@@ -645,7 +645,7 @@ export const softDeleteChatMessage = async (
 };
 
 export const requestMarkAsRead = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>,
   messages: HomebaseFile<ChatMessage>[]
 ) => {
@@ -654,9 +654,9 @@ export const requestMarkAsRead = async (
       (msg) =>
         msg.fileMetadata.appData.content.deliveryStatus !== ChatDeliveryStatus.Read &&
         msg.fileMetadata.senderOdinId &&
-        msg.fileMetadata.senderOdinId !== dotYouClient.getHostIdentity()
+        msg.fileMetadata.senderOdinId !== odinClient.getHostIdentity()
     )
     .map((msg) => msg.fileId) as string[];
 
-  return sendReadReceipt(dotYouClient, ChatDrive, chatFileIds);
+  return sendReadReceipt(odinClient, ChatDrive, chatFileIds);
 };

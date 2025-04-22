@@ -22,7 +22,7 @@ import {
   getLocalContentFromHeader,
 } from '@homebase-id/js-lib/core';
 import { jsonStringify64, tryJsonParse } from '@homebase-id/js-lib/helpers';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 const includeMetadataHeader = true;
 const includeTransferHistory = true;
@@ -35,7 +35,7 @@ export const useFiles = ({
   targetDrive: TargetDrive;
   systemFileType?: SystemFileType;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchFiles = async ({
     targetDrive,
@@ -45,7 +45,7 @@ export const useFiles = ({
     pageParam: string | undefined;
   }) => {
     const response = await queryBatch(
-      dotYouClient,
+      odinClient,
       { targetDrive, systemFileType },
       {
         cursorState: pageParam,
@@ -78,7 +78,7 @@ export const useFileQuery = ({
   id: string | undefined;
   systemFileType?: SystemFileType;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   return useQuery({
     queryKey: ['file', targetDrive?.alias, id],
@@ -87,14 +87,14 @@ export const useFileQuery = ({
 
       const queryFile = async (decrypt = true) => {
         // Search by fileId
-        const fileByFileId = await getFileHeader(dotYouClient, targetDrive, id, {
+        const fileByFileId = await getFileHeader(odinClient, targetDrive, id, {
           systemFileType,
           decrypt,
         });
         if (fileByFileId) return fileByFileId;
 
         // Search by uniqueId
-        const fileByUniqueId = await getFileHeaderByUniqueId(dotYouClient, targetDrive, id, {
+        const fileByUniqueId = await getFileHeaderByUniqueId(odinClient, targetDrive, id, {
           systemFileType,
           decrypt,
         });
@@ -102,7 +102,7 @@ export const useFileQuery = ({
 
         // Search by globalTransitId
         const fileByGlobalTransitId = await getFileHeaderBytesByGlobalTransitId(
-          dotYouClient,
+          odinClient,
           targetDrive,
           id,
           { systemFileType }
@@ -123,7 +123,7 @@ export const useFileQuery = ({
                 ...decryptedFile.fileMetadata.appData,
               },
               localAppData: await getLocalContentFromHeader(
-                dotYouClient,
+                odinClient,
                 targetDrive,
                 decryptedFile,
                 true
@@ -153,20 +153,19 @@ export const useFile = ({
   systemFileType?: SystemFileType;
 }) => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchFile = async (result: HomebaseFile | DeletedHomebaseFile, payloadKey?: string) => {
     if (payloadKey) {
-      const payload = await getPayloadBytes(dotYouClient, targetDrive, result.fileId, payloadKey, {
+      const payload = await getPayloadBytes(odinClient, targetDrive, result.fileId, payloadKey, {
         systemFileType: result.fileSystemType,
       });
       if (!payload) return null;
 
       return window.URL.createObjectURL(
         new Blob([payload.bytes], {
-          type: `${
-            result.fileMetadata.payloads?.find((payload) => payload.key === payloadKey)?.contentType
-          };charset=utf-8`,
+          type: `${result.fileMetadata.payloads?.find((payload) => payload.key === payloadKey)?.contentType
+            };charset=utf-8`,
         })
       );
     }
@@ -175,9 +174,9 @@ export const useFile = ({
       try {
         return result.fileMetadata.appData.content && result.fileMetadata.isEncrypted
           ? await decryptJsonContent(
-              result.fileMetadata,
-              await decryptKeyHeader(dotYouClient, result.sharedSecretEncryptedKeyHeader)
-            )
+            result.fileMetadata,
+            await decryptKeyHeader(odinClient, result.sharedSecretEncryptedKeyHeader)
+          )
           : result.fileMetadata.appData.content;
       } catch (e) {
         console.error('Failed to decrypt file', e);
@@ -196,7 +195,7 @@ export const useFile = ({
       },
       serverMetadata: result.serverMetadata,
       defaultPayload: await getContentFromHeaderOrPayload(
-        dotYouClient,
+        odinClient,
         targetDrive,
         result,
         includeMetadataHeader,
@@ -213,7 +212,7 @@ export const useFile = ({
   };
 
   const removeFile = async (fileId: string) =>
-    await deleteFile(dotYouClient, targetDrive, fileId, undefined, systemFileType);
+    await deleteFile(odinClient, targetDrive, fileId, undefined, systemFileType);
 
   return {
     fetchFile: fetchFile,

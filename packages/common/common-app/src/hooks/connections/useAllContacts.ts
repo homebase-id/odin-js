@@ -1,11 +1,11 @@
 import { ContactFile, getContacts } from '@homebase-id/js-lib/network';
 import { useQuery } from '@tanstack/react-query';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 
 const CHUNKSIZE = 200;
 export const useAllContacts = (enabled: boolean) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchMentionTargets = async () => {
     // self invoking function that fetches the contacts in blocks of a CHUNKSIZE untill there are no more contacts to fetch
@@ -13,7 +13,7 @@ export const useAllContacts = (enabled: boolean) => {
       cursor: string | undefined,
       limit: number
     ): Promise<HomebaseFile<ContactFile>[]> => {
-      const contacts = await getContacts(dotYouClient, cursor, limit);
+      const contacts = await getContacts(odinClient, cursor, limit);
       if (contacts?.cursorState && contacts.results.length >= limit) {
         const nextContacts = await internalGetContacts(contacts.cursorState, limit);
         return contacts.results.concat(nextContacts);

@@ -1,7 +1,7 @@
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
-import { ApiType, DotYouClient } from '../../../core/DotYouClient';
+import { ApiType, OdinClient } from '../../../core/OdinClient';
 import { DEFAULT_PAYLOAD_KEY, MAX_HEADER_CONTENT_BYTES } from '../../../core/constants';
 import {
   getDrivesByType,
@@ -34,9 +34,9 @@ import {
 import { ChannelDefinition, BlogConfig, CollaborativeChannelDefinition } from '../PostTypes';
 
 export const getChannelDefinitions = async (
-  dotYouClient: DotYouClient
+  odinClient: OdinClient
 ): Promise<HomebaseFile<ChannelDefinition>[]> => {
-  const drives = await getDrivesByType(dotYouClient, BlogConfig.DriveType, 1, 1000);
+  const drives = await getDrivesByType(odinClient, BlogConfig.DriveType, 1, 1000);
   const channelHeaders = drives.results.map((drive) => {
     return {
       id: drive.targetDriveInfo.alias,
@@ -67,14 +67,14 @@ export const getChannelDefinitions = async (
     };
   });
 
-  const response = await queryBatchCollection(dotYouClient, queries);
+  const response = await queryBatchCollection(odinClient, queries);
   const definitions = await Promise.all(
     response.results.map(async (response) => {
       if (response.searchResults.length == 1) {
         const channelDrive = getChannelDrive(response.name);
         const dsr = response.searchResults[0];
 
-        return dsrToChannelFile(dotYouClient, dsr, channelDrive, response.includeMetadataHeader);
+        return dsrToChannelFile(odinClient, dsr, channelDrive, response.includeMetadataHeader);
       }
     })
   );
@@ -85,18 +85,18 @@ export const getChannelDefinitions = async (
 };
 
 export const getChannelDefinition = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   channelId: string
 ): Promise<HomebaseFile<ChannelDefinition> | undefined> =>
-  await getChannelDefinitionInternal(dotYouClient, channelId);
+  await getChannelDefinitionInternal(odinClient, channelId);
 
-export const getChannelDefinitionBySlug = async (dotYouClient: DotYouClient, slug: string) => {
-  const channels = await getChannelDefinitions(dotYouClient);
+export const getChannelDefinitionBySlug = async (odinClient: OdinClient, slug: string) => {
+  const channels = await getChannelDefinitions(odinClient);
   return channels.find((channel) => channel.fileMetadata.appData.content.slug === slug);
 };
 
 export const saveChannelDefinition = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   definition: NewHomebaseFile<ChannelDefinition>,
   onMissingDrive?: () => void
 ): Promise<UploadResult | undefined> => {
@@ -113,14 +113,14 @@ export const saveChannelDefinition = async (
 
   const encrypt = !(
     definition.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-      SecurityGroupType.Anonymous ||
+    SecurityGroupType.Anonymous ||
     definition.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-      SecurityGroupType.Authenticated
+    SecurityGroupType.Authenticated
   );
 
   const targetDrive = GetTargetDriveFromChannelId(definition.fileMetadata.appData.uniqueId);
   const existingChannelDef = await getChannelDefinitionInternal(
-    dotYouClient,
+    odinClient,
     definition.fileMetadata.appData.uniqueId
   );
   const fileId = existingChannelDef?.fileId;
@@ -128,7 +128,7 @@ export const saveChannelDefinition = async (
 
   if (!fileId) {
     // Channel doesn't exist yet, we need to check if the drive does exist and if there is access:
-    const securityContext = await getSecurityContext(dotYouClient);
+    const securityContext = await getSecurityContext(odinClient);
     if (
       !securityContext?.permissionContext.permissionGroups.some((x) =>
         x.driveGrants.some((driveGrant) =>
@@ -136,9 +136,9 @@ export const saveChannelDefinition = async (
         )
       )
     ) {
-      if (dotYouClient.getType() === ApiType.Owner) {
+      if (odinClient.getType() === ApiType.Owner) {
         await ensureDrive(
-          dotYouClient,
+          odinClient,
           targetDrive,
           channelContent.name,
           channelContent.description,
@@ -184,17 +184,17 @@ export const saveChannelDefinition = async (
   };
 
   const result = await uploadFile(
-    dotYouClient,
+    odinClient,
     instructionSet,
     metadata,
     shouldEmbedContent
       ? undefined
       : [
-          {
-            payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
-            key: DEFAULT_PAYLOAD_KEY,
-          },
-        ],
+        {
+          payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
+          key: DEFAULT_PAYLOAD_KEY,
+        },
+      ],
     undefined,
     encrypt
   );
@@ -203,13 +203,13 @@ export const saveChannelDefinition = async (
   return result;
 };
 
-export const removeChannelDefinition = async (dotYouClient: DotYouClient, channelId: string) => {
+export const removeChannelDefinition = async (odinClient: OdinClient, channelId: string) => {
   if (stringGuidsEqual(channelId, BlogConfig.PublicChannelId))
     throw new Error(`Remove Channel: can't remove default channel`);
 
-  const channelData = await getChannelDefinitionInternal(dotYouClient, channelId);
+  const channelData = await getChannelDefinitionInternal(odinClient, channelId);
   if (channelData?.fileId) {
-    deleteFile(dotYouClient, GetTargetDriveFromChannelId(channelId), channelData.fileId);
+    deleteFile(odinClient, GetTargetDriveFromChannelId(channelId), channelData.fileId);
     // TODO Should remove the Drive itself as well
   } else {
     throw new Error(`Remove Channel: Channel with id: ${channelId} not found`);
@@ -229,7 +229,7 @@ export const GetTargetDriveFromChannelId = (channelId: string): TargetDrive => {
 
 // Internals:
 const getChannelDefinitionInternal = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   channelId: string
 ): Promise<HomebaseFile<ChannelDefinition> | undefined> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
@@ -246,11 +246,11 @@ const getChannelDefinitionInternal = async (
   };
 
   try {
-    const response = await queryBatch(dotYouClient, params, ro);
+    const response = await queryBatch(odinClient, params, ro);
 
     if (response.searchResults.length == 1) {
       const dsr = response.searchResults[0];
-      return dsrToChannelFile(dotYouClient, dsr, targetDrive, response.includeMetadataHeader);
+      return dsrToChannelFile(odinClient, dsr, targetDrive, response.includeMetadataHeader);
     }
   } catch {
     // Catch al, as targetDrive might be inaccesible (when it doesn't exist yet)
@@ -260,13 +260,13 @@ const getChannelDefinitionInternal = async (
 };
 
 export const dsrToChannelFile = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<ChannelDefinition> | undefined> => {
   const definitionContent = await getContentFromHeaderOrPayload<ChannelDefinition>(
-    dotYouClient,
+    odinClient,
     targetDrive,
     dsr,
     includeMetadataHeader

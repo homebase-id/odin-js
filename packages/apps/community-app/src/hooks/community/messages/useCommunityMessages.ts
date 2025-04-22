@@ -14,13 +14,13 @@ import {
 } from '../../../providers/CommunityMessageProvider';
 import {
   DeletedHomebaseFile,
-  DotYouClient,
+  OdinClient,
   HomebaseFile,
   NewHomebaseFile,
 } from '@homebase-id/js-lib/core';
 
 import { formatGuidId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { invalidateCommunityMessage, updateCacheCommunityMessage } from './useCommunityMessage';
 
@@ -33,7 +33,7 @@ export const useCommunityMessages = (props?: {
   maxAge?: number;
 }) => {
   const { odinId, communityId, threadId, channelId, maxAge } = props || {};
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const removeMessage = async ({
@@ -50,7 +50,7 @@ export const useCommunityMessages = (props?: {
     return await Promise.all(
       messages.map(async (msg) => {
         await hardDeleteCommunityMessage(
-          dotYouClient,
+          odinClient,
           community.fileMetadata.senderOdinId,
           community.fileMetadata.appData.uniqueId as string,
           msg
@@ -62,7 +62,7 @@ export const useCommunityMessages = (props?: {
   return {
     all: useInfiniteQuery(
       getCommunityMessagesInfiniteQueryOptions(
-        dotYouClient,
+        odinClient,
         odinId,
         communityId,
         channelId,
@@ -117,11 +117,11 @@ export const invalidateCommunityMessages = (
 
 type TransformFnReturnData =
   | InfiniteData<{
-      searchResults: (HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage> | null)[];
-      cursorState: string;
-      queryTime: number;
-      includeMetadataHeader: boolean;
-    }>
+    searchResults: (HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage> | null)[];
+    cursorState: string;
+    queryTime: number;
+    includeMetadataHeader: boolean;
+  }>
   | undefined;
 export const updateCacheCommunityMessages = (
   queryClient: QueryClient,
@@ -169,7 +169,7 @@ export const updateCacheCommunityMessages = (
 };
 
 const fetchMessages = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   communityId: string,
   channelId: string | undefined,
@@ -183,7 +183,7 @@ const fetchMessages = async (
   const groupIds = threadId ? [threadId] : channelId ? [channelId] : undefined;
 
   return await getCommunityMessages(
-    dotYouClient,
+    odinClient,
     odinId,
     communityId,
     groupIds,
@@ -195,7 +195,7 @@ const fetchMessages = async (
 };
 
 export const getCommunityMessagesInfiniteQueryOptions: (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId?: string,
   communityId?: string,
   channelId?: string,
@@ -206,7 +206,7 @@ export const getCommunityMessagesInfiniteQueryOptions: (
   cursorState: string;
   queryTime: number;
   includeMetadataHeader: boolean;
-}> = (dotYouClient, odinId, communityId, channelId, threadId, maxAge) => {
+}> = (odinClient, odinId, communityId, channelId, threadId, maxAge) => {
   if (stringGuidsEqual(communityId, threadId)) {
     throw new Error('ThreadId and CommunityId cannot be the same');
   }
@@ -223,7 +223,7 @@ export const getCommunityMessagesInfiniteQueryOptions: (
       }
 
       return fetchMessages(
-        dotYouClient,
+        odinClient,
         odinId as string,
         communityId as string,
         channelId,
@@ -238,20 +238,20 @@ export const getCommunityMessagesInfiniteQueryOptions: (
     select: !maxAge
       ? undefined
       : (data) => ({
-          ...data,
-          pages: data.pages.map((page) => {
-            const filteredPage = {
-              ...page,
+        ...data,
+        pages: data.pages.map((page) => {
+          const filteredPage = {
+            ...page,
 
-              searchResults: page.searchResults.filter((msg) => {
-                if (!msg) return false;
-                return msg.fileMetadata.created > maxAge;
-              }),
-            };
+            searchResults: page.searchResults.filter((msg) => {
+              if (!msg) return false;
+              return msg.fileMetadata.created > maxAge;
+            }),
+          };
 
-            return filteredPage;
-          }),
+          return filteredPage;
         }),
+      }),
     enabled: !!odinId && !!communityId && (!!channelId || !!threadId),
     refetchOnMount: true,
     staleTime: 1000 * 60 * 60 * 24, // 24 hour
@@ -411,8 +411,8 @@ export const internalInsertNewMessage = (
           searchResults:
             index === 0
               ? [newMessage, ...filteredSearchResults].sort(
-                  (a, b) => b.fileMetadata.created - a.fileMetadata.created
-                ) // Re-sort the first page, as the new message might be older than the first message in the page;
+                (a, b) => b.fileMetadata.created - a.fileMetadata.created
+              ) // Re-sort the first page, as the new message might be older than the first message in the page;
               : filteredSearchResults,
         };
       }

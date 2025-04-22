@@ -2,7 +2,7 @@ import { EmbeddedThumb, TargetDrive } from '@homebase-id/js-lib/core';
 import { useMemo, useState } from 'react';
 import { OdinImage } from '@homebase-id/ui-lib';
 import { ImageLightbox } from '../../../../../dialogs/ImageLightbox/ImageLightbox';
-import { useDotYouClientContext } from '../../../../../hooks/auth/useDotYouClientContext';
+import { useOdinClientContext } from '../../../../../hooks/auth/useOdinClientContext';
 
 export const CommentMedia = ({
   postAuthorOdinId,
@@ -19,7 +19,7 @@ export const CommentMedia = ({
   lastModified?: number;
   previewThumbnail?: EmbeddedThumb;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const [isImageLightboxOpen, setIsImageLightboxOpen] = useState(false);
 
   if (!targetDrive) return null;
@@ -29,7 +29,7 @@ export const CommentMedia = ({
         <a onClick={() => setIsImageLightboxOpen(true)} className="cursor-pointer">
           <OdinImage
             odinId={postAuthorOdinId}
-            dotYouClient={dotYouClient}
+            odinClient={odinClient}
             fileId={fileId}
             targetDrive={targetDrive}
             fileKey={fileKey}

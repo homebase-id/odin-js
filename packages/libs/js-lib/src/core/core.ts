@@ -1,6 +1,6 @@
-// DotYouClient
+// OdinClient
 export * from './constants';
-export * from './DotYouClient';
+export * from './OdinClient';
 
 import { encryptUrl, encryptData, buildIvFromQueryString } from './InterceptionEncryptionUtil';
 export type { SharedSecretEncryptedPayload } from './InterceptionEncryptionUtil';

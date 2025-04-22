@@ -1,19 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
 import { getChannelsOverPeer } from '@homebase-id/js-lib/peer';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 
 interface useSocialChannelsProps {
   odinId?: string;
 }
 
 export const useSocialChannels = ({ odinId }: useSocialChannelsProps) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetch = async ({ odinId }: useSocialChannelsProps) => {
     if (!odinId) {
       return;
     }
-    return await getChannelsOverPeer(dotYouClient, odinId);
+    return await getChannelsOverPeer(odinClient, odinId);
   };
 
   return {

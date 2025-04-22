@@ -1,4 +1,4 @@
-import { DotYouClient, EmbeddedThumb, ImageSize } from '@homebase-id/js-lib/core';
+import { OdinClient, EmbeddedThumb, ImageSize } from '@homebase-id/js-lib/core';
 import { useTinyThumb } from '../../hooks/image/useTinyThumb';
 import { forwardRef, useEffect, useMemo, useRef } from 'react';
 import { useImageCache } from '../../hooks/image/useImage';
@@ -16,7 +16,7 @@ export interface OdinPreviewImageProps
       >,
       'onLoad'
     > {
-  dotYouClient: DotYouClient;
+  odinClient: OdinClient;
 
   blockFetchFromServer?: boolean;
   blur?: 'auto' | 'none';
@@ -32,7 +32,7 @@ const isDebug = hasDebugFlag();
 export const OdinPreviewImage = forwardRef(
   (
     {
-      dotYouClient,
+      odinClient,
       odinId,
       targetDrive,
       fileId,
@@ -64,7 +64,7 @@ export const OdinPreviewImage = forwardRef(
       [previewThumbnail]
     );
 
-    const { getFromCache } = useImageCache(dotYouClient);
+    const { getFromCache } = useImageCache(odinClient);
     const cachedImage = useMemo(
       () =>
         fileId && fileKey
@@ -79,7 +79,7 @@ export const OdinPreviewImage = forwardRef(
       error: tinyError,
       isFetched: isTinyFetched,
     } = useTinyThumb(
-      dotYouClient,
+      odinClient,
       odinId,
       fetchTinyFromServer ? fileId : undefined,
       globalTransitId,

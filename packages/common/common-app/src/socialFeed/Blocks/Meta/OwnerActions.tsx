@@ -2,14 +2,14 @@ import { ChannelDefinition, PostContent } from '@homebase-id/js-lib/public';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useManagePost } from '../../../hooks/socialFeed/post/useManagePost';
-import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
 import { ActionGroup, ActionGroupOptionProps } from '../../../ui/Buttons/ActionGroup';
 import { Pencil } from '../../../ui/Icons/Pencil';
 import { t } from '../../../helpers/i18n/dictionary';
 import { Clipboard, Globe, Trash } from '../../../ui/Icons';
 import { EditPostDialog } from '../../EditPostDialog/EditPostDialog';
-import { useDotYouClientContext } from '../../../hooks';
+import { useOdinClientContext } from '../../../hooks';
 import { FEED_ROOT_PATH } from '../../../constants';
 
 export const OwnerActions = ({
@@ -22,7 +22,7 @@ export const OwnerActions = ({
   postFile: HomebaseFile<PostContent>;
   channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition> | undefined;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const postContent = postFile.fileMetadata.appData.content;
 
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -32,7 +32,7 @@ export const OwnerActions = ({
 
   const navigate = useNavigate();
   if (!loggedOnIdentity) return null;
-  const host = new DotYouClient({ api: ApiType.Guest, hostIdentity: loggedOnIdentity }).getRoot();
+  const host = new OdinClient({ api: ApiType.Guest, hostIdentity: loggedOnIdentity }).getRoot();
 
   return (
     <div className="ml-auto" onClick={(e) => e.stopPropagation()}>

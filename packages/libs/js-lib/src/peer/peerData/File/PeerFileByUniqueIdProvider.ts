@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../../core/DotYouClient';
+import { OdinClient } from '../../../core/OdinClient';
 import { decryptKeyHeader, decryptJsonContent } from '../../../core/DriveData/SecurityHelpers';
 import { TargetDrive, HomebaseFile, SystemFileType } from '../../../core/core';
 import {
@@ -19,7 +19,7 @@ interface GetFileRequest {
 const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile | null>>();
 
 export const getFileHeaderOverPeerByUniqueId = async <T = string>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   targetDrive: TargetDrive,
   uniqueId: string,
@@ -29,7 +29,7 @@ export const getFileHeaderOverPeerByUniqueId = async <T = string>(
   const systemFileType = options?.systemFileType ?? 'Standard';
 
   const fileHeader = await getFileHeaderBytesOverPeerByUniqueId(
-    dotYouClient,
+    odinClient,
     odinId,
     targetDrive,
     uniqueId,
@@ -55,13 +55,13 @@ export const getFileHeaderOverPeerByUniqueId = async <T = string>(
 };
 
 export const getFileHeaderBytesOverPeerByUniqueId = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   targetDrive: TargetDrive,
   uniqueId: string,
   options?: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
 ): Promise<HomebaseFile> => {
-  assertIfDefined('DotYouClient', dotYouClient);
+  assertIfDefined('OdinClient', odinClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('uniqueId', uniqueId);
   assertIfDefinedAndNotDefault('OdinId', odinId);
@@ -75,7 +75,7 @@ export const getFileHeaderBytesOverPeerByUniqueId = async (
     if (cacheData) return cacheData;
   }
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
+  const client = getAxiosClient(odinClient, systemFileType);
 
   const request: GetFileRequest = {
     odinId: odinId,
@@ -89,7 +89,7 @@ export const getFileHeaderBytesOverPeerByUniqueId = async (
     .then(async (fileHeader) => {
       if (decrypt) {
         const keyheader = fileHeader.fileMetadata.isEncrypted
-          ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)
+          ? await decryptKeyHeader(odinClient, fileHeader.sharedSecretEncryptedKeyHeader)
           : undefined;
 
         fileHeader.fileMetadata.appData.content = await decryptJsonContent(

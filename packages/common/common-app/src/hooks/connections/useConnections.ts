@@ -19,15 +19,15 @@ import {
   ConnectionRequest,
   ActiveConnection,
 } from '@homebase-id/js-lib/network';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 
 export const usePendingConnections = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const pageSize = 6;
 
   const fetchPendingConnections = async ({ pageNumber }: { pageNumber: number }) => {
     return (
-      (await getPendingRequests(dotYouClient, {
+      (await getPendingRequests(odinClient, {
         pageNumber: pageNumber,
         pageSize,
       })) || null
@@ -77,11 +77,11 @@ interface useSentConnectionsProps {
 }
 export const useSentConnections = (props?: useSentConnectionsProps) => {
   const { includeIntroductions } = props || {};
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const pageSize = 6;
 
   const fetchSentRequests = async ({ pageNumber }: { pageNumber: number }) =>
-    await getSentRequests(dotYouClient, {
+    await getSentRequests(odinClient, {
       pageNumber: pageNumber,
       pageSize: pageSize,
     });
@@ -102,24 +102,24 @@ export const useSentConnections = (props?: useSentConnectionsProps) => {
       select:
         includeIntroductions !== true
           ? (data) => {
-              if (includeIntroductions === 'only') {
-                return {
-                  ...data,
-                  pages: data.pages.map((page) => ({
-                    ...page,
-                    results: page.results.filter((result) => result.introducerOdinId),
-                  })),
-                };
-              } else {
-                return {
-                  ...data,
-                  pages: data.pages.map((page) => ({
-                    ...page,
-                    results: page.results.filter((result) => !result.introducerOdinId),
-                  })),
-                };
-              }
+            if (includeIntroductions === 'only') {
+              return {
+                ...data,
+                pages: data.pages.map((page) => ({
+                  ...page,
+                  results: page.results.filter((result) => result.introducerOdinId),
+                })),
+              };
+            } else {
+              return {
+                ...data,
+                pages: data.pages.map((page) => ({
+                  ...page,
+                  results: page.results.filter((result) => !result.introducerOdinId),
+                })),
+              };
             }
+          }
           : undefined,
     }),
   };
@@ -149,10 +149,10 @@ export const updateCacheSentConnections = (
 
 export const useReceivedIntroductions = () => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchIncomingIntroductions = async () => {
-    return await getReceivedIntroductions(dotYouClient);
+    return await getReceivedIntroductions(odinClient);
   };
 
   return {
@@ -162,7 +162,7 @@ export const useReceivedIntroductions = () => {
       refetchOnWindowFocus: false,
     }),
     deleteAll: useMutation({
-      mutationFn: () => removeAllReceivedIntroductions(dotYouClient),
+      mutationFn: () => removeAllReceivedIntroductions(odinClient),
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ['received-introductions'] });
       },
@@ -179,7 +179,7 @@ export const useActiveConnections = (
     pageSize: 10,
   }
 ) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchConnections = async (
     { pageSize, cursor }: { pageSize: number; cursor?: unknown } = {
@@ -187,7 +187,7 @@ export const useActiveConnections = (
     }
   ) => {
     try {
-      return await getConnections(dotYouClient, {
+      return await getConnections(odinClient, {
         cursor: cursor ?? undefined,
         count: pageSize,
       });

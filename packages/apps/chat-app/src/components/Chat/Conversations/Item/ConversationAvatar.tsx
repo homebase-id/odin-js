@@ -1,4 +1,4 @@
-import { useDotYouClientContext, ConnectionImage, OwnerImage } from '@homebase-id/common-app';
+import { useOdinClientContext, ConnectionImage, OwnerImage } from '@homebase-id/common-app';
 import { Persons } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { OdinImage } from '@homebase-id/ui-lib';
@@ -17,8 +17,8 @@ export const ConversationAvatar = ({
   conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   sizeClassName?: string;
 }) => {
-  const dotYouClient = useDotYouClientContext();
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const odinClient = useOdinClientContext();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   if (!loggedOnIdentity) return null;
 
   const conversationContent = conversation.fileMetadata.appData.content;
@@ -38,7 +38,7 @@ export const ConversationAvatar = ({
       {payload ? (
         <OdinImage
           fileId={conversation.fileId}
-          dotYouClient={dotYouClient}
+          odinClient={odinClient}
           fileKey={payload.key}
           targetDrive={ChatDrive}
           fit="cover"

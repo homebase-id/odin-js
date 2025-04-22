@@ -13,15 +13,15 @@ import {
   PermissionUpdateRequest,
   PermissionSetGrantRequest,
 } from './AppManagementProviderTypes';
-import { DotYouClient } from '@homebase-id/js-lib/core';
+import { OdinClient } from '@homebase-id/js-lib/core';
 import { DriveGrant } from '@homebase-id/js-lib/network';
 
 //adds the specified client to the list of allowed clients for a given app; returns a CAT
 export const RegisterAppClient = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   request: AppClientRegistrationRequest
 ): Promise<AppClientRegistrationResponse> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const response = await client.post<AppClientRegistrationResponse>(
     'appmanagement/register/client',
     request
@@ -30,10 +30,10 @@ export const RegisterAppClient = async (
 };
 
 export const GetAppClients = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   appId: string
 ): Promise<AppClientRegistration[]> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const response = await client.post<AppClientRegistration[]>(`appmanagement/clients`, {
     appId: appId,
   });
@@ -41,10 +41,10 @@ export const GetAppClients = async (
 };
 
 export const RemoveClient = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   request: { appId: string; registrationId: string }
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const response = await client.post('appmanagement/deleteClient', {
     accessRegistrationId: request.registrationId,
   });
@@ -52,10 +52,10 @@ export const RemoveClient = async (
 };
 
 export const RevokeClient = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   request: { appId: string; registrationId: string }
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const response = await client.post('appmanagement/revokeClient', {
     accessRegistrationId: request.registrationId,
   });
@@ -63,10 +63,10 @@ export const RevokeClient = async (
 };
 
 export const AllowClient = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   request: { appId: string; registrationId: string }
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const response = await client.post('appmanagement/allowClient', {
     accessRegistrationId: request.registrationId,
   });
@@ -74,10 +74,10 @@ export const AllowClient = async (
 };
 
 export const RegisterChatAppClient_temp = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   request: AppClientRegistrationRequest
 ): Promise<AppClientRegistrationResponse> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const response = await client.post<AppClientRegistrationResponse>(
     'appmanagement/register/chatclient_temp',
     request
@@ -87,10 +87,10 @@ export const RegisterChatAppClient_temp = async (
 };
 
 export const RegisterApp = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   request: AppRegistrationRequest
 ): Promise<RedactedAppRegistration> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const response = await client.post<RedactedAppRegistration>('appmanagement/register/app', {
     ...request,
     drives: request.drives?.map((driveGrant) => ({
@@ -110,10 +110,10 @@ export const RegisterApp = async (
 };
 
 export const GetAppRegistration = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   request: GetAppRequest
 ): Promise<RedactedAppRegistration | undefined> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const appreg = await client
     .post<RedactedAppRegistration>('appmanagement/app', request)
     .then((response) => response.data);
@@ -147,9 +147,9 @@ export const GetAppRegistration = async (
 };
 
 export const GetAppRegistrations = async (
-  dotYouClient: DotYouClient
+  odinClient: OdinClient
 ): Promise<RedactedAppRegistration[]> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const response = await client.get<RedactedAppRegistration[]>('appmanagement/list');
 
   return response.data.map((appreg) => {
@@ -182,38 +182,38 @@ export const GetAppRegistrations = async (
 };
 
 export const RevokeApp = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   request: GetAppRequest
 ): Promise<void> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   await client.post('appmanagement/revoke', request);
 };
 
 export const AllowApp = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   request: GetAppRequest
 ): Promise<void> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   return await client.post('appmanagement/allow', request).then((response) => response.data);
 };
 
 export const RemoveApp = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   request: GetAppRequest
 ): Promise<void> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   return await client.post('appmanagement/deleteApp', request).then((response) => response.data);
 };
 
 export const UpdateAuthorizedCircles = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   request: {
     appId: string;
     authorizedCircles: string[];
     circleMemberPermissionGrant: PermissionSetGrantRequest;
   }
 ) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const response = await client.post('appmanagement/register/updateauthorizedcircles', {
     ...request,
     circleMemberPermissionGrant: {
@@ -228,7 +228,7 @@ export const UpdateAuthorizedCircles = async (
 };
 
 export const UpdatePermissions = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   request: PermissionUpdateRequest
 ) => {
   const cleanedUpRequest: PermissionUpdateRequest = {
@@ -250,7 +250,7 @@ export const UpdatePermissions = async (
     }, [] as DriveGrant[]),
   };
 
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const response = await client.post('appmanagement/register/updateapppermissions', {
     ...cleanedUpRequest,
     drives: cleanedUpRequest.drives.map((driveGrant) => ({

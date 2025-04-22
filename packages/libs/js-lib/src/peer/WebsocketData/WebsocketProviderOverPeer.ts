@@ -1,4 +1,4 @@
-import { ApiType, DotYouClient } from '../../core/DotYouClient';
+import { ApiType, OdinClient } from '../../core/OdinClient';
 import { TargetDrive } from '../../core/DriveData/File/DriveFileTypes';
 import { encryptData, getRandomIv } from '../../core/InterceptionEncryptionUtil';
 import {
@@ -34,7 +34,7 @@ let reconnectCounter = 0;
 let reconnectPromise: Promise<void> | undefined = undefined;
 
 const subscribers: {
-  handler: (dotYouClient: DotYouClient, data: TypedConnectionNotification) => void;
+  handler: (odinClient: OdinClient, data: TypedConnectionNotification) => void;
   onDisconnect?: () => void;
   onReconnect?: () => void;
 }[] = [];
@@ -42,7 +42,7 @@ const subscribers: {
 const isDebug = hasDebugFlag();
 
 const ConnectSocket = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   drives: TargetDrive[],
   args?: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...;
@@ -56,7 +56,7 @@ const ConnectSocket = async (
     subscribedDrives = drives;
 
     // we need to preauth before we can connect
-    const tokenToConnectOverPeer = await dotYouClient
+    const tokenToConnectOverPeer = await odinClient
       .createAxiosClient()
       .post<{
         authenticationToken64: string;
@@ -85,7 +85,7 @@ const ConnectSocket = async (
     }
 
     activeSs = base64ToUint8Array(tokenToConnectOverPeer.sharedSecret);
-    const directGuestClient = new DotYouClient({
+    const directGuestClient = new OdinClient({
       api: ApiType.Guest,
       hostIdentity: odinId,
       headers: {
@@ -126,7 +126,7 @@ const ConnectSocket = async (
           // 2 ping intervals have passed without a pong, reconnect
           if (isDebug) console.debug(`[WebsocketProviderOverPeer] Ping timeout`);
 
-          ReconnectSocket(dotYouClient, odinId, drives, args);
+          ReconnectSocket(odinClient, odinId, drives, args);
           return;
         }
         NotifyOverPeer({
@@ -176,7 +176,7 @@ const ConnectSocket = async (
         }
       }
 
-      ReconnectSocket(dotYouClient, odinId, drives, args);
+      ReconnectSocket(odinClient, odinId, drives, args);
     };
   });
 
@@ -184,7 +184,7 @@ const ConnectSocket = async (
 };
 
 const ReconnectSocket = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   drives: TargetDrive[],
   args?: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this
@@ -206,12 +206,12 @@ const ReconnectSocket = async (
     setTimeout(async () => {
       if (isDebug) console.debug('[WebsocketProviderOverPeer] Reconnecting - Delayed reconnect');
       try {
-        await ConnectSocket(dotYouClient, odinId, drives, args);
+        await ConnectSocket(odinClient, odinId, drives, args);
       } catch (e) {
         console.error('[WebsocketProviderOverPeer] Reconnect failed', e);
         reject();
 
-        ReconnectSocket(dotYouClient, odinId, drives, args);
+        ReconnectSocket(odinClient, odinId, drives, args);
         return;
       }
       subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
@@ -241,17 +241,17 @@ const DisconnectSocket = async () => {
 };
 
 export const SubscribeOverPeer = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   drives: TargetDrive[],
-  handler: (dotYouClient: DotYouClient, data: TypedConnectionNotification) => void,
+  handler: (odinClient: OdinClient, data: TypedConnectionNotification) => void,
   onDisconnect?: () => void,
   onReconnect?: () => void,
   args?: unknown, // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this,
   refId?: string
 ): Promise<void> => {
-  const apiType = dotYouClient.getType();
-  const sharedSecret = dotYouClient.getSharedSecret();
+  const apiType = odinClient.getType();
+  const sharedSecret = odinClient.getSharedSecret();
   if ((apiType !== ApiType.Owner && apiType !== ApiType.App) || !sharedSecret) {
     throw new Error(`NotificationProvider is not supported for ApiType: ${apiType}`);
   }
@@ -273,11 +273,11 @@ export const SubscribeOverPeer = async (
 
   // Already connected, no need to initiate a new connection
   if (webSocketClient) return Promise.resolve();
-  return ConnectSocket(dotYouClient, odinId, drives, args);
+  return ConnectSocket(odinClient, odinId, drives, args);
 };
 
 export const UnsubscribeOverPeer = (
-  handler: (dotYouClient: DotYouClient, data: TypedConnectionNotification) => void
+  handler: (odinClient: OdinClient, data: TypedConnectionNotification) => void
 ) => {
   const index = subscribers.findIndex((subscriber) => subscriber.handler === handler);
   if (index !== -1) {

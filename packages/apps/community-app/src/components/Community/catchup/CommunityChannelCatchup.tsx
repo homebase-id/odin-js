@@ -2,7 +2,7 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { ChannelWithRecentMessage } from '../../../hooks/community/channels/useCommunityChannelsWithRecentMessages';
 import { CommunityHistory } from '../channel/CommunityHistory';
-import { ActionLink, COMMUNITY_ROOT_PATH, useDotYouClientContext } from '@homebase-id/common-app';
+import { ActionLink, COMMUNITY_ROOT_PATH, useOdinClientContext } from '@homebase-id/common-app';
 import { ExternalLink } from '@homebase-id/common-app/icons';
 import { useCommunityMetadata } from '../../../hooks/community/useCommunityMetadata';
 import { useMemo } from 'react';
@@ -33,7 +33,7 @@ export const CommunityChannelCatchup = ({
     [metadata, channel]
   );
 
-  const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedInIdentity = useOdinClientContext().getLoggedInIdentity();
 
   const defaultMaxAge = useMemo(() => {
     if (!channel.lastMessage) return 0;

@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../../core/DotYouClient';
+import { OdinClient } from '../../../core/OdinClient';
 import { FileIdFileIdentifier, TargetDrive } from '../../../core/DriveData/File/DriveFileTypes';
 import { assertIfDefined } from '../../../helpers/DataUtil';
 
@@ -18,12 +18,12 @@ export enum SendReadReceiptResponseRecipientStatus {
 }
 
 export const sendReadReceipt = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   fileIds: string[]
 ): Promise<SendReadReceiptResponse> => {
   assertIfDefined('TargetDrive', targetDrive);
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
 
   const request = {
     files: fileIds.map((fileId) => ({

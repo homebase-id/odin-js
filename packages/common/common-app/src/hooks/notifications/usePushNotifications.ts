@@ -17,22 +17,22 @@ import {
   markAllNotificationsOfAppAsRead,
 } from '@homebase-id/js-lib/core';
 import { useEffect } from 'react';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 import { useRef } from 'react';
 
 const PAGE_SIZE = 500;
 export const usePushNotifications = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const getNotifications = async (cursor: unknown | undefined) =>
-    await GetNotifications(dotYouClient, undefined, PAGE_SIZE, cursor);
+    await GetNotifications(odinClient, undefined, PAGE_SIZE, cursor);
 
   const markAsRead = async (notificationIds: string[]) =>
-    await MarkNotificationsAsRead(dotYouClient, notificationIds);
+    await MarkNotificationsAsRead(odinClient, notificationIds);
 
   const removeNotifications = async (notificationIds: string[]) =>
-    await DeleteNotifications(dotYouClient, notificationIds);
+    await DeleteNotifications(odinClient, notificationIds);
 
   return {
     fetch: useInfiniteQuery({
@@ -139,9 +139,9 @@ export const insertNewNotification = (
       results:
         index === 0
           ? [
-              appNotification,
-              ...page.results.filter((notification) => notification.id !== appNotification.id),
-            ]
+            appNotification,
+            ...page.results.filter((notification) => notification.id !== appNotification.id),
+          ]
           : page.results.filter((notification) => notification.id !== appNotification.id),
     })),
   };
@@ -155,8 +155,8 @@ export const insertNewNotification = (
 };
 
 export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
-  const dotYouClient = useDotYouClientContext();
-  const getCounts = async () => (await getNotificationCountsByAppId(dotYouClient)).unreadCounts;
+  const odinClient = useOdinClientContext();
+  const getCounts = async () => (await getNotificationCountsByAppId(odinClient)).unreadCounts;
 
   return useQuery({
     queryKey: ['push-notifications-count'],
@@ -176,7 +176,7 @@ export const useRemoveNotifications = (props: {
   appId: string;
   typeId?: string;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
   const { data: unreadCount } = useUnreadPushNotificationsCount({
     appId: props.appId,
@@ -184,8 +184,8 @@ export const useRemoveNotifications = (props: {
 
   const markAsRead = async ({ appId, typeId }: { appId: string; typeId?: string }) => {
     const response = typeId
-      ? await markAllNotificationsOfAppAndTypeIdAsRead(dotYouClient, appId, typeId)
-      : await markAllNotificationsOfAppAsRead(dotYouClient, appId);
+      ? await markAllNotificationsOfAppAndTypeIdAsRead(odinClient, appId, typeId)
+      : await markAllNotificationsOfAppAsRead(odinClient, appId);
     return response;
   };
 

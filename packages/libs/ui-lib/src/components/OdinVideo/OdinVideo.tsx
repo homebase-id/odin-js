@@ -1,4 +1,4 @@
-import { DotYouClient, HomebaseFile, SystemFileType, TargetDrive } from '@homebase-id/js-lib/core';
+import { OdinClient, HomebaseFile, SystemFileType, TargetDrive } from '@homebase-id/js-lib/core';
 import { SegmentedVideoMetadata } from '@homebase-id/js-lib/media';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useIntersection } from '../../hooks/intersection/useIntersection';
@@ -14,7 +14,7 @@ import { MseSource } from './MseSource';
 import { HlsSource } from './HlsSource';
 
 export interface OdinVideoProps {
-  dotYouClient: DotYouClient;
+  odinClient: OdinClient;
   odinId?: string;
   systemFileType?: SystemFileType;
   targetDrive: TargetDrive;
@@ -35,7 +35,7 @@ export interface OdinVideoProps {
 const MB = 1000000;
 export const OdinVideo = (videoProps: OdinVideoProps) => {
   const {
-    dotYouClient,
+    odinClient,
     odinId,
     targetDrive,
     fileId,
@@ -63,7 +63,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
   const {
     fetchMetadata: { data, isFetched: videoMetaDataFetched },
   } = useVideo(
-    dotYouClient,
+    odinClient,
     odinId,
     isInView ? fileId : undefined,
     globalTransitId,

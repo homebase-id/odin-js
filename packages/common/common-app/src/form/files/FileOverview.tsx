@@ -12,7 +12,7 @@ import { ExtensionThumbnail } from './ExtensionThumbnail';
 import { ActionButton } from '../../ui/Buttons/ActionButton';
 import { Trash } from '../../ui/Icons/Trash';
 import { bytesToSize, ellipsisAtMaxChar } from '../../helpers';
-import { useDotYouClientContext } from '../../hooks';
+import { useOdinClientContext } from '../../hooks';
 
 type NewFileArray = NewMediaFile[];
 interface FileOverViewProps {
@@ -39,7 +39,7 @@ export const FileOverview = ({
   className,
   cols,
 }: FileOverViewProps | ExistingFileOverviewProps) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   useEffect(() => {
     if (!files) return;
@@ -103,7 +103,7 @@ export const FileOverview = ({
                 fileKey={currFile.key}
                 targetDrive={targetDrive}
                 className="aspect-square h-auto w-full object-cover"
-                dotYouClient={dotYouClient}
+                odinClient={odinClient}
                 loadSize={{ pixelWidth: 400, pixelHeight: 400 }}
               />
             ) : currFile.contentType.startsWith('video/') ? (
@@ -113,7 +113,7 @@ export const FileOverview = ({
                   fileKey={currFile.key}
                   targetDrive={targetDrive}
                   className="aspect-square h-auto w-full object-cover"
-                  dotYouClient={dotYouClient}
+                  odinClient={odinClient}
                   loadSize={{ pixelWidth: 400, pixelHeight: 400 }}
                 />
                 <div className="absolute inset-0 flex flex-row items-center justify-center">

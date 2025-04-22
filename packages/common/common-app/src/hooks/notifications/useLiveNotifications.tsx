@@ -2,7 +2,7 @@ import {
   ApiType,
   AppNotification,
   ClientConnectionNotification,
-  DotYouClient,
+  OdinClient,
   PushNotification,
   TargetDrive,
   TypedConnectionNotification,
@@ -43,7 +43,7 @@ export const useLiveNotifications = (props: { drives?: TargetDrive[] } | undefin
   const [liveNotifications, setLiveNotifications] = useState<LiveNotification[]>([]);
   const queryClient = useQueryClient();
 
-  const handler = useCallback((_: DotYouClient, wsNotification: TypedConnectionNotification) => {
+  const handler = useCallback((_: OdinClient, wsNotification: TypedConnectionNotification) => {
     const clientNotification = wsNotification as ClientConnectionNotification;
 
     if (
@@ -57,7 +57,7 @@ export const useLiveNotifications = (props: { drives?: TargetDrive[] } | undefin
           ? clientNotification.sender
           : clientNotification.recipient;
 
-      const host = new DotYouClient({ api: ApiType.Guest, hostIdentity: otherId }).getRoot();
+      const host = new OdinClient({ api: ApiType.Guest, hostIdentity: otherId }).getRoot();
 
       const liveNotification: LiveNotification = {
         key: `incoming-${otherId}`,
@@ -89,7 +89,7 @@ export const useLiveNotifications = (props: { drives?: TargetDrive[] } | undefin
       incrementAppIdNotificationCount(queryClient, clientNotification.options.appId);
 
       // Add as live notification
-      const host = new DotYouClient({
+      const host = new OdinClient({
         api: ApiType.Guest,
         hostIdentity: clientNotification.senderId,
       }).getRoot();

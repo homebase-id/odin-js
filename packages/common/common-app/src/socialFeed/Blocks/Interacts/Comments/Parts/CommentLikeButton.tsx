@@ -6,14 +6,14 @@ import { useOutsideTrigger } from '../../../../../hooks/clickedOutsideTrigger/us
 import { ReactionsBarHandle, SocialReactionsBar } from '../../Reactions/ReactionsBar';
 import { ErrorNotification } from '../../../../../ui/Alert/ErrorNotification';
 import { t } from '../../../../../helpers/i18n/dictionary';
-import { useDotYouClientContext, useMyEmojiReactions } from '../../../../../hooks';
+import { useOdinClientContext, useMyEmojiReactions } from '../../../../../hooks';
 
 export const CommentLikeButton = ({ threadContext }: { threadContext: ReactionContext }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isReact, setIsReact] = useState(false);
   const [isCustomReactOpen, setIsCustomReactOpen] = useState(false);
 
-  const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedInIdentity = useOdinClientContext().getLoggedInIdentity();
   const {
     saveEmoji: { mutate: postEmoji, error: postEmojiError },
     removeEmoji: { mutate: removeEmoji, error: removeEmojiError },

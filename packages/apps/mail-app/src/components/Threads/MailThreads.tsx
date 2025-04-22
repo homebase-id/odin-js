@@ -13,7 +13,7 @@ import { Archive, Download, Trash } from '@homebase-id/common-app/icons';
 import { MailConversation } from '../../providers/MailProvider';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { useMailThread } from '../../hooks/mail/useMailThread';
 import { MailThreadsFilter, useFilteredMailThreads } from '../../hooks/mail/useFilteredMailThreads';
 import { useMailConversation } from '../../hooks/mail/useMailConversation';
@@ -28,7 +28,7 @@ export const MailThreads = ({
 }) => {
   const [selection, setSelection] = useState<HomebaseFile<MailConversation>[][]>([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
 
   // Don't auto load next pages when there's a query
   const autoPage = !query;
@@ -218,7 +218,7 @@ const MailConversationsHeader = ({
   clearSelection: () => void;
   filter?: MailThreadsFilter;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const hasASelection = selection.length > 0;
   const {
     mutate: removeThread,

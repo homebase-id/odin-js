@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../DotYouClient';
+import { OdinClient } from '../../OdinClient';
 
 import { TransitInstructionSet } from '../../../peer/peerData/PeerTypes';
 import {
@@ -48,16 +48,16 @@ export const encryptMetaData = async (
 ) => {
   return keyHeader && metadata.appData.content
     ? {
-        ...metadata,
-        appData: {
-          ...metadata.appData,
-          content: metadata.appData.content
-            ? uint8ArrayToBase64(
-                await encryptWithKeyheader(stringToUint8Array(metadata.appData.content), keyHeader)
-              )
-            : undefined,
-        },
-      }
+      ...metadata,
+      appData: {
+        ...metadata.appData,
+        content: metadata.appData.content
+          ? uint8ArrayToBase64(
+            await encryptWithKeyheader(stringToUint8Array(metadata.appData.content), keyHeader)
+          )
+          : undefined,
+      },
+    }
     : metadata;
 };
 
@@ -122,7 +122,7 @@ export const buildUpdateManifest = (
 };
 
 export const buildDescriptor = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   keyHeader: KeyHeader | undefined,
   instructions: UploadInstructionSet | TransitInstructionSet | UpdateInstructionSet,
   metadata: UploadFileMetadata
@@ -130,10 +130,10 @@ export const buildDescriptor = async (
   if (!instructions.transferIv) throw new Error('Transfer IV is required');
 
   return await encryptWithSharedSecret(
-    dotYouClient,
+    odinClient,
     {
       encryptedKeyHeader: await encryptKeyHeader(
-        dotYouClient,
+        odinClient,
         keyHeader ?? EMPTY_KEY_HEADER,
         instructions.transferIv
       ),
@@ -161,11 +161,11 @@ export const buildFormData = async (
       const encryptedPayload =
         keyHeader && !payload.skipEncryption
           ? await encryptWithKeyheader(payload.payload, {
-              ...keyHeader,
-              iv:
-                manifest?.PayloadDescriptors?.find((p) => p.payloadKey === payload.key)?.iv ||
-                keyHeader.iv,
-            })
+            ...keyHeader,
+            iv:
+              manifest?.PayloadDescriptors?.find((p) => p.payloadKey === payload.key)?.iv ||
+              keyHeader.iv,
+          })
           : payload.payload;
 
       data.append('payload', encryptedPayload, payload.key);
@@ -178,11 +178,11 @@ export const buildFormData = async (
       const encryptedThumb =
         keyHeader && !thumb.skipEncryption
           ? await encryptWithKeyheader(thumb.payload, {
-              ...keyHeader,
-              iv:
-                manifest?.PayloadDescriptors?.find((p) => p.payloadKey === thumb.key)?.iv ||
-                keyHeader.iv,
-            })
+            ...keyHeader,
+            iv:
+              manifest?.PayloadDescriptors?.find((p) => p.payloadKey === thumb.key)?.iv ||
+              keyHeader.iv,
+          })
           : thumb.payload;
 
       data.append('thumbnail', encryptedThumb, thumb.key + thumb.pixelWidth);
@@ -193,13 +193,13 @@ export const buildFormData = async (
 };
 
 export const pureUpload = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   data: FormData,
   systemFileType?: SystemFileType,
   onVersionConflict?: () => Promise<void | UploadResult> | void,
   axiosConfig?: AxiosRequestConfig
 ): Promise<UploadResult | void> => {
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true, systemFileType });
+  const client = odinClient.createAxiosClient({ overrideEncryption: true, systemFileType });
   const url = '/drive/files/upload';
 
   const config: AxiosRequestConfig = {
@@ -232,13 +232,13 @@ export const pureUpload = async (
 };
 
 export const pureUpdate = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   data: FormData,
   systemFileType?: SystemFileType,
   onVersionConflict?: () => Promise<void | UpdateResult> | void,
   axiosConfig?: AxiosRequestConfig
 ): Promise<UpdateResult | void> => {
-  const client = dotYouClient.createAxiosClient({
+  const client = odinClient.createAxiosClient({
     overrideEncryption: true,
     systemFileType,
   });

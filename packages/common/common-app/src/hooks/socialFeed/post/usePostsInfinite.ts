@@ -9,7 +9,7 @@ import {
 import { getCachedPosts, getCachedRecentPosts } from './cachedDataHelpers';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useChannels } from '../channels/useChannels';
-import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../../auth/useOdinClientContext';
 
 type usePostsInfiniteProps = {
   channelId?: string;
@@ -30,9 +30,9 @@ export const usePostsInfinite = ({
   enabled = true,
   includeHidden = false,
 }: usePostsInfiniteProps) => {
-  const dotYouClient = useDotYouClientContext();
-  const isOwner = dotYouClient.isOwner();
-  const isAuthenticated = dotYouClient.isAuthenticated();
+  const odinClient = useOdinClientContext();
+  const isOwner = odinClient.isOwner();
+  const isAuthenticated = odinClient.isAuthenticated();
   const { data: channels } = useChannels({ isAuthenticated, isOwner });
 
   const fetchBlogData = async ({
@@ -45,30 +45,30 @@ export const usePostsInfinite = ({
     const canRunCached = !pageParam && !isAuthenticated;
     const cachedData = canRunCached
       ? channelId
-        ? await getCachedPosts(dotYouClient, channelId, postType)
-        : await getCachedRecentPosts(dotYouClient, postType)
+        ? await getCachedPosts(odinClient, channelId, postType)
+        : await getCachedRecentPosts(odinClient, postType)
       : undefined;
 
     const response =
       cachedData ||
       (channelId
         ? await getPosts(
-            dotYouClient,
-            channelId,
-            postType,
-            false,
-            typeof pageParam === 'string' ? pageParam : undefined,
-            BLOG_POST_INFIITE_PAGE_SIZE
-          )
+          odinClient,
+          channelId,
+          postType,
+          false,
+          typeof pageParam === 'string' ? pageParam : undefined,
+          BLOG_POST_INFIITE_PAGE_SIZE
+        )
         : await getRecentPosts(
-            dotYouClient,
-            postType,
-            false,
-            typeof pageParam === 'object' ? pageParam : undefined,
-            BLOG_POST_INFIITE_PAGE_SIZE,
-            channels,
-            includeHidden
-          ));
+          odinClient,
+          postType,
+          false,
+          typeof pageParam === 'object' ? pageParam : undefined,
+          BLOG_POST_INFIITE_PAGE_SIZE,
+          channels,
+          includeHidden
+        ));
 
     return {
       results: response.results.filter(

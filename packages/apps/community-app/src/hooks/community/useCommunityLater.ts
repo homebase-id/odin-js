@@ -1,4 +1,4 @@
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import {
   getCommunityMetadataQueryOptions,
   useCommunityMetadata,
@@ -34,14 +34,14 @@ export const useManageCommunityLater = (props?: {
 }) => {
   const { messageId, systemFileType } = props || {};
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const { odinKey, communityKey } = useParams();
   const { mutate: updateMeta, ...saveProps } = useCommunityMetadata().update;
 
   const mutate = useCallback(() => {
     queryClient
       .fetchQuery(
-        getCommunityMetadataQueryOptions(dotYouClient, queryClient, odinKey, communityKey)
+        getCommunityMetadataQueryOptions(odinClient, queryClient, odinKey, communityKey)
       )
       .then((communityMetadata) => {
         if (!messageId || !systemFileType || !communityMetadata) return;

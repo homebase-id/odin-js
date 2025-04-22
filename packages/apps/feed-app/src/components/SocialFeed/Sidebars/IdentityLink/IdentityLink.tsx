@@ -6,16 +6,16 @@ import {
   Image,
   HOME_ROOT_PATH,
   ThemeLinksSettings,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient } from '@homebase-id/js-lib/core';
 
 const IdentityLink = ({ className }: { className?: string }) => {
   const { data } = useSiteData();
-  const odinId = useDotYouClientContext().getHostIdentity();
+  const odinId = useOdinClientContext().getHostIdentity();
 
-  const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot();
+  const host = new OdinClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot();
   return (
     <a href={`${host}${HOME_ROOT_PATH}`} className={`block ${className ?? ''}`}>
       <div className="relative">

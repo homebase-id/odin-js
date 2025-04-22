@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { DotYouClient, TypedConnectionNotification } from '@homebase-id/js-lib/core';
+import { OdinClient, TypedConnectionNotification } from '@homebase-id/js-lib/core';
 import {
   invalidateActiveConnections,
   invalidatePendingConnections,
@@ -17,7 +17,7 @@ export const useLiveOwnerProcessor = () => {
 const useOwnerWebSocket = (isEnabled: boolean) => {
   const queryClient = useQueryClient();
 
-  const handler = useCallback((_: DotYouClient, notification: TypedConnectionNotification) => {
+  const handler = useCallback((_: OdinClient, notification: TypedConnectionNotification) => {
     if (notification.notificationType === 'connectionFinalized') {
       setTimeout(() => {
         invalidatePendingConnections(queryClient);

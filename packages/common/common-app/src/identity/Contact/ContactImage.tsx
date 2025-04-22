@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useContact } from '@homebase-id/common-app';
 import { FallbackImg, Image, LoadingBlock } from '@homebase-id/common-app';
 import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@homebase-id/js-lib/network';
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient } from '@homebase-id/js-lib/core';
 
 export const ContactImage = ({
   odinId,
@@ -51,7 +51,7 @@ export const ContactImage = ({
         />
       ) : (
         <img
-          src={`${new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}/pub/image`}
+          src={`${new OdinClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}/pub/image`}
           className="h-full w-full"
           onError={() => setFullError(true)}
         />

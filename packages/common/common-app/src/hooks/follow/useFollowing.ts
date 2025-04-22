@@ -1,15 +1,15 @@
 import { QueryClient, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createOrUpdateFollow, fetchFollowing, FollowRequest } from '@homebase-id/js-lib/network';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 
 const PAGE_SIZE = 30;
 export const useFollowingInfinite = () => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchFollowingInternal = async ({ pageParam }: { pageParam?: string }) => {
     try {
-      const response = await fetchFollowing(dotYouClient, pageParam, PAGE_SIZE);
+      const response = await fetchFollowing(odinClient, pageParam, PAGE_SIZE);
       if (response) return response;
     } catch (ex) {
       console.error('Failed to fetch following', ex);
@@ -27,7 +27,7 @@ export const useFollowingInfinite = () => {
   }: {
     request: FollowRequest;
     includeHistory?: boolean;
-  }) => await createOrUpdateFollow(dotYouClient, request, includeHistory);
+  }) => await createOrUpdateFollow(odinClient, request, includeHistory);
 
   return {
     fetch: useInfiniteQuery({

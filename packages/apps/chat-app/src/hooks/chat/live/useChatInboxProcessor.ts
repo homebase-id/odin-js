@@ -1,7 +1,7 @@
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import {
   HomebaseFile,
-  DotYouClient,
+  OdinClient,
   FileQueryParams,
   queryBatch,
   queryModified,
@@ -30,18 +30,18 @@ const MINUTE_IN_MS = 60000;
 const BATCH_SIZE = 2000;
 // Process the inbox on startup
 export const useChatInboxProcessor = (connected?: boolean) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const fetchData = async () => {
     const lastProcessedTime = queryClient.getQueryState(['process-chat-inbox'])?.dataUpdatedAt;
     const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 2;
 
-    const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
+    const processedresult = await processInbox(odinClient, ChatDrive, BATCH_SIZE);
     isDebug && console.debug('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
     if (lastProcessedWithBuffer) {
       const updatedMessages = await findChangesSinceTimestamp(
-        dotYouClient,
+        odinClient,
         lastProcessedWithBuffer,
         {
           targetDrive: ChatDrive,
@@ -55,7 +55,7 @@ export const useChatInboxProcessor = (connected?: boolean) => {
             updatedMessages.map(
               async (msg) =>
                 await dsrToMessage(
-                  dotYouClient,
+                  odinClient,
                   msg as unknown as HomebaseFile<string>,
                   ChatDrive,
                   false
@@ -63,11 +63,11 @@ export const useChatInboxProcessor = (connected?: boolean) => {
             )
           )
         ).filter(Boolean) as HomebaseFile<ChatMessage>[];
-        await processChatMessagesBatch(dotYouClient, queryClient, fullMessages);
+        await processChatMessagesBatch(odinClient, queryClient, fullMessages);
       }
 
       const updatedConversations = await findChangesSinceTimestamp(
-        dotYouClient,
+        odinClient,
         lastProcessedWithBuffer,
         {
           targetDrive: ChatDrive,
@@ -75,7 +75,7 @@ export const useChatInboxProcessor = (connected?: boolean) => {
         }
       );
       isDebug && console.debug('[InboxProcessor] new conversations', updatedConversations.length);
-      await processConversationsBatch(dotYouClient, queryClient, updatedConversations);
+      await processConversationsBatch(odinClient, queryClient, updatedConversations);
     } else {
       console.warn('[useChatInboxProcessor] Invalidating all conversations & chat messages');
       // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
@@ -96,21 +96,21 @@ export const useChatInboxProcessor = (connected?: boolean) => {
 };
 
 const findChangesSinceTimestamp = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   timeStamp: number,
   params: FileQueryParams
 ) => {
   const modifiedCursor = getQueryModifiedCursorFromTime(timeStamp); // Friday, 31 May 2024 09:38:54.678
   const batchCursor = getQueryBatchCursorFromTime(new Date().getTime(), timeStamp);
 
-  const newFiles = await queryBatch(dotYouClient, params, {
+  const newFiles = await queryBatch(odinClient, params, {
     maxRecords: BATCH_SIZE,
     cursorState: batchCursor,
     includeMetadataHeader: true,
     includeTransferHistory: true,
   });
 
-  const modifiedFiles = await queryModified(dotYouClient, params, {
+  const modifiedFiles = await queryModified(odinClient, params, {
     maxRecords: BATCH_SIZE,
     cursor: modifiedCursor + '',
     excludePreviewThumbnail: false,
@@ -122,7 +122,7 @@ const findChangesSinceTimestamp = async (
 };
 
 const processConversationsBatch = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   queryClient: QueryClient,
   conversations: (HomebaseFile<string> | DeletedHomebaseFile<string>)[]
 ) => {
@@ -134,7 +134,7 @@ const processConversationsBatch = async (
       }
 
       const updatedConversation = await dsrToConversation(
-        dotYouClient,
+        odinClient,
         conversationsDsr,
         ChatDrive,
         true

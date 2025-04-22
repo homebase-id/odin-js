@@ -12,13 +12,13 @@ import { Layout, NoLayout } from '../components/ui/Layout/Layout';
 
 import './App.css';
 import {
-  DotYouClientProvider,
+  OdinClientProvider,
   ErrorBoundary,
   HOME_ROOT_PATH,
   NotFound,
   OdinQueryClient,
   PREVIEW_ROOT,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import Header from '../components/ui/Layout/Header/Header';
 import Footer from '../components/ui/Layout/Footer/Footer';
@@ -104,7 +104,7 @@ function App() {
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
       <OdinQueryClient app="public" type="indexeddb">
-        <DotYouClientProvider>
+        <OdinClientProvider>
           <RouterProvider
             router={router}
             fallbackElement={<></>}
@@ -112,18 +112,18 @@ function App() {
               v7_startTransition: true,
             }}
           />
-        </DotYouClientProvider>
+        </OdinClientProvider>
       </OdinQueryClient>
     </HelmetProvider>
   );
 }
 
 const PublicRoute = ({ children }: { children: ReactNode }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   useValidateAuthorization();
-  const isAuthenticated = dotYouClient.isAuthenticated();
-  const isOwner = dotYouClient.isOwner();
+  const isAuthenticated = odinClient.isAuthenticated();
+  const isOwner = odinClient.isOwner();
 
   const [searchParams] = useSearchParams();
   const { data: siteData, isFetched: siteDataFetched } = useSiteData();
@@ -188,12 +188,12 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
 };
 
 const ActionRedirect = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
-  const isAuthenticated = dotYouClient.isAuthenticated();
+  const isAuthenticated = odinClient.isAuthenticated();
   const [searchParams] = useSearchParams();
 
-  const host = dotYouClient.getRoot();
+  const host = odinClient.getRoot();
   if (isAuthenticated && host) {
     console.debug('[AUTHENTICATED]: Redirect to action after login');
     window.location.href = `${host}${searchParams.get('targetPath')}`;

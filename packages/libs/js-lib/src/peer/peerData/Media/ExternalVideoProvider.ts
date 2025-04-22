@@ -1,7 +1,7 @@
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
-import { ApiType, DotYouClient } from '../../../core/DotYouClient';
+import { ApiType, OdinClient } from '../../../core/OdinClient';
 import { SystemFileType, TargetDrive } from '../../../core/core';
 import { stringifyToQueryParams } from '../../../helpers/helpers';
 import {
@@ -11,7 +11,7 @@ import {
 import { getFileHeaderOverPeer, getPayloadBytesOverPeer } from '../File/PeerFileProvider';
 
 export const getDecryptedVideoChunkOverPeer = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
@@ -23,28 +23,28 @@ export const getDecryptedVideoChunkOverPeer = async (
 ): Promise<Uint8Array | null> => {
   const payload = globalTransitId
     ? await getPayloadBytesOverPeerByGlobalTransitId(
-        dotYouClient,
-        odinId,
-        targetDrive,
-        globalTransitId,
-        key,
-        {
-          systemFileType,
-          chunkStart,
-          chunkEnd,
-        }
-      )
-    : await getPayloadBytesOverPeer(dotYouClient, odinId, targetDrive, fileId, key, {
+      odinClient,
+      odinId,
+      targetDrive,
+      globalTransitId,
+      key,
+      {
         systemFileType,
         chunkStart,
         chunkEnd,
-      });
+      }
+    )
+    : await getPayloadBytesOverPeer(odinClient, odinId, targetDrive, fileId, key, {
+      systemFileType,
+      chunkStart,
+      chunkEnd,
+    });
 
   return payload?.bytes || null;
 };
 
 export const getDecryptedVideoUrlOverPeer = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
@@ -52,11 +52,11 @@ export const getDecryptedVideoUrlOverPeer = async (
   systemFileType?: SystemFileType,
   fileSizeLimit?: number
 ): Promise<string> => {
-  const meta = await getFileHeaderOverPeer(dotYouClient, odinId, targetDrive, fileId, {
+  const meta = await getFileHeaderOverPeer(odinClient, odinId, targetDrive, fileId, {
     systemFileType,
   });
   if (!meta?.fileMetadata.isEncrypted) {
-    const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getEndpoint();
+    const host = new OdinClient({ hostIdentity: odinId, api: ApiType.Guest }).getEndpoint();
 
     return `${host}/drive/files/payload?${stringifyToQueryParams({
       ...targetDrive,
@@ -68,7 +68,7 @@ export const getDecryptedVideoUrlOverPeer = async (
   }
 
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
-  return getPayloadBytesOverPeer(dotYouClient, odinId, targetDrive, fileId, key, {
+  return getPayloadBytesOverPeer(odinClient, odinId, targetDrive, fileId, key, {
     systemFileType,
     chunkStart: fileSizeLimit ? 0 : undefined,
     chunkEnd: fileSizeLimit,
@@ -79,7 +79,7 @@ export const getDecryptedVideoUrlOverPeer = async (
   });
 };
 export const getDecryptedVideoUrlOverPeerByGlobalTransitId = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   targetDrive: TargetDrive,
   videoGlobalTransitId: string,
@@ -88,7 +88,7 @@ export const getDecryptedVideoUrlOverPeerByGlobalTransitId = async (
   fileSizeLimit?: number
 ): Promise<string> => {
   const meta = await getFileHeaderOverPeerByGlobalTransitId(
-    dotYouClient,
+    odinClient,
     odinId,
     targetDrive,
     videoGlobalTransitId,
@@ -97,7 +97,7 @@ export const getDecryptedVideoUrlOverPeerByGlobalTransitId = async (
     }
   );
   if (!meta?.fileMetadata.isEncrypted) {
-    const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getEndpoint();
+    const host = new OdinClient({ hostIdentity: odinId, api: ApiType.Guest }).getEndpoint();
     return `${host}/drive/files/payload?${stringifyToQueryParams({
       ...targetDrive,
       fileId: meta?.fileId,
@@ -108,7 +108,7 @@ export const getDecryptedVideoUrlOverPeerByGlobalTransitId = async (
   }
 
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
-  return getPayloadBytesOverPeer(dotYouClient, odinId, targetDrive, meta?.fileId, key, {
+  return getPayloadBytesOverPeer(odinClient, odinId, targetDrive, meta?.fileId, key, {
     systemFileType,
     chunkStart: fileSizeLimit ? 0 : undefined,
     chunkEnd: fileSizeLimit,

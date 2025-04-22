@@ -6,12 +6,12 @@ import {
   ErrorNotification,
   HybridLink,
   t,
-  useDotYouClientContext,
+  useOdinClientContext,
   useIntroductions,
   useIsConnected,
 } from '@homebase-id/common-app';
 import { ChevronDown, ChevronLeft } from '@homebase-id/common-app/icons';
-import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   ConversationMetadata,
   ConversationWithYourselfId,
@@ -45,7 +45,7 @@ export const ChatDetail = ({
   const { mutate: inviteRecipient } = useConversation().inviteRecipient;
   const { mutate: introduceIdentities } = useIntroductions().introduceIdentities;
   const [replyMsg, setReplyMsg] = useState<HomebaseFile<ChatMessage> | undefined>();
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const Composer = useMemo(() => options?.composer || ChatComposer, [options]);
 
   if (!conversationId || isLoading || (!conversation && isFetched))
@@ -117,7 +117,7 @@ const ChatHeader = ({
   rootPath: string;
 }) => {
   const navigate = useNavigate();
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
 
   const withYourself =
     conversationDsr?.fileMetadata.appData.uniqueId === ConversationWithYourselfId;
@@ -282,7 +282,7 @@ const GroupChatConnectedState = ({
 }: {
   conversation: HomebaseFile<UnifiedConversation, ConversationMetadata> | undefined;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
 
   if (!conversation) return null;
   const recipients = conversation.fileMetadata.appData.content.recipients;
@@ -301,7 +301,7 @@ const GroupChatConnectedState = ({
 
 const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
   const { data: isConnected, isFetched: isFetchedConnected } = useIsConnected(recipient);
-  const host = useDotYouClientContext().getRoot();
+  const host = useOdinClientContext().getRoot();
 
   if (!isConnected && isFetchedConnected) {
     return (
@@ -309,7 +309,7 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
         <p>
           {t('You can only chat with connected identities, messages will not be delivered to')}:{' '}
           <a
-            href={`${new DotYouClient({ hostIdentity: recipient, api: ApiType.Guest }).getRoot()}`}
+            href={`${new OdinClient({ hostIdentity: recipient, api: ApiType.Guest }).getRoot()}`}
             className="underline"
           >
             {recipient}

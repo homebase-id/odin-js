@@ -2,12 +2,12 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { GetTargetDriveFromChannelId, ReactionContext } from '@homebase-id/js-lib/public';
 
 import { getReactions, EmojiReaction } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../../auth/useOdinClientContext';
 
 const PAGE_SIZE = 15;
 
 export const useEmojiReactions = (context?: ReactionContext) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetch = async ({
     context,
@@ -24,7 +24,7 @@ export const useEmojiReactions = (context?: ReactionContext) => {
       return { reactions: [] as EmojiReaction[], cursor: undefined };
     }
     return await getReactions(
-      dotYouClient,
+      odinClient,
       context.odinId,
       {
         fileId: context.target.fileId,

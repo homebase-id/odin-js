@@ -1,15 +1,15 @@
-import { ActionLink, t, useDotYouClientContext, useSecurityContext } from '@homebase-id/common-app';
+import { ActionLink, t, useOdinClientContext, useSecurityContext } from '@homebase-id/common-app';
 import { Check, Persons } from '@homebase-id/common-app/icons';
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient } from '@homebase-id/js-lib/core';
 
 const ConnectLink = ({ className }: { className: string }) => {
-  const dotYouClient = useDotYouClientContext();
-  const isAuthenticated = dotYouClient.isAuthenticated();
-  const isOwner = dotYouClient.isOwner();
+  const odinClient = useOdinClientContext();
+  const isAuthenticated = odinClient.isAuthenticated();
+  const isOwner = odinClient.isOwner();
 
-  const loggedOnIdentity = dotYouClient.getLoggedInIdentity();
+  const loggedOnIdentity = odinClient.getLoggedInIdentity();
   const host = loggedOnIdentity
-    ? new DotYouClient({
+    ? new OdinClient({
         hostIdentity: loggedOnIdentity,
         api: ApiType.Guest,
       }).getRoot()

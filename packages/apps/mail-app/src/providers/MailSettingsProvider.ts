@@ -1,5 +1,5 @@
 import {
-  DotYouClient,
+  OdinClient,
   HomebaseFile,
   NewHomebaseFile,
   RichText,
@@ -21,10 +21,10 @@ export interface MailSettings {
 
 export const mailSettingsUniqueId = toGuidId('mail-settings');
 export const fetchMailSettings = async (
-  dotYouClient: DotYouClient
+  odinClient: OdinClient
 ): Promise<HomebaseFile<MailSettings> | null> => {
   const fileHeader = await getFileHeaderByUniqueId<MailSettings>(
-    dotYouClient,
+    odinClient,
     MailDrive,
     mailSettingsUniqueId
   );
@@ -37,7 +37,7 @@ export const fetchMailSettings = async (
 };
 
 export const uploadMailSettings = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   settings: HomebaseFile<MailSettings> | NewHomebaseFile<MailSettings>
 ): Promise<UploadResult> => {
   if (!stringGuidsEqual(settings.fileMetadata.appData.uniqueId, mailSettingsUniqueId)) {
@@ -68,7 +68,7 @@ export const uploadMailSettings = async (
     },
   };
 
-  const uploadResult = await uploadFile(dotYouClient, uploadInstructions, uploadMetadata);
+  const uploadResult = await uploadFile(odinClient, uploadInstructions, uploadMetadata);
   if (!uploadResult) {
     throw new Error('Failed to save mail settings');
   }

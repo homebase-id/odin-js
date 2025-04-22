@@ -1,15 +1,15 @@
 import { QueryClient, useQuery } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { CommunityChannel, getCommunityChannels } from '../../../providers/CommunityProvider';
 import { DeletedHomebaseFile, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { formatGuidId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const useCommunityChannels = (props: { odinId?: string; communityId?: string }) => {
   const { odinId, communityId } = props;
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchChannels = async (odinId: string, communityId: string) => {
-    return await getCommunityChannels(dotYouClient, odinId, communityId);
+    return await getCommunityChannels(odinClient, odinId, communityId);
   };
 
   return {

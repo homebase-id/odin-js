@@ -13,7 +13,7 @@ import {
 } from '@homebase-id/common-app';
 import { Arrow } from '@homebase-id/common-app/icons';
 import { MailConversation, getAllRecipients } from '../../providers/MailProvider';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { useMailOrigin } from '../../hooks/mail/useMailOrigin';
 import { RecipientsList } from '../../components/Threads/RecipientsList';
 
@@ -25,10 +25,10 @@ export const MailThreadInfo = ({
   mailThread: HomebaseFile<MailConversation>[];
   onClose: () => void;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const target = usePortal('modal-container');
   const lastMessage = mailThread[mailThread.length - 1];
-  const host = useDotYouClientContext().getRoot();
+  const host = useOdinClientContext().getRoot();
 
   const lastMessageContent = lastMessage.fileMetadata.appData.content;
   const recipients = getAllRecipients(lastMessage, loggedOnIdentity);

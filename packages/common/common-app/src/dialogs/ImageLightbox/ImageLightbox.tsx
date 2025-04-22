@@ -7,7 +7,7 @@ import { ButtonColors } from '../../ui/Buttons/ColorConfig';
 import { usePortal } from '../../hooks/portal/usePortal';
 import { Times } from '../../ui/Icons/Times';
 import { OdinImage } from '@homebase-id/ui-lib';
-import { useDotYouClientContext } from '../../hooks';
+import { useOdinClientContext } from '../../hooks';
 
 export const ImageLightbox = ({
   targetDrive,
@@ -26,7 +26,7 @@ export const ImageLightbox = ({
   systemFileType?: SystemFileType;
   onClose: () => void;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const target = usePortal('modal-container');
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export const ImageLightbox = ({
           ) : null}
 
           <OdinImage
-            dotYouClient={dotYouClient}
+            odinClient={odinClient}
             className={`m-auto h-auto max-h-screen w-auto max-w-full object-contain`}
             fileId={fileId}
             fileKey={fileKey}

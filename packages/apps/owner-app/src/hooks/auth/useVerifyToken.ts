@@ -1,10 +1,10 @@
 import { QueryClient, useQuery } from '@tanstack/react-query';
-import { hasValidOwnerToken, useDotYouClientContext } from '@homebase-id/common-app';
+import { hasValidOwnerToken, useOdinClientContext } from '@homebase-id/common-app';
 
 const MINUTE_IN_MS = 60000;
 
 export const useVerifyToken = () => {
-  const isAuthenticated = useDotYouClientContext().isAuthenticated();
+  const isAuthenticated = useOdinClientContext().isAuthenticated();
   const fetchData = async () => await hasValidOwnerToken();
 
   return useQuery({

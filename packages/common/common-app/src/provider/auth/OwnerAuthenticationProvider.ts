@@ -1,4 +1,4 @@
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient } from '@homebase-id/js-lib/core';
 import { OwnerClient } from '../../core/OwnerClient';
 import { logout } from '@homebase-id/js-lib/auth';
 import { APP_KEYS } from '../../constants';
@@ -8,24 +8,24 @@ import { del } from 'idb-keyval';
 
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidOwnerToken = async (): Promise<boolean> => {
-  const dotYouClient = new OwnerClient({
+  const odinClient = new OwnerClient({
     api: ApiType.Owner,
   });
   //Note: the token is in a cookie marked http-only so making
   // the call to the endpoint will automatically include the
   // cookie.  we just need to check the success code
 
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
+  const client = odinClient.createAxiosClient({ overrideEncryption: true });
   return client.get('/authentication/verifyToken').then((response) => {
     return response.data;
   });
 };
 
 const logoutOwner = async (): Promise<boolean> => {
-  const dotYouClient = new OwnerClient({
+  const odinClient = new OwnerClient({
     api: ApiType.Owner,
   });
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
+  const client = odinClient.createAxiosClient({ overrideEncryption: true });
 
   //withCredentials lets us set the cookies return from the /admin/authentication endpoint
   return client.get('/authentication/logout', { withCredentials: true }).then((response) => {
@@ -36,10 +36,10 @@ const logoutOwner = async (): Promise<boolean> => {
 export const logoutOwnerAndAllApps = async (): Promise<void> => {
   try {
     // Unsubscribe from notifications
-    const dotYouClient = new OwnerClient({
+    const odinClient = new OwnerClient({
       api: ApiType.Owner,
     });
-    await removeCurrentRegisteredDevice(dotYouClient);
+    await removeCurrentRegisteredDevice(odinClient);
   } catch (ex) {
     console.warn('Failed unregister push notifiations', ex);
   }
@@ -57,7 +57,7 @@ export const logoutOwnerAndAllApps = async (): Promise<void> => {
         };
 
         const apss = base64ToUint8Array(rawApps);
-        const dotYouClient = new DotYouClient({
+        const odinClient = new OdinClient({
           api: ApiType.App,
           sharedSecret: apss,
           hostIdentity: window.location ? window.location.host : '',
@@ -65,7 +65,7 @@ export const logoutOwnerAndAllApps = async (): Promise<void> => {
         });
 
         // Remove app sessions from server
-        await logout(dotYouClient);
+        await logout(odinClient);
       })
     );
 
@@ -103,7 +103,7 @@ export const logoutOwnerAndAllApps = async (): Promise<void> => {
   window.location.href = '/owner/login';
 };
 
-const removeCurrentRegisteredDevice = async (dotYouClient: DotYouClient) => {
-  const axiosClient = dotYouClient.createAxiosClient();
+const removeCurrentRegisteredDevice = async (odinClient: OdinClient) => {
+  const axiosClient = odinClient.createAxiosClient();
   return await axiosClient.post(`/notify/push/unsubscribe/`);
 };

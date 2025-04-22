@@ -7,7 +7,7 @@ import {
   DialogWrapper,
   OWNER_ROOT,
   t,
-  useDotYouClientContext,
+  useOdinClientContext,
   usePortal,
   useTransferHistory,
 } from '@homebase-id/common-app';
@@ -29,7 +29,7 @@ export const ChatMessageInfo = ({
   conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   onClose: () => void;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const target = usePortal('modal-container');
   const conversationContent = conversation.fileMetadata.appData.content;
   const recipients = conversationContent.recipients.filter(

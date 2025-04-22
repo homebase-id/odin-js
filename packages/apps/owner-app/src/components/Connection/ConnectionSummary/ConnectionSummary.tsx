@@ -7,7 +7,7 @@ import {
   ActionLink,
   useIdentityIFollow,
   useCircles,
-  useDotYouClientContext,
+  useOdinClientContext,
   useConnectionInfo,
   useDetailedConnectionInfo,
   useIsConnected,
@@ -27,7 +27,7 @@ import {
   Feed,
 } from '@homebase-id/common-app/icons';
 import Section from '../../ui/Sections/Section';
-import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   AUTO_CONNECTIONS_CIRCLE_ID,
   CONFIRMED_CONNECTIONS_CIRCLE_ID,
@@ -60,7 +60,7 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
   const {
     fetch: { data: connectionInfo },
   } = useDetailedConnectionInfo({ odinId: odinId });
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
 
   const { data: isConnectedWithIntroducer } = useIsConnected(connectionInfo?.introducerOdinId);
 
@@ -88,7 +88,7 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
               {connectionInfo?.connectionRequestOrigin === 'introduction' ? (
                 <p className="flex gap-1 text-sm">
                   <a
-                    href={`${new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}${
+                    href={`${new OdinClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}${
                       isConnected && loggedOnIdentity ? '?youauth-logon=' + loggedOnIdentity : ''
                     }`}
                     rel="noopener noreferrer"
@@ -101,7 +101,7 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
                     <>
                       {t('was introduced by')}
                       <a
-                        href={`${new DotYouClient({ hostIdentity: connectionInfo?.introducerOdinId, api: ApiType.Guest }).getRoot()}${
+                        href={`${new OdinClient({ hostIdentity: connectionInfo?.introducerOdinId, api: ApiType.Guest }).getRoot()}${
                           isConnectedWithIntroducer && loggedOnIdentity
                             ? '?youauth-logon=' + loggedOnIdentity
                             : ''
@@ -117,7 +117,7 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
                 </p>
               ) : (
                 <a
-                  href={`${new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}${
+                  href={`${new OdinClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}${
                     isConnected && loggedOnIdentity ? '?youauth-logon=' + loggedOnIdentity : ''
                   }`}
                   rel="noopener noreferrer"

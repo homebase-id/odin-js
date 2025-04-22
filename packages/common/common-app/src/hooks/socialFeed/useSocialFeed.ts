@@ -1,13 +1,13 @@
 import { InfiniteData, QueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { getSocialFeed, RecentsFromConnectionsReturn } from '@homebase-id/js-lib/peer';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 import { useChannels } from './channels/useChannels';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { PostContent } from '@homebase-id/js-lib/public';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const { data: ownChannels, isFetched: channelsFetched } = useChannels({
     isAuthenticated: true,
     isOwner: true,
@@ -18,7 +18,7 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
   }: {
     pageParam?: { cursorState?: string; ownerCursorState?: Record<string, string> };
   }) => {
-    return await getSocialFeed(dotYouClient, pageSize, pageParam?.cursorState, {
+    return await getSocialFeed(odinClient, pageSize, pageParam?.cursorState, {
       ownCursorState: pageParam?.ownerCursorState,
       ownChannels,
     });
@@ -33,8 +33,8 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
       queryFn: ({ pageParam }) => fetchAll({ pageParam }),
       getNextPageParam: (lastPage) =>
         lastPage &&
-        lastPage?.results?.length >= 1 &&
-        (lastPage?.cursorState || lastPage?.ownerCursorState)
+          lastPage?.results?.length >= 1 &&
+          (lastPage?.cursorState || lastPage?.ownerCursorState)
           ? { cursorState: lastPage.cursorState, ownerCursorState: lastPage.ownerCursorState }
           : undefined,
       staleTime: 1000 * 60 * 2, // 2 minutes
@@ -116,10 +116,10 @@ export const insertNewPostIntoFeed = (
             results:
               index === 0
                 ? [newPost, ...filteredResults].sort(
-                    (a, b) =>
-                      (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
-                      (a.fileMetadata.appData.userDate || a.fileMetadata.created)
-                  ) // Re-sort the first page, as the new message might be older than the first message in the page;
+                  (a, b) =>
+                    (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
+                    (a.fileMetadata.appData.userDate || a.fileMetadata.created)
+                ) // Re-sort the first page, as the new message might be older than the first message in the page;
                 : filteredResults,
           };
         }

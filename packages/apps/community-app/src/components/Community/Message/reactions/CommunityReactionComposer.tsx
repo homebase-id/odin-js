@@ -1,4 +1,4 @@
-import { ReactionsBar, ReactionsBarHandle, useDotYouClientContext } from '@homebase-id/common-app';
+import { ReactionsBar, ReactionsBarHandle, useOdinClientContext } from '@homebase-id/common-app';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
@@ -24,7 +24,7 @@ export const CommunityReactionComposer = forwardRef(
     },
     ref: Ref<ReactionsBarHandle>
   ) => {
-    const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+    const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
 
     const { mutate: addReaction } = useCommunityReaction().add;
     const { mutate: removeReaction } = useCommunityReaction().remove;

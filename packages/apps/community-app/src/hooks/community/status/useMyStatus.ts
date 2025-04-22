@@ -1,7 +1,7 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { CommunityStatus, getStatus, setStatus } from '../../../providers/CommunityStatusProvider';
 import { formatGuidId } from '@homebase-id/js-lib/helpers';
 
@@ -10,14 +10,14 @@ export const useMyStatus = (props: {
   odinId?: string;
 }) => {
   const { community, odinId } = props || {};
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const fetchMyStatus = async (community: HomebaseFile<CommunityDefinition>) => {
     return await getStatus(
-      dotYouClient,
+      odinClient,
       community,
-      odinId || dotYouClient.getLoggedInIdentity() || ''
+      odinId || odinClient.getLoggedInIdentity() || ''
     );
   };
 
@@ -28,7 +28,7 @@ export const useMyStatus = (props: {
     community: HomebaseFile<CommunityDefinition>;
     status: CommunityStatus;
   }) => {
-    return setStatus(dotYouClient, community, status);
+    return setStatus(odinClient, community, status);
   };
 
   return {

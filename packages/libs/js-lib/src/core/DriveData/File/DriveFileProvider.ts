@@ -8,7 +8,7 @@ import {
 } from './DriveFileTypes';
 import { TargetDrive, ImageContentType, FileMetadata } from './DriveFileTypes';
 
-import { DotYouClient } from '../../DotYouClient';
+import { OdinClient } from '../../OdinClient';
 import {
   decryptKeyHeader,
   decryptJsonContent,
@@ -38,12 +38,12 @@ const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile | nul
 
 /// Get methods by FileId:
 export const getFileHeader = async <T = string>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   fileId: string,
   options?: { systemFileType?: SystemFileType; decrypt?: boolean; axiosConfig?: AxiosRequestConfig }
 ): Promise<HomebaseFile<T> | null> => {
-  assertIfDefined('DotYouClient', dotYouClient);
+  assertIfDefined('OdinClient', odinClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
@@ -51,7 +51,7 @@ export const getFileHeader = async <T = string>(
   const systemFileType = options?.systemFileType ?? 'Standard';
   const axiosConfig = options?.axiosConfig;
 
-  const fileHeader = await getFileHeaderBytes(dotYouClient, targetDrive, fileId, {
+  const fileHeader = await getFileHeaderBytes(odinClient, targetDrive, fileId, {
     decrypt,
     systemFileType,
     axiosConfig,
@@ -75,14 +75,14 @@ export const getFileHeader = async <T = string>(
 };
 
 export const getFileHeaderBytes = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   fileId: string,
   options:
     | { decrypt?: boolean; systemFileType?: SystemFileType; axiosConfig?: AxiosRequestConfig }
     | undefined
 ) => {
-  assertIfDefined('DotYouClient', dotYouClient);
+  assertIfDefined('OdinClient', odinClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
@@ -95,7 +95,7 @@ export const getFileHeaderBytes = async (
     (await _internalMetadataPromiseCache.get(cacheKey));
   if (cacheEntry) return cacheEntry;
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
+  const client = getAxiosClient(odinClient, systemFileType);
 
   const request: GetFileRequest = {
     ...targetDrive,
@@ -111,7 +111,7 @@ export const getFileHeaderBytes = async (
     .then(async (fileHeader) => {
       if (decrypt) {
         const keyheader = fileHeader.fileMetadata.isEncrypted
-          ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)
+          ? await decryptKeyHeader(odinClient, fileHeader.sharedSecretEncryptedKeyHeader)
           : undefined;
 
         fileHeader.fileMetadata.appData.content = await decryptJsonContent(
@@ -134,7 +134,7 @@ export const getFileHeaderBytes = async (
 };
 
 export const getPayloadAsJson = async <T>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   fileId: string,
   key: string,
@@ -146,7 +146,7 @@ export const getPayloadAsJson = async <T>(
 ): Promise<T | null> => {
   const { systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
 
-  return getPayloadBytes(dotYouClient, targetDrive, fileId, key, {
+  return getPayloadBytes(odinClient, targetDrive, fileId, key, {
     systemFileType,
     decrypt: true,
     axiosConfig: options?.axiosConfig,
@@ -155,7 +155,7 @@ export const getPayloadAsJson = async <T>(
 };
 
 export const getPayloadBytes = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   fileId: string,
   key: string,
@@ -168,7 +168,7 @@ export const getPayloadBytes = async (
     axiosConfig?: AxiosRequestConfig;
   }
 ): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
-  assertIfDefined('DotYouClient', dotYouClient);
+  assertIfDefined('OdinClient', odinClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
   assertIfDefined('Key', key);
@@ -177,7 +177,7 @@ export const getPayloadBytes = async (
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
+  const client = getAxiosClient(odinClient, systemFileType);
   const request: GetFilePayloadRequest = {
     ...targetDrive,
     fileId,
@@ -207,19 +207,19 @@ export const getPayloadBytes = async (
           ? new Uint8Array(response.data)
           : updatedChunkStart !== undefined
             ? (
-                await decryptChunkedBytesResponse(
-                  dotYouClient,
-                  response,
-                  startOffset,
-                  updatedChunkStart
-                )
-              ).slice(
-                0,
-                chunkEnd !== undefined && chunkStart !== undefined
-                  ? chunkEnd - chunkStart
-                  : undefined
+              await decryptChunkedBytesResponse(
+                odinClient,
+                response,
+                startOffset,
+                updatedChunkStart
               )
-            : await decryptBytesResponse(dotYouClient, response),
+            ).slice(
+              0,
+              chunkEnd !== undefined && chunkStart !== undefined
+                ? chunkEnd - chunkStart
+                : undefined
+            )
+            : await decryptBytesResponse(odinClient, response),
 
         contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };
@@ -232,7 +232,7 @@ export const getPayloadBytes = async (
 };
 
 export const getThumbBytes = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   fileId: string,
   payloadKey: string,
@@ -244,7 +244,7 @@ export const getThumbBytes = async (
     axiosConfig?: AxiosRequestConfig;
   }
 ): Promise<{ bytes: Uint8Array; contentType: ImageContentType } | null> => {
-  assertIfDefined('DotYouClient', dotYouClient);
+  assertIfDefined('OdinClient', odinClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
   assertIfDefined('PayloadKey', payloadKey);
@@ -253,7 +253,7 @@ export const getThumbBytes = async (
 
   const { systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
+  const client = getAxiosClient(odinClient, systemFileType);
   const request: GetFileThumbRequest = {
     ...targetDrive,
     fileId,
@@ -272,7 +272,7 @@ export const getThumbBytes = async (
     .then(async (response) => {
       if (!response.data) return null;
       return {
-        bytes: await decryptBytesResponse(dotYouClient, response),
+        bytes: await decryptBytesResponse(odinClient, response),
         contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
       };
     })
@@ -284,7 +284,7 @@ export const getThumbBytes = async (
 };
 
 export const getTransferHistory = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   fileId: string,
   options?: {
@@ -292,13 +292,13 @@ export const getTransferHistory = async (
     axiosConfig?: AxiosRequestConfig;
   }
 ) => {
-  assertIfDefined('DotYouClient', dotYouClient);
+  assertIfDefined('OdinClient', odinClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
   const { systemFileType } = options ?? { systemFileType: 'Standard' };
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
+  const client = getAxiosClient(odinClient, systemFileType);
   const request: GetFileRequest = {
     ...targetDrive,
     fileId,
@@ -318,7 +318,7 @@ export const getTransferHistory = async (
 };
 
 export const getContentFromHeader = async <T>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   dsr: {
     fileId: string;
@@ -332,7 +332,7 @@ export const getContentFromHeader = async <T>(
   const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
 
   const keyHeader = fileMetadata.isEncrypted
-    ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader as EncryptedKeyHeader)
+    ? await decryptKeyHeader(odinClient, sharedSecretEncryptedKeyHeader as EncryptedKeyHeader)
     : undefined;
 
   let decryptedJsonContent;
@@ -340,7 +340,7 @@ export const getContentFromHeader = async <T>(
     decryptedJsonContent = await decryptJsonContent(fileMetadata, keyHeader);
   } else {
     // When contentIsComplete but includesJsonContent == false the query before was done without including the content; So we just get and parse
-    const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, {
+    const fileHeader = await getFileHeader(odinClient, targetDrive, fileId, {
       systemFileType: dsr.fileSystemType || systemFileType,
     });
     if (!fileHeader) return null;
@@ -357,7 +357,7 @@ export const getContentFromHeader = async <T>(
 };
 
 export const getContentFromHeaderOrPayload = async <T>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   dsr: {
     fileId: string;
@@ -379,7 +379,7 @@ export const getContentFromHeaderOrPayload = async <T>(
 
   if (contentIsComplete) {
     return getContentFromHeader<T>(
-      dotYouClient,
+      odinClient,
       targetDrive,
       dsr,
       includesJsonContent,
@@ -389,7 +389,7 @@ export const getContentFromHeaderOrPayload = async <T>(
     const payloadDescriptor = dsr.fileMetadata.payloads?.find(
       (payload) => payload.key === DEFAULT_PAYLOAD_KEY
     );
-    return await getPayloadAsJson<T>(dotYouClient, targetDrive, fileId, DEFAULT_PAYLOAD_KEY, {
+    return await getPayloadAsJson<T>(odinClient, targetDrive, fileId, DEFAULT_PAYLOAD_KEY, {
       systemFileType: dsr.fileSystemType || systemFileType,
       lastModified: payloadDescriptor?.lastModified,
     });
@@ -397,7 +397,7 @@ export const getContentFromHeaderOrPayload = async <T>(
 };
 
 export const getLocalContentFromHeader = async <T>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   dsr: {
     fileId: string;
@@ -414,7 +414,7 @@ export const getLocalContentFromHeader = async <T>(
   }
 
   const keyHeader = fileMetadata.isEncrypted
-    ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader as EncryptedKeyHeader)
+    ? await decryptKeyHeader(odinClient, sharedSecretEncryptedKeyHeader as EncryptedKeyHeader)
     : undefined;
 
   let decryptedLocalContent;
@@ -422,7 +422,7 @@ export const getLocalContentFromHeader = async <T>(
     decryptedLocalContent = await decryptLocalContent(fileMetadata, keyHeader);
   } else {
     // When contentIsComplete but includesJsonContent == false the query before was done without including the content; So we just get and parse
-    const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, {
+    const fileHeader = await getFileHeader(odinClient, targetDrive, fileId, {
       systemFileType: dsr.fileSystemType || systemFileType,
     });
     if (!fileHeader) return null;

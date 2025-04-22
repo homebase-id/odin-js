@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../core/DotYouClient';
+import { OdinClient } from '../../core/OdinClient';
 import { BuiltInProfiles } from '../../profile/ProfileData/ProfileConfig';
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionManager';
 import { Attribute, AttributeConfig } from '../../profile/profile';
@@ -9,7 +9,7 @@ import { HomebaseFile, TargetDrive } from '../../core/DriveData/File/DriveFileTy
 import { compareAcl } from '../../helpers/DataUtil';
 
 export const getProfileAttributesOverPeer = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   attributeType?: string | string[]
 ): Promise<HomebaseFile<Attribute>[]> => {
@@ -26,14 +26,14 @@ export const getProfileAttributesOverPeer = async (
       : undefined,
   };
   try {
-    const result = await queryBatchOverPeer(dotYouClient, odinId, queryParams);
+    const result = await queryBatchOverPeer(odinClient, odinId, queryParams);
     if (!result) return [];
 
     let attributes: HomebaseFile<Attribute>[] = (
       await Promise.all(
         result.searchResults.map(async (dsr) =>
           dsrToAttributeFileOverPeer(
-            dotYouClient,
+            odinClient,
             odinId,
             dsr,
             targetDrive,
@@ -55,7 +55,7 @@ export const getProfileAttributesOverPeer = async (
 };
 
 export const dsrToAttributeFileOverPeer = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   dsr: HomebaseFile,
   targetDrive: TargetDrive,
@@ -63,7 +63,7 @@ export const dsrToAttributeFileOverPeer = async (
 ): Promise<HomebaseFile<Attribute> | null> => {
   try {
     const attrContent = await getContentFromHeaderOrPayloadOverPeer<Attribute>(
-      dotYouClient,
+      odinClient,
       odinId,
       targetDrive,
       dsr,

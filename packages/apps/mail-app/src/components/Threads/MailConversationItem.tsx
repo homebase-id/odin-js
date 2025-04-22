@@ -15,7 +15,7 @@ import {
   highlightQuery,
   MAIL_ROOT_PATH,
   t,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { MailAttachmentOverview } from '../../templates/Mail/MailAttachmentOverview';
 import { RecipientsList } from './RecipientsList';
@@ -36,7 +36,7 @@ export const MailConversationItem = ({
   pathPrefix?: string;
   query?: string;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
 
   const lastConversation = mailThread[0];
   const lastReceivedConversation = mailThread.find(

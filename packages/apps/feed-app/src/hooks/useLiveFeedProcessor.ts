@@ -3,7 +3,7 @@ import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
   DeletedHomebaseFile,
-  DotYouClient,
+  OdinClient,
   FileQueryParams,
   HomebaseFile,
   queryBatch,
@@ -23,7 +23,7 @@ import {
   invalidateComments,
   invalidateEmojiSummary,
   invalidateSocialFeeds,
-  useDotYouClientContext,
+  useOdinClientContext,
   useWebsocketSubscriber,
 } from '@homebase-id/common-app';
 import { BlogConfig, dsrToPostFile } from '@homebase-id/js-lib/public';
@@ -50,31 +50,31 @@ export const useLiveFeedProcessor = () => {
 const useFeedInboxProcessor = (isEnabled?: boolean) => {
   const { data: chnlDrives, isFetchedAfterMount: channelsFetched } = useChannelDrives(!!isEnabled);
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchData = async () => {
     const lastProcessedTime = queryClient.getQueryState(['process-feed-inbox'])?.dataUpdatedAt;
     const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 2;
 
-    await processInbox(dotYouClient, BlogConfig.FeedDrive, 100);
+    await processInbox(odinClient, BlogConfig.FeedDrive, 100);
 
     if (lastProcessedWithBuffer) {
-      const updatedPosts = await findChangesSinceTimestamp(dotYouClient, lastProcessedWithBuffer, {
+      const updatedPosts = await findChangesSinceTimestamp(odinClient, lastProcessedWithBuffer, {
         targetDrive: BlogConfig.FeedDrive,
         fileType: [BlogConfig.PostFileType],
       });
       isDebug && console.debug('[FeedInboxProcessor] new posts', updatedPosts.length);
-      await processPostsBatch(dotYouClient, queryClient, BlogConfig.FeedDrive, updatedPosts);
+      await processPostsBatch(odinClient, queryClient, BlogConfig.FeedDrive, updatedPosts);
     }
 
     if (chnlDrives)
       await Promise.all(
         chnlDrives.map(async (chnlDrive) => {
-          await processInbox(dotYouClient, chnlDrive.targetDriveInfo, 100);
+          await processInbox(odinClient, chnlDrive.targetDriveInfo, 100);
 
           if (lastProcessedWithBuffer) {
             const updatedPosts = await findChangesSinceTimestamp(
-              dotYouClient,
+              odinClient,
               lastProcessedWithBuffer,
               {
                 targetDrive: chnlDrive.targetDriveInfo,
@@ -84,7 +84,7 @@ const useFeedInboxProcessor = (isEnabled?: boolean) => {
             isDebug &&
               console.debug('[FeedInboxProcessor] new posts for channel', updatedPosts.length);
             await processPostsBatch(
-              dotYouClient,
+              odinClient,
               queryClient,
               chnlDrive.targetDriveInfo,
               updatedPosts
@@ -110,12 +110,12 @@ const useFeedInboxProcessor = (isEnabled?: boolean) => {
 };
 
 const useFeedWebSocket = (isEnabled: boolean) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
   const websocketDrives = useWebsocketDrives();
 
   const handler = useCallback(
-    async (_: DotYouClient, notification: TypedConnectionNotification) => {
+    async (_: OdinClient, notification: TypedConnectionNotification) => {
       if (
         (notification.notificationType === 'fileAdded' ||
           notification.notificationType === 'fileModified' ||
@@ -125,7 +125,7 @@ const useFeedWebSocket = (isEnabled: boolean) => {
         notification.header.fileSystemType.toLowerCase() === 'standard'
       ) {
         await internalProcessNewPost(
-          dotYouClient,
+          odinClient,
           queryClient,
           BlogConfig.FeedDrive,
           notification.header
@@ -148,21 +148,21 @@ const useFeedWebSocket = (isEnabled: boolean) => {
 
 const BATCH_SIZE = 2000;
 const findChangesSinceTimestamp = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   timeStamp: number,
   params: FileQueryParams
 ) => {
   const modifiedCursor = getQueryModifiedCursorFromTime(timeStamp); // Friday, 31 May 2024 09:38:54.678
   const batchCursor = getQueryBatchCursorFromTime(new Date().getTime(), timeStamp);
 
-  const newFiles = await queryBatch(dotYouClient, params, {
+  const newFiles = await queryBatch(odinClient, params, {
     maxRecords: BATCH_SIZE,
     cursorState: batchCursor,
     includeMetadataHeader: true,
     includeTransferHistory: false,
   });
 
-  const modifiedFiles = await queryModified(dotYouClient, params, {
+  const modifiedFiles = await queryModified(odinClient, params, {
     maxRecords: BATCH_SIZE,
     cursor: modifiedCursor + '',
     excludePreviewThumbnail: false,
@@ -174,20 +174,20 @@ const findChangesSinceTimestamp = async (
 };
 
 const processPostsBatch = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   queryClient: QueryClient,
   targetDrive: TargetDrive,
   posts: (HomebaseFile<string> | DeletedHomebaseFile<string>)[]
 ) => {
   await Promise.all(
     posts.map(async (postDsr) =>
-      internalProcessNewPost(dotYouClient, queryClient, targetDrive, postDsr)
+      internalProcessNewPost(odinClient, queryClient, targetDrive, postDsr)
     )
   );
 };
 
 const internalProcessNewPost = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   queryClient: QueryClient,
   targetDrive: TargetDrive,
   dsr: HomebaseFile<string> | DeletedHomebaseFile<string>
@@ -197,7 +197,7 @@ const internalProcessNewPost = async (
     return;
   }
 
-  const post = await dsrToPostFile(dotYouClient, dsr, targetDrive, true);
+  const post = await dsrToPostFile(odinClient, dsr, targetDrive, true);
 
   if (post) insertNewPostIntoFeed(queryClient, post);
   else invalidateSocialFeeds(queryClient);

@@ -1,13 +1,13 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { fetchFollowers } from '@homebase-id/js-lib/network';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 
 const PAGE_SIZE = 30;
 export const useFollowerInfinite = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetch = async ({ pageParam }: { pageParam?: string }) => {
-    const response = await fetchFollowers(dotYouClient, pageParam, PAGE_SIZE);
+    const response = await fetchFollowers(odinClient, pageParam, PAGE_SIZE);
     return response;
   };
 

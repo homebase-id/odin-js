@@ -6,26 +6,26 @@ import {
   updateFlag,
   updateSettings,
 } from '../../provider/system/SettingsProvider';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 export const useSettings = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const fetchFlags = async () => {
-    return getFlags(dotYouClient);
+    return getFlags(odinClient);
   };
 
   const updateFlagInternal = async ({ name, value }: { name: string; value: boolean }) => {
-    return updateFlag(dotYouClient, name, value);
+    return updateFlag(odinClient, name, value);
   };
 
   const fetchUiSettings = async () => {
-    return getSettings(dotYouClient);
+    return getSettings(odinClient);
   };
 
   const updateUiSetting = async (settings: uiSettings) => {
-    return updateSettings(dotYouClient, settings);
+    return updateSettings(odinClient, settings);
   };
 
   return {

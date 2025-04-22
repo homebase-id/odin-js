@@ -1,13 +1,13 @@
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient } from '@homebase-id/js-lib/core';
 import { STORAGE_IDENTITY_KEY, HOME_SHARED_SECRET, OWNER_SHARED_SECRET } from '../../hooks';
 
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidPublicToken = async (): Promise<boolean> => {
-  const dotYouClient = new DotYouClient({
+  const odinClient = new OdinClient({
     hostIdentity: window.location.hostname,
     api: ApiType.Guest,
   });
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const response = await client.get('/builtin/home/auth/is-authenticated', {
     validateStatus: () => true,
   });
@@ -15,11 +15,11 @@ export const hasValidPublicToken = async (): Promise<boolean> => {
 };
 
 export const getEccPublicKey = async (): Promise<string> => {
-  const dotYouClient = new DotYouClient({
+  const odinClient = new OdinClient({
     hostIdentity: window.location.hostname,
     api: ApiType.Guest,
   });
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   return await client
     .get('/public/keys/offline_ecc', { validateStatus: () => true })
     .then((response) => response.data);
@@ -27,11 +27,11 @@ export const getEccPublicKey = async (): Promise<string> => {
 
 export const logoutPublicSession = async (): Promise<void> => {
   try {
-    const dotYouClient = new DotYouClient({
+    const odinClient = new OdinClient({
       hostIdentity: window.location.hostname,
       api: ApiType.Guest,
     });
-    const client = dotYouClient.createAxiosClient();
+    const client = odinClient.createAxiosClient();
     await client.get('/builtin/home/auth/delete-token');
   } catch (ex) {
     console.warn('Failed to logout on the server', ex);

@@ -1,14 +1,14 @@
 import { ActionButton } from '@homebase-id/common-app';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { BePolite, MakeConversation } from '../../providers/DebugDataProvider';
 
 export const DebugDataPage = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   return (
     <section className="flex flex-row justify-start gap-5 p-5">
       <ActionButton
         onClick={async () => {
-          await MakeConversation(dotYouClient);
+          await MakeConversation(odinClient);
           alert('done!');
         }}
       >
@@ -16,7 +16,7 @@ export const DebugDataPage = () => {
       </ActionButton>
       <ActionButton
         onClick={async () => {
-          await BePolite(dotYouClient);
+          await BePolite(odinClient);
           alert('done!');
         }}
       >

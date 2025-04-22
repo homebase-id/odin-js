@@ -13,7 +13,7 @@ import {
   LoadingBlock,
   t,
   ToGroupBlock,
-  useDotYouClientContext,
+  useOdinClientContext,
   PostSource,
 } from '@homebase-id/common-app';
 import { useNavigate } from 'react-router-dom';
@@ -30,9 +30,9 @@ interface PostTeaserCardProps {
 }
 
 const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, showSummary }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const post = postFile.fileMetadata.appData.content;
-  const identity = dotYouClient.getHostIdentity();
+  const identity = odinClient.getHostIdentity();
   const isExternal = odinId && odinId !== identity;
   const navigate = useNavigate();
 

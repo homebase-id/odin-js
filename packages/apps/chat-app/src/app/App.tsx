@@ -33,9 +33,9 @@ const AUTH_FINALIZE_PATH = CHAT_ROOT_PATH + '/auth/finalize';
 import {
   ErrorBoundary,
   NotFound,
-  DotYouClientProvider,
+  OdinClientProvider,
   CHAT_ROOT_PATH,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { OdinQueryClient } from '@homebase-id/common-app';
 import { useValidateAuthorization } from '../hooks/auth/useAuth';
@@ -106,7 +106,7 @@ function App() {
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
       <OdinQueryClient app="app" type="indexeddb">
-        <DotYouClientProvider>
+        <OdinClientProvider>
           <RouterProvider
             router={router}
             fallbackElement={<></>}
@@ -114,7 +114,7 @@ function App() {
               v7_startTransition: true,
             }}
           />
-        </DotYouClientProvider>
+        </OdinClientProvider>
       </OdinQueryClient>
     </HelmetProvider>
   );
@@ -123,7 +123,7 @@ function App() {
 const RootRoute = ({ children }: { children: ReactNode }) => {
   useValidateAuthorization();
 
-  const isAuthenticated = useDotYouClientContext().isAuthenticated();
+  const isAuthenticated = useOdinClientContext().isAuthenticated();
   const location = useLocation();
 
   if (!isAuthenticated) {

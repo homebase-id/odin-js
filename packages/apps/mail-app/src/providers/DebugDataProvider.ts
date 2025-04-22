@@ -1,5 +1,5 @@
 import {
-  DotYouClient,
+  OdinClient,
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
@@ -95,7 +95,7 @@ export const getFunName = () => {
   return `${rando(adjectives)} ${rando(adjectives)} ${rando(nouns)}`;
 };
 
-const sendOne = async (dotYouClient: DotYouClient, threadId: string, recipients: string[]) => {
+const sendOne = async (odinClient: OdinClient, threadId: string, recipients: string[]) => {
   const uniqueId = getNewId();
   const originId = getNewId();
 
@@ -107,7 +107,7 @@ const sendOne = async (dotYouClient: DotYouClient, threadId: string, recipients:
         fileType: MAIL_CONVERSATION_FILE_TYPE,
         content: {
           subject: getFunName(),
-          sender: dotYouClient.getHostIdentity(),
+          sender: odinClient.getHostIdentity(),
           message: [
             {
               type: 'p',
@@ -133,12 +133,12 @@ const sendOne = async (dotYouClient: DotYouClient, threadId: string, recipients:
     },
   };
 
-  await uploadMail(dotYouClient, newMailConversation, undefined);
+  await uploadMail(odinClient, newMailConversation, undefined);
 };
 
-export const MakeConversation = async (dotYouClient: DotYouClient) => {
+export const MakeConversation = async (odinClient: OdinClient) => {
   const connections = (
-    await getConnections(dotYouClient, {
+    await getConnections(odinClient, {
       cursor: undefined,
       count: 5,
     })
@@ -147,13 +147,13 @@ export const MakeConversation = async (dotYouClient: DotYouClient) => {
 
   for (let i = 0; i < 25; i++) {
     const threadId = getNewId();
-    await sendOne(dotYouClient, threadId, recipients);
+    await sendOne(odinClient, threadId, recipients);
   }
 };
 
 const PAGE_SIZE = 100;
-export const BePolite = async (dotYouClient: DotYouClient) => {
-  const allThreads = await getMailConversations(dotYouClient, undefined, undefined, PAGE_SIZE);
+export const BePolite = async (odinClient: OdinClient) => {
+  const allThreads = await getMailConversations(odinClient, undefined, undefined, PAGE_SIZE);
 
   // Group the flattenedConversations by their groupId
   const threadsDictionary = allThreads.results.reduce(
@@ -172,8 +172,8 @@ export const BePolite = async (dotYouClient: DotYouClient) => {
   for (let i = 0; i < threads.length; i++) {
     const thread = threads[i][0];
     if (!thread) continue;
-    const recipients = getAllRecipients(thread, dotYouClient.getHostIdentity());
+    const recipients = getAllRecipients(thread, odinClient.getHostIdentity());
 
-    await sendOne(dotYouClient, thread.fileMetadata.appData.content.threadId, recipients);
+    await sendOne(odinClient, thread.fileMetadata.appData.content.threadId, recipients);
   }
 };

@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../core/DotYouClient';
+import { OdinClient } from '../../core/OdinClient';
 import {
   FileQueryParams,
   queryBatch,
@@ -21,7 +21,7 @@ const sortAttrs = (
 
 //Gets all attributes available to the caller
 export const getProfileAttributes = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   profileId: string,
   sectionId: string | undefined,
   types: string[] | undefined,
@@ -35,7 +35,7 @@ export const getProfileAttributes = async (
     tagsMatchAtLeastOne: types,
   };
 
-  const result = await queryBatch(dotYouClient, qp, {
+  const result = await queryBatch(odinClient, qp, {
     maxRecords: pageSize,
     includeMetadataHeader: true,
   });
@@ -43,7 +43,7 @@ export const getProfileAttributes = async (
   const attributes: HomebaseFile<Attribute>[] = (
     await Promise.all(
       result.searchResults.map(async (dsr) =>
-        homebaseFileToProfileAttribute(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
+        homebaseFileToProfileAttribute(odinClient, dsr, targetDrive, result.includeMetadataHeader)
       )
     )
   ).filter((attr) => !!attr) as HomebaseFile<Attribute>[];
@@ -52,7 +52,7 @@ export const getProfileAttributes = async (
 };
 
 export const getProfileAttribute = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   profileId: string,
   id: string
 ): Promise<HomebaseFile<Attribute | undefined> | null> => {
@@ -68,7 +68,7 @@ export const getProfileAttribute = async (
     includeMetadataHeader: true,
   };
 
-  const result = await queryBatch(dotYouClient, qp, ro);
+  const result = await queryBatch(odinClient, qp, ro);
 
   if (result.searchResults.length == 0) return null;
   if (result.searchResults.length > 1) {
@@ -79,7 +79,7 @@ export const getProfileAttribute = async (
 
   const dsr: HomebaseFile = result.searchResults[0];
   return homebaseFileToProfileAttribute(
-    dotYouClient,
+    odinClient,
     dsr,
     targetDrive,
     result.includeMetadataHeader
@@ -87,14 +87,14 @@ export const getProfileAttribute = async (
 };
 
 export const homebaseFileToProfileAttribute = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<Attribute | undefined> | null> => {
   try {
     const attrContent = await getContentFromHeaderOrPayload<Attribute>(
-      dotYouClient,
+      odinClient,
       targetDrive,
       dsr,
       includeMetadataHeader

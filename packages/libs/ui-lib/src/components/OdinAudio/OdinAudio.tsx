@@ -1,4 +1,4 @@
-import { TargetDrive, SystemFileType, DotYouClient } from '@homebase-id/js-lib/core';
+import { TargetDrive, SystemFileType, OdinClient } from '@homebase-id/js-lib/core';
 import { useAudio } from '../../hooks/audio/useAudio';
 
 export interface AudioSource {
@@ -21,12 +21,12 @@ export interface OdinAudioProps
   extends AudioSource,
     React.DetailedHTMLProps<React.AudioHTMLAttributes<HTMLAudioElement>, HTMLAudioElement> {
   probablyEncrypted?: boolean;
-  dotYouClient: DotYouClient;
+  odinClient: OdinClient;
 }
 
 export const OdinAudio = (props: OdinAudioProps) => {
   const {
-    dotYouClient,
+    odinClient,
     odinId,
     fileId,
     globalTransitId,
@@ -39,7 +39,7 @@ export const OdinAudio = (props: OdinAudioProps) => {
     ...elementProps
   } = props;
   const { data: audioUrl } = useAudio(
-    dotYouClient,
+    odinClient,
     odinId,
     fileId,
     globalTransitId,

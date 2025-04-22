@@ -1,4 +1,4 @@
-import { getOdinIdColor, useDotYouClientContext, useErrors } from '@homebase-id/common-app';
+import { getOdinIdColor, useOdinClientContext, useErrors } from '@homebase-id/common-app';
 import {
   base64ToUint8Array,
   byteArrayToString,
@@ -27,7 +27,7 @@ export const useAutofixDefaultConfig = () => {
   const lastRunAutoFix = uiSettings?.lastRunAutoFix;
   const shouldRun = lastRunAutoFix !== AUTO_FIX_VERSION;
 
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const isRunning = useRef<boolean>();
 
   const { fixDefaultProfileImage } = useFixDefaultProfileImage();
@@ -39,7 +39,7 @@ export const useAutofixDefaultConfig = () => {
     (async () => {
       try {
         await fixDefaultProfileImage();
-        await autoFixConnections(dotYouClient);
+        await autoFixConnections(odinClient);
 
         updateUiSetting({ ...uiSettings, lastRunAutoFix: AUTO_FIX_VERSION });
         console.log('[useAutoFixDefaultConfig] Finished ', AUTO_FIX_VERSION);
@@ -55,13 +55,13 @@ export const useAutofixDefaultConfig = () => {
 };
 
 const useFixDefaultProfileImage = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const { mutateAsync: saveAttr } = useAttribute().save;
 
   return {
     fixDefaultProfileImage: async () => {
       const data = await getProfileAttributes(
-        dotYouClient,
+        odinClient,
         BuiltInProfiles.StandardProfileId,
         undefined,
         [BuiltInAttributes.Photo],

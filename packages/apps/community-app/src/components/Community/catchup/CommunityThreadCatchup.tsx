@@ -5,7 +5,7 @@ import {
   ActionLink,
   COMMUNITY_ROOT_PATH,
   ErrorBoundary,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
 import { useCommunityChannel } from '../../../hooks/community/channels/useCommunityChannel';
@@ -59,7 +59,7 @@ export const CommunityThreadCatchup = ({
     };
   }, [community, channel]);
 
-  const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedInIdentity = useOdinClientContext().getLoggedInIdentity();
 
   const defaultMaxAge = useMemo(() => {
     const todayDate = new Date(threadMeta.lastMessageCreated);

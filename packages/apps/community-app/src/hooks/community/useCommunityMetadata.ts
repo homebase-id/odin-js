@@ -5,10 +5,10 @@ import {
   QueryClient,
   UndefinedInitialDataOptions,
 } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import {
   DeletedHomebaseFile,
-  DotYouClient,
+  OdinClient,
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
@@ -26,7 +26,7 @@ export const useCommunityMetadata = (props?: {
   communityId: string | undefined;
 }) => {
   const { communityId, odinId } = props || {};
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const saveMetadata = async ({
@@ -45,7 +45,7 @@ export const useCommunityMetadata = (props?: {
       maxRetries--;
 
       const serverVersion = await getCommunityMetadata(
-        dotYouClient,
+        odinClient,
         metadata.fileMetadata.appData.content.communityId
       );
       if (!serverVersion) {
@@ -55,15 +55,15 @@ export const useCommunityMetadata = (props?: {
       const newlyMerged = mergeMetadata(metadata, serverVersion);
       insertNewcommunityMetadata(queryClient, newlyMerged);
 
-      return await uploadCommunityMetadata(dotYouClient, newlyMerged, onVersionConflict);
+      return await uploadCommunityMetadata(odinClient, newlyMerged, onVersionConflict);
     };
 
-    return await uploadCommunityMetadata(dotYouClient, metadata, onVersionConflict);
+    return await uploadCommunityMetadata(odinClient, metadata, onVersionConflict);
   };
 
   return {
     single: useQuery(
-      getCommunityMetadataQueryOptions(dotYouClient, queryClient, odinId, communityId)
+      getCommunityMetadataQueryOptions(odinClient, queryClient, odinId, communityId)
     ),
     update: useMutation({
       mutationFn: saveMetadata,
@@ -110,12 +110,12 @@ export const useCommunityMetadata = (props?: {
 };
 
 const getMetadata = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   queryClient: QueryClient,
   odinId: string,
   communityId: string
 ) => {
-  const serverFile = await getCommunityMetadata(dotYouClient, communityId);
+  const serverFile = await getCommunityMetadata(odinClient, communityId);
   if (!serverFile) {
     const newMetadata: NewHomebaseFile<CommunityMetadata> = {
       fileMetadata: {
@@ -147,16 +147,16 @@ const getMetadata = async (
 };
 
 export const getCommunityMetadataQueryOptions: (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   queryClient: QueryClient,
   odinId: string | undefined,
   communityId: string | undefined
 ) => UndefinedInitialDataOptions<
   HomebaseFile<CommunityMetadata> | NewHomebaseFile<CommunityMetadata> | null
-> = (dotYouClient, queryClient, odinId, communityId) => ({
+> = (odinClient, queryClient, odinId, communityId) => ({
   queryKey: ['community-metadata', formatGuidId(communityId)],
   queryFn: () =>
-    getMetadata(dotYouClient, queryClient, odinId as string, formatGuidId(communityId) as string),
+    getMetadata(odinClient, queryClient, odinId as string, formatGuidId(communityId) as string),
   enabled: !!odinId && !!communityId,
   staleTime: 1000 * 60 * 5, // 5 minutes
 });
@@ -243,7 +243,7 @@ export const useCommunityMetadataSavedOnly = (props?: {
   communityId: string | undefined;
 }) => {
   const { communityId, odinId } = props || {};
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   return useQuery({
@@ -251,7 +251,7 @@ export const useCommunityMetadataSavedOnly = (props?: {
     enabled: !!odinId && !!communityId,
     queryFn: async () => {
       const communityMetadata = await queryClient.fetchQuery(
-        getCommunityMetadataQueryOptions(dotYouClient, queryClient, odinId, communityId)
+        getCommunityMetadataQueryOptions(odinClient, queryClient, odinId, communityId)
       );
       return communityMetadata?.fileMetadata.appData.content.savedMessages || [];
     },

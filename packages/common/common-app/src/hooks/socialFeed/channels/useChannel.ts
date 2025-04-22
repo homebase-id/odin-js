@@ -7,7 +7,7 @@ import {
 } from '@homebase-id/js-lib/public';
 
 import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
-import { useDotYouClientContext } from '../../../..';
+import { useOdinClientContext } from '../../../..';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { fetchCachedPublicChannels } from '../post/cachedDataHelpers';
@@ -19,14 +19,14 @@ type useChannelsProps = {
 };
 
 export const useChannel = ({ odinId, channelKey }: useChannelsProps) => {
-  const dotYouClient = useDotYouClientContext();
-  const isOwner = dotYouClient.isOwner;
+  const odinClient = useOdinClientContext();
+  const isOwner = odinClient.isOwner;
   const queryClient = useQueryClient();
 
   const fetchChannelData = async ({ channelKey }: useChannelsProps) => {
     if (!channelKey) return null;
 
-    if (!odinId || odinId === dotYouClient.getHostIdentity()) {
+    if (!odinId || odinId === odinClient.getHostIdentity()) {
       const cachedChannels = queryClient.getQueryData<HomebaseFile<ChannelDefinitionVm>[]>([
         'channels',
       ]);
@@ -39,7 +39,7 @@ export const useChannel = ({ odinId, channelKey }: useChannelsProps) => {
         if (foundChannel) return foundChannel;
       }
 
-      const channel = (await fetchCachedPublicChannels(dotYouClient))?.find(
+      const channel = (await fetchCachedPublicChannels(odinClient))?.find(
         (chnl) =>
           stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, channelKey) ||
           chnl.fileMetadata.appData.content.slug === channelKey
@@ -47,8 +47,8 @@ export const useChannel = ({ odinId, channelKey }: useChannelsProps) => {
       if (channel && !isOwner) return channel;
 
       const directFetchOfChannel =
-        (await getChannelDefinitionBySlug(dotYouClient, channelKey)) ||
-        (await getChannelDefinition(dotYouClient, channelKey));
+        (await getChannelDefinitionBySlug(odinClient, channelKey)) ||
+        (await getChannelDefinition(odinClient, channelKey));
 
       if (directFetchOfChannel) {
         return {
@@ -73,8 +73,8 @@ export const useChannel = ({ odinId, channelKey }: useChannelsProps) => {
       if (channelKey === BlogConfig.PublicChannelId) return BlogConfig.PublicChannelNewDsr;
 
       return (
-        (await getChannelBySlugOverPeer(dotYouClient, odinId, channelKey)) ||
-        (await getChannelOverPeer(dotYouClient, odinId, channelKey)) ||
+        (await getChannelBySlugOverPeer(odinClient, odinId, channelKey)) ||
+        (await getChannelOverPeer(odinClient, odinId, channelKey)) ||
         null
       );
     }
@@ -82,7 +82,7 @@ export const useChannel = ({ odinId, channelKey }: useChannelsProps) => {
 
   return {
     fetch: useQuery({
-      queryKey: ['channel', odinId || dotYouClient.getHostIdentity(), channelKey],
+      queryKey: ['channel', odinId || odinClient.getHostIdentity(), channelKey],
       queryFn: () => fetchChannelData({ channelKey }),
       staleTime: 1000 * 60 * 60, // 1 hour
       enabled: !!channelKey,

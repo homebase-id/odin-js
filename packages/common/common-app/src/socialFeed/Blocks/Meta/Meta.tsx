@@ -2,7 +2,7 @@ import { Suspense, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChannelDefinition, EmbeddedPost, PostContent } from '@homebase-id/js-lib/public';
 import { OwnerActions } from './OwnerActions';
-import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { aclEqual } from '@homebase-id/js-lib/helpers';
 import { AclSummary } from '../../../acl';
 import { t } from '../../../helpers';
@@ -12,7 +12,7 @@ import { useIsConnected } from '../../../hooks/connections/useIsConnected';
 import { EditPostDialog } from '../../EditPostDialog/EditPostDialog';
 import { Persons, UserX, Times, Flag, Block, Link, Trash, Lock, Pencil } from '../../../ui/Icons';
 import { FEED_ROOT_PATH, HOME_ROOT_PATH } from '../../../constants';
-import { useDotYouClientContext } from '../../../hooks/auth/useDotYouClientContext';
+import { useOdinClientContext } from '../../../hooks/auth/useOdinClientContext';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;
@@ -50,9 +50,9 @@ export const PostMeta = ({
   size = 'text-xs',
   excludeContextMenu,
 }: PostMetaWithPostFileProps | PostMetaWithEmbeddedPostContentProps) => {
-  const dotYouClient = useDotYouClientContext();
-  const isOwner = dotYouClient.isOwner();
-  const loggedInIdentity = dotYouClient.getLoggedInIdentity();
+  const odinClient = useOdinClientContext();
+  const isOwner = odinClient.isOwner();
+  const loggedInIdentity = odinClient.getLoggedInIdentity();
 
   const now = new Date();
   const date = new Date(postFile?.fileMetadata.appData.userDate || embeddedPost?.userDate || now);
@@ -71,7 +71,7 @@ export const PostMeta = ({
 
   const isConnected = useIsConnected(odinId).data;
   const channelLink = channel
-    ? `${odinId ? new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot() : ''}${HOME_ROOT_PATH}posts/${
+    ? `${odinId ? new OdinClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot() : ''}${HOME_ROOT_PATH}posts/${
         channel.fileMetadata.appData.content.slug
       }${isConnected && loggedInIdentity ? '?youauth-logon=' + loggedInIdentity : ''}`
     : undefined;
@@ -139,7 +139,7 @@ export const ToGroupBlock = ({
     | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
   className?: string;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const groupPost =
     channel?.fileMetadata.appData.content.isCollaborative ||
     (authorOdinId !== (odinId || loggedOnIdentity) && (odinId || loggedOnIdentity) && authorOdinId);
@@ -148,7 +148,7 @@ export const ToGroupBlock = ({
   if (!groupPost) return null;
 
   const channelLink = channel
-    ? `${odinId ? new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot() : ''}${HOME_ROOT_PATH}posts/${
+    ? `${odinId ? new OdinClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot() : ''}${HOME_ROOT_PATH}posts/${
         channel.fileMetadata.appData.content.slug
       }${isConnected && loggedOnIdentity ? '?youauth-logon=' + loggedOnIdentity : ''}`
     : undefined;
@@ -181,7 +181,7 @@ const ExternalActions = ({
     | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
   postFile: HomebaseFile<PostContent>;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const navigate = useNavigate();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -191,7 +191,7 @@ const ExternalActions = ({
   } = useManageSocialFeed({ odinId });
 
   if (!loggedOnIdentity) return null;
-  const host = new DotYouClient({ api: ApiType.Guest, hostIdentity: loggedOnIdentity }).getRoot();
+  const host = new OdinClient({ api: ApiType.Guest, hostIdentity: loggedOnIdentity }).getRoot();
   const options: ActionGroupOptionProps[] = [
     {
       icon: UserX,
@@ -283,12 +283,12 @@ const GroupChannelActions = ({
   const navigate = useNavigate();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
-  const hostIdentity = useDotYouClientContext().getHostIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
+  const hostIdentity = useOdinClientContext().getHostIdentity();
 
   const isAuthor = postFile.fileMetadata.originalAuthor === loggedOnIdentity;
   const host = loggedOnIdentity
-    ? new DotYouClient({
+    ? new OdinClient({
         api: ApiType.Guest,
         hostIdentity: loggedOnIdentity,
       }).getRoot()

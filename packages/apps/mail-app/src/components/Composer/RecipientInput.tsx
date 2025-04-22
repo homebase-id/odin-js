@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-import { useAllContacts, ActionButton, useDotYouClientContext } from '@homebase-id/common-app';
+import { useAllContacts, ActionButton, useOdinClientContext } from '@homebase-id/common-app';
 import { Times } from '@homebase-id/common-app/icons';
 import { ContactFile } from '@homebase-id/js-lib/network';
 
@@ -19,7 +19,7 @@ export const RecipientInput = ({
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [inputStateIndex, setInputStateIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
 
   const ownContactFile: ContactFile = {
     odinId: loggedOnIdentity,

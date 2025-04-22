@@ -10,7 +10,7 @@ import {
   uploadReaction,
 } from '@homebase-id/js-lib/core';
 import { getNewId, tryJsonParse } from '@homebase-id/js-lib/helpers';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import {
   CommunityDefinition,
   getTargetDriveFromCommunityId,
@@ -25,7 +25,7 @@ export const useCommunityReaction = (props?: {
 }) => {
   const { messageGlobalTransitId, messageFileId, community } = props || {};
 
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const getReactionsByMessageGlobalTransitId =
@@ -33,7 +33,7 @@ export const useCommunityReaction = (props?: {
       const reactions =
         (
           await getReactions(
-            dotYouClient,
+            odinClient,
             community?.fileMetadata.senderOdinId,
             {
               fileId: messageFileId,
@@ -64,7 +64,7 @@ export const useCommunityReaction = (props?: {
     if (!message.fileMetadata.globalTransitId)
       throw new Error('Message does not have a global transit id');
 
-    return await uploadReaction(dotYouClient, reaction, community.fileMetadata.senderOdinId, {
+    return await uploadReaction(odinClient, reaction, community.fileMetadata.senderOdinId, {
       fileId: message.fileId,
       globalTransitId: message.fileMetadata.globalTransitId,
       targetDrive,
@@ -89,7 +89,7 @@ export const useCommunityReaction = (props?: {
     if (!message.fileMetadata.globalTransitId)
       throw new Error('Message does not have a global transit id');
 
-    return await deleteReaction(dotYouClient, reaction, community.fileMetadata.senderOdinId, {
+    return await deleteReaction(odinClient, reaction, community.fileMetadata.senderOdinId, {
       targetDrive,
       fileId: message.fileId,
       globalTransitId: message.fileMetadata.globalTransitId,
@@ -114,7 +114,7 @@ export const useCommunityReaction = (props?: {
           queryClient.getQueryData<EmojiReaction[]>(['community-reaction', message.fileId]) || [];
 
         const newReaction: EmojiReaction = {
-          authorOdinId: dotYouClient.getHostIdentity(),
+          authorOdinId: odinClient.getHostIdentity(),
           body: reaction,
         };
 

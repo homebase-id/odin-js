@@ -1,5 +1,5 @@
 import { assertIfDefined, stringifyToQueryParams, tryJsonParse } from '../../../helpers/DataUtil';
-import { DotYouClient } from '../../DotYouClient';
+import { OdinClient } from '../../OdinClient';
 import { decryptKeyHeader, decryptJsonContent } from '../SecurityHelpers';
 import { getCacheKey, getAxiosClient } from './DriveFileHelper';
 import { TargetDrive, SystemFileType, HomebaseFile } from './DriveFileTypes';
@@ -14,7 +14,7 @@ const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile | nul
 
 /// Get methods by UniqueId
 export const getFileHeaderByGlobalTransitId = async <T = string>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   uniqueId: string,
   options?: { systemFileType?: SystemFileType; decrypt?: boolean }
@@ -23,7 +23,7 @@ export const getFileHeaderByGlobalTransitId = async <T = string>(
   const systemFileType = options?.systemFileType ?? 'Standard';
 
   const fileHeader = await getFileHeaderBytesByGlobalTransitId(
-    dotYouClient,
+    odinClient,
     targetDrive,
     uniqueId,
     {
@@ -48,12 +48,12 @@ export const getFileHeaderByGlobalTransitId = async <T = string>(
 };
 
 export const getFileHeaderBytesByGlobalTransitId = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   uniqueId: string,
   options?: { decrypt?: boolean; systemFileType?: SystemFileType }
 ): Promise<HomebaseFile | null> => {
-  assertIfDefined('DotYouClient', dotYouClient);
+  assertIfDefined('OdinClient', odinClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
 
@@ -66,7 +66,7 @@ export const getFileHeaderBytesByGlobalTransitId = async (
     (await _internalMetadataPromiseCache.get(cacheKey));
   if (cacheEntry) return cacheEntry;
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
+  const client = getAxiosClient(odinClient, systemFileType);
 
   const request: GetFileByGlobalTransitIdRequest = {
     ...targetDrive,
@@ -79,7 +79,7 @@ export const getFileHeaderBytesByGlobalTransitId = async (
     .then(async (fileHeader) => {
       if (decrypt) {
         const keyheader = fileHeader.fileMetadata.isEncrypted
-          ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)
+          ? await decryptKeyHeader(odinClient, fileHeader.sharedSecretEncryptedKeyHeader)
           : undefined;
 
         fileHeader.fileMetadata.appData.content = await decryptJsonContent(

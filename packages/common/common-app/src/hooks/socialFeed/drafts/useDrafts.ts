@@ -2,13 +2,13 @@ import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/re
 import { Article, PostContent, getPosts, removePost } from '@homebase-id/js-lib/public';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useChannels } from '../channels/useChannels';
-import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../../auth/useOdinClientContext';
 
 export const useDrafts = () => {
   const queryClient = useQueryClient();
 
   const { data: channels } = useChannels({ isAuthenticated: true, isOwner: true });
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetch = async () => {
     if (!channels) return;
@@ -16,7 +16,7 @@ export const useDrafts = () => {
     const drafts = await Promise.all(
       channels.map(async (channel) => {
         return await getPosts<Article>(
-          dotYouClient,
+          odinClient,
           channel.fileMetadata.appData.uniqueId as string,
           undefined,
           'only',
@@ -36,7 +36,7 @@ export const useDrafts = () => {
     channelId: string;
     postFile: HomebaseFile<PostContent>;
   }) => {
-    return await removePost(dotYouClient, postFile, channelId);
+    return await removePost(odinClient, postFile, channelId);
   };
 
   return {

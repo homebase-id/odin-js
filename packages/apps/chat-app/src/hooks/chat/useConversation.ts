@@ -14,7 +14,7 @@ import {
   uploadConversation,
 } from '../../providers/ConversationProvider';
 import {
-  DotYouClient,
+  OdinClient,
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
@@ -22,14 +22,14 @@ import {
 import { formatGuidId, getNewId, getNewXorId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { invalidateConversations, updateCacheConversations } from './useConversations';
 import { deleteAllChatMessages } from '../../providers/ChatProvider';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { invalidateChatMessages } from './useChatMessages';
 
 export const useConversation = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
 
   const createConversation = async ({
     recipients,
@@ -46,7 +46,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
         : formatGuidId(getNewId());
 
     if (recipients.length === 1) {
-      const existingConversation = await getConversation(dotYouClient, newConversationId);
+      const existingConversation = await getConversation(odinClient, newConversationId);
       if (existingConversation) return { ...existingConversation, newConversationId };
     }
 
@@ -71,7 +71,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
 
     const uploadResult = {
       newConversationId,
-      ...(await uploadConversation(dotYouClient, newConversation, imagePayload)),
+      ...(await uploadConversation(odinClient, newConversation, imagePayload)),
     };
 
     return uploadResult;
@@ -82,7 +82,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   }: {
     conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   }) => {
-    return await updateConversation(dotYouClient, conversation, undefined, true);
+    return await updateConversation(odinClient, conversation, undefined, true);
   };
 
   const updateExistingConversation = async ({
@@ -95,9 +95,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     distribute?: boolean;
   }) => {
     if (distribute && conversation.fileMetadata.appData.content.recipients?.length >= 2) {
-      return await updateConversation(dotYouClient, conversation, imagePayload, distribute);
+      return await updateConversation(odinClient, conversation, imagePayload, distribute);
     } else {
-      return await updateConversation(dotYouClient, conversation, imagePayload);
+      return await updateConversation(odinClient, conversation, imagePayload);
     }
   };
 
@@ -107,7 +107,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   }) => {
     return await deleteAllChatMessages(
-      dotYouClient,
+      odinClient,
       conversation.fileMetadata.appData.uniqueId as string
     );
   };
@@ -118,7 +118,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   }) => {
     const deletedResult = await deleteAllChatMessages(
-      dotYouClient,
+      odinClient,
       conversation.fileMetadata.appData.uniqueId as string
     );
     if (!deletedResult) throw new Error('Failed to delete chat messages');
@@ -132,7 +132,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       },
     };
 
-    return await updateConversation(dotYouClient, newConversation, undefined);
+    return await updateConversation(odinClient, newConversation, undefined);
   };
 
   const archiveChat = async ({
@@ -148,11 +148,11 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       },
     };
 
-    return await updateConversation(dotYouClient, newConversation, undefined);
+    return await updateConversation(odinClient, newConversation, undefined);
   };
 
   return {
-    single: useQuery(getConversationQueryOptions(dotYouClient, queryClient, conversationId)),
+    single: useQuery(getConversationQueryOptions(odinClient, queryClient, conversationId)),
     create: useMutation({
       mutationFn: createConversation,
       onSettled: async (_data) => {
@@ -235,7 +235,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
         conversation,
       }: {
         conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
-      }) => restoreChat(dotYouClient, conversation),
+      }) => restoreChat(odinClient, conversation),
 
       onSettled: async (_data, _error, variables) => {
         invalidateConversations(queryClient);
@@ -250,7 +250,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
 };
 
 export const restoreChat = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>
 ) => {
   const newConversation: HomebaseFile<UnifiedConversation, ConversationMetadata> = {
@@ -261,7 +261,7 @@ export const restoreChat = async (
     },
   };
 
-  return await updateConversation(dotYouClient, newConversation, undefined);
+  return await updateConversation(odinClient, newConversation, undefined);
 };
 
 export const invalidateConversation = (queryClient: QueryClient, conversationId?: string) => {
@@ -291,7 +291,7 @@ export const updateCacheConversation = (
 };
 
 const fetchSingleConversation = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   queryClient: QueryClient,
   conversationId: string
 ): Promise<HomebaseFile<UnifiedConversation, ConversationMetadata> | null> => {
@@ -313,7 +313,7 @@ const fetchSingleConversation = async (
 
   if (!conversationId) return null;
 
-  const conversationFromServer = await getConversation(dotYouClient, conversationId);
+  const conversationFromServer = await getConversation(odinClient, conversationId);
   // Don't cache if the conversation is not found
   if (!conversationFromServer) throw new Error('Conversation not found');
 
@@ -321,16 +321,16 @@ const fetchSingleConversation = async (
 };
 
 export const getConversationQueryOptions: (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   queryClient: QueryClient,
   conversationId: string | undefined
 ) => UndefinedInitialDataOptions<HomebaseFile<UnifiedConversation, ConversationMetadata> | null> = (
-  dotYouClient,
+  odinClient,
   queryClient,
   conversationId
 ) => ({
   queryKey: ['conversation', conversationId],
-  queryFn: () => fetchSingleConversation(dotYouClient, queryClient, conversationId as string),
+  queryFn: () => fetchSingleConversation(odinClient, queryClient, conversationId as string),
   staleTime: 1000 * 60 * 60 * 24, // 24 hours
   enabled: !!conversationId,
   retry: (failureCount, error) => {

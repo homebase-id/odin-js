@@ -9,7 +9,7 @@ import {
   t,
   ErrorNotification,
   ActionGroup,
-  useDotYouClientContext,
+  useOdinClientContext,
   useOutsideTrigger,
   ReactionsBarHandle,
   usePortal,
@@ -202,7 +202,7 @@ const CommunityContextActions = ({
 
   const { mutate: resend, error: resendError } = useCommunityMessage().update;
 
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const authorOdinId = msg.fileMetadata.originalAuthor;
 
   const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;

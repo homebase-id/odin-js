@@ -1,9 +1,9 @@
-import { ActionLink, ellipsisAtMaxChar, useDotYouClientContext } from '@homebase-id/common-app';
+import { ActionLink, ellipsisAtMaxChar, useOdinClientContext } from '@homebase-id/common-app';
 import { t } from '@homebase-id/common-app';
 
 import { Feed, Check } from '@homebase-id/common-app/icons';
 import { useFollowDetail } from '../../../hooks/follow/useFollowDetail';
-import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ChannelDefinition } from '@homebase-id/js-lib/public';
 
@@ -14,9 +14,9 @@ const FollowLink = ({
   className?: string;
   channel?: HomebaseFile<ChannelDefinition>;
 }) => {
-  const dotYouClient = useDotYouClientContext();
-  const loggedInIdentity = dotYouClient.getLoggedInIdentity();
-  const isOwner = dotYouClient.isOwner();
+  const odinClient = useOdinClientContext();
+  const loggedInIdentity = odinClient.getLoggedInIdentity();
+  const isOwner = odinClient.isOwner();
   const { data } = useFollowDetail().fetch;
 
   if (isOwner) return null;
@@ -34,8 +34,8 @@ const FollowLink = ({
       <ActionLink
         className={`w-auto ${className ?? ''}`}
         href={
-          (dotYouClient.isAuthenticated() && loggedInIdentity
-            ? `${new DotYouClient({ hostIdentity: loggedInIdentity, api: ApiType.Guest }).getRoot()}/owner/follow/following/${window.location.hostname}?return=${encodeURIComponent(window.location.href)}`
+          (odinClient.isAuthenticated() && loggedInIdentity
+            ? `${new OdinClient({ hostIdentity: loggedInIdentity, api: ApiType.Guest }).getRoot()}/owner/follow/following/${window.location.hostname}?return=${encodeURIComponent(window.location.href)}`
             : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect/owner/follow/following/${window.location.hostname}?return=${encodeURIComponent(window.location.href)}`) +
           (channel ? `?chnl=${channel.fileMetadata.appData.uniqueId}` : '')
         }

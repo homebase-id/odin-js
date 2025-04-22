@@ -1,5 +1,5 @@
 import {
-  DotYouClient,
+  OdinClient,
   FileQueryParams,
   GetBatchQueryResultOptions,
   SystemFileType,
@@ -24,11 +24,11 @@ import {
 import { parseChannelTemplate, ChannelDefinitionVm } from '../channels/useChannels';
 
 export const getCachedPosts = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   channelId: string,
   postType?: PostType
 ) => {
-  const cachedData = await cachedQuery(dotYouClient);
+  const cachedData = await cachedQuery(odinClient);
   const posts =
     cachedData.postsPerChannel
       .find((data) => stringGuidsEqual(data.channelId, channelId))
@@ -40,8 +40,8 @@ export const getCachedPosts = async (
   return { results: posts, cursorState: cachedData.allCursors[channelId] };
 };
 
-export const getCachedRecentPosts = async (dotYouClient: DotYouClient, postType?: PostType) => {
-  const cachedData = await cachedQuery(dotYouClient);
+export const getCachedRecentPosts = async (odinClient: OdinClient, postType?: PostType) => {
+  const cachedData = await cachedQuery(odinClient);
   if (
     !cachedData ||
     !cachedData.postsPerChannel?.length ||
@@ -64,8 +64,8 @@ export const getCachedRecentPosts = async (dotYouClient: DotYouClient, postType?
   return { results: sortedPosts, cursorState: allCursors };
 };
 
-export const fetchCachedPublicChannels = async (dotYouClient: DotYouClient) => {
-  const fileData = await GetFile(dotYouClient, 'sitedata.json');
+export const fetchCachedPublicChannels = async (odinClient: OdinClient) => {
+  const fileData = await GetFile(odinClient, 'sitedata.json');
   if (fileData) {
     let channels: HomebaseFile<ChannelDefinitionVm>[] = [];
 
@@ -103,9 +103,9 @@ export const fetchCachedPublicChannels = async (dotYouClient: DotYouClient) => {
   }
 };
 
-const cachedQuery = async (dotYouClient: DotYouClient) => {
+const cachedQuery = async (odinClient: OdinClient) => {
   const pageSize = 30;
-  const channels = (await fetchCachedPublicChannels(dotYouClient)) || [];
+  const channels = (await fetchCachedPublicChannels(odinClient)) || [];
   const allCursors: Record<string, string> = {};
   const queries: {
     name: string;
@@ -136,7 +136,7 @@ const cachedQuery = async (dotYouClient: DotYouClient) => {
       };
     });
 
-  const response = await queryBatchCachedCollection(dotYouClient, queries);
+  const response = await queryBatchCachedCollection(odinClient, queries);
   const postsPerChannel = await Promise.all(
     response.results.map(async (result) => {
       const targetDrive = GetTargetDriveFromChannelId(result.name);
@@ -145,7 +145,7 @@ const cachedQuery = async (dotYouClient: DotYouClient) => {
         await Promise.all(
           result.searchResults.map(
             async (dsr) =>
-              await dsrToPostFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
+              await dsrToPostFile(odinClient, dsr, targetDrive, result.includeMetadataHeader)
           )
         )
       ).filter((post) => !!post) as HomebaseFile<PostContent>[];
@@ -160,7 +160,7 @@ const cachedQuery = async (dotYouClient: DotYouClient) => {
 };
 
 const queryBatchCachedCollection = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   queries: {
     name: string;
     queryParams: FileQueryParams;
@@ -168,7 +168,7 @@ const queryBatchCachedCollection = async (
   }[],
   systemFileType?: SystemFileType
 ): Promise<QueryBatchCollectionResponse> => {
-  const client = dotYouClient.createAxiosClient({
+  const client = odinClient.createAxiosClient({
     systemFileType,
   });
 

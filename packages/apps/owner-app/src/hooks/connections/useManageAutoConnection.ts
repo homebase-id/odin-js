@@ -5,13 +5,13 @@ import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import {
   invalidateConnectionInfo,
   updateCachedConnectionInfo,
-  useDotYouClientContext,
+  useOdinClientContext,
   useFollowingInfinite,
 } from '@homebase-id/common-app';
 
 export const useManageAutoConnection = ({ odinId }: { odinId?: string }) => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const { mutateAsync: follow } = useFollowingInfinite().follow;
 
@@ -29,7 +29,7 @@ export const useManageAutoConnection = ({ odinId }: { odinId?: string }) => {
       });
     }
 
-    return confirmIntroduction(dotYouClient, odinId);
+    return confirmIntroduction(odinClient, odinId);
   };
 
   return {

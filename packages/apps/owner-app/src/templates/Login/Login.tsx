@@ -11,7 +11,7 @@ import {
   Label,
   ActionButton,
   ErrorNotification,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { Loader, Arrow } from '@homebase-id/common-app/icons';
 
@@ -20,7 +20,7 @@ const Login = () => {
   const [passwordState, setPasswordState] = useState<'unknown' | 'pending' | 'ready'>('unknown');
   const [state, setState] = useState<'loading' | 'error' | 'success' | undefined>();
   const [error, setError] = useState<unknown | undefined>();
-  const isAuthenticated = useDotYouClientContext().isAuthenticated();
+  const isAuthenticated = useOdinClientContext().isAuthenticated();
   const { authenticate, setFirstPassword, isPasswordSet, checkRedirectToReturn } = useAuth();
   useValidateAuthorization();
 

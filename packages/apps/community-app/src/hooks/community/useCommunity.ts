@@ -2,13 +2,13 @@ import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/re
 import { stringGuidsEqual, stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import {
   ApiType,
-  DotYouClient,
+  OdinClient,
   DrivePermissionType,
   HomebaseFile,
   NewHomebaseFile,
   TargetDrive,
 } from '@homebase-id/js-lib/core';
-import { COMMUNITY_ROOT_PATH, useDotYouClientContext } from '@homebase-id/common-app';
+import { COMMUNITY_ROOT_PATH, useOdinClientContext } from '@homebase-id/common-app';
 import {
   CommunityDefinition,
   getCommunityDefinition,
@@ -95,7 +95,7 @@ const ensureNewDriveAndPermission = (
     returnUrl
   );
 
-  const host = new DotYouClient({
+  const host = new OdinClient({
     hostIdentity: identity,
     api: ApiType.App,
   }).getRoot();
@@ -104,13 +104,13 @@ const ensureNewDriveAndPermission = (
 
 export const useCommunity = (props?: useCommunityProps) => {
   const { odinId, communityId } = props || {};
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const fetchCommunity = async ({ odinId, communityId }: useCommunityProps) => {
     if (!odinId || !communityId) return undefined;
 
-    return (await getCommunityDefinition(dotYouClient, odinId, communityId)) || undefined;
+    return (await getCommunityDefinition(odinClient, odinId, communityId)) || undefined;
   };
 
   const saveData = async (
@@ -120,7 +120,7 @@ export const useCommunity = (props?: useCommunityProps) => {
       if (!communityDef.fileMetadata.appData.uniqueId)
         throw new Error('Community unique id is not set');
 
-      const host = dotYouClient.getHostIdentity();
+      const host = odinClient.getHostIdentity();
       const returnUrl = `${COMMUNITY_ROOT_PATH}/new?draft=${JSON.stringify(communityDef)}`;
 
       const targetDrive = getTargetDriveFromCommunityId(communityDef.fileMetadata.appData.uniqueId);
@@ -144,7 +144,7 @@ export const useCommunity = (props?: useCommunityProps) => {
       );
     };
 
-    return await saveCommunity(dotYouClient, { ...communityDef }, onMissingDrive);
+    return await saveCommunity(odinClient, { ...communityDef }, onMissingDrive);
   };
 
   const getInviteLink = async ({
@@ -156,7 +156,7 @@ export const useCommunity = (props?: useCommunityProps) => {
   };
 
   const removeCommunity = async (communityDef: HomebaseFile<CommunityDefinition>) =>
-    await removeCommunityDefinition(dotYouClient, communityDef);
+    await removeCommunityDefinition(odinClient, communityDef);
 
   return {
     fetch: useQuery({
@@ -250,7 +250,7 @@ export const getExtendCirclePermissionUrl = (
     c: circleIds.join(','),
   };
 
-  const host = new DotYouClient({
+  const host = new OdinClient({
     hostIdentity: identity,
     api: ApiType.App,
   }).getRoot();

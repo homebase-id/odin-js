@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { SubscribeToPeerNotifications } from '../../providers/PeerNotificationSubscriber';
 import { useCommunityMetadata } from './useCommunityMetadata';
 import { useEffect } from 'react';
@@ -9,7 +9,7 @@ export const useCommunityNotifications = (
   odinId: string | undefined,
   communityId: string | undefined
 ) => {
-  const identity = useDotYouClientContext().getHostIdentity();
+  const identity = useOdinClientContext().getHostIdentity();
   const { data: community } = useCommunity({ odinId, communityId }).fetch;
 
   const {
@@ -20,7 +20,7 @@ export const useCommunityNotifications = (
     communityId: community?.fileMetadata.appData.uniqueId as string,
   });
 
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const enableCommunityNotifications = async () => {
     if (
@@ -31,7 +31,7 @@ export const useCommunityNotifications = (
       return;
 
     return await SubscribeToPeerNotifications(
-      dotYouClient,
+      odinClient,
       community.fileMetadata.senderOdinId,
       community.fileMetadata.appData.uniqueId as string
     );

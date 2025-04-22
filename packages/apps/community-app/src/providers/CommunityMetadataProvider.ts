@@ -1,6 +1,6 @@
 import {
   DEFAULT_PAYLOAD_KEY,
-  DotYouClient,
+  OdinClient,
   getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
   HomebaseFile,
@@ -50,7 +50,7 @@ export const LOCAL_COMMUNITY_APP_DRIVE: TargetDrive = {
 export const COMMUNITY_METADATA_FILE_TYPE = 7011;
 
 export const uploadCommunityMetadata = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   definition: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata>,
   onVersionConflicht?: () => Promise<void | UploadResult> | void
 ): Promise<UploadResult | undefined> => {
@@ -115,7 +115,7 @@ export const uploadCommunityMetadata = async (
   };
 
   const result = await uploadFile(
-    dotYouClient,
+    odinClient,
     instructionSet,
     metadata,
     payloads,
@@ -129,22 +129,22 @@ export const uploadCommunityMetadata = async (
 };
 
 export const getCommunityMetadata = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   communityId: string
 ): Promise<HomebaseFile<CommunityMetadata> | null> => {
   const header = await getFileHeaderByUniqueId(
-    dotYouClient,
+    odinClient,
     LOCAL_COMMUNITY_APP_DRIVE,
     communityId
   );
 
   if (!header) return null;
-  return dsrToCommunityMetadata(dotYouClient, header, LOCAL_COMMUNITY_APP_DRIVE, true);
+  return dsrToCommunityMetadata(odinClient, header, LOCAL_COMMUNITY_APP_DRIVE, true);
 };
 
-export const getCommunitiesMetadata = async (dotYouClient: DotYouClient) => {
+export const getCommunitiesMetadata = async (odinClient: OdinClient) => {
   const response = await queryBatch(
-    dotYouClient,
+    odinClient,
     {
       targetDrive: LOCAL_COMMUNITY_APP_DRIVE,
       fileType: [COMMUNITY_METADATA_FILE_TYPE],
@@ -157,7 +157,7 @@ export const getCommunitiesMetadata = async (dotYouClient: DotYouClient) => {
 
   return await Promise.all(
     response.searchResults.map((dsr) =>
-      dsrToCommunityMetadata(dotYouClient, dsr, LOCAL_COMMUNITY_APP_DRIVE, true)
+      dsrToCommunityMetadata(odinClient, dsr, LOCAL_COMMUNITY_APP_DRIVE, true)
     )
   );
 };
@@ -165,14 +165,14 @@ export const getCommunitiesMetadata = async (dotYouClient: DotYouClient) => {
 // Helpers
 
 export const dsrToCommunityMetadata = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<CommunityMetadata> | null> => {
   try {
     const definitionContent = await getContentFromHeaderOrPayload<Partial<CommunityMetadata>>(
-      dotYouClient,
+      odinClient,
       targetDrive,
       dsr,
       includeMetadataHeader

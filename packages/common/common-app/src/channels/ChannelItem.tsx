@@ -1,6 +1,6 @@
 import {
   ApiType,
-  DotYouClient,
+  OdinClient,
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
@@ -26,7 +26,7 @@ import { ActionLink, Alert } from '../ui';
 import { useCollaborativeChannel } from '../hooks/socialFeed/channels/useCollaborativeChannel';
 import { ChannelDefinitionVm } from '../hooks/socialFeed/channels/useChannels';
 import { useManageChannel } from '../hooks/socialFeed/channels/useManageChannel';
-import { useDotYouClientContext } from '../hooks';
+import { useOdinClientContext } from '../hooks';
 
 export const ChannelItem = ({
   chnl: chnlDsr,
@@ -39,7 +39,7 @@ export const ChannelItem = ({
   className?: string;
   isDefaultEdit?: boolean;
 }) => {
-  const identity = useDotYouClientContext().getHostIdentity();
+  const identity = useOdinClientContext().getHostIdentity();
   const isNew = !chnlDsr;
 
   const [isEdit, setIsEdit] = useState(isDefaultEdit);
@@ -323,7 +323,7 @@ export const ChannelItem = ({
             icon={ExternalLink}
             size="square"
             type="mute"
-            href={`${new DotYouClient({ hostIdentity: identity, api: ApiType.Guest }).getRoot()}/posts/${chnl?.slug}`}
+            href={`${new OdinClient({ hostIdentity: identity, api: ApiType.Guest }).getRoot()}/posts/${chnl?.slug}`}
           ></ActionLink>
         </div>
       )}

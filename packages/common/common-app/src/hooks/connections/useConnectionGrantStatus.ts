@@ -1,11 +1,11 @@
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import { fetchCircleMembershipStatus } from '@homebase-id/js-lib/network';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 
 export const useConnectionGrantStatus = ({ odinId }: { odinId?: string }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
-  const fetchStatus = async (odinId: string) => fetchCircleMembershipStatus(dotYouClient, odinId);
+  const fetchStatus = async (odinId: string) => fetchCircleMembershipStatus(odinClient, odinId);
   return {
     fetchStatus: useQuery({
       queryKey: ['connection-grant-status', odinId],

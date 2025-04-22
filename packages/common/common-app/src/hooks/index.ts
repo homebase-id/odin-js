@@ -1,5 +1,5 @@
-export * from './auth/useDotYouClient';
-export * from './auth/useDotYouClientContext';
+export * from './auth/useOdinClient';
+export * from './auth/useOdinClientContext';
 export * from './checkIdentity/useCheckIdentity';
 export * from './circles/useCircle';
 export * from './circles/useCircles';

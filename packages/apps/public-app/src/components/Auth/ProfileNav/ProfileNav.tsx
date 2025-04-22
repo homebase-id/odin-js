@@ -1,20 +1,20 @@
 import { useRef } from 'react';
 import { MouseEventHandler } from 'react';
 import { useState } from 'react';
-import { ConnectionImage, OwnerImage, t, useDotYouClientContext } from '@homebase-id/common-app';
+import { ConnectionImage, OwnerImage, t, useOdinClientContext } from '@homebase-id/common-app';
 import { useAuth } from '../../../hooks/auth/useAuth';
 import { useOutsideTrigger } from '@homebase-id/common-app';
 import { AUTO_LOGON_PARAM, LoginBox } from '../LoginBox/LoginBox';
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient } from '@homebase-id/js-lib/core';
 import { Person, Times } from '@homebase-id/common-app/icons';
 import { useSearchParams } from 'react-router-dom';
 
 const ProfileNav = () => {
   const { logout } = useAuth();
-  const dotYouClient = useDotYouClientContext();
-  const isOwner = dotYouClient.isOwner();
-  const isAuthenticated = dotYouClient.isAuthenticated();
-  const loggedOnIdentity = dotYouClient.getLoggedInIdentity();
+  const odinClient = useOdinClientContext();
+  const isOwner = odinClient.isOwner();
+  const isAuthenticated = odinClient.isAuthenticated();
+  const loggedOnIdentity = odinClient.getLoggedInIdentity();
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -78,7 +78,7 @@ const ProfileNav = () => {
                     <a
                       href={
                         loggedOnIdentity
-                          ? new DotYouClient({
+                          ? new OdinClient({
                               hostIdentity: loggedOnIdentity,
                               api: ApiType.Guest,
                             }).getRoot()

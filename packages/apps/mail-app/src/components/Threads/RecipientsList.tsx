@@ -1,7 +1,7 @@
 import { t, ConnectionName } from '@homebase-id/common-app';
 import { MailConversation, getAllRecipients } from '../../providers/MailProvider';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import React from 'react';
 
 export const RecipientsList = ({
@@ -9,7 +9,7 @@ export const RecipientsList = ({
 }: {
   mailThread: HomebaseFile<MailConversation>[];
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const allRecipients = getAllRecipients(mailThread[0]);
 
   const anyReply = mailThread.some(
@@ -56,7 +56,7 @@ export const RecipientsList = ({
 };
 
 const InnerRecipients = ({ recipients }: { recipients: string[] }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
 
   return recipients.map((recipient, index) => (
     <React.Fragment key={recipient}>

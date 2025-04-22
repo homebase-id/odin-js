@@ -1,10 +1,10 @@
 import { AxiosRequestConfig } from 'axios';
-import { DotYouClient } from '../../../core/DotYouClient';
+import { OdinClient } from '../../../core/OdinClient';
 import { TargetDrive, SystemFileType } from '../../../core/core';
 import { assertIfDefined } from '../../../helpers/DataUtil';
 
 export const deleteFileOverPeer = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   globalTransitId: string,
   recipients?: string[],
@@ -14,7 +14,7 @@ export const deleteFileOverPeer = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GlobalTransitId', globalTransitId);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
 
   const request = {
     fileSystemType: systemFileType || 'Standard',

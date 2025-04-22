@@ -5,14 +5,14 @@ import {
   HybridLink,
   LoadingBlock,
   FEED_ROOT_PATH,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { Persons, Quote } from '@homebase-id/common-app/icons';
 import React from 'react';
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient } from '@homebase-id/js-lib/core';
 
 const ChannelsOverview = ({ className }: { className?: string }) => {
-  const identity = useDotYouClientContext().getHostIdentity();
+  const identity = useOdinClientContext().getHostIdentity();
   const { data: channels, isLoading } = useChannels({ isAuthenticated: true, isOwner: true });
   const { data: collaborativeChannels } = useCollaborativeChannels().fetch;
 
@@ -32,7 +32,7 @@ const ChannelsOverview = ({ className }: { className?: string }) => {
               {channels?.map((chnl) => (
                 <HybridLink
                   key={chnl.fileMetadata.appData.uniqueId}
-                  href={`${new DotYouClient({ hostIdentity: identity, api: ApiType.Guest }).getRoot()}/posts/${chnl?.fileMetadata.appData.content.slug}`}
+                  href={`${new OdinClient({ hostIdentity: identity, api: ApiType.Guest }).getRoot()}/posts/${chnl?.fileMetadata.appData.content.slug}`}
                   className="relative flex w-full flex-row items-center gap-2 bg-background p-1 hover:underline"
                 >
                   <Quote className="h-4 w-4 flex-shrink-0" />
@@ -53,7 +53,7 @@ const ChannelsOverview = ({ className }: { className?: string }) => {
                 {collaborative.channels.map((chnl) => (
                   <HybridLink
                     key={chnl.fileMetadata.appData.uniqueId}
-                    href={`${new DotYouClient({ hostIdentity: collaborative.odinId, api: ApiType.Guest }).getRoot()}/posts/${chnl?.fileMetadata.appData.content.slug}?youauth-logon=${identity}`}
+                    href={`${new OdinClient({ hostIdentity: collaborative.odinId, api: ApiType.Guest }).getRoot()}/posts/${chnl?.fileMetadata.appData.content.slug}?youauth-logon=${identity}`}
                     className="relative flex w-full flex-row items-center gap-2 bg-background p-1 hover:underline"
                   >
                     <Persons className="h-4 w-4 flex-shrink-0" />

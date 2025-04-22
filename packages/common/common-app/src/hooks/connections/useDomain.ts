@@ -1,14 +1,14 @@
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import { getDomainInfo } from '../../provider/network/domainNetwork/DomainProvider';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 
 export const useDomain = ({ domain }: { domain?: string }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchSingle = async ({ domain }: { domain: string }) => {
     if (!domain) return;
 
-    return await getDomainInfo(dotYouClient, domain);
+    return await getDomainInfo(odinClient, domain);
   };
   return {
     fetch: useQuery({

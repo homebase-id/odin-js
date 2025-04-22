@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
 import { hasDebugFlag, jsonStringify64 } from '@homebase-id/js-lib/helpers';
 import { OutgoingConnectionDialog } from '../../../components/Connection/ConnectionDialogs/OutgoingConnectionDialog';
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient } from '@homebase-id/js-lib/core';
 import {
   useIdentityIFollow,
   ActionButton,
@@ -16,7 +16,7 @@ import {
   ActionGroup,
   ConfirmDialog,
   useConnectionGrantStatus,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import {
   House,
@@ -34,7 +34,7 @@ export const IdentityPageMetaAndActions = ({ odinId }: { odinId: string }) => {
   const isSentConnectionOpen = action === 'connect';
   const isBlockConfirmationOpen = action === 'block';
 
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
 
   useEffect(() => {
     if (action === 'connect' && !isSentConnectionOpen) {
@@ -129,7 +129,7 @@ export const IdentityPageMetaAndActions = ({ odinId }: { odinId: string }) => {
       label: t('Open homepage'),
       onClick: () => {
         window.open(
-          `${new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}${isConnected && loggedOnIdentity ? '?youauth-logon=' + loggedOnIdentity : ''}`,
+          `${new OdinClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}${isConnected && loggedOnIdentity ? '?youauth-logon=' + loggedOnIdentity : ''}`,
           '_blank'
         );
       },

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MailHomeHeader } from '../../components/Header/Header';
 import { useMailThread } from '../../hooks/mail/useMailThread';
-import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   ARCHIVE_ARCHIVAL_STATUS,
   MailConversation,
@@ -19,7 +19,7 @@ import {
   highlightQuery,
   MAIL_ROOT_PATH,
   t,
-  useDotYouClientContext,
+  useOdinClientContext,
   useIsConnected,
 } from '@homebase-id/common-app';
 import { MailHistory } from './MailHistory';
@@ -42,7 +42,7 @@ export const MailThread = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const { conversationKey, messageKey, payloadKey } = useParams();
   const previewAttachment = !!messageKey && !!payloadKey;
 
@@ -412,7 +412,7 @@ const MailConnectedState = ({ recipients }: { recipients: string[] }) => {
 
 const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
   const { data: isConnected, isFetched } = useIsConnected(recipient);
-  const host = useDotYouClientContext().getRoot();
+  const host = useOdinClientContext().getRoot();
 
   if (isConnected || !isFetched) return null;
   return (
@@ -420,7 +420,7 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
       <p>
         {t('You can only chat with connected identities, messages will not be delivered to')}:{' '}
         <a
-          href={new DotYouClient({ hostIdentity: recipient, api: ApiType.Guest }).getRoot()}
+          href={new OdinClient({ hostIdentity: recipient, api: ApiType.Guest }).getRoot()}
           className="underline"
         >
           {recipient}

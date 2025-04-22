@@ -1,16 +1,16 @@
-import { ApiType, DotYouClient } from '../../core/DotYouClient';
+import { ApiType, OdinClient } from '../../core/OdinClient';
 
 const root = '/youauthdomain';
 
 export const removeDomainFromCircle = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   membershipGrant: { domain: string; circleId: string }
 ) => {
-  if (dotYouClient.getType() !== ApiType.Owner) {
+  if (odinClient.getType() !== ApiType.Owner) {
     throw new Error('Only owner can get domains');
   }
 
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = root + '/circles/revoke';
 
   return client
@@ -18,18 +18,18 @@ export const removeDomainFromCircle = async (
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export const addDomainToCircle = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   membershipGrant: { domain: string; circleId: string }
 ) => {
-  if (dotYouClient.getType() !== ApiType.Owner) {
+  if (odinClient.getType() !== ApiType.Owner) {
     throw new Error('Only owner can get domains');
   }
 
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = root + '/circles/add';
 
   return client
@@ -37,5 +37,5 @@ export const addDomainToCircle = async (
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };

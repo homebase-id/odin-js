@@ -13,11 +13,11 @@ import { getRichTextFromString } from '../../helpers/richTextHelper';
 import { UseCommentsVal } from './comments/useComments';
 
 import { CommentReaction, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 
 export const useReaction = () => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const saveCommentData = async ({
     context,
@@ -28,7 +28,7 @@ export const useReaction = () => {
       | Omit<HomebaseFile<CommentReaction>, 'serverMetadata'>
       | Omit<NewHomebaseFile<RawReactionContent>, 'serverMetadata'>;
   }) => {
-    return await saveComment(dotYouClient, context, {
+    return await saveComment(odinClient, context, {
       ...commentData,
       fileMetadata: {
         ...commentData.fileMetadata,
@@ -52,7 +52,7 @@ export const useReaction = () => {
     context: ReactionContext;
     commentFile: HomebaseFile<CommentReaction>;
   }) => {
-    return await removeComment(dotYouClient, context, commentFile);
+    return await removeComment(odinClient, context, commentFile);
   };
 
   const saveEmojiReactionData = async ({
@@ -62,7 +62,7 @@ export const useReaction = () => {
     emojiData: RawReactionContent;
     context: ReactionContext;
   }) => {
-    return await saveEmojiReaction(dotYouClient, emojiData, context);
+    return await saveEmojiReaction(odinClient, emojiData, context);
   };
 
   const removeEmojiReactionData = async ({
@@ -72,7 +72,7 @@ export const useReaction = () => {
     emojiData: RawReactionContent;
     context: ReactionContext;
   }) => {
-    return await removeEmojiReaction(dotYouClient, emojiData, context);
+    return await removeEmojiReaction(odinClient, emojiData, context);
   };
 
   return {

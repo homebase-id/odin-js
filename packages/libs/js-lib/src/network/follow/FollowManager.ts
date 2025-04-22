@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../core/DotYouClient';
+import { OdinClient } from '../../core/OdinClient';
 import { CursoredResult } from '../../core/DriveData/Query/DriveQueryTypes';
 import { TargetDrive } from '../../core/core';
 import { stringifyToQueryParams } from '../../helpers/DataUtil';
@@ -16,11 +16,11 @@ export interface UnfollowRequest {
 const root = '/followers';
 
 export const fetchFollowing = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   cursorState?: string,
   pageSize?: number
 ): Promise<CursoredResult<string[]> | undefined> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
 
   const params = {
     cursor: cursorState,
@@ -33,14 +33,14 @@ export const fetchFollowing = async (
     .then((response) => {
       return { results: response.data.results, cursorState: response.data.cursor };
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export const fetchIdentityIFollow = (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string
 ): Promise<FollowRequest> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = root + `/IdentityIFollow?odinId=${odinId}`;
 
   return client
@@ -48,15 +48,15 @@ export const fetchIdentityIFollow = (
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export const createOrUpdateFollow = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   request: FollowRequest,
   synchronizeFeedHistoryNow?: boolean
 ): Promise<boolean | undefined> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = root + `/follow`;
 
   return client
@@ -66,15 +66,15 @@ export const createOrUpdateFollow = async (
     })
     .catch((err) => {
       if (err?.response?.data?.errorCode === 'identityAlreadyFollowed') return true;
-      return dotYouClient.handleErrorResponse(err);
+      return odinClient.handleErrorResponse(err);
     });
 };
 
 export const syncFeedHistoryForFollowing = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   request: { odinId: string }
 ): Promise<boolean | undefined> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = root + `/sync-feed-history`;
 
   return client
@@ -82,14 +82,14 @@ export const syncFeedHistoryForFollowing = async (
     .then(() => {
       return true;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export const Unfollow = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   request: UnfollowRequest
 ): Promise<boolean | undefined> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = root + `/unfollow`;
 
   return client
@@ -97,15 +97,15 @@ export const Unfollow = async (
     .then(() => {
       return true;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export const fetchFollowers = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   cursorState?: string,
   pageSize?: number
 ): Promise<CursoredResult<string[]> | undefined> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
 
   const params = {
     cursor: cursorState,
@@ -118,14 +118,14 @@ export const fetchFollowers = async (
     .then((response) => {
       return { results: response.data.results, cursorState: response.data.cursor };
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export const fetchFollower = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string
 ): Promise<FollowRequest> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = root + `/follower?odinId=${odinId}`;
 
   return client
@@ -133,13 +133,13 @@ export const fetchFollower = async (
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export const fetchFollowDetail = async (
-  dotYouClient: DotYouClient
+  odinClient: OdinClient
 ): Promise<FollowRequest | null> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
 
   const url = root + `/followerconfiguration`;
 
@@ -148,5 +148,5 @@ export const fetchFollowDetail = async (
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };

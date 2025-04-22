@@ -1,12 +1,12 @@
 import { AxiosRequestConfig } from 'axios';
 import { assertIfDefined } from '../../../helpers/DataUtil';
-import { DotYouClient } from '../../DotYouClient';
+import { OdinClient } from '../../OdinClient';
 import { SystemFileType } from './DriveFileTypes';
 import { TargetDrive } from './DriveFileTypes';
 
 /// Delete methods:
 export const deleteFile = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   fileId: string,
   recipients?: string[],
@@ -17,7 +17,7 @@ export const deleteFile = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
-  const client = dotYouClient.createAxiosClient({
+  const client = odinClient.createAxiosClient({
     systemFileType,
   });
 
@@ -45,7 +45,7 @@ export const deleteFile = async (
 };
 
 export const deleteFiles = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   fileIds: string[],
   recipients?: string[],
@@ -55,7 +55,7 @@ export const deleteFiles = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileIds', fileIds);
 
-  const client = dotYouClient.createAxiosClient({
+  const client = odinClient.createAxiosClient({
     systemFileType,
   });
 
@@ -83,7 +83,7 @@ export const deleteFiles = async (
 };
 
 export const deleteFilesByGroupId = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   groupIds: string[],
   recipients?: string[],
@@ -93,7 +93,7 @@ export const deleteFilesByGroupId = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GroupIds', groupIds);
 
-  const client = dotYouClient.createAxiosClient({
+  const client = odinClient.createAxiosClient({
     systemFileType,
   });
 

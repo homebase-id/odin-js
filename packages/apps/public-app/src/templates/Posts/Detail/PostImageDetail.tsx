@@ -2,7 +2,7 @@ import {
   PostImageDetailCard,
   t,
   useChannel,
-  useDotYouClientContext,
+  useOdinClientContext,
   usePost,
 } from '@homebase-id/common-app';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -18,9 +18,9 @@ const PostImageDetail = () => {
     postKey,
   });
 
-  const dotYouClient = useDotYouClientContext();
-  const isOwner = dotYouClient.isOwner();
-  const isAuthenticated = dotYouClient.isAuthenticated();
+  const odinClient = useOdinClientContext();
+  const isOwner = odinClient.isOwner();
+  const isAuthenticated = odinClient.isAuthenticated();
   const [isLogin, setIsLogin] = useState(false);
   const location = useLocation();
   const state = location.state as Record<string, unknown> | undefined;

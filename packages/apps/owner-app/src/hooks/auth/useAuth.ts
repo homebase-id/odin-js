@@ -15,7 +15,7 @@ import {
   STORAGE_IDENTITY_KEY,
   logoutOwnerAndAllApps,
   logoutPublicSession,
-  useDotYouClient,
+  useOdinClient,
 } from '@homebase-id/common-app';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -29,7 +29,7 @@ export const RETURN_URL_PARAM = 'returnUrl';
 export const HOME_PATH = '/owner';
 
 export const useValidateAuthorization = () => {
-  const { hasSharedSecret } = useDotYouClient();
+  const { hasSharedSecret } = useOdinClient();
   const { data: hasValidToken, isFetched } = useVerifyToken();
 
   useEffect(() => {

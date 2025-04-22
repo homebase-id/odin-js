@@ -15,7 +15,7 @@ import {
 } from '@homebase-id/js-lib/public';
 
 import { usePostsInfiniteReturn } from './usePostsInfinite';
-import { DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
+import { OdinClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { useChannel } from '../channels/useChannel';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import {
@@ -23,7 +23,7 @@ import {
   getPostOverPeer,
   RecentsFromConnectionsReturn,
 } from '@homebase-id/js-lib/peer';
-import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../../auth/useOdinClientContext';
 
 type usePostProps = {
   odinId?: string;
@@ -37,12 +37,12 @@ export const usePost = ({ odinId, channelKey, postKey }: usePostProps = {}) => {
     channelKey,
   }).fetch;
 
-  const dotYouClient = useDotYouClientContext();
-  const isOwner = dotYouClient.isOwner();
+  const odinClient = useOdinClientContext();
+  const isOwner = odinClient.isOwner();
   const queryClient = useQueryClient();
 
   return useQuery(
-    getPostQueryOptions(dotYouClient, queryClient, isOwner, odinId, channel || undefined, postKey)
+    getPostQueryOptions(odinClient, queryClient, isOwner, odinId, channel || undefined, postKey)
   );
 };
 
@@ -59,13 +59,13 @@ const getLocalCachedBlogs = (queryClient: QueryClient, channelId?: string) => {
 };
 
 const fetchBlog = async ({
-  dotYouClient,
+  odinClient,
   queryClient,
   odinId,
   channel,
   postKey,
 }: {
-  dotYouClient: DotYouClient;
+  odinClient: OdinClient;
   queryClient: QueryClient;
 
   odinId?: string;
@@ -74,7 +74,7 @@ const fetchBlog = async ({
 }) => {
   if (!channel || !postKey) return null;
 
-  if (!odinId || odinId === dotYouClient.getHostIdentity()) {
+  if (!odinId || odinId === odinClient.getHostIdentity()) {
     // Search in cache
     const localBlogs = getLocalCachedBlogs(queryClient, channel.fileMetadata.appData.uniqueId);
     if (localBlogs) {
@@ -90,18 +90,18 @@ const fetchBlog = async ({
 
     const postFile =
       (await getPostBySlug(
-        dotYouClient,
+        odinClient,
         channel.fileMetadata.appData.uniqueId as string,
         postKey
       )) ||
-      (await getPost(dotYouClient, channel.fileMetadata.appData.uniqueId as string, postKey)) ||
+      (await getPost(odinClient, channel.fileMetadata.appData.uniqueId as string, postKey)) ||
       (await getPostByFileId(
-        dotYouClient,
+        odinClient,
         channel.fileMetadata.appData.uniqueId as string,
         postKey
       )) ||
       (await getPostByGlobalTransitId(
-        dotYouClient,
+        odinClient,
         channel.fileMetadata.appData.uniqueId as string,
         postKey
       ));
@@ -125,13 +125,13 @@ const fetchBlog = async ({
     }
     return (
       (await getPostBySlugOverPeer(
-        dotYouClient,
+        odinClient,
         odinId,
         channel.fileMetadata.appData.uniqueId as string,
         postKey
       )) ||
       (await getPostOverPeer(
-        dotYouClient,
+        odinClient,
         odinId,
         channel.fileMetadata.appData.uniqueId as string,
         postKey
@@ -141,14 +141,14 @@ const fetchBlog = async ({
 };
 
 export const getPostQueryOptions: (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   queryClient: QueryClient,
   isOwner: boolean,
   odinId: string | undefined,
   channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition> | undefined,
   postKey: string | undefined
 ) => UndefinedInitialDataOptions<HomebaseFile<PostContent> | null> = (
-  dotYouClient,
+  odinClient,
   queryClient,
   isOwner,
   odinId,
@@ -157,12 +157,12 @@ export const getPostQueryOptions: (
 ) => ({
   queryKey: [
     'post',
-    odinId || dotYouClient.getHostIdentity(),
+    odinId || odinClient.getHostIdentity(),
     channel?.fileMetadata.appData.uniqueId,
     postKey,
   ],
   queryFn: () =>
-    fetchBlog({ dotYouClient, queryClient, odinId, channel, postKey: postKey as string }),
+    fetchBlog({ odinClient, queryClient, odinId, channel, postKey: postKey as string }),
   enabled: !!channel && !!postKey,
   staleTime: isOwner ? 0 : 1000 * 60 * 10, // 10 minutes
 });

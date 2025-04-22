@@ -4,15 +4,15 @@ import { HomePageAttributes, HomePageConfig } from '@homebase-id/js-lib/public';
 import { AttributeVm } from './useAttributes';
 import { AttributeDefinitions } from './AttributeDefinitions';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 export const useHomeAttributes = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchTheme = async () => {
     const foundThemeAttributes = (
       await getProfileAttributes(
-        dotYouClient,
+        odinClient,
         HomePageConfig.DefaultDriveId,
         undefined,
         [HomePageAttributes.Theme],

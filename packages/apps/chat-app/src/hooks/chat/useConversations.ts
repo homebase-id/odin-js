@@ -4,7 +4,7 @@ import {
   getConversations,
 } from '../../providers/ConversationProvider';
 import { InfiniteData, QueryClient, useInfiniteQuery } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { invalidateConversation, updateCacheConversation } from './useConversation';
@@ -18,12 +18,12 @@ export interface ChatConversationsReturn {
 
 const PAGE_SIZE = 500;
 export const useConversations = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchConversations = async (
     cursorState: string | undefined
   ): Promise<ChatConversationsReturn | null> =>
-    await getConversations(dotYouClient, cursorState, PAGE_SIZE);
+    await getConversations(odinClient, cursorState, PAGE_SIZE);
 
   return {
     all: useInfiniteQuery({
@@ -48,8 +48,8 @@ export const insertNewConversation = (
     const isNewFile =
       isUpdate === undefined
         ? !data.pages.some((page) =>
-            page.searchResults.some((msg) => stringGuidsEqual(msg?.fileId, newConversation.fileId))
-          )
+          page.searchResults.some((msg) => stringGuidsEqual(msg?.fileId, newConversation.fileId))
+        )
         : !isUpdate;
 
     return {
@@ -59,23 +59,23 @@ export const insertNewConversation = (
         searchResults: isNewFile
           ? index === 0
             ? [
-                newConversation,
-                // There shouldn't be any duplicates for a fileAdded, but just in case
-                ...page.searchResults.filter(
-                  (msg) => !stringGuidsEqual(msg?.fileId, newConversation.fileId)
-                ),
-              ].sort((a, b) => b.fileMetadata.created - a.fileMetadata.created) // Re-sort the first page, as the new message might be older than the first message in the page;
-            : page.searchResults.filter(
+              newConversation,
+              // There shouldn't be any duplicates for a fileAdded, but just in case
+              ...page.searchResults.filter(
                 (msg) => !stringGuidsEqual(msg?.fileId, newConversation.fileId)
-              ) // There shouldn't be any duplicates for a fileAdded, but just in case
+              ),
+            ].sort((a, b) => b.fileMetadata.created - a.fileMetadata.created) // Re-sort the first page, as the new message might be older than the first message in the page;
+            : page.searchResults.filter(
+              (msg) => !stringGuidsEqual(msg?.fileId, newConversation.fileId)
+            ) // There shouldn't be any duplicates for a fileAdded, but just in case
           : page.searchResults.map((conversation) =>
-              stringGuidsEqual(
-                conversation.fileMetadata.appData.uniqueId,
-                newConversation.fileMetadata.appData.uniqueId
-              )
-                ? newConversation
-                : conversation
-            ),
+            stringGuidsEqual(
+              conversation.fileMetadata.appData.uniqueId,
+              newConversation.fileMetadata.appData.uniqueId
+            )
+              ? newConversation
+              : conversation
+          ),
       })),
     };
   });
@@ -107,11 +107,11 @@ export const updateCacheConversations = (
     }>
   ) =>
     | InfiniteData<{
-        searchResults: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
-        cursorState: string;
-        queryTime: number;
-        includeMetadataHeader: boolean;
-      }>
+      searchResults: HomebaseFile<UnifiedConversation, ConversationMetadata>[];
+      cursorState: string;
+      queryTime: number;
+      includeMetadataHeader: boolean;
+    }>
     | undefined
 ) => {
   const existingConversations = queryClient.getQueryData<

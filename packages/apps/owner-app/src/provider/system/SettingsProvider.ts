@@ -1,4 +1,4 @@
-import { DotYouClient } from '@homebase-id/js-lib/core';
+import { OdinClient } from '@homebase-id/js-lib/core';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 
 export interface uiSettings extends Record<string, unknown> {
@@ -9,8 +9,8 @@ const root = '/config';
 
 //Handles management of Contacts
 
-export const getFlags = async (dotYouClient: DotYouClient) => {
-  const client = dotYouClient.createAxiosClient();
+export const getFlags = async (odinClient: OdinClient) => {
+  const client = odinClient.createAxiosClient();
   const url = root + '/system/flags';
 
   return await client.post<Record<string, boolean>>(url).then((response) => {
@@ -18,8 +18,8 @@ export const getFlags = async (dotYouClient: DotYouClient) => {
   });
 };
 
-export const updateFlag = async (dotYouClient: DotYouClient, name: string, value: boolean) => {
-  const client = dotYouClient.createAxiosClient();
+export const updateFlag = async (odinClient: OdinClient, name: string, value: boolean) => {
+  const client = odinClient.createAxiosClient();
   const url = root + '/system/updateflag';
 
   return await client
@@ -29,8 +29,8 @@ export const updateFlag = async (dotYouClient: DotYouClient, name: string, value
     });
 };
 
-export const getSettings = async (dotYouClient: DotYouClient) => {
-  const client = dotYouClient.createAxiosClient();
+export const getSettings = async (odinClient: OdinClient) => {
+  const client = odinClient.createAxiosClient();
   const url = root + '/ownerapp/settings/list';
 
   return await client.post<{ settings: uiSettings }>(url).then((response) => {
@@ -45,8 +45,8 @@ export const getSettings = async (dotYouClient: DotYouClient) => {
   });
 };
 
-export const updateSettings = async (dotYouClient: DotYouClient, settings: uiSettings) => {
-  const client = dotYouClient.createAxiosClient();
+export const updateSettings = async (odinClient: OdinClient, settings: uiSettings) => {
+  const client = odinClient.createAxiosClient();
   const url = root + '/ownerapp/settings/update';
 
   const requestObj: uiSettings = {};

@@ -18,48 +18,48 @@ import { formatGuidId } from '@homebase-id/js-lib/helpers';
 import { invalidateDomainInfo } from '../connections/useDomain';
 import { invalidateConnectionInfo } from '../connections/useConnectionInfo';
 import { invalidateConnectionGrantStatus } from '../connections/useConnectionGrantStatus';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 
 export const useCircle = (props?: { circleId?: string }) => {
   const { circleId } = props || {};
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const fetch = async ({ circleId }: { circleId: string }) => {
     if (!circleId) {
       return;
     }
-    return await getCircle(dotYouClient, circleId);
+    return await getCircle(odinClient, circleId);
   };
 
   const fetchMembers = async ({ circleId }: { circleId: string }) => {
     if (!circleId) {
       return;
     }
-    return await fetchMembersOfCircle(dotYouClient, circleId);
+    return await fetchMembersOfCircle(odinClient, circleId);
   };
 
   const createOrUpdate = async (circleDefinition: CircleDefinition) => {
     if (circleDefinition.id) {
-      return await updateCircleDefinition(dotYouClient, circleDefinition);
+      return await updateCircleDefinition(odinClient, circleDefinition);
     } else {
-      return await createCircleDefinition(dotYouClient, circleDefinition);
+      return await createCircleDefinition(odinClient, circleDefinition);
     }
   };
 
   const disableCircleInternal = async ({ circleId }: { circleId: string }) => {
-    return await disableCircle(dotYouClient, circleId);
+    return await disableCircle(odinClient, circleId);
   };
 
   const enableCircleInternal = async ({ circleId }: { circleId: string }) => {
-    return await enableCircle(dotYouClient, circleId);
+    return await enableCircle(odinClient, circleId);
   };
 
   const provideGrants = async ({ circleId, odinIds }: { circleId: string; odinIds: string[] }) => {
     return await Promise.all(
       odinIds.map(
         async (odinId) =>
-          await addMemberToCircle(dotYouClient, { circleId: circleId, odinId: odinId })
+          await addMemberToCircle(odinClient, { circleId: circleId, odinId: odinId })
       )
     );
   };
@@ -73,7 +73,7 @@ export const useCircle = (props?: { circleId?: string }) => {
   }) => {
     return await Promise.all(
       domains.map(
-        async (domain) => await removeDomainFromCircle(dotYouClient, { circleId: circleId, domain })
+        async (domain) => await removeDomainFromCircle(odinClient, { circleId: circleId, domain })
       )
     );
   };
@@ -88,25 +88,25 @@ export const useCircle = (props?: { circleId?: string }) => {
     return await Promise.all(
       odinIds.map(
         async (odinId) =>
-          await removeMemberFromCircle(dotYouClient, { circleId: circleId, odinId: odinId })
+          await removeMemberFromCircle(odinClient, { circleId: circleId, odinId: odinId })
       )
     );
   };
 
   const provideGrant = async ({ circleId, odinId }: { circleId: string; odinId: string }) =>
-    await addMemberToCircle(dotYouClient, { circleId: circleId, odinId: odinId });
+    await addMemberToCircle(odinClient, { circleId: circleId, odinId: odinId });
 
   const revokeGrant = async ({ circleId, odinId }: { circleId: string; odinId: string }) =>
-    await removeMemberFromCircle(dotYouClient, { circleId: circleId, odinId: odinId });
+    await removeMemberFromCircle(odinClient, { circleId: circleId, odinId: odinId });
 
   const provideDomainGrant = async ({ circleId, domain }: { circleId: string; domain: string }) =>
-    await addDomainToCircle(dotYouClient, { circleId: circleId, domain: domain });
+    await addDomainToCircle(odinClient, { circleId: circleId, domain: domain });
 
   const revokeDomainGrant = async ({ circleId, domain }: { circleId: string; domain: string }) =>
-    await removeDomainFromCircle(dotYouClient, { circleId: circleId, domain: domain });
+    await removeDomainFromCircle(odinClient, { circleId: circleId, domain: domain });
 
   const removeCircleInternal = async ({ circleId }: { circleId: string }) =>
-    await removeCircle(dotYouClient, circleId);
+    await removeCircle(odinClient, circleId);
 
   return {
     fetch: useQuery({

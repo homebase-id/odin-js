@@ -9,7 +9,7 @@ import {
   ConnectionName,
   ErrorBoundary,
   t,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { getNewXorId, isTouchDevice, tryJsonParse } from '@homebase-id/js-lib/helpers';
@@ -298,7 +298,7 @@ const ChannelItem = memo(
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const { odinKey, communityKey } = useParams();
 
-    const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+    const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
     const channelId = channel.fileMetadata.appData.uniqueId;
     const href = `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelId}`;
     const isActive = !!useMatch({ path: href, end: false });
@@ -461,8 +461,8 @@ const DirectMessageItem = memo(
     if (!recipient) return null;
 
     const { odinKey, communityKey } = useParams();
-    const dotYouClient = useDotYouClientContext();
-    const identity = dotYouClient.getHostIdentity();
+    const odinClient = useOdinClientContext();
+    const identity = odinClient.getHostIdentity();
     const href = `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/direct/${recipient}`;
     const isActive = !!useMatch({ path: href });
 
@@ -498,7 +498,7 @@ const DirectMessageItem = memo(
     }, [messages, conversationMetadata]);
 
     useEffect(() => setUnreadCount(recipient, unreadCount || 0), [unreadCount]);
-    const isYou = recipient === dotYouClient.getHostIdentity();
+    const isYou = recipient === odinClient.getHostIdentity();
 
     return (
       <Link

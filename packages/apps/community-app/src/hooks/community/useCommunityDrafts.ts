@@ -5,10 +5,10 @@ import {
   QueryClient,
   UndefinedInitialDataOptions,
 } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import {
   DeletedHomebaseFile,
-  DotYouClient,
+  OdinClient,
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
@@ -27,7 +27,7 @@ export const useCommunityDrafts = (props?: {
   communityId: string | undefined;
 }) => {
   const { communityId, odinId } = props || {};
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const saveDrafts = async ({
@@ -46,7 +46,7 @@ export const useCommunityDrafts = (props?: {
       maxRetries--;
 
       const serverVersion = await getCommunityDrafts(
-        dotYouClient,
+        odinClient,
         drafts.fileMetadata.appData.content.communityId
       );
       if (!serverVersion) {
@@ -56,7 +56,7 @@ export const useCommunityDrafts = (props?: {
       const newlyMerged = mergeDrafts(drafts, serverVersion);
       insertNewcommunityDrafts(queryClient, newlyMerged);
 
-      return await uploadCommunityDrafts(dotYouClient, newlyMerged, onVersionConflict);
+      return await uploadCommunityDrafts(odinClient, newlyMerged, onVersionConflict);
     };
 
     // We cleanup the drafts only for the inital save; When we retry we want to keep the drafts to avoid bad merging
@@ -64,12 +64,12 @@ export const useCommunityDrafts = (props?: {
     draftsCopy.fileMetadata.appData.content.drafts = cleanupDrafts(
       draftsCopy.fileMetadata.appData.content.drafts || {}
     );
-    return await uploadCommunityDrafts(dotYouClient, draftsCopy, onVersionConflict);
+    return await uploadCommunityDrafts(odinClient, draftsCopy, onVersionConflict);
   };
 
   return {
     single: useQuery(
-      getCommunityDraftsQueryOptions(dotYouClient, queryClient, odinId, communityId)
+      getCommunityDraftsQueryOptions(odinClient, queryClient, odinId, communityId)
     ),
     update: useMutation({
       mutationFn: saveDrafts,
@@ -116,12 +116,12 @@ export const useCommunityDrafts = (props?: {
 };
 
 const getDrafts = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   queryClient: QueryClient,
   odinId: string,
   communityId: string
 ) => {
-  const serverFile = await getCommunityDrafts(dotYouClient, communityId);
+  const serverFile = await getCommunityDrafts(odinClient, communityId);
   if (!serverFile) {
     const newDrafts: NewHomebaseFile<CommunityDrafts> = {
       fileMetadata: {
@@ -149,16 +149,16 @@ const getDrafts = async (
 };
 
 export const getCommunityDraftsQueryOptions: (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   queryClient: QueryClient,
   odinId: string | undefined,
   communityId: string | undefined
 ) => UndefinedInitialDataOptions<
   HomebaseFile<CommunityDrafts> | NewHomebaseFile<CommunityDrafts> | null
-> = (dotYouClient, queryClient, odinId, communityId) => ({
+> = (odinClient, queryClient, odinId, communityId) => ({
   queryKey: ['community-drafts', formatGuidId(communityId)],
   queryFn: () =>
-    getDrafts(dotYouClient, queryClient, odinId as string, formatGuidId(communityId) as string),
+    getDrafts(odinClient, queryClient, odinId as string, formatGuidId(communityId) as string),
   enabled: !!odinId && !!communityId,
   staleTime: 1000 * 60 * 5, // 5 minutes
 });
