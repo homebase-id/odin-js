@@ -1,13 +1,14 @@
 import { isEmptyRichText, isRichTextEqual, useDebounce } from '@homebase-id/common-app';
 import { HomebaseFile, RichText, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { useState, useEffect, memo } from 'react';
-import {
-  insertNewcommunityMetadata,
-  useCommunityMetadata,
-} from '../../../../hooks/community/useCommunityMetadata';
 import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
-import { CommunityMetadata, Draft } from '../../../../providers/CommunityMetadataProvider';
+import { Draft } from '../../../../providers/CommunityMetadataProvider';
 import { useQueryClient } from '@tanstack/react-query';
+import {
+  insertNewcommunityDrafts,
+  useCommunityDrafts,
+} from '../../../../hooks/community/useCommunityDrafts';
+import { CommunityDrafts } from '../../../../providers/CommunityDraftsProvider';
 
 export const DraftSaver = memo(
   ({
@@ -21,16 +22,16 @@ export const DraftSaver = memo(
   }) => {
     const queryClient = useQueryClient();
     const {
-      single: { data: metadata },
-      update: { mutate: updateMetadata },
-    } = useCommunityMetadata({
+      single: { data: communityDrafts },
+      update: { mutate: updateCommunityDrafts },
+    } = useCommunityDrafts({
       odinId: community?.fileMetadata.senderOdinId,
       communityId: community?.fileMetadata.appData.uniqueId,
     });
 
     const debouncedSave = useDebounce(
       () => {
-        metadata && updateMetadata({ metadata: metadata });
+        communityDrafts && updateCommunityDrafts({ drafts: communityDrafts });
       },
       {
         timeoutMillis: 1000,
@@ -39,13 +40,16 @@ export const DraftSaver = memo(
 
     const [updatedAt, setUpdatedAt] = useState<number | undefined>(undefined);
     useEffect(() => {
+      const drafts = communityDrafts?.fileMetadata.appData.content.drafts || {};
+      if (drafts && draftKey && isRichTextEqual(drafts[draftKey]?.message, message)) return;
+
       setUpdatedAt(new Date().getTime());
     }, [message]);
 
     useEffect(() => {
-      const drafts = metadata?.fileMetadata.appData.content.drafts || {};
+      const drafts = communityDrafts?.fileMetadata.appData.content.drafts || {};
 
-      if (metadata && draftKey && updatedAt) {
+      if (communityDrafts && draftKey && updatedAt) {
         if (
           isRichTextEqual(drafts[draftKey]?.message, message) ||
           (drafts[draftKey] && drafts[draftKey]?.updatedAt >= updatedAt)
@@ -67,29 +71,47 @@ export const DraftSaver = memo(
           delete newDrafts[draftKey];
         }
 
-        const newMeta: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata> = {
-          ...metadata,
-          fileMetadata: {
-            ...metadata?.fileMetadata,
-            appData: {
-              ...metadata?.fileMetadata.appData,
-              content: { ...metadata?.fileMetadata.appData.content, drafts: newDrafts },
+        const newCommunityDrafts: NewHomebaseFile<CommunityDrafts> | HomebaseFile<CommunityDrafts> =
+          {
+            ...communityDrafts,
+            fileMetadata: {
+              ...communityDrafts?.fileMetadata,
+              appData: {
+                ...communityDrafts?.fileMetadata.appData,
+                content: { ...communityDrafts?.fileMetadata.appData.content, drafts: newDrafts },
+              },
             },
-          },
-        };
+          };
 
-        if (emptiedDraft === undefined || message === undefined || message.length === 0) {
-          insertNewcommunityMetadata(queryClient, newMeta as HomebaseFile<CommunityMetadata>);
-          updateMetadata({ metadata: newMeta });
+        if (isEmptyRichText(message) || message === undefined || message.length === 0) {
+          insertNewcommunityDrafts(
+            queryClient,
+            newCommunityDrafts as HomebaseFile<CommunityDrafts>
+          );
+          updateCommunityDrafts({ drafts: newCommunityDrafts });
           return;
         } else {
-          insertNewcommunityMetadata(queryClient, newMeta as HomebaseFile<CommunityMetadata>);
+          insertNewcommunityDrafts(
+            queryClient,
+            newCommunityDrafts as HomebaseFile<CommunityDrafts>
+          );
           debouncedSave();
         }
       }
-    }, [metadata, draftKey, message, debouncedSave]);
+    }, [communityDrafts, draftKey, message, debouncedSave]);
 
     return null;
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.draftKey === nextProps.draftKey &&
+      prevProps.community?.fileMetadata.appData.uniqueId ===
+        nextProps.community?.fileMetadata.appData.uniqueId &&
+      prevProps.community?.fileMetadata.senderOdinId ===
+        nextProps.community?.fileMetadata.senderOdinId &&
+      // Avoid re-rendering if the message is the same
+      isRichTextEqual(prevProps.message, nextProps.message)
+    );
   }
 );
 

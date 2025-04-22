@@ -74,7 +74,7 @@ export const useContact = ({
     ) {
       return contactBookContact;
     } else if (contactBookContact)
-      console.log(
+      console.debug(
         `[${odinId}] [${!hasCache ? 'Explicit' : 'Implicit'}] Ignoring contact book record`,
         contactBookContact
       );
