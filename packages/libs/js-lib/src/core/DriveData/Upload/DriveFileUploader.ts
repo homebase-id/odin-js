@@ -121,7 +121,7 @@ export const patchFile = async (
     options?: {
         axiosConfig?: AxiosRequestConfig;
     }
-): Promise<UpdateResult | UploadResult | void> => {
+): Promise<UpdateResult | void> => {
     isDebug &&
         console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/update`).pathname, {
             instructions,
