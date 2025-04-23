@@ -6,10 +6,13 @@ import {
   HomebaseFile,
   MAX_HEADER_CONTENT_BYTES,
   NewHomebaseFile,
+  patchFile,
   PayloadFile,
   RichText,
   SecurityGroupType,
   TargetDrive,
+  UpdateLocalInstructionSet,
+  UpdateResult,
   uploadFile,
   UploadFileMetadata,
   UploadInstructionSet,
@@ -45,18 +48,11 @@ export const COMMUNITY_DRAFTS_FILE_TYPE = 7012;
 export const uploadCommunityDrafts = async (
   dotYouClient: DotYouClient,
   definition: NewHomebaseFile<CommunityDrafts> | HomebaseFile<CommunityDrafts>,
-  onVersionConflicht?: () => Promise<void | UploadResult> | void
-): Promise<UploadResult | undefined> => {
+  onVersionConflicht?: () => Promise<void | UploadResult | UpdateResult> | void
+): Promise<UploadResult | UpdateResult | undefined> => {
   if (!definition.fileMetadata.appData.uniqueId) {
     throw new Error('CommunityDrafts must have a uniqueId');
   }
-
-  const instructionSet: UploadInstructionSet = {
-    storageOptions: {
-      overwriteFileId: definition.fileId,
-      drive: LOCAL_COMMUNITY_APP_DRIVE,
-    },
-  };
 
   const payloads: PayloadFile[] = [];
 
@@ -95,6 +91,32 @@ export const uploadCommunityDrafts = async (
     },
   };
 
+  if (definition.fileId) {
+    const existingDefiniton = definition as HomebaseFile<CommunityDrafts, string>;
+    const encryptedKeyHeader = existingDefiniton.sharedSecretEncryptedKeyHeader;
+
+    const patchInstructions: UpdateLocalInstructionSet = {
+      file: {
+        fileId: existingDefiniton.fileId,
+        targetDrive: LOCAL_COMMUNITY_APP_DRIVE,
+      },
+      versionTag: existingDefiniton.fileMetadata.versionTag,
+      locale: 'local'
+    }
+
+    const patchResult = await patchFile(dotYouClient, encryptedKeyHeader, patchInstructions, metadata, payloads, undefined, undefined, onVersionConflicht as () => Promise<void | UpdateResult>,
+    );
+    if (!patchResult) throw new Error(`Upload failed`);
+    return patchResult;
+  }
+
+  const instructionSet: UploadInstructionSet = {
+    storageOptions: {
+      overwriteFileId: definition.fileId,
+      drive: LOCAL_COMMUNITY_APP_DRIVE,
+    },
+  };
+
   const result = await uploadFile(
     dotYouClient,
     instructionSet,
@@ -102,7 +124,7 @@ export const uploadCommunityDrafts = async (
     payloads,
     undefined,
     true,
-    onVersionConflicht
+    onVersionConflicht as () => Promise<void | UploadResult>
   );
   if (!result) throw new Error(`Upload failed`);
 
