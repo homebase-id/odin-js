@@ -16,8 +16,8 @@ import {
   UploadResult,
 } from '@homebase-id/js-lib/core';
 import {
+  hashGuidId,
   jsonStringify64,
-  stringGuidsEqual,
   stringToUint8Array,
   uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
@@ -49,15 +49,6 @@ export const uploadCommunityDrafts = async (
 ): Promise<UploadResult | undefined> => {
   if (!definition.fileMetadata.appData.uniqueId) {
     throw new Error('CommunityDrafts must have a uniqueId');
-  }
-
-  if (
-    !stringGuidsEqual(
-      definition.fileMetadata.appData.uniqueId,
-      definition.fileMetadata.appData.content.communityId
-    )
-  ) {
-    throw new Error('CommunityDrafts must have a uniqueId that matches the communityId');
   }
 
   const instructionSet: UploadInstructionSet = {
@@ -94,7 +85,7 @@ export const uploadCommunityDrafts = async (
     allowDistribution: false,
     appData: {
       tags: definition.fileMetadata.appData.tags,
-      uniqueId: definition.fileMetadata.appData.uniqueId,
+      uniqueId: await hashGuidId(definition.fileMetadata.appData.uniqueId),
       fileType: COMMUNITY_DRAFTS_FILE_TYPE,
       content: content,
     },
@@ -125,7 +116,7 @@ export const getCommunityDrafts = async (
   const header = await getFileHeaderByUniqueId(
     dotYouClient,
     LOCAL_COMMUNITY_APP_DRIVE,
-    communityId
+    await hashGuidId(communityId)
   );
 
   if (!header) return null;
