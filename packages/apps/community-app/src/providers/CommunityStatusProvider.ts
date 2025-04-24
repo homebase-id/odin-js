@@ -104,7 +104,6 @@ const internalSaveStatusFile = async (
     const instructions: UploadInstructionSet = {
       storageOptions: {
         drive: targetDrive,
-        overwriteFileId: status.fileId,
       },
     };
 

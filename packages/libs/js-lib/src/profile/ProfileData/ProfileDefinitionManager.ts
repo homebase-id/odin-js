@@ -109,7 +109,7 @@ export const saveProfileDefinition = async (
   const driveMetadata = 'Drive that stores: ' + definition.name;
   const targetDrive = GetTargetDriveFromProfileId(definition.profileId);
   await ensureDrive(odinClient, targetDrive, definition.name, driveMetadata, true);
-  const { fileId, versionTag } = (await getProfileDefinitionInternal(
+  const { versionTag } = (await getProfileDefinitionInternal(
     odinClient,
     definition.profileId
   )) ?? {
@@ -120,7 +120,6 @@ export const saveProfileDefinition = async (
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
-      overwriteFileId: fileId?.toString(),
       drive: targetDrive,
     },
   };
@@ -178,16 +177,15 @@ export const saveProfileSection = async (
   }
 
   const targetDrive = GetTargetDriveFromProfileId(profileId);
-  const { fileId, versionTag } = (!isCreate
+  const { versionTag } = (!isCreate
     ? await getProfileSectionInternal(odinClient, profileId, profileSection.sectionId)
-    : { fileId: undefined, versionTag: undefined }) ?? {
+    : { versionTag: undefined }) ?? {
     fileId: undefined,
   };
 
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
-      overwriteFileId: fileId ?? undefined,
       drive: targetDrive,
     },
   };

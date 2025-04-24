@@ -12,6 +12,7 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
+  UploadResult,
 } from '@homebase-id/js-lib/core';
 import {
   CommunityDrafts,
@@ -87,13 +88,12 @@ export const useCommunityDrafts = (props?: {
         if (!data) return;
 
         const updatedMeta = {
+          fileId: (data as Partial<UploadResult>)?.file?.fileId,
           ...variables.drafts,
-          fileId: data?.file.fileId,
-
           fileMetadata: {
+            globalTransitId: (data as Partial<UploadResult>)?.globalTransitIdFileIdentifier?.globalTransitId,
             ...variables.drafts.fileMetadata,
             versionTag: data.newVersionTag,
-            globalTransitId: data.globalTransitIdFileIdentifier.globalTransitId,
           },
         } as HomebaseFile<CommunityDrafts>;
 

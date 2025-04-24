@@ -168,7 +168,6 @@ export const uploadMail = async (
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: MailDrive,
-      overwriteFileId: conversation.fileId,
     },
     transitOptions: distribute
       ? {

@@ -119,7 +119,6 @@ export const saveComment = async (
     const instructionSet: UploadInstructionSet = {
       transferIv: getRandom16ByteArray(),
       storageOptions: {
-        overwriteFileId: comment.fileId || undefined,
         drive: targetDrive,
       },
       transitOptions: {

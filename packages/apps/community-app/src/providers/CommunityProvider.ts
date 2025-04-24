@@ -137,7 +137,6 @@ export const saveCommunityChannel = async (
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: targetDrive,
-      overwriteFileId: channel.fileId,
     },
   };
 

@@ -11,6 +11,8 @@ import {
 export interface VolatileInputRef {
   focus: () => void;
   clear: () => void;
+  getPosition?: () => unknown;
+  setPosition?: (position: unknown) => void;
 }
 
 export const VolatileInput = forwardRef(

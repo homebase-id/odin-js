@@ -1,5 +1,5 @@
 import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { HomebaseFile, uploadLocalMetadataContent } from '@homebase-id/js-lib/core';
+import { getFileHeader, getLocalContentFromHeader, HomebaseFile, uploadLocalMetadataContent } from '@homebase-id/js-lib/core';
 import {
   ConversationMetadata,
   UnifiedConversation,
@@ -25,10 +25,30 @@ export const useConversationMetadata = (props?: { conversationId?: string | unde
     conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
     newMetadata: ConversationMetadata;
   }) => {
+    let maxRetries = 5;
+    const onVersionConflict = async () => {
+      if (maxRetries <= 0) return;
+      maxRetries--;
+
+      const serverHeader = await getFileHeader(odinClient, ChatDrive, conversation.fileId);
+      if (!serverHeader) return;
+
+      const serverLocalData = await getLocalContentFromHeader<ConversationMetadata>(odinClient, ChatDrive, serverHeader, true);
+      const mergedData: ConversationMetadata = {
+        conversationId: newMetadata.conversationId,
+        lastReadTime: Math.max((newMetadata.lastReadTime || 0), (serverLocalData?.lastReadTime || 0)),
+      }
+
+      return await uploadLocalMetadataContent(odinClient, ChatDrive, serverHeader, {
+        ...serverHeader.fileMetadata.localAppData,
+        content: mergedData
+      });
+    };
+
     return await uploadLocalMetadataContent(odinClient, ChatDrive, conversation, {
       ...conversation.fileMetadata.localAppData,
       content: newMetadata,
-    });
+    }, onVersionConflict);
   };
 
   return {

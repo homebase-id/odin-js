@@ -6,18 +6,21 @@ import {
   HomebaseFile,
   MAX_HEADER_CONTENT_BYTES,
   NewHomebaseFile,
+  patchFile,
   PayloadFile,
   RichText,
   SecurityGroupType,
   TargetDrive,
+  UpdateLocalInstructionSet,
+  UpdateResult,
   uploadFile,
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
 } from '@homebase-id/js-lib/core';
 import {
+  hashGuidId,
   jsonStringify64,
-  stringGuidsEqual,
   stringToUint8Array,
   uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
@@ -45,27 +48,11 @@ export const COMMUNITY_DRAFTS_FILE_TYPE = 7012;
 export const uploadCommunityDrafts = async (
   odinClient: OdinClient,
   definition: NewHomebaseFile<CommunityDrafts> | HomebaseFile<CommunityDrafts>,
-  onVersionConflicht?: () => Promise<void | UploadResult> | void
-): Promise<UploadResult | undefined> => {
+  onVersionConflicht?: () => Promise<void | UploadResult | UpdateResult> | void
+): Promise<UploadResult | UpdateResult | undefined> => {
   if (!definition.fileMetadata.appData.uniqueId) {
     throw new Error('CommunityDrafts must have a uniqueId');
   }
-
-  if (
-    !stringGuidsEqual(
-      definition.fileMetadata.appData.uniqueId,
-      definition.fileMetadata.appData.content.communityId
-    )
-  ) {
-    throw new Error('CommunityDrafts must have a uniqueId that matches the communityId');
-  }
-
-  const instructionSet: UploadInstructionSet = {
-    storageOptions: {
-      overwriteFileId: definition.fileId,
-      drive: LOCAL_COMMUNITY_APP_DRIVE,
-    },
-  };
 
   const payloads: PayloadFile[] = [];
 
@@ -94,13 +81,39 @@ export const uploadCommunityDrafts = async (
     allowDistribution: false,
     appData: {
       tags: definition.fileMetadata.appData.tags,
-      uniqueId: definition.fileMetadata.appData.uniqueId,
+      uniqueId: await hashGuidId(definition.fileMetadata.appData.uniqueId),
       fileType: COMMUNITY_DRAFTS_FILE_TYPE,
       content: content,
     },
     isEncrypted: true,
     accessControlList: {
       requiredSecurityGroup: SecurityGroupType.Owner,
+    },
+  };
+
+  if (definition.fileId) {
+    const existingDefiniton = definition as HomebaseFile<CommunityDrafts, string>;
+    const encryptedKeyHeader = existingDefiniton.sharedSecretEncryptedKeyHeader;
+
+    const patchInstructions: UpdateLocalInstructionSet = {
+      file: {
+        fileId: existingDefiniton.fileId,
+        targetDrive: LOCAL_COMMUNITY_APP_DRIVE,
+      },
+      versionTag: existingDefiniton.fileMetadata.versionTag,
+      locale: 'local'
+    }
+
+    const patchResult = await patchFile(dotYouClient, encryptedKeyHeader, patchInstructions, metadata, payloads, undefined, undefined, onVersionConflicht as () => Promise<void | UpdateResult>,
+    );
+    if (!patchResult) throw new Error(`Upload failed`);
+    return patchResult;
+  }
+
+  const instructionSet: UploadInstructionSet = {
+    storageOptions: {
+      overwriteFileId: definition.fileId,
+      drive: LOCAL_COMMUNITY_APP_DRIVE,
     },
   };
 
@@ -111,7 +124,7 @@ export const uploadCommunityDrafts = async (
     payloads,
     undefined,
     true,
-    onVersionConflicht
+    onVersionConflicht as () => Promise<void | UploadResult>
   );
   if (!result) throw new Error(`Upload failed`);
 
@@ -125,7 +138,7 @@ export const getCommunityDrafts = async (
   const header = await getFileHeaderByUniqueId(
     odinClient,
     LOCAL_COMMUNITY_APP_DRIVE,
-    communityId
+    await hashGuidId(communityId)
   );
 
   if (!header) return null;
