@@ -104,7 +104,7 @@ export const uploadCommunityDrafts = async (
       locale: 'local'
     }
 
-    const patchResult = await patchFile(dotYouClient, encryptedKeyHeader, patchInstructions, metadata, payloads, undefined, undefined, onVersionConflicht as () => Promise<void | UpdateResult>,
+    const patchResult = await patchFile(odinClient, encryptedKeyHeader, patchInstructions, metadata, payloads, undefined, undefined, onVersionConflicht as () => Promise<void | UpdateResult>,
     );
     if (!patchResult) throw new Error(`Upload failed`);
     return patchResult;
