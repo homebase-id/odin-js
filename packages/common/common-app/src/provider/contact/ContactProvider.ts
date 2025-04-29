@@ -11,6 +11,8 @@ import {
   UploadResult,
   getFileHeader,
   MAX_HEADER_CONTENT_BYTES,
+  UpdateLocalInstructionSet,
+  patchFile,
 } from '@homebase-id/js-lib/core';
 import { createThumbnails } from '@homebase-id/js-lib/media';
 import {
@@ -37,22 +39,25 @@ export const saveContact = async (
 ): Promise<UploadResult | void> => {
   console.debug('Saving contact', { ...contact });
 
-  if (contact.fileMetadata.appData.uniqueId)
-    contact.fileId = (
-      await getContactByUniqueId(dotYouClient, contact.fileMetadata.appData.uniqueId)
-    )?.fileId;
+  if (contact.fileMetadata.appData.uniqueId) {
+    const existingContact = await getContactByUniqueId(dotYouClient, contact.fileMetadata.appData.uniqueId);
+    if (existingContact) {
+      contact.fileId = existingContact.fileId;
+      contact.sharedSecretEncryptedKeyHeader = existingContact.sharedSecretEncryptedKeyHeader;
+    }
+  }
 
   if (!contact.fileId && contact.fileMetadata.appData.content.odinId) {
     const existingContact = await getContactByOdinId(
       dotYouClient,
       contact.fileMetadata.appData.content.odinId
     );
-
     contact.fileMetadata.appData.uniqueId =
       existingContact?.fileMetadata.appData.uniqueId ?? getNewId();
     contact.fileId = existingContact?.fileId ?? undefined;
     contact.fileMetadata.versionTag =
       existingContact?.fileMetadata.versionTag || contact.fileMetadata.versionTag;
+    contact.sharedSecretEncryptedKeyHeader = existingContact?.sharedSecretEncryptedKeyHeader;
   }
 
   const payloads: PayloadFile[] = [];
@@ -122,6 +127,42 @@ export const saveContact = async (
     payloads.push({
       payload: new Blob([payloadBytes], { type: 'application/json' }),
       key: DEFAULT_PAYLOAD_KEY,
+    });
+  }
+
+  if (contact.fileId) {
+    const updateInstructions: UpdateLocalInstructionSet = {
+      versionTag: contact.fileMetadata.versionTag,
+      file: { fileId: contact.fileId, targetDrive: ContactConfig.ContactTargetDrive },
+      locale: 'local',
+      transferIv: getRandom16ByteArray(),
+    }
+    return await patchFile(dotYouClient, contact.sharedSecretEncryptedKeyHeader, updateInstructions, metadata, payloads, thumbnails, undefined, async () => {
+      if (!contact.fileId) return;
+      const existingContactFile = await getFileHeader(
+        dotYouClient,
+        ContactConfig.ContactTargetDrive,
+        contact.fileId
+      );
+      if (!existingContactFile) return;
+      contact.fileMetadata.versionTag = existingContactFile.fileMetadata.versionTag;
+      return saveContact(dotYouClient, contact);
+    }).then((result) => {
+      if (!result) throw new Error('Failed to upload contact');
+      //todo: should we create a seperate updateContact method?
+      return {
+        newVersionTag: result.newVersionTag,
+        recipientStatus: result.recipientStatus,
+        file: {
+          fileId: contact.fileId as string,
+          targetDrive: ContactConfig.ContactTargetDrive,
+        },
+        globalTransitIdFileIdentifier: {
+          globalTransitId: '',
+          targetDrive: ContactConfig.ContactTargetDrive,
+        },
+        keyHeader: undefined,
+      }
     });
   }
 
