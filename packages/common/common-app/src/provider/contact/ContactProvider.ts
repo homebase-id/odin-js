@@ -41,7 +41,6 @@ export const saveContact = async (
 
   if (contact.fileMetadata.appData.uniqueId) {
     const existingContact = await getContactByUniqueId(dotYouClient, contact.fileMetadata.appData.uniqueId);
-    console.debug('Existing contact', { ...existingContact });
     if (existingContact) {
       contact.fileId = existingContact.fileId;
       contact.sharedSecretEncryptedKeyHeader = existingContact.sharedSecretEncryptedKeyHeader;
@@ -53,7 +52,6 @@ export const saveContact = async (
       dotYouClient,
       contact.fileMetadata.appData.content.odinId
     );
-    console.debug('Existing contact by odinId', { ...existingContact });
     contact.fileMetadata.appData.uniqueId =
       existingContact?.fileMetadata.appData.uniqueId ?? getNewId();
     contact.fileId = existingContact?.fileId ?? undefined;
