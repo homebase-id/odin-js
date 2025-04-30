@@ -47,7 +47,6 @@ export const uploadMailSettings = async (
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: MailDrive,
-      overwriteFileId: settings.fileId,
     },
   };
 

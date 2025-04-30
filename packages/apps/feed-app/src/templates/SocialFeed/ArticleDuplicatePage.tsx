@@ -39,8 +39,6 @@ export const ArticleDuplicatePage = () => {
   const navigate = useNavigate();
 
   const doDuplicate = async () => {
-    console.log({ postFile, channel, targetChannel });
-
     if (!postFile || !channel?.fileMetadata.appData.uniqueId) return;
 
     duplicatePost({

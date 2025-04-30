@@ -12,10 +12,10 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
+  UploadResult,
 } from '@homebase-id/js-lib/core';
 import {
   CommunityMetadata,
-  Draft,
   getCommunityMetadata,
   uploadCommunityMetadata,
 } from '../../providers/CommunityMetadataProvider';
@@ -59,12 +59,7 @@ export const useCommunityMetadata = (props?: {
       return await uploadCommunityMetadata(dotYouClient, newlyMerged, onVersionConflict);
     };
 
-    // We cleanup the drafts only for the inital save; When we retry we want to keep the drafts to avoid bad merging
-    const metadataCopy = { ...metadata };
-    metadataCopy.fileMetadata.appData.content.drafts = cleanupDrafts(
-      metadataCopy.fileMetadata.appData.content.drafts || {}
-    );
-    return await uploadCommunityMetadata(dotYouClient, metadataCopy, onVersionConflict);
+    return await uploadCommunityMetadata(dotYouClient, metadata, onVersionConflict);
   };
 
   return {
@@ -87,13 +82,13 @@ export const useCommunityMetadata = (props?: {
         if (!data) return;
 
         const updatedMeta = {
+          fileId: (data as Partial<UploadResult>)?.file?.fileId,
           ...variables.metadata,
-          fileId: data?.file.fileId,
 
           fileMetadata: {
+            globalTransitId: (data as Partial<UploadResult>)?.globalTransitIdFileIdentifier?.globalTransitId,
             ...variables.metadata.fileMetadata,
             versionTag: data.newVersionTag,
-            globalTransitId: data.globalTransitIdFileIdentifier.globalTransitId,
           },
         } as HomebaseFile<CommunityMetadata>;
 
@@ -167,28 +162,6 @@ export const getCommunityMetadataQueryOptions: (
   staleTime: 1000 * 60 * 5, // 5 minutes
 });
 
-const cleanupDrafts = (drafts: Record<string, Draft | undefined>) => {
-  const newDrafts = { ...drafts };
-
-  const oneDayAgo = new Date().getTime() - 24 * 60 * 60 * 1000;
-  // Cleanup empty drafts
-  Object.keys(newDrafts).forEach((key) => {
-    // We assume that we don't have to store emtpy drafts
-    if (newDrafts[key]?.message === undefined) {
-      delete newDrafts[key];
-    }
-
-    // We assume that if a draft has cleared the message that other devices have synced it within a week and we can delete it
-    if (newDrafts[key]?.message?.length === 0) {
-      if (newDrafts[key]?.updatedAt < oneDayAgo) {
-        delete newDrafts[key];
-      }
-    }
-  });
-
-  return newDrafts;
-};
-
 const mergeMetadata = (
   local: HomebaseFile<CommunityMetadata> | NewHomebaseFile<CommunityMetadata>,
   server: HomebaseFile<CommunityMetadata>
@@ -221,29 +194,6 @@ const mergeMetadata = (
               {} as { [key: string]: number }
             );
           })(),
-          drafts: (() => {
-            const mergedKeys = [
-              ...Object.keys(localContent.drafts || {}),
-              ...Object.keys(serverContent.drafts || {}),
-            ];
-
-            return mergedKeys.reduce(
-              (acc, key) => {
-                const localDraft = localContent.drafts?.[key];
-                const serverDraft = serverContent.drafts?.[key];
-
-                const newestDraft =
-                  !serverDraft ||
-                  (localDraft?.updatedAt && localDraft?.updatedAt > serverDraft?.updatedAt)
-                    ? localDraft
-                    : serverDraft;
-
-                acc[key] = newestDraft;
-                return acc;
-              },
-              {} as Record<string, Draft | undefined>
-            );
-          })(),
         },
       },
       versionTag: server.fileMetadata.versionTag,
@@ -266,9 +216,25 @@ export const insertNewcommunityMetadata = (
     if (newMetadata.fileMetadata.appData.uniqueId)
       invalidateCommunityMetadata(queryClient, newMetadata.fileMetadata.appData.uniqueId);
   } else {
-    queryClient.setQueryData(
-      ['community-metadata', formatGuidId(newMetadata.fileMetadata.appData.content.communityId)],
-      newMetadata
+    const queryKey = [
+      'community-metadata',
+      formatGuidId(newMetadata.fileMetadata.appData.content.communityId),
+    ];
+
+    const existingMetadata = queryClient.getQueryData<HomebaseFile<CommunityMetadata>>(queryKey)
+
+    if (!existingMetadata) {
+      queryClient.setQueryData(queryKey,
+        newMetadata
+      );
+      return;
+    }
+
+    const mergedMeta = mergeMetadata(
+      existingMetadata, newMetadata);
+
+    queryClient.setQueryData(queryKey,
+      mergedMeta
     );
   }
 };

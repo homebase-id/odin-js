@@ -74,7 +74,7 @@ export const ChatDetail = ({
       conversation.serverMetadata?.originalRecipientCount !==
       conversation.serverMetadata?.transferHistory?.summary.totalDelivered;
     if (anyRecipientMissingConversation) {
-      console.log('invite recipient');
+      console.debug('invite recipient(s)', filteredRecipients);
       inviteRecipient({ conversation });
       if (filteredRecipients.length > 1) {
         // Group chat; Good to introduce everyone

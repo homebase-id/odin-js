@@ -23,7 +23,7 @@ const loadFFmpeg = async () => {
     let t;
     if (
       ((t = classWorkerBlob && (window.URL || window.webkitURL).createObjectURL(classWorkerBlob)),
-      !t)
+        !t)
     )
       throw '';
 
@@ -180,9 +180,6 @@ export const getThumbnailWithFfmpeg = async (videoFile: File | Blob): Promise<Bl
   const buffer = await videoFile.arrayBuffer();
   await ffmpeg.writeFile('input.mp4', new Uint8Array(buffer));
 
-  // ffmpeg.on('log', ({ message }) => {
-  //   console.log(message);
-  // });
   await ffmpeg.exec(['-i', 'input.mp4', '-frames:v', '1', 'thumb%04d.png']);
 
   const data = await ffmpeg.readFile('thumb0001.png');

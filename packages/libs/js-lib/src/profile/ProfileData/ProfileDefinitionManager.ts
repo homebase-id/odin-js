@@ -109,7 +109,7 @@ export const saveProfileDefinition = async (
   const driveMetadata = 'Drive that stores: ' + definition.name;
   const targetDrive = GetTargetDriveFromProfileId(definition.profileId);
   await ensureDrive(dotYouClient, targetDrive, definition.name, driveMetadata, true);
-  const { fileId, versionTag } = (await getProfileDefinitionInternal(
+  const { versionTag } = (await getProfileDefinitionInternal(
     dotYouClient,
     definition.profileId
   )) ?? {
@@ -120,7 +120,6 @@ export const saveProfileDefinition = async (
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
-      overwriteFileId: fileId?.toString(),
       drive: targetDrive,
     },
   };
@@ -153,11 +152,11 @@ export const saveProfileDefinition = async (
     shouldEmbedContent
       ? undefined
       : [
-          {
-            payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
-            key: DEFAULT_PAYLOAD_KEY,
-          },
-        ],
+        {
+          payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
+          key: DEFAULT_PAYLOAD_KEY,
+        },
+      ],
     undefined,
     encrypt
   );
@@ -187,7 +186,6 @@ export const saveProfileSection = async (
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
-      overwriteFileId: fileId ?? undefined,
       drive: targetDrive,
     },
   };
@@ -220,11 +218,11 @@ export const saveProfileSection = async (
     shouldEmbedContent
       ? undefined
       : [
-          {
-            payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
-            key: DEFAULT_PAYLOAD_KEY,
-          },
-        ],
+        {
+          payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
+          key: DEFAULT_PAYLOAD_KEY,
+        },
+      ],
     undefined,
     encrypt
   );

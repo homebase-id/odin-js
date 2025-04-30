@@ -68,9 +68,9 @@ export const saveProfileAttribute = async (
 
   const encrypt = !(
     toSaveAttribute.serverMetadata?.accessControlList.requiredSecurityGroup ===
-      SecurityGroupType.Anonymous ||
+    SecurityGroupType.Anonymous ||
     toSaveAttribute.serverMetadata?.accessControlList.requiredSecurityGroup ===
-      SecurityGroupType.Authenticated
+    SecurityGroupType.Authenticated
   );
 
   if (!attrContent.id || !attrContent.profileId || !attrContent.type || !attrContent.sectionId)
