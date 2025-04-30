@@ -1,4 +1,4 @@
-import { TElement, SlatePlugin, Descendant } from '@udecode/plate';
+import { TElement, SlatePlugin, Descendant, At } from '@udecode/plate';
 import { ParagraphPlugin, PlateElement, usePlateEditor } from '@udecode/plate/react';
 import { withProps } from '@udecode/cn';
 import {
@@ -356,6 +356,12 @@ const InnerRichTextEditor = memo(
         },
         clear() {
           if (editor) editor.tf.reset();
+        },
+        getPosition() {
+          return editor?.selection;
+        },
+        setPosition(position: At | undefined) {
+          editor?.tf.select(position);
         },
       }),
       [editor]

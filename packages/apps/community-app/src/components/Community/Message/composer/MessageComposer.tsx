@@ -148,7 +148,13 @@ export const MessageComposer = memo(
 
     useEffect(() => {
       // focus, clear message to allow draft to be loaded
-      const onFocus = () => setMessage(undefined);
+      const onFocus = () => {
+        const position = volatileRef.current?.getPosition?.();
+
+        setMessage(undefined);
+        // Set timeout to allow RTE to render the new message;
+        setTimeout(() => volatileRef.current?.setPosition?.(position), 100);
+      };
       window.addEventListener('focus', onFocus);
       return () => window.removeEventListener('focus', onFocus);
     });

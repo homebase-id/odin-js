@@ -182,9 +182,9 @@ export const saveCommunity = async (
 
   const encrypt = !(
     definition.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-      SecurityGroupType.Anonymous ||
+    SecurityGroupType.Anonymous ||
     definition.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-      SecurityGroupType.Authenticated
+    SecurityGroupType.Authenticated
   );
 
   const targetDrive = getTargetDriveFromCommunityId(definition.fileMetadata.appData.uniqueId);
@@ -225,7 +225,6 @@ export const saveCommunity = async (
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
-      overwriteFileId: fileId,
       drive: targetDrive,
     },
   };
@@ -256,11 +255,11 @@ export const saveCommunity = async (
     shouldEmbedContent
       ? undefined
       : [
-          {
-            payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
-            key: DEFAULT_PAYLOAD_KEY,
-          },
-        ],
+        {
+          payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
+          key: DEFAULT_PAYLOAD_KEY,
+        },
+      ],
     undefined,
     encrypt
   );
@@ -328,18 +327,18 @@ export const dsrToCommunity = async (
   const definitionContent =
     dsr.fileMetadata.senderOdinId !== dotYouClient.getHostIdentity()
       ? await getContentFromHeaderOrPayloadOverPeer<CommunityDefinition>(
-          dotYouClient,
-          dsr.fileMetadata.senderOdinId,
-          targetDrive,
-          dsr,
-          includeMetadataHeader
-        )
+        dotYouClient,
+        dsr.fileMetadata.senderOdinId,
+        targetDrive,
+        dsr,
+        includeMetadataHeader
+      )
       : await getContentFromHeaderOrPayload<CommunityDefinition>(
-          dotYouClient,
-          targetDrive,
-          dsr,
-          includeMetadataHeader
-        );
+        dotYouClient,
+        targetDrive,
+        dsr,
+        includeMetadataHeader
+      );
   if (!definitionContent) return undefined;
 
   const file: HomebaseFile<CommunityDefinition> = {

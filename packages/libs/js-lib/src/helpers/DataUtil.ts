@@ -483,3 +483,20 @@ export const getLargestThumbOfPayload = (payload?: PayloadDescriptor) => {
     return prev.pixelHeight * prev.pixelWidth > curr.pixelHeight * curr.pixelWidth ? prev : curr;
   }, payload?.thumbnails?.[0]);
 };
+
+export const hashGuidId = async (input: string, salt?: string) => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(salt ? `${salt}:${input}` : input);
+
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+  return [
+    hashHex.slice(0, 8),
+    hashHex.slice(8, 12),
+    '4' + hashHex.slice(13, 16),
+    ((parseInt(hashHex.slice(16, 18), 16) & 0x3f) | 0x80).toString(16).padStart(2, '0') + hashHex.slice(18, 20),
+    hashHex.slice(20, 32),
+  ].join('-');
+}
