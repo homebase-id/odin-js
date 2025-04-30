@@ -39,6 +39,8 @@ import {
   LOCAL_COMMUNITY_APP_DRIVE,
 } from '../../../providers/CommunityMetadataProvider';
 import { insertNewcommunityMetadata } from '../useCommunityMetadata';
+import { COMMUNITY_DRAFTS_FILE_TYPE, dsrToCommunityDrafts } from '../../../providers/CommunityDraftsProvider';
+import { insertNewcommunityDrafts } from '../useCommunityDrafts';
 
 const isDebug = hasDebugFlag();
 
@@ -59,7 +61,7 @@ export const useCommunityInboxProcessor = (
       'process-community-inbox',
       communityId,
     ])?.dataUpdatedAt;
-    const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 2;
+    const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 15;
 
     // Process community;
     const processedresult =
@@ -150,14 +152,42 @@ export const useCommunityInboxProcessor = (
           const newMetadata =
             updatedDsr.fileState === 'active'
               ? await dsrToCommunityMetadata(
-                  dotYouClient,
-                  updatedDsr,
-                  LOCAL_COMMUNITY_APP_DRIVE,
-                  true
-                )
+                dotYouClient,
+                updatedDsr,
+                LOCAL_COMMUNITY_APP_DRIVE,
+                true
+              )
               : updatedDsr;
           if (!newMetadata) return;
           insertNewcommunityMetadata(queryClient, newMetadata);
+        })
+      );
+
+      const newCommunityDrafts = await findChangesSinceTimestamp(
+        dotYouClient,
+        undefined,
+        lastProcessedWithBuffer,
+        {
+          targetDrive: LOCAL_COMMUNITY_APP_DRIVE,
+          fileType: [COMMUNITY_DRAFTS_FILE_TYPE],
+        }
+      );
+
+      isDebug && console.debug('[CommunityInboxProcessor] new community drafts');
+
+      await Promise.all(
+        newCommunityDrafts.map(async (updatedDsr) => {
+          const newDrafts =
+            updatedDsr.fileState === 'active'
+              ? await dsrToCommunityDrafts(
+                dotYouClient,
+                updatedDsr,
+                LOCAL_COMMUNITY_APP_DRIVE,
+                true
+              )
+              : updatedDsr;
+          if (!newDrafts) return;
+          insertNewcommunityDrafts(queryClient, newDrafts);
         })
       );
     } else {
@@ -190,34 +220,34 @@ const findChangesSinceTimestamp = async (
   const newFiles =
     odinId && dotYouClient.getHostIdentity() !== odinId
       ? await queryBatchOverPeer(dotYouClient, odinId, params, {
-          maxRecords: BATCH_SIZE,
-          cursorState: batchCursor,
-          includeMetadataHeader: true,
-          includeTransferHistory: false,
-        })
+        maxRecords: BATCH_SIZE,
+        cursorState: batchCursor,
+        includeMetadataHeader: true,
+        includeTransferHistory: false,
+      })
       : await queryBatch(dotYouClient, params, {
-          maxRecords: BATCH_SIZE,
-          cursorState: batchCursor,
-          includeMetadataHeader: true,
-          includeTransferHistory: false,
-        });
+        maxRecords: BATCH_SIZE,
+        cursorState: batchCursor,
+        includeMetadataHeader: true,
+        includeTransferHistory: false,
+      });
 
   const modifiedFiles =
     odinId && dotYouClient.getHostIdentity() !== odinId
       ? await queryModifiedOverPeer(dotYouClient, odinId, params, {
-          maxRecords: BATCH_SIZE,
-          cursor: modifiedCursor + '',
-          excludePreviewThumbnail: false,
-          includeHeaderContent: true,
-          includeTransferHistory: false,
-        })
+        maxRecords: BATCH_SIZE,
+        cursor: modifiedCursor + '',
+        excludePreviewThumbnail: false,
+        includeHeaderContent: true,
+        includeTransferHistory: false,
+      })
       : await queryModified(dotYouClient, params, {
-          maxRecords: BATCH_SIZE,
-          cursor: modifiedCursor + '',
-          excludePreviewThumbnail: false,
-          includeHeaderContent: true,
-          includeTransferHistory: false,
-        });
+        maxRecords: BATCH_SIZE,
+        cursor: modifiedCursor + '',
+        excludePreviewThumbnail: false,
+        includeHeaderContent: true,
+        includeTransferHistory: false,
+      });
 
   return modifiedFiles.searchResults.concat(newFiles.searchResults);
 };
@@ -268,14 +298,14 @@ const processCommunityMessagesBatch = async (
         await Promise.all(
           groupedMessages[channelId].map(async (newMessage) =>
             typeof newMessage.fileMetadata.appData.content === 'string' ||
-            newMessage.fileMetadata.payloads?.some((pyld) => pyld.key === DEFAULT_PAYLOAD_KEY)
+              newMessage.fileMetadata.payloads?.some((pyld) => pyld.key === DEFAULT_PAYLOAD_KEY)
               ? await dsrToMessage(
-                  dotYouClient,
-                  newMessage as HomebaseFile<string>,
-                  odinId,
-                  targetDrive,
-                  true
-                )
+                dotYouClient,
+                newMessage as HomebaseFile<string>,
+                odinId,
+                targetDrive,
+                true
+              )
               : (newMessage as HomebaseFile<CommunityMessage>)
           )
         )

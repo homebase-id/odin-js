@@ -74,7 +74,7 @@ export const useContact = ({
     ) {
       return contactBookContact;
     } else if (contactBookContact)
-      console.log(
+      console.debug(
         `[${odinId}] [${!hasCache ? 'Explicit' : 'Implicit'}] Ignoring contact book record`,
         contactBookContact
       );
@@ -93,6 +93,7 @@ export const useContact = ({
       serverMetadata: {
         accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
       },
+      sharedSecretEncryptedKeyHeader: contactBookContact?.sharedSecretEncryptedKeyHeader,
     };
 
     if (canSave && hasContactDriveWriteAccess) {
@@ -141,6 +142,7 @@ export const useContact = ({
           ...contact.fileMetadata,
           appData: { content: { ...publicContact, odinId: odinId } },
         },
+        sharedSecretEncryptedKeyHeader: contact.sharedSecretEncryptedKeyHeader,
       });
     }
   };

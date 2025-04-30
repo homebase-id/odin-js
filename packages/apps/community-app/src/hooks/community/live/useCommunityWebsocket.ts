@@ -21,6 +21,8 @@ import {
 import { useWebsocketDrives } from '../../auth/useWebsocketDrives';
 import { insertNewcommunityMetadata } from '../useCommunityMetadata';
 import { useChatSocketHandler } from '@homebase-id/chat-app/src/hooks/chat/live/useChatWebsocket';
+import { COMMUNITY_DRAFTS_FILE_TYPE, dsrToCommunityDrafts } from '../../../providers/CommunityDraftsProvider';
+import { insertNewcommunityDrafts } from '../useCommunityDrafts';
 
 const isDebug = hasDebugFlag();
 
@@ -58,6 +60,20 @@ export const useCommunityWebsocket = (
             return;
           }
           insertNewcommunityMetadata(queryClient, communityMetadata);
+        }
+
+        if (notification.header.fileMetadata.appData.fileType === COMMUNITY_DRAFTS_FILE_TYPE) {
+          const communityDrafts = await dsrToCommunityDrafts(
+            dotYouClient,
+            notification.header,
+            targetDrive,
+            true
+          );
+          if (!communityDrafts) {
+            console.warn('[CommunityWebsocket] Invalid community drafts received', notification);
+            return;
+          }
+          insertNewcommunityDrafts(queryClient, communityDrafts);
         }
       }
 

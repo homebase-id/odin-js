@@ -57,6 +57,7 @@ const APP_QUERY_KEYS = [
   'communities',
   'community',
   'community-metadata',
+  'community-drafts',
   'community-channels',
   'community-messages',
   'channels-with-recent-message',
