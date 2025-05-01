@@ -36,7 +36,6 @@ export const ArticleComposerPage = () => {
   const navigate = useNavigate();
   const [isOptionsDialogOpen, setIsOptionsDialogOpen] = useState(false);
 
-  console.info("odinKey:", odinKey??"none");
   const {
     // Actions
     doSave,
@@ -74,7 +73,7 @@ export const ArticleComposerPage = () => {
 
   // Delay needSaving to willSave; Auto save every 15s
   const milliseconds = 1000 * 15;
-  console.log("auto-save interval (seconds)", milliseconds/1000)
+  // console.info("auto-save interval (seconds)", milliseconds/1000)
   useEffect(() => {
     const interval = setInterval(() => {
       setNeedsSaving((needsSaving) => {
@@ -87,20 +86,16 @@ export const ArticleComposerPage = () => {
     
   useEffect(()=>
   {
-        console.info("something changed postFile");
-        console.info(`postFile fileId: :${postFile.fileId}`);
-      console.info(`postFile version: ${postFile.fileMetadata.versionTag}`);
-      console.info(`postFile whole: ${postFile}`);
-        
-    },[postFile]);
+        console.info("Something changed postFile fileId/versiontag", postFile.fileId, postFile.fileMetadata.versionTag)
+  }, [postFile]);
   
   useEffect(() => {
     if (willSave) {
       setNeedsSaving(false);
       setWillSave(false);
-      console.info("Start: auto-saving post: fileId/uniqueId/versiontag", postFile.fileId, postFile.fileMetadata.appData.uniqueId, postFile.fileMetadata.versionTag)
+      console.info("Start: auto-saving post: fileId/versiontag", postFile.fileId, postFile.fileMetadata.appData.uniqueId, postFile.fileMetadata.versionTag)
       doSave(postFile, isPublished ? 'publish' : undefined).then(()=>{
-        console.log('done: auto-saving post: fileId/uniqueId/versiontag', postFile.fileId,postFile.fileMetadata.appData.uniqueId, postFile.fileMetadata.versionTag);
+        console.info('Done: auto-saving post: fileId/uniqueId/versiontag', postFile.fileId,postFile.fileMetadata.appData.uniqueId, postFile.fileMetadata.versionTag);
       });
     }
   }, [willSave, setWillSave, postFile, isPublished]);
