@@ -84,7 +84,16 @@ export const ArticleComposerPage = () => {
     }, milliseconds);
     return () => clearInterval(interval);
   }, [setNeedsSaving, setWillSave]);
-
+    
+  useEffect(()=>
+  {
+        console.info("something changed postFile");
+        console.info(`postFile fileId: :${postFile.fileId}`);
+      console.info(`postFile version: ${postFile.fileMetadata.versionTag}`);
+      console.info(`postFile whole: ${postFile}`);
+        
+    },[postFile]);
+  
   useEffect(() => {
     if (willSave) {
       setNeedsSaving(false);
