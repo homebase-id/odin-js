@@ -252,7 +252,8 @@ const updatePost = async <T extends PostContent>(
       // There's a conflict, but we will just force ahead
       file.fileMetadata.versionTag = header.fileMetadata.versionTag;
     } else {
-      throw new Error('[odin-js] PostUploader: Version conflict');
+      console.error('compare file to header', file.fileMetadata, header.fileMetadata);
+      throw new Error(`[odin-js] PostUploader: Version conflict [UID: ${file.fileMetadata.appData.uniqueId} slug:${file.fileMetadata.appData?.content?.slug}]`);
     }
   }
   if (

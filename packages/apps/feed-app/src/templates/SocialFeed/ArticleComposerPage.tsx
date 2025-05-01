@@ -36,6 +36,7 @@ export const ArticleComposerPage = () => {
   const navigate = useNavigate();
   const [isOptionsDialogOpen, setIsOptionsDialogOpen] = useState(false);
 
+  console.info("odinKey:", odinKey??"none");
   const {
     // Actions
     doSave,
@@ -72,13 +73,15 @@ export const ArticleComposerPage = () => {
   const [willSave, setWillSave] = useState(false);
 
   // Delay needSaving to willSave; Auto save every 15s
+  const milliseconds = 1000 * 15;
+  console.log("auto-save interval (seconds)", milliseconds/1000)
   useEffect(() => {
     const interval = setInterval(() => {
       setNeedsSaving((needsSaving) => {
         setWillSave(needsSaving);
         return needsSaving;
       });
-    }, 1000 * 15);
+    }, milliseconds);
     return () => clearInterval(interval);
   }, [setNeedsSaving, setWillSave]);
 
@@ -86,7 +89,10 @@ export const ArticleComposerPage = () => {
     if (willSave) {
       setNeedsSaving(false);
       setWillSave(false);
-      doSave(postFile, isPublished ? 'publish' : undefined);
+      console.info("Start: auto-saving post: fileId/uniqueId/versiontag", postFile.fileId, postFile.fileMetadata.appData.uniqueId, postFile.fileMetadata.versionTag)
+      doSave(postFile, isPublished ? 'publish' : undefined).then(()=>{
+        console.log('done: auto-saving post: fileId/uniqueId/versiontag', postFile.fileId,postFile.fileMetadata.appData.uniqueId, postFile.fileMetadata.versionTag);
+      });
     }
   }, [willSave, setWillSave, postFile, isPublished]);
 
