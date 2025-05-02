@@ -73,7 +73,6 @@ export const ArticleComposerPage = () => {
 
   // Delay needSaving to willSave; Auto save every 15s
   const milliseconds = 1000 * 15;
-  // console.info("auto-save interval (seconds)", milliseconds/1000)
   useEffect(() => {
     const interval = setInterval(() => {
       setNeedsSaving((needsSaving) => {

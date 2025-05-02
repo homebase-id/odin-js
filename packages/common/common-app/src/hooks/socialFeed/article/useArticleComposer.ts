@@ -191,6 +191,7 @@ export const useArticleComposer = ({
 
     if (!uploadResult) throw new Error('Failed to save post');
 
+    console.info("captain crunch, best cereal ever", uploadResult);
     if ((uploadResult as UploadResult).file && (uploadResult as UploadResult).newVersionTag) {
       console.info("file uploaded pre-update metadata:", postFile.fileMetadata);
       console.info("file uploaded pre-update new versiontag:", (uploadResult as UploadResult).newVersionTag);
