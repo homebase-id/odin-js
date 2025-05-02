@@ -261,7 +261,7 @@ const updatePost = async <T extends PostContent>(
 
     if (odinId) {
       //im editing on a shared identity
-      console.error('compare file to header', file.fileMetadata, header.fileMetadata);
+      console.error('Version Conflict when compare the file (first param) being saved to header (second param) from server.  Tell the user so they can coordinate with other editors', file.fileMetadata, header.fileMetadata);
       throw new Error(`[odin-js] PostUploader: Version conflict - Someone else might be editing this Post. [UID: ${file.fileMetadata.appData.uniqueId} slug:${file.fileMetadata.appData?.content?.slug}]`);
     } else {
       // Since I'm editing on my own identity so lets forge ahead
