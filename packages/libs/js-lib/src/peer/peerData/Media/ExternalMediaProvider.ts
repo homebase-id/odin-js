@@ -1,4 +1,4 @@
-import { ApiType, DotYouClient } from '../../../core/DotYouClient';
+import { ApiType, OdinClient } from '../../../core/OdinClient';
 import {
   ImageSize,
   SystemFileType,
@@ -19,7 +19,7 @@ import {
 
 // Retrieves an image/thumb, decrypts, then returns a url to be passed to an image control
 export const getDecryptedMediaUrlOverPeerByGlobalTransitId = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   targetDrive: TargetDrive,
   globalTransitId: string,
@@ -52,7 +52,7 @@ export const getDecryptedMediaUrlOverPeerByGlobalTransitId = async (
   //   and the CAT is passed via a header that we can't set on a direct url
   if (!isProbablyEncrypted) {
     const meta = await getFileHeaderOverPeerByGlobalTransitId(
-      dotYouClient,
+      odinClient,
       odinId,
       targetDrive,
       globalTransitId,
@@ -71,7 +71,7 @@ export const getDecryptedMediaUrlOverPeerByGlobalTransitId = async (
     if (size) {
       try {
         const thumbBytes = await getThumbBytesOverPeerByGlobalTransitId(
-          dotYouClient,
+          odinClient,
           odinId,
           targetDrive,
           globalTransitId,
@@ -87,7 +87,7 @@ export const getDecryptedMediaUrlOverPeerByGlobalTransitId = async (
     }
 
     return await getPayloadBytesOverPeerByGlobalTransitId(
-      dotYouClient,
+      odinClient,
       odinId,
       targetDrive,
       globalTransitId,
@@ -115,7 +115,7 @@ export const getDecryptedMediaUrlOverPeerByGlobalTransitId = async (
 
 // Retrieves an image/thumb, decrypts, then returns a url to be passed to an image control
 export const getDecryptedMediaUrlOverPeer = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
@@ -142,15 +142,15 @@ export const getDecryptedMediaUrlOverPeer = async (
       lastModified
     );
 
-  const ss = dotYouClient.getSharedSecret();
+  const ss = odinClient.getSharedSecret();
 
   // // If there is no shared secret, we wouldn't even be able to decrypt
-  if (!ss || dotYouClient.getType() === ApiType.Guest) return await getDirectImageUrl();
+  if (!ss || odinClient.getType() === ApiType.Guest) return await getDirectImageUrl();
 
   // We try and avoid the payload call as much as possible, so if the payload is probabaly not encrypted,
   //   we first get confirmation from the header and return a direct url if possible
   if (!isProbablyEncrypted) {
-    const meta = await getFileHeaderOverPeer(dotYouClient, odinId, targetDrive, fileId, {
+    const meta = await getFileHeaderOverPeer(odinClient, odinId, targetDrive, fileId, {
       systemFileType,
     });
     if (!meta?.fileMetadata.isEncrypted) return await getDirectImageUrl();
@@ -162,7 +162,7 @@ export const getDecryptedMediaUrlOverPeer = async (
     if (size) {
       try {
         const thumbBytes = await getThumbBytesOverPeer(
-          dotYouClient,
+          odinClient,
           odinId,
           targetDrive,
           fileId,
@@ -177,7 +177,7 @@ export const getDecryptedMediaUrlOverPeer = async (
       }
     }
 
-    return await getPayloadBytesOverPeer(dotYouClient, odinId, targetDrive, fileId, fileKey, {
+    return await getPayloadBytesOverPeer(odinClient, odinId, targetDrive, fileId, fileKey, {
       systemFileType,
       chunkStart: fileSizeLimit ? 0 : undefined,
       chunkEnd: fileSizeLimit,

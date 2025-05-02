@@ -3,7 +3,7 @@ const OdinBlob: typeof Blob =
   Blob;
 
 import {
-  DotYouClient,
+  OdinClient,
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
@@ -43,7 +43,7 @@ import {
 } from '@homebase-id/js-lib/profile';
 
 export const saveProfileAttribute = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   toSaveAttribute: HomebaseFile<Attribute> | NewHomebaseFile<Attribute>,
   onVersionConflict?: () => void
 ): Promise<HomebaseFile<Attribute> | NewHomebaseFile<Attribute> | undefined> => {
@@ -63,7 +63,7 @@ export const saveProfileAttribute = async (
   if (!attrContent.id) attrContent.id = getNewId();
   else if (!toSaveAttribute.fileId)
     toSaveAttribute.fileId =
-      (await getProfileAttribute(dotYouClient, attrContent.profileId, attrContent.id))?.fileId ??
+      (await getProfileAttribute(odinClient, attrContent.profileId, attrContent.id))?.fileId ??
       undefined;
 
   const encrypt = !(
@@ -116,7 +116,7 @@ export const saveProfileAttribute = async (
 
     // When switching between encrypted and unencrypted, we need to re-upload the full file
     if (wasEncrypted !== encrypt) {
-      const result = await reUploadFile(dotYouClient, instructionSet, metadata, encrypt);
+      const result = await reUploadFile(odinClient, instructionSet, metadata, encrypt);
       if (result)
         return {
           ...toSaveAttribute,
@@ -132,7 +132,7 @@ export const saveProfileAttribute = async (
     }
 
     const existingAttribute = await getAttributeByFileId(
-      dotYouClient,
+      odinClient,
       attrContent.profileId,
       toSaveAttribute.fileId
     );
@@ -182,7 +182,7 @@ export const saveProfileAttribute = async (
     };
 
     const result = await patchFile(
-      dotYouClient,
+      odinClient,
       keyHeader,
       patchInstructions,
       metadata,
@@ -203,7 +203,7 @@ export const saveProfileAttribute = async (
   }
 
   const result = await uploadFile(
-    dotYouClient,
+    odinClient,
     instructionSet,
     metadata,
     payloads,
@@ -225,12 +225,12 @@ export const saveProfileAttribute = async (
 };
 
 export const removeProfileAttribute = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   profileId: string,
   attributeFileId: string
 ): Promise<void> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
-  deleteFile(dotYouClient, targetDrive, attributeFileId);
+  deleteFile(odinClient, targetDrive, attributeFileId);
 };
 
 // Attribute Processors:
@@ -384,12 +384,12 @@ const processAttribute = async (attribute: Attribute) => {
 };
 
 const getAttributeByFileId = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   profileId: string,
   fileId: string
 ): Promise<HomebaseFile<Attribute | undefined> | null> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
-  const header = await getFileHeader(dotYouClient, targetDrive, fileId);
+  const header = await getFileHeader(odinClient, targetDrive, fileId);
   if (!header) return null;
-  return homebaseFileToProfileAttribute(dotYouClient, header, targetDrive, true);
+  return homebaseFileToProfileAttribute(odinClient, header, targetDrive, true);
 };

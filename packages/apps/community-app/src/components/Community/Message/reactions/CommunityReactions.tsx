@@ -6,7 +6,7 @@ import {
   AuthorName,
   DialogWrapper,
   t,
-  useDotYouClientContext,
+  useOdinClientContext,
   useLongPress,
   usePortal,
 } from '@homebase-id/common-app';
@@ -25,7 +25,7 @@ export const CommunityReactions = ({
   community: HomebaseFile<CommunityDefinition> | undefined;
   scrollRef?: React.RefObject<HTMLDivElement>;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const [showDetails, setShowDetails] = useState(false);
 
   const hasReactions =
@@ -109,7 +109,7 @@ const ReactionButton = ({
   myReactions: ReactionBase[] | undefined;
   onLongPress: (e?: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
 
   const { mutate: addReaction } = useCommunityReaction().add;
   const { mutate: removeReaction } = useCommunityReaction().remove;

@@ -5,11 +5,11 @@ import {
   getPendingRequest,
   getSentRequest,
 } from '@homebase-id/js-lib/network';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 
 const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]{2,25}(?::\d{1,5})?$/i;
 export const useConnectionInfo = ({ odinId }: { odinId?: string }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const doGetConnectionInfo = async (odinId: string) => {
     if (!odinId) return null;
@@ -18,7 +18,7 @@ export const useConnectionInfo = ({ odinId }: { odinId?: string }) => {
       return null;
     }
 
-    const connectionInfo = await getConnectionInfo(dotYouClient, odinId);
+    const connectionInfo = await getConnectionInfo(odinClient, odinId);
     if (connectionInfo && connectionInfo.status.toLowerCase() !== 'none')
       return connectionInfo || null;
 
@@ -36,16 +36,16 @@ export const useConnectionInfo = ({ odinId }: { odinId?: string }) => {
 };
 
 export const useDetailedConnectionInfo = ({ odinId }: { odinId?: string }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const connectionInfoQuery = useConnectionInfo({ odinId }).fetch;
 
   const doGetDetailedConnectionInfo = async (odinId: string) => {
     if (!odinId) return;
 
-    const pendingRequest = await getPendingRequest(dotYouClient, odinId);
+    const pendingRequest = await getPendingRequest(odinClient, odinId);
     if (pendingRequest) return pendingRequest;
 
-    const sentRequest = await getSentRequest(dotYouClient, odinId);
+    const sentRequest = await getSentRequest(odinClient, odinId);
     if (sentRequest) return sentRequest;
 
     return null;
@@ -65,8 +65,8 @@ export const useDetailedConnectionInfo = ({ odinId }: { odinId?: string }) => {
   return {
     fetch:
       connectionInfoQuery.data?.status.toLowerCase() === 'connected' ||
-      connectionInfoQuery.data?.status.toLowerCase() === 'blocked' ||
-      !connectionInfoQuery.isFetched
+        connectionInfoQuery.data?.status.toLowerCase() === 'blocked' ||
+        !connectionInfoQuery.isFetched
         ? connectionInfoQuery
         : detailedConnectionInfoQuery,
   };

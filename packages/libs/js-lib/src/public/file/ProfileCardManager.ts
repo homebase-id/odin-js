@@ -2,7 +2,7 @@ const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
 import axios from 'axios';
-import { ApiType, DotYouClient } from '../../core/DotYouClient';
+import { ApiType, OdinClient } from '../../core/OdinClient';
 import { HomebaseFile, SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
 import { getDecryptedImageData } from '../../media/ImageProvider';
 import {
@@ -34,9 +34,9 @@ export const ProfileCardAttributeTypes = [
   ...BuiltInAttributes.AllGames,
 ];
 
-export const publishProfileCard = async (dotYouClient: DotYouClient) => {
+export const publishProfileCard = async (odinClient: OdinClient) => {
   const profileNameAttributes = await getProfileAttributes(
-    dotYouClient,
+    odinClient,
     BuiltInProfiles.StandardProfileId,
     undefined,
     [BuiltInAttributes.Name]
@@ -59,7 +59,7 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
   ] as string | undefined;
 
   const bioAttributes = await getProfileAttributes(
-    dotYouClient,
+    odinClient,
     BuiltInProfiles.StandardProfileId,
     undefined,
     [BuiltInAttributes.FullBio]
@@ -83,7 +83,7 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
     .filter((data) => data !== undefined);
 
   const bioSummaryAttributes = await getProfileAttributes(
-    dotYouClient,
+    odinClient,
     BuiltInProfiles.StandardProfileId,
     undefined,
     [BuiltInAttributes.BioSummary]
@@ -107,7 +107,7 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
     .filter((data) => data !== undefined);
 
   const emailAttributes = await getProfileAttributes(
-    dotYouClient,
+    odinClient,
     BuiltInProfiles.StandardProfileId,
     undefined,
     [BuiltInAttributes.Email]
@@ -126,7 +126,7 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
     .filter((email) => email.type && email.email);
 
   const socialAttributes = await getProfileAttributes(
-    dotYouClient,
+    odinClient,
     BuiltInProfiles.StandardProfileId,
     undefined,
     [...BuiltInAttributes.AllSocial, ...BuiltInAttributes.AllGames]
@@ -149,7 +149,7 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
     .filter((link) => link.type && link.url);
 
   const linkAttributes = await getProfileAttributes(
-    dotYouClient,
+    odinClient,
     BuiltInProfiles.StandardProfileId,
     undefined,
     [BuiltInAttributes.Link]
@@ -167,13 +167,13 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
     }))
     .filter((link) => link.type && link.url);
 
-  await publishProfileCardFile(dotYouClient, {
-    name: displayName || dotYouClient.getHostIdentity(),
+  await publishProfileCardFile(odinClient, {
+    name: displayName || odinClient.getHostIdentity(),
     givenName: (givenName?.length && givenName) || undefined,
     familyName: (familyName?.length && familyName) || undefined,
     bio: bios?.[0] || '',
     bioSummary: bioSummaries?.[0] || '',
-    image: `https://${dotYouClient.getHostIdentity()}/pub/image`,
+    image: `https://${odinClient.getHostIdentity()}/pub/image`,
     email: emails,
     links: [...socials, ...links],
     sameAs: [...socials]
@@ -186,7 +186,7 @@ export const GetProfileCard = async (odinId: string): Promise<ProfileCard | unde
       return await _internalFileCache.get(odinId);
     }
 
-    const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot();
+    const host = new OdinClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot();
 
     const httpClient = axios.create();
     const fetchProfileCard = async () => {
@@ -212,9 +212,9 @@ export const GetProfileCard = async (odinId: string): Promise<ProfileCard | unde
   }
 };
 
-export const publishProfileImage = async (dotYouClient: DotYouClient) => {
+export const publishProfileImage = async (odinClient: OdinClient) => {
   const profilePhotoAttributes = await getProfileAttributes(
-    dotYouClient,
+    odinClient,
     BuiltInProfiles.StandardProfileId,
     BuiltInProfiles.PersonalInfoSectionId,
     [BuiltInAttributes.Photo]
@@ -238,7 +238,7 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
         ?.contentType === 'image/svg+xml';
 
     const imageData = await getDecryptedImageData(
-      dotYouClient,
+      odinClient,
       GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
       publicProfilePhotoAttr.fileId as string,
       fileKey,
@@ -258,14 +258,14 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
         );
 
         await publishProfileImageFile(
-          dotYouClient,
+          odinClient,
           new Uint8Array(await resizedJpgData.blob.arrayBuffer()),
           resizedJpgData.blob.type
         );
       } catch {
         // Fallback to unresized image
         await publishProfileImageFile(
-          dotYouClient,
+          odinClient,
           new Uint8Array(imageData.bytes),
           imageData.contentType
         );
@@ -278,7 +278,7 @@ export const GetProfileImage = async (odinId: string): Promise<Blob | undefined>
   try {
     const httpClient = axios.create();
     const fetchProfileCard = async () => {
-      const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot();
+      const host = new OdinClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot();
 
       return await httpClient
         .get(`${host}/pub/image`, {

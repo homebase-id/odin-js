@@ -2,11 +2,11 @@ import { MouseEventHandler, ReactNode, useRef, useState } from 'react';
 import {
   ContactImage,
   ContactName,
-  useDotYouClientContext,
+  useOdinClientContext,
   useIntersection,
   useIsConnected,
 } from '../..';
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient } from '@homebase-id/js-lib/core';
 
 export const IdentityTeaser = ({
   odinId,
@@ -23,18 +23,18 @@ export const IdentityTeaser = ({
   isBorderLess?: boolean;
   children?: ReactNode;
 }) => {
-  const dotYouClient = useDotYouClientContext();
-  const identity = dotYouClient.getLoggedInIdentity();
+  const odinClient = useOdinClientContext();
+  const identity = odinClient.getLoggedInIdentity();
   const [isInView, setIsInView] = useState(false);
   const wrapperRef = useRef<HTMLAnchorElement>(null);
 
   // isLocal when both the logged in user and the api host is the same
-  const isLocal = identity === dotYouClient.getHostIdentity();
+  const isLocal = identity === odinClient.getHostIdentity();
   const { data: isConnected } = useIsConnected(isInView && isLocal ? odinId : undefined);
   useIntersection(wrapperRef, () => setIsInView(true));
 
   const imageSizeClass = size === 'sm' ? 'h-10 w-10 mr-2' : 'h-16 w-16 mr-4';
-  const link = `${new DotYouClient({ hostIdentity: odinId, api: ApiType.App }).getRoot()}${isConnected && identity ? '?youauth-logon=' + identity : ''}`;
+  const link = `${new OdinClient({ hostIdentity: odinId, api: ApiType.App }).getRoot()}${isConnected && identity ? '?youauth-logon=' + identity : ''}`;
 
   return (
     <a

@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from 'axios';
-import { DotYouClient } from '../../../core/DotYouClient';
+import { OdinClient } from '../../../core/OdinClient';
 import {
   decryptKeyHeader,
   decryptJsonContent,
@@ -46,7 +46,7 @@ interface GetThumbRequest extends GetFileRequest {
 const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile | null>>();
 
 export const getPayloadAsJsonOverPeerByGlobalTransitId = async <T>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   targetDrive: TargetDrive,
   globalTransitId: string,
@@ -58,7 +58,7 @@ export const getPayloadAsJsonOverPeerByGlobalTransitId = async <T>(
   const { systemFileType } = options ?? { systemFileType: 'Standard' };
 
   return getPayloadBytesOverPeerByGlobalTransitId(
-    dotYouClient,
+    odinClient,
     odinId,
     targetDrive,
     globalTransitId,
@@ -71,7 +71,7 @@ export const getPayloadAsJsonOverPeerByGlobalTransitId = async <T>(
 };
 
 export const getPayloadBytesOverPeerByGlobalTransitId = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   targetDrive: TargetDrive,
   globalTransitId: string,
@@ -84,7 +84,7 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
     lastModified?: number;
   }
 ): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
-  assertIfDefined('DotYouClient', dotYouClient);
+  assertIfDefined('OdinClient', odinClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefinedAndNotDefault('GlobalTransitId', globalTransitId);
   assertIfDefinedAndNotDefault('Key', key);
@@ -94,7 +94,7 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
+  const client = getAxiosClient(odinClient, systemFileType);
   const request: GetPayloadRequest = {
     odinId: odinId,
     ...targetDrive,
@@ -115,7 +115,7 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
   return client
     .get<ArrayBuffer>(
       '/transit/query/payload_byglobaltransitid?' +
-        stringifyToQueryParams({ ...request, lastModified }),
+      stringifyToQueryParams({ ...request, lastModified }),
       config
     )
     .then(async (response) => {
@@ -125,19 +125,19 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
           ? new Uint8Array(response.data)
           : updatedChunkStart !== undefined
             ? (
-                await decryptChunkedBytesResponse(
-                  dotYouClient,
-                  response,
-                  startOffset,
-                  updatedChunkStart
-                )
-              ).slice(
-                0,
-                chunkEnd !== undefined && chunkStart !== undefined
-                  ? chunkEnd - chunkStart
-                  : undefined
+              await decryptChunkedBytesResponse(
+                odinClient,
+                response,
+                startOffset,
+                updatedChunkStart
               )
-            : await decryptBytesResponse(dotYouClient, response),
+            ).slice(
+              0,
+              chunkEnd !== undefined && chunkStart !== undefined
+                ? chunkEnd - chunkStart
+                : undefined
+            )
+            : await decryptBytesResponse(odinClient, response),
 
         contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };
@@ -150,7 +150,7 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
 };
 
 export const getThumbBytesOverPeerByGlobalTransitId = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   targetDrive: TargetDrive,
   globalTransitId: string,
@@ -162,7 +162,7 @@ export const getThumbBytesOverPeerByGlobalTransitId = async (
     lastModified?: number;
   }
 ): Promise<{ bytes: Uint8Array; contentType: ImageContentType } | null> => {
-  assertIfDefined('DotYouClient', dotYouClient);
+  assertIfDefined('OdinClient', odinClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GlobalTransitId', globalTransitId);
   assertIfDefined('PayloadKey', payloadKey);
@@ -171,7 +171,7 @@ export const getThumbBytesOverPeerByGlobalTransitId = async (
   assertIfDefinedAndNotDefault('OdinId', odinId);
 
   const { systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
-  const client = getAxiosClient(dotYouClient, systemFileType);
+  const client = getAxiosClient(odinClient, systemFileType);
   const request: GetThumbRequest = {
     odinId: odinId,
     ...targetDrive,
@@ -186,12 +186,12 @@ export const getThumbBytesOverPeerByGlobalTransitId = async (
   return client
     .get<ArrayBuffer>(
       '/transit/query/thumb_byglobaltransitid?' +
-        stringifyToQueryParams({ ...request, width, height, lastModified }),
+      stringifyToQueryParams({ ...request, width, height, lastModified }),
       config
     )
     .then(async (response) => {
       return {
-        bytes: await decryptBytesResponse(dotYouClient, response),
+        bytes: await decryptBytesResponse(odinClient, response),
         contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
       };
     })
@@ -203,7 +203,7 @@ export const getThumbBytesOverPeerByGlobalTransitId = async (
 };
 
 export const getFileHeaderOverPeerByGlobalTransitId = async <T = string>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   targetDrive: TargetDrive,
   globalTransitId: string,
@@ -213,7 +213,7 @@ export const getFileHeaderOverPeerByGlobalTransitId = async <T = string>(
   const systemFileType = options?.systemFileType ?? 'Standard';
 
   const fileHeader = await getFileHeaderBytesOverPeerByGlobalTransitId(
-    dotYouClient,
+    odinClient,
     odinId,
     targetDrive,
     globalTransitId,
@@ -239,13 +239,13 @@ export const getFileHeaderOverPeerByGlobalTransitId = async <T = string>(
 };
 
 export const getFileHeaderBytesOverPeerByGlobalTransitId = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   targetDrive: TargetDrive,
   globalTransitId: string,
   options?: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
 ): Promise<HomebaseFile> => {
-  assertIfDefined('DotYouClient', dotYouClient);
+  assertIfDefined('OdinClient', odinClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GlobalTransitId', globalTransitId);
   assertIfDefinedAndNotDefault('OdinId', odinId);
@@ -259,7 +259,7 @@ export const getFileHeaderBytesOverPeerByGlobalTransitId = async (
     if (cacheData) return cacheData;
   }
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
+  const client = getAxiosClient(odinClient, systemFileType);
 
   const request: GetFileRequest = {
     odinId: odinId,
@@ -273,7 +273,7 @@ export const getFileHeaderBytesOverPeerByGlobalTransitId = async (
     .then(async (fileHeader) => {
       if (decrypt) {
         const keyheader = fileHeader.fileMetadata.isEncrypted
-          ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)
+          ? await decryptKeyHeader(odinClient, fileHeader.sharedSecretEncryptedKeyHeader)
           : undefined;
 
         fileHeader.fileMetadata.appData.content = await decryptJsonContent(
@@ -296,7 +296,7 @@ export const getFileHeaderBytesOverPeerByGlobalTransitId = async (
 };
 
 export const getContentFromHeaderOrPayloadOverPeerByGlobalTransitId = async <T>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   targetDrive: TargetDrive,
   dsr: {
@@ -311,7 +311,7 @@ export const getContentFromHeaderOrPayloadOverPeerByGlobalTransitId = async <T>(
   const contentIsComplete =
     fileMetadata.payloads?.filter((payload) => payload.key === DEFAULT_PAYLOAD_KEY).length === 0;
   const keyHeader = fileMetadata.isEncrypted
-    ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
+    ? await decryptKeyHeader(odinClient, sharedSecretEncryptedKeyHeader)
     : undefined;
 
   if (contentIsComplete) {
@@ -321,7 +321,7 @@ export const getContentFromHeaderOrPayloadOverPeerByGlobalTransitId = async <T>(
     } else {
       // When contentIsComplete but includesJsonContent == false the query before was done without including the content; So we just get and parse
       const fileHeader = await getFileHeaderOverPeerByGlobalTransitId(
-        dotYouClient,
+        odinClient,
         odinId,
         targetDrive,
         globalTransitId,
@@ -335,7 +335,7 @@ export const getContentFromHeaderOrPayloadOverPeerByGlobalTransitId = async <T>(
     return tryJsonParse<T>(decryptedJsonContent);
   } else {
     return await getPayloadAsJsonOverPeerByGlobalTransitId<T>(
-      dotYouClient,
+      odinClient,
       odinId,
       targetDrive,
       globalTransitId,

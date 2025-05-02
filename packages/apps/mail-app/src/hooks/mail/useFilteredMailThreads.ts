@@ -8,7 +8,7 @@ import {
   REMOVE_ARCHIVAL_STATUS,
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
 } from '../../providers/MailProvider';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { MAIL_CONVERSATIONS_PAGE_SIZE, useMailConversations } from './useMailConversations';
 import fuzzysort from 'fuzzysort';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
@@ -16,7 +16,7 @@ import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 export type MailThreadsFilter = 'inbox' | 'sent' | 'drafts' | 'archive' | 'trash';
 
 export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string | undefined) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const {
     data: conversations,
     hasNextPage: hasMorePosts,
@@ -108,38 +108,38 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
     const today = new Date().getTime();
     const searchResults = query
       ? fuzzysort
-          .go(query, filteredConversations, {
-            keys: [
-              'fileMetadata.appData.content.subject',
-              'fileMetadata.appData.content.plainMessage',
-              'fileMetadata.appData.content.plainAttachment',
-            ],
-            threshold: -10000,
-            scoreFn: (a) => {
-              // Less than 0 days old, no penalty
-              const agePenalty = Math.abs(
-                Math.round(
-                  (today -
-                    (a as unknown as { obj: HomebaseFile<MailConversation> }).obj.fileMetadata
-                      .created) /
-                    (1000 * 60 * 60 * 24)
-                )
-              );
+        .go(query, filteredConversations, {
+          keys: [
+            'fileMetadata.appData.content.subject',
+            'fileMetadata.appData.content.plainMessage',
+            'fileMetadata.appData.content.plainAttachment',
+          ],
+          threshold: -10000,
+          scoreFn: (a) => {
+            // Less than 0 days old, no penalty
+            const agePenalty = Math.abs(
+              Math.round(
+                (today -
+                  (a as unknown as { obj: HomebaseFile<MailConversation> }).obj.fileMetadata
+                    .created) /
+                (1000 * 60 * 60 * 24)
+              )
+            );
 
-              // -100 to the plainMessage score makes it a worse match than a subject match
-              return (
-                Math.max(
-                  a[0] ? a[0].score : -Infinity,
-                  a[1] ? a[1].score - 100 : -Infinity,
-                  a[2] ? a[2].score - 50 : -Infinity
-                ) - agePenalty
-              );
-            },
-          })
-          .map((result) => ({
-            originId: result.obj.fileMetadata.appData.content.originId,
-            threadId: result.obj.fileMetadata.appData.content.threadId,
-          }))
+            // -100 to the plainMessage score makes it a worse match than a subject match
+            return (
+              Math.max(
+                a[0] ? a[0].score : -Infinity,
+                a[1] ? a[1].score - 100 : -Infinity,
+                a[2] ? a[2].score - 50 : -Infinity
+              ) - agePenalty
+            );
+          },
+        })
+        .map((result) => ({
+          originId: result.obj.fileMetadata.appData.content.originId,
+          threadId: result.obj.fileMetadata.appData.content.threadId,
+        }))
       : [];
 
     // filter threadsDictionary by searchResults if there's a query

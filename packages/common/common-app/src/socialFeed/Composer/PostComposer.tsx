@@ -31,7 +31,7 @@ import {
   useCollaborativeChannels,
   useChannel,
   useLinkPreviewBuilder,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '../../hooks';
 
 import { EmbeddedPostContent } from '../Blocks/Body/EmbeddedPostContent';
@@ -57,9 +57,9 @@ export const PostComposer = ({
   className?: string;
   excludeCustom?: boolean;
 }) => {
-  const dotYouClient = useDotYouClientContext();
-  const isOwner = dotYouClient.isOwner();
-  const loggedOnIdentity = dotYouClient.getLoggedInIdentity();
+  const odinClient = useOdinClientContext();
+  const isOwner = odinClient.isOwner();
+  const loggedOnIdentity = odinClient.getLoggedInIdentity();
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
 
   const { savePost, postState, processingProgress, error } = usePostComposer();
@@ -370,7 +370,7 @@ export const ChannelOrAclSelector = React.forwardRef(
     },
     ref: Ref<HTMLSelectElement>
   ) => {
-    const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+    const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
     const { data: channels, isLoading } = useChannels({ isAuthenticated: true, isOwner: true });
     const { data: collaborativeChannels } = useCollaborativeChannels().fetch;
     const [isChnlMgmtOpen, setIsChnlMgmtOpen] = useState(false);

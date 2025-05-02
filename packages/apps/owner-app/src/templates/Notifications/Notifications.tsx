@@ -12,7 +12,7 @@ import {
   buildNotificationTargetLink,
   buildNotificationBody,
   buildNotificationTitle,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { Cog, Times, Bell } from '@homebase-id/common-app/icons';
 import { PageMeta } from '@homebase-id/common-app';
@@ -21,7 +21,7 @@ import { useApp } from '../../hooks/apps/useApp';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useSearchParams } from 'react-router-dom';
 import { useContact } from '@homebase-id/common-app';
-import { ApiType, DotYouClient, PushNotification } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient, PushNotification } from '@homebase-id/js-lib/core';
 import PushNotificationsDialog from '../../components/Notifications/PushNotificationsDialog/PushNotificationsDialog';
 
 interface NotificationClickData {
@@ -332,7 +332,7 @@ const NotificationItem = ({
   groupCount: number;
   appName?: string;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const isLocalNotification = notification.senderId === loggedOnIdentity;
 
   const { data: contactFile } = useContact({
@@ -355,7 +355,7 @@ const NotificationItem = ({
       title={title}
       imgSrc={
         notification.senderId
-          ? `${new DotYouClient({ hostIdentity: notification.senderId, api: ApiType.Guest }).getRoot()}/pub/image`
+          ? `${new OdinClient({ hostIdentity: notification.senderId, api: ApiType.Guest }).getRoot()}/pub/image`
           : undefined
       }
       // Keeping the hidden ones short

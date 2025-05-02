@@ -13,7 +13,7 @@ import {
   BoringFile,
   useDarkMode,
   LinkPreviewItem,
-  useDotYouClientContext,
+  useOdinClientContext,
   COMMUNITY_ROOT_PATH,
 } from '@homebase-id/common-app';
 import { Triangle } from '@homebase-id/common-app/icons';
@@ -100,7 +100,7 @@ const MediaItem = ({
   onLoad?: () => void;
 }) => {
   const { isDarkMode } = useDarkMode();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const isVideo =
     payload.contentType?.startsWith('video') ||
     payload.contentType === 'application/vnd.apple.mpegurl';
@@ -134,7 +134,7 @@ const MediaItem = ({
               }
             >
               <OdinThumbnailImage
-                dotYouClient={dotYouClient}
+                odinClient={odinClient}
                 odinId={odinId}
                 fileId={fileId}
                 fileKey={payload.key}
@@ -152,7 +152,7 @@ const MediaItem = ({
           ) : isAudio ? (
             <>
               <OdinAudio
-                dotYouClient={dotYouClient}
+                odinClient={odinClient}
                 odinId={odinId}
                 fileId={fileId}
                 fileKey={payload.key}
@@ -163,7 +163,7 @@ const MediaItem = ({
                 className="w-full"
               />
               <OdinAudioWaveForm
-                dotYouClient={dotYouClient}
+                odinClient={odinClient}
                 odinId={odinId}
                 fileId={fileId}
                 fileKey={payload.key}
@@ -177,7 +177,7 @@ const MediaItem = ({
             </>
           ) : isImage ? (
             <OdinImage
-              dotYouClient={dotYouClient}
+              odinClient={odinClient}
               odinId={odinId}
               fileId={fileId}
               fileKey={payload.key}

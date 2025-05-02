@@ -33,7 +33,7 @@ import {
   MailDrive,
 } from '../../providers/MailProvider';
 import { RecipientInput } from './RecipientInput';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { RichTextEditor } from '@homebase-id/rich-text-editor';
 import { useBlocker } from 'react-router-dom';
 import { MediaOptions } from '@homebase-id/rich-text-editor/src/editor/ImagePlugin/ImagePlugin';
@@ -67,7 +67,7 @@ export const MailComposer = ({
   const { data: mailSettings, isFetched: mailSettingsFetched } = useMailSettings().get;
 
   const [expanded, setExpanded] = useState(!forwardedMailThread || !currentRecipients?.length);
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const [autosavedDsr, setAutosavedDsr] = useState<
     NewHomebaseFile<MailConversation> | HomebaseFile<MailConversation>
   >(

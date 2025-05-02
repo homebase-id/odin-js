@@ -1,7 +1,7 @@
 import {
   UploadFileMetadata,
   UploadInstructionSet,
-  DotYouClient,
+  OdinClient,
   uploadFile,
   DEFAULT_PAYLOAD_KEY,
   ThumbnailFile,
@@ -34,13 +34,13 @@ import {
 
 //Handles management of Contacts
 export const saveContact = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   contact: NewHomebaseFile<RawContact>
 ): Promise<UploadResult | void> => {
   console.debug('Saving contact', { ...contact });
 
   if (contact.fileMetadata.appData.uniqueId) {
-    const existingContact = await getContactByUniqueId(dotYouClient, contact.fileMetadata.appData.uniqueId);
+    const existingContact = await getContactByUniqueId(odinClient, contact.fileMetadata.appData.uniqueId);
     if (existingContact) {
       contact.fileId = existingContact.fileId;
       contact.sharedSecretEncryptedKeyHeader = existingContact.sharedSecretEncryptedKeyHeader;
@@ -49,7 +49,7 @@ export const saveContact = async (
 
   if (!contact.fileId && contact.fileMetadata.appData.content.odinId) {
     const existingContact = await getContactByOdinId(
-      dotYouClient,
+      odinClient,
       contact.fileMetadata.appData.content.odinId
     );
     contact.fileMetadata.appData.uniqueId =
@@ -137,16 +137,16 @@ export const saveContact = async (
       locale: 'local',
       transferIv: getRandom16ByteArray(),
     }
-    return await patchFile(dotYouClient, contact.sharedSecretEncryptedKeyHeader, updateInstructions, metadata, payloads, thumbnails, undefined, async () => {
+    return await patchFile(odinClient, contact.sharedSecretEncryptedKeyHeader, updateInstructions, metadata, payloads, thumbnails, undefined, async () => {
       if (!contact.fileId) return;
       const existingContactFile = await getFileHeader(
-        dotYouClient,
+        odinClient,
         ContactConfig.ContactTargetDrive,
         contact.fileId
       );
       if (!existingContactFile) return;
       contact.fileMetadata.versionTag = existingContactFile.fileMetadata.versionTag;
-      return saveContact(dotYouClient, contact);
+      return saveContact(odinClient, contact);
     }).then((result) => {
       if (!result) throw new Error('Failed to upload contact');
       //todo: should we create a seperate updateContact method?
@@ -167,7 +167,7 @@ export const saveContact = async (
   }
 
   return await uploadFile(
-    dotYouClient,
+    odinClient,
     instructionSet,
     metadata,
     payloads,
@@ -176,13 +176,13 @@ export const saveContact = async (
     async () => {
       if (!contact.fileId) return;
       const existingContactFile = await getFileHeader(
-        dotYouClient,
+        odinClient,
         ContactConfig.ContactTargetDrive,
         contact.fileId
       );
       if (!existingContactFile) return;
       contact.fileMetadata.versionTag = existingContactFile.fileMetadata.versionTag;
-      return saveContact(dotYouClient, contact);
+      return saveContact(odinClient, contact);
     }
   );
   // if (!result) throw new Error('Failed to upload contact');

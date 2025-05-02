@@ -6,7 +6,7 @@
   OdinIdRequest,
   ConnectionRequest,
 } from '../circle/CircleDataTypes';
-import { DotYouClient } from '../../core/DotYouClient';
+import { OdinClient } from '../../core/OdinClient';
 import { PagingOptions, PagedResult } from '../../core/core';
 import { stringifyToQueryParams } from '../../helpers/helpers';
 import { getConnectionInfo } from './ConnectionManager';
@@ -17,10 +17,10 @@ const SentPathRoot: string = Root + '/sent';
 const PendingPathRoot: string = Root + '/pending';
 
 export const getPendingRequests = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   params: PagingOptions
 ): Promise<PagedResult<IncomingConnectionRequest>> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = PendingPathRoot + '/list?' + stringifyToQueryParams(params);
 
   return client
@@ -28,14 +28,14 @@ export const getPendingRequests = async (
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export const getPendingRequest = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string
 ): Promise<ConnectionRequest | null> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = PendingPathRoot + '/single';
   const data: OdinIdRequest = { odinId: odinId };
   return client
@@ -47,10 +47,10 @@ export const getPendingRequest = async (
 };
 
 export const getSentRequests = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   params: PagingOptions
 ): Promise<PagedResult<ConnectionRequest>> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = SentPathRoot + '/list?' + stringifyToQueryParams(params);
 
   return client
@@ -58,14 +58,14 @@ export const getSentRequests = async (
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export const getSentRequest = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string
 ): Promise<ConnectionRequest> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = SentPathRoot + '/single';
   const data: OdinIdRequest = { odinId: odinId };
 
@@ -79,11 +79,11 @@ export const getSentRequest = async (
 };
 
 export const acceptConnectionRequest = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   circleIds?: string[]
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = PendingPathRoot + '/accept/';
 
   const header: AcceptRequestHeader = {
@@ -97,14 +97,14 @@ export const acceptConnectionRequest = async (
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export const deletePendingRequest = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = PendingPathRoot + '/delete';
   const data: OdinIdRequest = { odinId: odinId };
 
@@ -113,14 +113,14 @@ export const deletePendingRequest = async (
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export const deleteSentRequest = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = SentPathRoot + '/delete';
   const data: OdinIdRequest = { odinId: odinId };
 
@@ -129,11 +129,11 @@ export const deleteSentRequest = async (
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export const sendRequest = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   message: string,
   circleIds: string[]
@@ -145,17 +145,17 @@ export const sendRequest = async (
     circleIds: circleIds,
   };
 
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   return client
     .post(url, data)
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
-export const blockOdinId = async (dotYouClient: DotYouClient, odinId: string) => {
-  const client = dotYouClient.createAxiosClient();
+export const blockOdinId = async (odinClient: OdinClient, odinId: string) => {
+  const client = odinClient.createAxiosClient();
   const url = '/circles/connections/block';
   const data: OdinIdRequest = { odinId: odinId };
 
@@ -165,13 +165,13 @@ export const blockOdinId = async (dotYouClient: DotYouClient, odinId: string) =>
       return response.data;
     })
     .catch((err) => {
-      dotYouClient.handleErrorResponse(err);
+      odinClient.handleErrorResponse(err);
       return false;
     });
 };
 
-export const unblockOdinId = async (dotYouClient: DotYouClient, odinId: string) => {
-  const client = dotYouClient.createAxiosClient();
+export const unblockOdinId = async (odinClient: OdinClient, odinId: string) => {
+  const client = odinClient.createAxiosClient();
   const url = '/circles/connections/unblock';
   const data: OdinIdRequest = { odinId: odinId };
 
@@ -181,24 +181,24 @@ export const unblockOdinId = async (dotYouClient: DotYouClient, odinId: string) 
       return response.data;
     })
     .catch((err) => {
-      dotYouClient.handleErrorResponse(err);
+      odinClient.handleErrorResponse(err);
       return false;
     });
 };
 
 export const getDetailedConnectionInfo = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string
 ): Promise<ConnectionRequest | ConnectionInfo | undefined> => {
   if (!odinId) return;
 
-  const connectionInfo = await getConnectionInfo(dotYouClient, odinId);
+  const connectionInfo = await getConnectionInfo(odinClient, odinId);
   if (connectionInfo && connectionInfo.status.toLowerCase() !== 'none') return connectionInfo;
 
-  const pendingRequest = await getPendingRequest(dotYouClient, odinId);
+  const pendingRequest = await getPendingRequest(odinClient, odinId);
   if (pendingRequest) return { ...pendingRequest };
 
-  const sentRequest = await getSentRequest(dotYouClient, odinId);
+  const sentRequest = await getSentRequest(odinClient, odinId);
   if (sentRequest) return { ...sentRequest };
 
   return undefined;

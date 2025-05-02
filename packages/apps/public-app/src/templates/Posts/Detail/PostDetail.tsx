@@ -6,7 +6,7 @@ import {
   RelatedArticles,
   t,
   useChannel,
-  useDotYouClientContext,
+  useOdinClientContext,
   usePost,
 } from '@homebase-id/common-app';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
@@ -23,9 +23,9 @@ const PostDetail = () => {
     postKey,
   });
 
-  const dotYouClient = useDotYouClientContext();
-  const isOwner = dotYouClient.isOwner();
-  const isAuthenticated = dotYouClient.isAuthenticated();
+  const odinClient = useOdinClientContext();
+  const isOwner = odinClient.isOwner();
+  const isAuthenticated = odinClient.isAuthenticated();
   const [isLogin, setIsLogin] = useState(false);
 
   if (!postData && !postDataLoading) {

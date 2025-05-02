@@ -1,5 +1,5 @@
 import { DEFAULT_PAYLOAD_KEY, EmbeddedThumb, PayloadDescriptor } from '../..';
-import { DotYouClient } from '../../core/DotYouClient';
+import { OdinClient } from '../../core/OdinClient';
 import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
 import { HomebaseFile } from '../../core/DriveData/File/DriveFileTypes';
 import {
@@ -51,12 +51,12 @@ type PublishProfileImage = {
 const _internalFileCache = new Map<string, Promise<Map<string, ResponseEntry[]>>>();
 
 export const publishFile = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   fileName: string,
   sections: QueryParamsSection[],
   crossOriginBehavior: 'allowAllOrigins' | 'default' = 'default'
 ) => {
-  const httpClient = dotYouClient.createAxiosClient();
+  const httpClient = odinClient.createAxiosClient();
 
   const fileRequest: PublishStaticFileRequest = {
     filename: fileName,
@@ -71,7 +71,7 @@ export const publishFile = async (
 };
 
 export const publishProfileCardFile = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   profileCard: {
     image: `https://${string}/pub/image`;
     givenName: string | undefined;
@@ -84,7 +84,7 @@ export const publishProfileCardFile = async (
     sameAs: { type: string; url: string | undefined }[]
   }
 ) => {
-  const httpClient = dotYouClient.createAxiosClient();
+  const httpClient = odinClient.createAxiosClient();
 
   return await httpClient.post('/optimization/cdn/profilecard', {
     profileCardJson: JSON.stringify(profileCard),
@@ -92,11 +92,11 @@ export const publishProfileCardFile = async (
 };
 
 export const publishProfileImageFile = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   imageBuffer: Uint8Array,
   contentType: string
 ) => {
-  const httpClient = dotYouClient.createAxiosClient();
+  const httpClient = odinClient.createAxiosClient();
 
   const fileRequest: PublishProfileImage = {
     image64: uint8ArrayToBase64(imageBuffer),
@@ -107,20 +107,20 @@ export const publishProfileImageFile = async (
 };
 
 export const GetFile = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   fileName: string
 ): Promise<Map<string, ResponseEntry[]>> => {
   try {
-    if (_internalFileCache.has(`${dotYouClient.getRoot()}+${fileName}`)) {
-      return (await _internalFileCache.get(`${dotYouClient.getRoot()}+${fileName}`)) ?? new Map();
+    if (_internalFileCache.has(`${odinClient.getRoot()}+${fileName}`)) {
+      return (await _internalFileCache.get(`${odinClient.getRoot()}+${fileName}`)) ?? new Map();
     }
 
-    const httpClient = dotYouClient.createAxiosClient({ overrideEncryption: true });
+    const httpClient = odinClient.createAxiosClient({ overrideEncryption: true });
 
     const fetchResponseMap = async (fileName: string) => {
       const response = await httpClient({
         url: `/cdn/${fileName}`,
-        baseURL: dotYouClient.getRoot(),
+        baseURL: odinClient.getRoot(),
         withCredentials: false,
         // Force headers to have the same as the preload manual fetch, and to allow a cached resource
         //headers: { accept: '*/*', 'cache-control': 'max-age=20' },
@@ -143,7 +143,7 @@ export const GetFile = async (
     };
 
     const promise = fetchResponseMap(fileName);
-    _internalFileCache.set(`${dotYouClient.getRoot()}+${fileName}`, promise);
+    _internalFileCache.set(`${odinClient.getRoot()}+${fileName}`, promise);
 
     return await promise;
   } catch {

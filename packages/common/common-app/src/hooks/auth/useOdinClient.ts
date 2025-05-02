@@ -1,4 +1,4 @@
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient } from '@homebase-id/js-lib/core';
 import { base64ToUint8Array, isLocalStorageAvailable } from '@homebase-id/js-lib/helpers';
 import { OwnerClient } from '../../core';
 import { retrieveIdentity } from '@homebase-id/js-lib/auth';
@@ -16,11 +16,11 @@ export const APP_SHARED_SECRET = window.location.pathname.startsWith(OWNER_APPS_
   ? `APPS_${window.location.pathname.split('/')?.[2]}`
   : 'APSS';
 
-export const useDotYouClient = () => {
+export const useOdinClient = () => {
   const _app = window.location.pathname.startsWith(OWNER_ROOT)
     ? 'owner'
     : window.location.hostname === 'dev.dotyou.cloud' ||
-        window.location.pathname.startsWith(OWNER_APPS_ROOT)
+      window.location.pathname.startsWith(OWNER_APPS_ROOT)
       ? 'apps'
       : 'home';
 
@@ -58,10 +58,10 @@ export const useDotYouClient = () => {
       : localStorage.getItem(STORAGE_IDENTITY_KEY) || undefined;
   };
 
-  const getDotYouClient = () => {
+  const getOdinClient = () => {
     // When running in an iframe, use the public YouAuth Api;
     if (window.self !== window.top)
-      return new DotYouClient({ hostIdentity: window.location.hostname, api: ApiType.Guest });
+      return new OdinClient({ hostIdentity: window.location.hostname, api: ApiType.Guest });
     const apiType = getApiType();
 
     if (apiType === ApiType.Owner)
@@ -70,7 +70,7 @@ export const useDotYouClient = () => {
         sharedSecret: getSharedSecret(),
       });
     else if (apiType === ApiType.Guest)
-      return new DotYouClient({
+      return new OdinClient({
         hostIdentity: window.location.hostname,
         api: apiType,
         sharedSecret: getSharedSecret(),
@@ -83,7 +83,7 @@ export const useDotYouClient = () => {
         headers['bx0900'] = authToken;
       }
 
-      return new DotYouClient({
+      return new OdinClient({
         sharedSecret: getSharedSecret(),
         api: ApiType.App,
         hostIdentity: retrieveIdentity() || window.location.hostname,
@@ -96,7 +96,7 @@ export const useDotYouClient = () => {
   return {
     hasSharedSecret,
     getSharedSecret,
-    getDotYouClient,
+    getOdinClient,
     isOwner: _isOwner,
   };
 };

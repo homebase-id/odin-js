@@ -1,5 +1,5 @@
 import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { DotYouClient, TypedConnectionNotification } from '@homebase-id/js-lib/core';
+import { OdinClient, TypedConnectionNotification } from '@homebase-id/js-lib/core';
 
 import { processInbox } from '@homebase-id/js-lib/peer';
 
@@ -7,7 +7,7 @@ import { useWebsocketSubscriber } from '@homebase-id/common-app';
 import { useCallback } from 'react';
 
 import { hasDebugFlag, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import {
   MAIL_CONVERSATION_FILE_TYPE,
   MailConversationsReturn,
@@ -29,11 +29,11 @@ export const useLiveMailProcessor = () => {
 
 // Process the inbox on startup
 const useInboxProcessor = (connected?: boolean) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const fetchData = async () => {
-    const processedresult = await processInbox(dotYouClient, MailDrive, 2000);
+    const processedresult = await processInbox(odinClient, MailDrive, 2000);
     // We don't know how many messages we have processed, so we can only invalidate the entire mail query
     // TODO: Extend with a queryBatch + queryModified with a timestamp check to directly add the new messages into the cache
     queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
@@ -52,10 +52,10 @@ const isDebug = hasDebugFlag();
 
 const useMailWebsocket = (isEnabled: boolean) => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const handler = useCallback(
-    async (_: DotYouClient, notification: TypedConnectionNotification) => {
+    async (_: OdinClient, notification: TypedConnectionNotification) => {
       isDebug && console.debug('[MailWebsocket] Got notification', notification);
 
       if (
@@ -67,7 +67,7 @@ const useMailWebsocket = (isEnabled: boolean) => {
 
           // This skips the invalidation of all chat messages, as we only need to add/update this specific message
           const updatedChatMessage = await dsrToMailConversation(
-            dotYouClient,
+            odinClient,
             notification.header,
             MailDrive,
             true
@@ -86,18 +86,18 @@ const useMailWebsocket = (isEnabled: boolean) => {
                 results: isNewFile
                   ? index === 0
                     ? [
-                        updatedChatMessage,
-                        ...page.results.filter(
-                          (existingMail) =>
-                            !stringGuidsEqual(existingMail.fileId, updatedChatMessage.fileId)
-                        ),
-                      ]
+                      updatedChatMessage,
+                      ...page.results.filter(
+                        (existingMail) =>
+                          !stringGuidsEqual(existingMail.fileId, updatedChatMessage.fileId)
+                      ),
+                    ]
                     : page.results
                   : page.results.map((msg) =>
-                      stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
-                        ? updatedChatMessage
-                        : msg
-                    ),
+                    stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                      ? updatedChatMessage
+                      : msg
+                  ),
               })),
             };
             queryClient.setQueryData(['mail-conversations'], newConversations);

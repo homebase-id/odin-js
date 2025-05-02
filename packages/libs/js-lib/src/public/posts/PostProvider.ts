@@ -10,7 +10,7 @@ import {
 import {
   CursoredResult,
   deleteFile,
-  DotYouClient,
+  OdinClient,
   HomebaseFile,
   FileQueryParams,
   GetBatchQueryResultOptions,
@@ -28,7 +28,7 @@ import { toGuidId } from '../../helpers/DataUtil';
 
 //Gets posts. if type is specified, returns a filtered list of the requested type; otherwise all types are returned
 export const getPosts = async <T extends PostContent>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   channelId: string,
   type: PostType | undefined,
   includeDrafts: true | 'only' | false,
@@ -56,13 +56,13 @@ export const getPosts = async <T extends PostContent>(
     sorting: 'userDate',
   };
 
-  const response = await queryBatch(dotYouClient, params, ro);
+  const response = await queryBatch(odinClient, params, ro);
 
   const posts: HomebaseFile<T>[] = (
     await Promise.all(
       response.searchResults.map(
         async (dsr) =>
-          await dsrToPostFile(dotYouClient, dsr, targetDrive, response.includeMetadataHeader)
+          await dsrToPostFile(odinClient, dsr, targetDrive, response.includeMetadataHeader)
       )
     )
   ).filter((post) => !!post) as HomebaseFile<T>[];
@@ -72,7 +72,7 @@ export const getPosts = async <T extends PostContent>(
 
 //Gets posts across all channels, ordered by date
 export const getRecentPosts = async <T extends PostContent>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   type: PostType | undefined,
   includeDrafts: true | 'only' | false,
   cursorState: Record<string, string> | undefined = undefined,
@@ -80,7 +80,7 @@ export const getRecentPosts = async <T extends PostContent>(
   channels?: HomebaseFile<ChannelDefinition>[],
   includeHiddenChannels = false
 ): Promise<MultiRequestCursoredResult<HomebaseFile<T>[]>> => {
-  const chnls = channels || (await getChannelDefinitions(dotYouClient));
+  const chnls = channels || (await getChannelDefinitions(odinClient));
   const allCursors: Record<string, string> = {};
 
   const queries = chnls
@@ -114,7 +114,7 @@ export const getRecentPosts = async <T extends PostContent>(
       };
     });
 
-  const response = await queryBatchCollection(dotYouClient, queries);
+  const response = await queryBatchCollection(odinClient, queries);
   const postsPerChannel = await Promise.all(
     response.results.map(async (result) => {
       const targetDrive = GetTargetDriveFromChannelId(result.name);
@@ -123,7 +123,7 @@ export const getRecentPosts = async <T extends PostContent>(
         await Promise.all(
           result.searchResults.map(
             async (dsr) =>
-              await dsrToPostFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
+              await dsrToPostFile(odinClient, dsr, targetDrive, result.includeMetadataHeader)
           )
         )
       ).filter((post) => !!post) as HomebaseFile<T>[];
@@ -145,30 +145,30 @@ export const getRecentPosts = async <T extends PostContent>(
 };
 
 export const getPostByFileId = async <T extends PostContent>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   channelId: string,
   fileId: string
 ): Promise<HomebaseFile<T> | null> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
-  const header = await getFileHeader(dotYouClient, targetDrive, fileId);
-  if (header) return await dsrToPostFile(dotYouClient, header, targetDrive, true);
+  const header = await getFileHeader(odinClient, targetDrive, fileId);
+  if (header) return await dsrToPostFile(odinClient, header, targetDrive, true);
   return null;
 };
 
 export const getPostByGlobalTransitId = async <T extends PostContent>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   channelId: string,
   globalTransitId: string
 ): Promise<HomebaseFile<T> | null> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
-  const header = await getFileHeaderByGlobalTransitId(dotYouClient, targetDrive, globalTransitId);
-  if (header) return await dsrToPostFile(dotYouClient, header, targetDrive, true);
+  const header = await getFileHeaderByGlobalTransitId(odinClient, targetDrive, globalTransitId);
+  if (header) return await dsrToPostFile(odinClient, header, targetDrive, true);
   return null;
 };
 
 //Gets the content for a given post id
 export const getPost = async <T extends PostContent>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   channelId: string,
   id: string
 ): Promise<HomebaseFile<T> | null> => {
@@ -179,7 +179,7 @@ export const getPost = async <T extends PostContent>(
     fileType: [BlogConfig.PostFileType, BlogConfig.DraftPostFileType],
   };
 
-  const response = await queryBatch(dotYouClient, params);
+  const response = await queryBatch(odinClient, params);
 
   if (response.searchResults.length >= 1) {
     if (response.searchResults.length > 1) {
@@ -187,28 +187,28 @@ export const getPost = async <T extends PostContent>(
     }
 
     const dsr = response.searchResults[0];
-    return await dsrToPostFile<T>(dotYouClient, dsr, targetDrive, response.includeMetadataHeader);
+    return await dsrToPostFile<T>(odinClient, dsr, targetDrive, response.includeMetadataHeader);
   }
 
   return null;
 };
 
 export const getPostBySlug = async <T extends PostContent>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   channelId: string,
   postSlug: string
 ): Promise<HomebaseFile<T> | null> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
-  const dsr = await getFileHeaderBytesByUniqueId(dotYouClient, targetDrive, toGuidId(postSlug), {
+  const dsr = await getFileHeaderBytesByUniqueId(odinClient, targetDrive, toGuidId(postSlug), {
     decrypt: false,
   });
 
   if (!dsr) return null;
-  return await dsrToPostFile<T>(dotYouClient, dsr, targetDrive, true);
+  return await dsrToPostFile<T>(odinClient, dsr, targetDrive, true);
 };
 
 export const removePost = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   postFile: HomebaseFile<PostContent>,
   channelId: string
 ) => {
@@ -218,7 +218,7 @@ export const removePost = async (
     // Fetch the first 1000 comments and delete their level 2 replies by groupId;
     const comments = (
       await queryBatch(
-        dotYouClient,
+        odinClient,
         {
           targetDrive: targetDrive,
           groupId: [postFile.fileMetadata.globalTransitId],
@@ -231,7 +231,7 @@ export const removePost = async (
     ).searchResults;
 
     await deleteFilesByGroupId(
-      dotYouClient,
+      odinClient,
       targetDrive,
       [
         ...(comments.map((cmnt) => cmnt.fileMetadata.globalTransitId).filter(Boolean) as string[]),
@@ -242,20 +242,20 @@ export const removePost = async (
     );
   }
 
-  return await deleteFile(dotYouClient, targetDrive, postFile.fileId);
+  return await deleteFile(odinClient, targetDrive, postFile.fileId);
 };
 
 ///
 
 export const dsrToPostFile = async <T extends PostContent>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<T> | null> => {
   try {
     const postContent = await getContentFromHeaderOrPayload<T>(
-      dotYouClient,
+      odinClient,
       targetDrive,
       dsr,
       includeMetadataHeader

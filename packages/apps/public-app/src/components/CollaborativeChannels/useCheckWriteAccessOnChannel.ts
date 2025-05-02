@@ -1,4 +1,4 @@
-import { useDotYouClientContext, useSecurityContext } from '@homebase-id/common-app';
+import { useOdinClientContext, useSecurityContext } from '@homebase-id/common-app';
 import { HomebaseFile, ApiType, DrivePermissionType } from '@homebase-id/js-lib/core';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
 import { ChannelDefinition, GetTargetDriveFromChannelId } from '@homebase-id/js-lib/public';
@@ -8,7 +8,7 @@ export const useCheckWriteAccessOnChannel = ({
 }: {
   activeChannel: HomebaseFile<ChannelDefinition>;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const { data: securityContext } = useSecurityContext().fetch;
 
   const channelDrive =
@@ -16,7 +16,7 @@ export const useCheckWriteAccessOnChannel = ({
       ? GetTargetDriveFromChannelId(activeChannel.fileMetadata.appData.uniqueId)
       : undefined;
 
-  const isOwner = dotYouClient.getType() === ApiType.Owner;
+  const isOwner = odinClient.getType() === ApiType.Owner;
 
   const hasWriteAccess =
     channelDrive &&

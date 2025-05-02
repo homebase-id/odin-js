@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../core/DotYouClient';
+import { OdinClient } from '../../core/OdinClient';
 
 export interface IntroductionGroup {
   message: string;
@@ -10,10 +10,10 @@ export interface IntroductionResult {
 }
 
 export const sendIntroduction = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   introduction: IntroductionGroup
 ): Promise<IntroductionResult | null> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
 
   if (introduction.recipients.length < 2) {
     return null;
@@ -39,10 +39,10 @@ export const sendIntroduction = async (
 };
 
 export const confirmIntroduction = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   recipient: string
 ): Promise<boolean | null> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
 
   return client
     .post<IntroductionResult>('/circles/connections/confirm-connection', { odinId: recipient })
@@ -63,9 +63,9 @@ export interface Introduction {
 }
 
 export const getReceivedIntroductions = async (
-  dotYouClient: DotYouClient
+  odinClient: OdinClient
 ): Promise<Introduction[] | null> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
 
   return client
     .get<Introduction[]>('/circles/requests/introductions/received')
@@ -77,9 +77,9 @@ export const getReceivedIntroductions = async (
 };
 
 export const removeAllReceivedIntroductions = async (
-  dotYouClient: DotYouClient
+  odinClient: OdinClient
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
 
   return client
     .delete<Introduction[]>('/circles/requests/introductions')

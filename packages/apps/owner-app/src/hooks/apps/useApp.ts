@@ -17,7 +17,7 @@ import {
   PermissionUpdateRequest,
 } from '../../provider/app/AppManagementProviderTypes';
 import { invalidateApps } from './useApps';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 interface PermissionExtensionRequest extends Omit<PermissionUpdateRequest, 'drives'> {
   drives?: (DriveGrantRequest | DriveGrant)[];
@@ -25,10 +25,10 @@ interface PermissionExtensionRequest extends Omit<PermissionUpdateRequest, 'driv
 
 export const useApp = ({ appId }: { appId?: string }) => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetch = async ({ appId }: { appId: string }) => {
-    return (await GetAppRegistration(dotYouClient, { appId: appId })) || null;
+    return (await GetAppRegistration(odinClient, { appId: appId })) || null;
   };
 
   const registerNewApp = async (appRegRequest: AppRegistrationRequest) => {
@@ -37,7 +37,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
         appRegRequest.drives.map(async (driveGrant) => {
           if (driveGrant.driveMeta && driveGrant.driveMeta.name)
             return await ensureDrive(
-              dotYouClient,
+              odinClient,
               driveGrant.permissionedDrive.drive,
               driveGrant.driveMeta.name,
               driveGrant.driveMeta.description,
@@ -47,26 +47,26 @@ export const useApp = ({ appId }: { appId?: string }) => {
         })
       );
 
-    await RegisterApp(dotYouClient, {
+    await RegisterApp(odinClient, {
       ...appRegRequest,
       drives: appRegRequest.drives
         ? appRegRequest.drives.map((driveGrant) => {
-            return { ...driveGrant, driveMeta: undefined };
-          })
+          return { ...driveGrant, driveMeta: undefined };
+        })
         : [],
     });
   };
 
   const revokeAppInternal = async ({ appId }: { appId: string }) => {
-    return await RevokeApp(dotYouClient, { appId: appId });
+    return await RevokeApp(odinClient, { appId: appId });
   };
 
   const allowAppInternal = async ({ appId }: { appId: string }) => {
-    return await AllowApp(dotYouClient, { appId: appId });
+    return await AllowApp(odinClient, { appId: appId });
   };
 
   const removeAppInternal = async ({ appId }: { appId: string }) => {
-    return await RemoveApp(dotYouClient, { appId: appId });
+    return await RemoveApp(odinClient, { appId: appId });
   };
 
   const updateAuthorizedCircles = async ({
@@ -78,7 +78,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
     circleIds: string[];
     circleMemberPermissionGrant: PermissionSetGrantRequest;
   }) => {
-    return await UpdateAuthorizedCircles(dotYouClient, {
+    return await UpdateAuthorizedCircles(odinClient, {
       appId,
       authorizedCircles: circleIds,
       circleMemberPermissionGrant,
@@ -95,7 +95,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
         drives.map(async (driveGrant: DriveGrantRequest) => {
           if (driveGrant.driveMeta && driveGrant.driveMeta.name)
             return await ensureDrive(
-              dotYouClient,
+              odinClient,
               driveGrant.permissionedDrive.drive,
               driveGrant.driveMeta.name,
               driveGrant.driveMeta.description,
@@ -105,7 +105,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
         })
       );
 
-    return await UpdatePermissions(dotYouClient, {
+    return await UpdatePermissions(odinClient, {
       appId,
       permissionSet,
       drives: drives || [],
@@ -113,7 +113,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
   };
 
   const updatePermissions = async ({ appId, permissionSet, drives }: PermissionUpdateRequest) => {
-    return await UpdatePermissions(dotYouClient, {
+    return await UpdatePermissions(odinClient, {
       appId,
       permissionSet,
       drives,

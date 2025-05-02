@@ -1,4 +1,4 @@
-import { DotYouClient } from '@homebase-id/js-lib/core';
+import { OdinClient } from '@homebase-id/js-lib/core';
 
 export interface RecoveryKeyResponse {
   key: string;
@@ -8,8 +8,8 @@ export interface RecoveryKeyResponse {
   };
 }
 
-export const getRecoveryKey = async (dotYouClient: DotYouClient) => {
-  const axiosClient = dotYouClient.createAxiosClient();
+export const getRecoveryKey = async (odinClient: OdinClient) => {
+  const axiosClient = odinClient.createAxiosClient();
 
   return await axiosClient
     .get<RecoveryKeyResponse>(`/security/recovery-key`)

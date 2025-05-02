@@ -1,6 +1,6 @@
 import { useWebsocketSubscriber } from '@homebase-id/common-app';
 import {
-  DotYouClient,
+  OdinClient,
   TypedConnectionNotification,
   TargetDrive,
   decryptKeyHeader,
@@ -44,7 +44,7 @@ export const useCommunityPeerWebsocket = (
   const targetDrive = getTargetDriveFromCommunityId(communityId || '');
 
   const handler = useCallback(
-    async (decryptionClient: DotYouClient, notification: TypedConnectionNotification) => {
+    async (decryptionClient: OdinClient, notification: TypedConnectionNotification) => {
       if (!communityId) {
         console.warn('[CommunityWebsocket] No communityId', notification);
         return;
@@ -125,7 +125,7 @@ export const useCommunityPeerWebsocket = (
 };
 
 const wsDsrToMessage = async (
-  websocketDotyouClient: DotYouClient,
+  websocketOdinClient: OdinClient,
   dsr: HomebaseFile
 ): Promise<HomebaseFile<CommunityMessage> | null> => {
   const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
@@ -137,9 +137,9 @@ const wsDsrToMessage = async (
 
   const keyHeader = fileMetadata.isEncrypted
     ? await decryptKeyHeader(
-        websocketDotyouClient,
-        sharedSecretEncryptedKeyHeader as EncryptedKeyHeader
-      )
+      websocketOdinClient,
+      sharedSecretEncryptedKeyHeader as EncryptedKeyHeader
+    )
     : undefined;
 
   const content = tryJsonParse<CommunityMessage>(await decryptJsonContent(fileMetadata, keyHeader));

@@ -26,7 +26,7 @@ interface createAxiosClientOptions {
   systemFileType?: SystemFileType;
 }
 
-export class BaseDotYouClient {
+export class BaseOdinClient {
   private _options: BaseProviderOptions;
 
   constructor(options: BaseProviderOptions) {
@@ -181,24 +181,23 @@ export interface ProviderOptions extends BaseProviderOptions {
   api: ApiType.App | ApiType.Guest;
 }
 
-export class DotYouClient extends BaseDotYouClient {
+export class OdinClient extends BaseOdinClient {
   constructor(options: ProviderOptions) {
     super({ ...options });
   }
 }
 
-export const assertIfDotYouClientIsOwner = (dotYouClient: DotYouClient) => {
-  if (dotYouClient.getType() !== ApiType.Owner) {
+export const assertIfOdinClientIsOwner = (odinClient: OdinClient) => {
+  if (odinClient.getType() !== ApiType.Owner) {
     throw new Error(
-      `This method is not available for ${
-        dotYouClient.getType() === ApiType.App ? 'app' : 'youauth'
+      `This method is not available for ${odinClient.getType() === ApiType.App ? 'app' : 'youauth'
       } clients`
     );
   }
 };
 
-export const assertIfDotYouClientIsOwnerOrApp = (dotYouClient: DotYouClient) => {
-  if (dotYouClient.getType() !== ApiType.Owner && dotYouClient.getType() !== ApiType.App) {
+export const assertIfOdinClientIsOwnerOrApp = (odinClient: OdinClient) => {
+  if (odinClient.getType() !== ApiType.Owner && odinClient.getType() !== ApiType.App) {
     throw new Error(`This method is not available for youauth clients`);
   }
 };

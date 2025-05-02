@@ -1,5 +1,5 @@
 import { hasDebugFlag } from '../../../helpers/BrowserUtil';
-import { assertIfDotYouClientIsOwnerOrApp, DotYouClient } from '../../DotYouClient';
+import { assertIfOdinClientIsOwnerOrApp, OdinClient } from '../../OdinClient';
 import {
     PayloadFile,
     ThumbnailFile,
@@ -44,7 +44,7 @@ const isDebug = hasDebugFlag();
 
 /// Upload methods:
 export const uploadFile = async (
-    dotYouClient: DotYouClient,
+    odinClient: OdinClient,
     instructions: UploadInstructionSet,
     metadata: UploadFileMetadata,
     payloads?: PayloadFile[],
@@ -57,7 +57,7 @@ export const uploadFile = async (
     }
 ): Promise<UploadResult | void> => {
     isDebug &&
-        console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/upload`).pathname, {
+        console.debug('request', new URL(`${odinClient.getEndpoint()}/drive/files/upload`).pathname, {
             instructions,
             metadata,
             payloads,
@@ -80,7 +80,7 @@ export const uploadFile = async (
 
     // Build package
     const encryptedDescriptor = await buildDescriptor(
-        dotYouClient,
+        odinClient,
         keyHeader,
         instructionsWithManifest,
         metadata
@@ -97,7 +97,7 @@ export const uploadFile = async (
 
     // Upload
     const uploadResult = await pureUpload(
-        dotYouClient,
+        odinClient,
         data,
         systemFileType,
         onVersionConflict,
@@ -110,7 +110,7 @@ export const uploadFile = async (
 };
 
 export const patchFile = async (
-    dotYouClient: DotYouClient,
+    odinClient: OdinClient,
     keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
     instructions: UpdateInstructionSet,
     metadata: UploadFileMetadata,
@@ -121,9 +121,9 @@ export const patchFile = async (
     options?: {
         axiosConfig?: AxiosRequestConfig;
     }
-): Promise<UpdateResult | void> => {
+): Promise<UpdateResult | UploadResult | void> => {
     isDebug &&
-        console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/update`).pathname, {
+        console.debug('request', new URL(`${odinClient.getEndpoint()}/drive/files/update`).pathname, {
             instructions,
             metadata,
             payloads,
@@ -133,7 +133,7 @@ export const patchFile = async (
 
     const decryptedKeyHeader =
         keyHeader && 'encryptionVersion' in keyHeader
-            ? await decryptKeyHeader(dotYouClient, keyHeader)
+            ? await decryptKeyHeader(odinClient, keyHeader)
             : keyHeader;
 
     if (decryptedKeyHeader) {
@@ -157,7 +157,7 @@ export const patchFile = async (
 
     // Build package
     const encryptedDescriptor = await buildDescriptor(
-        dotYouClient,
+        odinClient,
         decryptedKeyHeader,
         instructionsWithManifest,
         metadata
@@ -174,7 +174,7 @@ export const patchFile = async (
 
     // Upload
     const updateResult = await pureUpdate(
-        dotYouClient,
+        odinClient,
         data,
         systemFileType,
         onVersionConflict,
@@ -186,7 +186,7 @@ export const patchFile = async (
 };
 
 export const reUploadFile = async (
-    dotYouClient: DotYouClient,
+    odinClient: OdinClient,
     instructions: UploadInstructionSet,
     metadata: UploadFileMetadata,
     encrypt: boolean,
@@ -197,7 +197,7 @@ export const reUploadFile = async (
     if (!targetDrive) throw new Error('storageOptions.drive is required');
     if (!fileId) throw new Error('storageOptions.overwriteFileId is required');
 
-    const header = await getFileHeader(dotYouClient, targetDrive, fileId);
+    const header = await getFileHeader(odinClient, targetDrive, fileId);
 
     const payloads: PayloadFile[] = [];
     const thumbnails: ThumbnailFile[] = [];
@@ -206,7 +206,7 @@ export const reUploadFile = async (
     for (let i = 0; existingPayloads && i < existingPayloads.length; i++) {
         const existingPayload = existingPayloads[i];
         const payloadData = await getPayloadBytes(
-            dotYouClient,
+            odinClient,
             targetDrive,
             fileId,
             existingPayload.key,
@@ -219,11 +219,12 @@ export const reUploadFile = async (
             payload: new OdinBlob([payloadData.bytes], { type: existingPayload.contentType }),
         });
 
+
         const existingThumbnails = existingPayload.thumbnails;
         for (let j = 0; j < existingThumbnails.length; j++) {
             const existingThumbnail = existingThumbnails[j];
             const thumbnailData = await getThumbBytes(
-                dotYouClient,
+                odinClient,
                 targetDrive,
                 fileId,
                 existingPayload.key,
@@ -244,7 +245,7 @@ export const reUploadFile = async (
     }
 
     return await uploadFile(
-        dotYouClient,
+        odinClient,
         instructions,
         metadata,
         payloads,
@@ -253,8 +254,7 @@ export const reUploadFile = async (
         undefined,
         {
             axiosConfig,
-        }
-    );
+        });
 };
 
 export interface LocalMetadataUploadResult {
@@ -262,13 +262,13 @@ export interface LocalMetadataUploadResult {
 }
 
 export const uploadLocalMetadataTags = async (
-    dotYouClient: DotYouClient,
+    odinClient: OdinClient,
     file: FileIdFileIdentifier,
     localAppData: LocalAppData,
     onVersionConflict?: () => Promise<void | LocalMetadataUploadResult> | void
 ) => {
-    assertIfDotYouClientIsOwnerOrApp(dotYouClient);
-    const axiosClient = dotYouClient.createAxiosClient();
+    assertIfOdinClientIsOwnerOrApp(odinClient);
+    const axiosClient = odinClient.createAxiosClient();
 
     return await axiosClient
         .patch<LocalMetadataUploadResult>('/drive/files/update-local-metadata-tags', {
@@ -294,14 +294,14 @@ export const uploadLocalMetadataTags = async (
 };
 
 export const uploadLocalMetadataContent = async (
-    dotYouClient: DotYouClient,
+    odinClient: OdinClient,
     targetDrive: TargetDrive,
     file: HomebaseFile<unknown, unknown>,
     localAppData: LocalAppData<unknown>,
     onVersionConflict?: () => Promise<void | LocalMetadataUploadResult> | void
 ) => {
-    assertIfDotYouClientIsOwnerOrApp(dotYouClient);
-    const axiosClient = dotYouClient.createAxiosClient();
+    assertIfOdinClientIsOwnerOrApp(odinClient);
+    const axiosClient = odinClient.createAxiosClient();
 
     const fileIdentifier: FileIdFileIdentifier = {
         fileId: file.fileId,
@@ -309,7 +309,7 @@ export const uploadLocalMetadataContent = async (
     };
 
     const decryptedKeyHeader = file.sharedSecretEncryptedKeyHeader
-        ? await decryptKeyHeader(dotYouClient, file.sharedSecretEncryptedKeyHeader)
+        ? await decryptKeyHeader(odinClient, file.sharedSecretEncryptedKeyHeader)
         : undefined;
 
     if (file.fileMetadata.isEncrypted && !decryptedKeyHeader) {

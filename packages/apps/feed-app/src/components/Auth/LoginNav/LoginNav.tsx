@@ -5,18 +5,18 @@ import {
   useOutsideTrigger,
   ConnectionImage,
   t,
-  useDotYouClientContext,
+  useOdinClientContext,
   logoutOwnerAndAllApps,
 } from '@homebase-id/common-app';
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient } from '@homebase-id/js-lib/core';
 import { Times, Person } from '@homebase-id/common-app/icons';
 
 const LoginNav = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const dotYouClient = useDotYouClientContext();
-  const isAuthenticated = dotYouClient.isAuthenticated();
-  const identity = dotYouClient.getLoggedInIdentity();
+  const odinClient = useOdinClientContext();
+  const isAuthenticated = odinClient.isAuthenticated();
+  const identity = odinClient.getLoggedInIdentity();
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOutsideTrigger(wrapperRef, () => setIsOpen(false));
@@ -56,7 +56,7 @@ const LoginNav = () => {
                   <a
                     href={
                       identity
-                        ? new DotYouClient({ hostIdentity: identity, api: ApiType.Guest }).getRoot()
+                        ? new OdinClient({ hostIdentity: identity, api: ApiType.Guest }).getRoot()
                         : ''
                     }
                     className="underline"

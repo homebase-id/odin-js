@@ -1,6 +1,6 @@
 import { getTransferHistory, SystemFileType, TargetDrive } from '@homebase-id/js-lib/core';
 import { useQuery } from '@tanstack/react-query';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 
 export const useTransferHistory = ({
   fileId,
@@ -11,10 +11,10 @@ export const useTransferHistory = ({
   targetDrive: TargetDrive;
   systemFileType?: SystemFileType;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchTransferHistory = async () => {
-    return getTransferHistory(dotYouClient, targetDrive, fileId, {
+    return getTransferHistory(odinClient, targetDrive, fileId, {
       systemFileType,
     });
   };

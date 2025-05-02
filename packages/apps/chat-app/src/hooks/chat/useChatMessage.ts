@@ -22,26 +22,26 @@ import {
   UnifiedConversation,
 } from '../../providers/ConversationProvider';
 import { LinkPreview } from '@homebase-id/js-lib/media';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { insertNewMessage, updateCacheChatMessages } from './useChatMessages';
 
 export const useChatMessage = (props?: {
   conversationId?: string | undefined; // Optional: if we have it we can use the cache
   messageId: string | undefined;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const getMessageByUniqueId = async (conversationId: string | undefined, messageId: string) => {
     const extistingMessages = conversationId
       ? queryClient.getQueryData<
-          InfiniteData<{
-            searchResults: (HomebaseFile<ChatMessage> | null)[];
-            cursorState: string;
-            queryTime: number;
-            includeMetadataHeader: boolean;
-          }>
-        >(['chat-messages', conversationId])
+        InfiniteData<{
+          searchResults: (HomebaseFile<ChatMessage> | null)[];
+          cursorState: string;
+          queryTime: number;
+          includeMetadataHeader: boolean;
+        }>
+      >(['chat-messages', conversationId])
       : undefined;
 
     if (extistingMessages) {
@@ -54,7 +54,7 @@ export const useChatMessage = (props?: {
       }
     }
 
-    return await getChatMessage(dotYouClient, messageId);
+    return await getChatMessage(odinClient, messageId);
   };
 
   const sendMessage = async ({
@@ -78,7 +78,7 @@ export const useChatMessage = (props?: {
   }): Promise<NewHomebaseFile<ChatMessage> | null> => {
     const conversationId = conversation.fileMetadata.appData.uniqueId as string;
     const conversationContent = conversation.fileMetadata.appData.content;
-    const identity = dotYouClient.getHostIdentity();
+    const identity = odinClient.getHostIdentity();
     const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     // We prefer having the uniqueId set outside of the mutation, so that an auto-retry of the mutation doesn't create duplicates
@@ -123,7 +123,7 @@ export const useChatMessage = (props?: {
                   : 'a 📄 file';
 
     const uploadResult = await uploadChatMessage(
-      dotYouClient,
+      odinClient,
       newChat,
       recipients,
       files,
@@ -160,10 +160,10 @@ export const useChatMessage = (props?: {
     conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
-    const identity = dotYouClient.getHostIdentity();
+    const identity = odinClient.getHostIdentity();
     const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
-    await updateChatMessage(dotYouClient, updatedChatMessage, recipients);
+    await updateChatMessage(odinClient, updatedChatMessage, recipients);
   };
 
   return {
@@ -176,7 +176,7 @@ export const useChatMessage = (props?: {
     send: useMutation({
       mutationFn: sendMessage,
       onMutate: async ({ conversation, replyId, files, message, chatId, userDate, tags }) => {
-        const identity = dotYouClient.getLoggedInIdentity();
+        const identity = odinClient.getLoggedInIdentity();
         const newMessageDsr: NewHomebaseFile<ChatMessage> = {
           fileMetadata: {
             created: userDate,

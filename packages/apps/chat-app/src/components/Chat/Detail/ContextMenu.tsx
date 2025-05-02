@@ -5,7 +5,7 @@ import {
   t,
   ActionGroup,
   ErrorNotification,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { ChevronDown } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
@@ -42,7 +42,7 @@ export const ContextMenu = ({
   const { isStarred } = useChatToggleMessageStar({ msg });
   const { mutate: resend, error: resendError } = useChatMessage().update;
 
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const authorOdinId = msg.fileMetadata.senderOdinId;
 
   const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;

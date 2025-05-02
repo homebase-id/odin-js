@@ -7,7 +7,7 @@ import {
   OwnerName,
   LoadingBlock,
   getPlainTextFromRichText,
-  useDotYouClientContext,
+  useOdinClientContext,
   ActionGroup,
   CHAT_ROOT_PATH,
   ErrorNotification,
@@ -137,7 +137,7 @@ const ConversationBody = ({
   title: string | ReactNode | undefined;
   conversationId?: string;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const { data: conversationMetadata } = useConversationMetadata({ conversationId }).single;
   const { data: conversation } = useConversation({ conversationId }).single;
   const { data, isFetched: fetchedMessages } = useChatMessages({ conversationId }).all;

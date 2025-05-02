@@ -1,19 +1,19 @@
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient } from '@homebase-id/js-lib/core';
 import {
   useSiteData,
   useExternalOdinId,
   useIsConnected,
-  useDotYouClientContext,
+  useOdinClientContext,
   ContactName,
 } from '../../../..';
 
 export const AuthorName = ({ odinId, excludeLink }: { odinId?: string; excludeLink?: boolean }) => {
   if (!odinId || odinId === window.location.hostname) return <OwnerName />;
 
-  const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedInIdentity = useOdinClientContext().getLoggedInIdentity();
   const isConnected = useIsConnected(odinId).data;
 
-  const host = new DotYouClient({
+  const host = new OdinClient({
     hostIdentity: odinId,
     api: ApiType.Guest,
   }).getRoot();

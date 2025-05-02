@@ -1,12 +1,12 @@
 import { SystemFileType, TargetDrive, getPayloadBytes } from '@homebase-id/js-lib/core';
 import { getPayloadBytesOverPeerByGlobalTransitId } from '@homebase-id/js-lib/peer';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 
 export const useFile = (props?: { targetDrive: TargetDrive; systemFileType?: SystemFileType }) => {
   const { targetDrive, systemFileType } = props || {};
 
-  const dotYouClient = useDotYouClientContext();
-  const identity = dotYouClient.getHostIdentity();
+  const odinClient = useOdinClientContext();
+  const identity = odinClient.getHostIdentity();
 
   const fetchFile = async (
     odinId: string | undefined,
@@ -21,31 +21,31 @@ export const useFile = (props?: { targetDrive: TargetDrive; systemFileType?: Sys
     const payload = !isLocal
       ? globalTransitId
         ? await getPayloadBytesOverPeerByGlobalTransitId(
-            dotYouClient,
-            odinId,
-            targetDrive,
-            globalTransitId,
-            payloadKey,
-            {
-              systemFileType,
-              decrypt: true,
-            }
-          )
+          odinClient,
+          odinId,
+          targetDrive,
+          globalTransitId,
+          payloadKey,
+          {
+            systemFileType,
+            decrypt: true,
+          }
+        )
         : await getPayloadBytesOverPeerByGlobalTransitId(
-            dotYouClient,
-            odinId,
-            targetDrive,
-            fileId,
-            payloadKey,
-            {
-              systemFileType,
-              decrypt: true,
-            }
-          )
-      : await getPayloadBytes(dotYouClient, targetDrive, fileId, payloadKey, {
-          systemFileType,
-          decrypt: true,
-        });
+          odinClient,
+          odinId,
+          targetDrive,
+          fileId,
+          payloadKey,
+          {
+            systemFileType,
+            decrypt: true,
+          }
+        )
+      : await getPayloadBytes(odinClient, targetDrive, fileId, payloadKey, {
+        systemFileType,
+        decrypt: true,
+      });
     if (!payload) return null;
 
     return window.URL.createObjectURL(

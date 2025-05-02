@@ -24,12 +24,12 @@ import { invalidatePosts } from './usePostsInfinite';
 import { invalidateSocialFeeds, updateCacheSocialFeeds } from '../useSocialFeed';
 import { invalidatePost } from './usePost';
 import { formatGuidId, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../../auth/useOdinClientContext';
 
 export const useManagePost = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
-  const loggedInIdentity = dotYouClient.getLoggedInIdentity();
+  const loggedInIdentity = odinClient.getLoggedInIdentity();
 
   const savePost = async ({
     postFile,
@@ -50,45 +50,45 @@ export const useManagePost = () => {
       const onVersionConflict = odinId
         ? undefined
         : async () => {
-            const serverPost = await getPost<PostContent>(
-              dotYouClient,
-              channelId,
-              postFile.fileMetadata.appData.content.id
-            );
-            if (!serverPost) return;
+          const serverPost = await getPost<PostContent>(
+            odinClient,
+            channelId,
+            postFile.fileMetadata.appData.content.id
+          );
+          if (!serverPost) return;
 
-            const newPost: HomebaseFile<PostContent> = {
-              ...serverPost,
-              fileMetadata: {
-                ...serverPost.fileMetadata,
-                appData: {
-                  ...serverPost.fileMetadata.appData,
-                  content: {
-                    ...serverPost.fileMetadata.appData.content,
-                    ...postFile.fileMetadata.appData.content,
-                  },
+          const newPost: HomebaseFile<PostContent> = {
+            ...serverPost,
+            fileMetadata: {
+              ...serverPost.fileMetadata,
+              appData: {
+                ...serverPost.fileMetadata.appData,
+                content: {
+                  ...serverPost.fileMetadata.appData.content,
+                  ...postFile.fileMetadata.appData.content,
                 },
               },
-            };
-            savePostFile(
-              dotYouClient,
-              newPost,
-              odinId,
-              channelId,
-              mediaFiles,
-              linkPreviews,
-              onVersionConflict
-            ).then((result) => {
-              if (result) resolve(result);
-            });
+            },
           };
+          savePostFile(
+            odinClient,
+            newPost,
+            odinId,
+            channelId,
+            mediaFiles,
+            linkPreviews,
+            onVersionConflict
+          ).then((result) => {
+            if (result) resolve(result);
+          });
+        };
 
       postFile.fileMetadata.appData.content.captionAsRichText = getRichTextFromString(
         postFile.fileMetadata.appData.content.caption.trim()
       );
 
       savePostFile(
-        dotYouClient,
+        odinClient,
         postFile,
         odinId,
         channelId,
@@ -124,7 +124,7 @@ export const useManagePost = () => {
       await Promise.all(
         (toDuplicatePostFile.fileMetadata.payloads || []).map(async (payload) => {
           const bytes = await getPayloadBytes(
-            dotYouClient,
+            odinClient,
             currentTargetDrive,
             toDuplicatePostFile.fileId,
             payload.key
@@ -162,7 +162,7 @@ export const useManagePost = () => {
     };
 
     return savePostFile(
-      dotYouClient,
+      odinClient,
       postFile,
       odinId,
       targetChannel.fileMetadata.appData.uniqueId as string,
@@ -178,7 +178,7 @@ export const useManagePost = () => {
     postFile: HomebaseFile<PostContent>;
     channelId: string;
   }) => {
-    if (postFile) return await removePost(dotYouClient, postFile, channelId);
+    if (postFile) return await removePost(odinClient, postFile, channelId);
   };
 
   return {
@@ -188,7 +188,7 @@ export const useManagePost = () => {
         if (variables.postFile.fileMetadata.appData.content.slug) {
           invalidatePost(
             queryClient,
-            variables.odinId || dotYouClient.getHostIdentity(),
+            variables.odinId || odinClient.getHostIdentity(),
             variables.channelId,
             variables.postFile.fileMetadata.appData.content.slug
           );
@@ -198,19 +198,19 @@ export const useManagePost = () => {
 
         invalidatePost(
           queryClient,
-          variables.odinId || dotYouClient.getHostIdentity(),
+          variables.odinId || odinClient.getHostIdentity(),
           variables.channelId,
           variables.postFile.fileId
         );
         invalidatePost(
           queryClient,
-          variables.odinId || dotYouClient.getHostIdentity(),
+          variables.odinId || odinClient.getHostIdentity(),
           variables.channelId,
           variables.postFile.fileMetadata.appData.content.id
         );
         invalidatePost(
           queryClient,
-          variables.odinId || dotYouClient.getHostIdentity(),
+          variables.odinId || odinClient.getHostIdentity(),
           variables.channelId,
           formatGuidId(variables.postFile.fileMetadata.appData.content.id)
         );
@@ -225,15 +225,15 @@ export const useManagePost = () => {
             ...page,
             results: page.results.map((post) =>
               post.fileMetadata.appData.content.id ===
-              variables.postFile.fileMetadata.appData.content.id
+                variables.postFile.fileMetadata.appData.content.id
                 ? {
-                    ...post,
-                    fileMetadata: {
-                      ...post.fileMetadata,
-                      versionTag:
-                        (_data as UploadResult).newVersionTag || post.fileMetadata.versionTag,
-                    },
-                  }
+                  ...post,
+                  fileMetadata: {
+                    ...post.fileMetadata,
+                    versionTag:
+                      (_data as UploadResult).newVersionTag || post.fileMetadata.versionTag,
+                  },
+                }
                 : post
             ),
           })),
@@ -253,10 +253,10 @@ export const useManagePost = () => {
                 primaryMediaFile:
                   newPost.mediaFiles?.[0] && newPost.mediaFiles?.[0].key
                     ? {
-                        fileId: undefined,
-                        fileKey: newPost.mediaFiles?.[0].key,
-                        type: (newPost.mediaFiles?.[0] as MediaFile)?.contentType,
-                      }
+                      fileId: undefined,
+                      fileKey: newPost.mediaFiles?.[0].key,
+                      type: (newPost.mediaFiles?.[0] as MediaFile)?.contentType,
+                    }
                     : undefined,
               },
             },
@@ -266,21 +266,21 @@ export const useManagePost = () => {
         const previousFeed =
           newPostFile.fileMetadata.appData.fileType !== BlogConfig.DraftPostFileType
             ? updateCacheSocialFeeds(queryClient, (data) => ({
-                ...data,
-                pages: data.pages.map((page, index) => ({
-                  ...page,
-                  results: [
-                    ...(index === 0 ? [newPostFile as HomebaseFile<PostContent>] : []),
-                    ...page.results.filter(
-                      (post) =>
-                        !stringGuidsEqual(
-                          post.fileMetadata.appData.uniqueId,
-                          newPostFile.fileMetadata.appData.uniqueId
-                        )
-                    ),
-                  ],
-                })),
-              }))
+              ...data,
+              pages: data.pages.map((page, index) => ({
+                ...page,
+                results: [
+                  ...(index === 0 ? [newPostFile as HomebaseFile<PostContent>] : []),
+                  ...page.results.filter(
+                    (post) =>
+                      !stringGuidsEqual(
+                        post.fileMetadata.appData.uniqueId,
+                        newPostFile.fileMetadata.appData.uniqueId
+                      )
+                  ),
+                ],
+              })),
+            }))
             : undefined;
 
         return { newPost, previousFeed };
@@ -305,30 +305,30 @@ export const useManagePost = () => {
         if (variables.postFile.fileMetadata.appData.content.slug) {
           invalidatePost(
             queryClient,
-            dotYouClient.getHostIdentity(),
+            odinClient.getHostIdentity(),
             variables.channelId,
             variables.postFile.fileMetadata.appData.content.slug
           );
         } else {
-          invalidatePost(queryClient, dotYouClient.getHostIdentity(), variables.channelId);
+          invalidatePost(queryClient, odinClient.getHostIdentity(), variables.channelId);
         }
 
         // Too many invalidates, but during article creation, the slug is not known
         invalidatePost(
           queryClient,
-          dotYouClient.getHostIdentity(),
+          odinClient.getHostIdentity(),
           variables.channelId,
           variables.postFile.fileId
         );
         invalidatePost(
           queryClient,
-          dotYouClient.getHostIdentity(),
+          odinClient.getHostIdentity(),
           variables.channelId,
           variables.postFile.fileMetadata.appData.content.slug
         );
         invalidatePost(
           queryClient,
-          dotYouClient.getHostIdentity(),
+          odinClient.getHostIdentity(),
           variables.channelId,
           formatGuidId(variables.postFile.fileMetadata.appData.content.id)
         );
@@ -342,15 +342,15 @@ export const useManagePost = () => {
             ...page,
             results: page.results.map((post) =>
               post.fileMetadata.appData.content.id ===
-              variables.postFile.fileMetadata.appData.content.id
+                variables.postFile.fileMetadata.appData.content.id
                 ? {
-                    ...post,
-                    fileMetadata: {
-                      ...post.fileMetadata,
-                      versionTag:
-                        (_data as UploadResult).newVersionTag || post.fileMetadata.versionTag,
-                    },
-                  }
+                  ...post,
+                  fileMetadata: {
+                    ...post.fileMetadata,
+                    versionTag:
+                      (_data as UploadResult).newVersionTag || post.fileMetadata.versionTag,
+                  },
+                }
                 : post
             ),
           })),
@@ -372,12 +372,12 @@ export const useManagePost = () => {
         if (variables && variables.postFile.fileMetadata.appData.content.slug) {
           invalidatePost(
             queryClient,
-            dotYouClient.getHostIdentity(),
+            odinClient.getHostIdentity(),
             variables.channelId,
             variables.postFile.fileMetadata.appData.content.slug
           );
         } else {
-          invalidatePost(queryClient, dotYouClient.getHostIdentity(), variables.channelId);
+          invalidatePost(queryClient, odinClient.getHostIdentity(), variables.channelId);
         }
 
         invalidatePosts(queryClient, variables.postFile.fileMetadata.appData.content.channelId);

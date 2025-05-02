@@ -7,15 +7,15 @@ import {
 } from '@homebase-id/ui-lib';
 import { EmbeddedThumb, SystemFileType } from '@homebase-id/js-lib/core';
 import { useMemo, useState } from 'react';
-import { useDotYouClientContext } from '../hooks/auth/useDotYouClientContext';
+import { useOdinClientContext } from '../hooks/auth/useOdinClientContext';
 import { Triangle } from '../ui/Icons';
 
-export interface VideoProps extends Omit<OdinVideoProps, 'dotYouClient'> {
+export interface VideoProps extends Omit<OdinVideoProps, 'odinClient'> {
   previewThumbnail?: EmbeddedThumb;
 }
 
 export const Video = ({ previewThumbnail, ...props }: VideoProps) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const poster = useMemo(() => {
     if (!previewThumbnail || !!props.poster) return undefined;
@@ -24,7 +24,7 @@ export const Video = ({ previewThumbnail, ...props }: VideoProps) => {
 
   return (
     <OdinVideo
-      dotYouClient={dotYouClient}
+      odinClient={odinClient}
       poster={poster || props.poster}
       {...props}
       autoPlay={props.autoPlay}
@@ -32,7 +32,7 @@ export const Video = ({ previewThumbnail, ...props }: VideoProps) => {
   );
 };
 
-export interface VideoClickToLoadProps extends Omit<OdinVideoProps, 'dotYouClient' | 'autoPlay'> {
+export interface VideoClickToLoadProps extends Omit<OdinVideoProps, 'odinClient' | 'autoPlay'> {
   fit?: 'cover' | 'contain';
   preload?: boolean;
   previewThumbnail?: EmbeddedThumb;
@@ -45,7 +45,7 @@ export const VideoClickToLoad = ({
   probablyEncrypted,
   ...props
 }: VideoClickToLoadProps) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const [loadVideo, setLoadVideo] = useState(false);
   const [imageHasError, setImageHasError] = useState(false);
@@ -64,7 +64,7 @@ export const VideoClickToLoad = ({
       {/* OdinPreviewImage provides the aspect ratio spacing; If it had an error, we let the video decide on the necessary size */}
       {!imageHasError ? (
         <OdinPreviewImage
-          dotYouClient={dotYouClient}
+          odinClient={odinClient}
           {...props}
           className={`${props.className || ''} ${previewLoaded || preload || loadVideo ? 'opacity-0' : 'opacity-100'} blur-sm`}
           previewThumbnail={previewThumbnail}
@@ -79,7 +79,7 @@ export const VideoClickToLoad = ({
           <div className="bg-slate-200 dark:bg-slate-800 aspect-video w-full h-full"></div>
         ) : (
           <OdinThumbnailImage
-            dotYouClient={dotYouClient}
+            odinClient={odinClient}
             {...props}
             className={`${props.className || ''} absolute inset-0 blur-sm ${props.className?.includes('object-') ? '' : 'object-cover'}`}
             loadSize={{ pixelWidth: 100, pixelHeight: 100 }}
@@ -112,12 +112,12 @@ export const VideoClickToLoad = ({
   );
 };
 
-type OdinVideoWrapperProps = Omit<OdinVideoProps, 'dotYouClient'>;
+type OdinVideoWrapperProps = Omit<OdinVideoProps, 'odinClient'>;
 export const OdinVideoWrapper = ({ ...props }: OdinVideoWrapperProps) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const { data: image } = useImage({
-    dotYouClient,
+    odinClient,
     probablyEncrypted: props.probablyEncrypted,
     imageDrive: props.targetDrive,
     imageFileId: props.fileId,
@@ -129,7 +129,5 @@ export const OdinVideoWrapper = ({ ...props }: OdinVideoWrapperProps) => {
     size: { pixelWidth: 100, pixelHeight: 100 },
   }).fetch;
 
-  return (
-    <OdinVideo dotYouClient={dotYouClient} {...props} poster={image ? image.url : props.poster} />
-  );
+  return <OdinVideo odinClient={odinClient} {...props} poster={image ? image.url : props.poster} />;
 };

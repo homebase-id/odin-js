@@ -5,7 +5,7 @@ import { useChatMessages } from './useChatMessages';
 import { useEffect, useState } from 'react';
 import { ConversationMetadata, UnifiedConversation } from '../../providers/ConversationProvider';
 import { useConversationMetadata } from './useConversationMetadata';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 export const useMarkMessagesAsRead = ({
   conversation,
@@ -14,7 +14,7 @@ export const useMarkMessagesAsRead = ({
   conversation: HomebaseFile<UnifiedConversation, ConversationMetadata> | undefined;
   messages: HomebaseFile<ChatMessage>[] | undefined;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const { mutateAsync: markAsRead } = useChatMessages({
     conversationId: conversation?.fileMetadata.appData.uniqueId,
   }).markAsRead;
@@ -33,7 +33,7 @@ export const useMarkMessagesAsRead = ({
       const unreadMessages = messages.filter(
         (msg) =>
           (msg?.fileMetadata.transitCreated || msg?.fileMetadata.created) >
-            (conversation.fileMetadata.localAppData?.content?.lastReadTime || 0) &&
+          (conversation.fileMetadata.localAppData?.content?.lastReadTime || 0) &&
           (!msg.fileMetadata.senderOdinId || msg.fileMetadata.senderOdinId !== loggedOnIdentity)
       );
 

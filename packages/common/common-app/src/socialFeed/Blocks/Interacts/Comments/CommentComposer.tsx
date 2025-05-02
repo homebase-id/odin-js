@@ -8,7 +8,7 @@ import {
   AllContactMentionDropdown,
 } from '../../../../form';
 import { t, getImagesFromPasteEvent } from '../../../../helpers';
-import { CanReactInfo, useDotYouClientContext, useReaction } from '../../../../hooks';
+import { CanReactInfo, useOdinClientContext, useReaction } from '../../../../hooks';
 import { ErrorNotification, ActionButtonState, ActionButton } from '../../../../ui';
 import { AuthorImage } from '../../Author/AuthorImage';
 import { CantReactInfo } from '../CantReactInfo';
@@ -32,7 +32,7 @@ export const CommentComposer = ({
 }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
 
-  const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedInIdentity = useOdinClientContext().getLoggedInIdentity();
   const {
     mutateAsync: postComment,
     error: postCommentError,

@@ -1,4 +1,4 @@
-import { ApiType, DotYouClient } from '../../core/DotYouClient';
+import { ApiType, OdinClient } from '../../core/OdinClient';
 import { DrivePermissionType } from '../../core/DriveData/Drive/DriveTypes';
 import { TargetDrive } from '../../core/DriveData/File/DriveFileTypes';
 import { cbcDecrypt } from '../../helpers/AesEncrypt';
@@ -54,8 +54,8 @@ export interface TargetDriveAccessRequest extends TargetDrive {
 }
 
 //checks if the authentication token (stored in a cookie) is valid
-export const hasValidToken = async (dotYouClient: DotYouClient): Promise<boolean | null> => {
-  const client = dotYouClient.createAxiosClient();
+export const hasValidToken = async (odinClient: OdinClient): Promise<boolean | null> => {
+  const client = odinClient.createAxiosClient();
 
   const response = await client.get('/auth/verifytoken').catch((_error) => {
     return { status: _error?.response?.status || 404 };
@@ -165,7 +165,7 @@ export const getExtendAppRegistrationParams = (
 };
 
 export const exchangeDigestForToken = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   base64ExchangedSecretDigest: string
 ): Promise<{
   base64ClientAuthTokenCipher: string;
@@ -173,7 +173,7 @@ export const exchangeDigestForToken = async (
   base64SharedSecretCipher: string;
   base64SharedSecretIv: string;
 }> => {
-  const axiosClient = dotYouClient.createAxiosClient({ overrideEncryption: true });
+  const axiosClient = odinClient.createAxiosClient({ overrideEncryption: true });
   const tokenResponse = await axiosClient
     .post(
       '/youauth/token',
@@ -204,12 +204,12 @@ export const finalizeAuthentication = async (
   const exchangedSecretDigest = await crypto.subtle.digest('SHA-256', exchangedSecret);
   const base64ExchangedSecretDigest = uint8ArrayToBase64(new Uint8Array(exchangedSecretDigest));
 
-  const dotYouClient = new DotYouClient({
+  const odinClient = new OdinClient({
     api: ApiType.App,
     hostIdentity: identity,
   });
 
-  const token = await exchangeDigestForToken(dotYouClient, base64ExchangedSecretDigest);
+  const token = await exchangeDigestForToken(odinClient, base64ExchangedSecretDigest);
 
   const sharedSecretCipher = base64ToUint8Array(token.base64SharedSecretCipher);
   const sharedSecretIv = base64ToUint8Array(token.base64SharedSecretIv);
@@ -229,8 +229,8 @@ export const finalizeAuthentication = async (
   };
 };
 
-export const logout = async (dotYouClient: DotYouClient) => {
-  const client = dotYouClient.createAxiosClient();
+export const logout = async (odinClient: OdinClient) => {
+  const client = odinClient.createAxiosClient();
 
   await client
     .post('/auth/logout', undefined, {
@@ -242,8 +242,8 @@ export const logout = async (dotYouClient: DotYouClient) => {
     });
 };
 
-export const preAuth = async (dotYouClient: DotYouClient) => {
-  const client = dotYouClient.createAxiosClient();
+export const preAuth = async (odinClient: OdinClient) => {
+  const client = odinClient.createAxiosClient();
 
   await client
     .post('/notify/preauth', undefined, {

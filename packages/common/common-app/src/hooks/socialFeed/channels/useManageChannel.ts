@@ -18,13 +18,13 @@ import {
   invalidateChannel,
   t,
   updateCacheChannel,
-  useDotYouClientContext,
+  useOdinClientContext,
   useStaticFiles,
 } from '../../../..';
 import { stringGuidsEqual, stringifyToQueryParams, toGuidId } from '@homebase-id/js-lib/helpers';
 import {
   ApiType,
-  DotYouClient,
+  OdinClient,
   DrivePermissionType,
   HomebaseFile,
   NewHomebaseFile,
@@ -61,7 +61,7 @@ const getExtendAuthorizationUrl = (
     d: JSON.stringify(drives),
   };
 
-  const host = new DotYouClient({
+  const host = new OdinClient({
     hostIdentity: identity,
     api: ApiType.App,
   }).getRoot();
@@ -71,7 +71,7 @@ const getExtendAuthorizationUrl = (
 };
 
 export const useManageChannel = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
   const { mutate: publishStaticFiles } = useStaticFiles().publish;
 
@@ -89,7 +89,7 @@ export const useManageChannel = () => {
       if (!channelDef.fileMetadata.appData.uniqueId)
         throw new Error('Channel unique id is not set');
 
-      const host = dotYouClient.getHostIdentity();
+      const host = odinClient.getHostIdentity();
       const returnUrl = `${FEED_ROOT_PATH}/channels?new=${JSON.stringify(channelDef)}`;
 
       const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);
@@ -105,11 +105,11 @@ export const useManageChannel = () => {
       );
     };
 
-    return await saveChannelDefinition(dotYouClient, { ...channelDef }, onMissingDrive);
+    return await saveChannelDefinition(odinClient, { ...channelDef }, onMissingDrive);
   };
 
   const removeChannel = async (channelDef: HomebaseFile<ChannelDefinition>) => {
-    await removeChannelDefinition(dotYouClient, channelDef.fileMetadata.appData.uniqueId as string);
+    await removeChannelDefinition(odinClient, channelDef.fileMetadata.appData.uniqueId as string);
   };
 
   return {
@@ -145,13 +145,13 @@ export const useManageChannel = () => {
         // Update channel
         updateCacheChannel(
           queryClient,
-          dotYouClient.getHostIdentity(),
+          odinClient.getHostIdentity(),
           toSaveChannelAsVm.fileMetadata.appData.content.slug,
           () => toSaveChannelAsVm
         );
         updateCacheChannel(
           queryClient,
-          dotYouClient.getHostIdentity(),
+          odinClient.getHostIdentity(),
           toSaveChannelAsVm.fileMetadata.appData.uniqueId as string,
           () => toSaveChannelAsVm
         );
@@ -171,12 +171,12 @@ export const useManageChannel = () => {
         ) {
           invalidateChannel(
             queryClient,
-            dotYouClient.getHostIdentity(),
+            odinClient.getHostIdentity(),
             variables.fileMetadata.appData.uniqueId
           );
           invalidateChannel(
             queryClient,
-            dotYouClient.getHostIdentity(),
+            odinClient.getHostIdentity(),
             variables.fileMetadata.appData.content.slug
           );
         }

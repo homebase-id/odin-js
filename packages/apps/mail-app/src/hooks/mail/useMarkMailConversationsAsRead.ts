@@ -2,7 +2,7 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { MailConversation } from '../../providers/MailProvider';
 import { useEffect, useMemo, useRef } from 'react';
 import { useMailConversation } from './useMailConversation';
-import { useDotYouClient } from '@homebase-id/common-app';
+import { useOdinClient } from '@homebase-id/common-app';
 
 export const useMarkMailConversationsAsRead = ({
   mailThread,
@@ -11,7 +11,7 @@ export const useMarkMailConversationsAsRead = ({
 }) => {
   // We really want this to only run once
   const isProcessing = useRef(false);
-  const identity = useDotYouClient().getDotYouClient().getLoggedInIdentity();
+  const identity = useOdinClient().getOdinClient().getLoggedInIdentity();
   const { mutateAsync: markAsRead } = useMailConversation().markAsRead;
 
   const unreadMessages = useMemo(

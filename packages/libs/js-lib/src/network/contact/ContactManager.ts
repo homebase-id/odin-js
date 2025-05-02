@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../core/DotYouClient';
+import { OdinClient } from '../../core/OdinClient';
 import { getContentFromHeaderOrPayload } from '../../core/DriveData/File/DriveFileProvider';
 import { queryBatch } from '../../core/DriveData/Query/DriveQueryService';
 import { CursoredResult } from '../../core/DriveData/Query/DriveQueryTypes';
@@ -10,18 +10,18 @@ import { getFileHeaderByUniqueId } from '../../core/core';
 export const CONTACT_PROFILE_IMAGE_KEY = 'prfl_pic';
 
 export const getContactByOdinId = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string
 ): Promise<HomebaseFile<ContactFile> | null> =>
-  getContactByUniqueId(dotYouClient, toGuidId(odinId));
+  getContactByUniqueId(odinClient, toGuidId(odinId));
 
 export const getContactByUniqueId = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   uniqueId: string
 ): Promise<HomebaseFile<ContactFile> | null> => {
   try {
     return await getFileHeaderByUniqueId<ContactFile>(
-      dotYouClient,
+      odinClient,
       ContactConfig.ContactTargetDrive,
       uniqueId
     );
@@ -31,12 +31,12 @@ export const getContactByUniqueId = async (
 };
 
 export const getContacts = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   cursorState: string | undefined = undefined,
   pageSize = 10
 ): Promise<CursoredResult<HomebaseFile<ContactFile>[]>> => {
   const response = await queryBatch(
-    dotYouClient,
+    odinClient,
     {
       targetDrive: ContactConfig.ContactTargetDrive,
       fileType: [ContactConfig.ContactFileType],
@@ -55,7 +55,7 @@ export const getContacts = async (
           const dsr: HomebaseFile = result;
           if (!dsr) return;
 
-          return dsrToContact(dotYouClient, dsr, response.includeMetadataHeader);
+          return dsrToContact(odinClient, dsr, response.includeMetadataHeader);
         })
       )
     ).filter(Boolean) as HomebaseFile<ContactFile>[],
@@ -64,12 +64,12 @@ export const getContacts = async (
 };
 
 const dsrToContact = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   dsr: HomebaseFile,
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<ContactFile> | undefined> => {
   const contactContent: ContactFile | null = await getContentFromHeaderOrPayload<ContactFile>(
-    dotYouClient,
+    odinClient,
     ContactConfig.ContactTargetDrive,
     dsr,
     includeMetadataHeader

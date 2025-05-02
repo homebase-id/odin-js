@@ -10,7 +10,7 @@ interface OdinEncryptedMseProps extends OdinVideoProps {
 }
 
 export const EncryptedMseSource = ({
-  dotYouClient,
+  odinClient,
   odinId,
   targetDrive,
   fileId,
@@ -23,7 +23,7 @@ export const EncryptedMseSource = ({
   lastModified,
 }: OdinEncryptedMseProps) => {
   const { getChunk } = useVideo(
-    dotYouClient,
+    odinClient,
     odinId,
     fileId,
     globalTransitId,

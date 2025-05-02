@@ -4,7 +4,7 @@ import {
   ActionButton,
   Label,
   logoutOwnerAndAllApps,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { useState } from 'react';
 import Section from '../../components/ui/Sections/Section';
@@ -20,14 +20,14 @@ export const SecuritySettings = () => {
   const [retypePassword, setRetypePassword] = useState('');
 
   const { changePassword } = useAuth();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const passwordIsValid = password === retypePassword && password !== '';
 
   const doSetNewPassword = async () => {
     setState('loading');
 
-    if (await changePassword(dotYouClient, oldPassword, password)) setState('success');
+    if (await changePassword(odinClient, oldPassword, password)) setState('success');
     else setState('error');
   };
 

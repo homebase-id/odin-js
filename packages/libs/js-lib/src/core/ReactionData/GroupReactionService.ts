@@ -1,5 +1,5 @@
 import { stringifyToQueryParams, tryJsonParse } from '../../helpers/DataUtil';
-import { DotYouClient } from '../DotYouClient';
+import { OdinClient } from '../OdinClient';
 import { EmojiReaction, TargetDrive } from '../DriveData/File/DriveFileTypes';
 
 export interface GroupEmojiReaction {
@@ -19,7 +19,7 @@ interface ServerReactionsListWithCursor {
 const emojiRoot = '/drive/files/group/reactions';
 
 export const getGroupReactions = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   context: {
     target: {
       globalTransitId: string;
@@ -29,7 +29,7 @@ export const getGroupReactions = async (
   pageSize = 15,
   cursor?: string
 ): Promise<{ reactions: EmojiReaction[]; cursor: string } | undefined> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
 
   const data = {
     'file.targetDrive.alias.value': context.target.targetDrive.alias,
@@ -52,17 +52,17 @@ export const getGroupReactions = async (
         cursor: response.data.cursor,
       };
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export const uploadGroupReaction = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   messageGlobalTransitId: string,
   reaction: string,
   recipients: string[]
 ) => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = odinClient.createAxiosClient();
 
   return await axiosClient.post(emojiRoot, {
     transitOptions: {
@@ -77,7 +77,7 @@ export const uploadGroupReaction = async (
 };
 
 export const deleteGroupReaction = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   recipients: string[],
   emoji: EmojiReaction,
@@ -87,7 +87,7 @@ export const deleteGroupReaction = async (
     targetDrive: TargetDrive;
   }
 ) => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = odinClient.createAxiosClient();
 
   return await axiosClient.delete(emojiRoot, {
     data: {

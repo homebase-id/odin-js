@@ -6,7 +6,7 @@ import {
   useDarkMode,
   RichTextRenderer,
   getPlainTextFromRichText,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { DEFAULT_PAYLOAD_KEY, HomebaseFile, RichText } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
@@ -32,7 +32,7 @@ export const ChatMessageItem = ({
   conversation?: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   chatActions?: ChatActions;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const authorOdinId = msg.fileMetadata.senderOdinId || '';
 
   const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;

@@ -6,7 +6,7 @@ import {
   AuthorName,
   DialogWrapper,
   t,
-  useDotYouClientContext,
+  useOdinClientContext,
   usePortal,
 } from '@homebase-id/common-app';
 import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
@@ -24,7 +24,7 @@ export const CommunityMessageInfo = ({
   community: HomebaseFile<CommunityDefinition>;
   onClose: () => void;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const target = usePortal('modal-container');
   const messageContent = msg.fileMetadata.appData.content;
   const communityContent = community.fileMetadata.appData.content;

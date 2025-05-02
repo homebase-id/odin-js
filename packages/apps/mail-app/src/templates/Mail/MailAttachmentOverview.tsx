@@ -6,7 +6,7 @@ import {
 } from '@homebase-id/common-app';
 import { PayloadDescriptor } from '@homebase-id/js-lib/core';
 import { OdinPreviewImage } from '@homebase-id/ui-lib';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { MailDrive } from '../../providers/MailProvider';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -61,7 +61,7 @@ export const AttachmentFile = ({
   query?: string | null;
   children?: React.ReactNode;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const navigate = useNavigate();
   const { filter } = useParams();
 
@@ -85,7 +85,7 @@ export const AttachmentFile = ({
     >
       {file.contentType.startsWith('image/') ? (
         <OdinPreviewImage
-          dotYouClient={dotYouClient}
+          odinClient={odinClient}
           fileId={file.fileId}
           fileKey={file.key}
           targetDrive={MailDrive}

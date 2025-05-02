@@ -11,7 +11,7 @@ interface OdinDirectProps extends OdinVideoProps {
 
 // Plain normal playback of a payload, no MSE, no chunks...
 export const DirectSource = ({
-  dotYouClient,
+  odinClient,
   odinId,
   targetDrive,
   fileId,
@@ -24,7 +24,7 @@ export const DirectSource = ({
   systemFileType,
 }: OdinDirectProps) => {
   const { data: videoUrl } = useVideoUrl(
-    dotYouClient,
+    odinClient,
     odinId,
     fileId,
     globalTransitId,

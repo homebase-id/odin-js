@@ -1,6 +1,6 @@
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient } from '@homebase-id/js-lib/core';
 import { t } from '../../../../../helpers';
-import { useDotYouClientContext } from '../../../../../hooks';
+import { useOdinClientContext } from '../../../../../hooks';
 import { AuthorName } from '../../../Author/AuthorName';
 import { Block, Pencil, Times } from '../../../../../ui/Icons';
 import { ActionGroup } from '../../../../../ui';
@@ -16,7 +16,7 @@ export const CommentHead = ({
   commentBody: string;
   onRemove?: () => void;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const isAuthor = authorOdinId === loggedOnIdentity;
 
   const actionOptions = [];
@@ -31,7 +31,7 @@ export const CommentHead = ({
     actionOptions.push({
       icon: Block,
       label: `${t('Block this user')}`,
-      href: `${new DotYouClient({ hostIdentity: loggedOnIdentity, api: ApiType.Guest }).getRoot()}/owner/connections/${authorOdinId}/block`,
+      href: `${new OdinClient({ hostIdentity: loggedOnIdentity, api: ApiType.Guest }).getRoot()}/owner/connections/${authorOdinId}/block`,
     });
   }
 

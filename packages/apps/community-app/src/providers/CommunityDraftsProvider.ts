@@ -1,6 +1,6 @@
 import {
   DEFAULT_PAYLOAD_KEY,
-  DotYouClient,
+  OdinClient,
   getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
   HomebaseFile,
@@ -46,7 +46,7 @@ export const LOCAL_COMMUNITY_APP_DRIVE: TargetDrive = {
 export const COMMUNITY_DRAFTS_FILE_TYPE = 7012;
 
 export const uploadCommunityDrafts = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   definition: NewHomebaseFile<CommunityDrafts> | HomebaseFile<CommunityDrafts>,
   onVersionConflicht?: () => Promise<void | UploadResult | UpdateResult> | void
 ): Promise<UploadResult | UpdateResult | undefined> => {
@@ -104,7 +104,7 @@ export const uploadCommunityDrafts = async (
       locale: 'local'
     }
 
-    const patchResult = await patchFile(dotYouClient, encryptedKeyHeader, patchInstructions, metadata, payloads, undefined, undefined, onVersionConflicht as () => Promise<void | UpdateResult>,
+    const patchResult = await patchFile(odinClient, encryptedKeyHeader, patchInstructions, metadata, payloads, undefined, undefined, onVersionConflicht as () => Promise<void | UpdateResult>,
     );
     if (!patchResult) throw new Error(`Upload failed`);
     return patchResult;
@@ -118,7 +118,7 @@ export const uploadCommunityDrafts = async (
   };
 
   const result = await uploadFile(
-    dotYouClient,
+    odinClient,
     instructionSet,
     metadata,
     payloads,
@@ -132,30 +132,30 @@ export const uploadCommunityDrafts = async (
 };
 
 export const getCommunityDrafts = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   communityId: string
 ): Promise<HomebaseFile<CommunityDrafts> | null> => {
   const header = await getFileHeaderByUniqueId(
-    dotYouClient,
+    odinClient,
     LOCAL_COMMUNITY_APP_DRIVE,
     await hashGuidId(communityId)
   );
 
   if (!header) return null;
-  return dsrToCommunityDrafts(dotYouClient, header, LOCAL_COMMUNITY_APP_DRIVE, true);
+  return dsrToCommunityDrafts(odinClient, header, LOCAL_COMMUNITY_APP_DRIVE, true);
 };
 
 // Helpers
 
 export const dsrToCommunityDrafts = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<CommunityDrafts> | null> => {
   try {
     const definitionContent = await getContentFromHeaderOrPayload<Partial<CommunityDrafts>>(
-      dotYouClient,
+      odinClient,
       targetDrive,
       dsr,
       includeMetadataHeader

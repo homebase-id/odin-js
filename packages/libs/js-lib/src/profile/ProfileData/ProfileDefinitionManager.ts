@@ -1,7 +1,7 @@
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
-import { DotYouClient } from '../../core/DotYouClient';
+import { OdinClient } from '../../core/OdinClient';
 import { DEFAULT_PAYLOAD_KEY, MAX_HEADER_CONTENT_BYTES } from '../../core/constants';
 import {
   getDrivesByType,
@@ -29,9 +29,9 @@ import { ProfileConfig } from './ProfileConfig';
 import { ProfileDefinition, ProfileSection } from './ProfileTypes';
 
 export const getProfileDefinitions = async (
-  dotYouClient: DotYouClient
+  odinClient: OdinClient
 ): Promise<ProfileDefinition[]> => {
-  const drives = await getDrivesByType(dotYouClient, ProfileConfig.ProfileDriveType, 1, 1000);
+  const drives = await getDrivesByType(odinClient, ProfileConfig.ProfileDriveType, 1, 1000);
 
   const profileHeaders = drives.results.map((drive) => {
     return {
@@ -57,7 +57,7 @@ export const getProfileDefinitions = async (
     };
   });
 
-  const response = await queryBatchCollection(dotYouClient, queries);
+  const response = await queryBatchCollection(odinClient, queries);
 
   const definitions = await Promise.all(
     response.results.map(async (response) => {
@@ -66,7 +66,7 @@ export const getProfileDefinitions = async (
         const dsr = response.searchResults[0];
 
         const definition = await getContentFromHeaderOrPayload<ProfileDefinition>(
-          dotYouClient,
+          odinClient,
           profileDrive,
           dsr,
           response.includeMetadataHeader
@@ -81,11 +81,11 @@ export const getProfileDefinitions = async (
 };
 
 export const getProfileDefinition = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   profileId: string
 ): Promise<ProfileDefinition | undefined> => {
   try {
-    const { definition } = (await getProfileDefinitionInternal(dotYouClient, profileId)) ?? {
+    const { definition } = (await getProfileDefinitionInternal(odinClient, profileId)) ?? {
       definition: undefined,
     };
     return definition;
@@ -97,7 +97,7 @@ export const getProfileDefinition = async (
 };
 
 export const saveProfileDefinition = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   definition: ProfileDefinition
 ): Promise<void> => {
   if (!definition.profileId) {
@@ -108,9 +108,9 @@ export const saveProfileDefinition = async (
 
   const driveMetadata = 'Drive that stores: ' + definition.name;
   const targetDrive = GetTargetDriveFromProfileId(definition.profileId);
-  await ensureDrive(dotYouClient, targetDrive, definition.name, driveMetadata, true);
+  await ensureDrive(odinClient, targetDrive, definition.name, driveMetadata, true);
   const { versionTag } = (await getProfileDefinitionInternal(
-    dotYouClient,
+    odinClient,
     definition.profileId
   )) ?? {
     fileId: undefined,
@@ -146,7 +146,7 @@ export const saveProfileDefinition = async (
 
   //reshape the definition to group attributes by their type
   await uploadFile(
-    dotYouClient,
+    odinClient,
     instructionSet,
     metadata,
     shouldEmbedContent
@@ -164,7 +164,7 @@ export const saveProfileDefinition = async (
 };
 
 export const saveProfileSection = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   profileId: string,
   profileSection: ProfileSection
 ) => {
@@ -177,9 +177,9 @@ export const saveProfileSection = async (
   }
 
   const targetDrive = GetTargetDriveFromProfileId(profileId);
-  const { fileId, versionTag } = (!isCreate
-    ? await getProfileSectionInternal(dotYouClient, profileId, profileSection.sectionId)
-    : { fileId: undefined, versionTag: undefined }) ?? {
+  const { versionTag } = (!isCreate
+    ? await getProfileSectionInternal(odinClient, profileId, profileSection.sectionId)
+    : { versionTag: undefined }) ?? {
     fileId: undefined,
   };
 
@@ -212,7 +212,7 @@ export const saveProfileSection = async (
   };
 
   await uploadFile(
-    dotYouClient,
+    odinClient,
     instructionSet,
     metadata,
     shouldEmbedContent
@@ -229,36 +229,36 @@ export const saveProfileSection = async (
 };
 
 export const removeProfileSection = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   profileId: string,
   sectionId: string
 ) => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
 
-  const profileSection = await getProfileSectionInternal(dotYouClient, profileId, sectionId);
+  const profileSection = await getProfileSectionInternal(odinClient, profileId, sectionId);
   if (!profileSection) {
     console.error('[odin-js]', "Profile not found, can't delete");
     return false;
   }
 
-  return deleteFile(dotYouClient, targetDrive, profileSection.fileId);
+  return deleteFile(odinClient, targetDrive, profileSection.fileId);
 };
 
-export const removeProfileDefinition = async (dotYouClient: DotYouClient, profileId: string) => {
+export const removeProfileDefinition = async (odinClient: OdinClient, profileId: string) => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
 
-  const profileDefinition = await getProfileDefinitionInternal(dotYouClient, profileId);
+  const profileDefinition = await getProfileDefinitionInternal(odinClient, profileId);
   if (!profileDefinition) {
     console.error('[odin-js]', "Profile not found, can't delete");
     return false;
   }
 
   // TODO: remove drive
-  return deleteFile(dotYouClient, targetDrive, profileDefinition.fileId);
+  return deleteFile(odinClient, targetDrive, profileDefinition.fileId);
 };
 
 export const getProfileSections = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   profileId: string
 ): Promise<ProfileSection[]> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
@@ -269,14 +269,14 @@ export const getProfileSections = async (
     groupId: [profileId],
   };
 
-  const response = await queryBatch(dotYouClient, params);
+  const response = await queryBatch(odinClient, params);
   if (response.searchResults.length >= 1) {
     const sections = (
       await Promise.all(
         response.searchResults.map(
           async (dsr) =>
             await getContentFromHeaderOrPayload<ProfileSection>(
-              dotYouClient,
+              odinClient,
               targetDrive,
               dsr,
               response.includeMetadataHeader
@@ -303,7 +303,7 @@ export const GetTargetDriveFromProfileId = (profileId: string): TargetDrive => {
 ///
 
 const getProfileDefinitionInternal = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   profileId: string
 ): Promise<{ definition: ProfileDefinition; versionTag: string; fileId: string } | undefined> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
@@ -314,7 +314,7 @@ const getProfileDefinitionInternal = async (
     fileType: [ProfileConfig.ProfileDefinitionFileType],
   };
 
-  const response = await queryBatch(dotYouClient, params);
+  const response = await queryBatch(odinClient, params);
 
   if (response.searchResults.length >= 1) {
     if (response.searchResults.length !== 1) {
@@ -324,7 +324,7 @@ const getProfileDefinitionInternal = async (
     }
     const dsr = response.searchResults[0];
     const definition = await getContentFromHeaderOrPayload<ProfileDefinition>(
-      dotYouClient,
+      odinClient,
       targetDrive,
       dsr,
       response.includeMetadataHeader
@@ -343,7 +343,7 @@ const getProfileDefinitionInternal = async (
 };
 
 const getProfileSectionInternal = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   profileId: string,
   sectionId: string
 ) => {
@@ -355,7 +355,7 @@ const getProfileSectionInternal = async (
     fileType: [ProfileConfig.ProfileSectionFileType],
   };
 
-  const response = await queryBatch(dotYouClient, params);
+  const response = await queryBatch(odinClient, params);
 
   if (response.searchResults.length >= 1) {
     if (response.searchResults.length !== 1) {
@@ -365,7 +365,7 @@ const getProfileSectionInternal = async (
     }
     const dsr = response.searchResults[0];
     const definition = await getContentFromHeaderOrPayload<ProfileSection>(
-      dotYouClient,
+      odinClient,
       targetDrive,
       dsr,
       response.includeMetadataHeader

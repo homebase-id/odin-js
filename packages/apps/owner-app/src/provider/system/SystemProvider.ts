@@ -1,4 +1,4 @@
-import { DotYouClient, DriveDefinition, TargetDrive } from '@homebase-id/js-lib/core';
+import { OdinClient, DriveDefinition, TargetDrive } from '@homebase-id/js-lib/core';
 import { CircleDefinition } from '@homebase-id/js-lib/network';
 
 export interface DriveDefinitionParam extends Omit<DriveDefinition, 'targetDriveInfo'> {
@@ -9,12 +9,12 @@ export interface DriveDefinitionParam extends Omit<DriveDefinition, 'targetDrive
 const root = '/config/system';
 
 export const initialize = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   firstRunToken: string | null,
   drives?: DriveDefinitionParam[],
   circles?: CircleDefinition[]
 ) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = root + '/initialize?';
   const data = { firstRunToken: firstRunToken, drives: drives ?? [], circles: circles ?? [] };
 
@@ -27,8 +27,8 @@ export const initialize = async (
     });
 };
 
-export const isConfigured = async (dotYouClient: DotYouClient) => {
-  const client = dotYouClient.createAxiosClient();
+export const isConfigured = async (odinClient: OdinClient) => {
+  const client = odinClient.createAxiosClient();
   const url = root + '/isconfigured';
   return client.post<boolean>(url, {}).then((response) => {
     return response.data;

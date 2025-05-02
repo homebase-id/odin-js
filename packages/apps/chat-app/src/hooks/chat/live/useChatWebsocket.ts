@@ -1,12 +1,12 @@
 import {
-  useDotYouClientContext,
+  useOdinClientContext,
   insertNewNotification,
   incrementAppIdNotificationCount,
   useWebsocketSubscriber,
 } from '@homebase-id/common-app';
 import {
   HomebaseFile,
-  DotYouClient,
+  OdinClient,
   TypedConnectionNotification,
   AppNotification,
   ReactionNotification,
@@ -57,10 +57,10 @@ export const useChatWebsocket = (isEnabled: boolean) => {
 };
 
 export const useChatSocketHandler = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
-  const identity = dotYouClient.getHostIdentity();
+  const identity = odinClient.getHostIdentity();
 
   // Added to ensure we have the conversation query available
   const {
@@ -70,7 +70,7 @@ export const useChatSocketHandler = () => {
   const [chatMessagesQueue, setChatMessagesQueue] = useState<HomebaseFile<ChatMessage>[]>([]);
 
   const chatHandler = useCallback(
-    async (_: DotYouClient, notification: TypedConnectionNotification) => {
+    async (_: OdinClient, notification: TypedConnectionNotification) => {
       isDebug && console.debug('[ChatWebsocket] Got notification', notification);
 
       if (
@@ -86,7 +86,7 @@ export const useChatSocketHandler = () => {
           if (isNewMessageFile) {
             // Check if the message is orphaned from a conversation
             const conversation = await queryClient.fetchQuery(
-              getConversationQueryOptions(dotYouClient, queryClient, conversationId)
+              getConversationQueryOptions(odinClient, queryClient, conversationId)
             );
 
             if (!conversation) {
@@ -102,7 +102,7 @@ export const useChatSocketHandler = () => {
 
           // This skips the invalidation of all chat messages, as we only need to add/update this specific message
           const updatedChatMessage = await dsrToMessage(
-            dotYouClient,
+            odinClient,
             notification.header,
             ChatDrive,
             true
@@ -128,7 +128,7 @@ export const useChatSocketHandler = () => {
         ) {
           const isNewConversationFile = notification.notificationType === 'fileAdded';
           const updatedConversation = await dsrToConversation(
-            dotYouClient,
+            odinClient,
             notification.header,
             ChatDrive,
             true
@@ -223,7 +223,7 @@ export const useChatSocketHandler = () => {
       return acc;
     }, [] as HomebaseFile<ChatMessage>[]);
 
-    await processChatMessagesBatch(dotYouClient, queryClient, filteredMessages);
+    await processChatMessagesBatch(odinClient, queryClient, filteredMessages);
   }, []);
 
   const timeout = useRef<NodeJS.Timeout | null>(null);
@@ -247,7 +247,7 @@ export const useChatSocketHandler = () => {
 };
 
 export const processChatMessagesBatch = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   queryClient: QueryClient,
   chatMessages: (HomebaseFile<string | ChatMessage> | DeletedHomebaseFile<string>)[]
 ) => {
@@ -284,11 +284,11 @@ export const processChatMessagesBatch = async (
           uniqueMessagesPerConversation[conversationId].map(async (newMessage) =>
             typeof newMessage.fileMetadata.appData.content === 'string'
               ? await dsrToMessage(
-                  dotYouClient,
-                  newMessage as HomebaseFile<string>,
-                  ChatDrive,
-                  true
-                )
+                odinClient,
+                newMessage as HomebaseFile<string>,
+                ChatDrive,
+                true
+              )
               : (newMessage as HomebaseFile<ChatMessage>)
           )
         )
@@ -297,14 +297,14 @@ export const processChatMessagesBatch = async (
 
       // Check if the message is orphaned from a conversation
       const conversation = await queryClient.fetchQuery(
-        getConversationQueryOptions(dotYouClient, queryClient, conversationId)
+        getConversationQueryOptions(odinClient, queryClient, conversationId)
       );
       if (
         conversation &&
         (conversation.fileMetadata.appData.archivalStatus === 2 ||
           conversation.fileMetadata.appData.archivalStatus === 3)
       ) {
-        restoreChat(dotYouClient, conversation);
+        restoreChat(odinClient, conversation);
       }
     })
   );

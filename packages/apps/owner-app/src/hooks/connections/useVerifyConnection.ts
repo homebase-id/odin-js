@@ -1,11 +1,11 @@
 import { useMutation } from '@tanstack/react-query';
 import { verifyConnection } from '@homebase-id/js-lib/network';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 export const useVerifyConnection = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
-  const doVerifyConnection = async (odinId: string) => verifyConnection(dotYouClient, odinId);
+  const doVerifyConnection = async (odinId: string) => verifyConnection(odinClient, odinId);
 
   return {
     confirmConnection: useMutation({

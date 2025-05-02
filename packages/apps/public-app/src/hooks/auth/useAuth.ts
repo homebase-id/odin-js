@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { invalidateVerifyToken, useVerifyToken } from './useVerifyToken';
 import { getEccPublicKey, logoutOwnerAndAllApps, logoutPublic } from '@homebase-id/common-app';
-import { HOME_SHARED_SECRET, STORAGE_IDENTITY_KEY, useDotYouClient } from '@homebase-id/common-app';
+import { HOME_SHARED_SECRET, STORAGE_IDENTITY_KEY, useOdinClient } from '@homebase-id/common-app';
 import {
   YouAuthorizationParams,
   createEccPair,
@@ -22,7 +22,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 
 export const useValidateAuthorization = () => {
-  const { hasSharedSecret, isOwner } = useDotYouClient();
+  const { hasSharedSecret, isOwner } = useOdinClient();
 
   const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(isOwner);
   const { logout } = useAuth();
@@ -46,7 +46,7 @@ export const useValidateAuthorization = () => {
 };
 
 export const useAuth = () => {
-  const { isOwner } = useDotYouClient();
+  const { isOwner } = useOdinClient();
 
   const logout = async (): Promise<void> => {
     try {

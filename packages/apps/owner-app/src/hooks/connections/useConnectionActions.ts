@@ -17,15 +17,15 @@ import {
   invalidateSentConnections,
   saveContact,
   updateCacheSentConnections,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 
 export const useConnectionActions = () => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const disconnect = async ({ connectionOdinId }: { connectionOdinId: string }) => {
-    return await disconnectFromContact(dotYouClient, connectionOdinId);
+    return await disconnectFromContact(odinClient, connectionOdinId);
   };
 
   const sendConnectionRequest = async ({
@@ -37,12 +37,12 @@ export const useConnectionActions = () => {
     message: string;
     circleIds: string[];
   }) => {
-    await sendRequest(dotYouClient, targetOdinId, message, circleIds);
+    await sendRequest(odinClient, targetOdinId, message, circleIds);
 
     // Save contact
-    const connectionInfo = await fetchConnectionInfo(dotYouClient, targetOdinId);
+    const connectionInfo = await fetchConnectionInfo(odinClient, targetOdinId);
     if (connectionInfo)
-      await saveContact(dotYouClient, {
+      await saveContact(odinClient, {
         fileMetadata: { appData: { content: connectionInfo } },
         serverMetadata: { accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner } },
       });
@@ -51,14 +51,14 @@ export const useConnectionActions = () => {
   };
 
   const revokeConnectionRequest = async ({ targetOdinId }: { targetOdinId: string }) => {
-    return await deleteSentRequest(dotYouClient, targetOdinId);
+    return await deleteSentRequest(odinClient, targetOdinId);
   };
 
   const block = async (odinId: string) => {
-    return await blockOdinId(dotYouClient, odinId);
+    return await blockOdinId(odinClient, odinId);
   };
   const unblock = async (odinId: string) => {
-    return await unblockOdinId(dotYouClient, odinId);
+    return await unblockOdinId(odinClient, odinId);
   };
 
   return {
@@ -81,7 +81,7 @@ export const useConnectionActions = () => {
           recipient: targetOdinId,
           id: getNewId(),
           message: message,
-          senderOdinId: dotYouClient.getHostIdentity(),
+          senderOdinId: odinClient.getHostIdentity(),
           receivedTimestampMilliseconds: Date.now(),
           connectionRequestOrigin: 'identityowner',
         };
@@ -92,9 +92,9 @@ export const useConnectionActions = () => {
             pages: data.pages.map((page, index) =>
               index === 0
                 ? {
-                    ...page,
-                    results: [newRequest, ...page.results],
-                  }
+                  ...page,
+                  results: [newRequest, ...page.results],
+                }
                 : page
             ),
           };

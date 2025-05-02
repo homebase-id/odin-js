@@ -1,17 +1,17 @@
-import { DotYouClient, assertIfDotYouClientIsOwnerOrApp } from '../../../core/DotYouClient';
+import { OdinClient, assertIfOdinClientIsOwnerOrApp } from '../../../core/OdinClient';
 import { TargetDrive, SystemFileType, PagedResult, DriveDefinition } from '../../../core/core';
 
 /// Drive methods:
 //returns all drives for a given type
 export const getDrivesByTypeOverPeer = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   type: string,
   pageNumber: number,
   pageSize: number,
   odinId: string,
   systemFileType?: SystemFileType
 ): Promise<PagedResult<DriveDefinition>> => {
-  assertIfDotYouClientIsOwnerOrApp(dotYouClient);
+  assertIfOdinClientIsOwnerOrApp(odinClient);
   const params = {
     driveType: type,
     pageNumber: pageNumber,
@@ -19,7 +19,7 @@ export const getDrivesByTypeOverPeer = async (
     odinId: odinId,
   };
 
-  const client = dotYouClient.createAxiosClient({
+  const client = odinClient.createAxiosClient({
     systemFileType,
   });
 

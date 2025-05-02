@@ -1,11 +1,11 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 export const useEula = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchRequired = async (): Promise<string | false> => {
-    const client = dotYouClient.createAxiosClient();
+    const client = odinClient.createAxiosClient();
     const required = await client
       .post<boolean>('/config/system/iseulasignaturerequired')
       .then((response) => !!response?.data);
@@ -17,7 +17,7 @@ export const useEula = () => {
   };
 
   const markAccepted = (version: string) => {
-    const client = dotYouClient.createAxiosClient();
+    const client = odinClient.createAxiosClient();
     return client
       .post('/config/system/MarkEulaSigned', {
         version,

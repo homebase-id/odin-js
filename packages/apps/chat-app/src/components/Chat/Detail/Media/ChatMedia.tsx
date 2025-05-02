@@ -13,7 +13,7 @@ import {
   BoringFile,
   useDarkMode,
   LinkPreviewItem,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { Triangle } from '@homebase-id/common-app/icons';
 import { useNavigate } from 'react-router-dom';
@@ -68,7 +68,7 @@ const MediaItem = ({
   onLoad?: () => void;
 }) => {
   const { isDarkMode } = useDarkMode();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const isVideo =
     payload.contentType?.startsWith('video') ||
     payload.contentType === 'application/vnd.apple.mpegurl';
@@ -95,7 +95,7 @@ const MediaItem = ({
               }
             >
               <OdinThumbnailImage
-                dotYouClient={dotYouClient}
+                odinClient={odinClient}
                 fileId={fileId}
                 fileKey={payload.key}
                 lastModified={payload.lastModified || fileLastModified}
@@ -113,7 +113,7 @@ const MediaItem = ({
           ) : isAudio ? (
             <>
               <OdinAudio
-                dotYouClient={dotYouClient}
+                odinClient={odinClient}
                 fileId={fileId}
                 fileKey={payload.key}
                 lastModified={payload.lastModified || fileLastModified}
@@ -122,7 +122,7 @@ const MediaItem = ({
                 className="w-full"
               />
               <OdinAudioWaveForm
-                dotYouClient={dotYouClient}
+                odinClient={odinClient}
                 fileId={fileId}
                 fileKey={payload.key}
                 lastModified={payload.lastModified || fileLastModified}
@@ -134,7 +134,7 @@ const MediaItem = ({
             </>
           ) : isImage ? (
             <OdinImage
-              dotYouClient={dotYouClient}
+              odinClient={odinClient}
               fileId={fileId}
               fileKey={payload.key}
               lastModified={payload.lastModified || fileLastModified}

@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../../core/DotYouClient';
+import { OdinClient } from '../../../core/OdinClient';
 import { getRandom16ByteArray, uint8ArrayToBase64 } from '../../../helpers/DataUtil';
 import { createThumbnails } from '../../../media/Thumbs/ThumbnailProvider';
 import {
@@ -48,14 +48,14 @@ const COMMENT_MEDIA_PAYLOAD = 'cmmnt_md';
 
 /* Adding a comment might fail if the referencedFile isn't available anymore (ACL got updates, post got deleted...) */
 export const saveComment = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   context: ReactionContext,
   comment:
     | Omit<NewHomebaseFile<RawReactionContent>, 'serverMetadata'>
     | HomebaseFile<RawReactionContent>
 ): Promise<string> => {
   const encrypt = context.target.isEncrypted;
-  const isLocal = context.odinId === dotYouClient.getHostIdentity();
+  const isLocal = context.odinId === odinClient.getHostIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
 
   const payloads: PayloadFile[] = [];
@@ -133,7 +133,7 @@ export const saveComment = async (
     // Use owner/guest endpoint for reactions if the post to comment on is on the current root identity
     if (comment.fileId && comment.fileMetadata.globalTransitId) {
       const result = await patchFile(
-        dotYouClient,
+        odinClient,
         comment.sharedSecretEncryptedKeyHeader,
         {
           file: {
@@ -155,7 +155,7 @@ export const saveComment = async (
       return comment.fileMetadata.globalTransitId;
     } else {
       const result = await uploadFile(
-        dotYouClient,
+        odinClient,
         instructionSet,
         metadata,
         payloads,
@@ -176,7 +176,7 @@ export const saveComment = async (
 
     const remoteHeader = comment.fileMetadata.globalTransitId
       ? await getFileHeaderOverPeerByGlobalTransitId(
-        dotYouClient,
+        odinClient,
         context.odinId,
         targetDrive,
         comment.fileMetadata.globalTransitId,
@@ -207,7 +207,7 @@ export const saveComment = async (
         metadata
       );
       result = await patchFile(
-        dotYouClient,
+        odinClient,
         remoteHeader?.fileMetadata.isEncrypted
           ? remoteHeader?.sharedSecretEncryptedKeyHeader
           : undefined,
@@ -227,7 +227,7 @@ export const saveComment = async (
       };
 
       result = await uploadFileOverPeer(
-        dotYouClient,
+        odinClient,
         instructionSet,
         metadata,
         payloads,
@@ -248,22 +248,22 @@ export const saveComment = async (
 };
 
 export const removeComment = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   context: ReactionContext,
   commentFile: HomebaseFile<CommentReaction>
 ) => {
-  const isLocal = context.odinId === dotYouClient.getHostIdentity();
+  const isLocal = context.odinId === odinClient.getHostIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
 
   if (isLocal) {
     if (!commentFile.fileId) return;
 
-    return await deleteFile(dotYouClient, targetDrive, commentFile.fileId, undefined, 'Comment');
+    return await deleteFile(odinClient, targetDrive, commentFile.fileId, undefined, 'Comment');
   } else {
     if (!commentFile.fileMetadata.globalTransitId) return;
 
     return await deleteFileOverPeer(
-      dotYouClient,
+      odinClient,
       targetDrive,
       commentFile.fileMetadata.globalTransitId,
       [context.odinId],
@@ -273,12 +273,12 @@ export const removeComment = async (
 };
 
 export const getComments = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   context: ReactionContext,
   pageSize = 25,
   cursorState?: string
 ): Promise<{ comments: HomebaseFile<CommentReaction>[]; cursorState: string }> => {
-  const isLocal = context.odinId === dotYouClient.getHostIdentity();
+  const isLocal = context.odinId === odinClient.getHostIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
@@ -293,13 +293,13 @@ export const getComments = async (
   };
 
   const result = isLocal
-    ? await queryBatch(dotYouClient, qp, ro)
-    : await queryBatchOverPeer(dotYouClient, context.odinId, qp, ro);
+    ? await queryBatch(odinClient, qp, ro)
+    : await queryBatchOverPeer(odinClient, context.odinId, qp, ro);
 
   const comments: HomebaseFile<CommentReaction>[] = (
     await Promise.all(
       result.searchResults.map(async (dsr) =>
-        dsrToComment(dotYouClient, context.odinId, dsr, targetDrive, result.includeMetadataHeader)
+        dsrToComment(odinClient, context.odinId, dsr, targetDrive, result.includeMetadataHeader)
       )
     )
   ).filter((attr) => !!attr) as HomebaseFile<CommentReaction>[];
@@ -308,19 +308,19 @@ export const getComments = async (
 };
 
 export const dsrToComment = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<CommentReaction> | null> => {
-  const isLocal = odinId === dotYouClient.getHostIdentity();
+  const isLocal = odinId === odinClient.getHostIdentity();
 
   const params = [targetDrive, dsr, includeMetadataHeader] as const;
 
   const contentData = isLocal
-    ? await getContentFromHeaderOrPayload<CommentReaction>(dotYouClient, ...params)
-    : await getContentFromHeaderOrPayloadOverPeer<CommentReaction>(dotYouClient, odinId, ...params);
+    ? await getContentFromHeaderOrPayload<CommentReaction>(odinClient, ...params)
+    : await getContentFromHeaderOrPayloadOverPeer<CommentReaction>(odinClient, odinId, ...params);
 
   if (!contentData) return null;
 

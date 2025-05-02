@@ -6,10 +6,10 @@ import {
   TargetDrive,
   TypedConnectionNotification,
   Notify,
-  DotYouClient,
+  OdinClient,
 } from '@homebase-id/js-lib/core';
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 import { hasDebugFlag } from '@homebase-id/js-lib/helpers';
 import { NotifyOverPeer, SubscribeOverPeer, UnsubscribeOverPeer } from '@homebase-id/js-lib/peer';
 
@@ -18,7 +18,7 @@ const isDebug = hasDebugFlag();
 // Wrapper for the notification subscriber within DotYouCore-js to add client side filtering of the notifications
 export const useWebsocketSubscriber = (
   handler:
-    | ((dotYouClient: DotYouClient, notification: TypedConnectionNotification) => void)
+    | ((odinClient: OdinClient, notification: TypedConnectionNotification) => void)
     | undefined,
   odinId: string | undefined,
   types: NotificationType[],
@@ -27,14 +27,14 @@ export const useWebsocketSubscriber = (
   onReconnect?: () => void,
   refId?: string
 ) => {
-  const dotYouClient = useDotYouClientContext();
-  const isPeer = useMemo(() => !!odinId && odinId !== dotYouClient.getHostIdentity(), [odinId]);
+  const odinClient = useOdinClientContext();
+  const isPeer = useMemo(() => !!odinId && odinId !== odinClient.getHostIdentity(), [odinId]);
   const [isConnected, setIsConected] = useState(false);
   const connectedHandler =
-    useRef<(dotYouClient: DotYouClient, data: TypedConnectionNotification) => void | null>();
+    useRef<(odinClient: OdinClient, data: TypedConnectionNotification) => void | null>();
 
   const wrappedHandler = useCallback(
-    (dotYouClient: DotYouClient, notification: TypedConnectionNotification) => {
+    (odinClient: OdinClient, notification: TypedConnectionNotification) => {
       if (notification.notificationType === 'inboxItemReceived') {
         isDebug &&
           console.debug(
@@ -60,7 +60,7 @@ export const useWebsocketSubscriber = (
       }
 
       if (types?.length >= 1 && !types.includes(notification.notificationType)) return;
-      handler && handler(dotYouClient, notification);
+      handler && handler(odinClient, notification);
     },
     [handler]
   );
@@ -68,12 +68,12 @@ export const useWebsocketSubscriber = (
   const localHandler = handler ? wrappedHandler : undefined;
 
   const subscribe = useCallback(
-    async (handler: (dotYouClient: DotYouClient, data: TypedConnectionNotification) => void) => {
+    async (handler: (odinClient: OdinClient, data: TypedConnectionNotification) => void) => {
       connectedHandler.current = handler;
 
       if (isPeer)
         await SubscribeOverPeer(
-          dotYouClient,
+          odinClient,
           odinId as string,
           drives,
           handler,
@@ -90,7 +90,7 @@ export const useWebsocketSubscriber = (
         );
       else
         await Subscribe(
-          dotYouClient,
+          odinClient,
           drives,
           handler,
           () => {
@@ -109,7 +109,7 @@ export const useWebsocketSubscriber = (
   );
 
   const unsubscribe = useCallback(
-    (handler: (dotYouClient: DotYouClient, data: TypedConnectionNotification) => void) => {
+    (handler: (odinClient: OdinClient, data: TypedConnectionNotification) => void) => {
       try {
         if (isPeer) UnsubscribeOverPeer(handler);
         else Unsubscribe(handler);
@@ -122,8 +122,8 @@ export const useWebsocketSubscriber = (
 
   useEffect(() => {
     if (
-      (dotYouClient.getType() !== ApiType.Owner && dotYouClient.getType() !== ApiType.App) ||
-      !dotYouClient.getSharedSecret() ||
+      (odinClient.getType() !== ApiType.Owner && odinClient.getType() !== ApiType.App) ||
+      !odinClient.getSharedSecret() ||
       !localHandler
     )
       return;

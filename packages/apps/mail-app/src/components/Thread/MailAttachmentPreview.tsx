@@ -7,7 +7,7 @@ import {
   ActionButton,
   bytesToSize,
   ExtensionThumbnail,
-  useDotYouClientContext,
+  useOdinClientContext,
   useFile,
 } from '@homebase-id/common-app';
 import { OdinImage } from '@homebase-id/ui-lib';
@@ -21,7 +21,7 @@ export const MailAttachmentPreview = ({
   messageId: string;
   payloadKey: string;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const { data: mailMessage, isLoading: mailMessageLoading } = useMailConversation({
     messageFileId: messageId,
   }).getMessage;
@@ -157,7 +157,7 @@ export const MailAttachmentPreview = ({
           <>
             {payloadDescriptor.contentType.startsWith('image/') ? (
               <OdinImage
-                dotYouClient={dotYouClient}
+                odinClient={odinClient}
                 fileId={messageId}
                 fileKey={payloadKey}
                 targetDrive={MailDrive}

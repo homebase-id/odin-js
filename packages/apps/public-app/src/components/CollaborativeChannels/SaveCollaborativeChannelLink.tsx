@@ -1,5 +1,5 @@
-import { ActionLink, t, useDotYouClientContext } from '@homebase-id/common-app';
-import { ApiType, DotYouClient, HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
+import { ActionLink, t, useOdinClientContext } from '@homebase-id/common-app';
+import { ApiType, OdinClient, HomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import {
   RemoteCollaborativeChannelDefinition,
   CollaborativeChannelDefinition,
@@ -16,10 +16,10 @@ export const SaveCollaborativeChannelLink = ({
   channel: HomebaseFile<ChannelDefinition>;
   className?: string;
 }) => {
-  const dotYouClient = useDotYouClientContext();
-  const loggedInIdentity = dotYouClient.getLoggedInIdentity();
-  const ownerIdentity = dotYouClient.getHostIdentity();
-  const isOwner = dotYouClient.isOwner();
+  const odinClient = useOdinClientContext();
+  const loggedInIdentity = odinClient.getLoggedInIdentity();
+  const ownerIdentity = odinClient.getHostIdentity();
+  const isOwner = odinClient.isOwner();
 
   const hasWriteAccess = useCheckWriteAccessOnChannel({ activeChannel: channel });
   if (
@@ -45,7 +45,7 @@ export const SaveCollaborativeChannelLink = ({
   return (
     <ActionLink
       className={`w-auto ${className ?? ''}`}
-      href={`${new DotYouClient({ hostIdentity: loggedInIdentity, api: ApiType.Guest }).getRoot()}/apps/feed/channels/incoming-collaborative?channel=${JSON.stringify(remoteGroupChannel)}`}
+      href={`${new OdinClient({ hostIdentity: loggedInIdentity, api: ApiType.Guest }).getRoot()}/apps/feed/channels/incoming-collaborative?channel=${JSON.stringify(remoteGroupChannel)}`}
       icon={Plus}
       type={'primary'}
     >

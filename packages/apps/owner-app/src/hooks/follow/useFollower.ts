@@ -1,16 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchFollower } from '@homebase-id/js-lib/network';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 type useFollowerProps = {
   odinId?: string;
 };
 
 export const useFollower = ({ odinId }: useFollowerProps) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchFollowDetails = async ({ odinId }: { odinId: string }) => {
-    const response = await fetchFollower(dotYouClient, odinId);
+    const response = await fetchFollower(odinClient, odinId);
     return response;
   };
 

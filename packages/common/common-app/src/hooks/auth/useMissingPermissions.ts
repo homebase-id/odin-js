@@ -6,7 +6,7 @@ import {
 import { AppPermissionType } from '@homebase-id/js-lib/network';
 import { useSecurityContext } from '../securityContext/useSecurityContext';
 import { getExtendAppRegistrationParams, TargetDriveAccessRequest } from '@homebase-id/js-lib/auth';
-import { useDotYouClientContext } from './useDotYouClientContext';
+import { useOdinClientContext } from './useOdinClientContext';
 
 const getExtendAppRegistrationUrl = (
   host: string,
@@ -43,7 +43,7 @@ export const useMissingPermissions = ({
   needsAllConnected?: boolean;
 }) => {
   const { data: context } = useSecurityContext().fetch;
-  const host = useDotYouClientContext().getRoot();
+  const host = useOdinClientContext().getRoot();
 
   if (!context || !host) return;
 

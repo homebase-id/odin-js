@@ -8,7 +8,7 @@ import {
 } from '@homebase-id/js-lib/profile';
 import { GetFile } from '@homebase-id/js-lib/public';
 import { getProfileAttributesOverPeer } from '@homebase-id/js-lib/peer';
-import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../../auth/useOdinClientContext';
 
 interface LinkData {
   text: string;
@@ -20,15 +20,15 @@ interface LinkData {
 export const useLinks = (props?: { odinId: string } | undefined) => {
   const { odinId } = props || {};
 
-  const dotYouClient = useDotYouClientContext();
-  const isAuthenticated = !!dotYouClient.getHostIdentity();
+  const odinClient = useOdinClientContext();
+  const isAuthenticated = !!odinClient.getHostIdentity();
   const queryClient = useQueryClient();
 
   const fetchData: (odinId?: string) => Promise<LinkData[] | undefined> = async () => {
     const fetchStaticData = async () => {
       if (odinId) return null;
 
-      const fileData = await GetFile(dotYouClient, 'sitedata.json');
+      const fileData = await GetFile(odinClient, 'sitedata.json');
       if (fileData.has('link')) {
         const linkAttributes = (
           fileData
@@ -54,10 +54,10 @@ export const useLinks = (props?: { odinId: string } | undefined) => {
     const fetchDynamicData = async () => {
       try {
         const linkAttributes = odinId
-          ? await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.Link)
-          : await getProfileAttributes(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
-              BuiltInAttributes.Link,
-            ]);
+          ? await getProfileAttributesOverPeer(odinClient, odinId, BuiltInAttributes.Link)
+          : await getProfileAttributes(odinClient, BuiltInProfiles.StandardProfileId, undefined, [
+            BuiltInAttributes.Link,
+          ]);
 
         return linkAttributes
           ?.map((dsr) => {

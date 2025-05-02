@@ -13,7 +13,7 @@ import {
 import { ChatMessage } from '../../providers/ChatProvider';
 import { UnifiedConversation } from '../../providers/ConversationProvider';
 import { getNewId, tryJsonParse } from '@homebase-id/js-lib/helpers';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { insertNewMessage } from './useChatMessages';
 
 export const useChatReaction = (props?: {
@@ -22,13 +22,13 @@ export const useChatReaction = (props?: {
 }) => {
   const { messageGlobalTransitId, messageFileId } = props || {};
 
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const getReactionsByMessageGlobalTransitId = (messageGlobalTransitId: string) => async () => {
     const reactions =
       (
-        await getGroupReactions(dotYouClient, {
+        await getGroupReactions(odinClient, {
           target: {
             globalTransitId: messageGlobalTransitId,
             targetDrive: ChatDrive,
@@ -49,14 +49,14 @@ export const useChatReaction = (props?: {
     reaction: string;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
-    const identity = dotYouClient.getHostIdentity();
+    const identity = odinClient.getHostIdentity();
     const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     if (!message.fileMetadata.globalTransitId)
       throw new Error('Message does not have a global transit id');
 
     return await uploadGroupReaction(
-      dotYouClient,
+      odinClient,
       ChatDrive,
       message.fileMetadata.globalTransitId,
       reaction,
@@ -74,13 +74,13 @@ export const useChatReaction = (props?: {
     reaction: EmojiReaction;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
-    const identity = dotYouClient.getHostIdentity();
+    const identity = odinClient.getHostIdentity();
     const recipients = conversationContent.recipients.filter((recipient) => recipient !== identity);
 
     if (!message.fileMetadata.globalTransitId)
       throw new Error('Message does not have a global transit id');
 
-    return await deleteGroupReaction(dotYouClient, ChatDrive, recipients, reaction, {
+    return await deleteGroupReaction(odinClient, ChatDrive, recipients, reaction, {
       fileId: message.fileId,
       globalTransitId: message.fileMetadata.globalTransitId,
       targetDrive: ChatDrive,
@@ -102,7 +102,7 @@ export const useChatReaction = (props?: {
           queryClient.getQueryData<EmojiReaction[]>(['chat-reaction', message.fileId]) || [];
 
         const newReaction: EmojiReaction = {
-          authorOdinId: dotYouClient.getHostIdentity(),
+          authorOdinId: odinClient.getHostIdentity(),
           body: reaction,
         };
 

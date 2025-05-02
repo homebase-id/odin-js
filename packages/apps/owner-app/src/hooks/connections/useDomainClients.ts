@@ -3,16 +3,16 @@ import {
   getDomainClients,
   removeDomainClient,
 } from '../../provider/network/domainNetwork/DomainManager';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 export const useDomainClients = ({ domain }: { domain?: string }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const fetchClients = async ({ domain }: { domain: string }) => {
     if (!domain) return;
 
-    return await getDomainClients(dotYouClient, domain);
+    return await getDomainClients(odinClient, domain);
   };
 
   const removeClient = async ({
@@ -22,7 +22,7 @@ export const useDomainClients = ({ domain }: { domain?: string }) => {
     domain: string;
     registrationId: string;
   }) => {
-    return await removeDomainClient(dotYouClient, domain, registrationId);
+    return await removeDomainClient(odinClient, domain, registrationId);
   };
 
   return {

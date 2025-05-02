@@ -1,6 +1,6 @@
 import { tinyThumbSize } from './Thumbs/ThumbnailProvider';
 import { getLargestThumbOfPayload } from '../helpers/DataUtil';
-import { DotYouClient } from '../core/DotYouClient';
+import { OdinClient } from '../core/OdinClient';
 import {
   TargetDrive,
   getFileHeader,
@@ -14,13 +14,13 @@ import { ImageMetadata, ThumbnailMeta } from './MediaTypes';
 import { getDecryptedMediaUrl } from './MediaProvider';
 
 export const getDecryptedThumbnailMeta = (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   fileId: string,
   fileKey: string,
   systemFileType: SystemFileType | undefined
 ): Promise<ThumbnailMeta | undefined> => {
-  return getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType }).then(
+  return getFileHeader(odinClient, targetDrive, fileId, { systemFileType }).then(
     async (header) => {
       if (!header) return;
 
@@ -40,7 +40,7 @@ export const getDecryptedThumbnailMeta = (
         !previewThumbnail
       ) {
         url = await getDecryptedImageUrl(
-          dotYouClient,
+          odinClient,
           targetDrive,
           fileId,
           fileKey,
@@ -78,7 +78,7 @@ export const getDecryptedThumbnailMeta = (
 // Retrieves an image/thumb, decrypts, then returns a url to be passed to an image control
 export const getDecryptedImageUrl = getDecryptedMediaUrl;
 export const getDecryptedImageData = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   fileId: string,
   key: string,
@@ -94,7 +94,7 @@ export const getDecryptedImageData = async (
   if (size) {
     try {
       const thumbBytes = await getThumbBytes(
-        dotYouClient,
+        odinClient,
         targetDrive,
         fileId,
         key,
@@ -108,7 +108,7 @@ export const getDecryptedImageData = async (
     }
   }
 
-  const payload = await getPayloadBytes(dotYouClient, targetDrive, fileId, key, {
+  const payload = await getPayloadBytes(odinClient, targetDrive, fileId, key, {
     systemFileType,
     lastModified,
   });
@@ -120,12 +120,12 @@ export const getDecryptedImageData = async (
 };
 
 export const getDecryptedImageMetadata = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   fileId: string,
   systemFileType?: SystemFileType
 ): Promise<ImageMetadata | null> => {
-  const fileHeader = await getFileHeader<ImageMetadata>(dotYouClient, targetDrive, fileId, {
+  const fileHeader = await getFileHeader<ImageMetadata>(odinClient, targetDrive, fileId, {
     systemFileType,
   });
   if (!fileHeader) return null;

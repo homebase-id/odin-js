@@ -1,41 +1,41 @@
 import { expect, test } from 'vitest';
-import { DotYouClient, ApiType } from './DotYouClient';
+import { OdinClient, ApiType } from './OdinClient';
 import { AxiosHeaders, InternalAxiosRequestConfig } from 'axios';
 import { base64ToUint8Array, byteArrayToString, cbcDecrypt } from '../helpers/helpers';
 
-test('App DotYouClient', () => {
-  const dotYouClient = new DotYouClient({
+test('App OdinClient', () => {
+  const odinClient = new OdinClient({
     api: ApiType.App,
     hostIdentity: 'example.com',
   });
 
-  expect(dotYouClient).toBeInstanceOf(DotYouClient);
-  expect(dotYouClient.getEndpoint()).toEqual('https://example.com/api/apps/v1');
-  expect(dotYouClient.getRoot()).toEqual('https://example.com');
-  expect(dotYouClient.getType()).toEqual(ApiType.App);
+  expect(odinClient).toBeInstanceOf(OdinClient);
+  expect(odinClient.getEndpoint()).toEqual('https://example.com/api/apps/v1');
+  expect(odinClient.getRoot()).toEqual('https://example.com');
+  expect(odinClient.getType()).toEqual(ApiType.App);
 });
 
-test('Guest DotYouClient', () => {
-  const dotYouClient = new DotYouClient({
+test('Guest OdinClient', () => {
+  const odinClient = new OdinClient({
     api: ApiType.Guest,
     hostIdentity: 'example.com',
   });
 
-  expect(dotYouClient).toBeInstanceOf(DotYouClient);
-  expect(dotYouClient.getRoot()).toEqual('https://example.com');
-  expect(dotYouClient.getType()).toEqual(ApiType.Guest);
-  expect(dotYouClient.getEndpoint()).toEqual('https://example.com/api/guest/v1');
+  expect(odinClient).toBeInstanceOf(OdinClient);
+  expect(odinClient.getRoot()).toEqual('https://example.com');
+  expect(odinClient.getType()).toEqual(ApiType.Guest);
+  expect(odinClient.getEndpoint()).toEqual('https://example.com/api/guest/v1');
 });
 
-test('DotYouClient GET request interceptor', async () => {
+test('OdinClient GET request interceptor', async () => {
   const fixedSharedSecret = new Uint8Array(16).fill(1);
-  const dotYouClient = new DotYouClient({
+  const odinClient = new OdinClient({
     api: ApiType.App,
     hostIdentity: 'example.com',
     sharedSecret: fixedSharedSecret,
   });
 
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = odinClient.createAxiosClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const internalAxiosHandlers = (axiosClient.interceptors.request as any)?.handlers;
 
@@ -53,15 +53,15 @@ test('DotYouClient GET request interceptor', async () => {
   );
 });
 
-test('DotYouClient POST request interceptor', async () => {
+test('OdinClient POST request interceptor', async () => {
   const fixedSharedSecret = new Uint8Array(16).fill(1);
-  const dotYouClient = new DotYouClient({
+  const odinClient = new OdinClient({
     api: ApiType.App,
     hostIdentity: 'example.com',
     sharedSecret: fixedSharedSecret,
   });
 
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = odinClient.createAxiosClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const internalAxiosHandlers = (axiosClient.interceptors.request as any)?.handlers;
 

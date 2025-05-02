@@ -21,14 +21,14 @@ import {
   COMMUNITY_ROOT_PATH,
   logoutOwnerAndAllApps,
   OWNER_APPS_ROOT,
-  useDotYouClient,
+  useOdinClient,
 } from '@homebase-id/common-app';
 import { LOCAL_COMMUNITY_APP_DRIVE } from '../../providers/CommunityMetadataProvider';
 import { useQueryClient } from '@tanstack/react-query';
 import { ChatDrive } from '@homebase-id/chat-app/src/providers/ConversationProvider';
 
 export const useValidateAuthorization = () => {
-  const { hasSharedSecret } = useDotYouClient();
+  const { hasSharedSecret } = useOdinClient();
   const { data: hasValidToken, isFetched } = useVerifyToken();
 
   useEffect(() => {
@@ -42,8 +42,8 @@ export const useValidateAuthorization = () => {
 };
 
 export const useAuth = () => {
-  const { getDotYouClient } = useDotYouClient();
-  const preauth = async (): Promise<void> => await preauthApps(getDotYouClient());
+  const { getOdinClient } = useOdinClient();
+  const preauth = async (): Promise<void> => await preauthApps(getOdinClient());
 
   return {
     preauth,

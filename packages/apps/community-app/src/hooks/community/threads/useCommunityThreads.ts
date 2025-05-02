@@ -1,7 +1,7 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CommunityMessage } from '../../../providers/CommunityMessageProvider';
-import { findMentionedInRichText, useDotYouClientContext } from '@homebase-id/common-app';
+import { findMentionedInRichText, useOdinClientContext } from '@homebase-id/common-app';
 import { useCommunityMetadata } from '../useCommunityMetadata';
 import { useCommunityChannels } from '../channels/useCommunityChannels';
 import { getCommunityMessagesInfiniteQueryOptions } from '../messages/useCommunityMessages';
@@ -25,8 +25,8 @@ export const useCommunityThreads = ({
   communityId?: string;
 }) => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
-  const identity = dotYouClient.getLoggedInIdentity();
+  const odinClient = useOdinClientContext();
+  const identity = odinClient.getLoggedInIdentity();
   const { data: channels, isFetched } = useCommunityChannels({ odinId, communityId }).fetch;
 
   const lastUpdate = useLastUpdatedCommunityMessages({ communityId });
@@ -43,7 +43,7 @@ export const useCommunityThreads = ({
         channels.map(async (channel) => {
           const channelMessages = await queryClient.fetchInfiniteQuery(
             getCommunityMessagesInfiniteQueryOptions(
-              dotYouClient,
+              odinClient,
               odinId,
               communityId,
               channel.fileMetadata.appData.uniqueId,
@@ -66,7 +66,7 @@ export const useCommunityThreads = ({
 
         const replies = await queryClient.fetchInfiniteQuery(
           getCommunityMessagesInfiniteQueryOptions(
-            dotYouClient,
+            odinClient,
             odinId,
             communityId,
             origin.fileMetadata.appData.content.channelId,
@@ -130,7 +130,7 @@ export const useLastUpdatedThreadExcludingMine = (props: {
   odinId: string | undefined;
   communityId: string | undefined;
 }) => {
-  const identity = useDotYouClientContext().getLoggedInIdentity();
+  const identity = useOdinClientContext().getLoggedInIdentity();
   const { data: flattedThreads } = useCommunityThreads(props);
 
   return flattedThreads
@@ -156,6 +156,6 @@ export const useHasUnreadThreads = (props: { odinId: string; communityId: string
     lastUpdatedThread &&
     (!metadata ||
       metadata?.fileMetadata.appData.content.threadsLastReadTime <
-        lastUpdatedThread.lastMessageCreated)
+      lastUpdatedThread.lastMessageCreated)
   );
 };

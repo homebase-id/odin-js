@@ -1,5 +1,5 @@
 import { stringifyToQueryParams, uint8ArrayToBase64 } from '../helpers/DataUtil';
-import { ApiType, DotYouClient } from '../core/DotYouClient';
+import { ApiType, OdinClient } from '../core/OdinClient';
 import {
   TargetDrive,
   SystemFileType,
@@ -13,7 +13,7 @@ import {
  * @param isProbablyEncrypted {boolean} Hints wether or not we can expect the image to be encrypted, when true no direct url is returned instead the contents are fetched and decrypted depending on their metadata; This allows to skip a probably unneeded header call
  */
 export const getDecryptedMediaUrl = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   fileId: string,
   fileKey: string,
@@ -29,7 +29,7 @@ export const getDecryptedMediaUrl = async (
   const { size, systemFileType, fileSizeLimit } = options || {};
   const getDirectImageUrl = () =>
     getAnonymousDirectImageUrl(
-      dotYouClient.getHostIdentity(),
+      odinClient.getHostIdentity(),
       targetDrive,
       fileId,
       fileKey,
@@ -38,7 +38,7 @@ export const getDecryptedMediaUrl = async (
       lastModified
     );
 
-  const ss = dotYouClient.getSharedSecret();
+  const ss = odinClient.getSharedSecret();
 
   // If there is no shared secret, we wouldn't even be able to decrypt
   if (!ss) return await getDirectImageUrl();
@@ -46,7 +46,7 @@ export const getDecryptedMediaUrl = async (
   // We try and avoid the payload call as much as possible, so if the payload is probabaly not encrypted,
   //   we first get confirmation from the header and return a direct url if possible
   if (!isProbablyEncrypted) {
-    const meta = await getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType });
+    const meta = await getFileHeader(odinClient, targetDrive, fileId, { systemFileType });
     if (!meta?.fileMetadata.isEncrypted) return await getDirectImageUrl();
   }
 
@@ -56,7 +56,7 @@ export const getDecryptedMediaUrl = async (
     if (size) {
       try {
         const thumbBytes = await getThumbBytes(
-          dotYouClient,
+          odinClient,
           targetDrive,
           fileId,
           fileKey,
@@ -70,7 +70,7 @@ export const getDecryptedMediaUrl = async (
       }
     }
 
-    return await getPayloadBytes(dotYouClient, targetDrive, fileId, fileKey, {
+    return await getPayloadBytes(odinClient, targetDrive, fileId, fileKey, {
       systemFileType,
       chunkStart: fileSizeLimit ? 0 : undefined,
       chunkEnd: fileSizeLimit,
@@ -98,18 +98,17 @@ export const getAnonymousDirectImageUrl = (
   systemFileType?: SystemFileType,
   lastModified?: number
 ) => {
-  const dotYouClient = new DotYouClient({ hostIdentity: identity, api: ApiType.Guest });
-  return `${dotYouClient.getEndpoint()}/drive/files/${
-    size ? 'thumb' : 'payload'
-  }?${stringifyToQueryParams({
-    alias: targetDrive.alias,
-    type: targetDrive.type,
-    fileId: fileId,
-    ...(size
-      ? { payloadKey: fileKey, width: size.pixelWidth, height: size.pixelHeight }
-      : { key: fileKey }),
-    lastModified: lastModified,
-    xfst: systemFileType || 'Standard',
-    iac: true, // iac is a flag that tells the identity to ignore any auth cookies
-  })}`;
+  const odinClient = new OdinClient({ hostIdentity: identity, api: ApiType.Guest });
+  return `${odinClient.getEndpoint()}/drive/files/${size ? 'thumb' : 'payload'
+    }?${stringifyToQueryParams({
+      alias: targetDrive.alias,
+      type: targetDrive.type,
+      fileId: fileId,
+      ...(size
+        ? { payloadKey: fileKey, width: size.pixelWidth, height: size.pixelHeight }
+        : { key: fileKey }),
+      lastModified: lastModified,
+      xfst: systemFileType || 'Standard',
+      iac: true, // iac is a flag that tells the identity to ignore any auth cookies
+    })}`;
 };

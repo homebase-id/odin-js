@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../../core/DotYouClient';
+import { OdinClient } from '../../../core/OdinClient';
 import { FileQueryParams } from '../../../core/DriveData/Drive/DriveTypes';
 import { deleteFile } from '../../../core/DriveData/File/DriveFileManager';
 import { getContentFromHeaderOrPayload } from '../../../core/DriveData/File/DriveFileProvider';
@@ -19,14 +19,14 @@ import { getRandom16ByteArray, jsonStringify64, toGuidId } from '../../../helper
 import { BlogConfig, RemoteCollaborativeChannelDefinition } from '../PostTypes';
 
 export const getChannelLinkDefinitions = async (
-  dotYouClient: DotYouClient
+  odinClient: OdinClient
 ): Promise<HomebaseFile<RemoteCollaborativeChannelDefinition>[] | null> => {
   const params: FileQueryParams = {
     targetDrive: BlogConfig.FeedDrive,
     fileType: [BlogConfig.RemoteChannelDefinitionFileType],
   };
 
-  const response = await queryBatch(dotYouClient, params);
+  const response = await queryBatch(odinClient, params);
 
   if (!response.searchResults.length) {
     return null;
@@ -35,14 +35,14 @@ export const getChannelLinkDefinitions = async (
   return (
     await Promise.all(
       response.searchResults.map((dsr) =>
-        dsrToChannelLink(dotYouClient, dsr, response.includeMetadataHeader)
+        dsrToChannelLink(odinClient, dsr, response.includeMetadataHeader)
       )
     )
   ).filter(Boolean) as HomebaseFile<RemoteCollaborativeChannelDefinition>[];
 };
 
 export const saveChannelLink = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   definition: NewHomebaseFile<RemoteCollaborativeChannelDefinition>
 ): Promise<UploadResult | undefined> => {
   const channelContent = definition.fileMetadata.appData.content;
@@ -78,7 +78,7 @@ export const saveChannelLink = async (
   };
 
   const result = await uploadFile(
-    dotYouClient,
+    odinClient,
     instructionSet,
     metadata,
     undefined,
@@ -91,20 +91,20 @@ export const saveChannelLink = async (
 };
 
 export const removeChannelLink = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   channelLink: HomebaseFile<RemoteCollaborativeChannelDefinition>
 ) => {
-  return await deleteFile(dotYouClient, BlogConfig.FeedDrive, channelLink.fileId);
+  return await deleteFile(odinClient, BlogConfig.FeedDrive, channelLink.fileId);
 };
 
 const dsrToChannelLink = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   dsr: HomebaseFile,
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<RemoteCollaborativeChannelDefinition> | undefined> => {
   const definitionContent =
     await getContentFromHeaderOrPayload<RemoteCollaborativeChannelDefinition>(
-      dotYouClient,
+      odinClient,
       BlogConfig.FeedDrive,
       dsr,
       includeMetadataHeader

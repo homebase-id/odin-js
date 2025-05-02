@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../DotYouClient';
+import { OdinClient } from '../../OdinClient';
 import {
   FileQueryParams,
   GetModifiedResultOptions,
@@ -38,7 +38,7 @@ export const DEFAULT_QUERY_BATCH_RESULT_OPTION = {
 
 /// Query methods:
 export const queryModified = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   params: FileQueryParams,
   ro?: GetModifiedResultOptions,
   options?: {
@@ -51,7 +51,7 @@ export const queryModified = async (
   const strippedQueryParams = { ...params };
   delete strippedQueryParams.systemFileType;
 
-  const client = dotYouClient.createAxiosClient({
+  const client = odinClient.createAxiosClient({
     systemFileType: params.systemFileType,
   });
 
@@ -85,7 +85,7 @@ export const queryModified = async (
         searchResults: await Promise.all(
           response.data.searchResults.map(async (dsr) => {
             const keyheader = dsr.fileMetadata.isEncrypted
-              ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
+              ? await decryptKeyHeader(odinClient, dsr.sharedSecretEncryptedKeyHeader)
               : undefined;
 
             dsr.fileMetadata.appData.content = await decryptJsonContent(
@@ -110,10 +110,10 @@ interface QueryBatchParamsWithFileState extends Omit<FileQueryParams, 'fileState
 export const queryBatch = async <
   T extends QueryBatchParamsWithFileState | QueryBatchParamsWithoutFileState,
   R = T extends QueryBatchParamsWithFileState
-    ? QueryBatchResponseWithDeletedResults
-    : QueryBatchResponse,
+  ? QueryBatchResponseWithDeletedResults
+  : QueryBatchResponse,
 >(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   params: T,
   ro?: GetBatchQueryResultOptions,
   options?: {
@@ -129,7 +129,7 @@ export const queryBatch = async <
   };
   delete strippedQueryParams.systemFileType;
 
-  const client = dotYouClient.createAxiosClient({
+  const client = odinClient.createAxiosClient({
     systemFileType: params.systemFileType,
   });
 
@@ -164,7 +164,7 @@ export const queryBatch = async <
             response.data as QueryBatchResponseWithDeletedResults | QueryBatchResponse
           ).searchResults.map(async (dsr) => {
             const keyheader = dsr.fileMetadata.isEncrypted
-              ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
+              ? await decryptKeyHeader(odinClient, dsr.sharedSecretEncryptedKeyHeader)
               : undefined;
 
             dsr.fileMetadata.appData.content = await decryptJsonContent(
@@ -183,7 +183,7 @@ export const queryBatch = async <
 };
 
 export const queryBatchCollection = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   queries: {
     name: string;
     queryParams: FileQueryParams;
@@ -197,7 +197,7 @@ export const queryBatchCollection = async (
 ): Promise<QueryBatchCollectionResponse> => {
   const { decrypt, axiosConfig } = config ?? {};
 
-  const client = dotYouClient.createAxiosClient({
+  const client = odinClient.createAxiosClient({
     systemFileType,
   });
 
@@ -242,7 +242,7 @@ export const queryBatchCollection = async (
               searchResults: await Promise.all(
                 result.searchResults.map(async (dsr) => {
                   const keyheader = dsr.fileMetadata.isEncrypted
-                    ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
+                    ? await decryptKeyHeader(odinClient, dsr.sharedSecretEncryptedKeyHeader)
                     : undefined;
 
                   dsr.fileMetadata.appData.content = await decryptJsonContent(

@@ -7,7 +7,7 @@ import {
 
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { fetchCachedPublicChannels } from '../post/cachedDataHelpers';
-import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../../auth/useOdinClientContext';
 export interface ChannelDefinitionVm extends ChannelDefinition {
   template: ChannelTemplate;
 }
@@ -27,13 +27,13 @@ export const useChannels = ({
   isAuthenticated: boolean;
   isOwner: boolean;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const fetchChannelData = async () => {
     const fetchDynamicData = async () => {
       try {
-        return (await getChannelDefinitions(dotYouClient))?.map((channel) => {
+        return (await getChannelDefinitions(odinClient))?.map((channel) => {
           return {
             ...channel,
             fileMetadata: {
@@ -57,7 +57,7 @@ export const useChannels = ({
 
     const returnData = isOwner
       ? await fetchDynamicData()
-      : ((await fetchCachedPublicChannels(dotYouClient)) ?? (await fetchDynamicData()));
+      : ((await fetchCachedPublicChannels(odinClient)) ?? (await fetchDynamicData()));
 
     if (isAuthenticated && !isOwner) {
       // We are authenticated, so we might have more data when fetching non-static data; Let's do so async with timeout to allow other static info to load and render

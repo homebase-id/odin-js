@@ -9,22 +9,22 @@ import {
 import { ApiType } from '@homebase-id/js-lib/core';
 import { BuiltInAttributes } from '@homebase-id/js-lib/profile';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 
 export const useStaticFiles = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const publishData = async (dataType?: 'channel' | typeof BuiltInAttributes.Name) => {
     console.debug('[STARTED] Static file publish', dataType);
 
-    const publishActions: Promise<unknown>[] = [publishProfile(dotYouClient, dataType)];
+    const publishActions: Promise<unknown>[] = [publishProfile(odinClient, dataType)];
 
-    if (dotYouClient.getType() === ApiType.Owner) {
+    if (odinClient.getType() === ApiType.Owner) {
       if (!dataType || stringGuidsEqual(dataType, BuiltInAttributes.Photo))
-        publishActions.push(publishProfileImage(dotYouClient));
+        publishActions.push(publishProfileImage(odinClient));
 
       if (!dataType || ProfileCardAttributeTypes.some((type) => stringGuidsEqual(dataType, type)))
-        publishActions.push(publishProfileCard(dotYouClient));
+        publishActions.push(publishProfileCard(odinClient));
     }
 
     await Promise.all(publishActions);

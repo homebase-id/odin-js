@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   ActionLink,
   CHAT_ROOT_PATH,
@@ -7,7 +7,7 @@ import {
   ConnectionName,
   DialogWrapper,
   t,
-  useDotYouClientContext,
+  useOdinClientContext,
   usePortal,
 } from '@homebase-id/common-app';
 import { ConversationMetadata, UnifiedConversation } from '../../../providers/ConversationProvider';
@@ -25,7 +25,7 @@ export const ChatInfo = ({
 }) => {
   const target = usePortal('modal-container');
 
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   if (!loggedOnIdentity) return null;
   const conversationContent = conversation.fileMetadata.appData.content;
   const recipients = conversationContent.recipients.filter(
@@ -67,7 +67,7 @@ export const ChatInfo = ({
           <div className="flex flex-col gap-4">
             {recipients.map((recipient) => (
               <a
-                href={`${new DotYouClient({ hostIdentity: loggedOnIdentity, api: ApiType.Guest }).getRoot()}/owner/connections/${recipient}`}
+                href={`${new OdinClient({ hostIdentity: loggedOnIdentity, api: ApiType.Guest }).getRoot()}/owner/connections/${recipient}`}
                 rel="noreferrer noopener"
                 target="_blank"
                 className="group flex flex-row items-center gap-3"

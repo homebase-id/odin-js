@@ -1,5 +1,5 @@
 import { AxiosResponse } from 'axios';
-import { DotYouClient } from '../DotYouClient';
+import { OdinClient } from '../OdinClient';
 
 import { cbcEncrypt, streamEncryptWithCbc, cbcDecrypt } from '../../helpers/AesEncrypt';
 import {
@@ -17,11 +17,11 @@ const OdinBlob: typeof Blob =
 
 /// Encryption
 export const encryptKeyHeader = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   keyHeader: KeyHeader,
   transferIv: Uint8Array
 ): Promise<EncryptedKeyHeader> => {
-  const ss = dotYouClient.getSharedSecret();
+  const ss = odinClient.getSharedSecret();
   if (!ss) throw new Error('attempting to encrypt but missing the shared secret');
 
   const combined = [...Array.from(keyHeader.iv), ...Array.from(keyHeader.aesKey)];
@@ -84,12 +84,12 @@ export const encryptWithKeyheader = async <
 };
 
 export const encryptWithSharedSecret = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   o: unknown,
   iv: Uint8Array
 ): Promise<Uint8Array> => {
   //encrypt metadata with shared secret
-  const ss = dotYouClient.getSharedSecret();
+  const ss = odinClient.getSharedSecret();
   const json = jsonStringify64(o);
 
   if (!ss) {
@@ -157,7 +157,7 @@ export const decryptUsingKeyHeader = async (
 ): Promise<Uint8Array> => await cbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
 
 export const decryptBytesResponse = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   response: AxiosResponse<ArrayBuffer>
   // keyHeader: KeyHeader | EncryptedKeyHeader | undefined
 ): Promise<Uint8Array> => {
@@ -166,7 +166,7 @@ export const decryptBytesResponse = async (
   // if (keyHeader) {
   //   const decryptedKeyHeader =
   //     'encryptionVersion' in keyHeader
-  //       ? await decryptKeyHeader(dotYouClient, keyHeader)
+  //       ? await decryptKeyHeader(odinClient, keyHeader)
   //       : keyHeader;
 
   //   return decryptUsingKeyHeader(responseBa, decryptedKeyHeader);
@@ -178,7 +178,7 @@ export const decryptBytesResponse = async (
     const encryptedKeyHeader = splitSharedSecretEncryptedKeyHeader(
       response.headers.sharedsecretencryptedheader64
     );
-    const keyHeader = await decryptKeyHeader(dotYouClient, encryptedKeyHeader);
+    const keyHeader = await decryptKeyHeader(odinClient, encryptedKeyHeader);
 
     return await decryptUsingKeyHeader(responseBa, keyHeader);
   } else if (response.headers.payloadencrypted === 'True') {
@@ -189,7 +189,7 @@ export const decryptBytesResponse = async (
 };
 
 export const decryptChunkedBytesResponse = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   response: AxiosResponse<ArrayBuffer>,
   startOffset: number,
   chunkStart: number
@@ -203,7 +203,7 @@ export const decryptChunkedBytesResponse = async (
     const encryptedKeyHeader = splitSharedSecretEncryptedKeyHeader(
       response.headers.sharedsecretencryptedheader64
     );
-    const keyHeader = await decryptKeyHeader(dotYouClient, encryptedKeyHeader);
+    const keyHeader = await decryptKeyHeader(odinClient, encryptedKeyHeader);
     const key = keyHeader.aesKey;
     const { iv, cipher } = await (async () => {
       const padding = new Uint8Array(16).fill(16);
@@ -234,7 +234,7 @@ export const decryptChunkedBytesResponse = async (
 };
 
 export const decryptKeyHeader = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   encryptedKeyHeader: EncryptedKeyHeader | KeyHeader
 ): Promise<KeyHeader> => {
   const encryptedKeyHeaderIsAlreadyDecrypted =
@@ -243,7 +243,7 @@ export const decryptKeyHeader = async (
     return encryptedKeyHeader as KeyHeader;
   }
 
-  const ss = dotYouClient.getSharedSecret();
+  const ss = odinClient.getSharedSecret();
   if (!ss) throw new Error('attempting to decrypt but missing the shared secret');
 
   // Check if used params aren't still base64 encoded if so parse to bytearrays

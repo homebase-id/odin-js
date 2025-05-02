@@ -1,4 +1,4 @@
-import { DotYouClient } from '@homebase-id/js-lib/core';
+import { OdinClient } from '@homebase-id/js-lib/core';
 
 const root = '/youauthdomain';
 
@@ -11,8 +11,8 @@ export interface DomainClient {
   isRevoked: boolean;
 }
 
-export const getDomainClients = async (dotYouClient: DotYouClient, domain: string) => {
-  const client = dotYouClient.createAxiosClient();
+export const getDomainClients = async (odinClient: OdinClient, domain: string) => {
+  const client = odinClient.createAxiosClient();
   const url = `${root}/clients?domain=${domain}`;
 
   return client.get<DomainClient[]>(url).then((response) => {
@@ -21,11 +21,11 @@ export const getDomainClients = async (dotYouClient: DotYouClient, domain: strin
 };
 
 export const removeDomainClient = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   domain: string,
   accessRegistrationId: string
 ) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = root + '/deleteClient';
 
   return client.post(url, { accessRegistrationId }).then((response) => {
@@ -33,8 +33,8 @@ export const removeDomainClient = async (
   });
 };
 
-export const revokeDomainAccess = async (dotYouClient: DotYouClient, domain: string) => {
-  const client = dotYouClient.createAxiosClient();
+export const revokeDomainAccess = async (odinClient: OdinClient, domain: string) => {
+  const client = odinClient.createAxiosClient();
   const url = root + '/revoke';
 
   return client.post(url, { domain }).then((response) => {
@@ -42,8 +42,8 @@ export const revokeDomainAccess = async (dotYouClient: DotYouClient, domain: str
   });
 };
 
-export const restoreDomainAccess = async (dotYouClient: DotYouClient, domain: string) => {
-  const client = dotYouClient.createAxiosClient();
+export const restoreDomainAccess = async (odinClient: OdinClient, domain: string) => {
+  const client = odinClient.createAxiosClient();
   const url = root + '/allow';
 
   return client.post(url, { domain }).then((response) => {
@@ -51,8 +51,8 @@ export const restoreDomainAccess = async (dotYouClient: DotYouClient, domain: st
   });
 };
 
-export const disconnectFromDomain = async (dotYouClient: DotYouClient, domain: string) => {
-  const client = dotYouClient.createAxiosClient();
+export const disconnectFromDomain = async (odinClient: OdinClient, domain: string) => {
+  const client = odinClient.createAxiosClient();
   const url = root + '/deleteDomain';
 
   return client.post(url, { domain }).then((response) => {

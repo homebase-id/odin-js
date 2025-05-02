@@ -1,40 +1,40 @@
-import { DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
+import { OdinClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   QueryClient,
   UndefinedInitialDataInfiniteOptions,
   useInfiniteQuery,
 } from '@tanstack/react-query';
 import { ChatMessage, getStarredChatMessages } from '../../providers/ChatProvider';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 const FIRST_PAGE_SIZE = 100;
 const PAGE_SIZE = 100;
 const fetchMessages = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
 
   cursorState: string | undefined
 ) => {
   return await getStarredChatMessages(
-    dotYouClient,
+    odinClient,
     cursorState,
     cursorState ? PAGE_SIZE : FIRST_PAGE_SIZE
   );
 };
 
 const getStarredChatMessageInfiniteQueryOptions: (
-  dotYouClient: DotYouClient
+  odinClient: OdinClient
 ) => UndefinedInitialDataInfiniteOptions<{
   searchResults: (HomebaseFile<ChatMessage> | null)[];
   cursorState: string;
   queryTime: number;
   includeMetadataHeader: boolean;
-}> = (dotYouClient) => ({
+}> = (odinClient) => ({
   queryKey: ['starred-chat-messages'],
   initialPageParam: undefined as string | undefined,
-  queryFn: ({ pageParam }) => fetchMessages(dotYouClient, pageParam as string | undefined),
+  queryFn: ({ pageParam }) => fetchMessages(odinClient, pageParam as string | undefined),
   getNextPageParam: (lastPage, pages) =>
     lastPage &&
-    lastPage.searchResults?.length >= (lastPage === pages[0] ? FIRST_PAGE_SIZE : PAGE_SIZE)
+      lastPage.searchResults?.length >= (lastPage === pages[0] ? FIRST_PAGE_SIZE : PAGE_SIZE)
       ? lastPage.cursorState
       : undefined,
 
@@ -42,9 +42,9 @@ const getStarredChatMessageInfiniteQueryOptions: (
 });
 
 export const useStarredMessages = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   return {
-    all: useInfiniteQuery(getStarredChatMessageInfiniteQueryOptions(dotYouClient)),
+    all: useInfiniteQuery(getStarredChatMessageInfiniteQueryOptions(odinClient)),
   };
 };
 

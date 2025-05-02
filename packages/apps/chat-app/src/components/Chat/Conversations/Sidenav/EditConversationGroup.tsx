@@ -13,7 +13,7 @@ import {
   Label,
   NotFound,
   t,
-  useDotYouClientContext,
+  useOdinClientContext,
   useIntroductions,
   useRawImage,
 } from '@homebase-id/common-app';
@@ -24,7 +24,7 @@ import { GroupContactSearch } from './ConversationGroupFIelds';
 import { ChatDrive, CONVERSATION_IMAGE_KEY } from '../../../../providers/ConversationProvider';
 
 export const EditConversationGroup = () => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const { conversationKey } = useParams();
   const {
     single: { data: conversation, isFetched: isConversationFetched },

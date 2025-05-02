@@ -2,7 +2,7 @@ import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/re
 import { Attribute, getProfileAttribute } from '@homebase-id/js-lib/profile';
 import {
   invalidateSiteData,
-  useDotYouClientContext,
+  useOdinClientContext,
   useStaticFiles,
 } from '@homebase-id/common-app';
 import { AttributeDefinitions } from './AttributeDefinitions';
@@ -23,7 +23,7 @@ const getListItemCacheKey = (newAttrVm: Attribute) => {
 
 export const useAttribute = (props?: { profileId?: string; attributeId?: string }) => {
   const { profileId, attributeId } = props || {};
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const queryClient = useQueryClient();
   const { mutate: publishStaticFiles } = useStaticFiles().publish;
@@ -33,7 +33,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
     if (!profileId || !attributeId) {
       return null;
     }
-    const foundAttribute = await getProfileAttribute(dotYouClient, profileId, attributeId);
+    const foundAttribute = await getProfileAttribute(odinClient, profileId, attributeId);
 
     return foundAttribute || null;
   };
@@ -41,19 +41,19 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
   const saveData = async (attribute: NewHomebaseFile<Attribute> | HomebaseFile<Attribute>) => {
     const onVersionConflict = async () => {
       const serverAttr = await getProfileAttribute(
-        dotYouClient,
+        odinClient,
         attribute.fileMetadata.appData.content.profileId,
         attribute.fileMetadata.appData.content.id
       );
       if (!serverAttr || !serverAttr.fileMetadata.appData.content) return;
 
       const newAttr = { ...attribute, ...(serverAttr as HomebaseFile<Attribute>) };
-      return saveProfileAttribute(dotYouClient, newAttr, onVersionConflict);
+      return saveProfileAttribute(odinClient, newAttr, onVersionConflict);
     };
 
     // Don't edit original attribute as it will be used for caching decisions in onSettled
     const uploadResult = saveProfileAttribute(
-      dotYouClient,
+      odinClient,
       {
         ...attribute,
       },
@@ -74,7 +74,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
       (attribute.fileMetadata.appData.content as Attribute)?.profileId || overrideProfileId;
 
     if (attribute.fileId && profileId)
-      return await removeProfileAttribute(dotYouClient, profileId, attribute.fileId);
+      return await removeProfileAttribute(odinClient, profileId, attribute.fileId);
     else console.error('No FileId provided for removeData');
   };
 
@@ -137,8 +137,8 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
           (data) =>
             (data?.some((attr) => attr.fileMetadata.appData.content.id === newAttrVm.id)
               ? data?.map((attr) =>
-                  attr.fileMetadata.appData.content.id === newAttrVm.id ? updatedDsr : attr
-                )
+                attr.fileMetadata.appData.content.id === newAttrVm.id ? updatedDsr : attr
+              )
               : [updatedDsr, ...(data ?? [])]
             )?.sort(
               (a, b) =>
@@ -221,7 +221,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
           invalidateAttributes(
             queryClient,
             (variables.attribute.fileMetadata.appData.content as Attribute)?.profileId ||
-              variables.overrideProfileId
+            variables.overrideProfileId
           );
           return;
         }

@@ -1,11 +1,11 @@
 import {
-  useDotYouClientContext,
+  useOdinClientContext,
   insertNewNotification,
   incrementAppIdNotificationCount,
   useWebsocketSubscriber,
 } from '@homebase-id/common-app';
 import {
-  DotYouClient,
+  OdinClient,
   TypedConnectionNotification,
   AppNotification,
   TargetDrive,
@@ -30,14 +30,14 @@ export const useCommunityWebsocket = (
   odinId: string | undefined,
   communityId: string | undefined
 ) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
   const targetDrive = LOCAL_COMMUNITY_APP_DRIVE;
 
   const { chatHandler } = useChatSocketHandler();
 
   const handler = useCallback(
-    async (_: DotYouClient, notification: TypedConnectionNotification) => {
+    async (_: OdinClient, notification: TypedConnectionNotification) => {
       await chatHandler(_, notification);
 
       if (!communityId) return;
@@ -50,7 +50,7 @@ export const useCommunityWebsocket = (
       ) {
         if (notification.header.fileMetadata.appData.fileType === COMMUNITY_METADATA_FILE_TYPE) {
           const communityMetadata = await dsrToCommunityMetadata(
-            dotYouClient,
+            odinClient,
             notification.header,
             targetDrive,
             true
@@ -64,7 +64,7 @@ export const useCommunityWebsocket = (
 
         if (notification.header.fileMetadata.appData.fileType === COMMUNITY_DRAFTS_FILE_TYPE) {
           const communityDrafts = await dsrToCommunityDrafts(
-            dotYouClient,
+            odinClient,
             notification.header,
             targetDrive,
             true

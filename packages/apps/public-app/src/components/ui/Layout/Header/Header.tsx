@@ -6,12 +6,12 @@ import {
   HOME_ROOT_PATH,
   OwnerImage,
   OwnerName,
-  useDotYouClientContext,
+  useOdinClientContext,
   useSiteData,
 } from '@homebase-id/common-app';
 
 const Header = () => {
-  const isOwner = useDotYouClientContext().isOwner();
+  const isOwner = useOdinClientContext().isOwner();
   const { owner } = useSiteData().data ?? {};
 
   return (

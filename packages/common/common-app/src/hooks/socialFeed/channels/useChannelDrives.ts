@@ -1,14 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { BlogConfig } from '@homebase-id/js-lib/public';
 import { getDrivesByType } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../../auth/useOdinClientContext';
 
 export const useChannelDrives = (isEnabled: boolean) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchChannelData = async () => {
     return await (
-      await getDrivesByType(dotYouClient, BlogConfig.DriveType, 1, 25)
+      await getDrivesByType(odinClient, BlogConfig.DriveType, 1, 25)
     ).results;
   };
 

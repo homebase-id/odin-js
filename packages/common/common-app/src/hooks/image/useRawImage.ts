@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ImageSize, TargetDrive } from '@homebase-id/js-lib/core';
 import { getDecryptedImageUrl } from '@homebase-id/js-lib/media';
 import { getDecryptedImageUrlOverPeer } from '@homebase-id/js-lib/peer';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 
 export interface ImageData {
   url: string;
@@ -29,7 +29,7 @@ export const useRawImage = ({
   lastModified?: number;
 }) => {
   const localHost = window.location.hostname;
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchImageData = async (
     odinId: string,
@@ -54,24 +54,24 @@ export const useRawImage = ({
         url:
           odinId !== localHost
             ? await getDecryptedImageUrlOverPeer(
-                dotYouClient,
-                odinId,
-                imageDrive,
-                imageFileId,
-                imageFileKey,
-                probablyEncrypted,
-                lastModified,
-                { size }
-              )
+              odinClient,
+              odinId,
+              imageDrive,
+              imageFileId,
+              imageFileKey,
+              probablyEncrypted,
+              lastModified,
+              { size }
+            )
             : await getDecryptedImageUrl(
-                dotYouClient,
-                imageDrive,
-                imageFileId,
-                imageFileKey,
-                probablyEncrypted,
-                lastModified,
-                { size }
-              ),
+              odinClient,
+              imageDrive,
+              imageFileId,
+              imageFileKey,
+              probablyEncrypted,
+              lastModified,
+              { size }
+            ),
         naturalSize: naturalSize,
       };
     };

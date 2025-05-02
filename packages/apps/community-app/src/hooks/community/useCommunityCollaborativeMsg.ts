@@ -5,7 +5,7 @@ import {
   CommunityDefinition,
   getTargetDriveFromCommunityId,
 } from '../../providers/CommunityDefinitionProvider';
-import { useContentFromPayload, useDotYouClientContext } from '@homebase-id/common-app';
+import { useContentFromPayload, useOdinClientContext } from '@homebase-id/common-app';
 
 export const useCommunityCollaborativeMsg = ({
   msg,
@@ -14,7 +14,7 @@ export const useCommunityCollaborativeMsg = ({
   msg: HomebaseFile<CommunityMessage>;
   community?: HomebaseFile<CommunityDefinition>;
 }) => {
-  const loggedInOdinId = useDotYouClientContext().getLoggedInIdentity();
+  const loggedInOdinId = useOdinClientContext().getLoggedInIdentity();
 
   const { mutate, ...updateProps } = useCommunityMessage().update;
   const isCollaborative = msg.fileMetadata.appData.content.isCollaborative;
@@ -26,12 +26,12 @@ export const useCommunityCollaborativeMsg = ({
       community.fileMetadata.appData.uniqueId &&
       msg.fileId
       ? {
-          odinId: community?.fileMetadata.senderOdinId,
-          targetDrive: getTargetDriveFromCommunityId(community.fileMetadata.appData.uniqueId),
-          fileId: msg.fileId,
-          payloadKey: BACKEDUP_PAYLOAD_KEY,
-          systemFileType: msg.fileSystemType,
-        }
+        odinId: community?.fileMetadata.senderOdinId,
+        targetDrive: getTargetDriveFromCommunityId(community.fileMetadata.appData.uniqueId),
+        fileId: msg.fileId,
+        payloadKey: BACKEDUP_PAYLOAD_KEY,
+        systemFileType: msg.fileSystemType,
+      }
       : undefined
   );
 

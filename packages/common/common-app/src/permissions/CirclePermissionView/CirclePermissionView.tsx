@@ -10,8 +10,8 @@ import { Circles } from '../../ui/Icons/Circles';
 import { LoadingBlock } from '../../ui/LoadingBlock/LoadingBlock';
 import { Arrow } from '../../ui/Icons/Arrow';
 import { t } from '../../helpers/i18n/dictionary';
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from '../../hooks';
+import { ApiType, OdinClient } from '@homebase-id/js-lib/core';
+import { useOdinClientContext } from '../../hooks';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 export const CirclePermissionView = ({
@@ -32,7 +32,7 @@ export const CirclePermissionView = ({
   const { data: members, isLoading: membersLoading } = useCircle({
     circleId: !hideMembers ? circleDef?.id : undefined,
   }).fetchMembers;
-  const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedInIdentity = useOdinClientContext().getLoggedInIdentity();
   const isSystemCircle =
     stringGuidsEqual(circleDef.id, CONFIRMED_CONNECTIONS_CIRCLE_ID) ||
     stringGuidsEqual(circleDef.id, AUTO_CONNECTIONS_CIRCLE_ID);
@@ -47,7 +47,7 @@ export const CirclePermissionView = ({
       </a>
     ) : (
       <Link
-        to={`${new DotYouClient({ hostIdentity: loggedInIdentity, api: ApiType.App }).getRoot()}/owner/circles/${encodeURIComponent(circleDef.id || '')}`}
+        to={`${new OdinClient({ hostIdentity: loggedInIdentity, api: ApiType.App }).getRoot()}/owner/circles/${encodeURIComponent(circleDef.id || '')}`}
         className={`hover:text-slate-700 hover:underline dark:hover:text-slate-400 ${
           className ?? ''
         }`}

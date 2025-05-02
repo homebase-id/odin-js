@@ -1,4 +1,4 @@
-import { DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
+import { OdinClient, HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   COMMUNITY_PINNED_TAG,
   CommunityMessage,
@@ -8,7 +8,7 @@ import { useCommunityMessage } from './messages/useCommunityMessage';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 export const useCommunityPin = ({
   msg,
@@ -58,16 +58,16 @@ export const useCommunityPins = (props?: {
   channelId?: string;
 }) => {
   const { odinId, communityId, channelId } = props || {};
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   return {
-    all: useQuery(getFetchPinnedMessagesQueryOptions(dotYouClient, odinId, communityId, channelId)),
+    all: useQuery(getFetchPinnedMessagesQueryOptions(odinClient, odinId, communityId, channelId)),
   };
 };
 
 const PAGE_SIZE = 100;
 const fetchPinnedMessages = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   communityId: string,
   channelId: string | undefined,
@@ -76,7 +76,7 @@ const fetchPinnedMessages = async (
   const groupIds = channelId ? [channelId] : undefined;
 
   return await getCommunityMessages(
-    dotYouClient,
+    odinClient,
     odinId,
     communityId,
     groupIds,
@@ -87,7 +87,7 @@ const fetchPinnedMessages = async (
 };
 
 const getFetchPinnedMessagesQueryOptions = (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId?: string,
   communityId?: string,
   channelId?: string
@@ -101,7 +101,7 @@ const getFetchPinnedMessagesQueryOptions = (
     queryKey: ['community-pinned-messages'],
     queryFn: () =>
       fetchPinnedMessages(
-        dotYouClient,
+        odinClient,
         odinId as string,
         communityId as string,
         channelId,

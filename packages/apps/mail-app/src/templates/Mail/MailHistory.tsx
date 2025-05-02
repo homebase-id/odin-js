@@ -20,7 +20,7 @@ import {
 import { ChevronDown, Exclamation } from '@homebase-id/common-app/icons';
 import { useEffect, useRef, useState } from 'react';
 import { useMarkMailConversationsAsRead } from '../../hooks/mail/useMarkMailConversationsAsRead';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { MailConversationInfo } from './MailConversationInfo';
 import { useNavigate } from 'react-router-dom';
 import { MailAttachmentOverview } from './MailAttachmentOverview';
@@ -198,7 +198,7 @@ const MailMessage = ({
   const showMessageInfo = isActive && searchParams.has('message-info');
   const query = searchParams.get('q');
 
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const sender = message.fileMetadata.senderOdinId || message.fileMetadata.appData.content.sender;
 
   const messageFromMe = !sender || sender === loggedOnIdentity;
@@ -313,7 +313,7 @@ const ForwardedThread = ({
 }: {
   mailThread: HomebaseFile<MailConversation>[] | undefined;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const filteredMailThread = mailThread?.filter(
     (conv) => !getAllRecipients(conv).some((recipient) => recipient === loggedOnIdentity)
   );
@@ -361,7 +361,7 @@ const ConversationalAwareness = ({
   message: HomebaseFile<MailConversation>;
   query: string | undefined | null;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
 
   const lastSender =
     message.fileMetadata.senderOdinId || message.fileMetadata.appData.content.sender;

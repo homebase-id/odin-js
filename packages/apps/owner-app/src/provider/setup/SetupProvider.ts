@@ -1,4 +1,4 @@
-import { DotYouClient, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
+import { OdinClient, NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
 import {
   HomePageConfig,
   HomePageAttributes,
@@ -28,7 +28,7 @@ import { saveProfileAttribute } from '../profile/AttributeData/ManageAttributePr
 import { fallbackHeaderImage, invalidateSiteData } from '@homebase-id/common-app';
 import { QueryClient } from '@tanstack/react-query';
 
-export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
+export const SetupProfileDefinition = async (odinClient: OdinClient) => {
   const initialStandardProfile: ProfileDefinition = {
     profileId: BuiltInProfiles.StandardProfileId,
     name: 'Standard Info',
@@ -71,21 +71,21 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
     isSystemSection: true,
   };
 
-  if (!(await getProfileDefinition(dotYouClient, initialStandardProfile.profileId))) {
-    await saveProfileDefinition(dotYouClient, initialStandardProfile);
+  if (!(await getProfileDefinition(odinClient, initialStandardProfile.profileId))) {
+    await saveProfileDefinition(odinClient, initialStandardProfile);
 
     await saveProfileSection(
-      dotYouClient,
+      odinClient,
       initialStandardProfile.profileId,
       initialPersonalInfoSection
     );
-    await saveProfileSection(dotYouClient, initialStandardProfile.profileId, initialLinksSection);
-    await saveProfileSection(dotYouClient, initialStandardProfile.profileId, initialAboutSection);
+    await saveProfileSection(odinClient, initialStandardProfile.profileId, initialLinksSection);
+    await saveProfileSection(odinClient, initialStandardProfile.profileId, initialAboutSection);
   }
-  if (!(await getProfileDefinition(dotYouClient, initialWallet.profileId))) {
-    await saveProfileDefinition(dotYouClient, initialWallet);
+  if (!(await getProfileDefinition(odinClient, initialWallet.profileId))) {
+    await saveProfileDefinition(odinClient, initialWallet);
 
-    await saveProfileSection(dotYouClient, initialWallet.profileId, initialCreditCardSection);
+    await saveProfileSection(odinClient, initialWallet.profileId, initialCreditCardSection);
   }
 
   const defaultShortBioAttribute: NewHomebaseFile<Attribute> = {
@@ -110,14 +110,14 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
   };
 
   const shortBioAttr = await getProfileAttributes(
-    dotYouClient,
+    odinClient,
     BuiltInProfiles.StandardProfileId,
     undefined,
     [BuiltInAttributes.FullBio],
     1
   );
 
-  if (!shortBioAttr?.length) await saveProfileAttribute(dotYouClient, defaultShortBioAttribute);
+  if (!shortBioAttr?.length) await saveProfileAttribute(odinClient, defaultShortBioAttribute);
 
   const defaultStatusAttribute: NewHomebaseFile<Attribute> = {
     fileMetadata: {
@@ -138,17 +138,17 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
   };
 
   const statusAttr = await getProfileAttributes(
-    dotYouClient,
+    odinClient,
     BuiltInProfiles.StandardProfileId,
     undefined,
     [BuiltInAttributes.Status],
     1
   );
 
-  if (!statusAttr?.length) await saveProfileAttribute(dotYouClient, defaultStatusAttribute);
+  if (!statusAttr?.length) await saveProfileAttribute(odinClient, defaultStatusAttribute);
 };
 
-export const SetupHome = async (dotYouClient: DotYouClient) => {
+export const SetupHome = async (odinClient: OdinClient) => {
   const defaultThemeAttribute: NewHomebaseFile<Attribute> = {
     fileMetadata: {
       appData: {
@@ -172,21 +172,21 @@ export const SetupHome = async (dotYouClient: DotYouClient) => {
   };
 
   const themeDef = await getProfileAttributes(
-    dotYouClient,
+    odinClient,
     HomePageConfig.DefaultDriveId,
     undefined,
     [HomePageAttributes.Theme],
     1
   );
 
-  if (!themeDef?.length) await saveProfileAttribute(dotYouClient, defaultThemeAttribute);
+  if (!themeDef?.length) await saveProfileAttribute(odinClient, defaultThemeAttribute);
 };
 
-export const SetupBlog = async (dotYouClient: DotYouClient) => {
+export const SetupBlog = async (odinClient: OdinClient) => {
   // Create Public Channel oon the (Default) Public Posts Drive
-  const publicDef = await getChannelDefinition(dotYouClient, BlogConfig.PublicChannelId);
+  const publicDef = await getChannelDefinition(odinClient, BlogConfig.PublicChannelId);
   if (!publicDef) {
-    await saveChannelDefinition(dotYouClient, BlogConfig.PublicChannelNewDsr);
+    await saveChannelDefinition(odinClient, BlogConfig.PublicChannelNewDsr);
   }
 };
 
@@ -212,13 +212,13 @@ const ANONYMOUS_ACL = { requiredSecurityGroup: SecurityGroupType.Anonymous };
 
 const SetupProfileData = async (
   queryClient: QueryClient,
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   profileData: ProfileSetupData
 ) => {
   // Default Photo Attribute
   const defaultPhotoAttrId = toGuidId('default_photo_attribute');
   const existingPhotoAttr = await getProfileAttribute(
-    dotYouClient,
+    odinClient,
     BuiltInProfiles.StandardProfileId,
     defaultPhotoAttrId
   );
@@ -245,13 +245,13 @@ const SetupProfileData = async (
     newPhotoAttr.fileMetadata.appData.content.data[MinimalProfileFields.ProfileImageKey] =
       profileData.imageData;
 
-    await saveProfileAttribute(dotYouClient, newPhotoAttr);
+    await saveProfileAttribute(odinClient, newPhotoAttr);
   }
 
   // Default Name Attribute
   const defaultNameAttrId = toGuidId('default_name_attribute');
   const existingNameAttr = await getProfileAttribute(
-    dotYouClient,
+    odinClient,
     BuiltInProfiles.StandardProfileId,
     defaultNameAttrId
   );
@@ -282,14 +282,14 @@ const SetupProfileData = async (
     newNameAttr.fileMetadata.appData.content.data[MinimalProfileFields.DisplayName] =
       `${profileData.givenName} ${profileData.surname}`;
 
-    await saveProfileAttribute(dotYouClient, newNameAttr);
+    await saveProfileAttribute(odinClient, newNameAttr);
   }
 
   // Default Location Attribute (Optional)
   if (profileData.city || profileData.country) {
     const defaultLocationAttrId = toGuidId('default_location_attribute');
     const existingLocationAttr = await getProfileAttribute(
-      dotYouClient,
+      odinClient,
       BuiltInProfiles.StandardProfileId,
       defaultLocationAttrId
     );
@@ -318,7 +318,7 @@ const SetupProfileData = async (
       newLocationAttr.fileMetadata.appData.content.data[LocationFields.Country] =
         profileData.country ?? '';
 
-      await saveProfileAttribute(dotYouClient, newLocationAttr);
+      await saveProfileAttribute(odinClient, newLocationAttr);
     }
   }
 
@@ -327,13 +327,13 @@ const SetupProfileData = async (
 
 const SetupSocialData = async (
   queryClient: QueryClient,
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   socialData: SocialSetupData
 ) => {
   const saveSocial = async (type: string, dataField: string, value: string, priority: number) => {
     // Search attribute:
     const foundAttributesOfType = await getProfileAttributes(
-      dotYouClient,
+      odinClient,
       BuiltInProfiles.StandardProfileId,
       undefined,
       [type]
@@ -361,7 +361,7 @@ const SetupSocialData = async (
         socialAttribute.fileMetadata.appData.content.data = {};
       socialAttribute.fileMetadata.appData.content.data[dataField] = value;
 
-      await saveProfileAttribute(dotYouClient, socialAttribute);
+      await saveProfileAttribute(odinClient, socialAttribute);
     }
 
     return true;
@@ -439,7 +439,7 @@ const SetupSocialData = async (
         linkAttribute.fileMetadata.appData.content.data[LinkFields.LinkText] = link.text;
         linkAttribute.fileMetadata.appData.content.data[LinkFields.LinkTarget] = link.target;
 
-        return await saveProfileAttribute(dotYouClient, linkAttribute);
+        return await saveProfileAttribute(odinClient, linkAttribute);
       })
     );
 
@@ -448,17 +448,17 @@ const SetupSocialData = async (
 
 export const SetupDefaultIdentity = async (
   queryClient: QueryClient,
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   data: { profile: ProfileSetupData; social: SocialSetupData }
 ) => {
-  await SetupProfileData(queryClient, dotYouClient, data.profile);
-  await SetupSocialData(queryClient, dotYouClient, data.social);
+  await SetupProfileData(queryClient, odinClient, data.profile);
+  await SetupSocialData(queryClient, odinClient, data.social);
 };
 
 const DEFAULT_FOLLOW_REQUEST: FollowRequest = {
   notificationType: 'allNotifications',
   odinId: 'id.homebase.id',
 };
-export const SetupAutoFollow = async (dotYouClient: DotYouClient) => {
-  await createOrUpdateFollow(dotYouClient, DEFAULT_FOLLOW_REQUEST, false);
+export const SetupAutoFollow = async (odinClient: OdinClient) => {
+  await createOrUpdateFollow(odinClient, DEFAULT_FOLLOW_REQUEST, false);
 };

@@ -4,7 +4,7 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useCallback, useEffect, useMemo } from 'react';
 import { getChatMessageInfiniteQueryOptions } from './useChatMessages';
 import { useConversations } from './useConversations';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { ChatMessage } from '../../providers/ChatProvider';
 import { ConversationMetadata, UnifiedConversation } from '../../providers/ConversationProvider';
 
@@ -15,7 +15,7 @@ export type ConversationWithRecentMessage = HomebaseFile<
   lastMessage: HomebaseFile<ChatMessage> | null;
 };
 export const useConversationsWithRecentMessage = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const { data: conversations } = useConversations().all;
@@ -39,7 +39,7 @@ export const useConversationsWithRecentMessage = () => {
       ).map(async (convo) => {
         const conversationId = convo.fileMetadata.appData.uniqueId;
         const messages = await queryClient.fetchInfiniteQuery(
-          getChatMessageInfiniteQueryOptions(dotYouClient, conversationId)
+          getChatMessageInfiniteQueryOptions(odinClient, conversationId)
         );
         return {
           ...convo,
@@ -59,7 +59,7 @@ export const useConversationsWithRecentMessage = () => {
     queryClient.setQueryData(['conversations-with-recent-message'], convoWithMessage, {
       updatedAt: Date.now(),
     });
-  }, [flatConversations, dotYouClient, queryClient]);
+  }, [flatConversations, odinClient, queryClient]);
 
   const lastUpdate = useLastUpdatedChatMessages();
   const lastConversationUpdate = useLastUpdatedConversations();

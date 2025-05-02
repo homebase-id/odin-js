@@ -7,7 +7,7 @@ import {
   toGuidId,
   uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { ChatDrive } from '../../providers/ConversationProvider';
 import { insertNewMessage } from './useChatMessages';
 import { invalidateStarredMessages } from './useStarredMessages';
@@ -15,11 +15,11 @@ import { invalidateStarredMessages } from './useStarredMessages';
 export const STARRED_MSG_TAG = toGuidId('starred');
 export const useChatToggleMessageStar = (props?: { msg: HomebaseFile<ChatMessage> }) => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const toggleStar = async (msg: HomebaseFile<ChatMessage>) => {
     return uploadLocalMetadataTags(
-      dotYouClient,
+      odinClient,
       {
         fileId: msg.fileId,
         targetDrive: ChatDrive,

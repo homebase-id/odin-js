@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../../core/DotYouClient';
+import { OdinClient } from '../../../core/OdinClient';
 import { deleteReaction, uploadReaction } from '../../../core/ReactionData/ReactionService';
 import { tryJsonParse } from '../../../helpers/DataUtil';
 import { getChannelDrive, GetTargetDriveFromChannelId } from '../Channel/PostChannelManager';
@@ -14,34 +14,34 @@ interface ServerReactionsSummary {
 const emojiRootTransit = '/transit/reactions';
 const emojiRoot = '/drive/files/reactions';
 export const saveEmojiReaction = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   emoji: RawReactionContent,
   context: ReactionContext
 ): Promise<string> => {
-  return uploadReaction(dotYouClient, emoji.body, context.odinId, {
+  return uploadReaction(odinClient, emoji.body, context.odinId, {
     ...context.target,
     targetDrive: getChannelDrive(context.channelId),
   });
 };
 
 export const removeEmojiReaction = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   emoji: RawReactionContent,
   context: ReactionContext
 ): Promise<string> => {
-  return deleteReaction(dotYouClient, emoji, context.odinId, {
+  return deleteReaction(odinClient, emoji, context.odinId, {
     ...context.target,
     targetDrive: getChannelDrive(context.channelId),
   });
 };
 
 export const getReactionSummary = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   context: ReactionContext
 ): Promise<EmojiReactionSummary> => {
-  const isLocal = context.odinId === dotYouClient.getHostIdentity();
+  const isLocal = context.odinId === odinClient.getHostIdentity();
 
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
 
   const data = {
     file: {
@@ -76,7 +76,7 @@ export const getReactionSummary = async (
         };
       })
       .catch((e) => {
-        dotYouClient.handleErrorResponse(e);
+        odinClient.handleErrorResponse(e);
         return { reactions: [], totalCount: 0 };
       });
   } else {
@@ -102,21 +102,21 @@ export const getReactionSummary = async (
         };
       })
       .catch((e) => {
-        dotYouClient.handleErrorResponse(e);
+        odinClient.handleErrorResponse(e);
         return { reactions: [], totalCount: 0 };
       });
   }
 };
 
 export const getMyReactions = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string | undefined,
   context: ReactionContext,
   pageSize = 15,
   cursor?: string
 ): Promise<string[] | undefined> => {
-  const isLocal = context.odinId === dotYouClient.getHostIdentity();
-  const client = dotYouClient.createAxiosClient();
+  const isLocal = context.odinId === odinClient.getHostIdentity();
+  const client = odinClient.createAxiosClient();
 
   const data = {
     file: {
@@ -124,7 +124,7 @@ export const getMyReactions = async (
       fileId: context.target.fileId,
       globalTransitId: context.target.globalTransitId,
     },
-    identity: odinId || dotYouClient.getHostIdentity(),
+    identity: odinId || odinClient.getHostIdentity(),
     cursor: cursor,
     maxRecords: pageSize,
   };
@@ -138,7 +138,7 @@ export const getMyReactions = async (
           (emojiString) => tryJsonParse<{ emoji: string }>(emojiString).emoji
         );
       })
-      .catch(dotYouClient.handleErrorResponse);
+      .catch(odinClient.handleErrorResponse);
   } else {
     const url = emojiRootTransit + '/listbyidentity';
     return client
@@ -148,6 +148,6 @@ export const getMyReactions = async (
           (emojiString) => tryJsonParse<{ emoji: string }>(emojiString).emoji
         );
       })
-      .catch(dotYouClient.handleErrorResponse);
+      .catch(odinClient.handleErrorResponse);
   }
 };

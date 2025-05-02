@@ -2,7 +2,7 @@ import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { PostContent, ReactionContext } from '@homebase-id/js-lib/public';
 import React, { useMemo } from 'react';
 import { useRef } from 'react';
-import { useReaction, useDoubleTap, useDotYouClientContext } from '../../../hooks';
+import { useReaction, useDoubleTap, useOdinClientContext } from '../../../hooks';
 import { ErrorNotification } from '../../../ui';
 import { PostMedia } from './Media';
 
@@ -23,7 +23,7 @@ export const DoubleClickHeartForMedia = ({
 }) => {
   const wrapperRef = useRef<HTMLSpanElement>(null);
   const { mutateAsync: postEmoji, error: postEmojiError } = useReaction().saveEmoji;
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
 
   const postContent = postFile.fileMetadata.appData.content;
   const reactionContext: ReactionContext = {

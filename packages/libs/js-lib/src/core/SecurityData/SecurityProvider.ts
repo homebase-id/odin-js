@@ -1,9 +1,9 @@
 import { getDrivePermissionFromString } from '../../helpers/PermissionHelpers';
-import { ApiType, DotYouClient } from '../DotYouClient';
+import { ApiType, OdinClient } from '../OdinClient';
 import { SecurityContex } from './SecurityTypes';
 
-export const getSecurityContext = async (dotYouClient: DotYouClient): Promise<SecurityContex> => {
-  if (dotYouClient.getType() === ApiType.Owner) {
+export const getSecurityContext = async (odinClient: OdinClient): Promise<SecurityContex> => {
+  if (odinClient.getType() === ApiType.Owner) {
     return {
       caller: {
         odinId: undefined,
@@ -13,7 +13,7 @@ export const getSecurityContext = async (dotYouClient: DotYouClient): Promise<Se
     };
   }
 
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
 
   return client
     .get<SecurityContex>('/security/context')
@@ -43,10 +43,10 @@ export const getSecurityContext = async (dotYouClient: DotYouClient): Promise<Se
 };
 
 export const getSecurityContextOverPeer = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string
 ): Promise<SecurityContex> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
 
   return client
     .post<SecurityContex>(`/transit/query/security/context`, { odinId })

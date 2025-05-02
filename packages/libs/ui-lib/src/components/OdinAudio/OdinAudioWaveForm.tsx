@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AudioSource } from './OdinAudio';
-import { DotYouClient } from '@homebase-id/js-lib/core';
+import { OdinClient } from '@homebase-id/js-lib/core';
 import { useAudio } from '../../hooks/audio/useAudio';
 
 export interface OdinAudioWaveformProps
   extends AudioSource,
     React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
   probablyEncrypted?: boolean;
-  dotYouClient: DotYouClient;
+  odinClient: OdinClient;
   isDarkMode: boolean;
 }
 
 export const OdinAudioWaveForm = (props: OdinAudioWaveformProps) => {
   const {
-    dotYouClient,
+    odinClient,
     odinId,
     fileId,
     globalTransitId,
@@ -28,7 +28,7 @@ export const OdinAudioWaveForm = (props: OdinAudioWaveformProps) => {
   } = props;
 
   const { data: audioData } = useAudio(
-    dotYouClient,
+    odinClient,
     odinId,
     fileId,
     globalTransitId,

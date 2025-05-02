@@ -5,9 +5,9 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { ellipsisAtMaxCharOfRichText, useDotYouClientContext } from '@homebase-id/common-app';
+import { ellipsisAtMaxCharOfRichText, useOdinClientContext } from '@homebase-id/common-app';
 import {
-  DotYouClient,
+  OdinClient,
   HomebaseFile,
   NewHomebaseFile,
   NewMediaFile,
@@ -40,7 +40,7 @@ import {
 
 export const getCommunityMessageQueryOptions = (
   queryClient: QueryClient,
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   props?: {
     odinId: string | undefined;
     communityId: string | undefined;
@@ -58,7 +58,7 @@ export const getCommunityMessageQueryOptions = (
   queryFn: () =>
     getMessageByUniqueId(
       queryClient,
-      dotYouClient,
+      odinClient,
       props?.odinId as string,
       props?.communityId as string,
       props?.channelId,
@@ -76,9 +76,9 @@ export const useCommunityMessage = (props?: {
   messageId: string | undefined;
   fileSystemType?: SystemFileType;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
-  const identity = dotYouClient.getHostIdentity();
+  const identity = odinClient.getHostIdentity();
 
   const sendMessage = async ({
     community,
@@ -128,7 +128,7 @@ export const useCommunityMessage = (props?: {
     };
 
     const uploadResult = await uploadCommunityMessage(
-      dotYouClient,
+      odinClient,
       community,
       newChat,
       files,
@@ -174,7 +174,7 @@ export const useCommunityMessage = (props?: {
     const transformedMessage = {
       ...updatedChatMessage,
     };
-    const identity = dotYouClient.getLoggedInIdentity();
+    const identity = odinClient.getLoggedInIdentity();
     if (identity && identity !== updatedChatMessage.fileMetadata.originalAuthor) {
       transformedMessage.fileMetadata.appData.content.collaborators = Array.from(
         new Set([
@@ -187,7 +187,7 @@ export const useCommunityMessage = (props?: {
     transformedMessage.fileMetadata.appData.content.lastEditedBy = identity;
 
     await updateCommunityMessage(
-      dotYouClient,
+      odinClient,
       community,
       transformedMessage,
       undefined,
@@ -196,7 +196,7 @@ export const useCommunityMessage = (props?: {
   };
 
   return {
-    get: useQuery(getCommunityMessageQueryOptions(queryClient, dotYouClient, props)),
+    get: useQuery(getCommunityMessageQueryOptions(queryClient, odinClient, props)),
     send: useMutation({
       mutationFn: sendMessage,
       onMutate: async ({ community, channel, files, message, chatId, thread, userDate }) => {
@@ -298,7 +298,7 @@ export const useCommunityMessage = (props?: {
       mutationFn: updateMessage,
       onMutate: async ({ updatedChatMessage, community }) => {
         const transformedMessage = { ...updatedChatMessage };
-        const identity = dotYouClient.getLoggedInIdentity();
+        const identity = odinClient.getLoggedInIdentity();
         if (identity && identity !== updatedChatMessage.fileMetadata.originalAuthor) {
           transformedMessage.fileMetadata.appData.content.collaborators = Array.from(
             new Set([
@@ -362,7 +362,7 @@ export const useCommunityMessage = (props?: {
 
 const getMessageByUniqueId = async (
   queryClient: QueryClient,
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   communityId: string,
   channelId: string | undefined,
@@ -387,7 +387,7 @@ const getMessageByUniqueId = async (
     if (message) return message;
   }
 
-  return await getCommunityMessage(dotYouClient, odinId, communityId, messageId, fileSystemType);
+  return await getCommunityMessage(odinClient, odinId, communityId, messageId, fileSystemType);
 };
 
 export const invalidateCommunityMessage = (

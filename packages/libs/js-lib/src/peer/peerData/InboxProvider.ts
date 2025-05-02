@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../core/DotYouClient';
+import { OdinClient } from '../../core/OdinClient';
 import { TargetDrive } from '../../core/core';
 
 type ProcessInboxResponse = {
@@ -8,11 +8,11 @@ type ProcessInboxResponse = {
 };
 
 export const processInbox = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   batchSize?: number
 ) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
 
   return client
     .post<ProcessInboxResponse>('/transit/inbox/processor/process', {

@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../core/DotYouClient';
+import { OdinClient } from '../../core/OdinClient';
 
 interface LinkPreviewFromServer {
   title: string;
@@ -28,10 +28,10 @@ export interface LinkPreviewDescriptor {
 const _internalPreviewPromiseCache = new Map<string, Promise<LinkPreview | null>>();
 
 export const getLinkPreview = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   url: string
 ): Promise<LinkPreview | null> => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = odinClient.createAxiosClient();
   const standardizedUrl = url.startsWith('http') ? url : `https://${url}`;
 
   const cacheKey = standardizedUrl;

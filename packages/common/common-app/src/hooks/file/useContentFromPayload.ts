@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 import { getPayloadAsJson, SystemFileType, TargetDrive } from '@homebase-id/js-lib/core';
 import { getPayloadAsJsonOverPeer } from '@homebase-id/js-lib/peer';
 
@@ -12,7 +12,7 @@ export const useContentFromPayload = <T>(props?: {
   systemFileType?: SystemFileType;
 }) => {
   const { odinId, targetDrive, fileId, payloadKey, lastModified, systemFileType } = props || {};
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchContentFromPayload = async (
     odinId: string | undefined,
@@ -22,14 +22,14 @@ export const useContentFromPayload = <T>(props?: {
     lastModified: number | undefined,
     systemFileType: SystemFileType | undefined
   ) => {
-    if (!odinId || odinId === dotYouClient.getHostIdentity()) {
-      return await getPayloadAsJson<T>(dotYouClient, targetDrive, fileId, payloadKey, {
+    if (!odinId || odinId === odinClient.getHostIdentity()) {
+      return await getPayloadAsJson<T>(odinClient, targetDrive, fileId, payloadKey, {
         lastModified,
         systemFileType,
       });
     }
     return await getPayloadAsJsonOverPeer<T>(
-      dotYouClient,
+      odinClient,
       odinId,
       targetDrive,
       fileId,

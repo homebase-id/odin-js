@@ -1,19 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchFollowDetail } from '@homebase-id/js-lib/network';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 export const useFollowDetail = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
-  const isOwner = dotYouClient.isOwner();
-  const isAuthenticated = dotYouClient.isAuthenticated();
+  const isOwner = odinClient.isOwner();
+  const isAuthenticated = odinClient.isAuthenticated();
 
   const fetchDetail = async () => {
     if (!isAuthenticated || isOwner) {
       return null;
     }
 
-    return await fetchFollowDetail(dotYouClient);
+    return await fetchFollowDetail(odinClient);
   };
 
   return { fetch: useQuery({ queryKey: ['followDetail'], queryFn: fetchDetail }) };

@@ -1,4 +1,4 @@
-import { useCircle, useDotYouClientContext } from '@homebase-id/common-app';
+import { useCircle, useOdinClientContext } from '@homebase-id/common-app';
 import { useCommunity } from './useCommunity';
 import { useEffect } from 'react';
 
@@ -7,7 +7,7 @@ export const useCommunityMemberUpdater = (
   communityId: string | undefined
 ) => {
   const { data: community } = useCommunity({ odinId, communityId }).fetch;
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
 
   const isAdmin = community?.fileMetadata.originalAuthor === loggedOnIdentity;
 

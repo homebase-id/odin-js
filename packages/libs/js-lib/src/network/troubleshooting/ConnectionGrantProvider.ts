@@ -1,16 +1,16 @@
-import { DotYouClient } from '../../core/DotYouClient';
+import { OdinClient } from '../../core/OdinClient';
 import { assertIfDefined } from '../../helpers/DataUtil';
 
 const statusPath = '/circles/connections/troubleshooting-info';
-export const fetchCircleMembershipStatus = async (dotYouClient: DotYouClient, odinId: string) => {
-  assertIfDefined('DotYouClient is required', dotYouClient);
+export const fetchCircleMembershipStatus = async (odinClient: OdinClient, odinId: string) => {
+  assertIfDefined('OdinClient is required', odinClient);
   assertIfDefined('OdinId is required', odinId);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   return await client
     .post<CircleMembershipStatus>(statusPath, { odinId: odinId })
     .then((res) => res.data)
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export interface CircleMembershipStatus {
@@ -36,13 +36,13 @@ export interface CircleMembershipStatusDriveGrantAnalysis {
 }
 
 const verifyPath = '/circles/connections/verify-connection';
-export const verifyConnection = async (dotYouClient: DotYouClient, odinId: string) => {
-  assertIfDefined('DotYouClient is required', dotYouClient);
+export const verifyConnection = async (odinClient: OdinClient, odinId: string) => {
+  assertIfDefined('OdinClient is required', odinClient);
   assertIfDefined('OdinId is required', odinId);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   return await client
     .post<{ isValid: boolean }>(verifyPath, { odinId: odinId })
     .then((res) => res.data.isValid)
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };

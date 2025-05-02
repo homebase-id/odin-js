@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import {
   COMMUNITY_GENERAL_CHANNEL,
   CommunityChannel,
@@ -16,7 +16,7 @@ export const useCommunityChannel = (props?: {
   channelId?: string;
 }) => {
   const { odinId, communityId, channelId } = props || {};
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const channelsQuery = useCommunityChannels({ odinId, communityId }).fetch;
@@ -44,7 +44,7 @@ export const useCommunityChannel = (props?: {
       },
     };
 
-    return await saveCommunityChannel(dotYouClient, community, newChannel);
+    return await saveCommunityChannel(odinClient, community, newChannel);
   };
 
   const updateChannel = async ({
@@ -54,7 +54,7 @@ export const useCommunityChannel = (props?: {
     community: HomebaseFile<CommunityDefinition>;
     channel: HomebaseFile<CommunityChannel>;
   }) => {
-    return await saveCommunityChannel(dotYouClient, community, channel);
+    return await saveCommunityChannel(odinClient, community, channel);
   };
 
   return {
@@ -63,8 +63,8 @@ export const useCommunityChannel = (props?: {
       data: stringGuidsEqual(channelId, COMMUNITY_GENERAL_CHANNEL.fileMetadata.appData.uniqueId)
         ? COMMUNITY_GENERAL_CHANNEL
         : channelsQuery.data?.find((channel) =>
-            stringGuidsEqual(channel.fileMetadata.appData.uniqueId, channelId)
-          ),
+          stringGuidsEqual(channel.fileMetadata.appData.uniqueId, channelId)
+        ),
     },
     create: useMutation({
       mutationFn: createChannel,

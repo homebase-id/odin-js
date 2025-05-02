@@ -10,12 +10,12 @@ import {
 } from '@homebase-id/js-lib/network';
 import {
   ApiType,
-  DotYouClient,
+  OdinClient,
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
 } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 import {
   fetchConnectionInfo,
   fetchDataFromPublic,
@@ -33,7 +33,7 @@ export const useContact = ({
   id?: string;
   canSave: boolean;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
   const hasContactDriveWriteAccess = useHasWriteAccess(ContactConfig.ContactTargetDrive);
   const hasContactDriveReadAccess = useHasReadAccess(ContactConfig.ContactTargetDrive);
@@ -53,7 +53,7 @@ export const useContact = ({
       if (!id) return null;
 
       //Direct fetch with id:
-      return (await getContactByUniqueId(dotYouClient, id)) || null;
+      return (await getContactByUniqueId(odinClient, id)) || null;
     }
 
     const hasCache =
@@ -66,7 +66,7 @@ export const useContact = ({
 
     // Direct fetch with odinId:
     // Use the data from the contact book, if it exists and if it's a contact level source or we are not allowed to save anyway
-    const contactBookContact = (await getContactByOdinId(dotYouClient, odinId)) ?? null;
+    const contactBookContact = (await getContactByOdinId(odinClient, odinId)) ?? null;
     if (
       !hasCache && // If we have a contact on drive, and we don't have cache, we need a fast return; Otherwise we trigger a refresh
       contactBookContact &&
@@ -80,7 +80,7 @@ export const useContact = ({
       );
 
     const returnContact =
-      (await fetchConnectionInfo(dotYouClient, odinId)) || (await fetchDataFromPublic(odinId));
+      (await fetchConnectionInfo(odinClient, odinId)) || (await fetchDataFromPublic(odinId));
 
     if (!returnContact) return null;
 
@@ -97,7 +97,7 @@ export const useContact = ({
     };
 
     if (canSave && hasContactDriveWriteAccess) {
-      const uploadResult = await saveContact(dotYouClient, contactFile);
+      const uploadResult = await saveContact(odinClient, contactFile);
       const savedContactFile = {
         ...contactFile,
         fileId: uploadResult?.file.fileId,
@@ -117,14 +117,14 @@ export const useContact = ({
     }
 
     const connectionInfo =
-      (await fetchConnectionInfo(dotYouClient, contact.fileMetadata.appData.content.odinId)) ??
+      (await fetchConnectionInfo(odinClient, contact.fileMetadata.appData.content.odinId)) ??
       undefined;
     const newContact = connectionInfo
       ? { ...contact.fileMetadata.appData.content, ...connectionInfo }
       : undefined;
 
     if (newContact) {
-      await saveContact(dotYouClient, {
+      await saveContact(odinClient, {
         ...contact,
         fileMetadata: {
           ...contact.fileMetadata,
@@ -136,7 +136,7 @@ export const useContact = ({
     } else {
       const publicContact = await fetchDataFromPublic(contact.fileMetadata.appData.content.odinId);
       if (!publicContact) return;
-      await saveContact(dotYouClient, {
+      await saveContact(odinClient, {
         ...contact,
         fileMetadata: {
           ...contact.fileMetadata,
@@ -214,7 +214,7 @@ export const parseContact = (
   const imageUrl = pureContent.image
     ? `data:${pureContent.image.contentType};base64,${pureContent.image.content}`
     : pureContent.odinId
-      ? `${new DotYouClient({ hostIdentity: pureContent.odinId, api: ApiType.Guest }).getRoot()}/pub/image`
+      ? `${new OdinClient({ hostIdentity: pureContent.odinId, api: ApiType.Guest }).getRoot()}/pub/image`
       : undefined;
 
   const { name, location, phone, birthday, odinId, source } = pureContent;

@@ -1,1 +1,1 @@
-export * from './DotYouClientProvider';
+export * from './OdinClientProvider';

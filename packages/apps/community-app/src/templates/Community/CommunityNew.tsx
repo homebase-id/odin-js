@@ -12,7 +12,7 @@ import {
   t,
   useCircle,
   useCircles,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
 import { NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
@@ -24,7 +24,7 @@ import { Ellipsis, Arrow } from '@homebase-id/common-app/icons';
 import { useEffect } from 'react';
 
 export const NewCommunity = () => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const { data: circles } = useCircles(true).fetch;
 
   const [selectedCircle, setSelectedCircle] = useState<{

@@ -10,7 +10,7 @@ interface OdinMseProps extends OdinVideoProps {
 }
 
 export const MseSource = ({
-  dotYouClient,
+  odinClient,
   odinId,
   targetDrive,
   fileId,
@@ -22,7 +22,7 @@ export const MseSource = ({
   systemFileType,
 }: OdinMseProps) => {
   const { data: videoUrl } = useVideoUrl(
-    dotYouClient,
+    odinClient,
     odinId,
     fileId,
     globalTransitId,

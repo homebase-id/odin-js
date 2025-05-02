@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import {
   accountDeletionStatus,
   markAccountDeletion,
@@ -10,20 +10,20 @@ const MINUTE_IN_MS = 60000;
 
 export const useAccountRemoval = () => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
-  const isAuthenticated = useDotYouClientContext().isAuthenticated();
+  const isAuthenticated = useOdinClientContext().isAuthenticated();
 
   const getAccountDeletionStatus = async () => {
-    return accountDeletionStatus(dotYouClient);
+    return accountDeletionStatus(odinClient);
   };
 
   const markDeletion = async (currentPassword: string) => {
-    return await markAccountDeletion(dotYouClient, currentPassword);
+    return await markAccountDeletion(odinClient, currentPassword);
   };
 
   const unMarkDeletion = async (currentPassword: string) => {
-    return await unmarkAccountDeletion(dotYouClient, currentPassword);
+    return await unmarkAccountDeletion(odinClient, currentPassword);
   };
 
   return {

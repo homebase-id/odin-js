@@ -1,5 +1,5 @@
 import {
-  DotYouClient,
+  OdinClient,
   NewHomebaseFile,
   NewMediaFile,
   UploadInstructionSet,
@@ -89,7 +89,7 @@ export interface CommunityMessage {
 }
 
 export const uploadCommunityMessage = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   community: HomebaseFile<CommunityDefinition>,
   message: NewHomebaseFile<CommunityMessage>,
   files: NewMediaFile[] | undefined,
@@ -201,7 +201,7 @@ export const uploadCommunityMessage = async (
   uploadMetadata.appData.previewThumbnail =
     previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
-  const identity = dotYouClient.getLoggedInIdentity();
+  const identity = odinClient.getLoggedInIdentity();
   if (!shouldEmbedContent) {
     payloads.push({
       key: DEFAULT_PAYLOAD_KEY,
@@ -212,7 +212,7 @@ export const uploadCommunityMessage = async (
   let uploadResult: UploadResult | TransitUploadResult | void;
   if (
     community.fileMetadata.senderOdinId &&
-    community.fileMetadata.senderOdinId !== dotYouClient.getHostIdentity()
+    community.fileMetadata.senderOdinId !== odinClient.getHostIdentity()
   ) {
     const transitInstructions: TransitInstructionSet = {
       remoteTargetDrive: targetDrive,
@@ -234,7 +234,7 @@ export const uploadCommunityMessage = async (
     };
 
     uploadResult = await uploadFileOverPeer(
-      dotYouClient,
+      odinClient,
       transitInstructions,
       uploadMetadata,
       payloads,
@@ -267,7 +267,7 @@ export const uploadCommunityMessage = async (
     };
 
     uploadResult = await uploadFile(
-      dotYouClient,
+      odinClient,
       uploadInstructions,
       uploadMetadata,
       payloads,
@@ -299,7 +299,7 @@ export const uploadCommunityMessage = async (
   ) {
     message.fileMetadata.appData.content.deliveryStatus = CommunityDeliveryStatus.Failed;
     await updateCommunityMessage(
-      dotYouClient,
+      odinClient,
       community,
       message as HomebaseFile<CommunityMessage>,
       'keyHeader' in uploadResult ? uploadResult.keyHeader : undefined
@@ -315,7 +315,7 @@ export const uploadCommunityMessage = async (
 export const BACKEDUP_PAYLOAD_KEY = 'bckp_key';
 
 export const updateCommunityMessage = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   community: HomebaseFile<CommunityDefinition>,
   message: HomebaseFile<CommunityMessage>,
   keyHeader?: KeyHeader,
@@ -372,7 +372,7 @@ export const updateCommunityMessage = async (
   const encryptedKeyHeader = message.sharedSecretEncryptedKeyHeader;
   const odinId = community.fileMetadata.senderOdinId;
   const instructionSet: UpdateInstructionSet =
-    odinId && odinId !== dotYouClient.getHostIdentity()
+    odinId && odinId !== odinClient.getHostIdentity()
       ? {
         transferIv: getRandom16ByteArray(),
         locale: 'peer',
@@ -413,7 +413,7 @@ export const updateCommunityMessage = async (
   }
 
   const updateResult = await patchFile(
-    dotYouClient,
+    odinClient,
     encryptedKeyHeader,
     instructionSet,
     uploadMetadata,
@@ -422,14 +422,14 @@ export const updateCommunityMessage = async (
     undefined,
     async () => {
       const existingChatMessage = await getCommunityMessage(
-        dotYouClient,
+        odinClient,
         community.fileMetadata.senderOdinId,
         communityId,
         message.fileMetadata.appData.uniqueId as string
       );
       if (!existingChatMessage) return;
       message.fileMetadata.versionTag = existingChatMessage.fileMetadata.versionTag;
-      return await updateCommunityMessage(dotYouClient, community, message, keyHeader);
+      return await updateCommunityMessage(odinClient, community, message, keyHeader);
     }
   );
 
@@ -437,18 +437,18 @@ export const updateCommunityMessage = async (
 };
 
 export const hardDeleteCommunityMessage = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   communityId: string,
   message: HomebaseFile<CommunityMessage>
 ) => {
   const targetDrive = getTargetDriveFromCommunityId(communityId);
-  if (odinId !== dotYouClient.getHostIdentity()) {
+  if (odinId !== odinClient.getHostIdentity()) {
     if (!message.fileMetadata.globalTransitId) {
       throw new Error('Global Transit Id is required for hard delete over peer');
     }
     return await deleteFileOverPeer(
-      dotYouClient,
+      odinClient,
       targetDrive,
       message.fileMetadata.globalTransitId,
       [odinId],
@@ -457,7 +457,7 @@ export const hardDeleteCommunityMessage = async (
   }
 
   return await deleteFile(
-    dotYouClient,
+    odinClient,
     targetDrive,
     message.fileId,
     undefined,
@@ -466,7 +466,7 @@ export const hardDeleteCommunityMessage = async (
 };
 
 export const getCommunityMessage = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   communityId: string,
   chatMessageId: string,
@@ -475,9 +475,9 @@ export const getCommunityMessage = async (
   const targetDrive = getTargetDriveFromCommunityId(communityId);
 
   const fileHeader =
-    odinId !== dotYouClient.getHostIdentity()
+    odinId !== odinClient.getHostIdentity()
       ? await getFileHeaderOverPeerByUniqueId<string>(
-        dotYouClient,
+        odinClient,
         odinId,
         targetDrive,
         chatMessageId,
@@ -486,18 +486,18 @@ export const getCommunityMessage = async (
           systemFileType,
         }
       )
-      : await getFileHeaderByUniqueId<string>(dotYouClient, targetDrive, chatMessageId, {
+      : await getFileHeaderByUniqueId<string>(odinClient, targetDrive, chatMessageId, {
         decrypt: true,
         systemFileType,
       });
 
   if (!fileHeader) return null;
 
-  return await dsrToMessage(dotYouClient, fileHeader, odinId, targetDrive, true);
+  return await dsrToMessage(odinClient, fileHeader, odinId, targetDrive, true);
 };
 
 export const getCommunityMessages = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   communityId: string,
   groupIds: string[] | undefined,
@@ -523,16 +523,16 @@ export const getCommunityMessages = async (
   };
 
   const response =
-    odinId && odinId !== dotYouClient.getHostIdentity()
-      ? await queryBatchOverPeer(dotYouClient, odinId, params, ro)
-      : await queryBatch(dotYouClient, params, ro);
+    odinId && odinId !== odinClient.getHostIdentity()
+      ? await queryBatchOverPeer(odinClient, odinId, params, ro)
+      : await queryBatch(odinClient, params, ro);
   return {
     ...response,
     searchResults:
       ((await Promise.all(
         response.searchResults
           .map(
-            async (result) => await dsrToMessage(dotYouClient, result, odinId, targetDrive, true)
+            async (result) => await dsrToMessage(odinClient, result, odinId, targetDrive, true)
           )
           .filter(Boolean)
       )) as HomebaseFile<CommunityMessage>[]) || [],
@@ -540,7 +540,7 @@ export const getCommunityMessages = async (
 };
 
 export const dsrToMessage = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   dsr: HomebaseFile,
   odinId: string | undefined,
   targetDrive: TargetDrive,
@@ -551,9 +551,9 @@ export const dsrToMessage = async (
       // Only here for backwards compatibility; Can be removed once Community is pushed live for all on production
       const hasPartialOrFullContent = !!dsr.fileMetadata.appData.content?.length;
       if (hasPartialOrFullContent)
-        return odinId && dotYouClient.getHostIdentity() !== odinId
+        return odinId && odinClient.getHostIdentity() !== odinId
           ? await getContentFromHeaderOverPeer<CommunityMessage>(
-            dotYouClient,
+            odinClient,
             odinId,
             targetDrive,
             dsr,
@@ -561,16 +561,16 @@ export const dsrToMessage = async (
             dsr.fileSystemType
           )
           : await getContentFromHeader<CommunityMessage>(
-            dotYouClient,
+            odinClient,
             targetDrive,
             dsr,
             includeMetadataHeader,
             dsr.fileSystemType
           );
       else
-        return odinId && dotYouClient.getHostIdentity() !== odinId
+        return odinId && odinClient.getHostIdentity() !== odinId
           ? await getContentFromHeaderOrPayloadOverPeer<CommunityMessage>(
-            dotYouClient,
+            odinClient,
             odinId,
             targetDrive,
             dsr,
@@ -578,7 +578,7 @@ export const dsrToMessage = async (
             dsr.fileSystemType
           )
           : await getContentFromHeaderOrPayload<CommunityMessage>(
-            dotYouClient,
+            odinClient,
             targetDrive,
             dsr,
             includeMetadataHeader,

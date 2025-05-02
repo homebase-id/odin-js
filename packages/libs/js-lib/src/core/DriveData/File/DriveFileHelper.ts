@@ -4,15 +4,15 @@ import {
   roundToSmallerMultipleOf16,
   tryJsonParse,
 } from '../../../helpers/DataUtil';
-import { DotYouClient } from '../../DotYouClient';
+import { OdinClient } from '../../OdinClient';
 import { TargetDrive, SystemFileType, ContentType } from './DriveFileTypes';
 
 /// Helper methods:
 export const getCacheKey = (targetDrive: TargetDrive, id: string, decrypt: boolean) =>
   `${targetDrive.alias}-${targetDrive.type}+${id}+${decrypt}`;
 
-export const getAxiosClient = (dotYouClient: DotYouClient, systemFileType?: SystemFileType) =>
-  dotYouClient.createAxiosClient({
+export const getAxiosClient = (odinClient: OdinClient, systemFileType?: SystemFileType) =>
+  odinClient.createAxiosClient({
     systemFileType,
   });
 

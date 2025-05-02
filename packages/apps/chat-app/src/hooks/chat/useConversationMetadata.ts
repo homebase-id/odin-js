@@ -5,13 +5,13 @@ import {
   UnifiedConversation,
   ChatDrive,
 } from '../../providers/ConversationProvider';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { useConversation } from './useConversation';
 import { insertNewConversation } from './useConversations';
 
 export const useConversationMetadata = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const conversationQuery = useConversation({
@@ -30,22 +30,22 @@ export const useConversationMetadata = (props?: { conversationId?: string | unde
       if (maxRetries <= 0) return;
       maxRetries--;
 
-      const serverHeader = await getFileHeader(dotYouClient, ChatDrive, conversation.fileId);
+      const serverHeader = await getFileHeader(odinClient, ChatDrive, conversation.fileId);
       if (!serverHeader) return;
 
-      const serverLocalData = await getLocalContentFromHeader<ConversationMetadata>(dotYouClient, ChatDrive, serverHeader, true);
+      const serverLocalData = await getLocalContentFromHeader<ConversationMetadata>(odinClient, ChatDrive, serverHeader, true);
       const mergedData: ConversationMetadata = {
         conversationId: newMetadata.conversationId,
         lastReadTime: Math.max((newMetadata.lastReadTime || 0), (serverLocalData?.lastReadTime || 0)),
       }
 
-      return await uploadLocalMetadataContent(dotYouClient, ChatDrive, serverHeader, {
+      return await uploadLocalMetadataContent(odinClient, ChatDrive, serverHeader, {
         ...serverHeader.fileMetadata.localAppData,
         content: mergedData
       });
     };
 
-    return await uploadLocalMetadataContent(dotYouClient, ChatDrive, conversation, {
+    return await uploadLocalMetadataContent(odinClient, ChatDrive, conversation, {
       ...conversation.fileMetadata.localAppData,
       content: newMetadata,
     }, onVersionConflict);

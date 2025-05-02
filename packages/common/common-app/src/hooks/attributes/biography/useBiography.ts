@@ -10,7 +10,7 @@ import {
 import { GetFile } from '@homebase-id/js-lib/public';
 import { PayloadDescriptor } from '@homebase-id/js-lib/core';
 import { getProfileAttributesOverPeer } from '@homebase-id/js-lib/peer';
-import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../../auth/useOdinClientContext';
 
 type BioData = {
   id: string;
@@ -38,15 +38,15 @@ export type BiographyData = {
 export const useBiography = (props?: { odinId: string } | undefined) => {
   const { odinId } = props || {};
 
-  const dotYouClient = useDotYouClientContext();
-  const isAuthenticated = !!dotYouClient.getHostIdentity();
+  const odinClient = useOdinClientContext();
+  const isAuthenticated = !!odinClient.getHostIdentity();
   const queryClient = useQueryClient();
 
   const fetchData: (odinId?: string) => Promise<BiographyData | undefined> = async () => {
     const fetchStaticData = async (): Promise<BiographyData | undefined> => {
       if (odinId) return undefined;
 
-      const fileData = await GetFile(dotYouClient, 'sitedata.json');
+      const fileData = await GetFile(odinClient, 'sitedata.json');
       if (!fileData.has('short-bio') && !fileData.has('long-bio') && !fileData.has('short-bio-summary')) return;
 
       const bioAttributes = await (async () => {
@@ -66,7 +66,7 @@ export const useBiography = (props?: { odinId: string } | undefined) => {
               // Fetch attribute if it is not included in the static data
               attr = (
                 await getProfileAttribute(
-                  dotYouClient,
+                  odinClient,
                   BuiltInProfiles.StandardProfileId,
                   entry.header.fileMetadata.appData.uniqueId
                 )
@@ -124,7 +124,7 @@ export const useBiography = (props?: { odinId: string } | undefined) => {
               // Fetch attribute if it is not included in the static data
               attr = (
                 await getProfileAttribute(
-                  dotYouClient,
+                  odinClient,
                   BuiltInProfiles.StandardProfileId,
                   entry.header.fileMetadata.appData.uniqueId
                 )
@@ -156,9 +156,9 @@ export const useBiography = (props?: { odinId: string } | undefined) => {
       try {
         const biographyAttributes = (
           odinId
-            ? await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.FullBio)
+            ? await getProfileAttributesOverPeer(odinClient, odinId, BuiltInAttributes.FullBio)
             : await getProfileAttributes(
-              dotYouClient,
+              odinClient,
               BuiltInProfiles.StandardProfileId,
               undefined,
               [BuiltInAttributes.FullBio]
@@ -174,9 +174,9 @@ export const useBiography = (props?: { odinId: string } | undefined) => {
 
         const longBiographyAttributes = (
           odinId
-            ? await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.Experience)
+            ? await getProfileAttributesOverPeer(odinClient, odinId, BuiltInAttributes.Experience)
             : await getProfileAttributes(
-              dotYouClient,
+              odinClient,
               BuiltInProfiles.StandardProfileId,
               undefined,
               [BuiltInAttributes.Experience]
@@ -199,9 +199,9 @@ export const useBiography = (props?: { odinId: string } | undefined) => {
 
         const bioSummaryAttributes = (
           odinId
-            ? await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.BioSummary)
+            ? await getProfileAttributesOverPeer(odinClient, odinId, BuiltInAttributes.BioSummary)
             : await getProfileAttributes(
-              dotYouClient,
+              odinClient,
               BuiltInProfiles.StandardProfileId,
               undefined,
               [BuiltInAttributes.BioSummary]

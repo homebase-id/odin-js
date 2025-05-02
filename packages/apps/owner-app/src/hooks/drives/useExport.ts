@@ -12,7 +12,7 @@ import {
   DEFAULT_PAYLOAD_KEY,
 } from '@homebase-id/js-lib/core';
 import { jsonStringify64 } from '@homebase-id/js-lib/helpers';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 const includeMetadataHeader = true;
 const pageSize = 10;
@@ -73,12 +73,12 @@ export const isImportable = (obj: unknown): obj is importable => {
 };
 
 export const useExport = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const getAllFilesOnDrive = async (drive: TargetDrive) => {
     const queryBatchPart = async (cursorState: string | undefined) => {
       return await queryBatch(
-        dotYouClient,
+        odinClient,
         { targetDrive: drive },
         {
           maxRecords: pageSize,
@@ -111,14 +111,14 @@ export const useExport = () => {
     const getPayloadForDsr = async (dsr: HomebaseFile) => {
       if (dsr.fileMetadata.appData.content) {
         return await getContentFromHeaderOrPayload(
-          dotYouClient,
+          odinClient,
           targetDrive,
           dsr,
           includeMetadataHeader
         );
       } else {
         return (
-          (await getPayloadBytes(dotYouClient, targetDrive, dsr.fileId, DEFAULT_PAYLOAD_KEY))
+          (await getPayloadBytes(odinClient, targetDrive, dsr.fileId, DEFAULT_PAYLOAD_KEY))
             ?.bytes || null
         );
       }

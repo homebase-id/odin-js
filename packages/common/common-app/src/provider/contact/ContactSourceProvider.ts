@@ -9,7 +9,7 @@ import {
   EmailFields,
 } from '@homebase-id/js-lib/profile';
 
-import { DotYouClient, ImageContentType } from '@homebase-id/js-lib/core';
+import { OdinClient, ImageContentType } from '@homebase-id/js-lib/core';
 import {
   getProfileAttributesOverPeer,
   getDecryptedImageDataOverPeer,
@@ -21,12 +21,12 @@ import { RawContact, getConnectionInfo } from '@homebase-id/js-lib/network';
 //Handles fetching and parsing of Contact Source data
 
 export const fetchConnectionInfo = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string
 ): Promise<RawContact | undefined> => {
   const [connectionContactData, contactFromTransit] = await Promise.all([
-    getConnectionInfo(dotYouClient, odinId),
-    queryRemoteAttributes(dotYouClient, odinId),
+    getConnectionInfo(odinClient, odinId),
+    queryRemoteAttributes(odinClient, odinId),
   ]);
 
   return {
@@ -39,19 +39,19 @@ export const fetchConnectionInfo = async (
 };
 
 const queryRemoteAttributes = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string
 ): Promise<RawContact | undefined> => {
   try {
     const [name, phone, email, location, birthday, photo] = await Promise.all([
-      (await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.Name))?.[0],
+      (await getProfileAttributesOverPeer(odinClient, odinId, BuiltInAttributes.Name))?.[0],
       (
-        await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.PhoneNumber)
+        await getProfileAttributesOverPeer(odinClient, odinId, BuiltInAttributes.PhoneNumber)
       )?.[0],
-      (await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.Email))?.[0],
-      (await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.Address))?.[0],
-      (await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.Birthday))?.[0],
-      (await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.Photo))?.[0],
+      (await getProfileAttributesOverPeer(odinClient, odinId, BuiltInAttributes.Email))?.[0],
+      (await getProfileAttributesOverPeer(odinClient, odinId, BuiltInAttributes.Address))?.[0],
+      (await getProfileAttributesOverPeer(odinClient, odinId, BuiltInAttributes.Birthday))?.[0],
+      (await getProfileAttributesOverPeer(odinClient, odinId, BuiltInAttributes.Photo))?.[0],
     ]);
 
     const nameAttr = name?.fileMetadata.appData.content;
@@ -79,11 +79,11 @@ const queryRemoteAttributes = async (
       birthday: { date: birthdayAttr?.data?.[BirthdayFields.Date] },
       image: photo
         ? (await queryConnectionPhotoData(
-            dotYouClient,
-            odinId,
-            photo.fileId as string,
-            photoAttr.data?.[MinimalProfileFields.ProfileImageKey]
-          )) || undefined
+          odinClient,
+          odinId,
+          photo.fileId as string,
+          photoAttr.data?.[MinimalProfileFields.ProfileImageKey]
+        )) || undefined
         : undefined,
     };
   } catch (ex) {
@@ -93,13 +93,13 @@ const queryRemoteAttributes = async (
 };
 
 const queryConnectionPhotoData = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   profileImageFileId: string,
   profileImageKey: string
 ) => {
   const imageData = await getDecryptedImageDataOverPeer(
-    dotYouClient,
+    odinClient,
     odinId,
     GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
     profileImageFileId,
@@ -123,16 +123,16 @@ export const fetchDataFromPublic = async (odinId: string): Promise<RawContact | 
   return {
     name: profileCard?.name
       ? {
-          displayName: profileCard?.name,
-        }
+        displayName: profileCard?.name,
+      }
       : undefined,
     image: imageData
       ? {
-          content: uint8ArrayToBase64(new Uint8Array(await imageData.arrayBuffer())),
-          contentType: imageData.type as ImageContentType,
-          pixelWidth: 250,
-          pixelHeight: 250,
-        }
+        content: uint8ArrayToBase64(new Uint8Array(await imageData.arrayBuffer())),
+        contentType: imageData.type as ImageContentType,
+        pixelWidth: 250,
+        pixelHeight: 250,
+      }
       : undefined,
     source: 'public',
   };

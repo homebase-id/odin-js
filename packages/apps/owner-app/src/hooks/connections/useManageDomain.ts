@@ -7,22 +7,22 @@ import {
 import {
   invalidateDomainInfo,
   invalidateDomains,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 
 export const useManageDomain = () => {
   const queryClient = useQueryClient();
 
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const revokeDomain = async ({ domain }: { domain: string }) =>
-    await revokeDomainAccess(dotYouClient, domain);
+    await revokeDomainAccess(odinClient, domain);
 
   const restoreDomain = async ({ domain }: { domain: string }) =>
-    await restoreDomainAccess(dotYouClient, domain);
+    await restoreDomainAccess(odinClient, domain);
 
   const removeDomain = async ({ domain }: { domain: string }) =>
-    await disconnectFromDomain(dotYouClient, domain);
+    await disconnectFromDomain(odinClient, domain);
 
   return {
     revokeDomain: useMutation({

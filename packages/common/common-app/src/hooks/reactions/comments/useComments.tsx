@@ -1,7 +1,7 @@
 import { QueryClient, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { getComments, ReactionContext } from '@homebase-id/js-lib/public';
 import { HomebaseFile, CommentReaction } from '@homebase-id/js-lib/core';
-import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../../auth/useOdinClientContext';
 import { formatGuidId } from '@homebase-id/js-lib/helpers';
 import { invalidateCommentSummary } from './useCommentSummary';
 
@@ -13,7 +13,7 @@ export interface UseCommentsVal {
 }
 
 export const useComments = ({ context }: { context: ReactionContext }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const queryClient = useQueryClient();
 
@@ -27,7 +27,7 @@ export const useComments = ({ context }: { context: ReactionContext }) => {
     if (!context.odinId || !context.channelId || !context.target.globalTransitId)
       return { comments: [] as HomebaseFile<CommentReaction>[], cursorState: undefined };
 
-    const response = await getComments(dotYouClient, context, PAGE_SIZE, pageParam);
+    const response = await getComments(odinClient, context, PAGE_SIZE, pageParam);
     setTimeout(() => {
       invalidateCommentSummary(
         queryClient,

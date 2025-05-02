@@ -1,20 +1,20 @@
 import { MailConversationsReturn, getMailConversations } from '../../providers/MailProvider';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { useInfiniteQuery, InfiniteData } from '@tanstack/react-query';
 
 export const MAIL_CONVERSATIONS_PAGE_SIZE = 100;
 export const useMailConversations = (
   select?:
     | ((
-        data: InfiniteData<MailConversationsReturn, string | undefined>
-      ) => InfiniteData<MailConversationsReturn, unknown>)
+      data: InfiniteData<MailConversationsReturn, string | undefined>
+    ) => InfiniteData<MailConversationsReturn, unknown>)
     | undefined
 ) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchMailConversations = async (cursorState: string | undefined) => {
     return await getMailConversations(
-      dotYouClient,
+      odinClient,
       cursorState,
       undefined,
       MAIL_CONVERSATIONS_PAGE_SIZE

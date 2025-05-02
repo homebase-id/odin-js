@@ -3,7 +3,7 @@ import {
   DialogWrapper,
   t,
   ActionLink,
-  useDotYouClientContext,
+  useOdinClientContext,
   useCircle,
 } from '@homebase-id/common-app';
 import { Shield } from '@homebase-id/common-app/icons';
@@ -44,7 +44,7 @@ const useCommunityAccessVerifier = (
   communityId: string | undefined
 ) => {
   const { data: community } = useCommunity({ odinId, communityId }).fetch;
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const isAdmin = community?.fileMetadata.originalAuthor === loggedOnIdentity;
 
   const communityCircleId = community?.fileMetadata.appData.content.acl.circleIdList?.[0];

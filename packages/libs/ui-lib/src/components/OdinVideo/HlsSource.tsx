@@ -13,7 +13,7 @@ interface OdinHlsProps extends OdinVideoProps {
 }
 
 export const HlsSource = ({
-  dotYouClient,
+  odinClient,
   odinId,
   targetDrive,
   fileId,
@@ -26,7 +26,7 @@ export const HlsSource = ({
   lastModified,
 }: OdinHlsProps) => {
   const { data: hlsManifest } = useHlsManifest(
-    dotYouClient,
+    odinClient,
     odinId,
     fileId,
     globalTransitId,
@@ -50,9 +50,9 @@ export const HlsSource = ({
     () => hls.isSupported(),
     // hls.isSupported()
     // && (!videoRef.current?.canPlayType('application/vnd.apple.mpegurl') ||
-    //   (dotYouClient.getType() === ApiType.App &&
+    //   (odinClient.getType() === ApiType.App &&
     //     odinId &&
-    //     odinId !== dotYouClient.getHostIdentity())),
+    //     odinId !== odinClient.getHostIdentity())),
     [videoRef]
   );
 
@@ -61,7 +61,7 @@ export const HlsSource = ({
     if (videoRef.current) {
       const hlsInstance = new hls({
         xhrSetup: (xhr) => {
-          const headers: Record<string, string> = dotYouClient.getHeaders();
+          const headers: Record<string, string> = odinClient.getHeaders();
           for (const [key, value] of Object.entries(headers)) {
             xhr.setRequestHeader(key, value);
           }

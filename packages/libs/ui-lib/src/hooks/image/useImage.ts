@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
-import { ImageSize, TargetDrive, DotYouClient, SystemFileType } from '@homebase-id/js-lib/core';
+import { ImageSize, TargetDrive, OdinClient, SystemFileType } from '@homebase-id/js-lib/core';
 import { getDecryptedImageUrl } from '@homebase-id/js-lib/media';
 import {
   getDecryptedImageUrlOverPeer,
@@ -12,8 +12,8 @@ interface ImageData {
   naturalSize?: ImageSize;
 }
 
-export const useImageCache = (dotYouClient: DotYouClient) => {
-  const localHost = dotYouClient.getHostIdentity();
+export const useImageCache = (odinClient: OdinClient) => {
+  const localHost = odinClient.getHostIdentity();
   const queryClient = useQueryClient();
 
   return {
@@ -45,7 +45,7 @@ export const useImageCache = (dotYouClient: DotYouClient) => {
 };
 
 export const useImage = (props: {
-  dotYouClient: DotYouClient;
+  odinClient: OdinClient;
   odinId?: string;
   imageFileId?: string | undefined;
   imageGlobalTransitId?: string | undefined;
@@ -59,7 +59,7 @@ export const useImage = (props: {
   preferObjectUrl?: boolean;
 }): { fetch: UseQueryResult<ImageData | undefined, Error> } => {
   const {
-    dotYouClient,
+    odinClient,
     odinId,
     imageFileId,
     imageGlobalTransitId,
@@ -73,7 +73,7 @@ export const useImage = (props: {
     preferObjectUrl,
   } = props;
 
-  const localHost = dotYouClient.getHostIdentity();
+  const localHost = odinClient.getHostIdentity();
   const queryClient = useQueryClient();
 
   const checkIfWeHaveLargerCachedImage = (
@@ -167,37 +167,24 @@ export const useImage = (props: {
           odinId !== localHost
             ? imageGlobalTransitId
               ? await getDecryptedImageUrlOverPeerByGlobalTransitId(
-                  dotYouClient,
-                  odinId,
-                  imageDrive,
-                  imageGlobalTransitId,
-                  imageFileKey,
+                odinClient,
+                odinId,
+                imageDrive,
+                imageGlobalTransitId,
+                imageFileKey,
 
-                  probablyEncrypted,
+                probablyEncrypted,
 
-                  lastModified,
-                  {
-                    size,
-                    systemFileType,
-                    preferObjectUrl,
-                  }
-                )
+                lastModified,
+                {
+                  size,
+                  systemFileType,
+                  preferObjectUrl,
+                }
+              )
               : await getDecryptedImageUrlOverPeer(
-                  dotYouClient,
-                  odinId,
-                  imageDrive,
-                  imageFileId,
-                  imageFileKey,
-                  probablyEncrypted,
-                  lastModified,
-                  {
-                    size,
-                    systemFileType,
-                    preferObjectUrl,
-                  }
-                )
-            : await getDecryptedImageUrl(
-                dotYouClient,
+                odinClient,
+                odinId,
                 imageDrive,
                 imageFileId,
                 imageFileKey,
@@ -208,7 +195,20 @@ export const useImage = (props: {
                   systemFileType,
                   preferObjectUrl,
                 }
-              ),
+              )
+            : await getDecryptedImageUrl(
+              odinClient,
+              imageDrive,
+              imageFileId,
+              imageFileKey,
+              probablyEncrypted,
+              lastModified,
+              {
+                size,
+                systemFileType,
+                preferObjectUrl,
+              }
+            ),
         naturalSize: naturalSize,
       };
     };

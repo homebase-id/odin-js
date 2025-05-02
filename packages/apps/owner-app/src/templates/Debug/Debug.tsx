@@ -5,7 +5,7 @@ import {
   ActionButton,
   t,
   Textarea,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { Times } from '@homebase-id/common-app/icons';
 import { useEffect, useState } from 'react';
@@ -26,7 +26,7 @@ interface DefaulValue {
 }
 
 const Debug = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const defaultValues = tryJsonParse<DefaulValue>(window.localStorage.getItem(STORAGE_KEY) || '');
 
@@ -52,7 +52,7 @@ const Debug = () => {
   }, [url, isPost, headers, params]);
 
   const doRequest = async () => {
-    const client = dotYouClient.createAxiosClient({ headers });
+    const client = odinClient.createAxiosClient({ headers });
     addToOutput(`Requesting ${isPost ? 'POST' : 'GET'} ${url}\n`);
     const result = isPost
       ? await client.post(url, params).catch((data) => data.response)

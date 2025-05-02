@@ -15,17 +15,17 @@ import {
   saveContact,
   updateCacheActiveConnections,
   updateCachePendingConnections,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 
 export const usePendingConnection = ({ odinId }: { odinId?: string }) => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const getPendingConnectionInfo = async ({ odinId }: { odinId: string }) => {
     if (!odinId) return null;
 
-    return await getPendingRequest(dotYouClient, odinId);
+    return await getPendingRequest(odinClient, odinId);
   };
 
   const acceptRequest = async ({
@@ -35,12 +35,12 @@ export const usePendingConnection = ({ odinId }: { odinId?: string }) => {
     senderOdinId: string;
     circleIds: string[];
   }) => {
-    await acceptConnectionRequest(dotYouClient, senderOdinId, circleIds);
+    await acceptConnectionRequest(odinClient, senderOdinId, circleIds);
 
     // Save contact
-    const connectionInfo = await fetchConnectionInfo(dotYouClient, senderOdinId);
+    const connectionInfo = await fetchConnectionInfo(odinClient, senderOdinId);
     if (connectionInfo)
-      await saveContact(dotYouClient, {
+      await saveContact(odinClient, {
         fileMetadata: { appData: { content: connectionInfo } },
         serverMetadata: { accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner } },
       });
@@ -49,7 +49,7 @@ export const usePendingConnection = ({ odinId }: { odinId?: string }) => {
   };
 
   const ignoreRequest = async ({ senderOdinId }: { senderOdinId: string }) => {
-    return await deletePendingRequest(dotYouClient, senderOdinId);
+    return await deletePendingRequest(odinClient, senderOdinId);
   };
 
   return {
@@ -72,16 +72,16 @@ export const usePendingConnection = ({ odinId }: { odinId?: string }) => {
           pages: data.pages.map((page, index) =>
             index === 0
               ? {
-                  ...page,
-                  results: [
-                    newConnection,
-                    ...page.results.filter((r) => r.odinId !== newRequest.senderOdinId),
-                  ],
-                }
+                ...page,
+                results: [
+                  newConnection,
+                  ...page.results.filter((r) => r.odinId !== newRequest.senderOdinId),
+                ],
+              }
               : {
-                  ...page,
-                  results: page.results.filter((r) => r.odinId !== newRequest.senderOdinId),
-                }
+                ...page,
+                results: page.results.filter((r) => r.odinId !== newRequest.senderOdinId),
+              }
           ),
         }));
 

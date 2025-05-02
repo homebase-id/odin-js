@@ -4,7 +4,7 @@ import {
   ExtensionThumbnail,
   getPlainTextFromRichText,
   t,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
@@ -32,7 +32,7 @@ export const EmbeddedMessage = ({
   msg: HomebaseFile<ChatMessage> | undefined;
   className?: string;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const hasMedia = msg && !!msg.fileMetadata.payloads?.length;
   const plainText = msg && getPlainTextFromRichText(msg.fileMetadata.appData.content.message);
   return (
@@ -68,14 +68,14 @@ export const EmbeddedMessageMedia = ({
   msg: HomebaseFile<ChatMessage>;
   className?: string;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const firstPayload = msg.fileMetadata.payloads?.[0];
   if (!firstPayload) return null;
 
   if (firstPayload.contentType.includes('image/')) {
     return (
       <OdinImage
-        dotYouClient={dotYouClient}
+        odinClient={odinClient}
         fileId={msg.fileId}
         fileKey={firstPayload.key}
         lastModified={firstPayload.lastModified || msg.fileMetadata.updated}

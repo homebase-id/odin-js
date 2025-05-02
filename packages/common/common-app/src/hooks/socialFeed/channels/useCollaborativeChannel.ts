@@ -15,12 +15,12 @@ import {
   t,
   useChannelDrives,
   useCircles,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '../../../..';
 import { drivesEqual, stringGuidsEqual, stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import {
   ApiType,
-  DotYouClient,
+  OdinClient,
   DrivePermissionType,
   HomebaseFile,
   NewHomebaseFile,
@@ -56,7 +56,7 @@ const getExtendDriveDetailsUrl = (
     d: JSON.stringify(drives),
   };
 
-  const host = new DotYouClient({
+  const host = new OdinClient({
     hostIdentity: identity,
     api: ApiType.App,
   }).getRoot();
@@ -93,7 +93,7 @@ const getExtendCirclePermissionUrl = (
     c: circleIds.join(','),
   };
 
-  const host = new DotYouClient({
+  const host = new OdinClient({
     hostIdentity: identity,
     api: ApiType.App,
   }).getRoot();
@@ -104,7 +104,7 @@ const getExtendCirclePermissionUrl = (
 
 export const useCollaborativeChannel = (props?: { channelId: string }) => {
   const { channelId } = props || {};
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const { data: channelDef, isFetched: isChannelFetched } = useChannel({
@@ -116,13 +116,13 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
   const saveCollaborativeChannel = async (
     chnlLink: NewHomebaseFile<RemoteCollaborativeChannelDefinition>
   ) => {
-    return await saveChannelLink(dotYouClient, chnlLink);
+    return await saveChannelLink(odinClient, chnlLink);
   };
 
   const removeCollaborativeChannel = async (
     chnlLink: HomebaseFile<RemoteCollaborativeChannelDefinition>
   ) => {
-    return await removeChannelLink(dotYouClient, chnlLink);
+    return await removeChannelLink(odinClient, chnlLink);
   };
 
   const validateCollaborativeChannel = () => {
@@ -176,7 +176,7 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
 
     if (!collaborativeCircleIds.length) throw new Error('No circles found for channel');
 
-    const identity = dotYouClient.getHostIdentity();
+    const identity = odinClient.getHostIdentity();
     const returnUrl = `${FEED_ROOT_PATH}/channels`;
 
     const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);
@@ -185,7 +185,7 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
     collaborativeChannelDef.fileMetadata.appData.content.isCollaborative = true;
     (collaborativeChannelDef.fileMetadata.appData.content as CollaborativeChannelDefinition).acl =
       channelDef.serverMetadata.accessControlList;
-    await saveChannelDefinition(dotYouClient, collaborativeChannelDef);
+    await saveChannelDefinition(odinClient, collaborativeChannelDef);
 
     const intermediateReturnUrl = getExtendDriveDetailsUrl(
       identity,
@@ -212,9 +212,9 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
     collaborativeChannelDef.fileMetadata.appData.content.isCollaborative = false;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (collaborativeChannelDef.fileMetadata.appData.content as any).acl;
-    await saveChannelDefinition(dotYouClient, collaborativeChannelDef);
+    await saveChannelDefinition(odinClient, collaborativeChannelDef);
 
-    const identity = dotYouClient.getHostIdentity();
+    const identity = odinClient.getHostIdentity();
     const returnUrl = `${FEED_ROOT_PATH}/channels`;
 
     const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);

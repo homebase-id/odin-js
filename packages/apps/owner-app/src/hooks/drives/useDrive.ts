@@ -10,11 +10,11 @@ import {
   editDriveAllowSubscriptions,
 } from '@homebase-id/js-lib/core';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?: boolean }) => {
   const { targetDrive, fetchOutboxStatus } = props || {};
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const fetch = async (targetDrive: TargetDrive) => {
@@ -27,13 +27,13 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
       if (foundDrive) return foundDrive;
     }
 
-    const allDrives = await (await getDrivesByType(dotYouClient, targetDrive.type, 1, 100)).results;
+    const allDrives = await (await getDrivesByType(odinClient, targetDrive.type, 1, 100)).results;
 
     return allDrives.find((drive) => drivesEqual(drive.targetDriveInfo, targetDrive)) || null;
   };
 
   const fetchDriveDetail = async (targetDrive: TargetDrive) =>
-    await getDriveStatus(dotYouClient, targetDrive);
+    await getDriveStatus(odinClient, targetDrive);
 
   const editDescription = async ({
     targetDrive,
@@ -42,7 +42,7 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
     targetDrive: TargetDrive;
     newDescription: string;
   }) => {
-    return editDriveMetadata(dotYouClient, targetDrive, newDescription);
+    return editDriveMetadata(odinClient, targetDrive, newDescription);
   };
 
   const editAnonymousRead = async ({
@@ -52,7 +52,7 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
     targetDrive: TargetDrive;
     newAllowAnonymousRead: boolean;
   }) => {
-    return editDriveAllowAnonymousRead(dotYouClient, targetDrive, newAllowAnonymousRead);
+    return editDriveAllowAnonymousRead(odinClient, targetDrive, newAllowAnonymousRead);
   };
 
   const editAllowSubscriptions = async ({
@@ -62,7 +62,7 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
     targetDrive: TargetDrive;
     newAllowSubscriptions: boolean;
   }) => {
-    return editDriveAllowSubscriptions(dotYouClient, targetDrive, newAllowSubscriptions);
+    return editDriveAllowSubscriptions(odinClient, targetDrive, newAllowSubscriptions);
   };
 
   const editAttributes = async ({
@@ -72,7 +72,7 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
     targetDrive: TargetDrive;
     newAttributes: { [key: string]: string };
   }) => {
-    return editDriveAttributes(dotYouClient, targetDrive, newAttributes);
+    return editDriveAttributes(odinClient, targetDrive, newAttributes);
   };
 
   return {

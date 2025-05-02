@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { LinkPreview, getLinkPreview } from '@homebase-id/js-lib/media';
-import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../auth/useOdinClientContext';
 
 export const useLinkPreviewBuilder = (textToSearchIn: string) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const foundLinks = useMemo(
     () =>
@@ -31,7 +31,7 @@ export const useLinkPreviewBuilder = (textToSearchIn: string) => {
 
     (async () => {
       const LinkPreviews = (
-        await Promise.all(newLinks.map(async (link) => await getLinkPreview(dotYouClient, link)))
+        await Promise.all(newLinks.map(async (link) => await getLinkPreview(odinClient, link)))
       ).filter(Boolean) as LinkPreview[];
 
       setLinkPreviews((old) => ({

@@ -6,7 +6,7 @@ import {
   ActionButton,
   BoringFile,
   usePortal,
-  useDotYouClientContext,
+  useOdinClientContext,
   OdinVideoWrapper,
   bytesToSize,
   useFile,
@@ -206,7 +206,7 @@ const CustomOdinImage = ({
   className,
   ...props
 }: { className?: string; previewThumbnail?: EmbeddedThumb } & ImageSource) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const [tinyLoaded, setTinyLoaded] = useState(false);
   const [finalLoaded, setFinalLoaded] = useState(false);
 
@@ -226,7 +226,7 @@ const CustomOdinImage = ({
     >
       <OdinPreviewImage
         className={`absolute inset-0 h-full w-full max-w-none object-contain object-center transition-opacity delay-500 ${finalLoaded ? 'opacity-0' : 'opacity-100'}`}
-        dotYouClient={dotYouClient}
+        odinClient={odinClient}
         {...props}
         blur="auto"
         onLoad={(naturalSize: ImageSize | undefined) => {
@@ -246,7 +246,7 @@ const CustomOdinImage = ({
       {tinyLoaded ? (
         <OdinPayloadImage
           className={`absolute inset-0 h-full w-full max-w-none object-contain object-center transition-opacity duration-300 ${finalLoaded ? 'opacity-100' : 'opacity-0'}`}
-          dotYouClient={dotYouClient}
+          odinClient={odinClient}
           {...props}
           naturalSize={naturalSize}
           style={

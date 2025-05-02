@@ -1,4 +1,4 @@
-import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 
 import {
   CollaborativeChannelDefinition,
@@ -53,7 +53,7 @@ export const CollaborativeChannelItem = ({
           icon={ExternalLink}
           size="square"
           type="mute"
-          href={`${new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}/posts/${chnl?.slug}`}
+          href={`${new OdinClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot()}/posts/${chnl?.slug}`}
         ></ActionLink>
       </div>
     </div>

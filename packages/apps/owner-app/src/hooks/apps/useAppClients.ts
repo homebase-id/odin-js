@@ -7,14 +7,14 @@ import {
   AllowClient,
 } from '../../provider/app/AppManagementProvider';
 import { AppClientRegistrationRequest } from '../../provider/app/AppManagementProviderTypes';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 export const useAppClients = ({ appId }: { appId?: string }) => {
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetch = async ({ appId }: { appId: string }) => {
-    return await GetAppClients(dotYouClient, appId);
+    return await GetAppClients(odinClient, appId);
   };
 
   const registerClient = async ({
@@ -32,7 +32,7 @@ export const useAppClients = ({ appId }: { appId?: string }) => {
       clientFriendlyName: clientFriendlyName,
     };
 
-    return RegisterAppClient(dotYouClient, clientRegRequest);
+    return RegisterAppClient(odinClient, clientRegRequest);
   };
 
   const removeClient = async ({
@@ -42,7 +42,7 @@ export const useAppClients = ({ appId }: { appId?: string }) => {
     appId: string;
     registrationId: string;
   }) => {
-    return await RemoveClient(dotYouClient, { appId, registrationId });
+    return await RemoveClient(odinClient, { appId, registrationId });
   };
 
   const revokeClient = async ({
@@ -52,7 +52,7 @@ export const useAppClients = ({ appId }: { appId?: string }) => {
     appId: string;
     registrationId: string;
   }) => {
-    return await RevokeClient(dotYouClient, { appId, registrationId });
+    return await RevokeClient(odinClient, { appId, registrationId });
   };
 
   const allowClient = async ({
@@ -62,7 +62,7 @@ export const useAppClients = ({ appId }: { appId?: string }) => {
     appId: string;
     registrationId: string;
   }) => {
-    return await AllowClient(dotYouClient, { appId, registrationId });
+    return await AllowClient(odinClient, { appId, registrationId });
   };
 
   return {

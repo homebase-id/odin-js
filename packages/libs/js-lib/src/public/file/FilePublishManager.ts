@@ -1,5 +1,5 @@
 import { BuiltInAttributes } from '../../profile/profile';
-import { DotYouClient } from '../../core/DotYouClient';
+import { OdinClient } from '../../core/OdinClient';
 import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
 import { SecurityGroupType } from '../../core/core';
 import { stringGuidsEqual } from '../../helpers/DataUtil';
@@ -9,17 +9,17 @@ import { DEFAULT_SECTIONS, BASE_RESULT_OPTIONS } from './FileBase';
 import { publishFile } from './FileProvider';
 
 export const publishProfile = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   dataType?: 'channel' | typeof BuiltInAttributes.Name
 ) => {
-  const channels = await getChannelDefinitions(dotYouClient);
+  const channels = await getChannelDefinitions(odinClient);
   const channelSections = channels
     ?.filter(
       (chnl) =>
         chnl.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-          SecurityGroupType.Anonymous ||
+        SecurityGroupType.Anonymous ||
         chnl.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-          SecurityGroupType.Authenticated
+        SecurityGroupType.Authenticated
     )
     .map((channel) => {
       const channelDrive = getChannelDrive(channel.fileMetadata.appData.uniqueId as string);
@@ -44,7 +44,7 @@ export const publishProfile = async (
     )
   )
     publishActions.push(
-      publishFile(dotYouClient, 'sitedata.json', [...DEFAULT_SECTIONS, ...channelSections])
+      publishFile(odinClient, 'sitedata.json', [...DEFAULT_SECTIONS, ...channelSections])
     );
 
   return await Promise.all(publishActions);

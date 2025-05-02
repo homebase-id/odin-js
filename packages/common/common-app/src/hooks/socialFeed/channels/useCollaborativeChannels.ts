@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useDotYouClientContext } from '../../auth/useDotYouClientContext';
+import { useOdinClientContext } from '../../auth/useOdinClientContext';
 import { getChannelsOverPeer } from '@homebase-id/js-lib/peer';
 import { useAllContacts } from '../../connections/useAllContacts';
 import {
@@ -18,7 +18,7 @@ export const useCollaborativeChannels = (enableDiscovery?: boolean) => {
   const { data: alllContacts, isFetched: fetchedAllContacts } = useAllContacts(
     enableDiscovery || false
   );
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const discoverByOdinId = async () => {
     const discoveredByOdinId = await Promise.all(
@@ -26,8 +26,8 @@ export const useCollaborativeChannels = (enableDiscovery?: boolean) => {
         const odinId = contact.fileMetadata.appData.content.odinId;
         if (!odinId) return undefined;
 
-        const securityContext = await getSecurityContextOverPeer(dotYouClient, odinId);
-        const allChannels = await getChannelsOverPeer(dotYouClient, odinId);
+        const securityContext = await getSecurityContextOverPeer(odinClient, odinId);
+        const allChannels = await getChannelsOverPeer(odinClient, odinId);
 
         return {
           odinId,
@@ -78,7 +78,7 @@ export const useCollaborativeChannels = (enableDiscovery?: boolean) => {
   };
 
   const getLinksByOdinId = async () => {
-    const channelLinks = await getChannelLinkDefinitions(dotYouClient);
+    const channelLinks = await getChannelLinkDefinitions(odinClient);
 
     return (
       channelLinks?.reduce(

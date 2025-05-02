@@ -11,7 +11,7 @@ import {
   SetupHome,
   SetupProfileDefinition,
 } from '../../provider/setup/SetupProvider';
-import { useDotYouClientContext, useStaticFiles } from '@homebase-id/common-app';
+import { useOdinClientContext, useStaticFiles } from '@homebase-id/common-app';
 import { getSettings, updateSettings } from '../../provider/system/SettingsProvider';
 import { AUTO_FIX_VERSION } from '../useAutoFixDefaultConfig';
 
@@ -20,8 +20,8 @@ export const FIRST_RUN_TOKEN_STORAGE_KEY = 'first-run-token';
 export const useInit = () => {
   const firstRunToken = localStorage.getItem(FIRST_RUN_TOKEN_STORAGE_KEY);
 
-  const dotYouClient = useDotYouClientContext();
-  const isAuthenticated = dotYouClient.isAuthenticated();
+  const odinClient = useOdinClientContext();
+  const isAuthenticated = odinClient.isAuthenticated();
 
   const queryClient = useQueryClient();
 
@@ -44,17 +44,17 @@ export const useInit = () => {
     });
 
     // Initialize
-    await initialize(dotYouClient, firstRunToken, initDrives, initCircles);
+    await initialize(odinClient, firstRunToken, initDrives, initCircles);
 
     // Ensure Config
-    await SetupProfileDefinition(dotYouClient);
-    await SetupBlog(dotYouClient);
-    await SetupHome(dotYouClient);
+    await SetupProfileDefinition(odinClient);
+    await SetupBlog(odinClient);
+    await SetupHome(odinClient);
 
     // Setup (default) Data
-    await SetupDefaultIdentity(queryClient, dotYouClient, data);
+    await SetupDefaultIdentity(queryClient, odinClient, data);
     try {
-      await SetupAutoFollow(dotYouClient);
+      await SetupAutoFollow(odinClient);
     } catch (ex) {
       console.error('[init] autofollow failed', ex);
     }
@@ -63,9 +63,9 @@ export const useInit = () => {
     // This is normally a side effect from the useAttribute hook.. but we need to do it here after the first setup
     await publishStaticFiles(undefined);
 
-    const defaultServerSettings = getSettings(dotYouClient);
+    const defaultServerSettings = getSettings(odinClient);
 
-    await updateSettings(dotYouClient, {
+    await updateSettings(odinClient, {
       ...defaultServerSettings,
       lastRunAutoFix: AUTO_FIX_VERSION,
     });

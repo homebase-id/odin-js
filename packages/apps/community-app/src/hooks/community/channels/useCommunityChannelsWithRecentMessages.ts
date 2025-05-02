@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { CommunityChannel } from '../../../providers/CommunityProvider';
 import { useCommunityChannels } from './useCommunityChannels';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
@@ -17,7 +17,7 @@ export const useCommunityChannelsWithRecentMessages = (props: {
   odinId?: string;
   communityId?: string;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
   const queryKey = ['channels-with-recent-message', formatGuidId(props.communityId)];
 
@@ -50,7 +50,7 @@ export const useCommunityChannelsWithRecentMessages = (props: {
           const chnlId = chnl.fileMetadata.appData.uniqueId;
           const messagesA = await queryClient.fetchInfiniteQuery(
             getCommunityMessagesInfiniteQueryOptions(
-              dotYouClient,
+              odinClient,
               props.odinId,
               props.communityId,
               chnlId,

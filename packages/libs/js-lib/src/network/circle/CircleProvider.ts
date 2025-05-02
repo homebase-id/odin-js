@@ -1,5 +1,5 @@
 import { TargetDrive } from '../../core/core';
-import { ApiType, DotYouClient } from '../../core/DotYouClient';
+import { ApiType, OdinClient } from '../../core/OdinClient';
 import {
   getDrivePermissionFromString,
   getNewId,
@@ -22,10 +22,10 @@ interface ServerCircleUpdateRequest extends Omit<CircleDefinition, 'driveGrants'
   }[];
 }
 export const updateCircleDefinition = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   circleDefinition: CircleDefinition
 ) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = root + '/update';
 
   const data: ServerCircleUpdateRequest = {
@@ -42,14 +42,14 @@ export const updateCircleDefinition = async (
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export const createCircleDefinition = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   circleDefinition: CircleDefinition
 ) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = root + '/create';
 
   const data: ServerCircleUpdateRequest = {
@@ -70,19 +70,19 @@ export const createCircleDefinition = async (
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export const getCircles = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   excludeSystemCircles: boolean
 ): Promise<CircleDefinition[]> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url =
     root +
     '/list' +
-    ((dotYouClient.getType() === ApiType.Owner || dotYouClient.getType() === ApiType.App) &&
-    !excludeSystemCircles
+    ((odinClient.getType() === ApiType.Owner || odinClient.getType() === ApiType.App) &&
+      !excludeSystemCircles
       ? '?includeSystemCircle=true'
       : '');
 
@@ -104,10 +104,10 @@ export const getCircles = async (
 };
 
 export const getCircle = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   circleId: string
 ): Promise<CircleDefinition> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = root + '/get';
 
   const circleDef = await client.post<CircleDefinition>(url, circleId).then((response) => {
@@ -127,8 +127,8 @@ export const getCircle = async (
   } as CircleDefinition;
 };
 
-export const disableCircle = async (dotYouClient: DotYouClient, circleId: string) => {
-  const client = dotYouClient.createAxiosClient();
+export const disableCircle = async (odinClient: OdinClient, circleId: string) => {
+  const client = odinClient.createAxiosClient();
   const url = root + '/disable';
 
   return client
@@ -136,11 +136,11 @@ export const disableCircle = async (dotYouClient: DotYouClient, circleId: string
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
-export const enableCircle = async (dotYouClient: DotYouClient, circleId: string) => {
-  const client = dotYouClient.createAxiosClient();
+export const enableCircle = async (odinClient: OdinClient, circleId: string) => {
+  const client = odinClient.createAxiosClient();
   const url = root + '/enable';
 
   return client
@@ -148,11 +148,11 @@ export const enableCircle = async (dotYouClient: DotYouClient, circleId: string)
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
-export const removeCircle = async (dotYouClient: DotYouClient, circleId: string) => {
-  const client = dotYouClient.createAxiosClient();
+export const removeCircle = async (odinClient: OdinClient, circleId: string) => {
+  const client = odinClient.createAxiosClient();
   const url = root + '/delete';
 
   return client
@@ -160,5 +160,5 @@ export const removeCircle = async (dotYouClient: DotYouClient, circleId: string)
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };

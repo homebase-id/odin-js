@@ -3,7 +3,7 @@ import {
   RichTextRenderer,
   t,
   useBiography,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { OdinImage } from '@homebase-id/ui-lib';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
@@ -60,7 +60,7 @@ const ExperienceBlock = ({
   lastModified: number | undefined;
   className?: string;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const domain = link ? new URL(link).hostname : undefined;
 
   return (
@@ -69,7 +69,7 @@ const ExperienceBlock = ({
     >
       {imageFileId ? (
         <OdinImage
-          dotYouClient={dotYouClient}
+          odinClient={odinClient}
           odinId={odinId}
           targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
           fileId={imageFileId}

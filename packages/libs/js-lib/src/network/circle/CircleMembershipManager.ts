@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../core/DotYouClient';
+import { OdinClient } from '../../core/OdinClient';
 import { CircleGrant } from './CircleDataTypes';
 
 const connectionsRoot = '/circles/connections/circles';
@@ -6,10 +6,10 @@ const membershipRoot = '/circles/membership';
 
 //Handles management of Circles
 export const addMemberToCircle = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   membershipGrant: { odinId: string; circleId: string }
 ) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = connectionsRoot + '/add';
 
   return client
@@ -17,14 +17,14 @@ export const addMemberToCircle = async (
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export const removeMemberFromCircle = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   membershipGrant: { odinId: string; circleId: string }
 ) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = connectionsRoot + '/revoke';
 
   return client
@@ -32,7 +32,7 @@ export const removeMemberFromCircle = async (
     .then((response) => {
       return response.data;
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };
 
 export interface Membership {
@@ -42,17 +42,17 @@ export interface Membership {
 }
 
 export const fetchMembersOfCircle = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   circleId: string
 ): Promise<Membership[]> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const url = membershipRoot + '/list';
 
   return client
     .post<Membership[]>(url, { circleId: circleId })
     .then((response) => response.data)
     .catch((err) => {
-      dotYouClient.handleErrorResponse(err);
+      odinClient.handleErrorResponse(err);
       return [];
     });
 };

@@ -2,7 +2,7 @@ import { FC, ReactNode, Suspense, lazy } from 'react';
 import { useTheme } from '../../../hooks/theme/useTheme';
 import { ScrollRestoration } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Toaster, useDotYouClientContext, useRawImage } from '@homebase-id/common-app';
+import { Toaster, useOdinClientContext, useRawImage } from '@homebase-id/common-app';
 import { GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { HomePageConfig } from '@homebase-id/js-lib/public';
 
@@ -18,7 +18,7 @@ interface LayoutProps {
 }
 
 export const Layout: FC<LayoutProps> = ({ children }) => {
-  const isOwner = useDotYouClientContext().isOwner();
+  const isOwner = useOdinClientContext().isOwner();
 
   return (
     <NoLayout>
@@ -40,7 +40,7 @@ export const Layout: FC<LayoutProps> = ({ children }) => {
 };
 
 export const NoLayout: FC<LayoutProps> = ({ children }) => {
-  const isOwner = useDotYouClientContext().isOwner();
+  const isOwner = useOdinClientContext().isOwner();
   const { colors, favicon, imageFileId } = useTheme();
 
   const { data: imageData } = useRawImage({

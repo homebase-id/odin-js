@@ -6,18 +6,18 @@ import {
   saveProfileSection,
 } from '@homebase-id/js-lib/profile';
 import { useAttributes } from './useAttributes';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 export const useProfileSections = ({ profileId }: { profileId?: string }) => {
   const queryClient = useQueryClient();
   const { mutateAsync: removeAttributes } = useAttributes({}).removeAttributes;
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const fetchSections = async ({ profileId }: { profileId: string }) => {
     if (!profileId) {
       return [];
     }
-    const definitions = await getProfileSections(dotYouClient, profileId);
+    const definitions = await getProfileSections(odinClient, profileId);
 
     return definitions;
   };
@@ -29,7 +29,7 @@ export const useProfileSections = ({ profileId }: { profileId?: string }) => {
     profileId: string;
     profileSection: ProfileSection;
   }) => {
-    await saveProfileSection(dotYouClient, profileId, profileSection);
+    await saveProfileSection(odinClient, profileId, profileSection);
     return { profileId, profileSection };
   };
 
@@ -42,7 +42,7 @@ export const useProfileSections = ({ profileId }: { profileId?: string }) => {
   }) => {
     await removeAttributes({ profileId: profileId, sectionId: profileSection.sectionId });
 
-    return await removeProfileSection(dotYouClient, profileId, profileSection.sectionId);
+    return await removeProfileSection(odinClient, profileId, profileSection.sectionId);
   };
 
   return {

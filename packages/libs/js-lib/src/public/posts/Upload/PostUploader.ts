@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../../core/DotYouClient';
+import { OdinClient } from '../../../core/OdinClient';
 import { patchFile, uploadFile } from '../../../core/DriveData/Upload/DriveFileUploader';
 import {
   PriorityOptions,
@@ -45,7 +45,7 @@ import {
 export const POST_LINKS_PAYLOAD_KEY = 'pst_links';
 
 export const savePost = async <T extends PostContent>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   file: HomebaseFile<T> | NewHomebaseFile<T>,
   odinId: string | undefined,
   channelId: string,
@@ -59,7 +59,7 @@ export const savePost = async <T extends PostContent>(
     throw new Error('[odin-js] PostUploader: ACL is required to save a post');
 
   if (!file.fileMetadata.appData.content.authorOdinId)
-    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getHostIdentity();
+    file.fileMetadata.appData.content.authorOdinId = odinClient.getHostIdentity();
 
   if (!file.fileMetadata.appData.content.id) {
     // The content id is set once, and then never updated to keep the permalinks correct at all times; Even when the slug changes
@@ -69,12 +69,12 @@ export const savePost = async <T extends PostContent>(
   } else if (!file.fileId && !odinId) {
     // Check if fileMetadata.appData.content.id already exists and with which fileId if it does
     file.fileId =
-      (await getPost(dotYouClient, channelId, file.fileMetadata.appData.content.id))?.fileId ??
+      (await getPost(odinClient, channelId, file.fileMetadata.appData.content.id))?.fileId ??
       undefined;
   }
 
   if (!file.fileMetadata.appData.content.authorOdinId)
-    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getHostIdentity();
+    file.fileMetadata.appData.content.authorOdinId = odinClient.getHostIdentity();
 
   // Delete embeddedPost of embeddedPost (we don't want to embed an embed)
   if (file.fileMetadata.appData.content.embeddedPost) {
@@ -88,7 +88,7 @@ export const savePost = async <T extends PostContent>(
       );
     }
     return await updatePost(
-      dotYouClient,
+      odinClient,
       odinId,
       file as HomebaseFile<T>,
       channelId,
@@ -104,7 +104,7 @@ export const savePost = async <T extends PostContent>(
     }
 
     return await uploadPost(
-      dotYouClient,
+      odinClient,
       odinId,
       file as NewHomebaseFile<T>,
       channelId,
@@ -116,7 +116,7 @@ export const savePost = async <T extends PostContent>(
 };
 
 const uploadPost = async <T extends PostContent>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string | undefined,
   file: NewHomebaseFile<T>,
   channelId: string,
@@ -179,7 +179,7 @@ const uploadPost = async <T extends PostContent>(
     },
   };
 
-  if (await hasConflictingSlug(dotYouClient, odinId, file, channelId)) {
+  if (await hasConflictingSlug(odinClient, odinId, file, channelId)) {
     // There is clash with an existing slug
     file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
       }-${new Date().getTime()}`;
@@ -190,7 +190,7 @@ const uploadPost = async <T extends PostContent>(
 
   if (!odinId) {
     const result = await uploadFile(
-      dotYouClient,
+      odinClient,
       instructionSet,
       metadata,
       payloads,
@@ -212,7 +212,7 @@ const uploadPost = async <T extends PostContent>(
     };
 
     const result = await uploadFileOverPeer(
-      dotYouClient,
+      odinClient,
       transitInstructionSet,
       metadata,
       payloads,
@@ -227,7 +227,7 @@ const uploadPost = async <T extends PostContent>(
 };
 
 const updatePost = async <T extends PostContent>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   remoteOdinId: string | undefined,
   file: HomebaseFile<T>,
   channelId: string,
@@ -235,17 +235,17 @@ const updatePost = async <T extends PostContent>(
   onVersionConflict?: () => void,
   onUpdate?: (progress: number) => void
 ): Promise<UploadResult | UpdateResult> => {
-  const odinId = remoteOdinId === dotYouClient.getHostIdentity() ? undefined : remoteOdinId;
+  const odinId = remoteOdinId === odinClient.getHostIdentity() ? undefined : remoteOdinId;
 
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const header = odinId
     ? await getFileHeaderBytesOverPeerByGlobalTransitId(
-      dotYouClient,
+      odinClient,
       odinId,
       targetDrive,
       file.fileMetadata.globalTransitId as string
     )
-    : await getFileHeader(dotYouClient, targetDrive, file.fileId as string);
+    : await getFileHeader(odinClient, targetDrive, file.fileId as string);
 
   if (!header) throw new Error('[odin-js] PostUploader: Cannot update a post that does not exist');
 
@@ -307,7 +307,7 @@ const updatePost = async <T extends PostContent>(
   }
 
   return await patchPost(
-    dotYouClient,
+    odinClient,
     odinId,
     file,
     channelId,
@@ -318,7 +318,7 @@ const updatePost = async <T extends PostContent>(
 };
 
 const patchPost = async <T extends PostContent>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string | undefined,
   file: HomebaseFile<T>,
   channelId: string,
@@ -333,7 +333,7 @@ const patchPost = async <T extends PostContent>(
     SecurityGroupType.Authenticated
   );
 
-  if (await hasConflictingSlug(dotYouClient, odinId, file, channelId)) {
+  if (await hasConflictingSlug(odinClient, odinId, file, channelId)) {
     // There is clash with an existing slug
     file.fileMetadata.appData.content.slug = `${file.fileMetadata.appData.content.slug
       }-${new Date().getTime()}`;
@@ -348,7 +348,7 @@ const patchPost = async <T extends PostContent>(
 
   // decrypt keyheader;
   const decryptedKeyHeader = encryptedKeyHeader
-    ? await decryptKeyHeader(dotYouClient, encryptedKeyHeader)
+    ? await decryptKeyHeader(odinClient, encryptedKeyHeader)
     : undefined;
 
   const {
@@ -408,7 +408,7 @@ const patchPost = async <T extends PostContent>(
     };
 
   const updateResult = await patchFile(
-    dotYouClient,
+    odinClient,
     encryptedKeyHeader,
     instructionSet,
     metadata,

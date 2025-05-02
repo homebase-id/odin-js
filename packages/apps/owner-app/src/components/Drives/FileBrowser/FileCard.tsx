@@ -9,7 +9,7 @@ import {
   Image,
   ActionButton,
   t,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 
 import { Exclamation, Trash, Download } from '@homebase-id/common-app/icons';
@@ -345,12 +345,12 @@ const FileState = ({
   className?: string;
 }) => {
   const [isBroken, setIsBroken] = useState(false);
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   useEffect(() => {
     (async () => {
       try {
         const keyheader = file.fileMetadata.isEncrypted
-          ? await decryptKeyHeader(dotYouClient, file.sharedSecretEncryptedKeyHeader)
+          ? await decryptKeyHeader(odinClient, file.sharedSecretEncryptedKeyHeader)
           : undefined;
         const parsedContent = await decryptJsonContent(file.fileMetadata, keyheader);
 

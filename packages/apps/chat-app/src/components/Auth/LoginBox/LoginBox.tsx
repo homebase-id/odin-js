@@ -11,7 +11,7 @@ import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { MinimalLayout } from '../../ui/Layout/Layout';
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import { ApiType, OdinClient } from '@homebase-id/js-lib/core';
 
 const AUTHORIZE_PATH = '/api/owner/v1/youauth/authorize';
 
@@ -35,7 +35,7 @@ export const LoginBox = () => {
   const isAutoAuthorize = window.location.pathname.startsWith(OWNER_APPS_ROOT);
 
   useEffect(() => {
-    const host = new DotYouClient({
+    const host = new OdinClient({
       hostIdentity: window.location.hostname,
       api: ApiType.Guest,
     }).getRoot();

@@ -5,20 +5,20 @@ import {
   fetchMailSettings,
   uploadMailSettings,
 } from '../../providers/MailSettingsProvider';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 
 export const useMailSettings = () => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
 
   const getMailSettings = async () => {
-    return await fetchMailSettings(dotYouClient);
+    return await fetchMailSettings(odinClient);
   };
 
   const saveMailSettings = async (
     settings: HomebaseFile<MailSettings> | NewHomebaseFile<MailSettings>
   ) => {
-    return await uploadMailSettings(dotYouClient, settings);
+    return await uploadMailSettings(odinClient, settings);
   };
 
   return {

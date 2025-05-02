@@ -1,4 +1,4 @@
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   ConversationMetadata,
@@ -15,7 +15,7 @@ export const ConversationListItem = ({
   onClick: () => void;
   isActive: boolean;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const recipients = conversation.fileMetadata.appData.content.recipients.filter(
     (recipient) => recipient !== loggedOnIdentity
   );

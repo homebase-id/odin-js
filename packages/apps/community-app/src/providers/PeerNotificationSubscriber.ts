@@ -1,11 +1,11 @@
-import { DotYouClient } from '@homebase-id/js-lib/core';
+import { OdinClient } from '@homebase-id/js-lib/core';
 
 export const SubscribeToPeerNotifications = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   peerOdinId: string,
   peerSubscriptionId: string
 ): Promise<boolean> => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = odinClient.createAxiosClient();
 
   ///api/apps/v1/notify/peer/subscriptions/push-notification
   return await axiosClient

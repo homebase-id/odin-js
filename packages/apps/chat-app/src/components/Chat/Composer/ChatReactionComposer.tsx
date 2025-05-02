@@ -2,7 +2,7 @@ import { Lol } from '@homebase-id/common-app/icons';
 import {
   ReactionsBar,
   t,
-  useDotYouClientContext,
+  useOdinClientContext,
   useMostSpace,
   useOutsideTrigger,
 } from '@homebase-id/common-app';
@@ -19,7 +19,7 @@ export const ChatReactionComposer = ({
   conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
   msg: HomebaseFile<ChatMessage>;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const [isReact, setIsReact] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOutsideTrigger(wrapperRef, () => setIsReact(false));

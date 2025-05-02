@@ -2,7 +2,7 @@ import {
   getPostQueryOptions,
   NotFound,
   useChannels,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { Loader } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
@@ -14,7 +14,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 export const NavigateToReferencedPost = () => {
   const { postKey } = useParams();
   const navigate = useNavigate();
-  const identity = useDotYouClientContext().getHostIdentity();
+  const identity = useOdinClientContext().getHostIdentity();
 
   const post = useReferencedPost(postKey);
   useEffect(() => {
@@ -43,7 +43,7 @@ export const NavigateToReferencedPost = () => {
 
 const useReferencedPost = (postKey: string | undefined) => {
   const [post, setPost] = useState<HomebaseFile<PostContent> | null>(null);
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
   const queryClient = useQueryClient();
   const { data: allChannels } = useChannels({ isOwner: true, isAuthenticated: true });
 
@@ -52,7 +52,7 @@ const useReferencedPost = (postKey: string | undefined) => {
 
     allChannels?.forEach(async (channel) => {
       const post = await queryClient.fetchQuery(
-        getPostQueryOptions(dotYouClient, queryClient, true, undefined, channel, postKey)
+        getPostQueryOptions(odinClient, queryClient, true, undefined, channel, postKey)
       );
       if (post) {
         setPost(post);

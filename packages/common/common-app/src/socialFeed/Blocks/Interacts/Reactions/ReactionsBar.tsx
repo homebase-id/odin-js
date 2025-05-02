@@ -10,7 +10,7 @@ import { useMostSpace } from '../../../../hooks/intersection/useMostSpace';
 import { EmojiPicker } from '../EmojiPicker/EmojiPicker';
 import { Emojis } from '../../../../ui/Icons';
 import { t } from '../../../../helpers/i18n/dictionary';
-import { useDotYouClientContext, usePortal } from '../../../../hooks';
+import { useOdinClientContext, usePortal } from '../../../../hooks';
 
 export const SocialReactionsBar = forwardRef(
   (
@@ -36,7 +36,7 @@ export const SocialReactionsBar = forwardRef(
     const [isHover, setIsHover] = useState(false);
     const addError = useErrors().add;
 
-    const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+    const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
     const {
       saveEmoji: { mutate: postEmoji, error: postEmojiError },
       removeEmoji: { mutate: removeEmoji, error: removeEmojiError },

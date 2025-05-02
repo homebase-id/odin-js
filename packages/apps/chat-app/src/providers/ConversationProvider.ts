@@ -1,5 +1,5 @@
 import {
-  DotYouClient,
+  OdinClient,
   HomebaseFile,
   FileQueryParams,
   GetBatchQueryResultOptions,
@@ -88,7 +88,7 @@ export interface GroupConversation extends BaseConversation {
 export type Conversation = SingleConversation | GroupConversation;
 
 export const getConversations = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   cursorState: string | undefined,
   pageSize: number
 ) => {
@@ -103,7 +103,7 @@ export const getConversations = async (
     includeMetadataHeader: true,
   };
 
-  const response = await queryBatch(dotYouClient, params, ro);
+  const response = await queryBatch(odinClient, params, ro);
 
   if (!response) return null;
 
@@ -112,41 +112,41 @@ export const getConversations = async (
     searchResults:
       ((await Promise.all(
         response.searchResults
-          .map(async (result) => await dsrToConversation(dotYouClient, result, ChatDrive, true))
+          .map(async (result) => await dsrToConversation(odinClient, result, ChatDrive, true))
           .filter(Boolean)
       )) as HomebaseFile<UnifiedConversation, ConversationMetadata>[]) || [],
   };
 };
 
-export const getConversation = async (dotYouClient: DotYouClient, conversationId: string) => {
+export const getConversation = async (odinClient: OdinClient, conversationId: string) => {
   if (conversationId === ConversationWithYourselfId) return ConversationWithYourself;
 
   const conversationHeader = await getFileHeaderByUniqueId<string>(
-    dotYouClient,
+    odinClient,
     ChatDrive,
     conversationId
   );
   if (!conversationHeader) return null;
 
-  return dsrToConversation(dotYouClient, conversationHeader, ChatDrive, true);
+  return dsrToConversation(odinClient, conversationHeader, ChatDrive, true);
 };
 
 export const dsrToConversation = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<UnifiedConversation, ConversationMetadata> | null> => {
   try {
     const attrContent = await getContentFromHeaderOrPayload<Conversation>(
-      dotYouClient,
+      odinClient,
       targetDrive,
       dsr,
       includeMetadataHeader
     );
     if (!attrContent) return null;
 
-    const identity = dotYouClient.getHostIdentity();
+    const identity = odinClient.getHostIdentity();
     const conversation: HomebaseFile<UnifiedConversation> = {
       ...dsr,
       fileMetadata: {
@@ -173,7 +173,7 @@ export const dsrToConversation = async (
       if (localContent) {
         try {
           const localMetadata = await getLocalContentFromHeader<ConversationMetadata>(
-            dotYouClient,
+            odinClient,
             ChatDrive,
             conversation,
             true
@@ -190,7 +190,7 @@ export const dsrToConversation = async (
 
       // TODO: remove at any point after july 2025 (couple months after the deprecation of the local metadata file)
       const serverFile = await getConversationMetadata(
-        dotYouClient,
+        odinClient,
         conversation.fileMetadata.appData.uniqueId as string
       );
       return (
@@ -215,7 +215,7 @@ export const dsrToConversation = async (
 };
 
 export const uploadConversation = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   conversation:
     | NewHomebaseFile<UnifiedConversation, ConversationMetadata>
     | HomebaseFile<UnifiedConversation, ConversationMetadata>,
@@ -266,7 +266,7 @@ export const uploadConversation = async (
   };
 
   return await uploadFile(
-    dotYouClient,
+    odinClient,
     uploadInstructions,
     uploadMetadata,
     payloads,
@@ -277,13 +277,13 @@ export const uploadConversation = async (
 };
 
 export const updateConversation = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>,
   imagePayload: Blob | null | undefined, // undefined means no change
   distribute = false,
   ignoreConflict = false
 ): Promise<UpdateResult | void> => {
-  const identity = dotYouClient.getHostIdentity();
+  const identity = odinClient.getHostIdentity();
 
   if (!conversation.fileId) throw new Error('Message does not have a fileId');
   const recipients = conversation.fileMetadata.appData.content.recipients.filter(
@@ -345,7 +345,7 @@ export const updateConversation = async (
   };
 
   return await patchFile(
-    dotYouClient,
+    odinClient,
     conversation.sharedSecretEncryptedKeyHeader,
     uploadInstructions,
     uploadMetadata,
@@ -355,14 +355,14 @@ export const updateConversation = async (
     !ignoreConflict
       ? async () => {
         const existingConversation = await getConversation(
-          dotYouClient,
+          odinClient,
           conversation.fileMetadata.appData.uniqueId as string
         );
         if (!existingConversation) return;
         conversation.fileMetadata.versionTag = existingConversation.fileMetadata.versionTag;
         conversation.sharedSecretEncryptedKeyHeader =
           existingConversation.sharedSecretEncryptedKeyHeader;
-        return updateConversation(dotYouClient, conversation, imagePayload, distribute, true);
+        return updateConversation(odinClient, conversation, imagePayload, distribute, true);
       }
       : () => {
         // We just supress the warning; As we are ignoring the conflict following @param ignoreConflict
@@ -379,13 +379,13 @@ export interface ConversationMetadata {
  * @deprecated Use getConversation instead
  */
 export const getConversationMetadata = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   conversationId: string
 ) => {
   if (conversationId === ConversationWithYourselfId) return null;
 
   const result = await queryBatch(
-    dotYouClient,
+    odinClient,
     {
       fileType: [CHAT_CONVERSATION_LOCAL_METADATA_FILE_TYPE],
       tagsMatchAtLeastOne: [conversationId],
@@ -396,18 +396,18 @@ export const getConversationMetadata = async (
 
   if (!result || !result.searchResults?.length) return null;
 
-  return dsrToConversationMetadata(dotYouClient, result.searchResults[0], ChatDrive, true);
+  return dsrToConversationMetadata(odinClient, result.searchResults[0], ChatDrive, true);
 };
 
 const dsrToConversationMetadata = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<ConversationMetadata> | null> => {
   try {
     const attrContent = await getContentFromHeaderOrPayload<ConversationMetadata>(
-      dotYouClient,
+      odinClient,
       targetDrive,
       dsr,
       includeMetadataHeader

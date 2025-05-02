@@ -70,11 +70,11 @@ import {
 } from '../hooks/auth/useAuth';
 import { useIsConfigured } from '../hooks/configure/useIsConfigured';
 import {
-  DotYouClientProvider,
+  OdinClientProvider,
   ErrorBoundary,
   NotFound,
   OdinQueryClient,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { useOwnerInboxProcessor } from '../hooks/inbox/useOwnerInboxProcessor';
 
@@ -244,7 +244,7 @@ function App() {
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
       <OdinQueryClient app="owner" type="indexeddb">
-        <DotYouClientProvider>
+        <OdinClientProvider>
           <RouterProvider
             router={router}
             fallbackElement={<></>}
@@ -252,7 +252,7 @@ function App() {
               v7_startTransition: true,
             }}
           />
-        </DotYouClientProvider>
+        </OdinClientProvider>
       </OdinQueryClient>
     </HelmetProvider>
   );
@@ -262,7 +262,7 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
   useValidateAuthorization();
   const location = useLocation();
 
-  const isAuthenticated = useDotYouClientContext().isAuthenticated();
+  const isAuthenticated = useOdinClientContext().isAuthenticated();
   const { data: isConfigured, isFetched } = useIsConfigured().isConfigured;
   useOwnerInboxProcessor(isAuthenticated);
 

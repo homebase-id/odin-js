@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from 'axios';
-import { DotYouClient } from '../../../core/DotYouClient';
+import { OdinClient } from '../../../core/OdinClient';
 import {
   FileQueryParams,
   GetBatchQueryResultOptions,
@@ -26,10 +26,10 @@ interface QueryBatchParamsWithFileState extends Omit<FileQueryParams, 'fileState
 export const queryBatchOverPeer = async <
   T extends QueryBatchParamsWithFileState | QueryBatchParamsWithoutFileState,
   R = T extends QueryBatchParamsWithFileState
-    ? QueryBatchResponseWithDeletedResults
-    : QueryBatchResponse,
+  ? QueryBatchResponseWithDeletedResults
+  : QueryBatchResponse,
 >(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   params: T,
   ro?: GetBatchQueryResultOptions,
@@ -46,7 +46,7 @@ export const queryBatchOverPeer = async <
   };
   delete strippedQueryParams.systemFileType;
 
-  const client = dotYouClient.createAxiosClient({
+  const client = odinClient.createAxiosClient({
     systemFileType: params.systemFileType,
   });
 
@@ -67,7 +67,7 @@ export const queryBatchOverPeer = async <
             response.data as QueryBatchResponseWithDeletedResults | QueryBatchResponse
           ).searchResults.map(async (dsr) => {
             const keyheader = dsr.fileMetadata.isEncrypted
-              ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
+              ? await decryptKeyHeader(odinClient, dsr.sharedSecretEncryptedKeyHeader)
               : undefined;
 
             dsr.fileMetadata.appData.content = await decryptJsonContent(
@@ -93,7 +93,7 @@ interface TransitQueryModifiedRequest {
 
 /// Query methods:
 export const queryModifiedOverPeer = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string,
   params: FileQueryParams,
   ro?: GetModifiedResultOptions,
@@ -107,7 +107,7 @@ export const queryModifiedOverPeer = async (
   const strippedQueryParams = { ...params };
   delete strippedQueryParams.systemFileType;
 
-  const client = dotYouClient.createAxiosClient({
+  const client = odinClient.createAxiosClient({
     systemFileType: params.systemFileType,
   });
 
@@ -129,7 +129,7 @@ export const queryModifiedOverPeer = async (
           searchResults: await Promise.all(
             response.data.searchResults.map(async (dsr) => {
               const keyheader = dsr.fileMetadata.isEncrypted
-                ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
+                ? await decryptKeyHeader(odinClient, dsr.sharedSecretEncryptedKeyHeader)
                 : undefined;
 
               dsr.fileMetadata.appData.content = await decryptJsonContent(

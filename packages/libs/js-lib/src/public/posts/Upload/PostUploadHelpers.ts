@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../../core/DotYouClient';
+import { OdinClient } from '../../../core/OdinClient';
 import {
   HomebaseFile,
   EmbeddedThumb,
@@ -64,8 +64,8 @@ export const getPayloadForLinkPreview = async (
 
   const imageBlob = imageUrl
     ? new Blob([base64ToUint8Array(imageUrl.split(',')[1])], {
-        type: imageUrl.split(';')[0].split(':')[1],
-      })
+      type: imageUrl.split(';')[0].split(':')[1],
+    })
     : undefined;
 
   const { tinyThumb } = imageBlob
@@ -83,23 +83,23 @@ export const getPayloadForLinkPreview = async (
 };
 
 export const hasConflictingSlug = async <T extends PostContent>(
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId: string | undefined,
   file: HomebaseFile<T> | NewHomebaseFile<T>,
   channelId: string
 ) => {
   const existingPostWithThisSlug = odinId
     ? await getPostBySlugOverPeer(
-        dotYouClient,
-        odinId,
-        channelId,
-        file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
-      )
+      odinClient,
+      odinId,
+      channelId,
+      file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
+    )
     : await getPostBySlug(
-        dotYouClient,
-        channelId,
-        file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
-      );
+      odinClient,
+      channelId,
+      file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
+    );
 
   if (!existingPostWithThisSlug) {
     return false;
@@ -112,9 +112,9 @@ export const hasConflictingSlug = async <T extends PostContent>(
     ) &&
     (odinId
       ? !stringGuidsEqual(
-          existingPostWithThisSlug?.fileMetadata.globalTransitId,
-          file?.fileMetadata.globalTransitId
-        )
+        existingPostWithThisSlug?.fileMetadata.globalTransitId,
+        file?.fileMetadata.globalTransitId
+      )
       : !stringGuidsEqual(existingPostWithThisSlug?.fileId, file.fileId))
   );
 };
@@ -133,7 +133,7 @@ export const getUploadFileMetadata = async <T extends PostContent>(
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-      SecurityGroupType.Authenticated
+    SecurityGroupType.Authenticated
   );
 
   const payloadJson: string = jsonStringify64({ ...file.fileMetadata.appData.content });

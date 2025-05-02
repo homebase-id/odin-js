@@ -1,5 +1,5 @@
 import { DriveDefinition } from './DriveTypes';
-import { ApiType, DotYouClient } from '../../DotYouClient';
+import { ApiType, OdinClient } from '../../OdinClient';
 import {
   assertIfDefined,
   drivesEqual,
@@ -13,10 +13,10 @@ export const TRANSIENT_TEMP_DRIVE_ALIAS = '90f5e74ab7f9efda0ac298373a32ad8c';
 const isDebug = hasDebugFlag();
 
 export const getDrives = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   params: PagingOptions
 ): Promise<PagedResult<DriveDefinition>> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
 
   return client.post<PagedResult<DriveDefinition>>('drive/mgmt', params).then((response) => {
     return {
@@ -24,15 +24,15 @@ export const getDrives = async (
       results: isDebug
         ? response?.data?.results
         : response?.data?.results?.filter(
-            (drive) => !stringGuidsEqual(drive.targetDriveInfo.alias, TRANSIENT_TEMP_DRIVE_ALIAS)
-          ),
+          (drive) => !stringGuidsEqual(drive.targetDriveInfo.alias, TRANSIENT_TEMP_DRIVE_ALIAS)
+        ),
     };
   });
 };
 
 //returns all drives for a given type
 export const getDrivesByType = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   type: string,
   pageNumber: number,
   pageSize: number
@@ -43,8 +43,8 @@ export const getDrivesByType = async (
     pageSize: pageSize,
   };
 
-  if (dotYouClient.getType() === ApiType.Owner) {
-    const client = dotYouClient.createAxiosClient();
+  if (odinClient.getType() === ApiType.Owner) {
+    const client = odinClient.createAxiosClient();
     return client
       .get<PagedResult<DriveDefinition>>('drive/mgmt/type?' + stringifyToQueryParams(params))
       .then((response) => {
@@ -53,13 +53,13 @@ export const getDrivesByType = async (
           results: isDebug
             ? response?.data?.results
             : response?.data?.results?.filter(
-                (drive) =>
-                  !stringGuidsEqual(drive.targetDriveInfo.alias, TRANSIENT_TEMP_DRIVE_ALIAS)
-              ),
+              (drive) =>
+                !stringGuidsEqual(drive.targetDriveInfo.alias, TRANSIENT_TEMP_DRIVE_ALIAS)
+            ),
         };
       });
   } else {
-    const client = dotYouClient.createAxiosClient();
+    const client = odinClient.createAxiosClient();
     return client.get('drive/metadata/type?' + stringifyToQueryParams(params)).then((response) => {
       return {
         ...response.data,
@@ -72,7 +72,7 @@ export const getDrivesByType = async (
 };
 
 export const ensureDrive = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   name: string,
   metadata: string | undefined,
@@ -83,8 +83,8 @@ export const ensureDrive = async (
   assertIfDefined('name', name);
 
   //create the drive if it does not exist
-  const client = dotYouClient.createAxiosClient();
-  const allDrives = await getDrives(dotYouClient, { pageNumber: 1, pageSize: 1000 });
+  const client = odinClient.createAxiosClient();
+  const allDrives = await getDrives(odinClient, { pageNumber: 1, pageSize: 1000 });
 
   const foundDrive = allDrives.results.find((d) => drivesEqual(d.targetDriveInfo, targetDrive));
 
@@ -108,14 +108,14 @@ export const ensureDrive = async (
 };
 
 export const editDriveMetadata = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   newMetadata: string
 ) => {
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newMetadata', newMetadata);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const data = {
     targetDrive: targetDrive,
     metadata: newMetadata,
@@ -131,14 +131,14 @@ export const editDriveMetadata = async (
 };
 
 export const editDriveAllowAnonymousRead = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   newAllowAnonymousRead: boolean
 ) => {
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newAllowAnonymousRead', newAllowAnonymousRead);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const data = {
     targetDrive: targetDrive,
     allowAnonymousReads: newAllowAnonymousRead,
@@ -154,14 +154,14 @@ export const editDriveAllowAnonymousRead = async (
 };
 
 export const editDriveAllowSubscriptions = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   newAllowSubscriptions: boolean
 ) => {
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newAllowSubscriptions', newAllowSubscriptions);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const data = {
     targetDrive: targetDrive,
     allowSubscriptions: newAllowSubscriptions,
@@ -177,14 +177,14 @@ export const editDriveAllowSubscriptions = async (
 };
 
 export const editDriveAttributes = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive,
   newAttributes: { [key: string]: string }
 ) => {
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newAttributes', newAttributes);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   const data = {
     targetDrive: targetDrive,
     attributes: newAttributes,
@@ -217,12 +217,12 @@ export interface DriveStatus {
 }
 
 export const getDriveStatus = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   targetDrive: TargetDrive
 ): Promise<DriveStatus> => {
   assertIfDefined('targetDrive', targetDrive);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
 
   return client
     .get<DriveStatus>('/drive/status?' + stringifyToQueryParams(targetDrive))

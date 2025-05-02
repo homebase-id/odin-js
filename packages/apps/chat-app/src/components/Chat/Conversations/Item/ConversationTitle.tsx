@@ -1,6 +1,6 @@
-import { useDotYouClientContext, ConnectionName, OwnerName, t } from '@homebase-id/common-app';
+import { useOdinClientContext, ConnectionName, OwnerName, t } from '@homebase-id/common-app';
 import { House } from '@homebase-id/common-app/icons';
-import { HomebaseFile, DotYouClient, ApiType } from '@homebase-id/js-lib/core';
+import { HomebaseFile, OdinClient, ApiType } from '@homebase-id/js-lib/core';
 import {
   UnifiedConversation,
   ConversationMetadata,
@@ -16,7 +16,7 @@ export const ConversationTitle = ({
   sizeClassName?: string;
   includeLink?: boolean;
 }) => {
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   if (!loggedOnIdentity) return null;
 
   const conversationContent = conversation.fileMetadata.appData.content;
@@ -36,7 +36,7 @@ export const ConversationTitle = ({
             <small className="flex flex-row gap-2 text-sm">
               <House className="h-5 w-5" />
               <a
-                href={new DotYouClient({
+                href={new OdinClient({
                   hostIdentity: recipient,
                   api: ApiType.Guest,
                 }).getRoot()}

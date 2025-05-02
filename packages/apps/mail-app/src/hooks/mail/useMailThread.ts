@@ -9,7 +9,7 @@ import {
   REMOVE_ARCHIVAL_STATUS,
   updateMail,
 } from '../../providers/MailProvider';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { useOdinClientContext } from '@homebase-id/common-app';
 import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useMailConversations } from './useMailConversations';
@@ -17,18 +17,18 @@ import { useMailConversations } from './useMailConversations';
 export const useMailThread = (props?: { threadId: string | undefined }) => {
   const { threadId } = props || {};
   const queryClient = useQueryClient();
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const removeMailThread = async (mailThread: HomebaseFile<MailConversation>[]) => {
     return await Promise.all(
       mailThread.map((message) => {
         if (message.fileMetadata.appData.fileType === MAIL_DRAFT_CONVERSATION_FILE_TYPE) {
-          return deleteFile(dotYouClient, MailDrive, message.fileId);
+          return deleteFile(odinClient, MailDrive, message.fileId);
         }
 
         const updatedMailMessage = { ...message };
         updatedMailMessage.fileMetadata.appData.archivalStatus = REMOVE_ARCHIVAL_STATUS;
-        return updateMail(dotYouClient, message, message.fileMetadata.payloads);
+        return updateMail(odinClient, message, message.fileMetadata.payloads);
       })
     );
   };
@@ -38,7 +38,7 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
       mailThread.map((message) => {
         const updatedMailMessage = { ...message };
         updatedMailMessage.fileMetadata.appData.archivalStatus = ARCHIVE_ARCHIVAL_STATUS;
-        return updateMail(dotYouClient, message, message.fileMetadata.payloads);
+        return updateMail(odinClient, message, message.fileMetadata.payloads);
       })
     );
   };
@@ -48,7 +48,7 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
       mailThread.map((message) => {
         const updatedMailMessage = { ...message };
         updatedMailMessage.fileMetadata.appData.archivalStatus = DEFAULT_ARCHIVAL_STATUS;
-        return updateMail(dotYouClient, message, message.fileMetadata.payloads);
+        return updateMail(odinClient, message, message.fileMetadata.payloads);
       })
     );
   };
@@ -87,15 +87,15 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
                       stringGuidsEqual(msg.fileId, conversation.fileId)
                     )
                       ? {
-                          ...conversation,
-                          fileMetadata: {
-                            ...conversation.fileMetadata,
-                            appData: {
-                              ...conversation.fileMetadata.appData,
-                              archivalStatus: REMOVE_ARCHIVAL_STATUS,
-                            },
+                        ...conversation,
+                        fileMetadata: {
+                          ...conversation.fileMetadata,
+                          appData: {
+                            ...conversation.fileMetadata.appData,
+                            archivalStatus: REMOVE_ARCHIVAL_STATUS,
                           },
-                        }
+                        },
+                      }
                       : conversation;
                   }),
                 };
@@ -133,15 +133,15 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
                       stringGuidsEqual(msg.fileId, conversation.fileId)
                     )
                       ? {
-                          ...conversation,
-                          fileMetadata: {
-                            ...conversation.fileMetadata,
-                            appData: {
-                              ...conversation.fileMetadata.appData,
-                              archivalStatus: ARCHIVE_ARCHIVAL_STATUS,
-                            },
+                        ...conversation,
+                        fileMetadata: {
+                          ...conversation.fileMetadata,
+                          appData: {
+                            ...conversation.fileMetadata.appData,
+                            archivalStatus: ARCHIVE_ARCHIVAL_STATUS,
                           },
-                        }
+                        },
+                      }
                       : conversation;
                   }),
                 };
@@ -184,15 +184,15 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
                       stringGuidsEqual(msg.fileId, conversation.fileId)
                     )
                       ? {
-                          ...conversation,
-                          fileMetadata: {
-                            ...conversation.fileMetadata,
-                            appData: {
-                              ...conversation.fileMetadata.appData,
-                              archivalStatus: DEFAULT_ARCHIVAL_STATUS,
-                            },
+                        ...conversation,
+                        fileMetadata: {
+                          ...conversation.fileMetadata,
+                          appData: {
+                            ...conversation.fileMetadata.appData,
+                            archivalStatus: DEFAULT_ARCHIVAL_STATUS,
                           },
-                        }
+                        },
+                      }
                       : conversation;
                   }),
                 };

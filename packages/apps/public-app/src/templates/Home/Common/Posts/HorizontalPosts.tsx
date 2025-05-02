@@ -1,11 +1,11 @@
-import { SubtleMessage, t, useDotYouClientContext } from '@homebase-id/common-app';
+import { SubtleMessage, t, useOdinClientContext } from '@homebase-id/common-app';
 import { useChannels } from '@homebase-id/common-app';
 import { PostChannelTeaser } from '../PostChannelTeaser/PostChannelTeaser';
 
 const HorizontalPosts = () => {
-  const dotYouClient = useDotYouClientContext();
-  const isOwner = dotYouClient.isOwner();
-  const isAuthenticated = dotYouClient.isAuthenticated();
+  const odinClient = useOdinClientContext();
+  const isOwner = odinClient.isOwner();
+  const isAuthenticated = odinClient.isAuthenticated();
 
   const { data: channels } = useChannels({ isAuthenticated, isOwner });
 

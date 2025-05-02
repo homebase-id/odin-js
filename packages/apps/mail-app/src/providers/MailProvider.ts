@@ -1,6 +1,6 @@
 import {
   CursoredResult,
-  DotYouClient,
+  OdinClient,
   HomebaseFile,
   FileQueryParams,
   GetBatchQueryResultOptions,
@@ -91,7 +91,7 @@ export const MailDrive: TargetDrive = {
 export type MailConversationsReturn = CursoredResult<HomebaseFile<MailConversation>[]>;
 
 export const getMailConversations = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   cursorState: string | undefined,
   threadId: string | undefined,
   pageSize: number
@@ -109,34 +109,34 @@ export const getMailConversations = async (
     includeTransferHistory: true,
   };
 
-  const response = await queryBatch(dotYouClient, params, ro);
+  const response = await queryBatch(odinClient, params, ro);
 
   return {
     cursorState: response.cursorState,
     results: (await Promise.all(
       response.searchResults
-        .map(async (result) => await dsrToMailConversation(dotYouClient, result, MailDrive, true))
+        .map(async (result) => await dsrToMailConversation(odinClient, result, MailDrive, true))
         .filter(Boolean)
     )) as HomebaseFile<MailConversation>[],
   };
 };
 
-export const getMailConversation = async (dotYouClient: DotYouClient, fileId: string) => {
-  const header = await getFileHeader<string>(dotYouClient, MailDrive, fileId, {
+export const getMailConversation = async (odinClient: OdinClient, fileId: string) => {
+  const header = await getFileHeader<string>(odinClient, MailDrive, fileId, {
     decrypt: false,
   });
   if (!header) return null;
 
-  return await dsrToMailConversation(dotYouClient, header, MailDrive, true);
+  return await dsrToMailConversation(odinClient, header, MailDrive, true);
 };
 
 export const uploadMail = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   conversation: NewHomebaseFile<MailConversation>,
   newMediaFiles: NewMediaFile[] | undefined,
   onVersionConflict?: () => void
 ) => {
-  const identity = dotYouClient.getHostIdentity();
+  const identity = odinClient.getHostIdentity();
   const recipients = conversation.fileMetadata.appData.content.recipients.filter(
     (recipient) => recipient !== identity
   );
@@ -149,7 +149,7 @@ export const uploadMail = async (
 
   const encryptedKeyHeader = conversation.sharedSecretEncryptedKeyHeader || GenerateKeyHeader();
   const decryptedKeyHeader = encryptedKeyHeader
-    ? await decryptKeyHeader(dotYouClient, encryptedKeyHeader)
+    ? await decryptKeyHeader(odinClient, encryptedKeyHeader)
     : undefined;
 
   const aesKey = decryptedKeyHeader?.aesKey || getRandom16ByteArray();
@@ -217,7 +217,7 @@ export const uploadMail = async (
   }
 
   const uploadResult = await uploadFile(
-    dotYouClient,
+    odinClient,
     uploadInstructions,
     uploadMetadata,
     payloads,
@@ -247,7 +247,7 @@ export const uploadMail = async (
       conversation.fileMetadata.appData.content.deliveryStatus = MailDeliveryStatus.Failed;
 
       await updateMail(
-        dotYouClient,
+        odinClient,
         conversation as HomebaseFile<MailConversation>,
         payloads.map((pyld) => {
           return {
@@ -270,12 +270,12 @@ export const uploadMail = async (
 };
 
 export const updateMail = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   conversation: HomebaseFile<MailConversation>,
   existingAndNewMediaFiles?: (NewMediaFile | MediaFile)[],
   onVersionConflict?: () => void
 ) => {
-  const identity = dotYouClient.getHostIdentity();
+  const identity = odinClient.getHostIdentity();
   const recipients = conversation.fileMetadata.appData.content.recipients.filter(
     (recipient) => recipient !== identity
   );
@@ -347,7 +347,7 @@ export const updateMail = async (
 
   // decrypt keyheader;
   const decryptedKeyHeader = encryptedKeyHeader
-    ? await decryptKeyHeader(dotYouClient, encryptedKeyHeader)
+    ? await decryptKeyHeader(odinClient, encryptedKeyHeader)
     : undefined;
 
   const { payloads: newMediaPayloads, thumbnails: newMediaThumbnails } =
@@ -374,7 +374,7 @@ export const updateMail = async (
   }
 
   const patchResult = await patchFile(
-    dotYouClient,
+    odinClient,
     conversation.sharedSecretEncryptedKeyHeader,
     uploadInstructions,
     uploadMetadata,
@@ -398,14 +398,14 @@ export const updateMail = async (
 };
 
 export const dsrToMailConversation = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<MailConversation> | null> => {
   try {
     const mailContent = await getContentFromHeaderOrPayload<MailConversation>(
-      dotYouClient,
+      odinClient,
       targetDrive,
       dsr,
       includeMetadataHeader

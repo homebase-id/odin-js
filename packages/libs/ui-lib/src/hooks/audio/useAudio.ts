@@ -2,7 +2,7 @@ import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import {
   TargetDrive,
   SystemFileType,
-  DotYouClient,
+  OdinClient,
   getPayloadBytes,
 } from '@homebase-id/js-lib/core';
 import { getDecryptedMediaUrl } from '@homebase-id/js-lib/media';
@@ -14,7 +14,7 @@ import {
 } from '@homebase-id/js-lib/peer';
 
 export const useAudio = (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   odinId?: string,
   fileId?: string | undefined,
   globalTransitId?: string | undefined,
@@ -29,7 +29,7 @@ export const useAudio = (
   fetchUrl: UseQueryResult<string | null, Error>;
   fetch: UseQueryResult<{ bytes: Uint8Array; contentType: string } | null, Error>;
 } => {
-  const localHost = dotYouClient.getHostIdentity();
+  const localHost = odinClient.getHostIdentity();
 
   const fetchAudioData = async (
     odinId: string,
@@ -44,24 +44,24 @@ export const useAudio = (
     return odinId !== localHost
       ? globalTransitId
         ? await getPayloadBytesOverPeerByGlobalTransitId(
-            dotYouClient,
-            odinId,
-            drive,
-            globalTransitId,
-            fileKey,
-            {
-              systemFileType,
-              lastModified,
-            }
-          )
-        : await getPayloadBytesOverPeer(dotYouClient, odinId, drive, fileId, fileKey, {
+          odinClient,
+          odinId,
+          drive,
+          globalTransitId,
+          fileKey,
+          {
             systemFileType,
             lastModified,
-          })
-      : await getPayloadBytes(dotYouClient, drive, fileId, fileKey, {
+          }
+        )
+        : await getPayloadBytesOverPeer(odinClient, odinId, drive, fileId, fileKey, {
           systemFileType,
           lastModified,
-        });
+        })
+      : await getPayloadBytes(odinClient, drive, fileId, fileKey, {
+        systemFileType,
+        lastModified,
+      });
   };
 
   const fetchAudioUrl = async (
@@ -78,31 +78,20 @@ export const useAudio = (
     return odinId !== localHost
       ? globalTransitId
         ? await getDecryptedMediaUrlOverPeerByGlobalTransitId(
-            dotYouClient,
-            odinId,
-            drive,
-            globalTransitId,
-            fileKey,
-            probablyEncrypted,
-            lastModified,
-            {
-              systemFileType,
-            }
-          )
+          odinClient,
+          odinId,
+          drive,
+          globalTransitId,
+          fileKey,
+          probablyEncrypted,
+          lastModified,
+          {
+            systemFileType,
+          }
+        )
         : await getDecryptedMediaUrlOverPeer(
-            dotYouClient,
-            odinId,
-            drive,
-            fileId,
-            fileKey,
-            probablyEncrypted,
-            lastModified,
-            {
-              systemFileType,
-            }
-          )
-      : await getDecryptedMediaUrl(
-          dotYouClient,
+          odinClient,
+          odinId,
           drive,
           fileId,
           fileKey,
@@ -111,7 +100,18 @@ export const useAudio = (
           {
             systemFileType,
           }
-        );
+        )
+      : await getDecryptedMediaUrl(
+        odinClient,
+        drive,
+        fileId,
+        fileKey,
+        probablyEncrypted,
+        lastModified,
+        {
+          systemFileType,
+        }
+      );
   };
 
   return {

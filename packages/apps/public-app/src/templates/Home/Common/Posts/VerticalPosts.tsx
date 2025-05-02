@@ -7,7 +7,7 @@ import {
   Label,
   SubtleMessage,
   usePostsInfinite,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { Select } from '@homebase-id/common-app';
 import { flattenInfinteData } from '@homebase-id/common-app';
@@ -33,9 +33,9 @@ const VerticalPosts = ({ className }: { className?: string }) => {
 };
 
 const ChannelSidebar = ({ className }: { className: string }) => {
-  const dotYouClient = useDotYouClientContext();
-  const isOwner = dotYouClient.isOwner();
-  const isAuthenticated = dotYouClient.isAuthenticated();
+  const odinClient = useOdinClientContext();
+  const isOwner = odinClient.isOwner();
+  const isAuthenticated = odinClient.isAuthenticated();
 
   const navigate = useNavigate();
   const { data: channels } = useChannels({ isAuthenticated, isOwner });
@@ -87,9 +87,9 @@ const ChannelSidebar = ({ className }: { className: string }) => {
 // Docs for combination of Virtual and infinite:
 // https://tanstack.com/virtual/v3/docs/examples/react/infinite-scroll
 const MainVerticalPosts = ({ className, channelId }: { className: string; channelId?: string }) => {
-  const dotYouClient = useDotYouClientContext();
-  const isOwner = dotYouClient.isOwner();
-  const isAuthenticated = dotYouClient.isAuthenticated();
+  const odinClient = useOdinClientContext();
+  const isOwner = odinClient.isOwner();
+  const isAuthenticated = odinClient.isAuthenticated();
   const { data: channels } = useChannels({ isAuthenticated, isOwner });
   const showAuthor =
     !!channels?.find(

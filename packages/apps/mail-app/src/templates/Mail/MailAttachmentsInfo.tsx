@@ -12,7 +12,7 @@ import {
   MAIL_ROOT_PATH,
   OwnerImage,
   t,
-  useDotYouClientContext,
+  useOdinClientContext,
   usePortal,
 } from '@homebase-id/common-app';
 import { OdinPreviewImage } from '@homebase-id/ui-lib';
@@ -102,7 +102,7 @@ const FileGroup = ({
   fileName: string;
   onClose?: () => void;
 }) => {
-  const dotYouClient = useDotYouClientContext();
+  const odinClient = useOdinClientContext();
 
   const hasMultiple = files.length > 1;
 
@@ -117,7 +117,7 @@ const FileGroup = ({
         >
           {firstFile.contentType.startsWith('image/') ? (
             <OdinPreviewImage
-              dotYouClient={dotYouClient}
+              odinClient={odinClient}
               fileId={firstFile.fileId}
               fileKey={firstFile.key}
               targetDrive={MailDrive}
@@ -153,8 +153,8 @@ const FileGroup = ({
 };
 
 export const AttachmentFile = ({ file }: { file: ExtendedFile }) => {
-  const dotYouClient = useDotYouClientContext();
-  const identity = dotYouClient.getHostIdentity();
+  const odinClient = useOdinClientContext();
+  const identity = odinClient.getHostIdentity();
   const navigate = useNavigate();
   const { filter } = useParams();
   const fileName =
@@ -175,7 +175,7 @@ export const AttachmentFile = ({ file }: { file: ExtendedFile }) => {
     >
       {file.contentType.startsWith('image/') ? (
         <OdinPreviewImage
-          dotYouClient={dotYouClient}
+          odinClient={odinClient}
           fileId={file.fileId}
           fileKey={file.key}
           targetDrive={MailDrive}

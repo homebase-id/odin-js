@@ -1,11 +1,11 @@
-import { DotYouClient } from '@homebase-id/js-lib/core';
+import { OdinClient } from '@homebase-id/js-lib/core';
 import { assertIfDefined } from '@homebase-id/js-lib/helpers';
 
 const dataConverionRoot = '/data-conversion';
-export const autoFixConnections = async (dotYouClient: DotYouClient) => {
-  assertIfDefined('DotYouClient is required', dotYouClient);
+export const autoFixConnections = async (odinClient: OdinClient) => {
+  assertIfDefined('OdinClient is required', odinClient);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = odinClient.createAxiosClient();
   return await client
     .post<unknown>(`${dataConverionRoot}/autofix-connections`, {})
     .then((response) => {
@@ -13,5 +13,5 @@ export const autoFixConnections = async (dotYouClient: DotYouClient) => {
         throw new Error('Auto fix connections failed with status ' + response.status);
       }
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch(odinClient.handleErrorResponse);
 };

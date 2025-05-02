@@ -12,7 +12,7 @@ import {
   useCircle,
   ActionLink,
   OWNER_ROOT,
-  useDotYouClientContext,
+  useOdinClientContext,
 } from '@homebase-id/common-app';
 import { Circles, Clipboard } from '@homebase-id/common-app/icons';
 import { useState } from 'react';
@@ -24,7 +24,7 @@ export const CommunityInfoDialog = ({ onClose }: { onClose: () => void }) => {
   const { odinKey, communityKey } = useParams();
   const { data: community } = useCommunity({ odinId: odinKey, communityId: communityKey }).fetch;
 
-  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const loggedOnIdentity = useOdinClientContext().getLoggedInIdentity();
   const isCommunityOwner = community?.fileMetadata?.senderOdinId === loggedOnIdentity;
 
   const target = usePortal('modal-container');

@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../../core/DotYouClient';
+import { OdinClient } from '../../../core/OdinClient';
 import {
   GenerateKeyHeader,
   buildDescriptor,
@@ -20,7 +20,7 @@ const isDebug = hasDebugFlag();
 
 /// Upload methods
 export const uploadFileOverPeer = async (
-  dotYouClient: DotYouClient,
+  odinClient: OdinClient,
   instructions: TransitInstructionSet,
   metadata: UploadFileMetadata,
   payloads?: PayloadFile[],
@@ -34,7 +34,7 @@ export const uploadFileOverPeer = async (
   isDebug &&
     console.debug(
       'request',
-      new URL(`${dotYouClient.getEndpoint()}/transit/sender/files/send'`).pathname,
+      new URL(`${odinClient.getEndpoint()}/transit/sender/files/send'`).pathname,
       {
         instructions,
         metadata,
@@ -54,7 +54,7 @@ export const uploadFileOverPeer = async (
   };
 
   const encryptedDescriptor = await buildDescriptor(
-    dotYouClient,
+    odinClient,
     keyHeader,
     instructionsWithManifest,
     metadata
@@ -69,7 +69,7 @@ export const uploadFileOverPeer = async (
     manifest
   );
 
-  const client = dotYouClient.createAxiosClient({
+  const client = odinClient.createAxiosClient({
     overrideEncryption: true,
     systemFileType: systemFileType,
   });
@@ -103,7 +103,7 @@ export const uploadFileOverPeer = async (
   isDebug &&
     console.debug(
       'response',
-      new URL(`${dotYouClient.getEndpoint()}/transit/sender/files/send'`).pathname,
+      new URL(`${odinClient.getEndpoint()}/transit/sender/files/send'`).pathname,
       uploadResult
     );
 
