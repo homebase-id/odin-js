@@ -191,7 +191,14 @@ export const useArticleComposer = ({
 
     if (!uploadResult) throw new Error('Failed to save post');
 
+    if(!(uploadResult as UploadResult).file){
+      console.warn("No file returned on upload result; was this a Peer update?\n  If so, this can lead to a version conflict.", uploadResult)
+    }
+    
     if ((uploadResult as UploadResult).file && (uploadResult as UploadResult).newVersionTag) {
+      console.info("file uploaded pre-update metadata:", postFile.fileMetadata);
+      console.info("file uploaded pre-update new versiontag:", (uploadResult as UploadResult).newVersionTag);
+      
       setPostFile((oldPostFile) => {
         return {
           ...oldPostFile,
@@ -213,6 +220,9 @@ export const useArticleComposer = ({
           sharedSecretEncryptedKeyHeader: (uploadResult as UploadResult).keyHeader as any,
         };
       });
+
+      console.info("file uploaded post-update metadata:", postFile.fileMetadata);
+
     } else if (!postFile.fileId) {
       // We didn't get any direct info from the upload; So we need to fully load the edit page again so it can get fetched;
       window.location.href = `${FEED_ROOT_PATH}/edit/${odinId ? `${odinId}/` : ''}${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.id}`;
