@@ -162,6 +162,8 @@ export interface UploadResult {
 }
 
 export interface UpdateResult {
+  file: FileIdFileIdentifier | undefined; // undefined when locale == Peer
+  globalTransitIdFileIdentifier: GlobalTransitIdFileIdentifier;
   newVersionTag: string;
   recipientStatus: { [key: string]: TransferUploadStatus };
 }
