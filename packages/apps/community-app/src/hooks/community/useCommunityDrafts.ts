@@ -31,14 +31,8 @@ export const useCommunityDrafts = (props?: {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
-  const saveDrafts = async ({
-    drafts,
-  }: {
-    drafts: HomebaseFile<CommunityDrafts> | NewHomebaseFile<CommunityDrafts>;
-  }) => {
-    drafts.fileMetadata.appData.content.communityId = formatGuidId(
-      drafts.fileMetadata.appData.content.communityId
-    );
+  const saveDrafts = async ({drafts,}: { drafts: HomebaseFile<CommunityDrafts> | NewHomebaseFile<CommunityDrafts>; }) => {
+    drafts.fileMetadata.appData.content.communityId = formatGuidId(drafts.fileMetadata.appData.content.communityId);
     drafts.fileMetadata.appData.uniqueId = formatGuidId(drafts.fileMetadata.appData.uniqueId);
 
     let maxRetries = 5;
@@ -60,7 +54,7 @@ export const useCommunityDrafts = (props?: {
       return await uploadCommunityDrafts(dotYouClient, newlyMerged, onVersionConflict);
     };
 
-    // We cleanup the drafts only for the inital save; When we retry we want to keep the drafts to avoid bad merging
+    // We clean up the drafts only for the initial save; When we retry we want to keep the drafts to avoid bad merging
     const draftsCopy = { ...drafts };
     draftsCopy.fileMetadata.appData.content.drafts = cleanupDrafts(
       draftsCopy.fileMetadata.appData.content.drafts || {}
@@ -76,6 +70,9 @@ export const useCommunityDrafts = (props?: {
       mutationFn: saveDrafts,
 
       onMutate: async (variables) => {
+        
+        console.info("mutate called - drafts are: ", variables.drafts);
+        
         queryClient.setQueryData<HomebaseFile<CommunityDrafts>>(
           [
             'community-drafts',
@@ -103,6 +100,7 @@ export const useCommunityDrafts = (props?: {
         );
 
         if (!variables.drafts.fileId) {
+          console.info(("no drafts.fileid found"))
           // It's a new drafts file, so we need to invalidate the communities query
           invalidateCommunities(queryClient);
         }
@@ -192,6 +190,7 @@ const mergeDrafts = (
   const localContent = local.fileMetadata.appData.content;
   const serverContent = server.fileMetadata.appData.content;
 
+  console.info("mergeDrafts", local, server);
   return {
     ...server,
     fileMetadata: {
