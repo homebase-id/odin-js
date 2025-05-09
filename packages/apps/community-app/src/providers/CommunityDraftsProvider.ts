@@ -92,22 +92,34 @@ export const uploadCommunityDrafts = async (
   };
 
   if (definition.fileId) {
-    const existingDefiniton = definition as HomebaseFile<CommunityDrafts, string>;
-    const encryptedKeyHeader = existingDefiniton.sharedSecretEncryptedKeyHeader;
+    const existingDefinition = definition as HomebaseFile<CommunityDrafts, string>;
+    const encryptedKeyHeader = existingDefinition.sharedSecretEncryptedKeyHeader;
 
     const patchInstructions: UpdateLocalInstructionSet = {
       file: {
-        fileId: existingDefiniton.fileId,
+        fileId: existingDefinition.fileId,
         targetDrive: LOCAL_COMMUNITY_APP_DRIVE,
       },
-      versionTag: existingDefiniton.fileMetadata.versionTag,
+      versionTag: existingDefinition.fileMetadata.versionTag,
       locale: 'local'
     }
 
-    const patchResult = await patchFile(dotYouClient, encryptedKeyHeader, patchInstructions, metadata, payloads, undefined, undefined, onVersionConflict as () => Promise<void | UpdateResult>,
-    );
-    if (!patchResult) throw new Error(`Upload failed`);
+    console.info('patchInstructions', patchInstructions);
+    
+    const patchResult = await patchFile(
+        dotYouClient,
+        encryptedKeyHeader,
+        patchInstructions,
+        metadata,
+        payloads,
+        undefined, 
+        undefined, 
+        onVersionConflict as () => Promise<void | UpdateResult>);
+    
     console.info("community draft patch result", patchResult);
+
+    if (!patchResult) throw new Error(`Patch failed`);
+
     return patchResult;
   }
 
@@ -179,6 +191,8 @@ export const dsrToCommunityDrafts = async (
       },
     };
 
+    console.info("community dsrToCommunityDrafts result", file);
+    
     return file;
   } catch (ex) {
     console.error('[community] failed to get the CommunityDrafts of a dsr', dsr, ex);

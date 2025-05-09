@@ -55,7 +55,7 @@ export const COMMUNITY_METADATA_FILE_TYPE = 7011;
 export const uploadCommunityMetadata = async (
   dotYouClient: DotYouClient,
   definition: NewHomebaseFile<CommunityMetadata> | HomebaseFile<CommunityMetadata>,
-  onVersionConflicht?: () => Promise<void | UploadResult | UpdateResult> | void
+  onVersionConflict?: () => Promise<void | UploadResult | UpdateResult> | void
 ): Promise<UploadResult | UpdateResult | undefined> => {
   if (!definition.fileMetadata.appData.uniqueId) {
     throw new Error('CommunityMetadata must have a uniqueId');
@@ -111,21 +111,28 @@ export const uploadCommunityMetadata = async (
   };
 
   if (definition.fileId) {
-    const existingDefiniton = definition as HomebaseFile<CommunityMetadata, string>;
-    const encryptedKeyHeader = existingDefiniton.sharedSecretEncryptedKeyHeader;
+    const existingDefinition = definition as HomebaseFile<CommunityMetadata, string>;
+    const encryptedKeyHeader = existingDefinition.sharedSecretEncryptedKeyHeader;
 
     const patchInstructions: UpdateLocalInstructionSet = {
       file: {
-        fileId: existingDefiniton.fileId,
+        fileId: existingDefinition.fileId,
         targetDrive: LOCAL_COMMUNITY_APP_DRIVE,
       },
-      versionTag: existingDefiniton.fileMetadata.versionTag,
+      versionTag: existingDefinition.fileMetadata.versionTag,
       locale: 'local'
     }
 
-    const patchResult = await patchFile(dotYouClient, encryptedKeyHeader, patchInstructions, metadata, payloads, undefined, undefined, onVersionConflicht as () => Promise<void | UpdateResult>,
-    );
-    if (!patchResult) throw new Error(`Upload failed`);
+    const patchResult = await patchFile(dotYouClient,
+        encryptedKeyHeader,
+        patchInstructions, 
+        metadata, 
+        payloads,
+        undefined,
+        undefined,
+        onVersionConflict as () => Promise<void | UpdateResult>,);
+    
+    if (!patchResult) throw new Error(`Patch update failed`);
     return patchResult;
   }
 
@@ -140,8 +147,8 @@ export const uploadCommunityMetadata = async (
     metadata,
     payloads,
     undefined,
-    true,
-    onVersionConflicht as () => Promise<void | UploadResult>,
+    true, 
+    onVersionConflict as () => Promise<void | UploadResult>,
   );
   if (!result) throw new Error(`Upload failed`);
 
