@@ -48,7 +48,7 @@ export const COMMUNITY_DRAFTS_FILE_TYPE = 7012;
 export const uploadCommunityDrafts = async (
   dotYouClient: DotYouClient,
   definition: NewHomebaseFile<CommunityDrafts> | HomebaseFile<CommunityDrafts>,
-  onVersionConflicht?: () => Promise<void | UploadResult | UpdateResult> | void
+  onVersionConflict?: () => Promise<void | UploadResult | UpdateResult> | void
 ): Promise<UploadResult | UpdateResult | undefined> => {
   if (!definition.fileMetadata.appData.uniqueId) {
     throw new Error('CommunityDrafts must have a uniqueId');
@@ -104,9 +104,10 @@ export const uploadCommunityDrafts = async (
       locale: 'local'
     }
 
-    const patchResult = await patchFile(dotYouClient, encryptedKeyHeader, patchInstructions, metadata, payloads, undefined, undefined, onVersionConflicht as () => Promise<void | UpdateResult>,
+    const patchResult = await patchFile(dotYouClient, encryptedKeyHeader, patchInstructions, metadata, payloads, undefined, undefined, onVersionConflict as () => Promise<void | UpdateResult>,
     );
     if (!patchResult) throw new Error(`Upload failed`);
+    console.info("community draft patch result", patchResult);
     return patchResult;
   }
 
@@ -124,7 +125,7 @@ export const uploadCommunityDrafts = async (
     payloads,
     undefined,
     true,
-    onVersionConflicht as () => Promise<void | UploadResult>
+    onVersionConflict as () => Promise<void | UploadResult>
   );
   if (!result) throw new Error(`Upload failed`);
 
