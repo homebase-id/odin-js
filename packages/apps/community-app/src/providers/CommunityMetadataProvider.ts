@@ -124,14 +124,14 @@ export const uploadCommunityMetadata = async (
     }
 
     const patchResult = await patchFile(dotYouClient,
-        encryptedKeyHeader,
-        patchInstructions, 
-        metadata, 
-        payloads,
-        undefined,
-        undefined,
-        onVersionConflict as () => Promise<void | UpdateResult>,);
-    
+      encryptedKeyHeader,
+      patchInstructions,
+      metadata,
+      payloads,
+      undefined,
+      undefined,
+      onVersionConflict as () => Promise<void | UpdateResult>,);
+
     if (!patchResult) throw new Error(`Patch update failed`);
     return patchResult;
   }
@@ -139,6 +139,7 @@ export const uploadCommunityMetadata = async (
   const instructionSet: UploadInstructionSet = {
     storageOptions: {
       drive: LOCAL_COMMUNITY_APP_DRIVE,
+      overwriteFileId: definition.fileId,
     },
   };
   const result = await uploadFile(
@@ -147,7 +148,7 @@ export const uploadCommunityMetadata = async (
     metadata,
     payloads,
     undefined,
-    true, 
+    true,
     onVersionConflict as () => Promise<void | UploadResult>,
   );
   if (!result) throw new Error(`Upload failed`);

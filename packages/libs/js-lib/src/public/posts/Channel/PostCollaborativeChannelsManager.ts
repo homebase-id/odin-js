@@ -58,6 +58,7 @@ export const saveChannelLink = async (
     transferIv: getRandom16ByteArray(),
     storageOptions: {
       drive: BlogConfig.FeedDrive,
+      overwriteFileId: definition.fileId,
     },
   };
 

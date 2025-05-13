@@ -156,6 +156,7 @@ export const saveChannelDefinition = async (
     transferIv: getRandom16ByteArray(),
     storageOptions: {
       drive: targetDrive,
+      overwriteFileId: fileId,
     },
   };
 
