@@ -64,6 +64,10 @@ export const uploadFile = async (
       thumbnails,
     });
 
+  if (!instructions.storageOptions?.overwriteFileId && metadata.versionTag) {
+    console.warn('VersionTag is set but no overwriteFileId is provided. You will run into issues since the uniqueId is not used to identify the file for update anymore.');
+  }
+
   // Force isEncrypted on the metadata to match the encrypt flag
   metadata.isEncrypted = encrypt || !!options?.aesKey;
 
