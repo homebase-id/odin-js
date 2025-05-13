@@ -59,7 +59,7 @@ export const MentionDropdownInputElement = withRef<typeof PlateElement>(
       <PlateElement as="span" ref={ref} {...props} className={cn('relative', className)}>
         <RTEDropdown
           trigger="@"
-          items={mentionables}
+          items={mentionables || []}
           onSelect={(channelItem) => onSelectItem(editor, channelItem, element)}
           onCancel={(clear) => onCancel(editor, clear ? '' : `${element.trigger}${value}`, element)}
           searchVal={value}
