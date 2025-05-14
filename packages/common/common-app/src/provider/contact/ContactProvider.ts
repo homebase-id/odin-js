@@ -92,6 +92,7 @@ export const saveContact = async (
     transferIv: getRandom16ByteArray(),
     storageOptions: {
       drive: ContactConfig.ContactTargetDrive,
+      overwriteFileId: contact.fileId,
     },
   };
 
