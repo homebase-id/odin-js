@@ -49,6 +49,7 @@ export const RTEDropdown = <T extends DropdownValue>({
   };
 
   const filteredItems = useMemo(() => {
+    if (!items) return [];
     if (options?.manualFilter) return items;
 
     const lowerSearchVal = searchVal?.toLowerCase();
@@ -145,7 +146,7 @@ export const RTEDropdown = <T extends DropdownValue>({
 
   useEffect(() => {
     if (
-      filteredItems.length > 0 &&
+      filteredItems?.length > 0 &&
       (!selectedItem || (selectedItem && !filteredItems.includes(selectedItem)))
     ) {
       setSelectedItem(filteredItems[0]);
@@ -176,7 +177,7 @@ export const RTEDropdown = <T extends DropdownValue>({
         wrapperRef={wrapperRef}
         className="z-10 flex max-h-44 flex-col overflow-auto rounded-lg border bg-background text-foreground shadow-lg"
       >
-        {filteredItems.length === 0 && newItem ? (
+        {filteredItems?.length === 0 && newItem ? (
           <a
             className={`block cursor-pointer px-2 py-1 transition-colors ${selectedItem === newItem ? 'bg-primary text-primary-contrast' : 'hover:bg-primary hover:text-primary-contrast'}`}
             onClick={() => doSelect(newItem)}
