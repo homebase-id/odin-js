@@ -76,12 +76,15 @@ export const uploadCommunityDrafts = async (
         });
     }
 
+    const hashedUniqueId = await hashGuidId(definition.fileMetadata.appData.uniqueId);
+    console.info(`uploadCommunityDrafts: UniqueId: ${definition.fileMetadata.appData.uniqueId} / hashed: ${hashedUniqueId}.  Does this match results from getCommunityDrafts -> getFileHeaderByUniqueId`)
+
     const metadata: UploadFileMetadata = {
         versionTag: definition.fileMetadata.versionTag,
         allowDistribution: false,
         appData: {
             tags: definition.fileMetadata.appData.tags,
-            uniqueId: await hashGuidId(definition.fileMetadata.appData.uniqueId),
+            uniqueId: hashedUniqueId,
             fileType: COMMUNITY_DRAFTS_FILE_TYPE,
             content: content,
         },
@@ -161,7 +164,7 @@ export const getCommunityDrafts = async (
         console.info(`getCommunityDrafts -> getFileHeaderByUniqueId (communityId: ${communityId} hashed: ${cid} - HEADER NOT FOUND`);
         return null;
     }
-    
+
     return dsrToCommunityDrafts(dotYouClient, header, LOCAL_COMMUNITY_APP_DRIVE, true);
 };
 
@@ -174,13 +177,20 @@ export const dsrToCommunityDrafts = async (
     includeMetadataHeader: boolean
 ): Promise<HomebaseFile<CommunityDrafts> | null> => {
     try {
+
+        console.info(`dsrToCommunityDrafts -> getting content via dsr:`, dsr)
+
         const definitionContent = await getContentFromHeaderOrPayload<Partial<CommunityDrafts>>(
             dotYouClient,
             targetDrive,
             dsr,
             includeMetadataHeader
         );
-        if (!definitionContent) return null;
+
+        if (!definitionContent) {
+            console.info("dsrToCommunityDrafts -> no content found")
+            return null;
+        }
 
         const file: HomebaseFile<CommunityDrafts> = {
             ...dsr,
