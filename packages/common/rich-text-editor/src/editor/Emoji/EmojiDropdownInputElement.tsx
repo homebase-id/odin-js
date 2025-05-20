@@ -43,9 +43,8 @@ export const EmojiDropdownInputElement = withRef<typeof PlateElement>(({ ...prop
       if (!value || value.trim().length === 0) return [];
       const skintone = await database.getPreferredSkinTone();
 
-      const filteredEmojis = (await database.getEmojiBySearchQuery(
-        value.replace(/:$/, '')
-      )) as NativeEmoji[];
+      const filteredEmojis = ((await database.getEmojiBySearchQuery(value.replace(/:$/, ''))) ||
+        []) as NativeEmoji[];
 
       const dropdownValues: DropdownValue[] = filteredEmojis.map((emoji) => {
         const unicode =
