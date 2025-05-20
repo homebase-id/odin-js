@@ -76,15 +76,18 @@ export const uploadCommunityDrafts = async (
         });
     }
 
-    const hashedUniqueId = await hashGuidId(definition.fileMetadata.appData.uniqueId);
-    console.info(`uploadCommunityDrafts: UniqueId: ${definition.fileMetadata.appData.uniqueId} / hashed: ${hashedUniqueId}.  Does this match results from getCommunityDrafts -> getFileHeaderByUniqueId`)
+    // const hashedUniqueId = await hashGuidId(definition.fileMetadata.appData.uniqueId);
+    // console.info(`uploadCommunityDrafts: UniqueId: ${definition.fileMetadata.appData.uniqueId} / hashed: ${hashedUniqueId}.  Does this match results from getCommunityDrafts -> getFileHeaderByUniqueId`)
+  
+    console.info(`uploadCommunityDrafts:(non hashing) UniqueId: ${definition.fileMetadata.appData.uniqueId}.  Does this match results from getCommunityDrafts -> getFileHeaderByUniqueId`)
 
     const metadata: UploadFileMetadata = {
         versionTag: definition.fileMetadata.versionTag,
         allowDistribution: false,
         appData: {
             tags: definition.fileMetadata.appData.tags,
-            uniqueId: hashedUniqueId,
+            // uniqueId: hashedUniqueId,
+            uniqueId: definition.fileMetadata.appData.uniqueId, // should already be hashed
             fileType: COMMUNITY_DRAFTS_FILE_TYPE,
             content: content,
         },

@@ -108,7 +108,7 @@ export const useCommunityDrafts = (props?: {
                 );
 
                 if (!variables.drafts.fileId) {
-                    console.info(("no drafts.fileid found"))
+                    console.info(("no drafts.fileid found; must be a new drafts file"))
                     // It's a new drafts file, so we need to invalidate the communities query
                     invalidateCommunities(queryClient);
                 }
