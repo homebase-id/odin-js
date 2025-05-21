@@ -47,13 +47,18 @@ export const COMMUNITY_DRAFTS_FILE_TYPE = 7012;
 
 export const uploadCommunityDrafts = async (
     dotYouClient: DotYouClient,
+    communityId: string,
     definition: NewHomebaseFile<CommunityDrafts> | HomebaseFile<CommunityDrafts>,
     onVersionConflict?: () => Promise<void | UploadResult | UpdateResult> | void
 ): Promise<UploadResult | UpdateResult | undefined> => {
     if (!definition.fileMetadata.appData.uniqueId) {
         throw new Error('CommunityDrafts must have a uniqueId');
     }
-
+    
+    if(definition.fileMetadata.appData.uniqueId !== communityId) {
+        console.error("the drafts being uploaded do not match the specified communityId")
+    }
+    
     const payloads: PayloadFile[] = [];
 
     const jsonContent: string = jsonStringify64({...definition.fileMetadata.appData.content});
@@ -76,18 +81,15 @@ export const uploadCommunityDrafts = async (
         });
     }
 
-    // const hashedUniqueId = await hashGuidId(definition.fileMetadata.appData.uniqueId);
-    // console.info(`uploadCommunityDrafts: UniqueId: ${definition.fileMetadata.appData.uniqueId} / hashed: ${hashedUniqueId}.  Does this match results from getCommunityDrafts -> getFileHeaderByUniqueId`)
-  
-    console.info(`uploadCommunityDrafts:(non hashing) UniqueId: ${definition.fileMetadata.appData.uniqueId}.  Does this match results from getCommunityDrafts -> getFileHeaderByUniqueId`)
+    const hashedCommunityId = await hashCommunityId(communityId);
+    console.info(`uploadCommunityDrafts: hashedCommunityId: ${hashedCommunityId}.  Does this match results from getCommunityDrafts -> getFileHeaderByUniqueId`)
 
     const metadata: UploadFileMetadata = {
         versionTag: definition.fileMetadata.versionTag,
         allowDistribution: false,
         appData: {
             tags: definition.fileMetadata.appData.tags,
-            // uniqueId: hashedUniqueId,
-            uniqueId: definition.fileMetadata.appData.uniqueId, // should already be hashed
+            uniqueId: hashedCommunityId,
             fileType: COMMUNITY_DRAFTS_FILE_TYPE,
             content: content,
         },
@@ -155,21 +157,25 @@ export const getCommunityDrafts = async (
     communityId: string
 ): Promise<HomebaseFile<CommunityDrafts> | null> => {
 
-    const cid = await hashGuidId(communityId);
-    console.info(`getCommunityDrafts -> getFileHeaderByUniqueId (communityId: ${communityId} hashed: ${cid}`);
+    const hashedCommunityId = await hashCommunityId(communityId);
+    console.info(`getCommunityDrafts -> getFileHeaderByUniqueId (communityId: ${communityId} hashed: ${hashedCommunityId}`);
     const header = await getFileHeaderByUniqueId(
         dotYouClient,
         LOCAL_COMMUNITY_APP_DRIVE,
-        cid
+        hashedCommunityId
     );
 
     if (!header) {
-        console.info(`getCommunityDrafts -> getFileHeaderByUniqueId (communityId: ${communityId} hashed: ${cid} - HEADER NOT FOUND`);
+        console.info(`getCommunityDrafts -> getFileHeaderByUniqueId (communityId: ${communityId} hashed: ${hashedCommunityId} - HEADER NOT FOUND`);
         return null;
     }
     
     return dsrToCommunityDrafts(dotYouClient, header, LOCAL_COMMUNITY_APP_DRIVE, true);
 };
+
+const hashCommunityId = async (communityId: string) =>{
+    return await hashGuidId("drafts" + communityId);
+}
 
 // Helpers
 
