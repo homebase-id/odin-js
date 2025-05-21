@@ -43,7 +43,7 @@ export const LOCAL_COMMUNITY_APP_DRIVE: TargetDrive = {
     type: '93a6e08d-14d9-479e-8d99-bae4e5348a16',
 };
 
-export const COMMUNITY_DRAFTS_FILE_TYPE = 7012;
+export const COMMUNITY_DRAFTS_FILE_TYPE = 7017;
 
 export const uploadCommunityDrafts = async (
     dotYouClient: DotYouClient,
