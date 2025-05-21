@@ -30,14 +30,24 @@ export const useCommunityDrafts = (props?: {
     const {communityId, odinId} = props || {};
     const dotYouClient = useDotYouClientContext();
     const queryClient = useQueryClient();
+    
+    if(!communityId)
+    {
+        console.error("CommunityId is missing");
+    }
 
     const saveDrafts = async ({drafts,}: { drafts: HomebaseFile<CommunityDrafts> | NewHomebaseFile<CommunityDrafts>; }) => {
         drafts.fileMetadata.appData.content.communityId = formatGuidId(drafts.fileMetadata.appData.content.communityId);
         drafts.fileMetadata.appData.uniqueId = formatGuidId(drafts.fileMetadata.appData.uniqueId);
 
-        console.info("drafts communityId", drafts.fileMetadata.appData.content.communityId);
-        console.info("drafts uid", drafts.fileMetadata.appData.uniqueId);
+        // console.info("drafts communityId", drafts.fileMetadata.appData.content.communityId);
+        // console.info("drafts uid", drafts.fileMetadata.appData.uniqueId);
 
+        if(!communityId)
+        {
+            throw new Error("CommunityId is missing");
+        }
+        
         let maxRetries = 5;
         const onVersionConflict = async () => {
             if (maxRetries <= 0) return;
@@ -56,7 +66,7 @@ export const useCommunityDrafts = (props?: {
 
             console.info(`Uploading version via version conflict - retry #${maxRetries}`, serverVersion, newlyMerged);
 
-            return await uploadCommunityDrafts(dotYouClient, newlyMerged, onVersionConflict);
+            return await uploadCommunityDrafts(dotYouClient, communityId, newlyMerged, onVersionConflict);
         };
 
         // We clean up the drafts only for the initial save; When we retry we want to keep the drafts to avoid bad merging
@@ -67,7 +77,7 @@ export const useCommunityDrafts = (props?: {
 
         console.info("drafts copy uid", draftsCopy.fileMetadata.appData.uniqueId);
 
-        return await uploadCommunityDrafts(dotYouClient, draftsCopy, onVersionConflict);
+        return await uploadCommunityDrafts(dotYouClient, communityId, draftsCopy, onVersionConflict);
     };
 
     return {
@@ -129,7 +139,7 @@ const getDrafts = async (
 ) => {
     const serverFile = await getCommunityDrafts(dotYouClient, communityId);
     if (!serverFile) {
-        console.info(`no community drafts found; creating a new one with uid from communityId ${communityId}`);
+        console.info(`no community drafts found`);
         const newDrafts: NewHomebaseFile<CommunityDrafts> = {
             fileMetadata: {
                 appData: {
