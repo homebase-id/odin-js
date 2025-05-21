@@ -55,10 +55,6 @@ export const uploadCommunityDrafts = async (
         throw new Error('CommunityDrafts must have a uniqueId');
     }
     
-    if(definition.fileMetadata.appData.uniqueId !== communityId) {
-        console.error("the drafts being uploaded do not match the specified communityId")
-    }
-    
     const payloads: PayloadFile[] = [];
 
     const jsonContent: string = jsonStringify64({...definition.fileMetadata.appData.content});
