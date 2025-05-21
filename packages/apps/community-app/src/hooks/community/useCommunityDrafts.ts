@@ -31,11 +31,6 @@ export const useCommunityDrafts = (props?: {
     const dotYouClient = useDotYouClientContext();
     const queryClient = useQueryClient();
     
-    if(!communityId)
-    {
-        console.error("CommunityId is missing");
-    }
-
     const saveDrafts = async ({drafts,}: { drafts: HomebaseFile<CommunityDrafts> | NewHomebaseFile<CommunityDrafts>; }) => {
         drafts.fileMetadata.appData.content.communityId = formatGuidId(drafts.fileMetadata.appData.content.communityId);
         drafts.fileMetadata.appData.uniqueId = formatGuidId(drafts.fileMetadata.appData.uniqueId);
