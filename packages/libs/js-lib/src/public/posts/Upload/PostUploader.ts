@@ -128,7 +128,7 @@ const uploadPost = async <T extends PostContent>(
   const targetDrive = GetTargetDriveFromChannelId(channelId);
 
   console.info("uploading post", file.fileMetadata);
-  
+
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
@@ -170,6 +170,7 @@ const uploadPost = async <T extends PostContent>(
     transferIv: getRandom16ByteArray(),
     storageOptions: {
       drive: targetDrive,
+      overwriteFileId: file.fileId,
     },
     transitOptions: {
       recipients: [],
@@ -250,7 +251,7 @@ const updatePost = async <T extends PostContent>(
   if (!header) throw new Error('[odin-js] PostUploader: Cannot update a post that does not exist');
 
   if (header?.fileMetadata.versionTag !== file.fileMetadata.versionTag) {
-    
+
     // if (odinId) {
     //   // There's a conflict, but we will just force ahead
     //   file.fileMetadata.versionTag = header.fileMetadata.versionTag;

@@ -120,6 +120,7 @@ export const saveComment = async (
       transferIv: getRandom16ByteArray(),
       storageOptions: {
         drive: targetDrive,
+        overwriteFileId: comment.fileId,
       },
       transitOptions: {
         recipients: [],
