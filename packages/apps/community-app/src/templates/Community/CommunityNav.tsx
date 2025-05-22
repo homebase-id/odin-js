@@ -333,20 +333,21 @@ const ChannelItem = memo(
 
     const unreadMessagesCount = useMemo(() => {
       if (channel.lastMessage?.fileMetadata.senderOdinId === loggedOnIdentity) return 0;
+      if (!channelId || !metadata) return 0;
+      if (!messages?.pages) return 0;
 
-      return (
-        channelId &&
-        metadata &&
-        messages?.pages
-          ?.flatMap((page) => page?.searchResults)
-          ?.filter(
-            (msg) =>
-              msg &&
-              (metadata?.fileMetadata.appData.content?.channelLastReadTime[channelId] || 0) <
-                msg.fileMetadata.created &&
-              msg.fileMetadata.senderOdinId !== loggedOnIdentity
-          )?.length
-      );
+      const flatMessages = messages?.pages?.flatMap((page) => page?.searchResults);
+      if (!flatMessages) return 0;
+
+      const unreadMessages = flatMessages?.filter(
+        (msg) =>
+          msg &&
+          (metadata?.fileMetadata.appData.content?.channelLastReadTime[channelId] || 0) <
+            msg.fileMetadata.created &&
+          msg.fileMetadata.senderOdinId !== loggedOnIdentity
+      )?.length;
+
+      return unreadMessages || 0;
     }, [messages, metadata]);
 
     useEffect(
