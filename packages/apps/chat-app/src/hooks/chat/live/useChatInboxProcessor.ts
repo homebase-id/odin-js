@@ -4,11 +4,9 @@ import {
   DotYouClient,
   FileQueryParams,
   queryBatch,
-  queryModified,
   DeletedHomebaseFile,
 } from '@homebase-id/js-lib/core';
 import {
-  getQueryModifiedCursorFromTime,
   getQueryBatchCursorFromTime,
   hasDebugFlag,
 } from '@homebase-id/js-lib/helpers';

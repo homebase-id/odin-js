@@ -1,5 +1,5 @@
 import { useDotYouClientContext } from '@homebase-id/common-app';
-import { processInbox, queryBatchOverPeer, queryModifiedOverPeer } from '@homebase-id/js-lib/peer';
+import { processInbox, queryBatchOverPeer } from '@homebase-id/js-lib/peer';
 import { useQueryClient, useQuery, QueryClient } from '@tanstack/react-query';
 import { getTargetDriveFromCommunityId } from '../../../providers/CommunityDefinitionProvider';
 import {
@@ -11,7 +11,6 @@ import {
   DotYouClient,
   FileQueryParams,
   queryBatch,
-  queryModified,
   TargetDrive,
   HomebaseFile,
   DeletedHomebaseFile,
@@ -19,7 +18,6 @@ import {
 } from '@homebase-id/js-lib/core';
 import {
   hasDebugFlag,
-  getQueryModifiedCursorFromTime,
   getQueryBatchCursorFromTime,
   stringGuidsEqual,
 } from '@homebase-id/js-lib/helpers';
@@ -214,7 +212,7 @@ const findChangesSinceTimestamp = async (
   timeStamp: number,
   params: FileQueryParams
 ) => {
-  const modifiedCursor = getQueryModifiedCursorFromTime(timeStamp); // Friday, 31 May 2024 09:38:54.678
+  // const modifiedCursor = getQueryModifiedCursorFromTime(timeStamp); // Friday, 31 May 2024 09:38:54.678
   const batchCursor = getQueryBatchCursorFromTime(new Date().getTime(), timeStamp);
 
   const newFiles =
@@ -224,32 +222,37 @@ const findChangesSinceTimestamp = async (
         cursorState: batchCursor,
         includeMetadataHeader: true,
         includeTransferHistory: false,
+        ordering: 'newestFirst',
+        sorting: 'anyChangeDate',
       })
       : await queryBatch(dotYouClient, params, {
         maxRecords: BATCH_SIZE,
         cursorState: batchCursor,
         includeMetadataHeader: true,
         includeTransferHistory: false,
+        ordering: 'newestFirst',
+        sorting: 'anyChangeDate',
       });
 
-  const modifiedFiles =
-    odinId && dotYouClient.getHostIdentity() !== odinId
-      ? await queryModifiedOverPeer(dotYouClient, odinId, params, {
-        maxRecords: BATCH_SIZE,
-        cursor: modifiedCursor + '',
-        excludePreviewThumbnail: false,
-        includeHeaderContent: true,
-        includeTransferHistory: false,
-      })
-      : await queryModified(dotYouClient, params, {
-        maxRecords: BATCH_SIZE,
-        cursor: modifiedCursor + '',
-        excludePreviewThumbnail: false,
-        includeHeaderContent: true,
-        includeTransferHistory: false,
-      });
+  // const modifiedFiles =
+  //   odinId && dotYouClient.getHostIdentity() !== odinId
+  //     ? await queryModifiedOverPeer(dotYouClient, odinId, params, {
+  //       maxRecords: BATCH_SIZE,
+  //       cursor: modifiedCursor + '',
+  //       excludePreviewThumbnail: false,
+  //       includeHeaderContent: true,
+  //       includeTransferHistory: false,
+  //     })
+  //     : await queryModified(dotYouClient, params, {
+  //       maxRecords: BATCH_SIZE,
+  //       cursor: modifiedCursor + '',
+  //       excludePreviewThumbnail: false,
+  //       includeHeaderContent: true,
+  //       includeTransferHistory: false,
+  //     });
 
-  return modifiedFiles.searchResults.concat(newFiles.searchResults);
+  // return modifiedFiles.searchResults.concat(newFiles.searchResults);
+  return newFiles.searchResults
 };
 
 // Process batched updates after a processInbox
