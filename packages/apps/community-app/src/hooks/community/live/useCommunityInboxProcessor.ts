@@ -28,16 +28,18 @@ import {
 } from '../messages/useCommunityMessages';
 import {
   COMMUNITY_CHANNEL_FILE_TYPE,
+  CommunityChannel,
   dsrToCommunityChannel,
 } from '../../../providers/CommunityProvider';
 import { insertNewCommunityChannel } from '../channels/useCommunityChannels';
 import {
   COMMUNITY_METADATA_FILE_TYPE,
+  CommunityMetadata,
   dsrToCommunityMetadata,
   LOCAL_COMMUNITY_APP_DRIVE,
 } from '../../../providers/CommunityMetadataProvider';
 import { insertNewcommunityMetadata } from '../useCommunityMetadata';
-import { COMMUNITY_DRAFTS_FILE_TYPE, dsrToCommunityDrafts } from '../../../providers/CommunityDraftsProvider';
+import { COMMUNITY_DRAFTS_FILE_TYPE, CommunityDrafts, dsrToCommunityDrafts } from '../../../providers/CommunityDraftsProvider';
 import { insertNewcommunityDrafts } from '../useCommunityDrafts';
 
 const isDebug = hasDebugFlag();
@@ -126,7 +128,7 @@ export const useCommunityInboxProcessor = (
           const newChannel =
             updatedDsr.fileState === 'active'
               ? await dsrToCommunityChannel(dotYouClient, updatedDsr, odinId, targetDrive, true)
-              : updatedDsr;
+              : updatedDsr as unknown as HomebaseFile<CommunityChannel>;
 
           if (!newChannel) return;
           insertNewCommunityChannel(queryClient, newChannel, communityId);
@@ -155,7 +157,7 @@ export const useCommunityInboxProcessor = (
                 LOCAL_COMMUNITY_APP_DRIVE,
                 true
               )
-              : updatedDsr;
+              : updatedDsr as unknown as HomebaseFile<CommunityMetadata>;
           if (!newMetadata) return;
           insertNewcommunityMetadata(queryClient, newMetadata);
         })
@@ -183,7 +185,7 @@ export const useCommunityInboxProcessor = (
                 LOCAL_COMMUNITY_APP_DRIVE,
                 true
               )
-              : updatedDsr;
+              : updatedDsr as unknown as HomebaseFile<CommunityDrafts>;
           if (!newDrafts) return;
           insertNewcommunityDrafts(queryClient, newDrafts);
         })
