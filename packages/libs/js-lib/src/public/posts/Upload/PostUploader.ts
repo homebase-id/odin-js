@@ -127,6 +127,8 @@ const uploadPost = async <T extends PostContent>(
   const newMediaFiles = toSaveFiles as NewMediaFile[];
   const targetDrive = GetTargetDriveFromChannelId(channelId);
 
+  console.info("uploading post", file.fileMetadata);
+
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
@@ -168,6 +170,7 @@ const uploadPost = async <T extends PostContent>(
     transferIv: getRandom16ByteArray(),
     storageOptions: {
       drive: targetDrive,
+      overwriteFileId: file.fileId,
     },
     transitOptions: {
       recipients: [],
@@ -248,11 +251,24 @@ const updatePost = async <T extends PostContent>(
   if (!header) throw new Error('[odin-js] PostUploader: Cannot update a post that does not exist');
 
   if (header?.fileMetadata.versionTag !== file.fileMetadata.versionTag) {
+
+    // if (odinId) {
+    //   // There's a conflict, but we will just force ahead
+    //   file.fileMetadata.versionTag = header.fileMetadata.versionTag;
+    // } else {
+    //   console.error('compare file to header', file.fileMetadata, header.fileMetadata);
+    //   throw new Error(`[odin-js] PostUploader: Version conflict [UID: ${file.fileMetadata.appData.uniqueId} slug:${file.fileMetadata.appData?.content?.slug}]`);
+    // }
+
     if (odinId) {
-      // There's a conflict, but we will just force ahead
-      file.fileMetadata.versionTag = header.fileMetadata.versionTag;
+      //im editing on a shared identity
+      console.error('Version Conflict when compare the file (first param) being saved to header (second param) from server.  Tell the user so they can coordinate with other editors', file.fileMetadata, header.fileMetadata);
+      throw new Error(`[odin-js] PostUploader: Version conflict - Someone else might be editing this Post. [UID: ${file.fileMetadata.appData.uniqueId} slug:${file.fileMetadata.appData?.content?.slug}]`);
     } else {
-      throw new Error('[odin-js] PostUploader: Version conflict');
+      // Since I'm editing on my own identity so lets forge ahead
+      // There's a conflict, but we will just force ahead
+      console.error('Version Conflict when compare the file (first param) being saved to header (second param) from server.  We will overwrite.', file.fileMetadata, header.fileMetadata);
+      file.fileMetadata.versionTag = header.fileMetadata.versionTag;
     }
   }
   if (
