@@ -72,21 +72,30 @@ export const ArticleComposerPage = () => {
   const [willSave, setWillSave] = useState(false);
 
   // Delay needSaving to willSave; Auto save every 15s
+  const milliseconds = 1000 * 15;
   useEffect(() => {
     const interval = setInterval(() => {
       setNeedsSaving((needsSaving) => {
         setWillSave(needsSaving);
         return needsSaving;
       });
-    }, 1000 * 15);
+    }, milliseconds);
     return () => clearInterval(interval);
   }, [setNeedsSaving, setWillSave]);
-
+    
+  useEffect(()=>
+  {
+        console.info("Something changed postFile fileId/versiontag", postFile.fileId, postFile.fileMetadata.versionTag)
+  }, [postFile]);
+  
   useEffect(() => {
     if (willSave) {
       setNeedsSaving(false);
       setWillSave(false);
-      doSave(postFile, isPublished ? 'publish' : undefined);
+      console.info("Start: auto-saving post: fileId/versiontag", postFile.fileId, postFile.fileMetadata.appData.uniqueId, postFile.fileMetadata.versionTag)
+      doSave(postFile, isPublished ? 'publish' : undefined).then(()=>{
+        console.info('Done: auto-saving post: fileId/uniqueId/versiontag', postFile.fileId,postFile.fileMetadata.appData.uniqueId, postFile.fileMetadata.versionTag);
+      });
     }
   }, [willSave, setWillSave, postFile, isPublished]);
 
