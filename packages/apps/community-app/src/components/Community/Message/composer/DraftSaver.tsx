@@ -80,6 +80,7 @@ export const DraftSaver = memo(
                 ...communityDrafts?.fileMetadata.appData,
                 content: { ...communityDrafts?.fileMetadata.appData.content, drafts: newDrafts },
               },
+              versionTag: communityDrafts?.fileMetadata.versionTag,
             },
           };
 
@@ -88,7 +89,9 @@ export const DraftSaver = memo(
             queryClient,
             newCommunityDrafts as HomebaseFile<CommunityDrafts>
           );
+          
           updateCommunityDrafts({ drafts: newCommunityDrafts });
+          
           return;
         } else {
           insertNewcommunityDrafts(

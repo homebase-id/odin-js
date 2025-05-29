@@ -30,7 +30,7 @@ export const useCommunityDrafts = (props?: {
     const {communityId, odinId} = props || {};
     const dotYouClient = useDotYouClientContext();
     const queryClient = useQueryClient();
-    
+
     const saveDrafts = async ({drafts,}: { drafts: HomebaseFile<CommunityDrafts> | NewHomebaseFile<CommunityDrafts>; }) => {
         drafts.fileMetadata.appData.content.communityId = formatGuidId(drafts.fileMetadata.appData.content.communityId);
         drafts.fileMetadata.appData.uniqueId = formatGuidId(drafts.fileMetadata.appData.uniqueId);
@@ -38,30 +38,29 @@ export const useCommunityDrafts = (props?: {
         // console.info("drafts communityId", drafts.fileMetadata.appData.content.communityId);
         // console.info("drafts uid", drafts.fileMetadata.appData.uniqueId);
 
-        if(!communityId)
-        {
+        if (!communityId) {
             throw new Error("CommunityId is missing");
         }
-        
+
         let maxRetries = 5;
         const onVersionConflict = async () => {
-            if (maxRetries <= 0) return;
-            maxRetries--;
-
-            const serverVersion = await getCommunityDrafts(
-                dotYouClient,
-                drafts.fileMetadata.appData.content.communityId
-            );
-            if (!serverVersion) {
-                return;
-            }
-
-            const newlyMerged = mergeDrafts(drafts, serverVersion);
-            insertNewcommunityDrafts(queryClient, newlyMerged);
-
-            console.info(`Uploading version via version conflict - retry #${maxRetries}`, serverVersion, newlyMerged);
-
-            return await uploadCommunityDrafts(dotYouClient, communityId, newlyMerged, onVersionConflict);
+            // if (maxRetries <= 0) return;
+            // maxRetries--;
+            //
+            // const serverVersion = await getCommunityDrafts(
+            //     dotYouClient,
+            //     drafts.fileMetadata.appData.content.communityId
+            // );
+            // if (!serverVersion) {
+            //     return;
+            // }
+            //
+            // const newlyMerged = mergeDrafts(drafts, serverVersion);
+            // insertNewcommunityDrafts(queryClient, newlyMerged);
+            //
+            // console.info(`Uploading version via version conflict - retry #${maxRetries}`, serverVersion, newlyMerged);
+            //
+            // return await uploadCommunityDrafts(dotYouClient, communityId, newlyMerged, onVersionConflict);
         };
 
         // We clean up the drafts only for the initial save; When we retry we want to keep the drafts to avoid bad merging
@@ -70,9 +69,14 @@ export const useCommunityDrafts = (props?: {
             draftsCopy.fileMetadata.appData.content.drafts || {}
         );
 
-        console.info("drafts copy uid", draftsCopy.fileMetadata.appData.uniqueId);
+        // console.info("drafts copy uid", draftsCopy.fileMetadata.appData.uniqueId);
+        console.info("communityId version tag going up", draftsCopy.fileMetadata.versionTag);
 
-        return await uploadCommunityDrafts(dotYouClient, communityId, draftsCopy, onVersionConflict);
+        const r = await uploadCommunityDrafts(dotYouClient, communityId, draftsCopy, onVersionConflict);
+        
+        console.info("version tag returned", r?.newVersionTag)
+        
+        return r;
     };
 
     return {
