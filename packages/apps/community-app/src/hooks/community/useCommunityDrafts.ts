@@ -44,23 +44,23 @@ export const useCommunityDrafts = (props?: {
 
         let maxRetries = 5;
         const onVersionConflict = async () => {
-            // if (maxRetries <= 0) return;
-            // maxRetries--;
-            //
-            // const serverVersion = await getCommunityDrafts(
-            //     dotYouClient,
-            //     drafts.fileMetadata.appData.content.communityId
-            // );
-            // if (!serverVersion) {
-            //     return;
-            // }
-            //
-            // const newlyMerged = mergeDrafts(drafts, serverVersion);
-            // insertNewcommunityDrafts(queryClient, newlyMerged);
-            //
-            // console.info(`Uploading version via version conflict - retry #${maxRetries}`, serverVersion, newlyMerged);
-            //
-            // return await uploadCommunityDrafts(dotYouClient, communityId, newlyMerged, onVersionConflict);
+            if (maxRetries <= 0) return;
+            maxRetries--;
+
+            const serverVersion = await getCommunityDrafts(
+                dotYouClient,
+                drafts.fileMetadata.appData.content.communityId
+            );
+            if (!serverVersion) {
+                return;
+            }
+
+            const newlyMerged = mergeDrafts(drafts, serverVersion);
+            insertNewcommunityDrafts(queryClient, newlyMerged);
+
+            console.info(`Uploading version via version conflict - retry #${maxRetries}`, serverVersion, newlyMerged);
+
+            return await uploadCommunityDrafts(dotYouClient, communityId, newlyMerged, onVersionConflict);
         };
 
         // We clean up the drafts only for the initial save; When we retry we want to keep the drafts to avoid bad merging
@@ -73,9 +73,9 @@ export const useCommunityDrafts = (props?: {
         console.info("communityId version tag going up", draftsCopy.fileMetadata.versionTag);
 
         const r = await uploadCommunityDrafts(dotYouClient, communityId, draftsCopy, onVersionConflict);
-        
+
         console.info("version tag returned", r?.newVersionTag)
-        
+
         return r;
     };
 
