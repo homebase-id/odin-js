@@ -5,7 +5,7 @@ import {CommunityDefinition} from '../../../../providers/CommunityDefinitionProv
 import {Draft} from '../../../../providers/CommunityMetadataProvider';
 import {useQueryClient} from '@tanstack/react-query';
 import {
-    insertNewcommunityDrafts,
+    insertNewCommunityDrafts,
     useCommunityDrafts,
 } from '../../../../hooks/community/useCommunityDrafts';
 import {CommunityDrafts} from '../../../../providers/CommunityDraftsProvider';
@@ -84,15 +84,16 @@ export const DraftSaver = memo(
                         },
                     };
 
-                insertNewcommunityDrafts(
+                insertNewCommunityDrafts(
                     queryClient,
                     newCommunityDrafts as HomebaseFile<CommunityDrafts>
                 );
                 
                 debouncedSave();
-
+                
+                //
                 // if (isEmptyRichText(message) || message === undefined || message.length === 0) {
-                //     insertNewcommunityDrafts(
+                //     insertNewCommunityDrafts(
                 //         queryClient,
                 //         newCommunityDrafts as HomebaseFile<CommunityDrafts>
                 //     );
@@ -102,12 +103,13 @@ export const DraftSaver = memo(
                 //
                 //     return;
                 // } else {
-                //     insertNewcommunityDrafts(
+                //     insertNewCommunityDrafts(
                 //         queryClient,
                 //         newCommunityDrafts as HomebaseFile<CommunityDrafts>
                 //     );
                 //     debouncedSave();
                 // }
+                
             }
         }, [communityDrafts, draftKey, message, debouncedSave]);
 
