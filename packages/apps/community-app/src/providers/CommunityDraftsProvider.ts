@@ -78,7 +78,7 @@ export const uploadCommunityDrafts = async (
     }
 
     const hashedCommunityId = await hashCommunityId(communityId);
-    console.info(`uploadCommunityDrafts: hashedCommunityId: ${hashedCommunityId}.  Does this match results from getCommunityDrafts -> getFileHeaderByUniqueId`)
+    // console.info(`uploadCommunityDrafts: hashedCommunityId: ${hashedCommunityId}.  Does this match results from getCommunityDrafts -> getFileHeaderByUniqueId`)
 
     const metadata: UploadFileMetadata = {
         versionTag: definition.fileMetadata.versionTag,
