@@ -56,7 +56,7 @@ export const useCommunityDrafts = (props?: {
             }
 
             const newlyMerged = mergeDrafts(drafts, serverVersion);
-            insertNewcommunityDrafts(queryClient, newlyMerged);
+            insertNewCommunityDrafts(queryClient, newlyMerged);
 
             console.log(`Uploading version via version conflict - retry #${maxRetries}`, serverVersion, newlyMerged);
 
@@ -203,12 +203,16 @@ const cleanupDrafts = (drafts: Record<string, Draft | undefined>) => {
 
 const mergeDrafts = (
     local: HomebaseFile<CommunityDrafts> | NewHomebaseFile<CommunityDrafts>,
-    server: HomebaseFile<CommunityDrafts>
+    server: HomebaseFile<CommunityDrafts>,
+    viaNew?:boolean
 ): HomebaseFile<CommunityDrafts> => {
     const localContent = local.fileMetadata.appData.content;
     const serverContent = server.fileMetadata.appData.content;
 
-    console.log("mergeDrafts", local, server);
+    if(viaNew) {
+        console.info("[1] Starting mergeDrafts", local, server);
+    }
+    
     return {
         ...server,
         fileMetadata: {
@@ -227,12 +231,55 @@ const mergeDrafts = (
                             (acc, key) => {
                                 const localDraft = localContent.drafts?.[key];
                                 const serverDraft = serverContent.drafts?.[key];
+                                
+                                // gpt debugging
+                                const hasServerDraft = serverDraft !== undefined && serverDraft !== null;
+                                const hasLocalDraft = localDraft !== undefined && localDraft !== null;
 
-                                const newestDraft =
-                                    !serverDraft ||
-                                    (localDraft?.updatedAt && localDraft?.updatedAt > serverDraft?.updatedAt)
-                                        ? localDraft
-                                        : serverDraft;
+                                const bothHaveDrafts =
+                                    hasLocalDraft &&
+                                    hasServerDraft &&
+                                    localDraft.updatedAt !== undefined &&
+                                    serverDraft.updatedAt !== undefined;
+                                
+                                const localIsNewer = bothHaveDrafts
+                                    ? localDraft.updatedAt > serverDraft.updatedAt
+                                    : false;
+
+                                if(viaNew) {
+                                    console.info('[1] local updated at:', localDraft?.updatedAt ?? "nada");
+                                    console.info('[1] hasServerDraft:', hasServerDraft);
+                                    console.info('[1] hasLocalDraft:', hasLocalDraft);
+                                    console.info('[1] localIsNewer:', localIsNewer);
+                                }
+
+                                let draftSource: 'local' | 'server' | 'none';
+                                let newestDraft;
+
+                                if (!hasServerDraft && hasLocalDraft) {
+                                    newestDraft = localDraft;
+                                    draftSource = 'local';
+                                } else if (localIsNewer) {
+                                    newestDraft = localDraft;
+                                    draftSource = 'local';
+                                } else if (hasServerDraft) {
+                                    newestDraft = serverDraft;
+                                    draftSource = 'server';
+                                } else {
+                                    newestDraft = undefined;
+                                    draftSource = 'none';
+                                }
+
+                                if(viaNew) {
+                                    console.info('[1] newestDraft:', newestDraft);
+                                    console.info('[1] draftSource:', draftSource);
+                                }
+
+                                // const newestDraft =
+                                //     !serverDraft ||
+                                //     (localDraft?.updatedAt && localDraft?.updatedAt > serverDraft?.updatedAt)
+                                //         ? localDraft
+                                //         : serverDraft;
 
                                 acc[key] = newestDraft;
                                 return acc;
@@ -254,7 +301,7 @@ export const invalidateCommunityDrafts = (queryClient: QueryClient, communityId?
     });
 };
 
-export const insertNewcommunityDrafts = (
+export const insertNewCommunityDrafts = (
     queryClient: QueryClient,
     newDrafts: HomebaseFile<CommunityDrafts> | DeletedHomebaseFile<unknown>
 ) => {
@@ -276,8 +323,12 @@ export const insertNewcommunityDrafts = (
             return;
         }
 
-        const mergedMeta = mergeDrafts(
-            existingDrafts, newDrafts);
+        // console.info("[1] insertNewCommunityDrafts -> merge start", existingDrafts.fileMetadata.appData.content, 
+        //     newDrafts.fileMetadata.appData.content.drafts);
+        
+        const mergedMeta = mergeDrafts(existingDrafts, newDrafts, true);
+        
+        // console.info("[1] insertNewCommunityDrafts -> merge complete", mergedMeta.fileMetadata.appData.content);
 
         queryClient.setQueryData(queryKey,
             mergedMeta
