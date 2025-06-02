@@ -58,7 +58,7 @@ export const useCommunityDrafts = (props?: {
             const newlyMerged = mergeDrafts(drafts, serverVersion);
             insertNewcommunityDrafts(queryClient, newlyMerged);
 
-            console.info(`Uploading version via version conflict - retry #${maxRetries}`, serverVersion, newlyMerged);
+            console.log(`Uploading version via version conflict - retry #${maxRetries}`, serverVersion, newlyMerged);
 
             return await uploadCommunityDrafts(dotYouClient, communityId, newlyMerged, onVersionConflict);
         };
@@ -88,7 +88,7 @@ export const useCommunityDrafts = (props?: {
 
             onMutate: async (variables) => {
 
-                console.info("mutate called - drafts are: ", variables.drafts);
+                console.log("mutate called - drafts are: ", variables.drafts);
 
                 queryClient.setQueryData<HomebaseFile<CommunityDrafts>>(
                     [
@@ -117,7 +117,7 @@ export const useCommunityDrafts = (props?: {
                 );
 
                 if (!variables.drafts.fileId) {
-                    console.info(("no drafts.fileid found; must be a new drafts file"))
+                    console.log(("no drafts.fileid found; must be a new drafts file"))
                     // It's a new drafts file, so we need to invalidate the communities query
                     invalidateCommunities(queryClient);
                 }
@@ -208,7 +208,7 @@ const mergeDrafts = (
     const localContent = local.fileMetadata.appData.content;
     const serverContent = server.fileMetadata.appData.content;
 
-    console.info("mergeDrafts", local, server);
+    console.log("mergeDrafts", local, server);
     return {
         ...server,
         fileMetadata: {
