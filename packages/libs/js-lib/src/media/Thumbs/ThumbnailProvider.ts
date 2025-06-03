@@ -144,7 +144,7 @@ const createVectorThumbnail = async (
   const thumb: ThumbnailFile = {
     pixelWidth: 50,
     pixelHeight: 50,
-    payload: new Blob([new Uint8Array(imageBytes)], { type: svgType }),
+    payload: new Blob([imageBytes], { type: svgType }),
     key: payloadKey,
   };
 
