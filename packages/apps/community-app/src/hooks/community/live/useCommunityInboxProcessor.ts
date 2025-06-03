@@ -40,7 +40,7 @@ import {
 } from '../../../providers/CommunityMetadataProvider';
 import { insertNewcommunityMetadata } from '../useCommunityMetadata';
 import { COMMUNITY_DRAFTS_FILE_TYPE, dsrToCommunityDrafts } from '../../../providers/CommunityDraftsProvider';
-import { insertNewcommunityDrafts } from '../useCommunityDrafts';
+import { insertNewCommunityDrafts } from '../useCommunityDrafts';
 
 const isDebug = hasDebugFlag();
 
@@ -187,7 +187,7 @@ export const useCommunityInboxProcessor = (
               )
               : updatedDsr;
           if (!newDrafts) return;
-          insertNewcommunityDrafts(queryClient, newDrafts);
+          insertNewCommunityDrafts(queryClient, newDrafts);
         })
       );
     } else {

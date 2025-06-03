@@ -22,7 +22,7 @@ import { useWebsocketDrives } from '../../auth/useWebsocketDrives';
 import { insertNewcommunityMetadata } from '../useCommunityMetadata';
 import { useChatSocketHandler } from '@homebase-id/chat-app/src/hooks/chat/live/useChatWebsocket';
 import { COMMUNITY_DRAFTS_FILE_TYPE, dsrToCommunityDrafts } from '../../../providers/CommunityDraftsProvider';
-import { insertNewcommunityDrafts } from '../useCommunityDrafts';
+import { insertNewCommunityDrafts } from '../useCommunityDrafts';
 
 const isDebug = hasDebugFlag();
 
@@ -73,7 +73,7 @@ export const useCommunityWebsocket = (
             console.warn('[CommunityWebsocket] Invalid community drafts received', notification);
             return;
           }
-          insertNewcommunityDrafts(queryClient, communityDrafts);
+          insertNewCommunityDrafts(queryClient, communityDrafts);
         }
       }
 

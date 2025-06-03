@@ -56,9 +56,9 @@ export const useCommunityDrafts = (props?: {
             }
 
             const newlyMerged = mergeDrafts(drafts, serverVersion);
-            insertNewcommunityDrafts(queryClient, newlyMerged);
+            insertNewCommunityDrafts(queryClient, newlyMerged);
 
-            console.info(`Uploading version via version conflict - retry #${maxRetries}`, serverVersion, newlyMerged);
+            console.log(`Uploading version via version conflict - retry #${maxRetries}`, serverVersion, newlyMerged);
 
             return await uploadCommunityDrafts(dotYouClient, communityId, newlyMerged, onVersionConflict);
         };
@@ -88,7 +88,7 @@ export const useCommunityDrafts = (props?: {
 
             onMutate: async (variables) => {
 
-                console.info("mutate called - drafts are: ", variables.drafts);
+                console.log("mutate called - drafts are: ", variables.drafts);
 
                 queryClient.setQueryData<HomebaseFile<CommunityDrafts>>(
                     [
@@ -117,7 +117,7 @@ export const useCommunityDrafts = (props?: {
                 );
 
                 if (!variables.drafts.fileId) {
-                    console.info(("no drafts.fileid found; must be a new drafts file"))
+                    console.log(("no drafts.fileid found; must be a new drafts file"))
                     // It's a new drafts file, so we need to invalidate the communities query
                     invalidateCommunities(queryClient);
                 }
@@ -203,12 +203,16 @@ const cleanupDrafts = (drafts: Record<string, Draft | undefined>) => {
 
 const mergeDrafts = (
     local: HomebaseFile<CommunityDrafts> | NewHomebaseFile<CommunityDrafts>,
-    server: HomebaseFile<CommunityDrafts>
+    server: HomebaseFile<CommunityDrafts>,
+    viaNew?:boolean
 ): HomebaseFile<CommunityDrafts> => {
     const localContent = local.fileMetadata.appData.content;
     const serverContent = server.fileMetadata.appData.content;
 
-    console.info("mergeDrafts", local, server);
+    if(viaNew) {
+        console.info("[1] Starting mergeDrafts", local, server);
+    }
+    
     return {
         ...server,
         fileMetadata: {
@@ -227,12 +231,55 @@ const mergeDrafts = (
                             (acc, key) => {
                                 const localDraft = localContent.drafts?.[key];
                                 const serverDraft = serverContent.drafts?.[key];
+                                
+                                // gpt debugging
+                                const hasServerDraft = serverDraft !== undefined && serverDraft !== null;
+                                const hasLocalDraft = localDraft !== undefined && localDraft !== null;
 
-                                const newestDraft =
-                                    !serverDraft ||
-                                    (localDraft?.updatedAt && localDraft?.updatedAt > serverDraft?.updatedAt)
-                                        ? localDraft
-                                        : serverDraft;
+                                const bothHaveDrafts =
+                                    hasLocalDraft &&
+                                    hasServerDraft &&
+                                    localDraft.updatedAt !== undefined &&
+                                    serverDraft.updatedAt !== undefined;
+                                
+                                const localIsNewer = bothHaveDrafts
+                                    ? localDraft.updatedAt > serverDraft.updatedAt
+                                    : false;
+
+                                if(viaNew) {
+                                    console.info('[1] local updated at:', localDraft?.updatedAt ?? "nada");
+                                    console.info('[1] hasServerDraft:', hasServerDraft);
+                                    console.info('[1] hasLocalDraft:', hasLocalDraft);
+                                    console.info('[1] localIsNewer:', localIsNewer);
+                                }
+
+                                let draftSource: 'local' | 'server' | 'none';
+                                let newestDraft;
+
+                                if (!hasServerDraft && hasLocalDraft) {
+                                    newestDraft = localDraft;
+                                    draftSource = 'local';
+                                } else if (localIsNewer) {
+                                    newestDraft = localDraft;
+                                    draftSource = 'local';
+                                } else if (hasServerDraft) {
+                                    newestDraft = serverDraft;
+                                    draftSource = 'server';
+                                } else {
+                                    newestDraft = undefined;
+                                    draftSource = 'none';
+                                }
+
+                                if(viaNew) {
+                                    console.info('[1] newestDraft:', newestDraft);
+                                    console.info('[1] draftSource:', draftSource);
+                                }
+
+                                // const newestDraft =
+                                //     !serverDraft ||
+                                //     (localDraft?.updatedAt && localDraft?.updatedAt > serverDraft?.updatedAt)
+                                //         ? localDraft
+                                //         : serverDraft;
 
                                 acc[key] = newestDraft;
                                 return acc;
@@ -254,7 +301,7 @@ export const invalidateCommunityDrafts = (queryClient: QueryClient, communityId?
     });
 };
 
-export const insertNewcommunityDrafts = (
+export const insertNewCommunityDrafts = (
     queryClient: QueryClient,
     newDrafts: HomebaseFile<CommunityDrafts> | DeletedHomebaseFile<unknown>
 ) => {
@@ -276,8 +323,12 @@ export const insertNewcommunityDrafts = (
             return;
         }
 
-        const mergedMeta = mergeDrafts(
-            existingDrafts, newDrafts);
+        // console.info("[1] insertNewCommunityDrafts -> merge start", existingDrafts.fileMetadata.appData.content, 
+        //     newDrafts.fileMetadata.appData.content.drafts);
+        
+        const mergedMeta = mergeDrafts(existingDrafts, newDrafts, true);
+        
+        // console.info("[1] insertNewCommunityDrafts -> merge complete", mergedMeta.fileMetadata.appData.content);
 
         queryClient.setQueryData(queryKey,
             mergedMeta
