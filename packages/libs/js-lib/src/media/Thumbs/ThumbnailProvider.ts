@@ -193,7 +193,7 @@ const createImageThumbnail = async (
 
     // Check if dimensions already match the target and file size is under 500KB for larger dimensions
     const dimensionsMatch = naturalWidth === targetWidth && naturalHeight === targetHeight;
-    const isLargerDimension = targetWidth >= 400 || targetHeight >= 400; // Consider 400px+ as larger
+    const isLargerDimension = targetWidth >= LARGE_DIMENSION_THRESHOLD_PX || targetHeight >= LARGE_DIMENSION_THRESHOLD_PX; // Consider dimensions >= threshold as larger
     const isUnder500KB = originalFileSize && originalFileSize <= maxFileSizeForSkipResize;
 
     if (dimensionsMatch && (!isLargerDimension || isUnder500KB)) {
