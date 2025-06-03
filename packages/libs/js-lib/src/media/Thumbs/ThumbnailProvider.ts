@@ -3,6 +3,9 @@ import { ImageContentType, ImageSize, ThumbnailFile, EmbeddedThumb } from '../..
 import { ThumbnailInstruction } from '../MediaTypes';
 import { resizeImageFromBlob } from './ImageResizer';
 
+const SKIP_RESIZE_MAX_BYTES = 500 * 1024; // 500 KB
+const LARGE_DIMENSION_THRESHOLD_PX = 1000; // Threshold for considering dimensions as large
+
 export const baseThumbSizes: ThumbnailInstruction[] = [
   { quality: 75, width: 400, height: 400 },
   { quality: 75, width: 1600, height: 1600 },
