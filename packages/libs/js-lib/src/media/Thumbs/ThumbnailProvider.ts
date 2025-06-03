@@ -53,6 +53,7 @@ export const createThumbnails = async (
   }
 
   const contentType = image.type as ImageContentType;
+  const originalFileSize = image.size;
 
   if (image.type === svgType) {
     const vectorThumb = await createVectorThumbnail(imageBytes, payloadKey);
@@ -68,7 +69,7 @@ export const createThumbnails = async (
     const gifThumb = await createImageThumbnail(imageBytes, payloadKey, {
       ...tinyGifThumbSize,
       type: 'gif',
-    });
+    }, originalFileSize);
 
     return {
       tinyThumb: await getEmbeddedThumbOfThumbnailFile(gifThumb.thumb, gifThumb.naturalSize),
@@ -87,9 +88,9 @@ export const createThumbnails = async (
   const { naturalSize, thumb: tinyThumb } = await createImageThumbnail(
     imageBytes,
     payloadKey,
-    tinyThumbSize
+    tinyThumbSize,
+    originalFileSize
   );
-
   const applicableThumbSizes = (thumbSizes || baseThumbSizes).reduce((currArray, thumbSize) => {
     if (tinyThumb.payload.type === svgType) return currArray;
 
@@ -119,7 +120,7 @@ export const createThumbnails = async (
       applicableThumbSizes.map(
         async (thumbSize) =>
           await (
-            await createImageThumbnail(imageBytes, payloadKey, thumbSize)
+            await createImageThumbnail(imageBytes, payloadKey, thumbSize, originalFileSize)
           ).thumb
       )
     )),
@@ -143,7 +144,7 @@ const createVectorThumbnail = async (
   const thumb: ThumbnailFile = {
     pixelWidth: 50,
     pixelHeight: 50,
-    payload: new Blob([imageBytes], { type: svgType }),
+    payload: new Blob([new Uint8Array(imageBytes)], { type: svgType }),
     key: payloadKey,
   };
 
@@ -171,9 +172,10 @@ const createVectorThumbnail = async (
 const createImageThumbnail = async (
   imageBytes: Uint8Array,
   payloadKey: string,
-  instruction: ThumbnailInstruction
+  instruction: ThumbnailInstruction,
+  originalFileSize?: number
 ): Promise<{ naturalSize: ImageSize; thumb: ThumbnailFile }> => {
-  const blob: Blob = new Blob([imageBytes], {});
+  const blob: Blob = new Blob([new Uint8Array(imageBytes)], {});
   const type = instruction.type || 'webp';
 
   return resizeImageFromBlob(
@@ -183,10 +185,56 @@ const createImageThumbnail = async (
     instruction.height,
     type
   ).then((resizedData) => {
+    const naturalWidth = resizedData.naturalSize.width;
+    const naturalHeight = resizedData.naturalSize.height;
+    const targetWidth = instruction.width;
+    const targetHeight = instruction.height;
+    const maxFileSizeForSkipResize = 500 * 1024; // 500KB
+
+    // Check if dimensions already match the target and file size is under 500KB for larger dimensions
+    const dimensionsMatch = naturalWidth === targetWidth && naturalHeight === targetHeight;
+    const isLargerDimension = targetWidth >= 400 || targetHeight >= 400; // Consider 400px+ as larger
+    const isUnder500KB = originalFileSize && originalFileSize <= maxFileSizeForSkipResize;
+
+    if (dimensionsMatch && (!isLargerDimension || isUnder500KB)) {
+      // Use original image without resizing
+      return {
+        naturalSize: {
+          pixelWidth: naturalWidth,
+          pixelHeight: naturalHeight,
+        },
+        thumb: {
+          pixelWidth: naturalWidth,
+          pixelHeight: naturalHeight,
+          payload: blob, // Use original blob
+          contentType: blob.type || `image/${type}`,
+          key: payloadKey,
+        },
+      };
+    }
+
+    // Check if the resized thumbnail is larger than the original file
+    // If so, use the original blob instead
+    if (originalFileSize && resizedData.blob.size > originalFileSize) {
+      return {
+        naturalSize: {
+          pixelWidth: naturalWidth,
+          pixelHeight: naturalHeight,
+        },
+        thumb: {
+          pixelWidth: naturalWidth,
+          pixelHeight: naturalHeight,
+          payload: blob,
+          contentType: blob.type || `image/${type}`,
+          key: payloadKey,
+        },
+      };
+    }
+
     return {
       naturalSize: {
-        pixelWidth: resizedData.naturalSize.width,
-        pixelHeight: resizedData.naturalSize.height,
+        pixelWidth: naturalWidth,
+        pixelHeight: naturalHeight,
       },
       thumb: {
         pixelWidth: resizedData.size.width,
