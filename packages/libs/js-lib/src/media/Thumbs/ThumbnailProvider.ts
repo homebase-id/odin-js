@@ -189,7 +189,7 @@ const createImageThumbnail = async (
     const naturalHeight = resizedData.naturalSize.height;
     const targetWidth = instruction.width;
     const targetHeight = instruction.height;
-    const maxFileSizeForSkipResize = 500 * 1024; // 500KB
+    const maxFileSizeForSkipResize = SKIP_RESIZE_MAX_BYTES;
 
     // Check if dimensions already match the target and file size is under 500KB for larger dimensions
     const dimensionsMatch = naturalWidth === targetWidth && naturalHeight === targetHeight;
