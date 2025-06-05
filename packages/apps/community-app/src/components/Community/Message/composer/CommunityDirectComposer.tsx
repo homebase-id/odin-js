@@ -114,18 +114,35 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
       []
     );
 
-    useEffect(() => {
-      // focus, clear message to allow draft to be loaded
-      const onFocus = () => {
-        const position = volatileRef.current?.getPosition?.();
-
-        setMessage(undefined);
-        // Set timeout to allow RTE to render the new message;
-        setTimeout(() => volatileRef.current?.setPosition?.(position), 100);
-      };
-      window.addEventListener('focus', onFocus);
-      return () => window.removeEventListener('focus', onFocus);
-    });
+      useEffect(() => {
+          const onFocus = () => {
+              const position = volatileRef.current?.getPosition?.();
+              setMessage(undefined);
+    
+              // Defer twice to ensure DOM updates complete
+              setTimeout(() => {
+                  requestAnimationFrame(() => {
+                      volatileRef.current?.setPosition?.(position);
+                  });
+              }, 0);
+          };
+    
+          window.addEventListener('focus', onFocus);
+          return () => window.removeEventListener('focus', onFocus);
+      }, []);
+      
+    // useEffect(() => {
+    //   // focus, clear message to allow draft to be loaded
+    //   const onFocus = () => {
+    //     const position = volatileRef.current?.getPosition?.();
+    //
+    //     setMessage(undefined);
+    //     // Set timeout to allow RTE to render the new message;
+    //     setTimeout(() => volatileRef.current?.setPosition?.(position), 100);
+    //   };
+    //   window.addEventListener('focus', onFocus);
+    //   return () => window.removeEventListener('focus', onFocus);
+    // });
 
     useEffect(() => {
       // When replying to a message, focus the input
