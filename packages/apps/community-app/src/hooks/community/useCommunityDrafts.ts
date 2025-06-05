@@ -56,7 +56,7 @@ export const useCommunityDrafts = (props?: {
             }
 
             const newlyMerged = mergeDrafts(drafts, serverVersion);
-            insertNewCommunityDrafts(queryClient, newlyMerged);
+            insertNewCommunityDrafts(queryClient, newlyMerged, communityId);
 
             console.log(`Uploading version via version conflict - retry #${maxRetries}`, serverVersion, newlyMerged);
 
@@ -303,15 +303,38 @@ export const invalidateCommunityDrafts = (queryClient: QueryClient, communityId?
 
 export const insertNewCommunityDrafts = (
     queryClient: QueryClient,
-    newDrafts: HomebaseFile<CommunityDrafts> | DeletedHomebaseFile<unknown>
+    newDrafts: HomebaseFile<CommunityDrafts> | DeletedHomebaseFile<unknown>,
+    communityId?: string //note I only marked this as optional  there seems to be a scenario where a caller may pass be missing the communityId
 ) => {
     if (newDrafts.fileState === 'deleted') {
-        if (newDrafts.fileMetadata.appData.uniqueId)
-            invalidateCommunityDrafts(queryClient, newDrafts.fileMetadata.appData.uniqueId);
+
+        if(!communityId)
+        {
+            console.warn("insertNewCommunityDrafts -> Using fallback community id for fileState = deleted");
+        }
+
+        const useThisCommunityId = communityId ?? newDrafts.fileMetadata.appData.uniqueId;
+        if (useThisCommunityId) {
+            invalidateCommunityDrafts(queryClient, useThisCommunityId);
+        }
+        else{
+            console.warn("insertNewCommunityDrafts -> No fallback communityId found (in appcontent).  newDrafts.fileMetadata", newDrafts.fileMetadata);
+        }
+
     } else {
+        if(!communityId)
+        {
+            console.warn("insertNewCommunityDrafts -> Using fallback community id for fileState = active");
+        }
+
+        const useThisCommunityId = communityId ?? formatGuidId(newDrafts.fileMetadata.appData.content.communityId);
+        if (!useThisCommunityId) {
+            console.warn("insertNewCommunityDrafts -> No fallback communityId found (in uid).  newDrafts.fileMetadata", newDrafts.fileMetadata);
+        }
+        
         const queryKey = [
             'community-drafts',
-            formatGuidId(newDrafts.fileMetadata.appData.content.communityId),
+            useThisCommunityId
         ];
 
         const existingDrafts = queryClient.getQueryData<HomebaseFile<CommunityDrafts>>(queryKey)
@@ -323,12 +346,7 @@ export const insertNewCommunityDrafts = (
             return;
         }
 
-        // console.info("[1] insertNewCommunityDrafts -> merge start", existingDrafts.fileMetadata.appData.content, 
-        //     newDrafts.fileMetadata.appData.content.drafts);
-        
         const mergedMeta = mergeDrafts(existingDrafts, newDrafts, true);
-        
-        // console.info("[1] insertNewCommunityDrafts -> merge complete", mergedMeta.fileMetadata.appData.content);
 
         queryClient.setQueryData(queryKey,
             mergedMeta
