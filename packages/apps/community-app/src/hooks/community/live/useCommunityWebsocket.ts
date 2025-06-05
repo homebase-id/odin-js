@@ -73,7 +73,7 @@ export const useCommunityWebsocket = (
             console.warn('[CommunityWebsocket] Invalid community drafts received', notification);
             return;
           }
-          insertNewCommunityDrafts(queryClient, communityDrafts);
+          insertNewCommunityDrafts(queryClient, communityDrafts, communityId);
         }
       }
 
