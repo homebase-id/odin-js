@@ -187,7 +187,7 @@ export const useCommunityInboxProcessor = (
               )
               : updatedDsr;
           if (!newDrafts) return;
-          insertNewCommunityDrafts(queryClient, newDrafts);
+          insertNewCommunityDrafts(queryClient, newDrafts, communityId);
         })
       );
     } else {
