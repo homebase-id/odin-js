@@ -46,7 +46,7 @@ const getMimeType = (format: 'png' | 'webp' | 'bmp' | 'jpeg' | 'gif' | null) => 
  * @returns {Size} Returns the image width and height
  */
 
-const getTargetSize = (
+export const getTargetSize = (
   img: HTMLImageElement,
   maxWidth: number | undefined,
   maxHeight: number | undefined
@@ -85,9 +85,11 @@ const getTargetSize = (
 export const resizeImageFromBlob = (
   imgBlob: Blob,
   quality = 100,
-  width: number,
-  height: number,
-  format: 'png' | 'webp' | 'bmp' | 'jpeg' | 'gif' | null = null
+  width?: number,
+  height?: number,
+  format: 'png' | 'webp' | 'bmp' | 'jpeg' | 'gif' | null = null,
+  isTinyThumb: boolean = false,
+  maxBytes?: number
 ): Promise<{
   naturalSize: { width: number; height: number };
   size: { width: number; height: number };
@@ -96,11 +98,13 @@ export const resizeImageFromBlob = (
   if (!(imgBlob instanceof Blob)) {
     throw new TypeError(`Expected blob or file! ${typeof imgBlob} given!`);
   }
-  if (quality <= 0) {
-    throw new RangeError('Quality must be higher than 0!');
+  if (quality <= 0 || quality > 100) {
+    throw new RangeError('Quality must be between 1 and 100!');
   }
-  return new Promise((resolve) => {
-    const mimeType = format ? getMimeType(format) : imgBlob.type;
+
+  return new Promise((resolve, reject) => {
+    const outputFormat = format || 'webp';
+    const mimeType = getMimeType(outputFormat);
     const imgQuality = quality < 1 ? quality : quality / 100;
 
     const reader = new FileReader();
@@ -108,31 +112,74 @@ export const resizeImageFromBlob = (
     reader.onload = () => {
       const img = new Image();
       if (!reader.result || typeof reader.result !== 'string') {
+        reject(new Error('Failed to read image data'));
         return;
       }
       img.src = reader.result;
       img.onload = () => {
+        const naturalSize = { width: img.naturalWidth, height: img.naturalHeight };
+        const imageTargetSize = { width: width || naturalSize.width, height: height || naturalSize.height };
+        const targetFinalSize = getTargetSize(img, imageTargetSize.width, imageTargetSize.height);
+
+        // Check if we can return original image unmodified
+        if (targetFinalSize.width === naturalSize.width &&
+          targetFinalSize.height === naturalSize.height &&
+          imgBlob.type === mimeType &&
+          maxBytes && imgBlob.size <= maxBytes) {
+          resolve({
+            naturalSize,
+            size: targetFinalSize,
+            blob: imgBlob
+          });
+          return;
+        }
+
         const canvas = document.createElement('canvas');
-        const size = getTargetSize(img, width, height);
-        canvas.width = size.width;
-        canvas.height = size.height;
-        canvas.getContext('2d')?.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.width = targetFinalSize.width;
+        canvas.height = targetFinalSize.height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Failed to get canvas context'));
+          return;
+        }
+
+        // For tiny thumbs, apply some optimization (simplified version of quantization)
+        if (isTinyThumb) {
+          ctx.imageSmoothingEnabled = false;
+          ctx.imageSmoothingQuality = 'low';
+        } else {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+        }
+
+        ctx.drawImage(img, 0, 0, targetFinalSize.width, targetFinalSize.height);
+
         canvas.toBlob(
           (blob) => {
-            if (!blob) return;
+            if (!blob) {
+              reject(new Error('Failed to create blob from canvas'));
+              return;
+            }
 
             resolve({
-              naturalSize: { width: img.naturalWidth, height: img.naturalHeight },
-              size: { width: size.width, height: size.height },
-              blob: new Blob([blob], {
-                type: mimeType,
-              }),
+              naturalSize,
+              size: targetFinalSize,
+              blob: new Blob([blob], { type: mimeType })
             });
           },
           mimeType,
           imgQuality
         );
       };
+
+      img.onerror = () => {
+        reject(new Error('Failed to load image'));
+      };
+    };
+
+    reader.onerror = () => {
+      reject(new Error('Failed to read blob'));
     };
   });
 };

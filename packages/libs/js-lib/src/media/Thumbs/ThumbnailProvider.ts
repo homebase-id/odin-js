@@ -1,27 +1,21 @@
 import { uint8ArrayToBase64 } from '../../helpers/DataUtil';
 import { ImageContentType, ImageSize, ThumbnailFile, EmbeddedThumb } from '../../core/core';
 import { ThumbnailInstruction } from '../MediaTypes';
-import { resizeImageFromBlob } from './ImageResizer';
-
-const SKIP_RESIZE_MAX_BYTES = 500 * 1024; // 500 KB
-const LARGE_DIMENSION_THRESHOLD_PX = 1000; // Threshold for considering dimensions as large
+import { resizeImageFromBlob, getTargetSize } from './ImageResizer';
 
 export const baseThumbSizes: ThumbnailInstruction[] = [
-  { quality: 75, width: 400, height: 400 },
-  { quality: 75, width: 1600, height: 1600 },
+  { quality: 84, maxPixelDimension: 320, maxBytes: 26 * 1024 },
+  { quality: 84, maxPixelDimension: 640, maxBytes: 102 * 1024 },
+  { quality: 76, maxPixelDimension: 1080, maxBytes: 291 * 1024 },
+  { quality: 76, maxPixelDimension: 1600, maxBytes: 640 * 1024 },
 ];
 
 export const tinyThumbSize: ThumbnailInstruction = {
-  quality: 10,
-  width: 20,
-  height: 20,
+  quality: 76,
+  maxPixelDimension: 20,
+  maxBytes: 768, // 1024 limit in core base64(byte[768]).Length ~= 1.33*786
 };
 
-export const tinyGifThumbSize: ThumbnailInstruction = {
-  quality: 10,
-  width: 10,
-  height: 10,
-};
 
 const svgType = 'image/svg+xml';
 const gifType = 'image/gif';
@@ -36,6 +30,59 @@ const getEmbeddedThumbOfThumbnailFile = async (
     contentType: thumbnailFile.payload.type as ImageContentType,
     content: uint8ArrayToBase64(new Uint8Array(await thumbnailFile.payload.arrayBuffer())),
   };
+};
+
+export const getRevisedThumbs = (
+  sourceSize: ImageSize,
+  thumbs: ThumbnailInstruction[]
+): ThumbnailInstruction[] => {
+  const sourceMax = Math.max(sourceSize.pixelWidth, sourceSize.pixelHeight);
+  const thresholdMin = Math.floor((90 * sourceMax) / 100);
+  const thresholdMax = Math.floor((110 * sourceMax) / 100);
+
+  // Filter thumbnails: keep those not larger than sourceMax and outside 10% range
+  const keptThumbs = thumbs.filter(
+    (t) =>
+      (t.maxPixelDimension ?? 0) <= sourceMax &&
+      ((t.maxPixelDimension ?? 0) < thresholdMin ||
+        (t.maxPixelDimension ?? 0) > thresholdMax)
+  );
+
+  // If any thumbnails were removed, add the source size as a thumbnail
+  if (keptThumbs.length < thumbs.length) {
+    // Find the thumbnail with closest maxPixelDimension
+    const nearestThumb = thumbs
+      .slice()
+      .sort(
+        (a, b) =>
+          Math.abs((a.maxPixelDimension ?? 0) - sourceMax) -
+          Math.abs((b.maxPixelDimension ?? 0) - sourceMax)
+      )[0];
+
+    let maxBytes: number;
+    if (
+      nearestThumb &&
+      nearestThumb.maxPixelDimension &&
+      nearestThumb.maxBytes
+    ) {
+      const scale = sourceMax / nearestThumb.maxPixelDimension;
+      maxBytes = Math.round(nearestThumb.maxBytes * scale);
+      // Clamp between 10KB and 1MB
+      maxBytes = Math.max(10 * 1024, Math.min(maxBytes, 1024 * 1024));
+    } else {
+      maxBytes = 300 * 1024;
+    }
+
+    keptThumbs.push({
+      quality: sourceMax <= 640 ? 84 : 76,
+      maxPixelDimension: sourceMax,
+      maxBytes,
+    });
+  }
+
+  return keptThumbs.sort(
+    (a, b) => (a.maxPixelDimension ?? 0) - (b.maxPixelDimension ?? 0)
+  );
 };
 
 export const createThumbnails = async (
@@ -56,7 +103,6 @@ export const createThumbnails = async (
   }
 
   const contentType = image.type as ImageContentType;
-  const originalFileSize = image.size;
 
   if (image.type === svgType) {
     const vectorThumb = await createVectorThumbnail(imageBytes, payloadKey);
@@ -70,9 +116,9 @@ export const createThumbnails = async (
 
   if (contentType === gifType) {
     const gifThumb = await createImageThumbnail(imageBytes, payloadKey, {
-      ...tinyGifThumbSize,
+      ...tinyThumbSize,
       type: 'gif',
-    }, originalFileSize);
+    });
 
     return {
       tinyThumb: await getEmbeddedThumbOfThumbnailFile(gifThumb.thumb, gifThumb.naturalSize),
@@ -92,29 +138,25 @@ export const createThumbnails = async (
     imageBytes,
     payloadKey,
     tinyThumbSize,
-    originalFileSize
+    true,
   );
-  const applicableThumbSizes = (thumbSizes || baseThumbSizes).reduce((currArray, thumbSize) => {
-    if (tinyThumb.payload.type === svgType) return currArray;
 
-    if (naturalSize.pixelWidth < thumbSize.width && naturalSize.pixelHeight < thumbSize.height)
-      return currArray;
+  const requestedSizes = thumbSizes || baseThumbSizes;
 
-    return [...currArray, thumbSize];
-  }, [] as ThumbnailInstruction[]);
+  const applicableThumbSizes: ThumbnailInstruction[] = getRevisedThumbs(naturalSize, requestedSizes);
 
-  if (
-    applicableThumbSizes.length !== (thumbSizes || baseThumbSizes).length &&
-    !applicableThumbSizes.some((thumbSize) => thumbSize.width === naturalSize.pixelWidth) &&
-    tinyThumb.pixelWidth !== naturalSize.pixelWidth // if the tinyThumb is the same size as the naturalSize we don't need to add it again
-  ) {
-    // Source image is too small for some of the requested sizes so we add the source dimensions as exact size
-    applicableThumbSizes.push({
-      quality: 100,
-      width: naturalSize.pixelWidth,
-      height: naturalSize.pixelHeight,
-    });
-  }
+  // if (
+  //   applicableThumbSizes.length !== (thumbSizes || baseThumbSizes).length &&
+  //   !applicableThumbSizes.some((thumbSize) => thumbSize.width === naturalSize.pixelWidth) &&
+  //   tinyThumb.pixelWidth !== naturalSize.pixelWidth // if the tinyThumb is the same size as the naturalSize we don't need to add it again
+  // ) {
+  //   // Source image is too small for some of the requested sizes so we add the source dimensions as exact size
+  //   applicableThumbSizes.push({
+  //     quality: 100,
+  //     width: naturalSize.pixelWidth,
+  //     height: naturalSize.pixelHeight,
+  //   });
+  // }
 
   // Create additionalThumbnails
   const additionalThumbnails: ThumbnailFile[] = [
@@ -123,7 +165,7 @@ export const createThumbnails = async (
       applicableThumbSizes.map(
         async (thumbSize) =>
           await (
-            await createImageThumbnail(imageBytes, payloadKey, thumbSize, originalFileSize)
+            await createImageThumbnail(imageBytes, payloadKey, thumbSize)
           ).thumb
       )
     )),
@@ -176,76 +218,98 @@ const createImageThumbnail = async (
   imageBytes: Uint8Array,
   payloadKey: string,
   instruction: ThumbnailInstruction,
-  originalFileSize?: number
+  isTinyThumb: boolean = false
 ): Promise<{ naturalSize: ImageSize; thumb: ThumbnailFile }> => {
-  const blob: Blob = new Blob([new Uint8Array(imageBytes)], {});
-  const type = instruction.type || 'webp';
+  const targetFormatType = instruction.type || 'webp';
 
-  return resizeImageFromBlob(
-    blob,
-    instruction.quality,
-    instruction.width,
-    instruction.height,
-    type
-  ).then((resizedData) => {
-    const naturalWidth = resizedData.naturalSize.width;
-    const naturalHeight = resizedData.naturalSize.height;
-    const targetWidth = instruction.width;
-    const targetHeight = instruction.height;
-    const maxFileSizeForSkipResize = SKIP_RESIZE_MAX_BYTES;
-
-    // Check if dimensions already match the target and file size is under 500KB for larger dimensions
-    const dimensionsMatch = naturalWidth === targetWidth && naturalHeight === targetHeight;
-    const isLargerDimension = targetWidth >= LARGE_DIMENSION_THRESHOLD_PX || targetHeight >= LARGE_DIMENSION_THRESHOLD_PX; // Consider dimensions >= threshold as larger
-    const isUnder500KB = originalFileSize && originalFileSize <= maxFileSizeForSkipResize;
-
-    if (dimensionsMatch && (!isLargerDimension || isUnder500KB)) {
-      // Use original image without resizing
-      return {
-        naturalSize: {
-          pixelWidth: naturalWidth,
-          pixelHeight: naturalHeight,
-        },
-        thumb: {
-          pixelWidth: naturalWidth,
-          pixelHeight: naturalHeight,
-          payload: blob, // Use original blob
-          contentType: blob.type || `image/${type}`,
-          key: payloadKey,
-        },
+  // Get natural size directly using Image element
+  const naturalSize = await new Promise<ImageSize>((resolve, reject) => {
+    const blob = new Blob([imageBytes]);
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    reader.onload = () => {
+      const img = new Image();
+      if (!reader.result || typeof reader.result !== 'string') {
+        reject(new Error('Failed to read image data'));
+        return;
+      }
+      img.src = reader.result;
+      img.onload = () => {
+        const size = getTargetSize(img, undefined, undefined);
+        resolve({
+          pixelWidth: size.width,
+          pixelHeight: size.height
+        });
       };
-    }
-
-    // Check if the resized thumbnail is larger than the original file
-    // If so, use the original blob instead
-    if (originalFileSize && resizedData.blob.size > originalFileSize) {
-      return {
-        naturalSize: {
-          pixelWidth: naturalWidth,
-          pixelHeight: naturalHeight,
-        },
-        thumb: {
-          pixelWidth: naturalWidth,
-          pixelHeight: naturalHeight,
-          payload: blob,
-          contentType: blob.type || `image/${type}`,
-          key: payloadKey,
-        },
+      img.onerror = () => {
+        reject(new Error('Failed to load image'));
       };
-    }
-
-    return {
-      naturalSize: {
-        pixelWidth: naturalWidth,
-        pixelHeight: naturalHeight,
-      },
-      thumb: {
-        pixelWidth: resizedData.size.width,
-        pixelHeight: resizedData.size.height,
-        payload: resizedData.blob,
-        contentType: `image/${type}`,
-        key: payloadKey,
-      },
+    };
+    reader.onerror = () => {
+      reject(new Error('Failed to read blob'));
     };
   });
+
+  const maxTargetSize: ImageSize = {
+    pixelWidth: instruction.maxPixelDimension,
+    pixelHeight: instruction.maxPixelDimension,
+  };
+
+  let quality = instruction.quality;
+  let currentImageBytes = imageBytes;
+
+  let resizedData = await resizeImageFromBlob(
+    new Blob([currentImageBytes]),
+    quality,
+    maxTargetSize.pixelWidth,
+    maxTargetSize.pixelHeight,
+    targetFormatType,
+    isTinyThumb,
+    instruction.maxBytes
+  );
+
+  // Reduce quality until size <= MaxBytes or quality reaches 1
+  while (resizedData.blob.size > instruction.maxBytes && quality > 1) {
+    const excessRatio = resizedData.blob.size / instruction.maxBytes;
+    const qualityDrop = Math.min(40, Math.max(5, Math.floor(quality * excessRatio * 0.5)));
+    quality = Math.max(1, quality - qualityDrop);
+
+    resizedData = await resizeImageFromBlob(
+      new Blob([isTinyThumb ? new Uint8Array(await resizedData.blob.arrayBuffer()) : currentImageBytes]),
+      quality,
+      maxTargetSize.pixelWidth,
+      maxTargetSize.pixelHeight,
+      targetFormatType,
+      isTinyThumb,
+      instruction.maxBytes
+    );
+
+    if (resizedData.blob.size > instruction.maxBytes && quality < 2 && isTinyThumb) {
+      if (maxTargetSize.pixelWidth === 1) {
+        throw new Error("The world has ended. A 1x1 thumb in quality 1 takes up more than MaxBytes bytes...");
+      }
+
+      // Ok we're in trouble... wild hack attempt here, let's try to make a thumb from the thumb
+      currentImageBytes = new Uint8Array(await resizedData.blob.arrayBuffer());
+
+      // For some strange images we cannot fit them into a 20x20 thumb even with quality 1.
+      // In such a case, make the thumb half the size
+      quality = 2; // To make while run again
+      maxTargetSize.pixelWidth = Math.max(1, maxTargetSize.pixelWidth - 5);
+      maxTargetSize.pixelHeight = Math.max(1, maxTargetSize.pixelHeight - 5);
+    }
+  }
+
+  const thumb: ThumbnailFile = {
+    pixelWidth: resizedData.size.width,
+    pixelHeight: resizedData.size.height,
+    payload: resizedData.blob,
+    // contentType: `image/${targetFormatType}`,
+    key: payloadKey,
+  };
+
+  return {
+    naturalSize,
+    thumb,
+  };
 };

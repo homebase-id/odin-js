@@ -68,8 +68,8 @@ export const saveComment = async (
       imageFile,
       COMMENT_MEDIA_PAYLOAD,
       [
-        { height: 250, width: 250, quality: 100 },
-        { height: 1600, width: 1600, quality: 100 },
+        { quality: 100, maxPixelDimension: 250, maxBytes: 200 * 1024 }, // 200kb
+        { quality: 100, maxPixelDimension: 1600, maxBytes: 640 * 1024 }, // 640kb
       ]
     );
 
