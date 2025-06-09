@@ -256,14 +256,14 @@ const nameAttributeProcessing = (nameAttr: Attribute): ProcessedAttribute => {
 };
 
 const profileInstructionThumbSizes: ThumbnailInstruction[] = [
-  { quality: 85, width: 250, height: 250 },
-  { quality: 75, width: 600, height: 600 },
+  { quality: 85, maxPixelDimension: 250, maxBytes: 102 * 1024 },
+  { quality: 75, maxPixelDimension: 600, maxBytes: 250 * 1024 },
 ];
 
 const headerInstructionThumbSizes: ThumbnailInstruction[] = [
-  { quality: 85, width: 600, height: 600 },
-  { quality: 75, width: 1600, height: 1600 },
-  { quality: 75, width: 2600, height: 2600 },
+  { quality: 85, maxPixelDimension: 600, maxBytes: 300 * 1024 },
+  { quality: 75, maxPixelDimension: 1600, maxBytes: 640 * 1024 },
+  { quality: 75, maxPixelDimension: 2600, maxBytes: 1700 * 1024 },
 ];
 
 const getNewThumbnails = async (
