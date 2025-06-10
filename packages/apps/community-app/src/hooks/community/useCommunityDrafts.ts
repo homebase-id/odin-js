@@ -112,12 +112,12 @@ export const useCommunityDrafts = (props?: {
                 } as HomebaseFile<CommunityDrafts>;
 
                 queryClient.setQueryData<HomebaseFile<CommunityDrafts>>(
-                    ['community-drafts', updatedMeta.fileMetadata.appData.content.communityId],
+                    ['community-drafts', formatGuidId(updatedMeta.fileMetadata.appData.content.communityId)],
                     updatedMeta
                 );
 
                 if (!variables.drafts.fileId) {
-                    console.log(("no drafts.fileid found; must be a new drafts file"))
+                    // console.log(("no drafts.fileid found; must be a new drafts file"))
                     // It's a new drafts file, so we need to invalidate the communities query
                     invalidateCommunities(queryClient);
                 }
@@ -231,55 +231,56 @@ const mergeDrafts = (
                             (acc, key) => {
                                 const localDraft = localContent.drafts?.[key];
                                 const serverDraft = serverContent.drafts?.[key];
-                                
-                                // gpt debugging
-                                const hasServerDraft = serverDraft !== undefined && serverDraft !== null;
-                                const hasLocalDraft = localDraft !== undefined && localDraft !== null;
+                              
+                                //
+                                // // gpt debugging
+                                // const hasServerDraft = serverDraft !== undefined && serverDraft !== null;
+                                // const hasLocalDraft = localDraft !== undefined && localDraft !== null;
+                                //
+                                // const bothHaveDrafts =
+                                //     hasLocalDraft &&
+                                //     hasServerDraft &&
+                                //     localDraft.updatedAt !== undefined &&
+                                //     serverDraft.updatedAt !== undefined;
+                                //
+                                // const localIsNewer = bothHaveDrafts
+                                //     ? localDraft.updatedAt > serverDraft.updatedAt
+                                //     : false;
+                                //
+                                // if(viaNew) {
+                                //     console.info('[1] local updated at:', localDraft?.updatedAt ?? "nada");
+                                //     console.info('[1] hasServerDraft:', hasServerDraft);
+                                //     console.info('[1] hasLocalDraft:', hasLocalDraft);
+                                //     console.info('[1] localIsNewer:', localIsNewer);
+                                // }
+                                //
+                                // let draftSource: 'local' | 'server' | 'none';
+                                // let newestDraft;
+                                //
+                                // if (!hasServerDraft && hasLocalDraft) {
+                                //     newestDraft = localDraft;
+                                //     draftSource = 'local';
+                                // } else if (localIsNewer) {
+                                //     newestDraft = localDraft;
+                                //     draftSource = 'local';
+                                // } else if (hasServerDraft) {
+                                //     newestDraft = serverDraft;
+                                //     draftSource = 'server';
+                                // } else {
+                                //     newestDraft = undefined;
+                                //     draftSource = 'none';
+                                // }
+                                //
+                                // if(viaNew) {
+                                //     console.info('[1] newestDraft:', newestDraft);
+                                //     console.info('[1] draftSource:', draftSource);
+                                // }
 
-                                const bothHaveDrafts =
-                                    hasLocalDraft &&
-                                    hasServerDraft &&
-                                    localDraft.updatedAt !== undefined &&
-                                    serverDraft.updatedAt !== undefined;
-                                
-                                const localIsNewer = bothHaveDrafts
-                                    ? localDraft.updatedAt > serverDraft.updatedAt
-                                    : false;
-
-                                if(viaNew) {
-                                    console.info('[1] local updated at:', localDraft?.updatedAt ?? "nada");
-                                    console.info('[1] hasServerDraft:', hasServerDraft);
-                                    console.info('[1] hasLocalDraft:', hasLocalDraft);
-                                    console.info('[1] localIsNewer:', localIsNewer);
-                                }
-
-                                let draftSource: 'local' | 'server' | 'none';
-                                let newestDraft;
-
-                                if (!hasServerDraft && hasLocalDraft) {
-                                    newestDraft = localDraft;
-                                    draftSource = 'local';
-                                } else if (localIsNewer) {
-                                    newestDraft = localDraft;
-                                    draftSource = 'local';
-                                } else if (hasServerDraft) {
-                                    newestDraft = serverDraft;
-                                    draftSource = 'server';
-                                } else {
-                                    newestDraft = undefined;
-                                    draftSource = 'none';
-                                }
-
-                                if(viaNew) {
-                                    console.info('[1] newestDraft:', newestDraft);
-                                    console.info('[1] draftSource:', draftSource);
-                                }
-
-                                // const newestDraft =
-                                //     !serverDraft ||
-                                //     (localDraft?.updatedAt && localDraft?.updatedAt > serverDraft?.updatedAt)
-                                //         ? localDraft
-                                //         : serverDraft;
+                                const newestDraft =
+                                    !serverDraft ||
+                                    (localDraft?.updatedAt && localDraft?.updatedAt > serverDraft?.updatedAt)
+                                        ? localDraft
+                                        : serverDraft;
 
                                 acc[key] = newestDraft;
                                 return acc;
@@ -296,7 +297,7 @@ const mergeDrafts = (
 
 export const invalidateCommunityDrafts = (queryClient: QueryClient, communityId?: string) => {
     queryClient.invalidateQueries({
-        queryKey: ['community-drafts', communityId],
+        queryKey: ['community-drafts', formatGuidId(communityId)],
         exact: !!communityId,
     });
 };
@@ -306,6 +307,8 @@ export const insertNewCommunityDrafts = (
     newDrafts: HomebaseFile<CommunityDrafts> | DeletedHomebaseFile<unknown>,
     communityId?: string //note I only marked this as optional  there seems to be a scenario where a caller may pass be missing the communityId
 ) => {
+    
+    communityId = formatGuidId(communityId);
     if (newDrafts.fileState === 'deleted') {
 
         if(!communityId)
@@ -324,7 +327,7 @@ export const insertNewCommunityDrafts = (
     } else {
         if(!communityId)
         {
-            console.warn("insertNewCommunityDrafts -> Using fallback community id for fileState = active");
+            console.warn("insertNewCommunityDrafts -> Using fallback community id for fileState = active", formatGuidId(newDrafts.fileMetadata.appData.content.communityId));
         }
 
         const useThisCommunityId = communityId ?? formatGuidId(newDrafts.fileMetadata.appData.content.communityId);

@@ -14,22 +14,22 @@ import {
   trimRichText,
   getPlainTextFromRichText,
 } from '@homebase-id/common-app';
-import { PaperPlane, Plus } from '@homebase-id/common-app/icons';
-import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
+import {PaperPlane, Plus} from '@homebase-id/common-app/icons';
+import {HomebaseFile, NewMediaFile, RichText} from '@homebase-id/js-lib/core';
 
-import { useState, useRef, useMemo, lazy, Suspense, useCallback, useEffect, memo } from 'react';
+import {useState, useRef, useMemo, lazy, Suspense, useCallback, useEffect, memo} from 'react';
 
-import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
-import { LinkPreview } from '@homebase-id/js-lib/media';
-import { useCommunityMessage } from '../../../../hooks/community/messages/useCommunityMessage';
-import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
-import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
-import { CommunityChannel } from '../../../../providers/CommunityProvider';
-import { ChannelPlugin } from '../RTEChannelDropdown/RTEChannelDropdownPlugin';
-import { useMessageDraft } from './useMessageDraft';
-import { DraftSaver } from './DraftSaver';
+import {getNewId, isTouchDevice} from '@homebase-id/js-lib/helpers';
+import {LinkPreview} from '@homebase-id/js-lib/media';
+import {useCommunityMessage} from '../../../../hooks/community/messages/useCommunityMessage';
+import {CommunityDefinition} from '../../../../providers/CommunityDefinitionProvider';
+import {CommunityMessage} from '../../../../providers/CommunityMessageProvider';
+import {CommunityChannel} from '../../../../providers/CommunityProvider';
+import {ChannelPlugin} from '../RTEChannelDropdown/RTEChannelDropdownPlugin';
+import {useMessageDraft} from './useMessageDraft';
+import {DraftSaver} from './DraftSaver';
 import React from 'react';
-import type { Mentionable } from '@homebase-id/rich-text-editor';
+import type {Mentionable} from '@homebase-id/rich-text-editor';
 
 const RichTextEditor = lazy(() =>
   import('@homebase-id/rich-text-editor').then((rootExport) => ({
@@ -48,7 +48,7 @@ export const MessageComposer = memo(
     autoFocus?: boolean;
     className?: string;
   }) => {
-    const { community, channel, thread, threadParticipants, onKeyDown, className } = props;
+    const {community, channel, thread, threadParticipants, onKeyDown, className} = props;
     const autoFocus = props.autoFocus ?? true;
 
     const formRef = useRef<HTMLFormElement>(null);
@@ -60,22 +60,22 @@ export const MessageComposer = memo(
     const draft = useMessageDraft(
       !message
         ? {
-            community,
-            draftKey:
-              thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId,
-          }
+          community,
+          draftKey:
+            thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId,
+        }
         : undefined
     );
 
     const addError = useErrors().add;
-    const { mutateAsync: sendMessage } = useCommunityMessage().send;
+    const {mutateAsync: sendMessage} = useCommunityMessage().send;
 
     const plainMessage = useMemo(
       () => getPlainTextFromRichText(message || draft?.message) || '',
       [message, draft]
     );
 
-    const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(plainMessage);
+    const {linkPreviews, setLinkPreviews} = useLinkPreviewBuilder(plainMessage);
 
     const doSend = useCallback(async () => {
       const toSendMessage = message || draft?.message;
@@ -127,7 +127,7 @@ export const MessageComposer = memo(
       threadParticipants,
     ]);
 
-    const mentionables = useMentionables({ community });
+    const mentionables = useMentionables({community});
 
     const changeHandler = useCallback(
       (newVal: {
@@ -142,28 +142,10 @@ export const MessageComposer = memo(
     const plugins = useMemo(() => {
       return [
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
+        ChannelPlugin.configure({options: {insertSpaceAfterChannel: true}} as any),
       ];
     }, []);
 
-    useEffect(() => {
-      const onFocus = () => {
-        const position = volatileRef.current?.getPosition?.();
-        setMessage(undefined);
-
-        // Defer twice to ensure DOM updates complete
-        setTimeout(() => {
-          requestAnimationFrame(() => {
-            volatileRef.current?.setPosition?.(position);
-          });
-        }, 0);
-      };
-
-      window.addEventListener('focus', onFocus);
-      return () => window.removeEventListener('focus', onFocus);
-    }, []);
-
-    
     // useEffect(() => {
     //   // focus, clear message to allow draft to be loaded
     //   const onFocus = () => {
@@ -171,11 +153,58 @@ export const MessageComposer = memo(
     //
     //     setMessage(undefined);
     //     // Set timeout to allow RTE to render the new message;
-    //     setTimeout(() => volatileRef.current?.setPosition?.(position), 100);
+    //     setTimeout(() => volatileRef.current?.setPosition?.(position), 250);
     //   };
     //   window.addEventListener('focus', onFocus);
     //   return () => window.removeEventListener('focus', onFocus);
     // });
+    //
+
+    useEffect(() => {
+      const onFocus = () => {
+        let position = undefined;
+        try {
+          position = volatileRef.current?.getPosition?.();
+
+        } catch (err) {
+          if (
+            err instanceof Error &&
+            err.message.includes('Cannot resolve a DOM node')
+          ) {
+            console.warn('Skipped getPosition: DOM not ready');
+          } else {
+            throw err;
+          }
+        }
+
+        setMessage(undefined);
+
+        setTimeout(() => {
+          requestAnimationFrame(() => {
+            try {
+              if (position) {
+                volatileRef.current?.setPosition?.(position);
+              }
+            } catch (err) {
+              if (
+                err instanceof Error &&
+                err.message.includes('Cannot resolve a DOM node')
+              ) {
+                console.warn('Skipped setPosition: DOM not ready');
+              } else {
+                console.error('something else');
+                // throw err;
+              }
+            }
+          });
+        }, 100);
+
+      };
+
+      window.addEventListener('focus', onFocus);
+      return () => window.removeEventListener('focus', onFocus);
+    }, []);
+
 
     const isTouch = useMemo(isTouchDevice, [isTouchDevice]);
     const onRTESubmit = useMemo(
@@ -188,7 +217,7 @@ export const MessageComposer = memo(
       return (
         <>
           <div className="max-h-[30vh] overflow-auto">
-            <FileOverview files={files} setFiles={setFiles} cols={8} />
+            <FileOverview files={files} setFiles={setFiles} cols={8}/>
             {files?.length ? null : (
               <LinkOverview
                 linkPreviews={linkPreviews}
@@ -200,12 +229,12 @@ export const MessageComposer = memo(
           </div>
           <div className="-mx-1 flex flex-row justify-between md:pt-2">
             <FileSelector
-              onChange={(files) => setFiles(files.map((file) => ({ file })))}
+              onChange={(files) => setFiles(files.map((file) => ({file})))}
               className="my-auto px-1 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
               accept="*"
               maxSize={HUNDRED_MEGA_BYTES}
             >
-              <Plus className="h-5 w-5" />
+              <Plus className="h-5 w-5"/>
             </FileSelector>
             <span className="my-auto">
               <ActionButton
@@ -233,7 +262,7 @@ export const MessageComposer = memo(
           <form
             className="flex flex-shrink-0 flex-row gap-2 px-0 md:px-3 md:pb-2 lg:pb-3"
             onPaste={(e) => {
-              const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
+              const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({file}));
 
               if (mediaFiles.length) {
                 setFiles([...(files ?? []), ...mediaFiles]);
@@ -250,7 +279,7 @@ export const MessageComposer = memo(
           >
             <Suspense
               fallback={
-                <div className="relative h-[111px] w-full border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border" />
+                <div className="relative h-[111px] w-full border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border"/>
               }
             >
               <RichTextEditor
@@ -289,11 +318,11 @@ export const MessageComposer = memo(
 MessageComposer.displayName = 'MessageComposer';
 
 const useMentionables = ({
-  community,
-}: {
+                           community,
+                         }: {
   community: HomebaseFile<CommunityDefinition> | undefined;
 }) => {
-  const { data: contacts } = useAllContacts(true);
+  const {data: contacts} = useAllContacts(true);
   return useMemo(() => {
     const filteredContacts =
       (contacts
@@ -321,7 +350,7 @@ const useMentionables = ({
         })
         .filter(Boolean) as Mentionable[]) || [];
 
-    filteredContacts.push({ value: '@channel', label: 'channel' });
+    filteredContacts.push({value: '@channel', label: 'channel'});
     return filteredContacts;
   }, [contacts]);
 };

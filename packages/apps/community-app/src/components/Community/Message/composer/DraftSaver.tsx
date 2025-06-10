@@ -21,6 +21,7 @@ export const DraftSaver = memo(
         message: RichText | undefined;
     }) => {
         const queryClient = useQueryClient();
+        
         // Note: I don't know why Stef is handling undefined here, when you walk up the stack
         // there is always a commuity; I mean the draft saver itself makes no sense unless there 
         // is a community. I know it's not random yet can't seem to find the scenario... yet
