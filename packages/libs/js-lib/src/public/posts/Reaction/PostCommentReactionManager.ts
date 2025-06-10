@@ -1,6 +1,6 @@
 import { DotYouClient } from '../../../core/DotYouClient';
 import { getRandom16ByteArray, uint8ArrayToBase64 } from '../../../helpers/DataUtil';
-import { createThumbnails } from '../../../media/Thumbs/ThumbnailProvider';
+import { baseThumbSizes, createThumbnails } from '../../../media/Thumbs/ThumbnailProvider';
 import {
   ThumbnailFile,
   UploadFileMetadata,
@@ -40,7 +40,7 @@ import { deleteFileOverPeer } from '../../../peer/peerData/File/PeerFileManager'
 import { queryBatchOverPeer } from '../../../peer/peerData/Query/PeerDriveQueryService';
 import { getContentFromHeaderOrPayloadOverPeer } from '../../../peer/peerData/File/PeerFileProvider';
 import { getFileHeaderOverPeerByGlobalTransitId } from '../../../peer/peer';
-import { baseThumbSizes } from '../../../../media';
+
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
