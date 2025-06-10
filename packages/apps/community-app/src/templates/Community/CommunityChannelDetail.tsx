@@ -199,7 +199,7 @@ const CommunityChannelPins = ({
         pinnedMessages?.searchResults.map((pinned, index) => {
           return (
             <Link
-              to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey}/${pinned.fileMetadata.appData.uniqueId}`}
+              to={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelKey}/${pinned.fileMetadata.appData.uniqueId}/thread?ui=full`}
               key={pinned.fileId || index}
             >
               <CommunityMessageItem
