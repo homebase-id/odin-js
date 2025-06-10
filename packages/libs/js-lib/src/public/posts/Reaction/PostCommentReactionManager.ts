@@ -40,6 +40,7 @@ import { deleteFileOverPeer } from '../../../peer/peerData/File/PeerFileManager'
 import { queryBatchOverPeer } from '../../../peer/peerData/Query/PeerDriveQueryService';
 import { getContentFromHeaderOrPayloadOverPeer } from '../../../peer/peerData/File/PeerFileProvider';
 import { getFileHeaderOverPeerByGlobalTransitId } from '../../../peer/peer';
+import { baseThumbSizes } from '../../../../media';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
@@ -67,10 +68,7 @@ export const saveComment = async (
     const { additionalThumbnails, tinyThumb } = await createThumbnails(
       imageFile,
       COMMENT_MEDIA_PAYLOAD,
-      [
-        { quality: 100, maxPixelDimension: 250, maxBytes: 200 * 1024 }, // 200kb
-        { quality: 100, maxPixelDimension: 1600, maxBytes: 640 * 1024 }, // 640kb
-      ]
+      baseThumbSizes.slice(0, 3),
     );
 
     thumbnails.push(...additionalThumbnails);
