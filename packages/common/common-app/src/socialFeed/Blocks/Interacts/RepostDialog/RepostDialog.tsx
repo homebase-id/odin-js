@@ -21,7 +21,7 @@ export const RepostDialog = ({
     return null;
   }
   const dialog = (
-    <DialogWrapper title={t('Repost')} onClose={onClose} isSidePanel={false} size="large">
+    <DialogWrapper title={t('Repost')} keepOpenOnBlur={true} onClose={onClose} isSidePanel={false} size="large">
       <PostComposer embeddedPost={embeddedPost} onPost={onClose} excludeCustom={true} />
     </DialogWrapper>
   );
