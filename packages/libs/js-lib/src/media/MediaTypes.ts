@@ -81,8 +81,8 @@ export interface HlsVideoMetadata extends BaseVideoMetadata {
 
 export interface ThumbnailInstruction {
   quality: number;
-  width: number;
-  height: number;
+  maxPixelDimension: number;
+  maxBytes: number;
   type?: 'webp' | 'png' | 'bmp' | 'jpeg' | 'gif';
 }
 

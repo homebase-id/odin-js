@@ -238,8 +238,8 @@ export const uploadConversation = async (
       imagePayload,
       CONVERSATION_IMAGE_KEY,
       [
-        { height: 75, width: 75, quality: 0.8 },
-        { height: 300, width: 300, quality: 0.8 },
+        { quality: 80, maxPixelDimension: 75, maxBytes: 8 * 1024 },
+        { quality: 80, maxPixelDimension: 300, maxBytes: 26 * 1024 },
       ]
     );
 
@@ -312,8 +312,8 @@ export const updateConversation = async (
       imagePayload,
       CONVERSATION_IMAGE_KEY,
       [
-        { height: 75, width: 75, quality: 0.8 },
-        { height: 300, width: 300, quality: 0.8 },
+        { quality: 80, maxPixelDimension: 75, maxBytes: 8 * 1024 },
+        { quality: 80, maxPixelDimension: 300, maxBytes: 26 * 1024 },
       ]
     );
 
