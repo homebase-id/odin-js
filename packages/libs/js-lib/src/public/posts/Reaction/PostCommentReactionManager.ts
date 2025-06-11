@@ -1,6 +1,6 @@
 import { DotYouClient } from '../../../core/DotYouClient';
 import { getRandom16ByteArray, uint8ArrayToBase64 } from '../../../helpers/DataUtil';
-import { createThumbnails } from '../../../media/Thumbs/ThumbnailProvider';
+import { baseThumbSizes, createThumbnails } from '../../../media/Thumbs/ThumbnailProvider';
 import {
   ThumbnailFile,
   UploadFileMetadata,
@@ -40,6 +40,7 @@ import { deleteFileOverPeer } from '../../../peer/peerData/File/PeerFileManager'
 import { queryBatchOverPeer } from '../../../peer/peerData/Query/PeerDriveQueryService';
 import { getContentFromHeaderOrPayloadOverPeer } from '../../../peer/peerData/File/PeerFileProvider';
 import { getFileHeaderOverPeerByGlobalTransitId } from '../../../peer/peer';
+
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
@@ -67,10 +68,7 @@ export const saveComment = async (
     const { additionalThumbnails, tinyThumb } = await createThumbnails(
       imageFile,
       COMMENT_MEDIA_PAYLOAD,
-      [
-        { height: 250, width: 250, quality: 100 },
-        { height: 1600, width: 1600, quality: 100 },
-      ]
+      baseThumbSizes.slice(0, 3),
     );
 
     thumbnails.push(...additionalThumbnails);
