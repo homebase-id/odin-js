@@ -261,9 +261,9 @@ const profileInstructionThumbSizes: ThumbnailInstruction[] = [
 ];
 
 const headerInstructionThumbSizes: ThumbnailInstruction[] = [
-  { quality: 85, maxPixelDimension: 600, maxBytes: 300 * 1024 },
-  { quality: 75, maxPixelDimension: 1600, maxBytes: 640 * 1024 },
-  { quality: 75, maxPixelDimension: 2600, maxBytes: 1700 * 1024 },
+  { quality: 85, maxPixelDimension: 600, maxBytes: 100 * 1024 },
+  { quality: 75, maxPixelDimension: 1600, maxBytes: 250 * 1024 },
+  { quality: 75, maxPixelDimension: 2600, maxBytes: 450 * 1024 },
 ];
 
 const getNewThumbnails = async (
