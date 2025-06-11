@@ -298,7 +298,7 @@ export const PostComposer = ({
                     title: t('Post'),
                     buttonText: t('Post'),
                     body: t(
-                      'Posting this, will make it publicly available on your identity {0}. \n\nIf you want to hide this post from anonymos users, you have to change the security settings from the dropdown first.',
+                      'Posting this, will make it publicly available on your identity {0}. \n\nIf you want to hide this post from anonymous users, you have to change the security settings from the dropdown first.',
                       `${loggedOnIdentity}`
                     ),
                     type: 'info',

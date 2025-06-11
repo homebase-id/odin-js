@@ -198,7 +198,7 @@ export const CommunityPins = () => {
                     pinnedMessages?.searchResults.map((pinned, index) => {
                       return (
                         <FakeAnchor
-                          href={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${pinned.fileMetadata.appData.content.channelId}/${pinned.fileMetadata.appData.uniqueId}`}
+                          href={`${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${pinned.fileMetadata.appData.content.channelId}/${pinned.fileMetadata.appData.uniqueId}/thread?ui=full`}
                           key={pinned.fileId || index}
                         >
                           <CommunityMessageItem
