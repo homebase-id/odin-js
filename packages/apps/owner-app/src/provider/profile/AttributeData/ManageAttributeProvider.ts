@@ -256,8 +256,8 @@ const nameAttributeProcessing = (nameAttr: Attribute): ProcessedAttribute => {
 };
 
 const profileInstructionThumbSizes: ThumbnailInstruction[] = [
-  { quality: 85, maxPixelDimension: 250, maxBytes: 102 * 1024 },
-  { quality: 75, maxPixelDimension: 600, maxBytes: 250 * 1024 },
+  { quality: 85, maxPixelDimension: 250, maxBytes: 22 * 1024 },
+  { quality: 75, maxPixelDimension: 600, maxBytes: 90 * 1024 },
 ];
 
 const headerInstructionThumbSizes: ThumbnailInstruction[] = [

@@ -48,7 +48,7 @@ export const processVideoFile = async (
   })();
 
   const { tinyThumb, additionalThumbnails } = thumbnail
-    ? await createThumbnails(thumbnail, payloadKey, [{ quality: 100, maxPixelDimension: 250, maxBytes: 102 * 1024 }]) // TODO: Determine the appropriate maxBytes value for thumbnail generation.
+    ? await createThumbnails(thumbnail, payloadKey, [{ quality: 95, maxPixelDimension: 250, maxBytes: 40 * 1024 }])
     : { tinyThumb: undefined, additionalThumbnails: [] };
 
   thumbnails.push(...additionalThumbnails);
