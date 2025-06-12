@@ -1,5 +1,5 @@
 import { useDotYouClientContext } from '@homebase-id/common-app';
-import { processInbox, queryBatchOverPeer, queryModifiedOverPeer } from '@homebase-id/js-lib/peer';
+import { processInbox, queryBatchOverPeer } from '@homebase-id/js-lib/peer';
 import { useQueryClient, useQuery, QueryClient } from '@tanstack/react-query';
 import { getTargetDriveFromCommunityId } from '../../../providers/CommunityDefinitionProvider';
 import {
@@ -11,7 +11,6 @@ import {
   DotYouClient,
   FileQueryParams,
   queryBatch,
-  queryModified,
   TargetDrive,
   HomebaseFile,
   DeletedHomebaseFile,
@@ -19,7 +18,6 @@ import {
 } from '@homebase-id/js-lib/core';
 import {
   hasDebugFlag,
-  getQueryModifiedCursorFromTime,
   getQueryBatchCursorFromTime,
   stringGuidsEqual,
 } from '@homebase-id/js-lib/helpers';
@@ -30,16 +28,18 @@ import {
 } from '../messages/useCommunityMessages';
 import {
   COMMUNITY_CHANNEL_FILE_TYPE,
+  CommunityChannel,
   dsrToCommunityChannel,
 } from '../../../providers/CommunityProvider';
 import { insertNewCommunityChannel } from '../channels/useCommunityChannels';
 import {
   COMMUNITY_METADATA_FILE_TYPE,
+  CommunityMetadata,
   dsrToCommunityMetadata,
   LOCAL_COMMUNITY_APP_DRIVE,
 } from '../../../providers/CommunityMetadataProvider';
 import { insertNewcommunityMetadata } from '../useCommunityMetadata';
-import { COMMUNITY_DRAFTS_FILE_TYPE, dsrToCommunityDrafts } from '../../../providers/CommunityDraftsProvider';
+import { COMMUNITY_DRAFTS_FILE_TYPE, CommunityDrafts, dsrToCommunityDrafts } from '../../../providers/CommunityDraftsProvider';
 import { insertNewCommunityDrafts } from '../useCommunityDrafts';
 
 const isDebug = hasDebugFlag();
@@ -128,7 +128,7 @@ export const useCommunityInboxProcessor = (
           const newChannel =
             updatedDsr.fileState === 'active'
               ? await dsrToCommunityChannel(dotYouClient, updatedDsr, odinId, targetDrive, true)
-              : updatedDsr;
+              : updatedDsr as unknown as HomebaseFile<CommunityChannel>;
 
           if (!newChannel) return;
           insertNewCommunityChannel(queryClient, newChannel, communityId);
@@ -157,7 +157,7 @@ export const useCommunityInboxProcessor = (
                 LOCAL_COMMUNITY_APP_DRIVE,
                 true
               )
-              : updatedDsr;
+              : updatedDsr as unknown as HomebaseFile<CommunityMetadata>;
           if (!newMetadata) return;
           insertNewcommunityMetadata(queryClient, newMetadata);
         })
@@ -185,7 +185,7 @@ export const useCommunityInboxProcessor = (
                 LOCAL_COMMUNITY_APP_DRIVE,
                 true
               )
-              : updatedDsr;
+              : updatedDsr as unknown as HomebaseFile<CommunityDrafts>;
           if (!newDrafts) return;
           insertNewCommunityDrafts(queryClient, newDrafts, communityId);
         })
@@ -214,7 +214,7 @@ const findChangesSinceTimestamp = async (
   timeStamp: number,
   params: FileQueryParams
 ) => {
-  const modifiedCursor = getQueryModifiedCursorFromTime(timeStamp); // Friday, 31 May 2024 09:38:54.678
+  // const modifiedCursor = getQueryModifiedCursorFromTime(timeStamp); // Friday, 31 May 2024 09:38:54.678
   const batchCursor = getQueryBatchCursorFromTime(new Date().getTime(), timeStamp);
 
   const newFiles =
@@ -224,32 +224,37 @@ const findChangesSinceTimestamp = async (
         cursorState: batchCursor,
         includeMetadataHeader: true,
         includeTransferHistory: false,
+        ordering: 'newestFirst',
+        sorting: 'anyChangeDate',
       })
       : await queryBatch(dotYouClient, params, {
         maxRecords: BATCH_SIZE,
         cursorState: batchCursor,
         includeMetadataHeader: true,
         includeTransferHistory: false,
+        ordering: 'newestFirst',
+        sorting: 'anyChangeDate',
       });
 
-  const modifiedFiles =
-    odinId && dotYouClient.getHostIdentity() !== odinId
-      ? await queryModifiedOverPeer(dotYouClient, odinId, params, {
-        maxRecords: BATCH_SIZE,
-        cursor: modifiedCursor + '',
-        excludePreviewThumbnail: false,
-        includeHeaderContent: true,
-        includeTransferHistory: false,
-      })
-      : await queryModified(dotYouClient, params, {
-        maxRecords: BATCH_SIZE,
-        cursor: modifiedCursor + '',
-        excludePreviewThumbnail: false,
-        includeHeaderContent: true,
-        includeTransferHistory: false,
-      });
+  // const modifiedFiles =
+  //   odinId && dotYouClient.getHostIdentity() !== odinId
+  //     ? await queryModifiedOverPeer(dotYouClient, odinId, params, {
+  //       maxRecords: BATCH_SIZE,
+  //       cursor: modifiedCursor + '',
+  //       excludePreviewThumbnail: false,
+  //       includeHeaderContent: true,
+  //       includeTransferHistory: false,
+  //     })
+  //     : await queryModified(dotYouClient, params, {
+  //       maxRecords: BATCH_SIZE,
+  //       cursor: modifiedCursor + '',
+  //       excludePreviewThumbnail: false,
+  //       includeHeaderContent: true,
+  //       includeTransferHistory: false,
+  //     });
 
-  return modifiedFiles.searchResults.concat(newFiles.searchResults);
+  // return modifiedFiles.searchResults.concat(newFiles.searchResults);
+  return newFiles.searchResults
 };
 
 // Process batched updates after a processInbox

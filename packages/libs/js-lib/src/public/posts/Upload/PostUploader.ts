@@ -73,9 +73,6 @@ export const savePost = async <T extends PostContent>(
       undefined;
   }
 
-  if (!file.fileMetadata.appData.content.authorOdinId)
-    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getHostIdentity();
-
   // Delete embeddedPost of embeddedPost (we don't want to embed an embed)
   if (file.fileMetadata.appData.content.embeddedPost) {
     delete (file.fileMetadata.appData.content.embeddedPost as PostContent)['embeddedPost'];

@@ -7,14 +7,12 @@ import {
   FileQueryParams,
   HomebaseFile,
   queryBatch,
-  queryModified,
   TargetDrive,
   TypedConnectionNotification,
 } from '@homebase-id/js-lib/core';
 import {
   drivesEqual,
   getQueryBatchCursorFromTime,
-  getQueryModifiedCursorFromTime,
   hasDebugFlag,
   stringGuidsEqual,
 } from '@homebase-id/js-lib/helpers';
@@ -152,7 +150,7 @@ const findChangesSinceTimestamp = async (
   timeStamp: number,
   params: FileQueryParams
 ) => {
-  const modifiedCursor = getQueryModifiedCursorFromTime(timeStamp); // Friday, 31 May 2024 09:38:54.678
+  // const modifiedCursor = getQueryModifiedCursorFromTime(timeStamp); // Friday, 31 May 2024 09:38:54.678
   const batchCursor = getQueryBatchCursorFromTime(new Date().getTime(), timeStamp);
 
   const newFiles = await queryBatch(dotYouClient, params, {
@@ -160,17 +158,20 @@ const findChangesSinceTimestamp = async (
     cursorState: batchCursor,
     includeMetadataHeader: true,
     includeTransferHistory: false,
+    ordering: 'newestFirst',
+    sorting: 'anyChangeDate',
   });
 
-  const modifiedFiles = await queryModified(dotYouClient, params, {
-    maxRecords: BATCH_SIZE,
-    cursor: modifiedCursor + '',
-    excludePreviewThumbnail: false,
-    includeHeaderContent: true,
-    includeTransferHistory: false,
-  });
+  // const modifiedFiles = await queryModified(dotYouClient, params, {
+  //   maxRecords: BATCH_SIZE,
+  //   cursor: modifiedCursor + '',
+  //   excludePreviewThumbnail: false,
+  //   includeHeaderContent: true,
+  //   includeTransferHistory: false,
+  // });
 
-  return modifiedFiles.searchResults.concat(newFiles.searchResults);
+  // return modifiedFiles.searchResults.concat(newFiles.searchResults);
+  return newFiles.searchResults;
 };
 
 const processPostsBatch = async (
