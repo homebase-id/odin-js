@@ -47,7 +47,7 @@ export const getDecryptedThumbnailMeta = (
           header.fileMetadata.isEncrypted,
           header.fileMetadata.updated,
           {
-            size: { pixelHeight: tinyThumbSize.height, pixelWidth: tinyThumbSize.width },
+            size: { pixelHeight: tinyThumbSize.maxPixelDimension, pixelWidth: tinyThumbSize.maxPixelDimension },
             systemFileType,
           }
         );

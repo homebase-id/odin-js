@@ -226,6 +226,7 @@ export const saveCommunity = async (
     transferIv: getRandom16ByteArray(),
     storageOptions: {
       drive: targetDrive,
+      overwriteFileId: fileId,
     },
   };
 

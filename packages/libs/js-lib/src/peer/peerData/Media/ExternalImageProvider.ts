@@ -30,14 +30,14 @@ export const getDecryptedThumbnailMetaOverPeer = async (
   return (
     globalTransitId
       ? getFileHeaderBytesOverPeerByGlobalTransitId(
-          dotYouClient,
-          odinId,
-          targetDrive,
-          globalTransitId,
-          {
-            systemFileType,
-          }
-        )
+        dotYouClient,
+        odinId,
+        targetDrive,
+        globalTransitId,
+        {
+          systemFileType,
+        }
+      )
       : getFileHeaderOverPeer(dotYouClient, odinId, targetDrive, fileId, { systemFileType })
   ).then(async (header) => {
     if (!header) return;
@@ -66,7 +66,7 @@ export const getDecryptedThumbnailMetaOverPeer = async (
         header.fileMetadata.isEncrypted,
         header.fileMetadata.updated,
         {
-          size: { pixelHeight: tinyThumbSize.height, pixelWidth: tinyThumbSize.width },
+          size: { pixelHeight: tinyThumbSize.maxPixelDimension, pixelWidth: tinyThumbSize.maxPixelDimension },
           systemFileType,
         }
       );
