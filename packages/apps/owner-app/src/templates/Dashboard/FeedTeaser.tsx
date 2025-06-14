@@ -13,13 +13,13 @@ import {
   useDotYouClientContext,
   LoadingBlock,
 } from '@homebase-id/common-app';
-import { UnreachableIdentity } from '@homebase-id/feed-app/src/components/SocialFeed/UnreachableIdentity';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { PostContent } from '@homebase-id/js-lib/public';
+import {UnreachableIdentity} from '@homebase-id/feed-app/src/components/SocialFeed/UnreachableIdentity';
+import {HomebaseFile} from '@homebase-id/js-lib/core';
+import {PostContent} from '@homebase-id/js-lib/public';
 
 const POSTS_TO_SHOW = 2;
-export const FeedTeaser = ({ className }: { className?: string }) => {
-  const { data: posts, isFetched } = useSocialFeed({ pageSize: POSTS_TO_SHOW }).fetchAll;
+export const FeedTeaser = ({className}: { className?: string }) => {
+  const {data: posts, isFetched} = useSocialFeed({pageSize: POSTS_TO_SHOW}).fetchAll;
   const latestPosts = posts?.pages?.[0]?.results;
 
   const hasPosts = latestPosts && latestPosts?.length;
@@ -37,7 +37,7 @@ export const FeedTeaser = ({ className }: { className?: string }) => {
                 className={`w-full rounded-md bg-background ${index !== 0 ? 'hidden lg:block' : ''}`}
                 key={post.fileId}
               >
-                <PostTeaser postFile={post} odinId={post.fileMetadata.senderOdinId} />
+                <PostTeaser postFile={post}/>
               </div>
             ))
           ) : isFetched ? (
@@ -46,8 +46,8 @@ export const FeedTeaser = ({ className }: { className?: string }) => {
             </p>
           ) : (
             <>
-              <LoadingBlock className="h-44 w-full bg-background" />
-              <LoadingBlock className="h-44 w-full bg-background" />
+              <LoadingBlock className="h-44 w-full bg-background"/>
+              <LoadingBlock className="h-44 w-full bg-background"/>
             </>
           )}
         </div>
@@ -57,29 +57,36 @@ export const FeedTeaser = ({ className }: { className?: string }) => {
 };
 
 const PostTeaser = ({
-  postFile,
-  odinId,
-  className,
-}: {
+                      postFile,
+                      className,
+                    }: {
   postFile: HomebaseFile<PostContent>;
-  odinId?: string;
   className?: string;
 }) => {
   const post = postFile.fileMetadata.appData.content;
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+
+  let odinId = postFile.fileMetadata.senderOdinId
+  let channelId = post.channelId;
+  
+  if (postFile.fileMetadata.remotePayloadSource) {
+    odinId = postFile.fileMetadata.remotePayloadSource.identity;
+    channelId = postFile.fileMetadata.remotePayloadSource.driveId;
+  }
+  
   const isExternal = odinId && odinId !== loggedOnIdentity;
 
-  const { data: identityAccessible } = useCheckIdentity(isExternal ? odinId : undefined);
+  const {data: identityAccessible} = useCheckIdentity(isExternal ? odinId : undefined);
 
-  const { data: channel } = useChannel({
+  const {data: channel} = useChannel({
     odinId: isExternal ? odinId : undefined,
-    channelKey: post.channelId,
+    channelKey: channelId
   }).fetch;
 
   const authorOdinId = postFile.fileMetadata.originalAuthor || odinId;
 
   if (identityAccessible === false && isExternal)
-    return <UnreachableIdentity postFile={postFile} className={className} odinId={odinId} />;
+    return <UnreachableIdentity postFile={postFile} className={className} odinId={odinId}/>;
 
   return (
     <div className={`w-full break-words rounded-lg ${className ?? ''}`}>
@@ -99,7 +106,7 @@ const PostTeaser = ({
             <div className="flex w-20 flex-grow flex-col">
               <div className="mb-1 flex flex-col text-foreground text-opacity-60 md:flex-row md:flex-wrap md:items-center">
                 <h2>
-                  <AuthorName odinId={authorOdinId} />
+                  <AuthorName odinId={authorOdinId}/>
                 </h2>
                 <span className="hidden px-2 leading-4 md:block">·</span>
 
