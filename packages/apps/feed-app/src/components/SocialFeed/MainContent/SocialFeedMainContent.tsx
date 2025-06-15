@@ -1,6 +1,6 @@
-import { PostContent } from '@homebase-id/js-lib/public';
-import { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
-import { useWindowVirtualizer } from '@tanstack/react-virtual';
+import {PostContent} from '@homebase-id/js-lib/public';
+import {useMemo, useEffect, useRef, useLayoutEffect} from 'react';
+import {useWindowVirtualizer} from '@tanstack/react-virtual';
 
 import {
   flattenInfinteData,
@@ -10,9 +10,9 @@ import {
   useSocialFeed,
   SubtleMessage,
 } from '@homebase-id/common-app';
-import PostTeaserCard, { NewPostTeaserCard } from '../PostTeaserCard';
-import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { useLiveFeedProcessor } from '../../../hooks/useLiveFeedProcessor';
+import PostTeaserCard, {NewPostTeaserCard} from '../PostTeaserCard';
+import {HomebaseFile} from '@homebase-id/js-lib/core';
+import {useLiveFeedProcessor} from '../../../hooks/useLiveFeedProcessor';
 
 const PAGE_SIZE = 15; // We could increase this one, but also might not, as on mobile 10 items are rather far, and on desktop fetching more is fast...
 
@@ -27,7 +27,7 @@ const SocialFeedMainContent = () => {
     isLoading: postsLoading,
     fetchNextPage,
     isFetchingNextPage,
-  } = useSocialFeed({ pageSize: PAGE_SIZE }).fetchAll;
+  } = useSocialFeed({pageSize: PAGE_SIZE}).fetchAll;
 
   // Flatten all pages, sorted descending and slice on the max number expected
   const flattenedPosts = useMemo(
@@ -77,13 +77,13 @@ const SocialFeedMainContent = () => {
   return (
     <>
       {isReactNative ? null : (
-        <PostComposer className="mb-2 w-full rounded-md border-gray-200 border-opacity-60 bg-background p-4 shadow-sm dark:border-gray-800 lg:border" />
+        <PostComposer className="mb-2 w-full rounded-md border-gray-200 border-opacity-60 bg-background p-4 shadow-sm dark:border-gray-800 lg:border"/>
       )}
       {postsLoading ? (
         <div className="flex flex-col gap-4">
-          <LoadingBlock className="my-4 h-10" />
-          <LoadingBlock className="my-4 h-10" />
-          <LoadingBlock className="my-4 h-10" />
+          <LoadingBlock className="my-4 h-10"/>
+          <LoadingBlock className="my-4 h-10"/>
+          <LoadingBlock className="my-4 h-10"/>
         </div>
       ) : flattenedPosts?.length ? (
         <>
@@ -124,9 +124,9 @@ const SocialFeedMainContent = () => {
                   }
 
                   const post = flattenedPosts[virtualRow.index];
+                  
                   const postTeaserCardProps = {
                     postFile: post,
-                    odinId: post.fileMetadata.senderOdinId,
                     className: 'bg-background shadow-sm',
                     showSummary: true,
                   };

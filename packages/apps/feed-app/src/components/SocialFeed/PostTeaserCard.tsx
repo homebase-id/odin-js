@@ -25,14 +25,22 @@ import { useHighlightFeedItem } from '../../hooks/useHighlightFeedItem';
 interface PostTeaserCardProps {
   className?: string;
   postFile: HomebaseFile<PostContent>;
-  odinId?: string;
   showSummary?: boolean;
 }
 
-const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, showSummary }) => {
+const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, postFile, showSummary }) => {
   const dotYouClient = useDotYouClientContext();
   const post = postFile.fileMetadata.appData.content;
   const identity = dotYouClient.getHostIdentity();
+
+  let odinId = postFile.fileMetadata.senderOdinId
+  let channelId = post.channelId;
+
+  if (postFile.fileMetadata.dataSubscriptionSource?.payloadsAreRemote === true) {
+    odinId = postFile.fileMetadata.dataSubscriptionSource.identity;
+    channelId = postFile.fileMetadata.dataSubscriptionSource.driveId;
+  }
+  
   const isExternal = odinId && odinId !== identity;
   const navigate = useNavigate();
 
@@ -41,7 +49,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
 
   const { data: channel } = useChannel({
     odinId: isExternal ? odinId : undefined,
-    channelKey: post.channelId,
+    channelKey: channelId,
   }).fetch;
 
   const postPath = `preview/${isExternal ? odinId : identity}/${
