@@ -68,10 +68,10 @@ const PostTeaser = ({
 
   let odinId = postFile.fileMetadata.senderOdinId
   let channelId = post.channelId;
-  
-  if (postFile.fileMetadata.remotePayloadSource) {
-    odinId = postFile.fileMetadata.remotePayloadSource.identity;
-    channelId = postFile.fileMetadata.remotePayloadSource.driveId;
+
+  if (postFile.fileMetadata.dataSubscriptionSource?.payloadsAreRemote === true) {
+    odinId = postFile.fileMetadata.dataSubscriptionSource.identity;
+    channelId = postFile.fileMetadata.dataSubscriptionSource.driveId;
   }
   
   const isExternal = odinId && odinId !== loggedOnIdentity;
