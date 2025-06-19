@@ -14,10 +14,9 @@ export interface FileMetadata<T = string, L = string> {
   reactionPreview?: ReactionPreview;
   localAppData?: LocalAppData<L>;
   versionTag: string;
-  dataSubscriptionSource?: {
+  remotePayloadInfo?: {
     identity: string,
-    driveId: string,
-    payloadsAreRemote: boolean
+    driveId: string
   } | undefined
   payloads?: PayloadDescriptor[];
 }

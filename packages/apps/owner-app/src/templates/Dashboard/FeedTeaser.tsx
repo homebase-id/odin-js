@@ -69,9 +69,10 @@ const PostTeaser = ({
   let odinId = postFile.fileMetadata.senderOdinId
   let channelId = post.channelId;
 
-  if (postFile.fileMetadata.dataSubscriptionSource?.payloadsAreRemote === true) {
-    odinId = postFile.fileMetadata.dataSubscriptionSource.identity;
-    channelId = postFile.fileMetadata.dataSubscriptionSource.driveId;
+  if (postFile.fileMetadata.remotePayloadInfo) {
+    // console.info("Feed Teaser -> using remote payload info", postFile.fileMetadata.remotePayloadInfo);
+    odinId = postFile.fileMetadata.remotePayloadInfo.identity;
+    channelId = postFile.fileMetadata.remotePayloadInfo.driveId;
   }
   
   const isExternal = odinId && odinId !== loggedOnIdentity;
