@@ -115,15 +115,26 @@ export const createThumbnails = async (
   }
 
   if (contentType === gifType) {
-    const gifThumb = await createImageThumbnail(imageBytes, payloadKey, {
-      ...tinyThumbSize,
-      type: 'gif',
-    });
+    // For GIFs, only generate a tiny thumb in WebP format
+    const { naturalSize, thumb: tinyThumb } = await createImageThumbnail(
+      imageBytes,
+      payloadKey,
+      tinyThumbSize,
+      true
+    );
+
+
+    const originalGifThumb: ThumbnailFile = {
+      pixelWidth: naturalSize.pixelWidth,
+      pixelHeight: naturalSize.pixelHeight,
+      payload: image,
+      key: payloadKey,
+    };
 
     return {
-      tinyThumb: await getEmbeddedThumbOfThumbnailFile(gifThumb.thumb, gifThumb.naturalSize),
-      naturalSize: gifThumb.naturalSize,
-      additionalThumbnails: [],
+      tinyThumb: await getEmbeddedThumbOfThumbnailFile(tinyThumb, naturalSize),
+      naturalSize,
+      additionalThumbnails: [originalGifThumb], // Include original GIF
     };
   }
 
