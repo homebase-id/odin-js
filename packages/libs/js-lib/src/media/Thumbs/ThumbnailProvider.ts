@@ -225,7 +225,9 @@ const createImageThumbnail = async (
   instruction: ThumbnailInstruction,
   isTinyThumb: boolean = false
 ): Promise<{ naturalSize: ImageSize; thumb: ThumbnailFile }> => {
-  const targetFormatType = instruction.type || 'webp';
+
+  let targetFormatType = instruction.type || 'webp';
+  if (isTinyThumb) targetFormatType = 'webp';
 
   // Get natural size directly using Image element
   const naturalSize = await new Promise<ImageSize>((resolve, reject) => {
