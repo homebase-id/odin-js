@@ -1,5 +1,5 @@
-import { PostContent } from '@homebase-id/js-lib/public';
-import { FC } from 'react';
+import {PostContent} from '@homebase-id/js-lib/public';
+import {FC} from 'react';
 import {
   AuthorImage,
   AuthorName,
@@ -16,11 +16,11 @@ import {
   useDotYouClientContext,
   PostSource,
 } from '@homebase-id/common-app';
-import { useNavigate } from 'react-router-dom';
-import { DoubleClickHeartForMedia } from '@homebase-id/common-app';
-import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
-import { UnreachableIdentity } from './UnreachableIdentity';
-import { useHighlightFeedItem } from '../../hooks/useHighlightFeedItem';
+import {useNavigate} from 'react-router-dom';
+import {DoubleClickHeartForMedia} from '@homebase-id/common-app';
+import {HomebaseFile, NewHomebaseFile} from '@homebase-id/js-lib/core';
+import {UnreachableIdentity} from './UnreachableIdentity';
+import {useHighlightFeedItem} from '../../hooks/useHighlightFeedItem';
 
 interface PostTeaserCardProps {
   className?: string;
@@ -28,7 +28,7 @@ interface PostTeaserCardProps {
   showSummary?: boolean;
 }
 
-const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, postFile, showSummary }) => {
+const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSummary}) => {
   const dotYouClient = useDotYouClientContext();
   const post = postFile.fileMetadata.appData.content;
   const identity = dotYouClient.getHostIdentity();
@@ -40,14 +40,14 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, postFile, showSumm
     odinId = postFile.fileMetadata.dataSource.identity;
     channelId = postFile.fileMetadata.dataSource.driveId;
   }
-  
+
   const isExternal = odinId && odinId !== identity;
   const navigate = useNavigate();
 
   const highlight = useHighlightFeedItem(postFile);
-  const { data: identityAccessible } = useCheckIdentity(isExternal ? odinId : undefined);
+  const {data: identityAccessible} = useCheckIdentity(isExternal ? odinId : undefined);
 
-  const { data: channel } = useChannel({
+  const {data: channel} = useChannel({
     odinId: isExternal ? odinId : undefined,
     channelKey: channelId,
   }).fetch;
@@ -60,7 +60,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, postFile, showSumm
   const authorOdinId = postFile.fileMetadata.originalAuthor || odinId;
 
   if (identityAccessible === false && isExternal)
-    return <UnreachableIdentity postFile={postFile} className={className} odinId={odinId} />;
+    return <UnreachableIdentity postFile={postFile} className={className} odinId={odinId}/>;
 
   return (
     <div
@@ -77,7 +77,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, postFile, showSumm
             clickable ? 'hover:shadow-md hover:dark:shadow-slate-600' : ''
           } dark:border-gray-800 lg:border`}
         >
-          <PostSource postFile={postFile} className="rounded-t-lg" />
+          <PostSource postFile={postFile} className="rounded-t-lg"/>
           <div className="flex flex-row gap-4 px-3 py-3 sm:px-4">
             <div className="flex-shrink-0 py-1">
               <div className="h-10 w-10 sm:h-12 sm:w-12 md:h-[4rem] md:w-[4rem]">
@@ -89,9 +89,10 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, postFile, showSumm
               </div>
             </div>
             <div className="flex w-20 flex-grow flex-col">
-              <div className="mb-1 flex flex-col text-foreground text-opacity-60 md:flex-row md:flex-wrap md:items-center">
+              <div
+                className="mb-1 flex flex-col text-foreground text-opacity-60 md:flex-row md:flex-wrap md:items-center">
                 <h2>
-                  <AuthorName odinId={authorOdinId} />
+                  <AuthorName odinId={authorOdinId}/>
                   <ToGroupBlock
                     channel={channel || undefined}
                     odinId={odinId}
@@ -125,12 +126,12 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, postFile, showSumm
             // Clicks don't propogate to the parent container because of the Double Tap listener
             onClick={(e, index) => {
               if (post.type !== 'Article')
-                navigate(`${postPath}/${index}`, { state: { referrer: window.location.pathname } });
-              else navigate(postPath, { state: { referrer: window.location.pathname } });
+                navigate(`${postPath}/${index}`, {state: {referrer: window.location.pathname}});
+              else navigate(postPath, {state: {referrer: window.location.pathname}});
             }}
             className="mb-4"
           />
-          <MediaStillUploading postFile={postFile} />
+          <MediaStillUploading postFile={postFile}/>
           <PostInteracts
             odinId={odinId || window.location.hostname}
             postFile={postFile}
@@ -145,14 +146,14 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, postFile, showSumm
   );
 };
 
-const MediaStillUploading = ({ postFile }: { postFile: NewHomebaseFile<PostContent> }) => {
+const MediaStillUploading = ({postFile}: { postFile: NewHomebaseFile<PostContent> }) => {
   if (postFile.fileId) return null;
   if (!postFile.fileMetadata.appData.content.primaryMediaFile?.fileId) return null;
 
   return (
     <>
       <div className={`relative`}>
-        <LoadingBlock className="aspect-square h-full w-full" />
+        <LoadingBlock className="aspect-square h-full w-full"/>
         <div className="absolute inset-0 flex animate-pulse items-center justify-center">
           <p>{t('Your media is being processed')}</p>
         </div>
