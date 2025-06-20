@@ -36,9 +36,9 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, postFile, showSumm
   let odinId = postFile.fileMetadata.senderOdinId
   let channelId = post.channelId;
 
-  if (postFile.fileMetadata.dataSubscriptionSource?.payloadsAreRemote === true) {
-    odinId = postFile.fileMetadata.dataSubscriptionSource.identity;
-    channelId = postFile.fileMetadata.dataSubscriptionSource.driveId;
+  if (postFile.fileMetadata.dataSource?.payloadsAreRemote === true) {
+    odinId = postFile.fileMetadata.dataSource.identity;
+    channelId = postFile.fileMetadata.dataSource.driveId;
   }
   
   const isExternal = odinId && odinId !== identity;

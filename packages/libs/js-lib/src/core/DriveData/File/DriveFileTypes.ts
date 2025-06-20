@@ -14,7 +14,7 @@ export interface FileMetadata<T = string, L = string> {
   reactionPreview?: ReactionPreview;
   localAppData?: LocalAppData<L>;
   versionTag: string;
-  dataSubscriptionSource?: {
+  dataSource?: {
     identity: string,
     driveId: string,
     payloadsAreRemote: boolean
