@@ -46,7 +46,7 @@ export const OwnerActions = ({
             ? ([
                 {
                   icon: Pencil,
-                  label: t(postContent.type === 'Article' ? 'Edit Article' : 'Edit post'),
+                  label: t(postContent.type === 'Article' ? 'Edit Article' : 'Edit post'), // this is edit post of my item on my feed
                   onClick: (e) => {
                     e.stopPropagation();
                     if (postContent.type === 'Article') {
