@@ -128,7 +128,7 @@ const DriveDetails = () => {
             </>
           ) : null}
           <li className="my-3 border-b border-slate-200 dark:border-slate-800"></li>
-          <li>Alias: {driveDef.targetDriveInfo.alias}</li>
+          <li>Id: {driveDef.targetDriveInfo.alias}</li>
           <li>Type: {driveDef.targetDriveInfo.type}</li>
         </ul>
       </Section>
