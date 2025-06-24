@@ -14,7 +14,11 @@ export interface FileMetadata<T = string, L = string> {
   reactionPreview?: ReactionPreview;
   localAppData?: LocalAppData<L>;
   versionTag: string;
-
+  dataSource?: {
+    identity: string,
+    driveId: string,
+    payloadsAreRemote: boolean
+  } | undefined
   payloads?: PayloadDescriptor[];
 }
 
@@ -155,15 +159,19 @@ export interface AppFileMetaData<T = string> {
   previewThumbnail?: EmbeddedThumb;
   archivalStatus?: ArchivalStatus;
 }
+
 interface BaseFileIdentifier {
   targetDrive: TargetDrive;
 }
+
 export interface FileIdFileIdentifier extends BaseFileIdentifier {
   fileId: string;
 }
+
 export interface GlobalTransitIdFileIdentifier extends BaseFileIdentifier {
   globalTransitId: string;
 }
+
 export interface UniqueIdFileIdentifier extends BaseFileIdentifier {
   uniqueId: string;
 }
@@ -221,6 +229,7 @@ interface DeletePayloadInstruction extends Partial<UploadPayloadDescriptor> {
 }
 
 export type UpdatePayloadInstruction = AppendPayloadInstruction | DeletePayloadInstruction;
+
 export interface UploadThumbnailDescriptor extends ImageSize {
   thumbnailKey: string;
 }
