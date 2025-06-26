@@ -16,7 +16,7 @@ import {
 } from '@homebase-id/common-app';
 import { PaperPlane, Plus } from '@homebase-id/common-app/icons';
 import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
-import { useState, useRef, useMemo, lazy, Suspense, useCallback, useEffect, memo } from 'react';
+import { useState, useRef, useMemo, lazy, Suspense, useCallback, memo } from 'react';
 import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { useCommunityMessage } from '../../../../hooks/community/messages/useCommunityMessage';
@@ -128,7 +128,8 @@ export const MessageComposer = memo(
 
         const plugins = useMemo(() => {
             return [
-                ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
+                // ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
+                ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } satisfies Parameters<typeof ChannelPlugin.configure>[0]),
             ];
         }, []);
 
