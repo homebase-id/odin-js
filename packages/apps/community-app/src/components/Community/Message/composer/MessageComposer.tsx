@@ -14,19 +14,19 @@ import {
     trimRichText,
     getPlainTextFromRichText,
 } from '@homebase-id/common-app';
-import { PaperPlane, Plus } from '@homebase-id/common-app/icons';
-import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
-import { useState, useRef, useMemo, lazy, Suspense, useCallback, memo } from 'react';
-import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
-import { LinkPreview } from '@homebase-id/js-lib/media';
-import { useCommunityMessage } from '../../../../hooks/community/messages/useCommunityMessage';
-import { CommunityDefinition } from '../../../../providers/CommunityDefinitionProvider';
-import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
-import { CommunityChannel } from '../../../../providers/CommunityProvider';
-import { ChannelPlugin } from '../RTEChannelDropdown/RTEChannelDropdownPlugin';
-import { useMessageDraft } from './useMessageDraft';
-import { DraftSaver } from './DraftSaver';
-import type { Mentionable } from '@homebase-id/rich-text-editor';
+import {PaperPlane, Plus} from '@homebase-id/common-app/icons';
+import {HomebaseFile, NewMediaFile, RichText} from '@homebase-id/js-lib/core';
+import {useState, useRef, useMemo, lazy, Suspense, useCallback, memo} from 'react';
+import {getNewId, isTouchDevice} from '@homebase-id/js-lib/helpers';
+import {LinkPreview} from '@homebase-id/js-lib/media';
+import {useCommunityMessage} from '../../../../hooks/community/messages/useCommunityMessage';
+import {CommunityDefinition} from '../../../../providers/CommunityDefinitionProvider';
+import {CommunityMessage} from '../../../../providers/CommunityMessageProvider';
+import {CommunityChannel} from '../../../../providers/CommunityProvider';
+import {ChannelPlugin} from '../RTEChannelDropdown/RTEChannelDropdownPlugin';
+import {useMessageDraft} from './useMessageDraft';
+import {DraftSaver} from './DraftSaver';
+import type {Mentionable} from '@homebase-id/rich-text-editor';
 
 const RichTextEditor = lazy(() =>
     import('@homebase-id/rich-text-editor').then((rootExport) => ({
@@ -46,24 +46,24 @@ export const MessageComposer = memo(
         autoFocus?: boolean;
         className?: string;
     }) => {
-        const { community, channel, thread, threadParticipants, onKeyDown, className } = props;
+        const {community, channel, thread, threadParticipants, onKeyDown, className} = props;
         const autoFocus = props.autoFocus ?? true;
 
         const formRef = useRef<HTMLFormElement>(null);
         const volatileRef = useRef<VolatileInputRef>(null);
 
         const draftKey = thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId;
-        const draft = useMessageDraft(community && draftKey ? { community, draftKey } : undefined);
+        const draft = useMessageDraft(community && draftKey ? {community, draftKey} : undefined);
         const [message, setMessage] = useState<RichText | undefined>(draft?.message); // Initialize with draft
         const [files, setFiles] = useState<NewMediaFile[]>();
         const [isSent, setIsSent] = useState(false);
 
         const addError = useErrors().add;
-        const { mutateAsync: sendMessage } = useCommunityMessage().send;
+        const {mutateAsync: sendMessage} = useCommunityMessage().send;
 
         const plainMessage = useMemo(() => getPlainTextFromRichText(message) || '', [message]);
 
-        const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(plainMessage);
+        const {linkPreviews, setLinkPreviews} = useLinkPreviewBuilder(plainMessage);
 
         const doSend = useCallback(async () => {
             const toSendMessage = message;
@@ -116,7 +116,7 @@ export const MessageComposer = memo(
             threadParticipants,
         ]);
 
-        const mentionables = useMentionables({ community });
+        const mentionables = useMentionables({community});
 
         const changeHandler = useCallback(
             (newVal: { target: { name: string; value: RichText } }) => {
@@ -127,9 +127,16 @@ export const MessageComposer = memo(
         );
 
         const plugins = useMemo(() => {
+            interface ChannelPluginConfig {
+                options?: {
+                    insertSpaceAfterChannel?: boolean;
+                    createComboboxInput?: () => { children: { text: string }[]; trigger: string; type: "channel_input" };
+                    trigger?: string;
+                    triggerPreviousCharPattern?: RegExp;
+                };
+            }
             return [
-                // ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
-                ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } satisfies Parameters<typeof ChannelPlugin.configure>[0]),
+                ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } as ChannelPluginConfig),
             ];
         }, []);
 
@@ -160,7 +167,7 @@ export const MessageComposer = memo(
             return (
                 <>
                     <div className="max-h-[30vh] overflow-auto">
-                        <FileOverview files={files} setFiles={setFiles} cols={8} />
+                        <FileOverview files={files} setFiles={setFiles} cols={8}/>
                         {files?.length ? null : (
                             <LinkOverview
                                 linkPreviews={linkPreviews}
@@ -172,12 +179,12 @@ export const MessageComposer = memo(
                     </div>
                     <div className="-mx-1 flex flex-row justify-between md:pt-2">
                         <FileSelector
-                            onChange={(files) => setFiles(files.map((file) => ({ file })))}
+                            onChange={(files) => setFiles(files.map((file) => ({file})))}
                             className="my-auto px-1 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
                             accept="*"
                             maxSize={HUNDRED_MEGA_BYTES}
                         >
-                            <Plus className="h-5 w-5" />
+                            <Plus className="h-5 w-5"/>
                         </FileSelector>
                         <span className="my-auto">
               <ActionButton
@@ -206,7 +213,7 @@ export const MessageComposer = memo(
                     <form
                         className="flex flex-shrink-0 flex-row gap-2 px-0 md:px-3 md:pb-2 lg:pb-3"
                         onPaste={(e) => {
-                            const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
+                            const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({file}));
                             if (mediaFiles.length) {
                                 setFiles([...(files ?? []), ...mediaFiles]);
                                 e.preventDefault();
@@ -221,7 +228,7 @@ export const MessageComposer = memo(
                     >
                         <Suspense
                             fallback={
-                                <div className="relative h-[111px] w-full border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border" />
+                                <div className="relative h-[111px] w-full border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border"/>
                             }
                         >
                             <RichTextEditor
@@ -262,7 +269,7 @@ const useMentionables = ({
                          }: {
     community: HomebaseFile<CommunityDefinition> | undefined;
 }) => {
-    const { data: contacts } = useAllContacts(true);
+    const {data: contacts} = useAllContacts(true);
     return useMemo(() => {
         const filteredContacts =
             (contacts
@@ -290,7 +297,7 @@ const useMentionables = ({
                 })
                 .filter(Boolean) as Mentionable[]) || [];
 
-        filteredContacts.push({ value: '@channel', label: 'channel' });
+        filteredContacts.push({value: '@channel', label: 'channel'});
         return filteredContacts;
     }, [contacts]);
 };
