@@ -15,21 +15,21 @@ export const DraftSaver = memo(
          community,
          draftKey,
          message,
-         isSent,
      }: {
         community: HomebaseFile<CommunityDefinition> | undefined;
         draftKey: string | undefined;
         message: RichText | undefined;
-        isSent?: boolean;
     }) => {
         const queryClient = useQueryClient();
+        // Note: I don't know why Stef is handling undefined here, when you walk up the stack
+        // there is always a commuity; I mean the draft saver itself makes no sense unless there 
+        // is a community. I know it's not random yet can't seem to find the scenario... yet
         const communityId = community?.fileMetadata.appData.uniqueId;
-
-        if (!communityId) {
-            console.warn('DraftSaver is missing community 🤯');
-            return null;
+        
+        if(!communityId ) {
+            console.warn("Draft Saver is missing community 🤯");
         }
-
+        
         const {
             single: {data: communityDrafts},
             update: {mutate: updateCommunityDrafts},
@@ -40,114 +40,88 @@ export const DraftSaver = memo(
 
         const debouncedSave = useDebounce(
             () => {
-                if (communityDrafts && !isSent) {
-                    updateCommunityDrafts({drafts: communityDrafts});
-                }
+                communityDrafts && updateCommunityDrafts({drafts: communityDrafts});
             },
-            {timeoutMillis: 1000}
+            {
+                timeoutMillis: 1000,
+            }
         );
 
-        const [updatedAt, setUpdatedAt] = useState<number>(new Date().getTime()); // Initialize with current timestamp
+        const [updatedAt, setUpdatedAt] = useState<number | undefined>(undefined);
+        useEffect(() => {
+            const drafts = communityDrafts?.fileMetadata.appData.content.drafts || {};
+            if (drafts && draftKey && isRichTextEqual(drafts[draftKey]?.message, message)) return;
+
+            setUpdatedAt(new Date().getTime());
+        }, [message]);
 
         useEffect(() => {
-            if (isSent || !draftKey || !communityDrafts || !message) {
-                return;
-            }
+            const drafts = communityDrafts?.fileMetadata.appData.content.drafts || {};
 
-            const drafts = communityDrafts.fileMetadata.appData.content.drafts || {};
-            const currentDraft = drafts[draftKey];
+            if (communityDrafts && draftKey && updatedAt) {
+                if (
+                    isRichTextEqual(drafts[draftKey]?.message, message) ||
+                    (drafts[draftKey] && drafts[draftKey]?.updatedAt >= updatedAt)
+                )
+                    return;
 
-            if (!isRichTextEqual(currentDraft?.message, message)) {
-                setUpdatedAt(new Date().getTime());
-            }
-        }, [message, draftKey, communityDrafts, isSent]);
+                const emptiedDraft = isEmptyRichText(message) ? [] : message;
+                if (drafts[draftKey]?.message === undefined && emptiedDraft === undefined) return;
 
-        const debouncedDraftUpdate = useDebounce(() => {
-            if (!communityDrafts || !draftKey || isSent) {
-                return;
-            }
-
-            const drafts = communityDrafts.fileMetadata.appData.content.drafts || {};
-            const currentDraft = drafts[draftKey];
-
-            if (
-                isRichTextEqual(currentDraft?.message, message) ||
-                (currentDraft?.updatedAt && currentDraft.updatedAt >= updatedAt)
-            ) {
-                return;
-            }
-
-            const emptiedDraft = isEmptyRichText(message) || message === undefined ? undefined : message;
-
-            if (currentDraft?.message === undefined && emptiedDraft === undefined) {
-                return;
-            }
-
-            const newDrafts: Record<string, Draft | undefined> = {
-                ...drafts,
-                [draftKey]: emptiedDraft ? {message: emptiedDraft, updatedAt} : undefined,
-            };
-
-            if (!emptiedDraft) {
-                delete newDrafts[draftKey];
-            }
-
-            const newCommunityDrafts: HomebaseFile<CommunityDrafts> | NewHomebaseFile<CommunityDrafts> = {
-                ...communityDrafts,
-                fileMetadata: {
-                    ...communityDrafts.fileMetadata,
-                    appData: {
-                        ...communityDrafts.fileMetadata.appData,
-                        content: {
-                            ...communityDrafts.fileMetadata.appData.content,
-                            drafts: newDrafts,
-                        },
+                const newDrafts: Record<string, Draft | undefined> = {
+                    ...drafts,
+                    [draftKey]: {
+                        message: emptiedDraft,
+                        updatedAt: updatedAt || 0,
                     },
-                    versionTag: communityDrafts.fileMetadata.versionTag,
-                },
-            };
+                };
 
-            insertNewCommunityDrafts(queryClient, newCommunityDrafts as HomebaseFile<CommunityDrafts>, communityId);
-
-            if (emptiedDraft) {
-                debouncedSave();
-            } else {
-                updateCommunityDrafts({drafts: newCommunityDrafts});
-            }
-        }, {timeoutMillis: 1000});
-
-        useEffect(() => {
-            debouncedDraftUpdate();
-        }, [communityDrafts, draftKey, message, updatedAt, debouncedSave, communityId, isSent, debouncedDraftUpdate]);
-
-        // New effect to clear draft after send
-        useEffect(() => {
-            if (isSent && communityDrafts && draftKey) {
-                const drafts = communityDrafts.fileMetadata.appData.content.drafts || {};
-                if (drafts[draftKey]) {
-                    const newDrafts: Record<string, Draft | undefined> = {...drafts};
+                if (message === undefined) {
                     delete newDrafts[draftKey];
+                }
 
-                    const newCommunityDrafts: HomebaseFile<CommunityDrafts> | NewHomebaseFile<CommunityDrafts> = {
+                const newCommunityDrafts: NewHomebaseFile<CommunityDrafts> | HomebaseFile<CommunityDrafts> =
+                    {
                         ...communityDrafts,
                         fileMetadata: {
-                            ...communityDrafts.fileMetadata,
+                            ...communityDrafts?.fileMetadata,
                             appData: {
-                                ...communityDrafts.fileMetadata.appData,
-                                content: {
-                                    ...communityDrafts.fileMetadata.appData.content,
-                                    drafts: newDrafts,
-                                },
+                                ...communityDrafts?.fileMetadata.appData,
+                                content: {...communityDrafts?.fileMetadata.appData.content, drafts: newDrafts},
                             },
-                            versionTag: communityDrafts.fileMetadata.versionTag,
+                            versionTag: communityDrafts?.fileMetadata.versionTag,
                         },
                     };
 
-                    insertNewCommunityDrafts(queryClient, newCommunityDrafts as HomebaseFile<CommunityDrafts>, communityId);
-                    updateCommunityDrafts({drafts: newCommunityDrafts});
-                }
+                insertNewCommunityDrafts(
+                    queryClient,
+                    newCommunityDrafts as HomebaseFile<CommunityDrafts>,
+                    communityId
+                );
+                
+                debouncedSave();
+                
+                //
+                // if (isEmptyRichText(message) || message === undefined || message.length === 0) {
+                //     insertNewCommunityDrafts(
+                //         queryClient,
+                //         newCommunityDrafts as HomebaseFile<CommunityDrafts>
+                //     );
+                //
+                //     // console.info("start calling update for empty message", newCommunityDrafts.fileMetadata.versionTag)
+                //     updateCommunityDrafts({drafts: newCommunityDrafts});
+                //
+                //     return;
+                // } else {
+                //     insertNewCommunityDrafts(
+                //         queryClient,
+                //         newCommunityDrafts as HomebaseFile<CommunityDrafts>
+                //     );
+                //     debouncedSave();
+                // }
+                
             }
-        }, [isSent, communityDrafts, draftKey, communityId, queryClient, updateCommunityDrafts]);
+        }, [communityDrafts, draftKey, message, debouncedSave]);
 
         return null;
     },
@@ -158,7 +132,7 @@ export const DraftSaver = memo(
             nextProps.community?.fileMetadata.appData.uniqueId &&
             prevProps.community?.fileMetadata.senderOdinId ===
             nextProps.community?.fileMetadata.senderOdinId &&
-            prevProps.isSent === nextProps.isSent &&
+            // Avoid re-rendering if the message is the same
             isRichTextEqual(prevProps.message, nextProps.message)
         );
     }
