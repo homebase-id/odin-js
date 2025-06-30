@@ -95,8 +95,7 @@ export const DraftSaver = memo(
 
                 insertNewCommunityDrafts(
                     queryClient,
-                    newCommunityDrafts as HomebaseFile<CommunityDrafts>,
-                    communityId
+                    newCommunityDrafts as HomebaseFile<CommunityDrafts>
                 );
                 
                 debouncedSave();
