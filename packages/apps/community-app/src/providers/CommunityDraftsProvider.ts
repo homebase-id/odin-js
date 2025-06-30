@@ -47,19 +47,18 @@ export const COMMUNITY_DRAFTS_FILE_TYPE = 7017;
 
 export const uploadCommunityDrafts = async (
     dotYouClient: DotYouClient,
-    communityId: string,
     definition: NewHomebaseFile<CommunityDrafts> | HomebaseFile<CommunityDrafts>,
-    onVersionConflict?: () => Promise<void | UploadResult | UpdateResult> | void
+    onVersionConflicht?: () => Promise<void | UploadResult | UpdateResult> | void
 ): Promise<UploadResult | UpdateResult | undefined> => {
     if (!definition.fileMetadata.appData.uniqueId) {
         throw new Error('CommunityDrafts must have a uniqueId');
     }
-    
+
     const payloads: PayloadFile[] = [];
 
-    const jsonContent: string = jsonStringify64({...definition.fileMetadata.appData.content});
+    const jsonContent: string = jsonStringify64({ ...definition.fileMetadata.appData.content });
     const payloadBytes = stringToUint8Array(
-        jsonStringify64({...definition.fileMetadata.appData.content})
+        jsonStringify64({ ...definition.fileMetadata.appData.content })
     );
 
     const shouldEmbedContent = uint8ArrayToBase64(payloadBytes).length < MAX_HEADER_CONTENT_BYTES;
@@ -73,19 +72,16 @@ export const uploadCommunityDrafts = async (
     if (!shouldEmbedContent) {
         payloads.push({
             key: DEFAULT_PAYLOAD_KEY,
-            payload: new Blob([payloadBytes], {type: 'application/json'}),
+            payload: new Blob([payloadBytes], { type: 'application/json' }),
         });
     }
-
-    const hashedCommunityId = await hashCommunityId(communityId);
-    // console.info(`uploadCommunityDrafts: hashedCommunityId: ${hashedCommunityId}.  Does this match results from getCommunityDrafts -> getFileHeaderByUniqueId`)
 
     const metadata: UploadFileMetadata = {
         versionTag: definition.fileMetadata.versionTag,
         allowDistribution: false,
         appData: {
             tags: definition.fileMetadata.appData.tags,
-            uniqueId: hashedCommunityId,
+            uniqueId: await hashGuidId(definition.fileMetadata.appData.uniqueId),
             fileType: COMMUNITY_DRAFTS_FILE_TYPE,
             content: content,
         },
@@ -96,34 +92,21 @@ export const uploadCommunityDrafts = async (
     };
 
     if (definition.fileId) {
-        const existingDefinition = definition as HomebaseFile<CommunityDrafts, string>;
-        const encryptedKeyHeader = existingDefinition.sharedSecretEncryptedKeyHeader;
+        const existingDefiniton = definition as HomebaseFile<CommunityDrafts, string>;
+        const encryptedKeyHeader = existingDefiniton.sharedSecretEncryptedKeyHeader;
 
         const patchInstructions: UpdateLocalInstructionSet = {
             file: {
-                fileId: existingDefinition.fileId,
+                fileId: existingDefiniton.fileId,
                 targetDrive: LOCAL_COMMUNITY_APP_DRIVE,
             },
-            versionTag: existingDefinition.fileMetadata.versionTag,
+            versionTag: existingDefiniton.fileMetadata.versionTag,
             locale: 'local'
         }
 
-        console.info('patchInstructions -> ', patchInstructions, metadata);
-
-        const patchResult = await patchFile(
-            dotYouClient,
-            encryptedKeyHeader,
-            patchInstructions,
-            metadata,
-            payloads,
-            undefined,
-            undefined,
-            onVersionConflict as () => Promise<void | UpdateResult>);
-
-        console.info("community draft patch result", patchResult);
-
-        if (!patchResult) throw new Error(`Patch failed`);
-
+        const patchResult = await patchFile(dotYouClient, encryptedKeyHeader, patchInstructions, metadata, payloads, undefined, undefined, onVersionConflicht as () => Promise<void | UpdateResult>,
+        );
+        if (!patchResult) throw new Error(`Upload failed`);
         return patchResult;
     }
 
@@ -141,7 +124,7 @@ export const uploadCommunityDrafts = async (
         payloads,
         undefined,
         true,
-        onVersionConflict as () => Promise<void | UploadResult>
+        onVersionConflicht as () => Promise<void | UploadResult>
     );
     if (!result) throw new Error(`Upload failed`);
 
@@ -152,26 +135,15 @@ export const getCommunityDrafts = async (
     dotYouClient: DotYouClient,
     communityId: string
 ): Promise<HomebaseFile<CommunityDrafts> | null> => {
-
-    const hashedCommunityId = await hashCommunityId(communityId);
-    console.info(`getCommunityDrafts -> getFileHeaderByUniqueId (communityId: ${communityId} hashed: ${hashedCommunityId}`);
     const header = await getFileHeaderByUniqueId(
         dotYouClient,
         LOCAL_COMMUNITY_APP_DRIVE,
-        hashedCommunityId
+        await hashGuidId(communityId)
     );
 
-    if (!header) {
-        console.info(`getCommunityDrafts -> getFileHeaderByUniqueId (communityId: ${communityId} hashed: ${hashedCommunityId} - HEADER NOT FOUND`);
-        return null;
-    }
-    
+    if (!header) return null;
     return dsrToCommunityDrafts(dotYouClient, header, LOCAL_COMMUNITY_APP_DRIVE, true);
 };
-
-const hashCommunityId = async (communityId: string) =>{
-    return await hashGuidId("drafts" + communityId);
-}
 
 // Helpers
 
@@ -205,8 +177,6 @@ export const dsrToCommunityDrafts = async (
                 },
             },
         };
-
-        console.info("community dsrToCommunityDrafts result", file);
 
         return file;
     } catch (ex) {

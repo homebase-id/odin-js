@@ -5,7 +5,7 @@ import {
     QueryClient,
     UndefinedInitialDataOptions,
 } from '@tanstack/react-query';
-import {useDotYouClientContext} from '@homebase-id/common-app';
+import { useDotYouClientContext } from '@homebase-id/common-app';
 import {
     DeletedHomebaseFile,
     DotYouClient,
@@ -20,27 +20,26 @@ import {
     getCommunityDrafts,
     uploadCommunityDrafts,
 } from '../../providers/CommunityDraftsProvider';
-import {formatGuidId} from '@homebase-id/js-lib/helpers';
-import {invalidateCommunities} from './useCommunities';
+import { formatGuidId } from '@homebase-id/js-lib/helpers';
+import { invalidateCommunities } from './useCommunities';
 
 export const useCommunityDrafts = (props?: {
     odinId: string | undefined;
     communityId: string | undefined;
 }) => {
-    const {communityId, odinId} = props || {};
+    const { communityId, odinId } = props || {};
     const dotYouClient = useDotYouClientContext();
     const queryClient = useQueryClient();
 
-    const saveDrafts = async ({drafts,}: { drafts: HomebaseFile<CommunityDrafts> | NewHomebaseFile<CommunityDrafts>; }) => {
-        drafts.fileMetadata.appData.content.communityId = formatGuidId(drafts.fileMetadata.appData.content.communityId);
+    const saveDrafts = async ({
+                                  drafts,
+                              }: {
+        drafts: HomebaseFile<CommunityDrafts> | NewHomebaseFile<CommunityDrafts>;
+    }) => {
+        drafts.fileMetadata.appData.content.communityId = formatGuidId(
+            drafts.fileMetadata.appData.content.communityId
+        );
         drafts.fileMetadata.appData.uniqueId = formatGuidId(drafts.fileMetadata.appData.uniqueId);
-
-        // console.info("drafts communityId", drafts.fileMetadata.appData.content.communityId);
-        // console.info("drafts uid", drafts.fileMetadata.appData.uniqueId);
-
-        if (!communityId) {
-            throw new Error("CommunityId is missing");
-        }
 
         let maxRetries = 5;
         const onVersionConflict = async () => {
@@ -56,27 +55,17 @@ export const useCommunityDrafts = (props?: {
             }
 
             const newlyMerged = mergeDrafts(drafts, serverVersion);
-            insertNewCommunityDrafts(queryClient, newlyMerged, communityId);
+            // insertNewCommunityDrafts(queryClient, newlyMerged);
 
-            console.log(`Uploading version via version conflict - retry #${maxRetries}`, serverVersion, newlyMerged);
-
-            return await uploadCommunityDrafts(dotYouClient, communityId, newlyMerged, onVersionConflict);
+            return await uploadCommunityDrafts(dotYouClient, newlyMerged, onVersionConflict);
         };
 
-        // We clean up the drafts only for the initial save; When we retry we want to keep the drafts to avoid bad merging
-        const draftsCopy = {...drafts};
+        // We cleanup the drafts only for the inital save; When we retry we want to keep the drafts to avoid bad merging
+        const draftsCopy = { ...drafts };
         draftsCopy.fileMetadata.appData.content.drafts = cleanupDrafts(
             draftsCopy.fileMetadata.appData.content.drafts || {}
         );
-
-        // console.info("drafts copy uid", draftsCopy.fileMetadata.appData.uniqueId);
-        console.info("communityId version tag going up", draftsCopy.fileMetadata.versionTag);
-
-        const r = await uploadCommunityDrafts(dotYouClient, communityId, draftsCopy, onVersionConflict);
-
-        console.info("version tag returned", r?.newVersionTag)
-
-        return r;
+        return await uploadCommunityDrafts(dotYouClient, draftsCopy, onVersionConflict);
     };
 
     return {
@@ -87,9 +76,6 @@ export const useCommunityDrafts = (props?: {
             mutationFn: saveDrafts,
 
             onMutate: async (variables) => {
-
-                console.log("mutate called - drafts are: ", variables.drafts);
-
                 queryClient.setQueryData<HomebaseFile<CommunityDrafts>>(
                     [
                         'community-drafts',
@@ -117,7 +103,6 @@ export const useCommunityDrafts = (props?: {
                 );
 
                 if (!variables.drafts.fileId) {
-                    console.log(("no drafts.fileid found; must be a new drafts file"))
                     // It's a new drafts file, so we need to invalidate the communities query
                     invalidateCommunities(queryClient);
                 }
@@ -138,7 +123,6 @@ const getDrafts = async (
 ) => {
     const serverFile = await getCommunityDrafts(dotYouClient, communityId);
     if (!serverFile) {
-        console.info(`no community drafts found`);
         const newDrafts: NewHomebaseFile<CommunityDrafts> = {
             fileMetadata: {
                 appData: {
@@ -151,7 +135,7 @@ const getDrafts = async (
                 },
             },
             serverMetadata: {
-                accessControlList: {requiredSecurityGroup: SecurityGroupType.Owner},
+                accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
             },
         };
         setTimeout(() => {
@@ -180,7 +164,7 @@ export const getCommunityDraftsQueryOptions: (
 });
 
 const cleanupDrafts = (drafts: Record<string, Draft | undefined>) => {
-    const newDrafts = {...drafts};
+    const newDrafts = { ...drafts };
 
     const oneDayAgo = new Date().getTime() - 24 * 60 * 60 * 1000;
     // Cleanup empty drafts
@@ -203,16 +187,11 @@ const cleanupDrafts = (drafts: Record<string, Draft | undefined>) => {
 
 const mergeDrafts = (
     local: HomebaseFile<CommunityDrafts> | NewHomebaseFile<CommunityDrafts>,
-    server: HomebaseFile<CommunityDrafts>,
-    viaNew?:boolean
+    server: HomebaseFile<CommunityDrafts>
 ): HomebaseFile<CommunityDrafts> => {
     const localContent = local.fileMetadata.appData.content;
     const serverContent = server.fileMetadata.appData.content;
 
-    if(viaNew) {
-        console.info("[1] Starting mergeDrafts", local, server);
-    }
-    
     return {
         ...server,
         fileMetadata: {
@@ -231,55 +210,12 @@ const mergeDrafts = (
                             (acc, key) => {
                                 const localDraft = localContent.drafts?.[key];
                                 const serverDraft = serverContent.drafts?.[key];
-                                
-                                // gpt debugging
-                                const hasServerDraft = serverDraft !== undefined && serverDraft !== null;
-                                const hasLocalDraft = localDraft !== undefined && localDraft !== null;
 
-                                const bothHaveDrafts =
-                                    hasLocalDraft &&
-                                    hasServerDraft &&
-                                    localDraft.updatedAt !== undefined &&
-                                    serverDraft.updatedAt !== undefined;
-                                
-                                const localIsNewer = bothHaveDrafts
-                                    ? localDraft.updatedAt > serverDraft.updatedAt
-                                    : false;
-
-                                if(viaNew) {
-                                    console.info('[1] local updated at:', localDraft?.updatedAt ?? "nada");
-                                    console.info('[1] hasServerDraft:', hasServerDraft);
-                                    console.info('[1] hasLocalDraft:', hasLocalDraft);
-                                    console.info('[1] localIsNewer:', localIsNewer);
-                                }
-
-                                let draftSource: 'local' | 'server' | 'none';
-                                let newestDraft;
-
-                                if (!hasServerDraft && hasLocalDraft) {
-                                    newestDraft = localDraft;
-                                    draftSource = 'local';
-                                } else if (localIsNewer) {
-                                    newestDraft = localDraft;
-                                    draftSource = 'local';
-                                } else if (hasServerDraft) {
-                                    newestDraft = serverDraft;
-                                    draftSource = 'server';
-                                } else {
-                                    newestDraft = undefined;
-                                    draftSource = 'none';
-                                }
-
-                                if(viaNew) {
-                                    console.info('[1] newestDraft:', newestDraft);
-                                    console.info('[1] draftSource:', draftSource);
-                                }
-
-                                // const newestDraft =
-                                //     !serverDraft ||
-                                //     (localDraft?.updatedAt && localDraft?.updatedAt > serverDraft?.updatedAt)
-                                //         ? localDraft
-                                //         : serverDraft;
+                                const newestDraft =
+                                    !serverDraft ||
+                                    (localDraft?.updatedAt && localDraft?.updatedAt > serverDraft?.updatedAt)
+                                        ? localDraft
+                                        : serverDraft;
 
                                 acc[key] = newestDraft;
                                 return acc;
@@ -303,38 +239,15 @@ export const invalidateCommunityDrafts = (queryClient: QueryClient, communityId?
 
 export const insertNewCommunityDrafts = (
     queryClient: QueryClient,
-    newDrafts: HomebaseFile<CommunityDrafts> | DeletedHomebaseFile<unknown>,
-    communityId?: string //note I only marked this as optional  there seems to be a scenario where a caller may pass be missing the communityId
+    newDrafts: HomebaseFile<CommunityDrafts> | DeletedHomebaseFile<unknown>
 ) => {
     if (newDrafts.fileState === 'deleted') {
-
-        if(!communityId)
-        {
-            console.warn("insertNewCommunityDrafts -> Using fallback community id for fileState = deleted");
-        }
-
-        const useThisCommunityId = communityId ?? newDrafts.fileMetadata.appData.uniqueId;
-        if (useThisCommunityId) {
-            invalidateCommunityDrafts(queryClient, useThisCommunityId);
-        }
-        else{
-            console.warn("insertNewCommunityDrafts -> No fallback communityId found (in appcontent).  newDrafts.fileMetadata", newDrafts.fileMetadata);
-        }
-
+        if (newDrafts.fileMetadata.appData.uniqueId)
+            invalidateCommunityDrafts(queryClient, newDrafts.fileMetadata.appData.uniqueId);
     } else {
-        if(!communityId)
-        {
-            console.warn("insertNewCommunityDrafts -> Using fallback community id for fileState = active");
-        }
-
-        const useThisCommunityId = communityId ?? formatGuidId(newDrafts.fileMetadata.appData.content.communityId);
-        if (!useThisCommunityId) {
-            console.warn("insertNewCommunityDrafts -> No fallback communityId found (in uid).  newDrafts.fileMetadata", newDrafts.fileMetadata);
-        }
-        
         const queryKey = [
             'community-drafts',
-            useThisCommunityId
+            formatGuidId(newDrafts.fileMetadata.appData.content.communityId),
         ];
 
         const existingDrafts = queryClient.getQueryData<HomebaseFile<CommunityDrafts>>(queryKey)
@@ -346,7 +259,8 @@ export const insertNewCommunityDrafts = (
             return;
         }
 
-        const mergedMeta = mergeDrafts(existingDrafts, newDrafts, true);
+        const mergedMeta = mergeDrafts(
+            existingDrafts, newDrafts);
 
         queryClient.setQueryData(queryKey,
             mergedMeta
