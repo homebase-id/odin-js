@@ -187,7 +187,7 @@ export const useCommunityInboxProcessor = (
               )
               : updatedDsr as unknown as HomebaseFile<CommunityDrafts>;
           if (!newDrafts) return;
-          insertNewCommunityDrafts(queryClient, newDrafts);
+          insertNewCommunityDrafts(queryClient, communityId, newDrafts);
         })
       );
     } else {

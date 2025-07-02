@@ -239,11 +239,13 @@ export const invalidateCommunityDrafts = (queryClient: QueryClient, communityId?
 
 export const insertNewCommunityDrafts = (
     queryClient: QueryClient,
+    communityId: string,
     newDrafts: HomebaseFile<CommunityDrafts> | DeletedHomebaseFile<unknown>
 ) => {
     if (newDrafts.fileState === 'deleted') {
         if (newDrafts.fileMetadata.appData.uniqueId)
-            invalidateCommunityDrafts(queryClient, newDrafts.fileMetadata.appData.uniqueId);
+            // invalidateCommunityDrafts(queryClient, newDrafts.fileMetadata.appData.uniqueId);
+            invalidateCommunityDrafts(queryClient, communityId);
     } else {
         const queryKey = [
             'community-drafts',

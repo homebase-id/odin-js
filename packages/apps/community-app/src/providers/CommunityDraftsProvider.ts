@@ -136,7 +136,7 @@ export const uploadCommunityDrafts = async (
     return result;
 };
 
-const hashCommunityId = async (communityId: string) =>{
+export const hashCommunityId = async (communityId: string) =>{
     return await hashGuidId("drafts" + communityId);
 }
 
