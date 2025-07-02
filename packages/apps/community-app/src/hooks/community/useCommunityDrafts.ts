@@ -5,7 +5,7 @@ import {
     QueryClient,
     UndefinedInitialDataOptions,
 } from '@tanstack/react-query';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import {useDotYouClientContext} from '@homebase-id/common-app';
 import {
     DeletedHomebaseFile,
     DotYouClient,
@@ -20,14 +20,14 @@ import {
     getCommunityDrafts,
     uploadCommunityDrafts,
 } from '../../providers/CommunityDraftsProvider';
-import { formatGuidId } from '@homebase-id/js-lib/helpers';
-import { invalidateCommunities } from './useCommunities';
+import {formatGuidId} from '@homebase-id/js-lib/helpers';
+import {invalidateCommunities} from './useCommunities';
 
 export const useCommunityDrafts = (props?: {
     odinId: string | undefined;
     communityId: string | undefined;
 }) => {
-    const { communityId, odinId } = props || {};
+    const {communityId, odinId} = props || {};
     const dotYouClient = useDotYouClientContext();
     const queryClient = useQueryClient();
 
@@ -55,17 +55,17 @@ export const useCommunityDrafts = (props?: {
             }
 
             const newlyMerged = mergeDrafts(drafts, serverVersion);
-            // insertNewCommunityDrafts(queryClient, newlyMerged);
+            insertNewCommunityDrafts(queryClient, communityId!, newlyMerged);
 
-            return await uploadCommunityDrafts(dotYouClient, newlyMerged, onVersionConflict);
+            return await uploadCommunityDrafts(dotYouClient, communityId!, newlyMerged, onVersionConflict);
         };
 
         // We cleanup the drafts only for the inital save; When we retry we want to keep the drafts to avoid bad merging
-        const draftsCopy = { ...drafts };
+        const draftsCopy = {...drafts};
         draftsCopy.fileMetadata.appData.content.drafts = cleanupDrafts(
             draftsCopy.fileMetadata.appData.content.drafts || {}
         );
-        return await uploadCommunityDrafts(dotYouClient, draftsCopy, onVersionConflict);
+        return await uploadCommunityDrafts(dotYouClient, communityId ?? "", draftsCopy, onVersionConflict);
     };
 
     return {
@@ -135,7 +135,7 @@ const getDrafts = async (
                 },
             },
             serverMetadata: {
-                accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+                accessControlList: {requiredSecurityGroup: SecurityGroupType.Owner},
             },
         };
         setTimeout(() => {
@@ -164,7 +164,7 @@ export const getCommunityDraftsQueryOptions: (
 });
 
 const cleanupDrafts = (drafts: Record<string, Draft | undefined>) => {
-    const newDrafts = { ...drafts };
+    const newDrafts = {...drafts};
 
     const oneDayAgo = new Date().getTime() - 24 * 60 * 60 * 1000;
     // Cleanup empty drafts
@@ -239,15 +239,23 @@ export const invalidateCommunityDrafts = (queryClient: QueryClient, communityId?
 
 export const insertNewCommunityDrafts = (
     queryClient: QueryClient,
+    communityId: string,
     newDrafts: HomebaseFile<CommunityDrafts> | DeletedHomebaseFile<unknown>
 ) => {
+
+    console.log(`insertNewCommunityDrafts-> communityId: ${communityId}`);
+
     if (newDrafts.fileState === 'deleted') {
-        if (newDrafts.fileMetadata.appData.uniqueId)
-            invalidateCommunityDrafts(queryClient, newDrafts.fileMetadata.appData.uniqueId);
+        console.log("insertNewCommunityDrafts-> fileState = deleted")
+        // if (newDrafts.fileMetadata.appData.uniqueId)
+        // invalidateCommunityDrafts(queryClient, newDrafts.fileMetadata.appData.uniqueId);
+        invalidateCommunityDrafts(queryClient, communityId);
     } else {
+        const fg = formatGuidId(newDrafts.fileMetadata.appData.content.communityId);
+        console.log("insertNewCommunityDrafts-> fileState=active")
         const queryKey = [
             'community-drafts',
-            formatGuidId(newDrafts.fileMetadata.appData.content.communityId),
+            communityId //formatGuidId(newDrafts.fileMetadata.appData.content.communityId),
         ];
 
         const existingDrafts = queryClient.getQueryData<HomebaseFile<CommunityDrafts>>(queryKey)
