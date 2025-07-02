@@ -55,9 +55,9 @@ export const useCommunityDrafts = (props?: {
             }
 
             const newlyMerged = mergeDrafts(drafts, serverVersion);
-            // insertNewCommunityDrafts(queryClient, newlyMerged);
+            insertNewCommunityDrafts(queryClient, communityId!, newlyMerged);
 
-            return await uploadCommunityDrafts(dotYouClient, communityId ?? "", newlyMerged, onVersionConflict);
+            return await uploadCommunityDrafts(dotYouClient, communityId!, newlyMerged, onVersionConflict);
         };
 
         // We cleanup the drafts only for the inital save; When we retry we want to keep the drafts to avoid bad merging
