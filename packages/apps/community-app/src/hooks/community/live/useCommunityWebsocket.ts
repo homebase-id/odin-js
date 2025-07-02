@@ -74,7 +74,7 @@ export const useCommunityWebsocket = (
                         return;
                     }
 
-                    // console.info("d", communityDrafts.fileMetadata.appData.content)
+                    console.info("Drafts file coming from websocket", communityDrafts)
                     insertNewCommunityDrafts(queryClient, communityId, communityDrafts);
                 }
             }

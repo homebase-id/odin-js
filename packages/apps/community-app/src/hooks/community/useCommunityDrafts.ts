@@ -242,11 +242,17 @@ export const insertNewCommunityDrafts = (
     communityId: string,
     newDrafts: HomebaseFile<CommunityDrafts> | DeletedHomebaseFile<unknown>
 ) => {
+
+    console.log(`insertNewCommunityDrafts-> communityId: ${communityId}`);
+
     if (newDrafts.fileState === 'deleted') {
+        console.log("insertNewCommunityDrafts-> fileState = deleted")
         // if (newDrafts.fileMetadata.appData.uniqueId)
-            // invalidateCommunityDrafts(queryClient, newDrafts.fileMetadata.appData.uniqueId);
-            invalidateCommunityDrafts(queryClient, communityId);
+        // invalidateCommunityDrafts(queryClient, newDrafts.fileMetadata.appData.uniqueId);
+        invalidateCommunityDrafts(queryClient, communityId);
     } else {
+        const fg = formatGuidId(newDrafts.fileMetadata.appData.content.communityId);
+        console.log("insertNewCommunityDrafts-> fileState=active")
         const queryKey = [
             'community-drafts',
             communityId //formatGuidId(newDrafts.fileMetadata.appData.content.communityId),
