@@ -47,9 +47,14 @@ export const COMMUNITY_DRAFTS_FILE_TYPE = 7017;
 
 export const uploadCommunityDrafts = async (
     dotYouClient: DotYouClient,
+    communityId: string,
     definition: NewHomebaseFile<CommunityDrafts> | HomebaseFile<CommunityDrafts>,
     onVersionConflicht?: () => Promise<void | UploadResult | UpdateResult> | void
 ): Promise<UploadResult | UpdateResult | undefined> => {
+    if (!communityId) {
+        throw new Error('communityId param is required');
+    }
+    
     if (!definition.fileMetadata.appData.uniqueId) {
         throw new Error('CommunityDrafts must have a uniqueId');
     }
@@ -81,7 +86,7 @@ export const uploadCommunityDrafts = async (
         allowDistribution: false,
         appData: {
             tags: definition.fileMetadata.appData.tags,
-            uniqueId: await hashGuidId(definition.fileMetadata.appData.uniqueId),
+            uniqueId: await hashCommunityId(communityId), //old: await hashGuidId(definition.fileMetadata.appData.uniqueId),
             fileType: COMMUNITY_DRAFTS_FILE_TYPE,
             content: content,
         },
@@ -131,6 +136,10 @@ export const uploadCommunityDrafts = async (
     return result;
 };
 
+const hashCommunityId = async (communityId: string) =>{
+    return await hashGuidId("drafts" + communityId);
+}
+
 export const getCommunityDrafts = async (
     dotYouClient: DotYouClient,
     communityId: string
@@ -138,7 +147,7 @@ export const getCommunityDrafts = async (
     const header = await getFileHeaderByUniqueId(
         dotYouClient,
         LOCAL_COMMUNITY_APP_DRIVE,
-        await hashGuidId(communityId)
+        await hashCommunityId(communityId)
     );
 
     if (!header) return null;
