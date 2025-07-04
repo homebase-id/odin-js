@@ -4,8 +4,7 @@ import { ThumbnailInstruction } from '../MediaTypes';
 import { resizeImageFromBlob, getTargetSize } from './ImageResizer';
 
 export const baseThumbSizes: ThumbnailInstruction[] = [
-  { quality: 84, maxPixelDimension: 320, maxBytes: 26 * 1024 },
-  { quality: 84, maxPixelDimension: 640, maxBytes: 102 * 1024 },
+  { quality: 90, maxPixelDimension: 640, maxBytes: 120 * 1024 },
   { quality: 76, maxPixelDimension: 1080, maxBytes: 291 * 1024 },
   { quality: 76, maxPixelDimension: 1600, maxBytes: 640 * 1024 },
 ];
