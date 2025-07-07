@@ -76,6 +76,7 @@ export const publishProfileCardFile = async (
     image: `https://${string}/pub/image`;
     givenName: string | undefined;
     familyName: string | undefined;
+    status: string | undefined;
     name: string;
     bio: string;
     bioSummary: string | undefined;

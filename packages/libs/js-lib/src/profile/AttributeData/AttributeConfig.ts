@@ -49,6 +49,7 @@ export class BuiltInAttributes {
     BuiltInAttributes.Birthday,
     BuiltInAttributes.PhoneNumber,
     BuiltInAttributes.Email,
+    BuiltInAttributes.Status
   ];
 
   static readonly AllSocial = [

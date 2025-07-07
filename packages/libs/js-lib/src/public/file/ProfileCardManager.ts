@@ -30,6 +30,7 @@ export const ProfileCardAttributeTypes = [
   BuiltInAttributes.Photo,
   BuiltInAttributes.FullBio,
   BuiltInAttributes.BioSummary,
+  BuiltInAttributes.Status,
   ...BuiltInAttributes.AllSocial,
   ...BuiltInAttributes.AllGames,
 ];
@@ -58,6 +59,26 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
     MinimalProfileFields.SurnameId
   ] as string | undefined;
 
+  ////
+  
+  const statusAttributes = await getProfileAttributes(
+      dotYouClient,
+      BuiltInProfiles.StandardProfileId,
+      undefined,
+      [BuiltInAttributes.Status]
+  );
+
+  const statusAttribute = statusAttributes?.filter((attr) =>
+      attr.serverMetadata?.accessControlList.requiredSecurityGroup.toLowerCase() ===
+      SecurityGroupType.Anonymous.toLowerCase()
+  )[0];
+
+  const status = statusAttribute?.fileMetadata?.appData?.content?.data?.[
+      MinimalProfileFields.Status
+      ] as string | undefined;
+  
+  ////
+  
   const bioAttributes = await getProfileAttributes(
     dotYouClient,
     BuiltInProfiles.StandardProfileId,
@@ -81,7 +102,7 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
         ) || ''
     )
     .filter((data) => data !== undefined);
-
+  
   const bioSummaryAttributes = await getProfileAttributes(
     dotYouClient,
     BuiltInProfiles.StandardProfileId,
@@ -171,6 +192,7 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
     name: displayName || dotYouClient.getHostIdentity(),
     givenName: (givenName?.length && givenName) || undefined,
     familyName: (familyName?.length && familyName) || undefined,
+    status: (status?.length && status) || undefined,
     bio: bios?.[0] || '',
     bioSummary: bioSummaries?.[0] || '',
     image: `https://${dotYouClient.getHostIdentity()}/pub/image`,
