@@ -14,7 +14,7 @@ import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 export const useStaticFiles = () => {
   const dotYouClient = useDotYouClientContext();
 
-  const publishData = async (dataType?: 'channel' | typeof BuiltInAttributes.Name) => {
+  const publishData = async (dataType?: 'channel' | typeof BuiltInAttributes.Name | typeof BuiltInAttributes.Status) => {
     console.debug('[STARTED] Static file publish', dataType);
 
     const publishActions: Promise<unknown>[] = [publishProfile(dotYouClient, dataType)];
