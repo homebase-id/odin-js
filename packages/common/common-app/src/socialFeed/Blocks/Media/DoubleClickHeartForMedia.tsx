@@ -68,11 +68,11 @@ export const DoubleClickHeartForMedia = ({
           odinId={odinId}
           postInfo={{
             fileId: postFile.fileId,
+            dataSource: postFile.fileMetadata.dataSource,
             globalTransitId: postFile.fileMetadata.globalTransitId,
             lastModified: postFile.fileMetadata.updated,
             previewThumbnail: previewThumbnail,
             isEncrypted: postFile.fileMetadata.isEncrypted,
-
             content: postContent,
             payloads: postFile.fileMetadata.payloads,
           }}

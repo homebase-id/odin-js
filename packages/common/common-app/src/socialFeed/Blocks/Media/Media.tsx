@@ -1,19 +1,20 @@
-import { PostContent } from '@homebase-id/js-lib/public';
-import { DEFAULT_PAYLOAD_KEY, EmbeddedThumb, PayloadDescriptor } from '@homebase-id/js-lib/core';
-import { MediaGallery } from './MediaGallery';
-import { PrimaryMedia } from './PrimaryMedia';
+import {PostContent} from '@homebase-id/js-lib/public';
+import {DataSource, DEFAULT_PAYLOAD_KEY, EmbeddedThumb, PayloadDescriptor} from '@homebase-id/js-lib/core';
+import {MediaGallery} from './MediaGallery';
+import {PrimaryMedia} from './PrimaryMedia';
 
 export const PostMedia = ({
-  odinId,
-  postInfo,
-  showFallback,
-  forceAspectRatio,
-  onClick,
-  className,
-}: {
+                            odinId,
+                            postInfo,
+                            showFallback,
+                            forceAspectRatio,
+                            onClick,
+                            className,
+                          }: {
   odinId?: string;
   postInfo: {
     fileId: string;
+    dataSource: DataSource | undefined,
     globalTransitId?: string;
     lastModified: number | undefined;
     content: PostContent;
@@ -26,7 +27,16 @@ export const PostMedia = ({
   onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => void;
   className?: string;
 }) => {
-  const { content: post, previewThumbnail } = postInfo;
+  const {content: post, previewThumbnail} = postInfo;
+
+  const fileId = postInfo.fileId;
+  const globalTransitId = postInfo.globalTransitId;
+
+  let channelId = post.channelId;
+  if (postInfo.dataSource) {
+    channelId = postInfo.dataSource.driveId;
+    odinId = postInfo.dataSource.identity;
+  }
 
   // Fo articles we only want the primary media file
   const mediaFiles =
@@ -56,10 +66,10 @@ export const PostMedia = ({
     return (
       <MediaGallery
         odinId={odinId}
-        fileId={postInfo.fileId}
-        globalTransitId={postInfo.globalTransitId}
+        fileId={fileId}
+        globalTransitId={globalTransitId}
+        channelId={channelId}
         lastModified={postInfo.lastModified}
-        channelId={post.channelId}
         files={mediaFiles}
         className={`${className || ''}`}
         previewThumbnail={previewThumbnail}
@@ -71,13 +81,13 @@ export const PostMedia = ({
   return (
     <div className={`relative ${className || ''}`}>
       <PrimaryMedia
+        odinId={odinId}
+        fileId={fileId}
+        globalTransitId={globalTransitId}
+        channelId={channelId}
         fit="contain"
         file={mediaFiles[0]}
-        channelId={post.channelId}
-        fileId={postInfo.fileId}
-        globalTransitId={postInfo.globalTransitId}
         lastModified={postInfo.lastModified}
-        odinId={odinId}
         className={`w-full max-h-[80vh] ${forceAspectRatio ? 'md:aspect-square ' : ''} `}
         previewThumbnail={previewThumbnail}
         probablyEncrypted={postInfo.isEncrypted}

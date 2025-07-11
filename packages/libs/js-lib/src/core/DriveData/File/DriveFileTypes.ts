@@ -14,13 +14,15 @@ export interface FileMetadata<T = string, L = string> {
   reactionPreview?: ReactionPreview;
   localAppData?: LocalAppData<L>;
   versionTag: string;
-  dataSource?: {
-    identity: string,
-    driveId: string,
-    payloadsAreRemote: boolean
-  } | undefined
+  dataSource?: DataSource | undefined;
   payloads?: PayloadDescriptor[];
 }
+
+export interface DataSource  {
+  identity: string,
+  driveId: string,
+  payloadsAreRemote: boolean
+} 
 
 export interface LocalAppData<L = string> {
   versionTag?: string;

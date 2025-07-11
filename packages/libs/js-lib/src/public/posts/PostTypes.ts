@@ -6,9 +6,9 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
   AccessControlList,
-  CommentReaction,
+  CommentReaction, DataSource,
 } from '../../core/core';
-import { toGuidId } from '../../helpers/helpers';
+import {toGuidId} from '../../helpers/helpers';
 
 export interface ChannelDefinition {
   name: string;
@@ -114,6 +114,7 @@ export interface EmbeddedPost extends Omit<PostContent, 'embeddedPost'> {
   permalink: string;
   previewThumbnail?: EmbeddedThumb;
   fileId: string;
+  dataSource?: DataSource | undefined,
   globalTransitId: string | undefined;
   lastModified: number | undefined;
   userDate: number;

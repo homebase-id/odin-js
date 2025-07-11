@@ -43,6 +43,8 @@ export const EmbeddedPostContent = ({
       SecurityGroupType.Authenticated ||
     channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
       SecurityGroupType.Anonymous;
+  
+  content.dataSource
 
   return (
     <div className={`overflow-hidden rounded-lg border dark:border-slate-700 ${className ?? ''}`}>
@@ -88,6 +90,7 @@ export const EmbeddedPostContent = ({
           <PostMedia
             postInfo={{
               fileId: content.primaryMediaFile?.fileId || content.fileId,
+              dataSource: content.dataSource,
               globalTransitId: content.globalTransitId,
               lastModified: content.lastModified,
               content,

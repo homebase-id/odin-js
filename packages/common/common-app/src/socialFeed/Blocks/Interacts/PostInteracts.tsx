@@ -215,6 +215,7 @@ export const RepostButton = ({
             ...postContent,
             authorOdinId: postFile.fileMetadata.originalAuthor,
             fileId: postFile.fileId,
+            dataSource: postFile.fileMetadata.dataSource,
             globalTransitId: postFile.fileMetadata.globalTransitId,
             lastModified: postFile.fileMetadata.updated,
             permalink,
