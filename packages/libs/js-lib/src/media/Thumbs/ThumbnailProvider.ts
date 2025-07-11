@@ -106,10 +106,11 @@ export const createThumbnails = async (
 
   if (image.type === svgType) {
     const vectorThumb = await createVectorThumbnail(imageBytes, payloadKey);
+    const tinyResult = await createImageThumbnail(imageBytes, payloadKey, tinyThumbSize, true);
 
     return {
-      tinyThumb: await getEmbeddedThumbOfThumbnailFile(vectorThumb.thumb, vectorThumb.naturalSize),
       naturalSize: vectorThumb.naturalSize,
+      tinyThumb: await getEmbeddedThumbOfThumbnailFile(tinyResult.thumb, vectorThumb.naturalSize),
       additionalThumbnails: [vectorThumb.thumb],
     };
   }
