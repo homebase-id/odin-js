@@ -30,3 +30,4 @@ export * from './BrandIcons/HomebasePhoto';
 export * from './BrandIcons/HomebaseMail';
 export * from './BrandIcons/HomebaseCommunity';
 export * from './BrandIcons/HomebaseNotifications';
+export * from './BrandIcons/HomebaseSocialSync';

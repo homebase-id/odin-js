@@ -5,6 +5,7 @@ export const COMMUNITY_APP_ID = '77ed6136-6b33-4654-8088-3d89c91e6065';
 export const FEED_CHAT_APP_ID = 'b4a2a939-45d3-42af-95bf-7d241016e3bf';
 export const PHOTO_APP_ID = '32f0bdbf-017f-4fc0-8004-2d4631182d1e';
 export const OWNER_APP_ID = 'ac126e09-54cb-4878-a690-856be692da16';
+export const SOCIAL_SYNC_APP_ID = "99bbae1f-4c99-4944-aecd-0356bfe8974e"
 
 export const HOME_ROOT_PATH = '/';
 export const PREVIEW_ROOT = '/preview';
