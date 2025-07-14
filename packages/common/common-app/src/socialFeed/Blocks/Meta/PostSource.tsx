@@ -17,36 +17,36 @@ export const PostSource = ({
       case BlogConfig.XDataType:
         return {
           icon: Twitter,
-          colors: 'text-[#1e9bf1]',
-          text: 'Tweet from x.com',
+          iconColors: 'text-black dark:text-white',
+          text: 'Tweet from X',
           rootUrl: 'https://x.com',
         };
       case BlogConfig.FacebookDataType:
         return {
           icon: Facebook,
-          colors: 'text-[#0966ff]',
+          iconColors: 'text-[#1877f2]',
           text: 'Post from Facebook',
           rootUrl: 'https://facebook.com',
         };
       case BlogConfig.InstagramDataType:
         return {
           icon: Instagram,
-          colors: 'text-[#0095f6]',
+          iconColors: 'text-[#E4405F]',
           text: 'Post from Instagram',
           rootUrl: 'https://instagram.com',
         };
       case BlogConfig.YoutubeDataType:
         return {
           icon: Youtube,
-          colors: 'text-[#ff0033]',
-          text: 'Video from Youtube',
+          iconColors: 'text-[#FF0000]',
+          text: 'Video from YouTube',
           rootUrl: 'https://youtube.com',
         };
       case BlogConfig.WordpressDataType:
         return {
           icon: Wordpress,
-          colors: 'text-[#21759b]',
-          text: 'Post from Wordpress',
+          iconColors: 'text-[#21759B]',
+          text: 'Post from WordPress',
           rootUrl: 'https://wordpress.com',
         };
     }
@@ -56,7 +56,7 @@ export const PostSource = ({
 
   if (!sourceData) return null;
 
-  const { icon, colors, text, rootUrl } = sourceData;
+  const { icon, iconColors, text, rootUrl } = sourceData;
 
   return (
     <a
@@ -67,8 +67,8 @@ export const PostSource = ({
       <div
         className={`px-2 py-2 bg-slate-300 dark:bg-gray-700 flex flex-row items-center gap-1 opacity-80 hover:opacity-100 ${className ?? ''}`}
       >
-        {icon({ className: 'w-4 h-4' })}
-        <p className={`${colors} font-semibold text-sm`}>{text}</p>
+        {icon({ className: `w-4 h-4 ${iconColors}` })}
+        <span className="font-medium text-sm">{text}</span>
       </div>
     </a>
   );
