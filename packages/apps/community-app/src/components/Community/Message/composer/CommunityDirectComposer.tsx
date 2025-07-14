@@ -196,11 +196,11 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
     }, [files, setFiles, linkPreviews, setLinkPreviews, canSend, replyMsg, clearReplyMsg]);
     return (
       <>
-        <DraftSaver
-          community={community}
-          draftKey={conversation?.fileMetadata.appData.uniqueId}
-          message={message || draft?.message}
-        />
+        {/*<DraftSaver*/}
+        {/*  community={community}*/}
+        {/*  draftKey={conversation?.fileMetadata.appData.uniqueId}*/}
+        {/*  message={message || draft?.message}*/}
+        {/*/>*/}
 
         <div className={`bg-background pb-[env(safe-area-inset-bottom)]`}>
           <form

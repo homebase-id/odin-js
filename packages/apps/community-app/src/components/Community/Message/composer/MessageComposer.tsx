@@ -226,11 +226,11 @@ export const MessageComposer = memo(
 
     return (
       <>
-        <DraftSaver
-          community={community}
-          draftKey={thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId}
-          message={message || draft?.message}
-        />
+        {/*<DraftSaver*/}
+        {/*  community={community}*/}
+        {/*  draftKey={thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId}*/}
+        {/*  message={message || draft?.message}*/}
+        {/*/>*/}
         <div className={`bg-background pb-[env(safe-area-inset-bottom)] ${className || ''}`}>
           <form
             className="flex flex-shrink-0 flex-row gap-2 px-0 md:px-3 md:pb-2 lg:pb-3"
