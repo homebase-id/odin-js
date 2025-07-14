@@ -1,7 +1,7 @@
-import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import {useQuery, useQueryClient, UseQueryResult} from '@tanstack/react-query';
 
-import { ImageSize, TargetDrive, DotYouClient, SystemFileType } from '@homebase-id/js-lib/core';
-import { getDecryptedImageUrl } from '@homebase-id/js-lib/media';
+import {ImageSize, TargetDrive, DotYouClient, SystemFileType} from '@homebase-id/js-lib/core';
+import {getDecryptedImageUrl} from '@homebase-id/js-lib/media';
 import {
   getDecryptedImageUrlOverPeer,
   getDecryptedImageUrlOverPeerByGlobalTransitId,
@@ -101,7 +101,7 @@ export const useImage = (props: {
     const cachedEntriesWithSize = cachedEntries.map((entry) => {
       const sizeParts = (entry.queryKey[5] as string)?.split('x');
       const size = sizeParts
-        ? { pixelHeight: parseInt(sizeParts[0]), pixelWidth: parseInt(sizeParts[1]) }
+        ? {pixelHeight: parseInt(sizeParts[0]), pixelWidth: parseInt(sizeParts[1])}
         : undefined;
 
       return {
@@ -162,55 +162,93 @@ export const useImage = (props: {
     }
 
     const fetchDataPromise = async () => {
-      return {
-        url:
-          odinId !== localHost
-            ? imageGlobalTransitId
-              ? await getDecryptedImageUrlOverPeerByGlobalTransitId(
-                  dotYouClient,
-                  odinId,
-                  imageDrive,
-                  imageGlobalTransitId,
-                  imageFileKey,
+      let url: string;
 
-                  probablyEncrypted,
+      if (odinId === localHost) {
+        url = await getDecryptedImageUrl(
+          dotYouClient,
+          imageDrive,
+          imageFileId,
+          imageFileKey,
+          probablyEncrypted,
+          lastModified,
+          {
+            size,
+            systemFileType,
+            preferObjectUrl
+          }
+        );
 
-                  lastModified,
-                  {
-                    size,
-                    systemFileType,
-                    preferObjectUrl,
-                  }
-                )
-              : await getDecryptedImageUrlOverPeer(
-                  dotYouClient,
-                  odinId,
-                  imageDrive,
-                  imageFileId,
-                  imageFileKey,
-                  probablyEncrypted,
-                  lastModified,
-                  {
-                    size,
-                    systemFileType,
-                    preferObjectUrl,
-                  }
-                )
-            : await getDecryptedImageUrl(
-                dotYouClient,
-                imageDrive,
-                imageFileId,
-                imageFileKey,
-                probablyEncrypted,
-                lastModified,
-                {
-                  size,
-                  systemFileType,
-                  preferObjectUrl,
-                }
-              ),
-        naturalSize: naturalSize,
-      };
+        if (url) {
+          console.debug("Decrypted URL (local):", url);
+          return {url, naturalSize};
+        }
+
+        console.debug("Could not get image url by fileId, trying global transitId");
+        if (imageGlobalTransitId) {
+          url = await getDecryptedImageUrlOverPeerByGlobalTransitId(
+            dotYouClient,
+            odinId,
+            imageDrive,
+            imageGlobalTransitId,
+            imageFileKey,
+            probablyEncrypted,
+            lastModified,
+            {
+              size,
+              systemFileType,
+              preferObjectUrl
+            }
+          );
+
+          console.debug("Edge Case: Decrypted URL (peer via globalTransitId for local host -_-):", url);
+          return {url, naturalSize};
+        }
+
+        console.error("Failed to get Url, and there was no global transit id for fallback");
+        return {url, naturalSize};
+
+      }
+
+      if (odinId !== localHost && imageGlobalTransitId) {
+        url = await getDecryptedImageUrlOverPeerByGlobalTransitId(
+          dotYouClient,
+          odinId,
+          imageDrive,
+          imageGlobalTransitId,
+          imageFileKey,
+          probablyEncrypted,
+          lastModified,
+          {
+            size,
+            systemFileType,
+            preferObjectUrl
+          }
+        );
+        console.debug("Decrypted URL (peer via globalTransitId):", url);
+        return {url, naturalSize};
+      }
+
+      if (odinId !== localHost && !imageGlobalTransitId) {
+        url = await getDecryptedImageUrlOverPeer(
+          dotYouClient,
+          odinId,
+          imageDrive,
+          imageFileId,
+          imageFileKey,
+          probablyEncrypted,
+          lastModified,
+          {
+            size,
+            systemFileType,
+            preferObjectUrl
+          }
+        );
+        console.debug("Decrypted URL (peer via fileId):", url);
+        return {url, naturalSize};
+      }
+
+      throw new Error("Invalid configuration for fetching decrypted image URL.");
     };
 
     return await fetchDataPromise();
