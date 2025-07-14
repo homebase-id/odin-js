@@ -108,6 +108,8 @@ export const MessageComposer = memo(
           userDate: new Date().getTime(),
           linkPreviews: Object.values(linkPreviews).filter(Boolean) as LinkPreview[],
         });
+
+        delete draft?.message
       } catch (err) {
         addError(
           err,

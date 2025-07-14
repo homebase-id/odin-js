@@ -24,7 +24,7 @@ export const DraftSaver = memo(
         // Note: I don't know why Stef is handling undefined here, when you walk up the stack
         // there is always a commuity; I mean the draft saver itself makes no sense unless there 
         // is a community. I know it's not random yet can't seem to find the scenario... yet
-        const communityId = community?.fileMetadata.appData.uniqueId;
+        const communityId = community?.fileMetadata.appData.uniqueId ?? "";
         
         if(!communityId ) {
             console.warn("Draft Saver is missing community 🤯");
@@ -95,8 +95,8 @@ export const DraftSaver = memo(
 
                 insertNewCommunityDrafts(
                     queryClient,
-                    newCommunityDrafts as HomebaseFile<CommunityDrafts>,
-                    communityId
+                    communityId,
+                    newCommunityDrafts as HomebaseFile<CommunityDrafts>
                 );
                 
                 debouncedSave();
