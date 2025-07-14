@@ -13,6 +13,8 @@ import {
   FEED_CHAT_APP_ID,
   COMMUNITY_APP_ID,
   HomebaseCommunity,
+  SOCIAL_SYNC_APP_ID,
+  HomebaseSocialSync,
 } from '@homebase-id/common-app';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useState, useMemo } from 'react';
@@ -66,4 +68,5 @@ export const AppSpecificIcon = (appId: string | undefined) => {
   if (stringGuidsEqual(appId, PHOTO_APP_ID)) return HomebasePhoto;
   if (stringGuidsEqual(appId, MAIL_APP_ID)) return HomebaseMail;
   if (stringGuidsEqual(appId, COMMUNITY_APP_ID)) return HomebaseCommunity;
+  if (stringGuidsEqual(appId, SOCIAL_SYNC_APP_ID)) return HomebaseSocialSync;
 };
