@@ -1,6 +1,6 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { BlogConfig, PostContent } from '@homebase-id/js-lib/public';
-import { Facebook, Instagram, Twitter, Youtube, Wordpress } from '../../../ui/Icons';
+import { Facebook, Instagram, Twitter, Youtube, Wordpress, Linkedin } from '../../../ui/Icons';
 
 export const PostSource = ({
   postFile,
@@ -48,6 +48,13 @@ export const PostSource = ({
           iconColors: 'text-[#21759B]',
           text: 'Post from WordPress',
           rootUrl: 'https://wordpress.com',
+        };
+      case BlogConfig.LinkedInDataType:
+        return {
+          icon: Linkedin,
+          iconColors: 'text-[#0077B5]',
+          text: 'Post from LinkedIn',
+          rootUrl: 'https://linkedin.com',
         };
     }
 

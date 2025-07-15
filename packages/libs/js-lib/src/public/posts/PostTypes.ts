@@ -85,6 +85,7 @@ export class BlogConfig {
   static readonly InstagramDataType: number = 520;
   static readonly YoutubeDataType: number = 530;
   static readonly WordpressDataType: number = 540;
+  static readonly LinkedInDataType: number = 550;
 
 }
 
