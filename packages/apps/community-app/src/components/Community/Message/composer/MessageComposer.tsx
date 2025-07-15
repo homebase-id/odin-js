@@ -26,8 +26,8 @@ import { CommunityDefinition } from '../../../../providers/CommunityDefinitionPr
 import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
 import { CommunityChannel } from '../../../../providers/CommunityProvider';
 import { ChannelPlugin } from '../RTEChannelDropdown/RTEChannelDropdownPlugin';
-import { useMessageDraft } from './useMessageDraft';
-import { DraftSaver } from './DraftSaver';
+// import { useMessageDraft } from './useMessageDraft';
+// import { DraftSaver } from './DraftSaver';
 import React from 'react';
 import type { Mentionable } from '@homebase-id/rich-text-editor';
 
@@ -57,28 +57,33 @@ export const MessageComposer = memo(
     const [message, setMessage] = useState<RichText | undefined>(undefined);
     const [files, setFiles] = useState<NewMediaFile[]>();
 
-    const draft = useMessageDraft(
-      !message
-        ? {
-            community,
-            draftKey:
-              thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId,
-          }
-        : undefined
-    );
+    // const draft = useMessageDraft(
+    //   !message
+    //     ? {
+    //         community,
+    //         draftKey:
+    //           thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId,
+    //       }
+    //     : undefined
+    // );
 
     const addError = useErrors().add;
     const { mutateAsync: sendMessage } = useCommunityMessage().send;
 
+    // const plainMessage = useMemo(
+    //     () => getPlainTextFromRichText(message || draft?.message) || '',
+    //     [message, draft]
+    // );
     const plainMessage = useMemo(
-      () => getPlainTextFromRichText(message || draft?.message) || '',
-      [message, draft]
+      () => getPlainTextFromRichText(message) || '',
+      [message]
     );
 
     const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(plainMessage);
 
     const doSend = useCallback(async () => {
-      const toSendMessage = message || draft?.message;
+      // const toSendMessage = message || draft?.message;
+      const toSendMessage = message;
 
       const trimmedVal = getPlainTextFromRichText(toSendMessage) || '';
       const newFiles = [...(files || [])];
@@ -109,7 +114,7 @@ export const MessageComposer = memo(
           linkPreviews: Object.values(linkPreviews).filter(Boolean) as LinkPreview[],
         });
 
-        delete draft?.message
+        // delete draft?.message
       } catch (err) {
         addError(
           err,
@@ -259,7 +264,8 @@ export const MessageComposer = memo(
                 className="relative w-8 flex-grow border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border"
                 contentClassName="max-h-[50vh] overflow-auto"
                 onChange={changeHandler}
-                defaultValue={message || draft?.message}
+                // defaultValue={message || draft?.message}
+                defaultValue={message}
                 placeholder={
                   thread
                     ? t(`Reply...`)
@@ -277,7 +283,8 @@ export const MessageComposer = memo(
                 uniqueId={
                   thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId
                 }
-                rteKey={draft?.updatedAt}
+                  // rteKey={draft?.updatedAt}
+                  rteKey={"not-sure-here"}
                 children={innerChildren}
               />
             </Suspense>
