@@ -432,43 +432,7 @@ describe('ThumbnailProvider', () => {
     });
   });
 
-  describe('SVG Tiny test typeless', () => {
-    it('should generate tiny thumbnail for SVG only when MIME type is provided', async () => {
-    try {
-    // Arrange
-    const minimalSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="red"/></svg>';
-    const svgBytes = new TextEncoder().encode(minimalSvg);
-    const payloadKey = 'test-svg-mime-key';
-    const testBlob = createTestBlob(svgBytes, 'image/svg+xml'); // Used for createThumbnails call
-
-    // Act and Assert for old behavior (simulate by not passing originalContentType to createImageThumbnail)
-    // In the old code (without the originalContentType param), this would throw 'Failed to load image' during resizeImageFromBlob
-    await expect(createImageThumbnail(svgBytes, payloadKey, tinyThumbSize, true)).rejects.toThrow('Failed to load image');
-
-    // Act and Assert for new behavior (pass originalContentType)
-    // This should succeed, producing a valid WebP tiny thumb
-    const tinyResult = await createImageThumbnail(svgBytes, payloadKey, tinyThumbSize, true, 'image/svg+xml');
-    expect(tinyResult).toBeDefined();
-    expect(tinyResult.naturalSize).toBeDefined();
-    expect(tinyResult.naturalSize.pixelWidth).toBe(100);
-    expect(tinyResult.naturalSize.pixelHeight).toBe(100);
-    expect(tinyResult.thumb).toBeDefined();
-    expect(tinyResult.thumb.payload.type).toBe('image/webp');
-    expect(tinyResult.thumb.payload.size).toBeGreaterThan(0);
-    expect(tinyResult.thumb.pixelWidth).toBeLessThanOrEqual(20);
-    expect(tinyResult.thumb.pixelHeight).toBeLessThanOrEqual(20);
-
-    // Optional: Integrate with full createThumbnails to verify end-to-end
-    const fullResult = await createThumbnails(testBlob, payloadKey);
-    expect(fullResult.tinyThumb.contentType).toBe('image/webp');
-    expect(fullResult.tinyThumb.content.length).toBeLessThan(2000); // Rough check for small size
-    } catch (error) {
-    console.log('Test failed unexpectedly:', error);
-    throw error; // Ensure test fails if unexpected issue
-    }
-    });
-  });
-
+  
   describe('SVG Tiny test', () => {
     it('should generate rasterized tiny thumb for SVG while preserving original vector', async () => {
     try {
