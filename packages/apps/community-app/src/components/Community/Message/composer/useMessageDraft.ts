@@ -29,5 +29,6 @@ export const useMessageDraft = (props?: {
     setDraft(draftKey ? drafts[draftKey] : undefined);
   }, [draftKey, communityDrafts, draft]);
 
-  return draft || (draftKey && drafts[draftKey]) || undefined;
+  // return draft || (draftKey && drafts[draftKey]) || undefined;
+  return undefined;
 };
