@@ -106,21 +106,23 @@ export const createThumbnails = async (
 
   if (image.type === svgType) {
     const vectorThumb = await createVectorThumbnail(imageBytes, payloadKey);
+    const tinyResult = await createImageThumbnail(imageBytes, payloadKey, tinyThumbSize, true, svgType);  // Pass svgType
 
     return {
-      tinyThumb: await getEmbeddedThumbOfThumbnailFile(vectorThumb.thumb, vectorThumb.naturalSize),
       naturalSize: vectorThumb.naturalSize,
+      tinyThumb: await getEmbeddedThumbOfThumbnailFile(tinyResult.thumb, vectorThumb.naturalSize),
       additionalThumbnails: [vectorThumb.thumb],
     };
   }
-
-  if (contentType === gifType) {
+  
+if (contentType === gifType) {
     // For GIFs, only generate a tiny thumb in WebP format
     const { naturalSize, thumb: tinyThumb } = await createImageThumbnail(
       imageBytes,
       payloadKey,
       tinyThumbSize,
-      true
+      true,
+      gifType
     );
 
 
@@ -170,7 +172,7 @@ export const createThumbnails = async (
       applicableThumbSizes.map(
         async (thumbSize) =>
           await (
-            await createImageThumbnail(imageBytes, payloadKey, thumbSize)
+            await createImageThumbnail(imageBytes, payloadKey, thumbSize, false, contentType)
           ).thumb
       )
     )),
@@ -219,21 +221,24 @@ const createVectorThumbnail = async (
   };
 };
 
-const createImageThumbnail = async (
+export const createImageThumbnail = async (
   imageBytes: Uint8Array,
   payloadKey: string,
   instruction: ThumbnailInstruction,
-  isTinyThumb: boolean = false
+  isTinyThumb: boolean = false,
+  originalContentType?: string  // The blobl type, e.g. image:svg+xml
 ): Promise<{ naturalSize: ImageSize; thumb: ThumbnailFile }> => {
 
   let targetFormatType = instruction.type || 'webp';
   if (isTinyThumb) targetFormatType = 'webp';
 
-  // Get natural size directly using Image element
+  // Create typed input blob (fixes SVG loading for both naturalSize and resize)
+  const inputBlob = new Blob([imageBytes], { type: originalContentType || '' });
+
+// Get natural size directly using Image element
   const naturalSize = await new Promise<ImageSize>((resolve, reject) => {
-    const blob = new Blob([imageBytes]);
     const reader = new FileReader();
-    reader.readAsDataURL(blob);
+    reader.readAsDataURL(inputBlob);
     reader.onload = () => {
       const img = new Image();
       if (!reader.result || typeof reader.result !== 'string') {
@@ -263,10 +268,10 @@ const createImageThumbnail = async (
   };
 
   let quality = instruction.quality;
-  let currentImageBytes = imageBytes;
+  let currentInputBlob = inputBlob;
 
   let resizedData = await resizeImageFromBlob(
-    new Blob([currentImageBytes]),
+    currentInputBlob,
     quality,
     maxTargetSize.pixelWidth,
     maxTargetSize.pixelHeight,
@@ -281,8 +286,13 @@ const createImageThumbnail = async (
     const qualityDrop = Math.min(40, Math.max(5, Math.floor(quality * excessRatio * 0.5)));
     quality = Math.max(1, quality - qualityDrop);
 
+    // Create new source blob, preserving type from appropriate source
+    const sourceArrayBuffer = await (isTinyThumb ? resizedData.blob.arrayBuffer() : currentInputBlob.arrayBuffer());
+    const sourceType = isTinyThumb ? resizedData.blob.type : currentInputBlob.type;
+    const sourceBlob = new Blob([sourceArrayBuffer], { type: sourceType });
+    
     resizedData = await resizeImageFromBlob(
-      new Blob([isTinyThumb ? new Uint8Array(await resizedData.blob.arrayBuffer()) : currentImageBytes]),
+      sourceBlob,
       quality,
       maxTargetSize.pixelWidth,
       maxTargetSize.pixelHeight,
@@ -297,7 +307,7 @@ const createImageThumbnail = async (
       }
 
       // Ok we're in trouble... wild hack attempt here, let's try to make a thumb from the thumb
-      currentImageBytes = new Uint8Array(await resizedData.blob.arrayBuffer());
+      currentInputBlob = resizedData.blob;
 
       // For some strange images we cannot fit them into a 20x20 thumb even with quality 1.
       // In such a case, make the thumb half the size
