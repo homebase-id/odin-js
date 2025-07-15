@@ -221,7 +221,7 @@ const createVectorThumbnail = async (
   };
 };
 
-const createImageThumbnail = async (
+export const createImageThumbnail = async (
   imageBytes: Uint8Array,
   payloadKey: string,
   instruction: ThumbnailInstruction,
