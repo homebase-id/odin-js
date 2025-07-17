@@ -8,6 +8,7 @@ import {
   TargetDrive,
   editDriveAttributes,
   editDriveAllowSubscriptions,
+  setDriveArchiveFlag
 } from '@homebase-id/js-lib/core';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
@@ -55,6 +56,16 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
     return editDriveAllowAnonymousRead(dotYouClient, targetDrive, newAllowAnonymousRead);
   };
 
+  const editDriveArchiveFlag = async ({
+                                     targetDrive,
+                                     newArchiveFlag,
+                                   }: {
+    targetDrive: TargetDrive;
+    newArchiveFlag: boolean;
+  }) => {
+    return setDriveArchiveFlag(dotYouClient, targetDrive, newArchiveFlag);
+  };
+  
   const editAllowSubscriptions = async ({
     targetDrive,
     newAllowSubscriptions,
@@ -102,6 +113,12 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
     }),
     editAnonymousRead: useMutation({
       mutationFn: editAnonymousRead,
+      onSettled: (_data, _error, variables) => {
+        invalidateDrive(queryClient, variables.targetDrive);
+      },
+    }),
+    editDriveArchiveFlag:useMutation({
+      mutationFn: editDriveArchiveFlag,
       onSettled: (_data, _error, variables) => {
         invalidateDrive(queryClient, variables.targetDrive);
       },

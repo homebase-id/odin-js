@@ -153,6 +153,29 @@ export const editDriveAllowAnonymousRead = async (
     });
 };
 
+export const setDriveArchiveFlag = async (
+    dotYouClient: DotYouClient,
+    targetDrive: TargetDrive,
+    newArchiveFlag: boolean
+) => {
+  assertIfDefined('targetDrive', targetDrive);
+  assertIfDefined('newArchiveFlag', newArchiveFlag);
+
+  const client = dotYouClient.createAxiosClient();
+  const data = {
+    targetDrive: targetDrive,
+    archived: newArchiveFlag,
+  };
+
+  return client
+      .post('/drive/mgmt/set-archive-drive', data)
+      .then((response) => response.status === 200)
+      .catch((error) => {
+        console.error('[odin-js:setDriveArchiveFlag]', error);
+        throw error;
+      });
+};
+
 export const editDriveAllowSubscriptions = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,

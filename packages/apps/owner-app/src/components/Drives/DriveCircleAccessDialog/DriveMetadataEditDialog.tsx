@@ -61,11 +61,19 @@ const DriveMetadataEditDialog = ({
       status: updateAttributesStatus,
       reset: resetAttributes,
     },
+    editDriveArchiveFlag:
+    {
+      mutate: updateDriveArchiveFlag,
+      error: updateArchiveFlagError,
+      status: updateArchiveFlagStatus,
+      reset: resetArchiveFlag,
+    }
   } = useDrive();
 
   const [allowAnonymousReads, setAllowAnonymousReads] = useState(
     driveDefinition.allowAnonymousReads
   );
+  const [isArchived, setIsArchived] = useState(driveDefinition.isArchived);
   const [allowSubscriptions, setAllowSubscriptions] = useState(driveDefinition.allowSubscriptions);
   const [metadata, setMetadata] = useState(driveDefinition.metadata);
   const [attributes, setAttributes] = useState(driveDefinition.attributes);
@@ -75,12 +83,14 @@ const DriveMetadataEditDialog = ({
       updateAnonymousReadStatus === 'success' &&
       updateAllowSubscriptionStatus === 'success' &&
       updateDescriptionStatus === 'success' &&
-      updateAttributesStatus === 'success'
+      updateAttributesStatus === 'success' && 
+      updateArchiveFlagStatus === 'success'
     ) {
       resetAnonymousRead();
       resetAllowSubscription();
       resetDescription();
       resetAttributes();
+      resetArchiveFlag();
       onConfirm();
     }
   }, [
@@ -88,6 +98,7 @@ const DriveMetadataEditDialog = ({
     updateAllowSubscriptionStatus,
     updateDescriptionStatus,
     updateAttributesStatus,
+    updateDriveArchiveFlag
   ]);
 
   if (!isOpen) return null;
@@ -100,7 +111,8 @@ const DriveMetadataEditDialog = ({
             updateAnonymousReadError ||
             updateAllowSubscriptionError ||
             updateDescriptionError ||
-            updateAttributesError
+            updateAttributesError || 
+            updateArchiveFlagError
           }
         />
         <form
@@ -128,24 +140,47 @@ const DriveMetadataEditDialog = ({
               newAttributes: attributes,
             });
 
+            updateDriveArchiveFlag({
+              targetDrive:driveDefinition.targetDriveInfo,
+              newArchiveFlag: isArchived
+            });
+            
             return false;
           }}
         >
           <div className="flex flex-col gap-3">
             <div className="flex flex-row items-center justify-between gap-2">
               <Label>
-                {t('Allow anonymous reads')}
+                {t('Drive is Archived')}
                 <small className="block text-sm text-slate-400">
                   {t(
-                    'Can the drive be read by anonymous users? Individual files can still be stricter.'
+                      'Is the drive offline/archived?  Apps and guests can no longer access the drive or data'
                   )}
                 </small>
               </Label>
 
               <div>
                 <CheckboxToggle
-                  defaultChecked={driveDefinition.allowAnonymousReads}
-                  onChange={(e) => setAllowAnonymousReads(e.currentTarget.checked)}
+                    defaultChecked={driveDefinition.isArchived}
+                    onChange={(e) => setIsArchived(e.currentTarget.checked)}
+                />
+              </div>
+            </div>
+            
+            <div className="flex flex-row items-center justify-between gap-2">
+              <Label>
+                {t('Allow anonymous reads')}
+                <small className="block text-sm text-slate-400">
+                  {t(
+                      'Can the drive be read by anonymous users? Individual files can still be stricter.'
+                  )}
+                </small>
+              </Label>
+
+              <div>
+                <CheckboxToggle
+                    defaultChecked={driveDefinition.allowAnonymousReads}
+                    onChange={(e) => setAllowAnonymousReads(e.currentTarget.checked)}
                 />
               </div>
             </div>
@@ -155,15 +190,15 @@ const DriveMetadataEditDialog = ({
                 {t('Allow subscriptions')}
                 <small className="block text-sm text-slate-400">
                   {t(
-                    'Can the drive be subscribed to? Subscriptions are used to notify users of new files.'
+                      'Can the drive be subscribed to? Subscriptions are used to notify users of new files.'
                   )}
                 </small>
               </Label>
 
               <div>
                 <CheckboxToggle
-                  defaultChecked={driveDefinition.allowSubscriptions}
-                  onChange={(e) => setAllowSubscriptions(e.currentTarget.checked)}
+                    defaultChecked={driveDefinition.allowSubscriptions}
+                    onChange={(e) => setAllowSubscriptions(e.currentTarget.checked)}
                 />
               </div>
             </div>
@@ -171,32 +206,32 @@ const DriveMetadataEditDialog = ({
             <div>
               <Label>{t('Metadata')}</Label>
               <Input
-                defaultValue={driveDefinition.metadata}
-                onChange={(e) => setMetadata(e.currentTarget.value)}
+                  defaultValue={driveDefinition.metadata}
+                  onChange={(e) => setMetadata(e.currentTarget.value)}
               />
             </div>
 
             <div>
               <Label>{t('Attributes')}</Label>
               <DictionaryEditor
-                defaultValue={attributes}
-                onChange={(newRecords) => setAttributes(newRecords)}
+                  defaultValue={attributes}
+                  onChange={(newRecords) => setAttributes(newRecords)}
               />
             </div>
           </div>
           <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
             <ActionButton
-              icon={Arrow}
-              state={mergeStates(updateAnonymousReadStatus, updateDescriptionStatus)}
+                icon={Arrow}
+                state={mergeStates(updateAnonymousReadStatus, updateDescriptionStatus)}
             >
               {confirmText || t('Save')}
             </ActionButton>
             <ActionButton
-              type="secondary"
-              onClick={(e) => {
-                e.preventDefault();
-                onCancel();
-              }}
+                type="secondary"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onCancel();
+                }}
             >
               {t('Cancel')}
             </ActionButton>

@@ -29,6 +29,7 @@ export interface DriveDefinition {
   metadata: string;
   allowAnonymousReads: boolean;
   allowSubscriptions: boolean;
+  isArchived:boolean;
   ownerOnly: boolean;
   attributes: { [key: string]: string };
 }

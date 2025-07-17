@@ -118,7 +118,9 @@ const DriveDetails = () => {
           {/* BE is never reporting allowSubscriptions */}
           {driveDef.allowSubscriptions ? <li>{t('Allow subscriptions')}</li> : null}
           {driveDef.ownerOnly ? <li>{t('Owner only')}</li> : null}
-          {driveDef?.attributes ? (
+          {driveDef.isArchived ? <li>{t('Archived')}</li> : null}
+
+            {driveDef?.attributes ? (
             <>
               {Object.keys(driveDef.attributes).map((attrKey) => (
                 <li key={attrKey}>
