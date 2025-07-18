@@ -117,7 +117,7 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
         invalidateDrive(queryClient, variables.targetDrive);
       },
     }),
-    editDriveArchiveFlag:useMutation({
+    editDriveArchiveFlag: useMutation({
       mutationFn: editDriveArchiveFlag,
       onSettled: (_data, _error, variables) => {
         invalidateDrive(queryClient, variables.targetDrive);

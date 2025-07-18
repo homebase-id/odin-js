@@ -25,7 +25,8 @@ import {
   t,
   useCircles,
 } from '@homebase-id/common-app';
-import { HardDrive, Download, HeartBeat, Pencil } from '@homebase-id/common-app/icons';
+import {HardDrive, Download, HeartBeat, Pencil, Archive} from '@homebase-id/common-app/icons';
+import {DriveArchiveDialog} from "../../../components/Drives/DriveArchiveDialog/DriveArchiveDialog";
 
 const DriveDetails = () => {
   const { driveKey } = useParams();
@@ -48,6 +49,8 @@ const DriveDetails = () => {
   const [isCircleSelectorOpen, setIsCircleSelectorOpen] = useState(false);
   const [isAppSelectorOpen, setIsAppSelectorOpen] = useState(false);
   const [isShowDriveStatus, setIsShowDriveStatus] = useState(false);
+  const [showDriveArchiveDialog, setShowDriveArchiveDialog] = useState(false);
+    
 
   if (driveDefLoading) return <LoadingDetailPage />;
 
@@ -91,6 +94,11 @@ const DriveDetails = () => {
                   label: 'Drive Status',
                   icon: HeartBeat,
                   onClick: () => setIsShowDriveStatus(true),
+                },
+                {
+                    label: 'Archive Drive',
+                    icon: Archive,
+                    onClick: () => setShowDriveArchiveDialog(true),
                 },
               ]}
               state={exportStatus}
@@ -240,6 +248,12 @@ const DriveDetails = () => {
         isOpen={isShowDriveStatus}
         onClose={() => setIsShowDriveStatus(false)}
       />
+        
+      <DriveArchiveDialog 
+          targetDrive={targetDriveInfo}
+          driveDefinition={driveDef}
+          isOpen={showDriveArchiveDialog}
+          onClose={()=>setShowDriveArchiveDialog(false)}/>
     </>
   );
 };

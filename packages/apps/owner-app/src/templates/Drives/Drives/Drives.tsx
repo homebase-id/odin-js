@@ -64,16 +64,17 @@ const Drives = () => {
                     ) ?? [])
                   : appDrives
                 )?.map((driveDef) => (
-                  <CardLink
-                    title={driveDef.name}
-                    href={`/owner/drives/${driveDef.targetDriveInfo.alias}_${driveDef.targetDriveInfo.type}`}
-                    key={`${driveDef.targetDriveInfo.alias}-${driveDef.targetDriveInfo.type}`}
-                  >
-                    {isDebug && driveDef.driveId && <p>DriveId: {driveDef.driveId}</p>}
-                    <h3 className="text-lg">Metadata</h3>
-                    <p>{driveDef.metadata}</p>
-                    <ul>{driveDef.allowAnonymousReads ? <li>Allow Anonymous Reads</li> : null}</ul>
-                  </CardLink>
+                    <CardLink
+                        title={driveDef.name}
+                        href={`/owner/drives/${driveDef.targetDriveInfo.alias}_${driveDef.targetDriveInfo.type}`}
+                        key={`${driveDef.targetDriveInfo.alias}-${driveDef.targetDriveInfo.type}`}
+                    >
+                      {isDebug && driveDef.driveId && <p>DriveId: {driveDef.driveId}</p>}
+                      <h3 className="text-lg">Metadata</h3>
+                      <p>{driveDef.metadata}</p>
+                      <ul>{driveDef.allowAnonymousReads ? <li>Allow Anonymous Reads</li> : null}</ul>
+                      <ul>{driveDef.isArchived ? <li>Archived</li> : null}</ul>
+                    </CardLink>
                 ))}
               </div>
             </React.Fragment>

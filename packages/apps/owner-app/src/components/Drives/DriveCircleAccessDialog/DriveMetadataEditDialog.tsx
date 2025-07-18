@@ -60,20 +60,12 @@ const DriveMetadataEditDialog = ({
       error: updateAttributesError,
       status: updateAttributesStatus,
       reset: resetAttributes,
-    },
-    editDriveArchiveFlag:
-    {
-      mutate: updateDriveArchiveFlag,
-      error: updateArchiveFlagError,
-      status: updateArchiveFlagStatus,
-      reset: resetArchiveFlag,
     }
   } = useDrive();
 
   const [allowAnonymousReads, setAllowAnonymousReads] = useState(
     driveDefinition.allowAnonymousReads
   );
-  const [isArchived, setIsArchived] = useState(driveDefinition.isArchived);
   const [allowSubscriptions, setAllowSubscriptions] = useState(driveDefinition.allowSubscriptions);
   const [metadata, setMetadata] = useState(driveDefinition.metadata);
   const [attributes, setAttributes] = useState(driveDefinition.attributes);
@@ -83,22 +75,19 @@ const DriveMetadataEditDialog = ({
       updateAnonymousReadStatus === 'success' &&
       updateAllowSubscriptionStatus === 'success' &&
       updateDescriptionStatus === 'success' &&
-      updateAttributesStatus === 'success' && 
-      updateArchiveFlagStatus === 'success'
+      updateAttributesStatus === 'success' 
     ) {
       resetAnonymousRead();
       resetAllowSubscription();
       resetDescription();
       resetAttributes();
-      resetArchiveFlag();
       onConfirm();
     }
   }, [
     updateAnonymousReadStatus,
     updateAllowSubscriptionStatus,
     updateDescriptionStatus,
-    updateAttributesStatus,
-    updateDriveArchiveFlag
+    updateAttributesStatus
   ]);
 
   if (!isOpen) return null;
@@ -111,8 +100,7 @@ const DriveMetadataEditDialog = ({
             updateAnonymousReadError ||
             updateAllowSubscriptionError ||
             updateDescriptionError ||
-            updateAttributesError || 
-            updateArchiveFlagError
+            updateAttributesError
           }
         />
         <form
@@ -139,34 +127,11 @@ const DriveMetadataEditDialog = ({
               targetDrive: driveDefinition.targetDriveInfo,
               newAttributes: attributes,
             });
-
-            updateDriveArchiveFlag({
-              targetDrive:driveDefinition.targetDriveInfo,
-              newArchiveFlag: isArchived
-            });
             
             return false;
           }}
         >
           <div className="flex flex-col gap-3">
-            <div className="flex flex-row items-center justify-between gap-2">
-              <Label>
-                {t('Drive is Archived')}
-                <small className="block text-sm text-slate-400">
-                  {t(
-                      'Is the drive offline/archived?  Apps and guests can no longer access the drive or data'
-                  )}
-                </small>
-              </Label>
-
-              <div>
-                <CheckboxToggle
-                    defaultChecked={driveDefinition.isArchived}
-                    onChange={(e) => setIsArchived(e.currentTarget.checked)}
-                />
-              </div>
-            </div>
-            
             <div className="flex flex-row items-center justify-between gap-2">
               <Label>
                 {t('Allow anonymous reads')}
