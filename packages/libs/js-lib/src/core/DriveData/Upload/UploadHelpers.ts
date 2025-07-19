@@ -151,6 +151,8 @@ export const buildFormData = async (
   keyHeader: KeyHeader | undefined,
   manifest: UploadManifest | UpdateManifest | undefined
 ): Promise<CrossPlatformFormData> => {
+
+  const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
   const FormDataImplementation = await createFormData();
   const data = new FormDataImplementation() as CrossPlatformFormData;
   data.append('instructions', await toBlob(instructionSet));
@@ -169,7 +171,11 @@ export const buildFormData = async (
           })
           : payload.payload;
 
-      data.append('payload', encryptedPayload, { filename: payload.key });
+      if (isNode) {
+        data.append('payload', encryptedPayload, { filename: payload.key });
+      } else {
+        data.append('payload', encryptedPayload, payload.key);
+      }
     }
   }
 
@@ -186,7 +192,11 @@ export const buildFormData = async (
           })
           : thumb.payload;
 
-      data.append('thumbnail', encryptedThumb, { filename: thumb.key + thumb.pixelWidth });
+      if (isNode) {
+        data.append('thumbnail', encryptedThumb, { filename: thumb.key + thumb.pixelWidth });
+      } else {
+        data.append('thumbnail', encryptedThumb, thumb.key + thumb.pixelWidth);
+      }
     }
   }
 

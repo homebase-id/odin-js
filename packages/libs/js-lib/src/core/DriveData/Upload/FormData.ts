@@ -1,9 +1,9 @@
-
+// formData.ts
 const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
 
 // Define a minimal FormData interface for cross-compatibility
 export interface CrossPlatformFormData {
-    append: (key: string, value: any, options?: { filename?: string }) => void;
+    append(key: string, value: any, filenameOrOptions?: string | { filename?: string }): void;
 }
 
 // Define interface for form-data's FormData with getHeaders
