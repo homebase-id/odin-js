@@ -28,9 +28,9 @@ const RichTextEditor = lazy(() =>
 import { EmbeddedMessage } from '@homebase-id/chat-app/src/components/Chat/Detail/EmbeddedMessage';
 import { ChatMessage } from '@homebase-id/chat-app/src/providers/ChatProvider';
 import { useParams } from 'react-router-dom';
-import { DraftSaver } from './DraftSaver';
+// import { DraftSaver } from './DraftSaver';
 import { useCommunity } from '../../../../hooks/community/useCommunity';
-import { useMessageDraft } from './useMessageDraft';
+// import { useMessageDraft } from './useMessageDraft';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 
@@ -49,20 +49,20 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
     const [message, setMessage] = useState<RichText | undefined>(undefined);
     const [files, setFiles] = useState<NewMediaFile[]>();
 
-    const draft = useMessageDraft(
-      !message
-        ? {
-            community,
-            draftKey: conversation?.fileMetadata.appData.uniqueId,
-          }
-        : undefined
-    );
+    // const draft = useMessageDraft(
+    //   !message
+    //     ? {
+    //         community,
+    //         draftKey: conversation?.fileMetadata.appData.uniqueId,
+    //       }
+    //     : undefined
+    // );
 
     const addError = useErrors().add;
     const { mutateAsync: sendMessage } = useChatMessage().send;
 
     const doSend = async () => {
-      const toSendMessage = message || draft?.message;
+      const toSendMessage = message; // || draft?.message;
 
       const trimmedVal = getPlainTextFromRichText(toSendMessage) || '';
       const replyId = replyMsg?.fileMetadata.appData.uniqueId;
@@ -98,9 +98,13 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
       }
     };
 
+    // const plainMessage = useMemo(
+    //     () => getPlainTextFromRichText(message || draft?.message) || '',
+    //   [message, draft]
+    // );
     const plainMessage = useMemo(
-      () => getPlainTextFromRichText(message || draft?.message) || '',
-      [message, draft]
+        () => getPlainTextFromRichText(message) || '',
+        [message]
     );
     const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(plainMessage || '');
 
@@ -196,11 +200,11 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
     }, [files, setFiles, linkPreviews, setLinkPreviews, canSend, replyMsg, clearReplyMsg]);
     return (
       <>
-        <DraftSaver
-          community={community}
-          draftKey={conversation?.fileMetadata.appData.uniqueId}
-          message={message || draft?.message}
-        />
+        {/*<DraftSaver*/}
+        {/*  community={community}*/}
+        {/*  draftKey={conversation?.fileMetadata.appData.uniqueId}*/}
+        {/*  message={message || draft?.message}*/}
+        {/*/>*/}
 
         <div className={`bg-background pb-[env(safe-area-inset-bottom)]`}>
           <form
@@ -231,12 +235,14 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
                 className="relative w-8 flex-grow border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border"
                 contentClassName="max-h-[50vh] overflow-auto"
                 onChange={changeHandler}
-                defaultValue={message || draft?.message}
+                // defaultValue={message || draft?.message}
+                defaultValue={message}
                 autoFocus={!isTouch}
                 onSubmit={onRTESubmit}
                 placeholder={t('Your message')}
                 ref={volatileRef}
-                key={draft?.updatedAt}
+                  // key={draft?.updatedAt}
+                key={"not-sure-what-goes-here"}
                 children={innerChildren}
                 disableHeadings={true}
               />
