@@ -80,7 +80,8 @@
   "optionalDependencies": {
     "@ffmpeg/util": "^0.12.1",
     "@homebase-id/ffmpeg": "0.12.15",
-    "mp4box": "^0.5.2"
+    "mp4box": "^0.5.2",
+    "form-data": "^4.0.0"
   },
   "devDependencies": {
     "vitest": "^0.34.6"

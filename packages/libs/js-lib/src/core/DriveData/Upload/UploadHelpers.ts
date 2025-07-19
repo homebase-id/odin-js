@@ -1,5 +1,5 @@
 import { DotYouClient } from '../../DotYouClient';
-
+import { FormData, isNodeFormData, NodeFormData } from './FormData';
 import { TransitInstructionSet } from '../../../peer/peerData/PeerTypes';
 import {
   UploadFileMetadata,
@@ -28,7 +28,7 @@ import {
   KeyHeader,
   PayloadFileWithManualEncryption,
 } from '../File/DriveFileTypes';
-import { AxiosRequestConfig } from 'axios';
+import { AxiosRequestConfig, RawAxiosRequestHeaders } from 'axios';
 import { getSecuredBlob } from '../../../helpers/BlobHelpers';
 
 const EMPTY_KEY_HEADER: KeyHeader = {
@@ -48,16 +48,16 @@ export const encryptMetaData = async (
 ) => {
   return keyHeader && metadata.appData.content
     ? {
-        ...metadata,
-        appData: {
-          ...metadata.appData,
-          content: metadata.appData.content
-            ? uint8ArrayToBase64(
-                await encryptWithKeyheader(stringToUint8Array(metadata.appData.content), keyHeader)
-              )
-            : undefined,
-        },
-      }
+      ...metadata,
+      appData: {
+        ...metadata.appData,
+        content: metadata.appData.content
+          ? uint8ArrayToBase64(
+            await encryptWithKeyheader(stringToUint8Array(metadata.appData.content), keyHeader)
+          )
+          : undefined,
+      },
+    }
     : metadata;
 };
 
@@ -161,11 +161,11 @@ export const buildFormData = async (
       const encryptedPayload =
         keyHeader && !payload.skipEncryption
           ? await encryptWithKeyheader(payload.payload, {
-              ...keyHeader,
-              iv:
-                manifest?.PayloadDescriptors?.find((p) => p.payloadKey === payload.key)?.iv ||
-                keyHeader.iv,
-            })
+            ...keyHeader,
+            iv:
+              manifest?.PayloadDescriptors?.find((p) => p.payloadKey === payload.key)?.iv ||
+              keyHeader.iv,
+          })
           : payload.payload;
 
       data.append('payload', encryptedPayload, payload.key);
@@ -178,11 +178,11 @@ export const buildFormData = async (
       const encryptedThumb =
         keyHeader && !thumb.skipEncryption
           ? await encryptWithKeyheader(thumb.payload, {
-              ...keyHeader,
-              iv:
-                manifest?.PayloadDescriptors?.find((p) => p.payloadKey === thumb.key)?.iv ||
-                keyHeader.iv,
-            })
+            ...keyHeader,
+            iv:
+              manifest?.PayloadDescriptors?.find((p) => p.payloadKey === thumb.key)?.iv ||
+              keyHeader.iv,
+          })
           : thumb.payload;
 
       data.append('thumbnail', encryptedThumb, thumb.key + thumb.pixelWidth);
@@ -194,7 +194,7 @@ export const buildFormData = async (
 
 export const pureUpload = async (
   dotYouClient: DotYouClient,
-  data: FormData,
+  data: FormData | NodeFormData,
   systemFileType?: SystemFileType,
   onVersionConflict?: () => Promise<void | UploadResult> | void,
   axiosConfig?: AxiosRequestConfig
@@ -202,13 +202,26 @@ export const pureUpload = async (
   const client = dotYouClient.createAxiosClient({ overrideEncryption: true, systemFileType });
   const url = '/drive/files/upload';
 
+  const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
+
+  // Use RawAxiosRequestHeaders for compatibility with Axios headers
+  const headers: RawAxiosRequestHeaders = {
+    ...axiosConfig?.headers,
+  };
+
+  if (isNode && isNodeFormData(data)) {
+    // In Node.js, use form-data's getHeaders to include the boundary
+    Object.assign(headers, data.getHeaders());
+  } else {
+    // In browsers, let Axios set the Content-Type with boundary
+    headers['content-type'] = 'multipart/form-data';
+  }
+
   const config: AxiosRequestConfig = {
     ...axiosConfig,
-    headers: {
-      'content-type': 'multipart/form-data',
-      ...axiosConfig?.headers,
-    },
+    headers,
   };
+
 
   return client
     .post<UploadResult>(url, data, config)
