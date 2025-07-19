@@ -1,5 +1,5 @@
 import { DotYouClient } from '../../DotYouClient';
-import { FormData, isNodeFormData, NodeFormData } from './FormData';
+import { CrossPlatformFormData, FormDataImplementation, isNodeFormData, NodeFormData } from './FormData';
 import { TransitInstructionSet } from '../../../peer/peerData/PeerTypes';
 import {
   UploadFileMetadata,
@@ -150,8 +150,8 @@ export const buildFormData = async (
   thumbnails: ThumbnailFile[] | undefined,
   keyHeader: KeyHeader | undefined,
   manifest: UploadManifest | UpdateManifest | undefined
-) => {
-  const data = new FormData();
+): Promise<CrossPlatformFormData> => {
+  const data = new FormDataImplementation() as CrossPlatformFormData;
   data.append('instructions', await toBlob(instructionSet));
   if (encryptedDescriptor) data.append('metadata', await getSecuredBlob([encryptedDescriptor]));
 
@@ -168,7 +168,7 @@ export const buildFormData = async (
           })
           : payload.payload;
 
-      data.append('payload', encryptedPayload, payload.key);
+      data.append('payload', encryptedPayload, { filename: payload.key });
     }
   }
 
@@ -185,7 +185,7 @@ export const buildFormData = async (
           })
           : thumb.payload;
 
-      data.append('thumbnail', encryptedThumb, thumb.key + thumb.pixelWidth);
+      data.append('thumbnail', encryptedThumb, { filename: thumb.key + thumb.pixelWidth });
     }
   }
 
@@ -194,7 +194,7 @@ export const buildFormData = async (
 
 export const pureUpload = async (
   dotYouClient: DotYouClient,
-  data: FormData | NodeFormData,
+  data: CrossPlatformFormData,
   systemFileType?: SystemFileType,
   onVersionConflict?: () => Promise<void | UploadResult> | void,
   axiosConfig?: AxiosRequestConfig
@@ -246,7 +246,7 @@ export const pureUpload = async (
 
 export const pureUpdate = async (
   dotYouClient: DotYouClient,
-  data: FormData,
+  data: CrossPlatformFormData,
   systemFileType?: SystemFileType,
   onVersionConflict?: () => Promise<void | UpdateResult> | void,
   axiosConfig?: AxiosRequestConfig
@@ -257,12 +257,24 @@ export const pureUpdate = async (
   });
   const url = '/drive/files/update';
 
-  const config = {
+  const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
+
+  // Use RawAxiosRequestHeaders for compatibility with Axios headers
+  const headers: RawAxiosRequestHeaders = {
+    ...axiosConfig?.headers,
+  };
+
+  if (isNode && isNodeFormData(data)) {
+    // In Node.js, use form-data's getHeaders to include the boundary
+    Object.assign(headers, data.getHeaders());
+  } else {
+    // In browsers, let Axios set the Content-Type with boundary
+    headers['content-type'] = 'multipart/form-data';
+  }
+
+  const config: AxiosRequestConfig = {
     ...axiosConfig,
-    headers: {
-      'content-type': 'multipart/form-data',
-      ...axiosConfig?.headers,
-    },
+    headers,
   };
 
   return client
