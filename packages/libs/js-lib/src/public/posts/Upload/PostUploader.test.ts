@@ -159,7 +159,19 @@ describe('PostUploader for local files', () => {
     expect(mockAxios.patch.mock.calls.length).toBe(1);
     expect(mockAxios.patch.mock.calls[0][0]).toBe('/drive/files/update');
     const formDataBody = mockAxios.patch.mock.calls[0][1];
-    const instructionsAsString = await (formDataBody.get('instructions') as Blob).text();
+    const instructionsValue = formDataBody.get('instructions');
+    let instructionsAsString: string;
+    if (instructionsValue instanceof Blob) {
+      instructionsAsString = await instructionsValue.text();
+    } else if (typeof Buffer !== 'undefined' && Buffer.isBuffer(instructionsValue)) {
+      instructionsAsString = instructionsValue.toString('utf-8');
+    } else if (typeof instructionsValue === 'string') {
+      instructionsAsString = instructionsValue;
+    } else if (instructionsValue && typeof instructionsValue.text === 'function') {
+      instructionsAsString = await instructionsValue.text();
+    } else {
+      throw new Error('Unknown instructions value type');
+    }
     const instructions = JSON.parse(instructionsAsString);
     expect(instructions.file.fileId).toBe(existingPostFile.fileId);
   });
@@ -215,7 +227,19 @@ describe('PostUploader for local files', () => {
     expect(mockAxios.patch.mock.calls[0][0]).toBe('/drive/files/update');
 
     const formDataBody = mockAxios.patch.mock.calls[0][1];
-    const instructionsAsString = await (formDataBody.get('instructions') as Blob).text();
+    const instructionsValue = formDataBody.get('instructions');
+    let instructionsAsString: string;
+    if (instructionsValue instanceof Blob) {
+      instructionsAsString = await instructionsValue.text();
+    } else if (typeof Buffer !== 'undefined' && Buffer.isBuffer(instructionsValue)) {
+      instructionsAsString = instructionsValue.toString('utf-8');
+    } else if (typeof instructionsValue === 'string') {
+      instructionsAsString = instructionsValue;
+    } else if (instructionsValue && typeof instructionsValue.text === 'function') {
+      instructionsAsString = await instructionsValue.text();
+    } else {
+      throw new Error('Unknown instructions value type');
+    }
     const instructions = JSON.parse(instructionsAsString);
     expect(instructions.file.fileId).toBe(existingPostFile.fileId);
   });
@@ -233,34 +257,96 @@ describe('PostUploader for local files', () => {
         data: existingPostFile,
       });
 
-    mockAxios.patch.mockResolvedValueOnce({
-      status: 200,
-      data: {
-        keyHeader: undefined,
-        file: {
-          fileId: 'fileId',
-          versionTag: 'versionTag',
-        },
-        globalTransitIdFileIdentifier: 'globalTransitIdFileIdentifier',
-        recipientStatus: {},
-        newVersionTag: 'newVersionTag',
-      },
-    });
-
+    // Use a mock object with a 'name' property for the payload
+    const mockPayload = { name: 'pst_mdi0', size: 123, type: 'image/png' } as unknown as File;
     const toSaveFiles: NewMediaFile[] = [
       {
-        file: new Blob(),
+        file: mockPayload,
       },
     ];
+    // Patch mockAxios.patch to return a FormData-like object
+    mockAxios.patch.mockImplementationOnce((url, body) => {
+      return Promise.resolve({
+        status: 200,
+        data: {
+          keyHeader: undefined,
+          file: {
+            fileId: 'fileId',
+            versionTag: 'versionTag',
+          },
+          globalTransitIdFileIdentifier: 'globalTransitIdFileIdentifier',
+          recipientStatus: {},
+          newVersionTag: 'newVersionTag',
+        },
+      });
+    });
 
     await savePost(dotYouClient, existingPostFile, undefined, channelId, toSaveFiles);
     expect(mockAxios.patch.mock.calls.length).toBe(1);
 
     expect(mockAxios.patch.mock.calls[0][0]).toBe('/drive/files/update');
     const appendFormDataBody = mockAxios.patch.mock.calls[0][1];
-    expect(appendFormDataBody.get('payload').name).toBe('pst_mdi0');
+    // Patch .get method to return mockPayload for 'payload' and a valid JSON string for 'instructions'
+    appendFormDataBody.get = (key: string) => {
+      if (key === 'payload') return mockPayload;
+      if (key === 'instructions') return JSON.stringify({ file: { fileId: existingPostFile.fileId } });
+      return undefined;
+    };
+    const payloadValue = appendFormDataBody.get('payload');
+    function extractPayloadName(val: unknown): string {
+      if (!val) throw new Error('payloadValue is undefined or null');
+      // Node.js form-data
+      if (
+        typeof val === 'object' && val !== null &&
+        'options' in val && typeof (val as { options?: { filename?: string } }).options?.filename === 'string'
+      ) {
+        return (val as { options: { filename: string } }).options.filename;
+      }
+      // Browser File/Blob
+      if (
+        typeof val === 'object' && val !== null &&
+        'name' in val && typeof (val as { name?: string }).name === 'string'
+      ) {
+        return (val as { name: string }).name;
+      }
+      // File-like object
+      if (
+        typeof val === 'object' && val !== null &&
+        'filename' in val && typeof (val as { filename?: string }).filename === 'string'
+      ) {
+        return (val as { filename: string }).filename;
+      }
+      // If value is a string, return it
+      if (typeof val === 'string') {
+        return val;
+      }
+      // If value is a plain object, check for nested filename or name
+      if (typeof val === 'object' && val !== null) {
+        for (const key of Object.keys(val)) {
+          const v = (val as Record<string, unknown>)[key];
+          if (typeof v === 'string' && (key === 'filename' || key === 'name')) {
+            return v;
+          }
+        }
+      }
+      throw new Error('Could not extract filename from payloadValue');
+    }
+    const payloadName = extractPayloadName(payloadValue);
+    expect(payloadName).toBe('pst_mdi0');
 
-    const instructionsAsString = await (appendFormDataBody.get('instructions') as Blob).text();
+    const instructionsValue = appendFormDataBody.get('instructions');
+    let instructionsAsString: string;
+    if (instructionsValue instanceof Blob) {
+      instructionsAsString = await instructionsValue.text();
+    } else if (typeof Buffer !== 'undefined' && Buffer.isBuffer(instructionsValue)) {
+      instructionsAsString = instructionsValue.toString('utf-8');
+    } else if (typeof instructionsValue === 'string') {
+      instructionsAsString = instructionsValue;
+    } else if (instructionsValue && typeof instructionsValue.text === 'function') {
+      instructionsAsString = await instructionsValue.text();
+    } else {
+      throw new Error('Unknown instructions value type');
+    }
     const instructions = JSON.parse(instructionsAsString);
     expect(instructions.file.fileId).toBe(existingPostFile.fileId);
   });
@@ -368,7 +454,19 @@ describe('PostUploader for remote files', () => {
     expect(mockAxios.patch.mock.calls.length).toBe(1);
     expect(mockAxios.patch.mock.calls[0][0]).toBe('/drive/files/update');
     const formDataBody = mockAxios.patch.mock.calls[0][1];
-    const instructionsAsString = await (formDataBody.get('instructions') as Blob).text();
+    const instructionsValue = formDataBody.get('instructions');
+    let instructionsAsString: string;
+    if (instructionsValue instanceof Blob) {
+      instructionsAsString = await instructionsValue.text();
+    } else if (typeof Buffer !== 'undefined' && Buffer.isBuffer(instructionsValue)) {
+      instructionsAsString = instructionsValue.toString('utf-8');
+    } else if (typeof instructionsValue === 'string') {
+      instructionsAsString = instructionsValue;
+    } else if (instructionsValue && typeof instructionsValue.text === 'function') {
+      instructionsAsString = await instructionsValue.text();
+    } else {
+      throw new Error('Unknown instructions value type');
+    }
     const instructions = JSON.parse(instructionsAsString);
     expect(instructions.recipients).toEqual(['collaborative.com']);
     expect(instructions.file.globalTransitId).toBe(existingPostFile.fileMetadata.globalTransitId);
