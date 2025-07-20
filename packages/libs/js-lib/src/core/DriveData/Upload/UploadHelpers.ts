@@ -1,5 +1,5 @@
 import { DotYouClient } from '../../DotYouClient';
-import { createFormData, CrossPlatformFormData, isNodeFormData } from './FormData';
+import { createFormData, CrossPlatformFormData, isNodeFormData, toNodeCompatibleValue } from './FormData';
 import { TransitInstructionSet } from '../../../peer/peerData/PeerTypes';
 import {
   UploadFileMetadata,
@@ -155,8 +155,8 @@ export const buildFormData = async (
   const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
   const FormDataImplementation = await createFormData();
   const data = new FormDataImplementation() as CrossPlatformFormData;
-  data.append('instructions', await toBlob(instructionSet));
-  if (encryptedDescriptor) data.append('metadata', await getSecuredBlob([encryptedDescriptor]));
+  data.append('instructions', await toNodeCompatibleValue(await toBlob(instructionSet)));
+  if (encryptedDescriptor) data.append('metadata', await toNodeCompatibleValue(await getSecuredBlob([encryptedDescriptor])));
 
   if (payloads) {
     for (let i = 0; i < payloads.length; i++) {
