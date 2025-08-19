@@ -12,6 +12,7 @@ import {
   EstablishConnectionRequest,
   TypedConnectionNotification,
 } from './WebsocketTypes';
+import { onlineManager } from '@tanstack/react-query';
 
 let webSocketClient: WebSocket | undefined;
 let activeSs: Uint8Array;
@@ -92,6 +93,8 @@ const ConnectSocket = async (
       lastPong = Date.now();
       pingInterval = setInterval(() => {
         if (lastPong && Date.now() - lastPong > PING_INTERVAL * 2) {
+          if (!onlineManager.isOnline()) return;
+
           // 2 ping intervals have passed without a pong, reconnect
           if (isDebug) console.debug(`[WebsocketProvider] Ping timeout`);
           ReconnectSocket(dotYouClient, drives, args);
@@ -171,6 +174,12 @@ const ReconnectSocket = async (
 
     // Delay the reconnect to avoid a tight loop on network issues
     setTimeout(async () => {
+      if (!onlineManager.isOnline()) {
+        reconnectPromise = undefined;
+        resolve();
+        return;
+      }
+
       if (isDebug) console.debug('[WebsocketProvider] Reconnecting - Delayed reconnect');
 
       try {
@@ -185,7 +194,7 @@ const ReconnectSocket = async (
       subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
 
       resolve();
-    }, reconnectCounter * 100);
+    }, Math.min(500 * reconnectCounter, 5000)); //500ms*n, 5s delay max
   });
 };
 
