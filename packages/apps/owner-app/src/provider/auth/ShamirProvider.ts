@@ -1,8 +1,14 @@
-import { DotYouClient } from '@homebase-id/js-lib/core';
+import {DotYouClient} from '@homebase-id/js-lib/core';
 
 export interface ShamiraPlayer {
   odinId: OdinId;
   type: PlayerType;
+}
+
+export interface ConfigureShardsRequest {
+  players: ShamiraPlayer[];
+  totalShards: number;
+  minMatchingShards: number;
 }
 
 export interface DealerShardEnvelopeRedacted {
@@ -12,7 +18,7 @@ export interface DealerShardEnvelopeRedacted {
 
 export interface DealerShardConfig {
   envelopes: DealerShardEnvelopeRedacted[];
-  created: number; 
+  created: number;
 }
 
 // Assuming OdinId is just a GUID, we'll use string

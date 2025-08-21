@@ -1,26 +1,11 @@
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 import {createPortal} from 'react-dom';
-import {
-  Alert,
-  Textarea,
-  t,
-  useCheckIdentity,
-  usePortal,
-  ErrorNotification,
-  ActionButton,
-  CircleSelector,
-  useFollowingInfinite,
-  Input,
-  Label,
-  DialogWrapper,
-  CheckboxToggle,
-  useIsConnected,
-} from '@homebase-id/common-app';
-import {getDomainFromUrl} from '@homebase-id/js-lib/helpers';
+import {ActionButton, DialogWrapper, t, usePortal,} from '@homebase-id/common-app';
 import {Arrow} from '@homebase-id/common-app/icons';
-import {ConnectionListItem, SelectPlayers} from "./SelectPlayers";
-
-const DEFAULT_MESSAGE = t('Hi, I would like to connect with you');
+import {Step1SelectPlayers} from "./Step1SelectPlayers";
+import {Step2OtherOptions} from "./Step2OtherOptions";
+import {Step3Finalize} from "./Step3Finalize";
+import {PlayerType} from "../../provider/auth/ShamirProvider";
 
 export const ShamirDistributionDialog = ({
                                            title,
@@ -33,9 +18,12 @@ export const ShamirDistributionDialog = ({
   onConfirm: () => void;
   onCancel: () => void;
 }) => {
+
   const target = usePortal('modal-container');
+  const [stepNumber, setStepNumber] = useState(0);
   const [players, setPlayers] = useState<string[]>([]);
-  const [minShards, setMinShards] = useState<number>(3);
+  const [minShards, setMinShards] = useState(3);
+
   if (!isOpen) return null;
 
   const dialog = (
@@ -54,55 +42,112 @@ export const ShamirDistributionDialog = ({
             e.preventDefault();
             // start config process
           }}>
-
-          <hr />
-
-          <SelectPlayers
-            addContact={(newContact) => {
-              setPlayers([...players.filter((x) => x !== newContact), newContact]);
-            }}
-            
-            removeContact={(contact) => {
-              setPlayers([...players.filter((x) => x !== contact), contact]);
-            }}
-
-            defaultValue={players}
-          />
           
-          <div className="flex w-full flex-col gap-2 p-5">
-            <Label htmlFor="duration">
-              {t('Minimum matching shards')}
-            </Label>
-            <Input
-              onChange={(e) => setMinShards(Number(e.target.value))}
-              className="w-full"
-              placeholder={t('Set min shards')}
-              value={minShards}
-            />
-          </div>
+          {stepNumber === 0 && (
+            <>
+              <Step1SelectPlayers
+                addContact={(newContact) => {
+                  setPlayers([...players.filter((x) => x !== newContact), newContact]);
+                }}
 
-          <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
-            <ActionButton state="idle" icon={Arrow}>
-              {t('Finalize Configuration')}
-            </ActionButton>
-            <ActionButton
-              onClick={(e) => {
-                e.preventDefault();
-              }}
-              type={'secondary'}
-            >
-              {t('Back')}
-            </ActionButton>
-            <ActionButton
-              className="sm:mr-auto"
-              type="secondary"
-              onClick={() => {
-                onCancel();
-              }}
-            >
-              {t('Cancel')}
-            </ActionButton>
-          </div>
+                removeContact={(contact) => {
+                  setPlayers([...players.filter((x) => x !== contact), contact]);
+                }}
+
+                defaultValue={players}
+              />
+
+              <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
+                <ActionButton onClick={() => setStepNumber(1)} icon={Arrow}>
+                  {t('Next')}
+                </ActionButton>
+                <ActionButton
+                  className="sm:mr-auto"
+                  type="secondary"
+                  onClick={() => {
+                    setStepNumber(0);
+                    onCancel();
+                  }}
+                >
+                  {t('Cancel')}
+                </ActionButton>
+              </div>
+            </>
+
+          )}
+
+          {stepNumber === 1 && (
+            <>
+
+              <Step2OtherOptions minShards={minShards} onChange={(s) => setMinShards(s)}/>
+
+              <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
+                <ActionButton
+                  onClick={() => setStepNumber(stepNumber + 1)}
+                  icon={Arrow}>
+                  {t('Next')}
+                </ActionButton>
+                <ActionButton
+                  onClick={(e) => {
+                    setStepNumber(stepNumber - 1);
+                    e.preventDefault();
+                  }}
+                  type={'secondary'}
+                >
+                  {t('Back')}
+                </ActionButton>
+                <ActionButton
+                  className="sm:mr-auto"
+                  type="secondary"
+                  onClick={() => {
+                    setStepNumber(0);
+                    onCancel();
+                  }}
+                >
+                  {t('Cancel')}
+                </ActionButton>
+              </div>
+            </>
+
+          )}
+
+          {stepNumber === 2 && (
+            <>
+              <Step3Finalize config={{
+                players: players.map(p => {
+                  return {
+                    odinId: p,
+                    type: PlayerType.Delegate
+                  }
+                }),
+                minMatchingShards: minShards,
+                totalShards: players.length,
+              }}/>
+
+              <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
+                <ActionButton onClick={() => setStepNumber(1)} icon={Arrow}>
+                  {t('Distribute')}
+                </ActionButton>
+                <ActionButton
+                  onClick={(e) => {
+                    setStepNumber(stepNumber - 1);
+                    e.preventDefault();
+                  }}
+                  type={'secondary'}>
+                  {t('Back')}
+                </ActionButton>
+                <ActionButton
+                  className="sm:mr-auto"
+                  type="secondary"
+                  onClick={() => {
+                    setStepNumber(0);
+                    onCancel();
+                  }}>
+                  {t('Cancel')}
+                </ActionButton>
+              </div>
+            </>
+          )}
 
         </form>
       </>

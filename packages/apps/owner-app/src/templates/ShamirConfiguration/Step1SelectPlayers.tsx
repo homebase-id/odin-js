@@ -7,7 +7,7 @@ import {
 } from '@homebase-id/common-app';
 import {ReactNode, useState} from 'react';
 
-export const SelectPlayers = ({
+export const Step1SelectPlayers = ({
                                 addContact,
                                 defaultValue,
                               }: {
@@ -34,6 +34,34 @@ export const SelectPlayers = ({
 
   return (
     <>
+      <Label>
+        {t('Selected list')}
+      </Label>
+
+      {defaultValue?.length ? (
+        <div className="flex-grow overflow-auto">
+          {defaultValue.map((odinId, index) => (
+            <ConnectionListItem
+              odinId={odinId as string}
+              isActive={false}
+              key={odinId || index}
+              onClick={() => {
+                if (!odinId) return;
+              }}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-grow items-center justify-center p-5">
+          <p className="text-slate-400">{t('Select players from list below')}</p>
+        </div>
+      )}
+
+      <br/>
+      <hr/>
+      <br/>
+      
+      
       <div className="flex w-full flex-col gap-2 p-5">
         <Input
           onChange={(e) => setQuery(e.target.value)}
@@ -61,32 +89,6 @@ export const SelectPlayers = ({
       ) : (
         <div className="flex flex-grow items-center justify-center p-5">
           <p className="text-slate-400">{t('No contacts found')}</p>
-        </div>
-      )}
-
-      {/*the selected list*/}
-
-      <hr/>
-      <Label>
-        {t('Selected list')}
-      </Label>
-
-      {defaultValue?.length ? (
-        <div className="flex-grow overflow-auto">
-          {defaultValue.map((odinId, index) => (
-            <ConnectionListItem
-              odinId={odinId as string}
-              isActive={false}
-              key={odinId || index}
-              onClick={() => {
-                if (!odinId) return;
-              }}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-grow items-center justify-center p-5">
-          <p className="text-slate-400">{t('Select players from list below')}</p>
         </div>
       )}
     </>
