@@ -18,7 +18,7 @@ import {
 } from '@homebase-id/common-app';
 import {getDomainFromUrl} from '@homebase-id/js-lib/helpers';
 import {Arrow} from '@homebase-id/common-app/icons';
-import {ConnectionListItem, GroupContactSearch} from "./GroupContactSearch";
+import {ConnectionListItem, SelectPlayers} from "./SelectPlayers";
 
 const DEFAULT_MESSAGE = t('Hi, I would like to connect with you');
 
@@ -55,6 +55,20 @@ export const ShamirDistributionDialog = ({
             // start config process
           }}>
 
+          <hr />
+
+          <SelectPlayers
+            addContact={(newContact) => {
+              setPlayers([...players.filter((x) => x !== newContact), newContact]);
+            }}
+            
+            removeContact={(contact) => {
+              setPlayers([...players.filter((x) => x !== contact), contact]);
+            }}
+
+            defaultValue={players}
+          />
+          
           <div className="flex w-full flex-col gap-2 p-5">
             <Label htmlFor="duration">
               {t('Minimum matching shards')}
@@ -67,37 +81,9 @@ export const ShamirDistributionDialog = ({
             />
           </div>
 
-          {players?.length ? (
-            <div className="flex-grow overflow-auto">
-              {players.map((odinId, index) => (
-                <ConnectionListItem
-                  odinId={odinId as string}
-                  isActive={false}
-                  key={odinId || index}
-                  onClick={() => {
-                    if (!odinId) return;
-                  }}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-grow items-center justify-center p-5">
-              <p className="text-slate-400">{t('Select players from list below')}</p>
-            </div>
-          )}
-          
-          <hr />
-          
-          <GroupContactSearch
-            addContact={(newContact) => {
-              setPlayers([...players.filter((x) => x !== newContact), newContact]);
-            }}
-            defaultValue={players}
-          />
-
           <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
             <ActionButton state="idle" icon={Arrow}>
-              {t('Send')}
+              {t('Finalize Configuration')}
             </ActionButton>
             <ActionButton
               onClick={(e) => {
