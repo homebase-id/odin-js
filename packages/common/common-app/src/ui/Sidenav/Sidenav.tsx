@@ -44,7 +44,7 @@ import { Times } from '../Icons/Times';
 import { IconProps } from '../Icons/Types';
 import { Wallet } from '../Icons/Wallet';
 import { logoutOwnerAndAllApps } from '../../provider';
-import { RadioTower } from '../Icons';
+import {Cake, RadioTower} from '../Icons';
 
 const STORAGE_KEY = 'sidenavIsOpen';
 
@@ -275,7 +275,9 @@ const MoreItems = ({
           </button>
         ) : null}
         <NavItem icon={Cog} label={'Settings'} to={`${OWNER_ROOT}/settings`} />
+        <NavItem icon={Cake} label={'Shamir'} to={`${OWNER_ROOT}/shamir`} />
         <hr className="border-b dark:border-slate-500" />
+        
         <NavItem icon={HardDrive} label={'Drives'} to={`${OWNER_ROOT}/drives`} />
         <hr className="border-b dark:border-slate-500" />
         <WalletLink />
