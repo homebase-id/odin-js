@@ -4,28 +4,38 @@ import {
   ActionButton,
   t,
   SubtleMessage,
-  Pager,
-  LoadingBlock,
-  useActiveConnections,
+  useDotYouClient,
 } from '@homebase-id/common-app';
 import {SectionTitle} from '../../components/ui/Sections/Section';
 import {useEffect, useState} from 'react';
 import {PageMeta} from '@homebase-id/common-app';
-import {Cog, Exclamation, Persons, Plus} from '@homebase-id/common-app/icons';
-import ConnectionCard from '../../components/Connection/ConnectionCard/ConnectionCard';
-import {NewShamirPlayerGroup} from "./NewShamirPlayerGroup";
+import {Cog, Persons, Plus} from '@homebase-id/common-app/icons';
 import {ShamirDistributionDialog} from "./ShamirDistributionDialog";
+import {DealerShardConfig, getShamirConfiguration} from "../../provider/auth/ShamirProvider";
+import {PlayerStatusList} from "./PlayerStatusList";
 
 const ShamirConfiguration = () => {
-  const [hasActiveConnections, setActiveConnections] = useState(true);
   const [isConfigurationOpen, setIsConfigurationOpen] = useState(false);
+  const [shardConfig, setshardConfig] = useState<DealerShardConfig | null>(null);
   useRemoveNotifications({appId: OWNER_APP_ID});
+
+  const {getDotYouClient} = useDotYouClient();
+  const handleConfirm = () => {
+    setIsConfigurationOpen(false);
+  }
+
+  useEffect(() => {
+    const client = getDotYouClient();
+    getShamirConfiguration(client).then(cfg => {
+      setshardConfig(cfg);
+    })
+  }, []);
 
   return (
     <>
       <PageMeta
         icon={Persons}
-        title={'Shmira Shamira'}
+        title={'Shamira Shamira'}
         actions={
           <>
             <ActionButton onClick={() => setIsConfigurationOpen(true)} icon={Cog}>
@@ -45,11 +55,9 @@ const ShamirConfiguration = () => {
         }
       />
 
-      <NewShamirPlayerGroup/>
-
-      {!hasActiveConnections ? (
+      {!shardConfig ? (
         <SubtleMessage className="flex flex-row items-center gap-3">
-          <span>{t('Ready to add some connections?')}</span>
+          <span>{t('You have not yet configured shamir password recovery.')}</span>
           <ActionButton
             onClick={(e) => {
               e.preventDefault();
@@ -60,17 +68,22 @@ const ShamirConfiguration = () => {
             type="secondary"
             icon={Plus}
           >
-            {t('Add')}
+            {t('Get started')}
           </ActionButton>
         </SubtleMessage>
       ) : null}
 
-      <ActiveConnectionSection setNoActiveConnections={() => setActiveConnections(false)}/>
+      {shardConfig &&
+          <>
+              <SectionTitle title="Shamir Shard Holders"/>
+              <PlayerStatusList config={shardConfig}/>
+          </>
+      }
 
       <ShamirDistributionDialog
         title={t('Configure new password recovery')}
         isOpen={isConfigurationOpen}
-        onConfirm={() => setIsConfigurationOpen(false)}
+        onConfirm={() => handleConfirm}
         onCancel={() => setIsConfigurationOpen(false)}
       />
     </>
@@ -78,97 +91,3 @@ const ShamirConfiguration = () => {
 };
 
 export default ShamirConfiguration;
-
-
-const ActiveConnectionSection = ({
-                                   setNoActiveConnections,
-                                 }: {
-  setNoActiveConnections: () => void;
-}) => {
-  const [activePage, setActivePage] = useState(1);
-
-  const {
-    data: activeConnections,
-    isLoading: activeConnectionsLoading,
-    isFetchedAfterMount: activeConnectionsFetchedAfterMount,
-    hasNextPage: activeHasNextPageOnServer,
-    fetchNextPage: fetchNextActivePage,
-  } = useActiveConnections({
-    pageSize: 18,
-  }).fetch;
-
-  useEffect(() => {
-    if (!activeConnectionsFetchedAfterMount) return;
-    if (activeConnections?.pages[0]?.results?.length === 0) setNoActiveConnections();
-
-    if (activeConnections?.pages[activePage - 1]) {
-      // already have that
-    } else {
-      fetchNextActivePage();
-    }
-  }, [activePage, activeConnectionsFetchedAfterMount]);
-
-  const activeHasNextPage = activeConnections?.pages[activePage] || activeHasNextPageOnServer;
-
-  if (!activeConnections?.pages?.[0]?.results?.length) return null;
-
-  return (
-    <>
-      {activeConnections?.pages?.[0]?.results?.length || activeConnectionsLoading ? (
-        <>
-          <SectionTitle
-            title={t('Contacts')}
-            actions={
-              <Pager
-                totalPages={activeHasNextPage ? activePage + 1 : activePage}
-                setPage={setActivePage}
-                currentPage={activePage}
-              />
-            }
-          />
-          <div
-            className="mt-5 grid grid-cols-2 gap-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10">
-            {activeConnectionsLoading && (
-              <>
-                <LoadingBlock className="w-full"/>
-                <LoadingBlock className="w-full"/>
-              </>
-            )}
-
-            {activeConnections?.pages?.[activePage - 1]?.results?.map((activeConnection) =>
-              typeof activeConnection === 'object' ? (
-                <ConnectionCard
-                  odinId={activeConnection.odinId}
-                  href={
-                    (activeConnection.odinId && `/owner/connections/${activeConnection.odinId}`) ??
-                    undefined
-                  }
-                  canSave={true}
-                  key={activeConnection.odinId}
-                >
-                  {!activeConnection.hasVerificationHash ? (
-                    <div
-                      className="absolute left-3 top-3 rounded-full bg-background p-[0.2rem] text-blue-400"
-                      title={t('Missing confirmation hash')}
-                    >
-                      <Exclamation className="h-5 w-5"/>
-                    </div>
-                  ) : null}
-                </ConnectionCard>
-              ) : null
-            )}
-            <div></div>
-          </div>
-          <div className="flex flex-row justify-center pt-5 md:hidden">
-            <Pager
-              totalPages={activeHasNextPage ? activePage + 1 : activePage}
-              setPage={setActivePage}
-              currentPage={activePage}
-              size="xl"
-            />
-          </div>
-        </>
-      ) : null}
-    </>
-  );
-};

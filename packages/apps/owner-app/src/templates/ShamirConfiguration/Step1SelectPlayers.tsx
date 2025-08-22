@@ -88,7 +88,7 @@ export const Step1SelectPlayers = ({
         </div>
       ) : (
         <div className="flex flex-grow items-center justify-center p-5">
-          <p className="text-slate-400">{t('No contacts found')}</p>
+          {/*<p className="text-slate-400">{t('No contacts found')}</p>*/}
         </div>
       )}
     </>

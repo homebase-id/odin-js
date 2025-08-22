@@ -27,6 +27,10 @@ import { ContactConfig } from '@homebase-id/js-lib/network';
 import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
 import { useFile } from '../../../hooks/files/useFiles';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
+import {
+  SHAMIR_DEALER_SHARD_CONFIG_FILE_TYPE,
+  SHAMIR_PLAYER_ENCRYPTED_SHARD_FILE_TYPE
+} from "../../../provider/auth/ShamirProvider";
 
 export const FileCard = ({
   targetDrive,
@@ -265,6 +269,12 @@ const FileTypeLabel = ({ file }: { file: HomebaseFile<string> | DeletedHomebaseF
     case COMMUNITY_MESSAGE_FILE_TYPE:
       return 'Community Message';
 
+    // Shamir password recovery
+    case SHAMIR_DEALER_SHARD_CONFIG_FILE_TYPE:
+      return 'Shamir Dealer Shard Config';
+    case SHAMIR_PLAYER_ENCRYPTED_SHARD_FILE_TYPE:
+      return 'Shamir Player Encrypted Shard';
+      
     // Assets
     case 0:
       return 'Asset';

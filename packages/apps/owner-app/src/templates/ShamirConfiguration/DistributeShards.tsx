@@ -1,13 +1,13 @@
 import {
   ConnectionImage,
   ConnectionName,
-  Label,
+  Label, SubtleMessage,
   t,
 } from '@homebase-id/common-app';
 import {ReactNode} from 'react';
 import {ConfigureShardsRequest} from "../../provider/auth/ShamirProvider";
 
-export const Step3Finalize = ({config}: {
+export const DistributeShards = ({config}: {
   config: ConfigureShardsRequest;
 }) => {
 
@@ -17,11 +17,15 @@ export const Step3Finalize = ({config}: {
         {t('Review')}
       </Label>
 
-      Min Shards: {config.minMatchingShards}
+      Minimum matching Shards: {config.minMatchingShards}
+      <SubtleMessage>
+        {t('Minimum matching shards is the minimum number of shards that must be made ' +
+          'available in the case you need to recover your account.')}
+      </SubtleMessage>
       <br/>
       <br/>
       <br/>
-      
+
       Players
       <br/>
       {config.players?.length ? (

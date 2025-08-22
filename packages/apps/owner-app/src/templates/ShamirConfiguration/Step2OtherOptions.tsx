@@ -9,10 +9,6 @@ export const Step2OtherOptions = ({
 }) => {
   return (
     <>
-      <Label>
-        {t('Selected list')}
-      </Label>
-
       <div className="flex w-full flex-col gap-2 p-5">
         <Label htmlFor="duration">
           {t('Minimum matching shards')}

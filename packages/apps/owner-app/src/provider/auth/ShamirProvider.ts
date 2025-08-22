@@ -1,5 +1,9 @@
 import {DotYouClient} from '@homebase-id/js-lib/core';
 
+export const SHAMIR_DEALER_SHARD_CONFIG_FILE_TYPE = 44532;
+export const SHAMIR_PLAYER_ENCRYPTED_SHARD_FILE_TYPE = 74829;
+
+
 export interface ShamiraPlayer {
   odinId: OdinId;
   type: PlayerType;
@@ -7,7 +11,6 @@ export interface ShamiraPlayer {
 
 export interface ConfigureShardsRequest {
   players: ShamiraPlayer[];
-  totalShards: number;
   minMatchingShards: number;
 }
 
@@ -16,7 +19,21 @@ export interface DealerShardEnvelopeRedacted {
   player: ShamiraPlayer;
 }
 
+export interface RemoteShardVerificationResult {
+  players: Record<string, ShardVerificationResult>;
+}
+
+export interface ShardVerificationResult {
+  isValid: boolean
+}
+
+export interface VerifyRemotePlayerShardRequest {
+  odinId: string;
+  shardId: string;
+}
+
 export interface DealerShardConfig {
+  minMatchingShards: number;
   envelopes: DealerShardEnvelopeRedacted[];
   created: number;
 }
@@ -43,7 +60,48 @@ export enum PlayerType {
 
 const root = "/security/recovery";
 
-export const getShamirConfiguration = async (dotYouClient: DotYouClient) => {
+export const configureShards = async (dotYouClient: DotYouClient, request: ConfigureShardsRequest) => {
+  const axiosClient = dotYouClient.createAxiosClient();
+  return await axiosClient
+    .post(`${root}/configure-shards`, request)
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      console.warn(error);
+      return null;
+    });
+}
+
+
+export const verifyRemoteShards = async (dotYouClient: DotYouClient): Promise<RemoteShardVerificationResult | null> => {
+  const axiosClient = dotYouClient.createAxiosClient();
+  return await axiosClient
+    .post<RemoteShardVerificationResult>(`${root}/verify-remote-shards`)
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      console.warn(error);
+      return null;
+    });
+}
+
+
+export const verifyRemotePlayerShard = async (dotYouClient: DotYouClient, request: VerifyRemotePlayerShardRequest): Promise<ShardVerificationResult | null> => {
+  const axiosClient = dotYouClient.createAxiosClient();
+  return await axiosClient
+    .post<ShardVerificationResult>(`${root}/verify-remote-player-shard`, request)
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      console.warn(error);
+      return null;
+    });
+}
+
+export const getShamirConfiguration = async (dotYouClient: DotYouClient): Promise<DealerShardConfig | null> => {
   const axiosClient = dotYouClient.createAxiosClient();
 
   return await axiosClient

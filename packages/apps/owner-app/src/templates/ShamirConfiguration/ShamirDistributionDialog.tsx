@@ -1,11 +1,11 @@
 import {useState} from 'react';
 import {createPortal} from 'react-dom';
-import {ActionButton, DialogWrapper, t, usePortal,} from '@homebase-id/common-app';
+import {ActionButton, DialogWrapper, t, useDotYouClient, usePortal,} from '@homebase-id/common-app';
 import {Arrow} from '@homebase-id/common-app/icons';
 import {Step1SelectPlayers} from "./Step1SelectPlayers";
 import {Step2OtherOptions} from "./Step2OtherOptions";
-import {Step3Finalize} from "./Step3Finalize";
-import {PlayerType} from "../../provider/auth/ShamirProvider";
+import {DistributeShards} from "./DistributeShards";
+import {configureShards, ConfigureShardsRequest, PlayerType} from "../../provider/auth/ShamirProvider";
 
 export const ShamirDistributionDialog = ({
                                            title,
@@ -23,6 +23,63 @@ export const ShamirDistributionDialog = ({
   const [stepNumber, setStepNumber] = useState(0);
   const [players, setPlayers] = useState<string[]>([]);
   const [minShards, setMinShards] = useState(3);
+  const client = useDotYouClient().getDotYouClient();
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const reset = () => {
+    setStepNumber(0);
+    setPlayers([]);
+    setMinShards(3);
+  }
+
+  const handleStep1Next = () => {
+    if (players.length < 3) {
+      setValidationError(t('You must select at least 3 players'));
+      return;
+    }
+
+    setValidationError(null);
+    setStepNumber(stepNumber + 1)
+
+  }
+
+
+  const handleStep2Next = () => {
+    if (minShards < 1) {
+      setValidationError(t('Min shards cannot be less than 1'));
+      return;
+    }
+
+    if (minShards > players.length) {
+      setValidationError(t('Min shards cannot be more than total players'));
+      return;
+    }
+
+    setValidationError(null);
+    setStepNumber(stepNumber + 1)
+  }
+
+  const handleStep3Finalize = async () => {
+
+    setValidationError(null);
+    
+    const request: ConfigureShardsRequest = {
+      players: players.map(p => {
+        return {
+          odinId: p,
+          type: PlayerType.Delegate
+        }
+      }),
+      minMatchingShards: minShards
+    };
+    
+    await configureShards(client, request);
+
+    // now we need to 
+    reset();
+    onConfirm();
+
+  }
 
   if (!isOpen) return null;
 
@@ -35,14 +92,15 @@ export const ShamirDistributionDialog = ({
       keepOpenOnBlur={true}
       size="2xlarge">
       <>
-        {/*<ErrorNotification error={actionError || followError}/>*/}
+        {validationError && <span className="text-red-500">{validationError}</span>}
+        {/*<ErrorNotification error={}/>*/}
 
         <form
           onSubmit={async (e) => {
             e.preventDefault();
             // start config process
           }}>
-          
+
           {stepNumber === 0 && (
             <>
               <Step1SelectPlayers
@@ -58,14 +116,14 @@ export const ShamirDistributionDialog = ({
               />
 
               <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
-                <ActionButton onClick={() => setStepNumber(1)} icon={Arrow}>
+                <ActionButton onClick={() => handleStep1Next()} icon={Arrow}>
                   {t('Next')}
                 </ActionButton>
                 <ActionButton
                   className="sm:mr-auto"
                   type="secondary"
                   onClick={() => {
-                    setStepNumber(0);
+                    reset();
                     onCancel();
                   }}
                 >
@@ -83,7 +141,7 @@ export const ShamirDistributionDialog = ({
 
               <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
                 <ActionButton
-                  onClick={() => setStepNumber(stepNumber + 1)}
+                  onClick={() => handleStep2Next()}
                   icon={Arrow}>
                   {t('Next')}
                 </ActionButton>
@@ -100,7 +158,7 @@ export const ShamirDistributionDialog = ({
                   className="sm:mr-auto"
                   type="secondary"
                   onClick={() => {
-                    setStepNumber(0);
+                    reset();
                     onCancel();
                   }}
                 >
@@ -113,19 +171,18 @@ export const ShamirDistributionDialog = ({
 
           {stepNumber === 2 && (
             <>
-              <Step3Finalize config={{
+              <DistributeShards config={{
                 players: players.map(p => {
                   return {
                     odinId: p,
                     type: PlayerType.Delegate
                   }
                 }),
-                minMatchingShards: minShards,
-                totalShards: players.length,
+                minMatchingShards: minShards
               }}/>
 
               <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
-                <ActionButton onClick={() => setStepNumber(1)} icon={Arrow}>
+                <ActionButton onClick={() => handleStep3Finalize()} icon={Arrow}>
                   {t('Distribute')}
                 </ActionButton>
                 <ActionButton
@@ -140,7 +197,7 @@ export const ShamirDistributionDialog = ({
                   className="sm:mr-auto"
                   type="secondary"
                   onClick={() => {
-                    setStepNumber(0);
+                    reset();
                     onCancel();
                   }}>
                   {t('Cancel')}
