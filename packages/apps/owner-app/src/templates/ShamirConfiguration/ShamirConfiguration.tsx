@@ -16,19 +16,24 @@ import {PlayerStatusList} from "./PlayerStatusList";
 
 const ShamirConfiguration = () => {
   const [isConfigurationOpen, setIsConfigurationOpen] = useState(false);
-  const [shardConfig, setshardConfig] = useState<DealerShardConfig | null>(null);
+  const [shardConfig, setShardConfig] = useState<DealerShardConfig | null>(null);
   useRemoveNotifications({appId: OWNER_APP_ID});
 
   const {getDotYouClient} = useDotYouClient();
   const handleConfirm = () => {
     setIsConfigurationOpen(false);
+    reset();
   }
 
-  useEffect(() => {
+  const reset = async () => {
     const client = getDotYouClient();
     getShamirConfiguration(client).then(cfg => {
-      setshardConfig(cfg);
-    })
+      setShardConfig(cfg);
+    });
+  }
+  
+  useEffect(() => {
+    reset();
   }, []);
 
   return (
@@ -83,7 +88,7 @@ const ShamirConfiguration = () => {
       <ShamirDistributionDialog
         title={t('Configure new password recovery')}
         isOpen={isConfigurationOpen}
-        onConfirm={() => handleConfirm}
+        onConfirm={() => handleConfirm()}
         onCancel={() => setIsConfigurationOpen(false)}
       />
     </>

@@ -17,7 +17,7 @@ export const DistributeShards = ({config}: {
         {t('Review')}
       </Label>
 
-      Minimum matching Shards: {config.minMatchingShards}
+      {t('Minimum matching Shards')} : {config.minMatchingShards}
       <SubtleMessage>
         {t('Minimum matching shards is the minimum number of shards that must be made ' +
           'available in the case you need to recover your account.')}
