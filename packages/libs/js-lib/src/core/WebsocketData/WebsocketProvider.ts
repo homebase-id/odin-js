@@ -192,8 +192,8 @@ const ReconnectSocket = async (
         return;
       }
 
-      if (isDebug) console.debug('[WebsocketProvider] Reconnecting - Delayed reconnect #', reconnectCounter);
-
+      if (isDebug) console.debug(`[WebsocketProvider] Reconnecting - Delayed reconnect #${reconnectCounter} at ${Date.now()}ms`);
+      
       try {
         await ConnectSocket(dotYouClient, drives, args);
       } catch (e) {
