@@ -12,13 +12,6 @@ import {
   EstablishConnectionRequest,
   TypedConnectionNotification,
 } from './WebsocketTypes';
-import { onlineManager } from '@tanstack/react-query';
-// The use of onlineManager is pretty much useless for browsers.
-// It has been added for better React Native support, 
-// where the online/offline events are more reliable,
-// Added to handle scenario where RN gets flooded with reconnect 
-// events when in airplane mode.
-//
 
 let webSocketClient: WebSocket | undefined;
 let activeSs: Uint8Array;
@@ -58,13 +51,6 @@ const ConnectSocket = async (
   connectPromise = new Promise<void>(async (resolve, reject) => {
     subscribedDrives = drives;
 
-    if (!onlineManager.isOnline()) {
-      if (isDebug) console.debug('[WebsocketProvider] Offline, ConnectSocket: skipping connection attempt');
-      reconnectPromise = undefined;
-      reject('[WebsocketProvider] Offline, cannot connect');
-      return;
-    }
-
     if (apiType === ApiType.App) {
       // we need to preauth before we can connect
       await dotYouClient
@@ -85,7 +71,7 @@ const ConnectSocket = async (
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     webSocketClient = new WebSocket(url, undefined, args);
-    if (isDebug) console.debug(`[WebsocketProvider] WebSocket object created, attempting connection`);
+    if (isDebug) console.debug(`[WebsocketProvider] Client connected`);
     reconnectPromise = undefined;
     isHandshaked = false;
 
@@ -106,12 +92,6 @@ const ConnectSocket = async (
       lastPong = Date.now();
       pingInterval = setInterval(() => {
         if (lastPong && Date.now() - lastPong > PING_INTERVAL * 2) {
-          if (!onlineManager.isOnline())
-          {
-            if (isDebug) console.debug(`[WebsocketProvider] Offline, ConnectSocket: skipping ping`);
-            return;
-          }
-
           // 2 ping intervals have passed without a pong, reconnect
           if (isDebug) console.debug(`[WebsocketProvider] Ping timeout`);
           ReconnectSocket(dotYouClient, drives, args);
@@ -152,7 +132,7 @@ const ConnectSocket = async (
     };
 
     webSocketClient.onerror = (e) => {
-      console.log('[WebsocketProvider] Error:', e); // Grok says console.error may causes issues in React Native
+      console.error('[WebsocketProvider]', e);
     };
 
     webSocketClient.onclose = (e) => {
@@ -191,14 +171,7 @@ const ReconnectSocket = async (
 
     // Delay the reconnect to avoid a tight loop on network issues
     setTimeout(async () => {
-      if (!onlineManager.isOnline()) {
-        if (isDebug) console.debug(`[WebsocketProvider] Offline, ReconnectSocket: skipping reconnect`);
-        reconnectPromise = undefined;
-        resolve();
-        return;
-      }
-
-      if (isDebug) console.debug(`[WebsocketProvider] Reconnecting - Delayed reconnect #${reconnectCounter} at ${Date.now()}ms`);
+      if (isDebug) console.debug('[WebsocketProvider] Reconnecting - Delayed reconnect');
 
       try {
         await ConnectSocket(dotYouClient, drives, args);
@@ -206,13 +179,13 @@ const ReconnectSocket = async (
         console.error('[WebsocketProvider] Reconnect failed', e);
         reject();
 
-        // Grok recommends we try to disable the recursive call - it'll fallback to Ping timeouts: ReconnectSocket(dotYouClient, drives, args);
+        ReconnectSocket(dotYouClient, drives, args);
         return;
       }
       subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
 
       resolve();
-    }, Math.min(500 * reconnectCounter, 5000)); //500ms*n, 5s delay max
+    }, reconnectCounter * 100);
   });
 };
 
@@ -251,13 +224,8 @@ export const Subscribe = async (
 
   activeSs = sharedSecret;
   if (subscribers.some((subscriber) => subscriber.handler === handler)) return;
-
-  if (!onlineManager.isOnline()) {
-    if (isDebug) console.debug('[WebsocketProvider] Offline, Subscribe: skipping subscription connection');
-    return Promise.resolve();
-  }
-
   subscribers.push({ handler, onDisconnect, onReconnect });
+
   if (isDebug) console.debug(`[WebsocketProvider] New subscriber (${subscribers.length})`, refId);
 
   if (
@@ -288,12 +256,6 @@ export const Unsubscribe = (
 
 export const Notify = async (command: WebsocketCommand) => {
   if (!webSocketClient) throw new Error('No active websocket to message across');
-
-  if (!onlineManager.isOnline()) {
-    if (isDebug) console.debug('[WebsocketProvider] Offline, Notify: skipping notify');
-    return;
-  }
-
   if (isDebug) console.debug(`[WebsocketProvider] Send command (${JSON.stringify(command)})`);
 
   const json = jsonStringify64(command);
