@@ -79,7 +79,7 @@ const ConnectSocket = async (
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     webSocketClient = new WebSocket(url, undefined, args);
-    if (isDebug) console.debug(`[WebsocketProvider] Client connected`);
+    if (isDebug) console.debug(`[WebsocketProvider] WebSocket object created, attempting connection`);
     reconnectPromise = undefined;
     isHandshaked = false;
 
@@ -146,7 +146,7 @@ const ConnectSocket = async (
     };
 
     webSocketClient.onerror = (e) => {
-      console.error('[WebsocketProvider]', e);
+      console.log('[WebsocketProvider] Error:', e); // Grok says console.error may causes issues in React Native
     };
 
     webSocketClient.onclose = (e) => {
@@ -192,7 +192,7 @@ const ReconnectSocket = async (
         return;
       }
 
-      if (isDebug) console.debug('[WebsocketProvider] Reconnecting - Delayed reconnect');
+      if (isDebug) console.debug('[WebsocketProvider] Reconnecting - Delayed reconnect #', reconnectCounter);
 
       try {
         await ConnectSocket(dotYouClient, drives, args);
@@ -200,7 +200,7 @@ const ReconnectSocket = async (
         console.error('[WebsocketProvider] Reconnect failed', e);
         reject();
 
-        ReconnectSocket(dotYouClient, drives, args);
+        // Grok recommends we try to disable the recursive call - it'll fallback to Ping timeouts: ReconnectSocket(dotYouClient, drives, args);
         return;
       }
       subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
