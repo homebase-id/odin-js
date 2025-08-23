@@ -52,6 +52,13 @@ const ConnectSocket = async (
   connectPromise = new Promise<void>(async (resolve, reject) => {
     subscribedDrives = drives;
 
+    if (!onlineManager.isOnline()) {
+      if (isDebug) console.debug('[WebsocketProvider] Offline, ConnectSocket: skipping connection attempt');
+      reconnectPromise = undefined;
+      reject('[WebsocketProvider] Offline, cannot connect');
+      return;
+    }
+
     if (apiType === ApiType.App) {
       // we need to preauth before we can connect
       await dotYouClient
@@ -93,7 +100,11 @@ const ConnectSocket = async (
       lastPong = Date.now();
       pingInterval = setInterval(() => {
         if (lastPong && Date.now() - lastPong > PING_INTERVAL * 2) {
-          if (!onlineManager.isOnline()) return;
+          if (!onlineManager.isOnline())
+          {
+            if (isDebug) console.debug(`[WebsocketProvider] Offline, ConnectSocket: skipping ping`);
+            return;
+          }
 
           // 2 ping intervals have passed without a pong, reconnect
           if (isDebug) console.debug(`[WebsocketProvider] Ping timeout`);
@@ -175,6 +186,7 @@ const ReconnectSocket = async (
     // Delay the reconnect to avoid a tight loop on network issues
     setTimeout(async () => {
       if (!onlineManager.isOnline()) {
+        if (isDebug) console.debug(`[WebsocketProvider] Offline, ReconnectSocket: skipping reconnect`);
         reconnectPromise = undefined;
         resolve();
         return;
@@ -233,8 +245,13 @@ export const Subscribe = async (
 
   activeSs = sharedSecret;
   if (subscribers.some((subscriber) => subscriber.handler === handler)) return;
-  subscribers.push({ handler, onDisconnect, onReconnect });
 
+  if (!onlineManager.isOnline()) {
+    if (isDebug) console.debug('[WebsocketProvider] Offline, Subscribe: skipping subscription connection');
+    return Promise.resolve();
+  }
+
+  subscribers.push({ handler, onDisconnect, onReconnect });
   if (isDebug) console.debug(`[WebsocketProvider] New subscriber (${subscribers.length})`, refId);
 
   if (
@@ -265,6 +282,12 @@ export const Unsubscribe = (
 
 export const Notify = async (command: WebsocketCommand) => {
   if (!webSocketClient) throw new Error('No active websocket to message across');
+
+  if (!onlineManager.isOnline()) {
+    if (isDebug) console.debug('[WebsocketProvider] Offline, Notify: skipping notify');
+    return;
+  }
+
   if (isDebug) console.debug(`[WebsocketProvider] Send command (${JSON.stringify(command)})`);
 
   const json = jsonStringify64(command);
