@@ -13,6 +13,12 @@ import {
   TypedConnectionNotification,
 } from './WebsocketTypes';
 import { onlineManager } from '@tanstack/react-query';
+// The use of onlineManager is pretty much useless for browsers.
+// It has been added for better React Native support, 
+// where the online/offline events are more reliable,
+// Added to handle scenario where RN gets flooded with reconnect 
+// events when in airplane mode.
+//
 
 let webSocketClient: WebSocket | undefined;
 let activeSs: Uint8Array;
@@ -193,7 +199,7 @@ const ReconnectSocket = async (
       }
 
       if (isDebug) console.debug(`[WebsocketProvider] Reconnecting - Delayed reconnect #${reconnectCounter} at ${Date.now()}ms`);
-      
+
       try {
         await ConnectSocket(dotYouClient, drives, args);
       } catch (e) {
