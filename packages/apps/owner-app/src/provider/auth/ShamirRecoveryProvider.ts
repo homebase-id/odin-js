@@ -8,8 +8,10 @@ export enum ShamirRecoveryState {
     /**
      * Email was sent to owner; we are waiting for the owner to click the email link to verify
      */
-    AwaitingOwnerEmailVerification = "awaitingOwnerEmailVerification",
+    AwaitingOwnerEmailVerificationToEnterRecoveryMode = "awaitingOwnerEmailVerificationToEnterRecoveryMode",
 
+    AwaitingOwnerEmailVerificationToExitRecoveryMode = "awaitingOwnerEmailVerificationToExitRecoveryMode",
+    
     /**
      * Players have been notified this owner needs their shards.
      * We are waiting for enough players to send their shard to this owner
@@ -33,6 +35,19 @@ export const getRecoveryStatus = async (): Promise<ShamirRecoveryStatusRedacted>
     const axiosClient = dotYouClient.createAxiosClient();
     return await axiosClient
         .get(`${root}/status`)
+        .then((response) => {
+            return response.data;
+        })
+        .catch((error) => {
+            console.warn(error);
+            return null;
+        });
+};
+
+export const exitRecoveryMode = async () => {
+    const axiosClient = dotYouClient.createAxiosClient();
+    return await axiosClient
+        .post(`${root}/exit-recovery-mode`)
         .then((response) => {
             return response.data;
         })

@@ -5,7 +5,7 @@ import {MinimalLayout} from '../../../components/ui/Layout/Layout';
 import UrlNotifier from '../../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import {Arrow} from "@homebase-id/common-app/icons";
 import {useLocation} from "react-router-dom";
-import {getRecoveryStatus, initiateRecoveryMode, ShamirRecoveryStatusRedacted} from "../../../provider/auth/ShamirRecoveryProvider";
+import {exitRecoveryMode, getRecoveryStatus, initiateRecoveryMode, ShamirRecoveryStatusRedacted} from "../../../provider/auth/ShamirRecoveryProvider";
 
 const ShamirAccountRecovery = () => {
     const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
@@ -22,13 +22,18 @@ const ShamirAccountRecovery = () => {
         await reloadStatus();
     }
 
-    const reloadStatus = async ()=>{
+    const cancelRecoveryMode = async () => {
+        await exitRecoveryMode();
+        await reloadStatus();
+    }
+
+    const reloadStatus = async () => {
         getRecoveryStatus().then((result) => {
             setStatus(result);
             setLoaded(true);
         });
     };
-    
+
     useEffect(() => {
         reloadStatus();
     }, []);
@@ -58,12 +63,12 @@ const ShamirAccountRecovery = () => {
                                     <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                                 </small>
                             </h1>
-                            {recoveryState === 'awaitingOwnerEmailVerification' ? (
+                            {recoveryState === 'awaitingOwnerEmailVerificationToEnterRecoveryMode' ? (
                                 <div className="my-2">
                                     <p>{t('We sent an email to the one you used during signup.  Click the link in this email to continue.')}</p>
                                     <p className="mt-3">Email: <b>{status?.email}</b></p>
                                     <hr className="mb-5 mt-7 dark:border-slate-700"/>
-                                    
+
                                     <div className="flex flex-row-reverse">
                                         <ActionButton className="mt-3 mb-3"
                                                       onClick={() => startRecoveryMode()}>
@@ -73,49 +78,71 @@ const ShamirAccountRecovery = () => {
                                     </div>
                                 </div>
                             ) : recoveryState === 'awaitingSufficientDelegateConfirmation' ? (<>
-                                    {t('We notified your delegates/shard holders that you are in recovery mode.')}
+                                        {t('We notified your delegates/shard holders that you are in recovery mode.')}
 
-                                    <Alert type="warning" isCompact={false} className="mt-3">
-                                        {t('We are waiting for a sufficient number of your delegates to confirm')}
-                                    </Alert>
+                                        <Alert type="warning" isCompact={false} className="mt-3">
+                                            {t('We are waiting for a sufficient number of your delegates to confirm')}
+                                        </Alert>
 
-                                    <hr className="mb-5 mt-7 dark:border-slate-700"/>
-                                    
-                                    <div className="flex flex-row-reverse">
-                                        <ActionButton className="mt-3 mb-3"
-                                                      onClick={() => startRecoveryMode()}>
-                                            {t('Start over')}
-                                            <Arrow className="ml-auto h-5 w-5"/>
-                                        </ActionButton>
+                                        <hr className="mb-5 mt-7 dark:border-slate-700"/>
+
+                                        <div className="flex flex-row-reverse justify-between">
+                                            <ActionButton className="mt-3 mb-3"
+                                                          onClick={() => startRecoveryMode()}>
+                                                {t('Start over')}
+                                                <Arrow className="ml-auto h-5 w-5"/>
+                                            </ActionButton>
+
+                                            <ActionButton
+                                                type="secondary"
+                                                className="mt-3 mb-3"
+                                                onClick={() => cancelRecoveryMode()}>
+                                                {t('Exit recovery mode')}
+                                            </ActionButton>
+                                        </div>
+                                    </>
+                                ) : recoveryState === 'awaitingOwnerEmailVerificationToExitRecoveryMode' ? (
+                                    <div className="my-2">
+                                        <p>{t('We sent an email to the one you used during signup.  Click the link in this email to continue ' +
+                                            'exiting recovery mode.')}</p>
+                                        <p className="mt-3">Email: <b>{status?.email}</b></p>
+                                        <hr className="mb-5 mt-7 dark:border-slate-700"/>
+
+                                        <div className="flex flex-row-reverse">
+                                            <ActionButton className="mt-3 mb-3"
+                                                          onClick={() => exitRecoveryMode()}>
+                                                {t('Send it again')}
+                                                <Arrow className="ml-auto h-5 w-5"/>
+                                            </ActionButton>
+                                        </div>
                                     </div>
+                                ) : (
+                                    <form onSubmit={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                    }}>
+                                        <div className="mb-2">
+                                            <p className="max-w-md text-slate-400">
+                                                {t('To regain access you will need to initiate recovery mode.')}{' '}
+                                                {t('Click the button below to send an email to the email address you used during signup.')}{' '}
+                                            </p>
+                                            <ActionButton className="mt-3 mb-3"
+                                                          onClick={() => startRecoveryMode()}>
+                                                {t('Enter Recovery mode now')}
+                                                <Arrow className="ml-auto h-5 w-5"/>
+                                            </ActionButton>
+                                        </div>
+                                        {/*<hr className="mb-5 mt-7 dark:border-slate-700"/>*/}
+
+                                    </form>
+                                )}
+                                </div>
+                                </div>
+                                </section>
+
+                                </MinimalLayout>
                                 </>
-                            ) : (
-                                <form onSubmit={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                }}>
-                                    <div className="mb-2">
-                                        <p className="max-w-md text-slate-400">
-                                            {t('To regain access you will need to initiate recovery mode.')}{' '}
-                                            {t('Click the button below to send an email to the email address you used during signup.')}{' '}
-                                        </p>
-                                        <ActionButton className="mt-3 mb-3"
-                                                      onClick={() => startRecoveryMode()}>
-                                            {t('Enter Recovery mode now')}
-                                            <Arrow className="ml-auto h-5 w-5"/>
-                                        </ActionButton>
-                                    </div>
-                                    {/*<hr className="mb-5 mt-7 dark:border-slate-700"/>*/}
-
-                                </form>
-                            )}
-                        </div>
-                    </div>
-                </section>
-
-            </MinimalLayout>
-        </>
-    );
-};
+                                );
+                            };
 
 export default ShamirAccountRecovery;
