@@ -52,12 +52,10 @@ export const DistributeShards = ({config}: {
 
 export const ConnectionListItem = ({
                                      odinId,
-                                     conversationId,
                                      ...props
                                    }: {
   onClick: (() => void) | undefined;
   odinId: string | undefined;
-  conversationId?: string;
   isActive: boolean;
 }) => {
   return (

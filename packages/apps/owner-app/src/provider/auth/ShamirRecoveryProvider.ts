@@ -1,4 +1,4 @@
-import {ApiType, DotYouClient} from '@homebase-id/js-lib/core';
+import {ApiType} from '@homebase-id/js-lib/core';
 import {OwnerClient} from "@homebase-id/common-app";
 
 export enum ShamirRecoveryState {

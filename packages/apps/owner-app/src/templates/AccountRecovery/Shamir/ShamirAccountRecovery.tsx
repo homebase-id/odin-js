@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import {Helmet} from 'react-helmet-async';
-import {ActionButton, ActionLink, Alert, DomainHighlighter, t} from '@homebase-id/common-app';
+import {ActionButton, Alert, DomainHighlighter, t} from '@homebase-id/common-app';
 import {MinimalLayout} from '../../../components/ui/Layout/Layout';
 import UrlNotifier from '../../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import {Arrow} from "@homebase-id/common-app/icons";
@@ -8,8 +8,6 @@ import {useLocation} from "react-router-dom";
 import {exitRecoveryMode, getRecoveryStatus, initiateRecoveryMode, ShamirRecoveryStatusRedacted} from "../../../provider/auth/ShamirRecoveryProvider";
 
 const ShamirAccountRecovery = () => {
-    const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
-
     const location = useLocation();
     const params = new URLSearchParams(location.search);
 
