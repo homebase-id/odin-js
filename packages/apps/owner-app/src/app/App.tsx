@@ -32,6 +32,7 @@ const UpdateDriveDetailsFromApp = lazy(
 );
 const Login = lazy(() => import('../templates/Login/Login'));
 const AccountRecovery = lazy(() => import('../templates/AccountRecovery/AccountRecovery'));
+const ShamirAccountRecovery = lazy(() => import('../templates/AccountRecovery/Shamir/ShamirAccountRecovery'));
 const FirstRun = lazy(() => import('../templates/FirstRun/FirstRun'));
 
 const Notifications = lazy(() => import('../templates/Notifications/Notifications'));
@@ -66,7 +67,7 @@ import {
   FIRSTRUN_PATH,
   LOGIN_PATH,
   RECOVERY_PATH,
-  SETUP_PATH,
+  SETUP_PATH, SHAMIR_RECOVERY_PATH,
   useValidateAuthorization,
 } from '../hooks/auth/useAuth';
 import { useIsConfigured } from '../hooks/configure/useIsConfigured';
@@ -122,6 +123,17 @@ function App() {
                 </ErrorBoundary>
               </Suspense>
             }
+          />
+
+          <Route
+              path={SHAMIR_RECOVERY_PATH}
+              element={
+                <Suspense fallback={<LoadingDetailPage />}>
+                  <ErrorBoundary>
+                    <ShamirAccountRecovery />
+                  </ErrorBoundary>
+                </Suspense>
+              }
           />
 
           <Route
@@ -272,8 +284,9 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
 
   if (!isAuthenticated) {
     if (
-      location.pathname === FIRSTRUN_PATH ||
+      location.pathname === FIRSTRUN_PATH || 
       location.pathname === RECOVERY_PATH ||
+      location.pathname === SHAMIR_RECOVERY_PATH ||
       location.pathname === LOGIN_PATH
     ) {
       return <>{children}</>;
