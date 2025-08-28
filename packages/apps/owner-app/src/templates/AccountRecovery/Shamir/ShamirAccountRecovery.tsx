@@ -22,6 +22,13 @@ const ShamirAccountRecovery = () => {
   const [loaded, setLoaded] = useState<boolean>(false);
   const navigate = useNavigate();
 
+  // see if we came here from recovery mode
+  const fromVerification = params.get("fv") === "1";
+  const nonceId = params.get("id");
+  const token = params.get("token");
+  const fromFinalize = nonceId && token;
+  const recoveryState = status?.state ?? "None";
+
   const startRecoveryMode = async () => {
     await initiateRecoveryMode();
     await reloadStatus();
@@ -38,9 +45,9 @@ const ShamirAccountRecovery = () => {
       setLoaded(true);
     });
   };
-  
+
   const continueToUseRecoveryKey = async () => {
-    navigate(`${RECOVERY_PATH}?id=${params.get("id")}&fk=${params.get("fk")}`)
+    navigate(`${RECOVERY_PATH}?id=${params.get("id")}&fk=${params.get("token")}`)
   }
 
   useEffect(() => {
@@ -55,12 +62,6 @@ const ShamirAccountRecovery = () => {
     return () => clearInterval(intervalId); // cleanup on unmount
   }, []);
 
-  // see if we came here from recovery mode
-  const fromVerification = params.get("fv") === "1";
-  const nonceId = params.get("id");
-  const token = params.get("token");
-  const fromFinalize = nonceId && token;
-  const recoveryState = status?.state ?? "None";
 
   if ((fromVerification || fromFinalize) && !loaded) {
     // we need to wait until we get the status
@@ -124,23 +125,54 @@ const ShamirAccountRecovery = () => {
               ) : recoveryState === 'awaitingOwnerFinalization' ? (<>
                   {t('🎉 You are ready to finalize your password recovery!')}
 
-                  {/*//TODO */}
                   <hr className="mb-5 mt-7 dark:border-slate-700"/>
 
-                  <div className="flex flex-row-reverse justify-between">
-                    <ActionButton className="mt-3 mb-3"
-                                  onClick={() => continueToUseRecoveryKey()}>
-                      {t('Continue to set password')}
-                      <Arrow className="ml-auto h-5 w-5"/>
-                    </ActionButton>
+                  {/*user is on the screen but did not click the email*/}
+                  {(!token || !nonceId) && (
+                    <>
+                      <div className="my-2">
+                        <p>{t('We sent an email including your final recovery link.  Click the link in this email to continue.')}</p>
+                        <p className="mt-3">Email: <b>{status?.email}</b></p>
+                        <hr className="mb-5 mt-7 dark:border-slate-700"/>
+                      </div>
 
-                    <ActionButton
-                      type="secondary"
-                      className="mt-3 mb-3"
-                      onClick={() => cancelRecoveryMode()}>
-                      {t('Exit recovery mode')}
-                    </ActionButton>
-                  </div>
+                      <div className="my-2">
+                        <ActionButton
+                          type="secondary"
+                          className="mt-3 mb-3"
+                          onClick={() => cancelRecoveryMode()}>
+                          {t('Exit recovery mode')}
+                        </ActionButton>
+                      </div>
+                    </>
+                  )}
+
+                  {token && nonceId && (
+                    <div className="flex flex-row-reverse justify-between">
+                      {(!token || !nonceId) && (
+                        <div className="my-2">
+                          <p>{t('We sent an email including your final recovery link.  Click the link in this email to continue.')}</p>
+                          <p className="mt-3">Email: <b>{status?.email}</b></p>
+                          <hr className="mb-5 mt-7 dark:border-slate-700"/>
+                        </div>
+                      )}
+
+                      <ActionButton className="mt-3 mb-3"
+                                    onClick={() => continueToUseRecoveryKey()}>
+                        {t('Continue to set password')}
+                        <Arrow className="ml-auto h-5 w-5"/>
+                      </ActionButton>
+                      <div className="my-2">
+                        <ActionButton
+                          type="secondary"
+                          className="mt-3 mb-3"
+                          onClick={() => cancelRecoveryMode()}>
+                          {t('Exit recovery mode')}
+                        </ActionButton>
+                      </div>
+                    </div>
+                  )}
+
                 </>
               ) : recoveryState === 'awaitingOwnerEmailVerificationToExitRecoveryMode' ? (
                 <div className="my-2">
