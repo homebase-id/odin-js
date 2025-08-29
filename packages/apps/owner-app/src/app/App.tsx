@@ -58,6 +58,7 @@ const DriveDetails = lazy(() => import('../templates/Drives/DriveDetails/DriveDe
 const FileDetails = lazy(() => import('../templates/Drives/DriveDetails/FileDetails'));
 const Settings = lazy(() => import('../templates/Settings/Settings'));
 const ShamirConfiguration = lazy(() => import('../templates/ShamirConfiguration/ShamirConfiguration'));
+const ShamirVerifyShardRequest = lazy(() => import('../templates/ShamirConfiguration/ShamirVerifyShardRequest'));
 
 const Debug = lazy(() => import('../templates/Debug/Debug'));
 
@@ -228,7 +229,8 @@ function App() {
               <Route path="settings/:sectionId" element={<Settings />}></Route>
 
               <Route path="shamir" element={<ShamirConfiguration />}></Route>
-
+              <Route path="shamir/verify" element={<ShamirVerifyShardRequest />}></Route>
+              
               
               <Route path="debug" element={<Debug />}></Route>
             </Route>
