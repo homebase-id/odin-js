@@ -9,7 +9,7 @@ import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import {PasswordInput} from '../../components/Password/PasswordInput';
 import {PasswordStrength} from '../../components/Password/PasswordStrength';
 import {useLocation, useNavigate} from "react-router-dom";
-import {FinalRecoveryResult, getFinalRecoveryResult} from "../../provider/auth/ShamirRecoveryProvider";
+import {getFinalRecoveryResult} from "../../provider/auth/ShamirRecoveryProvider";
 
 const AccountRecovery = () => {
   const location = useLocation();
@@ -21,7 +21,6 @@ const AccountRecovery = () => {
   const [recoveryKey, setRecoveryKey] = useState('');
   const [password, setPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
-  // const [finalRecoveryResult, setFinalRecoveryResult] = useState<FinalRecoveryResult | null>(null);
 
   const {resetPassword} = useAuth();
 
@@ -31,7 +30,6 @@ const AccountRecovery = () => {
 
     if (id && fk) {
       getFinalRecoveryResult(id, fk).then(r => {
-        // setFinalRecoveryResult(r);
         setRecoveryKey(r.recoveryText);
       })
     }
