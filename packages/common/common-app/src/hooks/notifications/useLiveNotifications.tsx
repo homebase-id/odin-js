@@ -198,7 +198,7 @@ export const buildNotificationBody = (
     } else if (payload.options.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_RECRUITED) {
       return `${sender} added you as part of their password recovery process.  This has zero impact to you :)`;
     } else if (payload.options.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_SHARD_REQUESTED) {
-      return `${sender} as has requested you verify their request to help recover their password.`;
+      return `${sender} has requested your assistance in recovering their identity.  Tap to continue...`;
     } else if (payload.options.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_SUFFICIENT_SHARDS_COLLECTED) {
       return 'We now have sufficient shards to recover your password.  Check your email for the final steps.';
     } else if (payload.options.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_SHARD_COLLECTED) {

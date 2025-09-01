@@ -37,7 +37,7 @@ const ShamirVerifyShardRequest = () => {
       />
       <div>
 
-        TODO: show all requests
+        TODO: show all requests - if you're here then uhm we're in alpha mode and uhm - you shouldnt be ;)
       </div>
     </>
   );

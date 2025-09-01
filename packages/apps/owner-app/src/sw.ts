@@ -86,7 +86,7 @@ const buildNotificationBody = async (
     } else if (payload.options.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_RECRUITED) {
       return `${sender} added you as part of their password recovery process.  This has zero impact to you :)`;
     } else if (payload.options.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_SHARD_REQUESTED) {
-      return `${sender} as has requested you verify their request to help recover their password.`;
+      return `${sender} has requested your assistance in recovering their identity.  Tap to continue...`;
     } else if (payload.options.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_SUFFICIENT_SHARDS_COLLECTED) {
       return 'We now have sufficient shards to recover your password.  Check your email for the final steps.';
     } else if (payload.options.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_SHARD_COLLECTED) {
@@ -175,40 +175,47 @@ self.addEventListener('notificationclick', (event) => {
 
   const {pathToOpen, postMessageData}: { pathToOpen: string; postMessageData?: unknown } =
     (() => {
-      if (
-        event.notification?.data?.options?.appId === CHAT_APP_ID &&
-        event.notification?.data?.options?.typeId
-      ) {
+        if (
+          event.notification?.data?.options?.appId === CHAT_APP_ID &&
+          event.notification?.data?.options?.typeId
+        ) {
+          return {
+            pathToOpen: `/apps/chat/${event.notification?.data?.options?.typeId}`,
+          };
+        }
+
+        if (
+          event.notification?.data?.options?.appId === MAIL_APP_ID &&
+          event.notification?.data?.options?.typeId
+        ) {
+          return {
+            pathToOpen: `/apps/mail/inbox/${event.notification?.data?.options?.typeId}`,
+          };
+        }
+
+        if (event.notification?.data?.options?.appId === FEED_APP_ID) {
+          return {pathToOpen: `/apps/feed`};
+        }
+
+        if (event.notification?.data?.options?.appId === COMMUNITY_APP_ID) {
+          return {
+            pathToOpen: `/apps/community/redirect/${event.notification?.data?.options?.typeId}/${event.notification?.data?.options?.tagId}`,
+          };
+        }
+
+        // we're in the owner app at this point
+        if (event.notification?.data?.options?.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_SHARD_REQUESTED) {
+          return `/owner/shamir/verify`
+        }
+
+        const tagId = event.notification?.data?.options?.tagId;
         return {
-          pathToOpen: `/apps/chat/${event.notification?.data?.options?.typeId}`,
+          pathToOpen: `/owner/notifications${tagId ? `?notification=${tagId}` : ''}`,
+          postMessageData: {notification: tagId},
         };
       }
-
-      if (
-        event.notification?.data?.options?.appId === MAIL_APP_ID &&
-        event.notification?.data?.options?.typeId
-      ) {
-        return {
-          pathToOpen: `/apps/mail/inbox/${event.notification?.data?.options?.typeId}`,
-        };
-      }
-
-      if (event.notification?.data?.options?.appId === FEED_APP_ID) {
-        return {pathToOpen: `/apps/feed`};
-      }
-
-      if (event.notification?.data?.options?.appId === COMMUNITY_APP_ID) {
-        return {
-          pathToOpen: `/apps/community/redirect/${event.notification?.data?.options?.typeId}/${event.notification?.data?.options?.tagId}`,
-        };
-      }
-
-      const tagId = event.notification?.data?.options?.tagId;
-      return {
-        pathToOpen: `/owner/notifications${tagId ? `?notification=${tagId}` : ''}`,
-        postMessageData: {notification: tagId},
-      };
-    })();
+    )
+    ();
 
   const urlToOpen = new URL(pathToOpen, self.location.origin).href;
   // const matchingUrl = matchingPath ? new URL(matchingPath, self.location.origin).href : '';

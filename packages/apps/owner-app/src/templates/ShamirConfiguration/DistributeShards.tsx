@@ -43,7 +43,7 @@ export const DistributeShards = ({config}: {
         </div>
       ) : (
         <div className="flex flex-grow items-center justify-center p-5">
-          <p className="text-slate-400">{t('Select players from list below')}</p>
+          <p className="text-slate-400">{t('Select trusted connections from list below')}</p>
         </div>
       )}
     </>
