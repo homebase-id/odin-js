@@ -38,6 +38,23 @@ export interface DealerShardConfig {
   created: number;
 }
 
+export interface ApproveShardRequest {
+  odinId: string;
+  shardId: string;
+}
+
+export interface RejectShardRequest {
+  odinId: string;
+  shardId: string;
+}
+
+
+export interface ShardApprovalRequest {
+  id: string;
+  player: string;
+  created: number
+}
+
 // Assuming OdinId is just a GUID, we'll use string
 export type OdinId = string;
 
@@ -73,7 +90,6 @@ export const configureShards = async (dotYouClient: DotYouClient, request: Confi
     });
 }
 
-
 export const verifyRemoteShards = async (dotYouClient: DotYouClient): Promise<RemoteShardVerificationResult | null> => {
   const axiosClient = dotYouClient.createAxiosClient();
   return await axiosClient
@@ -86,7 +102,6 @@ export const verifyRemoteShards = async (dotYouClient: DotYouClient): Promise<Re
       return null;
     });
 }
-
 
 export const verifyRemotePlayerShard = async (dotYouClient: DotYouClient, request: VerifyRemotePlayerShardRequest): Promise<ShardVerificationResult | null> => {
   const axiosClient = dotYouClient.createAxiosClient();
@@ -112,5 +127,49 @@ export const getShamirConfiguration = async (dotYouClient: DotYouClient): Promis
     .catch((error) => {
       console.warn(error);
       return null;
+    });
+};
+
+export const getShardRequestList = async (
+  dotYouClient: DotYouClient
+): Promise<ShardApprovalRequest[] | null> => {
+  const axiosClient = dotYouClient.createAxiosClient();
+
+  return await axiosClient
+    .get<ShardApprovalRequest[]>(`${root}/shard-request-list`)
+    .then((response) => response.data)
+    .catch((error) => {
+      console.warn(error);
+      return null;
+    });
+};
+
+export const approveShardRequest = async (
+  dotYouClient: DotYouClient,
+  payload: ApproveShardRequest
+) => {
+  const axiosClient = dotYouClient.createAxiosClient();
+
+  return await axiosClient
+    .post(`${root}/approve-shard-request`, payload)
+    .then(() => true)
+    .catch((error) => {
+      console.warn(error);
+      return false;
+    });
+};
+
+export const rejectShardRequest = async (
+  dotYouClient: DotYouClient,
+  payload: RejectShardRequest
+) => {
+  const axiosClient = dotYouClient.createAxiosClient();
+
+  return await axiosClient
+    .post(`${root}/reject-shard-request`, payload)
+    .then(() => true)
+    .catch((error) => {
+      console.warn(error);
+      return false;
     });
 };

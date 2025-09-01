@@ -22,6 +22,7 @@ export interface VerifyRemotePlayerShardRequest {
   shardId: string;
 }
 
+
 type Status = 'loading' | 'valid' | 'invalid' | 'error';
 
 const toKey = (odinId: string) => odinId.toLowerCase();
