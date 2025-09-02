@@ -28,7 +28,7 @@ import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
 import { useFile } from '../../../hooks/files/useFiles';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
 import {
-  SHAMIR_DEALER_SHARD_CONFIG_FILE_TYPE,
+  SHAMIR_DEALER_SHARD_CONFIG_FILE_TYPE, SHAMIR_PLAYER_COLLECTED_SHARD_REQUEST_FILE_TYPE,
   SHAMIR_PLAYER_ENCRYPTED_SHARD_FILE_TYPE
 } from "../../../provider/auth/ShamirProvider";
 
@@ -271,10 +271,13 @@ const FileTypeLabel = ({ file }: { file: HomebaseFile<string> | DeletedHomebaseF
 
     // Shamir password recovery
     case SHAMIR_DEALER_SHARD_CONFIG_FILE_TYPE:
-      return 'Shamir Dealer Shard Config';
+      return 'Password Recovery Dealer Shard Config';
     case SHAMIR_PLAYER_ENCRYPTED_SHARD_FILE_TYPE:
-      return 'Shamir Player Encrypted Shard';
+      return 'Password Recovery Player Encrypted Shard';
       
+    case SHAMIR_PLAYER_COLLECTED_SHARD_REQUEST_FILE_TYPE:
+      return 'Password Recovery Collected Shard Request File';
+
     // Assets
     case 0:
       return 'Asset';

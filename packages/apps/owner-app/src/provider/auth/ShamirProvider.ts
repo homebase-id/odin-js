@@ -2,6 +2,7 @@ import {DotYouClient} from '@homebase-id/js-lib/core';
 
 export const SHAMIR_DEALER_SHARD_CONFIG_FILE_TYPE = 44532;
 export const SHAMIR_PLAYER_ENCRYPTED_SHARD_FILE_TYPE = 74829;
+export const SHAMIR_PLAYER_COLLECTED_SHARD_REQUEST_FILE_TYPE = 84099;
 
 
 export interface ShamiraPlayer {
@@ -50,8 +51,8 @@ export interface RejectShardRequest {
 
 
 export interface ShardApprovalRequest {
-  id: string;
-  player: string;
+  shardId: string;
+  dealer: string;
   created: number
 }
 

@@ -29,13 +29,13 @@ const ShamirVerifyShardRequest = () => {
 
   const handleApprove = async (r: ShardApprovalRequest) => {
     const client = getDotYouClient();
-    await approveShardRequest(client, {odinId: r.player, shardId: r.id});
+    await approveShardRequest(client, {odinId: r.dealer, shardId: r.shardId});
     await loadRequests();
   };
 
   const handleReject = async (r: ShardApprovalRequest) => {
     const client = getDotYouClient();
-    await rejectShardRequest(client, {odinId: r.player, shardId: r.id});
+    await rejectShardRequest(client, {odinId: r.dealer, shardId: r.shardId});
     await loadRequests();
   };
 
@@ -55,11 +55,11 @@ const ShamirVerifyShardRequest = () => {
           <ul className="space-y-3">
             {requests.map((r) => (
               <li
-                key={r.id}
+                key={r.shardId}
                 className="flex items-center justify-between border rounded p-3"
               >
                 <div>
-                  <div className="font-medium">{r.player}</div>
+                  <div className="font-medium">{r.dealer}</div>
                   <div className="text-sm text-gray-500">
                     {formatDateExludingYearIfCurrent(new Date(r.created))}
                   </div>
