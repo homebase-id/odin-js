@@ -35,7 +35,7 @@ export interface VerifyRemotePlayerShardRequest {
 export interface DealerShardConfig {
   minMatchingShards: number;
   envelopes: DealerShardEnvelopeRedacted[];
-  created: number;
+  updated: number;
 }
 
 export interface ApproveShardRequest {
@@ -62,17 +62,17 @@ export enum PlayerType {
   /**
    * The dealer can request the copy of the (encrypted) shard from a (machine) player
    */
-  Automatic = 1,
+  Automatic = "automatic",
 
   /**
    * The (human) player must click OK to release a shard to the dealer.
    */
-  Delegate = 2,
+  Delegate = "delegate",
 
   /**
    * The (human) player must give the information out-of-band, Not yet implemented
    */
-  Manual = 3,
+  Manual = "manual"
 }
 
 const root = "/security/recovery";

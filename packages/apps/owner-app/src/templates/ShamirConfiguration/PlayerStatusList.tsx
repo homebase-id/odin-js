@@ -2,13 +2,17 @@ import {ReactNode, useEffect, useMemo, useRef, useState} from 'react';
 import {
   ConnectionImage,
   ConnectionName,
-  formatDateExludingYearIfCurrent, Label, SubtleMessage,
+  formatDateExludingYearIfCurrent,
+  Label,
+  SubtleMessage,
   t,
   useDotYouClient
 } from '@homebase-id/common-app';
 import {
   DealerShardConfig,
   DealerShardEnvelopeRedacted,
+  PlayerType,
+  ShamiraPlayer,
   verifyRemotePlayerShard
 } from '../../provider/auth/ShamirProvider';
 import {DotYouClient} from "@homebase-id/js-lib/core";
@@ -148,7 +152,7 @@ export const PlayerStatusList = ({config}: { config: DealerShardConfig }) => {
         <Label>
           {t('Last Updated')}
         </Label>
-        {formatDateExludingYearIfCurrent(new Date(config.created))}
+        {formatDateExludingYearIfCurrent(new Date(config.updated))}
       </div>
 
       <br/>
@@ -158,7 +162,7 @@ export const PlayerStatusList = ({config}: { config: DealerShardConfig }) => {
           {t(`The connections below each hold a piece of the data needed to recover your account. To regain access, 
           at least ${config.minMatchingShards} trusted connections must respond to your request.`)}
         </p>
-          
+
       </SubtleMessage>
       <br/>
 
@@ -172,8 +176,8 @@ export const PlayerStatusList = ({config}: { config: DealerShardConfig }) => {
               (key && statusByOdin[key]) || (odinId ? 'loading' : 'error');
 
             return (
-              <ConnectionListItem
-                odinId={odinId}
+              <PlayerListItem
+                player={p?.player}
                 isActive={false}
                 key={odinId || index}
                 status={status}
@@ -193,14 +197,14 @@ export const PlayerStatusList = ({config}: { config: DealerShardConfig }) => {
   );
 };
 
-export const ConnectionListItem = ({
-                                     odinId,
-                                     status,
-                                     onRetry,
-                                     ...props
-                                   }: {
+export const PlayerListItem = ({
+                                 player,
+                                 status,
+                                 onRetry,
+                                 ...props
+                               }: {
   onClick?: () => void;
-  odinId: string | undefined;
+  player: ShamiraPlayer | undefined;
   isActive: boolean;
   status: Status;
   onRetry: () => void;
@@ -208,13 +212,20 @@ export const ConnectionListItem = ({
   return (
     <ListItemWrapper {...props}>
       <ConnectionImage
-        odinId={odinId}
+        odinId={player?.odinId as string}
         className="border border-neutral-200 dark:border-neutral-800"
         size="sm"
       />
       <div className="flex w-full items-center justify-between">
-        <ConnectionName odinId={odinId}/>
+        <ConnectionName odinId={player?.odinId as string}/>
         <div className="flex items-center gap-2">
+          <div>
+            {player?.type === "automatic"
+              ? "Automatic"
+              : player?.type === "delegate"
+                ? "Approval Required"
+                : null}
+          </div>
           <StatusIcon status={status}/>
           {(status === 'invalid' || status === 'error') && (
             <button
@@ -224,7 +235,7 @@ export const ConnectionListItem = ({
               }}
               className="text-xs text-blue-600 hover:underline"
             >
-              {t('Retry')}
+              {t('Retry Verification')}
             </button>
           )}
         </div>

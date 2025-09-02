@@ -1,6 +1,5 @@
 import {
-  ConnectionImage,
-  ConnectionName,
+  ConnectionImage, ConnectionName,
   Label, SubtleMessage,
   t,
 } from '@homebase-id/common-app';
