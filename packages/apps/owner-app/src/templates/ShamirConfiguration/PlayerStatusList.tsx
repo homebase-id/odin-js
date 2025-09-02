@@ -11,7 +11,6 @@ import {
 import {
   DealerShardConfig,
   DealerShardEnvelopeRedacted,
-  PlayerType,
   ShamiraPlayer,
   verifyRemotePlayerShard
 } from '../../provider/auth/ShamirProvider';

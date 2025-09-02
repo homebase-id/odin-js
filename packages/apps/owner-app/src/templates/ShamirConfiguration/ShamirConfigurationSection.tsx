@@ -4,10 +4,10 @@ import {
   ActionButton,
   t,
   SubtleMessage,
-  useDotYouClient, Label, formatDateExludingYearIfCurrent,
+  useDotYouClient, Label,
 } from '@homebase-id/common-app';
 import {useEffect, useState} from 'react';
-import {Arrow, Plus} from '@homebase-id/common-app/icons';
+import {Arrow} from '@homebase-id/common-app/icons';
 import {ShamirDistributionDialog} from "./ShamirDistributionDialog";
 import {DealerShardConfig, getShamirConfiguration} from "../../provider/auth/ShamirProvider";
 import {PlayerStatusList} from "./PlayerStatusList";
@@ -62,7 +62,7 @@ const ShamirConfigurationSection = () => {
               </li>
               <li>
                 <strong>Recover your account</strong> – Once enough pieces are combined, your key is restored and you 
-                can reset your password.  We'll email you a link to the recovery page
+                can reset your password.  We will email you a link to the recovery page
               </li>
             </ol>
           </details>
