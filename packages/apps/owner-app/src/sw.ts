@@ -205,7 +205,7 @@ self.addEventListener('notificationclick', (event) => {
 
         // we're in the owner app at this point
         if (event.notification?.data?.options?.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_SHARD_REQUESTED) {
-          return `/owner/shamir/verify`
+          return `/owner/security/release-shards`
         }
 
         const tagId = event.notification?.data?.options?.tagId;

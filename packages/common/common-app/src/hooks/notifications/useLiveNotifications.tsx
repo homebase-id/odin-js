@@ -237,7 +237,7 @@ export const buildNotificationTargetLink = (payload: PushNotification) => {
     } else if (payload.options.typeId === OWNER_INTRODUCTION_RECEIVED_TYPE_ID) {
       return `/owner/connections`;
     } else if (payload.options.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_SHARD_REQUESTED) {
-      return `/owner/shamir/verify`
+      return `/owner/security/release-shards`
     }
   } else if (payload.options.appId === CHAT_APP_ID) {
     return `/apps/chat/${payload.options.typeId}`;

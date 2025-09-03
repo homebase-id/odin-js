@@ -4,7 +4,7 @@ import {
   t,
 } from '@homebase-id/common-app';
 import {ReactNode} from 'react';
-import {ConfigureShardsRequest} from "../../provider/auth/ShamirProvider";
+import {ConfigureShardsRequest} from "../../../provider/auth/ShamirProvider";
 
 export const DistributeShards = ({config}: {
   config: ConfigureShardsRequest;

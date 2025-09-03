@@ -5,7 +5,7 @@ import {Arrow} from '@homebase-id/common-app/icons';
 import {PlayerMode, Step1SelectPlayers} from "./Step1SelectPlayers";
 import {Step2OtherOptions} from "./Step2OtherOptions";
 import {DistributeShards} from "./DistributeShards";
-import {configureShards, ConfigureShardsRequest, PlayerType} from "../../provider/auth/ShamirProvider";
+import {configureShards, ConfigureShardsRequest, PlayerType} from "../../../provider/auth/ShamirProvider";
 
 interface Player {
   odinId: string;

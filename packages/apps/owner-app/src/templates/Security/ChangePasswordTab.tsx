@@ -13,7 +13,7 @@ import {PasswordInput} from '../../components/Password/PasswordInput';
 import {PasswordStrength} from '../../components/Password/PasswordStrength';
 import {hasDebugFlag} from "@homebase-id/js-lib/helpers";
 
-export const SecuritySettings = () => {
+export const ChangePasswordTab = () => {
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
 
   const [oldPassword, setOldPassword] = useState('');
@@ -24,7 +24,6 @@ export const SecuritySettings = () => {
   const dotYouClient = useDotYouClientContext();
 
   const passwordIsValid = password === retypePassword && password !== '';
-  const isDebug = hasDebugFlag();
 
   const doSetNewPassword = async () => {
     setState('loading');

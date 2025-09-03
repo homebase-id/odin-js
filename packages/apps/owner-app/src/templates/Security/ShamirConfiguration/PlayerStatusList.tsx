@@ -13,7 +13,7 @@ import {
   DealerShardEnvelopeRedacted,
   ShamiraPlayer,
   verifyRemotePlayerShard
-} from '../../provider/auth/ShamirProvider';
+} from '../../../provider/auth/ShamirProvider';
 import {DotYouClient} from "@homebase-id/js-lib/core";
 
 export interface ShardVerificationResult {

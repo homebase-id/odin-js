@@ -99,8 +99,9 @@ const ShamirAccountRecovery = () => {
                   </div>
                 </div>
               ) : recoveryState === 'awaitingSufficientDelegateConfirmation' ? (<>
-                  {t('We notified your delegates/shard holders that you are in recovery mode.')}
-
+                  {t('We notified your trusted connections that you are in recovery mode.  Forget who they were?  ' +
+                    'Check the email we sent when you entered recovery mode.')}
+                  
                   <Alert type="warning" isCompact={false} className="mt-3">
                     {t('We are waiting for a sufficient number of your delegates to confirm')}
                   </Alert>
