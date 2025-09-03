@@ -162,7 +162,7 @@ export const getNonce = async (dotYouClient: DotYouClient): Promise<NonceData> =
     .catch(dotYouClient.handleErrorResponse);
 };
 
-const getSalts = async (dotYouClient: DotYouClient): Promise<NonceData> => {
+export const getSalts = async (dotYouClient: DotYouClient): Promise<NonceData> => {
   const client = dotYouClient.createAxiosClient({overrideEncryption: true});
   return client.get('/authentication/getsalts').then((response) => {
     return response.data;
@@ -175,7 +175,7 @@ export interface PublicKeyData {
   expiration: number;
 }
 
-const getPublicKey = async (dotYouClient: DotYouClient): Promise<PublicKeyData> => {
+export const getPublicKey = async (dotYouClient: DotYouClient): Promise<PublicKeyData> => {
   const client = dotYouClient.createAxiosClient({overrideEncryption: true});
   return client
     .get<PublicKeyData>('/authentication/publickey_ecc?keyType=offlineKey')

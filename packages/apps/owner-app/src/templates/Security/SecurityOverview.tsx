@@ -4,10 +4,11 @@ import Section from '../../components/ui/Sections/Section';
 import {Link} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {VerifyPasswordDialog} from "./Tab/VerifyPasswordDialog";
+import {VerifyRecoveryKeyDialog} from "./Tab/VerifyRecoveryKeyDialog";
 
 export const SecurityOverview = () => {
 
-  const [showVerifyPasswordDialog, setShowVerifyPasswordDialog] = useState(false);
+  const [openDialog, setOpenDialog] = useState<'none' | 'verify-password' | 'verify-recovery-phrase'>('none');
   const systemSettingsLoading = true;
   const lastVerified = '11mo ago';
 
@@ -18,11 +19,12 @@ export const SecurityOverview = () => {
   useEffect(() => {
     reset();
   }, []);
-  const handleConfirmVerifyPassword = async () => {
 
-    reset();
-    setShowVerifyPasswordDialog(false);
+  const handleConfirmDialog = async () => {
+    await reset();
+    setOpenDialog('none');
   }
+
   return (
     <>
       {/*<ErrorNotification error={updateFlagError}/>*/}
@@ -45,8 +47,8 @@ export const SecurityOverview = () => {
                   <p>{t('Password last verified:')}</p>
                   <p className="ml-2 text-sm font-medium">{lastVerified}</p>
                 </div>
-                <Link to={""} className="underline" onClick={() => setShowVerifyPasswordDialog(true)}>
-                  verify now
+                <Link to={""} className="ml-3 underline" onClick={() => setOpenDialog('verify-password')}>
+                  Verify now
                 </Link>
               </div>
 
@@ -56,7 +58,9 @@ export const SecurityOverview = () => {
                   <p>{t('Recovery phrase last verified:')}</p>
                   <p className="ml-2 text-sm font-medium">{t('11mo ago')}</p>
                 </div>
-                <ActionButton className="ml-auto">{t('Manage Recovery Phrase → B1')}</ActionButton>
+                <Link to={""} className="ml-3 underline" onClick={() => setOpenDialog('verify-password')}>
+                  Verify now
+                </Link>
               </div>
 
               {/* Password Recovery */}
@@ -87,9 +91,17 @@ export const SecurityOverview = () => {
       )}
 
       <VerifyPasswordDialog title={t('Verify Password')}
-                            isOpen={showVerifyPasswordDialog}
-                            onConfirm={handleConfirmVerifyPassword}
-                            onCancel={() => setShowVerifyPasswordDialog(false)}/>
+                            isOpen={openDialog === 'verify-password'}
+                            onConfirm={handleConfirmDialog}
+                            onCancel={() => setOpenDialog('none')}/>
+
+
+      <VerifyRecoveryKeyDialog title={t('Verify Recovery Phrase')}
+                               isOpen={openDialog === 'verify-recovery-phrase'}
+                               onConfirm={handleConfirmDialog}
+                               onCancel={() => setOpenDialog('none')}/>
+
+
     </>
   );
 };

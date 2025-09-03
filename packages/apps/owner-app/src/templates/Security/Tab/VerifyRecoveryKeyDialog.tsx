@@ -2,11 +2,11 @@ import {useState} from 'react';
 import {createPortal} from 'react-dom';
 import {ActionButton, DialogWrapper, Label, t, usePortal,} from '@homebase-id/common-app';
 import {Check} from "@homebase-id/common-app/icons";
-import {verifyPassword} from "../../../provider/auth/SecurityRecoveryProvider";
+import {verifyRecoveryKey} from "../../../provider/auth/SecurityRecoveryProvider";
 import {MaskedInput} from "../../../components/Password/MaskedInput";
 
 
-export const VerifyPasswordDialog = ({
+export const VerifyRecoveryKeyDialog = ({
                                        title,
                                        isOpen,
                                        onConfirm,
@@ -21,23 +21,23 @@ export const VerifyPasswordDialog = ({
   const target = usePortal('modal-container');
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [currentPassword, setCurrentPassword] = useState<string>('');
-  const [view, setView] = useState<'prompt' | 'valid-password'>('prompt');
+  const [recoveryPhrase, setRecoveryPhrase] = useState<string>('');
+  const [view, setView] = useState<'prompt' | 'valid-phrase'>('prompt');
 
   const reset = () => {
-    setCurrentPassword('');
+    setRecoveryPhrase('');
     setState('idle');
     setValidationError(null);
     setView('prompt');
   }
 
-  const doVerifyPassword = async () => {
+  const doVerify = async () => {
 
     setState('loading');
-    const valid = await verifyPassword(currentPassword);
+    const valid = await verifyRecoveryKey(recoveryPhrase);
     setState("idle");
     if (valid) {
-      setView('valid-password');
+      setView('valid-phrase');
       setValidationError(null);
       
     } else {
@@ -57,11 +57,11 @@ export const VerifyPasswordDialog = ({
       keepOpenOnBlur={true}
       size="2xlarge">
       <>
-        {view == 'valid-password' &&
+        {view == 'valid-phrase' &&
             <div className="mb-2 rounded-lg px-3 py-2">
                 <div className="flex items-center ">
                     <Check className="h-5 w-5 mr-2 text-green-600"/>
-                    <span className="font-medium">{t('Your password is verified')}</span>
+                    <span className="font-medium">{t('Your phrase has been verified')}</span>
                 </div>
 
                 <div className="mt-3">
@@ -83,7 +83,7 @@ export const VerifyPasswordDialog = ({
                   e.stopPropagation();
 
                   if (e.currentTarget.reportValidity()) {
-                    doVerifyPassword();
+                    doVerify();
                   }
                 }}
             >
@@ -91,14 +91,15 @@ export const VerifyPasswordDialog = ({
                     <Label>{t('Your current password')}</Label>
                     <MaskedInput
                         required
-                        name="pleaesIgnoreMeFirefox"
-                        id="pleaesIgnoreMeFirefox"
+                        name="recoveryPhrase"
+                        id="recoveryPhrase"
                         type="password"
-                        onChange={(e) => setCurrentPassword(e.target.value)}
-                        defaultValue={currentPassword}
-                        autoComplete="one-time-code"
+                        onChange={(e) => setRecoveryPhrase(e.target.value)}
+                        defaultValue={recoveryPhrase}
+                        autoComplete="off"
                     />
                 </div>
+              
               {validationError && <span className="text-red-500">{validationError}</span>}
 
                 <div className="mt-5 flex flex-row-reverse">

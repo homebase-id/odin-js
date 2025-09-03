@@ -1,5 +1,7 @@
 import {ApiType} from '@homebase-id/js-lib/core';
 import {OwnerClient} from "@homebase-id/common-app";
+import {encryptRecoveryKey, prepareAuthPassword} from "./AuthenticationHelper";
+import {getNonce, getPublicKey, getSalts} from "./AuthenticationProvider";
 
 export enum ShamirRecoveryState {
 
@@ -89,5 +91,58 @@ export const initiateRecoveryMode = async () => {
     .catch((error) => {
       console.warn(error);
       return null;
+    });
+};
+
+
+export const verifyRecoveryKey = async (recoveryKey: string): Promise<boolean> => {
+  const dotYouClient = new OwnerClient({
+    api: ApiType.Owner,
+  });
+
+  const publicKey = await getPublicKey(dotYouClient);
+  const salts = await getSalts(dotYouClient);
+  const passwordReply = await prepareAuthPassword("some thign to toss away", salts);
+
+  const encryptedRecoveryKey = await encryptRecoveryKey(recoveryKey, passwordReply, publicKey);
+
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
+  const url = '/security/recovery/verify-recovery-key';
+
+  return await client.post(url, {encryptedRecoveryKey})
+    .then((response) => {
+      return response.status === 200;
+    })
+    .catch((error) => {
+      if (error.response?.status === 403) {
+        return false;
+      }
+      console.error(error);
+      return false;
+    });
+};
+
+// Verifies the password without logging in the owner (i.e. changing cookies, etc.)
+export const verifyPassword = async (password: string): Promise<boolean> => {
+  const dotYouClient = new OwnerClient({
+    api: ApiType.Owner,
+  });
+
+  const noncePackage = await getNonce(dotYouClient);
+  const reply = await prepareAuthPassword(password, noncePackage);
+
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
+  const url = '/security/recovery/verify-password';
+
+  return await client.post(url, reply)
+    .then((response) => {
+      return response.status === 200;
+    })
+    .catch((error) => {
+      if (error.response?.status === 403) {
+        return false;
+      }
+      console.error(error);
+      return false;
     });
 };

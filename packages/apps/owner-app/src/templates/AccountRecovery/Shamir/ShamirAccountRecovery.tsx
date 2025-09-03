@@ -5,13 +5,12 @@ import {MinimalLayout} from '../../../components/ui/Layout/Layout';
 import UrlNotifier from '../../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import {Arrow} from "@homebase-id/common-app/icons";
 import {useLocation, useNavigate} from "react-router-dom";
+import {RECOVERY_PATH} from "../../../hooks/auth/useAuth";
 import {
   exitRecoveryMode,
   getRecoveryStatus,
-  initiateRecoveryMode,
-  ShamirRecoveryStatusRedacted
-} from "../../../provider/auth/ShamirRecoveryProvider";
-import {RECOVERY_PATH} from "../../../hooks/auth/useAuth";
+  initiateRecoveryMode, ShamirRecoveryStatusRedacted,
+} from "../../../provider/auth/SecurityRecoveryProvider";
 
 const ShamirAccountRecovery = () => {
   const location = useLocation();
