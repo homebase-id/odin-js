@@ -1,4 +1,3 @@
-/* eslint-disable no-fallthrough */
 import {
   ActionButton,
   OWNER_APP_ID,

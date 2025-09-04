@@ -1,8 +1,7 @@
-/* eslint-disable no-fallthrough */
 import {t, ActionButton, LoadingBlock} from '@homebase-id/common-app';
 import Section from '../../components/ui/Sections/Section';
 import {Link} from "react-router-dom";
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {VerifyPasswordDialog} from "./Tab/VerifyPasswordDialog";
 import {VerifyRecoveryKeyDialog} from "./Tab/VerifyRecoveryKeyDialog";
 import {getVerificationStatus, VerificationStatus} from "../../provider/auth/SecurityHealthProvider";

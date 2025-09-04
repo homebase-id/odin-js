@@ -11,7 +11,6 @@ import Section from '../../components/ui/Sections/Section';
 import {useAuth} from '../../hooks/auth/useAuth';
 import {PasswordInput} from '../../components/Password/PasswordInput';
 import {PasswordStrength} from '../../components/Password/PasswordStrength';
-import {hasDebugFlag} from "@homebase-id/js-lib/helpers";
 
 export const SecuritySettings = () => {
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
@@ -24,7 +23,6 @@ export const SecuritySettings = () => {
   const dotYouClient = useDotYouClientContext();
 
   const passwordIsValid = password === retypePassword && password !== '';
-  const isDebug = hasDebugFlag();
 
   const doSetNewPassword = async () => {
     setState('loading');
