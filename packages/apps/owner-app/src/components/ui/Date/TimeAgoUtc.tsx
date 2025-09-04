@@ -1,5 +1,6 @@
 import TimeAgo from "timeago-react";
 import {t} from "@homebase-id/common-app";
+import { format, register } from "timeago.js";
 
 type TimeAgoUtcProps = {
   value: number | null;   // UTC timestamp in seconds
@@ -8,6 +9,15 @@ type TimeAgoUtcProps = {
   locale?: string;        // optional locale pass-through
   live?: boolean;         // optional live update control
 };
+
+const customFormatter = (value: number, unit: string, suffix: string) => {
+  if (unit === "second") {
+    return "just now";
+  }
+  return `${value} ${unit}${value > 1 ? "s" : ""} ${suffix}`;
+};
+
+register("no-seconds", customFormatter);
 
 export function TimeAgoUtc({
                              value,

@@ -5,7 +5,8 @@ import {getNonce, getPublicKey, getSalts} from "./AuthenticationProvider";
 
 export interface VerificationStatus {
   passwordLastVerified: number,
-  recoveryKeyLastVerified: number
+  recoveryKeyLastVerified: number,
+  distributedRecoveryLastVerified: number
 }
 
 const root = "/security/recovery"

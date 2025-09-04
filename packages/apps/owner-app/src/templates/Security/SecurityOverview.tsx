@@ -79,7 +79,7 @@ export const SecurityOverview = () => {
                   <div className="flex flex-row flex-wrap items-center">
                     <div className="flex items-center">
                       <p>{t('Password recovery last verified:')}</p>
-                      <p className="ml-2 text-sm font-medium">{t('7mo ago')}</p>
+                      <TimeAgoUtc className="ml-2 text-sm font-medium" value={status?.distributedRecoveryLastVerified ?? 0}/>
                     </div>
                     <ActionButton className="ml-auto">{t('Manage Password Recovery → C1')}</ActionButton>
                   </div>
@@ -89,17 +89,18 @@ export const SecurityOverview = () => {
 
         </Section>
 
-        <Section
-          title={
-            <div className="flex flex-col">
-              {t('Login history')}
-              <small className="text-sm text-gray-400">
-                {t('Logins across apps')}
-              </small>
-            </div>
-          }>
-          <div></div>
-        </Section>
+        {/*do this later*/}
+        {/*<Section*/}
+        {/*  title={*/}
+        {/*    <div className="flex flex-col">*/}
+        {/*      {t('Login history')}*/}
+        {/*      <small className="text-sm text-gray-400">*/}
+        {/*        {t('Logins across apps')}*/}
+        {/*      </small>*/}
+        {/*    </div>*/}
+        {/*  }>*/}
+        {/*  <div></div>*/}
+        {/*</Section>*/}
       </>
 
       <VerifyPasswordDialog title={t('Verify Password')}
