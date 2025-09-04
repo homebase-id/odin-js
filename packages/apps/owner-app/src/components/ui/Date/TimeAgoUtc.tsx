@@ -1,4 +1,3 @@
-import React from "react";
 import TimeAgo from "timeago-react";
 import {t} from "@homebase-id/common-app";
 
