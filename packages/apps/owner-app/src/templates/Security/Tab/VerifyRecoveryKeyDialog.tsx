@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {createPortal} from 'react-dom';
 import {ActionButton, DialogWrapper, Label, t, usePortal,} from '@homebase-id/common-app';
 import {Check} from "@homebase-id/common-app/icons";
-import {verifyRecoveryKey} from "../../../provider/auth/SecurityRecoveryProvider";
+import {verifyRecoveryKey} from "../../../provider/auth/SecurityHealthProvider";
 import {MaskedInput} from "../../../components/Password/MaskedInput";
 
 
@@ -41,7 +41,7 @@ export const VerifyRecoveryKeyDialog = ({
       setValidationError(null);
       
     } else {
-      setValidationError("Your password was not correct");
+      setValidationError("Your recovery phrase was not correct");
     }
   }
 
@@ -88,7 +88,7 @@ export const VerifyRecoveryKeyDialog = ({
                 }}
             >
                 <div className="mb-2">
-                    <Label>{t('Your current password')}</Label>
+                    <Label>{t('Your recovery phrase')}</Label>
                     <MaskedInput
                         required
                         name="recoveryPhrase"

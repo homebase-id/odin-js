@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {createPortal} from 'react-dom';
 import {ActionButton, DialogWrapper, Label, t, usePortal,} from '@homebase-id/common-app';
 import {Check} from "@homebase-id/common-app/icons";
-import {verifyPassword} from "../../../provider/auth/SecurityRecoveryProvider";
+import {verifyPassword} from "../../../provider/auth/SecurityHealthProvider";
 import {MaskedInput} from "../../../components/Password/MaskedInput";
 
 
@@ -39,7 +39,7 @@ export const VerifyPasswordDialog = ({
     if (valid) {
       setView('valid-password');
       setValidationError(null);
-      
+
     } else {
       setValidationError("Your password was not correct");
     }

@@ -9,7 +9,7 @@ import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import {PasswordInput} from '../../components/Password/PasswordInput';
 import {PasswordStrength} from '../../components/Password/PasswordStrength';
 import {useLocation, useNavigate} from "react-router-dom";
-import {getFinalRecoveryResult} from "../../provider/auth/ShamirRecoveryProvider";
+import {getFinalRecoveryResult} from "../../provider/auth/SecurityRecoveryProvider";
 
 const AccountRecovery = () => {
   const location = useLocation();
