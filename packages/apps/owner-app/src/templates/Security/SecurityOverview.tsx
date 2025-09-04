@@ -81,7 +81,7 @@ export const SecurityOverview = () => {
                       <p>{t('Password recovery last verified:')}</p>
                       <TimeAgoUtc className="ml-2 text-sm font-medium" value={status?.distributedRecoveryLastVerified ?? 0}/>
                     </div>
-                    <ActionButton className="ml-auto">{t('Manage Password Recovery → C1')}</ActionButton>
+                    {/*<ActionButton className="ml-auto">{t('Manage Password Recovery → C1')}</ActionButton>*/}
                   </div>
                 </div>
               )}
