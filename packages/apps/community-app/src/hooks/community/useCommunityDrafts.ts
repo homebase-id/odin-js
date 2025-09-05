@@ -251,7 +251,6 @@ export const insertNewCommunityDrafts = (
         // invalidateCommunityDrafts(queryClient, newDrafts.fileMetadata.appData.uniqueId);
         invalidateCommunityDrafts(queryClient, communityId);
     } else {
-        const fg = formatGuidId(newDrafts.fileMetadata.appData.content.communityId);
         console.log("insertNewCommunityDrafts-> fileState=active")
         const queryKey = [
             'community-drafts',

@@ -1,13 +1,10 @@
-import {lazy, useMemo, useState} from 'react';
-import {useParams} from 'react-router-dom';
+import {lazy, useMemo} from 'react';
 
 import {cn, withRef} from '@udecode/cn';
 import {PlateEditor} from '@udecode/plate-core/react';
 import {getEditorPlugin, TNode} from '@udecode/plate';
 
-import {ErrorNotification, getPlainTextFromRichText} from '@homebase-id/common-app';
-import {useCommunity} from '../../../../hooks/community/useCommunity';
-import {useCommunityChannel} from '../../../../hooks/community/channels/useCommunityChannel';
+import {getPlainTextFromRichText} from '@homebase-id/common-app';
 
 import {ELEMENT_CHANNEL} from './RTEChannelDropdownPlugin';
 
@@ -34,15 +31,6 @@ const onSelectItem = (editor: PlateEditor, item: DropdownValue, node: TNode) => 
     const path = editor.api.findPath(node);
     editor.tf.removeNodes({at: path});
   }
-
-  //
-  // editor.tf.insertNodes({
-  //   children: [{text: ''}],
-  //   type: ELEMENT_CHANNEL,
-  //   value: item.label,
-  //   uniqueId: item.value,
-  // });
-
 
   editor.tf.insertText(item.value);
   // editor.tf.insertNodes({
@@ -96,8 +84,6 @@ const TableFlipDropdown = ({
   onSelect: (value: DropdownValue) => void;
   onCancel: (clear?: boolean) => void;
 }) => {
-  const {odinKey, communityKey} = useParams();
-  const [creationError, setCreationError] = useState<unknown | null>(null);
 
   const tableFlips: DropdownValue[] = [
     // === Main Pack ===
@@ -134,7 +120,6 @@ const TableFlipDropdown = ({
 
   return (
     <>
-      <ErrorNotification error={creationError}/>
       <RTEDropdown
         trigger="~"
         items={tableFlips}

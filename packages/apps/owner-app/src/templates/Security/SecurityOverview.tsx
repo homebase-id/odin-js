@@ -1,4 +1,4 @@
-import {t, ActionButton, LoadingBlock} from '@homebase-id/common-app';
+import {t, LoadingBlock} from '@homebase-id/common-app';
 import Section from '../../components/ui/Sections/Section';
 import {Link} from "react-router-dom";
 import {useEffect, useState} from "react";

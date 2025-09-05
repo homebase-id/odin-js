@@ -1,9 +1,7 @@
 import {
-  ConnectionImage, ConnectionName,
   Label, SubtleMessage,
   t,
 } from '@homebase-id/common-app';
-import {ReactNode} from 'react';
 import {ConfigureShardsRequest} from "../../../provider/auth/ShamirProvider";
 import {ConfigureTrustedConnections} from "./ConfigureTrustedConnections";
 
