@@ -10,8 +10,8 @@ export const Step2OtherOptions = ({
                                   }: {
   config: ConfigureShardsRequest;
   onChange: (minShards: number) => void;
-  removePlayer: (odinId: string) => void;
-  updatePlayerType: (odinId: string, type: PlayerType) => void;
+  removePlayer?: (odinId: string) => void;
+  updatePlayerType?: (odinId: string, type: PlayerType) => void;
 }) => {
   return (
     <>

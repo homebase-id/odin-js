@@ -20,12 +20,13 @@ export const ConfigureTrustedConnections = ({
               key={player.odinId || index}
               player={player}
               onRemove={() => {
-                if (removePlayer) (player.odinId)
+                if (removePlayer) removePlayer(player.odinId)
               }}
               onTypeChange={(type) => {
                 if (updatePlayerType) updatePlayerType(player.odinId, type)
               }}
-              readonly={!updatePlayerType}
+              allowUpdatePlayerType={updatePlayerType !== undefined}
+              allowRemove={removePlayer !== undefined}
             />
           ))}
         </div>
@@ -44,12 +45,14 @@ const SelectedConnectionItem = ({
                                   player,
                                   onRemove,
                                   onTypeChange,
-                                  readonly
+                                  allowUpdatePlayerType,
+                                  allowRemove
                                 }: {
   player: ShamiraPlayer;
-  onRemove?: () => void;
+  onRemove: () => void;
   onTypeChange: (mode: PlayerType) => void;
-  readonly?: boolean;
+  allowUpdatePlayerType?: boolean;
+  allowRemove?: boolean;
 }) => {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border p-3 mb-2">
@@ -65,9 +68,7 @@ const SelectedConnectionItem = ({
 
       {/* right side: controls */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-        {readonly ? (
-          <SubtleMessage>{playerTypeText(player.type)}</SubtleMessage>
-        ) : (
+        {allowUpdatePlayerType ? (
           <select
             value={player.type}
             onChange={(e) => onTypeChange(e.target.value as PlayerType)}
@@ -75,9 +76,11 @@ const SelectedConnectionItem = ({
             <option value={PlayerType.Automatic}>{playerTypeText(PlayerType.Automatic)}</option>
             <option value={PlayerType.Delegate}>{playerTypeText(PlayerType.Delegate)}</option>
           </select>
+        ) : (
+          <SubtleMessage>{playerTypeText(player.type)}</SubtleMessage>
         )}
 
-        {!readonly && <button
+        {allowRemove && <button
             onClick={onRemove}
             className="text-red-600 hover:text-red-800 text-sm sm:text-xs sm:bg-red-500 sm:px-2 sm:py-1 sm:rounded sm:text-white sm:hover:bg-red-600">
           {t("Remove")}

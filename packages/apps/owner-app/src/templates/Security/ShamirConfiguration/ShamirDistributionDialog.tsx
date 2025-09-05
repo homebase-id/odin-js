@@ -130,8 +130,7 @@ export const ShamirDistributionDialog = ({
         {validationError && <span className="text-red-500">{validationError}</span>}
         {/*<ErrorNotification error={}/>*/}
 
-        <form
-          onSubmit={async (e) => {
+        <form onSubmit={async (e) => {
             e.preventDefault();
             // start config process
           }}>
@@ -170,7 +169,7 @@ export const ShamirDistributionDialog = ({
             <>
               <Step2OtherOptions
                 config={cfg}
-                removePlayer={removePlayer}
+                removePlayer={undefined}
                 updatePlayerType={updatePlayerType}
                 onChange={(s) => setMinShards(s)}/>
               <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
