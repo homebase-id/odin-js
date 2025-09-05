@@ -85,7 +85,7 @@ export const CommunityMessageEditor = ({
         ...msg.fileMetadata,
         appData: {
           ...msg.fileMetadata.appData,
-          content: { ...msg.fileMetadata.appData.content, message: newMessage },
+          content: { ...msg.fileMetadata.appData.content, message: newMessage, isEdited: true },
         },
       },
     };

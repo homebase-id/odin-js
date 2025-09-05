@@ -86,6 +86,7 @@ export interface CommunityMessage {
 
   /// lastEdited by Identity of the message
   lastEditedBy?: string;
+  isEdited?: boolean;
 }
 
 export const uploadCommunityMessage = async (
@@ -335,7 +336,7 @@ export const updateCommunityMessage = async (
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: true,
     referencedFile:
-      message.fileSystemType.toLocaleLowerCase() === 'comment'
+      message.fileSystemType?.toLocaleLowerCase() === 'comment'
         ? {
           targetDrive,
           globalTransitId: message.fileMetadata.appData.groupId as string,
@@ -345,7 +346,7 @@ export const updateCommunityMessage = async (
       uniqueId: message.fileMetadata.appData.uniqueId,
       tags: message.fileMetadata.appData.tags,
       groupId:
-        message.fileSystemType.toLocaleLowerCase() === 'comment'
+        message.fileSystemType?.toLocaleLowerCase() === 'comment'
           ? undefined
           : message.fileMetadata.appData.groupId,
       archivalStatus: (message.fileMetadata.appData as AppFileMetaData<CommunityMessage>)

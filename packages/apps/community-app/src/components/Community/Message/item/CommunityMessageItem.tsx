@@ -41,6 +41,7 @@ import { useCommunityCollaborativeMsg } from '../../../../hooks/community/useCom
 import { CommunityMessageAuthorName } from './CommunityMesageAuthorName';
 import { CommunityMessageAvatar } from './CommunityMessageAvatar';
 import { CommunityMessageLastUpdatedIndicator } from './CommunityMessageLastUpdatedIndicator';
+import { CommunityMessageEdited } from './CommunityMessageEdited';
 
 export const CommunityMessageItem = memo(
   (props: {
@@ -193,6 +194,7 @@ export const CommunityMessageItem = memo(
                   <>
                     <CommunityMessageAuthorName msg={msg} />
                     <CommunitySentTimeIndicator className="text-sm" msg={msg} />
+                    <CommunityMessageEdited className="text-sm" msg={msg} />
                     <CommunityDeliveryIndicator msg={msg} />
                   </>
                 )}
