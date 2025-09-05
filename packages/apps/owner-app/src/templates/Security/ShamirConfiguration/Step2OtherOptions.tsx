@@ -1,11 +1,17 @@
 import {Input, Label, t} from '@homebase-id/common-app';
+import {ConfigureShardsRequest, PlayerType} from "../../../provider/auth/ShamirProvider";
+import {ConfigureTrustedConnections} from "./ConfigureTrustedConnections";
 
 export const Step2OtherOptions = ({
-                                    minShards,
+                                    config,
                                     onChange,
+                                    removePlayer,
+                                    updatePlayerType,
                                   }: {
-  minShards: number;
+  config: ConfigureShardsRequest;
   onChange: (minShards: number) => void;
+  removePlayer: (odinId: string) => void;
+  updatePlayerType: (odinId: string, type: PlayerType) => void;
 }) => {
   return (
     <>
@@ -17,8 +23,14 @@ export const Step2OtherOptions = ({
           onChange={(e) => onChange(Number(e.target.value))}
           className="w-full"
           placeholder={t('Set min shards')}
-          value={minShards}
+          value={config.minMatchingShards}
         />
+      </div>
+      <div>
+        <ConfigureTrustedConnections
+          removePlayer={removePlayer}
+          updatePlayerType={updatePlayerType}
+          trustedPlayers={config.players}/>
       </div>
     </>
   );

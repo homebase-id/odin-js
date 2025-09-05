@@ -19,32 +19,34 @@ import {
   useDarkMode,
   useProfiles,
   useUnreadPushNotificationsCount,
+  useSiteData,
 } from '../../hooks';
 import {OwnerImage} from '../../socialFeed';
 import {MiniDarkModeToggle} from '../DarkModeToggle/DarkModeToggle';
-import {AddressBook} from '../Icons/AddressBook';
-import {ArrowDown} from '../Icons/Arrow';
-import {Bars} from '../Icons/Bars';
-import {Bell} from '../Icons/Bell';
-import {ChatBubble} from '../Icons/ChatBubble';
-import {Circles} from '../Icons/Circles';
-import {Cloud} from '../Icons/Cloud';
-import {Cog} from '../Icons/Cog';
-import {Ellipsis} from '../Icons/Ellipsis';
-import {Envelope} from '../Icons/Envelope';
-import {Feed} from '../Icons/Feed';
-import {Grid} from '../Icons/Grid';
-import {HardDrive} from '../Icons/HardDrive';
-import {Heart} from '../Icons/Heart';
-import {House} from '../Icons/House';
-import {Person} from '../Icons/Person';
-import {Persons} from '../Icons/Persons';
-import {Pin} from '../Icons/Pin';
-import {Times} from '../Icons/Times';
-import {IconProps} from '../Icons/Types';
-import {Wallet} from '../Icons/Wallet';
+import {AddressBook} from '../Icons';
+import {ArrowDown} from '../Icons';
+import {Bars} from '../Icons';
+import {Bell} from '../Icons';
+import {ChatBubble} from '../Icons';
+import {Circles} from '../Icons';
+import {Cloud} from '../Icons';
+import {Cog} from '../Icons';
+import {Ellipsis} from '../Icons';
+import {Envelope} from '../Icons';
+import {Feed} from '../Icons';
+import {Grid} from '../Icons';
+import {HardDrive} from '../Icons';
+import {Heart} from '../Icons';
+import {House} from '../Icons';
+import {Person} from '../Icons';
+import {Persons} from '../Icons';
+import {Pin} from '../Icons';
+import {Times} from '../Icons';
+import {IconProps} from '../Icons';
+import {Wallet} from '../Icons';
 import {logoutOwnerAndAllApps} from '../../provider';
 import {Lock, RadioTower} from '../Icons';
+import {SubtleMessage} from "../Alert/Alert";
 
 const STORAGE_KEY = 'sidenavIsOpen';
 
@@ -360,16 +362,26 @@ const ExternalNavItem = ({
 };
 
 const IdentityNavItem = () => {
+  const {owner} = useSiteData().data ?? {};
+
+  const displayName = ellipsisAtMaxChar(owner?.displayName ?? window.location.hostname, 20);
+
   return (
-    <a className={`relative flex py-2 pl-[0.2rem] pr-1`} href={HOME_ROOT_PATH}>
+    <a className="relative flex items-start py-2 pl-[0.2rem] pr-1" href={HOME_ROOT_PATH}>
       <span className="h-9 w-9 flex-shrink-0">
-        <OwnerImage className={`h-9 w-9 rounded-full`} size="custom"/>
+       <OwnerImage className="h-9 w-9 rounded-full" size="custom"/>
       </span>
-      <span className={`my-auto ml-3 overflow-hidden text-lg font-medium`}>
-        {' '}
-        {ellipsisAtMaxChar(window.location.hostname, 20)}
-      </span>
+      <div className="ml-3 flex flex-col overflow-hidden">
+        <span className="text-lg font-medium truncate">
+          {displayName}
+        </span>
+        {owner?.status && <SubtleMessage className="text-sm  truncate">
+          {ellipsisAtMaxChar(owner?.status, 20)}
+        </SubtleMessage>
+        }
+      </div>
     </a>
+
   );
 };
 

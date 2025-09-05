@@ -1,8 +1,22 @@
 import {DotYouClient} from '@homebase-id/js-lib/core';
+import {t} from "@homebase-id/common-app";
 
 export const SHAMIR_DEALER_SHARD_CONFIG_FILE_TYPE = 44532;
 export const SHAMIR_PLAYER_ENCRYPTED_SHARD_FILE_TYPE = 74829;
 export const SHAMIR_PLAYER_COLLECTED_SHARD_REQUEST_FILE_TYPE = 84099;
+
+export const playerTypeText = (type: PlayerType) => {
+  switch (type) {
+    case PlayerType.Delegate:
+      return t('Approval First');
+
+    case PlayerType.Automatic:
+      return t('Release Automatically');
+
+    case PlayerType.Manual:
+      return t('Connect off Homebase');
+  }
+}
 
 
 export interface ShamiraPlayer {

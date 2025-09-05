@@ -10,7 +10,7 @@ import {
 } from '@homebase-id/common-app';
 import {
   DealerShardConfig,
-  DealerShardEnvelopeRedacted,
+  DealerShardEnvelopeRedacted, playerTypeText,
   ShamiraPlayer,
   verifyRemotePlayerShard
 } from '../../../provider/auth/ShamirProvider';
@@ -203,7 +203,7 @@ export const PlayerListItem = ({
                                  ...props
                                }: {
   onClick?: () => void;
-  player: ShamiraPlayer | undefined;
+  player: ShamiraPlayer;
   isActive: boolean;
   status: Status;
   onRetry: () => void;
@@ -211,19 +211,15 @@ export const PlayerListItem = ({
   return (
     <ListItemWrapper {...props}>
       <ConnectionImage
-        odinId={player?.odinId as string}
+        odinId={player.odinId as string}
         className="border border-neutral-200 dark:border-neutral-800"
         size="sm"
       />
       <div className="flex w-full items-center justify-between">
-        <ConnectionName odinId={player?.odinId as string}/>
+        <ConnectionName odinId={player.odinId as string}/>
         <div className="flex items-center gap-2">
           <div>
-            {player?.type === "automatic"
-              ? "Automatic"
-              : player?.type === "delegate"
-                ? "Approval Required"
-                : null}
+            {playerTypeText(player.type)}
           </div>
           <StatusIcon status={status}/>
           {(status === 'invalid' || status === 'error') && (

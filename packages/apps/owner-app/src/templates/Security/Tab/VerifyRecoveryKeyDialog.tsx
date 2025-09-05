@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {createPortal} from 'react-dom';
-import {ActionButton, DialogWrapper, Label, t, usePortal,} from '@homebase-id/common-app';
+import {ActionButton, DialogWrapper, Label, SubtleMessage, t, usePortal,} from '@homebase-id/common-app';
 import {Check} from "@homebase-id/common-app/icons";
 import {verifyRecoveryKey} from "../../../provider/auth/SecurityHealthProvider";
 import {MaskedInput} from "../../../components/Password/MaskedInput";
@@ -100,7 +100,12 @@ export const VerifyRecoveryKeyDialog = ({
                     />
                 </div>
               
-              {validationError && <span className="text-red-500">{validationError}</span>}
+              {validationError && <div>
+                  <span className="text-red-500">{validationError}</span>
+                  <SubtleMessage>
+                      If you cannot recall your password, try your password.
+                  </SubtleMessage>
+              </div>}
 
                 <div className="mt-5 flex flex-row-reverse">
                     <ActionButton state={state}>
