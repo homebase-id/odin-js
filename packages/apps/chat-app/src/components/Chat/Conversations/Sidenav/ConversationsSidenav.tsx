@@ -100,14 +100,26 @@ const ListConversations = ({
     [conversations, isArchivedType]
   );
 
-  if (!filteredConversations?.length) return <EmptyConversations />;
   return (
-    <ConversationList
-      conversations={filteredConversations}
-      openConversation={openConversation}
-      activeConversationId={activeConversationId}
-      scrollRef={scrollRef}
-    />
+    <div className="flex flex-grow flex-col">
+      {!isArchivedType ? (
+        <ConversationWithYourselfItem
+          onClick={() => openConversation(ConversationWithYourselfId)}
+          isActive={stringGuidsEqual(activeConversationId, ConversationWithYourselfId)}
+        />
+      ) : null}
+
+      {!filteredConversations?.length ? (
+        <EmptyConversations />
+      ) : (
+        <ConversationList
+          conversations={filteredConversations}
+          openConversation={openConversation}
+          activeConversationId={activeConversationId}
+          scrollRef={scrollRef}
+        />
+      )}
+    </div>
   );
 };
 
@@ -158,9 +170,6 @@ const ConversationList = ({
   activeConversationId: string | undefined;
   scrollRef: RefObject<HTMLDivElement>;
 }) => {
-  const [searchParams] = useSearchParams();
-  const isArchivedType = searchParams.get('type') === 'archived';
-
   const virtualizer = useVirtualizer({
     getScrollElement: () => scrollRef.current,
     count: conversations.length,
@@ -173,13 +182,6 @@ const ConversationList = ({
   return (
     <div className="flex flex-grow flex-col">
       <div className="flex flex-grow flex-col">
-        {!isArchivedType ? (
-          <ConversationWithYourselfItem
-            onClick={() => openConversation(ConversationWithYourselfId)}
-            isActive={stringGuidsEqual(activeConversationId, ConversationWithYourselfId)}
-          />
-        ) : null}
-
         <div
           className="relative w-full"
           style={{
