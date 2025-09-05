@@ -30,6 +30,7 @@ import { ChannelPlugin } from '../RTEChannelDropdown/RTEChannelDropdownPlugin';
 // import { DraftSaver } from './DraftSaver';
 import React from 'react';
 import type { Mentionable } from '@homebase-id/rich-text-editor';
+import {TableFlipPlugin} from "../RTETableFlipDropdown/RTEChannelDropdownPlugin";
 
 const RichTextEditor = lazy(() =>
   import('@homebase-id/rich-text-editor').then((rootExport) => ({
@@ -150,6 +151,8 @@ export const MessageComposer = memo(
       return [
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        TableFlipPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
       ];
     }, []);
 

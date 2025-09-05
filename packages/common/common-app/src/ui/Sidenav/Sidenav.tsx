@@ -1,7 +1,7 @@
-import { FC, ReactNode, useEffect, useRef, useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import { BuiltInProfiles } from '@homebase-id/js-lib/profile';
-import { isTouchDevice } from '@homebase-id/js-lib/helpers';
+import {FC, ReactNode, useEffect, useRef, useState} from 'react';
+import {NavLink} from 'react-router-dom';
+import {BuiltInProfiles} from '@homebase-id/js-lib/profile';
+import {hasDebugFlag, isTouchDevice} from '@homebase-id/js-lib/helpers';
 import {
   FEED_APP_ID,
   CHAT_APP_ID,
@@ -13,38 +13,40 @@ import {
   COMMUNITY_APP_ID,
   OWNER_ROOT,
 } from '../../constants';
-import { getVersion, t, ellipsisAtMaxChar } from '../../helpers';
+import {getVersion, t, ellipsisAtMaxChar} from '../../helpers';
 import {
   useOutsideTrigger,
   useDarkMode,
   useProfiles,
   useUnreadPushNotificationsCount,
+  useSiteData,
 } from '../../hooks';
-import { OwnerImage } from '../../socialFeed';
-import { MiniDarkModeToggle } from '../DarkModeToggle/DarkModeToggle';
-import { AddressBook } from '../Icons/AddressBook';
-import { ArrowDown } from '../Icons/Arrow';
-import { Bars } from '../Icons/Bars';
-import { Bell } from '../Icons/Bell';
-import { ChatBubble } from '../Icons/ChatBubble';
-import { Circles } from '../Icons/Circles';
-import { Cloud } from '../Icons/Cloud';
-import { Cog } from '../Icons/Cog';
-import { Ellipsis } from '../Icons/Ellipsis';
-import { Envelope } from '../Icons/Envelope';
-import { Feed } from '../Icons/Feed';
-import { Grid } from '../Icons/Grid';
-import { HardDrive } from '../Icons/HardDrive';
-import { Heart } from '../Icons/Heart';
-import { House } from '../Icons/House';
-import { Person } from '../Icons/Person';
-import { Persons } from '../Icons/Persons';
-import { Pin } from '../Icons/Pin';
-import { Times } from '../Icons/Times';
-import { IconProps } from '../Icons/Types';
-import { Wallet } from '../Icons/Wallet';
-import { logoutOwnerAndAllApps } from '../../provider';
-import { RadioTower } from '../Icons';
+import {OwnerImage} from '../../socialFeed';
+import {MiniDarkModeToggle} from '../DarkModeToggle/DarkModeToggle';
+import {AddressBook} from '../Icons';
+import {ArrowDown} from '../Icons';
+import {Bars} from '../Icons';
+import {Bell} from '../Icons';
+import {ChatBubble} from '../Icons';
+import {Circles} from '../Icons';
+import {Cloud} from '../Icons';
+import {Cog} from '../Icons';
+import {Ellipsis} from '../Icons';
+import {Envelope} from '../Icons';
+import {Feed} from '../Icons';
+import {Grid} from '../Icons';
+import {HardDrive} from '../Icons';
+import {Heart} from '../Icons';
+import {House} from '../Icons';
+import {Person} from '../Icons';
+import {Persons} from '../Icons';
+import {Pin} from '../Icons';
+import {Times} from '../Icons';
+import {IconProps} from '../Icons';
+import {Wallet} from '../Icons';
+import {logoutOwnerAndAllApps} from '../../provider';
+import {Lock, RadioTower} from '../Icons';
+import {SubtleMessage} from "../Alert/Alert";
 
 const STORAGE_KEY = 'sidenavIsOpen';
 
@@ -57,9 +59,9 @@ const sidebarBg = 'bg-indigo-100 text-black dark:bg-indigo-900 dark:text-white';
 const moreBg = 'bg-[#d4ddff] dark:bg-[#3730a3] text-black dark:text-white';
 
 export const Sidenav = ({
-  disablePinning,
-  hideMobileDrawer,
-}: {
+                          disablePinning,
+                          hideMobileDrawer,
+                        }: {
   disablePinning?: boolean;
   hideMobileDrawer?: boolean;
 }) => {
@@ -84,7 +86,7 @@ export const Sidenav = ({
 
   return (
     <>
-      {hideMobileDrawer ? null : <MobileDrawer setIsOpen={setIsOpen} />}
+      {hideMobileDrawer ? null : <MobileDrawer setIsOpen={setIsOpen}/>}
 
       <aside
         className={`body-font fixed bottom-0 left-0 right-0 top-0 z-30 max-w-3xl flex-shrink-0 transition-all duration-300 md:sticky md:bottom-auto md:min-h-[100dvh] ${
@@ -108,7 +110,7 @@ export const Sidenav = ({
         >
           <div className="flex flex-col px-3 pb-5 pt-3 md:min-h-[100dvh] md:whitespace-nowrap">
             <div className="flex flex-shrink-0 flex-row items-center justify-between overflow-hidden">
-              <IdentityNavItem />
+              <IdentityNavItem/>
               {canPin ? (
                 <button
                   className={`${navItemClassName} ${
@@ -116,8 +118,8 @@ export const Sidenav = ({
                   }`}
                   onClick={() => setIsPinned(!isPinned)}
                 >
-                  <Pin className={'h-5 w-5 flex-shrink-0 hidden md:block'} />
-                  <Times className={'h-5 w-5 flex-shrink-0 block md:hidden'} />
+                  <Pin className={'h-5 w-5 flex-shrink-0 hidden md:block'}/>
+                  <Times className={'h-5 w-5 flex-shrink-0 block md:hidden'}/>
                 </button>
               ) : isOpen || isPeeking ? (
                 <button
@@ -129,29 +131,29 @@ export const Sidenav = ({
                     setIsOpen(false);
                   }}
                 >
-                  <Times className={'h-5 w-5 flex-shrink-0'} />
+                  <Times className={'h-5 w-5 flex-shrink-0'}/>
                 </button>
               ) : null}
             </div>
 
             <div className="pb-3">
-              <NavItem icon={House} label={'Dashboard'} to={`${OWNER_ROOT}/`} end={true} />
-              <NotificationBell />
+              <NavItem icon={House} label={'Dashboard'} to={`${OWNER_ROOT}/`} end={true}/>
+              <NotificationBell/>
             </div>
 
             <div className="py-3">
-              <ProfilesNavItem isOpen={isPinned || isOpen || isHoverOpen || isPeeking} />
+              <ProfilesNavItem isOpen={isPinned || isOpen || isHoverOpen || isPeeking}/>
             </div>
 
             <div className="py-3">
-              <FeedNavItem />
-              <ChatNavItem />
-              <MailNavItem />
-              <CommunityNavItem />
+              <FeedNavItem/>
+              <ChatNavItem/>
+              <MailNavItem/>
+              <CommunityNavItem/>
             </div>
 
             <div className={`py-3`}>
-              <NavItem icon={AddressBook} label={'Connections'} to={`${OWNER_ROOT}/connections`} />
+              <NavItem icon={AddressBook} label={'Connections'} to={`${OWNER_ROOT}/connections`}/>
               {isTightHeight ? null : (
                 <NavItem
                   icon={Persons}
@@ -167,7 +169,7 @@ export const Sidenav = ({
                 />
               )}
               {isTightHeight ? null : (
-                <NavItem icon={Circles} label={'Circles'} to={`${OWNER_ROOT}/circles`} />
+                <NavItem icon={Circles} label={'Circles'} to={`${OWNER_ROOT}/circles`}/>
               )}
             </div>
 
@@ -187,7 +189,7 @@ export const Sidenav = ({
                     label={'Third party apps & services'}
                     to={`${OWNER_ROOT}/third-parties`}
                   />
-                  <NavItem icon={Circles} label={'Circles'} to={`${OWNER_ROOT}/circles`} />
+                  <NavItem icon={Circles} label={'Circles'} to={`${OWNER_ROOT}/circles`}/>
                 </>
               ) : null}
             </MoreItems>
@@ -216,7 +218,7 @@ export const Sidenav = ({
                   setIsPeeking(!isPeeking);
                 }}
               >
-                <Bars className={iconClassName} />
+                <Bars className={iconClassName}/>
               </button>
             ) : null}
           </div>
@@ -227,10 +229,10 @@ export const Sidenav = ({
 };
 
 const MoreItems = ({
-  isOpen: isNavOpen,
-  logout,
-  children,
-}: {
+                     isOpen: isNavOpen,
+                     logout,
+                     children,
+                   }: {
   isOpen: boolean;
   logout?: () => void;
   children?: ReactNode;
@@ -238,7 +240,7 @@ const MoreItems = ({
   const wrapperRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   useOutsideTrigger(wrapperRef, () => setIsOpen(false));
-  const { toggleDarkMode, isDarkMode } = useDarkMode();
+  const {toggleDarkMode, isDarkMode} = useDarkMode();
 
   useEffect(() => {
     if (!isNavOpen && isOpen) {
@@ -256,7 +258,7 @@ const MoreItems = ({
           setIsOpen(!isOpen);
         }}
       >
-        <Ellipsis className={iconClassName} />
+        <Ellipsis className={iconClassName}/>
         <span className={`my-auto ml-3 overflow-hidden ${!isNavOpen && 'hidden'}`}>
           {t('More')}
         </span>
@@ -270,24 +272,26 @@ const MoreItems = ({
       >
         {logout ? (
           <button onClick={() => logout()} className={`w-full ${navItemClassName}`}>
-            <Person className={`${iconClassName}`} />
+            <Person className={`${iconClassName}`}/>
             <span className={`my-auto ml-3`}>Log out</span>
           </button>
         ) : null}
-        <NavItem icon={Cog} label={'Settings'} to={`${OWNER_ROOT}/settings`} />
-        <hr className="border-b dark:border-slate-500" />
-        <NavItem icon={HardDrive} label={'Drives'} to={`${OWNER_ROOT}/drives`} />
-        <hr className="border-b dark:border-slate-500" />
-        <WalletLink />
-        <hr className="border-b dark:border-slate-500" />
+        <NavItem icon={Cog} label={'Settings'} to={`${OWNER_ROOT}/settings`}/>
+        {hasDebugFlag() && <NavItem icon={Lock} label={'Security'} to={`${OWNER_ROOT}/security`}/>}
+        <hr className="border-b dark:border-slate-500"/>
+
+        <NavItem icon={HardDrive} label={'Drives'} to={`${OWNER_ROOT}/drives`}/>
+        <hr className="border-b dark:border-slate-500"/>
+        <WalletLink/>
+        <hr className="border-b dark:border-slate-500"/>
         <button className={navItemClassName} onClick={() => toggleDarkMode()}>
-          <MiniDarkModeToggle className={`my-auto ${iconClassName}`} />
+          <MiniDarkModeToggle className={`my-auto ${iconClassName}`}/>
           <span className={`mx-3 my-auto`}>{isDarkMode ? t('Light mode') : t('Dark mode')}</span>
         </button>
 
         {children ? (
           <>
-            <hr className="border-b dark:border-slate-500" />
+            <hr className="border-b dark:border-slate-500"/>
             {children}
           </>
         ) : null}
@@ -297,13 +301,13 @@ const MoreItems = ({
 };
 
 const NavItem = ({
-  icon,
-  to,
-  label,
+                   icon,
+                   to,
+                   label,
 
-  unread,
-  end,
-}: {
+                   unread,
+                   end,
+                 }: {
   icon?: FC<IconProps>;
   to: string;
   label?: string;
@@ -311,37 +315,37 @@ const NavItem = ({
   unread?: boolean;
   end?: boolean;
 }) => {
-  const { pathname } = window.location;
+  const {pathname} = window.location;
   const isExternal =
     pathname.split('/')[1] !== to.split('/')[1] ||
     (to.split('/')[1] === 'apps' && pathname.split('/')[2] !== to.split('/')[2]);
 
   if (isExternal) {
-    return <ExternalNavItem icon={icon} href={to} label={label} unread={unread} />;
+    return <ExternalNavItem icon={icon} href={to} label={label} unread={unread}/>;
   }
 
   return (
     <NavLink
-      className={({ isActive }) =>
+      className={({isActive}) =>
         `${navItemClassName} ${isActive && navItemActiveClassname} relative`
       }
       to={to}
       end={end}
     >
-      {icon && icon({ className: iconClassName })}
-      {unread ? <span className="absolute h-2 w-2 rounded-full bg-red-500" /> : null}
+      {icon && icon({className: iconClassName})}
+      {unread ? <span className="absolute h-2 w-2 rounded-full bg-red-500"/> : null}
       {label ? <span className={`my-auto ml-3 overflow-hidden`}>{label}</span> : null}
     </NavLink>
   );
 };
 
 const ExternalNavItem = ({
-  icon,
-  href,
-  label,
+                           icon,
+                           href,
+                           label,
 
-  unread,
-}: {
+                           unread,
+                         }: {
   icon?: FC<IconProps>;
   href: string;
   label?: string;
@@ -350,30 +354,40 @@ const ExternalNavItem = ({
 }) => {
   return (
     <a className={`${navItemClassName} relative`} href={href}>
-      {icon && icon({ className: iconClassName })}
-      {unread ? <span className="absolute h-2 w-2 rounded-full bg-red-500" /> : null}
+      {icon && icon({className: iconClassName})}
+      {unread ? <span className="absolute h-2 w-2 rounded-full bg-red-500"/> : null}
       {label ? <span className={`my-auto ml-3 overflow-hidden`}>{label}</span> : null}
     </a>
   );
 };
 
 const IdentityNavItem = () => {
+  const {owner} = useSiteData().data ?? {};
+
+  const displayName = ellipsisAtMaxChar(owner?.displayName ?? window.location.hostname, 20);
+
   return (
-    <a className={`relative flex py-2 pl-[0.2rem] pr-1`} href={HOME_ROOT_PATH}>
+    <a className="relative flex items-start py-2 pl-[0.2rem] pr-1" href={HOME_ROOT_PATH}>
       <span className="h-9 w-9 flex-shrink-0">
-        <OwnerImage className={`h-9 w-9 rounded-full`} size="custom" />
+       <OwnerImage className="h-9 w-9 rounded-full" size="custom"/>
       </span>
-      <span className={`my-auto ml-3 overflow-hidden text-lg font-medium`}>
-        {' '}
-        {ellipsisAtMaxChar(window.location.hostname, 20)}
-      </span>
+      <div className="ml-3 flex flex-col overflow-hidden">
+        <span className="text-lg font-medium truncate">
+          {displayName}
+        </span>
+        {owner?.status && <SubtleMessage className="text-sm  truncate">
+          {ellipsisAtMaxChar(owner?.status, 20)}
+        </SubtleMessage>
+        }
+      </div>
     </a>
+
   );
 };
 
-const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
+const ProfilesNavItem = ({isOpen: isNavOpen}: { isOpen: boolean }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { data: profiles, isFetching } = useProfiles().fetchProfiles;
+  const {data: profiles, isFetching} = useProfiles().fetchProfiles;
 
   useEffect(() => {
     if (!isNavOpen && isOpen) setIsOpen(false);
@@ -392,7 +406,7 @@ const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
           icon={Person}
           to={`/owner/profile/${standardProfile?.slug || 'standard-info'}`}
         />
-        <NavItem label={'Home Settings'} icon={Cloud} to={`${OWNER_ROOT}/profile/homepage`} />
+        <NavItem label={'Home Settings'} icon={Cloud} to={`${OWNER_ROOT}/profile/homepage`}/>
       </>
     );
   }
@@ -401,7 +415,7 @@ const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
   return (
     <>
       <NavLink
-        className={({ isActive }) =>
+        className={({isActive}) =>
           `${navItemClassName} ${isActive && navItemActiveClassname} relative`
         }
         to={`${OWNER_ROOT}/profile`}
@@ -411,11 +425,11 @@ const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
           setIsOpen(!isOpen);
         }}
       >
-        {Heart({ className: iconClassName })}
+        {Heart({className: iconClassName})}
         <span className={`my-auto ml-3 flex w-full flex-row items-stretch overflow-hidden`}>
           <span>{'Personal data'} </span>
           <button className={`${iconClassName} ml-auto opacity-80 `}>
-            <ArrowDown className={`transition-transform ${isOpen ? '-rotate-90' : ''}`} />
+            <ArrowDown className={`transition-transform ${isOpen ? '-rotate-90' : ''}`}/>
           </button>
         </span>
       </NavLink>
@@ -433,7 +447,7 @@ const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
                 key={profile.slug}
               />
             ))}
-          <NavItem label={'Home Settings'} to={`${OWNER_ROOT}/profile/homepage`} />
+          <NavItem label={'Home Settings'} to={`${OWNER_ROOT}/profile/homepage`}/>
         </div>
       ) : null}
     </>
@@ -441,7 +455,7 @@ const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
 };
 
 const WalletLink = () => {
-  const { data: profiles } = useProfiles().fetchProfiles;
+  const {data: profiles} = useProfiles().fetchProfiles;
   const walletProfile = profiles?.find((profile) => profile.profileId === BuiltInProfiles.WalletId);
 
   return (
@@ -454,7 +468,7 @@ const WalletLink = () => {
 };
 
 const NotificationBell = () => {
-  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: 'all' });
+  const {data: unreadCount} = useUnreadPushNotificationsCount({appId: 'all'});
   return (
     <NavItem
       label={t('Notifications')}
@@ -466,39 +480,39 @@ const NotificationBell = () => {
 };
 
 const FeedNavItem = () => {
-  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: FEED_APP_ID });
-  return <NavItem icon={Feed} label={'Feed'} to="/apps/feed" unread={!!unreadCount} />;
+  const {data: unreadCount} = useUnreadPushNotificationsCount({appId: FEED_APP_ID});
+  return <NavItem icon={Feed} label={'Feed'} to="/apps/feed" unread={!!unreadCount}/>;
 };
 
 const ChatNavItem = () => {
-  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
-  return <NavItem icon={ChatBubble} label={'Chat'} to={CHAT_ROOT_PATH} unread={!!unreadCount} />;
+  const {data: unreadCount} = useUnreadPushNotificationsCount({appId: CHAT_APP_ID});
+  return <NavItem icon={ChatBubble} label={'Chat'} to={CHAT_ROOT_PATH} unread={!!unreadCount}/>;
 };
 
 const MailNavItem = () => {
-  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: MAIL_APP_ID });
-  return <NavItem icon={Envelope} label={'Mail'} to={MAIL_ROOT_PATH} unread={!!unreadCount} />;
+  const {data: unreadCount} = useUnreadPushNotificationsCount({appId: MAIL_APP_ID});
+  return <NavItem icon={Envelope} label={'Mail'} to={MAIL_ROOT_PATH} unread={!!unreadCount}/>;
 };
 
 const CommunityNavItem = () => {
-  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: COMMUNITY_APP_ID });
+  const {data: unreadCount} = useUnreadPushNotificationsCount({appId: COMMUNITY_APP_ID});
   return (
-    <NavItem icon={RadioTower} label={'Community'} to="/apps/community" unread={!!unreadCount} />
+    <NavItem icon={RadioTower} label={'Community'} to="/apps/community" unread={!!unreadCount}/>
   );
 };
 
-const MobileDrawer = ({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) => {
+const MobileDrawer = ({setIsOpen}: { setIsOpen: (isOpen: boolean) => void }) => {
   return (
     <div
       className={`fixed left-0 right-0 bottom-0 md:hidden z-20 px-4 py-1 pb-[env(safe-area-inset-bottom)] ${sidebarBg}`}
     >
       <div className="flex flex-row justify-between">
-        <NavItem icon={House} to={'/owner/'} end={true} />
-        <NavItem icon={Feed} to={FEED_ROOT_PATH} end={true} />
-        <NavItem icon={ChatBubble} to={CHAT_ROOT_PATH} />
+        <NavItem icon={House} to={'/owner/'} end={true}/>
+        <NavItem icon={Feed} to={FEED_ROOT_PATH} end={true}/>
+        <NavItem icon={ChatBubble} to={CHAT_ROOT_PATH}/>
 
         <button className={navItemClassName} onClick={() => setIsOpen(true)}>
-          <Bars className={iconClassName} />
+          <Bars className={iconClassName}/>
         </button>
       </div>
     </div>

@@ -12,7 +12,7 @@ import {useAuth} from '../../hooks/auth/useAuth';
 import {PasswordInput} from '../../components/Password/PasswordInput';
 import {PasswordStrength} from '../../components/Password/PasswordStrength';
 
-export const SecuritySettings = () => {
+export const ChangePasswordTab = () => {
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
 
   const [oldPassword, setOldPassword] = useState('');
