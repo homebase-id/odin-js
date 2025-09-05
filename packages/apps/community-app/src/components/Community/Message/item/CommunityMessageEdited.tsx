@@ -1,12 +1,12 @@
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { ChatMessage } from '../../../providers/ChatProvider';
 import { t } from '@homebase-id/common-app';
+import { CommunityMessage } from '../../../../providers/CommunityMessageProvider';
 
-export const ChatEdited = ({
+export const CommunityMessageEdited = ({
   msg,
   className,
 }: {
-  msg: HomebaseFile<ChatMessage>;
+  msg: HomebaseFile<CommunityMessage>;
   className?: string;
   keepDetail?: boolean;
 }) => {
@@ -20,5 +20,5 @@ export const ChatEdited = ({
   // Only show if the message was actually edited
   if (!isEdited) return null;
 
-  return <Wrapper>{t('edited')}</Wrapper>;
+  return <Wrapper>{t('· Edited')}</Wrapper>;
 };
