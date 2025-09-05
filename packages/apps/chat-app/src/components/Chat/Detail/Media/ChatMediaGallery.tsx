@@ -179,7 +179,10 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
           {prevKey ? (
             <ActionButton
               icon={ArrowLeft}
-              onClick={(e) => goPrev(e.nativeEvent)}
+              onClick={(e) => {
+                e.stopPropagation();
+                goPrev(e.nativeEvent);
+              }}
               className="absolute left-2 top-[calc(50%-1.25rem)] rounded-full p-3"
               size="square"
               type="secondary"
@@ -188,7 +191,10 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
           {nextKey ? (
             <ActionButton
               icon={Arrow}
-              onClick={(e) => goNext(e.nativeEvent)}
+              onClick={(e) => {
+                e.stopPropagation();
+                goNext(e.nativeEvent);
+              }}
               className="absolute right-2 top-[calc(50%-1.25rem)] rounded-full p-3"
               size="square"
               type="secondary"
