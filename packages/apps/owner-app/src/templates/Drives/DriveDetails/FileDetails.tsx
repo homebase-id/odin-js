@@ -52,7 +52,7 @@ const DriveDetails = () => {
           <JsonViewer
             data={file.fileMetadata.appData.content}
             wrapLines={true}
-            title="Content"
+            title="Text"
             className="max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-32rem)]"
           />
         </div>
