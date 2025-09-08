@@ -6,6 +6,7 @@ import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/
 import { PageMeta } from '@homebase-id/common-app';
 import { useFileQuery } from '../../../hooks/files/useFiles';
 import { SystemFileType } from '@homebase-id/js-lib/core';
+import { JsonViewer } from '../../../components/ui/Json';
 
 const DriveDetails = () => {
   const { driveKey, systemFileType, fileKey } = useParams();
@@ -47,7 +48,7 @@ const DriveDetails = () => {
       />
 
       <pre className="max-w-[calc(100vw-1rem)] overflow-auto sm:max-w-[calc(100vw-32rem)]">
-        {JSON.stringify(file, null, 2)}
+        <JsonViewer data={file} />
       </pre>
     </>
   );
