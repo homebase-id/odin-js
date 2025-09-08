@@ -1,5 +1,3 @@
-// utils.ts
-
 export function safeStringify(value: unknown, space: number | string = 2): string {
   const seen = new WeakSet();
   return JSON.stringify(
@@ -20,14 +18,13 @@ export type Token =
   | { cls: "key" | "string" | "number" | "boolean" | "null" | "punct" | "ws" | "plain"; text: string };
 
 /**
- * Tokenize VALID JSON (pretty-printed). No HTML escaping here;
- * render as React text nodes so React escapes safely.
+ * Tokenize VALID JSON (pretty-printed). Render as React text nodes (no HTML escaping here).
  */
 export function tokenizeJson(jsonText: string): Token[] {
   // Strings (with optional trailing colon), literals, numbers, punctuation, whitespace.
-  // Removed unnecessary escapes to satisfy `no-useless-escape`.
+  // NOTE: '[' and ']' MUST be escaped inside character classes.
   const re =
-    /("(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^"\\]*)")(?:\s*:)?|\b(?:true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|[{}[\],:]|\s+/g;
+    /("(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^"\\]*)")(?:\s*:)?|\b(?:true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|[{}\[\],:]|\s+/g;
 
   const out: Token[] = [];
   let m: RegExpExecArray | null;
@@ -36,8 +33,7 @@ export function tokenizeJson(jsonText: string): Token[] {
     const [tok, strLit] = m;
 
     if (strLit !== undefined) {
-      // Was a string; check if the regex consumed a trailing colon by comparing `tok`
-      // e.g. `"key":` vs `"value"`
+      // It was a string literal; if regex consumed a colon, it's a key.
       if (tok.endsWith(":")) {
         out.push({ cls: "key", text: strLit });
         out.push({ cls: "punct", text: ":" });
@@ -50,7 +46,7 @@ export function tokenizeJson(jsonText: string): Token[] {
     if (tok === "true" || tok === "false") { out.push({ cls: "boolean", text: tok }); continue; }
     if (tok === "null") { out.push({ cls: "null", text: tok }); continue; }
     if (/^-?\d/.test(tok)) { out.push({ cls: "number", text: tok }); continue; }
-    if (/^[{}[\],:]$/.test(tok)) { out.push({ cls: "punct", text: tok }); continue; }
+    if (/^[{}\[\],:]$/.test(tok)) { out.push({ cls: "punct", text: tok }); continue; }
     if (/^\s+$/.test(tok)) { out.push({ cls: "ws", text: tok }); continue; }
 
     out.push({ cls: "plain", text: tok });
