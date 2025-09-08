@@ -363,25 +363,18 @@ const ExternalNavItem = ({
 
 const IdentityNavItem = () => {
   const {owner} = useSiteData().data ?? {};
-
   const displayName = ellipsisAtMaxChar(owner?.displayName ?? window.location.hostname, 20);
-
+  
   return (
-    <a className="relative flex items-start py-2 pl-[0.2rem] pr-1" href={HOME_ROOT_PATH}>
+    <a className={`relative flex py-2 pl-[0.2rem] pr-1`} href={HOME_ROOT_PATH}>
       <span className="h-9 w-9 flex-shrink-0">
-       <OwnerImage className="h-9 w-9 rounded-full" size="custom"/>
+        <OwnerImage className={`h-9 w-9 rounded-full`} size="custom" />
       </span>
-      <div className="ml-3 flex flex-col overflow-hidden">
-        <span className="text-lg font-medium truncate">
-          {displayName}
-        </span>
-        {owner?.status && <SubtleMessage className="text-sm  truncate">
-          {ellipsisAtMaxChar(owner?.status, 20)}
-        </SubtleMessage>
-        }
-      </div>
+      <span className={`my-auto ml-3 overflow-hidden text-lg font-medium`}>
+        {' '}
+        {displayName}
+      </span>
     </a>
-
   );
 };
 
