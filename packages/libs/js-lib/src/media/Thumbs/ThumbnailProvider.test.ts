@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { createImageThumbnail, createThumbnails, getRevisedThumbs, baseThumbSizes, tinyThumbSize } from './ThumbnailProvider';
-import { ThumbnailInstruction } from '../MediaTypes';
-import { readFileSync, readdirSync, existsSync } from 'fs';
-import { join, extname } from 'path';
-import { ImageSize } from '../../core/core';
+import {describe, it, expect, beforeEach} from 'vitest';
+import {createThumbnails, getRevisedThumbs, baseThumbSizes} from './ThumbnailProvider';
+import {ThumbnailInstruction} from '../MediaTypes';
+import {readFileSync, readdirSync, existsSync} from 'fs';
+import {join, extname} from 'path';
+import {ImageSize} from '../../core/core';
 
 // Mock test images helper
 const loadTestImageFromFile = (filename: string): Uint8Array => {
@@ -37,7 +37,7 @@ const createTestBlob = (data: Uint8Array, type = 'image/jpeg'): Blob => {
   const buffer = new ArrayBuffer(data.length);
   const view = new Uint8Array(buffer);
   view.set(data);
-  return new Blob([buffer], { type });
+  return new Blob([buffer], {type});
 };
 
 describe('ThumbnailProvider', () => {
@@ -63,7 +63,7 @@ describe('ThumbnailProvider', () => {
             },
             toBlob: (callback: (blob: Blob | null) => void, type?: string) => {
               // Create a mock blob with some data
-              const mockBlob = new Blob([new Uint8Array([1, 2, 3, 4])], { type: type || 'image/webp' });
+              const mockBlob = new Blob([new Uint8Array([1, 2, 3, 4])], {type: type || 'image/webp'});
               setTimeout(() => callback(mockBlob), 0);
             }
           };
@@ -103,7 +103,7 @@ describe('ThumbnailProvider', () => {
         void blob; // Explicitly void unused parameter
         this.result = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gA';
         setTimeout(() => {
-          if (this.onload) this.onload({ target: this } as unknown as ProgressEvent<FileReader>);
+          if (this.onload) this.onload({target: this} as unknown as ProgressEvent<FileReader>);
         }, 0);
       }
     } as unknown as typeof FileReader;
@@ -112,7 +112,7 @@ describe('ThumbnailProvider', () => {
   describe('getRevisedThumbs', () => {
     it('should keep all thumbnails for large source (2500px)', () => {
       // Arrange
-      const sourceSize: ImageSize = { pixelWidth: 2500, pixelHeight: 800 };
+      const sourceSize: ImageSize = {pixelWidth: 2500, pixelHeight: 800};
 
       // Act
       const result = getRevisedThumbs(sourceSize, baseThumbSizes);
@@ -127,7 +127,7 @@ describe('ThumbnailProvider', () => {
 
     it('should keep none and add 200px for small source (200px)', () => {
       // Arrange
-      const sourceSize: ImageSize = { pixelWidth: 200, pixelHeight: 150 };
+      const sourceSize: ImageSize = {pixelWidth: 200, pixelHeight: 150};
 
       // Act
       const result = getRevisedThumbs(sourceSize, baseThumbSizes);
@@ -141,7 +141,7 @@ describe('ThumbnailProvider', () => {
 
     it('should keep none and add 50px for minimum source (40x50px)', () => {
       // Arrange
-      const sourceSize: ImageSize = { pixelWidth: 40, pixelHeight: 50 };
+      const sourceSize: ImageSize = {pixelWidth: 40, pixelHeight: 50};
 
       // Act
       const result = getRevisedThumbs(sourceSize, baseThumbSizes);
@@ -154,7 +154,7 @@ describe('ThumbnailProvider', () => {
 
     it('should remove 1600px and add 1660px for source 1660px', () => {
       // Arrange
-      const sourceSize: ImageSize = { pixelWidth: 1660, pixelHeight: 1200 };
+      const sourceSize: ImageSize = {pixelWidth: 1660, pixelHeight: 1200};
 
       // Act
       const result = getRevisedThumbs(sourceSize, baseThumbSizes);
@@ -170,7 +170,7 @@ describe('ThumbnailProvider', () => {
 
     it('should remove 1600px and add 1540px for source 1540px', () => {
       // Arrange
-      const sourceSize: ImageSize = { pixelWidth: 1540, pixelHeight: 1200 };
+      const sourceSize: ImageSize = {pixelWidth: 1540, pixelHeight: 1200};
 
       // Act
       const result = getRevisedThumbs(sourceSize, baseThumbSizes);
@@ -186,7 +186,7 @@ describe('ThumbnailProvider', () => {
 
     it('should keep 320px and add 500px for source 500px', () => {
       // Arrange
-      const sourceSize: ImageSize = { pixelWidth: 500, pixelHeight: 300 };
+      const sourceSize: ImageSize = {pixelWidth: 500, pixelHeight: 300};
 
       // Act
       const result = getRevisedThumbs(sourceSize, baseThumbSizes);
@@ -344,8 +344,8 @@ describe('ThumbnailProvider', () => {
         const payloadKey = 'test-custom-key';
         const testBlob = createTestBlob(imageData, 'image/webp');
         const customSizes: ThumbnailInstruction[] = [
-          { quality: 80, maxPixelDimension: 200, maxBytes: Number.MAX_SAFE_INTEGER },
-          { quality: 90, maxPixelDimension: 800, maxBytes: Number.MAX_SAFE_INTEGER }
+          {quality: 80, maxPixelDimension: 200, maxBytes: Number.MAX_SAFE_INTEGER},
+          {quality: 90, maxPixelDimension: 800, maxBytes: Number.MAX_SAFE_INTEGER}
         ];
 
         // Act
@@ -432,10 +432,10 @@ describe('ThumbnailProvider', () => {
     });
   });
 
-  
+
   describe('SVG Tiny test', () => {
     it('should generate rasterized tiny thumb for SVG while preserving original vector', async () => {
-    try {
+      try {
         // Arrange - Use a minimal inline SVG for testing (or load from file if available)
         const minimalSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="red"/></svg>`;
         const svgBytes = new TextEncoder().encode(minimalSvg);
@@ -471,9 +471,9 @@ describe('ThumbnailProvider', () => {
         const tinyBase64Decoded = atob(result.tinyThumb.content);
         const originalSvgString = new TextDecoder().decode(svgBytes);
         expect(tinyBase64Decoded).not.toBe(originalSvgString);
-    } catch (error) {
+      } catch (error) {
         console.log('Skipping SVG tiny thumb test - potential issue with mock environment or no SVG data:', error);
-    }
+      }
     });
   });
 });
