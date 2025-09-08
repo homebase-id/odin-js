@@ -46,10 +46,22 @@ const DriveDetails = () => {
           { title: fileKey ?? '' },
         ]}
       />
+      {/* Content JSON Viewer */}
+      {file?.fileMetadata?.appData?.content && (
+        <div className="mb-6">
+          <JsonViewer
+            data={file.fileMetadata.appData.content}
+            wrapLines={true}
+            title="Content"
+            className="max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-32rem)]"
+          />
+        </div>
+      )}
 
-      <pre className="max-w-[calc(100vw-1rem)] overflow-auto sm:max-w-[calc(100vw-32rem)]">
+      {/* Full File JSON Viewer */}
+      <div className="max-w-[calc(100vw-1rem)] overflow-auto sm:max-w-[calc(100vw-32rem)]">
         <JsonViewer data={file} />
-      </pre>
+      </div>
     </>
   );
 };
