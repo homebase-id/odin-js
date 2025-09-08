@@ -24,6 +24,7 @@ export function tokenizeJson(jsonText: string): Token[] {
   // Strings (with optional trailing colon), literals, numbers, punctuation, whitespace.
   // NOTE: '[' and ']' MUST be escaped inside character classes.
   const re =
+    // eslint-disable-next-line no-useless-escape
     /("(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^"\\]*)")(?:\s*:)?|\b(?:true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|[{}\[\],:]|\s+/g;
 
   const out: Token[] = [];
@@ -46,6 +47,7 @@ export function tokenizeJson(jsonText: string): Token[] {
     if (tok === "true" || tok === "false") { out.push({ cls: "boolean", text: tok }); continue; }
     if (tok === "null") { out.push({ cls: "null", text: tok }); continue; }
     if (/^-?\d/.test(tok)) { out.push({ cls: "number", text: tok }); continue; }
+    // eslint-disable-next-line no-useless-escape
     if (/^[{}\[\],:]$/.test(tok)) { out.push({ cls: "punct", text: tok }); continue; }
     if (/^\s+$/.test(tok)) { out.push({ cls: "ws", text: tok }); continue; }
 
