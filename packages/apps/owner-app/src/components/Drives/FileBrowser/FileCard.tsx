@@ -43,7 +43,7 @@ export const FileCard = ({
   isRow?: boolean;
 }) => {
   const firstPayload = file.fileMetadata.payloads?.[0];
-  const canDownload = !file.fileMetadata.dataSource?.payloadsAreRemote;
+  const canDownload = !file.fileMetadata.dataSource?.payloadsAreRemote || true;
 
   const contentType = firstPayload?.contentType || 'application/json';
   const isImage = [
