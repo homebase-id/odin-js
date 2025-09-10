@@ -5,6 +5,7 @@ import {
   NewHomebaseFile,
   NewPayloadDescriptor,
   DEFAULT_PAYLOAD_KEY,
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
 } from '@homebase-id/js-lib/core';
 import { OdinImage, OdinThumbnailImage, OdinAudio, OdinAudioWaveForm } from '@homebase-id/ui-lib';
 import { CHAT_LINKS_PAYLOAD_KEY, ChatMessage } from '../../../../providers/ChatProvider';
@@ -25,7 +26,8 @@ export const ChatMedia = ({
   msg: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>;
 }) => {
   const payloads = msg.fileMetadata.payloads?.filter(
-    (payload) => payload.key !== DEFAULT_PAYLOAD_KEY
+    (payload) =>
+      payload.key !== DEFAULT_PAYLOAD_KEY && !payload.key?.includes(DEFAULT_PAYLOAD_DESCRIPTOR_KEY)
   );
   const isGallery = payloads && payloads.length >= 2;
   const navigate = useNavigate();

@@ -1,3 +1,4 @@
+import { DEFAULT_PAYLOAD_DESCRIPTOR_KEY } from '../core/constants';
 import {
   EmbeddedThumb,
   NewMediaFile,
@@ -29,12 +30,13 @@ export const getPayloadsAndThumbnailsForNewMedia = async (
     const payloadKey =
       newMediaFile.key ||
       `${options?.keyPrefix || MEDIA_PAYLOAD_KEY}${(options?.keyIndex || 0) + i}`;
+    const descriptorKey = `${DEFAULT_PAYLOAD_DESCRIPTOR_KEY}${(options?.keyIndex || 0) + i}`;
     if (newMediaFile.file.type.startsWith('video/')) {
       const {
         tinyThumb,
         thumbnails: thumbnailsFromVideo,
         payloads: payloadsFromVideo,
-      } = await processVideoFile(newMediaFile, payloadKey, aesKey);
+      } = await processVideoFile(newMediaFile, payloadKey, descriptorKey, aesKey);
 
       thumbnails.push(...thumbnailsFromVideo);
       payloads.push(...payloadsFromVideo);
