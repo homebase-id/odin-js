@@ -28,7 +28,6 @@ export const PasswordRecoverySetupTab = () => {
     const client = getDotYouClient();
     getShamirConfiguration(client).then(cfg => {
       setShardConfig(cfg);
-      console.info("shamon", cfg);
     });
   }
 
