@@ -29,6 +29,8 @@ import {
   UpdateInstructionSet,
   UpdateResult,
   getContentFromHeaderOrPayload,
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
+
 } from '@homebase-id/js-lib/core';
 import {
   jsonStringify64,
@@ -86,6 +88,7 @@ export interface CommunityMessage {
 
   /// lastEdited by Identity of the message
   lastEditedBy?: string;
+  isEdited?: boolean;
 }
 
 export const uploadCommunityMessage = async (
@@ -162,13 +165,14 @@ export const uploadCommunityMessage = async (
 
   for (let i = 0; files && i < files?.length; i++) {
     const payloadKey = `${COMMUNITY_MESSAGE_PAYLOAD_KEY}${i}`;
+    const descriptorKey = `${DEFAULT_PAYLOAD_DESCRIPTOR_KEY}${i}`;
     const newMediaFile = files[i];
     if (newMediaFile.file.type.startsWith('video/')) {
       const {
         tinyThumb,
         thumbnails: thumbnailsFromVideo,
         payloads: payloadsFromVideo,
-      } = await processVideoFile(newMediaFile, payloadKey, aesKey);
+      } = await processVideoFile(newMediaFile, payloadKey, descriptorKey, aesKey);
 
       thumbnails.push(...thumbnailsFromVideo);
       payloads.push(...payloadsFromVideo);
@@ -335,7 +339,7 @@ export const updateCommunityMessage = async (
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: true,
     referencedFile:
-      message.fileSystemType.toLocaleLowerCase() === 'comment'
+      message.fileSystemType?.toLocaleLowerCase() === 'comment'
         ? {
           targetDrive,
           globalTransitId: message.fileMetadata.appData.groupId as string,
@@ -345,7 +349,7 @@ export const updateCommunityMessage = async (
       uniqueId: message.fileMetadata.appData.uniqueId,
       tags: message.fileMetadata.appData.tags,
       groupId:
-        message.fileSystemType.toLocaleLowerCase() === 'comment'
+        message.fileSystemType?.toLocaleLowerCase() === 'comment'
           ? undefined
           : message.fileMetadata.appData.groupId,
       archivalStatus: (message.fileMetadata.appData as AppFileMetaData<CommunityMessage>)

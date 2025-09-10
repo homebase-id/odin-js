@@ -6,6 +6,7 @@ import {
   NewPayloadDescriptor,
   SystemFileType,
   DEFAULT_PAYLOAD_KEY,
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
 } from '@homebase-id/js-lib/core';
 import { OdinImage, OdinThumbnailImage, OdinAudio, OdinAudioWaveForm } from '@homebase-id/ui-lib';
 
@@ -38,7 +39,10 @@ export const CommunityMedia = ({
   originId?: string;
 }) => {
   const payloads = msg.fileMetadata.payloads?.filter(
-    (pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY && pyld.key !== BACKEDUP_PAYLOAD_KEY
+    (pyld) =>
+      pyld.key !== DEFAULT_PAYLOAD_KEY &&
+      pyld.key !== BACKEDUP_PAYLOAD_KEY &&
+      !pyld.key?.includes(DEFAULT_PAYLOAD_DESCRIPTOR_KEY)
   );
   const isGallery = payloads && payloads.length >= 2;
   const navigate = useNavigate();

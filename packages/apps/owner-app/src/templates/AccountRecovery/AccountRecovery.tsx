@@ -1,22 +1,43 @@
-import { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { ActionLink, Alert, DomainHighlighter, t } from '@homebase-id/common-app';
-import { useAuth } from '../../hooks/auth/useAuth';
-import { ActionButton } from '@homebase-id/common-app';
-import { Label } from '@homebase-id/common-app';
-import { MinimalLayout } from '../../components/ui/Layout/Layout';
+import {useEffect, useState} from 'react';
+import {Helmet} from 'react-helmet-async';
+import {ActionLink, Alert, DomainHighlighter, t} from '@homebase-id/common-app';
+import {SHAMIR_RECOVERY_PATH, useAuth} from '../../hooks/auth/useAuth';
+import {ActionButton} from '@homebase-id/common-app';
+import {Label} from '@homebase-id/common-app';
+import {MinimalLayout} from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
-import { PasswordInput } from '../../components/Password/PasswordInput';
-import { PasswordStrength } from '../../components/Password/PasswordStrength';
+import {PasswordInput} from '../../components/Password/PasswordInput';
+import {PasswordStrength} from '../../components/Password/PasswordStrength';
+import {useLocation, useNavigate} from "react-router-dom";
+import {getFinalRecoveryResult} from "../../provider/auth/SecurityRecoveryProvider";
 
-const Login = () => {
+const AccountRecovery = () => {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const fromShamirRecovery = params.get("sv") === "1";
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
 
+  const navigate = useNavigate();
   const [recoveryKey, setRecoveryKey] = useState('');
   const [password, setPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
 
-  const { resetPassword } = useAuth();
+  const {resetPassword} = useAuth();
+
+  useEffect(() => {
+    const id = params.get("id");
+    const fk = params.get("fk");
+
+    if (id && fk) {
+      getFinalRecoveryResult(id, fk).then(r => {
+        setRecoveryKey(r.recoveryText);
+      })
+    }
+  }, [fromShamirRecovery]);
+
+  const enterShamirMode = () => {
+    navigate(SHAMIR_RECOVERY_PATH);
+  }
 
   const passwordIsValid = password === retypePassword && password !== '';
 
@@ -36,7 +57,8 @@ const Login = () => {
         <title>{t('Recover access to your account')} | Homebase</title>
       </Helmet>
       <MinimalLayout noShadedBg={true} noPadding={true}>
-        <UrlNotifier />
+        <UrlNotifier/>
+
         <section className="body-font flex h-full pt-24">
           <div className="container m-auto h-full max-w-[35rem] p-5">
             <div className="">
@@ -63,18 +85,18 @@ const Login = () => {
                   </div>
                 </>
               ) : (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    doSetNewPassword();
-                  }}
-                >
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  doSetNewPassword();
+                }}>
                   <div className="mb-2">
                     <p className="max-w-md text-slate-400">
                       {t('To regain access to your account you will need your recovery key.')}{' '}
-                      {t('You have gotten your recovery key when you first signed up')}
+                      {t('You received your recovery key when you first signed up')}{' '}
                     </p>
+                    <ActionButton className="mt-3 mb-3"
+                                  onClick={() => enterShamirMode()}>{t('Click here if you forgot your recovery key')}</ActionButton>
                   </div>
                   <div className="mb-2">
                     <Label>{t('Your recovery key')}</Label>
@@ -88,7 +110,7 @@ const Login = () => {
                       autoComplete="off"
                     />
                   </div>
-                  <hr className="mb-5 mt-7 dark:border-slate-700" />
+                  <hr className="mb-5 mt-7 dark:border-slate-700"/>
                   <div className="mb-2">
                     <Label>{t('New password')}</Label>
                     <PasswordInput
@@ -138,9 +160,12 @@ const Login = () => {
             </div>
           </div>
         </section>
+
       </MinimalLayout>
     </>
   );
+
+
 };
 
-export default Login;
+export default AccountRecovery;

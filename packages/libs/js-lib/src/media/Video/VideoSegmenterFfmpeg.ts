@@ -83,6 +83,7 @@ export const segmentVideoFileWithFfmpeg = async (
       metadata: {
         isSegmented: false,
         mimeType: 'video/mp4',
+        fileSize: file.size,
       },
     };
   }
@@ -162,6 +163,8 @@ export const segmentVideoFileWithFfmpeg = async (
     isSegmented: true,
     mimeType: 'application/vnd.apple.mpegurl',
     hlsPlaylist: await playlistBlob.text(),
+    fileSize: file.size,
+    duration: durationinMiliseconds,
   };
 
   return {

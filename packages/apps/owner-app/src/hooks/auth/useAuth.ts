@@ -24,6 +24,8 @@ export const SETUP_PATH = '/owner/setup';
 export const LOGIN_PATH = '/owner/login';
 export const FIRSTRUN_PATH = '/owner/firstrun';
 export const RECOVERY_PATH = '/owner/account-recovery';
+export const SHAMIR_RECOVERY_PATH = '/owner/shamir-account-recovery';
+
 
 export const RETURN_URL_PARAM = 'returnUrl';
 export const HOME_PATH = '/owner';

@@ -47,7 +47,6 @@ export const MediaGallery = ({
 
   const slicedFiles = files.length > maxVisible ? files.slice(0, maxVisible) : files;
   const countExcludedFromView = files.length - slicedFiles.length;
-
   const dotYouClient = useDotYouClientContext();
   const { getFromCache } = useImageCache(dotYouClient);
 

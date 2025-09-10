@@ -32,6 +32,7 @@ const UpdateDriveDetailsFromApp = lazy(
 );
 const Login = lazy(() => import('../templates/Login/Login'));
 const AccountRecovery = lazy(() => import('../templates/AccountRecovery/AccountRecovery'));
+const ShamirAccountRecovery = lazy(() => import('../templates/AccountRecovery/Shamir/ShamirAccountRecovery'));
 const FirstRun = lazy(() => import('../templates/FirstRun/FirstRun'));
 
 const Notifications = lazy(() => import('../templates/Notifications/Notifications'));
@@ -56,6 +57,7 @@ const Drives = lazy(() => import('../templates/Drives/Drives/Drives'));
 const DriveDetails = lazy(() => import('../templates/Drives/DriveDetails/DriveDetails'));
 const FileDetails = lazy(() => import('../templates/Drives/DriveDetails/FileDetails'));
 const Settings = lazy(() => import('../templates/Settings/Settings'));
+const Security = lazy(() => import('../templates/Security/Security'));
 
 const Debug = lazy(() => import('../templates/Debug/Debug'));
 
@@ -65,7 +67,7 @@ import {
   FIRSTRUN_PATH,
   LOGIN_PATH,
   RECOVERY_PATH,
-  SETUP_PATH,
+  SETUP_PATH, SHAMIR_RECOVERY_PATH,
   useValidateAuthorization,
 } from '../hooks/auth/useAuth';
 import { useIsConfigured } from '../hooks/configure/useIsConfigured';
@@ -121,6 +123,17 @@ function App() {
                 </ErrorBoundary>
               </Suspense>
             }
+          />
+
+          <Route
+              path={SHAMIR_RECOVERY_PATH}
+              element={
+                <Suspense fallback={<LoadingDetailPage />}>
+                  <ErrorBoundary>
+                    <ShamirAccountRecovery />
+                  </ErrorBoundary>
+                </Suspense>
+              }
           />
 
           <Route
@@ -214,6 +227,9 @@ function App() {
               <Route path="settings" element={<Settings />}></Route>
               <Route path="settings/:sectionId" element={<Settings />}></Route>
 
+              <Route path="security" element={<Security />}></Route>
+              <Route path="security/:sectionId" element={<Security />}></Route>
+              
               <Route path="debug" element={<Debug />}></Route>
             </Route>
 
@@ -268,8 +284,9 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
 
   if (!isAuthenticated) {
     if (
-      location.pathname === FIRSTRUN_PATH ||
+      location.pathname === FIRSTRUN_PATH || 
       location.pathname === RECOVERY_PATH ||
+      location.pathname === SHAMIR_RECOVERY_PATH ||
       location.pathname === LOGIN_PATH
     ) {
       return <>{children}</>;

@@ -6,6 +6,7 @@ import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/
 import { PageMeta } from '@homebase-id/common-app';
 import { useFileQuery } from '../../../hooks/files/useFiles';
 import { SystemFileType } from '@homebase-id/js-lib/core';
+import { JsonViewer } from '../../../components/ui/Json';
 
 const DriveDetails = () => {
   const { driveKey, systemFileType, fileKey } = useParams();
@@ -45,10 +46,22 @@ const DriveDetails = () => {
           { title: fileKey ?? '' },
         ]}
       />
+      {/* Content JSON Viewer */}
+      {file?.fileMetadata?.appData?.content && (
+        <div className="mb-6">
+          <JsonViewer
+            data={file.fileMetadata.appData.content}
+            wrapLines={true}
+            title="Text"
+            className="max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-32rem)]"
+          />
+        </div>
+      )}
 
-      <pre className="max-w-[calc(100vw-1rem)] overflow-auto sm:max-w-[calc(100vw-32rem)]">
-        {JSON.stringify(file, null, 2)}
-      </pre>
+      {/* Full File JSON Viewer */}
+      <div className="max-w-[calc(100vw-1rem)] overflow-auto sm:max-w-[calc(100vw-32rem)]">
+        <JsonViewer data={file} />
+      </div>
     </>
   );
 };
