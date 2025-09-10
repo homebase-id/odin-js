@@ -70,7 +70,7 @@ export const DriveStatusDialog = ({
           <div className="flex flex-col gap-2">
             <h2 className="text-lg">Size info</h2>
             <p>
-              <span className="block text-slate-400">{t('Number of files')}</span>
+              <span className="block text-slate-400">{t('Number of meta files')}</span>
               {outboxStatus?.sizeInfo?.fileCount}
             </p>
             <p>
