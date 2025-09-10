@@ -59,8 +59,9 @@ export interface ImageMetadata {
 export interface BaseVideoMetadata {
   mimeType: string;
   isSegmented: boolean;
-
+  isDescriptorContentComplete?: boolean;
   fileSize?: number;
+  key?: string;
 }
 
 export interface PlainVideoMetadata extends BaseVideoMetadata {
@@ -77,6 +78,7 @@ export interface SegmentedVideoMetadata extends BaseVideoMetadata {
 export interface HlsVideoMetadata extends BaseVideoMetadata {
   isSegmented: true;
   hlsPlaylist: string;
+  duration?: number;
 }
 
 export interface ThumbnailInstruction {
