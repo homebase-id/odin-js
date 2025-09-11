@@ -4,9 +4,20 @@ import {encryptRecoveryKey, prepareAuthPassword} from "./AuthenticationHelper";
 import {getNonce, getPublicKey, getSalts} from "./AuthenticationProvider";
 
 export interface VerificationStatus {
-  passwordLastVerified: number,
-  recoveryKeyLastVerified: number,
-  distributedRecoveryLastVerified: number
+  passwordLastVerified: number; // Unix timestamp (UTC)
+  recoveryKeyLastVerified: number; // Unix timestamp (UTC)
+  periodicSecurityHealthCheckStatus: PeriodicSecurityHealthCheckStatus;
+}
+
+export interface PeriodicSecurityHealthCheckStatus {
+  lastUpdated: number; // Unix timestamp (UTC)
+  isConfigured: boolean;
+  players: PlayerShardHealthResult[];
+}
+
+export interface PlayerShardHealthResult {
+  playerId: string; // OdinId mapped as string
+  isValid: boolean;
 }
 
 const root = "/security/recovery"
@@ -29,7 +40,6 @@ export const getRecoveryInfo = async (): Promise<RecoveryInfo | null> => {
     .get<RecoveryInfo>(url)
     .then((response) => {
       console.log("getVerificationStatus");
-      console.log(response);
       return response.data;
     })
     .catch((error) => {
