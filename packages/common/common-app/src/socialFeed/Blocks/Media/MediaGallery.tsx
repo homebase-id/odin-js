@@ -6,6 +6,9 @@ import { useImageCache } from '@homebase-id/ui-lib';
 import { useIntersection, useDarkMode, useDotYouClientContext } from '../../../hooks';
 import { Triangle } from '../../../ui/Icons';
 import { BoringFile } from './PrimaryMedia';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { BaseVideoMetadata } from '@homebase-id/js-lib/media';
+import { formatDuration } from '../../../helpers/common';
 
 interface MediaGalleryProps {
   odinId?: string;
@@ -80,6 +83,10 @@ export const MediaGallery = ({
                 file.contentType.startsWith('video') ||
                 file.contentType.startsWith('application/vnd.apple.mpegurl');
 
+              const duration = tryJsonParse<BaseVideoMetadata>(
+                file.descriptorContent || '{}'
+              )?.duration;
+
               return (
                 <div
                   className={slicedFiles.length === 3 && index === 2 ? 'col-span-2' : undefined}
@@ -115,16 +122,26 @@ export const MediaGallery = ({
                       />
                     )}
 
+                    {/* Overlay for excluded files */}
                     {index === maxVisible - 1 && countExcludedFromView > 0 ? (
                       <div className="absolute inset-0 flex flex-col justify-center bg-black bg-opacity-40 text-6xl font-light text-white">
                         <span className="block text-center">+{countExcludedFromView}</span>
                       </div>
                     ) : isVideo ? (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="bg-background/40 rounded-full p-7 border border-foreground/20">
-                          <Triangle className="text-foreground h-12 w-12" />
+                      <>
+                        {/* Play icon overlay */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="bg-background/40 rounded-full p-7 border border-foreground/20">
+                            <Triangle className="text-foreground h-12 w-12" />
+                          </div>
                         </div>
-                      </div>
+                        {/* Duration overlay (bottom right) */}
+                        {duration && duration > 0 && (
+                          <div className="absolute bottom-1 right-1 bg-black bg-opacity-70 text-white text-xs px-2 py-0.5 rounded">
+                            {formatDuration(duration)}
+                          </div>
+                        )}
+                      </>
                     ) : null}
                   </div>
                 </div>

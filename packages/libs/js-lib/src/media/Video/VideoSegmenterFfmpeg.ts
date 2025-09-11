@@ -77,6 +77,12 @@ export const segmentVideoFileWithFfmpeg = async (
     throw new Error('No (supported) mp4 file found, segmentation only works with mp4 files');
   }
 
+
+
+  const mp4Info = await getMp4Info(file);
+  const durationInSeconds = mp4Info.duration / mp4Info.timescale;
+  const durationinMiliseconds = durationInSeconds * 1000;
+
   if (file.size < 5 * MB) {
     return {
       video: file,
@@ -84,13 +90,10 @@ export const segmentVideoFileWithFfmpeg = async (
         isSegmented: false,
         mimeType: 'video/mp4',
         fileSize: file.size,
+        duration: durationinMiliseconds,
       },
     };
   }
-
-  const mp4Info = await getMp4Info(file);
-  const durationInSeconds = mp4Info.duration / mp4Info.timescale;
-  const durationinMiliseconds = durationInSeconds * 1000;
   if (mp4Info.isFragmented) {
     return {
       video: file,
