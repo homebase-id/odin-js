@@ -67,6 +67,7 @@ export const processVideoFile = async (
     isDescriptorContentComplete: false,
     fileSize: metadata.fileSize,
     key: descriptorKey || DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
+    duration: metadata.duration,
   })
 
   if ('segments' in videoData) {

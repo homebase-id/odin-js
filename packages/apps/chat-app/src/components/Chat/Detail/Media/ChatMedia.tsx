@@ -15,10 +15,13 @@ import {
   useDarkMode,
   LinkPreviewItem,
   useDotYouClientContext,
+  formatDuration,
 } from '@homebase-id/common-app';
 import { Triangle } from '@homebase-id/common-app/icons';
 import { useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { BaseVideoMetadata } from '@homebase-id/js-lib/media';
 
 export const ChatMedia = ({
   msg,
@@ -77,6 +80,9 @@ const MediaItem = ({
   const isAudio = payload.contentType?.startsWith('audio');
   const isImage = payload.contentType?.startsWith('image');
   const isLink = payload.key === CHAT_LINKS_PAYLOAD_KEY;
+  const duration = isVideo
+    ? tryJsonParse<BaseVideoMetadata>(payload.descriptorContent || '{}')?.duration
+    : undefined;
 
   return (
     <div
@@ -111,6 +117,11 @@ const MediaItem = ({
               <div className="absolute inset-0 flex items-center justify-center">
                 <Triangle className="h-16 w-16 text-background" />
               </div>
+              {duration && duration > 0 && (
+                <div className="absolute bottom-1 right-1 rounded bg-black bg-opacity-70 px-2 py-0.5 text-xs text-white">
+                  {formatDuration(duration)}
+                </div>
+              )}
             </div>
           ) : isAudio ? (
             <>

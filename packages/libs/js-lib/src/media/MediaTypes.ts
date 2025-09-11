@@ -62,6 +62,7 @@ export interface BaseVideoMetadata {
   isDescriptorContentComplete?: boolean;
   fileSize?: number;
   key?: string;
+  duration: number;
 }
 
 export interface PlainVideoMetadata extends BaseVideoMetadata {
@@ -70,15 +71,12 @@ export interface PlainVideoMetadata extends BaseVideoMetadata {
 
 export interface SegmentedVideoMetadata extends BaseVideoMetadata {
   isSegmented: true;
-
   codec: string;
-  duration: number;
 }
 
 export interface HlsVideoMetadata extends BaseVideoMetadata {
   isSegmented: true;
   hlsPlaylist: string;
-  duration?: number;
 }
 
 export interface ThumbnailInstruction {
