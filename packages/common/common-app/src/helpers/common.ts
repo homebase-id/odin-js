@@ -29,9 +29,9 @@ export const getVersion = () => {
 export const flattenInfinteData = <T>(
   rawData:
     | InfiniteData<{
-        results: T[];
-        cursorState: unknown;
-      }>
+      results: T[];
+      cursorState: unknown;
+    }>
     | undefined,
   pageSize?: number,
   sortFn?: (a: T, b: T) => number
@@ -107,4 +107,17 @@ export const moveElementInArray = (arr: Array<unknown>, fromIndex: number, toInd
   arr.splice(toIndex, 0, element);
 
   return arr;
+};
+
+// Utility to format seconds to mm:ss or h:mm:ss
+export const formatDuration = (milliseconds?: number): string => {
+  if (!milliseconds || milliseconds <= 0) return '';
+  const totalSeconds = Math.floor(milliseconds / 1000);
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  if (h > 0) {
+    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+  return `${m}:${s.toString().padStart(2, '0')}`;
 };
