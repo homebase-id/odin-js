@@ -7,7 +7,8 @@ import {VerifyRecoveryKeyDialog} from "./Dialog/VerifyRecoveryKeyDialog";
 import {getRecoveryInfo, RecoveryInfo} from "../../provider/auth/SecurityHealthProvider";
 import {TimeAgoUtc} from "../../components/ui/Date/TimeAgoUtc";
 import {ChangeRecoveryEmailDialog} from "./Dialog/ChangeRecoveryEmailDialog";
-import {Check, Sad} from "@homebase-id/common-app/icons";
+import {Sad, Happy} from "@homebase-id/common-app/icons";
+import {DealerRecoveryRiskOverview} from "./DealerRecoveryRiskOverview";
 
 export const SecurityOverview = () => {
 
@@ -30,7 +31,8 @@ export const SecurityOverview = () => {
         setOpenDialog('none');
         await reset();
     }
-
+    // const recoverable = info?.recoveryRisk?.isRecoverable;
+    console.log('rr', info?.recoveryRisk)
     return (
         <>
             {/*<ErrorNotification error={updateFlagError}/>*/}
@@ -94,16 +96,20 @@ export const SecurityOverview = () => {
                                         <div className="flex items-center">
                                             <p>{t("Password recovery last verified:")}</p>
 
-                                            <TimeAgoUtc
-                                                className="ml-2 text-sm font-medium"
-                                                value={info?.status?.periodicSecurityHealthCheckStatus?.lastUpdated ?? 0}
-                                            />
-
-                                            {info?.status?.periodicSecurityHealthCheckStatus?.isConfigured ? (
-                                                <Check className="ml-2 h-5 w-5 text-green-500"/>
-                                            ) : (
-                                                <Sad className="ml-2 h-5 w-5 text-red-500"/>
-                                            )}
+                                            {info?.recoveryRisk &&
+                                                <>
+                                                    <TimeAgoUtc
+                                                        className="ml-2 text-sm font-medium"
+                                                        value={info?.recoveryRisk.healthLastChecked ?? 0}
+                                                    />
+                                                    <span className="ml-3"><DealerRecoveryRiskOverview report={info.recoveryRisk}/></span>
+                                                </>
+                                            }
+                                            {/*{recoverable ? (*/}
+                                            {/*    <Happy className="ml-2 h-5 w-5 text-green-500"/>*/}
+                                            {/*) : (*/}
+                                            {/*    <Sad className="ml-2 h-5 w-5 text-red-500"/>*/}
+                                            {/*)}*/}
                                         </div>
 
                                         <Link to="/owner/security/password-recovery" className="ml-3 underline">
