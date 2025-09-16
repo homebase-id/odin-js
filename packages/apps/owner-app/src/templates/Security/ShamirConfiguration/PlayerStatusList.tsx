@@ -2,7 +2,6 @@ import {ReactNode, useEffect, useRef, useState} from 'react';
 import {
   ConnectionImage,
   ConnectionName,
-  formatDateExludingYearIfCurrent,
   Label,
   SubtleMessage,
   t,
@@ -14,6 +13,8 @@ import {
 } from '../../../provider/auth/ShamirProvider';
 import {DotYouClient} from "@homebase-id/js-lib/core";
 import {DealerRecoveryRiskReport, ShardTrustLevel} from "../../../provider/auth/SecurityHealthProvider";
+import {TimeAgoUtc} from "../../../components/ui/Date/TimeAgoUtc";
+import {DealerRecoveryRiskOverview} from "../DealerRecoveryRiskOverview";
 
 export interface ShardVerificationResult {
   isValid: boolean;
@@ -27,28 +28,6 @@ export interface VerifyRemotePlayerShardRequest {
 type Status = 'loading' | 'valid' | 'invalid' | 'error';
 
 const toKey = (odinId: string) => odinId.toLowerCase();
-const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-/** initial backoff to avoid reporting red too early */
-async function verifyWithRetry(
-  client: DotYouClient,
-  req: VerifyRemotePlayerShardRequest,
-  {maxAttempts = 3, baseDelayMs = 1200, jitterMs = 200} = {},
-): Promise<'valid' | 'invalid' | 'error'> {
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      const result: ShardVerificationResult | null =
-        await verifyRemotePlayerShard(client, req);
-      if (result?.isValid) return 'valid';
-      if (attempt === maxAttempts) return 'invalid';
-    } catch {
-      if (attempt === maxAttempts) return 'error';
-    }
-    const wait = baseDelayMs * attempt + Math.floor((Math.random() - 0.5) * 2 * jitterMs);
-    await delay(Math.max(300, wait));
-  }
-  return 'error';
-}
 
 /** single immediate verification (used by manual retry) */
 async function verifyOnce(
@@ -97,7 +76,7 @@ export const PlayerStatusList = ({report}: { report: DealerRecoveryRiskReport })
 
     return () => clearInterval(interval);
   }, [report.players, getDotYouClient]);
-  
+
   const runVerificationOnce = async (odinId: string, shardId: string) => {
     const k = toKey(odinId);
     setStatusByOdin((prev) => ({...prev, [k]: "loading"}));
@@ -109,57 +88,63 @@ export const PlayerStatusList = ({report}: { report: DealerRecoveryRiskReport })
 
   return (
     <>
-      <div>
-        <Label>{t("Last Checked")}</Label>
-        {report.healthLastChecked
-          ? formatDateExludingYearIfCurrent(new Date(report.healthLastChecked))
-          : t("Never")}
+      <div className="flex w-full flex-row gap-2">
+        <Label>{t("Overview")}:</Label>
+        <DealerRecoveryRiskOverview report={report} onConfigure={() => {
+
+        }}/>
+      </div>
+      
+      <div className="mt-3 flex w-full flex-row gap-2">
+        <Label>{t("Last Checked")}:</Label>
+        <TimeAgoUtc value={report.healthLastChecked ?? 0}/>
+      </div>
+      
+      <div className="mt-3">
+        <Label>{t("Trusted connections")}</Label>
+        <SubtleMessage>
+          <p>
+            {t(`The connections below each hold a piece of the data needed to recover your account. To regain access, 
+            at least ${report.minRequired} trusted connections must respond to your request.`)}
+          </p>
+        </SubtleMessage>
       </div>
 
-      <br/>
-      <Label>{t("Trusted connections")}</Label>
-      <SubtleMessage>
-        <p>
-          {t(
-            `The connections below each hold a piece of the data needed to recover your account. To regain access, at least ${report.minRequired} trusted connections must respond to your request.`
-          )}
-        </p>
-      </SubtleMessage>
-      <br/>
+      <div className="flex w-full flex-col 2">
+        {report.players.length ? (
+          <div className="flex-grow overflow-auto">
+            {report.players.map((p, index) => {
+              const key = toKey(p.player.odinId);
+              const statusOverride = statusByOdin[key];
 
-      {report.players.length ? (
-        <div className="flex-grow overflow-auto">
-          {report.players.map((p, index) => {
-            const key = toKey(p.player.odinId);
-            const statusOverride = statusByOdin[key];
+              let status: Status;
+              if (p.isMissing) {
+                status = "error";
+              } else if (statusOverride) {
+                status = statusOverride;
+              } else {
+                status = p.isValid ? "valid" : "invalid";
+              }
 
-            let status: Status;
-            if (p.isMissing) {
-              status = "error";
-            } else if (statusOverride) {
-              status = statusOverride;
-            } else {
-              status = p.isValid ? "valid" : "invalid";
-            }
-
-            return (
-              <PlayerListItem
-                key={p.player.odinId || index}
-                player={p.player}
-                isActive={false}
-                status={status}
-                trustLevel={p.trustLevel}
-                isMissing={p.isMissing}
-                onRetry={() => runVerificationOnce(p.player.odinId, p.shardId)}
-              />
-            );
-          })}
-        </div>
-      ) : (
-        <div className="flex flex-grow items-center justify-center p-5">
-          <p className="text-slate-400">{t("No players selected")}</p>
-        </div>
-      )}
+              return (
+                <PlayerListItem
+                  key={p.player.odinId || index}
+                  player={p.player}
+                  isActive={false}
+                  status={status}
+                  trustLevel={p.trustLevel}
+                  isMissing={p.isMissing}
+                  onRetry={() => runVerificationOnce(p.player.odinId, p.shardId)}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <div className="flex flex-grow items-center justify-center p-5">
+            <p className="text-slate-400">{t("No players selected")}</p>
+          </div>
+        )}
+      </div>
     </>
   );
 };
@@ -307,15 +292,16 @@ function trustEmoji(level: ShardTrustLevel): string {
 function trustLabel(level: ShardTrustLevel): string {
   switch (level) {
     case ShardTrustLevel.Thumbsup:
-      return "Active recently";        // < 2 weeks
+      return "Active";
     case ShardTrustLevel.TheSideEye:
-      return "Inactive ~2–4 weeks";    // 2–4 weeks
+      return "Less active";
     case ShardTrustLevel.Warning:
-      return "Inactive ~1–3 months";   // 1–3 months
+      return "Inactive";
     case ShardTrustLevel.RedAlert:
-      return "Inactive >3 months"; // > 3 months
+      return "Unreachable";
     default:
       return "Unknown";
   }
 }
+
 
