@@ -292,7 +292,7 @@ function trustLabel(level: ShardTrustLevel): string {
         case ShardTrustLevel.Warning:
             return "Inactive ~1–3 months";   // 1–3 months
         case ShardTrustLevel.RedAlert:
-            return "Inactive >3 months / Unknown"; // > 3 months
+            return "Inactive >3 months"; // > 3 months
         default:
             return "Unknown";
     }

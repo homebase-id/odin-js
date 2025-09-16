@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
   DEFAULT_PAYLOAD_KEY,
   EmbeddedThumb,
   HomebaseFile,
@@ -51,7 +52,12 @@ export const CommunityMediaGallery = ({
   };
 
   const allkeys = msg.fileMetadata.payloads
-    ?.filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY && pyld.key !== BACKEDUP_PAYLOAD_KEY)
+    ?.filter(
+      (pyld) =>
+        pyld.key !== DEFAULT_PAYLOAD_KEY &&
+        pyld.key !== BACKEDUP_PAYLOAD_KEY &&
+        !pyld.key.includes(DEFAULT_PAYLOAD_DESCRIPTOR_KEY)
+    )
     ?.map((p) => p.key);
   const nextKey = allkeys?.[allkeys.indexOf(mediaKey) + 1];
   const prevKey = allkeys?.[allkeys.indexOf(mediaKey) - 1];

@@ -1,5 +1,10 @@
 import { PostContent } from '@homebase-id/js-lib/public';
-import { DEFAULT_PAYLOAD_KEY, EmbeddedThumb, PayloadDescriptor } from '@homebase-id/js-lib/core';
+import {
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
+  DEFAULT_PAYLOAD_KEY,
+  EmbeddedThumb,
+  PayloadDescriptor,
+} from '@homebase-id/js-lib/core';
 import { MediaGallery } from './MediaGallery';
 import { PrimaryMedia } from './PrimaryMedia';
 
@@ -31,7 +36,9 @@ export const PostMedia = ({
   // Fo articles we only want the primary media file
   const mediaFiles =
     postInfo?.content.type !== 'Article'
-      ? postInfo?.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY)
+      ? postInfo?.payloads?.filter(
+          (p) => p.key !== DEFAULT_PAYLOAD_KEY && !p.key.includes(DEFAULT_PAYLOAD_DESCRIPTOR_KEY)
+        )
       : postInfo?.payloads?.filter((p) => p.key === postInfo.content.primaryMediaFile?.fileKey);
 
   if (!post.primaryMediaFile) {

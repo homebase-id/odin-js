@@ -6,7 +6,12 @@ import {
 } from '@homebase-id/js-lib/public';
 import { useEffect } from 'react';
 
-import { DEFAULT_PAYLOAD_KEY, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
+import {
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
+  DEFAULT_PAYLOAD_KEY,
+  HomebaseFile,
+  NewHomebaseFile,
+} from '@homebase-id/js-lib/core';
 import { getAnonymousDirectImageUrl } from '@homebase-id/js-lib/media';
 import { Helmet } from 'react-helmet-async';
 import { Video } from '../../media/Video';
@@ -46,7 +51,9 @@ export const PostImageDetailCard = ({
   const currIndex = attachmentKey ? parseInt(attachmentKey) : 0;
   const post = postFile?.fileMetadata.appData.content;
 
-  const mediaFiles = postFile?.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY);
+  const mediaFiles = postFile?.fileMetadata.payloads?.filter(
+    (p) => p.key !== DEFAULT_PAYLOAD_KEY && !p.key.includes(DEFAULT_PAYLOAD_DESCRIPTOR_KEY)
+  );
 
   const doSlide = (dir: 1 | -1) => {
     const dirtyIndex = currIndex + dir;
