@@ -5,7 +5,7 @@ import {
 import {ConfigureShardsRequest} from "../../../provider/auth/ShamirProvider";
 import {ConfigureTrustedConnections} from "./ConfigureTrustedConnections";
 
-export const DistributeShards = ({config}: {
+export const DistributeShardsReview = ({config}: {
   config: ConfigureShardsRequest;
 }) => {
 
