@@ -56,7 +56,7 @@ function ActionPrompt({riskLevel}: {
     case RecoveryRiskLevel.Critical:
       return (
         <Link to={url} className="text-blue-600 underline">
-          Add or replace shards immediately
+          Reset now
         </Link>
       );
 
