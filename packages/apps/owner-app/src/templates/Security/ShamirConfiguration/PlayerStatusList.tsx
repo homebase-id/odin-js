@@ -1,20 +1,24 @@
-import {ReactNode, useEffect, useRef, useState} from 'react';
+import {ReactNode, useEffect, useRef, useState} from "react";
 import {
   ConnectionImage,
   ConnectionName,
   Label,
   SubtleMessage,
   t,
-  useDotYouClient
-} from '@homebase-id/common-app';
+  useDotYouClient,
+} from "@homebase-id/common-app";
 import {
+  playerTypeText,
   ShamiraPlayer,
-  verifyRemotePlayerShard
-} from '../../../provider/auth/ShamirProvider';
+  verifyRemotePlayerShard,
+} from "../../../provider/auth/ShamirProvider";
 import {DotYouClient} from "@homebase-id/js-lib/core";
-import {DealerRecoveryRiskReport, ShardTrustLevel} from "../../../provider/auth/SecurityHealthProvider";
+import {
+  DealerRecoveryRiskReport,
+  ShardTrustLevel,
+} from "../../../provider/auth/SecurityHealthProvider";
 import {TimeAgoUtc} from "../../../components/ui/Date/TimeAgoUtc";
-import {DealerRecoveryRiskOverview} from "../DealerRecoveryRiskOverview";
+import {DealerRecoveryRiskDetails} from "../DealerRecoveryRiskDetails";
 
 export interface ShardVerificationResult {
   isValid: boolean;
@@ -25,25 +29,29 @@ export interface VerifyRemotePlayerShardRequest {
   shardId: string;
 }
 
-type Status = 'loading' | 'valid' | 'invalid' | 'error';
+type Status = "loading" | "valid" | "invalid" | "error";
 
 const toKey = (odinId: string) => odinId.toLowerCase();
 
 /** single immediate verification (used by manual retry) */
 async function verifyOnce(
   client: DotYouClient,
-  req: VerifyRemotePlayerShardRequest,
-): Promise<'valid' | 'invalid' | 'error'> {
+  req: VerifyRemotePlayerShardRequest
+): Promise<"valid" | "invalid" | "error"> {
   try {
     const result: ShardVerificationResult | null =
       await verifyRemotePlayerShard(client, req);
-    return result?.isValid ? 'valid' : 'invalid';
+    return result?.isValid ? "valid" : "invalid";
   } catch {
-    return 'error';
+    return "error";
   }
 }
 
-export const PlayerStatusList = ({report}: { report: DealerRecoveryRiskReport }) => {
+export const PlayerStatusList = ({
+                                   report,
+                                 }: {
+  report: DealerRecoveryRiskReport;
+}) => {
   const [statusByOdin, setStatusByOdin] = useState<Record<string, Status>>({});
   const {getDotYouClient} = useDotYouClient();
   const unmountedRef = useRef(false);
@@ -59,7 +67,7 @@ export const PlayerStatusList = ({report}: { report: DealerRecoveryRiskReport })
     if (!report.players.length) return;
 
     // first run immediately
-    report.players.forEach(p => {
+    report.players.forEach((p) => {
       if (!p.isMissing && !p.isValid) {
         runVerificationOnce(p.player.odinId, p.shardId);
       }
@@ -67,7 +75,7 @@ export const PlayerStatusList = ({report}: { report: DealerRecoveryRiskReport })
 
     // set up interval
     const interval = setInterval(() => {
-      report.players.forEach(p => {
+      report.players.forEach((p) => {
         if (!p.isMissing && !p.isValid) {
           runVerificationOnce(p.player.odinId, p.shardId);
         }
@@ -90,27 +98,27 @@ export const PlayerStatusList = ({report}: { report: DealerRecoveryRiskReport })
     <>
       <div className="flex w-full flex-row gap-2">
         <Label>{t("Overview")}:</Label>
-        <DealerRecoveryRiskOverview report={report} onConfigure={() => {
-
-        }}/>
+        <DealerRecoveryRiskDetails report={report}/>
       </div>
-      
+
       <div className="mt-3 flex w-full flex-row gap-2">
         <Label>{t("Last Checked")}:</Label>
         <TimeAgoUtc value={report.healthLastChecked ?? 0}/>
       </div>
-      
+
       <div className="mt-3">
         <Label>{t("Trusted connections")}</Label>
         <SubtleMessage>
           <p>
-            {t(`The connections below each hold a piece of the data needed to recover your account. To regain access, 
-            at least ${report.minRequired} trusted connections must respond to your request.`)}
+            {t(
+              `The connections below each hold a piece of the data needed to recover your account. To regain access, 
+            at least ${report.minRequired} trusted connections must respond to your request.`
+            )}
           </p>
         </SubtleMessage>
       </div>
 
-      <div className="flex w-full flex-col 2">
+      <div className="flex w-full flex-col">
         {report.players.length ? (
           <div className="flex-grow overflow-auto">
             {report.players.map((p, index) => {
@@ -134,7 +142,9 @@ export const PlayerStatusList = ({report}: { report: DealerRecoveryRiskReport })
                   status={status}
                   trustLevel={p.trustLevel}
                   isMissing={p.isMissing}
-                  onRetry={() => runVerificationOnce(p.player.odinId, p.shardId)}
+                  onRetry={() =>
+                    runVerificationOnce(p.player.odinId, p.shardId)
+                  }
                 />
               );
             })}
@@ -148,7 +158,6 @@ export const PlayerStatusList = ({report}: { report: DealerRecoveryRiskReport })
     </>
   );
 };
-
 
 export const PlayerListItem = ({
                                  player,
@@ -175,8 +184,12 @@ export const PlayerListItem = ({
       />
 
       <div className="flex w-full items-center justify-between">
+
         {/* Left: Player name */}
-        <ConnectionName odinId={player.odinId as string}/>
+        <div>
+          <ConnectionName odinId={player.odinId as string}/>
+          <span className="ml-3 text-sm text-slate-400">({playerTypeText(player.type)})</span>
+        </div>
 
         {/* Right: Verification + Trust + Retry */}
         <div className="flex flex-col md:flex-row md:items-center md:gap-6 gap-2 text-right">
@@ -184,26 +197,25 @@ export const PlayerListItem = ({
           <div className="flex items-center gap-2 justify-end">
             <StatusIcon status={status}/>
             <span className="text-sm text-slate-700 dark:text-slate-300">
-          {status === "valid" && t("Shard verified")}
+              {status === "valid" && t("Shard verified")}
               {status === "invalid" && t("Shard invalid")}
               {status === "error" && t("Error verifying")}
               {status === "loading" && t("Verifying…")}
-        </span>
+            </span>
           </div>
 
-          {/* Trust / last seen */}
           <div
             className={`flex items-center gap-2 justify-end text-sm ${
-              trustLevel === ShardTrustLevel.RedAlert || isMissing
+              trustLevel === ShardTrustLevel.Critical && player.type === "delegate" || isMissing
                 ? "text-red-600"
-                : trustLevel === ShardTrustLevel.Warning
+                : trustLevel === ShardTrustLevel.Medium
                   ? "text-orange-600"
-                  : trustLevel === ShardTrustLevel.TheSideEye
+                  : trustLevel === ShardTrustLevel.Low
                     ? "text-yellow-600"
                     : "text-green-600"
             }`}
           >
-            {trustEmoji(trustLevel)} {trustLabel(trustLevel)}
+            {trustEmoji(trustLevel)} {trustLabel(trustLevel, player.type)}
             {isMissing && " (missing)"}
           </div>
 
@@ -224,7 +236,6 @@ export const PlayerListItem = ({
         </div>
       </div>
     </ListItemWrapper>
-
   );
 };
 
@@ -241,7 +252,7 @@ const ListItemWrapper = ({
     <div
       onClick={onClick}
       className={`flex w-full cursor-pointer flex-row items-center gap-3 rounded-lg px-3 py-4 transition-colors hover:bg-primary/20 ${
-        isActive ? 'bg-slate-200 dark:bg-slate-800' : 'bg-transparent'
+        isActive ? "bg-slate-200 dark:bg-slate-800" : "bg-transparent"
       }`}
     >
       {children}
@@ -250,58 +261,103 @@ const ListItemWrapper = ({
 );
 
 const StatusIcon = ({status}: { status: Status }) => {
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
-      <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-label="Verifying…">
-        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" opacity="0.25"/>
-        <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <svg
+        className="h-5 w-5 animate-spin"
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-label="Verifying…"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="9"
+          stroke="currentColor"
+          strokeWidth="2"
+          opacity="0.25"
+        />
+        <path
+          d="M21 12a9 9 0 0 0-9-9"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
       </svg>
     );
   }
-  if (status === 'valid') {
+  if (status === "valid") {
     return (
-      <svg className="h-5 w-5 text-green-600" viewBox="0 0 24 24" fill="none" aria-label="Valid">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-        <path d="M8 12l3 3 5-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <svg
+        className="h-5 w-5 text-green-600"
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-label="Valid"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="2"
+        />
+        <path
+          d="M8 12l3 3 5-6"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
       </svg>
     );
   }
   return (
-    <svg className="h-5 w-5 text-red-600" viewBox="0 0 24 24" fill="none" aria-label="Invalid">
+    <svg
+      className="h-5 w-5 text-red-600"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-label="Invalid"
+    >
       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-      <path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <path
+        d="M9 9l6 6M15 9l-6 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 };
 
 function trustEmoji(level: ShardTrustLevel): string {
   switch (level) {
-    case ShardTrustLevel.Thumbsup:
-      return "👍";
-    case ShardTrustLevel.TheSideEye:
-      return "👀";
-    case ShardTrustLevel.Warning:
+    case ShardTrustLevel.High:
+      return "✅";
+    case ShardTrustLevel.Medium:
       return "⚠️";
-    case ShardTrustLevel.RedAlert:
+    case ShardTrustLevel.Low:
+      return "👀";
+    case ShardTrustLevel.Critical:
       return "🚨";
     default:
       return "";
   }
 }
 
-function trustLabel(level: ShardTrustLevel): string {
+function trustLabel(level: ShardTrustLevel, playerType: string): string {
+  if (playerType === "automatic" && level === ShardTrustLevel.Critical) {
+    return "Automatic (ok)";
+  }
+
   switch (level) {
-    case ShardTrustLevel.Thumbsup:
+    case ShardTrustLevel.High:
       return "Active";
-    case ShardTrustLevel.TheSideEye:
-      return "Less active";
-    case ShardTrustLevel.Warning:
+    case ShardTrustLevel.Medium:
       return "Inactive";
-    case ShardTrustLevel.RedAlert:
+    case ShardTrustLevel.Low:
+      return "Less active";
+    case ShardTrustLevel.Critical:
       return "Unreachable";
     default:
       return "Unknown";
   }
 }
-
-

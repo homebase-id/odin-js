@@ -13,8 +13,6 @@ import {
 import {createPortal} from "react-dom";
 import {PlayerStatusList} from "./PlayerStatusList";
 import {getRecoveryInfo, RecoveryInfo, ShardTrustLevel} from "../../../provider/auth/SecurityHealthProvider";
-import {TimeAgoUtc} from "../../../components/ui/Date/TimeAgoUtc";
-import {DealerRecoveryRiskOverview} from "../DealerRecoveryRiskOverview";
 
 export const ShamirDistributionDialog = ({
                                            title,
@@ -301,7 +299,7 @@ function WaitForShardConfig({request}: { request: ConfigureShardsRequest }) {
 
   const badShards =
     recoveryInfo?.recoveryRisk?.players.filter(
-      (p) => !p.isValid || p.isMissing || p.trustLevel === ShardTrustLevel.RedAlert
+      (p) => !p.isValid || p.isMissing || p.trustLevel === ShardTrustLevel.Critical
     ) ?? [];
 
   if (hasIssue) {

@@ -54,7 +54,6 @@ export const PasswordRecoverySetupTab = () => {
                             </small>
                         </div>
                     }>
-
                         <>
                             <div className="mb-2">
 

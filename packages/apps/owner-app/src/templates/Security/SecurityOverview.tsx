@@ -7,7 +7,7 @@ import {VerifyRecoveryKeyDialog} from "./Dialog/VerifyRecoveryKeyDialog";
 import {getRecoveryInfo, RecoveryInfo} from "../../provider/auth/SecurityHealthProvider";
 import {TimeAgoUtc} from "../../components/ui/Date/TimeAgoUtc";
 import {ChangeRecoveryEmailDialog} from "./Dialog/ChangeRecoveryEmailDialog";
-import {DealerRecoveryRiskOverview} from "./DealerRecoveryRiskOverview";
+import {DealerRecoveryRiskHeadline} from "./DealerRecoveryRiskHeadline";
 
 export const SecurityOverview = () => {
 
@@ -103,11 +103,7 @@ export const SecurityOverview = () => {
                           <TimeAgoUtc className="ml-2" value={info.recoveryRisk.healthLastChecked ?? 0}/>
                         </div>
 
-                        <DealerRecoveryRiskOverview
-                          report={info.recoveryRisk}
-                          onConfigure={() => {
-                          }}
-                        />
+                        <DealerRecoveryRiskHeadline report={info.recoveryRisk}/>
                       </div>
                     )}
                   </div>

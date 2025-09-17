@@ -5,30 +5,44 @@ import {getNonce, getPublicKey, getSalts} from "./AuthenticationProvider";
 import {ShamiraPlayer} from "./ShamirProvider";
 
 export interface DealerRecoveryRiskReport {
-
-  healthLastChecked: number;
-
-  /** True if the dealer currently has enough usable shards */
+  /**
+   * True if the dealer currently has enough usable shards
+   * to meet or exceed `minRequired`.
+   */
   isRecoverable: boolean;
 
-  /** Number of usable shards (isValid && !isMissing && trustLevel !== RedAlert) */
+  /**
+   * Number of shards considered usable
+   * (isValid && not missing && trustLevel != Critical).
+   */
   validShardCount: number;
 
-  /** Minimum number of shards required for recovery */
+  /**
+   * The minimum number of shards required for recovery.
+   */
   minRequired: number;
 
-  /** Overall system risk level */
+  /**
+   * Overall system risk level, based on shard health and trust.
+   */
   riskLevel: RecoveryRiskLevel;
 
-  /** Detailed per-player shard health */
+  /**
+   * Detailed per-player shard health (includes isMissing, trustLevel, etc).
+   */
   players: PlayerShardHealthResult[];
+
+  /**
+   * Last time health was checked (UTC).
+   */
+  healthLastChecked?: number; 
 }
 
 export enum RecoveryRiskLevel {
-  Low = "Low",         // Plenty of shards, mostly healthy and active
-  Moderate = "Moderate", // Enough shards, but some are getting stale
-  High = "High",       // Just enough shards, or some show worrisome trust levels
-  Critical = "Critical" // Not enough usable shards to meet recovery threshold
+  Low = "low",         // Plenty of shards, mostly healthy and active
+  Moderate = "moderate", // Enough shards, but some are getting stale
+  High = "high",       // Just enough shards, or some show worrisome trust levels
+  Critical = "critical" // Not enough usable shards to meet recovery threshold
 }
 
 export interface PeriodicSecurityHealthCheckStatus {
@@ -46,12 +60,11 @@ export interface PlayerShardHealthResult {
 }
 
 export enum ShardTrustLevel {
-  Thumbsup = "thumbsup",   // Active recently
-  TheSideEye = "theSideEye", // Slightly stale
-  Warning = "warning",     // Worrisome
-  RedAlert = "redAlert"    // Very stale or missing
+  Low = "low",
+  Medium = "medium",
+  High = "high",
+  Critical = "critical",
 }
-
 
 export interface VerificationStatus {
   passwordLastVerified: number; // Unix timestamp (UTC)
