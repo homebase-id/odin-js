@@ -1,7 +1,7 @@
-import { base64ToUint8Array } from '@homebase-id/js-lib/helpers';
-import { OwnerClient } from '@homebase-id/common-app';
-import { NonceData, encryptRecoveryKey, prepareAuthPassword } from './AuthenticationHelper';
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
+import {base64ToUint8Array} from '@homebase-id/js-lib/helpers';
+import {OwnerClient} from '@homebase-id/common-app';
+import {NonceData, encryptRecoveryKey, prepareAuthPassword} from './AuthenticationHelper';
+import {ApiType, DotYouClient} from '@homebase-id/js-lib/core';
 
 interface AuthenticationResponse {
   sharedSecret: Uint8Array;
@@ -16,7 +16,7 @@ export const authenticate = async (password: string): Promise<AuthenticationResp
   const noncePackage = await getNonce(dotYouClient);
   const reply = await prepareAuthPassword(password, noncePackage);
 
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
   const url = '/authentication';
 
   const response = await client.post(url, reply);
@@ -31,6 +31,32 @@ export const authenticate = async (password: string): Promise<AuthenticationResp
   return null;
 };
 
+
+// Verifies the password without logging in the owner (i.e. changing cookies, etc.)
+export const verifyPassword = async (password: string): Promise<boolean> => {
+  const dotYouClient = new OwnerClient({
+    api: ApiType.Owner,
+  });
+
+  const noncePackage = await getNonce(dotYouClient);
+  const reply = await prepareAuthPassword(password, noncePackage);
+
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
+  const url = '/authentication/verify-password';
+
+  return await client.post(url, reply)
+    .then((response) => {
+      return response.status === 200;
+    })
+    .catch((error) => {
+      if (error.response?.status === 403) {
+        return false;
+      }
+      console.error(error);
+      return false;
+    });
+};
+
 export const setFirstPassword = async (
   newPassword: string,
   firstRunToken: string
@@ -43,8 +69,8 @@ export const setFirstPassword = async (
   const reply = await prepareAuthPassword(newPassword, salts);
 
   return dotYouClient
-    .createAxiosClient({ overrideEncryption: true })
-    .post('/authentication/passwd', { ...reply, firstRunToken })
+    .createAxiosClient({overrideEncryption: true})
+    .post('/authentication/passwd', {...reply, firstRunToken})
     .then((response) => {
       return response.status === 200;
     })
@@ -66,8 +92,8 @@ export const resetPassword = async (newPassword: string, recoveryKey: string): P
   const encryptedRecoveryKey = await encryptRecoveryKey(recoveryKey, passwordReply, publicKey);
 
   return dotYouClient
-    .createAxiosClient({ overrideEncryption: true })
-    .post('/authentication/resetpasswdrk', { passwordReply, encryptedRecoveryKey })
+    .createAxiosClient({overrideEncryption: true})
+    .post('/authentication/resetpasswdrk', {passwordReply, encryptedRecoveryKey})
     .then((response) => {
       return response.status === 200;
     })
@@ -89,8 +115,8 @@ export const changePassword = async (
   const newPasswordReply = await prepareAuthPassword(newPassword, salts);
 
   return dotYouClient
-    .createAxiosClient({ overrideEncryption: false })
-    .post('/security/resetpasswd', { currentAuthenticationPasswordReply, newPasswordReply })
+    .createAxiosClient({overrideEncryption: false})
+    .post('/security/resetpasswd', {currentAuthenticationPasswordReply, newPasswordReply})
     .then((response) => {
       return response.status === 200;
     })
@@ -104,7 +130,7 @@ export const finalizeRegistration = async (firstRunToken: string) => {
   const dotYouClient = new OwnerClient({
     api: ApiType.Owner,
   });
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
   const url = '/config/registration/finalize?frid=' + firstRunToken;
 
   return await client.get(url).then((response) => {
@@ -118,7 +144,7 @@ export const isPasswordSet = async (): Promise<boolean> => {
   });
 
   return dotYouClient
-    .createAxiosClient({ overrideEncryption: true })
+    .createAxiosClient({overrideEncryption: true})
     .post('/authentication/ispasswordset')
     .then((response) => {
       return response.data == true;
@@ -127,7 +153,7 @@ export const isPasswordSet = async (): Promise<boolean> => {
 
 /// Internal helpers
 export const getNonce = async (dotYouClient: DotYouClient): Promise<NonceData> => {
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
   return client
     .get('/authentication/nonce')
     .then((response) => {
@@ -136,8 +162,8 @@ export const getNonce = async (dotYouClient: DotYouClient): Promise<NonceData> =
     .catch(dotYouClient.handleErrorResponse);
 };
 
-const getSalts = async (dotYouClient: DotYouClient): Promise<NonceData> => {
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
+export const getSalts = async (dotYouClient: DotYouClient): Promise<NonceData> => {
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
   return client.get('/authentication/getsalts').then((response) => {
     return response.data;
   });
@@ -149,8 +175,8 @@ export interface PublicKeyData {
   expiration: number;
 }
 
-const getPublicKey = async (dotYouClient: DotYouClient): Promise<PublicKeyData> => {
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
+export const getPublicKey = async (dotYouClient: DotYouClient): Promise<PublicKeyData> => {
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
   return client
     .get<PublicKeyData>('/authentication/publickey_ecc?keyType=offlineKey')
     .then((response) => {

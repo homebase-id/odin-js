@@ -19,6 +19,7 @@ import {
 import { useCommunityMessage } from '../../../../hooks/community/messages/useCommunityMessage';
 import { ChannelPlugin } from '../RTEChannelDropdown/RTEChannelDropdownPlugin';
 import type { Mentionable } from '@homebase-id/rich-text-editor';
+import {TableFlipPlugin} from "../RTETableFlipDropdown/RTEChannelDropdownPlugin";
 
 const RichTextEditor = lazy(() =>
   import('@homebase-id/rich-text-editor').then((rootExport) => ({
@@ -84,7 +85,7 @@ export const CommunityMessageEditor = ({
         ...msg.fileMetadata,
         appData: {
           ...msg.fileMetadata.appData,
-          content: { ...msg.fileMetadata.appData.content, message: newMessage },
+          content: { ...msg.fileMetadata.appData.content, message: newMessage, isEdited: true },
         },
       },
     };
@@ -135,6 +136,8 @@ export const CommunityMessageEditor = ({
     return [
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      TableFlipPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
     ];
   }, []);
 

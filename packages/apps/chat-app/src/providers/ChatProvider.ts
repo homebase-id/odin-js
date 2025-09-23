@@ -38,6 +38,7 @@ import {
   SystemFileType,
   getContentFromHeader,
   getPayloadAsJson,
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
 } from '@homebase-id/js-lib/core';
 import {
   ChatDrive,
@@ -93,6 +94,7 @@ export interface ChatMessage {
 
   // DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;
+  isEdited?: boolean;
 }
 
 const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_web';
@@ -422,13 +424,14 @@ export const uploadChatMessage = async (
 
   for (let i = 0; files && i < files?.length; i++) {
     const payloadKey = `${CHAT_MESSAGE_PAYLOAD_KEY}${i}`;
+    const descriptorKey = `${DEFAULT_PAYLOAD_DESCRIPTOR_KEY}${i}`;
     const newMediaFile = files[i];
     if (newMediaFile.file.type.startsWith('video/')) {
       const {
         tinyThumb,
         thumbnails: thumbnailsFromVideo,
         payloads: payloadsFromVideo,
-      } = await processVideoFile(newMediaFile, payloadKey, aesKey);
+      } = await processVideoFile(newMediaFile, payloadKey, descriptorKey, aesKey);
 
       thumbnails.push(...thumbnailsFromVideo);
       payloads.push(...payloadsFromVideo);

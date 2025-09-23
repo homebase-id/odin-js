@@ -27,6 +27,11 @@ import { ContactConfig } from '@homebase-id/js-lib/network';
 import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
 import { useFile } from '../../../hooks/files/useFiles';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
+import {
+  SHAMIR_DEALER_SHARD_CONFIG_FILE_TYPE,
+  SHAMIR_PLAYER_COLLECTED_SHARD_REQUEST_FILE_TYPE,
+  SHAMIR_PLAYER_ENCRYPTED_SHARD_FILE_TYPE,
+} from '../../../provider/auth/ShamirProvider';
 
 export const FileCard = ({
   targetDrive,
@@ -38,6 +43,8 @@ export const FileCard = ({
   isRow?: boolean;
 }) => {
   const firstPayload = file.fileMetadata.payloads?.[0];
+  const canDownload = !file.fileMetadata.dataSource?.payloadsAreRemote;
+
   const contentType = firstPayload?.contentType || 'application/json';
   const isImage = [
     'image/webp',
@@ -95,7 +102,8 @@ export const FileCard = ({
               />
             </div>
           )}
-          {firstPayload ? (
+          {/* TODO: We should see if we can support remote payloads downloading  */}
+          {firstPayload && canDownload ? (
             <div className="absolute inset-0 flex cursor-pointer flex-row items-center justify-center bg-slate-200 bg-opacity-50 opacity-0 hover:opacity-100">
               <FileDownload file={file} targetDrive={targetDrive} payloadKey={firstPayload.key} />
             </div>
@@ -155,7 +163,6 @@ const FileDownload = ({
   className?: string;
 }) => {
   const fetchFile = useFile({ targetDrive }).fetchFile;
-
   const doDownload = (url: string) => {
     // Dirty hack for easy download
     const link = document.createElement('a');
@@ -264,6 +271,15 @@ const FileTypeLabel = ({ file }: { file: HomebaseFile<string> | DeletedHomebaseF
       return 'Community Defintion';
     case COMMUNITY_MESSAGE_FILE_TYPE:
       return 'Community Message';
+
+    // Shamir password recovery
+    case SHAMIR_DEALER_SHARD_CONFIG_FILE_TYPE:
+      return 'Password Recovery Dealer Shard Config';
+    case SHAMIR_PLAYER_ENCRYPTED_SHARD_FILE_TYPE:
+      return 'Password Recovery Player Encrypted Shard';
+
+    case SHAMIR_PLAYER_COLLECTED_SHARD_REQUEST_FILE_TYPE:
+      return 'Password Recovery Collected Shard Request File';
 
     // Assets
     case 0:

@@ -1,5 +1,4 @@
 import { Suspense, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ChannelDefinition, EmbeddedPost, PostContent } from '@homebase-id/js-lib/public';
 import { OwnerActions } from './OwnerActions';
 import { ApiType, DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
@@ -7,12 +6,12 @@ import { aclEqual } from '@homebase-id/js-lib/helpers';
 import { AclSummary } from '../../../acl';
 import { t } from '../../../helpers';
 import { ActionGroupOptionProps, ActionGroup, ErrorNotification } from '../../../ui';
-import { ChannelDefinitionVm, useManagePost, useManageSocialFeed } from '../../../hooks/socialFeed';
-import { useIsConnected } from '../../../hooks/connections/useIsConnected';
+import { ChannelDefinitionVm, useManagePost, useManageSocialFeed } from '../../../hooks';
+import { useIsConnected } from '../../../hooks';
 import { EditPostDialog } from '../../EditPostDialog/EditPostDialog';
-import { Persons, UserX, Times, Flag, Block, Link, Trash, Lock, Pencil } from '../../../ui/Icons';
+import { Persons, UserX, Times, Flag, Block, Link, Trash, Lock } from '../../../ui/Icons';
 import { FEED_ROOT_PATH, HOME_ROOT_PATH } from '../../../constants';
-import { useDotYouClientContext } from '../../../hooks/auth/useDotYouClientContext';
+import { useDotYouClientContext } from '../../../hooks';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;
@@ -118,7 +117,8 @@ export const PostMeta = ({
               <OwnerActions postFile={postFile} channel={channel} />
             </Suspense>
           ) : odinId ? (
-            <ExternalActions odinId={odinId} channel={channel} postFile={postFile} />
+            // <ExternalActions odinId={odinId} channel={channel} postFile={postFile} />
+            <ExternalActions odinId={odinId} postFile={postFile} />
           ) : null}
         </>
       )}
@@ -172,17 +172,12 @@ export const ToGroupBlock = ({
 
 const ExternalActions = ({
   odinId,
-  channel,
   postFile,
 }: {
   odinId: string;
-  channel?:
-    | HomebaseFile<ChannelDefinitionVm | ChannelDefinition>
-    | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
   postFile: HomebaseFile<PostContent>;
 }) => {
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
-  const navigate = useNavigate();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const {
@@ -282,7 +277,6 @@ const GroupChannelActions = ({
     | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
   postFile: HomebaseFile<PostContent>;
 }) => {
-  const navigate = useNavigate();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();

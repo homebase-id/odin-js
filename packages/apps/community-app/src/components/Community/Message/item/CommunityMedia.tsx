@@ -6,6 +6,7 @@ import {
   NewPayloadDescriptor,
   SystemFileType,
   DEFAULT_PAYLOAD_KEY,
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
 } from '@homebase-id/js-lib/core';
 import { OdinImage, OdinThumbnailImage, OdinAudio, OdinAudioWaveForm } from '@homebase-id/ui-lib';
 
@@ -15,6 +16,7 @@ import {
   LinkPreviewItem,
   useDotYouClientContext,
   COMMUNITY_ROOT_PATH,
+  formatDuration,
 } from '@homebase-id/common-app';
 import { Triangle } from '@homebase-id/common-app/icons';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -25,6 +27,8 @@ import {
   CommunityMessage,
 } from '../../../../providers/CommunityMessageProvider';
 import { getTargetDriveFromCommunityId } from '../../../../providers/CommunityDefinitionProvider';
+import { BaseVideoMetadata } from '@homebase-id/js-lib/media';
+import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 
 export const CommunityMedia = ({
   odinId,
@@ -38,7 +42,10 @@ export const CommunityMedia = ({
   originId?: string;
 }) => {
   const payloads = msg.fileMetadata.payloads?.filter(
-    (pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY && pyld.key !== BACKEDUP_PAYLOAD_KEY
+    (pyld) =>
+      pyld.key !== DEFAULT_PAYLOAD_KEY &&
+      pyld.key !== BACKEDUP_PAYLOAD_KEY &&
+      !pyld.key?.includes(DEFAULT_PAYLOAD_DESCRIPTOR_KEY)
   );
   const isGallery = payloads && payloads.length >= 2;
   const navigate = useNavigate();
@@ -107,6 +114,9 @@ const MediaItem = ({
   const isAudio = payload.contentType?.startsWith('audio');
   const isImage = payload.contentType?.startsWith('image');
   const isLink = payload.key === COMMUNITY_LINKS_PAYLOAD_KEY;
+  const duration = isVideo
+    ? tryJsonParse<BaseVideoMetadata>(payload.descriptorContent || '{}')?.duration
+    : undefined;
 
   const targetDrive = getTargetDriveFromCommunityId(communityId);
 
@@ -148,6 +158,11 @@ const MediaItem = ({
               <div className="absolute inset-0 flex items-center justify-center">
                 <Triangle className="h-16 w-16 text-black dark:text-white" />
               </div>
+              {duration && duration > 0 && (
+                <div className="absolute bottom-1 right-1 rounded bg-black bg-opacity-70 px-2 py-0.5 text-xs text-white">
+                  {formatDuration(duration)}
+                </div>
+              )}
             </div>
           ) : isAudio ? (
             <>

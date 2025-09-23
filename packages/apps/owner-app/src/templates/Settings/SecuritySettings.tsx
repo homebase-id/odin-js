@@ -6,11 +6,11 @@ import {
   logoutOwnerAndAllApps,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
-import { useState } from 'react';
+import {useState} from 'react';
 import Section from '../../components/ui/Sections/Section';
-import { useAuth } from '../../hooks/auth/useAuth';
-import { PasswordInput } from '../../components/Password/PasswordInput';
-import { PasswordStrength } from '../../components/Password/PasswordStrength';
+import {useAuth} from '../../hooks/auth/useAuth';
+import {PasswordInput} from '../../components/Password/PasswordInput';
+import {PasswordStrength} from '../../components/Password/PasswordStrength';
 
 export const SecuritySettings = () => {
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
@@ -19,7 +19,7 @@ export const SecuritySettings = () => {
   const [password, setPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
 
-  const { changePassword } = useAuth();
+  const {changePassword} = useAuth();
   const dotYouClient = useDotYouClientContext();
 
   const passwordIsValid = password === retypePassword && password !== '';
@@ -75,7 +75,7 @@ export const SecuritySettings = () => {
                 autoComplete="current-password"
               />
             </div>
-            <hr className="mb-5 mt-7" />
+            <hr className="mb-5 mt-7"/>
             <div className="mb-2">
               <Label>{t('New password')}</Label>
               <PasswordInput
@@ -89,7 +89,7 @@ export const SecuritySettings = () => {
               />
             </div>
 
-            <PasswordStrength password={password} userInputs={[oldPassword]} className="mb-2" />
+            <PasswordStrength password={password} userInputs={[oldPassword]} className="mb-2"/>
 
             <div className="mb-2">
               <Label htmlFor="retypepassword" className="text-sm leading-7 dark:text-gray-400">
