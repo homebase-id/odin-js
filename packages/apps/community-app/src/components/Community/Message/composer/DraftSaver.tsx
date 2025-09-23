@@ -65,7 +65,8 @@ export const DraftSaver = memo(
                 )
                     return;
 
-                const emptiedDraft = isEmptyRichText(message) ? [] : message;
+                //const emptiedDraft = isEmptyRichText(message) ? [] : message;
+                const emptiedDraft = isEmptyRichText(message) ? undefined : message;
                 if (drafts[draftKey]?.message === undefined && emptiedDraft === undefined) return;
 
                 const newDrafts: Record<string, Draft | undefined> = {
