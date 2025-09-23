@@ -31,7 +31,7 @@ export const SecurityOverview = () => {
     await reset();
   }
   // const recoverable = info?.recoveryRisk?.isRecoverable;
-  console.log('rr', info?.recoveryRisk)
+  // console.log('rr', info?.recoveryRisk)
   return (
     <>
       {/*<ErrorNotification error={updateFlagError}/>*/}
