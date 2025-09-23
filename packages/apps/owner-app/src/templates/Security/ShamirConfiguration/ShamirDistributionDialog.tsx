@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {ActionButton, DialogWrapper, LoadingBlock, t, useDotYouClient, usePortal,} from '@homebase-id/common-app';
+import {ActionButton, DialogWrapper, Label, LoadingBlock, t, useDotYouClient, usePortal,} from '@homebase-id/common-app';
 import {Arrow} from '@homebase-id/common-app/icons';
 import {Step1SelectPlayers} from "./Step1SelectPlayers";
 import {Step2OtherOptions} from "./Step2OtherOptions";
@@ -13,6 +13,7 @@ import {
 import {createPortal} from "react-dom";
 import {PlayerStatusList} from "./PlayerStatusList";
 import {getRecoveryInfo, RecoveryInfo, ShardTrustLevel} from "../../../provider/auth/SecurityHealthProvider";
+import {DealerRecoveryRiskDetails} from "../DealerRecoveryRiskDetails";
 
 export const ShamirDistributionDialog = ({
                                            title,
@@ -46,7 +47,7 @@ export const ShamirDistributionDialog = ({
 
   const handleStep1Next = () => {
     if (players.length < minPlayers) {
-      setValidationError(t(`You must select at least ${minPlayers} players`));
+      setValidationError(t(`You must select at least ${minPlayers} trusted connections`));
       return;
     }
 
@@ -62,7 +63,7 @@ export const ShamirDistributionDialog = ({
     }
 
     if (minShards > players.length) {
-      setValidationError(t('Min shards cannot be more than total players'));
+      setValidationError(t('Minimum shards cannot be more than the number of trusted connections you selected'));
       return;
     }
 
@@ -317,17 +318,21 @@ function WaitForShardConfig({request}: { request: ConfigureShardsRequest }) {
 
   if (recoveryInfo?.recoveryRisk) {
     return (
-      <>
-        <PlayerStatusList report={recoveryInfo.recoveryRisk}/>
-      </>
+        <>
+          <div className="flex w-full flex-row gap-2">
+            <Label>{t("Overview")}:</Label>
+            <DealerRecoveryRiskDetails report={recoveryInfo.recoveryRisk}/>
+          </div>
+          <PlayerStatusList report={recoveryInfo.recoveryRisk}/>
+        </>
     );
   }
 
   return (
-    <>
-      <LoadingBlock className="my-2 h-4"/>
-      <LoadingBlock className="my-2 h-4"/>
-      <LoadingBlock className="my-2 h-4"/>
+      <>
+        <LoadingBlock className="my-2 h-4"/>
+        <LoadingBlock className="my-2 h-4"/>
+        <LoadingBlock className="my-2 h-4"/>
     </>
   );
 }

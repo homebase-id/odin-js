@@ -99,6 +99,59 @@ export const PasswordRecoverySetupTab = () => {
 
           </Section>
 
+            {/*<ErrorNotification error={updateFlagError}/>*/}
+            {!systemSettingsLoading && (
+                <>
+                    <Section>
+                        <>
+                            <div className="flex flex-col">
+                                <span className="text-gray-400">
+                                    {t('Your recovery key is split among trusted people you choose. You can share with many, but only need some of them to help you get back in.')}
+                                </span>
+                            </div>
+                            <div className="mb-2">
+                                {shardConfig && (<ActionButton
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setIsConfigurationOpen(true);
+                                        return false;
+                                    }}
+                                    type="secondary"
+                                    icon={Arrow}>
+                                    {t('Change now?')}
+                                </ActionButton>)}
+                            </div>
+                            {!shardConfig ? (
+                                <SubtleMessage className="flex flex-row items-center gap-3">
+                                    <ActionButton
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setIsConfigurationOpen(true);
+
+                                            return false;
+                                        }}
+                                        type="primary"
+                                        icon={Arrow}
+                                    >
+                                        {t('Get started')}
+                                    </ActionButton>
+                                </SubtleMessage>
+                            ) : null}
+
+                            {recoveryInfo?.isConfigured && <PlayerStatusList report={recoveryInfo.recoveryRisk}/>}
+
+                            <ShamirDistributionDialog
+                                title={t('Configure new password recovery')}
+                                isOpen={isConfigurationOpen}
+                                onConfirm={() => handleConfirm()}
+                                onCancel={() => setIsConfigurationOpen(false)}
+                            />
+                        </>
+
+                    </Section>
+
+                </>
+            )}
         </>
       )}
     </>

@@ -4,7 +4,7 @@ import {SubtleMessage} from "@homebase-id/common-app";
 export function DealerRecoveryRiskDetails({ report }: { report: DealerRecoveryRiskReport }) {
   return (
     <div>
-      <ul className="list-disc pl-5">
+      <ul className="pl-5">
         <li>
           <SubtleMessage>
             {report.isRecoverable

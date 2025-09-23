@@ -11,14 +11,13 @@ export const DistributeShardsReview = ({config}: {
 
   return (
     <>
-      <Label>
+      <h1>
         {t('Review')}
-      </Label>
+      </h1>
 
       {t('Minimum matching Shards')} : {config.minMatchingShards}
       <SubtleMessage>
-        {t('Minimum matching shards is the minimum number of shards that must be made ' +
-          'available in the case you need to recover your account.')}
+          {t('Minimum matching shards is the fewest number of your trusted connections that need to help you before your account can be recovered.')}
       </SubtleMessage>
       <br/>
       <br/>
