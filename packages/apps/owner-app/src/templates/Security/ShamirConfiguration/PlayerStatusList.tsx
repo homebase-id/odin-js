@@ -14,11 +14,11 @@ import {
 } from "../../../provider/auth/ShamirProvider";
 import {DotYouClient} from "@homebase-id/js-lib/core";
 import {
-    DealerRecoveryRiskReport,
-    ShardTrustLevel,
+    DealerRecoveryRiskReport
 } from "../../../provider/auth/SecurityHealthProvider";
 import {TimeAgoUtc} from "../../../components/ui/Date/TimeAgoUtc";
 import {PlayerListItem, Status} from "./PlayerListItem";
+import {DealerRecoveryRiskHeadline} from "../DealerRecoveryRiskHeadline";
 
 export interface ShardVerificationResult {
     isValid: boolean;
@@ -45,7 +45,7 @@ async function verifyOnce(
     }
 }
 
-export const PlayerStatusList = ({report,}: {
+export const PlayerStatusList = ({report}: {
     report: DealerRecoveryRiskReport;
 }) => {
     if (!report) {
@@ -97,6 +97,12 @@ export const PlayerStatusList = ({report,}: {
     return (
         <>
             <div className="mt-3 flex w-full flex-row gap-2">
+                <Label>{t("Status")}:</Label>
+                <DealerRecoveryRiskHeadline report={report} hidePrompt={true}/>
+            </div>
+            
+            
+            <div className="mt-3 flex w-full flex-row gap-2">
                 <Label>{t("Last Checked")}:</Label>
                 <TimeAgoUtc value={report.healthLastChecked ?? 0}/>
             </div>
@@ -106,8 +112,9 @@ export const PlayerStatusList = ({report,}: {
                 <SubtleMessage>
                     <p>
                         {t(
-                            `The connections below each hold a piece of the data needed to recover your account. To regain access, 
-            at least ${report.minRequired} trusted connections must respond to your request.`
+                            `The connections below each hold a piece of the data needed to recover your 
+                            account. To regain access, at least ${report.minRequired} trusted 
+                            connections must respond to your request.`
                         )}
                     </p>
                 </SubtleMessage>

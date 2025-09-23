@@ -6,11 +6,9 @@ export function DealerRecoveryRiskDetails({ report }: { report: DealerRecoveryRi
     <div>
       <ul className="pl-5">
         <li>
-          <SubtleMessage>
             {report.isRecoverable
-              ? "✅ You currently have enough shards to recover."
+              ? "✅ You have enough shards to recover."
               : "❌ Not enough usable shards for recovery."}
-          </SubtleMessage>
         </li>
 
         {(() => {

@@ -60,7 +60,7 @@ export const SecurityOverview = () => {
                                     <div className="flex flex-row flex-wrap items-center">
                                         <div className="flex items-center">
                                             <p>{t('Recovery Email:')}</p>
-                                            {info?.email}
+                                            <span className="ml-2">{info?.email}</span>
                                         </div>
                                         <Link to={""} className="ml-3 underline" onClick={() => setOpenDialog('change-email')}>
                                             Change

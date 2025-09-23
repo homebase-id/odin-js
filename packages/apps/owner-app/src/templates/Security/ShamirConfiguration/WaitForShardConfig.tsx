@@ -64,16 +64,15 @@ export function WaitForShardConfig({ request }: { request: ConfigureShardsReques
 
     return (
         <div className="space-y-3">
-            <div className="flex w-full flex-row gap-2">
-                <Label>{t("Overview")}:</Label>
+            <div className="flex w-full flex-col gap-1">
+                <Label>{t("Status")}:</Label>
                 {recoveryInfo?.recoveryRisk ? (
-                    <DealerRecoveryRiskDetails report={recoveryInfo.recoveryRisk} />
+                    <DealerRecoveryRiskDetails report={recoveryInfo.recoveryRisk}/>
                 ) : (
-                    <span className="text-gray-500 italic">
-            {t("waiting for shard statuses…")}
-          </span>
+                    <span className="text-gray-500 italic">{t("Waiting for distribution statuses…")}</span>
                 )}
             </div>
+
 
             <div>
                 <Label>{t("Players")}:</Label>
