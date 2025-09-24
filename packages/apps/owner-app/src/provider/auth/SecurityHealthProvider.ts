@@ -81,7 +81,8 @@ export interface RecoveryInfo {
     // Indicates when the configuration was last updated
     configurationUpdated: number,
 
-    email: string,
+    email: string | null,
+    emailLastVerified: number | null,
     status: VerificationStatus,
     recoveryRisk: DealerRecoveryRiskReport
 }

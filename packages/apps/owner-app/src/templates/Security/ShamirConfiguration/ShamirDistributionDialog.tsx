@@ -118,6 +118,7 @@ export const ShamirDistributionDialog = ({
             minMatchingShards: minShards
         }
 
+
     const dialog = (
         <DialogWrapper
             title={title}
@@ -125,123 +126,125 @@ export const ShamirDistributionDialog = ({
                 onCancel();
             }}
             keepOpenOnBlur={true}
-            size="2xlarge">
+            size="2xlarge"
+            footer={
+                <div className="border-t border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+                    {awaitConfigureShardsRequest != null ? (
+                        <div className="flex w-full flex-col gap-2 sm:flex-row-reverse">
+                            <ActionButton onClick={() => close()}>
+                                {t('Close')}
+                            </ActionButton>
+                        </div>
+                    ) : stepNumber === 0 ? (
+                        <div className="flex w-full flex-col gap-2 sm:flex-row-reverse">
+                            <ActionButton onClick={() => handleStep1Next()} icon={Arrow}>
+                                {t('Next')}
+                            </ActionButton>
+                            <ActionButton
+                                className="sm:mr-auto"
+                                type="secondary"
+                                onClick={() => {
+                                    reset();
+                                    onCancel();
+                                }}
+                            >
+                                {t('Cancel')}
+                            </ActionButton>
+                        </div>
+                    ) : stepNumber === 1 ? (
+                        <div className="flex flex-col gap-2 sm:flex-row-reverse">
+                            <ActionButton onClick={() => handleStep2Next()} icon={Arrow}>
+                                {t('Next')}
+                            </ActionButton>
+                            <ActionButton
+                                onClick={(e) => {
+                                    setStepNumber(stepNumber - 1);
+                                    e.preventDefault();
+                                }}
+                                type="secondary"
+                            >
+                                {t('Back')}
+                            </ActionButton>
+                            <ActionButton
+                                className="sm:mr-auto"
+                                type="secondary"
+                                onClick={() => {
+                                    reset();
+                                    onCancel();
+                                }}
+                            >
+                                {t('Cancel')}
+                            </ActionButton>
+                        </div>
+                    ) : stepNumber === 2 ? (
+                        <div className="flex flex-col gap-2 sm:flex-row-reverse">
+                            <ActionButton onClick={() => startConfigureShards()} icon={Arrow}>
+                                {t('Distribute')}
+                            </ActionButton>
+                            <ActionButton
+                                onClick={(e) => {
+                                    setStepNumber(stepNumber - 1);
+                                    e.preventDefault();
+                                }}
+                                type="secondary"
+                            >
+                                {t('Back')}
+                            </ActionButton>
+                            <ActionButton
+                                className="sm:mr-auto"
+                                type="secondary"
+                                onClick={() => {
+                                    reset();
+                                    onCancel();
+                                }}
+                            >
+                                {t('Cancel')}
+                            </ActionButton>
+                        </div>
+                    ) : null}
+                </div>
+            }
+
+        >
             {awaitConfigureShardsRequest != null ? (
-                <>
-                    <WaitForShardConfig request={awaitConfigureShardsRequest}/>
-                    <div className="mt-4 flex w-full flex-col gap-2 py-3 sm:flex-row-reverse">
-                        <ActionButton onClick={() => close()}>
-                            {t('Close')}
-                        </ActionButton>
-                    </div>
-                </>
+                <WaitForShardConfig request={awaitConfigureShardsRequest}/>
             ) : (
                 <>
-                    {validationError && <span className="text-red-500">{validationError}</span>}
-                    {/*<ErrorNotification error={}/>*/}
+                    {validationError && (
+                        <span className="text-red-500">{validationError}</span>
+                    )}
 
-                    <form onSubmit={async (e) => {
-                        e.preventDefault();
-                        // start config process
-                    }}>
-
+                    <form
+                        onSubmit={async (e) => {
+                            e.preventDefault();
+                            // start config process
+                        }}
+                        className="flex h-full flex-col"
+                    >
                         {stepNumber === 0 && (
-                            <>
+                            <div className="flex-1 overflow-y-auto">
                                 <Step1SelectPlayers
                                     addPlayer={addPlayer}
                                     removePlayer={removePlayer}
                                     updatePlayerType={updatePlayerType}
                                     players={players}
                                 />
-
-                                <div className="sticky bottom-0 mt-6 flex flex-col gap-2 border-t border-slate-200
-                 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 sm:flex-row-reverse">
-
-                                    <div className="flex w-full flex-col gap-2 py-3 sm:flex-row-reverse">
-                                        <ActionButton onClick={() => handleStep1Next()} icon={Arrow}>
-                                            {t('Next')}
-                                        </ActionButton>
-                                        <ActionButton
-                                            className="sm:mr-auto"
-                                            type="secondary"
-                                            onClick={() => {
-                                                reset();
-                                                onCancel();
-                                            }}>
-                                            {t('Cancel')}
-                                        </ActionButton>
-                                    </div>
-                                </div>
-                            </>
+                            </div>
                         )}
 
                         {stepNumber === 1 && (
-                            <>
-                                <Step2OtherOptions
-                                    config={cfg}
-                                    removePlayer={undefined}
-                                    updatePlayerType={updatePlayerType}
-                                    onChange={(s) => setMinShards(s)}/>
-                                <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
-                                    <ActionButton
-                                        onClick={() => handleStep2Next()}
-                                        icon={Arrow}>
-                                        {t('Next')}
-                                    </ActionButton>
-                                    <ActionButton
-                                        onClick={(e) => {
-                                            setStepNumber(stepNumber - 1);
-                                            e.preventDefault();
-                                        }}
-                                        type={'secondary'}
-                                    >
-                                        {t('Back')}
-                                    </ActionButton>
-                                    <ActionButton
-                                        className="sm:mr-auto"
-                                        type="secondary"
-                                        onClick={() => {
-                                            reset();
-                                            onCancel();
-                                        }}
-                                    >
-                                        {t('Cancel')}
-                                    </ActionButton>
-                                </div>
-                            </>
-
+                            <Step2OtherOptions
+                                config={cfg}
+                                removePlayer={undefined}
+                                updatePlayerType={updatePlayerType}
+                                onChange={(s) => setMinShards(s)}
+                            />
                         )}
 
-                        {stepNumber === 2 && (
-                            <>
-                                <DistributeShardsReview config={cfg}/>
-
-                                <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
-                                    <ActionButton onClick={() => startConfigureShards()} icon={Arrow}>
-                                        {t('Distribute')}
-                                    </ActionButton>
-                                    <ActionButton
-                                        onClick={(e) => {
-                                            setStepNumber(stepNumber - 1);
-                                            e.preventDefault();
-                                        }}
-                                        type={'secondary'}>
-                                        {t('Back')}
-                                    </ActionButton>
-                                    <ActionButton
-                                        className="sm:mr-auto"
-                                        type="secondary"
-                                        onClick={() => {
-                                            reset();
-                                            onCancel();
-                                        }}>
-                                        {t('Cancel')}
-                                    </ActionButton>
-                                </div>
-                            </>
-                        )}
+                        {stepNumber === 2 && <DistributeShardsReview config={cfg}/>}
                     </form>
-                </>)}
+                </>
+            )}
         </DialogWrapper>
     );
 

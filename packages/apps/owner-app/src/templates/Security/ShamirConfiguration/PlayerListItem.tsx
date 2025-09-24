@@ -96,10 +96,10 @@ const ListItemWrapper = ({
     isActive: boolean;
     children: ReactNode;
 }) => (
-    <div className="group px-2">
+    <div className="group px-0 sm:px-2">
         <div
             onClick={onClick}
-            className={`flex w-full cursor-pointer flex-row items-center gap-3 rounded-lg px-3 py-4 transition-colors hover:bg-primary/20 ${
+            className={`flex w-full cursor-pointer flex-row items-center gap-2 rounded-lg px-1 py-2 sm:gap-3 sm:px-3 sm:py-4 transition-colors hover:bg-primary/20 ${
                 isActive ? "bg-slate-200 dark:bg-slate-800" : "bg-transparent"
             }`}
         >
@@ -107,6 +107,8 @@ const ListItemWrapper = ({
         </div>
     </div>
 );
+
+
 
 const StatusIcon = ({status}: { status: Status }) => {
     if (status === "loading") {

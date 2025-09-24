@@ -48,26 +48,32 @@ export const PasswordRecoverySetupTab = () => {
             {!systemSettingsLoading && (
                 <>
                     <Section title={
-                        <div className="flex flex-row items-center justify-between gap-4">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex-1">
-                                <span className='text-lg'>{t('Recovery Key Setup')}</span>
-                                <div className="flex-1 text-sm text-gray-400">
-                                    {t('Your recovery key is split among trusted people you choose. You can share with many, but only need some of them to help you get back in.')}
+                                <span className="block text-lg">{t('Recovery Key Setup')}</span>
+                                <div className="mt-1 text-sm text-gray-400">
+                                    {t(
+                                        'Your recovery key is split among trusted people you choose. You can share with many, but only need some of them to help you get back in.'
+                                    )}
                                 </div>
                             </div>
-                            <div>
-                                {shardConfig && (<ActionButton
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        setIsConfigurationOpen(true);
-                                        return false;
-                                    }}
-                                    type="secondary"
-                                    icon={Arrow}>
-                                    {t('Change now?')}
-                                </ActionButton>)}
+                            <div className="sm:flex-shrink-0">
+                                {shardConfig && (
+                                    <ActionButton
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setIsConfigurationOpen(true);
+                                            return false;
+                                        }}
+                                        type="secondary"
+                                        icon={Arrow}
+                                    >
+                                        {t('Change now?')}
+                                    </ActionButton>
+                                )}
                             </div>
                         </div>
+
                     }>
                         <>
                             {!shardConfig ? (
