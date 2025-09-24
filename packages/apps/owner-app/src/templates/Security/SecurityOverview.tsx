@@ -86,7 +86,7 @@ export const SecurityOverview = () => {
 
                                     {/* Password Recovery */}
                                     <div>
-                                        <p className="">{t("Trusted Friends Recovery Status")}</p>
+                                        <p className="">{t("Trusted Connects Recovery Status")}</p>
                                         {!info?.isConfigured &&
                                             <div className="mt-1">
                                                 {/*<span className="mr-3">💀 Recovery not possible.</span>*/}
