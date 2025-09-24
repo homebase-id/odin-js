@@ -54,13 +54,27 @@ export const FileSelector = forwardRef(
           className={`sr-only`}
           ref={ref}
         />
-        <DropZone onChange={onChange} />
+        <DropZone
+          onChange={onChange}
+          accept={
+            accept || 'image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif'
+          }
+          maxSize={maxSize}
+        />
       </>
     );
   }
 );
 
-const DropZone = ({ onChange }: { onChange?: (files: File[]) => void }) => {
+const DropZone = ({
+  onChange,
+  maxSize,
+  accept,
+}: {
+  onChange?: (files: File[]) => void;
+  accept?: string;
+  maxSize?: number;
+}) => {
   const [dropZoneActive, setDropZoneActive] = useState(false);
 
   useEffect(() => {
@@ -92,9 +106,28 @@ const DropZone = ({ onChange }: { onChange?: (files: File[]) => void }) => {
         // Prevent default behavior (Prevent file from being opened)
         ev.preventDefault();
 
-        const newFiles = ev.dataTransfer.items
+        let newFiles = ev.dataTransfer.items
           ? [...ev.dataTransfer.items].map((itm) => itm.getAsFile())
           : [...ev.dataTransfer.files];
+
+        newFiles = newFiles.filter((file) => {
+          if (maxSize && file && file.size > maxSize) {
+            alert(`File ${file.name} is too big. Max size is ${maxSize / 1024 / 1024} MB.`);
+            return false;
+          }
+          if (
+            accept &&
+            file &&
+            !accept
+              .split(',')
+              .map((s) => s.trim())
+              .includes(file.type)
+          ) {
+            alert(`File ${file.name} is not a supported file type.`);
+            return false;
+          }
+          return !!file;
+        });
 
         onChange && onChange(newFiles.filter(Boolean) as File[]);
       }}

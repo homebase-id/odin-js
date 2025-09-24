@@ -252,7 +252,9 @@ export const ReactionsBar = forwardRef(
                   <Suspense>
                     <EmojiPicker
                       onInput={(emojiDetail) => {
-                        handleLike(emojiDetail.unicode);
+                        if (defaultValue?.includes(emojiDetail.unicode))
+                          handleUnlike(emojiDetail.unicode);
+                        else handleLike(emojiDetail.unicode);
                         setIsCustomOpen(false);
                       }}
                       key={'emoji-picker'}
