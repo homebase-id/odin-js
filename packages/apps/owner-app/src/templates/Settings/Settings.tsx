@@ -8,7 +8,6 @@ import {ReactionSettings} from './ReactionSettings';
 import {SecuritySettings} from './SecuritySettings';
 import {DeleteAccountSettings} from './DeleteAccountSettings';
 import {Cog} from '@homebase-id/common-app/icons';
-import React from "react";
 import {VersionInfoSettings} from "./VersionInfoSettings";
 
 const Settings = () => {

@@ -196,7 +196,7 @@ export const updateRecoveryEmail = async (recoveryEmail: string, password: strin
         email: recoveryEmail,
         passwordReply: reply
     })
-        .then((_) => {
+        .then(() => {
             // no-op
         })
         .catch((error) => {

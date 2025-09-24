@@ -1,15 +1,11 @@
-import React, {ReactNode, useEffect, useRef, useState} from "react";
+import { useEffect, useRef, useState} from "react";
 import {
-    ConnectionImage,
-    ConnectionName,
     Label,
     SubtleMessage,
     t,
     useDotYouClient,
 } from "@homebase-id/common-app";
 import {
-    playerTypeText,
-    ShamiraPlayer,
     verifyRemotePlayerShard,
 } from "../../../provider/auth/ShamirProvider";
 import {DotYouClient} from "@homebase-id/js-lib/core";

@@ -1,5 +1,5 @@
 import {
-  Label, SubtleMessage,
+  SubtleMessage,
   t,
 } from '@homebase-id/common-app';
 import {ConfigureShardsRequest} from "../../../provider/auth/ShamirProvider";

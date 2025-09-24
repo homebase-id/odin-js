@@ -50,6 +50,7 @@ export const ChangeRecoveryEmailDialog = ({
       await updateRecoveryEmail(emailToUse, currentPassword);
       setView('done');
       setValidationError(null);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setValidationError(err.message);
     } finally {

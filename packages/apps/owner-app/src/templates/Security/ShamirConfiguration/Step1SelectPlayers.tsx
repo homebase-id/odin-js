@@ -2,7 +2,7 @@ import {
   ConnectionImage,
   ConnectionName,
   Input,
-  Label, SubtleMessage,
+  Label,
   t,
   useAllContacts,
 } from "@homebase-id/common-app";
