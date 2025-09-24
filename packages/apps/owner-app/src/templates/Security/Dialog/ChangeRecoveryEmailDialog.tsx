@@ -3,7 +3,6 @@ import {createPortal} from 'react-dom';
 import {ActionButton, DialogWrapper, Input, Label, t, usePortal,} from '@homebase-id/common-app';
 import {Check} from "@homebase-id/common-app/icons";
 import {
-  getRecoveryInfo,
   RecoveryInfo,
   updateRecoveryEmail
 } from "../../../provider/auth/SecurityHealthProvider";
@@ -47,7 +46,8 @@ export const ChangeRecoveryEmailDialog = ({
   const doUpdateRecoveryEmail = async () => {
     setState('loading');
     try {
-      await updateRecoveryEmail(newRecoveryEmail, currentPassword);
+      const emailToUse = verifyOnly ? info!.email! : newRecoveryEmail;
+      await updateRecoveryEmail(emailToUse, currentPassword);
       setView('done');
       setValidationError(null);
     } catch (err: any) {

@@ -155,6 +155,7 @@ export const SecurityOverview = () => {
 
   function RecoveryEmailRow({info}: { info?: RecoveryInfo | null; }) {
     const isVerified = !!info?.emailLastVerified;
+    const hasEmail = !!info?.email;
 
     return (
       <div className="flex flex-wrap items-center gap-2">
@@ -172,16 +173,19 @@ export const SecurityOverview = () => {
               />
           </span>
           ) : (
-            <span className="ml-2 flex items-center text-red-600 text-sm">
-            <Exclamation className="h-5 w-5 mr-1" aria-hidden="true"/>
-              {t("Not Verified")}
-              <button
-                type="button"
-                onClick={() => setOpenDialog("verify-email")}
-                className="ml-2 underline text-blue-600 hover:text-blue-800">
-              {t("Verify")}
-            </button>
-          </span>
+            <>
+              {hasEmail && (
+                <span className="ml-2 flex items-center text-red-600 text-sm">
+                  <Exclamation className="h-5 w-5 mr-1" aria-hidden="true"/>
+                      {t("Not Verified")}
+                    <button
+                      type="button"
+                      onClick={() => setOpenDialog("verify-email")}
+                      className="ml-2 underline text-blue-600 hover:text-blue-800">{t("Verify")}
+                    </button>
+              </span>
+              )}
+            </>
           )}
         </div>
 
