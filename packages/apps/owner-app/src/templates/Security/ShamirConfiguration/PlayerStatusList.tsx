@@ -1,286 +1,159 @@
-import {ReactNode, useEffect, useMemo, useRef, useState} from 'react';
+import { useEffect, useRef, useState} from "react";
 import {
-  ConnectionImage,
-  ConnectionName,
-  formatDateExludingYearIfCurrent,
-  Label,
-  SubtleMessage,
-  t,
-  useDotYouClient
-} from '@homebase-id/common-app';
+    Label,
+    SubtleMessage,
+    t,
+    useDotYouClient,
+} from "@homebase-id/common-app";
 import {
-  DealerShardConfig,
-  DealerShardEnvelopeRedacted, playerTypeText,
-  ShamiraPlayer,
-  verifyRemotePlayerShard
-} from '../../../provider/auth/ShamirProvider';
+    verifyRemotePlayerShard,
+} from "../../../provider/auth/ShamirProvider";
 import {DotYouClient} from "@homebase-id/js-lib/core";
+import {
+    DealerRecoveryRiskReport
+} from "../../../provider/auth/SecurityHealthProvider";
+import {TimeAgoUtc} from "../../../components/ui/Date/TimeAgoUtc";
+import {PlayerListItem, Status} from "./PlayerListItem";
+import {DealerRecoveryRiskHeadline} from "../DealerRecoveryRiskHeadline";
 
 export interface ShardVerificationResult {
-  isValid: boolean;
+    isValid: boolean;
 }
 
 export interface VerifyRemotePlayerShardRequest {
-  odinId: string;
-  shardId: string;
+    odinId: string;
+    shardId: string;
 }
-
-
-type Status = 'loading' | 'valid' | 'invalid' | 'error';
 
 const toKey = (odinId: string) => odinId.toLowerCase();
-const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-/** initial backoff to avoid reporting red too early */
-async function verifyWithRetry(
-  client: DotYouClient,
-  req: VerifyRemotePlayerShardRequest,
-  {maxAttempts = 3, baseDelayMs = 1200, jitterMs = 200} = {},
-): Promise<'valid' | 'invalid' | 'error'> {
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      const result: ShardVerificationResult | null =
-        await verifyRemotePlayerShard(client, req);
-      if (result?.isValid) return 'valid';
-      if (attempt === maxAttempts) return 'invalid';
-    } catch {
-      if (attempt === maxAttempts) return 'error';
-    }
-    const wait = baseDelayMs * attempt + Math.floor((Math.random() - 0.5) * 2 * jitterMs);
-    await delay(Math.max(300, wait));
-  }
-  return 'error';
-}
 
 /** single immediate verification (used by manual retry) */
 async function verifyOnce(
-  client: DotYouClient,
-  req: VerifyRemotePlayerShardRequest,
-): Promise<'valid' | 'invalid' | 'error'> {
-  try {
-    const result: ShardVerificationResult | null =
-      await verifyRemotePlayerShard(client, req);
-    return result?.isValid ? 'valid' : 'invalid';
-  } catch {
-    return 'error';
-  }
+    client: DotYouClient,
+    req: VerifyRemotePlayerShardRequest
+): Promise<"valid" | "invalid" | "error"> {
+    try {
+        const result: ShardVerificationResult | null =
+            await verifyRemotePlayerShard(client, req);
+        return result?.isValid ? "valid" : "invalid";
+    } catch {
+        return "error";
+    }
 }
 
-export const PlayerStatusList = ({config}: { config: DealerShardConfig }) => {
-  const [statusByOdin, setStatusByOdin] = useState<Record<string, Status>>({});
-  const {getDotYouClient} = useDotYouClient();
-
-  // derive odinId + shardId per envelope
-  const targets = useMemo(() => {
-    return (config.envelopes ?? [])
-      .map((p: DealerShardEnvelopeRedacted) => {
-        const odinId: string | undefined = p?.player?.odinId ?? undefined;
-        const shardId: string | undefined = p?.shardId ?? undefined;
-        return odinId && shardId ? {odinId, shardId, key: toKey(odinId)} : null;
-      })
-      .filter(Boolean) as Array<{ odinId: string; shardId: string; key: string }>;
-  }, [config.envelopes]);
-
-  // quick map for lookup on retry
-  // const shardByKey = useMemo(() => {
-  //   const m: Record<string, string> = {};
-  //   for (const { key, shardId } of targets) m[key] = shardId;
-  //   return m;
-  // }, [targets]);
-
-  // track which players have started verification
-  const startedRef = useRef<Set<string>>(new Set());
-
-  // only block updates after unmount (not on re-render)
-  const unmountedRef = useRef(false);
-  useEffect(() => {
-    unmountedRef.current = false;
-    return () => {
-      unmountedRef.current = true;
-    };
-  }, []);
-
-  // keep startedRef in sync (remove players that disappeared)
-  useEffect(() => {
-    const current = new Set(targets.map(t => t.key));
-    for (const id of Array.from(startedRef.current)) {
-      if (!current.has(id)) startedRef.current.delete(id);
-    }
-  }, [targets]);
-
-  // manual retry: single call + spinner
-  const runVerificationOnce = async (odinId: string, shardId: string) => {
-    const k = toKey(odinId);
-    setStatusByOdin(prev => ({...prev, [k]: 'loading'}));
-    const status = await verifyOnce(getDotYouClient(), {odinId, shardId});
-    if (!unmountedRef.current) {
-      setStatusByOdin(prev => ({...prev, [k]: status}));
-    }
-  };
-
-  // initial batch verify with backoff, but only for players not started yet
-  useEffect(() => {
-    const toStart = targets.filter(({key}) => !startedRef.current.has(key));
-    if (!toStart.length) return;
-
-    // mark loading only for new players
-    setStatusByOdin(prev => ({
-      ...prev,
-      ...Object.fromEntries(toStart.map(({key}) => [key, 'loading' as Status])),
-    }));
-
-    // mark started before kicking off
-    toStart.forEach(({key}) => startedRef.current.add(key));
-
-    (async () => {
-      await Promise.all(
-        toStart.map(async ({odinId, shardId, key}) => {
-          const finalStatus = await verifyWithRetry(getDotYouClient(), {odinId, shardId});
-          if (!unmountedRef.current) {
-            setStatusByOdin(prev => ({...prev, [key]: finalStatus}));
-          }
-        }),
-      );
-    })();
-    // NOTE: no cleanup that flips a "cancelled" flag on re-render; we let in-flight updates finish.
-  }, [targets, getDotYouClient]);
-
-  return (
-    <>
-      <div>
-        <Label>
-          {t('Last Updated')}
-        </Label>
-        {formatDateExludingYearIfCurrent(new Date(config.updated))}
-      </div>
-
-      <br/>
-      {t('Trusted connections')}
-      <SubtleMessage>
-        <p>
-          {t(`The connections below each hold a piece of the data needed to recover your account. To regain access, 
-          at least ${config.minMatchingShards} trusted connections must respond to your request.`)}
-        </p>
-
-      </SubtleMessage>
-      <br/>
-
-      {config.envelopes?.length ? (
-        <div className="flex-grow overflow-auto">
-          {config.envelopes.map((p: DealerShardEnvelopeRedacted, index: number) => {
-            const odinId = (p?.player?.odinId as string) ?? undefined;
-            const shardId = p?.shardId ?? undefined;
-            const key = odinId ? toKey(odinId) : undefined;
-            const status: Status =
-              (key && statusByOdin[key]) || (odinId ? 'loading' : 'error');
-
-            return (
-              <PlayerListItem
-                player={p?.player}
-                isActive={false}
-                key={odinId || index}
-                status={status}
-                onRetry={() => {
-                  if (odinId && shardId) runVerificationOnce(odinId, shardId);
-                }}
-              />
-            );
-          })}
-        </div>
-      ) : (
-        <div className="flex flex-grow items-center justify-center p-5">
-          <p className="text-slate-400">{t('No players selected')}</p>
-        </div>
-      )}
-    </>
-  );
-};
-
-export const PlayerListItem = ({
-                                 player,
-                                 status,
-                                 onRetry,
-                                 ...props
-                               }: {
-  onClick?: () => void;
-  player: ShamiraPlayer;
-  isActive: boolean;
-  status: Status;
-  onRetry: () => void;
+export const PlayerStatusList = ({report}: {
+    report: DealerRecoveryRiskReport;
 }) => {
-  return (
-    <ListItemWrapper {...props}>
-      <ConnectionImage
-        odinId={player.odinId as string}
-        className="border border-neutral-200 dark:border-neutral-800"
-        size="sm"
-      />
-      <div className="flex w-full items-center justify-between">
-        <ConnectionName odinId={player.odinId as string}/>
-        <div className="flex items-center gap-2">
-          <div>
-            {playerTypeText(player.type)}
-          </div>
-          <StatusIcon status={status}/>
-          {(status === 'invalid' || status === 'error') && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onRetry();
-              }}
-              className="text-xs text-blue-600 hover:underline"
-            >
-              {t('Retry Verification')}
-            </button>
-          )}
-        </div>
-      </div>
-    </ListItemWrapper>
-  );
-};
+    if (!report) {
+        return null;
+    }
 
-const ListItemWrapper = ({
-                           onClick,
-                           isActive,
-                           children,
-                         }: {
-  onClick?: () => void;
-  isActive: boolean;
-  children: ReactNode;
-}) => (
-  <div className="group px-2">
-    <div
-      onClick={onClick}
-      className={`flex w-full cursor-pointer flex-row items-center gap-3 rounded-lg px-3 py-4 transition-colors hover:bg-primary/20 ${
-        isActive ? 'bg-slate-200 dark:bg-slate-800' : 'bg-transparent'
-      }`}
-    >
-      {children}
-    </div>
-  </div>
-);
+    const [statusByOdin, setStatusByOdin] = useState<Record<string, Status>>({});
+    const {getDotYouClient} = useDotYouClient();
+    const unmountedRef = useRef(false);
 
-const StatusIcon = ({status}: { status: Status }) => {
-  if (status === 'loading') {
+    useEffect(() => {
+        unmountedRef.current = false;
+        return () => {
+            unmountedRef.current = true;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!report.players.length) return;
+
+        // first run immediately
+        report.players.forEach((p) => {
+            if (!p.isMissing && !p.isValid) {
+                runVerificationOnce(p.player.odinId, p.shardId);
+            }
+        });
+
+        // set up interval
+        const interval = setInterval(() => {
+            report.players.forEach((p) => {
+                if (!p.isMissing && !p.isValid) {
+                    runVerificationOnce(p.player.odinId, p.shardId);
+                }
+            });
+        }, 2_000);
+
+        return () => clearInterval(interval);
+    }, [report?.players, getDotYouClient]);
+
+    const runVerificationOnce = async (odinId: string, shardId: string) => {
+        const k = toKey(odinId);
+        setStatusByOdin((prev) => ({...prev, [k]: "loading"}));
+        const status = await verifyOnce(getDotYouClient(), {odinId, shardId});
+        if (!unmountedRef.current) {
+            setStatusByOdin((prev) => ({...prev, [k]: status}));
+        }
+    };
+
     return (
-      <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-label="Verifying…">
-        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" opacity="0.25"/>
-        <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      </svg>
+        <>
+            <div className="mt-3 flex w-full flex-row gap-2">
+                <Label>{t("Status")}:</Label>
+                <DealerRecoveryRiskHeadline report={report} hidePrompt={true}/>
+            </div>
+            
+            
+            <div className="mt-3 flex w-full flex-row gap-2">
+                <Label>{t("Last Checked")}:</Label>
+                <TimeAgoUtc value={report.healthLastChecked ?? 0}/>
+            </div>
+
+            <div className="mt-3">
+                <Label>{t("Trusted connections")}</Label>
+                <SubtleMessage>
+                    <p>
+                        {t(
+                            `The connections below each hold a piece of the data needed to recover your 
+                            account. To regain access, at least ${report.minRequired} trusted 
+                            connections must respond to your request.`
+                        )}
+                    </p>
+                </SubtleMessage>
+            </div>
+
+            <div className="flex w-full flex-col">
+                {report.players.length ? (
+                    <div className="flex-grow overflow-auto">
+                        {report.players.map((p, index) => {
+                            const key = toKey(p.player.odinId);
+                            const statusOverride = statusByOdin[key];
+
+                            let status: Status;
+                            if (p.isMissing) {
+                                status = "error";
+                            } else if (statusOverride) {
+                                status = statusOverride;
+                            } else {
+                                status = p.isValid ? "valid" : "invalid";
+                            }
+
+                            return (
+                                <PlayerListItem
+                                    key={p.player.odinId || index}
+                                    player={p.player}
+                                    isActive={false}
+                                    status={status}
+                                    trustLevel={p.trustLevel}
+                                    isMissing={p.isMissing}
+                                    onRetry={() =>
+                                        runVerificationOnce(p.player.odinId, p.shardId)
+                                    }
+                                />
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <div className="flex flex-grow items-center justify-center p-5">
+                        <p className="text-slate-400">{t("No trusted connections selected")}</p>
+                    </div>
+                )}
+            </div>
+        </>
     );
-  }
-  if (status === 'valid') {
-    return (
-      <svg className="h-5 w-5 text-green-600" viewBox="0 0 24 24" fill="none" aria-label="Valid">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-        <path d="M8 12l3 3 5-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      </svg>
-    );
-  }
-  return (
-    <svg className="h-5 w-5 text-red-600" viewBox="0 0 24 24" fill="none" aria-label="Invalid">
-      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-      <path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    </svg>
-  );
+
 };

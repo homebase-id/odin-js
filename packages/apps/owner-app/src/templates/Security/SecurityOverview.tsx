@@ -1,22 +1,25 @@
-import {t, LoadingBlock} from '@homebase-id/common-app';
+import {t, LoadingBlock, Label} from '@homebase-id/common-app';
 import Section from '../../components/ui/Sections/Section';
 import {Link} from "react-router-dom";
 import {useEffect, useState} from "react";
-import {VerifyPasswordDialog} from "./Tab/VerifyPasswordDialog";
-import {VerifyRecoveryKeyDialog} from "./Tab/VerifyRecoveryKeyDialog";
-import {getVerificationStatus, VerificationStatus} from "../../provider/auth/SecurityHealthProvider";
+import {VerifyPasswordDialog} from "./Dialog/VerifyPasswordDialog";
+import {VerifyRecoveryKeyDialog} from "./Dialog/VerifyRecoveryKeyDialog";
+import {getRecoveryInfo, RecoveryInfo} from "../../provider/auth/SecurityHealthProvider";
 import {TimeAgoUtc} from "../../components/ui/Date/TimeAgoUtc";
+import {ChangeRecoveryEmailDialog} from "./Dialog/ChangeRecoveryEmailDialog";
+import {DealerRecoveryRiskHeadline} from "./DealerRecoveryRiskHeadline";
+import {Check, Exclamation} from "@homebase-id/common-app/icons";
 
 export const SecurityOverview = () => {
 
-  const [openDialog, setOpenDialog] = useState<'none' | 'verify-password' | 'verify-recovery-phrase'>('none');
+  const [openDialog, setOpenDialog] = useState<'none' | 'verify-password' | 'verify-recovery-phrase' | 'change-email' | 'verify-email'>('none');
   const [statusLoading, setStatusLoading] = useState(false);
-  const [status, setStatus] = useState<VerificationStatus | null>();
+  const [info, setInfo] = useState<RecoveryInfo | null>();
 
   const reset = async () => {
     setStatusLoading(true)
-    const status = await getVerificationStatus();
-    setStatus(status);
+    const status = await getRecoveryInfo();
+    setInfo(status);
     setStatusLoading(false);
   }
 
@@ -29,6 +32,8 @@ export const SecurityOverview = () => {
     await reset();
   }
 
+  console.log(info)
+  console.log(openDialog)
   return (
     <>
       {/*<ErrorNotification error={updateFlagError}/>*/}
@@ -50,14 +55,18 @@ export const SecurityOverview = () => {
                   <LoadingBlock className="m-4 h-10"/>
                   <LoadingBlock className="m-4 h-10"/>
                   <LoadingBlock className="m-4 h-10"/>
+                  <LoadingBlock className="m-4 h-10"/>
                 </>
               ) : (
                 <div className="space-y-4">
+                  {/* Recovery Email */}
+                  <RecoveryEmailRow info={info}/>
+
                   {/* Password Status */}
                   <div className="flex flex-row flex-wrap items-center">
                     <div className="flex items-center">
                       <p>{t('Password last verified:')}</p>
-                      <TimeAgoUtc className="ml-2 text-sm font-medium" value={status?.passwordLastVerified ?? 0}/>
+                      <TimeAgoUtc className="ml-2 text-sm font-medium" value={info?.status?.passwordLastVerified ?? 0}/>
                     </div>
                     <Link to={""} className="ml-3 underline" onClick={() => setOpenDialog('verify-password')}>
                       Verify now
@@ -68,7 +77,8 @@ export const SecurityOverview = () => {
                   <div className="flex flex-row flex-wrap items-center">
                     <div className="flex items-center">
                       <p>{t('Recovery phrase last verified:')}</p>
-                      <TimeAgoUtc className="ml-2 text-sm font-medium" value={status?.recoveryKeyLastVerified ?? 0}/>
+                      <TimeAgoUtc className="ml-2 text-sm font-medium"
+                                  value={info?.status?.recoveryKeyLastVerified ?? 0}/>
                     </div>
                     <Link to={""} className="ml-3 underline" onClick={() => setOpenDialog('verify-recovery-phrase')}>
                       Verify now
@@ -76,12 +86,29 @@ export const SecurityOverview = () => {
                   </div>
 
                   {/* Password Recovery */}
-                  <div className="flex flex-row flex-wrap items-center">
-                    <div className="flex items-center">
-                      <p>{t('Password recovery last verified:')}</p>
-                      <TimeAgoUtc className="ml-2 text-sm font-medium" value={status?.distributedRecoveryLastVerified ?? 0}/>
-                    </div>
-                    {/*<ActionButton className="ml-auto">{t('Manage Password Recovery → C1')}</ActionButton>*/}
+                  <div>
+                    <p className="">{t("Trusted Connects Recovery Status")}</p>
+                    {!info?.isConfigured &&
+                        <div className="mt-1">
+                          {/*<span className="mr-3">💀 Recovery not possible.</span>*/}
+                            <Link className="underline" to="/owner/security/password-recovery">
+                                Setup Now
+                            </Link>
+                        </div>
+
+                    }
+
+                    {info?.recoveryRisk && (
+                      <div className="p-2 mt-2 space-y-2">
+
+                        <div className="flex flex-row">
+                          <Label>{t('Last Updated:')}</Label>
+                          <TimeAgoUtc className="ml-2" value={info.recoveryRisk.healthLastChecked ?? 0}/>
+                        </div>
+
+                        <DealerRecoveryRiskHeadline report={info.recoveryRisk}/>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -103,6 +130,13 @@ export const SecurityOverview = () => {
         {/*</Section>*/}
       </>
 
+      {info && <ChangeRecoveryEmailDialog title={t('Change Recovery Email')}
+                                          info={info}
+                                          isOpen={openDialog === 'change-email' || openDialog === 'verify-email'}
+                                          verifyOnly={openDialog === 'verify-email'}
+                                          onConfirm={handleConfirmDialog}
+                                          onCancel={() => setOpenDialog('none')}/>}
+
       <VerifyPasswordDialog title={t('Verify Password')}
                             isOpen={openDialog === 'verify-password'}
                             onConfirm={handleConfirmDialog}
@@ -117,4 +151,56 @@ export const SecurityOverview = () => {
 
     </>
   );
-};
+
+
+  function RecoveryEmailRow({info}: { info?: RecoveryInfo | null; }) {
+    const isVerified = !!info?.emailLastVerified;
+    const hasEmail = !!info?.email;
+
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center">
+          <p className="font-medium">{t("Recovery Email:")}</p>
+          <span className="ml-2 text-zinc-700">{info?.email}</span>
+
+          {isVerified ? (
+            <span className="ml-2 flex items-center text-green-600 text-sm">
+            <Check className="h-5 w-5 mr-1" aria-hidden="true"/>
+              {t("Verified")}
+              <TimeAgoUtc
+                className="ml-1 text-sm font-medium"
+                value={info?.emailLastVerified ?? 0}
+              />
+          </span>
+          ) : (
+            <>
+              {hasEmail && (
+                <span className="ml-2 flex items-center text-red-600 text-sm">
+                  <Exclamation className="h-5 w-5 mr-1" aria-hidden="true"/>
+                      {t("Not Verified")}
+                    <button
+                      type="button"
+                      onClick={() => setOpenDialog("verify-email")}
+                      className="ml-2 underline text-blue-600 hover:text-blue-800">{t("Verify")}
+                    </button>
+              </span>
+              )}
+            </>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setOpenDialog("change-email")}
+          className="ml-3 underline text-blue-600 hover:text-blue-800"
+        >
+          {t("Change")}
+        </button>
+      </div>
+    );
+  }
+
+
+}
+
+

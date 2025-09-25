@@ -105,19 +105,6 @@ export const configureShards = async (dotYouClient: DotYouClient, request: Confi
     });
 }
 
-export const verifyRemoteShards = async (dotYouClient: DotYouClient): Promise<RemoteShardVerificationResult | null> => {
-  const axiosClient = dotYouClient.createAxiosClient();
-  return await axiosClient
-    .post<RemoteShardVerificationResult>(`${root}/verify-remote-shards`)
-    .then((response) => {
-      return response.data;
-    })
-    .catch((error) => {
-      console.warn(error);
-      return null;
-    });
-}
-
 export const verifyRemotePlayerShard = async (dotYouClient: DotYouClient, request: VerifyRemotePlayerShardRequest): Promise<ShardVerificationResult | null> => {
   const axiosClient = dotYouClient.createAxiosClient();
   return await axiosClient
