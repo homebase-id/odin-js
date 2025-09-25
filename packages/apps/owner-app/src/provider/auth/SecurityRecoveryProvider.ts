@@ -1,4 +1,4 @@
-import {ApiType} from '@homebase-id/js-lib/core';
+import {ApiType, getKnownOdinErrorMessages} from '@homebase-id/js-lib/core';
 import {OwnerClient} from "@homebase-id/common-app";
 
 export enum ShamirRecoveryState {
@@ -87,7 +87,18 @@ export const initiateRecoveryMode = async () => {
       return response.data;
     })
     .catch((error) => {
-      console.warn(error);
+
+      if (error.response?.status === 400) {
+        const knownErrorText = getKnownOdinErrorMessages(error);
+
+        if (knownErrorText) {
+          throw new Error(knownErrorText)
+        }
+
+        throw new Error("An unknown error occurred.");
+
+      }
+      console.error("Failed to initiate recovery mode:", error);
       return null;
     });
 };
