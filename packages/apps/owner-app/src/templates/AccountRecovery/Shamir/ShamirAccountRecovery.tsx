@@ -34,8 +34,9 @@ const ShamirAccountRecovery = () => {
       setErrorMessage(null); // clear previous
       await initiateRecoveryMode();
       await reloadStatus();
-    } catch (err: any) {
-      setErrorMessage(err.message || t("An unexpected error occurred."));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      setErrorMessage(error.message || t("An unexpected error occurred."));
     }
   };
 
