@@ -6,7 +6,8 @@ import {
     useDotYouClient,
 } from "@homebase-id/common-app";
 import {
-    verifyRemotePlayerShard,
+    ShardVerificationResult,
+    verifyRemotePlayerShard, VerifyRemotePlayerShardRequest,
 } from "../../../provider/auth/ShamirProvider";
 import {DotYouClient} from "@homebase-id/js-lib/core";
 import {
@@ -16,15 +17,6 @@ import {TimeAgoUtc} from "../../../components/ui/Date/TimeAgoUtc";
 import {PlayerListItem, Status} from "./PlayerListItem";
 import {DealerRecoveryRiskHeadline} from "../DealerRecoveryRiskHeadline";
 
-export interface ShardVerificationResult {
-    isValid: boolean;
-}
-
-export interface VerifyRemotePlayerShardRequest {
-    odinId: string;
-    shardId: string;
-}
-
 const toKey = (odinId: string) => odinId.toLowerCase();
 
 /** single immediate verification (used by manual retry) */
@@ -33,8 +25,13 @@ async function verifyOnce(
     req: VerifyRemotePlayerShardRequest
 ): Promise<"valid" | "invalid" | "error"> {
     try {
-        const result: ShardVerificationResult | null =
-            await verifyRemotePlayerShard(client, req);
+        
+        const result: ShardVerificationResult | null = await verifyRemotePlayerShard(client, req);
+        if(result?.remoteServerError)
+        {
+            return "error";
+        }
+        
         return result?.isValid ? "valid" : "invalid";
     } catch {
         return "error";
@@ -96,7 +93,6 @@ export const PlayerStatusList = ({report}: {
                 <Label>{t("Status")}:</Label>
                 <DealerRecoveryRiskHeadline report={report} hidePrompt={true}/>
             </div>
-            
             
             <div className="mt-3 flex w-full flex-row gap-2">
                 <Label>{t("Last Checked")}:</Label>
