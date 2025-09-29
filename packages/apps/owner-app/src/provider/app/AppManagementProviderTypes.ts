@@ -4,7 +4,7 @@ import { DriveGrant } from '@homebase-id/js-lib/network';
 export interface AppClientRegistrationRequest {
   appId: string;
   clientFriendlyName: string;
-  clientPublicKey64: string;
+  jwkBase64UrlPublicKey: string;
 }
 
 export interface AppClientRegistrationResponse {

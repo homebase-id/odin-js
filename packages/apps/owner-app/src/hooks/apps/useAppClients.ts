@@ -19,16 +19,16 @@ export const useAppClients = ({ appId }: { appId?: string }) => {
 
   const registerClient = async ({
     appId,
-    clientPublicKey64,
+    jwkBase64UrlPublicKey,
     clientFriendlyName,
   }: {
     appId: string;
-    clientPublicKey64: string;
+    jwkBase64UrlPublicKey: string;
     clientFriendlyName: string;
   }) => {
     const clientRegRequest: AppClientRegistrationRequest = {
       appId: appId,
-      clientPublicKey64: clientPublicKey64,
+      jwkBase64UrlPublicKey: jwkBase64UrlPublicKey,
       clientFriendlyName: clientFriendlyName,
     };
 
