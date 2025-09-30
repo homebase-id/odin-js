@@ -9,10 +9,12 @@ import {
   Image,
   ActionButton,
   t,
+  HOME_ROOT_PATH,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
 
-import { Exclamation, Trash, Download } from '@homebase-id/common-app/icons';
+import { Exclamation, Trash, Download, Eye } from '@homebase-id/common-app/icons';
+import { createPortal } from 'react-dom';
 import {
   DeletedHomebaseFile,
   HomebaseFile,
@@ -22,11 +24,11 @@ import {
   decryptJsonContent,
   decryptKeyHeader,
 } from '@homebase-id/js-lib/core';
-import { BlogConfig, ReactionConfig } from '@homebase-id/js-lib/public';
+import { BlogConfig, PostContent, ReactionConfig } from '@homebase-id/js-lib/public';
 import { ContactConfig } from '@homebase-id/js-lib/network';
 import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
 import { useFile } from '../../../hooks/files/useFiles';
-import { drivesEqual } from '@homebase-id/js-lib/helpers';
+import { drivesEqual, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import {
   SHAMIR_DEALER_SHARD_CONFIG_FILE_TYPE,
   SHAMIR_PLAYER_COLLECTED_SHARD_REQUEST_FILE_TYPE,
@@ -71,6 +73,10 @@ export const FileCard = ({
           file={file}
           targetDrive={targetDrive}
           className={`${isRow ? '' : 'absolute left-2 top-2'} z-10`}
+        />
+        <FileViewPost
+          file={file}
+          className={`${isRow ? '' : 'absolute right-2 top-[4.5rem]'} z-10`}
         />
         <FileDelete
           file={file}
@@ -210,6 +216,89 @@ const FileDelete = ({
         buttonText: t('Delete'),
       }}
     />
+  );
+};
+
+const FileViewPost = ({
+  file,
+  className,
+}: {
+  file: HomebaseFile<string> | DeletedHomebaseFile<string>;
+  className?: string;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const fileType = file.fileMetadata.appData.fileType;
+  const isPost = fileType === BlogConfig.PostFileType;
+  const postContent: PostContent = tryJsonParse<PostContent>(file.fileMetadata.appData.content);
+  const channelId = postContent?.channelId;
+  const slugOrId = postContent?.slug || postContent?.id;
+  console.log(postContent);
+  // Construct permalink using current origin and HOME_ROOT_PATH
+  // Use relative path so all first-party cookies (SameSite=Lax/Strict) are automatically included
+  const href =
+    isPost && channelId && slugOrId ? `${HOME_ROOT_PATH}posts/${channelId}/${slugOrId}` : undefined;
+
+  if (!isPost || !href) return null;
+
+  return (
+    <>
+      <ActionButton
+        icon={Eye}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsOpen(true);
+        }}
+        size="square"
+        type="secondary"
+        className={className}
+        title={t('View post') ?? 'View post'}
+      />
+      {isOpen
+        ? createPortal(
+            <div
+              className="fixed inset-0 z-[1000] flex flex-col bg-black/70 backdrop-blur-sm"
+              onClick={() => setIsOpen(false)}
+            >
+              <div
+                className="mx-auto mt-10 flex max-h-[85vh] w-[95%] max-w-5xl flex-1 flex-col overflow-hidden rounded-lg bg-background shadow-xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex flex-shrink-0 flex-row items-center justify-between border-b px-4 py-2">
+                  <p className="text-sm font-semibold">{t('Post preview')}</p>
+                  <div className="flex flex-row gap-2">
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {t('Open in new tab')}
+                    </a>
+                    <button
+                      className="rounded bg-slate-200 px-2 py-1 text-xs dark:bg-slate-700"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {t('Close')}
+                    </button>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-auto bg-white dark:bg-slate-900">
+                  <iframe
+                    // Same-site relative URL ensures browser sends cookies; sandbox keeps isolation while allow-same-origin preserves cookie access
+                    src={href}
+                    className="h-full w-full"
+                    title="Post preview"
+                    sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+                  />
+                </div>
+              </div>
+            </div>,
+            document.body
+          )
+        : null}
+    </>
   );
 };
 
