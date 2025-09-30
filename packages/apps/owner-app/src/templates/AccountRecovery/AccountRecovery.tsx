@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 import {Helmet} from 'react-helmet-async';
 import {ActionLink, Alert, DomainHighlighter, t} from '@homebase-id/common-app';
 import {SHAMIR_RECOVERY_PATH, useAuth} from '../../hooks/auth/useAuth';
@@ -9,12 +9,10 @@ import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import {PasswordInput} from '../../components/Password/PasswordInput';
 import {PasswordStrength} from '../../components/Password/PasswordStrength';
 import {useLocation, useNavigate} from "react-router-dom";
-import {getFinalRecoveryResult} from "../../provider/auth/SecurityRecoveryProvider";
 
 const AccountRecovery = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const fromShamirRecovery = params.get("sv") === "1";
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
 
   const navigate = useNavigate();
@@ -24,16 +22,6 @@ const AccountRecovery = () => {
 
   const {resetPassword} = useAuth();
 
-  useEffect(() => {
-    const id = params.get("id");
-    const fk = params.get("fk");
-
-    if (id && fk) {
-      getFinalRecoveryResult(id, fk).then(r => {
-        setRecoveryKey(r.recoveryText);
-      })
-    }
-  }, [fromShamirRecovery]);
 
   const enterShamirMode = () => {
     navigate(SHAMIR_RECOVERY_PATH);
