@@ -1,10 +1,20 @@
-import { ActionButton, Label, t } from '@homebase-id/common-app';
-import { useRecoveryKey } from '../../hooks/recovery/useRecoveryKey';
-import { useEffect, useState } from 'react';
-import { Eye, CloseEye, Clipboard } from '@homebase-id/common-app/icons';
+import {ActionButton, Label, t} from '@homebase-id/common-app';
+import {useRecoveryKey} from '../../hooks/recovery/useRecoveryKey';
+import {useEffect, useState} from 'react';
+import {Eye, CloseEye, Clipboard} from '@homebase-id/common-app/icons';
 
-const ShowRecoveryKey = ({ onConfirm }: { onConfirm: () => void }) => {
-  const { data: recoveryKey } = useRecoveryKey().fetchKey;
+const ShowRecoveryKey = ({onConfirm}: { onConfirm: () => void }) => {
+  const {confirmHasKey} = useRecoveryKey();
+  const {data: recoveryKey} = useRecoveryKey().fetchKey;
+
+  const handleOnConfirm = async () => {
+    const confirmed = await confirmHasKey();
+    if (confirmed) {
+      onConfirm();
+    } else {
+      alert('There was an error confirming you have your recovery key.  Please try again');
+    }
+  }
 
   return (
     <>
@@ -19,7 +29,7 @@ const ShowRecoveryKey = ({ onConfirm }: { onConfirm: () => void }) => {
       </p>
       <div className="my-5">
         <Label>{t('Your recovery key')}</Label>
-        <ClickToReveal textToShow={recoveryKey?.key} />
+        <ClickToReveal textToShow={recoveryKey?.key}/>
         <p className="mt-2 text-sm text-slate-400">
           {t(
             'Click to reveal your recovery key, for your safety make sure no one else can see your screen'
@@ -36,7 +46,7 @@ const ShowRecoveryKey = ({ onConfirm }: { onConfirm: () => void }) => {
             buttonText: t('Yes'),
             type: 'warning',
           }}
-          onClick={onConfirm}
+          onClick={handleOnConfirm}
         >
           {t('I have safely stored my recovery key')}
         </ActionButton>
@@ -45,7 +55,7 @@ const ShowRecoveryKey = ({ onConfirm }: { onConfirm: () => void }) => {
   );
 };
 
-const ClickToReveal = ({ textToShow }: { textToShow?: string }) => {
+const ClickToReveal = ({textToShow}: { textToShow?: string }) => {
   const [show, setShow] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
   const redactedText = textToShow?.replace(/[^ ]/g, '•');
@@ -66,13 +76,14 @@ const ClickToReveal = ({ textToShow }: { textToShow?: string }) => {
 
   return (
     <>
-      <div className="relative flex flex-col items-center rounded border border-gray-300 dark:border-gray-700 md:flex-row">
+      <div
+        className="relative flex flex-col items-center rounded border border-gray-300 dark:border-gray-700 md:flex-row">
         <div className="flex w-full flex-row justify-around border-b dark:border-gray-700 md:contents">
           <button className={`${buttonStyle} md:border-r`} onClick={() => setShow(!show)}>
-            {show ? <CloseEye className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
+            {show ? <CloseEye className="h-6 w-6"/> : <Eye className="h-6 w-6"/>}
           </button>
           <button className={`${buttonStyle} opacity-50 md:order-3 md:border-l`} onClick={doCopy}>
-            <Clipboard className="h-6 w-6" />
+            <Clipboard className="h-6 w-6"/>
           </button>
         </div>
 
