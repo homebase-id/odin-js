@@ -7,7 +7,7 @@ import { PageMeta } from '@homebase-id/common-app';
 import { useFileQuery } from '../../../hooks/files/useFiles';
 import { SystemFileType } from '@homebase-id/js-lib/core';
 
-const DriveDetails = () => {
+const FileDetails = () => {
   const { driveKey, systemFileType, fileKey } = useParams();
   const splittedDriveKey = driveKey ? driveKey.split('_') : undefined;
 
@@ -65,4 +65,4 @@ const DriveDetails = () => {
   );
 };
 
-export default DriveDetails;
+export default FileDetails;

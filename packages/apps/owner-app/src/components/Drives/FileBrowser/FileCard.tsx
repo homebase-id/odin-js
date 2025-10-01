@@ -34,6 +34,7 @@ import {
   SHAMIR_PLAYER_COLLECTED_SHARD_REQUEST_FILE_TYPE,
   SHAMIR_PLAYER_ENCRYPTED_SHARD_FILE_TYPE,
 } from '../../../provider/auth/ShamirProvider';
+import { PostTeaser } from '../../SocialFeed/PostTeaser';
 
 export const FileCard = ({
   targetDrive,
@@ -229,16 +230,33 @@ const FileViewPost = ({
   const [isOpen, setIsOpen] = useState(false);
   const fileType = file.fileMetadata.appData.fileType;
   const isPost = fileType === BlogConfig.PostFileType;
-  const postContent: PostContent = tryJsonParse<PostContent>(file.fileMetadata.appData.content);
-  const channelId = postContent?.channelId;
-  const slugOrId = postContent?.slug || postContent?.id;
-  console.log(postContent);
-  // Construct permalink using current origin and HOME_ROOT_PATH
-  // Use relative path so all first-party cookies (SameSite=Lax/Strict) are automatically included
+  const rawContent = file.fileMetadata.appData.content as unknown;
+  const parsedContent =
+    typeof rawContent === 'string'
+      ? tryJsonParse<PostContent>(rawContent)
+      : (rawContent as PostContent | undefined);
+  const channelId = parsedContent?.channelId;
+  const slugOrId = parsedContent?.slug || parsedContent?.id;
+
   const href =
     isPost && channelId && slugOrId ? `${HOME_ROOT_PATH}posts/${channelId}/${slugOrId}` : undefined;
 
-  if (!isPost || !href) return null;
+  // Skip deleted files for preview
+  const isDeleted = (file as DeletedHomebaseFile).fileState === 'deleted';
+  if (!isPost || !href || !parsedContent || isDeleted) return null;
+
+  // Create a temporary strongly typed post file for the teaser
+  const source = file as unknown as HomebaseFile<PostContent>;
+  const postFilePreview: HomebaseFile<PostContent> = {
+    ...source,
+    fileMetadata: {
+      ...source.fileMetadata,
+      appData: {
+        ...source.fileMetadata.appData,
+        content: parsedContent,
+      },
+    },
+  };
 
   return (
     <>
@@ -267,15 +285,6 @@ const FileViewPost = ({
                 <div className="flex flex-shrink-0 flex-row items-center justify-between border-b px-4 py-2">
                   <p className="text-sm font-semibold">{t('Post preview')}</p>
                   <div className="flex flex-row gap-2">
-                    <a
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs underline"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {t('Open in new tab')}
-                    </a>
                     <button
                       className="rounded bg-slate-200 px-2 py-1 text-xs dark:bg-slate-700"
                       onClick={() => setIsOpen(false)}
@@ -284,14 +293,8 @@ const FileViewPost = ({
                     </button>
                   </div>
                 </div>
-                <div className="flex-1 overflow-auto bg-white dark:bg-slate-900">
-                  <iframe
-                    // Same-site relative URL ensures browser sends cookies; sandbox keeps isolation while allow-same-origin preserves cookie access
-                    src={href}
-                    className="h-full w-full"
-                    title="Post preview"
-                    sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-                  />
+                <div className="flex-1 overflow-auto bg-white p-4 dark:bg-slate-900">
+                  <PostTeaser postFile={postFilePreview} />
                 </div>
               </div>
             </div>,
