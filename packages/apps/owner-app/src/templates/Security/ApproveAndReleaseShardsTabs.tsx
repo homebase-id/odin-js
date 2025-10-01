@@ -45,7 +45,7 @@ const ApproveAndReleaseShardsTabs = () => {
     <div className="p-4">
       {loading && <div>Loading shard requests…</div>}
       {!loading && requests.length === 0 && (
-        <div>No shard requests at the moment.</div>
+        <div>No requests at the moment.</div>
       )}
       {!loading && requests.length > 0 && (
         <ul className="space-y-3">

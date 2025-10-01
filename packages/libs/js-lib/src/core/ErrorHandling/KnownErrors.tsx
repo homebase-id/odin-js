@@ -35,6 +35,7 @@ export const getKnownOdinErrorMessages = (error: unknown): string | undefined =>
   if (errorCode === 'invalidAuthToken') return t('Invalid authentification token');
   if (errorCode === 'sharedSecretEncryptionIsInvalid') return t("Request couldn't be decrypted");
 
+  if (errorCode === 'invalidEmail') return t('The email address is invalid');
   // Circle Errors
   if (errorCode === 'atLeastOneDriveOrPermissionRequiredForCircle')
     return t('At least one drive or permission required for circle');
@@ -124,6 +125,9 @@ export const getKnownOdinErrorMessages = (error: unknown): string | undefined =>
   if (errorCode === 'invalidTransitOptions') return t('Invalid transit options');
   if (errorCode === 'registrationStatusNotReadyForFinalization')
     return t('Registration status not ready for finalization');
+  
+  if(errorCode === 'passwordRecoveryNotConfigured')
+    return t('Password recovery not configured');
 
   console.error('[KnownErrors] Unknown error code', errorCode);
   return undefined;

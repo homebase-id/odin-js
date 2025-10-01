@@ -3,238 +3,251 @@ import {ActionButton, DialogWrapper, t, useDotYouClient, usePortal,} from '@home
 import {Arrow} from '@homebase-id/common-app/icons';
 import {Step1SelectPlayers} from "./Step1SelectPlayers";
 import {Step2OtherOptions} from "./Step2OtherOptions";
-import {DistributeShards} from "./DistributeShards";
-import {
-  configureShards,
-  ConfigureShardsRequest,
-  PlayerType,
-  ShamiraPlayer
-} from "../../../provider/auth/ShamirProvider";
+import {DistributeShardsReview} from "./DistributeShardsReview";
+import {configureShards, ConfigureShardsRequest, PlayerType, ShamiraPlayer} from "../../../provider/auth/ShamirProvider";
 import {createPortal} from "react-dom";
+import {WaitForShardConfig} from "./WaitForShardConfig";
 
 export const ShamirDistributionDialog = ({
-                                           title,
-                                           isOpen,
-                                           onConfirm,
-                                           onCancel,
+                                             title,
+                                             isOpen,
+                                             onConfirm,
+                                             onCancel,
                                          }: {
-  title: string;
-  isOpen: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
+    title: string;
+    isOpen: boolean;
+    onConfirm: () => void;
+    onCancel: () => void;
 }) => {
 
-  const minPlayers = 3;
-  const target = usePortal('modal-container');
-  const [stepNumber, setStepNumber] = useState(0);
-  const [players, setPlayers] = useState<ShamiraPlayer[]>([]);
-  const [minShards, setMinShards] = useState(3);
-  const client = useDotYouClient().getDotYouClient();
-  const [validationError, setValidationError] = useState<string | null>(null);
+    const minPlayers = 3;
+    const target = usePortal('modal-container');
+    const [stepNumber, setStepNumber] = useState(0);
+    const [players, setPlayers] = useState<ShamiraPlayer[]>([]);
+    const [minShards, setMinShards] = useState(3);
+    const client = useDotYouClient().getDotYouClient();
+    const [validationError, setValidationError] = useState<string | null>(null);
+    const [awaitConfigureShardsRequest, setAwaitConfigureShardsRequest] = useState<ConfigureShardsRequest | null>(null);
 
-  const reset = () => {
-    setStepNumber(0);
-    setPlayers([]);
-    setMinShards(3);
-  }
+    const reset = () => {
+        setStepNumber(0);
+        setPlayers([]);
+        setMinShards(3);
+        setAwaitConfigureShardsRequest(null);
+        setValidationError(null);
 
-  const handleStep1Next = () => {
-    if (players.length < minPlayers) {
-      setValidationError(t(`You must select at least ${minPlayers} players`));
-      return;
     }
 
-    setValidationError(null);
-    setStepNumber(stepNumber + 1)
-
-  }
-
-  const handleStep2Next = () => {
-    if (minShards < 1) {
-      setValidationError(t('Min shards cannot be less than 1'));
-      return;
-    }
-
-    if (minShards > players.length) {
-      setValidationError(t('Min shards cannot be more than total players'));
-      return;
-    }
-
-    setValidationError(null);
-    setStepNumber(stepNumber + 1)
-  }
-
-  const handleStep3Finalize = async () => {
-
-    setValidationError(null);
-
-    const request: ConfigureShardsRequest = {
-      players: players.map(p => {
-        return {
-          odinId: p.odinId,
-          type: p.type
+    const handleStep1Next = () => {
+        if (players.length < minPlayers) {
+            setValidationError(t(`You must select at least ${minPlayers} trusted connections`));
+            return;
         }
-      }),
-      minMatchingShards: minShards
-    };
 
-    await configureShards(client, request);
+        setValidationError(null);
+        setStepNumber(stepNumber + 1)
 
-    // now we need to 
-    reset();
-    onConfirm();
-
-  }
-
-  const addPlayer = (odinId: string) => {
-    if (players.find((p) => p.odinId === odinId)) {
-      return;
     }
-    setPlayers([...players, {odinId: odinId, type: PlayerType.Automatic}]);
-  }
-  const removePlayer = (odinId: string) => {
-    setPlayers(players.filter((p) => p.odinId !== odinId));
-  }
 
-  const updatePlayerType = (odinId: string, type: PlayerType) => {
-    setPlayers(
-      players.map((p) =>
-        p.odinId === odinId ? {...p, type} : p
-      )
-    );
-  }
-
-  if (!isOpen) return null;
-
-  const cfg: ConfigureShardsRequest =
-    {
-      players: players.map(p => {
-        return {
-          odinId: p.odinId,
-          type: p.type
+    const handleStep2Next = () => {
+        if (minShards < 1) {
+            setValidationError(t('Min shards cannot be less than 1'));
+            return;
         }
-      }),
-      minMatchingShards: minShards
+
+        if (minShards > players.length) {
+            setValidationError(t('Minimum shards cannot be more than the number of trusted connections you selected'));
+            return;
+        }
+
+        setValidationError(null);
+        setStepNumber(stepNumber + 1)
     }
 
+    const startConfigureShards = async () => {
 
-  const dialog = (
-    <DialogWrapper
-      title={title}
-      onClose={() => {
-        onCancel();
-      }}
-      keepOpenOnBlur={true}
-      size="2xlarge">
-      <>
-        {validationError && <span className="text-red-500">{validationError}</span>}
-        {/*<ErrorNotification error={}/>*/}
+        setValidationError(null);
 
-        <form onSubmit={async (e) => {
-            e.preventDefault();
-            // start config process
-          }}>
+        const request: ConfigureShardsRequest = {
+            players: players.map(p => {
+                return {
+                    odinId: p.odinId,
+                    type: p.type
+                }
+            }),
+            minMatchingShards: minShards
+        };
 
-          {stepNumber === 0 && (
-            <>
-              <Step1SelectPlayers
-                addPlayer={addPlayer}
-                removePlayer={removePlayer}
-                updatePlayerType={updatePlayerType}
-                players={players}
-              />
+        setAwaitConfigureShardsRequest(request);
+        await configureShards(client, request);
+    }
 
-              <div className="sticky bottom-0 mt-6 flex flex-col gap-2 border-t border-slate-200
-                 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 sm:flex-row-reverse">
+    const close = () => {
+        reset();
+        onConfirm();
+    }
 
-                <div className="flex w-full flex-col gap-2 py-3 sm:flex-row-reverse">
-                  <ActionButton onClick={() => handleStep1Next()} icon={Arrow}>
-                    {t('Next')}
-                  </ActionButton>
-                  <ActionButton
-                    className="sm:mr-auto"
-                    type="secondary"
-                    onClick={() => {
-                      reset();
-                      onCancel();
-                    }}>
-                    {t('Cancel')}
-                  </ActionButton>
+    const addPlayer = (odinId: string) => {
+        if (players.find((p) => p.odinId === odinId)) {
+            return;
+        }
+        setPlayers([...players, {odinId: odinId, type: PlayerType.Automatic}]);
+    }
+    const removePlayer = (odinId: string) => {
+        setPlayers(players.filter((p) => p.odinId !== odinId));
+    }
+
+    const updatePlayerType = (odinId: string, type: PlayerType) => {
+        setPlayers(
+            players.map((p) =>
+                p.odinId === odinId ? {...p, type} : p
+            )
+        );
+    }
+
+    if (!isOpen) return null;
+
+    const cfg: ConfigureShardsRequest =
+        {
+            players: players.map(p => {
+                return {
+                    odinId: p.odinId,
+                    type: p.type
+                }
+            }),
+            minMatchingShards: minShards
+        }
+
+
+    const dialog = (
+        <DialogWrapper
+            title={title}
+            onClose={() => {
+                onCancel();
+            }}
+            keepOpenOnBlur={true}
+            size="2xlarge"
+            footer={
+                <div className="border-t border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+                    {awaitConfigureShardsRequest != null ? (
+                        <div className="flex w-full flex-col gap-2 sm:flex-row-reverse">
+                            <ActionButton onClick={() => close()}>
+                                {t('Close')}
+                            </ActionButton>
+                        </div>
+                    ) : stepNumber === 0 ? (
+                        <div className="flex w-full flex-col gap-2 sm:flex-row-reverse">
+                            <ActionButton onClick={() => handleStep1Next()} icon={Arrow}>
+                                {t('Next')}
+                            </ActionButton>
+                            <ActionButton
+                                className="sm:mr-auto"
+                                type="secondary"
+                                onClick={() => {
+                                    reset();
+                                    onCancel();
+                                }}
+                            >
+                                {t('Cancel')}
+                            </ActionButton>
+                        </div>
+                    ) : stepNumber === 1 ? (
+                        <div className="flex flex-col gap-2 sm:flex-row-reverse">
+                            <ActionButton onClick={() => handleStep2Next()} icon={Arrow}>
+                                {t('Next')}
+                            </ActionButton>
+                            <ActionButton
+                                onClick={(e) => {
+                                    setStepNumber(stepNumber - 1);
+                                    e.preventDefault();
+                                }}
+                                type="secondary"
+                            >
+                                {t('Back')}
+                            </ActionButton>
+                            <ActionButton
+                                className="sm:mr-auto"
+                                type="secondary"
+                                onClick={() => {
+                                    reset();
+                                    onCancel();
+                                }}
+                            >
+                                {t('Cancel')}
+                            </ActionButton>
+                        </div>
+                    ) : stepNumber === 2 ? (
+                        <div className="flex flex-col gap-2 sm:flex-row-reverse">
+                            <ActionButton onClick={() => startConfigureShards()} icon={Arrow}>
+                                {t('Distribute')}
+                            </ActionButton>
+                            <ActionButton
+                                onClick={(e) => {
+                                    setStepNumber(stepNumber - 1);
+                                    e.preventDefault();
+                                }}
+                                type="secondary"
+                            >
+                                {t('Back')}
+                            </ActionButton>
+                            <ActionButton
+                                className="sm:mr-auto"
+                                type="secondary"
+                                onClick={() => {
+                                    reset();
+                                    onCancel();
+                                }}
+                            >
+                                {t('Cancel')}
+                            </ActionButton>
+                        </div>
+                    ) : null}
                 </div>
-              </div>
-            </>
-          )}
+            }
 
-          {stepNumber === 1 && (
-            <>
-              <Step2OtherOptions
-                config={cfg}
-                removePlayer={undefined}
-                updatePlayerType={updatePlayerType}
-                onChange={(s) => setMinShards(s)}/>
-              <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
-                <ActionButton
-                  onClick={() => handleStep2Next()}
-                  icon={Arrow}>
-                  {t('Next')}
-                </ActionButton>
-                <ActionButton
-                  onClick={(e) => {
-                    setStepNumber(stepNumber - 1);
-                    e.preventDefault();
-                  }}
-                  type={'secondary'}
-                >
-                  {t('Back')}
-                </ActionButton>
-                <ActionButton
-                  className="sm:mr-auto"
-                  type="secondary"
-                  onClick={() => {
-                    reset();
-                    onCancel();
-                  }}
-                >
-                  {t('Cancel')}
-                </ActionButton>
-              </div>
-            </>
+        >
+            {awaitConfigureShardsRequest != null ? (
+                <WaitForShardConfig request={awaitConfigureShardsRequest}/>
+            ) : (
+                <>
+                    {validationError && (
+                        <span className="text-red-500">{validationError}</span>
+                    )}
 
-          )}
+                    <form
+                        onSubmit={async (e) => {
+                            e.preventDefault();
+                            // start config process
+                        }}
+                        className="flex h-full flex-col"
+                    >
+                        {stepNumber === 0 && (
+                            <div className="flex-1 overflow-y-auto">
+                                <Step1SelectPlayers
+                                    addPlayer={addPlayer}
+                                    removePlayer={removePlayer}
+                                    updatePlayerType={updatePlayerType}
+                                    players={players}
+                                />
+                            </div>
+                        )}
 
-          {stepNumber === 2 && (
-            <>
-              <DistributeShards config={cfg}/>
+                        {stepNumber === 1 && (
+                            <Step2OtherOptions
+                                config={cfg}
+                                removePlayer={undefined}
+                                updatePlayerType={updatePlayerType}
+                                onChange={(s) => setMinShards(s)}
+                            />
+                        )}
 
-              <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
-                <ActionButton onClick={() => handleStep3Finalize()} icon={Arrow}>
-                  {t('Distribute')}
-                </ActionButton>
-                <ActionButton
-                  onClick={(e) => {
-                    setStepNumber(stepNumber - 1);
-                    e.preventDefault();
-                  }}
-                  type={'secondary'}>
-                  {t('Back')}
-                </ActionButton>
-                <ActionButton
-                  className="sm:mr-auto"
-                  type="secondary"
-                  onClick={() => {
-                    reset();
-                    onCancel();
-                  }}>
-                  {t('Cancel')}
-                </ActionButton>
-              </div>
-            </>
-          )}
+                        {stepNumber === 2 && <DistributeShardsReview config={cfg}/>}
+                    </form>
+                </>
+            )}
+        </DialogWrapper>
+    );
 
-        </form>
-      </>
-    </DialogWrapper>
-  );
-
-  return createPortal(dialog, target);
+    return createPortal(dialog, target);
 };
+
