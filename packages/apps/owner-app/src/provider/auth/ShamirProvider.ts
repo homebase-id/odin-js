@@ -34,12 +34,9 @@ export interface DealerShardEnvelopeRedacted {
   player: ShamiraPlayer;
 }
 
-export interface RemoteShardVerificationResult {
-  players: Record<string, ShardVerificationResult>;
-}
-
 export interface ShardVerificationResult {
   isValid: boolean
+  remoteServerError:boolean
 }
 
 export interface VerifyRemotePlayerShardRequest {

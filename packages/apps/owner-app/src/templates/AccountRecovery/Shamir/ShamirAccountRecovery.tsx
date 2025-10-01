@@ -16,9 +16,10 @@ const ShamirAccountRecovery = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
 
-  // const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
   const [status, setStatus] = useState<ShamirRecoveryStatusRedacted | null>(null);
   const [loaded, setLoaded] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const navigate = useNavigate();
 
   // see if we came here from recovery mode
@@ -29,9 +30,16 @@ const ShamirAccountRecovery = () => {
   const recoveryState = status?.state ?? "None";
 
   const startRecoveryMode = async () => {
-    await initiateRecoveryMode();
-    await reloadStatus();
-  }
+    try {
+      setErrorMessage(null); // clear previous
+      await initiateRecoveryMode();
+      await reloadStatus();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      setErrorMessage(error.message || t("An unexpected error occurred."));
+    }
+  };
+
 
   const cancelRecoveryMode = async () => {
     await exitRecoveryMode();
@@ -199,6 +207,13 @@ const ShamirAccountRecovery = () => {
                       {t('To regain access you will need to initiate recovery mode.')}{' '}
                       {t('Click the button below to send an email to the email address you used during signup.')}{' '}
                     </p>
+
+                    {errorMessage && (
+                      <Alert type="critical" isCompact={false} className="mt-3">
+                        {errorMessage}
+                      </Alert>
+                    )}
+                    
                     <ActionButton className="mt-3 mb-3"
                                   onClick={() => startRecoveryMode()}>
                       {t('Enter Recovery mode now')}
