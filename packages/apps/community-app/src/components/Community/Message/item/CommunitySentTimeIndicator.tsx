@@ -24,7 +24,8 @@ export const CommunitySentTimeIndicator = ({
   );
 
   const date = useMemo(
-    () => (msg.fileMetadata.created && new Date(msg.fileMetadata.created)) || undefined,
+    () =>
+      (msg.fileMetadata.transitCreated && new Date(msg.fileMetadata.transitCreated)) || undefined,
     [msg.fileMetadata.created]
   );
 
