@@ -34,12 +34,9 @@ export interface DealerShardEnvelopeRedacted {
   player: ShamiraPlayer;
 }
 
-export interface RemoteShardVerificationResult {
-  players: Record<string, ShardVerificationResult>;
-}
-
 export interface ShardVerificationResult {
   isValid: boolean
+  remoteServerError:boolean
 }
 
 export interface VerifyRemotePlayerShardRequest {
@@ -96,19 +93,6 @@ export const configureShards = async (dotYouClient: DotYouClient, request: Confi
   const axiosClient = dotYouClient.createAxiosClient();
   return await axiosClient
     .post(`${root}/configure-shards`, request)
-    .then((response) => {
-      return response.data;
-    })
-    .catch((error) => {
-      console.warn(error);
-      return null;
-    });
-}
-
-export const verifyRemoteShards = async (dotYouClient: DotYouClient): Promise<RemoteShardVerificationResult | null> => {
-  const axiosClient = dotYouClient.createAxiosClient();
-  return await axiosClient
-    .post<RemoteShardVerificationResult>(`${root}/verify-remote-shards`)
     .then((response) => {
       return response.data;
     })

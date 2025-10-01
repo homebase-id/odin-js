@@ -2,7 +2,7 @@ import {
   ConnectionImage,
   ConnectionName,
   Input,
-  Label, SubtleMessage,
+  Label,
   t,
   useAllContacts,
 } from "@homebase-id/common-app";
@@ -43,12 +43,12 @@ export const Step1SelectPlayers = ({
     <>
       <Label>{t("Selected list")}</Label>
 
-      <SubtleMessage className="mb-3">
+      <div className="mb-3 text-gray-400">
         <ul className="list-disc pl-5 space-y-2 not-italic">
           <li>{t("Send automatically - The piece is sent right away during recovery.")}</li>
           <li>{t("Approve first - The connection must confirm before their piece is sent.")}</li>
         </ul>
-      </SubtleMessage>
+      </div>
 
       <ConfigureTrustedConnections
         removePlayer={removePlayer}
