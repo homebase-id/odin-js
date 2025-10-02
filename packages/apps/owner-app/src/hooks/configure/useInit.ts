@@ -1,86 +1,87 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {useMutation, useQueryClient} from '@tanstack/react-query';
 
-import { WelcomeData } from '../../templates/Setup/Setup';
-import { DriveDefinitionParam, initialize } from '../../provider/system/SystemProvider';
-import { toGuidId } from '@homebase-id/js-lib/helpers';
-import { CircleDefinition } from '@homebase-id/js-lib/network';
+import {WelcomeData} from '../../templates/Setup/Setup';
+import {DriveDefinitionParam, initialize} from '../../provider/system/SystemProvider';
+import {toGuidId} from '@homebase-id/js-lib/helpers';
+import {CircleDefinition} from '@homebase-id/js-lib/network';
 import {
-  SetupAutoFollow,
-  SetupBlog,
-  SetupDefaultIdentity,
-  SetupHome,
-  SetupProfileDefinition,
+    SetupAutoFollow,
+    SetupBlog,
+    SetupDefaultIdentity,
+    SetupHome,
+    SetupProfileDefinition,
 } from '../../provider/setup/SetupProvider';
-import { useDotYouClientContext, useStaticFiles } from '@homebase-id/common-app';
-import { getSettings, updateSettings } from '../../provider/system/SettingsProvider';
-import { AUTO_FIX_VERSION } from '../useAutoFixDefaultConfig';
+import {useDotYouClientContext, useStaticFiles} from '@homebase-id/common-app';
+import {getSettings, updateSettings} from '../../provider/system/SettingsProvider';
+import {AUTO_FIX_VERSION} from '../useAutoFixDefaultConfig';
 
 export const FIRST_RUN_TOKEN_STORAGE_KEY = 'first-run-token';
+export const SHOULD_USE_AUTOMATED_PASSWORD_RECOVERY = 'use-auto-pwd-recovery';
 
 export const useInit = () => {
-  const firstRunToken = localStorage.getItem(FIRST_RUN_TOKEN_STORAGE_KEY);
+    const firstRunToken = localStorage.getItem(FIRST_RUN_TOKEN_STORAGE_KEY);
 
-  const dotYouClient = useDotYouClientContext();
-  const isAuthenticated = dotYouClient.isAuthenticated();
+    const dotYouClient = useDotYouClientContext();
+    const isAuthenticated = dotYouClient.isAuthenticated();
 
-  const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
-  const { mutateAsync: publishStaticFiles } = useStaticFiles().publish;
+    const {mutateAsync: publishStaticFiles} = useStaticFiles().publish;
 
-  const initDrives: DriveDefinitionParam[] = [];
+    const initDrives: DriveDefinitionParam[] = [];
 
-  const doInitWithData = async (data: WelcomeData) => {
-    if (!isAuthenticated) return;
+    const doInitWithData = async (data: WelcomeData) => {
+        if (!isAuthenticated) return;
 
-    const initCircles: CircleDefinition[] = data?.circles?.map((circle) => {
-      return {
-        id: toGuidId(circle.name),
-        name: circle.name,
-        description: circle.description,
-        permissions: {
-          keys: [10],
-        },
-      };
-    });
+        const initCircles: CircleDefinition[] = data?.circles?.map((circle) => {
+            return {
+                id: toGuidId(circle.name),
+                name: circle.name,
+                description: circle.description,
+                permissions: {
+                    keys: [10],
+                },
+            };
+        });
 
-    // Initialize
-    await initialize(dotYouClient, firstRunToken, initDrives, initCircles);
+        // Initialize
+        await initialize(dotYouClient, firstRunToken, initDrives, initCircles, data?.enableAutomatedPasswordRecovery);
 
-    // Ensure Config
-    await SetupProfileDefinition(dotYouClient);
-    await SetupBlog(dotYouClient);
-    await SetupHome(dotYouClient);
+        // Ensure Config
+        await SetupProfileDefinition(dotYouClient);
+        await SetupBlog(dotYouClient);
+        await SetupHome(dotYouClient);
 
-    // Setup (default) Data
-    await SetupDefaultIdentity(queryClient, dotYouClient, data);
-    try {
-      await SetupAutoFollow(dotYouClient);
-    } catch (ex) {
-      console.error('[init] autofollow failed', ex);
-    }
+        // Setup (default) Data
+        await SetupDefaultIdentity(queryClient, dotYouClient, data);
+        try {
+            await SetupAutoFollow(dotYouClient);
+        } catch (ex) {
+            console.error('[init] autofollow failed', ex);
+        }
 
-    // Do a first publish of the static files
-    // This is normally a side effect from the useAttribute hook.. but we need to do it here after the first setup
-    await publishStaticFiles(undefined);
+        // Do a first publish of the static files
+        // This is normally a side effect from the useAttribute hook.. but we need to do it here after the first setup
+        await publishStaticFiles(undefined);
 
-    const defaultServerSettings = getSettings(dotYouClient);
+        const defaultServerSettings = getSettings(dotYouClient);
 
-    await updateSettings(dotYouClient, {
-      ...defaultServerSettings,
-      lastRunAutoFix: AUTO_FIX_VERSION,
-    });
-  };
+        await updateSettings(dotYouClient, {
+            ...defaultServerSettings,
+            lastRunAutoFix: AUTO_FIX_VERSION,
+        });
+    };
 
-  return {
-    initWithData: useMutation({
-      mutationFn: doInitWithData,
-      onError: (ex) => {
-        console.error(ex);
-      },
-      retry: 0,
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ['initialized'] });
-      },
-    }),
-  };
+    return {
+        initWithData: useMutation({
+            mutationFn: doInitWithData,
+            onError: (ex) => {
+                console.error(ex);
+            },
+            retry: 0,
+            onSettled: () => {
+                queryClient.invalidateQueries({queryKey: ['initialized']});
+            },
+        }),
+    };
 };
