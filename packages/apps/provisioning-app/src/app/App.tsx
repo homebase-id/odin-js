@@ -63,8 +63,8 @@ function App() {
               >
                 <Route path="/" element={<InvitationCodeCheck />}></Route>
                 <Route path={ROOT_PATH}>
-                  <Route index={true} element={<DomainChoice />} />
-                  <Route path="managed-domain" element={<ProvisionManagedDomain />} />
+                  {/*<Route index={true} element={<DomainChoice />} />*/}
+                  <Route index={true} element={<ProvisionManagedDomain />} />
                   <Route path="own-domain" element={<ProvisionOwnDomain />} />
                   <Route
                     path="*"

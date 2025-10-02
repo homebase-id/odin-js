@@ -46,20 +46,20 @@ export const PasswordRecoverySetupTab = () => {
   return (
     <>
 
-      <Section title={
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex-1">
-            <span className="block text-lg">{t('Recovery Phrase')}</span>
-            <div className="mt-1 text-sm text-gray-400">
-              {t(
-                'Your recovery phrase lets you reset your password if you ever forget it.  Request your key by clicking the button below.  There is a 2 week waiting period to get your key'
-              )}
-            </div>
-          </div>
-        </div>
-      }>
-        <RevealRecoveryKey/>
-      </Section>
+      {/*<Section title={*/}
+      {/*  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">*/}
+      {/*    <div className="flex-1">*/}
+      {/*      <span className="block text-lg">{t('Recovery Phrase')}</span>*/}
+      {/*      <div className="mt-1 text-sm text-gray-400">*/}
+      {/*        {t(*/}
+      {/*          'Your recovery phrase lets you reset your password if you ever forget it.  Request your key by clicking the button below.  There is a 2-week waiting period to get your key'*/}
+      {/*        )}*/}
+      {/*      </div>*/}
+      {/*    </div>*/}
+      {/*  </div>*/}
+      {/*}>*/}
+      {/*  <RevealRecoveryKey/>*/}
+      {/*</Section>*/}
 
       {/*<ErrorNotification error={updateFlagError}/>*/}
       {!systemSettingsLoading && (

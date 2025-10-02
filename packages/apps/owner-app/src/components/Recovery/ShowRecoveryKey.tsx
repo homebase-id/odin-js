@@ -8,12 +8,12 @@ const ShowRecoveryKey = ({onConfirm}: { onConfirm: () => void }) => {
   const {data: recoveryKey} = useRecoveryKey().fetchKey;
 
   const handleOnConfirm = async () => {
-    const confirmed = await confirmHasKey();
-    if (confirmed) {
+    // const confirmed = await confirmHasKey();
+    // if (confirmed) {
       onConfirm();
-    } else {
-      alert('There was an error confirming you have your recovery key.  Please try again');
-    }
+    // } else {
+    //   alert('There was an error confirming you have your recovery key.  Please try again');
+    // }
   }
 
   return (
