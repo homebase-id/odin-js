@@ -60,6 +60,6 @@
     "@rollup/rollup-linux-x64-gnu": "4.21.1"
   },
   "dependencies": {
-    "patch-package": "8.0.0"
+    "patch-package": "8.0.1"
   }
 }
