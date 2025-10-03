@@ -12,12 +12,11 @@ export const initialize = async (
     dotYouClient: DotYouClient,
     firstRunToken: string | null,
     drives?: DriveDefinitionParam[],
-    circles?: CircleDefinition[],
-    enableAutomatedPasswordRecovery?: boolean
+    circles?: CircleDefinition[]
 ) => {
     const client = dotYouClient.createAxiosClient();
     const url = root + '/initialize?';
-    const data = {firstRunToken: firstRunToken, drives: drives ?? [], circles: circles ?? [], enableAutomatedPasswordRecovery: enableAutomatedPasswordRecovery};
+    const data = {firstRunToken: firstRunToken, drives: drives ?? [], circles: circles ?? []};
 
     return client
         .post<boolean>(url, data, {
@@ -27,6 +26,21 @@ export const initialize = async (
             return response.data;
         });
 };
+
+export const enableAutoPasswordRecovery = async (dotYouClient: DotYouClient) => {
+
+    const client = dotYouClient.createAxiosClient();
+    const url = root + '/enable-auto-password-recovery?';
+    const data = {};
+
+    return client
+        .post(url, data, {
+            timeout: 120 * 1000, // 120s
+        })
+        .then((response) => {
+            return response.status === 200;
+        });
+}
 
 export const isConfigured = async (dotYouClient: DotYouClient) => {
     const client = dotYouClient.createAxiosClient();

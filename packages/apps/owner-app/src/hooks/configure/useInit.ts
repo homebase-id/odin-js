@@ -1,7 +1,7 @@
 import {useMutation, useQueryClient} from '@tanstack/react-query';
 
 import {WelcomeData} from '../../templates/Setup/Setup';
-import {DriveDefinitionParam, initialize} from '../../provider/system/SystemProvider';
+import {DriveDefinitionParam, enableAutoPasswordRecovery, initialize} from '../../provider/system/SystemProvider';
 import {toGuidId} from '@homebase-id/js-lib/helpers';
 import {CircleDefinition} from '@homebase-id/js-lib/network';
 import {
@@ -45,8 +45,13 @@ export const useInit = () => {
         });
 
         // Initialize
-        await initialize(dotYouClient, firstRunToken, initDrives, initCircles, data?.enableAutomatedPasswordRecovery);
-
+        await initialize(dotYouClient, firstRunToken, initDrives, initCircles);
+        
+        if(data?.enableAutomatedPasswordRecovery === true)
+        {
+            await enableAutoPasswordRecovery(dotYouClient);
+        }
+        
         // Ensure Config
         await SetupProfileDefinition(dotYouClient);
         await SetupBlog(dotYouClient);
