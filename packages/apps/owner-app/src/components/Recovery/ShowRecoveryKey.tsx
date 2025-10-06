@@ -9,7 +9,7 @@ const ShowRecoveryKey = ({onConfirm}: { onConfirm: () => void }) => {
   const handleOnConfirm = async () => {
     // const confirmed = await confirmHasKey();
     // if (confirmed) {
-      onConfirm();
+    onConfirm();
     // } else {
     //   alert('There was an error confirming you have your recovery key.  Please try again');
     // }
@@ -54,7 +54,7 @@ const ShowRecoveryKey = ({onConfirm}: { onConfirm: () => void }) => {
   );
 };
 
-const ClickToReveal = ({textToShow}: { textToShow?: string }) => {
+const ClickToReveal = ({textToShow}: { textToShow?: string | null | undefined }) => {
   const [show, setShow] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
   const redactedText = textToShow?.replace(/[^ ]/g, '•');
