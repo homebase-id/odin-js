@@ -6,6 +6,7 @@ import {
   useDotYouClient,
 } from "@homebase-id/common-app";
 import {
+  ShardVerificationResult, verifyRemotePlayerShard,
   // ShardVerificationResult,
   // verifyRemotePlayerShard,
   VerifyRemotePlayerShardRequest,
@@ -23,12 +24,13 @@ async function verifyOnce(
   client: DotYouClient,
   req: VerifyRemotePlayerShardRequest
 ): Promise<"valid" | "invalid" | "error" | "serverError"> {
-  return "valid";
-  // try {
-  //   const result: ShardVerificationResult | null = await verifyRemotePlayerShard(client, req);
-  //   if (result?.remoteServerError) return "serverError";
-  //   return result?.isValid ? "valid" : "invalid";
-  // } catch { return "error"; }
+  try {
+    const result: ShardVerificationResult | null = await verifyRemotePlayerShard(client, req);
+    if (result?.remoteServerError) return "serverError";
+    return result?.isValid ? "valid" : "invalid";
+  } catch {
+    return "error";
+  }
 }
 
 export const PlayerStatusList = ({report}: { report: DealerRecoveryRiskReport }) => {

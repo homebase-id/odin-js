@@ -10,7 +10,7 @@ import {useSearchParams} from 'react-router-dom';
 import {FIRST_RUN_TOKEN_STORAGE_KEY, SHOULD_USE_AUTOMATED_PASSWORD_RECOVERY} from '../../hooks/configure/useInit';
 import {
     ActionButton,
-    Alert, Checkbox, CheckboxToggle,
+    Alert, CheckboxToggle,
     DomainHighlighter,
     ErrorNotification,
     Label,

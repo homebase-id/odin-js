@@ -14,7 +14,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import './App.css';
 
-import DomainChoice from '../templates/Provision/DomainChoice';
 import InvitationCodeCheck from '../templates/InvitationCode/InvitationCodeCheck';
 
 const ProvisionManagedDomain = lazy(() => import('../templates/Provision/ProvisionManagedDomain'));

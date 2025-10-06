@@ -4,7 +4,6 @@ import {useEffect, useState} from 'react';
 import {Eye, CloseEye, Clipboard} from '@homebase-id/common-app/icons';
 
 const ShowRecoveryKey = ({onConfirm}: { onConfirm: () => void }) => {
-  const {confirmHasKey} = useRecoveryKey();
   const {data: recoveryKey} = useRecoveryKey().fetchKey;
 
   const handleOnConfirm = async () => {

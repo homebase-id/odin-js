@@ -8,11 +8,9 @@ import {MinimalLayout} from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import {PasswordInput} from '../../components/Password/PasswordInput';
 import {PasswordStrength} from '../../components/Password/PasswordStrength';
-import {useLocation, useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 
 const AccountRecovery = () => {
-  const location = useLocation();
-  const params = new URLSearchParams(location.search);
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
 
   const navigate = useNavigate();
