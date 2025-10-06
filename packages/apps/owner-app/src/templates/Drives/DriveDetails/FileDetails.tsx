@@ -1,14 +1,13 @@
 import { useParams } from 'react-router-dom';
-import { t } from '@homebase-id/common-app';
+import { JsonViewer, t } from '@homebase-id/common-app';
 import { File } from '@homebase-id/common-app/icons';
 import { useDrive } from '../../../hooks/drives/useDrive';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import { PageMeta } from '@homebase-id/common-app';
 import { useFileQuery } from '../../../hooks/files/useFiles';
 import { SystemFileType } from '@homebase-id/js-lib/core';
-import { JsonViewer } from '../../../components/ui/Json';
 
-const DriveDetails = () => {
+const FileDetails = () => {
   const { driveKey, systemFileType, fileKey } = useParams();
   const splittedDriveKey = driveKey ? driveKey.split('_') : undefined;
 
@@ -66,4 +65,4 @@ const DriveDetails = () => {
   );
 };
 
-export default DriveDetails;
+export default FileDetails;
