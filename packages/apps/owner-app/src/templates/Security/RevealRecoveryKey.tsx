@@ -82,9 +82,9 @@ export function RevealRecoveryKey() {
   }
 
   if (status === "waiting") {
-    const nextDate =
-      recoveryKey?.nextViewableDate ?? recoveryKeyRequest?.nextViewableDate ?? 0;
-    const formattedDate = formatDateExludingYearIfCurrent(new Date(nextDate));
+    const rawNextDate = recoveryKey?.nextViewableDate ?? recoveryKeyRequest?.nextViewableDate ?? 0;
+    const adjustedDate = rawNextDate ? rawNextDate + 60_000 : 0;
+    const formattedDate = formatDateExludingYearIfCurrent(new Date(adjustedDate));
 
     return (
       <div className="flex flex-col items-start gap-4">

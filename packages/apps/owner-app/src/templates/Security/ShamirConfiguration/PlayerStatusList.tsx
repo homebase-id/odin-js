@@ -92,27 +92,27 @@ export const PlayerStatusList = ({report}: { report: DealerRecoveryRiskReport })
   useEffect(() => {
     if (!report.players.length) return;
 
-    // initial pass
-    for (const p of report.players) {
-      const k = toKey(p.player.odinId);
-      if (!p.isMissing && !p.isValid && !noRetryRef.current[k]) {
-        runVerificationOnce(p.player.odinId, p.shardId);
-      }
-    }
-
-    // interval retries
     const interval = setInterval(() => {
-      for (const p of report.players) {
-        const k = toKey(p.player.odinId);
-        if (!p.isMissing && !p.isValid && !noRetryRef.current[k]) {
-          runVerificationOnce(p.player.odinId, p.shardId);
-        }
+      const remaining = report.players.filter(
+        (p) =>
+          !p.isMissing &&
+          !noRetryRef.current[toKey(p.player.odinId)] &&
+          (statusByOdin[toKey(p.player.odinId)] === undefined ||
+            statusByOdin[toKey(p.player.odinId)] === "invalid")
+      );
+
+      if (remaining.length === 0) {
+        clearInterval(interval);
+        return;
+      }
+
+      for (const p of remaining) {
+        runVerificationOnce(p.player.odinId, p.shardId);
       }
     }, 2000);
 
     return () => clearInterval(interval);
-    // deps: only the stable key + the stable callback
-  }, [playersDepKey, runVerificationOnce]);
+  }, [playersDepKey, runVerificationOnce, statusByOdin]);
 
   return (
     <>
