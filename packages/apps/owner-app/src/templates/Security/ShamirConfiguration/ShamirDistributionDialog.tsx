@@ -14,7 +14,6 @@ import {
 import {createPortal} from "react-dom";
 import {WaitForShardConfig} from "./WaitForShardConfig";
 import {Step1SelectConfigurationType} from "./Step1SelectConfigurationType";
-import {enableAutoPasswordRecovery} from "../../../provider/system/SystemProvider";
 
 export const ShamirDistributionDialog = ({
                                            title,
@@ -36,8 +35,6 @@ export const ShamirDistributionDialog = ({
   const client = useDotYouClient().getDotYouClient();
   const [validationError, setValidationError] = useState<string | null>(null);
   const [awaitConfigureShardsRequest, setAwaitConfigureShardsRequest] = useState<ConfigureShardsRequest | null>(null);
-  const [showAutoEnabledFinalized, setShowAutoEnabledFinalized] = useState<boolean>(false);
-  const [showAutoRecoveryNotEnabled, setShowAutoRecoveryNotEnabled] = useState<boolean>(false);
 
   const reset = () => {
     setStepNumber(0);
@@ -45,20 +42,10 @@ export const ShamirDistributionDialog = ({
     setMinShards(3);
     setAwaitConfigureShardsRequest(null);
     setValidationError(null);
-    setShowAutoEnabledFinalized(false);
   }
 
   const updateConfigurationType = async (type: ShamirConfigurationType) => {
-    if (type === "auto") {
-      try {
-        await enableAutoPasswordRecovery(client);
-        setShowAutoEnabledFinalized(true);
-      }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      catch (error) {
-        setShowAutoRecoveryNotEnabled(true);
-      }
-    } else {
+    if (type === "manual") {
       setValidationError(null);
       setStepNumber(stepNumber + 1)
     }
@@ -234,55 +221,12 @@ export const ShamirDistributionDialog = ({
           ) : null}
         </div>
       }>
-      {showAutoRecoveryNotEnabled &&
-          <div className="flex flex-col gap-8">
-              <div
-                  className="flex flex-col gap-3 rounded-lg border border-gray-300 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                  <div className="flex flex-row items-center gap-3">
-                      <Person className="h-6 w-6 text-primary"/>
-                      <h3 className="text-lg font-semibold">
-                        {t('Auto Recovery not supported by Hosting Provider')}
-                      </h3>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                      t{"This hosting provider does not have auto-password recovery enabled.  You can manually configure using your trusted connections"}
-                  </p>
-                  <div className="mt-4">
-                      <ActionButton onClick={() => close()}>
-                        {t('Close')}
-                      </ActionButton>
-                  </div>
-              </div>
-          </div>
-      }
 
-      {showAutoEnabledFinalized &&
-          <div className="flex flex-col gap-8">
-              <div
-                  className="flex flex-col gap-3 rounded-lg border border-gray-300 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                  <div className="flex flex-row items-center gap-3">
-                      <Person className="h-6 w-6 text-primary"/>
-                      <h3 className="text-lg font-semibold">
-                        {t('Automatic Recovery Enabled')}
-                      </h3>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                    {t("Your password recovery will be handled automatically by the system. Your recovery details have be divided among multiple managed identities for safekeeping.")}
-                  </p>
-                  <div className="mt-4">
-                      <ActionButton onClick={() => close()}>
-                        {t('Close')}
-                      </ActionButton>
-                  </div>
-              </div>
-          </div>
-      }
-
-      {!showAutoEnabledFinalized && awaitConfigureShardsRequest != null && (
+      {awaitConfigureShardsRequest != null && (
         <WaitForShardConfig request={awaitConfigureShardsRequest}/>
       )}
 
-      {!showAutoEnabledFinalized && awaitConfigureShardsRequest == null && (
+      {awaitConfigureShardsRequest == null && (
         <>
           {validationError && (
             <span className="text-red-500">{validationError}</span>
