@@ -81,6 +81,8 @@ export interface RecoveryInfo {
     // Indicates when the configuration was last updated
     configurationUpdated: number,
 
+    usesAutomaticRecovery:boolean,
+    
     email: string | null,
     emailLastVerified: number | null,
     status: VerificationStatus,

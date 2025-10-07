@@ -98,7 +98,6 @@ export const PasswordRecoverySetupTab = () => {
                     onClick={(e) => {
                       e.preventDefault();
                       setIsConfigurationOpen(true);
-
                       return false;
                     }}
                     type="primary"
@@ -109,10 +108,10 @@ export const PasswordRecoverySetupTab = () => {
                 </SubtleMessage>
               ) : null}
 
-              {recoveryInfo && <PlayerStatusList report={recoveryInfo.recoveryRisk}/>}
+              {recoveryInfo && <PlayerStatusList recoveryInfo={recoveryInfo}/>}
 
               <ShamirDistributionDialog
-                title={t('Configure new password recovery')}
+                title={t('Setup password recovery')}
                 isOpen={isConfigurationOpen}
                 onConfirm={() => handleConfirm()}
                 onCancel={() => setIsConfigurationOpen(false)}

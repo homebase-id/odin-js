@@ -39,7 +39,13 @@ export const enableAutoPasswordRecovery = async (dotYouClient: DotYouClient) => 
         })
         .then((response) => {
             return response.status === 200;
-        });
+        }).catch((error) => {
+            error.response = error.response || {};
+            if(error.response.status === 400) {
+                // hosting environment does not have auto password recovery enabled
+                throw "Hosting environment does not have auto-password recovery enabled";
+            }
+      });
 }
 
 export const isConfigured = async (dotYouClient: DotYouClient) => {

@@ -12,7 +12,7 @@ import {
   VerifyRemotePlayerShardRequest,
 } from "../../../provider/auth/ShamirProvider";
 import {DotYouClient} from "@homebase-id/js-lib/core";
-import {DealerRecoveryRiskReport} from "../../../provider/auth/SecurityHealthProvider";
+import {RecoveryInfo} from "../../../provider/auth/SecurityHealthProvider";
 import {TimeAgoUtc} from "../../../components/ui/Date/TimeAgoUtc";
 import {PlayerListItem, Status} from "./PlayerListItem";
 import {DealerRecoveryRiskHeadline} from "../DealerRecoveryRiskHeadline";
@@ -33,8 +33,10 @@ async function verifyOnce(
   }
 }
 
-export const PlayerStatusList = ({report}: { report: DealerRecoveryRiskReport }) => {
-  if (!report) return null;
+export const PlayerStatusList = ({recoveryInfo}: { recoveryInfo: RecoveryInfo }) => {
+  if (!recoveryInfo) return null;
+
+  const report = recoveryInfo.recoveryRisk;
 
   const [statusByOdin, setStatusByOdin] = useState<Record<string, Status>>({});
   const {getDotYouClient} = useDotYouClient();
@@ -126,16 +128,29 @@ export const PlayerStatusList = ({report}: { report: DealerRecoveryRiskReport })
         <TimeAgoUtc value={report.healthLastChecked ?? 0}/>
       </div>
 
-      <div className="mt-3">
-        <Label>{t("Trusted connections")}</Label>
-        <SubtleMessage>
-          {t(
-            `The connections below each hold a piece of the data needed to recover your 
+      {recoveryInfo.usesAutomaticRecovery ?
+        (
+          <div className="mt-3">
+            <Label>{t("Automated Recovery")}</Label>
+            <SubtleMessage>
+              {t(`You're using automated recovery.  The identities below are managed by your hosting provider and will automatically respond when
+             you enter password recovery mode.`)}
+            </SubtleMessage>
+          </div>
+        )
+        :
+        (
+          <div className="mt-3">
+            <Label>{t("Trusted connections")}</Label>
+            <SubtleMessage>
+              {t(
+                `The connections below each hold a piece of the data needed to recover your 
               account. To regain access, at least ${report.minRequired} trusted 
               connections must respond to your request.`
-          )}
-        </SubtleMessage>
-      </div>
+              )}
+            </SubtleMessage>
+          </div>
+        )}
 
       <div className="flex w-full flex-col">
         {report.players.length ? (
