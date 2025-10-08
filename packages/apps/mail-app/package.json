@@ -26,7 +26,7 @@
     "@homebase-id/js-lib": "*",
     "@homebase-id/rich-text-editor": "*",
     "@homebase-id/ui-lib": "*",
-    "hls.js": "^1.6.13",
+    "hls.js": "^1.6.10",
     "axios": "1.8.2",
     "emoji-picker-element": "^1.24.0",
     "fuzzysort": "^2.0.4",
