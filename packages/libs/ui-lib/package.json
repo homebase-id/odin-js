@@ -37,7 +37,7 @@
     "@homebase-id/js-lib": "*"
   },
   "optionalDependencies": {
-    "hls.js": "^1.6.13"
+    "hls.js": "^1.6.10"
   },
   "peerDependencies": {
     "@tanstack/react-query": "5.51.1",
