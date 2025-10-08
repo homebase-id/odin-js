@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {ActionButton, DialogWrapper, t, useDotYouClient, usePortal,} from '@homebase-id/common-app';
-import {Arrow, Person} from '@homebase-id/common-app/icons';
+import {Arrow} from '@homebase-id/common-app/icons';
 import {Step2SelectPlayers} from "./Step2SelectPlayers";
 import {Step3OtherOptions} from "./Step3OtherOptions";
 import {DistributeShardsReview} from "./DistributeShardsReview";

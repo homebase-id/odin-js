@@ -18,9 +18,14 @@ export const Step1SelectConfigurationType = ({
 
   const client = useDotYouClient().getDotYouClient();
 
-  const close = () => {
+  const useManual = () => {
     onUpdateType("manual");
   }
+
+  const close = () => {
+    
+  }
+
   
   const handleAutoClick = async () => {
 
@@ -57,7 +62,7 @@ export const Step1SelectConfigurationType = ({
                   your trusted connections
                 </p>
                 <div className="mt-4">
-                  <ActionButton onClick={() => close()}>
+                  <ActionButton onClick={() => useManual()}>
                     {t('Use Manual')}
                   </ActionButton>
                 </div>

@@ -11,7 +11,7 @@ import {
   SetupHome,
   SetupProfileDefinition,
 } from '../../provider/setup/SetupProvider';
-import {t, useDotYouClientContext, useStaticFiles} from '@homebase-id/common-app';
+import {useDotYouClientContext, useStaticFiles} from '@homebase-id/common-app';
 import {getSettings, updateSettings} from '../../provider/system/SettingsProvider';
 import {AUTO_FIX_VERSION} from '../useAutoFixDefaultConfig';
 
@@ -51,10 +51,10 @@ export const useInit = () => {
       try {
         await enableAutoPasswordRecovery(dotYouClient);
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        alert(t("This hosting provider does not have auto-password recovery enabled.  You can manually configure " +
-          "this after you have added connections"));
+        console.error(error);
+        // alert(t("This hosting provider does not have auto-password recovery enabled.  You can manually configure " +
+        //   "this after you have added connections"));
       }
     }
 
