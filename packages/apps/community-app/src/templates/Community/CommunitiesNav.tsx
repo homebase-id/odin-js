@@ -120,7 +120,6 @@ const CommunityListItem = ({
   const communityImage = community.fileMetadata.payloads?.find((p) =>
     p.key.includes(COMMUNITY_DEF_PROFILE_KEY)
   );
-  console.log('Rendering community item', communityImage);
   const targetDrive = getTargetDriveFromCommunityId(
     community.fileMetadata.appData.uniqueId as string
   );
