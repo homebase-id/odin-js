@@ -212,11 +212,21 @@ const CommunityContextActions = ({
   const optionalOptions: ActionGroupOptionProps[] = [
     {
       icon: Clipboard,
-      label: t('Copy link'),
+      label: t('Copy External link'),
       onClick: () => {
         navigator.clipboard.writeText(
           `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${channelId}/${threadId ? `${threadId}/thread/` : ``}${msg.fileMetadata.appData.uniqueId}`
         );
+      },
+    },
+    {
+      icon: Clipboard,
+      label: t('Copy link'),
+      onClick: () => {
+        //TODO(2002Bishwajeet): Create a richText that the richTextinput understands and then we can navigate natively
+        // navigator.clipboard.writeText(
+        //   `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${channelId}/${threadId ? `${threadId}/thread/` : ``}${msg.fileMetadata.appData.uniqueId}`
+        // );
       },
     },
     {
