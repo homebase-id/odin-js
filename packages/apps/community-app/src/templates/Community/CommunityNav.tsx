@@ -1,4 +1,5 @@
 import { useParams, useMatch, Link, useNavigate } from 'react-router-dom';
+import { DeleteChannelDialog } from '../../components/Community/channel/DeleteChannelDialog';
 
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -12,7 +13,12 @@ import {
   useDotYouClientContext,
 } from '@homebase-id/common-app';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
-import { getNewXorId, isTouchDevice, tryJsonParse } from '@homebase-id/js-lib/helpers';
+import {
+  getNewXorId,
+  isTouchDevice,
+  stringGuidsEqual,
+  tryJsonParse,
+} from '@homebase-id/js-lib/helpers';
 import { useCommunity } from '../../hooks/community/useCommunity';
 import {
   ChannelWithRecentMessage,
@@ -31,6 +37,7 @@ import {
   Question,
   Plus,
   Pencil,
+  Trash,
 } from '@homebase-id/common-app/icons';
 import { CommunityInfoDialog } from '../../components/Community/CommunityInfoDialog';
 import { useConversationMetadata } from '@homebase-id/chat-app/src/hooks/chat/useConversationMetadata';
@@ -42,6 +49,7 @@ import { useHasUnreadThreads } from '../../hooks/community/threads/useCommunityT
 import { MyProfileStatus, ProfileStatus } from '../../components/Community/status/MyProfileStatus';
 import { CreateOrUpdateChannelDialog } from '../../components/Community/channel/CreateOrUpdateChannelDialog';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
+import { COMMUNITY_GENERAL_CHANNEL } from '../../providers/CommunityProvider';
 
 const maxChannels = 7;
 export const CommunityNav = memo(
@@ -296,6 +304,7 @@ const ChannelItem = memo(
     setUnreadCount: (identifier: string, count: number) => void;
   }) => {
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const { odinKey, communityKey } = useParams();
 
     const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
@@ -380,6 +389,7 @@ const ChannelItem = memo(
     }, [metadata, channelId, isPinned]);
 
     const toggleEdit = useCallback(() => setIsEditDialogOpen(true), []);
+    const toggleDelete = useCallback(() => setIsDeleteDialogOpen(true), []);
     const channelPath = `${COMMUNITY_ROOT_PATH}/${odinKey}/${communityKey}/${channelId}`;
 
     return (
@@ -417,6 +427,15 @@ const ChannelItem = memo(
                     onClick: toggleEdit,
                   }
                 : undefined,
+              // channel.fileMetadata.originalAuthor === loggedOnIdentity ||
+              community.fileMetadata.originalAuthor === loggedOnIdentity &&
+              !stringGuidsEqual(channel.fileId, COMMUNITY_GENERAL_CHANNEL.fileId)
+                ? {
+                    label: 'Delete',
+                    icon: Trash,
+                    onClick: toggleDelete,
+                  }
+                : undefined,
               {
                 label: 'Channel info',
                 icon: Question,
@@ -444,6 +463,9 @@ const ChannelItem = memo(
             onClose={() => setIsEditDialogOpen(false)}
             defaultValue={channel}
           />
+        ) : null}
+        {isDeleteDialogOpen ? (
+          <DeleteChannelDialog onClose={() => setIsDeleteDialogOpen(false)} channel={channel} />
         ) : null}
       </>
     );
