@@ -5,6 +5,7 @@ import { MailDrive } from '../../providers/MailProvider';
 import { useMailConversation } from '../../hooks/mail/useMailConversation';
 import {
   ActionButton,
+  BoringFile,
   bytesToSize,
   ExtensionThumbnail,
   useDotYouClientContext,
@@ -165,18 +166,29 @@ export const MailAttachmentPreview = ({
                 className="rounded object-cover object-center"
               />
             ) : (
-              <div className="flex flex-col items-center justify-center gap-2">
-                <ExtensionThumbnail
-                  contentType={payloadDescriptor.contentType}
-                  className="h-32 w-32 text-white"
-                />
-                <div className="max-w-xs text-white">
-                  <p className="text-sm">
-                    {payloadDescriptor.descriptorContent} (
-                    {bytesToSize(payloadDescriptor.bytesWritten)})
-                  </p>
-                </div>
-              </div>
+              <BoringFile
+                targetDrive={MailDrive}
+                systemFileType={mailMessage?.fileSystemType}
+                fileId={messageId}
+                globalTransitId={mailMessage?.fileMetadata.globalTransitId}
+                file={payloadDescriptor}
+                canDownload={true}
+                isPreview={true}
+                className="h-full min-h-[inherit] w-full"
+              />
+
+              // <div className="flex flex-col items-center justify-center gap-2">
+              //   <ExtensionThumbnail
+              //     contentType={payloadDescriptor.contentType}
+              //     className="h-32 w-32 text-white"
+              //   />
+              //   <div className="max-w-xs text-white">
+              //     <p className="text-sm">
+              //       {payloadDescriptor.descriptorContent} (
+              //       {bytesToSize(payloadDescriptor.bytesWritten)})
+              //     </p>
+              //   </div>
+              // </div>
             )}
 
             {currIndex !== 0 ? (
