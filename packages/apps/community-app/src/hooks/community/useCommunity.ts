@@ -6,6 +6,7 @@ import {
   DrivePermissionType,
   HomebaseFile,
   NewHomebaseFile,
+  NewPayloadDescriptor,
   TargetDrive,
 } from '@homebase-id/js-lib/core';
 import { COMMUNITY_ROOT_PATH, useDotYouClientContext } from '@homebase-id/common-app';
@@ -20,11 +21,14 @@ import { COMMUNITY_APP_ID, t } from '@homebase-id/common-app';
 import { getExtendAppRegistrationParams, TargetDriveAccessRequest } from '@homebase-id/js-lib/auth';
 import { COMMUNITY_DEFAULT_GENERAL_ID } from '../../providers/CommunityProvider';
 import { invalidateCommunities, updateCacheCommunities } from './useCommunities';
+import { putBlob } from '@homebase-id/js-lib/helpers'
 
 type useCommunityProps = {
   odinId: string | undefined;
   communityId: string | undefined;
 };
+
+export const COMMUNITY_PHOTO_PAYLOAD_CACHE = 'community-photo';
 
 const getEnsureNewDriveAndPermissionPath = (
   name: string,
@@ -116,12 +120,27 @@ export const useCommunity = (props?: useCommunityProps) => {
   const saveData = async (
     communityDef: NewHomebaseFile<CommunityDefinition> | HomebaseFile<CommunityDefinition>
   ) => {
-    const onMissingDrive = () => {
+    const onMissingDrive = async () => {
       if (!communityDef.fileMetadata.appData.uniqueId)
         throw new Error('Community unique id is not set');
-
       const host = dotYouClient.getHostIdentity();
-      const returnUrl = `${COMMUNITY_ROOT_PATH}/new?draft=${JSON.stringify(communityDef)}`;
+      let returnUrl = `${COMMUNITY_ROOT_PATH}/new`;
+
+
+      if (communityDef.fileMetadata.payloads) {
+        // we store thhem in indexedDb cache anyway
+        // add a early exit if no payloads
+
+        const pendingFile = (communityDef.fileMetadata.payloads[0] as NewPayloadDescriptor)?.pendingFile;
+        if (pendingFile) {
+          await putBlob(COMMUNITY_PHOTO_PAYLOAD_CACHE, pendingFile);
+          returnUrl += `?photo-key=${COMMUNITY_PHOTO_PAYLOAD_CACHE}`;
+        }
+        // Remove payloads to avoid hitting URL length limits
+        delete communityDef.fileMetadata.payloads;
+      }
+
+      returnUrl += `&draft=${JSON.stringify(communityDef)}`;
 
       const targetDrive = getTargetDriveFromCommunityId(communityDef.fileMetadata.appData.uniqueId);
 

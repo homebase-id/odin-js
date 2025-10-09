@@ -8,3 +8,4 @@ export * from './AttributeHelpers';
 export * from './PermissionHelpers';
 export * from './ImageMerger';
 export * from './PayloadAndThumbnailGenerator';
+export * from './BlobHelpers';
