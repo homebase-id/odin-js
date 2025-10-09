@@ -89,7 +89,7 @@ export interface RecoveryInfo {
     recoveryRisk: DealerRecoveryRiskReport
 }
 
-export const getRecoveryInfo = async (live: boolean = false): Promise<RecoveryInfo | null> => {
+export const getRecoveryInfo = async (live: boolean = true): Promise<RecoveryInfo | null> => {
 
     const dotYouClient = new OwnerClient({
         api: ApiType.Owner,
