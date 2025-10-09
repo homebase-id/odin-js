@@ -32,8 +32,8 @@ export const SecurityOverview = () => {
     await reset();
   }
 
-  console.log(info)
-  console.log(openDialog)
+  // console.log(info)
+  // console.log(openDialog)
   return (
     <>
       {/*<ErrorNotification error={updateFlagError}/>*/}

@@ -2,7 +2,7 @@ import {Input, Label, SubtleMessage, t} from '@homebase-id/common-app';
 import {ConfigureShardsRequest, PlayerType} from "../../../provider/auth/ShamirProvider";
 import {ConfigureTrustedConnections} from "./ConfigureTrustedConnections";
 
-export const Step2OtherOptions = ({
+export const Step3OtherOptions = ({
                                     config,
                                     onChange,
                                     removePlayer,

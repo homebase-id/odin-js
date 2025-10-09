@@ -11,7 +11,7 @@ import {ConfigureTrustedConnections} from "./ConfigureTrustedConnections";
 import {PlayerType, ShamiraPlayer} from "../../../provider/auth/ShamirProvider";
 
 
-export const Step1SelectPlayers = ({
+export const Step2SelectPlayers = ({
                                      addPlayer,
                                      removePlayer,
                                      updatePlayerType,

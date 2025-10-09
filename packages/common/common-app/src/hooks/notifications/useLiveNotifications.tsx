@@ -151,6 +151,7 @@ const OWNER_SHAMIR_PASSWORD_RECOVERY_RECRUITED = 'c5e3a188-487f-4162-8b37-ee6c6f
 const OWNER_SHAMIR_PASSWORD_RECOVERY_SHARD_REQUESTED = '260e370d-85d5-4ed9-92ed-bb2b36b0f73c';
 const OWNER_SHAMIR_PASSWORD_RECOVERY_SUFFICIENT_SHARDS_COLLECTED = '0df41b47-939e-47c0-8439-d38ce8b4d048';
 const OWNER_SHAMIR_PASSWORD_RECOVERY_SHARD_COLLECTED = 'e1cb2e75-2002-4ce0-a2e3-f228579229ef';
+const OWNER_SHAMIR_PASSWORD_RECOVERY_RISK_REPORT_GENERATED = '959f197f-4f97-4ff1-b36e-eb237b79eda1';
 
 const FEED_NEW_CONTENT_TYPE_ID = 'ad695388-c2df-47a0-ad5b-fc9f9e1fffc9';
 const FEED_NEW_REACTION_TYPE_ID = '37dae95d-e137-4bd4-b782-8512aaa2c96a';
@@ -203,6 +204,8 @@ export const buildNotificationBody = (
       return 'We now have sufficient shards to recover your password.  Check your email for the final steps.';
     } else if (payload.options.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_SHARD_COLLECTED) {
       return `Good news!  We've collected a shard of your password recovery from ${sender}.  ${payload.options.unEncryptedMessage}`
+    } else if (payload.options.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_RISK_REPORT_GENERATED) {
+      return 'Your password recovery report has been generated.  Tap to continue...';
     }
   } else if (payload.options.appId === CHAT_APP_ID) {
     return `${sender} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
@@ -238,6 +241,8 @@ export const buildNotificationTargetLink = (payload: PushNotification) => {
       return `/owner/connections`;
     } else if (payload.options.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_SHARD_REQUESTED) {
       return `/owner/security/release-shards`
+    } else if (payload.options.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_RISK_REPORT_GENERATED) {
+      return `/owner/security/password-recovery`
     }
   } else if (payload.options.appId === CHAT_APP_ID) {
     return `/apps/chat/${payload.options.typeId}`;

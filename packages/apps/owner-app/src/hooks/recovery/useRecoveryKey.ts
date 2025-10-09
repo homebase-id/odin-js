@@ -1,12 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
-import { getRecoveryKey } from '../../provider/auth/RecoveryProvider';
+import {confirmUserStoredKey, getRecoveryKey } from '../../provider/auth/RecoveryProvider';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useRecoveryKey = () => {
   const dotYouClient = useDotYouClientContext();
   const fetchKey = async () => await getRecoveryKey(dotYouClient);
 
+  const confirmHasKey = async ()=> await confirmUserStoredKey(dotYouClient);
+  
   return {
+    confirmHasKey,
     fetchKey: useQuery({
       queryKey: ['recovery-key'],
       queryFn: fetchKey,

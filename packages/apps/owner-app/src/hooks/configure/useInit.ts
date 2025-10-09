@@ -1,9 +1,9 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {useMutation, useQueryClient} from '@tanstack/react-query';
 
-import { WelcomeData } from '../../templates/Setup/Setup';
-import { DriveDefinitionParam, initialize } from '../../provider/system/SystemProvider';
-import { toGuidId } from '@homebase-id/js-lib/helpers';
-import { CircleDefinition } from '@homebase-id/js-lib/network';
+import {WelcomeData} from '../../templates/Setup/Setup';
+import {DriveDefinitionParam, enableAutoPasswordRecovery, initialize} from '../../provider/system/SystemProvider';
+import {toGuidId} from '@homebase-id/js-lib/helpers';
+import {CircleDefinition} from '@homebase-id/js-lib/network';
 import {
   SetupAutoFollow,
   SetupBlog,
@@ -11,11 +11,12 @@ import {
   SetupHome,
   SetupProfileDefinition,
 } from '../../provider/setup/SetupProvider';
-import { useDotYouClientContext, useStaticFiles } from '@homebase-id/common-app';
-import { getSettings, updateSettings } from '../../provider/system/SettingsProvider';
-import { AUTO_FIX_VERSION } from '../useAutoFixDefaultConfig';
+import {useDotYouClientContext, useStaticFiles} from '@homebase-id/common-app';
+import {getSettings, updateSettings} from '../../provider/system/SettingsProvider';
+import {AUTO_FIX_VERSION} from '../useAutoFixDefaultConfig';
 
 export const FIRST_RUN_TOKEN_STORAGE_KEY = 'first-run-token';
+export const SHOULD_USE_AUTOMATED_PASSWORD_RECOVERY = 'use-auto-pwd-recovery';
 
 export const useInit = () => {
   const firstRunToken = localStorage.getItem(FIRST_RUN_TOKEN_STORAGE_KEY);
@@ -25,7 +26,7 @@ export const useInit = () => {
 
   const queryClient = useQueryClient();
 
-  const { mutateAsync: publishStaticFiles } = useStaticFiles().publish;
+  const {mutateAsync: publishStaticFiles} = useStaticFiles().publish;
 
   const initDrives: DriveDefinitionParam[] = [];
 
@@ -45,6 +46,17 @@ export const useInit = () => {
 
     // Initialize
     await initialize(dotYouClient, firstRunToken, initDrives, initCircles);
+
+    if (data?.enableAutomatedPasswordRecovery === true) {
+      try {
+        await enableAutoPasswordRecovery(dotYouClient);
+
+      } catch (error) {
+        console.error(error);
+        // alert(t("This hosting provider does not have auto-password recovery enabled.  You can manually configure " +
+        //   "this after you have added connections"));
+      }
+    }
 
     // Ensure Config
     await SetupProfileDefinition(dotYouClient);
@@ -79,7 +91,7 @@ export const useInit = () => {
       },
       retry: 0,
       onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ['initialized'] });
+        queryClient.invalidateQueries({queryKey: ['initialized']});
       },
     }),
   };

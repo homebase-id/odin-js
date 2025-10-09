@@ -18,6 +18,8 @@ export const playerTypeText = (type: PlayerType) => {
   }
 }
 
+export type ShamirConfigurationType = 'manual' | 'auto';
+
 
 export interface ShamiraPlayer {
   odinId: OdinId;
@@ -36,7 +38,7 @@ export interface DealerShardEnvelopeRedacted {
 
 export interface ShardVerificationResult {
   isValid: boolean
-  remoteServerError:boolean
+  remoteServerError: boolean
 }
 
 export interface VerifyRemotePlayerShardRequest {
@@ -48,6 +50,7 @@ export interface DealerShardConfig {
   minMatchingShards: number;
   envelopes: DealerShardEnvelopeRedacted[];
   updated: number;
+  usesAutomaticRecovery: boolean;
 }
 
 export interface ApproveShardRequest {

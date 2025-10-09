@@ -1,5 +1,7 @@
 import {ApiType, getKnownOdinErrorMessages} from '@homebase-id/js-lib/core';
 import {OwnerClient} from "@homebase-id/common-app";
+import {prepareAuthPassword} from "./AuthenticationHelper";
+import {getSalts} from "./AuthenticationProvider";
 
 export enum ShamirRecoveryState {
 
@@ -21,10 +23,6 @@ export enum ShamirRecoveryState {
   AwaitingOwnerFinalization = "awaitingOwnerFinalization"
 }
 
-export interface FinalRecoveryResult {
-  recoveryText: string
-}
-
 // Status type
 export interface ShamirRecoveryStatusRedacted {
   updated: number; // Unix timestamp (UTC)
@@ -36,22 +34,6 @@ const root = "/security/recovery"
 const dotYouClient = new OwnerClient({
   api: ApiType.Owner,
 });
-
-export const getFinalRecoveryResult = async (id: string, fk: string): Promise<FinalRecoveryResult> => {
-  const axiosClient = dotYouClient.createAxiosClient();
-  return await axiosClient
-    .post(`${root}/finalize`, {
-      id: id,
-      finalKey: fk
-    })
-    .then((response) => {
-      return response.data;
-    })
-    .catch((error) => {
-      console.warn(error);
-      return null;
-    });
-};
 
 export const getRecoveryStatus = async (): Promise<ShamirRecoveryStatusRedacted> => {
   const axiosClient = dotYouClient.createAxiosClient();
@@ -65,6 +47,28 @@ export const getRecoveryStatus = async (): Promise<ShamirRecoveryStatusRedacted>
       return null;
     });
 };
+
+export const finalizeRecovery = async (id: string, fk: string, newPassword: string): Promise<boolean> => {
+  const axiosClient = dotYouClient.createAxiosClient();
+
+  const salts = await getSalts(dotYouClient);
+  const passwordReply = await prepareAuthPassword(newPassword, salts);
+
+  return await axiosClient
+    .post(`${root}/finalize`, {
+      id: id,
+      finalKey: fk,
+      passwordReply: passwordReply
+    })
+    .then((response) => {
+      return response.status == 200;
+    })
+    .catch((error) => {
+      console.warn(error);
+      return false;
+    });
+};
+
 
 export const exitRecoveryMode = async () => {
   const axiosClient = dotYouClient.createAxiosClient();

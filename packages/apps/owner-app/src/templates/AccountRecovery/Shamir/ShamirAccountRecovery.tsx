@@ -1,16 +1,20 @@
 import {useEffect, useState} from 'react';
 import {Helmet} from 'react-helmet-async';
-import {ActionButton, Alert, DomainHighlighter, t} from '@homebase-id/common-app';
+import {ActionButton, ActionLink, Alert, DomainHighlighter, Label, t} from '@homebase-id/common-app';
 import {MinimalLayout} from '../../../components/ui/Layout/Layout';
 import UrlNotifier from '../../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import {Arrow} from "@homebase-id/common-app/icons";
-import {useLocation, useNavigate} from "react-router-dom";
-import {RECOVERY_PATH} from "../../../hooks/auth/useAuth";
+import {useLocation} from "react-router-dom";
 import {
   exitRecoveryMode,
+  finalizeRecovery,
   getRecoveryStatus,
-  initiateRecoveryMode, ShamirRecoveryStatusRedacted,
+  initiateRecoveryMode,
+  ShamirRecoveryState,
+  ShamirRecoveryStatusRedacted,
 } from "../../../provider/auth/SecurityRecoveryProvider";
+import {PasswordInput} from "../../../components/Password/PasswordInput";
+import {PasswordStrength} from "../../../components/Password/PasswordStrength";
 
 const ShamirAccountRecovery = () => {
   const location = useLocation();
@@ -19,8 +23,6 @@ const ShamirAccountRecovery = () => {
   const [status, setStatus] = useState<ShamirRecoveryStatusRedacted | null>(null);
   const [loaded, setLoaded] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const navigate = useNavigate();
 
   // see if we came here from recovery mode
   const fromVerification = params.get("fv") === "1";
@@ -40,7 +42,6 @@ const ShamirAccountRecovery = () => {
     }
   };
 
-
   const cancelRecoveryMode = async () => {
     await exitRecoveryMode();
     await reloadStatus();
@@ -53,10 +54,6 @@ const ShamirAccountRecovery = () => {
     });
   };
 
-  const continueToUseRecoveryKey = async () => {
-    navigate(`${RECOVERY_PATH}?id=${params.get("id")}&fk=${params.get("token")}`)
-  }
-
   useEffect(() => {
     // run immediately on mount
     reloadStatus();
@@ -68,7 +65,6 @@ const ShamirAccountRecovery = () => {
 
     return () => clearInterval(intervalId); // cleanup on unmount
   }, []);
-
 
   if ((fromVerification || fromFinalize) && !loaded) {
     // we need to wait until we get the status
@@ -91,7 +87,7 @@ const ShamirAccountRecovery = () => {
                   <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                 </small>
               </h1>
-              {recoveryState === 'awaitingOwnerEmailVerificationToEnterRecoveryMode' ? (
+              {recoveryState === ShamirRecoveryState.AwaitingOwnerEmailVerificationToEnterRecoveryMode ? (
                 <div className="my-2">
                   <p>{t('We sent an email to the one you used during signup.  Click the link in this email to continue.')}</p>
                   <p className="mt-3">Email: <b>{status?.email}</b></p>
@@ -105,10 +101,10 @@ const ShamirAccountRecovery = () => {
                     </ActionButton>
                   </div>
                 </div>
-              ) : recoveryState === 'awaitingSufficientDelegateConfirmation' ? (<>
+              ) : recoveryState === ShamirRecoveryState.AwaitingSufficientDelegateConfirmation ? (<>
                   {t('We notified your trusted connections that you are in recovery mode.  Forget who they were?  ' +
                     'Check the email we sent when you entered recovery mode.')}
-                  
+
                   <Alert type="warning" isCompact={false} className="mt-3">
                     {t('We are waiting for a sufficient number of your delegates to confirm')}
                   </Alert>
@@ -130,10 +126,11 @@ const ShamirAccountRecovery = () => {
                     </ActionButton>
                   </div>
                 </>
-              ) : recoveryState === 'awaitingOwnerFinalization' ? (<>
+              ) : recoveryState === ShamirRecoveryState.AwaitingOwnerFinalization ? (<>
                   {t('🎉 You are ready to finalize your password recovery!')}
 
                   <hr className="mb-5 mt-7 dark:border-slate-700"/>
+                  {token && nonceId && (<PasswordReset/>)}
 
                   {/*user is on the screen but did not click the email*/}
                   {(!token || !nonceId) && (
@@ -155,34 +152,9 @@ const ShamirAccountRecovery = () => {
                     </>
                   )}
 
-                  {token && nonceId && (
-                    <div className="flex flex-row-reverse justify-between">
-                      {(!token || !nonceId) && (
-                        <div className="my-2">
-                          <p>{t('We sent an email including your final recovery link.  Click the link in this email to continue.')}</p>
-                          <p className="mt-3">Email: <b>{status?.email}</b></p>
-                          <hr className="mb-5 mt-7 dark:border-slate-700"/>
-                        </div>
-                      )}
-
-                      <ActionButton className="mt-3 mb-3"
-                                    onClick={() => continueToUseRecoveryKey()}>
-                        {t('Continue to set password')}
-                        <Arrow className="ml-auto h-5 w-5"/>
-                      </ActionButton>
-                      <div className="my-2">
-                        <ActionButton
-                          type="secondary"
-                          className="mt-3 mb-3"
-                          onClick={() => cancelRecoveryMode()}>
-                          {t('Exit recovery mode')}
-                        </ActionButton>
-                      </div>
-                    </div>
-                  )}
 
                 </>
-              ) : recoveryState === 'awaitingOwnerEmailVerificationToExitRecoveryMode' ? (
+              ) : recoveryState === ShamirRecoveryState.AwaitingOwnerEmailVerificationToExitRecoveryMode ? (
                 <div className="my-2">
                   <p>{t('We sent an email to the one you used during signup.  Click the link in this email to continue ' +
                     'exiting recovery mode.')}</p>
@@ -213,7 +185,7 @@ const ShamirAccountRecovery = () => {
                         {errorMessage}
                       </Alert>
                     )}
-                    
+
                     <ActionButton className="mt-3 mb-3"
                                   onClick={() => startRecoveryMode()}>
                       {t('Enter Recovery mode now')}
@@ -232,5 +204,105 @@ const ShamirAccountRecovery = () => {
     </>
   );
 };
+
+
+function PasswordReset() {
+
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+
+  // see if we came here from recovery mode
+  const nonceId = params.get("id") ?? "";
+  const token = params.get("token") ?? "";
+
+  const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
+  const [password, setPassword] = useState('');
+  const [retypePassword, setRetypePassword] = useState('');
+
+  const passwordIsValid = password === retypePassword && password !== '';
+
+  const doSetNewPassword = async () => {
+    setState('loading');
+    const resetResult = await finalizeRecovery(nonceId, token, password);
+    if (resetResult) {
+      setState('success');
+    } else {
+      setState('error');
+    }
+  };
+
+  return (
+    <div className="">
+      {state === 'success' ? (
+        <div className="my-2">
+          <p>{t('Your password has been changed successfully')}</p>
+          <div className="flex flex-row-reverse">
+            <ActionLink href="/owner/login">{t('Login')}</ActionLink>
+          </div>
+        </div>
+      ) : state === 'error' ? (
+        <>
+          <Alert type="warning" isCompact={true}>
+            {t('Failed to set a new password, check your recovery key and try again')}
+          </Alert>
+          <div className="mt-5 flex flex-row-reverse">
+            <ActionButton onClick={() => setState('idle')}>{t('Try again')}</ActionButton>
+          </div>
+        </>
+      ) : (
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          doSetNewPassword();
+        }}>
+          <div className="mb-2">
+            <Label>{t('New password')}</Label>
+            <PasswordInput
+              required
+              name="password"
+              id="password"
+              type="password"
+              onChange={(e) => setPassword(e.target.value)}
+              defaultValue={password}
+              autoComplete="new-password"
+            />
+          </div>
+          <PasswordStrength
+            password={password}
+            userInputs={[]}
+            className="mb-2"
+          />
+          <div className="mb-2">
+            <Label htmlFor="retypepassword" className="text-sm leading-7">
+              {t('Retype Password')}
+            </Label>
+            <PasswordInput
+              required
+              type="password"
+              name="retypePassword"
+              id="retypePassword"
+              onChange={(e) => setRetypePassword(e.target.value)}
+              defaultValue={retypePassword}
+              autoComplete="new-password"
+            />
+            {password !== retypePassword && retypePassword !== '' ? (
+              <p className="py-2 text-red-800 dark:text-red-200">
+                {t("Passwords don't match")}
+              </p>
+            ) : null}
+          </div>
+          <div className="mt-5 flex flex-row-reverse justify-between gap-2">
+            <ActionButton state={state} disabled={!passwordIsValid}>
+              {t('Reset password')}
+            </ActionButton>
+            <ActionLink type="secondary" href="/owner/login">
+              {t('Cancel')}
+            </ActionLink>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+}
 
 export default ShamirAccountRecovery;
