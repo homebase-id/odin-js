@@ -1,7 +1,6 @@
 /// <reference lib="webworker" />
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import {el} from "timeago.js/lib/lang";
 
 declare const self: ServiceWorkerGlobalScope;
 
