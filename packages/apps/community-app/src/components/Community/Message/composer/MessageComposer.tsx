@@ -30,7 +30,8 @@ import { ChannelPlugin } from '../RTEChannelDropdown/RTEChannelDropdownPlugin';
 // import { DraftSaver } from './DraftSaver';
 import React from 'react';
 import type { Mentionable } from '@homebase-id/rich-text-editor';
-import {TableFlipPlugin} from "../RTETableFlipDropdown/RTEChannelDropdownPlugin";
+import { TableFlipPlugin } from '../RTETableFlipDropdown/RTEChannelDropdownPlugin';
+import { ReferenceMessagePlugin } from '../RTEReferencedMessage/RTEReferencedMessagePlugin';
 
 const RichTextEditor = lazy(() =>
   import('@homebase-id/rich-text-editor').then((rootExport) => ({
@@ -75,10 +76,7 @@ export const MessageComposer = memo(
     //     () => getPlainTextFromRichText(message || draft?.message) || '',
     //     [message, draft]
     // );
-    const plainMessage = useMemo(
-      () => getPlainTextFromRichText(message) || '',
-      [message]
-    );
+    const plainMessage = useMemo(() => getPlainTextFromRichText(message) || '', [message]);
 
     const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(plainMessage);
 
@@ -153,6 +151,8 @@ export const MessageComposer = memo(
         ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         TableFlipPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ReferenceMessagePlugin.configure({ options: { insertSpaceAfterReference: true } } as any),
       ];
     }, []);
 
@@ -173,7 +173,6 @@ export const MessageComposer = memo(
       return () => window.removeEventListener('focus', onFocus);
     }, []);
 
-    
     // useEffect(() => {
     //   // focus, clear message to allow draft to be loaded
     //   const onFocus = () => {
@@ -286,8 +285,8 @@ export const MessageComposer = memo(
                 uniqueId={
                   thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId
                 }
-                  // rteKey={draft?.updatedAt}
-                  rteKey={"not-sure-here"}
+                // rteKey={draft?.updatedAt}
+                rteKey={'not-sure-here'}
                 children={innerChildren}
               />
             </Suspense>

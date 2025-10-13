@@ -42,6 +42,7 @@ import { CommunityMessageAuthorName } from './CommunityMesageAuthorName';
 import { CommunityMessageAvatar } from './CommunityMessageAvatar';
 import { CommunityMessageLastUpdatedIndicator } from './CommunityMessageLastUpdatedIndicator';
 import { CommunityMessageEdited } from './CommunityMessageEdited';
+import { CommunityMessageInternalLink } from './CommunityMessageInternalLink';
 
 export const CommunityMessageItem = memo(
   (props: {
@@ -400,6 +401,14 @@ const MessageTextRenderer = ({
                 @{attributes.value.replaceAll('@', '')}
               </span>
             );
+        }
+
+        if (type === 'referenced_message') {
+          return (
+            <CommunityMessageInternalLink attributes={attributes}>
+              {children}
+            </CommunityMessageInternalLink>
+          );
         }
 
         return null;
