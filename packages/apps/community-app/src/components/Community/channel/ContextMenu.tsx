@@ -213,15 +213,6 @@ const CommunityContextActions = ({
   const optionalOptions: ActionGroupOptionProps[] = [
     {
       icon: Clipboard,
-      label: t('Copy external link'),
-      onClick: () => {
-        navigator.clipboard.writeText(
-          `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${channelId}/${threadId ? `${threadId}/thread/` : ``}${msg.fileMetadata.appData.uniqueId}`
-        );
-      },
-    },
-    {
-      icon: Clipboard,
       label: t('Copy link'),
       onClick: () => {
         // Copy an internal token the RTE recognizes; include extra context so renderer can fetch and render richly
@@ -244,6 +235,15 @@ const CommunityContextActions = ({
         const params = new URLSearchParams(threadId ? { ...baseParams, threadId } : baseParams);
         const internalToken = `message://${messageId}?${params.toString()}`;
         navigator.clipboard.writeText(internalToken);
+      },
+    },
+    {
+      icon: Clipboard,
+      label: t('Copy external link'),
+      onClick: () => {
+        navigator.clipboard.writeText(
+          `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${channelId}/${threadId ? `${threadId}/thread/` : ``}${msg.fileMetadata.appData.uniqueId}`
+        );
       },
     },
     {
