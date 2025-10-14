@@ -2,6 +2,7 @@ import { hasDebugFlag, jsonStringify64, drivesEqual } from '../../helpers/helper
 import { ApiType, DotYouClient } from '../DotYouClient';
 import { encryptData, getRandomIv } from '../InterceptionEncryptionUtil';
 import { TargetDrive } from '../core';
+import { signalRService } from './SignalR/signalRService';
 import {
   parseMessage,
   ParseRawClientNotification,
@@ -14,9 +15,9 @@ import {
 } from './WebsocketTypes';
 import { onlineManager } from '@tanstack/react-query';
 // The use of onlineManager is pretty much useless for browsers.
-// It has been added for better React Native support, 
+// It has been added for better React Native support,
 // where the online/offline events are more reliable,
-// Added to handle scenario where RN gets flooded with reconnect 
+// Added to handle scenario where RN gets flooded with reconnect
 // events when in airplane mode.
 //
 
@@ -59,7 +60,8 @@ const ConnectSocket = async (
     subscribedDrives = drives;
 
     if (!onlineManager.isOnline()) {
-      if (isDebug) console.debug('[WebsocketProvider] Offline, ConnectSocket: skipping connection attempt');
+      if (isDebug)
+        console.debug('[WebsocketProvider] Offline, ConnectSocket: skipping connection attempt');
       reconnectPromise = undefined;
       reject('[WebsocketProvider] Offline, cannot connect');
       return;
@@ -85,7 +87,8 @@ const ConnectSocket = async (
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     webSocketClient = new WebSocket(url, undefined, args);
-    if (isDebug) console.debug(`[WebsocketProvider] WebSocket object created, attempting connection`);
+    if (isDebug)
+      console.debug(`[WebsocketProvider] WebSocket object created, attempting connection`);
     reconnectPromise = undefined;
     isHandshaked = false;
 
@@ -106,8 +109,7 @@ const ConnectSocket = async (
       lastPong = Date.now();
       pingInterval = setInterval(() => {
         if (lastPong && Date.now() - lastPong > PING_INTERVAL * 2) {
-          if (!onlineManager.isOnline())
-          {
+          if (!onlineManager.isOnline()) {
             if (isDebug) console.debug(`[WebsocketProvider] Offline, ConnectSocket: skipping ping`);
             return;
           }
@@ -190,29 +192,36 @@ const ReconnectSocket = async (
     clearInterval(pingInterval);
 
     // Delay the reconnect to avoid a tight loop on network issues
-    setTimeout(async () => {
-      if (!onlineManager.isOnline()) {
-        if (isDebug) console.debug(`[WebsocketProvider] Offline, ReconnectSocket: skipping reconnect`);
-        reconnectPromise = undefined;
+    setTimeout(
+      async () => {
+        if (!onlineManager.isOnline()) {
+          if (isDebug)
+            console.debug(`[WebsocketProvider] Offline, ReconnectSocket: skipping reconnect`);
+          reconnectPromise = undefined;
+          resolve();
+          return;
+        }
+
+        if (isDebug)
+          console.debug(
+            `[WebsocketProvider] Reconnecting - Delayed reconnect #${reconnectCounter} at ${Date.now()}ms`
+          );
+
+        try {
+          await ConnectSocket(dotYouClient, drives, args);
+        } catch (e) {
+          console.error('[WebsocketProvider] Reconnect failed', e);
+          reject();
+
+          // Grok recommends we try to disable the recursive call - it'll fallback to Ping timeouts: ReconnectSocket(dotYouClient, drives, args);
+          return;
+        }
+        subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
+
         resolve();
-        return;
-      }
-
-      if (isDebug) console.debug(`[WebsocketProvider] Reconnecting - Delayed reconnect #${reconnectCounter} at ${Date.now()}ms`);
-
-      try {
-        await ConnectSocket(dotYouClient, drives, args);
-      } catch (e) {
-        console.error('[WebsocketProvider] Reconnect failed', e);
-        reject();
-
-        // Grok recommends we try to disable the recursive call - it'll fallback to Ping timeouts: ReconnectSocket(dotYouClient, drives, args);
-        return;
-      }
-      subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
-
-      resolve();
-    }, Math.min(500 * reconnectCounter, 5000)); //500ms*n, 5s delay max
+      },
+      Math.min(500 * reconnectCounter, 5000)
+    ); //500ms*n, 5s delay max
   });
 };
 
@@ -253,7 +262,8 @@ export const Subscribe = async (
   if (subscribers.some((subscriber) => subscriber.handler === handler)) return;
 
   if (!onlineManager.isOnline()) {
-    if (isDebug) console.debug('[WebsocketProvider] Offline, Subscribe: skipping subscription connection');
+    if (isDebug)
+      console.debug('[WebsocketProvider] Offline, Subscribe: skipping subscription connection');
     return Promise.resolve();
   }
 
@@ -266,6 +276,19 @@ export const Subscribe = async (
       drives.some((drive) => !subscribedDrives?.find((d) => drivesEqual(d, drive))))
   ) {
     throw new Error('Socket already connected with different drives');
+  }
+
+  console.log('XXXXXXXXXXXXXXXXXX SIGNALR CONNECT XXXXXXXXXXXXXXXXXX');
+  try {
+    const url = `https://${dotYouClient.getRoot().split('//')[1]}/api/${
+      apiType === ApiType.Owner ? 'owner' : 'apps'
+    }/v1/hub`;
+    // const url = `https://${dotYouClient.getRoot().split('//')[1]}/api/guest/v1/hub`;
+    await signalRService.connect(url);
+    // await signalRService.sendTextMessage('hello from client');
+    await signalRService.testConnection();
+  } catch (error) {
+    console.error('Failed to connect:', error);
   }
 
   // Already connected, no need to initiate a new connection

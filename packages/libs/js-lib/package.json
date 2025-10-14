@@ -75,6 +75,7 @@
     "url": "https://github.com/homebase-id/odin-js"
   },
   "dependencies": {
+    "@microsoft/signalr": "^8.0.0",
     "guid-typescript": "^1.0.9"
   },
   "optionalDependencies": {
