@@ -2,7 +2,7 @@ import { hasDebugFlag, jsonStringify64, drivesEqual } from '../../helpers/helper
 import { ApiType, DotYouClient } from '../DotYouClient';
 import { encryptData, getRandomIv } from '../InterceptionEncryptionUtil';
 import { TargetDrive } from '../core';
-import { signalRService } from './SignalR/signalRService';
+import { signalRService } from './SignalR/SignalRService';
 import {
   parseMessage,
   ParseRawClientNotification,

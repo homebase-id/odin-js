@@ -9,13 +9,13 @@ class SignalRService {
   // private userLeftHandlers: ((username: string) => void)[] = [];
   // private userTypingHandlers: ((username: string, isTyping: boolean) => void)[] = [];
   // private joinedSuccessfullyHandlers: ((username: string) => void)[] = [];
-  private pingHandlers: ((ping: TextMessage) => void)[] = [];
+  private textMessageHandlers: ((text: TextMessage) => void)[] = [];
 
   async connect(hubUrl: string): Promise<void> {
     // Set a test cookie BEFORE connecting
     // const testCookieValue = `test-${Date.now()}-${Math.random().toString(36).substring(7)}`;
     // document.cookie = `SignalRTestCookie=${testCookieValue}; path=/; SameSite=Lax`;
-    // console.log(`🔵 [Client] Set cookie: SignalRTestCookie=${testCookieValue}`);
+    // console.log(`[Client] Set cookie: SignalRTestCookie=${testCookieValue}`);
 
     this.connection = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl, {
@@ -45,6 +45,20 @@ class SignalRService {
   private setupEventHandlers(): void {
     if (!this.connection) return;
 
+    // Registers with the SignalR Hub to listen for XXX (e.g. ReceivePing) events from the server
+    // When the server sends a ping, this callback is triggered
+    // It then notifies all registered local handlers by iterating through this.pingHandlers
+    // This is the "entry point" where server messages come into your client application
+
+    this.connection.on(HubMethods.ReceiveTextMessage, (text: TextMessage) => {
+      console.log(
+        `[Text Message from server] Received at ${new Date(
+          text.Timestamp
+        ).toLocaleTimeString()}: ${text.Message}`
+      );
+      this.textMessageHandlers.forEach((handler) => handler(text));
+    });
+
     // this.connection.on(HubMethods.ReceiveMessage, (message: ChatMessage) => {
     //   this.messageHandlers.forEach((handler) => handler(message));
     // });
@@ -69,14 +83,7 @@ class SignalRService {
     //   this.joinedSuccessfullyHandlers.forEach((handler) => handler(username));
     // });
 
-    this.connection.on(HubMethods.ReceivePing, (ping: TextMessage) => {
-      console.log(
-        `[Server Ping] Received at ${new Date(
-          ping.Timestamp
-        ).toLocaleTimeString()}: ${ping.Message}`
-      );
-      this.pingHandlers.forEach((handler) => handler(ping));
-    });
+    //
 
     this.connection.onreconnecting((error) => {
       console.log('Connection lost. Reconnecting...', error);
@@ -136,6 +143,16 @@ class SignalRService {
   //     await this.connection.invoke(HubMethods.NotifyTyping, isTyping);
   //   }
   // }
+
+  //
+  //
+  //
+
+  //
+  // Below: allows React components to register their own handlers for ping messages
+  // Adds the component's handler to the pingHandlers array
+  // Returns a cleanup function to unsubscribe (important for React's useEffect cleanup)
+  //
 
   // onReceiveMessage(handler: (message: ChatMessage) => void): () => void {
   //   this.messageHandlers.push(handler);
@@ -199,14 +216,16 @@ class SignalRService {
   // }
 
   onReceivePing(handler: (ping: TextMessage) => void): () => void {
-    this.pingHandlers.push(handler);
+    this.textMessageHandlers.push(handler);
     return () => {
-      const index = this.pingHandlers.indexOf(handler);
+      const index = this.textMessageHandlers.indexOf(handler);
       if (index > -1) {
-        this.pingHandlers.splice(index, 1);
+        this.textMessageHandlers.splice(index, 1);
       }
     };
   }
+
+  //
 
   getConnectionState(): signalR.HubConnectionState | null {
     return this.connection?.state ?? null;
