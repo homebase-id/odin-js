@@ -43,10 +43,10 @@ export const PlayerListItem = ({
                     <div className="flex items-center gap-2 justify-end">
                         <StatusIcon status={status}/>
                         <span className="text-sm text-slate-700 dark:text-slate-300">
-              {status === "valid" && t("Shard verified")}
+                            {status === "valid" && t("Shard verified")}
                             {status === "invalid" && t("Shard invalid")}
                             {status === "error" && t("Error verifying")}
-                            {status === "loading" && t("Verifying…")}
+                            {status === "loading" && t("Verifying...")}
             </span>
                     </div>
 
