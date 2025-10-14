@@ -15,14 +15,18 @@ import {
   getDrivesByType,
   getSecurityContext,
   HomebaseFile,
+  KeyHeader,
   MAX_HEADER_CONTENT_BYTES,
   NewHomebaseFile,
+  NewPayloadDescriptor,
+  patchFile,
   PayloadFile,
   queryBatch,
   queryBatchCollection,
   SecurityGroupType,
   TargetDrive,
   ThumbnailFile,
+  UpdateInstructionSet,
   uploadFile,
   UploadFileMetadata,
   UploadInstructionSet,
@@ -43,6 +47,7 @@ import {
   getDrivesByTypeOverPeer,
   queryBatchOverPeer,
 } from '@homebase-id/js-lib/peer';
+import { getChannelDefinition } from '@homebase-id/js-lib/public';
 
 export interface CommunityDefinition {
   title: string;
@@ -305,6 +310,132 @@ export const saveCommunity = async (
 
   return result;
 };
+
+export const updateCommunity = async (
+  dotYouClient: DotYouClient,
+  definition: HomebaseFile<CommunityDefinition>,
+  imagePayload?: NewPayloadDescriptor[],
+  keyHeader?: KeyHeader,
+
+) => {
+  if (!definition.fileId) throw new Error('File id is not set');
+  const targetDrive = getTargetDriveFromCommunityId(
+    definition.fileMetadata.appData.uniqueId as string
+  );
+  const odinId = definition.fileMetadata.senderOdinId;
+  const payloadJson: string = jsonStringify64(definition.fileMetadata.appData.content);
+  const payloadBytes = stringToUint8Array(payloadJson);
+  // Set max of 3kb for content so enough room is left for metedata
+  const shouldEmbedContent = uint8ArrayToBase64(payloadBytes).length < MAX_HEADER_CONTENT_BYTES;
+
+  const encryptedKeyHeader = definition.sharedSecretEncryptedKeyHeader;
+
+  const instructionSet: UpdateInstructionSet =
+    odinId && odinId !== dotYouClient.getHostIdentity()
+      ? {
+        transferIv: getRandom16ByteArray(),
+        locale: 'peer',
+        file: {
+          globalTransitId: definition.fileMetadata.globalTransitId as string,
+          targetDrive,
+        },
+        versionTag: definition.fileMetadata.versionTag,
+        recipients: [odinId],
+        systemFileType: definition.fileSystemType,
+      }
+      : {
+        transferIv: getRandom16ByteArray(),
+        locale: 'local',
+        file: {
+          fileId: definition.fileId,
+          targetDrive,
+        },
+        versionTag: definition.fileMetadata.versionTag,
+        systemFileType: definition.fileSystemType,
+      };
+
+  const versionTag = definition?.fileMetadata.versionTag;
+
+
+
+
+  const payloads: PayloadFile[] = [];
+  const thumbnails: ThumbnailFile[] = [];
+  const previewThumbnails: EmbeddedThumb[] = [];
+  for (let i = 0; imagePayload && i < imagePayload?.length; i++) {
+    const payloadKey = `${COMMUNITY_DEF_PROFILE_KEY}${i}`;
+    const newMediaFile = imagePayload[i];
+
+    if (!newMediaFile.pendingFile) continue;
+
+    if (newMediaFile.contentType?.startsWith('image/')) {
+      const { additionalThumbnails, tinyThumb } = await createThumbnails(
+        newMediaFile.pendingFile,
+        payloadKey
+      );
+
+      thumbnails.push(...additionalThumbnails);
+      payloads.push({
+        key: payloadKey,
+        payload: newMediaFile.pendingFile,
+        previewThumbnail: tinyThumb,
+        descriptorContent: newMediaFile.descriptorContent
+      });
+
+      if (tinyThumb) previewThumbnails.push(tinyThumb);
+    }
+  }
+
+  const uploadMetadata: UploadFileMetadata = {
+    versionTag: versionTag,
+    allowDistribution: false,
+    appData: {
+      uniqueId: definition.fileMetadata.appData.uniqueId,
+      tags: [definition.fileMetadata.appData.uniqueId as string],
+      fileType: COMMUNITY_FILE_TYPE,
+      content: shouldEmbedContent ? payloadJson : undefined,
+      previewThumbnail:
+        previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0],
+    },
+    isEncrypted: true,
+    accessControlList:
+      definition.fileMetadata.appData.content.acl || definition.serverMetadata?.accessControlList,
+  };
+
+  if (!shouldEmbedContent) {
+    payloads.push({
+      key: DEFAULT_PAYLOAD_KEY,
+      payload: new Blob([payloadBytes], { type: 'application/json' }),
+      iv: getRandom16ByteArray(),
+    });
+  }
+
+  const updateResult = await patchFile(
+    dotYouClient,
+    encryptedKeyHeader,
+    instructionSet,
+    uploadMetadata,
+    payloads,
+    thumbnails,
+    undefined,
+    async () => {
+      console.warn(
+        `[CommunityDefinitionProvider] Update Community: Version tag mismatch, fetching latest version...`
+      );
+      const existingChannel = await getChannelDefinition(
+        dotYouClient,
+        definition.fileMetadata.appData.uniqueId as string,
+      );
+      if (!existingChannel) return;
+      definition.fileMetadata.versionTag = existingChannel.fileMetadata.versionTag;
+      return await updateCommunity(dotYouClient, definition, imagePayload, keyHeader);
+    }
+  );
+
+  return updateResult;
+
+
+}
 
 export const getCommunityDefinition = async (
   dotYouClient: DotYouClient,
