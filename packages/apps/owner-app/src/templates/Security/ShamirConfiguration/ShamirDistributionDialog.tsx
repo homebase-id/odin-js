@@ -267,7 +267,7 @@ export const ShamirDistributionDialog = ({
                             />
                         )}
 
-                        {stepNumber === 2 && <DistributeShardsReview config={cfg}/>}
+                        {stepNumber === 3 && <DistributeShardsReview config={cfg}/>}
                     </form>
                 </>
             )}
