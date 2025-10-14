@@ -16,7 +16,7 @@ export interface TReferencedMessageElement extends TElement {
 const isRefMsgNode = (n: unknown): boolean =>
   (n as { type?: string })?.type === ELEMENT_REFERENCED_MESSAGE;
 
-// Regex to detect referenced message URLs
+// Regex to detect referenced message URLs (original single-scheme version)
 const RE_MSG_URL = /^message:\/\/([A-Za-z0-9._-]+)(\?[^\s]+)?/i;
 const RE_MSG_URL_GLOBAL = /message:\/\/([A-Za-z0-9._-]+)(\?[^\s]+)?/gi;
 
@@ -55,6 +55,7 @@ function parseMessageUrl(input: string): RefMsgParsed | null {
   const id = match[1];
   const query = match[2] ?? '';
   const params = new URLSearchParams(query.startsWith('?') ? query : query ? `?${query}` : '');
+  // Require core identifiers; if missing, treat as plain text.
   if (!params.has('channelId') || !params.has('odinId') || !params.has('communityId')) return null;
   const channelId = params.get('channelId') ?? '';
   const threadId = params.get('threadId') ?? undefined;
@@ -175,44 +176,47 @@ export const ReferenceMessagePlugin = createPlatePlugin({
       },
     },
   })
-  .overrideEditor(({ editor, tf }) => ({
-    transforms: {
-      insertData(data: DataTransfer) {
-        const text = data.getData('text/plain');
-        if (text && /message:\/\/[A-Za-z0-9._-]+/i.test(text)) {
-          const lines = text.replace(/\r\n/g, '\n').split('\n');
-          const re = RE_MSG_URL_GLOBAL;
-
-          editor.tf.withoutNormalizing(() => {
-            lines.forEach((line, idx) => {
-              let lastIndex = 0;
-              let match: RegExpExecArray | null;
-              while ((match = re.exec(line)) !== null) {
-                const start = match.index;
-                const before = line.slice(lastIndex, start);
-                if (before) tf.insertText(before);
-                const token = match[0];
-                const parsed = parseMessageUrl(token);
-                if (parsed) {
-                  const node = createReferencedMessageNode(parsed);
-                  insertRefMsgNodeWithSpace(editor as unknown as PlateEditorLike, node);
-                } else {
-                  // If not strictly formatted, insert as plain text (no backward compat)
-                  tf.insertText(match[0]);
+  .overrideEditor(({ editor, tf }) => {
+    // Preserve original insertData to avoid recursion when we call a fallback.
+    const originalInsertData = tf.insertData.bind(tf);
+    return {
+      transforms: {
+        insertData(data: DataTransfer) {
+          const text = data.getData('text/plain');
+          if (text && /message:\/\/[A-Za-z0-9._-]+/i.test(text)) {
+            const lines = text.replace(/\r\n/g, '\n').split('\n');
+            const re = RE_MSG_URL_GLOBAL;
+            editor.tf.withoutNormalizing(() => {
+              lines.forEach((line, idx) => {
+                let lastIndex = 0;
+                let match: RegExpExecArray | null;
+                while ((match = re.exec(line)) !== null) {
+                  const start = match.index;
+                  const before = line.slice(lastIndex, start);
+                  if (before) tf.insertText(before);
+                  const token = match[0];
+                  const parsed = parseMessageUrl(token);
+                  if (parsed) {
+                    const node = createReferencedMessageNode(parsed);
+                    insertRefMsgNodeWithSpace(editor as unknown as PlateEditorLike, node);
+                  } else {
+                    // If not strictly formatted, insert as plain text
+                    tf.insertText(match[0]);
+                  }
+                  lastIndex = re.lastIndex;
                 }
-                lastIndex = re.lastIndex;
-              }
-              const tail = line.slice(lastIndex);
-              if (tail) tf.insertText(tail);
-              if (idx < lines.length - 1) tf.insertBreak();
-              re.lastIndex = 0;
+                const tail = line.slice(lastIndex);
+                if (tail) tf.insertText(tail);
+                if (idx < lines.length - 1) tf.insertBreak();
+                re.lastIndex = 0;
+              });
             });
-          });
-          return;
-        }
+            return;
+          }
 
-        // fallback to default
-        tf.insertData(data);
+          // fallback to original implementation (avoids infinite recursion)
+          originalInsertData(data);
+        },
       },
-    },
-  }));
+    };
+  });

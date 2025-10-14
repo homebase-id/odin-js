@@ -15,11 +15,11 @@ export const RTEReferencedMessageElement = withRef<typeof PlateElement>(
           'inline-flex items-center gap-1 whitespace-nowrap rounded bg-primary/10 px-1 align-baseline text-primary',
           className
         )}
-        data-messageId={element.messageId}
-        data-threadId={element.threadId}
-        data-channelId={element.channelId}
-        data-odinId={element.odinId}
-        data-communityId={element.communityId}
+        data-messageid={element.messageId}
+        data-threadid={element.threadId}
+        data-channelid={element.channelId}
+        data-odinid={element.odinId}
+        data-communityid={element.communityId}
       >
         <span className="inline-flex items-center" contentEditable={false}>
           <Link className="pointer-events-none h-4 w-4 shrink-0 select-none" aria-hidden="true" />
