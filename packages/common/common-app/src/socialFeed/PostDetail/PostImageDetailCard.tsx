@@ -169,6 +169,7 @@ export const PostImageDetailCard = ({
                   globalTransitId={postFile.fileMetadata.globalTransitId}
                   file={currentMediaFile}
                   canDownload={true}
+                  isLegacy={true}
                 />
               ) : null}
               <ActionButton
