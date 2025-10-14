@@ -16,6 +16,7 @@ import {
   ActionButton,
   getPlainTextFromRichText,
   COMMUNITY_ROOT_PATH,
+  ellipsisAtMaxChar,
 } from '@homebase-id/common-app';
 import { useEffect, useRef, useState } from 'react';
 import { useCommunityMessage } from '../../../hooks/community/messages/useCommunityMessage';
@@ -213,6 +214,32 @@ const CommunityContextActions = ({
     {
       icon: Clipboard,
       label: t('Copy link'),
+      onClick: () => {
+        // Copy an internal token the RTE recognizes; include extra context so renderer can fetch and render richly
+        const messageId = msg.fileMetadata.appData.uniqueId || '';
+        const channelId = msg.fileMetadata.appData.content.channelId;
+        const threadId = msg.fileMetadata.appData.content.threadId || undefined;
+        const odinId = community?.fileMetadata.senderOdinId;
+        const communityId = community?.fileMetadata.appData.uniqueId as string | undefined;
+        // Use the actual message text as hint so the editor can render a nice inline preview
+        const hint = ellipsisAtMaxChar(
+          getPlainTextFromRichText(msg.fileMetadata.appData.content.message, true) || '',
+          25
+        );
+        const baseParams: Record<string, string> = {
+          channelId: channelId || '',
+          odinId: odinId || '',
+          communityId: communityId || '',
+          ...(hint ? { hint } : {}),
+        };
+        const params = new URLSearchParams(threadId ? { ...baseParams, threadId } : baseParams);
+        const internalToken = `message://${messageId}?${params.toString()}`;
+        navigator.clipboard.writeText(internalToken);
+      },
+    },
+    {
+      icon: Clipboard,
+      label: t('Copy external link'),
       onClick: () => {
         navigator.clipboard.writeText(
           `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect${COMMUNITY_ROOT_PATH}/${community?.fileMetadata.senderOdinId}/${community?.fileMetadata.appData.uniqueId}/${channelId}/${threadId ? `${threadId}/thread/` : ``}${msg.fileMetadata.appData.uniqueId}`

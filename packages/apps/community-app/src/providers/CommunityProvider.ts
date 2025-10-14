@@ -1,4 +1,6 @@
 import {
+  deleteFile,
+  deleteFilesByGroupId,
   DotYouClient,
   EncryptedKeyHeader,
   FileQueryParams,
@@ -188,6 +190,38 @@ export const saveCommunityChannel = async (
 
   return uniqueId;
 };
+
+export const deleteCommunityChannel = async (
+  dotYouClient: DotYouClient,
+  community: HomebaseFile<CommunityDefinition>,
+  channel: NewHomebaseFile<CommunityChannel> | HomebaseFile<CommunityChannel>
+) => {
+  const communityId = community.fileMetadata.appData.uniqueId as string;
+  const targetDrive = getTargetDriveFromCommunityId(communityId);
+  if (!channel.fileId) throw new Error('Channel has no fileId');
+
+  // Delete the Community channel
+  const deleteResult = await deleteFile(
+    dotYouClient,
+    targetDrive,
+    channel.fileId,
+    undefined,
+    undefined,
+    undefined
+  );
+
+
+  // This only deletes files in the community channel, not threads or anything else
+  const deleteCommunityMessageResult = await deleteFilesByGroupId(
+    dotYouClient,
+    targetDrive,
+    [communityId],
+    undefined
+  );
+
+  if (!deleteResult || !deleteCommunityMessageResult) throw new Error('Delete failed');
+
+}
 
 // Helpers
 

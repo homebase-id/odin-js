@@ -6,6 +6,7 @@ import {
   ActionLink,
   AuthorImage,
   ErrorBoundary,
+  ImageSelector,
   Input,
   Label,
   Radio,
@@ -13,13 +14,20 @@ import {
   useCircle,
   useCircles,
   useDotYouClientContext,
+  ErrorNotification,
 } from '@homebase-id/common-app';
 import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
-import { NewHomebaseFile, SecurityGroupType } from '@homebase-id/js-lib/core';
-import { getNewId, stringGuidsEqual, tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { NewHomebaseFile, NewPayloadDescriptor, SecurityGroupType } from '@homebase-id/js-lib/core';
+import {
+  deleteBlob,
+  getBlob,
+  getNewId,
+  stringGuidsEqual,
+  tryJsonParse,
+} from '@homebase-id/js-lib/helpers';
 import { useState } from 'react';
 import { CircleDefinition } from '@homebase-id/js-lib/network';
-import { useCommunity } from '../../hooks/community/useCommunity';
+import { COMMUNITY_PHOTO_PAYLOAD_CACHE, useCommunity } from '../../hooks/community/useCommunity';
 import { Ellipsis, Arrow } from '@homebase-id/common-app/icons';
 import { useEffect } from 'react';
 
@@ -32,18 +40,52 @@ export const NewCommunity = () => {
     members: string[];
   }>();
   const [groupTitle, setGroupTitle] = useState<string>();
+  const [groupImage, setGroupImage] = useState<NewPayloadDescriptor>();
 
   const [searchParams] = useSearchParams();
   const pendingDefinition = searchParams.get('draft');
+  const photoCacheKey = searchParams.get('photo-key');
 
   const navigate = useNavigate();
 
   useEffect(() => {
     if (pendingDefinition) {
       const definitionFile = tryJsonParse<NewHomebaseFile<CommunityDefinition>>(pendingDefinition);
+      setGroupTitle(definitionFile?.fileMetadata.appData.content.title || '');
+      setGroupImage(
+        definitionFile?.fileMetadata.payloads && definitionFile.fileMetadata.payloads.length > 0
+          ? definitionFile.fileMetadata.payloads[0]
+          : undefined
+      );
+      setSelectedCircle(
+        circles?.find(
+          (c) => c.id === definitionFile?.fileMetadata.appData.content.acl?.circleIdList?.[0]
+        )
+          ? {
+              circle: circles?.find(
+                (c) => c.id === definitionFile?.fileMetadata.appData.content.acl?.circleIdList?.[0]
+              ) as CircleDefinition,
+              members: definitionFile?.fileMetadata.appData.content.members || [],
+            }
+          : undefined
+      );
       if (!definitionFile) return;
       (async () => {
+        if (photoCacheKey) {
+          const cachedPhoto = await getBlob(COMMUNITY_PHOTO_PAYLOAD_CACHE);
+          if (cachedPhoto) {
+            definitionFile.fileMetadata.payloads = [
+              {
+                pendingFile: cachedPhoto,
+                contentType: (cachedPhoto as Blob).type || 'image/png',
+                descriptorContent: 'groupImage',
+              },
+            ];
+            setGroupImage(definitionFile.fileMetadata.payloads[0]);
+          }
+        }
         await createNew(definitionFile);
+        await deleteBlob(COMMUNITY_PHOTO_PAYLOAD_CACHE);
         navigate(
           `${COMMUNITY_ROOT_PATH}/${loggedOnIdentity}/${definitionFile.fileMetadata.appData.uniqueId}`
         );
@@ -51,10 +93,9 @@ export const NewCommunity = () => {
     }
   }, [pendingDefinition]);
 
-  const { mutateAsync: createNew, status: createStatus } = useCommunity().save;
+  const { mutateAsync: createNew, status: createStatus, error } = useCommunity().save;
   const doCreate = async () => {
     if (!selectedCircle || !selectedCircle.circle.id || !groupTitle || !loggedOnIdentity) return;
-
     try {
       const communityId = getNewId();
       const newCommunityDef: NewHomebaseFile<CommunityDefinition> = {
@@ -70,6 +111,7 @@ export const NewCommunity = () => {
             },
             uniqueId: communityId,
           },
+          payloads: groupImage ? [groupImage] : undefined,
         },
         serverMetadata: {
           accessControlList: {
@@ -86,6 +128,7 @@ export const NewCommunity = () => {
 
   return (
     <ErrorBoundary>
+      <ErrorNotification error={error} />
       <form
         className="flex h-full w-full justify-center overflow-auto p-5"
         onSubmit={(e) => {
@@ -102,7 +145,25 @@ export const NewCommunity = () => {
               )}
             </small>
           </h2>
-
+          <div className="mb-4">
+            <Label>{t('Group image')}</Label>
+            <ImageSelector
+              name="groupImage"
+              defaultValue={groupImage?.pendingFile || groupImage?.pendingFileUrl}
+              label={t('No image selected')}
+              onChange={(e) =>
+                setGroupImage(
+                  e.target.value
+                    ? {
+                        pendingFile: e.target.value,
+                        contentType: (e.target.value as Blob).type || 'image/png',
+                        descriptorContent: e.target.name,
+                      }
+                    : undefined
+                )
+              }
+            />
+          </div>
           <div className="mb-4">
             <Label>{t('Name')} </Label>
             <Input
@@ -111,6 +172,7 @@ export const NewCommunity = () => {
               required
             />
           </div>
+
           <div>
             <Label>
               {t('Members')}
