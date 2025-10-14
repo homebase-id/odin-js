@@ -1,12 +1,19 @@
 import {useState} from 'react';
 import {ActionButton, DialogWrapper, t, useDotYouClient, usePortal,} from '@homebase-id/common-app';
 import {Arrow} from '@homebase-id/common-app/icons';
-import {Step1SelectPlayers} from "./Step1SelectPlayers";
-import {Step2OtherOptions} from "./Step2OtherOptions";
+import {Step2SelectPlayers} from "./Step2SelectPlayers";
+import {Step3OtherOptions} from "./Step3OtherOptions";
 import {DistributeShardsReview} from "./DistributeShardsReview";
-import {configureShards, ConfigureShardsRequest, PlayerType, ShamiraPlayer} from "../../../provider/auth/ShamirProvider";
+import {
+    configureShards,
+    ConfigureShardsRequest,
+    PlayerType,
+    ShamiraPlayer,
+    ShamirConfigurationType
+} from "../../../provider/auth/ShamirProvider";
 import {createPortal} from "react-dom";
 import {WaitForShardConfig} from "./WaitForShardConfig";
+import {Step1SelectConfigurationType} from "./Step1SelectConfigurationType";
 
 export const ShamirDistributionDialog = ({
                                              title,
@@ -35,10 +42,16 @@ export const ShamirDistributionDialog = ({
         setMinShards(3);
         setAwaitConfigureShardsRequest(null);
         setValidationError(null);
-
     }
 
-    const handleStep1Next = () => {
+    const updateConfigurationType = async (type: ShamirConfigurationType) => {
+        if (type === "manual") {
+            setValidationError(null);
+            setStepNumber(stepNumber + 1)
+        }
+    }
+
+    const handleStep2Next = () => {
         if (players.length < minPlayers) {
             setValidationError(t(`You must select at least ${minPlayers} trusted connections`));
             return;
@@ -49,7 +62,7 @@ export const ShamirDistributionDialog = ({
 
     }
 
-    const handleStep2Next = () => {
+    const handleStep3Next = () => {
         if (minShards < 1) {
             setValidationError(t('Min shards cannot be less than 1'));
             return;
@@ -118,7 +131,6 @@ export const ShamirDistributionDialog = ({
             minMatchingShards: minShards
         }
 
-
     const dialog = (
         <DialogWrapper
             title={title}
@@ -137,7 +149,12 @@ export const ShamirDistributionDialog = ({
                         </div>
                     ) : stepNumber === 0 ? (
                         <div className="flex w-full flex-col gap-2 sm:flex-row-reverse">
-                            <ActionButton onClick={() => handleStep1Next()} icon={Arrow}>
+                            {/* this page intentionally left blank.  why do books do this?  if the page is blank then does 
+              the text make it not blank?  I don't get it... */}
+                        </div>
+                    ) : stepNumber === 1 ? (
+                        <div className="flex w-full flex-col gap-2 sm:flex-row-reverse">
+                            <ActionButton onClick={() => handleStep2Next()} icon={Arrow}>
                                 {t('Next')}
                             </ActionButton>
                             <ActionButton
@@ -151,9 +168,9 @@ export const ShamirDistributionDialog = ({
                                 {t('Cancel')}
                             </ActionButton>
                         </div>
-                    ) : stepNumber === 1 ? (
+                    ) : stepNumber === 2 ? (
                         <div className="flex flex-col gap-2 sm:flex-row-reverse">
-                            <ActionButton onClick={() => handleStep2Next()} icon={Arrow}>
+                            <ActionButton onClick={() => handleStep3Next()} icon={Arrow}>
                                 {t('Next')}
                             </ActionButton>
                             <ActionButton
@@ -176,7 +193,7 @@ export const ShamirDistributionDialog = ({
                                 {t('Cancel')}
                             </ActionButton>
                         </div>
-                    ) : stepNumber === 2 ? (
+                    ) : stepNumber === 3 ? (
                         <div className="flex flex-col gap-2 sm:flex-row-reverse">
                             <ActionButton onClick={() => startConfigureShards()} icon={Arrow}>
                                 {t('Distribute')}
@@ -203,12 +220,13 @@ export const ShamirDistributionDialog = ({
                         </div>
                     ) : null}
                 </div>
-            }
+            }>
 
-        >
-            {awaitConfigureShardsRequest != null ? (
+            {awaitConfigureShardsRequest != null && (
                 <WaitForShardConfig request={awaitConfigureShardsRequest}/>
-            ) : (
+            )}
+
+            {awaitConfigureShardsRequest == null && (
                 <>
                     {validationError && (
                         <span className="text-red-500">{validationError}</span>
@@ -219,11 +237,19 @@ export const ShamirDistributionDialog = ({
                             e.preventDefault();
                             // start config process
                         }}
-                        className="flex h-full flex-col"
-                    >
+                        className="flex h-full flex-col">
                         {stepNumber === 0 && (
                             <div className="flex-1 overflow-y-auto">
-                                <Step1SelectPlayers
+                                <Step1SelectConfigurationType
+                                    onUpdateType={updateConfigurationType}
+                                    onClose={() => onConfirm()}
+                                />
+                            </div>
+                        )}
+
+                        {stepNumber === 1 && (
+                            <div className="flex-1 overflow-y-auto">
+                                <Step2SelectPlayers
                                     addPlayer={addPlayer}
                                     removePlayer={removePlayer}
                                     updatePlayerType={updatePlayerType}
@@ -232,8 +258,8 @@ export const ShamirDistributionDialog = ({
                             </div>
                         )}
 
-                        {stepNumber === 1 && (
-                            <Step2OtherOptions
+                        {stepNumber === 2 && (
+                            <Step3OtherOptions
                                 config={cfg}
                                 removePlayer={undefined}
                                 updatePlayerType={updatePlayerType}
@@ -241,7 +267,7 @@ export const ShamirDistributionDialog = ({
                             />
                         )}
 
-                        {stepNumber === 2 && <DistributeShardsReview config={cfg}/>}
+                        {stepNumber === 3 && <DistributeShardsReview config={cfg}/>}
                     </form>
                 </>
             )}

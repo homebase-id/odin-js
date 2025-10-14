@@ -32,8 +32,8 @@ export const SecurityOverview = () => {
     await reset();
   }
 
-  console.log(info)
-  console.log(openDialog)
+  // console.log(info)
+  // console.log(openDialog)
   return (
     <>
       {/*<ErrorNotification error={updateFlagError}/>*/}
@@ -87,7 +87,7 @@ export const SecurityOverview = () => {
 
                   {/* Password Recovery */}
                   <div>
-                    <p className="">{t("Trusted Connects Recovery Status")}</p>
+                    <p className="">{t("Trusted Connections Recovery Status")}</p>
                     {!info?.isConfigured &&
                         <div className="mt-1">
                           {/*<span className="mr-3">💀 Recovery not possible.</span>*/}

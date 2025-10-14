@@ -81,13 +81,15 @@ export interface RecoveryInfo {
     // Indicates when the configuration was last updated
     configurationUpdated: number,
 
+    usesAutomaticRecovery:boolean,
+    
     email: string | null,
     emailLastVerified: number | null,
     status: VerificationStatus,
     recoveryRisk: DealerRecoveryRiskReport
 }
 
-export const getRecoveryInfo = async (live: boolean = false): Promise<RecoveryInfo | null> => {
+export const getRecoveryInfo = async (live: boolean = true): Promise<RecoveryInfo | null> => {
 
     const dotYouClient = new OwnerClient({
         api: ApiType.Owner,

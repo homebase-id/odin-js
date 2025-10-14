@@ -138,6 +138,18 @@ export const finalizeRegistration = async (firstRunToken: string) => {
   });
 };
 
+export const canUseAutoRecovery = async (firstRunToken:string) => {
+  const dotYouClient = new OwnerClient({
+    api: ApiType.Owner,
+  });
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
+  const url = `/config/can-use-auto-recovery?frt=${firstRunToken}`;
+
+  return await client.get(url).then((response) => {
+    return response.status === 200;
+  });
+};
+
 export const isPasswordSet = async (): Promise<boolean> => {
   const dotYouClient = new OwnerClient({
     api: ApiType.Owner,

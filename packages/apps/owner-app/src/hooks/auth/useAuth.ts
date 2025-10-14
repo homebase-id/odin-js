@@ -6,7 +6,7 @@ import {
   isPasswordSet as isPasswordSetOwner,
   setFirstPassword as setFirstOwnerPassword,
   resetPassword as resetOwnerPassword,
-  changePassword as setNewOwnerPassword,
+  changePassword as setNewOwnerPassword, canUseAutoRecovery,
 } from '../../provider/auth/AuthenticationProvider';
 import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import {
@@ -89,6 +89,7 @@ export const useAuth = () => {
     changePassword: setNewOwnerPassword,
     finalizeRegistration,
     isPasswordSet: isPasswordSetOwner,
+    canUseAutoRecovery
   };
 };
 
