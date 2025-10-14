@@ -7,7 +7,7 @@ import {
   Input,
   ActionButton,
 } from '@homebase-id/common-app';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams } from 'react-router-dom';
 import { useCommunityChannel } from '../../../hooks/community/channels/useCommunityChannel';
@@ -27,6 +27,8 @@ export const CreateOrUpdateChannelDialog = ({
   const [channelName, setChannelName] = useState(
     defaultValue?.fileMetadata.appData.content.title || ''
   );
+  // Compute the final channel name by replacing spaces with dashes, trimming extra whitespace
+  const hyphenatedName = useMemo(() => channelName.trim().replace(/\s+/g, '-'), [channelName]);
 
   const { odinKey, communityKey } = useParams();
   const { data: community } = useCommunity({ odinId: odinKey, communityId: communityKey }).fetch;
@@ -85,7 +87,8 @@ export const CreateOrUpdateChannelDialog = ({
                         ...defaultValue.fileMetadata.appData,
                         content: {
                           ...defaultValue.fileMetadata.appData.content,
-                          title: channelName,
+                          // Save with spaces replaced by dashes
+                          title: hyphenatedName,
                         },
                       },
                     },
@@ -94,7 +97,8 @@ export const CreateOrUpdateChannelDialog = ({
               } else {
                 createCommunityChannel({
                   community: community,
-                  channelName,
+                  // Save with spaces replaced by dashes
+                  channelName: hyphenatedName,
                 });
               }
             }}
@@ -106,13 +110,13 @@ export const CreateOrUpdateChannelDialog = ({
                 name="channelName"
                 required
                 defaultValue={channelName}
-                onKeyDown={(e) => {
-                  // Remove spaces from the channel name
-                  if (e.key === ' ') {
-                    e.preventDefault();
-                  }
-                }}
               />
+              {channelName.includes(' ') && (
+                <div className="mt-1 text-xs text-neutral-500">
+                  {/* Informational hint showing the final channel identifier */}
+                  {t('The new channel name will be "{0}"', hyphenatedName)}
+                </div>
+              )}
             </div>
 
             <div className="mt-3 flex flex-row-reverse justify-between gap-2">

@@ -5,6 +5,7 @@ import {
   t,
   ActionGroup,
   getOdinIdColor,
+  Image,
 } from '@homebase-id/common-app';
 import { RadioTower, MagnifyingGlass, Plus, Loader, Ellipsis } from '@homebase-id/common-app/icons';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
@@ -12,7 +13,11 @@ import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useState } from 'react';
 import { useMatch, useParams, useNavigate, Link } from 'react-router-dom';
 import { useCommunities } from '../../hooks/community/useCommunities';
-import { CommunityDefinition } from '../../providers/CommunityDefinitionProvider';
+import {
+  COMMUNITY_DEF_PROFILE_KEY,
+  CommunityDefinition,
+  getTargetDriveFromCommunityId,
+} from '../../providers/CommunityDefinitionProvider';
 
 export const CommunitiesNav = ({ togglePin }: { togglePin: (newVal?: boolean) => void }) => {
   const isReactNative = window.localStorage.getItem('client_type')?.startsWith('react-native');
@@ -112,6 +117,13 @@ const CommunityListItem = ({
   isActive: boolean;
   togglePin: (newVal?: boolean) => void;
 }) => {
+  const communityImage = community.fileMetadata.payloads?.find((p) =>
+    p.key.includes(COMMUNITY_DEF_PROFILE_KEY)
+  );
+  console.log('communityImage', community);
+  const targetDrive = getTargetDriveFromCommunityId(
+    community.fileMetadata.appData.uniqueId as string
+  );
   return (
     <div className={`w-full px-2 py-2 ${isActive ? 'bg-primary/20' : ''}`}>
       <Link
@@ -129,13 +141,36 @@ const CommunityListItem = ({
         }}
       >
         <span
-          className="flex aspect-square w-16 flex-row items-center justify-center rounded-2xl p-2 text-lg uppercase leading-none text-white hover:shadow-md lg:w-full"
-          style={{
-            backgroundColor: getOdinIdColor(community.fileMetadata.appData.content.title).darkTheme,
-          }}
+          className="flex aspect-square w-16 items-center justify-center overflow-hidden rounded-2xl hover:shadow-md lg:w-full"
+          style={
+            !communityImage
+              ? {
+                  backgroundColor: getOdinIdColor(community.fileMetadata.appData.content.title)
+                    .darkTheme,
+                }
+              : undefined
+          }
         >
-          {community.fileMetadata.appData.content.title.slice(0, 2)}
+          {communityImage ? (
+            <Image
+              className="h-full w-full"
+              fileId={community.fileId}
+              globalTransitId={community.fileMetadata.globalTransitId}
+              odinId={community.fileMetadata.senderOdinId}
+              fileKey={communityImage.key}
+              targetDrive={targetDrive}
+              previewThumbnail={
+                community.fileMetadata.appData.previewThumbnail || communityImage.previewThumbnail
+              }
+              fit="cover"
+            />
+          ) : (
+            <span className="p-2 text-lg uppercase leading-none text-white">
+              {community.fileMetadata.appData.content.title.slice(0, 2)}
+            </span>
+          )}
         </span>
+
         <span className="text-lg lg:hidden">{community.fileMetadata.appData.content.title}</span>
       </Link>
     </div>

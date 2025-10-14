@@ -3,6 +3,7 @@ import { useDotYouClientContext } from '@homebase-id/common-app';
 import {
   COMMUNITY_GENERAL_CHANNEL,
   CommunityChannel,
+  deleteCommunityChannel,
   saveCommunityChannel,
 } from '../../../providers/CommunityProvider';
 import { CommunityDefinition } from '../../../providers/CommunityDefinitionProvider';
@@ -57,14 +58,27 @@ export const useCommunityChannel = (props?: {
     return await saveCommunityChannel(dotYouClient, community, channel);
   };
 
+  const deleteChannel = async ({
+    community,
+    channel,
+  }: {
+    community: HomebaseFile<CommunityDefinition>;
+    channel: HomebaseFile<CommunityChannel>;
+  }) => {
+    if (stringGuidsEqual(channel.fileId, COMMUNITY_GENERAL_CHANNEL.fileId)) {
+      throw new Error('Cannot delete general channel');
+    }
+    return await deleteCommunityChannel(dotYouClient, community, channel);
+  }
+
   return {
     fetch: {
       ...channelsQuery,
       data: stringGuidsEqual(channelId, COMMUNITY_GENERAL_CHANNEL.fileMetadata.appData.uniqueId)
         ? COMMUNITY_GENERAL_CHANNEL
         : channelsQuery.data?.find((channel) =>
-            stringGuidsEqual(channel.fileMetadata.appData.uniqueId, channelId)
-          ),
+          stringGuidsEqual(channel.fileMetadata.appData.uniqueId, channelId)
+        ),
     },
     create: useMutation({
       mutationFn: createChannel,
@@ -111,6 +125,28 @@ export const useCommunityChannel = (props?: {
           queryClient,
           community.fileMetadata.appData.uniqueId as string,
           (data) => data.map((c) => (stringGuidsEqual(c.fileId, channel.fileId) ? channel : c))
+        );
+
+        return { existingChannels };
+      },
+      onError: (_, { community }, context) => {
+        if (context?.existingChannels) {
+          updateCacheCommunityChannels(
+            queryClient,
+            community.fileMetadata.appData.uniqueId as string,
+            () => context.existingChannels
+          );
+        }
+      },
+    }),
+    delete: useMutation({
+      mutationFn: deleteChannel,
+      onMutate: async ({ channel, community }) => {
+        const existingChannels = updateCacheCommunityChannels(
+          queryClient,
+          community.fileMetadata.appData.uniqueId as string,
+          (data) =>
+            data.filter((c) => !stringGuidsEqual(c.fileId, channel.fileId))
         );
 
         return { existingChannels };

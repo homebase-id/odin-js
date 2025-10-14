@@ -6,6 +6,7 @@ import {
   DrivePermissionType,
   HomebaseFile,
   NewHomebaseFile,
+  NewPayloadDescriptor,
   TargetDrive,
 } from '@homebase-id/js-lib/core';
 import { COMMUNITY_ROOT_PATH, useDotYouClientContext } from '@homebase-id/common-app';
@@ -15,16 +16,20 @@ import {
   getTargetDriveFromCommunityId,
   removeCommunityDefinition,
   saveCommunity,
+  updateCommunity,
 } from '../../providers/CommunityDefinitionProvider';
 import { COMMUNITY_APP_ID, t } from '@homebase-id/common-app';
 import { getExtendAppRegistrationParams, TargetDriveAccessRequest } from '@homebase-id/js-lib/auth';
 import { COMMUNITY_DEFAULT_GENERAL_ID } from '../../providers/CommunityProvider';
 import { invalidateCommunities, updateCacheCommunities } from './useCommunities';
+import { putBlob } from '@homebase-id/js-lib/helpers'
 
 type useCommunityProps = {
   odinId: string | undefined;
   communityId: string | undefined;
 };
+
+export const COMMUNITY_PHOTO_PAYLOAD_CACHE = 'community-photo';
 
 const getEnsureNewDriveAndPermissionPath = (
   name: string,
@@ -116,12 +121,27 @@ export const useCommunity = (props?: useCommunityProps) => {
   const saveData = async (
     communityDef: NewHomebaseFile<CommunityDefinition> | HomebaseFile<CommunityDefinition>
   ) => {
-    const onMissingDrive = () => {
+    const onMissingDrive = async () => {
       if (!communityDef.fileMetadata.appData.uniqueId)
         throw new Error('Community unique id is not set');
-
       const host = dotYouClient.getHostIdentity();
-      const returnUrl = `${COMMUNITY_ROOT_PATH}/new?draft=${JSON.stringify(communityDef)}`;
+      let returnUrl = `${COMMUNITY_ROOT_PATH}/new`;
+
+
+      if (communityDef.fileMetadata.payloads) {
+        // we store thhem in indexedDb cache anyway
+        // add a early exit if no payloads
+
+        const pendingFile = (communityDef.fileMetadata.payloads[0] as NewPayloadDescriptor)?.pendingFile;
+        if (pendingFile) {
+          await putBlob(COMMUNITY_PHOTO_PAYLOAD_CACHE, pendingFile);
+          returnUrl += `?photo-key=${COMMUNITY_PHOTO_PAYLOAD_CACHE}`;
+        }
+        // Remove payloads to avoid hitting URL length limits
+        delete communityDef.fileMetadata.payloads;
+      }
+
+      returnUrl += `&draft=${JSON.stringify(communityDef)}`;
 
       const targetDrive = getTargetDriveFromCommunityId(communityDef.fileMetadata.appData.uniqueId);
 
@@ -146,6 +166,17 @@ export const useCommunity = (props?: useCommunityProps) => {
 
     return await saveCommunity(dotYouClient, { ...communityDef }, onMissingDrive);
   };
+
+  const updateData = async ({
+    communityDef,
+    payloads,
+  }: {
+    communityDef: HomebaseFile<CommunityDefinition>,
+    payloads?: NewPayloadDescriptor[] | undefined
+  }
+  ) => {
+    return await updateCommunity(dotYouClient, communityDef, payloads);
+  }
 
   const getInviteLink = async ({
     communityDef,
@@ -189,6 +220,33 @@ export const useCommunity = (props?: useCommunityProps) => {
       },
       onSettled: (_data, _error, variables) => {
         invalidateCommunity(queryClient, variables.fileMetadata.appData.uniqueId as string);
+        invalidateCommunities(queryClient);
+      },
+    }),
+    update: useMutation({
+      mutationFn: updateData,
+      onMutate: async ({ communityDef: toUpdateCommunity }) => {
+        const previousCommunities = updateCacheCommunities(queryClient, (data) =>
+          data?.map((chnl) =>
+            stringGuidsEqual(
+              chnl.fileMetadata.appData.uniqueId,
+              toUpdateCommunity.fileMetadata.appData.uniqueId
+            )
+              ? toUpdateCommunity
+              : chnl
+          )
+        );
+
+        return { toUpdateCommunity, previousCommunities };
+      },
+      onError: (err, toUpdateCommunity, context) => {
+        console.warn(err);
+
+        // Revert local caches to what they were
+        updateCacheCommunities(queryClient, () => context?.previousCommunities);
+      },
+      onSettled: (_data, _error, { communityDef }) => {
+        invalidateCommunity(queryClient, communityDef.fileMetadata.appData.uniqueId as string);
         invalidateCommunities(queryClient);
       },
     }),
