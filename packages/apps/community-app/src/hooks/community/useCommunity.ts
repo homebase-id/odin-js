@@ -126,6 +126,7 @@ export const useCommunity = (props?: useCommunityProps) => {
         throw new Error('Community unique id is not set');
       const host = dotYouClient.getHostIdentity();
       let returnUrl = `${COMMUNITY_ROOT_PATH}/new`;
+      returnUrl += `?draft=${JSON.stringify(communityDef)}`;
 
 
       if (communityDef.fileMetadata.payloads) {
@@ -135,13 +136,12 @@ export const useCommunity = (props?: useCommunityProps) => {
         const pendingFile = (communityDef.fileMetadata.payloads[0] as NewPayloadDescriptor)?.pendingFile;
         if (pendingFile) {
           await putBlob(COMMUNITY_PHOTO_PAYLOAD_CACHE, pendingFile);
-          returnUrl += `?photo-key=${COMMUNITY_PHOTO_PAYLOAD_CACHE}`;
+          returnUrl += `&photo-key=${COMMUNITY_PHOTO_PAYLOAD_CACHE}`;
         }
         // Remove payloads to avoid hitting URL length limits
         delete communityDef.fileMetadata.payloads;
       }
 
-      returnUrl += `&draft=${JSON.stringify(communityDef)}`;
 
       const targetDrive = getTargetDriveFromCommunityId(communityDef.fileMetadata.appData.uniqueId);
 

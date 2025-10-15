@@ -85,7 +85,7 @@ export const NewCommunity = () => {
           }
         }
         await createNew(definitionFile);
-        await deleteBlob(COMMUNITY_PHOTO_PAYLOAD_CACHE);
+        if (photoCacheKey) await deleteBlob(COMMUNITY_PHOTO_PAYLOAD_CACHE);
         navigate(
           `${COMMUNITY_ROOT_PATH}/${loggedOnIdentity}/${definitionFile.fileMetadata.appData.uniqueId}`
         );
