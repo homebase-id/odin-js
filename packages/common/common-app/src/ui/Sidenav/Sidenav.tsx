@@ -1,7 +1,7 @@
 import {FC, ReactNode, useEffect, useRef, useState} from 'react';
 import {NavLink} from 'react-router-dom';
 import {BuiltInProfiles} from '@homebase-id/js-lib/profile';
-import {hasDebugFlag, isTouchDevice} from '@homebase-id/js-lib/helpers';
+import {isTouchDevice} from '@homebase-id/js-lib/helpers';
 import {
   FEED_APP_ID,
   CHAT_APP_ID,
@@ -276,7 +276,7 @@ const MoreItems = ({
           </button>
         ) : null}
         <NavItem icon={Cog} label={'Settings'} to={`${OWNER_ROOT}/settings`}/>
-        {hasDebugFlag() && <NavItem icon={Lock} label={'Security'} to={`${OWNER_ROOT}/security`}/>}
+        <NavItem icon={Lock} label={'Security'} to={`${OWNER_ROOT}/security`}/>
         <hr className="border-b dark:border-slate-500"/>
 
         <NavItem icon={HardDrive} label={'Drives'} to={`${OWNER_ROOT}/drives`}/>
