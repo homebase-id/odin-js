@@ -20,6 +20,13 @@ export const tinyThumbSize: ThumbnailInstruction = {
 const svgType = 'image/svg+xml';
 const gifType = 'image/gif';
 
+// Helper: ensure we pass an ArrayBuffer (not ArrayBufferLike) into Blob for TS/dom typings
+const toArrayBuffer = (u8: Uint8Array): ArrayBuffer => {
+  const ab = new ArrayBuffer(u8.byteLength);
+  new Uint8Array(ab).set(u8);
+  return ab;
+};
+
 const getEmbeddedThumbOfThumbnailFile = async (
   thumbnailFile: ThumbnailFile,
   naturalSize: ImageSize
@@ -114,8 +121,8 @@ export const createThumbnails = async (
       additionalThumbnails: [vectorThumb.thumb],
     };
   }
-  
-if (contentType === gifType) {
+
+  if (contentType === gifType) {
     // For GIFs, only generate a tiny thumb in WebP format
     const { naturalSize, thumb: tinyThumb } = await createImageThumbnail(
       imageBytes,
@@ -125,18 +132,24 @@ if (contentType === gifType) {
       gifType
     );
 
+    // Only include the original GIF as an additional thumbnail if it's < 1 MB
+    const includeOriginalGif = image.size < 1024 * 1024; // 1 MB
 
-    const originalGifThumb: ThumbnailFile = {
-      pixelWidth: naturalSize.pixelWidth,
-      pixelHeight: naturalSize.pixelHeight,
-      payload: image,
-      key: payloadKey,
-    };
+    const additionalThumbnails: ThumbnailFile[] = includeOriginalGif
+      ? [
+        {
+          pixelWidth: naturalSize.pixelWidth,
+          pixelHeight: naturalSize.pixelHeight,
+          payload: image,
+          key: payloadKey,
+        },
+      ]
+      : [];
 
     return {
       tinyThumb: await getEmbeddedThumbOfThumbnailFile(tinyThumb, naturalSize),
       naturalSize,
-      additionalThumbnails: [originalGifThumb], // Include original GIF
+      additionalThumbnails,
     };
   }
 
@@ -196,7 +209,7 @@ const createVectorThumbnail = async (
   const thumb: ThumbnailFile = {
     pixelWidth: 50,
     pixelHeight: 50,
-    payload: new Blob([imageBytes], { type: svgType }),
+    payload: new Blob([toArrayBuffer(imageBytes)], { type: svgType }),
     key: payloadKey,
   };
 
@@ -233,9 +246,9 @@ export const createImageThumbnail = async (
   if (isTinyThumb) targetFormatType = 'webp';
 
   // Create typed input blob (fixes SVG loading for both naturalSize and resize)
-  const inputBlob = new Blob([imageBytes], { type: originalContentType || '' });
+  const inputBlob = new Blob([toArrayBuffer(imageBytes)], { type: originalContentType || '' });
 
-// Get natural size directly using Image element
+  // Get natural size directly using Image element
   const naturalSize = await new Promise<ImageSize>((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(inputBlob);
@@ -290,7 +303,7 @@ export const createImageThumbnail = async (
     const sourceArrayBuffer = await (isTinyThumb ? resizedData.blob.arrayBuffer() : currentInputBlob.arrayBuffer());
     const sourceType = isTinyThumb ? resizedData.blob.type : currentInputBlob.type;
     const sourceBlob = new Blob([sourceArrayBuffer], { type: sourceType });
-    
+
     resizedData = await resizeImageFromBlob(
       sourceBlob,
       quality,
