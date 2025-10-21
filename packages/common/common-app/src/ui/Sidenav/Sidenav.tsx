@@ -468,16 +468,17 @@ const WalletLink = () => {
 const SecurityMenuItem = () => {
   const [needsAttention, setNeedsAttention] = useState<boolean | null>(null);
 
-  const getNeedsAttention = async (): Promise<boolean | null> => {
+  const getNeedsAttention = async (): Promise<boolean> => {
     const dotYouClient = new OwnerClient({ api: ApiType.Owner });
     const client = dotYouClient.createAxiosClient({ overrideEncryption: false });
     const url = "/security/recovery/needs-attention";
     try {
-      const { data } = await client.get<boolean>(url);
-      return data;
+      const { data } = await client.get(url);
+      // normalize to boolean
+      return data === true;
     } catch (err) {
       console.warn(err);
-      return null;
+      return false;
     }
   };
 
