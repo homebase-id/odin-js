@@ -473,7 +473,7 @@ const SecurityMenuItem = () => {
     const client = dotYouClient.createAxiosClient({overrideEncryption: true});
     const url = "/security/recovery/needs-attention";
     try {
-      
+
       const {data} = await client.get<{ needsAttention: boolean }>(url);
       return data.needsAttention === true;
     } catch (err) {
