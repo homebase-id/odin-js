@@ -19,7 +19,7 @@ import {
   useDarkMode,
   useProfiles,
   useUnreadPushNotificationsCount,
-  useSiteData,
+  useSiteData, useDotYouClientContext,
 } from '../../hooks';
 import {OwnerImage} from '../../socialFeed';
 import {MiniDarkModeToggle} from '../DarkModeToggle/DarkModeToggle';
@@ -464,18 +464,18 @@ const WalletLink = () => {
 };
 
 
-
 const SecurityMenuItem = () => {
+
   const [needsAttention, setNeedsAttention] = useState<boolean | null>(null);
 
   const getNeedsAttention = async (): Promise<boolean> => {
-    const dotYouClient = new OwnerClient({ api: ApiType.Owner });
-    const client = dotYouClient.createAxiosClient({ overrideEncryption: false });
+    const dotYouClient = new OwnerClient({api: ApiType.Owner});
+    const client = dotYouClient.createAxiosClient({overrideEncryption: true});
     const url = "/security/recovery/needs-attention";
     try {
-      const { data } = await client.get(url);
-      // normalize to boolean
-      return data === true;
+
+      const {data} = await client.get<{ needsAttention: boolean }>(url);
+      return data.needsAttention === true;
     } catch (err) {
       console.warn(err);
       return false;
@@ -490,7 +490,7 @@ const SecurityMenuItem = () => {
     <div className="relative">
       <NavItem icon={Lock} label={'Security'} to={`${OWNER_ROOT}/security`}/>
       {needsAttention && (
-        <span className="absolute top-1 left-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+        <span className="absolute top-1 left-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"/>
       )}
     </div>
   );
