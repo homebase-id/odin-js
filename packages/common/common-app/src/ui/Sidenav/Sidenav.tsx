@@ -46,6 +46,8 @@ import {IconProps} from '../Icons';
 import {Wallet} from '../Icons';
 import {logoutOwnerAndAllApps} from '../../provider';
 import {Lock, RadioTower} from '../Icons';
+import {OwnerClient} from "../../core";
+import {ApiType} from "@homebase-id/js-lib/core";
 
 const STORAGE_KEY = 'sidenavIsOpen';
 
@@ -136,8 +138,17 @@ export const Sidenav = ({
             </div>
 
             <div className="pb-3">
-              <NavItem icon={House} label={'Dashboard'} to={`${OWNER_ROOT}/`} end={true}/>
+              <NavItem
+                icon={House}
+                label="Dashboard"
+                to={`${OWNER_ROOT}/`}
+                end
+              />
               <NotificationBell/>
+            </div>
+
+            <div className="pb-3">
+              <SecurityMenuItem/>
             </div>
 
             <div className="py-3">
@@ -161,13 +172,6 @@ export const Sidenav = ({
                 />
               )}
               {isTightHeight ? null : (
-                <NavItem
-                  icon={Grid}
-                  label={'Third party apps & services'}
-                  to={`${OWNER_ROOT}/third-parties`}
-                />
-              )}
-              {isTightHeight ? null : (
                 <NavItem icon={Circles} label={'Circles'} to={`${OWNER_ROOT}/circles`}/>
               )}
             </div>
@@ -182,11 +186,6 @@ export const Sidenav = ({
                     icon={Persons}
                     label={'Following & Followers'}
                     to={`${OWNER_ROOT}/follow`}
-                  />
-                  <NavItem
-                    icon={Grid}
-                    label={'Third party apps & services'}
-                    to={`${OWNER_ROOT}/third-parties`}
                   />
                   <NavItem icon={Circles} label={'Circles'} to={`${OWNER_ROOT}/circles`}/>
                 </>
@@ -276,9 +275,14 @@ const MoreItems = ({
           </button>
         ) : null}
         <NavItem icon={Cog} label={'Settings'} to={`${OWNER_ROOT}/settings`}/>
-        <NavItem icon={Lock} label={'Security'} to={`${OWNER_ROOT}/security`}/>
+
         <hr className="border-b dark:border-slate-500"/>
 
+        <NavItem
+          icon={Grid}
+          label={'Third party apps & services'}
+          to={`${OWNER_ROOT}/third-parties`}
+        />
         <NavItem icon={HardDrive} label={'Drives'} to={`${OWNER_ROOT}/drives`}/>
         <hr className="border-b dark:border-slate-500"/>
         <WalletLink/>
@@ -458,6 +462,39 @@ const WalletLink = () => {
     />
   );
 };
+
+
+
+const SecurityMenuItem = () => {
+  const [needsAttention, setNeedsAttention] = useState<boolean | null>(null);
+
+  const getNeedsAttention = async (): Promise<boolean | null> => {
+    const dotYouClient = new OwnerClient({ api: ApiType.Owner });
+    const client = dotYouClient.createAxiosClient({ overrideEncryption: false });
+    const url = "/security/recovery/needs-attention";
+    try {
+      const { data } = await client.get<boolean>(url);
+      return data;
+    } catch (err) {
+      console.warn(err);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    (async () => setNeedsAttention(await getNeedsAttention()))();
+  }, []);
+
+  return (
+    <div className="relative">
+      <NavItem icon={Lock} label={'Security'} to={`${OWNER_ROOT}/security`}/>
+      {needsAttention && (
+        <span className="absolute top-1 left-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+      )}
+    </div>
+  );
+};
+
 
 const NotificationBell = () => {
   const {data: unreadCount} = useUnreadPushNotificationsCount({appId: 'all'});
