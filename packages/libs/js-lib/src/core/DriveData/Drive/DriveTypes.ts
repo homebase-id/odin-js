@@ -55,8 +55,8 @@ export interface FileQueryParams {
   sender?: string[] | undefined;
   groupId?: string[] | undefined;
   userDate?: TimeRange;
-  userStartDate?: number | undefined;
-  userEndDate?: number | undefined;
+  userDateStart?: number | undefined;
+  userDateEnd?: number | undefined;
   tagsMatchAtLeastOne?: string[] | undefined;
   tagsMatchAll?: string[] | undefined;
   localTagsMatchAtLeastOne?: string[] | undefined;
