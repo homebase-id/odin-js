@@ -90,17 +90,17 @@ export const SecurityOverview = () => {
 
                   {/* Password Recovery */}
                   <div>
-                    <p className="font-medium">{t('Trusted Connections Recovery Status')}</p>
+                    <span className="font-medium">{t('Trusted Connections Recovery Status')}</span>
 
                     {!info?.isConfigured && (
-                      <div className="mt-2">
+                      <span className="ml-2">
                         <Link
-                          to="/owner/security/password-recovery"
+                          to="/owner/security/password-recovery?gs=1"
                           className="underline text-blue-600 hover:text-blue-800"
                         >
                           {t('Setup Now')}
                         </Link>
-                      </div>
+                      </span>
                     )}
 
                     {info?.recoveryRisk && (
@@ -150,7 +150,8 @@ export const SecurityOverview = () => {
       <VerifyRecoveryKeyDialog title={t('Verify Recovery Phrase')}
                                isOpen={openDialog === 'verify-recovery-phrase'}
                                onConfirm={handleConfirmDialog}
-                               onCancel={() => setOpenDialog('none')}/>
+                               onCancel={() => setOpenDialog('none')}
+                               showHint={true}/>
 
 
     </>
