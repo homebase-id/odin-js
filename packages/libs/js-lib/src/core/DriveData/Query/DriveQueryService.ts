@@ -126,14 +126,14 @@ export const queryBatch = async <
   const strippedQueryParams: FileQueryParams = {
     ...params,
     fileState: 'fileState' in params ? params.fileState : [1],
-    // if userDate is set, then we set userStartDate and userEndDate, 
-    // is userStartDate and userEndDate are userDate unset, we set userDate values
-    userStartDate: params.userDate ? params.userDate.start : params.userStartDate,
-    userEndDate: params.userDate ? params.userDate.end : params.userEndDate,
-    userDate: 'userStartDate' in params && 'userEndDate' in params && params.userStartDate !== undefined && params.userEndDate !== undefined
+    // if userDate is set, then we set userDateStart and userDateEnd,
+    // is userDateStart and userDateEnd are userDate unset, we set userDate values
+    userDateStart: params.userDate ? params.userDate.start : params.userDateStart,
+    userDateEnd: params.userDate ? params.userDate.end : params.userDateEnd,
+    userDate: 'userDateStart' in params && 'userDateEnd' in params && params.userDateStart !== undefined && params.userDateEnd !== undefined
       ? {
-        start: params.userStartDate,
-        end: params.userEndDate,
+        start: params.userDateStart,
+        end: params.userDateEnd,
       }
       : params.userDate,
   };
