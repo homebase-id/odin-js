@@ -12,200 +12,210 @@ import {Check, Exclamation} from "@homebase-id/common-app/icons";
 
 export const SecurityOverview = () => {
 
-  const [openDialog, setOpenDialog] = useState<'none' | 'verify-password' | 'verify-recovery-phrase' | 'change-email' | 'verify-email'>('none');
-  const [statusLoading, setStatusLoading] = useState(false);
-  const [info, setInfo] = useState<RecoveryInfo | null>();
+    const [openDialog, setOpenDialog] = useState<'none' | 'verify-password' | 'verify-recovery-phrase' | 'change-email' | 'verify-email'>('none');
+    const [statusLoading, setStatusLoading] = useState(false);
+    const [info, setInfo] = useState<RecoveryInfo | null>();
 
-  const reset = async () => {
-    setStatusLoading(true)
-    const status = await getRecoveryInfo();
-    setInfo(status);
-    setStatusLoading(false);
-  }
+    const reset = async () => {
+        setStatusLoading(true)
+        const status = await getRecoveryInfo();
+        setInfo(status);
+        setStatusLoading(false);
+    }
 
-  useEffect(() => {
-    reset();
-  }, []);
+    useEffect(() => {
+        reset();
+    }, []);
 
-  const handleConfirmDialog = async () => {
-    setOpenDialog('none');
-    await reset();
-  }
+    const handleConfirmDialog = async () => {
+        setOpenDialog('none');
+        await reset();
+    }
 
-  // console.log(info)
-  // console.log(openDialog)
-  return (
-    <>
-      {/*<ErrorNotification error={updateFlagError}/>*/}
+    // console.log(info)
+    // console.log(openDialog)
+    return (
+        <>
+            {/*<ErrorNotification error={updateFlagError}/>*/}
 
-      <>
-        <Section
-          title={
-            <div className="flex flex-col">
-              {t('Account Recovery Health')}
-              <small className="text-sm text-gray-400">
-                {t('')}
-              </small>
-            </div>
-          }>
-          <>
-            {
-              statusLoading ? (
-                <>
-                  <LoadingBlock className="m-4 h-10"/>
-                  <LoadingBlock className="m-4 h-10"/>
-                  <LoadingBlock className="m-4 h-10"/>
-                  <LoadingBlock className="m-4 h-10"/>
-                </>
-              ) : (
-                <div className="space-y-6">
-                  {/* Recovery Email */}
-                  <RecoveryEmailRow info={info}/>
+            <>
+                <Section
+                    title={
+                        <div className="flex flex-col">
+                            {t('Account Recovery Health')}
+                            <small className="text-sm text-gray-400">
+                                {t('')}
+                            </small>
+                        </div>
+                    }>
+                    <>
+                        {
+                            statusLoading ? (
+                                <>
+                                    <LoadingBlock className="m-4 h-10"/>
+                                    <LoadingBlock className="m-4 h-10"/>
+                                    <LoadingBlock className="m-4 h-10"/>
+                                    <LoadingBlock className="m-4 h-10"/>
+                                </>
+                            ) : (
+                                <div className="space-y-6">
+                                    {/* Recovery Email */}
+                                    <RecoveryEmailRow info={info}/>
 
-                  {/* Password Status */}
-                  <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-2">
-                    <p className="font-medium">{t('Password last verified:')}</p>
-                    <TimeAgoUtc className="text-sm font-medium" value={info?.status?.passwordLastVerified ?? 0}/>
-                    <Link
-                      to=""
-                      onClick={() => setOpenDialog('verify-password')}
-                      className="underline text-blue-600 hover:text-blue-800"
-                    >
-                      {t('Verify now')}
-                    </Link>
-                  </div>
+                                    {/* Password Status */}
+                                    <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-2">
+                                        <p className="font-medium">{t('Password last verified:')}</p>
+                                        {(info?.status?.passwordLastVerified ?? 0) > 0 &&
+                                            <div className="flex text-green-600">
+                                                <Check className="text-green-600 h-4 w-4 mr-2" aria-hidden="true"/>
+                                                {t('Verified')}
+                                                <TimeAgoUtc className="ml-2 text-green-600 font-medium" value={info?.status?.passwordLastVerified ?? 0}/>
+                                            </div>
+                                        }
+                                        <Link
+                                            to=""
+                                            onClick={() => setOpenDialog('verify-password')}
+                                            className="underline text-blue-600 hover:text-blue-800">
+                                            {t('Verify now')}
+                                        </Link>
+                                    </div>
 
-                  {/* Recovery Phrase */}
-                  <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-2">
-                    <p className="font-medium">{t('Recovery phrase last verified:')}</p>
-                    <TimeAgoUtc className="text-sm font-medium" value={info?.status?.recoveryKeyLastVerified ?? 0}/>
-                    <Link
-                      to=""
-                      onClick={() => setOpenDialog('verify-recovery-phrase')}
-                      className="underline text-blue-600 hover:text-blue-800"
-                    >
-                      {t('Verify now')}
-                    </Link>
-                  </div>
+                                    {/* Recovery Phrase */}
+                                    <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-2">
+                                        <p className="font-medium">{t('Recovery phrase last verified:')}</p>
+                                        {(info?.status?.recoveryKeyLastVerified ?? 0) > 0 &&
+                                            <div className="flex text-green-600">
+                                                <Check className="text-green-600 h-4 w-4 mr-2" aria-hidden="true"/>
+                                                {t('Verified')}
+                                                <TimeAgoUtc className="ml-2 text-green-600 font-medium" value={info?.status?.recoveryKeyLastVerified ?? 0}/>
+                                            </div>
+                                        }
 
-                  {/* Password Recovery */}
-                  <div>
-                    <span className="font-medium">{t('Trusted Connections Recovery Status')}</span>
+                                        <Link
+                                            to=""
+                                            onClick={() => setOpenDialog('verify-recovery-phrase')}
+                                            className="underline text-blue-600 hover:text-blue-800">
+                                            {t('Verify now')}
+                                        </Link>
+                                    </div>
 
-                    {!info?.isConfigured && (
-                      <span className="ml-2">
+                                    {/* Password Recovery */}
+                                    <div>
+                                        <span className="font-medium">{t('Trusted Connections Recovery Status')}</span>
+
+                                        {!info?.isConfigured && (
+                                            <span className="ml-2">
                         <Link
-                          to="/owner/security/password-recovery?gs=1"
-                          className="underline text-blue-600 hover:text-blue-800"
+                            to="/owner/security/password-recovery?gs=1"
+                            className="underline text-blue-600 hover:text-blue-800"
                         >
                           {t('Setup Now')}
                         </Link>
                       </span>
-                    )}
+                                        )}
 
-                    {info?.recoveryRisk && (
-                      <div className="p-3 mt-3 border rounded-lg bg-gray-50 space-y-2">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-1">
-                          <Label>{t('Last Updated:')}</Label>
-                          <TimeAgoUtc className="text-sm" value={info.recoveryRisk.healthLastChecked ?? 0}/>
-                        </div>
-                        <DealerRecoveryRiskHeadline report={info.recoveryRisk}/>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                                        {info?.recoveryRisk && (
+                                            <div className="p-3 mt-3 border rounded-lg bg-gray-50 space-y-2">
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-1">
+                                                    <Label>{t('Last Updated:')}</Label>
+                                                    <TimeAgoUtc className="text-sm" value={info.recoveryRisk.healthLastChecked ?? 0}/>
+                                                </div>
+                                                <DealerRecoveryRiskHeadline report={info.recoveryRisk}/>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
 
-              )}
-          </>
+                            )}
+                    </>
 
-        </Section>
+                </Section>
 
-        {/*do this later*/}
-        {/*<Section*/}
-        {/*  title={*/}
-        {/*    <div className="flex flex-col">*/}
-        {/*      {t('Login history')}*/}
-        {/*      <small className="text-sm text-gray-400">*/}
-        {/*        {t('Logins across apps')}*/}
-        {/*      </small>*/}
-        {/*    </div>*/}
-        {/*  }>*/}
-        {/*  <div></div>*/}
-        {/*</Section>*/}
-      </>
+                {/*do this later*/}
+                {/*<Section*/}
+                {/*  title={*/}
+                {/*    <div className="flex flex-col">*/}
+                {/*      {t('Login history')}*/}
+                {/*      <small className="text-sm text-gray-400">*/}
+                {/*        {t('Logins across apps')}*/}
+                {/*      </small>*/}
+                {/*    </div>*/}
+                {/*  }>*/}
+                {/*  <div></div>*/}
+                {/*</Section>*/}
+            </>
 
-      {info && <ChangeRecoveryEmailDialog title={t('Change Recovery Email')}
-                                          info={info}
-                                          isOpen={openDialog === 'change-email' || openDialog === 'verify-email'}
-                                          verifyOnly={openDialog === 'verify-email'}
-                                          onConfirm={handleConfirmDialog}
-                                          onCancel={() => setOpenDialog('none')}/>}
+            {info && <ChangeRecoveryEmailDialog title={t('Change Recovery Email')}
+                                                info={info}
+                                                isOpen={openDialog === 'change-email' || openDialog === 'verify-email'}
+                                                verifyOnly={openDialog === 'verify-email'}
+                                                onConfirm={handleConfirmDialog}
+                                                onCancel={() => setOpenDialog('none')}/>}
 
-      <VerifyPasswordDialog title={t('Verify Password')}
-                            isOpen={openDialog === 'verify-password'}
-                            onConfirm={handleConfirmDialog}
-                            onCancel={() => setOpenDialog('none')}/>
-
-
-      <VerifyRecoveryKeyDialog title={t('Verify Recovery Phrase')}
-                               isOpen={openDialog === 'verify-recovery-phrase'}
-                               onConfirm={handleConfirmDialog}
-                               onCancel={() => setOpenDialog('none')}
-                               showHint={true}/>
+            <VerifyPasswordDialog title={t('Verify Password')}
+                                  isOpen={openDialog === 'verify-password'}
+                                  onConfirm={handleConfirmDialog}
+                                  onCancel={() => setOpenDialog('none')}/>
 
 
-    </>
-  );
+            <VerifyRecoveryKeyDialog title={t('Verify Recovery Phrase')}
+                                     isOpen={openDialog === 'verify-recovery-phrase'}
+                                     onConfirm={handleConfirmDialog}
+                                     onCancel={() => setOpenDialog('none')}
+                                     showHint={true}/>
 
-  function RecoveryEmailRow({ info }: { info?: RecoveryInfo | null }) {
-    const isVerified = !!info?.emailLastVerified;
-    const hasEmail = !!info?.email;
 
-    return (
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3">
-        {/* Left side: label, email, verification */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-          <p className="font-medium">{t('Recovery Email:')}</p>
+        </>
+    );
 
-          {info?.email && <span className="text-zinc-700 break-all">{info.email}</span>}
+    function RecoveryEmailRow({info}: { info?: RecoveryInfo | null }) {
+        const isVerified = !!info?.emailLastVerified;
+        const hasEmail = !!info?.email;
 
-          {isVerified ? (
-            <span className="flex items-center text-green-600 text-sm">
-            <Check className="h-4 w-4 mr-1" aria-hidden="true" />
-              {t('Verified')}
-              <TimeAgoUtc
-                className="ml-1 text-sm font-medium"
-                value={info?.emailLastVerified ?? 0}
-              />
+        return (
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start gap-1 sm:gap-3">
+                {/* Left side: label, email, verification */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                    <p className="font-medium">{t('Recovery Email:')}</p>
+
+                    {info?.email && <span className="text-zinc-700 break-all">{info.email}</span>}
+
+                    {isVerified ? (
+                        <span className="flex items-center text-green-600 text-sm">
+            <Check className="h-4 w-4 mr-1" aria-hidden="true"/>
+                            {t('Verified')}
+                            <TimeAgoUtc
+                                className="ml-1 text-sm font-medium"
+                                value={info?.emailLastVerified ?? 0}
+                            />
           </span>
-          ) : (
-            hasEmail && (
-              <span className="flex items-center text-red-600 text-sm">
-              <Exclamation className="h-4 w-4 mr-1" aria-hidden="true" />
-                {t('Not Verified')}
-                <button
-                  type="button"
-                  onClick={() => setOpenDialog('verify-email')}
-                  className="ml-2 underline text-blue-600 hover:text-blue-800"
-                >
+                    ) : (
+                        hasEmail && (
+                            <span className="flex items-center text-red-600 text-sm">
+              <Exclamation className="h-4 w-4 mr-1" aria-hidden="true"/>
+                                {t('Not Verified')}
+                                <button
+                                    type="button"
+                                    onClick={() => setOpenDialog('verify-email')}
+                                    className="ml-2 underline text-blue-600 hover:text-blue-800">
                 {t('Verify')}
               </button>
             </span>
-            )
-          )}
-        </div>
+                        )
+                    )}
+                </div>
 
-        {/* Right side: Change button */}
-        <button
-          type="button"
-          onClick={() => setOpenDialog('change-email')}
-          className="underline text-blue-600 hover:text-blue-800 text-sm sm:text-base whitespace-nowrap self-start sm:self-auto"
-        >
-          {t('Change')}
-        </button>
-      </div>
-    );
-  }
+                {/* Right side: Change button */}
+                <button
+                    type="button"
+                    onClick={() => setOpenDialog('change-email')}
+                    className="underline text-blue-600 hover:text-blue-800 text-sm sm:text-base whitespace-nowrap self-start sm:self-auto"
+                >
+                    {t('Change')}
+                </button>
+            </div>
+        );
+    }
 
 
 }
