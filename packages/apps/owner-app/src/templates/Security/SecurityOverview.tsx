@@ -109,16 +109,16 @@ export const SecurityOverview = () => {
                             to="/owner/security/password-recovery?gs=1"
                             className="underline text-blue-600 hover:text-blue-800"
                         >
-                          {t('Setup Now')}
+                          {t('Setup now')}
                         </Link>
                       </span>
                                         )}
 
                                         {info?.recoveryRisk && (
                                             <div className="p-3 mt-3 border rounded-lg bg-gray-50 space-y-2">
-                                                <div className="flex flex-col sm:flex-row sm:items-center gap-1">
-                                                    <Label>{t('Last Updated:')}</Label>
-                                                    <TimeAgoUtc className="text-sm" value={info.recoveryRisk.healthLastChecked ?? 0}/>
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 mb-3">
+                                                    <span className="font-medium">{t('Last Updated:')}</span>
+                                                    <TimeAgoUtc value={info.recoveryRisk.healthLastChecked ?? 0}/>
                                                 </div>
                                                 <DealerRecoveryRiskHeadline report={info.recoveryRisk}/>
                                             </div>
@@ -191,25 +191,24 @@ export const SecurityOverview = () => {
           </span>
                     ) : (
                         hasEmail && (
-                            <span className="flex items-center text-red-600 text-sm">
+                            <span className="flex items-center text-red-600">
               <Exclamation className="h-4 w-4 mr-1" aria-hidden="true"/>
                                 {t('Not Verified')}
                                 <button
                                     type="button"
                                     onClick={() => setOpenDialog('verify-email')}
                                     className="ml-2 underline text-blue-600 hover:text-blue-800">
-                {t('Verify')}
+                {t('Verify now')}
               </button>
             </span>
                         )
                     )}
                 </div>
-
                 {/* Right side: Change button */}
                 <button
                     type="button"
                     onClick={() => setOpenDialog('change-email')}
-                    className="underline text-blue-600 hover:text-blue-800 text-sm sm:text-base whitespace-nowrap self-start sm:self-auto"
+                    className="underline text-blue-600 hover:text-blue-800 sm:text-base whitespace-nowrap self-start sm:self-auto"
                 >
                     {t('Change')}
                 </button>
