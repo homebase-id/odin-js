@@ -60,10 +60,10 @@ export const PasswordRecoverySetupTab = () => {
                     <Section title={
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex-1">
-                                <span className="block text-lg">{t('Recovery Key Setup')}</span>
+                                <span className="block text-lg">{t('Password Recovery Setup')}</span>
                                 <div className="mt-1 text-sm text-gray-400">
                                     {t(
-                                        'Your recovery key is split among trusted people you choose. You can share with many, but only need some of them to help you get back in.'
+                                        'Setup secure password recovery so that you can receive an email if you forget your password.'
                                     )}
                                 </div>
                             </div>

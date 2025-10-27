@@ -103,12 +103,13 @@ export const Step1SelectConfigurationType = ({
                 <div className="flex flex-row items-center gap-3">
                     <Person className="h-6 w-6 text-primary"/>
                     <h3 className="text-lg font-semibold">
-                        {t("Automatic Recovery Configuration")}
+                        {t("Automatic Recovery")}
                     </h3>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                     {t(
-                        "Your password recovery will be handled automatically by the system. Your recovery details will be divided among multiple managed identities for safekeeping. This method is more convenient but less secure—it’s recommended to use trusted contacts instead."
+                        "Your password recovery will be handled automatically by the system. Your recovery details will be divided among multiple managed identities for safekeeping. " +
+                        "This method is more convenient but less secure — for extra security we recommend the Manual Recovery below."
                     )}
                 </p>
                 <div className="mt-4">
@@ -124,7 +125,7 @@ export const Step1SelectConfigurationType = ({
                 <div className="flex flex-row items-center gap-3">
                     <Person className="h-6 w-6 text-primary"/>
                     <h3 className="text-lg font-semibold">
-                        {t("Manual Recovery Configuration")}
+                        {t("Manual Recovery")}
                     </h3>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">

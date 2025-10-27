@@ -16,7 +16,7 @@ const Security = () => {
       <Submenu
         items={[
           {
-            title: `Security Health`,
+            title: `Status`,
             path: `/owner/security/overview`,
           },
           {

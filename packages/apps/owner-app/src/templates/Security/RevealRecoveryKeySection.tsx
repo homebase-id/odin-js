@@ -172,6 +172,11 @@ export function RevealRecoveryKeySection() {
                         </button>
                         .{' '}If you forgot your recovery phrase you can request it again by clicking the button below. There is a 2-week waiting period to
                         get your phrase.
+
+                        <br/>
+                        <br/>
+                        Keep your recovery phrase stored securely. The recovery phrase will enable you to reset forgotten passwords and to kick out a hacker
+                        that has hijacked your account and changed your password (if you do so within 2 weeks).
                     </div>
                 </div>
             </div>
