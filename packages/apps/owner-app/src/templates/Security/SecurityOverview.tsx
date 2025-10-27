@@ -80,6 +80,38 @@ export const SecurityOverview = () => {
                                         </Link>
                                     </div>
 
+                                    {/* Password Recovery */}
+                                    <div>
+                                        <span className="flex items-center">
+                                            {t('Password Recovery')}
+
+                                            {!info?.isConfigured && (
+                                                <span className="ml-2 flex items-center text-red-600">
+                                                      <Exclamation className="h-4 w-4 mr-1 shrink-0" aria-hidden="true"/>
+                                                      <span className="flex items-center space-x-1">
+                                                        <span className="mr-1">{t('Not Verified')}</span>
+                                                        <Link
+                                                            to="/owner/security/password-recovery?gs=1"
+                                                            className="ml-2 underline text-blue-600 hover:text-blue-800">
+                                                          {t('Setup now')}
+                                                        </Link>
+                                                      </span>
+                                                    </span>
+                                            )}
+                                            </span>
+
+
+                                        {info?.recoveryRisk && (
+                                            <div className="p-3 mt-3 border rounded-lg space-y-2">
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 mb-3">
+                                                    <span className="font-medium">{t('Last Updated:')}</span>
+                                                    <TimeAgoUtc value={info.recoveryRisk.healthLastChecked ?? 0}/>
+                                                </div>
+                                                <DealerRecoveryRiskHeadline report={info.recoveryRisk}/>
+                                            </div>
+                                        )}
+                                    </div>
+                                    
                                     {/* Recovery Phrase */}
                                     <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-2">
                                         <p className="font-medium">{t('Recovery phrase last verified:')}</p>
@@ -97,32 +129,6 @@ export const SecurityOverview = () => {
                                             className="underline text-blue-600 hover:text-blue-800">
                                             {t('Verify now')}
                                         </Link>
-                                    </div>
-
-                                    {/* Password Recovery */}
-                                    <div>
-                                        <span className="font-medium">{t('Trusted Connections Recovery Status')}</span>
-
-                                        {!info?.isConfigured && (
-                                            <span className="ml-2">
-                        <Link
-                            to="/owner/security/password-recovery?gs=1"
-                            className="underline text-blue-600 hover:text-blue-800"
-                        >
-                          {t('Setup now')}
-                        </Link>
-                      </span>
-                                        )}
-
-                                        {info?.recoveryRisk && (
-                                            <div className="p-3 mt-3 border rounded-lg bg-gray-50 space-y-2">
-                                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 mb-3">
-                                                    <span className="font-medium">{t('Last Updated:')}</span>
-                                                    <TimeAgoUtc value={info.recoveryRisk.healthLastChecked ?? 0}/>
-                                                </div>
-                                                <DealerRecoveryRiskHeadline report={info.recoveryRisk}/>
-                                            </div>
-                                        )}
                                     </div>
                                 </div>
 

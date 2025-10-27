@@ -4,6 +4,7 @@ import {ActionButton, DialogWrapper, Label, SubtleMessage, t, usePortal,} from '
 import {Check} from "@homebase-id/common-app/icons";
 import {verifyPassword} from "../../../provider/auth/SecurityHealthProvider";
 import {MaskedInput} from "../../../components/Password/MaskedInput";
+import {Link} from "react-router-dom";
 
 
 export const VerifyPasswordDialog = ({
@@ -89,6 +90,17 @@ export const VerifyPasswordDialog = ({
             >
                 <div className="mb-2">
                     <Label>{t('Your current password')}</Label>
+
+                    {/*<SubtleMessage>*/}
+                    {/*    <div>*/}
+                    {/*        Forgot your password? {' '}*/}
+                    {/*        <Link to={'/owner/security/password-recovery'} className="text-blue-600 underline">*/}
+                    {/*            Click here*/}
+                    {/*        </Link>*/}
+                    {/*        {' '} to request to view it.*/}
+                    {/*    </div>*/}
+                    {/*</SubtleMessage>*/}
+                    
                     <MaskedInput
                         required
                         name="pleaesIgnoreMeFirefox"

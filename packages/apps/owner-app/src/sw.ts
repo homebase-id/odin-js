@@ -213,7 +213,7 @@ self.addEventListener('notificationclick', (event) => {
         }
 
         if (event.notification?.data?.options?.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_RISK_REPORT_GENERATED) {
-          return `/owner/security/password-recovery`
+          return `/owner/security/overview`
         }
 
         const tagId = event.notification?.data?.options?.tagId;

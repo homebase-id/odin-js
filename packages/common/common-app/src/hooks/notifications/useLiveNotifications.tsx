@@ -242,7 +242,7 @@ export const buildNotificationTargetLink = (payload: PushNotification) => {
     } else if (payload.options.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_SHARD_REQUESTED) {
       return `/owner/security/release-shards`
     } else if (payload.options.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_RISK_REPORT_GENERATED) {
-      return `/owner/security/password-recovery`
+      return `/owner/security/overview`
     }
   } else if (payload.options.appId === CHAT_APP_ID) {
     return `/apps/chat/${payload.options.typeId}`;
