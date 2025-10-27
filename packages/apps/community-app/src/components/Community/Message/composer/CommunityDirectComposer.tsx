@@ -12,36 +12,37 @@ import {
   useLinkPreviewBuilder,
   VolatileInputRef,
 } from '@homebase-id/common-app';
-import {useState, FC, useRef, lazy, useMemo, useCallback, useEffect, Suspense, memo} from 'react';
+import { useState, FC, useRef, lazy, useMemo, useCallback, useEffect, Suspense, memo } from 'react';
 
-import {getNewId, isTouchDevice} from '@homebase-id/js-lib/helpers';
-import {ChatComposerProps} from '@homebase-id/chat-app/src/components/Chat/Composer/ChatComposer';
-import {HomebaseFile, NewMediaFile, RichText} from '@homebase-id/js-lib/core';
-import {useChatMessage} from '@homebase-id/chat-app/src/hooks/chat/useChatMessage';
-import {Plus, PaperPlane, Times} from '@homebase-id/common-app/icons';
-import {LinkPreview} from '@homebase-id/js-lib/media';
+import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
+import { ChatComposerProps } from '@homebase-id/chat-app/src/components/Chat/Composer/ChatComposer';
+import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
+import { useChatMessage } from '@homebase-id/chat-app/src/hooks/chat/useChatMessage';
+import { Plus, PaperPlane, Times } from '@homebase-id/common-app/icons';
+import { LinkPreview } from '@homebase-id/js-lib/media';
 
 const RichTextEditor = lazy(() =>
   import('@homebase-id/rich-text-editor').then((rootExport) => ({
     default: rootExport.RichTextEditor,
   }))
 );
-import {EmbeddedMessage} from '@homebase-id/chat-app/src/components/Chat/Detail/EmbeddedMessage';
-import {ChatMessage} from '@homebase-id/chat-app/src/providers/ChatProvider';
-import {useParams} from 'react-router-dom';
+import { EmbeddedMessage } from '@homebase-id/chat-app/src/components/Chat/Detail/EmbeddedMessage';
+import { ChatMessage } from '@homebase-id/chat-app/src/providers/ChatProvider';
+import { useParams } from 'react-router-dom';
 // import { DraftSaver } from './DraftSaver';
 // import { useMessageDraft } from './useMessageDraft';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 
 export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
-  ({conversation, clearReplyMsg, replyMsg, onSend}) => {
-    const {communityKey} = useParams();
+  ({ conversation, clearReplyMsg, replyMsg, onSend }) => {
+    const { communityKey } = useParams();
 
     const formRef = useRef<HTMLFormElement>(null);
     const volatileRef = useRef<VolatileInputRef>(null);
 
     const [message, setMessage] = useState<RichText | undefined>(undefined);
+    console.info('CommunityDirectComposer render with message:', message);
     const [files, setFiles] = useState<NewMediaFile[]>();
 
     // const draft = useMessageDraft(
@@ -54,7 +55,7 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
     // );
 
     const addError = useErrors().add;
-    const {mutateAsync: sendMessage} = useChatMessage().send;
+    const { mutateAsync: sendMessage } = useChatMessage().send;
 
     const doSend = async () => {
       const toSendMessage = message; // || draft?.message;
@@ -97,11 +98,8 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
     //     () => getPlainTextFromRichText(message || draft?.message) || '',
     //   [message, draft]
     // );
-    const plainMessage = useMemo(
-      () => getPlainTextFromRichText(message) || '',
-      [message]
-    );
-    const {linkPreviews, setLinkPreviews} = useLinkPreviewBuilder(plainMessage || '');
+    const plainMessage = useMemo(() => getPlainTextFromRichText(message) || '', [message]);
+    const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(plainMessage || '');
 
     const changeHandler = useCallback(
       (newVal: {
@@ -114,34 +112,18 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
     );
 
     useEffect(() => {
+      // focus, clear message to allow draft to be loaded
       const onFocus = () => {
         const position = volatileRef.current?.getPosition?.();
-        setMessage(undefined);
 
-        // Defer twice to ensure DOM updates complete
-        setTimeout(() => {
-          requestAnimationFrame(() => {
-            volatileRef.current?.setPosition?.(position);
-          });
-        }, 0);
+        // TODO(biswa) : Set this again when u make draft work
+        //  setMessage(undefined);
+        // Set timeout to allow RTE to render the new message;
+        setTimeout(() => volatileRef.current?.setPosition?.(position), 100);
       };
-
       window.addEventListener('focus', onFocus);
       return () => window.removeEventListener('focus', onFocus);
-    }, []);
-
-    // useEffect(() => {
-    //   // focus, clear message to allow draft to be loaded
-    //   const onFocus = () => {
-    //     const position = volatileRef.current?.getPosition?.();
-    //
-    //     setMessage(undefined);
-    //     // Set timeout to allow RTE to render the new message;
-    //     setTimeout(() => volatileRef.current?.setPosition?.(position), 100);
-    //   };
-    //   window.addEventListener('focus', onFocus);
-    //   return () => window.removeEventListener('focus', onFocus);
-    // });
+    });
 
     useEffect(() => {
       // When replying to a message, focus the input
@@ -159,8 +141,8 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
       return (
         <>
           <div className="max-h-[30vh] overflow-auto">
-            {replyMsg ? <MessageForReply msg={replyMsg} onClear={clearReplyMsg}/> : null}
-            <FileOverview files={files} setFiles={setFiles} cols={8}/>
+            {replyMsg ? <MessageForReply msg={replyMsg} onClear={clearReplyMsg} /> : null}
+            <FileOverview files={files} setFiles={setFiles} cols={8} />
             {files?.length ? null : (
               <LinkOverview
                 linkPreviews={linkPreviews}
@@ -172,12 +154,12 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
           </div>
           <div className="-mx-1 flex flex-row justify-between md:pt-2">
             <FileSelector
-              onChange={(files) => setFiles(files.map((file) => ({file})))}
+              onChange={(files) => setFiles(files.map((file) => ({ file })))}
               className="my-auto px-1 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
               accept="*"
               maxSize={HUNDRED_MEGA_BYTES}
             >
-              <Plus className="h-5 w-5"/>
+              <Plus className="h-5 w-5" />
             </FileSelector>
             <span className="my-auto">
               <ActionButton
@@ -206,7 +188,7 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
             className="flex flex-shrink-0 flex-row gap-2 px-0 md:px-3 md:pb-2 lg:pb-3"
             data-default-value={message}
             onPaste={(e) => {
-              const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({file}));
+              const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
 
               if (mediaFiles.length) {
                 setFiles([...(files ?? []), ...mediaFiles]);
@@ -223,8 +205,7 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
           >
             <Suspense
               fallback={
-                <div
-                  className="relative h-[119px] w-full border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border"/>
+                <div className="relative h-[119px] w-full border-t bg-background px-2 pb-1 dark:border-slate-800 md:rounded-md md:border" />
               }
             >
               <RichTextEditor
@@ -238,7 +219,7 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
                 placeholder={t('Your message')}
                 ref={volatileRef}
                 // key={draft?.updatedAt}
-                key={"not-sure-what-goes-here"}
+                key={'not-sure-what-goes-here'}
                 children={innerChildren}
                 disableHeadings={true}
               />
@@ -253,15 +234,15 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
 CommunityDirectComposer.displayName = 'CommunityDirectComposer';
 
 const MessageForReply = ({
-                           msg,
-                           onClear,
-                         }: {
+  msg,
+  onClear,
+}: {
   msg: HomebaseFile<ChatMessage>;
   onClear: () => void;
 }) => {
   return (
     <div className="flex flex-row gap-2 py-3">
-      <EmbeddedMessage msg={msg}/>
+      <EmbeddedMessage msg={msg} />
       <ActionButton icon={Times} type="mute" onClick={onClear}></ActionButton>
     </div>
   );
