@@ -4,7 +4,6 @@ import {ActionButton, DialogWrapper, Label, SubtleMessage, t, usePortal,} from '
 import {Check} from "@homebase-id/common-app/icons";
 import {verifyPassword} from "../../../provider/auth/SecurityHealthProvider";
 import {MaskedInput} from "../../../components/Password/MaskedInput";
-import {Link} from "react-router-dom";
 
 
 export const VerifyPasswordDialog = ({

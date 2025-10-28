@@ -19,7 +19,7 @@ import {
   useDarkMode,
   useProfiles,
   useUnreadPushNotificationsCount,
-  useSiteData, useDotYouClientContext,
+  useSiteData,
 } from '../../hooks';
 import {OwnerImage} from '../../socialFeed';
 import {MiniDarkModeToggle} from '../DarkModeToggle/DarkModeToggle';

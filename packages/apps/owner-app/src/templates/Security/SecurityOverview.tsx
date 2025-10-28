@@ -1,4 +1,4 @@
-import {t, LoadingBlock, Label} from '@homebase-id/common-app';
+import {t, LoadingBlock} from '@homebase-id/common-app';
 import Section from '../../components/ui/Sections/Section';
 import {Link} from "react-router-dom";
 import {useEffect, useState} from "react";
@@ -82,8 +82,8 @@ export const SecurityOverview = () => {
 
                                     {/* Password Recovery */}
                                     <div>
-                                        <span className="flex items-center">
-                                            {t('Password Recovery')}
+                                        <div className="flex items-center">
+                                            <p className="font-medium">{t('Password Recovery')}</p>
 
                                             {!info?.isConfigured && (
                                                 <span className="ml-2 flex items-center text-red-600">
@@ -98,20 +98,14 @@ export const SecurityOverview = () => {
                                                       </span>
                                                     </span>
                                             )}
-                                            </span>
 
-
-                                        {info?.recoveryRisk && (
-                                            <div className="p-3 mt-3 border rounded-lg space-y-2">
-                                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 mb-3">
-                                                    <span className="font-medium">{t('Last Updated:')}</span>
-                                                    <TimeAgoUtc value={info.recoveryRisk.healthLastChecked ?? 0}/>
-                                                </div>
+                                            {info?.isConfigured && info?.recoveryRisk && (
                                                 <DealerRecoveryRiskHeadline report={info.recoveryRisk}/>
-                                            </div>
-                                        )}
+                                            )}
+                                        </div>
+
                                     </div>
-                                    
+
                                     {/* Recovery Phrase */}
                                     <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-2">
                                         <p className="font-medium">{t('Recovery phrase last verified:')}</p>

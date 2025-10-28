@@ -101,6 +101,8 @@ export const configureShards = async (dotYouClient: DotYouClient, request: Confi
     })
     .catch((error) => {
       console.warn(error);
+      
+      // getOdinErrorDetails(error).
       return null;
     });
 }

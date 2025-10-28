@@ -23,10 +23,11 @@ export const DistributeShardsReview = ({config}: {
       <br/>
       <br/>
 
-      Trusted Connections
+      Trusted Contacts
       <br/>
       {config.players?.length ? (
         <ConfigureTrustedConnections
+          showPlayerType={true}
           removePlayer={undefined}
           updatePlayerType={undefined}
           trustedPlayers={config.players}/>

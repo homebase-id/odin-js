@@ -5,10 +5,12 @@ export const ConfigureTrustedConnections = ({
                                               removePlayer,
                                               updatePlayerType,
                                               trustedPlayers,
+                                              showPlayerType
                                             }: {
   removePlayer?: (odinId: string) => void;
   updatePlayerType?: (odinId: string, mode: PlayerType) => void;
   trustedPlayers: ShamiraPlayer[];
+  showPlayerType?: boolean
 }) => {
 
   return (
@@ -26,6 +28,7 @@ export const ConfigureTrustedConnections = ({
                 if (updatePlayerType) updatePlayerType(player.odinId, type)
               }}
               allowUpdatePlayerType={updatePlayerType !== undefined}
+              showPlayerType={showPlayerType}
               allowRemove={removePlayer !== undefined}
             />
           ))}
@@ -46,12 +49,14 @@ const SelectedConnectionItem = ({
                                   onRemove,
                                   onTypeChange,
                                   allowUpdatePlayerType,
-                                  allowRemove
+                                  allowRemove,
+                                  showPlayerType
                                 }: {
   player: ShamiraPlayer;
   onRemove: () => void;
   onTypeChange: (mode: PlayerType) => void;
   allowUpdatePlayerType?: boolean;
+  showPlayerType?: boolean;
   allowRemove?: boolean;
 }) => {
   return (
@@ -77,7 +82,9 @@ const SelectedConnectionItem = ({
             <option value={PlayerType.Delegate}>{playerTypeText(PlayerType.Delegate)}</option>
           </select>
         ) : (
-          <SubtleMessage>{playerTypeText(player.type)}</SubtleMessage>
+          <>
+            {showPlayerType && <SubtleMessage>{playerTypeText(player.type)}</SubtleMessage>}
+          </>
         )}
 
         {allowRemove && <button

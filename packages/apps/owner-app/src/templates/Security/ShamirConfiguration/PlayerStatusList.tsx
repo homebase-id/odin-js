@@ -137,8 +137,9 @@ export const PlayerStatusList = ({recoveryInfo}: { recoveryInfo: RecoveryInfo })
                     <div className="mt-3">
                         <Label>{t("Automated Recovery")}</Label>
                         <SubtleMessage>
-                            {t(`You're using automated recovery.  The identities below are managed by your hosting provider and will automatically respond when
-             you enter password recovery mode.`)}
+                            {t(`You're using automated recovery.  The identities below are managed by your hosting provider and will 
+                            automatically respond when you enter password recovery mode.  You need ${report.minRequired} out of ${report.players.length} 
+                            to respond to recover your account`)}
                         </SubtleMessage>
                     </div>
                 )
