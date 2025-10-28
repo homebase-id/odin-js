@@ -4,7 +4,6 @@ import {
 } from '@homebase-id/common-app';
 import {ConfigureShardsRequest} from "../../../provider/auth/ShamirProvider";
 import {ConfigureTrustedConnections} from "./ConfigureTrustedConnections";
-import {tr} from "timeago.js/lib/lang";
 
 export const DistributeShardsReview = ({config}: {
   config: ConfigureShardsRequest;

@@ -41,7 +41,7 @@ export const Step2SelectPlayers = ({
     <>
       <Label>{t("Selected Trusted Contacts")}</Label>
       <div className="mb-3 text-gray-400">
-        Choose 3-7 trusted contacts to help recover your account. You'll set security options next.
+        Choose 3-7 trusted contacts to help recover your account. You will set security options next.
       </div>
 
       <div className="mb-3 text-gray-400">

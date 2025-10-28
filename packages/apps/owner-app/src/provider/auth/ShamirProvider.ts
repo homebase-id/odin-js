@@ -1,4 +1,4 @@
-import {DotYouClient, getOdinErrorDetails} from '@homebase-id/js-lib/core';
+import {DotYouClient} from '@homebase-id/js-lib/core';
 import {t} from "@homebase-id/common-app";
 
 export const SHAMIR_DEALER_SHARD_CONFIG_FILE_TYPE = 44532;

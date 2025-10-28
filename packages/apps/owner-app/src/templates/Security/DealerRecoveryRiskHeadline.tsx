@@ -1,7 +1,5 @@
 import {DealerRecoveryRiskReport, RecoveryRiskLevel} from "../../provider/auth/SecurityHealthProvider";
 import {Link} from "react-router-dom";
-import React from "react";
-import {TimeAgoUtc} from "../../components/ui/Date/TimeAgoUtc";
 
 export function DealerRecoveryRiskHeadline({
                                                report,
@@ -25,7 +23,7 @@ export function DealerRecoveryRiskHeadline({
 export function DealerRecoveryRiskHeadlineText({report}: { report: DealerRecoveryRiskReport }) {
     let headline: string;
 
-    let textColor = "";
+    let textColor;
     switch (report.riskLevel) {
         case RecoveryRiskLevel.Low:
             headline = "✅ Recovery key is safe";

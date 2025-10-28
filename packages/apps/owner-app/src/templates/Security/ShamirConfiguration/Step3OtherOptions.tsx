@@ -55,8 +55,8 @@ export const Step3OtherOptions = ({
 
         <SubtleMessage>
           <ul className="list-none space-y-1">
-            <li><strong>'Release Automatically'</strong>: Fast but less secure — shard is sent during recovery.</li>
-            <li><strong>'Approve First'</strong>: Ultimate security — requires the contact’s online approval.</li>
+            <li><strong>Release Automatically</strong>: Fast but less secure — shard is sent during recovery.</li>
+            <li><strong>Approve First</strong>: Ultimate security — requires the contact’s online approval.</li>
           </ul>
         </SubtleMessage>
 

@@ -1,4 +1,4 @@
-import {t, LoadingBlock, Label} from '@homebase-id/common-app';
+import {t, LoadingBlock} from '@homebase-id/common-app';
 import Section from '../../components/ui/Sections/Section';
 import {Link} from "react-router-dom";
 import {useEffect, useState} from "react";
@@ -7,7 +7,7 @@ import {VerifyRecoveryKeyDialog} from "./Dialog/VerifyRecoveryKeyDialog";
 import {getRecoveryInfo, RecoveryInfo} from "../../provider/auth/SecurityHealthProvider";
 import {TimeAgoUtc} from "../../components/ui/Date/TimeAgoUtc";
 import {ChangeRecoveryEmailDialog} from "./Dialog/ChangeRecoveryEmailDialog";
-import {DealerRecoveryRiskHeadline, DealerRecoveryRiskHeadlineText} from "./DealerRecoveryRiskHeadline";
+import {DealerRecoveryRiskHeadline} from "./DealerRecoveryRiskHeadline";
 import {Check, Exclamation} from "@homebase-id/common-app/icons";
 
 export const SecurityOverview = () => {

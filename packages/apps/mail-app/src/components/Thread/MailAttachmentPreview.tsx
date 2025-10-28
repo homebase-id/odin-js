@@ -7,7 +7,6 @@ import {
   ActionButton,
   BoringFile,
   bytesToSize,
-  ExtensionThumbnail,
   useDotYouClientContext,
   useFile,
 } from '@homebase-id/common-app';
