@@ -8,21 +8,19 @@ import {
 } from "@homebase-id/common-app";
 import {ReactNode, useState} from "react";
 import {ConfigureTrustedConnections} from "./ConfigureTrustedConnections";
-import {PlayerType, ShamiraPlayer} from "../../../provider/auth/ShamirProvider";
+import {ShamiraPlayer} from "../../../provider/auth/ShamirProvider";
 
 
 export const Step2SelectPlayers = ({
                                      addPlayer,
                                      removePlayer,
-                                     updatePlayerType,
                                      players,
                                    }: {
   addPlayer: (newOdinId: string) => void;
   removePlayer: (odinId: string) => void;
-  updatePlayerType: (odinId: string, mode: PlayerType) => void;
   players: ShamiraPlayer[];
 }) => {
-  
+
   const [query, setQuery] = useState<string>("");
   const {data: contacts} = useAllContacts(true);
   const searchable = players?.map((p) => p.odinId);
@@ -41,19 +39,19 @@ export const Step2SelectPlayers = ({
 
   return (
     <>
-      <Label>{t("Selected list")}</Label>
+      <Label>{t("Selected Trusted Contacts")}</Label>
+      <div className="mb-3 text-gray-400">
+        Choose 3-7 trusted contacts to help recover your account. You'll set security options next.
+      </div>
 
       <div className="mb-3 text-gray-400">
-        <ul className="list-disc pl-5 space-y-2 not-italic">
-          <li>{t("Send automatically - The piece is sent right away during recovery.")}</li>
-          <li>{t("Approve first - The connection must confirm before their piece is sent.")}</li>
-        </ul>
+        Selected: {players?.length} (3-7 recommended)
       </div>
 
       <ConfigureTrustedConnections
         removePlayer={removePlayer}
-        updatePlayerType={updatePlayerType}
-        trustedPlayers={players}/>
+        trustedPlayers={players}
+        showPlayerType={false}/>
 
       <br/>
       <hr/>
