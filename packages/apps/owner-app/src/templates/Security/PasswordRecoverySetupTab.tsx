@@ -13,8 +13,7 @@ import {useEffect, useState} from "react";
 import {DealerShardConfig, getShamirConfiguration} from "../../provider/auth/ShamirProvider";
 import {getRecoveryInfo, RecoveryInfo} from "../../provider/auth/SecurityHealthProvider";
 import {RevealRecoveryKeySection} from "./RevealRecoveryKeySection";
-import {Link, useSearchParams} from "react-router-dom";
-import {VerifyRecoveryKeyDialog} from "./Dialog/VerifyRecoveryKeyDialog";
+import {useSearchParams} from "react-router-dom";
 
 export const PasswordRecoverySetupTab = () => {
 

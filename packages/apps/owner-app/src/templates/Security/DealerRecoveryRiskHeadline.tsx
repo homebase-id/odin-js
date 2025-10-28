@@ -1,5 +1,7 @@
 import {DealerRecoveryRiskReport, RecoveryRiskLevel} from "../../provider/auth/SecurityHealthProvider";
 import {Link} from "react-router-dom";
+import React from "react";
+import {TimeAgoUtc} from "../../components/ui/Date/TimeAgoUtc";
 
 export function DealerRecoveryRiskHeadline({
                                                report,
@@ -8,53 +10,68 @@ export function DealerRecoveryRiskHeadline({
     report: DealerRecoveryRiskReport;
     hidePrompt?: boolean
 }) {
-    let headline: string;
-
-    switch (report.riskLevel) {
-        case RecoveryRiskLevel.Low:
-            headline = "✅ Recovery key is safe";
-            break;
-        case RecoveryRiskLevel.Moderate:
-            headline = "⚠️ Recovery is fragile. You should add at least one more trusted connection";
-            break;
-        case RecoveryRiskLevel.High:
-            headline = "🚨 Just enough shards — at risk; add at least 2 more trusted connections";
-            break;
-        case RecoveryRiskLevel.Critical:
-            headline = "💀 Recovery not possible";
-            break;
-        default:
-            headline = "ℹ️ Recovery status unknown";
-            break;
-    }
-
     return (
-        <div className="flex flex-row gap-2">
-            <span>{headline}</span>
+        <span className="ml-2 space-x-1">
+            <DealerRecoveryRiskHeadlineText report={report}/>
+            {/*<TimeAgoUtc value={report.healthLastChecked ?? 0}/>*/}
             {!hidePrompt &&
                 <ActionPrompt riskLevel={report.riskLevel}/>
             }
-        </div>
+        </span>
     );
 }
 
 
-function ActionPrompt({riskLevel}: {
+export function DealerRecoveryRiskHeadlineText({report}: { report: DealerRecoveryRiskReport }) {
+    let headline: string;
+
+    let textColor = "";
+    switch (report.riskLevel) {
+        case RecoveryRiskLevel.Low:
+            headline = "✅ Recovery key is safe";
+            textColor = "text-green-600"
+            break;
+        case RecoveryRiskLevel.Moderate:
+            // headline = "⚠️ Recovery is fragile. You should add at least one more trusted connection";
+            headline = "⚠️ Recovery is fragile";
+            textColor = "text-green-600"
+            break;
+        case RecoveryRiskLevel.High:
+            // headline = "🚨 Just enough shards — at risk; add at least 2 more trusted connections";
+            headline = "🚨 Just enough shards";
+            textColor = "text-red-600"
+            break;
+        case RecoveryRiskLevel.Critical:
+            headline = "💀 Recovery not possible";
+            textColor = "text-red-600"
+            break;
+        default:
+            headline = "ℹ️ Recovery status unknown";
+            textColor = "text-red-600"
+            break;
+    }
+
+    return <span className={textColor}>{headline}</span>
+}
+
+
+export function ActionPrompt({riskLevel}: {
     riskLevel: RecoveryRiskLevel;
 }) {
 
-    const url = '/owner/security/password-recovery'
+    const url = '/owner/security/password-recovery?gs=1'
     switch (riskLevel) {
         case RecoveryRiskLevel.Moderate:
             return (
                 <Link to={url} className="text-blue-600 underline">
-                    Configure shards
+                    Configure now
                 </Link>
             );
         case RecoveryRiskLevel.High:
             return (
                 <Link to={url} className="text-blue-600 underline">
-                    Re-configure shards now
+                    {/*Re-configure shards now*/}
+                    Add More connections
                 </Link>
             );
         case RecoveryRiskLevel.Critical:
