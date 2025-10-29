@@ -193,7 +193,6 @@ export function RevealRecoveryKeySection() {
   )
 }
 
-
 const GenerateNewRecoveryKeySection = () => {
   type Status2 = "loading" | "prompt" | "waiting" | "success" | "failure";
 
@@ -204,50 +203,71 @@ const GenerateNewRecoveryKeySection = () => {
   const handleGenerateNew = async () => {
     setStatus("waiting");
     const result = await requestRecoveryKey(dotYouClient);
-    if (result?.key !== "") {
+    if (result?.key) {
       setRecoveryKeyRequest(result);
       setStatus("success");
     } else {
       setStatus("failure");
     }
-  }
+  };
+
   const state: ActionButtonState =
     status === "waiting" ? "pending" :
       status === "failure" ? "error" : "idle";
 
   return (
-    <Section title={
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex-1">
-          <span className="block text-lg">{t('Recovery Phrase')}</span>
-          <div className="mt-1 text-sm text-gray-400">
-            To get your recovery phrase press the button below. You should store this safely.
+    <Section
+      title={
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex-1">
+            <span className="block text-lg">{t('Recovery Phrase')}</span>
+            <div className="mt-1 text-sm text-gray-400">
+              {t('To get your recovery phrase press the button below. You should store this safely.')}
+            </div>
           </div>
         </div>
-      </div>
-    }>
-      <div
-        className="mb-4 rounded-md border-l-4 border-yellow-500 bg-yellow-50 p-4 text-yellow-900 dark:border-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-200">
-        <p className="font-semibold">{t("Action Required")}</p>
-        <p className="text-sm">
-          {t("You haven’t generated your recovery phrase yet. Please generate and store it securely now.")}
-        </p>
-      </div>
+      }
+    >
+      {/* Pre-generation alert */}
+      {status !== "success" && (
+        <div className="mb-4 rounded-md border-l-4 border-yellow-500 bg-yellow-50 p-4 text-yellow-900 dark:border-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-200">
+          <p className="font-semibold">{t("Action Required")}</p>
+          <p className="text-sm">
+            {t("You haven’t generated your recovery phrase yet. Please generate and store it securely now.")}
+          </p>
+        </div>
+      )}
 
-      {status === "success" && <ClickToReveal textToShow={recoveryKeyRequest!.key ?? ""}/>}
+      {/* Post-generation alert */}
+      {status === "success" && (
+        <div className="mb-4 rounded-md border-l-4 border-green-600 bg-green-50 p-4 text-green-900 dark:border-green-500 dark:bg-green-900/30 dark:text-green-200">
+          <p className="font-semibold">{t("Important Security Notice")}</p>
+          <p className="text-sm">
+            {t("Store your recovery phrase in a secure location, such as a password manager or offline storage.")}
+          </p>
+        </div>
+      )}
 
-      {(status === "prompt" || status === "waiting") &&
-          <>
-              <ActionButton type="primary" state={state} icon={Eye} onClick={handleGenerateNew}>
-                {t("Generate New Recovery Phrase")}
-              </ActionButton>
-          </>}
+      {/* Reveal key or button */}
+      {status === "success" && (
+        <ClickToReveal textToShow={recoveryKeyRequest!.key ?? ""} />
+      )}
 
-      {status === "failure" && <Alert type="critical">Failed to load your recovery key. Please try again</Alert>}
+      {(status === "prompt" || status === "waiting") && (
+        <ActionButton type="primary" state={state} icon={Eye} onClick={handleGenerateNew}>
+          {t("Generate New Recovery Phrase")}
+        </ActionButton>
+      )}
 
+      {status === "failure" && (
+        <Alert type="critical">
+          {t("Failed to load your recovery key. Please try again")}
+        </Alert>
+      )}
     </Section>
-  )
-}
+  );
+};
+
 
 
 const ClickToReveal = ({
