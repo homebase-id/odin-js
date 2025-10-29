@@ -88,7 +88,7 @@ export const DialogWrapper = ({
                 >
                   {title ? (
                     <h3
-                      className="w-20 flex-grow my-3 text-2xl font-medium leading-6 text-gray-900 dark:text-slate-50"
+                      className="z-40 w-20 flex-grow my-3 text-2xl font-medium leading-6 text-gray-900 dark:text-slate-50"
                       id="modal-title"
                     >
                       {title}

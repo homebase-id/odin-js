@@ -69,7 +69,7 @@ export function ActionPrompt({riskLevel}: {
             return (
                 <Link to={url} className="text-blue-600 underline">
                     {/*Re-configure shards now*/}
-                    Add More connections
+                    Change
                 </Link>
             );
         case RecoveryRiskLevel.Critical:
