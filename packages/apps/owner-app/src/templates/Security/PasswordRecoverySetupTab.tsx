@@ -19,8 +19,6 @@ export const PasswordRecoverySetupTab = () => {
 
     const [searchParams] = useSearchParams();
     const getStartedParam = searchParams.get("gs");
-    const getRecoveryPhraseParam = searchParams.get("rp");
-    
 
     const [isConfigurationOpen, setIsConfigurationOpen] = useState(getStartedParam === "1");
     const [shardConfig, setShardConfig] = useState<DealerShardConfig | null>(null);
@@ -53,7 +51,7 @@ export const PasswordRecoverySetupTab = () => {
 
     return (
         <>
-            <RevealRecoveryKeySection highlight={getRecoveryPhraseParam === "1"}/>
+            <RevealRecoveryKeySection/>
 
             {/*<ErrorNotification error={updateFlagError}/>*/}
             {!systemSettingsLoading && (
