@@ -47,18 +47,18 @@ const FileDetails = () => {
       />
       {/* Content JSON Viewer */}
       {file?.fileMetadata?.appData?.content && (
-        <div className="mb-6">
+        <div className="mx-auto mb-6 w-full max-w-4xl px-2">
           <JsonViewer
             data={file.fileMetadata.appData.content}
             wrapLines={true}
             title="Text"
-            className="max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-32rem)]"
+            className="w-full"
           />
         </div>
       )}
 
       {/* Full File JSON Viewer */}
-      <div className="max-w-[calc(100vw-1rem)] overflow-auto sm:max-w-[calc(100vw-32rem)]">
+      <div className="mx-auto w-full max-w-4xl overflow-auto px-2">
         <JsonViewer data={file} />
       </div>
     </>
