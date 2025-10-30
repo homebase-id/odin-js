@@ -41,6 +41,56 @@ const subscribers: {
 
 const isDebug = hasDebugFlag();
 
+// Keep a cache of peer tokens to avoid repeated calls; invalidated on reconnect failures
+type PeerTokenCacheItem = {
+  authenticationToken64: string;
+  sharedSecret: string;
+  sharedSecretBytes: Uint8Array;
+};
+const peerTokenCache = new Map<string, PeerTokenCacheItem>();
+
+const invalidatePeerToken = (odinId: string) => {
+  peerTokenCache.delete(odinId);
+};
+
+const getOrFetchPeerToken = async (
+  dotYouClient: DotYouClient,
+  odinId: string
+): Promise<PeerTokenCacheItem | null> => {
+  const cached = peerTokenCache.get(odinId);
+  if (cached) {
+    isDebug && console.debug('[WebsocketProviderOverPeer] Using cached peer token');
+    return cached;
+  }
+
+  isDebug && console.debug('[WebsocketProviderOverPeer] Fetching new peer token');
+  const token = await dotYouClient
+    .createAxiosClient()
+    .post<{
+      authenticationToken64: string;
+      sharedSecret: string;
+    }>(
+      '/notify/peer/token',
+      { identity: odinId },
+      { validateStatus: () => true }
+    )
+    .then((response) => response.data)
+    .catch((error) => {
+      console.error({ error });
+      return null;
+    });
+
+  if (!token) return null;
+
+  const item: PeerTokenCacheItem = {
+    authenticationToken64: token.authenticationToken64,
+    sharedSecret: token.sharedSecret,
+    sharedSecretBytes: base64ToUint8Array(token.sharedSecret),
+  };
+  peerTokenCache.set(odinId, item);
+  return item;
+};
+
 const ConnectSocket = async (
   dotYouClient: DotYouClient,
   odinId: string,
@@ -55,36 +105,15 @@ const ConnectSocket = async (
   connectPromise = new Promise<void>(async (resolve, reject) => {
     subscribedDrives = drives;
 
-    // we need to preauth before we can connect
-    const tokenToConnectOverPeer = await dotYouClient
-      .createAxiosClient()
-      .post<{
-        authenticationToken64: string;
-        sharedSecret: string;
-      }>(
-        '/notify/peer/token',
-        {
-          identity: odinId,
-        },
-        {
-          validateStatus: () => true,
-        }
-      )
-      .then((response) => {
-        return response.data;
-      })
-      .catch((error) => {
-        console.error({ error });
-        return null;
-      });
-
+    // we need to preauth before we can connect (cached)
+    const tokenToConnectOverPeer = await getOrFetchPeerToken(dotYouClient, odinId);
     if (!tokenToConnectOverPeer) {
       reconnectPromise = undefined;
       reject('[WebsocketProviderOverPeer] Preauth failed');
       return;
     }
 
-    activeSs = base64ToUint8Array(tokenToConnectOverPeer.sharedSecret);
+    activeSs = tokenToConnectOverPeer.sharedSecretBytes;
     const directGuestClient = new DotYouClient({
       api: ApiType.Guest,
       hostIdentity: odinId,
@@ -210,7 +239,8 @@ const ReconnectSocket = async (
       } catch (e) {
         console.error('[WebsocketProviderOverPeer] Reconnect failed', e);
         reject();
-
+        // Invalidate cached token so the next attempt fetches a fresh one
+        invalidatePeerToken(odinId);
         ReconnectSocket(dotYouClient, odinId, drives, args);
         return;
       }
