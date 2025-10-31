@@ -41,28 +41,61 @@ const subscribers: {
 
 const isDebug = hasDebugFlag();
 
-// Keep a cache of peer tokens to avoid repeated calls; invalidated on reconnect failures
+// Keep a cache of peer tokens in localStorage to avoid repeated calls
 type PeerTokenCacheItem = {
   authenticationToken64: string;
   sharedSecret: string;
-  sharedSecretBytes: Uint8Array;
 };
-const peerTokenCache = new Map<string, PeerTokenCacheItem>();
+
+const PEER_TOKEN_CACHE_KEY_PREFIX = 'odin_peer_token_';
+
+const getPeerTokenCacheKey = (odinId: string) => `${PEER_TOKEN_CACHE_KEY_PREFIX}${odinId}`;
+
+const getCachedPeerToken = (odinId: string): PeerTokenCacheItem | null => {
+  try {
+    if (typeof localStorage === 'undefined') return null;
+    const cached = localStorage.getItem(getPeerTokenCacheKey(odinId));
+    if (!cached) return null;
+    return JSON.parse(cached) as PeerTokenCacheItem;
+  } catch (error) {
+    console.error('[WebsocketProviderOverPeer] Error reading cached token:', error);
+    return null;
+  }
+};
+
+const setCachedPeerToken = (odinId: string, token: PeerTokenCacheItem): void => {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(getPeerTokenCacheKey(odinId), JSON.stringify(token));
+  } catch (error) {
+    console.error('[WebsocketProviderOverPeer] Error caching token:', error);
+  }
+};
 
 const invalidatePeerToken = (odinId: string) => {
-  peerTokenCache.delete(odinId);
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.removeItem(getPeerTokenCacheKey(odinId));
+  } catch (error) {
+    console.error('[WebsocketProviderOverPeer] Error invalidating token:', error);
+  }
 };
 
 const getOrFetchPeerToken = async (
   dotYouClient: DotYouClient,
   odinId: string
-): Promise<PeerTokenCacheItem | null> => {
-  const cached = peerTokenCache.get(odinId);
+): Promise<{ authenticationToken64: string; sharedSecretBytes: Uint8Array } | null> => {
+  // Check cache first
+  const cached = getCachedPeerToken(odinId);
   if (cached) {
     isDebug && console.debug('[WebsocketProviderOverPeer] Using cached peer token');
-    return cached;
+    return {
+      authenticationToken64: cached.authenticationToken64,
+      sharedSecretBytes: base64ToUint8Array(cached.sharedSecret),
+    };
   }
 
+  // Fetch new token
   isDebug && console.debug('[WebsocketProviderOverPeer] Fetching new peer token');
   const token = await dotYouClient
     .createAxiosClient()
@@ -82,13 +115,16 @@ const getOrFetchPeerToken = async (
 
   if (!token) return null;
 
-  const item: PeerTokenCacheItem = {
+  // Cache it
+  setCachedPeerToken(odinId, {
     authenticationToken64: token.authenticationToken64,
     sharedSecret: token.sharedSecret,
+  });
+
+  return {
+    authenticationToken64: token.authenticationToken64,
     sharedSecretBytes: base64ToUint8Array(token.sharedSecret),
   };
-  peerTokenCache.set(odinId, item);
-  return item;
 };
 
 const ConnectSocket = async (
@@ -145,6 +181,7 @@ const ConnectSocket = async (
           data: JSON.stringify(establishConnectionRequest),
         },
         tokenToConnectOverPeer.authenticationToken64
+        // "basdasjodhkjsad==="
       );
     };
 
@@ -169,6 +206,13 @@ const ConnectSocket = async (
 
       if (notification.notificationType === 'error') {
         console.warn('[WebsocketProviderOverPeer] Error:', notification.data);
+      }
+
+      if (notification.notificationType === 'authenticationError') {
+        isDebug && console.warn('[WebsocketProviderOverPeer] Error:', notification.data);
+        invalidatePeerToken(odinId);
+        ReconnectSocket(dotYouClient, odinId, drives, args);
+        return;
       }
 
       if (!isHandshaked) {
@@ -239,8 +283,6 @@ const ReconnectSocket = async (
       } catch (e) {
         console.error('[WebsocketProviderOverPeer] Reconnect failed', e);
         reject();
-        // Invalidate cached token so the next attempt fetches a fresh one
-        invalidatePeerToken(odinId);
         ReconnectSocket(dotYouClient, odinId, drives, args);
         return;
       }
