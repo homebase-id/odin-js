@@ -12,10 +12,20 @@ const GITHUB_BRANCH = process.env.GITHUB_BRANCH || 'mcp-llm-doc-creation';
 const KNOWN_DOCS = [
   'WORKSPACE_INSTRUCTIONS.md',
   'ARCHITECTURE.md',
+  'AUTHENTICATION.md',
   'CODE_MAP.md',
   'RUNBOOK.md',
   'GLOSSARY.md',
   'README.md',
+  // Module documentation
+  'modules/CORE_MODULE.md',
+  'modules/AUTH_MODULE.md',
+  'modules/HELPERS_MODULE.md',
+  'modules/PUBLIC_MODULE.md',
+  'modules/NETWORK_MODULE.md',
+  'modules/PROFILE_MODULE.md',
+  'modules/PEER_MODULE.md',
+  'modules/MEDIA_MODULE.md',
 ];
 
 // Simple in-memory cache with TTL

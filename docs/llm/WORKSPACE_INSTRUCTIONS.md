@@ -50,6 +50,12 @@ These instructions help AI coding assistants read, navigate, and safely modify t
   - `hostIdentity`: e.g., `example.dotyou.cloud`
   - `sharedSecret: Uint8Array` (base64-decoded)
   - `headers.Authorization: 'Bearer <clientAuthToken>'`
+- **For complete authentication implementation**, see [AUTHENTICATION.md](./AUTHENTICATION.md) which covers:
+  - YouAuth protocol and ECC key exchange flow
+  - Token finalization and storage
+  - React hooks for auth validation
+  - Drive and circle permissions
+  - Security best practices
 - If you must provision credentials, see `auth/providers/AuthenticationProvider.ts` (`finalizeAuthentication`). Prefer provisioning outside app runtime.
 
 ## Patterns to follow
