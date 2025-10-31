@@ -208,6 +208,13 @@ const ConnectSocket = async (
         console.warn('[WebsocketProviderOverPeer] Error:', notification.data);
       }
 
+      if (notification.notificationType === 'authenticationError') {
+        isDebug && console.warn('[WebsocketProviderOverPeer] Error:', notification.data);
+        invalidatePeerToken(odinId);
+        ReconnectSocket(dotYouClient, odinId, drives, args);
+        return;
+      }
+
       if (!isHandshaked) {
         // First message must be acknowledgement of successful handshake
         if (notification.notificationType == 'deviceHandshakeSuccess') {
@@ -276,8 +283,6 @@ const ReconnectSocket = async (
       } catch (e) {
         console.error('[WebsocketProviderOverPeer] Reconnect failed', e);
         reject();
-        // Invalidate cached token so the next attempt fetches a fresh one
-        // invalidatePeerToken(odinId);
         ReconnectSocket(dotYouClient, odinId, drives, args);
         return;
       }
