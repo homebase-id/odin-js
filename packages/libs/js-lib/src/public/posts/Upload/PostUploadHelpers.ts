@@ -9,6 +9,7 @@ import {
   DEFAULT_PAYLOAD_KEY,
   SecurityGroupType,
   MAX_HEADER_CONTENT_BYTES,
+  MAX_PAYLOAD_DESCRIPTOR_BYTES,
 } from '../../../core/core';
 import {
   base64ToUint8Array,
@@ -49,23 +50,38 @@ export const getPayloadForLinkPreview = async (
   linkPreviews: LinkPreview[] | undefined
 ): Promise<PayloadFile | null> => {
   if (!linkPreviews || linkPreviews.length === 0) return null;
-  const descriptorContent = JSON.stringify(
+  let descriptorContent = jsonStringify64(
     linkPreviews.map((preview) => {
       return {
         url: preview.url,
         hasImage: !!preview.imageUrl,
         imageWidth: preview.imageWidth,
         imageHeight: preview.imageHeight,
+        description: preview.description,
+        title: preview.title,
       } as LinkPreviewDescriptor;
     })
   );
+  if (descriptorContent.length < MAX_PAYLOAD_DESCRIPTOR_BYTES) {
+    // we trim down the descriptor if its too large
+    descriptorContent = jsonStringify64(linkPreviews.map((preview) => {
+      return {
+        url: preview.url,
+        hasImage: !!preview.imageUrl,
+        imageWidth: preview.imageWidth,
+        imageHeight: preview.imageHeight,
+        description: preview.description?.substring(0, 100),
+        title: preview.title,
+      } as LinkPreviewDescriptor;
+    }));
+  }
 
   const imageUrl = linkPreviews.find((preview) => preview.imageUrl)?.imageUrl;
 
   const imageBlob = imageUrl
     ? new Blob([base64ToUint8Array(imageUrl.split(',')[1])], {
-        type: imageUrl.split(';')[0].split(':')[1],
-      })
+      type: imageUrl.split(';')[0].split(':')[1],
+    })
     : undefined;
 
   const { tinyThumb } = imageBlob
@@ -90,16 +106,16 @@ export const hasConflictingSlug = async <T extends PostContent>(
 ) => {
   const existingPostWithThisSlug = odinId
     ? await getPostBySlugOverPeer(
-        dotYouClient,
-        odinId,
-        channelId,
-        file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
-      )
+      dotYouClient,
+      odinId,
+      channelId,
+      file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
+    )
     : await getPostBySlug(
-        dotYouClient,
-        channelId,
-        file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
-      );
+      dotYouClient,
+      channelId,
+      file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
+    );
 
   if (!existingPostWithThisSlug) {
     return false;
@@ -112,9 +128,9 @@ export const hasConflictingSlug = async <T extends PostContent>(
     ) &&
     (odinId
       ? !stringGuidsEqual(
-          existingPostWithThisSlug?.fileMetadata.globalTransitId,
-          file?.fileMetadata.globalTransitId
-        )
+        existingPostWithThisSlug?.fileMetadata.globalTransitId,
+        file?.fileMetadata.globalTransitId
+      )
       : !stringGuidsEqual(existingPostWithThisSlug?.fileId, file.fileId))
   );
 };
@@ -133,7 +149,7 @@ export const getUploadFileMetadata = async <T extends PostContent>(
   const encrypt = !(
     file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
-      SecurityGroupType.Authenticated
+    SecurityGroupType.Authenticated
   );
 
   const payloadJson: string = jsonStringify64({ ...file.fileMetadata.appData.content });
