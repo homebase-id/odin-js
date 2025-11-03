@@ -39,6 +39,7 @@ import {
   getContentFromHeader,
   getPayloadAsJson,
   DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
+  MAX_PAYLOAD_DESCRIPTOR_BYTES,
 } from '@homebase-id/js-lib/core';
 import {
   ChatDrive,
@@ -389,16 +390,31 @@ export const uploadChatMessage = async (
 
   if (!files?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
-    const descriptorContent = JSON.stringify(
+    let descriptorContent = jsonStringify64(
       linkPreviews.map((preview) => {
         return {
           url: preview.url,
           hasImage: !!preview.imageUrl,
           imageWidth: preview.imageWidth,
           imageHeight: preview.imageHeight,
+          description: preview.description,
+          title: preview.title,
         } as LinkPreviewDescriptor;
       })
     );
+    if (descriptorContent.length < MAX_PAYLOAD_DESCRIPTOR_BYTES) {
+      // we trim down the descriptor if its too large
+      descriptorContent = jsonStringify64(linkPreviews.map((preview) => {
+        return {
+          url: preview.url,
+          hasImage: !!preview.imageUrl,
+          imageWidth: preview.imageWidth,
+          imageHeight: preview.imageHeight,
+          description: ellipsisAtMaxChar(preview.description, 100),
+          title: preview.title,
+        } as LinkPreviewDescriptor;
+      }));
+    }
 
     const imageUrl = linkPreviews.find((preview) => preview.imageUrl)?.imageUrl;
 
