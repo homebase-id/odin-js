@@ -78,7 +78,13 @@ export function ActionPrompt({riskLevel}: {
                     Reset now
                 </Link>
             );
-
+        case RecoveryRiskLevel.Low:
+            return (
+                <Link to={url} className="text-blue-600 underline">
+                    {/*Re-configure shards now*/}
+                    Change
+                </Link>
+            );
         default:
             return null;
     }
