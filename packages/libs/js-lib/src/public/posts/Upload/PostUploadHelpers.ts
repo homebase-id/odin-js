@@ -89,7 +89,7 @@ export const getPayloadForLinkPreview = async (
 export const getPostContentForUpload = <T extends PostContent>(
   file: HomebaseFile<T> | NewHomebaseFile<T>
 ): { headerContent: string; defaultPayload: PayloadFile | null; additionalPayloads: PayloadFile[] } => {
-  const TEXT_FIELD_BYTE_LIMIT = 200; // simple 200-byte trimming per spec
+  const TEXT_FIELD_BYTE_LIMIT = 400; // simple 200-byte trimming per spec
 
   const fullContent = file.fileMetadata.appData.content as T;
 
@@ -176,35 +176,38 @@ export const getPostContentForUpload = <T extends PostContent>(
 
   // If still too big, move heavy fields (embeddedPost, primaryMediaFile, readingTimeStats) to default payload
   const defaultPayloadObj: Partial<PostContent> & { readingTimeStats?: ReadTimeStats } = {};
-  const moveEmbeddedPost = () => {
-    if (headerObj.embeddedPost !== undefined) {
-      defaultPayloadObj.embeddedPost = headerObj.embeddedPost;
-      delete headerObj.embeddedPost;
-    }
-  };
-  const movePrimaryMediaFile = () => {
-    if (headerObj.primaryMediaFile !== undefined) {
-      defaultPayloadObj.primaryMediaFile = headerObj.primaryMediaFile;
-      delete headerObj.primaryMediaFile;
-    }
-  };
-  const moveReadingTimeStats = () => {
-    const h = headerObj as Partial<Omit<Article, 'type'>>;
-    if (h.readingTimeStats !== undefined) {
-      defaultPayloadObj.readingTimeStats = h.readingTimeStats;
-      delete h.readingTimeStats;
-    }
-  };
+  // const moveEmbeddedPost = () => {
+  //   if (headerObj.embeddedPost !== undefined) {
+  //     defaultPayloadObj.embeddedPost = headerObj.embeddedPost;
+  //     delete headerObj.embeddedPost;
+  //   }
+  // };
+  // const movePrimaryMediaFile = () => {
+  //   if (headerObj.primaryMediaFile !== undefined) {
+  //     defaultPayloadObj.primaryMediaFile = headerObj.primaryMediaFile;
+  //     delete headerObj.primaryMediaFile;
+  //   }
+  // };
+  // const moveReadingTimeStats = () => {
+  //   const h = headerObj as Partial<Omit<Article, 'type'>>;
+  //   if (h.readingTimeStats !== undefined) {
+  //     defaultPayloadObj.readingTimeStats = h.readingTimeStats;
+  //     delete h.readingTimeStats;
+  //   }
+  // };
 
-  if (!fitsInHeader(headerObj)) {
-    moveEmbeddedPost();
-  }
-  if (!fitsInHeader(headerObj)) {
-    movePrimaryMediaFile();
-  }
-  if (!fitsInHeader(headerObj)) {
-    moveReadingTimeStats();
-  }
+  // if (!fitsInHeader(headerObj)) {
+  //   console.warn('Moving embeddedPost out of header for size constraints');
+  //   moveEmbeddedPost();
+  // }
+  // if (!fitsInHeader(headerObj)) {
+  //   console.warn('Moving primaryMediaFile out of header for size constraints');
+  //   movePrimaryMediaFile();
+  // }
+  // if (!fitsInHeader(headerObj)) {
+  //   console.warn('Moving readingTimeStats out of header for size constraints');
+  //   moveReadingTimeStats();
+  // }
 
   // Do not drop critical metadata (sourceUrl, reactAccess, isCollaborative)
 
