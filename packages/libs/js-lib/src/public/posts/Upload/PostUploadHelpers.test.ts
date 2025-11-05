@@ -114,7 +114,7 @@ describe('getPostContentForUpload', () => {
         expect(textParsed.body).toBe('short');
     });
 
-    it('falls back to minimal header and puts full content in default payload when still too big', async () => {
+    it('throws when header remains too large after trimming (moving disabled)', async () => {
         const huge = makeLong('z', 20000);
         const content: PostContent = {
             id: 'id4',
@@ -131,13 +131,7 @@ describe('getPostContentForUpload', () => {
             },
         } as unknown as NewHomebaseFile<PostContent>;
 
-        const { headerContent, defaultPayload } = getPostContentForUpload(file);
-        const parsed = JSON.parse(headerContent);
-        // Minimal header contains only channelId and type
-        expect(parsed).toEqual({ channelId: 'chan', type: 'Tweet' });
-        expect(defaultPayload).not.toBeNull();
-        const payloadJson = await (defaultPayload!.payload as Blob).text();
-        expect(JSON.parse(payloadJson)).toEqual(content);
+        expect(() => getPostContentForUpload(file)).toThrow();
     });
 
     it('does not move media/embed when trimming makes header fit (split path)', async () => {
@@ -183,7 +177,7 @@ describe('getPostContentForUpload', () => {
         expect(additionalPayloads[0].key).toBe(POST_FULL_TEXT_PAYLOAD_KEY);
     });
 
-    it('moves embeddedPost (and then media if needed) to default payload when header still too large', async () => {
+    it('throws when embeddedPost makes header too large (moving disabled)', async () => {
         const hugeEmbedCaption = makeLong('e', 15000);
         const content: PostContent = {
             id: 'id6',
@@ -214,19 +208,6 @@ describe('getPostContentForUpload', () => {
             },
         } as unknown as NewHomebaseFile<PostContent>;
 
-        const { headerContent, defaultPayload, additionalPayloads } = getPostContentForUpload(file);
-        const parsed = JSON.parse(headerContent);
-
-        // embeddedPost should be moved out of the header
-        expect(parsed.embeddedPost).toBeUndefined();
-        expect(defaultPayload).not.toBeNull();
-        expect(defaultPayload!.key).toBe(DEFAULT_PAYLOAD_KEY);
-        const defJson = await (defaultPayload!.payload as Blob).text();
-        const defParsed = JSON.parse(defJson);
-        expect(defParsed.embeddedPost).toBeTruthy();
-
-        // text payload is produced
-        expect(additionalPayloads.length).toBe(1);
-        expect(additionalPayloads[0].key).toBe(POST_FULL_TEXT_PAYLOAD_KEY);
+        expect(() => getPostContentForUpload(file)).toThrow();
     });
 });
