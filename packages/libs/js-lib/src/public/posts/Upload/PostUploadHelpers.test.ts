@@ -30,7 +30,7 @@ describe('getPostContentForUpload', () => {
         expect(parsed).toEqual(content);
     });
 
-    it('splits non-Article: trims caption to ~200 bytes and emits full-text payload', async () => {
+    it('splits non-Article: trims caption to ~400 bytes and emits full-text payload', async () => {
         const longCaption = makeLong('x', 10000);
         const content: PostContent = {
             id: 'id2',
@@ -67,7 +67,7 @@ describe('getPostContentForUpload', () => {
         // Caption should be trimmed with ellipsis
         expect(typeof parsed.caption).toBe('string');
         expect((parsed.caption as string).endsWith('...')).toBe(true);
-        expect((parsed.caption as string).length).toBeLessThanOrEqual(203);
+        expect((parsed.caption as string).length).toBeLessThanOrEqual(403);
 
         // Text payload should contain full caption
         expect(additionalPayloads.length).toBe(1);
@@ -82,7 +82,7 @@ describe('getPostContentForUpload', () => {
         }
     });
 
-    it('Article: trims abstract to ~200 bytes, includes small body in header, full text in payload', async () => {
+    it('Article: trims abstract to ~400 bytes, includes small body in header, full text in payload', async () => {
         const longAbstract = makeLong('a', 15000);
         const content: Article = {
             id: 'id3',
@@ -105,7 +105,7 @@ describe('getPostContentForUpload', () => {
 
         expect(typeof parsed.abstract).toBe('string');
         expect((parsed.abstract as string).endsWith('...')).toBe(true);
-        expect((parsed.abstract as string).length).toBeLessThanOrEqual(203);
+        expect((parsed.abstract as string).length).toBeLessThanOrEqual(403);
         expect(parsed.body).toBe('short');
 
         const textJson = await (additionalPayloads[0].payload as Blob).text();
