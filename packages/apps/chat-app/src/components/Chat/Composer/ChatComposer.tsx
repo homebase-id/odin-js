@@ -11,6 +11,7 @@ import {
   VolatileInputRef,
   LinkOverview,
   useLinkPreviewBuilder,
+  getVideosFromPasteEvent,
 } from '@homebase-id/common-app';
 import { HomebaseFile, NewMediaFile } from '@homebase-id/js-lib/core';
 
@@ -113,6 +114,9 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
     if (replyMsg) volatileRef.current?.focus();
   }, [replyMsg]);
 
+  const acceptedFileTypes =
+    'image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4, audio/mp3, application/pdf';
+
   return (
     <>
       <div className="bg-page-background pb-[env(safe-area-inset-bottom)]">
@@ -139,7 +143,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
             <FileSelector
               onChange={(files) => setFiles(files.map((file) => ({ file })))}
               className="px-2 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
-              accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4, audio/mp3, application/pdf"
+              accept={acceptedFileTypes}
               maxSize={HUNDRED_MEGA_BYTES}
             >
               <Plus className="h-5 w-5" />
@@ -154,11 +158,37 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
             autoFocus={!isTouchDevice()}
             ref={volatileRef}
             onPaste={(e) => {
-              const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
+              const mediaFiles = [...getImagesFromPasteEvent(e), ...getVideosFromPasteEvent(e)].map(
+                (file) => ({ file })
+              );
               if (mediaFiles.length) {
+                const filteredMediaFiles: {
+                  file: File;
+                }[] = [];
+
+                for (const mediaFile of mediaFiles) {
+                  if (mediaFile.file.size > HUNDRED_MEGA_BYTES) {
+                    addError(
+                      new Error('File too large'),
+                      t('File too large'),
+                      t('The file "{0}" exceeds the maximum size of 100MB.', mediaFile.file.name)
+                    );
+                    continue;
+                  }
+                  if (!acceptedFileTypes.includes(mediaFile.file.type)) {
+                    addError(
+                      new Error('Unsupported file type'),
+                      t('Unsupported file type'),
+                      t('The file "{0}" is not a supported file type.', mediaFile.file.name)
+                    );
+                    continue;
+                  }
+                  filteredMediaFiles.push(mediaFile);
+                }
+
                 setFiles([
                   ...(files ?? []),
-                  ...mediaFiles.filter(
+                  ...filteredMediaFiles.filter(
                     (newFile) =>
                       !files?.some(
                         (oldFile) =>

@@ -9,10 +9,12 @@ import {
   Image,
   ActionButton,
   t,
+  HOME_ROOT_PATH,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
 
-import { Exclamation, Trash, Download } from '@homebase-id/common-app/icons';
+import { Exclamation, Trash, Download, Eye } from '@homebase-id/common-app/icons';
+import { createPortal } from 'react-dom';
 import {
   DeletedHomebaseFile,
   HomebaseFile,
@@ -22,11 +24,17 @@ import {
   decryptJsonContent,
   decryptKeyHeader,
 } from '@homebase-id/js-lib/core';
-import { BlogConfig, ReactionConfig } from '@homebase-id/js-lib/public';
+import { BlogConfig, PostContent, ReactionConfig } from '@homebase-id/js-lib/public';
 import { ContactConfig } from '@homebase-id/js-lib/network';
 import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
 import { useFile } from '../../../hooks/files/useFiles';
-import { drivesEqual } from '@homebase-id/js-lib/helpers';
+import { drivesEqual, tryJsonParse } from '@homebase-id/js-lib/helpers';
+import {
+  SHAMIR_DEALER_SHARD_CONFIG_FILE_TYPE,
+  SHAMIR_PLAYER_COLLECTED_SHARD_REQUEST_FILE_TYPE,
+  SHAMIR_PLAYER_ENCRYPTED_SHARD_FILE_TYPE,
+} from '../../../provider/auth/ShamirProvider';
+import { PostTeaser } from '../../SocialFeed/PostTeaser';
 
 export const FileCard = ({
   targetDrive,
@@ -38,6 +46,8 @@ export const FileCard = ({
   isRow?: boolean;
 }) => {
   const firstPayload = file.fileMetadata.payloads?.[0];
+  const canDownload = !file.fileMetadata.dataSource?.payloadsAreRemote;
+
   const contentType = firstPayload?.contentType || 'application/json';
   const isImage = [
     'image/webp',
@@ -64,6 +74,10 @@ export const FileCard = ({
           file={file}
           targetDrive={targetDrive}
           className={`${isRow ? '' : 'absolute left-2 top-2'} z-10`}
+        />
+        <FileViewPost
+          file={file}
+          className={`${isRow ? '' : 'absolute right-2 top-[4.5rem]'} z-10`}
         />
         <FileDelete
           file={file}
@@ -95,7 +109,8 @@ export const FileCard = ({
               />
             </div>
           )}
-          {firstPayload ? (
+          {/* TODO: We should see if we can support remote payloads downloading  */}
+          {firstPayload && canDownload ? (
             <div className="absolute inset-0 flex cursor-pointer flex-row items-center justify-center bg-slate-200 bg-opacity-50 opacity-0 hover:opacity-100">
               <FileDownload file={file} targetDrive={targetDrive} payloadKey={firstPayload.key} />
             </div>
@@ -155,7 +170,6 @@ const FileDownload = ({
   className?: string;
 }) => {
   const fetchFile = useFile({ targetDrive }).fetchFile;
-
   const doDownload = (url: string) => {
     // Dirty hack for easy download
     const link = document.createElement('a');
@@ -203,6 +217,91 @@ const FileDelete = ({
         buttonText: t('Delete'),
       }}
     />
+  );
+};
+
+const FileViewPost = ({
+  file,
+  className,
+}: {
+  file: HomebaseFile<string> | DeletedHomebaseFile<string>;
+  className?: string;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const fileType = file.fileMetadata.appData.fileType;
+  const isPost = fileType === BlogConfig.PostFileType;
+  const rawContent = file.fileMetadata.appData.content as unknown;
+  const parsedContent =
+    typeof rawContent === 'string'
+      ? tryJsonParse<PostContent>(rawContent)
+      : (rawContent as PostContent | undefined);
+  const channelId = parsedContent?.channelId;
+  const slugOrId = parsedContent?.slug || parsedContent?.id;
+
+  const href =
+    isPost && channelId && slugOrId ? `${HOME_ROOT_PATH}posts/${channelId}/${slugOrId}` : undefined;
+
+  // Skip deleted files for preview
+  const isDeleted = (file as DeletedHomebaseFile).fileState === 'deleted';
+  if (!isPost || !href || !parsedContent || isDeleted) return null;
+
+  // Create a temporary strongly typed post file for the teaser
+  const source = file as unknown as HomebaseFile<PostContent>;
+  const postFilePreview: HomebaseFile<PostContent> = {
+    ...source,
+    fileMetadata: {
+      ...source.fileMetadata,
+      appData: {
+        ...source.fileMetadata.appData,
+        content: parsedContent,
+      },
+    },
+  };
+
+  return (
+    <>
+      <ActionButton
+        icon={Eye}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsOpen(true);
+        }}
+        size="square"
+        type="secondary"
+        className={className}
+        title={t('View post') ?? 'View post'}
+      />
+      {isOpen
+        ? createPortal(
+            <div
+              className="fixed inset-0 z-[1000] flex flex-col bg-black/70 backdrop-blur-sm"
+              onClick={() => setIsOpen(false)}
+            >
+              <div
+                className="mx-auto mt-10 flex max-h-[85vh] w-[95%] max-w-5xl flex-1 flex-col overflow-hidden rounded-lg bg-background shadow-xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex flex-shrink-0 flex-row items-center justify-between border-b px-4 py-2">
+                  <p className="text-sm font-semibold">{t('Post preview')}</p>
+                  <div className="flex flex-row gap-2">
+                    <button
+                      className="rounded bg-slate-200 px-2 py-1 text-xs dark:bg-slate-700"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {t('Close')}
+                    </button>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-auto bg-white p-4 dark:bg-slate-900">
+                  <PostTeaser postFile={postFilePreview} />
+                </div>
+              </div>
+            </div>,
+            document.body
+          )
+        : null}
+    </>
   );
 };
 
@@ -264,6 +363,15 @@ const FileTypeLabel = ({ file }: { file: HomebaseFile<string> | DeletedHomebaseF
       return 'Community Defintion';
     case COMMUNITY_MESSAGE_FILE_TYPE:
       return 'Community Message';
+
+    // Shamir password recovery
+    case SHAMIR_DEALER_SHARD_CONFIG_FILE_TYPE:
+      return 'Password Recovery Dealer Shard Config';
+    case SHAMIR_PLAYER_ENCRYPTED_SHARD_FILE_TYPE:
+      return 'Password Recovery Player Encrypted Shard';
+
+    case SHAMIR_PLAYER_COLLECTED_SHARD_REQUEST_FILE_TYPE:
+      return 'Password Recovery Collected Shard Request File';
 
     // Assets
     case 0:

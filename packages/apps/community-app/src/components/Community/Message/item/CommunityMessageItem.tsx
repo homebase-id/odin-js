@@ -41,6 +41,8 @@ import { useCommunityCollaborativeMsg } from '../../../../hooks/community/useCom
 import { CommunityMessageAuthorName } from './CommunityMesageAuthorName';
 import { CommunityMessageAvatar } from './CommunityMessageAvatar';
 import { CommunityMessageLastUpdatedIndicator } from './CommunityMessageLastUpdatedIndicator';
+import { CommunityMessageEdited } from './CommunityMessageEdited';
+import { CommunityMessageInternalLink } from './CommunityMessageInternalLink';
 
 export const CommunityMessageItem = memo(
   (props: {
@@ -193,6 +195,7 @@ export const CommunityMessageItem = memo(
                   <>
                     <CommunityMessageAuthorName msg={msg} />
                     <CommunitySentTimeIndicator className="text-sm" msg={msg} />
+                    <CommunityMessageEdited className="text-sm" msg={msg} />
                     <CommunityDeliveryIndicator msg={msg} />
                   </>
                 )}
@@ -398,6 +401,14 @@ const MessageTextRenderer = ({
                 @{attributes.value.replaceAll('@', '')}
               </span>
             );
+        }
+
+        if (type === 'referenced_message') {
+          return (
+            <CommunityMessageInternalLink attributes={attributes}>
+              {children}
+            </CommunityMessageInternalLink>
+          );
         }
 
         return null;

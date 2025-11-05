@@ -47,7 +47,8 @@ export const CommunityReactionComposer = forwardRef(
         ref={ref}
         className={className}
         emojis={['👍️', '❤️', '😂']}
-        defaultValue={[]}
+        defaultValue={myReactions?.map((reaction) => reaction.body) || []}
+        // defaultValue={[]}
         onClick={onClick}
         doLike={(emoji) => addReaction({ community, message: msg, reaction: emoji })}
         doUnlike={(emoji) => {

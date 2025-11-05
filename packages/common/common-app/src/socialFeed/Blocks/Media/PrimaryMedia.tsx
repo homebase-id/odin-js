@@ -14,6 +14,7 @@ import { Download } from '../../../ui/Icons';
 import { bytesToSize, t } from '../../../helpers';
 import { LinkPreviewItem } from '../../../media/Link';
 import { useEffect } from 'react';
+import { PDFHandler } from '../../../media/PdfHandler';
 
 export const PrimaryMedia = ({
   odinId,
@@ -126,6 +127,8 @@ interface BaseBoringFileProps {
   canDownload?: boolean;
   className?: string;
   onLoad?: () => void;
+  isLegacy?: boolean;
+  isPreview?: boolean;
 }
 
 interface BoringFilePayloadProps extends BaseBoringFileProps {
@@ -152,6 +155,8 @@ export const BoringFile = ({
   canDownload,
   className,
   onLoad,
+  isLegacy,
+  isPreview,
 }: BoringFileProps) => {
   const contentType =
     (file as NewPayloadDescriptor)?.pendingFile?.type ||
@@ -182,8 +187,71 @@ export const BoringFile = ({
 
   if (!file) return null;
 
+  // Legacy preview-style UI (large square tile with centered icon/text)
+  if (isLegacy) {
+    return (
+      <ExtensionFile
+        contentType={contentType}
+        fileName={
+          ((file as NewPayloadDescriptor)?.pendingFile as File)?.name ||
+          file.descriptorContent ||
+          contentType
+        }
+        byteSize={byteSize}
+        canDownload={canDownload}
+        className={className}
+        onDownload={
+          canDownload
+            ? async () => {
+                doDownload(await fetchFile());
+              }
+            : undefined
+        }
+      />
+    );
+  }
+
+  if (isPreview) {
+    if (contentType.includes('pdf')) {
+      const previewName =
+        ((file as NewPayloadDescriptor)?.pendingFile as File)?.name ||
+        file.descriptorContent ||
+        'Document.pdf';
+      const fetchPdfUrl = async () => await fetchFile();
+      return <PDFHandler fetchFile={fetchPdfUrl} className={className} fileName={previewName} />;
+    }
+    return (
+      <ExtensionFile
+        contentType={contentType}
+        fileName={
+          ((file as NewPayloadDescriptor)?.pendingFile as File)?.name ||
+          file.descriptorContent ||
+          contentType
+        }
+        byteSize={byteSize}
+        canDownload={canDownload}
+        className={className}
+        onDownload={
+          canDownload
+            ? async () => {
+                doDownload(await fetchFile());
+              }
+            : undefined
+        }
+      />
+    );
+  }
+
+  // New chat-style compact row UI (like WhatsApp/Telegram)
+  const fileName =
+    ((file as NewPayloadDescriptor)?.pendingFile as File)?.name ||
+    file.descriptorContent ||
+    file.key ||
+    contentType;
+
   return (
     <div
+      className={`flex items-center gap-3 rounded-lg border border-border bg-background p-3 text-foreground ${className || ''}`}
       onClick={
         canDownload
           ? async () => {
@@ -191,13 +259,53 @@ export const BoringFile = ({
             }
           : undefined
       }
+      role={canDownload !== false ? 'button' : undefined}
+    >
+      <ExtensionThumbnail contentType={contentType} className="h-10 w-10 text-foreground/60" />
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm font-medium">{fileName}</div>
+        <div className="text-xs text-muted-foreground">{bytesToSize(byteSize)}</div>
+      </div>
+      {canDownload !== false ? (
+        <button
+          type="button"
+          data-action="download"
+          onClick={async (e) => {
+            e.stopPropagation();
+            doDownload(await fetchFile());
+          }}
+          className="inline-flex items-center gap-2 rounded-md border border-border px-2 py-1 text-sm hover:bg-muted"
+          aria-label={t('Download')}
+        >
+          <Download className="h-4 w-4" />
+        </button>
+      ) : null}
+    </div>
+  );
+};
+
+// A tile-style file renderer with large centered icon and optional big download overlay
+export const ExtensionFile = ({
+  contentType,
+  fileName,
+  byteSize,
+  canDownload,
+  className,
+  onDownload,
+}: {
+  contentType: string;
+  fileName: string;
+  byteSize: number;
+  canDownload?: boolean;
+  className?: string;
+  onDownload?: () => void | Promise<void>;
+}) => {
+  return (
+    <div
+      onClick={canDownload ? onDownload : undefined}
       className={`${className || ''} relative ${className?.indexOf('aspect-') ? '' : 'aspect-square'} overflow-hidden bg-slate-50 text-slate-200 dark:bg-slate-700 dark:text-slate-600 mx-auto ${canDownload ? 'cursor-pointer' : ''}`}
     >
-      <p className="absolute inset-0 p-2 text-9xl break-all">
-        {((file as NewPayloadDescriptor)?.pendingFile as File)?.name ||
-          file.descriptorContent ||
-          contentType}
-      </p>
+      <p className="absolute inset-0 p-2 text-9xl break-all">{fileName}</p>
       <div className="absolute inset-0 flex gap-3 items-center justify-center text-foreground">
         <ExtensionThumbnail
           contentType={contentType}

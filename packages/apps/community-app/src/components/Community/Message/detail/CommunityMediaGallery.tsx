@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
   DEFAULT_PAYLOAD_KEY,
   EmbeddedThumb,
   HomebaseFile,
@@ -51,7 +52,12 @@ export const CommunityMediaGallery = ({
   };
 
   const allkeys = msg.fileMetadata.payloads
-    ?.filter((pyld) => pyld.key !== DEFAULT_PAYLOAD_KEY && pyld.key !== BACKEDUP_PAYLOAD_KEY)
+    ?.filter(
+      (pyld) =>
+        pyld.key !== DEFAULT_PAYLOAD_KEY &&
+        pyld.key !== BACKEDUP_PAYLOAD_KEY &&
+        !pyld.key.includes(DEFAULT_PAYLOAD_DESCRIPTOR_KEY)
+    )
     ?.map((p) => p.key);
   const nextKey = allkeys?.[allkeys.indexOf(mediaKey) + 1];
   const prevKey = allkeys?.[allkeys.indexOf(mediaKey) - 1];
@@ -117,7 +123,8 @@ export const CommunityMediaGallery = ({
     link.download = fileName || url.substring(url.lastIndexOf('/') + 1);
     link.click();
   };
-
+  //TODO: Revisit this again for cleaner implementation
+  const isPdf = contentType === 'application/pdf';
   if (!payload) return null;
 
   const dialog = (
@@ -163,15 +170,18 @@ export const CommunityMediaGallery = ({
               globalTransitId={msg.fileMetadata.globalTransitId}
               file={payload}
               canDownload={true}
+              isPreview={true}
               className="h-full min-h-[inherit] w-full"
             />
           ) : null}
 
           <div
-            onClick={(e) => e.stopPropagation()}
-            className="absolute left-0 right-0 top-0 flex w-full flex-row flex-wrap px-3 py-3 text-white"
+            onClick={!isPdf ? (e) => e.stopPropagation() : undefined}
+            className={`absolute left-0 right-0 top-0 flex w-full flex-row flex-wrap px-3 py-3 text-white ${isPdf ? 'pointer-events-none' : ''}`}
           >
-            <div className="flex flex-row items-center gap-2">
+            <div
+              className={`flex flex-row items-center gap-2 ${isPdf ? 'pointer-events-auto' : ''}`}
+            >
               {onClose ? (
                 <ActionButton
                   icon={Times}
@@ -182,17 +192,19 @@ export const CommunityMediaGallery = ({
                 />
               ) : null}
             </div>
-            <div className="ml-auto flex flex-row items-center gap-2">
-              <p className="text-sm text-slate-400">{bytesToSize(payload.bytesWritten)}</p>
+            {!isPdf && (
+              <div className="ml-auto flex flex-row items-center gap-2">
+                <p className="text-sm text-slate-400">{bytesToSize(payload.bytesWritten)}</p>
 
-              <ActionButton
-                icon={Download}
-                onClick={doDownload}
-                className="rounded-full p-3"
-                size="square"
-                type="secondary"
-              />
-            </div>
+                <ActionButton
+                  icon={Download}
+                  onClick={doDownload}
+                  className="rounded-full p-3"
+                  size="square"
+                  type="secondary"
+                />
+              </div>
+            )}
           </div>
 
           {prevKey ? (

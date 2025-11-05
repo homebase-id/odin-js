@@ -21,6 +21,35 @@ export const FileSelector = forwardRef(
   ) => {
     const id = getNewId();
 
+    const matchesAccept = (file: File, acceptList?: string): boolean => {
+      if (!acceptList) return true;
+      const tokens = acceptList
+        .split(',')
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean);
+      if (!tokens.length) return true;
+
+      const type = (file.type || '').toLowerCase();
+      const name = file.name.toLowerCase();
+
+      return tokens.some((token) => {
+        if (token === '*/*') return true;
+        if (token === '*') return true;
+        // Wildcard mime e.g. image/*
+        if (token.endsWith('/*')) {
+          const base = token.slice(0, -1); // keep trailing slash trimmed
+          return type.startsWith(base);
+        }
+        // Extension e.g. .png
+        if (token.startsWith('.')) return name.endsWith(token);
+        // Bare extension fallback (png)
+        if (!token.includes('/') && !token.startsWith('.')) return name.endsWith('.' + token);
+        // Common alias normalization
+        if (token === 'image/jpg' && type === 'image/jpeg') return true;
+        return type === token;
+      });
+    };
+
     return (
       <>
         <label htmlFor={id} className={`block cursor-pointer select-none ${className ?? ''}`}>
@@ -43,7 +72,14 @@ export const FileSelector = forwardRef(
                   }
                 }
               }
-              onChange && onChange(Array.from(files));
+              const arr = Array.from(files).filter((f) => {
+                if (!matchesAccept(f, accept)) {
+                  alert(`File ${f.name} is not a supported file type.`);
+                  return false;
+                }
+                return true;
+              });
+              onChange && onChange(arr);
             }
           }}
           type="file"
@@ -54,13 +90,27 @@ export const FileSelector = forwardRef(
           className={`sr-only`}
           ref={ref}
         />
-        <DropZone onChange={onChange} />
+        <DropZone
+          onChange={onChange}
+          accept={
+            accept || 'image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif'
+          }
+          maxSize={maxSize}
+        />
       </>
     );
   }
 );
 
-const DropZone = ({ onChange }: { onChange?: (files: File[]) => void }) => {
+const DropZone = ({
+  onChange,
+  maxSize,
+  accept,
+}: {
+  onChange?: (files: File[]) => void;
+  accept?: string;
+  maxSize?: number;
+}) => {
   const [dropZoneActive, setDropZoneActive] = useState(false);
 
   useEffect(() => {
@@ -92,9 +142,38 @@ const DropZone = ({ onChange }: { onChange?: (files: File[]) => void }) => {
         // Prevent default behavior (Prevent file from being opened)
         ev.preventDefault();
 
-        const newFiles = ev.dataTransfer.items
+        let newFiles = ev.dataTransfer.items
           ? [...ev.dataTransfer.items].map((itm) => itm.getAsFile())
           : [...ev.dataTransfer.files];
+
+        newFiles = newFiles.filter((file) => {
+          if (maxSize && file && file.size > maxSize) {
+            alert(`File ${file.name} is too big. Max size is ${maxSize / 1024 / 1024} MB.`);
+            return false;
+          }
+          if (accept && file) {
+            const tokens = accept
+              .split(',')
+              .map((s) => s.trim().toLowerCase())
+              .filter(Boolean);
+            const type = (file.type || '').toLowerCase();
+            const name = file.name.toLowerCase();
+            const matches = tokens.some((token) => {
+              if (token === '*/*') return true;
+              if (token === '*') return true;
+              if (token.endsWith('/*')) return type.startsWith(token.slice(0, -1));
+              if (token.startsWith('.')) return name.endsWith(token);
+              if (!token.includes('/') && !token.startsWith('.')) return name.endsWith('.' + token);
+              if (token === 'image/jpg' && type === 'image/jpeg') return true;
+              return type === token;
+            });
+            if (!matches) {
+              alert(`File ${file.name} is not a supported file type.`);
+              return false;
+            }
+          }
+          return !!file;
+        });
 
         onChange && onChange(newFiles.filter(Boolean) as File[]);
       }}

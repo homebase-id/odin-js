@@ -20,6 +20,7 @@ import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
 import { useChatMessage } from '@homebase-id/chat-app/src/hooks/chat/useChatMessage';
 import { Plus, PaperPlane, Times } from '@homebase-id/common-app/icons';
 import { LinkPreview } from '@homebase-id/js-lib/media';
+
 const RichTextEditor = lazy(() =>
   import('@homebase-id/rich-text-editor').then((rootExport) => ({
     default: rootExport.RichTextEditor,
@@ -29,24 +30,19 @@ import { EmbeddedMessage } from '@homebase-id/chat-app/src/components/Chat/Detai
 import { ChatMessage } from '@homebase-id/chat-app/src/providers/ChatProvider';
 import { useParams } from 'react-router-dom';
 // import { DraftSaver } from './DraftSaver';
-import { useCommunity } from '../../../../hooks/community/useCommunity';
 // import { useMessageDraft } from './useMessageDraft';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 
 export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
   ({ conversation, clearReplyMsg, replyMsg, onSend }) => {
-    const { odinKey, communityKey } = useParams();
+    const { communityKey } = useParams();
 
     const formRef = useRef<HTMLFormElement>(null);
     const volatileRef = useRef<VolatileInputRef>(null);
 
-    const { data: community } = useCommunity({
-      odinId: odinKey,
-      communityId: communityKey,
-    }).fetch;
-
     const [message, setMessage] = useState<RichText | undefined>(undefined);
+    console.info('CommunityDirectComposer render with message:', message);
     const [files, setFiles] = useState<NewMediaFile[]>();
 
     // const draft = useMessageDraft(
@@ -102,10 +98,7 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
     //     () => getPlainTextFromRichText(message || draft?.message) || '',
     //   [message, draft]
     // );
-    const plainMessage = useMemo(
-        () => getPlainTextFromRichText(message) || '',
-        [message]
-    );
+    const plainMessage = useMemo(() => getPlainTextFromRichText(message) || '', [message]);
     const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(plainMessage || '');
 
     const changeHandler = useCallback(
@@ -118,35 +111,19 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
       []
     );
 
-      useEffect(() => {
-          const onFocus = () => {
-              const position = volatileRef.current?.getPosition?.();
-              setMessage(undefined);
-    
-              // Defer twice to ensure DOM updates complete
-              setTimeout(() => {
-                  requestAnimationFrame(() => {
-                      volatileRef.current?.setPosition?.(position);
-                  });
-              }, 0);
-          };
-    
-          window.addEventListener('focus', onFocus);
-          return () => window.removeEventListener('focus', onFocus);
-      }, []);
-      
-    // useEffect(() => {
-    //   // focus, clear message to allow draft to be loaded
-    //   const onFocus = () => {
-    //     const position = volatileRef.current?.getPosition?.();
-    //
-    //     setMessage(undefined);
-    //     // Set timeout to allow RTE to render the new message;
-    //     setTimeout(() => volatileRef.current?.setPosition?.(position), 100);
-    //   };
-    //   window.addEventListener('focus', onFocus);
-    //   return () => window.removeEventListener('focus', onFocus);
-    // });
+    useEffect(() => {
+      // focus, clear message to allow draft to be loaded
+      const onFocus = () => {
+        const position = volatileRef.current?.getPosition?.();
+
+        // TODO(biswa) : Set this again when u make draft work
+        //  setMessage(undefined);
+        // Set timeout to allow RTE to render the new message;
+        setTimeout(() => volatileRef.current?.setPosition?.(position), 100);
+      };
+      window.addEventListener('focus', onFocus);
+      return () => window.removeEventListener('focus', onFocus);
+    });
 
     useEffect(() => {
       // When replying to a message, focus the input
@@ -241,8 +218,8 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
                 onSubmit={onRTESubmit}
                 placeholder={t('Your message')}
                 ref={volatileRef}
-                  // key={draft?.updatedAt}
-                key={"not-sure-what-goes-here"}
+                // key={draft?.updatedAt}
+                key={'not-sure-what-goes-here'}
                 children={innerChildren}
                 disableHeadings={true}
               />

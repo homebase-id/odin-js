@@ -1,4 +1,4 @@
-import {hasDebugFlag, stringGuidsEqual} from '@homebase-id/js-lib/helpers';
+import { hasDebugFlag, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import React from 'react';
 import { useDrives } from '../../../hooks/drives/useDrives';
 import { SectionTitle } from '../../../components/ui/Sections/Section';
@@ -17,7 +17,7 @@ const Drives = () => {
   } = useDrives();
 
   const isDebug = hasDebugFlag();
-  
+
   if (isDrivesLoading) <LoadingDetailPage />;
 
   const driveTypeDefinitions = [
@@ -35,6 +35,10 @@ const Drives = () => {
     {
       title: t('System Drives'),
       type: [ContactConfig.ContactTargetDrive.type, '90f5e74ab7f9efda0ac298373a32ad8c'],
+    },
+    {
+      title: t('Channel Backup Drives'),
+      type: ['4b69b85e2e3241c5862e40b533a0a3b9'],
     },
   ];
 

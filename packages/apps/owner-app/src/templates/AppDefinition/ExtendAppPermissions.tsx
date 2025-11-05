@@ -64,7 +64,7 @@ export const ExtendAppPermissions = () => {
         appId: appRegistration.appId,
         permissionSet: {
           keys: [
-            ...(appRegistration?.grant.permissionSet.keys || []),
+            ...(appRegistration?.grant.permissionSet?.keys || []),
             ...(permissionSet?.keys || []),
           ],
         },

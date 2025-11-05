@@ -8,6 +8,7 @@ import {
 import { createThumbnails } from '../Thumbs/ThumbnailProvider';
 import { segmentVideoFileWithFfmpeg, getThumbnailWithFfmpeg } from './VideoSegmenterFfmpeg';
 import { GenerateKeyHeader } from '../../core/DriveData/Upload/UploadHelpers';
+import { DEFAULT_PAYLOAD_DESCRIPTOR_KEY, MAX_PAYLOAD_DESCRIPTOR_BYTES } from '../../core/constants';
 
 const megaByte = 1024 * 1024;
 
@@ -20,6 +21,7 @@ const megaByte = 1024 * 1024;
 export const processVideoFile = async (
   videoFile: { file: File | Blob; thumbnail?: ThumbnailFile },
   payloadKey: string,
+  descriptorKey?: string,
   aesKey?: Uint8Array
 ): Promise<{
   tinyThumb: EmbeddedThumb | undefined;
@@ -56,13 +58,24 @@ export const processVideoFile = async (
   // Processing video
   const { metadata, ...videoData } = await segmentVideoFileWithFfmpeg(videoFile.file, keyHeader);
 
+  // get the metadata size 
+  const shouldEmbedContent = jsonStringify64(metadata).length < MAX_PAYLOAD_DESCRIPTOR_BYTES;
+
+  const descriptorContent = shouldEmbedContent ? jsonStringify64(metadata) : jsonStringify64({
+    mimeType: metadata.mimeType,
+    isSegmented: metadata.isSegmented,
+    isDescriptorContentComplete: false,
+    fileSize: metadata.fileSize,
+    key: descriptorKey || DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
+    duration: metadata.duration,
+  })
+
   if ('segments' in videoData) {
     const { segments } = videoData;
     payloads.push({
       key: payloadKey,
       payload: segments,
-      descriptorContent: jsonStringify64(metadata),
-
+      descriptorContent: descriptorContent,
       ...(keyHeader && keyHeader.iv
         ? { skipEncryption: true, iv: keyHeader.iv }
         : { skipEncryption: false }),
@@ -71,7 +84,16 @@ export const processVideoFile = async (
     payloads.push({
       key: payloadKey,
       payload: videoData.video,
-      descriptorContent: metadata ? jsonStringify64(metadata) : undefined,
+      descriptorContent: descriptorContent,
+    });
+  }
+
+  if (!shouldEmbedContent) {
+    payloads.push({
+      key: descriptorKey || DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
+      payload: new Blob([jsonStringify64(metadata)], { type: 'application/json' }),
+      descriptorContent: undefined,
+      skipEncryption: false,
     });
   }
 

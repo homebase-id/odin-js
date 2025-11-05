@@ -13,6 +13,7 @@ export * from './richText';
 export * from './media/Image';
 export * from './media/Video';
 export * from './media/Link';
+export * from './media/PdfHandler';
 export * from './socialFeed';
 export * from './identity';
 export * from './reactQuery';

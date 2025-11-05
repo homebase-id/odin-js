@@ -30,6 +30,8 @@ import { ChannelPlugin } from '../RTEChannelDropdown/RTEChannelDropdownPlugin';
 // import { DraftSaver } from './DraftSaver';
 import React from 'react';
 import type { Mentionable } from '@homebase-id/rich-text-editor';
+import { TableFlipPlugin } from '../RTETableFlipDropdown/RTEChannelDropdownPlugin';
+import { ReferenceMessagePlugin } from '../RTEReferencedMessage/RTEReferencedMessagePlugin';
 
 const RichTextEditor = lazy(() =>
   import('@homebase-id/rich-text-editor').then((rootExport) => ({
@@ -74,10 +76,7 @@ export const MessageComposer = memo(
     //     () => getPlainTextFromRichText(message || draft?.message) || '',
     //     [message, draft]
     // );
-    const plainMessage = useMemo(
-      () => getPlainTextFromRichText(message) || '',
-      [message]
-    );
+    const plainMessage = useMemo(() => getPlainTextFromRichText(message) || '', [message]);
 
     const { linkPreviews, setLinkPreviews } = useLinkPreviewBuilder(plainMessage);
 
@@ -150,39 +149,25 @@ export const MessageComposer = memo(
       return [
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ChannelPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        TableFlipPlugin.configure({ options: { insertSpaceAfterChannel: true } } as any),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ReferenceMessagePlugin.configure({ options: { insertSpaceAfterReference: true } } as any),
       ];
     }, []);
 
     useEffect(() => {
+      // focus, clear message to allow draft to be loaded
       const onFocus = () => {
         const position = volatileRef.current?.getPosition?.();
-        setMessage(undefined);
-
-        // Defer twice to ensure DOM updates complete
-        setTimeout(() => {
-          requestAnimationFrame(() => {
-            volatileRef.current?.setPosition?.(position);
-          });
-        }, 0);
+        // TODO(biswa): Uncomment when u make draft work
+        // setMessage(undefined);
+        // Set timeout to allow RTE to render the new message;
+        setTimeout(() => volatileRef.current?.setPosition?.(position), 100);
       };
-
       window.addEventListener('focus', onFocus);
       return () => window.removeEventListener('focus', onFocus);
-    }, []);
-
-    
-    // useEffect(() => {
-    //   // focus, clear message to allow draft to be loaded
-    //   const onFocus = () => {
-    //     const position = volatileRef.current?.getPosition?.();
-    //
-    //     setMessage(undefined);
-    //     // Set timeout to allow RTE to render the new message;
-    //     setTimeout(() => volatileRef.current?.setPosition?.(position), 100);
-    //   };
-    //   window.addEventListener('focus', onFocus);
-    //   return () => window.removeEventListener('focus', onFocus);
-    // });
+    });
 
     const isTouch = useMemo(isTouchDevice, [isTouchDevice]);
     const onRTESubmit = useMemo(
@@ -283,8 +268,8 @@ export const MessageComposer = memo(
                 uniqueId={
                   thread?.fileMetadata.globalTransitId || channel?.fileMetadata.appData.uniqueId
                 }
-                  // rteKey={draft?.updatedAt}
-                  rteKey={"not-sure-here"}
+                // rteKey={draft?.updatedAt}
+                rteKey={'not-sure-here'}
                 children={innerChildren}
               />
             </Suspense>

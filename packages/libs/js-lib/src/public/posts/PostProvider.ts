@@ -23,6 +23,9 @@ import {
   deleteFilesByGroupId,
   getFileHeaderBytesByUniqueId,
   getFileHeaderByGlobalTransitId,
+  DEFAULT_PAYLOAD_KEY,
+  getContentFromHeader,
+  getPayloadAsJson,
 } from '../../core/core';
 import { toGuidId } from '../../helpers/DataUtil';
 
@@ -254,7 +257,7 @@ export const dsrToPostFile = async <T extends PostContent>(
   includeMetadataHeader: boolean
 ): Promise<HomebaseFile<T> | null> => {
   try {
-    const postContent = await getContentFromHeaderOrPayload<T>(
+    const postContent = await getPostFileFromHeaderOrPayload<T>(
       dotYouClient,
       targetDrive,
       dsr,
@@ -283,5 +286,49 @@ export const dsrToPostFile = async <T extends PostContent>(
   } catch (ex) {
     console.error('[odin-js] failed to get the payload of a dsr', dsr, ex);
     return null;
+  }
+};
+
+
+// Built on top of getContentFromHeaderOrPayload
+// This function fetches the full json payload(if exists) and appends with the existing header content
+export const getPostFileFromHeaderOrPayload = async <T extends PostContent>(
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  dsr: HomebaseFile,
+  includeMetadataHeader: boolean
+): Promise<T | null> => {
+  const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
+  if (!fileId || !fileMetadata) {
+    throw new Error('[odin-js] getPostFileFromHeaderOrPayload: fileId or fileMetadata is undefined');
+  }
+
+  const contentIsComplete =
+    fileMetadata.payloads?.filter((payload) => payload.key === DEFAULT_PAYLOAD_KEY).length === 0;
+  if (fileMetadata.isEncrypted && !sharedSecretEncryptedKeyHeader) return null;
+
+  const postContent = await getContentFromHeader<T>(
+    dotYouClient,
+    targetDrive,
+    dsr,
+    includeMetadataHeader
+  );
+
+
+  if (contentIsComplete) {
+    return postContent;
+  } else {
+    const payloadDescriptor = dsr.fileMetadata.payloads?.find(
+      (payload) => payload.key === DEFAULT_PAYLOAD_KEY
+    );
+    const payload = await getPayloadAsJson<T>(dotYouClient, targetDrive, fileId, DEFAULT_PAYLOAD_KEY, {
+      systemFileType: dsr.fileSystemType,
+      lastModified: payloadDescriptor?.lastModified,
+    });
+    if (!payload || !postContent) return null;
+    return {
+      ...postContent,
+      ...payload,
+    }
   }
 };

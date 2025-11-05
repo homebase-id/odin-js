@@ -50,7 +50,7 @@ export const EditChatMessage = ({
         ...msg.fileMetadata,
         appData: {
           ...msg.fileMetadata.appData,
-          content: { ...msg.fileMetadata.appData.content, message },
+          content: { ...msg.fileMetadata.appData.content, message, isEdited: true },
         },
       },
     };

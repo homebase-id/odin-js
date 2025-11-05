@@ -25,7 +25,8 @@ export type NotificationType =
   | 'reactionContentAdded'
   | 'reactionContentDeleted'
   | 'error'
-  | 'unknown';
+  | 'unknown'
+  | 'authenticationError';
 
 export interface ClientNotification {
   notificationType: NotificationType;

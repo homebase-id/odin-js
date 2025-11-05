@@ -1,18 +1,19 @@
 import ActionButton from '../ui/Buttons/ActionButton';
-import { t } from '../../helpers/i18n/dictionary';
-import { useEffect, useMemo, useState } from 'react';
+import {t} from '../../helpers/i18n/dictionary';
+import {useEffect, useMemo, useState} from 'react';
 import {
   useFetchManagedDomainsApexes,
   useFetchIsManagedDomainAvailable,
   ManagedDomainApex,
   ManagedDomainProvisionState,
 } from '../../hooks/managedDomain/useManagedDomain';
-import { Arrow, Exclamation, Loader } from '@homebase-id/common-app/icons';
-import { Input, Label, Select } from '@homebase-id/common-app';
-import { domainFromPrefixAndApex, validDomainLabelRegEx } from '../../helpers/common';
+import {Arrow, Exclamation, Globe, Loader} from '@homebase-id/common-app/icons';
+import {Input, Label, Select} from '@homebase-id/common-app';
+import {domainFromPrefixAndApex, validDomainLabelRegEx} from '../../helpers/common';
 import CreateManagedDomain from './CreateManagedDomain';
-import { debounce } from 'lodash-es';
-import { AlertError } from '../ErrorAlert/ErrorAlert';
+import {debounce} from 'lodash-es';
+import {AlertError} from '../ErrorAlert/ErrorAlert';
+import {useNavigate} from "react-router-dom";
 
 interface EnteringDetailsProps {
   domain: string;
@@ -24,13 +25,13 @@ interface EnteringDetailsProps {
 }
 
 const EnteringDetails = ({
-  provisionState,
-  setProvisionState,
-  domain,
-  setDomain,
-  setEmail,
-  invitationCode,
-}: EnteringDetailsProps) => {
+                           provisionState,
+                           setProvisionState,
+                           domain,
+                           setDomain,
+                           setEmail,
+                           invitationCode,
+                         }: EnteringDetailsProps) => {
   const [prefixes, setPrefixes] = useState<string[]>([]); // array of prefixes in ui, e.g ['john', 'doe']
   const [domainApex, setDomainApex] = useState<ManagedDomainApex | undefined>(undefined);
 
@@ -56,7 +57,7 @@ const EnteringDetails = ({
   //
 
   const {
-    fetchManagedDomainApexes: { data: managedDomainApexes, error: errorManagedDomainApexes },
+    fetchManagedDomainApexes: {data: managedDomainApexes, error: errorManagedDomainApexes},
   } = useFetchManagedDomainsApexes();
 
   const {
@@ -70,6 +71,8 @@ const EnteringDetails = ({
   //
   // HOOKS
   //
+
+  const navigate = useNavigate();
 
   // Initialize Apex on load
   useEffect(() => {
@@ -98,7 +101,7 @@ const EnteringDetails = ({
   if (!domainApex) {
     return (
       <div className="w-1/2 p-2">
-        <Loader className="mx-auto mb-10 h-20 w-20" />
+        <Loader className="mx-auto mb-10 h-20 w-20"/>
       </div>
     );
   }
@@ -106,7 +109,7 @@ const EnteringDetails = ({
   if (provisionState === 'EnteringDetails') {
     return (
       <>
-        <AlertError error={errorManagedDomainApexes || errorIsManagedDomainAvailable} />
+        <AlertError error={errorManagedDomainApexes || errorIsManagedDomainAvailable}/>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -120,8 +123,9 @@ const EnteringDetails = ({
           <div className="flex flex-row flex-wrap items-center">
             <Label>{t('Your domain')}</Label>
             {isManagedDomainAvailable === false && domain ? (
-              <p className="order-1 ml-auto mt-2 flex flex-row items-center rounded-lg bg-slate-100 px-2 py-1 md:order-none md:mt-0 md:rounded-b-none">
-                <Exclamation className="mr-2 h-5 w-5" />
+              <p
+                className="order-1 ml-auto mt-2 flex flex-row items-center rounded-lg bg-slate-100 px-2 py-1 md:order-none md:mt-0 md:rounded-b-none">
+                <Exclamation className="mr-2 h-5 w-5"/>
                 {t(`This domain isn't available, try another one`)}
               </p>
             ) : null}
@@ -174,8 +178,20 @@ const EnteringDetails = ({
               onChange={(e) => setEmail(e.target.value.toLowerCase())}
             />
           </div>
-          <div className="mt-5 flex flex-row-reverse">
+          <div className="mt-5 flex flex-col-reverse sm:flex-row sm:justify-between gap-3">
             <ActionButton
+              className="w-full sm:w-auto"
+              icon={Globe}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(`./own-domain?invitation-code=${invitationCode}`);
+              }}
+            >
+              {t('Use your own domain')}
+            </ActionButton>
+
+            <ActionButton
+              className="w-full sm:w-auto"
               isDisabled={
                 !(isManagedDomainAvailable === true && isManagedDomainAvailableStatus === 'success')
               }
@@ -189,6 +205,7 @@ const EnteringDetails = ({
               {t('Register your identity')}
             </ActionButton>
           </div>
+
         </form>
       </>
     );
@@ -206,11 +223,11 @@ const EnteringDetails = ({
 };
 
 const PrefixInput = ({
-  name,
-  defaultValue,
-  placeholder,
-  onChange,
-}: {
+                       name,
+                       defaultValue,
+                       placeholder,
+                       onChange,
+                     }: {
   name: string;
   defaultValue?: string;
   placeholder?: string;
@@ -231,7 +248,7 @@ const PrefixInput = ({
         const text = e.clipboardData.getData('text');
         const newText = text.trim().replaceAll(/\s/g, '');
         e.currentTarget.value = newText;
-        debouncedChange({ target: { name, value: newText } });
+        debouncedChange({target: {name, value: newText}});
         e.preventDefault();
       }}
       className="focus:outline-t-0 focus:outline-x-0 border-x-0 border-t-0 focus:ring-0"

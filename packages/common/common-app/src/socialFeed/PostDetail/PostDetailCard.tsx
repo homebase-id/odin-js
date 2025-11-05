@@ -18,7 +18,12 @@ import {
   ToGroupBlock,
   PostSource,
 } from '../../..';
-import { DEFAULT_PAYLOAD_KEY, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
+import {
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
+  DEFAULT_PAYLOAD_KEY,
+  HomebaseFile,
+  NewHomebaseFile,
+} from '@homebase-id/js-lib/core';
 
 export const PostDetailCard = ({
   odinId,
@@ -42,7 +47,9 @@ export const PostDetailCard = ({
   login?: () => void;
 }) => {
   const post = postFile?.fileMetadata.appData.content;
-  const mediaFiles = postFile?.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY);
+  const mediaFiles = postFile?.fileMetadata.payloads?.filter(
+    (p) => p.key !== DEFAULT_PAYLOAD_KEY && !p.key.includes(DEFAULT_PAYLOAD_DESCRIPTOR_KEY)
+  );
 
   return (
     <div

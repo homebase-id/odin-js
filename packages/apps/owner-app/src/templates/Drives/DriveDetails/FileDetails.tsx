@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { t } from '@homebase-id/common-app';
+import { JsonViewer, t } from '@homebase-id/common-app';
 import { File } from '@homebase-id/common-app/icons';
 import { useDrive } from '../../../hooks/drives/useDrive';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
@@ -7,7 +7,7 @@ import { PageMeta } from '@homebase-id/common-app';
 import { useFileQuery } from '../../../hooks/files/useFiles';
 import { SystemFileType } from '@homebase-id/js-lib/core';
 
-const DriveDetails = () => {
+const FileDetails = () => {
   const { driveKey, systemFileType, fileKey } = useParams();
   const splittedDriveKey = driveKey ? driveKey.split('_') : undefined;
 
@@ -45,12 +45,24 @@ const DriveDetails = () => {
           { title: fileKey ?? '' },
         ]}
       />
+      {/* Content JSON Viewer */}
+      {file?.fileMetadata?.appData?.content && (
+        <div className="mx-auto mb-6 w-full max-w-4xl px-2">
+          <JsonViewer
+            data={file.fileMetadata.appData.content}
+            wrapLines={true}
+            title="Text"
+            className="w-full"
+          />
+        </div>
+      )}
 
-      <pre className="max-w-[calc(100vw-1rem)] overflow-auto sm:max-w-[calc(100vw-32rem)]">
-        {JSON.stringify(file, null, 2)}
-      </pre>
+      {/* Full File JSON Viewer */}
+      <div className="mx-auto w-full max-w-4xl overflow-auto px-2">
+        <JsonViewer data={file} />
+      </div>
     </>
   );
 };
 
-export default DriveDetails;
+export default FileDetails;

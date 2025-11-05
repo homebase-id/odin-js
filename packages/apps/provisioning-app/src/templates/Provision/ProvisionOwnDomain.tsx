@@ -57,6 +57,7 @@ const ProvisionOwnDomain = () => {
               email={email}
               setEmail={setEmail}
               setProvisionState={setProvisionState}
+              invitationCode={invitationCode}
             />
           ) : provisionState === 'DnsRecords' ? (
             <ValidatingDnsRecords domain={domain} setProvisionState={setProvisionState} />

@@ -18,11 +18,8 @@ export interface LinkPreview {
   url: string;
 }
 
-export interface LinkPreviewDescriptor {
-  url: string;
+export interface LinkPreviewDescriptor extends Omit<LinkPreview, 'imageUrl'> {
   hasImage?: boolean;
-  imageWidth?: number;
-  imageHeight?: number;
 }
 
 const _internalPreviewPromiseCache = new Map<string, Promise<LinkPreview | null>>();

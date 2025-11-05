@@ -283,12 +283,13 @@ const PhotoApp = () => {
 
 const SocialSyncApp = () => {
   const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: SOCIAL_SYNC_APP_ID });
-
+  // get the domain from the window location
+  const domain = window.location.hostname;
   return (
     <AppWrapper
       appId={SOCIAL_SYNC_APP_ID}
       name={'Social Sync'}
-      href={`https://sync.homebase.id`}
+      href={`https://sync.homebase.id?youauth-logon=${domain}`}
       unreadCount={unreadCount || 0}
       options={[
         {

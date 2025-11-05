@@ -6,21 +6,25 @@ import { Times } from '../../ui/Icons';
 export const DialogWrapper = ({
   children,
   title,
+  footer,
   onClose,
   keepOpenOnBlur,
   size = 'large',
   isSidePanel = true,
   isPaddingLess = false,
   isOverflowLess = false,
+  zIndex,
 }: {
   children: ReactNode;
   title?: string | ReactNode;
+  footer?: string | ReactNode;
   onClose?: () => void;
   keepOpenOnBlur?: boolean;
   size?: 'large' | 'normal' | '4xlarge' | '2xlarge';
   isSidePanel?: boolean;
   isPaddingLess?: boolean;
   isOverflowLess?: boolean;
+  zIndex?: number;
 }) => {
   const wrapperRef = useRef(null);
   useOutsideTrigger(wrapperRef, () => !keepOpenOnBlur && onClose && onClose());
@@ -45,7 +49,13 @@ export const DialogWrapper = ({
   }, []);
 
   return (
-    <div className="relative z-40" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div
+      className="relative"
+      style={{ zIndex: zIndex ?? 40 }}
+      aria-labelledby="modal-title"
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
       <div className="fixed inset-0 z-10 overflow-y-auto">
         <div
@@ -78,7 +88,7 @@ export const DialogWrapper = ({
                 >
                   {title ? (
                     <h3
-                      className="w-20 flex-grow my-3 text-2xl font-medium leading-6 text-gray-900 dark:text-slate-50"
+                      className="z-40 w-20 flex-grow my-3 text-2xl font-medium leading-6 text-gray-900 dark:text-slate-50"
                       id="modal-title"
                     >
                       {title}
@@ -103,7 +113,9 @@ export const DialogWrapper = ({
                 className={`bg-white dark:bg-black pb-2 rounded-b-lg ${
                   isSidePanel ? 'sm:rounded-none' : ''
                 }`}
-              ></div>
+              >
+                {footer}
+              </div>
             </div>
           </div>
         </div>

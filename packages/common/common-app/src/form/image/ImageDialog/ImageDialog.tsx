@@ -45,7 +45,13 @@ export const ImageDialog = ({
   };
 
   const dialog = (
-    <DialogWrapper onClose={() => onCancel()} title={title} size="2xlarge">
+    <DialogWrapper
+      onClose={() => onCancel()}
+      title={title}
+      size="2xlarge"
+      zIndex={50}
+      keepOpenOnBlur
+    >
       <>
         <ImageUploadAndCrop
           expectedAspectRatio={expectedAspectRatio}

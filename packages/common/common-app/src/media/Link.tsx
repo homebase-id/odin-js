@@ -13,10 +13,12 @@ import { useMemo } from 'react';
 
 export const LinkPreviewTextual = ({
   linkPreview,
+  descriptor,
   size,
   className,
 }: {
-  linkPreview?: LinkPreview;
+  linkPreview?: LinkPreview | undefined;
+  descriptor?: LinkPreviewDescriptor;
   size?: 'sm' | 'md';
   className?: string;
 }) => {
@@ -28,28 +30,35 @@ export const LinkPreviewTextual = ({
       rel="noopener noreferrer"
     >
       <div className="">
-        {linkPreview ? (
-          <>
-            <p className="capitalize font-bold">{getHostFromUrl(linkPreview.url)}</p>
-            <p
-              className={`text-sm text-primary group-hover:underline ${
-                size === 'sm' ? 'max-h-[1.3rem] overflow-hidden' : ''
-              }`}
-            >
-              {ellipsisAtMaxChar(linkPreview.title || linkPreview.url, size !== 'sm' ? 120 : 40)}
-            </p>
+        <>
+          <p className="capitalize font-bold">
+            {getHostFromUrl(descriptor?.url || linkPreview?.url)}
+          </p>
+          <p
+            className={`text-sm text-primary group-hover:underline ${
+              size === 'sm' ? 'max-h-[1.3rem] overflow-hidden' : ''
+            }`}
+          >
+            {ellipsisAtMaxChar(
+              descriptor?.title || linkPreview?.title || linkPreview?.url || descriptor?.url || '',
+              size !== 'sm' ? 120 : 40
+            )}
+          </p>
 
-            {size !== 'sm' ? (
-              <p className="text-sm">{ellipsisAtMaxChar(linkPreview.description, 140)}</p>
-            ) : null}
-          </>
-        ) : (
-          <div className="flex flex-col gap-1">
-            <LoadingBlock className="w-full max-w-[5rem] h-8" />
-            <LoadingBlock className="w-full h-6" />
-            {size !== 'sm' ? <LoadingBlock className="w-full h-12" /> : null}
-          </div>
-        )}
+          {size !== 'sm' ? (
+            <p className="text-sm">
+              {ellipsisAtMaxChar(linkPreview?.description || descriptor?.description, 140)}
+            </p>
+          ) : null}
+        </>
+
+        {/* // (
+        //   <div className="flex flex-col gap-1">
+        //     <LoadingBlock className="w-full max-w-[5rem] h-8" />
+        //     <LoadingBlock className="w-full h-6" />
+        //     {size !== 'sm' ? <LoadingBlock className="w-full h-12" /> : null}
+        //   </div>
+        // )} */}
       </div>
     </a>
   );
@@ -155,7 +164,7 @@ export const LinkPreviewItem = ({
   className?: string;
   onLoad?: () => void;
 }) => {
-  const { data: linkMetadata, isLoading: linkMetadataLoading } = useLinkMetadata({
+  const { data: linkMetadata } = useLinkMetadata({
     odinId,
     globalTransitId,
     fileId,
@@ -170,7 +179,7 @@ export const LinkPreviewItem = ({
 
   // ATM We only use the first one
   const linkPreview = linkMetadata?.[0];
-  if (!linkPreview && !linkMetadataLoading) return null;
+  // if (!linkPreview && !linkMetadataLoading) return null;
 
   return (
     <div
@@ -179,6 +188,7 @@ export const LinkPreviewItem = ({
     >
       <LinkPreviewTextual
         linkPreview={linkPreview}
+        descriptor={descriptorInfo}
         className={`rounded-t-md break-words p-2 bg-primary/10`}
       />
       {descriptorInfo?.hasImage ? (

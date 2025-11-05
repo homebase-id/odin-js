@@ -110,8 +110,8 @@ interface QueryBatchParamsWithFileState extends Omit<FileQueryParams, 'fileState
 export const queryBatch = async <
   T extends QueryBatchParamsWithFileState | QueryBatchParamsWithoutFileState,
   R = T extends QueryBatchParamsWithFileState
-    ? QueryBatchResponseWithDeletedResults
-    : QueryBatchResponse,
+  ? QueryBatchResponseWithDeletedResults
+  : QueryBatchResponse,
 >(
   dotYouClient: DotYouClient,
   params: T,
@@ -126,6 +126,16 @@ export const queryBatch = async <
   const strippedQueryParams: FileQueryParams = {
     ...params,
     fileState: 'fileState' in params ? params.fileState : [1],
+    // if userDate is set, then we set userDateStart and userDateEnd,
+    // is userDateStart and userDateEnd are userDate unset, we set userDate values
+    userDateStart: params.userDate ? params.userDate.start : params.userDateStart,
+    userDateEnd: params.userDate ? params.userDate.end : params.userDateEnd,
+    userDate: 'userDateStart' in params && 'userDateEnd' in params && params.userDateStart !== undefined && params.userDateEnd !== undefined
+      ? {
+        start: params.userDateStart,
+        end: params.userDateEnd,
+      }
+      : params.userDate,
   };
   delete strippedQueryParams.systemFileType;
 
@@ -145,6 +155,7 @@ export const queryBatch = async <
       ...request.queryParams,
       ...request.resultOptionsRequest,
     });
+
 
     const getUrl = '/drive/query/batch?' + queryParams;
     // Max Url is 1800 so we keep room for encryption overhead

@@ -6,7 +6,7 @@ import {
   isPasswordSet as isPasswordSetOwner,
   setFirstPassword as setFirstOwnerPassword,
   resetPassword as resetOwnerPassword,
-  changePassword as setNewOwnerPassword,
+  changePassword as setNewOwnerPassword, canUseAutoRecovery,
 } from '../../provider/auth/AuthenticationProvider';
 import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import {
@@ -24,6 +24,8 @@ export const SETUP_PATH = '/owner/setup';
 export const LOGIN_PATH = '/owner/login';
 export const FIRSTRUN_PATH = '/owner/firstrun';
 export const RECOVERY_PATH = '/owner/account-recovery';
+export const SHAMIR_RECOVERY_PATH = '/owner/shamir-account-recovery';
+
 
 export const RETURN_URL_PARAM = 'returnUrl';
 export const HOME_PATH = '/owner';
@@ -87,6 +89,7 @@ export const useAuth = () => {
     changePassword: setNewOwnerPassword,
     finalizeRegistration,
     isPasswordSet: isPasswordSetOwner,
+    canUseAutoRecovery
   };
 };
 

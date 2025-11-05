@@ -16,6 +16,7 @@ import { ChatMedia } from './Media/ChatMedia';
 import { ChatMediaGallery } from './Media/ChatMediaGallery';
 import { ChatDeliveryIndicator } from './ChatDeliveryIndicator';
 import { ChatSentTimeIndicator } from './ChatSentTimeIndicator';
+import { ChatEdited } from './ChatEdited';
 import { ChatActions, ContextMenu } from './ContextMenu';
 import { EmbeddedMessageWithId } from './EmbeddedMessage';
 import { useParams } from 'react-router-dom';
@@ -166,6 +167,7 @@ const ChatTextMessageBody = ({
         <div className="ml-auto mt-auto flex flex-shrink-0 flex-row-reverse gap-2">
           <ChatDeliveryIndicator msg={msg} />
           <ChatSentTimeIndicator msg={msg} />
+          <ChatEdited msg={msg} />
         </div>
         {!isDeleted ? (
           <ContextMenu chatActions={chatActions} msg={msg} conversation={conversation} />
@@ -287,6 +289,19 @@ const ChatMediaMessageBody = ({
       <div className={`ml-2 mt-auto flex flex-row-reverse gap-2 ${className || ''}`}>
         <ChatDeliveryIndicator msg={msg} />
         <ChatSentTimeIndicator
+          msg={msg}
+          className={`dark:text-white/70 ${
+            !hasACaption &&
+            !isDarkMode &&
+            msg.fileMetadata.payloads?.some(
+              (payload) =>
+                payload.contentType.includes('image/') || payload.contentType.includes('video/')
+            )
+              ? 'invert'
+              : ''
+          }`}
+        />
+        <ChatEdited
           msg={msg}
           className={`dark:text-white/70 ${
             !hasACaption &&

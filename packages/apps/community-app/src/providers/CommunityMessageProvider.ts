@@ -29,6 +29,9 @@ import {
   UpdateInstructionSet,
   UpdateResult,
   getContentFromHeaderOrPayload,
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
+  MAX_PAYLOAD_DESCRIPTOR_BYTES,
+
 } from '@homebase-id/js-lib/core';
 import {
   jsonStringify64,
@@ -55,7 +58,7 @@ import {
   TransitUploadResult,
   uploadFileOverPeer,
 } from '@homebase-id/js-lib/peer';
-import { COMMUNITY_APP_ID, ellipsisAtMaxCharOfRichText } from '@homebase-id/common-app';
+import { COMMUNITY_APP_ID, ellipsisAtMaxChar, ellipsisAtMaxCharOfRichText } from '@homebase-id/common-app';
 
 export const COMMUNITY_MESSAGE_FILE_TYPE = 7020;
 export const CommunityDeletedArchivalStaus = 2;
@@ -86,6 +89,7 @@ export interface CommunityMessage {
 
   /// lastEdited by Identity of the message
   lastEditedBy?: string;
+  isEdited?: boolean;
 }
 
 export const uploadCommunityMessage = async (
@@ -140,16 +144,31 @@ export const uploadCommunityMessage = async (
 
   if (!files?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
-    const descriptorContent = JSON.stringify(
+    let descriptorContent = jsonStringify64(
       linkPreviews.map((preview) => {
         return {
           url: preview.url,
           hasImage: !!preview.imageUrl,
           imageWidth: preview.imageWidth,
           imageHeight: preview.imageHeight,
+          description: preview.description,
+          title: preview.title,
         } as LinkPreviewDescriptor;
       })
     );
+    if (descriptorContent.length < MAX_PAYLOAD_DESCRIPTOR_BYTES) {
+      // we trim down the descriptor if its too large
+      descriptorContent = jsonStringify64(linkPreviews.map((preview) => {
+        return {
+          url: preview.url,
+          hasImage: !!preview.imageUrl,
+          imageWidth: preview.imageWidth,
+          imageHeight: preview.imageHeight,
+          description: ellipsisAtMaxChar(preview.description, 100),
+          title: preview.title,
+        } as LinkPreviewDescriptor;
+      }));
+    }
 
     payloads.push({
       key: COMMUNITY_LINKS_PAYLOAD_KEY,
@@ -162,13 +181,14 @@ export const uploadCommunityMessage = async (
 
   for (let i = 0; files && i < files?.length; i++) {
     const payloadKey = `${COMMUNITY_MESSAGE_PAYLOAD_KEY}${i}`;
+    const descriptorKey = `${DEFAULT_PAYLOAD_DESCRIPTOR_KEY}${i}`;
     const newMediaFile = files[i];
     if (newMediaFile.file.type.startsWith('video/')) {
       const {
         tinyThumb,
         thumbnails: thumbnailsFromVideo,
         payloads: payloadsFromVideo,
-      } = await processVideoFile(newMediaFile, payloadKey, aesKey);
+      } = await processVideoFile(newMediaFile, payloadKey, descriptorKey, aesKey);
 
       thumbnails.push(...thumbnailsFromVideo);
       payloads.push(...payloadsFromVideo);
@@ -335,7 +355,7 @@ export const updateCommunityMessage = async (
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: true,
     referencedFile:
-      message.fileSystemType.toLocaleLowerCase() === 'comment'
+      message.fileSystemType?.toLocaleLowerCase() === 'comment'
         ? {
           targetDrive,
           globalTransitId: message.fileMetadata.appData.groupId as string,
@@ -345,7 +365,7 @@ export const updateCommunityMessage = async (
       uniqueId: message.fileMetadata.appData.uniqueId,
       tags: message.fileMetadata.appData.tags,
       groupId:
-        message.fileSystemType.toLocaleLowerCase() === 'comment'
+        message.fileSystemType?.toLocaleLowerCase() === 'comment'
           ? undefined
           : message.fileMetadata.appData.groupId,
       archivalStatus: (message.fileMetadata.appData as AppFileMetaData<CommunityMessage>)

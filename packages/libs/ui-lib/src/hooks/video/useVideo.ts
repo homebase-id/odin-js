@@ -1,10 +1,12 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import {
+  DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
   DotYouClient,
   HomebaseFile,
   SystemFileType,
   TargetDrive,
   getFileHeader,
+  getPayloadAsJson,
 } from '@homebase-id/js-lib/core';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
 import {
@@ -13,6 +15,7 @@ import {
   PlainVideoMetadata,
   SegmentedVideoMetadata,
   HlsVideoMetadata,
+  BaseVideoMetadata,
 } from '@homebase-id/js-lib/media';
 import {
   getDecryptedVideoChunkOverPeer,
@@ -20,6 +23,8 @@ import {
   getDecryptedVideoUrlOverPeerByGlobalTransitId,
   getFileHeaderBytesOverPeerByGlobalTransitId,
   getFileHeaderOverPeer,
+  getPayloadAsJsonOverPeer,
+  getPayloadAsJsonOverPeerByGlobalTransitId,
 } from '@homebase-id/js-lib/peer';
 
 export const useVideo = (
@@ -68,15 +73,15 @@ export const useVideo = (
         odinId !== identity
           ? videoGlobalTransitId
             ? await getFileHeaderBytesOverPeerByGlobalTransitId(
-                dotYouClient,
-                odinId,
-                videoDrive,
-                videoGlobalTransitId,
-                { systemFileType }
-              )
+              dotYouClient,
+              odinId,
+              videoDrive,
+              videoGlobalTransitId,
+              { systemFileType }
+            )
             : await getFileHeaderOverPeer(dotYouClient, odinId, videoDrive, videoFileId, {
-                systemFileType,
-              })
+              systemFileType,
+            })
           : await getFileHeader(dotYouClient, videoDrive, videoFileId, { systemFileType });
 
       if (!fileHeader) return undefined;
@@ -85,11 +90,30 @@ export const useVideo = (
       if (!descriptor) return undefined;
 
       const parsedMetaData = tryJsonParse<
-        PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata
+        PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata | BaseVideoMetadata
       >(descriptor);
-      // The fileHeader contains the most accurate file size; So we use that one.
-      parsedMetaData.fileSize = payloadData.bytesWritten;
-      return { metadata: parsedMetaData, fileHeader };
+
+      if (parsedMetaData?.isDescriptorContentComplete === false) {
+        const descriptorKey = parsedMetaData.key || DEFAULT_PAYLOAD_DESCRIPTOR_KEY;
+        const fullMetaData = odinId !== identity
+          ? videoGlobalTransitId
+            ? await getPayloadAsJsonOverPeerByGlobalTransitId<PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata>(
+              dotYouClient, odinId, videoDrive, videoGlobalTransitId, descriptorKey, { systemFileType }
+            ) : await getPayloadAsJsonOverPeer<PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata>(
+              dotYouClient, odinId, videoDrive, videoFileId, descriptorKey, { systemFileType }
+            ) : await getPayloadAsJson<PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata>(
+              dotYouClient, videoDrive, videoFileId, descriptorKey, { systemFileType }
+            )
+        if (!fullMetaData) return undefined;
+        // The fileHeader contains the most accurate file size; So we use that one.
+        fullMetaData.fileSize = payloadData.bytesWritten;
+        return { metadata: fullMetaData, fileHeader };
+      }
+      else {
+        // The fileHeader contains the most accurate file size; So we use that one.
+        parsedMetaData.fileSize = payloadData.bytesWritten;
+        return { metadata: parsedMetaData as PlainVideoMetadata | SegmentedVideoMetadata | HlsVideoMetadata, fileHeader };
+      }
     };
 
     return (await fetchMetaPromise()) || null;
@@ -167,33 +191,33 @@ export const useVideoUrl = (
       return odinId !== identity
         ? videoGlobalTransitId
           ? await getDecryptedVideoUrlOverPeerByGlobalTransitId(
-              dotYouClient,
-              odinId,
-              videoDrive,
-              videoGlobalTransitId,
-              videoFileKey,
-
-              systemFileType,
-              fileSizeLimit
-            )
-          : await getDecryptedVideoUrlOverPeer(
-              dotYouClient,
-              odinId,
-              videoDrive,
-              videoFileId,
-              videoFileKey,
-              systemFileType,
-              fileSizeLimit
-            )
-        : await getDecryptedVideoUrl(
             dotYouClient,
+            odinId,
+            videoDrive,
+            videoGlobalTransitId,
+            videoFileKey,
+
+            systemFileType,
+            fileSizeLimit
+          )
+          : await getDecryptedVideoUrlOverPeer(
+            dotYouClient,
+            odinId,
             videoDrive,
             videoFileId,
             videoFileKey,
-            undefined,
-            fileSizeLimit,
-            { systemFileType }
-          );
+            systemFileType,
+            fileSizeLimit
+          )
+        : await getDecryptedVideoUrl(
+          dotYouClient,
+          videoDrive,
+          videoFileId,
+          videoFileKey,
+          undefined,
+          fileSizeLimit,
+          { systemFileType }
+        );
     };
 
     return await fetchUrl();

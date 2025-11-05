@@ -1,5 +1,5 @@
 {
-  "version": "0.0.3-alpha.31",
+  "version": "0.0.3-alpha.36",
   "name": "@homebase-id/ui-lib",
   "author": "YouFoundation",
   "description": "UI-Lib for DotYouCore",
@@ -37,7 +37,7 @@
     "@homebase-id/js-lib": "*"
   },
   "optionalDependencies": {
-    "hls.js": "^1.5.15"
+    "hls.js": "^1.6.10"
   },
   "peerDependencies": {
     "@tanstack/react-query": "5.51.1",
