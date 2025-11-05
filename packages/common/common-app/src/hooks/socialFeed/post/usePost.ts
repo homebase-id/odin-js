@@ -7,18 +7,22 @@ import {
 } from '@tanstack/react-query';
 import {
   ChannelDefinition,
+  getChannelDrive,
   getPost,
   getPostByFileId,
   getPostByGlobalTransitId,
   getPostBySlug,
+  POST_FULL_TEXT_PAYLOAD_KEY,
   PostContent,
 } from '@homebase-id/js-lib/public';
 
 import { usePostsInfiniteReturn } from './usePostsInfinite';
-import { DotYouClient, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
+import { DotYouClient, getPayloadAsJson, getPayloadAsJsonByUniqueId, HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { useChannel } from '../channels/useChannel';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import {
+  getPayloadAsJsonOverPeer,
+  getPayloadAsJsonOverPeerByGlobalTransitId,
   getPostBySlugOverPeer,
   getPostOverPeer,
   RecentsFromConnectionsReturn,
@@ -29,6 +33,70 @@ type usePostProps = {
   odinId?: string;
   channelKey?: string;
   postKey?: string;
+};
+
+// Hydrate a post file with the full-text payload when available (local or over peer), mutating postFile in place
+const hydratePostWithFullTextIfAvailable = async ({
+  dotYouClient,
+  odinId,
+  channelUniqueId,
+  postFile,
+}: {
+  dotYouClient: DotYouClient;
+  odinId?: string;
+  channelUniqueId: string;
+  postFile: HomebaseFile<PostContent>;
+}): Promise<PostContent | undefined> => {
+  const hasFullTextPayload = postFile.fileMetadata.payloads?.some(
+    (p) => p.key === POST_FULL_TEXT_PAYLOAD_KEY
+  );
+  if (!hasFullTextPayload) return;// no full-text payload to hydrate ;
+
+  const targetDrive = getChannelDrive(channelUniqueId);
+  const payloadKey = POST_FULL_TEXT_PAYLOAD_KEY;
+
+  let payloadData: PostContent | null | undefined;
+
+  const isPeer = !!odinId && odinId !== dotYouClient.getHostIdentity();
+  console.log('isPeer', isPeer);
+  if (isPeer) {
+    payloadData =
+      (await getPayloadAsJsonOverPeer<PostContent>(
+        dotYouClient,
+        odinId as string,
+        targetDrive,
+        postFile.fileId as string,
+        payloadKey
+      )) ||
+      (await getPayloadAsJsonOverPeerByGlobalTransitId<PostContent>(
+        dotYouClient,
+        odinId as string,
+        targetDrive,
+        postFile.fileMetadata.globalTransitId as string,
+        payloadKey
+      ));
+  } else {
+    // Local owner
+    const fileId = postFile.fileId;
+    payloadData =
+      (await getPayloadAsJson<PostContent>(
+        dotYouClient,
+        targetDrive,
+        fileId,
+        payloadKey
+      )) ||
+      (await getPayloadAsJsonByUniqueId<PostContent>(
+        dotYouClient,
+        targetDrive,
+        postFile.fileMetadata.appData.uniqueId as string,
+        payloadKey
+      ));
+  }
+
+  return {
+    ...postFile.fileMetadata.appData.content,
+    ...payloadData,
+  };
 };
 
 export const usePost = ({ odinId, channelKey, postKey }: usePostProps = {}) => {
@@ -106,6 +174,15 @@ const fetchBlog = async ({
         postKey
       ));
 
+    if (postFile) {
+      postFile.fileMetadata.appData.content = await hydratePostWithFullTextIfAvailable({
+        dotYouClient,
+        odinId: undefined,
+        channelUniqueId: channel.fileMetadata.appData.uniqueId as string,
+        postFile,
+      }) || postFile.fileMetadata.appData.content;
+    }
+
     return postFile;
   } else {
     // Search in social feed cache
@@ -120,10 +197,20 @@ const fetchBlog = async ({
             x.fileMetadata.appData.content?.slug === postKey ||
             stringGuidsEqual(x.fileMetadata.appData.content.id, postKey)
         );
-        if (post) return post;
+
+        // if post found the chances is the full text payload is not there , so we need to fetch it
+        if (post) {
+          post.fileMetadata.appData.content = await hydratePostWithFullTextIfAvailable({
+            dotYouClient,
+            odinId,
+            channelUniqueId: channel.fileMetadata.appData.uniqueId as string,
+            postFile: post,
+          }) || post.fileMetadata.appData.content;
+          return post;
+        }
       }
     }
-    return (
+    const postFile = (
       (await getPostBySlugOverPeer(
         dotYouClient,
         odinId,
@@ -137,6 +224,17 @@ const fetchBlog = async ({
         postKey
       ))
     );
+    if (postFile) {
+      postFile.fileMetadata.appData.content = await hydratePostWithFullTextIfAvailable({
+        dotYouClient,
+        odinId,
+        channelUniqueId: channel.fileMetadata.appData.uniqueId as string,
+        postFile,
+      }) || postFile.fileMetadata.appData.content;
+    }
+
+    return postFile;
+
   }
 };
 

@@ -3,6 +3,7 @@ import {
   RemoteCollaborativeChannelDefinition,
   PostContent,
   getChannelDrive,
+  POST_FULL_TEXT_PAYLOAD_KEY,
 } from '@homebase-id/js-lib/public';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -45,7 +46,10 @@ export const EditPostDialog = ({
   const [postFile, setPostFile] = useState<HomebaseFile<PostContent>>({ ...incomingPostFile });
   const [newMediaFiles, setNewMediaFiles] = useState<(MediaFile | NewMediaFile)[]>(
     postFile.fileMetadata.payloads?.filter(
-      (p) => p.key !== DEFAULT_PAYLOAD_KEY && p.key !== POST_LINKS_PAYLOAD_KEY
+      (p) =>
+        p.key !== DEFAULT_PAYLOAD_KEY &&
+        p.key !== POST_LINKS_PAYLOAD_KEY &&
+        p.key !== POST_FULL_TEXT_PAYLOAD_KEY
     ) || []
   );
 
@@ -53,7 +57,10 @@ export const EditPostDialog = ({
     if (incomingPostFile) {
       setPostFile({ ...incomingPostFile });
       const newMediaFiles = incomingPostFile.fileMetadata.payloads?.filter(
-        (p) => p.key !== DEFAULT_PAYLOAD_KEY && p.key !== POST_LINKS_PAYLOAD_KEY
+        (p) =>
+          p.key !== DEFAULT_PAYLOAD_KEY &&
+          p.key !== POST_LINKS_PAYLOAD_KEY &&
+          p.key !== POST_FULL_TEXT_PAYLOAD_KEY
       );
       if (newMediaFiles) setNewMediaFiles(newMediaFiles);
     }

@@ -43,6 +43,7 @@ import {
 } from './PostUploadHelpers';
 
 export const POST_LINKS_PAYLOAD_KEY = 'pst_links';
+export const POST_FULL_TEXT_PAYLOAD_KEY = 'pst_text';
 
 export const savePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
@@ -183,8 +184,13 @@ const uploadPost = async <T extends PostContent>(
       }-${new Date().getTime()}`;
   }
 
-  const { metadata, defaultPayload } = await getUploadFileMetadata(odinId, file, previewThumbnail);
+  const { metadata, defaultPayload, additionalPayloads } = await getUploadFileMetadata(
+    odinId,
+    file,
+    previewThumbnail
+  );
   if (defaultPayload) payloads.push(defaultPayload);
+  if (additionalPayloads?.length) payloads.push(...additionalPayloads);
 
   if (!odinId) {
     const result = await uploadFile(
@@ -287,7 +293,10 @@ const updatePost = async <T extends PostContent>(
 
   const existingMediaFiles =
     file.fileMetadata.payloads?.filter(
-      (p) => p.key !== DEFAULT_PAYLOAD_KEY && p.key !== POST_LINKS_PAYLOAD_KEY
+      (p) =>
+        p.key !== DEFAULT_PAYLOAD_KEY &&
+        p.key !== POST_LINKS_PAYLOAD_KEY &&
+        p.key !== POST_FULL_TEXT_PAYLOAD_KEY
     ) || [];
 
   const newMediaFiles: NewMediaFile[] =
@@ -367,8 +376,13 @@ const patchPost = async <T extends PostContent>(
   const previewThumbnail: EmbeddedThumb | undefined =
     previewThumbnails?.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
-  const { metadata, defaultPayload } = await getUploadFileMetadata(odinId, file, previewThumbnail);
+  const { metadata, defaultPayload, additionalPayloads } = await getUploadFileMetadata(
+    odinId,
+    file,
+    previewThumbnail
+  );
   if (defaultPayload) payloads.push(defaultPayload);
+  if (additionalPayloads?.length) payloads.push(...additionalPayloads);
 
   const deletedPayloads =
     deletedMediaFiles?.map((payload) => {
