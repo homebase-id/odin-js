@@ -196,18 +196,21 @@ export const getPostContentForUpload = <T extends PostContent>(
   //   }
   // };
 
-  // if (!fitsInHeader(headerObj)) {
-  //   console.warn('Moving embeddedPost out of header for size constraints');
-  //   moveEmbeddedPost();
-  // }
-  // if (!fitsInHeader(headerObj)) {
-  //   console.warn('Moving primaryMediaFile out of header for size constraints');
-  //   movePrimaryMediaFile();
-  // }
-  // if (!fitsInHeader(headerObj)) {
-  //   console.warn('Moving readingTimeStats out of header for size constraints');
-  //   moveReadingTimeStats();
-  // }
+  if (!fitsInHeader(headerObj)) {
+    console.warn('Moving embeddedPost out of header for size constraints');
+    throw new Error(`Header Size Exceeded: embeddedPost cannot be uploaded. Size is ${stringify(headerObj).length} bytes. That's Homebase Problem. Ping them to fix it.`);
+    // moveEmbeddedPost();
+  }
+  if (!fitsInHeader(headerObj)) {
+    console.warn('Moving primaryMediaFile out of header for size constraints');
+    throw new Error(`Header Size Exceeded: primaryMediaFile cannot be uploaded. Size is ${stringify(headerObj).length} bytes.`);
+    // movePrimaryMediaFile();
+  }
+  if (!fitsInHeader(headerObj)) {
+    console.warn('Moving readingTimeStats out of header for size constraints');
+    throw new Error(`Header Size Exceeded: readingTimeStats cannot be uploaded. Size is ${stringify(headerObj).length} bytes.`);
+    // moveReadingTimeStats();
+  }
 
   // Do not drop critical metadata (sourceUrl, reactAccess, isCollaborative)
 
