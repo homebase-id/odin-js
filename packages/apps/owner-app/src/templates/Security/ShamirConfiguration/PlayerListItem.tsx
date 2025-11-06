@@ -177,7 +177,7 @@ const StatusIcon = ({status}: { status: Status }) => {
     );
 };
 
-function trustEmoji(level: ShardTrustLevel): string {
+export function trustEmoji(level: ShardTrustLevel): string {
     switch (level) {
         case ShardTrustLevel.High:
             return "✅";
@@ -192,7 +192,7 @@ function trustEmoji(level: ShardTrustLevel): string {
     }
 }
 
-function trustLabel(level: ShardTrustLevel, playerType: string): string {
+export function trustLabel(level: ShardTrustLevel, playerType: string): string {
     if (playerType === "automatic" && level === ShardTrustLevel.Critical) {
         return "Automatic (ok)";
     }

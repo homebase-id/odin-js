@@ -14,7 +14,7 @@ import {
     VerifyRemotePlayerReadinessRequest,
 } from "../../../provider/auth/ShamirProvider";
 import { ShardTrustLevel } from "../../../provider/auth/SecurityHealthProvider";
-import { Status } from "./PlayerListItem";
+import { Status, trustEmoji, trustLabel } from "./PlayerListItem"; // ✅ import helpers
 
 export const ConfigureTrustedConnections = ({
                                                 removePlayer,
@@ -29,7 +29,12 @@ export const ConfigureTrustedConnections = ({
     trustedPlayers: ShamiraPlayer[];
     showPlayerType?: boolean;
     enableVerification?: boolean;
-    onVerificationComplete?: (results: Record<string,{ status: Status; trustLevel?: ShardTrustLevel; isValid?: boolean }>) => void;
+    onVerificationComplete?: (
+        results: Record<
+            string,
+            { status: Status; trustLevel?: ShardTrustLevel; isValid?: boolean }
+        >
+    ) => void;
 }) => {
     const [statuses, setStatuses] = useState<
         Record<
@@ -43,14 +48,20 @@ export const ConfigureTrustedConnections = ({
     useEffect(() => {
         if (!enableVerification) return;
 
-        if(!trustedPlayers?.length){
-            const results: Record<string,{ status: Status; trustLevel?: ShardTrustLevel; isValid?: boolean }> = {};
+        if (!trustedPlayers?.length) {
+            const results: Record<
+                string,
+                { status: Status; trustLevel?: ShardTrustLevel; isValid?: boolean }
+            > = {};
             onVerificationComplete?.(results);
             return;
         }
 
         const verifyAll = async () => {
-            const results: Record<string,{ status: Status; trustLevel?: ShardTrustLevel; isValid?: boolean }> = {};
+            const results: Record<
+                string,
+                { status: Status; trustLevel?: ShardTrustLevel; isValid?: boolean }
+            > = {};
 
             for (const player of trustedPlayers) {
                 results[player.odinId] = { status: "loading" };
@@ -84,19 +95,16 @@ export const ConfigureTrustedConnections = ({
                     [player.odinId]: results[player.odinId],
                 }));
 
-                // Optionally report incremental progress
                 onVerificationComplete?.({
                     ...results,
                     [player.odinId]: results[player.odinId],
                 });
             }
 
-            // final result callback
             onVerificationComplete?.(results);
         };
 
         verifyAll();
-        
     }, [enableVerification, trustedPlayers, dotYouClient]);
 
     return (
@@ -117,8 +125,12 @@ export const ConfigureTrustedConnections = ({
                                 allowUpdatePlayerType={!!updatePlayerType}
                                 allowRemove={!!removePlayer}
                                 showPlayerType={showPlayerType}
-                                verificationStatus={enableVerification ? info.status : "moot"}
-                                trustLevel={enableVerification ? info.trustLevel : undefined}
+                                verificationStatus={
+                                    enableVerification ? info.status : "moot"
+                                }
+                                trustLevel={
+                                    enableVerification ? info.trustLevel : undefined
+                                }
                                 isValid={enableVerification ? info.isValid : true}
                             />
                         );
@@ -156,21 +168,15 @@ const SelectedConnectionItem = ({
     trustLevel?: ShardTrustLevel;
     isValid?: boolean;
 }) => {
+    // ✅ Use the same color logic as PlayerListItem
     const trustColor =
-        trustLevel === ShardTrustLevel.Critical
+        trustLevel === ShardTrustLevel.Critical && player.type === "delegate"
             ? "text-red-600"
             : trustLevel === ShardTrustLevel.Medium
                 ? "text-orange-600"
                 : trustLevel === ShardTrustLevel.Low
                     ? "text-yellow-600"
                     : "text-green-600";
-
-    const trustMsg =
-        trustLevel === ShardTrustLevel.Low
-            ? t("Trust level is low")
-            : trustLevel === ShardTrustLevel.Medium
-                ? t("Trust level is medium")
-                : undefined;
 
     return (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border p-3 mb-2">
@@ -185,14 +191,23 @@ const SelectedConnectionItem = ({
 
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-sm">
 
-                {trustMsg && <span className={trustColor}>{trustMsg}</span>}
+                {trustLevel && (
+                    <span className={`flex items-center gap-1 ${trustColor}`}>
+                        {trustEmoji(trustLevel)} {trustLabel(trustLevel, player.type)}
+                    </span>
+                )}
 
                 {verificationStatus === "loading" ? (
                     <span className="text-slate-500">{t("Verifying...")}</span>
-                ) : ((verificationStatus === "invalid" ||
-                    verificationStatus === "error" || !isValid) && (
-                    <span className="text-xs text-red-600">{t("⚠ Unavailable")}</span>
-                ))}
+                ) : (
+                    (verificationStatus === "invalid" ||
+                        verificationStatus === "error" ||
+                        !isValid) && (
+                        <span className="text-xs text-red-600">
+                            {t("⚠ Unavailable")}
+                        </span>
+                    )
+                )}
 
                 {allowUpdatePlayerType ? (
                     <select
@@ -212,7 +227,6 @@ const SelectedConnectionItem = ({
                         <SubtleMessage>{playerTypeText(player.type)}</SubtleMessage>
                     )
                 )}
-
 
                 {allowRemove && (
                     <button
