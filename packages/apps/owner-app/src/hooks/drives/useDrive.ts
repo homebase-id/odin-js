@@ -100,39 +100,134 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
     }),
     editDescription: useMutation({
       mutationFn: editDescription,
-      onSettled: (_data, _error, variables) => {
-        invalidateDrive(queryClient, variables.targetDrive);
+      onSettled: (data, _error, variables) => {
+        const { targetDrive, newDescription } = variables;
+        if (data === true) {
+          updateDriveCache(queryClient, targetDrive, (base) => ({
+            ...base,
+            metadata: newDescription,
+          }), 'editDescription');
+        } else {
+          console.warn('[owner-app:useDrive] editDescription mutation did not return true');
+        }
       },
     }),
     editAttributes: useMutation({
       mutationFn: editAttributes,
-      onSettled: (_data, _error, variables) => {
-        invalidateDrive(queryClient, variables.targetDrive);
+      onSettled: (data, _error, variables) => {
+        const { targetDrive, newAttributes } = variables;
+        if (data === true) {
+          updateDriveCache(queryClient, targetDrive, (base) => ({
+            ...base,
+            attributes: { ...(base.attributes || {}), ...(newAttributes || {}) },
+          }), 'editAttributes');
+        } else {
+          console.warn('[owner-app:useDrive] editAttributes mutation did not return true');
+        }
       },
     }),
     editAnonymousRead: useMutation({
       mutationFn: editAnonymousRead,
-      onSettled: (_data, _error, variables) => {
-        invalidateDrive(queryClient, variables.targetDrive);
+      onSettled: (data, _error, variables) => {
+        const { targetDrive, newAllowAnonymousRead } = variables;
+        if (data === true) {
+          updateDriveCache(queryClient, targetDrive, (base) => ({
+            ...base,
+            allowAnonymousReads: newAllowAnonymousRead,
+          }), 'editAnonymousRead');
+        } else {
+          console.warn('[owner-app:useDrive] editAnonymousRead mutation did not return true');
+        }
       },
     }),
     editAllowSubscriptions: useMutation({
       mutationFn: editAllowSubscriptions,
-      onSettled: (_data, _error, variables) => {
-        invalidateDrive(queryClient, variables.targetDrive);
+      onSettled: (data, _error, variables) => {
+        const { targetDrive, newAllowSubscriptions } = variables;
+        if (data === true) {
+          updateDriveCache(queryClient, targetDrive, (base) => ({
+            ...base,
+            allowSubscriptions: newAllowSubscriptions,
+          }), 'editAllowSubscriptions');
+        } else {
+          console.warn('[owner-app:useDrive] editAllowSubscriptions mutation did not return true');
+        }
       },
     }),
     editArchiveStatus: useMutation({
       mutationFn: editArchiveFlag,
-      onSettled: (_data, _error, variables) => {
-        invalidateDrive(queryClient, variables.targetDrive);
+      onSettled: (data, _error, variables) => {
+        const { targetDrive, newArchived } = variables;
+        if (data === true) {
+          updateDriveCache(queryClient, targetDrive, (base) => ({
+            ...base,
+            isArchived: newArchived,
+          }), 'editArchiveStatus');
+        } else {
+          console.warn('[owner-app:useDrive] editArchiveStatus mutation did not return true');
+        }
       },
     }),
   };
 };
 
-export const invalidateDrive = (queryClient: QueryClient, targetDrive: TargetDrive) => {
-  queryClient.invalidateQueries({
-    queryKey: ['drives', `${targetDrive?.alias}_${targetDrive?.type}`],
-  });
+// Helper to keep the ['drives'] list cache in sync with the individual drive cache
+export const syncDriveIntoDrivesList = (
+  queryClient: QueryClient,
+  updated: TargetDrive | DriveDefinition
+) => {
+  const listKey = ['drives'] as const;
+  const list = queryClient.getQueryData<DriveDefinition[]>(listKey);
+  if (!list || list.length === 0) return;
+
+  // Determine whether we have a full DriveDefinition or only a TargetDrive
+  const isFullDrive = (val: unknown): val is DriveDefinition =>
+    typeof val === 'object' && val !== null && 'targetDriveInfo' in (val as Record<string, unknown>);
+
+  if (isFullDrive(updated)) {
+    const targetDrive = updated.targetDriveInfo;
+    const individualKey = ['drives', `${targetDrive?.alias}_${targetDrive?.type}`] as const;
+    // Ensure the individual cache is up-to-date as well
+    queryClient.setQueryData(individualKey, updated);
+
+    const updatedList = list.map((d) =>
+      drivesEqual(d.targetDriveInfo, targetDrive) ? updated : d
+    );
+    const changed = updatedList.some((d, i) => d !== list[i]);
+    if (changed) queryClient.setQueryData(listKey, updatedList);
+    return;
+  }
+
+  // Fallback: only TargetDrive provided; sync from the individual cache if present
+  const targetDrive = updated as TargetDrive;
+  const individualKey = ['drives', `${targetDrive?.alias}_${targetDrive?.type}`] as const;
+  const cachedDrive = queryClient.getQueryData<DriveDefinition | null>(individualKey);
+  if (!cachedDrive) return;
+
+  const updatedList = list.map((d) =>
+    drivesEqual(d.targetDriveInfo, targetDrive) ? cachedDrive : d
+  );
+  const changed = updatedList.some((d, i) => d !== list[i]);
+  if (changed) queryClient.setQueryData(listKey, updatedList);
 };
+
+// Helper to update the individual drive cache and sync the main list using an updater function
+export const updateDriveCache = (
+  queryClient: QueryClient,
+  targetDrive: TargetDrive,
+  buildUpdated: (base: DriveDefinition) => DriveDefinition,
+  label: string
+) => {
+  const individualKey = ['drives', `${targetDrive?.alias}_${targetDrive?.type}`] as const;
+  const fromIndividual = queryClient.getQueryData<DriveDefinition | null>(individualKey);
+  if (fromIndividual) {
+    const updated = buildUpdated(fromIndividual);
+    queryClient.setQueryData(individualKey, updated);
+    syncDriveIntoDrivesList(queryClient, updated);
+  } else {
+    console.warn(`[owner-app:useDrive] ${label}: no cached drive found to update`);
+  }
+};
+
+
+
