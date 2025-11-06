@@ -29,7 +29,7 @@ export const Step2SelectPlayers = ({
     >({});
     const [allPlayersVerified, setAllPlayersVerified] = useState(false);
 
-    // 🔁 Recalculate overall validity whenever players or verification results change
+    // 🟢 Recalculate validity when results or player list changes
     useEffect(() => {
         const allValid =
             players.length > 0 &&
@@ -38,6 +38,14 @@ export const Step2SelectPlayers = ({
         setAllPlayersVerified(allValid);
         onPlayerValidityChange(allValid);
     }, [players, verificationResults, onPlayerValidityChange]);
+
+    // 🟡 When returning to this screen, re-trigger verification if we have players but no cached results
+    useEffect(() => {
+        if (players.length > 0 && Object.keys(verificationResults).length === 0) {
+            // Trigger re-verification by resetting the state
+            setVerificationResults({});
+        }
+    }, []); // run once on mount
 
     const searchable = players?.map((p) => p.odinId);
 
@@ -59,13 +67,15 @@ export const Step2SelectPlayers = ({
     return (
         <>
             <Label>{t("Selected Trusted Contacts")}</Label>
+
             <div className="mb-3 text-gray-400">
-                Choose 3-7 trusted contacts to help recover your account. You will set
-                security options next.
+                {t(
+                    "Choose 3–7 trusted contacts to help recover your account. You will set security options next."
+                )}
             </div>
 
             <div className="mb-3 text-gray-400">
-                Selected: {players?.length} (3–7 recommended)
+                {t("Selected")}: {players?.length} (3–7 {t("recommended")})
             </div>
 
             {!allPlayersVerified && players.length > 0 && (
