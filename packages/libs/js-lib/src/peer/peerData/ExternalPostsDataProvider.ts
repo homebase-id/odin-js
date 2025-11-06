@@ -285,7 +285,10 @@ const dsrToPostFile = async <T extends PostContent>(
           dsr.fileMetadata.senderOdinId,
         appData: {
           ...dsr.fileMetadata.appData,
-          content: postContent,
+          content: {
+            ...parsedHeaderContent,
+            ...postContent
+          },
         },
         // Fallback to the author odin id if the sender odin id is not set; (Sanity after the issues we had with the senderOdinId being reset)
         senderOdinId: dsr.fileMetadata.senderOdinId || dsr.fileMetadata.originalAuthor,
