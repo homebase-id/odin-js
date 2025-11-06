@@ -5,7 +5,7 @@ import {
     t,
     useDotYouClientContext,
 } from "@homebase-id/common-app";
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import {
     PlayerType,
     playerTypeText,
@@ -13,8 +13,8 @@ import {
     verifyRemotePlayerReadiness,
     VerifyRemotePlayerReadinessRequest,
 } from "../../../provider/auth/ShamirProvider";
-import { ShardTrustLevel } from "../../../provider/auth/SecurityHealthProvider";
-import { Status, trustEmoji, trustLabel } from "./PlayerListItem"; // ✅ import helpers
+import {ShardTrustLevel} from "../../../provider/auth/SecurityHealthProvider";
+import {Status, trustEmoji, trustLabel} from "./PlayerListItem"; // ✅ import helpers
 
 export const ConfigureTrustedConnections = ({
                                                 removePlayer,
@@ -46,73 +46,58 @@ export const ConfigureTrustedConnections = ({
     const dotYouClient = useDotYouClientContext();
 
     useEffect(() => {
-        if (!enableVerification) return;
+        if (!enableVerification || !trustedPlayers?.length) return;
 
-        if (!trustedPlayers?.length) {
-            const results: Record<
-                string,
-                { status: Status; trustLevel?: ShardTrustLevel; isValid?: boolean }
-            > = {};
-            onVerificationComplete?.(results);
-            return;
-        }
-
-        const verifyAll = async () => {
-            const results: Record<
-                string,
-                { status: Status; trustLevel?: ShardTrustLevel; isValid?: boolean }
-            > = {};
-
+        const verifyNewPlayers = async () => {
             for (const player of trustedPlayers) {
-                results[player.odinId] = { status: "loading" };
+                // Skip already verified players
+                if (statuses[player.odinId]) continue;
+
+                // Mark as loading
                 setStatuses((prev) => ({
                     ...prev,
-                    [player.odinId]: results[player.odinId],
+                    [player.odinId]: {status: "loading"},
                 }));
 
                 try {
-                    const req: VerifyRemotePlayerReadinessRequest = {
-                        odinId: player.odinId,
-                    };
+                    const req: VerifyRemotePlayerReadinessRequest = {odinId: player.odinId};
                     const res = await verifyRemotePlayerReadiness(dotYouClient, req);
 
-                    if (res != null) {
-                        results[player.odinId] = {
-                            status: res.isValid ? "valid" : "invalid",
-                            trustLevel: res.trustLevel,
-                            isValid: res.isValid,
-                        };
-                    } else {
-                        results[player.odinId] = { status: "error" };
-                    }
+                    setStatuses((prev) => ({
+                        ...prev,
+                        [player.odinId]: res
+                            ? {
+                                status: res.isValid ? "valid" : "invalid",
+                                trustLevel: res.trustLevel,
+                                isValid: res.isValid,
+                            }
+                            : {status: "error"},
+                    }));
                 } catch (e) {
                     console.error(e);
-                    results[player.odinId] = { status: "error" };
+                    setStatuses((prev) => ({
+                        ...prev,
+                        [player.odinId]: {status: "error"},
+                    }));
                 }
-
-                setStatuses((prev) => ({
-                    ...prev,
-                    [player.odinId]: results[player.odinId],
-                }));
-
-                onVerificationComplete?.({
-                    ...results,
-                    [player.odinId]: results[player.odinId],
-                });
             }
 
-            onVerificationComplete?.(results);
+            // Report results upward
+            onVerificationComplete?.(statuses);
         };
 
-        verifyAll();
-    }, [enableVerification, trustedPlayers, dotYouClient]);
+        verifyNewPlayers();
+        // Only re-run when a new odinId appears or verification is toggled
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [enableVerification, trustedPlayers.map(p => p.odinId).join(","), dotYouClient]);
+
 
     return (
         <>
             {trustedPlayers?.length ? (
                 <div className="flex-grow overflow-auto">
                     {trustedPlayers.map((player, index) => {
-                        const info = statuses[player.odinId] || { status: "loading" };
+                        const info = statuses[player.odinId] || {status: "loading"};
 
                         return (
                             <SelectedConnectionItem
@@ -186,7 +171,7 @@ const SelectedConnectionItem = ({
                     className="border border-neutral-200 dark:border-neutral-800"
                     size="sm"
                 />
-                <ConnectionName odinId={player.odinId} />
+                <ConnectionName odinId={player.odinId}/>
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-sm">
