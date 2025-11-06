@@ -1,5 +1,6 @@
 import {DotYouClient} from '@homebase-id/js-lib/core';
 import {t} from "@homebase-id/common-app";
+import {ShardTrustLevel} from "./SecurityHealthProvider";
 
 export const SHAMIR_DEALER_SHARD_CONFIG_FILE_TYPE = 44532;
 export const SHAMIR_PLAYER_ENCRYPTED_SHARD_FILE_TYPE = 74829;
@@ -36,9 +37,20 @@ export interface DealerShardEnvelopeRedacted {
   player: ShamiraPlayer;
 }
 
+
+export interface RemotePlayerReadinessResult
+{
+  isValid: boolean
+  trustLevel: ShardTrustLevel
+}
+
 export interface ShardVerificationResult {
   isValid: boolean
   remoteServerError: boolean
+}
+
+export interface VerifyRemotePlayerReadinessRequest {
+  odinId: string;
 }
 
 export interface VerifyRemotePlayerShardRequest {
@@ -105,6 +117,19 @@ export const configureShards = async (dotYouClient: DotYouClient, request: Confi
       // getOdinErrorDetails(error).
       return null;
     });
+}
+
+export const verifyRemotePlayerReadiness = async (dotYouClient: DotYouClient, request: VerifyRemotePlayerReadinessRequest): Promise<RemotePlayerReadinessResult | null> => {
+  const axiosClient = dotYouClient.createAxiosClient();
+  return await axiosClient
+      .post<RemotePlayerReadinessResult>(`${root}/verify-remote-player-readiness`, request)
+      .then((response) => {
+        return response.data;
+      })
+      .catch((error) => {
+        console.warn(error);
+        return null;
+      });
 }
 
 export const verifyRemotePlayerShard = async (dotYouClient: DotYouClient, request: VerifyRemotePlayerShardRequest): Promise<ShardVerificationResult | null> => {

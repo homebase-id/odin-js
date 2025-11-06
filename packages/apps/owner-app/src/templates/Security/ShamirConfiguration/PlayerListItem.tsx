@@ -3,7 +3,7 @@ import {ShardTrustLevel} from "../../../provider/auth/SecurityHealthProvider";
 import {ConnectionImage, ConnectionName, t} from "@homebase-id/common-app";
 import {ReactNode} from "react";
 
-export type Status = "loading" | "valid" | "invalid" | "error";
+export type Status = "loading" | "valid" | "invalid" | "error" | "moot";
 
 export const PlayerListItem = ({
                                    player,
@@ -107,7 +107,6 @@ const ListItemWrapper = ({
         </div>
     </div>
 );
-
 
 
 const StatusIcon = ({status}: { status: Status }) => {
