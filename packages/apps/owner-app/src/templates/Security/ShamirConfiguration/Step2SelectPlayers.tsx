@@ -7,28 +7,39 @@ import {
     t,
     useAllContacts,
 } from "@homebase-id/common-app";
-import {ReactNode, useEffect, useState} from "react";
-import {ConfigureTrustedConnections} from "./ConfigureTrustedConnections";
-import {ShamiraPlayer} from "../../../provider/auth/ShamirProvider";
-import {all} from "axios";
-
+import { ReactNode, useEffect, useState } from "react";
+import { ConfigureTrustedConnections } from "./ConfigureTrustedConnections";
+import { ShamiraPlayer } from "../../../provider/auth/ShamirProvider";
 
 export const Step2SelectPlayers = ({
                                        addPlayer,
                                        removePlayer,
                                        players,
-                                       onPlayerValidityChange
+                                       onPlayerValidityChange,
                                    }: {
     addPlayer: (newOdinId: string) => void;
     removePlayer: (odinId: string) => void;
     players: ShamiraPlayer[];
     onPlayerValidityChange: (allValid: boolean) => void;
 }) => {
-
     const [query, setQuery] = useState<string>("");
-    const {data: contacts} = useAllContacts(true);
+    const { data: contacts } = useAllContacts(true);
+    const [verificationResults, setVerificationResults] = useState<
+        Record<string, { isValid?: boolean }>
+    >({});
+    const [allPlayersVerified, setAllPlayersVerified] = useState(false);
+
+    // 🔁 Recalculate overall validity whenever players or verification results change
+    useEffect(() => {
+        const allValid =
+            players.length > 0 &&
+            players.every((p) => verificationResults[p.odinId]?.isValid === true);
+
+        setAllPlayersVerified(allValid);
+        onPlayerValidityChange(allValid);
+    }, [players, verificationResults, onPlayerValidityChange]);
+
     const searchable = players?.map((p) => p.odinId);
-    const [allPlayersVerified, setAllPlayersVerified] = useState<boolean>(false);
 
     const contactResults = contacts
         ? contacts
@@ -40,23 +51,26 @@ export const Step2SelectPlayers = ({
                         contact.odinId?.includes(query) ||
                         contact.name?.displayName?.includes(query))
             )
-            .filter((contact) => contact.odinId && !searchable.includes(contact.odinId))
+            .filter(
+                (contact) => contact.odinId && !searchable.includes(contact.odinId)
+            )
         : [];
 
     return (
         <>
             <Label>{t("Selected Trusted Contacts")}</Label>
             <div className="mb-3 text-gray-400">
-                Choose 3-7 trusted contacts to help recover your account. You will set security options next.
+                Choose 3-7 trusted contacts to help recover your account. You will set
+                security options next.
             </div>
 
             <div className="mb-3 text-gray-400">
-                Selected: {players?.length} (3-7 recommended)
+                Selected: {players?.length} (3–7 recommended)
             </div>
 
-            {!allPlayersVerified && (
+            {!allPlayersVerified && players.length > 0 && (
                 <Alert type="warning" isCompact={false} className="mb-3">
-                    You have one or more trusted contacts who cannot be verified
+                    {t("You have one or more trusted contacts who cannot be verified.")}
                 </Alert>
             )}
 
@@ -65,15 +79,14 @@ export const Step2SelectPlayers = ({
                 trustedPlayers={players}
                 enableVerification={true}
                 onVerificationComplete={(results) => {
-                    const allValid = Object.values(results).every((r) => r.isValid === true);
-                    setAllPlayersVerified(allValid);
-                    onPlayerValidityChange(allValid);
+                    setVerificationResults(results);
                 }}
-                showPlayerType={false}/>
+                showPlayerType={false}
+            />
 
-            <br/>
-            <hr/>
-            <br/>
+            <br />
+            <hr />
+            <br />
 
             <div className="flex w-full flex-col gap-2 p-5">
                 <Input
@@ -84,7 +97,7 @@ export const Step2SelectPlayers = ({
                 />
             </div>
 
-            {/*selection list */}
+            {/* Selection list */}
             {contactResults?.length ? (
                 <div className="flex-grow overflow-auto">
                     {contactResults.map((result, index) => (
@@ -100,7 +113,7 @@ export const Step2SelectPlayers = ({
                     ))}
                 </div>
             ) : (
-                <div className="flex flex-grow items-center justify-center p-5"/>
+                <div className="flex flex-grow items-center justify-center p-5" />
             )}
         </>
     );
@@ -121,7 +134,7 @@ export const ConnectionListItem = ({
                 className="border border-neutral-200 dark:border-neutral-800"
                 size="sm"
             />
-            <ConnectionName odinId={odinId}/>
+            <ConnectionName odinId={odinId} />
         </ListItemWrapper>
     );
 };
