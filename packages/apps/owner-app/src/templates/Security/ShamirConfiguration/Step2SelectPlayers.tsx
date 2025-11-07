@@ -35,7 +35,6 @@ export const Step2SelectPlayers = ({
             players.length > 0 &&
             players.every((p) => verificationResults[p.odinId]?.isValid === true);
 
-        console.log('all valid', allValid)
         setAllPlayersVerified(allValid);
         onPlayerValidityChange(allValid);
         setForceVerify((x) => x + 1)
