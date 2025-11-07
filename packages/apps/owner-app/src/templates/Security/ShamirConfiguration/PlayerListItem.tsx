@@ -3,7 +3,7 @@ import {ShardTrustLevel} from "../../../provider/auth/SecurityHealthProvider";
 import {ConnectionImage, ConnectionName, t} from "@homebase-id/common-app";
 import {ReactNode} from "react";
 
-export type Status = "loading" | "valid" | "invalid" | "error";
+export type Status = "loading" | "valid" | "invalid" | "error" | "moot";
 
 export const PlayerListItem = ({
                                    player,
@@ -109,7 +109,6 @@ const ListItemWrapper = ({
 );
 
 
-
 const StatusIcon = ({status}: { status: Status }) => {
     if (status === "loading") {
         return (
@@ -178,7 +177,8 @@ const StatusIcon = ({status}: { status: Status }) => {
     );
 };
 
-function trustEmoji(level: ShardTrustLevel): string {
+// eslint-disable-next-line react-refresh/only-export-components
+export function trustEmoji(level: ShardTrustLevel): string {
     switch (level) {
         case ShardTrustLevel.High:
             return "✅";
@@ -193,7 +193,8 @@ function trustEmoji(level: ShardTrustLevel): string {
     }
 }
 
-function trustLabel(level: ShardTrustLevel, playerType: string): string {
+// eslint-disable-next-line react-refresh/only-export-components
+export function trustLabel(level: ShardTrustLevel, playerType: string): string {
     if (playerType === "automatic" && level === ShardTrustLevel.Critical) {
         return "Automatic (ok)";
     }
