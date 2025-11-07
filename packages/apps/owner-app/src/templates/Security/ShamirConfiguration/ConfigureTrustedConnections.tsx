@@ -179,7 +179,7 @@ const SelectedConnectionItem = ({
 
                 {trustLevel && (
                     <span className={`flex items-center gap-1 ${trustColor}`}>
-                        {trustEmoji(trustLevel)} {trustLabel(trustLevel, player.type)}
+                        {trustEmoji(trustLevel)} {trustLabel(trustLevel, "")}
                     </span>
                 )}
 
