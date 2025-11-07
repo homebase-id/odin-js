@@ -28,25 +28,23 @@ export const Step2SelectPlayers = ({
         Record<string, { isValid?: boolean }>
     >({});
     const [allPlayersVerified, setAllPlayersVerified] = useState(false);
-
-    // 🟢 Recalculate validity when results or player list changes
+    const [forceVerify, setForceVerify] = useState(0);
+    
     useEffect(() => {
         const allValid =
             players.length > 0 &&
             players.every((p) => verificationResults[p.odinId]?.isValid === true);
 
+        console.log('all valid', allValid)
         setAllPlayersVerified(allValid);
         onPlayerValidityChange(allValid);
+        setForceVerify((x) => x + 1)
     }, [players, verificationResults, onPlayerValidityChange]);
 
-    // 🟡 When returning to this screen, re-trigger verification if we have players but no cached results
     useEffect(() => {
-        if (players.length > 0 && Object.keys(verificationResults).length === 0) {
-            // Trigger re-verification by resetting the state
-            setVerificationResults({});
-        }
-    }, []); // run once on mount
-
+        if (players.length > 0) setForceVerify((x) => x + 1);
+    }, []); // only on mount
+    
     const searchable = players?.map((p) => p.odinId);
 
     const contactResults = contacts
@@ -78,7 +76,7 @@ export const Step2SelectPlayers = ({
                 {t("Selected")}: {players?.length} (3–7 {t("recommended")})
             </div>
 
-            {!allPlayersVerified && players.length > 0 && (
+            {!allPlayersVerified && players.length > 3 && (
                 <Alert type="warning" isCompact={false} className="mb-3">
                     {t("You have one or more trusted contacts who cannot be verified.")}
                 </Alert>
@@ -92,6 +90,7 @@ export const Step2SelectPlayers = ({
                     setVerificationResults(results);
                 }}
                 showPlayerType={false}
+                forceVerify={forceVerify}
             />
 
             <br />
