@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {ActionButton, Alert, DialogWrapper, t, useDotYouClient, usePortal,} from '@homebase-id/common-app';
+import {ActionButton, DialogWrapper, t, useDotYouClient, usePortal,} from '@homebase-id/common-app';
 import {Arrow} from '@homebase-id/common-app/icons';
 import {Step2SelectPlayers} from "./Step2SelectPlayers";
 import {Step3OtherOptions} from "./Step3OtherOptions";
@@ -26,6 +26,7 @@ const validationMatrix = [
     {players: 10, minShards: 6, approvals: 4},
 ];
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function getRuleForPlayers(count: number) {
     return validationMatrix.find(r => r.players === count);
 }

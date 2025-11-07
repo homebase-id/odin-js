@@ -90,7 +90,6 @@ export const ConfigureTrustedConnections = ({
 
         verifyNewPlayers();
         // Only re-run when a new odinId appears or verification is toggled
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [enableVerification, trustedPlayers.map(p => p.odinId).join(","), forceVerify, dotYouClient]);
 
 
