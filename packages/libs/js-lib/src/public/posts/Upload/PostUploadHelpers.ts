@@ -6,7 +6,6 @@ import {
   NewMediaFile,
   NewHomebaseFile,
   UploadFileMetadata,
-  DEFAULT_PAYLOAD_KEY,
   SecurityGroupType,
   MAX_HEADER_CONTENT_BYTES,
 } from '../../../core/core';
@@ -19,7 +18,7 @@ import {
   uint8ArrayToBase64,
 } from '../../../helpers/DataUtil';
 import { getPostBySlug } from '../PostProvider';
-import { BlogConfig, PostContent, postTypeToDataType, Article, ReadTimeStats } from '../PostTypes';
+import { BlogConfig, PostContent, postTypeToDataType, Article } from '../PostTypes';
 import { createThumbnails, LinkPreview, LinkPreviewDescriptor } from '../../../media/media';
 import { getPostBySlugOverPeer } from '../../../peer/peer';
 import { POST_LINKS_PAYLOAD_KEY } from './PostUploader';
@@ -125,7 +124,7 @@ export const getPostContentForUpload = <T extends PostContent>(
   const isArticle = isArticleContent(fullContent);
 
   // Build a header candidate with essential fields
-  let headerObj: Partial<PostContent> & Partial<Omit<Article, 'type'>> = {
+  const headerObj: Partial<PostContent> & Partial<Omit<Article, 'type'>> = {
     id: fullContent.id,
     slug: fullContent.slug,
     channelId: fullContent.channelId,
@@ -140,11 +139,24 @@ export const getPostContentForUpload = <T extends PostContent>(
     headerObj.caption = fullContent.caption;
   }
 
+  // Tentatively include captionAsRichText; may remove if header doesn't fit
+  if (fullContent.captionAsRichText !== undefined) {
+    headerObj.captionAsRichText = fullContent.captionAsRichText;
+  }
+
   // Article specifics: include trimmed abstract; include readingTimeStats; include body if small
+  // Track what gets trimmed/omitted for payload decisions
+  let wasCaptionTrimmed = false;
+  let movedCaptionRichToPayload = false;
+  let wasAbstractTrimmed = false;
+  let bodyIncludedInHeader = false;
+
   if (isArticle) {
     const article = fullContent;
     if (typeof article.abstract === 'string') {
-      headerObj.abstract = trimToBytes(article.abstract, TEXT_FIELD_BYTE_LIMIT);
+      const trimmed = trimToBytes(article.abstract, TEXT_FIELD_BYTE_LIMIT);
+      headerObj.abstract = trimmed;
+      wasAbstractTrimmed = trimmed !== article.abstract;
     }
     if (article.readingTimeStats !== undefined) {
       headerObj.readingTimeStats = article.readingTimeStats;
@@ -153,6 +165,7 @@ export const getPostContentForUpload = <T extends PostContent>(
       const bodyJson = stringify(article.body);
       if (stringToUint8Array(bodyJson).length <= TEXT_FIELD_BYTE_LIMIT) {
         headerObj.body = article.body;
+        bodyIncludedInHeader = true;
       }
     }
   }
@@ -162,102 +175,84 @@ export const getPostContentForUpload = <T extends PostContent>(
     headerObj.primaryMediaFile = fullContent.primaryMediaFile;
   }
   if (fullContent.embeddedPost !== undefined) {
-    headerObj.embeddedPost = fullContent.embeddedPost;
+    // Strip previewThumbnail from each payload descriptor up front to reduce size
+    const ep = fullContent.embeddedPost;
+    const cleanedPayloads = ep.payloads?.map((p) => {
+      return { ...p, previewThumbnail: undefined };
+    });
+    headerObj.embeddedPost = { ...ep, payloads: cleanedPayloads };
   }
 
   // Helper to check fit
   const fitsInHeader = (obj: object) =>
     uint8ArrayToBase64(stringToUint8Array(stringify(obj))).length < MAX_HEADER_CONTENT_BYTES;
 
-  // If too big, try trimming caption to 200 bytes with ellipsis
+
+
+  // If too big, first try trimming caption
   if (!fitsInHeader(headerObj) && typeof headerObj.caption === 'string') {
-    headerObj.caption = trimToBytes(headerObj.caption as string, TEXT_FIELD_BYTE_LIMIT);
-  }
-
-  // If still too big, move heavy fields (embeddedPost, primaryMediaFile, readingTimeStats) to default payload
-  const defaultPayloadObj: Partial<PostContent> & { readingTimeStats?: ReadTimeStats } = {};
-  // const moveEmbeddedPost = () => {
-  //   if (headerObj.embeddedPost !== undefined) {
-  //     defaultPayloadObj.embeddedPost = headerObj.embeddedPost;
-  //     delete headerObj.embeddedPost;
-  //   }
-  // };
-  // const movePrimaryMediaFile = () => {
-  //   if (headerObj.primaryMediaFile !== undefined) {
-  //     defaultPayloadObj.primaryMediaFile = headerObj.primaryMediaFile;
-  //     delete headerObj.primaryMediaFile;
-  //   }
-  // };
-  // const moveReadingTimeStats = () => {
-  //   const h = headerObj as Partial<Omit<Article, 'type'>>;
-  //   if (h.readingTimeStats !== undefined) {
-  //     defaultPayloadObj.readingTimeStats = h.readingTimeStats;
-  //     delete h.readingTimeStats;
-  //   }
-  // };
-
-  if (!fitsInHeader(headerObj)) {
-    console.warn('Moving embeddedPost out of header for size constraints');
-    throw new Error(`Header Size Exceeded: embeddedPost cannot be uploaded. Size is ${stringify(headerObj).length} bytes. That's Homebase Problem. Ping them to fix it.`);
-    // moveEmbeddedPost();
-  }
-  if (!fitsInHeader(headerObj)) {
-    console.warn('Moving primaryMediaFile out of header for size constraints');
-    throw new Error(`Header Size Exceeded: primaryMediaFile cannot be uploaded. Size is ${stringify(headerObj).length} bytes.`);
-    // movePrimaryMediaFile();
-  }
-  if (!fitsInHeader(headerObj)) {
-    console.warn('Moving readingTimeStats out of header for size constraints');
-    throw new Error(`Header Size Exceeded: readingTimeStats cannot be uploaded. Size is ${stringify(headerObj).length} bytes.`);
-    // moveReadingTimeStats();
-  }
-
-  // Do not drop critical metadata (sourceUrl, reactAccess, isCollaborative)
-
-  // Final fallback to minimal header to guarantee fit
-  let fellBackToMinimalHeader = false;
-  if (!fitsInHeader(headerObj)) {
-    fellBackToMinimalHeader = true;
-    headerObj = { channelId: fullContent.channelId, type: fullContent.type };
-  }
-
-  const headerContent = stringify(headerObj);
-
-  // Default payload
-  // If we fell back to minimal header, include the entire content in the default payload
-  // Otherwise, include only the fields we moved out of the header (embeddedPost/primaryMediaFile/readingTimeStats)
-  const defaultPayload: PayloadFile | null = fellBackToMinimalHeader
-    ? {
-      key: DEFAULT_PAYLOAD_KEY,
-      payload: new OdinBlob([stringify(fullContent)], { type: 'application/json' }),
+    const original = headerObj.caption as string;
+    const trimmed = trimToBytes(original, TEXT_FIELD_BYTE_LIMIT);
+    if (trimmed !== original) {
+      wasCaptionTrimmed = true;
+      headerObj.caption = trimmed;
     }
-    : Object.keys(defaultPayloadObj).length > 0
-      ? {
-        key: DEFAULT_PAYLOAD_KEY,
-        payload: new OdinBlob([stringify(defaultPayloadObj)], { type: 'application/json' }),
-      }
-      : null;
+  }
 
-  // Text payload: include full text fields (body, abstract, caption, captionAsRichText) and type
+  // If still too big, try removing captionAsRichText from header (will send via payload)
+  if (!fitsInHeader(headerObj) && headerObj.captionAsRichText !== undefined) {
+    movedCaptionRichToPayload = true;
+    delete headerObj.captionAsRichText;
+  }
+
+  // If still too big, try limiting embeddedPost payload descriptors to first 6
+  if (
+    !fitsInHeader(headerObj) &&
+    headerObj.embeddedPost?.payloads &&
+    headerObj.embeddedPost.payloads.length > 6
+  ) {
+    headerObj.embeddedPost.payloads = headerObj.embeddedPost.payloads.slice(0, 6);
+  }
+
+  if (!fitsInHeader(headerObj) && headerObj.embeddedPost) {
+    console.warn('[odin-js] getPostContentForUpload: removing embeddedPost from header due to size');
+    throw new Error(`Header content exceeds size limit even after optimizations. Size exceeded by ${uint8ArrayToBase64(stringToUint8Array(stringify(headerObj))).length - MAX_HEADER_CONTENT_BYTES
+      } `);
+  }
+
+
+  // Text payload: include only fields that were trimmed or couldn't fit in the header
   const textPayloadObj: Record<string, unknown> = { type: fullContent.type };
-  textPayloadObj.caption = fullContent.caption;
-  if (fullContent.captionAsRichText !== undefined) {
+  if (wasCaptionTrimmed && fullContent.caption) {
+    textPayloadObj.caption = fullContent.caption;
+  }
+  if (movedCaptionRichToPayload && fullContent.captionAsRichText !== undefined) {
     textPayloadObj.captionAsRichText = fullContent.captionAsRichText;
   }
   if (isArticle) {
     const article = fullContent;
-    textPayloadObj.abstract = article.abstract;
-    textPayloadObj.body = article.body;
+    if (wasAbstractTrimmed) {
+      textPayloadObj.abstract = article.abstract;
+    }
+    if (!bodyIncludedInHeader && article.body !== undefined) {
+      textPayloadObj.body = article.body;
+    }
   }
 
-  const additionalPayloads: PayloadFile[] = [
+  // only add the payload if its not empty
+  const isTextPayloadEmpty =
+    Object.keys(textPayloadObj).length === 1 && textPayloadObj.type === fullContent.type;
+
+  const additionalPayloads: PayloadFile[] = !isTextPayloadEmpty ? [
     {
       key: POST_FULL_TEXT_PAYLOAD_KEY,
       payload: new OdinBlob([stringify(textPayloadObj)], { type: 'application/json' }),
     },
-  ];
+  ] : [];
 
-  return { headerContent, defaultPayload, additionalPayloads };
+  const headerContent = stringify(headerObj);
+
+  return { headerContent, defaultPayload: null, additionalPayloads };
 };
 
 export const hasConflictingSlug = async <T extends PostContent>(
