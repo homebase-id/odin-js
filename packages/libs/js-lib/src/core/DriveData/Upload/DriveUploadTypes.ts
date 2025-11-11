@@ -133,6 +133,7 @@ export interface UploadFileMetadata {
   versionTag?: string;
 }
 
+
 export interface UploadManifest {
   PayloadDescriptors?: UploadPayloadDescriptor[];
 }
