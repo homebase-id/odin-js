@@ -105,7 +105,10 @@ export const PostBody = ({
       <h1 className="text-foreground">
         {isExpanded || !hasMoreToShowNonArticle ? (
           effectivePost.captionAsRichText ? (
-            <RichTextRenderer body={effectivePost.captionAsRichText} odinId={odinId} />
+            <RichTextRenderer
+              body={effectivePost.captionAsRichText || effectivePost.caption}
+              odinId={odinId}
+            />
           ) : (
             <span className="whitespace-pre-wrap">{effectivePost.caption}</span>
           )
