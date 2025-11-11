@@ -174,41 +174,21 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
 // Helper to keep the ['drives'] list cache in sync with the individual drive cache
 export const syncDriveIntoDrivesList = (
   queryClient: QueryClient,
-  updated: TargetDrive | DriveDefinition
+  updated: DriveDefinition
 ) => {
   const listKey = ['drives'] as const;
   const list = queryClient.getQueryData<DriveDefinition[]>(listKey);
   if (!list || list.length === 0) return;
-
-  // Determine whether we have a full DriveDefinition or only a TargetDrive
-  const isFullDrive = (val: unknown): val is DriveDefinition =>
-    typeof val === 'object' && val !== null && 'targetDriveInfo' in (val as Record<string, unknown>);
-
-  if (isFullDrive(updated)) {
-    const targetDrive = updated.targetDriveInfo;
-    const individualKey = ['drives', `${targetDrive?.alias}_${targetDrive?.type}`] as const;
-    // Ensure the individual cache is up-to-date as well
-    queryClient.setQueryData(individualKey, updated);
-
-    const updatedList = list.map((d) =>
-      drivesEqual(d.targetDriveInfo, targetDrive) ? updated : d
-    );
-    const changed = updatedList.some((d, i) => d !== list[i]);
-    if (changed) queryClient.setQueryData(listKey, updatedList);
-    return;
-  }
-
-  // Fallback: only TargetDrive provided; sync from the individual cache if present
-  const targetDrive = updated as TargetDrive;
-  const individualKey = ['drives', `${targetDrive?.alias}_${targetDrive?.type}`] as const;
-  const cachedDrive = queryClient.getQueryData<DriveDefinition | null>(individualKey);
-  if (!cachedDrive) return;
-
+  const targetDrive = updated.targetDriveInfo;
   const updatedList = list.map((d) =>
-    drivesEqual(d.targetDriveInfo, targetDrive) ? cachedDrive : d
+    drivesEqual(d.targetDriveInfo, targetDrive) ? updated : d
   );
   const changed = updatedList.some((d, i) => d !== list[i]);
-  if (changed) queryClient.setQueryData(listKey, updatedList);
+  if (changed) queryClient.setQueryData(listKey, updatedList, { updatedAt: Date.now() });
+
+  return;
+
+
 };
 
 // Helper to update the individual drive cache and sync the main list using an updater function
