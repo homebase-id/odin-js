@@ -190,7 +190,7 @@ const SelectedConnectionItem = ({
                         verificationStatus === "error" ||
                         !isValid) && (
                         <span className="text-xs text-red-600">
-                            {t("⚠ Unavailable")}
+                            {t("️️⚠️ Unavailable")}
                         </span>
                     )
                 )}

@@ -1,5 +1,7 @@
 import {DealerRecoveryRiskReport, RecoveryRiskLevel} from "../../provider/auth/SecurityHealthProvider";
 import {Link} from "react-router-dom";
+import {Check} from "@homebase-id/common-app/icons";
+import { AlertTriangle, AlertCircle, Skull } from "lucide-react";
 
 export function DealerRecoveryRiskHeadline({
                                                report,
@@ -20,36 +22,45 @@ export function DealerRecoveryRiskHeadline({
 }
 
 
-export function DealerRecoveryRiskHeadlineText({report}: { report: DealerRecoveryRiskReport }) {
+export function DealerRecoveryRiskHeadlineText({ report }: { report: DealerRecoveryRiskReport }) {
     let headline: string;
+    let textColor: string;
+    let Icon: React.ElementType;
 
-    let textColor;
     switch (report.riskLevel) {
         case RecoveryRiskLevel.Low:
-            headline = "✅ Recovery key is safe";
-            textColor = "text-green-600"
+            headline = "Recovery key is safe";
+            textColor = "text-green-600";
+            Icon = Check;
             break;
         case RecoveryRiskLevel.Moderate:
-            // headline = "⚠️ Recovery is fragile. You should add at least one more trusted connection";
-            headline = "⚠️ Recovery is fragile";
-            textColor = "text-green-600"
+            headline = "Recovery is fragile";
+            textColor = "text-yellow-600";
+            Icon = AlertTriangle;
             break;
         case RecoveryRiskLevel.High:
-            // headline = "🚨 Just enough shards — at risk; add at least 2 more trusted connections";
-            headline = "🚨 Just enough shards";
-            textColor = "text-red-600"
+            headline = "Just enough shards";
+            textColor = "text-orange-600";
+            Icon = AlertCircle;
             break;
         case RecoveryRiskLevel.Critical:
-            headline = "💀 Recovery not possible";
-            textColor = "text-red-600"
+            headline = "Recovery not possible";
+            textColor = "text-red-600";
+            Icon = Skull;
             break;
         default:
-            headline = "ℹ️ Recovery status unknown";
-            textColor = "text-red-600"
+            headline = "Recovery status unknown";
+            textColor = "text-gray-600";
+            Icon = AlertCircle;
             break;
     }
 
-    return <span className={textColor}>{headline}</span>
+    return (
+        <span className={`inline-flex ${textColor}`}>
+            <Icon className="h-4 w-4 mr-2" aria-hidden="true" />
+            {headline}
+        </span>
+    );
 }
 
 

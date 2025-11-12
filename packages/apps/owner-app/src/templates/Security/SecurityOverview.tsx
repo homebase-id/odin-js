@@ -84,7 +84,7 @@ export const SecurityOverview = () => {
                   {/* Password Recovery */}
                   <div>
                     <div className="flex items-center">
-                      <p className="font-medium">{t('Password Recovery')}</p>
+                      <p className="font-medium">{t('Password Recovery:')}</p>
 
                       {!info?.isConfigured && (
                         <span className="ml-2 flex items-center text-red-600">
