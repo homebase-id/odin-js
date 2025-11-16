@@ -67,6 +67,7 @@ export const Step3OtherOptions = ({
         removePlayer={removePlayer}
         updatePlayerType={handleUpdateType}
         trustedPlayers={localPlayers}
+        forceVerify={0}
       />
     </>
   );

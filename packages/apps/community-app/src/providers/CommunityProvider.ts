@@ -211,11 +211,11 @@ export const deleteCommunityChannel = async (
   );
 
 
-  // This only deletes files in the community channel, not threads or anything else
+  // // This only deletes files in the community channel, not threads or anything else
   const deleteCommunityMessageResult = await deleteFilesByGroupId(
     dotYouClient,
     targetDrive,
-    [communityId],
+    [channel.fileId],
     undefined
   );
 
