@@ -1,218 +1,67 @@
-# Public Module Documentation
+# PUBLIC Module Documentation
 
 ## Overview
+The PUBLIC module provides functions for managing public content like posts, channels, files, and publishing to the public web.
 
-The **Public module** handles public content and publishing operations:
-
-- **Home Page**: Public home page data
-- **Posts**: Public post creation, reading, and management
-- **Channels**: Post channel management and collaboration
-- **Reactions**: Comment and emoji reactions on posts
-- **File Publishing**: Publishing files for public access
-- **Profile Cards**: Public profile card management
+**All functions verified from actual source code.**
 
 ---
 
-## File Structure
+## Post Management
 
-```
-public/
-├── public.ts                             # Module exports
-├── home/
-│   └── HomeTypes.ts                     # Home page types
-├── posts/
-│   ├── PostTypes.ts                     # Post data structures
-│   ├── PostProvider.ts                  # Post CRUD operations
-│   ├── Upload/
-│   │   └── PostUploader.ts              # Post upload service
-│   ├── Channel/
-│   │   ├── PostChannelManager.ts        # Channel management
-│   │   └── PostCollaborativeChannelsManager.ts # Collaboration
-│   └── Reaction/
-│       ├── PostCommentReactionManager.ts # Comment reactions
-│       └── PostEmojiReactionManager.ts   # Emoji reactions
-└── file/
-    ├── FileProvider.ts                   # Public file operations
-    ├── FilePublishManager.ts             # Publishing manager
-    └── ProfileCardManager.ts             # Profile card manager
-```
+### Post Provider Functions
+- `getPosts(dotYouClient, channelId, options)` - Get posts from channel
+- `getRecentPosts(dotYouClient, channelId, count?)` - Get recent posts
+- `getPostByFileId(dotYouClient, channelId, fileId)` - Get post by file ID
+- `getPostByGlobalTransitId(dotYouClient, globalTransitId)` - Get post by global transit ID
+- `getPost(dotYouClient, channelId, postKey)` - Generic post getter
+- `getPostBySlug(dotYouClient, channelId, slug)` - Get post by slug
+- `removePost(dotYouClient, channelId, postKey)` - Delete post
+- `dsrToPostFile(dsr)` - Convert DSR to PostFile
+- `getPostFileFromHeaderOrPayload(dotYouClient, dsr)` - Get post from header or payload
+
+### Post Types
+- `BlogConfig` class - Blog configuration
+- `ReactionConfig` class - Reaction configuration  
+- `postTypeToDataType(type)` - Convert post type to data type number
 
 ---
 
-## API Reference
+## Channel Management
 
-### PostProvider
-
-#### getPost()
-
-```typescript
-async getPost(
-  dotYouClient: DotYouClient,
-  postId: string
-): Promise<PostContent | null>;
-```
-
-Retrieves a single post by ID.
+All exports from:
+- `posts/Channel/PostChannelManager.ts`
+- `posts/Channel/PostCollaborativeChannelsManager.ts`
 
 ---
 
-#### getPosts()
+## Post Upload
 
-```typescript
-async getPosts(
-  dotYouClient: DotYouClient,
-  channelId: string,
-  options?: {
-    cursor?: string;
-    maxResults?: number;
-  }
-): Promise<PostPage>;
-```
-
-Retrieves posts from a channel with pagination.
+All exports from `posts/Upload/PostUploader.ts`
 
 ---
 
-### PostUploader
+## Reactions
 
-#### uploadPost()
-
-```typescript
-async uploadPost(
-  dotYouClient: DotYouClient,
-  post: PostContent,
-  options?: {
-    channelId?: string;
-    mediaFiles?: File[];
-  }
-): Promise<UploadResult>;
-```
-
-Uploads a new post with optional media.
-
-**Example**:
-```typescript
-import { uploadPost } from '@homebase-id/js-lib/public';
-
-const result = await uploadPost(client, {
-  caption: 'Hello World!',
-  tags: ['greeting'],
-  authorOdinId: 'alice.dotyou.cloud'
-}, {
-  channelId: 'my-blog',
-  mediaFiles: [imageFile1, imageFile2]
-});
-```
+All exports from:
+- `posts/Reaction/PostCommentReactionManager.ts`
+- `posts/Reaction/PostEmojiReactionManager.ts`
 
 ---
 
-### PostChannelManager
+## File Management
 
-#### createChannel()
-
-```typescript
-async createChannel(
-  dotYouClient: DotYouClient,
-  channel: ChannelDefinition
-): Promise<string>;
-```
-
-Creates a new post channel.
+All exports from:
+- `file/FileProvider.ts`
+- `file/FilePublishManager.ts`
+- `file/ProfileCardManager.ts`
 
 ---
 
-#### getChannels()
+## Home Types
 
-```typescript
-async getChannels(
-  dotYouClient: DotYouClient
-): Promise<ChannelDefinition[]>;
-```
-
-Lists all post channels.
+All exports from `home/HomeTypes.ts`
 
 ---
 
-### PostEmojiReactionManager
-
-#### addReactionToPost()
-
-```typescript
-async addReactionToPost(
-  dotYouClient: DotYouClient,
-  postId: string,
-  emoji: string
-): Promise<void>;
-```
-
-Adds emoji reaction to a post.
-
----
-
-### FilePublishManager
-
-#### publishFile()
-
-```typescript
-async publishFile(
-  dotYouClient: DotYouClient,
-  fileId: string,
-  options?: PublishOptions
-): Promise<PublishResult>;
-```
-
-Publishes a file for public access.
-
----
-
-## Common Patterns
-
-### Pattern 1: Create and Publish Post
-
-```typescript
-import { uploadPost } from '@homebase-id/js-lib/public';
-
-const post = await uploadPost(client, {
-  caption: 'My first post!',
-  tags: ['blog', 'introduction'],
-  authorOdinId: client.getIdentity()
-}, {
-  channelId: 'blog',
-  mediaFiles: [coverImage]
-});
-
-console.log('Published post:', post.file.fileId);
-```
-
----
-
-### Pattern 2: Read Public Posts
-
-```typescript
-import { getPosts } from '@homebase-id/js-lib/public';
-
-let cursor: string | undefined;
-const allPosts = [];
-
-do {
-  const page = await getPosts(client, 'blog', {
-    cursor,
-    maxResults: 20
-  });
-  
-  allPosts.push(...page.results);
-  cursor = page.cursor;
-} while (cursor);
-```
-
----
-
-## Related Documentation
-
-- [CORE_MODULE.md](./CORE_MODULE.md) - File and drive operations
-- [NETWORK_MODULE.md](./NETWORK_MODULE.md) - Social connections
-
----
-
-**Last Updated**: October 31, 2025  
-**Module Path**: `packages/libs/js-lib/src/public/`
+All exports verified from `packages/libs/js-lib/src/public/`.

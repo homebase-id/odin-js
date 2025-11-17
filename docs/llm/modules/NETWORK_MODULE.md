@@ -1,297 +1,117 @@
-# Network Module Documentation
+# NETWORK Module Documentation
 
 ## Overview
+The NETWORK module manages social connections, circles, contacts, follows, and permissions.
 
-The **Network module** manages social connections and relationships:
-
-- **Connections**: Identity-to-identity connections
-- **Circles**: Grouping and organizing connections
-- **Contacts**: Contact information management
-- **Follows**: Following other identities
-- **Permissions**: Network-based access control
-- **Connection Requests**: Managing pending connections
-- **Introductions**: Third-party connection introductions
+**All functions verified from actual source code.**
 
 ---
 
-## File Structure
+## Circle Management
 
-```
-network/
-├── network.ts                              # Module exports
-├── connection/
-│   ├── ConnectionManager.ts               # Connection operations
-│   ├── ConnectionRequestManager.ts         # Request handling
-│   └── IntroductionManager.ts             # Introduction management
-├── circle/
-│   ├── CircleProvider.ts                  # Circle CRUD
-│   ├── CircleMembershipManager.ts         # Member management
-│   ├── CircleDomainMembershipManager.ts   # Domain membership
-│   └── CircleDataTypes.ts                 # Circle types
-├── contact/
-│   ├── ContactManager.ts                  # Contact management
-│   └── ContactTypes.ts                    # Contact types
-├── follow/
-│   └── FollowManager.ts                   # Follow operations
-├── permission/
-│   └── PermissionTypes.ts                 # Permission types
-└── troubleshooting/
-    └── ConnectionGrantProvider.ts          # Connection troubleshooting
-```
+### Circle Provider
+- `CONFIRMED_CONNECTIONS_CIRCLE_ID` = 'bb2683fa402aff866e771a6495765a15'
+- `AUTO_CONNECTIONS_CIRCLE_ID` = '9e22b42952f74d2580e11250b651d343'
+- `updateCircleDefinition(dotYouClient, circleId, name, description, driveGrants, permissions, disabled?)` - Update circle
+- `createCircleDefinition(dotYouClient, name, description, driveGrants, permissions, disabled?)` - Create circle
+- `getCircles(dotYouClient)` - Get all circles
+- `getCircle(dotYouClient, circleId)` - Get single circle
+- `disableCircle(dotYouClient, circleId)` - Disable circle
+- `enableCircle(dotYouClient, circleId)` - Enable circle
+- `removeCircle(dotYouClient, circleId)` - Delete circle
+
+### Circle Membership
+- `addMemberToCircle(dotYouClient, circleId, odinId)` - Add member
+- `removeMemberFromCircle(dotYouClient, circleId, odinId)` - Remove member
+- `fetchMembersOfCircle(dotYouClient, circleId)` - Get all members
+
+### Domain Membership
+- `removeDomainFromCircle(dotYouClient, circleId, domain)` - Remove domain
+- `addDomainToCircle(dotYouClient, circleId, domain)` - Add domain
 
 ---
 
-## API Reference
+## Connection Management
 
-### ConnectionManager
+- `disconnectFromContact(dotYouClient, odinId)` - Disconnect
+- `getConnections(dotYouClient)` - Get all connections
+- `getBlockedConnections(dotYouClient)` - Get blocked
+- `getConnectionInfo(dotYouClient, odinId)` - Get connection info
 
-#### getConnections()
+### Connection Requests
+- `getPendingRequests(dotYouClient)` - Get pending incoming requests
+- `getPendingRequest(dotYouClient, odinId)` - Get single pending request
+- `getSentRequests(dotYouClient)` - Get sent requests
+- `getSentRequest(dotYouClient, odinId)` - Get single sent request
+- `acceptConnectionRequest(dotYouClient, odinId, circleIds?)` - Accept request
+- `deletePendingRequest(dotYouClient, odinId)` - Delete pending
+- `deleteSentRequest(dotYouClient, odinId)` - Delete sent
+- `sendRequest(dotYouClient, odinId, message?)` - Send connection request
+- `blockOdinId(dotYouClient, odinId)` - Block identity
+- `unblockOdinId(dotYouClient, odinId)` - Unblock identity
+- `getDetailedConnectionInfo(dotYouClient, odinId)` - Get detailed info
 
-```typescript
-async getConnections(
-  dotYouClient: DotYouClient,
-  status?: ConnectionStatus
-): Promise<Connection[]>;
-```
-
-Retrieves all connections, optionally filtered by status.
-
----
-
-#### sendConnectionRequest()
-
-```typescript
-async sendConnectionRequest(
-  dotYouClient: DotYouClient,
-  targetIdentity: string,
-  message?: string
-): Promise<void>;
-```
-
-Sends a connection request to another identity.
-
-**Example**:
-```typescript
-import { sendConnectionRequest } from '@homebase-id/js-lib/network';
-
-await sendConnectionRequest(
-  client,
-  'bob.dotyou.cloud',
-  'Hi Bob, let\'s connect!'
-);
-```
+### Introductions
+- `sendIntroduction(dotYouClient, introduceeOdinIds, introduceToOdinIds, message?)` - Send introduction
+- `confirmIntroduction(dotYouClient, introducerOdinId, introduceeOdinIds)` - Confirm
+- `getReceivedIntroductions(dotYouClient)` - Get received
+- `removeAllReceivedIntroductions(dotYouClient, introducer OdinId)` - Remove all
 
 ---
 
-#### acceptConnectionRequest()
+## Contact Management
 
-```typescript
-async acceptConnectionRequest(
-  dotYouClient: DotYouClient,
-  requestId: string
-): Promise<void>;
-```
+- `CONTACT_PROFILE_IMAGE_KEY` = 'prfl_pic'
+- `getContactByOdinId(dotYouClient, odinId)` - Get by Odin ID
+- `getContactByUniqueId(dotYouClient, uniqueId)` - Get by unique ID
+- `getContacts(dotYouClient)` - Get all contacts
 
-Accepts a pending connection request.
-
----
-
-#### removeConnection()
-
-```typescript
-async removeConnection(
-  dotYouClient: DotYouClient,
-  identity: string
-): Promise<void>;
-```
-
-Removes an existing connection.
+### Contact Types
+- `ContactConfig` class
+- `ContactDataImage` interface
+- `ContactFile` interface
+- `RawContact` interface
+- `ContactVm` interface
 
 ---
 
-### CircleProvider
+## Follow Management
 
-#### getCircles()
-
-```typescript
-async getCircles(
-  dotYouClient: DotYouClient
-): Promise<Circle[]>;
-```
-
-Lists all circles.
-
----
-
-#### createCircle()
-
-```typescript
-async createCircle(
-  dotYouClient: DotYouClient,
-  circle: CircleDefinition
-): Promise<string>;
-```
-
-Creates a new circle.
-
-**Example**:
-```typescript
-import { createCircle } from '@homebase-id/js-lib/network';
-
-const circleId = await createCircle(client, {
-  name: 'Close Friends',
-  description: 'My closest friends',
-  permissions: {
-    allowRead: true,
-    allowWrite: false
-  }
-});
-```
+- `fetchFollowing(dotYouClient, cursor?)` - Get following list
+- `fetchIdentityIFollow(dotYouClient, odinId)` - Check if following
+- `createOrUpdateFollow(dotYouClient, odinId, notificationType?)` - Follow
+- `syncFeedHistoryForFollowing(dotYouClient, odinId)` - Sync feed
+- `Unfollow(dotYouClient, odinId)` - Unfollow
+- `fetchFollowers(dotYouClient, cursor?)` - Get followers
+- `fetchFollower(dotYouClient, odinId)` - Get single follower
+- `fetchFollowDetail(dotYouClient, odinId)` - Get follow details
 
 ---
 
-### CircleMembershipManager
+## Troubleshooting
 
-#### addMemberToCircle()
-
-```typescript
-async addMemberToCircle(
-  dotYouClient: DotYouClient,
-  circleId: string,
-  identity: string
-): Promise<void>;
-```
-
-Adds a connection to a circle.
+- `fetchCircleMembershipStatus(dotYouClient, odinId)` - Get membership status
+- `verifyConnection(dotYouClient, odinId)` - Verify connection
 
 ---
 
-#### removeMemberFromCircle()
+## Permission Types
 
-```typescript
-async removeMemberFromCircle(
-  dotYouClient: DotYouClient,
-  circleId: string,
-  identity: string
-): Promise<void>;
-```
-
-Removes a member from a circle.
+- `CirclePermissionType` enum
+- `AppCirclePermissionType` enum
+- `AppPermissionType` enum
 
 ---
 
-### FollowManager
+## Data Types
 
-#### followIdentity()
-
-```typescript
-async followIdentity(
-  dotYouClient: DotYouClient,
-  targetIdentity: string
-): Promise<void>;
-```
-
-Follows an identity (asymmetric relationship).
+All type exports from `circle/CircleDataTypes.ts` including:
+- `ConnectionRequestHeader`, `CircleNetworkNotification`, `DotYouProfile`
+- `ActiveConnection`, `CircleGrant`, `AppGrant`, `AccessGrant`
+- `ConnectionRequestOrigin`, `ConnectionInfo`, `IncomingConnectionRequest`
+- `ConnectionRequest`, `ContactData`, `AcknowledgedConnectionRequest`
+- `CircleDefinition`, `DriveGrant`, `AcceptRequestHeader`, `OdinIdRequest`
 
 ---
 
-#### unfollowIdentity()
-
-```typescript
-async unfollowIdentity(
-  dotYouClient: DotYouClient,
-  targetIdentity: string
-): Promise<void>;
-```
-
-Unfollows an identity.
-
----
-
-#### getFollowers()
-
-```typescript
-async getFollowers(
-  dotYouClient: DotYouClient
-): Promise<string[]>;
-```
-
-Gets list of identities following you.
-
----
-
-#### getFollowing()
-
-```typescript
-async getFollowing(
-  dotYouClient: DotYouClient
-): Promise<string[]>;
-```
-
-Gets list of identities you're following.
-
----
-
-## Common Patterns
-
-### Pattern 1: Connect with Another Identity
-
-```typescript
-import { sendConnectionRequest, getConnections } from '@homebase-id/js-lib/network';
-
-// Send request
-await sendConnectionRequest(client, 'bob.dotyou.cloud', 'Hi!');
-
-// Later: check connection status
-const connections = await getConnections(client);
-const bobConnection = connections.find(c => c.identity === 'bob.dotyou.cloud');
-
-if (bobConnection?.status === 'connected') {
-  console.log('Connected with Bob!');
-}
-```
-
----
-
-### Pattern 2: Organize Connections in Circles
-
-```typescript
-import { createCircle, addMemberToCircle } from '@homebase-id/js-lib/network';
-
-// Create circle
-const familyCircleId = await createCircle(client, {
-  name: 'Family',
-  permissions: { allowRead: true, allowWrite: true }
-});
-
-// Add members
-await addMemberToCircle(client, familyCircleId, 'mom.dotyou.cloud');
-await addMemberToCircle(client, familyCircleId, 'dad.dotyou.cloud');
-```
-
----
-
-### Pattern 3: Follow Public Identities
-
-```typescript
-import { followIdentity, getFollowing } from '@homebase-id/js-lib/network';
-
-// Follow someone
-await followIdentity(client, 'celebrity.dotyou.cloud');
-
-// List all following
-const following = await getFollowing(client);
-console.log('Following', following.length, 'identities');
-```
-
----
-
-## Related Documentation
-
-- [CORE_MODULE.md](./CORE_MODULE.md) - Permission and access control
-- [PUBLIC_MODULE.md](./PUBLIC_MODULE.md) - Public posts and content
-
----
-
-**Last Updated**: October 31, 2025  
-**Module Path**: `packages/libs/js-lib/src/network/`
+All exports verified from `packages/libs/js-lib/src/network/`.

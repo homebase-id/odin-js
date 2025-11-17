@@ -15,10 +15,12 @@ For AI assistants and developers working with the Homebase ecosystem:
 ### Core Modules
 
 - **[CORE_MODULE.md](./CORE_MODULE.md)** (1,146 lines)
+
   - DotYouClient, Drive, File, Query, Upload, Security, WebSocket, Reactions
   - The foundation of all operations
 
 - **[AUTH_MODULE.md](./AUTH_MODULE.md)** (848 lines)
+
   - Authentication flow, ECC/RSA keys, Identity management
   - Essential for secure communication
 
@@ -29,15 +31,19 @@ For AI assistants and developers working with the Homebase ecosystem:
 ### Domain Modules
 
 - **[PUBLIC_MODULE.md](./PUBLIC_MODULE.md)** (218 lines)
+
   - Public posts, files, home page, publishing
 
 - **[NETWORK_MODULE.md](./NETWORK_MODULE.md)** (297 lines)
+
   - Connections, circles, contacts, follows, permissions
 
 - **[PROFILE_MODULE.md](./PROFILE_MODULE.md)** (155 lines)
+
   - Profile attributes, definitions, validation
 
 - **[PEER_MODULE.md](./PEER_MODULE.md)** (190 lines)
+
   - Peer-to-peer communication, external data, inbox
 
 - **[MEDIA_MODULE.md](./MEDIA_MODULE.md)** (277 lines)
@@ -95,9 +101,11 @@ Modules needed:
 ## Integration with MCP Server
 
 These docs are served by the MCP docs server at:
+
 - `packages/libs/mcp-docs-server/`
 
 Access via:
+
 - `GET /mcp/docs` - List all docs
 - `GET /mcp/docs/modules/CORE_MODULE.md` - Get specific doc
 
@@ -119,6 +127,6 @@ When updating module documentation:
 
 ---
 
-**Last Updated**: October 31, 2025
+**Last Updated**: November 17, 2025
 **Status**: Production Ready
 **Coverage**: Complete

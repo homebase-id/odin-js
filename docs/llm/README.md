@@ -30,10 +30,18 @@ Operational guide for common tasks: setup, testing, debugging, deployment, and t
 
 ### 📦 [modules/](./modules/)
 
-**Deep-dive module documentation** - Detailed API references for each major module:
+**Module documentation** - Conceptual overview and function discovery for each module. For complete TypeScript signatures and type definitions, MCP servers should read directly from:
 
-- [modules/MODULES_README.md](./modules/MODULES_README.md) - Navigation guide and overview
-- Core, Auth, Helpers, Public, Network, Profile, Peer, Media modules (detailed references)> /Users/biswa/Documents/GitHub/dotyoucore-js/docs/llm/GLOSSARY.md << 'EOF'
+- **Source files**: `packages/libs/js-lib/src/**/*.ts` - Original TypeScript with full type information
+- **Declaration files**: `packages/libs/js-lib/dist/**/*.d.ts` - Generated type definitions (after build)
+- **Installed package**: `node_modules/@homebase-id/js-lib/**/*.d.ts` - Published package types
+
+Module docs provide:
+
+- [modules/MODULE_INDEX.md](./modules/MODULE_INDEX.md) - Navigation guide and overview
+- Core, Auth, Helpers, Public, Network, Profile, Peer, Media modules - Function discovery, usage patterns, when to use what
+
+**Note for MCP servers**: Parse `.d.ts` files for complete type signatures rather than relying on markdown docs. The module docs are for conceptual understanding and function discovery.
 
 # Glossary
 
@@ -744,7 +752,7 @@ Add to `packages/libs/js-lib/package.json`:
 
 ```json
 {
-  "name": "@dotyou/js-lib",
+  "name": "@homebase-id/js-lib",
   "version": "1.0.0",
   "description": "TypeScript SDK for DotYou/Odin platform",
   "llm": {
@@ -821,7 +829,7 @@ Users can reference in their project's `.github/copilot-instructions.md`:
 ```markdown
 # Copilot Instructions for odin-js
 
-When working with `@dotyou/js-lib`, refer to the comprehensive LLM documentation:
+When working with `@homebase-id/js-lib`, refer to the comprehensive LLM documentation:
 
 https://raw.githubusercontent.com/homebase-id/odin-js/main/docs/llm/WORKSPACE_INSTRUCTIONS.md
 
@@ -834,29 +842,32 @@ Key points:
 - Check GLOSSARY.md for terminology
 ```
 
-### 6. VS Code Workspace Settings
+### 6. VS Code Custom Instructions File
 
-Users can add to their `.vscode/settings.json`:
+Users can create `.github/copilot-instructions.md` in their project root:
 
-```json
-{
-  "github.copilot.advanced": {
-    "inlineSuggestCount": 3
-  },
-  "github.copilot.chat.codeGeneration.instructions": [
-    {
-      "text": "When working with @dotyou/js-lib, follow patterns from: https://raw.githubusercontent.com/homebase-id/odin-js/main/docs/llm/WORKSPACE_INSTRUCTIONS.md"
-    }
-  ]
-}
+```markdown
+When working with `@homebase-id/js-lib`, refer to the comprehensive LLM documentation:
+
+https://raw.githubusercontent.com/homebase-id/odin-js/main/docs/llm/WORKSPACE_INSTRUCTIONS.md
+
+Key points:
+
+- Always use DotYouClient for API calls
+- Follow encryption patterns (don't bypass interceptors)
+- Respect pagination with cursorState
+- Use existing providers before creating new ones
+- Check GLOSSARY.md for terminology
 ```
+
+This file is automatically used by GitHub Copilot in VS Code.
 
 ### 7. Cursor AI (.cursorrules)
 
 Add `.cursorrules` file to projects using the library:
 
 ```
-This project uses @dotyou/js-lib. Reference the LLM documentation at:
+This project uses @homebase-id/js-lib. Reference the LLM documentation at:
 docs/llm/WORKSPACE_INSTRUCTIONS.md
 
 Follow the golden rules and established patterns documented there.

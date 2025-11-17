@@ -1,190 +1,130 @@
-# Peer Module Documentation
+# PEER Module Documentation
 
 ## Overview
+The PEER module provides peer-to-peer data exchange, allowing retrieval of data from other identities.
 
-The **Peer module** enables cross-identity data operations and peer-to-peer communication:
-
-- **Peer Files**: Access files from other identities
-- **Peer Drives**: Drive operations on remote identities
-- **Peer Queries**: Query files from connected identities
-- **Peer Uploads**: Send files to other identities
-- **Inbox**: Receive files and data from peers
-- **External Media**: Fetch media from other identities
-- **External Posts**: Read posts from connected identities
-- **External Profiles**: Access profile data from peers
-- **Peer WebSocket**: Real-time updates from peers
-- **Read Receipts**: Track file read status
+**All functions verified from actual source code.**
 
 ---
 
-## File Structure
+## Drive Operations Over Peer
 
-```
-peer/
-├── peer.ts                                  # Module exports
-├── peerData/
-│   ├── Drive/
-│   │   └── PeerDriveProvider.ts            # Remote drive operations
-│   ├── File/
-│   │   ├── PeerFileProvider.ts             # Peer file operations
-│   │   ├── PeerFileByUniqueIdProvider.ts   # File by unique ID
-│   │   ├── PeerFileByGlobalTransitProvider.ts # File by transit ID
-│   │   ├── PeerFileManager.ts              # File management
-│   │   └── PeerReadReceiptManager.ts        # Read receipts
-│   ├── Query/
-│   │   └── PeerDriveQueryService.ts        # Query peer files
-│   ├── Upload/
-│   │   └── PeerFileUploader.ts             # Send files to peers
-│   ├── Media/
-│   │   ├── ExternalMediaProvider.ts        # External media access
-│   │   ├── ExternalImageProvider.ts        # External images
-│   │   └── ExternalVideoProvider.ts        # External videos
-│   ├── InboxProvider.ts                    # Inbox management
-│   ├── ExternalPostsDataProvider.ts        # External posts
-│   ├── ExternalProfileDataProvider.ts      # External profiles
-│   └── PeerTypes.ts                        # Peer type definitions
-└── WebsocketData/
-    └── WebsocketProviderOverPeer.ts         # Peer WebSocket
-```
+- `getDrivesByTypeOverPeer(dotYouClient, odinId, type)` - Get drives by type from peer
 
 ---
 
-## API Reference
+## File Operations Over Peer
 
-### PeerFileProvider
+### By File ID
+- `getFileHeaderOverPeer<T>(dotYouClient, targetDrive, fileId, odinId, options?)` - Get header
+- `getFileHeaderBytesOverPeer(dotYouClient, targetDrive, fileId, odinId, options?)` - Get header bytes
+- `getPayloadAsJsonOverPeer<T>(dotYouClient, targetDrive, fileId, odinId, key?, options?)` - Get payload JSON
+- `getPayloadBytesOverPeer(dotYouClient, targetDrive, fileId, odinId, key?, options?)` - Get payload bytes
+- `getThumbBytesOverPeer(dotYouClient, targetDrive, fileId, odinId, options?)` - Get thumbnail
+- `getContentFromHeaderOverPeer<T>(dotYouClient, file)` - Get content from header
+- `getContentFromHeaderOrPayloadOverPeer<T>(dotYouClient, file, odinId, options?)` - Get from header or payload
 
-#### getPeerFile()
+### By Unique ID
+- `getFileHeaderOverPeerByUniqueId<T>(dotYouClient, targetDrive, uniqueId, odinId, options?)` - Get header by unique ID
+- `getFileHeaderBytesOverPeerByUniqueId(dotYouClient, targetDrive, uniqueId, odinId, options?)` - Get header bytes by unique ID
 
-```typescript
-async getPeerFile(
-  dotYouClient: DotYouClient,
-  peerIdentity: string,
-  fileId: string
-): Promise<HomebaseFile | null>;
-```
+### By Global Transit ID
+- `getPayloadAsJsonOverPeerByGlobalTransitId<T>(dotYouClient, odinId, globalTransitId, options?)` - Get payload JSON
+- `getPayloadBytesOverPeerByGlobalTransitId(dotYouClient, odinId, globalTransitId, key?, options?)` - Get payload bytes
+- `getThumbBytesOverPeerByGlobalTransitId(dotYouClient, odinId, globalTransitId, options?)` - Get thumbnail
+- `getFileHeaderOverPeerByGlobalTransitId<T>(dotYouClient, odinId, globalTransitId, options?)` - Get header
+- `getFileHeaderBytesOverPeerByGlobalTransitId(dotYouClient, odinId, globalTransitId, options?)` - Get header bytes
+- `getContentFromHeaderOrPayloadOverPeerByGlobalTransitId<T>(dotYouClient, odinId, globalTransitId, options?)` - Get from header or payload
 
-Retrieves a file from another identity.
-
-**Example**:
-```typescript
-import { getPeerFile } from '@homebase-id/js-lib/peer';
-
-const file = await getPeerFile(client, 'bob.dotyou.cloud', fileId);
-```
-
----
-
-### PeerFileUploader
-
-#### sendFileToPeer()
-
-```typescript
-async sendFileToPeer(
-  dotYouClient: DotYouClient,
-  recipient: string,
-  file: File,
-  metadata?: PeerFileMetadata
-): Promise<UploadResult>;
-```
-
-Sends a file to another identity.
-
-**Example**:
-```typescript
-import { sendFileToPeer } from '@homebase-id/js-lib/peer';
-
-await sendFileToPeer(
-  client,
-  'bob.dotyou.cloud',
-  documentFile,
-  { description: 'Shared document', tags: ['work'] }
-);
-```
+### File Management
+- `deleteFileOverPeer(dotYouClient, targetDrive, fileId, recipients, options?)` - Delete file over peer
 
 ---
 
-### InboxProvider
+## Query Over Peer
 
-#### getInbox()
-
-```typescript
-async getInbox(
-  dotYouClient: DotYouClient,
-  options?: {
-    cursor?: string;
-    maxResults?: number;
-  }
-): Promise<InboxPage>;
-```
-
-Retrieves inbox items (received files from peers).
+- `queryBatchOverPeer<T>(dotYouClient, params, odinId, options?)` - Batch query
+- `queryModifiedOverPeer(dotYouClient, params, odinId, options?)` - Query modified
 
 ---
 
-### ExternalPostsDataProvider
+## Upload Over Peer
 
-#### getPeerPosts()
-
-```typescript
-async getPeerPosts(
-  dotYouClient: DotYouClient,
-  peerIdentity: string,
-  channelId: string
-): Promise<PostContent[]>;
-```
-
-Retrieves posts from a connected identity.
+- `uploadFileOverPeer(dotYouClient, instructionSet, metadata, payloads?, options?)` - Upload file to peer
 
 ---
 
-## Common Patterns
+## Inbox
 
-### Pattern 1: Send File to Peer
-
-```typescript
-import { sendFileToPeer } from '@homebase-id/js-lib/peer';
-
-await sendFileToPeer(
-  client,
-  'alice.dotyou.cloud',
-  photoFile,
-  { description: 'Vacation photos' }
-);
-```
+- `processInbox(dotYouClient)` - Process inbox
 
 ---
 
-### Pattern 2: Check Inbox
+## Media Over Peer
 
-```typescript
-import { getInbox } from '@homebase-id/js-lib/peer';
+### Images
+- `getDecryptedThumbnailMetaOverPeer(dotYouClient, targetDrive, fileId, odinId, options?)` - Get thumbnail meta
+- `getDecryptedImageUrlOverPeerByGlobalTransitId(...)` - Get image URL by global transit ID
+- `getDecryptedImageUrlOverPeer(...)` - Get image URL
+- `getDecryptedImageDataOverPeerByGlobalTransitId(...)` - Get image data by global transit ID
+- `getDecryptedImageDataOverPeer(...)` - Get image data
 
-const inbox = await getInbox(client, { maxResults: 20 });
-console.log(`${inbox.results.length} new items`);
-```
+### Videos
+- `getDecryptedVideoChunkOverPeer(...)` - Get video chunk
+- `getDecryptedVideoUrlOverPeer(...)` - Get video URL
+- `getDecryptedVideoUrlOverPeerByGlobalTransitId(...)` - Get video URL by global transit ID
 
----
-
-### Pattern 3: Query Peer Files
-
-```typescript
-import { queryPeerFiles } from '@homebase-id/js-lib/peer';
-
-const peerFiles = await queryPeerFiles(
-  client,
-  'bob.dotyou.cloud',
-  { targetDrive: sharedDrive, maxRecords: 50 }
-);
-```
+### Generic Media
+- `getDecryptedMediaUrlOverPeerByGlobalTransitId(...)` - Get media URL by global transit ID
+- `getDecryptedMediaUrlOverPeer(...)` - Get media URL
 
 ---
 
-## Related Documentation
+## Posts Over Peer
 
-- [CORE_MODULE.md](./CORE_MODULE.md) - File operations
-- [NETWORK_MODULE.md](./NETWORK_MODULE.md) - Connections
+- `getSocialFeed(dotYouClient, options?)` - Get social feed from connections
+- `getChannelsOverPeer(dotYouClient, odinId)` - Get channels from peer
+- `getChannelOverPeer(dotYouClient, odinId, channelId)` - Get channel from peer
+- `getChannelBySlugOverPeer(dotYouClient, odinId, slug)` - Get channel by slug
+- `getPostOverPeer(dotYouClient, odinId, channelId, postKey)` - Get post from peer
+- `getPostBySlugOverPeer<T>(dotYouClient, odinId, channelId, slug)` - Get post by slug
+
+### Post Types
+- `RecentsFromConnectionsReturn` interface
 
 ---
 
-**Last Updated**: October 31, 2025  
-**Module Path**: `packages/libs/js-lib/src/peer/`
+## Profile Over Peer
+
+- `getProfileAttributesOverPeer(dotYouClient, odinId, profileId?)` - Get profile attributes
+- `dsrToAttributeFileOverPeer(dotYouClient, dsr)` - Convert DSR to attribute file
+
+---
+
+## WebSocket Over Peer
+
+- `SubscribeOverPeer(dotYouClient, odinId, driveId, options?)` - Subscribe to peer notifications
+- `UnsubscribeOverPeer(dotYouClient, odinId, id)` - Unsubscribe
+- `NotifyOverPeer(command)` - Send notification to peer
+
+---
+
+## Read Receipts
+
+- `sendReadReceipt(dotYouClient, recipients, fileId, targetDrive?)` - Send read receipt
+
+### Read Receipt Types
+- `SendReadReceiptResponse` interface
+- `SendReadReceiptResponseRecipientStatus` enum
+
+---
+
+## Transit Types
+
+- `TransitQueryBatchRequest` interface
+- `TransitInstructionSet` interface
+- `TransitUploadResult` interface
+
+---
+
+All exports verified from `packages/libs/js-lib/src/peer/`.

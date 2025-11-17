@@ -17,6 +17,7 @@ Complete reference for implementing authentication in Homebase applications usin
 ## Overview
 
 Homebase uses a **YouAuth** protocol for authentication, which implements:
+
 - **ECC (Elliptic Curve Cryptography)** key exchange (P-384 curve)
 - **ECDH** (Elliptic Curve Diffie-Hellman) shared secret generation
 - **HKDF** (HMAC-based Key Derivation Function) for key derivation
@@ -60,7 +61,7 @@ import {
   createEccPair,
   saveEccKey,
   getRegistrationParams,
-  YouAuthorizationParams
+  YouAuthorizationParams,
 } from '@homebase-id/js-lib/auth';
 
 // Step 1: Generate ECC key pair for secure exchange
@@ -72,18 +73,18 @@ await saveEccKey(eccKey);
 // Step 3: Build authorization parameters
 const finalizeUrl = `${window.location.origin}/auth/finalize`;
 const params: YouAuthorizationParams = await getRegistrationParams(
-  finalizeUrl,           // Where to redirect after auth
-  'My App Name',         // Display name
-  'app-uuid',            // Unique app identifier
-  permissions,           // Array of AppPermissionType values
-  circlePermissions,     // Optional circle permission keys
-  drives,                // Array of TargetDriveAccessRequest
-  circleDrives,          // Optional circle drive access
-  circles,               // Optional circle IDs (e.g., CONFIRMED_CONNECTIONS_CIRCLE_ID)
-  eccKey.publicKey,      // Public key for exchange
-  'myapp.example.com',   // Optional: custom host/domain
-  'Device Name',         // Optional: client-friendly name
-  returnUrl              // Optional: post-auth redirect
+  finalizeUrl, // Where to redirect after auth
+  'My App Name', // Display name
+  'app-uuid', // Unique app identifier
+  permissions, // Array of AppPermissionType values
+  circlePermissions, // Optional circle permission keys
+  drives, // Array of TargetDriveAccessRequest
+  circleDrives, // Optional circle drive access
+  circles, // Optional circle IDs (e.g., CONFIRMED_CONNECTIONS_CIRCLE_ID)
+  eccKey.publicKey, // Public key for exchange
+  'myapp.example.com', // Optional: custom host/domain
+  'Device Name', // Optional: client-friendly name
+  returnUrl // Optional: post-auth redirect
 );
 
 // Step 4: Redirect user to identity server
@@ -119,12 +120,9 @@ import {
   retrieveEccKey,
   finalizeAuthentication,
   saveIdentity,
-  throwAwayTheECCKey
+  throwAwayTheECCKey,
 } from '@homebase-id/js-lib/auth';
-import {
-  APP_AUTH_TOKEN,
-  APP_SHARED_SECRET
-} from '@homebase-id/common-app';
+import { APP_AUTH_TOKEN, APP_SHARED_SECRET } from '@homebase-id/common-app';
 
 async function finalizeAuthorization(
   identity: string,
@@ -178,24 +176,28 @@ async function finalizeAuthorization(
 ### ECC Key Management
 
 **Generation**:
+
 ```typescript
 const eccKeyPair: CryptoKeyPair = await createEccPair();
 // Uses P-384 curve, suitable for 'deriveKey' and 'deriveBits'
 ```
 
 **Storage**:
+
 ```typescript
 await saveEccKey(eccKeyPair);
 // Exports private key as PKCS#8 and stores base64 in localStorage['ecc-pk']
 ```
 
 **Retrieval**:
+
 ```typescript
 const privateKey: CryptoKey | undefined = await retrieveEccKey();
 // Imports from localStorage and reconstructs CryptoKey
 ```
 
 **Cleanup**:
+
 ```typescript
 throwAwayTheECCKey();
 // Removes 'ecc-pk' from localStorage after finalization
@@ -216,13 +218,9 @@ const derivedBits = await crypto.subtle.deriveBits(
 );
 
 // 2. Import as HKDF key
-const hkdfKey = await crypto.subtle.importKey(
-  'raw',
-  derivedBits,
-  { name: 'HKDF' },
-  false,
-  ['deriveKey']
-);
+const hkdfKey = await crypto.subtle.importKey('raw', derivedBits, { name: 'HKDF' }, false, [
+  'deriveKey',
+]);
 
 // 3. Derive AES-CBC key using salt
 const aesKey = await crypto.subtle.deriveKey(
@@ -230,7 +228,7 @@ const aesKey = await crypto.subtle.deriveKey(
     name: 'HKDF',
     hash: 'SHA-256',
     salt: base64ToUint8Array(salt),
-    info: new Uint8Array([])
+    info: new Uint8Array([]),
   },
   hkdfKey,
   { name: 'AES-CBC', length: 128 },
@@ -247,18 +245,21 @@ const sharedSecret = await crypto.subtle.exportKey('raw', aesKey);
 ### Token Storage
 
 **Client Auth Token**:
+
 ```typescript
 localStorage.setItem(APP_AUTH_TOKEN, clientAuthToken);
 // Base64-encoded token used for authenticated API requests
 ```
 
 **Shared Secret**:
+
 ```typescript
 localStorage.setItem(APP_SHARED_SECRET, sharedSecret);
 // Base64-encoded secret for encrypting/decrypting data
 ```
 
 **Identity**:
+
 ```typescript
 saveIdentity('user.domain.com');
 // Stored in localStorage['identity']
@@ -280,6 +281,7 @@ const isValid: boolean | null = await hasValidToken(dotYouClient);
 **Endpoint**: `GET /auth/verifytoken`
 
 **Response Codes**:
+
 - `200`: Token is valid
 - `401/403`: Token is invalid or expired
 - Other: Verification couldn't be performed
@@ -360,22 +362,16 @@ import {
   throwAwayTheECCKey,
   preAuth,
   YouAuthorizationParams,
-  TargetDriveAccessRequest
+  TargetDriveAccessRequest,
 } from '@homebase-id/js-lib/auth';
-import {
-  APP_AUTH_TOKEN,
-  APP_SHARED_SECRET,
-  useDotYouClient
-} from '@homebase-id/common-app';
+import { APP_AUTH_TOKEN, APP_SHARED_SECRET, useDotYouClient } from '@homebase-id/common-app';
 import { invalidateVerifyToken } from './useVerifyToken';
 
 export const useYouAuthAuthorization = () => {
   const queryClient = useQueryClient();
   const { getDotYouClient } = useDotYouClient();
 
-  const getAuthorizationParameters = async (
-    returnUrl: string
-  ): Promise<YouAuthorizationParams> => {
+  const getAuthorizationParameters = async (returnUrl: string): Promise<YouAuthorizationParams> => {
     const eccKey = await createEccPair();
     await saveEccKey(eccKey);
 
@@ -432,7 +428,7 @@ export const useYouAuthAuthorization = () => {
   return {
     getAuthorizationParameters,
     finalizeAuthorization,
-    preauth: performPreAuth
+    preauth: performPreAuth,
   };
 };
 ```
@@ -496,30 +492,39 @@ export default AuthFinalize;
 ### Core Functions
 
 #### `createEccPair()`
+
 ```typescript
 const eccKeyPair: CryptoKeyPair = await createEccPair();
 ```
+
 Generates a new ECC key pair using P-384 curve.
 
 #### `saveEccKey(keyPair: CryptoKeyPair)`
+
 ```typescript
 await saveEccKey(eccKeyPair);
 ```
+
 Exports and stores the private key in localStorage as base64.
 
 #### `retrieveEccKey()`
+
 ```typescript
 const privateKey: CryptoKey | undefined = await retrieveEccKey();
 ```
+
 Retrieves and imports the stored private key from localStorage.
 
 #### `throwAwayTheECCKey()`
+
 ```typescript
 throwAwayTheECCKey();
 ```
+
 Removes the temporary ECC private key from localStorage.
 
 #### `getRegistrationParams(...)`
+
 ```typescript
 const params: YouAuthorizationParams = await getRegistrationParams(
   finalizeUrl: string,
@@ -536,11 +541,13 @@ const params: YouAuthorizationParams = await getRegistrationParams(
   state?: string
 ): Promise<YouAuthorizationParams>
 ```
+
 Builds the authorization URL parameters for the YouAuth flow.
 
 #### `finalizeAuthentication(...)`
+
 ```typescript
-const result: { clientAuthToken: string; sharedSecret: string } = 
+const result: { clientAuthToken: string; sharedSecret: string } =
   await finalizeAuthentication(
     identity: string,
     privateKey: CryptoKey,
@@ -548,36 +555,47 @@ const result: { clientAuthToken: string; sharedSecret: string } =
     salt: string
   );
 ```
+
 Performs ECDH key exchange and decrypts auth tokens.
 
 #### `hasValidToken(dotYouClient)`
+
 ```typescript
 const isValid: boolean | null = await hasValidToken(dotYouClient);
 ```
+
 Verifies if the current auth token is valid.
 
 #### `preAuth(dotYouClient)`
+
 ```typescript
 await preAuth(dotYouClient);
 ```
+
 Performs pre-authorization handshake with the identity server.
 
 #### `saveIdentity(identity: string)`
+
 ```typescript
 saveIdentity('user.domain.com');
 ```
+
 Stores the user's identity in localStorage.
 
 #### `retrieveIdentity()`
+
 ```typescript
 const identity: string = retrieveIdentity();
 ```
+
 Retrieves the stored identity from localStorage.
 
 #### `logout(dotYouClient)`
+
 ```typescript
 await logout(dotYouClient);
 ```
+
 Logs out the current user and invalidates tokens.
 
 ---
@@ -631,6 +649,7 @@ interface TargetDriveAccessRequest extends TargetDrive {
 ```
 
 **Example**:
+
 ```typescript
 const drives: TargetDriveAccessRequest[] = [
   {
@@ -638,14 +657,10 @@ const drives: TargetDriveAccessRequest[] = [
     type: 'unique-drive-type-uuid',
     name: 'My App Drive',
     description: 'Stores app data',
-    permissions: [
-      DrivePermissionType.Read,
-      DrivePermissionType.Write,
-      DrivePermissionType.React
-    ],
+    permissions: [DrivePermissionType.Read, DrivePermissionType.Write, DrivePermissionType.React],
     allowAnonymousRead: false,
-    allowSubscriptions: true
-  }
+    allowSubscriptions: true,
+  },
 ];
 ```
 
@@ -654,15 +669,16 @@ const drives: TargetDriveAccessRequest[] = [
 ### Circle Configuration
 
 **Predefined Circle IDs**:
+
 ```typescript
 import {
   CONFIRMED_CONNECTIONS_CIRCLE_ID,
-  AUTO_CONNECTIONS_CIRCLE_ID
+  AUTO_CONNECTIONS_CIRCLE_ID,
 } from '@homebase-id/js-lib/network';
 
 const circles = [
-  CONFIRMED_CONNECTIONS_CIRCLE_ID,  // Confirmed connections only
-  AUTO_CONNECTIONS_CIRCLE_ID         // All connections
+  CONFIRMED_CONNECTIONS_CIRCLE_ID, // Confirmed connections only
+  AUTO_CONNECTIONS_CIRCLE_ID, // All connections
 ];
 ```
 
@@ -671,32 +687,38 @@ const circles = [
 ## Security Considerations
 
 ### 1. ECC Key Storage
+
 - Private keys are **temporarily** stored in localStorage during auth flow
 - Keys are **automatically deleted** after finalization with `throwAwayTheECCKey()`
 - Never persist ECC private keys long-term
 
 ### 2. Shared Secret Protection
+
 - The shared secret is used to encrypt/decrypt all data
 - Stored in localStorage (vulnerable to XSS)
 - Implement proper Content Security Policy (CSP)
 - Consider using `httpOnly` cookies for production
 
 ### 3. Token Expiration
+
 - Tokens can expire or be revoked server-side
 - Implement periodic token verification (every 10 minutes recommended)
 - Auto-logout on invalid token to prevent stale sessions
 
 ### 4. HTTPS Requirement
+
 - All authentication flows **require HTTPS**
 - Never transmit credentials over HTTP
 
 ### 5. XSS Protection
+
 - localStorage is vulnerable to XSS attacks
 - Sanitize all user input
 - Implement strict CSP headers
 - Consider using `SameSite` cookies
 
 ### 6. CORS Configuration
+
 - Identity server must whitelist your app's origin
 - Use specific origins, avoid wildcards in production
 
@@ -747,7 +769,7 @@ if (isOwnerApp) {
 const permissions = [
   DrivePermissionType.Read,
   DrivePermissionType.Write,
-  DrivePermissionType.React
+  DrivePermissionType.React,
 ];
 
 // Calculate combined permission value
@@ -795,26 +817,26 @@ import {
   saveEccKey,
   retrieveEccKey,
   throwAwayTheECCKey,
-  TargetDriveAccessRequest
+  TargetDriveAccessRequest,
 } from '@homebase-id/js-lib/auth';
 import {
   AppPermissionType,
   AUTO_CONNECTIONS_CIRCLE_ID,
   CONFIRMED_CONNECTIONS_CIRCLE_ID,
-  ContactConfig
+  ContactConfig,
 } from '@homebase-id/js-lib/network';
 import {
   APP_AUTH_TOKEN,
   APP_SHARED_SECRET,
   CHAT_APP_ID,
   CHAT_ROOT_PATH,
-  useDotYouClient
+  useDotYouClient,
 } from '@homebase-id/common-app';
 import { useQueryClient } from '@tanstack/react-query';
 
 const ChatDrive = {
   alias: 'chat-drive-alias',
-  type: 'chat-drive-type-uuid'
+  type: 'chat-drive-type-uuid',
 };
 
 const drives: TargetDriveAccessRequest[] = [
@@ -822,18 +844,14 @@ const drives: TargetDriveAccessRequest[] = [
     ...ChatDrive,
     name: 'Chat Drive',
     description: 'Stores chat messages',
-    permissions: [
-      DrivePermissionType.Read,
-      DrivePermissionType.Write,
-      DrivePermissionType.React
-    ]
+    permissions: [DrivePermissionType.Read, DrivePermissionType.Write, DrivePermissionType.React],
   },
   {
     ...ContactConfig.ContactTargetDrive,
     name: 'Contact Drive',
     description: 'Access to contacts',
-    permissions: [DrivePermissionType.Read, DrivePermissionType.Write]
-  }
+    permissions: [DrivePermissionType.Read, DrivePermissionType.Write],
+  },
 ];
 
 const permissions = [
@@ -841,7 +859,7 @@ const permissions = [
   AppPermissionType.ReadConnectionRequests,
   AppPermissionType.ReadConnections,
   AppPermissionType.SendPushNotifications,
-  AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf
+  AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
 ];
 
 const circleDrives: TargetDriveAccessRequest[] = [
@@ -850,8 +868,8 @@ const circleDrives: TargetDriveAccessRequest[] = [
     type: ChatDrive.type,
     name: 'Chat Drive',
     description: '',
-    permissions: [DrivePermissionType.Write, DrivePermissionType.React]
-  }
+    permissions: [DrivePermissionType.Write, DrivePermissionType.React],
+  },
 ];
 
 export const useYouAuthAuthorization = () => {
@@ -879,11 +897,7 @@ export const useYouAuthAuthorization = () => {
     );
   };
 
-  const finalizeAuthorization = async (
-    identity: string,
-    publicKey: string,
-    salt: string
-  ) => {
+  const finalizeAuthorization = async (identity: string, publicKey: string, salt: string) => {
     try {
       const privateKey = await retrieveEccKey();
       if (!privateKey) throw new Error('Failed to retrieve key');
@@ -915,7 +929,7 @@ export const useYouAuthAuthorization = () => {
   return {
     getAuthorizationParameters,
     finalizeAuthorization,
-    preauth: performPreAuth
+    preauth: performPreAuth,
   };
 };
 ```
@@ -925,22 +939,27 @@ export const useYouAuthAuthorization = () => {
 ## Troubleshooting
 
 ### "Failed to retrieve key" Error
+
 **Cause**: ECC private key not found in localStorage.
 **Solution**: User needs to restart the auth flow from the beginning.
 
 ### Token Verification Returns `null`
+
 **Cause**: Network error or server unavailable.
 **Solution**: Assume token is valid to avoid unnecessary logouts. Retry verification later.
 
 ### "Invalid token" After Successful Auth
+
 **Cause**: Clock skew between client and server, or race condition.
 **Solution**: Add a small delay before token verification, or retry once.
 
 ### localStorage Not Available
+
 **Cause**: Private browsing mode or browser security settings.
 **Solution**: Detect with `isLocalStorageAvailable()` and show appropriate error message.
 
 ### CORS Errors During Auth
+
 **Cause**: Identity server not configured to accept requests from your origin.
 **Solution**: Contact server administrator to whitelist your domain.
 
@@ -963,7 +982,8 @@ export const useYouAuthAuthorization = () => {
 
 ## Related Documentation
 
-- [DotYouClient Guide](./DotYouClient.md)
-- [Drive Management](./file-management.md)
-- [Network & Connections](./connections.md)
-- [Security Model](./security.md)
+- [Workspace Instructions](./WORKSPACE_INSTRUCTIONS.md) - Quick start patterns and common operations
+- [Architecture Guide](./ARCHITECTURE.md) - System design and DotYouClient details
+- [Code Map](./CODE_MAP.md) - File locations for drive, network, and security modules
+- [Runbook](./RUNBOOK.md) - Development setup and authentication configuration
+- [Glossary](./GLOSSARY.md) - Authentication terms and security concepts

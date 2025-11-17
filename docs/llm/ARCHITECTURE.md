@@ -11,23 +11,26 @@ The `odin-js` library (`packages/libs/js-lib`) is a TypeScript SDK for interacti
 **Location**: `packages/libs/js-lib/src/core/DotYouClient.ts`
 
 The central client for all API operations. Handles:
+
 - HTTP request/response lifecycle
 - Automatic encryption/decryption via Axios interceptors
 - Multiple API types (Owner, App, Guest)
-- Shared secret management
+- Shared secret management (credentials obtained from login, unique per identity/session)
 
 **Key Features**:
+
 - Transparent encryption: Non-GET requests encrypt body, GET requests encrypt URL params
 - Automatic decryption: Response bodies decrypted when `sharedSecret` present
 - Identity-based routing: Routes to `https://{hostIdentity}/api/{apiType}/v1/...`
 
 **Configuration**:
+
 ```typescript
 new DotYouClient({
   api: ApiType.Owner | ApiType.App | ApiType.Guest,
-  hostIdentity: string,           // e.g., "alice.dotyou.cloud"
-  sharedSecret?: Uint8Array,      // Symmetric key for encryption
-  headers?: { Authorization: string } // Bearer token
+  hostIdentity: string,           // homebaseId (domain-based identity, e.g., "alice.dotyou.cloud")
+  sharedSecret?: Uint8Array,      // Symmetric key obtained from login, stored securely
+  headers?: { Authorization: string } // Bearer token obtained from login
 })
 ```
 
@@ -38,6 +41,7 @@ new DotYouClient({
 Drives are logical storage containers within an identity.
 
 **TargetDrive Structure**:
+
 ```typescript
 {
   type: string,  // e.g., "30e18f35a9448c15ab6f6b9df38e8f4e"
@@ -46,6 +50,7 @@ Drives are logical storage containers within an identity.
 ```
 
 **Drive Operations**:
+
 - `getDrivesByType()`: Query drives by type
 - `getDriveDefinition()`: Fetch drive metadata and configuration
 - Drive definitions include ACLs, tags, attributes
@@ -57,6 +62,7 @@ Drives are logical storage containers within an identity.
 Files are the fundamental storage unit. Structure:
 
 **HomebaseFile<T>**:
+
 ```typescript
 {
   fileId: string,
@@ -86,6 +92,7 @@ Files are the fundamental storage unit. Structure:
 ```
 
 **File Operations**:
+
 - **Query**: `DriveQueryService.queryBatch()` with filters
 - **Read**: `getFileHeader()`, `getPayloadBytes()`, `getContentFromHeaderOrPayload()`
 - **Write**: `DriveFileUploader.uploadFile()` with metadata and optional payload
@@ -98,6 +105,7 @@ Files are the fundamental storage unit. Structure:
 Powerful filtering and pagination for file discovery.
 
 **FileQueryParams**:
+
 ```typescript
 {
   targetDrive: TargetDrive,
@@ -115,6 +123,7 @@ Powerful filtering and pagination for file discovery.
 ```
 
 **Query Functions**:
+
 - `queryBatch()`: Single drive query with pagination
 - `queryBatchCollection()`: Multi-drive aggregated query
 - Returns `{ searchResults: HomebaseFile[], cursorState?: string }`
@@ -126,6 +135,7 @@ Powerful filtering and pagination for file discovery.
 Handles file creation and updates with encryption.
 
 **UploadInstructionSet**:
+
 ```typescript
 {
   transferIv: Uint8Array,       // Random IV for this upload
@@ -137,6 +147,7 @@ Handles file creation and updates with encryption.
 ```
 
 **Upload Process**:
+
 1. Generate `transferIv` (16 random bytes)
 2. Build `UploadFileMetadata` with typed content
 3. Optionally attach payload bytes and thumbnails
@@ -148,16 +159,19 @@ Handles file creation and updates with encryption.
 **Location**: `packages/libs/js-lib/src/core/InterceptionEncryptionUtil.ts`
 
 **Encryption Flow**:
+
 - **Requests**: Intercept → Encrypt body with AES-256-GCM → Add IV to headers
 - **Responses**: Intercept → Decrypt body using IV from headers → Return plain data
 - **GET URLs**: Encrypt sensitive query params, encode as base64
 
 **Key Management**:
+
 - `sharedSecret`: Symmetric key (Uint8Array) for client-server encryption
 - `transferIv`: Per-upload IV for file content encryption
 - ECC key exchange: Used during authentication to derive shared secrets
 
 **Security Helpers**:
+
 - `assertIfDotYouClientIsOwner()`: Guard owner-only operations
 - `handleErrorResponse()`: Parse and throw typed errors
 - `getContentFromHeaderOrPayload()`: Safely decrypt and hydrate content
@@ -165,18 +179,21 @@ Handles file creation and updates with encryption.
 ### 7. WebSocket System
 
 **Owner Notifications** (`packages/libs/js-lib/src/core/WebsocketData/NotificationProvider.ts`):
+
 - Real-time updates for owned drives
 - Notifications: `fileAdded`, `fileModified`, `fileDeleted`, `statisticsChanged`
 - Subscribe to multiple drives simultaneously
 - Auto-reconnect on disconnect
 
 **Peer Notifications** (`packages/libs/js-lib/src/peer/WebsocketData/WebsocketProviderOverPeer.ts`):
+
 - Real-time updates from remote identities
 - Token-based authentication (cached in localStorage)
 - Guest client auto-created for peer connections
 - ECC-derived shared secret for encrypted messaging
 
 **WebSocket Lifecycle**:
+
 1. Connect: `wss://{identity}/api/{owner|guest}/v1/notify/ws`
 2. Handshake: Send `establishConnectionRequest` with drives
 3. Receive: `deviceHandshakeSuccess` confirmation
@@ -191,6 +208,7 @@ Handles file creation and updates with encryption.
 Provides access to public content (posts, files).
 
 **Key Providers**:
+
 - **PostProvider**: CRUD for posts, comments, reactions
 - **FileProvider**: Public file access
 - **PostChannelManager**: Channel-to-drive mapping
@@ -200,6 +218,7 @@ Provides access to public content (posts, files).
 Owner-scoped operations for managing connections.
 
 **Key Providers**:
+
 - **ConnectionProvider**: Manage connections (followers/following)
 - **CircleProvider**: Define and manage circles
 - **ContactProvider**: Contact information
@@ -210,6 +229,7 @@ Owner-scoped operations for managing connections.
 Identity profile data.
 
 **Key Providers**:
+
 - **AttributeProvider**: Profile attributes (name, bio, avatar)
 - **ProfileDefinitionProvider**: Profile structure definitions
 
@@ -218,6 +238,7 @@ Identity profile data.
 Media processing utilities (mostly browser-centric).
 
 **Key Providers**:
+
 - **ThumbnailProvider**: Generate and fetch thumbnails
 - **ImageProvider**: Image manipulation
 - **LinkPreviewProvider**: URL metadata extraction
@@ -228,6 +249,7 @@ Media processing utilities (mostly browser-centric).
 Authentication and key management.
 
 **Key Providers**:
+
 - **AuthenticationProvider**: ECC key exchange, token retrieval
 - **EccKeyProvider**: ECC key generation
 - **RsaKeyProvider**: RSA key management
@@ -308,15 +330,16 @@ do {
     targetDrive,
     fileType: [MY_TYPE],
     maxRecords: 50,
-    cursorState: cursor
+    cursorState: cursor,
   });
-  
+
   allResults.push(...results);
   cursor = cursorState;
 } while (cursor);
 ```
 
 **Best Practices**:
+
 - Use reasonable `maxRecords` (10-100)
 - Store `cursorState` for "load more" functionality
 - Never fetch unbounded lists
@@ -324,10 +347,12 @@ do {
 ## Error Handling Strategy
 
 **Typed Errors** (`helpers/ErrorHandling/KnownErrors.ts`):
+
 - Import and throw specific error types
 - Include context in error messages
 
 **Response Validation**:
+
 ```typescript
 const response = await dotYouClient
   .createAxiosClient()
@@ -339,6 +364,7 @@ if (response.status !== 200) {
 ```
 
 **Graceful Degradation**:
+
 - Return `null` for not-found scenarios
 - Log errors without exposing secrets
 - Provide fallback UI states
@@ -346,21 +372,25 @@ if (response.status !== 200) {
 ## Performance Considerations
 
 ### 1. Query Optimization
+
 - Use `includeHeaderContent: false` when payload not needed
 - Filter at query level (fileType, tags) vs. post-filtering
 - Implement cursor-based pagination
 
 ### 2. Upload Optimization
+
 - Upload thumbnails alongside main file
 - Use batch uploads for multiple files
 - Limit concurrent uploads (5-10 max)
 
 ### 3. WebSocket Optimization
+
 - Subscribe to minimal necessary drives
 - Debounce rapid notification bursts
 - Unsubscribe when component unmounts
 
 ### 4. Caching Strategy
+
 - Cache authentication tokens in localStorage
 - Cache drive definitions (rarely change)
 - Cache query results with TTL
@@ -369,16 +399,19 @@ if (response.status !== 200) {
 ## Testing Strategy
 
 **Unit Tests**:
+
 - Test providers with mocked `DotYouClient`
 - Verify encryption/decryption logic
 - Test error handling paths
 
 **Integration Tests**:
+
 - Use test identity with known credentials
 - Test full CRUD lifecycle
 - Verify WebSocket notifications
 
 **Build Verification**:
+
 ```bash
 npm run build:libs
 # Check for TypeScript errors
@@ -388,31 +421,48 @@ npm run build:libs
 ## Deployment Patterns
 
 ### Browser (Vite/React)
+
 ```typescript
-// In app initialization
+// After login, retrieve stored credentials
+const identity = localStorage.getItem('homebaseId'); // e.g., "alice.dotyou.cloud"
+const sharedSecretBase64 = localStorage.getItem('sharedSecret');
+const authToken = localStorage.getItem('authToken');
+
 const client = new DotYouClient({
   api: ApiType.Owner,
-  hostIdentity: import.meta.env.VITE_IDENTITY,
-  sharedSecret: base64ToUint8Array(import.meta.env.VITE_SHARED_SECRET),
-  headers: { Authorization: `Bearer ${import.meta.env.VITE_TOKEN}` }
+  hostIdentity: identity,
+  sharedSecret: base64ToUint8Array(sharedSecretBase64),
+  headers: { Authorization: `Bearer ${authToken}` },
 });
+
+// Login flow example
+const { sharedSecret, token } = await finalizeAuthentication(identity, publicKey, salt, returnUrl);
+
+// Store securely in localStorage
+localStorage.setItem('homebaseId', identity);
+localStorage.setItem('sharedSecret', uint8ArrayToBase64(sharedSecret));
+localStorage.setItem('authToken', token);
 ```
 
 ### Node.js (Server/CLI)
+
 ```typescript
-// From environment variables
+// For server/CLI, credentials can come from environment or secure storage
 const client = new DotYouClient({
   api: ApiType.Owner,
-  hostIdentity: process.env.HOMEBASE_IDENTITY!,
+  hostIdentity: process.env.HOMEBASE_IDENTITY!, // Domain-based identity
   sharedSecret: base64ToUint8Array(process.env.HOMEBASE_SHARED_SECRET!),
-  headers: { Authorization: `Bearer ${process.env.HOMEBASE_TOKEN}` }
+  headers: { Authorization: `Bearer ${process.env.HOMEBASE_TOKEN}` },
 });
+
+// Note: In production, use secure credential storage (e.g., secrets manager)
 ```
 
 ### React Native
+
 ```typescript
 // Same as browser, but WebSocket needs polyfill
-import { SubscribeOverPeer } from '@dotyou/js-lib';
+import { SubscribeOverPeer } from '@homebase-id/js-lib';
 
 // Pass args for native WebSocket
 await SubscribeOverPeer(
@@ -422,7 +472,11 @@ await SubscribeOverPeer(
   handler,
   undefined,
   undefined,
-  { headers: { /* custom headers */ } } // Platform-specific args
+  {
+    headers: {
+      /* custom headers */
+    },
+  } // Platform-specific args
 );
 ```
 
@@ -444,7 +498,18 @@ await SubscribeOverPeer(
 
 - Client ↔ Server: Encrypted with shared secret
 - Peer ↔ Peer: Encrypted with ECC-derived secret
-- Browser ↔ LocalStorage: Token caching (consider encryption for sensitive data)
+- Browser ↔ LocalStorage: Credentials stored after successful login (homebaseId, sharedSecret, authToken)
+
+### Authentication Flow
+
+1. **Login**: User provides homebaseId (domain-based identity like "alice.dotyou.cloud")
+2. **Key Exchange**: ECC key exchange performed during YouAuth protocol
+3. **Credential Receipt**: Server returns `sharedSecret` and `authToken`
+4. **Secure Storage**: Credentials stored in localStorage (browser) or secure storage (native)
+5. **Client Initialization**: `DotYouClient` created with stored credentials
+6. **Session Management**: Credentials persist until logout or expiration
+
+**Note**: The `sharedSecret` is unique per identity and login session. It is NOT a fixed value but dynamically generated during authentication.
 
 ## Extension Points
 
@@ -471,17 +536,14 @@ export type MyContent = {
 // Use in queries
 const files = await queryBatch(dotYouClient, {
   targetDrive,
-  dataType: [MY_DATA_TYPE]
+  dataType: [MY_DATA_TYPE],
 });
 ```
 
 ### Custom WebSocket Handlers
 
 ```typescript
-const customHandler = async (
-  client: DotYouClient,
-  notification: TypedConnectionNotification
-) => {
+const customHandler = async (client: DotYouClient, notification: TypedConnectionNotification) => {
   // Custom logic based on notification type
   if (notification.notificationType === 'fileAdded') {
     // Handle new file

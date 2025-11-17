@@ -1,528 +1,375 @@
-# Helpers Module Documentation
+# HELPERS Module Documentation
 
 ## Overview
+The HELPERS module (`@homebase-id/js-lib/helpers`) provides utility functions for data transformation, encryption, permissions, browser detection, and media processing.
 
-The **Helpers module** provides utility functions for common operations throughout the Homebase ecosystem:
-
-- **AES Encryption**: Symmetric encryption/decryption
-- **Data Utilities**: Type conversions, encoding, and formatting
-- **Hash Utilities**: Hashing and checksums
-- **Browser Utilities**: Browser detection and capabilities
-- **Domain Utilities**: Domain parsing and validation
-- **Attribute Helpers**: Attribute type conversions and validation
-- **Permission Helpers**: Permission checking and formatting
-- **Image Processing**: Image merging and manipulation
-- **Blob Helpers**: Binary data handling
-- **Payload Generation**: Thumbnail and payload creation
+**All functions and types documented below are verified exports from the actual source code.**
 
 ---
 
-## File Structure
+## Data Utilities
 
-```
-helpers/
-├── helpers.ts                         # Module exports
-├── AesEncrypt.ts                      # AES-CBC encryption
-├── DataUtil.ts                        # Data conversion utilities
-├── HashUtil.ts                        # Hashing functions
-├── BrowserUtil.ts                     # Browser detection
-├── DomainUtil.ts                      # Domain parsing
-├── AttributeHelpers.ts                # Attribute conversions
-├── PermissionHelpers.ts               # Permission utilities
-├── ImageMerger.ts                     # Image composition
-├── BlobHelpers.ts                     # Binary data utilities
-├── PayloadAndThumbnailGenerator.ts   # Payload generation
-└── md5/                               # MD5 hashing implementation
-```
+### `stringToUint8Array(str)`
+Converts string to Uint8Array using TextEncoder
+- **str**: `string`
+- **Returns**: `Uint8Array`
 
----
+### `base64ToUint8Array(base64)`
+Converts base64 string to Uint8Array
+- **base64**: `string`
+- **Returns**: `Uint8Array`
 
-## API Reference
+### `uint8ArrayToBase64(buffer)`
+Converts Uint8Array to base64 string
+- **buffer**: `Uint8Array`
+- **Returns**: `string`
 
-### AesEncrypt
+### `jsonStringify64(obj)`
+Stringify JSON with base64 encoding for byte arrays
+- **obj**: `unknown`
+- **Returns**: `string`
 
-#### encrypt()
+### `byteArrayToString(bytes)`
+Converts byte array to string using TextDecoder
+- **bytes**: `Uint8Array`
+- **Returns**: `string`
 
-```typescript
-async encrypt(
-  data: Uint8Array,
-  key: Uint8Array,
-  iv?: Uint8Array
-): Promise<{ encryptedData: Uint8Array; iv: Uint8Array }>;
-```
+### `byteArrayToNumber(byteArray)`
+Converts byte array to number
+- **byteArray**: `Uint8Array`
+- **Returns**: `number`
 
-Encrypts data using AES-CBC.
+### `getNewId()`
+Generates new GUID using Guid.create()
+- **Returns**: `string`
 
-**Parameters**:
-- `data`: Data to encrypt
-- `key`: 32-byte encryption key
-- `iv`: 16-byte initialization vector (generated if not provided)
+### `formatGuidId(guid)`
+Removes dashes from GUID
+- **guid**: `string`
+- **Returns**: `string`
 
-**Example**:
-```typescript
-import { encrypt } from '@homebase-id/js-lib/helpers';
-import { stringToUint8Array } from '@homebase-id/js-lib/helpers';
+### `toGuidId(input)`
+Converts string to GUID format
+- **input**: `string`
+- **Returns**: `string`
 
-const data = stringToUint8Array('Secret message');
-const key = crypto.getRandomValues(new Uint8Array(32));
+### `isAGuidId(input)`
+Checks if string is a valid GUID
+- **input**: `string`
+- **Returns**: `boolean`
 
-const { encryptedData, iv } = await encrypt(data, key);
-```
+### `stringGuidsEqual(a?, b?)`
+Compares two GUIDs for equality
+- **a**: `string`
+- **b**: `string`
+- **Returns**: `boolean`
 
----
+### `drivesEqual(a?, b?)`
+Compares two TargetDrive objects
+- **a**: `TargetDrive`
+- **b**: `TargetDrive`
+- **Returns**: `boolean`
 
-#### decrypt()
+### `aclEqual(a, b)`
+Compares two AccessControlList objects
+- **a**: `AccessControlList`
+- **b**: `AccessControlList`
+- **Returns**: `boolean`
 
-```typescript
-async decrypt(
-  encryptedData: Uint8Array,
-  key: Uint8Array,
-  iv: Uint8Array
-): Promise<Uint8Array>;
-```
+### `compareAcl(currentAcl, newAcl)`
+Compares ACLs and returns differences
+- **currentAcl**: `AccessControlList`
+- **newAcl**: `AccessControlList`
+- **Returns**: Comparison result object
 
-Decrypts AES-CBC encrypted data.
+### `assertIfDefined(key, value)`
+Throws error if value is undefined
+- **key**: `string`
+- **value**: `unknown`
+- **Throws**: Error if value is undefined
 
----
+### `assertIfDefinedAndNotDefault(key, value)`
+Throws error if value is undefined or empty
+- **key**: `string`
+- **value**: `unknown`
+- **Throws**: Error if value is undefined/empty
 
-### DataUtil
+### `getRandom16ByteArray()`
+Generates random 16-byte array using crypto.getRandomValues
+- **Returns**: `Uint8Array`
 
-#### stringToUint8Array()
+### `splitSharedSecretEncryptedKeyHeader(keyHeader)`
+Splits encrypted key header into components
+- **keyHeader**: `KeyHeader`
+- **Returns**: Split components
 
-```typescript
-stringToUint8Array(str: string): Uint8Array;
-```
+### `mergeByteArrays(chunks)`
+Merges multiple byte arrays into one
+- **chunks**: `Uint8Array[]`
+- **Returns**: `Uint8Array`
 
-Converts string to Uint8Array (UTF-8 encoding).
+### `roundToSmallerMultipleOf16(x)`
+Rounds down to nearest multiple of 16
+- **x**: `number`
+- **Returns**: `number`
 
-**Example**:
-```typescript
-import { stringToUint8Array } from '@homebase-id/js-lib/helpers';
+### `roundToLargerMultipleOf16(x)`
+Rounds up to nearest multiple of 16
+- **x**: `number`
+- **Returns**: `number`
 
-const bytes = stringToUint8Array('Hello World');
-```
+### `stringifyToQueryParams(obj)`
+Converts object to query string
+- **obj**: `Record<string, unknown>`
+- **Returns**: `string`
 
----
+### `stringifyArrayToQueryParams(arr)`
+Converts array to query string
+- **arr**: `Record<string, unknown>[]`
+- **Returns**: `string`
 
-#### uint8ArrayToString()
+### `getQueryBatchCursorFromTime(fromUnixTimeInMs, toUnixTimeInMs?)`
+Generates batch query cursor from timestamps
+- **fromUnixTimeInMs**: `number`
+- **toUnixTimeInMs**: `number`
+- **Returns**: Cursor string
 
-```typescript
-uint8ArrayToString(array: Uint8Array): string;
-```
+### `getQueryModifiedCursorFromTime(unixTimeInMs)`
+Generates modified query cursor from timestamp
+- **unixTimeInMs**: `number`
+- **Returns**: Cursor string
 
-Converts Uint8Array to string (UTF-8 decoding).
+### `tryJsonParse<T>(json, onError?)`
+Safely parses JSON with error handling
+- **json**: `string`
+- **onError**: `(ex: unknown) => void`
+- **Returns**: `T`
 
----
+### `getDataUriFromBlob(blob)`
+Converts blob to data URI
+- **blob**: `Blob`
+- **Returns**: `Promise<string>`
 
-#### base64ToUint8Array()
+### `getBlobFromBytes({ bytes, type })`
+Creates blob from byte array
+- **bytes**: `Uint8Array`
+- **type**: `string`
+- **Returns**: `Blob`
 
-```typescript
-base64ToUint8Array(base64: string): Uint8Array;
-```
+### `getLargestThumbOfPayload(payload?)`
+Gets largest thumbnail from payload
+- **payload**: `PayloadDescriptor`
+- **Returns**: `ThumbnailFile | undefined`
 
-Decodes base64 string to Uint8Array.
-
----
-
-#### uint8ArrayToBase64()
-
-```typescript
-uint8ArrayToBase64(array: Uint8Array): string;
-```
-
-Encodes Uint8Array to base64 string.
-
----
-
-#### jsonStringify64()
-
-```typescript
-jsonStringify64<T>(obj: T): string;
-```
-
-JSON stringify and base64 encode in one step.
-
-**Example**:
-```typescript
-import { jsonStringify64 } from '@homebase-id/js-lib/helpers';
-
-const encoded = jsonStringify64({ message: 'Hello', count: 42 });
-```
-
----
-
-#### tryJsonParse()
-
-```typescript
-tryJsonParse<T>(str: string): T | null;
-```
-
-Safely parse JSON, returning null on error.
-
----
-
-### HashUtil
-
-#### sha256()
-
-```typescript
-async sha256(data: Uint8Array): Promise<Uint8Array>;
-```
-
-Computes SHA-256 hash.
-
-**Example**:
-```typescript
-import { sha256, stringToUint8Array } from '@homebase-id/js-lib/helpers';
-
-const data = stringToUint8Array('Hash this');
-const hash = await sha256(data);
-```
+### `hashGuidId(input, salt?)`
+Hashes GUID with optional salt
+- **input**: `string`
+- **salt**: `string`
+- **Returns**: `Promise<string>`
 
 ---
 
-#### md5()
+## AES Encryption
 
-```typescript
-md5(data: Uint8Array): string;
-```
+### `cbcEncrypt(data, key, iv)`
+Encrypts data using AES-CBC
+- **data**: `Uint8Array`
+- **key**: `Uint8Array`
+- **iv**: `Uint8Array`
+- **Returns**: `Promise<Uint8Array>`
 
-Computes MD5 hash (returns hex string).
+### `cbcDecrypt(data, key, iv)`
+Decrypts data using AES-CBC
+- **data**: `Uint8Array`
+- **key**: `Uint8Array`
+- **iv**: `Uint8Array`
+- **Returns**: `Promise<Uint8Array>`
 
----
+### `streamEncryptWithCbc(stream, key, iv)`
+Encrypts stream using AES-CBC
+- **stream**: `ReadableStream<Uint8Array>`
+- **key**: `Uint8Array`
+- **iv**: `Uint8Array`
+- **Returns**: `Promise<ReadableStream<Uint8Array>>`
 
-### BrowserUtil
-
-#### hasDebugFlag()
-
-```typescript
-hasDebugFlag(): boolean;
-```
-
-Checks if debug mode is enabled.
-
----
-
-#### isLocalStorageAvailable()
-
-```typescript
-isLocalStorageAvailable(): boolean;
-```
-
-Checks if localStorage is accessible.
-
----
-
-#### isTouchDevice()
-
-```typescript
-isTouchDevice(): boolean;
-```
-
-Detects if device supports touch.
+### `streamDecryptWithCbc(stream, key, iv)`
+Decrypts stream using AES-CBC
+- **stream**: `ReadableStream<Uint8Array>`
+- **key**: `Uint8Array`
+- **iv**: `Uint8Array`
+- **Returns**: `Promise<ReadableStream<Uint8Array>>`
 
 ---
 
-#### getBrowserName()
+## Hash Utilities
 
-```typescript
-getBrowserName(): string;
-```
-
-Returns browser name ('chrome', 'firefox', 'safari', etc.).
-
----
-
-### DomainUtil
-
-#### parseDomain()
-
-```typescript
-parseDomain(url: string): string;
-```
-
-Extracts domain from URL.
-
-**Example**:
-```typescript
-import { parseDomain } from '@homebase-id/js-lib/helpers';
-
-const domain = parseDomain('https://alice.dotyou.cloud/page');
-// Returns: 'alice.dotyou.cloud'
-```
+### `getNewXorId(a, b)`
+Generates XOR ID from two strings
+- **a**: `string`
+- **b**: `string`
+- **Returns**: `Promise<string>`
 
 ---
 
-#### isValidDomain()
+## Blob Helpers
 
-```typescript
-isValidDomain(domain: string): boolean;
-```
+### `streamToByteArray(stream, mimeType)`
+Converts stream to byte array
+- **stream**: `ReadableStream<Uint8Array>`
+- **mimeType**: `string`
+- **Returns**: `Promise<Uint8Array>`
 
-Validates domain format.
-
----
-
-### AttributeHelpers
-
-#### getAttribute()
-
-```typescript
-getAttribute<T>(
-  attributes: AttributeMap,
-  key: string
-): T | undefined;
-```
-
-Gets typed attribute value.
+### `getSecuredBlob(bytes, key, iv, mimeType?)`
+Creates encrypted blob
+- **bytes**: `Uint8Array`
+- **key**: `Uint8Array`
+- **iv**: `Uint8Array`
+- **mimeType**: `string`
+- **Returns**: `Promise<Blob>`
 
 ---
 
-#### setAttribute()
+## Browser Utilities
 
-```typescript
-setAttribute<T>(
-  attributes: AttributeMap,
-  key: string,
-  value: T
-): AttributeMap;
-```
+### `isLocalStorageAvailable()`
+Checks if localStorage is available
+- **Returns**: `boolean`
 
-Sets attribute value (immutable update).
+### `isTouchDevice()`
+Checks if device supports touch
+- **Returns**: `boolean`
 
----
-
-### PermissionHelpers
-
-#### hasPermission()
-
-```typescript
-hasPermission(
-  permissions: number,
-  requiredPermission: PermissionType
-): boolean;
-```
-
-Checks if permission flags include required permission.
-
-**Example**:
-```typescript
-import { hasPermission, PermissionType } from '@homebase-id/js-lib/helpers';
-
-const userPerms = PermissionType.Read | PermissionType.Write;
-const canWrite = hasPermission(userPerms, PermissionType.Write);
-// Returns: true
-```
+### `hasDebugFlag()`
+Checks for debug flag in URL
+- **Returns**: `boolean`
 
 ---
 
-#### formatPermissions()
+## Domain Utilities
 
-```typescript
-formatPermissions(permissions: number): string[];
-```
+### `getDomainFromUrl(url?)`
+Extracts domain from URL
+- **url**: `string`
+- **Returns**: `string | undefined`
 
-Converts permission number to array of permission names.
+### `getHostFromUrl(url?)`
+Extracts host from URL
+- **url**: `string`
+- **Returns**: `string | undefined`
 
----
-
-### BlobHelpers
-
-#### blobToUint8Array()
-
-```typescript
-async blobToUint8Array(blob: Blob): Promise<Uint8Array>;
-```
-
-Converts Blob to Uint8Array.
+### `getTwoLettersFromDomain(domain)`
+Gets two-letter identifier from domain
+- **domain**: `string`
+- **Returns**: `string`
 
 ---
 
-#### uint8ArrayToBlob()
+## Permission Helpers
 
-```typescript
-uint8ArrayToBlob(
-  data: Uint8Array,
-  mimeType: string
-): Blob;
-```
+### `getDrivePermissionFromNumber(value?)`
+Converts number to DrivePermissionType array
+- **value**: `number[]`
+- **Returns**: `DrivePermissionType[]`
 
-Converts Uint8Array to Blob.
+### `getAppPermissionFromNumber(value)`
+Converts number to AppPermissionType
+- **value**: `number`
+- **Returns**: `AppPermissionType`
 
----
+### `getDrivePermissionFromString(permission)`
+Converts string to DrivePermissionType array
+- **permission**: `unknown`
+- **Returns**: `DrivePermissionType[]`
 
-### ImageMerger
+### `getUniqueDrivesWithHighestPermission(grants)`
+Gets unique drives with highest permission
+- **grants**: `DriveGrant[]`
+- **Returns**: Filtered drive grants
 
-#### mergeImages()
-
-```typescript
-async mergeImages(
-  images: (string | Blob)[],
-  options?: {
-    width?: number;
-    height?: number;
-    layout?: 'grid' | 'horizontal' | 'vertical';
-  }
-): Promise<Blob>;
-```
-
-Merges multiple images into one.
-
-**Example**:
-```typescript
-import { mergeImages } from '@homebase-id/js-lib/helpers';
-
-const merged = await mergeImages(
-  [imageBlob1, imageBlob2, imageBlob3],
-  { layout: 'grid', width: 600, height: 600 }
-);
-```
+### `getPermissionNumberFromDrivePermission(permission)`
+Converts DrivePermissionType to number
+- **permission**: `PermissionedDrive`
+- **Returns**: `number`
 
 ---
 
-### PayloadAndThumbnailGenerator
+## Attribute Helpers
 
-#### generatePayloadAndThumbnails()
+### `slugify(text)`
+Converts text to URL slug
+- **text**: `string`
+- **Returns**: `string`
 
-```typescript
-async generatePayloadAndThumbnails(
-  file: File,
-  options?: {
-    thumbnailSizes?: number[];
-    maxPayloadSize?: number;
-  }
-): Promise<{
-  payload: PayloadDescriptor;
-  thumbnails: ThumbnailDescriptor[];
-}>;
-```
+### `makeSlug(post)`
+Generates slug from post
+- **post**: `HomebaseFile<PostContent> | NewHomebaseFile<PostContent>`
+- **Returns**: `string`
 
-Generates payload and thumbnails from file.
+### `generateDisplayLocation(city?, region?, country?)`
+Generates display location string
+- **city**: `string`
+- **region**: `string`
+- **country**: `string`
+- **Returns**: `string`
 
-**Example**:
-```typescript
-import { generatePayloadAndThumbnails } from '@homebase-id/js-lib/helpers';
+### `getDisplayLocationFromLocationAttribute(attr)`
+Gets display location from attribute
+- **attr**: `Attribute`
+- **Returns**: `string`
 
-const { payload, thumbnails } = await generatePayloadAndThumbnails(
-  imageFile,
-  { thumbnailSizes: [200, 400, 800] }
-);
-```
+### `generateDisplayName(first, last)`
+Generates display name from first/last name
+- **first**: `string`
+- **last**: `string`
+- **Returns**: `string`
 
----
+### `getDisplayNameOfNameAttribute(attr)`
+Gets display name from name attribute
+- **attr**: `Attribute`
+- **Returns**: `string`
 
-## Common Patterns
-
-### Pattern 1: Encrypt and Store Data
-
-```typescript
-import { 
-  encrypt, 
-  decrypt, 
-  stringToUint8Array, 
-  uint8ArrayToString 
-} from '@homebase-id/js-lib/helpers';
-
-// Encrypt
-const message = 'Secret data';
-const data = stringToUint8Array(message);
-const key = crypto.getRandomValues(new Uint8Array(32));
-
-const { encryptedData, iv } = await encrypt(data, key);
-
-// Store encrypted data and IV
-localStorage.setItem('data', uint8ArrayToBase64(encryptedData));
-localStorage.setItem('iv', uint8ArrayToBase64(iv));
-
-// Later: Decrypt
-const storedData = base64ToUint8Array(localStorage.getItem('data')!);
-const storedIv = base64ToUint8Array(localStorage.getItem('iv')!);
-
-const decrypted = await decrypt(storedData, key, storedIv);
-const originalMessage = uint8ArrayToString(decrypted);
-```
+### `getInitialsOfNameAttribute(attr)`
+Gets initials from name attribute
+- **attr**: `Attribute`
+- **Returns**: `string`
 
 ---
 
-### Pattern 2: Permission Checking
+## Media Helpers
 
-```typescript
-import { hasPermission, PermissionType } from '@homebase-id/js-lib/helpers';
+### `makeGrid(thumbs)`
+Creates grid from thumbnails
+- **thumbs**: `EmbeddedThumb[]`
+- **Returns**: `Promise<Canvas>`
 
-function checkFileAccess(userPermissions: number) {
-  const canRead = hasPermission(userPermissions, PermissionType.Read);
-  const canWrite = hasPermission(userPermissions, PermissionType.Write);
-  const canDelete = hasPermission(userPermissions, PermissionType.Delete);
-  
-  return { canRead, canWrite, canDelete };
-}
-```
-
----
-
-### Pattern 3: Safe JSON Parsing
-
-```typescript
-import { tryJsonParse } from '@homebase-id/js-lib/helpers';
-
-const data = tryJsonParse<MyType>(jsonString);
-
-if (data) {
-  // Valid JSON
-  processData(data);
-} else {
-  // Invalid JSON
-  console.error('Failed to parse JSON');
-}
-```
+### `getPayloadsAndThumbnailsForNewMedia(files, targetDrive, encrypt?)`
+Processes media files for upload
+- **files**: `File[]`
+- **targetDrive**: `TargetDrive`
+- **encrypt**: `boolean`
+- **Returns**: `Promise<{ payloads, thumbnails }>`
 
 ---
 
-## Best Practices
+## Video Segmenter
 
-### ✅ DO:
-
-1. **Use type-safe conversions**
-   ```typescript
-   const data = tryJsonParse<ExpectedType>(json);
-   ```
-
-2. **Handle encryption IV properly**
-   ```typescript
-   const { encryptedData, iv } = await encrypt(data, key);
-   // Store both encrypted data and IV
-   ```
-
-3. **Check browser capabilities**
-   ```typescript
-   if (isLocalStorageAvailable()) {
-     localStorage.setItem('key', 'value');
-   }
-   ```
-
-### ❌ DON'T:
-
-1. **Don't ignore encryption failures**
-   ```typescript
-   // Bad: no error handling
-   const decrypted = await decrypt(data, key, iv);
-   
-   // Good: with error handling
-   try {
-     const decrypted = await decrypt(data, key, iv);
-   } catch (error) {
-     console.error('Decryption failed');
-   }
-   ```
+All exports from `Video/VideoSegmenter.ts` including:
+- `getMp4Info(file)` - Gets MP4 file information
+- `getCodecFromMp4Info(info)` - Extracts codec from MP4 info
+- `segmentVideoFile(...)` - Segments video file
 
 ---
 
-## Related Documentation
+## Summary
 
-- [CORE_MODULE.md](./CORE_MODULE.md) - Uses helpers for encryption
-- [AUTH_MODULE.md](./AUTH_MODULE.md) - Uses helpers for key derivation
+The HELPERS module provides:
+- **Data Conversion**: String/bytes/base64 conversions
+- **GUID Management**: Generation, formatting, comparison
+- **Encryption**: AES-CBC encryption/decryption for data and streams
+- **Browser Detection**: Feature detection and environment checks
+- **Permission Conversion**: Permission type conversions
+- **Attribute Helpers**: Slug generation, name/location formatting
+- **Media Processing**: Grid creation, media preparation
+- **Utilities**: Query params, parsing, hashing
 
----
-
-**Last Updated**: October 31, 2025  
-**Module Path**: `packages/libs/js-lib/src/helpers/`
+All exports are verified from actual source code in `packages/libs/js-lib/src/helpers/`.

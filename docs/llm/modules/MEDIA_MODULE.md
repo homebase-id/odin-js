@@ -1,277 +1,95 @@
-# Media Module Documentation
+# MEDIA Module Documentation
 
 ## Overview
+The MEDIA module provides image and video processing, thumbnail generation, and media URL handling.
 
-The **Media module** provides media processing and management utilities:
-
-- **Image Processing**: Resize, crop, and optimize images
-- **Thumbnails**: Generate thumbnails at multiple sizes
-- **Video Processing**: Video transcoding and optimization
-- **Video Segmentation**: Split videos into segments (HLS/DASH)
-- **Link Previews**: Extract metadata and thumbnails from URLs
-- **Media Providers**: Access media files with proper handling
-- **Image Provider**: Specialized image fetching
-- **Video Provider**: Specialized video fetching
+**All functions verified from actual source code.**
 
 ---
 
-## File Structure
+## Image Provider
 
-```
-media/
-├── media.ts                          # Module exports
-├── MediaTypes.ts                     # Media type definitions
-├── MediaProvider.ts                  # Generic media provider
-├── ImageProvider.ts                  # Image-specific provider
-├── VideoProvider.ts                  # Video-specific provider
-├── Thumbs/
-│   ├── ImageResizer.ts              # Image resizing
-│   └── ThumbnailProvider.ts          # Thumbnail generation
-├── Video/
-│   ├── VideoProcessor.ts             # Video processing
-│   ├── VideoSegmenter.ts             # Video segmentation
-│   └── VideoSegmenterFfmpeg.ts       # FFmpeg-based segmentation
-└── Link/
-    └── LinkPreviewProvider.ts        # URL metadata extraction
-```
+- `getDecryptedThumbnailMeta(dotYouClient, targetDrive, fileId, options?)` - Get thumbnail metadata
+- `getDecryptedImageUrl(...)` - Get decrypted image URL (alias for getDecryptedMediaUrl)
+- `getDecryptedImageData(dotYouClient, targetDrive, fileId, options?)` - Get decrypted image data
+- `getDecryptedImageMetadata(dotYouClient, targetDrive, fileId, options?)` - Get image metadata
 
 ---
 
-## API Reference
+## Video Provider
 
-### ImageResizer
-
-#### resizeImage()
-
-```typescript
-async resizeImage(
-  image: Blob | File,
-  options: {
-    maxWidth?: number;
-    maxHeight?: number;
-    quality?: number;
-    format?: 'jpeg' | 'png' | 'webp';
-  }
-): Promise<Blob>;
-```
-
-Resizes an image to fit within dimensions.
-
-**Example**:
-```typescript
-import { resizeImage } from '@homebase-id/js-lib/media';
-
-const resized = await resizeImage(imageFile, {
-  maxWidth: 800,
-  maxHeight: 600,
-  quality: 0.85,
-  format: 'jpeg'
-});
-```
+- `VideoContentType` = 'video/mp4'
+- `getDecryptedVideoChunk(dotYouClient, targetDrive, fileId, chunkStart, chunkEnd, options?)` - Get video chunk
+- `getDecryptedVideoUrl(...)` - Get decrypted video URL (alias for getDecryptedMediaUrl)
 
 ---
 
-### ThumbnailProvider
+## Media Provider
 
-#### generateThumbnails()
-
-```typescript
-async generateThumbnails(
-  image: Blob | File,
-  sizes: number[]
-): Promise<ThumbnailFile[]>;
-```
-
-Generates multiple thumbnail sizes.
-
-**Example**:
-```typescript
-import { generateThumbnails } from '@homebase-id/js-lib/media';
-
-const thumbnails = await generateThumbnails(imageFile, [200, 400, 800]);
-```
+- `getDecryptedMediaUrl(dotYouClient, targetDrive, fileId, key?, options?)` - Get decrypted media URL
+- `getAnonymousDirectImageUrl(targetDrive, fileId, payloadKey?, size?)` - Get anonymous image URL
 
 ---
 
-### VideoProcessor
+## Thumbnail Provider
 
-#### processVideo()
-
-```typescript
-async processVideo(
-  video: File,
-  options?: {
-    maxWidth?: number;
-    maxHeight?: number;
-    bitrate?: number;
-    format?: 'mp4' | 'webm';
-  }
-): Promise<Blob>;
-```
-
-Processes and optimizes a video.
+- `baseThumbSizes` - Array of base thumbnail sizes (50x50, 200x200, 400x400, 800x800)
+- `tinyThumbSize` - Tiny thumbnail size (10x10)
+- `getRevisedThumbs(existingThumbs, newInstructions)` - Get revised thumbnails
+- `createThumbnails(file, thumbnailInstructions)` - Create thumbnails from file
+- `createImageThumbnail(image, size, pixelated?)` - Create single image thumbnail
 
 ---
 
-### VideoSegmenter
+## Video Processing
 
-#### segmentVideo()
+- `processVideoFile(file, onProgress?, options?)` - Process video file for upload
 
-```typescript
-async segmentVideo(
-  video: File,
-  options?: {
-    segmentDuration?: number;
-    format?: 'hls' | 'dash';
-  }
-): Promise<VideoSegments>;
-```
+### Video Segmenter
 
-Segments a video for streaming.
+- `getMp4Info(file)` - Get MP4 file information
+- `getCodecFromMp4Info(info)` - Extract codec from MP4 info
+- `segmentVideoFile(file, onProgress?, options?)` - Segment video file
 
----
+### FFmpeg Segmenter
 
-### LinkPreviewProvider
-
-#### getLinkPreview()
-
-```typescript
-async getLinkPreview(
-  dotYouClient: DotYouClient,
-  url: string
-): Promise<LinkPreview>;
-```
-
-Extracts metadata and preview from a URL.
-
-**Example**:
-```typescript
-import { getLinkPreview } from '@homebase-id/js-lib/media';
-
-const preview = await getLinkPreview(client, 'https://example.com/article');
-console.log('Title:', preview.title);
-console.log('Description:', preview.description);
-console.log('Image:', preview.imageUrl);
-```
+- `segmentVideoFileWithFfmpeg(file, onProgress?)` - Segment video using FFmpeg
+- `getThumbnailWithFfmpeg(videoFile)` - Get thumbnail using FFmpeg
 
 ---
 
-### ImageProvider
+## Image Resizer
 
-#### getImage()
-
-```typescript
-async getImage(
-  dotYouClient: DotYouClient,
-  fileId: string,
-  size?: 'thumbnail' | 'preview' | 'full'
-): Promise<Blob>;
-```
-
-Retrieves an image at specified size.
+- `getTargetSize(originalWidth, originalHeight, targetSize)` - Calculate target dimensions
+- `resizeImageFromBlob(blob, size, pixelated?)` - Resize image from blob
 
 ---
 
-### VideoProvider
+## Link Preview
 
-#### getVideo()
+- `getLinkPreview(dotYouClient, url)` - Get link preview data
 
-```typescript
-async getVideo(
-  dotYouClient: DotYouClient,
-  fileId: string,
-  quality?: 'low' | 'medium' | 'high'
-): Promise<Blob>;
-```
-
-Retrieves a video at specified quality.
+### Link Preview Types
+- `LinkPreview` interface (url, title, description, imageUrl, etc.)
+- `LinkPreviewDescriptor` interface (extends LinkPreview without imageUrl)
 
 ---
 
-## Common Patterns
+## Media Types
 
-### Pattern 1: Generate and Upload Image with Thumbnails
-
-```typescript
-import { generateThumbnails } from '@homebase-id/js-lib/media';
-import { uploadFile } from '@homebase-id/js-lib/core';
-
-const thumbnails = await generateThumbnails(imageFile, [200, 400, 800]);
-
-await uploadFile(client, instructions, metadata, [mainPayload], thumbnails);
-```
-
----
-
-### Pattern 2: Process Video Before Upload
-
-```typescript
-import { processVideo } from '@homebase-id/js-lib/media';
-
-const optimized = await processVideo(videoFile, {
-  maxWidth: 1920,
-  maxHeight: 1080,
-  bitrate: 5000000 // 5 Mbps
-});
-
-// Upload optimized video
-await uploadVideo(client, optimized);
-```
+- `ThumbnailMeta` type
+- `MediaUploadMeta` interface
+- `MediaUploadResult` interface
+- `VideoUploadResult` interface
+- `ImageUploadResult` interface
+- `ImageMetadata` interface
+- `BaseVideoMetadata` interface
+- `PlainVideoMetadata` interface
+- `SegmentedVideoMetadata` interface
+- `HlsVideoMetadata` interface
+- `ThumbnailInstruction` interface
+- `MediaConfig` class
 
 ---
 
-### Pattern 3: Link Preview for Social Post
-
-```typescript
-import { getLinkPreview } from '@homebase-id/js-lib/media';
-
-const url = 'https://example.com/article'\;
-const preview = await getLinkPreview(client, url);
-
-// Include in post
-await createPost(client, {
-  text: 'Check this out!',
-  link: url,
-  linkPreview: preview
-});
-```
-
----
-
-## Best Practices
-
-### ✅ DO:
-
-1. **Generate multiple thumbnail sizes**
-   ```typescript
-   const thumbnails = await generateThumbnails(image, [200, 400, 800, 1200]);
-   ```
-
-2. **Optimize images before upload**
-   ```typescript
-   const optimized = await resizeImage(image, { quality: 0.85 });
-   ```
-
-3. **Use appropriate formats**
-   ```typescript
-   // WebP for modern browsers
-   const webp = await resizeImage(image, { format: 'webp' });
-   ```
-
-### ❌ DON'T:
-
-1. **Don't upload full-resolution images without optimization**
-
-2. **Don't skip thumbnail generation for images**
-
----
-
-## Related Documentation
-
-- [CORE_MODULE.md](./CORE_MODULE.md) - File upload operations
-- [PUBLIC_MODULE.md](./PUBLIC_MODULE.md) - Post media handling
-
----
-
-**Last Updated**: October 31, 2025  
-**Module Path**: `packages/libs/js-lib/src/media/`
+All exports verified from `packages/libs/js-lib/src/media/`.
