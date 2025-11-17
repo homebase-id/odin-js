@@ -30,6 +30,7 @@ import {
   UpdateResult,
   getContentFromHeaderOrPayload,
   DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
+  MAX_PAYLOAD_DESCRIPTOR_BYTES,
 
 } from '@homebase-id/js-lib/core';
 import {
@@ -57,7 +58,7 @@ import {
   TransitUploadResult,
   uploadFileOverPeer,
 } from '@homebase-id/js-lib/peer';
-import { COMMUNITY_APP_ID, ellipsisAtMaxCharOfRichText } from '@homebase-id/common-app';
+import { COMMUNITY_APP_ID, ellipsisAtMaxChar, ellipsisAtMaxCharOfRichText } from '@homebase-id/common-app';
 
 export const COMMUNITY_MESSAGE_FILE_TYPE = 7020;
 export const CommunityDeletedArchivalStaus = 2;
@@ -143,16 +144,31 @@ export const uploadCommunityMessage = async (
 
   if (!files?.length && linkPreviews?.length) {
     // We only support link previews when there is no media
-    const descriptorContent = JSON.stringify(
+    let descriptorContent = jsonStringify64(
       linkPreviews.map((preview) => {
         return {
           url: preview.url,
           hasImage: !!preview.imageUrl,
           imageWidth: preview.imageWidth,
           imageHeight: preview.imageHeight,
+          description: preview.description,
+          title: preview.title,
         } as LinkPreviewDescriptor;
       })
     );
+    if (descriptorContent.length < MAX_PAYLOAD_DESCRIPTOR_BYTES) {
+      // we trim down the descriptor if its too large
+      descriptorContent = jsonStringify64(linkPreviews.map((preview) => {
+        return {
+          url: preview.url,
+          hasImage: !!preview.imageUrl,
+          imageWidth: preview.imageWidth,
+          imageHeight: preview.imageHeight,
+          description: ellipsisAtMaxChar(preview.description, 100),
+          title: preview.title,
+        } as LinkPreviewDescriptor;
+      }));
+    }
 
     payloads.push({
       key: COMMUNITY_LINKS_PAYLOAD_KEY,

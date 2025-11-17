@@ -21,23 +21,31 @@ export type Token =
  * Tokenize VALID JSON (pretty-printed). Render as React text nodes (no HTML escaping here).
  */
 export function tokenizeJson(jsonText: string): Token[] {
-  // Strings (with optional trailing colon), literals, numbers, punctuation, whitespace.
-  // NOTE: '[' and ']' MUST be escaped inside character classes.
+  // Improved regex pattern that properly handles all JSON escape sequences
+  // String pattern: "..." with proper escape handling including \", \\, \/, \b, \f, \n, \r, \t, \uXXXX
+  // Followed by optional whitespace and colon (for keys)
   const re =
     // eslint-disable-next-line no-useless-escape
-    /("(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^"\\]*)")(?:\s*:)?|\b(?:true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|[{}\[\],:]|\s+/g;
+    /("(?:[^"\\]|\\["\\\/bfnrt]|\\u[0-9a-fA-F]{4})*")(\s*:)?|\b(?:true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|[{}\[\],:]|\s+/g;
 
   const out: Token[] = [];
   let m: RegExpExecArray | null;
 
   while ((m = re.exec(jsonText)) !== null) {
-    const [tok, strLit] = m;
+    const [tok, strLit, colonPart] = m;
 
     if (strLit !== undefined) {
       // It was a string literal; if regex consumed a colon, it's a key.
-      if (tok.endsWith(":")) {
+      if (colonPart) {
         out.push({ cls: "key", text: strLit });
-        out.push({ cls: "punct", text: ":" });
+        // Handle whitespace between string and colon
+        const wsMatch = colonPart.match(/^(\s*)(:)$/);
+        if (wsMatch) {
+          if (wsMatch[1]) out.push({ cls: "ws", text: wsMatch[1] });
+          out.push({ cls: "punct", text: wsMatch[2] });
+        } else {
+          out.push({ cls: "punct", text: ":" });
+        }
       } else {
         out.push({ cls: "string", text: strLit });
       }
