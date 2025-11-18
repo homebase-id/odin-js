@@ -19,7 +19,8 @@ export const ChatSentTimeIndicator = ({
 
   const date = useMemo(
     () =>
-      (msg.fileMetadata.transitCreated && new Date(msg.fileMetadata.transitCreated)) || undefined,
+      (msg.fileMetadata.appData.userDate && new Date(msg.fileMetadata.appData.userDate)) ||
+      undefined,
     [msg.fileMetadata.transitCreated]
   );
 
