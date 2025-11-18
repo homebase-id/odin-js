@@ -54,8 +54,14 @@ export const ChatMessageInfo = ({
       <div className="flex flex-col gap-5">
         <div>
           <p className="mb-2 text-xl">{t('Details')}</p>
+          {msg.fileMetadata.appData.userDate ? (
+            <p>
+              {t('Created')}:{' '}
+              {formatDateExludingYearIfCurrent(new Date(msg.fileMetadata.appData.userDate))}
+            </p>
+          ) : null}
           <p>
-            {t('Sent')}: {formatDateExludingYearIfCurrent(new Date(msg.fileMetadata.created))}
+            {t('Accepted')}: {formatDateExludingYearIfCurrent(new Date(msg.fileMetadata.created))}
           </p>
           {msg.fileMetadata.updated !== msg.fileMetadata.created ? (
             <p>
@@ -64,7 +70,7 @@ export const ChatMessageInfo = ({
           ) : null}
           {msg.fileMetadata.transitCreated ? (
             <p>
-              {t('Received')}:{' '}
+              {t('Transmitted')}:{' '}
               {formatDateExludingYearIfCurrent(new Date(msg.fileMetadata.transitCreated))}
             </p>
           ) : null}
