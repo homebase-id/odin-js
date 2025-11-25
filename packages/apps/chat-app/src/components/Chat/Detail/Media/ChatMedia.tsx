@@ -197,7 +197,6 @@ const PendingFile = ({
   className?: string;
   onLoad?: () => void;
 }) => {
-  console.log('Rendering PendingFile with payload:', payload);
   const fileUrl = useMemo(
     () =>
       (payload.pendingFileUrl || payload.pendingFile) &&
