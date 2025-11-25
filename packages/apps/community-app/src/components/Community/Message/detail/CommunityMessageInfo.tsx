@@ -61,7 +61,7 @@ export const CommunityMessageInfo = ({
           ) : null}
           {msg.fileMetadata.transitCreated ? (
             <p>
-              {t('Received ')}:
+              {t('Received')}:
               {formatDateExludingYearIfCurrent(new Date(msg.fileMetadata.transitCreated))}
             </p>
           ) : null}

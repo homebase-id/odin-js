@@ -28,7 +28,34 @@ interface Mp4Info {
   duration: number;
   timescale: number;
   brands: string[];
+  rotation?: number
 }
+
+
+// Add this helper function to convert matrix to rotation degrees
+const getRotationFromMatrix = (matrix: number[]): number => {
+  if (!matrix || matrix.length < 5) return 0;
+
+  // Convert from 16.16 fixed-point to floating point
+  const fixedToFloat = (val: number) => val / 65536;
+
+  const [a, b, , c, d] = matrix.map(fixedToFloat);
+
+  // Detect rotation based on matrix pattern
+  if (Math.abs(a) < 0.01 && Math.abs(b - 1) < 0.01 &&
+    Math.abs(c + 1) < 0.01 && Math.abs(d) < 0.01) {
+    return -90; // 270° clockwise
+  } else if (Math.abs(a) < 0.01 && Math.abs(b + 1) < 0.01 &&
+    Math.abs(c - 1) < 0.01 && Math.abs(d) < 0.01) {
+    return 90; // 90° clockwise
+  } else if (Math.abs(a + 1) < 0.01 && Math.abs(b) < 0.01 &&
+    Math.abs(c) < 0.01 && Math.abs(d + 1) < 0.01) {
+    return 180;
+  }
+
+  return 0; // No rotation
+};
+
 
 const loadMp4box = async () => {
   try {
@@ -47,7 +74,22 @@ export const getMp4Info = async (file: File | Blob): Promise<Mp4Info> => {
     const mp4File = createFile(true);
 
     mp4File.onReady = function (info: Mp4Info) {
-      resolve(info);
+      // Extract rotation from tkhd matrix (first video track)
+      let rotation = 0;
+      try {
+        const moov = mp4File.moov;
+        const videoTrak = moov?.traks?.find((trak: any) =>
+          trak.mdia?.hdlr?.handler === 'vide'
+        );
+
+        if (videoTrak?.tkhd?.matrix) {
+          rotation = getRotationFromMatrix(videoTrak.tkhd.matrix);
+          isDebug && console.debug('Detected rotation:', rotation, '°');
+        }
+      } catch (ex) {
+        console.warn('Failed to extract rotation matrix', ex);
+      }
+      resolve({ ...info, rotation });
     };
 
     let offset = 0;
