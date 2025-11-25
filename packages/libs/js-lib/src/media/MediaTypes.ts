@@ -63,6 +63,7 @@ export interface BaseVideoMetadata {
   fileSize?: number;
   key?: string;
   duration: number;
+  rotation?: number;
 }
 
 export interface PlainVideoMetadata extends BaseVideoMetadata {

@@ -8,6 +8,42 @@ import { getCodecFromMp4Info, getMp4Info } from './VideoSegmenter';
 
 const isDebug = hasDebugFlag();
 
+/**
+ * Returns additional FFmpeg arguments that preserveify the rotation metadata is kept
+ * in the HLS segments when doing stream-copy.
+ * 
+ * For videos that have a displaymatrix rotation (most Android portrait videos)
+ * we add `-vf format=yuv420p` – this forces FFmpeg to re-inject the side-data
+ * into the MPEG-TS segments without re-encoding.
+ * 
+ * If there is no rotation → returns an empty array (no unnecessary filters)
+ */
+const getRotationPreserveArgs = (rotation?: number): string[] => {
+  if (rotation === undefined) {
+    return []; // no rotation side data → nothing to do
+  }
+
+
+  // Normalize to 0–359 range and treat 0° and 180° as "no special handling needed"
+  const normalized = Math.abs(((rotation % 360) + 360) % 360);
+  const needsRotationFix = normalized !== 0 && normalized !== 180;
+
+
+  if (!needsRotationFix) {
+    // No rotation → pure stream copy (no re-encode)
+    return ['-c:v', 'copy'];
+  }
+
+  // Rotation detected → fast re-encode to fix orientation permanently
+  // ultrafast preset + high CRF = near-lossless, ~10-30% slower than copy
+  return [
+    '-c:v', 'libx264',
+    '-preset', 'ultrafast',  // Fastest preset
+    '-crf', '25',            // High quality (0=lossless, 23=default)
+  ];
+};
+
+
 const loadFFmpeg = async () => {
   try {
     // Pretty hacky way to get the worker working; We have a custom package that has the "correct" vite way of importing the worker;
@@ -82,6 +118,7 @@ export const segmentVideoFileWithFfmpeg = async (
   const mp4Info = await getMp4Info(file);
   const durationInSeconds = mp4Info.duration / mp4Info.timescale;
   const durationinMiliseconds = durationInSeconds * 1000;
+  const rotationArgs = getRotationPreserveArgs(mp4Info.rotation);
 
   if (file.size < 5 * MB) {
     return {
@@ -138,8 +175,11 @@ export const segmentVideoFileWithFfmpeg = async (
   const status = await ffmpeg.exec([
     '-i',
     inputFile,
-    '-codec:',
-    'copy',
+
+    ...rotationArgs,           // ← only added when rotation ≠ 0°/180°
+
+    // Audio
+    '-c:a', 'copy',
     ...encryptionInfo,
     '-hls_time',
     '6',
@@ -168,6 +208,7 @@ export const segmentVideoFileWithFfmpeg = async (
     hlsPlaylist: await playlistBlob.text(),
     fileSize: file.size,
     duration: durationinMiliseconds,
+    rotation: mp4Info.rotation,
   };
 
   return {
