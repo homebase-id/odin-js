@@ -46,9 +46,14 @@ export const CommunityMessageInfo = ({
       <div className="flex flex-col gap-5">
         <div>
           <p className="mb-2 text-xl">{t('Details')}</p>
+
           <p>
-            {t('Sent')}: {formatDateExludingYearIfCurrent(new Date(msg.fileMetadata.created))}
+            {t('Created')}:
+            {formatDateExludingYearIfCurrent(
+              new Date(msg.fileMetadata.appData.userDate || msg.fileMetadata.created)
+            )}
           </p>
+
           {msg.fileMetadata.updated !== msg.fileMetadata.created ? (
             <p>
               {t('Updated')}: {formatDateExludingYearIfCurrent(new Date(msg.fileMetadata.updated))}
@@ -56,7 +61,7 @@ export const CommunityMessageInfo = ({
           ) : null}
           {msg.fileMetadata.transitCreated ? (
             <p>
-              {t('Received')}:{' '}
+              {t('Received ')}:
               {formatDateExludingYearIfCurrent(new Date(msg.fileMetadata.transitCreated))}
             </p>
           ) : null}
