@@ -78,7 +78,7 @@ export const getMp4Info = async (file: File | Blob): Promise<Mp4Info> => {
       let rotation = 0;
       try {
         const moov = mp4File.moov;
-        const videoTrak = moov?.traks?.find((trak: any) =>
+        const videoTrak = moov?.traks?.find((trak: { mdia?: { hdlr?: { handler?: string } }; tkhd?: { matrix?: number[] } }) =>
           trak.mdia?.hdlr?.handler === 'vide'
         );
 
