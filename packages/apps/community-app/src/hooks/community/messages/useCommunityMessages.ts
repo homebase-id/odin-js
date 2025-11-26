@@ -47,8 +47,11 @@ export const useCommunityMessages = (props?: {
       throw new Error('Community unique id is not set');
     }
 
+    // check for messages where delivery details is not sent (should not happen normally) but can happen if the message failed to send
+    const filteredMessages = messages.filter((msg) => !!msg.fileMetadata.globalTransitId);
+
     return await Promise.all(
-      messages.map(async (msg) => {
+      filteredMessages.map(async (msg) => {
         await hardDeleteCommunityMessage(
           dotYouClient,
           community.fileMetadata.senderOdinId,
@@ -117,11 +120,11 @@ export const invalidateCommunityMessages = (
 
 type TransformFnReturnData =
   | InfiniteData<{
-      searchResults: (HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage> | null)[];
-      cursorState: string;
-      queryTime: number;
-      includeMetadataHeader: boolean;
-    }>
+    searchResults: (HomebaseFile<CommunityMessage> | NewHomebaseFile<CommunityMessage> | null)[];
+    cursorState: string;
+    queryTime: number;
+    includeMetadataHeader: boolean;
+  }>
   | undefined;
 export const updateCacheCommunityMessages = (
   queryClient: QueryClient,
@@ -238,20 +241,20 @@ export const getCommunityMessagesInfiniteQueryOptions: (
     select: !maxAge
       ? undefined
       : (data) => ({
-          ...data,
-          pages: data.pages.map((page) => {
-            const filteredPage = {
-              ...page,
+        ...data,
+        pages: data.pages.map((page) => {
+          const filteredPage = {
+            ...page,
 
-              searchResults: page.searchResults.filter((msg) => {
-                if (!msg) return false;
-                return msg.fileMetadata.created > maxAge;
-              }),
-            };
+            searchResults: page.searchResults.filter((msg) => {
+              if (!msg) return false;
+              return msg.fileMetadata.created > maxAge;
+            }),
+          };
 
-            return filteredPage;
-          }),
+          return filteredPage;
         }),
+      }),
     enabled: !!odinId && !!communityId && (!!channelId || !!threadId),
     refetchOnMount: true,
     staleTime: 1000 * 60 * 60 * 24, // 24 hour
@@ -411,8 +414,8 @@ export const internalInsertNewMessage = (
           searchResults:
             index === 0
               ? [newMessage, ...filteredSearchResults].sort(
-                  (a, b) => b.fileMetadata.created - a.fileMetadata.created
-                ) // Re-sort the first page, as the new message might be older than the first message in the page;
+                (a, b) => b.fileMetadata.created - a.fileMetadata.created
+              ) // Re-sort the first page, as the new message might be older than the first message in the page;
               : filteredSearchResults,
         };
       }
