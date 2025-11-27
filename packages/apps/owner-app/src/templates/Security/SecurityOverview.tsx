@@ -4,7 +4,12 @@ import {Link} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {VerifyPasswordDialog} from "./Dialog/VerifyPasswordDialog";
 import {VerifyRecoveryKeyDialog} from "./Dialog/VerifyRecoveryKeyDialog";
-import {getRecoveryInfo, RecoveryInfo} from "../../provider/auth/SecurityHealthProvider";
+import {
+  getMonthlyReportSetting,
+  getRecoveryInfo,
+  RecoveryInfo,
+  updateMonthlyReportSetting
+} from "../../provider/auth/SecurityHealthProvider";
 import {TimeAgoUtc} from "../../components/ui/Date/TimeAgoUtc";
 import {ChangeRecoveryEmailDialog} from "./Dialog/ChangeRecoveryEmailDialog";
 import {DealerRecoveryRiskHeadline} from "./DealerRecoveryRiskHeadline";
@@ -15,11 +20,16 @@ export const SecurityOverview = () => {
   const [openDialog, setOpenDialog] = useState<'none' | 'verify-password' | 'verify-recovery-phrase' | 'change-email' | 'verify-email'>('none');
   const [statusLoading, setStatusLoading] = useState(false);
   const [info, setInfo] = useState<RecoveryInfo | null>();
+  const [monthlyStatusReportEnabled, setMonthlyStatusReportEnabled] = useState(false);
+
 
   const reset = async () => {
     setStatusLoading(true)
     const status = await getRecoveryInfo();
     setInfo(status);
+
+    const reportEnabled = await getMonthlyReportSetting();
+    setMonthlyStatusReportEnabled(reportEnabled);
     setStatusLoading(false);
   }
 
@@ -32,8 +42,20 @@ export const SecurityOverview = () => {
     await reset();
   }
 
-  // console.log(info)
-  // console.log(openDialog)
+  const disableMonthlyReport = async () => {
+    setStatusLoading(true);
+    await updateMonthlyReportSetting(false);
+    setMonthlyStatusReportEnabled(false);
+    setStatusLoading(false);
+  }
+
+  const enableMonthlyReport = async () => {
+    setStatusLoading(true);
+    await updateMonthlyReportSetting(true);
+    setMonthlyStatusReportEnabled(true);
+    setStatusLoading(false);
+  }
+
   return (
     <>
       {/*<ErrorNotification error={updateFlagError}/>*/}
@@ -108,6 +130,38 @@ export const SecurityOverview = () => {
 
                   </div>
 
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-2">
+                    <p className="font-medium">{t('Email monthly security health report:')}</p>
+
+                    {(monthlyStatusReportEnabled) ? (
+                      <>
+                        <div className="flex items-center text-green-600">
+                          <Check className="h-4 w-4 mr-2" aria-hidden="true"/>
+                          {t('Enabled')}
+                        </div>
+
+                        <Link
+                          to=""
+                          onClick={() => disableMonthlyReport()}
+                          className="underline text-blue-600 hover:text-blue-800"
+                        >
+                          {t('Disable now')}
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-zinc-600">{t('Not Enabled')}</span>
+                        <Link
+                          to=""
+                          onClick={() => enableMonthlyReport()}
+                          className="underline text-blue-600 hover:text-blue-800"
+                        >
+                          {t('Enable now')}
+                        </Link>
+                      </>
+                    )}
+                  </div>
+
                   {/* Recovery Phrase Section */}
                   {info?.hasRecoveryKeyBeenViewed ? (
                     <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-2">
@@ -148,7 +202,7 @@ export const SecurityOverview = () => {
                       </Link>
                     </div>
                   )}
-                  
+
                 </div>
               )}
           </>
