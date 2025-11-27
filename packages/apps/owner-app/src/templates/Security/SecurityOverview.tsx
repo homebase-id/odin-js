@@ -14,6 +14,7 @@ import {TimeAgoUtc} from "../../components/ui/Date/TimeAgoUtc";
 import {ChangeRecoveryEmailDialog} from "./Dialog/ChangeRecoveryEmailDialog";
 import {DealerRecoveryRiskHeadline} from "./DealerRecoveryRiskHeadline";
 import {Check, Exclamation} from "@homebase-id/common-app/icons";
+import { SettingsRow } from './SettingsRow';
 
 export const SecurityOverview = () => {
 
@@ -85,108 +86,105 @@ export const SecurityOverview = () => {
                   <RecoveryEmailRow info={info}/>
 
                   {/* Password Status */}
-                  <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-2">
-                    <p className="font-medium">{t('Password last verified:')}</p>
-                    {(info?.status?.passwordLastVerified ?? 0) > 0 &&
+                  <SettingsRow label={t('Password last verified:')}>
+                    {(info?.status?.passwordLastVerified ?? 0) > 0 && (
                         <div className="flex text-green-600">
-                            <Check className="text-green-600 h-4 w-4 mr-2" aria-hidden="true"/>
+                          <Check className="text-green-600 h-4 w-4 mr-2" />
                           {t('Verified')}
-                            <TimeAgoUtc className="ml-2 text-green-600 font-medium"
-                                        value={info?.status?.passwordLastVerified ?? 0}/>
+                          <TimeAgoUtc
+                              className="ml-2 text-green-600 font-medium"
+                              value={info?.status?.passwordLastVerified ?? 0}
+                          />
                         </div>
-                    }
+                    )}
+
                     <Link
-                      to=""
-                      onClick={() => setOpenDialog('verify-password')}
-                      className="underline text-blue-600 hover:text-blue-800">
+                        to=""
+                        onClick={() => setOpenDialog('verify-password')}
+                        className="underline text-blue-600 hover:text-blue-800"
+                    >
                       {t('Verify now')}
                     </Link>
-                  </div>
+                  </SettingsRow>
 
                   {/* Password Recovery */}
-                  <div>
-                    <div className="flex items-center">
-                      <p className="font-medium">{t('Password Recovery')}</p>
-
-                      {!info?.isConfigured && (
-                        <span className="ml-2 flex items-center text-red-600">
-                                                      <Exclamation className="h-4 w-4 mr-1 shrink-0"
-                                                                   aria-hidden="true"/>
-                                                      <span className="flex items-center space-x-1">
-                                                        <span className="mr-1">{t('Not Verified')}</span>
-                                                        <Link
-                                                          to="/owner/security/password-recovery?gs=1"
-                                                          className="ml-2 underline text-blue-600 hover:text-blue-800">
-                                                          {t('Setup now')}
-                                                        </Link>
-                                                      </span>
-                                                    </span>
-                      )}
-
-                      {info?.isConfigured && info?.recoveryRisk && (
-                        <DealerRecoveryRiskHeadline report={info.recoveryRisk}/>
-                      )}
-                    </div>
-
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-2">
-                    <p className="font-medium">{t('Email monthly security health report:')}</p>
-
-                    {(monthlyStatusReportEnabled) ? (
-                      <>
-                        <div className="flex items-center text-green-600">
-                          <Check className="h-4 w-4 mr-2" aria-hidden="true"/>
-                          {t('Enabled')}
-                        </div>
-
-                        <Link
-                          to=""
-                          onClick={() => disableMonthlyReport()}
-                          className="underline text-blue-600 hover:text-blue-800"
-                        >
-                          {t('Disable now')}
-                        </Link>
-                      </>
-                    ) : (
-                      <>
-                        <span className="text-zinc-600">{t('Not Enabled')}</span>
-                        <Link
-                          to=""
-                          onClick={() => enableMonthlyReport()}
-                          className="underline text-blue-600 hover:text-blue-800"
-                        >
-                          {t('Enable now')}
-                        </Link>
-                      </>
+                  <SettingsRow label={t('Password Recovery:')}>
+                    {!info?.isConfigured && (
+                        <span className="flex items-center text-red-600">
+                          <Exclamation className="h-4 w-4 mr-1" />
+                                              {t('Not Verified')}
+                                              <Link
+                                                  to="/owner/security/password-recovery?gs=1"
+                                                  className="ml-2 underline text-blue-600 hover:text-blue-800"
+                                              >
+                            {t('Setup now')}
+                          </Link>
+                        </span>
                     )}
-                  </div>
+
+                    {info?.isConfigured && info?.recoveryRisk && (
+                        <DealerRecoveryRiskHeadline report={info.recoveryRisk} />
+                    )}
+                  </SettingsRow>
+
+                  <SettingsRow label={t('Email monthly security health report:')}>
+                    {monthlyStatusReportEnabled ? (
+                        <>
+                          <div className="flex items-center text-green-600">
+                            <Check className="h-4 w-4 mr-2" />
+                            {t('Enabled')}
+                          </div>
+
+                          <Link
+                              to=""
+                              onClick={disableMonthlyReport}
+                              className="underline text-blue-600 hover:text-blue-800"
+                          >
+                            {t('Disable now')}
+                          </Link>
+                        </>
+                    ) : (
+                        <>
+                          <span className="text-zinc-600">{t('Not Enabled')}</span>
+
+                          <Link
+                              to=""
+                              onClick={enableMonthlyReport}
+                              className="underline text-blue-600 hover:text-blue-800"
+                          >
+                            {t('Enable now')}
+                          </Link>
+                        </>
+                    )}
+                  </SettingsRow>
+
+                  
 
                   {/* Recovery Phrase Section */}
                   {info?.hasRecoveryKeyBeenViewed ? (
                     <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-2">
-                      <p className="font-medium">{t('Recovery phrase last verified:')}</p>
+                      <SettingsRow label={t('Recovery phrase last verified:')}>
+                        {(info?.status?.recoveryKeyLastVerified ?? 0) > 0 ? (
+                            <div className="flex items-center text-green-600">
+                              <Check className="h-4 w-4 mr-2" />
+                              {t('Verified')}
+                              <TimeAgoUtc
+                                  className="ml-2 text-green-600 font-medium"
+                                  value={info?.status?.recoveryKeyLastVerified ?? 0}
+                              />
+                            </div>
+                        ) : (
+                            <span className="text-zinc-600">{t('Not verified yet')}</span>
+                        )}
 
-                      {(info?.status?.recoveryKeyLastVerified ?? 0) > 0 ? (
-                        <div className="flex items-center text-green-600">
-                          <Check className="h-4 w-4 mr-2" aria-hidden="true"/>
-                          {t('Verified')}
-                          <TimeAgoUtc
-                            className="ml-2 text-green-600 font-medium"
-                            value={info?.status?.recoveryKeyLastVerified ?? 0}
-                          />
-                        </div>
-                      ) : (
-                        <span className="text-zinc-600">{t('Not verified yet')}</span>
-                      )}
-
-                      <Link
-                        to=""
-                        onClick={() => setOpenDialog('verify-recovery-phrase')}
-                        className="underline text-blue-600 hover:text-blue-800"
-                      >
-                        {t('Verify now')}
-                      </Link>
+                        <Link
+                            to=""
+                            onClick={() => setOpenDialog('verify-recovery-phrase')}
+                            className="underline text-blue-600 hover:text-blue-800"
+                        >
+                          {t('Verify now')}
+                        </Link>
+                      </SettingsRow>
                     </div>
                   ) : (
                     <div className="rounded-xl border border-zinc-200 bg-white p-4">
@@ -245,7 +243,7 @@ export const SecurityOverview = () => {
 
     </>
   );
-
+  
   function RecoveryEmailRow({info}: { info?: RecoveryInfo | null }) {
     const isVerified = !!info?.emailLastVerified;
     const hasEmail = !!info?.email;

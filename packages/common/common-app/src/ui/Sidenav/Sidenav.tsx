@@ -45,7 +45,7 @@ import {Times} from '../Icons';
 import {IconProps} from '../Icons';
 import {Wallet} from '../Icons';
 import {logoutOwnerAndAllApps} from '../../provider';
-import {Lock, RadioTower} from '../Icons';
+import {Shield, RadioTower} from '../Icons';
 import {OwnerClient} from "../../core";
 import {ApiType} from "@homebase-id/js-lib/core";
 
@@ -488,7 +488,7 @@ const SecurityMenuItem = () => {
 
   return (
     <div className="relative">
-      <NavItem icon={Lock} label={'Security'} to={`${OWNER_ROOT}/security`}/>
+      <NavItem icon={Shield} label={'Security'} to={`${OWNER_ROOT}/security`}/>
       {needsAttention && (
         <span className="absolute top-1 left-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"/>
       )}
