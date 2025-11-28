@@ -18,6 +18,7 @@ export function DealerRecoveryRiskHeadline({
     );
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export function DealerRecoveryRiskHeadlineText({report}: {
     report: DealerRecoveryRiskReport;
