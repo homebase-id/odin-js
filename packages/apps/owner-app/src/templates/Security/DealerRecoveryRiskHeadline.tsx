@@ -1,5 +1,7 @@
 import {DealerRecoveryRiskReport, RecoveryRiskLevel} from "../../provider/auth/SecurityHealthProvider";
 import {Link} from "react-router-dom";
+import {AlertOctagon, Skull} from "lucide-react";
+import { Exclamation, Check } from '@homebase-id/common-app/icons';
 
 export function DealerRecoveryRiskHeadline({
                                                report,
@@ -9,49 +11,61 @@ export function DealerRecoveryRiskHeadline({
     hidePrompt?: boolean
 }) {
     return (
-        <span className="ml-2 space-x-1">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
             <DealerRecoveryRiskHeadlineText report={report}/>
-            {/*<TimeAgoUtc value={report.healthLastChecked ?? 0}/>*/}
-            {!hidePrompt &&
-                <ActionPrompt riskLevel={report.riskLevel}/>
-            }
-        </span>
+            {!hidePrompt && <ActionPrompt riskLevel={report.riskLevel}/>}
+        </div>
     );
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-export function DealerRecoveryRiskHeadlineText({report}: { report: DealerRecoveryRiskReport }) {
-    let headline: string;
+export function DealerRecoveryRiskHeadlineText({report}: {
+    report: DealerRecoveryRiskReport;
+}) {
+    let text: string;
+    let Icon: React.ComponentType<any>;
+    let textColor: string;
 
-    let textColor;
     switch (report.riskLevel) {
         case RecoveryRiskLevel.Low:
-            headline = "✅ Recovery key is safe";
-            textColor = "text-green-600"
+            text = "Recovery is safe";
+            Icon = Check;
+            textColor = "text-green-600";
             break;
+
         case RecoveryRiskLevel.Moderate:
-            // headline = "⚠️ Recovery is fragile. You should add at least one more trusted connection";
-            headline = "⚠️ Recovery is fragile";
-            textColor = "text-green-600"
+            text = "Recovery is fragile";
+            Icon = Exclamation;
+            textColor = "text-yellow-600";
             break;
+
         case RecoveryRiskLevel.High:
-            // headline = "🚨 Just enough shards — at risk; add at least 2 more trusted connections";
-            headline = "🚨 Just enough shards";
-            textColor = "text-red-600"
+            text = "Just enough shards";
+            Icon = AlertOctagon;
+            textColor = "text-red-600";
             break;
+
         case RecoveryRiskLevel.Critical:
-            headline = "💀 Recovery not possible";
-            textColor = "text-red-600"
+            text = "Recovery not possible";
+            Icon = Skull;
+            textColor = "text-red-600";
             break;
+
         default:
-            headline = "ℹ️ Recovery status unknown";
-            textColor = "text-red-600"
+            text = "Recovery status unknown";
+            Icon = AlertOctagon;
+            textColor = "text-gray-600";
             break;
     }
 
-    return <span className={textColor}>{headline}</span>
+    return (
+        <span className={`flex items-center gap-1 ${textColor}`}>
+            <Icon className="h-4 w-4"/>
+            {text}
+        </span>
+    );
 }
-
 
 export function ActionPrompt({riskLevel}: {
     riskLevel: RecoveryRiskLevel;

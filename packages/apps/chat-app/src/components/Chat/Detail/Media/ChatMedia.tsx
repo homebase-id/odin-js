@@ -231,13 +231,17 @@ const PendingFile = ({
 
   return (
     <div
-      className="aspect-square h-full w-full"
+      className="h-full w-full"
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
       }}
     >
-      <BoringFile file={payload} className={'pointer-events-none h-full w-full animate-pulse'} />
+      <BoringFile
+        file={payload}
+        className={'pointer-events-none h-full w-full animate-pulse'}
+        canDownload={false}
+      />
     </div>
   );
 };

@@ -110,6 +110,46 @@ export const getRecoveryInfo = async (live: boolean = true): Promise<RecoveryInf
     });
 };
 
+
+export const updateMonthlyReportSetting = async (enabled: boolean): Promise<boolean> => {
+
+  const dotYouClient = new OwnerClient({
+    api: ApiType.Owner,
+  });
+
+  const client = dotYouClient.createAxiosClient({overrideEncryption: false});
+
+  const url = `${root}/update-monthly-security-health-report-status?enabled=${enabled}`;
+  return await client
+    .post(url)
+    .then((response) => {
+      return response.status === 200
+    })
+    .catch((error) => {
+      console.warn(error);
+      return false;
+    });
+};
+
+export const getMonthlyReportSetting = async (): Promise<boolean> => {
+  const dotYouClient = new OwnerClient({
+    api: ApiType.Owner,
+  });
+
+  const client = dotYouClient.createAxiosClient({overrideEncryption: false});
+
+  const url = `${root}/monthly-security-health-report-status`;
+  return await client
+    .get(url)
+    .then((response) => {
+      return Boolean(response.data);
+    })
+    .catch((error) => {
+      console.warn(error);
+      return false;
+    });
+};
+
 export const getShardHealthStatus = async (): Promise<PeriodicSecurityHealthCheckStatus | null> => {
 
   const dotYouClient = new OwnerClient({
