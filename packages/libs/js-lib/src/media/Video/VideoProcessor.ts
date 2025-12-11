@@ -8,7 +8,7 @@ import {
 import { createThumbnails } from '../Thumbs/ThumbnailProvider';
 import { segmentVideoFileWithFfmpeg, getThumbnailWithFfmpeg } from './VideoSegmenterFfmpeg';
 import { GenerateKeyHeader } from '../../core/DriveData/Upload/UploadHelpers';
-import { DEFAULT_PAYLOAD_DESCRIPTOR_KEY, MAX_PAYLOAD_DESCRIPTOR_BYTES } from '../../core/constants';
+import { DEFAULT_PAYLOAD_DESCRIPTOR_KEY } from '../../core/constants';
 
 const megaByte = 1024 * 1024;
 
@@ -59,7 +59,9 @@ export const processVideoFile = async (
   const { metadata, ...videoData } = await segmentVideoFileWithFfmpeg(videoFile.file, keyHeader);
 
   // get the metadata size 
-  const shouldEmbedContent = jsonStringify64(metadata).length < MAX_PAYLOAD_DESCRIPTOR_BYTES;
+  // We decided to always embed hls content for simplicity and reliability
+  const shouldEmbedContent = false;
+  // const shouldEmbedContent = jsonStringify64(metadata).length < MAX_PAYLOAD_DESCRIPTOR_BYTES;
 
   const descriptorContent = shouldEmbedContent ? jsonStringify64(metadata) : jsonStringify64({
     mimeType: metadata.mimeType,
