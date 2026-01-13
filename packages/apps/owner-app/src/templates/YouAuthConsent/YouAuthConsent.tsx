@@ -127,7 +127,7 @@ const YouAuthConsent = () => {
                       value={JSON.stringify(consentRequirements)}
                     />
                   ) : null}
-                  <ActionButton type="primary" className="w-full sm:w-auto" icon={Arrow}>
+                  <ActionButton type="primary" className="w-full sm:w-auto" icon={Arrow} autoFocus>
                     {t('Login')}
                   </ActionButton>
                 </form>
