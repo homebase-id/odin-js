@@ -15,6 +15,7 @@ export interface BaseProviderOptions {
   sharedSecret?: Uint8Array;
   hostIdentity: string;
   loggedInIdentity?: string;
+  cdnPayloadPath?: string;
   headers?: Record<string, string>;
 }
 
@@ -31,6 +32,14 @@ export class BaseDotYouClient {
 
   constructor(options: BaseProviderOptions) {
     this._options = options;
+  }
+
+  getCdnPayloadPath(): string | undefined {
+    return this._options.cdnPayloadPath;
+  }
+
+  setCdnPayloadPath(path: string | undefined): void {
+    this._options.cdnPayloadPath = path;
   }
 
   getSharedSecret(): Uint8Array | undefined {
@@ -117,7 +126,7 @@ export class BaseDotYouClient {
     const ss = this.getSharedSecret();
 
     client.interceptors.request.use(
-      async function (request) {
+      async (request) => {
         if (!ss) {
           return request;
         }
@@ -133,15 +142,44 @@ export class BaseDotYouClient {
           request.url = await encryptUrl(request.url ?? '', ss);
         }
 
+        // Sanity
+        if (!request.url) {
+          return request;
+        }
+
+        // Forward payload and thumb requests to the CDN payload path if enabled
+        const cdnPayloadPath = this.getCdnPayloadPath();
+        if (cdnPayloadPath) {
+          const path = (request.url?.split('?')[0] || '').toLowerCase();
+          if (
+            path.includes('/payload/') ||
+            path.endsWith('/payload') ||
+            path.endsWith('/thumb') ||
+            path.includes('/thumb.')
+          ) {
+            console.log('RAW', request.url);
+            const forwardedUrl = request.url.startsWith('http')
+              ? request.url
+              : this.getEndpoint() + request.url;
+            request.url = cdnPayloadPath + `?forward=${encodeURIComponent(forwardedUrl)}`;
+            console.log('CDN', request.url);
+          }
+        }
+
         return request;
       },
-      function (error) {
+      (error) => {
         return Promise.reject(error);
       }
     );
 
     client.interceptors.response.use(
-      async function (response) {
+      async (response) => {
+        const cdnPayloadPath = response.headers['x-odin-cdn-payload'];
+        if (cdnPayloadPath) {
+          this.setCdnPayloadPath(cdnPayloadPath);
+        }
+
         if (response.status == 204) {
           response.data = null;
           return response;
@@ -156,7 +194,7 @@ export class BaseDotYouClient {
 
         return response;
       },
-      async function (error) {
+      async (error) => {
         if (error?.response?.data?.data && ss && error.response.status !== 404) {
           // Try and get a more detailed error message
           console.error(
