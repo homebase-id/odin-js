@@ -27,7 +27,7 @@ const RichTextEditor = lazy(() =>
   }))
 );
 import { EmbeddedMessage } from '@homebase-id/chat-app/src/components/Chat/Detail/EmbeddedMessage';
-import { ChatMessage } from '@homebase-id/chat-app/src/providers/ChatProvider';
+import { ChatMessage, ReplyPreview } from '@homebase-id/chat-app/src/providers/ChatProvider';
 import { useParams } from 'react-router-dom';
 // import { DraftSaver } from './DraftSaver';
 // import { useMessageDraft } from './useMessageDraft';
@@ -61,7 +61,18 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
       const toSendMessage = message; // || draft?.message;
 
       const trimmedVal = getPlainTextFromRichText(toSendMessage) || '';
-      const replyId = replyMsg?.fileMetadata.appData.uniqueId;
+      const replyPreview: ReplyPreview | undefined = replyMsg
+        ? {
+            replyUniqueId: replyMsg.fileMetadata.appData.uniqueId as string,
+            authorOdinId: replyMsg.fileMetadata.originalAuthor,
+            message:
+              ellipsisAtMaxChar(
+                getPlainTextFromRichText(replyMsg.fileMetadata.appData.content.message) || '',
+                50
+              ) || '',
+            previewThumbnail: replyMsg.fileMetadata.appData.previewThumbnail,
+          }
+        : undefined;
       const newFiles = [...(files || [])];
 
       if (!conversation || (!trimmedVal && !files?.length)) return;
@@ -77,7 +88,7 @@ export const CommunityDirectComposer: FC<ChatComposerProps> = memo(
         await sendMessage({
           conversation,
           message: trimRichText(toSendMessage) || '',
-          replyId: replyId,
+          replyPreview: replyPreview,
           files: newFiles,
           chatId: getNewId(),
           userDate: new Date().getTime(),

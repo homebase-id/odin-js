@@ -83,6 +83,7 @@ export enum ChatDeliveryStatus {
 
 export interface ChatMessage {
   replyId?: string;
+  replyPreview?: ReplyPreview;
 
   /// Content of the message
   message: string | RichText;
@@ -96,6 +97,13 @@ export interface ChatMessage {
   // DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;
   isEdited?: boolean;
+}
+
+export interface ReplyPreview {
+  replyUniqueId: string;
+  authorOdinId: string;
+  message: string; // we don't need rich text as its a short preview
+  previewThumbnail?: EmbeddedThumb;
 }
 
 const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_web';
@@ -218,7 +226,9 @@ export const getChatMessageContentFromHeaderOrPayload = async (
     return {
       message: payload.message,
       deliveryStatus: messageContent.deliveryStatus,
-      replyId: messageContent.replyId
+      replyId: messageContent.replyId,
+      isEdited: messageContent.isEdited,
+      replyPreview: messageContent.replyPreview,
 
     }
   }
@@ -354,13 +364,19 @@ export const uploadChatMessage = async (
   const jsonContent: string = jsonStringify64({ ...messageContent });
   const payloadBytes = stringToUint8Array(jsonStringify64({ message: messageContent.message }));
 
-  // Set max of 3kb for content so enough room is left for metadata
+  // Set max of 7kb for content so enough room is left for metadata
   const shouldEmbedContent = uint8ArrayToBase64(payloadBytes).length < MAX_HEADER_CONTENT_BYTES;
   const content = shouldEmbedContent
     ? jsonContent
     : jsonStringify64({
       message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
       replyId: messageContent.replyId,
+      replyPreview: messageContent.replyPreview ? {
+        replyUniqueId: messageContent.replyPreview.replyUniqueId,
+        authorOdinId: messageContent.replyPreview.authorOdinId,
+        message: ellipsisAtMaxChar(messageContent.replyPreview.message, 30),
+        previewThumbnail: messageContent.replyPreview.previewThumbnail
+      } : undefined,
       deliveryStatus: messageContent.deliveryStatus,
     }); // We only embed the content if it's less than 3kb
 
@@ -559,6 +575,12 @@ export const updateChatMessage = async (
     : jsonStringify64({
       message: ellipsisAtMaxChar(getPlainTextFromRichText(messageContent.message), 400),
       replyId: messageContent.replyId,
+      replyPreview: messageContent.replyPreview ? {
+        replyUniqueId: messageContent.replyPreview.replyUniqueId,
+        authorOdinId: messageContent.replyPreview.authorOdinId,
+        message: ellipsisAtMaxChar(messageContent.replyPreview.message, 30),
+        previewThumbnail: messageContent.replyPreview.previewThumbnail
+      } : undefined,
       deliveryStatus: messageContent.deliveryStatus,
     }); // We only embed the content if it's less than 3kb
 
