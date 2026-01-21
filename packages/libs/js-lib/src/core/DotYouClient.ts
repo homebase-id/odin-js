@@ -16,6 +16,7 @@ export interface BaseProviderOptions {
   hostIdentity: string;
   loggedInIdentity?: string;
   headers?: Record<string, string>;
+  v2Experimental?: boolean;
 }
 
 const getRandomIv = () => crypto.getRandomValues(new Uint8Array(16));
@@ -76,6 +77,11 @@ export class BaseDotYouClient {
 
   //Returns the endpoint for the identity
   getEndpoint(): string {
+
+    if (this._options.v2Experimental) {
+      return this.getRoot() + '/api/v2';
+    }
+
     let endpoint = ``;
     switch (this._options?.api) {
       case ApiType.Owner:
@@ -190,8 +196,7 @@ export class DotYouClient extends BaseDotYouClient {
 export const assertIfDotYouClientIsOwner = (dotYouClient: DotYouClient) => {
   if (dotYouClient.getType() !== ApiType.Owner) {
     throw new Error(
-      `This method is not available for ${
-        dotYouClient.getType() === ApiType.App ? 'app' : 'youauth'
+      `This method is not available for ${dotYouClient.getType() === ApiType.App ? 'app' : 'youauth'
       } clients`
     );
   }
