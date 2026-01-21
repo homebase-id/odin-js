@@ -28,7 +28,7 @@
     "@homebase-id/ui-lib": "*",
     "axios": "1.8.2",
     "emoji-picker-element": "^1.24.0",
-    "lodash-es": "^4.17.21",
+    "lodash-es": "^4.17.23",
     "mp4box": "^0.5.2",
     "hls.js": "^1.6.10",
     "react": "^18.3.1",

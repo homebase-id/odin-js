@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.6",
-    "lodash-es": "^4.17.21",
+    "lodash-es": "^4.17.23",
     "prettier-plugin-tailwindcss": "0.6.11",
     "tailwindcss": "4.0.6"
   }
