@@ -235,7 +235,7 @@ export const UpdatePermissions = async (
     ...request,
     permissionSet: {
       ...request.permissionSet,
-      keys: request.permissionSet.keys.reduce((acc: number[], key: number) => {
+      keys: (request.permissionSet?.keys ?? []).reduce((acc: number[], key: number) => {
         if (!acc.includes(key)) acc.push(key);
         return acc;
       }, [] as number[]),
