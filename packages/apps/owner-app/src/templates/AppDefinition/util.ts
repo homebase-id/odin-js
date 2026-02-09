@@ -4,6 +4,10 @@ import { DriveGrantRequest } from '../../provider/app/AppManagementProviderTypes
 import { AppDriveAuthorizationParams } from '@homebase-id/js-lib/auth';
 
 export const circleToCircleIds = (queryParamVal: string | undefined): string[] => {
+  const parsedString = queryParamVal && tryJsonParse<string[]>(queryParamVal);
+  if (Array.isArray(parsedString)) {
+    return parsedString;
+  }
   return queryParamVal?.split(',') || [];
 };
 
