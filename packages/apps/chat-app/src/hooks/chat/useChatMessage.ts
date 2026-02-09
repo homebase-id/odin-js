@@ -5,7 +5,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { ChatDeliveryStatus, ChatMessage, getChatMessage } from '../../providers/ChatProvider';
+import { ChatDeliveryStatus, ChatMessage, getChatMessage, ReplyPreview } from '../../providers/ChatProvider';
 import {
   HomebaseFile,
   NewHomebaseFile,
@@ -35,13 +35,13 @@ export const useChatMessage = (props?: {
   const getMessageByUniqueId = async (conversationId: string | undefined, messageId: string) => {
     const extistingMessages = conversationId
       ? queryClient.getQueryData<
-          InfiniteData<{
-            searchResults: (HomebaseFile<ChatMessage> | null)[];
-            cursorState: string;
-            queryTime: number;
-            includeMetadataHeader: boolean;
-          }>
-        >(['chat-messages', conversationId])
+        InfiniteData<{
+          searchResults: (HomebaseFile<ChatMessage> | null)[];
+          cursorState: string;
+          queryTime: number;
+          includeMetadataHeader: boolean;
+        }>
+      >(['chat-messages', conversationId])
       : undefined;
 
     if (extistingMessages) {
@@ -59,7 +59,7 @@ export const useChatMessage = (props?: {
 
   const sendMessage = async ({
     conversation,
-    replyId,
+    replyPreview,
     files,
     message,
     linkPreviews,
@@ -68,7 +68,7 @@ export const useChatMessage = (props?: {
     tags,
   }: {
     conversation: HomebaseFile<UnifiedConversation, ConversationMetadata>;
-    replyId?: string;
+    replyPreview: ReplyPreview | undefined;
     files?: NewMediaFile[];
     message: string | RichText;
     linkPreviews?: LinkPreview[];
@@ -94,7 +94,8 @@ export const useChatMessage = (props?: {
             deliveryStatus: stringGuidsEqual(conversationId, ConversationWithYourselfId)
               ? ChatDeliveryStatus.Read
               : ChatDeliveryStatus.Sent,
-            replyId: replyId,
+            replyId: replyPreview?.replyUniqueId,
+            replyPreview: replyPreview,
           },
           userDate: userDate || new Date().getTime(),
           tags,
@@ -175,7 +176,7 @@ export const useChatMessage = (props?: {
     }),
     send: useMutation({
       mutationFn: sendMessage,
-      onMutate: async ({ conversation, replyId, files, message, chatId, userDate, tags }) => {
+      onMutate: async ({ conversation, replyPreview, files, message, chatId, userDate, tags }) => {
         const identity = dotYouClient.getLoggedInIdentity();
         const newMessageDsr: NewHomebaseFile<ChatMessage> = {
           fileMetadata: {
@@ -186,7 +187,8 @@ export const useChatMessage = (props?: {
               content: {
                 message: message,
                 deliveryStatus: ChatDeliveryStatus.Sending,
-                replyId: replyId,
+                replyPreview: replyPreview,
+                replyId: replyPreview?.replyUniqueId,
               },
               userDate,
               tags,

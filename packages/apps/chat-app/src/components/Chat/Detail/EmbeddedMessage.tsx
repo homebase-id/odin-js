@@ -25,6 +25,7 @@ export const EmbeddedMessageWithId = ({
   return <EmbeddedMessage msg={msg || undefined} className={className} />;
 };
 
+//TODO(2002Bishwajeet): Revisit this component for adding support for ReplyPreview in EmbeddedMessage
 export const EmbeddedMessage = ({
   msg,
   className,
@@ -79,6 +80,9 @@ export const EmbeddedMessageMedia = ({
         fileId={msg.fileId}
         fileKey={firstPayload.key}
         lastModified={firstPayload.lastModified || msg.fileMetadata.updated}
+        previewThumbnail={
+          firstPayload.previewThumbnail || msg.fileMetadata.appData.previewThumbnail
+        }
         targetDrive={ChatDrive}
         avoidPayload={true}
         className={`${className || ''} flex-shrink-0`}

@@ -12,11 +12,12 @@ import {
   LinkOverview,
   useLinkPreviewBuilder,
   getVideosFromPasteEvent,
+  getPlainTextFromRichText,
 } from '@homebase-id/common-app';
 import { HomebaseFile, NewMediaFile } from '@homebase-id/js-lib/core';
 
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
-import { ChatMessage } from '../../../providers/ChatProvider';
+import { ChatMessage, ReplyPreview } from '../../../providers/ChatProvider';
 import { ConversationMetadata, UnifiedConversation } from '../../../providers/ConversationProvider';
 import { useState, useEffect, useRef } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
@@ -72,7 +73,19 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   const conversationContent = conversation?.fileMetadata.appData.content;
   const doSend = async (forcedVal?: string) => {
     const trimmedVal = (forcedVal || message)?.trim();
-    const replyId = replyMsg?.fileMetadata.appData.uniqueId;
+    const replyPreview: ReplyPreview | undefined = replyMsg
+      ? {
+          replyUniqueId: replyMsg.fileMetadata.appData.uniqueId as string,
+          authorOdinId: replyMsg.fileMetadata.originalAuthor,
+          message:
+            ellipsisAtMaxChar(
+              getPlainTextFromRichText(replyMsg.fileMetadata.appData.content.message) || '',
+              50
+            ) || '',
+          previewThumbnail: replyMsg.fileMetadata.appData.previewThumbnail,
+        }
+      : undefined;
+
     const newFiles = [...(files || [])];
 
     if (
@@ -92,7 +105,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
       await sendMessage({
         conversation,
         message: trimmedVal || '',
-        replyId: replyId,
+        replyPreview: replyPreview,
         files: newFiles,
         chatId: getNewId(),
         userDate: new Date().getTime(),
