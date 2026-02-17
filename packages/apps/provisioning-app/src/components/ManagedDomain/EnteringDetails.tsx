@@ -184,7 +184,7 @@ const EnteringDetails = ({
               icon={Globe}
               onClick={(e) => {
                 e.preventDefault();
-                navigate(`./own-domain?invitation-code=${invitationCode}`);
+                navigate(`../own-domain?invitation-code=${invitationCode}`);
               }}
             >
               {t('Use your own domain')}
