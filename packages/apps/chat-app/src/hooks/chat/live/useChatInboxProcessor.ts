@@ -32,7 +32,7 @@ export const useChatInboxProcessor = (connected?: boolean) => {
   const fetchData = async () => {
     const lastCursor = queryClient.getQueryData(['cursor-chat-inbox']);
     const shouldInvalidate = lastCursor === undefined;
-    const cursor = lastCursor === null ? null : (typeof lastCursor === 'string' ? lastCursor : null);
+    const cursor = typeof lastCursor === 'string' ? lastCursor : null;
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
     isDebug && console.debug('[InboxProcessor] fetching updates since', cursor);
@@ -101,7 +101,7 @@ const findChangesSinceTimestamp = async (
 ) => {
   const newFiles = await queryBatch(dotYouClient, params, {
     maxRecords: BATCH_SIZE,
-    cursorState: cursor,
+    cursorState: cursor ?? undefined,
     includeMetadataHeader: true,
     includeTransferHistory: true,
     ordering: 'newestFirst',
