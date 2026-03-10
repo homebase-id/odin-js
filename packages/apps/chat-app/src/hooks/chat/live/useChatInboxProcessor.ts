@@ -99,9 +99,6 @@ const findChangesSinceTimestamp = async (
   cursor: string | null,
   params: FileQueryParams
 ) => {
-  // const modifiedCursor = getQueryModifiedCursorFromTime(timeStamp); // Friday, 31 May 2024 09:38:54.678
-  // const batchCursor = getQueryBatchCursorFromTime(new Date().getTime(), timeStamp);
-
   const newFiles = await queryBatch(dotYouClient, params, {
     maxRecords: BATCH_SIZE,
     cursorState: cursor,
@@ -111,15 +108,6 @@ const findChangesSinceTimestamp = async (
     sorting: 'anyChangeDate',
   });
 
-  // const modifiedFiles = await queryModified(dotYouClient, params, {
-  //   maxRecords: BATCH_SIZE,
-  //   cursor: modifiedCursor + '',
-  //   excludePreviewThumbnail: false,
-  //   includeHeaderContent: true,
-  //   includeTransferHistory: true,
-  // });
-
-  // return modifiedFiles.searchResults.concat(newFiles.searchResults);
   return newFiles;
 };
 

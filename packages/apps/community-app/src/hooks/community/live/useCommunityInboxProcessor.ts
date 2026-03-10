@@ -71,7 +71,6 @@ export const useCommunityInboxProcessor = (
       console.warn('[useCommunityInboxProcessor] Invalidating all community messages');
       // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
       invalidateCommunityMessages(queryClient, communityId);
-      return null;
     }
 
     const newMessagesResult = await findChangesSinceTimestamp(
@@ -217,9 +216,6 @@ const findChangesSinceTimestamp = async (
   cursor: string | null,
   params: FileQueryParams
 ) => {
-  // const modifiedCursor = getQueryModifiedCursorFromTime(timeStamp); // Friday, 31 May 2024 09:38:54.678
-  // const batchCursor = getQueryBatchCursorFromTime(new Date().getTime(), timeStamp);
-
   const newFiles =
     odinId && dotYouClient.getHostIdentity() !== odinId
       ? await queryBatchOverPeer(dotYouClient, odinId, params, {
@@ -239,24 +235,6 @@ const findChangesSinceTimestamp = async (
         sorting: 'anyChangeDate',
       });
 
-  // const modifiedFiles =
-  //   odinId && dotYouClient.getHostIdentity() !== odinId
-  //     ? await queryModifiedOverPeer(dotYouClient, odinId, params, {
-  //       maxRecords: BATCH_SIZE,
-  //       cursor: modifiedCursor + '',
-  //       excludePreviewThumbnail: false,
-  //       includeHeaderContent: true,
-  //       includeTransferHistory: false,
-  //     })
-  //     : await queryModified(dotYouClient, params, {
-  //       maxRecords: BATCH_SIZE,
-  //       cursor: modifiedCursor + '',
-  //       excludePreviewThumbnail: false,
-  //       includeHeaderContent: true,
-  //       includeTransferHistory: false,
-  //     });
-
-  // return modifiedFiles.searchResults.concat(newFiles.searchResults);
   return newFiles
 };
 
