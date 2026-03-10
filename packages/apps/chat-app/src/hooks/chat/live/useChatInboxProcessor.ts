@@ -31,57 +31,58 @@ export const useChatInboxProcessor = (connected?: boolean) => {
 
   const fetchData = async () => {
     const lastCursor = queryClient.getQueryData(['cursor-chat-inbox']);
+    const shouldInvalidate = lastCursor === undefined;
     const cursor = lastCursor ?? null;
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
     isDebug && console.debug('[InboxProcessor] fetching updates since', cursor);
-    if (cursor) {
-      const updatedMessagesResult = await findChangesSinceTimestamp(
-        dotYouClient,
-        cursor,
-        {
-          targetDrive: ChatDrive,
-          fileType: [CHAT_MESSAGE_FILE_TYPE],
-        }
-      );
-      const updatedMessages = updatedMessagesResult.searchResults;
-      isDebug && console.debug('[InboxProcessor] new messages', updatedMessages.length);
-      if (updatedMessages.length > 0) {
-        const fullMessages = (
-          await Promise.all(
-            updatedMessages.map(
-              async (msg) =>
-                await dsrToMessage(
-                  dotYouClient,
-                  msg as unknown as HomebaseFile<string>,
-                  ChatDrive,
-                  false
-                )
-            )
-          )
-        ).filter(Boolean) as HomebaseFile<ChatMessage>[];
-        await processChatMessagesBatch(dotYouClient, queryClient, fullMessages);
-      }
-
-      const updatedConversationsResult = await findChangesSinceTimestamp(
-        dotYouClient,
-        cursor,
-        {
-          targetDrive: ChatDrive,
-          fileType: [CHAT_CONVERSATION_FILE_TYPE],
-        }
-      );
-      const updatedConversations = updatedConversationsResult.searchResults;
-      isDebug && console.debug('[InboxProcessor] new conversations', updatedConversations.length);
-      await processConversationsBatch(dotYouClient, queryClient, updatedConversations);
-      return updatedConversationsResult.cursor ?? null;
-    } else {
+    if (shouldInvalidate)
+    {
       console.warn('[useChatInboxProcessor] Invalidating all conversations & chat messages');
       // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
       invalidateChatMessages(queryClient);
       invalidateConversations(queryClient);
-      return null;
     }
+
+    const updatedMessagesResult = await findChangesSinceTimestamp(
+      dotYouClient,
+      cursor,
+      {
+        targetDrive: ChatDrive,
+        fileType: [CHAT_MESSAGE_FILE_TYPE],
+      }
+    );
+    const updatedMessages = updatedMessagesResult.searchResults;
+    isDebug && console.debug('[InboxProcessor] new messages', updatedMessages.length);
+    if (updatedMessages.length > 0) {
+      const fullMessages = (
+        await Promise.all(
+          updatedMessages.map(
+            async (msg) =>
+              await dsrToMessage(
+                dotYouClient,
+                msg as unknown as HomebaseFile<string>,
+                ChatDrive,
+                false
+              )
+          )
+        )
+      ).filter(Boolean) as HomebaseFile<ChatMessage>[];
+      await processChatMessagesBatch(dotYouClient, queryClient, fullMessages);
+    }
+
+    const updatedConversationsResult = await findChangesSinceTimestamp(
+      dotYouClient,
+      cursor,
+      {
+        targetDrive: ChatDrive,
+        fileType: [CHAT_CONVERSATION_FILE_TYPE],
+      }
+    );
+    const updatedConversations = updatedConversationsResult.searchResults;
+    isDebug && console.debug('[InboxProcessor] new conversations', updatedConversations.length);
+    await processConversationsBatch(dotYouClient, queryClient, updatedConversations);
+    return updatedConversationsResult.cursor ?? null;
   };
 
   // We refetch this one on mount as each mount the websocket would reconnect, and there might be a backlog of messages

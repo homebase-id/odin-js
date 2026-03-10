@@ -49,50 +49,50 @@ const useFeedInboxProcessor = (isEnabled?: boolean) => {
 
   const fetchData = async () => {
     const lastCursor = queryClient.getQueryData(['cursor-feed-inbox']);
+    const shouldInvalidate = lastCursor === undefined;
     const cursor = lastCursor ?? null;
 
     await processInbox(dotYouClient, BlogConfig.FeedDrive, 100);
 
-    if (lastCursor) {
-      const updatedPostsResult = await findChangesSinceTimestamp(dotYouClient, cursor, {
-        targetDrive: BlogConfig.FeedDrive,
-        fileType: [BlogConfig.PostFileType],
-      });
-      const updatedPosts = updatedPostsResult.searchResults;
-      isDebug && console.debug('[FeedInboxProcessor] new posts', updatedPosts.length);
-      await processPostsBatch(dotYouClient, queryClient, BlogConfig.FeedDrive, updatedPosts);
-
-      if (chnlDrives)
-        await Promise.all(
-          chnlDrives.map(async (chnlDrive) => {
-            await processInbox(dotYouClient, chnlDrive.targetDriveInfo, 100);
-
-            const updatedPostsResult = await findChangesSinceTimestamp(
-              dotYouClient,
-              cursor,
-              {
-                targetDrive: chnlDrive.targetDriveInfo,
-                fileType: [BlogConfig.PostFileType],
-              }
-            );
-            const updatedPosts = updatedPostsResult.searchResults;
-            isDebug &&
-              console.debug('[FeedInboxProcessor] new posts for channel', updatedPosts.length);
-            await processPostsBatch(
-              dotYouClient,
-              queryClient,
-              chnlDrive.targetDriveInfo,
-              updatedPosts
-            );
-          })
-        );
-
-      return updatedPostsResult.cursor ?? null;
-    } else {
+    if (shouldInvalidate) {
       isDebug && console.warn('[FeedInboxProcessor] No lastCursor');
       invalidateSocialFeeds(queryClient);
-      return null;
     }
+
+    const updatedPostsResult = await findChangesSinceTimestamp(dotYouClient, cursor, {
+      targetDrive: BlogConfig.FeedDrive,
+      fileType: [BlogConfig.PostFileType],
+    });
+    const updatedPosts = updatedPostsResult.searchResults;
+    isDebug && console.debug('[FeedInboxProcessor] new posts', updatedPosts.length);
+    await processPostsBatch(dotYouClient, queryClient, BlogConfig.FeedDrive, updatedPosts);
+
+    if (chnlDrives)
+      await Promise.all(
+        chnlDrives.map(async (chnlDrive) => {
+          await processInbox(dotYouClient, chnlDrive.targetDriveInfo, 100);
+
+          const updatedPostsResult = await findChangesSinceTimestamp(
+            dotYouClient,
+            cursor,
+            {
+              targetDrive: chnlDrive.targetDriveInfo,
+              fileType: [BlogConfig.PostFileType],
+            }
+          );
+          const updatedPosts = updatedPostsResult.searchResults;
+          isDebug &&
+            console.debug('[FeedInboxProcessor] new posts for channel', updatedPosts.length);
+          await processPostsBatch(
+            dotYouClient,
+            queryClient,
+            chnlDrive.targetDriveInfo,
+            updatedPosts
+          );
+        })
+      );
+
+    return updatedPostsResult.cursor ?? null;
   };
 
   return useQuery({

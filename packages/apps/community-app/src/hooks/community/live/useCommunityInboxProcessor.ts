@@ -54,10 +54,8 @@ export const useCommunityInboxProcessor = (
   const targetDrive = getTargetDriveFromCommunityId(communityId || '');
 
   const fetchData = async (communityId: string) => {
-    const lastCursor = queryClient.getQueryData([
-      'cursor-community-inbox',
-      communityId,
-    ]);
+    const lastCursor = queryClient.getQueryData(['cursor-community-inbox']);
+    const shouldInvalidate = lastCursor === undefined;
     const cursor = lastCursor ?? null;
 
     // Process community;
@@ -68,139 +66,140 @@ export const useCommunityInboxProcessor = (
 
     isDebug &&
       console.debug('[CommunityInboxProcessor] fetching updates since', cursor);
-    if (cursor) {
-      const newMessagesResult = await findChangesSinceTimestamp(
-        dotYouClient,
-        odinId,
-        cursor,
-        {
-          targetDrive: targetDrive,
-          fileType: [COMMUNITY_MESSAGE_FILE_TYPE],
-          fileState: [0, 1],
-        }
-      );
-      const newMessages = newMessagesResult.searchResults;
-      isDebug && console.debug('[CommunityInboxProcessor] new messages', newMessages.length);
 
-      await processCommunityMessagesBatch(
-        dotYouClient,
-        queryClient,
-        odinId,
-        targetDrive,
-        communityId,
-        newMessages
-      );
-
-      const newThreadMessagesResult = await findChangesSinceTimestamp(
-        dotYouClient,
-        odinId,
-        cursor,
-        {
-          targetDrive: targetDrive,
-          fileType: [COMMUNITY_MESSAGE_FILE_TYPE],
-          fileState: [0, 1],
-          systemFileType: 'Comment',
-        }
-      );
-      isDebug && console.debug('[CommunityInboxProcessor] new thread messages', newThreadMessages);
-
-      await processCommunityMessagesBatch(
-        dotYouClient,
-        queryClient,
-        odinId,
-        targetDrive,
-        communityId,
-        newThreadMessages
-      );
-
-      const newChannelsResult = await findChangesSinceTimestamp(
-        dotYouClient,
-        odinId,
-        cursor,
-        { targetDrive: targetDrive, fileType: [COMMUNITY_CHANNEL_FILE_TYPE], fileState: [0, 1] }
-      );
-
-      const newChannels = newChannelsResult.searchResults;
-
-      isDebug && console.debug('[CommunityInboxProcessor] new channels', newChannels.length);
-      await Promise.all(
-        newChannels.map(async (updatedDsr) => {
-          const newChannel =
-            updatedDsr.fileState === 'active'
-              ? await dsrToCommunityChannel(dotYouClient, updatedDsr, odinId, targetDrive, true)
-              : updatedDsr as unknown as HomebaseFile<CommunityChannel>;
-
-          if (!newChannel) return;
-          insertNewCommunityChannel(queryClient, newChannel, communityId);
-        })
-      );
-
-      const newCommunityMetadataResult = await findChangesSinceTimestamp(
-        dotYouClient,
-        undefined,
-        cursor,
-        {
-          targetDrive: LOCAL_COMMUNITY_APP_DRIVE,
-          fileType: [COMMUNITY_METADATA_FILE_TYPE],
-        }
-      );
-
-      const newCommunityMetadata = newCommunityMetadataResult.searchResults;
-
-      isDebug && console.debug('[CommunityInboxProcessor] new community metadata', newCommunityMetadata.length);
-
-      await Promise.all(
-        newCommunityMetadata.map(async (updatedDsr) => {
-          const newMetadata =
-            updatedDsr.fileState === 'active'
-              ? await dsrToCommunityMetadata(
-                dotYouClient,
-                updatedDsr,
-                LOCAL_COMMUNITY_APP_DRIVE,
-                true
-              )
-              : updatedDsr as unknown as HomebaseFile<CommunityMetadata>;
-          if (!newMetadata) return;
-          insertNewcommunityMetadata(queryClient, newMetadata);
-        })
-      );
-
-      const newCommunityDraftsResult = await findChangesSinceTimestamp(
-        dotYouClient,
-        undefined,
-        cursor,
-        {
-          targetDrive: LOCAL_COMMUNITY_APP_DRIVE,
-          fileType: [COMMUNITY_DRAFTS_FILE_TYPE],
-        }
-      );
-
-      const newCommunityDrafts = newCommunityDraftsResult.searchResults;
-
-      isDebug && console.debug('[CommunityInboxProcessor] new community drafts', newCommunityDrafts.length);
-
-      await Promise.all(
-        newCommunityDrafts.map(async (updatedDsr) => {
-          const newDrafts =
-            updatedDsr.fileState === 'active'
-              ? await dsrToCommunityDrafts(
-                dotYouClient,
-                updatedDsr,
-                LOCAL_COMMUNITY_APP_DRIVE,
-                true
-              )
-              : updatedDsr as unknown as HomebaseFile<CommunityDrafts>;
-          if (!newDrafts) return;
-          insertNewCommunityDrafts(queryClient, communityId, newDrafts);
-        })
-      );
-      return newCommunityDraftsResult.cursor ?? null;
-    } else {
+    if (shouldInvalidate) {
       console.warn('[useCommunityInboxProcessor] Invalidating all community messages');
       // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
       invalidateCommunityMessages(queryClient, communityId);
       return null;
     }
+
+    const newMessagesResult = await findChangesSinceTimestamp(
+      dotYouClient,
+      odinId,
+      cursor,
+      {
+        targetDrive: targetDrive,
+        fileType: [COMMUNITY_MESSAGE_FILE_TYPE],
+        fileState: [0, 1],
+      }
+    );
+    const newMessages = newMessagesResult.searchResults;
+    isDebug && console.debug('[CommunityInboxProcessor] new messages', newMessages.length);
+
+    await processCommunityMessagesBatch(
+      dotYouClient,
+      queryClient,
+      odinId,
+      targetDrive,
+      communityId,
+      newMessages
+    );
+
+    const newThreadMessagesResult = await findChangesSinceTimestamp(
+      dotYouClient,
+      odinId,
+      cursor,
+      {
+        targetDrive: targetDrive,
+        fileType: [COMMUNITY_MESSAGE_FILE_TYPE],
+        fileState: [0, 1],
+        systemFileType: 'Comment',
+      }
+    );
+    isDebug && console.debug('[CommunityInboxProcessor] new thread messages', newThreadMessages);
+
+    await processCommunityMessagesBatch(
+      dotYouClient,
+      queryClient,
+      odinId,
+      targetDrive,
+      communityId,
+      newThreadMessages
+    );
+
+    const newChannelsResult = await findChangesSinceTimestamp(
+      dotYouClient,
+      odinId,
+      cursor,
+      { targetDrive: targetDrive, fileType: [COMMUNITY_CHANNEL_FILE_TYPE], fileState: [0, 1] }
+    );
+
+    const newChannels = newChannelsResult.searchResults;
+
+    isDebug && console.debug('[CommunityInboxProcessor] new channels', newChannels.length);
+    await Promise.all(
+      newChannels.map(async (updatedDsr) => {
+        const newChannel =
+          updatedDsr.fileState === 'active'
+            ? await dsrToCommunityChannel(dotYouClient, updatedDsr, odinId, targetDrive, true)
+            : updatedDsr as unknown as HomebaseFile<CommunityChannel>;
+
+        if (!newChannel) return;
+        insertNewCommunityChannel(queryClient, newChannel, communityId);
+      })
+    );
+
+    const newCommunityMetadataResult = await findChangesSinceTimestamp(
+      dotYouClient,
+      undefined,
+      cursor,
+      {
+        targetDrive: LOCAL_COMMUNITY_APP_DRIVE,
+        fileType: [COMMUNITY_METADATA_FILE_TYPE],
+      }
+    );
+
+    const newCommunityMetadata = newCommunityMetadataResult.searchResults;
+
+    isDebug && console.debug('[CommunityInboxProcessor] new community metadata', newCommunityMetadata.length);
+
+    await Promise.all(
+      newCommunityMetadata.map(async (updatedDsr) => {
+        const newMetadata =
+          updatedDsr.fileState === 'active'
+            ? await dsrToCommunityMetadata(
+              dotYouClient,
+              updatedDsr,
+              LOCAL_COMMUNITY_APP_DRIVE,
+              true
+            )
+            : updatedDsr as unknown as HomebaseFile<CommunityMetadata>;
+        if (!newMetadata) return;
+        insertNewcommunityMetadata(queryClient, newMetadata);
+      })
+    );
+
+    const newCommunityDraftsResult = await findChangesSinceTimestamp(
+      dotYouClient,
+      undefined,
+      cursor,
+      {
+        targetDrive: LOCAL_COMMUNITY_APP_DRIVE,
+        fileType: [COMMUNITY_DRAFTS_FILE_TYPE],
+      }
+    );
+
+    const newCommunityDrafts = newCommunityDraftsResult.searchResults;
+
+    isDebug && console.debug('[CommunityInboxProcessor] new community drafts', newCommunityDrafts.length);
+
+    await Promise.all(
+      newCommunityDrafts.map(async (updatedDsr) => {
+        const newDrafts =
+          updatedDsr.fileState === 'active'
+            ? await dsrToCommunityDrafts(
+              dotYouClient,
+              updatedDsr,
+              LOCAL_COMMUNITY_APP_DRIVE,
+              true
+            )
+            : updatedDsr as unknown as HomebaseFile<CommunityDrafts>;
+        if (!newDrafts) return;
+        insertNewCommunityDrafts(queryClient, communityId, newDrafts);
+      })
+    );
+    return newCommunityDraftsResult.cursor ?? null;
   };
 
   // We refetch this one on mount as each mount the websocket would reconnect, and there might be a backlog of messages
