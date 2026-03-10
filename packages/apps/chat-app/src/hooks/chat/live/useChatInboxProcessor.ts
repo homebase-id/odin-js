@@ -7,7 +7,6 @@ import {
   DeletedHomebaseFile,
 } from '@homebase-id/js-lib/core';
 import {
-  getQueryBatchCursorFromTime,
   hasDebugFlag,
 } from '@homebase-id/js-lib/helpers';
 import { processInbox } from '@homebase-id/js-lib/peer';
@@ -24,7 +23,6 @@ import { invalidateChatMessages } from '../useChatMessages';
 
 const isDebug = hasDebugFlag();
 
-const MINUTE_IN_MS = 60000;
 const BATCH_SIZE = 2000;
 // Process the inbox on startup
 export const useChatInboxProcessor = (connected?: boolean) => {
@@ -32,20 +30,21 @@ export const useChatInboxProcessor = (connected?: boolean) => {
   const queryClient = useQueryClient();
 
   const fetchData = async () => {
-    const lastProcessedTime = queryClient.getQueryState(['process-chat-inbox'])?.dataUpdatedAt;
-    const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 2;
+    const lastCursor = queryClient.getQueryData(['cursor-chat-inbox']);
+    const cursor = lastCursor ?? null;
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
-    isDebug && console.debug('[InboxProcessor] fetching updates since', lastProcessedWithBuffer);
-    if (lastProcessedWithBuffer) {
-      const updatedMessages = await findChangesSinceTimestamp(
+    isDebug && console.debug('[InboxProcessor] fetching updates since', cursor);
+    if (cursor) {
+      const updatedMessagesResult = await findChangesSinceTimestamp(
         dotYouClient,
-        lastProcessedWithBuffer,
+        cursor,
         {
           targetDrive: ChatDrive,
           fileType: [CHAT_MESSAGE_FILE_TYPE],
         }
       );
+      const updatedMessages = updatedMessagesResult.searchResults;
       isDebug && console.debug('[InboxProcessor] new messages', updatedMessages.length);
       if (updatedMessages.length > 0) {
         const fullMessages = (
@@ -64,29 +63,30 @@ export const useChatInboxProcessor = (connected?: boolean) => {
         await processChatMessagesBatch(dotYouClient, queryClient, fullMessages);
       }
 
-      const updatedConversations = await findChangesSinceTimestamp(
+      const updatedConversationsResult = await findChangesSinceTimestamp(
         dotYouClient,
-        lastProcessedWithBuffer,
+        cursor,
         {
           targetDrive: ChatDrive,
           fileType: [CHAT_CONVERSATION_FILE_TYPE],
         }
       );
+      const updatedConversations = updatedConversationsResult.searchResults;
       isDebug && console.debug('[InboxProcessor] new conversations', updatedConversations.length);
       await processConversationsBatch(dotYouClient, queryClient, updatedConversations);
+      return updatedConversationsResult.cursor ?? null;
     } else {
       console.warn('[useChatInboxProcessor] Invalidating all conversations & chat messages');
       // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
       invalidateChatMessages(queryClient);
       invalidateConversations(queryClient);
+      return null;
     }
-
-    return processedresult;
   };
 
   // We refetch this one on mount as each mount the websocket would reconnect, and there might be a backlog of messages
   return useQuery({
-    queryKey: ['process-chat-inbox'],
+    queryKey: ['cursor-chat-inbox'],
     queryFn: fetchData,
     enabled: connected,
     staleTime: 1000,
@@ -95,15 +95,15 @@ export const useChatInboxProcessor = (connected?: boolean) => {
 
 const findChangesSinceTimestamp = async (
   dotYouClient: DotYouClient,
-  timeStamp: number,
+  cursor: string | null,
   params: FileQueryParams
 ) => {
   // const modifiedCursor = getQueryModifiedCursorFromTime(timeStamp); // Friday, 31 May 2024 09:38:54.678
-  const batchCursor = getQueryBatchCursorFromTime(new Date().getTime(), timeStamp);
+  // const batchCursor = getQueryBatchCursorFromTime(new Date().getTime(), timeStamp);
 
   const newFiles = await queryBatch(dotYouClient, params, {
     maxRecords: BATCH_SIZE,
-    cursorState: batchCursor,
+    cursorState: cursor,
     includeMetadataHeader: true,
     includeTransferHistory: true,
     ordering: 'newestFirst',
@@ -119,7 +119,7 @@ const findChangesSinceTimestamp = async (
   // });
 
   // return modifiedFiles.searchResults.concat(newFiles.searchResults);
-  return newFiles.searchResults;
+  return newFiles;
 };
 
 const processConversationsBatch = async (

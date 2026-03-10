@@ -18,7 +18,6 @@ import {
 } from '@homebase-id/js-lib/core';
 import {
   hasDebugFlag,
-  getQueryBatchCursorFromTime,
   stringGuidsEqual,
 } from '@homebase-id/js-lib/helpers';
 import {
@@ -44,8 +43,6 @@ import { insertNewCommunityDrafts } from '../useCommunityDrafts';
 
 const isDebug = hasDebugFlag();
 
-const MINUTE_IN_MS = 60000;
-
 const BATCH_SIZE = 2000;
 // Process the inbox on startup
 export const useCommunityInboxProcessor = (
@@ -57,11 +54,11 @@ export const useCommunityInboxProcessor = (
   const targetDrive = getTargetDriveFromCommunityId(communityId || '');
 
   const fetchData = async (communityId: string) => {
-    const lastProcessedTime = queryClient.getQueryState([
-      'process-community-inbox',
+    const lastCursor = queryClient.getQueryData([
+      'cursor-community-inbox',
       communityId,
-    ])?.dataUpdatedAt;
-    const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 15;
+    ]);
+    const cursor = lastCursor ?? null;
 
     // Process community;
     const processedresult =
@@ -70,19 +67,20 @@ export const useCommunityInboxProcessor = (
         : null;
 
     isDebug &&
-      console.debug('[CommunityInboxProcessor] fetching updates since', lastProcessedWithBuffer);
-    if (lastProcessedWithBuffer) {
-      const newMessages = await findChangesSinceTimestamp(
+      console.debug('[CommunityInboxProcessor] fetching updates since', cursor);
+    if (cursor) {
+      const newMessagesResult = await findChangesSinceTimestamp(
         dotYouClient,
         odinId,
-        lastProcessedWithBuffer,
+        cursor,
         {
           targetDrive: targetDrive,
           fileType: [COMMUNITY_MESSAGE_FILE_TYPE],
           fileState: [0, 1],
         }
       );
-      isDebug && console.debug('[CommunityInboxProcessor] new messages', newMessages);
+      const newMessages = newMessagesResult.searchResults;
+      isDebug && console.debug('[CommunityInboxProcessor] new messages', newMessages.length);
 
       await processCommunityMessagesBatch(
         dotYouClient,
@@ -93,10 +91,10 @@ export const useCommunityInboxProcessor = (
         newMessages
       );
 
-      const newThreadMessages = await findChangesSinceTimestamp(
+      const newThreadMessagesResult = await findChangesSinceTimestamp(
         dotYouClient,
         odinId,
-        lastProcessedWithBuffer,
+        cursor,
         {
           targetDrive: targetDrive,
           fileType: [COMMUNITY_MESSAGE_FILE_TYPE],
@@ -115,12 +113,14 @@ export const useCommunityInboxProcessor = (
         newThreadMessages
       );
 
-      const newChannels = await findChangesSinceTimestamp(
+      const newChannelsResult = await findChangesSinceTimestamp(
         dotYouClient,
         odinId,
-        lastProcessedWithBuffer,
+        cursor,
         { targetDrive: targetDrive, fileType: [COMMUNITY_CHANNEL_FILE_TYPE], fileState: [0, 1] }
       );
+
+      const newChannels = newChannelsResult.searchResults;
 
       isDebug && console.debug('[CommunityInboxProcessor] new channels', newChannels.length);
       await Promise.all(
@@ -135,17 +135,19 @@ export const useCommunityInboxProcessor = (
         })
       );
 
-      const newCommunityMetadata = await findChangesSinceTimestamp(
+      const newCommunityMetadataResult = await findChangesSinceTimestamp(
         dotYouClient,
         undefined,
-        lastProcessedWithBuffer,
+        cursor,
         {
           targetDrive: LOCAL_COMMUNITY_APP_DRIVE,
           fileType: [COMMUNITY_METADATA_FILE_TYPE],
         }
       );
 
-      isDebug && console.debug('[CommunityInboxProcessor] new community metadata');
+      const newCommunityMetadata = newCommunityMetadataResult.searchResults;
+
+      isDebug && console.debug('[CommunityInboxProcessor] new community metadata', newCommunityMetadata.length);
 
       await Promise.all(
         newCommunityMetadata.map(async (updatedDsr) => {
@@ -163,17 +165,19 @@ export const useCommunityInboxProcessor = (
         })
       );
 
-      const newCommunityDrafts = await findChangesSinceTimestamp(
+      const newCommunityDraftsResult = await findChangesSinceTimestamp(
         dotYouClient,
         undefined,
-        lastProcessedWithBuffer,
+        cursor,
         {
           targetDrive: LOCAL_COMMUNITY_APP_DRIVE,
           fileType: [COMMUNITY_DRAFTS_FILE_TYPE],
         }
       );
 
-      isDebug && console.debug('[CommunityInboxProcessor] new community drafts');
+      const newCommunityDrafts = newCommunityDraftsResult.searchResults;
+
+      isDebug && console.debug('[CommunityInboxProcessor] new community drafts', newCommunityDrafts.length);
 
       await Promise.all(
         newCommunityDrafts.map(async (updatedDsr) => {
@@ -190,18 +194,18 @@ export const useCommunityInboxProcessor = (
           insertNewCommunityDrafts(queryClient, communityId, newDrafts);
         })
       );
+      return newCommunityDraftsResult.cursor ?? null;
     } else {
       console.warn('[useCommunityInboxProcessor] Invalidating all community messages');
       // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
       invalidateCommunityMessages(queryClient, communityId);
+      return null;
     }
-
-    return processedresult;
   };
 
   // We refetch this one on mount as each mount the websocket would reconnect, and there might be a backlog of messages
   return useQuery({
-    queryKey: ['process-community-inbox', communityId],
+    queryKey: ['cursor-community-inbox', communityId],
     queryFn: () => fetchData(communityId as string),
     enabled: !!communityId,
     staleTime: 1000 * 10, // 10 seconds
@@ -211,17 +215,17 @@ export const useCommunityInboxProcessor = (
 const findChangesSinceTimestamp = async (
   dotYouClient: DotYouClient,
   odinId: string | undefined,
-  timeStamp: number,
+  cursor: string | null,
   params: FileQueryParams
 ) => {
   // const modifiedCursor = getQueryModifiedCursorFromTime(timeStamp); // Friday, 31 May 2024 09:38:54.678
-  const batchCursor = getQueryBatchCursorFromTime(new Date().getTime(), timeStamp);
+  // const batchCursor = getQueryBatchCursorFromTime(new Date().getTime(), timeStamp);
 
   const newFiles =
     odinId && dotYouClient.getHostIdentity() !== odinId
       ? await queryBatchOverPeer(dotYouClient, odinId, params, {
         maxRecords: BATCH_SIZE,
-        cursorState: batchCursor,
+        cursorState: cursor,
         includeMetadataHeader: true,
         includeTransferHistory: false,
         ordering: 'newestFirst',
@@ -229,7 +233,7 @@ const findChangesSinceTimestamp = async (
       })
       : await queryBatch(dotYouClient, params, {
         maxRecords: BATCH_SIZE,
-        cursorState: batchCursor,
+        cursorState: cursor,
         includeMetadataHeader: true,
         includeTransferHistory: false,
         ordering: 'newestFirst',
@@ -254,7 +258,7 @@ const findChangesSinceTimestamp = async (
   //     });
 
   // return modifiedFiles.searchResults.concat(newFiles.searchResults);
-  return newFiles.searchResults
+  return newFiles
 };
 
 // Process batched updates after a processInbox

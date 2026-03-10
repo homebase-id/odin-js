@@ -12,7 +12,6 @@ import {
 } from '@homebase-id/js-lib/core';
 import {
   drivesEqual,
-  getQueryBatchCursorFromTime,
   hasDebugFlag,
   stringGuidsEqual,
 } from '@homebase-id/js-lib/helpers';
@@ -30,8 +29,6 @@ import { useChannelDrives } from '@homebase-id/common-app';
 import { useWebsocketDrives } from './auth/useWebsocketDrives';
 
 const isDebug = hasDebugFlag();
-
-const MINUTE_IN_MS = 60000;
 
 // We first process the inbox, then we connect for live updates;
 export const useLiveFeedProcessor = () => {
@@ -51,34 +48,34 @@ const useFeedInboxProcessor = (isEnabled?: boolean) => {
   const dotYouClient = useDotYouClientContext();
 
   const fetchData = async () => {
-    const lastProcessedTime = queryClient.getQueryState(['process-feed-inbox'])?.dataUpdatedAt;
-    const lastProcessedWithBuffer = lastProcessedTime && lastProcessedTime - MINUTE_IN_MS * 2;
+    const lastCursor = queryClient.getQueryData(['cursor-feed-inbox']);
+    const cursor = lastCursor ?? null;
 
     await processInbox(dotYouClient, BlogConfig.FeedDrive, 100);
 
-    if (lastProcessedWithBuffer) {
-      const updatedPosts = await findChangesSinceTimestamp(dotYouClient, lastProcessedWithBuffer, {
+    if (lastCursor) {
+      const updatedPostsResult = await findChangesSinceTimestamp(dotYouClient, cursor, {
         targetDrive: BlogConfig.FeedDrive,
         fileType: [BlogConfig.PostFileType],
       });
+      const updatedPosts = updatedPostsResult.searchResults;
       isDebug && console.debug('[FeedInboxProcessor] new posts', updatedPosts.length);
       await processPostsBatch(dotYouClient, queryClient, BlogConfig.FeedDrive, updatedPosts);
-    }
 
-    if (chnlDrives)
-      await Promise.all(
-        chnlDrives.map(async (chnlDrive) => {
-          await processInbox(dotYouClient, chnlDrive.targetDriveInfo, 100);
+      if (chnlDrives)
+        await Promise.all(
+          chnlDrives.map(async (chnlDrive) => {
+            await processInbox(dotYouClient, chnlDrive.targetDriveInfo, 100);
 
-          if (lastProcessedWithBuffer) {
-            const updatedPosts = await findChangesSinceTimestamp(
+            const updatedPostsResult = await findChangesSinceTimestamp(
               dotYouClient,
-              lastProcessedWithBuffer,
+              cursor,
               {
                 targetDrive: chnlDrive.targetDriveInfo,
                 fileType: [BlogConfig.PostFileType],
               }
             );
+            const updatedPosts = updatedPostsResult.searchResults;
             isDebug &&
               console.debug('[FeedInboxProcessor] new posts for channel', updatedPosts.length);
             await processPostsBatch(
@@ -87,20 +84,19 @@ const useFeedInboxProcessor = (isEnabled?: boolean) => {
               chnlDrive.targetDriveInfo,
               updatedPosts
             );
-          }
-        })
-      );
+          })
+        );
 
-    if (!lastProcessedWithBuffer) {
-      isDebug && console.warn('[FeedInboxProcessor] No lastProcessedWithBuffer');
+      return updatedPostsResult.cursor ?? null;
+    } else {
+      isDebug && console.warn('[FeedInboxProcessor] No lastCursor');
       invalidateSocialFeeds(queryClient);
+      return null;
     }
-
-    return true;
   };
 
   return useQuery({
-    queryKey: ['process-feed-inbox'],
+    queryKey: ['cursor-feed-inbox'],
     queryFn: fetchData,
     staleTime: 1000 * 10, // 10 seconds
     enabled: channelsFetched,
@@ -138,8 +134,8 @@ const useFeedWebSocket = (isEnabled: boolean) => {
     undefined,
     ['fileAdded', 'fileModified', 'statisticsChanged'],
     websocketDrives as TargetDrive[],
-    () => queryClient.invalidateQueries({ queryKey: ['process-feed-inbox'] }),
-    () => queryClient.invalidateQueries({ queryKey: ['process-feed-inbox'] }),
+    () => queryClient.invalidateQueries({ queryKey: ['cursor-feed-inbox'] }),
+    () => queryClient.invalidateQueries({ queryKey: ['cursor-feed-inbox'] }),
     'useLiveFeedProcessor'
   );
 };
@@ -147,15 +143,15 @@ const useFeedWebSocket = (isEnabled: boolean) => {
 const BATCH_SIZE = 2000;
 const findChangesSinceTimestamp = async (
   dotYouClient: DotYouClient,
-  timeStamp: number,
+  cursor: string | null,
   params: FileQueryParams
 ) => {
   // const modifiedCursor = getQueryModifiedCursorFromTime(timeStamp); // Friday, 31 May 2024 09:38:54.678
-  const batchCursor = getQueryBatchCursorFromTime(new Date().getTime(), timeStamp);
+  // const batchCursor = getQueryBatchCursorFromTime(new Date().getTime(), timeStamp);
 
   const newFiles = await queryBatch(dotYouClient, params, {
     maxRecords: BATCH_SIZE,
-    cursorState: batchCursor,
+    cursorState: cursor,
     includeMetadataHeader: true,
     includeTransferHistory: false,
     ordering: 'newestFirst',
@@ -171,7 +167,7 @@ const findChangesSinceTimestamp = async (
   // });
 
   // return modifiedFiles.searchResults.concat(newFiles.searchResults);
-  return newFiles.searchResults;
+  return newFiles;
 };
 
 const processPostsBatch = async (
