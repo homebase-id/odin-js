@@ -50,7 +50,7 @@ const useFeedInboxProcessor = (isEnabled?: boolean) => {
   const fetchData = async () => {
     const lastCursor = queryClient.getQueryData(['cursor-feed-inbox']);
     const shouldInvalidate = lastCursor === undefined;
-    const cursor = typeof lastCursor === 'string' ? lastCursor : null;
+    const cursor = lastCursor === null ? null : (typeof lastCursor === 'string' ? lastCursor : null);
 
     await processInbox(dotYouClient, BlogConfig.FeedDrive, 100);
 
@@ -148,7 +148,7 @@ const findChangesSinceTimestamp = async (
 ) => {
   const newFiles = await queryBatch(dotYouClient, params, {
     maxRecords: BATCH_SIZE,
-    cursorState: cursor ?? undefined,
+    cursorState: cursor,
     includeMetadataHeader: true,
     includeTransferHistory: false,
     ordering: 'newestFirst',

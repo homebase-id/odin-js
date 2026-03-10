@@ -56,7 +56,7 @@ export const useCommunityInboxProcessor = (
   const fetchData = async (communityId: string) => {
     const lastCursor = queryClient.getQueryData(['cursor-community-inbox', communityId]);
     const shouldInvalidate = lastCursor === undefined;
-    const cursor = typeof lastCursor === 'string' ? lastCursor : null;
+    const cursor = lastCursor === null ? null : (typeof lastCursor === 'string' ? lastCursor : null);
 
     // Process community;
     const processedresult =
@@ -221,7 +221,7 @@ const findChangesSinceTimestamp = async (
     odinId && dotYouClient.getHostIdentity() !== odinId
       ? await queryBatchOverPeer(dotYouClient, odinId, params, {
         maxRecords: BATCH_SIZE,
-        cursorState: cursor ?? undefined,
+        cursorState: cursor,
         includeMetadataHeader: true,
         includeTransferHistory: false,
         ordering: 'newestFirst',
@@ -229,7 +229,7 @@ const findChangesSinceTimestamp = async (
       })
       : await queryBatch(dotYouClient, params, {
         maxRecords: BATCH_SIZE,
-        cursorState: cursor ?? undefined,
+        cursorState: cursor,
         includeMetadataHeader: true,
         includeTransferHistory: false,
         ordering: 'newestFirst',
