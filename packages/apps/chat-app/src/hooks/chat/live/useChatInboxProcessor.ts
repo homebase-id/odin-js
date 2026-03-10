@@ -32,7 +32,7 @@ export const useChatInboxProcessor = (connected?: boolean) => {
   const fetchData = async () => {
     const lastCursor = queryClient.getQueryData(['cursor-chat-inbox']);
     const shouldInvalidate = lastCursor === undefined;
-    const cursor = lastCursor ?? null;
+    const cursor = typeof lastCursor === 'string' ? lastCursor : null;
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
     isDebug && console.debug('[InboxProcessor] fetching updates since', cursor);
@@ -82,7 +82,7 @@ export const useChatInboxProcessor = (connected?: boolean) => {
     const updatedConversations = updatedConversationsResult.searchResults;
     isDebug && console.debug('[InboxProcessor] new conversations', updatedConversations.length);
     await processConversationsBatch(dotYouClient, queryClient, updatedConversations);
-    return updatedConversationsResult.cursor ?? null;
+    return updatedConversationsResult.cursorState ?? null;
   };
 
   // We refetch this one on mount as each mount the websocket would reconnect, and there might be a backlog of messages
@@ -101,7 +101,7 @@ const findChangesSinceTimestamp = async (
 ) => {
   const newFiles = await queryBatch(dotYouClient, params, {
     maxRecords: BATCH_SIZE,
-    cursorState: cursor,
+    cursorState: cursor ?? undefined,
     includeMetadataHeader: true,
     includeTransferHistory: true,
     ordering: 'newestFirst',

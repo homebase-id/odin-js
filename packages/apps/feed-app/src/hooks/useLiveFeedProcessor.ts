@@ -50,7 +50,7 @@ const useFeedInboxProcessor = (isEnabled?: boolean) => {
   const fetchData = async () => {
     const lastCursor = queryClient.getQueryData(['cursor-feed-inbox']);
     const shouldInvalidate = lastCursor === undefined;
-    const cursor = lastCursor ?? null;
+    const cursor = typeof lastCursor === 'string' ? lastCursor : null;
 
     await processInbox(dotYouClient, BlogConfig.FeedDrive, 100);
 
@@ -88,11 +88,11 @@ const useFeedInboxProcessor = (isEnabled?: boolean) => {
             queryClient,
             chnlDrive.targetDriveInfo,
             updatedPosts
-          );
-        })
-      );
+           );
+         })
+       );
 
-    return updatedPostsResult.cursor ?? null;
+    return updatedPostsResult.cursorState ?? null;
   };
 
   return useQuery({
@@ -148,7 +148,7 @@ const findChangesSinceTimestamp = async (
 ) => {
   const newFiles = await queryBatch(dotYouClient, params, {
     maxRecords: BATCH_SIZE,
-    cursorState: cursor,
+    cursorState: cursor ?? undefined,
     includeMetadataHeader: true,
     includeTransferHistory: false,
     ordering: 'newestFirst',
