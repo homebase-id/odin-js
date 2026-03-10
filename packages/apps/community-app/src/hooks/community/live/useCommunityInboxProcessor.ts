@@ -54,7 +54,7 @@ export const useCommunityInboxProcessor = (
   const targetDrive = getTargetDriveFromCommunityId(communityId || '');
 
   const fetchData = async (communityId: string) => {
-    const lastCursor = queryClient.getQueryData(['cursor-community-inbox']);
+    const lastCursor = queryClient.getQueryData(['cursor-community-inbox', communityId]);
     const shouldInvalidate = lastCursor === undefined;
     const cursor = lastCursor ?? null;
 

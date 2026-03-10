@@ -17,7 +17,6 @@ import {
   stringifyToQueryParams,
   stringifyArrayToQueryParams,
   tryJsonParse,
-  getQueryModifiedCursorFromTime,
   drivesEqual,
   compareAcl,
 } from './DataUtil';
