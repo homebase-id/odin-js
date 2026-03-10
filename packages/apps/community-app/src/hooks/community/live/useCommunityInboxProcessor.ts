@@ -55,7 +55,7 @@ export const useCommunityInboxProcessor = (
 
   const fetchData = async (communityId: string) => {
     const lastCursor = queryClient.getQueryData(['cursor-community-inbox', communityId]);
-    const shouldInvalidate = lastCursor === undefined;
+    const shouldInvalidate = queryClient.getQueryData(['cursor-community-inbox', communityId]) === undefined;
     const cursor = typeof lastCursor === 'string' ? lastCursor : null;
 
     // Process community;

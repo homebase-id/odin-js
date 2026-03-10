@@ -31,7 +31,7 @@ export const useChatInboxProcessor = (connected?: boolean) => {
 
   const fetchData = async () => {
     const lastCursor = queryClient.getQueryData(['cursor-chat-inbox']);
-    const shouldInvalidate = lastCursor === undefined;
+    const shouldInvalidate = queryClient.getQueryData(['cursor-chat-inbox']) === undefined;
     const cursor = typeof lastCursor === 'string' ? lastCursor : null;
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);

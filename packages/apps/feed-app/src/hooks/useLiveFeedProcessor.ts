@@ -49,7 +49,7 @@ const useFeedInboxProcessor = (isEnabled?: boolean) => {
 
   const fetchData = async () => {
     const lastCursor = queryClient.getQueryData(['cursor-feed-inbox']);
-    const shouldInvalidate = lastCursor === undefined;
+    const shouldInvalidate = queryClient.getQueryData(['cursor-feed-inbox']) === undefined;
     const cursor = typeof lastCursor === 'string' ? lastCursor : null;
 
     await processInbox(dotYouClient, BlogConfig.FeedDrive, 100);
