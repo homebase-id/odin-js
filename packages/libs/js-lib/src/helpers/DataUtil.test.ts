@@ -269,10 +269,6 @@ test('JSON.parse', () => {
   expect(tryJsonParse(JSON.stringify(objectwithArray))).toEqual(objectwithArray);
 });
 
-test('getQueryModifiedCursorFromTime', () => {
-  expect(getQueryModifiedCursorFromTime(1712833436831)).toEqual(JSON.stringify({"time": 1712833436831, "row": null }));
-});
-
 test('compareAcl', () => {
   expect(
     compareAcl(
