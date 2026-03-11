@@ -207,7 +207,7 @@ export const useCommunityInboxProcessor = (
     queryKey: ['cursor-community-inbox', communityId],
     queryFn: () => fetchData(communityId as string),
     enabled: !!communityId,
-    staleTime: 1000 * 10, // 10 seconds
+    staleTime: 365*24*60*60*1000,
   });
 };
 

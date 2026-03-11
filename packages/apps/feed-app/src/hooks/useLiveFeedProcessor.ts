@@ -98,7 +98,7 @@ const useFeedInboxProcessor = (isEnabled?: boolean) => {
   return useQuery({
     queryKey: ['cursor-feed-inbox'],
     queryFn: fetchData,
-    staleTime: 1000 * 10, // 10 seconds
+    staleTime: 365*24*60*60*1000,
     enabled: channelsFetched,
   });
 };

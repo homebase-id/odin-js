@@ -36,7 +36,7 @@ export const useChatInboxProcessor = (connected?: boolean) => {
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
     isDebug && console.debug('[InboxProcessor] fetching updates since', cursor);
-    
+
     // if (shouldInvalidate)
     // {
     //   console.warn('[useChatInboxProcessor] Invalidating all conversations & chat messages');
@@ -91,7 +91,7 @@ export const useChatInboxProcessor = (connected?: boolean) => {
     queryKey: ['cursor-chat-inbox'],
     queryFn: fetchData,
     enabled: connected,
-    staleTime: 1000,
+    staleTime: 365*24*60*60*1000,
   });
 };
 
