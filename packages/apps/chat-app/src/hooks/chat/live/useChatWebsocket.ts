@@ -50,7 +50,10 @@ export const useChatWebsocket = (isEnabled: boolean) => {
       'appNotificationAdded',
     ],
     websocketDrives,
-    () => queryClient.refetchQueries({ queryKey: ['cursor-chat-inbox'] }),
+    () => {
+      console.log('[ChatWebsocket] onConnect triggered at', new Date().toISOString());
+      queryClient.refetchQueries({ queryKey: ['cursor-chat-inbox'] });
+    },
     undefined,
     'useLiveChatProcessor'
   );

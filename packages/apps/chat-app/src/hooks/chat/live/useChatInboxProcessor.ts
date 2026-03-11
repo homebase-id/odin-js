@@ -11,6 +11,7 @@ import {
 } from '@homebase-id/js-lib/helpers';
 import { processInbox } from '@homebase-id/js-lib/peer';
 import { useQueryClient, useQuery, QueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { CHAT_MESSAGE_FILE_TYPE, dsrToMessage, ChatMessage } from '../../../providers/ChatProvider';
 import {
   ChatDrive,
@@ -29,7 +30,13 @@ export const useChatInboxProcessor = (connected?: boolean) => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    console.log('[ChatInboxProcessor] mounted at', new Date().toISOString());
+    return () => console.log('[ChatInboxProcessor] unmounted at', new Date().toISOString());
+  }, []);
+
   const fetchData = async () => {
+    console.log('[ChatInboxProcessor] fetchData called with cursor:', queryClient.getQueryData(['cursor-chat-inbox']), 'at', new Date().toISOString());
     const lastCursor = queryClient.getQueryData(['cursor-chat-inbox']);
     const shouldInvalidate = queryClient.getQueryData(['cursor-chat-inbox']) === undefined;
     const cursor = typeof lastCursor === 'string' ? lastCursor : null;
