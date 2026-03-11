@@ -36,13 +36,14 @@ export const useChatInboxProcessor = (connected?: boolean) => {
 
     const processedresult = await processInbox(dotYouClient, ChatDrive, BATCH_SIZE);
     isDebug && console.debug('[InboxProcessor] fetching updates since', cursor);
-    if (shouldInvalidate)
-    {
-      console.warn('[useChatInboxProcessor] Invalidating all conversations & chat messages');
-      // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
-      invalidateChatMessages(queryClient);
-      invalidateConversations(queryClient);
-    }
+    
+    // if (shouldInvalidate)
+    // {
+    //   console.warn('[useChatInboxProcessor] Invalidating all conversations & chat messages');
+    //   // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
+    //   invalidateChatMessages(queryClient);
+    //   invalidateConversations(queryClient);
+    // }
 
     const updatedMessagesResult = await findChangesSinceTimestamp(
       dotYouClient,

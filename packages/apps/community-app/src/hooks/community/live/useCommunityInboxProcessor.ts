@@ -67,11 +67,11 @@ export const useCommunityInboxProcessor = (
     isDebug &&
       console.debug('[CommunityInboxProcessor] fetching updates since', cursor);
 
-    if (shouldInvalidate) {
-      console.warn('[useCommunityInboxProcessor] Invalidating all community messages');
-      // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
-      invalidateCommunityMessages(queryClient, communityId);
-    }
+    // if (shouldInvalidate) {
+    //   console.warn('[useCommunityInboxProcessor] Invalidating all community messages');
+    //   // We have no reference to the last time we processed the inbox, so we can only invalidate all chat messages
+    //   invalidateCommunityMessages(queryClient, communityId);
+    // }
 
     const newMessagesResult = await findChangesSinceTimestamp(
       dotYouClient,

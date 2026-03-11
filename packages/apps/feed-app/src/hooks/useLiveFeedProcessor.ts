@@ -54,10 +54,10 @@ const useFeedInboxProcessor = (isEnabled?: boolean) => {
 
     await processInbox(dotYouClient, BlogConfig.FeedDrive, 100);
 
-    if (shouldInvalidate) {
-      isDebug && console.warn('[FeedInboxProcessor] No lastCursor');
-      invalidateSocialFeeds(queryClient);
-    }
+    // if (shouldInvalidate) {
+    //   isDebug && console.warn('[FeedInboxProcessor] No lastCursor');
+    //   invalidateSocialFeeds(queryClient);
+    // }
 
     const updatedPostsResult = await findChangesSinceTimestamp(dotYouClient, cursor, {
       targetDrive: BlogConfig.FeedDrive,
