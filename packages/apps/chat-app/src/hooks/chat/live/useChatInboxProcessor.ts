@@ -36,7 +36,7 @@ export const useChatInboxProcessor = (connected?: boolean) => {
   }, []);
 
   const fetchData = async () => {
-    console.log('[ChatInboxProcessor] fetchData called with cursor:', queryClient.getQueryData(['cursor-chat-inbox']), 'at', new Date().toISOString());
+    isDebug && console.log('[ChatInboxProcessor] fetchData called with cursor:', queryClient.getQueryData(['cursor-chat-inbox']), 'at', new Date().toISOString());
     const lastCursor = queryClient.getQueryData(['cursor-chat-inbox']);
     const shouldInvalidate = queryClient.getQueryData(['cursor-chat-inbox']) === undefined;
     const cursor = typeof lastCursor === 'string' ? lastCursor : null;
@@ -90,6 +90,7 @@ export const useChatInboxProcessor = (connected?: boolean) => {
     const updatedConversations = updatedConversationsResult.searchResults;
     isDebug && console.debug('[InboxProcessor] new conversations', updatedConversations.length);
     await processConversationsBatch(dotYouClient, queryClient, updatedConversations);
+    isDebug && console.log('[ChatInboxProcessor] Saving cursor:', updatedConversationsResult.cursorState ?? null);
     return updatedConversationsResult.cursorState ?? null;
   };
 
@@ -99,6 +100,7 @@ export const useChatInboxProcessor = (connected?: boolean) => {
     queryFn: fetchData,
     enabled: connected,
     staleTime: 365*24*60*60*1000,
+    onSuccess: (data) => console.log('[ChatInboxProcessor] Query succeeded, cursor cached:', data),
   });
 };
 

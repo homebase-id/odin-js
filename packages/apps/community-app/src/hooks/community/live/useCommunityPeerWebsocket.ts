@@ -117,7 +117,8 @@ export const useCommunityPeerWebsocket = (
     odinId,
     ['fileAdded', 'fileModified', 'fileDeleted', 'statisticsChanged'],
     drives as TargetDrive[],
-    () => queryClient.refetchQueries({ queryKey: ['cursor-community-inbox'] }),
+    // () => queryClient.refetchQueries({ queryKey: ['cursor-community-inbox'] }),
+    undefined,
     undefined,
     'useCommunityPeerWebsocket'
   );

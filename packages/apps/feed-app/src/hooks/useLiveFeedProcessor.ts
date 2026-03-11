@@ -134,7 +134,8 @@ const useFeedWebSocket = (isEnabled: boolean) => {
     undefined,
     ['fileAdded', 'fileModified', 'statisticsChanged'],
     websocketDrives as TargetDrive[],
-    () => queryClient.refetchQueries({ queryKey: ['cursor-feed-inbox'] }),
+    // () => queryClient.refetchQueries({ queryKey: ['cursor-feed-inbox'] }),
+    undefined,
     undefined,
     'useLiveFeedProcessor'
   );

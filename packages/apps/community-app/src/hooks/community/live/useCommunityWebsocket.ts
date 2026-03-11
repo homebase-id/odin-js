@@ -96,7 +96,8 @@ export const useCommunityWebsocket = (
         undefined,
         ['fileAdded', 'fileModified', 'fileDeleted', 'statisticsChanged'],
         localCommunityDrives as TargetDrive[],
-        () => queryClient.refetchQueries({queryKey: ['cursor-community-inbox']}),
+        // () => queryClient.refetchQueries({queryKey: ['cursor-community-inbox']}),
+        undefined,
         undefined,
         'useCommunityWebsocket'
     );
