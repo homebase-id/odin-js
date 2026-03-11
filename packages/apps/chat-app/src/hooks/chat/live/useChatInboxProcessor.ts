@@ -100,7 +100,6 @@ export const useChatInboxProcessor = (connected?: boolean) => {
     queryFn: fetchData,
     enabled: connected,
     staleTime: 365*24*60*60*1000,
-    onSuccess: (data) => console.log('[ChatInboxProcessor] Query succeeded, cursor cached:', data),
   });
 };
 
