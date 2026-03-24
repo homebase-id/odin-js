@@ -58,13 +58,15 @@ export const ChatMessageInfo = ({
           <p>
             {t('Created')}:
             {formatDateExludingYearIfCurrent(
-              new Date(msg.fileMetadata.appData.userDate || msg.fileMetadata.created)
+              new Date(msg.fileMetadata.appData.userDate || msg.fileMetadata.created),
+              true
             )}
           </p>
 
           {msg.fileMetadata.updated !== msg.fileMetadata.created ? (
             <p>
-              {t('Updated')}: {formatDateExludingYearIfCurrent(new Date(msg.fileMetadata.updated))}
+              {t('Updated')}:{' '}
+              {formatDateExludingYearIfCurrent(new Date(msg.fileMetadata.updated), true)}
             </p>
           ) : null}
           {msg.fileMetadata.transitCreated ? (

@@ -19,7 +19,8 @@ export const formatToTimeAgo = (date: TDate, locale = 'en_short', opts?: Opts): 
 export const formatToTimeAgoWithRelativeDetail = (
   date: Date | undefined,
   keepDetailWhenIncludesDate?: boolean,
-  ignoreTimeOfDay?: boolean
+  ignoreTimeOfDay?: boolean,
+  showSeconds?: boolean
 ): string | undefined => {
   if (!date) return undefined;
 
@@ -38,6 +39,7 @@ export const formatToTimeAgoWithRelativeDetail = (
     const timeFormat: Intl.DateTimeFormatOptions = {
       hour: 'numeric',
       minute: 'numeric',
+      second: showSeconds ? 'numeric' : undefined,
     };
     return date.toLocaleTimeString(undefined, timeFormat);
   }
@@ -71,11 +73,15 @@ export const formatToTimeAgoWithRelativeDetail = (
     year: yearsAgo !== 0 ? 'numeric' : undefined,
     hour: keepDetailWhenIncludesDate ? 'numeric' : undefined,
     minute: keepDetailWhenIncludesDate ? 'numeric' : undefined,
+    second: keepDetailWhenIncludesDate && showSeconds ? 'numeric' : undefined,
   };
   return date.toLocaleDateString(undefined, dateTimeFormat);
 };
 
-export const formatToDateAgoWithRelativeDetail = (date: Date | undefined): string | undefined => {
+export const formatToDateAgoWithRelativeDetail = (
+  date: Date | undefined,
+  showSeconds?: boolean
+): string | undefined => {
   if (!date) return undefined;
 
   // if date is this week
@@ -117,17 +123,21 @@ export const formatToDateAgoWithRelativeDetail = (date: Date | undefined): strin
     day: 'numeric',
     month: 'short',
     year: yearsAgo !== 0 ? 'numeric' : undefined,
+    second: showSeconds ? 'numeric' : undefined,
   };
   return date.toLocaleDateString(undefined, dateTimeFormat);
 };
 
-const dateFormat: Intl.DateTimeFormatOptions = {
+const getDateFormat = (showSeconds?: boolean): Intl.DateTimeFormatOptions => ({
   month: 'short',
   day: 'numeric',
   hour: 'numeric',
   minute: 'numeric',
-};
-export const formatDateExludingYearIfCurrent = (date: Date) => {
+  second: showSeconds ? 'numeric' : undefined,
+});
+
+export const formatDateExludingYearIfCurrent = (date: Date, showSeconds?: boolean) => {
+  const dateFormat = getDateFormat(showSeconds);
   const now = new Date();
   if (now.getFullYear() === date.getFullYear()) {
     return date.toLocaleDateString(undefined, dateFormat);
