@@ -20,7 +20,7 @@
     "@homebase-id/js-lib": "*",
     "@homebase-id/ui-lib": "*",
     "hls.js": "^1.6.10",
-    "axios": "1.8.2",
+    "axios": "1.13.5",
     "emoji-picker-element": "^1.24.0",
     "lodash-es": "^4.17.23",
     "react": "^18.3.1",
