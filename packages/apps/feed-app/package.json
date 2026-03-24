@@ -26,7 +26,7 @@
     "@homebase-id/js-lib": "*",
     "@homebase-id/rich-text-editor": "*",
     "@homebase-id/ui-lib": "*",
-    "axios": "1.8.2",
+    "axios": "1.12.0",
     "emoji-picker-element": "^1.24.0",
     "lodash-es": "^4.17.23",
     "mp4box": "^0.5.2",
