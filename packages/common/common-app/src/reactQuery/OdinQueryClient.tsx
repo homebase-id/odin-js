@@ -35,7 +35,7 @@ const APP_QUERY_KEYS = [
   'chat-reaction',
   'conversations',
   'conversations-with-recent-message',
-  'process-chat-inbox',
+  'cursor-chat-inbox',
 
   // Feed:
   'raw-image',
@@ -45,15 +45,15 @@ const APP_QUERY_KEYS = [
   'following',
   'channels',
   'channel',
-  'process-feed-inbox',
+  'cursor-feed-inbox',
 
   // Mail:
   'mail-conversations',
   'mail-settings',
-  'process-mail-inbox',
+  'cursor-mail-inbox',
 
   // Community:
-  'process-community-inbox',
+  'cursor-community-inbox',
   'communities',
   'community',
   'community-metadata',

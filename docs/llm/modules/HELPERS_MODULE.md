@@ -128,17 +128,6 @@ Converts array to query string
 - **arr**: `Record<string, unknown>[]`
 - **Returns**: `string`
 
-### `getQueryBatchCursorFromTime(fromUnixTimeInMs, toUnixTimeInMs?)`
-Generates batch query cursor from timestamps
-- **fromUnixTimeInMs**: `number`
-- **toUnixTimeInMs**: `number`
-- **Returns**: Cursor string
-
-### `getQueryModifiedCursorFromTime(unixTimeInMs)`
-Generates modified query cursor from timestamp
-- **unixTimeInMs**: `number`
-- **Returns**: Cursor string
-
 ### `tryJsonParse<T>(json, onError?)`
 Safely parses JSON with error handling
 - **json**: `string`
