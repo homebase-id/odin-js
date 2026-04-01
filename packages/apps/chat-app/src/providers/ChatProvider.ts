@@ -438,7 +438,7 @@ export const uploadChatMessage = async (
       ? new Blob([base64ToUint8Array(imageUrl.split(',')[1])], {
         type: imageUrl.split(';')[0].split(':')[1],
       })
-      : undefined;
+      : new Blob(new Uint8Array(0));
 
     const { tinyThumb } = imageBlob
       ? await createThumbnails(imageBlob, '', [])
@@ -446,9 +446,7 @@ export const uploadChatMessage = async (
 
     payloads.push({
       key: CHAT_LINKS_PAYLOAD_KEY,
-      payload: new Blob([stringToUint8Array(JSON.stringify(linkPreviews))], {
-        type: 'application/json',
-      }),
+      payload: imageBlob,
       descriptorContent,
       previewThumbnail: tinyThumb,
     });
