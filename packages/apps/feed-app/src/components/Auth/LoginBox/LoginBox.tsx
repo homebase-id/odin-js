@@ -1,7 +1,6 @@
 import { useYouAuthAuthorization } from '../../../hooks/auth/useAuth';
 import {
   FEED_ROOT_PATH,
-  LoadingBlock,
   OWNER_APPS_ROOT,
   YouAuthLoginBox,
 } from '@homebase-id/common-app';
@@ -27,7 +26,7 @@ const useParams = (returnUrl: string) => {
 
 export const LoginBox = () => {
   const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
-  const { data: authParams, isLoading } = useParams(returnUrl || FEED_ROOT_PATH || '/');
+  const { data: authParams } = useParams(returnUrl || FEED_ROOT_PATH || '/');
 
   const stringifiedAuthParams = authParams && stringifyToQueryParams(authParams);
 
@@ -42,18 +41,12 @@ export const LoginBox = () => {
       window.location.href = `${host}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
   }, [isAutoAuthorize, stringifiedAuthParams]);
 
-  if (isLoading || isAutoAuthorize) return <LoadingBlock className="h-[16rem] w-full" />;
-
   return (
     <>
-      {authParams ? (
-        <>
-          <Helmet>
-            <meta name="youauth" content={stringifiedAuthParams as string} />
-          </Helmet>
-          <YouAuthLoginBox authParams={authParams} />
-        </>
-      ) : null}
+      <Helmet>
+        <meta name="youauth" content={stringifiedAuthParams as string} />
+      </Helmet>
+      <YouAuthLoginBox authParams={authParams} centralLoginHost={import.meta.env.VITE_CENTRAL_LOGIN_HOST} />
     </>
   );
 };
@@ -69,16 +62,14 @@ export const AutoAuthorize = () => {
   }, [stringifiedAuthParams]);
 
   return (
-    <>
-      <MinimalLayout noShadedBg={true} noPadding={true}>
-        <div className="h-screen">
-          <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col p-5">
-            <div className="my-auto flex flex-col">
-              <Loader className="mx-auto mb-10 h-20 w-20" />
-            </div>
+    <MinimalLayout noShadedBg={true} noPadding={true}>
+      <div className="h-screen">
+        <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col p-5">
+          <div className="my-auto flex flex-col">
+            <Loader className="mx-auto mb-10 h-20 w-20" />
           </div>
         </div>
-      </MinimalLayout>
-    </>
+      </div>
+    </MinimalLayout>
   );
 };
