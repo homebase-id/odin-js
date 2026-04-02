@@ -1,15 +1,10 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
-import { Input } from '../form/Input';
-import { Label } from '../form/Label';
-import { Checkbox } from '../form/Checkbox';
-import { ActionButton } from '../ui/Buttons/ActionButton';
-import { YouAuthorizationParams } from '@homebase-id/js-lib/auth';
+import { type YouAuthorizationParams } from '@homebase-id/js-lib/auth';
 import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 
 const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]{2,25}(?::\d{1,5})?$/i;
 const AUTHORIZE_PATH = '/api/owner/v1/youauth/authorize';
 const STORAGE_KEY_IDENTITY = 'youauth-previous-identity';
-const STORAGE_KEY_REMEMBER = 'youauth-remember';
 
 const stripIdentity = (identity: string) =>
   identity
@@ -35,42 +30,32 @@ const getSavedIdentity = (): string | null => {
   }
 };
 
-const getSavedRemember = (): boolean => {
-  try {
-    return localStorage.getItem(STORAGE_KEY_REMEMBER) === 'true';
-  } catch {
-    return false;
-  }
-};
-
-const savePreferences = (identity: string, remember: boolean) => {
+const saveIdentity = (identity: string) => {
   try {
     localStorage.setItem(STORAGE_KEY_IDENTITY, identity);
-    localStorage.setItem(STORAGE_KEY_REMEMBER, remember ? 'true' : 'false');
   } catch {
     // localStorage unavailable
   }
 };
 
 interface YouAuthLoginBoxProps {
-  authParams: YouAuthorizationParams;
+  authParams?: YouAuthorizationParams;
+  centralLoginHost?: string;
   className?: string;
 }
 
-export const YouAuthLoginBox = ({ authParams, className }: YouAuthLoginBoxProps) => {
+export const YouAuthLoginBox = ({
+  authParams,
+  centralLoginHost,
+  className,
+}: YouAuthLoginBoxProps) => {
   const [identity, setIdentity] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isValidating, setIsValidating] = useState(false);
 
-  // Pre-fill from saved preferences
   useEffect(() => {
-    const savedIdentity = getSavedIdentity();
-    const savedRemember = getSavedRemember();
-    if (savedRemember && savedIdentity) {
-      setIdentity(savedIdentity);
-      setRememberMe(true);
-    }
+    const saved = getSavedIdentity();
+    if (saved) setIdentity(saved);
   }, []);
 
   const handleSubmit = useCallback(
@@ -81,7 +66,14 @@ export const YouAuthLoginBox = ({ authParams, className }: YouAuthLoginBoxProps)
 
       const strippedIdentity = stripIdentity(identity);
       if (!strippedIdentity) {
-        setError('Please enter your Homebase identity');
+        if (authParams) {
+          if (!centralLoginHost) {
+            setError('Central Login host missing envs');
+          }
+          const stringifiedParams = stringifyToQueryParams(authParams);
+          const host = centralLoginHost;
+          window.location.href = `${host}/anonymous?${stringifiedParams}`;
+        }
         return;
       }
 
@@ -99,71 +91,63 @@ export const YouAuthLoginBox = ({ authParams, className }: YouAuthLoginBoxProps)
         return;
       }
 
-      savePreferences(strippedIdentity, rememberMe);
+      saveIdentity(strippedIdentity);
+      if (!authParams) {
+        setError('Missing authentication parameters');
+        return;
+      }
 
       const stringifiedParams = stringifyToQueryParams(authParams);
 
-      // Redirect to owner login if identity matches current host
       if (strippedIdentity === window.location.hostname) {
         window.location.href = `https://${strippedIdentity}/owner/login?returnUrl=/owner`;
       } else {
         window.location.href = `https://${strippedIdentity}${AUTHORIZE_PATH}?${stringifiedParams}`;
       }
     },
-    [identity, rememberMe, authParams]
+    [identity, isValidating, authParams]
   );
 
   return (
     <div className={className}>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <div>
-          <Label htmlFor="youauth-identity" className="mb-1 text-sm">
+      <form onSubmit={handleSubmit} className="flex flex-col">
+        <h1 className="text-lg">YouAuth</h1>
+        <div className="flex flex-col">
+          <label
+            htmlFor="youauth-identity"
+            className="text-sm leading-7 text-gray-600 dark:text-gray-500"
+          >
             Homebase Id
-          </Label>
-          <Input
-            id="youauth-identity"
+          </label>
+          <input
+            className="w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
             type="text"
+            name="homebase-id"
+            id="youauth-identity"
             inputMode="url"
             autoComplete="off"
-            placeholder="example.homebase.id"
             value={identity}
             onChange={(e) => {
               setIdentity(e.target.value.replace(/\s/g, '.'));
               setError(null);
             }}
           />
-          {error ? <p className="mt-1 text-sm text-red-500">{error}</p> : null}
+          {error ? <span className="text-sm text-red-500">{error}</span> : null}
         </div>
 
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="youauth-remember"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-          />
-          <label htmlFor="youauth-remember" className="text-sm">
-            Remember me
-          </label>
-        </div>
-
-        <ActionButton
-          type="primary"
-          state={isValidating ? 'loading' : undefined}
-          onClick={(e) => handleSubmit(e as unknown as FormEvent)}
-        >
+        <button className="my-3 block cursor-pointer rounded-md bg-indigo-500 px-4 py-2 text-center text-white hover:brightness-90">
           Login
-        </ActionButton>
-
-        <p className="text-center text-sm">or</p>
-        <a
-          className="block rounded-md bg-slate-200 px-4 py-2 text-center text-black hover:brightness-90 dark:bg-slate-700 dark:text-white"
-          href="https://homebase.id/sign-up"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Sign up
-        </a>
+        </button>
       </form>
+      <p className="text-center">or</p>
+      <a
+        className="my-3 block rounded-md bg-slate-200 px-4 py-2 text-center text-black hover:brightness-90"
+        href="https://homebase.id/sign-up"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Signup
+      </a>
     </div>
   );
 };

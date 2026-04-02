@@ -34,17 +34,13 @@ export const LoginBox = ({ returnUrl }: { returnUrl?: string }) => {
   }, [authParams, searchParams, stringifiedAuthParams]);
 
   return (
-    <>
-      {authParams ? (
+
+
         <>
           <Helmet>
             <meta name="youauth" content={stringifiedAuthParams as string} />
           </Helmet>
-          <YouAuthLoginBox authParams={authParams} />
+          <YouAuthLoginBox authParams={authParams} centralLoginHost={import.meta.env.VITE_CENTRAL_LOGIN_HOST} />
         </>
-      ) : (
-        <Loader className="m-auto h-20 w-20" />
-      )}
-    </>
   );
 };
