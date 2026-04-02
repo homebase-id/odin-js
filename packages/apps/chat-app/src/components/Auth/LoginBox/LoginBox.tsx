@@ -1,9 +1,9 @@
 import { useYouAuthAuthorization } from '../../../hooks/auth/useAuth';
 import {
   CHAT_ROOT_PATH,
-  IS_DARK_CLASSNAME,
   LoadingBlock,
   OWNER_APPS_ROOT,
+  YouAuthLoginBox,
 } from '@homebase-id/common-app';
 import { Loader } from '@homebase-id/common-app/icons';
 import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
@@ -30,7 +30,6 @@ export const LoginBox = () => {
   const { data: authParams, isLoading } = useParams(returnUrl || CHAT_ROOT_PATH || '/');
 
   const stringifiedAuthParams = authParams && stringifyToQueryParams(authParams);
-  const isDarkMode = document.documentElement.classList.contains(IS_DARK_CLASSNAME);
 
   const isAutoAuthorize = window.location.pathname.startsWith(OWNER_APPS_ROOT);
 
@@ -41,25 +40,19 @@ export const LoginBox = () => {
     }).getRoot();
     if (isAutoAuthorize && stringifiedAuthParams)
       window.location.href = `${host}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
-  }, [authParams]);
+  }, [isAutoAuthorize, stringifiedAuthParams]);
 
   if (isLoading || isAutoAuthorize) return <LoadingBlock className="h-[16rem] w-full" />;
 
   return (
     <>
       {authParams ? (
-        <Helmet>
-          <meta name="youauth" content={stringifyToQueryParams(authParams)} />
-        </Helmet>
-      ) : null}
-      {stringifiedAuthParams ? (
-        <iframe
-          src={`${
-            import.meta.env.VITE_CENTRAL_LOGIN_HOST
-          }/anonymous?isDarkMode=${isDarkMode}${`&${stringifiedAuthParams}`}`}
-          key={stringifiedAuthParams}
-          className="h-[16rem] w-full"
-        ></iframe>
+        <>
+          <Helmet>
+            <meta name="youauth" content={stringifiedAuthParams as string} />
+          </Helmet>
+          <YouAuthLoginBox authParams={authParams} />
+        </>
       ) : null}
     </>
   );
@@ -73,7 +66,7 @@ export const AutoAuthorize = () => {
   useEffect(() => {
     if (stringifiedAuthParams)
       window.location.href = `https://${window.location.host}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
-  }, [authParams]);
+  }, [stringifiedAuthParams]);
 
   return (
     <>

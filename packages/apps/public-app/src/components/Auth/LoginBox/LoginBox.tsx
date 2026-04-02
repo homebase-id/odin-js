@@ -1,5 +1,5 @@
-import { IS_DARK_CLASSNAME } from '@homebase-id/common-app';
 import { useYouAuthAuthorization } from '../../../hooks/auth/useAuth';
+import { YouAuthLoginBox } from '@homebase-id/common-app';
 import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
@@ -20,12 +20,9 @@ const useParams = (returnUrl: string) => {
   });
 };
 
-// Iframes and navigation is weird
-// https://www.aleksandrhovhannisyan.com/blog/react-iframes-back-navigation-bug/
 export const LoginBox = ({ returnUrl }: { returnUrl?: string }) => {
   const { data: authParams } = useParams(returnUrl || window.location.href.split('?')[0]);
   const stringifiedAuthParams = authParams && stringifyToQueryParams(authParams);
-  const isDarkMode = document.documentElement.classList.contains(IS_DARK_CLASSNAME);
 
   // Auto logon when requested by a queryString param
   const [searchParams] = useSearchParams();
@@ -34,22 +31,16 @@ export const LoginBox = ({ returnUrl }: { returnUrl?: string }) => {
       window.location.href = `https://${searchParams.get(
         AUTO_LOGON_PARAM
       )}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
-  }, [authParams]);
+  }, [authParams, searchParams, stringifiedAuthParams]);
 
   return (
     <>
-      {stringifiedAuthParams ? (
+      {authParams ? (
         <>
           <Helmet>
-            <meta name="youauth" content={stringifiedAuthParams} />
+            <meta name="youauth" content={stringifiedAuthParams as string} />
           </Helmet>
-          <iframe
-            src={`${
-              import.meta.env.VITE_CENTRAL_LOGIN_HOST
-            }/anonymous?isDarkMode=${isDarkMode}${`&${stringifiedAuthParams}`}`}
-            key={stringifiedAuthParams}
-            className="h-[16rem] w-full"
-          ></iframe>
+          <YouAuthLoginBox authParams={authParams} />
         </>
       ) : (
         <Loader className="m-auto h-20 w-20" />
