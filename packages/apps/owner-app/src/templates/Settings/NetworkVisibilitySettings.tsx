@@ -37,6 +37,13 @@ export const NetworkVisibilitySettings = () => {
     });
   };
 
+  const handleDisableAutoAcceptChange: React.MouseEventHandler = async (e) => {
+    await updateFlag({
+      name: 'disableAutoAcceptConnectionRequests',
+      value: e.currentTarget.id === 'disableAutoAcceptConnectionRequestsYes',
+    });
+  };
+
   const handleCanViewWhoIFollowChange: React.MouseEventHandler = async (e) => {
     let allowAnonymous = false;
     let allowAuthenticated = false;
@@ -138,6 +145,39 @@ export const NetworkVisibilitySettings = () => {
                 systemSettings?.allConnectedIdentitiesCanViewConnections === false
               }
               onClick={handleCanViewConnectionsChange}
+            />
+          </Section>
+          <Section
+            title={
+              <div className="flex flex-col">
+                {t('Disable auto-accept of connection requests sent from apps')}
+                <small className="text-sm text-gray-400">
+                  {t(
+                    'Controls how incoming connection requests that were sent from an app are handled'
+                  )}
+                </small>
+              </div>
+            }
+          >
+            <RadioOption
+              label={t('Yes')}
+              description={t(
+                'Requests sent from an app will NOT be auto-accepted — they land in your pending list for manual review before you connect'
+              )}
+              id="disableAutoAcceptConnectionRequestsYes"
+              name="disableAutoAcceptConnectionRequests"
+              defaultChecked={systemSettings?.disableAutoAcceptConnectionRequests === true}
+              onClick={handleDisableAutoAcceptChange}
+            />
+            <RadioOption
+              label={t('No')}
+              description={t(
+                'Requests sent from an app will be auto-accepted, so a new connection is established without any manual action from you'
+              )}
+              id="disableAutoAcceptConnectionRequestsNo"
+              name="disableAutoAcceptConnectionRequests"
+              defaultChecked={systemSettings?.disableAutoAcceptConnectionRequests === false}
+              onClick={handleDisableAutoAcceptChange}
             />
           </Section>
           <Section
