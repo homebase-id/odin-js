@@ -84,6 +84,8 @@ const MediaItem = ({
     ? tryJsonParse<BaseVideoMetadata>(payload.descriptorContent || '{}')?.duration
     : undefined;
 
+  const aspectRatioThumb = payload.thumbnails?.at(-1) ?? previewThumbnail;
+
   return (
     <div
       className={`relative cursor-pointer ${fit === 'cover' ? 'aspect-square overflow-hidden' : ''} ${className || ''}`}
@@ -97,8 +99,8 @@ const MediaItem = ({
           {isVideo ? (
             <div
               style={
-                previewThumbnail
-                  ? { aspectRatio: `${previewThumbnail.pixelWidth / previewThumbnail.pixelHeight}` }
+                aspectRatioThumb?.pixelWidth && aspectRatioThumb?.pixelHeight
+                  ? { aspectRatio: `${aspectRatioThumb.pixelWidth / aspectRatioThumb.pixelHeight}` }
                   : undefined
               }
             >
@@ -154,6 +156,7 @@ const MediaItem = ({
               targetDrive={ChatDrive}
               avoidPayload={isVideo}
               previewThumbnail={previewThumbnail}
+              naturalSize={aspectRatioThumb}
               className={
                 fit === 'cover' ? 'h-full w-full' : `max-h-[inherit] w-full max-w-[inherit]`
               }
