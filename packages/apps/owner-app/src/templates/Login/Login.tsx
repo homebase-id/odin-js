@@ -1,6 +1,7 @@
 import { FormEventHandler, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useAuth, useValidateAuthorization } from '../../hooks/auth/useAuth';
+import { useVerifyToken } from '../../hooks/auth/useVerifyToken';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import { Link } from 'react-router-dom';
@@ -54,9 +55,10 @@ const Login = () => {
     }
   }, []);
 
+  const { data: hasValidToken, isFetched } = useVerifyToken();
   useEffect(() => {
-    if (isAuthenticated) checkRedirectToReturn();
-  }, [isAuthenticated]);
+    if (isFetched && hasValidToken) checkRedirectToReturn();
+  }, [isFetched, hasValidToken]);
 
   if (passwordState === 'unknown' || passwordState === 'pending' || isAuthenticated) {
     return (
