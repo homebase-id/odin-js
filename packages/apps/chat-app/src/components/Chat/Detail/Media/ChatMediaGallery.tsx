@@ -233,7 +233,7 @@ const CustomOdinImage = ({
         naturalSize?.pixelWidth && naturalSize?.pixelHeight
           ? {
               aspectRatio: `${naturalSize?.pixelWidth}/${naturalSize?.pixelHeight}`,
-              maxWidth: `${naturalSize.pixelWidth}px`,
+              maxWidth: naturalSize.pixelWidth > 50 ? `${naturalSize.pixelWidth}px` : undefined,
             }
           : undefined
       }
