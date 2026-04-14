@@ -5,6 +5,7 @@ import {
     OwnDomainProvisionState,
     useFetchIsOwnDomainAvailable,
 } from '../../hooks/ownDomain/useOwnDomain';
+import {useFetchManagedDomainsApexes} from '../../hooks/managedDomain/useManagedDomain';
 import {AlertError} from '../ErrorAlert/ErrorAlert';
 import {Input, Label} from '@homebase-id/common-app';
 import {Arrow, Exclamation, Globe} from '@homebase-id/common-app/icons';
@@ -31,6 +32,10 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
         error: errorIsOwnDomainAvailable,
         status: statusIsOwnDomainAvailable,
     } = useFetchIsOwnDomainAvailable(domain || '').fetchIsOwnDomainAvailable;
+
+    const {
+        fetchManagedDomainApexes: {data: managedDomainApexes},
+    } = useFetchManagedDomainsApexes();
 
     //
     // RENDERING
@@ -97,14 +102,16 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
 
                 <div className="mt-5 flex justify-between">
 
-                    <ActionButton
-                        icon={Globe}
-                        onClick={(e) => {
-                            e.preventDefault();
-                            navigate(`/?invitation-code=${invitationCode}`);
-                        }}>
-                        {t('Use a managed domain')}
-                    </ActionButton>
+                    {managedDomainApexes && managedDomainApexes.length > 0 ? (
+                        <ActionButton
+                            icon={Globe}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                navigate(`../managed-domain?invitation-code=${invitationCode}`);
+                            }}>
+                            {t('Use a managed domain')}
+                        </ActionButton>
+                    ) : <div />}
 
                     <ActionButton
                         className="h-[2.66rem]"

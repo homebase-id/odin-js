@@ -25,6 +25,7 @@ export const ROOT_PATH = '/sign-up';
 import { config } from './config';
 import { ErrorBoundary, NotFound } from '@homebase-id/common-app';
 import { useConfiguration } from '../hooks/configuration/useConfiguration';
+import { useFetchManagedDomainsApexes } from '../hooks/managedDomain/useManagedDomain';
 import { Loader } from '@homebase-id/common-app/icons';
 
 function App() {
@@ -62,8 +63,8 @@ function App() {
               >
                 <Route path="/" element={<InvitationCodeCheck />}></Route>
                 <Route path={ROOT_PATH}>
-                  {/*<Route index={true} element={<DomainChoice />} />*/}
-                  <Route index={true} element={<ProvisionManagedDomain />} />
+                  <Route index={true} element={<DomainRedirect />} />
+                  <Route path="managed-domain" element={<ProvisionManagedDomain />} />
                   <Route path="own-domain" element={<ProvisionOwnDomain />} />
                   <Route
                     path="*"
@@ -100,6 +101,24 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
   }
 
   return <>{children}</>;
+};
+
+const DomainRedirect = () => {
+  const {
+    fetchManagedDomainApexes: { data: managedDomainApexes, isLoading },
+  } = useFetchManagedDomainsApexes();
+
+  if (isLoading)
+    return (
+      <div className="flex flex-grow flex-col">
+        <Loader className="m-auto h-20 w-20" />
+      </div>
+    );
+
+  const target =
+    managedDomainApexes && managedDomainApexes.length > 0 ? 'managed-domain' : 'own-domain';
+
+  return <Navigate to={`${ROOT_PATH}/${target}${window.location.search}`} replace />;
 };
 
 export default App;
