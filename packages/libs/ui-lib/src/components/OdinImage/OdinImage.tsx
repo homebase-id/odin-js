@@ -19,6 +19,7 @@ export interface OdinImageProps
   position?: 'left' | 'center';
   preferObjectUrl?: boolean; // => Prefer image urls over base64; But the objectUrls are never cleared after use;
 
+  naturalSize?: ImageSize;
   maxWidth?: string;
 }
 
@@ -33,6 +34,7 @@ export const OdinImage = ({
   position,
   onLoad,
   lazyLoad = true,
+  naturalSize: naturalSizeProp,
   maxWidth,
   ...props
 }: OdinImageProps) => {
@@ -50,7 +52,7 @@ export const OdinImage = ({
 
   const [loadSize, setLoadSize] = useState<ImageSize | 'full' | undefined>(undefined);
 
-  const [naturalSize, setNaturalSize] = useState<ImageSize | undefined>(previewThumbnail);
+  const [naturalSize, setNaturalSize] = useState<ImageSize | undefined>(naturalSizeProp || previewThumbnail);
   const [tinyThumb, setTinyThumb] = useState<ThumbnailMeta | undefined>();
 
   const weDontHaveSourceProps = !props.fileId || !props.fileKey || !props.targetDrive;
@@ -75,8 +77,7 @@ export const OdinImage = ({
     const targetHeight = previewImgRef.current?.clientHeight;
 
     // Find the best matching size in the meta sizes
-    let matchingSize = undefined;
-    tinyThumb?.sizes?.find((size) => {
+    let matchingSize = tinyThumb?.sizes?.find((size) => {
       return targetWidth < size.pixelWidth && targetHeight < size.pixelHeight;
     });
 
@@ -127,7 +128,7 @@ export const OdinImage = ({
         naturalSize?.pixelWidth && naturalSize?.pixelHeight && fit !== 'cover'
           ? {
               aspectRatio: `${naturalSize?.pixelWidth}/${naturalSize?.pixelHeight}`,
-              maxWidth: maxWidth || `${naturalSize.pixelWidth}px`,
+              maxWidth: maxWidth || (naturalSize.pixelWidth > 50 ? `${naturalSize.pixelWidth}px` : undefined),
             }
           : undefined
       }

@@ -44,7 +44,7 @@ export interface AccessGrant {
   appGrants: Record<string, AppGrant>;
 }
 
-export type ConnectionRequestOrigin = 'identityowner' | 'introduction';
+export type ConnectionRequestOrigin = 'identityowner' | 'introduction' | 'identityownerapp';
 
 export interface ConnectionInfo {
   status: 'none' | 'connected' | 'blocked';
