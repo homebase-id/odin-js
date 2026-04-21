@@ -84,7 +84,7 @@ const ConnectSocket = async (
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    webSocketClient = new WebSocket(url, undefined, args);
+    webSocketClient = args? new WebSocket(url, undefined, args) : new WebSocket(url);
     if (isDebug) console.debug(`[WebsocketProvider] WebSocket object created, attempting connection`);
     reconnectPromise = undefined;
     isHandshaked = false;
