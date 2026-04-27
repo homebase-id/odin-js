@@ -22,6 +22,21 @@ import YourSignature from '../../Connection/YourSignature/YourSignature';
 import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
 import { Arrow } from '@homebase-id/common-app/icons';
+import {
+  AutoConnectOutcome,
+  describeConnectionRequestResult,
+  type ConnectionRequestDisplayMessage,
+  type ConnectionRequestResult,
+} from '@homebase-id/js-lib/network';
+
+const severityToAlertType = (
+  severity: ConnectionRequestDisplayMessage['severity']
+): 'success' | 'info' | 'warning' | 'critical' =>
+  severity === 'error' ? 'critical' : severity;
+
+const isConnectionEstablishedOutcome = (outcome: AutoConnectOutcome): boolean =>
+  outcome === AutoConnectOutcome.Connected ||
+  outcome === AutoConnectOutcome.AcceptedFromExistingIncoming;
 
 const DEFAULT_MESSAGE = t('Hi, I would like to connect with you');
 
@@ -45,6 +60,7 @@ export const OutgoingConnectionDialog = ({
     status: sendConnectionRequestStatus,
     reset: resetConnectionRequest,
     error: actionError,
+    data: sendResult,
   } = useConnectionActions().sendConnectionRequest;
   const { mutateAsync: follow, error: followError } = useFollowingInfinite().follow;
   const checkReturnTo = useFocusedEditing();
@@ -65,14 +81,26 @@ export const OutgoingConnectionDialog = ({
 
   useEffect(() => setInvalid(false), [connectionTarget]);
 
+  const resetAll = () => {
+    resetConnectionRequest();
+    setConnectionTarget(targetOdinId?.toLowerCase() || undefined);
+    setMessage(DEFAULT_MESSAGE);
+    setCircleGrants([]);
+    setDoubleChecked(false);
+  };
+
   if (!isOpen) return null;
+
+  const outcomeResult: ConnectionRequestResult | undefined = sendResult?.result;
 
   const dialog = (
     <DialogWrapper
       title={title}
       onClose={() => {
-        setDoubleChecked(false);
-        onCancel();
+        const processed = !!outcomeResult;
+        resetAll();
+        if (processed) onConfirm();
+        else onCancel();
       }}
       keepOpenOnBlur={true}
       size="2xlarge"
@@ -84,28 +112,12 @@ export const OutgoingConnectionDialog = ({
             e.preventDefault();
             if (sendConnectionRequestStatus === 'pending') return;
             if (doubleChecked) {
-              await sendConnectionRequest(
-                {
-                  message: message,
-                  targetOdinId: connectionTarget as string, // Will be defined as otherwise it would have failed validation before
-
-                  circleIds: circleGrants,
-                },
-                {
-                  onSuccess: () => {
-                    if (checkReturnTo()) return;
-
-                    resetConnectionRequest();
-                    setConnectionTarget('');
-                    setMessage(DEFAULT_MESSAGE);
-                    setCircleGrants([]);
-                    setDoubleChecked(false);
-
-                    onConfirm();
-                  },
-                }
-              );
-              if (shouldFollow) {
+              const { result } = await sendConnectionRequest({
+                message: message,
+                targetOdinId: connectionTarget as string, // Will be defined as otherwise it would have failed validation before
+                circleIds: circleGrants,
+              });
+              if (shouldFollow && isConnectionEstablishedOutcome(result.outcome)) {
                 await follow({
                   request: {
                     odinId: connectionTarget as string,
@@ -123,7 +135,33 @@ export const OutgoingConnectionDialog = ({
             }
           }}
         >
-          {!doubleChecked ? (
+          {outcomeResult ? (
+            <>
+              {(() => {
+                const msg = describeConnectionRequestResult(
+                  outcomeResult,
+                  connectionTarget || ''
+                );
+                return (
+                  <Alert type={severityToAlertType(msg.severity)} title={t(msg.title)}>
+                    {msg.description ? t(msg.description) : null}
+                  </Alert>
+                );
+              })()}
+              <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
+                <ActionButton
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (checkReturnTo()) return;
+                    resetAll();
+                    onConfirm();
+                  }}
+                >
+                  {t('Close')}
+                </ActionButton>
+              </div>
+            </>
+          ) : !doubleChecked ? (
             <>
               {isConnected ? (
                 <Alert type={'warning'} className="mb-5">

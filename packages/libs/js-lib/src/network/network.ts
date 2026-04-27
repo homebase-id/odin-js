@@ -3,6 +3,7 @@
 // Connection
 export * from './connection/ConnectionManager';
 export * from './connection/ConnectionRequestManager';
+export * from './connection/ConnectionRequestResult';
 export * from './connection/IntroductionManager';
 
 // Circle

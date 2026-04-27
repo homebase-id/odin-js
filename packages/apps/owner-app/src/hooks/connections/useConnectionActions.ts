@@ -1,14 +1,14 @@
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import {
   disconnectFromContact,
-  sendRequest,
+  sendConnectionRequestWithOutcome,
   deleteSentRequest,
   blockOdinId,
   unblockOdinId,
-  ConnectionRequest,
+  AutoConnectOutcome,
+  ConnectionRequestResult,
 } from '@homebase-id/js-lib/network';
 import { SecurityGroupType } from '@homebase-id/js-lib/core';
-import { getNewId } from '@homebase-id/js-lib/helpers';
 import {
   fetchConnectionInfo,
   invalidateActiveConnections,
@@ -16,7 +16,6 @@ import {
   invalidatePendingConnections,
   invalidateSentConnections,
   saveContact,
-  updateCacheSentConnections,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
 
@@ -36,18 +35,28 @@ export const useConnectionActions = () => {
     targetOdinId: string;
     message: string;
     circleIds: string[];
-  }) => {
-    await sendRequest(dotYouClient, targetOdinId, message, circleIds);
+  }): Promise<{ targetOdinId: string; result: ConnectionRequestResult }> => {
+    const result = await sendConnectionRequestWithOutcome(
+      dotYouClient,
+      targetOdinId,
+      message,
+      circleIds
+    );
 
-    // Save contact
-    const connectionInfo = await fetchConnectionInfo(dotYouClient, targetOdinId);
-    if (connectionInfo)
-      await saveContact(dotYouClient, {
-        fileMetadata: { appData: { content: connectionInfo } },
-        serverMetadata: { accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner } },
-      });
+    if (
+      result.outcome === AutoConnectOutcome.Connected ||
+      result.outcome === AutoConnectOutcome.AcceptedFromExistingIncoming ||
+      result.outcome === AutoConnectOutcome.AlreadyConnected
+    ) {
+      const connectionInfo = await fetchConnectionInfo(dotYouClient, targetOdinId);
+      if (connectionInfo)
+        await saveContact(dotYouClient, {
+          fileMetadata: { appData: { content: connectionInfo } },
+          serverMetadata: { accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner } },
+        });
+    }
 
-    return { targetOdinId };
+    return { targetOdinId, result };
   };
 
   const revokeConnectionRequest = async ({ targetOdinId }: { targetOdinId: string }) => {
@@ -75,39 +84,23 @@ export const useConnectionActions = () => {
 
     sendConnectionRequest: useMutation({
       mutationFn: sendConnectionRequest,
-      onMutate: async ({ targetOdinId, message }) => {
-        const newRequest: ConnectionRequest = {
-          status: 'sent',
-          recipient: targetOdinId,
-          id: getNewId(),
-          message: message,
-          senderOdinId: dotYouClient.getHostIdentity(),
-          receivedTimestampMilliseconds: Date.now(),
-          connectionRequestOrigin: 'identityowner',
-        };
-
-        const previousRequests = updateCacheSentConnections(queryClient, (data) => {
-          return {
-            ...data,
-            pages: data.pages.map((page, index) =>
-              index === 0
-                ? {
-                    ...page,
-                    results: [newRequest, ...page.results],
-                  }
-                : page
-            ),
-          };
-        });
-        return { previousRequests, newRequest };
+      onSuccess: ({ targetOdinId, result }) => {
+        switch (result.outcome) {
+          case AutoConnectOutcome.Connected:
+          case AutoConnectOutcome.AcceptedFromExistingIncoming:
+          case AutoConnectOutcome.AlreadyConnected:
+            invalidateActiveConnections(queryClient);
+            invalidateConnectionInfo(queryClient, targetOdinId);
+            return;
+          case AutoConnectOutcome.PendingManualApproval:
+          case AutoConnectOutcome.OutgoingRequestAlreadyExists:
+            invalidateSentConnections(queryClient);
+            invalidateConnectionInfo(queryClient, targetOdinId);
+            return;
+        }
       },
-      onError: (err, newData, context) => {
+      onError: (err) => {
         console.error(err);
-        updateCacheSentConnections(queryClient, () => context?.previousRequests);
-      },
-      onSettled: (data) => {
-        invalidateSentConnections(queryClient);
-        data?.targetOdinId && invalidateConnectionInfo(queryClient, data.targetOdinId);
       },
     }),
     revokeConnectionRequest: useMutation({

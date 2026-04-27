@@ -10,6 +10,7 @@ import { DotYouClient } from '../../core/DotYouClient';
 import { PagingOptions, PagedResult } from '../../core/core';
 import { stringifyToQueryParams } from '../../helpers/helpers';
 import { getConnectionInfo } from './ConnectionManager';
+import { ConnectionRequestResult } from './ConnectionRequestResult';
 
 //Handles making and reading requests to connect with others
 const Root = '/circles/requests';
@@ -139,6 +140,28 @@ export const sendRequest = async (
   circleIds: string[]
 ): Promise<boolean> => {
   const url = Root + '/sendrequest';
+  const data: ConnectionRequestHeader = {
+    recipient: odinId,
+    message: message,
+    circleIds: circleIds,
+  };
+
+  const client = dotYouClient.createAxiosClient();
+  return client
+    .post(url, data)
+    .then((response) => {
+      return response.data;
+    })
+    .catch(dotYouClient.handleErrorResponse);
+};
+
+export const sendConnectionRequestWithOutcome = async (
+  dotYouClient: DotYouClient,
+  odinId: string,
+  message: string,
+  circleIds: string[]
+): Promise<ConnectionRequestResult> => {
+  const url = Root + '/send-request-with-outcome';
   const data: ConnectionRequestHeader = {
     recipient: odinId,
     message: message,
