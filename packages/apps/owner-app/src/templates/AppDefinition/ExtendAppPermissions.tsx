@@ -7,7 +7,7 @@ import {
   t,
   useCircles,
 } from '@homebase-id/common-app';
-import { Arrow } from '@homebase-id/common-app/icons';
+import { Arrow, Chevron } from '@homebase-id/common-app/icons';
 import Section from '../../components/ui/Sections/Section';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useApp } from '../../hooks/apps/useApp';
@@ -163,121 +163,133 @@ export const ExtendAppPermissions = () => {
               {t('The app')} &quot;{appRegistration?.name}&quot;{' '}
               {t('has requested extra access on your identity')}.
             </p>
-            <p className="mt-2">
-              {t('By allowing this, the app')} &quot;{appRegistration?.name}&quot;{' '}
-              {t('will receive the following extra access on your identity')}:
-            </p>
 
-            {permissionSet?.keys.length ? (
-              <Section>
-                <div className="flex flex-col gap-4">
-                  {permissionSet.keys.map((permissionLevel) => (
-                    <PermissionView key={`${permissionLevel}`} permission={permissionLevel} />
-                  ))}
-                </div>
-              </Section>
-            ) : null}
+            <details className="group my-6 rounded-lg border bg-white dark:border-slate-800 dark:bg-black">
+              <summary className="flex cursor-pointer list-none flex-row items-center px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
+                <span className="mr-auto">{t('Show details')}</span>
+                <Chevron className="h-4 w-4 transition-transform group-open:rotate-180" />
+              </summary>
 
-            {extensionGrantsOnExistingDrives?.length ? (
-              <Section>
-                <div className="flex flex-col gap-4">
-                  {extensionGrantsOnExistingDrives.map((grant) => (
-                    <DrivePermissionRequestView
-                      key={`${grant.permissionedDrive.drive.alias}-${grant.permissionedDrive.drive.type}`}
-                      driveGrant={grant}
-                      existingGrant={appRegistration?.grant?.driveGrants?.find(
-                        (existing) =>
-                          stringGuidsEqual(
-                            existing.permissionedDrive.drive.alias,
-                            grant.permissionedDrive.drive.alias
-                          ) &&
-                          stringGuidsEqual(
-                            existing.permissionedDrive.drive.type,
-                            grant.permissionedDrive.drive.type
-                          )
-                      )}
-                    />
-                  ))}
-                </div>
-              </Section>
-            ) : null}
-
-            {newDrives?.length ? (
-              <>
-                <Section>
-                  <div className="flex flex-col gap-4">
-                    {newDrives.map((grant) => (
-                      <DrivePermissionRequestView
-                        key={`${grant.permissionedDrive.drive.alias}-${grant.permissionedDrive.drive.type}`}
-                        driveGrant={grant}
-                      />
-                    ))}
-                  </div>
-                </Section>
-              </>
-            ) : null}
-
-            {circleIds?.length ? (
-              <>
+              <div className="border-t px-4 py-4 dark:border-slate-800">
                 <p>
-                  {t(
-                    'Requests these circles to interact with you via {0}',
-                    appRegistration?.name || ''
-                  )}
+                  {t('By allowing this, the app')} &quot;{appRegistration?.name}&quot;{' '}
+                  {t('will receive the following extra access on your identity')}:
                 </p>
-                <Section>
+
+                {permissionSet?.keys.length ? (
+                  <Section>
+                    <div className="flex flex-col gap-4">
+                      {permissionSet.keys.map((permissionLevel) => (
+                        <PermissionView key={`${permissionLevel}`} permission={permissionLevel} />
+                      ))}
+                    </div>
+                  </Section>
+                ) : null}
+
+                {extensionGrantsOnExistingDrives?.length ? (
+                  <Section>
+                    <div className="flex flex-col gap-4">
+                      {extensionGrantsOnExistingDrives.map((grant) => (
+                        <DrivePermissionRequestView
+                          key={`${grant.permissionedDrive.drive.alias}-${grant.permissionedDrive.drive.type}`}
+                          driveGrant={grant}
+                          existingGrant={appRegistration?.grant?.driveGrants?.find(
+                            (existing) =>
+                              stringGuidsEqual(
+                                existing.permissionedDrive.drive.alias,
+                                grant.permissionedDrive.drive.alias
+                              ) &&
+                              stringGuidsEqual(
+                                existing.permissionedDrive.drive.type,
+                                grant.permissionedDrive.drive.type
+                              )
+                          )}
+                        />
+                      ))}
+                    </div>
+                  </Section>
+                ) : null}
+
+                {newDrives?.length ? (
+                  <Section>
+                    <div className="flex flex-col gap-4">
+                      {newDrives.map((grant) => (
+                        <DrivePermissionRequestView
+                          key={`${grant.permissionedDrive.drive.alias}-${grant.permissionedDrive.drive.type}`}
+                          driveGrant={grant}
+                        />
+                      ))}
+                    </div>
+                  </Section>
+                ) : null}
+
+                {circleIds?.length ? (
                   <>
-                    {circleIds.map((circleId) => {
-                      const circleDef = circles?.find(
-                        (circle) => circle.id && stringGuidsEqual(circle.id, circleId)
-                      );
-                      if (!circleId || !circleDef) return null;
-                      return <CirclePermissionView circleDef={circleDef} key={circleId} />;
-                    })}
+                    <p>
+                      {t(
+                        'Requests these circles to interact with you via {0}',
+                        appRegistration?.name || ''
+                      )}
+                    </p>
+                    <Section>
+                      <>
+                        {circleIds.map((circleId) => {
+                          const circleDef = circles?.find(
+                            (circle) => circle.id && stringGuidsEqual(circle.id, circleId)
+                          );
+                          if (!circleId || !circleDef) return null;
+                          return <CirclePermissionView circleDef={circleDef} key={circleId} />;
+                        })}
+                      </>
+                    </Section>
                   </>
-                </Section>
-              </>
-            ) : null}
+                ) : null}
 
-            {circlePermissionSet?.keys?.length ? (
-              <>
-                <p>{t('Requests circles that can interact to have the following access within')}</p>
-                <Section>
-                  <div className="flex flex-col gap-4">
-                    {circlePermissionSet.keys.map((permissionLevel) => (
-                      <PermissionView key={`${permissionLevel}`} permission={permissionLevel} />
-                    ))}
-                  </div>
-                </Section>
-              </>
-            ) : null}
+                {circlePermissionSet?.keys?.length ? (
+                  <>
+                    <p>
+                      {t('Requests circles that can interact to have the following access within')}
+                    </p>
+                    <Section>
+                      <div className="flex flex-col gap-4">
+                        {circlePermissionSet.keys.map((permissionLevel) => (
+                          <PermissionView key={`${permissionLevel}`} permission={permissionLevel} />
+                        ))}
+                      </div>
+                    </Section>
+                  </>
+                ) : null}
 
-            {circleDriveGrants?.length ? (
-              <>
-                <p>{t('Requests circles that can interact to have the following drive access')}</p>
-                <Section>
-                  <div className="flex flex-col gap-4">
-                    {circleDriveGrants.map((grant) => (
-                      <DrivePermissionRequestView
-                        key={`${grant.permissionedDrive.drive.alias}-${grant.permissionedDrive.drive.type}`}
-                        driveGrant={grant}
-                        existingGrant={appRegistration?.circleMemberPermissionSetGrantRequest?.drives?.find(
-                          (existing) =>
-                            stringGuidsEqual(
-                              existing.permissionedDrive.drive.alias,
-                              grant.permissionedDrive.drive.alias
-                            ) &&
-                            stringGuidsEqual(
-                              existing.permissionedDrive.drive.type,
-                              grant.permissionedDrive.drive.type
-                            )
-                        )}
-                      />
-                    ))}
-                  </div>
-                </Section>
-              </>
-            ) : null}
+                {circleDriveGrants?.length ? (
+                  <>
+                    <p>
+                      {t('Requests circles that can interact to have the following drive access')}
+                    </p>
+                    <Section>
+                      <div className="flex flex-col gap-4">
+                        {circleDriveGrants.map((grant) => (
+                          <DrivePermissionRequestView
+                            key={`${grant.permissionedDrive.drive.alias}-${grant.permissionedDrive.drive.type}`}
+                            driveGrant={grant}
+                            existingGrant={appRegistration?.circleMemberPermissionSetGrantRequest?.drives?.find(
+                              (existing) =>
+                                stringGuidsEqual(
+                                  existing.permissionedDrive.drive.alias,
+                                  grant.permissionedDrive.drive.alias
+                                ) &&
+                                stringGuidsEqual(
+                                  existing.permissionedDrive.drive.type,
+                                  grant.permissionedDrive.drive.type
+                                )
+                            )}
+                          />
+                        ))}
+                      </div>
+                    </Section>
+                  </>
+                ) : null}
+              </div>
+            </details>
 
             <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
               <ActionButton
