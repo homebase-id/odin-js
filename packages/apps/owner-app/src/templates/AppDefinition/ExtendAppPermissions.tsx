@@ -131,8 +131,9 @@ export const ExtendAppPermissions = () => {
   };
 
   const doCancel = async () => {
-    // Redirect
-    window.location.href = returnUrl || '/';
+    const url = new URL(returnUrl || '/', window.location.origin);
+    url.searchParams.set('status', 'canceled');
+    window.location.href = url.toString();
   };
 
   const { data: existingDrives } = useDrives().fetch;
