@@ -67,7 +67,7 @@ const LoginNav = () => {
                   </a>
                 </p>
                 <button
-                  onClick={logoutOwnerAndAllApps}
+                  onClick={() => logoutOwnerAndAllApps()}
                   className="mt-2 block w-full rounded border-0 bg-green-500 px-4 py-2 text-white hover:bg-green-600 focus:outline-none"
                 >
                   {t('logout')}

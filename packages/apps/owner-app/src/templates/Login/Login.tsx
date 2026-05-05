@@ -1,10 +1,10 @@
 import { FormEventHandler, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useAuth, useValidateAuthorization } from '../../hooks/auth/useAuth';
+import { RETURN_URL_PARAM, useAuth, useValidateAuthorization } from '../../hooks/auth/useAuth';
 import { useVerifyToken } from '../../hooks/auth/useVerifyToken';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { PasswordInput } from '../../components/Password/PasswordInput';
 import {
   t,
@@ -23,6 +23,11 @@ const Login = () => {
   const [error, setError] = useState<unknown | undefined>();
   const isAuthenticated = useDotYouClientContext().isAuthenticated();
   const { authenticate, setFirstPassword, isPasswordSet, checkRedirectToReturn } = useAuth();
+  const [searchParams] = useSearchParams();
+  const returnUrl = searchParams.get(RETURN_URL_PARAM);
+  const recoveryHref = returnUrl
+    ? `/owner/account-recovery?${RETURN_URL_PARAM}=${encodeURIComponent(returnUrl)}`
+    : '/owner/account-recovery';
   useValidateAuthorization();
 
   const doLogin: FormEventHandler = async (e) => {
@@ -117,7 +122,7 @@ const Login = () => {
                   {t('login')}
                 </ActionButton>
                 <Link
-                  to="/owner/account-recovery"
+                  to={recoveryHref}
                   className="mt-5 block text-center text-slate-400 hover:underline"
                 >
                   {t('Forgot your password?')}

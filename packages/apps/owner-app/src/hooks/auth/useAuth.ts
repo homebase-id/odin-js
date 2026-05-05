@@ -30,6 +30,33 @@ export const SHAMIR_RECOVERY_PATH = '/owner/shamir-account-recovery';
 export const RETURN_URL_PARAM = 'returnUrl';
 export const HOME_PATH = '/owner';
 
+const AUTH_FLOW_PATHS = [
+  LOGIN_PATH,
+  FIRSTRUN_PATH,
+  RECOVERY_PATH,
+  SHAMIR_RECOVERY_PATH,
+  SETUP_PATH,
+];
+
+const isAuthFlowPath = (pathname: string): boolean =>
+  AUTH_FLOW_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'));
+
+// Accepts path-relative URLs ("/foo") and same-origin absolute URLs
+// (the backend issues those for the youauth/authorize flow).
+// Rejects protocol-relative ("//evil"), backslash-prefixed ("/\evil"), cross-origin,
+// and non-http schemes ("javascript:", "data:", etc).
+export const isSafeReturnUrl = (url: string | null | undefined): url is string => {
+  if (!url) return false;
+  if (url.startsWith('/')) {
+    return url.length < 2 || (url[1] !== '/' && url[1] !== '\\');
+  }
+  try {
+    return new URL(url).origin === window.location.origin;
+  } catch {
+    return false;
+  }
+};
+
 export const useValidateAuthorization = () => {
   const { hasSharedSecret } = useDotYouClient();
   const { data: hasValidToken, isFetched } = useVerifyToken();
@@ -38,7 +65,14 @@ export const useValidateAuthorization = () => {
     if (isFetched && hasValidToken !== undefined) {
       if (!hasValidToken && hasSharedSecret) {
         console.warn('Token is invalid, logging out..');
-        logoutOwnerAndAllApps();
+        const existing = new URLSearchParams(window.location.search).get(RETURN_URL_PARAM);
+        const safeExisting = isSafeReturnUrl(existing) ? existing : null;
+        // Skip capture on auth-flow pages: those URLs may carry one-time tokens
+        // (recovery `token`/`id`, etc.) that shouldn't be persisted in history.
+        const captured = isAuthFlowPath(window.location.pathname)
+          ? null
+          : window.location.pathname + window.location.search;
+        logoutOwnerAndAllApps(safeExisting ?? captured ?? undefined);
       }
     }
   }, [hasValidToken, hasSharedSecret]);
@@ -77,7 +111,7 @@ export const useAuth = () => {
   const checkRedirectToReturn = () => {
     if (window.location.pathname === LOGIN_PATH || window.location.pathname === FIRSTRUN_PATH) {
       const returnUrl = searchParams.get(RETURN_URL_PARAM);
-      window.location.href = returnUrl || HOME_PATH;
+      window.location.href = isSafeReturnUrl(returnUrl) ? returnUrl : HOME_PATH;
     }
   };
 
