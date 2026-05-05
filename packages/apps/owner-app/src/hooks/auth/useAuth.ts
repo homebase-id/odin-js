@@ -41,11 +41,20 @@ const AUTH_FLOW_PATHS = [
 const isAuthFlowPath = (pathname: string): boolean =>
   AUTH_FLOW_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'));
 
-// Only same-origin path-relative URLs are accepted, to prevent open-redirect via returnUrl.
+// Accepts path-relative URLs ("/foo") and same-origin absolute URLs
+// (the backend issues those for the youauth/authorize flow).
+// Rejects protocol-relative ("//evil"), backslash-prefixed ("/\evil"), cross-origin,
+// and non-http schemes ("javascript:", "data:", etc).
 export const isSafeReturnUrl = (url: string | null | undefined): url is string => {
-  if (!url || !url.startsWith('/')) return false;
-  // reject protocol-relative ("//evil.com") and backslash-prefixed ("/\evil.com") forms
-  return url.length < 2 || (url[1] !== '/' && url[1] !== '\\');
+  if (!url) return false;
+  if (url.startsWith('/')) {
+    return url.length < 2 || (url[1] !== '/' && url[1] !== '\\');
+  }
+  try {
+    return new URL(url).origin === window.location.origin;
+  } catch {
+    return false;
+  }
 };
 
 export const useValidateAuthorization = () => {
