@@ -15,10 +15,12 @@ import {
 } from "../../../provider/auth/SecurityRecoveryProvider";
 import {PasswordInput} from "../../../components/Password/PasswordInput";
 import {PasswordStrength} from "../../../components/Password/PasswordStrength";
+import {RETURN_URL_PARAM} from "../../../hooks/auth/useAuth";
 
 const ShamirAccountRecovery = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
+  const returnUrl = params.get(RETURN_URL_PARAM);
 
   const [status, setStatus] = useState<ShamirRecoveryStatusRedacted | null>(null);
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -130,7 +132,7 @@ const ShamirAccountRecovery = () => {
                   {t('🎉 You are ready to finalize your password recovery!')}
 
                   <hr className="mb-5 mt-7 dark:border-slate-700"/>
-                  {token && nonceId && (<PasswordReset/>)}
+                  {token && nonceId && (<PasswordReset returnUrl={returnUrl}/>)}
 
                   {/*user is on the screen but did not click the email*/}
                   {(!token || !nonceId) && (
@@ -206,7 +208,7 @@ const ShamirAccountRecovery = () => {
 };
 
 
-function PasswordReset() {
+function PasswordReset({returnUrl}: {returnUrl: string | null}) {
 
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -214,6 +216,10 @@ function PasswordReset() {
   // see if we came here from recovery mode
   const nonceId = params.get("id") ?? "";
   const token = params.get("token") ?? "";
+
+  const loginHref = returnUrl
+    ? `/owner/login?${RETURN_URL_PARAM}=${encodeURIComponent(returnUrl)}`
+    : '/owner/login';
 
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
   const [password, setPassword] = useState('');
@@ -237,7 +243,7 @@ function PasswordReset() {
         <div className="my-2">
           <p>{t('Your password has been changed successfully')}</p>
           <div className="flex flex-row-reverse">
-            <ActionLink href="/owner/login">{t('Login')}</ActionLink>
+            <ActionLink href={loginHref}>{t('Login')}</ActionLink>
           </div>
         </div>
       ) : state === 'error' ? (
@@ -295,7 +301,7 @@ function PasswordReset() {
             <ActionButton state={state} disabled={!passwordIsValid}>
               {t('Reset password')}
             </ActionButton>
-            <ActionLink type="secondary" href="/owner/login">
+            <ActionLink type="secondary" href={loginHref}>
               {t('Cancel')}
             </ActionLink>
           </div>

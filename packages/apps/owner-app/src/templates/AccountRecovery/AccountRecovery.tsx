@@ -1,19 +1,23 @@
 import {useState} from 'react';
 import {Helmet} from 'react-helmet-async';
 import {ActionLink, Alert, DomainHighlighter, t} from '@homebase-id/common-app';
-import {SHAMIR_RECOVERY_PATH, useAuth} from '../../hooks/auth/useAuth';
+import {RETURN_URL_PARAM, SHAMIR_RECOVERY_PATH, useAuth} from '../../hooks/auth/useAuth';
 import {ActionButton} from '@homebase-id/common-app';
 import {Label} from '@homebase-id/common-app';
 import {MinimalLayout} from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import {PasswordInput} from '../../components/Password/PasswordInput';
 import {PasswordStrength} from '../../components/Password/PasswordStrength';
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useSearchParams} from "react-router-dom";
 
 const AccountRecovery = () => {
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnUrl = searchParams.get(RETURN_URL_PARAM);
+  const returnSuffix = returnUrl ? `?${RETURN_URL_PARAM}=${encodeURIComponent(returnUrl)}` : '';
+  const loginHref = `/owner/login${returnSuffix}`;
   const [recoveryKey, setRecoveryKey] = useState('');
   const [password, setPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
@@ -22,7 +26,7 @@ const AccountRecovery = () => {
 
 
   const enterShamirMode = () => {
-    navigate(SHAMIR_RECOVERY_PATH);
+    navigate(`${SHAMIR_RECOVERY_PATH}${returnSuffix}`);
   }
 
   const passwordIsValid = password === retypePassword && password !== '';
@@ -58,7 +62,7 @@ const AccountRecovery = () => {
                 <div className="my-2">
                   <p>{t('Your password has been changed successfully')}</p>
                   <div className="flex flex-row-reverse">
-                    <ActionLink href="/owner/login">{t('Login')}</ActionLink>
+                    <ActionLink href={loginHref}>{t('Login')}</ActionLink>
                   </div>
                 </div>
               ) : state === 'error' ? (
@@ -137,7 +141,7 @@ const AccountRecovery = () => {
                     <ActionButton state={state} disabled={!passwordIsValid}>
                       {t('Reset password')}
                     </ActionButton>
-                    <ActionLink type="secondary" href="/owner/login">
+                    <ActionLink type="secondary" href={loginHref}>
                       {t('Cancel')}
                     </ActionLink>
                   </div>
