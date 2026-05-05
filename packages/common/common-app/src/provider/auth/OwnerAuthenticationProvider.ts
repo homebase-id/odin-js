@@ -101,9 +101,6 @@ export const logoutOwnerAndAllApps = async (returnUrl?: string): Promise<void> =
   del(`APP_REACT_QUERY_OFFLINE_CACHE`);
 
   const loginUrl = '/owner/login';
-  // Already on login: localStorage is cleaned, but don't re-navigate — that would
-  // clobber any existing ?returnUrl= the server (or a prior nav) put in the URL.
-  if (window.location.pathname === loginUrl) return;
   window.location.href = returnUrl
     ? `${loginUrl}?returnUrl=${encodeURIComponent(returnUrl)}`
     : loginUrl;
