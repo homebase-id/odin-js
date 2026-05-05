@@ -164,8 +164,26 @@ export const ExtendAppPermissions = () => {
               {t('The app')} &quot;{appRegistration?.name}&quot;{' '}
               {t('has requested extra access on your identity')}.
             </p>
+            
+            <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
+              <ActionButton
+                onClick={doUpdateApp}
+                type="primary"
+                state={mergeStates(
+                  mergeStates(extendPermissionStatus, updateCirclesState),
+                  setAttributesStatus
+                )}
+                icon={Arrow}
+              >
+                {t('Allow')}
+              </ActionButton>
 
-            <details className="group my-6 rounded-lg border bg-white dark:border-slate-800 dark:bg-black">
+              <ActionButton type="secondary" onClick={() => doCancel()}>
+                {t('Cancel')}
+              </ActionButton>
+            </div>
+
+            <details className="mt-6 group my-6 rounded-lg border bg-white dark:border-slate-800 dark:bg-black">
               <summary className="flex cursor-pointer list-none flex-row items-center px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
                 <span className="mr-auto">{t('Show details')}</span>
                 <Chevron className="h-4 w-4 transition-transform group-open:rotate-180" />
@@ -291,24 +309,7 @@ export const ExtendAppPermissions = () => {
                 ) : null}
               </div>
             </details>
-
-            <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
-              <ActionButton
-                onClick={doUpdateApp}
-                type="primary"
-                state={mergeStates(
-                  mergeStates(extendPermissionStatus, updateCirclesState),
-                  setAttributesStatus
-                )}
-                icon={Arrow}
-              >
-                {t('Allow')}
-              </ActionButton>
-
-              <ActionButton type="secondary" onClick={() => doCancel()}>
-                {t('Cancel')}
-              </ActionButton>
-            </div>
+            
           </div>
         </div>
       </section>
