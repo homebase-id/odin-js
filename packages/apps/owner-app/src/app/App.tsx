@@ -30,6 +30,7 @@ const ExtendCirclePermissionsFromApp = lazy(() =>
 const UpdateDriveDetailsFromApp = lazy(
   () => import('../templates/AppDefinition/UpdateDriveDetailsFromApp')
 );
+const DataUpgrade = lazy(() => import('../templates/DataUpgrade/DataUpgrade'));
 const Login = lazy(() => import('../templates/Login/Login'));
 const AccountRecovery = lazy(() => import('../templates/AccountRecovery/AccountRecovery'));
 const ShamirAccountRecovery = lazy(() => import('../templates/AccountRecovery/Shamir/ShamirAccountRecovery'));
@@ -164,6 +165,7 @@ function App() {
               <Route path="appupdate" element={<ExtendAppDrivePermissions />} />
               <Route path="apprequest-circles" element={<ExtendCirclePermissionsFromApp />} />
               <Route path="apprequest-drives" element={<UpdateDriveDetailsFromApp />} />
+              <Route path="data-upgrade" element={<DataUpgrade />} />
             </Route>
 
             <Route
