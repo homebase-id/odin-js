@@ -4,7 +4,6 @@ import { Helmet } from 'react-helmet-async';
 import { CheckCircle } from 'lucide-react';
 import { t, ActionButton, Label, useDotYouClient } from '@homebase-id/common-app';
 import { Arrow, Chevron, Loader } from '@homebase-id/common-app/icons';
-import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
 import {
   forceVersionUpgrade,
   getDataVersionInfo,
@@ -23,31 +22,12 @@ type UpgradePhase =
   | 'done' // the data is up to date
   | 'error'; // the check or trigger failed
 
-interface ReturnTarget {
-  url: string;
-  label: string;
-  /** A native mobile/desktop app deep link (custom scheme) rather than a web url */
-  isNativeApp: boolean;
-}
-
 // Schemes we refuse to navigate to (XSS / local-file risks). Everything else is
 // allowed: `http(s)` for web apps and custom schemes for native mobile/desktop apps.
 const BLOCKED_RETURN_SCHEMES = ['javascript:', 'data:', 'vbscript:', 'blob:', 'file:'];
 
-// Turns a deep-link scheme into a human label, e.g. `homebase-chat:` -> "Homebase Chat".
-const prettifyScheme = (protocol: string): string =>
-  protocol
-    .replace(/:$/, '')
-    .split(/[-_.]/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-
-// Resolves the "Return to {app}" target. Supports web apps (http/https) as well as
-// native mobile & desktop apps that hand us a custom-scheme deep link such as
-// `homebase-chat://` - navigated via window.location, the same way the app-update flow
-// returns control to the calling app.
-const resolveReturnTarget = (returnUrl: string | null): ReturnTarget | undefined => {
+// Returns the raw returnUrl if it parses and isn't a blocked scheme; otherwise undefined.
+const resolveReturnUrl = (returnUrl: string | null): string | undefined => {
   if (!returnUrl) return undefined;
 
   let parsed: URL;
@@ -59,13 +39,7 @@ const resolveReturnTarget = (returnUrl: string | null): ReturnTarget | undefined
 
   if (BLOCKED_RETURN_SCHEMES.includes(parsed.protocol.toLowerCase())) return undefined;
 
-  const isWebApp = parsed.protocol === 'http:' || parsed.protocol === 'https:';
-  const label = isWebApp
-    ? getDomainFromUrl(parsed.href) || parsed.host
-    : prettifyScheme(parsed.protocol);
-
-  // Navigate to the raw value so native deep links aren't mangled by URL normalisation.
-  return { url: returnUrl, label: label || t('the app'), isNativeApp: !isWebApp };
+  return returnUrl;
 };
 
 const DataUpgrade = () => {
@@ -80,8 +54,8 @@ const DataUpgrade = () => {
   // The app that sent the user here; we redirect back to it once the upgrade succeeds.
   // The caller may be a web app, or a native mobile/desktop app passing a deep link.
   // `returnUrl` is the agreed param; `return` is also accepted to match the app flows.
-  const returnTarget = useMemo(
-    () => resolveReturnTarget(searchParams.get(RETURN_URL_PARAM) ?? searchParams.get('return')),
+  const returnUrl = useMemo(
+    () => resolveReturnUrl(searchParams.get(RETURN_URL_PARAM) ?? searchParams.get('return')),
     [searchParams]
   );
 
@@ -170,7 +144,7 @@ const DataUpgrade = () => {
   }, [phase]);
 
   const doReturn = () => {
-    window.location.href = returnTarget ? returnTarget.url : '/owner';
+    window.location.href = returnUrl ?? '/owner';
   };
 
   const isBusy = phase === 'checking' || phase === 'running';
@@ -207,12 +181,8 @@ const DataUpgrade = () => {
               <div className="flex flex-col items-center gap-3 py-6 text-center">
                 <CheckCircle className="h-16 w-16 text-green-500" aria-hidden={true} />
                 <p className="text-lg dark:text-white">{t('Your data is up to date')}</p>
-                {returnTarget ? (
-                  <p className="text-sm text-slate-400">
-                    {returnTarget.isNativeApp
-                      ? t('You can now return to {0}.', returnTarget.label)
-                      : t('You can now continue to {0}.', returnTarget.label)}
-                  </p>
+                {returnUrl ? (
+                  <p className="text-sm text-slate-400">{t('You can now return to the app.')}</p>
                 ) : null}
               </div>
             ) : null}
@@ -230,9 +200,7 @@ const DataUpgrade = () => {
               <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:flex-row">
                 {phase === 'done' ? (
                   <ActionButton type="primary" icon={Arrow} onClick={doReturn} autoFocus>
-                    {returnTarget
-                      ? t('Return to {0}', returnTarget.label)
-                      : t('Continue to Homebase')}
+                    {returnUrl ? t('Return to App') : t('Continue to Homebase')}
                   </ActionButton>
                 ) : null}
 
