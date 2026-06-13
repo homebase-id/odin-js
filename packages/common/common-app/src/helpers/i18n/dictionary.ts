@@ -41,6 +41,7 @@ const enLocale = [
   ['readmyfollowers', 'Read My Followers'],
   ['managefeed', 'Manage Feed'],
   ['readwhoifollow', 'Read Who I Follow'],
+  ['managecontacts', 'Manage Contacts'],
   ['receivedatafromotheridentitiesonmybehalf', 'Receive data from other identities on my behalf'],
   ['senddatatootheridentitiesonmybehalf', 'Send data to other identities on my behalf'],
   ['writer', 'Write'],
