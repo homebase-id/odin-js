@@ -43,14 +43,29 @@ const subscribers: {
 
 const isDebug = hasDebugFlag();
 
+// V2 (App only) authenticates the WS upgrade with a Sec-WebSocket-Protocol bearer instead of the
+// preauth cookie, so a browser can connect cross-site where it can send neither the BX0900 header
+// nor the SameSite cookie on the upgrade. 'odin.notify.v1' is echoed by the server so the browser
+// accepts the 101. Mirrors the kube-apiserver subprotocol-bearer pattern.
+const getV2Protocols = (dotYouClient: DotYouClient): string[] | undefined => {
+  const token = dotYouClient.getHeaders()['bx0900'];
+  if (!token) return undefined;
+  // Subprotocol values must be RFC 7230 tokens, so the base64 token is sent base64url-encoded.
+  const base64Url = token.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return ['odin.notify.v1', `odin.bearer.${base64Url}`];
+};
+
 const ConnectSocket = async (
   dotYouClient: DotYouClient,
   drives: TargetDrive[],
-  args?: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...;
+  args?: unknown, // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...;
+  useV2 = false
 ) => {
   if (webSocketClient) throw new Error('Socket already connected');
 
   const apiType = dotYouClient.getType();
+  // V2 is App-only; Owner always stays on the V1 cookie path.
+  const useV2App = useV2 && apiType === ApiType.App;
 
   // We're already connecting, return the existing promise
   if (connectPromise) return connectPromise;
@@ -65,26 +80,29 @@ const ConnectSocket = async (
       return;
     }
 
-    const url = `wss://${dotYouClient.getRoot().split('//')[1]}/api/${
-      apiType === ApiType.Owner ? 'owner' : 'apps'
-    }/v1/notify/ws`;
-
-    // App: a browser can send neither the BX0900 header nor the cross-site SameSite cookie on a
-    // WS upgrade, so carry the app token in a Sec-WebSocket-Protocol value ("odin.bearer." +
-    // base64url) — the kube-style subprotocol bearer the server accepts. No preauth cookie
-    // round-trip needed. (Owner is same-site and keeps the cookie path.)
-    let protocols: string[] | undefined;
-    if (apiType === ApiType.App) {
-      const token = dotYouClient.getHeaders()['bx0900'];
-      if (token) {
-        const tokenBase64Url = token.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-        protocols = ['odin.notify.v1', `odin.bearer.${tokenBase64Url}`];
-      }
+    if (apiType === ApiType.App && !useV2App) {
+      // we need to preauth before we can connect
+      await dotYouClient
+        .createAxiosClient()
+        .post('/notify/preauth', undefined, {
+          validateStatus: () => true,
+        })
+        .catch(() => {
+          reconnectPromise = undefined;
+          reject('[WebsocketProvider] Preauth failed');
+        });
     }
 
+    const host = dotYouClient.getRoot().split('//')[1];
+    const url = useV2App
+      ? `wss://${host}/api/v2/notify/ws-token-wasm`
+      : `wss://${host}/api/${apiType === ApiType.Owner ? 'owner' : 'apps'}/v1/notify/ws`;
+
+    const protocols = useV2App ? getV2Protocols(dotYouClient) : undefined;
+
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore — 3rd arg (React-Native connection options) is ignored by browsers
-    webSocketClient = new WebSocket(url, protocols, args);
+    // @ts-ignore
+    webSocketClient = protocols ? new WebSocket(url, protocols, args) : args ? new WebSocket(url, undefined, args) : new WebSocket(url);
     if (isDebug) console.debug(`[WebsocketProvider] WebSocket object created, attempting connection`);
     reconnectPromise = undefined;
     isHandshaked = false;
@@ -114,7 +132,7 @@ const ConnectSocket = async (
 
           // 2 ping intervals have passed without a pong, reconnect
           if (isDebug) console.debug(`[WebsocketProvider] Ping timeout`);
-          ReconnectSocket(dotYouClient, drives, args);
+          ReconnectSocket(dotYouClient, drives, args, useV2);
           return;
         }
         Notify({
@@ -164,7 +182,7 @@ const ConnectSocket = async (
         }
       }
 
-      ReconnectSocket(dotYouClient, drives, args);
+      ReconnectSocket(dotYouClient, drives, args, useV2);
     };
   });
 
@@ -174,7 +192,8 @@ const ConnectSocket = async (
 const ReconnectSocket = async (
   dotYouClient: DotYouClient,
   drives: TargetDrive[],
-  args?: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this
+  args?: unknown, // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this
+  useV2 = false
 ) => {
   if (reconnectPromise) return;
 
@@ -201,7 +220,7 @@ const ReconnectSocket = async (
       if (isDebug) console.debug(`[WebsocketProvider] Reconnecting - Delayed reconnect #${reconnectCounter} at ${Date.now()}ms`);
 
       try {
-        await ConnectSocket(dotYouClient, drives, args);
+        await ConnectSocket(dotYouClient, drives, args, useV2);
       } catch (e) {
         console.error('[WebsocketProvider] Reconnect failed', e);
         reject();
@@ -241,7 +260,8 @@ export const Subscribe = async (
   onDisconnect?: () => void,
   onReconnect?: () => void,
   args?: unknown, // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this,
-  refId?: string
+  refId?: string,
+  useV2 = false // App only: authenticate the upgrade with the odin.bearer subprotocol against /api/v2 (cross-site capable)
 ): Promise<void> => {
   const apiType = dotYouClient.getType();
   const sharedSecret = dotYouClient.getSharedSecret();
@@ -270,7 +290,7 @@ export const Subscribe = async (
 
   // Already connected, no need to initiate a new connection
   if (webSocketClient) return Promise.resolve();
-  return ConnectSocket(dotYouClient, drives, args);
+  return ConnectSocket(dotYouClient, drives, args, useV2);
 };
 
 export const Unsubscribe = (
