@@ -65,26 +65,26 @@ const ConnectSocket = async (
       return;
     }
 
-    if (apiType === ApiType.App) {
-      // we need to preauth before we can connect
-      await dotYouClient
-        .createAxiosClient()
-        .post('/notify/preauth', undefined, {
-          validateStatus: () => true,
-        })
-        .catch(() => {
-          reconnectPromise = undefined;
-          reject('[WebsocketProvider] Preauth failed');
-        });
-    }
-
     const url = `wss://${dotYouClient.getRoot().split('//')[1]}/api/${
       apiType === ApiType.Owner ? 'owner' : 'apps'
     }/v1/notify/ws`;
 
+    // App: a browser can send neither the BX0900 header nor the cross-site SameSite cookie on a
+    // WS upgrade, so carry the app token in a Sec-WebSocket-Protocol value ("odin.bearer." +
+    // base64url) — the kube-style subprotocol bearer the server accepts. No preauth cookie
+    // round-trip needed. (Owner is same-site and keeps the cookie path.)
+    let protocols: string[] | undefined;
+    if (apiType === ApiType.App) {
+      const token = dotYouClient.getHeaders()['bx0900'];
+      if (token) {
+        const tokenBase64Url = token.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        protocols = ['odin.notify.v1', `odin.bearer.${tokenBase64Url}`];
+      }
+    }
+
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    webSocketClient = args? new WebSocket(url, undefined, args) : new WebSocket(url);
+    // @ts-ignore — 3rd arg (React-Native connection options) is ignored by browsers
+    webSocketClient = new WebSocket(url, protocols, args);
     if (isDebug) console.debug(`[WebsocketProvider] WebSocket object created, attempting connection`);
     reconnectPromise = undefined;
     isHandshaked = false;
