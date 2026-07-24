@@ -4,7 +4,6 @@ import {
   getContactByUniqueId,
   getContactByOdinId,
   ContactWriteResponse,
-  ContactWriteConflict,
   createContact,
   updateContactWithRetry,
   setContactImage,
@@ -31,6 +30,10 @@ export const saveContact = async (
 
   // The image is stored via a dedicated endpoint (encrypted under the file key), not in the content.
   const { image, ...content } = contact.fileMetadata.appData.content;
+  // Defensive: never forward the server-owned per-app `appData` map, even if a prior read left it on
+  // the object at runtime (the type has no such field). The server ignores it on update, but not
+  // sending it keeps the intent unambiguous.
+  delete (content as Record<string, unknown>).appData;
   const odinId = content.odinId;
 
   // The server keys contacts on md5(odinId); match it so create/update land on the same file.
@@ -55,11 +58,14 @@ export const saveContact = async (
     try {
       result = await createContact(dotYouClient, content);
     } catch (ex) {
-      // A create that collides on the deterministic uniqueId (409) means it already exists — update it
-      // over the returned current version tag instead.
-      const response = (ex as AxiosError<ContactWriteConflict>)?.response;
-      if (response?.status !== 409 || !response.data?.versionTag) throw ex;
-      result = await updateContactWithRetry(dotYouClient, uniqueId, response.data.versionTag, content);
+      // A create that collides on the deterministic uniqueId (409) means the contact already exists
+      // (a race, or our existence read missed it). Reconcile by re-reading the current version and
+      // updating. NOTE: the client does not decrypt error-response bodies, so the version must come
+      // from a fresh GET — not from the 409 payload.
+      if ((ex as AxiosError)?.response?.status !== 409) throw ex;
+      const current = await getContactByUniqueId(dotYouClient, uniqueId);
+      if (!current?.fileMetadata.versionTag) throw ex;
+      result = await updateContactWithRetry(dotYouClient, uniqueId, current.fileMetadata.versionTag, content);
     }
   }
 
