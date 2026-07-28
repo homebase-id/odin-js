@@ -17,6 +17,7 @@ export * from './troubleshooting/ConnectionGrantProvider';
 // Contact
 export * from './contact/ContactManager';
 export * from './contact/ContactTypes';
+export * from './contact/ContactWriteProvider';
 
 // Follow
 export * from './follow/FollowManager';
