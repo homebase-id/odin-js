@@ -52,6 +52,14 @@ const EnteringDetails = ({
     }
   }, [domainPrefix, domainApex]);
 
+  // Live preview of the resulting address; falls back to the placeholder labels
+  // so it always reads like a real address (e.g. john.doe.id.pub) before typing.
+  const previewDomain = useMemo(() => {
+    if (!domainApex) return '';
+    const parts = domainApex.prefixLabels.map((label, i) => prefixes[i]?.trim() || label);
+    return domainFromPrefixAndApex(parts.join('.'), domainApex.apex);
+  }, [prefixes, domainApex]);
+
   //
   // API
   //
@@ -121,7 +129,7 @@ const EnteringDetails = ({
           className="w-full max-w-5xl"
         >
           <div className="flex flex-row flex-wrap items-center">
-            <Label>{t('Your domain')}</Label>
+            <Label>{t('Choose your username')}</Label>
             {isManagedDomainAvailable === false && domain ? (
               <p
                 className="order-1 ml-auto mt-2 flex flex-row items-center rounded-lg bg-slate-100 px-2 py-1 md:order-none md:mt-0 md:rounded-b-none">
@@ -130,6 +138,12 @@ const EnteringDetails = ({
               </p>
             ) : null}
           </div>
+          <small className="mb-1 block text-sm font-normal text-slate-500">
+            <span className="font-medium">https://{previewDomain}/</span>{' '}
+            {t(
+              'also doubles as your own public-facing website. You can choose between other options in the drop-down.'
+            )}
+          </small>
           <div className="flex w-full flex-col flex-wrap gap-2 md:flex-row">
             {domainApex.prefixLabels.map((label, index) => (
               <div className="flex-grow" key={index}>
