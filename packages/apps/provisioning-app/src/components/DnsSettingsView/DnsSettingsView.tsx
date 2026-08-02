@@ -138,7 +138,7 @@ const ApexInfoBlock = ({
   return (
     <div className={`${className} flex flex-col gap-4`}>
       <p className="text-2xl">
-        Point your domain <span className="rounded-md bg-slate-100 px-2">{yourDomain}</span> to
+        Point your domain <span className="rounded-md bg-slate-100 px-2 dark:bg-slate-700">{yourDomain}</span> to
         Homebase
       </p>
       {aliasARecord ? (
@@ -208,7 +208,7 @@ const SubdomainInfoBlock = ({
   return (
     <div className={`${className} flex flex-col gap-4`}>
       <p className="text-2xl">
-        Point your domain <span className="rounded-md bg-slate-100 px-2">{yourDomain}</span> to
+        Point your domain <span className="rounded-md bg-slate-100 px-2 dark:bg-slate-700">{yourDomain}</span> to
         Homebase
       </p>
       {aliasARecord ? (
@@ -288,11 +288,11 @@ const RecordView = ({
         className={`flex flex-row flex-wrap items-center gap-2 rounded-lg ${
           showStatus
             ? isGood
-              ? 'bg-green-100'
+              ? 'bg-green-100 dark:bg-green-900'
               : errorStates.includes(simpleStatus)
-                ? 'bg-orange-100'
-                : 'bg-gray-100'
-            : 'bg-gray-100'
+                ? 'bg-orange-100 dark:bg-orange-900'
+                : 'bg-gray-100 dark:bg-gray-800'
+            : 'bg-gray-100 dark:bg-gray-800'
         } px-4 py-3 font-mono text-base shadow-sm`}
       >
         <ClickToCopy value={recordValue}>
@@ -312,7 +312,7 @@ const RecordView = ({
             className={`ml-auto flex flex-row items-center gap-2 text-sm ${
               isInCorrectvalue
                 ? 'cursor-pointer text-indigo-500 hover:underline'
-                : `${!isGood ? 'text-orange-600' : ''}`
+                : `${!isGood ? 'text-orange-600 dark:text-orange-400' : ''}`
             }`}
             onClick={isInCorrectvalue ? () => setShowBadValue(true) : undefined}
           >
@@ -347,14 +347,14 @@ const RecordView = ({
         >
           <p className="mb-4">
             Expected value:
-            <span className="mt-1 block bg-gray-100 px-4 py-3 font-mono text-base">
+            <span className="mt-1 block bg-gray-100 px-4 py-3 font-mono dark:bg-gray-800 text-base">
               {record.value}
               {hideDotOnValue ? '' : '.'}
             </span>
           </p>
           <p>
             But we have found this:{' '}
-            <span className="mt-1 block bg-orange-100 px-4 py-3 font-mono text-base">
+            <span className="mt-1 block bg-orange-100 px-4 py-3 font-mono dark:bg-orange-900 text-base">
               {Object.values(record.records)[0]}
             </span>
           </p>
