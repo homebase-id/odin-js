@@ -97,14 +97,12 @@ export const useContact = ({
     };
 
     if (canSave && hasContactDriveWriteAccess) {
-      const uploadResult = await saveContact(dotYouClient, contactFile);
-      const savedContactFile = {
-        ...contactFile,
-        fileId: uploadResult?.file.fileId,
-        fileMetaData: { ...contactFile.fileMetadata, versionTag: uploadResult?.newVersionTag },
-      };
-
-      return parseContact(savedContactFile);
+      await saveContact(dotYouClient, contactFile);
+      // Re-read the stored contact so we return the merged server state (fileId, versionTag, and any
+      // server-preserved appData) rather than a synthesized header. The write API is keyed by uniqueId
+      // and returns no fileId, so a read-back is the reliable way to get the fresh header.
+      const savedContact = await getContactByOdinId(dotYouClient, odinId);
+      return savedContact ? parseContact(savedContact) : parseContact(contactFile);
     }
 
     return parseContact(contactFile);

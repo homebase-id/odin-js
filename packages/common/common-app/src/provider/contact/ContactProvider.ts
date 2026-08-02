@@ -1,195 +1,78 @@
-import {
-  UploadFileMetadata,
-  UploadInstructionSet,
-  DotYouClient,
-  uploadFile,
-  DEFAULT_PAYLOAD_KEY,
-  ThumbnailFile,
-  PayloadFile,
-  EmbeddedThumb,
-  NewHomebaseFile,
-  UploadResult,
-  getFileHeader,
-  MAX_HEADER_CONTENT_BYTES,
-  UpdateLocalInstructionSet,
-  patchFile,
-} from '@homebase-id/js-lib/core';
-import { createThumbnails } from '@homebase-id/js-lib/media';
+import { ApiType, DotYouClient, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import {
   RawContact,
   getContactByUniqueId,
-  ContactConfig,
-  CONTACT_PROFILE_IMAGE_KEY,
   getContactByOdinId,
+  ContactWriteResponse,
+  createContact,
+  updateContactWithRetry,
+  setContactImage,
 } from '@homebase-id/js-lib/network';
-import {
-  base64ToUint8Array,
-  getNewId,
-  stringToUint8Array,
-  toGuidId,
-  jsonStringify64,
-  getRandom16ByteArray,
-  uint8ArrayToBase64,
-} from '@homebase-id/js-lib/helpers';
+import { toGuidId } from '@homebase-id/js-lib/helpers';
+import { AxiosError } from 'axios';
 
 //Handles management of Contacts
+//
+// All contact writes go through the server-side contact API (create/update), NOT a direct drive write.
+// That matters: the server merge preserves the per-app `appData` map (e.g. another app's flags) that
+// rides inline in the contact content. A direct drive upload would replace the content wholesale and
+// silently wipe those slots — this client never sends `appData`, and it must not need to.
 export const saveContact = async (
   dotYouClient: DotYouClient,
   contact: NewHomebaseFile<RawContact>
-): Promise<UploadResult | void> => {
-  console.debug('Saving contact', { ...contact });
-
-  if (contact.fileMetadata.appData.uniqueId) {
-    const existingContact = await getContactByUniqueId(dotYouClient, contact.fileMetadata.appData.uniqueId);
-    if (existingContact) {
-      contact.fileId = existingContact.fileId;
-      contact.sharedSecretEncryptedKeyHeader = existingContact.sharedSecretEncryptedKeyHeader;
-    }
+): Promise<ContactWriteResponse | void> => {
+  // Only the owner console and app clients can write contacts; guests have no write endpoint.
+  const apiType = dotYouClient.getType();
+  if (apiType !== ApiType.Owner && apiType !== ApiType.App) {
+    console.warn('[common-app:saveContact] ignored write in non-writable context', apiType);
+    return;
   }
 
-  if (!contact.fileId && contact.fileMetadata.appData.content.odinId) {
-    const existingContact = await getContactByOdinId(
+  // The image is stored via a dedicated endpoint (encrypted under the file key), not in the content.
+  const { image, ...content } = contact.fileMetadata.appData.content;
+  // Defensive: never forward the server-owned per-app `appData` map, even if a prior read left it on
+  // the object at runtime (the type has no such field). The server ignores it on update, but not
+  // sending it keeps the intent unambiguous.
+  delete (content as Record<string, unknown>).appData;
+  const odinId = content.odinId;
+
+  // The server keys contacts on md5(odinId); match it so create/update land on the same file.
+  const uniqueId = odinId ? toGuidId(odinId) : contact.fileMetadata.appData.uniqueId;
+  if (!uniqueId) throw new Error('a contact needs an odinId or a uniqueId to be saved');
+
+  // Decide create vs update from the current stored version (no fileId needed — the API is keyed by
+  // uniqueId). NOTE: `content` deliberately carries no `appData`; the server preserves the stored slot.
+  const existing = odinId
+    ? await getContactByOdinId(dotYouClient, odinId)
+    : await getContactByUniqueId(dotYouClient, uniqueId);
+
+  let result: ContactWriteResponse;
+  if (existing?.fileMetadata.versionTag) {
+    result = await updateContactWithRetry(
       dotYouClient,
-      contact.fileMetadata.appData.content.odinId
+      uniqueId,
+      existing.fileMetadata.versionTag,
+      content
     );
-    contact.fileMetadata.appData.uniqueId =
-      existingContact?.fileMetadata.appData.uniqueId ?? getNewId();
-    contact.fileId = existingContact?.fileId ?? undefined;
-    contact.fileMetadata.versionTag =
-      existingContact?.fileMetadata.versionTag || contact.fileMetadata.versionTag;
-    contact.sharedSecretEncryptedKeyHeader = existingContact?.sharedSecretEncryptedKeyHeader;
-  }
-
-  const payloads: PayloadFile[] = [];
-  const thumbnails: ThumbnailFile[] = [];
-  let previewThumb: EmbeddedThumb | undefined = undefined;
-
-  // Append image:
-  if (contact.fileMetadata.appData.content.image?.content) {
-    const imageBlob = new Blob(
-      [base64ToUint8Array(contact.fileMetadata.appData.content.image?.content)],
-      {
-        type: contact.fileMetadata.appData.content.image?.contentType,
-      }
-    );
-
-    const { tinyThumb, additionalThumbnails } = await createThumbnails(
-      imageBlob,
-      CONTACT_PROFILE_IMAGE_KEY
-    );
-    previewThumb = tinyThumb;
-    thumbnails.push(...additionalThumbnails);
-
-    payloads.push({
-      key: CONTACT_PROFILE_IMAGE_KEY,
-      payload: imageBlob,
-    });
-  }
-
-  const encrypt = true;
-
-  const instructionSet: UploadInstructionSet = {
-    transferIv: getRandom16ByteArray(),
-    storageOptions: {
-      drive: ContactConfig.ContactTargetDrive,
-      overwriteFileId: contact.fileId,
-    },
-  };
-
-  const payloadJson: string = jsonStringify64({
-    ...contact.fileMetadata.appData.content,
-    // image is stored in the payload, so remove it from the header content
-    image: undefined,
-  });
-  const payloadBytes = stringToUint8Array(payloadJson);
-
-  const tags = [];
-  if (contact.fileMetadata.appData.content.odinId)
-    tags.push(toGuidId(contact.fileMetadata.appData.content.odinId));
-
-  const shouldEmbedContent = uint8ArrayToBase64(payloadBytes).length < MAX_HEADER_CONTENT_BYTES;
-  const metadata: UploadFileMetadata = {
-    allowDistribution: false,
-    appData: {
-      tags: tags,
-      fileType: ContactConfig.ContactFileType,
-      content: shouldEmbedContent ? payloadJson : undefined,
-      // Having the odinId MD5 hashed as unique id, avoids having duplicates getting created, enforced server-side;
-      uniqueId: contact.fileMetadata.appData.content.odinId
-        ? toGuidId(contact.fileMetadata.appData.content.odinId)
-        : contact.fileMetadata.appData.uniqueId,
-      previewThumbnail: previewThumb,
-    },
-    versionTag: contact.fileMetadata.versionTag,
-    isEncrypted: encrypt,
-  };
-
-  if (!shouldEmbedContent) {
-    payloads.push({
-      payload: new Blob([payloadBytes], { type: 'application/json' }),
-      key: DEFAULT_PAYLOAD_KEY,
-    });
-  }
-
-  if (contact.fileId) {
-    const updateInstructions: UpdateLocalInstructionSet = {
-      versionTag: contact.fileMetadata.versionTag,
-      file: { fileId: contact.fileId, targetDrive: ContactConfig.ContactTargetDrive },
-      locale: 'local',
-      transferIv: getRandom16ByteArray(),
+  } else {
+    try {
+      result = await createContact(dotYouClient, content);
+    } catch (ex) {
+      // A create that collides on the deterministic uniqueId (409) means the contact already exists
+      // (a race, or our existence read missed it). Reconcile by re-reading the current version and
+      // updating. NOTE: the client does not decrypt error-response bodies, so the version must come
+      // from a fresh GET — not from the 409 payload.
+      if ((ex as AxiosError)?.response?.status !== 409) throw ex;
+      const current = await getContactByUniqueId(dotYouClient, uniqueId);
+      if (!current?.fileMetadata.versionTag) throw ex;
+      result = await updateContactWithRetry(dotYouClient, uniqueId, current.fileMetadata.versionTag, content);
     }
-    return await patchFile(dotYouClient, contact.sharedSecretEncryptedKeyHeader, updateInstructions, metadata, payloads, thumbnails, undefined, async () => {
-      if (!contact.fileId) return;
-      const existingContactFile = await getFileHeader(
-        dotYouClient,
-        ContactConfig.ContactTargetDrive,
-        contact.fileId
-      );
-      if (!existingContactFile) return;
-      contact.fileMetadata.versionTag = existingContactFile.fileMetadata.versionTag;
-      return saveContact(dotYouClient, contact);
-    }).then((result) => {
-      if (!result) throw new Error('Failed to upload contact');
-      //todo: should we create a seperate updateContact method?
-      return {
-        newVersionTag: result.newVersionTag,
-        recipientStatus: result.recipientStatus,
-        file: {
-          fileId: contact.fileId as string,
-          targetDrive: ContactConfig.ContactTargetDrive,
-        },
-        globalTransitIdFileIdentifier: {
-          globalTransitId: '',
-          targetDrive: ContactConfig.ContactTargetDrive,
-        },
-        keyHeader: undefined,
-      }
-    });
   }
 
-  return await uploadFile(
-    dotYouClient,
-    instructionSet,
-    metadata,
-    payloads,
-    thumbnails,
-    encrypt,
-    async () => {
-      if (!contact.fileId) return;
-      const existingContactFile = await getFileHeader(
-        dotYouClient,
-        ContactConfig.ContactTargetDrive,
-        contact.fileId
-      );
-      if (!existingContactFile) return;
-      contact.fileMetadata.versionTag = existingContactFile.fileMetadata.versionTag;
-      return saveContact(dotYouClient, contact);
-    }
-  );
-  // if (!result) throw new Error('Failed to upload contact');
+  // Persist the profile image (if any) via its dedicated, version-gated endpoint.
+  if (image?.content) {
+    result = await setContactImage(dotYouClient, uniqueId, image);
+  }
 
-  // //update server-side info
-  // contact.fileId = result.file.fileId;
-  // contact.fileMetadata.versionTag = result.newVersionTag;
-  // return contact;
+  return result;
 };
