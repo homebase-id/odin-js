@@ -62,18 +62,25 @@ export const useCreateManagedDomain = () => {
     domainPrefix: string;
     domainApex: string;
     invitationCode: string | null;
+    // Not consumed by the server yet; sent so the hosting region can be acted
+    // on later without another frontend change
+    region?: string | null;
   };
 
   const createManagedDomain = async ({
     domainPrefix,
     domainApex,
     invitationCode,
+    region,
   }: PrefixAndApex): Promise<void> => {
-    let url = root + `/registration/create-managed-domain/${domainApex}/${domainPrefix}`;
-    if (invitationCode) {
-      url += `?invitation-code=${invitationCode}`;
-    }
-    await axios.post(url);
+    const url = root + `/registration/create-managed-domain/${domainApex}/${domainPrefix}`;
+
+    const params = new URLSearchParams();
+    if (invitationCode) params.set('invitation-code', invitationCode);
+    if (region) params.set('region', region);
+
+    const query = params.toString();
+    await axios.post(query ? `${url}?${query}` : url);
   };
 
   return {

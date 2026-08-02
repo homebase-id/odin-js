@@ -126,20 +126,22 @@ type CreateIdentityKey = {
   email: string;
   planId: string;
   invitationCode: string | null;
+  // Optional so the own-domain flow, which has no region step, keeps sending
+  // exactly the request it sends today. Not consumed by the server yet.
+  region?: string | null;
 };
 
 export const useCreateIdentity = () => {
   const root = '//' + window.location.host + '/api/registration/v1';
 
   const createIdentity = async (identity: CreateIdentityKey): Promise<string> => {
-    const response = await axios.post(
-      root + `/registration/create-identity-on-domain/${identity.domain}`,
-      {
-        email: identity.email,
-        planId: identity.planId,
-        invitationCode: identity.invitationCode,
-      }
-    );
+    const url = root + `/registration/create-identity-on-domain/${identity.domain}`;
+
+    const response = await axios.post(identity.region ? `${url}?region=${identity.region}` : url, {
+      email: identity.email,
+      planId: identity.planId,
+      invitationCode: identity.invitationCode,
+    });
     return response.data;
   };
 

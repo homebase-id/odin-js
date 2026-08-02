@@ -16,7 +16,7 @@ import './App.css';
 
 import InvitationCodeCheck from '../templates/InvitationCode/InvitationCodeCheck';
 
-const ProvisionManagedDomain = lazy(() => import('../templates/Provision/ProvisionManagedDomain'));
+const ProvisionManagedDomain = lazy(() => import('../templates/Provision/ClaimIdentity'));
 const ProvisionOwnDomain = lazy(() => import('../templates/Provision/ProvisionOwnDomain'));
 
 const queryClient = new QueryClient();
