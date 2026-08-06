@@ -5,8 +5,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: 'rgb(255 255 255 / <alpha-value>)',
-        foreground: 'rgb(11 11 11 / <alpha-value>)',
+        // Driven by CSS variables so the shell can follow the device theme;
+        // the values live in Layout's SharedStyleTag
+        background: 'rgb(var(--color-background) / <alpha-value>)',
+        foreground: 'rgb(var(--color-foreground) / <alpha-value>)',
         button: 'rgb(99 101 241 / <alpha-value>)',
         'button-text': 'rgb(255 255 255 / <alpha-value>)',
       },

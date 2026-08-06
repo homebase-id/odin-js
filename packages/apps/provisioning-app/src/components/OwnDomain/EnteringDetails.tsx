@@ -63,7 +63,7 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
                 <div className="flex flex-row flex-wrap items-center">
                     <Label htmlFor="domain">{t('Your own domain')}</Label>
                     {isOwnDomainAvailable === false && domain ? (
-                        <p className="order-1 ml-auto mt-2 flex flex-row items-center rounded-lg bg-slate-100 px-2 py-1 md:order-none md:mt-0 md:rounded-b-none">
+                        <p className="order-1 ml-auto mt-2 flex flex-row items-center rounded-lg bg-slate-100 px-2 py-1 dark:bg-slate-700 md:order-none md:mt-0 md:rounded-b-none">
                             <Exclamation className="mr-2 h-5 w-5"/>
                             {t(`This domain isn't available, try another one`)}
                         </p>
