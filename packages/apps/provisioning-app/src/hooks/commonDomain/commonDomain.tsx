@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios, { AxiosError } from 'axios';
+import { Region } from '../../helpers/region';
 
 export type DnsRecordStatus =
   | 'unknown'
@@ -126,9 +127,9 @@ type CreateIdentityKey = {
   email: string;
   planId: string;
   invitationCode: string | null;
-  // Optional so the own-domain flow, which has no region step, keeps sending
-  // exactly the request it sends today. Not consumed by the server yet.
-  region?: string | null;
+  // Omitted by the own-domain flow, which has no region step. Not consumed by
+  // the server yet.
+  region?: Region | null;
 };
 
 export const useCreateIdentity = () => {
@@ -136,8 +137,9 @@ export const useCreateIdentity = () => {
 
   const createIdentity = async (identity: CreateIdentityKey): Promise<string> => {
     const url = root + `/registration/create-identity-on-domain/${identity.domain}`;
+    const query = identity.region ? `?${new URLSearchParams({ region: identity.region })}` : '';
 
-    const response = await axios.post(identity.region ? `${url}?region=${identity.region}` : url, {
+    const response = await axios.post(url + query, {
       email: identity.email,
       planId: identity.planId,
       invitationCode: identity.invitationCode,

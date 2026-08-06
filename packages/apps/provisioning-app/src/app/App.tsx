@@ -16,7 +16,7 @@ import './App.css';
 
 import InvitationCodeCheck from '../templates/InvitationCode/InvitationCodeCheck';
 
-const ProvisionManagedDomain = lazy(() => import('../templates/Provision/ClaimIdentity'));
+const ClaimIdentity = lazy(() => import('../templates/Provision/ClaimIdentity'));
 const ProvisionOwnDomain = lazy(() => import('../templates/Provision/ProvisionOwnDomain'));
 
 const queryClient = new QueryClient();
@@ -64,7 +64,7 @@ function App() {
                 <Route path="/" element={<InvitationCodeCheck />}></Route>
                 <Route path={ROOT_PATH}>
                   <Route index={true} element={<DomainRedirect />} />
-                  <Route path="managed-domain" element={<ProvisionManagedDomain />} />
+                  <Route path="managed-domain" element={<ClaimIdentity />} />
                   <Route path="own-domain" element={<ProvisionOwnDomain />} />
                   <Route
                     path="*"

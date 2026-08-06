@@ -1,11 +1,15 @@
 export type Region = 'eu' | 'ca';
 
-// Where the region guess came from, so the UI can explain itself
 export type RegionSource = 'locale' | 'timezone';
 
 export const REGION_NAMES: Record<Region, string> = {
   eu: 'Europe',
   ca: 'Canada',
+};
+
+export const REGION_SOURCE_LABELS: Record<RegionSource, string> = {
+  locale: 'based on your device settings',
+  timezone: 'based on your time zone',
 };
 
 export const REGIONS = Object.keys(REGION_NAMES) as Region[];
@@ -19,16 +23,12 @@ export const isRegion = (value: string | null | undefined): value is Region =>
   !!value && REGIONS.includes(value as Region);
 
 /**
- * Guess which region to host in, without a network probe.
+ * Guess which region to host in, without a network probe. Returns a null region
+ * when neither signal resolves, so the caller can ask rather than guess.
  *
- * Time zone is tried first, because it comes from the OS clock and is a real
- * location signal. The browser's language list is deliberately second: Chrome
- * and Edge default it to "en-US" whatever the machine's actual locale, so
- * trusting it first sends most of Europe to the wrong datacenter. It's only
- * useful when the time zone doesn't resolve to a region we host in.
- *
- * Returns a null region when neither signal resolves; the caller is expected to
- * ask the user rather than guess.
+ * Time zone goes first because Chrome and Edge default the language list to
+ * "en-US" whatever the machine's actual locale, which would send most of Europe
+ * to the wrong datacenter.
  */
 export const detectRegion = (): { region: Region | null; source: RegionSource | null } => {
   try {
@@ -53,6 +53,3 @@ export const detectRegion = (): { region: Region | null; source: RegionSource | 
 
   return { region: null, source: null };
 };
-
-export const regionSourceLabel = (source: RegionSource) =>
-  source === 'locale' ? 'based on your device settings' : 'based on your time zone';

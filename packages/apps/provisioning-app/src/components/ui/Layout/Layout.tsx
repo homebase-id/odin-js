@@ -22,9 +22,7 @@ const SharedStyleTag = () => (
 );
 
 export const Layout: FC<LayoutProps> = ({ children }) => {
-  // Applies the `dark` class from the device preference (overridable via
-  // localStorage `prefersDark` or a ?prefersDark=1 query param). Layout wraps
-  // every route, so this one call covers the whole flow.
+  // Layout wraps every route, so this one call themes the whole flow
   useDarkMode();
 
   return (

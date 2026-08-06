@@ -1,20 +1,19 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
+import { Label } from '@homebase-id/common-app';
 import { Arrow, Globe } from '@homebase-id/common-app/icons';
 import ActionButton from '../ui/Buttons/ActionButton';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
+import { StatusLine, StatusTone } from '../ui/StatusLine/StatusLine';
 import { IdentityPreviewCard } from './IdentityPreviewCard';
 import { t } from '../../helpers/i18n/dictionary';
+import { config } from '../../app/config';
 import {
   ManagedDomainApex,
   useFetchIsManagedDomainAvailable,
 } from '../../hooks/managedDomain/useManagedDomain';
 import { cleanLabel, domainFromPrefixAndApex, MAX_DNS_LABEL_LENGTH } from '../../helpers/common';
 
-// Tinted example text in the name boxes. Indexed, so a single-label apex shows
-// just "john" and a two-label apex shows "john" / "doe".
 const PLACEHOLDER_NAMES = ['john', 'doe'];
-
-const placeholderFor = (index: number) => PLACEHOLDER_NAMES[index] ?? 'name';
 
 interface ClaimNameProps {
   apexes: ManagedDomainApex[];
@@ -22,7 +21,6 @@ interface ClaimNameProps {
   onApexChange: (apex: ManagedDomainApex) => void;
   prefixes: string[];
   onPrefixesChange: (prefixes: string[]) => void;
-  // Dotted prefix, empty until every label is filled in and valid
   domainPrefix: string;
   apexesError: unknown;
   onClaim: () => void;
@@ -44,8 +42,8 @@ const ClaimName = ({
   const domain = domainFromPrefixAndApex(domainPrefix, domainApex.apex);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Debounce the *value* that drives the query key, rather than the change
-  // handler, so a fast typist produces one lookup instead of one per keystroke
+  // Debounce the value that drives the query key, not the change handler, so a
+  // fast typist produces one lookup instead of one per keystroke
   const [debouncedPrefix, setDebouncedPrefix] = useState<string>(domainPrefix);
   useEffect(() => {
     const timeout = setTimeout(() => setDebouncedPrefix(domainPrefix), 500);
@@ -56,27 +54,29 @@ const ClaimName = ({
     fetchIsManagedDomainAvailable: { data: isAvailable, error: availabilityError, status },
   } = useFetchIsManagedDomainAvailable(debouncedPrefix, domainApex.apex);
 
-  // While the debounce is still catching up, the query result belongs to a name
-  // the user has already moved on from
+  // Until the debounce catches up the result belongs to a name the user has
+  // already moved on from
   const isSettled = debouncedPrefix === domainPrefix;
   const canClaim = !!domainPrefix && isSettled && status === 'success' && isAvailable === true;
   const isTaken = !!domainPrefix && isSettled && status === 'success' && isAvailable === false;
 
-  const statusLine = (() => {
+  // Gated on domainPrefix: the query is disabled until there is one, and a
+  // disabled query reports 'pending' forever
+  const isChecking = !!domainPrefix && (!isSettled || status === 'pending');
+
+  const statusLine = ((): { tone: StatusTone; text: string } => {
     if (!domainPrefix)
       return {
-        tone: 'idle' as const,
+        tone: 'idle',
         text:
           labelCount > 1
             ? t('Enter both parts of your name')
             : t('Only letters, numbers and hyphens'),
       };
-    if (!isSettled || status === 'pending')
-      return { tone: 'checking' as const, text: `${t('Checking')} ${domain} …` };
-    if (status === 'error')
-      return { tone: 'bad' as const, text: t(`Couldn't check that name, try again`) };
-    if (isAvailable) return { tone: 'ok' as const, text: `${domain} ${t('is available')}` };
-    return { tone: 'bad' as const, text: `${domain} ${t('is taken — try another name')}` };
+    if (isChecking) return { tone: 'checking', text: t('Checking {0} …', domain) };
+    if (status === 'error') return { tone: 'bad', text: t(`Couldn't check that name, try again`) };
+    if (isAvailable) return { tone: 'ok', text: t('{0} is available', domain) };
+    return { tone: 'bad', text: t('{0} is taken — try another name', domain) };
   })();
 
   const onPrefixInput = (index: number, raw: string) => {
@@ -89,9 +89,7 @@ const ClaimName = ({
     const next = apexes.find((apex) => apex.apex === value);
     if (!next) return;
 
-    // Resize rather than keep: moving between a one-label and a two-label apex
-    // must not leave a stale extra label behind, or the server rejects the
-    // label count outright
+    // Resize rather than keep: the server rejects a mismatched label count
     onPrefixesChange(
       Array.from({ length: next.prefixLabels.length }, (_, index) => prefixes[index] ?? '')
     );
@@ -110,19 +108,19 @@ const ClaimName = ({
         }}
       >
         <div className="flex flex-row flex-wrap items-baseline justify-between gap-2">
-          <label htmlFor="prefix0" className="font-medium">
+          <Label htmlFor="prefix0" className="mb-0">
             {t('Choose your name')}
-          </label>
+          </Label>
           <span className="text-sm text-slate-500 dark:text-slate-400">
             {labelCount > 1 ? t('two parts, e.g. john.doe') : t('one word, e.g. john')}
           </span>
         </div>
 
         <div
-          className={`mt-2 flex items-stretch overflow-hidden rounded-lg border bg-white transition-colors focus-within:ring-2 focus-within:ring-indigo-300 dark:bg-slate-900 ${
+          className={`mt-2 flex items-stretch overflow-hidden rounded-lg border bg-white transition-colors focus-within:ring-2 dark:bg-slate-900 ${
             isTaken
               ? 'border-red-500'
-              : 'border-gray-300 focus-within:border-indigo-500 dark:border-gray-700'
+              : `border-gray-300 dark:border-gray-700 ${config.accentFocusClassName}`
           }`}
         >
           <div className="flex min-w-0 flex-1 items-center pl-3">
@@ -141,10 +139,10 @@ const ClaimName = ({
                   name={`prefix${index}`}
                   type="text"
                   value={prefixes[index] ?? ''}
-                  // The server-provided label ("First name", "Surname", …) still
-                  // carries the meaning, even though the visible hint is john/doe
+                  // The server-provided label ("First name", "Surname", …) carries
+                  // the meaning; the visible hint is only john/doe
                   aria-label={serverLabel}
-                  placeholder={placeholderFor(index)}
+                  placeholder={PLACEHOLDER_NAMES[index] ?? 'name'}
                   autoCapitalize="none"
                   autoComplete="off"
                   spellCheck={false}
@@ -153,8 +151,6 @@ const ClaimName = ({
                   className="w-full min-w-0 bg-transparent py-3 font-mono text-base text-gray-700 outline-none placeholder:text-slate-400 dark:text-gray-100 dark:placeholder:text-slate-500"
                   onChange={(e) => onPrefixInput(index, e.target.value)}
                   onKeyDown={(e) => {
-                    // A dot or a space means "next box" — it's what people type
-                    // when they think of this as one name
                     if ((e.key === '.' || e.key === ' ') && index < labelCount - 1) {
                       e.preventDefault();
                       inputRefs.current[index + 1]?.focus();
@@ -186,7 +182,7 @@ const ClaimName = ({
               aria-label={t('Domain ending')}
               value={domainApex.apex}
               onChange={(e) => onApexSelect(e.target.value)}
-              className="h-full cursor-pointer bg-transparent px-3 py-3 font-mono text-sm text-gray-700 outline-none dark:text-gray-100"
+              className="h-full cursor-pointer bg-transparent px-3 py-3 font-mono text-base leading-6 text-gray-700 outline-none dark:text-gray-100"
             >
               {apexes.map((apex) => (
                 <option key={apex.apex} value={apex.apex}>
@@ -197,36 +193,11 @@ const ClaimName = ({
           </div>
         </div>
 
-        <p
-          role="status"
-          aria-live="polite"
-          className={`mt-2 flex min-h-[1.5rem] flex-row items-center gap-2 text-sm ${
-            statusLine.tone === 'ok'
-              ? 'text-green-600 dark:text-green-400'
-              : statusLine.tone === 'bad'
-                ? 'text-red-600 dark:text-red-400'
-                : 'text-slate-500 dark:text-slate-400'
-          }`}
-        >
-          <span
-            aria-hidden="true"
-            className={`h-2 w-2 flex-none rounded-full ${
-              statusLine.tone === 'ok'
-                ? 'bg-green-500'
-                : statusLine.tone === 'bad'
-                  ? 'bg-red-500'
-                  : 'bg-slate-400'
-            } ${statusLine.tone === 'checking' ? 'animate-pulse' : ''}`}
-          />
+        <StatusLine tone={statusLine.tone} className="min-h-[1.5rem]">
           {statusLine.text}
-        </p>
+        </StatusLine>
 
-        <IdentityPreviewCard
-          className="mt-6"
-          domainPrefix={domainPrefix}
-          apex={domainApex.apex}
-          isLive={!!domainPrefix}
-        />
+        <IdentityPreviewCard className="mt-6" domainPrefix={domainPrefix} apex={domainApex.apex} />
 
         <div className="mt-6 flex flex-col gap-3">
           <ActionButton
@@ -234,9 +205,9 @@ const ClaimName = ({
             size="large"
             icon={Arrow}
             isDisabled={!canClaim}
-            state={!isSettled || status === 'pending' ? 'loading' : undefined}
+            state={isChecking ? 'loading' : undefined}
           >
-            {canClaim ? `${t('Claim')} ${domain}` : t('Claim your name')}
+            {canClaim ? t('Claim {0}', domain) : t('Claim your name')}
           </ActionButton>
 
           <ActionButton

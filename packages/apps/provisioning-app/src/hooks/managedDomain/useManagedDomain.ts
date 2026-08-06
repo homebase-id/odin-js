@@ -1,15 +1,8 @@
 import axios, { AxiosError } from 'axios';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { Region } from '../../helpers/region';
 
 const root = '//' + window.location.host + '/api/registration/v1';
-
-export type ManagedDomainProvisionState =
-  | 'EnteringDetails'
-  | 'CreatingManagedDomain'
-  | 'Provisioning'
-  | 'Failed';
-
-//
 
 export interface ManagedDomainApex {
   apex: string;
@@ -28,6 +21,9 @@ export const useFetchManagedDomainsApexes = () => {
     fetchManagedDomainApexes: useQuery<ManagedDomainApex[], AxiosError>({
       queryKey: ['managed-domain-apexes'],
       queryFn: () => fetchManagedDomains(),
+      // Server config; the route guard and the signup page both mount an
+      // observer on this key, and without a staleTime that is two GETs
+      staleTime: 1000 * 60 * 5,
     }),
   };
 };
@@ -35,21 +31,21 @@ export const useFetchManagedDomainsApexes = () => {
 //
 
 export const useFetchIsManagedDomainAvailable = (prefix: string, apex: string) => {
-  const fetchIsManagedDomainAvailable = async (prefix: string, apex: string): Promise<boolean> => {
-    if (!prefix || !apex) return false;
-
-    return await axios
+  const fetchIsManagedDomainAvailable = async (): Promise<boolean> =>
+    await axios
       .get(root + `/registration/is-managed-domain-available/${apex}/${prefix}`)
       .then((response) => response.data);
-  };
 
   return {
     fetchIsManagedDomainAvailable: useQuery<boolean, AxiosError>({
       queryKey: ['is-managed-domain-available', apex, prefix],
-      queryFn: () => fetchIsManagedDomainAvailable(prefix, apex),
-      gcTime: 0, // Immediately garbage collect this query so it's always fresh
-      enabled: true,
-      refetchOnWindowFocus: true, // Refetch as the available status may have changed on the server
+      queryFn: fetchIsManagedDomainAvailable,
+      // An empty prefix would otherwise resolve as "taken" rather than "unknown"
+      enabled: !!prefix && !!apex,
+      // Long enough that stepping back from the confirm step doesn't re-check a
+      // name the user just saw confirmed
+      staleTime: 1000 * 30,
+      refetchOnWindowFocus: true, // The available status may have changed on the server
       retry: false,
     }),
   };
@@ -62,9 +58,9 @@ export const useCreateManagedDomain = () => {
     domainPrefix: string;
     domainApex: string;
     invitationCode: string | null;
-    // Not consumed by the server yet; sent so the hosting region can be acted
-    // on later without another frontend change
-    region?: string | null;
+    // Not consumed by the server yet; sent so the hosting region can be acted on
+    // later without another frontend change
+    region?: Region | null;
   };
 
   const createManagedDomain = async ({

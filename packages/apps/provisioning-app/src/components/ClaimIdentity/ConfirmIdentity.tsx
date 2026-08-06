@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Input, Label } from '@homebase-id/common-app';
 import { Arrow, ArrowLeft, Shield } from '@homebase-id/common-app/icons';
 import ActionButton from '../ui/Buttons/ActionButton';
@@ -8,10 +7,6 @@ import { RegionPicker } from './RegionPicker';
 import { t } from '../../helpers/i18n/dictionary';
 import { useCreateManagedDomain } from '../../hooks/managedDomain/useManagedDomain';
 import { Region, RegionSource, REGION_NAMES } from '../../helpers/region';
-
-// Loose on purpose: enough to catch a half-typed address, without rejecting
-// anything the server would actually accept
-const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim());
 
 interface ConfirmIdentityProps {
   domainPrefix: string;
@@ -39,12 +34,8 @@ const ConfirmIdentity = ({
   onCreated,
 }: ConfirmIdentityProps) => {
   const {
-    createManagedDomain: { status, mutate: createManagedDomain, error, isPending },
+    createManagedDomain: { mutate: createManagedDomain, error, isPending },
   } = useCreateManagedDomain();
-
-  useEffect(() => {
-    if (status === 'success') onCreated();
-  }, [status]);
 
   return (
     <>
@@ -54,8 +45,11 @@ const ConfirmIdentity = ({
         className="w-full"
         onSubmit={(e) => {
           e.preventDefault();
-          if (!e.currentTarget.checkValidity() || !region || isPending) return;
-          createManagedDomain({ domainPrefix, domainApex, invitationCode, region });
+          if (!e.currentTarget.reportValidity() || !region || isPending) return;
+          createManagedDomain(
+            { domainPrefix, domainApex, invitationCode, region },
+            { onSuccess: onCreated }
+          );
         }}
       >
         <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
@@ -66,12 +60,7 @@ const ConfirmIdentity = ({
           <span className="text-slate-400 dark:text-slate-500">.{domainApex}</span>
         </p>
 
-        <IdentityPreviewCard
-          className="mt-5"
-          domainPrefix={domainPrefix}
-          apex={domainApex}
-          isLive={true}
-        />
+        <IdentityPreviewCard className="mt-5" domainPrefix={domainPrefix} apex={domainApex} />
 
         <div className="mt-5">
           <RegionPicker region={region} source={regionSource} onChange={onRegionChange} />
@@ -100,7 +89,9 @@ const ConfirmIdentity = ({
           />
           <p className="mt-3 flex flex-row items-start gap-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
             <Shield className="mt-0.5 h-4 w-4 flex-none" />
-            <span>{t('Used only for setup and account recovery. Never shared, never marketing.')}</span>
+            <span>
+              {t('Used only for setup and account recovery. Never shared, never marketing.')}
+            </span>
           </p>
         </div>
 
@@ -109,11 +100,11 @@ const ConfirmIdentity = ({
             className="justify-center"
             size="large"
             icon={Arrow}
-            isDisabled={!region || !isValidEmail(email) || isPending}
+            isDisabled={!region || !email || isPending}
             state={isPending ? 'loading' : undefined}
           >
             {region
-              ? `${t('Create my identity in')} ${t(REGION_NAMES[region])}`
+              ? t('Create my identity in {0}', t(REGION_NAMES[region]))
               : t('Create my identity')}
           </ActionButton>
 

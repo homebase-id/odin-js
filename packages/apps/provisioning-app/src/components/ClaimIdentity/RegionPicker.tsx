@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import { t } from '../../helpers/i18n/dictionary';
 import { config } from '../../app/config';
-import { Region, RegionSource, REGION_NAMES, REGIONS, regionSourceLabel } from '../../helpers/region';
+import { Card } from '../ui/Card/Card';
+import {
+  Region,
+  RegionSource,
+  REGION_NAMES,
+  REGION_SOURCE_LABELS,
+  REGIONS,
+} from '../../helpers/region';
 
 interface RegionPickerProps {
   region: Region | null;
@@ -10,23 +17,24 @@ interface RegionPickerProps {
   onChange: (region: Region) => void;
 }
 
-/**
- * Shows the detected hosting region with a way to correct it. When detection
- * came up empty the pills stay open — better to ask than to silently guess.
- */
 export const RegionPicker = ({ region, source, onChange }: RegionPickerProps) => {
-  const [isEditing, setIsEditing] = useState<boolean>(region === null);
+  const [isEditing, setIsEditing] = useState(false);
+  // Detection came up empty: better to ask than to silently guess
   const showPills = isEditing || region === null;
 
   return (
-    <div className="flex flex-row flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-800">
+    <Card className="flex flex-row flex-wrap items-center gap-3 py-3 text-sm">
       <span className="flex-none text-slate-500 dark:text-slate-400">
         {showPills ? t('Host near') : t('Hosted in')}
       </span>
 
       {showPills ? (
         <>
-          <div className="flex flex-grow flex-row gap-2" role="group" aria-label={t('Choose hosting region')}>
+          <div
+            className="flex flex-grow flex-row gap-2"
+            role="group"
+            aria-label={t('Choose hosting region')}
+          >
             {REGIONS.map((option) => (
               <button
                 key={option}
@@ -59,7 +67,7 @@ export const RegionPicker = ({ region, source, onChange }: RegionPickerProps) =>
             {source ? (
               <span className="font-normal text-slate-500 dark:text-slate-400">
                 {' '}
-                · {t(regionSourceLabel(source))}
+                · {t(REGION_SOURCE_LABELS[source])}
               </span>
             ) : null}
           </span>
@@ -72,8 +80,6 @@ export const RegionPicker = ({ region, source, onChange }: RegionPickerProps) =>
           </button>
         </>
       )}
-    </div>
+    </Card>
   );
 };
-
-export default RegionPicker;
