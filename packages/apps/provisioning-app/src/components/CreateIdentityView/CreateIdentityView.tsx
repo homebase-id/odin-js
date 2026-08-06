@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { t } from '../../helpers/i18n/dictionary';
 import ActionLink from '../ui/Buttons/ActionLink';
 import {
@@ -24,6 +25,7 @@ interface Props {
 }
 
 const CreateIdentityView = ({ domain, email, planId, invitationCode, region }: Props) => {
+  const [searchParams] = useSearchParams();
   const { data: canConnectToPort80 } = useCanConnectToDomain(domain, 80).fetchCanConnectToDomain;
   const { data: canConnectToPort443 } = useCanConnectToDomain(domain, 443).fetchCanConnectToDomain;
 
@@ -41,6 +43,14 @@ const CreateIdentityView = ({ domain, email, planId, invitationCode, region }: P
   const doCreateIdentity = () => createIdentity({ domain, email, planId, invitationCode, region });
   const canProvision = canConnectToPort80 && canConnectToPort443;
   const isDone = canProvision && !!firstRunToken;
+
+  // Signup can be launched by an app (the mobile clients open this page in a browser). It rides
+  // along to the owner console, which is what hands the user back once setup actually finishes —
+  // at this point the identity has no password and no drives yet, so it can't be logged into.
+  const returnUrl = searchParams.get('returnUrl');
+  const firstRunUrl =
+    `https://${domain}/owner/firstrun?frt=${firstRunToken}` +
+    (returnUrl ? `&returnUrl=${encodeURIComponent(returnUrl)}` : '');
 
   useEffect(() => {
     if (canProvision && createIdentityStatus === 'idle') doCreateIdentity();
@@ -96,7 +106,7 @@ const CreateIdentityView = ({ domain, email, planId, invitationCode, region }: P
           <ActionLink
             className="mt-6 justify-center"
             size="large"
-            href={`https://${domain}/owner/firstrun?frt=${firstRunToken}`}
+            href={firstRunUrl}
             icon={Arrow}
           >
             {t('Open {0}', domain)}

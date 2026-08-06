@@ -97,7 +97,8 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
     );
 
   if (!configuration?.invitationCodeEnabled && !!isRoot) {
-    return <Navigate to={ROOT_PATH} />;
+    // Keep the query string: returnUrl, plan-id, invitation-code and region all arrive on `/`.
+    return <Navigate to={`${ROOT_PATH}${window.location.search}`} />;
   }
 
   return <>{children}</>;

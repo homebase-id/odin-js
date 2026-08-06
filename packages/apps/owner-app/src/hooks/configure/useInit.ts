@@ -17,6 +17,9 @@ import {AUTO_FIX_VERSION} from '../useAutoFixDefaultConfig';
 
 export const FIRST_RUN_TOKEN_STORAGE_KEY = 'first-run-token';
 export const SHOULD_USE_AUTOMATED_PASSWORD_RECOVERY = 'use-auto-pwd-recovery';
+// Survives firstrun -> setup, which is a full page navigation the query string doesn't make it
+// through: RootRoute rewrites the URL to /owner/setup once the new owner authenticates.
+export const APP_RETURN_URL_STORAGE_KEY = 'app-return-url';
 
 export const useInit = () => {
   const firstRunToken = localStorage.getItem(FIRST_RUN_TOKEN_STORAGE_KEY);

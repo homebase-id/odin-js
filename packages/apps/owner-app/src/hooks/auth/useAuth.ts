@@ -45,6 +45,16 @@ const isAuthFlowPath = (pathname: string): boolean =>
 // (the backend issues those for the youauth/authorize flow).
 // Rejects protocol-relative ("//evil"), backslash-prefixed ("/\evil"), cross-origin,
 // and non-http schemes ("javascript:", "data:", etc).
+// A returnUrl handed in by a Homebase app that launched signup and wants the user back once the
+// identity is set up. Only our own custom schemes: an https target here would be an open redirect
+// out of a brand-new identity, straight into a page well placed to ask for the password that was
+// just chosen. Distinct from isSafeReturnUrl, which covers same-origin navigation and rejects
+// every non-http scheme.
+// ponytail: scheme allowlist, not a host allowlist — enough for the mobile clients. A web caller
+// would need an explicit origin allowlist, which is a decision for whoever adds one.
+export const isAppReturnUrl = (url: string | null | undefined): url is string =>
+  !!url && /^homebase[a-z0-9-]*:\/\//i.test(url);
+
 export const isSafeReturnUrl = (url: string | null | undefined): url is string => {
   if (!url) return false;
   if (url.startsWith('/')) {
