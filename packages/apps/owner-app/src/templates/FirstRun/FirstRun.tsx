@@ -1,13 +1,17 @@
 import {FormEventHandler, useEffect, useState} from 'react';
 import {Helmet} from 'react-helmet-async';
 
-import {useAuth} from '../../hooks/auth/useAuth';
+import {RETURN_URL_PARAM, useAuth} from '../../hooks/auth/useAuth';
 
 import {MinimalLayout} from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 
 import {useSearchParams} from 'react-router-dom';
-import {FIRST_RUN_TOKEN_STORAGE_KEY, SHOULD_USE_AUTOMATED_PASSWORD_RECOVERY} from '../../hooks/configure/useInit';
+import {
+    APP_RETURN_URL_STORAGE_KEY,
+    FIRST_RUN_TOKEN_STORAGE_KEY,
+    SHOULD_USE_AUTOMATED_PASSWORD_RECOVERY
+} from '../../hooks/configure/useInit';
 import {
     ActionButton,
     Alert, CheckboxToggle,
@@ -50,6 +54,11 @@ const FirstRun = () => {
         try {
             localStorage.setItem(FIRST_RUN_TOKEN_STORAGE_KEY, firstRunToken || ''); // Store FRT to localStorage, so it can be used on initialize later
             localStorage.setItem(SHOULD_USE_AUTOMATED_PASSWORD_RECOVERY, shouldUseAutomatedPasswordRecovery ? "true" : "false"); // Store option to localStorage, so it can be used on initialize later
+
+            // Set by an app that launched signup; Setup hands the user back to it once the
+            // identity is configured. Validated there, at the point it's actually navigated to.
+            const appReturnUrl = searchParams.get(RETURN_URL_PARAM);
+            if (appReturnUrl) localStorage.setItem(APP_RETURN_URL_STORAGE_KEY, appReturnUrl);
 
             await finalizeRegistration(password, firstRunToken || '');
             await authenticate(password);

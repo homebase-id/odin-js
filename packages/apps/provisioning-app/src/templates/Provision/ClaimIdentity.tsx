@@ -89,9 +89,8 @@ const ClaimIdentity = () => {
   const domain = domainFromPrefixAndApex(domainPrefix, domainApex?.apex ?? '');
 
   const goToOwnDomain = () => {
-    const params = new URLSearchParams();
-    if (invitationCode) params.set('invitation-code', invitationCode);
-    if (planIdParam) params.set('plan-id', planIdParam);
+    // Carry the whole query over — own-domain needs returnUrl too — with the resolved region on top.
+    const params = new URLSearchParams(searchParams);
     if (region) params.set('region', region);
 
     const query = params.toString();

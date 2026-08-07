@@ -1,8 +1,8 @@
 import {useEffect, useState} from 'react';
 import {Helmet} from 'react-helmet-async';
 import {useSearchParams} from 'react-router-dom';
-import {HOME_PATH, RETURN_URL_PARAM} from '../../hooks/auth/useAuth';
-import {useInit} from '../../hooks/configure/useInit';
+import {HOME_PATH, isAppReturnUrl, RETURN_URL_PARAM} from '../../hooks/auth/useAuth';
+import {APP_RETURN_URL_STORAGE_KEY, useInit} from '../../hooks/configure/useInit';
 import {useIsConfigured} from '../../hooks/configure/useIsConfigured';
 import {DomainHighlighter, ErrorNotification} from '@homebase-id/common-app';
 import {ProfileSetupData, SocialSetupData} from '../../provider/setup/SetupProvider';
@@ -45,6 +45,19 @@ export const Setup = () => {
     }, [initWithDataStatus]);
 
     const redirectToReturn = () => {
+        // An app launched signup and is waiting for its user. This is the first moment the
+        // identity is worth handing back: the password is set and initialize() has run, so it can
+        // actually be logged into. Consume unconditionally — a stale key would otherwise bounce
+        // some later, unrelated setup out of the browser.
+        const appReturnUrl = localStorage.getItem(APP_RETURN_URL_STORAGE_KEY);
+        localStorage.removeItem(APP_RETURN_URL_STORAGE_KEY);
+        if (isAppReturnUrl(appReturnUrl)) {
+            const target = new URL(appReturnUrl);
+            target.searchParams.set('domain', window.location.hostname);
+            window.location.href = target.toString();
+            return;
+        }
+
         const returnUrl = searchParams.get(RETURN_URL_PARAM);
 
         if (returnUrl) window.location.href = returnUrl;
