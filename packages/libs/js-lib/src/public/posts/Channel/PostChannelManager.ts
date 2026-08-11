@@ -137,11 +137,14 @@ export const saveChannelDefinition = async (
       )
     ) {
       if (dotYouClient.getType() === ApiType.Owner) {
+        // Channel drives are always CDN-enabled so their payloads can be served from the CDN
         await ensureDrive(
           dotYouClient,
           targetDrive,
           channelContent.name,
           channelContent.description,
+          true,
+          false,
           true
         );
       } else {

@@ -1,5 +1,7 @@
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ensureDrive } from '@homebase-id/js-lib/core';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { BlogConfig } from '@homebase-id/js-lib/public';
 import { DriveGrant } from '@homebase-id/js-lib/network';
 import {
   AllowApp,
@@ -42,7 +44,9 @@ export const useApp = ({ appId }: { appId?: string }) => {
               driveGrant.driveMeta.name,
               driveGrant.driveMeta.description,
               driveGrant.driveMeta.allowAnonymousReads || false,
-              driveGrant.driveMeta.allowSubscriptions || false
+              driveGrant.driveMeta.allowSubscriptions || false,
+              // Channel drives are always CDN-enabled
+              stringGuidsEqual(driveGrant.permissionedDrive.drive.type, BlogConfig.DriveType)
             );
         })
       );
@@ -100,7 +104,9 @@ export const useApp = ({ appId }: { appId?: string }) => {
               driveGrant.driveMeta.name,
               driveGrant.driveMeta.description,
               driveGrant.driveMeta.allowAnonymousReads || false,
-              driveGrant.driveMeta.allowSubscriptions || false
+              driveGrant.driveMeta.allowSubscriptions || false,
+              // Channel drives are always CDN-enabled
+              stringGuidsEqual(driveGrant.permissionedDrive.drive.type, BlogConfig.DriveType)
             );
         })
       );

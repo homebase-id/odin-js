@@ -29,6 +29,7 @@ export interface DriveDefinition {
     metadata: string;
     allowAnonymousReads: boolean;
     allowSubscriptions: boolean;
+    allowCdn: boolean;
     ownerOnly: boolean;
     isArchived: boolean;
     isSystemDrive: boolean;

@@ -118,6 +118,7 @@ const DriveDetails = () => {
 
                     {/* BE is never reporting allowSubscriptions */}
                     {driveDef.allowSubscriptions ? <li>{t('Allow subscriptions')}</li> : null}
+                    {driveDef.allowCdn ? <li>{t('Allow CDN')}</li> : null}
                     {driveDef.isArchived ? <li>{t('Drive is Archived')}</li> : null}
                     {driveDef.ownerOnly ? <li>{t('Owner only')}</li> : null}
                     {driveDef?.attributes ? (

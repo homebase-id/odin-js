@@ -77,7 +77,8 @@ export const ensureDrive = async (
   name: string,
   metadata: string | undefined,
   allowAnonymousReads: boolean,
-  allowSubscriptions = false
+  allowSubscriptions = false,
+  allowCdn = false
 ): Promise<boolean> => {
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('name', name);
@@ -96,6 +97,7 @@ export const ensureDrive = async (
     metadata: metadata,
     allowAnonymousReads: allowAnonymousReads,
     allowSubscriptions: allowSubscriptions,
+    allowCdn: allowCdn,
   };
 
   return client
@@ -196,6 +198,29 @@ export const editDriveAllowSubscriptions = async (
     .then((response) => response.status === 200)
     .catch((error) => {
       console.error('[odin-js:editDriveAllowSubscriptions]', error);
+      throw error;
+    });
+};
+
+export const editDriveAllowCdn = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  newAllowCdn: boolean
+) => {
+  assertIfDefined('targetDrive', targetDrive);
+  assertIfDefined('newAllowCdn', newAllowCdn);
+
+  const client = dotYouClient.createAxiosClient();
+  const data = {
+    targetDrive: targetDrive,
+    allowCdn: newAllowCdn,
+  };
+
+  return client
+    .post('/drive/mgmt/set-allow-cdn', data)
+    .then((response) => response.status === 200)
+    .catch((error) => {
+      console.error('[odin-js:editDriveAllowCdn]', error);
       throw error;
     });
 };

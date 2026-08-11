@@ -49,6 +49,12 @@ const DriveMetadataEditDialog = ({
             status: updateAllowSubscriptionStatus,
             reset: resetAllowSubscription,
         },
+        editAllowCdn: {
+            mutate: updateAllowCdn,
+            error: updateAllowCdnError,
+            status: updateAllowCdnStatus,
+            reset: resetAllowCdn,
+        },
         editDescription: {
             mutate: updateDescription,
             error: updateDescriptionError,
@@ -77,6 +83,7 @@ const DriveMetadataEditDialog = ({
     );
 
     const [allowSubscriptions, setAllowSubscriptions] = useState(driveDefinition.allowSubscriptions);
+    const [allowCdn, setAllowCdn] = useState(driveDefinition.allowCdn);
     const [metadata, setMetadata] = useState(driveDefinition.metadata);
     const [attributes, setAttributes] = useState(driveDefinition.attributes);
 
@@ -84,12 +91,14 @@ const DriveMetadataEditDialog = ({
         if (
             updateAnonymousReadStatus === 'success' &&
             updateAllowSubscriptionStatus === 'success' &&
+            updateAllowCdnStatus === 'success' &&
             updateDescriptionStatus === 'success' &&
             updateAttributesStatus === 'success' &&
             updateDriveArchiveFlagStatus === 'success'
         ) {
             resetAnonymousRead();
             resetAllowSubscription();
+            resetAllowCdn();
             resetDescription();
             resetAttributes();
             resetDriveArchiveFlag();
@@ -98,6 +107,7 @@ const DriveMetadataEditDialog = ({
     }, [
         updateAnonymousReadStatus,
         updateAllowSubscriptionStatus,
+        updateAllowCdnStatus,
         updateDescriptionStatus,
         updateAttributesStatus,
         updateDriveArchiveFlagStatus
@@ -112,6 +122,7 @@ const DriveMetadataEditDialog = ({
                     error={
                         updateAnonymousReadError ||
                         updateAllowSubscriptionError ||
+                        updateAllowCdnError ||
                         updateDescriptionError ||
                         updateAttributesError ||
                         updateDriveArchiveFlagError
@@ -130,6 +141,11 @@ const DriveMetadataEditDialog = ({
                         updateAllowSubscription({
                             targetDrive: driveDefinition.targetDriveInfo,
                             newAllowSubscriptions: allowSubscriptions,
+                        });
+
+                        updateAllowCdn({
+                            targetDrive: driveDefinition.targetDriveInfo,
+                            newAllowCdn: allowCdn,
                         });
 
                         updateDescription({
@@ -230,6 +246,24 @@ const DriveMetadataEditDialog = ({
                                 <CheckboxToggle
                                     defaultChecked={driveDefinition.allowSubscriptions}
                                     onChange={(e) => setAllowSubscriptions(e.currentTarget.checked)}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex flex-row items-center justify-between gap-2">
+                            <Label>
+                                {t('Allow CDN')}
+                                <small className="block text-sm text-slate-400">
+                                    {t(
+                                        "Allow the CDN to read and cache this drive's payloads and thumbnails."
+                                    )}
+                                </small>
+                            </Label>
+
+                            <div>
+                                <CheckboxToggle
+                                    defaultChecked={driveDefinition.allowCdn}
+                                    onChange={(e) => setAllowCdn(e.currentTarget.checked)}
                                 />
                             </div>
                         </div>
