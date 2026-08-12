@@ -8,6 +8,7 @@ import {
   TargetDrive,
   editDriveAttributes,
   editDriveAllowSubscriptions, editDriveArchiveFlag,
+  editDriveAllowCdn,
 } from '@homebase-id/js-lib/core';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
@@ -63,6 +64,16 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
     newAllowSubscriptions: boolean;
   }) => {
     return editDriveAllowSubscriptions(dotYouClient, targetDrive, newAllowSubscriptions);
+  };
+
+  const editAllowCdn = async ({
+    targetDrive,
+    newAllowCdn,
+  }: {
+    targetDrive: TargetDrive;
+    newAllowCdn: boolean;
+  }) => {
+    return editDriveAllowCdn(dotYouClient, targetDrive, newAllowCdn);
   };
 
   const editArchiveFlag = async ({
@@ -151,6 +162,20 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
           }), 'editAllowSubscriptions');
         } else {
           console.warn('[owner-app:useDrive] editAllowSubscriptions mutation did not return true');
+        }
+      },
+    }),
+    editAllowCdn: useMutation({
+      mutationFn: editAllowCdn,
+      onSettled: (data, _error, variables) => {
+        const { targetDrive, newAllowCdn } = variables;
+        if (data === true) {
+          updateDriveCache(queryClient, targetDrive, (base) => ({
+            ...base,
+            allowCdn: newAllowCdn,
+          }), 'editAllowCdn');
+        } else {
+          console.warn('[owner-app:useDrive] editAllowCdn mutation did not return true');
         }
       },
     }),
