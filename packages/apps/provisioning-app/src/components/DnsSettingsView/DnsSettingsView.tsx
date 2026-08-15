@@ -20,7 +20,8 @@ const DnsSettingsView = ({
   const isApexDomain = apexDomain === domain;
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
 
-  const subRecords = dnsConfig.filter((record) => !!record.name);
+  const subRecords = dnsConfig.filter((record) => !!record.name && record.type !== 'NS');
+  const nsRecords = dnsConfig.filter((record) => record.type === 'NS');
 
   if (!gotApexInfo)
     return (
@@ -37,6 +38,24 @@ const DnsSettingsView = ({
             {t('How do I do this?')}
           </button>
         </p>
+
+        {nsRecords.length > 0 ? (
+          <>
+            <NsDelegationBlock
+              nsRecords={nsRecords}
+              domain={domain}
+              isApexDomain={isApexDomain}
+              apexDomain={apexDomain || domain}
+              showStatus={showStatus}
+              className="mb-10"
+            />
+            <p className="mb-10 flex flex-row items-center gap-4 text-xl text-slate-400">
+              <span className="h-px flex-grow bg-slate-200 dark:bg-slate-700"></span>
+              {t('or set up the records yourself')}
+              <span className="h-px flex-grow bg-slate-200 dark:bg-slate-700"></span>
+            </p>
+          </>
+        ) : null}
 
         {isApexDomain ? (
           <ApexInfoBlock
@@ -110,6 +129,64 @@ const DnsSettingsView = ({
         </>
       </InfoDialog>
     </>
+  );
+};
+
+const NsDelegationBlock = ({
+  nsRecords,
+  domain,
+  isApexDomain,
+  apexDomain,
+  showStatus,
+  className,
+}: {
+  nsRecords: DnsRecord[];
+  domain: string;
+  isApexDomain: boolean;
+  apexDomain: string;
+  showStatus: boolean;
+  className: string;
+}) => {
+  const isDelegated =
+    nsRecords.length > 0 && nsRecords.every((record) => record.status === 'success');
+  const subLabel = isApexDomain ? '' : domain.replace(`.${apexDomain}`, '');
+
+  return (
+    <div className={`${className} flex flex-col gap-4`}>
+      <p className="text-2xl">
+        <span className="font-medium">{t('Recommended')}:</span>{' '}
+        {t('Let Homebase manage DNS for')}{' '}
+        <span className="rounded-md bg-slate-100 px-2 dark:bg-slate-700">{domain}</span>
+      </p>
+      {isApexDomain ? (
+        <>
+          <p>
+            {t(
+              `Change your domain's nameservers at your registrar to the servers below. Homebase then manages all DNS records for you - including any future ones (e.g. email) - so you never have to touch DNS again.`
+            )}
+          </p>
+          <Alert type="warning">
+            {t(
+              `Heads up: this moves ALL DNS for ${domain} to Homebase. Any existing records (website, email, ...) at your current DNS host will stop being served. If you rely on such records, use the manual setup below instead.`
+            )}
+          </Alert>
+        </>
+      ) : (
+        <p>
+          {t(
+            `Add these NS records for "${subLabel}" in the ${apexDomain} zone at your DNS host. Homebase then manages all DNS records for ${domain} - including any future ones (e.g. email) - so you never have to touch DNS again.`
+          )}
+        </p>
+      )}
+      {nsRecords.map((record) => (
+        <RecordView key={record.value} record={record} domain={domain} showStatus={showStatus} />
+      ))}
+      {showStatus && isDelegated ? (
+        <Alert type="success">
+          {t('DNS delegation detected - no other records are needed.')}
+        </Alert>
+      ) : null}
+    </div>
   );
 };
 

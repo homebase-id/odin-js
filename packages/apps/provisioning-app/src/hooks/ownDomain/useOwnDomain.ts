@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { DnsConfig } from '../commonDomain/commonDomain';
 
 export type OwnDomainProvisionState = 'EnteringDetails' | 'DnsRecords' | 'Provisioning' | 'Failed';
@@ -25,6 +25,32 @@ export const useFetchIsOwnDomainAvailable = (domain: string) => {
       enabled: true,
       refetchOnWindowFocus: true, // Refetch as the available status may have changed on the server
       retry: false,
+    }),
+  };
+};
+
+//
+
+// Pre-provisions the DNS zone for the domain on Homebase's nameservers so the user can
+// delegate via NS records (or keep the manual-records flow; the zone is inert until
+// delegated). Idempotent; a no-op on servers without zone hosting configured.
+export const useCreateOwnDomainZone = () => {
+  const createOwnDomainZone = async ({
+    domain,
+    invitationCode,
+  }: {
+    domain: string;
+    invitationCode: string | null;
+  }): Promise<void> => {
+    const query = invitationCode
+      ? `?${new URLSearchParams({ 'invitation-code': invitationCode })}`
+      : '';
+    await axios.post(`${root}/registration/create-own-domain-zone/${domain}${query}`);
+  };
+
+  return {
+    createOwnDomainZone: useMutation<void, AxiosError, { domain: string; invitationCode: string | null }>({
+      mutationFn: createOwnDomainZone,
     }),
   };
 };
