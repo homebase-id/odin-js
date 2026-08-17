@@ -3,6 +3,7 @@ import ActionButton from '../ui/Buttons/ActionButton';
 import { t } from '../../helpers/i18n/dictionary';
 import {
   OwnDomainProvisionState,
+  useCreateOwnDomainZone,
   useFetchOwnDomainDnsConfig,
 } from '../../hooks/ownDomain/useOwnDomain';
 import { hasInvalidDnsRecords } from '../../hooks/commonDomain/commonDomain';
@@ -13,10 +14,11 @@ import { Arrow } from '@homebase-id/common-app/icons';
 
 interface Props {
   domain: string;
+  invitationCode: string | null;
   setProvisionState: React.Dispatch<React.SetStateAction<OwnDomainProvisionState>>;
 }
 
-const ValidatingDnsRecords = ({ domain, setProvisionState }: Props) => {
+const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Props) => {
   const {
     fetchOwnDomainDnsConfig: { data: initialDnsConfig, error: initialError },
     fetchOwnDomainDnsStatus: {
@@ -38,8 +40,25 @@ const ValidatingDnsRecords = ({ domain, setProvisionState }: Props) => {
     [dnsConfig]
   );
 
+  const {
+    createOwnDomainZone: { mutateAsync: createOwnDomainZone, status: createZoneStatus },
+  } = useCreateOwnDomainZone();
+
   const [showStatus, setShowStatus] = useState(false);
   const canShowStatus = isDnsStateFetched && !statePending;
+
+  const validate = async () => {
+    setShowStatus(true);
+    // The zone is created server-side only once domain control is provable (NS delegation
+    // visible at the parent, or valid manual records). Retried on every Validate; failures
+    // are expected until then and the status check below reports the actual state.
+    try {
+      await createOwnDomainZone({ domain, invitationCode });
+    } catch {
+      // ignore - status below tells the user what is missing
+    }
+    refetchDnsStatus();
+  };
 
   return (
     <section className="max-w-3xl">
@@ -61,12 +80,9 @@ const ValidatingDnsRecords = ({ domain, setProvisionState }: Props) => {
       <div className="mt-10 flex flex-row-reverse justify-between gap-2">
         {hasInvalid ? (
           <ActionButton
-            onClick={() => {
-              setShowStatus(true);
-              refetchDnsStatus();
-            }}
+            onClick={validate}
             icon={Arrow}
-            state={isFetching ? 'loading' : undefined}
+            state={isFetching || createZoneStatus === 'pending' ? 'loading' : undefined}
           >
             {t('Validate')}
           </ActionButton>

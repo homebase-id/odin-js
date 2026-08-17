@@ -3,7 +3,6 @@ import {t} from '../../helpers/i18n/dictionary';
 import {validDomainRegEx} from '../../helpers/common';
 import {
     OwnDomainProvisionState,
-    useCreateOwnDomainZone,
     useFetchIsOwnDomainAvailable,
 } from '../../hooks/ownDomain/useOwnDomain';
 import {useFetchManagedDomainsApexes} from '../../hooks/managedDomain/useManagedDomain';
@@ -38,41 +37,27 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
         fetchManagedDomainApexes: {data: managedDomainApexes},
     } = useFetchManagedDomainsApexes();
 
-    const {
-        createOwnDomainZone: {
-            mutateAsync: createOwnDomainZone,
-            error: createZoneError,
-            status: createZoneStatus,
-        },
-    } = useCreateOwnDomainZone();
-
     //
     // RENDERING
     //
 
     return (
         <>
-            <AlertError error={errorIsOwnDomainAvailable || createZoneError}/>
+            <AlertError error={errorIsOwnDomainAvailable}/>
             <form
-                onSubmit={async (e) => {
+                onSubmit={(e) => {
                     e.preventDefault();
                     e.currentTarget.reportValidity();
 
+                    // The zone is NOT created here: creating it requires proof of domain
+                    // control, which only exists once the user has set up delegation or
+                    // records - the DNS step's Validate action handles that
                     if (
                         e.currentTarget.checkValidity() &&
                         isOwnDomainAvailable &&
                         statusIsOwnDomainAvailable === 'success'
-                    ) {
-                        // Pre-provision the domain's DNS zone on our nameservers so the
-                        // next step can offer NS delegation; inert until delegated
-                        try {
-                            await createOwnDomainZone({domain, invitationCode});
-                        } catch {
-                            // Error is surfaced via AlertError above
-                            return;
-                        }
+                    )
                         setProvisionState('DnsRecords');
-                    }
 
                     return false;
                 }}
@@ -137,11 +122,7 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
                         icon={Arrow}
                         isDisabled={!(isOwnDomainAvailable && statusIsOwnDomainAvailable === 'success')}
                         state={
-                            createZoneStatus === 'pending'
-                                ? 'loading'
-                                : statusIsOwnDomainAvailable !== 'success'
-                                    ? statusIsOwnDomainAvailable
-                                    : undefined
+                            statusIsOwnDomainAvailable !== 'success' ? statusIsOwnDomainAvailable : undefined
                         }
                     >
                         {t('Register your domain')}
