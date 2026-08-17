@@ -1,5 +1,3 @@
-export const validDomainRegEx = /[^\w-.]/g;
-
 export const getVersion = () => {
   try {
     const numberedVersion = parseInt(import.meta.env.VITE_APP_VERSION ?? '');
@@ -41,6 +39,23 @@ export const cleanLabel = (value: string) =>
 // The server rejects a leading or trailing hyphen on any label
 export const isCompleteLabel = (label: string) =>
   label.length >= MIN_DNS_LABEL_LENGTH && !label.endsWith('-');
+
+// Live domain cleaner, applied on every keystroke/paste of a full-domain input:
+// lowercases, turns spaces into dots, strips characters a domain can't contain,
+// collapses duplicate dots and cleans each label (via cleanLabel). Deliberately KEEPS
+// a single trailing dot - the user is probably about to type the next label.
+export const cleanDomainInput = (value: string) =>
+  value
+    .toLocaleLowerCase()
+    .replace(/\s+/g, '.')
+    .replace(/\.{2,}/g, '.')
+    .replace(/^\./, '')
+    .split('.')
+    .map(cleanLabel)
+    .join('.');
+
+// Final domain cleaner, run when input is done (blur/submit): also drops trailing dots
+export const cleanDomain = (value: string) => cleanDomainInput(value).replace(/\.+$/, '');
 
 export const websiteFromDomain = (domain: string) => (domain ? `https://${domain}/` : '');
 

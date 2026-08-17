@@ -1,6 +1,6 @@
 import ActionButton from '../ui/Buttons/ActionButton';
 import {t} from '../../helpers/i18n/dictionary';
-import {validDomainRegEx} from '../../helpers/common';
+import {cleanDomain, cleanDomainInput} from '../../helpers/common';
 import {
     OwnDomainProvisionState,
     useFetchIsOwnDomainAvailable,
@@ -49,6 +49,15 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
                     e.preventDefault();
                     e.currentTarget.reportValidity();
 
+                    // Final cleanup (e.g. Enter-key submit skips the input's onBlur): a
+                    // trailing dot is stripped here; the availability check then re-runs
+                    // for the cleaned domain before the button can proceed
+                    const cleaned = cleanDomain(domain);
+                    if (cleaned !== domain) {
+                        setDomain(cleaned);
+                        return false;
+                    }
+
                     // The zone is NOT created here: creating it requires proof of domain
                     // control, which only exists once the user has set up delegation or
                     // records - the DNS step's Validate action handles that
@@ -77,9 +86,9 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
                         type="text"
                         required
                         placeholder={t('your.domain.here')}
-                        defaultValue={domain}
-                        onKeyDown={(e) => e.key.match(validDomainRegEx) && e.preventDefault()}
-                        onChange={(e) => setDomain(e.target.value.toLowerCase())}
+                        value={domain}
+                        onChange={(e) => setDomain(cleanDomainInput(e.target.value))}
+                        onBlur={() => setDomain(cleanDomain(domain))}
                     />
                 </div>
 
