@@ -83,12 +83,15 @@ export const LoginBox = async (
     localDomainCheck(e.target.value);
   }, 500);
 
-  const replaceSpacesWithDots = () => {
-    dotyouInputBox.value = dotyouInputBox.value.replace(/\s/g, '.');
+  // Space and comma both act as the dot key. Kept in sync BY HAND with
+  // common-app/src/helpers/domainCleaner.ts (replaceDomainSeparators) - this app has no
+  // dependency on common-app and adding one is blocked by the auth-gated npm registry.
+  const replaceSeparatorsWithDots = () => {
+    dotyouInputBox.value = dotyouInputBox.value.replace(/[\s,]/g, '.');
   };
 
   dotyouInputBox.addEventListener('keydown', debouncedDomainValidator);
-  dotyouInputBox.addEventListener('keyup', replaceSpacesWithDots);
+  dotyouInputBox.addEventListener('keyup', replaceSeparatorsWithDots);
 
   const pingIdentity = async (identity: string) => {
     return await fetch(`https://${identity}/api/guest/v1/auth/ident`)

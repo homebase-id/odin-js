@@ -22,43 +22,20 @@ export const domainFromPrefixAndApex = (prefix: string, apex: string) => {
   }
 };
 
-// As enforced server side by AsciiDomainNameValidator.MAX_DNS_LABEL_LENGTH
-export const MAX_DNS_LABEL_LENGTH = 63;
+// Domain-input cleaning is shared with the YouAuth login box - single implementation
+// in common-app so a domain typed anywhere behaves the same
+export {
+  MAX_DNS_LABEL_LENGTH,
+  cleanLabel,
+  cleanDomain,
+  cleanDomainInput,
+} from '@homebase-id/common-app';
 
 const MIN_DNS_LABEL_LENGTH = 2;
-
-// The server rejects underscores even though they are word characters, so \w is
-// wrong here
-export const cleanLabel = (value: string) =>
-  value
-    .toLocaleLowerCase()
-    .replace(/[^a-z0-9-]/g, '')
-    .replace(/^-+/, '')
-    .slice(0, MAX_DNS_LABEL_LENGTH);
 
 // The server rejects a leading or trailing hyphen on any label
 export const isCompleteLabel = (label: string) =>
   label.length >= MIN_DNS_LABEL_LENGTH && !label.endsWith('-');
-
-// Live domain cleaner, applied on every keystroke/paste of a full-domain input:
-// strips a pasted URL down to its host (same idea as YouAuthLoginBox's stripIdentity),
-// lowercases, turns spaces into dots, strips characters a domain can't contain,
-// collapses duplicate dots and cleans each label (via cleanLabel). Deliberately KEEPS
-// a single trailing dot - the user is probably about to type the next label.
-export const cleanDomainInput = (value: string) =>
-  value
-    .replace(/^(https?):\/\//, '')
-    .split('/')[0]
-    .toLocaleLowerCase()
-    .replace(/\s+/g, '.')
-    .replace(/\.{2,}/g, '.')
-    .replace(/^\./, '')
-    .split('.')
-    .map(cleanLabel)
-    .join('.');
-
-// Final domain cleaner, run when input is done (blur/submit): also drops trailing dots
-export const cleanDomain = (value: string) => cleanDomainInput(value).replace(/\.+$/, '');
 
 export const websiteFromDomain = (domain: string) => (domain ? `https://${domain}/` : '');
 
