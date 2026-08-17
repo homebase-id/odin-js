@@ -38,7 +38,7 @@ export const useFetchIsOwnDomainAvailable = (domain: string) => {
 // setup) from permanent ones (shadowsHostedZone, notConfigured).
 export interface CreateOwnDomainZoneResult {
   created: boolean;
-  reason: 'created' | 'notConfigured' | 'shadowsHostedZone' | 'controlNotProven';
+  reason: 'created' | 'notConfigured' | 'shadowsHostedZone' | 'zoneAlreadyHosted' | 'controlNotProven';
 }
 
 export const useCreateOwnDomainZone = () => {

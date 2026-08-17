@@ -74,6 +74,12 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
             `${domain} is part of a domain that is already hosted on Homebase, so it cannot be set up as its own identity domain this way.`
           )}
         </Alert>
+      ) : createZoneData?.reason === 'zoneAlreadyHosted' ? (
+        <Alert type="critical" className="mb-5">
+          {t(
+            `A DNS zone for ${domain} is already hosted on Homebase - most likely it serves an existing identity. It cannot be claimed here. If this is your domain and you believe this is wrong, please contact support.`
+          )}
+        </Alert>
       ) : null}
       {activeDnsConfig ? (
         <DnsSettingsView
