@@ -41,11 +41,14 @@ export const isCompleteLabel = (label: string) =>
   label.length >= MIN_DNS_LABEL_LENGTH && !label.endsWith('-');
 
 // Live domain cleaner, applied on every keystroke/paste of a full-domain input:
+// strips a pasted URL down to its host (same idea as YouAuthLoginBox's stripIdentity),
 // lowercases, turns spaces into dots, strips characters a domain can't contain,
 // collapses duplicate dots and cleans each label (via cleanLabel). Deliberately KEEPS
 // a single trailing dot - the user is probably about to type the next label.
 export const cleanDomainInput = (value: string) =>
   value
+    .replace(/^(https?):\/\//, '')
+    .split('/')[0]
     .toLocaleLowerCase()
     .replace(/\s+/g, '.')
     .replace(/\.{2,}/g, '.')
