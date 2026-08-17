@@ -27,11 +27,14 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
     //
     // API
     //
+    // Availability is checked for the CLEANED domain: the live input deliberately keeps a
+    // trailing dot while typing, which the server would (correctly) reject as invalid -
+    // the user is asking about the domain without it
     const {
         data: isOwnDomainAvailable,
         error: errorIsOwnDomainAvailable,
         status: statusIsOwnDomainAvailable,
-    } = useFetchIsOwnDomainAvailable(domain || '').fetchIsOwnDomainAvailable;
+    } = useFetchIsOwnDomainAvailable(cleanDomain(domain) || '').fetchIsOwnDomainAvailable;
 
     const {
         fetchManagedDomainApexes: {data: managedDomainApexes},
@@ -49,19 +52,17 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
                     e.preventDefault();
                     e.currentTarget.reportValidity();
 
-                    // Final cleanup (e.g. Enter-key submit skips the input's onBlur): a
-                    // trailing dot is stripped here; the availability check then re-runs
-                    // for the cleaned domain before the button can proceed
+                    // Final cleanup (e.g. Enter-key submit skips the input's onBlur).
+                    // Advancing right away is safe: the availability check already ran
+                    // against the cleaned domain.
                     const cleaned = cleanDomain(domain);
-                    if (cleaned !== domain) {
-                        setDomain(cleaned);
-                        return false;
-                    }
+                    if (cleaned !== domain) setDomain(cleaned);
 
                     // The zone is NOT created here: creating it requires proof of domain
                     // control, which only exists once the user has set up delegation or
                     // records - the DNS step's Validate action handles that
                     if (
+                        cleaned &&
                         e.currentTarget.checkValidity() &&
                         isOwnDomainAvailable &&
                         statusIsOwnDomainAvailable === 'success'
