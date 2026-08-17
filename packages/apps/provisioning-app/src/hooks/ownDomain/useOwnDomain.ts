@@ -94,21 +94,6 @@ export const useFetchOwnDomainDnsConfig = (domain: string) => {
   };
 };
 
-//
-
-export const useApexDomain = (domain?: string) => {
-  const getApexDomain = async (domain?: string) => {
-    if (!domain) return null;
-    const response = await axios.get<string>(`${root}/registration/lookup-zone-apex/${domain}`);
-    return response.data;
-  };
-
-  return useQuery({
-    queryKey: ['apex-domain', domain],
-    queryFn: () => getApexDomain(domain),
-    retry: false,
-    enabled: !!domain,
-    gcTime: 1000 * 60 * 60 * 24, // 24 hours => Very unlikely to change
-    staleTime: 1000 * 60 * 60 * 24, // 24 hours => Very unlikely to change
-  });
-};
+// NOTE: the former useApexDomain (lookup-zone-apex) hook is gone on purpose: a zone
+// lookup cannot decide apex-vs-subdomain anymore, because a subdomain delegated to
+// Homebase has its own SOA and looks like an apex. See helpers/registrableDomain.ts.
