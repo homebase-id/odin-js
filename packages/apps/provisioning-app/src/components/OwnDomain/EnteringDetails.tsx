@@ -9,7 +9,7 @@ import {
 import {useFetchManagedDomainsApexes} from '../../hooks/managedDomain/useManagedDomain';
 import {AlertError} from '../ErrorAlert/ErrorAlert';
 import {Input, Label} from '@homebase-id/common-app';
-import {Arrow, Exclamation, Globe} from '@homebase-id/common-app/icons';
+import {Arrow, Exclamation} from '@homebase-id/common-app/icons';
 import {useNavigate} from "react-router-dom";
 
 interface Props {
@@ -122,12 +122,13 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
 
                     {managedDomainApexes && managedDomainApexes.length > 0 ? (
                         <ActionButton
-                            icon={Globe}
+                            type="secondary"
+                            buttonType="button"
                             onClick={(e) => {
                                 e.preventDefault();
-                                navigate(`../managed-domain?invitation-code=${invitationCode}`);
+                                navigate(`../managed-domain${window.location.search}`);
                             }}>
-                            {t('Use a managed domain')}
+                            {t('« Back')}
                         </ActionButton>
                     ) : <div />}
 

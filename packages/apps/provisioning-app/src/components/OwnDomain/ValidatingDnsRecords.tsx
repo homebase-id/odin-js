@@ -58,7 +58,7 @@ const ValidatingDnsRecords = ({ domain, setProvisionState }: Props) => {
           )}
         </Alert>
       ) : null}
-      <div className="mt-10 flex flex-row-reverse">
+      <div className="mt-10 flex flex-row-reverse justify-between gap-2">
         {hasInvalid ? (
           <ActionButton
             onClick={() => {
@@ -75,6 +75,9 @@ const ValidatingDnsRecords = ({ domain, setProvisionState }: Props) => {
             {t('Provision')}
           </ActionButton>
         )}
+        <ActionButton type="secondary" onClick={() => setProvisionState('EnteringDetails')}>
+          {t('« Back')}
+        </ActionButton>
       </div>
     </section>
   );

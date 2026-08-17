@@ -9,6 +9,9 @@ export interface ActionButtonProps {
   className?: string;
   icon?: FC<IconProps>;
   type?: 'primary' | 'secondary' | 'remove' | 'mute';
+  // HTML button type. Defaults to the browser default ("submit" inside a form) - pass
+  // 'button' for buttons in a form that must not react to the Enter key
+  buttonType?: 'button' | 'submit' | 'reset';
   state?: ActionButtonState;
   isDisabled?: boolean;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
@@ -22,6 +25,7 @@ const ActionButton: FC<ActionButtonProps> = ({
   className,
   icon,
   type,
+  buttonType,
   state,
   title,
   size,
@@ -70,6 +74,7 @@ const ActionButton: FC<ActionButtonProps> = ({
         } flex flex-row ${
           className && className.indexOf('rounded-') !== -1 ? '' : 'rounded-md'
         } text-left ${widthClasses} ${sizeClasses} ${colorClasses} ${stateClasses} ${className}`}
+        type={buttonType}
         disabled={isDisabled || state === 'loading' || state === 'pending'}
         onClick={onClick}
         title={title}
