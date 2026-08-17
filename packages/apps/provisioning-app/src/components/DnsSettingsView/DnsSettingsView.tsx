@@ -11,7 +11,7 @@ import {
   Exclamation,
   ExternalLink,
 } from '@homebase-id/common-app/icons';
-import { getRegistrableDomain, isRegistrableApex } from '../../helpers/registrableDomain';
+import { getRegistrableDomain, getSubLabel, isRegistrableApex } from '../../helpers/registrableDomain';
 
 const DnsSettingsView = ({
   domain,
@@ -34,9 +34,9 @@ const DnsSettingsView = ({
   // Subdomains: delegation is two easy NS records at the DNS host - recommend it.
   // Apexes: delegation means a registrar nameserver change that silently takes down any
   // other use of the domain (website, email, ...) - recommend the manual records instead.
-  const [openSection, setOpenSection] = useState<'delegate' | 'manual'>(
-    isApexDomain ? 'manual' : 'delegate'
-  );
+  // The recommended section is the first and the initially unfolded one.
+  const recommendedSection: 'delegate' | 'manual' = isApexDomain ? 'manual' : 'delegate';
+  const [openSection, setOpenSection] = useState<'delegate' | 'manual'>(recommendedSection);
 
   const manualSetupBlock = (
     <>
@@ -59,15 +59,39 @@ const DnsSettingsView = ({
       )}
       <div className="flex flex-col gap-2">
         <p className="mb-5 text-2xl">{t('Add the required subdomains')}</p>
-        {subRecords.length > 0 ? (
-          <>
-            {subRecords.map((record) => (
-              <RecordView key={record.name} record={record} domain={domain} showStatus={showStatus} />
-            ))}
-          </>
-        ) : null}
+        {subRecords.map((record) => (
+          <RecordView key={record.name} record={record} domain={domain} showStatus={showStatus} />
+        ))}
       </div>
     </>
+  );
+
+  const delegateSection = (
+    <AccordionSection
+      key="delegate"
+      title={t('Let Homebase manage DNS')}
+      badge={recommendedSection === 'delegate' ? t('Recommended') : undefined}
+      isOpen={openSection === 'delegate'}
+      onOpen={() => setOpenSection('delegate')}
+    >
+      <NsDelegationBlock
+        nsRecords={nsRecords}
+        domain={domain}
+        isApexDomain={isApexDomain}
+        showStatus={showStatus}
+      />
+    </AccordionSection>
+  );
+  const manualSection = (
+    <AccordionSection
+      key="manual"
+      title={t('Set up the records yourself')}
+      badge={recommendedSection === 'manual' ? t('Recommended') : undefined}
+      isOpen={openSection === 'manual'}
+      onOpen={() => setOpenSection('manual')}
+    >
+      {manualSetupBlock}
+    </AccordionSection>
   );
 
   return (
@@ -80,53 +104,12 @@ const DnsSettingsView = ({
         </p>
 
         {nsRecords.length > 0 ? (
-          // Two mutually exclusive setups; only one is unfolded at a time, and the
-          // recommended one comes first
-          (() => {
-            const delegateSection = (
-              <AccordionSection
-                key="delegate"
-                title={t('Let Homebase manage DNS')}
-                badge={!isApexDomain ? t('Recommended') : undefined}
-                isOpen={openSection === 'delegate'}
-                onOpen={() => setOpenSection('delegate')}
-              >
-                <NsDelegationBlock
-                  nsRecords={nsRecords}
-                  domain={domain}
-                  isApexDomain={isApexDomain}
-                  showStatus={showStatus}
-                  className=""
-                />
-              </AccordionSection>
-            );
-            const manualSection = (
-              <AccordionSection
-                key="manual"
-                title={t('Set up the records yourself')}
-                badge={isApexDomain ? t('Recommended') : undefined}
-                isOpen={openSection === 'manual'}
-                onOpen={() => setOpenSection('manual')}
-              >
-                {manualSetupBlock}
-              </AccordionSection>
-            );
-            return (
-              <div className="flex flex-col gap-4">
-                {isApexDomain ? (
-                  <>
-                    {manualSection}
-                    {delegateSection}
-                  </>
-                ) : (
-                  <>
-                    {delegateSection}
-                    {manualSection}
-                  </>
-                )}
-              </div>
-            );
-          })()
+          // Two mutually exclusive setups; only one is unfolded at a time
+          <div className="flex flex-col gap-4">
+            {recommendedSection === 'manual'
+              ? [manualSection, delegateSection]
+              : [delegateSection, manualSection]}
+          </div>
         ) : (
           manualSetupBlock
         )}
@@ -217,21 +200,18 @@ const NsDelegationBlock = ({
   domain,
   isApexDomain,
   showStatus,
-  className,
 }: {
   nsRecords: DnsRecord[];
   domain: string;
   isApexDomain: boolean;
   showStatus: boolean;
-  className: string;
 }) => {
-  const isDelegated =
-    nsRecords.length > 0 && nsRecords.every((record) => record.status === 'success');
+  const isDelegated = nsRecords.every((record) => record.status === 'success');
   const registrableDomain = getRegistrableDomain(domain) || domain;
-  const subLabel = isApexDomain ? '' : domain.replace(`.${registrableDomain}`, '');
+  const subLabel = getSubLabel(domain);
 
   return (
-    <div className={`${className} flex flex-col gap-4`}>
+    <div className="flex flex-col gap-4">
       {isApexDomain ? (
         <>
           <p>
@@ -429,8 +409,7 @@ const RecordView = ({
 
   // Name-based split (see registrableDomain.ts for why a DNS lookup can't be used here)
   const registrableDomain = getRegistrableDomain(domain) || domain;
-  const subDomain =
-    registrableDomain !== domain ? domain.replace(`.${registrableDomain}`, '') : '';
+  const subDomain = getSubLabel(domain);
 
   return (
     <>

@@ -204,6 +204,7 @@ const ClaimName = ({
             className="justify-center"
             size="large"
             icon={Arrow}
+            buttonType="submit"
             isDisabled={!canClaim}
             state={isChecking ? 'loading' : undefined}
           >

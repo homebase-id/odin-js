@@ -6,7 +6,6 @@ import {
   useCreateOwnDomainZone,
   useFetchOwnDomainDnsConfig,
 } from '../../hooks/ownDomain/useOwnDomain';
-import { hasInvalidDnsRecords } from '../../hooks/commonDomain/commonDomain';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
 import { useMemo, useState } from 'react';
 import { Alert } from '@homebase-id/common-app';
@@ -22,7 +21,7 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
   const {
     fetchOwnDomainDnsConfig: { data: initialDnsConfig, error: initialError },
     fetchOwnDomainDnsStatus: {
-      data: dnsConfig,
+      data: dnsStatus,
       isFetched: isDnsStateFetched,
       error: statusError,
       isFetching,
@@ -30,19 +29,22 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
     },
   } = useFetchOwnDomainDnsConfig(domain);
 
-  const activeDnsConfig = dnsConfig || initialDnsConfig;
-  const hasInvalid = useMemo(
-    () => (dnsConfig ? hasInvalidDnsRecords(dnsConfig) : true),
-    [dnsConfig]
-  );
-  const statePending = useMemo(
-    () => (dnsConfig ? dnsConfig.some((record) => record.status === 'unknown') : false),
-    [dnsConfig]
-  );
-
   const {
-    createOwnDomainZone: { mutateAsync: createOwnDomainZone, status: createZoneStatus },
+    createOwnDomainZone: {
+      mutateAsync: createOwnDomainZone,
+      data: createZoneData,
+      error: createZoneError,
+      status: createZoneStatus,
+    },
   } = useCreateOwnDomainZone();
+
+  const activeDnsConfig = dnsStatus?.records || initialDnsConfig;
+  // The server owns the success rule; 200 vs 202 arrives as dnsStatus.success
+  const hasInvalid = !dnsStatus?.success;
+  const statePending = useMemo(
+    () => (dnsStatus ? dnsStatus.records.some((record) => record.status === 'unknown') : false),
+    [dnsStatus]
+  );
 
   const [showStatus, setShowStatus] = useState(false);
   const canShowStatus = isDnsStateFetched && !statePending;
@@ -50,19 +52,29 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
   const validate = async () => {
     setShowStatus(true);
     // The zone is created server-side only once domain control is provable (NS delegation
-    // visible at the parent, or valid manual records). Retried on every Validate; failures
-    // are expected until then and the status check below reports the actual state.
-    try {
-      await createOwnDomainZone({ domain, invitationCode });
-    } catch {
-      // ignore - status below tells the user what is missing
+    // visible at the parent, or valid manual records). Retried on every Validate until it
+    // succeeds; controlNotProven is the expected state before the user's DNS setup lands.
+    // HTTP errors (expired invitation code, domain taken) surface via AlertError below.
+    if (createZoneData?.created !== true) {
+      try {
+        await createOwnDomainZone({ domain, invitationCode });
+      } catch {
+        // surfaced via createZoneError
+      }
     }
     refetchDnsStatus();
   };
 
   return (
     <section className="max-w-3xl">
-      <AlertError error={statusError || initialError} />
+      <AlertError error={statusError || initialError || createZoneError} />
+      {createZoneData?.reason === 'shadowsHostedZone' ? (
+        <Alert type="critical" className="mb-5">
+          {t(
+            `${domain} is part of a domain that is already hosted on Homebase, so it cannot be set up as its own identity domain this way.`
+          )}
+        </Alert>
+      ) : null}
       {activeDnsConfig ? (
         <DnsSettingsView
           domain={domain}
@@ -70,7 +82,7 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
           showStatus={showStatus && canShowStatus}
         />
       ) : null}
-      {dnsConfig && hasInvalid && showStatus ? (
+      {dnsStatus && hasInvalid && showStatus ? (
         <Alert type="info" className="mt-5">
           {t(
             'Sometimes it can take hours for DNS changes to propagate, please try again later if you just set them up. Otherwise, please inspect your DNS configuration for any incorrect settings.'

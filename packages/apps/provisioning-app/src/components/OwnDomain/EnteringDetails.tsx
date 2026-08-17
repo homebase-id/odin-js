@@ -108,7 +108,6 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
                     {managedDomainApexes && managedDomainApexes.length > 0 ? (
                         <ActionButton
                             type="secondary"
-                            buttonType="button"
                             onClick={(e) => {
                                 e.preventDefault();
                                 navigate(`../managed-domain${window.location.search}`);
@@ -120,6 +119,7 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
                     <ActionButton
                         className="h-[2.66rem]"
                         icon={Arrow}
+                        buttonType="submit"
                         isDisabled={!(isOwnDomainAvailable && statusIsOwnDomainAvailable === 'success')}
                         state={
                             statusIsOwnDomainAvailable !== 'success' ? statusIsOwnDomainAvailable : undefined

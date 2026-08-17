@@ -33,7 +33,14 @@ export const useFetchIsOwnDomainAvailable = (domain: string) => {
 
 // Pre-provisions the DNS zone for the domain on Homebase's nameservers so the user can
 // delegate via NS records (or keep the manual-records flow; the zone is inert until
-// delegated). Idempotent; a no-op on servers without zone hosting configured.
+// delegated). The server only creates the zone once domain control is provable;
+// `reason` distinguishes the transient refusal (controlNotProven - retry after DNS
+// setup) from permanent ones (shadowsHostedZone, notConfigured).
+export interface CreateOwnDomainZoneResult {
+  created: boolean;
+  reason: 'created' | 'notConfigured' | 'shadowsHostedZone' | 'controlNotProven';
+}
+
 export const useCreateOwnDomainZone = () => {
   const createOwnDomainZone = async ({
     domain,
@@ -41,15 +48,22 @@ export const useCreateOwnDomainZone = () => {
   }: {
     domain: string;
     invitationCode: string | null;
-  }): Promise<void> => {
+  }): Promise<CreateOwnDomainZoneResult> => {
     const query = invitationCode
       ? `?${new URLSearchParams({ 'invitation-code': invitationCode })}`
       : '';
-    await axios.post(`${root}/registration/create-own-domain-zone/${domain}${query}`);
+    const response = await axios.post<CreateOwnDomainZoneResult>(
+      `${root}/registration/create-own-domain-zone/${domain}${query}`
+    );
+    return response.data;
   };
 
   return {
-    createOwnDomainZone: useMutation<void, AxiosError, { domain: string; invitationCode: string | null }>({
+    createOwnDomainZone: useMutation<
+      CreateOwnDomainZoneResult,
+      AxiosError,
+      { domain: string; invitationCode: string | null }
+    >({
       mutationFn: createOwnDomainZone,
     }),
   };
@@ -57,17 +71,26 @@ export const useCreateOwnDomainZone = () => {
 
 //
 
+// The server's overall verdict rides on the HTTP status: 200 = DNS setup is valid,
+// 202 = not yet. The client does NOT re-derive success from the records - the server
+// owns that rule (DnsLookupService.AreDnsLookupsSuccessful).
+export interface OwnDomainDnsStatus {
+  success: boolean;
+  records: DnsConfig;
+}
+
 export const useFetchOwnDomainDnsConfig = (domain: string) => {
   const fetchOwnDomainDnsConfig = async (domain: string): Promise<DnsConfig> => {
     const response = await axios.get(`${root}/registration/dns-config/${domain}?includeAlias=true`);
     return response.data;
   };
 
-  const fetchOwnDomainDnsStatus = async (domain: string): Promise<DnsConfig | null> => {
+  const fetchOwnDomainDnsStatus = async (domain: string): Promise<OwnDomainDnsStatus | null> => {
     if (!domain) return null;
-    return await axios
-      .get(`${root}/registration/own-domain-dns-status/${domain}?includeAlias=true`)
-      .then((response) => response.data);
+    const response = await axios.get(
+      `${root}/registration/own-domain-dns-status/${domain}?includeAlias=true`
+    );
+    return { success: response.status === 200, records: response.data };
   };
 
   return {
@@ -80,8 +103,8 @@ export const useFetchOwnDomainDnsConfig = (domain: string) => {
         error?.response?.status ? error.response.status >= 500 : false,
       staleTime: 1000 * 60 * 2, // 2 minutes
     }),
-    fetchOwnDomainDnsStatus: useQuery<DnsConfig | null, AxiosError>({
-      queryKey: ['own-domain-dns-config', domain],
+    fetchOwnDomainDnsStatus: useQuery<OwnDomainDnsStatus | null, AxiosError>({
+      queryKey: ['own-domain-dns-status', domain],
       queryFn: () => fetchOwnDomainDnsStatus(domain as string),
 
       enabled: !!domain,

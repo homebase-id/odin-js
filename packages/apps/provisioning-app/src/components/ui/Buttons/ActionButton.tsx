@@ -9,8 +9,9 @@ export interface ActionButtonProps {
   className?: string;
   icon?: FC<IconProps>;
   type?: 'primary' | 'secondary' | 'remove' | 'mute';
-  // HTML button type. Defaults to the browser default ("submit" inside a form) - pass
-  // 'button' for buttons in a form that must not react to the Enter key
+  // HTML button type. Defaults to "button" (NOT the browser's "submit" default) so a
+  // button placed inside a form never becomes an accidental Enter-key submit target -
+  // the form's actual submit button must opt in with buttonType="submit"
   buttonType?: 'button' | 'submit' | 'reset';
   state?: ActionButtonState;
   isDisabled?: boolean;
@@ -74,7 +75,7 @@ const ActionButton: FC<ActionButtonProps> = ({
         } flex flex-row ${
           className && className.indexOf('rounded-') !== -1 ? '' : 'rounded-md'
         } text-left ${widthClasses} ${sizeClasses} ${colorClasses} ${stateClasses} ${className}`}
-        type={buttonType}
+        type={buttonType ?? 'button'}
         disabled={isDisabled || state === 'loading' || state === 'pending'}
         onClick={onClick}
         title={title}

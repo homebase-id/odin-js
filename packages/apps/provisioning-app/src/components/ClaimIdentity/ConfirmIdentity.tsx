@@ -100,6 +100,7 @@ const ConfirmIdentity = ({
             className="justify-center"
             size="large"
             icon={Arrow}
+            buttonType="submit"
             isDisabled={!region || !email || isPending}
             state={isPending ? 'loading' : undefined}
           >
