@@ -9,7 +9,7 @@ import {
 import { AlertError } from '../ErrorAlert/ErrorAlert';
 import { useMemo, useState } from 'react';
 import { Alert } from '@homebase-id/common-app';
-import { Arrow } from '@homebase-id/common-app/icons';
+import { Arrow, Refresh } from '@homebase-id/common-app/icons';
 
 interface Props {
   domain: string;
@@ -48,21 +48,37 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
 
   const [showStatus, setShowStatus] = useState(false);
   const canShowStatus = isDnsStateFetched && !statePending;
+  // A fully valid setup shows its green statuses without requiring a Validate click -
+  // e.g. returning to this step when the DNS was configured earlier
+  const effectiveShowStatus = (showStatus || dnsStatus?.success === true) && canShowStatus;
+
+  // The zone is created server-side only once domain control is provable (NS delegation
+  // visible at the parent, or valid manual records). Retried until it succeeds;
+  // controlNotProven is the expected state before the user's DNS setup lands. HTTP
+  // errors (expired invitation code, domain taken) surface via AlertError below.
+  const ensureZone = async () => {
+    if (createZoneData?.created === true) return;
+    try {
+      await createOwnDomainZone({ domain, invitationCode });
+    } catch {
+      // surfaced via createZoneError
+    }
+  };
 
   const validate = async () => {
     setShowStatus(true);
-    // The zone is created server-side only once domain control is provable (NS delegation
-    // visible at the parent, or valid manual records). Retried on every Validate until it
-    // succeeds; controlNotProven is the expected state before the user's DNS setup lands.
-    // HTTP errors (expired invitation code, domain taken) surface via AlertError below.
-    if (createZoneData?.created !== true) {
-      try {
-        await createOwnDomainZone({ domain, invitationCode });
-      } catch {
-        // surfaced via createZoneError
-      }
-    }
+    await ensureZone();
     refetchDnsStatus();
+  };
+
+  const provision = async () => {
+    // Ensure the zone also on Provision: validation can turn green via the background
+    // poll alone (which never creates zones), so this click may be the first
+    // control-proven moment. Idempotent; the server re-proves control either way, and
+    // create-identity-on-domain re-validates DNS server-side - a force-enabled button
+    // gains nothing.
+    await ensureZone();
+    setProvisionState('Provisioning');
   };
 
   return (
@@ -82,11 +98,7 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
         </Alert>
       ) : null}
       {activeDnsConfig ? (
-        <DnsSettingsView
-          domain={domain}
-          dnsConfig={activeDnsConfig}
-          showStatus={showStatus && canShowStatus}
-        />
+        <DnsSettingsView domain={domain} dnsConfig={activeDnsConfig} showStatus={effectiveShowStatus} />
       ) : null}
       {dnsStatus && hasInvalid && showStatus ? (
         <Alert type="info" className="mt-5">
@@ -95,23 +107,23 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
           )}
         </Alert>
       ) : null}
-      <div className="mt-10 flex flex-row-reverse justify-between gap-2">
-        {hasInvalid ? (
+      <div className="mt-10 flex flex-row justify-between gap-2">
+        <ActionButton type="secondary" onClick={() => setProvisionState('EnteringDetails')}>
+          {t('« Back')}
+        </ActionButton>
+        <div className="flex flex-row gap-2">
           <ActionButton
+            type="secondary"
+            icon={Refresh}
             onClick={validate}
-            icon={Arrow}
             state={isFetching || createZoneStatus === 'pending' ? 'loading' : undefined}
           >
             {t('Validate')}
           </ActionButton>
-        ) : (
-          <ActionButton icon={Arrow} onClick={() => setProvisionState('Provisioning')}>
+          <ActionButton icon={Arrow} isDisabled={hasInvalid} onClick={provision}>
             {t('Provision')}
           </ActionButton>
-        )}
-        <ActionButton type="secondary" onClick={() => setProvisionState('EnteringDetails')}>
-          {t('« Back')}
-        </ActionButton>
+        </div>
       </div>
     </section>
   );
