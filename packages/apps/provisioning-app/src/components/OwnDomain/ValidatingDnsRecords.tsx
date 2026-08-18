@@ -24,7 +24,6 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
       data: dnsStatus,
       isFetched: isDnsStateFetched,
       error: statusError,
-      isFetching,
       refetch: refetchDnsStatus,
     },
   } = useFetchOwnDomainDnsConfig(domain);
@@ -65,10 +64,21 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
     }
   };
 
+  // Spinner state for user-initiated validation ONLY. The status query also runs on
+  // mount and every 15s in the background - animating the button for those suggested a
+  // result was about to appear while the display gate (showStatus) kept it hidden,
+  // which read as a glitch.
+  const [isValidating, setIsValidating] = useState(false);
+
   const validate = async () => {
     setShowStatus(true);
-    await ensureZone();
-    refetchDnsStatus();
+    setIsValidating(true);
+    try {
+      await ensureZone();
+      await refetchDnsStatus();
+    } finally {
+      setIsValidating(false);
+    }
   };
 
   const provision = async () => {
@@ -116,11 +126,16 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
             type="secondary"
             icon={Refresh}
             onClick={validate}
-            state={isFetching || createZoneStatus === 'pending' ? 'loading' : undefined}
+            state={isValidating ? 'loading' : undefined}
           >
             {t('Validate')}
           </ActionButton>
-          <ActionButton icon={Arrow} isDisabled={hasInvalid} onClick={provision}>
+          <ActionButton
+            icon={Arrow}
+            isDisabled={hasInvalid}
+            onClick={provision}
+            state={createZoneStatus === 'pending' && !isValidating ? 'loading' : undefined}
+          >
             {t('Provision')}
           </ActionButton>
         </div>
