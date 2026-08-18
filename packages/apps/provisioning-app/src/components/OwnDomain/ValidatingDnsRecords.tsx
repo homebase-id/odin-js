@@ -33,7 +33,6 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
       mutateAsync: createOwnDomainZone,
       data: createZoneData,
       error: createZoneError,
-      status: createZoneStatus,
     },
   } = useCreateOwnDomainZone();
 
@@ -51,44 +50,69 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
   // e.g. returning to this step when the DNS was configured earlier
   const effectiveShowStatus = (showStatus || dnsStatus?.success === true) && canShowStatus;
 
-  // The zone is created server-side only once domain control is provable (NS delegation
-  // visible at the parent, or valid manual records). Retried until it succeeds;
-  // controlNotProven is the expected state before the user's DNS setup lands. HTTP
-  // errors (expired invitation code, domain taken) surface via AlertError below.
-  const ensureZone = async () => {
-    if (createZoneData?.created === true) return;
-    try {
-      await createOwnDomainZone({ domain, invitationCode });
-    } catch {
-      // surfaced via createZoneError
-    }
-  };
-
   // Spinner state for user-initiated validation ONLY. The status query also runs on
   // mount and every 15s in the background - animating the button for those suggested a
   // result was about to appear while the display gate (showStatus) kept it hidden,
   // which read as a glitch.
   const [isValidating, setIsValidating] = useState(false);
+  const [isProvisioning, setIsProvisioning] = useState(false);
 
+  // Validate is strictly read-only: it re-checks DNS and reveals the statuses.
+  // Nothing is created anywhere before the Provision click.
   const validate = async () => {
     setShowStatus(true);
     setIsValidating(true);
     try {
-      await ensureZone();
       await refetchDnsStatus();
     } finally {
       setIsValidating(false);
     }
   };
 
+  // Provision is the commit point: create the zone (server creates only if missing and
+  // only with proof of domain control - the enabled button implies delegation or valid
+  // records, and the server re-proves it regardless), then re-verify once so we know
+  // the freshly created zone actually serves before advancing. The re-check is
+  // cache-safe: it queries authoritative servers only, never public resolvers.
   const provision = async () => {
-    // Ensure the zone also on Provision: validation can turn green via the background
-    // poll alone (which never creates zones), so this click may be the first
-    // control-proven moment. Idempotent; the server re-proves control either way, and
-    // create-identity-on-domain re-validates DNS server-side - a force-enabled button
-    // gains nothing.
-    await ensureZone();
-    setProvisionState('Provisioning');
+    setIsProvisioning(true);
+    try {
+      if (createZoneData?.created !== true) {
+        let result;
+        try {
+          result = await createOwnDomainZone({ domain, invitationCode });
+        } catch {
+          // HTTP error (expired invitation code, domain taken, server down) -
+          // surfaced via createZoneError; do not advance
+          return;
+        }
+        // Permanent refusals are surfaced by the alerts above; do not advance.
+        // (notConfigured is fine: no zone hosting on this deployment - the manual
+        // records carried the validation.)
+        if (!result.created && result.reason !== 'notConfigured') {
+          setShowStatus(true);
+          return;
+        }
+      }
+
+      const { data } = await refetchDnsStatus();
+      // Confirmation (not the gating verdict, which is delegation-OR-records and would
+      // pass on delegation alone): after zone creation the actual records must resolve,
+      // proving the freshly created zone serves. For manual-records users this simply
+      // re-confirms their records.
+      const records = data?.records ?? [];
+      const zoneServes =
+        records.some((r) => (r.type === 'A' || r.type === 'ALIAS') && r.status === 'success') &&
+        records.filter((r) => r.type === 'CNAME').every((r) => r.status === 'success');
+      if (zoneServes) {
+        setProvisionState('Provisioning');
+      } else {
+        // The fresh zone does not serve (yet) - stay here with statuses visible
+        setShowStatus(true);
+      }
+    } finally {
+      setIsProvisioning(false);
+    }
   };
 
   return (
@@ -134,7 +158,7 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
             icon={Arrow}
             isDisabled={hasInvalid}
             onClick={provision}
-            state={createZoneStatus === 'pending' && !isValidating ? 'loading' : undefined}
+            state={isProvisioning ? 'loading' : undefined}
           >
             {t('Provision')}
           </ActionButton>
