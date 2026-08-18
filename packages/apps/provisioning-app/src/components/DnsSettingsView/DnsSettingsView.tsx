@@ -3,8 +3,15 @@ import { t } from '../../helpers/i18n/dictionary';
 import InfoDialog from '../Dialog/InfoDialog/InfoDialog';
 import { DnsConfig, DnsRecord, DnsRecordStatus } from '../../hooks/commonDomain/commonDomain';
 import { Alert, DialogWrapper } from '@homebase-id/common-app';
-import { Arrow, Check, Exclamation, ExternalLink, Loader } from '@homebase-id/common-app/icons';
-import { useApexDomain } from '../../hooks/ownDomain/useOwnDomain';
+import {
+  Arrow,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Exclamation,
+  ExternalLink,
+} from '@homebase-id/common-app/icons';
+import { getRegistrableDomain, getSubLabel, isRegistrableApex } from '../../helpers/registrableDomain';
 
 const DnsSettingsView = ({
   domain,
@@ -15,19 +22,93 @@ const DnsSettingsView = ({
   dnsConfig: DnsConfig;
   showStatus: boolean;
 }) => {
-  const { data: apexDomain, isFetched: gotApexInfo } = useApexDomain(domain);
-
-  const isApexDomain = apexDomain === domain;
+  // Apex-ness is decided from the domain name (public-suffix based), NOT from a zone
+  // lookup: a subdomain delegated to Homebase has its own SOA and would look like an
+  // apex to any DNS-based check
+  const isApexDomain = isRegistrableApex(domain);
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
 
-  const subRecords = dnsConfig.filter((record) => !!record.name);
+  const subRecords = dnsConfig.filter((record) => !!record.name && record.type !== 'NS');
+  const nsRecords = dnsConfig.filter((record) => record.type === 'NS');
 
-  if (!gotApexInfo)
-    return (
-      <div className="flex flex-row items-center justify-center">
-        <Loader className="h-10 w-10" />
+  // Subdomains: delegation is two easy NS records at the DNS host - recommend it.
+  // Apexes: delegation means a registrar nameserver change that silently takes down any
+  // other use of the domain (website, email, ...) - recommend the manual records instead.
+  // The recommended section is the first and the initially unfolded one.
+  const recommendedSection: 'delegate' | 'manual' = isApexDomain ? 'manual' : 'delegate';
+  const [openSection, setOpenSection] = useState<'delegate' | 'manual'>(recommendedSection);
+
+  // Delegation active = the NS records at the parent verified. From that moment the
+  // manual records are moot: our zone is the only authoritative source, and any records
+  // still sitting at the user's DNS host are occluded by the delegation - so the manual
+  // section is greyed out and its statuses suppressed (they would just echo our own zone).
+  const isDelegated = nsRecords.length > 0 && nsRecords.every((r) => r.status === 'success');
+  const manualShowStatus = showStatus && !isDelegated;
+
+  const manualSetupBlock = (
+    <>
+      {isDelegated ? (
+        <Alert type="info" className="mb-5">
+          {t(
+            `DNS delegation to Homebase is active - these records are served automatically from your Homebase-hosted zone. Manual setup does not apply.`
+          )}
+        </Alert>
+      ) : null}
+      <div className={isDelegated ? 'pointer-events-none opacity-50' : ''}>
+        {isApexDomain ? (
+          <ApexInfoBlock
+            dnsConfig={dnsConfig}
+            domain={domain}
+            showStatus={manualShowStatus}
+            yourDomain={domain}
+            className="mb-10"
+          />
+        ) : (
+          <SubdomainInfoBlock
+            dnsConfig={dnsConfig}
+            domain={domain}
+            showStatus={manualShowStatus}
+            yourDomain={domain}
+            className="mb-10"
+          />
+        )}
+        <div className="flex flex-col gap-2">
+          <p className="mb-5 text-2xl">{t('Add the required subdomains')}</p>
+          {subRecords.map((record) => (
+            <RecordView key={record.name} record={record} domain={domain} showStatus={manualShowStatus} />
+          ))}
+        </div>
       </div>
-    );
+    </>
+  );
+
+  const delegateSection = (
+    <AccordionSection
+      key="delegate"
+      title={t('Let Homebase manage DNS')}
+      badge={recommendedSection === 'delegate' ? t('Recommended') : undefined}
+      isOpen={openSection === 'delegate'}
+      onOpen={() => setOpenSection('delegate')}
+    >
+      <NsDelegationBlock
+        nsRecords={nsRecords}
+        domain={domain}
+        isApexDomain={isApexDomain}
+        showStatus={showStatus}
+      />
+    </AccordionSection>
+  );
+  const manualSection = (
+    <AccordionSection
+      key="manual"
+      title={t('Set up the records yourself')}
+      badge={recommendedSection === 'manual' ? t('Recommended') : undefined}
+      isOpen={openSection === 'manual'}
+      onOpen={() => setOpenSection('manual')}
+    >
+      {manualSetupBlock}
+    </AccordionSection>
+  );
 
   return (
     <>
@@ -38,38 +119,16 @@ const DnsSettingsView = ({
           </button>
         </p>
 
-        {isApexDomain ? (
-          <ApexInfoBlock
-            dnsConfig={dnsConfig}
-            domain={domain}
-            showStatus={showStatus}
-            yourDomain={domain}
-            className="mb-10"
-          />
+        {nsRecords.length > 0 ? (
+          // Two mutually exclusive setups; only one is unfolded at a time
+          <div className="flex flex-col gap-4">
+            {recommendedSection === 'manual'
+              ? [manualSection, delegateSection]
+              : [delegateSection, manualSection]}
+          </div>
         ) : (
-          <SubdomainInfoBlock
-            dnsConfig={dnsConfig}
-            domain={domain}
-            showStatus={showStatus}
-            yourDomain={domain}
-            className="mb-10"
-          />
+          manualSetupBlock
         )}
-        <div className="flex flex-col gap-2">
-          <p className="mb-5 text-2xl">{t('Add the required subdomains')}</p>
-          {subRecords.length > 0 ? (
-            <>
-              {subRecords.map((record) => (
-                <RecordView
-                  key={record.name}
-                  record={record}
-                  domain={domain}
-                  showStatus={showStatus}
-                />
-              ))}
-            </>
-          ) : null}
-        </div>
       </section>
       <InfoDialog
         title={t('How do I do this?')}
@@ -110,6 +169,88 @@ const DnsSettingsView = ({
         </>
       </InfoDialog>
     </>
+  );
+};
+
+const AccordionSection = ({
+  title,
+  badge,
+  isOpen,
+  onOpen,
+  children,
+}: {
+  title: string;
+  badge?: string;
+  isOpen: boolean;
+  onOpen: () => void;
+  children: ReactNode;
+}) => {
+  return (
+    <div className="rounded-lg border border-slate-200 dark:border-slate-700">
+      <button
+        type="button"
+        onClick={onOpen}
+        className={`flex w-full flex-row items-center gap-3 px-5 py-4 text-left text-xl ${
+          isOpen ? '' : 'text-slate-500 dark:text-slate-400'
+        }`}
+      >
+        {title}
+        {badge ? (
+          <span className="rounded-full bg-indigo-100 px-3 py-0.5 text-sm text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200">
+            {badge}
+          </span>
+        ) : null}
+        {isOpen ? (
+          <ChevronUp className="ml-auto h-5 w-5 flex-shrink-0" />
+        ) : (
+          <ChevronDown className="ml-auto h-5 w-5 flex-shrink-0" />
+        )}
+      </button>
+      {isOpen ? <div className="px-5 pb-5">{children}</div> : null}
+    </div>
+  );
+};
+
+const NsDelegationBlock = ({
+  nsRecords,
+  domain,
+  isApexDomain,
+  showStatus,
+}: {
+  nsRecords: DnsRecord[];
+  domain: string;
+  isApexDomain: boolean;
+  showStatus: boolean;
+}) => {
+  const registrableDomain = getRegistrableDomain(domain) || domain;
+  const subLabel = getSubLabel(domain);
+
+  return (
+    <div className="flex flex-col gap-4">
+      {isApexDomain ? (
+        <>
+          <p className="text-slate-500 dark:text-slate-400">
+            {t(
+              `Change your domain's nameservers at your registrar to the servers below. Homebase then manages all DNS records for you - including any future ones (e.g. email) - so you never have to touch DNS again.`
+            )}
+          </p>
+          <Alert type="warning">
+            {t(
+              `If you use ${domain} for anything except Homebase (a website, email, ...), don't do this - set up the records yourself instead.`
+            )}
+          </Alert>
+        </>
+      ) : (
+        <p className="text-slate-500 dark:text-slate-400">
+          {t(
+            `Add these NS records for "${subLabel}" in the ${registrableDomain} zone at your DNS host. Homebase then manages all DNS records for ${domain} - including any future ones (e.g. email) - so you never have to touch DNS again.`
+          )}
+        </p>
+      )}
+      {nsRecords.map((record) => (
+        <RecordView key={record.value} record={record} domain={domain} showStatus={showStatus} />
+      ))}
+    </div>
   );
 };
 
@@ -266,7 +407,6 @@ const RecordView = ({
   showStatus: boolean;
   hideDotOnValue?: boolean;
 }) => {
-  const { data: apexDomain } = useApexDomain(domain);
   const [showBadValue, setShowBadValue] = useState(false);
 
   const simpleStatus = status || record.status;
@@ -277,9 +417,9 @@ const RecordView = ({
   const recordValue = `${[record.name, domain].filter(Boolean).join('.')}`;
   const recordIsApex = !record.name;
 
-  const subDomain = apexDomain
-    ? domain.replace(`.${apexDomain}`, '').replace(`${apexDomain}`, '')
-    : '';
+  // Name-based split (see registrableDomain.ts for why a DNS lookup can't be used here)
+  const registrableDomain = getRegistrableDomain(domain) || domain;
+  const subDomain = getSubLabel(domain);
 
   return (
     <>
@@ -301,7 +441,7 @@ const RecordView = ({
           ) : (
             <>
               {[record.name, subDomain].filter(Boolean).join('.')}
-              <span className={record.name ? `text-slate-400` : ''}>.{apexDomain || domain}.</span>
+              <span className={record.name ? `text-slate-400` : ''}>.{registrableDomain}.</span>
             </>
           )}
         </ClickToCopy>

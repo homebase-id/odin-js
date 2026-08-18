@@ -75,6 +75,7 @@ const InvitationCodeCheck = () => {
                   key="form-submit"
                   className="flex-grow justify-center text-center"
                   type="primary"
+                  buttonType="submit"
                   state={
                     (status === 'pending' || status === 'error') && invitationCode
                       ? status

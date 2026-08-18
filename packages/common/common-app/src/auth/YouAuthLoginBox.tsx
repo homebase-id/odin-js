@@ -1,16 +1,13 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { type YouAuthorizationParams } from '@homebase-id/js-lib/auth';
 import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
+import { replaceDomainSeparators, stripUrlToHost } from '../helpers/domainCleaner';
 
 const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]{2,25}(?::\d{1,5})?$/i;
 const AUTHORIZE_PATH = '/api/owner/v1/youauth/authorize';
 const STORAGE_KEY_IDENTITY = 'youauth-previous-identity';
 
-const stripIdentity = (identity: string) =>
-  identity
-    .replace(/^(https?):\/\//, '')
-    .split('/')[0]
-    .toLowerCase();
+const stripIdentity = stripUrlToHost;
 
 const pingIdentity = async (identity: string): Promise<boolean> => {
   try {
@@ -128,7 +125,7 @@ export const YouAuthLoginBox = ({
             autoComplete="off"
             value={identity}
             onChange={(e) => {
-              setIdentity(e.target.value.replace(/\s/g, '.'));
+              setIdentity(replaceDomainSeparators(e.target.value));
               setError(null);
             }}
           />

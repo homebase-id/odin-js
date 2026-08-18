@@ -24,20 +24,10 @@ export type DnsConfig = Array<DnsRecord>;
 
 //
 
-export function hasInvalidDnsRecords(dnsConfig: DnsConfig | undefined): boolean {
-  if (!dnsConfig) return true;
-
-  const aliasARecord = dnsConfig.find((record) => record.type === 'ALIAS');
-  const fallbackARecord = dnsConfig.find((record) => record.type === 'A');
-  const subRecords = dnsConfig.filter((record) => !!record.name);
-
-  const mainRecordValid =
-    aliasARecord?.status === 'success' || fallbackARecord?.status === 'success';
-
-  const subRecordsValid = !subRecords.some((record) => record.status !== 'success');
-
-  return !mainRecordValid || !subRecordsValid;
-}
+// NOTE: there is deliberately no client-side "are the DNS records valid" rule here.
+// The server owns that rule (DnsLookupService.AreDnsLookupsSuccessful) and reports the
+// verdict through the own-domain-dns-status HTTP code (200 valid / 202 not yet), which
+// useFetchOwnDomainDnsConfig surfaces as OwnDomainDnsStatus.success.
 
 // //
 

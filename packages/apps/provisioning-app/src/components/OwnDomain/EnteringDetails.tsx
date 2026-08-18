@@ -1,6 +1,6 @@
 import ActionButton from '../ui/Buttons/ActionButton';
 import {t} from '../../helpers/i18n/dictionary';
-import {validDomainRegEx} from '../../helpers/common';
+import {cleanDomain, cleanDomainInput} from '../../helpers/common';
 import {
     OwnDomainProvisionState,
     useFetchIsOwnDomainAvailable,
@@ -8,7 +8,7 @@ import {
 import {useFetchManagedDomainsApexes} from '../../hooks/managedDomain/useManagedDomain';
 import {AlertError} from '../ErrorAlert/ErrorAlert';
 import {Input, Label} from '@homebase-id/common-app';
-import {Arrow, Exclamation, Globe} from '@homebase-id/common-app/icons';
+import {Arrow, Exclamation} from '@homebase-id/common-app/icons';
 import {useNavigate} from "react-router-dom";
 
 interface Props {
@@ -27,11 +27,14 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
     //
     // API
     //
+    // Availability is checked for the CLEANED domain: the live input deliberately keeps a
+    // trailing dot while typing, which the server would (correctly) reject as invalid -
+    // the user is asking about the domain without it
     const {
         data: isOwnDomainAvailable,
         error: errorIsOwnDomainAvailable,
         status: statusIsOwnDomainAvailable,
-    } = useFetchIsOwnDomainAvailable(domain || '').fetchIsOwnDomainAvailable;
+    } = useFetchIsOwnDomainAvailable(cleanDomain(domain) || '').fetchIsOwnDomainAvailable;
 
     const {
         fetchManagedDomainApexes: {data: managedDomainApexes},
@@ -49,7 +52,17 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
                     e.preventDefault();
                     e.currentTarget.reportValidity();
 
+                    // Final cleanup (e.g. Enter-key submit skips the input's onBlur).
+                    // Advancing right away is safe: the availability check already ran
+                    // against the cleaned domain.
+                    const cleaned = cleanDomain(domain);
+                    if (cleaned !== domain) setDomain(cleaned);
+
+                    // The zone is NOT created here: creating it requires proof of domain
+                    // control, which only exists once the user has set up delegation or
+                    // records - the DNS step's Validate action handles that
                     if (
+                        cleaned &&
                         e.currentTarget.checkValidity() &&
                         isOwnDomainAvailable &&
                         statusIsOwnDomainAvailable === 'success'
@@ -74,9 +87,9 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
                         type="text"
                         required
                         placeholder={t('your.domain.here')}
-                        defaultValue={domain}
-                        onKeyDown={(e) => e.key.match(validDomainRegEx) && e.preventDefault()}
-                        onChange={(e) => setDomain(e.target.value.toLowerCase())}
+                        value={domain}
+                        onChange={(e) => setDomain(cleanDomainInput(e.target.value))}
+                        onBlur={() => setDomain(cleanDomain(domain))}
                     />
                 </div>
 
@@ -104,18 +117,19 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
 
                     {managedDomainApexes && managedDomainApexes.length > 0 ? (
                         <ActionButton
-                            icon={Globe}
+                            type="secondary"
                             onClick={(e) => {
                                 e.preventDefault();
-                                navigate(`../managed-domain?invitation-code=${invitationCode}`);
+                                navigate(`../managed-domain${window.location.search}`);
                             }}>
-                            {t('Use a managed domain')}
+                            {t('« Back')}
                         </ActionButton>
                     ) : <div />}
 
                     <ActionButton
                         className="h-[2.66rem]"
                         icon={Arrow}
+                        buttonType="submit"
                         isDisabled={!(isOwnDomainAvailable && statusIsOwnDomainAvailable === 'success')}
                         state={
                             statusIsOwnDomainAvailable !== 'success' ? statusIsOwnDomainAvailable : undefined

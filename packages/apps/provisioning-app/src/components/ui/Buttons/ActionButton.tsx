@@ -9,6 +9,10 @@ export interface ActionButtonProps {
   className?: string;
   icon?: FC<IconProps>;
   type?: 'primary' | 'secondary' | 'remove' | 'mute';
+  // HTML button type. Defaults to "button" (NOT the browser's "submit" default) so a
+  // button placed inside a form never becomes an accidental Enter-key submit target -
+  // the form's actual submit button must opt in with buttonType="submit"
+  buttonType?: 'button' | 'submit' | 'reset';
   state?: ActionButtonState;
   isDisabled?: boolean;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
@@ -22,6 +26,7 @@ const ActionButton: FC<ActionButtonProps> = ({
   className,
   icon,
   type,
+  buttonType,
   state,
   title,
   size,
@@ -70,6 +75,7 @@ const ActionButton: FC<ActionButtonProps> = ({
         } flex flex-row ${
           className && className.indexOf('rounded-') !== -1 ? '' : 'rounded-md'
         } text-left ${widthClasses} ${sizeClasses} ${colorClasses} ${stateClasses} ${className}`}
+        type={buttonType ?? 'button'}
         disabled={isDisabled || state === 'loading' || state === 'pending'}
         onClick={onClick}
         title={title}

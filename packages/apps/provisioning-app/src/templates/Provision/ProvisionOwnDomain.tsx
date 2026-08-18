@@ -60,7 +60,11 @@ const ProvisionOwnDomain = () => {
               invitationCode={invitationCode}
             />
           ) : provisionState === 'DnsRecords' ? (
-            <ValidatingDnsRecords domain={domain} setProvisionState={setProvisionState} />
+            <ValidatingDnsRecords
+              domain={domain}
+              invitationCode={invitationCode}
+              setProvisionState={setProvisionState}
+            />
           ) : provisionState === 'Provisioning' ? (
             <CreateIdentityView
               domain={domain}

@@ -1,5 +1,3 @@
-export const validDomainRegEx = /[^\w-.]/g;
-
 export const getVersion = () => {
   try {
     const numberedVersion = parseInt(import.meta.env.VITE_APP_VERSION ?? '');
@@ -24,19 +22,16 @@ export const domainFromPrefixAndApex = (prefix: string, apex: string) => {
   }
 };
 
-// As enforced server side by AsciiDomainNameValidator.MAX_DNS_LABEL_LENGTH
-export const MAX_DNS_LABEL_LENGTH = 63;
+// Domain-input cleaning is shared with the YouAuth login box - single implementation
+// in common-app so a domain typed anywhere behaves the same
+export {
+  MAX_DNS_LABEL_LENGTH,
+  cleanLabel,
+  cleanDomain,
+  cleanDomainInput,
+} from '@homebase-id/common-app';
 
 const MIN_DNS_LABEL_LENGTH = 2;
-
-// The server rejects underscores even though they are word characters, so \w is
-// wrong here
-export const cleanLabel = (value: string) =>
-  value
-    .toLocaleLowerCase()
-    .replace(/[^a-z0-9-]/g, '')
-    .replace(/^-+/, '')
-    .slice(0, MAX_DNS_LABEL_LENGTH);
 
 // The server rejects a leading or trailing hyphen on any label
 export const isCompleteLabel = (label: string) =>
