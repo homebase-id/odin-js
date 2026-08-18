@@ -30,20 +30,23 @@ export const DnsSecuritySettings = () => {
 
       <Section
         title={
-          <div className="flex w-full flex-row items-center justify-between">
+          <div className="flex w-full flex-row items-center justify-between gap-6">
             <div className="flex flex-col">
               {t('DNS')}
               <small className="text-sm text-gray-400">
                 {t('The DNS records and DNSSEC state of your domain')}
               </small>
             </div>
+            {/* "Refresh", not "Verify": the check already runs when the tab opens */}
             <ActionButton
               type="secondary"
+              size="none"
+              className="px-3 py-1 text-sm"
               icon={Refresh}
               onClick={verify}
               state={isRefetching ? 'loading' : undefined}
             >
-              {t('Verify')}
+              {t('Refresh')}
             </ActionButton>
           </div>
         }
@@ -183,7 +186,7 @@ const DnssecBlock = ({ dnssec }: { dnssec: DnssecHealth }) => {
         // dsMissing
         <>
           <Alert type="warning">
-            {t('Your DNS zone is cryptographically signed, but the chain of trust is not anchored yet. Optional: add this DS record where your domain is delegated - at your registrar for a registered (apex) domain, or as a DS record next to your NS records at your DNS host for a subdomain.')}
+            {t('Your DNS zone is cryptographically signed, but the chain of trust is not anchored yet. Recommended: add this DS record where your domain is delegated - at your registrar for a registered (apex) domain, or as a DS record next to your NS records at your DNS host for a subdomain.')}
           </Alert>
           <DsTable dsRecords={dnssec.dsToPublish} copyable />
         </>
