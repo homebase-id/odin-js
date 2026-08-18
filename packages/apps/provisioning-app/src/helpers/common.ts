@@ -27,8 +27,10 @@ export const domainFromPrefixAndApex = (prefix: string, apex: string) => {
 export {
   MAX_DNS_LABEL_LENGTH,
   cleanLabel,
+  cleanLabelInPlace,
   cleanDomain,
   cleanDomainInput,
+  cleanDomainInputInPlace,
 } from '@homebase-id/common-app';
 
 const MIN_DNS_LABEL_LENGTH = 2;

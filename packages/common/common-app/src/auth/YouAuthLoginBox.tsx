@@ -1,7 +1,7 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { type YouAuthorizationParams } from '@homebase-id/js-lib/auth';
 import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
-import { replaceDomainSeparators, stripUrlToHost } from '../helpers/domainCleaner';
+import { replaceDomainSeparatorsInPlace, stripUrlToHost } from '../helpers/domainCleaner';
 
 const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]{2,25}(?::\d{1,5})?$/i;
 const AUTHORIZE_PATH = '/api/owner/v1/youauth/authorize';
@@ -125,7 +125,9 @@ export const YouAuthLoginBox = ({
             autoComplete="off"
             value={identity}
             onChange={(e) => {
-              setIdentity(replaceDomainSeparators(e.target.value));
+              // In-place so typing a space/comma mid-string doesn't jump the caret
+              // to the end when React rewrites the transformed value
+              setIdentity(replaceDomainSeparatorsInPlace(e.currentTarget));
               setError(null);
             }}
           />
