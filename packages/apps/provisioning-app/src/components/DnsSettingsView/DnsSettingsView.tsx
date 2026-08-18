@@ -94,7 +94,6 @@ const DnsSettingsView = ({
         nsRecords={nsRecords}
         domain={domain}
         isApexDomain={isApexDomain}
-        isDelegated={isDelegated}
         showStatus={showStatus}
       />
     </AccordionSection>
@@ -216,13 +215,11 @@ const NsDelegationBlock = ({
   nsRecords,
   domain,
   isApexDomain,
-  isDelegated,
   showStatus,
 }: {
   nsRecords: DnsRecord[];
   domain: string;
   isApexDomain: boolean;
-  isDelegated: boolean;
   showStatus: boolean;
 }) => {
   const registrableDomain = getRegistrableDomain(domain) || domain;
@@ -232,7 +229,7 @@ const NsDelegationBlock = ({
     <div className="flex flex-col gap-4">
       {isApexDomain ? (
         <>
-          <p>
+          <p className="text-slate-500 dark:text-slate-400">
             {t(
               `Change your domain's nameservers at your registrar to the servers below. Homebase then manages all DNS records for you - including any future ones (e.g. email) - so you never have to touch DNS again.`
             )}
@@ -244,7 +241,7 @@ const NsDelegationBlock = ({
           </Alert>
         </>
       ) : (
-        <p>
+        <p className="text-slate-500 dark:text-slate-400">
           {t(
             `Add these NS records for "${subLabel}" in the ${registrableDomain} zone at your DNS host. Homebase then manages all DNS records for ${domain} - including any future ones (e.g. email) - so you never have to touch DNS again.`
           )}
@@ -253,11 +250,6 @@ const NsDelegationBlock = ({
       {nsRecords.map((record) => (
         <RecordView key={record.value} record={record} domain={domain} showStatus={showStatus} />
       ))}
-      {showStatus && isDelegated ? (
-        <Alert type="success">
-          {t('DNS delegation detected - no other records are needed.')}
-        </Alert>
-      ) : null}
     </div>
   );
 };
