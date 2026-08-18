@@ -186,7 +186,7 @@ const DnssecBlock = ({ dnssec }: { dnssec: DnssecHealth }) => {
         // dsMissing
         <>
           <Alert type="warning">
-            {t('Your DNS zone is cryptographically signed, but the chain of trust is not anchored yet. Optional: add this DS record where your domain is delegated - at your registrar for a registered (apex) domain, or as a DS record next to your NS records at your DNS host for a subdomain.')}
+            {t('Your DNS zone is cryptographically signed, but the chain of trust is not anchored yet. Recommended: add this DS record where your domain is delegated - at your registrar for a registered (apex) domain, or as a DS record next to your NS records at your DNS host for a subdomain.')}
           </Alert>
           <DsTable dsRecords={dnssec.dsToPublish} copyable />
         </>
