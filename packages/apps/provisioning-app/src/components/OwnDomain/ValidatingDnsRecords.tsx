@@ -56,12 +56,17 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
   // which read as a glitch.
   const [isValidating, setIsValidating] = useState(false);
   const [isProvisioning, setIsProvisioning] = useState(false);
+  // Feedback for Provision attempts that keep the user on this screen; without it two
+  // failure paths were silent (a control-proof race, and the fresh zone not serving),
+  // because the delegation-OR-records verdict stays "valid" in both
+  const [provisionIssue, setProvisionIssue] = useState<string | null>(null);
 
   // Validate is strictly read-only: it re-checks DNS and reveals the statuses.
   // Nothing is created anywhere before the Provision click.
   const validate = async () => {
     setShowStatus(true);
     setIsValidating(true);
+    setProvisionIssue(null);
     try {
       await refetchDnsStatus();
     } finally {
@@ -76,6 +81,7 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
   // cache-safe: it queries authoritative servers only, never public resolvers.
   const provision = async () => {
     setIsProvisioning(true);
+    setProvisionIssue(null);
     try {
       if (createZoneData?.created !== true) {
         let result;
@@ -86,10 +92,19 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
           // surfaced via createZoneError; do not advance
           return;
         }
-        // Permanent refusals are surfaced by the alerts above; do not advance.
+        // Permanent refusals are surfaced by the dedicated alerts; do not advance.
         // (notConfigured is fine: no zone hosting on this deployment - the manual
         // records carried the validation.)
         if (!result.created && result.reason !== 'notConfigured') {
+          if (result.reason === 'controlNotProven') {
+            // Race: the verdict passed moments ago but the server could not re-prove
+            // control now (e.g. a DNS flap at the parent)
+            setProvisionIssue(
+              t(
+                'Domain control could not be re-verified just now. Press Validate to refresh the status, then try Provision again.'
+              )
+            );
+          }
           setShowStatus(true);
           return;
         }
@@ -108,6 +123,11 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
         setProvisionState('Provisioning');
       } else {
         // The fresh zone does not serve (yet) - stay here with statuses visible
+        setProvisionIssue(
+          t(
+            'The DNS zone was created, but its records do not resolve yet. Wait a moment and press Provision again.'
+          )
+        );
         setShowStatus(true);
       }
     } finally {
@@ -133,6 +153,11 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
       ) : null}
       {activeDnsConfig ? (
         <DnsSettingsView domain={domain} dnsConfig={activeDnsConfig} showStatus={effectiveShowStatus} />
+      ) : null}
+      {provisionIssue ? (
+        <Alert type="warning" className="mb-5">
+          {provisionIssue}
+        </Alert>
       ) : null}
       {dnsStatus && hasInvalid && showStatus ? (
         <Alert type="info" className="mt-5">
