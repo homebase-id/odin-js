@@ -8,9 +8,19 @@ import {PasswordRecoverySetupTab} from "./PasswordRecoverySetupTab";
 import {Lock} from "@homebase-id/common-app/icons";
 import {ChangePasswordTab} from "./ChangePasswordTab";
 import {DnsSecuritySettings} from "./DnsSecuritySettings";
+import {useDnsHealth} from "../../hooks/dns/useDnsHealth";
 
 const Security = () => {
   const {sectionId} = useParams();
+
+  // Red dot on the DNS tab only when the user should act: a required record is broken,
+  // or a stale DS makes validating resolvers refuse the domain. The optional-hardening
+  // state (dsMissing) deliberately does NOT light it up. Shares the DNS tab's query
+  // (5 min stale time), so opening the tab costs no extra fetch.
+  const {fetchDnsHealth: {data: dnsHealth}} = useDnsHealth();
+  const dnsNeedsAttention =
+    !!dnsHealth && (!dnsHealth.recordsAreValid || dnsHealth.dnssec.status === 'dsMismatch');
+
   return (
     <>
       <PageMeta icon={Lock} title={`${t('Security')}`}/>
@@ -33,7 +43,14 @@ const Security = () => {
             path: `/owner/security/release-shards`,
           },
           {
-            title: `DNS`,
+            title: (
+              <span className="flex flex-row items-center gap-2">
+                DNS
+                {dnsNeedsAttention ? (
+                  <span className="inline-block h-2 w-2 rounded-full bg-red-500"/>
+                ) : null}
+              </span>
+            ),
             path: `/owner/security/dns`,
           },
         ]}
