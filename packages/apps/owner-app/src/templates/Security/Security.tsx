@@ -7,6 +7,7 @@ import ApproveAndReleaseShardsTabs from "./ApproveAndReleaseShardsTabs";
 import {PasswordRecoverySetupTab} from "./PasswordRecoverySetupTab";
 import {Lock} from "@homebase-id/common-app/icons";
 import {ChangePasswordTab} from "./ChangePasswordTab";
+import {DnsSecuritySettings} from "./DnsSecuritySettings";
 
 const Security = () => {
   const {sectionId} = useParams();
@@ -31,6 +32,10 @@ const Security = () => {
             title: `Account Recovery Requests`,
             path: `/owner/security/release-shards`,
           },
+          {
+            title: `DNS`,
+            path: `/owner/security/dns`,
+          },
         ]}
         className="mb-4"
       />
@@ -38,6 +43,7 @@ const Security = () => {
       {sectionId === 'change-password' && <ChangePasswordTab/>}
       {sectionId === 'password-recovery' && <PasswordRecoverySetupTab/>}
       {sectionId === 'release-shards' && <ApproveAndReleaseShardsTabs/>}
+      {sectionId === 'dns' && <DnsSecuritySettings/>}
     </>
   );
 };
