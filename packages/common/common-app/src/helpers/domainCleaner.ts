@@ -45,3 +45,52 @@ export const cleanDomainInput = (value: string) =>
 
 // Final domain cleaner, run when input is done (blur/submit): also drops trailing dots
 export const cleanDomain = (value: string) => cleanDomainInput(value).replace(/\.+$/, '');
+
+// Caret-aware variant for live inputs. Whenever the cleaner changes the value - even
+// same-length changes like A->a or space->dot - a controlled React input (or a manual
+// `input.value = ...` assignment) rewrites the DOM value, which throws the caret to the
+// end; editing mid-string then jumps. The caret belongs right after the cleaned version
+// of everything that preceded it, so clean the prefix to find its new position.
+export const cleanDomainInputWithCaret = (
+  value: string,
+  caret: number | null
+): { value: string; caret: number } => {
+  const cleaned = cleanDomainInput(value);
+  const cleanedPrefix = cleanDomainInput(value.slice(0, caret ?? value.length));
+  return { value: cleaned, caret: Math.min(cleanedPrefix.length, cleaned.length) };
+};
+
+// Applies a cleaner directly to an input element, keeping the caret in place, and
+// returns the cleaned value for the state setter. Syncing the DOM value here makes the
+// controlled re-render a no-op (React only rewrites input.value - moving the caret -
+// when it differs from the rendered value).
+const applyCleanerInPlace = (input: HTMLInputElement, cleaner: (value: string) => string) => {
+  const cleaned = cleaner(input.value);
+  if (cleaned !== input.value) {
+    const caretIndex = input.selectionStart ?? input.value.length;
+    const caret = Math.min(cleaner(input.value.slice(0, caretIndex)).length, cleaned.length);
+    input.value = cleaned;
+    input.setSelectionRange(caret, caret);
+  }
+  return cleaned;
+};
+
+export const cleanDomainInputInPlace = (input: HTMLInputElement): string =>
+  applyCleanerInPlace(input, cleanDomainInput);
+
+// For single-label inputs (e.g. the managed-domain name boxes)
+export const cleanLabelInPlace = (input: HTMLInputElement): string =>
+  applyCleanerInPlace(input, cleanLabel);
+
+// Same in-place pattern for the lighter separator-only cleaning used by the login
+// boxes (which must keep ports, so they can't run the full cleaner). Separator
+// replacement is 1:1 per character, so the caret index itself is already correct.
+export const replaceDomainSeparatorsInPlace = (input: HTMLInputElement): string => {
+  const caret = input.selectionStart;
+  const replaced = replaceDomainSeparators(input.value);
+  if (replaced !== input.value) {
+    input.value = replaced;
+    if (caret !== null) input.setSelectionRange(caret, caret);
+  }
+  return replaced;
+};

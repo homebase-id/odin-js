@@ -84,10 +84,17 @@ export const LoginBox = async (
   }, 500);
 
   // Space and comma both act as the dot key. Kept in sync BY HAND with
-  // common-app/src/helpers/domainCleaner.ts (replaceDomainSeparators) - this app has no
-  // dependency on common-app and adding one is blocked by the auth-gated npm registry.
+  // common-app/src/helpers/domainCleaner.ts (replaceDomainSeparatorsInPlace) - this app
+  // has no dependency on common-app and adding one is blocked by the auth-gated npm
+  // registry. Restores the caret because assigning a changed input.value moves it to
+  // the end, which made mid-string edits jump. 1:1 replacement, so the index is stable.
   const replaceSeparatorsWithDots = () => {
-    dotyouInputBox.value = dotyouInputBox.value.replace(/[\s,]/g, '.');
+    const replaced = dotyouInputBox.value.replace(/[\s,]/g, '.');
+    if (replaced !== dotyouInputBox.value) {
+      const caret = dotyouInputBox.selectionStart;
+      dotyouInputBox.value = replaced;
+      if (caret !== null) dotyouInputBox.setSelectionRange(caret, caret);
+    }
   };
 
   dotyouInputBox.addEventListener('keydown', debouncedDomainValidator);

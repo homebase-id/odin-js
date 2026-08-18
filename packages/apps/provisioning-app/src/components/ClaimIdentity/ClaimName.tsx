@@ -11,7 +11,12 @@ import {
   ManagedDomainApex,
   useFetchIsManagedDomainAvailable,
 } from '../../hooks/managedDomain/useManagedDomain';
-import { cleanLabel, domainFromPrefixAndApex, MAX_DNS_LABEL_LENGTH } from '../../helpers/common';
+import {
+  cleanLabel,
+  cleanLabelInPlace,
+  domainFromPrefixAndApex,
+  MAX_DNS_LABEL_LENGTH,
+} from '../../helpers/common';
 
 const PLACEHOLDER_NAMES = ['john', 'doe'];
 
@@ -79,9 +84,12 @@ const ClaimName = ({
     return { tone: 'bad', text: t('{0} is taken — try another name', domain) };
   })();
 
-  const onPrefixInput = (index: number, raw: string) => {
+  // In-place cleaning keeps the caret where the user is typing; storing a transformed
+  // value in a controlled input makes React rewrite input.value, jumping the caret to
+  // the end (paste keeps plain cleanLabel - it replaces whole labels anyway)
+  const onPrefixInput = (index: number, input: HTMLInputElement) => {
     const next = [...prefixes];
-    next[index] = cleanLabel(raw);
+    next[index] = cleanLabelInPlace(input);
     onPrefixesChange(next);
   };
 
@@ -149,7 +157,7 @@ const ClaimName = ({
                   maxLength={MAX_DNS_LABEL_LENGTH}
                   required
                   className="w-full min-w-0 bg-transparent py-3 font-mono text-base text-gray-700 outline-none placeholder:text-slate-400 dark:text-gray-100 dark:placeholder:text-slate-500"
-                  onChange={(e) => onPrefixInput(index, e.target.value)}
+                  onChange={(e) => onPrefixInput(index, e.currentTarget)}
                   onKeyDown={(e) => {
                     if ((e.key === '.' || e.key === ' ') && index < labelCount - 1) {
                       e.preventDefault();

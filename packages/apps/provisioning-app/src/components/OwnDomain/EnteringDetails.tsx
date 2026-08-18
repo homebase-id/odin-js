@@ -1,6 +1,6 @@
 import ActionButton from '../ui/Buttons/ActionButton';
 import {t} from '../../helpers/i18n/dictionary';
-import {cleanDomain, cleanDomainInput} from '../../helpers/common';
+import {cleanDomain, cleanDomainInputInPlace} from '../../helpers/common';
 import {
     OwnDomainProvisionState,
     useFetchIsOwnDomainAvailable,
@@ -88,7 +88,10 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
                         required
                         placeholder={t('your.domain.here')}
                         value={domain}
-                        onChange={(e) => setDomain(cleanDomainInput(e.target.value))}
+                        // The in-place variant keeps the caret where the user is typing:
+                        // storing a transformed value in a controlled input makes React
+                        // rewrite input.value, which jumps the caret to the end
+                        onChange={(e) => setDomain(cleanDomainInputInPlace(e.currentTarget))}
                         onBlur={() => setDomain(cleanDomain(domain))}
                     />
                 </div>
