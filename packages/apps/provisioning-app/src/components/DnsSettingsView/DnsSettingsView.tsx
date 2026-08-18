@@ -38,30 +38,46 @@ const DnsSettingsView = ({
   const recommendedSection: 'delegate' | 'manual' = isApexDomain ? 'manual' : 'delegate';
   const [openSection, setOpenSection] = useState<'delegate' | 'manual'>(recommendedSection);
 
+  // Delegation active = the NS records at the parent verified. From that moment the
+  // manual records are moot: our zone is the only authoritative source, and any records
+  // still sitting at the user's DNS host are occluded by the delegation - so the manual
+  // section is greyed out and its statuses suppressed (they would just echo our own zone).
+  const isDelegated = nsRecords.length > 0 && nsRecords.every((r) => r.status === 'success');
+  const manualShowStatus = showStatus && !isDelegated;
+
   const manualSetupBlock = (
     <>
-      {isApexDomain ? (
-        <ApexInfoBlock
-          dnsConfig={dnsConfig}
-          domain={domain}
-          showStatus={showStatus}
-          yourDomain={domain}
-          className="mb-10"
-        />
-      ) : (
-        <SubdomainInfoBlock
-          dnsConfig={dnsConfig}
-          domain={domain}
-          showStatus={showStatus}
-          yourDomain={domain}
-          className="mb-10"
-        />
-      )}
-      <div className="flex flex-col gap-2">
-        <p className="mb-5 text-2xl">{t('Add the required subdomains')}</p>
-        {subRecords.map((record) => (
-          <RecordView key={record.name} record={record} domain={domain} showStatus={showStatus} />
-        ))}
+      {isDelegated ? (
+        <Alert type="info" className="mb-5">
+          {t(
+            `DNS delegation to Homebase is active - these records are served automatically from your Homebase-hosted zone. Manual setup does not apply.`
+          )}
+        </Alert>
+      ) : null}
+      <div className={isDelegated ? 'pointer-events-none opacity-50' : ''}>
+        {isApexDomain ? (
+          <ApexInfoBlock
+            dnsConfig={dnsConfig}
+            domain={domain}
+            showStatus={manualShowStatus}
+            yourDomain={domain}
+            className="mb-10"
+          />
+        ) : (
+          <SubdomainInfoBlock
+            dnsConfig={dnsConfig}
+            domain={domain}
+            showStatus={manualShowStatus}
+            yourDomain={domain}
+            className="mb-10"
+          />
+        )}
+        <div className="flex flex-col gap-2">
+          <p className="mb-5 text-2xl">{t('Add the required subdomains')}</p>
+          {subRecords.map((record) => (
+            <RecordView key={record.name} record={record} domain={domain} showStatus={manualShowStatus} />
+          ))}
+        </div>
       </div>
     </>
   );
@@ -78,6 +94,7 @@ const DnsSettingsView = ({
         nsRecords={nsRecords}
         domain={domain}
         isApexDomain={isApexDomain}
+        isDelegated={isDelegated}
         showStatus={showStatus}
       />
     </AccordionSection>
@@ -199,14 +216,15 @@ const NsDelegationBlock = ({
   nsRecords,
   domain,
   isApexDomain,
+  isDelegated,
   showStatus,
 }: {
   nsRecords: DnsRecord[];
   domain: string;
   isApexDomain: boolean;
+  isDelegated: boolean;
   showStatus: boolean;
 }) => {
-  const isDelegated = nsRecords.every((record) => record.status === 'success');
   const registrableDomain = getRegistrableDomain(domain) || domain;
   const subLabel = getSubLabel(domain);
 
