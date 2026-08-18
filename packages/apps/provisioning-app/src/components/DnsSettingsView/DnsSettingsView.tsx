@@ -231,7 +231,7 @@ const NsDelegationBlock = ({
         <>
           <p className="text-slate-500 dark:text-slate-400">
             {t(
-              `Change your domain's nameservers at your registrar to the servers below. Homebase then manages all DNS records for you - including any future ones (e.g. email) - so you never have to touch DNS again.`
+              `Replace your domain's nameservers at your registrar with the two below (remove any others). Homebase then manages all DNS records for you - including any future ones (e.g. email) - so you never have to touch DNS again.`
             )}
           </p>
           <Alert type="warning">
@@ -247,10 +247,99 @@ const NsDelegationBlock = ({
           )}
         </p>
       )}
-      {nsRecords.map((record) => (
-        <RecordView key={record.value} record={record} domain={domain} showStatus={showStatus} />
-      ))}
+      {isApexDomain
+        ? // A registrar's nameserver form takes bare hostnames - showing zone-file
+          // "domain. NS value." lines here reads as "add these records somewhere",
+          // which is exactly what an apex owner must NOT do
+          nsRecords.map((record, index) => (
+            <NameServerView key={record.value} record={record} index={index} showStatus={showStatus} />
+          ))
+        : nsRecords.map((record) => (
+            <RecordView key={record.value} record={record} domain={domain} showStatus={showStatus} />
+          ))}
     </div>
+  );
+};
+
+// The apex rendering of an NS entry: "Nameserver N: ns1.example" - mirroring the
+// registrar UI the user is about to type it into. Same status semantics as RecordView
+// (the NS statuses verify the PARENT's delegation server-side).
+const NameServerView = ({
+  record,
+  index,
+  showStatus,
+}: {
+  record: DnsRecord;
+  index: number;
+  showStatus: boolean;
+}) => {
+  const [showBadValue, setShowBadValue] = useState(false);
+
+  const simpleStatus = record.status;
+  const isGood = simpleStatus === 'success';
+  const isInCorrectvalue = simpleStatus === 'incorrectValue';
+  const delegationFound = record.records ? Object.values(record.records)[0] : undefined;
+
+  return (
+    <>
+      <div
+        className={`flex flex-row flex-wrap items-center gap-2 rounded-lg ${
+          showStatus
+            ? isGood
+              ? 'bg-green-100 dark:bg-green-900'
+              : errorStates.includes(simpleStatus)
+                ? 'bg-orange-100 dark:bg-orange-900'
+                : 'bg-gray-100 dark:bg-gray-800'
+            : 'bg-gray-100 dark:bg-gray-800'
+        } px-4 py-3 font-mono text-base shadow-sm`}
+      >
+        <span className="text-slate-400">{t('Nameserver')} {index + 1}</span>
+        <ClickToCopy>{record.value}</ClickToCopy>
+        {showStatus ? (
+          <div
+            className={`ml-auto flex flex-row items-center gap-2 text-sm ${
+              isInCorrectvalue
+                ? 'cursor-pointer text-indigo-500 hover:underline'
+                : `${!isGood ? 'text-orange-600 dark:text-orange-400' : ''}`
+            }`}
+            onClick={isInCorrectvalue ? () => setShowBadValue(true) : undefined}
+          >
+            {isGood ? (
+              <Check className="h-5 w-5" />
+            ) : (
+              <>
+                {isInCorrectvalue ? t('Unexpected nameservers') : t('Nameservers not changed yet')}
+                {isInCorrectvalue ? (
+                  <ExternalLink className="h-5 w-5" />
+                ) : (
+                  <Exclamation className="h-5 w-5" />
+                )}
+              </>
+            )}
+          </div>
+        ) : null}
+      </div>
+      {delegationFound && showBadValue ? (
+        <DialogWrapper
+          title={t('Unexpected nameservers')}
+          onClose={() => setShowBadValue(false)}
+          isSidePanel={false}
+          size="2xlarge"
+        >
+          <p className="mb-4">
+            {t('Your domain should use only the Homebase nameservers, but it currently lists:')}
+            <span className="mt-1 block bg-orange-100 px-4 py-3 font-mono dark:bg-orange-900 text-base">
+              {delegationFound.join(', ')}
+            </span>
+          </p>
+          <p>
+            {t(
+              'Remove the other nameservers at your registrar (or switch back to setting up the records yourself).'
+            )}
+          </p>
+        </DialogWrapper>
+      ) : null}
+    </>
   );
 };
 
