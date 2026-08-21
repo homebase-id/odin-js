@@ -54,6 +54,17 @@ Before starting the apps, ensure you have the backend server running. You can fi
 npm install && npm run build:libs
 ```
 
+> **No GitHub Packages auth?** Both `npm install` and the `npm i` embedded in `build:libs`/`build` will fail with `401 Unauthorized ... @homebase-id/ffmpeg` if you are not authenticated to `npm.pkg.github.com` — the lockfile pins that auth-gated package. Two-part workaround:
+>
+> 1. Stub the package so imports resolve (only needed once; video/HLS features will throw if used): create `.ffmpeg-stub/` at the repo root with a `package.json` (`"name": "@homebase-id/ffmpeg"`, `"type": "module"`, `"main": "index.js"`) and an `index.js` exporting a throwing `FFmpeg` class, then `ln -s ../../.ffmpeg-stub node_modules/@homebase-id/ffmpeg`.
+> 2. Skip the embedded `npm i` by running the underlying builds directly:
+>
+>    ```
+>    npm run build -w ./packages/libs/js-lib -w ./packages/libs/ui-lib
+>    ```
+>
+> This works as long as your existing `node_modules` is roughly current; if a build fails on a genuinely missing dependency you'll need registry auth (or a colleague's `node_modules`).
+
 2. **Run the apps**:
 
 - Run all apps concurrently:
