@@ -8,7 +8,9 @@ import {PasswordRecoverySetupTab} from "./PasswordRecoverySetupTab";
 import {Lock} from "@homebase-id/common-app/icons";
 import {ChangePasswordTab} from "./ChangePasswordTab";
 import {DnsSecuritySettings} from "./DnsSecuritySettings";
+import {EmailDnsSettings} from "./EmailDnsSettings";
 import {useDnsHealth} from "../../hooks/dns/useDnsHealth";
+import {useMailHealth} from "../../hooks/mail/useMailHealth";
 
 const Security = () => {
   const {sectionId} = useParams();
@@ -26,6 +28,17 @@ const Security = () => {
     (!dnsHealth.recordsAreValid ||
       dnsHealth.dnssec.status === 'dsMismatch' ||
       dnsHealth.dnssec.status === 'dsMissing');
+
+  // Same treatment for email. No records at all means email is not set up - nothing to act
+  // on, so no dot. The dot covers the SAME set the Email tab and the monthly security health
+  // report act on: broken mail DNS records, plus the checks a record comparison cannot make
+  // (DKIM pair proof, public-key drift). Errors only - warnings are things we could not
+  // check, and a dot that cries wolf gets ignored.
+  const emailRecords = dnsHealth?.mailRecords ?? [];
+  const {fetchMailHealth: {data: mailHealth}} = useMailHealth({enabled: emailRecords.length > 0});
+  const emailNeedsAttention =
+    emailRecords.some((record) => record.status !== 'success') ||
+    (mailHealth?.errors?.length ?? 0) > 0;
 
   return (
     <>
@@ -59,6 +72,17 @@ const Security = () => {
             ),
             path: `/owner/security/dns`,
           },
+          {
+            title: (
+              <span className="flex flex-row items-center gap-2">
+                Email
+                {emailNeedsAttention ? (
+                  <span className="inline-block h-2 w-2 rounded-full bg-red-500"/>
+                ) : null}
+              </span>
+            ),
+            path: `/owner/security/email`,
+          },
         ]}
         className="mb-4"
       />
@@ -67,6 +91,7 @@ const Security = () => {
       {sectionId === 'password-recovery' && <PasswordRecoverySetupTab/>}
       {sectionId === 'release-shards' && <ApproveAndReleaseShardsTabs/>}
       {sectionId === 'dns' && <DnsSecuritySettings/>}
+      {sectionId === 'email' && <EmailDnsSettings/>}
     </>
   );
 };

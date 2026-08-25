@@ -22,7 +22,10 @@ interface SubmenuProps {
 const Submenu: FC<SubmenuProps> = ({ className, items, isLoading }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const forceMobileView = items?.length >= 6;
+  // Above this many items the tab row stops fitting and collapses to the mobile dropdown.
+  // Security sits at 6 (Status, Change Password, Password Recovery, Account Recovery
+  // Requests, DNS, Email) and still fits; the next largest consumer is Settings at 4.
+  const forceMobileView = items?.length >= 7;
 
   if (isLoading === true) {
     return <LoadingBlock className="h-10" />;
