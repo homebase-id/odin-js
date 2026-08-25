@@ -72,10 +72,12 @@ export const EmailDnsSettings = () => {
             <LoadingBlock className="m-4 h-10" />
           </>
         ) : records.length === 0 ? (
-          // No records rather than failing ones: email is not switched on for this server,
-          // or this identity has not set it up yet. Either way there is nothing to fix.
+          // Two different situations, and telling them apart is the point: one is someone
+          // else's to fix, the other is the owner's.
           <p className="text-slate-500 dark:text-slate-400">
-            {t('Email is not set up for your identity, so there are no email DNS records to check yet.')}
+            {health?.tenantMailEnabled
+              ? t('Email is not set up for your identity yet, so there are no email DNS records to check.')
+              : t('This server does not offer email, so there is nothing to set up here.')}
           </p>
         ) : (
           <div className="flex flex-col gap-4">

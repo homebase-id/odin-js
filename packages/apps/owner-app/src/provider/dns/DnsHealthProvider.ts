@@ -57,6 +57,11 @@ export interface DnsHealth {
   // from recordsAreValid, because that verdict gates certificate issuance and a missing
   // mail record must never block a certificate. Empty when tenant mail is not enabled.
   mailRecords: DnsHealthRecord[];
+  // Whether this SERVER does tenant mail at all. Without it an empty mailRecords is
+  // ambiguous, and the two cases need opposite messages: false means the server does not
+  // offer email and the owner cannot act; true with no records means they have not set it
+  // up yet and can.
+  tenantMailEnabled: boolean;
   optionalRecords: OptionalDnsRecord[];
   dnssec: DnssecHealth;
 }
