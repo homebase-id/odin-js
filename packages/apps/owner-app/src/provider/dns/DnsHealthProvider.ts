@@ -52,6 +52,11 @@ export interface DnssecHealth {
 export interface DnsHealth {
   records: DnsHealthRecord[];
   recordsAreValid: boolean;
+  // The email record set - MX, SPF, DMARC, MTA-STS, TLS-RPT and the tenant's DKIM keys.
+  // Server-side these are the Optional-flagged records: they are deliberately excluded
+  // from recordsAreValid, because that verdict gates certificate issuance and a missing
+  // mail record must never block a certificate. Empty when tenant mail is not enabled.
+  mailRecords: DnsHealthRecord[];
   optionalRecords: OptionalDnsRecord[];
   dnssec: DnssecHealth;
 }

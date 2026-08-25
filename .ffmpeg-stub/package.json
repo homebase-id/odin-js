@@ -1,0 +1,15 @@
+{
+  "name": "@homebase-id/ffmpeg",
+  "version": "0.12.15",
+  "description": "Local no-op stub for the auth-gated @homebase-id/ffmpeg GitHub Packages dependency. Lets the vite dev servers resolve the optional `await import('@homebase-id/ffmpeg')` in js-lib without installing the real package. Video processing (HLS segmentation) will throw if actually invoked.",
+  "type": "module",
+  "main": "index.js",
+  "module": "index.js",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    }
+  }
+}
