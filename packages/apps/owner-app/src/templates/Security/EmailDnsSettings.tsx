@@ -30,7 +30,10 @@ export const EmailDnsSettings = () => {
   // tab is where someone looks after getting that mail, so the two must not disagree.
   // Skipped entirely when there are no mail records: nothing to verify, and the check is
   // expensive (signing plus outbound HTTPS).
-  const { fetchMailHealth: { data: mailHealth } } = useMailHealth({ enabled: records.length > 0 });
+  const {
+    fetchMailHealth: { data: mailHealth },
+    publishDnsRecords: { mutateAsync: publishDnsRecords, status: publishStatus, data: publishResult },
+  } = useMailHealth({ enabled: records.length > 0 });
   const healthErrors = mailHealth?.errors ?? [];
   const healthWarnings = mailHealth?.warnings ?? [];
   const needsAttention = broken.length > 0 || healthErrors.length > 0;
@@ -88,6 +91,64 @@ export const EmailDnsSettings = () => {
                 {t('Your email needs attention. Mail may not be delivered or may be treated as spam until this is fixed.')}
               </Alert>
             )}
+
+            {/* Missing records are usually an identity provisioned before this server offered
+                email: the records are written when an identity is created, so an older one
+                never received them. Publishing them is safe to repeat. Offered only for
+                missing/incorrect RECORDS - the other checks (key drift, DKIM pair proof) are
+                not fixed by writing DNS. */}
+            {broken.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-row items-center gap-3">
+                  <ActionButton
+                    type="primary"
+                    size="none"
+                    className="px-3 py-1 text-sm"
+                    icon={Refresh}
+                    state={publishStatus === 'pending' ? 'loading' : undefined}
+                    onClick={async () => {
+                      await publishDnsRecords();
+                    }}
+                  >
+                    {t('Publish missing records')}
+                  </ActionButton>
+                  <small className="text-slate-500 dark:text-slate-400">
+                    {t('Adds the email records for your domain. Safe to run more than once.')}
+                  </small>
+                </div>
+
+                {publishStatus === 'error' ? (
+                  <Alert type="critical">
+                    {t('Could not publish the records. Please try again later.')}
+                  </Alert>
+                ) : null}
+
+                {/* Written, but DNS is not instant - without saying so, rows that are still
+                    red a moment later read as the write having failed. */}
+                {publishResult?.dnsRecordsWritten ? (
+                  <Alert type="success">
+                    {t('Records published. They can take a few minutes to appear - press Refresh to check again.')}
+                  </Alert>
+                ) : null}
+
+                {/* Not ours to write: third-party DNS, or a host without DNS access. The
+                    records are still returned, as instructions to enter by hand. */}
+                {publishResult && !publishResult.dnsRecordsWritten ? (
+                  <Alert type="warning">
+                    <p className="mb-2">
+                      {t('Your DNS is managed elsewhere, so these records have to be added by hand:')}
+                    </p>
+                    <div className="flex flex-col gap-1 font-mono text-xs">
+                      {publishResult.records.map((record) => (
+                        <div key={`${record.type}-${record.domain}-${record.value}`}>
+                          {record.type} {record.domain || '@'} {record.value}
+                        </div>
+                      ))}
+                    </div>
+                  </Alert>
+                ) : null}
+              </div>
+            ) : null}
 
             <div className="flex flex-col gap-2">
               {records.map((record) => (
