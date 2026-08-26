@@ -22,3 +22,35 @@ export const getMailHealth = async (dotYouClient: DotYouClient): Promise<MailHea
   const response = await client.get<MailHealth>(`${root}/verify`);
   return response.data;
 };
+
+// POST /api/owner/v1/mail/publish-dns-records - (re)writes this identity's static mail DNS
+// records (MX, SPF, DMARC, MTA-STS, TLS-RPT, mta-sts CNAME) into whichever zone holds the
+// tenant's records.
+//
+// Those records are written at provisioning time, so an identity provisioned before tenant
+// mail was enabled never received them: it ends up with a working mailbox, valid DKIM, and
+// no MX to receive on. This is the owner's fix for that.
+//
+// dnsRecordsWritten is false - with records still populated - when the tenant's DNS is not
+// ours to write (third-party DNS, or a host without PowerDNS access). Show them as manual
+// instructions in that case rather than reporting a failure.
+export interface MailDnsRecord {
+  type: string;
+  name: string;
+  domain: string;
+  value: string;
+  description: string;
+}
+
+export interface MailDnsPublishResult {
+  dnsRecordsWritten: boolean;
+  records: MailDnsRecord[];
+}
+
+export const publishMailDnsRecords = async (
+  dotYouClient: DotYouClient
+): Promise<MailDnsPublishResult> => {
+  const client = dotYouClient.createAxiosClient();
+  const response = await client.post<MailDnsPublishResult>(`${root}/publish-dns-records`);
+  return response.data;
+};
