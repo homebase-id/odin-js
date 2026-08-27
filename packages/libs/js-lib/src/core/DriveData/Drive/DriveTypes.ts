@@ -25,6 +25,12 @@ export interface PermissionSet {
 export interface DriveDefinition {
     driveId: string;
     name: string;
+
+    /**
+     * The drive's wire address. Not served by every identity host, so treat it as optional.
+     */
+    driveSlug?: string | null;
+
     targetDriveInfo: TargetDrive;
     metadata: string;
     allowAnonymousReads: boolean;

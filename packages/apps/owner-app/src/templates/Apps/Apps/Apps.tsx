@@ -74,6 +74,11 @@ const AppListItem = ({ app, className }: { app: RedactedAppRegistration; classNa
             {`${app.isRevoked ? t('Revoked') : ''}`} {app.name}{' '}
             {app.corsHostName ? <>| {app.corsHostName}</> : null}
           </span>
+          {app.appSlug ? (
+            <small className="block font-mono text-sm text-slate-400 break-all">
+              {app.appSlug}
+            </small>
+          ) : null}
           <small className="block text-sm text-slate-400">
             {t('First used')}:{' '}
             {new Date(app.created).toLocaleString(undefined, {
