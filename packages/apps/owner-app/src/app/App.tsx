@@ -50,6 +50,7 @@ const Circles = lazy(() => import('../templates/Circles/Circles/Circles'));
 const CircleDetails = lazy(() => import('../templates/Circles/CircleDetails/CircleDetails'));
 const Apps = lazy(() => import('../templates/Apps/Apps/Apps'));
 const AppDetails = lazy(() => import('../templates/Apps/AppDetails/AppDetails'));
+const AppsOverview = lazy(() => import('../templates/Apps/Overview/Overview'));
 
 const Website = lazy(() => import('../templates/Website/Website'));
 const Following = lazy(() => import('../templates/Follow/Follow'));
@@ -212,6 +213,7 @@ function App() {
               <Route path="third-parties" element={<Apps />}></Route>
               <Route path="third-parties/apps/" element={<Apps />}></Route>
               <Route path="third-parties/apps/:appKey" element={<AppDetails />}></Route>
+              <Route path="third-parties/overview" element={<AppsOverview />}></Route>
 
               <Route path="follow" element={<Following />}></Route>
               <Route path="follow/followers" element={<Following />}></Route>
