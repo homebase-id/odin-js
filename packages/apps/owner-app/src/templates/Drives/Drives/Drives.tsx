@@ -74,6 +74,11 @@ const Drives = () => {
                     key={`${driveDef.targetDriveInfo.alias}-${driveDef.targetDriveInfo.type}`}
                   >
                     {isDebug && driveDef.driveId && <p>DriveId: {driveDef.driveId}</p>}
+                    {driveDef.driveSlug ? (
+                      <p className="font-mono text-sm text-slate-400 break-all">
+                        {driveDef.driveSlug}
+                      </p>
+                    ) : null}
                     <h3 className="text-lg">Metadata</h3>
                     <p>{driveDef.metadata}</p>
                     <ul>{driveDef.allowAnonymousReads ? <li>Allow Anonymous Reads</li> : null}</ul>

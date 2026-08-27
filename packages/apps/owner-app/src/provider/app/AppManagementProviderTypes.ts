@@ -76,6 +76,13 @@ export interface TargetDrive {
 
 export interface RedactedAppRegistration {
   appId: string;
+
+  /**
+   * The app's wire address. Only served by identity hosts that have the AppSlug column;
+   * older hosts omit it entirely, so treat it as optional.
+   */
+  appSlug?: string | null;
+
   name: string;
   created: number;
   corsHostName?: string;
