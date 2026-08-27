@@ -92,3 +92,23 @@ export const getUpgradeStatus = async (dotYouClient: DotYouClient): Promise<Upgr
     upgradeRunning: isHeaderTrue(readHeader(response.headers, 'X-UPGRADE-RUNNING')),
   };
 };
+
+export interface TenantVersionInfo {
+  dataVersionNumber: number;
+  lastUpgraded: number;
+}
+
+/**
+ * Forces the tenant's data version number to the given value; this also clears
+ * any recorded upgrade failure. Setting it lower than the server's data version
+ * will cause the upgrade steps from that version onwards to run again.
+ */
+export const forceVersionNumber = async (dotYouClient: DotYouClient, version: number) => {
+  const client = dotYouClient.createAxiosClient();
+  const url = root + '/force-version-number';
+  return client
+    .post<TenantVersionInfo>(url, {}, { params: { version } })
+    .then((response) => {
+      return response.data;
+    });
+};
