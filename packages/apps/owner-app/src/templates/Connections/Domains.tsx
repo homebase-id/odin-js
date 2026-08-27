@@ -56,6 +56,10 @@ const Domains = () => {
             title: `Services`,
             path: `/owner/third-parties/services`,
           },
+          {
+            title: t('Overview'),
+            path: `/owner/third-parties/overview`,
+          },
         ]}
         className="mb-6"
       />
