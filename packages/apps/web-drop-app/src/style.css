@@ -31,6 +31,38 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Aurora: a faint borealis along the top - the Homebase touch. Cold greens, teals and violets,
+   deliberately reusing the palette (--ok green, the glitch blue, a violet) so it reads as the same
+   world, and dim enough that the signal red stays the loudest thing on screen. */
+body::before {
+  content: '';
+  position: fixed;
+  top: -6%;
+  left: -12%;
+  right: -12%;
+  height: 68vh;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(56% 38% at 15% 14%, rgba(61, 220, 132, 0.65), transparent 62%),
+    radial-gradient(50% 34% at 50% 6%, rgba(43, 166, 255, 0.55), transparent 60%),
+    radial-gradient(46% 36% at 86% 16%, rgba(122, 92, 255, 0.6), transparent 64%);
+  filter: blur(40px) saturate(1.2);
+  opacity: 0.38;
+  mask-image: linear-gradient(to bottom, black 30%, transparent 92%);
+  -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 92%);
+  animation: aurora-drift 85s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-drift {
+  from { transform: translateX(-3.5%) scaleY(1); filter: blur(40px) saturate(1.2) hue-rotate(-10deg); }
+  to { transform: translateX(3.5%) scaleY(1.08); filter: blur(40px) saturate(1.2) hue-rotate(14deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+}
+
 /* CRT: scanlines over everything, and the faintest flicker */
 body::after {
   content: '';
@@ -52,6 +84,11 @@ body::after {
 #app,
 .screen {
   min-height: 100vh;
+}
+
+#app {
+  position: relative;
+  z-index: 1;
 }
 
 .screen {
