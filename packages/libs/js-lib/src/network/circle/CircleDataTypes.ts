@@ -144,6 +144,13 @@ export interface CircleDefinition {
 
 export interface DriveGrant {
   permissionedDrive: PermissionedDrive;
+
+  /**
+   * Whether the grant carries the drive's storage key, i.e. it can decrypt the drive rather than
+   * only read what is anonymous. Served on app grants (RedactedDriveGrant); circle grants are
+   * DriveGrantRequest and carry no such flag, so it is optional.
+   */
+  hasStorageKey?: boolean;
 }
 
 export interface AcceptRequestHeader {

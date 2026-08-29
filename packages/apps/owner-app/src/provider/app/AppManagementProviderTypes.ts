@@ -85,6 +85,10 @@ export interface RedactedAppRegistration {
 
   name: string;
   created: number;
+
+  /** Last change to the app's grant. Served as RedactedAppRegistration.Modified. */
+  modified?: number;
+
   corsHostName?: string;
   isRevoked: boolean;
   grant: RedactedExchangeGrant;
@@ -99,6 +103,9 @@ export interface RedactedExchangeGrant {
   isRevoked: boolean;
   permissionSet: PermissionSet;
   driveGrants: DriveGrant[];
+
+  /** Whether the grant carries an ICR key, i.e. the app can act over peer connections. */
+  hasIcrKey?: boolean;
 }
 
 export enum DrivePermission {

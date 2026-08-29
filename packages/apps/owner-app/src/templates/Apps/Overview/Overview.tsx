@@ -121,7 +121,7 @@ const AppOverview = ({
   const circleMemberPermissions =
     app.circleMemberPermissionSetGrantRequest?.permissionSet?.keys ?? [];
 
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   const ownedCircles = (circles ?? []).filter((circle) =>
     stringGuidsEqual(app.appId, circle.appId)
@@ -169,6 +169,36 @@ const AppOverview = ({
       <div className={`flex flex-col gap-6 ${isOpen ? '' : 'hidden'}`}>
         {/* What the app itself holds, beside what its circle members hold: one row on a wide
             screen, stacked once there is no room for two columns. */}
+        <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm sm:grid-cols-[max-content_1fr_max-content_1fr]">
+          <Fact label={t('App id')}>
+            <span className="font-mono break-all text-slate-400">{app.appId}</span>
+          </Fact>
+          {app.appSlug ? (
+            <Fact label={t('Slug')}>
+              <span className="font-mono break-all text-slate-400">{app.appSlug}</span>
+            </Fact>
+          ) : null}
+          <Fact label={t('CORS host')}>
+            {app.corsHostName || <span className="text-slate-400">{t('None')}</span>}
+          </Fact>
+          <Fact label={t('Revoked')}>
+            {app.isRevoked || app.grant?.isRevoked ? t('Yes') : t('No')}
+          </Fact>
+          <Fact label={t('Peer access (ICR key)')}>
+            {app.grant?.hasIcrKey === undefined
+              ? t('Unknown')
+              : app.grant.hasIcrKey
+                ? t('Yes')
+                : t('No')}
+          </Fact>
+          {formatTimestamp(app.created) ? (
+            <Fact label={t('First used')}>{formatTimestamp(app.created)}</Fact>
+          ) : null}
+          {formatTimestamp(app.modified) ? (
+            <Fact label={t('Last updated')}>{formatTimestamp(app.modified)}</Fact>
+          ) : null}
+        </dl>
+
         <div className="grid gap-4 lg:grid-cols-2">
           <Panel title={t('The app itself')}>
             <PanelBlock label={t('Permissions')}>
@@ -305,7 +335,7 @@ const CircleOverview = ({
       ) : null}
 
       <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
-        <CircleFact label={t('Owned by')}>
+        <Fact label={t('Owned by')}>
           {circle.appId ? (
             owningApp ? (
               <HybridLink
@@ -320,29 +350,29 @@ const CircleOverview = ({
           ) : (
             t('You (not owned by an app)')
           )}
-        </CircleFact>
+        </Fact>
 
         {circle.designation !== undefined ? (
-          <CircleFact label={t('Designation')}>
+          <Fact label={t('Designation')}>
             {t(CircleDesignation[circle.designation] ?? `${circle.designation}`)}
-          </CircleFact>
+          </Fact>
         ) : null}
 
         {circle.grantOn !== undefined ? (
-          <CircleFact label={t('Granted on')}>
+          <Fact label={t('Granted on')}>
             {t(CircleGrantOn[circle.grantOn] ?? `${circle.grantOn}`)}
-          </CircleFact>
+          </Fact>
         ) : null}
 
-        <CircleFact label={t('Enabled')}>{circle.disabled ? t('No') : t('Yes')}</CircleFact>
+        <Fact label={t('Enabled')}>{circle.disabled ? t('No') : t('Yes')}</Fact>
 
-        {created ? <CircleFact label={t('Created')}>{created}</CircleFact> : null}
-        {lastUpdated ? <CircleFact label={t('Last updated')}>{lastUpdated}</CircleFact> : null}
+        {created ? <Fact label={t('Created')}>{created}</Fact> : null}
+        {lastUpdated ? <Fact label={t('Last updated')}>{lastUpdated}</Fact> : null}
 
         {circle.id ? (
-          <CircleFact label={t('Id')}>
+          <Fact label={t('Id')}>
             <span className="font-mono break-all text-slate-400">{circle.id}</span>
-          </CircleFact>
+          </Fact>
         ) : null}
       </dl>
 
@@ -357,7 +387,8 @@ const CircleOverview = ({
   );
 };
 
-const CircleFact = ({ label, children }: { label: string; children: ReactNode }) => (
+/** One label/value pair in a facts grid; used for both apps and circles. */
+const Fact = ({ label, children }: { label: string; children: ReactNode }) => (
   <>
     <dt className="text-slate-400">{label}</dt>
     <dd>{children}</dd>
@@ -421,6 +452,10 @@ const DriveGrantRow = ({
 
   const permission = t(getDrivePermissionFromNumber(grant.permissionedDrive?.permission));
 
+  // Only app grants carry the flag; circle grants have no storage key concept, so undefined is
+  // "not applicable" rather than "no key" and stays unlabelled.
+  const storageKeyLabel = grant.hasStorageKey ? t('has storage key') : undefined;
+
   return (
     <div className="flex flex-row items-center">
       <HardDrive className="mr-3 h-5 w-5 flex-shrink-0 text-slate-400" />
@@ -429,7 +464,7 @@ const DriveGrantRow = ({
           href={`/owner/drives/${drive.targetDriveInfo.alias}_${drive.targetDriveInfo.type}`}
           className="hover:underline"
         >
-          <DriveLabel drive={drive} permission={permission} />
+          <DriveLabel drive={drive} permission={permission} extra={storageKeyLabel} />
         </HybridLink>
       ) : (
         <span className="text-slate-400">
@@ -445,13 +480,21 @@ const DriveGrantRow = ({
   );
 };
 
-const DriveLabel = ({ drive, permission }: { drive: DriveDefinition; permission: string }) => (
+const DriveLabel = ({
+  drive,
+  permission,
+  extra,
+}: {
+  drive: DriveDefinition;
+  permission: string;
+  extra?: string;
+}) => (
   <span>
     {drive.name}
     {drive.driveSlug ? (
       <span className="ml-2 font-mono text-sm text-slate-400 break-all">{drive.driveSlug}</span>
     ) : null}
-    <span className="text-slate-400">{`: ${permission}`}</span>
+    <span className="text-slate-400">{`: ${permission}${extra ? `, ${extra}` : ''}`}</span>
   </span>
 );
 
