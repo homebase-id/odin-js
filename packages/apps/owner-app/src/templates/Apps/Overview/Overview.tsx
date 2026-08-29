@@ -1,12 +1,19 @@
 import {
   t,
+  ActionLink,
   LoadingBlock,
   PageMeta,
   SubtleMessage,
   useCircles,
   HybridLink,
 } from '@homebase-id/common-app';
-import { Circles as CirclesIcon, Grid, HardDrive, Triangle } from '@homebase-id/common-app/icons';
+import {
+  Arrow,
+  Circles as CirclesIcon,
+  Grid,
+  HardDrive,
+  Triangle,
+} from '@homebase-id/common-app/icons';
 import { DriveDefinition } from '@homebase-id/js-lib/core';
 import {
   AUTO_CONNECTIONS_CIRCLE_ID,
@@ -134,22 +141,21 @@ const AppOverview = ({
   return (
     <Section
       title={
-        <span className="flex flex-row flex-wrap items-baseline gap-2">
-          <button
-            type="button"
-            onClick={() => setIsOpen(!isOpen)}
-            aria-expanded={isOpen}
-            className="-my-1 -ml-1 flex items-center rounded p-1 hover:bg-slate-100 dark:hover:bg-slate-800"
-            title={isOpen ? t('Collapse') : t('Expand')}
-          >
-            <Triangle className={`h-3 w-3 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
-          </button>
-          <HybridLink
-            href={`/owner/third-parties/apps/${encodeURIComponent(app.appId)}`}
-            className="hover:underline"
-          >
-            {app.name}
-          </HybridLink>
+        // The whole heading toggles; navigation to the app lives in its own action so that
+        // reaching for the name never leaves the page.
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-expanded={isOpen}
+          className="-my-1 -ml-1 flex flex-row flex-wrap items-baseline gap-2 rounded p-1 text-left hover:bg-slate-100 dark:hover:bg-slate-800"
+          title={isOpen ? t('Collapse') : t('Expand')}
+        >
+          <Triangle
+            className={`h-3 w-3 flex-shrink-0 self-center transition-transform ${
+              isOpen ? 'rotate-90' : ''
+            }`}
+          />
+          <span>{app.name}</span>
           {app.isRevoked ? (
             <span className="rounded bg-red-100 px-2 py-1 text-sm text-red-700 dark:bg-red-900 dark:text-red-100">
               {t('Revoked')}
@@ -163,7 +169,16 @@ const AppOverview = ({
           {app.corsHostName ? (
             <span className="text-sm font-normal text-slate-400">{app.corsHostName}</span>
           ) : null}
-        </span>
+        </button>
+      }
+      actions={
+        <ActionLink
+          type="mute"
+          size="square"
+          icon={Arrow}
+          href={`/owner/third-parties/apps/${encodeURIComponent(app.appId)}`}
+          title={t('Open app details')}
+        />
       }
     >
       <div className={`flex flex-col gap-6 ${isOpen ? '' : 'hidden'}`}>
