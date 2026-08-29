@@ -162,7 +162,7 @@ const AppOverview = ({
             </span>
           ) : null}
           {app.appSlug ? (
-            <span className="font-mono text-sm font-normal text-slate-400 break-all">
+            <span className="break-all font-mono text-sm font-normal text-slate-400">
               {app.appSlug}
             </span>
           ) : null}
@@ -181,76 +181,82 @@ const AppOverview = ({
         />
       }
     >
-      <div className={`flex flex-col gap-6 ${isOpen ? '' : 'hidden'}`}>
+      <div className={`flex flex-col gap-3 ${isOpen ? '' : 'hidden'}`}>
+        <Collapsible title={t('Details')}>
+          <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm sm:grid-cols-[max-content_1fr_max-content_1fr]">
+            <Fact label={t('App id')}>
+              <span className="break-all font-mono text-slate-400">{app.appId}</span>
+            </Fact>
+            {app.appSlug ? (
+              <Fact label={t('Slug')}>
+                <span className="break-all font-mono text-slate-400">{app.appSlug}</span>
+              </Fact>
+            ) : null}
+            <Fact label={t('CORS host')}>
+              {app.corsHostName || <span className="text-slate-400">{t('None')}</span>}
+            </Fact>
+            <Fact label={t('Revoked')}>
+              {app.isRevoked || app.grant?.isRevoked ? t('Yes') : t('No')}
+            </Fact>
+            <Fact label={t('Peer access (ICR key)')}>
+              {app.grant?.hasIcrKey === undefined
+                ? t('Unknown')
+                : app.grant.hasIcrKey
+                  ? t('Yes')
+                  : t('No')}
+            </Fact>
+            {formatTimestamp(app.created) ? (
+              <Fact label={t('First used')}>{formatTimestamp(app.created)}</Fact>
+            ) : null}
+            {formatTimestamp(app.modified) ? (
+              <Fact label={t('Last updated')}>{formatTimestamp(app.modified)}</Fact>
+            ) : null}
+          </dl>
+        </Collapsible>
+
         {/* What the app itself holds, beside what its circle members hold: one row on a wide
             screen, stacked once there is no room for two columns. */}
-        <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm sm:grid-cols-[max-content_1fr_max-content_1fr]">
-          <Fact label={t('App id')}>
-            <span className="font-mono break-all text-slate-400">{app.appId}</span>
-          </Fact>
-          {app.appSlug ? (
-            <Fact label={t('Slug')}>
-              <span className="font-mono break-all text-slate-400">{app.appSlug}</span>
-            </Fact>
-          ) : null}
-          <Fact label={t('CORS host')}>
-            {app.corsHostName || <span className="text-slate-400">{t('None')}</span>}
-          </Fact>
-          <Fact label={t('Revoked')}>
-            {app.isRevoked || app.grant?.isRevoked ? t('Yes') : t('No')}
-          </Fact>
-          <Fact label={t('Peer access (ICR key)')}>
-            {app.grant?.hasIcrKey === undefined
-              ? t('Unknown')
-              : app.grant.hasIcrKey
-                ? t('Yes')
-                : t('No')}
-          </Fact>
-          {formatTimestamp(app.created) ? (
-            <Fact label={t('First used')}>{formatTimestamp(app.created)}</Fact>
-          ) : null}
-          {formatTimestamp(app.modified) ? (
-            <Fact label={t('Last updated')}>{formatTimestamp(app.modified)}</Fact>
-          ) : null}
-        </dl>
-
-        <div className="grid gap-4 lg:grid-cols-2">
-          <Panel title={t('The app itself')}>
+        <div className="grid gap-3 lg:grid-cols-2">
+          <Collapsible
+            title={t('The app itself')}
+            count={directPermissions.length + directGrants.length}
+          >
             <PanelBlock label={t('Permissions')}>
               <PermissionKeyList keys={directPermissions} />
             </PanelBlock>
             <PanelBlock label={t('Drives')}>
               <DriveGrantList grants={directGrants} drives={drives} />
             </PanelBlock>
-          </Panel>
+          </Collapsible>
 
-          <Panel title={t('Members of its circles')}>
+          <Collapsible
+            title={t('Members of its circles')}
+            count={circleMemberPermissions.length + circleMemberGrants.length}
+          >
             <PanelBlock label={t('Permissions')}>
               <PermissionKeyList keys={circleMemberPermissions} />
             </PanelBlock>
             <PanelBlock label={t('Drives')}>
               <DriveGrantList grants={circleMemberGrants} drives={drives} />
             </PanelBlock>
-          </Panel>
+          </Collapsible>
         </div>
 
-        <div>
-          <h3 className="mb-2 font-medium">{t('Circles it owns')}</h3>
+        <Collapsible title={t('Circles it owns')} count={ownedCircles.length}>
           {!ownedCircles.length ? (
             <SubtleMessage>{t('No circles owned by this app')}</SubtleMessage>
           ) : (
             <CircleGrid circles={ownedCircles} apps={apps} drives={drives} />
           )}
-        </div>
+        </Collapsible>
 
-        <div>
-          <h3 className="mb-2 font-medium">{t('Authorized circles')}</h3>
+        <Collapsible title={t('Authorized circles')} count={authorizedCircles.length}>
           {!authorizedCircles.length ? (
             <SubtleMessage>{t('No circles authorized on this app')}</SubtleMessage>
           ) : (
             <CircleGrid circles={authorizedCircles} apps={apps} drives={drives} />
           )}
-        </div>
+        </Collapsible>
       </div>
     </Section>
   );
@@ -277,12 +283,41 @@ const CircleGrid = ({
   </div>
 );
 
-const Panel = ({ title, children }: { title: string; children: ReactNode }) => (
-  <div className="flex flex-col gap-3 rounded-lg border border-gray-200 border-opacity-80 p-4 dark:border-gray-700">
-    <h3 className="font-medium">{title}</h3>
-    {children}
-  </div>
-);
+/**
+ * A titled block that starts closed. Everything on this page is collapsed by default, so the count
+ * is part of the header rather than the body: a closed section still has to say whether there is
+ * anything inside it, otherwise the page is a list of labels that all look alike.
+ */
+const Collapsible = ({
+  title,
+  count,
+  children,
+}: {
+  title: string;
+  count?: number;
+  children: ReactNode;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="flex flex-col rounded-lg border border-gray-200 border-opacity-80 dark:border-gray-700">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        className="flex flex-row items-center gap-2 rounded-lg p-3 text-left font-medium hover:bg-slate-100 dark:hover:bg-slate-800"
+        title={isOpen ? t('Collapse') : t('Expand')}
+      >
+        <Triangle
+          className={`h-3 w-3 flex-shrink-0 transition-transform ${isOpen ? 'rotate-90' : ''}`}
+        />
+        <span>{title}</span>
+        {count !== undefined ? <span className="text-slate-400">{count}</span> : null}
+      </button>
+      <div className={`flex flex-col gap-3 px-3 pb-3 ${isOpen ? '' : 'hidden'}`}>{children}</div>
+    </div>
+  );
+};
 
 const PanelBlock = ({ label, children }: { label: string; children: ReactNode }) => (
   <div>
@@ -345,59 +380,59 @@ const CircleOverview = ({
         </span>
       </HybridLink>
 
-      {circle.description ? (
-        <small className="text-slate-400">{circle.description}</small>
-      ) : null}
+      {circle.description ? <small className="text-slate-400">{circle.description}</small> : null}
 
-      <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
-        <Fact label={t('Owned by')}>
-          {circle.appId ? (
-            owningApp ? (
-              <HybridLink
-                href={`/owner/third-parties/apps/${encodeURIComponent(owningApp.appId)}`}
-                className="hover:underline"
-              >
-                {owningApp.name}
-              </HybridLink>
+      <Collapsible title={t('Details')}>
+        <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
+          <Fact label={t('Owned by')}>
+            {circle.appId ? (
+              owningApp ? (
+                <HybridLink
+                  href={`/owner/third-parties/apps/${encodeURIComponent(owningApp.appId)}`}
+                  className="hover:underline"
+                >
+                  {owningApp.name}
+                </HybridLink>
+              ) : (
+                <span className="break-all font-mono">{circle.appId}</span>
+              )
             ) : (
-              <span className="font-mono break-all">{circle.appId}</span>
-            )
-          ) : (
-            t('You (not owned by an app)')
-          )}
-        </Fact>
-
-        {circle.designation !== undefined ? (
-          <Fact label={t('Designation')}>
-            {t(CircleDesignation[circle.designation] ?? `${circle.designation}`)}
+              t('You (not owned by an app)')
+            )}
           </Fact>
-        ) : null}
 
-        {circle.grantOn !== undefined ? (
-          <Fact label={t('Granted on')}>
-            {t(CircleGrantOn[circle.grantOn] ?? `${circle.grantOn}`)}
-          </Fact>
-        ) : null}
+          {circle.designation !== undefined ? (
+            <Fact label={t('Designation')}>
+              {t(CircleDesignation[circle.designation] ?? `${circle.designation}`)}
+            </Fact>
+          ) : null}
 
-        <Fact label={t('Enabled')}>{circle.disabled ? t('No') : t('Yes')}</Fact>
+          {circle.grantOn !== undefined ? (
+            <Fact label={t('Granted on')}>
+              {t(CircleGrantOn[circle.grantOn] ?? `${circle.grantOn}`)}
+            </Fact>
+          ) : null}
 
-        {created ? <Fact label={t('Created')}>{created}</Fact> : null}
-        {lastUpdated ? <Fact label={t('Last updated')}>{lastUpdated}</Fact> : null}
+          <Fact label={t('Enabled')}>{circle.disabled ? t('No') : t('Yes')}</Fact>
 
-        {circle.id ? (
-          <Fact label={t('Id')}>
-            <span className="font-mono break-all text-slate-400">{circle.id}</span>
-          </Fact>
-        ) : null}
-      </dl>
+          {created ? <Fact label={t('Created')}>{created}</Fact> : null}
+          {lastUpdated ? <Fact label={t('Last updated')}>{lastUpdated}</Fact> : null}
 
-      <PanelBlock label={t('Permissions')}>
+          {circle.id ? (
+            <Fact label={t('Id')}>
+              <span className="break-all font-mono text-slate-400">{circle.id}</span>
+            </Fact>
+          ) : null}
+        </dl>
+      </Collapsible>
+
+      <Collapsible title={t('Permissions')} count={permissionKeys.length}>
         <PermissionKeyList keys={permissionKeys} />
-      </PanelBlock>
+      </Collapsible>
 
-      <PanelBlock label={t('Drives')}>
+      <Collapsible title={t('Drives')} count={(circle.driveGrants ?? []).length}>
         <DriveGrantList grants={circle.driveGrants ?? []} drives={drives} />
-      </PanelBlock>
+      </Collapsible>
     </div>
   );
 };
@@ -484,7 +519,7 @@ const DriveGrantRow = ({
       ) : (
         <span className="text-slate-400">
           {targetDrive?.alias ? (
-            <span className="font-mono break-all">{targetDrive.alias}</span>
+            <span className="break-all font-mono">{targetDrive.alias}</span>
           ) : (
             t('Unknown drive')
           )}
@@ -507,7 +542,7 @@ const DriveLabel = ({
   <span>
     {drive.name}
     {drive.driveSlug ? (
-      <span className="ml-2 font-mono text-sm text-slate-400 break-all">{drive.driveSlug}</span>
+      <span className="ml-2 break-all font-mono text-sm text-slate-400">{drive.driveSlug}</span>
     ) : null}
     <span className="text-slate-400">{`: ${permission}${extra ? `, ${extra}` : ''}`}</span>
   </span>
