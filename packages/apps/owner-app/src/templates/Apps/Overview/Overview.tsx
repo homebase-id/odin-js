@@ -214,8 +214,8 @@ const AppOverview = ({
           </dl>
         </Collapsible>
 
-        {/* What the app itself holds, beside what its circle members hold: one row on a wide
-            screen, stacked once there is no room for two columns. */}
+        {/* What the app holds when you use it, beside what it hands to your connections through
+            the circles it authorizes: one row on a wide screen, stacked once there is no room. */}
         <div className="grid gap-3 lg:grid-cols-2">
           <Collapsible
             title={t('The app itself')}
@@ -230,7 +230,7 @@ const AppOverview = ({
           </Collapsible>
 
           <Collapsible
-            title={t('Members of its circles')}
+            title={t('Access your connections get')}
             count={circleMemberPermissions.length + circleMemberGrants.length}
           >
             <PanelBlock label={t('Permissions')}>
