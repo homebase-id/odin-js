@@ -17,7 +17,6 @@ import {
   stringifyToQueryParams,
   stringifyArrayToQueryParams,
   tryJsonParse,
-  getQueryModifiedCursorFromTime,
   drivesEqual,
   compareAcl,
 } from './DataUtil';
@@ -268,10 +267,6 @@ test('JSON.parse', () => {
 
   const objectwithArray = { test: 'test', deeperLevelArray: ['testDeeper', 'even further down'] };
   expect(tryJsonParse(JSON.stringify(objectwithArray))).toEqual(objectwithArray);
-});
-
-test('getQueryModifiedCursorFromTime', () => {
-  expect(getQueryModifiedCursorFromTime(1712833436831)).toEqual(JSON.stringify({"time": 1712833436831, "row": null }));
 });
 
 test('compareAcl', () => {
