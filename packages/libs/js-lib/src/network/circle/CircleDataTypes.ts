@@ -86,6 +86,31 @@ export interface AcknowledgedConnectionRequest {
   receivedTimestampMilliseconds: string;
 }
 
+/**
+ * When the owning app wants members enrolled in a circle.
+ * Mirrors CircleGrantOn in odin-core.
+ */
+export enum CircleGrantOn {
+  /** Manual membership only. The default, and what every circle that predates this is. */
+  None = 0,
+  /** Granted at any connection establishment, ambient introductions included. */
+  Connect = 1,
+  /** Granted only when the connection is made through the owning app's own consent flow. */
+  OwnFlowConnect = 2,
+  /** Granted when the owner completes the connection review. */
+  Review = 3,
+}
+
+/**
+ * What kind of relationship a circle represents. Presentation only.
+ * Mirrors CircleDesignation in odin-core.
+ */
+export enum CircleDesignation {
+  Personal = 1,
+  Audience = 2,
+  Vendor = 3,
+}
+
 export interface CircleDefinition {
   id?: string;
   created?: number;
@@ -97,6 +122,24 @@ export interface CircleDefinition {
   permissions: {
     keys: number[];
   };
+
+  /**
+   * The app that owns this circle; undefined means an owner circle. Read-only in practice: the
+   * server refuses to reassign ownership through an update, so that nobody who can PUT a
+   * definition can hand a circle to an app.
+   */
+  appId?: string;
+
+  /**
+   * IMPORTANT: round-trip these when updating a circle. This same type is the update body, and
+   * the server assigns grantOn, designation and emoji from whatever it receives -- so a PUT built
+   * from a fetched definition that drops them resets them to their defaults. That would silently
+   * take an ambient circle (grantOn: Connect) back to None and stop it being granted to
+   * auto-connections, with no error.
+   */
+  grantOn?: CircleGrantOn;
+  designation?: CircleDesignation;
+  emoji?: string;
 }
 
 export interface DriveGrant {

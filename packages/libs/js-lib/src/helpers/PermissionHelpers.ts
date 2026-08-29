@@ -1,6 +1,6 @@
 import { DrivePermissionType, PermissionedDrive } from '../core/DriveData/Drive/DriveTypes';
 import { DriveGrant } from '../network/network';
-import { AppPermissionType } from '../network/permission/PermissionTypes';
+import { AppPermissionType, PermissionKeyType } from '../network/permission/PermissionTypes';
 
 export const getDrivePermissionFromNumber = (value?: number[]) => {
   if (!value || !Array.isArray(value)) return 'none';
@@ -35,6 +35,18 @@ export const getDrivePermissionFromNumber = (value?: number[]) => {
   if (permissions.length === 0) return 'none';
 
   return permissions.join(', ');
+};
+
+/**
+ * Label for any permission key the server may send. Unlike getAppPermissionFromNumber this never
+ * collapses an unrecognised key to 'none' -- a key that is present but unnamed is still a granted
+ * permission, and reporting it as 'none' would understate the grant.
+ */
+export const getPermissionKeyName = (value: number) => {
+  const directMatch = PermissionKeyType[value];
+  if (directMatch) return directMatch;
+
+  return `Key ${value}`;
 };
 
 export const getAppPermissionFromNumber = (value: number) => {
