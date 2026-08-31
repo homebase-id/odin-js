@@ -18,12 +18,14 @@ export function renderIntro(root: HTMLElement, source: DropSource, header: DropH
   const totalBytes = header.payloads.reduce((sum, p) => sum + p.bytesWritten, 0);
   const isChoplifter = document.body.classList.contains('theme-choplifter');
 
+  // ttl 0 means the writer set no expiry, but nothing on a WebDrop drive is forever - the
+  // server-side sweep reaps everything at 30 days regardless. Never promise permanence.
   const destructLine =
     header.ttl < 0
       ? 'It will self-destruct when you open it.'
       : header.ttl > 0
         ? 'It is already counting down.'
-        : 'It does not expire.';
+        : 'It expires within 30 days.';
 
   const recipientLine = header.intro?.recipientName
     ? `<p class="recipient-line">For <span class="sender">${escapeHtml(header.intro.recipientName)}</span></p>`
