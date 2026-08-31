@@ -1,10 +1,14 @@
 import {
   t,
+  ActionButton,
   ActionLink,
   LoadingBlock,
   PageMeta,
   SubtleMessage,
   useCircles,
+  useDotYouClientContext,
+  usePortal,
+  DialogWrapper,
   HybridLink,
 } from '@homebase-id/common-app';
 import {
@@ -12,6 +16,7 @@ import {
   Circles as CirclesIcon,
   Grid,
   HardDrive,
+  Persons,
   Triangle,
 } from '@homebase-id/common-app/icons';
 import { DriveDefinition } from '@homebase-id/js-lib/core';
@@ -22,6 +27,8 @@ import {
   CircleGrantOn,
   CONFIRMED_CONNECTIONS_CIRCLE_ID,
   DriveGrant,
+  fetchMembersOfCircle,
+  Membership,
 } from '@homebase-id/js-lib/network';
 import {
   drivesEqual,
@@ -30,7 +37,9 @@ import {
   stringGuidsEqual,
 } from '@homebase-id/js-lib/helpers';
 
+import { useQueries } from '@tanstack/react-query';
 import { ReactNode, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Section from '../../../components/ui/Sections/Section';
 import Submenu from '../../../components/SubMenu/SubMenu';
 import { useApps } from '../../../hooks/apps/useApps';
@@ -239,6 +248,14 @@ const AppOverview = ({
             <PanelBlock label={t('Drives')}>
               <DriveGrantList grants={circleMemberGrants} drives={drives} />
             </PanelBlock>
+            <PanelBlock label={t('Who gets it')}>
+              <CircleMemberIdentities
+                appName={app.name}
+                circles={authorizedCircles}
+                grants={circleMemberGrants}
+                drives={drives}
+              />
+            </PanelBlock>
           </Collapsible>
         </div>
 
@@ -325,6 +342,165 @@ const PanelBlock = ({ label, children }: { label: string; children: ReactNode })
     {children}
   </div>
 );
+
+/**
+ * The members behind a set of circles, as one list. Membership is a request per circle, and the
+ * hook only mounts with the panel, so nothing is asked for until someone opens it. The query key
+ * is the one useCircle's fetchMembers uses, so an answer a circle page already fetched is reused
+ * rather than asked for a second time.
+ */
+const useMembersOfCircles = (circles: CircleDefinition[]) => {
+  const dotYouClient = useDotYouClientContext();
+
+  const results = useQueries({
+    queries: circles.map((circle) => ({
+      queryKey: ['circleMembers', circle.id],
+      queryFn: () => fetchMembersOfCircle(dotYouClient, circle.id as string),
+      refetchOnWindowFocus: false,
+      enabled: !!circle.id,
+    })),
+  });
+
+  // One identity can sit in several of an app's circles while still getting the access only once,
+  // so the list is keyed by identity with the circles that put it there named beside it.
+  const byDomain = new Map<string, { member: Membership; viaCircles: string[] }>();
+  results.forEach((result, index) => {
+    (result.data ?? []).forEach((member) => {
+      const existing = byDomain.get(member.domain);
+      if (existing) existing.viaCircles.push(circles[index].name);
+      else byDomain.set(member.domain, { member, viaCircles: [circles[index].name] });
+    });
+  });
+
+  return {
+    members: Array.from(byDomain.values()),
+    isLoading: results.some((result) => result.isLoading),
+  };
+};
+
+/**
+ * Who actually receives the circle-member grant: every member of the circles the app authorizes.
+ * Behind a button rather than loaded with the page, because it costs a request per circle and a
+ * built-in circle can hold every connection you have.
+ */
+const CircleMemberIdentities = ({
+  appName,
+  circles,
+  grants,
+  drives,
+}: {
+  appName: string;
+  circles: CircleDefinition[];
+  grants: DriveGrant[];
+  drives: DriveDefinition[] | undefined;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  if (!circles.length)
+    return <SubtleMessage>{t('No authorized circles, so nobody gets this access')}</SubtleMessage>;
+
+  return (
+    <>
+      <ActionButton type="secondary" icon={Persons} onClick={() => setIsOpen(true)}>
+        {t('Show the identities')}
+      </ActionButton>
+      {isOpen ? (
+        <CircleMemberIdentitiesDialog
+          appName={appName}
+          circles={circles}
+          grants={grants}
+          drives={drives}
+          onClose={() => setIsOpen(false)}
+        />
+      ) : null}
+    </>
+  );
+};
+
+/**
+ * The identity list in a side panel. Opened from one app's panel but read on its own, so the
+ * header carries the access with it: whose app it is, that this is what connections get rather
+ * than what the app holds, which circles carry it, and the drives it opens.
+ */
+const CircleMemberIdentitiesDialog = ({
+  appName,
+  circles,
+  grants,
+  drives,
+  onClose,
+}: {
+  appName: string;
+  circles: CircleDefinition[];
+  grants: DriveGrant[];
+  drives: DriveDefinition[] | undefined;
+  onClose: () => void;
+}) => {
+  const target = usePortal('modal-container');
+  const { members, isLoading } = useMembersOfCircles(circles);
+
+  const dialog = (
+    <DialogWrapper
+      size="2xlarge"
+      onClose={onClose}
+      title={
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-normal text-slate-500 dark:text-slate-400">{appName}</span>
+          <span>{t('Access your connections get')}</span>
+
+          <div className="flex flex-row flex-wrap items-center gap-2 text-sm font-normal">
+            {circles.map((circle) => (
+              <HybridLink
+                href={`/owner/circles/${encodeURIComponent(circle.id ?? '')}`}
+                className="flex flex-row items-center gap-1 rounded bg-slate-200 px-2 py-0.5 hover:underline dark:bg-slate-800"
+                key={circle.id}
+              >
+                <CirclesIcon className="h-4 w-4 flex-shrink-0" />
+                {circle.emoji ? `${circle.emoji} ` : ''}
+                {circle.name}
+              </HybridLink>
+            ))}
+          </div>
+
+          <div className="text-base font-normal">
+            <DriveGrantList grants={grants} drives={drives} />
+          </div>
+        </div>
+      }
+    >
+      {isLoading ? (
+        <>
+          <LoadingBlock className="m-1 h-6" />
+          <LoadingBlock className="m-1 h-6" />
+        </>
+      ) : !members.length ? (
+        <SubtleMessage>{t('Nobody is a member of these circles yet')}</SubtleMessage>
+      ) : (
+        <ul className="flex flex-col gap-1">
+          {members.map(({ member, viaCircles }) => (
+            <li key={member.domain} className="flex flex-row flex-wrap items-baseline gap-x-2">
+              <HybridLink
+                href={
+                  member.domainType === 'youAuth'
+                    ? `/owner/third-parties/services/${encodeURIComponent(member.domain)}`
+                    : `/owner/connections/${encodeURIComponent(member.domain)}`
+                }
+                className="break-all hover:underline"
+              >
+                {member.domain}
+              </HybridLink>
+              {/* Only worth naming the route in when there is more than one it could have been. */}
+              {circles.length > 1 ? (
+                <span className="text-sm text-slate-400">{`${t('via')} ${viaCircles.join(', ')}`}</span>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      )}
+    </DialogWrapper>
+  );
+
+  return createPortal(dialog, target);
+};
 
 const formatTimestamp = (value: number | undefined) =>
   value ? new Date(value).toLocaleString() : undefined;
