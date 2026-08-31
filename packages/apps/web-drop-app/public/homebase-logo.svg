@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="PRÆCISE_STØR" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 2902.7 2902.7">
+  <!-- Generator: Adobe Illustrator 29.1.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 142)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: url(#Ikke-navngivet_forløb);
+      }
+
+      .st1 {
+        fill: #fff;
+        stroke: #1d1d1b;
+        stroke-miterlimit: 10;
+      }
+    </style>
+    <linearGradient id="Ikke-navngivet_forløb" data-name="Ikke-navngivet forløb" x1="2297.4" y1="351.9" x2="-1551.9" y2="5341.7" gradientTransform="translate(0 2899.9) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#396281"/>
+      <stop offset="0" stop-color="#415a84"/>
+      <stop offset=".2" stop-color="#4f4d89"/>
+      <stop offset=".3" stop-color="#58458d"/>
+      <stop offset=".5" stop-color="#5b438e"/>
+      <stop offset=".7" stop-color="#57458c"/>
+      <stop offset=".8" stop-color="#534a8b"/>
+      <stop offset="1" stop-color="#425985"/>
+    </linearGradient>
+  </defs>
+  <rect class="st0" y="0" width="2902.7" height="2902.7"/>
+  <g>
+    <circle class="st1" cx="2018.3" cy="635" r="283.5"/>
+    <path class="st1" d="M2018.3,1167.9h-566.9c-156.6,0-283.5-126.9-283.5-283.5h0v-249.4c0-156.6-126.9-283.5-283.5-283.5s-283.5,126.9-283.5,283.5h0v1632.8h0c0,156.6,126.9,283.5,283.5,283.5s283.5-126.9,283.5-283.5v-532.9h0c.2-156.4,127-283.2,283.5-283.2s283.3,126.8,283.5,283.2h0v532.9h0c0,156.6,126.9,283.5,283.5,283.5s283.5-126.9,283.5-283.5v-816.4c0-156.6-126.9-283.5-283.5-283.5h0Z"/>
+  </g>
+</svg>

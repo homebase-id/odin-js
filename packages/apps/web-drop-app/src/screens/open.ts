@@ -62,7 +62,7 @@ export async function renderOpen(root: HTMLElement, source: DropSource, onDestru
   root.innerHTML = `
     <main class="screen">
       <header class="masthead">
-        <img class="logo" src="./odin-logo.svg" alt="Homebase" />
+        <img class="logo" src="./homebase-logo.svg" alt="Homebase" />
         <h1 class="wordmark">WEB<span>DROP</span></h1>
       </header>
 

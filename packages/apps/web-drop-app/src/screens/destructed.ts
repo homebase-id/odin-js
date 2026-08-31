@@ -24,7 +24,7 @@ export function renderDestructed(
   root.innerHTML = `
     <main class="screen destructed">
       <header class="masthead">
-        <img class="logo" src="./odin-logo.svg" alt="Homebase" />
+        <img class="logo" src="./homebase-logo.svg" alt="Homebase" />
         <h1 class="wordmark">WEB<span>DROP</span></h1>
       </header>
 

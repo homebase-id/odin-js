@@ -115,6 +115,7 @@ body::after {
 .logo {
   width: 44px;
   height: 44px;
+  border-radius: 4px; /* the mark ships square; keep the old tile's soft corner */
   filter: grayscale(1) brightness(1.6);
   opacity: 0.9;
 }

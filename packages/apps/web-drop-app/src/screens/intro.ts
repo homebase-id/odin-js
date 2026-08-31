@@ -42,7 +42,7 @@ export function renderIntro(root: HTMLElement, source: DropSource, header: DropH
     <main class="screen">
       ${isChoplifter ? choplifterScene() : ''}
       <header class="masthead">
-        <img class="logo" src="./odin-logo.svg" alt="Homebase" />
+        <img class="logo" src="./homebase-logo.svg" alt="Homebase" />
         <h1 class="wordmark">WEB<span>DROP</span></h1>
       </header>
 
