@@ -8,7 +8,8 @@
 export function renderDestructed(
   root: HTMLElement,
   headline = 'THIS DROP HAS SELF-DESTRUCTED',
-  linkDiesAtMs?: number
+  linkDiesAtMs?: number,
+  diagnostic?: string
 ) {
   const isChoplifter = document.body.classList.contains('theme-choplifter');
 
@@ -38,6 +39,7 @@ export function renderDestructed(
         </a>
       </section>
 
+      ${diagnostic ? `<p class="diagnostic">${diagnostic}</p>` : ''}
       ${isChoplifter ? '<p class="c64-ready">READY.<span class="c64-cursor"></span></p>' : ''}
     </main>
   `;

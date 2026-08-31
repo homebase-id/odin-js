@@ -857,6 +857,13 @@ body.theme-clean .destroy-button:hover {
   color: #ffffff;
 }
 
+.diagnostic {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--dim);
+  opacity: 0.8;
+}
+
 .c64-ready {
   align-self: flex-start;
   font-size: 0.95rem;

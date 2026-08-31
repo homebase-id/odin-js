@@ -21,23 +21,39 @@ const formatRemaining = (ms: number) => {
  * clock), re-read the header for the resolved absolute Ttl, then count down against it.
  */
 export async function renderOpen(root: HTMLElement, source: DropSource, onDestruct: () => void) {
-  const header = await source.fetchHeader();
-  if (!header) return renderDestructed(root);
+  const header = await source.fetchHeader().catch((e) => {
+    console.warn('[webdrop] open: header fetch threw', e);
+    return null;
+  });
+  if (!header) return renderDestructed(root, undefined, undefined, 'reason: header unavailable at open');
+
+  console.warn('[webdrop] open: header ttl=%s payloads=%o', header.ttl, header.payloads.map((p) => p.key));
 
   const files: Downloaded[] = [];
+  const failures: string[] = [];
   for (const payload of header.payloads) {
-    const blob = await source.fetchPayload(payload.key);
-    if (blob) {
-      files.push({
-        key: payload.key,
-        name: payload.name,
-        contentType: payload.contentType,
-        url: URL.createObjectURL(blob),
-      });
+    try {
+      const blob = await source.fetchPayload(payload.key);
+      if (blob) {
+        files.push({
+          key: payload.key,
+          name: payload.name,
+          contentType: payload.contentType,
+          url: URL.createObjectURL(blob),
+        });
+      } else {
+        failures.push(`${payload.key}: not ok`);
+      }
+    } catch (e) {
+      failures.push(`${payload.key}: ${e instanceof Error ? e.message : 'threw'}`);
     }
   }
 
-  if (files.length === 0) return renderDestructed(root);
+  if (files.length === 0) {
+    const why = header.payloads.length === 0 ? 'reason: header listed no payloads' : `reason: ${failures.join('; ')}`;
+    console.warn('[webdrop] open: destructing —', why);
+    return renderDestructed(root, undefined, undefined, why);
+  }
 
   // The clock started on the first payload fetch above; the header now carries the absolute time.
   const resolved = await source.fetchHeader();
