@@ -112,7 +112,7 @@ export class V2Source implements DropSource {
 
 // --- demo ---------------------------------------------------------------------------------------
 
-const DEMO_TTL_MS = 90_000; // short enough that the destruct is actually watchable
+const DEMO_TTL_MS = 1_200_000; // the real burn window - 20 minutes, no artificial panic
 const DEMO_DESTRUCTED_KEY = 'webdrop-demo-destructed';
 const DEMO_RESOLVED_KEY = 'webdrop-demo-resolved-at';
 

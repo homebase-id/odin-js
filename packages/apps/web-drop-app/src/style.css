@@ -403,6 +403,22 @@ body::after {
   color: var(--signal);
 }
 
+.fineprint {
+  line-height: 2;
+}
+
+.homebase-cta {
+  color: var(--signal);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--signal);
+  letter-spacing: 0.08em;
+  text-transform: none;
+}
+
+.homebase-cta:hover {
+  border-bottom-style: solid;
+}
+
 /* --- theme: clean ---------------------------------------------------------------------------- */
 /* The quiet, professional face - for the hotel clerk who would read scanlines as a hacker site. */
 

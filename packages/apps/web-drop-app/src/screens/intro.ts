@@ -66,7 +66,10 @@ export function renderIntro(root: HTMLElement, source: DropSource, header: DropH
 
       <button id="open" class="open-button" disabled>OPEN DROP</button>
 
-      <footer class="fineprint">delivered over Homebase &middot; no account required</footer>
+      <footer class="fineprint">
+        delivered over Homebase &middot; no account required<br />
+        <a class="homebase-cta" href="https://homebase.id" target="_blank" rel="noopener">This is cool - I want a Homebase account too</a>
+      </footer>
     </main>
   `;
 

@@ -74,7 +74,10 @@ export async function renderOpen(root: HTMLElement, source: DropSource, onDestru
           .join('')}
       </ul>
 
-      <footer class="fineprint">save what you need &middot; the drop will not wait</footer>
+      <footer class="fineprint">
+        save what you need &middot; the drop will not wait<br />
+        <a class="homebase-cta" href="https://homebase.id" target="_blank" rel="noopener">This is cool - I want a Homebase account too</a>
+      </footer>
     </main>
   `;
 
