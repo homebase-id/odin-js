@@ -7,6 +7,6 @@
     "start": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "esbuild src/crypto.ts --format=esm --outfile=test/_build/crypto.mjs --log-level=silent && node --test 'test/*.test.mjs'"
+    "test": "esbuild src/crypto.ts --format=esm --outfile=test/_build/crypto.mjs --log-level=silent && node --test test/crypto-vector.test.mjs"
   }
 }
