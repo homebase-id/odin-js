@@ -17,6 +17,9 @@
       "path": "./packages/apps/feed-app"
     },
     {
+      "path": "./packages/apps/web-drop-app"
+    },
+    {
       "path": "./packages/apps/login-app"
     },
     {

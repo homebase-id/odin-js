@@ -1,0 +1,887 @@
+/* WebDrop - Mission Impossible theme. Pure CSS: no fonts fetched, no images beyond the logo,
+   no libraries. Built to survive a strict CSP untouched. */
+
+:root {
+  --ground: #0a0a0a;
+  --panel: #111214;
+  --line: #26282c;
+  --ink: #d7d9dd;
+  --dim: #8a8f98;
+  --signal: #e02020;
+  --signal-glow: rgba(224, 32, 32, 0.55);
+  --ok: #3ddc84;
+  --amber: #ffb020;
+  --mono: 'SFMono-Regular', ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--mono);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Aurora: a faint borealis along the top - the Homebase touch. Cold greens, teals and violets,
+   deliberately reusing the palette (--ok green, the glitch blue, a violet) so it reads as the same
+   world, and dim enough that the signal red stays the loudest thing on screen. */
+body::before {
+  content: '';
+  position: fixed;
+  top: -6%;
+  left: -12%;
+  right: -12%;
+  height: 68vh;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(56% 38% at 15% 14%, rgba(61, 220, 132, 0.65), transparent 62%),
+    radial-gradient(50% 34% at 50% 6%, rgba(43, 166, 255, 0.55), transparent 60%),
+    radial-gradient(46% 36% at 86% 16%, rgba(122, 92, 255, 0.6), transparent 64%);
+  filter: blur(40px) saturate(1.2);
+  opacity: 0.38;
+  mask-image: linear-gradient(to bottom, black 30%, transparent 92%);
+  -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 92%);
+  animation: aurora-drift 85s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-drift {
+  from { transform: translateX(-3.5%) scaleY(1); filter: blur(40px) saturate(1.2) hue-rotate(-10deg); }
+  to { transform: translateX(3.5%) scaleY(1.08); filter: blur(40px) saturate(1.2) hue-rotate(14deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+}
+
+/* CRT: scanlines over everything, and the faintest flicker */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.22) 2px 3px);
+  mix-blend-mode: multiply;
+  animation: flicker 4s infinite steps(60);
+}
+
+@keyframes flicker {
+  0%, 97% { opacity: 1; }
+  98% { opacity: 0.86; }
+  99% { opacity: 1; }
+  100% { opacity: 0.93; }
+}
+
+#app,
+.screen {
+  min-height: 100vh;
+}
+
+#app {
+  position: relative;
+  z-index: 1;
+}
+
+.screen {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 5vw, 3rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.75rem;
+  text-align: center;
+}
+
+/* --- masthead ----------------------------------------------------------------------------- */
+
+.masthead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 4px; /* the mark ships square; keep the old tile's soft corner */
+  filter: grayscale(1) brightness(1.6);
+  opacity: 0.9;
+}
+
+.wordmark {
+  font-size: 1.35rem;
+  letter-spacing: 0.55em;
+  text-indent: 0.55em; /* recentre the tracked text */
+  font-weight: 600;
+}
+
+.wordmark span {
+  color: var(--signal);
+}
+
+/* --- intro -------------------------------------------------------------------------------- */
+
+.transmission {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  max-width: 34rem;
+}
+
+.typewriter {
+  overflow: hidden;
+  white-space: normal;
+  animation: reveal 1.1s steps(40) both;
+}
+
+@keyframes reveal {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+.sender {
+  color: var(--signal);
+  font-weight: 600;
+}
+
+.manifest {
+  color: var(--dim);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.consent {
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+  text-align: left;
+  max-width: 30rem;
+  padding: 1rem 1.1rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--signal);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--dim);
+  cursor: pointer;
+}
+
+.consent input {
+  accent-color: var(--signal);
+  width: 1.05rem;
+  height: 1.05rem;
+  margin-top: 0.1rem;
+  flex: none;
+  cursor: pointer;
+}
+
+.open-button {
+  font-family: inherit;
+  font-size: 1rem;
+  letter-spacing: 0.35em;
+  text-indent: 0.35em;
+  padding: 1rem 3rem;
+  color: var(--ground);
+  background: var(--signal);
+  border: none;
+  cursor: pointer;
+  transition: box-shadow 160ms, transform 160ms, opacity 160ms;
+  box-shadow: 0 0 24px var(--signal-glow);
+}
+
+.open-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 0 40px var(--signal-glow);
+}
+
+.open-button:disabled {
+  opacity: 0.28;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.fineprint {
+  color: var(--dim);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+/* --- countdown ---------------------------------------------------------------------------- */
+
+.countdown-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+}
+
+.countdown-label {
+  color: var(--dim);
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.countdown {
+  font-size: clamp(3rem, 14vw, 5.5rem);
+  font-variant-numeric: tabular-nums;
+  color: var(--ok);
+  text-shadow: 0 0 18px rgba(61, 220, 132, 0.35);
+  transition: color 400ms;
+}
+
+.countdown.amber {
+  color: var(--amber);
+  text-shadow: 0 0 18px rgba(255, 176, 32, 0.35);
+}
+
+.countdown.critical {
+  color: var(--signal);
+  text-shadow: 0 0 22px var(--signal-glow);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  50% { opacity: 0.55; }
+}
+
+.fuse {
+  width: min(28rem, 100%);
+  height: 3px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.fuse-burn {
+  height: 100%;
+  width: 100%;
+  margin-left: auto; /* burns from the left toward the right edge */
+  background: linear-gradient(90deg, var(--signal), #ff7a3c);
+  box-shadow: 0 0 12px var(--signal-glow);
+  transition: width 250ms linear;
+}
+
+/* --- payloads ----------------------------------------------------------------------------- */
+
+.payloads {
+  list-style: none;
+  padding: 0;
+  width: min(28rem, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.payload {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.85rem 1.1rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  text-align: left;
+}
+
+.payload-icon {
+  color: var(--signal);
+  font-size: 1.1rem;
+}
+
+.payload a {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--dim);
+  overflow-wrap: anywhere;
+}
+
+.payload a:hover {
+  color: var(--signal);
+  border-bottom-color: var(--signal);
+}
+
+.payload-type {
+  margin-left: auto;
+  color: var(--dim);
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+/* --- destructed --------------------------------------------------------------------------- */
+
+.destructed .glitch {
+  position: relative;
+  font-size: clamp(1.3rem, 5vw, 2rem);
+  letter-spacing: 0.18em;
+  color: var(--signal);
+  animation: jitter 2.4s infinite steps(2);
+}
+
+.destructed .glitch::before,
+.destructed .glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  opacity: 0.75;
+}
+
+.destructed .glitch::before {
+  color: #2ba6ff;
+  animation: slice-a 2.9s infinite linear alternate;
+}
+
+.destructed .glitch::after {
+  color: var(--signal);
+  animation: slice-b 2.3s infinite linear alternate;
+}
+
+@keyframes jitter {
+  0%, 92% { transform: translate(0); }
+  94% { transform: translate(-2px, 1px); }
+  96% { transform: translate(2px, -1px); }
+  98% { transform: translate(-1px, -1px); }
+}
+
+@keyframes slice-a {
+  0%, 88% { clip-path: inset(0 0 100% 0); transform: translate(0); }
+  90% { clip-path: inset(12% 0 60% 0); transform: translate(-3px); }
+  94% { clip-path: inset(55% 0 20% 0); transform: translate(3px); }
+  100% { clip-path: inset(0 0 100% 0); transform: translate(0); }
+}
+
+@keyframes slice-b {
+  0%, 85% { clip-path: inset(100% 0 0 0); transform: translate(0); }
+  88% { clip-path: inset(65% 0 8% 0); transform: translate(3px); }
+  93% { clip-path: inset(20% 0 55% 0); transform: translate(-3px); }
+  100% { clip-path: inset(100% 0 0 0); transform: translate(0); }
+}
+
+.epitaph {
+  color: var(--dim);
+  font-size: 0.85rem;
+}
+
+/* --- intro personalization (all themes) ------------------------------------------------------ */
+
+.recipient-line {
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.terms {
+  list-style: none;
+  padding: 0.9rem 1.1rem;
+  margin: 0;
+  max-width: 30rem;
+  text-align: left;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--dim);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.terms li::before {
+  content: '\25AA\00A0\00A0';
+  color: var(--signal);
+}
+
+.fineprint {
+  line-height: 2;
+}
+
+.homebase-cta {
+  color: var(--signal);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--signal);
+  letter-spacing: 0.08em;
+  text-transform: none;
+}
+
+.homebase-cta:hover {
+  border-bottom-style: solid;
+}
+
+/* --- theme: clean ---------------------------------------------------------------------------- */
+/* The quiet, professional face - for the hotel clerk who would read scanlines as a hacker site. */
+
+body.theme-clean {
+  --ground: #ffffff;
+  --panel: #f8f9fa;
+  --line: #dadce0;
+  --ink: #202124;
+  --dim: #5f6368;
+  --signal: #1a73e8;
+  --signal-glow: rgba(26, 115, 232, 0.25);
+  --ok: #188038;
+  --amber: #f9ab00;
+  --mono: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+body.theme-clean::before,
+body.theme-clean::after {
+  display: none; /* no aurora, no scanlines, no flicker */
+}
+
+body.theme-clean .logo {
+  filter: none;
+}
+
+body.theme-clean .typewriter,
+body.theme-clean .destructed .glitch,
+body.theme-clean .destructed .glitch::before,
+body.theme-clean .destructed .glitch::after,
+body.theme-clean .countdown.critical {
+  animation: none;
+}
+
+body.theme-clean .destructed .glitch::before,
+body.theme-clean .destructed .glitch::after {
+  display: none;
+}
+
+body.theme-clean .destructed .glitch {
+  color: #d93025;
+}
+
+body.theme-clean .countdown.critical {
+  color: #d93025;
+  text-shadow: none;
+}
+
+body.theme-clean .countdown,
+body.theme-clean .countdown.amber {
+  text-shadow: none;
+}
+
+body.theme-clean .open-button {
+  border-radius: 8px;
+  color: #ffffff;
+  box-shadow: none;
+  letter-spacing: 0.05em;
+  text-indent: 0.05em;
+  text-transform: none;
+}
+
+body.theme-clean .consent,
+body.theme-clean .terms,
+body.theme-clean .payload {
+  border-radius: 8px;
+  border-left-width: 1px;
+}
+
+body.theme-clean .wordmark {
+  letter-spacing: 0.2em;
+  text-indent: 0.2em;
+  font-weight: 700;
+}
+
+/* --- theme: choplifter ----------------------------------------------------------------------- */
+/* The Apple II original: night starfield, banded moon, magenta ground with a green strip, the
+   tan barracks with its flag, and the white chopper with orange rotor tips that BANKS in flight.
+   It flies in, levels out, lands by the barracks, pushes the crate out of its side - the crate IS
+   the drop - and takes off again. Runs once; never gates access. */
+
+body.theme-choplifter {
+  --a2-black: #000000;
+  --a2-white: #ffffff;
+  --a2-magenta: #e434e4;
+  --a2-green: #2ed23c;
+  --a2-orange: #f25c05;
+  --a2-blue: #359eff;
+  --a2-tan: #d99a4e;
+
+  --ground: #000000;
+  --panel: #120e18;
+  --line: #33284a;
+  --ink: #ffffff;
+  --dim: #8f95b8;
+  --signal: #f25c05;
+  --signal-glow: rgba(242, 92, 5, 0.45);
+  --ok: #2ed23c;
+  --amber: #f2a705;
+}
+
+body.theme-choplifter::before {
+  display: none; /* the aurora belongs to mission */
+}
+
+body.theme-choplifter .screen {
+  text-transform: uppercase;
+}
+
+body.theme-choplifter .typewriter {
+  animation: none;
+}
+
+body.theme-choplifter .open-button {
+  color: var(--a2-black);
+  border: 2px solid var(--a2-white);
+}
+
+body.theme-choplifter .countdown {
+  text-shadow: none;
+}
+
+body.theme-choplifter .destructed .glitch {
+  color: var(--a2-magenta);
+}
+
+/* the marquee */
+
+.c64-scene {
+  position: relative;
+  width: min(30rem, 100%);
+  height: 150px;
+  overflow: hidden;
+  background: var(--a2-black);
+  image-rendering: pixelated;
+  flex: none;
+}
+
+/* hand-placed two-tone starfield, as the original scatters orange/blue/white pairs */
+.cl-stars {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 3px;
+  height: 2px;
+  background: var(--a2-white);
+  box-shadow:
+    34px 6px var(--a2-blue), 78px 22px var(--a2-orange), 120px 2px var(--a2-white),
+    160px 30px var(--a2-blue), 205px 12px var(--a2-orange), 248px 26px var(--a2-white),
+    292px 6px var(--a2-blue), 338px 18px var(--a2-orange), 388px 8px var(--a2-blue),
+    422px 28px var(--a2-white), 456px 14px var(--a2-orange), 18px 44px var(--a2-orange),
+    64px 56px var(--a2-white), 108px 40px var(--a2-blue), 150px 62px var(--a2-orange),
+    198px 48px var(--a2-white), 246px 58px var(--a2-blue), 300px 44px var(--a2-orange),
+    352px 60px var(--a2-white), 404px 50px var(--a2-blue), 448px 64px var(--a2-orange),
+    30px 84px var(--a2-blue), 84px 92px var(--a2-orange), 140px 78px var(--a2-white),
+    226px 88px var(--a2-blue), 328px 82px var(--a2-orange), 434px 86px var(--a2-white);
+}
+
+.cl-moon {
+  position: absolute;
+  top: 12px;
+  right: 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: repeating-linear-gradient(
+    0deg,
+    var(--a2-orange) 0 3px,
+    var(--a2-blue) 3px 5px,
+    var(--a2-white) 5px 7px
+  );
+}
+
+.cl-ground {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 24px;
+  background: var(--a2-magenta);
+  border-top: 2px solid var(--a2-white);
+}
+
+.cl-lawn {
+  position: absolute;
+  bottom: 22px;
+  right: 0;
+  width: 210px;
+  height: 6px;
+  background: var(--a2-green);
+  border-radius: 6px 0 0 0;
+}
+
+.cl-bush {
+  position: absolute;
+  bottom: 24px;
+  width: 18px;
+  height: 5px;
+  border-radius: 3px 3px 0 0;
+  background: var(--a2-blue);
+}
+
+.cl-bush-1 { left: 12px; }
+.cl-bush-2 { left: 36px; background: var(--a2-orange); }
+.cl-bush-3 { left: 62px; }
+
+.cl-barracks {
+  position: absolute;
+  bottom: 26px;
+  right: 18px;
+  width: 120px;
+  height: 30px;
+  background: var(--a2-tan);
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.cl-roof {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  height: 4px;
+  background: var(--a2-white);
+}
+
+.cl-window {
+  width: 20px;
+  height: 10px;
+  background: var(--a2-black);
+  border: 2px solid #8a5a20;
+}
+
+.cl-door {
+  width: 10px;
+  height: 18px;
+  margin-top: 10px;
+  background: var(--a2-black);
+}
+
+.cl-flagpole {
+  position: absolute;
+  bottom: 56px;
+  right: 44px;
+  width: 3px;
+  height: 30px;
+  background: var(--a2-white);
+}
+
+.cl-flag {
+  position: absolute;
+  top: 0;
+  left: 3px;
+  width: 26px;
+  height: 12px;
+  background: repeating-linear-gradient(0deg, var(--a2-orange) 0 2px, var(--a2-white) 2px 4px);
+  animation: flag-ripple 1.2s infinite steps(2);
+}
+
+.cl-flag span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 7px;
+  background: var(--a2-blue);
+  color: var(--a2-white);
+  font-size: 6px;
+  font-weight: 700;
+  line-height: 7px;
+  text-align: center;
+}
+
+@keyframes flag-ripple {
+  50% { transform: skewY(-6deg); }
+}
+
+.c64-chopper {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 108px;
+  height: 48px;
+  margin-left: -54px;
+  animation: chopper-sortie 9s forwards;
+}
+
+.c64-chopper svg {
+  width: 100%;
+  height: 100%;
+}
+
+.c64-chopper .rotor {
+  transform-origin: 32px 3px;
+  animation: rotor-spin 0.12s infinite steps(2);
+}
+
+.c64-chopper .tail-rotor {
+  transform-origin: 64px 13px;
+  animation: rotor-spin 0.09s infinite steps(2);
+}
+
+@keyframes rotor-spin {
+  50% { transform: scaleX(0.3); }
+}
+
+/* Banked on approach - the Apple II chopper leans into its motion - level for the landing by the
+   barracks, hold while the crate is pushed out, then bank the other way and leave. */
+@keyframes chopper-sortie {
+  0%   { transform: translate(300px, 6px) rotate(-14deg); }
+  28%  { transform: translate(-40px, 14px) rotate(-10deg); }
+  36%  { transform: translate(-60px, 18px) rotate(0deg); }
+  50%  { transform: translate(-60px, 88px) rotate(0deg); }
+  66%  { transform: translate(-60px, 88px) rotate(0deg); }
+  74%  { transform: translate(-60px, 10px) rotate(0deg); }
+  82%  { transform: translate(-140px, 2px) rotate(12deg); }
+  100% { transform: translate(-420px, -6px) rotate(14deg); }
+}
+
+.c64-crate {
+  position: absolute;
+  bottom: 26px;
+  left: 50%;
+  width: 22px;
+  height: 16px;
+  margin-left: -70px;
+  background: #8a5a20;
+  border: 2px solid #5a3a10;
+  color: var(--a2-orange);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  animation: crate-pushed 9s steps(5) forwards;
+}
+
+/* pushed out of the fuselage sideways once the skids are down, not dropped from the air */
+@keyframes crate-pushed {
+  0%, 55% { opacity: 0; transform: translateX(0); }
+  58% { opacity: 1; transform: translateX(0); }
+  66%, 100% { opacity: 1; transform: translateX(-30px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c64-chopper {
+    animation: none;
+    transform: translate(-60px, 88px); /* already landed by the barracks */
+  }
+  .c64-chopper .rotor,
+  .c64-chopper .tail-rotor,
+  .cl-flag {
+    animation: none;
+  }
+  .c64-crate {
+    animation: none;
+    opacity: 1;
+    transform: translateX(-30px);
+  }
+}
+
+/* --- destroy-now + the prominent CTA --------------------------------------------------------- */
+
+.destroy-button {
+  font-family: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-indent: 0.2em;
+  text-transform: uppercase;
+  padding: 0.7rem 1.6rem;
+  color: var(--signal);
+  background: transparent;
+  border: 1px solid var(--signal);
+  cursor: pointer;
+  transition: background 160ms, color 160ms;
+}
+
+.destroy-button:hover {
+  background: var(--signal);
+  color: var(--ground);
+}
+
+.cta-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 30rem;
+  padding: 1.4rem 1.6rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+
+.cta-pitch {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+.cta-button {
+  display: inline-block;
+  padding: 0.85rem 2rem;
+  color: var(--ground);
+  background: var(--signal);
+  text-decoration: none;
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  box-shadow: 0 0 20px var(--signal-glow);
+  transition: transform 160ms, box-shadow 160ms;
+}
+
+.cta-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 34px var(--signal-glow);
+}
+
+body.theme-clean .cta-card,
+body.theme-clean .cta-button,
+body.theme-clean .destroy-button {
+  border-radius: 8px;
+}
+
+body.theme-clean .cta-button {
+  color: #ffffff;
+  box-shadow: none;
+}
+
+body.theme-clean .destroy-button {
+  color: #d93025;
+  border-color: #d93025;
+}
+
+body.theme-clean .destroy-button:hover {
+  background: #d93025;
+  color: #ffffff;
+}
+
+.diagnostic {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--dim);
+  opacity: 0.8;
+}
+
+.c64-ready {
+  align-self: flex-start;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+}
+
+.c64-cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1em;
+  margin-left: 0.15em;
+  vertical-align: text-bottom;
+  background: var(--ink);
+  animation: cursor-blink 1s infinite steps(1);
+}
+
+@keyframes cursor-blink {
+  50% { opacity: 0; }
+}

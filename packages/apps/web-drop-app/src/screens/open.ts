@@ -1,0 +1,147 @@
+import type { DroppedFile, DropSource } from '../drop-source';
+import { renderDestructed } from './destructed';
+
+interface Downloaded {
+  key: string;
+  name: string;
+  contentType: string;
+  url: string; // object URL over the already-fetched bytes; no second round trip
+}
+
+const pad = (n: number) => String(n).padStart(2, '0');
+
+const formatRemaining = (ms: number) => {
+  const s = Math.max(0, Math.ceil(ms / 1000));
+  const h = Math.floor(s / 3600);
+  return h > 0 ? `${pad(h)}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}` : `${pad(Math.floor(s / 60))}:${pad(s % 60)}`;
+};
+
+/**
+ * The open screen: fetch every payload (the FIRST payload fetch is what starts the server-side
+ * clock), re-read the header for the resolved absolute Ttl, then count down against it.
+ */
+export async function renderOpen(root: HTMLElement, source: DropSource, onDestruct: () => void) {
+  const header = await source.fetchHeader().catch((e) => {
+    console.warn('[webdrop] open: header fetch threw', e);
+    return null;
+  });
+  if (!header) {
+    return renderDestructed(root, 'THIS DROP COULD NOT BE OPENED', undefined, 'reason: header unavailable at open');
+  }
+
+  console.warn('[webdrop] open: header ttl=%s payloads=%o', header.ttl, header.payloads.map((p) => p.key));
+
+  let dropped: DroppedFile[] | null = null;
+  try {
+    dropped = await source.openDrop();
+  } catch (e) {
+    console.warn('[webdrop] openDrop threw', e);
+  }
+
+  if (!dropped || dropped.length === 0) {
+    const why =
+      header.payloads.length === 0
+        ? 'reason: header listed no payloads'
+        : 'reason: payloads could not be fetched or decrypted';
+    console.warn('[webdrop] open failed —', why);
+    return renderDestructed(root, 'THIS DROP COULD NOT BE OPENED', undefined, why);
+  }
+
+  const files: Downloaded[] = dropped.map((f) => ({
+    key: f.name,
+    name: f.name,
+    contentType: f.contentType,
+    url: URL.createObjectURL(new Blob([f.bytes as BlobPart], { type: f.contentType })),
+  }));
+
+  // The clock started on the first payload fetch above; the header now carries the absolute time.
+  const resolved = await source.fetchHeader();
+  const deadline = resolved && resolved.ttl > 0 ? resolved.ttl : 0;
+  const fuseTotal = deadline > 0 ? deadline - Date.now() : 0;
+
+  root.innerHTML = `
+    <main class="screen">
+      <header class="masthead">
+        <img class="logo" src="./homebase-logo.svg" alt="Homebase" />
+        <h1 class="wordmark">WEB<span>DROP</span></h1>
+      </header>
+
+      ${
+        deadline > 0
+          ? `<section class="countdown-block">
+               <p class="countdown-label">This drop will self-destruct in</p>
+               <p id="countdown" class="countdown">--:--</p>
+               <div class="fuse"><div id="fuse-burn" class="fuse-burn"></div></div>
+             </section>`
+          : '<p class="countdown-label">This drop does not expire.</p>'
+      }
+
+      <ul class="payloads">
+        ${files
+          .map(
+            (f) => `
+          <li class="payload">
+            <span class="payload-icon" aria-hidden="true">&#8595;</span>
+            <a href="${f.url}" download="${f.name}">${f.name}</a>
+            <span class="payload-type">${f.contentType}</span>
+          </li>`
+          )
+          .join('')}
+      </ul>
+
+      <button id="destroy" class="destroy-button">I'm done &mdash; destroy it now</button>
+
+      <footer class="fineprint">
+        save what you need &middot; the drop will not wait<br />
+        <a class="homebase-cta" href="https://homebase.id" target="_blank" rel="noopener">This is cool - I want a Homebase account too</a>
+      </footer>
+    </main>
+  `;
+
+  let timer: ReturnType<typeof setInterval> | undefined;
+
+  const destroyNow = async () => {
+    for (const f of files) URL.revokeObjectURL(f.url);
+    onDestruct();
+    // Ask the server to kill the LINK too, for every holder. On failure fall back to reporting the
+    // server's own deadline - the page's copy is gone either way.
+    const linkKilled = await source.expireNow();
+    renderDestructed(
+      root,
+      'THIS DROP HAS SELF-DESTRUCTED',
+      linkKilled ? Date.now() : deadline > 0 ? deadline : undefined
+    );
+  };
+  root.querySelector<HTMLButtonElement>('#destroy')?.addEventListener('click', () => {
+    if (timer !== undefined) clearInterval(timer);
+    void destroyNow();
+  });
+
+  if (deadline <= 0) return;
+
+  const countdown = root.querySelector<HTMLElement>('#countdown')!;
+  const fuse = root.querySelector<HTMLElement>('#fuse-burn')!;
+
+  const destruct = () => {
+    clearInterval(timer);
+    for (const f of files) URL.revokeObjectURL(f.url);
+    onDestruct();
+    // The deadline has passed, so the server refuses the link from here on - say so.
+    renderDestructed(root, 'THIS DROP HAS SELF-DESTRUCTED', deadline);
+  };
+
+  const tick = () => {
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) return destruct();
+
+    countdown.textContent = formatRemaining(remaining);
+    const fraction = fuseTotal > 0 ? remaining / fuseTotal : 0;
+    fuse.style.width = `${(fraction * 100).toFixed(2)}%`;
+
+    countdown.classList.toggle('amber', fraction <= 0.5 && fraction > 0.2);
+    countdown.classList.toggle('critical', fraction <= 0.2);
+  };
+
+  timer = setInterval(tick, 250);
+  tick();
+}
