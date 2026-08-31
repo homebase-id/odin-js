@@ -74,12 +74,26 @@ export async function renderOpen(root: HTMLElement, source: DropSource, onDestru
           .join('')}
       </ul>
 
+      <button id="destroy" class="destroy-button">I'm done &mdash; destroy it now</button>
+
       <footer class="fineprint">
         save what you need &middot; the drop will not wait<br />
         <a class="homebase-cta" href="https://homebase.id" target="_blank" rel="noopener">This is cool - I want a Homebase account too</a>
       </footer>
     </main>
   `;
+
+  let timer: ReturnType<typeof setInterval> | undefined;
+
+  const destroyNow = () => {
+    for (const f of files) URL.revokeObjectURL(f.url);
+    onDestruct();
+    renderDestructed(root, 'THIS DROP HAS SELF-DESTRUCTED', deadline > 0 ? deadline : undefined);
+  };
+  root.querySelector<HTMLButtonElement>('#destroy')?.addEventListener('click', () => {
+    if (timer !== undefined) clearInterval(timer);
+    destroyNow();
+  });
 
   if (deadline <= 0) return;
 
@@ -105,6 +119,6 @@ export async function renderOpen(root: HTMLElement, source: DropSource, onDestru
     countdown.classList.toggle('critical', fraction <= 0.2);
   };
 
-  const timer = setInterval(tick, 250);
+  timer = setInterval(tick, 250);
   tick();
 }

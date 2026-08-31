@@ -780,3 +780,100 @@ body.theme-choplifter .destructed .glitch {
     transform: translateX(-30px);
   }
 }
+
+/* --- destroy-now + the prominent CTA --------------------------------------------------------- */
+
+.destroy-button {
+  font-family: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-indent: 0.2em;
+  text-transform: uppercase;
+  padding: 0.7rem 1.6rem;
+  color: var(--signal);
+  background: transparent;
+  border: 1px solid var(--signal);
+  cursor: pointer;
+  transition: background 160ms, color 160ms;
+}
+
+.destroy-button:hover {
+  background: var(--signal);
+  color: var(--ground);
+}
+
+.cta-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 30rem;
+  padding: 1.4rem 1.6rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+
+.cta-pitch {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+.cta-button {
+  display: inline-block;
+  padding: 0.85rem 2rem;
+  color: var(--ground);
+  background: var(--signal);
+  text-decoration: none;
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  box-shadow: 0 0 20px var(--signal-glow);
+  transition: transform 160ms, box-shadow 160ms;
+}
+
+.cta-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 34px var(--signal-glow);
+}
+
+body.theme-clean .cta-card,
+body.theme-clean .cta-button,
+body.theme-clean .destroy-button {
+  border-radius: 8px;
+}
+
+body.theme-clean .cta-button {
+  color: #ffffff;
+  box-shadow: none;
+}
+
+body.theme-clean .destroy-button {
+  color: #d93025;
+  border-color: #d93025;
+}
+
+body.theme-clean .destroy-button:hover {
+  background: #d93025;
+  color: #ffffff;
+}
+
+.c64-ready {
+  align-self: flex-start;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+}
+
+.c64-cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1em;
+  margin-left: 0.15em;
+  vertical-align: text-bottom;
+  background: var(--ink);
+  animation: cursor-blink 1s infinite steps(1);
+}
+
+@keyframes cursor-blink {
+  50% { opacity: 0; }
+}
