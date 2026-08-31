@@ -25,7 +25,9 @@ export async function renderOpen(root: HTMLElement, source: DropSource, onDestru
     console.warn('[webdrop] open: header fetch threw', e);
     return null;
   });
-  if (!header) return renderDestructed(root, undefined, undefined, 'reason: header unavailable at open');
+  if (!header) {
+    return renderDestructed(root, 'THIS DROP COULD NOT BE OPENED', undefined, 'reason: header unavailable at open');
+  }
 
   console.warn('[webdrop] open: header ttl=%s payloads=%o', header.ttl, header.payloads.map((p) => p.key));
 
@@ -51,8 +53,8 @@ export async function renderOpen(root: HTMLElement, source: DropSource, onDestru
 
   if (files.length === 0) {
     const why = header.payloads.length === 0 ? 'reason: header listed no payloads' : `reason: ${failures.join('; ')}`;
-    console.warn('[webdrop] open: destructing —', why);
-    return renderDestructed(root, undefined, undefined, why);
+    console.warn('[webdrop] open failed —', why);
+    return renderDestructed(root, 'THIS DROP COULD NOT BE OPENED', undefined, why);
   }
 
   // The clock started on the first payload fetch above; the header now carries the absolute time.

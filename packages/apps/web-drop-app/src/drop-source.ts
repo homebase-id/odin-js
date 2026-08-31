@@ -62,8 +62,19 @@ export class V2Source implements DropSource {
     return `/api/v2/drives/${this.driveId}/files/by-uid/${this.dropId}/${tail}`;
   }
 
+  // credentials: 'omit' is load-bearing, not hygiene. A drop link is a capability URL and must
+  // read the same for every holder - but if the OWNER opens their own link while logged in on
+  // this host, the browser's ambient cookie authenticates the request and the server wraps the
+  // response in the shared-secret {iv, data} envelope. That envelope is valid JSON, so it parsed
+  // "successfully" as a header with no fileMetadata: ttl read 0 and payloads read empty, and the
+  // viewer walked straight to the destruct screen. Cookieless, everyone is anonymous and the
+  // response is plain.
+  private fetchAnonymously(tail: string) {
+    return fetch(this.url(tail), { credentials: 'omit' });
+  }
+
   async fetchHeader(): Promise<DropHeader | null> {
-    const response = await fetch(this.url('header'));
+    const response = await this.fetchAnonymously('header');
     if (!response.ok) return null;
 
     const header = await response.json();
@@ -104,7 +115,7 @@ export class V2Source implements DropSource {
   }
 
   async fetchPayload(key: string): Promise<Blob | null> {
-    const response = await fetch(this.url(`payload/${key}`));
+    const response = await this.fetchAnonymously(`payload/${key}`);
     if (!response.ok) return null;
     return await response.blob();
   }
