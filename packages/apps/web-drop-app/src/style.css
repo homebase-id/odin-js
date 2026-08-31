@@ -478,40 +478,33 @@ body.theme-clean .wordmark {
 }
 
 /* --- theme: choplifter ----------------------------------------------------------------------- */
-/* C64, Pepto palette. The chopper flies in over the dunes, lands on the pad, delivers the crate
-   - the crate IS the drop - and departs. Runs once; never gates access. */
+/* The Apple II original: night starfield, banded moon, magenta ground with a green strip, the
+   tan barracks with its flag, and the white chopper with orange rotor tips that BANKS in flight.
+   It flies in, levels out, lands by the barracks, pushes the crate out of its side - the crate IS
+   the drop - and takes off again. Runs once; never gates access. */
 
 body.theme-choplifter {
-  --c64-border: #6c5eb5;
-  --c64-screen: #352879;
-  --c64-sky: #70a4b2;
-  --c64-sun: #b8c76f;
-  --c64-dune: #6f4f25;
-  --c64-dune-lit: #9a6759;
-  --c64-lgreen: #9ad284;
-  --c64-lgrey: #959595;
-  --c64-dgrey: #444444;
-  --c64-black: #000000;
-  --c64-white: #ffffff;
+  --a2-black: #000000;
+  --a2-white: #ffffff;
+  --a2-magenta: #e434e4;
+  --a2-green: #2ed23c;
+  --a2-orange: #f25c05;
+  --a2-blue: #359eff;
+  --a2-tan: #d99a4e;
 
-  --ground: var(--c64-screen);
-  --panel: #2a2060;
-  --line: var(--c64-border);
-  --ink: var(--c64-lgreen);
-  --dim: #8a7fd0;
-  --signal: #b8c76f;
-  --signal-glow: rgba(184, 199, 111, 0.4);
-  --ok: var(--c64-lgreen);
-  --amber: #b8c76f;
+  --ground: #000000;
+  --panel: #120e18;
+  --line: #33284a;
+  --ink: #ffffff;
+  --dim: #8f95b8;
+  --signal: #f25c05;
+  --signal-glow: rgba(242, 92, 5, 0.45);
+  --ok: #2ed23c;
+  --amber: #f2a705;
 }
 
 body.theme-choplifter::before {
   display: none; /* the aurora belongs to mission */
-}
-
-body.theme-choplifter {
-  border: 24px solid var(--c64-border); /* the C64 screen frame */
-  min-height: calc(100vh - 48px);
 }
 
 body.theme-choplifter .screen {
@@ -523,10 +516,8 @@ body.theme-choplifter .typewriter {
 }
 
 body.theme-choplifter .open-button {
-  color: var(--c64-screen);
-  box-shadow: none;
-  border: 2px solid var(--c64-lgreen);
-  background: var(--c64-lgreen);
+  color: var(--a2-black);
+  border: 2px solid var(--a2-white);
 }
 
 body.theme-choplifter .countdown {
@@ -534,7 +525,7 @@ body.theme-choplifter .countdown {
 }
 
 body.theme-choplifter .destructed .glitch {
-  color: var(--c64-lgreen);
+  color: var(--a2-magenta);
 }
 
 /* the marquee */
@@ -542,72 +533,147 @@ body.theme-choplifter .destructed .glitch {
 .c64-scene {
   position: relative;
   width: min(30rem, 100%);
-  height: 132px;
+  height: 150px;
   overflow: hidden;
-  background: var(--c64-sky);
+  background: var(--a2-black);
   image-rendering: pixelated;
   flex: none;
 }
 
-.c64-sun {
+/* hand-placed two-tone starfield, as the original scatters orange/blue/white pairs */
+.cl-stars {
   position: absolute;
-  top: 14px;
-  left: 32px;
-  width: 20px;
-  height: 20px;
-  background: var(--c64-sun);
-  clip-path: polygon(25% 0, 75% 0, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0 75%, 0 25%);
-}
-
-.c64-dune {
-  position: absolute;
-  left: -10%;
-  right: -10%;
-  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
-}
-
-.c64-dune-far {
-  bottom: 0;
-  height: 44px;
-  background: var(--c64-dune-lit);
-}
-
-.c64-dune-near {
-  bottom: -14px;
-  height: 40px;
-  background: var(--c64-dune);
-}
-
-.c64-pad {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 96px;
-  height: 6px;
-  background: var(--c64-dgrey);
-}
-
-.c64-flag {
-  position: absolute;
-  bottom: 16px;
-  left: calc(50% + 58px);
+  top: 4px;
+  left: 4px;
   width: 3px;
-  height: 34px;
-  background: var(--c64-lgrey);
+  height: 2px;
+  background: var(--a2-white);
+  box-shadow:
+    34px 6px var(--a2-blue), 78px 22px var(--a2-orange), 120px 2px var(--a2-white),
+    160px 30px var(--a2-blue), 205px 12px var(--a2-orange), 248px 26px var(--a2-white),
+    292px 6px var(--a2-blue), 338px 18px var(--a2-orange), 388px 8px var(--a2-blue),
+    422px 28px var(--a2-white), 456px 14px var(--a2-orange), 18px 44px var(--a2-orange),
+    64px 56px var(--a2-white), 108px 40px var(--a2-blue), 150px 62px var(--a2-orange),
+    198px 48px var(--a2-white), 246px 58px var(--a2-blue), 300px 44px var(--a2-orange),
+    352px 60px var(--a2-white), 404px 50px var(--a2-blue), 448px 64px var(--a2-orange),
+    30px 84px var(--a2-blue), 84px 92px var(--a2-orange), 140px 78px var(--a2-white),
+    226px 88px var(--a2-blue), 328px 82px var(--a2-orange), 434px 86px var(--a2-white);
 }
 
-.c64-flag-cloth {
+.cl-moon {
+  position: absolute;
+  top: 12px;
+  right: 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: repeating-linear-gradient(
+    0deg,
+    var(--a2-orange) 0 3px,
+    var(--a2-blue) 3px 5px,
+    var(--a2-white) 5px 7px
+  );
+}
+
+.cl-ground {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 24px;
+  background: var(--a2-magenta);
+  border-top: 2px solid var(--a2-white);
+}
+
+.cl-lawn {
+  position: absolute;
+  bottom: 22px;
+  right: 0;
+  width: 210px;
+  height: 6px;
+  background: var(--a2-green);
+  border-radius: 6px 0 0 0;
+}
+
+.cl-bush {
+  position: absolute;
+  bottom: 24px;
+  width: 18px;
+  height: 5px;
+  border-radius: 3px 3px 0 0;
+  background: var(--a2-blue);
+}
+
+.cl-bush-1 { left: 12px; }
+.cl-bush-2 { left: 36px; background: var(--a2-orange); }
+.cl-bush-3 { left: 62px; }
+
+.cl-barracks {
+  position: absolute;
+  bottom: 26px;
+  right: 18px;
+  width: 120px;
+  height: 30px;
+  background: var(--a2-tan);
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.cl-roof {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  height: 4px;
+  background: var(--a2-white);
+}
+
+.cl-window {
+  width: 20px;
+  height: 10px;
+  background: var(--a2-black);
+  border: 2px solid #8a5a20;
+}
+
+.cl-door {
+  width: 10px;
+  height: 18px;
+  margin-top: 10px;
+  background: var(--a2-black);
+}
+
+.cl-flagpole {
+  position: absolute;
+  bottom: 56px;
+  right: 44px;
+  width: 3px;
+  height: 30px;
+  background: var(--a2-white);
+}
+
+.cl-flag {
   position: absolute;
   top: 0;
   left: 3px;
-  padding: 1px 4px;
-  background: var(--c64-lgreen);
-  color: var(--c64-screen);
-  font-size: 9px;
-  font-weight: 700;
-  line-height: 1.2;
+  width: 26px;
+  height: 12px;
+  background: repeating-linear-gradient(0deg, var(--a2-orange) 0 2px, var(--a2-white) 2px 4px);
   animation: flag-ripple 1.2s infinite steps(2);
+}
+
+.cl-flag span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 7px;
+  background: var(--a2-blue);
+  color: var(--a2-white);
+  font-size: 6px;
+  font-weight: 700;
+  line-height: 7px;
+  text-align: center;
 }
 
 @keyframes flag-ripple {
@@ -618,10 +684,10 @@ body.theme-choplifter .destructed .glitch {
   position: absolute;
   top: 0;
   left: 50%;
-  width: 96px;
-  height: 42px;
-  margin-left: -48px;
-  animation: chopper-sortie 8s steps(24) forwards;
+  width: 108px;
+  height: 48px;
+  margin-left: -54px;
+  animation: chopper-sortie 9s forwards;
 }
 
 .c64-chopper svg {
@@ -630,69 +696,71 @@ body.theme-choplifter .destructed .glitch {
 }
 
 .c64-chopper .rotor {
-  fill: var(--c64-dgrey);
-  transform-origin: 28px 3px;
+  transform-origin: 32px 3px;
   animation: rotor-spin 0.12s infinite steps(2);
 }
 
 .c64-chopper .tail-rotor {
-  fill: var(--c64-dgrey);
-  transform-origin: 59px 12px;
+  transform-origin: 64px 13px;
   animation: rotor-spin 0.09s infinite steps(2);
 }
 
 @keyframes rotor-spin {
-  50% { transform: scaleX(0.25); }
+  50% { transform: scaleX(0.3); }
 }
 
-/* fly in from the right at altitude -> hover -> touch down on the pad -> hold while the crate
-   drops -> lift off -> exit left. Positions are % of the scene box. */
+/* Banked on approach - the Apple II chopper leans into its motion - level for the landing by the
+   barracks, hold while the crate is pushed out, then bank the other way and leave. */
 @keyframes chopper-sortie {
-  0%   { transform: translate(320px, 6px); }
-  32%  { transform: translate(0, 10px); }
-  40%  { transform: translate(0, 10px); }
-  52%  { transform: translate(0, 58px); }
-  68%  { transform: translate(0, 58px); }
-  80%  { transform: translate(0, 4px); }
-  100% { transform: translate(-360px, 0); }
+  0%   { transform: translate(300px, 6px) rotate(-14deg); }
+  28%  { transform: translate(-40px, 14px) rotate(-10deg); }
+  36%  { transform: translate(-60px, 18px) rotate(0deg); }
+  50%  { transform: translate(-60px, 88px) rotate(0deg); }
+  66%  { transform: translate(-60px, 88px) rotate(0deg); }
+  74%  { transform: translate(-60px, 10px) rotate(0deg); }
+  82%  { transform: translate(-140px, 2px) rotate(12deg); }
+  100% { transform: translate(-420px, -6px) rotate(14deg); }
 }
 
 .c64-crate {
   position: absolute;
-  bottom: 16px;
+  bottom: 26px;
   left: 50%;
   width: 22px;
-  height: 18px;
-  margin-left: -11px;
+  height: 16px;
+  margin-left: -70px;
   background: #8a5a20;
-  border: 2px solid #433900;
-  color: var(--c64-sun);
+  border: 2px solid #5a3a10;
+  color: var(--a2-orange);
   font-size: 10px;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  animation: crate-delivered 8s steps(6) forwards;
+  animation: crate-pushed 9s steps(5) forwards;
 }
 
-@keyframes crate-delivered {
-  0%, 60% { opacity: 0; transform: translateY(-14px); }
-  66%, 100% { opacity: 1; transform: translateY(0); }
+/* pushed out of the fuselage sideways once the skids are down, not dropped from the air */
+@keyframes crate-pushed {
+  0%, 55% { opacity: 0; transform: translateX(0); }
+  58% { opacity: 1; transform: translateX(0); }
+  66%, 100% { opacity: 1; transform: translateX(-30px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .c64-chopper {
     animation: none;
-    transform: translate(0, 58px); /* already landed */
+    transform: translate(-60px, 88px); /* already landed by the barracks */
   }
   .c64-chopper .rotor,
   .c64-chopper .tail-rotor,
-  .c64-flag-cloth {
+  .cl-flag {
     animation: none;
   }
   .c64-crate {
     animation: none;
     opacity: 1;
+    transform: translateX(-30px);
   }
 }

@@ -93,22 +93,38 @@ const escapeHtml = (value: string): string =>
  */
 const choplifterScene = (): string => `
   <div class="c64-scene" aria-hidden="true">
-    <div class="c64-sun"></div>
-    <div class="c64-dune c64-dune-far"></div>
-    <div class="c64-dune c64-dune-near"></div>
-    <div class="c64-pad"></div>
-    <div class="c64-flag"><div class="c64-flag-cloth">H</div></div>
+    <div class="cl-stars"></div>
+    <div class="cl-moon"></div>
+    <div class="cl-bush cl-bush-1"></div>
+    <div class="cl-bush cl-bush-2"></div>
+    <div class="cl-bush cl-bush-3"></div>
+    <div class="cl-ground"></div>
+    <div class="cl-lawn"></div>
+    <div class="cl-barracks">
+      <div class="cl-roof"></div>
+      <div class="cl-window"></div>
+      <div class="cl-window"></div>
+      <div class="cl-door"></div>
+      <div class="cl-window"></div>
+    </div>
+    <div class="cl-flagpole"><div class="cl-flag"><span>H</span></div></div>
     <div class="c64-chopper">
-      <svg viewBox="0 0 64 28" shape-rendering="crispEdges">
-        <rect class="rotor" x="6" y="2" width="44" height="2"/>
-        <rect x="26" y="4" width="4" height="4" fill="var(--c64-dgrey)"/>
-        <rect x="14" y="8" width="28" height="10" fill="var(--c64-lgrey)"/>
-        <rect x="14" y="8" width="10" height="6" fill="var(--c64-black)"/>
-        <rect x="42" y="10" width="16" height="4" fill="var(--c64-lgrey)"/>
-        <rect class="tail-rotor" x="58" y="6" width="2" height="12"/>
-        <rect x="18" y="18" width="2" height="4" fill="var(--c64-dgrey)"/>
-        <rect x="34" y="18" width="2" height="4" fill="var(--c64-dgrey)"/>
-        <rect x="12" y="22" width="30" height="2" fill="var(--c64-dgrey)"/>
+      <svg viewBox="0 0 72 32" shape-rendering="crispEdges">
+        <rect x="8" y="2" width="4" height="2" fill="var(--a2-orange)"/>
+        <rect class="rotor" x="12" y="2" width="40" height="2" fill="var(--a2-white)"/>
+        <rect x="52" y="2" width="4" height="2" fill="var(--a2-orange)"/>
+        <rect x="30" y="4" width="4" height="3" fill="var(--a2-white)"/>
+        <rect x="16" y="9" width="2" height="8" fill="var(--a2-white)"/>
+        <rect x="18" y="7" width="26" height="12" fill="var(--a2-white)"/>
+        <rect x="19" y="9" width="8" height="8" fill="var(--a2-black)"/>
+        <rect x="44" y="11" width="18" height="4" fill="var(--a2-white)"/>
+        <rect x="58" y="5" width="4" height="7" fill="var(--a2-white)"/>
+        <rect class="tail-rotor" x="63" y="6" width="2" height="14" fill="var(--a2-orange)"/>
+        <rect x="24" y="19" width="2" height="3" fill="var(--a2-blue)"/>
+        <rect x="38" y="19" width="2" height="3" fill="var(--a2-blue)"/>
+        <rect x="14" y="22" width="2" height="2" fill="var(--a2-orange)"/>
+        <rect x="16" y="22" width="32" height="2" fill="var(--a2-white)"/>
+        <rect x="48" y="22" width="2" height="2" fill="var(--a2-orange)"/>
       </svg>
     </div>
     <div class="c64-crate">H</div>
