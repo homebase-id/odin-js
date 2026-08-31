@@ -31,6 +31,12 @@ export interface DriveDefinition {
      */
     driveSlug?: string | null;
 
+    /**
+     * The address of the drive's type, shared by every drive of that type. Not served by every
+     * identity host, so treat it as optional.
+     */
+    driveTypeSlug?: string | null;
+
     targetDriveInfo: TargetDrive;
     metadata: string;
     allowAnonymousReads: boolean;

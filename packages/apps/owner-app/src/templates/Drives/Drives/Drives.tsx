@@ -75,8 +75,15 @@ const Drives = () => {
                   >
                     {isDebug && driveDef.driveId && <p>DriveId: {driveDef.driveId}</p>}
                     {driveDef.driveSlug ? (
-                      <p className="font-mono text-sm text-slate-400 break-all">
-                        {driveDef.driveSlug}
+                      <p className="text-sm text-slate-400">
+                        {t('Slug')}:{' '}
+                        <span className="break-all font-mono">{driveDef.driveSlug}</span>
+                      </p>
+                    ) : null}
+                    {driveDef.driveTypeSlug ? (
+                      <p className="text-sm text-slate-400">
+                        {t('Type slug')}:{' '}
+                        <span className="break-all font-mono">{driveDef.driveTypeSlug}</span>
                       </p>
                     ) : null}
                     <h3 className="text-lg">Metadata</h3>
