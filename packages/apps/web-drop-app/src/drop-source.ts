@@ -39,11 +39,21 @@ export interface DropHeader {
   intro?: DropIntro;
 }
 
+export interface DroppedFile {
+  name: string;
+  contentType: string;
+  bytes: Uint8Array;
+}
+
 export interface DropSource {
   readonly sender: string;
   /** null means gone: expired, burned, or never existed - the server does not say which. */
   fetchHeader(): Promise<DropHeader | null>;
-  fetchPayload(key: string): Promise<Blob | null>;
+  /**
+   * Fetches and DECRYPTS the drop: manifest first (real names), then every payload. The first
+   * payload fetch in here is what starts a burn clock. null means gone.
+   */
+  openDrop(): Promise<DroppedFile[] | null>;
 }
 
 // --- real ---------------------------------------------------------------------------------------
@@ -57,6 +67,9 @@ export class V2Source implements DropSource {
     /** The link key from the fragment; null when the URL carried none. */
     private readonly key: Uint8Array | null
   ) {}
+
+  /** payload key -> base64 IV, cached from the header's cleartext content. */
+  private ivs: Record<string, string> = {};
 
   private url(tail: string) {
     return `/api/v2/drives/${this.driveId}/files/by-uid/${this.dropId}/${tail}`;
@@ -91,6 +104,7 @@ export class V2Source implements DropSource {
     let intro: DropIntro | undefined;
     try {
       const content = JSON.parse(header?.fileMetadata?.appData?.content ?? '{}');
+      this.ivs = content.ivs ?? {};
       theme = content.theme ?? undefined;
       // The intro decrypts from the HEADER alone - deliberately, since a header read never
       // starts the burn clock, so personalizing this screen costs a prefetching scanner nothing.
@@ -114,10 +128,36 @@ export class V2Source implements DropSource {
     return { ttl: header?.fileMetadata?.ttl ?? 0, payloads, theme, intro };
   }
 
-  async fetchPayload(key: string): Promise<Blob | null> {
-    const response = await this.fetchAnonymously(`payload/${key}`);
+  async openDrop(): Promise<DroppedFile[] | null> {
+    if (!this.key) return null; // no fragment key, nothing decryptable
+
+    const manifestBytes = await this.fetchAndDecrypt('wdr_meta');
+    if (!manifestBytes) return null;
+
+    const manifest: { key: string; name: string; contentType: string }[] = JSON.parse(
+      new TextDecoder().decode(manifestBytes)
+    );
+
+    const files: DroppedFile[] = [];
+    for (const entry of manifest) {
+      const bytes = await this.fetchAndDecrypt(entry.key);
+      if (bytes) files.push({ name: entry.name, contentType: entry.contentType, bytes });
+    }
+    return files.length > 0 ? files : null;
+  }
+
+  private async fetchAndDecrypt(payloadKey: string): Promise<Uint8Array | null> {
+    const iv = this.ivs[payloadKey];
+    if (!iv || !this.key) return null;
+    const response = await this.fetchAnonymously(`payload/${payloadKey}`);
     if (!response.ok) return null;
-    return await response.blob();
+    const cipher = new Uint8Array(await response.arrayBuffer());
+    try {
+      return await decryptDropPayload(this.key, base64ToBytes(iv), cipher);
+    } catch (e) {
+      console.warn(`[webdrop] decrypt failed for ${payloadKey}`, e);
+      return null;
+    }
   }
 }
 
@@ -160,11 +200,6 @@ const demoBadge = () =>
 export class DemoSource implements DropSource {
   readonly sender = 'biggus.dickus';
 
-  private readonly blobs: Record<string, () => Blob> = {
-    wdr_data: demoBriefing,
-    wdr_img1: demoBadge,
-  };
-
   async fetchHeader(): Promise<DropHeader | null> {
     if (sessionStorage.getItem(DEMO_DESTRUCTED_KEY)) return null;
 
@@ -189,7 +224,7 @@ export class DemoSource implements DropSource {
     };
   }
 
-  async fetchPayload(key: string): Promise<Blob | null> {
+  async openDrop(): Promise<DroppedFile[] | null> {
     if (sessionStorage.getItem(DEMO_DESTRUCTED_KEY)) return null;
 
     if (!sessionStorage.getItem(DEMO_RESOLVED_KEY)) {
@@ -197,7 +232,18 @@ export class DemoSource implements DropSource {
     }
 
     await new Promise((resolve) => setTimeout(resolve, 350)); // let the transmission feel real
-    return this.blobs[key]?.() ?? null;
+    return [
+      {
+        name: 'mission-briefing.txt',
+        contentType: 'text/plain',
+        bytes: new Uint8Array(await demoBriefing().arrayBuffer()),
+      },
+      {
+        name: 'clearance-badge.svg',
+        contentType: 'image/svg+xml',
+        bytes: new Uint8Array(await demoBadge().arrayBuffer()),
+      },
+    ];
   }
 
   destruct() {

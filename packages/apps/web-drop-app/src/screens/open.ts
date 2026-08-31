@@ -1,4 +1,4 @@
-import type { DropSource } from '../drop-source';
+import type { DroppedFile, DropSource } from '../drop-source';
 import { renderDestructed } from './destructed';
 
 interface Downloaded {
@@ -31,31 +31,28 @@ export async function renderOpen(root: HTMLElement, source: DropSource, onDestru
 
   console.warn('[webdrop] open: header ttl=%s payloads=%o', header.ttl, header.payloads.map((p) => p.key));
 
-  const files: Downloaded[] = [];
-  const failures: string[] = [];
-  for (const payload of header.payloads) {
-    try {
-      const blob = await source.fetchPayload(payload.key);
-      if (blob) {
-        files.push({
-          key: payload.key,
-          name: payload.name,
-          contentType: payload.contentType,
-          url: URL.createObjectURL(blob),
-        });
-      } else {
-        failures.push(`${payload.key}: not ok`);
-      }
-    } catch (e) {
-      failures.push(`${payload.key}: ${e instanceof Error ? e.message : 'threw'}`);
-    }
+  let dropped: DroppedFile[] | null = null;
+  try {
+    dropped = await source.openDrop();
+  } catch (e) {
+    console.warn('[webdrop] openDrop threw', e);
   }
 
-  if (files.length === 0) {
-    const why = header.payloads.length === 0 ? 'reason: header listed no payloads' : `reason: ${failures.join('; ')}`;
+  if (!dropped || dropped.length === 0) {
+    const why =
+      header.payloads.length === 0
+        ? 'reason: header listed no payloads'
+        : 'reason: payloads could not be fetched or decrypted';
     console.warn('[webdrop] open failed —', why);
     return renderDestructed(root, 'THIS DROP COULD NOT BE OPENED', undefined, why);
   }
+
+  const files: Downloaded[] = dropped.map((f) => ({
+    key: f.name,
+    name: f.name,
+    contentType: f.contentType,
+    url: URL.createObjectURL(new Blob([f.bytes as BlobPart], { type: f.contentType })),
+  }));
 
   // The clock started on the first payload fetch above; the header now carries the absolute time.
   const resolved = await source.fetchHeader();
