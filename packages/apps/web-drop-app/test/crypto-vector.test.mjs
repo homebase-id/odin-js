@@ -12,9 +12,25 @@ const iv = Uint8Array.from({ length: 16 }, (_, i) => 0x10 + i);
 const plaintext = 'WebDrop cross-implementation vector v1';
 const cipherBase64 = '5wEI0MU52bMWHO0F/g8p3tSAu5WAYQniWJKBKP3eg0D6O7S8g098lvh4XuzQ+rSI';
 
+// The intro half: same link key, ITS OWN fixed IV, the exact recipient-name json the blob carries.
+const introIv = Uint8Array.from({ length: 16 }, (_, i) => 0x20 + i);
+const introJson = '{"recipientName":"Thomas Kragh-Muller","conditions":["recipient_only","no_retention"]}';
+const introCipherBase64 =
+  '9CSG5VYOrEx7oa/qoHLAIlfFZfLZMLoN888bSsxhTrLCvAL1dEFZSI+noniZZZlr' +
+  '+8zpS/KG2/tJzFbXXByyxe7uLW0LZ75E4okYAOeXzrQD0tpyoxGr2W0QjBO79chv';
+
 test('the shared vector decrypts with WebCrypto', async () => {
   const plain = await decryptDropPayload(key, iv, base64ToBytes(cipherBase64));
   assert.equal(new TextDecoder().decode(plain), plaintext);
+});
+
+test('the intro blob under its own IV decrypts and parses', async () => {
+  const plain = await decryptDropPayload(key, introIv, base64ToBytes(introCipherBase64));
+  const text = new TextDecoder().decode(plain);
+  assert.equal(text, introJson);
+  const parsed = JSON.parse(text);
+  assert.equal(parsed.recipientName, 'Thomas Kragh-Muller');
+  assert.deepEqual(parsed.conditions, ['recipient_only', 'no_retention']);
 });
 
 test('a tampered ciphertext does not decrypt silently', async () => {

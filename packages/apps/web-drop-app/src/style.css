@@ -373,3 +373,326 @@ body::after {
   color: var(--dim);
   font-size: 0.85rem;
 }
+
+/* --- intro personalization (all themes) ------------------------------------------------------ */
+
+.recipient-line {
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.terms {
+  list-style: none;
+  padding: 0.9rem 1.1rem;
+  margin: 0;
+  max-width: 30rem;
+  text-align: left;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--dim);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.terms li::before {
+  content: '\25AA\00A0\00A0';
+  color: var(--signal);
+}
+
+/* --- theme: clean ---------------------------------------------------------------------------- */
+/* The quiet, professional face - for the hotel clerk who would read scanlines as a hacker site. */
+
+body.theme-clean {
+  --ground: #ffffff;
+  --panel: #f8f9fa;
+  --line: #dadce0;
+  --ink: #202124;
+  --dim: #5f6368;
+  --signal: #1a73e8;
+  --signal-glow: rgba(26, 115, 232, 0.25);
+  --ok: #188038;
+  --amber: #f9ab00;
+  --mono: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+body.theme-clean::before,
+body.theme-clean::after {
+  display: none; /* no aurora, no scanlines, no flicker */
+}
+
+body.theme-clean .logo {
+  filter: none;
+}
+
+body.theme-clean .typewriter,
+body.theme-clean .destructed .glitch,
+body.theme-clean .destructed .glitch::before,
+body.theme-clean .destructed .glitch::after,
+body.theme-clean .countdown.critical {
+  animation: none;
+}
+
+body.theme-clean .destructed .glitch::before,
+body.theme-clean .destructed .glitch::after {
+  display: none;
+}
+
+body.theme-clean .destructed .glitch {
+  color: #d93025;
+}
+
+body.theme-clean .countdown.critical {
+  color: #d93025;
+  text-shadow: none;
+}
+
+body.theme-clean .countdown,
+body.theme-clean .countdown.amber {
+  text-shadow: none;
+}
+
+body.theme-clean .open-button {
+  border-radius: 8px;
+  color: #ffffff;
+  box-shadow: none;
+  letter-spacing: 0.05em;
+  text-indent: 0.05em;
+  text-transform: none;
+}
+
+body.theme-clean .consent,
+body.theme-clean .terms,
+body.theme-clean .payload {
+  border-radius: 8px;
+  border-left-width: 1px;
+}
+
+body.theme-clean .wordmark {
+  letter-spacing: 0.2em;
+  text-indent: 0.2em;
+  font-weight: 700;
+}
+
+/* --- theme: choplifter ----------------------------------------------------------------------- */
+/* C64, Pepto palette. The chopper flies in over the dunes, lands on the pad, delivers the crate
+   - the crate IS the drop - and departs. Runs once; never gates access. */
+
+body.theme-choplifter {
+  --c64-border: #6c5eb5;
+  --c64-screen: #352879;
+  --c64-sky: #70a4b2;
+  --c64-sun: #b8c76f;
+  --c64-dune: #6f4f25;
+  --c64-dune-lit: #9a6759;
+  --c64-lgreen: #9ad284;
+  --c64-lgrey: #959595;
+  --c64-dgrey: #444444;
+  --c64-black: #000000;
+  --c64-white: #ffffff;
+
+  --ground: var(--c64-screen);
+  --panel: #2a2060;
+  --line: var(--c64-border);
+  --ink: var(--c64-lgreen);
+  --dim: #8a7fd0;
+  --signal: #b8c76f;
+  --signal-glow: rgba(184, 199, 111, 0.4);
+  --ok: var(--c64-lgreen);
+  --amber: #b8c76f;
+}
+
+body.theme-choplifter::before {
+  display: none; /* the aurora belongs to mission */
+}
+
+body.theme-choplifter {
+  border: 24px solid var(--c64-border); /* the C64 screen frame */
+  min-height: calc(100vh - 48px);
+}
+
+body.theme-choplifter .screen {
+  text-transform: uppercase;
+}
+
+body.theme-choplifter .typewriter {
+  animation: none;
+}
+
+body.theme-choplifter .open-button {
+  color: var(--c64-screen);
+  box-shadow: none;
+  border: 2px solid var(--c64-lgreen);
+  background: var(--c64-lgreen);
+}
+
+body.theme-choplifter .countdown {
+  text-shadow: none;
+}
+
+body.theme-choplifter .destructed .glitch {
+  color: var(--c64-lgreen);
+}
+
+/* the marquee */
+
+.c64-scene {
+  position: relative;
+  width: min(30rem, 100%);
+  height: 132px;
+  overflow: hidden;
+  background: var(--c64-sky);
+  image-rendering: pixelated;
+  flex: none;
+}
+
+.c64-sun {
+  position: absolute;
+  top: 14px;
+  left: 32px;
+  width: 20px;
+  height: 20px;
+  background: var(--c64-sun);
+  clip-path: polygon(25% 0, 75% 0, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0 75%, 0 25%);
+}
+
+.c64-dune {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+}
+
+.c64-dune-far {
+  bottom: 0;
+  height: 44px;
+  background: var(--c64-dune-lit);
+}
+
+.c64-dune-near {
+  bottom: -14px;
+  height: 40px;
+  background: var(--c64-dune);
+}
+
+.c64-pad {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 96px;
+  height: 6px;
+  background: var(--c64-dgrey);
+}
+
+.c64-flag {
+  position: absolute;
+  bottom: 16px;
+  left: calc(50% + 58px);
+  width: 3px;
+  height: 34px;
+  background: var(--c64-lgrey);
+}
+
+.c64-flag-cloth {
+  position: absolute;
+  top: 0;
+  left: 3px;
+  padding: 1px 4px;
+  background: var(--c64-lgreen);
+  color: var(--c64-screen);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.2;
+  animation: flag-ripple 1.2s infinite steps(2);
+}
+
+@keyframes flag-ripple {
+  50% { transform: skewY(-6deg); }
+}
+
+.c64-chopper {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 96px;
+  height: 42px;
+  margin-left: -48px;
+  animation: chopper-sortie 8s steps(24) forwards;
+}
+
+.c64-chopper svg {
+  width: 100%;
+  height: 100%;
+}
+
+.c64-chopper .rotor {
+  fill: var(--c64-dgrey);
+  transform-origin: 28px 3px;
+  animation: rotor-spin 0.12s infinite steps(2);
+}
+
+.c64-chopper .tail-rotor {
+  fill: var(--c64-dgrey);
+  transform-origin: 59px 12px;
+  animation: rotor-spin 0.09s infinite steps(2);
+}
+
+@keyframes rotor-spin {
+  50% { transform: scaleX(0.25); }
+}
+
+/* fly in from the right at altitude -> hover -> touch down on the pad -> hold while the crate
+   drops -> lift off -> exit left. Positions are % of the scene box. */
+@keyframes chopper-sortie {
+  0%   { transform: translate(320px, 6px); }
+  32%  { transform: translate(0, 10px); }
+  40%  { transform: translate(0, 10px); }
+  52%  { transform: translate(0, 58px); }
+  68%  { transform: translate(0, 58px); }
+  80%  { transform: translate(0, 4px); }
+  100% { transform: translate(-360px, 0); }
+}
+
+.c64-crate {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  width: 22px;
+  height: 18px;
+  margin-left: -11px;
+  background: #8a5a20;
+  border: 2px solid #433900;
+  color: var(--c64-sun);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  animation: crate-delivered 8s steps(6) forwards;
+}
+
+@keyframes crate-delivered {
+  0%, 60% { opacity: 0; transform: translateY(-14px); }
+  66%, 100% { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c64-chopper {
+    animation: none;
+    transform: translate(0, 58px); /* already landed */
+  }
+  .c64-chopper .rotor,
+  .c64-chopper .tail-rotor,
+  .c64-flag-cloth {
+    animation: none;
+  }
+  .c64-crate {
+    animation: none;
+    opacity: 1;
+  }
+}

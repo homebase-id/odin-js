@@ -15,6 +15,8 @@
  * is why the intro screen only ever touches the header.
  */
 
+import { base64ToBytes, decryptDropPayload } from './crypto';
+
 export interface DropPayload {
   key: string;
   name: string;
@@ -22,9 +24,19 @@ export interface DropPayload {
   bytesWritten: number;
 }
 
+export interface DropIntro {
+  recipientName?: string;
+  conditions: string[];
+  note?: string;
+}
+
 export interface DropHeader {
   ttl: number;
   payloads: DropPayload[];
+  /** Viewer theme id from cleartext content; absent means mission. */
+  theme?: string;
+  /** Decrypted from the header's intro blob when the fragment key is present. */
+  intro?: DropIntro;
 }
 
 export interface DropSource {
@@ -41,7 +53,9 @@ export class V2Source implements DropSource {
 
   constructor(
     private readonly driveId: string,
-    private readonly dropId: string
+    private readonly dropId: string,
+    /** The link key from the fragment; null when the URL carried none. */
+    private readonly key: Uint8Array | null
   ) {}
 
   private url(tail: string) {
@@ -62,7 +76,31 @@ export class V2Source implements DropSource {
       })
     );
 
-    return { ttl: header?.fileMetadata?.ttl ?? 0, payloads };
+    let theme: string | undefined;
+    let intro: DropIntro | undefined;
+    try {
+      const content = JSON.parse(header?.fileMetadata?.appData?.content ?? '{}');
+      theme = content.theme ?? undefined;
+      // The intro decrypts from the HEADER alone - deliberately, since a header read never
+      // starts the burn clock, so personalizing this screen costs a prefetching scanner nothing.
+      if (content.intro && this.key) {
+        const plain = await decryptDropPayload(
+          this.key,
+          base64ToBytes(content.intro.iv),
+          base64ToBytes(content.intro.data)
+        );
+        const parsed = JSON.parse(new TextDecoder().decode(plain));
+        intro = {
+          recipientName: parsed.recipientName ?? undefined,
+          conditions: parsed.conditions ?? [],
+          note: parsed.note ?? undefined,
+        };
+      }
+    } catch {
+      // A malformed or undecryptable intro degrades to the impersonal screen, never to an error.
+    }
+
+    return { ttl: header?.fileMetadata?.ttl ?? 0, payloads, theme, intro };
   }
 
   async fetchPayload(key: string): Promise<Blob | null> {
@@ -123,12 +161,20 @@ export class DemoSource implements DropSource {
     const resolvedAt = sessionStorage.getItem(DEMO_RESOLVED_KEY);
     const ttl = resolvedAt ? Number(resolvedAt) : -DEMO_TTL_MS;
 
+    // ?theme=clean|choplifter previews the themes without minting a drop.
+    const theme = new URLSearchParams(window.location.search).get('theme') ?? 'mission';
+
     return {
       ttl,
       payloads: [
         { key: 'wdr_data', name: 'mission-briefing.txt', contentType: 'text/plain', bytesWritten: 292 },
         { key: 'wdr_img1', name: 'clearance-badge.svg', contentType: 'image/svg+xml', bytesWritten: 428 },
       ],
+      theme,
+      intro: {
+        recipientName: 'Thomas Kragh-Muller',
+        conditions: ['recipient_only', 'no_retention'],
+      },
     };
   }
 
