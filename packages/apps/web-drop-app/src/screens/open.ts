@@ -100,14 +100,21 @@ export async function renderOpen(root: HTMLElement, source: DropSource, onDestru
 
   let timer: ReturnType<typeof setInterval> | undefined;
 
-  const destroyNow = () => {
+  const destroyNow = async () => {
     for (const f of files) URL.revokeObjectURL(f.url);
     onDestruct();
-    renderDestructed(root, 'THIS DROP HAS SELF-DESTRUCTED', deadline > 0 ? deadline : undefined);
+    // Ask the server to kill the LINK too, for every holder. On failure fall back to reporting the
+    // server's own deadline - the page's copy is gone either way.
+    const linkKilled = await source.expireNow();
+    renderDestructed(
+      root,
+      'THIS DROP HAS SELF-DESTRUCTED',
+      linkKilled ? Date.now() : deadline > 0 ? deadline : undefined
+    );
   };
   root.querySelector<HTMLButtonElement>('#destroy')?.addEventListener('click', () => {
     if (timer !== undefined) clearInterval(timer);
-    destroyNow();
+    void destroyNow();
   });
 
   if (deadline <= 0) return;
@@ -119,7 +126,8 @@ export async function renderOpen(root: HTMLElement, source: DropSource, onDestru
     clearInterval(timer);
     for (const f of files) URL.revokeObjectURL(f.url);
     onDestruct();
-    renderDestructed(root);
+    // The deadline has passed, so the server refuses the link from here on - say so.
+    renderDestructed(root, 'THIS DROP HAS SELF-DESTRUCTED', deadline);
   };
 
   const tick = () => {

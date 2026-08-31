@@ -54,6 +54,12 @@ export interface DropSource {
    * payload fetch in here is what starts a burn clock. null means gone.
    */
   openDrop(): Promise<DroppedFile[] | null>;
+  /**
+   * Asks the server to bring the file's death forward to now, killing the LINK for every holder -
+   * not just this page's copy. True only when the server confirmed. Anonymous on purpose: whoever
+   * can call this already holds the content, so all they can surrender is remaining lifetime.
+   */
+  expireNow(): Promise<boolean>;
 }
 
 // --- real ---------------------------------------------------------------------------------------
@@ -159,6 +165,16 @@ export class V2Source implements DropSource {
       return null;
     }
   }
+
+  async expireNow(): Promise<boolean> {
+    try {
+      const response = await fetch(this.url('expire-now'), { method: 'POST', credentials: 'omit' });
+      return response.ok;
+    } catch (e) {
+      console.warn('[webdrop] expire-now failed', e);
+      return false;
+    }
+  }
 }
 
 // --- demo ---------------------------------------------------------------------------------------
@@ -249,5 +265,10 @@ export class DemoSource implements DropSource {
   destruct() {
     sessionStorage.setItem(DEMO_DESTRUCTED_KEY, '1');
     sessionStorage.removeItem(DEMO_RESOLVED_KEY);
+  }
+
+  async expireNow(): Promise<boolean> {
+    this.destruct();
+    return true;
   }
 }

@@ -13,9 +13,12 @@ export function renderDestructed(
 ) {
   const isChoplifter = document.body.classList.contains('theme-choplifter');
 
-  // The page has destroyed its copy; the LINK dies on the server's clock. Say so when we know it.
+  // The page has destroyed its copy; the LINK dies on the server's clock. Say so when we know it -
+  // a timestamp in the past (destroy-now confirmed, or the countdown ran out) means it is dead now.
   const linkLine = linkDiesAtMs
-    ? `<p class="epitaph">The link itself burns out at ${new Date(linkDiesAtMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.</p>`
+    ? linkDiesAtMs <= Date.now()
+      ? '<p class="epitaph">The link itself is dead. It will not open again, for anyone.</p>'
+      : `<p class="epitaph">The link itself burns out at ${new Date(linkDiesAtMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.</p>`
     : '';
 
   root.innerHTML = `
