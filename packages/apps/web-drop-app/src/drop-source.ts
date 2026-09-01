@@ -17,6 +17,9 @@
 
 import { base64ToBytes, decryptDropPayload } from './crypto';
 
+/** The drop's encrypted manifest payload - bookkeeping, not one of the recipient's files. */
+const MANIFEST_KEY = 'wdr_meta';
+
 export interface DropPayload {
   key: string;
   name: string;
@@ -97,7 +100,13 @@ export class V2Source implements DropSource {
     if (!response.ok) return null;
 
     const header = await response.json();
-    const payloads = (header?.fileMetadata?.payloads ?? []).map(
+    // The drop file carries one bookkeeping payload alongside the real files: wdr_meta, the
+    // encrypted manifest. It is fetched by its literal key at open time, never through this
+    // list - and it must not leak into what the screens show, or a one-file drop greets its
+    // recipient with "2 files" and a byte total padded by ciphertext bookkeeping.
+    const payloads = (header?.fileMetadata?.payloads ?? [])
+      .filter((p: { key: string }) => p.key !== MANIFEST_KEY)
+      .map(
       (p: { key: string; descriptorContent?: string; contentType: string; bytesWritten: number }) => ({
         key: p.key,
         name: p.descriptorContent || p.key,
@@ -137,7 +146,7 @@ export class V2Source implements DropSource {
   async openDrop(): Promise<DroppedFile[] | null> {
     if (!this.key) return null; // no fragment key, nothing decryptable
 
-    const manifestBytes = await this.fetchAndDecrypt('wdr_meta');
+    const manifestBytes = await this.fetchAndDecrypt(MANIFEST_KEY);
     if (!manifestBytes) return null;
 
     const manifest: { key: string; name: string; contentType: string }[] = JSON.parse(
