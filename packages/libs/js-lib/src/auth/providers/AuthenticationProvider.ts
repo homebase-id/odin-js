@@ -23,6 +23,8 @@ export interface YouAuthorizationParams {
 export interface AppAuthorizationParams {
   n: string;
   appId: string;
+  /** appSlug -- the app half of `/apps/{appSlug}/drives/{driveSlug}` */
+  as?: string;
   fn: string;
   p: string | undefined;
   cp: string | undefined;
@@ -42,6 +44,10 @@ export interface AppDriveAuthorizationParams {
   r?: boolean;
   s?: boolean;
   at?: string;
+  /** driveSlug */
+  ds?: string;
+  /** driveTypeSlug */
+  ts?: string;
 }
 
 export interface TargetDriveAccessRequest extends TargetDrive {
@@ -51,6 +57,20 @@ export interface TargetDriveAccessRequest extends TargetDrive {
   attributes?: Record<string, string>;
   allowAnonymousRead?: boolean;
   allowSubscriptions?: boolean;
+
+  /**
+   * The drive half of `/apps/{appSlug}/drives/{driveSlug}`. Only meaningful when the owner does not
+   * already have this drive -- an existing drive keeps the slug it was created with, since a slug is
+   * an address other identities resolve against. Omit it and the server derives one from `name`,
+   * picking a suffix that does not collide with what this app already holds.
+   */
+  driveSlug?: string;
+
+  /**
+   * The readable form of this drive's type, shared by every drive of that type (`channel`,
+   * `profile`, ...). Same caveat as `driveSlug`: it applies at creation only.
+   */
+  driveTypeSlug?: string;
 }
 
 //checks if the authentication token (stored in a cookie) is valid
@@ -80,6 +100,8 @@ export const parseDriveAccessRequest = (
     at: TargetDriveAccessRequest.attributes
       ? JSON.stringify(TargetDriveAccessRequest.attributes)
       : undefined,
+    ds: TargetDriveAccessRequest.driveSlug,
+    ts: TargetDriveAccessRequest.driveTypeSlug,
   };
 };
 
@@ -95,13 +117,22 @@ export const getRegistrationParams = async (
   eccPublicKey: CryptoKey,
   host?: string,
   clientFriendlyName?: string,
-  state?: string
+  state?: string,
+  /**
+   * The app half of `/apps/{appSlug}/drives/{driveSlug}`. Omit it and the server derives one from
+   * `appName` -- "Homebase - Location" becomes "homebase-locat". Either way it is immutable once
+   * written, and registration is first-come: a slug another app already holds is refused rather
+   * than silently changed. Only meaningful on first registration; extending permissions cannot
+   * change it.
+   */
+  appSlug?: string
 ): Promise<YouAuthorizationParams> => {
   const clientFriendly = clientFriendlyName || `${getBrowser()} | ${getOperatingSystem().name}`;
 
   const permissionRequest: AppAuthorizationParams = {
     n: appName,
     appId: appId,
+    as: appSlug,
     fn: clientFriendly,
     p: permissionKeys?.join(','),
     cp: circlePermissionKeys?.join(','),

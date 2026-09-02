@@ -49,13 +49,15 @@ export const useApp = ({ appId }: { appId?: string }) => {
               // Channel drives are always CDN-enabled
               stringGuidsEqual(driveGrant.permissionedDrive.drive.type, BlogConfig.DriveType),
               // The app asking for the drive owns it. Without an owner the server leaves it
-              // unaddressed; the slug itself is left to the server, which alone knows what this app
-              // has already used. The type slug is only known for channel drives.
+              // unaddressed. The app may name both slugs in its request; when it does not, the server
+              // derives the drive slug -- it alone knows what this app has already used -- and the
+              // only type we can name from here is a channel drive.
               appRegRequest.appId,
-              undefined,
-              stringGuidsEqual(driveGrant.permissionedDrive.drive.type, BlogConfig.DriveType)
-                ? CHANNEL_DRIVE_TYPE_SLUG
-                : undefined
+              driveGrant.driveMeta.driveSlug,
+              driveGrant.driveMeta.driveTypeSlug ||
+                (stringGuidsEqual(driveGrant.permissionedDrive.drive.type, BlogConfig.DriveType)
+                  ? CHANNEL_DRIVE_TYPE_SLUG
+                  : undefined)
             );
         })
       );
@@ -117,13 +119,15 @@ export const useApp = ({ appId }: { appId?: string }) => {
               // Channel drives are always CDN-enabled
               stringGuidsEqual(driveGrant.permissionedDrive.drive.type, BlogConfig.DriveType),
               // The app asking for the drive owns it. Without an owner the server leaves it
-              // unaddressed; the slug itself is left to the server, which alone knows what this app
-              // has already used. The type slug is only known for channel drives.
+              // unaddressed. The app may name both slugs in its request; when it does not, the server
+              // derives the drive slug -- it alone knows what this app has already used -- and the
+              // only type we can name from here is a channel drive.
               appId,
-              undefined,
-              stringGuidsEqual(driveGrant.permissionedDrive.drive.type, BlogConfig.DriveType)
-                ? CHANNEL_DRIVE_TYPE_SLUG
-                : undefined
+              driveGrant.driveMeta.driveSlug,
+              driveGrant.driveMeta.driveTypeSlug ||
+                (stringGuidsEqual(driveGrant.permissionedDrive.drive.type, BlogConfig.DriveType)
+                  ? CHANNEL_DRIVE_TYPE_SLUG
+                  : undefined)
             );
         })
       );

@@ -120,7 +120,7 @@ export const saveProfileDefinition = async (
     false,
     false,
     CONTACTS_APP_ID,
-    undefined,
+    undefined, // using undefined here intentionally leaves the slug to the server
     PROFILE_DRIVE_TYPE_SLUG
   );
   const { versionTag } = (await getProfileDefinitionInternal(

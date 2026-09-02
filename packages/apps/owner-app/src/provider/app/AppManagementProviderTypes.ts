@@ -75,6 +75,20 @@ export interface DriveGrantRequest {
     allowAnonymousReads?: boolean;
     allowSubscriptions?: boolean;
     attributes?: { [key: string]: string };
+
+    /**
+     * The drive half of `/apps/{appSlug}/drives/{driveSlug}`, declared by the app asking for the
+     * drive. Omit it and the server derives one from `name`, picking a suffix that does not collide
+     * with what this app already holds. Either way the slug is immutable once written, so a supplied
+     * one is permanent -- and a slug this app already uses is refused rather than silently changed.
+     */
+    driveSlug?: string;
+
+    /**
+     * The readable form of the drive's type, shared by every drive of that type. Declared by the app;
+     * when it says nothing, the only type we can name from here is a channel drive.
+     */
+    driveTypeSlug?: string;
   };
 }
 

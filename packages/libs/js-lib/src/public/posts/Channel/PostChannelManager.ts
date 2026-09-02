@@ -155,7 +155,7 @@ export const saveChannelDefinition = async (
           false,
           true,
           FEED_APP_ID,
-          undefined,
+          undefined, //leaving this undefined will let the server choose the slug
           CHANNEL_DRIVE_TYPE_SLUG
         );
       } else {

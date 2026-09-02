@@ -40,6 +40,8 @@ export const drivesParamToDriveGrantRequest = (
             allowAnonymousReads: d.r || false,
             allowSubscriptions: d.s || false,
             attributes: (d.at && tryJsonParse(d.at)) || undefined,
+            driveSlug: d.ds || undefined,
+            driveTypeSlug: d.ts || undefined,
           },
         };
       }

@@ -1,4 +1,4 @@
-import { DrivePermissionType } from '@homebase-id/js-lib/core';
+import { CHANNEL_DRIVE_TYPE_SLUG, DrivePermissionType } from '@homebase-id/js-lib/core';
 import { useEffect } from 'react';
 import { invalidateVerifyToken, useVerifyToken } from './useVerifyToken';
 import {
@@ -61,6 +61,8 @@ export const drives: TargetDriveAccessRequest[] = [
     name: '',
     description: '',
     permissions: [DrivePermissionType.Read + DrivePermissionType.Write],
+    driveSlug: 'feed',
+    driveTypeSlug: 'feed',
   },
   {
     // Standard profile Info
@@ -69,6 +71,8 @@ export const drives: TargetDriveAccessRequest[] = [
     name: '',
     description: '',
     permissions: [DrivePermissionType.Read],
+    driveSlug: 'profile',
+    driveTypeSlug: 'profile',
   },
   {
     // Homepage Drive
@@ -77,6 +81,9 @@ export const drives: TargetDriveAccessRequest[] = [
     name: '',
     description: '',
     permissions: [DrivePermissionType.Read],
+    driveSlug: 'home',
+    // The Homepage drive is a profile drive by type -- it shares ProfileDrive's type guid.
+    driveTypeSlug: 'profile',
   },
   {
     // Contact Drive
@@ -85,6 +92,8 @@ export const drives: TargetDriveAccessRequest[] = [
     name: '',
     description: '',
     permissions: [DrivePermissionType.Read, DrivePermissionType.Write],
+    driveSlug: 'contacts',
+    driveTypeSlug: 'contact',
   },
   {
     // Public posts
@@ -98,6 +107,8 @@ export const drives: TargetDriveAccessRequest[] = [
       DrivePermissionType.React,
       DrivePermissionType.Comment,
     ],
+    driveSlug: 'posts',
+    driveTypeSlug: CHANNEL_DRIVE_TYPE_SLUG,
   },
 ];
 
@@ -116,6 +127,10 @@ export const permissions = [
 
 export const appName = 'Homebase - Feed';
 export const appId = '5f887d80-0132-4294-ba40-bda79155551d';
+
+// The app half of `/apps/{appSlug}/drives/{driveSlug}`, and it must match what the server's
+// BuiltinApps tree assigns -- registration is first-come and the slug is immutable once written.
+export const appSlug = 'feed';
 
 export const useYouAuthAuthorization = () => {
   const queryClient = useQueryClient();
@@ -138,7 +153,8 @@ export const useYouAuthAuthorization = () => {
       eccKey.publicKey,
       FEED_ROOT_PATH.startsWith(OWNER_APPS_ROOT) ? undefined : window.location.host,
       undefined,
-      returnUrl
+      returnUrl,
+      appSlug
     );
   };
 
