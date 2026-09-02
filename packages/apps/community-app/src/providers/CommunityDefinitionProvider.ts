@@ -42,6 +42,7 @@ import {
   uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
 import { createThumbnails } from '@homebase-id/js-lib/media';
+import { COMMUNITY_APP_ID, COMMUNITY_DRIVE_TYPE_SLUG } from '@homebase-id/js-lib/core';
 import {
   getContentFromHeaderOrPayloadOverPeer,
   getDrivesByTypeOverPeer,
@@ -218,12 +219,19 @@ export const saveCommunity = async (
       )
     ) {
       if (dotYouClient.getType() === ApiType.Owner) {
+        // The community app owns its drives. The slug is left to the server: only it knows which
+        // slugs this app has already used, so only it can dedupe two communities sharing a title.
         await ensureDrive(
           dotYouClient,
           targetDrive,
           communityContent.title,
           `Drive for community ${communityContent.title}`,
-          true
+          true,
+          false,
+          false,
+          COMMUNITY_APP_ID,
+          undefined,
+          COMMUNITY_DRIVE_TYPE_SLUG
         );
       } else {
         console.warn(`[CommunityDefintionProvider] Save Community: No access to drive`);

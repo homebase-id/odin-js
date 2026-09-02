@@ -45,6 +45,15 @@ export interface AppRegistrationRequest {
   /** @format uuid */
   appId: string;
   name: string | null;
+
+  /**
+   * The app half of `/apps/{appSlug}/drives/{driveSlug}`. Omit it and the server derives one from
+   * `name` — "Homebase - Location" becomes "homebase-locat" — and a slug is immutable once written,
+   * so the derived one is permanent. Registration is first-come: a slug another app already holds is
+   * refused rather than silently changed.
+   */
+  appSlug?: string;
+
   corsHostName?: string;
   permissionSet?: PermissionSet;
 

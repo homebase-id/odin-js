@@ -3,6 +3,7 @@ import { ensureDrive } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { BlogConfig } from '@homebase-id/js-lib/public';
 import { DriveGrant } from '@homebase-id/js-lib/network';
+import { CHANNEL_DRIVE_TYPE_SLUG } from '@homebase-id/js-lib/core';
 import {
   AllowApp,
   GetAppRegistration,
@@ -46,7 +47,15 @@ export const useApp = ({ appId }: { appId?: string }) => {
               driveGrant.driveMeta.allowAnonymousReads || false,
               driveGrant.driveMeta.allowSubscriptions || false,
               // Channel drives are always CDN-enabled
+              stringGuidsEqual(driveGrant.permissionedDrive.drive.type, BlogConfig.DriveType),
+              // The app asking for the drive owns it. Without an owner the server leaves it
+              // unaddressed; the slug itself is left to the server, which alone knows what this app
+              // has already used. The type slug is only known for channel drives.
+              appRegRequest.appId,
+              undefined,
               stringGuidsEqual(driveGrant.permissionedDrive.drive.type, BlogConfig.DriveType)
+                ? CHANNEL_DRIVE_TYPE_SLUG
+                : undefined
             );
         })
       );
@@ -106,7 +115,15 @@ export const useApp = ({ appId }: { appId?: string }) => {
               driveGrant.driveMeta.allowAnonymousReads || false,
               driveGrant.driveMeta.allowSubscriptions || false,
               // Channel drives are always CDN-enabled
+              stringGuidsEqual(driveGrant.permissionedDrive.drive.type, BlogConfig.DriveType),
+              // The app asking for the drive owns it. Without an owner the server leaves it
+              // unaddressed; the slug itself is left to the server, which alone knows what this app
+              // has already used. The type slug is only known for channel drives.
+              appId,
+              undefined,
               stringGuidsEqual(driveGrant.permissionedDrive.drive.type, BlogConfig.DriveType)
+                ? CHANNEL_DRIVE_TYPE_SLUG
+                : undefined
             );
         })
       );

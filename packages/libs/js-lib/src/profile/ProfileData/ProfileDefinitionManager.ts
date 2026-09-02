@@ -3,6 +3,7 @@ const OdinBlob: typeof Blob =
   Blob;
 import { DotYouClient } from '../../core/DotYouClient';
 import { DEFAULT_PAYLOAD_KEY, MAX_HEADER_CONTENT_BYTES } from '../../core/constants';
+import { CONTACTS_APP_ID, PROFILE_DRIVE_TYPE_SLUG } from '../../core/constants';
 import {
   getDrivesByType,
   FileQueryParams,
@@ -108,7 +109,20 @@ export const saveProfileDefinition = async (
 
   const driveMetadata = 'Drive that stores: ' + definition.name;
   const targetDrive = GetTargetDriveFromProfileId(definition.profileId);
-  await ensureDrive(dotYouClient, targetDrive, definition.name, driveMetadata, true);
+  // Profile drives belong to the contacts app, which owns the standard profile drive too. The slug is
+  // left to the server: only it knows which slugs that app has already used.
+  await ensureDrive(
+    dotYouClient,
+    targetDrive,
+    definition.name,
+    driveMetadata,
+    true,
+    false,
+    false,
+    CONTACTS_APP_ID,
+    undefined,
+    PROFILE_DRIVE_TYPE_SLUG
+  );
   const { versionTag } = (await getProfileDefinitionInternal(
     dotYouClient,
     definition.profileId

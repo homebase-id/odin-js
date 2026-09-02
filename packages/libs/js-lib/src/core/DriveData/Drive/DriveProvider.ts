@@ -71,6 +71,15 @@ export const getDrivesByType = async (
   }
 };
 
+/**
+ * Creates the drive if it does not already exist.
+ *
+ * `appId`, `driveSlug` and `driveTypeSlug` are the drive's address. Pass them whenever the owning app
+ * is known: the server derives a slug from the drive name when one is omitted, and a slug is immutable
+ * once written and is resolved against by other identities — so a derived one is a permanent address
+ * nobody chose. `appId` and `driveSlug` belong together; a slug on a drive with no owning app is not
+ * covered by the server's uniqueness constraint.
+ */
 export const ensureDrive = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
@@ -78,7 +87,10 @@ export const ensureDrive = async (
   metadata: string | undefined,
   allowAnonymousReads: boolean,
   allowSubscriptions = false,
-  allowCdn = false
+  allowCdn = false,
+  appId?: string,
+  driveSlug?: string,
+  driveTypeSlug?: string
 ): Promise<boolean> => {
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('name', name);
@@ -98,6 +110,9 @@ export const ensureDrive = async (
     allowAnonymousReads: allowAnonymousReads,
     allowSubscriptions: allowSubscriptions,
     allowCdn: allowCdn,
+    appId: appId,
+    driveSlug: driveSlug,
+    driveTypeSlug: driveTypeSlug,
   };
 
   return client
