@@ -22,6 +22,14 @@ import {
 } from '@homebase-id/common-app';
 import { Grid, Refresh, Trash, Times, Pencil, HardDrive } from '@homebase-id/common-app/icons';
 import { DriveGrant } from '@homebase-id/js-lib/network';
+import {
+  CircleGrid,
+  CircleMemberIdentities,
+  Fact,
+  OWNERSHIP_HINTS,
+  formatTimestamp,
+} from '../../../components/Apps/AppOverviewParts';
+import { DriveView } from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 
 const AppDetails = () => {
   const { appKey } = useParams();
@@ -62,6 +70,21 @@ const AppDetails = () => {
     else console.warn('Duplicate permission key', key);
     return acc;
   }, []);
+
+  // Ownership, the same way the overview computes it: a circle or drive names its owning app, and
+  // that is a different relationship from the grants below. An app can own a circle it does not
+  // authorize, and hold a grant on a drive it does not own.
+  const ownedCircles = (circles ?? []).filter((circle) =>
+    stringGuidsEqual(decodedAppKey, circle.appId)
+  );
+
+  const ownedDrives = (drives ?? []).filter((drive) =>
+    stringGuidsEqual(decodedAppKey, drive.appId ?? undefined)
+  );
+
+  const authorizedCircleDefs = (app?.authorizedCircles ?? [])
+    .map((circleId) => (circles ?? []).find((circle) => stringGuidsEqual(circle.id, circleId)))
+    .filter((circle): circle is NonNullable<typeof circle> => !!circle);
 
   const driveGrants = app?.grant.driveGrants?.reduce((acc: DriveGrant[], grant) => {
     if (
@@ -188,10 +211,86 @@ const AppDetails = () => {
         </Section>
       ) : null}
 
+      <Section title={t('Details')}>
+        <div className="flex flex-col gap-3">
+          <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
+            <Fact label={t('App id')}>
+              <span className="break-all font-mono text-slate-400">{app.appId}</span>
+            </Fact>
+            <Fact label={t('Slug')}>
+              {app.appSlug ? (
+                <span className="break-all font-mono">{app.appSlug}</span>
+              ) : (
+                <span className="text-slate-400">{t('None')}</span>
+              )}
+            </Fact>
+            <Fact label={t('CORS host')}>
+              {app.corsHostName || <span className="text-slate-400">{t('None')}</span>}
+            </Fact>
+            <Fact label={t('Revoked')}>
+              {app.isRevoked || app.grant?.isRevoked ? t('Yes') : t('No')}
+            </Fact>
+            <Fact label={t('Peer access (ICR key)')} hint={OWNERSHIP_HINTS.icrKey}>
+              {app.grant?.hasIcrKey === undefined
+                ? t('Unknown')
+                : app.grant.hasIcrKey
+                  ? t('Yes')
+                  : t('No')}
+            </Fact>
+            {app.created ? (
+              <Fact label={t('First used')}>{formatTimestamp(app.created)}</Fact>
+            ) : null}
+            {app.modified ? (
+              <Fact label={t('Last updated')}>{formatTimestamp(app.modified)}</Fact>
+            ) : null}
+          </dl>
+        </div>
+      </Section>
+
+      {/* Ownership, not access. An app owns the drives and circles it brought with it; the grants
+          below are what it (and your connections) may reach -- a different question, and usually a
+          different set. Side by side on a wide screen, stacked on a narrow one, the same way the
+          permission sections below do it. */}
       <SectionTitle
         title={
           <>
-            {t('App permissions:')}
+            {t('What this app brought with it:')}
+            <small className="block text-sm text-slate-400">
+              {t('The drives and circles this app owns, whoever may reach them')}
+            </small>
+          </>
+        }
+      />
+      <div className="grid gap-4 sm:grid-flow-col sm:grid-cols-2">
+        <Section title={`${t('Drives it owns')} (${ownedDrives.length})`}>
+          {ownedDrives.length ? (
+            <div className="-my-4">
+              {ownedDrives.map((drive) => (
+                <DriveView
+                  drive={drive}
+                  className="my-4"
+                  key={`${drive.targetDriveInfo.alias}-${drive.targetDriveInfo.type}`}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-slate-400">{t('No drives owned by this app')}</p>
+          )}
+        </Section>
+
+        <Section title={`${t('Circles it owns')} (${ownedCircles.length})`}>
+          {ownedCircles.length ? (
+            <CircleGrid circles={ownedCircles} apps={app ? [app] : undefined} drives={drives} />
+          ) : (
+            <p className="text-slate-400">{t('No circles owned by this app')}</p>
+          )}
+        </Section>
+      </div>
+
+      <SectionTitle
+        title={
+          <>
+            {t('The app itself:')}
             <small className="block text-sm text-slate-400">
               {t('This describes what the app is allowed to access')}
             </small>
@@ -255,7 +354,7 @@ const AppDetails = () => {
       <SectionTitle
         title={
           <>
-            {t('Circles')}
+            {t('Access your connections get')}
             <small className="block text-sm text-slate-400">
               {t(
                 'This describes what the identities within these circles have unrestricted access to'
@@ -272,18 +371,24 @@ const AppDetails = () => {
             <ActionButton type="mute" onClick={() => setCircleEditState('circle')} icon={Pencil} />
           }
         >
-          {app.authorizedCircles?.length ? (
-            <ul className="-my-4">
-              {app.authorizedCircles.map((circleId) => {
-                const circleDef = circles?.find(
-                  (circle) => circle.id && stringGuidsEqual(circle.id, circleId)
-                );
-                if (!circleId || !circleDef) return null;
-                return (
-                  <CirclePermissionView circleDef={circleDef} key={circleId} className="my-4" />
-                );
-              })}
-            </ul>
+          {authorizedCircleDefs.length ? (
+            <div className="flex flex-col gap-4">
+              <ul className="-my-4">
+                {authorizedCircleDefs.map((circleDef) => (
+                  <CirclePermissionView circleDef={circleDef} key={circleDef.id} className="my-4" />
+                ))}
+              </ul>
+
+              {/* Who the grant above actually lands on. Editing circle access without seeing the
+                  identities behind it is the part of this page that was guesswork. Its own button
+                  opens the list, so it needs no section around it. */}
+              <CircleMemberIdentities
+                appName={app.name}
+                circles={authorizedCircleDefs}
+                grants={app.circleMemberPermissionSetGrantRequest.drives ?? []}
+                drives={drives}
+              />
+            </div>
           ) : (
             <div className="flex flex-row">
               <p className="my-auto text-slate-400">{t("This app doesn't have any access")}</p>

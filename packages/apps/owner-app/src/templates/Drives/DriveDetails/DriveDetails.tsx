@@ -1,11 +1,12 @@
 import {useState} from 'react';
-import {useParams} from 'react-router-dom';
+import {Link, useParams} from 'react-router-dom';
 import {useDrive} from '../../../hooks/drives/useDrive';
 import Section from '../../../components/ui/Sections/Section';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import {useExport} from '../../../hooks/drives/useExport';
 import AppMembershipView from '../../../components/PermissionViews/AppPermissionView/AppPermissionView';
 import {useApps} from '../../../hooks/apps/useApps';
+import {OWNERSHIP_HINTS} from '../../../components/Apps/AppOverviewParts';
 import {PageMeta} from '@homebase-id/common-app';
 import {
     drivesEqual,
@@ -64,6 +65,18 @@ const DriveDetails = () => {
             drivesEqual(grant.permissionedDrive.drive, targetDriveInfo)
         )
     );
+
+    // Ownership, not access: the app this drive belongs to, which is what supplies the first half
+    // of its wire address. An app can hold a grant on a drive it does not own, and vice versa.
+    const owningApp = driveDef.appId
+        ? apps?.find((app) => stringGuidsEqual(app.appId, driveDef.appId ?? undefined))
+        : undefined;
+
+    // Both slugs have to be there for the address to resolve on the other end.
+    const wireAddress =
+        owningApp?.appSlug && driveDef.driveSlug
+            ? `/apps/${owningApp.appSlug}/drives/${driveDef.driveSlug}`
+            : undefined;
 
     const doDownload = (url: string) => {
         // Dirty hack for easy download
@@ -135,6 +148,35 @@ const DriveDetails = () => {
                     <li>Type: {driveDef.targetDriveInfo.type}</li>
                     <li>Slug: {driveDef.driveSlug || t('None')}</li>
                     <li>Type slug: {driveDef.driveTypeSlug || t('None')}</li>
+                    <li>
+                        {t('Owned by')}:{' '}
+                        {driveDef.appId ? (
+                            owningApp ? (
+                                <Link
+                                    to={`/owner/third-parties/apps/${encodeURIComponent(driveDef.appId)}`}
+                                    className="hover:underline"
+                                >
+                                    {owningApp.name}
+                                </Link>
+                            ) : (
+                                <span className="break-all font-mono">{driveDef.appId}</span>
+                            )
+                        ) : (
+                            t('You (not owned by an app)')
+                        )}
+                        <small className="block max-w-prose text-slate-400">
+                            {OWNERSHIP_HINTS.ownedBy}
+                        </small>
+                    </li>
+                    {/* The wire address a remote caller uses. Both halves live in different
+                        places -- the app's slug and the drive's -- so the address itself is
+                        never visible unless it is assembled here. */}
+                    {wireAddress ? (
+                        <li>
+                            {t('Address')}:{' '}
+                            <span className="break-all font-mono">{wireAddress}</span>
+                        </li>
+                    ) : null}
                     <li>
                         {/* The public half only; the private half is escrowed under the drive's
                             storage key and never leaves the identity host. Shown by fingerprint,

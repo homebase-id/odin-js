@@ -8,9 +8,18 @@ import { AppInteractionPermissionOverview } from '../../../components/Permission
 import { PageMeta } from '@homebase-id/common-app';
 import {
   AUTO_CONNECTIONS_CIRCLE_ID,
+  CircleDesignation,
+  CircleGrantOn,
   CONFIRMED_CONNECTIONS_CIRCLE_ID,
   Membership,
 } from '@homebase-id/js-lib/network';
+import { Link } from 'react-router-dom';
+import { useApps } from '../../../hooks/apps/useApps';
+import {
+  Fact,
+  OWNERSHIP_HINTS,
+  formatTimestamp,
+} from '../../../components/Apps/AppOverviewParts';
 import DomainCard from '../../../components/Connection/DomainCard/DomainCard';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import CircleAppInteractionDialog from '../../../components/Circles/CircleAppInteractionDialog/CircleAppInteractionDialog';
@@ -57,6 +66,8 @@ const CircleDetails = () => {
     removeCircle: { mutateAsync: removeCircle, error: removeCircleError },
   } = useCircle({ circleId: decodedCircleKey });
 
+  const { data: apps } = useApps().fetchRegistered;
+
   const [isOpenEdit, setIsOpenEdit] = useState(false);
   const [isOpenMemberLookup, setIsOpenMemberLookup] = useState(false);
   const [isOpenAppInteractionDialog, setIsOpenAppInteractionDialog] = useState(false);
@@ -66,6 +77,14 @@ const CircleDetails = () => {
   if (!circle || !circle.id || !decodedCircleKey) return <>{t('No matching circle found')}</>;
 
   const circleId = circle.id;
+
+  // The app that owns this circle -- the field the third-party overview shows and this page did
+  // not. Ownership decides who provisions and upgrades the circle, which is exactly what you want
+  // to know before editing one by hand.
+  const owningApp = circle.appId
+    ? apps?.find((app) => stringGuidsEqual(app.appId, circle.appId ?? undefined))
+    : undefined;
+
   const isSystemCircle =
     stringGuidsEqual(circleId, CONFIRMED_CONNECTIONS_CIRCLE_ID) ||
     stringGuidsEqual(circleId, AUTO_CONNECTIONS_CIRCLE_ID);
@@ -161,6 +180,54 @@ const CircleDetails = () => {
           </div>
         </section>
       ) : null}
+
+      <Section title={t('Details')}>
+        <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
+          <Fact label={t('Owned by')} hint={OWNERSHIP_HINTS.ownedBy}>
+            {circle.appId ? (
+              owningApp ? (
+                <Link
+                  to={`/owner/third-parties/apps/${encodeURIComponent(owningApp.appId)}`}
+                  className="hover:underline"
+                >
+                  {owningApp.name}
+                </Link>
+              ) : (
+                <span className="break-all font-mono">{circle.appId}</span>
+              )
+            ) : (
+              t('You (not owned by an app)')
+            )}
+          </Fact>
+
+          {/* Only served by hosts that have these columns, so each is shown when present rather
+              than defaulted to something the host never sent. */}
+          {circle.designation !== undefined ? (
+            <Fact label={t('Designation')} hint={OWNERSHIP_HINTS.designation}>
+              {t(CircleDesignation[circle.designation] ?? `${circle.designation}`)}
+            </Fact>
+          ) : null}
+
+          {circle.grantOn !== undefined ? (
+            <Fact label={t('Granted on')} hint={OWNERSHIP_HINTS.grantOn}>
+              {t(CircleGrantOn[circle.grantOn] ?? `${circle.grantOn}`)}
+            </Fact>
+          ) : null}
+
+          <Fact label={t('Enabled')}>{circle.disabled ? t('No') : t('Yes')}</Fact>
+
+          {circle.created ? (
+            <Fact label={t('Created')}>{formatTimestamp(circle.created)}</Fact>
+          ) : null}
+          {circle.lastUpdated ? (
+            <Fact label={t('Last updated')}>{formatTimestamp(circle.lastUpdated)}</Fact>
+          ) : null}
+
+          <Fact label={t('Id')}>
+            <span className="break-all font-mono text-slate-400">{circleId}</span>
+          </Fact>
+        </dl>
+      </Section>
 
       <SectionTitle
         title={t('Members')}

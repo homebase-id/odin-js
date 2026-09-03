@@ -86,6 +86,16 @@ const Drives = () => {
                         <span className="break-all font-mono">{driveDef.driveTypeSlug}</span>
                       </p>
                     ) : null}
+                    {/* Which drives can collect a deposit, without opening each one. Shown by
+                        fingerprint; the JWK itself lives on the detail page. */}
+                    {driveDef.writeOnlyPublicKeyJwk ? (
+                      <p className="text-sm text-slate-400">
+                        {t('Public key')}: CRC{' '}
+                        <span className="break-all font-mono">
+                          {driveDef.writeOnlyPublicKeyCrc32 ?? t('Unknown')}
+                        </span>
+                      </p>
+                    ) : null}
                     <h3 className="text-lg">Metadata</h3>
                     <p>{driveDef.metadata}</p>
                     <ul>{driveDef.allowAnonymousReads ? <li>Allow Anonymous Reads</li> : null}</ul>

@@ -38,6 +38,12 @@ export interface DriveDefinition {
     driveTypeSlug?: string | null;
 
     /**
+     * The app that owns this drive; absent means an owner drive that no app claims. Only served by
+     * identity hosts that have the AppId column, so treat it as optional.
+     */
+    appId?: string | null;
+
+    /**
      * The drive's write-only public key (JWK). This is the half a remote caller seals a deposit to;
      * the private half never leaves the identity host. Null on a drive that has no keypair, and not
      * served by every identity host, so treat it as optional.

@@ -24,7 +24,22 @@ const DrivePermissionView = ({
     return <LoadingBlock className={`h-4 max-w-xs ${className}`} />;
   }
 
-  if (!drive) return null;
+  // A grant whose drive cannot be resolved is still a live grant. Returning null here hid it
+  // entirely -- on the pages where access is edited, an invisible grant is worse than an ugly one --
+  // so fall back to the raw alias, the way the overview does.
+  if (!drive) {
+    return (
+      <div className={`flex flex-row ${className}`} title={permissionTree}>
+        <HardDrive className="mb-auto mr-3 mt-1 h-6 w-6 flex-shrink-0 text-slate-400" />
+        <p className="my-auto text-slate-400">
+          <span className="break-all font-mono">
+            {driveGrant?.permissionedDrive?.drive?.alias ?? t('Unknown drive')}
+          </span>
+          {`: ${t(getDrivePermissionFromNumber(driveGrant?.permissionedDrive.permission))}`}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -39,8 +54,19 @@ const DrivePermissionView = ({
         <HardDrive className="mb-auto mr-3 mt-1 h-6 w-6 flex-shrink-0" />
         <div className="mr-2 flex flex-col">
           <p className={`leading-none ${!permissionTree ? 'my-auto' : ''}`}>
-            {drive?.name}:{' '}
+            {drive?.name}
+            {drive?.driveSlug ? (
+              <span className="ml-2 break-all font-mono text-sm text-slate-400">
+                {drive.driveSlug}
+              </span>
+            ) : null}
+            {': '}
             {t(getDrivePermissionFromNumber(driveGrant?.permissionedDrive.permission))}
+            {/* Only app grants carry the flag; a circle grant has no storage key concept, so
+                undefined means "not applicable" rather than "no key" and stays unlabelled. */}
+            {driveGrant.hasStorageKey ? (
+              <span className="text-slate-400">{`, ${t('has storage key')}`}</span>
+            ) : null}
           </p>
           {permissionTree && (
             <small className="">
