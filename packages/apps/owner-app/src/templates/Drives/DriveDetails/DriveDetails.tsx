@@ -6,7 +6,6 @@ import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/
 import {useExport} from '../../../hooks/drives/useExport';
 import AppMembershipView from '../../../components/PermissionViews/AppPermissionView/AppPermissionView';
 import {useApps} from '../../../hooks/apps/useApps';
-import {OWNERSHIP_HINTS} from '../../../components/Apps/AppOverviewParts';
 import {PageMeta} from '@homebase-id/common-app';
 import {
     drivesEqual,
@@ -152,21 +151,26 @@ const DriveDetails = () => {
                         {t('Owned by')}:{' '}
                         {driveDef.appId ? (
                             owningApp ? (
-                                <Link
-                                    to={`/owner/third-parties/apps/${encodeURIComponent(driveDef.appId)}`}
-                                    className="hover:underline"
-                                >
-                                    {owningApp.name}
-                                </Link>
+                                <>
+                                    <Link
+                                        to={`/owner/third-parties/apps/${encodeURIComponent(driveDef.appId)}`}
+                                        className="hover:underline"
+                                    >
+                                        {owningApp.name}
+                                    </Link>
+                                    <span className="text-slate-400">{` ${t('(app)')}`}</span>
+                                </>
                             ) : (
-                                <span className="break-all font-mono">{driveDef.appId}</span>
+                                <>
+                                    <span className="break-all font-mono">{driveDef.appId}</span>
+                                    <span className="text-slate-400">
+                                        {` ${t('(app, no longer registered)')}`}
+                                    </span>
+                                </>
                             )
                         ) : (
                             t('You (not owned by an app)')
                         )}
-                        <small className="block max-w-prose text-slate-400">
-                            {OWNERSHIP_HINTS.ownedBy}
-                        </small>
                     </li>
                     {/* The wire address a remote caller uses. Both halves live in different
                         places -- the app's slug and the drive's -- so the address itself is

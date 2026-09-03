@@ -8,15 +8,18 @@ import { AppInteractionPermissionOverview } from '../../../components/Permission
 import { PageMeta } from '@homebase-id/common-app';
 import {
   AUTO_CONNECTIONS_CIRCLE_ID,
-  CircleDesignation,
-  CircleGrantOn,
   CONFIRMED_CONNECTIONS_CIRCLE_ID,
   Membership,
 } from '@homebase-id/js-lib/network';
 import { Link } from 'react-router-dom';
 import { useApps } from '../../../hooks/apps/useApps';
 import {
+  DESIGNATION_HINTS,
+  DESIGNATION_LABELS,
   Fact,
+  GRANT_ON_CAVEAT,
+  GRANT_ON_HINTS,
+  GRANT_ON_LABELS,
   OWNERSHIP_HINTS,
   formatTimestamp,
 } from '../../../components/Apps/AppOverviewParts';
@@ -186,14 +189,20 @@ const CircleDetails = () => {
           <Fact label={t('Owned by')} hint={OWNERSHIP_HINTS.ownedBy}>
             {circle.appId ? (
               owningApp ? (
-                <Link
-                  to={`/owner/third-parties/apps/${encodeURIComponent(owningApp.appId)}`}
-                  className="hover:underline"
-                >
-                  {owningApp.name}
-                </Link>
+                <>
+                  <Link
+                    to={`/owner/third-parties/apps/${encodeURIComponent(owningApp.appId)}`}
+                    className="hover:underline"
+                  >
+                    {owningApp.name}
+                  </Link>
+                  <span className="text-slate-400">{` ${t('(app)')}`}</span>
+                </>
               ) : (
-                <span className="break-all font-mono">{circle.appId}</span>
+                <>
+                  <span className="break-all font-mono">{circle.appId}</span>
+                  <span className="text-slate-400">{` ${t('(app, no longer registered)')}`}</span>
+                </>
               )
             ) : (
               t('You (not owned by an app)')
@@ -203,14 +212,17 @@ const CircleDetails = () => {
           {/* Only served by hosts that have these columns, so each is shown when present rather
               than defaulted to something the host never sent. */}
           {circle.designation !== undefined ? (
-            <Fact label={t('Designation')} hint={OWNERSHIP_HINTS.designation}>
-              {t(CircleDesignation[circle.designation] ?? `${circle.designation}`)}
+            <Fact label={t('Designation')} hint={DESIGNATION_HINTS[circle.designation]}>
+              {DESIGNATION_LABELS[circle.designation] ?? circle.designation}
             </Fact>
           ) : null}
 
           {circle.grantOn !== undefined ? (
-            <Fact label={t('Granted on')} hint={OWNERSHIP_HINTS.grantOn}>
-              {t(CircleGrantOn[circle.grantOn] ?? `${circle.grantOn}`)}
+            <Fact
+              label={t('Granted on')}
+              hint={`${GRANT_ON_HINTS[circle.grantOn] ?? ''} ${GRANT_ON_CAVEAT}`.trim()}
+            >
+              {GRANT_ON_LABELS[circle.grantOn] ?? circle.grantOn}
             </Fact>
           ) : null}
 

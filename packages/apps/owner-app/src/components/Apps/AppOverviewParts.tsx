@@ -323,16 +323,24 @@ export const CircleOverview = ({
       <Collapsible title={t('Details')}>
         <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
           <Fact label={t('Owned by')} hint={OWNERSHIP_HINTS.ownedBy}>
+            {/* "Chat" alone does not say what Chat is; the qualifier is what makes the row
+                readable to someone who has not memorised the app list. */}
             {circle.appId ? (
               owningApp ? (
-                <HybridLink
-                  href={`/owner/third-parties/apps/${encodeURIComponent(owningApp.appId)}`}
-                  className="hover:underline"
-                >
-                  {owningApp.name}
-                </HybridLink>
+                <>
+                  <HybridLink
+                    href={`/owner/third-parties/apps/${encodeURIComponent(owningApp.appId)}`}
+                    className="hover:underline"
+                  >
+                    {owningApp.name}
+                  </HybridLink>
+                  <span className="text-slate-400">{` ${t('(app)')}`}</span>
+                </>
               ) : (
-                <span className="break-all font-mono">{circle.appId}</span>
+                <>
+                  <span className="break-all font-mono">{circle.appId}</span>
+                  <span className="text-slate-400">{` ${t('(app, no longer registered)')}`}</span>
+                </>
               )
             ) : (
               t('You (not owned by an app)')
@@ -340,14 +348,17 @@ export const CircleOverview = ({
           </Fact>
 
           {circle.designation !== undefined ? (
-            <Fact label={t('Designation')} hint={OWNERSHIP_HINTS.designation}>
-              {t(CircleDesignation[circle.designation] ?? `${circle.designation}`)}
+            <Fact label={t('Designation')} hint={DESIGNATION_HINTS[circle.designation]}>
+              {DESIGNATION_LABELS[circle.designation] ?? circle.designation}
             </Fact>
           ) : null}
 
           {circle.grantOn !== undefined ? (
-            <Fact label={t('Granted on')} hint={OWNERSHIP_HINTS.grantOn}>
-              {t(CircleGrantOn[circle.grantOn] ?? `${circle.grantOn}`)}
+            <Fact
+              label={t('Granted on')}
+              hint={`${GRANT_ON_HINTS[circle.grantOn] ?? ''} ${GRANT_ON_CAVEAT}`.trim()}
+            >
+              {GRANT_ON_LABELS[circle.grantOn] ?? circle.grantOn}
             </Fact>
           ) : null}
 
@@ -405,11 +416,45 @@ export const Fact = ({
  * the same field differently.
  */
 export const OWNERSHIP_HINTS = {
-  ownedBy: t('The app that created this and keeps it up to date. Editing it by hand may be undone the next time that app runs.'),
-  designation: t('What kind of relationship this circle is for. Presentation only -- it grants nothing on its own.'),
-  grantOn: t('When members are enrolled automatically: never, on any new connection, only through the owning app\'s own flow, or once you have reviewed the connection.'),
+  ownedBy: t('The app that declared this circle at install time and re-creates it if it goes missing. Its name, grants and enrolment rule are that app\'s recipe -- editing them by hand may be undone the next time the app is registered or updated.'),
   icrKey: t('Whether this app can act as you toward the identities you are connected to -- sending and reading over peer. Without it the app only reaches data on this identity.'),
 } as const;
+
+/**
+ * What each designation actually means, rather than one line covering all three. The value on
+ * screen is one of these, so the explanation should be about that one.
+ */
+export const DESIGNATION_LABELS: Record<string, string> = {
+  [CircleDesignation.Personal]: t('Personal'),
+  [CircleDesignation.Audience]: t('Audience'),
+  [CircleDesignation.Vendor]: t('Vendor'),
+};
+
+export const GRANT_ON_LABELS: Record<string, string> = {
+  [CircleGrantOn.None]: t('Manual only'),
+  [CircleGrantOn.Connect]: t('Any new connection'),
+  [CircleGrantOn.OwnFlowConnect]: t("This app's own consent flow"),
+  [CircleGrantOn.Review]: t('After your review'),
+};
+
+export const DESIGNATION_HINTS: Record<string, string> = {
+  [CircleDesignation.Personal]: t('People you know individually. Membership counts as having reviewed them, so these are the circles sensitive things can be shared with.'),
+  [CircleDesignation.Audience]: t('A group you broadcast to rather than people you know individually -- the subscribers to one of your channels, for instance.'),
+  [CircleDesignation.Vendor]: t('A business or service you deal with. It can send things to you -- receipts, bookings -- without being able to read anything else of yours.'),
+};
+
+/**
+ * What each enrolment rule means. The trailing caveat is the same for all of them: the app asks,
+ * your per-app setting decides.
+ */
+export const GRANT_ON_HINTS: Record<string, string> = {
+  [CircleGrantOn.None]: t('Manual membership only. Nobody joins unless you add them.'),
+  [CircleGrantOn.Connect]: t('Anyone who connects to you joins automatically, introductions included. Such a circle may only grant write access, never read -- so a stranger can send you things but see nothing.'),
+  [CircleGrantOn.OwnFlowConnect]: t('Only people who connect through this app\'s own consent screen join. An introduction never enrols them.'),
+  [CircleGrantOn.Review]: t('People join when you complete the connection review.'),
+};
+
+export const GRANT_ON_CAVEAT = t('The owning app asks for this; whether it takes effect is your per-app setting.');
 
 /**
  * Named through getPermissionKeyName rather than AppPermissionType: that enum only covers the

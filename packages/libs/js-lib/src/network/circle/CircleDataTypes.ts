@@ -89,16 +89,21 @@ export interface AcknowledgedConnectionRequest {
 /**
  * When the owning app wants members enrolled in a circle.
  * Mirrors CircleGrantOn in odin-core.
+ *
+ * String values, not the column's numbers: the host serializes enums through
+ * JsonStringEnumConverter(CamelCase), so this arrives as "connect", not 1. Declaring it numeric
+ * made every lookup miss silently -- a reverse-enum lookup on the name fell through to printing
+ * the raw wire value, which is why the console showed a lowercase "connect".
  */
 export enum CircleGrantOn {
   /** Manual membership only. The default, and what every circle that predates this is. */
-  None = 0,
+  None = 'none',
   /** Granted at any connection establishment, ambient introductions included. */
-  Connect = 1,
+  Connect = 'connect',
   /** Granted only when the connection is made through the owning app's own consent flow. */
-  OwnFlowConnect = 2,
+  OwnFlowConnect = 'ownFlowConnect',
   /** Granted when the owner completes the connection review. */
-  Review = 3,
+  Review = 'review',
 }
 
 /**
@@ -106,9 +111,9 @@ export enum CircleGrantOn {
  * Mirrors CircleDesignation in odin-core.
  */
 export enum CircleDesignation {
-  Personal = 1,
-  Audience = 2,
-  Vendor = 3,
+  Personal = 'personal',
+  Audience = 'audience',
+  Vendor = 'vendor',
 }
 
 export interface CircleDefinition {
