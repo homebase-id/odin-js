@@ -37,6 +37,19 @@ export interface DriveDefinition {
      */
     driveTypeSlug?: string | null;
 
+    /**
+     * The drive's write-only public key (JWK). This is the half a remote caller seals a deposit to;
+     * the private half never leaves the identity host. Null on a drive that has no keypair, and not
+     * served by every identity host, so treat it as optional.
+     */
+    writeOnlyPublicKeyJwk?: string | null;
+
+    /**
+     * CRC32C of the public key -- a short fingerprint for showing which key a drive holds without
+     * printing the whole JWK.
+     */
+    writeOnlyPublicKeyCrc32?: number | null;
+
     targetDriveInfo: TargetDrive;
     metadata: string;
     allowAnonymousReads: boolean;

@@ -135,6 +135,30 @@ const DriveDetails = () => {
                     <li>Type: {driveDef.targetDriveInfo.type}</li>
                     <li>Slug: {driveDef.driveSlug || t('None')}</li>
                     <li>Type slug: {driveDef.driveTypeSlug || t('None')}</li>
+                    <li>
+                        {/* The public half only; the private half is escrowed under the drive's
+                            storage key and never leaves the identity host. Shown by fingerprint,
+                            with the JWK behind a disclosure -- it is long enough to swamp the list. */}
+                        Public key:{' '}
+                        {driveDef.writeOnlyPublicKeyJwk ? (
+                            <>
+                                CRC{' '}
+                                <span className="font-mono">
+                                    {driveDef.writeOnlyPublicKeyCrc32 ?? t('Unknown')}
+                                </span>
+                                <details className="mt-1">
+                                    <summary className="cursor-pointer text-slate-400 dark:text-slate-500">
+                                        {t('Show key')}
+                                    </summary>
+                                    <span className="block break-all font-mono text-xs text-slate-500 dark:text-slate-400">
+                                        {driveDef.writeOnlyPublicKeyJwk}
+                                    </span>
+                                </details>
+                            </>
+                        ) : (
+                            t('None')
+                        )}
+                    </li>
                 </ul>
             </Section>
 
