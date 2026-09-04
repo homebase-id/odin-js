@@ -2,6 +2,7 @@ import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/re
 import { stringGuidsEqual, stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import {
   ApiType,
+  COMMUNITY_DRIVE_TYPE_SLUG,
   DotYouClient,
   DrivePermissionType,
   HomebaseFile,
@@ -53,6 +54,10 @@ const getEnsureNewDriveAndPermissionPath = (
       description: description,
       attributes: attributes,
       allowSubscriptions: allowSubscriptions,
+      // Unlike the fixed drives in useAuth, this one does not exist yet -- it is created per
+      // community. The slug is left to the server, which derives it from `name` against what
+      // Community already holds; two communities can share a title and only the server knows.
+      driveTypeSlug: COMMUNITY_DRIVE_TYPE_SLUG,
     },
   ];
 
@@ -68,6 +73,8 @@ const getEnsureNewDriveAndPermissionPath = (
       ],
       name: name,
       description: description,
+      // Same drive as above, so the type slug has to match or the two declarations disagree.
+      driveTypeSlug: COMMUNITY_DRIVE_TYPE_SLUG,
     },
   ];
 

@@ -86,6 +86,36 @@ export interface AcknowledgedConnectionRequest {
   receivedTimestampMilliseconds: string;
 }
 
+/**
+ * When the owning app wants members enrolled in a circle.
+ * Mirrors CircleGrantOn in odin-core.
+ *
+ * String values, not the column's numbers: the host serializes enums through
+ * JsonStringEnumConverter(CamelCase), so this arrives as "connect", not 1. Declaring it numeric
+ * made every lookup miss silently -- a reverse-enum lookup on the name fell through to printing
+ * the raw wire value, which is why the console showed a lowercase "connect".
+ */
+export enum CircleGrantOn {
+  /** Manual membership only. The default, and what every circle that predates this is. */
+  None = 'none',
+  /** Granted at any connection establishment, ambient introductions included. */
+  Connect = 'connect',
+  /** Granted only when the connection is made through the owning app's own consent flow. */
+  OwnFlowConnect = 'ownFlowConnect',
+  /** Granted when the owner completes the connection review. */
+  Review = 'review',
+}
+
+/**
+ * What kind of relationship a circle represents. Presentation only.
+ * Mirrors CircleDesignation in odin-core.
+ */
+export enum CircleDesignation {
+  Personal = 'personal',
+  Audience = 'audience',
+  Vendor = 'vendor',
+}
+
 export interface CircleDefinition {
   id?: string;
   created?: number;
@@ -97,10 +127,35 @@ export interface CircleDefinition {
   permissions: {
     keys: number[];
   };
+
+  /**
+   * The app that owns this circle; undefined means an owner circle. Read-only in practice: the
+   * server refuses to reassign ownership through an update, so that nobody who can PUT a
+   * definition can hand a circle to an app.
+   */
+  appId?: string;
+
+  /**
+   * IMPORTANT: round-trip these when updating a circle. This same type is the update body, and
+   * the server assigns grantOn, designation and emoji from whatever it receives -- so a PUT built
+   * from a fetched definition that drops them resets them to their defaults. That would silently
+   * take an ambient circle (grantOn: Connect) back to None and stop it being granted to
+   * auto-connections, with no error.
+   */
+  grantOn?: CircleGrantOn;
+  designation?: CircleDesignation;
+  emoji?: string;
 }
 
 export interface DriveGrant {
   permissionedDrive: PermissionedDrive;
+
+  /**
+   * Whether the grant carries the drive's storage key, i.e. it can decrypt the drive rather than
+   * only read what is anonymous. Served on app grants (RedactedDriveGrant); circle grants are
+   * DriveGrantRequest and carry no such flag, so it is optional.
+   */
+  hasStorageKey?: boolean;
 }
 
 export interface AcceptRequestHeader {

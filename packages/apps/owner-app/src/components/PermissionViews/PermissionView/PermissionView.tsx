@@ -1,9 +1,12 @@
 import { t } from '@homebase-id/common-app';
 import { Persons } from '@homebase-id/common-app/icons';
-import { AppPermissionType } from '@homebase-id/js-lib/network';
+import { getPermissionKeyName } from '@homebase-id/js-lib/helpers';
 
 const PermissionView = ({ permission, className }: { permission: number; className?: string }) => {
-  const permissionLevel = AppPermissionType[permission];
+  // getPermissionKeyName rather than AppPermissionType: that enum covers only the keys an app may
+  // request, so a key outside it (ManageCircleMembership, ManageProfile, SendOnBehalfOfOwner,
+  // AllowIntroductions) indexed to undefined and rendered as an empty row.
+  const permissionLevel = getPermissionKeyName(permission);
 
   return (
     <div key={`${permissionLevel}`} className={`flex flex-row ${className}`}>

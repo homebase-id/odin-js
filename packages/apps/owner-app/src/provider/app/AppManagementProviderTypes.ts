@@ -45,6 +45,15 @@ export interface AppRegistrationRequest {
   /** @format uuid */
   appId: string;
   name: string | null;
+
+  /**
+   * The app half of `/apps/{appSlug}/drives/{driveSlug}`. Omit it and the server derives one from
+   * `name` — "Homebase - Location" becomes "homebase-locat" — and a slug is immutable once written,
+   * so the derived one is permanent. Registration is first-come: a slug another app already holds is
+   * refused rather than silently changed.
+   */
+  appSlug?: string;
+
   corsHostName?: string;
   permissionSet?: PermissionSet;
 
@@ -66,6 +75,20 @@ export interface DriveGrantRequest {
     allowAnonymousReads?: boolean;
     allowSubscriptions?: boolean;
     attributes?: { [key: string]: string };
+
+    /**
+     * The drive half of `/apps/{appSlug}/drives/{driveSlug}`, declared by the app asking for the
+     * drive. Omit it and the server derives one from `name`, picking a suffix that does not collide
+     * with what this app already holds. Either way the slug is immutable once written, so a supplied
+     * one is permanent -- and a slug this app already uses is refused rather than silently changed.
+     */
+    driveSlug?: string;
+
+    /**
+     * The readable form of the drive's type, shared by every drive of that type. Declared by the app;
+     * when it says nothing, the only type we can name from here is a channel drive.
+     */
+    driveTypeSlug?: string;
   };
 }
 
@@ -85,6 +108,10 @@ export interface RedactedAppRegistration {
 
   name: string;
   created: number;
+
+  /** Last change to the app's grant. Served as RedactedAppRegistration.Modified. */
+  modified?: number;
+
   corsHostName?: string;
   isRevoked: boolean;
   grant: RedactedExchangeGrant;
@@ -99,6 +126,9 @@ export interface RedactedExchangeGrant {
   isRevoked: boolean;
   permissionSet: PermissionSet;
   driveGrants: DriveGrant[];
+
+  /** Whether the grant carries an ICR key, i.e. the app can act over peer connections. */
+  hasIcrKey?: boolean;
 }
 
 export enum DrivePermission {

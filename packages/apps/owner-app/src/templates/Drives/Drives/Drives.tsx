@@ -75,8 +75,25 @@ const Drives = () => {
                   >
                     {isDebug && driveDef.driveId && <p>DriveId: {driveDef.driveId}</p>}
                     {driveDef.driveSlug ? (
-                      <p className="font-mono text-sm text-slate-400 break-all">
-                        {driveDef.driveSlug}
+                      <p className="text-sm text-slate-400">
+                        {t('Slug')}:{' '}
+                        <span className="break-all font-mono">{driveDef.driveSlug}</span>
+                      </p>
+                    ) : null}
+                    {driveDef.driveTypeSlug ? (
+                      <p className="text-sm text-slate-400">
+                        {t('Type slug')}:{' '}
+                        <span className="break-all font-mono">{driveDef.driveTypeSlug}</span>
+                      </p>
+                    ) : null}
+                    {/* Which drives can collect a deposit, without opening each one. Shown by
+                        fingerprint; the JWK itself lives on the detail page. */}
+                    {driveDef.writeOnlyPublicKeyJwk ? (
+                      <p className="text-sm text-slate-400">
+                        {t('Public key')}: CRC{' '}
+                        <span className="break-all font-mono">
+                          {driveDef.writeOnlyPublicKeyCrc32 ?? t('Unknown')}
+                        </span>
                       </p>
                     ) : null}
                     <h3 className="text-lg">Metadata</h3>

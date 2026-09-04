@@ -48,6 +48,7 @@ const RegisterApp = () => {
 
   const appId = searchParams.get('appId');
   const name = searchParams.get('n');
+  const appSlug = searchParams.get('as') || undefined;
   const origin = searchParams.get('o') || undefined;
   const returnUrl = searchParams.get('return');
   const cancelUrl = searchParams.get('cancel');
@@ -95,6 +96,7 @@ const RegisterApp = () => {
             <AppRegistration
               name={name}
               appId={appId}
+              appSlug={appSlug}
               origin={origin}
               permissionSet={permissionSet}
               driveGrants={driveGrants}
@@ -117,6 +119,7 @@ export default RegisterApp;
 const AppRegistration = ({
   name,
   appId,
+  appSlug,
   origin,
   permissionSet,
   driveGrants,
@@ -129,6 +132,7 @@ const AppRegistration = ({
 }: {
   name: string;
   appId: string;
+  appSlug: string | undefined;
   origin: string | undefined;
   permissionSet?: PermissionSet;
   driveGrants?: DriveGrantRequest[];
@@ -148,6 +152,9 @@ const AppRegistration = ({
     await registerApp({
       appId: appId,
       name: name,
+      // Left undefined the server derives a slug from `name`. Either way it is permanent, so this
+      // is the app's one chance to name itself.
+      appSlug: appSlug,
       corsHostName: origin,
       permissionSet: permissionSet,
       drives: driveGrants,
@@ -190,6 +197,13 @@ const AppRegistration = ({
             ''
           )}
         </small>
+        {/* The slug is permanent and first-come, so the owner should be able to see the name being
+            claimed -- but it is an address, not something they are being asked to weigh. */}
+        {appSlug ? (
+          <small className="block text-sm font-normal text-slate-400 dark:text-slate-500">
+            /apps/{appSlug}
+          </small>
+        ) : null}
       </h1>
       {!circleSelection ? (
         <>

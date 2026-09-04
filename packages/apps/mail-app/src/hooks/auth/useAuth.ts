@@ -66,6 +66,8 @@ export const drives: TargetDriveAccessRequest[] = [
     name: 'Mail Drive',
     description: '',
     permissions: [DrivePermissionType.Read, DrivePermissionType.Write],
+    driveSlug: 'mail',
+    driveTypeSlug: 'mail',
   },
   {
     // Standard profile Info
@@ -74,6 +76,8 @@ export const drives: TargetDriveAccessRequest[] = [
     name: 'Standard Profile info',
     description: '',
     permissions: [DrivePermissionType.Read],
+    driveSlug: 'profile',
+    driveTypeSlug: 'profile',
   },
   {
     // Contacts
@@ -82,6 +86,8 @@ export const drives: TargetDriveAccessRequest[] = [
     name: 'Contact Drive',
     description: '',
     permissions: [DrivePermissionType.Read, DrivePermissionType.Write],
+    driveSlug: 'contacts',
+    driveTypeSlug: 'contact',
   },
 ];
 
@@ -101,11 +107,17 @@ const circleDrives: TargetDriveAccessRequest[] = [
     name: 'Mail Drive',
     description: '',
     permissions: [DrivePermissionType.Write],
+    driveSlug: 'mail',
+    driveTypeSlug: 'mail',
   },
 ];
 
 export const appName = 'Homebase - Mail';
 export const appId = MAIL_APP_ID;
+
+// The app half of `/apps/{appSlug}/drives/{driveSlug}`, and it must match what the server's
+// BuiltinApps tree assigns -- registration is first-come and the slug is immutable once written.
+export const appSlug = 'mail';
 
 export const useYouAuthAuthorization = () => {
   const queryClient = useQueryClient();
@@ -128,7 +140,8 @@ export const useYouAuthAuthorization = () => {
       eccKey.publicKey,
       MAIL_ROOT_PATH.startsWith(OWNER_APPS_ROOT) ? undefined : window.location.host,
       undefined,
-      returnUrl
+      returnUrl,
+      appSlug
     );
   };
 

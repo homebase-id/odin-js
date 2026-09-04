@@ -3,6 +3,8 @@ const OdinBlob: typeof Blob =
   Blob;
 import { ApiType, DotYouClient } from '../../../core/DotYouClient';
 import { DEFAULT_PAYLOAD_KEY, MAX_HEADER_CONTENT_BYTES } from '../../../core/constants';
+import { CHANNEL_DRIVE_TYPE_SLUG, FEED_APP_ID } from '../../../core/constants';
+
 import {
   getDrivesByType,
   FileQueryParams,
@@ -137,7 +139,13 @@ export const saveChannelDefinition = async (
       )
     ) {
       if (dotYouClient.getType() === ApiType.Owner) {
-        // Channel drives are always CDN-enabled so their payloads can be served from the CDN
+        // Channel drives are always CDN-enabled so their payloads can be served from the CDN.
+        //
+        // The feed app owns every channel drive, and `channel` is the readable form of their shared
+        // type. The drive slug is deliberately not passed: the server derives it from the drive name,
+        // and only it holds the set of slugs the feed app has already used, so only it can dedupe two
+        // channels that happen to share a name. Passing appId is what enables that derivation at all —
+        // without an owning app the server leaves the drive unaddressed.
         await ensureDrive(
           dotYouClient,
           targetDrive,
@@ -145,7 +153,10 @@ export const saveChannelDefinition = async (
           channelContent.description,
           true,
           false,
-          true
+          true,
+          FEED_APP_ID,
+          undefined, //leaving this undefined will let the server choose the slug
+          CHANNEL_DRIVE_TYPE_SLUG
         );
       } else {
         console.warn(`[odin-js: PostDefinitionProvider] Save Channel: No access to drive`);

@@ -3,6 +3,7 @@ import { ensureDrive } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { BlogConfig } from '@homebase-id/js-lib/public';
 import { DriveGrant } from '@homebase-id/js-lib/network';
+import { CHANNEL_DRIVE_TYPE_SLUG } from '@homebase-id/js-lib/core';
 import {
   AllowApp,
   GetAppRegistration,
@@ -46,7 +47,17 @@ export const useApp = ({ appId }: { appId?: string }) => {
               driveGrant.driveMeta.allowAnonymousReads || false,
               driveGrant.driveMeta.allowSubscriptions || false,
               // Channel drives are always CDN-enabled
-              stringGuidsEqual(driveGrant.permissionedDrive.drive.type, BlogConfig.DriveType)
+              stringGuidsEqual(driveGrant.permissionedDrive.drive.type, BlogConfig.DriveType),
+              // The app asking for the drive owns it. Without an owner the server leaves it
+              // unaddressed. The app may name both slugs in its request; when it does not, the server
+              // derives the drive slug -- it alone knows what this app has already used -- and the
+              // only type we can name from here is a channel drive.
+              appRegRequest.appId,
+              driveGrant.driveMeta.driveSlug,
+              driveGrant.driveMeta.driveTypeSlug ||
+                (stringGuidsEqual(driveGrant.permissionedDrive.drive.type, BlogConfig.DriveType)
+                  ? CHANNEL_DRIVE_TYPE_SLUG
+                  : undefined)
             );
         })
       );
@@ -106,7 +117,17 @@ export const useApp = ({ appId }: { appId?: string }) => {
               driveGrant.driveMeta.allowAnonymousReads || false,
               driveGrant.driveMeta.allowSubscriptions || false,
               // Channel drives are always CDN-enabled
-              stringGuidsEqual(driveGrant.permissionedDrive.drive.type, BlogConfig.DriveType)
+              stringGuidsEqual(driveGrant.permissionedDrive.drive.type, BlogConfig.DriveType),
+              // The app asking for the drive owns it. Without an owner the server leaves it
+              // unaddressed. The app may name both slugs in its request; when it does not, the server
+              // derives the drive slug -- it alone knows what this app has already used -- and the
+              // only type we can name from here is a channel drive.
+              appId,
+              driveGrant.driveMeta.driveSlug,
+              driveGrant.driveMeta.driveTypeSlug ||
+                (stringGuidsEqual(driveGrant.permissionedDrive.drive.type, BlogConfig.DriveType)
+                  ? CHANNEL_DRIVE_TYPE_SLUG
+                  : undefined)
             );
         })
       );
