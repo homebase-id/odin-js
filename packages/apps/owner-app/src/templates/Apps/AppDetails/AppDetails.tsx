@@ -39,6 +39,12 @@ import {
 } from '../../../components/Apps/AppOverviewParts';
 import { DriveView } from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 
+/**
+ * How many devices to show before the list is cut short. Five is enough to recognise the machines
+ * you use without the section owning the page.
+ */
+const DEVICE_PREVIEW_COUNT = 5;
+
 const AppDetails = () => {
   const { appKey } = useParams();
   const decodedAppKey = appKey ? decodeURIComponent(appKey) : undefined;
@@ -71,6 +77,7 @@ const AppDetails = () => {
     'circle' | 'permission' | 'drives' | undefined
   >();
   const [isPermissionEditOpen, setIsPermissionEditOpen] = useState(false);
+  const [showAllDevices, setShowAllDevices] = useState(false);
   const [isDrivesEditOpen, setIsDrivesEditOpen] = useState(false);
 
   const permissionKeys = app?.grant.permissionSet?.keys?.reduce((acc: number[], key: number) => {
@@ -201,17 +208,35 @@ const AppDetails = () => {
         </Alert>
       )}
 
+      {/* Capped, because this is the first section on the page and an app logged in from many
+          devices pushed everything else -- permissions, ownership, circles -- off the screen. The
+          count stays in the heading so a shortened list still says how many there are. */}
       {appClients ? (
-        <Section title={t('Devices')}>
+        <Section title={`${t('Devices')} (${appClients.length})`}>
           <div className="grid grid-flow-row gap-4">
             {appClients?.length ? (
-              appClients.map((appClient, index) => (
-                <ClientView
-                  appId={app.appId}
-                  appClient={appClient}
-                  key={`${appClient.accessRegistrationId}_${index}`}
-                />
-              ))
+              <>
+                {(showAllDevices ? appClients : appClients.slice(0, DEVICE_PREVIEW_COUNT)).map(
+                  (appClient, index) => (
+                    <ClientView
+                      appId={app.appId}
+                      appClient={appClient}
+                      key={`${appClient.accessRegistrationId}_${index}`}
+                    />
+                  )
+                )}
+                {appClients.length > DEVICE_PREVIEW_COUNT ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllDevices(!showAllDevices)}
+                    className="mr-auto text-sm text-slate-400 hover:underline"
+                  >
+                    {showAllDevices
+                      ? t('Show fewer')
+                      : `${t('Show all')} ${appClients.length} ${t('devices')}`}
+                  </button>
+                ) : null}
+              </>
             ) : (
               <p className="text-slate-400">{t('No devices currently logged in')}</p>
             )}
