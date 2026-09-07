@@ -24,6 +24,8 @@ export interface ActiveConnection extends DotYouProfile {
   connectionRequestOrigin: ConnectionRequestOrigin;
   hasVerificationHash: boolean;
   rku: boolean;
+  /** When the owner reviewed this connection; null or absent means it has never been reviewed. */
+  reviewedAt?: number | null;
 }
 
 export interface CircleGrant {
@@ -56,6 +58,8 @@ export interface ConnectionInfo {
   clientAccessTokenSharedSecret: string;
   connectionRequestOrigin: ConnectionRequestOrigin;
   introducerOdinId?: string;
+  /** When the owner reviewed this connection; null or absent means it has never been reviewed. */
+  reviewedAt?: number | null;
 }
 
 export interface IncomingConnectionRequest {

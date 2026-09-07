@@ -12,6 +12,7 @@ import {
   useDetailedConnectionInfo,
   useIsConnected,
   ContactImage,
+  formatDateExludingYearIfCurrent,
 } from '@homebase-id/common-app';
 import {
   Envelope,
@@ -129,6 +130,7 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
               )}
 
               <CirclesSummary odinId={odinId} />
+              <ReviewedSummary odinId={odinId} />
             </span>
           </>
         }
@@ -249,6 +251,28 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
         </div>
       </Section>
     </>
+  );
+};
+
+const ReviewedSummary = ({ odinId }: { odinId?: string }) => {
+  const {
+    fetch: { data: connectionInfo },
+  } = useConnectionInfo({ odinId: odinId });
+
+  if (connectionInfo?.status !== 'connected') return null;
+
+  const reviewedAt = (connectionInfo as ConnectionInfo).reviewedAt;
+
+  return (
+    <p className="text-sm text-slate-400">
+      {reviewedAt ? (
+        <>
+          {t('Reviewed')}: {formatDateExludingYearIfCurrent(new Date(reviewedAt))}
+        </>
+      ) : (
+        t('Not yet reviewed')
+      )}
+    </p>
   );
 };
 
