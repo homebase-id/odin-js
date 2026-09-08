@@ -42,13 +42,3 @@ export const isCompleteLabel = (label: string) =>
 export const websiteFromDomain = (domain: string) => (domain ? `https://${domain}/` : '');
 
 export const primaryMailFromDomain = (domain: string) => (domain ? `mail@${domain}` : '');
-
-// The personal address: the first label becomes the mailbox, everything after
-// it becomes the mail domain. So john.doe + id.pub -> john@doe.id.pub, and a
-// single-label prefix john + dominion.id -> john@dominion.id
-export const splitMailFromPrefixAndApex = (prefix: string, apex: string) => {
-  if (!prefix || !apex) return '';
-
-  const labels = prefix.split('.');
-  return `${labels[0]}@${[...labels.slice(1), apex].join('.')}`.toLocaleLowerCase();
-};
