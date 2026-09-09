@@ -28,8 +28,16 @@ const DnsSettingsView = ({
   const isApexDomain = isRegistrableApex(domain);
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
 
-  const subRecords = dnsConfig.filter((record) => !!record.name && record.type !== 'NS');
+  // Signup asks for the records that make an identity exist - the apex, capi and
+  // file - and nothing else. The optional ones are the email set, which a user
+  // does not need to decide about while claiming a domain and which the owner
+  // console shows them later, per record, with live status.
+  const subRecords = dnsConfig.filter(
+    (record) => !!record.name && record.type !== 'NS' && !record.optional
+  );
   const nsRecords = dnsConfig.filter((record) => record.type === 'NS');
+  // Only worth saying where the email records went on a server that has them
+  const hasOptionalRecords = dnsConfig.some((record) => record.optional);
 
   // Subdomains: delegation is two easy NS records at the DNS host - recommend it.
   // Apexes: delegation means a registrar nameserver change that silently takes down any
@@ -77,6 +85,13 @@ const DnsSettingsView = ({
           {subRecords.map((record) => (
             <RecordView key={record.name} record={record} domain={domain} showStatus={manualShowStatus} />
           ))}
+          {hasOptionalRecords ? (
+            <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+              {t(
+                'That is everything your identity needs. Email has its own DNS records - if you want email on this domain later, your owner console lists them under Security, Email.'
+              )}
+            </p>
+          ) : null}
         </div>
       </div>
     </>

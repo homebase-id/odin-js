@@ -32,17 +32,19 @@ const isRoutableHost = (hostname: string): boolean =>
  * a host this build does not route, or the user is already in the right place.
  *
  * Only the host changes — path, invitation code, plan, returnUrl and region all
- * ride along untouched. Pass `search` to route on a query string that is about
- * to be applied rather than the one currently in the address bar.
+ * ride along untouched. Pass `search` (and `hash`) to route on a query string or
+ * fragment that is about to be applied rather than the ones currently in the
+ * address bar.
  */
 export const regionRedirectUrl = (
   region: Region | null,
-  search: string = window.location.search
+  search: string = window.location.search,
+  hash: string = window.location.hash
 ): string | null => {
   if (!region) return null;
 
   const target = provisioningHostForRegion(region);
-  const { hostname, pathname, hash } = window.location;
+  const { hostname, pathname } = window.location;
   if (!target || target === hostname || !isRoutableHost(hostname)) return null;
 
   return `https://${target}${pathname}${search}${hash}`;
