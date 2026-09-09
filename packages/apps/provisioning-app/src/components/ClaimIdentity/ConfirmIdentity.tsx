@@ -3,7 +3,7 @@ import { Arrow, ArrowLeft, Shield } from '@homebase-id/common-app/icons';
 import ActionButton from '../ui/Buttons/ActionButton';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
 import { IdentityPreviewCard } from './IdentityPreviewCard';
-import { RegionPicker } from './RegionPicker';
+import { RegionPicker } from '../Region/RegionPicker';
 import { t } from '../../helpers/i18n/dictionary';
 import { useCreateManagedDomain } from '../../hooks/managedDomain/useManagedDomain';
 import { Region, RegionSource, REGION_NAMES } from '../../helpers/region';

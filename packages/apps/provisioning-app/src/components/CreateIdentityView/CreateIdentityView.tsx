@@ -20,7 +20,7 @@ interface Props {
   email: string;
   planId: string;
   invitationCode: string | null;
-  // Only the managed-domain flow collects a region
+  // Null when detection came up empty and no region was picked
   region?: Region | null;
 }
 

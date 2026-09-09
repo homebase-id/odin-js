@@ -17,8 +17,8 @@ import {
   isCompleteLabel,
   prefixesFromClaimedDomain,
 } from '../../helpers/common';
-import { detectRegion, isRegion, Region, RegionSource } from '../../helpers/region';
-import { regionRedirectUrl } from '../../helpers/regionRouting';
+import { Region } from '../../helpers/region';
+import { useRegionChoice } from '../../hooks/region/useRegionChoice';
 
 type ClaimStep = 'ClaimName' | 'Confirm' | 'Provisioning';
 
@@ -49,14 +49,7 @@ const ClaimIdentity = () => {
   const invitationCode = searchParams.get('invitation-code');
   const planId = planIdParam || 'free';
 
-  // Resolved once, on mount; a re-detect mid-flow would fight the user's choice
-  const [{ region, source: regionSource }, setRegionChoice] = useState<{
-    region: Region | null;
-    source: RegionSource | null;
-  }>(() => {
-    const param = searchParams.get('region');
-    return isRegion(param) ? { region: param, source: null } : detectRegion();
-  });
+  const { region, source: regionSource, chooseRegion } = useRegionChoice();
 
   const {
     fetchManagedDomainApexes: { data: managedDomainApexes, error: errorManagedDomainApexes },
@@ -101,30 +94,10 @@ const ClaimIdentity = () => {
 
   const domain = domainFromPrefixAndApex(domainPrefix, domainApex?.apex ?? '');
 
-  // Only an explicit choice is mirrored into the URL. Persisting a detected
-  // region would freeze one guess forever: a stale ?region= from an earlier
-  // visit outranks detection on every later load, so a wrong guess could never
-  // correct itself.
-  const onRegionChange = (next: Region) => {
-    const params = new URLSearchParams(searchParams);
-    params.set('region', next);
-
-    // Another region is another cluster, so this cannot be a state update: the
-    // rest of the flow — the availability lookup included — has to run on the
-    // host that will own the identity. The name rides along so the user is not
-    // sent back to an empty form, but it is re-checked on arrival, because the
-    // registry that cleared it does not span clusters either.
-    if (domain) params.set('claim', domain);
-
-    const redirectUrl = regionRedirectUrl(next, `?${params}`);
-    if (redirectUrl) {
-      window.location.replace(redirectUrl);
-      return;
-    }
-
-    setRegionChoice({ region: next, source: null });
-    setSearchParams(params, { replace: true });
-  };
+  // The name rides along so a region change does not send the user back to an
+  // empty form. It is re-checked on arrival: the registry that cleared it
+  // belongs to the cluster being left, and does not span clusters either.
+  const onRegionChange = (next: Region) => chooseRegion(next, { claim: domain });
 
   const goToOwnDomain = () => {
     // Carry the whole query over — own-domain needs returnUrl too — with the resolved region on top.
