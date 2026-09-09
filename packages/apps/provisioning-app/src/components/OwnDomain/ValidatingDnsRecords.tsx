@@ -115,7 +115,11 @@ const ValidatingDnsRecords = ({ domain, invitationCode, setProvisionState }: Pro
       // pass on delegation alone): after zone creation the actual records must resolve,
       // proving the freshly created zone serves. For manual-records users this simply
       // re-confirms their records.
-      const records = data?.records ?? [];
+      // The same rule the server applies: optional records say nothing about
+      // whether the domain points here. The mta-sts CNAME is one of them, so
+      // requiring every CNAME would hold a correctly configured domain at "not
+      // resolving yet" over a record the verdict above already ignored.
+      const records = (data?.records ?? []).filter((r) => !r.optional);
       const zoneServes =
         records.some((r) => (r.type === 'A' || r.type === 'ALIAS') && r.status === 'success') &&
         records.filter((r) => r.type === 'CNAME').every((r) => r.status === 'success');

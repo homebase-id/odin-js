@@ -9,7 +9,9 @@ import { useCheckInvitationCode } from '../../hooks/invitationCode/useCheckInvit
 import { Times } from '@homebase-id/common-app/icons';
 import { OwnDomainProvisionState } from '../../hooks/ownDomain/useOwnDomain';
 import { cleanDomain } from '../../helpers/common';
-import { Region } from '../../helpers/region';
+import { readCarriedFragment } from '../../helpers/carriedFragment';
+import { Region, REGION_NAMES } from '../../helpers/region';
+import { config } from '../../app/config';
 import { useRegionChoice } from '../../hooks/region/useRegionChoice';
 
 const LOCAL_EMAIL_STORAGE_KEY = 'email';
@@ -28,9 +30,15 @@ const ProvisionOwnDomain = () => {
     const carried = cleanDomain(searchParams.get('domain') ?? '');
     return carried || window.localStorage?.getItem(LOCAL_DOMAIN_STORAGE_KEY) || '';
   });
-  const [email, setEmail] = useState<string>(
-    window.localStorage?.getItem(LOCAL_EMAIL_STORAGE_KEY) || ''
-  );
+  const [email, setEmail] = useState<string>(() => {
+    // In the fragment, not the query: an email has no business in a URL the
+    // target cluster logs. An initializer and not an effect, because the field
+    // below renders with defaultValue - a later state change would not reach it.
+    const carried = readCarriedFragment('email');
+    return (
+      carried?.toLowerCase() || window.localStorage?.getItem(LOCAL_EMAIL_STORAGE_KEY) || ''
+    );
+  });
 
   const [planId] = useState<string>(searchParams.get('plan-id') || 'free');
   const [invitationCode] = useState<string | null>(searchParams.get('invitation-code'));
@@ -40,9 +48,10 @@ const ProvisionOwnDomain = () => {
   // here, on step 1, before any of those records are shown.
   const { region, source: regionSource, chooseRegion } = useRegionChoice();
 
-  // The domain rides along on a region change, for the same reason the managed
+  // Both fields ride along on a region change, for the same reason the managed
   // flow carries the claimed name: the user should not land on an empty form.
-  const onRegionChange = (next: Region) => chooseRegion(next, { domain });
+  const onRegionChange = (next: Region) =>
+    chooseRegion(next, { carry: { domain }, carryInFragment: { email } });
 
   // Consumed once. Left in the URL it would resurrect a stale domain on the next
   // reload, outranking whatever the user had typed since.
@@ -75,7 +84,12 @@ const ProvisionOwnDomain = () => {
       <div className="container mx-auto flex h-full min-h-full flex-grow flex-col px-5">
         <div className={`${provisionState === 'DnsRecords' ? 'mt-10' : 'mt-20'} min-h-[20rem]`}>
           <h1 className="mb-10 text-4xl">
-            Homebase | Signup
+            {/* The region is settled on this screen and everything below it - the DNS
+                records included - belongs to that cluster, so the title carries it.
+                Omitted while there is no region: detection can come up empty, and the
+                picker is then asking rather than telling. */}
+            {config.brandName}
+            {region ? ` ${t(REGION_NAMES[region])}` : ''} | {t('Signup')}
             <span className="mt-1 block text-3xl text-slate-400">{t('Create a new identity')}</span>
           </h1>
           {provisionState === 'EnteringDetails' ? (

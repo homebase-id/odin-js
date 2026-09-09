@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { detectRegion, isRegion, Region, RegionSource } from '../../helpers/region';
 import { regionRedirectUrl } from '../../helpers/regionRouting';
+import { carriedFragmentFor, clearCarriedFragment } from '../../helpers/carriedFragment';
 
 /**
  * The hosting region as a sign-up flow sees it, and the only way to change it.
@@ -32,21 +33,36 @@ export const useRegionChoice = () => {
   });
 
   /**
-   * `carry` holds whatever the user has typed so far, so a redirect does not
-   * drop them back onto an empty form. It rides in the URL of the *redirect
-   * only*: it exists to survive a full page load onto another origin, and left
-   * in the address bar of a host that did not move it would resurrect a stale
-   * value on the next reload. Carried values are restored, never trusted — the
-   * cluster that vetted them is the one being left.
+   * `carry` and `carryInFragment` hold whatever the user has typed so far, so a
+   * redirect does not drop them back onto an empty form. Both ride in the URL of
+   * the *redirect only*: they exist to survive a full page load onto another
+   * origin, and left in the address bar of a host that did not move they would
+   * resurrect a stale value on the next reload. Carried values are restored,
+   * never trusted — the cluster that vetted them is the one being left.
+   *
+   * The split is where each value is allowed to be seen. A query string reaches
+   * the target cluster and its access log; a fragment reaches neither, and is
+   * where anything personal goes. See helpers/carriedFragment.ts.
    */
-  const chooseRegion = (next: Region, carry?: Record<string, string | null>) => {
+  const chooseRegion = (
+    next: Region,
+    carried?: {
+      carry?: Record<string, string | null>;
+      carryInFragment?: Record<string, string | null>;
+    }
+  ) => {
     const params = new URLSearchParams(searchParams);
     params.set('region', next);
 
-    const carried = new URLSearchParams(params);
-    for (const [key, value] of Object.entries(carry ?? {})) if (value) carried.set(key, value);
+    const redirectParams = new URLSearchParams(params);
+    for (const [key, value] of Object.entries(carried?.carry ?? {}))
+      if (value) redirectParams.set(key, value);
 
-    const redirectUrl = regionRedirectUrl(next, `?${carried}`);
+    const redirectUrl = regionRedirectUrl(
+      next,
+      `?${redirectParams}`,
+      carriedFragmentFor(carried?.carryInFragment ?? {})
+    );
     if (redirectUrl) {
       window.location.replace(redirectUrl);
       return;
@@ -55,6 +71,11 @@ export const useRegionChoice = () => {
     setChoice({ region: next, source: null });
     setSearchParams(params, { replace: true });
   };
+
+  // Whatever arrived in the fragment has been snapshotted by now (module load),
+  // so the address bar can be cleaned as soon as this mounts. Not conditional on
+  // having consumed anything: a fragment nobody restored is still stale.
+  useEffect(() => clearCarriedFragment(), []);
 
   return { region, source, chooseRegion };
 };

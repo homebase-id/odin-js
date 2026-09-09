@@ -2,9 +2,12 @@ export type Region = 'eu' | 'ca';
 
 export type RegionSource = 'locale' | 'timezone';
 
+// Display names only. The keys are what travels - `?region=`, the telemetry sent
+// with a registration, the provisioning-host map - and `ca` stays `ca`: the
+// datacenter is in Canada, but what the user is choosing is a region.
 export const REGION_NAMES: Record<Region, string> = {
   eu: 'Europe',
-  ca: 'Canada',
+  ca: 'North America',
 };
 
 export const REGION_SOURCE_LABELS: Record<RegionSource, string> = {

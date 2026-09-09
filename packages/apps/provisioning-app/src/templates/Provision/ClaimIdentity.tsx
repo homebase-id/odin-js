@@ -17,7 +17,8 @@ import {
   isCompleteLabel,
   prefixesFromClaimedDomain,
 } from '../../helpers/common';
-import { Region } from '../../helpers/region';
+import { readCarriedFragment } from '../../helpers/carriedFragment';
+import { Region, REGION_NAMES } from '../../helpers/region';
 import { useRegionChoice } from '../../hooks/region/useRegionChoice';
 
 type ClaimStep = 'ClaimName' | 'Confirm' | 'Provisioning';
@@ -39,7 +40,11 @@ const ClaimIdentity = () => {
   const [step, setStep] = useState<ClaimStep>('ClaimName');
   const [domainApex, setDomainApex] = useState<ManagedDomainApex | undefined>(undefined);
   const [prefixes, setPrefixes] = useState<string[]>([]);
-  const [email, setEmail] = useState<string>('');
+  // Carried in the fragment across a region redirect - the picker sits on the
+  // same step as this field, so changing region emptied it (see ConfirmIdentity)
+  const [email, setEmail] = useState<string>(
+    () => readCarriedFragment('email')?.toLowerCase() ?? ''
+  );
 
   // The name a region redirect carried over, until this cluster's registry has
   // had its say about it
@@ -96,8 +101,10 @@ const ClaimIdentity = () => {
 
   // The name rides along so a region change does not send the user back to an
   // empty form. It is re-checked on arrival: the registry that cleared it
-  // belongs to the cluster being left, and does not span clusters either.
-  const onRegionChange = (next: Region) => chooseRegion(next, { claim: domain });
+  // belongs to the cluster being left, and does not span clusters either. The
+  // email travels in the fragment, which never reaches either cluster.
+  const onRegionChange = (next: Region) =>
+    chooseRegion(next, { carry: { claim: domain }, carryInFragment: { email } });
 
   const goToOwnDomain = () => {
     // Carry the whole query over — own-domain needs returnUrl too — with the resolved region on top.
@@ -183,7 +190,13 @@ const ClaimIdentity = () => {
         <div className="mx-auto mt-20 min-h-[20rem] w-full max-w-xl">
           <div className="mb-10 flex flex-row items-start justify-between gap-4">
             <h1 className="text-4xl">
-              {config.brandName} | {t('Signup')}
+              {/* Not on 1/2: the region is resolved by then but the user has not been
+                  shown it yet, and naming a cluster beside a name they are still
+                  typing answers a question nobody has asked. From 2/2 on, where the
+                  picker sits, the title says where this identity is going to live. */}
+              {config.brandName}
+              {step !== 'ClaimName' && region ? ` ${t(REGION_NAMES[region])}` : ''} |{' '}
+              {t('Signup')}
               {step !== 'Provisioning' ? (
                 <span className="mt-1 block text-3xl text-slate-400">
                   {t('Create a new identity')}
