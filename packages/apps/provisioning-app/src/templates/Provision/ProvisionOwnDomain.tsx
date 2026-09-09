@@ -8,6 +8,9 @@ import { Navigate, useSearchParams } from 'react-router-dom';
 import { useCheckInvitationCode } from '../../hooks/invitationCode/useCheckInvitationCode';
 import { Times } from '@homebase-id/common-app/icons';
 import { OwnDomainProvisionState } from '../../hooks/ownDomain/useOwnDomain';
+import { cleanDomain } from '../../helpers/common';
+import { Region } from '../../helpers/region';
+import { useRegionChoice } from '../../hooks/region/useRegionChoice';
 
 const LOCAL_EMAIL_STORAGE_KEY = 'email';
 const LOCAL_DOMAIN_STORAGE_KEY = 'domain';
@@ -15,16 +18,41 @@ const LOCAL_DOMAIN_STORAGE_KEY = 'domain';
 const ProvisionOwnDomain = () => {
   const [provisionState, setProvisionState] = useState<OwnDomainProvisionState>('EnteringDetails');
 
-  const [domain, setDomain] = useState<string>(
-    window.localStorage?.getItem(LOCAL_DOMAIN_STORAGE_KEY) || ''
-  );
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [domain, setDomain] = useState<string>(() => {
+    // A region redirect is a full page load onto another host, where
+    // localStorage does not follow, so the domain typed so far travels in the
+    // URL. Cleaned, never trusted: it is re-checked against this cluster before
+    // the flow can move on, exactly like a domain typed here by hand.
+    const carried = cleanDomain(searchParams.get('domain') ?? '');
+    return carried || window.localStorage?.getItem(LOCAL_DOMAIN_STORAGE_KEY) || '';
+  });
   const [email, setEmail] = useState<string>(
     window.localStorage?.getItem(LOCAL_EMAIL_STORAGE_KEY) || ''
   );
 
-  const [searchParams] = useSearchParams();
   const [planId] = useState<string>(searchParams.get('plan-id') || 'free');
   const [invitationCode] = useState<string | null>(searchParams.get('invitation-code'));
+
+  // The region decides which cluster serves this flow, and with it which
+  // nameservers and IP addresses the DNS instructions name — so it is settled
+  // here, on step 1, before any of those records are shown.
+  const { region, source: regionSource, chooseRegion } = useRegionChoice();
+
+  // The domain rides along on a region change, for the same reason the managed
+  // flow carries the claimed name: the user should not land on an empty form.
+  const onRegionChange = (next: Region) => chooseRegion(next, { domain });
+
+  // Consumed once. Left in the URL it would resurrect a stale domain on the next
+  // reload, outranking whatever the user had typed since.
+  useEffect(() => {
+    if (!searchParams.has('domain')) return;
+
+    const params = new URLSearchParams(searchParams);
+    params.delete('domain');
+    setSearchParams(params, { replace: true });
+  }, []);
 
   const { data: isValid } = useCheckInvitationCode(invitationCode || undefined).checkInvitationCode;
 
@@ -58,6 +86,9 @@ const ProvisionOwnDomain = () => {
               setEmail={setEmail}
               setProvisionState={setProvisionState}
               invitationCode={invitationCode}
+              region={region}
+              regionSource={regionSource}
+              onRegionChange={onRegionChange}
             />
           ) : provisionState === 'DnsRecords' ? (
             <ValidatingDnsRecords
@@ -71,6 +102,7 @@ const ProvisionOwnDomain = () => {
               email={email}
               planId={planId}
               invitationCode={invitationCode}
+              region={region}
             />
           ) : (
             <div>

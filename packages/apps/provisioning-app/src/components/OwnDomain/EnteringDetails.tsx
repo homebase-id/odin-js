@@ -7,6 +7,8 @@ import {
 } from '../../hooks/ownDomain/useOwnDomain';
 import {useFetchManagedDomainsApexes} from '../../hooks/managedDomain/useManagedDomain';
 import {AlertError} from '../ErrorAlert/ErrorAlert';
+import {RegionPicker} from '../Region/RegionPicker';
+import {Region, RegionSource} from '../../helpers/region';
 import {Input, Label} from '@homebase-id/common-app';
 import {Arrow, Exclamation} from '@homebase-id/common-app/icons';
 import {useNavigate} from "react-router-dom";
@@ -18,9 +20,23 @@ interface Props {
     setEmail: React.Dispatch<React.SetStateAction<string>>;
     setProvisionState: React.Dispatch<React.SetStateAction<OwnDomainProvisionState>>;
     invitationCode: string | null
+    region: Region | null;
+    // Null when the region was picked by the user rather than detected
+    regionSource: RegionSource | null;
+    onRegionChange: (region: Region) => void;
 }
 
-const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState, invitationCode}: Props) => {
+const EnteringDetails = ({
+                             domain,
+                             setDomain,
+                             email,
+                             setEmail,
+                             setProvisionState,
+                             invitationCode,
+                             region,
+                             regionSource,
+                             onRegionChange,
+                         }: Props) => {
 
     const navigate = useNavigate();
 
@@ -63,6 +79,7 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
                     // records - the DNS step's Validate action handles that
                     if (
                         cleaned &&
+                        region &&
                         e.currentTarget.checkValidity() &&
                         isOwnDomainAvailable &&
                         statusIsOwnDomainAvailable === 'success'
@@ -94,6 +111,13 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
                         onChange={(e) => setDomain(cleanDomainInputInPlace(e.currentTarget))}
                         onBlur={() => setDomain(cleanDomain(domain))}
                     />
+                </div>
+
+                {/* Before the DNS records, not after: those records name this cluster's
+                    nameservers and IP addresses, so which cluster serves the rest of the
+                    flow has to be settled while it still costs nothing to change */}
+                <div className="mt-8">
+                    <RegionPicker region={region} source={regionSource} onChange={onRegionChange}/>
                 </div>
 
                 <div className="mt-8">
@@ -133,7 +157,7 @@ const EnteringDetails = ({domain, setDomain, email, setEmail, setProvisionState,
                         className="h-[2.66rem]"
                         icon={Arrow}
                         buttonType="submit"
-                        isDisabled={!(isOwnDomainAvailable && statusIsOwnDomainAvailable === 'success')}
+                        isDisabled={!region || !(isOwnDomainAvailable && statusIsOwnDomainAvailable === 'success')}
                         state={
                             statusIsOwnDomainAvailable !== 'success' ? statusIsOwnDomainAvailable : undefined
                         }
