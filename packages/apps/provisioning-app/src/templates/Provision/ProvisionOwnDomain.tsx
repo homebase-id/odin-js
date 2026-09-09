@@ -10,7 +10,8 @@ import { Times } from '@homebase-id/common-app/icons';
 import { OwnDomainProvisionState } from '../../hooks/ownDomain/useOwnDomain';
 import { cleanDomain } from '../../helpers/common';
 import { readCarriedFragment } from '../../helpers/carriedFragment';
-import { Region } from '../../helpers/region';
+import { Region, REGION_NAMES } from '../../helpers/region';
+import { config } from '../../app/config';
 import { useRegionChoice } from '../../hooks/region/useRegionChoice';
 
 const LOCAL_EMAIL_STORAGE_KEY = 'email';
@@ -83,7 +84,12 @@ const ProvisionOwnDomain = () => {
       <div className="container mx-auto flex h-full min-h-full flex-grow flex-col px-5">
         <div className={`${provisionState === 'DnsRecords' ? 'mt-10' : 'mt-20'} min-h-[20rem]`}>
           <h1 className="mb-10 text-4xl">
-            Homebase | Signup
+            {/* The region is settled on this screen and everything below it - the DNS
+                records included - belongs to that cluster, so the title carries it.
+                Omitted while there is no region: detection can come up empty, and the
+                picker is then asking rather than telling. */}
+            {config.brandName}
+            {region ? ` ${t(REGION_NAMES[region])}` : ''} | {t('Signup')}
             <span className="mt-1 block text-3xl text-slate-400">{t('Create a new identity')}</span>
           </h1>
           {provisionState === 'EnteringDetails' ? (

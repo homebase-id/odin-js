@@ -18,7 +18,7 @@ import {
   prefixesFromClaimedDomain,
 } from '../../helpers/common';
 import { readCarriedFragment } from '../../helpers/carriedFragment';
-import { Region } from '../../helpers/region';
+import { Region, REGION_NAMES } from '../../helpers/region';
 import { useRegionChoice } from '../../hooks/region/useRegionChoice';
 
 type ClaimStep = 'ClaimName' | 'Confirm' | 'Provisioning';
@@ -190,7 +190,13 @@ const ClaimIdentity = () => {
         <div className="mx-auto mt-20 min-h-[20rem] w-full max-w-xl">
           <div className="mb-10 flex flex-row items-start justify-between gap-4">
             <h1 className="text-4xl">
-              {config.brandName} | {t('Signup')}
+              {/* Not on 1/2: the region is resolved by then but the user has not been
+                  shown it yet, and naming a cluster beside a name they are still
+                  typing answers a question nobody has asked. From 2/2 on, where the
+                  picker sits, the title says where this identity is going to live. */}
+              {config.brandName}
+              {step !== 'ClaimName' && region ? ` ${t(REGION_NAMES[region])}` : ''} |{' '}
+              {t('Signup')}
               {step !== 'Provisioning' ? (
                 <span className="mt-1 block text-3xl text-slate-400">
                   {t('Create a new identity')}
