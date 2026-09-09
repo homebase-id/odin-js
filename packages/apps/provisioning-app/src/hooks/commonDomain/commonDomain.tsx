@@ -117,8 +117,9 @@ type CreateIdentityKey = {
   email: string;
   planId: string;
   invitationCode: string | null;
-  // Omitted by the own-domain flow, which has no region step. Not consumed by
-  // the server yet.
+  // Omitted by the own-domain flow, which has no region step. Telemetry only:
+  // what actually routes a signup to a region is the host this page was served
+  // from (helpers/regionRouting.ts); odin-core never reads this.
   region?: Region | null;
 };
 
