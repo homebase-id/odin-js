@@ -12,7 +12,11 @@ import {
   ManagedDomainApex,
   useFetchManagedDomainsApexes,
 } from '../../hooks/managedDomain/useManagedDomain';
-import { domainFromPrefixAndApex, isCompleteLabel } from '../../helpers/common';
+import {
+  domainFromPrefixAndApex,
+  isCompleteLabel,
+  prefixesFromClaimedDomain,
+} from '../../helpers/common';
 import { detectRegion, isRegion, Region, RegionSource } from '../../helpers/region';
 import { regionRedirectUrl } from '../../helpers/regionRouting';
 
@@ -36,6 +40,10 @@ const ClaimIdentity = () => {
   const [domainApex, setDomainApex] = useState<ManagedDomainApex | undefined>(undefined);
   const [prefixes, setPrefixes] = useState<string[]>([]);
   const [email, setEmail] = useState<string>('');
+
+  // The name a region redirect carried over, until this cluster's registry has
+  // had its say about it
+  const [resumeClaim, setResumeClaim] = useState<string | null>(null);
 
   const planIdParam = searchParams.get('plan-id');
   const invitationCode = searchParams.get('invitation-code');
@@ -61,32 +69,26 @@ const ClaimIdentity = () => {
   useEffect(() => {
     if (domainApex || !managedDomainApexes?.length) return;
 
-    const initial = pickInitialApex(managedDomainApexes);
+    // A region redirect is a full page load onto another host, so the claim
+    // travels in the URL. It is restored, never trusted: the registry that
+    // called it available belongs to the cluster we just left.
+    const claimed = searchParams.get('claim');
+    const carried = claimed ? prefixesFromClaimedDomain(claimed, managedDomainApexes) : null;
+
+    const initial = carried?.apex ?? pickInitialApex(managedDomainApexes);
     setDomainApex(initial);
-    setPrefixes(Array(initial.prefixLabels.length).fill(''));
-  }, [domainApex, managedDomainApexes]);
+    setPrefixes(carried?.prefixes ?? Array(initial.prefixLabels.length).fill(''));
 
-  // Only an explicit choice is mirrored into the URL. Persisting a detected
-  // region would freeze one guess forever: a stale ?region= from an earlier
-  // visit outranks detection on every later load, so a wrong guess could never
-  // correct itself.
-  const onRegionChange = (next: Region) => {
+    if (!claimed) return;
+
+    if (carried) setResumeClaim(domainFromPrefixAndApex(carried.prefixes.join('.'), initial.apex));
+
+    // Consumed once. Left in the URL it would resurrect a stale name on the
+    // next reload, outranking whatever the user had typed since.
     const params = new URLSearchParams(searchParams);
-    params.set('region', next);
-
-    // Another region is another cluster, so this cannot be a state update: the
-    // rest of the flow — the availability lookup included — has to run on the
-    // host that will own the identity. The name typed so far does not survive
-    // the move; the registry it was checked against does not either.
-    const redirectUrl = regionRedirectUrl(next, `?${params}`);
-    if (redirectUrl) {
-      window.location.replace(redirectUrl);
-      return;
-    }
-
-    setRegionChoice({ region: next, source: null });
+    params.delete('claim');
     setSearchParams(params, { replace: true });
-  };
+  }, [domainApex, managedDomainApexes]);
 
   // Empty until every label is present and valid, which is also what gates the
   // availability lookup. Values in `prefixes` are already cleaned on input.
@@ -98,6 +100,31 @@ const ClaimIdentity = () => {
   }, [prefixes, domainApex]);
 
   const domain = domainFromPrefixAndApex(domainPrefix, domainApex?.apex ?? '');
+
+  // Only an explicit choice is mirrored into the URL. Persisting a detected
+  // region would freeze one guess forever: a stale ?region= from an earlier
+  // visit outranks detection on every later load, so a wrong guess could never
+  // correct itself.
+  const onRegionChange = (next: Region) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('region', next);
+
+    // Another region is another cluster, so this cannot be a state update: the
+    // rest of the flow — the availability lookup included — has to run on the
+    // host that will own the identity. The name rides along so the user is not
+    // sent back to an empty form, but it is re-checked on arrival, because the
+    // registry that cleared it does not span clusters either.
+    if (domain) params.set('claim', domain);
+
+    const redirectUrl = regionRedirectUrl(next, `?${params}`);
+    if (redirectUrl) {
+      window.location.replace(redirectUrl);
+      return;
+    }
+
+    setRegionChoice({ region: next, source: null });
+    setSearchParams(params, { replace: true });
+  };
 
   const goToOwnDomain = () => {
     // Carry the whole query over — own-domain needs returnUrl too — with the resolved region on top.
@@ -123,7 +150,11 @@ const ClaimIdentity = () => {
           onPrefixesChange={setPrefixes}
           domainPrefix={domainPrefix}
           apexesError={errorManagedDomainApexes}
-          onClaim={() => setStep('Confirm')}
+          autoClaimDomain={resumeClaim}
+          onClaim={() => {
+            setResumeClaim(null);
+            setStep('Confirm');
+          }}
           onUseOwnDomain={goToOwnDomain}
         />
       );
