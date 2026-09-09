@@ -39,6 +39,25 @@ const DnsSettingsView = ({
   // Only worth saying where the email records went on a server that has them
   const hasOptionalRecords = dnsConfig.some((record) => record.optional);
 
+  // A bare A record at the apex is the least resilient thing we offer: it pins one
+  // address a cluster may later change, and it is the option a provider without
+  // ALIAS support pushes people towards. Delegation is the better answer to that,
+  // so point at it - but only when this deployment actually hosts zones, and only
+  // in the direction the section really is. Inside the subdomain dialog there is
+  // no "below" to point at: the delegate section is behind the dialog, and for a
+  // subdomain it sits above the manual one anyway.
+  const canDelegate = nsRecords.length > 0;
+  const delegationHint = canDelegate
+    ? t(
+        `If your DNS provider does not support ALIAS, ANAME, or flattened CNAME records, we recommend you transfer your nameservers to Homebase instead - see "Let Homebase manage DNS" below. If you would rather not, use this fallback option.`
+      )
+    : null;
+  const delegationHintInDialog = canDelegate
+    ? t(
+        `If your DNS provider does not support ALIAS, ANAME, or flattened CNAME records, we recommend you transfer your nameservers to Homebase instead - see "Let Homebase manage DNS". If you would rather not, use this fallback option.`
+      )
+    : null;
+
   // Subdomains: delegation is two easy NS records at the DNS host - recommend it.
   // Apexes: delegation means a registrar nameserver change that silently takes down any
   // other use of the domain (website, email, ...) - recommend the manual records instead.
@@ -70,6 +89,7 @@ const DnsSettingsView = ({
             showStatus={manualShowStatus}
             yourDomain={domain}
             className="mb-10"
+            delegationHint={delegationHint}
           />
         ) : (
           <SubdomainInfoBlock
@@ -78,6 +98,7 @@ const DnsSettingsView = ({
             showStatus={manualShowStatus}
             yourDomain={domain}
             className="mb-10"
+            delegationHint={delegationHintInDialog}
           />
         )}
         <div className="flex flex-col gap-2">
@@ -364,12 +385,17 @@ const ApexInfoBlock = ({
   showStatus,
   yourDomain,
   className,
+  delegationHint,
 }: {
   dnsConfig: DnsRecord[];
   domain: string;
   showStatus: boolean;
   yourDomain: string;
   className: string;
+  // Null where there is nothing to delegate to: a deployment that hosts no zones
+  // returns no NS records, and recommending a section that is not there is worse
+  // than saying nothing
+  delegationHint?: ReactNode;
 }) => {
   const aliasARecord = dnsConfig.find((record) => record.type === 'ALIAS');
   const fallbackARecord = dnsConfig.find((record) => record.type === 'A');
@@ -413,9 +439,10 @@ const ApexInfoBlock = ({
             {t('Point A record to')} {fallbackARecord?.value}
           </p>
           <p className="text-sm text-slate-400">
-            {t(
-              'If your DNS provider does not support ALIAS, ANAME, or flattened CNAME records, use this fallback option.'
-            )}
+            {delegationHint ??
+              t(
+                'If your DNS provider does not support ALIAS, ANAME, or flattened CNAME records, use this fallback option.'
+              )}
           </p>
           <RecordView
             record={fallbackARecord}
@@ -436,12 +463,14 @@ const SubdomainInfoBlock = ({
   yourDomain,
   showStatus,
   className,
+  delegationHint,
 }: {
   dnsConfig: DnsRecord[];
   domain: string;
   yourDomain: string;
   showStatus: boolean;
   className: string;
+  delegationHint?: ReactNode;
 }) => {
   const aliasARecord = dnsConfig.find((record) => record.type === 'ALIAS');
   const fallbackARecord = dnsConfig.find((record) => record.type === 'A');
@@ -490,6 +519,7 @@ const SubdomainInfoBlock = ({
             yourDomain={yourDomain}
             showStatus={false}
             className=""
+            delegationHint={delegationHint}
           />
         </DialogWrapper>
       ) : null}
