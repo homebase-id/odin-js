@@ -412,6 +412,7 @@ const CircleDetails = () => {
         title={`${t('Assign')} "${circle.name}" ${t('to an app')}`}
         subject="circle"
         isOpen={isSetOwningAppOpen}
+        circleDriveGrants={circle.driveGrants}
         onCancel={() => setIsSetOwningAppOpen(false)}
         onConfirm={async (appId) => {
           await setOwningApp({ circleId: circleId, appId: appId });

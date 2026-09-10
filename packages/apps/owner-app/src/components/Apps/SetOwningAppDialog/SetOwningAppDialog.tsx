@@ -10,6 +10,9 @@ import {
 } from '@homebase-id/common-app';
 import { Arrow } from '@homebase-id/common-app/icons';
 import { useApps } from '../../../hooks/apps/useApps';
+import { useDrives } from '../../../hooks/drives/useDrives';
+import { DriveGrant } from '@homebase-id/js-lib/network';
+import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 /**
  * Hands something that belongs to no app to one that does.
@@ -29,6 +32,7 @@ export const SetOwningAppDialog = ({
   showSlugFields,
   existingDriveSlug,
   existingDriveTypeSlug,
+  circleDriveGrants,
   onConfirm,
   onCancel,
 }: {
@@ -44,11 +48,20 @@ export const SetOwningAppDialog = ({
    */
   existingDriveSlug?: string | null;
   existingDriveTypeSlug?: string | null;
+  /**
+   * The circle's own drive grants. Assigning a circle to an app also gives that app the access the
+   * circle requires -- owning a circle you cannot grant is not ownership -- so what that amounts to
+   * is listed here before the owner confirms rather than discovered afterwards.
+   */
+  circleDriveGrants?: DriveGrant[];
   onConfirm: (appId: string, driveSlug?: string, driveTypeSlug?: string) => Promise<unknown>;
   onCancel: () => void;
 }) => {
   const target = usePortal('modal-container');
   const { data: apps, isLoading: appsLoading } = useApps().fetchRegistered;
+  const {
+    fetch: { data: allDrives },
+  } = useDrives();
 
   const [appId, setAppId] = useState('');
   const [driveSlug, setDriveSlug] = useState('');
@@ -175,6 +188,13 @@ export const SetOwningAppDialog = ({
           </>
         ) : null}
 
+        <GrantPreview
+          appId={appId}
+          apps={apps}
+          circleDriveGrants={circleDriveGrants}
+          allDrives={allDrives}
+        />
+
         <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
           <ActionButton state={state} icon={Arrow} disabled={!appId}>
             {t('Assign')}
@@ -194,6 +214,61 @@ export const SetOwningAppDialog = ({
   );
 
   return createPortal(dialog, target);
+};
+
+/**
+ * What the app is about to gain, worked out the same way the server works it out: every drive the
+ * circle grants that the app does not already cover. Shown only once an app is chosen, and only
+ * when there is something to say -- an app that already has the access needs no warning.
+ */
+const GrantPreview = ({
+  appId,
+  apps,
+  circleDriveGrants,
+  allDrives,
+}: {
+  appId: string;
+  apps?: { appId: string; grant?: { driveGrants?: DriveGrant[] } }[];
+  circleDriveGrants?: DriveGrant[];
+  allDrives?: { name: string; targetDriveInfo: { alias: string; type: string } }[];
+}) => {
+  if (!appId || !circleDriveGrants?.length) return null;
+
+  const app = apps?.find((a) => stringGuidsEqual(a.appId, appId));
+  const held = app?.grant?.driveGrants ?? [];
+
+  const missing = circleDriveGrants.filter((needed) => {
+    const existing = held.find((h) =>
+      drivesEqual(h.permissionedDrive.drive, needed.permissionedDrive.drive)
+    );
+    if (!existing) return true;
+    // Covered only when the app already holds every permission the circle grants on that drive.
+    return needed.permissionedDrive.permission.some(
+      (p) => !existing.permissionedDrive.permission.includes(p)
+    );
+  });
+
+  if (!missing.length) return null;
+
+  const nameOf = (drive: { alias: string; type: string }) =>
+    allDrives?.find((d) => drivesEqual(d.targetDriveInfo, drive))?.name ?? `${drive.alias}`;
+
+  return (
+    <div className="mb-5 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm dark:border-amber-700 dark:bg-amber-950">
+      <p className="mb-2">
+        {t(
+          'This app will also be given access to the drives the circle grants, so that it can enrol people into it:'
+        )}
+      </p>
+      <ul className="list-disc pl-5">
+        {missing.map((m, i) => (
+          <li key={i}>
+            <strong>{nameOf(m.permissionedDrive.drive)}</strong>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 };
 
 export default SetOwningAppDialog;
