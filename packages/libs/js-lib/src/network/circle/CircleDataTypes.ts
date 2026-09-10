@@ -39,11 +39,42 @@ export interface AppGrant {
   permissionSet: PermissionSet;
 }
 
+/**
+ * A circle the owner chose for this connection that nothing has been able to grant yet, because the
+ * caller could not source the storage keys for the circle's drives. It waits on the app that owns the
+ * circle coming back for it, or on the owner.
+ *
+ * The names are resolved by the server when the connection is read, not stored on the entry, so a
+ * renamed circle or app reads correctly rather than showing whatever it was called at review time.
+ */
+export interface AwaitingAppEnrollment {
+  circleId: string;
+  /** Null when the circle has been deleted since the review. */
+  circleName?: string | null;
+  /** Null for an owner circle, which has no app. */
+  appId?: string | null;
+  /** Null for an owner circle, or for an app that has since been deleted. */
+  appName?: string | null;
+}
+
 export interface AccessGrant {
   isRevoked: false;
   masterKeyEncryptedKeyStoreKey: unknown;
   circleGrants: CircleGrant[];
   appGrants: Record<string, AppGrant>;
+
+  /**
+   * Circles asked for through an app's write-only grant whose grant is deposited but not yet
+   * converted. Not a member of these yet, but closer than awaitingApps: the key material exists and
+   * only needs the Peer Key to be in scope.
+   */
+  pendingCircleIds?: string[];
+
+  /**
+   * Circles waiting on the app that owns them. Further from membership than pendingCircleIds -- no
+   * key material has been recorded at all.
+   */
+  awaitingApps?: AwaitingAppEnrollment[];
 }
 
 export type ConnectionRequestOrigin = 'identityowner' | 'introduction' | 'identityownerapp';

@@ -36,6 +36,7 @@ import {
   ContactFile,
 } from '@homebase-id/js-lib/network';
 import { useVerifyConnection } from '../../../hooks/connections/useVerifyConnection';
+import { PendingEnrollments } from './PendingEnrollments';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { Link } from 'react-router-dom';
 
@@ -250,6 +251,7 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
           </div>
         </div>
       </Section>
+      <PendingEnrollments odinId={odinId} />
     </>
   );
 };
