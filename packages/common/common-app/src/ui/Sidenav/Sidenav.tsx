@@ -171,8 +171,11 @@ export const Sidenav = ({
                   to={`${OWNER_ROOT}/follow`}
                 />
               )}
+              {/* Apps hold the top-level slot circles used to. Apps own drives and circles now,
+                  so the app is what you navigate from; circles moved under Drives in the overflow,
+                  where you go when you already know which circle you want. */}
               {isTightHeight ? null : (
-                <NavItem icon={Circles} label={'Circles'} to={`${OWNER_ROOT}/circles`}/>
+                <NavItem icon={Grid} label={'Apps'} to={`${OWNER_ROOT}/apps`}/>
               )}
             </div>
 
@@ -187,7 +190,7 @@ export const Sidenav = ({
                     label={'Following & Followers'}
                     to={`${OWNER_ROOT}/follow`}
                   />
-                  <NavItem icon={Circles} label={'Circles'} to={`${OWNER_ROOT}/circles`}/>
+                  <NavItem icon={Grid} label={'Apps'} to={`${OWNER_ROOT}/apps`}/>
                 </>
               ) : null}
             </MoreItems>
@@ -284,6 +287,7 @@ const MoreItems = ({
           to={`${OWNER_ROOT}/third-parties`}
         />
         <NavItem icon={HardDrive} label={'Drives'} to={`${OWNER_ROOT}/drives`}/>
+        <NavItem icon={Circles} label={'Circles'} to={`${OWNER_ROOT}/circles`}/>
         <hr className="border-b dark:border-slate-500"/>
         <WalletLink/>
         <hr className="border-b dark:border-slate-500"/>
