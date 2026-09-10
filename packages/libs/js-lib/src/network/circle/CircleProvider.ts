@@ -148,6 +148,32 @@ export const setCircleOwningApp = async (
     .catch(dotYouClient.handleErrorResponse);
 };
 
+export interface ReassignCircleOwningAppResult {
+  enrollmentsRepointed: number;
+}
+
+/**
+ * Moves a circle from the app that owns it to another. The escape hatch, not the ordinary path --
+ * setCircleOwningApp refuses a circle that already has an owner.
+ *
+ * Requires the master key, so the owner console only. Pending enrollments queued against the
+ * circle are re-pointed at the new app in the same transaction; the count comes back so the caller
+ * can say what moved.
+ */
+export const reassignCircleOwningApp = async (
+  dotYouClient: DotYouClient,
+  circleId: string,
+  appId: string
+): Promise<ReassignCircleOwningAppResult> => {
+  const client = dotYouClient.createAxiosClient();
+  const url = root + '/reassign-owner';
+
+  return client
+    .post(url, { circleId: circleId, appId: appId })
+    .then((response) => response.data)
+    .catch(dotYouClient.handleErrorResponse);
+};
+
 export const disableCircle = async (dotYouClient: DotYouClient, circleId: string) => {
   const client = dotYouClient.createAxiosClient();
   const url = root + '/disable';

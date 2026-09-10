@@ -13,6 +13,7 @@ import {
   addDomainToCircle,
   removeDomainFromCircle,
   setCircleOwningApp,
+  reassignCircleOwningApp,
 } from '@homebase-id/js-lib/network';
 import { invalidateCircles } from './useCircles';
 import { formatGuidId } from '@homebase-id/js-lib/helpers';
@@ -111,6 +112,9 @@ export const useCircle = (props?: { circleId?: string }) => {
 
   const setOwningApp = async ({ circleId, appId }: { circleId: string; appId: string }) =>
     await setCircleOwningApp(dotYouClient, circleId, appId);
+
+  const reassignOwningApp = async ({ circleId, appId }: { circleId: string; appId: string }) =>
+    await reassignCircleOwningApp(dotYouClient, circleId, appId);
 
   return {
     fetch: useQuery({
@@ -300,6 +304,17 @@ export const useCircle = (props?: { circleId?: string }) => {
 
     setOwningApp: useMutation({
       mutationFn: setOwningApp,
+      onSuccess: async (data, param) => {
+        invalidateCircles(queryClient);
+        invalidateCircle(queryClient, param.circleId);
+      },
+      onError: (ex) => {
+        console.error(ex);
+      },
+    }),
+
+    reassignOwningApp: useMutation({
+      mutationFn: reassignOwningApp,
       onSuccess: async (data, param) => {
         invalidateCircles(queryClient);
         invalidateCircle(queryClient, param.circleId);

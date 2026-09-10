@@ -275,6 +275,40 @@ export const setDriveOwningApp = async (
     });
 };
 
+/**
+ * Moves a drive from the app that owns it to another, at a new address.
+ *
+ * Requires the master key, so the owner console only. The old address stops resolving -- there is
+ * no forwarding and no alias -- which is why the slug is required here rather than derived.
+ */
+export const reassignDriveOwningApp = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  appId: string,
+  driveSlug: string,
+  driveTypeSlug?: string
+) => {
+  assertIfDefined('targetDrive', targetDrive);
+  assertIfDefined('appId', appId);
+  assertIfDefined('driveSlug', driveSlug);
+
+  const client = dotYouClient.createAxiosClient();
+  const data = {
+    targetDrive: targetDrive,
+    appId: appId,
+    driveSlug: driveSlug,
+    driveTypeSlug: driveTypeSlug,
+  };
+
+  return client
+    .post('/drive/mgmt/reassign-owner', data)
+    .then((response) => response.status === 200)
+    .catch((error) => {
+      console.error('[odin-js:reassignDriveOwningApp]', error);
+      throw error;
+    });
+};
+
 export const editDriveAttributes = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,

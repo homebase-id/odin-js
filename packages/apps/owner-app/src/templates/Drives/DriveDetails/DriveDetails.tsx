@@ -18,6 +18,7 @@ import DriveCircleAccessDialog from '../../../components/Drives/DriveCircleAcces
 import DriveMetadataEditDialog from '../../../components/Drives/DriveCircleAccessDialog/DriveMetadataEditDialog';
 import {DriveStatusDialog} from '../../../components/Drives/DriveStatusDialog/DriveStatusDialog';
 import {SetOwningAppDialog} from '../../../components/Apps/SetOwningAppDialog/SetOwningAppDialog';
+import {ReassignOwningAppDialog} from '../../../components/Apps/SetOwningAppDialog/ReassignOwningAppDialog';
 import FileBrowser from '../../../components/Drives/FileBrowser/FileBrowser';
 import {
     ActionButton,
@@ -40,6 +41,7 @@ const DriveDetails = () => {
     });
     const {mutateAsync: exportUnencrypted, status: exportStatus} = useExport().exportUnencrypted;
     const {mutateAsync: setOwningApp} = useDrive().setOwningApp;
+    const {mutateAsync: reassignOwningApp} = useDrive().reassignOwningApp;
 
     const {data: circles} = useCircles().fetch;
     const {data: apps} = useApps().fetchRegistered;
@@ -51,6 +53,7 @@ const DriveDetails = () => {
     const [isAppSelectorOpen, setIsAppSelectorOpen] = useState(false);
     const [isShowDriveStatus, setIsShowDriveStatus] = useState(false);
     const [isSetOwningAppOpen, setIsSetOwningAppOpen] = useState(false);
+    const [isReassignOwningAppOpen, setIsReassignOwningAppOpen] = useState(false);
 
     if (driveDefLoading) return <LoadingDetailPage/>;
 
@@ -162,6 +165,9 @@ const DriveDetails = () => {
                                         {owningApp.name}
                                     </Link>
                                     <span className="text-slate-400">{` ${t('(app)')}`}</span>
+                                    {!driveDef.isSystemDrive && !readOnly ? (
+                                        <ReassignLink onClick={() => setIsReassignOwningAppOpen(true)}/>
+                                    ) : null}
                                 </>
                             ) : (
                                 <>
@@ -169,6 +175,9 @@ const DriveDetails = () => {
                                     <span className="text-slate-400">
                                         {` ${t('(app, no longer registered)')}`}
                                     </span>
+                                    {!driveDef.isSystemDrive && !readOnly ? (
+                                        <ReassignLink onClick={() => setIsReassignOwningAppOpen(true)}/>
+                                    ) : null}
                                 </>
                             )
                         ) : (
@@ -349,8 +358,35 @@ const DriveDetails = () => {
                     setIsSetOwningAppOpen(false);
                 }}
             />
+
+            <ReassignOwningAppDialog
+                title={`${t('Reassign')} "${driveDef.name}"`}
+                subject={t('drive')}
+                isOpen={isReassignOwningAppOpen}
+                currentAppName={owningApp?.name}
+                requireSlug={true}
+                currentDriveSlug={driveDef.driveSlug}
+                onCancel={() => setIsReassignOwningAppOpen(false)}
+                onConfirm={async (appId, driveSlug, driveTypeSlug) => {
+                    await reassignOwningApp({
+                        targetDrive: targetDriveInfo,
+                        appId: appId,
+                        driveSlug: driveSlug as string,
+                        driveTypeSlug: driveTypeSlug,
+                    });
+                    setIsReassignOwningAppOpen(false);
+                }}
+            />
         </>
     );
 };
+
+/** The way out of an ownership that is already set. Understated on purpose -- it is the escape
+    hatch, not something to invite. */
+const ReassignLink = ({onClick}: { onClick: () => void }) => (
+    <button type="button" className="ml-2 text-sm text-slate-400 hover:underline" onClick={onClick}>
+        {t('Change')}
+    </button>
+);
 
 export default DriveDetails;

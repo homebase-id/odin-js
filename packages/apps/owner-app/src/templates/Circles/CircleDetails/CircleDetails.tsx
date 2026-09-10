@@ -28,6 +28,7 @@ import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import CircleAppInteractionDialog from '../../../components/Circles/CircleAppInteractionDialog/CircleAppInteractionDialog';
 import CircleDialog from '../../../components/Circles/CircleDialog/CircleDialog';
 import { SetOwningAppDialog } from '../../../components/Apps/SetOwningAppDialog/SetOwningAppDialog';
+import { ReassignOwningAppDialog } from '../../../components/Apps/SetOwningAppDialog/ReassignOwningAppDialog';
 import MemberLookupDialog from '../../../components/Circles/MemberLookupDialog/MemberLookupDialog';
 import DrivePermissionSelectorDialog from '../../../components/Drives/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
 import {
@@ -69,6 +70,7 @@ const CircleDetails = () => {
     disableCircle: { mutate: disableCircle, error: disableCircleError },
     removeCircle: { mutateAsync: removeCircle, error: removeCircleError },
     setOwningApp: { mutateAsync: setOwningApp, error: setOwningAppError },
+    reassignOwningApp: { mutateAsync: reassignOwningApp, error: reassignOwningAppError },
   } = useCircle({ circleId: decodedCircleKey });
 
   const { data: apps } = useApps().fetchRegistered;
@@ -78,6 +80,7 @@ const CircleDetails = () => {
   const [isOpenAppInteractionDialog, setIsOpenAppInteractionDialog] = useState(false);
   const [isDrivesEditOpen, setIsDrivesEditOpen] = useState(false);
   const [isSetOwningAppOpen, setIsSetOwningAppOpen] = useState(false);
+  const [isReassignOwningAppOpen, setIsReassignOwningAppOpen] = useState(false);
 
   if (circleLoading) return <LoadingDetailPage />;
   if (!circle || !circle.id || !decodedCircleKey) return <>{t('No matching circle found')}</>;
@@ -102,6 +105,7 @@ const CircleDetails = () => {
       <ErrorNotification error={addMembersError} />
       <ErrorNotification error={removeMembersError} />
       <ErrorNotification error={setOwningAppError} />
+      <ErrorNotification error={reassignOwningAppError} />
       <ErrorNotification error={removeCircleError} />
       <PageMeta
         icon={Circles}
@@ -201,11 +205,17 @@ const CircleDetails = () => {
                     {owningApp.name}
                   </Link>
                   <span className="text-slate-400">{` ${t('(app)')}`}</span>
+                  {!isSystemCircle ? (
+                    <ReassignLink onClick={() => setIsReassignOwningAppOpen(true)} />
+                  ) : null}
                 </>
               ) : (
                 <>
                   <span className="break-all font-mono">{circle.appId}</span>
                   <span className="text-slate-400">{` ${t('(app, no longer registered)')}`}</span>
+                  {!isSystemCircle ? (
+                    <ReassignLink onClick={() => setIsReassignOwningAppOpen(true)} />
+                  ) : null}
                 </>
               )
             ) : (
@@ -408,9 +418,29 @@ const CircleDetails = () => {
           setIsSetOwningAppOpen(false);
         }}
       />
+
+      <ReassignOwningAppDialog
+        title={`${t('Reassign')} "${circle.name}"`}
+        subject={t('circle')}
+        isOpen={isReassignOwningAppOpen}
+        currentAppName={owningApp?.name}
+        onCancel={() => setIsReassignOwningAppOpen(false)}
+        onConfirm={async (appId) => {
+          await reassignOwningApp({ circleId: circleId, appId: appId });
+          setIsReassignOwningAppOpen(false);
+        }}
+      />
     </>
   );
 };
+
+/** The way out of an ownership that is already set. Understated on purpose -- it is the escape
+    hatch, not something to invite. */
+const ReassignLink = ({ onClick }: { onClick: () => void }) => (
+  <button type="button" className="ml-2 text-sm text-slate-400 hover:underline" onClick={onClick}>
+    {t('Change')}
+  </button>
+);
 
 const CircleMemberCard = ({
   circleId,
