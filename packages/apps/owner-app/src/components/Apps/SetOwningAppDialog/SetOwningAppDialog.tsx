@@ -27,6 +27,8 @@ export const SetOwningAppDialog = ({
   subject,
   isOpen,
   showSlugFields,
+  existingDriveSlug,
+  existingDriveTypeSlug,
   onConfirm,
   onCancel,
 }: {
@@ -35,6 +37,13 @@ export const SetOwningAppDialog = ({
   subject: string;
   isOpen: boolean;
   showSlugFields?: boolean;
+  /**
+   * A slug the drive already carries. Adoption keeps it rather than deriving a new one, and the
+   * server refuses to rename it on the way past -- so it is shown as settled rather than offered
+   * as a field that would only be rejected.
+   */
+  existingDriveSlug?: string | null;
+  existingDriveTypeSlug?: string | null;
   onConfirm: (appId: string, driveSlug?: string, driveTypeSlug?: string) => Promise<unknown>;
   onCancel: () => void;
 }) => {
@@ -115,31 +124,53 @@ export const SetOwningAppDialog = ({
           <>
             <div className="mb-5">
               <Label htmlFor="driveSlug">{t('Drive slug')}</Label>
-              <input
-                id="driveSlug"
-                className="w-full rounded border border-gray-300 bg-white px-3 py-2 dark:border-gray-700 dark:bg-black"
-                placeholder={t('Derived from the name when left blank')}
-                value={driveSlug}
-                onChange={(e) => setDriveSlug(e.target.value)}
-              />
-              <p className="mt-1 text-sm text-slate-400">
-                {t(
-                  'The segment this drive answers to under the app, as /apps/{app}/drives/{slug}.'
-                )}
-              </p>
+              {existingDriveSlug ? (
+                <>
+                  <p className="font-mono">{existingDriveSlug}</p>
+                  <p className="mt-1 text-sm text-slate-400">
+                    {t('This drive already has a slug. Assigning it to an app keeps it.')}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <input
+                    id="driveSlug"
+                    className="w-full rounded border border-gray-300 bg-white px-3 py-2 dark:border-gray-700 dark:bg-black"
+                    placeholder={t('Derived from the name when left blank')}
+                    value={driveSlug}
+                    onChange={(e) => setDriveSlug(e.target.value)}
+                  />
+                  <p className="mt-1 text-sm text-slate-400">
+                    {t(
+                      'The segment this drive answers to under the app, as /apps/{app}/drives/{slug}.'
+                    )}
+                  </p>
+                </>
+              )}
             </div>
             <div className="mb-5">
               <Label htmlFor="driveTypeSlug">{t('Drive type slug')}</Label>
-              <input
-                id="driveTypeSlug"
-                className="w-full rounded border border-gray-300 bg-white px-3 py-2 dark:border-gray-700 dark:bg-black"
-                placeholder={t('Derived from the type when left blank')}
-                value={driveTypeSlug}
-                onChange={(e) => setDriveTypeSlug(e.target.value)}
-              />
-              <p className="mt-1 text-sm text-slate-400">
-                {t('A category to filter on, not an address.')}
-              </p>
+              {existingDriveTypeSlug ? (
+                <>
+                  <p className="font-mono">{existingDriveTypeSlug}</p>
+                  <p className="mt-1 text-sm text-slate-400">
+                    {t('Kept as it is, the same as the slug.')}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <input
+                    id="driveTypeSlug"
+                    className="w-full rounded border border-gray-300 bg-white px-3 py-2 dark:border-gray-700 dark:bg-black"
+                    placeholder={t('Derived from the type when left blank')}
+                    value={driveTypeSlug}
+                    onChange={(e) => setDriveTypeSlug(e.target.value)}
+                  />
+                  <p className="mt-1 text-sm text-slate-400">
+                    {t('A category to filter on, not an address.')}
+                  </p>
+                </>
+              )}
             </div>
           </>
         ) : null}

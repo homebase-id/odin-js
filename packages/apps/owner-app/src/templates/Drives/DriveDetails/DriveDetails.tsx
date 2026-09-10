@@ -336,6 +336,8 @@ const DriveDetails = () => {
                 subject="drive"
                 isOpen={isSetOwningAppOpen}
                 showSlugFields={true}
+                existingDriveSlug={driveDef.driveSlug}
+                existingDriveTypeSlug={driveDef.driveTypeSlug}
                 onCancel={() => setIsSetOwningAppOpen(false)}
                 onConfirm={async (appId, driveSlug, driveTypeSlug) => {
                     await setOwningApp({
