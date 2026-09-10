@@ -343,7 +343,7 @@ export const CircleOverview = ({
                 </>
               )
             ) : (
-              t('You (not owned by an app)')
+              t('No app owns this')
             )}
           </Fact>
 

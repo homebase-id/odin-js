@@ -27,6 +27,7 @@ import DomainCard from '../../../components/Connection/DomainCard/DomainCard';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import CircleAppInteractionDialog from '../../../components/Circles/CircleAppInteractionDialog/CircleAppInteractionDialog';
 import CircleDialog from '../../../components/Circles/CircleDialog/CircleDialog';
+import { SetOwningAppDialog } from '../../../components/Apps/SetOwningAppDialog/SetOwningAppDialog';
 import MemberLookupDialog from '../../../components/Circles/MemberLookupDialog/MemberLookupDialog';
 import DrivePermissionSelectorDialog from '../../../components/Drives/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
 import {
@@ -67,6 +68,7 @@ const CircleDetails = () => {
     enableCircle: { mutate: enableCircle, error: enableCircleError },
     disableCircle: { mutate: disableCircle, error: disableCircleError },
     removeCircle: { mutateAsync: removeCircle, error: removeCircleError },
+    setOwningApp: { mutateAsync: setOwningApp, error: setOwningAppError },
   } = useCircle({ circleId: decodedCircleKey });
 
   const { data: apps } = useApps().fetchRegistered;
@@ -75,6 +77,7 @@ const CircleDetails = () => {
   const [isOpenMemberLookup, setIsOpenMemberLookup] = useState(false);
   const [isOpenAppInteractionDialog, setIsOpenAppInteractionDialog] = useState(false);
   const [isDrivesEditOpen, setIsDrivesEditOpen] = useState(false);
+  const [isSetOwningAppOpen, setIsSetOwningAppOpen] = useState(false);
 
   if (circleLoading) return <LoadingDetailPage />;
   if (!circle || !circle.id || !decodedCircleKey) return <>{t('No matching circle found')}</>;
@@ -98,6 +101,7 @@ const CircleDetails = () => {
       <ErrorNotification error={disableCircleError} />
       <ErrorNotification error={addMembersError} />
       <ErrorNotification error={removeMembersError} />
+      <ErrorNotification error={setOwningAppError} />
       <ErrorNotification error={removeCircleError} />
       <PageMeta
         icon={Circles}
@@ -205,7 +209,21 @@ const CircleDetails = () => {
                 </>
               )
             ) : (
-              t('You (not owned by an app)')
+              <span className="flex flex-row flex-wrap items-center gap-2">
+                {t('No app owns this circle')}
+                {/* Only offered while it is still possible: the server sets ownership once and
+                    refuses to move it, so the action disappears rather than failing. System
+                    circles are the app tree's to stamp, not the owner's to guess. */}
+                {!isSystemCircle ? (
+                  <button
+                    type="button"
+                    className="text-primary hover:underline"
+                    onClick={() => setIsSetOwningAppOpen(true)}
+                  >
+                    {t('Assign to an app')}
+                  </button>
+                ) : null}
+              </span>
             )}
           </Fact>
 
@@ -377,6 +395,17 @@ const CircleDetails = () => {
         onConfirm={async (newDriveGrants) => {
           await updateCircle({ ...circle, driveGrants: newDriveGrants });
           setIsDrivesEditOpen(false);
+        }}
+      />
+
+      <SetOwningAppDialog
+        title={`${t('Assign')} "${circle.name}" ${t('to an app')}`}
+        subject="circle"
+        isOpen={isSetOwningAppOpen}
+        onCancel={() => setIsSetOwningAppOpen(false)}
+        onConfirm={async (appId) => {
+          await setOwningApp({ circleId: circleId, appId: appId });
+          setIsSetOwningAppOpen(false);
         }}
       />
     </>

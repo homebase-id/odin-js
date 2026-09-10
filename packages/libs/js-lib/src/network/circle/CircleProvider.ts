@@ -127,6 +127,27 @@ export const getCircle = async (
   } as CircleDefinition;
 };
 
+/**
+ * Hands a circle that belongs to no app to one that does.
+ *
+ * One way, and owner-only. The server refuses a circle that already names an app rather than
+ * moving it, so this fills an empty owner and never reassigns a set one -- pending enrollments
+ * denormalise the owning app on the promise that it does not change.
+ */
+export const setCircleOwningApp = async (
+  dotYouClient: DotYouClient,
+  circleId: string,
+  appId: string
+) => {
+  const client = dotYouClient.createAxiosClient();
+  const url = root + '/set-owner';
+
+  return client
+    .post(url, { circleId: circleId, appId: appId })
+    .then((response) => response.data)
+    .catch(dotYouClient.handleErrorResponse);
+};
+
 export const disableCircle = async (dotYouClient: DotYouClient, circleId: string) => {
   const client = dotYouClient.createAxiosClient();
   const url = root + '/disable';

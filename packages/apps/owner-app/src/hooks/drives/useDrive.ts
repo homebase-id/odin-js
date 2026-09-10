@@ -9,6 +9,7 @@ import {
   editDriveAttributes,
   editDriveAllowSubscriptions, editDriveArchiveFlag,
   editDriveAllowCdn,
+  setDriveOwningApp,
 } from '@homebase-id/js-lib/core';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
@@ -94,6 +95,20 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
     newAttributes: { [key: string]: string };
   }) => {
     return editDriveAttributes(dotYouClient, targetDrive, newAttributes);
+  };
+
+  const setOwningApp = async ({
+    targetDrive,
+    appId,
+    driveSlug,
+    driveTypeSlug,
+  }: {
+    targetDrive: TargetDrive;
+    appId: string;
+    driveSlug?: string;
+    driveTypeSlug?: string;
+  }) => {
+    return setDriveOwningApp(dotYouClient, targetDrive, appId, driveSlug, driveTypeSlug);
   };
 
   return {
@@ -191,6 +206,16 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
         } else {
           console.warn('[owner-app:useDrive] editArchiveStatus mutation did not return true');
         }
+      },
+    }),
+
+    setOwningApp: useMutation({
+      mutationFn: setOwningApp,
+      // Refetched rather than patched in place, unlike the flag mutations above: the server
+      // derives the slug and type slug when they are not supplied, so what landed is not
+      // knowable from the request.
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ['drives'] });
       },
     }),
   };

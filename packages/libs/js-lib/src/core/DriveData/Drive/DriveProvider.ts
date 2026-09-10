@@ -170,11 +170,10 @@ export const editDriveAllowAnonymousRead = async (
     });
 };
 
-
 export const editDriveArchiveFlag = async (
-    dotYouClient: DotYouClient,
-    targetDrive: TargetDrive,
-    newArchived: boolean
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  newArchived: boolean
 ) => {
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newArchived', newArchived);
@@ -186,12 +185,12 @@ export const editDriveArchiveFlag = async (
   };
 
   return client
-      .post('/drive/mgmt/set-archive-drive', data)
-      .then((response) => response.status === 200)
-      .catch((error) => {
-        console.error('[odin-js:editDriveArchiveFlag]', error);
-        throw error;
-      });
+    .post('/drive/mgmt/set-archive-drive', data)
+    .then((response) => response.status === 200)
+    .catch((error) => {
+      console.error('[odin-js:editDriveArchiveFlag]', error);
+      throw error;
+    });
 };
 
 export const editDriveAllowSubscriptions = async (
@@ -236,6 +235,42 @@ export const editDriveAllowCdn = async (
     .then((response) => response.status === 200)
     .catch((error) => {
       console.error('[odin-js:editDriveAllowCdn]', error);
+      throw error;
+    });
+};
+
+/**
+ * Hands a drive that belongs to no app to one that does, and gives it the slug it answers to
+ * under that app.
+ *
+ * One way, and owner-only. The server refuses a drive that already names an app, and refuses a
+ * provisioned one outright. Omit the slugs to have them derived from the drive's name and type --
+ * a supplied slug is never coerced, so a malformed or already-taken one is rejected rather than
+ * turned into an address nobody asked for.
+ */
+export const setDriveOwningApp = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  appId: string,
+  driveSlug?: string,
+  driveTypeSlug?: string
+) => {
+  assertIfDefined('targetDrive', targetDrive);
+  assertIfDefined('appId', appId);
+
+  const client = dotYouClient.createAxiosClient();
+  const data = {
+    targetDrive: targetDrive,
+    appId: appId,
+    driveSlug: driveSlug,
+    driveTypeSlug: driveTypeSlug,
+  };
+
+  return client
+    .post('/drive/mgmt/set-owner', data)
+    .then((response) => response.status === 200)
+    .catch((error) => {
+      console.error('[odin-js:setDriveOwningApp]', error);
       throw error;
     });
 };

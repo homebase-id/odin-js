@@ -17,6 +17,7 @@ import DriveAppAccessDialog from '../../../components/Drives/DriveAppAccessDialo
 import DriveCircleAccessDialog from '../../../components/Drives/DriveCircleAccessDialog/DriveCircleAccessDialog';
 import DriveMetadataEditDialog from '../../../components/Drives/DriveCircleAccessDialog/DriveMetadataEditDialog';
 import {DriveStatusDialog} from '../../../components/Drives/DriveStatusDialog/DriveStatusDialog';
+import {SetOwningAppDialog} from '../../../components/Apps/SetOwningAppDialog/SetOwningAppDialog';
 import FileBrowser from '../../../components/Drives/FileBrowser/FileBrowser';
 import {
     ActionButton,
@@ -38,6 +39,7 @@ const DriveDetails = () => {
             : undefined,
     });
     const {mutateAsync: exportUnencrypted, status: exportStatus} = useExport().exportUnencrypted;
+    const {mutateAsync: setOwningApp} = useDrive().setOwningApp;
 
     const {data: circles} = useCircles().fetch;
     const {data: apps} = useApps().fetchRegistered;
@@ -48,6 +50,7 @@ const DriveDetails = () => {
     const [isCircleSelectorOpen, setIsCircleSelectorOpen] = useState(false);
     const [isAppSelectorOpen, setIsAppSelectorOpen] = useState(false);
     const [isShowDriveStatus, setIsShowDriveStatus] = useState(false);
+    const [isSetOwningAppOpen, setIsSetOwningAppOpen] = useState(false);
 
     if (driveDefLoading) return <LoadingDetailPage/>;
 
@@ -169,7 +172,21 @@ const DriveDetails = () => {
                                 </>
                             )
                         ) : (
-                            t('You (not owned by an app)')
+                            <span className="inline-flex flex-row flex-wrap items-center gap-2">
+                                {t('No app owns this drive')}
+                                {/* Only offered while it is still possible: ownership is set once
+                                    and never moved, and a provisioned drive is refused outright
+                                    because it is provisioning's to stamp. */}
+                                {!driveDef.isSystemDrive && !readOnly ? (
+                                    <button
+                                        type="button"
+                                        className="text-primary hover:underline"
+                                        onClick={() => setIsSetOwningAppOpen(true)}
+                                    >
+                                        {t('Assign to an app')}
+                                    </button>
+                                ) : null}
+                            </span>
                         )}
                     </li>
                     {/* The wire address a remote caller uses. Both halves live in different
@@ -312,6 +329,23 @@ const DriveDetails = () => {
                 targetDrive={targetDriveInfo}
                 isOpen={isShowDriveStatus}
                 onClose={() => setIsShowDriveStatus(false)}
+            />
+
+            <SetOwningAppDialog
+                title={`${t('Assign')} "${driveDef.name}" ${t('to an app')}`}
+                subject="drive"
+                isOpen={isSetOwningAppOpen}
+                showSlugFields={true}
+                onCancel={() => setIsSetOwningAppOpen(false)}
+                onConfirm={async (appId, driveSlug, driveTypeSlug) => {
+                    await setOwningApp({
+                        targetDrive: targetDriveInfo,
+                        appId: appId,
+                        driveSlug: driveSlug,
+                        driveTypeSlug: driveTypeSlug,
+                    });
+                    setIsSetOwningAppOpen(false);
+                }}
             />
         </>
     );
