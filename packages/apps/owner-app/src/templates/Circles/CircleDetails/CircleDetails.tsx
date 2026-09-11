@@ -20,7 +20,6 @@ import {
   Fact,
   GRANT_ON_CAVEAT,
   GRANT_ON_HINTS,
-  GRANT_ON_LABELS,
   OWNERSHIP_HINTS,
   formatTimestamp,
 } from '../../../components/Apps/AppOverviewParts';
@@ -31,6 +30,7 @@ import CircleDialog from '../../../components/Circles/CircleDialog/CircleDialog'
 import { SetOwningAppDialog } from '../../../components/Apps/SetOwningAppDialog/SetOwningAppDialog';
 import { ReassignOwningAppDialog } from '../../../components/Apps/SetOwningAppDialog/ReassignOwningAppDialog';
 import { EnrollCandidatesDialog } from '../../../components/Circles/EnrollCandidatesDialog/EnrollCandidatesDialog';
+import { GrantOnEditor } from '../../../components/Circles/GrantOnEditor/GrantOnEditor';
 import { useEnrollmentCandidates } from '../../../hooks/apps/useEnrollmentCandidates';
 import MemberLookupDialog from '../../../components/Circles/MemberLookupDialog/MemberLookupDialog';
 import DrivePermissionSelectorDialog from '../../../components/Drives/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
@@ -253,7 +253,7 @@ const CircleDetails = () => {
               label={t('Granted on')}
               hint={`${GRANT_ON_HINTS[circle.grantOn] ?? ''} ${GRANT_ON_CAVEAT}`.trim()}
             >
-              {GRANT_ON_LABELS[circle.grantOn] ?? circle.grantOn}
+              <GrantOnEditor circle={circle} isSystemCircle={isSystemCircle} />
             </Fact>
           ) : null}
 
@@ -587,12 +587,7 @@ const CircleEnrollmentPrompt = ({ circle }: { circle: CircleDefinition }) => {
         {t('Review and add')}
       </button>
 
-      <EnrollCandidatesDialog
-        appId={circle.appId}
-        circle={circle}
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-      />
+      <EnrollCandidatesDialog circle={circle} isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </div>
   );
 };

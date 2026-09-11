@@ -729,12 +729,7 @@ const EnrollmentOffer = ({ appId, circle }: { appId?: string; circle: CircleDefi
         {t('Review and add')}
       </button>
 
-      <EnrollCandidatesDialog
-        appId={appId}
-        circle={circle}
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-      />
+      <EnrollCandidatesDialog circle={circle} isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </div>
   );
 };

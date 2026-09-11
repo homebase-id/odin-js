@@ -149,6 +149,20 @@ export const getEnrollmentCandidates = async (
     .then((response) => response.data);
 };
 
+export const getEnrollmentCandidatesForCircle = async (
+  dotYouClient: DotYouClient,
+  circleId: string
+): Promise<CircleEnrollmentCandidates> => {
+  const client = dotYouClient.createAxiosClient();
+  return client
+    .post<CircleEnrollmentCandidates>(
+      `${root}/circles/enrollment-candidates-for-circle`,
+      JSON.stringify(circleId),
+      { headers: { 'Content-Type': 'application/json' } }
+    )
+    .then((response) => response.data);
+};
+
 export const grantCircleToMany = async (
   dotYouClient: DotYouClient,
   circleId: string,

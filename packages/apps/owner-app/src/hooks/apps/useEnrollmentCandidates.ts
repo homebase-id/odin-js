@@ -1,5 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getEnrollmentCandidates, grantCircleToMany } from '@homebase-id/js-lib/network';
+import {
+  getEnrollmentCandidates,
+  getEnrollmentCandidatesForCircle,
+  grantCircleToMany,
+} from '@homebase-id/js-lib/network';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 import { invalidateCircles } from '@homebase-id/common-app';
 
@@ -30,6 +34,38 @@ export const useEnrollmentCandidates = (appId?: string) => {
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ['enrollment-candidates', appId] });
         // Membership changed, so anything counting members is now wrong.
+        invalidateCircles(queryClient);
+        queryClient.invalidateQueries({ queryKey: ['connections'] });
+      },
+    }),
+  };
+};
+
+/**
+ * The same question asked about one circle rather than one app.
+ *
+ * Needed because a circle belonging to no app has no app to ask about, and an owner's own circle
+ * carries a grant rule like any other -- so changing that rule would otherwise create a backlog
+ * with nothing able to report it.
+ */
+export const useCircleEnrollmentCandidates = (circleId?: string) => {
+  const dotYouClient = useDotYouClientContext();
+  const queryClient = useQueryClient();
+
+  return {
+    fetch: useQuery({
+      queryKey: ['enrollment-candidates-circle', circleId],
+      queryFn: () => getEnrollmentCandidatesForCircle(dotYouClient, circleId as string),
+      enabled: !!circleId,
+      staleTime: 0,
+    }),
+
+    enrollAll: useMutation({
+      mutationFn: ({ odinIds }: { odinIds: string[] }) =>
+        grantCircleToMany(dotYouClient, circleId as string, odinIds),
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ['enrollment-candidates-circle', circleId] });
+        queryClient.invalidateQueries({ queryKey: ['enrollment-candidates'] });
         invalidateCircles(queryClient);
         queryClient.invalidateQueries({ queryKey: ['connections'] });
       },

@@ -18,8 +18,7 @@ import {
   EnrollmentCandidate,
   EnrollmentResult,
 } from '@homebase-id/js-lib/network';
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { useEnrollmentCandidates } from '../../../hooks/apps/useEnrollmentCandidates';
+import { useCircleEnrollmentCandidates } from '../../../hooks/apps/useEnrollmentCandidates';
 import DrivePermissionView from '../../PermissionViews/DrivePermissionView/DrivePermissionView';
 
 /**
@@ -35,26 +34,22 @@ import DrivePermissionView from '../../PermissionViews/DrivePermissionView/Drive
  * rest of the console asks for this kind of decision.
  */
 export const EnrollCandidatesDialog = ({
-  appId,
   circle,
   isOpen,
   onClose,
 }: {
-  appId?: string;
   circle: CircleDefinition;
   isOpen: boolean;
   onClose: () => void;
 }) => {
   const target = usePortal('modal-container');
+  // Asked per circle rather than per app: a circle belonging to no app has no app to ask about,
+  // and this panel serves those too.
   const {
-    fetch: { data: allCandidates, isLoading },
+    fetch: { data: offer, isLoading },
     enrollAll: { mutateAsync: enrollAll, error: enrollError },
-  } = useEnrollmentCandidates(appId);
+  } = useCircleEnrollmentCandidates(circle.id);
 
-  // stringGuidsEqual, never ===: guid formatting differs between what the server returns and what
-  // the client holds, so a strict compare finds nothing here while the prompt that opened this
-  // panel -- which does compare properly -- confidently reports a count.
-  const offer = allCandidates?.find((c) => stringGuidsEqual(c.circleId, circle.id));
   const candidates = offer?.candidates ?? [];
 
   // Nobody starts selected. Granting circle membership escrows a drive's storage key to each
@@ -127,10 +122,7 @@ export const EnrollCandidatesDialog = ({
               onClick={async () => {
                 setState('loading');
                 try {
-                  const r = await enrollAll({
-                    circleId: circle.id as string,
-                    odinIds: selected.map((c) => c.odinId),
-                  });
+                  const r = await enrollAll({ odinIds: selected.map((c) => c.odinId) });
                   setResult(r);
                   setState('success');
                 } catch {
