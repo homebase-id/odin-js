@@ -105,8 +105,11 @@ export const getConnectionInfo = (
 export interface CircleEnrollmentCandidates {
   circleId: string;
   circleName: string;
-  /** Why they qualify: 1 = Connect, 3 = Review. Lets a client name the reason. */
-  grantOn: number;
+  /**
+   * Why they qualify. The server serializes enums as camelCase strings (JsonStringEnumConverter),
+   * never as their numeric values -- comparing against a number silently never matches.
+   */
+  grantOn: 'none' | 'connect' | 'ownFlowConnect' | 'review';
   candidates: EnrollmentCandidate[];
 }
 
@@ -120,7 +123,7 @@ export interface EnrollmentCandidate {
   reviewedAt?: number | null;
 }
 
-export type EnrollmentOutcomeKind = 1 | 2 | 3; // Enrolled | Deposited | Skipped
+export type EnrollmentOutcomeKind = 'enrolled' | 'deposited' | 'skipped';
 
 export interface EnrollmentOutcome {
   odinId: string;

@@ -570,7 +570,9 @@ const CircleEnrollmentPrompt = ({ circle }: { circle: CircleDefinition }) => {
   const offer = candidates?.find((c) => stringGuidsEqual(c.circleId, circle.id));
   if (!offer?.candidates?.length) return null;
 
-  const who = offer.grantOn === 3 ? t('reviewed contacts are') : t('contacts are');
+  // Enums arrive as camelCase strings, not their numeric values. Naming the reason beats
+  // "some contacts".
+  const who = offer.grantOn === 'review' ? t('reviewed contacts are') : t('contacts are');
 
   return (
     <div className="flex flex-row flex-wrap items-center gap-2 rounded-lg bg-slate-100 p-3 text-sm dark:bg-slate-900">

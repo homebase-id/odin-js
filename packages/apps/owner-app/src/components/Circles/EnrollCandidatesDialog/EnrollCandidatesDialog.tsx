@@ -18,6 +18,7 @@ import {
   EnrollmentCandidate,
   EnrollmentResult,
 } from '@homebase-id/js-lib/network';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useEnrollmentCandidates } from '../../../hooks/apps/useEnrollmentCandidates';
 import DrivePermissionView from '../../PermissionViews/DrivePermissionView/DrivePermissionView';
 
@@ -50,7 +51,10 @@ export const EnrollCandidatesDialog = ({
     enrollAll: { mutateAsync: enrollAll, error: enrollError },
   } = useEnrollmentCandidates(appId);
 
-  const offer = allCandidates?.find((c) => c.circleId === circle.id);
+  // stringGuidsEqual, never ===: guid formatting differs between what the server returns and what
+  // the client holds, so a strict compare finds nothing here while the prompt that opened this
+  // panel -- which does compare properly -- confidently reports a count.
+  const offer = allCandidates?.find((c) => stringGuidsEqual(c.circleId, circle.id));
   const candidates = offer?.candidates ?? [];
 
   // Nobody starts selected. Granting circle membership escrows a drive's storage key to each
@@ -214,8 +218,8 @@ const Completion = ({
   circle: CircleDefinition;
   onClose: () => void;
 }) => {
-  const skipped = result.outcomes?.filter((o) => o.kind === 3) ?? [];
-  const deposited = result.outcomes?.filter((o) => o.kind === 2) ?? [];
+  const skipped = result.outcomes?.filter((o) => o.kind === 'skipped') ?? [];
+  const deposited = result.outcomes?.filter((o) => o.kind === 'deposited') ?? [];
 
   return (
     <>
