@@ -6,6 +6,7 @@ import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
 import { AppClientRegistration } from '../../../provider/app/AppManagementProviderTypes';
 import { useState } from 'react';
 import { useAppClients } from '../../../hooks/apps/useAppClients';
+import { useEnrollmentCandidates } from '../../../hooks/apps/useEnrollmentCandidates';
 import { useDrives } from '../../../hooks/drives/useDrives';
 import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { PageMeta } from '@homebase-id/common-app';
@@ -30,7 +31,7 @@ import {
   Arrow,
   Circles as CirclesIcon,
 } from '@homebase-id/common-app/icons';
-import { DriveGrant } from '@homebase-id/js-lib/network';
+import { DriveGrant, EnrollmentResult } from '@homebase-id/js-lib/network';
 import {
   CircleMemberIdentities,
   Fact,
@@ -331,17 +332,20 @@ const AppDetails = () => {
           {ownedCircles.length ? (
             <div className="-my-4">
               {ownedCircles.map((circle) => (
-                <div key={circle.id} className="my-4 flex flex-row">
-                  <Link
-                    to={`/owner/circles/${encodeURIComponent(circle.id ?? '')}`}
-                    className="flex flex-row hover:text-slate-700 hover:underline dark:hover:text-slate-400"
-                  >
-                    <CirclesIcon className="mb-auto mr-3 mt-1 h-6 w-6 flex-shrink-0" />
-                    <div className="mr-2 flex flex-col">
-                      <p className="my-auto">{circle.name}</p>
-                    </div>
-                    <Arrow className="my-auto ml-auto h-5 w-5" />
-                  </Link>
+                <div key={circle.id} className="my-4 flex flex-col">
+                  <div className="flex flex-row">
+                    <Link
+                      to={`/owner/circles/${encodeURIComponent(circle.id ?? '')}`}
+                      className="flex flex-row hover:text-slate-700 hover:underline dark:hover:text-slate-400"
+                    >
+                      <CirclesIcon className="mb-auto mr-3 mt-1 h-6 w-6 flex-shrink-0" />
+                      <div className="mr-2 flex flex-col">
+                        <p className="my-auto">{circle.name}</p>
+                      </div>
+                      <Arrow className="my-auto ml-auto h-5 w-5" />
+                    </Link>
+                  </div>
+                  <EnrollmentOffer appId={decodedAppKey} circleId={circle.id} />
                 </div>
               ))}
             </div>
@@ -689,3 +693,61 @@ const ClientView = ({
 };
 
 export default AppDetails;
+
+/**
+ * Contacts this circle was never offered to, and a way to offer it now.
+ *
+ * Handing a circle to an app does not reach back over contacts the owner already reviewed -- a
+ * review is a moment, not a standing rule -- so this backlog exists and nothing else reports it.
+ * Deliberately understated and deliberately not a prompt: it can be ignored for free, and it will
+ * still be here next time with a larger count as more reviews happen.
+ */
+const EnrollmentOffer = ({ appId, circleId }: { appId?: string; circleId?: string }) => {
+  const {
+    fetch: { data: candidates },
+    enrollAll: { mutateAsync: enrollAll, status: enrollStatus, error: enrollError },
+  } = useEnrollmentCandidates(appId);
+
+  const [result, setResult] = useState<EnrollmentResult | undefined>();
+
+  // Circles with nothing to offer are omitted server-side, so absence means nothing to do.
+  const offer = candidates?.find((c) => stringGuidsEqual(c.circleId, circleId));
+
+  if (result) {
+    return (
+      <p className="ml-9 mt-1 text-sm text-slate-400">
+        {/* Deposits are reported separately because they are not membership yet: the grant is
+            recorded and takes effect when the connection's key is next in scope. */}
+        {t('Added')} {result.enrolled}
+        {result.deposited ? `, ${result.deposited} ${t('pending')}` : ''}
+        {result.skipped ? `, ${result.skipped} ${t('skipped')}` : ''}
+      </p>
+    );
+  }
+
+  if (!offer?.candidates?.length || !circleId) return null;
+
+  // GrantOn: 3 = Review, 1 = Connect. Naming the reason beats "some contacts".
+  const who = offer.grantOn === 3 ? t('reviewed contacts are') : t('contacts are');
+
+  return (
+    <div className="ml-9 mt-1 flex flex-row flex-wrap items-center gap-2 text-sm">
+      <ErrorNotification error={enrollError} />
+      <span className="text-slate-400">
+        {offer.candidates.length} {t('of your')} {who} {t('not in this circle.')}
+      </span>
+      <ActionButton
+        type="mute"
+        size="none"
+        state={enrollStatus}
+        className="text-primary hover:underline"
+        onClick={async () => {
+          const r = await enrollAll({ circleId, odinIds: offer.candidates });
+          setResult(r);
+        }}
+      >
+        {t('Add them')}
+      </ActionButton>
+    </div>
+  );
+};
