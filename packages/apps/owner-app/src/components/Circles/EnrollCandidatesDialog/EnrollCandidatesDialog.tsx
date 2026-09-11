@@ -53,16 +53,18 @@ export const EnrollCandidatesDialog = ({
   const offer = allCandidates?.find((c) => c.circleId === circle.id);
   const candidates = offer?.candidates ?? [];
 
-  // Everyone pre-selected: the owner opened this panel to act on a suggestion, and making them
-  // tick fourteen boxes to accept it is friction without safety. Consent lives in the confirm
-  // step, which names the count and the access; deselecting is one click per exception.
-  const [excluded, setExcluded] = useState<string[]>([]);
+  // Nobody starts selected. Granting circle membership escrows a drive's storage key to each
+  // member, and removing them later does not undo that -- so the owner picks who, rather than
+  // confirming a selection the screen made on their behalf. Select-all is there for when the
+  // answer really is everyone.
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [state, setState] = useState<ActionButtonState>('idle');
   const [result, setResult] = useState<EnrollmentResult | undefined>();
 
   if (!isOpen) return null;
 
-  const selected = candidates.filter((c) => !excluded.includes(c.odinId));
+  const selected = candidates.filter((c) => selectedIds.includes(c.odinId));
+  const allSelected = candidates.length > 0 && selected.length === candidates.length;
 
   const dialog = (
     <DialogWrapper
@@ -91,9 +93,9 @@ export const EnrollCandidatesDialog = ({
             <button
               type="button"
               className="text-sm text-primary hover:underline"
-              onClick={() => setExcluded(excluded.length ? [] : candidates.map((c) => c.odinId))}
+              onClick={() => setSelectedIds(allSelected ? [] : candidates.map((c) => c.odinId))}
             >
-              {excluded.length ? t('Select all') : t('Select none')}
+              {allSelected ? t('Select none') : t('Select all')}
             </button>
           </div>
 
@@ -102,9 +104,9 @@ export const EnrollCandidatesDialog = ({
               <CandidateRow
                 key={candidate.odinId}
                 candidate={candidate}
-                checked={!excluded.includes(candidate.odinId)}
+                checked={selectedIds.includes(candidate.odinId)}
                 onToggle={() =>
-                  setExcluded((prev) =>
+                  setSelectedIds((prev) =>
                     prev.includes(candidate.odinId)
                       ? prev.filter((id) => id !== candidate.odinId)
                       : [...prev, candidate.odinId]
@@ -136,7 +138,9 @@ export const EnrollCandidatesDialog = ({
                   decision rather than a click. */}
               {state === 'loading'
                 ? t('Adding...')
-                : `${t('Add')} ${selected.length} ${selected.length === 1 ? t('contact') : t('contacts')}`}
+                : selected.length === 0
+                  ? t('Select contacts to add')
+                  : `${t('Add')} ${selected.length} ${selected.length === 1 ? t('contact') : t('contacts')}`}
             </ActionButton>
             <ActionButton type="secondary" onClick={onClose}>
               {t('Cancel')}
