@@ -107,7 +107,24 @@ export interface CircleEnrollmentCandidates {
   circleName: string;
   /** Why they qualify: 1 = Connect, 3 = Review. Lets a client name the reason. */
   grantOn: number;
-  candidates: string[];
+  candidates: EnrollmentCandidate[];
+}
+
+/**
+ * One identity that could be added, and the fact that qualifies them. The review date rides along
+ * because approving access off a list of bare names is approving on trust.
+ */
+export interface EnrollmentCandidate {
+  odinId: string;
+  /** Null on a Connect circle, where connecting rather than reviewing is what qualifies. */
+  reviewedAt?: number | null;
+}
+
+export type EnrollmentOutcomeKind = 1 | 2 | 3; // Enrolled | Deposited | Skipped
+
+export interface EnrollmentOutcome {
+  odinId: string;
+  kind: EnrollmentOutcomeKind;
 }
 
 /** What a bulk enrolment actually did. A deposit is membership pending, not membership. */
@@ -115,6 +132,8 @@ export interface EnrollmentResult {
   enrolled: number;
   deposited: number;
   skipped: number;
+  /** Per identity, because "which three were skipped" is the question a count cannot answer. */
+  outcomes: EnrollmentOutcome[];
 }
 
 export const getEnrollmentCandidates = async (

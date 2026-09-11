@@ -7,6 +7,7 @@ import { AppClientRegistration } from '../../../provider/app/AppManagementProvid
 import { useState } from 'react';
 import { useAppClients } from '../../../hooks/apps/useAppClients';
 import { useEnrollmentCandidates } from '../../../hooks/apps/useEnrollmentCandidates';
+import { EnrollCandidatesDialog } from '../../../components/Circles/EnrollCandidatesDialog/EnrollCandidatesDialog';
 import { useDrives } from '../../../hooks/drives/useDrives';
 import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { PageMeta } from '@homebase-id/common-app';
@@ -31,7 +32,7 @@ import {
   Arrow,
   Circles as CirclesIcon,
 } from '@homebase-id/common-app/icons';
-import { DriveGrant, EnrollmentResult } from '@homebase-id/js-lib/network';
+import { CircleDefinition, DriveGrant } from '@homebase-id/js-lib/network';
 import {
   CircleMemberIdentities,
   Fact,
@@ -345,7 +346,7 @@ const AppDetails = () => {
                       <Arrow className="my-auto ml-auto h-5 w-5" />
                     </Link>
                   </div>
-                  <EnrollmentOffer appId={decodedAppKey} circleId={circle.id} />
+                  <EnrollmentOffer appId={decodedAppKey} circle={circle} />
                 </div>
               ))}
             </div>
@@ -695,59 +696,44 @@ const ClientView = ({
 export default AppDetails;
 
 /**
- * Contacts this circle was never offered to, and a way to offer it now.
+ * That this circle has contacts waiting, and a way into reviewing them.
  *
- * Handing a circle to an app does not reach back over contacts the owner already reviewed -- a
- * review is a moment, not a standing rule -- so this backlog exists and nothing else reports it.
- * Deliberately understated and deliberately not a prompt: it can be ignored for free, and it will
- * still be here next time with a larger count as more reviews happen.
+ * A prompt, not the action: the action grants drive access and belongs behind a list you can read.
+ * Understated on purpose -- it can be ignored for free and will still be here next time, with a
+ * larger count as more reviews happen.
  */
-const EnrollmentOffer = ({ appId, circleId }: { appId?: string; circleId?: string }) => {
+const EnrollmentOffer = ({ appId, circle }: { appId?: string; circle: CircleDefinition }) => {
   const {
     fetch: { data: candidates },
-    enrollAll: { mutateAsync: enrollAll, status: enrollStatus, error: enrollError },
   } = useEnrollmentCandidates(appId);
-
-  const [result, setResult] = useState<EnrollmentResult | undefined>();
+  const [isOpen, setIsOpen] = useState(false);
 
   // Circles with nothing to offer are omitted server-side, so absence means nothing to do.
-  const offer = candidates?.find((c) => stringGuidsEqual(c.circleId, circleId));
-
-  if (result) {
-    return (
-      <p className="ml-9 mt-1 text-sm text-slate-400">
-        {/* Deposits are reported separately because they are not membership yet: the grant is
-            recorded and takes effect when the connection's key is next in scope. */}
-        {t('Added')} {result.enrolled}
-        {result.deposited ? `, ${result.deposited} ${t('pending')}` : ''}
-        {result.skipped ? `, ${result.skipped} ${t('skipped')}` : ''}
-      </p>
-    );
-  }
-
-  if (!offer?.candidates?.length || !circleId) return null;
+  const offer = candidates?.find((c) => stringGuidsEqual(c.circleId, circle.id));
+  if (!offer?.candidates?.length) return null;
 
   // GrantOn: 3 = Review, 1 = Connect. Naming the reason beats "some contacts".
   const who = offer.grantOn === 3 ? t('reviewed contacts are') : t('contacts are');
 
   return (
     <div className="ml-9 mt-1 flex flex-row flex-wrap items-center gap-2 text-sm">
-      <ErrorNotification error={enrollError} />
       <span className="text-slate-400">
         {offer.candidates.length} {t('of your')} {who} {t('not in this circle.')}
       </span>
-      <ActionButton
-        type="mute"
-        size="none"
-        state={enrollStatus}
+      <button
+        type="button"
         className="text-primary hover:underline"
-        onClick={async () => {
-          const r = await enrollAll({ circleId, odinIds: offer.candidates });
-          setResult(r);
-        }}
+        onClick={() => setIsOpen(true)}
       >
-        {t('Add them')}
-      </ActionButton>
+        {t('Review and add')}
+      </button>
+
+      <EnrollCandidatesDialog
+        appId={appId}
+        circle={circle}
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+      />
     </div>
   );
 };

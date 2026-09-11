@@ -9,6 +9,7 @@ import { PageMeta } from '@homebase-id/common-app';
 import {
   AUTO_CONNECTIONS_CIRCLE_ID,
   CONFIRMED_CONNECTIONS_CIRCLE_ID,
+  CircleDefinition,
   Membership,
 } from '@homebase-id/js-lib/network';
 import { Link } from 'react-router-dom';
@@ -29,6 +30,8 @@ import CircleAppInteractionDialog from '../../../components/Circles/CircleAppInt
 import CircleDialog from '../../../components/Circles/CircleDialog/CircleDialog';
 import { SetOwningAppDialog } from '../../../components/Apps/SetOwningAppDialog/SetOwningAppDialog';
 import { ReassignOwningAppDialog } from '../../../components/Apps/SetOwningAppDialog/ReassignOwningAppDialog';
+import { EnrollCandidatesDialog } from '../../../components/Circles/EnrollCandidatesDialog/EnrollCandidatesDialog';
+import { useEnrollmentCandidates } from '../../../hooks/apps/useEnrollmentCandidates';
 import MemberLookupDialog from '../../../components/Circles/MemberLookupDialog/MemberLookupDialog';
 import DrivePermissionSelectorDialog from '../../../components/Drives/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
 import {
@@ -277,6 +280,12 @@ const CircleDetails = () => {
           )
         }
       />
+
+      {/* Says there is something to do here. The app's page carries the same prompt, but somebody
+          looking at the circle itself is the likelier person to act on it, and they would
+          otherwise see a member list with no sign that anyone is missing from it. */}
+      {!isSystemCircle ? <CircleEnrollmentPrompt circle={circle} /> : null}
+
       <div className="py-5">
         {members?.length && !membersLoading ? (
           <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10">
@@ -543,3 +552,45 @@ const CircleMemberCard = ({
 };
 
 export default CircleDetails;
+
+/**
+ * Contacts eligible for this circle who are not in it, and a way into reviewing them.
+ *
+ * Only ever appears for a circle an app owns: the offer is built from the app's circles, and a
+ * circle belonging to no app has no app-declared rule (GrantOn) for who should be in it.
+ */
+const CircleEnrollmentPrompt = ({ circle }: { circle: CircleDefinition }) => {
+  const {
+    fetch: { data: candidates },
+  } = useEnrollmentCandidates(circle.appId ?? undefined);
+  const [isOpen, setIsOpen] = useState(false);
+
+  if (!circle.appId) return null;
+
+  const offer = candidates?.find((c) => stringGuidsEqual(c.circleId, circle.id));
+  if (!offer?.candidates?.length) return null;
+
+  const who = offer.grantOn === 3 ? t('reviewed contacts are') : t('contacts are');
+
+  return (
+    <div className="flex flex-row flex-wrap items-center gap-2 rounded-lg bg-slate-100 p-3 text-sm dark:bg-slate-900">
+      <span>
+        {offer.candidates.length} {t('of your')} {who} {t('not in this circle.')}
+      </span>
+      <button
+        type="button"
+        className="text-primary hover:underline"
+        onClick={() => setIsOpen(true)}
+      >
+        {t('Review and add')}
+      </button>
+
+      <EnrollCandidatesDialog
+        appId={circle.appId}
+        circle={circle}
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+      />
+    </div>
+  );
+};
