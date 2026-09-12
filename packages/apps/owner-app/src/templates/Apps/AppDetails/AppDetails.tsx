@@ -6,6 +6,8 @@ import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
 import { AppClientRegistration } from '../../../provider/app/AppManagementProviderTypes';
 import { useState } from 'react';
 import { useAppClients } from '../../../hooks/apps/useAppClients';
+import { useEnrollmentCandidates } from '../../../hooks/apps/useEnrollmentCandidates';
+import { EnrollCandidatesDialog } from '../../../components/Circles/EnrollCandidatesDialog/EnrollCandidatesDialog';
 import { useDrives } from '../../../hooks/drives/useDrives';
 import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { PageMeta } from '@homebase-id/common-app';
@@ -30,7 +32,7 @@ import {
   Arrow,
   Circles as CirclesIcon,
 } from '@homebase-id/common-app/icons';
-import { DriveGrant } from '@homebase-id/js-lib/network';
+import { CircleDefinition, DriveGrant } from '@homebase-id/js-lib/network';
 import {
   CircleMemberIdentities,
   Fact,
@@ -38,6 +40,12 @@ import {
   formatTimestamp,
 } from '../../../components/Apps/AppOverviewParts';
 import { DriveView } from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
+
+/**
+ * How many devices to show before the list is cut short. Five is enough to recognise the machines
+ * you use without the section owning the page.
+ */
+const DEVICE_PREVIEW_COUNT = 5;
 
 const AppDetails = () => {
   const { appKey } = useParams();
@@ -71,6 +79,7 @@ const AppDetails = () => {
     'circle' | 'permission' | 'drives' | undefined
   >();
   const [isPermissionEditOpen, setIsPermissionEditOpen] = useState(false);
+  const [showAllDevices, setShowAllDevices] = useState(false);
   const [isDrivesEditOpen, setIsDrivesEditOpen] = useState(false);
 
   const permissionKeys = app?.grant.permissionSet?.keys?.reduce((acc: number[], key: number) => {
@@ -201,17 +210,35 @@ const AppDetails = () => {
         </Alert>
       )}
 
+      {/* Capped, because this is the first section on the page and an app logged in from many
+          devices pushed everything else -- permissions, ownership, circles -- off the screen. The
+          count stays in the heading so a shortened list still says how many there are. */}
       {appClients ? (
-        <Section title={t('Devices')}>
+        <Section title={`${t('Devices')} (${appClients.length})`}>
           <div className="grid grid-flow-row gap-4">
             {appClients?.length ? (
-              appClients.map((appClient, index) => (
-                <ClientView
-                  appId={app.appId}
-                  appClient={appClient}
-                  key={`${appClient.accessRegistrationId}_${index}`}
-                />
-              ))
+              <>
+                {(showAllDevices ? appClients : appClients.slice(0, DEVICE_PREVIEW_COUNT)).map(
+                  (appClient, index) => (
+                    <ClientView
+                      appId={app.appId}
+                      appClient={appClient}
+                      key={`${appClient.accessRegistrationId}_${index}`}
+                    />
+                  )
+                )}
+                {appClients.length > DEVICE_PREVIEW_COUNT ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllDevices(!showAllDevices)}
+                    className="mr-auto text-sm text-slate-400 hover:underline"
+                  >
+                    {showAllDevices
+                      ? t('Show fewer')
+                      : `${t('Show all')} ${appClients.length} ${t('devices')}`}
+                  </button>
+                ) : null}
+              </>
             ) : (
               <p className="text-slate-400">{t('No devices currently logged in')}</p>
             )}
@@ -306,17 +333,20 @@ const AppDetails = () => {
           {ownedCircles.length ? (
             <div className="-my-4">
               {ownedCircles.map((circle) => (
-                <div key={circle.id} className="my-4 flex flex-row">
-                  <Link
-                    to={`/owner/circles/${encodeURIComponent(circle.id ?? '')}`}
-                    className="flex flex-row hover:text-slate-700 hover:underline dark:hover:text-slate-400"
-                  >
-                    <CirclesIcon className="mb-auto mr-3 mt-1 h-6 w-6 flex-shrink-0" />
-                    <div className="mr-2 flex flex-col">
-                      <p className="my-auto">{circle.name}</p>
-                    </div>
-                    <Arrow className="my-auto ml-auto h-5 w-5" />
-                  </Link>
+                <div key={circle.id} className="my-4 flex flex-col">
+                  <div className="flex flex-row">
+                    <Link
+                      to={`/owner/circles/${encodeURIComponent(circle.id ?? '')}`}
+                      className="flex flex-row hover:text-slate-700 hover:underline dark:hover:text-slate-400"
+                    >
+                      <CirclesIcon className="mb-auto mr-3 mt-1 h-6 w-6 flex-shrink-0" />
+                      <div className="mr-2 flex flex-col">
+                        <p className="my-auto">{circle.name}</p>
+                      </div>
+                      <Arrow className="my-auto ml-auto h-5 w-5" />
+                    </Link>
+                  </div>
+                  <EnrollmentOffer appId={decodedAppKey} circle={circle} />
                 </div>
               ))}
             </div>
@@ -664,3 +694,42 @@ const ClientView = ({
 };
 
 export default AppDetails;
+
+/**
+ * That this circle has contacts waiting, and a way into reviewing them.
+ *
+ * A prompt, not the action: the action grants drive access and belongs behind a list you can read.
+ * Understated on purpose -- it can be ignored for free and will still be here next time, with a
+ * larger count as more reviews happen.
+ */
+const EnrollmentOffer = ({ appId, circle }: { appId?: string; circle: CircleDefinition }) => {
+  const {
+    fetch: { data: candidates },
+  } = useEnrollmentCandidates(appId);
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Circles with nothing to offer are omitted server-side, so absence means nothing to do.
+  const offer = candidates?.find((c) => stringGuidsEqual(c.circleId, circle.id));
+  if (!offer?.candidates?.length) return null;
+
+  // Enums arrive as camelCase strings, not their numeric values. Naming the reason beats
+  // "some contacts".
+  const who = offer.grantOn === 'review' ? t('reviewed contacts are') : t('contacts are');
+
+  return (
+    <div className="ml-9 mt-1 flex flex-row flex-wrap items-center gap-2 text-sm">
+      <span className="text-slate-400">
+        {offer.candidates.length} {t('of your')} {who} {t('not in this circle.')}
+      </span>
+      <button
+        type="button"
+        className="text-primary hover:underline"
+        onClick={() => setIsOpen(true)}
+      >
+        {t('Review and add')}
+      </button>
+
+      <EnrollCandidatesDialog circle={circle} isOpen={isOpen} onClose={() => setIsOpen(false)} />
+    </div>
+  );
+};

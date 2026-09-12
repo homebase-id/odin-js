@@ -7,8 +7,11 @@ import {
   getDrivesByType,
   TargetDrive,
   editDriveAttributes,
-  editDriveAllowSubscriptions, editDriveArchiveFlag,
+  editDriveAllowSubscriptions,
+  editDriveArchiveFlag,
   editDriveAllowCdn,
+  setDriveOwningApp,
+  reassignDriveOwningApp,
 } from '@homebase-id/js-lib/core';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
@@ -96,6 +99,34 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
     return editDriveAttributes(dotYouClient, targetDrive, newAttributes);
   };
 
+  const setOwningApp = async ({
+    targetDrive,
+    appId,
+    driveSlug,
+    driveTypeSlug,
+  }: {
+    targetDrive: TargetDrive;
+    appId: string;
+    driveSlug?: string;
+    driveTypeSlug?: string;
+  }) => {
+    return setDriveOwningApp(dotYouClient, targetDrive, appId, driveSlug, driveTypeSlug);
+  };
+
+  const reassignOwningApp = async ({
+    targetDrive,
+    appId,
+    driveSlug,
+    driveTypeSlug,
+  }: {
+    targetDrive: TargetDrive;
+    appId: string;
+    driveSlug: string;
+    driveTypeSlug?: string;
+  }) => {
+    return reassignDriveOwningApp(dotYouClient, targetDrive, appId, driveSlug, driveTypeSlug);
+  };
+
   return {
     fetch: useQuery({
       queryKey: ['drives', `${targetDrive?.alias}_${targetDrive?.type}`],
@@ -114,10 +145,15 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
       onSettled: (data, _error, variables) => {
         const { targetDrive, newDescription } = variables;
         if (data === true) {
-          updateDriveCache(queryClient, targetDrive, (base) => ({
-            ...base,
-            metadata: newDescription,
-          }), 'editDescription');
+          updateDriveCache(
+            queryClient,
+            targetDrive,
+            (base) => ({
+              ...base,
+              metadata: newDescription,
+            }),
+            'editDescription'
+          );
         } else {
           console.warn('[owner-app:useDrive] editDescription mutation did not return true');
         }
@@ -128,10 +164,15 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
       onSettled: (data, _error, variables) => {
         const { targetDrive, newAttributes } = variables;
         if (data === true) {
-          updateDriveCache(queryClient, targetDrive, (base) => ({
-            ...base,
-            attributes: { ...(base.attributes || {}), ...(newAttributes || {}) },
-          }), 'editAttributes');
+          updateDriveCache(
+            queryClient,
+            targetDrive,
+            (base) => ({
+              ...base,
+              attributes: { ...(base.attributes || {}), ...(newAttributes || {}) },
+            }),
+            'editAttributes'
+          );
         } else {
           console.warn('[owner-app:useDrive] editAttributes mutation did not return true');
         }
@@ -142,10 +183,15 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
       onSettled: (data, _error, variables) => {
         const { targetDrive, newAllowAnonymousRead } = variables;
         if (data === true) {
-          updateDriveCache(queryClient, targetDrive, (base) => ({
-            ...base,
-            allowAnonymousReads: newAllowAnonymousRead,
-          }), 'editAnonymousRead');
+          updateDriveCache(
+            queryClient,
+            targetDrive,
+            (base) => ({
+              ...base,
+              allowAnonymousReads: newAllowAnonymousRead,
+            }),
+            'editAnonymousRead'
+          );
         } else {
           console.warn('[owner-app:useDrive] editAnonymousRead mutation did not return true');
         }
@@ -156,10 +202,15 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
       onSettled: (data, _error, variables) => {
         const { targetDrive, newAllowSubscriptions } = variables;
         if (data === true) {
-          updateDriveCache(queryClient, targetDrive, (base) => ({
-            ...base,
-            allowSubscriptions: newAllowSubscriptions,
-          }), 'editAllowSubscriptions');
+          updateDriveCache(
+            queryClient,
+            targetDrive,
+            (base) => ({
+              ...base,
+              allowSubscriptions: newAllowSubscriptions,
+            }),
+            'editAllowSubscriptions'
+          );
         } else {
           console.warn('[owner-app:useDrive] editAllowSubscriptions mutation did not return true');
         }
@@ -170,10 +221,15 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
       onSettled: (data, _error, variables) => {
         const { targetDrive, newAllowCdn } = variables;
         if (data === true) {
-          updateDriveCache(queryClient, targetDrive, (base) => ({
-            ...base,
-            allowCdn: newAllowCdn,
-          }), 'editAllowCdn');
+          updateDriveCache(
+            queryClient,
+            targetDrive,
+            (base) => ({
+              ...base,
+              allowCdn: newAllowCdn,
+            }),
+            'editAllowCdn'
+          );
         } else {
           console.warn('[owner-app:useDrive] editAllowCdn mutation did not return true');
         }
@@ -184,36 +240,51 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
       onSettled: (data, _error, variables) => {
         const { targetDrive, newArchived } = variables;
         if (data === true) {
-          updateDriveCache(queryClient, targetDrive, (base) => ({
-            ...base,
-            isArchived: newArchived,
-          }), 'editArchiveStatus');
+          updateDriveCache(
+            queryClient,
+            targetDrive,
+            (base) => ({
+              ...base,
+              isArchived: newArchived,
+            }),
+            'editArchiveStatus'
+          );
         } else {
           console.warn('[owner-app:useDrive] editArchiveStatus mutation did not return true');
         }
+      },
+    }),
+
+    setOwningApp: useMutation({
+      mutationFn: setOwningApp,
+      // Refetched rather than patched in place, unlike the flag mutations above: the server
+      // derives the slug and type slug when they are not supplied, so what landed is not
+      // knowable from the request.
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ['drives'] });
+      },
+    }),
+
+    reassignOwningApp: useMutation({
+      mutationFn: reassignOwningApp,
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ['drives'] });
       },
     }),
   };
 };
 
 // Helper to keep the ['drives'] list cache in sync with the individual drive cache
-export const syncDriveIntoDrivesList = (
-  queryClient: QueryClient,
-  updated: DriveDefinition
-) => {
+export const syncDriveIntoDrivesList = (queryClient: QueryClient, updated: DriveDefinition) => {
   const listKey = ['drives'] as const;
   const list = queryClient.getQueryData<DriveDefinition[]>(listKey);
   if (!list || list.length === 0) return;
   const targetDrive = updated.targetDriveInfo;
-  const updatedList = list.map((d) =>
-    drivesEqual(d.targetDriveInfo, targetDrive) ? updated : d
-  );
+  const updatedList = list.map((d) => (drivesEqual(d.targetDriveInfo, targetDrive) ? updated : d));
   const changed = updatedList.some((d, i) => d !== list[i]);
   if (changed) queryClient.setQueryData(listKey, updatedList, { updatedAt: Date.now() });
 
   return;
-
-
 };
 
 // Helper to update the individual drive cache and sync the main list using an updater function
@@ -233,6 +304,3 @@ export const updateDriveCache = (
     console.warn(`[owner-app:useDrive] ${label}: no cached drive found to update`);
   }
 };
-
-
-
