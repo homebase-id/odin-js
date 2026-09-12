@@ -171,6 +171,17 @@ export interface CircleDefinition {
   appId?: string;
 
   /**
+   * True when the app tree declares this circle, so every version upgrade re-applies its owner,
+   * grant rule and designation -- an edit to any of the three is undone without warning. Derived
+   * server-side from the build's app catalogue, so it is read-only: sending it back changes
+   * nothing.
+   *
+   * Not the same as `appId`. An app's runtime circle -- one per feed channel, say -- is
+   * app-owned but not declared anywhere, and stays exactly as the owner leaves it.
+   */
+  isTreeDeclared?: boolean;
+
+  /**
    * IMPORTANT: round-trip these when updating a circle. This same type is the update body, and
    * the server assigns grantOn, designation and emoji from whatever it receives -- so a PUT built
    * from a fetched definition that drops them resets them to their defaults. That would silently

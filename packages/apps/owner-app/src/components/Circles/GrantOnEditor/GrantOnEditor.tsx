@@ -48,9 +48,13 @@ export const GrantOnEditor = ({
   const current = circle.grantOn ?? CircleGrantOn.None;
   const waiting = offer?.candidates?.length ?? 0;
 
-  // A built-in circle's rule is declared in the app tree and re-applied on every version upgrade,
-  // so editing it here would be undone without warning. Better to say so than to offer it.
-  if (isSystemCircle || circle.appId) {
+  // A tree-declared circle's rule is re-applied on every version upgrade, so editing it here would
+  // be undone without warning. Better to show it read-only than to offer a change that reverts.
+  //
+  // Keyed on isTreeDeclared, not appId: most app-owned circles are minted at runtime -- one per feed
+  // channel, say -- and are declared nowhere, so an edit to those sticks. Keying on appId hid the
+  // editor from nearly every circle that has one.
+  if (isSystemCircle || circle.isTreeDeclared) {
     return (
       <>
         {GRANT_ON_LABELS[current] ?? current}
