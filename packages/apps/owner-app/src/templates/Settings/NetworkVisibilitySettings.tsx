@@ -260,7 +260,7 @@ export const NetworkVisibilitySettings = () => {
                 {t('Require a review before a connection is treated as Reviewed')}
                 <small className="text-sm text-gray-400">
                   {t(
-                    'Decides which security level an incoming connection is given. Only available once your identity has run the upgrade that fills in the review date for your existing connections'
+                    'Temporary. This switch exists so the change can be turned on a few identities at a time; once it has been rolled out everywhere the setting goes away and reviewed-only becomes the only behaviour. Available once your identity has run the upgrade that fills in the review date for your existing connections'
                   )}
                 </small>
               </div>
