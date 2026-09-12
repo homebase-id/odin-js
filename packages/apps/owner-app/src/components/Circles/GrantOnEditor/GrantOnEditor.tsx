@@ -100,25 +100,30 @@ export const GrantOnEditor = ({
     <div className="flex flex-col gap-2">
       <ErrorNotification error={updateError} />
 
-      {/* OwnFlowConnect is omitted on purpose: it means "only through this app's own consent
-          flow", which is the app's business to declare, not a value an owner picks. */}
+      {/* Every rule is offered, OwnFlowConnect included. It is the one an app declares for itself
+          rather than one an owner would normally reach for, but it is the owner's circle: they may
+          set it, at their own peril, and the hint below says what it means. */}
       <Select
         defaultValue={String(pending ?? current)}
         onChange={(e) => setPending(e.target.value as CircleGrantOn)}
       >
         <option value={CircleGrantOn.None}>{GRANT_ON_LABELS[CircleGrantOn.None]}</option>
         <option value={CircleGrantOn.Connect}>{GRANT_ON_LABELS[CircleGrantOn.Connect]}</option>
+        <option value={CircleGrantOn.OwnFlowConnect}>
+          {GRANT_ON_LABELS[CircleGrantOn.OwnFlowConnect]}
+        </option>
         <option value={CircleGrantOn.Review}>{GRANT_ON_LABELS[CircleGrantOn.Review]}</option>
       </Select>
 
       <p className="max-w-prose text-sm text-slate-400">{GRANT_ON_HINTS[pending ?? current]}</p>
 
-      {/* The server refuses an ambient rule on a circle that grants Read or holds a permission
-          key -- ambient circles are write/react only. Said here rather than left to a 400. */}
-      {pending === CircleGrantOn.Connect ? (
+      {/* AssertDepositOnlyIfAmbientAsync treats both connect-time rules the same, so this warns on
+          both: either one is minted without the owner present, and a read grant or a permission key
+          needs the Peer Key. Said here rather than left to a 400. */}
+      {pending === CircleGrantOn.Connect || pending === CircleGrantOn.OwnFlowConnect ? (
         <Alert type="warning" isCompact={true}>
           {t(
-            'An automatic circle may only grant write access, never read. If this circle grants read, the change will be refused.'
+            'A circle granted at connection time may only grant write access, and may hold no permission keys. If this circle grants read on a non-public drive, or holds a key, the change will be refused.'
           )}
         </Alert>
       ) : null}
