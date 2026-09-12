@@ -44,6 +44,13 @@ export const NetworkVisibilitySettings = () => {
     });
   };
 
+  const handleUseReviewedSecurityTierChange: React.MouseEventHandler = async (e) => {
+    await updateFlag({
+      name: 'useReviewedSecurityTier',
+      value: e.currentTarget.id === 'useReviewedSecurityTierYes',
+    });
+  };
+
   const handleCanViewWhoIFollowChange: React.MouseEventHandler = async (e) => {
     let allowAnonymous = false;
     let allowAuthenticated = false;
@@ -245,6 +252,39 @@ export const NetworkVisibilitySettings = () => {
                 systemSettings?.allConnectedIdentitiesCanViewWhoIFollow === false
               }
               onClick={handleCanViewWhoIFollowChange}
+            />
+          </Section>
+          <Section
+            title={
+              <div className="flex flex-col">
+                {t('Require a review before a connection counts as connected')}
+                <small className="text-sm text-gray-400">
+                  {t(
+                    'Decides which security level an incoming connection is given. Only available once your identity has run the upgrade that fills in the review date for your existing connections'
+                  )}
+                </small>
+              </div>
+            }
+          >
+            <RadioOption
+              label={t('Yes')}
+              description={t(
+                'Connections you have reviewed are treated as connected; the ones you have not reviewed yet are treated as merely authenticated, so anything you share with connections stays out of reach until you review them'
+              )}
+              id="useReviewedSecurityTierYes"
+              name="useReviewedSecurityTier"
+              defaultChecked={systemSettings?.useReviewedSecurityTier === true}
+              onClick={handleUseReviewedSecurityTierChange}
+            />
+            <RadioOption
+              label={t('No')}
+              description={t(
+                'Every connection is treated as connected whether or not you have reviewed them. This is the current behaviour'
+              )}
+              id="useReviewedSecurityTierNo"
+              name="useReviewedSecurityTier"
+              defaultChecked={systemSettings?.useReviewedSecurityTier !== true}
+              onClick={handleUseReviewedSecurityTierChange}
             />
           </Section>
         </>
