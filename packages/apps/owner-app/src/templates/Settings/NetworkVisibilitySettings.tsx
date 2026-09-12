@@ -257,7 +257,7 @@ export const NetworkVisibilitySettings = () => {
           <Section
             title={
               <div className="flex flex-col">
-                {t('Require a review before a connection counts as connected')}
+                {t('Require a review before a connection is treated as Reviewed')}
                 <small className="text-sm text-gray-400">
                   {t(
                     'Decides which security level an incoming connection is given. Only available once your identity has run the upgrade that fills in the review date for your existing connections'
@@ -269,7 +269,7 @@ export const NetworkVisibilitySettings = () => {
             <RadioOption
               label={t('Yes')}
               description={t(
-                'Connections you have reviewed are treated as connected; the ones you have not reviewed yet are treated as merely authenticated, so anything you share with connections stays out of reach until you review them'
+                'Connections you have reviewed are treated as Reviewed. The ones you have not are treated as Authenticated — no better placed than any logged-in identity — so anything you share at the Reviewed level stays out of reach until you review them'
               )}
               id="useReviewedSecurityTierYes"
               name="useReviewedSecurityTier"
@@ -279,7 +279,7 @@ export const NetworkVisibilitySettings = () => {
             <RadioOption
               label={t('No')}
               description={t(
-                'Every connection is treated as connected whether or not you have reviewed them. This is the current behaviour'
+                'Every connection is treated as Reviewed whether or not you have actually reviewed them. This is the current behaviour'
               )}
               id="useReviewedSecurityTierNo"
               name="useReviewedSecurityTier"
