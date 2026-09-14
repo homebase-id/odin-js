@@ -18,6 +18,12 @@ export interface DnsRecord {
   description: string;
   status: DnsRecordStatus;
   records?: Record<string, string[]>;
+  // Server-side this reads "excluded from IsDomainDnsReady" rather than
+  // "unimportant" (Odin.Services/Registry/Registration/DnsConfig.cs): the
+  // 200/202 verdict this app trusts is computed from the NOT-optional records
+  // alone. Today it flags the email set - MX, SPF, _dmarc, _mta-sts, _smtp._tls
+  // and the mta-sts CNAME - which a server only sends when tenant mail is on.
+  optional?: boolean;
 }
 
 export type DnsConfig = Array<DnsRecord>;
@@ -117,8 +123,9 @@ type CreateIdentityKey = {
   email: string;
   planId: string;
   invitationCode: string | null;
-  // Omitted by the own-domain flow, which has no region step. Not consumed by
-  // the server yet.
+  // Telemetry only: what actually routes a signup to a region is the host this
+  // page was served from (helpers/regionRouting.ts); odin-core never reads this.
+  // Null when detection came up empty and no region was picked.
   region?: Region | null;
 };
 

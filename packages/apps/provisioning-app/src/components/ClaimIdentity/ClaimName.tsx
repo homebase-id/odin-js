@@ -28,6 +28,11 @@ interface ClaimNameProps {
   onPrefixesChange: (prefixes: string[]) => void;
   domainPrefix: string;
   apexesError: unknown;
+  // Set only while a name carried over by a region redirect is waiting on this
+  // cluster's verdict. The name is already filled in; the step advances by
+  // itself once this cluster's registry says it is free, and stays put with the
+  // usual "taken" line when it is not.
+  autoClaimDomain: string | null;
   onClaim: () => void;
   onUseOwnDomain: () => void;
 }
@@ -40,6 +45,7 @@ const ClaimName = ({
   onPrefixesChange,
   domainPrefix,
   apexesError,
+  autoClaimDomain,
   onClaim,
   onUseOwnDomain,
 }: ClaimNameProps) => {
@@ -68,6 +74,14 @@ const ClaimName = ({
   // Gated on domainPrefix: the query is disabled until there is one, and a
   // disabled query reports 'pending' forever
   const isChecking = !!domainPrefix && (!isSettled || status === 'pending');
+
+  // canClaim already means settled, fetched, and free ON THIS HOST, which is
+  // exactly the condition a carried-over name has to meet before the flow may
+  // pick up where it left off. The parent clears autoClaimDomain as it advances,
+  // so pressing "Change my name" does not land straight back here.
+  useEffect(() => {
+    if (autoClaimDomain && autoClaimDomain === domain && canClaim) onClaim();
+  }, [autoClaimDomain, domain, canClaim, onClaim]);
 
   const statusLine = ((): { tone: StatusTone; text: string } => {
     if (!domainPrefix)

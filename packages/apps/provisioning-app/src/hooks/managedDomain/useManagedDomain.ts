@@ -58,8 +58,9 @@ export const useCreateManagedDomain = () => {
     domainPrefix: string;
     domainApex: string;
     invitationCode: string | null;
-    // Not consumed by the server yet; sent so the hosting region can be acted on
-    // later without another frontend change
+    // Telemetry only: the region is routed by hostname
+    // (helpers/regionRouting.ts), so by the time this is sent the cluster has
+    // already been decided. odin-core does not read it.
     region?: Region | null;
   };
 

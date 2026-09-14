@@ -1,5 +1,19 @@
 import ravenLogo from '../assets/raven-logo.svg';
 import homebaseLogo from '../assets/homebase-logo.svg';
+import { Region } from '../helpers/region';
+
+// Which provisioning host serves each region, per brand.
+//
+// odin-core has no concept of regions: a cluster serves the sign-up app only for
+// requests whose Host equals its own Registry:ProvisioningDomain, and it knows
+// nothing of any other cluster - separate registries, separate databases. So the
+// hostname *is* the region, and picking one is the front-end sending the user to
+// a different host. See helpers/regionRouting.ts.
+//
+// A brand with no entries (or a partial map) simply does not route: the flow
+// stays on whatever host served the page, which is what happened everywhere
+// before regions existed.
+type ProvisioningHosts = Partial<Record<Region, string>>;
 
 const ravenHostingConfig = {
   id: 'ravenhosting',
@@ -15,6 +29,12 @@ const ravenHostingConfig = {
   accentFocusClassName: 'focus-within:border-teal-500 focus-within:ring-teal-300',
   termsAndConditionsLink: 'https://ravenhosting.cloud/terms-and-conditions',
   privacyPolicyLink: 'https://ravenhosting.cloud/privacy-policy',
+  // `createme.<region>` is deliberately a pointer, not a cluster name: repointing
+  // the DNS record moves new sign-ups to another cluster without a release here.
+  provisioningHosts: {
+    eu: 'createme.ravenhosting.cloud',
+    ca: 'createme.na.ravenhosting.cloud',
+  } as ProvisioningHosts,
 };
 
 const homebaseHostingConfig = {
@@ -31,6 +51,8 @@ const homebaseHostingConfig = {
   accentFocusClassName: 'focus-within:border-indigo-500 focus-within:ring-indigo-300',
   termsAndConditionsLink: 'https://homebase.id/terms-and-conditions',
   privacyPolicyLink: 'https://homebase.id/privacy-policy',
+  // Single cluster today; add the hosts here when this brand gains a region.
+  provisioningHosts: {} as ProvisioningHosts,
 };
 
 export const config =

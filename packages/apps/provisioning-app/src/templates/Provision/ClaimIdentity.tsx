@@ -12,8 +12,14 @@ import {
   ManagedDomainApex,
   useFetchManagedDomainsApexes,
 } from '../../hooks/managedDomain/useManagedDomain';
-import { domainFromPrefixAndApex, isCompleteLabel } from '../../helpers/common';
-import { detectRegion, isRegion, Region, RegionSource } from '../../helpers/region';
+import {
+  domainFromPrefixAndApex,
+  isCompleteLabel,
+  prefixesFromClaimedDomain,
+} from '../../helpers/common';
+import { readCarriedFragment } from '../../helpers/carriedFragment';
+import { Region, REGION_NAMES } from '../../helpers/region';
+import { useRegionChoice } from '../../hooks/region/useRegionChoice';
 
 type ClaimStep = 'ClaimName' | 'Confirm' | 'Provisioning';
 
@@ -34,20 +40,21 @@ const ClaimIdentity = () => {
   const [step, setStep] = useState<ClaimStep>('ClaimName');
   const [domainApex, setDomainApex] = useState<ManagedDomainApex | undefined>(undefined);
   const [prefixes, setPrefixes] = useState<string[]>([]);
-  const [email, setEmail] = useState<string>('');
+  // Carried in the fragment across a region redirect - the picker sits on the
+  // same step as this field, so changing region emptied it (see ConfirmIdentity)
+  const [email, setEmail] = useState<string>(
+    () => readCarriedFragment('email')?.toLowerCase() ?? ''
+  );
+
+  // The name a region redirect carried over, until this cluster's registry has
+  // had its say about it
+  const [resumeClaim, setResumeClaim] = useState<string | null>(null);
 
   const planIdParam = searchParams.get('plan-id');
   const invitationCode = searchParams.get('invitation-code');
   const planId = planIdParam || 'free';
 
-  // Resolved once, on mount; a re-detect mid-flow would fight the user's choice
-  const [{ region, source: regionSource }, setRegionChoice] = useState<{
-    region: Region | null;
-    source: RegionSource | null;
-  }>(() => {
-    const param = searchParams.get('region');
-    return isRegion(param) ? { region: param, source: null } : detectRegion();
-  });
+  const { region, source: regionSource, chooseRegion } = useRegionChoice();
 
   const {
     fetchManagedDomainApexes: { data: managedDomainApexes, error: errorManagedDomainApexes },
@@ -60,22 +67,26 @@ const ClaimIdentity = () => {
   useEffect(() => {
     if (domainApex || !managedDomainApexes?.length) return;
 
-    const initial = pickInitialApex(managedDomainApexes);
+    // A region redirect is a full page load onto another host, so the claim
+    // travels in the URL. It is restored, never trusted: the registry that
+    // called it available belongs to the cluster we just left.
+    const claimed = searchParams.get('claim');
+    const carried = claimed ? prefixesFromClaimedDomain(claimed, managedDomainApexes) : null;
+
+    const initial = carried?.apex ?? pickInitialApex(managedDomainApexes);
     setDomainApex(initial);
-    setPrefixes(Array(initial.prefixLabels.length).fill(''));
-  }, [domainApex, managedDomainApexes]);
+    setPrefixes(carried?.prefixes ?? Array(initial.prefixLabels.length).fill(''));
 
-  // Only an explicit choice is mirrored into the URL. Persisting a detected
-  // region would freeze one guess forever: a stale ?region= from an earlier
-  // visit outranks detection on every later load, so a wrong guess could never
-  // correct itself.
-  const onRegionChange = (next: Region) => {
-    setRegionChoice({ region: next, source: null });
+    if (!claimed) return;
 
+    if (carried) setResumeClaim(domainFromPrefixAndApex(carried.prefixes.join('.'), initial.apex));
+
+    // Consumed once. Left in the URL it would resurrect a stale name on the
+    // next reload, outranking whatever the user had typed since.
     const params = new URLSearchParams(searchParams);
-    params.set('region', next);
+    params.delete('claim');
     setSearchParams(params, { replace: true });
-  };
+  }, [domainApex, managedDomainApexes]);
 
   // Empty until every label is present and valid, which is also what gates the
   // availability lookup. Values in `prefixes` are already cleaned on input.
@@ -87,6 +98,13 @@ const ClaimIdentity = () => {
   }, [prefixes, domainApex]);
 
   const domain = domainFromPrefixAndApex(domainPrefix, domainApex?.apex ?? '');
+
+  // The name rides along so a region change does not send the user back to an
+  // empty form. It is re-checked on arrival: the registry that cleared it
+  // belongs to the cluster being left, and does not span clusters either. The
+  // email travels in the fragment, which never reaches either cluster.
+  const onRegionChange = (next: Region) =>
+    chooseRegion(next, { carry: { claim: domain }, carryInFragment: { email } });
 
   const goToOwnDomain = () => {
     // Carry the whole query over — own-domain needs returnUrl too — with the resolved region on top.
@@ -112,7 +130,11 @@ const ClaimIdentity = () => {
           onPrefixesChange={setPrefixes}
           domainPrefix={domainPrefix}
           apexesError={errorManagedDomainApexes}
-          onClaim={() => setStep('Confirm')}
+          autoClaimDomain={resumeClaim}
+          onClaim={() => {
+            setResumeClaim(null);
+            setStep('Confirm');
+          }}
           onUseOwnDomain={goToOwnDomain}
         />
       );
@@ -168,7 +190,13 @@ const ClaimIdentity = () => {
         <div className="mx-auto mt-20 min-h-[20rem] w-full max-w-xl">
           <div className="mb-10 flex flex-row items-start justify-between gap-4">
             <h1 className="text-4xl">
-              {config.brandName} | {t('Signup')}
+              {/* Not on 1/2: the region is resolved by then but the user has not been
+                  shown it yet, and naming a cluster beside a name they are still
+                  typing answers a question nobody has asked. From 2/2 on, where the
+                  picker sits, the title says where this identity is going to live. */}
+              {config.brandName}
+              {step !== 'ClaimName' && region ? ` ${t(REGION_NAMES[region])}` : ''} |{' '}
+              {t('Signup')}
               {step !== 'Provisioning' ? (
                 <span className="mt-1 block text-3xl text-slate-400">
                   {t('Create a new identity')}

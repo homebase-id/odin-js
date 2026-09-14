@@ -26,9 +26,16 @@ import { config } from './config';
 import { ErrorBoundary, NotFound } from '@homebase-id/common-app';
 import { useConfiguration } from '../hooks/configuration/useConfiguration';
 import { useFetchManagedDomainsApexes } from '../hooks/managedDomain/useManagedDomain';
+import { useRegionHostRouting } from '../hooks/region/useRegionHostRouting';
 import { Loader } from '@homebase-id/common-app/icons';
 
 function App() {
+  // Before the flow starts, not just before the final POST: a name is checked
+  // against one cluster's registry, so the whole flow has to run on the cluster
+  // that will own the identity. Resolved above the query client so a cluster we
+  // already know we are leaving is asked nothing at all.
+  const isRoutingToRegionHost = useRegionHostRouting();
+
   return (
     <HelmetProvider>
       <Helmet>
@@ -43,44 +50,52 @@ function App() {
         <meta name="msapplication-TileColor" content="#2b5797" />
         <meta name="theme-color" content="#ff0000" />
       </Helmet>
-      <QueryClientProvider client={queryClient}>
-        <Router>
-          <Suspense fallback={<Layout />}>
-            <Routes>
-              <Route
-                path=""
-                element={
-                  <Layout>
-                    <Suspense>
-                      <ErrorBoundary>
-                        <RootRoute>
-                          <Outlet />
-                        </RootRoute>
-                      </ErrorBoundary>
-                    </Suspense>
-                  </Layout>
-                }
-              >
-                <Route path="/" element={<InvitationCodeCheck />}></Route>
-                <Route path={ROOT_PATH}>
-                  <Route index={true} element={<DomainRedirect />} />
-                  <Route path="managed-domain" element={<ClaimIdentity />} />
-                  <Route path="own-domain" element={<ProvisionOwnDomain />} />
-                  <Route
-                    path="*"
-                    element={
-                      <Layout>
-                        <NotFound />
-                      </Layout>
-                    }
-                  />
+      {isRoutingToRegionHost ? (
+        // Deliberately not <Layout>: its header and footer render <Link>, which
+        // needs the Router this branch exists to avoid mounting
+        <div className="flex min-h-screen flex-col bg-background text-foreground">
+          <Loader className="m-auto h-20 w-20" />
+        </div>
+      ) : (
+        <QueryClientProvider client={queryClient}>
+          <Router>
+            <Suspense fallback={<Layout />}>
+              <Routes>
+                <Route
+                  path=""
+                  element={
+                    <Layout>
+                      <Suspense>
+                        <ErrorBoundary>
+                          <RootRoute>
+                            <Outlet />
+                          </RootRoute>
+                        </ErrorBoundary>
+                      </Suspense>
+                    </Layout>
+                  }
+                >
+                  <Route path="/" element={<InvitationCodeCheck />}></Route>
+                  <Route path={ROOT_PATH}>
+                    <Route index={true} element={<DomainRedirect />} />
+                    <Route path="managed-domain" element={<ClaimIdentity />} />
+                    <Route path="own-domain" element={<ProvisionOwnDomain />} />
+                    <Route
+                      path="*"
+                      element={
+                        <Layout>
+                          <NotFound />
+                        </Layout>
+                      }
+                    />
+                  </Route>
                 </Route>
-              </Route>
-            </Routes>
-          </Suspense>
-        </Router>
-        {/* <ReactQueryDevtools initialIsOpen={false} /> */}
-      </QueryClientProvider>
+              </Routes>
+            </Suspense>
+          </Router>
+          {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+        </QueryClientProvider>
+      )}
     </HelmetProvider>
   );
 }

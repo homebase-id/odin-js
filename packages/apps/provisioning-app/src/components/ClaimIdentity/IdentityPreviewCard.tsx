@@ -6,7 +6,6 @@ import { Card, CardRow } from '../ui/Card/Card';
 import {
   domainFromPrefixAndApex,
   primaryMailFromDomain,
-  splitMailFromPrefixAndApex,
   websiteFromDomain,
 } from '../../helpers/common';
 
@@ -31,14 +30,7 @@ export const IdentityPreviewCard = ({
       </PreviewRow>
 
       <PreviewRow icon={Envelope} label={t('Email')} isLive={isLive}>
-        {isLive ? (
-          <>
-            <span className="block">{primaryMailFromDomain(domain)}</span>
-            <span className="block">{splitMailFromPrefixAndApex(domainPrefix, apex)}</span>
-          </>
-        ) : (
-          <Ghost>{t('encrypted, end to end')}</Ghost>
-        )}
+        {isLive ? primaryMailFromDomain(domain) : <Ghost>{t('encrypted, end to end')}</Ghost>}
       </PreviewRow>
 
       <PreviewRow icon={ChatBubble} label={t('Chat')} isLive={isLive}>
