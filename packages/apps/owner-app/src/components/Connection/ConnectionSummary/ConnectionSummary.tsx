@@ -12,6 +12,7 @@ import {
   useDetailedConnectionInfo,
   useIsConnected,
   ContactImage,
+  formatDateExludingYearIfCurrent,
 } from '@homebase-id/common-app';
 import {
   Envelope,
@@ -35,6 +36,7 @@ import {
   ContactFile,
 } from '@homebase-id/js-lib/network';
 import { useVerifyConnection } from '../../../hooks/connections/useVerifyConnection';
+import { PendingEnrollments } from './PendingEnrollments';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { Link } from 'react-router-dom';
 
@@ -129,6 +131,7 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
               )}
 
               <CirclesSummary odinId={odinId} />
+              <ReviewedSummary odinId={odinId} />
             </span>
           </>
         }
@@ -248,7 +251,30 @@ export const ConnectionSummary = ({ odinId, contactId }: ContactInfoProps) => {
           </div>
         </div>
       </Section>
+      <PendingEnrollments odinId={odinId} />
     </>
+  );
+};
+
+const ReviewedSummary = ({ odinId }: { odinId?: string }) => {
+  const {
+    fetch: { data: connectionInfo },
+  } = useConnectionInfo({ odinId: odinId });
+
+  if (connectionInfo?.status !== 'connected') return null;
+
+  const reviewedAt = (connectionInfo as ConnectionInfo).reviewedAt;
+
+  return (
+    <p className="text-sm text-slate-400">
+      {reviewedAt ? (
+        <>
+          {t('Reviewed')}: {formatDateExludingYearIfCurrent(new Date(reviewedAt))}
+        </>
+      ) : (
+        t('Not yet reviewed')
+      )}
+    </p>
   );
 };
 

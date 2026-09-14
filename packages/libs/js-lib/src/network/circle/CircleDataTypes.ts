@@ -24,6 +24,8 @@ export interface ActiveConnection extends DotYouProfile {
   connectionRequestOrigin: ConnectionRequestOrigin;
   hasVerificationHash: boolean;
   rku: boolean;
+  /** When the owner reviewed this connection; null or absent means it has never been reviewed. */
+  reviewedAt?: number | null;
 }
 
 export interface CircleGrant {
@@ -37,11 +39,42 @@ export interface AppGrant {
   permissionSet: PermissionSet;
 }
 
+/**
+ * A circle the owner chose for this connection that nothing has been able to grant yet, because the
+ * caller could not source the storage keys for the circle's drives. It waits on the app that owns the
+ * circle coming back for it, or on the owner.
+ *
+ * The names are resolved by the server when the connection is read, not stored on the entry, so a
+ * renamed circle or app reads correctly rather than showing whatever it was called at review time.
+ */
+export interface AwaitingAppEnrollment {
+  circleId: string;
+  /** Null when the circle has been deleted since the review. */
+  circleName?: string | null;
+  /** Null for an owner circle, which has no app. */
+  appId?: string | null;
+  /** Null for an owner circle, or for an app that has since been deleted. */
+  appName?: string | null;
+}
+
 export interface AccessGrant {
   isRevoked: false;
   masterKeyEncryptedKeyStoreKey: unknown;
   circleGrants: CircleGrant[];
   appGrants: Record<string, AppGrant>;
+
+  /**
+   * Circles asked for through an app's write-only grant whose grant is deposited but not yet
+   * converted. Not a member of these yet, but closer than awaitingApps: the key material exists and
+   * only needs the Peer Key to be in scope.
+   */
+  pendingCircleIds?: string[];
+
+  /**
+   * Circles waiting on the app that owns them. Further from membership than pendingCircleIds -- no
+   * key material has been recorded at all.
+   */
+  awaitingApps?: AwaitingAppEnrollment[];
 }
 
 export type ConnectionRequestOrigin = 'identityowner' | 'introduction' | 'identityownerapp';
@@ -56,6 +89,8 @@ export interface ConnectionInfo {
   clientAccessTokenSharedSecret: string;
   connectionRequestOrigin: ConnectionRequestOrigin;
   introducerOdinId?: string;
+  /** When the owner reviewed this connection; null or absent means it has never been reviewed. */
+  reviewedAt?: number | null;
 }
 
 export interface IncomingConnectionRequest {
@@ -134,6 +169,17 @@ export interface CircleDefinition {
    * definition can hand a circle to an app.
    */
   appId?: string;
+
+  /**
+   * True when the app tree declares this circle, so every version upgrade re-applies its owner,
+   * grant rule and designation -- an edit to any of the three is undone without warning. Derived
+   * server-side from the build's app catalogue, so it is read-only: sending it back changes
+   * nothing.
+   *
+   * Not the same as `appId`. An app's runtime circle -- one per feed channel, say -- is
+   * app-owned but not declared anywhere, and stays exactly as the owner leaves it.
+   */
+  isTreeDeclared?: boolean;
 
   /**
    * IMPORTANT: round-trip these when updating a circle. This same type is the update body, and

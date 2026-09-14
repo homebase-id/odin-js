@@ -9,6 +9,7 @@ import { PageMeta } from '@homebase-id/common-app';
 import {
   AUTO_CONNECTIONS_CIRCLE_ID,
   CONFIRMED_CONNECTIONS_CIRCLE_ID,
+  CircleDefinition,
   Membership,
 } from '@homebase-id/js-lib/network';
 import { Link } from 'react-router-dom';
@@ -19,7 +20,6 @@ import {
   Fact,
   GRANT_ON_CAVEAT,
   GRANT_ON_HINTS,
-  GRANT_ON_LABELS,
   OWNERSHIP_HINTS,
   formatTimestamp,
 } from '../../../components/Apps/AppOverviewParts';
@@ -27,6 +27,11 @@ import DomainCard from '../../../components/Connection/DomainCard/DomainCard';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import CircleAppInteractionDialog from '../../../components/Circles/CircleAppInteractionDialog/CircleAppInteractionDialog';
 import CircleDialog from '../../../components/Circles/CircleDialog/CircleDialog';
+import { SetOwningAppDialog } from '../../../components/Apps/SetOwningAppDialog/SetOwningAppDialog';
+import { ReassignOwningAppDialog } from '../../../components/Apps/SetOwningAppDialog/ReassignOwningAppDialog';
+import { EnrollCandidatesDialog } from '../../../components/Circles/EnrollCandidatesDialog/EnrollCandidatesDialog';
+import { GrantOnEditor } from '../../../components/Circles/GrantOnEditor/GrantOnEditor';
+import { useEnrollmentCandidates } from '../../../hooks/apps/useEnrollmentCandidates';
 import MemberLookupDialog from '../../../components/Circles/MemberLookupDialog/MemberLookupDialog';
 import DrivePermissionSelectorDialog from '../../../components/Drives/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
 import {
@@ -67,6 +72,8 @@ const CircleDetails = () => {
     enableCircle: { mutate: enableCircle, error: enableCircleError },
     disableCircle: { mutate: disableCircle, error: disableCircleError },
     removeCircle: { mutateAsync: removeCircle, error: removeCircleError },
+    setOwningApp: { mutateAsync: setOwningApp, error: setOwningAppError },
+    reassignOwningApp: { mutateAsync: reassignOwningApp, error: reassignOwningAppError },
   } = useCircle({ circleId: decodedCircleKey });
 
   const { data: apps } = useApps().fetchRegistered;
@@ -75,6 +82,8 @@ const CircleDetails = () => {
   const [isOpenMemberLookup, setIsOpenMemberLookup] = useState(false);
   const [isOpenAppInteractionDialog, setIsOpenAppInteractionDialog] = useState(false);
   const [isDrivesEditOpen, setIsDrivesEditOpen] = useState(false);
+  const [isSetOwningAppOpen, setIsSetOwningAppOpen] = useState(false);
+  const [isReassignOwningAppOpen, setIsReassignOwningAppOpen] = useState(false);
 
   if (circleLoading) return <LoadingDetailPage />;
   if (!circle || !circle.id || !decodedCircleKey) return <>{t('No matching circle found')}</>;
@@ -98,6 +107,8 @@ const CircleDetails = () => {
       <ErrorNotification error={disableCircleError} />
       <ErrorNotification error={addMembersError} />
       <ErrorNotification error={removeMembersError} />
+      <ErrorNotification error={setOwningAppError} />
+      <ErrorNotification error={reassignOwningAppError} />
       <ErrorNotification error={removeCircleError} />
       <PageMeta
         icon={Circles}
@@ -197,15 +208,35 @@ const CircleDetails = () => {
                     {owningApp.name}
                   </Link>
                   <span className="text-slate-400">{` ${t('(app)')}`}</span>
+                  {!isSystemCircle ? (
+                    <ReassignLink onClick={() => setIsReassignOwningAppOpen(true)} />
+                  ) : null}
                 </>
               ) : (
                 <>
                   <span className="break-all font-mono">{circle.appId}</span>
                   <span className="text-slate-400">{` ${t('(app, no longer registered)')}`}</span>
+                  {!isSystemCircle ? (
+                    <ReassignLink onClick={() => setIsReassignOwningAppOpen(true)} />
+                  ) : null}
                 </>
               )
             ) : (
-              t('You (not owned by an app)')
+              <span className="flex flex-row flex-wrap items-center gap-2">
+                {t('No app owns this circle')}
+                {/* Only offered while it is still possible: the server sets ownership once and
+                    refuses to move it, so the action disappears rather than failing. System
+                    circles are the app tree's to stamp, not the owner's to guess. */}
+                {!isSystemCircle ? (
+                  <button
+                    type="button"
+                    className="text-primary hover:underline"
+                    onClick={() => setIsSetOwningAppOpen(true)}
+                  >
+                    {t('Assign to an app')}
+                  </button>
+                ) : null}
+              </span>
             )}
           </Fact>
 
@@ -222,7 +253,7 @@ const CircleDetails = () => {
               label={t('Granted on')}
               hint={`${GRANT_ON_HINTS[circle.grantOn] ?? ''} ${GRANT_ON_CAVEAT}`.trim()}
             >
-              {GRANT_ON_LABELS[circle.grantOn] ?? circle.grantOn}
+              <GrantOnEditor circle={circle} isSystemCircle={isSystemCircle} />
             </Fact>
           ) : null}
 
@@ -249,6 +280,12 @@ const CircleDetails = () => {
           )
         }
       />
+
+      {/* Says there is something to do here. The app's page carries the same prompt, but somebody
+          looking at the circle itself is the likelier person to act on it, and they would
+          otherwise see a member list with no sign that anyone is missing from it. */}
+      {!isSystemCircle ? <CircleEnrollmentPrompt circle={circle} /> : null}
+
       <div className="py-5">
         {members?.length && !membersLoading ? (
           <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10">
@@ -379,9 +416,41 @@ const CircleDetails = () => {
           setIsDrivesEditOpen(false);
         }}
       />
+
+      <SetOwningAppDialog
+        title={`${t('Assign')} "${circle.name}" ${t('to an app')}`}
+        subject="circle"
+        isOpen={isSetOwningAppOpen}
+        circleDriveGrants={circle.driveGrants}
+        onCancel={() => setIsSetOwningAppOpen(false)}
+        onConfirm={async (appId) => {
+          await setOwningApp({ circleId: circleId, appId: appId });
+          setIsSetOwningAppOpen(false);
+        }}
+      />
+
+      <ReassignOwningAppDialog
+        title={`${t('Reassign')} "${circle.name}"`}
+        subject={t('circle')}
+        isOpen={isReassignOwningAppOpen}
+        currentAppName={owningApp?.name}
+        onCancel={() => setIsReassignOwningAppOpen(false)}
+        onConfirm={async (appId) => {
+          await reassignOwningApp({ circleId: circleId, appId: appId });
+          setIsReassignOwningAppOpen(false);
+        }}
+      />
     </>
   );
 };
+
+/** The way out of an ownership that is already set. Understated on purpose -- it is the escape
+    hatch, not something to invite. */
+const ReassignLink = ({ onClick }: { onClick: () => void }) => (
+  <button type="button" className="ml-2 text-sm text-slate-400 hover:underline" onClick={onClick}>
+    {t('Change')}
+  </button>
+);
 
 const CircleMemberCard = ({
   circleId,
@@ -483,3 +552,42 @@ const CircleMemberCard = ({
 };
 
 export default CircleDetails;
+
+/**
+ * Contacts eligible for this circle who are not in it, and a way into reviewing them.
+ *
+ * Only ever appears for a circle an app owns: the offer is built from the app's circles, and a
+ * circle belonging to no app has no app-declared rule (GrantOn) for who should be in it.
+ */
+const CircleEnrollmentPrompt = ({ circle }: { circle: CircleDefinition }) => {
+  const {
+    fetch: { data: candidates },
+  } = useEnrollmentCandidates(circle.appId ?? undefined);
+  const [isOpen, setIsOpen] = useState(false);
+
+  if (!circle.appId) return null;
+
+  const offer = candidates?.find((c) => stringGuidsEqual(c.circleId, circle.id));
+  if (!offer?.candidates?.length) return null;
+
+  // Enums arrive as camelCase strings, not their numeric values. Naming the reason beats
+  // "some contacts".
+  const who = offer.grantOn === 'review' ? t('reviewed contacts are') : t('contacts are');
+
+  return (
+    <div className="flex flex-row flex-wrap items-center gap-2 rounded-lg bg-slate-100 p-3 text-sm dark:bg-slate-900">
+      <span>
+        {offer.candidates.length} {t('of your')} {who} {t('not in this circle.')}
+      </span>
+      <button
+        type="button"
+        className="text-primary hover:underline"
+        onClick={() => setIsOpen(true)}
+      >
+        {t('Review and add')}
+      </button>
+
+      <EnrollCandidatesDialog circle={circle} isOpen={isOpen} onClose={() => setIsOpen(false)} />
+    </div>
+  );
+};
