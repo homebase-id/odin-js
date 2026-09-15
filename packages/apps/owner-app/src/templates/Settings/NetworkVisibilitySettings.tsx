@@ -44,6 +44,13 @@ export const NetworkVisibilitySettings = () => {
     });
   };
 
+  const handleDisableAutoAcceptIntroductionsChange: React.MouseEventHandler = async (e) => {
+    await updateFlag({
+      name: 'disableAutoAcceptIntroductions',
+      value: e.currentTarget.id === 'disableAutoAcceptIntroductionsYes',
+    });
+  };
+
   const handleUseReviewedSecurityTierChange: React.MouseEventHandler = async (e) => {
     await updateFlag({
       name: 'useReviewedSecurityTier',
@@ -185,6 +192,39 @@ export const NetworkVisibilitySettings = () => {
               name="disableAutoAcceptConnectionRequests"
               defaultChecked={systemSettings?.disableAutoAcceptConnectionRequests === false}
               onClick={handleDisableAutoAcceptChange}
+            />
+          </Section>
+          <Section
+            title={
+              <div className="flex flex-col">
+                {t('Disable auto-accept of introductions')}
+                <small className="text-sm text-gray-400">
+                  {t(
+                    'Controls whether a connection is made automatically when someone introduces you to another identity'
+                  )}
+                </small>
+              </div>
+            }
+          >
+            <RadioOption
+              label={t('Yes')}
+              description={t(
+                'Nothing is connected automatically — you do not send a request to people you are introduced to, and incoming requests (including ones sent from apps) wait in your pending list for you to accept'
+              )}
+              id="disableAutoAcceptIntroductionsYes"
+              name="disableAutoAcceptIntroductions"
+              defaultChecked={systemSettings?.disableAutoAcceptIntroductions === true}
+              onClick={handleDisableAutoAcceptIntroductionsChange}
+            />
+            <RadioOption
+              label={t('No')}
+              description={t(
+                'When you are introduced to someone, a connection request is sent and accepted automatically, so you connect without any manual action from you'
+              )}
+              id="disableAutoAcceptIntroductionsNo"
+              name="disableAutoAcceptIntroductions"
+              defaultChecked={systemSettings?.disableAutoAcceptIntroductions !== true}
+              onClick={handleDisableAutoAcceptIntroductionsChange}
             />
           </Section>
           <Section
