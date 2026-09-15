@@ -50,11 +50,11 @@ const Circles = lazy(() => import('../templates/Circles/Circles/Circles'));
 const CircleDetails = lazy(() => import('../templates/Circles/CircleDetails/CircleDetails'));
 const Apps = lazy(() => import('../templates/Apps/Apps/Apps'));
 const AppDetails = lazy(() => import('../templates/Apps/AppDetails/AppDetails'));
-const AppsOverview = lazy(() => import('../templates/Apps/Overview/Overview'));
 
 const Website = lazy(() => import('../templates/Website/Website'));
 const Following = lazy(() => import('../templates/Follow/Follow'));
 
+const AppsDashboard = lazy(() => import('../templates/Apps/AppsDashboard/AppsDashboard'));
 const Drives = lazy(() => import('../templates/Drives/Drives/Drives'));
 const DriveDetails = lazy(() => import('../templates/Drives/DriveDetails/DriveDetails'));
 const FileDetails = lazy(() => import('../templates/Drives/DriveDetails/FileDetails'));
@@ -213,13 +213,14 @@ function App() {
               <Route path="third-parties" element={<Apps />}></Route>
               <Route path="third-parties/apps/" element={<Apps />}></Route>
               <Route path="third-parties/apps/:appKey" element={<AppDetails />}></Route>
-              <Route path="third-parties/overview" element={<AppsOverview />}></Route>
 
               <Route path="follow" element={<Following />}></Route>
               <Route path="follow/followers" element={<Following />}></Route>
               <Route path="follow/followers/:followerKey" element={<Following />}></Route>
               <Route path="follow/following" element={<Following />}></Route>
               <Route path="follow/following/:toFollowKey" element={<Following />}></Route>
+
+              <Route path="apps" element={<AppsDashboard />}></Route>
 
               <Route path="drives" element={<Drives />}></Route>
               <Route path="drives/:driveKey" element={<DriveDetails />}></Route>
