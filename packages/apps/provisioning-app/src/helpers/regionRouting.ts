@@ -27,6 +27,14 @@ const isRoutableHost = (hostname: string): boolean =>
   Object.values(config.provisioningHosts).includes(hostname);
 
 /**
+ * Whether this page's host takes part in regions at all. Anywhere else the flow
+ * behaves as it did before regions existed: no region shown, none to pick, none
+ * sent. Same predicate the redirect uses, so the UI can never promise a move the
+ * redirect would not make.
+ */
+export const canRouteRegions = isRoutableHost(window.location.hostname);
+
+/**
  * Absolute URL for this same page on the region's provisioning host, or null
  * when there is nothing to do: no region resolved yet, no host mapped for it,
  * a host this build does not route, or the user is already in the right place.

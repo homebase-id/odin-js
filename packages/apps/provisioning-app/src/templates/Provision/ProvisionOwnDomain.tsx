@@ -50,8 +50,9 @@ const ProvisionOwnDomain = () => {
 
   // Both fields ride along on a region change, for the same reason the managed
   // flow carries the claimed name: the user should not land on an empty form.
-  const onRegionChange = (next: Region) =>
-    chooseRegion(next, { carry: { domain }, carryInFragment: { email } });
+  const onRegionChange =
+    chooseRegion &&
+    ((next: Region) => chooseRegion(next, { carry: { domain }, carryInFragment: { email } }));
 
   // Consumed once. Left in the URL it would resurrect a stale domain on the next
   // reload, outranking whatever the user had typed since.

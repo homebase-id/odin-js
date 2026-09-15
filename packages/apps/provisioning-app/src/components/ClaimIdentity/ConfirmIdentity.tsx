@@ -15,7 +15,8 @@ interface ConfirmIdentityProps {
   onEmailChange: (email: string) => void;
   region: Region | null;
   regionSource: RegionSource | null;
-  onRegionChange: (region: Region) => void;
+  // Absent on a host that does not route regions: nothing to show, nothing to pick
+  onRegionChange?: (region: Region) => void;
   invitationCode: string | null;
   onBack: () => void;
   onCreated: () => void;
@@ -37,6 +38,8 @@ const ConfirmIdentity = ({
     createManagedDomain: { mutate: createManagedDomain, error, isPending },
   } = useCreateManagedDomain();
 
+  const needsRegion = !!onRegionChange && !region;
+
   return (
     <>
       <AlertError error={error} />
@@ -45,7 +48,7 @@ const ConfirmIdentity = ({
         className="w-full"
         onSubmit={(e) => {
           e.preventDefault();
-          if (!e.currentTarget.reportValidity() || !region || isPending) return;
+          if (!e.currentTarget.reportValidity() || needsRegion || isPending) return;
           createManagedDomain(
             { domainPrefix, domainApex, invitationCode, region },
             { onSuccess: onCreated }
@@ -62,9 +65,11 @@ const ConfirmIdentity = ({
 
         <IdentityPreviewCard className="mt-5" domainPrefix={domainPrefix} apex={domainApex} />
 
-        <div className="mt-5">
-          <RegionPicker region={region} source={regionSource} onChange={onRegionChange} />
-        </div>
+        {onRegionChange ? (
+          <div className="mt-5">
+            <RegionPicker region={region} source={regionSource} onChange={onRegionChange} />
+          </div>
+        ) : null}
 
         <div className="mt-8">
           <Label htmlFor="email">
@@ -101,7 +106,7 @@ const ConfirmIdentity = ({
             size="large"
             icon={Arrow}
             buttonType="submit"
-            isDisabled={!region || !email || isPending}
+            isDisabled={needsRegion || !email || isPending}
             state={isPending ? 'loading' : undefined}
           >
             {region
