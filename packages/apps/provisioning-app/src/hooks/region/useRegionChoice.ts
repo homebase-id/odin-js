@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { detectRegion, isRegion, Region, RegionSource } from '../../helpers/region';
-import { regionRedirectUrl } from '../../helpers/regionRouting';
+import { canRouteRegions, regionRedirectUrl } from '../../helpers/regionRouting';
 import { carriedFragmentFor, clearCarriedFragment } from '../../helpers/carriedFragment';
 
 /**
@@ -20,6 +20,11 @@ import { carriedFragmentFor, clearCarriedFragment } from '../../helpers/carriedF
  * would freeze one guess forever: a stale `?region=` from an earlier visit
  * outranks detection on every later load, so a wrong guess could never correct
  * itself.
+ *
+ * On a host that does not route regions (a demo, dev or preview host, or a brand
+ * with a single cluster) there is no region and no `chooseRegion`: the identity
+ * lands on whichever cluster served the page, so naming a region there would be
+ * a promise nothing keeps.
  */
 export const useRegionChoice = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,6 +33,8 @@ export const useRegionChoice = () => {
     region: Region | null;
     source: RegionSource | null;
   }>(() => {
+    if (!canRouteRegions) return { region: null, source: null };
+
     const param = searchParams.get('region');
     return isRegion(param) ? { region: param, source: null } : detectRegion();
   });
@@ -77,5 +84,5 @@ export const useRegionChoice = () => {
   // having consumed anything: a fragment nobody restored is still stale.
   useEffect(() => clearCarriedFragment(), []);
 
-  return { region, source, chooseRegion };
+  return { region, source, chooseRegion: canRouteRegions ? chooseRegion : undefined };
 };

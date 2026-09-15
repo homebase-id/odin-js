@@ -103,8 +103,10 @@ const ClaimIdentity = () => {
   // empty form. It is re-checked on arrival: the registry that cleared it
   // belongs to the cluster being left, and does not span clusters either. The
   // email travels in the fragment, which never reaches either cluster.
-  const onRegionChange = (next: Region) =>
-    chooseRegion(next, { carry: { claim: domain }, carryInFragment: { email } });
+  const onRegionChange =
+    chooseRegion &&
+    ((next: Region) =>
+      chooseRegion(next, { carry: { claim: domain }, carryInFragment: { email } }));
 
   const goToOwnDomain = () => {
     // Carry the whole query over — own-domain needs returnUrl too — with the resolved region on top.

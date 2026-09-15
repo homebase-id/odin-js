@@ -23,7 +23,8 @@ interface Props {
     region: Region | null;
     // Null when the region was picked by the user rather than detected
     regionSource: RegionSource | null;
-    onRegionChange: (region: Region) => void;
+    // Absent on a host that does not route regions: nothing to show, nothing to pick
+    onRegionChange?: (region: Region) => void;
 }
 
 const EnteringDetails = ({
@@ -56,6 +57,8 @@ const EnteringDetails = ({
         fetchManagedDomainApexes: {data: managedDomainApexes},
     } = useFetchManagedDomainsApexes();
 
+    const needsRegion = !!onRegionChange && !region;
+
     //
     // RENDERING
     //
@@ -79,7 +82,7 @@ const EnteringDetails = ({
                     // records - the DNS step's Validate action handles that
                     if (
                         cleaned &&
-                        region &&
+                        !needsRegion &&
                         e.currentTarget.checkValidity() &&
                         isOwnDomainAvailable &&
                         statusIsOwnDomainAvailable === 'success'
@@ -116,9 +119,11 @@ const EnteringDetails = ({
                 {/* Before the DNS records, not after: those records name this cluster's
                     nameservers and IP addresses, so which cluster serves the rest of the
                     flow has to be settled while it still costs nothing to change */}
-                <div className="mt-8">
-                    <RegionPicker region={region} source={regionSource} onChange={onRegionChange}/>
-                </div>
+                {onRegionChange ? (
+                    <div className="mt-8">
+                        <RegionPicker region={region} source={regionSource} onChange={onRegionChange}/>
+                    </div>
+                ) : null}
 
                 <div className="mt-8">
                     <Label htmlFor="email">
@@ -157,7 +162,7 @@ const EnteringDetails = ({
                         className="h-[2.66rem]"
                         icon={Arrow}
                         buttonType="submit"
-                        isDisabled={!region || !(isOwnDomainAvailable && statusIsOwnDomainAvailable === 'success')}
+                        isDisabled={needsRegion || !(isOwnDomainAvailable && statusIsOwnDomainAvailable === 'success')}
                         state={
                             statusIsOwnDomainAvailable !== 'success' ? statusIsOwnDomainAvailable : undefined
                         }
