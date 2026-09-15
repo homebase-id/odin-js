@@ -9,8 +9,16 @@ import { useEffect, useMemo, useState } from 'react';
 import DrivePermissionView from '../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
 import Section from '../../components/ui/Sections/Section';
-import { t, Label, Select, ActionButton, DomainHighlighter } from '@homebase-id/common-app';
-import { Arrow } from '@homebase-id/common-app/icons';
+import {
+  t,
+  Label,
+  Select,
+  ActionButton,
+  DomainHighlighter,
+  useDotYouClient,
+} from '@homebase-id/common-app';
+import { Arrow, Loader } from '@homebase-id/common-app/icons';
+import { getDataVersionInfo } from '../../provider/system/DataConversionProvider';
 
 type AuthDuration = 'always' | 'for-1-year' | 'for-1-month' | 'for-1-week' | 'for-1-day' | 'never';
 
@@ -19,17 +27,78 @@ const REDIRECT_URI_PARAM = 'redirect_uri';
 const CLIENT_TYPE_PARAM = 'client_type';
 const CLIENT_ID_PARAM = 'client_id';
 
+/**
+ * Sends the owner to the upgrade screen when their identity's data is behind, rather than letting
+ * them consent into a sign-in that is about to fail.
+ *
+ * Logging in to approve a sign-in is itself what schedules the upgrade
+ * (OwnerAuthenticationHandler -> VersionUpgradeScheduler), so the upgrade starts *during* this
+ * flow: consent succeeds, and the code-for-token exchange a fraction of a second later is refused
+ * with a 503 by VersionUpgradeMiddleware. Waiting here turns a failure into a few seconds of
+ * spinner, and /owner/data-upgrade already polls to completion and follows returnUrl afterwards.
+ *
+ * Gated on requiresUpgrade -- the durable version comparison -- and NOT on "an upgrade is running".
+ * The run flag is only set once the background job starts, so between the owner authenticating and
+ * the job being picked up it reads false while an upgrade is certainly coming. That gap is exactly
+ * what let the failing sign-in through.
+ */
+const useUpgradeRequired = () => {
+  const { getDotYouClient } = useDotYouClient();
+  const [required, setRequired] = useState<boolean | undefined>(undefined);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getDataVersionInfo(getDotYouClient())
+      .then((info) => !cancelled && setRequired(!!info?.requiresUpgrade))
+      // Fail open. This is an infrastructure probe standing in front of login, so a probe that
+      // cannot answer must not be the reason somebody cannot sign in; the worst case is the
+      // pre-existing behaviour.
+      .catch(() => !cancelled && setRequired(false));
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return required;
+};
+
 const YouAuthConsent = () => {
   const [searchParams] = useSearchParams();
   const returnUrl = searchParams.get(RETURN_URL_PARAM);
   const [name, setName] = useState<string | null>();
   const [duration, setDuration] = useState<AuthDuration>('never');
+  const upgradeRequired = useUpgradeRequired();
+
+  useEffect(() => {
+    if (!upgradeRequired) return;
+
+    // Come back to this very page once the data is current, consent included.
+    const here = `${window.location.pathname}${window.location.search}`;
+    window.location.href = `/owner/data-upgrade?${RETURN_URL_PARAM}=${encodeURIComponent(here)}`;
+  }, [upgradeRequired]);
 
   if (!returnUrl) {
     console.error(
       'No returnUrl found, we cannot redirect back to the target domain... => Aborting youauth'
     );
     return null;
+  }
+
+  // Nothing is shown until the probe answers: rendering consent and then yanking it away once the
+  // answer arrives would be worse than a brief spinner.
+  if (upgradeRequired === undefined || upgradeRequired) {
+    return (
+      <MinimalLayout noShadedBg={true}>
+        <section className="flex min-h-screen flex-col justify-center md:min-h-0 md:py-20">
+          <div className="container mx-auto flex flex-row items-center gap-3 p-5">
+            <Loader className="h-6 w-6" />
+            <p>{upgradeRequired ? t('Updating your identity...') : t('One moment...')}</p>
+          </div>
+        </section>
+      </MinimalLayout>
+    );
   }
 
   const returnUrlParams = new URL(returnUrl).searchParams;
