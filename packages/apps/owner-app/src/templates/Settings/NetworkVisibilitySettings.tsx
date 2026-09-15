@@ -51,6 +51,13 @@ export const NetworkVisibilitySettings = () => {
     });
   };
 
+  const handleDisableAllowIntroductionsChange: React.MouseEventHandler = async (e) => {
+    await updateFlag({
+      name: 'disableAllowIntroductions',
+      value: e.currentTarget.id === 'nobodyCanIntroduce',
+    });
+  };
+
   const handleCanViewWhoIFollowChange: React.MouseEventHandler = async (e) => {
     let allowAnonymous = false;
     let allowAuthenticated = false;
@@ -252,6 +259,35 @@ export const NetworkVisibilitySettings = () => {
                 systemSettings?.allConnectedIdentitiesCanViewWhoIFollow === false
               }
               onClick={handleCanViewWhoIFollowChange}
+            />
+          </Section>
+          <Section
+            title={
+              <div className="flex flex-col">
+                {t('Who can introduce you to other people?')}
+                <small className="text-sm text-gray-400">
+                  {t(
+                    'An introduction lets one of your connections suggest that you connect with someone they know'
+                  )}
+                </small>
+              </div>
+            }
+          >
+            <RadioOption
+              label={t('All connections')}
+              description={t('Any of your connections can introduce you to people they know')}
+              id="allConnectionsCanIntroduce"
+              name="disableAllowIntroductions"
+              defaultChecked={systemSettings?.disableAllowIntroductions !== true}
+              onClick={handleDisableAllowIntroductionsChange}
+            />
+            <RadioOption
+              label={t('Nobody')}
+              description={t('Introductions sent to you are refused, whoever they come from')}
+              id="nobodyCanIntroduce"
+              name="disableAllowIntroductions"
+              defaultChecked={systemSettings?.disableAllowIntroductions === true}
+              onClick={handleDisableAllowIntroductionsChange}
             />
           </Section>
           <Section
