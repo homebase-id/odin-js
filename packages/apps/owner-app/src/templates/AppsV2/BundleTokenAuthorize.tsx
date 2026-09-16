@@ -117,7 +117,8 @@ const BundleConsent = ({ params }: { params: BundleAuthorizeParams }) => {
 
   // The first answer covers every app, so deselected apps can still be named on their cards.
   const [firstPreview, setFirstPreview] = useState<BundleAuthorizationPreview | undefined>();
-  if (preview && !firstPreview && !deselected.length && !isPlaceholderData) setFirstPreview(preview);
+  if (preview && !firstPreview && !deselected.length && !isPlaceholderData)
+    setFirstPreview(preview);
 
   const [isAuthorizing, setIsAuthorizing] = useState(false);
   const [authorizeError, setAuthorizeError] = useState<string | undefined>();
@@ -286,6 +287,54 @@ const actionLabel = (app: BundleAppPreview) => {
   return app.isRegistered ? t('Already registered') : t('Not installed');
 };
 
+/** One line for a collapsed card: what allowing does to this app. */
+const changeSummary = (app: BundleAppPreview | undefined) => {
+  const diff = app?.validation?.diff;
+  if (!app || !diff) {
+    return app?.isRegistered
+      ? t('Already installed; it keeps the access it has.')
+      : t('Checking...');
+  }
+
+  const parts: string[] = [];
+  const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+  if (diff.drivesToCreate.length || diff.circlesToCreate.length) {
+    parts.push(
+      `${t('creates')} ${[
+        diff.drivesToCreate.length
+          ? count(diff.drivesToCreate.length, t('drive'), t('drives'))
+          : '',
+        diff.circlesToCreate.length
+          ? count(diff.circlesToCreate.length, t('circle'), t('circles'))
+          : '',
+      ]
+        .filter(Boolean)
+        .join(` ${t('and')} `)}`
+    );
+  }
+  if (diff.driveAccessGained.length) {
+    parts.push(
+      `${t('gains access to')} ${count(diff.driveAccessGained.length, t('drive'), t('drives'))}`
+    );
+  }
+  if (diff.driveAccessLost.length) {
+    parts.push(
+      `${t('loses access to')} ${count(diff.driveAccessLost.length, t('drive'), t('drives'))}`
+    );
+  }
+  if (diff.permissionKeysGained.length || diff.permissionKeysLost.length) {
+    parts.push(t('changes its permissions'));
+  }
+  if (diff.authorizedCirclesAdded.length || diff.authorizedCirclesRemoved.length) {
+    parts.push(t('changes which circles can use it'));
+  }
+
+  if (!parts.length) return t('Nothing changes: the app is up to date.');
+  const sentence = parts.join(', ');
+  return sentence.charAt(0).toUpperCase() + sentence.slice(1);
+};
+
 const BundleAppCard = ({
   request,
   preview,
@@ -313,6 +362,7 @@ const BundleAppCard = ({
   const problems = [...(preview?.problems ?? []), ...(validation?.problems ?? [])];
   const action = `${preview?.action ?? ''}`.toLowerCase();
   const inputId = `bundle-app-${request.appId}`;
+  const [isDetails, setIsDetails] = useState(false);
 
   return (
     <Section
@@ -349,7 +399,9 @@ const BundleAppCard = ({
               ) : null}
             </span>
             {appSlug ? (
-              <small className="font-mono text-sm font-normal text-slate-400">/apps/{appSlug}</small>
+              <small className="font-mono text-sm font-normal text-slate-400">
+                /apps/{appSlug}
+              </small>
             ) : null}
           </span>
         </label>
@@ -361,21 +413,31 @@ const BundleAppCard = ({
         </p>
       ) : (
         <div className={isStale ? 'opacity-70' : ''}>
+          {/* Problems stay visible: they are what blocks Allow. */}
           {problems.length ? <ProblemsList problems={problems} /> : null}
+          <p className="text-slate-500 dark:text-slate-400">{changeSummary(preview)}</p>
           {validation && request.manifest ? (
-            <ValidationDiffSummary
-              manifest={request.manifest}
-              validation={validation}
-              driveName={driveName}
-              circleName={circleName}
-              compact={true}
-            />
-          ) : !problems.length ? (
-            <p className="text-slate-400">
-              {preview?.isRegistered
-                ? t('Already installed; it keeps the access it has.')
-                : t('Checking...')}
-            </p>
+            <>
+              <button
+                type="button"
+                onClick={() => setIsDetails(!isDetails)}
+                className={`mt-2 flex flex-row items-center ${isDetails ? 'font-bold' : 'text-sm italic'}`}
+              >
+                {t('Details')}
+                <Arrow
+                  className={`ml-2 h-5 w-5 transition-transform ${isDetails ? 'rotate-90' : ''}`}
+                />
+              </button>
+              {isDetails ? (
+                <ValidationDiffSummary
+                  manifest={request.manifest}
+                  validation={validation}
+                  driveName={driveName}
+                  circleName={circleName}
+                  compact={true}
+                />
+              ) : null}
+            </>
           ) : null}
         </div>
       )}
