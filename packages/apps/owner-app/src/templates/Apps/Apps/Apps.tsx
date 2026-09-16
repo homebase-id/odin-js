@@ -25,6 +25,10 @@ const Apps = () => {
             title: `Services`,
             path: `/owner/third-parties/services`,
           },
+          {
+            title: `Apps (V2)`,
+            path: `/owner/apps-v2`,
+          },
         ]}
         className="mb-6"
       />

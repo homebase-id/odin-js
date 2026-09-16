@@ -63,6 +63,12 @@ const Security = lazy(() => import('../templates/Security/Security'));
 
 const Debug = lazy(() => import('../templates/Debug/Debug'));
 
+const AppRegistrationV2 = lazy(() => import('../templates/AppsV2/AppRegistrationV2'));
+const BundleTokenAuthorize = lazy(() => import('../templates/AppsV2/BundleTokenAuthorize'));
+const AppsV2 = lazy(() => import('../templates/AppsV2/AppsV2'));
+const AppV2Details = lazy(() => import('../templates/AppsV2/AppV2Details'));
+const BundleTokens = lazy(() => import('../templates/AppsV2/BundleTokens'));
+
 import './App.css';
 import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import {
@@ -167,6 +173,8 @@ function App() {
               <Route path="apprequest-circles" element={<ExtendCirclePermissionsFromApp />} />
               <Route path="apprequest-drives" element={<UpdateDriveDetailsFromApp />} />
               <Route path="data-upgrade" element={<DataUpgrade />} />
+              <Route path="app-registration" element={<AppRegistrationV2 />} />
+              <Route path="bundle-tokens/authorize" element={<BundleTokenAuthorize />} />
             </Route>
 
             <Route
@@ -221,6 +229,9 @@ function App() {
               <Route path="follow/following/:toFollowKey" element={<Following />}></Route>
 
               <Route path="apps" element={<AppsDashboard />}></Route>
+              <Route path="apps-v2" element={<AppsV2 />}></Route>
+              <Route path="apps-v2/:appId" element={<AppV2Details />}></Route>
+              <Route path="bundle-tokens" element={<BundleTokens />}></Route>
 
               <Route path="drives" element={<Drives />}></Route>
               <Route path="drives/:driveKey" element={<DriveDetails />}></Route>
